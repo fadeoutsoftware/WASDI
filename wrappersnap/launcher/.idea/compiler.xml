@@ -1,0 +1,606 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CompilerConfiguration">
+    <option name="BUILD_PROCESS_HEAP_SIZE" value="4000" />
+    <excludeFromCompile>
+      <file url="file://$PROJECT_DIR$/../snap-engine/snap-core/src/test/java/org/esa/snap/core/util/ArrayUtilsTest.java" />
+    </excludeFromCompile>
+    <resourceExtensions />
+    <wildcardResourcePatterns>
+      <entry name="!?*.java" />
+      <entry name="!?*.form" />
+      <entry name="!?*.class" />
+      <entry name="!?*.groovy" />
+      <entry name="!?*.scala" />
+      <entry name="!?*.flex" />
+      <entry name="!?*.kt" />
+      <entry name="!?*.clj" />
+      <entry name="!?*.aj" />
+    </wildcardResourcePatterns>
+    <annotationProcessing>
+      <profile default="true" name="Default" enabled="false">
+        <processorPath useClasspath="true" />
+      </profile>
+      <profile default="false" name="Maven default annotation processors profile" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="true" />
+        <module name="publish" />
+        <module name="wasdi-engine" />
+      </profile>
+      <profile default="false" name="Annotation profile for snap-raster" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="true" />
+        <module name="snap-raster" />
+      </profile>
+      <profile default="false" name="Annotation profile for snap-rtp-codec" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="true" />
+        <module name="snap-rtp-codec" />
+      </profile>
+      <profile default="false" name="Annotation profile for snap-smart-configurator" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="true" />
+        <module name="snap-smart-configurator" />
+      </profile>
+      <profile default="false" name="Annotation profile for snap-statistics" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="true" />
+        <module name="snap-statistics" />
+      </profile>
+      <profile default="false" name="Annotation profile for snap-temporal-percentile" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="true" />
+        <module name="snap-temporal-percentile" />
+      </profile>
+      <profile default="false" name="Annotation profile for snap-unmix" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="true" />
+        <module name="snap-unmix" />
+      </profile>
+      <profile default="false" name="Annotation profile for snap-watermask" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="true" />
+        <module name="snap-watermask" />
+      </profile>
+      <profile default="false" name="Annotation profile for blue-marble-worldmap" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="true" />
+        <module name="blue-marble-worldmap" />
+      </profile>
+      <profile default="false" name="Annotation profile for globcover-worldmap" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="true" />
+        <module name="globcover-worldmap" />
+      </profile>
+      <profile default="false" name="Annotation profile for snap-sta" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="true" />
+        <module name="snap-sta" />
+      </profile>
+      <profile default="false" name="Annotation profile for lib-hdf" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="true" />
+        <module name="lib-hdf" />
+      </profile>
+      <profile default="false" name="Annotation profile for ceres-core" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="true" />
+        <module name="ceres-core" />
+      </profile>
+      <profile default="false" name="Annotation profile for ceres-binding" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="true" />
+        <module name="ceres-binding" />
+      </profile>
+      <profile default="false" name="Annotation profile for ceres-ui" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="true" />
+        <module name="ceres-ui" />
+      </profile>
+      <profile default="false" name="Annotation profile for ceres-glayer" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="true" />
+        <module name="ceres-glayer" />
+      </profile>
+      <profile default="false" name="Annotation profile for ceres-jai" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="true" />
+        <module name="ceres-jai" />
+      </profile>
+      <profile default="false" name="Annotation profile for ceres-binio" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="true" />
+        <module name="ceres-binio" />
+      </profile>
+      <profile default="false" name="Annotation profile for ceres-metadata" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="true" />
+        <module name="ceres-metadata" />
+      </profile>
+      <profile default="false" name="Annotation profile for snap-runtime" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="true" />
+        <module name="snap-runtime" />
+      </profile>
+      <profile default="false" name="Annotation profile for snap-core" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="true" />
+        <module name="snap-core" />
+      </profile>
+      <profile default="false" name="Annotation profile for snap-engine-kit" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="true" />
+        <module name="snap-engine-kit" />
+      </profile>
+      <profile default="false" name="Annotation profile for snap-engine-utilities" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="true" />
+        <module name="snap-engine-utilities" />
+      </profile>
+      <profile default="false" name="Annotation profile for snap-gpf" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="true" />
+        <module name="snap-gpf" />
+      </profile>
+      <profile default="false" name="Annotation profile for snap-arcbingrid-reader" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="true" />
+        <module name="snap-arcbingrid-reader" />
+      </profile>
+      <profile default="false" name="Annotation profile for snap-bigtiff" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="true" />
+        <module name="snap-bigtiff" />
+      </profile>
+      <profile default="false" name="Annotation profile for snap-binning" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="true" />
+        <module name="snap-binning" />
+      </profile>
+      <profile default="false" name="Annotation profile for snap-classification" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="true" />
+        <module name="snap-classification" />
+      </profile>
+      <profile default="false" name="Annotation profile for snap-cluster-analysis" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="true" />
+        <module name="snap-cluster-analysis" />
+      </profile>
+      <profile default="false" name="Annotation profile for snap-collocation" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="true" />
+        <module name="snap-collocation" />
+      </profile>
+      <profile default="false" name="Annotation profile for snap-csv-dataio" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="true" />
+        <module name="snap-csv-dataio" />
+      </profile>
+      <profile default="false" name="Annotation profile for snap-dem" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="true" />
+        <module name="snap-dem" />
+      </profile>
+      <profile default="false" name="Annotation profile for snap-envi-reader" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="true" />
+        <module name="snap-envi-reader" />
+      </profile>
+      <profile default="false" name="Annotation profile for snap-envisat-reader" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="true" />
+        <module name="snap-envisat-reader" />
+      </profile>
+      <profile default="false" name="Annotation profile for snap-getasse30-dem" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="true" />
+        <module name="snap-getasse30-dem" />
+      </profile>
+      <profile default="false" name="Annotation profile for snap-geotiff" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="true" />
+        <module name="snap-geotiff" />
+      </profile>
+      <profile default="false" name="Annotation profile for snap-hdf5-writer" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="true" />
+        <module name="snap-hdf5-writer" />
+      </profile>
+      <profile default="false" name="Annotation profile for snap-jython" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="true" />
+        <module name="snap-jython" />
+      </profile>
+      <profile default="false" name="Annotation profile for snap-land-cover" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="true" />
+        <module name="snap-land-cover" />
+      </profile>
+      <profile default="false" name="Annotation profile for snap-ndvi" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="true" />
+        <module name="snap-ndvi" />
+      </profile>
+      <profile default="false" name="Annotation profile for snap-netcdf" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="true" />
+        <module name="snap-netcdf" />
+      </profile>
+      <profile default="false" name="Annotation profile for snap-pconvert" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="true" />
+        <module name="snap-pconvert" />
+      </profile>
+      <profile default="false" name="Annotation profile for snap-pgx-reader" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="true" />
+        <module name="snap-pgx-reader" />
+      </profile>
+      <profile default="false" name="Annotation profile for snap-pixel-extraction" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="true" />
+        <module name="snap-pixel-extraction" />
+      </profile>
+      <profile default="false" name="Annotation profile for snap-python" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="true" />
+        <module name="snap-python" />
+      </profile>
+      <profile default="false" name="Annotation profile for jlinda-core" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="true" />
+        <module name="jlinda-core" />
+      </profile>
+      <profile default="false" name="Annotation profile for jlinda-nest" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="true" />
+        <module name="jlinda-nest" />
+      </profile>
+      <profile default="false" name="Annotation profile for jlinda-nest-ui" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="true" />
+        <module name="jlinda-nest-ui" />
+      </profile>
+      <profile default="false" name="Annotation profile for rstb-op-classification" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="true" />
+        <module name="rstb-op-classification" />
+      </profile>
+      <profile default="false" name="Annotation profile for rstb-op-classification-ui" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="true" />
+        <module name="rstb-op-classification-ui" />
+      </profile>
+      <profile default="false" name="Annotation profile for rstb-op-polarimetric-tools" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="true" />
+        <module name="rstb-op-polarimetric-tools" />
+      </profile>
+      <profile default="false" name="Annotation profile for rstb-op-polarimetric-tools-ui" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="true" />
+        <module name="rstb-op-polarimetric-tools-ui" />
+      </profile>
+      <profile default="false" name="Annotation profile for rstb-kit" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="true" />
+        <module name="rstb-kit" />
+      </profile>
+      <profile default="false" name="Annotation profile for s1tbx-commons" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="true" />
+        <module name="s1tbx-commons" />
+      </profile>
+      <profile default="false" name="Annotation profile for s1tbx-config" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="true" />
+        <module name="s1tbx-config" />
+      </profile>
+      <profile default="false" name="Annotation profile for s1tbx-io" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="true" />
+        <module name="s1tbx-io" />
+      </profile>
+      <profile default="false" name="Annotation profile for s1tbx-op-analysis-ui" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="true" />
+        <module name="s1tbx-op-analysis-ui" />
+      </profile>
+      <profile default="false" name="Annotation profile for s1tbx-op-calibration" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="true" />
+        <module name="s1tbx-op-calibration" />
+      </profile>
+      <profile default="false" name="Annotation profile for s1tbx-op-calibration-ui" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="true" />
+        <module name="s1tbx-op-calibration-ui" />
+      </profile>
+      <profile default="false" name="Annotation profile for s1tbx-op-feature-extraction" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="true" />
+        <module name="s1tbx-op-feature-extraction" />
+      </profile>
+      <profile default="false" name="Annotation profile for s1tbx-op-feature-extraction-ui" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="true" />
+        <module name="s1tbx-op-feature-extraction-ui" />
+      </profile>
+      <profile default="false" name="Annotation profile for s1tbx-op-insar" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="true" />
+        <module name="s1tbx-op-insar" />
+      </profile>
+      <profile default="false" name="Annotation profile for s1tbx-op-insar-ui" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="true" />
+        <module name="s1tbx-op-insar-ui" />
+      </profile>
+      <profile default="false" name="Annotation profile for s1tbx-op-ocean-ui" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="true" />
+        <module name="s1tbx-op-ocean-ui" />
+      </profile>
+      <profile default="false" name="Annotation profile for s1tbx-op-sar-processing" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="true" />
+        <module name="s1tbx-op-sar-processing" />
+      </profile>
+      <profile default="false" name="Annotation profile for s1tbx-op-sar-processing-ui" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="true" />
+        <module name="s1tbx-op-sar-processing-ui" />
+      </profile>
+      <profile default="false" name="Annotation profile for s1tbx-op-sentinel1" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="true" />
+        <module name="s1tbx-op-sentinel1" />
+      </profile>
+      <profile default="false" name="Annotation profile for s1tbx-op-sentinel1-ui" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="true" />
+        <module name="s1tbx-op-sentinel1-ui" />
+      </profile>
+      <profile default="false" name="Annotation profile for s1tbx-op-utilities" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="true" />
+        <module name="s1tbx-op-utilities" />
+      </profile>
+      <profile default="false" name="Annotation profile for s1tbx-op-utilities-ui" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="true" />
+        <module name="s1tbx-op-utilities-ui" />
+      </profile>
+      <profile default="false" name="Annotation profile for s1tbx-rcp" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="true" />
+        <module name="s1tbx-rcp" />
+      </profile>
+      <profile default="false" name="Annotation profile for s1tbx-kit" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="true" />
+        <module name="s1tbx-kit" />
+      </profile>
+    </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="blue-marble-worldmap" target="1.8" />
+      <module name="ceres-binding" target="1.8" />
+      <module name="ceres-binio" target="1.8" />
+      <module name="ceres-core" target="1.8" />
+      <module name="ceres-glayer" target="1.8" />
+      <module name="ceres-jai" target="1.8" />
+      <module name="ceres-metadata" target="1.8" />
+      <module name="ceres-ui" target="1.8" />
+      <module name="globcover-worldmap" target="1.8" />
+      <module name="jlinda-core" target="1.8" />
+      <module name="jlinda-nest" target="1.8" />
+      <module name="jlinda-nest-ui" target="1.8" />
+      <module name="lib-hdf" target="1.8" />
+      <module name="publish" target="1.5" />
+      <module name="rstb-kit" target="1.8" />
+      <module name="rstb-op-classification" target="1.8" />
+      <module name="rstb-op-classification-ui" target="1.8" />
+      <module name="rstb-op-polarimetric-tools" target="1.8" />
+      <module name="rstb-op-polarimetric-tools-ui" target="1.8" />
+      <module name="s1tbx-commons" target="1.8" />
+      <module name="s1tbx-config" target="1.8" />
+      <module name="s1tbx-io" target="1.8" />
+      <module name="s1tbx-kit" target="1.8" />
+      <module name="s1tbx-op-analysis-ui" target="1.8" />
+      <module name="s1tbx-op-calibration" target="1.8" />
+      <module name="s1tbx-op-calibration-ui" target="1.8" />
+      <module name="s1tbx-op-feature-extraction" target="1.8" />
+      <module name="s1tbx-op-feature-extraction-ui" target="1.8" />
+      <module name="s1tbx-op-insar" target="1.8" />
+      <module name="s1tbx-op-insar-ui" target="1.8" />
+      <module name="s1tbx-op-ocean-ui" target="1.8" />
+      <module name="s1tbx-op-sar-processing" target="1.8" />
+      <module name="s1tbx-op-sar-processing-ui" target="1.8" />
+      <module name="s1tbx-op-sentinel1" target="1.8" />
+      <module name="s1tbx-op-sentinel1-ui" target="1.8" />
+      <module name="s1tbx-op-utilities" target="1.8" />
+      <module name="s1tbx-op-utilities-ui" target="1.8" />
+      <module name="s1tbx-rcp" target="1.8" />
+      <module name="snap-arcbingrid-reader" target="1.8" />
+      <module name="snap-bigtiff" target="1.8" />
+      <module name="snap-binning" target="1.8" />
+      <module name="snap-classification" target="1.8" />
+      <module name="snap-cluster-analysis" target="1.8" />
+      <module name="snap-collocation" target="1.8" />
+      <module name="snap-core" target="1.8" />
+      <module name="snap-csv-dataio" target="1.8" />
+      <module name="snap-dem" target="1.8" />
+      <module name="snap-engine-kit" target="1.8" />
+      <module name="snap-engine-utilities" target="1.8" />
+      <module name="snap-envi-reader" target="1.8" />
+      <module name="snap-envisat-reader" target="1.8" />
+      <module name="snap-geotiff" target="1.8" />
+      <module name="snap-getasse30-dem" target="1.8" />
+      <module name="snap-gpf" target="1.8" />
+      <module name="snap-hdf5-writer" target="1.8" />
+      <module name="snap-jython" target="1.8" />
+      <module name="snap-land-cover" target="1.8" />
+      <module name="snap-ndvi" target="1.8" />
+      <module name="snap-netcdf" target="1.8" />
+      <module name="snap-pconvert" target="1.8" />
+      <module name="snap-pgx-reader" target="1.8" />
+      <module name="snap-pixel-extraction" target="1.8" />
+      <module name="snap-python" target="1.8" />
+      <module name="snap-raster" target="1.8" />
+      <module name="snap-rtp-codec" target="1.8" />
+      <module name="snap-runtime" target="1.8" />
+      <module name="snap-smart-configurator" target="1.8" />
+      <module name="snap-sta" target="1.8" />
+      <module name="snap-statistics" target="1.8" />
+      <module name="snap-temporal-percentile" target="1.8" />
+      <module name="snap-unmix" target="1.8" />
+      <module name="snap-watermask" target="1.8" />
+      <module name="wasdi-engine" target="1.5" />
+    </bytecodeTargetLevel>
+  </component>
+</project>

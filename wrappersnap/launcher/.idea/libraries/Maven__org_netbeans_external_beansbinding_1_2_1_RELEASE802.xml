@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="Maven: org.netbeans.external:beansbinding-1.2.1:RELEASE802">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/org/netbeans/external/beansbinding-1.2.1/RELEASE802/beansbinding-1.2.1-RELEASE802.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$MAVEN_REPOSITORY$/org/netbeans/external/beansbinding-1.2.1/RELEASE802/beansbinding-1.2.1-RELEASE802-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$MAVEN_REPOSITORY$/org/netbeans/external/beansbinding-1.2.1/RELEASE802/beansbinding-1.2.1-RELEASE802-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

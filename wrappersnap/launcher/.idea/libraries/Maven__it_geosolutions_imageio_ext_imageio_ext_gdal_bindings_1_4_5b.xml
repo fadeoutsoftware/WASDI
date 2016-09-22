@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="Maven: it.geosolutions.imageio-ext:imageio-ext-gdal-bindings:1.4.5b">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/it/geosolutions/imageio-ext/imageio-ext-gdal-bindings/1.4.5b/imageio-ext-gdal-bindings-1.4.5b.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$MAVEN_REPOSITORY$/it/geosolutions/imageio-ext/imageio-ext-gdal-bindings/1.4.5b/imageio-ext-gdal-bindings-1.4.5b-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$MAVEN_REPOSITORY$/it/geosolutions/imageio-ext/imageio-ext-gdal-bindings/1.4.5b/imageio-ext-gdal-bindings-1.4.5b-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

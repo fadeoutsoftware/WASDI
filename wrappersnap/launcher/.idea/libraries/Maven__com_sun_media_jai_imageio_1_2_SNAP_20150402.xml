@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="Maven: com.sun.media:jai-imageio:1.2-SNAP-20150402">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/com/sun/media/jai-imageio/1.2-SNAP-20150402/jai-imageio-1.2-SNAP-20150402.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$MAVEN_REPOSITORY$/com/sun/media/jai-imageio/1.2-SNAP-20150402/jai-imageio-1.2-SNAP-20150402-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$MAVEN_REPOSITORY$/com/sun/media/jai-imageio/1.2-SNAP-20150402/jai-imageio-1.2-SNAP-20150402-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="Maven: gov.nasa:worldwind:2.0.0-986">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/gov/nasa/worldwind/2.0.0-986/worldwind-2.0.0-986.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$MAVEN_REPOSITORY$/gov/nasa/worldwind/2.0.0-986/worldwind-2.0.0-986-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$MAVEN_REPOSITORY$/gov/nasa/worldwind/2.0.0-986/worldwind-2.0.0-986-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

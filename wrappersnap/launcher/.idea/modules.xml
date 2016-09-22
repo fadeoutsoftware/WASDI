@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/../snap-engine/blue-marble-worldmap/blue-marble-worldmap.iml" filepath="$PROJECT_DIR$/../snap-engine/blue-marble-worldmap/blue-marble-worldmap.iml" group="snap-engine and modules" />
+      <module fileurl="file://$PROJECT_DIR$/../snap-engine/ceres-binding/ceres-binding.iml" filepath="$PROJECT_DIR$/../snap-engine/ceres-binding/ceres-binding.iml" group="snap-engine and modules" />
+      <module fileurl="file://$PROJECT_DIR$/../snap-engine/ceres-binio/ceres-binio.iml" filepath="$PROJECT_DIR$/../snap-engine/ceres-binio/ceres-binio.iml" group="snap-engine and modules" />
+      <module fileurl="file://$PROJECT_DIR$/../snap-engine/ceres-core/ceres-core.iml" filepath="$PROJECT_DIR$/../snap-engine/ceres-core/ceres-core.iml" group="snap-engine and modules" />
+      <module fileurl="file://$PROJECT_DIR$/../snap-engine/ceres-glayer/ceres-glayer.iml" filepath="$PROJECT_DIR$/../snap-engine/ceres-glayer/ceres-glayer.iml" group="snap-engine and modules" />
+      <module fileurl="file://$PROJECT_DIR$/../snap-engine/ceres-jai/ceres-jai.iml" filepath="$PROJECT_DIR$/../snap-engine/ceres-jai/ceres-jai.iml" group="snap-engine and modules" />
+      <module fileurl="file://$PROJECT_DIR$/../snap-engine/ceres-metadata/ceres-metadata.iml" filepath="$PROJECT_DIR$/../snap-engine/ceres-metadata/ceres-metadata.iml" group="snap-engine and modules" />
+      <module fileurl="file://$PROJECT_DIR$/../snap-engine/ceres-ui/ceres-ui.iml" filepath="$PROJECT_DIR$/../snap-engine/ceres-ui/ceres-ui.iml" group="snap-engine and modules" />
+      <module fileurl="file://$PROJECT_DIR$/../snap-engine/globcover-worldmap/globcover-worldmap.iml" filepath="$PROJECT_DIR$/../snap-engine/globcover-worldmap/globcover-worldmap.iml" group="snap-engine and modules" />
+      <module fileurl="file://$PROJECT_DIR$/../s1tbx/jlinda/jlinda-core/jlinda-core.iml" filepath="$PROJECT_DIR$/../s1tbx/jlinda/jlinda-core/jlinda-core.iml" group="s1tbx and modules/jlinda and modules" />
+      <module fileurl="file://$PROJECT_DIR$/../s1tbx/jlinda/jlinda-nest/jlinda-nest.iml" filepath="$PROJECT_DIR$/../s1tbx/jlinda/jlinda-nest/jlinda-nest.iml" group="s1tbx and modules/jlinda and modules" />
+      <module fileurl="file://$PROJECT_DIR$/../s1tbx/jlinda/jlinda-nest-ui/jlinda-nest-ui.iml" filepath="$PROJECT_DIR$/../s1tbx/jlinda/jlinda-nest-ui/jlinda-nest-ui.iml" group="s1tbx and modules/jlinda and modules" />
+      <module fileurl="file://$PROJECT_DIR$/../snap-engine/lib-hdf/lib-hdf.iml" filepath="$PROJECT_DIR$/../snap-engine/lib-hdf/lib-hdf.iml" group="snap-engine and modules" />
+      <module fileurl="file://$PROJECT_DIR$/../publish/publish.iml" filepath="$PROJECT_DIR$/../publish/publish.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../s1tbx/rstb/rstb-kit/rstb-kit.iml" filepath="$PROJECT_DIR$/../s1tbx/rstb/rstb-kit/rstb-kit.iml" group="s1tbx and modules/rstb and modules" />
+      <module fileurl="file://$PROJECT_DIR$/../s1tbx/rstb/rstb-op-classification/rstb-op-classification.iml" filepath="$PROJECT_DIR$/../s1tbx/rstb/rstb-op-classification/rstb-op-classification.iml" group="s1tbx and modules/rstb and modules" />
+      <module fileurl="file://$PROJECT_DIR$/../s1tbx/rstb/rstb-op-classification-ui/rstb-op-classification-ui.iml" filepath="$PROJECT_DIR$/../s1tbx/rstb/rstb-op-classification-ui/rstb-op-classification-ui.iml" group="s1tbx and modules/rstb and modules" />
+      <module fileurl="file://$PROJECT_DIR$/../s1tbx/rstb/rstb-op-polarimetric-tools/rstb-op-polarimetric-tools.iml" filepath="$PROJECT_DIR$/../s1tbx/rstb/rstb-op-polarimetric-tools/rstb-op-polarimetric-tools.iml" group="s1tbx and modules/rstb and modules" />
+      <module fileurl="file://$PROJECT_DIR$/../s1tbx/rstb/rstb-op-polarimetric-tools-ui/rstb-op-polarimetric-tools-ui.iml" filepath="$PROJECT_DIR$/../s1tbx/rstb/rstb-op-polarimetric-tools-ui/rstb-op-polarimetric-tools-ui.iml" group="s1tbx and modules/rstb and modules" />
+      <module fileurl="file://$PROJECT_DIR$/../s1tbx/s1tbx-commons/s1tbx-commons.iml" filepath="$PROJECT_DIR$/../s1tbx/s1tbx-commons/s1tbx-commons.iml" group="s1tbx and modules" />
+      <module fileurl="file://$PROJECT_DIR$/../s1tbx/s1tbx-config/s1tbx-config.iml" filepath="$PROJECT_DIR$/../s1tbx/s1tbx-config/s1tbx-config.iml" group="s1tbx and modules" />
+      <module fileurl="file://$PROJECT_DIR$/../s1tbx/s1tbx-io/s1tbx-io.iml" filepath="$PROJECT_DIR$/../s1tbx/s1tbx-io/s1tbx-io.iml" group="s1tbx and modules" />
+      <module fileurl="file://$PROJECT_DIR$/../s1tbx/s1tbx-kit/s1tbx-kit.iml" filepath="$PROJECT_DIR$/../s1tbx/s1tbx-kit/s1tbx-kit.iml" group="s1tbx and modules" />
+      <module fileurl="file://$PROJECT_DIR$/../s1tbx/s1tbx-op-analysis-ui/s1tbx-op-analysis-ui.iml" filepath="$PROJECT_DIR$/../s1tbx/s1tbx-op-analysis-ui/s1tbx-op-analysis-ui.iml" group="s1tbx and modules" />
+      <module fileurl="file://$PROJECT_DIR$/../s1tbx/s1tbx-op-calibration/s1tbx-op-calibration.iml" filepath="$PROJECT_DIR$/../s1tbx/s1tbx-op-calibration/s1tbx-op-calibration.iml" group="s1tbx and modules" />
+      <module fileurl="file://$PROJECT_DIR$/../s1tbx/s1tbx-op-calibration-ui/s1tbx-op-calibration-ui.iml" filepath="$PROJECT_DIR$/../s1tbx/s1tbx-op-calibration-ui/s1tbx-op-calibration-ui.iml" group="s1tbx and modules" />
+      <module fileurl="file://$PROJECT_DIR$/../s1tbx/s1tbx-op-feature-extraction/s1tbx-op-feature-extraction.iml" filepath="$PROJECT_DIR$/../s1tbx/s1tbx-op-feature-extraction/s1tbx-op-feature-extraction.iml" group="s1tbx and modules" />
+      <module fileurl="file://$PROJECT_DIR$/../s1tbx/s1tbx-op-feature-extraction-ui/s1tbx-op-feature-extraction-ui.iml" filepath="$PROJECT_DIR$/../s1tbx/s1tbx-op-feature-extraction-ui/s1tbx-op-feature-extraction-ui.iml" group="s1tbx and modules" />
+      <module fileurl="file://$PROJECT_DIR$/../s1tbx/s1tbx-op-insar/s1tbx-op-insar.iml" filepath="$PROJECT_DIR$/../s1tbx/s1tbx-op-insar/s1tbx-op-insar.iml" group="s1tbx and modules" />
+      <module fileurl="file://$PROJECT_DIR$/../s1tbx/s1tbx-op-insar-ui/s1tbx-op-insar-ui.iml" filepath="$PROJECT_DIR$/../s1tbx/s1tbx-op-insar-ui/s1tbx-op-insar-ui.iml" group="s1tbx and modules" />
+      <module fileurl="file://$PROJECT_DIR$/../s1tbx/s1tbx-op-ocean-ui/s1tbx-op-ocean-ui.iml" filepath="$PROJECT_DIR$/../s1tbx/s1tbx-op-ocean-ui/s1tbx-op-ocean-ui.iml" group="s1tbx and modules" />
+      <module fileurl="file://$PROJECT_DIR$/../s1tbx/s1tbx-op-sar-processing/s1tbx-op-sar-processing.iml" filepath="$PROJECT_DIR$/../s1tbx/s1tbx-op-sar-processing/s1tbx-op-sar-processing.iml" group="s1tbx and modules" />
+      <module fileurl="file://$PROJECT_DIR$/../s1tbx/s1tbx-op-sar-processing-ui/s1tbx-op-sar-processing-ui.iml" filepath="$PROJECT_DIR$/../s1tbx/s1tbx-op-sar-processing-ui/s1tbx-op-sar-processing-ui.iml" group="s1tbx and modules" />
+      <module fileurl="file://$PROJECT_DIR$/../s1tbx/s1tbx-op-sentinel1/s1tbx-op-sentinel1.iml" filepath="$PROJECT_DIR$/../s1tbx/s1tbx-op-sentinel1/s1tbx-op-sentinel1.iml" group="s1tbx and modules" />
+      <module fileurl="file://$PROJECT_DIR$/../s1tbx/s1tbx-op-sentinel1-ui/s1tbx-op-sentinel1-ui.iml" filepath="$PROJECT_DIR$/../s1tbx/s1tbx-op-sentinel1-ui/s1tbx-op-sentinel1-ui.iml" group="s1tbx and modules" />
+      <module fileurl="file://$PROJECT_DIR$/../s1tbx/s1tbx-op-utilities/s1tbx-op-utilities.iml" filepath="$PROJECT_DIR$/../s1tbx/s1tbx-op-utilities/s1tbx-op-utilities.iml" group="s1tbx and modules" />
+      <module fileurl="file://$PROJECT_DIR$/../s1tbx/s1tbx-op-utilities-ui/s1tbx-op-utilities-ui.iml" filepath="$PROJECT_DIR$/../s1tbx/s1tbx-op-utilities-ui/s1tbx-op-utilities-ui.iml" group="s1tbx and modules" />
+      <module fileurl="file://$PROJECT_DIR$/../s1tbx/s1tbx-rcp/s1tbx-rcp.iml" filepath="$PROJECT_DIR$/../s1tbx/s1tbx-rcp/s1tbx-rcp.iml" group="s1tbx and modules" />
+      <module fileurl="file://$PROJECT_DIR$/../snap-engine/snap-arcbingrid-reader/snap-arcbingrid-reader.iml" filepath="$PROJECT_DIR$/../snap-engine/snap-arcbingrid-reader/snap-arcbingrid-reader.iml" group="snap-engine and modules" />
+      <module fileurl="file://$PROJECT_DIR$/../snap-engine/snap-bigtiff/snap-bigtiff.iml" filepath="$PROJECT_DIR$/../snap-engine/snap-bigtiff/snap-bigtiff.iml" group="snap-engine and modules" />
+      <module fileurl="file://$PROJECT_DIR$/../snap-engine/snap-binning/snap-binning.iml" filepath="$PROJECT_DIR$/../snap-engine/snap-binning/snap-binning.iml" group="snap-engine and modules" />
+      <module fileurl="file://$PROJECT_DIR$/../snap-engine/snap-classification/snap-classification.iml" filepath="$PROJECT_DIR$/../snap-engine/snap-classification/snap-classification.iml" group="snap-engine and modules" />
+      <module fileurl="file://$PROJECT_DIR$/../snap-engine/snap-cluster-analysis/snap-cluster-analysis.iml" filepath="$PROJECT_DIR$/../snap-engine/snap-cluster-analysis/snap-cluster-analysis.iml" group="snap-engine and modules" />
+      <module fileurl="file://$PROJECT_DIR$/../snap-engine/snap-collocation/snap-collocation.iml" filepath="$PROJECT_DIR$/../snap-engine/snap-collocation/snap-collocation.iml" group="snap-engine and modules" />
+      <module fileurl="file://$PROJECT_DIR$/../snap-engine/snap-core/snap-core.iml" filepath="$PROJECT_DIR$/../snap-engine/snap-core/snap-core.iml" group="snap-engine and modules" />
+      <module fileurl="file://$PROJECT_DIR$/../snap-engine/snap-csv-dataio/snap-csv-dataio.iml" filepath="$PROJECT_DIR$/../snap-engine/snap-csv-dataio/snap-csv-dataio.iml" group="snap-engine and modules" />
+      <module fileurl="file://$PROJECT_DIR$/../snap-engine/snap-dem/snap-dem.iml" filepath="$PROJECT_DIR$/../snap-engine/snap-dem/snap-dem.iml" group="snap-engine and modules" />
+      <module fileurl="file://$PROJECT_DIR$/../snap-engine/snap-engine-kit/snap-engine-kit.iml" filepath="$PROJECT_DIR$/../snap-engine/snap-engine-kit/snap-engine-kit.iml" group="snap-engine and modules" />
+      <module fileurl="file://$PROJECT_DIR$/../snap-engine/snap-engine-utilities/snap-engine-utilities.iml" filepath="$PROJECT_DIR$/../snap-engine/snap-engine-utilities/snap-engine-utilities.iml" group="snap-engine and modules" />
+      <module fileurl="file://$PROJECT_DIR$/../snap-engine/snap-envi-reader/snap-envi-reader.iml" filepath="$PROJECT_DIR$/../snap-engine/snap-envi-reader/snap-envi-reader.iml" group="snap-engine and modules" />
+      <module fileurl="file://$PROJECT_DIR$/../snap-engine/snap-envisat-reader/snap-envisat-reader.iml" filepath="$PROJECT_DIR$/../snap-engine/snap-envisat-reader/snap-envisat-reader.iml" group="snap-engine and modules" />
+      <module fileurl="file://$PROJECT_DIR$/../snap-engine/snap-geotiff/snap-geotiff.iml" filepath="$PROJECT_DIR$/../snap-engine/snap-geotiff/snap-geotiff.iml" group="snap-engine and modules" />
+      <module fileurl="file://$PROJECT_DIR$/../snap-engine/snap-getasse30-dem/snap-getasse30-dem.iml" filepath="$PROJECT_DIR$/../snap-engine/snap-getasse30-dem/snap-getasse30-dem.iml" group="snap-engine and modules" />
+      <module fileurl="file://$PROJECT_DIR$/../snap-engine/snap-gpf/snap-gpf.iml" filepath="$PROJECT_DIR$/../snap-engine/snap-gpf/snap-gpf.iml" group="snap-engine and modules" />
+      <module fileurl="file://$PROJECT_DIR$/../snap-engine/snap-hdf5-writer/snap-hdf5-writer.iml" filepath="$PROJECT_DIR$/../snap-engine/snap-hdf5-writer/snap-hdf5-writer.iml" group="snap-engine and modules" />
+      <module fileurl="file://$PROJECT_DIR$/../snap-engine/snap-jython/snap-jython.iml" filepath="$PROJECT_DIR$/../snap-engine/snap-jython/snap-jython.iml" group="snap-engine and modules" />
+      <module fileurl="file://$PROJECT_DIR$/../snap-engine/snap-land-cover/snap-land-cover.iml" filepath="$PROJECT_DIR$/../snap-engine/snap-land-cover/snap-land-cover.iml" group="snap-engine and modules" />
+      <module fileurl="file://$PROJECT_DIR$/../snap-engine/snap-ndvi/snap-ndvi.iml" filepath="$PROJECT_DIR$/../snap-engine/snap-ndvi/snap-ndvi.iml" group="snap-engine and modules" />
+      <module fileurl="file://$PROJECT_DIR$/../snap-engine/snap-netcdf/snap-netcdf.iml" filepath="$PROJECT_DIR$/../snap-engine/snap-netcdf/snap-netcdf.iml" group="snap-engine and modules" />
+      <module fileurl="file://$PROJECT_DIR$/../snap-engine/snap-pconvert/snap-pconvert.iml" filepath="$PROJECT_DIR$/../snap-engine/snap-pconvert/snap-pconvert.iml" group="snap-engine and modules" />
+      <module fileurl="file://$PROJECT_DIR$/../snap-engine/snap-pgx-reader/snap-pgx-reader.iml" filepath="$PROJECT_DIR$/../snap-engine/snap-pgx-reader/snap-pgx-reader.iml" group="snap-engine and modules" />
+      <module fileurl="file://$PROJECT_DIR$/../snap-engine/snap-pixel-extraction/snap-pixel-extraction.iml" filepath="$PROJECT_DIR$/../snap-engine/snap-pixel-extraction/snap-pixel-extraction.iml" group="snap-engine and modules" />
+      <module fileurl="file://$PROJECT_DIR$/../snap-engine/snap-python/snap-python.iml" filepath="$PROJECT_DIR$/../snap-engine/snap-python/snap-python.iml" group="snap-engine and modules" />
+      <module fileurl="file://$PROJECT_DIR$/../snap-engine/snap-raster/snap-raster.iml" filepath="$PROJECT_DIR$/../snap-engine/snap-raster/snap-raster.iml" group="snap-engine and modules" />
+      <module fileurl="file://$PROJECT_DIR$/../snap-engine/snap-rtp-codec/snap-rtp-codec.iml" filepath="$PROJECT_DIR$/../snap-engine/snap-rtp-codec/snap-rtp-codec.iml" group="snap-engine and modules" />
+      <module fileurl="file://$PROJECT_DIR$/../snap-engine/snap-runtime/snap-runtime.iml" filepath="$PROJECT_DIR$/../snap-engine/snap-runtime/snap-runtime.iml" group="snap-engine and modules" />
+      <module fileurl="file://$PROJECT_DIR$/../snap-engine/snap-smart-configurator/snap-smart-configurator.iml" filepath="$PROJECT_DIR$/../snap-engine/snap-smart-configurator/snap-smart-configurator.iml" group="snap-engine and modules" />
+      <module fileurl="file://$PROJECT_DIR$/../snap-engine/snap-sta/snap-sta.iml" filepath="$PROJECT_DIR$/../snap-engine/snap-sta/snap-sta.iml" group="snap-engine and modules" />
+      <module fileurl="file://$PROJECT_DIR$/../snap-engine/snap-statistics/snap-statistics.iml" filepath="$PROJECT_DIR$/../snap-engine/snap-statistics/snap-statistics.iml" group="snap-engine and modules" />
+      <module fileurl="file://$PROJECT_DIR$/../snap-engine/snap-temporal-percentile/snap-temporal-percentile.iml" filepath="$PROJECT_DIR$/../snap-engine/snap-temporal-percentile/snap-temporal-percentile.iml" group="snap-engine and modules" />
+      <module fileurl="file://$PROJECT_DIR$/../snap-engine/snap-unmix/snap-unmix.iml" filepath="$PROJECT_DIR$/../snap-engine/snap-unmix/snap-unmix.iml" group="snap-engine and modules" />
+      <module fileurl="file://$PROJECT_DIR$/../snap-engine/snap-watermask/snap-watermask.iml" filepath="$PROJECT_DIR$/../snap-engine/snap-watermask/snap-watermask.iml" group="snap-engine and modules" />
+      <module fileurl="file://$PROJECT_DIR$/wasdi-engine.iml" filepath="$PROJECT_DIR$/wasdi-engine.iml" />
+    </modules>
+  </component>
+</project>

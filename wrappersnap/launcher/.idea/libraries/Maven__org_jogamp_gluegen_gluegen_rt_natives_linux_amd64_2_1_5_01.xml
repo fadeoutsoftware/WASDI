@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="Maven: org.jogamp.gluegen:gluegen-rt:natives-linux-amd64:2.1.5-01">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/org/jogamp/gluegen/gluegen-rt/2.1.5-01/gluegen-rt-2.1.5-01-natives-linux-amd64.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$MAVEN_REPOSITORY$/org/jogamp/gluegen/gluegen-rt/2.1.5-01/gluegen-rt-2.1.5-01-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$MAVEN_REPOSITORY$/org/jogamp/gluegen/gluegen-rt/2.1.5-01/gluegen-rt-2.1.5-01-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

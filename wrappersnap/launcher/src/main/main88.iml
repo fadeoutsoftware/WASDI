@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module type="JAVA_MODULE" version="4">
+  <component name="NewModuleRootManager" inherit-compiler-output="true">
+    <exclude-output />
+    <content url="file://$MODULE_DIR$">
+      <sourceFolder url="file://$MODULE_DIR$/java" isTestSource="false" />
+    </content>
+    <orderEntry type="inheritedJdk" />
+    <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="library" name="org-esa-snap-snap-bigtiff" level="project" />
+    <orderEntry type="library" name="org-esa-snap-snap-engine-utilities" level="project" />
+    <orderEntry type="library" name="modules3" level="project" />
+    <orderEntry type="library" name="target19" level="project" />
+    <orderEntry type="library" name="s1tbx-op-calibration-5.0.0-SNAPSHOT" level="project" />
+    <orderEntry type="library" name="target59" level="project" />
+    <orderEntry type="library" name="org-esa-s1tbx-s1tbx-op-calibration" level="project" />
+    <orderEntry type="library" name="org-esa-snap-snap-gpf" level="project" />
+    <orderEntry type="library" name="target" level="project" />
+    <orderEntry type="library" name="org-esa-s1tbx-s1tbx-op-sar-processing" level="project" />
+    <orderEntry type="library" name="modules6" level="project" />
+    <orderEntry type="library" name="s1tbx-op-sar-processing-5.0.0-SNAPSHOT" level="project" />
+    <orderEntry type="library" name="abdera-1.1.3" level="project" />
+    <orderEntry type="module" module-name="test49" />
+    <orderEntry type="module" module-name="test9" />
+    <orderEntry type="module" module-name="test60" />
+    <orderEntry type="module" module-name="main1" />
+    <orderEntry type="module" module-name="main6" />
+    <orderEntry type="module" module-name="test41" />
+    <orderEntry type="module" module-name="test35" />
+    <orderEntry type="module" module-name="main45" />
+    <orderEntry type="module" module-name="test47" />
+    <orderEntry type="module" module-name="main35" />
+    <orderEntry type="module" module-name="main77" />
+    <orderEntry type="module" module-name="main66" />
+  </component>
+</module>
