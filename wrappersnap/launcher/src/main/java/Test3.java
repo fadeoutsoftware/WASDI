@@ -1,6 +1,4 @@
 
-import Operations.ReadProduct;
-import ViewModels.ProductViewModel;
 import org.esa.s1tbx.calibration.gpf.CalibrationOp;
 import org.esa.s1tbx.sar.gpf.MultilookOp;
 import org.esa.s1tbx.sar.gpf.filtering.SpeckleFilterOp;

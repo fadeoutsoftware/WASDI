@@ -3,12 +3,10 @@
  */
 
 //import publish.Publisher;
-import Operations.ReadProduct;
-import Operations.Calibration;
-import Operations.Filter;
-import Operations.Multilooking;
-import Operations.TerrainCorrection;
-import ViewModels.ProductViewModel;
+import it.fadeout.snapopearations.Calibration;
+import it.fadeout.snapopearations.Filter;
+import it.fadeout.snapopearations.Multilooking;
+import it.fadeout.snapopearations.TerrainCorrection;
 
 import org.esa.s1tbx.calibration.gpf.CalibrationOp;
 import org.esa.s1tbx.sar.gpf.MultilookOp;
