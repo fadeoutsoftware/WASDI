@@ -21,9 +21,9 @@ public class DownloadResource {
 		new Thread() {
 		     public void run() {
 		    	 try {
-					Process proc = Runtime.getRuntime().exec("java -jar C:\\Codice\\esa\\wasdi\\wrappersnap\\out\\artifacts\\launcher_jar\\launcher.jar -downloadFileUrl " + sFileUrl);
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
+					@SuppressWarnings("unused")
+					Process oProc = Runtime.getRuntime().exec("java -jar C:\\Codice\\esa\\wasdi\\wrappersnap\\out\\artifacts\\launcher_jar\\launcher.jar -downloadFileUrl " + sFileUrl);
+				} catch (IOException e) { 
 					e.printStackTrace();
 				}
 		     }
