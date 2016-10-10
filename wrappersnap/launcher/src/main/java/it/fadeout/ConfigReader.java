@@ -34,6 +34,7 @@ public class ConfigReader {
             m_aoProperties.put("RABBIT_HOST", prop.getProperty("RABBIT_HOST"));
             m_aoProperties.put("RABBIT_QUEUE_PORT", prop.getProperty("RABBIT_QUEUE_PORT"));
             m_aoProperties.put("RABBIT_QUEUE_DURABLE", prop.getProperty("RABBIT_QUEUE_DURABLE"));
+            m_aoProperties.put("DOWNLOAD_ROOT_PATH", prop.getProperty("DOWNLOAD_ROOT_PATH"));
 
         } catch (Exception e) {
             System.out.println("Exception: " + e);
@@ -44,8 +45,10 @@ public class ConfigReader {
 
     public static String getPropValue(String sValue) throws IOException
     {
-        if (m_aoProperties == null)
+        if (m_aoProperties == null) {
+            m_aoProperties = new HashMap<>();
             loadPropValues();
+        }
 
         return m_aoProperties.get(sValue);
     }
