@@ -164,5 +164,6 @@
     <orderEntry type="library" name="Maven: org.geotools:gt-swing:15.1" level="project" />
     <orderEntry type="library" name="Maven: com.miglayout:miglayout:swing:3.7" level="project" />
     <orderEntry type="library" name="Maven: javax.media:jai_core:1.1.3" level="project" />
+    <orderEntry type="module" module-name="wasdishared" />
   </component>
 </module>

@@ -14,6 +14,8 @@ import java.net.URL;
  */
 public class DownloadFile {
 
+
+
     private final int BUFFER_SIZE = 4096;
 
     //https://scihub.copernicus.eu/dhus/odata/v1/Products('18f7993d-eae1-4f7f-9d81-d7cf19c18378')/$value

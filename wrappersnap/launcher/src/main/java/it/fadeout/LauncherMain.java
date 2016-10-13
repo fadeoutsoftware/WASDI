@@ -1,6 +1,8 @@
 package it.fadeout;
 import it.fadeout.filebuffer.DownloadFile;
 import org.apache.commons.cli.*;
+import wasdi.DownloadFileParameter;
+import wasdi.SerializationUtils;
 
 /**
  * Created by s.adamo on 23/09/2016.
@@ -24,8 +26,14 @@ public class LauncherMain {
 
         Option oOptOperation   = OptionBuilder.withArgName( "operation" )
                 .hasArg()
-                .withDescription(  "operation to execute (CALIB,FILTER,MULTI,TERRAIN)" )
+                .withDescription(  "" )
                 .create( "operation" );
+
+        Option oOptParameter   = OptionBuilder.withArgName( "parameter" )
+                .hasArg()
+                .withDescription(  "" )
+                .create( "parameter" );
+
 
         Option oOptDownloadFile   = OptionBuilder.withArgName( "downloadFileUrl" )
                 .hasArg()
@@ -35,23 +43,40 @@ public class LauncherMain {
         oOptions.addOption(oOptElaborateFile);
         oOptions.addOption(oOptOperation);
         oOptions.addOption(oOptDownloadFile);
+        oOptions.addOption(oOptParameter);
+
 
         try {
-            Operation oOperation = null;
-            String sElaborateFile = null;
+            String sOperation = null;
+            String sParameter = null;
             String sDownloadFile = null;
             // parse the command line arguments
             CommandLine oLine = parser.parse( oOptions, args );
             if (oLine.hasOption("operation")) {
                 // print the value of block-size
-                oOperation  = Operation.valueOf(oLine.getOptionValue("operation"));
+                sOperation  = oLine.getOptionValue("operation");
 
             }
-            if (oLine.hasOption("elaboratefile")) {
+
+            if (oLine.hasOption("parameter")) {
                 // print the value of block-size
-                sElaborateFile = oLine.getOptionValue("elaboratefile");
+                sParameter = oLine.getOptionValue("parameter");
 
             }
+
+
+            switch (sOperation)
+            {
+                case "DOWNLOAD": {
+                    DownloadFileParameter oDownloadFileParameter = (DownloadFileParameter) SerializationUtils.deserializeXMLToObject(sParameter);
+
+                    DownloadFile oDownloadFile = new DownloadFile();
+                    oDownloadFile.ExecuteDownloadFile(oDownloadFileParameter.getUrls(), "c:/temp/wasdi");
+                }
+            }
+
+
+/*
             if (oLine.hasOption("downloadFileUrl")) {
                 // print the value of block-size
                 sDownloadFile = oLine.getOptionValue("downloadFileUrl");
@@ -69,7 +94,7 @@ public class LauncherMain {
                 //Thread oThread = new Thread(oDispatcher);
                 //oThread.start();
             }
-
+*/
 
         }
         catch( ParseException exp ) {
