@@ -1,3 +1,5 @@
+package wasdi.geoserver;
+
 import it.geosolutions.geoserver.rest.GeoServerRESTPublisher;
 import it.geosolutions.geoserver.rest.GeoServerRESTReader;
 import it.geosolutions.geoserver.rest.HTTPUtils;
@@ -24,8 +26,14 @@ public class GeoServerManager {
 
     public GeoServerManager() throws MalformedURLException {
         this.Init();
+    }
 
+    public GeoServerManager(String sRestUrl, String sUser, String sPassword) throws MalformedURLException {
+        RESTURL = sRestUrl;
+        RESTUSER = sUser;
+        RESTPW = sPassword;
 
+        this.Init();
     }
 
     private void Init() throws MalformedURLException {
