@@ -148,28 +148,29 @@ public class LauncherMain {
             // Download file
             String sFile = oParameter.getFileName();
 
-            //TODO: Here recognize the file type and run the right procedure. At the moment assume Sentinel1A
-            ReadProduct oReadProduct = new ReadProduct();
-
-            String sTiffFile = oReadProduct.writeBigTiff(sFile, ConfigReader.getPropValue("PYRAMID_BASE_FOLDER"));
-            //if (oSentinelProduct == null)
-            //    return;
-
-            //write
-            //WriteProduct oWriter = new WriteProduct();
-            //oWriter.Write(oSentinelProduct, TARGET_DIR_BASE, "", null);
-
-
             // Check result
             if (Utils.isNullOrEmpty(sFile))
             {
                 System.out.println( "LauncherMain.Publish: file is null or empty");
+                return  sLayerId;
             }
-            else {
-                // Ok publish
-                Publisher oPublisher = new Publisher(ConfigReader.getPropValue("PYRAMID_BASE_FOLDER"), ConfigReader.getPropValue("GDAL_PATH")+"/"+ConfigReader.getPropValue("GDAL_RETILE"));
-                oPublisher.publishImage(sFile,ConfigReader.getPropValue("GEOSERVER_ADDRESS"),ConfigReader.getPropValue("GEOSERVER_USER"),ConfigReader.getPropValue("GEOSERVER_PASSWORD"),ConfigReader.getPropValue("GEOSERVER_WORKSPACE"), oParameter.getStore());
+
+            //TODO: Here recognize the file type and run the right procedure. At the moment assume Sentinel1A
+
+            // Convert the product in a Tiff file
+            ReadProduct oReadProduct = new ReadProduct();
+            String sTiffFile = oReadProduct.writeBigTiff(sFile, ConfigReader.getPropValue("PYRAMID_BASE_FOLDER"));
+
+            // Check result
+            if (Utils.isNullOrEmpty(sTiffFile))
+            {
+                System.out.println( "LauncherMain.Publish: Tiff File is null or empty");
+                return sLayerId;
             }
+
+            // Ok publish
+            Publisher oPublisher = new Publisher(ConfigReader.getPropValue("PYRAMID_BASE_FOLDER"), ConfigReader.getPropValue("GDAL_PATH")+"/"+ConfigReader.getPropValue("GDAL_RETILE"));
+            sLayerId = oPublisher.publishImage(sTiffFile,ConfigReader.getPropValue("GEOSERVER_ADDRESS"),ConfigReader.getPropValue("GEOSERVER_USER"),ConfigReader.getPropValue("GEOSERVER_PASSWORD"),ConfigReader.getPropValue("GEOSERVER_WORKSPACE"), oParameter.getStore());
         }
         catch (Exception oEx) {
             System.out.println("LauncherMain.Publish: exception " + oEx.toString());
