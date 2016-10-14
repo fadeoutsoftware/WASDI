@@ -10,7 +10,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Response;
 
-import it.fadeout.filebuffer.OpenSearchQuery;
+import it.fadeout.opensearch.OpenSearchQuery;
 
 @Path("/search")
 public class OpenSearchResource {

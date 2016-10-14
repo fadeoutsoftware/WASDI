@@ -1,4 +1,4 @@
-package it.fadeout.filebuffer;
+package it.fadeout.opensearch;
 
 import java.util.HashMap;
 import java.util.Map;
