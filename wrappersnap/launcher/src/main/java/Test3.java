@@ -1,4 +1,5 @@
 
+import wasdi.geoserver.Publisher;
 import org.esa.s1tbx.calibration.gpf.CalibrationOp;
 import org.esa.s1tbx.sar.gpf.MultilookOp;
 import org.esa.s1tbx.sar.gpf.filtering.SpeckleFilterOp;
@@ -35,7 +36,7 @@ public class Test3 {
           Publisher oPublisher = new Publisher();
 
           String sName = "test_cal";
-          oPublisher.publishImage(sName + ".tif");
+          oPublisher.publishImage(sName + ".tif", "http://localhost:8080/geoserver", "admin", "geoserver", "wasdi", "pyramidstore");
 
         /*-------------------------------------*/
 

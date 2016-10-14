@@ -1,4 +1,4 @@
-package it.fadeout; /**
+package wasdi; /**
  * Created by s.adamo on 23/09/2016.
  */
 
@@ -35,6 +35,15 @@ public class ConfigReader {
             m_aoProperties.put("RABBIT_QUEUE_PORT", prop.getProperty("RABBIT_QUEUE_PORT"));
             m_aoProperties.put("RABBIT_QUEUE_DURABLE", prop.getProperty("RABBIT_QUEUE_DURABLE"));
             m_aoProperties.put("DOWNLOAD_ROOT_PATH", prop.getProperty("DOWNLOAD_ROOT_PATH"));
+            m_aoProperties.put("GEOSERVER_ADDRESS", prop.getProperty("GEOSERVER_ADDRESS"));
+            m_aoProperties.put("GEOSERVER_USER", prop.getProperty("GEOSERVER_USER"));
+            m_aoProperties.put("GEOSERVER_PASSWORD", prop.getProperty("GEOSERVER_PASSWORD"));
+            m_aoProperties.put("GEOSERVER_WORKSPACE", prop.getProperty("GEOSERVER_WORKSPACE"));
+            m_aoProperties.put("PYRAMID_BASE_FOLDER", prop.getProperty("PYRAMID_BASE_FOLDER"));
+            m_aoProperties.put("GDAL_PATH", prop.getProperty("GDAL_PATH"));
+            m_aoProperties.put("GDAL_RETILE", prop.getProperty("GDAL_RETILE"));
+            m_aoProperties.put("DHUS_USER", prop.getProperty("DHUS_USER"));
+            m_aoProperties.put("DHUS_PASSWORD", prop.getProperty("DHUS_PASSWORD"));
 
         } catch (Exception e) {
             System.out.println("Exception: " + e);

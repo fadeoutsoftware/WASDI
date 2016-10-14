@@ -1,4 +1,4 @@
-package it.fadeout.snapopearations;
+package wasdi.snapopearations;
 
 import org.esa.s1tbx.calibration.gpf.CalibrationOp;
 import org.esa.snap.core.dataio.ProductIO;

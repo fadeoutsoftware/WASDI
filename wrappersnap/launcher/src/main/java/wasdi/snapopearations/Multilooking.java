@@ -1,4 +1,4 @@
-package it.fadeout.snapopearations;
+package wasdi.snapopearations;
 
 import org.esa.s1tbx.sar.gpf.MultilookOp;
 import org.esa.snap.core.datamodel.Product;

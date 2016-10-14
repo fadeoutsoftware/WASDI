@@ -1,10 +1,10 @@
-package it.fadeout.snapopearations;
+package wasdi.snapopearations;
 
-import it.fadeout.viewmodels.AttributeViewModel;
-import it.fadeout.viewmodels.BandViewModel;
-import it.fadeout.viewmodels.MetadataViewModel;
-import it.fadeout.viewmodels.NodeGroupViewModel;
-import it.fadeout.viewmodels.ProductViewModel;
+import wasdi.shared.viewmodels.AttributeViewModel;
+import wasdi.shared.viewmodels.BandViewModel;
+import wasdi.shared.viewmodels.MetadataViewModel;
+import wasdi.shared.viewmodels.NodeGroupViewModel;
+import wasdi.shared.viewmodels.ProductViewModel;
 import org.esa.snap.core.dataio.ProductIO;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.MetadataAttribute;
@@ -114,20 +114,16 @@ public class ReadProduct {
 
     }
 
-    public String writeBigTiff(String sFileName) throws Exception {
-        String sLayerId = "";
+    public String writeBigTiff(String sFileName, String sWorkingPath) throws Exception {
 
-        String sTempFile = "C:\\temp\\ImagePyramidTest\\";
-
-        Product oSentinelProduct = ReadProduct.m_oCacheProducts.get(sFileName);
+        File oFile = new File (sFileName);
+        Product oSentinelProduct = ReadProduct(oFile);
 
         WriteProduct oWriter = new WriteProduct();
-        oWriter.WriteBigTiff(oSentinelProduct, sTempFile, sFileName, null);
 
+        oWriter.WriteBigTiff(oSentinelProduct, sWorkingPath, oFile.getName(), null);
 
-
-        return sLayerId;
-
+        return sWorkingPath+oFile.getName();
     }
 
 

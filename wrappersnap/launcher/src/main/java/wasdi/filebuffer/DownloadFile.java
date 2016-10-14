@@ -1,4 +1,6 @@
-package it.fadeout.filebuffer;
+package wasdi.filebuffer;
+
+import wasdi.ConfigReader;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -19,16 +21,43 @@ public class DownloadFile {
     private final int BUFFER_SIZE = 4096;
 
     //https://scihub.copernicus.eu/dhus/odata/v1/Products('18f7993d-eae1-4f7f-9d81-d7cf19c18378')/$value
-    public void ExecuteDownloadFile(String fileURL, String saveDirOnServer)
-            throws IOException {
+    public String ExecuteDownloadFile(String sFileURL, String sSaveDirOnServer) throws IOException {
 
+        // Domain check
+        if (sFileURL == null) {
+            System.out.println("DownloadFile.ExecuteDownloadFile: sFileURL is null");
+            return "";
+        }
+        if (sSaveDirOnServer == null) {
+            System.out.println("DownloadFile.ExecuteDownloadFile: sSaveDirOnServer is null");
+            return "";
+        }
+        if (sFileURL.isEmpty()) {
+            System.out.println("DownloadFile.ExecuteDownloadFile: sFileURL is Empty");
+            return "";
+        }
+        if (sSaveDirOnServer.isEmpty()) {
+            System.out.println("DownloadFile.ExecuteDownloadFile: sSaveDirOnServer is Empty");
+            return "";
+        }
+
+        String sReturnFilePath = "";
+
+
+        // TODO: Here we are assuming dhus authentication. But we have to find a general solution
         Authenticator.setDefault(new Authenticator() {
             protected PasswordAuthentication getPasswordAuthentication() {
-                return new PasswordAuthentication("sadamo", "***REMOVED***".toCharArray());
+                try{
+                    return new PasswordAuthentication(ConfigReader.getPropValue("DHUS_USER"), ConfigReader.getPropValue("DHUS_PASSWORD") .toCharArray());
+                }
+                catch (Exception oEx){
+                    System.out.println("DownloadFile.ExecuteDownloadFile: exception setting auth " + oEx.toString());
+                }
+                return null;
             }
         });
 
-        URL url = new URL(fileURL);
+        URL url = new URL(sFileURL);
         HttpURLConnection httpConn = (HttpURLConnection) url.openConnection();
         int responseCode = httpConn.getResponseCode();
 
@@ -48,8 +77,8 @@ public class DownloadFile {
                 }
             } else {
                 // extracts file name from URL
-                fileName = fileURL.substring(fileURL.lastIndexOf("/") + 1,
-                        fileURL.length());
+                fileName = sFileURL.substring(sFileURL.lastIndexOf("/") + 1,
+                        sFileURL.length());
             }
 
             System.out.println("Content-Type = " + contentType);
@@ -59,7 +88,7 @@ public class DownloadFile {
 
             // opens input stream from the HTTP connection
             InputStream inputStream = httpConn.getInputStream();
-            String saveFilePath = saveDirOnServer + File.separator + fileName;
+            String saveFilePath = sSaveDirOnServer + File.separator + fileName;
 
             // opens an output stream to save into file
             FileOutputStream outputStream = new FileOutputStream(saveFilePath);
@@ -73,10 +102,14 @@ public class DownloadFile {
             outputStream.close();
             inputStream.close();
 
-            System.out.println("File downloaded");
+            sReturnFilePath = saveFilePath;
+
+            System.out.println("File downloaded " + sReturnFilePath);
         } else {
             System.out.println("No file to download. Server replied HTTP code: " + responseCode);
         }
         httpConn.disconnect();
+
+        return  sReturnFilePath;
     }
 }

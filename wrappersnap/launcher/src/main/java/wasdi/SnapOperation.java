@@ -1,9 +1,9 @@
-package it.fadeout;
+package wasdi;
 
 /**
  * Created by s.adamo on 26/09/2016.
  */
-public enum Operation {
+public enum SnapOperation {
 
     CALIBRATION,
     FILTER,

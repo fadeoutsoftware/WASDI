@@ -1,14 +1,15 @@
-package it.fadeout.rabbit;
+package wasdi.rabbit;
 
 /**
  * Created by s.adamo on 23/09/2016.
  */
 import java.io.IOException;
 import java.util.concurrent.TimeoutException;
-import it.fadeout.*;
+
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
+import wasdi.ConfigReader;
 
 public class Send {
 

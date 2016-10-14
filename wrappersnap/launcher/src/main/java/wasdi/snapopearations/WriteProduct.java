@@ -1,4 +1,4 @@
-package it.fadeout.snapopearations;
+package wasdi.snapopearations;
 
 import org.esa.snap.core.dataio.ProductIO;
 import org.esa.snap.core.datamodel.Product;

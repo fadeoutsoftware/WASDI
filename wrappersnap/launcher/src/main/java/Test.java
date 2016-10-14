@@ -1,7 +1,7 @@
 
 //import publish.Publisher;
-import it.fadeout.snapopearations.ReadProduct;
-import it.fadeout.viewmodels.ProductViewModel;
+import wasdi.snapopearations.ReadProduct;
+import wasdi.shared.viewmodels.ProductViewModel;
 import org.esa.s1tbx.calibration.gpf.CalibrationOp;
 import org.esa.s1tbx.sar.gpf.MultilookOp;
 import org.esa.s1tbx.sar.gpf.filtering.SpeckleFilterOp;

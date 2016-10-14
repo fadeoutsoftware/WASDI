@@ -1,4 +1,4 @@
-package it.fadeout.snapopearations;
+package wasdi.snapopearations;
 
 import org.esa.s1tbx.sar.gpf.geometric.RangeDopplerGeocodingOp;
 import org.esa.snap.core.datamodel.Product;

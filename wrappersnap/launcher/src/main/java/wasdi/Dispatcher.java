@@ -1,24 +1,24 @@
-package it.fadeout;
+package wasdi;
 
 /**
  * Created by s.adamo on 26/09/2016.
  */
 public class Dispatcher implements Runnable{
 
-    Operation m_oOperation = null;
+    SnapOperation m_oSnapOperation = null;
 
     String m_sFile = null;
 
-    public Dispatcher(Operation oOperation, String sFile)
+    public Dispatcher(SnapOperation oSnapOperation, String sFile)
     {
-        this.m_oOperation = oOperation;
+        this.m_oSnapOperation = oSnapOperation;
         this.m_sFile = sFile;
     }
 
 
     public void run() {
 
-        switch (m_oOperation){
+        switch (m_oSnapOperation){
             case CALIBRATION:
                 break;
             case FILTER:
