@@ -1,4 +1,4 @@
-package wasdi;
+package wasdi.shared.utils;
 
 import java.beans.XMLDecoder;
 import java.beans.XMLEncoder;
