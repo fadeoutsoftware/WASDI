@@ -30,17 +30,22 @@ public class Publisher {
 
     public static String TARGET_DIR_PYRAMID = "c:\\temp\\ImagePyramidTest\\TempImagePyramidCreation\\";
 
-    public String GDALBasePath = "\"C:\\Program Files\\GDAL\\bin\\gdal\\python\\scripts\\gdal_retile.py\"";
+    public static String GDALBasePath = "\"C:\\Program Files\\GDAL\\bin\\gdal\\python\\scripts\\gdal_retile.py\"";
+
+    public static String PYRAMYD_ENV_OPTIONS = "PYTHONPATH=C:/Program Files/GDAL/bin/gdal/python|PROJ_LIB=C:/Program Files/GDAL/bin/proj/SHARE|GDAL_DATA=C:/Program Files/GDAL/bin/gdal-data|GDAL_DRIVER_PATH=C:/Program Files/GDAL/bin/gdal/plugins|PATH=C:/Program Files/GDAL/bin;C:/Program Files/GDAL/bin/gdal/python/osgeo;C:/Program Files/GDAL/bin/proj/apps;C:/Program Files/GDAL/bin/gdal/apps;C:/Program Files/GDAL/bin/ms/apps;C:/Program Files/GDAL/bin/gdal/csharp;C:/Program Files/GDAL/bin/ms/csharp;C:/Program Files/GDAL/bin/curl;C:/Python34";
+
+    public static String PYTHON_PATH = "c:/OSGeo4W64/bin/python";
 
     public Publisher()
     {
 
     }
 
-    public Publisher(String sPyramidBaseFolder, String sGDALBasePath)
+    public Publisher(String sPyramidBaseFolder, String sGDALBasePath, String sPyramidEnvOptions)
     {
         TARGET_DIR_BASE = sPyramidBaseFolder;
         GDALBasePath = sGDALBasePath;
+        PYRAMYD_ENV_OPTIONS = sPyramidEnvOptions;
     }
 
 
@@ -52,50 +57,56 @@ public class Publisher {
         String sTargetDir = sPathName;
         Path oTargetPath = Paths.get(sTargetDir);
         if (!Files.exists(oTargetPath))
+        {
             try {
                 Files.createDirectory(oTargetPath);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
 
-                String sCmd = String.format("python %s -v -r bilinear -levels %d -ps %s %s -co \"TILED=YES\" -targetDir %s %s", GDALBasePath, iLevel, iWidth, iHeight, sTargetDir, sInputFile);
-                String[] envp = {"PYTHONPATH=C:\\Program Files\\GDAL\\bin\\gdal\\python", "PROJ_LIB=C:\\Program Files\\GDAL\\bin\\proj\\SHARE", "GDAL_DATA=C:\\Program Files\\GDAL\\bin\\gdal-data",
-                        "GDAL_DRIVER_PATH=C:\\Program Files\\GDAL\\bin\\gdal\\plugins", "PATH=C:\\Program Files\\GDAL\\bin;C:\\Program Files\\GDAL\\bin\\gdal\\python\\osgeo;C:\\Program Files\\GDAL\\bin\\proj\\apps;C:\\Program Files\\GDAL\\bin\\gdal\\apps;" +
-                        "C:\\Program Files\\GDAL\\bin\\ms\\apps;C:\\Program Files\\GDAL\\bin\\gdal\\csharp;C:\\Program Files\\GDAL\\bin\\ms\\csharp;C:\\Program Files\\GDAL\\bin\\curl;C:\\Python34"};
+        try {
 
-                try {
+            String sCmd = String.format("%s %s -v -r bilinear -levels %d -ps %s %s -co \"TILED=YES\" -targetDir %s %s", PYTHON_PATH, GDALBasePath, iLevel, iWidth, iHeight, sTargetDir, sInputFile);
+            String[] asEnvp = PYRAMYD_ENV_OPTIONS.split("\\|");
 
-                    Process p;
-                    Runtime oRunTime = Runtime.getRuntime();
-                    p = oRunTime.exec(sCmd, envp);
-                    InputStream stdin = p.getInputStream();
-                    InputStreamReader isr = new InputStreamReader(stdin);
-                    BufferedReader br = new BufferedReader(isr);
-                    String line = null;
-                    System.out.println("<OUTPUT>");
-                    while ((line = br.readLine()) != null)
-                        System.out.println(line);
-                    System.out.println("</OUTPUT>");
-                    int exitVal = p.waitFor();
-                    p.destroy();
+            try {
 
+                Process oProcess;
+                Runtime oRunTime = Runtime.getRuntime();
+                oProcess = oRunTime.exec(sCmd, asEnvp);
+                InputStream stdin = oProcess.getInputStream();
+                InputStreamReader isr = new InputStreamReader(stdin);
+                BufferedReader br = new BufferedReader(isr);
+                String line = null;
+                System.out.println("<OUTPUT>");
+                while ((line = br.readLine()) != null)
+                    System.out.println(line);
+                System.out.println("</OUTPUT>");
+                int exitVal = oProcess.waitFor();
+                oProcess.destroy();
 
-                } catch (IOException e) {
-                    e.printStackTrace();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
 
             } catch (IOException e) {
                 e.printStackTrace();
-                return;
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return;
+        }
 
 
     }
 
     private String PublishImagePyramidOnGeoServer(String sFileName, String sGeoServerAddress, String sGeoServerUser, String sGeoServerPassword, String sWorkspace, String sStoreName) throws Exception {
 
-        LaunchImagePyramidCreation(sFileName, LEVEL, WIDTH, HEIGHT, TARGET_DIR_BASE);
+        // Create Pyramid
+        //LaunchImagePyramidCreation(sFileName, LEVEL, WIDTH, HEIGHT, TARGET_DIR_BASE);
 
-        //pubblico su geoserver
+        //Create GeoServer Manager
         GeoServerManager manager = new GeoServerManager(sGeoServerAddress, sGeoServerUser, sGeoServerPassword);
 
         if (!manager.getReader().existsWorkspace(sWorkspace)) {
@@ -105,12 +116,11 @@ public class Publisher {
         //publish image pyramid
         try {
 
-            //creo le immagini piramidali
             // now make sure we can actually rebuild the mosaic
-            final URL testFile = new URL("file:" + TARGET_DIR_PYRAMID + sFileName);
+            final URL testFile = new URL("file:" + sFileName);
             File sourceDir = new File(DataUtilities.urlToFile(testFile).getPath());
-            ImagePyramidFormat format = new ImagePyramidFormat();
-            final Hints hints = new Hints(Hints.DEFAULT_COORDINATE_REFERENCE_SYSTEM, DefaultGeographicCRS.WGS84);
+            //ImagePyramidFormat format = new ImagePyramidFormat();
+            //final Hints hints = new Hints(Hints.DEFAULT_COORDINATE_REFERENCE_SYSTEM, DefaultGeographicCRS.WGS84);
 
             //final ImagePyramidReader reader = format.getReader(sourceDir, hints);
 
