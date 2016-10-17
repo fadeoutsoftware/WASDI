@@ -40,10 +40,12 @@ public class ConfigReader {
             m_aoProperties.put("GEOSERVER_PASSWORD", prop.getProperty("GEOSERVER_PASSWORD"));
             m_aoProperties.put("GEOSERVER_WORKSPACE", prop.getProperty("GEOSERVER_WORKSPACE"));
             m_aoProperties.put("PYRAMID_BASE_FOLDER", prop.getProperty("PYRAMID_BASE_FOLDER"));
+            m_aoProperties.put("PYRAMYD_ENV_OPTIONS", prop.getProperty("PYRAMYD_ENV_OPTIONS"));
             m_aoProperties.put("GDAL_PATH", prop.getProperty("GDAL_PATH"));
             m_aoProperties.put("GDAL_RETILE", prop.getProperty("GDAL_RETILE"));
             m_aoProperties.put("DHUS_USER", prop.getProperty("DHUS_USER"));
             m_aoProperties.put("DHUS_PASSWORD", prop.getProperty("DHUS_PASSWORD"));
+            m_aoProperties.put("PYTHON_PATH", prop.getProperty("PYTHON_PATH"));
 
         } catch (Exception e) {
             System.out.println("Exception: " + e);

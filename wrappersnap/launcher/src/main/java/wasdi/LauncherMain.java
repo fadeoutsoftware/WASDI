@@ -158,8 +158,10 @@ public class LauncherMain {
             //TODO: Here recognize the file type and run the right procedure. At the moment assume Sentinel1A
 
             // Convert the product in a Tiff file
-            ReadProduct oReadProduct = new ReadProduct();
-            String sTiffFile = oReadProduct.writeBigTiff(sFile, ConfigReader.getPropValue("PYRAMID_BASE_FOLDER"));
+            //ReadProduct oReadProduct = new ReadProduct();
+            //String sTiffFile = oReadProduct.writeBigTiff(sFile, ConfigReader.getPropValue("PYRAMID_BASE_FOLDER"));
+
+            String sTiffFile = "C:/temp/wasdi/ImagePyramidTest/S1A_IW_GRDH_1SSV_20150213T095824_20150213T095849_004603_005AB7_5539.zip.tif";
 
             // Check result
             if (Utils.isNullOrEmpty(sTiffFile))
@@ -169,7 +171,13 @@ public class LauncherMain {
             }
 
             // Ok publish
-            Publisher oPublisher = new Publisher(ConfigReader.getPropValue("PYRAMID_BASE_FOLDER"), ConfigReader.getPropValue("GDAL_PATH")+"/"+ConfigReader.getPropValue("GDAL_RETILE"));
+
+            Publisher.PYTHON_PATH = ConfigReader.getPropValue("PYTHON_PATH");
+            Publisher.TARGET_DIR_BASE = ConfigReader.getPropValue("PYRAMID_BASE_FOLDER");
+            Publisher.GDALBasePath = ConfigReader.getPropValue("GDAL_PATH")+"/"+ConfigReader.getPropValue("GDAL_RETILE");
+            Publisher.PYRAMYD_ENV_OPTIONS = ConfigReader.getPropValue("PYRAMYD_ENV_OPTIONS");
+
+            Publisher oPublisher = new Publisher();
             sLayerId = oPublisher.publishImage(sTiffFile,ConfigReader.getPropValue("GEOSERVER_ADDRESS"),ConfigReader.getPropValue("GEOSERVER_USER"),ConfigReader.getPropValue("GEOSERVER_PASSWORD"),ConfigReader.getPropValue("GEOSERVER_WORKSPACE"), oParameter.getStore());
         }
         catch (Exception oEx) {
