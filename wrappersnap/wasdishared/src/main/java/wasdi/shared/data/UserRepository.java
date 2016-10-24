@@ -1,0 +1,98 @@
+package wasdi.shared.data;
+
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.mongodb.MongoClient;
+import com.mongodb.client.FindIterable;
+import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.result.DeleteResult;
+import org.bson.Document;
+import wasdi.shared.business.User;
+
+import java.io.IOException;
+
+/**
+ * Created by p.campanella on 21/10/2016.
+ */
+public class UserRepository extends  MongoRepository{
+
+    public boolean InsertUser(User oUser) {
+
+        try {
+            ObjectMapper oMapper = new ObjectMapper();
+            String sJSON = oMapper.writeValueAsString(oUser);
+            getCollection("users").insertOne(Document.parse(sJSON));
+
+            return true;
+
+        } catch (Exception oEx) {
+            oEx.printStackTrace();
+        }
+
+        return false;
+    }
+
+    public User GetUser(String sUserId) {
+
+        try {
+            Document oUserDocument = getCollection("users").find(new Document("userId", sUserId)).first();
+
+            String sJSON = oUserDocument.toJson();
+
+            ObjectMapper oMapper = new ObjectMapper();
+            oMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+
+            User oUser = oMapper.readValue(sJSON,User.class);
+
+            return oUser;
+        } catch (Exception oEx) {
+            oEx.printStackTrace();
+        }
+
+        return  null;
+    }
+
+    public User Login(String sUserId, String sPassword) {
+        try {
+            User oUser = GetUser(sUserId);
+
+            if (oUser != null)
+            {
+                if (oUser.getPassword() != null)
+                {
+                    if (oUser.getPassword().equals(sPassword))
+                    {
+                        return oUser;
+                    }
+                }
+            }
+
+            return null;
+        } catch (Exception oEx) {
+            oEx.printStackTrace();
+        }
+
+        return  null;
+    }
+
+    public boolean DeleteUser(String sUserId) {
+
+        try {
+
+            DeleteResult oDeleteResult = getCollection("users").deleteOne(new Document("userId", sUserId));
+
+            if (oDeleteResult != null)
+            {
+                if (oDeleteResult.getDeletedCount() == 1 )
+                {
+                    return  true;
+                }
+            }
+
+        } catch (Exception oEx) {
+            oEx.printStackTrace();
+        }
+
+        return  false;
+    }
+}

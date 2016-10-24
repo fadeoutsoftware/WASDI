@@ -6,8 +6,9 @@ package wasdi.shared.parameters;
 public class PublishParameters {
 
     private String fileName;
-    private String geoserverStore;
     private String queue;
+    private String userId;
+    private String workspace;
 
     public String getFileName() {
         return fileName;
@@ -17,19 +18,27 @@ public class PublishParameters {
         this.fileName = sFileName;
     }
 
-    public String getStore() {
-        return geoserverStore;
-    }
-
-    public void setStore(String sStore) {
-        this.geoserverStore = sStore;
-    }
-
     public String getQueue() {
         return queue;
     }
 
     public void setQueue(String queue) {
         this.queue = queue;
+    }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
+
+    public String getWorkspace() {
+        return workspace;
+    }
+
+    public void setWorkspace(String workspace) {
+        this.workspace = workspace;
     }
 }
