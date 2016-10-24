@@ -2,14 +2,7 @@ package wasdi.geoserver;
 
 import it.geosolutions.geoserver.rest.encoder.coverage.GSCoverageEncoder;
 
-import org.geotools.data.DataUtilities;
-import org.geotools.factory.Hints;
-import org.geotools.gce.imagepyramid.ImagePyramidFormat;
-import org.geotools.referencing.crs.DefaultGeographicCRS;
-
-
 import java.io.*;
-import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -52,7 +45,7 @@ public class Publisher {
     /*
 
      */
-    private void LaunchImagePyramidCreation(String sInputFile, Integer iLevel, Integer iWidth, Integer iHeight, String sPathName) {
+    private boolean LaunchImagePyramidCreation(String sInputFile, Integer iLevel, Integer iWidth, Integer iHeight, String sPathName) {
 
         String sTargetDir = sPathName;
         Path oTargetPath = Paths.get(sTargetDir);
@@ -67,8 +60,10 @@ public class Publisher {
 
         try {
 
-            String sCmd = String.format("%s %s -v -r bilinear -levels %d -ps %s %s -co \"TILED=YES\" -targetDir %s %s", PYTHON_PATH, GDALBasePath, iLevel, iWidth, iHeight, sTargetDir, sInputFile);
+            String sCmd = String.format("%s %s -v -r bilinear -levels %d -ps %s %s -co \"TILED=YES\" -targetDir %s %s", PYTHON_PATH, GDALBasePath, iLevel, iWidth, iHeight, "\""+sTargetDir +"\"","\""+ sInputFile+"\"");
             String[] asEnvp = PYRAMYD_ENV_OPTIONS.split("\\|");
+
+            System.out.println(sCmd);
 
             try {
 
@@ -89,54 +84,58 @@ public class Publisher {
 
             } catch (IOException e) {
                 e.printStackTrace();
+
+                return  false;
             } catch (InterruptedException e) {
                 e.printStackTrace();
+
+                return  false;
             }
 
         } catch (Exception e) {
             e.printStackTrace();
-            return;
+            return  false;
         }
 
+        return  true;
 
     }
 
     private String PublishImagePyramidOnGeoServer(String sFileName, String sGeoServerAddress, String sGeoServerUser, String sGeoServerPassword, String sWorkspace, String sStoreName) throws Exception {
 
+        File oFile = new File(sFileName);
+        String sPath = oFile.getParent();
+
+
         // Create Pyramid
-        //LaunchImagePyramidCreation(sFileName, LEVEL, WIDTH, HEIGHT, TARGET_DIR_BASE);
+        LaunchImagePyramidCreation(sFileName, LEVEL, WIDTH, HEIGHT, sPath);
 
         //Create GeoServer Manager
-        GeoServerManager manager = new GeoServerManager(sGeoServerAddress, sGeoServerUser, sGeoServerPassword);
+        GeoServerManager oManager = new GeoServerManager(sGeoServerAddress, sGeoServerUser, sGeoServerPassword);
 
-        if (!manager.getReader().existsWorkspace(sWorkspace)) {
-            manager.getPublisher().createWorkspace(sWorkspace);
+        if (!oManager.getReader().existsWorkspace(sWorkspace)) {
+            oManager.getPublisher().createWorkspace(sWorkspace);
         }
 
         //publish image pyramid
         try {
 
-            // now make sure we can actually rebuild the mosaic
-            final URL testFile = new URL("file:" + sFileName);
-            File sourceDir = new File(DataUtilities.urlToFile(testFile).getPath());
-            //ImagePyramidFormat format = new ImagePyramidFormat();
-            //final Hints hints = new Hints(Hints.DEFAULT_COORDINATE_REFERENCE_SYSTEM, DefaultGeographicCRS.WGS84);
-
-            //final ImagePyramidReader reader = format.getReader(sourceDir, hints);
+            // Storage Folder
+            File oSourceDir = new File(sPath);
 
             //Pubblico il layer
-            String layerName = sFileName;
-            manager.publishImagePyramid(sWorkspace, sStoreName, sourceDir);
+            String slLayerName = sFileName;
+            oManager.publishImagePyramid(sWorkspace, sStoreName, oSourceDir);
 
             //configure coverage
             GSCoverageEncoder ce = new GSCoverageEncoder();
             ce.setEnabled(true); //abilito il coverage
             ce.setSRS("EPSG:4326");
-            boolean exists = manager.getReader().existsCoveragestore(sWorkspace, sStoreName);
+            boolean exists = oManager.getReader().existsCoveragestore(sWorkspace, sStoreName);
             if (exists)
-                exists = manager.getReader().existsCoverage(sWorkspace, sStoreName, layerName);
+                exists = oManager.getReader().existsCoverage(sWorkspace, sStoreName, slLayerName);
             if(exists)
-                manager.getPublisher().configureCoverage(ce, sWorkspace, sStoreName, layerName);
+                oManager.getPublisher().configureCoverage(ce, sWorkspace, sStoreName, slLayerName);
         }catch (Exception oEx){}
 
         return sFileName;
@@ -144,8 +143,6 @@ public class Publisher {
     }
 
     public String publishImage(String sFileName, String sGeoServerAddress, String sGeoServerUser, String sGeoServerPassword, String sWorkspace, String sStore) throws Exception {
-
         return this.PublishImagePyramidOnGeoServer(sFileName, sGeoServerAddress, sGeoServerUser, sGeoServerPassword, sWorkspace, sStore);
-
     }
 }
