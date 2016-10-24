@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import javax.servlet.ServletConfig;
 import javax.ws.rs.GET;
+import javax.ws.rs.HeaderParam;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
@@ -12,9 +13,12 @@ import javax.ws.rs.core.Response;
 
 import it.fadeout.Wasdi;
 import wasdi.shared.LauncherOperations;
+import wasdi.shared.business.UserSession;
+import wasdi.shared.data.SessionRepository;
 import wasdi.shared.parameters.DownloadFileParameter;
 import wasdi.shared.parameters.PublishParameters;
 import wasdi.shared.utils.SerializationUtils;
+import wasdi.shared.utils.Utils;
 
 @Path("/download")
 public class DownloadResource {
@@ -25,15 +29,29 @@ public class DownloadResource {
 	@GET
 	@Path("downloadandpublish")
 	@Produces({"application/xml", "application/json", "text/xml"})
-	public Response DownloadAndPublish(@QueryParam("sFileUrl") String sFileUrl) throws IOException
+	public Response DownloadAndPublish(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sFileUrl") String sFileUrl, @QueryParam("sWorkspace") String sWorkspace) throws IOException
 	{
 		try {
+			
+			if (Utils.isNullOrEmpty(sSessionId)) return Response.status(401).build();
+			
+			SessionRepository oSessionRepo = new SessionRepository();
+			UserSession oSession = oSessionRepo.GetSession(sSessionId);
+			
+			if (oSession == null) return Response.status(401).build();
+			
+			// TODO Check if the session is too old?
+			
+			String sUserId = oSession.getUserId();
+			
 			
 			String sPath = m_oServletConfig.getInitParameter("SerializationPath") + Wasdi.GetSerializationFileName();
 			
 			DownloadFileParameter oParameter = new DownloadFileParameter();
 			oParameter.setQueue("TestWuaue");
 			oParameter.setUrl(sFileUrl);
+			oParameter.setWorkspace(sWorkspace);
+			oParameter.setUserId(sUserId);
 
 			SerializationUtils.serializeObjectToXML(sPath, oParameter);
 			
@@ -58,15 +76,29 @@ public class DownloadResource {
 	@GET
 	@Path("download")
 	@Produces({"application/xml", "application/json", "text/xml"})
-	public Response Download(@QueryParam("sFileUrl") String sFileUrl) throws IOException
+	public Response Download(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sFileUrl") String sFileUrl, @QueryParam("sWorkspace") String sWorkspace) throws IOException
 	{
 		try {
+			
+			if (Utils.isNullOrEmpty(sSessionId)) return Response.status(401).build();
+			
+			SessionRepository oSessionRepo = new SessionRepository();
+			UserSession oSession = oSessionRepo.GetSession(sSessionId);
+			
+			if (oSession == null) return Response.status(401).build();
+			
+			// TODO Check if the session is too old?
+			
+			String sUserId = oSession.getUserId();
+			
 			
 			String sPath = m_oServletConfig.getInitParameter("SerializationPath") + Wasdi.GetSerializationFileName();
 			
 			DownloadFileParameter oParameter = new DownloadFileParameter();
 			oParameter.setQueue("TestWuaue");
 			oParameter.setUrl(sFileUrl);
+			oParameter.setWorkspace(sWorkspace);
+			oParameter.setUserId(sUserId);
 
 			SerializationUtils.serializeObjectToXML(sPath, oParameter);
 			
@@ -91,17 +123,30 @@ public class DownloadResource {
 	@GET
 	@Path("publish")
 	@Produces({"application/xml", "application/json", "text/xml"})
-	public Response Publish(@QueryParam("sFileUrl") String sFileUrl, @QueryParam("sStore") String sStore) throws IOException
+	public Response Publish(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sFileUrl") String sFileUrl, @QueryParam("sWorkspace") String sWorkspace) throws IOException
 	{
 		try {
+			
+			if (Utils.isNullOrEmpty(sSessionId)) return Response.status(401).build();
+			
+			SessionRepository oSessionRepo = new SessionRepository();
+			UserSession oSession = oSessionRepo.GetSession(sSessionId);
+			
+			if (oSession == null) return Response.status(401).build();
+			
+			// TODO Check if the session is too old?
+			
+			String sUserId = oSession.getUserId();
+			
 			
 			String sPath = m_oServletConfig.getInitParameter("SerializationPath") + Wasdi.GetSerializationFileName();
 			
 			PublishParameters oParameter = new PublishParameters();
 			oParameter.setQueue("TestWuaue");
 			oParameter.setFileName(sFileUrl);
-			oParameter.setStore(sStore);
-
+			oParameter.setWorkspace(sWorkspace);
+			oParameter.setUserId(sUserId);
+			
 			SerializationUtils.serializeObjectToXML(sPath, oParameter);
 			
 			String sLauncherPath = m_oServletConfig.getInitParameter("LauncherPath");

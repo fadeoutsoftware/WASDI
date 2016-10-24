@@ -3,11 +3,9 @@ package it.fadeout.opensearch;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.util.List;
 
 import org.apache.abdera.Abdera;
 import org.apache.abdera.model.Document;
-import org.apache.abdera.model.Entry;
 import org.apache.abdera.model.Feed;
 import org.apache.abdera.parser.Parser;
 import org.apache.abdera.protocol.client.AbderaClient;

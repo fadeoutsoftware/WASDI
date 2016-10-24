@@ -16,7 +16,8 @@ public class WasdiResource {
 	public PrimitiveResult Hello()
 	{
 		PrimitiveResult oResult = new PrimitiveResult();
-		oResult.StringValue = "Hello Wasdi!!";
+		oResult.setStringValue("Hello Wasdi!!");
 		return oResult;
 	}
+	
 }
