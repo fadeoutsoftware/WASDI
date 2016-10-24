@@ -121,9 +121,9 @@ public class ReadProduct {
 
         WriteProduct oWriter = new WriteProduct();
 
-        oWriter.WriteBigTiff(oSentinelProduct, sWorkingPath, oFile.getName(), null);
+        String sBigTiff = oWriter.WriteBigTiff(oSentinelProduct, sWorkingPath, oFile.getName(), null);
 
-        return sWorkingPath+oFile.getName();
+        return sBigTiff;
     }
 
 

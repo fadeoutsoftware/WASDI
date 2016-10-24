@@ -11,11 +11,13 @@ import java.io.File;
  */
 public class WriteProduct {
 
-    public void WriteBigTiff(Product terrainProduct, String sFilePath, String sFileName, String format) throws Exception
+    public String WriteBigTiff(Product terrainProduct, String sFilePath, String sFileName, String format) throws Exception
     {
         if (format == null)
             format = BigGeoTiffProductReaderPlugIn.FORMAT_NAME;
         File newFile = new File(sFilePath + sFileName + ".tif");
         ProductIO.writeProduct(terrainProduct, newFile.getAbsolutePath(), format);
+
+        return newFile.getAbsolutePath();
     }
 }

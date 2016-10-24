@@ -1,4 +1,5 @@
 package wasdi;
+import org.apache.commons.io.FileUtils;
 import org.esa.snap.core.datamodel.Product;
 import wasdi.filebuffer.DownloadFile;
 import org.apache.commons.cli.*;
@@ -9,6 +10,10 @@ import wasdi.shared.parameters.PublishParameters;
 import wasdi.shared.utils.SerializationUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.snapopearations.ReadProduct;
+
+import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 /**
  * Created by s.adamo on 23/09/2016.
@@ -82,8 +87,7 @@ public class LauncherMain {
                     // Deserialize Parameters
                     DownloadFileParameter oDownloadFileParameter = (DownloadFileParameter) SerializationUtils.deserializeXMLToObject(sParameter);
 
-
-
+                    String sFile = Download(oDownloadFileParameter, ConfigReader.getPropValue("DOWNLOAD_ROOT_PATH"));
                 }
                 case LauncherOperations.DOWNLOADANDPUBLISH: {
 
@@ -108,8 +112,9 @@ public class LauncherMain {
                         // Recreate the download parameter
                         PublishParameters oPublishParameter = new PublishParameters();
                         oPublishParameter.setFileName(sFile);
+                        oPublishParameter.setUserId(oDownloadFileParameter.getUserId());
+                        oPublishParameter.setWorkspace(oDownloadFileParameter.getWorkspace());
                         oPublishParameter.setQueue(oDownloadFileParameter.getQueue());
-                        oPublishParameter.setStore("pyramidstore");
 
                         Publish(oPublishParameter);
                     }
@@ -130,6 +135,8 @@ public class LauncherMain {
     public String Download(DownloadFileParameter oParameter, String sDownloadPath) {
         String sFileName = "";
         try {
+            // Generate the Path adding user id and workspace
+            sDownloadPath += oParameter.getUserId()+"/"+oParameter.getWorkspace();
             // Download file
             DownloadFile oDownloadFile = new DownloadFile();
             sFileName = oDownloadFile.ExecuteDownloadFile(oParameter.getUrl(), sDownloadPath);
@@ -145,23 +152,54 @@ public class LauncherMain {
         String sLayerId = "";
 
         try {
-            // Download file
+            // Read File Name
             String sFile = oParameter.getFileName();
 
-            // Check result
+            // Check integrity
             if (Utils.isNullOrEmpty(sFile))
             {
                 System.out.println( "LauncherMain.Publish: file is null or empty");
                 return  sLayerId;
             }
 
+            // Create a file object for the downloaded file
+            File oDownloadedFile = new File(sFile);
+            String sInputFileNameOnly = oDownloadedFile.getName();
+
+            sLayerId = sInputFileNameOnly;
+
+            // Create a clean layer id: the file name without any extension
+            String [] asLayerIdSplit = sInputFileNameOnly.split("\\.");
+            if (asLayerIdSplit!=null) {
+                if (asLayerIdSplit.length>0){
+                    sLayerId = asLayerIdSplit[0];
+                }
+            }
+
+            // Copy fie to GeoServer Data Dir
+            String sGeoServerDataDir = ConfigReader.getPropValue("GEOSERVER_DATADIR");
+            String sTargetDir = sGeoServerDataDir;
+
+            if (!(sTargetDir.endsWith("/")||sTargetDir.endsWith("\\"))) sTargetDir+="/";
+            sTargetDir+=sLayerId+"/";
+
+            String sTargetFile = sTargetDir + sInputFileNameOnly;
+
+            File oTargetFile = new File(sTargetFile);
+
+            System.out.println("LauncherMain.publish: InputFile: " + sFile + " TargetFile: " + sTargetDir + " LayerId " + sLayerId);
+
+            FileUtils.copyFile(oDownloadedFile,oTargetFile);
+
             //TODO: Here recognize the file type and run the right procedure. At the moment assume Sentinel1A
 
+            System.out.println("LauncherMain.publish: Write Big Tiff");
             // Convert the product in a Tiff file
-            //ReadProduct oReadProduct = new ReadProduct();
-            //String sTiffFile = oReadProduct.writeBigTiff(sFile, ConfigReader.getPropValue("PYRAMID_BASE_FOLDER"));
+            ReadProduct oReadProduct = new ReadProduct();
+            String sTiffFile = oReadProduct.writeBigTiff(oTargetFile.getAbsolutePath(), sTargetDir);
+            //String sTiffFile = "C:\\Program Files (x86)\\GeoServer 2.9.2\\data_dir\\data\\S1A_IW_GRDH_1SSV_20150213T095824_20150213T095849_004603_005AB7_5539\\S1A_IW_GRDH_1SSV_20150213T095824_20150213T095849_004603_005AB7_5539.zip.tif";
 
-            String sTiffFile = "C:/temp/wasdi/ImagePyramidTest/S1A_IW_GRDH_1SSV_20150213T095824_20150213T095849_004603_005AB7_5539.zip.tif";
+            System.out.println("LauncherMain.publish: TiffFile: " +sTiffFile);
 
             // Check result
             if (Utils.isNullOrEmpty(sTiffFile))
@@ -171,14 +209,18 @@ public class LauncherMain {
             }
 
             // Ok publish
-
             Publisher.PYTHON_PATH = ConfigReader.getPropValue("PYTHON_PATH");
             Publisher.TARGET_DIR_BASE = ConfigReader.getPropValue("PYRAMID_BASE_FOLDER");
             Publisher.GDALBasePath = ConfigReader.getPropValue("GDAL_PATH")+"/"+ConfigReader.getPropValue("GDAL_RETILE");
             Publisher.PYRAMYD_ENV_OPTIONS = ConfigReader.getPropValue("PYRAMYD_ENV_OPTIONS");
 
+            System.out.println("LauncherMain.publish: call PublishImage");
             Publisher oPublisher = new Publisher();
-            sLayerId = oPublisher.publishImage(sTiffFile,ConfigReader.getPropValue("GEOSERVER_ADDRESS"),ConfigReader.getPropValue("GEOSERVER_USER"),ConfigReader.getPropValue("GEOSERVER_PASSWORD"),ConfigReader.getPropValue("GEOSERVER_WORKSPACE"), oParameter.getStore());
+            sLayerId = oPublisher.publishImage(sTiffFile,ConfigReader.getPropValue("GEOSERVER_ADDRESS"),ConfigReader.getPropValue("GEOSERVER_USER"),ConfigReader.getPropValue("GEOSERVER_PASSWORD"),ConfigReader.getPropValue("GEOSERVER_WORKSPACE"), sLayerId);
+
+            // Deletes the copy of the Zip file
+            File oZipTargetFile = new File(oTargetFile.getPath()+"/"+oDownloadedFile.getName());
+            oZipTargetFile.delete();
         }
         catch (Exception oEx) {
             System.out.println("LauncherMain.Publish: exception " + oEx.toString());

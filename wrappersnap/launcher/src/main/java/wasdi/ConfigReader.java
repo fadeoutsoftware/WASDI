@@ -5,7 +5,9 @@ package wasdi; /**
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Properties;
 
 public class ConfigReader {
@@ -27,25 +29,21 @@ public class ConfigReader {
                 throw new FileNotFoundException("property file '" + propFileName + "' not found in the classpath");
             }
 
+            Enumeration<String> aoProperties =  (Enumeration<String>) prop.propertyNames();
             //Clear all
             m_aoProperties.clear();
-            //get values properties
-            m_aoProperties.put("RABBIT_QUEUE_NAME", prop.getProperty("RABBIT_QUEUE_NAME"));
-            m_aoProperties.put("RABBIT_HOST", prop.getProperty("RABBIT_HOST"));
-            m_aoProperties.put("RABBIT_QUEUE_PORT", prop.getProperty("RABBIT_QUEUE_PORT"));
-            m_aoProperties.put("RABBIT_QUEUE_DURABLE", prop.getProperty("RABBIT_QUEUE_DURABLE"));
-            m_aoProperties.put("DOWNLOAD_ROOT_PATH", prop.getProperty("DOWNLOAD_ROOT_PATH"));
-            m_aoProperties.put("GEOSERVER_ADDRESS", prop.getProperty("GEOSERVER_ADDRESS"));
-            m_aoProperties.put("GEOSERVER_USER", prop.getProperty("GEOSERVER_USER"));
-            m_aoProperties.put("GEOSERVER_PASSWORD", prop.getProperty("GEOSERVER_PASSWORD"));
-            m_aoProperties.put("GEOSERVER_WORKSPACE", prop.getProperty("GEOSERVER_WORKSPACE"));
-            m_aoProperties.put("PYRAMID_BASE_FOLDER", prop.getProperty("PYRAMID_BASE_FOLDER"));
-            m_aoProperties.put("PYRAMYD_ENV_OPTIONS", prop.getProperty("PYRAMYD_ENV_OPTIONS"));
-            m_aoProperties.put("GDAL_PATH", prop.getProperty("GDAL_PATH"));
-            m_aoProperties.put("GDAL_RETILE", prop.getProperty("GDAL_RETILE"));
-            m_aoProperties.put("DHUS_USER", prop.getProperty("DHUS_USER"));
-            m_aoProperties.put("DHUS_PASSWORD", prop.getProperty("DHUS_PASSWORD"));
-            m_aoProperties.put("PYTHON_PATH", prop.getProperty("PYTHON_PATH"));
+
+            String sKey = aoProperties.nextElement();
+
+            while (sKey != null) {
+                m_aoProperties.put(sKey, prop.getProperty(sKey));
+                if (aoProperties.hasMoreElements()) {
+                    sKey = aoProperties.nextElement();
+                }
+                else  {
+                    break;
+                }
+            }
 
         } catch (Exception e) {
             System.out.println("Exception: " + e);
