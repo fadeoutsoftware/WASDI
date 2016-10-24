@@ -1,0 +1,30 @@
+<div>
+    <p>WASDI HOME</p>
+
+    <div ng-show="m_oController.isUserLogged()">
+        <p>
+            Welcome {{m_oController.getUserName()}}
+        </p>
+    </div>
+
+    <a  ng-show="m_oController.isUserLogged()" ng-click="m_oController.moveTo('/workspaces')">Workspaces</a>
+
+    <div ng-show="!m_oController.isUserLogged()">
+        <form class="form-horizontal" role="form">
+            <div class="form-group">
+                <label for="userName" class="col-sm-2  control-label">UserId: </label>
+                <div class="col-sm-10">
+                    <input type="text" class="form-control" id="userName" ng-model="m_oController.m_sUserName">
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="userPassword" class="col-sm-2  control-label">Password</label>
+                <div class="col-sm-10">
+                    <input type="password" class="form-control" id="userPassword" ng-model="m_oController.m_sUserPassword">
+                </div>
+            </div>
+        </form>
+
+        <a ng-click="m_oController.login()">Login</a>
+    </div>
+</div>
