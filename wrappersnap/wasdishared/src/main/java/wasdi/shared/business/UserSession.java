@@ -7,8 +7,8 @@ import java.util.Date;
  */
 public class UserSession {
     private String userId;
-    private Date loginDate;
-    private Date lastTouch;
+    private Double loginDate;
+    private Double lastTouch;
     private String sessionId;
 
     public String getUserId() {
@@ -19,19 +19,17 @@ public class UserSession {
         this.userId = userId;
     }
 
-    public Date getLoginDate() {
-        return loginDate;
-    }
+    public Double getLoginDate() { return loginDate; }
 
-    public void setLoginDate(Date loginDate) {
+    public void setLoginDate(Double loginDate) {
         this.loginDate = loginDate;
     }
 
-    public Date getLastTouch() {
+    public Double getLastTouch() {
         return lastTouch;
     }
 
-    public void setLastTouch(Date lastTouch) {
+    public void setLastTouch(Double lastTouch) {
         this.lastTouch = lastTouch;
     }
 

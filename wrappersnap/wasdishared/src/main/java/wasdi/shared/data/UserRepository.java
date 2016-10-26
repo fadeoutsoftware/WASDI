@@ -19,8 +19,7 @@ public class UserRepository extends  MongoRepository{
     public boolean InsertUser(User oUser) {
 
         try {
-            ObjectMapper oMapper = new ObjectMapper();
-            String sJSON = oMapper.writeValueAsString(oUser);
+            String sJSON = s_oMapper.writeValueAsString(oUser);
             getCollection("users").insertOne(Document.parse(sJSON));
 
             return true;
@@ -39,10 +38,7 @@ public class UserRepository extends  MongoRepository{
 
             String sJSON = oUserDocument.toJson();
 
-            ObjectMapper oMapper = new ObjectMapper();
-            oMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-
-            User oUser = oMapper.readValue(sJSON,User.class);
+            User oUser = s_oMapper.readValue(sJSON,User.class);
 
             return oUser;
         } catch (Exception oEx) {

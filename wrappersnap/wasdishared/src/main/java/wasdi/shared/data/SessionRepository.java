@@ -2,9 +2,14 @@ package wasdi.shared.data;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.mongodb.client.model.Filters;
+import com.mongodb.client.model.Updates;
+import com.mongodb.client.result.UpdateResult;
 import org.bson.Document;
 import wasdi.shared.business.User;
 import wasdi.shared.business.UserSession;
+
+import java.util.Date;
 
 /**
  * Created by p.campanella on 21/10/2016.
@@ -13,8 +18,7 @@ public class SessionRepository extends MongoRepository {
 
     public boolean InsertSession(UserSession oSession) {
         try {
-            ObjectMapper oMapper = new ObjectMapper();
-            String sJSON = oMapper.writeValueAsString(oSession);
+            String sJSON = s_oMapper.writeValueAsString(oSession);
             getCollection("sessions").insertOne(Document.parse(sJSON));
 
             return true;
@@ -32,10 +36,7 @@ public class SessionRepository extends MongoRepository {
 
             String sJSON = oSessionDocument.toJson();
 
-            ObjectMapper oMapper = new ObjectMapper();
-            oMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-
-            UserSession oUserSession = oMapper.readValue(sJSON,UserSession.class);
+            UserSession oUserSession = s_oMapper.readValue(sJSON,UserSession.class);
 
             return oUserSession;
         } catch (Exception oEx) {
@@ -45,12 +46,24 @@ public class SessionRepository extends MongoRepository {
         return  null;
     }
 
+    public boolean TouchSession(UserSession oSession) {
+        try {
+            UpdateResult oResult = getCollection("sessions").updateOne(Filters.eq("sessionId",oSession.getSessionId()), Updates.set("lastTouch", (double)new Date().getTime()));
+
+            if (oResult.getModifiedCount()==1) return  true;
+        }
+        catch (Exception oEx) {
+            oEx.printStackTrace();
+        }
+
+        return  false;
+    }
+
     public boolean DeleteSession(UserSession oSession) {
         try {
-            ObjectMapper oMapper = new ObjectMapper();
             getCollection("sessions").deleteOne(new Document("sessionId", oSession.getSessionId()));
-
             return true;
+
         } catch (Exception oEx) {
             oEx.printStackTrace();
         }

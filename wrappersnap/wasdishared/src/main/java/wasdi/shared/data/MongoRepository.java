@@ -1,5 +1,7 @@
 package wasdi.shared.data;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
@@ -12,6 +14,12 @@ public class MongoRepository {
     public static String DB_NAME = "wasdi";
     public static String SERVER_ADDRESS = "localhost";
     public static int SERVER_PORT = 27017;
+
+    public static ObjectMapper s_oMapper = new ObjectMapper();
+
+    static  {
+        s_oMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+    }
 
     private static MongoClient s_oMongoClient = null;
     private static  MongoDatabase s_oMongoDatabase = null;
