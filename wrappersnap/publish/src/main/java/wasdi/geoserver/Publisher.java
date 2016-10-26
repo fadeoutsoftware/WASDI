@@ -138,7 +138,7 @@ public class Publisher {
                 oManager.getPublisher().configureCoverage(ce, sWorkspace, sStoreName, slLayerName);
         }catch (Exception oEx){}
 
-        return sFileName;
+        return sStoreName;
 
     }
 
