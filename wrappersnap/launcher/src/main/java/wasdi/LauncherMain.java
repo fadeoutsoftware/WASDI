@@ -1,6 +1,7 @@
 package wasdi;
 import org.apache.commons.io.FileUtils;
 import org.esa.snap.core.datamodel.Product;
+import org.esa.snap.runtime.Config;
 import wasdi.filebuffer.DownloadFile;
 import org.apache.commons.cli.*;
 import wasdi.geoserver.Publisher;
@@ -89,6 +90,7 @@ public class LauncherMain {
 
                     String sFile = Download(oDownloadFileParameter, ConfigReader.getPropValue("DOWNLOAD_ROOT_PATH"));
                 }
+                break;
                 case LauncherOperations.DOWNLOADANDPUBLISH: {
 
                     // Deserialize Parameters
@@ -119,12 +121,14 @@ public class LauncherMain {
                         Publish(oPublishParameter);
                     }
                 }
+                break;
                 case LauncherOperations.PUBLISH: {
 
                     // Deserialize Parameters
                     PublishParameters oPublishParameter = (PublishParameters) SerializationUtils.deserializeXMLToObject(sParameter);
                     Publish(oPublishParameter);
                 }
+                break;
             }
         }
         catch (Exception oEx) {
@@ -135,8 +139,15 @@ public class LauncherMain {
     public String Download(DownloadFileParameter oParameter, String sDownloadPath) {
         String sFileName = "";
         try {
+            System.out.println("LauncherMain.Download: Download Start");
+
+            if (!sDownloadPath.endsWith("/"))sDownloadPath+="/";
+
             // Generate the Path adding user id and workspace
             sDownloadPath += oParameter.getUserId()+"/"+oParameter.getWorkspace();
+
+            System.out.println("LauncherMain.DownloadPath: " + sDownloadPath);
+
             // Download file
             DownloadFile oDownloadFile = new DownloadFile();
             sFileName = oDownloadFile.ExecuteDownloadFile(oParameter.getUrl(), sDownloadPath);
@@ -154,6 +165,12 @@ public class LauncherMain {
         try {
             // Read File Name
             String sFile = oParameter.getFileName();
+
+            String sPath = ConfigReader.getPropValue("DOWNLOAD_ROOT_PATH");
+            if (!sPath.endsWith("/")) sPath += "/";
+            sPath += oParameter.getUserId() + "/" + oParameter.getWorkspace()+ "/";
+            sFile = sPath + sFile;
+
 
             // Check integrity
             if (Utils.isNullOrEmpty(sFile))

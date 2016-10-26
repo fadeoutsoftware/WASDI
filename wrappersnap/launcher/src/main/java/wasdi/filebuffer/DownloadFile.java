@@ -57,12 +57,17 @@ public class DownloadFile {
             }
         });
 
+        System.out.println("DownloadFile.ExecuteDownloadFile: FileUrl = " + sFileURL);
+
         URL url = new URL(sFileURL);
         HttpURLConnection httpConn = (HttpURLConnection) url.openConnection();
         int responseCode = httpConn.getResponseCode();
 
         // always check HTTP response code first
         if (responseCode == HttpURLConnection.HTTP_OK) {
+
+            System.out.println("DownloadFile.ExecuteDownloadFile: Connected");
+
             String fileName = "";
             String disposition = httpConn.getHeaderField("Content-Disposition");
             String contentType = httpConn.getContentType();
@@ -88,7 +93,13 @@ public class DownloadFile {
 
             // opens input stream from the HTTP connection
             InputStream inputStream = httpConn.getInputStream();
-            String saveFilePath = sSaveDirOnServer + File.separator + fileName;
+            String saveFilePath= sSaveDirOnServer + File.separator + fileName;
+
+            System.out.println("DownloadFile.ExecuteDownloadFile: Create Save File Path = " + saveFilePath);
+
+            File oTargetFile = new File(saveFilePath);
+            File oTargetDir = oTargetFile.getParentFile();
+            oTargetDir.mkdirs();
 
             // opens an output stream to save into file
             FileOutputStream outputStream = new FileOutputStream(saveFilePath);

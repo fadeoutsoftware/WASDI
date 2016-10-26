@@ -32,8 +32,10 @@ public class ReadProduct {
         Product exportProduct = null;
         try {
 
-            if (m_oCacheProducts.get(oFile) == null)
+            if (m_oCacheProducts.get(oFile.getName()) == null) {
                 exportProduct =  ProductIO.readProduct(oFile, formatName);
+            }
+
 
             //put in cache dictionary
             m_oCacheProducts.put(oFile.getName(), exportProduct);
@@ -117,10 +119,17 @@ public class ReadProduct {
     public String writeBigTiff(String sFileName, String sWorkingPath) throws Exception {
 
         File oFile = new File (sFileName);
+
+        System.out.println("ReadProduct.writeBigTiff: Read Product FILE = " + sFileName);
         Product oSentinelProduct = ReadProduct(oFile);
+
+        if (oSentinelProduct == null) System.out.println("ReadProduct.writeBigTiff: Sentinel Product is null " + oFile.getAbsolutePath());
+
+        System.out.println("ReadProduct.writeBigTiff: Create Writer");
 
         WriteProduct oWriter = new WriteProduct();
 
+        System.out.println("ReadProduct.writeBigTiff: WriteTiff");
         String sBigTiff = oWriter.WriteBigTiff(oSentinelProduct, sWorkingPath, oFile.getName(), null);
 
         return sBigTiff;

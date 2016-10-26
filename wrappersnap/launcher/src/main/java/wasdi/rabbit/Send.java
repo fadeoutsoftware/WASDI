@@ -13,7 +13,11 @@ import wasdi.ConfigReader;
 
 public class Send {
 
-    public boolean SendMsg( String sMessageAttribute) throws IOException
+    public  boolean SendMsg(String sMessageAttribute) throws  IOException {
+        return  SendMsg(ConfigReader.getPropValue("RABBIT_QUEUE_NAME"),sMessageAttribute);
+    }
+
+    public boolean SendMsg(String sQueue, String sMessageAttribute) throws IOException
     {
         //create connection to the server
         ConnectionFactory oFactory = new ConnectionFactory();
@@ -32,16 +36,14 @@ public class Send {
         try {
             oChannel = oConnection.createChannel();
         } catch (IOException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
             return false;
         }
         //Declare queue for send message then send it.
         try {
 
-            oChannel.queueDeclare(ConfigReader.getPropValue("RABBIT_QUEUE_NAME"), Boolean.parseBoolean(ConfigReader.getPropValue("RABBIT_QUEUE_DURABLE")), false, false, null);
+            oChannel.queueDeclare(sQueue, Boolean.parseBoolean(ConfigReader.getPropValue("RABBIT_QUEUE_DURABLE")), false, false, null);
         } catch (IOException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
             return false;
         }
@@ -50,7 +52,6 @@ public class Send {
         try {
             oChannel.basicPublish("", ConfigReader.getPropValue("RABBIT_QUEUE_NAME"), null, sMessageAttribute.getBytes("UTF-8"));
         } catch (IOException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
             return false;
         }
@@ -59,7 +60,6 @@ public class Send {
         try {
             oChannel.close();
         } catch (IOException | TimeoutException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
             return false;
         }
@@ -67,7 +67,6 @@ public class Send {
             // ATTENZIONE DEVE FARLO IN TUTTI I CASI
             oConnection.close();
         } catch (IOException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
             return false;
         }
