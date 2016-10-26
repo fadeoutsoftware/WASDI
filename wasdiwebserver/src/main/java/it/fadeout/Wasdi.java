@@ -10,14 +10,18 @@ import javax.servlet.ServletContext;
 import javax.ws.rs.core.Application;
 import javax.ws.rs.core.Context;
 
+import com.mongodb.util.Util;
+
 import it.fadeout.rest.resources.AuthResource;
-import it.fadeout.rest.resources.DownloadResource;
+import it.fadeout.rest.resources.FileBufferResource;
 import it.fadeout.rest.resources.OpenSearchResource;
 import it.fadeout.rest.resources.WasdiResource;
+import it.fadeout.rest.resources.WorkspaceResource;
 import wasdi.shared.business.User;
 import wasdi.shared.business.UserSession;
 import wasdi.shared.data.SessionRepository;
 import wasdi.shared.data.UserRepository;
+import wasdi.shared.utils.Utils;
 
 public class Wasdi extends Application {
 	@Context
@@ -30,10 +34,11 @@ public class Wasdi extends Application {
 	public Set<Class<?>> getClasses() {
 		final Set<Class<?>> classes = new HashSet<Class<?>>();
 		// register resources and features
-		classes.add(DownloadResource.class);
+		classes.add(FileBufferResource.class);
 		classes.add(OpenSearchResource.class);
 		classes.add(WasdiResource.class);
 		classes.add(AuthResource.class);
+		classes.add(WorkspaceResource.class);
 		
 		return classes;
 	}
@@ -61,11 +66,13 @@ public class Wasdi extends Application {
 		// Get The User Session
 		UserSession oSession = oSessionRepo.GetSession(sSessionId);
 		
-		if (oSession != null) {
+		if (Utils.isValidSession(oSession)) {
 			// Create User Repo
 			UserRepository oUserRepo = new UserRepository();
 			// Get the user from the session
 			User oUser = oUserRepo.GetUser(oSession.getUserId());
+			
+			oSessionRepo.TouchSession(oSession);
 			
 			return oUser;
 		}

@@ -54,8 +54,8 @@ public class AuthResource {
 				oSession.setUserId(oWasdiUser.getUserId());
 				String sSessionId = UUID.randomUUID().toString();
 				oSession.setSessionId(sSessionId);
-				oSession.setLoginDate(new Date());
-				oSession.setLastTouch(new Date());
+				oSession.setLoginDate((double) new Date().getTime());
+				oSession.setLastTouch((double) new Date().getTime());
 				
 				SessionRepository oSessionRepository = new SessionRepository();
 				oSessionRepository.InsertSession(oSession);
