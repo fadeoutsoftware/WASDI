@@ -1,4 +1,27 @@
 <div>
     <p><a ng-click="m_oController.moveTo('workspaces')">Back to Workspaces</a> </p>
-    <p>WS EDITOR</p>
+
+    <p>WS EDITOR - Workspace {{m_oController.m_oActiveWorkspace.name}}</p>
+    <br>
+    <form class="form-horizontal" role="form">
+        <div class="form-group">
+            <label for="userName" class="col-sm-2  control-label">File Url: </label>
+            <div class="col-sm-10">
+                <input type="text" class="form-control" id="userName" ng-model="m_oController.m_sDownloadFilePath">
+            </div>
+        </div>
+    </form>
+    <br>
+    <a ng-click="m_oController.downloadEOImage(m_oController.m_sDownloadFilePath)">Download</a>
+    <br>
+    <a ng-click="m_oController.publish(m_oController.m_sDownloadFilePath)">Publish</a>
+    <br>
+
+
+    <p>
+        <span ng-click="m_oController.addTestLayer()">Add Test Layer</span>
+    </p>
+    <div style="height: 500px; width: 500px;" id = "wasdiMap"></div>
+
+
 </div>

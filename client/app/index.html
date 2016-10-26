@@ -13,6 +13,14 @@
   <link rel="stylesheet" href="bower_components/html5-boilerplate/dist/css/main.css">
   <link rel="stylesheet" href="css/app.css">
   <script src="bower_components/html5-boilerplate/dist/js/vendor/modernizr-2.8.3.min.js"></script>
+
+  <!-- Google Maps Scripts -->
+  <script src="http://maps.google.com/maps/api/js?v=3&amp;sensor=false"></script>
+
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.0.1/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.0.1/dist/leaflet.js"></script>
+
+  <script src='https://unpkg.com/leaflet.gridlayer.googlemutant@latest/Leaflet.GoogleMutant.js'></script>
 </head>
 <body>
   <!--[if lt IE 7]>
@@ -33,6 +41,9 @@
   <script src="services/ConstantsService.js"></script>
   <script src="services/SessionInjector.js"></script>
   <script src="services/AuthService.js"></script>
+  <script src="services/MapService.js"></script>
+  <script src="services/WorkspaceService.js"></script>
+  <script src="services/FileBufferService.js"></script>
 
   <!-- Wadsi Controllers -->
   <script src="controllers/HomeController.js"></script>

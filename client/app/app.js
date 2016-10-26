@@ -6,7 +6,10 @@ var wasdiApp = angular.module('wasdi', [
     'pascalprecht.translate',
     'wasdi.ConstantsService',
     'wasdi.sessionInjector',
-    'wasdi.AuthService'
+    'wasdi.AuthService',
+    'wasdi.MapService',
+    'wasdi.WorkspaceService',
+    'wasdi.FileBufferService'
 ]);
 
 wasdiApp.config(['$httpProvider', '$translateProvider', function($httpProvider, $translateProvider) {

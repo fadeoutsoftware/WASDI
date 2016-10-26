@@ -1,7 +1,13 @@
 <div>
     <p>
-        <a ng-click="m_oController.moveTo('editor')">New Workspace</a>
+        <a ng-click="m_oController.createWorkspace()">New Workspace</a>
     </p>
     <p>WORKSPACES</p>
+
+    <table>
+        <tr ng-repeat="oWSListItem in m_oController.getWorkspaceInfoList()">
+            <td>{{oWSListItem.workspaceName}}</td><td><a ng-click="m_oController.openWorkspace(oWSListItem.workspaceId)">Edit</a></td>
+        </tr>
+    </table>
 
 </div>
