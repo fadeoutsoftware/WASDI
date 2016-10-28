@@ -1,7 +1,5 @@
 package wasdi;
 import org.apache.commons.io.FileUtils;
-import org.esa.snap.core.datamodel.Product;
-import org.esa.snap.runtime.Config;
 import wasdi.filebuffer.DownloadFile;
 import org.apache.commons.cli.*;
 import wasdi.geoserver.Publisher;
@@ -13,8 +11,7 @@ import wasdi.shared.utils.Utils;
 import wasdi.snapopearations.ReadProduct;
 
 import java.io.File;
-import java.nio.file.Files;
-import java.nio.file.Path;
+
 
 /**
  * Created by s.adamo on 23/09/2016.
@@ -213,7 +210,7 @@ public class LauncherMain {
             System.out.println("LauncherMain.publish: Write Big Tiff");
             // Convert the product in a Tiff file
             ReadProduct oReadProduct = new ReadProduct();
-            String sTiffFile = oReadProduct.writeBigTiff(oTargetFile.getAbsolutePath(), sTargetDir);
+            String sTiffFile = oReadProduct.writeBigTiff(oTargetFile.getAbsolutePath(), sTargetDir, sLayerId);
             //String sTiffFile = "C:\\Program Files (x86)\\GeoServer 2.9.2\\data_dir\\data\\S1A_IW_GRDH_1SSV_20150213T095824_20150213T095849_004603_005AB7_5539\\S1A_IW_GRDH_1SSV_20150213T095824_20150213T095849_004603_005AB7_5539.zip.tif";
 
             System.out.println("LauncherMain.publish: TiffFile: " +sTiffFile);
@@ -236,8 +233,14 @@ public class LauncherMain {
             sLayerId = oPublisher.publishImage(sTiffFile,ConfigReader.getPropValue("GEOSERVER_ADDRESS"),ConfigReader.getPropValue("GEOSERVER_USER"),ConfigReader.getPropValue("GEOSERVER_PASSWORD"),ConfigReader.getPropValue("GEOSERVER_WORKSPACE"), sLayerId);
 
             // Deletes the copy of the Zip file
-            File oZipTargetFile = new File(oTargetFile.getPath()+"/"+oDownloadedFile.getName());
-            oZipTargetFile.delete();
+            //File oZipTargetFile = new File(oTargetFile.getPath());
+            //oZipTargetFile.delete();
+
+            System.out.println("LauncherMain.publish: delete Zip File Copy " + oTargetFile.getPath());
+
+            if (oTargetFile.delete()==false) {
+                System.out.println("LauncherMain.publish: impossible to delete zip file");
+            }
         }
         catch (Exception oEx) {
             System.out.println("LauncherMain.Publish: exception " + oEx.toString());

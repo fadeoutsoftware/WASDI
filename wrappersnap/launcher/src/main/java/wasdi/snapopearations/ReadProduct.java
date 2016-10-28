@@ -1,5 +1,7 @@
 package wasdi.snapopearations;
 
+import org.esa.s1tbx.io.sentinel1.Sentinel1ProductReader;
+import org.esa.snap.core.util.SystemUtils;
 import wasdi.shared.viewmodels.AttributeViewModel;
 import wasdi.shared.viewmodels.BandViewModel;
 import wasdi.shared.viewmodels.MetadataViewModel;
@@ -49,6 +51,15 @@ public class ReadProduct {
         }
 
         return m_oCacheProducts.get(oFile.getName());
+    }
+
+    private boolean RemoveFromCache(File oFile) {
+        if (m_oCacheProducts.get(oFile.getName()) != null) {
+            m_oCacheProducts.remove(oFile.getName());
+            return  true;
+        }
+
+        return  false;
     }
 
 
@@ -116,11 +127,12 @@ public class ReadProduct {
 
     }
 
-    public String writeBigTiff(String sFileName, String sWorkingPath) throws Exception {
+    public String writeBigTiff(String sFileName, String sWorkingPath, String sFileNameWithoutExtension) throws Exception {
 
         File oFile = new File (sFileName);
 
         System.out.println("ReadProduct.writeBigTiff: Read Product FILE = " + sFileName);
+
         Product oSentinelProduct = ReadProduct(oFile);
 
         if (oSentinelProduct == null) System.out.println("ReadProduct.writeBigTiff: Sentinel Product is null " + oFile.getAbsolutePath());
@@ -130,7 +142,19 @@ public class ReadProduct {
         WriteProduct oWriter = new WriteProduct();
 
         System.out.println("ReadProduct.writeBigTiff: WriteTiff");
-        String sBigTiff = oWriter.WriteBigTiff(oSentinelProduct, sWorkingPath, oFile.getName(), null);
+
+        String sBigTiff = "";
+
+        try {
+            sBigTiff = oWriter.WriteBigTiff(oSentinelProduct, sWorkingPath, sFileNameWithoutExtension, null);
+        }
+        catch (Exception oEx) {
+            oEx.printStackTrace();
+        }
+
+        // Close product IO
+        RemoveFromCache(oFile);
+        oSentinelProduct.closeIO();
 
         return sBigTiff;
     }
