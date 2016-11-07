@@ -1,7 +1,9 @@
 package wasdi.snapopearations;
 
+import org.apache.commons.net.io.Util;
 import org.esa.s1tbx.io.sentinel1.Sentinel1ProductReader;
 import org.esa.snap.core.util.SystemUtils;
+import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.AttributeViewModel;
 import wasdi.shared.viewmodels.BandViewModel;
 import wasdi.shared.viewmodels.MetadataViewModel;
@@ -26,7 +28,7 @@ public class ReadProduct {
     public  static HashMap<String, Product> m_oCacheProducts = new HashMap<String, Product>();
 
 
-    private Product ReadProduct(File oFile)
+    public Product ReadProduct(File oFile)
     {
         //Per ora ipotizziamo solo dati Sentinel-1
         String formatName = "SENTINEL-1";
@@ -36,12 +38,10 @@ public class ReadProduct {
 
             if (m_oCacheProducts.get(oFile.getName()) == null) {
                 exportProduct =  ProductIO.readProduct(oFile, formatName);
+
+                //put in cache dictionary
+                m_oCacheProducts.put(oFile.getName(), exportProduct);
             }
-
-
-            //put in cache dictionary
-            m_oCacheProducts.put(oFile.getName(), exportProduct);
-
         }
         catch(Exception oEx)
         {
@@ -63,7 +63,7 @@ public class ReadProduct {
     }
 
 
-    public ProductViewModel getProduct(File oFile) throws IOException
+    public ProductViewModel getProductViewModel(File oFile) throws IOException
     {
         ProductViewModel oViewModel = new ProductViewModel();
         Product exportProduct = ReadProduct(oFile);
@@ -74,6 +74,9 @@ public class ReadProduct {
         oViewModel.setMetadata(GetMetadataViewModel(exportProduct.getMetadataRoot(), new MetadataViewModel("Metadata")));
 
         this.FillBandsViewModel(oViewModel, exportProduct);
+
+        oViewModel.setName(Utils.GetFileNameWithoutExtension(oFile.getAbsolutePath()));
+        oViewModel.setFileName(oFile.getName());
 
         //Gson gson = new Gson();
         //String json = gson.toJson(oViewModel);

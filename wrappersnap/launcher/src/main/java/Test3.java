@@ -29,14 +29,14 @@ public class Test3 {
         //String sName = "S1A_IW_GRDH_1SDV_20160217T170557_20160217T170622_009989_00EAE9_507D.zip";
 
        // ReadProduct oRead = new ReadProduct();
-        //ProductViewModel oProductViewModel = oRead.getProduct(new File(sPath+sName));
+        //ProductViewModel oProductViewModel = oRead.getProductViewModel(new File(sPath+sName));
 
         //oRead.writeBigTiff(sName);
 
           Publisher oPublisher = new Publisher();
 
           String sName = "test_cal";
-          oPublisher.publishImage(sName + ".tif", "http://localhost:8080/geoserver", "admin", "geoserver", "wasdi", "pyramidstore");
+          oPublisher.publishGeoTiff(sName + ".tif", "http://localhost:8080/geoserver", "admin", "geoserver", "wasdi", "pyramidstore");
 
         /*-------------------------------------*/
 

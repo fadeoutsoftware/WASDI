@@ -33,14 +33,14 @@ public class Test {
         String sName = "S1A_IW_GRDH_1SDV_20160217T170557_20160217T170622_009989_00EAE9_507D.zip";
 
         ReadProduct oRead = new ReadProduct();
-        ProductViewModel oProductViewModel = oRead.getProduct(new File(sPath+sName));
+        ProductViewModel oProductViewModel = oRead.getProductViewModel(new File(sPath+sName));
 
         //oRead.writeBigTiff(sName);
 
      /*   Publisher oPublisher = new Publisher();
 
 
-        oPublisher.publishImage(sName + ".tif");*/
+        oPublisher.publishPyramidImage(sName + ".tif");*/
 
         /*-------------------------------------*/
 

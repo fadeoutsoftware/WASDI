@@ -23,11 +23,11 @@ public class Send {
         ConnectionFactory oFactory = new ConnectionFactory();
         oFactory.setHost(ConfigReader.getPropValue("RABBIT_HOST"));
         oFactory.setPort(Integer.parseInt(ConfigReader.getPropValue("RABBIT_QUEUE_PORT")));
+        //oFactory.setVirtualHost("/ws");
         Connection oConnection = null;
         try {
             oConnection = oFactory.newConnection();
         } catch (IOException | TimeoutException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
             return false;
         }
@@ -50,7 +50,7 @@ public class Send {
 
         //String message = "Hello World!";
         try {
-            oChannel.basicPublish("", ConfigReader.getPropValue("RABBIT_QUEUE_NAME"), null, sMessageAttribute.getBytes("UTF-8"));
+            oChannel.basicPublish("", sQueue, null, sMessageAttribute.getBytes("UTF-8"));
         } catch (IOException e) {
             e.printStackTrace();
             return false;

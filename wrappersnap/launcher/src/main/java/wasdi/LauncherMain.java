@@ -1,16 +1,31 @@
 package wasdi;
+import com.bc.ceres.glevel.MultiLevelImage;
+import com.mongodb.Mongo;
 import org.apache.commons.io.FileUtils;
+import org.esa.snap.core.datamodel.Band;
+import org.esa.snap.core.datamodel.GeoCoding;
+import org.esa.snap.core.datamodel.Product;
+import org.esa.snap.core.util.geotiff.GeoCoding2GeoTIFFMetadata;
+import org.esa.snap.core.util.geotiff.GeoTIFF;
+import org.esa.snap.core.util.geotiff.GeoTIFFMetadata;
 import wasdi.filebuffer.DownloadFile;
 import org.apache.commons.cli.*;
 import wasdi.geoserver.Publisher;
+import wasdi.rabbit.Send;
 import wasdi.shared.LauncherOperations;
+import wasdi.shared.data.MongoRepository;
 import wasdi.shared.parameters.DownloadFileParameter;
+import wasdi.shared.parameters.PublishBandParameter;
 import wasdi.shared.parameters.PublishParameters;
 import wasdi.shared.utils.SerializationUtils;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.viewmodels.ProductViewModel;
+import wasdi.shared.viewmodels.PublishBandResultViewModel;
+import wasdi.shared.viewmodels.RabbitMessageViewModel;
 import wasdi.snapopearations.ReadProduct;
 
 import java.io.File;
+import java.io.IOException;
 
 
 /**
@@ -75,6 +90,18 @@ public class LauncherMain {
 
     }
 
+    public  LauncherMain() {
+        try {
+            Publisher.PYTHON_PATH = ConfigReader.getPropValue("PYTHON_PATH");
+            Publisher.TARGET_DIR_BASE = ConfigReader.getPropValue("PYRAMID_BASE_FOLDER");
+            Publisher.GDALBasePath = ConfigReader.getPropValue("GDAL_PATH")+"/"+ConfigReader.getPropValue("GDAL_RETILE");
+            Publisher.PYRAMYD_ENV_OPTIONS = ConfigReader.getPropValue("PYRAMYD_ENV_OPTIONS");
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     public void ExecuteOperation(String sOperation, String sParameter) {
 
         try {
@@ -126,6 +153,13 @@ public class LauncherMain {
                     Publish(oPublishParameter);
                 }
                 break;
+                case LauncherOperations.PUBLISHBAND: {
+
+                    // Deserialize Parameters
+                    PublishBandParameter oPublishBandParameter = (PublishBandParameter) SerializationUtils.deserializeXMLToObject(sParameter);
+                    PublishBandImage(oPublishBandParameter);
+                }
+                break;
             }
         }
         catch (Exception oEx) {
@@ -146,8 +180,60 @@ public class LauncherMain {
             System.out.println("LauncherMain.DownloadPath: " + sDownloadPath);
 
             // Download file
-            DownloadFile oDownloadFile = new DownloadFile();
-            sFileName = oDownloadFile.ExecuteDownloadFile(oParameter.getUrl(), sDownloadPath);
+            if (ConfigReader.getPropValue("DOWNLOAD_ACTIVE").equals("true")) {
+                DownloadFile oDownloadFile = new DownloadFile();
+                sFileName = oDownloadFile.ExecuteDownloadFile(oParameter.getUrl(), sDownloadPath);
+            }
+            else {
+                sFileName = sDownloadPath + File.separator + ConfigReader.getPropValue("DOWNLOAD_FAKE_FILE");
+            }
+
+            // Rabbit Sender
+            Send oSendToRabbit = new Send();
+
+            if (Utils.isNullOrEmpty(sFileName)) {
+                System.out.println("LauncherMain.Download: file is null there must be an error");
+
+                RabbitMessageViewModel oMessageViewModel = new RabbitMessageViewModel();
+                oMessageViewModel.setMessageCode("download");
+                oMessageViewModel.setMessageResult("KO");
+                String sJSON = MongoRepository.s_oMapper.writeValueAsString(oMessageViewModel);
+
+                oSendToRabbit.SendMsg(oParameter.getQueue(),sJSON);
+            }
+            else {
+                System.out.println("LauncherMain.Download: Image downloaded. Send Rabbit Message");
+
+                // Get The product view Model
+                ReadProduct oReadProduct = new ReadProduct();
+                ProductViewModel oVM = oReadProduct.getProductViewModel(new File(sFileName));
+
+                if (oVM!=null) {
+
+                    System.out.println("LauncherMain.Download: Queue = " + oParameter.getQueue());
+
+                    RabbitMessageViewModel oMessageViewModel = new RabbitMessageViewModel();
+                    oMessageViewModel.setMessageCode(LauncherOperations.DOWNLOAD);
+                    oMessageViewModel.setMessageResult("OK");
+                    oMessageViewModel.setPayload(oVM);
+
+                    String sJSON = MongoRepository.s_oMapper.writeValueAsString(oMessageViewModel);
+
+                    if (oSendToRabbit.SendMsg(oParameter.getQueue(),sJSON)==false) {
+                        System.out.println("LauncherMain.Download: Error sending Rabbit Message");
+                    }
+                }
+                else {
+
+                    RabbitMessageViewModel oMessageViewModel = new RabbitMessageViewModel();
+                    oMessageViewModel.setMessageCode("download");
+                    oMessageViewModel.setMessageResult("KO");
+                    String sJSON = MongoRepository.s_oMapper.writeValueAsString(oMessageViewModel);
+
+                    oSendToRabbit.SendMsg(oParameter.getQueue(),sJSON);
+                }
+
+            }
         }
         catch (Exception oEx) {
             System.out.println("LauncherMain.Download: Exception " + oEx.toString());
@@ -179,8 +265,9 @@ public class LauncherMain {
             // Create a file object for the downloaded file
             File oDownloadedFile = new File(sFile);
             String sInputFileNameOnly = oDownloadedFile.getName();
-
             sLayerId = sInputFileNameOnly;
+/*
+            // TODO: Test row below if works delete this
 
             // Create a clean layer id: the file name without any extension
             String [] asLayerIdSplit = sInputFileNameOnly.split("\\.");
@@ -189,6 +276,8 @@ public class LauncherMain {
                     sLayerId = asLayerIdSplit[0];
                 }
             }
+  */
+            sLayerId = Utils.GetFileNameWithoutExtension(sFile);
 
             // Copy fie to GeoServer Data Dir
             String sGeoServerDataDir = ConfigReader.getPropValue("GEOSERVER_DATADIR");
@@ -223,19 +312,18 @@ public class LauncherMain {
             }
 
             // Ok publish
-            Publisher.PYTHON_PATH = ConfigReader.getPropValue("PYTHON_PATH");
-            Publisher.TARGET_DIR_BASE = ConfigReader.getPropValue("PYRAMID_BASE_FOLDER");
-            Publisher.GDALBasePath = ConfigReader.getPropValue("GDAL_PATH")+"/"+ConfigReader.getPropValue("GDAL_RETILE");
-            Publisher.PYRAMYD_ENV_OPTIONS = ConfigReader.getPropValue("PYRAMYD_ENV_OPTIONS");
-
             System.out.println("LauncherMain.publish: call PublishImage");
             Publisher oPublisher = new Publisher();
-            sLayerId = oPublisher.publishImage(sTiffFile,ConfigReader.getPropValue("GEOSERVER_ADDRESS"),ConfigReader.getPropValue("GEOSERVER_USER"),ConfigReader.getPropValue("GEOSERVER_PASSWORD"),ConfigReader.getPropValue("GEOSERVER_WORKSPACE"), sLayerId);
+            sLayerId = oPublisher.publishGeoTiff(sTiffFile,ConfigReader.getPropValue("GEOSERVER_ADDRESS"),ConfigReader.getPropValue("GEOSERVER_USER"),ConfigReader.getPropValue("GEOSERVER_PASSWORD"),ConfigReader.getPropValue("GEOSERVER_WORKSPACE"), sLayerId);
+
+            System.out.println("LauncherMain.publish: Image published. Send Rabbit Message");
+            Send oSendLayerId = new Send();
+            System.out.println("LauncherMain.publish: Queue = " + oParameter.getQueue() + " LayerId = " + sLayerId);
+            if (oSendLayerId.SendMsg(oParameter.getQueue(),sLayerId)==false) {
+                System.out.println("LauncherMain.publish: Error sending Rabbit Message");
+            }
 
             // Deletes the copy of the Zip file
-            //File oZipTargetFile = new File(oTargetFile.getPath());
-            //oZipTargetFile.delete();
-
             System.out.println("LauncherMain.publish: delete Zip File Copy " + oTargetFile.getPath());
 
             if (oTargetFile.delete()==false) {
@@ -247,5 +335,116 @@ public class LauncherMain {
         }
 
         return sLayerId;
+    }
+
+    public String PublishBandImage(PublishBandParameter oParameter) {
+
+        String sLayerId = "";
+
+        try {
+            // Read File Name
+            String sFile = oParameter.getFileName();
+
+            // Keep the product name
+            String sProductName = sFile;
+
+            // Generate full path name
+            String sPath = ConfigReader.getPropValue("DOWNLOAD_ROOT_PATH");
+            if (!sPath.endsWith("/")) sPath += "/";
+            sPath += oParameter.getUserId() + "/" + oParameter.getWorkspace()+ "/";
+            sFile = sPath + sFile;
+
+
+            // Check integrity
+            if (Utils.isNullOrEmpty(sFile))
+            {
+                System.out.println( "LauncherMain.PublishBandImage: file is null or empty");
+                return  sLayerId;
+            }
+
+            System.out.println( "LauncherMain.PublishBandImage:  File = " + sFile);
+
+            File oFile = new File(sFile);
+
+            String sInputFileNameOnly = oFile.getName();
+
+            sLayerId = sInputFileNameOnly;
+
+            sLayerId = Utils.GetFileNameWithoutExtension(sFile);
+
+            sLayerId +=  "_" + oParameter.getBandName();
+
+
+            System.out.println( "LauncherMain.PublishBandImage:  Generating Band Image...");
+
+            // Read the product
+            ReadProduct oReadProduct = new ReadProduct();
+            Product oSentinel = oReadProduct.ReadProduct(oFile);
+
+            // Get the Geocoding and Band
+            GeoCoding oGeoCoding = oSentinel.getSceneGeoCoding();
+            Band oBand = oSentinel.getBand(oParameter.getBandName());
+
+            // Get Image
+            MultiLevelImage oBandImage = oBand.getSourceImage();
+            // Get TIFF Metadata
+            GeoTIFFMetadata oMetadata = GeoCoding2GeoTIFFMetadata.createGeoTIFFMetadata(oGeoCoding, oBandImage.getWidth(),oBandImage.getHeight());
+
+            // Generate file output name
+            String sOutputFilePath = sPath + sLayerId + ".tif";
+            File oOutputFile = new File(sOutputFilePath);
+
+            // Write the Band Tiff
+            if (ConfigReader.getPropValue("CREATE_BAND_GEOTIFF_ACTIVE").equals("true")) GeoTIFF.writeImage(oBandImage, oOutputFile, oMetadata);
+
+            System.out.println( "LauncherMain.PublishBandImage:  Moving Band Image...");
+
+
+            // Copy fie to GeoServer Data Dir
+            String sGeoServerDataDir = ConfigReader.getPropValue("GEOSERVER_DATADIR");
+            String sTargetDir = sGeoServerDataDir;
+
+            if (!(sTargetDir.endsWith("/")||sTargetDir.endsWith("\\"))) sTargetDir+="/";
+            sTargetDir+=sLayerId+"/";
+
+            String sTargetFile = sTargetDir + oOutputFile.getName();
+
+            File oTargetFile = new File(sTargetFile);
+
+            System.out.println("LauncherMain.PublishBandImage: InputFile: " + sOutputFilePath + " TargetFile: " + sTargetFile + " LayerId " + sLayerId);
+
+            FileUtils.copyFile(oOutputFile,oTargetFile);
+
+            // Ok publish
+            System.out.println("LauncherMain.PublishBandImage: call PublishImage");
+            Publisher oPublisher = new Publisher();
+            sLayerId = oPublisher.publishGeoTiff(sTargetFile,ConfigReader.getPropValue("GEOSERVER_ADDRESS"),ConfigReader.getPropValue("GEOSERVER_USER"),ConfigReader.getPropValue("GEOSERVER_PASSWORD"),ConfigReader.getPropValue("GEOSERVER_WORKSPACE"), sLayerId);
+
+            System.out.println("LauncherMain.PublishBandImage: Image published. Send Rabbit Message");
+            Send oSendLayerId = new Send();
+
+            System.out.println("LauncherMain.PublishBandImage: Queue = " + oParameter.getQueue() + " LayerId = " + sLayerId);
+
+            PublishBandResultViewModel oVM = new PublishBandResultViewModel();
+            oVM.setBandName(oParameter.getBandName());
+            oVM.setProductName(sProductName);
+            oVM.setLayerId(sLayerId);
+
+            RabbitMessageViewModel oRabbitVM = new RabbitMessageViewModel();
+            oRabbitVM.setMessageCode(LauncherOperations.PUBLISHBAND);
+            oRabbitVM.setMessageResult("OK");
+            oRabbitVM.setPayload(oVM);
+
+            String sJSON = MongoRepository.s_oMapper.writeValueAsString(oRabbitVM);
+
+            if (oSendLayerId.SendMsg(oParameter.getQueue(),sJSON)==false) {
+                System.out.println("LauncherMain.PublishBandImage: Error sending Rabbit Message");
+            }
+        }
+        catch (Exception oEx) {
+            oEx.printStackTrace();
+        }
+
+        return  sLayerId;
     }
 }
