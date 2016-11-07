@@ -9,7 +9,8 @@ var wasdiApp = angular.module('wasdi', [
     'wasdi.AuthService',
     'wasdi.MapService',
     'wasdi.WorkspaceService',
-    'wasdi.FileBufferService'
+    'wasdi.FileBufferService',
+    'wasdi.SnakeDirective'
 ]);
 
 wasdiApp.config(['$httpProvider', '$translateProvider', function($httpProvider, $translateProvider) {

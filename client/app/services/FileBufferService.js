@@ -16,5 +16,9 @@ service('FileBufferService', ['$http',  'ConstantsService', function ($http, oCo
         return this.m_oHttp.get(this.APIURL + '/filebuffer/publish?sFileUrl='+sUrl+"&sWorkspaceId="+sWorkspaceId);
     }
 
+    this.publishBand = function(sUrl, sWorkspaceId, sBand) {
+        return this.m_oHttp.get(this.APIURL + '/filebuffer/publishband?sFileUrl='+sUrl+"&sWorkspaceId="+sWorkspaceId+'&sBand='+sBand);
+    }
+
 
 }]);

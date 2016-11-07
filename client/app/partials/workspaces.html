@@ -4,6 +4,7 @@
     </p>
     <p>WORKSPACES</p>
 
+    <snake></snake>
     <table>
         <tr ng-repeat="oWSListItem in m_oController.getWorkspaceInfoList()">
             <td>{{oWSListItem.workspaceName}}</td><td><a ng-click="m_oController.openWorkspace(oWSListItem.workspaceId)">Edit</a></td>

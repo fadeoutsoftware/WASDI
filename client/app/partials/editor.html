@@ -16,11 +16,26 @@
     <br>
     <a ng-click="m_oController.publish(m_oController.m_sDownloadFilePath)">Publish</a>
     <br>
-
+    <br>
+    <table>
+        <tr ng-repeat="oProductItem in m_oController.getProductList()">
+            <td>{{oProductItem.name}}</td>
+            <td>
+                <table>
+                    <tr ng-repeat="oBandItem in m_oController.getBandsForProduct(oProductItem)">
+                        <td><a ng-click="m_oController.openBandImage(oBandItem)">{{oBandItem.name}}</a></td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
 
     <p>
-        <span ng-click="m_oController.addTestLayer()">Add Test Layer</span>
+        <span ng-click="m_oController.addTestLayer('S1A_IW_GRDH_1SSV_20150213T095824_20150213T095849_004603_005AB7_5539')">Add Test Layer</span>
     </p>
+    <br>
+    <br>
+
     <div style="height: 500px; width: 500px;" id = "wasdiMap"></div>
 
 
