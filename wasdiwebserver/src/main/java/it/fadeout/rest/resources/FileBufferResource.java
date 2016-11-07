@@ -17,6 +17,7 @@ import wasdi.shared.business.User;
 import wasdi.shared.business.UserSession;
 import wasdi.shared.data.SessionRepository;
 import wasdi.shared.parameters.DownloadFileParameter;
+import wasdi.shared.parameters.PublishBandParameter;
 import wasdi.shared.parameters.PublishParameters;
 import wasdi.shared.utils.SerializationUtils;
 import wasdi.shared.utils.Utils;
@@ -91,7 +92,7 @@ public class FileBufferResource {
 			String sPath = m_oServletConfig.getInitParameter("SerializationPath") + Wasdi.GetSerializationFileName();
 			
 			DownloadFileParameter oParameter = new DownloadFileParameter();
-			oParameter.setQueue("TestWuaue");
+			oParameter.setQueue(sWorkspaceId);
 			oParameter.setUrl(sFileUrl);
 			oParameter.setWorkspace(sWorkspaceId);
 			oParameter.setUserId(sUserId);
@@ -136,7 +137,7 @@ public class FileBufferResource {
 			String sPath = m_oServletConfig.getInitParameter("SerializationPath") + Wasdi.GetSerializationFileName();
 			
 			PublishParameters oParameter = new PublishParameters();
-			oParameter.setQueue("TestWuaue");
+			oParameter.setQueue(sWorkspaceId);
 			oParameter.setFileName(sFileUrl);
 			oParameter.setWorkspace(sWorkspaceId);
 			oParameter.setUserId(sUserId);
@@ -147,7 +148,53 @@ public class FileBufferResource {
 			
 			String sShellExString = "java -jar " + sLauncherPath +" -operation " + LauncherOperations.PUBLISH + " -parameter " + sPath;
 			
-			System.out.println("DownloadResource.DownloadAndPublish: shell exec " + sShellExString);
+			System.out.println("DownloadResource.Publish: shell exec " + sShellExString);
+
+			Process oProc = Runtime.getRuntime().exec(sShellExString);
+			
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return Response.ok().build();
+
+	}	
+	
+	@GET
+	@Path("publishband")
+	@Produces({"application/xml", "application/json", "text/xml"})
+	public Response PublishBand(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sFileUrl") String sFileUrl, @QueryParam("sWorkspaceId") String sWorkspaceId, @QueryParam("sBand") String sBand) throws IOException
+	{
+		try {
+			
+			if (Utils.isNullOrEmpty(sSessionId)) return Response.status(401).build();
+			
+			User oUser = Wasdi.GetUserFromSession(sSessionId);
+			
+			if (oUser==null) return Response.status(401).build();
+			if (Utils.isNullOrEmpty(oUser.getUserId())) return Response.status(401).build();
+			
+			String sUserId = oUser.getUserId();
+			
+			
+			String sPath = m_oServletConfig.getInitParameter("SerializationPath") + Wasdi.GetSerializationFileName();
+			
+			PublishBandParameter oParameter = new PublishBandParameter();
+			oParameter.setQueue(sWorkspaceId);
+			oParameter.setFileName(sFileUrl);
+			oParameter.setWorkspace(sWorkspaceId);
+			oParameter.setUserId(sUserId);
+			oParameter.setBandName(sBand);
+			
+			SerializationUtils.serializeObjectToXML(sPath, oParameter);
+			
+			String sLauncherPath = m_oServletConfig.getInitParameter("LauncherPath");
+			
+			String sShellExString = "java -jar " + sLauncherPath +" -operation " + LauncherOperations.PUBLISHBAND + " -parameter " + sPath;
+			
+			System.out.println("DownloadResource.PublishBand: shell exec " + sShellExString);
 
 			Process oProc = Runtime.getRuntime().exec(sShellExString);
 			
