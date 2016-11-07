@@ -1,6 +1,9 @@
 package wasdi.geoserver;
 
+import it.geosolutions.geoserver.rest.GeoServerRESTPublisher;
 import it.geosolutions.geoserver.rest.encoder.coverage.GSCoverageEncoder;
+import org.apache.commons.httpclient.NameValuePair;
+import wasdi.shared.utils.Utils;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -142,7 +145,59 @@ public class Publisher {
 
     }
 
-    public String publishImage(String sFileName, String sGeoServerAddress, String sGeoServerUser, String sGeoServerPassword, String sWorkspace, String sStore) throws Exception {
-        return this.PublishImagePyramidOnGeoServer(sFileName, sGeoServerAddress, sGeoServerUser, sGeoServerPassword, sWorkspace, sStore);
+
+    private String PublishGeoTiffImage(String sFileName, String sGeoServerAddress, String sGeoServerUser, String sGeoServerPassword, String sWorkspace, String sStoreName) throws Exception {
+
+        File oFile = new File(sFileName);
+
+
+        //Create GeoServer Manager
+        GeoServerManager oManager = new GeoServerManager(sGeoServerAddress, sGeoServerUser, sGeoServerPassword);
+
+        if (!oManager.getReader().existsWorkspace(sWorkspace)) {
+            oManager.getPublisher().createWorkspace(sWorkspace);
+        }
+
+        //publish image pyramid
+        try {
+
+            //Pubblico il layer
+            String slLayerName = sFileName;
+            oManager.publishStandardGeoTiff(sWorkspace, sStoreName, oFile);
+
+            //configure coverage
+            GSCoverageEncoder ce = new GSCoverageEncoder();
+            ce.setEnabled(true); //abilito il coverage
+            ce.setSRS("EPSG:4326");
+            boolean exists = oManager.getReader().existsCoveragestore(sWorkspace, sStoreName);
+            if (exists)
+                exists = oManager.getReader().existsCoverage(sWorkspace, sStoreName, slLayerName);
+            if(exists)
+                oManager.getPublisher().configureCoverage(ce, sWorkspace, sStoreName, slLayerName);
+        }catch (Exception oEx){}
+
+        return sStoreName;
+
     }
+
+    public String publishGeoTiff(String sFileName, String sGeoServerAddress, String sGeoServerUser, String sGeoServerPassword, String sWorkspace, String sStore) throws Exception {
+
+        // Domain Check
+
+        if (Utils.isNullOrEmpty(sFileName)) return  "";
+        if (Utils.isNullOrEmpty(sGeoServerAddress)) return "";
+        if (Utils.isNullOrEmpty(sWorkspace)) return "";
+        if (Utils.isNullOrEmpty(sStore)) return  "";
+
+        File oFile = new File(sFileName);
+        if (oFile.exists()==false) return "";
+
+        long lFileLenght = oFile.length();
+        long lMaxSize = 2L*1024L*1024L*1024L;
+
+        // More than Gb => Pyramid, otherwise normal geotiff
+        if (lFileLenght> lMaxSize) return this.PublishImagePyramidOnGeoServer(sFileName, sGeoServerAddress, sGeoServerUser, sGeoServerPassword, sWorkspace, sStore);
+        else  return this.PublishGeoTiffImage(sFileName,sGeoServerAddress,sGeoServerUser,sGeoServerPassword,sWorkspace,sStore);
+    }
+
 }

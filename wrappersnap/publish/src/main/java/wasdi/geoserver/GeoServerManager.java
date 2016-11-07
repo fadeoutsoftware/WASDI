@@ -3,6 +3,7 @@ package wasdi.geoserver;
 import it.geosolutions.geoserver.rest.GeoServerRESTPublisher;
 import it.geosolutions.geoserver.rest.GeoServerRESTReader;
 import it.geosolutions.geoserver.rest.HTTPUtils;
+import it.geosolutions.geoserver.rest.encoder.GSResourceEncoder;
 import it.geosolutions.geoserver.rest.manager.GeoServerRESTStoreManager;
 import org.apache.commons.httpclient.NameValuePair;
 
@@ -90,8 +91,8 @@ public class GeoServerManager {
             throw new IllegalArgumentException("Null argument");
         }
         StringBuilder sbUrl = new StringBuilder(RESTURL).append("/rest/workspaces/")
-                .append(workspace).append("/").append(dsType).append("/").append(storeName)
-                .append("/").append(method).append(".").append("imagepyramid");
+                .append(workspace).append("/").append(dsType).append("/").append(storeName).append("/").append(method)
+                .append(".").append("imagepyramid");
 
         if (configure != null) {
             sbUrl.append("?configure=").append(configure);
@@ -174,10 +175,14 @@ public class GeoServerManager {
     public boolean publishImagePyramid(String workspace, String storeName, File zipFile)
             throws FileNotFoundException {
 
-
         return publishCoverage(workspace, storeName, GeoServerRESTPublisher.CoverageStoreExtension.IMAGEMOSAIC,
                 "image/geotiff", zipFile, GeoServerRESTPublisher.ParameterConfigure.FIRST, (NameValuePair[]) null);
+    }
 
 
+    public boolean publishStandardGeoTiff(String workspace, String storeName, File zipFile)
+            throws FileNotFoundException {
+
+        return publisher.publishExternalGeoTIFF(workspace,storeName,zipFile, storeName, "EPSG:4326", GSResourceEncoder.ProjectionPolicy.FORCE_DECLARED,"raster");
     }
 }
