@@ -7,4 +7,5 @@ public class LauncherOperations {
     public static final String DOWNLOAD = "DOWNLOAD";
     public static final String PUBLISH = "PUBLISH";
     public static final String DOWNLOADANDPUBLISH = "DOWNLOADANDPUBLISH";
+    public static final String PUBLISHBAND = "PUBLISHBAND";
 }

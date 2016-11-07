@@ -5,6 +5,10 @@ package wasdi.shared.viewmodels;
  */
 public class ProductViewModel {
 
+    private String name;
+
+    private String fileName;
+
     private MetadataViewModel metadata;
 
     private NodeGroupViewModel bandsGroups;
@@ -25,5 +29,21 @@ public class ProductViewModel {
 
     public void setBandsGroups(NodeGroupViewModel bandsGroups) {
         this.bandsGroups = bandsGroups;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getFileName() {
+        return fileName;
+    }
+
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
     }
 }

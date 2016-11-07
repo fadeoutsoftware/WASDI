@@ -2,6 +2,7 @@ package wasdi.shared.utils;
 
 import wasdi.shared.business.UserSession;
 
+import java.io.File;
 import java.util.Date;
 import java.util.UUID;
 
@@ -40,6 +41,22 @@ public class Utils {
         if ((lNow-lLastTouch)> 24*60*60*1000) return  false;
 
         return  true;
+    }
+
+    public static String GetFileNameWithoutExtension(String sInputFile) {
+        String sReturn = "";
+        File oFile = new File(sInputFile);
+        String sInputFileNameOnly = oFile.getName();
+
+        // Create a clean layer id: the file name without any extension
+        String [] asLayerIdSplit = sInputFileNameOnly.split("\\.");
+        if (asLayerIdSplit!=null) {
+            if (asLayerIdSplit.length>0){
+                sReturn = asLayerIdSplit[0];
+            }
+        }
+
+        return sReturn;
     }
 
 }
