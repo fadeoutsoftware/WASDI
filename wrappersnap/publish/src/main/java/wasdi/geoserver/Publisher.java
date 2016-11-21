@@ -3,6 +3,7 @@ package wasdi.geoserver;
 import it.geosolutions.geoserver.rest.GeoServerRESTPublisher;
 import it.geosolutions.geoserver.rest.encoder.coverage.GSCoverageEncoder;
 import org.apache.commons.httpclient.NameValuePair;
+import org.apache.log4j.Logger;
 import wasdi.shared.utils.Utils;
 
 import java.io.*;
@@ -15,6 +16,10 @@ import java.nio.file.Paths;
  * Created by s.adamo on 24/05/2016.
  */
 public class Publisher {
+
+    // Define a static logger variable so that it references the
+    // Logger instance named "MyApp".
+    static Logger logger = Logger.getLogger(Publisher.class);
 
     public static final int LEVEL = 4;
 
@@ -34,7 +39,7 @@ public class Publisher {
 
     public Publisher()
     {
-
+        logger.debug("New Publisher");
     }
 
     public Publisher(String sPyramidBaseFolder, String sGDALBasePath, String sPyramidEnvOptions)

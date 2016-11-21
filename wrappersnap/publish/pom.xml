@@ -14,6 +14,12 @@
 
     </properties>
     <dependencies>
+        <!-- https://mvnrepository.com/artifact/log4j/log4j -->
+        <dependency>
+            <groupId>log4j</groupId>
+            <artifactId>log4j</artifactId>
+            <version>1.2.17</version>
+        </dependency>
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
@@ -38,12 +44,15 @@
             <artifactId>geoserver-manager</artifactId>
             <version>1.7.0</version>
         </dependency>
-
         <dependency>
             <groupId>org.geotools</groupId>
             <artifactId>gt-imagepyramid</artifactId>
             <version>15.1</version>
-
+        </dependency>
+        <dependency>
+            <groupId>wasdi.shared</groupId>
+            <artifactId>wasdishared</artifactId>
+            <version>1.0-SNAPSHOT</version>
         </dependency>
        <!-- <dependency>
             <groupId>nl.cloudfarming.client</groupId>
