@@ -10,6 +10,9 @@ public class NodeGroupViewModel {
 
     private String nodeName;
 
+    public NodeGroupViewModel() {
+
+    }
     public NodeGroupViewModel(String sNodeName)
     {
         this.setNodeName(sNodeName);

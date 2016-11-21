@@ -5,6 +5,9 @@ package wasdi.shared.viewmodels;
  */
 public class BandViewModel {
 
+    public BandViewModel() {
+
+    }
     public BandViewModel(String sBandName)
     {
         this.name = sBandName;

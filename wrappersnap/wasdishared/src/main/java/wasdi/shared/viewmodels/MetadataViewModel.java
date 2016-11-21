@@ -7,6 +7,10 @@ import java.util.ArrayList;
  */
 public class MetadataViewModel {
 
+    public MetadataViewModel() {
+
+    }
+
     public MetadataViewModel(String sName)
     {
         this.name = sName;
