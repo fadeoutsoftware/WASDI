@@ -2,6 +2,7 @@ package wasdi;
 import com.bc.ceres.glevel.MultiLevelImage;
 import com.mongodb.Mongo;
 import org.apache.commons.io.FileUtils;
+import org.apache.log4j.Logger;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.GeoCoding;
 import org.esa.snap.core.datamodel.Product;
@@ -37,9 +38,14 @@ import java.io.IOException;
  */
 public class LauncherMain {
 
+    // Define a static logger variable so that it references the
+    // Logger instance named "MyApp".
+    static Logger logger = Logger.getLogger(LauncherMain.class);
+
     //-operation <operation> -elaboratefile <file>
     public static void main(String[] args) throws Exception {
 
+        logger.debug("OK");
 
         // create the parser
         CommandLineParser parser = new DefaultParser();
