@@ -15,6 +15,7 @@ import com.mongodb.util.Util;
 import it.fadeout.rest.resources.AuthResource;
 import it.fadeout.rest.resources.FileBufferResource;
 import it.fadeout.rest.resources.OpenSearchResource;
+import it.fadeout.rest.resources.ProductResource;
 import it.fadeout.rest.resources.WasdiResource;
 import it.fadeout.rest.resources.WorkspaceResource;
 import wasdi.shared.business.User;
@@ -39,6 +40,7 @@ public class Wasdi extends Application {
 		classes.add(WasdiResource.class);
 		classes.add(AuthResource.class);
 		classes.add(WorkspaceResource.class);
+		classes.add(ProductResource.class);
 		
 		return classes;
 	}
