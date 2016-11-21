@@ -71,16 +71,24 @@ public class ReadProduct {
         if (exportProduct == null)
             return null;
 
-        oViewModel.setMetadata(GetMetadataViewModel(exportProduct.getMetadataRoot(), new MetadataViewModel("Metadata")));
+        // P.Campanella: splitted bands and metadata view models
+        //oViewModel.setMetadata(GetMetadataViewModel(exportProduct.getMetadataRoot(), new MetadataViewModel("Metadata")));
 
         this.FillBandsViewModel(oViewModel, exportProduct);
 
         oViewModel.setName(Utils.GetFileNameWithoutExtension(oFile.getAbsolutePath()));
         oViewModel.setFileName(oFile.getName());
 
-        //Gson gson = new Gson();
-        //String json = gson.toJson(oViewModel);
         return  oViewModel;
+    }
+
+    public MetadataViewModel getProductMetadataViewModel(File oFile) throws IOException
+    {
+        Product exportProduct = ReadProduct(oFile);
+
+        if (exportProduct == null) return null;
+
+        return  GetMetadataViewModel(exportProduct.getMetadataRoot(), new MetadataViewModel("Metadata"));
     }
 
     private MetadataViewModel GetMetadataViewModel(MetadataElement oElement, MetadataViewModel oSourceViewModel) {

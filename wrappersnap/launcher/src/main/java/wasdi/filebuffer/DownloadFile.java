@@ -1,6 +1,7 @@
 package wasdi.filebuffer;
 
 import wasdi.ConfigReader;
+import wasdi.shared.utils.Utils;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -24,25 +25,16 @@ public class DownloadFile {
     public String ExecuteDownloadFile(String sFileURL, String sSaveDirOnServer) throws IOException {
 
         // Domain check
-        if (sFileURL == null) {
+        if (Utils.isNullOrEmpty(sFileURL)) {
             System.out.println("DownloadFile.ExecuteDownloadFile: sFileURL is null");
             return "";
         }
-        if (sSaveDirOnServer == null) {
+        if (Utils.isNullOrEmpty(sSaveDirOnServer)) {
             System.out.println("DownloadFile.ExecuteDownloadFile: sSaveDirOnServer is null");
-            return "";
-        }
-        if (sFileURL.isEmpty()) {
-            System.out.println("DownloadFile.ExecuteDownloadFile: sFileURL is Empty");
-            return "";
-        }
-        if (sSaveDirOnServer.isEmpty()) {
-            System.out.println("DownloadFile.ExecuteDownloadFile: sSaveDirOnServer is Empty");
             return "";
         }
 
         String sReturnFilePath = "";
-
 
         // TODO: Here we are assuming dhus authentication. But we have to find a general solution
         Authenticator.setDefault(new Authenticator() {
@@ -93,7 +85,7 @@ public class DownloadFile {
 
             // opens input stream from the HTTP connection
             InputStream inputStream = httpConn.getInputStream();
-            String saveFilePath= sSaveDirOnServer + File.separator + fileName;
+            String saveFilePath= sSaveDirOnServer + "/" + fileName;
 
             System.out.println("DownloadFile.ExecuteDownloadFile: Create Save File Path = " + saveFilePath);
 
@@ -116,6 +108,75 @@ public class DownloadFile {
             sReturnFilePath = saveFilePath;
 
             System.out.println("File downloaded " + sReturnFilePath);
+        } else {
+            System.out.println("No file to download. Server replied HTTP code: " + responseCode);
+        }
+        httpConn.disconnect();
+
+        return  sReturnFilePath;
+    }
+
+
+
+    //https://scihub.copernicus.eu/dhus/odata/v1/Products('18f7993d-eae1-4f7f-9d81-d7cf19c18378')/$value
+    public String GetFileName(String sFileURL) throws IOException {
+
+        // Domain check
+        if (Utils.isNullOrEmpty(sFileURL)) {
+            System.out.println("DownloadFile.GetFileName: sFileURL is null or Empty");
+            return "";
+        }
+
+        String sReturnFilePath = "";
+
+        // TODO: Here we are assuming dhus authentication. But we have to find a general solution
+        Authenticator.setDefault(new Authenticator() {
+            protected PasswordAuthentication getPasswordAuthentication() {
+                try{
+                    return new PasswordAuthentication(ConfigReader.getPropValue("DHUS_USER"), ConfigReader.getPropValue("DHUS_PASSWORD") .toCharArray());
+                }
+                catch (Exception oEx){
+                    System.out.println("DownloadFile.GetFileName: exception setting auth " + oEx.toString());
+                }
+                return null;
+            }
+        });
+
+        System.out.println("DownloadFile.GetFileName: FileUrl = " + sFileURL);
+
+        URL url = new URL(sFileURL);
+        HttpURLConnection httpConn = (HttpURLConnection) url.openConnection();
+        int responseCode = httpConn.getResponseCode();
+
+        // always check HTTP response code first
+        if (responseCode == HttpURLConnection.HTTP_OK) {
+
+            System.out.println("DownloadFile.GetFileName: Connected");
+
+            String fileName = "";
+            String disposition = httpConn.getHeaderField("Content-Disposition");
+            String contentType = httpConn.getContentType();
+            int contentLength = httpConn.getContentLength();
+
+            if (disposition != null) {
+                // extracts file name from header field
+                int index = disposition.indexOf("filename=");
+                if (index > 0) {
+                    fileName = disposition.substring(index + 10,
+                            disposition.length() - 1);
+                }
+            } else {
+                // extracts file name from URL
+                fileName = sFileURL.substring(sFileURL.lastIndexOf("/") + 1,
+                        sFileURL.length());
+            }
+
+            sReturnFilePath = fileName;
+
+            System.out.println("Content-Type = " + contentType);
+            System.out.println("Content-Disposition = " + disposition);
+            System.out.println("Content-Length = " + contentLength);
+            System.out.println("fileName = " + fileName);
         } else {
             System.out.println("No file to download. Server replied HTTP code: " + responseCode);
         }

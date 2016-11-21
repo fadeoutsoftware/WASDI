@@ -13,7 +13,11 @@ import org.apache.commons.cli.*;
 import wasdi.geoserver.Publisher;
 import wasdi.rabbit.Send;
 import wasdi.shared.LauncherOperations;
+import wasdi.shared.business.DownloadedFile;
+import wasdi.shared.business.PublishedBand;
+import wasdi.shared.data.DownloadedFilesRepository;
 import wasdi.shared.data.MongoRepository;
+import wasdi.shared.data.PublishedBandsRepository;
 import wasdi.shared.parameters.DownloadFileParameter;
 import wasdi.shared.parameters.PublishBandParameter;
 import wasdi.shared.parameters.PublishParameters;
@@ -67,18 +71,19 @@ public class LauncherMain {
             // parse the command line arguments
             CommandLine oLine = parser.parse( oOptions, args );
             if (oLine.hasOption("operation")) {
-                // print the value of block-size
+                // Get the Operation Code
                 sOperation  = oLine.getOptionValue("operation");
 
             }
 
             if (oLine.hasOption("parameter")) {
-                // print the value of block-size
+                // Get the Parameter File
                 sParameter = oLine.getOptionValue("parameter");
-
             }
 
+            // Create Launcher Instance
             LauncherMain oLauncher = new LauncherMain();
+            // And Run
             oLauncher.ExecuteOperation(sOperation,sParameter);
 
         }
@@ -92,6 +97,8 @@ public class LauncherMain {
 
     public  LauncherMain() {
         try {
+
+            // Set Global Settings
             Publisher.PYTHON_PATH = ConfigReader.getPropValue("PYTHON_PATH");
             Publisher.TARGET_DIR_BASE = ConfigReader.getPropValue("PYRAMID_BASE_FOLDER");
             Publisher.GDALBasePath = ConfigReader.getPropValue("GDAL_PATH")+"/"+ConfigReader.getPropValue("GDAL_RETILE");
@@ -172,20 +179,72 @@ public class LauncherMain {
         try {
             System.out.println("LauncherMain.Download: Download Start");
 
-            if (!sDownloadPath.endsWith("/"))sDownloadPath+="/";
+            if (!sDownloadPath.endsWith("/")) sDownloadPath+="/";
 
             // Generate the Path adding user id and workspace
             sDownloadPath += oParameter.getUserId()+"/"+oParameter.getWorkspace();
 
             System.out.println("LauncherMain.DownloadPath: " + sDownloadPath);
 
+            // Product view Model
+            ProductViewModel oVM = null;
+
+
             // Download file
             if (ConfigReader.getPropValue("DOWNLOAD_ACTIVE").equals("true")) {
+
+                // Download handler
                 DownloadFile oDownloadFile = new DownloadFile();
-                sFileName = oDownloadFile.ExecuteDownloadFile(oParameter.getUrl(), sDownloadPath);
+
+                // Get the file name
+                String sFileNameWithoutPath = oDownloadFile.GetFileName(oParameter.getUrl());
+
+                // Check if it is already downloaded
+                DownloadedFilesRepository oDownloadedRepo = new DownloadedFilesRepository();
+                DownloadedFile oAlreadyDownloaded = oDownloadedRepo.GetDownloadedFile(sFileNameWithoutPath);
+
+                if (oAlreadyDownloaded == null) {
+                    System.out.println("LauncherMain.Download: File not already downloaded. Download it");
+
+                    // No: it isn't: download it
+                    sFileName = oDownloadFile.ExecuteDownloadFile(oParameter.getUrl(), sDownloadPath);
+
+                    // Get The product view Model
+                    ReadProduct oReadProduct = new ReadProduct();
+                    oVM = oReadProduct.getProductViewModel(new File(sFileName));
+
+                    // Save it in the register
+                    oAlreadyDownloaded = new DownloadedFile();
+                    oAlreadyDownloaded.setFileName(sFileNameWithoutPath);
+                    oAlreadyDownloaded.setFilePath(sFileName);
+                    oAlreadyDownloaded.setProductViewModel(oVM);
+
+                    oDownloadedRepo.InsertDownloadedFile(oAlreadyDownloaded);
+                }
+                else {
+                    System.out.println("LauncherMain.Download: File already downloaded: make a copy");
+
+                    // Yes!! Here we have the path
+                    sFileName = oAlreadyDownloaded.getFilePath();
+
+                    // Check the path where we want the file
+                    String sDestinationFileWithPath = sDownloadPath+"/" + sFileNameWithoutPath;
+
+                    // Is it different?
+                    if (sDestinationFileWithPath.equals(sFileName) == false) {
+                        // Yes, make a copy
+                        FileUtils.copyFile(new File(sFileName), new File(sDestinationFileWithPath));
+                        sFileName = sDestinationFileWithPath;
+                    }
+                }
             }
             else {
+                System.out.println("LauncherMain.Download: Debug Option Active: file not really downloaded, using configured one");
+
                 sFileName = sDownloadPath + File.separator + ConfigReader.getPropValue("DOWNLOAD_FAKE_FILE");
+                // Get The product view Model
+                ReadProduct oReadProduct = new ReadProduct();
+                oVM = oReadProduct.getProductViewModel(new File(sFileName));
             }
 
             // Rabbit Sender
@@ -195,7 +254,7 @@ public class LauncherMain {
                 System.out.println("LauncherMain.Download: file is null there must be an error");
 
                 RabbitMessageViewModel oMessageViewModel = new RabbitMessageViewModel();
-                oMessageViewModel.setMessageCode("download");
+                oMessageViewModel.setMessageCode(LauncherOperations.DOWNLOAD);
                 oMessageViewModel.setMessageResult("KO");
                 String sJSON = MongoRepository.s_oMapper.writeValueAsString(oMessageViewModel);
 
@@ -203,10 +262,6 @@ public class LauncherMain {
             }
             else {
                 System.out.println("LauncherMain.Download: Image downloaded. Send Rabbit Message");
-
-                // Get The product view Model
-                ReadProduct oReadProduct = new ReadProduct();
-                ProductViewModel oVM = oReadProduct.getProductViewModel(new File(sFileName));
 
                 if (oVM!=null) {
 
@@ -224,9 +279,10 @@ public class LauncherMain {
                     }
                 }
                 else {
+                    System.out.println("LauncherMain.Download: Unable to read image. Send Rabbit Message");
 
                     RabbitMessageViewModel oMessageViewModel = new RabbitMessageViewModel();
-                    oMessageViewModel.setMessageCode("download");
+                    oMessageViewModel.setMessageCode(LauncherOperations.DOWNLOAD);
                     oMessageViewModel.setMessageResult("KO");
                     String sJSON = MongoRepository.s_oMapper.writeValueAsString(oMessageViewModel);
 
@@ -237,11 +293,29 @@ public class LauncherMain {
         }
         catch (Exception oEx) {
             System.out.println("LauncherMain.Download: Exception " + oEx.toString());
+            // Rabbit Sender
+            Send oSendToRabbit = new Send();
+            RabbitMessageViewModel oMessageViewModel = new RabbitMessageViewModel();
+            oMessageViewModel.setMessageCode(LauncherOperations.DOWNLOAD);
+            oMessageViewModel.setMessageResult("KO");
+
+            try {
+                String sJSON = MongoRepository.s_oMapper.writeValueAsString(oMessageViewModel);
+                oSendToRabbit.SendMsg(oParameter.getQueue(),sJSON);
+            }
+            catch (Exception oEx2) {
+                System.out.println("LauncherMain.Download: Inner Exception " + oEx2.toString());
+            }
         }
 
         return  sFileName;
     }
 
+    /**
+     * Generic publish function. NOTE: probably will not be used, use publish band instead
+     * @param oParameter
+     * @return
+     */
     public String Publish(PublishParameters oParameter) {
         String sLayerId = "";
 
@@ -266,17 +340,7 @@ public class LauncherMain {
             File oDownloadedFile = new File(sFile);
             String sInputFileNameOnly = oDownloadedFile.getName();
             sLayerId = sInputFileNameOnly;
-/*
-            // TODO: Test row below if works delete this
 
-            // Create a clean layer id: the file name without any extension
-            String [] asLayerIdSplit = sInputFileNameOnly.split("\\.");
-            if (asLayerIdSplit!=null) {
-                if (asLayerIdSplit.length>0){
-                    sLayerId = asLayerIdSplit[0];
-                }
-            }
-  */
             sLayerId = Utils.GetFileNameWithoutExtension(sFile);
 
             // Copy fie to GeoServer Data Dir
@@ -319,7 +383,13 @@ public class LauncherMain {
             System.out.println("LauncherMain.publish: Image published. Send Rabbit Message");
             Send oSendLayerId = new Send();
             System.out.println("LauncherMain.publish: Queue = " + oParameter.getQueue() + " LayerId = " + sLayerId);
-            if (oSendLayerId.SendMsg(oParameter.getQueue(),sLayerId)==false) {
+
+            RabbitMessageViewModel oMessageViewModel = new RabbitMessageViewModel();
+            oMessageViewModel.setMessageCode(LauncherOperations.PUBLISH);
+            oMessageViewModel.setMessageResult("OK");
+            String sJSON = MongoRepository.s_oMapper.writeValueAsString(oMessageViewModel);
+
+            if (oSendLayerId.SendMsg(oParameter.getQueue(),sJSON)==false) {
                 System.out.println("LauncherMain.publish: Error sending Rabbit Message");
             }
 
@@ -332,11 +402,30 @@ public class LauncherMain {
         }
         catch (Exception oEx) {
             System.out.println("LauncherMain.Publish: exception " + oEx.toString());
+
+            // Rabbit Sender
+            Send oSendToRabbit = new Send();
+            RabbitMessageViewModel oMessageViewModel = new RabbitMessageViewModel();
+            oMessageViewModel.setMessageCode(LauncherOperations.PUBLISH);
+            oMessageViewModel.setMessageResult("KO");
+
+            try {
+                String sJSON = MongoRepository.s_oMapper.writeValueAsString(oMessageViewModel);
+                oSendToRabbit.SendMsg(oParameter.getQueue(),sJSON);
+            }
+            catch (Exception oEx2) {
+                System.out.println("LauncherMain.Publish: Inner Exception " + oEx2.toString());
+            }
         }
 
         return sLayerId;
     }
 
+    /**
+     * Publish single band image
+     * @param oParameter
+     * @return
+     */
     public String PublishBandImage(PublishBandParameter oParameter) {
 
         String sLayerId = "";
@@ -358,22 +447,66 @@ public class LauncherMain {
             // Check integrity
             if (Utils.isNullOrEmpty(sFile))
             {
+                // File not good!!
                 System.out.println( "LauncherMain.PublishBandImage: file is null or empty");
+
+                // Send KO to rabbit
+                Send oSendToRabbit = new Send();
+                RabbitMessageViewModel oRabbitVM = new RabbitMessageViewModel();
+                oRabbitVM.setMessageCode(LauncherOperations.PUBLISHBAND);
+                oRabbitVM.setMessageResult("KO");
+
+                try {
+                    String sJSON = MongoRepository.s_oMapper.writeValueAsString(oRabbitVM);
+                    oSendToRabbit.SendMsg(oParameter.getQueue(),sJSON);
+                }
+                catch (Exception oEx2) {
+                    System.out.println("LauncherMain.Download: Inner Exception " + oEx2.toString());
+                }
+
                 return  sLayerId;
             }
 
             System.out.println( "LauncherMain.PublishBandImage:  File = " + sFile);
 
+            // Create file
             File oFile = new File(sFile);
-
             String sInputFileNameOnly = oFile.getName();
 
+            // Generate Layer Id
             sLayerId = sInputFileNameOnly;
-
             sLayerId = Utils.GetFileNameWithoutExtension(sFile);
-
             sLayerId +=  "_" + oParameter.getBandName();
 
+            // Is already published?
+            PublishedBandsRepository oPublishedBandsRepository = new PublishedBandsRepository();
+            PublishedBand oAlreadyPublished = oPublishedBandsRepository.GetPublishedBand(sLayerId,oParameter.getBandName());
+
+            if (oAlreadyPublished != null) {
+                // Yes !!
+                System.out.println( "LauncherMain.PublishBandImage:  Band already published. Return result");
+
+                // Generate the View Model
+                PublishBandResultViewModel oVM = new PublishBandResultViewModel();
+                oVM.setBandName(oParameter.getBandName());
+                oVM.setProductName(sProductName);
+                oVM.setLayerId(sLayerId);
+
+                RabbitMessageViewModel oRabbitVM = new RabbitMessageViewModel();
+                oRabbitVM.setMessageCode(LauncherOperations.PUBLISHBAND);
+                oRabbitVM.setMessageResult("OK");
+                oRabbitVM.setPayload(oVM);
+
+                String sJSON = MongoRepository.s_oMapper.writeValueAsString(oRabbitVM);
+
+                Send oSendLayerId = new Send();
+
+                if (oSendLayerId.SendMsg(oParameter.getQueue(),sJSON)==false) {
+                    System.out.println("LauncherMain.PublishBandImage: Error sending Rabbit Message");
+                }
+
+                return sLayerId;
+            }
 
             System.out.println( "LauncherMain.PublishBandImage:  Generating Band Image...");
 
@@ -399,7 +532,6 @@ public class LauncherMain {
 
             System.out.println( "LauncherMain.PublishBandImage:  Moving Band Image...");
 
-
             // Copy fie to GeoServer Data Dir
             String sGeoServerDataDir = ConfigReader.getPropValue("GEOSERVER_DATADIR");
             String sTargetDir = sGeoServerDataDir;
@@ -420,11 +552,25 @@ public class LauncherMain {
             Publisher oPublisher = new Publisher();
             sLayerId = oPublisher.publishGeoTiff(sTargetFile,ConfigReader.getPropValue("GEOSERVER_ADDRESS"),ConfigReader.getPropValue("GEOSERVER_USER"),ConfigReader.getPropValue("GEOSERVER_PASSWORD"),ConfigReader.getPropValue("GEOSERVER_WORKSPACE"), sLayerId);
 
-            System.out.println("LauncherMain.PublishBandImage: Image published. Send Rabbit Message");
+            System.out.println("LauncherMain.PublishBandImage: Image published. Update index and Send Rabbit Message");
+
+            // Create Entity
+            PublishedBand oPublishedBand = new PublishedBand();
+            oPublishedBand.setLayerId(sLayerId);
+            oPublishedBand.setProductName(sProductName);
+            oPublishedBand.setBandName(oParameter.getFileName());
+
+            // Add it the the db
+            oPublishedBandsRepository.InsertPublishedBand(oPublishedBand);
+
+            System.out.println("LauncherMain.PublishBandImage: Index Updated" );
+
+            // Rabbit Sender
             Send oSendLayerId = new Send();
 
             System.out.println("LauncherMain.PublishBandImage: Queue = " + oParameter.getQueue() + " LayerId = " + sLayerId);
 
+            // Create the View Model
             PublishBandResultViewModel oVM = new PublishBandResultViewModel();
             oVM.setBandName(oParameter.getBandName());
             oVM.setProductName(sProductName);
@@ -435,14 +581,30 @@ public class LauncherMain {
             oRabbitVM.setMessageResult("OK");
             oRabbitVM.setPayload(oVM);
 
+            // Convert in JSON
             String sJSON = MongoRepository.s_oMapper.writeValueAsString(oRabbitVM);
 
+            // Send it
             if (oSendLayerId.SendMsg(oParameter.getQueue(),sJSON)==false) {
                 System.out.println("LauncherMain.PublishBandImage: Error sending Rabbit Message");
             }
         }
         catch (Exception oEx) {
             oEx.printStackTrace();
+
+            // Rabbit Sender
+            Send oSendToRabbit = new Send();
+            RabbitMessageViewModel oMessageViewModel = new RabbitMessageViewModel();
+            oMessageViewModel.setMessageCode(LauncherOperations.PUBLISHBAND);
+            oMessageViewModel.setMessageResult("KO");
+
+            try {
+                String sJSON = MongoRepository.s_oMapper.writeValueAsString(oMessageViewModel);
+                oSendToRabbit.SendMsg(oParameter.getQueue(),sJSON);
+            }
+            catch (Exception oEx2) {
+                System.out.println("LauncherMain.Download: Inner Exception " + oEx2.toString());
+            }
         }
 
         return  sLayerId;
