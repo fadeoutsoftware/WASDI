@@ -19,7 +19,7 @@ public class Publisher {
 
     // Define a static logger variable so that it references the
     // Logger instance named "MyApp".
-    static Logger logger = Logger.getLogger(Publisher.class);
+    static Logger s_oLogger = Logger.getLogger(Publisher.class);
 
     public static final int LEVEL = 4;
 
@@ -39,7 +39,7 @@ public class Publisher {
 
     public Publisher()
     {
-        logger.debug("New Publisher");
+        
     }
 
     public Publisher(String sPyramidBaseFolder, String sGDALBasePath, String sPyramidEnvOptions)
@@ -71,7 +71,7 @@ public class Publisher {
             String sCmd = String.format("%s %s -v -r bilinear -levels %d -ps %s %s -co \"TILED=YES\" -targetDir %s %s", PYTHON_PATH, GDALBasePath, iLevel, iWidth, iHeight, "\""+sTargetDir +"\"","\""+ sInputFile+"\"");
             String[] asEnvp = PYRAMYD_ENV_OPTIONS.split("\\|");
 
-            System.out.println(sCmd);
+            s_oLogger.debug(sCmd);
 
             try {
 
@@ -82,10 +82,10 @@ public class Publisher {
                 InputStreamReader isr = new InputStreamReader(stdin);
                 BufferedReader br = new BufferedReader(isr);
                 String line = null;
-                System.out.println("<OUTPUT>");
+                s_oLogger.debug("<OUTPUT>");
                 while ((line = br.readLine()) != null)
-                    System.out.println(line);
-                System.out.println("</OUTPUT>");
+                    s_oLogger.debug(line);
+                s_oLogger.debug("</OUTPUT>");
                 int exitVal = oProcess.waitFor();
                 oProcess.destroy();
 
