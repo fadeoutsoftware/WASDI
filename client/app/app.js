@@ -10,6 +10,7 @@ var wasdiApp = angular.module('wasdi', [
     'wasdi.MapService',
     'wasdi.WorkspaceService',
     'wasdi.FileBufferService',
+    'wasdi.ProductService',
     'wasdi.SnakeDirective'
 ]);
 

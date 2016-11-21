@@ -331,7 +331,7 @@
                         _this.debug(msg);
                     }
                     _this._cleanUp();
-                    return typeof errorCallback === "function" ? errorCallback(msg) : void 0;
+                    return typeof errorCallback === "function" ? errorCallback("LOST_CONNECTION") : void 0;
                 };
             })(this);
             return this.ws.onopen = (function(_this) {

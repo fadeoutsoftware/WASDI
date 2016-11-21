@@ -2,15 +2,20 @@
  * Created by p.campanella on 24/10/2016.
  */
 var EditorController = (function () {
-    function EditorController($scope, $location, oConstantsService, oAuthService, oMapService, oFileBufferService) {
+    function EditorController($scope, $location, $interval, oConstantsService, oAuthService, oMapService, oFileBufferService, oProductService) {
 
         // Reference to the needed Services
         this.m_oScope = $scope;
         this.m_oLocation = $location;
+        this.m_oInterval = $interval;
         this.m_oConstantsService = oConstantsService;
         this.m_oAuthService = oAuthService;
         this.m_oMapService = oMapService;
         this.m_oFileBufferService = oFileBufferService;
+        this.m_oProductService = oProductService;
+
+        // Reconnection promise to stop the timer if the reconnection succeed or if the user change page
+        this.m_oReconnectTimerPromise = null;
 
         this.m_oScope.m_oController = this;
 
@@ -23,11 +28,14 @@ var EditorController = (function () {
         var oWebSocket = new WebSocket(this.m_oConstantsService.getStompUrl());
         this.m_oClient = Stomp.over(oWebSocket);
 
+        // Rabbit subscription
         var m_oSubscription = {};
 
-        var oController = this;
-
+        // Array of products to show
         this.m_aoProducts = [];
+
+        // Self reference for callbacks
+        var oController = this;
 
         /**
          * Rabbit Callback: receives the Messages
@@ -65,20 +73,78 @@ var EditorController = (function () {
         var on_connect = function() {
             console.log('Web Stomp connected');
             oController.m_oSubscription = oController.m_oClient.subscribe(oController.m_oActiveWorkspace.workspaceId, oRabbitCallback);
+
+            // Is this a re-connection?
+            if (oController.m_oReconnectTimerPromise != null) {
+                // Yes it is: clear the timer
+                oController.m_oInterval.cancel(oController.m_oReconnectTimerPromise);
+                oController.m_oReconnectTimerPromise = null;
+            }
         };
 
         /**
          * Callback for the Rabbit On Error
          */
-        var on_error =  function() {
-            console.log('Web Stomp connection Error');
+        var on_error =  function(sMessage) {
+            console.log('Web Stomp Error');
+            if (sMessage=="LOST_CONNECTION") {
+                console.log('LOST Connection');
+
+                if (oController.m_oReconnectTimerPromise == null) {
+                    // Try to Reconnect
+                    oController.m_oReconnectTimerPromise = oController.m_oInterval(rabbit_reconnect,5000);
+                }
+            }
+        };
+
+        // Keep local reference to the callbacks to use it in the reconnection callback
+        this.m_oOn_Connect = on_connect;
+        this.m_oOn_Error = on_error;
+
+        // Call back for rabbit reconnection
+        var rabbit_reconnect = function () {
+
+            console.log('Web Stomp Reconnection Attempt');
+
+            // Connect again
+            oController.oWebSocket = new WebSocket(oController.m_oConstantsService.getStompUrl());
+            oController.m_oClient = Stomp.over(oController.oWebSocket);
+            oController.m_oClient.connect('guest', 'guest', oController.m_oOn_Connect, oController.m_oOn_Error, '/');
         };
 
         //connect to the queue
         this.m_oClient.connect('guest', 'guest', on_connect, on_error, '/');
 
+        // Read Product List
+        this.m_oProductService.getProductListByWorkspace(this.m_oActiveWorkspace.workspaceId).success(function (data, status) {
+            if (data != null)
+            {
+                if (data != undefined)
+                {
+                    oController.m_aoProducts = data;
+                }
+            }
+        }).error(function (data,status) {
+            console.log('Error reading product list')
+        });
+
         // Initialize the map
         oMapService.initMap('wasdiMap');
+
+        // Clean Up when exit!!
+        this.m_oScope.$on('$destroy', function () {
+            // Is this a re-connection?
+            if (oController.m_oReconnectTimerPromise != null) {
+                // Yes it is: clear the timer
+                oController.m_oInterval.cancel(oController.m_oReconnectTimerPromise);
+                oController.m_oReconnectTimerPromise = null;
+            }
+            else {
+                if (oController.m_oClient != null) {
+                    oController.m_oClient.disconnect();
+                }
+            }
+        });
     }
 
     /**
@@ -94,6 +160,12 @@ var EditorController = (function () {
 
         this.m_aoProducts.push(oMessage.payload);
         this.m_oScope.$apply();
+
+        this.m_oProductService.addProductToWorkspace(oMessage.payload.name,this.m_oActiveWorkspace.workspaceId).success(function (data, status) {
+            console.log('Product added to the ws');
+        }).error(function (data,status) {
+            console.log('Error adding product to the ws');
+        });
     }
 
 
@@ -175,7 +247,9 @@ var EditorController = (function () {
         var oMap = this.m_oMapService.getMap();
 
         var wmsLayer = L.tileLayer.wms('http://localhost:8080/geoserver/ows?', {
-            layers: 'wasdi:' + sLayerId
+            layers: 'wasdi:' + sLayerId,
+            format: 'image/png',
+            transparent: true
         }).addTo(oMap);
     }
 
@@ -267,10 +341,12 @@ var EditorController = (function () {
     EditorController.$inject = [
         '$scope',
         '$location',
+        '$interval',
         'ConstantsService',
         'AuthService',
         'MapService',
-        'FileBufferService'
+        'FileBufferService',
+        'ProductService'
     ];
 
     return EditorController;

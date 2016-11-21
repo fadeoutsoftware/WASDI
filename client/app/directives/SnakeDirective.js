@@ -40,6 +40,13 @@ angular.module('wasdi.SnakeDirective', [])
 
                 $document.on("keydown keypress", KeyPress);
 
+                scope.$on(
+                    "$destroy",
+                    function( event ) {
+                        $document.off("keydown keypress", KeyPress);
+                    }
+                );
+
                 drawGame();
                 function drawGame() {
 

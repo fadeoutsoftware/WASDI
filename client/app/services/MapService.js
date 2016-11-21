@@ -65,7 +65,7 @@ service('MapService', ['$http',  'ConstantsService', function ($http, oConstants
 
     this.m_oWasdiMap = null;
 
-    this.m_oActiveBaseLayer = this.m_oGoogleHybrid;
+    this.m_oActiveBaseLayer = this.m_oOSMBasic;
 
 
     this.initMap = function(sMapDiv) {
@@ -77,7 +77,7 @@ service('MapService', ['$http',  'ConstantsService', function ($http, oConstants
          */
         this.m_oWasdiMap = L.map(sMapDiv, {
             zoomControl: false,
-            layers: [this.m_oGoogleHybrid],
+            layers: [this.m_oOSMBasic],
             // maxZoom: 22
         });
 
