@@ -1,6 +1,5 @@
 package wasdi;
 import com.bc.ceres.glevel.MultiLevelImage;
-import com.mongodb.Mongo;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.esa.snap.core.datamodel.Band;
@@ -38,14 +37,14 @@ import java.io.IOException;
  */
 public class LauncherMain {
 
-    // Define a static logger variable so that it references the
+    // Define a static s_oLogger variable so that it references the
     // Logger instance named "MyApp".
-    static Logger logger = Logger.getLogger(LauncherMain.class);
+    public static Logger s_oLogger = Logger.getLogger(LauncherMain.class);
 
     //-operation <operation> -elaboratefile <file>
     public static void main(String[] args) throws Exception {
 
-        logger.debug("OK");
+        s_oLogger.debug("OK");
 
         // create the parser
         CommandLineParser parser = new DefaultParser();
@@ -143,7 +142,7 @@ public class LauncherMain {
                         String sText = "LauncherMain: file not downloaded URL = ";
                         if (sUrl ==null) sText += " NULL";
                         else sText += sUrl;
-                        System.out.println( sText);
+                        s_oLogger.debug( sText);
                     }
                     else {
                         // Ok file downloaded, let publish it
@@ -176,21 +175,21 @@ public class LauncherMain {
             }
         }
         catch (Exception oEx) {
-            System.out.println("ExecuteOperation Exception " + oEx.toString());
+            s_oLogger.debug("ExecuteOperation Exception " + oEx.toString());
         }
     }
 
     public String Download(DownloadFileParameter oParameter, String sDownloadPath) {
         String sFileName = "";
         try {
-            System.out.println("LauncherMain.Download: Download Start");
+            s_oLogger.debug("LauncherMain.Download: Download Start");
 
             if (!sDownloadPath.endsWith("/")) sDownloadPath+="/";
 
             // Generate the Path adding user id and workspace
             sDownloadPath += oParameter.getUserId()+"/"+oParameter.getWorkspace();
 
-            System.out.println("LauncherMain.DownloadPath: " + sDownloadPath);
+            s_oLogger.debug("LauncherMain.DownloadPath: " + sDownloadPath);
 
             // Product view Model
             ProductViewModel oVM = null;
@@ -210,7 +209,7 @@ public class LauncherMain {
                 DownloadedFile oAlreadyDownloaded = oDownloadedRepo.GetDownloadedFile(sFileNameWithoutPath);
 
                 if (oAlreadyDownloaded == null) {
-                    System.out.println("LauncherMain.Download: File not already downloaded. Download it");
+                    s_oLogger.debug("LauncherMain.Download: File not already downloaded. Download it");
 
                     // No: it isn't: download it
                     sFileName = oDownloadFile.ExecuteDownloadFile(oParameter.getUrl(), sDownloadPath);
@@ -228,7 +227,7 @@ public class LauncherMain {
                     oDownloadedRepo.InsertDownloadedFile(oAlreadyDownloaded);
                 }
                 else {
-                    System.out.println("LauncherMain.Download: File already downloaded: make a copy");
+                    s_oLogger.debug("LauncherMain.Download: File already downloaded: make a copy");
 
                     // Yes!! Here we have the path
                     sFileName = oAlreadyDownloaded.getFilePath();
@@ -245,7 +244,7 @@ public class LauncherMain {
                 }
             }
             else {
-                System.out.println("LauncherMain.Download: Debug Option Active: file not really downloaded, using configured one");
+                s_oLogger.debug("LauncherMain.Download: Debug Option Active: file not really downloaded, using configured one");
 
                 sFileName = sDownloadPath + File.separator + ConfigReader.getPropValue("DOWNLOAD_FAKE_FILE");
                 // Get The product view Model
@@ -257,7 +256,7 @@ public class LauncherMain {
             Send oSendToRabbit = new Send();
 
             if (Utils.isNullOrEmpty(sFileName)) {
-                System.out.println("LauncherMain.Download: file is null there must be an error");
+                s_oLogger.debug("LauncherMain.Download: file is null there must be an error");
 
                 RabbitMessageViewModel oMessageViewModel = new RabbitMessageViewModel();
                 oMessageViewModel.setMessageCode(LauncherOperations.DOWNLOAD);
@@ -267,11 +266,11 @@ public class LauncherMain {
                 oSendToRabbit.SendMsg(oParameter.getQueue(),sJSON);
             }
             else {
-                System.out.println("LauncherMain.Download: Image downloaded. Send Rabbit Message");
+                s_oLogger.debug("LauncherMain.Download: Image downloaded. Send Rabbit Message");
 
                 if (oVM!=null) {
 
-                    System.out.println("LauncherMain.Download: Queue = " + oParameter.getQueue());
+                    s_oLogger.debug("LauncherMain.Download: Queue = " + oParameter.getQueue());
 
                     RabbitMessageViewModel oMessageViewModel = new RabbitMessageViewModel();
                     oMessageViewModel.setMessageCode(LauncherOperations.DOWNLOAD);
@@ -281,11 +280,11 @@ public class LauncherMain {
                     String sJSON = MongoRepository.s_oMapper.writeValueAsString(oMessageViewModel);
 
                     if (oSendToRabbit.SendMsg(oParameter.getQueue(),sJSON)==false) {
-                        System.out.println("LauncherMain.Download: Error sending Rabbit Message");
+                        s_oLogger.debug("LauncherMain.Download: Error sending Rabbit Message");
                     }
                 }
                 else {
-                    System.out.println("LauncherMain.Download: Unable to read image. Send Rabbit Message");
+                    s_oLogger.debug("LauncherMain.Download: Unable to read image. Send Rabbit Message");
 
                     RabbitMessageViewModel oMessageViewModel = new RabbitMessageViewModel();
                     oMessageViewModel.setMessageCode(LauncherOperations.DOWNLOAD);
@@ -298,7 +297,7 @@ public class LauncherMain {
             }
         }
         catch (Exception oEx) {
-            System.out.println("LauncherMain.Download: Exception " + oEx.toString());
+            s_oLogger.debug("LauncherMain.Download: Exception " + oEx.toString());
             // Rabbit Sender
             Send oSendToRabbit = new Send();
             RabbitMessageViewModel oMessageViewModel = new RabbitMessageViewModel();
@@ -310,7 +309,7 @@ public class LauncherMain {
                 oSendToRabbit.SendMsg(oParameter.getQueue(),sJSON);
             }
             catch (Exception oEx2) {
-                System.out.println("LauncherMain.Download: Inner Exception " + oEx2.toString());
+                s_oLogger.debug("LauncherMain.Download: Inner Exception " + oEx2.toString());
             }
         }
 
@@ -338,7 +337,7 @@ public class LauncherMain {
             // Check integrity
             if (Utils.isNullOrEmpty(sFile))
             {
-                System.out.println( "LauncherMain.Publish: file is null or empty");
+                s_oLogger.debug( "LauncherMain.Publish: file is null or empty");
                 return  sLayerId;
             }
 
@@ -360,35 +359,35 @@ public class LauncherMain {
 
             File oTargetFile = new File(sTargetFile);
 
-            System.out.println("LauncherMain.publish: InputFile: " + sFile + " TargetFile: " + sTargetDir + " LayerId " + sLayerId);
+            s_oLogger.debug("LauncherMain.publish: InputFile: " + sFile + " TargetFile: " + sTargetDir + " LayerId " + sLayerId);
 
             FileUtils.copyFile(oDownloadedFile,oTargetFile);
 
             //TODO: Here recognize the file type and run the right procedure. At the moment assume Sentinel1A
 
-            System.out.println("LauncherMain.publish: Write Big Tiff");
+            s_oLogger.debug("LauncherMain.publish: Write Big Tiff");
             // Convert the product in a Tiff file
             ReadProduct oReadProduct = new ReadProduct();
             String sTiffFile = oReadProduct.writeBigTiff(oTargetFile.getAbsolutePath(), sTargetDir, sLayerId);
             //String sTiffFile = "C:\\Program Files (x86)\\GeoServer 2.9.2\\data_dir\\data\\S1A_IW_GRDH_1SSV_20150213T095824_20150213T095849_004603_005AB7_5539\\S1A_IW_GRDH_1SSV_20150213T095824_20150213T095849_004603_005AB7_5539.zip.tif";
 
-            System.out.println("LauncherMain.publish: TiffFile: " +sTiffFile);
+            s_oLogger.debug("LauncherMain.publish: TiffFile: " +sTiffFile);
 
             // Check result
             if (Utils.isNullOrEmpty(sTiffFile))
             {
-                System.out.println( "LauncherMain.Publish: Tiff File is null or empty");
+                s_oLogger.debug( "LauncherMain.Publish: Tiff File is null or empty");
                 return sLayerId;
             }
 
             // Ok publish
-            System.out.println("LauncherMain.publish: call PublishImage");
+            s_oLogger.debug("LauncherMain.publish: call PublishImage");
             Publisher oPublisher = new Publisher();
             sLayerId = oPublisher.publishGeoTiff(sTiffFile,ConfigReader.getPropValue("GEOSERVER_ADDRESS"),ConfigReader.getPropValue("GEOSERVER_USER"),ConfigReader.getPropValue("GEOSERVER_PASSWORD"),ConfigReader.getPropValue("GEOSERVER_WORKSPACE"), sLayerId);
 
-            System.out.println("LauncherMain.publish: Image published. Send Rabbit Message");
+            s_oLogger.debug("LauncherMain.publish: Image published. Send Rabbit Message");
             Send oSendLayerId = new Send();
-            System.out.println("LauncherMain.publish: Queue = " + oParameter.getQueue() + " LayerId = " + sLayerId);
+            s_oLogger.debug("LauncherMain.publish: Queue = " + oParameter.getQueue() + " LayerId = " + sLayerId);
 
             RabbitMessageViewModel oMessageViewModel = new RabbitMessageViewModel();
             oMessageViewModel.setMessageCode(LauncherOperations.PUBLISH);
@@ -396,18 +395,18 @@ public class LauncherMain {
             String sJSON = MongoRepository.s_oMapper.writeValueAsString(oMessageViewModel);
 
             if (oSendLayerId.SendMsg(oParameter.getQueue(),sJSON)==false) {
-                System.out.println("LauncherMain.publish: Error sending Rabbit Message");
+                s_oLogger.debug("LauncherMain.publish: Error sending Rabbit Message");
             }
 
             // Deletes the copy of the Zip file
-            System.out.println("LauncherMain.publish: delete Zip File Copy " + oTargetFile.getPath());
+            s_oLogger.debug("LauncherMain.publish: delete Zip File Copy " + oTargetFile.getPath());
 
             if (oTargetFile.delete()==false) {
-                System.out.println("LauncherMain.publish: impossible to delete zip file");
+                s_oLogger.debug("LauncherMain.publish: impossible to delete zip file");
             }
         }
         catch (Exception oEx) {
-            System.out.println("LauncherMain.Publish: exception " + oEx.toString());
+            s_oLogger.debug("LauncherMain.Publish: exception " + oEx.toString());
 
             // Rabbit Sender
             Send oSendToRabbit = new Send();
@@ -420,7 +419,7 @@ public class LauncherMain {
                 oSendToRabbit.SendMsg(oParameter.getQueue(),sJSON);
             }
             catch (Exception oEx2) {
-                System.out.println("LauncherMain.Publish: Inner Exception " + oEx2.toString());
+                s_oLogger.debug("LauncherMain.Publish: Inner Exception " + oEx2.toString());
             }
         }
 
@@ -454,7 +453,7 @@ public class LauncherMain {
             if (Utils.isNullOrEmpty(sFile))
             {
                 // File not good!!
-                System.out.println( "LauncherMain.PublishBandImage: file is null or empty");
+                s_oLogger.debug( "LauncherMain.PublishBandImage: file is null or empty");
 
                 // Send KO to rabbit
                 Send oSendToRabbit = new Send();
@@ -467,13 +466,13 @@ public class LauncherMain {
                     oSendToRabbit.SendMsg(oParameter.getQueue(),sJSON);
                 }
                 catch (Exception oEx2) {
-                    System.out.println("LauncherMain.Download: Inner Exception " + oEx2.toString());
+                    s_oLogger.debug("LauncherMain.Download: Inner Exception " + oEx2.toString());
                 }
 
                 return  sLayerId;
             }
 
-            System.out.println( "LauncherMain.PublishBandImage:  File = " + sFile);
+            s_oLogger.debug( "LauncherMain.PublishBandImage:  File = " + sFile);
 
             // Create file
             File oFile = new File(sFile);
@@ -490,7 +489,7 @@ public class LauncherMain {
 
             if (oAlreadyPublished != null) {
                 // Yes !!
-                System.out.println( "LauncherMain.PublishBandImage:  Band already published. Return result");
+                s_oLogger.debug( "LauncherMain.PublishBandImage:  Band already published. Return result");
 
                 // Generate the View Model
                 PublishBandResultViewModel oVM = new PublishBandResultViewModel();
@@ -508,13 +507,13 @@ public class LauncherMain {
                 Send oSendLayerId = new Send();
 
                 if (oSendLayerId.SendMsg(oParameter.getQueue(),sJSON)==false) {
-                    System.out.println("LauncherMain.PublishBandImage: Error sending Rabbit Message");
+                    s_oLogger.debug("LauncherMain.PublishBandImage: Error sending Rabbit Message");
                 }
 
                 return sLayerId;
             }
 
-            System.out.println( "LauncherMain.PublishBandImage:  Generating Band Image...");
+            s_oLogger.debug( "LauncherMain.PublishBandImage:  Generating Band Image...");
 
             // Read the product
             ReadProduct oReadProduct = new ReadProduct();
@@ -536,7 +535,7 @@ public class LauncherMain {
             // Write the Band Tiff
             if (ConfigReader.getPropValue("CREATE_BAND_GEOTIFF_ACTIVE").equals("true")) GeoTIFF.writeImage(oBandImage, oOutputFile, oMetadata);
 
-            System.out.println( "LauncherMain.PublishBandImage:  Moving Band Image...");
+            s_oLogger.debug( "LauncherMain.PublishBandImage:  Moving Band Image...");
 
             // Copy fie to GeoServer Data Dir
             String sGeoServerDataDir = ConfigReader.getPropValue("GEOSERVER_DATADIR");
@@ -549,16 +548,16 @@ public class LauncherMain {
 
             File oTargetFile = new File(sTargetFile);
 
-            System.out.println("LauncherMain.PublishBandImage: InputFile: " + sOutputFilePath + " TargetFile: " + sTargetFile + " LayerId " + sLayerId);
+            s_oLogger.debug("LauncherMain.PublishBandImage: InputFile: " + sOutputFilePath + " TargetFile: " + sTargetFile + " LayerId " + sLayerId);
 
             FileUtils.copyFile(oOutputFile,oTargetFile);
 
             // Ok publish
-            System.out.println("LauncherMain.PublishBandImage: call PublishImage");
+            s_oLogger.debug("LauncherMain.PublishBandImage: call PublishImage");
             Publisher oPublisher = new Publisher();
             sLayerId = oPublisher.publishGeoTiff(sTargetFile,ConfigReader.getPropValue("GEOSERVER_ADDRESS"),ConfigReader.getPropValue("GEOSERVER_USER"),ConfigReader.getPropValue("GEOSERVER_PASSWORD"),ConfigReader.getPropValue("GEOSERVER_WORKSPACE"), sLayerId);
 
-            System.out.println("LauncherMain.PublishBandImage: Image published. Update index and Send Rabbit Message");
+            s_oLogger.debug("LauncherMain.PublishBandImage: Image published. Update index and Send Rabbit Message");
 
             // Create Entity
             PublishedBand oPublishedBand = new PublishedBand();
@@ -569,12 +568,12 @@ public class LauncherMain {
             // Add it the the db
             oPublishedBandsRepository.InsertPublishedBand(oPublishedBand);
 
-            System.out.println("LauncherMain.PublishBandImage: Index Updated" );
+            s_oLogger.debug("LauncherMain.PublishBandImage: Index Updated" );
 
             // Rabbit Sender
             Send oSendLayerId = new Send();
 
-            System.out.println("LauncherMain.PublishBandImage: Queue = " + oParameter.getQueue() + " LayerId = " + sLayerId);
+            s_oLogger.debug("LauncherMain.PublishBandImage: Queue = " + oParameter.getQueue() + " LayerId = " + sLayerId);
 
             // Create the View Model
             PublishBandResultViewModel oVM = new PublishBandResultViewModel();
@@ -592,7 +591,7 @@ public class LauncherMain {
 
             // Send it
             if (oSendLayerId.SendMsg(oParameter.getQueue(),sJSON)==false) {
-                System.out.println("LauncherMain.PublishBandImage: Error sending Rabbit Message");
+                s_oLogger.debug("LauncherMain.PublishBandImage: Error sending Rabbit Message");
             }
         }
         catch (Exception oEx) {
@@ -609,7 +608,7 @@ public class LauncherMain {
                 oSendToRabbit.SendMsg(oParameter.getQueue(),sJSON);
             }
             catch (Exception oEx2) {
-                System.out.println("LauncherMain.Download: Inner Exception " + oEx2.toString());
+                s_oLogger.debug("LauncherMain.Download: Inner Exception " + oEx2.toString());
             }
         }
 

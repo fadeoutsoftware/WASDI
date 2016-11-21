@@ -10,6 +10,7 @@ import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
 import wasdi.ConfigReader;
+import wasdi.LauncherMain;
 
 public class Send {
 
@@ -55,7 +56,7 @@ public class Send {
             e.printStackTrace();
             return false;
         }
-        System.out.println(" [x] Sent '" + sMessageAttribute + "'");
+        LauncherMain.s_oLogger.debug(" [x] Sent '" + sMessageAttribute + "'");
 
         try {
             oChannel.close();

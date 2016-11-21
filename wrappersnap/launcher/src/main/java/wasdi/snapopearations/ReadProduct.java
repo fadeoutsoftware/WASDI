@@ -3,6 +3,7 @@ package wasdi.snapopearations;
 import org.apache.commons.net.io.Util;
 import org.esa.s1tbx.io.sentinel1.Sentinel1ProductReader;
 import org.esa.snap.core.util.SystemUtils;
+import wasdi.LauncherMain;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.AttributeViewModel;
 import wasdi.shared.viewmodels.BandViewModel;
@@ -46,7 +47,7 @@ public class ReadProduct {
         catch(Exception oEx)
         {
             oEx.printStackTrace();
-            System.out.println(oEx.toString());
+            LauncherMain.s_oLogger.debug(oEx.toString());
 
         }
 
@@ -142,17 +143,17 @@ public class ReadProduct {
 
         File oFile = new File (sFileName);
 
-        System.out.println("ReadProduct.writeBigTiff: Read Product FILE = " + sFileName);
+        LauncherMain.s_oLogger.debug("ReadProduct.writeBigTiff: Read Product FILE = " + sFileName);
 
         Product oSentinelProduct = ReadProduct(oFile);
 
-        if (oSentinelProduct == null) System.out.println("ReadProduct.writeBigTiff: Sentinel Product is null " + oFile.getAbsolutePath());
+        if (oSentinelProduct == null) LauncherMain.s_oLogger.debug("ReadProduct.writeBigTiff: Sentinel Product is null " + oFile.getAbsolutePath());
 
-        System.out.println("ReadProduct.writeBigTiff: Create Writer");
+        LauncherMain.s_oLogger.debug("ReadProduct.writeBigTiff: Create Writer");
 
         WriteProduct oWriter = new WriteProduct();
 
-        System.out.println("ReadProduct.writeBigTiff: WriteTiff");
+        LauncherMain.s_oLogger.debug("ReadProduct.writeBigTiff: WriteTiff");
 
         String sBigTiff = "";
 

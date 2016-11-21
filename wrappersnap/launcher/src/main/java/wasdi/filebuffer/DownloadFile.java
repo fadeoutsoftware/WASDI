@@ -1,6 +1,7 @@
 package wasdi.filebuffer;
 
 import wasdi.ConfigReader;
+import wasdi.LauncherMain;
 import wasdi.shared.utils.Utils;
 
 import java.io.File;
@@ -26,11 +27,11 @@ public class DownloadFile {
 
         // Domain check
         if (Utils.isNullOrEmpty(sFileURL)) {
-            System.out.println("DownloadFile.ExecuteDownloadFile: sFileURL is null");
+            LauncherMain.s_oLogger.debug("DownloadFile.ExecuteDownloadFile: sFileURL is null");
             return "";
         }
         if (Utils.isNullOrEmpty(sSaveDirOnServer)) {
-            System.out.println("DownloadFile.ExecuteDownloadFile: sSaveDirOnServer is null");
+            LauncherMain.s_oLogger.debug("DownloadFile.ExecuteDownloadFile: sSaveDirOnServer is null");
             return "";
         }
 
@@ -43,13 +44,13 @@ public class DownloadFile {
                     return new PasswordAuthentication(ConfigReader.getPropValue("DHUS_USER"), ConfigReader.getPropValue("DHUS_PASSWORD") .toCharArray());
                 }
                 catch (Exception oEx){
-                    System.out.println("DownloadFile.ExecuteDownloadFile: exception setting auth " + oEx.toString());
+                    LauncherMain.s_oLogger.debug("DownloadFile.ExecuteDownloadFile: exception setting auth " + oEx.toString());
                 }
                 return null;
             }
         });
 
-        System.out.println("DownloadFile.ExecuteDownloadFile: FileUrl = " + sFileURL);
+        LauncherMain.s_oLogger.debug("DownloadFile.ExecuteDownloadFile: FileUrl = " + sFileURL);
 
         URL url = new URL(sFileURL);
         HttpURLConnection httpConn = (HttpURLConnection) url.openConnection();
@@ -58,7 +59,7 @@ public class DownloadFile {
         // always check HTTP response code first
         if (responseCode == HttpURLConnection.HTTP_OK) {
 
-            System.out.println("DownloadFile.ExecuteDownloadFile: Connected");
+            LauncherMain.s_oLogger.debug("DownloadFile.ExecuteDownloadFile: Connected");
 
             String fileName = "";
             String disposition = httpConn.getHeaderField("Content-Disposition");
@@ -78,16 +79,16 @@ public class DownloadFile {
                         sFileURL.length());
             }
 
-            System.out.println("Content-Type = " + contentType);
-            System.out.println("Content-Disposition = " + disposition);
-            System.out.println("Content-Length = " + contentLength);
-            System.out.println("fileName = " + fileName);
+            LauncherMain.s_oLogger.debug("Content-Type = " + contentType);
+            LauncherMain.s_oLogger.debug("Content-Disposition = " + disposition);
+            LauncherMain.s_oLogger.debug("Content-Length = " + contentLength);
+            LauncherMain.s_oLogger.debug("fileName = " + fileName);
 
             // opens input stream from the HTTP connection
             InputStream inputStream = httpConn.getInputStream();
             String saveFilePath= sSaveDirOnServer + "/" + fileName;
 
-            System.out.println("DownloadFile.ExecuteDownloadFile: Create Save File Path = " + saveFilePath);
+            LauncherMain.s_oLogger.debug("DownloadFile.ExecuteDownloadFile: Create Save File Path = " + saveFilePath);
 
             File oTargetFile = new File(saveFilePath);
             File oTargetDir = oTargetFile.getParentFile();
@@ -107,9 +108,9 @@ public class DownloadFile {
 
             sReturnFilePath = saveFilePath;
 
-            System.out.println("File downloaded " + sReturnFilePath);
+            LauncherMain.s_oLogger.debug("File downloaded " + sReturnFilePath);
         } else {
-            System.out.println("No file to download. Server replied HTTP code: " + responseCode);
+            LauncherMain.s_oLogger.debug("No file to download. Server replied HTTP code: " + responseCode);
         }
         httpConn.disconnect();
 
@@ -123,7 +124,7 @@ public class DownloadFile {
 
         // Domain check
         if (Utils.isNullOrEmpty(sFileURL)) {
-            System.out.println("DownloadFile.GetFileName: sFileURL is null or Empty");
+            LauncherMain.s_oLogger.debug("DownloadFile.GetFileName: sFileURL is null or Empty");
             return "";
         }
 
@@ -136,13 +137,13 @@ public class DownloadFile {
                     return new PasswordAuthentication(ConfigReader.getPropValue("DHUS_USER"), ConfigReader.getPropValue("DHUS_PASSWORD") .toCharArray());
                 }
                 catch (Exception oEx){
-                    System.out.println("DownloadFile.GetFileName: exception setting auth " + oEx.toString());
+                    LauncherMain.s_oLogger.debug("DownloadFile.GetFileName: exception setting auth " + oEx.toString());
                 }
                 return null;
             }
         });
 
-        System.out.println("DownloadFile.GetFileName: FileUrl = " + sFileURL);
+        LauncherMain.s_oLogger.debug("DownloadFile.GetFileName: FileUrl = " + sFileURL);
 
         URL url = new URL(sFileURL);
         HttpURLConnection httpConn = (HttpURLConnection) url.openConnection();
@@ -151,7 +152,7 @@ public class DownloadFile {
         // always check HTTP response code first
         if (responseCode == HttpURLConnection.HTTP_OK) {
 
-            System.out.println("DownloadFile.GetFileName: Connected");
+            LauncherMain.s_oLogger.debug("DownloadFile.GetFileName: Connected");
 
             String fileName = "";
             String disposition = httpConn.getHeaderField("Content-Disposition");
@@ -173,12 +174,12 @@ public class DownloadFile {
 
             sReturnFilePath = fileName;
 
-            System.out.println("Content-Type = " + contentType);
-            System.out.println("Content-Disposition = " + disposition);
-            System.out.println("Content-Length = " + contentLength);
-            System.out.println("fileName = " + fileName);
+            LauncherMain.s_oLogger.debug("Content-Type = " + contentType);
+            LauncherMain.s_oLogger.debug("Content-Disposition = " + disposition);
+            LauncherMain.s_oLogger.debug("Content-Length = " + contentLength);
+            LauncherMain.s_oLogger.debug("fileName = " + fileName);
         } else {
-            System.out.println("No file to download. Server replied HTTP code: " + responseCode);
+            LauncherMain.s_oLogger.debug("No file to download. Server replied HTTP code: " + responseCode);
         }
         httpConn.disconnect();
 
