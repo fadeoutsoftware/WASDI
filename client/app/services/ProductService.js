@@ -13,7 +13,7 @@ service('ProductService', ['$http',  'ConstantsService', function ($http, oConst
     }
 
     this.getProductListByWorkspace = function (sWorkspaceId) {
-        return this.m_oHttp.get(this.APIURL + '/product/bysw?sWorkspaceId='+sWorkspaceId);
+        return this.m_oHttp.get(this.APIURL + '/product/byws?sWorkspaceId='+sWorkspaceId);
     }
 
     this.addProductToWorkspace = function (sProductName, sWorkspaceId) {
