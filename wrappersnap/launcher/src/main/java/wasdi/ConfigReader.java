@@ -2,9 +2,9 @@ package wasdi; /**
  * Created by s.adamo on 23/09/2016.
  */
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
@@ -21,7 +21,9 @@ public class ConfigReader {
             Properties prop = new Properties();
             String propFileName = "config.properties";
 
-            inputStream = new ConfigReader().getClass().getClassLoader().getResourceAsStream(propFileName);
+            //inputStream = new ConfigReader().getClass().getClassLoader().getResourceAsStream(propFileName);
+            File oCurrentFile = new File(LauncherMain.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath());
+            inputStream = new FileInputStream(oCurrentFile.getParentFile().getPath() + "/config.properties");
 
             if (inputStream != null) {
                 prop.load(inputStream);

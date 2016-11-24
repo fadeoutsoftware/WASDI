@@ -11,10 +11,11 @@
     </appender>
 
     <appender name="fileLauncher" class="org.apache.log4j.RollingFileAppender">
-        <param name="append" value="false" />
+        <param name="append" value="true" />
         <param name="maxFileSize" value="10MB" />
         <param name="maxBackupIndex" value="10" />
-        <param name="file" value="./logs/launcher.log" />
+        <!--param name="file" value="/logs/launcher.log" /-->
+        <param name="file" value="/usr/lib/wasdi/launcher/logs/launcher.log" />
         <layout class="org.apache.log4j.PatternLayout">
             <param name="ConversionPattern"
                    value="%d{yyyy-MM-dd HH:mm:ss} %-5p %c{1}:%L - %m%n" />
@@ -25,21 +26,42 @@
         <param name="append" value="false" />
         <param name="maxFileSize" value="10MB" />
         <param name="maxBackupIndex" value="10" />
-        <param name="file" value="./logs/publisher.log" />
+        <!--param name="file" value="./logs/publisher.log" /-->
+        <param name="file" value="/usr/lib/wasdi/launcher/logs/publisher.log" />
         <layout class="org.apache.log4j.PatternLayout">
             <param name="ConversionPattern"
                    value="%d{yyyy-MM-dd HH:mm:ss} %-5p %c{1}:%L - %m%n" />
         </layout>
     </appender>
 
+
     <root>
         <level value="debug" />
         <appender-ref ref="console" />
-        <appender-ref ref="fileLauncher" />
     </root>
 
-    <logger name="wasdi.geoserver" additivity="false">
-        <level value="debug"/>
+    <logger name="wasdi">
+        <level value="debug" />
+        <appender-ref ref="fileLauncher" />
+    </logger>
+
+    <logger name="wasdi.rabbit">
+        <level value="debug" />
+        <appender-ref ref="fileLauncher" />
+    </logger>
+
+    <logger name="wasdi.filebuffer">
+        <level value="debug" />
+        <appender-ref ref="fileLauncher" />
+    </logger>
+
+    <logger name="wasdi.snapopearations">
+        <level value="debug" />
+        <appender-ref ref="fileLauncher" />
+    </logger>
+
+    <logger name="wasdi.geoserver">
+        <level value="debug" />
         <appender-ref ref="filePublisher" />
     </logger>
 

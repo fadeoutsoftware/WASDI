@@ -22,6 +22,8 @@ public class Send {
     {
         //create connection to the server
         ConnectionFactory oFactory = new ConnectionFactory();
+        oFactory.setUsername(ConfigReader.getPropValue("RABBIT_QUEUE_USER"));
+        oFactory.setPassword(ConfigReader.getPropValue("RABBIT_QUEUE_PWD"));
         oFactory.setHost(ConfigReader.getPropValue("RABBIT_HOST"));
         oFactory.setPort(Integer.parseInt(ConfigReader.getPropValue("RABBIT_QUEUE_PORT")));
         //oFactory.setVirtualHost("/ws");
@@ -29,7 +31,7 @@ public class Send {
         try {
             oConnection = oFactory.newConnection();
         } catch (IOException | TimeoutException e) {
-            e.printStackTrace();
+            LauncherMain.s_oLogger.debug("Send.SendMgs: " + e.getMessage());
             return false;
         }
         //Create Channel
@@ -37,7 +39,7 @@ public class Send {
         try {
             oChannel = oConnection.createChannel();
         } catch (IOException e) {
-            e.printStackTrace();
+            LauncherMain.s_oLogger.debug("Send.SendMgs: " + e.getMessage());
             return false;
         }
         //Declare queue for send message then send it.
@@ -45,7 +47,7 @@ public class Send {
 
             oChannel.queueDeclare(sQueue, Boolean.parseBoolean(ConfigReader.getPropValue("RABBIT_QUEUE_DURABLE")), false, false, null);
         } catch (IOException e) {
-            e.printStackTrace();
+            LauncherMain.s_oLogger.debug("Send.SendMgs: " + e.getMessage());
             return false;
         }
 
@@ -53,7 +55,7 @@ public class Send {
         try {
             oChannel.basicPublish("", sQueue, null, sMessageAttribute.getBytes("UTF-8"));
         } catch (IOException e) {
-            e.printStackTrace();
+            LauncherMain.s_oLogger.debug("Send.SendMgs: " + e.getMessage());
             return false;
         }
         LauncherMain.s_oLogger.debug(" [x] Sent '" + sMessageAttribute + "'");
@@ -61,14 +63,14 @@ public class Send {
         try {
             oChannel.close();
         } catch (IOException | TimeoutException e) {
-            e.printStackTrace();
+            LauncherMain.s_oLogger.debug("Send.SendMgs: " + e.getMessage());
             return false;
         }
         try {
             // ATTENZIONE DEVE FARLO IN TUTTI I CASI
             oConnection.close();
         } catch (IOException e) {
-            e.printStackTrace();
+            LauncherMain.s_oLogger.debug("Send.SendMgs: " + e.getMessage());
             return false;
         }
 

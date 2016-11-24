@@ -2,6 +2,7 @@ package wasdi;
 import com.bc.ceres.glevel.MultiLevelImage;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
+import org.apache.log4j.xml.DOMConfigurator;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.GeoCoding;
 import org.esa.snap.core.datamodel.Product;
@@ -30,6 +31,8 @@ import wasdi.snapopearations.ReadProduct;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 
 /**
@@ -44,7 +47,21 @@ public class LauncherMain {
     //-operation <operation> -elaboratefile <file>
     public static void main(String[] args) throws Exception {
 
+        try {
+            //get jar directory
+            File oCurrentFile = new File(LauncherMain.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath());
+            //configure log
+            DOMConfigurator.configure(oCurrentFile.getParentFile().getPath() + "/log4j.xml");
+
+        }catch(Exception exp)
+        {
+            //no log4j configuration
+            System.err.println( "Error loading log.  Reason: " + exp.getMessage() );
+            System.exit(-1);
+        }
+
         s_oLogger.debug("OK");
+
 
         // create the parser
         CommandLineParser parser = new DefaultParser();
