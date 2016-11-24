@@ -1,0 +1,120 @@
+//bootstrap
+@import "../bower_components/bootstrap-sass/assets/stylesheets/bootstrap";
+
+@import "login";
+@import "main_theme";
+@import "root";
+@import "editor";
+@import "workspaces";
+//directive css
+@import "../directives/tree_directive/tree";
+
+body
+{
+  margin: 0px;
+  font-family: $wasdi-font-web;
+  font-size: $wasdi-font-size;
+  line-height: $wasdi-line-height;
+  font-weight: $wasdi-font-weight;
+
+}
+//LEAFLET MAP 100% "SCREEN"
+html, body, #map {
+  height:100%;
+  width:100%;
+  padding:0px;
+  margin:0px;
+}
+//CESIUM GLOBE 100% "SCREEN"
+html, body, #cesiumContainer {
+  width: 100%; height: 100%; margin: 0; padding: 0; overflow: hidden;
+}
+
+h1
+{
+  font-family: $wasdi-font-web;
+  font-weight: $wasdi-font-weight;
+}
+h2
+{
+  font-family: $wasdi-font-web;
+  font-weight: $wasdi-font-weight;
+}
+h3
+{
+  font-family: $wasdi-font-web;
+  font-weight: $wasdi-font-weight;
+}
+h4
+{
+  font-family: $wasdi-font-web;
+  font-weight: $wasdi-font-weight;
+}
+
+//HEADLINE - TITLE
+.my-title
+{
+  //font-family: times, Times New Roman, times-roman, georgia, serif;
+  //color: #444;
+  //margin: 0;
+  //padding: 0px 0px 6px 0px;
+  //font-size: 51px;
+  //line-height: 44px;
+  //letter-spacing: -2px;
+  //font-weight: bold;
+  font-family: times, Times New Roman, times-roman, georgia, serif;
+  font-size: 51px;
+  line-height: 44px;
+  letter-spacing: -1px;
+  color: #444;
+}
+
+//INPUT TEXT
+.my-input-text{
+  input[type=text] {
+    width: 100%;
+    padding: 12px 20px;
+    margin: 8px 0;
+    box-sizing: border-box;
+
+    background-color: $wasdi-white;
+    border-color:$wasdi-input-text-border-color ;
+
+  }
+  // FIX COLOR INSIDE PLACEHOLDER
+  ::-webkit-input-placeholder {
+    color: $wasdi-input-text-color;
+  }
+
+  :-moz-placeholder { /* Firefox 18- */
+    color: $wasdi-input-text-color
+  }
+
+  ::-moz-placeholder {  /* Firefox 19+ */
+    color: $wasdi-input-text-color;
+  }
+
+  :-ms-input-placeholder {
+    color: $wasdi-input-text-color;
+  }
+
+}
+
+// BUTTON
+.my-button {
+  background-color: $wasdi-button-default-color;
+  border: none;
+  color: white;
+  padding: 15px 32px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  margin: 4px 2px;
+  cursor: pointer;
+}
+
+.my-button:hover {
+  background-color: $wasdi-button-over-color;
+  color: white;
+}
