@@ -269,6 +269,13 @@ public class LauncherMain {
                 ReadProduct oReadProduct = new ReadProduct();
                 s_oLogger.debug("LauncherMain.Download: call read product");
                 oVM = oReadProduct.getProductViewModel(new File(sFileName));
+
+                if (oVM.getBandsGroups() == null) s_oLogger.debug("LauncherMain.Download: Band Groups is NULL");
+                else if (oVM.getBandsGroups().getBands() == null) s_oLogger.debug("LauncherMain.Download: bands is NULL");
+                else {
+                    s_oLogger.debug("LauncherMain.Download: bands " + oVM.getBandsGroups().getBands().size());
+                }
+
                 s_oLogger.debug("LauncherMain.Download: done read product");
 
                 if (oVM == null) s_oLogger.debug("LauncherMain.Download VM is null!!!!!!!!!!");

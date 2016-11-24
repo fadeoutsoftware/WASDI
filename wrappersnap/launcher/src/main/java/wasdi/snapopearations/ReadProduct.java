@@ -66,19 +66,29 @@ public class ReadProduct {
 
     public ProductViewModel getProductViewModel(File oFile) throws IOException
     {
+        LauncherMain.s_oLogger.debug("ReadProduct.getProductViewModel: start");
+
         ProductViewModel oViewModel = new ProductViewModel();
         Product exportProduct = ReadProduct(oFile);
 
-        if (exportProduct == null)
+        if (exportProduct == null) {
+            LauncherMain.s_oLogger.debug("ReadProduct.getProductViewModel: read product returns null");
             return null;
+        }
 
         // P.Campanella: splitted bands and metadata view models
         //oViewModel.setMetadata(GetMetadataViewModel(exportProduct.getMetadataRoot(), new MetadataViewModel("Metadata")));
 
+        LauncherMain.s_oLogger.debug("ReadProduct.getProductViewModel: call fill bands view model");
+
         this.FillBandsViewModel(oViewModel, exportProduct);
+
+        LauncherMain.s_oLogger.debug("ReadProduct.getProductViewModel: setting Name and Path");
 
         oViewModel.setName(Utils.GetFileNameWithoutExtension(oFile.getAbsolutePath()));
         oViewModel.setFileName(oFile.getName());
+
+        LauncherMain.s_oLogger.debug("ReadProduct.getProductViewModel: end");
 
         return  oViewModel;
     }
@@ -116,25 +126,26 @@ public class ReadProduct {
 
     private void FillBandsViewModel(ProductViewModel oProductViewModel, Product oProduct)
     {
-        if (oProductViewModel == null)
+        if (oProductViewModel == null) {
+            LauncherMain.s_oLogger.debug("ReadProduct.FillBandsViewModel: ViewModel null return");
             return;
+        }
 
-        if (oProduct == null)
+        if (oProduct == null) {
+            LauncherMain.s_oLogger.debug("ReadProduct.FillBandsViewModel: Product null");
             return;
+        }
 
-        if (oProductViewModel.getBandsGroups() == null)
-            oProductViewModel.setBandsGroups(new NodeGroupViewModel("Bands"));
+        if (oProductViewModel.getBandsGroups() == null) oProductViewModel.setBandsGroups(new NodeGroupViewModel("Bands"));
 
-        ArrayList<BandViewModel> oBands = new ArrayList<BandViewModel>();
+        for (Band oBand : oProduct.getBands()) {
+            LauncherMain.s_oLogger.debug("ReadProduct.FillBandsViewModel: add band " + oBand.getName());
 
-        for (Band oBand :
-                oProduct.getBands()) {
             if (oProductViewModel.getBandsGroups().getBands() == null)
                 oProductViewModel.getBandsGroups().setBands(new ArrayList<BandViewModel>());
 
             BandViewModel oViewModel = new BandViewModel(oBand.getName());
             oProductViewModel.getBandsGroups().getBands().add(oViewModel);
-
         }
 
     }
