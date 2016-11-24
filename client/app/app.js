@@ -3,6 +3,7 @@
 // Declare app level module which depends on views, and components
 var wasdiApp = angular.module('wasdi', [
     'ngRoute',
+    'ui.router',//library alternative for router
     'pascalprecht.translate',
     'wasdi.ConstantsService',
     'wasdi.sessionInjector',
@@ -11,7 +12,9 @@ var wasdiApp = angular.module('wasdi', [
     'wasdi.WorkspaceService',
     'wasdi.FileBufferService',
     'wasdi.ProductService',
-    'wasdi.SnakeDirective'
+    'wasdi.SnakeDirective',
+    'wasdi.TreeDirective',
+    'wasdi.GlobeDirective'
 ]);
 
 wasdiApp.config(['$httpProvider', '$translateProvider', function($httpProvider, $translateProvider) {
@@ -30,16 +33,57 @@ wasdiApp.config(['$httpProvider', '$translateProvider', function($httpProvider, 
 }]);
 
 
-wasdiApp.config(['$locationProvider', '$routeProvider', function($locationProvider, $routeProvider) {
-    $locationProvider.hashPrefix('!');
-    $routeProvider.when('/home', {templateUrl: 'partials/home.html', controller: 'HomeController'} );
-    $routeProvider.when('/workspaces', {templateUrl: 'partials/workspaces.html', controller: 'WorkspaceController'} );
-    $routeProvider.when('/editor', {templateUrl: 'partials/editor.html', controller: 'EditorController'} );
+//wasdiApp.config(['$locationProvider', '$routeProvider', function($locationProvider, $routeProvider) {
+//    $locationProvider.hashPrefix('!');
+//    $routeProvider.when('/home', {templateUrl: 'partials/home.html', controller: 'HomeController'} );
+//    $routeProvider.when('/workspaces', {templateUrl: 'partials/workspaces.html', controller: 'WorkspaceController'} );
+//    $routeProvider.when('/editor', {templateUrl: 'partials/editor.html', controller: 'EditorController'} );
+//
+//    $routeProvider.otherwise({redirectTo: '/home'});
+//
+//}]);
+//ROUTER
+wasdiApp.config(['$stateProvider', '$urlRouterProvider', function($stateProvider, $urlRouterProvider) {
 
-    $routeProvider.otherwise({redirectTo: '/home'});
+
+    //set default page
+    $urlRouterProvider.otherwise("/home");
+
+    //LOGIN PAGE
+    $stateProvider.state('home', {
+        url: '/home',
+        templateUrl: 'partials/home.html',
+        controller: 'HomeController'
+    })
+
+    //ROOT abstract class
+    $stateProvider.state('root', {
+        url: '',
+        abstract: true,
+        templateUrl: 'partials/RootView.html',
+        controller : 'RootController'
+        //resolve: { authenticated: checkAuthentication }
+    })
+
+    //WORKSPACES
+    $stateProvider.state('root.workspaces', {
+        url: '/workspaces',
+        views:{
+            'maincontent' : { templateUrl : 'partials/workspaces.html', controller  : 'WorkspaceController'}
+        },
+    })
+
+    //EDITOR
+    $stateProvider.state('root.editor', {
+        url: '/editor',
+        views:{
+            'maincontent' : { templateUrl : 'partials/editor.html', controller  : 'EditorController'}
+        },
+    })
 
 }]);
 
 wasdiApp.controller("HomeController", HomeController);
 wasdiApp.controller("WorkspaceController", WorkspaceController);
-wasdiApp.controller("EditorController", EditorController)
+wasdiApp.controller("EditorController", EditorController);
+wasdiApp.controller("RootController",RootController);

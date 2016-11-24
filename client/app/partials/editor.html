@@ -1,42 +1,61 @@
-<div>
-    <p><a ng-click="m_oController.moveTo('workspaces')">Back to Workspaces</a> </p>
+<div class="editor-view col-lg-12 col-md-12 col-sm-12 col-xs-12">
+    <!--<p><a ng-click="m_oController.moveTo('workspaces')">Back to Workspaces</a> </p>-->
 
-    <p>WS EDITOR - Workspace {{m_oController.m_oActiveWorkspace.name}}</p>
-    <br>
-    <form class="form-horizontal" role="form">
-        <div class="form-group">
-            <label for="userName" class="col-sm-2  control-label">File Url: </label>
-            <div class="col-sm-10">
-                <input type="text" class="form-control" id="userName" ng-model="m_oController.m_sDownloadFilePath">
-            </div>
+    <!--<p>WS EDITOR - Workspace {{m_oController.m_oActiveWorkspace.name}}</p>-->
+    <!--<br>-->
+    <!--<form class="form-horizontal" role="form">-->
+        <!--<div class="form-group">-->
+            <!--<label for="userName" class="col-sm-2  control-label">File Url: </label>-->
+            <!--<div class="col-sm-10">-->
+                <!--<input type="text" class="form-control" id="userName" ng-model="m_oController.m_sDownloadFilePath">-->
+            <!--</div>-->
+        <!--</div>-->
+    <!--</form>-->
+    <!--<br>-->
+    <!--<a ng-click="m_oController.downloadEOImage(m_oController.m_sDownloadFilePath)">Download</a>-->
+    <!--<br>-->
+    <!--<a ng-click="m_oController.publish(m_oController.m_sDownloadFilePath)">Publish</a>-->
+    <!--<br>-->
+    <!--<br>-->
+
+
+    <!--<table>-->
+        <!--<tr ng-repeat="oProductItem in m_oController.getProductList()">-->
+            <!--<td>{{oProductItem.name}}</td>-->
+            <!--<td>-->
+                <!--<table>-->
+                    <!--<tr ng-repeat="oBandItem in m_oController.getBandsForProduct(oProductItem)">-->
+                        <!--<td><a ng-click="m_oController.openBandImage(oBandItem)">{{oBandItem.name}}</a></td>-->
+                    <!--</tr>-->
+                <!--</table>-->
+            <!--</td>-->
+        <!--</tr>-->
+    <!--</table>-->
+
+    <!--<p>-->
+        <!--<span ng-click="m_oController.addTestLayer('S1A_IW_GRDH_1SSV_20150213T095824_20150213T095849_004603_005AB7_5539')">Add Test Layer</span>-->
+    <!--</p>-->
+    <!--<br>-->
+    <!--<br>-->
+
+    <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4 sidebar">
+        <!--TREE PANEL-->
+        <div class="panel panel-default">
+            <div class="panel-heading">possible tree</div>
+            <tree></tree>
         </div>
-    </form>
-    <br>
-    <a ng-click="m_oController.downloadEOImage(m_oController.m_sDownloadFilePath)">Download</a>
-    <br>
-    <a ng-click="m_oController.publish(m_oController.m_sDownloadFilePath)">Publish</a>
-    <br>
-    <br>
-    <table>
-        <tr ng-repeat="oProductItem in m_oController.getProductList()">
-            <td>{{oProductItem.name}}</td>
-            <td>
-                <table>
-                    <tr ng-repeat="oBandItem in m_oController.getBandsForProduct(oProductItem)">
-                        <td><a ng-click="m_oController.openBandImage(oBandItem)">{{oBandItem.name}}</a></td>
-                    </tr>
-                </table>
-            </td>
-        </tr>
-    </table>
 
-    <p>
-        <span ng-click="m_oController.addTestLayer('S1A_IW_GRDH_1SSV_20150213T095824_20150213T095849_004603_005AB7_5539')">Add Test Layer</span>
-    </p>
-    <br>
-    <br>
+        <!-- PANEL CESIUM GLOBE-->
+        <div class="panel panel-default">
+            <div class="panel-heading">Panel heading without title</div>
+            <globe></globe>
+        </div>
 
-    <div style="height: 500px; width: 500px;" id = "wasdiMap"></div>
+    </div>
 
+    <div class="col-lg-8 col-md-8 col-sm-8 col-xs-8 map-container">
+        <div class="map" id = "wasdiMap"></div>
+
+    </div>
 
 </div>

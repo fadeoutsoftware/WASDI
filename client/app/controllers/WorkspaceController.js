@@ -9,7 +9,7 @@ var WorkspaceController = (function() {
         this.m_oAuthService = oAuthService;
         this.m_oWorkspaceService = oWorkspaceService;
         this.m_oConstantsService = oConstantsService;
-
+        this.m_oScope.m_oController=this;
         this.m_aoWorkspaceList = [];
 
         this.m_oScope.m_oController = this;

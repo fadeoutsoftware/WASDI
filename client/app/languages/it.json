@@ -1,0 +1,21 @@
+{
+  "LOGIN_PLACEHOLDER_EMAIL":"Email Address",
+  "LOGIN_PLACEHOLDER_PASSWORD":"Password",
+  "LOGIN_CHECK_BOX_LABEL":"Remember me",
+  "LOGIN_PLACEHOLDER_EMAIL":"Email Address",
+  "LOGIN_BUTTON_SIGN_IN":"Sign in",
+  "LOGIN_LINK_FORGOT_PASSWORD":"Forgot you password?",
+  "LOGIN_WRITE":"web based asi social data infrastucture",
+
+  "ROOT_VIEW_NAV_BAR_LINK_IMPORT":"Import",
+  "ROOT_VIEW_NAV_BAR_LINK_PROCESS":"Process",
+  "ROOT_VIEW_NAV_BAR_LINK_PUBLISH":"Publish",
+  "ROOT_VIEW_LINK_HELP":"Help",
+  "ROOT_VIEW_LINK_LOG_OUT":"Log-out",
+  "ROOT_VIEW_LABEL_USER":"User:",
+
+  "WORKSPACES_TITLE_LABEL":"WorkSpaces",
+  "WORKSPACES_PLACEHOLDER_SEARCH":"Search WorkSpace...",
+  "WORKSPACES_BUTTON_NEW_WORKSPACE":"New Workspace"
+
+}

@@ -3,16 +3,20 @@
  */
 
 var HomeController = (function() {
-    function HomeController($scope, $location, oConstantsService, oAuthService) {
+    function HomeController($scope, $location, oConstantsService, oAuthService,oState) {
         this.m_oScope = $scope;
         this.m_oLocation  = $location;
         this.m_oConstantsService = oConstantsService;
         this.m_oAuthService = oAuthService;
-
+        this.m_oState=oState;
+        this.m_oScope.m_oController=this;
+        this.m_bLoginIsVisible = false;//Login in visible after click on logo
         this.m_sUserName = "";
         this.m_sUserPassword = "";
 
-        this.m_oScope.m_oController = this;
+        if(this.m_oConstantsService.isUserLogged())
+            this.m_oState.go("root.workspaces");// go workspaces
+
     }
 
     HomeController.prototype.moveTo = function (sPath) {
@@ -21,10 +25,11 @@ var HomeController = (function() {
 
     HomeController.prototype.login = function () {
         var oLoginInfo = {};
-        oLoginInfo.userId = this.m_sUserName;
-        oLoginInfo.userPassword = this.m_sUserPassword;
+        var oController = this;
+        oLoginInfo.userId = oController.m_sUserName;
+        oLoginInfo.userPassword = oController.m_sUserPassword;
 
-        var oConstantsService = this.m_oConstantsService;
+        var oConstantsService = oController.m_oConstantsService;
 
         this.m_oAuthService.login(oLoginInfo).success(function (data, status) {
             if (data != null)
@@ -35,7 +40,8 @@ var HomeController = (function() {
                     {
                         if (data.userId != "")
                         {
-                            oConstantsService.setUser(data);
+                            oConstantsService.setUser(data);//set user
+                            oController.m_oState.go("root.workspaces");// go workspaces
                         }
                     }
                 }
@@ -79,7 +85,8 @@ var HomeController = (function() {
         '$scope',
         '$location',
         'ConstantsService',
-        'AuthService'
+        'AuthService',
+        '$state'
     ];
 
     return HomeController;

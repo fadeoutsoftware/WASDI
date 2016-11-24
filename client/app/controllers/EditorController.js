@@ -13,6 +13,7 @@ var EditorController = (function () {
         this.m_oMapService = oMapService;
         this.m_oFileBufferService = oFileBufferService;
         this.m_oProductService = oProductService;
+        this.m_oScope.m_oController = this;
 
         // Reconnection promise to stop the timer if the reconnection succeed or if the user change page
         this.m_oReconnectTimerPromise = null;
@@ -33,6 +34,7 @@ var EditorController = (function () {
 
         // Array of products to show
         this.m_aoProducts = [];
+
 
         // Self reference for callbacks
         var oController = this;
@@ -65,6 +67,7 @@ var EditorController = (function () {
             }
 
             //oController.addTestLayer(message.body);
+
         }
 
         /**
@@ -145,6 +148,8 @@ var EditorController = (function () {
                 }
             }
         });
+
+
     }
 
     /**
@@ -337,6 +342,8 @@ var EditorController = (function () {
             console.log('publish band error');
         });
     }
+
+
 
     EditorController.$inject = [
         '$scope',

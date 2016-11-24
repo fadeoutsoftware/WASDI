@@ -9,13 +9,18 @@
   <title>Wasdi</title>
   <meta name="description" content="">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="bower_components/html5-boilerplate/dist/css/normalize.css">
-  <link rel="stylesheet" href="bower_components/html5-boilerplate/dist/css/main.css">
-  <link rel="stylesheet" href="css/app.css">
-  <script src="bower_components/html5-boilerplate/dist/js/vendor/modernizr-2.8.3.min.js"></script>
 
+  <!-- CSS -->
+  <link rel="stylesheet" href="css/style.css">
+  <!-- FontAwesome -->
+  <link rel="stylesheet" href="bower_components/fontawesome/css/font-awesome.min.css">
   <!-- jQuery -->
   <link rel="stylesheet" href="//code.jquery.com/ui/1.11.1/themes/start/jquery-ui.css">
+  <!-- js tree css-->
+  <link rel="stylesheet" href="bower_components/jstree/dist/themes/default/style.min.css">
+  <!--Cesium css-->
+  <link rel="stylesheet" href="lib/Cesium/Widgets/widgets.css">
+
   <!--script src="lib/jquery/jquery-1.10.2.js"></script-->
   <script src="//code.jquery.com/jquery-1.11.0.min.js"></script>
 
@@ -34,7 +39,9 @@
       <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
   <![endif]-->
 
-  <div ng-view></div>
+  <!--<div ng-view></div>-->
+  <div ui-view></div>
+
 
   <!-- In production use:
   <script src="//ajax.googleapis.com/ajax/libs/angularjs/x.x.x/angular.min.js"></script>
@@ -43,6 +50,7 @@
   <script src="bower_components/angular-route/angular-route.js"></script>
   <script src="bower_components/angular-translate/angular-translate.min.js"></script>
   <script src="bower_components/angular-translate-loader-static-files/angular-translate-loader-static-files.min.js"></script>
+  <script src="bower_components/angular-ui-router/release/angular-ui-router.min.js"></script>
 
   <!-- Wasdi Services -->
   <script src="services/ConstantsService.js"></script>
@@ -55,16 +63,27 @@
 
   <!-- Wasdi Directives -->
   <script src="directives/SnakeDirective.js"></script>
+  <script src="directives/tree_directive/TreeDirective.js"></script>
+  <script src="directives/globe_directive/GlobeDirective.js"></script>
 
   <!-- Wadsi Controllers -->
   <script src="controllers/HomeController.js"></script>
   <script src="controllers/WorkspaceController.js"></script>
   <script src="controllers/EditorController.js"></script>
+  <script src="controllers/RootController.js"></script>
 
   <script src="app.js"></script>
 
   <!-- Stomp js -->
   <script src="lib/stomp/stomp.js"></script>
+  <!-- utils js -->
+  <script src="lib/utils/Utils.js"></script>
+  <!-- JStree-->
+  <script src="bower_components/jstree/dist/jstree.min.js"></script>
+  <!-- cesium -->
+  <script src="lib/Cesium/Cesium.js"></script>
+  <!--  bootstrap js-->
+  <script src="bower_components/bootstrap-sass/assets/javascripts/bootstrap.min.js"></script>
 
 </body>
 </html>
