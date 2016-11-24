@@ -11,7 +11,6 @@
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/index.html" afterPath="$PROJECT_DIR$/app/index.html" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/languages/en.json" afterPath="$PROJECT_DIR$/app/languages/en.json" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/languages/it.json" afterPath="$PROJECT_DIR$/app/languages/it.json" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/partials/editor.html" afterPath="$PROJECT_DIR$/app/partials/editor.html" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/partials/home.html" afterPath="$PROJECT_DIR$/app/partials/home.html" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/partials/workspaces.html" afterPath="$PROJECT_DIR$/app/partials/workspaces.html" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/services/ConstantsService.js" afterPath="$PROJECT_DIR$/app/services/ConstantsService.js" />
@@ -36,11 +35,41 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="EditorController.js" pinned="false" current-in-tab="true">
+      <file leaf-file-name="editor.html" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/app/partials/editor.html">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="-4.6363635">
+              <caret line="15" column="15" selection-start-line="15" selection-start-column="15" selection-end-line="15" selection-end-column="15" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="index.html" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/app/index.html">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="-2.6545455">
+              <caret line="29" column="53" selection-start-line="29" selection-start-column="49" selection-end-line="29" selection-end-column="53" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="ConstantsService.js" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/app/services/ConstantsService.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="0.27586207">
+              <caret line="8" column="67" selection-start-line="8" selection-start-column="67" selection-end-line="8" selection-end-column="67" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="EditorController.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/app/controllers/EditorController.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.25185186">
-              <caret line="159" column="37" selection-start-line="159" selection-start-column="37" selection-end-line="159" selection-end-column="37" />
+            <state vertical-scroll-proportion="-11.724138">
+              <caret line="158" column="54" selection-start-line="158" selection-start-column="31" selection-end-line="158" selection-end-column="54" />
               <folding />
             </state>
           </provider>
@@ -61,16 +90,6 @@
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0">
               <caret line="70" column="4" selection-start-line="70" selection-start-column="4" selection-end-line="70" selection-end-column="4" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="editor.html" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/app/partials/editor.html">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="-35.96154">
-              <caret line="55" column="65" selection-start-line="55" selection-start-column="65" selection-end-line="55" selection-end-column="65" />
               <folding />
             </state>
           </provider>
@@ -118,7 +137,6 @@
         <option value="$PROJECT_DIR$/app/languages/it.json" />
         <option value="$PROJECT_DIR$/app/css/_root.scss" />
         <option value="$PROJECT_DIR$/app/partials/RootView.html" />
-        <option value="$PROJECT_DIR$/app/services/ConstantsService.js" />
         <option value="$PROJECT_DIR$/app/partials/home.html" />
         <option value="$PROJECT_DIR$/app/controllers/HomeController.js" />
         <option value="$PROJECT_DIR$/app/css/_workspaces.scss" />
@@ -126,9 +144,10 @@
         <option value="$PROJECT_DIR$/app/controllers/WorkspaceController.js" />
         <option value="$PROJECT_DIR$/app/partials/workspaces.html" />
         <option value="$PROJECT_DIR$/app/controllers/EditorController.js" />
-        <option value="$PROJECT_DIR$/app/partials/editor.html" />
         <option value="$PROJECT_DIR$/app/css/style.scss" />
         <option value="$PROJECT_DIR$/app/css/_editor.scss" />
+        <option value="$PROJECT_DIR$/app/partials/editor.html" />
+        <option value="$PROJECT_DIR$/app/services/ConstantsService.js" />
       </list>
     </option>
   </component>
@@ -253,6 +272,24 @@
             </PATH_ELEMENT>
             <PATH_ELEMENT>
               <option name="myItemId" value="languages" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="client" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="client" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="app" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="directives" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
@@ -418,9 +455,9 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="-1288" y="-8" width="1296" height="1000" extended-state="6" />
-    <editor active="true" />
+    <editor active="false" />
     <layout>
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.24960254" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="true" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.24960254" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="8" side_tool="true" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
@@ -428,7 +465,7 @@
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32871974" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="true" content_ui="tabs" />
-      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.39907727" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.39907727" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="TypeScript Compiler" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.22002329" sideWeight="0.49682036" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
@@ -453,7 +490,14 @@
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
-      <option name="time" value="18" />
+      <breakpoints>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/app/controllers/EditorController.js</url>
+          <line>23</line>
+          <option name="timeStamp" value="18" />
+        </line-breakpoint>
+      </breakpoints>
+      <option name="time" value="19" />
     </breakpoint-manager>
     <watches-manager />
   </component>
@@ -612,25 +656,12 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/app/index.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.35547355">
-          <caret line="17" column="42" selection-start-line="17" selection-start-column="38" selection-end-line="17" selection-end-column="42" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/app/assets/wasdi/logoScritta_wasdi.png">
       <provider selected="true" editor-type-id="images">
         <state />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/app/assets/wasdi/logoWasdi.png">
-      <provider selected="true" editor-type-id="images">
-        <state />
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/assets/wasdi/scrittawasdi_white.png">
       <provider selected="true" editor-type-id="images">
         <state />
       </provider>
@@ -719,14 +750,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/services/ConstantsService.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.27586207">
-          <caret line="8" column="52" selection-start-line="8" selection-start-column="52" selection-end-line="8" selection-end-column="52" />
           <folding />
         </state>
       </provider>
@@ -835,18 +858,39 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/app/partials/editor.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-35.96154">
-          <caret line="55" column="65" selection-start-line="55" selection-start-column="65" selection-end-line="55" selection-end-column="65" />
-          <folding />
-        </state>
+    <entry file="file://$PROJECT_DIR$/app/assets/wasdi/scrittawasdi_white.png">
+      <provider selected="true" editor-type-id="images">
+        <state />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/app/controllers/EditorController.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.25185186">
-          <caret line="159" column="37" selection-start-line="159" selection-start-column="37" selection-end-line="159" selection-end-column="37" />
+        <state vertical-scroll-proportion="-11.724138">
+          <caret line="158" column="54" selection-start-line="158" selection-start-column="31" selection-end-line="158" selection-end-column="54" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/partials/editor.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="-4.6363635">
+          <caret line="15" column="15" selection-start-line="15" selection-start-column="15" selection-end-line="15" selection-end-column="15" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/index.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="-2.6545455">
+          <caret line="29" column="53" selection-start-line="29" selection-start-column="49" selection-end-line="29" selection-end-column="53" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/services/ConstantsService.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.27586207">
+          <caret line="8" column="67" selection-start-line="8" selection-start-column="67" selection-end-line="8" selection-end-column="67" />
           <folding />
         </state>
       </provider>

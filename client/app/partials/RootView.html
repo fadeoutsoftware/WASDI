@@ -1,0 +1,95 @@
+<div class="root-view">
+
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 logged-user"  >
+        <!-- HELP LOG-OUT-->
+        <ul class="link">
+
+            <li><a class="active" href="#news">{{"ROOT_VIEW_LINK_HELP"|translate}}</a></li>
+            <li><a href="#contact">{{"ROOT_VIEW_LINK_LOG_OUT"|translate}}</a></li>
+
+        </ul>
+        <!-- USER ID-->
+        <span class="user-span"><b>{{"ROOT_VIEW_LABEL_USER"|translate}}</b>{{m_oController.m_oUser.getFirstName()}}</span>
+        <!--SUBTITLE-->
+        <span class="subtitle-span"><h4>web based asi social data infrastucture</h4></span>
+    </div>
+
+
+    <div class="col-lg-1 col-md-1 col-sm-1 col-xs-1 ">
+        <a  ui-sref="root.workspaces">
+            <!--<img class="navbar-brand-logo">-->
+            <img class="brand-logo" id="brand-logo">
+            <script>
+                // Script fix an error with Firefox which does not
+                // show image correctly if the 'SRC' is set from CSS
+                // via 'content' field
+                $(document).ready(function () {
+                    var oImage = $("#brand-logo");
+                    var imageSrc = oImage.css("content");
+                    imageSrc = imageSrc.replace("url(\"","");
+                    imageSrc = imageSrc.replace("\")","");
+                    oImage.attr("src",imageSrc);
+                })
+            </script>
+        </a>
+    </div>
+
+    <div class="col-lg-11 col-md-11 col-sm-11 col-xs-11 my-nav-bar">
+        <nav class="navbar navbar-default">
+            <div class="container-fluid">
+                <div class="navbar-header">
+                    <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+                        <span class="sr-only">Toggle navigation</span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+
+                </div>
+
+
+                <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                    <ul class="nav navbar-nav navbar-right">
+                        <li ><a ui-sref="root.editor">{{"ROOT_VIEW_NAV_BAR_LINK_IMPORT"|translate}}</a></li>
+                        <li><a ui-sref="root.editor" ng-click="m_oController.onClickProcess()" >{{"ROOT_VIEW_NAV_BAR_LINK_PROCESS"|translate}}</a></li>
+                        <li><a ui-sref="root.editor">{{"ROOT_VIEW_NAV_BAR_LINK_PUBLISH"|translate}}</a></li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </div>
+    <!--<div class="col-lg-1 col-md-1 col-sm-1 col-xs-1 logo">qui ci va il logo</div>-->
+
+    <!--<div class="col-lg-10 col-md-10 col-sm-10 col-xs-10 my-nav-bar">-->
+        <!--<ul>-->
+            <!--<li><a class="active" href="#news">Process</a></li>-->
+            <!--<li><a href="#contact">Import</a></li>-->
+            <!--<li><a href="#about">Publish</a></li>-->
+
+        <!--</ul>-->
+    <!--</div>-->
+    <!---->
+    <!--&lt;!&ndash;SEARCH BAR&ndash;&gt;-->
+
+    <!--<div class="col-lg-1 col-md-1 col-sm-1 col-xs-1">-->
+        <!--<div class="form-group">-->
+            <!--<input type="text" class="form-control" id="usr">-->
+        <!--</div>-->
+    <!--</div>-->
+    <div class="col-lg-11 col-md-11 col-sm-11 col-xs-11 operations-bar" ng-show="m_oController.m_bProcessMenuIsVisible">
+        <ul>
+            <li><a><i class="fa fa-map-o fa-3x" aria-hidden="true"></i></a></li>
+            <li><a><i class="fa fa-globe fa-3x" aria-hidden="true"></i></a></li>
+            <li><a><i class="fa fa-picture-o fa-3x" aria-hidden="true"></i></a></li>
+            <li><a><i class="fa fa-map-o fa-3x" aria-hidden="true"></i></a></li>
+            <li><a><i class="fa fa-globe fa-3x" aria-hidden="true"></i></a></li>
+            <li><a><i class="fa fa-picture-o fa-3x" aria-hidden="true"></i></a></li>
+            <li><a><i class="fa fa-map-o fa-3x" aria-hidden="true"></i></a></li>
+            <li><a><i class="fa fa-globe fa-3x" aria-hidden="true"></i></a></li>
+            <li><a><i class="fa fa-picture-o fa-3x" aria-hidden="true"></i></a></li>
+        </ul>
+    </div>
+
+
+    <div ui-view="maincontent"></div>
+</div>
