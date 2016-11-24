@@ -1,0 +1,48 @@
+.workspaces-view
+{
+  //TITLE
+  .my-title
+  {
+    text-align: center;
+  }
+
+  // UTILS BAR
+  /*
+   *  search plus buttons
+  */
+  .utils-bar
+  {
+    margin-top: 20px;
+    margin-bottom: 20px;
+
+    .my-input-text
+    {
+      width: 30%;
+      float: left;
+      margin-right: 20px;
+    }
+  }
+
+  //TABLE WORKSPACES
+  //.table-hover tbody tr:hover td, .table-hover tbody tr:hover th {
+  //  background-color: #44536C;
+  //  color: white;
+  //}
+
+  // LIST OF FILES IN WORKSPACES
+  .list-files
+  {
+    .panel-default  {
+      border-color: $wasdi-list-of-files-border-color;
+    }
+
+  }
+  // COLOR OVER A TD
+  .over-color
+  {
+    i:hover {
+      background-color:white;
+      color:$wasdi-over-icon;
+    }
+  }
+}

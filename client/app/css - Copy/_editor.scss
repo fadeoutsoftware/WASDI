@@ -1,0 +1,28 @@
+.editor-view
+{
+  margin-top:30px;
+  //SIDEBAR
+  .sidebar
+  {
+    height:100vh;
+    //background-color: $wasdi-sidebar-background-color;
+    .panel-default {
+      border-color: $waddi-sidebar-color-border-panel;
+    }
+    .panel-default > .panel-heading
+    {
+      background-color:$wasdi-sidebar-color-title-panel ;
+      color:$wasdi-title-color;
+    }
+  }
+  .map-container
+  {
+    .map
+    {
+      //DIMENSIONS MAP
+      width: auto;//500px
+      height: 700px;//500px
+
+    }
+  }
+}
