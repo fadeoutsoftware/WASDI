@@ -31,8 +31,6 @@ import wasdi.snapopearations.ReadProduct;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 
 
 /**
@@ -264,9 +262,29 @@ public class LauncherMain {
                 s_oLogger.debug("LauncherMain.Download: Debug Option Active: file not really downloaded, using configured one");
 
                 sFileName = sDownloadPath + File.separator + ConfigReader.getPropValue("DOWNLOAD_FAKE_FILE");
+
+                s_oLogger.debug("LauncherMain.Download: File Name = " + sFileName);
+
                 // Get The product view Model
                 ReadProduct oReadProduct = new ReadProduct();
+                s_oLogger.debug("LauncherMain.Download: call read product");
                 oVM = oReadProduct.getProductViewModel(new File(sFileName));
+                s_oLogger.debug("LauncherMain.Download: done read product");
+
+                if (oVM == null) s_oLogger.debug("LauncherMain.Download VM is null!!!!!!!!!!");
+
+                s_oLogger.debug("Insert in db");
+                // Save it in the register
+                DownloadedFile oAlreadyDownloaded = new DownloadedFile();
+                File oFile = new File(sFileName);
+                oAlreadyDownloaded.setFileName(oFile.getName());
+                oAlreadyDownloaded.setFilePath(sFileName);
+                oAlreadyDownloaded.setProductViewModel(oVM);
+
+                DownloadedFilesRepository oDownloadedRepo = new DownloadedFilesRepository();
+                oDownloadedRepo.InsertDownloadedFile(oAlreadyDownloaded);
+
+                s_oLogger.debug("OK DONE");
             }
 
             // Rabbit Sender
