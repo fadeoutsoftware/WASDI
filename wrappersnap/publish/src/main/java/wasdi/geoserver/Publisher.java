@@ -4,6 +4,7 @@ import it.geosolutions.geoserver.rest.GeoServerRESTPublisher;
 import it.geosolutions.geoserver.rest.encoder.coverage.GSCoverageEncoder;
 import org.apache.commons.httpclient.NameValuePair;
 import org.apache.log4j.Logger;
+import org.apache.log4j.xml.DOMConfigurator;
 import wasdi.shared.utils.Utils;
 
 import java.io.*;
@@ -39,7 +40,18 @@ public class Publisher {
 
     public Publisher()
     {
-        
+        try {
+            //get jar directory
+            File oCurrentFile = new File(Publisher.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath());
+            //configure log
+            DOMConfigurator.configure(oCurrentFile.getParentFile().getPath() + "/log4j.xml");
+
+        }catch(Exception exp)
+        {
+            //no log4j configuration
+            System.err.println( "Error loading log.  Reason: " + exp.getMessage() );
+            System.exit(-1);
+        }
     }
 
     public Publisher(String sPyramidBaseFolder, String sGDALBasePath, String sPyramidEnvOptions)
