@@ -58,7 +58,7 @@ public class LauncherMain {
             System.exit(-1);
         }
 
-        s_oLogger.debug("OK");
+        s_oLogger.debug("Launcher Main Start");
 
 
         // create the parser
@@ -103,11 +103,17 @@ public class LauncherMain {
 
             // Create Launcher Instance
             LauncherMain oLauncher = new LauncherMain();
+
+            s_oLogger.debug("Executing " + sOperation + " Parameter " + sParameter);
+
             // And Run
             oLauncher.ExecuteOperation(sOperation,sParameter);
 
+            s_oLogger.debug("Operation Done, bye");
+
         }
         catch( ParseException exp ) {
+            s_oLogger.debug("Launcher Main Exception " + exp.toString());
             // oops, something went wrong
             System.err.println( "Parsing failed.  Reason: " + exp.getMessage() );
             System.exit(-1);
@@ -187,6 +193,9 @@ public class LauncherMain {
                     PublishBandImage(oPublishBandParameter);
                 }
                 break;
+                default:
+                    s_oLogger.debug("Operation Not Recognized. Nothing to do");
+                    break;
             }
         }
         catch (Exception oEx) {
@@ -557,12 +566,18 @@ public class LauncherMain {
 
             s_oLogger.debug( "LauncherMain.PublishBandImage:  Generating Band Image...");
 
+            s_oLogger.debug( "LauncherMain.PublishBandImage:  Read Product");
             // Read the product
             ReadProduct oReadProduct = new ReadProduct();
             Product oSentinel = oReadProduct.ReadProduct(oFile);
 
+            s_oLogger.debug( "LauncherMain.PublishBandImage:  Get GeoCoding");
+
             // Get the Geocoding and Band
             GeoCoding oGeoCoding = oSentinel.getSceneGeoCoding();
+
+            s_oLogger.debug( "LauncherMain.PublishBandImage:  Getting Band " + oParameter.getBandName());
+
             Band oBand = oSentinel.getBand(oParameter.getBandName());
 
             // Get Image
@@ -574,8 +589,16 @@ public class LauncherMain {
             String sOutputFilePath = sPath + sLayerId + ".tif";
             File oOutputFile = new File(sOutputFilePath);
 
+            s_oLogger.debug( "LauncherMain.PublishBandImage:  Output file: " + sOutputFilePath);
+
             // Write the Band Tiff
-            if (ConfigReader.getPropValue("CREATE_BAND_GEOTIFF_ACTIVE").equals("true")) GeoTIFF.writeImage(oBandImage, oOutputFile, oMetadata);
+            if (ConfigReader.getPropValue("CREATE_BAND_GEOTIFF_ACTIVE").equals("true"))  {
+                s_oLogger.debug( "LauncherMain.PublishBandImage:  Writing Image");
+                GeoTIFF.writeImage(oBandImage, oOutputFile, oMetadata);
+            }
+            else {
+                s_oLogger.debug( "LauncherMain.PublishBandImage:  Debug on. Jump GeoTiff Generate");
+            }
 
             s_oLogger.debug( "LauncherMain.PublishBandImage:  Moving Band Image...");
 
@@ -637,6 +660,9 @@ public class LauncherMain {
             }
         }
         catch (Exception oEx) {
+
+            s_oLogger.debug( "LauncherMain.PublishBandImage: Exception " + oEx.toString() + " " + oEx.getMessage());
+
             oEx.printStackTrace();
 
             // Rabbit Sender
