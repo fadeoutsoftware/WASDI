@@ -92,7 +92,7 @@ public class ProductResource {
 		ArrayList<ProductViewModel> aoProductList = new ArrayList<>();
 		
 		try {
-			/*
+			
 			// Domain Check
 			if (oUser == null) {
 				return aoProductList;
@@ -100,7 +100,7 @@ public class ProductResource {
 			if (Utils.isNullOrEmpty(oUser.getUserId())) {
 				return aoProductList;
 			}
-			*/
+			
 			
 			System.out.println("ProductResource.GetListByWorkspace: products for " + sWorkspaceId);
 			
