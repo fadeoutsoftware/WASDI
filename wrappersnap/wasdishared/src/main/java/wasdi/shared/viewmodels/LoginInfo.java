@@ -1,11 +1,18 @@
 package wasdi.shared.viewmodels;
 
+import javax.xml.bind.annotation.XmlRootElement;
+
 /**
  * Created by p.campanella on 21/10/2016.
  */
+@XmlRootElement
 public class LoginInfo {
     private String userId;
     private String userPassword;
+
+    public LoginInfo() {
+
+    }
 
     public String getUserId() {
         return userId;
