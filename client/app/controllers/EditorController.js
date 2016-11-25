@@ -18,7 +18,7 @@ var EditorController = (function () {
         // Reconnection promise to stop the timer if the reconnection succeed or if the user change page
         this.m_oReconnectTimerPromise = null;
 
-        this.m_oScope.m_oController = this;
+
 
         // Here a Workpsace is needed... if it is null create a new one..
         this.m_oActiveWorkspace = this.m_oConstantsService.getActiveWorkspace();
@@ -38,6 +38,9 @@ var EditorController = (function () {
 
         // Self reference for callbacks
         var oController = this;
+        //this.generateTree();
+        this.m_oTree="";
+
 
         /**
          * Rabbit Callback: receives the Messages
@@ -125,6 +128,9 @@ var EditorController = (function () {
                 if (data != undefined)
                 {
                     oController.m_aoProducts = data;
+                    // i need to make the tree after the products are loaded
+                    $scope.m_oController.m_oTree = oController.generateTree();
+                    //oController.m_oScope.$apply();
                 }
             }
         }).error(function (data,status) {
@@ -149,7 +155,12 @@ var EditorController = (function () {
             }
         });
 
+        $scope.$watch('$scope.m_oController.m_oTree', function(newValues, oldValues, scope) {
+            //if (newValues[0] && newValues[1])
+            //    LoadingCube.hide();
+            if($scope.m_oController.m_oTree=="test"){}
 
+        });
     }
 
     /**
@@ -343,8 +354,45 @@ var EditorController = (function () {
         });
     }
 
+    // GENERATE TREE
+    EditorController.prototype.generateTree = function ()
+    {
+        var oController = this;
+        var oTree =
+        {
+            'core': {
+                'data': []
+                , "check_callback": true
+            },
+        }
+
+        oController.m_aoProducts;
+
+        var productList = this.getProductList();
+        //var productList = [{"name":"nomeprodotto1"},{"name":"nomeprodotto2"}];
+        for (var iIndexProduct = 0; iIndexProduct < productList.length; iIndexProduct++) {
+            var oNode = new Object();
+            oNode.text=productList[iIndexProduct].name;//LABEL NODE
+            oNode.children=[{"text": "metadata"},{"text":"Bands", "children": []}];//CHILDREN
+            oTree.core.data.push(oNode);
 
 
+            var oaBandsItems = this.getBandsForProduct(productList[iIndexProduct]);
+            //var oaBandsItems = [{"name":"band1"},{"name":"band2"}];
+            for (var iIndexBandsItems = 0; iIndexBandsItems < oaBandsItems.length; iIndexBandsItems++)
+            {
+                var oNode=new Object();
+                oNode.text = oaBandsItems[iIndexBandsItems].name;//LABEL NODE
+                oNode.band = oaBandsItems[iIndexBandsItems];//BAND
+                oTree.core.data[iIndexProduct].children[1].children.push(oNode);
+
+            }
+
+
+        }
+
+        return oTree;
+    }
     EditorController.$inject = [
         '$scope',
         '$location',

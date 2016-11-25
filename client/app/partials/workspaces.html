@@ -32,8 +32,8 @@
             <tr ng-repeat="oWSListItem in m_oController.getWorkspaceInfoList() | filter:searchWorkSpace">
                 <td>{{$index}}</td>
                 <td> {{oWSListItem.workspaceName}} - {{oWSListItem.ownerUserId}}</td>
-                <td class="over-color" ng-click="m_oController.openWorkspace(oWSListItem.workspaceId)"><i class="fa fa-pencil" aria-hidden="true"></i></td>
-                <td class="over-color" ><i class="fa fa-info " aria-hidden="true"></i></td>
+                <td class="over-color" ng-click="m_oController.openWorkspace(oWSListItem.workspaceId)"><i class="fa fa-pencil fa-lg" aria-hidden="true"></i></td>
+                <td class="over-color" ><i class="fa fa-info fa-lg" aria-hidden="true"></i></td>
             </tr>
             <!--<tr ><td >1</td><td><i class="fa fa-globe" aria-hidden="true"></i> workspace name - <i class="fa fa-user" aria-hidden="true"></i> ownerID </td></tr>-->
             <!--<tr><td>2</td><td><i class="fa fa-globe" aria-hidden="true"></i> workspace name - <i class="fa fa-user" aria-hidden="true"></i> ownerID </td></tr>-->

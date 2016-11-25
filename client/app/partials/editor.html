@@ -42,15 +42,16 @@
         <!--TREE PANEL-->
         <div class="panel panel-default">
             <div class="panel-heading">possible tree</div>
-            <tree></tree>
+            <!-- MY TREE DIRECTIVE -->
+            <tree ngModelTree="prova"></tree>
 
             <form class="form-horizontal" role="form">
-            <div class="form-group">
-            <label for="userName" class="col-sm-2  control-label">File Url: </label>
-            <div class="col-sm-10">
-            <input type="text" class="form-control" id="userName" ng-model="m_oController.m_sDownloadFilePath">
-            </div>
-            </div>
+                <div class="form-group">
+                    <label for="userName" class="col-sm-2  control-label">File Url: </label>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" id="userName" ng-model="m_oController.m_sDownloadFilePath">
+                    </div>
+                </div>
             </form>
             <br>
             <a ng-click="m_oController.downloadEOImage(m_oController.m_sDownloadFilePath)">Download</a>
@@ -60,21 +61,21 @@
             <br>
 
 
-            <table>
-            <tr ng-repeat="oProductItem in m_oController.getProductList()">
-            <td>{{oProductItem.name}}</td>
-            <td>
-            <table>
-            <tr ng-repeat="oBandItem in m_oController.getBandsForProduct(oProductItem)">
-            <td><a ng-click="m_oController.openBandImage(oBandItem)">{{oBandItem.name}}</a></td>
-            </tr>
-            </table>
-            </td>
-            </tr>
-            </table>
+            <!--<table>-->
+                <!--<tr ng-repeat="oProductItem in m_oController.getProductList()">-->
+                    <!--<td>{{oProductItem.name}}</td>-->
+                    <!--<td>-->
+                        <!--<table>-->
+                            <!--<tr ng-repeat="oBandItem in m_oController.getBandsForProduct(oProductItem)">-->
+                                <!--<td><a ng-click="m_oController.openBandImage(oBandItem)">{{oBandItem.name}}</a></td>-->
+                            <!--</tr>-->
+                        <!--</table>-->
+                    <!--</td>-->
+                <!--</tr>-->
+            <!--</table>-->
 
             <p>
-            <span ng-click="m_oController.addTestLayer('S1A_IW_GRDH_1SSV_20150213T095824_20150213T095849_004603_005AB7_5539')">Add Test Layer</span>
+                <span ng-click="m_oController.addTestLayer('S1A_IW_GRDH_1SSV_20150213T095824_20150213T095849_004603_005AB7_5539')">Add Test Layer</span>
             </p>
             <br>
             <br>

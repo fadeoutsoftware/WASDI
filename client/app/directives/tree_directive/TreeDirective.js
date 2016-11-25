@@ -5,7 +5,7 @@ angular.module('wasdi.TreeDirective', [])
     .directive('tree', function () {
         "use strict";
 
-        function linkFunction(scope, element, attr){
+        function linkFunction($scope, element, attr){
 
             var generateWellFormedTree;// method
 
@@ -19,51 +19,54 @@ angular.module('wasdi.TreeDirective', [])
              *                         }
              * }
              * */
-            var oTree=
-            {
-                'core' :
-                {
-                    'data' :
-                    [
-                        'Simple root node',
-                        {
-                            'text' : 'Root node 2',
-                            'state' :
-                            {
-                                'opened' : true,
-                                'selected' : true
-                            },
-                            'children' :
-                            [
-                                { 'text' : 'Child 1' },
-                                'Child 2'
-                            ]
-                        }
-                    ]
-                    ,"check_callback" : true
-                },
-                "plugins" : [ "contextmenu" ],  // all plugin i use
-                "contextmenu" : // my right click menu
-                {
-                    "items" : function ($node)
-                    {
-                        return {
-                            "prova1" : {
-                                "label" : "func1",
-                                "action" : function (obj) {  }
-                            },
-                            "prova2" : {
-                                "label" : "func2",
-                                "action" : function (obj) {  }
-                            },
-                            "prova3" : {
-                                "label" : "func3",
-                                "action" : function (obj) {  }
-                            }
-                        };
-                    }
-                }
-            }
+
+            //var oTree=
+            //{
+            //    'core' :
+            //    {
+            //        'data' :
+            //        [
+            //            'Simple root node',
+            //            {
+            //                'text' : 'Root node 2',
+            //                'state' :
+            //                {
+            //                    'opened' : true,
+            //                    'selected' : true
+            //                },
+            //                'children' :
+            //                [
+            //                    { 'text' : 'Child 1' },
+            //                    'Child 2'
+            //                ]
+            //            }
+            //        ]
+            //        ,"check_callback" : true
+            //    },
+            //    "plugins" : [ "contextmenu" ],  // all plugin i use
+            //    "contextmenu" : // my right click menu
+            //    {
+            //        "items" : function ($node)
+            //        {
+            //            return {
+            //                "prova1" : {
+            //                    "label" : "func1",
+            //                    "action" : function (obj) {  }
+            //                },
+            //                "prova2" : {
+            //                    "label" : "func2",
+            //                    "action" : function (obj) {  }
+            //                },
+            //                "prova3" : {
+            //                    "label" : "func3",
+            //                    "action" : function (obj) {  }
+            //                }
+            //            };
+            //        }
+            //    }
+            //}
+
+
 
             //this.generateWellFormedTree=function(oElement,oNewTree,iIndexNewTreeAttribute)
             //{
@@ -105,14 +108,35 @@ angular.module('wasdi.TreeDirective', [])
             //
             //}
 
-
-            //load tree
-            $('#jstree').jstree(oTree);
+            //$scope.$watch('$scope.m_oController.m_oTree', function (newValue, oldValue, scope)
+            //{
+            //    if($scope.m_oController.m_oTree != "" &&  $scope.m_oController.m_oTree != null &&
+            //        angular.isUndefined($scope.m_oController.m_oTree) )
+            //    {
+            //        //load tree
+            //        $('#jstree').jstree($scope.m_oController.m_oTree);
+            //
+            //        //bind to events triggered on the tree
+            //        $('#jstree').on("changed.jstree", function (e, data) {
+            //
+            //            if(data.node.children.length == 0 )
+            //            {
+            //                $scope.m_oController.openBandImage(data.node.original.band)
+            //                //console.log(data.selected);
+            //                //console.log(data.node.text);
+            //                //console.log(data.node.id);
+            //                //console.log(data.node.children);
+            //            }
+            //
+            //        });
+            //    }
+            //});
 
         }
 
         return{
             restrict:"E",
+
             template:'<div id="jstree"class="panel-body jstree" ></div>',
             link: linkFunction
         };
