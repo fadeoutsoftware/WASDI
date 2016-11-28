@@ -240,7 +240,9 @@ public class LauncherMain {
 
                     // Get The product view Model
                     ReadProduct oReadProduct = new ReadProduct();
-                    oVM = oReadProduct.getProductViewModel(new File(sFileName));
+                    File oProductFile = new File(sFileName);
+                    oVM = oReadProduct.getProductViewModel(oProductFile);
+                    oVM.setMetadata(oReadProduct.getProductMetadataViewModel(oProductFile));
 
                     // Save it in the register
                     oAlreadyDownloaded = new DownloadedFile();
@@ -277,7 +279,9 @@ public class LauncherMain {
                 // Get The product view Model
                 ReadProduct oReadProduct = new ReadProduct();
                 s_oLogger.debug("LauncherMain.Download: call read product");
+                File oProductFile = new File(sFileName);
                 oVM = oReadProduct.getProductViewModel(new File(sFileName));
+                oVM.setMetadata(oReadProduct.getProductMetadataViewModel(oProductFile));
 
                 if (oVM.getBandsGroups() == null) s_oLogger.debug("LauncherMain.Download: Band Groups is NULL");
                 else if (oVM.getBandsGroups().getBands() == null) s_oLogger.debug("LauncherMain.Download: bands is NULL");
@@ -536,7 +540,7 @@ public class LauncherMain {
 
             // Is already published?
             PublishedBandsRepository oPublishedBandsRepository = new PublishedBandsRepository();
-            PublishedBand oAlreadyPublished = oPublishedBandsRepository.GetPublishedBand(sLayerId,oParameter.getBandName());
+            PublishedBand oAlreadyPublished = oPublishedBandsRepository.GetPublishedBand(oParameter.getFileName(),oParameter.getBandName());
 
             if (oAlreadyPublished != null) {
                 // Yes !!
@@ -628,7 +632,7 @@ public class LauncherMain {
             PublishedBand oPublishedBand = new PublishedBand();
             oPublishedBand.setLayerId(sLayerId);
             oPublishedBand.setProductName(sProductName);
-            oPublishedBand.setBandName(oParameter.getFileName());
+            oPublishedBand.setBandName(oParameter.getBandName());
 
             // Add it the the db
             oPublishedBandsRepository.InsertPublishedBand(oPublishedBand);
