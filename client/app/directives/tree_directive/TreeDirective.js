@@ -107,30 +107,31 @@ angular.module('wasdi.TreeDirective', [])
             //    }
             //
             //}
+            var prova;
+            $scope.$watch('m_oController.m_oTree', function (newValue, oldValue, scope)
+            {
+                if(!utilsIsObjectNullOrUndefined($scope.m_oController.m_oTree))
+                {
+                    //load tree
+                    $('#jstree').jstree($scope.m_oController.m_oTree);
 
-            //$scope.$watch('$scope.m_oController.m_oTree', function (newValue, oldValue, scope)
-            //{
-            //    if($scope.m_oController.m_oTree != "" &&  $scope.m_oController.m_oTree != null &&
-            //        angular.isUndefined($scope.m_oController.m_oTree) )
-            //    {
-            //        //load tree
-            //        $('#jstree').jstree($scope.m_oController.m_oTree);
-            //
-            //        //bind to events triggered on the tree
-            //        $('#jstree').on("changed.jstree", function (e, data) {
-            //
-            //            if(data.node.children.length == 0 )
-            //            {
-            //                $scope.m_oController.openBandImage(data.node.original.band)
-            //                //console.log(data.selected);
-            //                //console.log(data.node.text);
-            //                //console.log(data.node.id);
-            //                //console.log(data.node.children);
-            //            }
-            //
-            //        });
-            //    }
-            //});
+                    //bind to events triggered on the tree
+                    $('#jstree').on("changed.jstree", function (e, data) {
+
+                        data.event.preventDefault();
+
+                        if(data.node.children.length == 0 && $scope.m_oController.m_bStatusPublishing == false)
+                        {
+                            $scope.m_oController.openBandImage(data.node.original.band)
+                            //console.log(data.selected);
+                            //console.log(data.node.text);
+                            //console.log(data.node.id);
+                            //console.log(data.node.children);
+                        }
+
+                    });
+                }
+            });
 
         }
 
