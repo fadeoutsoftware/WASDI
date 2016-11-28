@@ -172,7 +172,7 @@ var EditorController = (function () {
         this.m_aoProducts.push(oMessage.payload);
         this.m_oScope.$apply();
 
-        this.m_oProductService.addProductToWorkspace(oMessage.payload.name,this.m_oActiveWorkspace.workspaceId).success(function (data, status) {
+        this.m_oProductService.addProductToWorkspace(oMessage.payload.fileName,this.m_oActiveWorkspace.workspaceId).success(function (data, status) {
             console.log('Product added to the ws');
         }).error(function (data,status) {
             console.log('Error adding product to the ws');
