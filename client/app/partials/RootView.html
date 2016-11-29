@@ -5,11 +5,11 @@
         <ul class="link">
 
             <li><a class="active" href="#news">{{"ROOT_VIEW_LINK_HELP"|translate}}</a></li>
-            <li><a href="#contact">{{"ROOT_VIEW_LINK_LOG_OUT"|translate}}</a></li>
+            <li><a  ng-click="m_oController.onClickLogOut()">{{"ROOT_VIEW_LINK_LOG_OUT"|translate}}</a></li>
 
         </ul>
         <!-- USER ID-->
-        <span class="user-span"><b>{{"ROOT_VIEW_LABEL_USER"|translate}}</b>{{m_oController.m_oUser.getFirstName()}}</span>
+        <span class="user-span">{{"ROOT_VIEW_LABEL_USER"|translate}} {{m_oController.m_oUser.name}}</span>
         <!--SUBTITLE-->
         <span class="subtitle-span"><h4>web based asi social data infrastucture</h4></span>
     </div>

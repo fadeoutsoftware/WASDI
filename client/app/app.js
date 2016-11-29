@@ -75,7 +75,8 @@ wasdiApp.config(['$stateProvider', '$urlRouterProvider', function($stateProvider
 
     //EDITOR
     $stateProvider.state('root.editor', {
-        url: '/editor',
+        url: '/{workSpace}/editor',
+
         views:{
             'maincontent' : { templateUrl : 'partials/editor.html', controller  : 'EditorController'}
         },

@@ -11,32 +11,38 @@ service('MapService', ['$http',  'ConstantsService', function ($http, oConstants
     /**
      * base layers
      */
-    this.m_oOSMBasic = L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution:
-            '&copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors',
-        maxZoom: 18
-    });
-    this.m_oOSMMapquest = L.tileLayer('http://otile{s}.mqcdn.com/tiles/1.0.0/osm/{z}/{x}/{y}.png', {
-        subdomains: "12",
-        attribution:
-            '&copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors. Tiles courtesy of <a href="http://www.mapquest.com/" target="_blank">MapQuest</a> <img src="https://developer.mapquest.com/content/osm/mq_logo.png">',
-        maxZoom: 18
-    });
-    this.m_oOSMHumanitarian = L.tileLayer('http://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', {
-        attribution:
-            '&copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors. Tiles courtesy of <a href="http://hot.openstreetmap.org/" target="_blank">Humanitarian OpenStreetMap Team</a>',
-        maxZoom: 18
-    });
-    this.m_oOCMCycle = L.tileLayer('http://{s}.tile.opencyclemap.org/cycle/{z}/{x}/{y}.png', {
-        attribution:
-            '&copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors. Tiles courtesy of <a href="http://www.thunderforest.com/" target="_blank">Andy Allan</a>',
-        maxZoom: 18
-    });
-    this.m_oOCMTransport = L.tileLayer('http://{s}.tile2.opencyclemap.org/transport/{z}/{x}/{y}.png', {
-        attribution:
-            '&copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors. Tiles courtesy of <a href="http://www.thunderforest.com/" target="_blank">Andy Allan</a>',
-        maxZoom: 18
-    });
+
+    this.initTileLayer= function(){
+        this.m_oOSMBasic = L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution:
+                '&copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors',
+            maxZoom: 18
+        });
+        this.m_oOSMMapquest = L.tileLayer('http://otile{s}.mqcdn.com/tiles/1.0.0/osm/{z}/{x}/{y}.png', {
+            subdomains: "12",
+            attribution:
+                '&copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors. Tiles courtesy of <a href="http://www.mapquest.com/" target="_blank">MapQuest</a> <img src="https://developer.mapquest.com/content/osm/mq_logo.png">',
+            maxZoom: 18
+        });
+        this.m_oOSMHumanitarian = L.tileLayer('http://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', {
+            attribution:
+                '&copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors. Tiles courtesy of <a href="http://hot.openstreetmap.org/" target="_blank">Humanitarian OpenStreetMap Team</a>',
+            maxZoom: 18
+        });
+        this.m_oOCMCycle = L.tileLayer('http://{s}.tile.opencyclemap.org/cycle/{z}/{x}/{y}.png', {
+            attribution:
+                '&copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors. Tiles courtesy of <a href="http://www.thunderforest.com/" target="_blank">Andy Allan</a>',
+            maxZoom: 18
+        });
+        this.m_oOCMTransport = L.tileLayer('http://{s}.tile2.opencyclemap.org/transport/{z}/{x}/{y}.png', {
+            attribution:
+                '&copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors. Tiles courtesy of <a href="http://www.thunderforest.com/" target="_blank">Andy Allan</a>',
+            maxZoom: 18
+        });
+    }
+
+    //init tile layer
+    this.initTileLayer();
 
     this.m_oGoogleHybrid = new L.gridLayer.googleMutant('hybrid');
     this.m_oGoogleMap = new L.gridLayer.googleMutant('roadmap');
@@ -70,16 +76,21 @@ service('MapService', ['$http',  'ConstantsService', function ($http, oConstants
 
     this.initMap = function(sMapDiv) {
 
-        if (this.m_oWasdiMap != null) return;
 
         /**
          * the map
          */
+        if(this.m_oWasdiMap != null)
+        {
+            this.initTileLayer();
+        }
+
         this.m_oWasdiMap = L.map(sMapDiv, {
             zoomControl: false,
             layers: [this.m_oOSMBasic],
             // maxZoom: 22
         });
+
 
         /**
          * scale control

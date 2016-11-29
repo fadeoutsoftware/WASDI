@@ -2,7 +2,7 @@
  * Created by p.campanella on 24/10/2016.
  */
 var EditorController = (function () {
-    function EditorController($scope, $location, $interval, oConstantsService, oAuthService, oMapService, oFileBufferService, oProductService) {
+    function EditorController($scope, $location, $interval, oConstantsService, oAuthService, oMapService, oFileBufferService, oProductService,$state,oWorkspaceService) {
 
         // Reference to the needed Services
         this.m_oScope = $scope;
@@ -15,6 +15,8 @@ var EditorController = (function () {
         this.m_oProductService = oProductService;
         this.m_oScope.m_oController = this;
         this.m_bStatusPublishing=false;
+        this.m_oState=$state;
+        this.m_oWorkspaceService = oWorkspaceService;
         // Reconnection promise to stop the timer if the reconnection succeed or if the user change page
         this.m_oReconnectTimerPromise = null;
 
@@ -23,6 +25,20 @@ var EditorController = (function () {
         // Here a Workpsace is needed... if it is null create a new one..
         this.m_oActiveWorkspace = this.m_oConstantsService.getActiveWorkspace();
 
+        //if there isn't workspace
+        if(utilsIsObjectNullOrUndefined( this.m_oActiveWorkspace) && utilsIsStrNullOrEmpty( this.m_oActiveWorkspace))
+        {
+            //if this.m_oState.params.workSpace in empty null or undefined create new workspace
+            if(!(utilsIsObjectNullOrUndefined(this.m_oState.params.workSpace) && utilsIsStrNullOrEmpty(this.m_oState.params.workSpace)))
+            {
+                this.openWorkspace(this.m_oState.params.workSpace);
+                this.m_oActiveWorkspace = this.m_oConstantsService.getActiveWorkspace();
+            }
+            else
+            {
+                //TODO CREATE NEW WORKSPACE OR GO HOME
+            }
+        }
         this.m_sDownloadFilePath = "";
 
         // Web Socket to receive workspace messages
@@ -38,7 +54,8 @@ var EditorController = (function () {
 
         // Self reference for callbacks
         var oController = this;
-        //this.generateTree();
+
+        //Set default value tree
         this.m_oTree=null;
 
 
@@ -122,23 +139,9 @@ var EditorController = (function () {
         //connect to the queue
         this.m_oClient.connect('guest', 'guest', on_connect, on_error, '/');
 
-        // Read Product List
-        this.m_oProductService.getProductListByWorkspace(this.m_oActiveWorkspace.workspaceId).success(function (data, status) {
-            if (data != null)
-            {
-                if (data != undefined)
-                {
-                    oController.m_aoProducts = data;
-                    // i need to make the tree after the products are loaded
-                    $scope.m_oController.m_oTree = oController.generateTree();
-                    //oController.m_oScope.$apply();
-                }
-            }
-        }).error(function (data,status) {
-            console.log('Error reading product list')
-        });
 
         // Initialize the map
+
         oMapService.initMap('wasdiMap');
 
         // Clean Up when exit!!
@@ -156,7 +159,33 @@ var EditorController = (function () {
             }
         });
 
+        /* ---------------- WATCH -----------------*/
+        // Read Product List
+        // watch when m_oController.m_oConstantsService.m_oActiveWorkspace change (usually after a load/reload of page)
+        // reload tree
+        $scope.$watch('m_oController.m_oConstantsService.m_oActiveWorkspace', function (newValue, oldValue, scope)
+        {
+            this.m_oActiveWorkspace = newValue;
+            if(!utilsIsObjectNullOrUndefined(this.m_oActiveWorkspace))
+            {
+                $scope.m_oController.m_oProductService.getProductListByWorkspace(this.m_oActiveWorkspace.workspaceId).success(function (data, status) {
+                    if (data != null) {
+                        if (data != undefined) {
+                            oController.m_aoProducts = data;
+                            // i need to make the tree after the products are loaded
+                            $scope.m_oController.m_oTree = oController.generateTree();
+                            //oController.m_oScope.$apply();
+                        }
+                    }
+                }).error(function (data, status) {
+                    console.log('Error reading product list')
+                });
+            }
+        });
+
     }
+
+    /********************METHODS********************/
 
     /**
      * Handler of the "download" message
@@ -408,6 +437,7 @@ var EditorController = (function () {
                 var oNode=new Object();
                 oNode.text = oaBandsItems[iIndexBandsItems].name;//LABEL NODE
                 oNode.band = oaBandsItems[iIndexBandsItems];//BAND
+                oNode.icon = "assets/icons/File.png";
                 oTree.core.data[iIndexProduct].children[1].children.push(oNode);
 
             }
@@ -417,6 +447,26 @@ var EditorController = (function () {
 
         return oTree;
     }
+
+    //---------------- OPENWORKSPACE -----------------------
+    // ReLOAD workspace when reload page
+    EditorController.prototype.openWorkspace = function (sWorkspaceId) {
+
+        var oController = this;
+
+        this.m_oWorkspaceService.getWorkspaceEditorViewModel(sWorkspaceId).success(function (data, status) {
+            if (data != null)
+            {
+                if (data != undefined)
+                {
+                    oController.m_oConstantsService.setActiveWorkspace(data);
+                }
+            }
+        }).error(function (data,status) {
+            alert('error');
+        });
+    }
+
     EditorController.$inject = [
         '$scope',
         '$location',
@@ -425,7 +475,9 @@ var EditorController = (function () {
         'AuthService',
         'MapService',
         'FileBufferService',
-        'ProductService'
+        'ProductService',
+        '$state',
+        'WorkspaceService'
     ];
 
     return EditorController;

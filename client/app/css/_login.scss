@@ -13,10 +13,10 @@
   .logo-link
   {
     cursor:pointer;
-  //LOGO CSS
+    //LOGO CSS
+
     .logo
     {
-
       content: $wasdi-brand-logo-login; // set 'src' attribute from CSS
       width: $wasdi-brand-logo-login-size;
       margin-top: -20px;
@@ -29,6 +29,9 @@
       top: 135%;
       left: 50%;
       transform: translate(-50%, -50%);
+
+
+
 
     }
     //WRITE(IMAGE) CSS
@@ -56,6 +59,8 @@
       left: 50%;
       transform: translate(-50%, -50%);
       color: $wasdi-blue-logo;
+
+
     }
   }
 

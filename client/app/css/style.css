@@ -5906,12 +5906,14 @@ button.close {
   .root-view .logged-user .link i {
     float: left;
     color: #009036; }
+  .root-view .logged-user .link a {
+    cursor: pointer; }
 .root-view .logged-user .user-span {
   margin-top: 7px;
   float: right; }
 .root-view .logged-user .subtitle-span {
   float: left;
-  margin-left: 110px;
+  margin-left: 10%;
   color: #009036; }
 .root-view .logged-user ul {
   float: right;

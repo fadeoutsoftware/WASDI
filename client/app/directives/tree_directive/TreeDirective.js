@@ -20,54 +20,6 @@ angular.module('wasdi.TreeDirective', [])
              * }
              * */
 
-            //var oTree=
-            //{
-            //    'core' :
-            //    {
-            //        'data' :
-            //        [
-            //            'Simple root node',
-            //            {
-            //                'text' : 'Root node 2',
-            //                'state' :
-            //                {
-            //                    'opened' : true,
-            //                    'selected' : true
-            //                },
-            //                'children' :
-            //                [
-            //                    { 'text' : 'Child 1' },
-            //                    'Child 2'
-            //                ]
-            //            }
-            //        ]
-            //        ,"check_callback" : true
-            //    },
-            //    "plugins" : [ "contextmenu" ],  // all plugin i use
-            //    "contextmenu" : // my right click menu
-            //    {
-            //        "items" : function ($node)
-            //        {
-            //            return {
-            //                "prova1" : {
-            //                    "label" : "func1",
-            //                    "action" : function (obj) {  }
-            //                },
-            //                "prova2" : {
-            //                    "label" : "func2",
-            //                    "action" : function (obj) {  }
-            //                },
-            //                "prova3" : {
-            //                    "label" : "func3",
-            //                    "action" : function (obj) {  }
-            //                }
-            //            };
-            //        }
-            //    }
-            //}
-
-
-
             //this.generateWellFormedTree=function(oElement,oNewTree,iIndexNewTreeAttribute)
             //{
             //
@@ -120,8 +72,10 @@ angular.module('wasdi.TreeDirective', [])
 
                         data.event.preventDefault();
 
+                        // if the node it's a band do $scope.m_oController.openBandImage()
                         if(data.node.children.length == 0 && $scope.m_oController.m_bStatusPublishing == false)
                         {
+                            //TODO CHECK IF THERE IS A BAND
                             $scope.m_oController.openBandImage(data.node.original.band)
                             //console.log(data.selected);
                             //console.log(data.node.text);

@@ -11,6 +11,7 @@ var RootController = (function() {
         this.m_oState=$state;
         this.m_oScope.m_oController=this;
         this.m_bProcessMenuIsVisible=false;
+        this.m_oScope.m_oController=this;
         //if user is logged
         //if(!utilsIsObjectNullOrUndefined(this.m_oConstantsService.getUser()))
         //    this.m_oUser = this.m_oConstantsService.getUser();
@@ -25,7 +26,12 @@ var RootController = (function() {
         var oController=this;
         oController.m_bProcessMenuIsVisible = !oController.m_bProcessMenuIsVisible;
     }
-
+    RootController.prototype.onClickLogOut = function()
+    {
+        var oController=this;
+        oController.m_oConstantsService.logOut();
+        oController.m_oState.go("home");
+    }
     RootController.$inject = [
         '$scope',
         'ConstantsService',
