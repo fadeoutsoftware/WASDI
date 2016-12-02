@@ -512,12 +512,21 @@ var EditorController = (function () {
     /**************** MAP 3D/2D MODE ON/OFF *************************/
     EditorController.prototype.onClickChangeMap=function()
     {
-        oController=this;
+        var oController=this;
 
         oController.m_b2DMapModeOn = !oController.m_b2DMapModeOn;
         oController.m_b3DMapModeOn = !oController.m_b3DMapModeOn;
 
-
+        if (oController.m_b2DMapModeOn == false && oController.m_b3DMapModeOn == true) {
+            oController.m_oMapService.clearMap();
+            oController.m_oMapService.initMap('wasdiMap2');
+            oController.m_oMapService.getMap().invalidateSize();
+        }
+        else if (oController.m_b2DMapModeOn == true && oController.m_b3DMapModeOn == false) {
+            oController.m_oMapService.clearMap();
+            oController.m_oMapService.initMap('wasdiMap');
+            oController.m_oMapService.getMap().invalidateSize();
+        }
     }
 
     EditorController.$inject = [
