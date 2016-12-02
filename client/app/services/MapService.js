@@ -73,6 +73,13 @@ service('MapService', ['$http',  'ConstantsService', function ($http, oConstants
 
     this.m_oActiveBaseLayer = this.m_oOSMBasic;
 
+    this.clearMap = function () {
+        if (this.m_oWasdiMap) {
+            this.m_oWasdiMap.remove();
+            this.m_oWasdiMap = null;
+        }
+    }
+
 
     this.initMap = function(sMapDiv) {
 
@@ -124,9 +131,12 @@ service('MapService', ['$http',  'ConstantsService', function ($http, oConstants
             oActiveBaseLayer = e;
         });
 
+        var oWasdiMap = this.m_oWasdiMap;
 
-
-
+        //add event on base change
+        this.m_oWasdiMap.on('load', function(e){
+            oWasdiMap.invalidateSize();
+        });
     }
 
     this.getMap = function () {
