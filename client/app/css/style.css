@@ -5979,7 +5979,8 @@ button.close {
   .editor-view .map-container {
     padding-left: 0;
     padding-right: 0;
-    border: 1px solid #43516A; }
+    border: 1px solid #43516A;
+    height: 500px; }
     .editor-view .map-container .map {
       width: auto;
       height: 700px; }

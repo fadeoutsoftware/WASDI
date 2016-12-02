@@ -5,17 +5,13 @@
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/app.js" afterPath="$PROJECT_DIR$/app/app.js" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/controllers/EditorController.js" afterPath="$PROJECT_DIR$/app/controllers/EditorController.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/controllers/RootController.js" afterPath="$PROJECT_DIR$/app/controllers/RootController.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/controllers/WorkspaceController.js" afterPath="$PROJECT_DIR$/app/controllers/WorkspaceController.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/css/_login.scss" afterPath="$PROJECT_DIR$/app/css/_login.scss" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/css/_root.scss" afterPath="$PROJECT_DIR$/app/css/_root.scss" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/css/_editor.scss" afterPath="$PROJECT_DIR$/app/css/_editor.scss" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/css/style.css" afterPath="$PROJECT_DIR$/app/css/style.css" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/css/style.css.map" afterPath="$PROJECT_DIR$/app/css/style.css.map" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/directives/globe_directive/GlobeDirective.js" afterPath="$PROJECT_DIR$/app/directives/globe_directive/GlobeDirective.js" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/directives/tree_directive/TreeDirective.js" afterPath="$PROJECT_DIR$/app/directives/tree_directive/TreeDirective.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/partials/RootView.html" afterPath="$PROJECT_DIR$/app/partials/RootView.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/partials/home.html" afterPath="$PROJECT_DIR$/app/partials/home.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/partials/workspaces.html" afterPath="$PROJECT_DIR$/app/partials/workspaces.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/services/ConstantsService.js" afterPath="$PROJECT_DIR$/app/services/ConstantsService.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/index.html" afterPath="$PROJECT_DIR$/app/index.html" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/partials/editor.html" afterPath="$PROJECT_DIR$/app/partials/editor.html" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/services/MapService.js" afterPath="$PROJECT_DIR$/app/services/MapService.js" />
     </list>
     <ignored path="client.iws" />
@@ -37,22 +33,64 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="_root.scss" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/app/css/_root.scss">
+      <file leaf-file-name="TreeDirective.js" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/app/directives/tree_directive/TreeDirective.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="42.615383">
-              <caret line="24" column="5" selection-start-line="24" selection-start-column="5" selection-end-line="24" selection-end-column="5" />
+            <state vertical-scroll-proportion="0.0">
+              <caret line="85" column="92" selection-start-line="85" selection-start-column="88" selection-end-line="85" selection-end-column="92" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="RootView.html" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/app/partials/RootView.html">
+      <file leaf-file-name="EditorController.js" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/app/controllers/EditorController.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.26814267">
-              <caret line="65" column="54" selection-start-line="65" selection-start-column="54" selection-end-line="65" selection-end-column="54" />
+            <state vertical-scroll-proportion="0.3001912">
+              <caret line="334" column="36" selection-start-line="334" selection-start-column="36" selection-end-line="334" selection-end-column="36" />
               <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="GlobeService.js" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/app/services/GlobeService.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="-9.965517">
+              <caret line="29" column="8" selection-start-line="29" selection-start-column="8" selection-end-line="29" selection-end-column="8" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="editor.html" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/app/partials/editor.html">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="-7.4363637">
+              <caret line="101" column="22" selection-start-line="101" selection-start-column="22" selection-end-line="101" selection-end-column="22" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="_editor.scss" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/app/css/_editor.scss">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="-10.884615">
+              <caret line="61" column="7" selection-start-line="61" selection-start-column="7" selection-end-line="61" selection-end-column="7" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="MapService.js" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/app/services/MapService.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="0.0">
+              <caret line="75" column="4" selection-start-line="75" selection-start-column="4" selection-end-line="75" selection-end-column="4" />
+              <folding>
+                <marker date="1480685044508" expanded="true" signature="4587:4593" placeholder="{...}" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -62,8 +100,8 @@
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
-        <option value="JavaScript File" />
         <option value="HTML File" />
+        <option value="JavaScript File" />
       </list>
     </option>
   </component>
@@ -73,35 +111,41 @@
         <option value="$PROJECT_DIR$/app/directives/TreeDirective/TreeDirectiveTemplate.html" />
         <option value="$PROJECT_DIR$/app/directives/TreeDirective/TreeDirective.js" />
         <option value="$PROJECT_DIR$/app/directives/tree_directive/TreeDirectiveTemplate.html" />
-        <option value="$PROJECT_DIR$/app/directives/globe_directive/GlobeDirective.js" />
         <option value="$PROJECT_DIR$/app/directives/tree_directive/_tree.scss" />
         <option value="$PROJECT_DIR$/app/directives/workspaces_directive/WorkSpacesDirective.js" />
         <option value="$PROJECT_DIR$/app/directives/workspaces_directive/WorkSpacesTemplate.html" />
         <option value="$PROJECT_DIR$/app/directives/workspaces_directive/WorkspacesTemplate.html" />
         <option value="$PROJECT_DIR$/app/directives/workspaces_directive/WorkspacesDirective.js" />
         <option value="$PROJECT_DIR$/app/languages/en.json" />
-        <option value="$PROJECT_DIR$/app/index.html" />
-        <option value="$PROJECT_DIR$/app/languages/it.json" />
         <option value="$PROJECT_DIR$/app/controllers/HomeController.js" />
-        <option value="$PROJECT_DIR$/app/css/_workspaces.scss" />
-        <option value="$PROJECT_DIR$/app/css/_main_theme.scss" />
-        <option value="$PROJECT_DIR$/app/css/style.scss" />
-        <option value="$PROJECT_DIR$/app/css/_editor.scss" />
-        <option value="$PROJECT_DIR$/app/partials/editor.html" />
-        <option value="$PROJECT_DIR$/app/directives/tree_directive/TreeDirective.js" />
-        <option value="$PROJECT_DIR$/app/services/MapService.js" />
-        <option value="$PROJECT_DIR$/app/app.js" />
         <option value="vm:109" />
         <option value="$PROJECT_DIR$/bower.json" />
         <option value="$PROJECT_DIR$/app/controllers/WorkspaceController.js" />
-        <option value="$PROJECT_DIR$/app/controllers/EditorController.js" />
-        <option value="$PROJECT_DIR$/app/controllers/RootController.js" />
-        <option value="$PROJECT_DIR$/app/services/ConstantsService.js" />
         <option value="$PROJECT_DIR$/app/css/_login.scss" />
         <option value="$PROJECT_DIR$/app/partials/home.html" />
-        <option value="$PROJECT_DIR$/app/css/_root.scss" />
         <option value="$PROJECT_DIR$/app/partials/workspaces.html" />
+        <option value="$PROJECT_DIR$/app/css/_root.scss" />
+        <option value="$PROJECT_DIR$/app/languages/it.json" />
+        <option value="$PROJECT_DIR$/app/partials/openSearch.html" />
+        <option value="$PROJECT_DIR$/app/css/style.scss" />
         <option value="$PROJECT_DIR$/app/partials/RootView.html" />
+        <option value="$PROJECT_DIR$/app/controllers/RootController.js" />
+        <option value="$PROJECT_DIR$/app/css/_main_theme.scss" />
+        <option value="$PROJECT_DIR$/app/css/_import.scss" />
+        <option value="$PROJECT_DIR$/app/partials/import.html" />
+        <option value="$PROJECT_DIR$/app/controllers/ImportController.js" />
+        <option value="$PROJECT_DIR$/app/css/_workspaces.scss" />
+        <option value="code.jquery.com/jquery-1.11.0.min.js" />
+        <option value="$PROJECT_DIR$/app/services/ConstantsService.js" />
+        <option value="$PROJECT_DIR$/app/services/MapService.js" />
+        <option value="$PROJECT_DIR$/app/index.html" />
+        <option value="$PROJECT_DIR$/app/app.js" />
+        <option value="$PROJECT_DIR$/app/directives/globe_directive/GlobeDirective.js" />
+        <option value="$PROJECT_DIR$/app/css/_editor.scss" />
+        <option value="$PROJECT_DIR$/app/partials/editor.html" />
+        <option value="$PROJECT_DIR$/app/services/GlobeService.js" />
+        <option value="$PROJECT_DIR$/app/directives/tree_directive/TreeDirective.js" />
+        <option value="$PROJECT_DIR$/app/controllers/EditorController.js" />
       </list>
     </option>
   </component>
@@ -111,7 +155,7 @@
     <detection-done>true</detection-done>
   </component>
   <component name="ProjectFrameBounds">
-    <option name="x" value="-1288" />
+    <option name="x" value="-8" />
     <option name="y" value="-8" />
     <option name="width" value="1296" />
     <option name="height" value="1000" />
@@ -141,6 +185,7 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
+      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <PATH>
@@ -223,7 +268,7 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
-              <option name="myItemId" value="languages" />
+              <option name="myItemId" value="directives" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
@@ -244,71 +289,38 @@
               <option name="myItemId" value="directives" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
-          </PATH>
-          <PATH>
             <PATH_ELEMENT>
-              <option name="myItemId" value="client" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="client" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="app" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="css" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="client" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="client" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="app" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="assets" />
+              <option name="myItemId" value="tree_directive" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
         </subPane>
       </pane>
       <pane id="Scratches" />
-      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="HbShouldOpenHtmlAsHb" value="" />
     <property name="settings.editor.selected.configurable" value="settings.github" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/../../../client" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../../../da cancellare/TestWasdi" />
     <property name="js-jscs-nodeInterpreter" value="C:\Program Files\nodejs6\node.exe" />
     <property name="DefaultHtmlFileTemplate" value="HTML File" />
   </component>
   <component name="RecentsManager">
-    <key name="CopyFile.RECENT_KEYS">
-      <recent name="C:\Codice_Alessio\WASDI\trunk\client\app\font" />
-      <recent name="C:\Codice_Alessio\WASDI\trunk\client\app\lib" />
-      <recent name="C:\Codice_Alessio\WASDI\trunk\client\app\lib\cesium\Workers" />
-      <recent name="C:\Codice_Alessio\WASDI\trunk\client\app\lib\cesium" />
-      <recent name="C:\Codice_Alessio\WASDI\trunk\client\app\controllers" />
-    </key>
     <key name="MoveFile.RECENT_KEYS">
       <recent name="C:\Codice_Alessio\WASDI\trunk\client\app\assets\icons" />
       <recent name="C:\Codice_Alessio\WASDI\trunk\client\app\assets" />
       <recent name="C:\Codice_Alessio\WASDI\trunk\client\app\fonts\hero_light" />
       <recent name="C:\Codice_Alessio\WASDI\trunk\client\app\assets\wasdi" />
       <recent name="C:\Codice_Alessio\WASDI\trunk\client\app\assets\img" />
+    </key>
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Codice_Alessio\WASDI\trunk\client\app\assets\icons" />
+      <recent name="C:\Codice_Alessio\WASDI\trunk\client\app\font" />
+      <recent name="C:\Codice_Alessio\WASDI\trunk\client\app\lib" />
+      <recent name="C:\Codice_Alessio\WASDI\trunk\client\app\lib\cesium\Workers" />
+      <recent name="C:\Codice_Alessio\WASDI\trunk\client\app\lib\cesium" />
     </key>
   </component>
   <component name="RunManager" selected="JavaScript Debug.index.html">
@@ -409,7 +421,7 @@
     <option name="totallyTimeSpent" value="323000" />
   </component>
   <component name="ToolWindowManager">
-    <frame x="-1288" y="-8" width="1296" height="1000" extended-state="6" />
+    <frame x="-8" y="-8" width="1296" height="1000" extended-state="6" />
     <editor active="true" />
     <layout>
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.24960254" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
@@ -420,7 +432,7 @@
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32871974" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="true" content_ui="tabs" />
-      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3160323" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.33102652" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="TypeScript Compiler" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.22002329" sideWeight="0.49682036" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
@@ -445,112 +457,32 @@
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
-      <option name="time" value="133" />
+      <breakpoints>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/app/controllers/ImportController.js</url>
+          <line>38</line>
+          <option name="timeStamp" value="159" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/app/controllers/EditorController.js</url>
+          <line>436</line>
+          <option name="timeStamp" value="200" />
+        </line-breakpoint>
+      </breakpoints>
+      <option name="time" value="201" />
     </breakpoint-manager>
     <watches-manager>
       <configuration name="JavascriptDebugType">
         <watch expression="m_oController.m_bStatusPublishing" language="JavaScript" />
+        <watch expression="e" language="JavaScript" />
       </configuration>
     </watches-manager>
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/app/partials/editor.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/controllers/EditorController.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="42" column="0" selection-start-line="42" selection-start-column="0" selection-end-line="42" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/partials/editor.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="44" column="64" selection-start-line="44" selection-start-column="64" selection-end-line="44" selection-end-column="64" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/directives/tree_directive/TreeDirective.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/controllers/EditorController.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="25" column="8" selection-start-line="25" selection-start-column="8" selection-end-line="25" selection-end-column="8" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/partials/editor.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="15" column="15" selection-start-line="15" selection-start-column="15" selection-end-line="15" selection-end-column="15" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/index.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="29" column="53" selection-start-line="29" selection-start-column="49" selection-end-line="29" selection-end-column="53" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/services/ConstantsService.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/controllers/EditorController.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="158" column="54" selection-start-line="158" selection-start-column="31" selection-end-line="158" selection-end-column="54" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/services/MapService.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="70" column="4" selection-start-line="70" selection-start-column="4" selection-end-line="70" selection-end-column="4" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/partials/workspaces.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/languages/it.json">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="15" column="32" selection-start-line="15" selection-start-column="3" selection-end-line="15" selection-end-column="32" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/app/partials/home.html">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="9" column="90" selection-start-line="9" selection-start-column="80" selection-end-line="9" selection-end-column="90" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -588,13 +520,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="9" selection-end-column="1" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/directives/globe_directive/GlobeDirective.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-0.31034482">
-          <caret line="19" column="31" selection-start-line="19" selection-start-column="26" selection-end-line="19" selection-end-column="31" />
         </state>
       </provider>
     </entry>
@@ -636,13 +561,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/app/languages/it.json">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.14637147">
-          <caret line="7" column="30" selection-start-line="7" selection-start-column="30" selection-end-line="7" selection-end-column="30" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/app/services/AuthService.js">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
@@ -655,19 +573,10 @@
         <state />
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/app/index.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.522113">
-          <caret line="25" column="0" selection-start-line="25" selection-start-column="0" selection-end-line="25" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/app/lib/utils/Utils.js">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.33333334">
           <caret line="18" column="9" selection-start-line="18" selection-start-column="9" selection-end-line="18" selection-end-column="9" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -683,35 +592,10 @@
         <state />
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/app/partials/editor.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-1.1447124">
-          <caret line="1" column="44" selection-start-line="1" selection-start-column="38" selection-end-line="1" selection-end-column="44" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/services/MapService.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.60954064">
-          <caret line="127" column="4" selection-start-line="127" selection-start-column="4" selection-end-line="127" selection-end-column="4" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/bower.json">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.29274294">
           <caret line="14" column="52" selection-start-line="14" selection-start-column="52" selection-end-line="14" selection-end-column="52" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/services/WorkspaceService.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.42123893">
-          <caret line="14" column="4" selection-start-line="14" selection-start-column="4" selection-end-line="14" selection-end-column="4" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -719,23 +603,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.24070796">
           <caret line="8" column="74" selection-start-line="8" selection-start-column="74" selection-end-line="8" selection-end-column="74" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/bower_components/angular/angular.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.33274338">
-          <caret line="17541" column="18" selection-start-line="17541" selection-start-column="18" selection-end-line="17541" selection-end-column="18" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/directives/tree_directive/TreeDirective.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="64" column="69" selection-start-line="64" selection-start-column="49" selection-end-line="64" selection-end-column="69" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -743,47 +610,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="14" column="4" selection-start-line="14" selection-start-column="4" selection-end-line="14" selection-end-column="4" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/controllers/EditorController.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-6.137931">
-          <caret line="68" column="31" selection-start-line="68" selection-start-column="29" selection-end-line="68" selection-end-column="31" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/app.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="52" column="34" selection-start-line="52" selection-start-column="34" selection-end-line="52" selection-end-column="34" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/controllers/RootController.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="33" column="5" selection-start-line="33" selection-start-column="5" selection-end-line="33" selection-end-column="5" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/services/ConstantsService.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.57876104">
-          <caret line="162" column="23" selection-start-line="162" selection-start-column="23" selection-end-line="162" selection-end-column="23" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/controllers/HomeController.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.18053098">
-          <caret line="6" column="8" selection-start-line="6" selection-start-column="8" selection-end-line="6" selection-end-column="8" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -791,15 +617,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.33208954">
           <caret line="53" column="42" selection-start-line="53" selection-start-column="42" selection-end-line="53" selection-end-column="42" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/partials/home.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.12546125">
-          <caret line="12" column="9" selection-start-line="12" selection-start-column="9" selection-end-line="12" selection-end-column="9" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -807,30 +624,228 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.12546125">
           <caret line="12" column="12" selection-start-line="12" selection-start-column="3" selection-end-line="12" selection-end-column="12" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/partials/workspaces.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.12546125">
-          <caret line="6" column="65" selection-start-line="6" selection-start-column="56" selection-end-line="6" selection-end-column="65" />
-          <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/app/css/_root.scss">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="42.615383">
-          <caret line="24" column="5" selection-start-line="24" selection-start-column="5" selection-end-line="24" selection-end-column="5" />
-          <folding />
+        <state vertical-scroll-proportion="-19.781818">
+          <caret line="64" column="0" selection-start-line="64" selection-start-column="0" selection-end-line="64" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/css/style.css">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.34920636">
+          <caret line="5954" column="1" selection-start-line="5954" selection-start-column="1" selection-end-line="5954" selection-end-column="1" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/css/style.css.map">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+        </state>
+      </provider>
+      <provider editor-type-id="sourcemapFileViewerProvider">
+        <state />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/languages/it.json">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="-13.076923">
+          <caret line="20" column="30" selection-start-line="20" selection-start-column="3" selection-end-line="20" selection-end-column="30" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/controllers/HomeController.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.610586">
+          <caret line="19" column="5" selection-start-line="4" selection-start-column="0" selection-end-line="19" selection-end-column="5" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/app/partials/RootView.html">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.26814267">
-          <caret line="65" column="54" selection-start-line="65" selection-start-column="54" selection-end-line="65" selection-end-column="54" />
+        <state vertical-scroll-proportion="0.2027833">
+          <caret line="15" column="0" selection-start-line="15" selection-start-column="0" selection-end-line="15" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/controllers/RootController.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="-0.47826087">
+          <caret line="5" column="74" selection-start-line="5" selection-start-column="74" selection-end-line="5" selection-end-column="74" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/partials/home.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="38.192307">
+          <caret line="12" column="9" selection-start-line="12" selection-start-column="9" selection-end-line="12" selection-end-column="9" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/css/style.scss">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="-1.2337023">
+          <caret line="8" column="17" selection-start-line="8" selection-start-column="17" selection-end-line="8" selection-end-column="17" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/controllers/ImportController.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.4215501">
+          <caret line="34" column="25" selection-start-line="34" selection-start-column="25" selection-end-line="34" selection-end-column="25" />
+          <folding>
+            <element signature="e#0#46#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/css/_main_theme.scss">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.7972167">
+          <caret line="87" column="47" selection-start-line="87" selection-start-column="0" selection-end-line="87" selection-end-column="47" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/partials/workspaces.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="-22.884615">
+          <caret line="35" column="38" selection-start-line="35" selection-start-column="38" selection-end-line="35" selection-end-column="38" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/css/_workspaces.scss">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="-23.423077">
+          <caret line="42" column="19" selection-start-line="42" selection-start-column="19" selection-end-line="42" selection-end-column="19" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="http://code.jquery.com/jquery-1.11.0.min.js">
+      <provider selected="true" editor-type-id="httpFileEditor">
+        <state />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/lib/stomp/stomp.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.33333334">
+          <caret line="307" column="45" selection-start-line="307" selection-start-column="45" selection-end-line="307" selection-end-column="45" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/services/WorkspaceService.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="14" column="4" selection-start-line="14" selection-start-column="4" selection-end-line="14" selection-end-column="4" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/services/ConstantsService.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="19" column="35" selection-start-line="19" selection-start-column="35" selection-end-line="19" selection-end-column="35" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/app.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="-5.275862">
+          <caret line="9" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="102" selection-end-column="57" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/directives/globe_directive/GlobeDirective.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.23859648">
+          <caret line="23" column="32" selection-start-line="0" selection-start-column="2" selection-end-line="84" selection-end-column="9" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/index.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.5696721">
+          <caret line="59" column="41" selection-start-line="59" selection-start-column="41" selection-end-line="59" selection-end-column="41" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/bower_components/angular/angular.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.33333334">
+          <caret line="9935" column="8" selection-start-line="9935" selection-start-column="8" selection-end-line="9935" selection-end-column="8" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/css/_import.scss">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.15625">
+          <caret line="5" column="3" selection-start-line="5" selection-start-column="3" selection-end-line="5" selection-end-column="3" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/partials/import.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.09375">
+          <caret line="3" column="43" selection-start-line="3" selection-start-column="43" selection-end-line="3" selection-end-column="43" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/services/MapService.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="75" column="4" selection-start-line="75" selection-start-column="4" selection-end-line="75" selection-end-column="4" />
+          <folding>
+            <marker date="1480685044508" expanded="true" signature="4587:4593" placeholder="{...}" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/css/_editor.scss">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="-10.884615">
+          <caret line="61" column="7" selection-start-line="61" selection-start-column="7" selection-end-line="61" selection-end-column="7" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/partials/editor.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="-7.4363637">
+          <caret line="101" column="22" selection-start-line="101" selection-start-column="22" selection-end-line="101" selection-end-column="22" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/directives/tree_directive/TreeDirective.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="85" column="92" selection-start-line="85" selection-start-column="88" selection-end-line="85" selection-end-column="92" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/services/GlobeService.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="-9.965517">
+          <caret line="29" column="8" selection-start-line="29" selection-start-column="8" selection-end-line="29" selection-end-column="8" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/controllers/EditorController.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.3001912">
+          <caret line="334" column="36" selection-start-line="334" selection-start-column="36" selection-end-line="334" selection-end-column="36" />
           <folding />
         </state>
       </provider>

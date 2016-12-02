@@ -2,7 +2,7 @@
  * Created by p.campanella on 24/10/2016.
  */
 var EditorController = (function () {
-    function EditorController($scope, $location, $interval, oConstantsService, oAuthService, oMapService, oFileBufferService, oProductService,$state,oWorkspaceService) {
+    function EditorController($scope, $location, $interval, oConstantsService, oAuthService, oMapService, oFileBufferService, oProductService,$state,oWorkspaceService,oGlobeService) {
 
         // Reference to the needed Services
         this.m_oScope = $scope;
@@ -14,11 +14,14 @@ var EditorController = (function () {
         this.m_oFileBufferService = oFileBufferService;
         this.m_oProductService = oProductService;
         this.m_oScope.m_oController = this;
-
+        this.m_oGlobeService=oGlobeService;
         this.m_oState=$state;
         this.m_oWorkspaceService = oWorkspaceService;
         this.m_b2DMapModeOn=true;
         this.m_b3DMapModeOn=false;
+        //layer list
+        this.m_aoLayersList=[];//only id
+
         // Reconnection promise to stop the timer if the reconnection succeed or if the user change page
         this.m_oReconnectTimerPromise = null;
         this.m_oRabbitReconnect = null;
@@ -162,6 +165,7 @@ var EditorController = (function () {
         // Initialize the map
 
         oMapService.initMap('wasdiMap');
+        this.m_oGlobeService.initGlobe('cesiumContainer2');
 
         // Clean Up when exit!!
         this.m_oScope.$on('$destroy', function () {
@@ -254,8 +258,10 @@ var EditorController = (function () {
             alert('There was an error in the publish band');
             return;
         }
-
+        //add layer in list
+        this.m_aoLayersList.push(oMessage.payload.layerId);
         this.addLayerMap2D(oMessage.payload.layerId);
+        this.addLayerMap3D(oMessage.payload.layerId);
     }
 
     /**
@@ -315,17 +321,19 @@ var EditorController = (function () {
         }).addTo(oMap);
     }
 
-    /**
-     * Add layer for Cesium Globe
-     * @param sLayerId
-     */
+    ///**
+    // * Add layer for Cesium Globe
+    // * @param sLayerId
+    // */
     EditorController.prototype.addLayerMap3D = function (sLayerId) {
-        var sUrlGeoserver = 'http://localhost:8080/geoserver/ows?';//TODO CHANGE IT
+        var oGlobe=this.m_oGlobeService.getGlobe();
+        var sUrlGeoserver = this.m_oConstantsService.getWmsUrlGeoserver();
         var oWMSOptions= { // wms options
             transparent: true,
             format: 'image/png',
             crossOriginKeyword: null
-        };
+        };//crossOriginKeyword: null
+
         // WMS get GEOSERVER
         var oProvider = new Cesium.WebMapServiceImageryProvider({
             url : sUrlGeoserver,
@@ -333,7 +341,7 @@ var EditorController = (function () {
             parameters : oWMSOptions,
 
         });
-        oViewer.imageryLayers.addImageryProvider(oProvider);
+        oGlobe.imageryLayers.addImageryProvider(oProvider);
     }
 
     /**
@@ -410,6 +418,7 @@ var EditorController = (function () {
         return asBands;
     }
 
+    // OPEN BAND
     EditorController.prototype.openBandImage = function (oBand) {
         var oController=this;
         var sFileName = this.m_aoProducts[oBand.productIndex].fileName;
@@ -420,6 +429,17 @@ var EditorController = (function () {
         }).error(function (data, status) {
             console.log('publish band error');
         });
+    }
+
+    //REMOVE BAND
+    EditorController.prototype.removeBandImage = function (oBand)
+    {
+        var oController = this;
+        var sLayerId=oBand.productName+oBand.name;
+        var oMap2D = oController.m_oMapService.getMap();
+        var oMap3D = oController.m_oGlobeService.getGlobe();
+
+        //oMap2D.removeLayer(sLayerId);
     }
 
     // GENERATE TREE
@@ -509,7 +529,7 @@ var EditorController = (function () {
             alert('error');
         });
     }
-    /**************** MAP 3D/2D MODE ON/OFF *************************/
+    /**************** MAP 3D/2D MODE ON/OFF  (SWITCH)*************************/
     EditorController.prototype.onClickChangeMap=function()
     {
         var oController=this;
@@ -519,16 +539,67 @@ var EditorController = (function () {
 
         if (oController.m_b2DMapModeOn == false && oController.m_b3DMapModeOn == true) {
             oController.m_oMapService.clearMap();
+            oController.m_oGlobeService.clearGlobe();
+            oController.m_oGlobeService.initGlobe('cesiumContainer');
             oController.m_oMapService.initMap('wasdiMap2');
-            oController.m_oMapService.getMap().invalidateSize();
+
+            //setTimeout(function(){ oController.m_oMapService.getMap().invalidateSize()}, 400);
+            oController.delayInLoadMaps();
+            // Load Layers
+            oController.loadLayersMap2D();
+            oController.loadLayersMap3D();
         }
         else if (oController.m_b2DMapModeOn == true && oController.m_b3DMapModeOn == false) {
             oController.m_oMapService.clearMap();
+            oController.m_oGlobeService.clearGlobe();
             oController.m_oMapService.initMap('wasdiMap');
-            oController.m_oMapService.getMap().invalidateSize();
+            oController.m_oGlobeService.initGlobe('cesiumContainer2');
+            //setTimeout(function(){ oController.m_oMapService.getMap().invalidateSize()}, 400);
+            oController.delayInLoadMaps();
+            // Load Layers
+            oController.loadLayersMap2D();
+            oController.loadLayersMap3D();
+        }
+
+    }
+
+    EditorController.prototype.delayInLoadMaps=function()
+    {
+        var oController=this;
+        setTimeout(function(){ oController.m_oMapService.getMap().invalidateSize()}, 400);
+    }
+
+    //Use it when switch mapd 2d/3d
+    EditorController.prototype.loadLayersMap2D=function()
+    {
+        var oController=this;
+        if(utilsIsObjectNullOrUndefined(oController.m_aoLayersList))
+        {
+            console.log('Error in layers list');
+            return false;
+        }
+
+        for(var iIndexLayers=0; iIndexLayers < oController.m_aoLayersList.length; iIndexLayers++)
+        {
+            oController.addLayerMap2D(oController.m_aoLayersList[iIndexLayers]);
         }
     }
 
+    //Use it when switch mapd 2d/3d
+    EditorController.prototype.loadLayersMap3D=function()
+    {
+        var oController=this;
+        if(utilsIsObjectNullOrUndefined(oController.m_aoLayersList))
+        {
+            console.log('Error in layers list');
+            return false;
+        }
+
+        for(var iIndexLayers=0; iIndexLayers < oController.m_aoLayersList.length; iIndexLayers++)
+        {
+            oController.addLayerMap3D(oController.m_aoLayersList[iIndexLayers]);
+        }
+    }
     EditorController.$inject = [
         '$scope',
         '$location',
@@ -539,7 +610,8 @@ var EditorController = (function () {
         'FileBufferService',
         'ProductService',
         '$state',
-        'WorkspaceService'
+        'WorkspaceService',
+        'GlobeService'
     ];
 
     return EditorController;

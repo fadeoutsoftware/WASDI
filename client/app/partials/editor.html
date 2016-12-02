@@ -94,18 +94,18 @@
         </div>
 
         <!-- PANEL CESIUM GLOBE-->
-        <div class="panel panel-default map-container">
+        <div class="panel panel-default small-map-container">
             <div class="panel-heading">
                 <div class="my-button" ng-click="m_oController.onClickChangeMap()" data-toggle="tooltip" data-placement="top" title="{{'EDITOR_TOOLTIP_SWITCH_3D_2D'|translate}}">
                     <i ng-show="m_oController.m_b2DMapModeOn == true" class="fa fa-map " aria-hidden="true"></i>
                     <i  ng-show="m_oController.m_b3DMapModeOn == true" class="fa fa-globe " aria-hidden="true"></i>
                 </div>
-                <a ng-click="m_oController.m_oMapService.getMap().invalidateSize()">TEST</a>
             </div>
-            <globe ng-if="m_oController.m_b2DMapModeOn == true && m_oController.m_b3DMapModeOn == false  "></globe>
+            <!--<globe ng-if="m_oController.m_b2DMapModeOn == true && m_oController.m_b3DMapModeOn == false  "></globe>-->
 
-            <div class="small-map-container">
+            <div class="panel-body fixed-panel">
                 <div class="map" id = "wasdiMap2" ng-show="m_oController.m_b2DMapModeOn == false && m_oController.m_b3DMapModeOn == true  "></div>
+                <div class="map" id="cesiumContainer2"   ng-show="m_oController.m_b2DMapModeOn == true && m_oController.m_b3DMapModeOn == false  "></div>
             </div>
         </div>
 
@@ -114,7 +114,8 @@
     <!--------------- MAP CONTAINER --------------->
     <div class="col-lg-8 col-md-8 col-sm-8 col-xs-8 map-container">
         <div class="map" id = "wasdiMap" ng-show="m_oController.m_b2DMapModeOn == true && m_oController.m_b3DMapModeOn == false  "></div>
-        <globe ng-if="m_oController.m_b2DMapModeOn == false && m_oController.m_b3DMapModeOn == true  "></globe>
+        <!--<globe ng-if="m_oController.m_b2DMapModeOn == false && m_oController.m_b3DMapModeOn == true  "></globe>-->
+        <div id="cesiumContainer" class="panel-body" ng-show="m_oController.m_b2DMapModeOn == false && m_oController.m_b3DMapModeOn == true  "></div>
     </div>
 
 </div>

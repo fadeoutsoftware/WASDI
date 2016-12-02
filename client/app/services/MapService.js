@@ -134,9 +134,9 @@ service('MapService', ['$http',  'ConstantsService', function ($http, oConstants
         var oWasdiMap = this.m_oWasdiMap;
 
         //add event on base change
-        this.m_oWasdiMap.on('load', function(e){
-            oWasdiMap.invalidateSize();
-        });
+        //this.m_oWasdiMap.on('load', function(e){
+        //    oWasdiMap.invalidateSize();
+        //});
     }
 
     this.getMap = function () {

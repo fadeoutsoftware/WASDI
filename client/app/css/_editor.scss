@@ -42,6 +42,7 @@
     padding-left: 0;
     padding-right: 0;
     border: 1px solid $wasdi-blue-logo;
+    height: 500px;
 
     .map
     {
@@ -54,12 +55,18 @@
   //map container leaflet in sidebar
   .small-map-container
   {
+    //.fixed-panel {
+    //  min-height: 300px;
+    //  max-height: 300px;
+    //  overflow-y: scroll;
+    //}
     .map
     {
       width: auto;//500px
       height: 200px;//500px
     }
   }
+
   //OPERATION BAR
   .operations-bar
   {

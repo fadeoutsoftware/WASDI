@@ -81,7 +81,10 @@ angular.module('wasdi.TreeDirective', [])
                             //TODO CHECK IF THERE IS the BAND
 
                             if(data.node.icon == 'assets/icons/check.png')
+                            {
                                 $('#jstree').jstree(true).set_icon(data.node.id, 'assets/icons/uncheck.png');
+                                $scope.m_oController.removeBandImage(data.node.original.band);
+                            }
                             else
                             {
                                 $('#jstree').jstree(true).set_icon(data.node.id, 'assets/icons/check.png');
