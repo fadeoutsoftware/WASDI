@@ -50,7 +50,7 @@
 
                 <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
                     <ul class="nav navbar-nav navbar-right">
-                        <li ><a ui-sref="root.editor">{{"ROOT_VIEW_NAV_BAR_LINK_IMPORT"|translate}}</a></li>
+                        <li ><a ui-sref="root.publish">{{"ROOT_VIEW_NAV_BAR_LINK_IMPORT"|translate}}</a></li>
                         <li><a ui-sref="root.editor" ng-click="m_oController.onClickProcess()" >{{"ROOT_VIEW_NAV_BAR_LINK_PROCESS"|translate}}</a></li>
                         <li><a ui-sref="root.editor">{{"ROOT_VIEW_NAV_BAR_LINK_PUBLISH"|translate}}</a></li>
                     </ul>
@@ -76,19 +76,6 @@
             <!--<input type="text" class="form-control" id="usr">-->
         <!--</div>-->
     <!--</div>-->
-    <div class="col-lg-11 col-md-11 col-sm-11 col-xs-11 operations-bar" ng-show="m_oController.m_bProcessMenuIsVisible">
-        <ul>
-            <li><a><i class="fa fa-map-o fa-3x" aria-hidden="true"></i></a></li>
-            <li><a><i class="fa fa-globe fa-3x" aria-hidden="true"></i></a></li>
-            <li><a><i class="fa fa-picture-o fa-3x" aria-hidden="true"></i></a></li>
-            <li><a><i class="fa fa-map-o fa-3x" aria-hidden="true"></i></a></li>
-            <li><a><i class="fa fa-globe fa-3x" aria-hidden="true"></i></a></li>
-            <li><a><i class="fa fa-picture-o fa-3x" aria-hidden="true"></i></a></li>
-            <li><a><i class="fa fa-map-o fa-3x" aria-hidden="true"></i></a></li>
-            <li><a><i class="fa fa-globe fa-3x" aria-hidden="true"></i></a></li>
-            <li><a><i class="fa fa-picture-o fa-3x" aria-hidden="true"></i></a></li>
-        </ul>
-    </div>
 
 
     <div ui-view="maincontent"></div>

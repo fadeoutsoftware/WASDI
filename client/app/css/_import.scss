@@ -1,0 +1,86 @@
+.import-view
+{
+  margin-top: 5px;
+  padding: 0;
+  // MAP CONTAINER
+  .map-container
+  {
+
+    .map
+    {
+      //DIMENSIONS MAP
+      width: auto;//500px
+      height: 700px;//500px
+
+    }
+  }
+
+  // SIDEBAR
+  .sidenav-animated{
+    .sidenav {
+      height: 100%;
+      width: 30%;
+      position: fixed;
+      z-index: 10000;
+      top: 0;
+      left: 0;
+      background-color:$wasdi-grey;
+      //border-right: 20px solid $wasdi-blue-logo;
+      border-right: 1px solid $wasdi-blue-logo;
+
+      overflow-x: hidden;
+      transition: 0.5s;
+      padding-top: 60px;
+      color:white;
+
+    }
+
+    //.sidenav a {
+    //  padding: 8px 8px 8px 32px;
+    //  text-decoration: none;
+    //  font-size: 25px;
+    //  color: #818181;
+    //  display: block;
+    //  transition: 0.3s
+    //}
+
+    //.sidenav a:hover, .offcanvas a:focus{
+    //  color: #f1f1f1;
+    //}
+
+    .sidenav .closebtn {
+
+      position: absolute;
+      top: 0;
+      right: 25px;
+      //font-size: 25px;
+      margin-left: 50px;
+    }
+    i
+    {
+      color: $wasdi-import-left-side-navbar-color-background;
+      cursor:pointer;
+    }
+
+    @media screen and (max-height: 450px) {
+      .sidenav {padding-top: 15px;}
+      .sidenav a {font-size: 18px;}
+    }
+
+
+
+  }
+  //FIXED OPEN MENU BUTTON
+  .fixed {
+    cursor:pointer;
+    position: fixed;
+    top: 50%;
+    left: 0;
+    background: $wasdi-import-left-side-navbar-color-background;
+    color:white;
+    padding:5px 10px;
+    border: 1px solid black;
+    z-index: 1000;
+  }
+  //END SIDEBAR
+}

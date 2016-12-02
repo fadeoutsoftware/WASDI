@@ -4,7 +4,7 @@
 $wasdi-blue-logo:#43516A;
 $wasdi-green-logo: #009036;
 $wasdi-white:white;
-$wasdi-grey:#e6e6e6;
+$wasdi-grey:#f5f5f5;//#f5f5f5 #e6e6e6
 
 /*COMPLEMENTARY $wasdi-blue-logo
   white
@@ -83,3 +83,6 @@ $wasdi-sidebar-background-color:$wasdi-grey;
 //WORKSPACES
 $wasdi-list-of-files-border-color:$wasdi-blue-logo;
 $wasdi-over-icon:$wasdi-green-logo;
+
+//IMPORT
+$wasdi-import-left-side-navbar-color-background:$wasdi-blue-logo;

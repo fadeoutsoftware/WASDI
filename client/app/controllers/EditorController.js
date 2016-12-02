@@ -14,13 +14,18 @@ var EditorController = (function () {
         this.m_oFileBufferService = oFileBufferService;
         this.m_oProductService = oProductService;
         this.m_oScope.m_oController = this;
-        this.m_bStatusPublishing=false;
+
         this.m_oState=$state;
         this.m_oWorkspaceService = oWorkspaceService;
+        this.m_b2DMapModeOn=true;
+        this.m_b3DMapModeOn=false;
         // Reconnection promise to stop the timer if the reconnection succeed or if the user change page
         this.m_oReconnectTimerPromise = null;
+        this.m_oRabbitReconnect = null;
 
-
+        // Web Socket to receive workspace messages
+        var oWebSocket = new WebSocket(this.m_oConstantsService.getStompUrl());
+        this.m_oClient = Stomp.over(oWebSocket);
 
         // Here a Workpsace is needed... if it is null create a new one..
         this.m_oActiveWorkspace = this.m_oConstantsService.getActiveWorkspace();
@@ -41,9 +46,7 @@ var EditorController = (function () {
         }
         this.m_sDownloadFilePath = "";
 
-        // Web Socket to receive workspace messages
-        var oWebSocket = new WebSocket(this.m_oConstantsService.getStompUrl());
-        this.m_oClient = Stomp.over(oWebSocket);
+
 
         // Rabbit subscription
         var m_oSubscription = {};
@@ -72,14 +75,14 @@ var EditorController = (function () {
                 var oMessageResult = JSON.parse(message.body);
 
                 // Route the message
-                if (oMessageResult.messageCode=="DOWNLOAD") {
+                if (oMessageResult.messageCode == "DOWNLOAD") {
                     oController.receivedDownloadMessage(oMessageResult);
                 }
-                else if (oMessageResult.messageCode=="PUBLISH") {
+                else if (oMessageResult.messageCode == "PUBLISH") {
                     oController.receivedPublishMessage(oMessageResult);
                 }
-                else if (oMessageResult.messageCode=="PUBLISHBAND") {
-                    this.m_bStatusPublishing=false;
+                else if (oMessageResult.messageCode == "PUBLISHBAND") {
+
                     oController.receivedPublishBandMessage(oMessageResult);
                 }
 
@@ -91,12 +94,22 @@ var EditorController = (function () {
 
         }
 
+
         /**
          * Callback of the Rabbit On Connect
          */
-        var on_connect = function() {
+
+        var on_connect = function () {
             console.log('Web Stomp connected');
-            oController.m_oSubscription = oController.m_oClient.subscribe(oController.m_oActiveWorkspace.workspaceId, oRabbitCallback);
+
+            //CHECK IF sWorkSpaceId is null
+            var sWorkSpaceId = null;
+            if(utilsIsObjectNullOrUndefined(oController.m_oActiveWorkspace))
+                sWorkSpaceId = oController.m_oState.params.workSpace;
+            else
+                sWorkSpaceId = oController.m_oActiveWorkspace.workspaceId;
+
+            oController.m_oSubscription = oController.m_oClient.subscribe(sWorkSpaceId, oRabbitCallback);
 
             // Is this a re-connection?
             if (oController.m_oReconnectTimerPromise != null) {
@@ -106,17 +119,18 @@ var EditorController = (function () {
             }
         };
 
+
         /**
          * Callback for the Rabbit On Error
          */
-        var on_error =  function(sMessage) {
+        var on_error = function (sMessage) {
             console.log('Web Stomp Error');
-            if (sMessage=="LOST_CONNECTION") {
+            if (sMessage == "LOST_CONNECTION") {
                 console.log('LOST Connection');
 
                 if (oController.m_oReconnectTimerPromise == null) {
                     // Try to Reconnect
-                    oController.m_oReconnectTimerPromise = oController.m_oInterval(rabbit_reconnect,5000);
+                    oController.m_oReconnectTimerPromise = oController.m_oInterval(this.m_oRabbitReconnect, 5000);
                 }
             }
         };
@@ -135,10 +149,15 @@ var EditorController = (function () {
             oController.m_oClient = Stomp.over(oController.oWebSocket);
             oController.m_oClient.connect('guest', 'guest', oController.m_oOn_Connect, oController.m_oOn_Error, '/');
         };
+        this.m_oRabbitReconnect = rabbit_reconnect;
 
         //connect to the queue
         this.m_oClient.connect('guest', 'guest', on_connect, on_error, '/');
-
+        //$scope.$watch('m_oController.m_oConstantsService.m_oActiveWorkspace', function (newValue, oldValue, scope) {
+        //    $scope.m_oController.m_oActiveWorkspace = newValue;
+        //    if (!utilsIsObjectNullOrUndefined( $scope.m_oController.m_oActiveWorkspace)) {
+        //    }
+        //});
 
         // Initialize the map
 
@@ -165,10 +184,10 @@ var EditorController = (function () {
         // reload tree
         $scope.$watch('m_oController.m_oConstantsService.m_oActiveWorkspace', function (newValue, oldValue, scope)
         {
-            this.m_oActiveWorkspace = newValue;
-            if(!utilsIsObjectNullOrUndefined(this.m_oActiveWorkspace))
+            $scope.m_oController.m_oActiveWorkspace = newValue;
+            if(!utilsIsObjectNullOrUndefined($scope.m_oController.m_oActiveWorkspace))
             {
-                $scope.m_oController.m_oProductService.getProductListByWorkspace(this.m_oActiveWorkspace.workspaceId).success(function (data, status) {
+                $scope.m_oController.m_oProductService.getProductListByWorkspace($scope.m_oController.m_oActiveWorkspace.workspaceId).success(function (data, status) {
                     if (data != null) {
                         if (data != undefined) {
                             oController.m_aoProducts = data;
@@ -180,6 +199,8 @@ var EditorController = (function () {
                 }).error(function (data, status) {
                     console.log('Error reading product list')
                 });
+
+
             }
         });
 
@@ -234,7 +255,7 @@ var EditorController = (function () {
             return;
         }
 
-        this.addTestLayer(oMessage.payload.layerId);
+        this.addLayerMap2D(oMessage.payload.layerId);
     }
 
     /**
@@ -282,15 +303,37 @@ var EditorController = (function () {
      * Add test layer
      * @param sLayerId
      */
-    EditorController.prototype.addTestLayer = function (sLayerId) {
+    EditorController.prototype.addLayerMap2D = function (sLayerId) {
         //
         var oMap = this.m_oMapService.getMap();
+        var sUrl=this.m_oConstantsService.getWmsUrlGeoserver();//'http://localhost:8080/geoserver/ows?'
 
-        var wmsLayer = L.tileLayer.wms('http://localhost:8080/geoserver/ows?', {
+        var wmsLayer = L.tileLayer.wms(sUrl, {
             layers: 'wasdi:' + sLayerId,
             format: 'image/png',
             transparent: true
         }).addTo(oMap);
+    }
+
+    /**
+     * Add layer for Cesium Globe
+     * @param sLayerId
+     */
+    EditorController.prototype.addLayerMap3D = function (sLayerId) {
+        var sUrlGeoserver = 'http://localhost:8080/geoserver/ows?';//TODO CHANGE IT
+        var oWMSOptions= { // wms options
+            transparent: true,
+            format: 'image/png',
+            crossOriginKeyword: null
+        };
+        // WMS get GEOSERVER
+        var oProvider = new Cesium.WebMapServiceImageryProvider({
+            url : sUrlGeoserver,
+            layers:'wasdi:' + sLayerId,
+            parameters : oWMSOptions,
+
+        });
+        oViewer.imageryLayers.addImageryProvider(oProvider);
     }
 
     /**
@@ -368,12 +411,12 @@ var EditorController = (function () {
     }
 
     EditorController.prototype.openBandImage = function (oBand) {
-
+        var oController=this;
         var sFileName = this.m_aoProducts[oBand.productIndex].fileName;
 
         this.m_oFileBufferService.publishBand(sFileName,this.m_oActiveWorkspace.workspaceId, oBand.name).success(function (data, status) {0
             console.log('publishing band ' + oBand.name);
-            this.m_bStatusPublishing = true;
+
         }).error(function (data, status) {
             console.log('publish band error');
         });
@@ -437,7 +480,7 @@ var EditorController = (function () {
                 var oNode=new Object();
                 oNode.text = oaBandsItems[iIndexBandsItems].name;//LABEL NODE
                 oNode.band = oaBandsItems[iIndexBandsItems];//BAND
-                oNode.icon = "assets/icons/File.png";
+                oNode.icon = "assets/icons/uncheck.png";
                 oTree.core.data[iIndexProduct].children[1].children.push(oNode);
 
             }
@@ -465,6 +508,16 @@ var EditorController = (function () {
         }).error(function (data,status) {
             alert('error');
         });
+    }
+    /**************** MAP 3D/2D MODE ON/OFF *************************/
+    EditorController.prototype.onClickChangeMap=function()
+    {
+        oController=this;
+
+        oController.m_b2DMapModeOn = !oController.m_b2DMapModeOn;
+        oController.m_b3DMapModeOn = !oController.m_b3DMapModeOn;
+
+
     }
 
     EditorController.$inject = [

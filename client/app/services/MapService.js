@@ -91,7 +91,6 @@ service('MapService', ['$http',  'ConstantsService', function ($http, oConstants
             // maxZoom: 22
         });
 
-
         /**
          * scale control
          */
@@ -99,6 +98,7 @@ service('MapService', ['$http',  'ConstantsService', function ($http, oConstants
             position: "bottomright",
             imperial: false
         }).addTo(this.m_oWasdiMap);
+
 
         /**
          * layers control
@@ -123,6 +123,8 @@ service('MapService', ['$http',  'ConstantsService', function ($http, oConstants
             e.layer.bringToBack()
             oActiveBaseLayer = e;
         });
+
+
 
 
     }

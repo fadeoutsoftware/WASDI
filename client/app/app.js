@@ -82,9 +82,19 @@ wasdiApp.config(['$stateProvider', '$urlRouterProvider', function($stateProvider
         },
     })
 
+    //IMPORT
+    $stateProvider.state('root.publish',{
+        url: '/publish',
+
+        views:{
+            'maincontent' : { templateUrl : 'partials/import.html', controller  : 'ImportController'}
+        },
+    })
+
 }]);
 
 wasdiApp.controller("HomeController", HomeController);
 wasdiApp.controller("WorkspaceController", WorkspaceController);
 wasdiApp.controller("EditorController", EditorController);
 wasdiApp.controller("RootController",RootController);
+wasdiApp.controller("ImportController",ImportController);

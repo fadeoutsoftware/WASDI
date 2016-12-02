@@ -3,15 +3,16 @@
  */
 var RootController = (function() {
 
-    function RootController($scope, oConstantsService, oAuthService,$state ) {
+    function RootController($scope, oConstantsService, oAuthService,$state) {
         this.m_oScope = $scope;
         this.m_oScope.m_oController = this;
         this.m_oConstantsService = oConstantsService;
         this.m_oAuthService = oAuthService;
         this.m_oState=$state;
         this.m_oScope.m_oController=this;
-        this.m_bProcessMenuIsVisible=false;
-        this.m_oScope.m_oController=this;
+
+
+
         //if user is logged
         //if(!utilsIsObjectNullOrUndefined(this.m_oConstantsService.getUser()))
         //    this.m_oUser = this.m_oConstantsService.getUser();
@@ -37,6 +38,7 @@ var RootController = (function() {
         'ConstantsService',
         'AuthService',
         '$state'
+
     ];
 
     return RootController;

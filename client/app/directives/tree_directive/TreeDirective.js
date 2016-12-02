@@ -59,11 +59,14 @@ angular.module('wasdi.TreeDirective', [])
             //    }
             //
             //}
+
+
             var prova;
             $scope.$watch('m_oController.m_oTree', function (newValue, oldValue, scope)
             {
                 if(!utilsIsObjectNullOrUndefined($scope.m_oController.m_oTree))
                 {
+
                     //load tree
                     $('#jstree').jstree($scope.m_oController.m_oTree);
 
@@ -73,17 +76,26 @@ angular.module('wasdi.TreeDirective', [])
                         data.event.preventDefault();
 
                         // if the node it's a band do $scope.m_oController.openBandImage()
-                        if(data.node.children.length == 0 && $scope.m_oController.m_bStatusPublishing == false)
+                        if(data.node.children.length == 0 )
                         {
-                            //TODO CHECK IF THERE IS A BAND
-                            $scope.m_oController.openBandImage(data.node.original.band)
-                            //console.log(data.selected);
-                            //console.log(data.node.text);
-                            //console.log(data.node.id);
-                            //console.log(data.node.children);
+                            //TODO CHECK IF THERE IS the BAND
+
+                            if(data.node.icon == 'assets/icons/check.png')
+                                $('#jstree').jstree(true).set_icon(data.node.id, 'assets/icons/uncheck.png');
+                            else
+                            {
+                                $('#jstree').jstree(true).set_icon(data.node.id, 'assets/icons/check.png');
+                                $scope.m_oController.openBandImage(data.node.original.band);
+                            }
+
+
+
+
                         }
 
                     });
+
+
                 }
             });
 

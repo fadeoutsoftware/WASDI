@@ -5932,28 +5932,6 @@ button.close {
   height: auto;
   min-height: 50px;
   min-width: 50px; }
-.root-view .operations-bar {
-  margin-bottom: 10px;
-  text-align: right; }
-  .root-view .operations-bar ul {
-    list-style-type: none;
-    margin: 0;
-    padding: 0;
-    overflow: hidden;
-    background-color: #e6e6e6; }
-  .root-view .operations-bar li {
-    float: right; }
-  .root-view .operations-bar li a {
-    display: block;
-    color: #43516A;
-    text-align: center;
-    padding: 14px 16px;
-    text-decoration: none; }
-  .root-view .operations-bar li a:hover:not(.active) {
-    background-color: #1B2B46;
-    color: white; }
-  .root-view .operations-bar .active {
-    background-color: #009036; }
 .root-view .my-nav-bar {
   height: 60px; }
   .root-view .my-nav-bar .navbar-default {
@@ -5975,17 +5953,61 @@ button.close {
     color: white; }
 
 .editor-view {
-  margin-top: 30px; }
+  margin-top: 5px;
+  padding-left: 0;
+  padding-right: 0; }
   .editor-view .sidebar {
-    height: 100vh; }
+    height: 100vh;
+    background-color: #f5f5f5;
+    border-right: 1px solid #eee;
+    position: relative;
+    bottom: 0;
+    left: 0; }
     .editor-view .sidebar .panel-default {
       border-color: #43516A; }
     .editor-view .sidebar .panel-default > .panel-heading {
       background-color: #43516A;
       color: white; }
-  .editor-view .map-container .map {
+    .editor-view .sidebar .my-button {
+      background-color: white;
+      color: #44536C;
+      padding: 5px 10px;
+      margin: 0; }
+    .editor-view .sidebar .my-button:hover {
+      background-color: #1B2B46;
+      color: white; }
+  .editor-view .map-container {
+    padding-left: 0;
+    padding-right: 0;
+    border: 1px solid #43516A; }
+    .editor-view .map-container .map {
+      width: auto;
+      height: 700px; }
+  .editor-view .small-map-container .map {
     width: auto;
-    height: 700px; }
+    height: 200px; }
+  .editor-view .operations-bar {
+    text-align: right;
+    padding: 0; }
+    .editor-view .operations-bar ul {
+      list-style-type: none;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      background-color: #f5f5f5; }
+    .editor-view .operations-bar li {
+      float: right; }
+    .editor-view .operations-bar li a {
+      display: block;
+      color: #43516A;
+      text-align: center;
+      padding: 14px 16px;
+      text-decoration: none; }
+    .editor-view .operations-bar li a:hover:not(.active) {
+      background-color: #1B2B46;
+      color: white; }
+    .editor-view .operations-bar .active {
+      background-color: #009036; }
 
 .workspaces-view {
   /*
@@ -6002,9 +6024,54 @@ button.close {
       margin-right: 20px; }
   .workspaces-view .list-files .panel-default {
     border-color: #43516A; }
-  .workspaces-view .over-color i:hover {
-    background-color: white;
-    color: #009036; }
+  .workspaces-view .over-color {
+    cursor: pointer; }
+    .workspaces-view .over-color i:hover {
+      background-color: white;
+      color: #009036; }
+
+.import-view {
+  margin-top: 5px;
+  padding: 0; }
+  .import-view .map-container .map {
+    width: auto;
+    height: 700px; }
+  .import-view .sidenav-animated .sidenav {
+    height: 100%;
+    width: 30%;
+    position: fixed;
+    z-index: 10000;
+    top: 0;
+    left: 0;
+    background-color: #f5f5f5;
+    border-right: 1px solid #43516A;
+    overflow-x: hidden;
+    transition: 0.5s;
+    padding-top: 60px;
+    color: white; }
+  .import-view .sidenav-animated .sidenav .closebtn {
+    position: absolute;
+    top: 0;
+    right: 25px;
+    margin-left: 50px; }
+  .import-view .sidenav-animated i {
+    color: #43516A;
+    cursor: pointer; }
+  @media screen and (max-height: 450px) {
+    .import-view .sidenav-animated .sidenav {
+      padding-top: 15px; }
+    .import-view .sidenav-animated .sidenav a {
+      font-size: 18px; } }
+  .import-view .fixed {
+    cursor: pointer;
+    position: fixed;
+    top: 50%;
+    left: 0;
+    background: #43516A;
+    color: white;
+    padding: 5px 10px;
+    border: 1px solid black;
+    z-index: 1000; }
 
 .jstree {
   display: block;

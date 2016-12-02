@@ -62,40 +62,7 @@
 
   }
 
-  //OPERATION BAR
-  .operations-bar
-  {
-    margin-bottom: 10px;
-    text-align: right;
-    ul {
-      list-style-type: none;
-      margin: 0;
-      padding: 0;
-      overflow: hidden;
-      background-color: $wasdi-operation-bar-backgroud;
-    }
 
-    li {
-      float: right;
-    }
-
-    li a {
-      display: block;
-      color: $wasdi-operation-bar-color-icon;
-      text-align: center;
-      padding: 14px 16px;
-      text-decoration: none;
-    }
-
-    li a:hover:not(.active) {
-      background-color: $wasdi-nav-bar-color-over;
-      color: white;
-    }
-
-    .active {
-      background-color: $wasdi-nav-bar-color-selected;
-    }
-  }
 
   //NAVBAR OVERIDE
   .my-nav-bar

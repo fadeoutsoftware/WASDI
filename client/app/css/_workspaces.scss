@@ -40,7 +40,9 @@
   // COLOR OVER A TD
   .over-color
   {
+    cursor:pointer;
     i:hover {
+
       background-color:white;
       color:$wasdi-over-icon;
     }
