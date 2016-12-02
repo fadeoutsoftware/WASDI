@@ -100,6 +100,7 @@
                     <i ng-show="m_oController.m_b2DMapModeOn == true" class="fa fa-map " aria-hidden="true"></i>
                     <i  ng-show="m_oController.m_b3DMapModeOn == true" class="fa fa-globe " aria-hidden="true"></i>
                 </div>
+                <a ng-click="m_oController.m_oMapService.getMap().invalidateSize()">TEST</a>
             </div>
             <globe ng-if="m_oController.m_b2DMapModeOn == true && m_oController.m_b3DMapModeOn == false  "></globe>
 
