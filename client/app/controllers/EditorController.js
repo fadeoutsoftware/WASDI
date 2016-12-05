@@ -21,7 +21,7 @@ var EditorController = (function () {
         this.m_b3DMapModeOn=false;
         //layer list
         this.m_aoLayersList=[];//only id
-
+        this.m_aoProcessesRunning=[];
         // Reconnection promise to stop the timer if the reconnection succeed or if the user change page
         this.m_oReconnectTimerPromise = null;
         this.m_oRabbitReconnect = null;
@@ -49,21 +49,17 @@ var EditorController = (function () {
         }
         this.m_sDownloadFilePath = "";
 
-
-
         // Rabbit subscription
         var m_oSubscription = {};
 
         // Array of products to show
         this.m_aoProducts = [];
 
-
         // Self reference for callbacks
         var oController = this;
 
         //Set default value tree
         this.m_oTree=null;
-
 
         /**
          * Rabbit Callback: receives the Messages
@@ -262,6 +258,7 @@ var EditorController = (function () {
         this.m_aoLayersList.push(oMessage.payload.layerId);
         this.addLayerMap2D(oMessage.payload.layerId);
         this.addLayerMap3D(oMessage.payload.layerId);
+        this.removeProcessInListOfRunningProcesses("test");
     }
 
     /**
@@ -319,6 +316,7 @@ var EditorController = (function () {
             format: 'image/png',
             transparent: true
         }).addTo(oMap);
+
     }
 
     ///**
@@ -326,7 +324,7 @@ var EditorController = (function () {
     // * @param sLayerId
     // */
     EditorController.prototype.addLayerMap3D = function (sLayerId) {
-        var oGlobe=this.m_oGlobeService.getGlobe();
+        var oGlobeLayers=this.m_oGlobeService.getGlobeLayers();
         var sUrlGeoserver = this.m_oConstantsService.getWmsUrlGeoserver();
         var oWMSOptions= { // wms options
             transparent: true,
@@ -341,7 +339,8 @@ var EditorController = (function () {
             parameters : oWMSOptions,
 
         });
-        oGlobe.imageryLayers.addImageryProvider(oProvider);
+        oGlobeLayers.addImageryProvider(oProvider);
+        //this.test=oGlobeLayers.addImageryProvider(oProvider);
     }
 
     /**
@@ -425,6 +424,7 @@ var EditorController = (function () {
 
         this.m_oFileBufferService.publishBand(sFileName,this.m_oActiveWorkspace.workspaceId, oBand.name).success(function (data, status) {0
             console.log('publishing band ' + oBand.name);
+            oController.pushProcessInListOfRunningProcesses("test");
 
         }).error(function (data, status) {
             console.log('publish band error');
@@ -434,12 +434,55 @@ var EditorController = (function () {
     //REMOVE BAND
     EditorController.prototype.removeBandImage = function (oBand)
     {
+        if(utilsIsObjectNullOrUndefined(oBand) == true)
+        {
+            console.log("Error in removeBandImage")
+            return false;
+        }
         var oController = this;
-        var sLayerId=oBand.productName+oBand.name;
+        var sLayerId="wasdi:"+oBand.productName+ "_" +oBand.name;
         var oMap2D = oController.m_oMapService.getMap();
-        var oMap3D = oController.m_oGlobeService.getGlobe();
+        var oGlobeLayers = oController.m_oGlobeService.getGlobeLayers();
 
-        //oMap2D.removeLayer(sLayerId);
+        //remove layer in 2D map
+        oMap2D.eachLayer(function(layer)
+        {
+            if(utilsIsStrNullOrEmpty(sLayerId) == false && layer.options.layers == sLayerId)
+                oMap2D.removeLayer(layer);
+        });
+
+        //remove layer in 3D globe
+        var oLayer = null;
+        var bCondition = true;
+        var iIndexLayer = 0;
+
+        while(bCondition)
+        {
+            oLayer = oGlobeLayers.get(iIndexLayer);
+
+            if(utilsIsStrNullOrEmpty(sLayerId) == false && utilsIsObjectNullOrUndefined(oLayer) == false
+                && oLayer.imageryProvider.layers == sLayerId)
+            {
+                bCondition=false;
+                oLayer=oGlobeLayers.remove(oLayer);
+            }
+            iIndexLayer++;
+        }
+
+        //Remove layer from layers list
+        var iLenghtLayersList;
+        if(utilsIsObjectNullOrUndefined(oController.m_aoLayersList))
+            iLenghtLayersList = 0;
+        else
+            iLenghtLayersList=oController.m_aoLayersList.length;
+
+        for (var iIndex=0; iIndex < iLenghtLayersList ;iIndex++)
+        {
+            if(utilsIsStrNullOrEmpty(sLayerId) == false && utilsIsSubstring(sLayerId,oController.m_aoLayersList[iIndex]))
+            {
+                oController.m_aoLayersList.splice(iIndex);
+            }
+        }
     }
 
     // GENERATE TREE
@@ -585,7 +628,7 @@ var EditorController = (function () {
         }
     }
 
-    //Use it when switch mapd 2d/3d
+    //Use it when switch map 2d/3d
     EditorController.prototype.loadLayersMap3D=function()
     {
         var oController=this;
@@ -600,6 +643,50 @@ var EditorController = (function () {
             oController.addLayerMap3D(oController.m_aoLayersList[iIndexLayers]);
         }
     }
+
+    /* Push process in List of Running Processes (in server)
+    * */
+
+    EditorController.prototype.pushProcessInListOfRunningProcesses=function(sProcess)
+    {
+        //if str == null or == ""
+        if(utilsIsStrNullOrEmpty(sProcess))
+            return false;
+
+        var oController=this;
+        oController.m_aoProcessesRunning.push(sProcess);
+
+    }
+
+    /*
+    * */
+    EditorController.prototype.removeProcessInListOfRunningProcesses=function(sProcess)
+    {
+        if(utilsIsStrNullOrEmpty(sProcess))
+            return false;
+
+        var oController=this;
+        var iLength;
+
+        if(utilsIsObjectNullOrUndefined(oController.m_aoLayersList) == true)
+        {
+            iLength = 0;
+        }
+        else
+        {
+            iLength = oController.m_aoLayersList.length;
+        }
+
+        for(var iIndex = 0;iIndex < iLength ;iIndex++ )
+        {
+            if(oController.m_aoProcessesRunning[iIndex] == sProcess)
+            {
+                oController.m_aoProcessesRunning.splice(iIndex);
+            }
+        }
+        oController.m_oScope.$apply();
+    }
+
     EditorController.$inject = [
         '$scope',
         '$location',

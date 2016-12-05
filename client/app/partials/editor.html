@@ -58,38 +58,38 @@
             <!-- MY TREE DIRECTIVE -->
             <tree ngModelTree="prova" ></tree>
 
-            <form class="form-horizontal" role="form">
-                <div class="form-group">
-                    <label for="userName" class="col-sm-2  control-label">File Url: </label>
-                    <div class="col-sm-10">
-                        <input type="text" class="form-control" id="userName" ng-model="m_oController.m_sDownloadFilePath">
-                    </div>
-                </div>
-            </form>
-            <br>
-            <a ng-click="m_oController.downloadEOImage(m_oController.m_sDownloadFilePath)">Download</a>
-            <br>
-            <a ng-click="m_oController.publish(m_oController.m_sDownloadFilePath)">Publish</a>
-            <br>
-            <br>
+            <!--<form class="form-horizontal" role="form">-->
+                <!--<div class="form-group">-->
+                    <!--<label for="userName" class="col-sm-2  control-label">File Url: </label>-->
+                    <!--<div class="col-sm-10">-->
+                        <!--<input type="text" class="form-control" id="userName" ng-model="m_oController.m_sDownloadFilePath">-->
+                    <!--</div>-->
+                <!--</div>-->
+            <!--</form>-->
+            <!--<br>-->
+            <!--<a ng-click="m_oController.downloadEOImage(m_oController.m_sDownloadFilePath)">Download</a>-->
+            <!--<br>-->
+            <!--<a ng-click="m_oController.publish(m_oController.m_sDownloadFilePath)">Publish</a>-->
+            <!--<br>-->
+            <!--<br>-->
 
 
-            <!--<table>-->
-                <!--<tr ng-repeat="oProductItem in m_oController.getProductList()">-->
-                    <!--<td>{{oProductItem.name}}</td>-->
-                    <!--<td>-->
-                        <!--<table>-->
-                            <!--<tr ng-repeat="oBandItem in m_oController.getBandsForProduct(oProductItem)">-->
-                                <!--<td><a ng-click="m_oController.openBandImage(oBandItem)">{{oBandItem.name}}</a></td>-->
-                            <!--</tr>-->
-                        <!--</table>-->
-                    <!--</td>-->
-                <!--</tr>-->
-            <!--</table>-->
+            <!--&lt;!&ndash;<table>&ndash;&gt;-->
+                <!--&lt;!&ndash;<tr ng-repeat="oProductItem in m_oController.getProductList()">&ndash;&gt;-->
+                    <!--&lt;!&ndash;<td>{{oProductItem.name}}</td>&ndash;&gt;-->
+                    <!--&lt;!&ndash;<td>&ndash;&gt;-->
+                        <!--&lt;!&ndash;<table>&ndash;&gt;-->
+                            <!--&lt;!&ndash;<tr ng-repeat="oBandItem in m_oController.getBandsForProduct(oProductItem)">&ndash;&gt;-->
+                                <!--&lt;!&ndash;<td><a ng-click="m_oController.openBandImage(oBandItem)">{{oBandItem.name}}</a></td>&ndash;&gt;-->
+                            <!--&lt;!&ndash;</tr>&ndash;&gt;-->
+                        <!--&lt;!&ndash;</table>&ndash;&gt;-->
+                    <!--&lt;!&ndash;</td>&ndash;&gt;-->
+                <!--&lt;!&ndash;</tr>&ndash;&gt;-->
+            <!--&lt;!&ndash;</table>&ndash;&gt;-->
 
-            <p>
-                <span ng-click="m_oController.addTestLayer('S1A_IW_GRDH_1SSV_20150213T095824_20150213T095849_004603_005AB7_5539')">Add Test Layer</span>
-            </p>
+            <!--<p>-->
+                <!--<span ng-click="m_oController.addTestLayer('S1A_IW_GRDH_1SSV_20150213T095824_20150213T095849_004603_005AB7_5539')">Add Test Layer</span>-->
+            <!--</p>-->
 
         </div>
 
@@ -118,6 +118,13 @@
         <div id="cesiumContainer" class="panel-body" ng-show="m_oController.m_b2DMapModeOn == false && m_oController.m_b3DMapModeOn == true  "></div>
     </div>
 
+    <!------------------ STATUS BAR ------------------->
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 map-container status-bar ">
+        <span ng-repeat="oProcess in m_oController.m_aoProcessesRunning track by $index">
+            <i class="fa fa-spinner fa-pulse fa-fw"></i>{{oProcess}}
+        </span>
+
+    </div>
 </div>
 
 <script>

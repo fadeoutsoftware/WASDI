@@ -6009,6 +6009,18 @@ button.close {
       color: white; }
     .editor-view .operations-bar .active {
       background-color: #009036; }
+  .editor-view .status-bar {
+    position: fixed;
+    bottom: 0;
+    padding: 0;
+    height: 31px;
+    z-index: 1000;
+    background-color: #848E9F;
+    border-style: solid;
+    border-width: 1px;
+    color: #43516A; }
+    .editor-view .status-bar i {
+      color: white; }
 
 .workspaces-view {
   /*

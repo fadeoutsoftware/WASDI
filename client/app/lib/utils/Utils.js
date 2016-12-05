@@ -32,3 +32,16 @@ function utilsIsEmail(sValue)
     var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
     return re.test(sValue);
 }
+
+//sString1 contains sString2
+function utilsIsSubstring(sString1,sString2)
+{
+    if(utilsIsStrNullOrEmpty(sString1) || utilsIsStrNullOrEmpty(sString2))
+    {
+        console.log("Error, Invalid String ")
+    }
+
+    if(sString1.indexOf(sString2) == -1)
+        return false;
+    return true;
+}

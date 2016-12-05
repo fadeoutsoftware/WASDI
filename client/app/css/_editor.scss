@@ -103,4 +103,23 @@
     }
 
   }
+
+  //STATUS BAR - FOOTER
+  .status-bar
+  {
+    position:fixed;
+    bottom: 0;
+    padding:0;
+    height: 31px;
+    z-index: 1000;
+    background-color: $wasdi-status-bar-color;
+    border-style: solid;
+    border-width: 1px;
+    color:$wasdi-blue-logo;
+    i
+    {
+      color:$wasdi-white;
+    }
+  }
+
 }
