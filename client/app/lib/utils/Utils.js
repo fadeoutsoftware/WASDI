@@ -45,3 +45,21 @@ function utilsIsSubstring(sString1,sString2)
         return false;
     return true;
 }
+
+
+function utilsFindBootstrapEnvironment()
+{
+    var envs = ["xs","sm","md","lg"];//extra small,small,medium,large screen
+    var $el = $('#screen-size-helper');
+    for (var i = envs.length - 1; i >= 0; i--) {
+        var env = envs[i];
+
+        $el.addClass('hidden-'+env);
+        var bIsElemHidden = $el.is(':hidden');
+        $el.removeClass('hidden-'+env);
+
+        if (bIsElemHidden == true) {
+            return env;
+        }
+    }
+}

@@ -12,12 +12,11 @@
 
 body
 {
-  margin: 0px;
+  margin:0px;
   font-family: $wasdi-font-web;
   font-size: $wasdi-font-size;
   line-height: $wasdi-line-height;
   font-weight: $wasdi-font-weight;
-
 }
 //LEAFLET MAP 100% "SCREEN"
 html, body, #map {
@@ -28,7 +27,11 @@ html, body, #map {
 }
 //CESIUM GLOBE 100% "SCREEN"
 html, body, #cesiumContainer {
-  width: 100%; height: 100%; margin: 0; padding: 0; overflow: hidden;
+  width: 100%;
+  //height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
 }
 
 h1

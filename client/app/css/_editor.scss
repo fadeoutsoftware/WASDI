@@ -3,6 +3,7 @@
   margin-top:5px;
   padding-left: 0;
   padding-right: 0;
+
   //SIDEBAR
   .sidebar
   {
@@ -26,14 +27,14 @@
     //override mybutton class in style.scss
     .my-button
     {
-      background-color:$wasdi-white;
-      color:$wasdi-button-default-color;
-      padding: 5px 10px;
+
+      color:white;
+      padding: 0;
       margin: 0;
     }
     .my-button:hover{
-      background-color: $wasdi-button-over-color;
-      color: white;
+      color: $wasdi-button-over-color;
+      background-color:transparent;
     }
   }
   //map container leaflet
@@ -42,15 +43,16 @@
     padding-left: 0;
     padding-right: 0;
     border: 1px solid $wasdi-blue-logo;
-    height: 500px;
 
+    //leaflet
     .map
     {
       //DIMENSIONS MAP
       width: auto;//500px
-      height: 700px;//500px
+      height: 650px;
 
     }
+
   }
   //map container leaflet in sidebar
   .small-map-container
@@ -65,6 +67,7 @@
       width: auto;//500px
       height: 200px;//500px
     }
+
   }
 
   //OPERATION BAR
@@ -72,20 +75,23 @@
   {
 
     text-align: right;
-    padding: 0 ;
+    margin-top: -45px;
     ul {
       list-style-type: none;
-      margin: 0;
+      //margin-bottom: 0;
+      //margin-top: -20px;
       padding: 0;
       overflow: hidden;
       background-color: $wasdi-operation-bar-backgroud;
     }
 
     li {
+
       float: right;
     }
 
     li a {
+
       display: block;
       color: $wasdi-operation-bar-color-icon;
       text-align: center;
@@ -115,10 +121,18 @@
     background-color: $wasdi-status-bar-color;
     border-style: solid;
     border-width: 1px;
-    color:$wasdi-blue-logo;
-    i
+    color:black;
+    vertical-align: center;
+    //center text same value as height
+    line-height: 31px;
+    span
     {
-      color:$wasdi-white;
+      // limit width of span
+      display: block;
+      width: 200px;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
     }
   }
 

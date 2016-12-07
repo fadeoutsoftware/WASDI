@@ -1,5 +1,6 @@
 .root-view
 {
+  overflow-y: scroll;
   // LOGGED USER
   .logged-user
   {
@@ -30,9 +31,19 @@
     //SPAN SUBTITLE
     .subtitle-span
     {
-      float:left;
-      margin-left:10%;
-      color:$wasdi-subtitle-color;
+
+      @media only screen and (min-width: 320px)
+      {
+        display: none;
+      }
+
+      @media only screen and (min-width: 961px)
+      {
+        display:inherit;
+        float:left;
+        margin-left:10%;
+        color:$wasdi-subtitle-color;
+      }
     }
 
     ul {

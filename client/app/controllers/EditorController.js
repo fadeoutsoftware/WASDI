@@ -129,7 +129,7 @@ var EditorController = (function () {
 
                 if (oController.m_oReconnectTimerPromise == null) {
                     // Try to Reconnect
-                    oController.m_oReconnectTimerPromise = oController.m_oInterval(this.m_oRabbitReconnect, 5000);
+                    oController.m_oReconnectTimerPromise = oController.m_oInterval(oController.m_oRabbitReconnect, 5000);
                 }
             }
         };
@@ -258,7 +258,7 @@ var EditorController = (function () {
         this.m_aoLayersList.push(oMessage.payload.layerId);
         this.addLayerMap2D(oMessage.payload.layerId);
         this.addLayerMap3D(oMessage.payload.layerId);
-        this.removeProcessInListOfRunningProcesses("test");
+        this.removeProcessInListOfRunningProcesses(oMessage.payload.layerId);
     }
 
     /**
@@ -424,7 +424,7 @@ var EditorController = (function () {
 
         this.m_oFileBufferService.publishBand(sFileName,this.m_oActiveWorkspace.workspaceId, oBand.name).success(function (data, status) {0
             console.log('publishing band ' + oBand.name);
-            oController.pushProcessInListOfRunningProcesses("test");
+            oController.pushProcessInListOfRunningProcesses(oBand.productName + "_" + oBand.name);
 
         }).error(function (data, status) {
             console.log('publish band error');
@@ -439,10 +439,13 @@ var EditorController = (function () {
             console.log("Error in removeBandImage")
             return false;
         }
+
         var oController = this;
         var sLayerId="wasdi:"+oBand.productName+ "_" +oBand.name;
+
         var oMap2D = oController.m_oMapService.getMap();
         var oGlobeLayers = oController.m_oGlobeService.getGlobeLayers();
+
 
         //remove layer in 2D map
         oMap2D.eachLayer(function(layer)
@@ -572,6 +575,7 @@ var EditorController = (function () {
             alert('error');
         });
     }
+
     /**************** MAP 3D/2D MODE ON/OFF  (SWITCH)*************************/
     EditorController.prototype.onClickChangeMap=function()
     {
@@ -580,6 +584,7 @@ var EditorController = (function () {
         oController.m_b2DMapModeOn = !oController.m_b2DMapModeOn;
         oController.m_b3DMapModeOn = !oController.m_b3DMapModeOn;
 
+        //3D MAP
         if (oController.m_b2DMapModeOn == false && oController.m_b3DMapModeOn == true) {
             oController.m_oMapService.clearMap();
             oController.m_oGlobeService.clearGlobe();
@@ -591,7 +596,7 @@ var EditorController = (function () {
             // Load Layers
             oController.loadLayersMap2D();
             oController.loadLayersMap3D();
-        }
+        }//2D MAP
         else if (oController.m_b2DMapModeOn == true && oController.m_b3DMapModeOn == false) {
             oController.m_oMapService.clearMap();
             oController.m_oGlobeService.clearGlobe();
@@ -653,12 +658,37 @@ var EditorController = (function () {
         if(utilsIsStrNullOrEmpty(sProcess))
             return false;
 
+        var iNumberOfProcessesRunning;
+        var bFind=false;
         var oController=this;
-        oController.m_aoProcessesRunning.push(sProcess);
+
+        //check the number of processes
+        if(utilsIsObjectNullOrUndefined(oController.m_aoProcessesRunning)==true)
+        {
+            iNumberOfProcessesRunning = 0;
+        }
+        else
+        {
+            iNumberOfProcessesRunning = oController.m_aoProcessesRunning.length;
+        }
+        //it doesn't push the process if it already exist
+        for( var iIndexProcesses = 0; iIndexProcesses < iNumberOfProcessesRunning ; iIndexProcesses++)
+        {
+            // if it find a process in ProcessesRunningList it doesn't need to push it
+             if(oController.m_aoProcessesRunning[iIndexProcesses] == sProcess)
+             {
+                 bFind=true;
+                 break;
+             }
+        }
+
+        if(bFind == false)
+            oController.m_aoProcessesRunning.push(sProcess);
 
     }
 
     /*
+    Remove process in List of Running processes
     * */
     EditorController.prototype.removeProcessInListOfRunningProcesses=function(sProcess)
     {
@@ -685,6 +715,26 @@ var EditorController = (function () {
             }
         }
         oController.m_oScope.$apply();
+    }
+
+    /*
+    * */
+    EditorController.prototype.isEmptyListOfRunningProcesses = function()
+    {
+        var oController = this;
+        if(utilsIsObjectNullOrUndefined(oController.m_aoProcessesRunning) == false)
+        {
+            if(oController.m_aoProcessesRunning.length == 0)
+                return true;
+            else
+                return false;
+
+        }
+        else
+        {
+            return true;
+        }
+
     }
 
     EditorController.$inject = [

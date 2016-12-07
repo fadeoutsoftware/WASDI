@@ -76,10 +76,9 @@ angular.module('wasdi.TreeDirective', [])
                         data.event.preventDefault();
 
                         // if the node it's a band do $scope.m_oController.openBandImage()
-                        if(data.node.children.length == 0 )
+                        if($scope.m_oController.isEmptyListOfRunningProcesses() == true && data.node.children.length == 0 )
                         {
-                            //TODO CHECK IF THERE IS the BAND
-
+                            //TODO CHECK IF THERE IS THE BAND
                             if(data.node.icon == 'assets/icons/check.png')
                             {
                                 $('#jstree').jstree(true).set_icon(data.node.id, 'assets/icons/uncheck.png');
@@ -90,9 +89,6 @@ angular.module('wasdi.TreeDirective', [])
                                 $('#jstree').jstree(true).set_icon(data.node.id, 'assets/icons/check.png');
                                 $scope.m_oController.openBandImage(data.node.original.band);
                             }
-
-
-
 
                         }
 

@@ -3,7 +3,7 @@
  */
 var RootController = (function() {
 
-    function RootController($scope, oConstantsService, oAuthService,$state) {
+    function RootController($scope, oConstantsService, oAuthService, $state) {
         this.m_oScope = $scope;
         this.m_oScope.m_oController = this;
         this.m_oConstantsService = oConstantsService;
@@ -33,6 +33,7 @@ var RootController = (function() {
         oController.m_oConstantsService.logOut();
         oController.m_oState.go("home");
     }
+
     RootController.$inject = [
         '$scope',
         'ConstantsService',
