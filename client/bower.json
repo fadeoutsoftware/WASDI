@@ -17,6 +17,7 @@
     "angular-ui-router" : "~0.2.x",
     "fontawesome": "^4.7.0",
     "bootstrap-sass" : "~3.3.7",
-    "jstree" : "^3.3.3"
+    "jstree" : "^3.3.3",
+    "leaflet-draw": "0.4.7"
   }
 }

@@ -5901,63 +5901,61 @@ button.close {
   src: url(../fonts/hero_light/Hero_Light.ttf);
   src: url(../fonts/hero_light/Hero_Light.woff);
   src: url(../fonts/hero_light/Hero_Light.svg); }
-.root-view {
-  overflow-y: scroll; }
-  .root-view .logged-user .link {
-    margin-top: 7px; }
-    .root-view .logged-user .link i {
-      float: left;
-      color: #009036; }
-    .root-view .logged-user .link a {
-      cursor: pointer; }
-  .root-view .logged-user .user-span {
-    margin-top: 7px;
-    float: right; }
-  @media only screen and (min-width: 320px) {
-    .root-view .logged-user .subtitle-span {
-      display: none; } }
-  @media only screen and (min-width: 961px) {
-    .root-view .logged-user .subtitle-span {
-      display: inherit;
-      float: left;
-      margin-left: 10%;
-      color: #009036; } }
-  .root-view .logged-user ul {
-    float: right;
-    list-style-type: none; }
-    .root-view .logged-user ul li {
-      float: left; }
-    .root-view .logged-user ul li a {
-      color: #009036;
-      text-align: center;
-      padding: 14px 16px;
-      text-decoration: none; }
-  .root-view .brand-logo {
-    content: url("../assets/wasdi/logoScritta_wasdi.png");
-    width: 100px;
-    margin-top: -20px;
-    height: auto;
-    min-height: 50px;
-    min-width: 50px; }
-  .root-view .my-nav-bar {
-    height: 60px; }
-    .root-view .my-nav-bar .navbar-default {
-      background-color: #43516A; }
-    .root-view .my-nav-bar .navbar-default .navbar-nav > li > a {
-      color: white; }
-    .root-view .my-nav-bar .navbar-default .navbar-nav > .active {
-      color: white;
-      background: #2C6469; }
-    .root-view .my-nav-bar .navbar-default .navbar-nav > .active > a,
-    .root-view .my-nav-bar .navbar-default .navbar-nav > .active > a:hover,
-    .root-view .my-nav-bar .navbar-default .navbar-nav > .active > a:focus {
-      color: white;
-      background: #2C6469; }
-    .root-view .my-nav-bar .navbar-default .navbar-toggle .icon-bar {
-      background-color: white; }
-    .root-view .my-nav-bar .navbar-default .navbar-nav > li > a:hover, .root-view .my-nav-bar .navbar-default .navbar-nav > li > a:focus {
-      background-color: #2C6469;
-      color: white; }
+.root-view .logged-user .link {
+  margin-top: 7px; }
+  .root-view .logged-user .link i {
+    float: left;
+    color: #009036; }
+  .root-view .logged-user .link a {
+    cursor: pointer; }
+.root-view .logged-user .user-span {
+  margin-top: 7px;
+  float: right; }
+@media only screen and (min-width: 320px) {
+  .root-view .logged-user .subtitle-span {
+    display: none; } }
+@media only screen and (min-width: 961px) {
+  .root-view .logged-user .subtitle-span {
+    display: inherit;
+    float: left;
+    margin-left: 10%;
+    color: #009036; } }
+.root-view .logged-user ul {
+  float: right;
+  list-style-type: none; }
+  .root-view .logged-user ul li {
+    float: left; }
+  .root-view .logged-user ul li a {
+    color: #009036;
+    text-align: center;
+    padding: 14px 16px;
+    text-decoration: none; }
+.root-view .brand-logo {
+  content: url("../assets/wasdi/logoScritta_wasdi.png");
+  width: 100px;
+  margin-top: -20px;
+  height: auto;
+  min-height: 50px;
+  min-width: 50px; }
+.root-view .my-nav-bar {
+  height: 60px; }
+  .root-view .my-nav-bar .navbar-default {
+    background-color: #43516A; }
+  .root-view .my-nav-bar .navbar-default .navbar-nav > li > a {
+    color: white; }
+  .root-view .my-nav-bar .navbar-default .navbar-nav > .active {
+    color: white;
+    background: #2C6469; }
+  .root-view .my-nav-bar .navbar-default .navbar-nav > .active > a,
+  .root-view .my-nav-bar .navbar-default .navbar-nav > .active > a:hover,
+  .root-view .my-nav-bar .navbar-default .navbar-nav > .active > a:focus {
+    color: white;
+    background: #2C6469; }
+  .root-view .my-nav-bar .navbar-default .navbar-toggle .icon-bar {
+    background-color: white; }
+  .root-view .my-nav-bar .navbar-default .navbar-nav > li > a:hover, .root-view .my-nav-bar .navbar-default .navbar-nav > li > a:focus {
+    background-color: #2C6469;
+    color: white; }
 
 .editor-view {
   margin-top: 5px;
@@ -5984,8 +5982,9 @@ button.close {
       background-color: transparent; }
   .editor-view .map-container {
     padding-left: 0;
-    padding-right: 0;
-    border: 1px solid #43516A; }
+    padding-right: 0px;
+    border: 1px solid #43516A;
+    margin-bottom: 35px; }
     .editor-view .map-container .map {
       width: auto;
       height: 650px; }
@@ -6104,23 +6103,18 @@ button.close {
   min-height: 30%; }
 
 body {
-  margin: 0px;
   font-family: "Hero-Light", Helvetica, sans-serif;
   font-size: 14px;
   line-height: 1.42857;
   font-weight: 600; }
 
 html, body, #map {
-  height: 100%;
-  width: 100%;
   padding: 0px;
   margin: 0px; }
 
 html, body, #cesiumContainer {
-  width: 100%;
   margin: 0;
-  padding: 0;
-  overflow: hidden; }
+  padding: 0; }
 
 h1 {
   font-family: "Hero-Light", Helvetica, sans-serif;

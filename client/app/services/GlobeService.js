@@ -26,9 +26,18 @@ service('GlobeService', ['$http',  'ConstantsService', function ($http, oConstan
 
     this.initGlobe = function(sGlobeDiv)
     {
-        // default globe
-        this.m_oWasdiGlobe = new Cesium.Viewer(sGlobeDiv,this.oGlobeOptions);
-        this.m_aoLayers =  this.m_oWasdiGlobe.imageryLayers;
+
+        if (window.WebGLRenderingContext)//check if browser supports WebGL
+        {
+            // browser supports WebGL
+            // default globe
+            this.m_oWasdiGlobe = new Cesium.Viewer(sGlobeDiv, this.oGlobeOptions);
+            this.m_aoLayers = this.m_oWasdiGlobe.imageryLayers;
+        }
+        else
+        {
+            //TODO ERROR  browser dosen't supports WebGL
+        }
     }
     //clear globe
     this.clearGlobe=function()

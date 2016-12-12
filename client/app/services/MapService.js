@@ -92,11 +92,37 @@ service('MapService', ['$http',  'ConstantsService', function ($http, oConstants
             this.initTileLayer();
         }
 
+        /*  it need disabled keyword, ther'is a bug :
+        *   https://github.com/Leaflet/Leaflet/issues/1228
+        *   thw window scroll vertically when i click (only if the browser window are smaller)
+        *   alternative solution (hack):
+        *   L.Map.addInitHook(function() {
+        *   return L.DomEvent.off(this._container, "mousedown", this.keyboard._onMouseDown);
+        *   });
+        */
         this.m_oWasdiMap = L.map(sMapDiv, {
             zoomControl: false,
             layers: [this.m_oOSMBasic],
+            keyboard: false,
+
             // maxZoom: 22
         });
+
+        // add draw search
+        var drawnItems = new L.FeatureGroup();
+        this.m_oWasdiMap.addLayer(drawnItems);
+        var drawControl = new L.Control.Draw({
+            position:'topright',
+            draw:{
+                marker:false,
+            },
+            edit: {
+                featureGroup: drawnItems
+            }
+        });
+
+
+        this.m_oWasdiMap.addControl(drawControl);
 
         /**
          * scale control
@@ -131,7 +157,6 @@ service('MapService', ['$http',  'ConstantsService', function ($http, oConstants
             oActiveBaseLayer = e;
         });
 
-        var oWasdiMap = this.m_oWasdiMap;
 
         //add event on base change
         //this.m_oWasdiMap.on('load', function(e){
