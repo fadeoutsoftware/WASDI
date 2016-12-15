@@ -1,39 +1,18 @@
 @import "main_theme";
-
 .login-view
 {
-
-  font-family: Arial;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  height: 50vh;
-  width: 100vw;
-  background-color: $wasdi-login-color-background;
-  position: relative;//for center login content element
-  .logo-link
+  .login-top
   {
-    cursor:pointer;
-    //LOGO CSS
 
-    .logo
-    {
-      content: $wasdi-brand-logo-login; // set 'src' attribute from CSS
-      width: $wasdi-brand-logo-login-size;
-      margin-top: -20px;
-      height: auto;
-      min-height: 50px;
-      min-width: 50px;
-
-      //POSITIONING ELEMENT
-      position: absolute;
-      top: 135%;
-      left: 50%;
-      transform: translate(-50%, -50%);
+    font-family: Arial;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    height: 50vh;
+    width: 100vw;
+    background-color: $wasdi-login-color-background;
+    position: relative;//for center login content element
 
 
-
-
-    }
     //WRITE(IMAGE) CSS
     .write-logo
     {
@@ -43,7 +22,8 @@
       height: auto;
       min-height: 50px;
       min-width: 250px;
-
+      max-width:512px;
+      max-height:102px;
       //POSITIONING ELEMENT
       position: absolute;
       top: 85%;
@@ -51,62 +31,114 @@
       transform: translate(-50%, -50%);
 
     }
+
+
+
+    .link-login
+    {
+      position: absolute;
+      right: 12%;
+      padding: 10px;
+      display: inline;
+      cursor:pointer;
+      color:$wasdi-white;
+
+    }
+
+    .link-login:hover
+    {
+      color:$wasdi-green-logo;
+    }
+
+    .login-content
+    {
+
+      //CENTER VERTICALLY and HORIZONTALLY
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+
+      //CONTENT
+      width: 350px;
+      max-width: 350px;
+      padding: 40px 40px;
+      background-color: $wasdi-login-color-background-content;
+
+      input[type=email][type=password]
+      {
+        width: 100%;
+
+        display: block;
+        margin-bottom: 10px;
+        z-index: 1;
+        position: relative;
+        -moz-box-sizing: border-box;
+        -webkit-box-sizing: border-box;
+        box-sizing: border-box;
+      }
+
+      //OVERRIDE BOOTSTRAP
+      //change input[email,password]
+      .form-control
+      {
+        height:45px ;
+      }
+
+      //OVERRIDE BOOTSTRAP
+      //change over color button
+      .btn-primary:hover, .btn-primary:focus, .btn-primary:active, .btn-primary.active, .open>.dropdown-toggle.btn-primary {
+        color: #fff;//default
+        background-color: $wasdi-login-color-background;
+        border-color: #285e8e; //default
+      }
+
+    }
+
+  }
+  .login-bottom
+  {
+    font-family: Arial;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    height: 50vh;
+    width: 100vw;
+    background-color: $wasdi-white;
+    position: relative;//for center login content element
+
+    //Logo
+    .logo
+    {
+      content: $wasdi-brand-logo-login; // set 'src' attribute from CSS
+      width: $wasdi-brand-logo-login-size;
+      margin-top: -20px;
+      height: auto;
+      min-height: 50px;
+      min-width: 50px;
+      max-height: 250px;
+      max-width: 250px;
+
+      //POSITIONING ELEMENT
+      //position: absolute;
+      position:fixed;
+      top: 70%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+
+
+    }
+
+    //web based asi social data infrastucture
     .write
     {
       //POSITIONING ELEMENT
-      position: absolute;
-      top: 175%;
+      //position: absolute;
+      position: fixed;
+      top: 85%;
       left: 50%;
+
       transform: translate(-50%, -50%);
       color: $wasdi-blue-logo;
-
-
     }
   }
-
-  .login-content
-  {
-
-    //CENTER VERTICALLY and HORIZONTALLY
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-
-    //CONTENT
-    width: 350px;
-    max-width: 350px;
-    padding: 40px 40px;
-    background-color: $wasdi-login-color-background-content;
-
-    input[type=email][type=password]
-    {
-      width: 100%;
-
-      display: block;
-      margin-bottom: 10px;
-      z-index: 1;
-      position: relative;
-      -moz-box-sizing: border-box;
-      -webkit-box-sizing: border-box;
-      box-sizing: border-box;
-    }
-
-    //OVERRIDE BOOTSTRAP
-    //change input[email,password]
-    .form-control
-    {
-      height:45px ;
-    }
-
-    //OVERRIDE BOOTSTRAP
-    //change over color button
-    .btn-primary:hover, .btn-primary:focus, .btn-primary:active, .btn-primary.active, .open>.dropdown-toggle.btn-primary {
-      color: #fff;//default
-      background-color: $wasdi-login-color-background;
-      border-color: #285e8e; //default
-    }
-
-  }
-
 }

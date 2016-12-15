@@ -11,17 +11,18 @@ service('GlobeService', ['$http',  'ConstantsService', function ($http, oConstan
 
     this.oGlobeOptions =
     {
+
         imageryProvider : Cesium.createOpenStreetMapImageryProvider(),
         timeline: false,
         animation: false,
         baseLayerPicker:false,
         fullscreenButton:false,
         infoBox:false,
-        sceneModePicker:false,
         selectionIndicator:false,
         geocoder:false,
         navigationHelpButton:false,
-
+        sceneModePicker:false,
+        scene3DOnly:true
     }
 
     this.initGlobe = function(sGlobeDiv)
@@ -32,11 +33,13 @@ service('GlobeService', ['$http',  'ConstantsService', function ($http, oConstan
             // browser supports WebGL
             // default globe
             this.m_oWasdiGlobe = new Cesium.Viewer(sGlobeDiv, this.oGlobeOptions);
+
             this.m_aoLayers = this.m_oWasdiGlobe.imageryLayers;
         }
         else
         {
-            //TODO ERROR  browser dosen't supports WebGL
+            //TODO ERROR  browser doesn't support WebGL
+            console.log("Error in initGlobe miss WebGl");
         }
     }
     //clear globe

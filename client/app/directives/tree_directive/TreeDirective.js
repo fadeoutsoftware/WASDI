@@ -61,7 +61,9 @@ angular.module('wasdi.TreeDirective', [])
             //}
 
 
-            var prova;
+            /*
+            *  NOTE: $SCOPE = EDITOR SCOPE
+            * */
             $scope.$watch('m_oController.m_oTree', function (newValue, oldValue, scope)
             {
                 if(!utilsIsObjectNullOrUndefined($scope.m_oController.m_oTree))
@@ -70,15 +72,16 @@ angular.module('wasdi.TreeDirective', [])
                     //load tree
                     $('#jstree').jstree($scope.m_oController.m_oTree);
 
-                    //bind to events triggered on the tree
+                    //bind event (it triggered when click a node tree)
                     $('#jstree').on("changed.jstree", function (e, data) {
 
-                        data.event.preventDefault();
+                        data.event.preventDefault();//TODO CHECK IF IT'S USEFUL
 
-                        // if the node it's a band do $scope.m_oController.openBandImage()
+                        // if there isn't running processes AND the node it's a band do $scope.m_oController.openBandImage()
                         if($scope.m_oController.isEmptyListOfRunningProcesses() == true && data.node.children.length == 0 )
                         {
                             //TODO CHECK IF THERE IS THE BAND
+
                             if(data.node.icon == 'assets/icons/check.png')
                             {
                                 $('#jstree').jstree(true).set_icon(data.node.id, 'assets/icons/uncheck.png');
@@ -87,16 +90,26 @@ angular.module('wasdi.TreeDirective', [])
                             else
                             {
                                 $('#jstree').jstree(true).set_icon(data.node.id, 'assets/icons/check.png');
-                                $scope.m_oController.openBandImage(data.node.original.band);
+                                $scope.m_oController.openBandImage(data.node.original.band,data.node.id);
                             }
 
                         }
 
                     });
 
+                    //bind event (event = after tree is loaded do checkTreeNode())
+                    /*
+                    * */
+                    $('#jstree').on("loaded.jstree", function (e, data)
+                    {
+                        //if the page was reload it method check all nodes in tree,
+                        //this nodes are processes running in server
+                        $scope.m_oController.checkNodesInTree();
+                    });
 
                 }
             });
+
 
         }
 

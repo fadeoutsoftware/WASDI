@@ -86,8 +86,8 @@ wasdiApp.config(['$stateProvider', '$urlRouterProvider', function($stateProvider
     })
 
     //IMPORT
-    $stateProvider.state('root.publish',{
-        url: '/publish',
+    $stateProvider.state('root.import',{
+        url: '/import',
 
         views:{
             'maincontent' : { templateUrl : 'partials/import.html', controller  : 'ImportController'}

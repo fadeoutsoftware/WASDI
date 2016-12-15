@@ -13,6 +13,7 @@ service('AuthService', ['$http',  'ConstantsService', function ($http, oConstant
     }
 
     this.logout = function() {
+        //CLEAN COOKIE
         return this.m_oHttp.get(this.APIURL + '/auth/logout');
     }
 

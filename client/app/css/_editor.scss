@@ -11,8 +11,19 @@
     background-color: #f5f5f5;//black;
     border-right: 1px solid #eee;
     position: relative;
+    padding-top:10px ;
     bottom: 0;
     left:0;
+
+    //override bootstrap
+    .panel-body
+    {
+      padding: 0;
+    }
+    //override bootstrap
+    .panel-heading {
+      border-bottom: 0;
+    }
 
     //background-color: $wasdi-sidebar-background-color;
     .panel-default {

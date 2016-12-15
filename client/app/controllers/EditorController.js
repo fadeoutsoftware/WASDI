@@ -22,6 +22,22 @@ var EditorController = (function () {
         //layer list
         this.m_aoLayersList=[];//only id
         this.m_aoProcessesRunning=[];
+
+        /* ---------------------- SET COOKIE (m_aoProcessesRunning)-------------*/
+        /*TODO USE DELETE COOKIE FOR DEBUG*/
+        this.m_oConstantsService.deleteCookie("m_aoProcessesRunning");
+
+        if(!utilsIsObjectNullOrUndefined( this.m_aoProcessesRunning) && this.m_aoProcessesRunning.length == 0)
+        {
+            var oResult = this.m_oConstantsService.getCookie("m_aoProcessesRunning");
+            if(utilsIsObjectNullOrUndefined(oResult) || oResult.length == 0 )
+                this.m_oConstantsService.setCookie("m_aoProcessesRunning", [], 1);
+            else
+            {
+                this.m_aoProcessesRunning = oResult;
+            }
+        }
+
         // Reconnection promise to stop the timer if the reconnection succeed or if the user change page
         this.m_oReconnectTimerPromise = null;
         this.m_oRabbitReconnect = null;
@@ -32,6 +48,7 @@ var EditorController = (function () {
 
         // Here a Workpsace is needed... if it is null create a new one..
         this.m_oActiveWorkspace = this.m_oConstantsService.getActiveWorkspace();
+
 
         //if there isn't workspace
         if(utilsIsObjectNullOrUndefined( this.m_oActiveWorkspace) && utilsIsStrNullOrEmpty( this.m_oActiveWorkspace))
@@ -59,7 +76,7 @@ var EditorController = (function () {
         var oController = this;
 
         //Set default value tree
-        this.m_oTree=null;
+        this.m_oTree=null;//IMPORTANT NOTE: there's a 'WATCH' for this.m_oTree in TREE DIRECTIVE
 
         /**
          * Rabbit Callback: receives the Messages
@@ -73,6 +90,12 @@ var EditorController = (function () {
                 // Get The Message View Model
                 var oMessageResult = JSON.parse(message.body);
 
+                if (oMessageResult == null) return;
+                if (oMessageResult.messageResult=="KO") {
+                    alert('There was an error in the publish band');
+                    return;
+                }
+
                 // Route the message
                 if (oMessageResult.messageCode == "DOWNLOAD") {
                     oController.receivedDownloadMessage(oMessageResult);
@@ -82,7 +105,7 @@ var EditorController = (function () {
                 }
                 else if (oMessageResult.messageCode == "PUBLISHBAND") {
 
-                    oController.receivedPublishBandMessage(oMessageResult);
+                    oController.receivedPublishBandMessage(oMessageResult.payload.layerId);
                 }
 
             } else {
@@ -248,17 +271,18 @@ var EditorController = (function () {
      * Handler of the "PUBLISHBAND" message
      * @param oMessage
      */
-    EditorController.prototype.receivedPublishBandMessage = function (oMessage) {
-        if (oMessage == null) return;
-        if (oMessage.messageResult=="KO") {
-            alert('There was an error in the publish band');
-            return;
+    EditorController.prototype.receivedPublishBandMessage = function (oLayerId) {
+
+        if(utilsIsStrNullOrEmpty(oLayerId))
+        {
+            console.log("Error LayerID is empty...");
+            return false;
         }
         //add layer in list
-        this.m_aoLayersList.push(oMessage.payload.layerId);
-        this.addLayerMap2D(oMessage.payload.layerId);
-        this.addLayerMap3D(oMessage.payload.layerId);
-        this.removeProcessInListOfRunningProcesses(oMessage.payload.layerId);
+        this.m_aoLayersList.push(oLayerId);
+        this.addLayerMap2D(oLayerId);
+        this.addLayerMap3D(oLayerId);
+        this.removeProcessInListOfRunningProcesses(oLayerId);
     }
 
     /**
@@ -418,13 +442,27 @@ var EditorController = (function () {
     }
 
     // OPEN BAND
-    EditorController.prototype.openBandImage = function (oBand) {
+    // oIdBandNodeInTree is the node id in tree, in some case when the page is reload
+    // we need know the node id for change the icon
+    EditorController.prototype.openBandImage = function (oBand,oIdBandNodeInTree) {
         var oController=this;
         var sFileName = this.m_aoProducts[oBand.productIndex].fileName;
 
         this.m_oFileBufferService.publishBand(sFileName,this.m_oActiveWorkspace.workspaceId, oBand.name).success(function (data, status) {0
             console.log('publishing band ' + oBand.name);
-            oController.pushProcessInListOfRunningProcesses(oBand.productName + "_" + oBand.name);
+            if(!utilsIsObjectNullOrUndefined(data) ||  data.messageResult != "KO")
+            {
+                if(data.messageCode == "PUBLISHBAND" )
+                    oController.receivedPublishBandMessage(data.payload);
+                else
+                    oController.pushProcessInListOfRunningProcesses(oBand.productName + "_" + oBand.name,oIdBandNodeInTree);
+
+            }
+            else
+            {
+                //TODO ERROR
+                console.log("Error in publish band");
+            }
 
         }).error(function (data, status) {
             console.log('publish band error');
@@ -522,10 +560,8 @@ var EditorController = (function () {
         var oController = this;
         var oTree =
         {
-            'core': {
-                'data': []
-                , "check_callback": true
-            },
+            'core': {'data': [], "check_callback": true},
+
         }
 
 
@@ -551,11 +587,12 @@ var EditorController = (function () {
 
             }
 
-
         }
 
         return oTree;
     }
+    /* Search element in tree
+    * */
 
     //---------------- OPENWORKSPACE -----------------------
     // ReLOAD workspace when reload page
@@ -652,7 +689,7 @@ var EditorController = (function () {
     /* Push process in List of Running Processes (in server)
     * */
 
-    EditorController.prototype.pushProcessInListOfRunningProcesses=function(sProcess)
+    EditorController.prototype.pushProcessInListOfRunningProcesses=function(sProcess,oIdBandNodeInTree)
     {
         //if str == null or == ""
         if(utilsIsStrNullOrEmpty(sProcess))
@@ -675,15 +712,19 @@ var EditorController = (function () {
         for( var iIndexProcesses = 0; iIndexProcesses < iNumberOfProcessesRunning ; iIndexProcesses++)
         {
             // if it find a process in ProcessesRunningList it doesn't need to push it
-             if(oController.m_aoProcessesRunning[iIndexProcesses] == sProcess)
+             if(oController.m_aoProcessesRunning[iIndexProcesses].processName == sProcess)
              {
                  bFind=true;
                  break;
              }
         }
 
-        if(bFind == false)
-            oController.m_aoProcessesRunning.push(sProcess);
+        if(bFind == false) {
+
+            oController.m_aoProcessesRunning.push({processName:sProcess,nodeId:oIdBandNodeInTree});
+            //update cookie
+            oController.m_oConstantsService.setCookie("m_aoProcessesRunning", oController.m_aoProcessesRunning, 1);
+        }
 
     }
 
@@ -698,23 +739,26 @@ var EditorController = (function () {
         var oController=this;
         var iLength;
 
-        if(utilsIsObjectNullOrUndefined(oController.m_aoLayersList) == true)
+        if(utilsIsObjectNullOrUndefined(oController.m_aoProcessesRunning) == true )
         {
             iLength = 0;
         }
         else
         {
-            iLength = oController.m_aoLayersList.length;
+            iLength = oController.m_aoProcessesRunning.length;
         }
 
         for(var iIndex = 0;iIndex < iLength ;iIndex++ )
         {
-            if(oController.m_aoProcessesRunning[iIndex] == sProcess)
+            if(oController.m_aoProcessesRunning[iIndex].processName == sProcess)
             {
                 oController.m_aoProcessesRunning.splice(iIndex);
+                //update cookie
+                oController.m_oConstantsService.setCookie("m_aoProcessesRunning", oController.m_aoProcessesRunning, 1);
             }
         }
-        oController.m_oScope.$apply();
+
+        //oController.m_oScope.$apply();CHECK IF WE NEED IT
     }
 
     /*
@@ -728,12 +772,30 @@ var EditorController = (function () {
                 return true;
             else
                 return false;
-
         }
         else
         {
             return true;
         }
+
+    }
+    /* fetch (after a page reload)all the running processes, check all the uncheck nodes
+    *  corresponding to the process
+    * */
+    EditorController.prototype.checkNodesInTree = function()
+    {
+        var oController = this;
+        if(utilsIsObjectNullOrUndefined(oController.m_aoProcessesRunning) || oController.m_aoProcessesRunning.length == 0)
+        {
+            return false;
+        }
+        var iLength = oController.m_aoProcessesRunning.length;
+        for(var iIndex = 0; iIndex < iLength; iIndex ++)
+        {
+            var sNodeId = oController.m_aoProcessesRunning[iIndex].nodeId;
+            $('#jstree').jstree(true).set_icon(sNodeId,"assets/icons/check.png");
+        }
+        return true;
 
     }
 

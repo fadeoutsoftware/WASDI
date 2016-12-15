@@ -1,21 +1,55 @@
 <div class="login-view">
+    <div class="login-top">
+        <div class="link-login" ng-click="m_oController.m_bLoginIsVisible= (!m_oController.m_bLoginIsVisible)" ng-show="!m_oController.m_bLoginIsVisible">
+            {{"LOGIN_LINK_FORM"|translate}}
+        </div>
+
+        <!------------------------------- LOGO(write) ------------------------------->
+        <div  ng-show="!m_oController.m_bLoginIsVisible">
+
+            <img class="write-logo" id="write-logo">
+            <script>
+                // Script fix an error with Firefox which does not
+                // show image correctly if the 'SRC' is set from CSS
+                // via 'content' field
+                $(document).ready(function () {
+                    var oImage = $("#write-logo");
+                    var imageSrc = oImage.css("content");
+                    imageSrc = imageSrc.replace("url(\"","");
+                    imageSrc = imageSrc.replace("\")","");
+                    oImage.attr("src",imageSrc);
+                })
+            </script>
+
+        </div>
 
 
-    <!--<div ng-show="m_oController.isUserLogged()">-->
-    <!--<p>-->
-    <!--Welcome {{m_oController.getUserName()}}-->
-    <!--</p>-->
-    <!--</div>-->
+        <!-- LOGIN FORM -->
+        <div class="login-content" ng-show="m_oController.m_bLoginIsVisible" >
+            <form class="form-signin" ng-submit="m_oController.login()" >
+                <div class="form-group">
+                    <input type="text"  placeholder="{{'LOGIN_PLACEHOLDER_EMAIL'|translate}}" class="form-control" id="userName" ng-model="m_oController.m_sUserName">
+                </div>
+                <div class="form-group">
+                    <input type="password" placeholder="{{'LOGIN_PLACEHOLDER_PASSWORD'|translate}}" class="form-control" id="userPassword" ng-model="m_oController.m_sUserPassword">
+                </div>
+                <label>
+                    <input type="checkbox" value="remember-me"> {{"LOGIN_CHECK_BOX_LABEL"|translate}}
+                </label>
+                <button class="btn btn-md btn-primary btn-block btn-signin" type="submit">{{"LOGIN_BUTTON_SIGN_IN"|translate}}</button>
+            </form>
+            <a href="#" class="forgot-password">
+                {{"LOGIN_LINK_FORGOT_PASSWORD"|translate}}
+            </a>
+        </div>
 
-    <!--<a  ng-show="m_oController.isUserLogged()" ng-click="m_oController.moveTo('/workspaces')">Workspaces</a>-->
+        <!--snake></snake-->
+    </div>
 
-    <!------------------------------- LOGO ------------------------------->
-    <div class="logo-link" ng-click="m_oController.m_bLoginIsVisible= (!m_oController.m_bLoginIsVisible)" ng-show="!m_oController.m_bLoginIsVisible">
+    <div class="login-bottom">
 
-        <!--<img class="navbar-brand-logo">-->
-
-
-        <img class="logo" id="logo">
+        <!------------------------------- LOGO ------------------------------->
+        <img class="logo" id="logo"  ng-show="!m_oController.m_bLoginIsVisible">
         <script>
             // Script fix an error with Firefox which does not
             // show image correctly if the 'SRC' is set from CSS
@@ -29,67 +63,7 @@
             })
         </script>
 
-        <!--<img class="navbar-brand-logo">-->
-        <img class="write-logo" id="write-logo">
-        <script>
-            // Script fix an error with Firefox which does not
-            // show image correctly if the 'SRC' is set from CSS
-            // via 'content' field
-            $(document).ready(function () {
-                var oImage = $("#write-logo");
-                var imageSrc = oImage.css("content");
-                imageSrc = imageSrc.replace("url(\"","");
-                imageSrc = imageSrc.replace("\")","");
-                oImage.attr("src",imageSrc);
-            })
-        </script>
-
-
-
-        <div class="write"><h2>{{"LOGIN_WRITE"|translate}}</h2></div>
+        <div class="write"  ng-show="!m_oController.m_bLoginIsVisible"><h2>{{"LOGIN_WRITE"|translate}}</h2></div>
 
     </div>
-
-
-    <!--<div class="login-content" ng-show="!m_oController.isUserLogged()  " >-->
-    <!--<div ng-show="!m_oController.isUserLogged()">-->
-    <!--<form class="form-horizontal" role="form">-->
-    <!--<div class="form-group">-->
-    <!--<label for="userName" class="col-sm-2  control-label">UserId: </label>-->
-    <!--<div class="col-sm-10">-->
-    <!--<input type="text" class="form-control" id="userName" ng-model="m_oController.m_sUserName">-->
-    <!--</div>-->
-    <!--</div>-->
-    <!--<div class="form-group">-->
-    <!--<label for="userPassword" class="col-sm-2  control-label">Password</label>-->
-    <!--<div class="col-sm-10">-->
-    <!--<input type="password" class="form-control" id="userPassword" ng-model="m_oController.m_sUserPassword">-->
-    <!--</div>-->
-    <!--</div>-->
-    <!--</form>-->
-
-    <!--<a ng-click="m_oController.login()">Login</a>-->
-    <!--</div>-->
-     <!--</div>-->
-
-    <!-- LOGIN FORM -->
-    <div class="login-content" ng-show="m_oController.m_bLoginIsVisible">
-        <form class="form-signin" ng-submit="m_oController.login()" >
-            <div class="form-group">
-                <input type="text"  placeholder="{{'LOGIN_PLACEHOLDER_EMAIL'|translate}}" class="form-control" id="userName" ng-model="m_oController.m_sUserName">
-            </div>
-            <div class="form-group">
-                <input type="password" placeholder="{{'LOGIN_PLACEHOLDER_PASSWORD'|translate}}" class="form-control" id="userPassword" ng-model="m_oController.m_sUserPassword">
-            </div>
-            <label>
-                <input type="checkbox" value="remember-me"> {{"LOGIN_CHECK_BOX_LABEL"|translate}}
-            </label>
-            <button class="btn btn-md btn-primary btn-block btn-signin" type="submit">{{"LOGIN_BUTTON_SIGN_IN"|translate}}</button>
-        </form>
-        <a href="#" class="forgot-password">
-            {{"LOGIN_LINK_FORGOT_PASSWORD"|translate}}
-        </a>
-    </div>
-
-    <!--snake></snake-->
 </div>

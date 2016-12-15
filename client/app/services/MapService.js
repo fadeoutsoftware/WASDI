@@ -69,7 +69,9 @@ service('MapService', ['$http',  'ConstantsService', function ($http, oConstants
         }
     );
 
+    //MAP
     this.m_oWasdiMap = null;
+
 
     this.m_oActiveBaseLayer = this.m_oOSMBasic;
 
@@ -108,21 +110,6 @@ service('MapService', ['$http',  'ConstantsService', function ($http, oConstants
             // maxZoom: 22
         });
 
-        // add draw search
-        var drawnItems = new L.FeatureGroup();
-        this.m_oWasdiMap.addLayer(drawnItems);
-        var drawControl = new L.Control.Draw({
-            position:'topright',
-            draw:{
-                marker:false,
-            },
-            edit: {
-                featureGroup: drawnItems
-            }
-        });
-
-
-        this.m_oWasdiMap.addControl(drawControl);
 
         /**
          * scale control
@@ -162,6 +149,51 @@ service('MapService', ['$http',  'ConstantsService', function ($http, oConstants
         //this.m_oWasdiMap.on('load', function(e){
         //    oWasdiMap.invalidateSize();
         //});
+    }
+
+    this.initMapWithDrawSearch = function(sMapDiv)
+    {
+        //Init standard map
+        this.initMap(sMapDiv);
+        //LEAFLET.DRAW LIB
+        //add draw.search
+        var drawnItems = new L.FeatureGroup();
+        this.m_oWasdiMap.addLayer(drawnItems);
+
+        var oOptions={
+            position:'topright',
+            draw:{
+                marker:false,
+                polyline:false,
+                circle:false
+            },
+
+            edit: {
+                featureGroup: drawnItems,
+            }
+        };
+
+        var oDrawControl = new L.Control.Draw(oOptions);
+
+        this.m_oWasdiMap.addControl(oDrawControl);
+
+        //Without this.m_oWasdiMap.on() the shape isn't saved on map
+        this.m_oWasdiMap.on(L.Draw.Event.CREATED, function (event) {
+            var layer = event.layer;
+
+            //remove old shape
+            if(drawnItems && drawnItems.getLayers().length!==0){
+                drawnItems.clearLayers();
+            }
+            //save new shape in map
+            drawnItems.addLayer(layer);
+        });
+
+        //TODO event EDITED
+        //this.m_oWasdiMap.on(L.Draw.Event.EDITED, function (event) {
+        //    var layer = event.layers;
+        //});
+
     }
 
     this.getMap = function () {

@@ -13,7 +13,7 @@ var ImportController = (function() {
         this.m_oScope.m_oController=this;
         this.m_oMapService=oMapService;
         this.m_bIsOpen=true;
-        this.m_oMapService.initMap('wasdiMapImport');
+        this.m_oMapService.initMapWithDrawSearch('wasdiMapImport');
         //if user is logged
         //if(!utilsIsObjectNullOrUndefined(this.m_oConstantsService.getUser()))
         //    this.m_oUser = this.m_oConstantsService.getUser();

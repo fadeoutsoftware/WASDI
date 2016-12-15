@@ -55,7 +55,7 @@
     <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12 sidebar">
         <!--TREE PANEL-->
         <div class="panel panel-default">
-            <div class="panel-heading">possible tree</div>
+            <div class="panel-heading">{{m_oController.m_oActiveWorkspace.workspaceId}}</div>
             <!-- MY TREE DIRECTIVE -->
             <tree ngModelTree="prova" ></tree>
 
@@ -122,7 +122,7 @@
     <!------------------ STATUS BAR ------------------->
     <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 status-bar ">
         <span ng-repeat="oProcess in m_oController.m_aoProcessesRunning track by $index">
-            <i class="fa fa-spinner fa-pulse fa-fw"></i> {{oProcess}}
+            <i class="fa fa-spinner fa-pulse fa-fw"></i> {{oProcess.processName}}
         </span>
         <!--<span >-->
             <!--<i class="fa fa-spinner fa-pulse fa-fw"></i>provaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa-->
