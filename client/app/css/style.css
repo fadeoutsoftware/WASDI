@@ -6000,7 +6000,8 @@ button.close {
     .editor-view .sidebar .my-button {
       color: white;
       padding: 0;
-      margin: 0; }
+      margin: 0;
+      padding-left: 10px; }
     .editor-view .sidebar .my-button:hover {
       color: #009036;
       background-color: transparent; }

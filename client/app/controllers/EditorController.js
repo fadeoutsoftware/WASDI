@@ -25,7 +25,7 @@ var EditorController = (function () {
 
         /* ---------------------- SET COOKIE (m_aoProcessesRunning)-------------*/
         /*TODO USE DELETE COOKIE FOR DEBUG*/
-        this.m_oConstantsService.deleteCookie("m_aoProcessesRunning");
+        //this.m_oConstantsService.deleteCookie("m_aoProcessesRunning");
 
         if(!utilsIsObjectNullOrUndefined( this.m_aoProcessesRunning) && this.m_aoProcessesRunning.length == 0)
         {
