@@ -29,8 +29,35 @@
       overflow-x: hidden;
       transition: 0.5s;
       padding-top: 60px;
-      color:white;
+      color:black;
+      .layers
+      {
 
+        thead
+        {
+          background-color: $wasdi-import-table-head-background-color;
+          color:$wasdi-import-table-head-color;
+        }
+        td,th
+        {
+          text-align:center;
+          vertical-align:middle;
+        }
+        .cellButton
+        {
+          cursor:pointer;
+        }
+        .cellButton:hover
+        {
+          background-color: $wasdi-import-cell-background-color-over-button;
+
+          i{
+
+            color:$wasdi-import-cell-color-over-button;
+          }
+
+        }
+      }
     }
 
     //.sidenav a {
@@ -50,9 +77,19 @@
 
       position: absolute;
       top: 0;
-      right: 25px;
+      left: 10px;
       //font-size: 25px;
-      margin-left: 50px;
+      //margin-left: 50px;
+
+    }
+
+    .sidenav .backbtn {
+
+      position: absolute;
+      top: 0;
+      right: 10px;
+      //font-size: 25px;
+      //margin-right: 50px;
     }
     i
     {

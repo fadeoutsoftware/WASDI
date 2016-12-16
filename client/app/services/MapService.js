@@ -69,7 +69,7 @@ service('MapService', ['$http',  'ConstantsService', function ($http, oConstants
         }
     );
 
-    //MAP
+    //************** MAP *********************
     this.m_oWasdiMap = null;
 
 
@@ -151,21 +151,69 @@ service('MapService', ['$http',  'ConstantsService', function ($http, oConstants
         //});
     }
 
+    //remove layer layer.remove()
+    this.removeLayerFromMap = function(oLayer)
+    {
+        if(utilsIsObjectNullOrUndefined(oLayer))
+            return false;
+        oLayer.remove();
+        return true;
+    }
+
+    //Add rectangle shape
+    this.addRectangleOnMap = function (oPointA,oPointB,sColor,fFunction)
+    {
+
+        if(utilsIsObjectNullOrUndefined(oPointA))
+            return null;
+        if(utilsIsObjectNullOrUndefined(oPointB))
+            return null;
+
+        //check if they are points
+        if(oPointA.length != 2 || oPointB.length != 2)
+            return null;
+
+        if(utilsIsStrNullOrEmpty(sColor))
+            sColor="#ff7800";//default color
+
+        // define rectangle geographical bounds
+        // example: var bounds = [[54.559322, -5.767822], [56.1210604, -3.021240]];
+        var aaBounds = [oPointA,oPointB];
+        // create an colored rectangle
+        var oRectangle = L.rectangle(aaBounds, {color: sColor, weight: 1}).addTo(this.m_oWasdiMap);
+
+        if(!utilsIsObjectNullOrUndefined(fFunction))
+            oRectangle.on("click",fFunction);//if fFunction != null bind "rectangle click" and function
+
+        //TODO REMOVE IT USED ONLY FOR TEST
+        this.m_oWasdiMap.fitBounds(aaBounds);//zoom on rectangle
+
+        return oRectangle;
+    }
+
+
     this.initMapWithDrawSearch = function(sMapDiv)
     {
         //Init standard map
         this.initMap(sMapDiv);
+
+        /*
+        * TODO REMOVE "Rectangle Test"
+        * */
+        this.addRectangleOnMap( [51.509, -0.08], [51.503, -0.06],"#ff7800", function (event) {console.log("test click")});
+
         //LEAFLET.DRAW LIB
         //add draw.search
         var drawnItems = new L.FeatureGroup();
         this.m_oWasdiMap.addLayer(drawnItems);
 
         var oOptions={
-            position:'topright',
-            draw:{
+            position:'topright',//position of menu
+            draw:{// what kind of shape is disable
                 marker:false,
                 polyline:false,
-                circle:false
+                circle:false,
+                polygon:false
             },
 
             edit: {

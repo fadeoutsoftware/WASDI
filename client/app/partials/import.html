@@ -2,13 +2,37 @@
     <!-- SIDEBAR -->
     <div class="sidenav-animated" >
         <div id="mySidenav" class="sidenav">
-            <i ng-click="m_oController.closeNav()" class="fa fa-times fa-2x closebtn" aria-hidden="true"></i>
 
-            <!--<a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>-->
-            <!--<a href="#">About</a>-->
-            <!--<a href="#">Services</a>-->
-            <!--<a href="#">Clients</a>-->
-            <!--<a href="#">Contact</a>-->
+            <!-- BACK -->
+            <i class="fa fa-arrow-left fa-2x closebtn" aria-hidden="true" ng-click="m_oController.m_bIsVisibleListOfLayers = false" ng-show="m_oController.m_bIsVisibleListOfLayers"></i>
+            <!-- CLOSE SIDE NAVBAR BUTTON -->
+            <i ng-click="m_oController.closeNav()" class="fa fa-times fa-2x  backbtn" aria-hidden="true"></i>
+
+
+                <!--**************** Layers Table ----------------------->
+                <!-- the table become visible after the user Search a layer -->
+                <table class="table layers" ng-show="m_oController.m_bIsVisibleListOfLayers" >
+                    <thead>
+                        <th>Preview</th>
+                        <th>Info</th>
+                        <th></th>
+                    </thead>
+                    <tr>
+                        <td>
+                            <img src="assets/img/test_image.jpg" alt="test" height="82" width="82">
+                        </td>
+                        <td>info varie</td>
+                        <td class="cellButton"><i class="fa fa-plus " aria-hidden="true"></i> </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <img src="assets/img/test_image.jpg" alt="test" height="82" width="82">
+                        </td>
+                        <td>info varie</td>
+                        <td class="cellButton"><i class="fa fa-plus " aria-hidden="true"></i> </td>
+                    </tr>
+                </table>
+
 
         </div>
     </div>

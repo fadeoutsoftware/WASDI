@@ -13,6 +13,7 @@ var ImportController = (function() {
         this.m_oScope.m_oController=this;
         this.m_oMapService=oMapService;
         this.m_bIsOpen=true;
+        this.m_bIsVisibleListOfLayers = true; //TODO SET FALSE AFTER MERGE
         this.m_oMapService.initMapWithDrawSearch('wasdiMapImport');
         //if user is logged
         //if(!utilsIsObjectNullOrUndefined(this.m_oConstantsService.getUser()))

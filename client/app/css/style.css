@@ -6095,12 +6095,27 @@ button.close {
     overflow-x: hidden;
     transition: 0.5s;
     padding-top: 60px;
-    color: white; }
+    color: black; }
+    .import-view .sidenav-animated .sidenav .layers thead {
+      background-color: #43516A;
+      color: white; }
+    .import-view .sidenav-animated .sidenav .layers td, .import-view .sidenav-animated .sidenav .layers th {
+      text-align: center;
+      vertical-align: middle; }
+    .import-view .sidenav-animated .sidenav .layers .cellButton {
+      cursor: pointer; }
+    .import-view .sidenav-animated .sidenav .layers .cellButton:hover {
+      background-color: #009036; }
+      .import-view .sidenav-animated .sidenav .layers .cellButton:hover i {
+        color: white; }
   .import-view .sidenav-animated .sidenav .closebtn {
     position: absolute;
     top: 0;
-    right: 25px;
-    margin-left: 50px; }
+    left: 10px; }
+  .import-view .sidenav-animated .sidenav .backbtn {
+    position: absolute;
+    top: 0;
+    right: 10px; }
   .import-view .sidenav-animated i {
     color: #43516A;
     cursor: pointer; }
