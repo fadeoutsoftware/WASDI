@@ -30,6 +30,14 @@
       transition: 0.5s;
       padding-top: 60px;
       color:black;
+
+      //Over tr
+      .table-hover tbody tr:hover td, .table-hover tbody tr:hover th {
+        //background-color: $wasdi;
+        color:$wasdi-green-logo;
+        border-top: 1px solid $wasdi-green-logo;
+        border-bottom: 1px solid $wasdi-green-logo;
+      }
       .layers
       {
 
@@ -119,3 +127,4 @@
   }
   //END SIDEBAR
 }
+

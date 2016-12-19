@@ -11,29 +11,59 @@
 
                 <!--**************** Layers Table ----------------------->
                 <!-- the table become visible after the user Search a layer -->
-                <table class="table layers" ng-show="m_oController.m_bIsVisibleListOfLayers" >
+                <table class="table table-hover layers" id="table_layers_list" ng-show="m_oController.m_bIsVisibleListOfLayers" >
+
                     <thead>
-                        <th>Preview</th>
+                        <th id="Preview">Preview</th>
                         <th>Info</th>
                         <th></th>
                     </thead>
-                    <tr>
-                        <td>
-                            <img src="assets/img/test_image.jpg" alt="test" height="82" width="82">
-                        </td>
-                        <td>info varie</td>
-                        <td class="cellButton"><i class="fa fa-plus " aria-hidden="true"></i> </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <img src="assets/img/test_image.jpg" alt="test" height="82" width="82">
-                        </td>
-                        <td>info varie</td>
-                        <td class="cellButton"><i class="fa fa-plus " aria-hidden="true"></i> </td>
-                    </tr>
+
+                    <tbody>
+                        <tr ng-repeat="layer in m_oController.m_aoLayersList"
+                            ng-mouseover="m_oController.changeStyleRectangleMouseOver(layer.rectangle)"
+                            ng-mouseleave="m_oController.changeStyleRectangleMouseLeave(layer.rectangle)"
+                            ng-attr-id='{{"layer"+$index}}'><!--id='{{"layer:"+$index}}'-->
+                            <td>
+                                <img src="assets/img/test_image.jpg" alt="test" height="82" width="82">
+                            </td>
+                            <td>info varie</td>
+                            <td class="cellButton"><i class="fa fa-plus " aria-hidden="true"></i> </td>
+                        </tr>
+                        <!--<tr >-->
+                            <!--<td>-->
+                                <!--<img src="assets/img/test_image.jpg" alt="test" height="82" width="82">-->
+                            <!--</td>-->
+                            <!--<td>info varie</td>-->
+                            <!--<td class="cellButton"><i class="fa fa-plus " aria-hidden="true"></i> </td>-->
+                        <!--</tr>-->
+
+                        <!--<tr>-->
+                            <!--<td>-->
+                                <!--<img src="assets/img/test_image.jpg" alt="test" height="82" width="82">-->
+                            <!--</td>-->
+                            <!--<td>info varie</td>-->
+                            <!--<td class="cellButton"><i class="fa fa-plus " aria-hidden="true"></i> </td>-->
+                        <!--</tr>-->
+
+                        <!--<tr>-->
+                            <!--<td>-->
+                                <!--<img src="assets/img/test_image.jpg" alt="test" height="82" width="82">-->
+                            <!--</td>-->
+                            <!--<td>info varie</td>-->
+                            <!--<td class="cellButton"><i class="fa fa-plus " aria-hidden="true"></i> </td>-->
+                        <!--</tr>-->
+
+                        <!--<tr>-->
+                            <!--<td>-->
+                                <!--<img src="assets/img/test_image.jpg" alt="test" height="82" width="82">-->
+                            <!--</td>-->
+                            <!--<td>info varie</td>-->
+                            <!--<td class="cellButton"><i class="fa fa-plus " aria-hidden="true"></i> </td>-->
+                        <!--</tr>-->
+
+                    </tbody>
                 </table>
-
-
         </div>
     </div>
     <!-- OPEN MENU -->

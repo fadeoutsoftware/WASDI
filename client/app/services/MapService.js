@@ -4,7 +4,7 @@
 
 'use strict';
 angular.module('wasdi.MapService', ['wasdi.ConstantsService']).
-service('MapService', ['$http',  'ConstantsService', function ($http, oConstantsService) {
+service('MapService', ['$http','$rootScope', 'ConstantsService', function ($http,$rootScope, oConstantsService) {
     this.APIURL = oConstantsService.getAPIURL();
     this.m_oHttp = $http;
 
@@ -169,7 +169,8 @@ service('MapService', ['$http',  'ConstantsService', function ($http, oConstants
         if(utilsIsObjectNullOrUndefined(oPointB))
             return null;
 
-        //check if they are points
+        //check if they are points [ax,ay],[bx,by] == good
+        // [ax,ay,az,....],[bx,by,bz,....] == bad
         if(oPointA.length != 2 || oPointB.length != 2)
             return null;
 
@@ -180,10 +181,23 @@ service('MapService', ['$http',  'ConstantsService', function ($http, oConstants
         // example: var bounds = [[54.559322, -5.767822], [56.1210604, -3.021240]];
         var aaBounds = [oPointA,oPointB];
         // create an colored rectangle
+        // weight = line thickness
         var oRectangle = L.rectangle(aaBounds, {color: sColor, weight: 1}).addTo(this.m_oWasdiMap);
 
         if(!utilsIsObjectNullOrUndefined(fFunction))
             oRectangle.on("click",fFunction);//if fFunction != null bind "rectangle click" and function
+
+        //mouse over event change rectangle style
+        oRectangle.on("mouseover", function (event) {
+            oRectangle.setStyle({weight:3,fillOpacity:0.7});
+            $rootScope.$broadcast('on-mouse-over-rectangle',{rectangle:oRectangle});// TODO SEND MASSAGE FOR CHANGE CSS in LAYER LIST TABLE
+
+        });
+        //mouse out event set default value of style
+        oRectangle.on("mouseout", function (event) {
+            oRectangle.setStyle({weight:1,fillOpacity:0.2});
+            $rootScope.$broadcast('on-mouse-leave-rectangle',{rectangle:oRectangle});// TODO SEND MASSAGE FOR CHANGE CSS in LAYER LIST TABLE
+        });
 
         //TODO REMOVE IT USED ONLY FOR TEST
         this.m_oWasdiMap.fitBounds(aaBounds);//zoom on rectangle
@@ -200,7 +214,7 @@ service('MapService', ['$http',  'ConstantsService', function ($http, oConstants
         /*
         * TODO REMOVE "Rectangle Test"
         * */
-        this.addRectangleOnMap( [51.509, -0.08], [51.503, -0.06],"#ff7800", function (event) {console.log("test click")});
+        //this.addRectangleOnMap( [51.509, -0.08], [51.503, -0.06],"#ff7800", function (event) {console.log("test click")});
 
         //LEAFLET.DRAW LIB
         //add draw.search

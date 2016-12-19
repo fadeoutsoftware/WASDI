@@ -6096,6 +6096,10 @@ button.close {
     transition: 0.5s;
     padding-top: 60px;
     color: black; }
+    .import-view .sidenav-animated .sidenav .table-hover tbody tr:hover td, .import-view .sidenav-animated .sidenav .table-hover tbody tr:hover th {
+      color: #009036;
+      border-top: 1px solid #009036;
+      border-bottom: 1px solid #009036; }
     .import-view .sidenav-animated .sidenav .layers thead {
       background-color: #43516A;
       color: white; }
