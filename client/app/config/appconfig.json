@@ -107,7 +107,7 @@
             "indexvalue": "Sentinel-1",
             "filters": [
                 {
-                    "indexname": "satelliteplatform",
+                    "indexname": "filename",
                     "indexlabel": "Satellite Platform",
                     "indexvalues": "S1A_*|S1B_*",
                     "regex": ".*"
