@@ -45,6 +45,7 @@
       .layers
       {
 
+
         thead
         {
           background-color: $wasdi-import-table-head-background-color;
@@ -69,6 +70,20 @@
           }
 
         }
+        .info
+        {
+          font-family:$wasdi-font-web-small-dimension;
+          font-size:12px;
+          line-height: 1.42857;
+          font-weight: 600;
+        }
+      }
+
+      //DROPDOWN MENU
+      .operations-table-layers{
+        display: inline;
+
+        
       }
     }
 
@@ -440,13 +455,19 @@
   .fixed {
     cursor:pointer;
     position: fixed;
-    top: 50%;
-    left: 0;
+   // top: 10%;
+    left: 5px;
     background: $wasdi-import-left-side-navbar-color-background;
     color:white;
-    padding:5px 10px;
-    border: 1px solid black;
+    padding:10px 20px;
+    margin-top: 5px;
+    //border: 1px solid white;
     z-index: 1000;
+    opacity: 0.9;
+  }
+  .fixed:hover
+  {
+    background-color: $wasdi-green-logo;
   }
   //END SIDEBAR
 }

@@ -7,7 +7,13 @@
             <!--<a href="#">Clients</a>-->
             <!--<a href="#">Contact</a>-->
 
-            <div id="coll-product-container" class="coll-product-container">
+            <!-- BACK -->
+            <i class="fa fa-arrow-left fa-2x closebtn" aria-hidden="true" ng-click="m_oController.m_bIsVisibleListOfLayers = false" ng-show="m_oController.m_bIsVisibleListOfLayers"></i>
+            <!-- CLOSE SIDE NAVBAR BUTTON -->
+            <i ng-click="m_oController.closeNav()" class="fa fa-times fa-2x  backbtn" aria-hidden="true"></i>
+
+            <div ng-hide="m_oController.m_bIsVisibleListOfLayers">
+                <div id="coll-product-container" class="coll-product-container">
                 <div class="coll-product-list-container">
                     <div class="coll-product-header">
                         <div class="listtitle row" style="color: #373b50; font-weight: bold; font-size: 14px; ">
@@ -96,7 +102,7 @@
                     </div>
                 </div>
             </div>
-            <div id="advanced-search-container">
+                <div id="advanced-search-container">
                 <div id="advanced-search-content">
 
                     <div class="panel-heading advanced-search-heading" role="tab">
@@ -273,76 +279,84 @@
                     </div>
                 </div>
             </div>
+            </div>
 
 
-            <!-- BACK -->
-            <i class="fa fa-arrow-left fa-2x closebtn" aria-hidden="true" ng-click="m_oController.m_bIsVisibleListOfLayers = false" ng-show="m_oController.m_bIsVisibleListOfLayers"></i>
-            <!-- CLOSE SIDE NAVBAR BUTTON -->
-            <i ng-click="m_oController.closeNav()" class="fa fa-times fa-2x  backbtn" aria-hidden="true"></i>
 
 
                 <!--**************** Layers Table ----------------------->
                 <!-- the table become visible after the user Search a layer -->
-
-                <!--<table class="table table-hover layers" id="table_layers_list" ng-show="m_oController.m_bIsVisibleListOfLayers" >
+                <table class="table table-hover layers" id="table_layers_list" ng-show="m_oController.m_bIsVisibleListOfLayers" >
 
                     <thead>
                         <th id="Preview">Preview</th>
                         <th>Info</th>
-                        <th></th>
+                        <!--<th></th>-->
+                        <!--<th></th>-->
                     </thead>
 
-                    <tbody>
-                        <tr ng-repeat="layer in m_oController.m_aoLayersList"
-                            ng-mouseover="m_oController.changeStyleRectangleMouseOver(layer.rectangle)"
-                            ng-mouseleave="m_oController.changeStyleRectangleMouseLeave(layer.rectangle)"
-                            ng-attr-id='{{"layer"+$index}}'>&lt;!&ndash;id='{{"layer:"+$index}}'&ndash;&gt;
+                    <!--<tbody>-->
+                        <!--<tr ng-repeat="layer in m_oController.m_aoLayersList"-->
+                            <!--ng-mouseover="m_oController.changeStyleRectangleMouseOver(layer.rectangle)"-->
+                            <!--ng-mouseleave="m_oController.changeStyleRectangleMouseLeave(layer.rectangle)"-->
+                            <!--ng-attr-id='{{"layer"+$index}}'>&lt;!&ndash;id='{{"layer:"+$index}}'&ndash;&gt;-->
+                            <!--<td>-->
+                                <!--<img src="assets/img/test_image.jpg" alt="test" height="82" width="82">-->
+                            <!--</td>-->
+                            <!--<td>info varie</td>-->
+                            <!--<td class="cellButton">-->
+                                <!--<i class="fa fa-plus " aria-hidden="true"></i>-->
+                            <!--</td>-->
+                            <!--<td class="cellButton" ng-click="m_oController.zoomOnBounds(layer.rectangle)">-->
+                                <!--<i class="fa fa-search-plus" aria-hidden="true"></i>-->
+                            <!--</td>-->
+                        <!--</tr>-->
+    <!---->
+                    <!--</tbody>-->
+                    <tbody ng-repeat="layer in m_oController.m_aoLayersList"
+                        ng-mouseover="m_oController.changeStyleRectangleMouseOver(layer.rectangle)"
+                        ng-mouseleave="m_oController.changeStyleRectangleMouseLeave(layer.rectangle)"
+                        ng-attr-id='{{"layer"+$index}}'><!--id='{{"layer:"+$index}}'-->
+
+                        <tr>
                             <td>
                                 <img src="assets/img/test_image.jpg" alt="test" height="82" width="82">
                             </td>
-                            <td>info varie</td>
-                            <td class="cellButton"><i class="fa fa-plus " aria-hidden="true"></i> </td>
+                            <td>
+                                <!--<td class="cellButton">-->
+                                <!--<i class="fa fa-plus " aria-hidden="true"></i>-->
+                                <!--</td>-->
+                                <!--<td class="cellButton" ng-click="m_oController.zoomOnBounds(layer.rectangle)">-->
+                                <!--<i class="fa fa-search-plus" aria-hidden="true"></i>-->
+                                <!--</td>-->
+                                <!--<div class="btn-group operations-table-layers">-->
+
+                                    <!--<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">-->
+                                        <!--<span class="caret"></span>-->
+                                    <!--</button>-->
+                                    <!--<ul class="dropdown-menu">-->
+                                        <!--<li class="cellButton"><i class="fa fa-plus " aria-hidden="true"></i> add</li>-->
+                                        <!--<li class="cellButton"><i class="fa fa-search-plus" aria-hidden="true"></i> zoom in</li>-->
+                                    <!--</ul>-->
+                                <!--</div>-->
+
+                                <div class="info">
+                                    <span ng-repeat="summary in layer.layerProperty.summary">
+                                        {{summary }}
+                                    </span>
+                                    <!--<span>summary</span>-->
+                                </div>
+
+
+                            </td>
                         </tr>
-                        &lt;!&ndash;<tr >&ndash;&gt;
-                            &lt;!&ndash;<td>&ndash;&gt;
-                                &lt;!&ndash;<img src="assets/img/test_image.jpg" alt="test" height="82" width="82">&ndash;&gt;
-                            &lt;!&ndash;</td>&ndash;&gt;
-                            &lt;!&ndash;<td>info varie</td>&ndash;&gt;
-                            &lt;!&ndash;<td class="cellButton"><i class="fa fa-plus " aria-hidden="true"></i> </td>&ndash;&gt;
-                        &lt;!&ndash;</tr>&ndash;&gt;
-
-                        &lt;!&ndash;<tr>&ndash;&gt;
-                            &lt;!&ndash;<td>&ndash;&gt;
-                                &lt;!&ndash;<img src="assets/img/test_image.jpg" alt="test" height="82" width="82">&ndash;&gt;
-                            &lt;!&ndash;</td>&ndash;&gt;
-                            &lt;!&ndash;<td>info varie</td>&ndash;&gt;
-                            &lt;!&ndash;<td class="cellButton"><i class="fa fa-plus " aria-hidden="true"></i> </td>&ndash;&gt;
-                        &lt;!&ndash;</tr>&ndash;&gt;
-
-                        &lt;!&ndash;<tr>&ndash;&gt;
-                            &lt;!&ndash;<td>&ndash;&gt;
-                                &lt;!&ndash;<img src="assets/img/test_image.jpg" alt="test" height="82" width="82">&ndash;&gt;
-                            &lt;!&ndash;</td>&ndash;&gt;
-                            &lt;!&ndash;<td>info varie</td>&ndash;&gt;
-                            &lt;!&ndash;<td class="cellButton"><i class="fa fa-plus " aria-hidden="true"></i> </td>&ndash;&gt;
-                        &lt;!&ndash;</tr>&ndash;&gt;
-
-                        &lt;!&ndash;<tr>&ndash;&gt;
-                            &lt;!&ndash;<td>&ndash;&gt;
-                                &lt;!&ndash;<img src="assets/img/test_image.jpg" alt="test" height="82" width="82">&ndash;&gt;
-                            &lt;!&ndash;</td>&ndash;&gt;
-                            &lt;!&ndash;<td>info varie</td>&ndash;&gt;
-                            &lt;!&ndash;<td class="cellButton"><i class="fa fa-plus " aria-hidden="true"></i> </td>&ndash;&gt;
-                        &lt;!&ndash;</tr>&ndash;&gt;
-
                     </tbody>
-                </table>-->
-
+                </table>
         </div>
     </div>
     <!-- OPEN MENU -->
     <div class="fixed" ng-click="m_oController.openNav()">
-        <i class="fa fa-bars fa-lg" aria-hidden="true"></i>
+        <i class="fa fa-search fa-lg" aria-hidden="true"></i>
 
     </div>
 

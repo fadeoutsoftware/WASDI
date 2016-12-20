@@ -34,7 +34,7 @@ var ImportController = (function() {
             opened: false
         };
         this.m_bIsOpen=true;
-        this.m_bIsVisibleListOfLayers = true; //TODO SET FALSE AFTER MERGE
+        this.m_bIsVisibleListOfLayers = false; //TODO SET FALSE AFTER MERGE
         this.m_oMapService.initMapWithDrawSearch('wasdiMapImport');
         this.m_aoLayersList= [];
 
@@ -202,6 +202,7 @@ var ImportController = (function() {
 
     ImportController.prototype.search = function() {
         var oController = this;
+        this.m_bIsVisibleListOfLayers = true;//change view on left side bar
         this.m_oSearchService.setTextQuery(this.m_oModel.textQuery);
         this.m_oSearchService.setGeoselection(this.m_oModel.geoselection); // todo: refactor setting by map
         // SearchService.setAdvancedFilter(scope.model.advancedFilter);
@@ -212,6 +213,15 @@ var ImportController = (function() {
 
             oController.m_oSearchService.search().then(function(result){
                 var sResults = result;
+
+                if(!utilsIsObjectNullOrUndefined(sResults))
+                {
+                    if(!utilsIsStrNullOrEmpty(sResults.data))
+                    {
+                        var aoData = JSON.parse(sResults.data);
+                        oController.generateLayersList(aoData);
+                    }
+                }
             });
         });
 
@@ -385,27 +395,26 @@ var ImportController = (function() {
     * Generate layers list
     * */
 
-    ImportController.prototype.generateLayersList=function()
+    ImportController.prototype.generateLayersList=function(aLayers)
     {
         var oController = this;
         //TODO TEST EXAMPLE
-        var aaBounds=[
-                        [[57.559322, -8.767822], [59.1210604, -6.021240]],
-                        [[54.559322, -5.767822], [56.1210604, -3.021240]],
-                        [[56.559322, -7.767822], [58.1210604, -5.021240]],
-                        [[55.559322, -6.767822], [57.1210604, -4.021240]]
-                        ];
-        if(utilsIsObjectNullOrUndefined(aaBounds))
+        //var aaBounds=[
+        //                [[57.559322, -8.767822], [59.1210604, -6.021240]],
+        //                [[54.559322, -5.767822], [56.1210604, -3.021240]],
+        //                [[56.559322, -7.767822], [58.1210604, -5.021240]],
+        //                [[55.559322, -6.767822], [57.1210604, -4.021240]]
+        //                ];
+        if(utilsIsObjectNullOrUndefined(aLayers))
             var iLength = 0;
         else
-            var iLength = aaBounds.length;
+            var iLength = aLayers.length;
 
         for(var iIndexLayers = 0; iIndexLayers < iLength; iIndexLayers++)
         {
-            var oRectangle = oController.m_oMapService.addRectangleOnMap(aaBounds[iIndexLayers][0],aaBounds[iIndexLayers][1],null,
-                                function (event) {console.log("Test: "+iIndexLayers)});
-
-            oController.m_aoLayersList.push({layerBounds:aaBounds[iIndexLayers], rectangle:oRectangle});
+           // var oRectangle = oController.m_oMapService.addRectangleOnMap(aaBounds[iIndexLayers][0],aaBounds[iIndexLayers][1],null,iIndexLayers);
+            var oRectangle =null;
+            oController.m_aoLayersList.push({layerProperty:aLayers[iIndexLayers], rectangle:oRectangle});
         }
 
     }
@@ -452,6 +461,26 @@ var ImportController = (function() {
                 return iIndex; // I FIND IT !!
         }
         return -1;//the method doesn't find the Rectangle in LayersList.
+    }
+
+    // Set bounds then call m_oMapService.zoomOnBounds(aaBounds)
+    ImportController.prototype.zoomOnBounds = function(oRectangle)
+    {
+        var oBounds = oRectangle.getBounds();
+        var oNorthEast = oBounds.getNorthEast();
+        var oSouthWest = oBounds.getSouthWest();
+
+        if(utilsIsObjectNullOrUndefined(oNorthEast) || utilsIsObjectNullOrUndefined(oSouthWest))
+        {
+            console.log("Error in zoom on bounds");
+        }
+        else
+        {
+            var aaBounds = [[oNorthEast.lat,oNorthEast.lng],[oSouthWest.lat,oSouthWest.lng]];
+            var oController = this;
+            if(oController.m_oMapService.zoomOnBounds(aaBounds) == false)
+                console.log("Error in zoom on bounds");
+        }
     }
 
     ImportController.$inject = [

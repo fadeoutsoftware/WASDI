@@ -161,7 +161,7 @@ service('MapService', ['$http','$rootScope', 'ConstantsService', function ($http
     }
 
     //Add rectangle shape
-    this.addRectangleOnMap = function (oPointA,oPointB,sColor,fFunction)
+    this.addRectangleOnMap = function (oPointA,oPointB,sColor,iIndexLayers)
     {
 
         if(utilsIsObjectNullOrUndefined(oPointA))
@@ -177,16 +177,17 @@ service('MapService', ['$http','$rootScope', 'ConstantsService', function ($http
         if(utilsIsStrNullOrEmpty(sColor))
             sColor="#ff7800";//default color
 
-        // define rectangle geographical bounds
+        // define rectangle with geographical bounds
         // example: var bounds = [[54.559322, -5.767822], [56.1210604, -3.021240]];
         var aaBounds = [oPointA,oPointB];
         // create an colored rectangle
         // weight = line thickness
         var oRectangle = L.rectangle(aaBounds, {color: sColor, weight: 1}).addTo(this.m_oWasdiMap);
 
-        if(!utilsIsObjectNullOrUndefined(fFunction))
-            oRectangle.on("click",fFunction);//if fFunction != null bind "rectangle click" and function
-
+        if(!utilsIsObjectNullOrUndefined(iIndexLayers))//event on click
+            oRectangle.on("click",function (event) {
+                console.log("test:" + iIndexLayers);
+            });
         //mouse over event change rectangle style
         oRectangle.on("mouseover", function (event) {
             oRectangle.setStyle({weight:3,fillOpacity:0.7});
@@ -199,22 +200,33 @@ service('MapService', ['$http','$rootScope', 'ConstantsService', function ($http
             $rootScope.$broadcast('on-mouse-leave-rectangle',{rectangle:oRectangle});// TODO SEND MASSAGE FOR CHANGE CSS in LAYER LIST TABLE
         });
 
-        //TODO REMOVE IT USED ONLY FOR TEST
-        this.m_oWasdiMap.fitBounds(aaBounds);//zoom on rectangle
+        ////TODO REMOVE IT USED ONLY FOR TEST
+        //this.m_oWasdiMap.fitBounds(aaBounds);//zoom on rectangle
 
         return oRectangle;
     }
 
+    // ZOOM
+    this.zoomOnBounds = function (aaBounds)
+    {
+        if(utilsIsObjectNullOrUndefined(aaBounds))
+            return false;
+        //check if there are 2 points
+        if(aaBounds.length != 2)
+            return false;
+        //check if they are points [ax,ay],[bx,by] == good
+        // [ax,ay,az,....],[bx,by,bz,....] == bad
+        if(aaBounds[0].length != 2 || aaBounds[1].length != 2)
+            return false;
+        this.m_oWasdiMap.fitBounds(aaBounds)
+        return true;
+    }
 
     this.initMapWithDrawSearch = function(sMapDiv)
     {
         //Init standard map
         this.initMap(sMapDiv);
 
-        /*
-        * TODO REMOVE "Rectangle Test"
-        * */
-        //this.addRectangleOnMap( [51.509, -0.08], [51.503, -0.06],"#ff7800", function (event) {console.log("test click")});
 
         //LEAFLET.DRAW LIB
         //add draw.search
@@ -239,7 +251,7 @@ service('MapService', ['$http','$rootScope', 'ConstantsService', function ($http
 
         this.m_oWasdiMap.addControl(oDrawControl);
 
-        //Without this.m_oWasdiMap.on() the shape isn't saved on map
+        //Without this.m_oWasdiMap.on() the shape isn't save on map
         this.m_oWasdiMap.on(L.Draw.Event.CREATED, function (event) {
             var layer = event.layer;
 
