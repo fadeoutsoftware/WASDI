@@ -14,10 +14,12 @@ var wasdiApp = angular.module('wasdi', [
     'wasdi.WorkspaceService',
     'wasdi.FileBufferService',
     'wasdi.ProductService',
-
+    'wasdi.ConfigurationService',
+    'wasdi.OpenSearchService',
 
     'wasdi.SnakeDirective',
-    'wasdi.TreeDirective'
+    'wasdi.TreeDirective',
+    'ui.bootstrap'
 ]);
 
 wasdiApp.config(['$httpProvider', '$translateProvider', function($httpProvider, $translateProvider) {

@@ -10,6 +10,9 @@
   <meta name="description" content="">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
+  <!--Bootstrap css-->
+  <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.min.css">
+
   <!-- CSS -->
   <link rel="stylesheet" href="css/style.css">
   <!-- FontAwesome -->
@@ -54,6 +57,8 @@
   <script src="bower_components/angular-translate/angular-translate.min.js"></script>
   <script src="bower_components/angular-translate-loader-static-files/angular-translate-loader-static-files.min.js"></script>
   <script src="bower_components/angular-ui-router/release/angular-ui-router.min.js"></script>
+  <script src="bower_components/angular-bootstrap/ui-bootstrap-tpls.js"></script>
+  <script src="bower_components/moment/moment.js"></script>
 
   <!-- Wasdi Services -->
   <script src="services/ConstantsService.js"></script>
@@ -64,6 +69,8 @@
   <script src="services/WorkspaceService.js"></script>
   <script src="services/FileBufferService.js"></script>
   <script src="services/ProductService.js"></script>
+  <script src="services/ConfigurationService.js"></script>
+  <script src="services/OpenSearchService.js"></script>
 
 
   <!-- Wasdi Directives -->
@@ -77,7 +84,15 @@
   <script src="controllers/EditorController.js"></script>
   <script src="controllers/RootController.js"></script>
   <script src="controllers/ImportController.js"></script>
+
+
   <script src="app.js"></script>
+
+  <!--Wasdi service search-->
+  <script src="services/search/advanced-filter-service.js"></script>
+  <script src="services/search/advanced-search-service.js"></script>
+  <script src="services/search/search-service.js"></script>
+
 
   <!-- Stomp js -->
   <script src="lib/stomp/stomp.js"></script>

@@ -1,7 +1,279 @@
 <div class="import-view col-lg-12 col-md-12 col-sm-12 col-xs-12">
     <!-- SIDEBAR -->
-    <div class="sidenav-animated" >
+    <div class="sidenav-animated">
         <div id="mySidenav" class="sidenav">
+            <!--<a href="#">About</a>-->
+            <!--<a href="#">Services</a>-->
+            <!--<a href="#">Clients</a>-->
+            <!--<a href="#">Contact</a>-->
+
+            <div id="coll-product-container" class="coll-product-container">
+                <div class="coll-product-list-container">
+                    <div class="coll-product-header">
+                        <div class="listtitle row" style="color: #373b50; font-weight: bold; font-size: 14px; ">
+                            <div ng-show="m_oController.m_iProductCount" class="col-md-6 coll-products-left">
+                                <input type="checkbox" id="product-list-all-checkbox" class="coll-product-list-checkbox"
+                                       ng-disabled="m_oController.m_bDisableField"
+                                       ng-click="m_oController.checkUncheckAll()">
+                                <span>
+                    Display {{visualizedProductsFrom}} to {{visualizedProductsTo}} of {{m_oController.m_iProductCount}} products.</span>
+                            </div>
+                            <div class="listtitle" style="color: #373b50; font-weight: bold; margin-left:5px;"
+                                 ng-hide="m_oController.m_iProductCount">No products found.
+                            </div>
+                            <div class="col-md-6  coll-products-right">
+                                <span>Search: </span>
+                                <input type="text" style="padding: 0px !important;" ng-model="m_oController.m_sFilter"
+                                       id="coll-product-search">
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="coll-product-list">
+                        <div ng-repeat="product in m_oController.m_aoProducts ">
+                            <div class="coll-product" title="{{product.identifier}}"><input type="checkbox"
+                                                                                            class="coll-product-list-checkbox"
+                                                                                            ng-disabled="m_oController.m_bDisableField"
+                                                                                            ng-checked="m_oController.isChecked(product)"
+                                                                                            ng-click="m_oController.addRemoveProduct(product)"><span>{{product.identifier}}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="coll-product-toolbar">
+                        <div style="height:20px;">
+                            <span ng-show="m_oController.m_iProductCount" id="coll-product-per-page-label"
+                                  class="coll-product-footer">Products per page:</span>
+                            <select ng-show="m_oController.m_iProductCount"
+                                    title="Products per page"
+                                    ng-model="m_oController.m_oScope.productsPerPage"
+                                    ng-change="m_oController.updateValue()"
+                                    id="coll-product-pagination">
+                                <option value="25">25</option>
+                                <option value="50">50</option>
+                                <option value="75">75</option>
+                                <option value="100">100</option>
+                                <option value="125">125</option>
+                                <option value="150">150</option>
+                            </select>
+                            <span ng-show="m_oController.m_iProductCount" class="pagination-button"
+                                  ng-class="{'disabled-button': (m_oController.m_iProductCount == 0 || m_oController.m_oScope.currentPage == 1)}"
+                                  class="select-page-button" ng-click="m_oController.gotoFirstPage()"
+                                  class="pagination-button">
+                            &lt;&lt;
+                        </span>
+                            <span ng-show="productCount" class="pagination-button"
+                                  ng-class="{'disabled-button': (productCount == 0 ||  currentPage == 1)}"
+                                  class="select-page-button" ng-click="m_oController.gotoPreviousPage()">
+                            &lt;
+                        </span>
+
+                            <span id="coll-page-label-id" ng-show="m_oController.m_iProductCount"
+                                  class="coll-product-footer">page:</span>
+
+                            <input ng-show="m_oController.m_iProductCount"
+                                   id="coll-product-page-selector"
+                                   ng-click="m_oController.selectPageDidClicked(this)"
+                                   type="text"
+                                   class="page-selector-input"
+                                   ng-model="m_oController.m_oScope.currentPage"
+                                   title="Enter page number"
+
+                            >
+                            <span ng-show="m_oController.m_iProductCount" class="coll-product-footer">of {{m_oController.m_oScope.pageCount}}</span>
+
+                            <span ng-show="m_oController.m_iProductCount" class="pagination-button"
+                                  ng-class="{'disabled-button': (m_oController.m_iProductCount == 0 || m_oController.m_oScope.currentPage == m_oController.m_oScope.pageCount || m_oController.m_oScope.pageCount == 1 || m_oController.m_oScope.pageCount == 0 ) }"
+                                  class="select-page-button" ng-click="m_oController.gotoNextPage()">
+                            &gt;
+                        </span>
+                            <span ng-show="m_oController.m_iProductCount" class="pagination-button"
+                                  ng-class="{'disabled-button': ( m_oController.m_iProductCount == 0 || m_oController.m_oScope.currentPage == m_oController.m_oScope.pageCount || m_oController.m_oScope.pageCount == 1 || m_oController.m_oScope.pageCount == 0 )}"
+                                  class="select-page-button" ng-click="m_oController.gotoLastPage()">
+                            &gt;&gt;
+                        </span>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="advanced-search-container">
+                <div id="advanced-search-content">
+
+                    <div class="panel-heading advanced-search-heading" role="tab">
+                        <h4 class="panel-title advanced-search-panel-title">
+                            <a class="accordion-toggle " role="button" data-toggle="collapse" data-parent="#accordion"
+                               aria-expanded="false" data-target="#section_2" aria-controls="section_2">
+                                <span class="advanced-search-collapse-title">Advanced search</span>
+                            </a>
+                            <span class="advanced-search-clear" ng-click="m_oController.clearFilter()"
+                                  title="Clear Search Filter">Clear</span>
+                        </h4>
+                    </div>
+                    <div id="section_2" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="section_2"
+                         style="overflow:visible;padding:15px 5px;">
+                        <div class="row" ng-if="m_oController.m_bShowsensingfilter">
+                            <div class="col-md-4 col-sd-12 col-xs-12 advanced-search-subtitle">&raquo; Sensing period
+                            </div>
+                            <div class="col-md-1 col-sd-2 col-xs-4 advanced-calendar-label">
+                                From:
+                            </div>
+                            <div class="col-md-3 col-sd-4 col-xs-8">
+                                <p class="input-group">
+                                    <input type="text" class="form-control advanced-calendar-date-input"
+                                           uib-datepicker-popup="yyyy/MM/dd"
+                                           ng-model="m_oController.m_oModel.sensingPeriodFrom"
+                                           is-open="m_oController.m_oStatus.openedSensingPeriodFrom"
+                                           date-disabled="m_oController.disabled(date, mode)"
+                                           max-date="m_oController.m_oModel.sensingPeriodTo" ng-required="true"
+                                           ng-blur="m_oController.updateAdvancedSearch()" readonly="true"
+                                           close-text="Close"/>
+                                    <span class="input-group-btn">
+							<button type="button" class="btn btn-default advanced-calendar-button"
+                                    ng-click="m_oController.openSensingPeriodFrom($event)"><i
+                                    class="glyphicon glyphicon-calendar"></i></button>
+						  </span>
+                                </p>
+                            </div>
+                            <div class="col-md-1 col-sd-2 col-xs-4 advanced-calendar-label">
+                                to:
+                            </div>
+                            <div class="col-md-3 col-sd-4 col-xs-8">
+                                <p class="input-group">
+                                    <input type="text" class="form-control advanced-calendar-date-input"
+                                           uib-datepicker-popup="yyyy/MM/dd"
+                                           ng-model="m_oController.m_oModel.sensingPeriodTo"
+                                           is-open="m_oController.m_oStatus.openedSensingPeriodTo"
+                                           date-disabled="m_oController.disabled(date, mode)" ng-required="true"
+                                           min-date="m_oController.m_oModel.sensingPeriodFrom"
+                                           ng-blur="m_oController.updateAdvancedSearch()" close-text="Close"
+                                           readonly="true" data-container="body"/>
+                                    <span class="input-group-btn">
+							<button type="button" class="btn btn-default advanced-calendar-button"
+                                    ng-click="m_oController.openSensingPeriodTo($event)"><i
+                                    class="glyphicon glyphicon-calendar"></i></button>
+						  </span>
+                                </p>
+                            </div>
+                        </div>
+                        <div class="row" ng-if="m_oController.m_bShowsensingfilter">
+                            <div class="col-md-4 col-sd-12 col-xs-12 avanced-search-subtitle">&raquo; Ingestion period
+                            </div>
+                            <div class="col-md-1 col-sd-2 col-xs-4 advanced-calendar-label">
+                                From:
+                            </div>
+                            <div class="col-md-3 col-sd-4 col-xs-8">
+                                <p class="input-group">
+                                    <input type="text" class="form-control advanced-calendar-date-input"
+                                           uib-datepicker-popup="yyyy/MM/dd"
+                                           ng-model="m_oController.m_oModel.ingestionFrom"
+                                           is-open="m_oController.m_oStatus.openedIngestionFrom"
+                                           date-disabled="m_oController.disabled(date, mode)"
+                                           max-date="m_oController.m_oModel.ingestionTo" ng-required="true"
+                                           ng-blur="m_oController.updateAdvancedSearch()" close-text="Close"
+                                           readonly="true" data-container="body"/>
+                                    <span class="input-group-btn">
+							<button type="button" class="btn btn-default advanced-calendar-button"
+                                    ng-click="m_oController.openIngestionFrom($event)"><i
+                                    class="glyphicon glyphicon-calendar"></i></button>
+						  </span>
+                                </p>
+                            </div>
+                            <div class="col-md-1 col-sd-2 col-xs-4 advanced-calendar-label">
+                                to:
+                            </div>
+                            <div class="col-md-3 col-sd-4 col-xs-8">
+                                <p class="input-group">
+                                    <input type="text" class="form-control advanced-calendar-date-input"
+                                           uib-datepicker-popup="yyyy/MM/dd"
+                                           ng-model="m_oController.m_oModel.ingestionTo"
+                                           is-open="m_oController.m_oStatus.openedIngestionTo"
+                                           date-disabled="m_oController.disabled(date, mode)"
+                                           min-date="m_oController.m_oModel.ingestionFrom" ng-required="true"
+                                           close-text="Close" ng-blur="m_oController.updateAdvancedSearch()"
+                                           readonly="true" data-container="body"/>
+                                    <span class="input-group-btn">
+							<button type="button" class="btn btn-default advanced-calendar-button"
+                                    ng-click="m_oController.openIngestionTo($event)"><i
+                                    class="glyphicon glyphicon-calendar"></i></button>
+						  </span>
+                                </p>
+                            </div>
+                        </div>
+
+
+                    </div>
+                    <div ng-repeat="mission in m_oController.getMissions()">
+                        <div>
+                            <div class="col-md-1 col-xs-4 col-sd-4">
+                                <div class="glyphicon mission-checkbox"
+                                     ng-class="{ ' glyphicon-unchecked': !mission.selected, 'glyphicon-check': mission.selected }"
+                                     ng-click="mission.selected = !mission.selected; m_oController.updateMissionSelection($index);"></div>
+
+                            </div>
+                            <div class="col-md-11 col-xs-8 col-sd-8">{{mission.name}}</div>
+                        </div>
+                        <!--<div class="checkbox filter-checkbox">
+                            <label class="filter-checkbox-label"><input  type="checkbox" ng-model="mission.selected" value="mission.selected" ng-change="updateMissionSelection($index)">{{mission.name}}</label>
+                        </div>-->
+                        <div class="row">
+                            <div ng-repeat="filter in mission.filters">
+                                <!--<div class="row">
+                                    <div >{{filter.indexlabel}}</div>
+                                    <div ><input type="text" value="{{filter.indexvalue}}"></div>
+                                </div>-->
+                                <div class="col-md-6"
+                                     ng-if="!(filter.indexvalues && filter.indexvalues.split('|').length > 0)">
+                                    <div class="group ">
+                                        <div>
+                                            <label class="filter-label">{{filter.indexlabel}}</label>
+
+                                            <input type="text" ng-model="filter.indexvalue"
+                                                   ng-value="filter.indexvalue" class="form-control filter-input"
+                                                   ng-blur="m_oController.updateFilter($parent.$parent.$index)"
+                                                   ng-pattern="filter.regex">
+                                            <span class="highlight filter-highlight"></span>
+                                            <span class="bar filter-bar"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div id="adv-options" class="group col-md-6"
+                                     ng-if="(filter.indexvalues && filter.indexvalues.split('|').length > 0)">
+                                    <label class="filter-label">{{filter.indexlabel}}</label>
+                                    <input type="text" ng-model="filter.indexvalue" ng-value="filter.indexvalue"
+                                           class="form-control filter-input"
+                                           ng-blur="m_oController.updateFilter($parent.$parent.$index)"
+                                           ng-click="m_oController.clearInput($parent.$parent.$index, $parent.$index)"
+                                           ng-pattern="filter.regex"
+                                           list="{{$parent.$parent.$index}}_{{$index}}_optlist">
+                                    <div class="adv-selectfield">
+                                        <datalist id="{{$parent.$parent.$index}}_{{$index}}_optlist"
+                                                  class="browser-default" ng-model="filter.indexvalue">
+                                            <option selected></option>
+                                            <option ng-repeat="option in filter.indexvalues.split('|')"
+                                                    value="{{option}}">{{option}}
+                                            </option>
+                                        </datalist>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!--<a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>-->
+                    <!--<a href="#">About</a>-->
+                    <!--<a href="#">Services</a>-->
+                    <!--<a href="#">Clients</a>-->
+                    <!--<a href="#">Contact</a>-->
+                    <div class="search-button" ng-click="m_oController.search()" id="search-button">
+                        <svg viewBox="0 0 24 24" height="100%" width="100%" preserveAspectRatio="xMidYMid meet" fit=""
+                             style="pointer-events: none; display: block;">
+                            <g>
+                                <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"></path>
+                            </g>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+
 
             <!-- BACK -->
             <i class="fa fa-arrow-left fa-2x closebtn" aria-hidden="true" ng-click="m_oController.m_bIsVisibleListOfLayers = false" ng-show="m_oController.m_bIsVisibleListOfLayers"></i>
@@ -69,18 +341,21 @@
     <!-- OPEN MENU -->
     <div class="fixed" ng-click="m_oController.openNav()">
         <i class="fa fa-bars fa-lg" aria-hidden="true"></i>
+
     </div>
+
     <div class="map-container">
-        <div class="map" id = "wasdiMapImport" ></div>
+        <div class="map" id="wasdiMapImport"></div>
     </div>
+
 </div>
 
 <!--<script>-->
-    <!--function openNav() {-->
-        <!--document.getElementById("mySidenav").style.width = "250px";-->
-    <!--}-->
+<!--function openNav() {-->
+<!--document.getElementById("mySidenav").style.width = "250px";-->
+<!--}-->
 
-    <!--function closeNav() {-->
-        <!--document.getElementById("mySidenav").style.width = "0";-->
-    <!--}-->
+<!--function closeNav() {-->
+<!--document.getElementById("mySidenav").style.width = "0";-->
+<!--}-->
 <!--</script>-->
