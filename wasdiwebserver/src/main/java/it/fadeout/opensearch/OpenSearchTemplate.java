@@ -21,7 +21,7 @@ public class OpenSearchTemplate {
     {
         Map<String,Object> map = new HashMap<String, Object>();
         map.put("scheme","https");
-        map.put("path", new String[] {"dhus","search"});
+        map.put("path", new String[] {"apihub","search"});
         map.put("q", qParams);
         
         return template.expand(map);

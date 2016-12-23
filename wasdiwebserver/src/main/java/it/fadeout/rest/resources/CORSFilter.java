@@ -33,6 +33,7 @@ public class CORSFilter implements Filter {
         response.addHeader("Access-Control-Allow-Headers", "Cache-Control, Pragma, Origin, Authorization, content-type, X-Requested-With, accept, x-session-token, x-refdate");
         //response.addHeader("Access-Control-Allow-Methods", "*");
         //response.addHeader("Access-Control-Allow-Headers", "*");
+        response.addHeader("Access-Control-Allow-Credentials", "true");
     }
 
 	@Override
