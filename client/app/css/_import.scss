@@ -18,7 +18,7 @@
 
     .sidenav {
       height: 100%;
-      width: 30%;
+      width: 35%;
       position: fixed;
       z-index: 10000;
       top: 0;
@@ -33,34 +33,50 @@
       color:black;
     }
 
-    .sidenav-container{
-      margin: 20px;
-      //Over tr
-      .table-hover tbody tr:hover td, .table-hover tbody tr:hover th {
-        //background-color: $wasdi;
-        color:$wasdi-green-logo;
-        border-top: 1px solid $wasdi-green-logo;
-        border-bottom: 1px solid $wasdi-green-logo;
-      }
+    /************************TABLE**************************/
+    //Over tr
+    //  .table-hover tbody tr:hover td, .table-hover tbody tr:hover th {
+    //    //background-color: $wasdi;
+    //    color:$wasdi-green-logo;
+    //    border-top: 1px solid $wasdi-green-logo;
+    //    border-bottom: 1px solid $wasdi-green-logo;
+    //  }
+
+    //Over TR
+    .table-hover tbody:hover{
+      //background-color: $wasdi;
+      //color:$wasdi-green-logo;
+      border-top: 2px solid $wasdi-green-logo;
+      border-bottom: 2px solid $wasdi-green-logo;
+    }
+      /*table css*/
       .layers
       {
-
 
         thead
         {
           background-color: $wasdi-import-table-head-background-color;
           color:$wasdi-import-table-head-color;
         }
-        td,th
+        td
+        {
+          vertical-align:middle;
+        }
+        th
         {
           text-align:center;
           vertical-align:middle;
         }
-        .cellButton
+        tbody
+        {
+          border-top: 1px solid #ddd;//FIX TABLE
+        }
+        .operation-button
         {
           cursor:pointer;
+
         }
-        .cellButton:hover
+        .operation-button:hover
         {
           background-color: $wasdi-import-cell-background-color-over-button;
 
@@ -70,22 +86,50 @@
           }
 
         }
-        .info
+        .info-layer
         {
-          font-family:$wasdi-font-web-small-dimension;
+          font-family:$wasdi-font-web-small-dimension !important;
           font-size:12px;
           line-height: 1.42857;
-          font-weight: 600;
+          font-weight: 500;
+          .label
+          {
+            font-size:90%;
+
+          }
+          //PREVIEW IMAGE
+          .preview-layer-image
+          {
+            margin-top: 2px;
+            margin-bottom: 2px;
+            //margin-right: 0;
+            //max-height:$wasdi-import-preview-layer-on-table-dimension;
+            //max-width:$wasdi-import-preview-layer-on-table-dimension;
+            img
+            {
+              height:$wasdi-import-preview-layer-on-table-dimension;
+              width:$wasdi-import-preview-layer-on-table-dimension;
+            }
+          }
+
+          //Data layer
+          .data-info-layer
+          {
+            position: relative;
+            right: -370px;
+          }
+          //DROPDOWN MENU
+          .operations-table-layers{
+            display: inline;
+          }
         }
+
+
       }
 
-      //DROPDOWN MENU
-      .operations-table-layers{
-        display: inline;
 
-        
-      }
     }
+  /********************************************************/
 
     .search-button{
       padding: 5px;
@@ -450,7 +494,7 @@
 
 
 
-  }
+
   //FIXED OPEN MENU BUTTON
   .fixed {
     cursor:pointer;
@@ -464,6 +508,10 @@
     //border: 1px solid white;
     z-index: 1000;
     opacity: 0.9;
+    i
+    {
+      color: white;
+    }
   }
   .fixed:hover
   {
@@ -471,4 +519,3 @@
   }
   //END SIDEBAR
 }
-

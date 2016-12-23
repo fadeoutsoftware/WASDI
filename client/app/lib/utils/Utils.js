@@ -63,3 +63,13 @@ function utilsFindBootstrapEnvironment()
         }
     }
 }
+
+function utilsStrContainsCaseInsensitive(sSource, sStrToSearch)
+{
+    if (sSource == null)
+        return false;
+
+    var s1 = sSource.toLowerCase();
+    var s2 = sStrToSearch.toLowerCase();
+    return (s1.indexOf(s2) > -1);
+}

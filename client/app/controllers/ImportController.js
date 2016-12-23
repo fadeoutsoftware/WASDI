@@ -34,10 +34,9 @@ var ImportController = (function() {
             opened: false
         };
         this.m_bIsOpen=true;
-        this.m_bIsVisibleListOfLayers = false; //TODO SET FALSE AFTER MERGE
+        this.m_bIsVisibleListOfLayers = false;
         this.m_oMapService.initMapWithDrawSearch('wasdiMapImport');
         this.m_aoLayersList= [];
-
         this.m_aoMissions;
         this.m_oModel = {
             textQuery:'',
@@ -105,7 +104,16 @@ var ImportController = (function() {
             return result;
         };
 
-
+        //vex.dialog.confirm({
+        //    message: 'Are you absolutely sure you want to destroy the alien planet?',
+        //    callback: function (value) {
+        //        if (value) {
+        //            console.log('Successfully destroyed the planet.')
+        //        } else {
+        //            console.log('Chicken.')
+        //        }
+        //    }
+        //})
     }
     /***************** METHODS ***************/
     //OPEN LEFT NAV-BAR
@@ -216,10 +224,10 @@ var ImportController = (function() {
 
                 if(!utilsIsObjectNullOrUndefined(sResults))
                 {
-                    if(!utilsIsStrNullOrEmpty(sResults.data))
+                    if(!utilsIsObjectNullOrUndefined(sResults.data))
                     {
                         var aoData = JSON.parse(sResults.data);
-                        oController.generateLayersList(aoData);
+                        oController.generateLayersList(aoData.feed);
                     }
                 }
             });
@@ -395,7 +403,7 @@ var ImportController = (function() {
     * Generate layers list
     * */
 
-    ImportController.prototype.generateLayersList=function(aLayers)
+    ImportController.prototype.generateLayersList=function(aData)
     {
         var oController = this;
         //TODO TEST EXAMPLE
@@ -405,18 +413,57 @@ var ImportController = (function() {
         //                [[56.559322, -7.767822], [58.1210604, -5.021240]],
         //                [[55.559322, -6.767822], [57.1210604, -4.021240]]
         //                ];
-        if(utilsIsObjectNullOrUndefined(aLayers))
+        var aoLayers =  aData.entry;
+        if(utilsIsObjectNullOrUndefined(aoLayers))
             var iLength = 0;
         else
-            var iLength = aLayers.length;
+            var iLength = aoLayers.length;
 
         for(var iIndexLayers = 0; iIndexLayers < iLength; iIndexLayers++)
         {
            // var oRectangle = oController.m_oMapService.addRectangleOnMap(aaBounds[iIndexLayers][0],aaBounds[iIndexLayers][1],null,iIndexLayers);
-            var oRectangle =null;
-            oController.m_aoLayersList.push({layerProperty:aLayers[iIndexLayers], rectangle:oRectangle});
+            var oRectangle = null;
+            //var oSummary = aoLayers[iIndexLayers].summary.content;//take summary of layer
+
+            //var aSplit = aoLayers[iIndexLayers].summary.content.split(",");
+            var oSummary = this.stringToObjectSummary(aoLayers[iIndexLayers].summary.content);
+            oController.m_aoLayersList.push({layerProperty:aoLayers[iIndexLayers],summary:oSummary,id:aoLayers[iIndexLayers].id, rectangle:oRectangle});
         }
 
+    }
+
+    /*
+        Usually the summary format is a string = "date:...,instrument:...,mode:...,satellite:...,size:...";
+     */
+    ImportController.prototype.stringToObjectSummary = function(sSummary)
+    {
+        if(utilsIsObjectNullOrUndefined(sSummary))
+            return null;
+        if(utilsIsStrNullOrEmpty(sSummary))
+            return null;
+
+        var aSplit = sSummary.split(",");//split summary
+        var oNewSummary = {Date:"",Instrument:"",Mode:"",Satellite:"",Size:""}//make object summary
+        var asSummary = ["Date","Instrument","Mode","Satellite","Size"]
+        var iSplitLength=aSplit.length;
+        var iSummaryLength = asSummary.length;
+
+        /* it dosen't know if date,instrument,mode...are the first element,second element,... of aSplit array
+        * we fix it with this code
+        * */
+        for(var iIndex = 0; iIndex < iSplitLength; iIndex++ )
+        {
+            for(var jIndex = 0; jIndex < iSummaryLength;jIndex++ )
+            {
+                if(utilsStrContainsCaseInsensitive(aSplit[iIndex],asSummary[jIndex]))
+                {
+                    oNewSummary[asSummary[jIndex].replace(":","")] = aSplit[iIndex].replace(asSummary[jIndex]+":","");
+                    break;
+                }
+            }
+        }
+
+        return oNewSummary;
     }
     /*********************** CHANGE CSS RECTANGLE (LEAFLET MAP) ****************************/
     /*

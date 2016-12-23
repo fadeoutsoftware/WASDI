@@ -20,6 +20,7 @@
     "bootstrap":"3.3.7",
     "angular-bootstrap":"",
     "moment":"",
-	"leaflet-draw": "0.4.7"
+	"leaflet-draw": "0.4.7",
+    "vex":"3.0.0"
   }
 }

@@ -288,12 +288,12 @@
                 <!-- the table become visible after the user Search a layer -->
                 <table class="table table-hover layers" id="table_layers_list" ng-show="m_oController.m_bIsVisibleListOfLayers" >
 
-                    <thead>
-                        <th id="Preview">Preview</th>
-                        <th>Info</th>
+                    <!--<thead>-->
+                        <!--<th id="Preview">Preview</th>-->
                         <!--<th></th>-->
-                        <!--<th></th>-->
-                    </thead>
+                        <!--&lt;!&ndash;<th></th>&ndash;&gt;-->
+                        <!--&lt;!&ndash;<th></th>&ndash;&gt;-->
+                    <!--</thead>-->
 
                     <!--<tbody>-->
                         <!--<tr ng-repeat="layer in m_oController.m_aoLayersList"-->
@@ -313,44 +313,46 @@
                         <!--</tr>-->
     <!---->
                     <!--</tbody>-->
+
                     <tbody ng-repeat="layer in m_oController.m_aoLayersList"
                         ng-mouseover="m_oController.changeStyleRectangleMouseOver(layer.rectangle)"
                         ng-mouseleave="m_oController.changeStyleRectangleMouseLeave(layer.rectangle)"
                         ng-attr-id='{{"layer"+$index}}'><!--id='{{"layer:"+$index}}'-->
-
-                        <tr>
+                        <!-------------------- SUMMARY ------------------>
+                        <tr class="info-layer" >
+                            <!--IMAGE CELL-->
                             <td>
-                                <img src="assets/img/test_image.jpg" alt="test" height="82" width="82">
+                                <span class="label label-default">{{layer.summary.Mode}}</span><!--Mode-->
+                                <span class="label label-default">{{layer.summary.Instrument}}</span><!--Instrument-->
+                                <div class="preview-layer-image" ><img src={{layer.layerProperty.link[2].href}} alt="test"></div>
+                                <!--<img src="assets/img/test_image.jpg" style="height: 80px;width:80px"alt="test;">-->
+                                <span class="badge">{{layer.summary.Size}}</span><!--Size-->
                             </td>
                             <td>
+                                <div>
+                                    <div class="data-info-layer">{{layer.summary.Date|date:'medium'}}</div><!--Date-->
+                                    <div>{{layer.id}}</div>
+                                    <span>{{layer.layer.summary.Satellite}}</span><!--satellite-->
+
+                                </div>
                                 <!--<td class="cellButton">-->
                                 <!--<i class="fa fa-plus " aria-hidden="true"></i>-->
                                 <!--</td>-->
                                 <!--<td class="cellButton" ng-click="m_oController.zoomOnBounds(layer.rectangle)">-->
                                 <!--<i class="fa fa-search-plus" aria-hidden="true"></i>-->
                                 <!--</td>-->
-                                <!--<div class="btn-group operations-table-layers">-->
 
-                                    <!--<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">-->
-                                        <!--<span class="caret"></span>-->
-                                    <!--</button>-->
-                                    <!--<ul class="dropdown-menu">-->
-                                        <!--<li class="cellButton"><i class="fa fa-plus " aria-hidden="true"></i> add</li>-->
-                                        <!--<li class="cellButton"><i class="fa fa-search-plus" aria-hidden="true"></i> zoom in</li>-->
-                                    <!--</ul>-->
-                                <!--</div>-->
-
-                                <div class="info">
-                                    <span ng-repeat="summary in layer.layerProperty.summary">
-                                        {{summary }}
-                                    </span>
-                                    <!--<span>summary</span>-->
+                                <div class="btn-group" role="group" >
+                                    <button type="button" class="btn btn-default"><i class="fa fa-plus " aria-hidden="true"></i> </button>
+                                    <button type="button" class="btn btn-default"><i class="fa fa-search-plus" aria-hidden="true"></i></button>
+                                    <button type="button" class="btn btn-default"><i class="fa fa-cart-plus" aria-hidden="true"></i></button>
+                                    <button type="button" class="btn btn-default"><i class="fa fa-info-circle" aria-hidden="true"></i></i></button>
                                 </div>
-
 
                             </td>
                         </tr>
                     </tbody>
+
                 </table>
         </div>
     </div>
