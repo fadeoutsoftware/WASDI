@@ -57,6 +57,8 @@ var ImportController = (function() {
         //    this.m_oUser = this.m_oConstantsService.getUser();
         //else
         //    this.m_oState.go("login");
+
+
         this.m_oUser = this.m_oConstantsService.getUser();
         var oController = this;
         //get configuration
@@ -64,6 +66,7 @@ var ImportController = (function() {
             oController.m_oConfiguration = configuration;
             oController.m_aoMissions = oController.m_oConfiguration.missions;
             oController.m_bShowsensingfilter = oController.m_oConfiguration.settings.showsensingfilter;
+            oController.m_oScope.$apply();
         });
 
 
@@ -114,6 +117,117 @@ var ImportController = (function() {
         //        }
         //    }
         //})
+        $scope.$on('rectangle-created-for-opensearch', function(event, args) {
+
+            var oLayer = args.layer;
+            var sFilter = '( footprint:"intersects(POLYGON((';
+            if(!utilsIsObjectNullOrUndefined(oLayer))
+            {
+                var iNumberOfPoints = oLayer._latlngs[0].length;
+                var aaLatLngs = oLayer._latlngs[0];
+                /*open search want the first poit as end poit */
+                var iLastlat=aaLatLngs[0].lat;
+                var iLastlng=aaLatLngs[0].lng;
+                for(var iIndexBounds = 0; iIndexBounds < iNumberOfPoints; iIndexBounds++)
+                {
+
+                    sFilter = sFilter + aaLatLngs[iIndexBounds].lng + " " +aaLatLngs[iIndexBounds].lat+",";
+                    //if(iIndexBounds != (iNumberOfPoints-1))
+                    //    sFilter = sFilter + ",";
+                }
+                sFilter = sFilter + iLastlng + " " + iLastlat + ')))" )';
+            }
+            //(%20footprint:%22Intersects(POLYGON((5.972671999999995%2036.232811331264955,20.123062624999992%2036.232811331264955,20.123062624999992%2048.3321995971576,5.972671999999995%2048.3321995971576,5.972671999999995%2036.232811331264955)))%22%20)
+            //set filter
+            $scope.m_oController.m_oModel.geoselection = sFilter ;
+        });
+
+        /*When mouse on rectangle layer (change css)*/
+        $scope.$on('on-mouse-over-rectangle', function(event, args) {
+
+            var oRectangle = args.rectangle;
+            if(!utilsIsObjectNullOrUndefined(oRectangle))
+            {
+                if(utilsIsObjectNullOrUndefined($scope.m_oController.m_aoLayersList.length))
+                    var iLengthLayersList = 0;
+                else
+                    var iLengthLayersList = $scope.m_oController.m_aoLayersList.length;
+
+                for(var iIndex = 0; iIndex < iLengthLayersList; iIndex++)
+                {
+
+                    if($scope.m_oController.m_aoLayersList[iIndex].rectangle == oRectangle)
+                    {
+                        var sId = "layer"+$scope.m_oController.m_aoLayersList[iIndex].id;
+                        //change css of table
+                        jQuery("#"+sId).css({"border-top": "2px solid green", "border-bottom": "2px solid green"});
+
+
+                    }
+                }
+
+            }
+        });
+
+        /*When mouse leaves rectangle layer (change css)*/
+        $scope.$on('on-mouse-leave-rectangle', function(event, args) {
+
+            var oRectangle = args.rectangle;
+            if(!utilsIsObjectNullOrUndefined(oRectangle))
+            {
+                if(utilsIsObjectNullOrUndefined($scope.m_oController.m_aoLayersList.length))
+                    var iLengthLayersList = 0;
+                else
+                    var iLengthLayersList = $scope.m_oController.m_aoLayersList.length;
+
+                for(var iIndex = 0; iIndex < iLengthLayersList; iIndex++)
+                {
+
+                    if($scope.m_oController.m_aoLayersList[iIndex].rectangle == oRectangle)
+                    {
+                        var sId = "layer"+$scope.m_oController.m_aoLayersList[iIndex].id;
+                        //return default css of table
+                        jQuery("#"+sId).css({"border-top": "", "border-bottom": ""});
+
+                    }
+                }
+
+            }
+
+        });
+
+        /*When rectangle was clicked (change focus on table)*/
+        $scope.$on('on-mouse-click-rectangle', function(event, args) {
+
+            var oRectangle = args.rectangle;
+            if(!utilsIsObjectNullOrUndefined(oRectangle))
+            {
+                if(utilsIsObjectNullOrUndefined($scope.m_oController.m_aoLayersList.length))
+                    var iLengthLayersList = 0;
+                else
+                    var iLengthLayersList = $scope.m_oController.m_aoLayersList.length;
+
+                for(var iIndex = 0; iIndex < iLengthLayersList; iIndex++)
+                {
+
+                    if($scope.m_oController.m_aoLayersList[iIndex].rectangle == oRectangle)
+                    {
+                        var sId = "layer"+$scope.m_oController.m_aoLayersList[iIndex].id;
+
+                        /* change view on table , when the pointer of mouse is on a rectangle the table scroll, the row will become visible(if it isn't) */
+                        var container = $('#div-container-table'), scrollTo = $("#"+sId);
+                        container.animate({
+                            scrollTop: scrollTo.offset().top - container.offset().top + container.scrollTop()
+                        });
+                        //container.scrollTop(
+                        //    scrollTo.offset().top - container.offset().top + container.scrollTop()
+                        //);
+
+                    }
+                }
+
+            }
+        });
     }
     /***************** METHODS ***************/
     //OPEN LEFT NAV-BAR
@@ -210,24 +324,38 @@ var ImportController = (function() {
 
     ImportController.prototype.search = function() {
         var oController = this;
-        this.m_bIsVisibleListOfLayers = true;//change view on left side bar
+
+        this.deleteLayers();/*delete layers (if it isn't the first search) and relatives rectangles in map*/
+
+        this.m_bIsVisibleListOfLayers = true;//change view on left side ba
         this.m_oSearchService.setTextQuery(this.m_oModel.textQuery);
         this.m_oSearchService.setGeoselection(this.m_oModel.geoselection); // todo: refactor setting by map
         // SearchService.setAdvancedFilter(scope.model.advancedFilter);
-        this.m_oSearchService.setOffset(0);
-        this.m_oSearchService.getProductsCount().then(function(result){
 
-            var iCount = result;
+        this.m_oSearchService.setOffset(0);//default 0
+        this.m_oSearchService.setLimit(25);// default 10
+
+        this.m_oSearchService.getProductsCount().then(function(result){
+            //TODO CHECK DATA
+            var iCount = result.data;
 
             oController.m_oSearchService.search().then(function(result){
                 var sResults = result;
 
                 if(!utilsIsObjectNullOrUndefined(sResults))
                 {
-                    if(!utilsIsObjectNullOrUndefined(sResults.data))
+
+                    if (typeof sResults.data == 'string')
                     {
-                        var aoData = JSON.parse(sResults.data);
-                        oController.generateLayersList(aoData.feed);
+                        if (!utilsIsStrNullOrEmpty(sResults.data)) {
+                            var aoData = JSON.parse(sResults.data);
+                            oController.generateLayersList(aoData.feed);
+                        }
+                    }
+                    else
+                    {
+                        //TODO REMOVE IT (use it only with fake data)
+                        oController.generateLayersList(sResults.data.feed);
                     }
                 }
             });
@@ -406,14 +534,14 @@ var ImportController = (function() {
     ImportController.prototype.generateLayersList=function(aData)
     {
         var oController = this;
-        //TODO TEST EXAMPLE
-        //var aaBounds=[
-        //                [[57.559322, -8.767822], [59.1210604, -6.021240]],
-        //                [[54.559322, -5.767822], [56.1210604, -3.021240]],
-        //                [[56.559322, -7.767822], [58.1210604, -5.021240]],
-        //                [[55.559322, -6.767822], [57.1210604, -4.021240]]
-        //                ];
+
         var aoLayers =  aData.entry;
+
+        if( ! Array.isArray(aoLayers))// if the later is alone it'isnt a array but a object
+        {
+            aoLayers = [aoLayers];
+        }
+
         if(utilsIsObjectNullOrUndefined(aoLayers))
             var iLength = 0;
         else
@@ -421,17 +549,119 @@ var ImportController = (function() {
 
         for(var iIndexLayers = 0; iIndexLayers < iLength; iIndexLayers++)
         {
-           // var oRectangle = oController.m_oMapService.addRectangleOnMap(aaBounds[iIndexLayers][0],aaBounds[iIndexLayers][1],null,iIndexLayers);
-            var oRectangle = null;
-            //var oSummary = aoLayers[iIndexLayers].summary.content;//take summary of layer
 
-            //var aSplit = aoLayers[iIndexLayers].summary.content.split(",");
+            var oRectangle = null;
+            var aasBounds = oController.getBoundsByLayerFootPrint(aoLayers[iIndexLayers]);
+            oRectangle = oController.m_oMapService.addRectangleOnMap(aasBounds ,null,iIndexLayers);
+
+            /*
+                m_aoLayersList[i]={
+                                    layerProperty:
+                                    summary:
+                                    id:
+                                    rectangle:
+                                    title:
+                                    preview:
+                                  }
+            * */
+
+            /*TODO CHANGE stringToObjectSummary() WITH JSON.parse() */
             var oSummary = this.stringToObjectSummary(aoLayers[iIndexLayers].summary.content);
-            oController.m_aoLayersList.push({layerProperty:aoLayers[iIndexLayers],summary:oSummary,id:aoLayers[iIndexLayers].id, rectangle:oRectangle});
+            oController.m_aoLayersList.push(
+                {
+                    layerProperty:aoLayers[iIndexLayers],
+                    summary:oSummary,
+                    id:aoLayers[iIndexLayers].id,
+                    rectangle:oRectangle,
+                    title:aoLayers[iIndexLayers].title.content,
+                    preview:oController.getPreviewLayer(aoLayers[iIndexLayers])
+                });
         }
 
     }
 
+    /*
+    * Get preview in layer
+    * If method return null somethings doesn't works
+    * N.B. the method can return empty image
+    * */
+    ImportController.prototype.getPreviewLayer = function(oLayer)
+    {
+        if(utilsIsObjectNullOrUndefined(oLayer))
+            return null;
+        if(utilsIsObjectNullOrUndefined(oLayer.link))
+            return null;
+        var iLinkLength = oLayer.link.length;
+
+        for(var iIndex = 0; iIndex < iLinkLength; iIndex++)
+        {
+            if(oLayer.link[iIndex].rel == "icon")
+                if( (!utilsIsObjectNullOrUndefined(oLayer.link[iIndex].image) ) && ( !utilsIsObjectNullOrUndefined(oLayer.link[iIndex].image.content) ) )
+                    return oLayer.link[iIndex].image.content;
+        }
+        return null;
+    }
+
+    /* Get bounds */
+
+    ImportController.prototype.getBoundsByLayerFootPrint=function(oLayer)
+    {
+        var sKeyWord = "footprint" //inside name property, if there is write footprint there are the BOUNDS
+        if(utilsIsObjectNullOrUndefined(oLayer))
+            return null;
+        var aoStr = oLayer.str;
+        if(utilsIsObjectNullOrUndefined(aoStr))
+        {
+            var iStrLength = 0;
+        }
+        {
+            var iStrLength = aoStr.length;
+        }
+
+        var sSourceProjection = "WGS84";
+        var sDestinationProjection = "GOOGLE";
+
+        //look for content with substring POLYGON
+        var aasNewContent = [];
+        for(var iIndexStr = 0; iIndexStr < iStrLength; iIndexStr++)
+        {
+            if(aoStr[iIndexStr].name == sKeyWord)//we find bounds
+            {
+                var sContent = aoStr[iIndexStr].content;
+                if(utilsIsObjectNullOrUndefined(sContent))
+                    null;
+                sContent = sContent.replace("POLYGON ","");
+                sContent = sContent.replace("((","");
+                sContent = sContent.replace("))","");
+                sContent = sContent.split(",");
+
+                for (var iIndexBounds = 0; iIndexBounds < sContent.length; iIndexBounds++)
+                {
+                    var aBounds = sContent[iIndexBounds];
+                    console.log(aBounds);
+                    var aNewBounds = aBounds.split(" ");
+
+                    //var aoOutputPoint = proj4(sSourceProjection,sDestinationProjection,aNewBounds);
+
+                    //var aBounds = sContent[iIndexBounds];
+                    //var aNewBounds = aBounds.split(" ");
+
+                    var oLatLonArray = [];
+
+                    oLatLonArray[0] = JSON.parse(aNewBounds[1]); //Lat
+                    oLatLonArray[1] = JSON.parse(aNewBounds[0]); //Lon
+
+
+                    //var aoOutputPoint = proj4(sSourceProjection,sDestinationProjection,aNewBounds);
+
+                    aasNewContent.push(oLatLonArray);
+                }
+
+            }
+        }
+
+        return aasNewContent;
+    }
     /*
         Usually the summary format is a string = "date:...,instrument:...,mode:...,satellite:...,size:...";
      */
@@ -457,7 +687,9 @@ var ImportController = (function() {
             {
                 if(utilsStrContainsCaseInsensitive(aSplit[iIndex],asSummary[jIndex]))
                 {
-                    oNewSummary[asSummary[jIndex].replace(":","")] = aSplit[iIndex].replace(asSummary[jIndex]+":","");
+                    var oData = aSplit[iIndex].replace(asSummary[jIndex]+":","");
+                    oData = oData.replace(" ","");//remove spaces from data
+                    oNewSummary[asSummary[jIndex].replace(":","")] = oData ;
                     break;
                 }
             }
@@ -493,6 +725,7 @@ var ImportController = (function() {
     /************************************************************/
 
     /* the method take in input a rectangle, return the layer index Bound with rectangle
+    *  parameters: rectangle
     * */
     ImportController.prototype.indexOfRectangleInLayersList=function(oRectangle) {
         var oController = this;
@@ -528,6 +761,50 @@ var ImportController = (function() {
             if(oController.m_oMapService.zoomOnBounds(aaBounds) == false)
                 console.log("Error in zoom on bounds");
         }
+    }
+
+    ImportController.prototype.isEmptyLayersList = function(){
+        if(utilsIsObjectNullOrUndefined(this.m_aoLayersList) )
+            return true;
+        if( this.m_aoLayersList.length == 0)
+            return true;
+
+        return false;
+    }
+
+    ImportController.prototype.deleteLayers = function()
+    {
+        //check if layers list is empty
+        if(this.isEmptyLayersList())
+            return false;
+        var iLengththLayersList = this.m_aoLayersList.length;
+        var oMap = this.m_oMapService.getMap();
+        /* remove rectangle in map*/
+        for(var iIndexLayersList = 0; iIndexLayersList < iLengththLayersList; iIndexLayersList++)
+        {
+            var oRectangle = this.m_aoLayersList[iIndexLayersList].rectangle
+            if(!utilsIsObjectNullOrUndefined(oRectangle))
+                oRectangle.removeFrom(oMap);
+
+        }
+        //delete layers list
+        this.m_aoLayersList = [];
+        return true;
+    }
+
+    ImportController.prototype.infoLayer=function()
+    {
+        vex.dialog.confirm({
+            message: 'Are you absolutely sure you want to destroy the alien planet?',
+            callback: function (value) {
+                if (value) {
+                    console.log('Successfully destroyed the planet.')
+                } else {
+                    console.log('Chicken.')
+                }
+            }
+        })
+
     }
 
     ImportController.$inject = [

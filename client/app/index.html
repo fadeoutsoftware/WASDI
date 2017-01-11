@@ -23,9 +23,7 @@
   <link rel="stylesheet" href="bower_components/jstree/dist/themes/default/style.min.css">
   <!--Cesium css-->
   <link rel="stylesheet" href="lib/Cesium/Widgets/widgets.css">
-  <!--VEX DIALOG-->
-  <link rel="stylesheet" href="bower_components/vex/dist/css/vex.css" />
-  <link rel="stylesheet" href="bower_components/vex/dist/css/vex-theme-os.css" />
+
   <!--script src="lib/jquery/jquery-1.10.2.js"></script-->
   <script src="//code.jquery.com/jquery-1.11.0.min.js"></script>
 
@@ -61,6 +59,8 @@
   <script src="bower_components/angular-ui-router/release/angular-ui-router.min.js"></script>
   <script src="bower_components/angular-bootstrap/ui-bootstrap-tpls.js"></script>
   <script src="bower_components/moment/moment.js"></script>
+  <script src="bower_components/proj4/dist/proj4.js"></script>
+  <script src="bower_components/Proj4Leaflet/src/proj4leaflet.js"></script>
 
   <!-- Wasdi Services -->
   <script src="services/ConstantsService.js"></script>
@@ -106,9 +106,14 @@
   <script src="lib/Cesium/Cesium.js"></script>
   <!--  bootstrap js-->
   <script src="bower_components/bootstrap-sass/assets/javascripts/bootstrap.min.js"></script>
+
   <!--VEX DIALOG-->
-  <script src="bower_components/vex/dist/js/vex.min.js"></script>
-  <script>vex.defaultOptions.className = 'vex-theme-os'</script>
+
+  <script src="bower_components/vex/dist/js/vex.combined.min.js"></script>
+  <link rel="stylesheet" href="bower_components/vex/dist/css/vex.css" />
+  <link rel="stylesheet" href="bower_components/vex/dist/css/vex-theme-default.css" />
+  <script>vex.defaultOptions.className = 'vex-theme-default'</script>
+
 
 </body>
 </html>

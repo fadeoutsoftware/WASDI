@@ -384,7 +384,7 @@ var EditorController = (function () {
      * @param sUrl
      */
     EditorController.prototype.publish = function (sUrl) {
-        this.m_oFileBufferService.publish(sUrl,this.m_oActiveWorkspace.workspaceId).success(function (data, status) {0
+        this.m_oFileBufferService.publish(sUrl,this.m_oActiveWorkspace.workspaceId).success(function (data, status) {
             console.log('publishing');
         }).error(function (data, status) {
             console.log('publish error');
@@ -448,7 +448,7 @@ var EditorController = (function () {
         var oController=this;
         var sFileName = this.m_aoProducts[oBand.productIndex].fileName;
 
-        this.m_oFileBufferService.publishBand(sFileName,this.m_oActiveWorkspace.workspaceId, oBand.name).success(function (data, status) {0
+        this.m_oFileBufferService.publish(sFileName,this.m_oActiveWorkspace.workspaceId, oBand.name).success(function (data, status) {0
             console.log('publishing band ' + oBand.name);
             if(!utilsIsObjectNullOrUndefined(data) ||  data.messageResult != "KO")
             {
@@ -567,8 +567,10 @@ var EditorController = (function () {
 
 
         var productList = this.getProductList();
-        //var productList = [{"name":"nomeprodotto1"},{"name":"nomeprodotto2"}];
+        //for each product i generate sub-node
         for (var iIndexProduct = 0; iIndexProduct < productList.length; iIndexProduct++) {
+
+            //product node
             var oNode = new Object();
             oNode.text=productList[iIndexProduct].name;//LABEL NODE
             oNode.children=[{"text": "metadata"},{"text":"Bands", "children": []}];//CHILDREN
@@ -576,7 +578,7 @@ var EditorController = (function () {
 
 
             var oaBandsItems = this.getBandsForProduct(productList[iIndexProduct]);
-            //var oaBandsItems = [{"name":"band1"},{"name":"band2"}];
+
             for (var iIndexBandsItems = 0; iIndexBandsItems < oaBandsItems.length; iIndexBandsItems++)
             {
                 var oNode=new Object();
@@ -591,6 +593,7 @@ var EditorController = (function () {
 
         return oTree;
     }
+
     /* Search element in tree
     * */
 

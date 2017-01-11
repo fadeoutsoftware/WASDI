@@ -14,11 +14,13 @@ service('OpenSearchService', ['$http',  'ConstantsService', function ($http, oCo
     //-------------------------------------
 
     this.getApiProductsCount = function (query) {
-        return this.APIURL + this.API_GET_PRODUCTS_COUNT + query;
+        //return this.APIURL + this.API_GET_PRODUCTS_COUNT + query;
+        return "fake-data/products_count.json";
     }
 
     this.getApiProducts = function (query) {
-        return this.APIURL + this.API_GET_PRODUCTS + query;
+        //return this.APIURL + this.API_GET_PRODUCTS + query;
+        return "fake-data/feed.json";
     }
 
 

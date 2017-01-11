@@ -20,6 +20,8 @@
   "WORKSPACES_PLACEHOLDER_SEARCH":"Search WorkSpace...",
   "WORKSPACES_BUTTON_NEW_WORKSPACE":"New Workspace",
 
-  "EDITOR_TOOLTIP_SWITCH_3D_2D":"Switch 3D globe and 2D map"
+  "EDITOR_TOOLTIP_SWITCH_3D_2D":"Switch 3D globe and 2D map",
+
+  "IMPORT_ADVANCE_SEARCH_LABEL":"Advance search"
 
 }

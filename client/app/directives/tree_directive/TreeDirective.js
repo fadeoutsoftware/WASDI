@@ -77,8 +77,10 @@ angular.module('wasdi.TreeDirective', [])
 
                         data.event.preventDefault();//TODO CHECK IF IT'S USEFUL
 
+
                         // if there isn't running processes AND the node it's a band do $scope.m_oController.openBandImage()
-                        if($scope.m_oController.isEmptyListOfRunningProcesses() == true && data.node.children.length == 0 )
+                        /*PUBLIC BAND*/
+                        if($scope.m_oController.isEmptyListOfRunningProcesses() == true && data.node.children.length == 0 && !utilsIsObjectNullOrUndefined(data.node.original.band))
                         {
                             //TODO CHECK IF THERE IS THE BAND
 
@@ -95,6 +97,13 @@ angular.module('wasdi.TreeDirective', [])
 
                         }
 
+                    });
+
+                    /* BIND EVENT DOUBLE CLICK */
+                    $("#jstree").delegate("a","dblclick", function(e) {
+                        var instance = $.jstree.reference(this);
+                        var node = instance.get_node(this);
+                        //TODO WHEN I DBLCLICK ON PRODUCT I PUBLISH IT
                     });
 
                     //bind event (event = after tree is loaded do checkTreeNode())

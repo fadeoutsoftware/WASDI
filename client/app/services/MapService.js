@@ -16,28 +16,48 @@ service('MapService', ['$http','$rootScope', 'ConstantsService', function ($http
         this.m_oOSMBasic = L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution:
                 '&copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors',
-            maxZoom: 18
+            maxZoom: 18,
+            // this map option disables world wrapping. by default, it is false.
+            continuousWorld: false,
+            // this option disables loading tiles outside of the world bounds.
+            noWrap: true
         });
         this.m_oOSMMapquest = L.tileLayer('http://otile{s}.mqcdn.com/tiles/1.0.0/osm/{z}/{x}/{y}.png', {
             subdomains: "12",
             attribution:
                 '&copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors. Tiles courtesy of <a href="http://www.mapquest.com/" target="_blank">MapQuest</a> <img src="https://developer.mapquest.com/content/osm/mq_logo.png">',
-            maxZoom: 18
+            maxZoom: 18,
+            // this map option disables world wrapping. by default, it is false.
+            continuousWorld: false,
+            // this option disables loading tiles outside of the world bounds.
+            noWrap: true
         });
         this.m_oOSMHumanitarian = L.tileLayer('http://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', {
             attribution:
                 '&copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors. Tiles courtesy of <a href="http://hot.openstreetmap.org/" target="_blank">Humanitarian OpenStreetMap Team</a>',
-            maxZoom: 18
+            maxZoom: 18,
+            // this map option disables world wrapping. by default, it is false.
+            continuousWorld: false,
+            // this option disables loading tiles outside of the world bounds.
+            noWrap: true
         });
         this.m_oOCMCycle = L.tileLayer('http://{s}.tile.opencyclemap.org/cycle/{z}/{x}/{y}.png', {
             attribution:
                 '&copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors. Tiles courtesy of <a href="http://www.thunderforest.com/" target="_blank">Andy Allan</a>',
-            maxZoom: 18
+            maxZoom: 18,
+            // this map option disables world wrapping. by default, it is false.
+            continuousWorld: false,
+            // this option disables loading tiles outside of the world bounds.
+            noWrap: true
         });
         this.m_oOCMTransport = L.tileLayer('http://{s}.tile2.opencyclemap.org/transport/{z}/{x}/{y}.png', {
             attribution:
                 '&copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors. Tiles courtesy of <a href="http://www.thunderforest.com/" target="_blank">Andy Allan</a>',
-            maxZoom: 18
+            maxZoom: 18,
+            // this map option disables world wrapping. by default, it is false.
+            continuousWorld: false,
+            // this option disables loading tiles outside of the world bounds.
+            noWrap: true
         });
     }
 
@@ -94,7 +114,7 @@ service('MapService', ['$http','$rootScope', 'ConstantsService', function ($http
             this.initTileLayer();
         }
 
-        /*  it need disabled keyword, ther'is a bug :
+        /*  it need disabled keyboard, there'is a bug :
         *   https://github.com/Leaflet/Leaflet/issues/1228
         *   thw window scroll vertically when i click (only if the browser window are smaller)
         *   alternative solution (hack):
@@ -106,7 +126,6 @@ service('MapService', ['$http','$rootScope', 'ConstantsService', function ($http
             zoomControl: false,
             layers: [this.m_oOSMBasic],
             keyboard: false,
-
             // maxZoom: 22
         });
 
@@ -125,15 +144,16 @@ service('MapService', ['$http','$rootScope', 'ConstantsService', function ($http
          */
         this.m_oLayersControl.addTo(this.m_oWasdiMap);
 
-        /**
-         * fitBounds
-         */
-
-        var southWest = L.latLng(40.712, -74.227),
-            northEast = L.latLng(40.774, -74.125),
+        ///**
+        // * fitBounds
+        //
+        // center map
+        var southWest = L.latLng(0, 0),
+            northEast = L.latLng(0, 0),
             oBoundaries = L.latLngBounds(southWest, northEast);
 
         this.m_oWasdiMap.fitBounds(oBoundaries);
+        this.m_oWasdiMap.setZoom(3);
 
         var oActiveBaseLayer = this.m_oActiveBaseLayer;
 
@@ -159,43 +179,49 @@ service('MapService', ['$http','$rootScope', 'ConstantsService', function ($http
         oLayer.remove();
         return true;
     }
+    /*remove layerS */
+    this.removeLayersFromMap = function()
+    {
+        var oController = this;
+        oController.m_oWasdiMap.eachLayer(function (layer) {
+            oController.m_oWasdiMap.removeLayer(layer);
+        });
+    }
 
     //Add rectangle shape
-    this.addRectangleOnMap = function (oPointA,oPointB,sColor,iIndexLayers)
+    this.addRectangleOnMap = function (aaBounds,sColor,iIndexLayers)
     {
-
-        if(utilsIsObjectNullOrUndefined(oPointA))
-            return null;
-        if(utilsIsObjectNullOrUndefined(oPointB))
+        if(utilsIsObjectNullOrUndefined(aaBounds))
             return null;
 
-        //check if they are points [ax,ay],[bx,by] == good
-        // [ax,ay,az,....],[bx,by,bz,....] == bad
-        if(oPointA.length != 2 || oPointB.length != 2)
-            return null;
+        for(var iIndex = 0; iIndex < aaBounds.length; iIndex++ )
+        {
+            if(utilsIsObjectNullOrUndefined(aaBounds[iIndex]))
+                return null;
+        }
 
         if(utilsIsStrNullOrEmpty(sColor))
             sColor="#ff7800";//default color
 
-        // define rectangle with geographical bounds
-        // example: var bounds = [[54.559322, -5.767822], [56.1210604, -3.021240]];
-        var aaBounds = [oPointA,oPointB];
+
         // create an colored rectangle
         // weight = line thickness
-        var oRectangle = L.rectangle(aaBounds, {color: sColor, weight: 1}).addTo(this.m_oWasdiMap);
+        var oRectangle = L.polygon(aaBounds, {color: sColor, weight: 1}).addTo(this.m_oWasdiMap);
 
         if(!utilsIsObjectNullOrUndefined(iIndexLayers))//event on click
             oRectangle.on("click",function (event) {
-                console.log("test:" + iIndexLayers);
+                $rootScope.$broadcast('on-mouse-click-rectangle',{rectangle:oRectangle});
             });
         //mouse over event change rectangle style
-        oRectangle.on("mouseover", function (event) {
+        oRectangle.on("mouseover", function (event) {//SEND MESSAGE TO IMPORT CONTROLLER
             oRectangle.setStyle({weight:3,fillOpacity:0.7});
             $rootScope.$broadcast('on-mouse-over-rectangle',{rectangle:oRectangle});// TODO SEND MASSAGE FOR CHANGE CSS in LAYER LIST TABLE
+            var temp = oRectangle.getBounds()
+
 
         });
         //mouse out event set default value of style
-        oRectangle.on("mouseout", function (event) {
+        oRectangle.on("mouseout", function (event) {//SEND MESSAGE TO IMPORT CONTROLLER
             oRectangle.setStyle({weight:1,fillOpacity:0.2});
             $rootScope.$broadcast('on-mouse-leave-rectangle',{rectangle:oRectangle});// TODO SEND MASSAGE FOR CHANGE CSS in LAYER LIST TABLE
         });
@@ -259,6 +285,7 @@ service('MapService', ['$http','$rootScope', 'ConstantsService', function ($http
             if(drawnItems && drawnItems.getLayers().length!==0){
                 drawnItems.clearLayers();
             }
+            $rootScope.$broadcast('rectangle-created-for-opensearch',{layer:layer});//SEND MESSAGE TO IMPORT CONTROLLER
             //save new shape in map
             drawnItems.addLayer(layer);
         });

@@ -21,6 +21,7 @@
     "angular-bootstrap":"",
     "moment":"",
 	"leaflet-draw": "0.4.7",
-    "vex":"3.0.0"
+    "vex":"3.0.0",
+    "Proj4Leaflet":"0.7.2"
   }
 }
