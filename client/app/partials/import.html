@@ -112,9 +112,7 @@
             </div>
             <!--ADVANCE SEARCH-->
             <div id="advanced-search-container" ng-hide="m_oController.m_bIsVisibleListOfLayers">
-
                 <div id="advanced-search-content">
-
                     <div class="panel-heading advanced-search-heading" role="tab">
                         <h4 class="panel-title advanced-search-panel-title">
                             <a class="accordion-toggle " role="button" data-toggle="collapse" data-parent="#accordion"
@@ -296,7 +294,7 @@
 
             <!--**************** Layers Table ----------------------->
             <!-- the table become visible after the user Search a layer -->
-            <div id="div-container-table" class="container-table-row" ng-if="m_oController.m_bIsVisibleListOfLayers">
+            <div id="div-container-table" class="container-table-row" ng-show="m_oController.m_bIsVisibleListOfLayers">
 
                 <div ng-show="m_oController.m_bIsVisibleListOfLayers && m_oController.isEmptyLayersList() == true" class="loadIcon">
                     <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
@@ -305,16 +303,13 @@
 
 
                 <!--PAGINATION-->
-                <div class="pages">
-
+                <div class="pages" ng-hide="m_oController.m_bIsVisibleListOfLayers && m_oController.isEmptyLayersList() == true">
                     <ul class="pager">
                         <div class="form-group" >
                             <label for="selectPages" >Products per page:</label>
-                            <select class="form-control" id="selectPages" >
-                                <option>1</option>
-                                <option>2</option>
-                                <option>3</option>
-                                <option>4</option>
+                            <select class="form-control" id="selectPages" ng-model="m_oController.m_iProductsPerPageSelected">
+                                <option ng-repeat="product in m_oController.m_iProductsPerPage">{{product}}</option>
+
                             </select>
                         </div>
 
@@ -326,20 +321,19 @@
                         <li><a href="#"><i class="fa fa-angle-right" aria-hidden="true"></i></a></li>
                         <li><a href="#"><i class="fa fa-angle-double-right" aria-hidden="true"></i></a></li>
 
-
                     </ul>
 
                 </div>
                 <!--********************************* TABLE **********************************-->
-                <table class="table table-hover layers" id="table_layers_list" ng-if="m_oController.m_bIsVisibleListOfLayers && m_oController.isEmptyLayersList() == false" >
+                <table class="table table-hover layers" id="table_layers_list" ng-show="m_oController.m_bIsVisibleListOfLayers && m_oController.isEmptyLayersList() == false" >
 
                     <tbody ng-repeat="layer in m_oController.m_aoLayersList"
                            ng-mouseover="m_oController.changeStyleRectangleMouseOver(layer.rectangle)"
                            ng-mouseleave="m_oController.changeStyleRectangleMouseLeave(layer.rectangle)"
                            id='{{"layer"+layer.id}}'> <!--id='{{"layer:"+$index}}' layer.id-->
-                    <!-------------------- SUMMARY ------------------>
+                    <!------------------------------- SUMMARY ------------------------------->
                     <tr class="info-layer" >
-                        <!--Buttons-->
+                        <!-- BUTTONS -->
                         <td>
                             <div class="btn-group-vertical" role="group" >
                                 <button type="button" class="btn btn btn-primary"><i class="fa fa-plus " aria-hidden="true"></i> </button>
@@ -347,7 +341,7 @@
                                 <button type="button" class="btn btn btn-primary" ng-click="m_oController.infoLayer()"><i class="fa fa-info-circle" aria-hidden="true"></i></i></button>
                             </div>
                         </td>
-                        <!--IMAGE CELL-->
+                        <!-- IMAGE CELL -->
                         <td class="image-cell">
 
                             <span class="label label-success">{{layer.summary.Mode}}</span>&nbsp;<!--Mode-->
@@ -355,6 +349,7 @@
                             <div class="preview-layer-image" ><img src={{layer.preview}} alt="test" style="height: 82px;width: 82px;"></div>
                             <span class="badge">{{layer.summary.Size}}</span><!--Size-->
                         </td>
+                        <!-- INFO CELL -->
                         <td class="info-cell">
 
                             <div>{{layer.summary.Date|date:'medium'}}</div><!--Date-->

@@ -73,7 +73,6 @@ angular
             },
             createSearchRequest: function (filter, offset, limit) {
                 var searchUrl = ":filter&offset=:offset&limit=:limit"
-                //var searchUrl = ":filterANDoffset=:offsetANDlimit=:limit"
                 searchUrl = searchUrl.replace(":filter", (filter) ? filter : '*');
                 searchUrl = searchUrl.replace(":offset", (offset) ? offset : '0');
                 searchUrl = searchUrl.replace(":limit", (limit) ? limit : '10');
