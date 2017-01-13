@@ -12,7 +12,7 @@ import org.bson.Document;
  */
 public class MongoRepository {
     public static String DB_NAME = "wasdi";
-    public static String SERVER_ADDRESS = "localhost";
+    public static String SERVER_ADDRESS = "127.0.0.1";
     public static int SERVER_PORT = 27017;
 
     public static ObjectMapper s_oMapper = new ObjectMapper();
