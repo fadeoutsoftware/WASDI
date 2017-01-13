@@ -169,12 +169,12 @@ var EditorController = (function () {
             // Connect again
             oController.oWebSocket = new WebSocket(oController.m_oConstantsService.getStompUrl());
             oController.m_oClient = Stomp.over(oController.oWebSocket);
-            oController.m_oClient.connect('guest', 'guest', oController.m_oOn_Connect, oController.m_oOn_Error, '/');
+            oController.m_oClient.connect(oController.m_oConstantsService.getRabbitUser(), oController.m_oConstantsService.getRabbitPassword(), oController.m_oOn_Connect, oController.m_oOn_Error, '/');
         };
         this.m_oRabbitReconnect = rabbit_reconnect;
 
         //connect to the queue
-        this.m_oClient.connect('guest', 'guest', on_connect, on_error, '/');
+        this.m_oClient.connect(oController.m_oConstantsService.getRabbitUser(), oController.m_oConstantsService.getRabbitPassword(), on_connect, on_error, '/');
         //$scope.$watch('m_oController.m_oConstantsService.m_oActiveWorkspace', function (newValue, oldValue, scope) {
         //    $scope.m_oController.m_oActiveWorkspace = newValue;
         //    if (!utilsIsObjectNullOrUndefined( $scope.m_oController.m_oActiveWorkspace)) {
@@ -448,7 +448,7 @@ var EditorController = (function () {
         var oController=this;
         var sFileName = this.m_aoProducts[oBand.productIndex].fileName;
 
-        this.m_oFileBufferService.publish(sFileName,this.m_oActiveWorkspace.workspaceId, oBand.name).success(function (data, status) {0
+        this.m_oFileBufferService.publishBand(sFileName,this.m_oActiveWorkspace.workspaceId, oBand.name).success(function (data, status) {0
             console.log('publishing band ' + oBand.name);
             if(!utilsIsObjectNullOrUndefined(data) ||  data.messageResult != "KO")
             {
