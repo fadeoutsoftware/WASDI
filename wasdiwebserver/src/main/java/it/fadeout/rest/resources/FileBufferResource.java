@@ -1,7 +1,6 @@
 package it.fadeout.rest.resources;
 
 import java.io.IOException;
-import java.util.List;
 
 import javax.servlet.ServletConfig;
 import javax.ws.rs.GET;
@@ -14,13 +13,9 @@ import javax.ws.rs.core.Response;
 
 import it.fadeout.Wasdi;
 import wasdi.shared.LauncherOperations;
-import wasdi.shared.business.ProductWorkspace;
 import wasdi.shared.business.PublishedBand;
 import wasdi.shared.business.User;
-import wasdi.shared.business.UserSession;
-import wasdi.shared.data.ProductWorkspaceRepository;
 import wasdi.shared.data.PublishedBandsRepository;
-import wasdi.shared.data.SessionRepository;
 import wasdi.shared.parameters.DownloadFileParameter;
 import wasdi.shared.parameters.PublishBandParameter;
 import wasdi.shared.parameters.PublishParameters;

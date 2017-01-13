@@ -8,12 +8,8 @@ import java.util.HashMap;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.Response;
-
-import org.json.JSONObject;
 
 import it.fadeout.Wasdi;
 import it.fadeout.opensearch.OpenSearchQuery;
@@ -29,6 +25,7 @@ public class OpenSearchResource {
 	@Produces({"application/xml", "application/json", "text/html"})
 	public String SearchSentinel(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sQuery") String sQuery, @QueryParam("offset") String sOffset, @QueryParam("limit") String sLimit, @QueryParam("sortedby") String sSortedBy, @QueryParam("order") String sOrder )
 	{
+		System.out.println("OpenSearchResource: Search Sentinel");
 		
 		if (Utils.isNullOrEmpty(sSessionId)) return null;
 		
@@ -48,6 +45,9 @@ public class OpenSearchResource {
 				asParameterMap.put("sortedby", sSortedBy);
 			if (sOrder != null)
 				asParameterMap.put("order", sOrder);
+			
+			System.out.println("Search Sentinel: execute query " + sQuery);
+			
 			//return OpenSearchQuery.ExecuteQuerySentinel(sQuery, asParams.toArray(new String[asParams.size()]));
 			return OpenSearchQuery.ExecuteQuery(sQuery, asParameterMap);
 		} catch (URISyntaxException | IOException e) {
@@ -64,6 +64,7 @@ public class OpenSearchResource {
 	@Produces({"application/xml", "application/json", "text/html"})
 	public String GetProductsCountSentinel(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sQuery") String sQuery)
 	{
+		System.out.println("OpenSearchResource: GetProductsCountSentinel");
 		
 		if (Utils.isNullOrEmpty(sSessionId)) return null;
 		

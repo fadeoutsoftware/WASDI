@@ -10,8 +10,6 @@ import javax.servlet.ServletContext;
 import javax.ws.rs.core.Application;
 import javax.ws.rs.core.Context;
 
-import com.mongodb.util.Util;
-
 import it.fadeout.rest.resources.AuthResource;
 import it.fadeout.rest.resources.FileBufferResource;
 import it.fadeout.rest.resources.OpenSearchResource;
@@ -30,6 +28,8 @@ public class Wasdi extends Application {
 	
 	@Context
 	ServletContext m_oContext;	
+	
+	private static boolean s_bDebug = false;
 
 	@Override
 	public Set<Class<?>> getClasses() {
@@ -48,7 +48,9 @@ public class Wasdi extends Application {
 	
 	@PostConstruct
 	public void initWasdi() {
-		
+		if (m_oServletConfig.getInitParameter("DebugVersion").equalsIgnoreCase("true")) {
+			s_bDebug = true;
+		}
 	}
 	
 	public static String GetSerializationFileName()
@@ -63,24 +65,36 @@ public class Wasdi extends Application {
 	 */
 	public static User GetUserFromSession(String sSessionId){
 		
-		// Create Session Repository
-		SessionRepository oSessionRepo = new SessionRepository();
-		// Get The User Session
-		UserSession oSession = oSessionRepo.GetSession(sSessionId);
-		
-		if (Utils.isValidSession(oSession)) {
-			// Create User Repo
-			UserRepository oUserRepo = new UserRepository();
-			// Get the user from the session
-			User oUser = oUserRepo.GetUser(oSession.getUserId());
-			
-			oSessionRepo.TouchSession(oSession);
-			
+		if (s_bDebug) {
+			User oUser = new User();
+			oUser.setId(1);
+			oUser.setUserId("paolo");
+			oUser.setName("Paolo");
+			oUser.setSurname("Campanella");
+			oUser.setPassword("password");
 			return oUser;
 		}
-		
-		// No Session, No User
-		return null;
+		else {
+			// Create Session Repository
+			SessionRepository oSessionRepo = new SessionRepository();
+			// Get The User Session
+			UserSession oSession = oSessionRepo.GetSession(sSessionId);
+			
+			if (Utils.isValidSession(oSession)) {
+				// Create User Repo
+				UserRepository oUserRepo = new UserRepository();
+				// Get the user from the session
+				User oUser = oUserRepo.GetUser(oSession.getUserId());
+				
+				oSessionRepo.TouchSession(oSession);
+				
+				return oUser;
+			}
+			
+			// No Session, No User
+			return null;
+			
+		}		
 	}
 	
 }

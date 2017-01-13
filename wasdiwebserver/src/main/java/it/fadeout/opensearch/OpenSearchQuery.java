@@ -1,32 +1,21 @@
 package it.fadeout.opensearch;
 
-import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.StringWriter;
 import java.net.HttpURLConnection;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLEncoder;
-import java.nio.charset.Charset;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 
 import javax.imageio.ImageIO;
-import javax.ws.rs.POST;
 
 import org.apache.abdera.Abdera;
-import org.apache.abdera.filter.ListParseFilter;
-import org.apache.abdera.i18n.iri.IRI;
-import org.apache.abdera.i18n.text.io.CompressionUtil.CompressionCodec;
-import org.apache.abdera.model.Attribute;
 import org.apache.abdera.model.Base;
-import org.apache.abdera.model.Category;
 import org.apache.abdera.model.Document;
 import org.apache.abdera.model.Entry;
 import org.apache.abdera.model.Feed;
@@ -37,19 +26,12 @@ import org.apache.abdera.protocol.Response.ResponseType;
 import org.apache.abdera.protocol.client.AbderaClient;
 import org.apache.abdera.protocol.client.ClientResponse;
 import org.apache.abdera.protocol.client.RequestOptions;
-import org.apache.abdera.util.filter.WhiteListParseFilter;
 import org.apache.abdera.writer.Writer;
-import org.apache.abdera.writer.WriterOptions;
 import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.httpclient.UsernamePasswordCredentials;
-import org.apache.http.HttpHeaders;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.tomcat.util.bcel.classfile.Constant;
-import org.apache.xerces.xni.QName;
 import org.json.JSONObject;
 import org.json.XML;
 
@@ -70,6 +52,9 @@ public class OpenSearchQuery{
 		String sUrl = OpenSearchTemplate.getHttpUrl(sQuery, asParams.getOrDefault("offset", "0"), asParams.getOrDefault("limit", "25"), asParams.getOrDefault("sortedby", "ingestiondate") + " " + asParams.getOrDefault("order", "asc"));
 		//create abdera client
 		AbderaClient oClient = new AbderaClient(oAbdera);
+		oClient.setConnectionTimeout(10000);
+		oClient.setSocketTimeout(10000);
+		oClient.setConnectionManagerTimeout(10000);
 		//oClient.usePreemptiveAuthentication(true);
 		//AbderaClient.registerTrustManager();
 		//	create credentials (username e password SSO ESA)
@@ -106,7 +91,10 @@ public class OpenSearchQuery{
 		Document<Feed> oDocument = null;
 		if (response.getType() == ResponseType.SUCCESS)
 		{
-			oDocument = parser.parse(response.getInputStream(), options); 
+			System.out.println("Response Success");
+			
+			oDocument = parser.parse(response.getInputStream(), options);
+			
 			if (oDocument == null) {
 				System.out.println("OpenSearchQuery.ExecuteQuery: Document response null");
 				return null;
@@ -114,26 +102,42 @@ public class OpenSearchQuery{
 		}
 		else
 		{
-			System.out.println(response.getType());
+			System.out.println("Response ERROR: " + response.getType());
 			return null;
 		}
 		
 		int iStreamSize = 1000000;
 		Feed oFeed = (Feed) oDocument.getRoot();
+		
 		for (Entry oEntry : oFeed.getEntries()) {
+			
+			System.out.println("Parsing new Entry");
+			
 			Link oLink = oEntry.getLink("icon");
-			System.out.println(oLink.getHref().toString());
-			ClientResponse oImageResponse = oClient.get(oLink.getHref().toString(), oOptions);
-			if (oImageResponse.getType() == ResponseType.SUCCESS)
-			{
-				InputStream oInputStreamImage = oImageResponse.getInputStream();
-				BufferedImage  oImage = ImageIO.read(oInputStreamImage);
-				ByteArrayOutputStream bas = new ByteArrayOutputStream();
-				ImageIO.write(oImage, "png", bas);
-			    oLink.addSimpleExtension(new javax.xml.namespace.QName("image"), "data:image/png;base64," + new String(Base64.encodeBase64(bas.toByteArray())));
+			System.out.println("Icon Link: " + oLink.getHref().toString());
+
+			try {
+				ClientResponse oImageResponse = oClient.get(oLink.getHref().toString(), oOptions);
+				System.out.println("Response Got from the client");
+				if (oImageResponse.getType() == ResponseType.SUCCESS)
+				{
+					System.out.println("Success: saving image preview");
+					InputStream oInputStreamImage = oImageResponse.getInputStream();
+					BufferedImage  oImage = ImageIO.read(oInputStreamImage);
+					ByteArrayOutputStream bas = new ByteArrayOutputStream();
+					ImageIO.write(oImage, "png", bas);
+				    oLink.addSimpleExtension(new javax.xml.namespace.QName("image"), "data:image/png;base64," + new String(Base64.encodeBase64(bas.toByteArray())));
+				    System.out.println("Image Saved");
+				}				
+			}
+			catch (Exception e) {
+				System.out.println("Image Preview Cycle Exception " + e.toString());
 			}
 		} 
 		JSONObject oFeedJSON = Atom2Json(oAbdera, new ByteArrayOutputStream(iStreamSize), oFeed);
+		
+		System.out.println("Search Done");
+		
 		return oFeedJSON.toString();
 
 	}
@@ -141,31 +145,38 @@ public class OpenSearchQuery{
 	public static String ExecuteQuerySentinel(String sQuery, String[] aoParams) throws URISyntaxException, IOException
 	{
 		
-		String sUrl = "https://scihub.copernicus.eu/dhus/api/stub/products?filter=";
-		String sParameter = URLEncoder.encode(sQuery, "UTF-8");
-		sUrl += sParameter;  
-		//Add params
-		for(int iParamCount = 0; iParamCount < aoParams.length;iParamCount++)
-		{
-			sUrl+='&' + aoParams[iParamCount];
-		}
-		HttpClient client = new DefaultHttpClient();
-		HttpGet request = new HttpGet(sUrl);
-		request.addHeader("Authorization", "Basic c2FkYW1vOmVzYTE1YWRhbQ==");
-		HttpResponse response = client.execute(request);
-		StringBuffer responseBuffer = new StringBuffer();
-		// Get the response
-		BufferedReader rd = new BufferedReader
-		        (new InputStreamReader(
-		        response.getEntity().getContent()));
+		HttpClient oClient = null;
+		try {
+			String sUrl = "https://scihub.copernicus.eu/dhus/api/stub/products?filter=";
+			String sParameter = URLEncoder.encode(sQuery, "UTF-8");
+			sUrl += sParameter;  
+			//Add params
+			for(int iParamCount = 0; iParamCount < aoParams.length;iParamCount++)
+			{
+				sUrl+='&' + aoParams[iParamCount];
+			}
+			oClient = new DefaultHttpClient();
+			HttpGet request = new HttpGet(sUrl);
+			request.addHeader("Authorization", "Basic c2FkYW1vOmVzYTE1YWRhbQ==");
+			HttpResponse response = oClient.execute(request);
+			StringBuffer responseBuffer = new StringBuffer();
+			// Get the response
+			BufferedReader rd = new BufferedReader
+			        (new InputStreamReader(
+			        response.getEntity().getContent()));
 
-		String line = "";
-		while ((line = rd.readLine()) != null) {
-			responseBuffer.append(line);
+			String line = "";
+			while ((line = rd.readLine()) != null) {
+				responseBuffer.append(line);
+			}
+			
+			return responseBuffer.toString();			
+		}
+		catch (Exception e) {
+			e.printStackTrace();
 		}
 		
-		return responseBuffer.toString();
-
+		return "";
 	}
 
 	private static JSONObject Atom2Json(Abdera oAbdera, ByteArrayOutputStream oOutputStream, Base oFeed) throws IOException{
@@ -210,7 +221,7 @@ public class OpenSearchQuery{
 		in.close();
 
 		//print result
-		System.out.println(response.toString());
+		System.out.println("Count Done: Response " + response.toString());
 
 		
 		return response.toString();

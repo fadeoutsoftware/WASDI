@@ -12,10 +12,8 @@ import javax.ws.rs.QueryParam;
 
 import it.fadeout.Wasdi;
 import wasdi.shared.business.User;
-import wasdi.shared.business.UserSession;
 import wasdi.shared.business.Workspace;
 import wasdi.shared.business.WorkspaceSharing;
-import wasdi.shared.data.SessionRepository;
 import wasdi.shared.data.WorkspaceRepository;
 import wasdi.shared.data.WorkspaceSharingRepository;
 import wasdi.shared.utils.Utils;
