@@ -276,7 +276,7 @@ angular.module('wasdi.SnakeDirective', [])
                     aoSnakePoints = [ { x:40,y:30}];
                     iPoints = 0;
                     oGoalPoint = GetGoalPoint();
-                    var iSlowLimit = 10;
+                    iSlowLimit = 10;
                 }
 
             }

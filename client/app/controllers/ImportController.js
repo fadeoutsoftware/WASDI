@@ -576,6 +576,12 @@ var ImportController = (function() {
     {
         var oController = this;
 
+        if (utilsIsObjectNullOrUndefined(aData.entry)) {
+            // TODO: Qui interrompere l'attesa della ricerca e comunicare No Result Found
+            console.log('no layers found');
+            return;
+        }
+
         var aoLayers =  aData.entry;
 
         if( ! Array.isArray(aoLayers))// if the later is alone it'isnt a array but a object
