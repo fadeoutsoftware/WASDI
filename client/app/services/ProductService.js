@@ -19,5 +19,7 @@ service('ProductService', ['$http',  'ConstantsService', function ($http, oConst
     this.addProductToWorkspace = function (sProductName, sWorkspaceId) {
         return this.m_oHttp.get(this.APIURL + '/product/addtows?sProductName='+sProductName+'&sWorkspaceId='+sWorkspaceId);
     }
+
+
 }]);
 

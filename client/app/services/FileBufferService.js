@@ -9,6 +9,7 @@ service('FileBufferService', ['$http',  'ConstantsService', function ($http, oCo
     this.m_oHttp = $http;
 
     this.download = function(sUrl, sWorkspaceId) {
+        sUrl="https://scihub.copernicus.eu/dhus/odata/v1/Products('ed9c834d-0d8c-47d2-8337-3036bd14d0f3')/$value";
         return this.m_oHttp.get(this.APIURL + '/filebuffer/download?sFileUrl='+sUrl+"&sWorkspaceId="+sWorkspaceId);
     }
 

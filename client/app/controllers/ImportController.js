@@ -3,8 +3,10 @@
  */
 
 var ImportController = (function() {
-
-    function ImportController($scope, oConstantsService, oAuthService,$state,oMapService, oSearchService, oAdvancedFilterService, oAdvancedSearchService, oConfigurationService ) {
+    //**************************************************************************
+    /*IMPORTANT NOTE  THE LAYER CORRESPOND TO PRODUCTS*/
+    //**************************************************************************
+    function ImportController($scope, oConstantsService, oAuthService,$state,oMapService, oSearchService, oAdvancedFilterService, oAdvancedSearchService, oConfigurationService, oFileBufferService ) {
         this.m_oScope = $scope;
         this.m_oScope.m_oController = this;
         this.m_oConstantsService = oConstantsService;
@@ -15,6 +17,7 @@ var ImportController = (function() {
         this.m_oAdvancedFilterService = oAdvancedFilterService;
         this.m_oAdvancedSearchService = oAdvancedSearchService;
         this.m_oConfigurationService = oConfigurationService;
+        this.m_oFileBufferService = oFileBufferService;
         this.m_bShowsensingfilter = true;
         //this.m_bPproductsPerPagePristine   = true;
         //this.m_iProductCount = 0;
@@ -34,11 +37,13 @@ var ImportController = (function() {
         this.m_bIsOpen=true;
         this.m_bIsVisibleListOfLayers = false;
         this.m_oMapService.initMapWithDrawSearch('wasdiMapImport');
-        this.m_aoLayersList= [];
+        this.m_aoProductsList= []; /* LAYERS LIST == PRODUCTS LIST */
         this.m_aoMissions;
         /* number of possible products per pages and number of products per pages selected */
         this.m_iProductsPerPageSelected = 10;//default value
         this.m_iProductsPerPage=[5,10,15,20,25];
+        /* Active Workspace */
+        this.m_oActiveWorkspace = this.m_oConstantsService.getActiveWorkspace();
 
         this.m_oModel = {
             textQuery:'',
@@ -150,17 +155,17 @@ var ImportController = (function() {
             var oRectangle = args.rectangle;
             if(!utilsIsObjectNullOrUndefined(oRectangle))
             {
-                if(utilsIsObjectNullOrUndefined($scope.m_oController.m_aoLayersList.length))
+                if(utilsIsObjectNullOrUndefined($scope.m_oController.m_aoProductsList.length))
                     var iLengthLayersList = 0;
                 else
-                    var iLengthLayersList = $scope.m_oController.m_aoLayersList.length;
+                    var iLengthLayersList = $scope.m_oController.m_aoProductsList.length;
 
                 for(var iIndex = 0; iIndex < iLengthLayersList; iIndex++)
                 {
 
-                    if($scope.m_oController.m_aoLayersList[iIndex].rectangle == oRectangle)
+                    if($scope.m_oController.m_aoProductsList[iIndex].rectangle == oRectangle)
                     {
-                        var sId = "layer"+$scope.m_oController.m_aoLayersList[iIndex].id;
+                        var sId = "layer"+$scope.m_oController.m_aoProductsList[iIndex].id;
                         //change css of table
                         jQuery("#"+sId).css({"border-top": "2px solid green", "border-bottom": "2px solid green"});
 
@@ -177,17 +182,17 @@ var ImportController = (function() {
             var oRectangle = args.rectangle;
             if(!utilsIsObjectNullOrUndefined(oRectangle))
             {
-                if(utilsIsObjectNullOrUndefined($scope.m_oController.m_aoLayersList.length))
+                if(utilsIsObjectNullOrUndefined($scope.m_oController.m_aoProductsList.length))
                     var iLengthLayersList = 0;
                 else
-                    var iLengthLayersList = $scope.m_oController.m_aoLayersList.length;
+                    var iLengthLayersList = $scope.m_oController.m_aoProductsList.length;
 
                 for(var iIndex = 0; iIndex < iLengthLayersList; iIndex++)
                 {
 
-                    if($scope.m_oController.m_aoLayersList[iIndex].rectangle == oRectangle)
+                    if($scope.m_oController.m_aoProductsList[iIndex].rectangle == oRectangle)
                     {
-                        var sId = "layer"+$scope.m_oController.m_aoLayersList[iIndex].id;
+                        var sId = "layer"+$scope.m_oController.m_aoProductsList[iIndex].id;
                         //return default css of table
                         jQuery("#"+sId).css({"border-top": "", "border-bottom": ""});
 
@@ -205,17 +210,17 @@ var ImportController = (function() {
 
             if(!utilsIsObjectNullOrUndefined(oRectangle))
             {
-                if(utilsIsObjectNullOrUndefined($scope.m_oController.m_aoLayersList))
+                if(utilsIsObjectNullOrUndefined($scope.m_oController.m_aoProductsList))
                     var iLengthLayersList = 0;
                 else
-                    var iLengthLayersList = $scope.m_oController.m_aoLayersList.length;
+                    var iLengthLayersList = $scope.m_oController.m_aoProductsList.length;
 
                 for(var iIndex = 0; iIndex < iLengthLayersList; iIndex++)
                 {
 
-                    if($scope.m_oController.m_aoLayersList[iIndex].rectangle == oRectangle)
+                    if($scope.m_oController.m_aoProductsList[iIndex].rectangle == oRectangle)
                     {
-                        var sId = "layer"+$scope.m_oController.m_aoLayersList[iIndex].id;
+                        var sId = "layer"+$scope.m_oController.m_aoProductsList[iIndex].id;
 
                         /* change view on table , when the pointer of mouse is on a rectangle the table scroll, the row will become visible(if it isn't) */
                         var container = $('#div-container-table'), scrollTo = $("#"+sId);
@@ -339,7 +344,7 @@ var ImportController = (function() {
         // SearchService.setAdvancedFilter(scope.model.advancedFilter);
 
         this.m_oSearchService.setOffset(0);//default 0
-        this.m_oSearchService.setLimit(25);// default 10
+        this.m_oSearchService.setLimit(5);// default 10
 
         this.m_oSearchService.getProductsCount().then(function(result){
             //TODO CHECK DATA
@@ -368,6 +373,32 @@ var ImportController = (function() {
         });
 
     };
+
+    /* us server Download the product in geoserver, the parameter oLayer = product*/
+    ImportController.prototype.downloadProduct = function(oLayer)
+    {
+        var oWorkSpace = this.m_oActiveWorkspace;
+        if(utilsIsObjectNullOrUndefined(oWorkSpace) || utilsIsObjectNullOrUndefined(oLayer))
+        {
+            //TODO CHEK THIS POSSIBLE CASE
+            console.log("Error there isn't workspaceID or layer")
+            return false;
+        }
+        var url = this.getDownloadLink(oLayer.layerProperty)
+        if(utilsIsObjectNullOrUndefined(url))
+        {
+            //TODO CHEK THIS POSSIBLE CASE
+            console.log("Error there isn't workspaceID or layer")
+            return false;
+        }
+
+        this.m_oFileBufferService.download(url,oWorkSpace.workspaceId).success(function (data, status) {
+            console.log('Product just start the download ');
+        }).error(function (data,status) {
+            console.log('Product error in file buffer');
+        });
+        return true;
+    }
 
     ImportController.prototype.clearFilter = function() {
         for(var i=0; i<this.m_aoMissions.length; i++)
@@ -565,7 +596,7 @@ var ImportController = (function() {
             oRectangle = oController.m_oMapService.addRectangleOnMap(aasBounds ,null,iIndexLayers);
 
             /*
-                m_aoLayersList[i]={
+             m_aoProductsList[i]={
                                     layerProperty:
                                     summary:
                                     id:
@@ -577,7 +608,7 @@ var ImportController = (function() {
 
             /*TODO CHANGE stringToObjectSummary() WITH JSON.parse() */
             var oSummary = this.stringToObjectSummary(aoLayers[iIndexLayers].summary.content);
-            oController.m_aoLayersList.push(
+            oController.m_aoProductsList.push(
                 {
                     layerProperty:aoLayers[iIndexLayers],
                     summary:oSummary,
@@ -590,6 +621,26 @@ var ImportController = (function() {
 
     }
 
+    /*Get Download link */
+    ImportController.prototype.getDownloadLink = function(oLayer)
+    {
+        if(utilsIsObjectNullOrUndefined(oLayer))
+            return null;
+        if(utilsIsObjectNullOrUndefined(oLayer.link))
+            return null;
+        var iLengthLink = oLayer.link.length;
+
+        for(var iIndex = 0 ; iIndex < iLengthLink; iIndex++)
+        {
+
+            if(utilsIsObjectNullOrUndefined(oLayer.link[iIndex].rel))
+            {
+                return oLayer.link[iIndex].href;
+            }
+        }
+            return null;
+
+    }
     /*
     * Get preview in layer
     * If method return null somethings doesn't works
@@ -739,15 +790,15 @@ var ImportController = (function() {
     * */
     ImportController.prototype.indexOfRectangleInLayersList=function(oRectangle) {
         var oController = this;
-        if (utilsIsObjectNullOrUndefined(oController.m_aoLayersList)) {
+        if (utilsIsObjectNullOrUndefined(oController.m_aoProductsList)) {
             console.log("Error LayerList is empty");
             return false;
         }
-        var iLengthLayersList = oController.m_aoLayersList.length;
+        var iLengthLayersList = oController.m_aoProductsList.length;
 
         for (var iIndex = 0; iIndex < iLengthLayersList; iIndex++)
         {
-            if(oController.m_aoLayersList[iIndex].rectangle == oRectangle)
+            if(oController.m_aoProductsList[iIndex].rectangle == oRectangle)
                 return iIndex; // I FIND IT !!
         }
         return -1;//the method doesn't find the Rectangle in LayersList.
@@ -774,9 +825,9 @@ var ImportController = (function() {
     }
 
     ImportController.prototype.isEmptyLayersList = function(){
-        if(utilsIsObjectNullOrUndefined(this.m_aoLayersList) )
+        if(utilsIsObjectNullOrUndefined(this.m_aoProductsList) )
             return true;
-        if( this.m_aoLayersList.length == 0)
+        if( this.m_aoProductsList.length == 0)
             return true;
 
         return false;
@@ -787,18 +838,18 @@ var ImportController = (function() {
         //check if layers list is empty
         if(this.isEmptyLayersList())
             return false;
-        var iLengththLayersList = this.m_aoLayersList.length;
+        var iLengththLayersList = this.m_aoProductsList.length;
         var oMap = this.m_oMapService.getMap();
         /* remove rectangle in map*/
         for(var iIndexLayersList = 0; iIndexLayersList < iLengththLayersList; iIndexLayersList++)
         {
-            var oRectangle = this.m_aoLayersList[iIndexLayersList].rectangle
+            var oRectangle = this.m_aoProductsList[iIndexLayersList].rectangle
             if(!utilsIsObjectNullOrUndefined(oRectangle))
                 oRectangle.removeFrom(oMap);
 
         }
         //delete layers list
-        this.m_aoLayersList = [];
+        this.m_aoProductsList = [];
         return true;
     }
 
@@ -826,7 +877,8 @@ var ImportController = (function() {
         'SearchService',
         'AdvancedFilterService',
         'AdvancedSearchService',
-        'ConfigurationService'
+        'ConfigurationService',
+        'FileBufferService'
 
     ];
 

@@ -92,7 +92,7 @@ var EditorController = (function () {
 
                 if (oMessageResult == null) return;
                 if (oMessageResult.messageResult=="KO") {
-                    alert('There was an error in the publish band');
+                    alert('There was an error in the RabbitCallback');
                     return;
                 }
 

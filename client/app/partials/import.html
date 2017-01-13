@@ -327,7 +327,7 @@
                 <!--********************************* TABLE **********************************-->
                 <table class="table table-hover layers" id="table_layers_list" ng-show="m_oController.m_bIsVisibleListOfLayers && m_oController.isEmptyLayersList() == false" >
 
-                    <tbody ng-repeat="layer in m_oController.m_aoLayersList"
+                    <tbody ng-repeat="layer in m_oController.m_aoProductsList"
                            ng-mouseover="m_oController.changeStyleRectangleMouseOver(layer.rectangle)"
                            ng-mouseleave="m_oController.changeStyleRectangleMouseLeave(layer.rectangle)"
                            id='{{"layer"+layer.id}}'> <!--id='{{"layer:"+$index}}' layer.id-->
@@ -336,7 +336,7 @@
                         <!-- BUTTONS -->
                         <td>
                             <div class="btn-group-vertical" role="group" >
-                                <button type="button" class="btn btn btn-primary"><i class="fa fa-plus " aria-hidden="true"></i> </button>
+                                <button type="button" class="btn btn btn-primary" ng-click="m_oController.downloadProduct(layer)"><i class="fa fa-plus " aria-hidden="true"></i> </button>
                                 <button type="button" class="btn btn btn-primary" ng-click="m_oController.zoomOnBounds(layer.rectangle)"><i class="fa fa-search-plus" aria-hidden="true"></i></button>
                                 <button type="button" class="btn btn btn-primary" ng-click="m_oController.infoLayer()"><i class="fa fa-info-circle" aria-hidden="true"></i></i></button>
                             </div>
