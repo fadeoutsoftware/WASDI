@@ -1,8 +1,11 @@
 package it.fadeout.opensearch;
 
+import java.awt.Image;
+import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.StringWriter;
 import java.net.HttpURLConnection;
@@ -11,8 +14,10 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
+import javax.imageio.ImageIO;
 import javax.ws.rs.POST;
 
 import org.apache.abdera.Abdera;
@@ -53,7 +58,7 @@ public class OpenSearchQuery{
 	//String sParameter = URLEncoder.encode("( beginPosition:[2016-10-03T00:00:00.000Z TO 2016-10-06T23:59:59.999Z] AND endPosition:[2016-10-03T00:00:00.000Z TO 2016-10-06T23:59:59.999Z] ) AND   (platformname:Sentinel-1 AND filename:S1A_* AND producttype:SLC)&offset=0&limit=25", "UTF-8");
 	//String sUrl = "https://scihub.copernicus.eu/dhus/api/stub/products/count?filter=";
 	
-	public static String ExecuteQuery(String sQuery, String[] aoParams) throws URISyntaxException, IOException
+	public static String ExecuteQuery(String sQuery, HashMap<String, String> asParams) throws URISyntaxException, IOException
 	{
 		
 		String sParameter = URLEncoder.encode(sQuery, "UTF-8");
@@ -62,12 +67,7 @@ public class OpenSearchQuery{
 		Abdera oAbdera = new Abdera();
 		String sJsonResult = new String("");
 		//create url passing search parameters
-		String sUrl = OpenSearchTemplate.getHttpUrl(sQuery);
-		//Add params
-		for(int iParamCount = 0; iParamCount < aoParams.length;iParamCount++)
-		{
-			sUrl+='&' + aoParams[iParamCount];
-		}
+		String sUrl = OpenSearchTemplate.getHttpUrl(sQuery, asParams.getOrDefault("offset", "0"), asParams.getOrDefault("limit", "25"), asParams.getOrDefault("sortedby", "ingestiondate") + " " + asParams.getOrDefault("order", "asc"));
 		//create abdera client
 		AbderaClient oClient = new AbderaClient(oAbdera);
 		//oClient.usePreemptiveAuthentication(true);
@@ -101,6 +101,7 @@ public class OpenSearchQuery{
 		//ListParseFilter filter = new WhiteListParseFilter();
 		// set authorization
 		oOptions.setAuthorization("Basic c2FkYW1vOmVzYTE1YWRhbQ==");
+		System.out.println("\nSending 'GET' request to URL : " + sUrl);
 		ClientResponse response = oClient.get(sUrl, oOptions);
 		Document<Feed> oDocument = null;
 		if (response.getType() == ResponseType.SUCCESS)
@@ -119,6 +120,19 @@ public class OpenSearchQuery{
 		
 		int iStreamSize = 1000000;
 		Feed oFeed = (Feed) oDocument.getRoot();
+		for (Entry oEntry : oFeed.getEntries()) {
+			Link oLink = oEntry.getLink("icon");
+			System.out.println(oLink.getHref().toString());
+			ClientResponse oImageResponse = oClient.get(oLink.getHref().toString(), oOptions);
+			if (oImageResponse.getType() == ResponseType.SUCCESS)
+			{
+				InputStream oInputStreamImage = oImageResponse.getInputStream();
+				BufferedImage  oImage = ImageIO.read(oInputStreamImage);
+				ByteArrayOutputStream bas = new ByteArrayOutputStream();
+				ImageIO.write(oImage, "png", bas);
+			    oLink.addSimpleExtension(new javax.xml.namespace.QName("image"), "data:image/png;base64," + new String(Base64.encodeBase64(bas.toByteArray())));
+			}
+		} 
 		JSONObject oFeedJSON = Atom2Json(oAbdera, new ByteArrayOutputStream(iStreamSize), oFeed);
 		return oFeedJSON.toString();
 
