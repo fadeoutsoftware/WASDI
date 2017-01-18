@@ -22,6 +22,8 @@
 
   "EDITOR_TOOLTIP_SWITCH_3D_2D":"Switch 3D globe and 2D map",
 
-  "IMPORT_ADVANCE_SEARCH_LABEL":"Advance search"
-
+  "IMPORT_ADVANCE_SEARCH_LABEL":"Advance search",
+  "IMPORT_PRODUCTS_PER_PAGE_LABEL":"Products per page:",
+  "IMPORT_PAGE_LABEL:":"Page:",
+  "IMPORT_OF_LABEL":"of"
 }

@@ -64,6 +64,7 @@ angular.module('wasdi.TreeDirective', [])
             /*
             *  NOTE: $SCOPE = EDITOR SCOPE
             * */
+
             $scope.$watch('m_oController.m_oTree', function (newValue, oldValue, scope)
             {
                 if(!utilsIsObjectNullOrUndefined($scope.m_oController.m_oTree))
@@ -72,17 +73,17 @@ angular.module('wasdi.TreeDirective', [])
                     //load tree
                     $('#jstree').jstree($scope.m_oController.m_oTree);
 
-                    //bind event (it triggered when click a node tree)
+                    //bind event (it triggered when click a node in tree)
                     $('#jstree').on("changed.jstree", function (e, data) {
 
                         data.event.preventDefault();//TODO CHECK IF IT'S USEFUL
 
 
                         // if there isn't running processes AND the node it's a band do $scope.m_oController.openBandImage()
+
                         /*PUBLIC BAND*/
                         if($scope.m_oController.isEmptyListOfRunningProcesses() == true && data.node.children.length == 0 && !utilsIsObjectNullOrUndefined(data.node.original.band))
                         {
-                            //TODO CHECK IF THERE IS THE BAND
 
                             if(data.node.icon == 'assets/icons/check.png')
                             {

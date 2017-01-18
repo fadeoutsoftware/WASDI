@@ -22,6 +22,19 @@ var RootController = (function() {
 
     }
 
+    RootController.prototype.isVisibleNavBar=function()
+    {
+        var sState=this.m_oState.current.name;
+        switch(sState) {
+            case "root.workspaces":
+                return false;
+                break;
+            default: return true;
+        }
+
+        return true;
+    }
+
     RootController.prototype.onClickProcess = function()
     {
         var oController=this;

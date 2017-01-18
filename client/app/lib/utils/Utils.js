@@ -73,3 +73,24 @@ function utilsStrContainsCaseInsensitive(sSource, sStrToSearch)
     var s2 = sStrToSearch.toLowerCase();
     return (s1.indexOf(s2) > -1);
 }
+
+function utilsIsANumber(oValue)
+{
+
+    //isNaN(123) //false
+    //isNaN(-1.23) //false
+    //isNaN(5-2) //false
+    //isNaN(0) //false
+    //isNaN('123') //false
+    //isNaN('Hello') //true
+    //isNaN('2005/12/12') //true
+    //isNaN('') //false
+    //isNaN(true) //false
+    //isNaN(undefined) //true
+    //isNaN('NaN') //true
+    //isNaN(NaN) //true
+    //isNaN(0 / 0) //true
+    if(isNaN(oValue) == false)
+        return true;
+    return false;
+}

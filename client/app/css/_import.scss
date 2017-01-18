@@ -95,13 +95,14 @@
 
     .container-table-row
     {
-      /*pls doesn't change it i need uit for on-mouse-click-rectangle event:
+      /*pls doesn't change it,  need it for on-mouse-click-rectangle event:
       *  var container = $('#div-container-table'), scrollTo = $("#"+sId);
          container.animate({
           scrollTop: scrollTo.offset().top - container.offset().top + container.scrollTop()
          });
       */
-
+      height:100%;
+      overflow: auto;
       /***************************/
       //Over TR
       .table-hover tbody:hover{
@@ -133,6 +134,10 @@
           {
             display: inline;
             width: 10%;
+          }
+          form
+          {
+            display: inline;
           }
 
         }

@@ -243,6 +243,7 @@ var EditorController = (function () {
         }
 
         this.m_aoProducts.push(oMessage.payload);
+        this.m_oTree = this.generateTree();
         this.m_oScope.$apply();
 
         this.m_oProductService.addProductToWorkspace(oMessage.payload.fileName,this.m_oActiveWorkspace.workspaceId).success(function (data, status) {
@@ -250,6 +251,7 @@ var EditorController = (function () {
         }).error(function (data,status) {
             console.log('Error adding product to the ws');
         });
+
     }
 
 
@@ -448,7 +450,7 @@ var EditorController = (function () {
         var oController=this;
         var sFileName = this.m_aoProducts[oBand.productIndex].fileName;
 
-        this.m_oFileBufferService.publishBand(sFileName,this.m_oActiveWorkspace.workspaceId, oBand.name).success(function (data, status) {0
+        this.m_oFileBufferService.publishBand(sFileName,this.m_oActiveWorkspace.workspaceId, oBand.name).success(function (data, status) {
             console.log('publishing band ' + oBand.name);
             if(!utilsIsObjectNullOrUndefined(data) ||  data.messageResult != "KO")
             {

@@ -198,7 +198,13 @@ service('MapService', ['$http','$rootScope', 'ConstantsService', function ($http
         {
             if(utilsIsObjectNullOrUndefined(aaBounds[iIndex]))
                 return null;
+
+            ///*  if the LatLng coordinates are "outside the map" return the right coordinates */
+            //var adLatLng = L.latLng(aaBounds[iIndex]);
+            //aaBounds[iIndex] = this.m_oWasdiMap.wrapLatLng(adLatLng);
+
         }
+
 
         if(utilsIsStrNullOrEmpty(sColor))
             sColor="#ff7800";//default color

@@ -29,7 +29,7 @@ var ImportController = (function() {
         this.m_oScope.selectedAll = false;
         //this.m_sFilter='';
         this.m_aoProducts = [];
-        this.m_oScope.currentPage = 1;
+        //this.m_oScope.currentPage = 1;
         this.m_oConfiguration = null;
         this.m_oStatus = {
             opened: false
@@ -40,11 +40,14 @@ var ImportController = (function() {
         this.m_aoProductsList= []; /* LAYERS LIST == PRODUCTS LIST */
         this.m_aoMissions;
         /* number of possible products per pages and number of products per pages selected */
-        this.m_iProductsPerPageSelected = 10;//default value
+        this.m_iProductsPerPageSelected = 5;//default value
         this.m_iProductsPerPage=[5,10,15,20,25];
         /* Active Workspace */
         this.m_oActiveWorkspace = this.m_oConstantsService.getActiveWorkspace();
-
+        //Page
+        this.m_iCurrentPage = 1;
+        this.m_iTotalPages = 1;
+        this.m_iTotalOfProducts = 0;
         this.m_oModel = {
             textQuery:'',
             list: '',
@@ -223,11 +226,12 @@ var ImportController = (function() {
                         var sId = "layer"+$scope.m_oController.m_aoProductsList[iIndex].id;
 
                         /* change view on table , when the pointer of mouse is on a rectangle the table scroll, the row will become visible(if it isn't) */
-                        var container = $('#div-container-table'), scrollTo = $("#"+sId);
+                        var container = $('#div-container-table'), scrollTo = $('#'+sId);
 
                         container.animate({
                             scrollTop: scrollTo.offset().top - container.offset().top + container.scrollTop()
                         });
+
                         //container.animate({scrollTop: 485}, 2000);
                         //container.scrollTop(
                         //    scrollTo.offset().top - container.offset().top + container.scrollTop()
@@ -342,37 +346,109 @@ var ImportController = (function() {
         this.m_oSearchService.setTextQuery(this.m_oModel.textQuery);
         this.m_oSearchService.setGeoselection(this.m_oModel.geoselection); // todo: refactor setting by map
         // SearchService.setAdvancedFilter(scope.model.advancedFilter);
-
-        this.m_oSearchService.setOffset(0);//default 0
-        this.m_oSearchService.setLimit(5);// default 10
-
-        this.m_oSearchService.getProductsCount().then(function(result){
-            //TODO CHECK DATA
-            var iCount = result.data;
-
+        this.m_oSearchService.setOffset(this.calcOffset());//default 0 (index page)
+        this.m_oSearchService.setLimit(this.m_iProductsPerPageSelected);// default 10 (total of element per page)
+        //
+        //this.m_oSearchService.getProductsCount().then(function(result){
+        //    //TODO CHECK DATA
+        //    oController.m_iTotalOfProducts = result.data;
+        //    oController.countPages();
             oController.m_oSearchService.search().then(function(result){
                 var sResults = result;
 
                 if(!utilsIsObjectNullOrUndefined(sResults))
                 {
 
-                    if (typeof sResults.data == 'string')
-                    {
-                        if (!utilsIsStrNullOrEmpty(sResults.data)) {
-                            var aoData = JSON.parse(sResults.data);
-                            oController.generateLayersList(aoData.feed);
-                        }
+                    //if (typeof sResults.data == 'string')
+                    //{
+                    //    if (!utilsIsStrNullOrEmpty(sResults.data)) {
+                    //        var aoData = JSON.parse(sResults.data);
+                    //        oController.m_iTotalOfProducts = aoData.feed['opensearch:totalResults'];
+                    //        oController.countPages();
+                    //        oController.generateLayersList(aoData.feed);
+                    //    }
+                    if (!utilsIsObjectNullOrUndefined(sResults.data)) {
+                        var aoData = sResults.data;
+                        oController.m_iTotalOfProducts = aoData.feed['opensearch:totalResults'];
+                        oController.countPages();
+                        oController.generateLayersList(aoData.feed);
                     }
-                    else
-                    {
-                        //TODO REMOVE IT (use it only with fake data)
-                        oController.generateLayersList(sResults.data.feed);
-                    }
+                    //}
+                    //else
+                    //{
+                    //    //TODO REMOVE IT (use it only with fake data)
+                    //    oController.generateLayersList(sResults.data.feed);
+                    //}
                 }
             });
-        });
+        //});
 
     };
+    /*+++++++++++++++++++++ PAGINATION ++++++++++++++++++++++++*/
+    //count total number of pages
+    ImportController.prototype.countPages = function()
+    {
+        //this.m_iCurrentPage
+        //this.m_iTotalPages
+        if(this.m_iProductsPerPageSelected != 0 )
+        {
+            if((this.m_iTotalOfProducts % this.m_iProductsPerPageSelected) == 0)
+            {
+                this.m_iTotalPages = Math.floor(this.m_iTotalOfProducts/this.m_iProductsPerPageSelected);
+            }
+            else
+            {
+                this.m_iTotalPages = Math.floor(this.m_iTotalOfProducts/this.m_iProductsPerPageSelected)+1;
+            }
+        }
+        return this.m_iTotalPages;
+    }
+
+    //calc offset for opensearch
+    ImportController.prototype.calcOffset = function()
+    {
+        return(this.m_iCurrentPage-1) * this.m_iProductsPerPageSelected;
+
+    }
+
+    // change actual page
+    ImportController.prototype.changePage = function(iNewPage)
+    {
+
+        if(!utilsIsObjectNullOrUndefined(iNewPage) && isNaN(iNewPage) == false && iNewPage >= 0 && iNewPage <= this.m_iTotalPages)
+        {
+            this.m_iCurrentPage = iNewPage;
+            this.search();
+        }
+
+    }
+
+    // +1 page
+    ImportController.prototype.plusOnePage = function()
+    {
+        this.changePage(this.m_iCurrentPage+1);
+    }
+
+    // -1 page
+    ImportController.prototype.minusOnePage = function()
+    {
+        this.changePage(this.m_iCurrentPage-1);
+    }
+
+    //last page
+    ImportController.prototype.lastPage = function()
+    {
+        this.changePage(this.m_iTotalPages);
+    }
+
+    //fist page
+
+    ImportController.prototype.firstPage = function()
+    {
+        this.changePage(1);
+    }
+    //+++++++++++++++++++++++++++++++++++++++++++++++++
+
 
     /* us server Download the product in geoserver, the parameter oLayer = product*/
     ImportController.prototype.downloadProduct = function(oLayer)
