@@ -128,7 +128,7 @@ angular.module('wasdi.TreeDirective', [])
         return{
             restrict:"E",
 
-            template:'<div id="jstree"class="panel-body jstree" ></div>',
+            template:'<div id="jstree"class="jstree" ></div>',
             link: linkFunction
         };
 });

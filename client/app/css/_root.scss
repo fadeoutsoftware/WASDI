@@ -106,6 +106,20 @@
       background-color: $wasdi-nav-bar-color-active;
       color: $wasdi-white;
     }
+    //Change input class for name
+    .name-workspace
+    {
+      margin-top: 15px;
+      input
+      {
+        border: 0;
+        outline: 0;
+        color: white;
+        background: transparent;
+        border-bottom: 2px solid $wasdi-green-logo;
+        width: 400px;
+      }
+    }
   }
 
 }

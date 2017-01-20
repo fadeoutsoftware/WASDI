@@ -130,7 +130,9 @@ service('MapService', ['$http','$rootScope', 'ConstantsService', function ($http
         });
 
 
-        /* coordinates in map*/
+        /* coordinates in map
+        * find this plugin in lib folder
+        * */
         L.control.mousePosition().addTo(this.m_oWasdiMap);
 
         /**

@@ -15,13 +15,14 @@
     </div>
 
     <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12 sidebar">
+
         <!--**************** TREE PANEL *****************-->
-        <div class="panel panel-default">
+        <div class="panel panel-default ">
             <div class="panel-heading">{{m_oController.m_oActiveWorkspace.workspaceId}}</div>
             <!-- MY TREE DIRECTIVE -->
-            <tree ngModelTree="prova" ></tree>
-
-
+            <div class="panel-body">
+                <tree ngModelTree="prova" ></tree>
+            </div>
 
         </div>
 
@@ -40,7 +41,7 @@
 
             <div class="panel-body fixed-panel">
                 <div class="map" id = "wasdiMap2" ng-show="m_oController.m_b2DMapModeOn == false && m_oController.m_b3DMapModeOn == true  "></div>
-                <div class="map" id="cesiumContainer2"   ng-show="m_oController.m_b2DMapModeOn == true && m_oController.m_b3DMapModeOn == false  "></div>
+                <div class="map" id="cesiumContainer2"  ng-show="m_oController.m_b2DMapModeOn == true && m_oController.m_b3DMapModeOn == false  "></div>
             </div>
         </div>
 

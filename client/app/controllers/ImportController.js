@@ -334,18 +334,6 @@ var ImportController = (function() {
             this.m_aoMissions[parentIndex].filters[index].indexvalue = "";
         }
 
-        /* remove rectangle in map */
-        if(!utilsIsObjectNullOrUndefined(this.m_aoProductsList))
-        {
-            var iNumberOfProducts = this.m_aoProductsList.length;
-            var oRectangle;
-            for(var iIndex = 0; iIndex < iNumberOfProducts; iIndex++)
-            {
-                oRectangle = this.m_aoProductsList[iIndex].rectangle;
-                this.m_oMapService.removeLayerFromMap(oRectangle);
-            }
-            this.m_aoProductsList = [];
-        }
 
     };
 
@@ -497,6 +485,20 @@ var ImportController = (function() {
             this.updateMissionSelection(i);
         }
         this.setFilter();
+
+        /* remove rectangle in map */
+        if(!utilsIsObjectNullOrUndefined(this.m_aoProductsList))
+        {
+            var iNumberOfProducts = this.m_aoProductsList.length;
+            var oRectangle;
+            for(var iIndex = 0; iIndex < iNumberOfProducts; iIndex++)
+            {
+                oRectangle = this.m_aoProductsList[iIndex].rectangle;
+                this.m_oMapService.removeLayerFromMap(oRectangle);
+            }
+            this.m_aoProductsList = [];
+        }
+
     }
 
     ImportController.prototype.openSensingPeriodFrom = function($event) {

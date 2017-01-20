@@ -17,5 +17,9 @@ service('AuthService', ['$http',  'ConstantsService', function ($http, oConstant
         return this.m_oHttp.get(this.APIURL + '/auth/logout');
     }
 
+    this.checkSession = function(sSession)
+    {
+        return this.m_oHttp.get(this.APIURL + '/auth/checksession');
+    }
 
 }]);

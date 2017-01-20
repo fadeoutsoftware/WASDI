@@ -18,6 +18,9 @@ $wasdi-blue-logo-complementary-1:#848E9F;
 $wasdi-blue-logo-complementary-2:#5F6C82;
 $wasdi-blue-logo-complementary-3:#2D394F;
 $wasdi-blue-logo-complementary-4:#1B2B46;
+
+
+
 //INPOOR HERO LIGHT
 @font-face {
   font-family:'Hero-Light' ;
@@ -34,6 +37,7 @@ $wasdi-font-size:14px;
 $wasdi-line-height: 1.42857;
 $wasdi-font-weight:600;
 $wasdi-font-weight-normal:400;
+
 
 $img-brand-logo-write-svg:   url("../assets/wasdi/logoScritta_wasdi.png");
 $img-brand-logo-svg:  url("../assets/wasdi/logoWasdi.png");
@@ -82,7 +86,9 @@ $wasdi-sidebar-color-title-panel:$wasdi-blue-logo;
 $wasdi-title-color:$wasdi-white;
 $waddi-sidebar-color-border-panel:$wasdi-blue-logo;
 $wasdi-sidebar-background-color:$wasdi-grey;
-
+$wasdi-map-height:730px;
+$wasdi-heigth-panel:320px;
+$wasdi-status-bar-heigth:50px;
 //WORKSPACES
 $wasdi-list-of-files-border-color:$wasdi-blue-logo;
 $wasdi-over-icon:$wasdi-green-logo;
