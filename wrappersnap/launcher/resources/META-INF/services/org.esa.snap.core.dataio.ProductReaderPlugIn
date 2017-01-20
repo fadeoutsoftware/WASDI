@@ -37,3 +37,4 @@ org.esa.snap.dataio.netcdf.metadata.profiles.hdfeos.HdfEosNetCdfReaderPlugIn
 org.esa.snap.dataio.netcdf.metadata.profiles.beam.BeamNetCdfReaderPlugIn
 org.esa.snap.dataio.pgx.PgxProductReaderPlugIn
 org.esa.snap.dataio.rtp.RawTiledPyramidsProductCodecSpi
+

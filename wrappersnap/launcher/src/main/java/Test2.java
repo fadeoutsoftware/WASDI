@@ -50,7 +50,7 @@ public class Test2 {
                 exportProduct = ProductIO.readProduct(file, formatName);
 
                 System.out.println("Calibrate");
-                oCalibratedProduct = oCalibration.getCalibration(exportProduct,"C:\\Users\\a.corrado\\Documents\\");
+                oCalibratedProduct = oCalibration.getCalibration(exportProduct, null);
 
                 returnVal = fc.showOpenDialog(null);
                     if (returnVal != JFileChooser.APPROVE_OPTION)
@@ -59,7 +59,7 @@ public class Test2 {
                 exportProduct = ProductIO.readProduct(file, formatName);
 
                 System.out.println("Filter");
-                oFilteredProduct = oFilter.getFilter(exportProduct,"C:\\Users\\a.corrado\\Documents\\");
+                oFilteredProduct = oFilter.getFilter(exportProduct, null);
                 System.out.println("PostFilter");
 
                 returnVal = fc.showOpenDialog(null);
@@ -69,7 +69,7 @@ public class Test2 {
                 exportProduct = ProductIO.readProduct(file, formatName);
 
                 System.out.println("Multilook");
-                oMultilookedProduct = oMultilooking.getMultilooking(exportProduct);
+                oMultilookedProduct = oMultilooking.getMultilooking(exportProduct, null);
 
                     //multi look product
                     File multiFile = new File("C:\\Users\\a.corrado\\Documents\\test_multi.tif");
@@ -84,7 +84,7 @@ public class Test2 {
                 file = fc.getSelectedFile();
                 exportProduct = ProductIO.readProduct(file, formatName);
                 System.out.println("terrainProduct");
-                terrainProduct=oTerrainCorrection.getTerrainCorrection(exportProduct);
+                terrainProduct=oTerrainCorrection.getTerrainCorrection(exportProduct, null);
                 System.out.println("PostterrainProduct");
 
                 //String bigGeoTiffFormatName = BigGeoTiffProductReaderPlugIn.FORMAT_NAME;

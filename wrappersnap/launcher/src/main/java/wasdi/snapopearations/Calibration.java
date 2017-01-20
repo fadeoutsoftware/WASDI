@@ -7,6 +7,7 @@ import org.esa.snap.core.gpf.Operator;
 import org.esa.snap.core.gpf.OperatorSpi;
 import org.esa.snap.dataio.bigtiff.BigGeoTiffProductReaderPlugIn;
 import org.esa.snap.engine_utilities.util.MemUtils;
+import wasdi.LauncherMain;
 
 import java.io.File;
 
@@ -15,20 +16,16 @@ import java.io.File;
  */
 public class Calibration {
 
-    public Product getCalibration(Product oProduct, String sFilePath) throws Exception
+    public Product getCalibration(Product oProduct, String[] asBandName) throws Exception
     {
         //calibration
         OperatorSpi spi = new CalibrationOp.Spi();
-        Operator op = spi.createOperator();
+        CalibrationOp op = (CalibrationOp) spi.createOperator();
         op.setSourceProduct(oProduct);
+        if (asBandName != null)
+            op.setParameter("sourceBands", asBandName);
         Product calibrateProduct = op.getTargetProduct();
 
-        String bigGeoTiffFormatName = BigGeoTiffProductReaderPlugIn.FORMAT_NAME;
-
-        File calFile = new File(sFilePath + "test_cal.tif");
-
-        ProductIO.writeProduct(calibrateProduct, calFile.getAbsolutePath(), bigGeoTiffFormatName);
-        MemUtils.freeAllMemory();
         return calibrateProduct;
     }
 

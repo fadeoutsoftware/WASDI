@@ -6,6 +6,7 @@ import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.gpf.OperatorSpi;
 import org.esa.snap.dataio.bigtiff.BigGeoTiffProductReaderPlugIn;
 import org.esa.snap.engine_utilities.util.MemUtils;
+import wasdi.LauncherMain;
 
 import java.io.File;
 
@@ -14,19 +15,15 @@ import java.io.File;
  */
 public class Filter {
 
-    public Product getFilter(Product oProduct, String sFilePath) throws Exception
-    {
+    public Product getFilter(Product oProduct, String[] asBandName) throws Exception {
         OperatorSpi spiFilter = new SpeckleFilterOp.Spi();
         SpeckleFilterOp opFilter = (SpeckleFilterOp) spiFilter.createOperator();
         opFilter.setSourceProduct(oProduct);
+        if (asBandName != null)
+            opFilter.setParameter("sourceBands", asBandName);
         opFilter.SetFilter("Refined Lee");
         Product filterProduct = opFilter.getTargetProduct();
-        String bigGeoTiffFormatName = BigGeoTiffProductReaderPlugIn.FORMAT_NAME;
-        File filterFile = new File(sFilePath + "test_filter.tif");
-        //ProductIO.writeProduct(filterProduct, filterFile.getAbsolutePath(), bigGeoTiffFormatName);
-        ProductIO.writeProduct(filterProduct, filterFile.getAbsolutePath(), bigGeoTiffFormatName);
-        System.out.println("Ho scritto la roba");
-        MemUtils.freeAllMemory();
-        return  filterProduct;
+
+        return filterProduct;
     }
 }

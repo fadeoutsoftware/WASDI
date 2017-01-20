@@ -16,8 +16,7 @@ import org.esa.snap.core.datamodel.MetadataAttribute;
 import org.esa.snap.core.datamodel.MetadataElement;
 import org.esa.snap.core.datamodel.Product;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -29,27 +28,30 @@ public class ReadProduct {
     public  static HashMap<String, Product> m_oCacheProducts = new HashMap<String, Product>();
 
 
-    public Product ReadProduct(File oFile)
-    {
+    public Product ReadProduct(File oFile, String sFormatName) {
         //Per ora ipotizziamo solo dati Sentinel-1
-        String formatName = "SENTINEL-1";
         //read product
         Product exportProduct = null;
+
         try {
 
             if (m_oCacheProducts.get(oFile.getName()) == null) {
-                exportProduct =  ProductIO.readProduct(oFile, formatName);
+                LauncherMain.s_oLogger.debug("ReadProduct.ReadProduct: begin read");
 
-                //put in cache dictionary
-                m_oCacheProducts.put(oFile.getName(), exportProduct);
+                if (sFormatName != null) {
+                    exportProduct = ProductIO.readProduct(oFile, sFormatName);
+                } else {
+                    exportProduct = ProductIO.readProduct(oFile);
+                }
             }
-        }
-        catch(Exception oEx)
-        {
+            //put in cache dictionary
+            m_oCacheProducts.put(oFile.getName(), exportProduct);
+        } catch (Exception oEx) {
             oEx.printStackTrace();
             LauncherMain.s_oLogger.debug(oEx.toString());
 
         }
+
 
         return m_oCacheProducts.get(oFile.getName());
     }
@@ -69,7 +71,7 @@ public class ReadProduct {
         LauncherMain.s_oLogger.debug("ReadProduct.getProductViewModel: start");
 
         ProductViewModel oViewModel = new ProductViewModel();
-        Product exportProduct = ReadProduct(oFile);
+        Product exportProduct = ReadProduct(oFile, null);
 
         if (exportProduct == null) {
             LauncherMain.s_oLogger.debug("ReadProduct.getProductViewModel: read product returns null");
@@ -95,7 +97,7 @@ public class ReadProduct {
 
     public MetadataViewModel getProductMetadataViewModel(File oFile) throws IOException
     {
-        Product exportProduct = ReadProduct(oFile);
+        Product exportProduct = ReadProduct(oFile, null);
 
         if (exportProduct == null) return null;
 
@@ -156,7 +158,7 @@ public class ReadProduct {
 
         LauncherMain.s_oLogger.debug("ReadProduct.writeBigTiff: Read Product FILE = " + sFileName);
 
-        Product oSentinelProduct = ReadProduct(oFile);
+        Product oSentinelProduct = ReadProduct(oFile, null);
 
         if (oSentinelProduct == null) LauncherMain.s_oLogger.debug("ReadProduct.writeBigTiff: Sentinel Product is null " + oFile.getAbsolutePath());
 
@@ -180,6 +182,50 @@ public class ReadProduct {
         oSentinelProduct.closeIO();
 
         return sBigTiff;
+    }
+
+    public Product ReadProduct(File oFile) throws IOException, ClassNotFoundException {
+        ByteArrayOutputStream ous = null;
+        InputStream ios = null;
+        try {
+            byte[] buffer = new byte[4096];
+            ous = new ByteArrayOutputStream();
+            ios = new FileInputStream(oFile);
+            int read = 0;
+            while ((read = ios.read(buffer)) != -1) {
+                ous.write(buffer, 0, read);
+            }
+        }finally {
+            try {
+                if (ous != null)
+                    ous.close();
+            } catch (IOException e) {
+            }
+
+            try {
+                if (ios != null)
+                    ios.close();
+            } catch (IOException e) {
+            }
+        }
+        Object oObjectProduct = null;
+        ByteArrayInputStream bis = new ByteArrayInputStream(ous.toByteArray());
+        ObjectInput in = null;
+        try {
+            in = new ObjectInputStream(bis);
+            oObjectProduct = in.readObject();
+
+        } finally {
+            try {
+                if (in != null) {
+                    in.close();
+                }
+            } catch (IOException ex) {
+                // ignore close exception
+            }
+        }
+
+        return (Product) oObjectProduct;
     }
 
 

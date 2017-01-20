@@ -33,10 +33,10 @@ public class Test3 {
 
         //oRead.writeBigTiff(sName);
 
-          Publisher oPublisher = new Publisher();
+          //Publisher oPublisher = new Publisher();
 
-          String sName = "test_cal";
-          oPublisher.publishGeoTiff(sName + ".tif", "http://localhost:8080/geoserver", "admin", "geoserver", "wasdi", "pyramidstore");
+          //String sName = "test_cal";
+          //oPublisher.publishGeoTiff(sName + ".tif", "http://localhost:8080/geoserver", "admin", "geoserver", "wasdi", "pyramidstore");
 
         /*-------------------------------------*/
 
@@ -64,8 +64,8 @@ public class Test3 {
 
                 String bigGeoTiffFormatName = BigGeoTiffProductReaderPlugIn.FORMAT_NAME;
 
-               // File calFile = new File("C:\\Users\\s.adamo\\Documents\\test_cal.tif");
-                File calFile = new File("C:\\Users\\a.corrado\\Documents\\test_cal.tif");
+                File calFile = new File("C:\\Users\\s.adamo\\Documents\\test_cal.tif");
+                //File calFile = new File("C:\\Users\\a.corrado\\Documents\\test_cal.tif");
                 ProductIO.writeProduct(calibrateProduct, calFile.getAbsolutePath(), bigGeoTiffFormatName);
                 MemUtils.freeAllMemory();
 
@@ -78,8 +78,8 @@ public class Test3 {
                 opFilter.SetFilter("Refined Lee");
                 Product filterProduct = opFilter.getTargetProduct();
 
-               // File filterFile = new File("C:\\Users\\s.adamo\\Documents\\test_filter.tif");
-                File filterFile = new File("C:\\Users\\a.corrado\\Documents\\test_filter.tif");
+                File filterFile = new File("C:\\Users\\s.adamo\\Documents\\test_filter.tif");
+                //File filterFile = new File("C:\\Users\\a.corrado\\Documents\\test_filter.tif");
                 //calibrateProduct
                 ProductIO.writeProduct(exportProduct, filterFile.getAbsolutePath(), bigGeoTiffFormatName);
                 MemUtils.freeAllMemory();
@@ -98,7 +98,7 @@ public class Test3 {
                 Product multiProduct = opMulti.getTargetProduct();
 
                 //multi look product
-                File multiFile = new File("C:\\Users\\a.corrado\\Documents\\test_multi.tif");
+                File multiFile = new File("C:\\Users\\s.adamo\\Documents\\test_multi.tif");
                 ProductIO.writeProduct(exportProduct, multiFile.getAbsolutePath(), bigGeoTiffFormatName);
                 MemUtils.freeAllMemory();
 
@@ -110,8 +110,8 @@ public class Test3 {
                 terrainProduct = opTerrain.getTargetProduct();
 
                 //String bigGeoTiffFormatName = BigGeoTiffProductReaderPlugIn.FORMAT_NAME;
-                //File newFile = new File("C:\\Users\\s.adamo\\Documents\\test.tif");
-                File terrainFile = new File("C:\\Users\\a.corrado\\Documents\\test_terrain.tif");
+                File terrainFile = new File("C:\\Users\\s.adamo\\Documents\\test.tif");
+                //File terrainFile = new File("C:\\Users\\a.corrado\\Documents\\test_terrain.tif");
                 ProductIO.writeProduct(exportProduct, terrainFile.getAbsolutePath(), bigGeoTiffFormatName);
 
             } catch (IOException e) {

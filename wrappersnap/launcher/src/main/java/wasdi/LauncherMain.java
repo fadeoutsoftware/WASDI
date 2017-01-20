@@ -1,14 +1,20 @@
 package wasdi;
+import com.bc.ceres.core.ProgressMonitor;
 import com.bc.ceres.glevel.MultiLevelImage;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.apache.log4j.xml.DOMConfigurator;
+import org.esa.snap.core.dataio.ProductIO;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.GeoCoding;
 import org.esa.snap.core.datamodel.Product;
+import org.esa.snap.core.datamodel.quicklooks.Quicklook;
+import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.core.util.geotiff.GeoCoding2GeoTIFFMetadata;
 import org.esa.snap.core.util.geotiff.GeoTIFF;
 import org.esa.snap.core.util.geotiff.GeoTIFFMetadata;
+import org.esa.snap.engine_utilities.util.MemUtils;
+import org.esa.snap.runtime.EngineConfig;
 import wasdi.filebuffer.DownloadFile;
 import org.apache.commons.cli.*;
 import wasdi.geoserver.Publisher;
@@ -27,10 +33,14 @@ import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.ProductViewModel;
 import wasdi.shared.viewmodels.PublishBandResultViewModel;
 import wasdi.shared.viewmodels.RabbitMessageViewModel;
-import wasdi.snapopearations.ReadProduct;
+import wasdi.snapopearations.*;
 
-import java.io.File;
-import java.io.IOException;
+import javax.media.jai.JAI;
+import java.awt.image.BufferedImage;
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 
 /**
@@ -168,6 +178,7 @@ public class LauncherMain {
                     }
                     else {
                         // Ok file downloaded, let publish it
+
 
                         // Recreate the download parameter
                         PublishParameters oPublishParameter = new PublishParameters();
@@ -378,6 +389,13 @@ public class LauncherMain {
      * @return
      */
     public String Publish(PublishParameters oParameter) {
+
+        //System.setProperty("snap.home", "C:\\Codice\\esa\\wasdi\\wrappersnap\\snap-desktop\\snap-application\\target\\snap\\etc\\snap.properties");
+
+        JAI.getDefaultInstance().getTileScheduler().setParallelism(Runtime.getRuntime().availableProcessors());
+        MemUtils.configureJaiTileCache();
+
+
         String sLayerId = "";
 
         try {
@@ -386,15 +404,14 @@ public class LauncherMain {
 
             String sPath = ConfigReader.getPropValue("DOWNLOAD_ROOT_PATH");
             if (!sPath.endsWith("/")) sPath += "/";
-            sPath += oParameter.getUserId() + "/" + oParameter.getWorkspace()+ "/";
+            sPath += oParameter.getUserId() + "/" + oParameter.getWorkspace() + "/";
             sFile = sPath + sFile;
 
 
             // Check integrity
-            if (Utils.isNullOrEmpty(sFile))
-            {
-                s_oLogger.debug( "LauncherMain.Publish: file is null or empty");
-                return  sLayerId;
+            if (Utils.isNullOrEmpty(sFile)) {
+                s_oLogger.debug("LauncherMain.Publish: file is null or empty");
+                return sLayerId;
             }
 
             // Create a file object for the downloaded file
@@ -408,8 +425,8 @@ public class LauncherMain {
             String sGeoServerDataDir = ConfigReader.getPropValue("GEOSERVER_DATADIR");
             String sTargetDir = sGeoServerDataDir;
 
-            if (!(sTargetDir.endsWith("/")||sTargetDir.endsWith("\\"))) sTargetDir+="/";
-            sTargetDir+=sLayerId+"/";
+            if (!(sTargetDir.endsWith("/") || sTargetDir.endsWith("\\"))) sTargetDir += "/";
+            sTargetDir += sLayerId + "/";
 
             String sTargetFile = sTargetDir + sInputFileNameOnly;
 
@@ -417,29 +434,95 @@ public class LauncherMain {
 
             s_oLogger.debug("LauncherMain.publish: InputFile: " + sFile + " TargetFile: " + sTargetDir + " LayerId " + sLayerId);
 
-            FileUtils.copyFile(oDownloadedFile,oTargetFile);
+            //FileUtils.copyFile(oDownloadedFile, oTargetFile);
+            WriteProduct oWriter = new WriteProduct();
 
-            //TODO: Here recognize the file type and run the right procedure. At the moment assume Sentinel1A
-
-            s_oLogger.debug("LauncherMain.publish: Write Big Tiff");
-            // Convert the product in a Tiff file
             ReadProduct oReadProduct = new ReadProduct();
-            String sTiffFile = oReadProduct.writeBigTiff(oTargetFile.getAbsolutePath(), sTargetDir, sLayerId);
-            //String sTiffFile = "C:\\Program Files (x86)\\GeoServer 2.9.2\\data_dir\\data\\S1A_IW_GRDH_1SSV_20150213T095824_20150213T095849_004603_005AB7_5539\\S1A_IW_GRDH_1SSV_20150213T095824_20150213T095849_004603_005AB7_5539.zip.tif";
+            //TODO: Here recognize the file type and run the right procedure. At the moment assume Sentinel1A
+            s_oLogger.debug("LauncherMain.publish: Read Product");
+            Product oOriginProduct = oReadProduct.ReadProduct(oDownloadedFile, null);
 
-            s_oLogger.debug("LauncherMain.publish: TiffFile: " +sTiffFile);
+            //TODO: questo pezzo dell'anteprima bisognerà spostarlo nella lettura del prodotto, ora volevo vedere solo come funzionava
+            Quicklook oQuickLook = oOriginProduct.getDefaultQuicklook();
+            BufferedImage oImage = oQuickLook.getImage(ProgressMonitor.NULL);
+            //----------------------------------------------------------------------------------
+
+            if (oOriginProduct == null)
+            {
+                s_oLogger.debug("LauncherMain.publish: Product null");
+                return null;
+            }
+            //Calibration
+            s_oLogger.debug("LauncherMain.publish: Calibrate Product");
+            Calibration oCalibration = new Calibration();
+            String[] asBands = new String[]{oOriginProduct.getBandAt(0).getName()};
+            Product oCalibratedProduct = oCalibration.getCalibration(oOriginProduct, asBands);
+            String sCalibrateProduct = oWriter.WriteBigTiff(oCalibratedProduct, sPath, oCalibratedProduct.getName(), null);
+
+            oCalibratedProduct = oReadProduct.ReadProduct(new File(sCalibrateProduct), null);
+
+            if (oCalibratedProduct == null)
+            {
+                s_oLogger.debug("LauncherMain.publish: Calibrated Product null");
+                return null;
+            }
+            //oWriter.WriteBigTiff(oCalibratedProduct, oCalibratedProduct.getName(), sPath);
+            //Filter
+            s_oLogger.debug("LauncherMain.publish: Filter Product");
+            Filter oFilter = new Filter();
+            asBands[0] = oCalibratedProduct.getBandAt(0).getName();
+            Product oFilteredProduct = oFilter.getFilter(oCalibratedProduct, asBands);
+            String sFilterProduct = oWriter.WriteBigTiff(oFilteredProduct, sPath, oFilteredProduct.getName(), null);
+            if (oFilteredProduct == null)
+            {
+                s_oLogger.debug("LauncherMain.publish: Filtered Product null");
+                return null;
+            }
+            oFilteredProduct = oReadProduct.ReadProduct(new File(sFilterProduct), null);
+            //Multilooking
+            s_oLogger.debug("LauncherMain.publish: Multilooking Product");
+            Multilooking oMultilooking = new Multilooking();
+            asBands[0] = oFilteredProduct.getBandAt(0).getName();
+            Product oMultilookedProduct = oMultilooking.getMultilooking(oFilteredProduct, asBands);
+            String sMultiProduct = oWriter.WriteBigTiff(oMultilookedProduct, sPath, oMultilookedProduct.getName(), null);
+            if (oMultilookedProduct == null)
+            {
+                s_oLogger.debug("LauncherMain.publish: Multilook Product null");
+                return null;
+            }
+            oMultilookedProduct = oReadProduct.ReadProduct(new File(sMultiProduct), null);
+            //Terrain
+            s_oLogger.debug("LauncherMain.publish: Terrain Product");
+            TerrainCorrection oTerrainCorrection = new TerrainCorrection();
+            asBands[0] = oMultilookedProduct.getBandAt(0).getName();
+            Product oTerrainProduct = oTerrainCorrection.getTerrainCorrection(oMultilookedProduct, asBands);
+            if (oTerrainProduct == null)
+            {
+                s_oLogger.debug("LauncherMain.publish: Terrain product null");
+                return null;
+            }
+
+            //s_oLogger.debug("LauncherMain.publish: Write Big Tiff");
+            String sTiffFile = oWriter.WriteBigTiff(oTerrainProduct, sPath, oTerrainProduct.getName(), null);
+
+            // Generate file output name
+            sLayerId = Utils.GetFileNameWithoutExtension(oTerrainProduct.getName());
+            String sOutputFilePath = sPath + sLayerId + ".tif";
+            //File oOutputFile = new File(sOutputFilePath);
+
 
             // Check result
-            if (Utils.isNullOrEmpty(sTiffFile))
-            {
-                s_oLogger.debug( "LauncherMain.Publish: Tiff File is null or empty");
+            if (Utils.isNullOrEmpty(sTiffFile)) {
+                s_oLogger.debug("LauncherMain.Publish: Tiff File is null or empty");
                 return sLayerId;
             }
 
             // Ok publish
+            //sLayerId = oTerrainProduct.getName();
+            s_oLogger.debug("LauncherMain.publish: Layer id " + sLayerId);
             s_oLogger.debug("LauncherMain.publish: call PublishImage");
             Publisher oPublisher = new Publisher();
-            sLayerId = oPublisher.publishGeoTiff(sTiffFile,ConfigReader.getPropValue("GEOSERVER_ADDRESS"),ConfigReader.getPropValue("GEOSERVER_USER"),ConfigReader.getPropValue("GEOSERVER_PASSWORD"),ConfigReader.getPropValue("GEOSERVER_WORKSPACE"), sLayerId);
+            sLayerId = oPublisher.publishGeoTiff(sOutputFilePath, ConfigReader.getPropValue("GEOSERVER_ADDRESS"), ConfigReader.getPropValue("GEOSERVER_USER"), ConfigReader.getPropValue("GEOSERVER_PASSWORD"), ConfigReader.getPropValue("GEOSERVER_WORKSPACE"), sLayerId);
 
             s_oLogger.debug("LauncherMain.publish: Image published. Send Rabbit Message");
             Send oSendLayerId = new Send();
@@ -450,14 +533,14 @@ public class LauncherMain {
             oMessageViewModel.setMessageResult("OK");
             String sJSON = MongoRepository.s_oMapper.writeValueAsString(oMessageViewModel);
 
-            if (oSendLayerId.SendMsg(oParameter.getQueue(),sJSON)==false) {
+            if (oSendLayerId.SendMsg(oParameter.getQueue(), sJSON) == false) {
                 s_oLogger.debug("LauncherMain.publish: Error sending Rabbit Message");
             }
 
             // Deletes the copy of the Zip file
             s_oLogger.debug("LauncherMain.publish: delete Zip File Copy " + oTargetFile.getPath());
 
-            if (oTargetFile.delete()==false) {
+            if (oTargetFile.delete() == false) {
                 s_oLogger.debug("LauncherMain.publish: impossible to delete zip file");
             }
         }
@@ -482,6 +565,10 @@ public class LauncherMain {
         return sLayerId;
     }
 
+
+
+
+
     /**
      * Publish single band image
      * @param oParameter
@@ -490,6 +577,9 @@ public class LauncherMain {
     public String PublishBandImage(PublishBandParameter oParameter) {
 
         String sLayerId = "";
+
+        JAI.getDefaultInstance().getTileScheduler().setParallelism(Runtime.getRuntime().availableProcessors());
+        MemUtils.configureJaiTileCache();
 
         try {
             // Read File Name
@@ -571,10 +661,9 @@ public class LauncherMain {
 
             s_oLogger.debug( "LauncherMain.PublishBandImage:  Generating Band Image...");
 
-            s_oLogger.debug( "LauncherMain.PublishBandImage:  Read Product");
             // Read the product
             ReadProduct oReadProduct = new ReadProduct();
-            Product oSentinel = oReadProduct.ReadProduct(oFile);
+            Product oSentinel = oReadProduct.ReadProduct(oFile, null);
 
             s_oLogger.debug( "LauncherMain.PublishBandImage:  Get GeoCoding");
 
@@ -597,8 +686,8 @@ public class LauncherMain {
             s_oLogger.debug( "LauncherMain.PublishBandImage:  Output file: " + sOutputFilePath);
 
             // Write the Band Tiff
-            if (ConfigReader.getPropValue("CREATE_BAND_GEOTIFF_ACTIVE").equals("true"))  {
-                s_oLogger.debug( "LauncherMain.PublishBandImage:  Writing Image");
+            if (ConfigReader.getPropValue("CREATE_BAND_GEOTIFF_ACTIVE").equals("true")) {
+                s_oLogger.debug("LauncherMain.PublishBandImage:  Writing Image");
                 GeoTIFF.writeImage(oBandImage, oOutputFile, oMetadata);
             }
             else {
