@@ -19,7 +19,7 @@ var RootController = (function() {
             }
             else
             {
-                this.m_oUser = this.m_oConstantsService.getUser();
+                oController.m_oUser = oController.m_oConstantsService.getUser();
             }
         }).error(function (data,status) {
             //TODO use vex for error message
