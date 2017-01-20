@@ -52,9 +52,12 @@ public class OpenSearchQuery{
 			String sUrl = OpenSearchTemplate.getHttpUrl(sQuery, asParams.getOrDefault("offset", "0"), asParams.getOrDefault("limit", "25"), asParams.getOrDefault("sortedby", "ingestiondate") + " " + asParams.getOrDefault("order", "asc"));
 			//create abdera client
 			AbderaClient oClient = new AbderaClient(oAbdera);
-			oClient.setConnectionTimeout(10000);
-			oClient.setSocketTimeout(10000);
+			oClient.setConnectionTimeout(5000);
+			oClient.setSocketTimeout(5000);
 			oClient.setConnectionManagerTimeout(10000);
+			oClient.setMaxConnectionsTotal(200);
+			oClient.setMaxConnectionsPerHost(50);
+			
 			//oClient.usePreemptiveAuthentication(true);
 			//AbderaClient.registerTrustManager();
 			//	create credentials (username e password SSO ESA)
@@ -108,6 +111,11 @@ public class OpenSearchQuery{
 			
 			int iStreamSize = 1000000;
 			Feed oFeed = (Feed) oDocument.getRoot();
+			
+			//set new connction timeout
+			oClient.setConnectionTimeout(2000);
+			oClient.setSocketTimeout(2000);
+			oClient.setConnectionManagerTimeout(2000);
 			
 			for (Entry oEntry : oFeed.getEntries()) {
 				
