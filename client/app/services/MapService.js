@@ -130,6 +130,9 @@ service('MapService', ['$http','$rootScope', 'ConstantsService', function ($http
         });
 
 
+        /* coordinates in map*/
+        L.control.mousePosition().addTo(this.m_oWasdiMap);
+
         /**
          * scale control
          */
