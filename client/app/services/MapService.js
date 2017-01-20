@@ -7,7 +7,7 @@ angular.module('wasdi.MapService', ['wasdi.ConstantsService']).
 service('MapService', ['$http','$rootScope', 'ConstantsService', function ($http,$rootScope, oConstantsService) {
     this.APIURL = oConstantsService.getAPIURL();
     this.m_oHttp = $http;
-
+    this.m_oRectangleOpenSearch = null;
     /**
      * base layers
      */
@@ -188,6 +188,8 @@ service('MapService', ['$http','$rootScope', 'ConstantsService', function ($http
         });
     }
 
+
+
     //Add rectangle shape
     this.addRectangleOnMap = function (aaBounds,sColor,iIndexLayers)
     {
@@ -256,12 +258,12 @@ service('MapService', ['$http','$rootScope', 'ConstantsService', function ($http
 
     this.initMapWithDrawSearch = function(sMapDiv)
     {
+        var oController=this;
         //Init standard map
         this.initMap(sMapDiv);
 
-
         //LEAFLET.DRAW LIB
-        //add draw.search
+        //add draw.search (opensearch)
         var drawnItems = new L.FeatureGroup();
         this.m_oWasdiMap.addLayer(drawnItems);
 
@@ -284,8 +286,10 @@ service('MapService', ['$http','$rootScope', 'ConstantsService', function ($http
         this.m_oWasdiMap.addControl(oDrawControl);
 
         //Without this.m_oWasdiMap.on() the shape isn't save on map
-        this.m_oWasdiMap.on(L.Draw.Event.CREATED, function (event) {
+        this.m_oWasdiMap.on(L.Draw.Event.CREATED, function (event)
+        {
             var layer = event.layer;
+            oController.m_oRectangleOpenSearch = layer;
 
             //remove old shape
             if(drawnItems && drawnItems.getLayers().length!==0){

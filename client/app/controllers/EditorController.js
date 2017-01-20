@@ -2,7 +2,8 @@
  * Created by p.campanella on 24/10/2016.
  */
 var EditorController = (function () {
-    function EditorController($scope, $location, $interval, oConstantsService, oAuthService, oMapService, oFileBufferService, oProductService,$state,oWorkspaceService,oGlobeService) {
+    function EditorController($scope, $location, $interval, oConstantsService, oAuthService, oMapService, oFileBufferService,
+                              oProductService,$state,oWorkspaceService,oGlobeService,oProcessesLaunchedService) {
 
         // Reference to the needed Services
         this.m_oScope = $scope;
@@ -16,27 +17,31 @@ var EditorController = (function () {
         this.m_oScope.m_oController = this;
         this.m_oGlobeService=oGlobeService;
         this.m_oState=$state;
+        this.m_oProcessesLaunchedService=oProcessesLaunchedService;
         this.m_oWorkspaceService = oWorkspaceService;
         this.m_b2DMapModeOn=true;
         this.m_b3DMapModeOn=false;
+
         //layer list
         this.m_aoLayersList=[];//only id
         this.m_aoProcessesRunning=[];
 
         /* ---------------------- SET COOKIE (m_aoProcessesRunning)-------------*/
-        /*TODO USE DELETE COOKIE FOR DEBUG*/
+        /* USE DELETE COOKIE FOR DEBUG*/
+        this.m_oProcessesLaunchedService.loadProcessesByCookie()
+        this.m_aoProcessesRunning =  this.m_oProcessesLaunchedService.getProcesses();
         //this.m_oConstantsService.deleteCookie("m_aoProcessesRunning");
 
-        if(!utilsIsObjectNullOrUndefined( this.m_aoProcessesRunning) && this.m_aoProcessesRunning.length == 0)
-        {
-            var oResult = this.m_oConstantsService.getCookie("m_aoProcessesRunning");
-            if(utilsIsObjectNullOrUndefined(oResult) || oResult.length == 0 )
-                this.m_oConstantsService.setCookie("m_aoProcessesRunning", [], 1);
-            else
-            {
-                this.m_aoProcessesRunning = oResult;
-            }
-        }
+        //if(!utilsIsObjectNullOrUndefined( this.m_aoProcessesRunning) && this.m_aoProcessesRunning.length == 0)
+        //{
+        //    var oResult = this.m_oConstantsService.getCookie("m_aoProcessesRunning");
+        //    if(utilsIsObjectNullOrUndefined(oResult) || oResult.length == 0 )
+        //        this.m_oConstantsService.setCookie("m_aoProcessesRunning", [], 1);
+        //    else
+        //    {
+        //        this.m_aoProcessesRunning = oResult;
+        //    }
+        //}
 
         // Reconnection promise to stop the timer if the reconnection succeed or if the user change page
         this.m_oReconnectTimerPromise = null;
@@ -92,6 +97,7 @@ var EditorController = (function () {
 
                 if (oMessageResult == null) return;
                 if (oMessageResult.messageResult=="KO") {
+                    //TODO REMOVE ELEMENT IN PROCESS QUEUE
                     alert('There was an error in the RabbitCallback');
                     return;
                 }
@@ -213,7 +219,11 @@ var EditorController = (function () {
                 $scope.m_oController.m_oProductService.getProductListByWorkspace($scope.m_oController.m_oActiveWorkspace.workspaceId).success(function (data, status) {
                     if (data != null) {
                         if (data != undefined) {
-                            oController.m_aoProducts = data;
+                            //push all products
+                            for(var iIndex = 0; iIndex < data.length; iIndex++)
+                            {
+                                oController.m_aoProducts.push(data[iIndex]);
+                            }
                             // i need to make the tree after the products are loaded
                             $scope.m_oController.m_oTree = oController.generateTree();
                             //oController.m_oScope.$apply();
@@ -243,8 +253,7 @@ var EditorController = (function () {
         }
 
         this.m_aoProducts.push(oMessage.payload);
-        this.m_oTree = this.generateTree();
-        this.m_oScope.$apply();
+
 
         this.m_oProductService.addProductToWorkspace(oMessage.payload.fileName,this.m_oActiveWorkspace.workspaceId).success(function (data, status) {
             console.log('Product added to the ws');
@@ -252,6 +261,10 @@ var EditorController = (function () {
             console.log('Error adding product to the ws');
         });
 
+        this.m_oTree = this.generateTree();
+
+
+        //this.m_oScope.$apply();
     }
 
 
@@ -284,7 +297,11 @@ var EditorController = (function () {
         this.m_aoLayersList.push(oLayerId);
         this.addLayerMap2D(oLayerId);
         this.addLayerMap3D(oLayerId);
-        this.removeProcessInListOfRunningProcesses(oLayerId);
+        //this.removeProcessInListOfRunningProcesses(oLayerId);
+        //TODO REMOVE PROCESS IN LIST
+        this.m_oProcessesLaunchedService.removeProcessByProperty("processName",oLayerId);
+        this.m_aoProcessesRunning =  this.m_oProcessesLaunchedService.getProcesses();
+        //this.m_oScope.$apply();
     }
 
     /**
@@ -374,7 +391,7 @@ var EditorController = (function () {
      * @param sUrl
      */
     EditorController.prototype.downloadEOImage = function (sUrl) {
-        this.m_oFileBufferService.download(sUrl,this.m_oActiveWorkspace.workspaceId).success(function (data, status) {0
+        this.m_oFileBufferService.download(sUrl,this.m_oActiveWorkspace.workspaceId).success(function (data, status) {
             console.log('downloading');
         }).error(function (data, status) {
             console.log('download error');
@@ -429,7 +446,10 @@ var EditorController = (function () {
         var oProduct = this.m_aoProducts[oProductItem.index];
 
         var aoBands = oProduct.bandsGroups.bands;
-        var iBandCount = aoBands.length;
+        if(!utilsIsObjectNullOrUndefined(aoBands))
+            var iBandCount = aoBands.length;
+        else
+            var iBandCount = 0;
 
         for (var i=0; i<iBandCount; i++) {
             var oBandItem = {};
@@ -457,8 +477,12 @@ var EditorController = (function () {
                 if(data.messageCode == "PUBLISHBAND" )
                     oController.receivedPublishBandMessage(data.payload);
                 else
-                    oController.pushProcessInListOfRunningProcesses(oBand.productName + "_" + oBand.name,oIdBandNodeInTree);
-
+                    oController.m_oProcessesLaunchedService.addProcesses({processName:oBand.productName + "_" + oBand.name,
+                                                                    nodeId:oIdBandNodeInTree,
+                                                                    typeOfProcess:"Publishing Band"});
+                //else
+                //    oController.pushProcessInListOfRunningProcesses(oBand.productName + "_" + oBand.name,oIdBandNodeInTree);
+                //TODO PUSH PROCESS WITH SERVICE
             }
             else
             {
@@ -468,6 +492,7 @@ var EditorController = (function () {
 
         }).error(function (data, status) {
             console.log('publish band error');
+            //TODO ERROR
         });
     }
 
@@ -694,115 +719,116 @@ var EditorController = (function () {
     /* Push process in List of Running Processes (in server)
     * */
 
-    EditorController.prototype.pushProcessInListOfRunningProcesses=function(sProcess,oIdBandNodeInTree)
-    {
-        //if str == null or == ""
-        if(utilsIsStrNullOrEmpty(sProcess))
-            return false;
-
-        var iNumberOfProcessesRunning;
-        var bFind=false;
-        var oController=this;
-
-        //check the number of processes
-        if(utilsIsObjectNullOrUndefined(oController.m_aoProcessesRunning)==true)
-        {
-            iNumberOfProcessesRunning = 0;
-        }
-        else
-        {
-            iNumberOfProcessesRunning = oController.m_aoProcessesRunning.length;
-        }
-        //it doesn't push the process if it already exist
-        for( var iIndexProcesses = 0; iIndexProcesses < iNumberOfProcessesRunning ; iIndexProcesses++)
-        {
-            // if it find a process in ProcessesRunningList it doesn't need to push it
-             if(oController.m_aoProcessesRunning[iIndexProcesses].processName == sProcess)
-             {
-                 bFind=true;
-                 break;
-             }
-        }
-
-        if(bFind == false) {
-
-            oController.m_aoProcessesRunning.push({processName:sProcess,nodeId:oIdBandNodeInTree});
-            //update cookie
-            oController.m_oConstantsService.setCookie("m_aoProcessesRunning", oController.m_aoProcessesRunning, 1);
-        }
-
-    }
+    //EditorController.prototype.pushProcessInListOfRunningProcesses=function(sProcess,oIdBandNodeInTree)
+    //{
+    //    //if str == null or == ""
+    //    if(utilsIsStrNullOrEmpty(sProcess))
+    //        return false;
+    //
+    //    var iNumberOfProcessesRunning;
+    //    var bFind=false;
+    //    var oController=this;
+    //
+    //    //check the number of processes
+    //    if(utilsIsObjectNullOrUndefined(oController.m_aoProcessesRunning)==true)
+    //    {
+    //        iNumberOfProcessesRunning = 0;
+    //    }
+    //    else
+    //    {
+    //        iNumberOfProcessesRunning = oController.m_aoProcessesRunning.length;
+    //    }
+    //    //it doesn't push the process if it already exist
+    //    for( var iIndexProcesses = 0; iIndexProcesses < iNumberOfProcessesRunning ; iIndexProcesses++)
+    //    {
+    //        // if it find a process in ProcessesRunningList it doesn't need to push it
+    //         if(oController.m_aoProcessesRunning[iIndexProcesses].processName == sProcess)
+    //         {
+    //             bFind=true;
+    //             break;
+    //         }
+    //    }
+    //
+    //    if(bFind == false) {
+    //
+    //        oController.m_aoProcessesRunning.push({processName:sProcess,nodeId:oIdBandNodeInTree});
+    //        //update cookie
+    //        oController.m_oConstantsService.setCookie("m_aoProcessesRunning", oController.m_aoProcessesRunning, 1);
+    //    }
+    //
+    //}
 
     /*
     Remove process in List of Running processes
     * */
-    EditorController.prototype.removeProcessInListOfRunningProcesses=function(sProcess)
-    {
-        if(utilsIsStrNullOrEmpty(sProcess))
-            return false;
-
-        var oController=this;
-        var iLength;
-
-        if(utilsIsObjectNullOrUndefined(oController.m_aoProcessesRunning) == true )
-        {
-            iLength = 0;
-        }
-        else
-        {
-            iLength = oController.m_aoProcessesRunning.length;
-        }
-
-        for(var iIndex = 0;iIndex < iLength ;iIndex++ )
-        {
-            if(oController.m_aoProcessesRunning[iIndex].processName == sProcess)
-            {
-                oController.m_aoProcessesRunning.splice(iIndex);
-                //update cookie
-                oController.m_oConstantsService.setCookie("m_aoProcessesRunning", oController.m_aoProcessesRunning, 1);
-            }
-        }
-
-        //oController.m_oScope.$apply();CHECK IF WE NEED IT
-    }
+    //EditorController.prototype.removeProcessInListOfRunningProcesses=function(sProcess)
+    //{
+    //    if(utilsIsStrNullOrEmpty(sProcess))
+    //        return false;
+    //
+    //    var oController=this;
+    //    var iLength;
+    //
+    //    if(utilsIsObjectNullOrUndefined(oController.m_aoProcessesRunning) == true )
+    //    {
+    //        iLength = 0;
+    //    }
+    //    else
+    //    {
+    //        iLength = oController.m_aoProcessesRunning.length;
+    //    }
+    //
+    //    for(var iIndex = 0;iIndex < iLength ;iIndex++ )
+    //    {
+    //        if(oController.m_aoProcessesRunning[iIndex].processName == sProcess)
+    //        {
+    //            oController.m_aoProcessesRunning.splice(iIndex);
+    //            //update cookie
+    //            oController.m_oConstantsService.setCookie("m_aoProcessesRunning", oController.m_aoProcessesRunning, 1);
+    //        }
+    //    }
+    //
+    //    //oController.m_oScope.$apply();CHECK IF WE NEED IT
+    //}
 
     /*
     * */
-    EditorController.prototype.isEmptyListOfRunningProcesses = function()
-    {
-        var oController = this;
-        if(utilsIsObjectNullOrUndefined(oController.m_aoProcessesRunning) == false)
-        {
-            if(oController.m_aoProcessesRunning.length == 0)
-                return true;
-            else
-                return false;
-        }
-        else
-        {
-            return true;
-        }
+    //EditorController.prototype.isEmptyListOfRunningProcesses = function()
+    //{
+    //    var oController = this;
+    //    if(utilsIsObjectNullOrUndefined(oController.m_aoProcessesRunning) == false)
+    //    {
+    //        if(oController.m_aoProcessesRunning.length == 0)
+    //            return true;
+    //        else
+    //            return false;
+    //    }
+    //    else
+    //    {
+    //        return true;
+    //    }
+    //
+    //
 
-    }
     /* fetch (after a page reload)all the running processes, check all the uncheck nodes
     *  corresponding to the process
     * */
-    EditorController.prototype.checkNodesInTree = function()
-    {
-        var oController = this;
-        if(utilsIsObjectNullOrUndefined(oController.m_aoProcessesRunning) || oController.m_aoProcessesRunning.length == 0)
-        {
-            return false;
-        }
-        var iLength = oController.m_aoProcessesRunning.length;
-        for(var iIndex = 0; iIndex < iLength; iIndex ++)
-        {
-            var sNodeId = oController.m_aoProcessesRunning[iIndex].nodeId;
-            $('#jstree').jstree(true).set_icon(sNodeId,"assets/icons/check.png");
-        }
-        return true;
+    //EditorController.prototype.checkNodesInTree = function()
+    //{
+    //    var oController = this;
+    //    if(utilsIsObjectNullOrUndefined(oController.m_aoProcessesRunning) || oController.m_aoProcessesRunning.length == 0)
+    //    {
+    //        return false;
+    //
+    //    var iLength = oController.m_aoProcessesRunning.length;
+    //    for(var iIndex = 0; iIndex < iLength; iIndex ++)
+    //    {
+    //        var sNodeId = oController.m_aoProcessesRunning[iIndex].nodeId;
+    //        $('#jstree').jstree(true).set_icon(sNodeId,"assets/icons/check.png");
+    //    }
+    //    return true;
 
-    }
+    //}
 
     EditorController.$inject = [
         '$scope',
@@ -815,7 +841,8 @@ var EditorController = (function () {
         'ProductService',
         '$state',
         'WorkspaceService',
-        'GlobeService'
+        'GlobeService',
+        'ProcessesLaunchedService'
     ];
 
     return EditorController;

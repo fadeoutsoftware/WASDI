@@ -330,11 +330,23 @@ var ImportController = (function() {
 
     ImportController.prototype.clearInput = function(parentIndex, index){
         //console.log("parentIndex    clearFilter",parentIndex);
-
-
         if(this.m_aoMissions[parentIndex] && this.m_aoMissions[parentIndex].filters[index]) {
             this.m_aoMissions[parentIndex].filters[index].indexvalue = "";
         }
+
+        /* remove rectangle in map */
+        if(!utilsIsObjectNullOrUndefined(this.m_aoProductsList))
+        {
+            var iNumberOfProducts = this.m_aoProductsList.length;
+            var oRectangle;
+            for(var iIndex = 0; iIndex < iNumberOfProducts; iIndex++)
+            {
+                oRectangle = this.m_aoProductsList[iIndex].rectangle;
+                this.m_oMapService.removeLayerFromMap(oRectangle);
+            }
+            this.m_aoProductsList = [];
+        }
+
     };
 
     ImportController.prototype.search = function() {
@@ -367,6 +379,7 @@ var ImportController = (function() {
                     //        oController.countPages();
                     //        oController.generateLayersList(aoData.feed);
                     //    }
+                    //TODO CHECK IF DATA == "" sometimes the opensearch doesnt work
                     if (!utilsIsObjectNullOrUndefined(sResults.data)) {
                         var aoData = sResults.data;
                         oController.m_iTotalOfProducts = aoData.feed['opensearch:totalResults'];
@@ -470,6 +483,7 @@ var ImportController = (function() {
 
         this.m_oFileBufferService.download(url,oWorkSpace.workspaceId).success(function (data, status) {
             console.log('Product just start the download ');
+
         }).error(function (data,status) {
             console.log('Product error in file buffer');
         });

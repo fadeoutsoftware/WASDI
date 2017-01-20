@@ -73,6 +73,7 @@ angular.module('wasdi.TreeDirective', [])
                     //load tree
                     $('#jstree').jstree($scope.m_oController.m_oTree);
 
+
                     //bind event (it triggered when click a node in tree)
                     $('#jstree').on("changed.jstree", function (e, data) {
 
@@ -82,7 +83,7 @@ angular.module('wasdi.TreeDirective', [])
                         // if there isn't running processes AND the node it's a band do $scope.m_oController.openBandImage()
 
                         /*PUBLIC BAND*/
-                        if($scope.m_oController.isEmptyListOfRunningProcesses() == true && data.node.children.length == 0 && !utilsIsObjectNullOrUndefined(data.node.original.band))
+                        if($scope.m_oController.m_oProcessesLaunchedService.isEmptyProcessesRunningList() == true && data.node.children.length == 0 && !utilsIsObjectNullOrUndefined(data.node.original.band))
                         {
 
                             if(data.node.icon == 'assets/icons/check.png')
@@ -114,8 +115,9 @@ angular.module('wasdi.TreeDirective', [])
                     {
                         //if the page was reload it method check all nodes in tree,
                         //this nodes are processes running in server
-                        $scope.m_oController.checkNodesInTree();
+                        //$scope.m_oController.checkNodesInTree();
                     });
+
 
                 }
             });

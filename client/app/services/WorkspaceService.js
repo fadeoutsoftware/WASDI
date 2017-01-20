@@ -1,6 +1,6 @@
 /**
- * Created by p.campanella on 25/10/2016.
- */
+* Created by p.campanella on 25/10/2016.
+*/
 
 'use strict';
 angular.module('wasdi.WorkspaceService', ['wasdi.WorkspaceService']).
