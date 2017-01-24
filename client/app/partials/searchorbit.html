@@ -1,0 +1,43 @@
+<div class="editor-view col-lg-12 col-md-12 col-sm-12 col-xs-12">
+    <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12">
+
+        <!--**************** TREE PANEL *****************-->
+        <div class="panel panel-default ">
+            <div class="panel-heading"></div>
+            <!-- MY TREE DIRECTIVE -->
+            <div class="panel-body">
+                <div class="col-lg-2 col-md-2 col-sm-2 col-xs-6" >
+                    <label ng-repeat="sensortype in m_oController.m_oConfiguration.orbitsearch.sensortypes" >
+                        <input type="checkbox" checklist-model="m_oController.m_oSelectedSensorType" checklist-value="sensortype"/> <span>{{sensortype}}</span>
+                    </label>
+                </div>
+                <div class="col-lg-2 col-md-2 col-sm-2 col-xs-6" >
+                    <label ng-repeat="sensorresolution in m_oController.m_oConfiguration.orbitsearch.sensorresolutions" >
+                        <input type="checkbox"  checklist-model="m_oController.m_oSelectedResolutionType" checklist-value="sensorresolution"/> <span>{{sensorresolution}}</span>
+                    </label>
+                </div>
+                <button class="btn" ng-click="m_oController.searchOrbit()">Search</button>
+
+            </div>
+
+        </div>
+        <div class="row col-lg-4 col-md-4 col-sm-4 col-xs-12">
+            <table class="table table-hover">
+                <thead>
+                    <tr>Satellite Name</tr>
+                </thead>
+                <tbody>
+                <tr ng-repeat="orbit in m_oController.getOrbits()">
+                    <td><span ng-click="m_oController.showSwath(orbit)">{{orbit.SatelliteName}}</span></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+
+        <!--------------- MAP CONTAINER --------------->
+    <div class="col-lg-8 col-md-8 col-sm-8 col-xs-12 map-container">
+        <div class="map" id = "orbitMap"></div>
+    </div>
+</div>

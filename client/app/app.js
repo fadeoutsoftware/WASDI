@@ -17,11 +17,13 @@ var wasdiApp = angular.module('wasdi', [
     'wasdi.ConfigurationService',
     'wasdi.OpenSearchService',
     'wasdi.ProcessesLaunchedService',
+    'wasdi.SearchOrbitService',
 
     'wasdi.SnakeDirective',
     'wasdi.TreeDirective',
 
-    'ui.bootstrap'
+    'ui.bootstrap',
+    'checklist-model'
 ]);
 
 wasdiApp.config(['$httpProvider', '$translateProvider', function($httpProvider, $translateProvider) {
@@ -61,7 +63,7 @@ wasdiApp.config(['$stateProvider', '$urlRouterProvider', function($stateProvider
         url: '/home',
         templateUrl: 'partials/home.html',
         controller: 'HomeController'
-    })
+    });
 
     //ROOT abstract class
     $stateProvider.state('root', {
@@ -70,7 +72,7 @@ wasdiApp.config(['$stateProvider', '$urlRouterProvider', function($stateProvider
         templateUrl: 'partials/RootView.html',
         controller : 'RootController'
         //resolve: { authenticated: checkAuthentication }
-    })
+    });
 
     //WORKSPACES
     $stateProvider.state('root.workspaces', {
@@ -78,7 +80,7 @@ wasdiApp.config(['$stateProvider', '$urlRouterProvider', function($stateProvider
         views:{
             'maincontent' : { templateUrl : 'partials/workspaces.html', controller  : 'WorkspaceController'}
         },
-    })
+    });
 
     //EDITOR
     $stateProvider.state('root.editor', {
@@ -87,7 +89,7 @@ wasdiApp.config(['$stateProvider', '$urlRouterProvider', function($stateProvider
         views:{
             'maincontent' : { templateUrl : 'partials/editor.html', controller  : 'EditorController'}
         },
-    })
+    });
 
     //IMPORT
     $stateProvider.state('root.import',{
@@ -96,7 +98,16 @@ wasdiApp.config(['$stateProvider', '$urlRouterProvider', function($stateProvider
         views:{
             'maincontent' : { templateUrl : 'partials/import.html', controller  : 'ImportController'}
         },
-    })
+    });
+
+    //IMPORT
+    $stateProvider.state('root.searchorbit',{
+        url: '/searchorbit',
+
+        views:{
+            'maincontent' : { templateUrl : 'partials/searchorbit.html', controller  : 'SearchOrbitController'}
+        },
+    });
 
 }]);
 
@@ -105,3 +116,4 @@ wasdiApp.controller("WorkspaceController", WorkspaceController);
 wasdiApp.controller("EditorController", EditorController);
 wasdiApp.controller("RootController",RootController);
 wasdiApp.controller("ImportController",ImportController);
+wasdiApp.controller("SearchOrbitController",SearchOrbitController);

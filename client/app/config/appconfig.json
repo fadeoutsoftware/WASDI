@@ -174,7 +174,11 @@
                 }
             ]
         }
-    ]
+    ],
+    "orbitsearch":{
+        "sensortypes":["SAR","Optical"],
+        "sensorresolutions":["High","Medium","Low"]
+    }
 
 }
 
