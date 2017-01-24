@@ -17,7 +17,9 @@ var wasdiApp = angular.module('wasdi', [
     'wasdi.ConfigurationService',
     'wasdi.OpenSearchService',
     'wasdi.ProcessesLaunchedService',
+    'wasdi.RabbitStompService',
     'wasdi.SearchOrbitService',
+    'wasdi.ResultsOfSearchService',
 
     'wasdi.SnakeDirective',
     'wasdi.TreeDirective',
@@ -93,7 +95,7 @@ wasdiApp.config(['$stateProvider', '$urlRouterProvider', function($stateProvider
 
     //IMPORT
     $stateProvider.state('root.import',{
-        url: '/import',
+        url: '/{workSpace}/import',
 
         views:{
             'maincontent' : { templateUrl : 'partials/import.html', controller  : 'ImportController'}

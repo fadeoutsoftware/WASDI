@@ -3,12 +3,13 @@
  */
 var RootController = (function() {
 
-    function RootController($scope, oConstantsService, oAuthService, $state) {
+    function RootController($scope, oConstantsService, oAuthService, $state, oProcessesLaunchedService) {
         this.m_oScope = $scope;
         this.m_oScope.m_oController = this;
         this.m_oConstantsService = oConstantsService;
         this.m_oAuthService = oAuthService;
         this.m_oState=$state;
+        this.m_oProcessesLaunchedService = oProcessesLaunchedService;
         this.m_oScope.m_oController=this;
         var oController = this;
         this.m_oAuthService.checkSession().success(function (data, status) {
@@ -32,6 +33,17 @@ var RootController = (function() {
         //else
         //    this.m_oState.go("login");
 
+        /*TODO WATCH OR SIMILAR THINGS */
+        this.m_aoProcessesRunning = this.m_oProcessesLaunchedService.getProcesses();
+
+        /*when ProccesLaunchedservice reload the m_aoProcessesRunning rootController reload m_aoProcessesRunning */
+        $scope.$on('m_aoProcessesRunning:updated', function(event,data) {
+            // you could inspect the data to see if what you care about changed, or just update your own scope
+            if(data == true)
+            {
+                $scope.m_oController.m_aoProcessesRunning = $scope.m_oController.m_oProcessesLaunchedService.getProcesses();
+            }
+        });
 
     }
 
@@ -66,18 +78,41 @@ var RootController = (function() {
             return "";
         else
         {
-            if(utilsIsObjectNullOrUndefined(sWorkspace.workspaceId))
+            if(utilsIsObjectNullOrUndefined(sWorkspace.name))
                 return ""
             else
-                return sWorkspace.workspaceId;
+                return sWorkspace.name;
         }
 
+    }
+    RootController.prototype.openImportPage = function () {
+
+        var oController = this;
+        // if it publishing a band u can't go in import controller
+        if( !(this.m_oProcessesLaunchedService.thereAreSomePublishBandProcess() == true) )
+        {
+            var sWorkSpace = this.m_oConstantsService.getActiveWorkspace();
+            oController.m_oState.go("root.import", { workSpace : sWorkSpace.workspaceId });//use workSpace when reload editor page
+        }
+        //TODO FEEDBACK IF U CAN'T CLICK ON IMPORT
+    }
+
+    RootController.prototype.noActiveLinkInNavBarCSS = function()
+    {
+        return ".not-active { pointer-events: none; cursor: default;}";
+    }
+    RootController.prototype.openEditorPage = function () {
+
+        var oController = this;
+        var sWorkSpace = this.m_oConstantsService.getActiveWorkspace();
+        oController.m_oState.go("root.editor", { workSpace : sWorkSpace.workspaceId });//use workSpace when reload editor page
     }
     RootController.$inject = [
         '$scope',
         'ConstantsService',
         'AuthService',
-        '$state'
+        '$state',
+        'ProcessesLaunchedService'
 
     ];
 

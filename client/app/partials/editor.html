@@ -18,7 +18,7 @@
 
         <!--**************** TREE PANEL *****************-->
         <div class="panel panel-default ">
-            <div class="panel-heading">{{m_oController.m_oActiveWorkspace.workspaceId}}</div>
+            <div class="panel-heading">{{"EDITOR_TITLE_PANEL_PRODUCTS"|translate}}</div>
             <!-- MY TREE DIRECTIVE -->
             <div class="panel-body">
                 <tree ngModelTree="prova" ></tree>
@@ -54,13 +54,13 @@
         <div id="cesiumContainer" class="map" ng-show="m_oController.m_b2DMapModeOn == false && m_oController.m_b3DMapModeOn == true  "></div>
     </div>
 
-    <!------------------ STATUS BAR ------------------->
-    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 status-bar ">
-        <span ng-repeat="oProcess in m_oController.m_aoProcessesRunning track by $index">
-            <i class="fa fa-spinner fa-pulse fa-fw"></i> {{oProcess.processName}}
-        </span>
+    <!--&lt;!&ndash;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45; STATUS BAR -&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&ndash;&gt;-->
+    <!--<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 status-bar ">-->
+        <!--<span ng-repeat="oProcess in m_oController.m_aoProcessesRunning track by $index">-->
+            <!--<i class="fa fa-spinner fa-pulse fa-fw"></i> {{oProcess.processName}}-->
+        <!--</span>-->
+    <!--</div>-->
 
-    </div>
 </div>
 
 <script>

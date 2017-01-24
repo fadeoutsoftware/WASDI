@@ -57,23 +57,30 @@
                 <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
                     <ul class="nav navbar-nav navbar-right">
                         <li>
+                            <!--<a  ng-click="m_oController.openImportPage()"> <i class="fa fa-download fa-lg" aria-hidden="true"></i>&lt;!&ndash;ui-sref="root.import"&ndash;&gt;-->
+
                             <a ui-sref="root.searchorbit"> <i class="fa fa-download fa-lg" aria-hidden="true"></i>
                                 {{"ROOT_VIEW_NAV_BAR_LINK_SEARCH"|translate}}
                             </a>
                         </li>
                         <li>
-                            <a ui-sref="root.import"> <i class="fa fa-download fa-lg" aria-hidden="true"></i>
+                            <a ng-click="m_oController.openImportPage()"> <i class="fa fa-download fa-lg" aria-hidden="true"></i><!--ui-sref="root.import"-->
                                 {{"ROOT_VIEW_NAV_BAR_LINK_IMPORT"|translate}}
                             </a>
                         </li>
                         <li>
-                            <a ui-sref="root.editor" ng-click="m_oController.onClickProcess()" ><i class="fa fa-cogs fa-lg" aria-hidden="true"></i>
+                            <a ng-click="m_oController.onClickProcess();m_oController.openEditorPage()"><i class="fa fa-cogs fa-lg" aria-hidden="true"></i><!-- ui-sref="root.editor"-->
                                 {{"ROOT_VIEW_NAV_BAR_LINK_PROCESS"|translate}}
                             </a>
                         </li>
                         <li>
-                            <a ui-sref="root.editor"><i class="fa fa-upload fa-lg" aria-hidden="true"></i>
+                            <a  ><i class="fa fa-upload fa-lg" aria-hidden="true"></i><!--ui-sref="root.editor"-->
                                 {{"ROOT_VIEW_NAV_BAR_LINK_PUBLISH"|translate}}
+                            </a>
+                        </li>
+                        <li>
+                            <a ui-sref="root.workspaces" ><i class="fa fa-list-ol" aria-hidden="true"></i>
+                                {{"ROOT_VIEW_NAV_BAR_LINK_WORKSPACES"|translate}}
                             </a>
                         </li>
                     </ul>
@@ -104,4 +111,12 @@
 
 
     <div ui-view="maincontent" ></div>
+
+    <!------------------ STATUS BAR ------------------->
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 status-bar ">
+        <span ng-repeat="oProcess in m_oController.m_aoProcessesRunning track by $index">
+            <i class="fa fa-spinner fa-pulse fa-fw"></i> {{oProcess.typeOfProcess}} : {{oProcess.processName}}
+        </span>
+    </div>
+
 </div>

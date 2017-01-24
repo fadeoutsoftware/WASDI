@@ -6,19 +6,25 @@ var ImportController = (function() {
     //**************************************************************************
     /*IMPORTANT NOTE  THE LAYER CORRESPOND TO PRODUCTS*/
     //**************************************************************************
-    function ImportController($scope, oConstantsService, oAuthService,$state,oMapService, oSearchService, oAdvancedFilterService, oAdvancedSearchService, oConfigurationService, oFileBufferService ) {
+    function ImportController($scope, oConstantsService, oAuthService,$state,oMapService, oSearchService, oAdvancedFilterService,
+                              oAdvancedSearchService, oConfigurationService, oFileBufferService, oRabbitStompService, oProductService,
+                              oProcessesLaunchedService,oWorkspaceService ) {
         this.m_oScope = $scope;
         this.m_oScope.m_oController = this;
         this.m_oConstantsService = oConstantsService;
         this.m_oAuthService = oAuthService;
-        this.m_oState=$state;
-        this.m_oMapService=oMapService;
+        this.m_oState = $state;
+        this.m_oMapService = oMapService;
         this.m_oSearchService = oSearchService;
         this.m_oAdvancedFilterService = oAdvancedFilterService;
         this.m_oAdvancedSearchService = oAdvancedSearchService;
         this.m_oConfigurationService = oConfigurationService;
         this.m_oFileBufferService = oFileBufferService;
         this.m_bShowsensingfilter = true;
+        this.m_oRabbitStompServive = oRabbitStompService;
+        this.m_oProductService = oProductService;
+        this.m_oProcessesLaunchedService = oProcessesLaunchedService;
+        this.m_oWorkspaceService=oWorkspaceService;
         //this.m_bPproductsPerPagePristine   = true;
         //this.m_iProductCount = 0;
         //this.m_bDisableField = true;
@@ -42,8 +48,7 @@ var ImportController = (function() {
         /* number of possible products per pages and number of products per pages selected */
         this.m_iProductsPerPageSelected = 5;//default value
         this.m_iProductsPerPage=[5,10,15,20,25];
-        /* Active Workspace */
-        this.m_oActiveWorkspace = this.m_oConstantsService.getActiveWorkspace();
+
         //Page
         this.m_iCurrentPage = 1;
         this.m_iTotalPages = 1;
@@ -62,11 +67,32 @@ var ImportController = (function() {
             ingestionFrom: '',
             ingestionTo: ''
         };
+
+        /* Active Workspace */
+        this.m_oActiveWorkspace = this.m_oConstantsService.getActiveWorkspace();
+        //if there isn't workspace
+        if(utilsIsObjectNullOrUndefined( this.m_oActiveWorkspace) && utilsIsStrNullOrEmpty( this.m_oActiveWorkspace))
+        {
+            //if this.m_oState.params.workSpace in empty null or undefined create new workspace
+            if(!(utilsIsObjectNullOrUndefined(this.m_oState.params.workSpace) && utilsIsStrNullOrEmpty(this.m_oState.params.workSpace)))
+            {
+                this.openWorkspace(this.m_oState.params.workSpace);
+                this.m_oActiveWorkspace = this.m_oConstantsService.getActiveWorkspace();
+            }
+            else
+            {
+                //TODO CREATE NEW WORKSPACE OR GO HOME
+            }
+        }
+
         //if user is logged
         //if(!utilsIsObjectNullOrUndefined(this.m_oConstantsService.getUser()))
         //    this.m_oUser = this.m_oConstantsService.getUser();
         //else
         //    this.m_oState.go("login");
+
+        /*Start Rabbit WebStomp*/
+        this.m_oRabbitStompServive.initWebStomp(this.m_oActiveWorkspace,"ImportController",this);
 
 
         this.m_oUser = this.m_oConstantsService.getUser();
@@ -342,7 +368,7 @@ var ImportController = (function() {
 
         this.deleteLayers();/*delete layers (if it isn't the first search) and relatives rectangles in map*/
 
-        this.m_bIsVisibleListOfLayers = true;//change view on left side ba
+        this.m_bIsVisibleListOfLayers = true;//change view on left side bar
         this.m_oSearchService.setTextQuery(this.m_oModel.textQuery);
         this.m_oSearchService.setGeoselection(this.m_oModel.geoselection); // todo: refactor setting by map
         // SearchService.setAdvancedFilter(scope.model.advancedFilter);
@@ -455,13 +481,14 @@ var ImportController = (function() {
     ImportController.prototype.downloadProduct = function(oLayer)
     {
         var oWorkSpace = this.m_oActiveWorkspace;
+        var oController=this
         if(utilsIsObjectNullOrUndefined(oWorkSpace) || utilsIsObjectNullOrUndefined(oLayer))
         {
             //TODO CHEK THIS POSSIBLE CASE
-            console.log("Error there isn't workspaceID or layer")
+            console.log("Error there isn't workspaceID or layer");
             return false;
         }
-        var url = this.getDownloadLink(oLayer.layerProperty)
+        var url = this.getDownloadLink(oLayer.layerProperty);
         if(utilsIsObjectNullOrUndefined(url))
         {
             //TODO CHEK THIS POSSIBLE CASE
@@ -471,6 +498,9 @@ var ImportController = (function() {
 
         this.m_oFileBufferService.download(url,oWorkSpace.workspaceId).success(function (data, status) {
             console.log('Product just start the download ');
+
+            oController.m_oProcessesLaunchedService.addProcesses({processName:oLayer.title, nodeId:null, typeOfProcess:oController.m_oProcessesLaunchedService.getTypeOfProcessProductDownload()});
+
 
         }).error(function (data,status) {
             console.log('Product error in file buffer');
@@ -966,6 +996,43 @@ var ImportController = (function() {
 
     }
 
+    ImportController.prototype.receivedDownloadMessage = function (oMessage) {
+
+        if (oMessage == null) return;
+        if (oMessage.messageResult=="KO") {
+            alert('There was an error in the download');
+            return;
+        }
+        var oController = this;
+        this.m_oProductService.addProductToWorkspace(oMessage.payload.fileName,this.m_oActiveWorkspace.workspaceId).success(function (data, status) {
+            console.log('Product added to the ws');
+            oController.m_oProcessesLaunchedService.removeProcessByPropertySubstringVersion("processName",oMessage.payload.fileName);
+        }).error(function (data,status) {
+            console.log('Error adding product to the ws');
+        });
+
+    }
+
+    ImportController.prototype.openWorkspace = function (sWorkspaceId) {
+
+        var oController = this;
+
+        this.m_oWorkspaceService.getWorkspaceEditorViewModel(sWorkspaceId).success(function (data, status) {
+            if (data != null)
+            {
+                if (data != undefined)
+                {
+                    oController.m_oConstantsService.setActiveWorkspace(data);
+                    oController.m_oActiveWorkspace = oController.m_oConstantsService.getActiveWorkspace();
+                    /*Start Rabbit WebStomp*/
+                    oController.m_oRabbitStompServive.initWebStomp(oController.m_oActiveWorkspace,"ImportController",oController);
+                }
+            }
+        }).error(function (data,status) {
+            alert('error');
+        });
+    }
+
     ImportController.$inject = [
         '$scope',
         'ConstantsService',
@@ -976,7 +1043,11 @@ var ImportController = (function() {
         'AdvancedFilterService',
         'AdvancedSearchService',
         'ConfigurationService',
-        'FileBufferService'
+        'FileBufferService',
+        'RabbitStompService',
+        'ProductService',
+        'ProcessesLaunchedService',
+        'WorkspaceService'
 
     ];
 

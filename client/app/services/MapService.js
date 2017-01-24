@@ -290,7 +290,7 @@ service('MapService', ['$http','$rootScope', 'ConstantsService', function ($http
 
         this.m_oWasdiMap.addControl(oDrawControl);
 
-        //Without this.m_oWasdiMap.on() the shape isn't save on map
+        //Without this.m_oWasdiMap.on() the shape isn't saved on map
         this.m_oWasdiMap.on(L.Draw.Event.CREATED, function (event)
         {
             var layer = event.layer;

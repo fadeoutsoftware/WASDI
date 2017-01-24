@@ -3,7 +3,7 @@
  */
 var EditorController = (function () {
     function EditorController($scope, $location, $interval, oConstantsService, oAuthService, oMapService, oFileBufferService,
-                              oProductService,$state,oWorkspaceService,oGlobeService,oProcessesLaunchedService) {
+                              oProductService,$state,oWorkspaceService,oGlobeService,oProcessesLaunchedService, oRabbitStompService) {
 
         // Reference to the needed Services
         this.m_oScope = $scope;
@@ -19,17 +19,19 @@ var EditorController = (function () {
         this.m_oState=$state;
         this.m_oProcessesLaunchedService=oProcessesLaunchedService;
         this.m_oWorkspaceService = oWorkspaceService;
+        this.m_oRabbitStompServive = oRabbitStompService;
         this.m_b2DMapModeOn=true;
         this.m_b3DMapModeOn=false;
 
         //layer list
         this.m_aoLayersList=[];//only id
-        this.m_aoProcessesRunning=[];
+        //this.m_aoProcessesRunning=[];
 
         /* ---------------------- SET COOKIE (m_aoProcessesRunning)-------------*/
         /* USE DELETE COOKIE FOR DEBUG*/
-        this.m_oProcessesLaunchedService.loadProcessesByCookie()
-        this.m_aoProcessesRunning =  this.m_oProcessesLaunchedService.getProcesses();
+        //this.m_oProcessesLaunchedService.loadProcessesByCookie()
+        //this.m_aoProcessesRunning =  this.m_oProcessesLaunchedService.getProcesses();
+
         //this.m_oConstantsService.deleteCookie("m_aoProcessesRunning");
 
         //if(!utilsIsObjectNullOrUndefined( this.m_aoProcessesRunning) && this.m_aoProcessesRunning.length == 0)
@@ -44,12 +46,12 @@ var EditorController = (function () {
         //}
 
         // Reconnection promise to stop the timer if the reconnection succeed or if the user change page
-        this.m_oReconnectTimerPromise = null;
-        this.m_oRabbitReconnect = null;
+        //this.m_oReconnectTimerPromise = null;
+        //this.m_oRabbitReconnect = null;
 
         // Web Socket to receive workspace messages
-        var oWebSocket = new WebSocket(this.m_oConstantsService.getStompUrl());
-        this.m_oClient = Stomp.over(oWebSocket);
+        //var oWebSocket = new WebSocket(this.m_oConstantsService.getStompUrl());
+        //this.m_oClient = Stomp.over(oWebSocket);
 
         // Here a Workpsace is needed... if it is null create a new one..
         this.m_oActiveWorkspace = this.m_oConstantsService.getActiveWorkspace();
@@ -72,7 +74,7 @@ var EditorController = (function () {
         this.m_sDownloadFilePath = "";
 
         // Rabbit subscription
-        var m_oSubscription = {};
+        //var m_oSubscription = {};
 
         // Array of products to show
         this.m_aoProducts = [];
@@ -83,104 +85,107 @@ var EditorController = (function () {
         //Set default value tree
         this.m_oTree=null;//IMPORTANT NOTE: there's a 'WATCH' for this.m_oTree in TREE DIRECTIVE
 
+        /*Start Rabbit WebStomp*/
+        this.m_oRabbitStompServive.initWebStomp(this.m_oActiveWorkspace,"EditorController",this);
+
         /**
          * Rabbit Callback: receives the Messages
          * @param message
          */
-        var oRabbitCallback = function (message) {
-            // called when the client receives a STOMP message from the server
-            if (message.body) {
-                console.log("got message with body " + message.body)
-
-                // Get The Message View Model
-                var oMessageResult = JSON.parse(message.body);
-
-                if (oMessageResult == null) return;
-                if (oMessageResult.messageResult=="KO") {
-                    //TODO REMOVE ELEMENT IN PROCESS QUEUE
-                    alert('There was an error in the RabbitCallback');
-                    return;
-                }
-
-                // Route the message
-                if (oMessageResult.messageCode == "DOWNLOAD") {
-                    oController.receivedDownloadMessage(oMessageResult);
-                }
-                else if (oMessageResult.messageCode == "PUBLISH") {
-                    oController.receivedPublishMessage(oMessageResult);
-                }
-                else if (oMessageResult.messageCode == "PUBLISHBAND") {
-
-                    oController.receivedPublishBandMessage(oMessageResult.payload.layerId);
-                }
-
-            } else {
-                console.log("got empty message");
-            }
-
-            //oController.addTestLayer(message.body);
-
-        }
+        //var oRabbitCallback = function (message) {
+        //    // called when the client receives a STOMP message from the server
+        //    if (message.body) {
+        //        console.log("got message with body " + message.body)
+        //
+        //        // Get The Message View Model
+        //        var oMessageResult = JSON.parse(message.body);
+        //
+        //        if (oMessageResult == null) return;
+        //        if (oMessageResult.messageResult=="KO") {
+        //            //TODO REMOVE ELEMENT IN PROCESS QUEUE
+        //            alert('There was an error in the RabbitCallback');
+        //            return;
+        //        }
+        //
+        //        // Route the message
+        //        if (oMessageResult.messageCode == "DOWNLOAD") {
+        //            oController.receivedDownloadMessage(oMessageResult);
+        //        }
+        //        else if (oMessageResult.messageCode == "PUBLISH") {
+        //            oController.receivedPublishMessage(oMessageResult);
+        //        }
+        //        else if (oMessageResult.messageCode == "PUBLISHBAND") {
+        //
+        //            oController.receivedPublishBandMessage(oMessageResult.payload.layerId);
+        //        }
+        //
+        //    } else {
+        //        console.log("got empty message");
+        //    }
+        //
+        //    //oController.addTestLayer(message.body);
+        //
+        //}
 
 
         /**
          * Callback of the Rabbit On Connect
          */
 
-        var on_connect = function () {
-            console.log('Web Stomp connected');
-
-            //CHECK IF sWorkSpaceId is null
-            var sWorkSpaceId = null;
-            if(utilsIsObjectNullOrUndefined(oController.m_oActiveWorkspace))
-                sWorkSpaceId = oController.m_oState.params.workSpace;
-            else
-                sWorkSpaceId = oController.m_oActiveWorkspace.workspaceId;
-
-            oController.m_oSubscription = oController.m_oClient.subscribe(sWorkSpaceId, oRabbitCallback);
-
-            // Is this a re-connection?
-            if (oController.m_oReconnectTimerPromise != null) {
-                // Yes it is: clear the timer
-                oController.m_oInterval.cancel(oController.m_oReconnectTimerPromise);
-                oController.m_oReconnectTimerPromise = null;
-            }
-        };
+        //var on_connect = function () {
+        //    console.log('Web Stomp connected');
+        //
+        //    //CHECK IF sWorkSpaceId is null
+        //    var sWorkSpaceId = null;
+        //    if(utilsIsObjectNullOrUndefined(oController.m_oActiveWorkspace))
+        //        sWorkSpaceId = oController.m_oState.params.workSpace;
+        //    else
+        //        sWorkSpaceId = oController.m_oActiveWorkspace.workspaceId;
+        //
+        //    oController.m_oSubscription = oController.m_oClient.subscribe(sWorkSpaceId, oRabbitCallback);
+        //
+        //    // Is this a re-connection?
+        //    if (oController.m_oReconnectTimerPromise != null) {
+        //        // Yes it is: clear the timer
+        //        oController.m_oInterval.cancel(oController.m_oReconnectTimerPromise);
+        //        oController.m_oReconnectTimerPromise = null;
+        //    }
+        //};
 
 
         /**
          * Callback for the Rabbit On Error
          */
-        var on_error = function (sMessage) {
-            console.log('Web Stomp Error');
-            if (sMessage == "LOST_CONNECTION") {
-                console.log('LOST Connection');
-
-                if (oController.m_oReconnectTimerPromise == null) {
-                    // Try to Reconnect
-                    oController.m_oReconnectTimerPromise = oController.m_oInterval(oController.m_oRabbitReconnect, 5000);
-                }
-            }
-        };
+        //var on_error = function (sMessage) {
+        //    console.log('Web Stomp Error');
+        //    if (sMessage == "LOST_CONNECTION") {
+        //        console.log('LOST Connection');
+        //
+        //        if (oController.m_oReconnectTimerPromise == null) {
+        //            // Try to Reconnect
+        //            oController.m_oReconnectTimerPromise = oController.m_oInterval(oController.m_oRabbitReconnect, 5000);
+        //        }
+        //    }
+        //};
 
         // Keep local reference to the callbacks to use it in the reconnection callback
-        this.m_oOn_Connect = on_connect;
-        this.m_oOn_Error = on_error;
+        //this.m_oOn_Connect = on_connect;
+        //this.m_oOn_Error = on_error;
 
         // Call back for rabbit reconnection
-        var rabbit_reconnect = function () {
-
-            console.log('Web Stomp Reconnection Attempt');
-
-            // Connect again
-            oController.oWebSocket = new WebSocket(oController.m_oConstantsService.getStompUrl());
-            oController.m_oClient = Stomp.over(oController.oWebSocket);
-            oController.m_oClient.connect(oController.m_oConstantsService.getRabbitUser(), oController.m_oConstantsService.getRabbitPassword(), oController.m_oOn_Connect, oController.m_oOn_Error, '/');
-        };
-        this.m_oRabbitReconnect = rabbit_reconnect;
+        //var rabbit_reconnect = function () {
+        //
+        //    console.log('Web Stomp Reconnection Attempt');
+        //
+        //    // Connect again
+        //    oController.oWebSocket = new WebSocket(oController.m_oConstantsService.getStompUrl());
+        //    oController.m_oClient = Stomp.over(oController.oWebSocket);
+        //    oController.m_oClient.connect(oController.m_oConstantsService.getRabbitUser(), oController.m_oConstantsService.getRabbitPassword(), oController.m_oOn_Connect, oController.m_oOn_Error, '/');
+        //};
+        //this.m_oRabbitReconnect = rabbit_reconnect;
 
         //connect to the queue
-        this.m_oClient.connect(oController.m_oConstantsService.getRabbitUser(), oController.m_oConstantsService.getRabbitPassword(), on_connect, on_error, '/');
+        //this.m_oClient.connect(oController.m_oConstantsService.getRabbitUser(), oController.m_oConstantsService.getRabbitPassword(), on_connect, on_error, '/');
         //$scope.$watch('m_oController.m_oConstantsService.m_oActiveWorkspace', function (newValue, oldValue, scope) {
         //    $scope.m_oController.m_oActiveWorkspace = newValue;
         //    if (!utilsIsObjectNullOrUndefined( $scope.m_oController.m_oActiveWorkspace)) {
@@ -193,19 +198,19 @@ var EditorController = (function () {
         this.m_oGlobeService.initGlobe('cesiumContainer2');
 
         // Clean Up when exit!!
-        this.m_oScope.$on('$destroy', function () {
-            // Is this a re-connection?
-            if (oController.m_oReconnectTimerPromise != null) {
-                // Yes it is: clear the timer
-                oController.m_oInterval.cancel(oController.m_oReconnectTimerPromise);
-                oController.m_oReconnectTimerPromise = null;
-            }
-            else {
-                if (oController.m_oClient != null) {
-                    oController.m_oClient.disconnect();
-                }
-            }
-        });
+        //this.m_oScope.$on('$destroy', function () {
+        //    // Is this a re-connection?
+        //    if (oController.m_oReconnectTimerPromise != null) {
+        //        // Yes it is: clear the timer
+        //        oController.m_oInterval.cancel(oController.m_oReconnectTimerPromise);
+        //        oController.m_oReconnectTimerPromise = null;
+        //    }
+        //    else {
+        //        if (oController.m_oClient != null) {
+        //            oController.m_oClient.disconnect();
+        //        }
+        //    }
+        //});
 
         /* ---------------- WATCH -----------------*/
         // Read Product List
@@ -245,24 +250,24 @@ var EditorController = (function () {
      * Handler of the "download" message
      * @param oMessage Received Message
      */
+    /* THIS FUNCTION ARE CALLED IN RABBIT SERVICE */
     EditorController.prototype.receivedDownloadMessage = function (oMessage) {
         if (oMessage == null) return;
         if (oMessage.messageResult=="KO") {
             alert('There was an error in the download');
             return;
         }
-
-        this.m_aoProducts.push(oMessage.payload);
-
-
+        var oController = this;
         this.m_oProductService.addProductToWorkspace(oMessage.payload.fileName,this.m_oActiveWorkspace.workspaceId).success(function (data, status) {
             console.log('Product added to the ws');
+            oController.m_aoProducts.push(oMessage.payload);
+            oController.m_oTree = oController.generateTree();
+            oController.m_oProcessesLaunchedService.removeProcessByPropertySubstringVersion("processName",oMessage.payload.fileName);
+            //oController.m_aoProcessesRunning =  this.m_oProcessesLaunchedService.getProcesses();
+
         }).error(function (data,status) {
             console.log('Error adding product to the ws');
         });
-
-        this.m_oTree = this.generateTree();
-
 
         //this.m_oScope.$apply();
     }
@@ -272,6 +277,7 @@ var EditorController = (function () {
      * Handler of the "publish" message
      * @param oMessage
      */
+    /* THIS FUNCTION ARE CALLED IN RABBIT SERVICE */
     EditorController.prototype.receivedPublishMessage = function (oMessage) {
         if (oMessage == null) return;
         if (oMessage.messageResult=="KO") {
@@ -286,6 +292,7 @@ var EditorController = (function () {
      * Handler of the "PUBLISHBAND" message
      * @param oMessage
      */
+    /* THIS FUNCTION ARE CALLED IN RABBIT SERVICE */
     EditorController.prototype.receivedPublishBandMessage = function (oLayerId) {
 
         if(utilsIsStrNullOrEmpty(oLayerId))
@@ -299,7 +306,7 @@ var EditorController = (function () {
         this.addLayerMap3D(oLayerId);
         //this.removeProcessInListOfRunningProcesses(oLayerId);
         //TODO REMOVE PROCESS IN LIST
-        this.m_oProcessesLaunchedService.removeProcessByProperty("processName",oLayerId);
+        this.m_oProcessesLaunchedService.removeProcessByPropertySubstringVersion("processName",oLayerId);
         this.m_aoProcessesRunning =  this.m_oProcessesLaunchedService.getProcesses();
         //this.m_oScope.$apply();
     }
@@ -474,12 +481,13 @@ var EditorController = (function () {
             console.log('publishing band ' + oBand.name);
             if(!utilsIsObjectNullOrUndefined(data) ||  data.messageResult != "KO")
             {
+                /*if the band was published*/
                 if(data.messageCode == "PUBLISHBAND" )
                     oController.receivedPublishBandMessage(data.payload);
                 else
                     oController.m_oProcessesLaunchedService.addProcesses({processName:oBand.productName + "_" + oBand.name,
                                                                     nodeId:oIdBandNodeInTree,
-                                                                    typeOfProcess:"Publishing Band"});
+                                                                    typeOfProcess:oController.m_oProcessesLaunchedService.getTypeOfProcessPublishingBand()});
                 //else
                 //    oController.pushProcessInListOfRunningProcesses(oBand.productName + "_" + oBand.name,oIdBandNodeInTree);
                 //TODO PUSH PROCESS WITH SERVICE
@@ -636,6 +644,9 @@ var EditorController = (function () {
                 if (data != undefined)
                 {
                     oController.m_oConstantsService.setActiveWorkspace(data);
+                    oController.m_oActiveWorkspace = oController.m_oConstantsService.getActiveWorkspace();
+                    /*Start Rabbit WebStomp*/
+                    oController.m_oRabbitStompServive.initWebStomp(oController.m_oActiveWorkspace,"EditorController",oController);
                 }
             }
         }).error(function (data,status) {
@@ -813,12 +824,15 @@ var EditorController = (function () {
     /* fetch (after a page reload)all the running processes, check all the uncheck nodes
     *  corresponding to the process
     * */
+
+    //TODO CHANGE IT
     //EditorController.prototype.checkNodesInTree = function()
     //{
     //    var oController = this;
-    //    if(utilsIsObjectNullOrUndefined(oController.m_aoProcessesRunning) || oController.m_aoProcessesRunning.length == 0)
-    //    {
+    //
+    //    if(utilsIsObjectNullOrUndefined(oController.m_aoProcessesRunning) || oController.m_aoProcessesRunning.length == 0) {
     //        return false;
+    //    }
     //
     //    var iLength = oController.m_aoProcessesRunning.length;
     //    for(var iIndex = 0; iIndex < iLength; iIndex ++)
@@ -827,7 +841,7 @@ var EditorController = (function () {
     //        $('#jstree').jstree(true).set_icon(sNodeId,"assets/icons/check.png");
     //    }
     //    return true;
-
+    //
     //}
 
     EditorController.$inject = [
@@ -842,7 +856,8 @@ var EditorController = (function () {
         '$state',
         'WorkspaceService',
         'GlobeService',
-        'ProcessesLaunchedService'
+        'ProcessesLaunchedService',
+        'RabbitStompService'
     ];
 
     return EditorController;

@@ -20,6 +20,5 @@ service('ProductService', ['$http',  'ConstantsService', function ($http, oConst
         return this.m_oHttp.get(this.APIURL + '/product/addtows?sProductName='+sProductName+'&sWorkspaceId='+sWorkspaceId);
     }
 
-
 }]);
 

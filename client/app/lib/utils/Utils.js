@@ -7,7 +7,7 @@ function utilsIsStrNullOrEmpty(sString)
     if( sString && typeof sString != 'string')
     {
         throw "[Utils.isStrNullOrEmpty] The value is NOT a string";
-        //return true;
+        return true;
     }
 
     if( sString && sString.length > 0)
@@ -94,3 +94,37 @@ function utilsIsANumber(oValue)
         return true;
     return false;
 }
+
+/*
+* return index of object in array
+* return -1 if there are some error or the object isn't inside array
+* */
+function utilsFindObjectInArray(oArray,oObject)
+{
+    //ERROR PARAMS == NULL OR UNDEFINED
+    if(utilsIsObjectNullOrUndefined(oArray) || utilsIsObjectNullOrUndefined(oObject))
+        return -1;
+    // 0 ELEMENTS IN ARRAY
+    if(oArray.length == 0)
+        return -1;
+
+    var iArrayLength = oArray.length;
+    for(var iIndex = 0; iIndex < iArrayLength; iIndex ++)
+    {
+        if(oArray[iIndex] == oObject)
+            return iIndex;
+    }
+    /* the object isn't inside array */
+    return -1;
+}
+
+function utilsIsString(sString)
+{
+    if( !sString && typeof sString == 'string')
+    {
+        return true;
+    }
+    return false;
+
+}
+
