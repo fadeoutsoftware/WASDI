@@ -13,6 +13,7 @@ import javax.ws.rs.core.Context;
 import it.fadeout.rest.resources.AuthResource;
 import it.fadeout.rest.resources.FileBufferResource;
 import it.fadeout.rest.resources.OpenSearchResource;
+import it.fadeout.rest.resources.OpportunitySearchResource;
 import it.fadeout.rest.resources.ProductResource;
 import it.fadeout.rest.resources.WasdiResource;
 import it.fadeout.rest.resources.WorkspaceResource;
@@ -41,7 +42,7 @@ public class Wasdi extends Application {
 		classes.add(AuthResource.class);
 		classes.add(WorkspaceResource.class);
 		classes.add(ProductResource.class);
-		
+		classes.add(OpportunitySearchResource.class);
 		return classes;
 	}
 	

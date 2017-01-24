@@ -9,6 +9,7 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 
+import it.fadeout.Wasdi;
 import wasdi.shared.business.User;
 import wasdi.shared.business.UserSession;
 import wasdi.shared.data.SessionRepository;
@@ -75,6 +76,22 @@ public class AuthResource {
 		
 		return oUserVM;
 	}
+	
+	@GET
+	@Path("/checksession")
+	@Produces({"application/xml", "application/json", "text/xml"})
+	public UserViewModel CheckSession(@HeaderParam("x-session-token") String sSessionId) {
+		UserViewModel oUserVM = new UserViewModel();
+		User oUser = Wasdi.GetUserFromSession(sSessionId);
+		if (oUser == null) return null;
+		if (Utils.isNullOrEmpty(oUser.getUserId())) return null;
+		
+		oUserVM.setName(oUser.getName());
+		oUserVM.setSurname(oUser.getSurname());
+		oUserVM.setUserId(oUser.getUserId());
+		
+		return oUserVM;
+	}	
 	
 
 	@GET
