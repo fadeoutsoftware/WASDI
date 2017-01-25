@@ -33,15 +33,26 @@ var RootController = (function() {
         //else
         //    this.m_oState.go("login");
 
-        /*TODO WATCH OR SIMILAR THINGS */
-        this.m_aoProcessesRunning = this.m_oProcessesLaunchedService.getProcesses();
 
+        this.m_sWorkSpace = this.m_oConstantsService.getActiveWorkspace();
+        this.m_oUser = this.m_oConstantsService.getUser();
+        if(!utilsIsObjectNullOrUndefined(this.m_sWorkSpace) && !utilsIsObjectNullOrUndefined(this.m_oUser))
+            this.m_aoProcessesRunning = this.m_oProcessesLaunchedService.getProcessesByLocalStorage(this.m_sWorkSpace.workspaceId,this.m_oUser.userId);
+
+        /*TODO WATCH OR SIMILAR THINGS */
         /*when ProccesLaunchedservice reload the m_aoProcessesRunning rootController reload m_aoProcessesRunning */
         $scope.$on('m_aoProcessesRunning:updated', function(event,data) {
-            // you could inspect the data to see if what you care about changed, or just update your own scope
+            // you could inspect the data to see
             if(data == true)
             {
-                $scope.m_oController.m_aoProcessesRunning = $scope.m_oController.m_oProcessesLaunchedService.getProcesses();
+                $scope.m_oController.m_sWorkSpace = $scope.m_oController.m_oConstantsService.getActiveWorkspace();
+                $scope.m_oController.m_oUser = $scope.m_oController.m_oConstantsService.getUser();
+                if(!utilsIsObjectNullOrUndefined( $scope.m_oController.m_sWorkSpace) && !utilsIsObjectNullOrUndefined( $scope.m_oController.m_oUser))
+                {
+                    $scope.m_oController.m_aoProcessesRunning = $scope.m_oController.m_oProcessesLaunchedService.getProcessesByLocalStorage(
+                        $scope.m_oController.m_sWorkSpace.workspaceId, $scope.m_oController.m_oUser.userId);
+                }
+                //$scope.m_oController.m_aoProcessesRunning = $scope.m_oController.m_oProcessesLaunchedService.getProcessesByLocalStorage();
             }
         });
 
@@ -89,7 +100,7 @@ var RootController = (function() {
 
         var oController = this;
         // if it publishing a band u can't go in import controller
-        if( !(this.m_oProcessesLaunchedService.thereAreSomePublishBandProcess() == true) )
+        if( this.m_oProcessesLaunchedService.thereAreSomePublishBandProcess() == false )
         {
             var sWorkSpace = this.m_oConstantsService.getActiveWorkspace();
             oController.m_oState.go("root.import", { workSpace : sWorkSpace.workspaceId });//use workSpace when reload editor page

@@ -8,7 +8,7 @@ var ImportController = (function() {
     //**************************************************************************
     function ImportController($scope, oConstantsService, oAuthService,$state,oMapService, oSearchService, oAdvancedFilterService,
                               oAdvancedSearchService, oConfigurationService, oFileBufferService, oRabbitStompService, oProductService,
-                              oProcessesLaunchedService,oWorkspaceService ) {
+                              oProcessesLaunchedService,oWorkspaceService,oResultsOfSearchService ) {
         this.m_oScope = $scope;
         this.m_oScope.m_oController = this;
         this.m_oConstantsService = oConstantsService;
@@ -25,6 +25,7 @@ var ImportController = (function() {
         this.m_oProductService = oProductService;
         this.m_oProcessesLaunchedService = oProcessesLaunchedService;
         this.m_oWorkspaceService=oWorkspaceService;
+        this.m_oResultsOfSearchService = oResultsOfSearchService;
         //this.m_bPproductsPerPagePristine   = true;
         //this.m_iProductCount = 0;
         //this.m_bDisableField = true;
@@ -68,10 +69,12 @@ var ImportController = (function() {
             ingestionTo: ''
         };
 
+
+
         /* Active Workspace */
         this.m_oActiveWorkspace = this.m_oConstantsService.getActiveWorkspace();
         //if there isn't workspace
-        if(utilsIsObjectNullOrUndefined( this.m_oActiveWorkspace) && utilsIsStrNullOrEmpty( this.m_oActiveWorkspace))
+        if(utilsIsObjectNullOrUndefined(this.m_oActiveWorkspace) && utilsIsStrNullOrEmpty( this.m_oActiveWorkspace))
         {
             //if this.m_oState.params.workSpace in empty null or undefined create new workspace
             if(!(utilsIsObjectNullOrUndefined(this.m_oState.params.workSpace) && utilsIsStrNullOrEmpty(this.m_oState.params.workSpace)))
@@ -84,6 +87,13 @@ var ImportController = (function() {
                 //TODO CREATE NEW WORKSPACE OR GO HOME
             }
         }
+        else
+        {
+            /*Load elements by Service if there was a previous search i load*/
+            this.loadOpenSearchParamsByResultsOfSearchServices(this);
+        }
+
+        this.m_oUser = this.m_oConstantsService.getUser();
 
         //if user is logged
         //if(!utilsIsObjectNullOrUndefined(this.m_oConstantsService.getUser()))
@@ -94,8 +104,6 @@ var ImportController = (function() {
         /*Start Rabbit WebStomp*/
         this.m_oRabbitStompServive.initWebStomp(this.m_oActiveWorkspace,"ImportController",this);
 
-
-        this.m_oUser = this.m_oConstantsService.getUser();
         var oController = this;
         //get configuration
         this.m_oConfigurationService.getConfiguration().then(function(configuration){
@@ -334,6 +342,7 @@ var ImportController = (function() {
         this.m_oAdvancedSearchService.setAdvancedSearchFilter(advancedFilter, this.m_oModel);
         this.m_oSearchService.setAdvancedFilter(this.m_oAdvancedSearchService.getAdvancedSearchFilter());
 
+
     };
 
     ImportController.prototype.updateMissionSelection = function(index){
@@ -367,14 +376,23 @@ var ImportController = (function() {
         var oController = this;
 
         this.deleteLayers();/*delete layers (if it isn't the first search) and relatives rectangles in map*/
-
         this.m_bIsVisibleListOfLayers = true;//change view on left side bar
         this.m_oSearchService.setTextQuery(this.m_oModel.textQuery);
         this.m_oSearchService.setGeoselection(this.m_oModel.geoselection); // todo: refactor setting by map
         // SearchService.setAdvancedFilter(scope.model.advancedFilter);
         this.m_oSearchService.setOffset(this.calcOffset());//default 0 (index page)
         this.m_oSearchService.setLimit(this.m_iProductsPerPageSelected);// default 10 (total of element per page)
-        //
+
+        /* SAVE OPENSEARCH PARAMS IN SERVICE*/
+        this.m_oResultsOfSearchService.setIsVisibleListOfProducts(this.m_bIsVisibleListOfLayers);
+        this.m_oResultsOfSearchService.setTextQuery(this.m_oModel.textQuery);
+        this.m_oResultsOfSearchService.setGeoSelection(this.m_oModel.geoselection);
+        this.m_oResultsOfSearchService.setCurrentPage(this.m_iCurrentPage);
+        this.m_oResultsOfSearchService.setProductsPerPageSelected(this.m_iProductsPerPageSelected);
+        this.m_oResultsOfSearchService.setSensingPeriodFrom(this.m_oModel.sensingPeriodFrom);
+        this.m_oResultsOfSearchService.setSensingPeriodTo(this.m_oModel.sensingPeriodTo);
+        //this.m_oResultsOfSearchService.setMissions(this.m_aoMissions);
+
         //this.m_oSearchService.getProductsCount().then(function(result){
         //    //TODO CHECK DATA
         //    oController.m_iTotalOfProducts = result.data;
@@ -394,18 +412,24 @@ var ImportController = (function() {
                     //        oController.generateLayersList(aoData.feed);
                     //    }
                     //TODO CHECK IF DATA == "" sometimes the opensearch doesnt work
-                    if (!utilsIsObjectNullOrUndefined(sResults.data)) {
+                    if (!utilsIsObjectNullOrUndefined(sResults.data) && sResults.data != "" ) {
+
                         var aoData = sResults.data;
                         oController.m_iTotalOfProducts = aoData.feed['opensearch:totalResults'];
+
+                        //save open search params in service
+                        oController.m_oResultsOfSearchService.setTotalOfProducts(oController.m_iTotalOfProducts);
                         oController.countPages();
+                        //save open search params in service
+                        oController.m_oResultsOfSearchService.setTotalPages(oController.m_iTotalPages);
                         oController.generateLayersList(aoData.feed);
                     }
-                    //}
-                    //else
-                    //{
-                    //    //TODO REMOVE IT (use it only with fake data)
-                    //    oController.generateLayersList(sResults.data.feed);
-                    //}
+                    else
+                    {
+                        console.log("Error in open search request...");
+                        ////TODO REMOVE IT (use it only with fake data)
+                        //oController.generateLayersList(sResults.data.feed);
+                    }
                 }
             });
         //});
@@ -499,7 +523,9 @@ var ImportController = (function() {
         this.m_oFileBufferService.download(url,oWorkSpace.workspaceId).success(function (data, status) {
             console.log('Product just start the download ');
 
-            oController.m_oProcessesLaunchedService.addProcesses({processName:oLayer.title, nodeId:null, typeOfProcess:oController.m_oProcessesLaunchedService.getTypeOfProcessProductDownload()});
+            oController.m_oProcessesLaunchedService.addProcessesByLocalStorage({processName:oLayer.title, nodeId:null,
+                                                                                typeOfProcess:oController.m_oProcessesLaunchedService.getTypeOfProcessProductDownload()}
+                                                                                ,oWorkSpace.workspaceId,oController.m_oUser.userId);
 
 
         }).error(function (data,status) {
@@ -746,6 +772,9 @@ var ImportController = (function() {
                     preview:oController.getPreviewLayer(aoLayers[iIndexLayers])
                 });
         }
+
+        //save open search params in service
+        oController.m_oResultsOfSearchService.setProductList(oController.m_aoProductsList);
 
     }
 
@@ -1006,7 +1035,8 @@ var ImportController = (function() {
         var oController = this;
         this.m_oProductService.addProductToWorkspace(oMessage.payload.fileName,this.m_oActiveWorkspace.workspaceId).success(function (data, status) {
             console.log('Product added to the ws');
-            oController.m_oProcessesLaunchedService.removeProcessByPropertySubstringVersion("processName",oMessage.payload.fileName);
+            oController.m_oProcessesLaunchedService.removeProcessByPropertySubstringVersion("processName",oMessage.payload.fileName,
+                oController.m_oActiveWorkspace.workspaceId,oController.m_oUser.userId);
         }).error(function (data,status) {
             console.log('Error adding product to the ws');
         });
@@ -1026,13 +1056,32 @@ var ImportController = (function() {
                     oController.m_oActiveWorkspace = oController.m_oConstantsService.getActiveWorkspace();
                     /*Start Rabbit WebStomp*/
                     oController.m_oRabbitStompServive.initWebStomp(oController.m_oActiveWorkspace,"ImportController",oController);
+                    oController.loadOpenSearchParamsByResultsOfSearchServices(oController);
                 }
             }
         }).error(function (data,status) {
             alert('error');
         });
     }
+    ImportController.prototype.loadOpenSearchParamsByResultsOfSearchServices = function(oController)
+    {
+        if(utilsIsObjectNullOrUndefined(oController))
+            return false;
 
+        /*Load elements by Service if there was a previous search i load*/
+        oController.m_oModel.textQuery = oController.m_oResultsOfSearchService.getTextQuery();
+        oController.m_oModel.geoselection = oController.m_oResultsOfSearchService.getGeoSelection();
+        oController.m_iCurrentPage = oController.m_oResultsOfSearchService.getCurrentPage();
+        oController.m_iProductsPerPageSelected = oController.m_oResultsOfSearchService.getProductsPerPageSelected();
+        oController.m_aoProductsList = oController.m_oResultsOfSearchService.getProductList();
+        oController.m_iTotalPages = oController.m_oResultsOfSearchService.getTotalPages();
+        oController.m_bIsVisibleListOfLayers = oController.m_oResultsOfSearchService.getIsVisibleListOfProducts();
+        oController.m_iTotalOfProducts = oController.m_oResultsOfSearchService.getTotalOfProducts();
+        oController.m_oModel.sensingPeriodFrom = oController.m_oResultsOfSearchService.getSensingPeriodFrom();
+        oController.m_oModel.sensingPeriodTo = oController.m_oResultsOfSearchService.getSensingPeriodTo();
+        //oController.m_aoMissions = oController.m_oResultsOfSearchService.getMissions();
+        return true;
+    }
     ImportController.$inject = [
         '$scope',
         'ConstantsService',
@@ -1047,7 +1096,8 @@ var ImportController = (function() {
         'RabbitStompService',
         'ProductService',
         'ProcessesLaunchedService',
-        'WorkspaceService'
+        'WorkspaceService',
+        'ResultsOfSearchService'
 
     ];
 

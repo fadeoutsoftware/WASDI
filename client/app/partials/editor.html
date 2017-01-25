@@ -33,7 +33,7 @@
                     <i ng-show="m_oController.m_b2DMapModeOn == true" class="fa fa-map " aria-hidden="true"></i>
                     <i  ng-show="m_oController.m_b3DMapModeOn == true" class="fa fa-globe " aria-hidden="true"></i>
                 </div>
-                <div class="my-button" ng-click="m_oController.m_oConstantsService.deleteCookie('m_aoProcessesRunning')">
+                <div class="my-button" ng-click="m_oController.m_oConstantsService.removeLocalStorageItem('m_aoProcessesRunning'+m_oController.m_oActiveWorkspace.workspaceId+m_oController.m_oUser.userId)"><!--m_oController.m_oConstantsService.deleteCookie('m_aoProcessesRunning');-->
                     <i class="fa fa-times-circle" aria-hidden="true"></i>
                 </div>
             </div>

@@ -83,7 +83,7 @@ angular.module('wasdi.TreeDirective', [])
                         // if there isn't running processes AND the node it's a band do $scope.m_oController.openBandImage()
 
                         /*PUBLIC BAND*/
-                        if($scope.m_oController.m_oProcessesLaunchedService.isEmptyProcessesRunningList() == true && data.node.children.length == 0 && !utilsIsObjectNullOrUndefined(data.node.original.band))
+                        if($scope.m_oController.m_oProcessesLaunchedService.thereAreSomePublishBandProcess() == false && data.node.children.length == 0 && !utilsIsObjectNullOrUndefined(data.node.original.band))
                         {
 
                             if(data.node.icon == 'assets/icons/check.png')

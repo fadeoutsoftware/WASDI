@@ -10,10 +10,46 @@ service('ResultsOfSearchService', ['$http',  'ConstantsService', function ($http
     this.m_oGeoSelection = '';
     this.m_iCurrentPage = 1;
     this.m_iProductsPerPageSelected = 5;
-    this.m_aoProductList = null;
+    this.m_aoProductList = [];
     this.m_iTotalPages = 1;
+    this.m_iTotalOfProducts = 0;
     this.m_bIsVisibleListOfProducts = false;
+    this.m_oActiveWorkspace = null;
+    this.m_aoMissions  = [];
+    this.m_oSensingPeriodFrom = '';
+    this.m_oSensingPeriodTo='';
     /************************ Set methods ***************************/
+    this.setDefaults  = function()
+    {
+        this.m_sTextQuery = "";
+        this.m_oGeoSelection = '';
+        this.m_iCurrentPage = 1;
+        this.m_iProductsPerPageSelected = 5;
+        this.m_aoProductList = [];
+        this.m_iTotalPages = 1;
+        this.m_iTotalOfProducts = 0;
+        this.m_bIsVisibleListOfProducts = false;
+        this.m_oActiveWorkspace = null;
+        this.m_aoMissions  = [];
+        this.m_oSensingPeriodFrom = '';
+        this.m_oSensingPeriodTo='';
+    }
+    this.setSensingPeriodTo  = function(oSensingPeriodTo)
+    {
+        if(utilsIsObjectNullOrUndefined(oSensingPeriodTo))
+            return false;
+        this.m_oSensingPeriodTo=oSensingPeriodTo;
+        return true;
+    }
+
+    this.setSensingPeriodFrom = function(oSensingPeriodFrom)
+    {
+        if(utilsIsObjectNullOrUndefined(oSensingPeriodFrom))
+            return false;
+        this.m_oSensingPeriodFrom=oSensingPeriodFrom;
+        return true;
+    }
+
     this.setTextQuery = function(sTextQuery)
     {
         if(utilsIsStrNullOrEmpty(sTextQuery))
@@ -23,7 +59,7 @@ service('ResultsOfSearchService', ['$http',  'ConstantsService', function ($http
     }
     this.setGeoSelection = function(oGeoSelection)
     {
-        if(utilsIsObjectNullOrUndefined(m_oGeoSelection))
+        if(utilsIsStrNullOrEmpty(oGeoSelection))
             return false //TODO throw error
         this.m_oGeoSelection = oGeoSelection;
         return true;
@@ -64,7 +100,29 @@ service('ResultsOfSearchService', ['$http',  'ConstantsService', function ($http
         this.m_bIsVisibleListOfProducts = bIsVisibleListOfProducts;
         return true;
     }
+    this.setTotalOfProducts = function(iTotalOfProducts)
+    {
+        if(utilsIsObjectNullOrUndefined(iTotalOfProducts))
+            return false;//TODO throw error
+        this.m_iTotalOfProducts = iTotalOfProducts;
+        return true;
+    }
 
+    this.setActiveWorkspace = function(oActiveWorkspace)
+    {
+        if(utilsIsObjectNullOrUndefined(oActiveWorkspace))
+            return false;//TODO throw error
+        this.m_oActiveWorkspace = oActiveWorkspace;
+        return true;
+    }
+
+    this.setMissions = function(aoMissions)
+    {
+        if(utilsIsObjectNullOrUndefined(aoMissions))
+            return false;
+        this.m_aoMissions = aoMissions;
+        return true;
+    }
     /************************ Get methods ***************************/
     this.getTextQuery = function()
     {
@@ -90,9 +148,30 @@ service('ResultsOfSearchService', ['$http',  'ConstantsService', function ($http
     {
         return this.m_iTotalPages;
     }
-    this.setIsVisibleListOfProducts = function()
+    this.getIsVisibleListOfProducts = function()
     {
         return this.m_bIsVisibleListOfProducts;
     }
+    this.getTotalOfProducts = function()
+    {
+        return this.m_iTotalOfProducts;
+    }
+    this.getActiveWorkspace = function()
+    {
+        return this.m_oActiveWorkspace;
+    }
+    this.getMissions = function()
+    {
+        return this.m_aoMissions;
+    }
 
+    this.getSensingPeriodFrom = function()
+    {
+        return this.m_oSensingPeriodFrom;
+    }
+    this.getSensingPeriodTo  = function()
+    {
+
+        return this.m_oSensingPeriodTo;
+    }
 }]);

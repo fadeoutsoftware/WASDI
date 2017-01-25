@@ -95,6 +95,7 @@ function utilsIsANumber(oValue)
     return false;
 }
 
+
 /*
 * return index of object in array
 * return -1 if there are some error or the object isn't inside array
@@ -128,3 +129,85 @@ function utilsIsString(sString)
 
 }
 
+
+/*************** LOCAL STORAGE UTILS ********************/
+//TODO TEST LOCAL STORAGE FUNCTIONS
+function utilsCheckIfBrowserSupportLocalStorage()
+{
+    if (typeof(Storage) !== "undefined")
+    {
+        // Code for localStorage/sessionStorage.
+        return true;
+    }
+    else
+    {
+        // Sorry! No Web Storage support..
+        //TODO Error with dialog
+        console.log("Error no web storage support");
+        return false;
+    }
+
+    return false;
+}
+
+/*
+ * Set local storage, if sName is empty or null return false
+ * */
+function utilsSetItemLocalStorage (sName,sValue)
+{
+    if(utilsIsStrNullOrEmpty(sName))
+        return false
+    localStorage.setItem(sName,sValue);
+    return true
+}
+
+
+/* Get local value
+ * */
+function getItemInLocalStorage (sName)
+{
+    if(utilsIsStrNullOrEmpty(sName))
+        return false;
+    //retrieve
+    return localStorage.getItem(sName);
+}
+
+/* Remove Item
+ * */
+function removeLocalStorageItem (sName)
+{
+    if(utilsIsStrNullOrEmpty(sName))
+        return false;
+    localStorage.removeItem(sName);
+}
+
+
+/************************* COOKIES ***************************/
+
+//TODO TEST COOKIES functions !!
+//set by w3school.com
+function utilsSetCookie(cname, cvalue, exdays) {
+    var d = new Date();
+    d.setTime(d.getTime() + (exdays*24*60*60*1000));
+    var expires = "expires="+ d.toUTCString();
+    ////FOR OBJECT ELEMENT I ADD cvalue=JSON.stringify(cvalue);
+    //cvalue=JSON.stringify(cvalue);
+    document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
+}
+
+//get by w3school.com
+function utilsGetCookie(cname) {
+    var name = cname + "=";
+    var ca = document.cookie.split(';');
+    for(var i = 0; i <ca.length; i++) {
+        var c = ca[i];
+        while (c.charAt(0)==' ') {
+            c = c.substring(1);
+        }
+        if (c.indexOf(name) == 0) {
+            return c.substring(name.length,c.length);
+            //return JSON.parse(c.substring(name.length,c.length));//FOR OBJECT ELEMENT I ADD JSON.parse()
+        }
+    }
+    return "";
+}

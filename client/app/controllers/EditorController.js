@@ -55,7 +55,7 @@ var EditorController = (function () {
 
         // Here a Workpsace is needed... if it is null create a new one..
         this.m_oActiveWorkspace = this.m_oConstantsService.getActiveWorkspace();
-
+        this.m_oUser = this.m_oConstantsService.getUser();
 
         //if there isn't workspace
         if(utilsIsObjectNullOrUndefined( this.m_oActiveWorkspace) && utilsIsStrNullOrEmpty( this.m_oActiveWorkspace))
@@ -262,7 +262,8 @@ var EditorController = (function () {
             console.log('Product added to the ws');
             oController.m_aoProducts.push(oMessage.payload);
             oController.m_oTree = oController.generateTree();
-            oController.m_oProcessesLaunchedService.removeProcessByPropertySubstringVersion("processName",oMessage.payload.fileName);
+            oController.m_oProcessesLaunchedService.removeProcessByPropertySubstringVersion("processName",oMessage.payload.fileName,
+                oController.m_oActiveWorkspace.workspaceId,oController.m_oUser.userId);
             //oController.m_aoProcessesRunning =  this.m_oProcessesLaunchedService.getProcesses();
 
         }).error(function (data,status) {
@@ -303,11 +304,13 @@ var EditorController = (function () {
         //add layer in list
         this.m_aoLayersList.push(oLayerId);
         this.addLayerMap2D(oLayerId);
-        this.addLayerMap3D(oLayerId);
+        //this.addLayerMap3D(oLayerId);
         //this.removeProcessInListOfRunningProcesses(oLayerId);
         //TODO REMOVE PROCESS IN LIST
-        this.m_oProcessesLaunchedService.removeProcessByPropertySubstringVersion("processName",oLayerId);
-        this.m_aoProcessesRunning =  this.m_oProcessesLaunchedService.getProcesses();
+        this.m_oProcessesLaunchedService.removeProcessByPropertySubstringVersion("processName",oLayerId,
+            this.m_oActiveWorkspace.workspaceId,this.m_oUser.userId);
+        //this.m_aoProcessesRunning =  this.m_oProcessesLaunchedService.getProcessesByLocalStorage(
+        //    this.m_oActiveWorkspace.workspaceId,this.m_oUser.userId);//TODO
         //this.m_oScope.$apply();
     }
 
@@ -485,9 +488,11 @@ var EditorController = (function () {
                 if(data.messageCode == "PUBLISHBAND" )
                     oController.receivedPublishBandMessage(data.payload);
                 else
-                    oController.m_oProcessesLaunchedService.addProcesses({processName:oBand.productName + "_" + oBand.name,
+                    oController.m_oProcessesLaunchedService.addProcessesByLocalStorage({processName:oBand.productName + "_" + oBand.name,
                                                                     nodeId:oIdBandNodeInTree,
-                                                                    typeOfProcess:oController.m_oProcessesLaunchedService.getTypeOfProcessPublishingBand()});
+                                                                    typeOfProcess:oController.m_oProcessesLaunchedService.getTypeOfProcessPublishingBand()},
+                                                                    oController.m_oActiveWorkspace.workspaceId,
+                                                                    oController.m_oUser.userId);
                 //else
                 //    oController.pushProcessInListOfRunningProcesses(oBand.productName + "_" + oBand.name,oIdBandNodeInTree);
                 //TODO PUSH PROCESS WITH SERVICE
@@ -531,19 +536,19 @@ var EditorController = (function () {
         var oLayer = null;
         var bCondition = true;
         var iIndexLayer = 0;
-
-        while(bCondition)
-        {
-            oLayer = oGlobeLayers.get(iIndexLayer);
-
-            if(utilsIsStrNullOrEmpty(sLayerId) == false && utilsIsObjectNullOrUndefined(oLayer) == false
-                && oLayer.imageryProvider.layers == sLayerId)
-            {
-                bCondition=false;
-                oLayer=oGlobeLayers.remove(oLayer);
-            }
-            iIndexLayer++;
-        }
+        //TODO DON'T REMOVE IT
+        //while(bCondition)
+        //{
+        //    oLayer = oGlobeLayers.get(iIndexLayer);
+        //
+        //    if(utilsIsStrNullOrEmpty(sLayerId) == false && utilsIsObjectNullOrUndefined(oLayer) == false
+        //        && oLayer.imageryProvider.layers == sLayerId)
+        //    {
+        //        bCondition=false;
+        //        oLayer=oGlobeLayers.remove(oLayer);
+        //    }
+        //    iIndexLayer++;
+        //}
 
         //Remove layer from layers list
         var iLenghtLayersList;

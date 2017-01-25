@@ -8,7 +8,8 @@
             <!--<a href="#">Contact</a>-->
 
             <!-- BACK -->
-            <i class="fa fa-arrow-left fa-2x closebtn" aria-hidden="true" ng-click="m_oController.m_bIsVisibleListOfLayers = false" ng-show="m_oController.m_bIsVisibleListOfLayers"></i>
+            <i class="fa fa-arrow-left fa-2x closebtn" aria-hidden="true" ng-click="m_oController.m_bIsVisibleListOfLayers = false;
+                            m_oController.m_oResultsOfSearchService.setDefaults();" ng-show="m_oController.m_bIsVisibleListOfLayers"></i>
             <!-- CLOSE SIDE NAVBAR BUTTON -->
             <i ng-click="m_oController.closeNav()" class="fa fa-times fa-2x  backbtn" aria-hidden="true"></i>
             <!-- SEARCH -->
@@ -216,7 +217,7 @@
                             </div>
                         </div>
 
-                        <!--*********************** MISSION LIST ********************************-->
+                        <!--*********************** MISSIONS LIST ********************************-->
                         <div ng-repeat="mission in m_oController.getMissions()" class="missions">
                             <div>
                                 <div class="col-md-1 col-xs-4 col-sd-4">
@@ -238,7 +239,7 @@
                                     </div>-->
                                     <div class="col-md-6"
                                          ng-if="!(filter.indexvalues && filter.indexvalues.split('|').length > 0)">
-                                        <div class="group ">
+                                        <div class="group">
                                             <div class="my-input-text" >
                                                 <label class="filter-label">{{filter.indexlabel}}</label>
                                                 <!--INPUT class="form controller"-->
@@ -349,7 +350,7 @@
 
                                 <span class="label label-success">{{layer.summary.Mode}}</span>&nbsp;<!--Mode-->
                                 <span class="label label-success"> {{layer.summary.Instrument}}</span><!--Instrument-->
-                                <div class="preview-layer-image" ><img src={{layer.preview}} alt="test" style="height: 82px;width: 82px;"></div>
+                                <div class="preview-layer-image" ><img src={{layer.preview}} alt="Image" style="height: 82px;width: 82px;"></div>
                                 <span class="badge">{{layer.summary.Size}}</span><!--Size-->
                             </td>
                             <!-- INFO CELL -->

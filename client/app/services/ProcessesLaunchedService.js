@@ -13,53 +13,122 @@ service('ProcessesLaunchedService', ['ConstantsService','$rootScope', function (
     this.TYPE_OF_PROCESS=["Product download","Publishing Band"];
     /*TODO ADD ID USER FOR COOKIE*/
 
-    /*Cookie methods*/
 
-    this.getProcessesRunningListByCookie = function()
+
+    /****************************************************/
+
+    /*LOCAL STORAGE METHODS */
+    this.getProcessesRunningListByLocalStorage = function(sWorkSpaceId,sUserId)
     {
-        var oResult = this.m_oConstantsService.getCookie("m_aoProcessesRunning");
-
-        if(utilsIsObjectNullOrUndefined(oResult) || oResult.length == 0 || (typeof sString == 'oResult' && utilsIsStrNullOrEmpty(oResult)))
-            return [];
-        else
-            return oResult;
+        if(utilsIsStrNullOrEmpty(sWorkSpaceId))
+            return null;
+        if(utilsIsStrNullOrEmpty(sUserId))
+            return null;
+        return JSON.parse(this.m_oConstantsService.getItemInLocalStorage("m_aoProcessesRunning"+sWorkSpaceId+sUserId));
     }
 
-    this.setProcessesRunningInCookie  = function(asProcesses)
+    this.setProcessesRunningListByLocalStorage  = function(oValue,sWorkSpaceId,sUserId)
     {
-        this.m_oConstantsService.setCookie("m_aoProcessesRunning",asProcesses , this.COOKIE_EXPIRE_TIME_DAYS);
-        //Ssend a broadcast message rootControlle catch it, and reload the bar of processes
+        if(utilsIsObjectNullOrUndefined(oValue))
+            return false;
+        if(utilsIsStrNullOrEmpty(sWorkSpaceId))
+            return false;
+        if(utilsIsStrNullOrEmpty(sUserId))
+            return false;
+        var sValue = JSON.stringify(oValue);
+        this.m_oConstantsService.setItemLocalStorage("m_aoProcessesRunning"+sWorkSpaceId+sUserId,sValue);
+        return true;
 
     }
     /****************************************************/
 
-    /*load process  */
-    this.loadProcessesByCookie = function()
+
+    this.loadProcessesByLocalStorage = function(sWorkSpaceId,sUserId)
     {
-        this.m_aoProcessesRunning = this.getProcessesRunningListByCookie();/*LOAD PROCESSES*/
+        if(utilsIsStrNullOrEmpty(sWorkSpaceId))
+            return false;
+        if(utilsIsStrNullOrEmpty(sUserId))
+            return false;
+
+        this.m_aoProcessesRunning =  this.getProcessesRunningListByLocalStorage (sWorkSpaceId,sUserId);
+        if(utilsIsObjectNullOrUndefined(this.m_aoProcessesRunning))
+            this.m_aoProcessesRunning = [];
+        return true;
     }
 
 
-
-    /*SERVICE METHODS*/
-
-    this.getProcesses = function()
+    //GET Processes by local storage
+    this.getProcessesByLocalStorage = function(sWorkSpaceId,sUserId)
     {
-        this.m_aoProcessesRunning = this.getProcessesRunningListByCookie();
+        this.loadProcessesByLocalStorage(sWorkSpaceId,sUserId);
         return this.m_aoProcessesRunning;
     }
 
-    this.addProcesses = function(sProcess)
+    this.addProcessesByLocalStorage = function(sProcess,sWorkSpaceId,sUserId)
     {
         if(utilsIsObjectNullOrUndefined(sProcess))
             return false;
-
-        var asProcess = this.getProcesses();
+        if(utilsIsStrNullOrEmpty(sWorkSpaceId))
+            return false;
+        if(utilsIsStrNullOrEmpty(sUserId))
+            return false;
+        var asProcess = this.getProcessesByLocalStorage(sWorkSpaceId,sUserId);
+        if(utilsIsObjectNullOrUndefined(asProcess))
+            return false;
         asProcess.push(sProcess);
-        this.setProcessesRunningInCookie(asProcess);
-        this.loadProcessesByCookie();
+        this.setProcessesRunningListByLocalStorage(asProcess,sWorkSpaceId,sUserId);
+        this.loadProcessesByLocalStorage(sWorkSpaceId,sUserId);
         $rootScope.$broadcast('m_aoProcessesRunning:updated',true);
+        return true;
     }
+
+    ///*SERVICE METHODS*/
+    ///******************************* Cookie methods *******************************************************************/
+    //
+    //this.getProcessesRunningListByCookie = function()
+    //{
+    //    var oResult = this.m_oConstantsService.getCookie("m_aoProcessesRunning");
+    //
+    //    if(utilsIsObjectNullOrUndefined(oResult) || oResult.length == 0 || (typeof sString == 'oResult' && utilsIsStrNullOrEmpty(oResult)))
+    //        return [];
+    //    else
+    //        return oResult;
+    //}
+    //
+    //this.setProcessesRunningInCookie  = function(asProcesses)
+    //{
+    //    this.m_oConstantsService.setCookie("m_aoProcessesRunning",asProcesses , this.COOKIE_EXPIRE_TIME_DAYS);
+    //    //Ssend a broadcast message rootControlle catch it, and reload the bar of processes
+    //
+    //}
+    ///*load process  */
+    //this.loadProcessesByCookie = function()
+    //{
+    //    this.m_aoProcessesRunning = this.getProcessesRunningListByCookie();/*LOAD PROCESSES*/
+    //}
+    //
+    ////GET Processes by coockie
+    //this.getProcesses = function()
+    //{
+    //    this.m_aoProcessesRunning = this.getProcessesRunningListByCookie();
+    //    return this.m_aoProcessesRunning;
+    //}
+    //
+    //
+    //
+    //
+    //this.addProcesses = function(sProcess)
+    //{
+    //    if(utilsIsObjectNullOrUndefined(sProcess))
+    //        return false;
+    //
+    //    var asProcess = this.getProcesses();
+    //    asProcess.push(sProcess);
+    //    this.setProcessesRunningInCookie(asProcess);
+    //    this.loadProcessesByCookie();
+    //    $rootScope.$broadcast('m_aoProcessesRunning:updated',true);
+    //}
+    /************************************************************************************************/
 
     this.isEmptyProcessesRunningList = function()
     {
@@ -117,37 +186,51 @@ service('ProcessesLaunchedService', ['ConstantsService','$rootScope', function (
         return -1;
     }
 
-    this.removeProcess = function(sProcess)
+    this.removeProcess = function(sProcess,sWorkSpaceId,sUserId)
     {
         if(utilsIsObjectNullOrUndefined(sProcess))
             return false;
+        if(utilsIsStrNullOrEmpty(sWorkSpaceId))
+            return false;
+        if(utilsIsStrNullOrEmpty(sUserId))
+            return false;
+
         var iIndexProcess =  this.indexProcess(sProcess);
 
         this.m_aoProcessesRunning.splice(iIndexProcess,1);
-        this.setProcessesRunningInCookie(this.m_aoProcessesRunning);
+        this.setProcessesRunningListByLocalStorage(this.m_aoProcessesRunning,sWorkSpaceId,sUserId);
     }
 
-    this.removeProcessByProperty = function(oProperty,oValue)
+    this.removeProcessByProperty = function(oProperty,oValue,sWorkSpaceId,sUserId)
     {
         if(utilsIsObjectNullOrUndefined(oProperty) )
             return false;
+        if(utilsIsStrNullOrEmpty(sWorkSpaceId))
+            return false;
+        if(utilsIsStrNullOrEmpty(sUserId))
+            return false;
+
         var iIndexProcess =  this.indexProcessFindByProperty(oProperty,oValue);
         if(iIndexProcess == -1)
             return false;
         this.m_aoProcessesRunning.splice(iIndexProcess,1);
-        this.setProcessesRunningInCookie(this.m_aoProcessesRunning);
+        this.setProcessesRunningListByLocalStorage(this.m_aoProcessesRunning,sWorkSpaceId,sUserId);
         return true;
     }
 
-    this.removeProcessByPropertySubstringVersion = function(oProperty,oValue)
+    this.removeProcessByPropertySubstringVersion = function(oProperty,oValue,sWorkSpaceId,sUserId)
     {
         if(utilsIsObjectNullOrUndefined(oProperty) )
+            return false;
+        if(utilsIsStrNullOrEmpty(sWorkSpaceId))
+            return false;
+        if(utilsIsStrNullOrEmpty(sUserId))
             return false;
         var iIndexProcess =  this.indexProcessFindByPropertySubstringVersion(oProperty,oValue);
         if(iIndexProcess == -1)
             return false;
         this.m_aoProcessesRunning.splice(iIndexProcess,1);
-        this.setProcessesRunningInCookie(this.m_aoProcessesRunning);
+        this.setProcessesRunningListByLocalStorage(this.m_aoProcessesRunning,sWorkSpaceId,sUserId);
         return true;
     }
 
@@ -162,11 +245,13 @@ service('ProcessesLaunchedService', ['ConstantsService','$rootScope', function (
             }
             return false;
         }
+        return false;
     }
     this.getTypeOfProcessProductDownload = function()
     {
         return this.TYPE_OF_PROCESS[0];
     }
+
     this.getTypeOfProcessPublishingBand = function()
     {
         return this.TYPE_OF_PROCESS[1];
