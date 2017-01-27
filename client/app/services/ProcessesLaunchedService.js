@@ -6,6 +6,10 @@
 angular.module('wasdi.ProcessesLaunchedService', ['wasdi.ProcessesLaunchedService']).
 service('ProcessesLaunchedService', ['ConstantsService','$rootScope', function (oConstantsService,$rootScope) {
     this.m_aoProcessesRunning = [];
+    /*
+    * this.m_aoProcessesRunning  is a list of object
+    * {processName: , nodeId:,typeOfProcess: }
+    * */
     this.COOKIE_EXPIRE_TIME_DAYS = 1;//days
     this.m_oConstantsService = oConstantsService;
 
@@ -37,6 +41,7 @@ service('ProcessesLaunchedService', ['ConstantsService','$rootScope', function (
             return false;
         var sValue = JSON.stringify(oValue);
         this.m_oConstantsService.setItemLocalStorage("m_aoProcessesRunning"+sWorkSpaceId+sUserId,sValue);
+
         return true;
 
     }
@@ -64,8 +69,15 @@ service('ProcessesLaunchedService', ['ConstantsService','$rootScope', function (
         return this.m_aoProcessesRunning;
     }
 
-    this.addProcessesByLocalStorage = function(sProcess,sWorkSpaceId,sUserId)
+    this.addProcessesByLocalStorage = function(sProcessName,iIdBandNodeInTree,sTypeOfProcess,sWorkSpaceId,sUserId)
     {
+        if(utilsIsStrNullOrEmpty(sProcessName))
+            return false;
+        if(utilsIsStrNullOrEmpty(sTypeOfProcess))
+            return false;
+
+        var sProcess = {"processName":sProcessName,"nodeId":iIdBandNodeInTree,"typeOfProcess":sTypeOfProcess};
+
         if(utilsIsObjectNullOrUndefined(sProcess))
             return false;
         if(utilsIsStrNullOrEmpty(sWorkSpaceId))
@@ -78,10 +90,15 @@ service('ProcessesLaunchedService', ['ConstantsService','$rootScope', function (
         asProcess.push(sProcess);
         this.setProcessesRunningListByLocalStorage(asProcess,sWorkSpaceId,sUserId);
         this.loadProcessesByLocalStorage(sWorkSpaceId,sUserId);
-        $rootScope.$broadcast('m_aoProcessesRunning:updated',true);
+        this.updateProcessesBar();
         return true;
     }
 
+    this.updateProcessesBar = function()
+    {
+        //send a message to RootController for update the bar of processes
+        $rootScope.$broadcast('m_aoProcessesRunning:updated',true);
+    }
     ///*SERVICE METHODS*/
     ///******************************* Cookie methods *******************************************************************/
     //
@@ -231,6 +248,7 @@ service('ProcessesLaunchedService', ['ConstantsService','$rootScope', function (
             return false;
         this.m_aoProcessesRunning.splice(iIndexProcess,1);
         this.setProcessesRunningListByLocalStorage(this.m_aoProcessesRunning,sWorkSpaceId,sUserId);
+        this.updateProcessesBar();
         return true;
     }
 
@@ -247,6 +265,41 @@ service('ProcessesLaunchedService', ['ConstantsService','$rootScope', function (
         }
         return false;
     }
+
+    this.checkIfFileIsDownloading = function(sProcessName,iIdBandNodeInTree,sTypeOfProcess,sWorkSpaceId,sUserId)
+    {
+        if(utilsIsStrNullOrEmpty(sProcessName))
+            return false;
+        if(utilsIsStrNullOrEmpty(sTypeOfProcess))
+            return false;
+
+        var sProcess = {"processName":sProcessName,"nodeId":iIdBandNodeInTree,"typeOfProcess":sTypeOfProcess};
+
+        if(utilsIsObjectNullOrUndefined(sProcess))
+            return false;
+        if(utilsIsStrNullOrEmpty(sWorkSpaceId))
+            return false;
+        if(utilsIsStrNullOrEmpty(sUserId))
+            return false;
+
+        var aoProcesses = this.getProcessesByLocalStorage(sWorkSpaceId,sUserId);
+        if(utilsIsObjectNullOrUndefined(aoProcesses))
+            return false;
+        var iNumberOfProcesses = aoProcesses.length;
+
+        for(var iIndex = 0; iIndex < iNumberOfProcesses; iIndex++ )
+        {
+            /*check if the processes are equals*/
+            if(aoProcesses[iIndex].processName == sProcess.processName && aoProcesses[iIndex].nodeId == sProcess.nodeId &&
+                    aoProcesses[iIndex].typeOfProcess == sProcess.typeOfProcess)
+            {
+                return true;
+            }
+        }
+        return false;
+
+    }
+
     this.getTypeOfProcessProductDownload = function()
     {
         return this.TYPE_OF_PROCESS[0];

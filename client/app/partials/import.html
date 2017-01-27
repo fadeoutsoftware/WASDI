@@ -340,9 +340,15 @@
                             <!-- BUTTONS -->
                             <td>
                                 <div class="btn-group-vertical" role="group" >
-                                    <button type="button" class="btn btn btn-primary" ng-click="m_oController.downloadProduct(layer)"><i class="fa fa-plus " aria-hidden="true"></i> </button>
-                                    <button type="button" class="btn btn btn-primary" ng-click="m_oController.zoomOnBounds(layer.rectangle)"><i class="fa fa-search-plus" aria-hidden="true"></i></button>
-                                    <button type="button" class="btn btn btn-primary" ng-click="m_oController.infoLayer()"><i class="fa fa-info-circle" aria-hidden="true"></i></i></button>
+                                    <button type="button" class="btn btn btn-primary" ng-click="m_oController.downloadProduct(layer)" ng-disabled="m_oController.isPossibleDoDownload(layer)">
+                                        <i class="fa fa-plus " aria-hidden="true"></i>
+                                    </button>
+                                    <button type="button" class="btn btn btn-primary" ng-click="m_oController.zoomOnBounds(layer.rectangle)">
+                                        <i class="fa fa-search-plus" aria-hidden="true"></i>
+                                    </button>
+                                    <button type="button" class="btn btn btn-primary" ng-click="m_oController.infoLayer()">
+                                        <i class="fa fa-info-circle" aria-hidden="true"></i>
+                                    </button>
                                 </div>
                             </td>
                             <!-- IMAGE CELL -->

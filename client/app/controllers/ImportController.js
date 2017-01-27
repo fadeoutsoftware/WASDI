@@ -73,6 +73,8 @@ var ImportController = (function() {
 
         /* Active Workspace */
         this.m_oActiveWorkspace = this.m_oConstantsService.getActiveWorkspace();
+        this.m_oUser = this.m_oConstantsService.getUser();
+        this.m_oProcessesLaunchedService.updateProcessesBar();
         //if there isn't workspace
         if(utilsIsObjectNullOrUndefined(this.m_oActiveWorkspace) && utilsIsStrNullOrEmpty( this.m_oActiveWorkspace))
         {
@@ -93,7 +95,7 @@ var ImportController = (function() {
             this.loadOpenSearchParamsByResultsOfSearchServices(this);
         }
 
-        this.m_oUser = this.m_oConstantsService.getUser();
+
 
         //if user is logged
         //if(!utilsIsObjectNullOrUndefined(this.m_oConstantsService.getUser()))
@@ -426,7 +428,8 @@ var ImportController = (function() {
                     }
                     else
                     {
-                        console.log("Error in open search request...");
+                        utilsVexDialogAlertTop("Error in open search request...");
+                        //console.log("Error in open search request...");
                         ////TODO REMOVE IT (use it only with fake data)
                         //oController.generateLayersList(sResults.data.feed);
                     }
@@ -509,6 +512,7 @@ var ImportController = (function() {
         if(utilsIsObjectNullOrUndefined(oWorkSpace) || utilsIsObjectNullOrUndefined(oLayer))
         {
             //TODO CHEK THIS POSSIBLE CASE
+            //utilsVexDialogAlertTop("Error there isn't workspaceID or layer")
             console.log("Error there isn't workspaceID or layer");
             return false;
         }
@@ -516,20 +520,26 @@ var ImportController = (function() {
         if(utilsIsObjectNullOrUndefined(url))
         {
             //TODO CHEK THIS POSSIBLE CASE
+            //utilsVexDialogAlertTop("Error there isn't workspaceID or layer")
             console.log("Error there isn't workspaceID or layer")
             return false;
         }
 
         this.m_oFileBufferService.download(url,oWorkSpace.workspaceId).success(function (data, status) {
-            console.log('Product just start the download ');
 
-            oController.m_oProcessesLaunchedService.addProcessesByLocalStorage({processName:oLayer.title, nodeId:null,
-                                                                                typeOfProcess:oController.m_oProcessesLaunchedService.getTypeOfProcessProductDownload()}
+            utilsVexDialogAlertBottomRightCorner("Product just start the download ");
+            oController.m_oProcessesLaunchedService.addProcessesByLocalStorage(oLayer.title,
+                                                                                null,
+                                                                                oController.m_oProcessesLaunchedService.getTypeOfProcessProductDownload()
                                                                                 ,oWorkSpace.workspaceId,oController.m_oUser.userId);
-
+            /*
+            * {processName:oLayer.title, nodeId:null,
+            * typeOfProcess:oController.m_oProcessesLaunchedService.getTypeOfProcessProductDownload()}
+            *
+            * */
 
         }).error(function (data,status) {
-            console.log('Product error in file buffer');
+            utilsVexDialogAlertTop('Product error in file buffer');
         });
         return true;
     }
@@ -726,7 +736,8 @@ var ImportController = (function() {
 
         if (utilsIsObjectNullOrUndefined(aData.entry)) {
             // TODO: Qui interrompere l'attesa della ricerca e comunicare No Result Found
-            console.log('no layers found');
+            utilsVexDialogAlertBottomRightCorner('no layers found');
+            //console.log('no layers found');
             return;
         }
 
@@ -856,7 +867,6 @@ var ImportController = (function() {
                 for (var iIndexBounds = 0; iIndexBounds < sContent.length; iIndexBounds++)
                 {
                     var aBounds = sContent[iIndexBounds];
-                    console.log(aBounds);
                     var aNewBounds = aBounds.split(" ");
 
                     //var aoOutputPoint = proj4(sSourceProjection,sDestinationProjection,aNewBounds);
@@ -1034,11 +1044,13 @@ var ImportController = (function() {
         }
         var oController = this;
         this.m_oProductService.addProductToWorkspace(oMessage.payload.fileName,this.m_oActiveWorkspace.workspaceId).success(function (data, status) {
-            console.log('Product added to the ws');
+            utilsVexDialogAlertBottomRightCorner('Product added to the ws')
+            //console.log('Product added to the ws');
             oController.m_oProcessesLaunchedService.removeProcessByPropertySubstringVersion("processName",oMessage.payload.fileName,
                 oController.m_oActiveWorkspace.workspaceId,oController.m_oUser.userId);
         }).error(function (data,status) {
-            console.log('Error adding product to the ws');
+            utilsVexDialogAlertTop('Error adding product to the ws');
+            //console.log('Error adding product to the ws');
         });
 
     }
@@ -1082,6 +1094,14 @@ var ImportController = (function() {
         //oController.m_aoMissions = oController.m_oResultsOfSearchService.getMissions();
         return true;
     }
+
+    ImportController.prototype.isPossibleDoDownload = function(oLayer)
+    {
+        if(utilsIsObjectNullOrUndefined(oLayer))
+            return false;
+        return this.m_oProcessesLaunchedService.checkIfFileIsDownloading(oLayer.title,null,this.m_oProcessesLaunchedService.getTypeOfProcessProductDownload(), this.m_oActiveWorkspace.workspaceId,this.m_oUser.userId);
+    }
+
     ImportController.$inject = [
         '$scope',
         'ConstantsService',

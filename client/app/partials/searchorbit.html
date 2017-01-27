@@ -1,30 +1,32 @@
 <div class="editor-view col-lg-12 col-md-12 col-sm-12 col-xs-12">
     <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12">
 
-        <!--**************** TREE PANEL *****************-->
         <div class="panel panel-default ">
-            <div class="panel-heading"></div>
-            <!-- MY TREE DIRECTIVE -->
+            <div class="panel-heading">{{"SEARCH_TITLE_PANEL_HEADING_FILTERS"|translate}}</div>
             <div class="panel-body">
-                <div class="col-lg-2 col-md-2 col-sm-2 col-xs-6" >
-                    <label ng-repeat="sensortype in m_oController.m_oConfiguration.orbitsearch.sensortypes" >
+                <div class="col-lg-5 col-md-5 col-sm-5 col-xs-5 well well-sm" >
+                   {{"SEARCH_TITLE_CHECK_BOX_SENSOR_TYPE"|translate}}
+                    <div ng-repeat="sensortype in m_oController.m_oConfiguration.orbitsearch.sensortypes" >
                         <input type="checkbox" checklist-model="m_oController.m_oSelectedSensorType" checklist-value="sensortype"/> <span>{{sensortype}}</span>
-                    </label>
-                </div>
-                <div class="col-lg-2 col-md-2 col-sm-2 col-xs-6" >
-                    <label ng-repeat="sensorresolution in m_oController.m_oConfiguration.orbitsearch.sensorresolutions" >
-                        <input type="checkbox"  checklist-model="m_oController.m_oSelectedResolutionType" checklist-value="sensorresolution"/> <span>{{sensorresolution}}</span>
-                    </label>
-                </div>
-                <button class="btn" ng-click="m_oController.searchOrbit()">Search</button>
+                    </div>
 
+                </div>
+                <div class="col-lg-5 col-md-5 col-sm-5 col-xs-5 well well-sm" >
+                    {{"SEARCH_TITLE_CHECK_BOX_SENSOR_RESOLUTION"|translate}}
+                    <div ng-repeat="sensorresolution in m_oController.m_oConfiguration.orbitsearch.sensorresolutions" >
+                        <input type="checkbox"  checklist-model="m_oController.m_oSelectedResolutionType" checklist-value="sensorresolution"/> <span>{{sensorresolution}}</span>
+                    </div>
+                </div>
+                <div class="col-lg-2 col-md-2 col-sm-2 col-xs-2" >
+                    <button class="btn" ng-click="m_oController.searchOrbit()">Search</button>
+                </div>
             </div>
 
         </div>
-        <div class="row col-lg-4 col-md-4 col-sm-4 col-xs-12">
+        <div class="row col-lg-12 col-md-12 col-sm-12 col-xs-12">
             <table class="table table-hover">
                 <thead>
-                    <tr>Satellite Name</tr>
+                <th>Satellite Name</th>
                 </thead>
                 <tbody>
                 <tr ng-repeat="orbit in m_oController.getOrbits()">
@@ -36,7 +38,7 @@
     </div>
 
 
-        <!--------------- MAP CONTAINER --------------->
+    <!--------------- MAP CONTAINER --------------->
     <div class="col-lg-8 col-md-8 col-sm-8 col-xs-12 map-container">
         <div class="map" id = "orbitMap"></div>
     </div>

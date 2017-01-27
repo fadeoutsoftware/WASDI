@@ -26,6 +26,8 @@ var EditorController = (function () {
         //layer list
         this.m_aoLayersList=[];//only id
         //this.m_aoProcessesRunning=[];
+        // Array of products to show
+        this.m_aoProducts = [];
 
         /* ---------------------- SET COOKIE (m_aoProcessesRunning)-------------*/
         /* USE DELETE COOKIE FOR DEBUG*/
@@ -56,7 +58,7 @@ var EditorController = (function () {
         // Here a Workpsace is needed... if it is null create a new one..
         this.m_oActiveWorkspace = this.m_oConstantsService.getActiveWorkspace();
         this.m_oUser = this.m_oConstantsService.getUser();
-
+        this.m_oProcessesLaunchedService.updateProcessesBar();
         //if there isn't workspace
         if(utilsIsObjectNullOrUndefined( this.m_oActiveWorkspace) && utilsIsStrNullOrEmpty( this.m_oActiveWorkspace))
         {
@@ -64,20 +66,22 @@ var EditorController = (function () {
             if(!(utilsIsObjectNullOrUndefined(this.m_oState.params.workSpace) && utilsIsStrNullOrEmpty(this.m_oState.params.workSpace)))
             {
                 this.openWorkspace(this.m_oState.params.workSpace);
-                this.m_oActiveWorkspace = this.m_oConstantsService.getActiveWorkspace();
+                //this.m_oActiveWorkspace = this.m_oConstantsService.getActiveWorkspace();
             }
             else
             {
                 //TODO CREATE NEW WORKSPACE OR GO HOME
             }
         }
+        else
+        {
+            this.getProductListByWorkspace();
+        }
         this.m_sDownloadFilePath = "";
 
         // Rabbit subscription
         //var m_oSubscription = {};
 
-        // Array of products to show
-        this.m_aoProducts = [];
 
         // Self reference for callbacks
         var oController = this;
@@ -216,31 +220,34 @@ var EditorController = (function () {
         // Read Product List
         // watch when m_oController.m_oConstantsService.m_oActiveWorkspace change (usually after a load/reload of page)
         // reload tree
-        $scope.$watch('m_oController.m_oConstantsService.m_oActiveWorkspace', function (newValue, oldValue, scope)
-        {
-            $scope.m_oController.m_oActiveWorkspace = newValue;
-            if(!utilsIsObjectNullOrUndefined($scope.m_oController.m_oActiveWorkspace))
-            {
-                $scope.m_oController.m_oProductService.getProductListByWorkspace($scope.m_oController.m_oActiveWorkspace.workspaceId).success(function (data, status) {
-                    if (data != null) {
-                        if (data != undefined) {
-                            //push all products
-                            for(var iIndex = 0; iIndex < data.length; iIndex++)
-                            {
-                                oController.m_aoProducts.push(data[iIndex]);
-                            }
-                            // i need to make the tree after the products are loaded
-                            $scope.m_oController.m_oTree = oController.generateTree();
-                            //oController.m_oScope.$apply();
-                        }
-                    }
-                }).error(function (data, status) {
-                    console.log('Error reading product list')
-                });
-
-
-            }
-        });
+        //$scope.$watch('m_oController.m_oConstantsService.m_oActiveWorkspace', function (newValue, oldValue, scope)
+        //{
+        //    //$scope.m_oController.m_oActiveWorkspace = newValue;
+        //
+        //    if(!utilsIsObjectNullOrUndefined($scope.m_oController.m_oActiveWorkspace) )
+        //    {
+        //        $scope.m_oController.m_oProductService.getProductListByWorkspace($scope.m_oController.m_oActiveWorkspace.workspaceId).success(function (data, status) {
+        //            if (data != null) {
+        //                if (data != undefined) {
+        //                    //push all products
+        //                    for(var iIndex = 0; iIndex < data.length; iIndex++)
+        //                    {
+        //                        $scope.m_oController.m_aoProducts.push(data[iIndex]);
+        //                    }
+        //                    // i need to make the tree after the products are loaded
+        //                    $scope.m_oController.m_oTree = oController.generateTree();
+        //                    //oController.m_oScope.$apply();
+        //                }
+        //            }
+        //        }).error(function (data, status) {
+        //            utilsVexDialogAlertTop('Error reading product list');
+        //            //console.log('Error reading product list');
+        //        });
+        //
+        //
+        //    }
+        //
+        //});
 
     }
 
@@ -259,15 +266,17 @@ var EditorController = (function () {
         }
         var oController = this;
         this.m_oProductService.addProductToWorkspace(oMessage.payload.fileName,this.m_oActiveWorkspace.workspaceId).success(function (data, status) {
-            console.log('Product added to the ws');
+            //console.log('Product added to the ws');
+            utilsVexDialogAlertBottomRightCorner('Product added to the ws');
             oController.m_aoProducts.push(oMessage.payload);
-            oController.m_oTree = oController.generateTree();
+            //oController.m_oTree = oController.generateTree();
             oController.m_oProcessesLaunchedService.removeProcessByPropertySubstringVersion("processName",oMessage.payload.fileName,
                 oController.m_oActiveWorkspace.workspaceId,oController.m_oUser.userId);
             //oController.m_aoProcessesRunning =  this.m_oProcessesLaunchedService.getProcesses();
 
         }).error(function (data,status) {
-            console.log('Error adding product to the ws');
+            utilsVexDialogAlertTop('Error adding product to the ws')
+            //console.log('Error adding product to the ws');
         });
 
         //this.m_oScope.$apply();
@@ -304,7 +313,7 @@ var EditorController = (function () {
         //add layer in list
         this.m_aoLayersList.push(oLayerId);
         this.addLayerMap2D(oLayerId);
-        //this.addLayerMap3D(oLayerId);
+        this.addLayerMap3D(oLayerId);
         //this.removeProcessInListOfRunningProcesses(oLayerId);
         //TODO REMOVE PROCESS IN LIST
         this.m_oProcessesLaunchedService.removeProcessByPropertySubstringVersion("processName",oLayerId,
@@ -382,7 +391,7 @@ var EditorController = (function () {
         var oWMSOptions= { // wms options
             transparent: true,
             format: 'image/png',
-            crossOriginKeyword: null
+            //crossOriginKeyword: null
         };//crossOriginKeyword: null
 
         // WMS get GEOSERVER
@@ -402,9 +411,11 @@ var EditorController = (function () {
      */
     EditorController.prototype.downloadEOImage = function (sUrl) {
         this.m_oFileBufferService.download(sUrl,this.m_oActiveWorkspace.workspaceId).success(function (data, status) {
-            console.log('downloading');
+            utilsVexDialogAlertBottomRightCorner('downloading');
+            //console.log('downloading');
         }).error(function (data, status) {
-            console.log('download error');
+            utilsVexDialogAlertTop('download error');
+            //console.log('download error');
         });
     }
 
@@ -414,9 +425,11 @@ var EditorController = (function () {
      */
     EditorController.prototype.publish = function (sUrl) {
         this.m_oFileBufferService.publish(sUrl,this.m_oActiveWorkspace.workspaceId).success(function (data, status) {
-            console.log('publishing');
+            utilsVexDialogAlertBottomRightCorner('publishing');
+            //console.log('publishing');
         }).error(function (data, status) {
-            console.log('publish error');
+            utilsVexDialogAlertTop('publish error');
+            //console.log('publish error');
         });
     }
 
@@ -481,18 +494,26 @@ var EditorController = (function () {
         var sFileName = this.m_aoProducts[oBand.productIndex].fileName;
 
         this.m_oFileBufferService.publishBand(sFileName,this.m_oActiveWorkspace.workspaceId, oBand.name).success(function (data, status) {
-            console.log('publishing band ' + oBand.name);
-            if(!utilsIsObjectNullOrUndefined(data) ||  data.messageResult != "KO")
+            var oDialog = utilsVexDialogAlertBottomRightCorner('publishing band ' + oBand.name);
+            utilsVexCloseDialogAfterFewSeconds(3000,oDialog);
+            //console.log('publishing band ' + oBand.name);
+            if(!utilsIsObjectNullOrUndefined(data) &&  data.messageResult != "KO" && utilsIsObjectNullOrUndefined(data.messageResult))
             {
                 /*if the band was published*/
                 if(data.messageCode == "PUBLISHBAND" )
                     oController.receivedPublishBandMessage(data.payload);
                 else
-                    oController.m_oProcessesLaunchedService.addProcessesByLocalStorage({processName:oBand.productName + "_" + oBand.name,
-                                                                    nodeId:oIdBandNodeInTree,
-                                                                    typeOfProcess:oController.m_oProcessesLaunchedService.getTypeOfProcessPublishingBand()},
-                                                                    oController.m_oActiveWorkspace.workspaceId,
-                                                                    oController.m_oUser.userId);
+                    oController.m_oProcessesLaunchedService.addProcessesByLocalStorage(oBand.productName + "_" + oBand.name,
+                                                                        oIdBandNodeInTree,
+                                                                        oController.m_oProcessesLaunchedService.getTypeOfProcessPublishingBand(),
+                                                                        oController.m_oActiveWorkspace.workspaceId,
+                                                                        oController.m_oUser.userId);
+
+                /*{processName:oBand.productName + "_" + oBand.name,
+                 nodeId:oIdBandNodeInTree,
+                 typeOfProcess:oController.m_oProcessesLaunchedService.getTypeOfProcessPublishingBand()}
+                *
+                * */
                 //else
                 //    oController.pushProcessInListOfRunningProcesses(oBand.productName + "_" + oBand.name,oIdBandNodeInTree);
                 //TODO PUSH PROCESS WITH SERVICE
@@ -500,11 +521,13 @@ var EditorController = (function () {
             else
             {
                 //TODO ERROR
-                console.log("Error in publish band");
+                utilsVexDialogAlertTop("Error in publish band");
+                //console.log("Error in publish band");
             }
 
         }).error(function (data, status) {
             console.log('publish band error');
+            utilsVexDialogAlertTop("Error in publish band");
             //TODO ERROR
         });
     }
@@ -634,6 +657,27 @@ var EditorController = (function () {
         return oTree;
     }
 
+    EditorController.prototype.getProductListByWorkspace = function()
+    {
+        var oController = this;
+        this.m_oProductService.getProductListByWorkspace(oController.m_oActiveWorkspace.workspaceId).success(function (data, status) {
+            if (data != null) {
+                if (data != undefined) {
+                    //push all products
+                    for(var iIndex = 0; iIndex < data.length; iIndex++)
+                    {
+                        oController.m_aoProducts.push(data[iIndex]);
+                    }
+                    // i need to make the tree after the products are loaded
+                    oController.m_oTree = oController.generateTree();
+                    //oController.m_oScope.$apply();
+                }
+            }
+        }).error(function (data, status) {
+            utilsVexDialogAlertTop('Error reading product list');
+            //console.log('Error reading product list');
+        });
+    }
     /* Search element in tree
     * */
 
@@ -652,10 +696,12 @@ var EditorController = (function () {
                     oController.m_oActiveWorkspace = oController.m_oConstantsService.getActiveWorkspace();
                     /*Start Rabbit WebStomp*/
                     oController.m_oRabbitStompServive.initWebStomp(oController.m_oActiveWorkspace,"EditorController",oController);
+                    oController.getProductListByWorkspace();
                 }
             }
         }).error(function (data,status) {
-            alert('error');
+            //alert('error');
+            utilsVexDialogAlertTop('error Impossible get workspace in editorController.js')
         });
     }
 

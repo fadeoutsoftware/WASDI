@@ -52,7 +52,8 @@ service('RabbitStompService', ['$http',  'ConstantsService','$interval', functio
                 if (oMessageResult == null) return;
                 if (oMessageResult.messageResult == "KO") {
                     //TODO REMOVE ELEMENT IN PROCESS QUEUE
-                    alert('There was an error in the RabbitCallback');
+                    utilsVexDialogAlertTop("There was an error in the RabbitCallback")
+                    //alert('There was an error in the RabbitCallback');
                     return;
                 }
 
@@ -60,19 +61,32 @@ service('RabbitStompService', ['$http',  'ConstantsService','$interval', functio
                 if (oMessageResult.messageCode == "DOWNLOAD") {
 
                     if(sControllerName == "EditorController" || sControllerName == "ImportController")
+                    {
                         oControllerActive.receivedDownloadMessage(oMessageResult);
+                        var oDialog = utilsVexDialogAlertBottomRightCorner("The download is ended");
+                        utilsVexCloseDialogAfterFewSeconds(3000,oDialog);
+                    }
                     //TODO ERRROR CASE
                 }
                 else if (oMessageResult.messageCode == "PUBLISH") {
                     if(sControllerName == "EditorController" )
+                    {
                         oControllerActive.receivedPublishMessage(oMessageResult);
+                        var oDialog = utilsVexDialogAlertBottomRightCorner("The publish is ended");
+                        utilsVexCloseDialogAfterFewSeconds(3000,oDialog);
+                    }
                     //TODO ERRROR CASE
 
                 }
                 else if (oMessageResult.messageCode == "PUBLISHBAND") {
 
                     if(sControllerName == "EditorController" || sControllerName == "ImportController")
+                    {
                         oControllerActive.receivedPublishBandMessage(oMessageResult.payload.layerId);
+                        var oDialog = utilsVexDialogAlertBottomRightCorner("The publish is ended");
+                        utilsVexCloseDialogAfterFewSeconds(3000,oDialog);
+
+                    }
                     //TODO ERRROR CASE
 
                 }

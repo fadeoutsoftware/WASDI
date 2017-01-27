@@ -15,6 +15,7 @@ var WorkspaceController = (function() {
         this.m_oScope.m_oController = this;
 
         this.fetchWorkspaceInfoList();
+
     }
 
     WorkspaceController.prototype.moveTo = function (sPath) {

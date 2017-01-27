@@ -45,7 +45,14 @@ var SearchOrbitController = (function() {
 
     SearchOrbitController.prototype.searchOrbit = function() {
         var oController = this;
-        var oOrbitSearch = new Object();
+
+        if(utilsIsObjectNullOrUndefined(oController.m_oGeoJSON))
+        {
+            utilsVexDialogAlertTop("You should select an area");
+            return false;
+        }
+
+            var oOrbitSearch = new Object();
         oOrbitSearch.orbitFilters = new Array();
         var oOrbitFilter = new Object();
 
