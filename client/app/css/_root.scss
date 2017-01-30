@@ -124,18 +124,22 @@
   /*STATUS BAR */
   .status-bar
   {
-    position:fixed;
-    bottom: 0;
+    //position:fixed;
+    //position:absolute;
+    //bottom: 0;
+    margin-top: 8px;
     padding:0;
     height: $wasdi-status-bar-heigth;
     z-index: 1000;
     background-color: $wasdi-status-bar-color;
-    border-style: solid;
-    border-width: 1px;
+    //border-style: solid;
+    //border-width: 1px;
     color:black;
     vertical-align: center;
     //center text same value as height
-    line-height: 31px;
+    //line-height: 31px;
+    overflow-x: auto;
+    overflow-y: auto;
     span
     {
       // limit width of span

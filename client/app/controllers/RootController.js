@@ -26,7 +26,9 @@ var RootController = (function() {
             }
         }).error(function (data,status) {
             //TODO use vex for error message
-            alert('error in check id session');
+            //alert('error in check id session');
+            oController.onClickLogOut();
+            utilsVexDialogAlertTop('error in check id session');
         });
 
         //if user is logged
@@ -189,6 +191,18 @@ var RootController = (function() {
         }).error(function (data,status) {
             utilsVexDialogAlertTop("Error in open WorkSPace by RootController.js");
         });
+    }
+    RootController.prototype.isVisibleProcessesBar = function ()
+    {
+        var sState=this.m_oState.current.name;
+        switch(sState) {
+            case "root.workspaces":
+                return false;
+                break;
+            default: return true;
+        }
+
+        return true;
     }
     RootController.$inject = [
         '$scope',

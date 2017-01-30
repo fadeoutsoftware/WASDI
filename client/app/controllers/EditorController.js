@@ -261,7 +261,8 @@ var EditorController = (function () {
     EditorController.prototype.receivedDownloadMessage = function (oMessage) {
         if (oMessage == null) return;
         if (oMessage.messageResult=="KO") {
-            alert('There was an error in the download');
+            //alert('There was an error in the download');
+            utilsVexDialogAlertTop('There was an error in the download');
             return;
         }
         var oController = this;
@@ -269,7 +270,7 @@ var EditorController = (function () {
             //console.log('Product added to the ws');
             utilsVexDialogAlertBottomRightCorner('Product added to the ws');
             oController.m_aoProducts.push(oMessage.payload);
-            //oController.m_oTree = oController.generateTree();
+            oController.getProductListByWorkspace();
             oController.m_oProcessesLaunchedService.removeProcessByPropertySubstringVersion("processName",oMessage.payload.fileName,
                 oController.m_oActiveWorkspace.workspaceId,oController.m_oUser.userId);
             //oController.m_aoProcessesRunning =  this.m_oProcessesLaunchedService.getProcesses();
@@ -291,7 +292,8 @@ var EditorController = (function () {
     EditorController.prototype.receivedPublishMessage = function (oMessage) {
         if (oMessage == null) return;
         if (oMessage.messageResult=="KO") {
-            alert('There was an error in the publish');
+            //alert('There was an error in the publish');
+            utilsVexDialogAlertTop('There was an error in the publish');
             return;
         }
 
@@ -660,6 +662,8 @@ var EditorController = (function () {
     EditorController.prototype.getProductListByWorkspace = function()
     {
         var oController = this;
+        oController.m_aoProducts = null;
+
         this.m_oProductService.getProductListByWorkspace(oController.m_oActiveWorkspace.workspaceId).success(function (data, status) {
             if (data != null) {
                 if (data != undefined) {
@@ -669,6 +673,7 @@ var EditorController = (function () {
                         oController.m_aoProducts.push(data[iIndex]);
                     }
                     // i need to make the tree after the products are loaded
+                    oController.m_oTree = null;
                     oController.m_oTree = oController.generateTree();
                     //oController.m_oScope.$apply();
                 }

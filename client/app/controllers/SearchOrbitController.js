@@ -71,10 +71,20 @@ var SearchOrbitController = (function() {
         this.m_oOrbitSearch.satelliteNames = new Array();
         var oOrbitFilter = new Object();
 
-        //add sensor type and resolution
-        for (var iSensorType = 0; iSensorType < this.m_oSelectedSensorType.length; iSensorType++) {
+        if(utilsIsObjectNullOrUndefined(this.m_oSelectedSensorType))
+            var iLengthSelectedSensorType = 0;
+        else
+            var iLengthSelectedSensorType = this.m_oSelectedSensorType.length;
 
-            for (var iResolutionType = 0; iResolutionType < this.m_oSelectedResolutionType.length; iResolutionType++) {
+        if(utilsIsObjectNullOrUndefined(this.m_oSelectedResolutionType))
+            var iLengthSelectedResolutionType  = 0;
+        else
+            var iLengthSelectedResolutionType  = this.m_oSelectedResolutionType.length;
+
+            //add sensor type and resolution
+        for (var iSensorType = 0; iSensorType < iLengthSelectedSensorType; iSensorType++) {
+
+            for (var iResolutionType = 0; iResolutionType < iLengthSelectedResolutionType; iResolutionType++) {
 
                 oOrbitFilter.sensorType = this.m_oSelectedSensorType[iSensorType];
                 oOrbitFilter.sensorResolution = this.m_oSelectedResolutionType[iResolutionType];
@@ -84,8 +94,13 @@ var SearchOrbitController = (function() {
 
         }
 
+        if(utilsIsObjectNullOrUndefined(this.m_oSelectedSatellite))
+            var iLengthSelectedSatellite = 0;
+        else
+            var iLengthSelectedSatellite =this.m_oSelectedSatellite.length;
+
         //satellite names
-        for (var iSatellite = 0; iSatellite < this.m_oSelectedSatellite.length; iSatellite++) {
+        for (var iSatellite = 0; iSatellite < iLengthSelectedSatellite; iSatellite++) {
             oController.m_oOrbitSearch.satelliteNames.push(this.m_oSelectedSatellite[iSatellite]);
         }
 
@@ -93,7 +108,12 @@ var SearchOrbitController = (function() {
 
         //add polygon area
         var sCoordinatesPolygon = "";
-        for (var iLayerCount = 0; iLayerCount < oController.m_oGeoJSON.geometry.coordinates.length; iLayerCount++) {
+        if(utilsIsObjectNullOrUndefined(oController.m_oGeoJSON.geometry.coordinates))
+            var iLengthCoordinates = 0;
+        else
+            var iLengthCoordinates = oController.m_oGeoJSON.geometry.coordinates.length;
+
+        for (var iLayerCount = 0; iLayerCount < iLengthCoordinates; iLayerCount++) {
 
             var oLayer = oController.m_oGeoJSON.geometry.coordinates[iLayerCount];
             for (var iCoordCount = 0; iCoordCount < oLayer.length; iCoordCount++) {

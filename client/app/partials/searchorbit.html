@@ -1,83 +1,94 @@
-<div class="editor-view col-lg-12 col-md-12 col-sm-12 col-xs-12">
-    <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12">
+<div class="editor-view col-lg-12 col-md-12 col-sm-12 col-xs-12 search-orbit-view">
+    <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12 left-side-bar">
+        <div class="my-panel">
+            <div class="panel panel-default">
+                <div class="panel-heading">{{"SEARCH_TITLE_PANEL_HEADING_FILTERS"|translate}}</div>
+                <div class="panel-body">
 
-        <div class="panel panel-default ">
-            <div class="panel-heading">{{"SEARCH_TITLE_PANEL_HEADING_FILTERS"|translate}}</div>
-            <div class="panel-body">
-                <div class="col-lg-5 col-md-5 col-sm-5 col-xs-5 well well-sm" >
-                   {{"SEARCH_TITLE_CHECK_BOX_SENSOR_TYPE"|translate}}
-                    <div ng-repeat="sensortype in m_oController.m_oConfiguration.orbitsearch.sensortypes" >
-                        <input type="checkbox" checklist-model="m_oController.m_oSelectedSensorType" checklist-value="sensortype"/> <span>{{sensortype}}</span>
-                    </div>
+                    <!------------------------- TIME PICKER START -------------------->
+                    <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 time-picker-container ">
+                        <i class="fa fa-calendar" aria-hidden="true"></i> Acquisition Start Time
 
-                </div>
-                <div class="col-lg-5 col-md-5 col-sm-5 col-xs-5 well well-sm" >
-                    {{"SEARCH_TITLE_CHECK_BOX_SENSOR_RESOLUTION"|translate}}
-                    <div ng-repeat="sensorresolution in m_oController.m_oConfiguration.orbitsearch.sensorresolutions" >
-                        <input type="checkbox"  checklist-model="m_oController.m_oSelectedResolutionType" checklist-value="sensorresolution"/> <span>{{sensorresolution}}</span>
-                    </div>
-                </div>
-                <div class="col-lg-2 col-md-2 col-sm-2 col-xs-2" >
-                    <button class="btn" ng-click="m_oController.searchOrbit()">Search</button>
-                </div>
-                <div class="input-group col-lg-4 col-md-2 col-sm-2 col-xs-6 ">
-                    <i class="fa fa-calendar" aria-hidden="true"></i> Acquisition Start Time
-                    <div class="input-group"
-                         moment-picker="m_oController.m_oOrbitSearch.acquisitionStartTime"
-                         format="YYYY-MM-DD HH:mm:ss"
-                         today="true">
+                        <div class="input-group"
+                             moment-picker="m_oController.m_oOrbitSearch.acquisitionStartTime"
+                             format="YYYY-MM-DD HH:mm:ss"
+                             today="true">
                         <span class="input-group-addon">
                             <i class="fa fa-calendar-o"></i>
                         </span>
-                        <input class="form-control"
-                               placeholder="Select acquisition start time"
-                               ng-model="m_oController.m_oOrbitSearch.acquisitionStartTime"
-                               ng-model-options="{ updateOn: 'blur' }">
+                            <input class="form-control"
+                                   placeholder="Select acquisition start time"
+                                   ng-model="m_oController.m_oOrbitSearch.acquisitionStartTime"
+                                   ng-model-options="{ updateOn: 'blur' }">
+                        </div>
                     </div>
 
-
-                </div>
-                <div class="col-lg-4 col-md-2 col-sm-2 col-xs-6 input-group">
-                    <i class="fa fa-calendar" aria-hidden="true"></i> Acquisition End Time
-                    <div class="input-group"
-                         moment-picker="m_oController.m_oOrbitSearch.acquisitionEndTime"
-                         format="YYYY-MM-DD HH:mm:ss"
-                         today="true">
+                    <!---------------------- TIME PICKER END -------------------->
+                    <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 time-picker-container">
+                        <i class="fa fa-calendar" aria-hidden="true"></i> Acquisition End Time
+                        <div class="input-group"
+                             moment-picker="m_oController.m_oOrbitSearch.acquisitionEndTime"
+                             format="YYYY-MM-DD HH:mm:ss"
+                             today="true">
                         <span class="input-group-addon">
                             <i class="fa fa-calendar-o"></i>
                         </span>
-                        <input class="form-control"
-                               placeholder="Select acquisition end time"
-                               ng-model="m_oController.m_oOrbitSearch.acquisitionEndTime"
-                               ng-model-options="{ updateOn: 'blur' }">
+                            <input class="form-control"
+                                   placeholder="Select acquisition end time"
+                                   ng-model="m_oController.m_oOrbitSearch.acquisitionEndTime"
+                                   ng-model-options="{ updateOn: 'blur' }">
+                        </div>
                     </div>
 
-                </div>
+                    <!---------------------------------------- CHECK BOX ---------------------------------------------->
+                    <!------------------------ Type ------------------>
+                    <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 container-checkbox" >
+                        {{"SEARCH_TITLE_CHECK_BOX_SENSOR_TYPE"|translate}}
+                        <div class="well well-sm">
+                            <div ng-repeat="sensortype in m_oController.m_oConfiguration.orbitsearch.sensortypes" >
+                                <input type="checkbox" checklist-model="m_oController.m_oSelectedSensorType" checklist-value="sensortype"/> <span>{{sensortype}}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <!-------------------------- Resolution --------------------->
+                    <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 " >
+                        {{"SEARCH_TITLE_CHECK_BOX_SENSOR_RESOLUTION"|translate}}
+                        <div class="well well-sm">
+                            <div ng-repeat="sensorresolution in m_oController.m_oConfiguration.orbitsearch.sensorresolutions" >
+                                <input type="checkbox"  checklist-model="m_oController.m_oSelectedResolutionType" checklist-value="sensorresolution"/> <span>{{sensorresolution}}</span>
+                            </div>
+                        </div>
+                    </div>
 
-                <div class="col-lg-4 col-md-4 col-sm-4 col-xs-6">
-                    <label ng-repeat="satellite in m_oController.m_oConfiguration.orbitsearch.satelliteNames">
-                        <input type="checkbox" checklist-model="m_oController.m_oSelectedSatellite"
-                               checklist-value="satellite"/> <span>{{satellite}}</span>
-                    </label>
-                </div>
+                    <!------------------------- Satellite ----------------------------->
+                    <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 ">
+                        <img src="assets/icons/Satellite.svg" alt="Satellite" height="30" width="30">{{"SEARCH_TITLE_CHECK_BOX_SATELLITE"|translate}}
+                        <div class="well well-sm">
+                            <div ng-repeat="satellite in m_oController.m_oConfiguration.orbitsearch.satelliteNames">
+                                <input type="checkbox" checklist-model="m_oController.m_oSelectedSatellite"
+                                       checklist-value="satellite"/> <span>{{satellite}}</span>
+                            </div>
+                        </div>
+                    </div>
 
+                    <button class="my-button" ng-click="m_oController.searchOrbit()">Search</button>
+
+                </div>
             </div>
-
-            <button class="btn" ng-click="m_oController.searchOrbit()">Search</button>
-
         </div>
+        <!------------------------------- TABLE ORBIT --------------------------------------->
         <div class="row col-lg-12 col-md-12 col-sm-12 col-xs-12">
             <table class="table table-hover">
                 <thead>
                 <tr>
                     <th>
-                        Satellite
+                        {{"SEARCH_TITLE_HEAD_ORBIT_TABLE_SATELLITE"|translate}}
                     </th>
                     <th>
-                        Acquisition Start
+                        {{"SEARCH_TITLE_HEAD_ORBIT_TABLE_ACQUISITION_START"|translate}}
                     </th>
                     <th>
-                        Acquisition End
+                        {{"SEARCH_TITLE_HEAD_ORBIT_TABLE_ACQUISITION_END"|translate}}
                     </th>
                 </tr>
                 </thead>

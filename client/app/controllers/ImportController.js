@@ -527,11 +527,12 @@ var ImportController = (function() {
 
         this.m_oFileBufferService.download(url,oWorkSpace.workspaceId).success(function (data, status) {
 
-            utilsVexDialogAlertBottomRightCorner("Product just start the download ");
+            var oDialog = utilsVexDialogAlertBottomRightCorner("Product just start the download ");
             oController.m_oProcessesLaunchedService.addProcessesByLocalStorage(oLayer.title,
                                                                                 null,
                                                                                 oController.m_oProcessesLaunchedService.getTypeOfProcessProductDownload()
                                                                                 ,oWorkSpace.workspaceId,oController.m_oUser.userId);
+            utilsVexCloseDialogAfterFewSeconds("3000",oDialog);
             /*
             * {processName:oLayer.title, nodeId:null,
             * typeOfProcess:oController.m_oProcessesLaunchedService.getTypeOfProcessProductDownload()}
@@ -1039,7 +1040,8 @@ var ImportController = (function() {
 
         if (oMessage == null) return;
         if (oMessage.messageResult=="KO") {
-            alert('There was an error in the download');
+            //alert('There was an error in the download');
+            utilsVexDialogAlertTop('There was an error in the download')
             return;
         }
         var oController = this;
@@ -1072,7 +1074,7 @@ var ImportController = (function() {
                 }
             }
         }).error(function (data,status) {
-            alert('error');
+            utilsVexDialogAlertTop("Error in openWorkspace. ImportController.js ");
         });
     }
     ImportController.prototype.loadOpenSearchParamsByResultsOfSearchServices = function(oController)

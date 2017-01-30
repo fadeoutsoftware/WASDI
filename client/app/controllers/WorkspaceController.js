@@ -37,7 +37,8 @@ var WorkspaceController = (function() {
                 }
             }
         }).error(function (data,status) {
-            alert('error');
+            //alert('error');
+            utilsVexDialogAlertTop('Error in create WorkSpace. WorkspaceController.js');
         });
     }
 
@@ -57,7 +58,8 @@ var WorkspaceController = (function() {
                 }
             }
         }).error(function (data,status) {
-            alert('error');
+            //alert('error');
+            utilsVexDialogAlertTop('Error OpenWorkspace. WorkSpaceController.js');
         });
     }
 
@@ -81,7 +83,8 @@ var WorkspaceController = (function() {
                         }
                     }
                 }).error(function (data,status) {
-                    alert('error');
+                    //alert('error');
+                    utilsVexDialogAlertTop('Error in WorkspacesInfo. WorkspaceController.js');
                 });
             }
         }
