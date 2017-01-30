@@ -20,17 +20,72 @@
                 <div class="col-lg-2 col-md-2 col-sm-2 col-xs-2" >
                     <button class="btn" ng-click="m_oController.searchOrbit()">Search</button>
                 </div>
+                <div class="input-group col-lg-4 col-md-2 col-sm-2 col-xs-6 ">
+                    <i class="fa fa-calendar" aria-hidden="true"></i> Acquisition Start Time
+                    <div class="input-group"
+                         moment-picker="m_oController.m_oOrbitSearch.acquisitionStartTime"
+                         format="YYYY-MM-DD HH:mm:ss"
+                         today="true">
+                        <span class="input-group-addon">
+                            <i class="fa fa-calendar-o"></i>
+                        </span>
+                        <input class="form-control"
+                               placeholder="Select acquisition start time"
+                               ng-model="m_oController.m_oOrbitSearch.acquisitionStartTime"
+                               ng-model-options="{ updateOn: 'blur' }">
+                    </div>
+
+
+                </div>
+                <div class="col-lg-4 col-md-2 col-sm-2 col-xs-6 input-group">
+                    <i class="fa fa-calendar" aria-hidden="true"></i> Acquisition End Time
+                    <div class="input-group"
+                         moment-picker="m_oController.m_oOrbitSearch.acquisitionEndTime"
+                         format="YYYY-MM-DD HH:mm:ss"
+                         today="true">
+                        <span class="input-group-addon">
+                            <i class="fa fa-calendar-o"></i>
+                        </span>
+                        <input class="form-control"
+                               placeholder="Select acquisition end time"
+                               ng-model="m_oController.m_oOrbitSearch.acquisitionEndTime"
+                               ng-model-options="{ updateOn: 'blur' }">
+                    </div>
+
+                </div>
+
+                <div class="col-lg-4 col-md-4 col-sm-4 col-xs-6">
+                    <label ng-repeat="satellite in m_oController.m_oConfiguration.orbitsearch.satelliteNames">
+                        <input type="checkbox" checklist-model="m_oController.m_oSelectedSatellite"
+                               checklist-value="satellite"/> <span>{{satellite}}</span>
+                    </label>
+                </div>
+
             </div>
+
+            <button class="btn" ng-click="m_oController.searchOrbit()">Search</button>
 
         </div>
         <div class="row col-lg-12 col-md-12 col-sm-12 col-xs-12">
             <table class="table table-hover">
                 <thead>
-                <th>Satellite Name</th>
+                <tr>
+                    <th>
+                        Satellite
+                    </th>
+                    <th>
+                        Acquisition Start
+                    </th>
+                    <th>
+                        Acquisition End
+                    </th>
+                </tr>
                 </thead>
                 <tbody>
-                <tr ng-repeat="orbit in m_oController.getOrbits()">
-                    <td><span ng-click="m_oController.showSwath(orbit)">{{orbit.SatelliteName}}</span></td>
+                <tr ng-repeat="orbit in m_oController.getOrbits()" ng-click="m_oController.showSwath(orbit)">
+                    <td><span >{{orbit.SatelliteName}}</span></td>
+                    <td><span >{{m_oController.getDateFromTimestamp(orbit.AcquisitionStartTime)}}</span></td>
+                    <td><span >{{m_oController.getDateFromTimestamp(orbit.AcquisitionEndTime)}}</span></td>
                 </tr>
                 </tbody>
             </table>
@@ -40,6 +95,6 @@
 
     <!--------------- MAP CONTAINER --------------->
     <div class="col-lg-8 col-md-8 col-sm-8 col-xs-12 map-container">
-        <div class="map" id = "orbitMap"></div>
+        <div class="map" id="orbitMap"></div>
     </div>
 </div>

@@ -25,7 +25,9 @@ var wasdiApp = angular.module('wasdi', [
     'wasdi.TreeDirective',
 
     'ui.bootstrap',
-    'checklist-model'
+    'checklist-model',
+    'moment-picker'
+
 ]);
 
 wasdiApp.config(['$httpProvider', '$translateProvider', function($httpProvider, $translateProvider) {

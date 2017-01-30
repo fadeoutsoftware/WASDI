@@ -13,9 +13,14 @@ service('SearchOrbitService', ['$http',  'ConstantsService', function ($http, oC
 
     this.searchOrbit = function (oData) {
 
-        return this.m_oHttp.post(this.APIURL + '/searchorbit/search', oData, {
+
+        return this.m_oHttp.post('http://localhost:8080/wasdiwebserver/rest/searchorbit/search', oData, {
             headers: { 'Content-Type': 'application/json;charset=utf-8'}
         });
+
+        //return this.m_oHttp.post(this.APIURL + '/searchorbit/search', oData, {
+        //    headers: { 'Content-Type': 'application/json;charset=utf-8'}
+        //});
     }
 
 }]);

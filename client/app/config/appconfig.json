@@ -177,7 +177,9 @@
     ],
     "orbitsearch":{
         "sensortypes":["SAR","Optical"],
-        "sensorresolutions":["High","Medium","Low"]
+        "sensorresolutions":["High","Medium","Low"],
+        "satelliteNames":["COSMOSKY1","COSMOSKY2","COSMOSKY3","COSMOSKY4"]
+
     }
 
 }

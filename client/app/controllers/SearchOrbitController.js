@@ -20,7 +20,15 @@ var SearchOrbitController = (function() {
         this.m_oGeoJSON = null;
         this.m_oSelectedSensorType = null;
         this.m_oSelectedResolutionType = null;
+        this.m_oSelectedSatellite = null;
         this.m_aoOrbits = null;
+
+        this.initOrbitSearch = function(){
+            //init orbit search
+            this.m_oOrbitSearch = new Object();
+            this.m_oOrbitSearch.acquisitionStartTime = moment();
+            this.m_oOrbitSearch.acquisitionEndTime = moment().add(1, 'd');
+        }
 
         var oController = this;
 
@@ -40,8 +48,13 @@ var SearchOrbitController = (function() {
 
         });
 
+        this.initOrbitSearch();
 
     }
+
+    SearchOrbitController.prototype.getDateFromTimestamp = function(timestamp) {
+      return moment.unix(timestamp / 1000).format("YYYY-MM-DD HH:mm:ss");
+    };
 
     SearchOrbitController.prototype.searchOrbit = function() {
         var oController = this;
@@ -54,20 +67,31 @@ var SearchOrbitController = (function() {
 
             var oOrbitSearch = new Object();
         oOrbitSearch.orbitFilters = new Array();
+        this.m_oOrbitSearch.orbitFilters = new Array();
+        this.m_oOrbitSearch.satelliteNames = new Array();
         var oOrbitFilter = new Object();
 
+        //add sensor type and resolution
         for (var iSensorType = 0; iSensorType < this.m_oSelectedSensorType.length; iSensorType++) {
 
             for (var iResolutionType = 0; iResolutionType < this.m_oSelectedResolutionType.length; iResolutionType++) {
 
                 oOrbitFilter.sensorType = this.m_oSelectedSensorType[iSensorType];
                 oOrbitFilter.sensorResolution = this.m_oSelectedResolutionType[iResolutionType];
-                oOrbitSearch.orbitFilters.push(oOrbitFilter);
+                oController.m_oOrbitSearch.orbitFilters.push(oOrbitFilter);
 
             }
 
         }
 
+        //satellite names
+        for (var iSatellite = 0; iSatellite < this.m_oSelectedSatellite.length; iSatellite++) {
+            oController.m_oOrbitSearch.satelliteNames.push(this.m_oSelectedSatellite[iSatellite]);
+        }
+
+        //
+
+        //add polygon area
         var sCoordinatesPolygon = "";
         for (var iLayerCount = 0; iLayerCount < oController.m_oGeoJSON.geometry.coordinates.length; iLayerCount++) {
 
@@ -86,10 +110,10 @@ var SearchOrbitController = (function() {
 
         }
 
-        oOrbitSearch.polygon = sCoordinatesPolygon;
+        oController.m_oOrbitSearch.polygon = sCoordinatesPolygon;
 
         //call search
-        this.m_oSearchOrbitService.searchOrbit(oOrbitSearch)
+        this.m_oSearchOrbitService.searchOrbit(oController.m_oOrbitSearch)
             .success(function (data, status, headers, config) {
                 oController.m_aoOrbits = data;
 
