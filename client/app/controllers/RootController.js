@@ -113,18 +113,7 @@ var RootController = (function() {
 
     }
 
-    RootController.prototype.isVisibleNavBar=function()
-    {
-        var sState=this.m_oState.current.name;
-        switch(sState) {
-            case "root.workspaces":
-                return false;
-                break;
-            default: return true;
-        }
-
-        return true;
-    }
+    /*********************************** METHODS **************************************/
 
     RootController.prototype.onClickProcess = function()
     {
@@ -151,27 +140,10 @@ var RootController = (function() {
         }
 
     }
-    RootController.prototype.openImportPage = function () {
-
-        var oController = this;
-        // if it publishing a band u can't go in import controller
-        if( this.m_oProcessesLaunchedService.thereAreSomePublishBandProcess() == false )
-        {
-            var sWorkSpace = this.m_oConstantsService.getActiveWorkspace();
-            oController.m_oState.go("root.import", { workSpace : sWorkSpace.workspaceId });//use workSpace when reload editor page
-        }
-        //TODO FEEDBACK IF U CAN'T CLICK ON IMPORT
-    }
 
     RootController.prototype.noActiveLinkInNavBarCSS = function()
     {
         return ".not-active { pointer-events: none; cursor: default;}";
-    }
-    RootController.prototype.openEditorPage = function () {
-
-        var oController = this;
-        var sWorkSpace = this.m_oConstantsService.getActiveWorkspace();
-        oController.m_oState.go("root.editor", { workSpace : sWorkSpace.workspaceId });//use workSpace when reload editor page
     }
 
     RootController.prototype.openWorkspace = function (sWorkspaceId) {
@@ -192,6 +164,8 @@ var RootController = (function() {
             utilsVexDialogAlertTop("Error in open WorkSPace by RootController.js");
         });
     }
+
+    /***************************** IS VISIBLE HTML ELEMENT ******************************/
     RootController.prototype.isVisibleProcessesBar = function ()
     {
         var sState=this.m_oState.current.name;
@@ -204,6 +178,55 @@ var RootController = (function() {
 
         return true;
     }
+
+    RootController.prototype.isVisibleNavBar=function()
+    {
+        var sState=this.m_oState.current.name;
+        switch(sState) {
+            case "root.workspaces":
+                return false;
+                break;
+            default: return true;
+        }
+
+        return true;
+    }
+    /*********************************************************************************/
+    /* ***************** OPEN LINK *****************/
+    RootController.prototype.openEditorPage = function () {
+
+        var oController = this;
+        var sWorkSpace = this.m_oConstantsService.getActiveWorkspace();
+        oController.m_oState.go("root.editor", { workSpace : sWorkSpace.workspaceId });//use workSpace when reload editor page
+    }
+
+
+    RootController.prototype.openSearchorbit = function()
+    {
+        var oController = this;
+        // if it publishing a band u can't go in import controller
+        if( this.m_oProcessesLaunchedService.thereAreSomePublishBandProcess() == false )
+        {
+            var sWorkSpace = this.m_oConstantsService.getActiveWorkspace();
+            oController.m_oState.go("root.searchorbit", { workSpace : sWorkSpace.workspaceId });//use workSpace when reload editor page
+        }
+
+
+    }
+
+    RootController.prototype.openImportPage = function () {
+
+        var oController = this;
+        // if it publishing a band u can't go in import controller
+        if( this.m_oProcessesLaunchedService.thereAreSomePublishBandProcess() == false )
+        {
+            var sWorkSpace = this.m_oConstantsService.getActiveWorkspace();
+            oController.m_oState.go("root.import", { workSpace : sWorkSpace.workspaceId });//use workSpace when reload editor page
+        }
+        //TODO FEEDBACK IF U CAN'T CLICK ON IMPORT
+    }
+
+    /*********************************************************************/
     RootController.$inject = [
         '$scope',
         'ConstantsService',

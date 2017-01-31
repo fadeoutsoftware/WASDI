@@ -519,14 +519,14 @@ var ImportController = (function() {
         var url = this.getDownloadLink(oLayer.layerProperty);
         if(utilsIsObjectNullOrUndefined(url))
         {
-            //TODO CHEK THIS POSSIBLE CASE
+            //TODO CHECK THIS POSSIBLE CASE
             //utilsVexDialogAlertTop("Error there isn't workspaceID or layer")
             console.log("Error there isn't workspaceID or layer")
             return false;
         }
 
         this.m_oFileBufferService.download(url,oWorkSpace.workspaceId).success(function (data, status) {
-
+            //TODO CHECK DATA-STATUS
             var oDialog = utilsVexDialogAlertBottomRightCorner("Product just start the download ");
             oController.m_oProcessesLaunchedService.addProcessesByLocalStorage(oLayer.title,
                                                                                 null,
@@ -546,7 +546,7 @@ var ImportController = (function() {
     }
 
     ImportController.prototype.clearFilter = function() {
-        for(var i=0; i<this.m_aoMissions.length; i++)
+        for(var i=0; i < this.m_aoMissions.length; i++)
         {
             this.m_aoMissions[i].selected = false;
             this.updateMissionSelection(i);
@@ -566,6 +566,7 @@ var ImportController = (function() {
             this.m_aoProductsList = [];
         }
 
+        this.m_oMapService.deleteDrawShapeEditToolbar();
     }
 
     ImportController.prototype.openSensingPeriodFrom = function($event) {

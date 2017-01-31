@@ -104,9 +104,9 @@ wasdiApp.config(['$stateProvider', '$urlRouterProvider', function($stateProvider
         },
     });
 
-    //IMPORT
+    //SEARCH ORBIT
     $stateProvider.state('root.searchorbit',{
-        url: '/searchorbit',
+        url: '/{workSpace}/searchorbit',
 
         views:{
             'maincontent' : { templateUrl : 'partials/searchorbit.html', controller  : 'SearchOrbitController'}

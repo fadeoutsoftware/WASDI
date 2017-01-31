@@ -87,7 +87,7 @@ var EditorController = (function () {
         var oController = this;
 
         //Set default value tree
-        this.m_oTree=null;//IMPORTANT NOTE: there's a 'WATCH' for this.m_oTree in TREE DIRECTIVE
+        this.m_oTree = null;//IMPORTANT NOTE: there's a 'WATCH' for this.m_oTree in TREE DIRECTIVE
 
         /*Start Rabbit WebStomp*/
         this.m_oRabbitStompServive.initWebStomp(this.m_oActiveWorkspace,"EditorController",this);
@@ -270,7 +270,8 @@ var EditorController = (function () {
             //console.log('Product added to the ws');
             utilsVexDialogAlertBottomRightCorner('Product added to the ws');
             oController.m_aoProducts.push(oMessage.payload);
-            oController.getProductListByWorkspace();
+            //oController.getProductListByWorkspace();
+            oController.m_oTree = oController.generateTree();
             oController.m_oProcessesLaunchedService.removeProcessByPropertySubstringVersion("processName",oMessage.payload.fileName,
                 oController.m_oActiveWorkspace.workspaceId,oController.m_oUser.userId);
             //oController.m_aoProcessesRunning =  this.m_oProcessesLaunchedService.getProcesses();
@@ -662,7 +663,7 @@ var EditorController = (function () {
     EditorController.prototype.getProductListByWorkspace = function()
     {
         var oController = this;
-        oController.m_aoProducts = null;
+        oController.m_aoProducts = [];
 
         this.m_oProductService.getProductListByWorkspace(oController.m_oActiveWorkspace.workspaceId).success(function (data, status) {
             if (data != null) {
@@ -673,7 +674,6 @@ var EditorController = (function () {
                         oController.m_aoProducts.push(data[iIndex]);
                     }
                     // i need to make the tree after the products are loaded
-                    oController.m_oTree = null;
                     oController.m_oTree = oController.generateTree();
                     //oController.m_oScope.$apply();
                 }

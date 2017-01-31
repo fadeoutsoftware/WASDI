@@ -65,62 +65,70 @@ angular.module('wasdi.TreeDirective', [])
             *  NOTE: $SCOPE = EDITOR SCOPE
             * */
 
+            /* WHEN THE TREE WAS CHANGED */
             $scope.$watch('m_oController.m_oTree', function (newValue, oldValue, scope)
             {
                 if(!utilsIsObjectNullOrUndefined($scope.m_oController.m_oTree))
                 {
-                    //$('#jstree').jstree.destroy();
-                    //load tree
-                    $('#jstree').jstree($scope.m_oController.m_oTree);
-
-
-                    //bind event (it triggered when click a node in tree)
-                    $('#jstree').on("changed.jstree", function (e, data) {
-
-                        //data.event.preventDefault();//TODO CHECK IF IT'S USEFUL
-
-
-                        // if there isn't running processes AND the node it's a band do $scope.m_oController.openBandImage()
-
-                        /*PUBLIC BAND*/
-                        //change icons
-                        if($scope.m_oController.m_oProcessesLaunchedService.thereAreSomePublishBandProcess() == false && data.node.children.length == 0 && !utilsIsObjectNullOrUndefined(data.node.original.band))
-                        {
-
-                            if(data.node.icon == 'assets/icons/check.png')
-                            {
-                                $('#jstree').jstree(true).set_icon(data.node.id, 'assets/icons/uncheck.png');
-                                $scope.m_oController.removeBandImage(data.node.original.band);
-                            }
-                            else
-                            {
-                                $('#jstree').jstree(true).set_icon(data.node.id, 'assets/icons/check.png');
-                                $scope.m_oController.openBandImage(data.node.original.band,data.node.id);
-                            }
-
-                        }
-
-                    });
-
-                    /* BIND EVENT DOUBLE CLICK */
-                    $("#jstree").delegate("a","dblclick", function(e) {
-                        var instance = $.jstree.reference(this);
-                        var node = instance.get_node(this);
-                        //TODO WHEN I DBLCLICK ON PRODUCT I PUBLISH IT
-                    });
-
-                    //bind event (event = after tree is loaded do checkTreeNode())
-                    /*
-                    * */
-                    $('#jstree').on("loaded.jstree", function (e, data)
+                    if(!utilsIsObjectNullOrUndefined(oldValue))
                     {
-                        //if the page was reload it method check all nodes in tree,
-                        //this nodes are processes running in server
-                        //$scope.m_oController.checkNodesInTree();
-                    });
+                        /********************RELAODED TREE CASE ****************************/
+                        //if the tree is reloaded need  $('#jstree').jstree(true).refresh();
+                        $('#jstree').jstree(true).settings.core.data = newValue.core.data;
+                        $('#jstree').jstree(true).refresh();
+                    }
+                    else
+                    {
+                        //****************** INIT JS TREE  *************************
+                        //load tree
+                        $('#jstree').jstree($scope.m_oController.m_oTree);
 
+                        //Bind Click node event
+                        $('#jstree').on("changed.jstree", function (e, data) {
 
+                            /*CLICK ON PUBLIC BAND*/
+                            // if there isn't running publish band processes AND the node it's a band do $scope.m_oController.openBandImage()
+                            //change icons
+                            if(!utilsIsObjectNullOrUndefined(data.node))
+                            {
+                                if($scope.m_oController.m_oProcessesLaunchedService.thereAreSomePublishBandProcess() == false && data.node.children.length == 0 && !utilsIsObjectNullOrUndefined(data.node.original.band))
+                                {
+
+                                    if(data.node.icon == 'assets/icons/check.png')
+                                    {
+                                        $('#jstree').jstree(true).set_icon(data.node.id, 'assets/icons/uncheck.png');
+                                        $scope.m_oController.removeBandImage(data.node.original.band);
+                                    }
+                                    else
+                                    {
+                                        $('#jstree').jstree(true).set_icon(data.node.id, 'assets/icons/check.png');
+                                        $scope.m_oController.openBandImage(data.node.original.band,data.node.id);
+                                    }
+
+                                }
+                            }
+                        });
+
+                        ///* BIND EVENT DOUBLE CLICK */
+                        //$("#jstree").delegate("a","dblclick", function(e) {
+                        //    var instance = $.jstree.reference(this);
+                        //    var node = instance.get_node(this);
+                        //
+                        //});
+
+                        //bind event (event = after tree is loaded do checkTreeNode())
+                        /*
+                         * */
+                        //$('#jstree').on("loaded.jstree", function (e, data)
+                        //{
+                        //    //if the page was reload it method check all nodes in tree,
+                        //    //this nodes are processes running in server
+                        //    //$scope.m_oController.checkNodesInTree();
+                        //});
+
+                    }
                 }
+
             });
 
 

@@ -8,6 +8,7 @@ service('MapService', ['$http','$rootScope', 'ConstantsService', function ($http
     this.APIURL = oConstantsService.getAPIURL();
     this.m_oHttp = $http;
     this.m_oRectangleOpenSearch = null;
+    this.m_oDrawItems = null;
     /**
      * base layers
      */
@@ -206,7 +207,7 @@ service('MapService', ['$http','$rootScope', 'ConstantsService', function ($http
             if(utilsIsObjectNullOrUndefined(aaBounds[iIndex]))
                 return null;
 
-            ///*  if the LatLng coordinates are "outside the map" return the right coordinates */
+            ///* if the LatLng coordinates are "outside the map" return the right coordinates */
             //var adLatLng = L.latLng(aaBounds[iIndex]);
             //aaBounds[iIndex] = this.m_oWasdiMap.wrapLatLng(adLatLng);
 
@@ -270,11 +271,12 @@ service('MapService', ['$http','$rootScope', 'ConstantsService', function ($http
         //LEAFLET.DRAW LIB
         //add draw.search (opensearch)
         var drawnItems = new L.FeatureGroup();
+        this.m_oDrawItems = drawnItems;//save draw items (used in delete shape)
         this.m_oWasdiMap.addLayer(drawnItems);
 
         var oOptions={
             position:'topright',//position of menu
-            draw:{// what kind of shape is disable
+            draw:{// what kind of shape is disable/enable
                 marker:false,
                 polyline:false,
                 circle:false,
@@ -282,7 +284,7 @@ service('MapService', ['$http','$rootScope', 'ConstantsService', function ($http
             },
 
             edit: {
-                featureGroup: drawnItems,
+                featureGroup: drawnItems,//draw items are the "voice" of menu
             }
         };
 
@@ -314,6 +316,10 @@ service('MapService', ['$http','$rootScope', 'ConstantsService', function ($http
 
     this.getMap = function () {
         return this.m_oWasdiMap;
+    }
+    this.deleteDrawShapeEditToolbar = function()
+    {
+        this.m_oDrawItems.clearLayers();
     }
 
 

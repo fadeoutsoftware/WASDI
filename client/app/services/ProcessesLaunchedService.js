@@ -309,4 +309,16 @@ service('ProcessesLaunchedService', ['ConstantsService','$rootScope', function (
     {
         return this.TYPE_OF_PROCESS[1];
     }
+
+    this.addProcessToList= function (sProcessName,sTypeOfProcess,sTimeStamp)
+    {
+        if(utilsIsObjectNullOrUndefined(sProcessName))
+            return false;
+        if(utilsIsObjectNullOrUndefined(sTypeOfProcess))
+            return false;
+        if(utilsIsObjectNullOrUndefined(sTimeStamp))
+            return false;
+        var oProcess = {"processName":sProcessName,"timeStamp":iIdBandNodeInTree,"typeOfProcess":sTypeOfProcess};
+        this.m_aoProcessesRunning.push(oProcess);
+    }
 }]);
