@@ -3,7 +3,7 @@
  */
 'use strict';
 angular.module('wasdi.RabbitStompService', ['wasdi.RabbitStompService']).
-service('RabbitStompService', ['$http',  'ConstantsService','$interval', function ($http, oConstantsService,$interval,$scope) {
+service('RabbitStompService', ['$http',  'ConstantsService','$interval','ProcessesLaunchedService', function ($http, oConstantsService,$interval,oProcessesLaunchedService,$scope) {
 
     // Reconnection promise to stop the timer if the reconnection succeed or if the user change page
     this.m_oInterval = $interval;
@@ -17,9 +17,10 @@ service('RabbitStompService', ['$http',  'ConstantsService','$interval', functio
     this.m_oOn_Connect = null;
     this.m_oOn_Error = null;
     this.m_oRabbitReconnect = null;
+    this.m_oProcessesLaunchedService = oProcessesLaunchedService;
 
     this.m_oSubscription = null;
-
+    this.m_oUser = null;
 
     /*@Params: WorkspaceID, Name of controller, Controller
     * it need the Controller for call the methods (the methods are inside the active controllers)
@@ -27,9 +28,11 @@ service('RabbitStompService', ['$http',  'ConstantsService','$interval', functio
     * */
     this.initWebStomp = function(oActiveWorkspace,sControllerName,oControllerActive)
     {
-        if(utilsIsObjectNullOrUndefined(oActiveWorkspace) || utilsIsObjectNullOrUndefined(oControllerActive) || utilsIsStrNullOrEmpty(sControllerName))
+        if(utilsIsObjectNullOrUndefined(oActiveWorkspace) || utilsIsObjectNullOrUndefined(oControllerActive) || utilsIsStrNullOrEmpty(sControllerName) )
+        {
+            console.log("InitWebStomp some value are null");
             return false;
-
+        }
         this.m_oActiveWorkspace=oActiveWorkspace;
 
         // Web Socket to receive workspace messages
@@ -43,7 +46,8 @@ service('RabbitStompService', ['$http',  'ConstantsService','$interval', functio
          */
         var oRabbitCallback = function (message) {
             // called when the client receives a STOMP message from the server
-            if (message.body) {
+            if (message.body)
+            {
                 console.log("got message with body " + message.body)
 
                 // Get The Message View Model
@@ -58,43 +62,86 @@ service('RabbitStompService', ['$http',  'ConstantsService','$interval', functio
                 }
 
                 // Route the message
-                if (oMessageResult.messageCode == "DOWNLOAD") {
+            //    if (oMessageResult.messageCode == "DOWNLOAD")
+            //    {
+            //
+            //        if(sControllerName == "EditorController" || sControllerName == "ImportController")
+            //        {
+            //            oControllerActive.receivedDownloadMessage(oMessageResult);
+            //            oController.m_oProcessesLaunchedService.loadProcessesFromServer();
+            //            var oDialog = utilsVexDialogAlertBottomRightCorner("The download is ended");
+            //            utilsVexCloseDialogAfterFewSeconds(3000,oDialog);
+            //        }
+            //        //TODO ERRROR CASE
+            //    }
+            //    else if (oMessageResult.messageCode == "PUBLISH") {
+            //        if(sControllerName == "EditorController" )
+            //        {
+            //            oControllerActive.receivedPublishMessage(oMessageResult);
+            //            oController.m_oProcessesLaunchedService.loadProcessesFromServer();
+            //            var oDialog = utilsVexDialogAlertBottomRightCorner("The publish is ended");
+            //            utilsVexCloseDialogAfterFewSeconds(3000,oDialog);
+            //        }
+            //        //TODO ERRROR CASE
+            //
+            //    }
+            //    else if (oMessageResult.messageCode == "PUBLISHBAND") {
+            //
+            //        if(sControllerName == "EditorController" || sControllerName == "ImportController")
+            //        {
+            //            oControllerActive.receivedPublishBandMessage(oMessageResult.payload.layerId);
+            //            oController.m_oProcessesLaunchedService.loadProcessesFromServer();
+            //            var oDialog = utilsVexDialogAlertBottomRightCorner("The publish is ended");
+            //            utilsVexCloseDialogAfterFewSeconds(3000,oDialog);
+            //
+            //        }
+            //        //TODO ERRROR CASE
+            //
+            //    }
+            //
+            //} else {
+            //    console.log("got empty message");
+            //}
 
+            switch(oMessageResult.messageCode)
+            {
+                case "DOWNLOAD":
                     if(sControllerName == "EditorController" || sControllerName == "ImportController")
                     {
                         oControllerActive.receivedDownloadMessage(oMessageResult);
+                        oController.m_oProcessesLaunchedService.loadProcessesFromServer();
                         var oDialog = utilsVexDialogAlertBottomRightCorner("The download is ended");
                         utilsVexCloseDialogAfterFewSeconds(3000,oDialog);
                     }
-                    //TODO ERRROR CASE
-                }
-                else if (oMessageResult.messageCode == "PUBLISH") {
+                    break;
+                case "PUBLISH":
                     if(sControllerName == "EditorController" )
                     {
                         oControllerActive.receivedPublishMessage(oMessageResult);
+                        oController.m_oProcessesLaunchedService.loadProcessesFromServer();
                         var oDialog = utilsVexDialogAlertBottomRightCorner("The publish is ended");
                         utilsVexCloseDialogAfterFewSeconds(3000,oDialog);
                     }
-                    //TODO ERRROR CASE
-
-                }
-                else if (oMessageResult.messageCode == "PUBLISHBAND") {
-
+                    break;
+                case "PUBLISHBAND":
                     if(sControllerName == "EditorController" || sControllerName == "ImportController")
                     {
                         oControllerActive.receivedPublishBandMessage(oMessageResult.payload.layerId);
+                        oController.m_oProcessesLaunchedService.loadProcessesFromServer();
                         var oDialog = utilsVexDialogAlertBottomRightCorner("The publish is ended");
                         utilsVexCloseDialogAfterFewSeconds(3000,oDialog);
 
                     }
-                    //TODO ERRROR CASE
-
-                }
-
-            } else {
-                console.log("got empty message");
+                    break;
+                case "UPDATEPROCESSES":
+                    oController.m_oProcessesLaunchedService.loadProcessesFromServer();
+                    break;
+                default:
+                    console.log("got empty message");
             }
+
         }
+    }
             //oController.addTestLayer(message.body);
             /**
              * Callback of the Rabbit On Connect
@@ -104,10 +151,13 @@ service('RabbitStompService', ['$http',  'ConstantsService','$interval', functio
                 console.log('Web Stomp connected');
 
                 //CHECK IF sWorkSpaceId is null
-                var sWorkSpaceId = null;
-                    sWorkSpaceId = oController.m_oActiveWorkspace.workspaceId;
-
-                oController.m_oSubscription = oController.m_oClient.subscribe(sWorkSpaceId, oRabbitCallback);
+                var oSessioId = oController.m_oConstantsService.getSessionId();
+                if(utilsIsObjectNullOrUndefined(oSessioId))
+                {
+                    console.log("Error session id Null in on_connect");
+                    return false;
+                }
+                oController.m_oSubscription = oController.m_oClient.subscribe(oSessioId, oRabbitCallback);
 
                 // Is this a re-connection?
                 if (oController.m_oReconnectTimerPromise != null) {

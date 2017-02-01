@@ -32,31 +32,29 @@ var RootController = (function() {
         });
 
         //if user is logged
-        //if(!utilsIsObjectNullOrUndefined(this.m_oConstantsService.getUser()))
-        //    this.m_oUser = this.m_oConstantsService.getUser();
-        //else
-        //    this.m_oState.go("login");
-        this.m_oUser = this.m_oConstantsService.getUser();
+        if(!utilsIsObjectNullOrUndefined(this.m_oConstantsService.getUser()))
+            this.m_oUser = this.m_oConstantsService.getUser();
+        else
+            this.m_oState.go("login");
 
-        //this.m_sWorkSpace = this.m_oConstantsService.getActiveWorkspace();
-        //if(utilsIsObjectNullOrUndefined(this.m_sWorkSpace) && utilsIsStrNullOrEmpty( this.m_sWorkSpace))
-        //{
-        //    //if this.m_oState.params.workSpace in empty null or undefined create new workspace
-        //    if(!(utilsIsObjectNullOrUndefined(this.m_oState.params.workSpace) && utilsIsStrNullOrEmpty(this.m_oState.params.workSpace)))
-        //    {
-        //        this.openWorkspace(this.m_oState.params.workSpace);
-        //        this.m_oActiveWorkspace = this.m_oConstantsService.getActiveWorkspace();
-        //    }
-        //    else
-        //    {
-        //        //TODO CREATE NEW WORKSPACE OR GO HOME
-        //    }
-        //}
-        //
-        //
+        //this.m_oUser = this.m_oConstantsService.getUser();
 
-        if(!utilsIsObjectNullOrUndefined(this.m_sWorkSpace) && !utilsIsObjectNullOrUndefined(this.m_oUser))
-            this.m_aoProcessesRunning = this.m_oProcessesLaunchedService.getProcessesByLocalStorage(this.m_sWorkSpace.workspaceId,this.m_oUser.userId);
+        this.m_sWorkSpace = this.m_oConstantsService.getActiveWorkspace();
+        if(utilsIsObjectNullOrUndefined(this.m_sWorkSpace) && utilsIsStrNullOrEmpty( this.m_sWorkSpace))
+        {
+            //if this.m_oState.params.workSpace in empty null or undefined create new workspace
+            if(!(utilsIsObjectNullOrUndefined(this.m_oState.params.workSpace) && utilsIsStrNullOrEmpty(this.m_oState.params.workSpace)))
+            {
+                this.openWorkspace(this.m_oState.params.workSpace);
+                //this.m_oActiveWorkspace = this.m_oConstantsService.getActiveWorkspace();
+            }
+            else
+            {
+                //TODO CREATE NEW WORKSPACE OR GO HOME
+            }
+        }
+
+        this.m_aoProcessesRunning = this.m_oProcessesLaunchedService.getProcesses();
 
         /*TODO WATCH OR SIMILAR THINGS */
         /*when ProccesLaunchedservice reload the m_aoProcessesRunning rootController reload m_aoProcessesRunning */
@@ -64,43 +62,44 @@ var RootController = (function() {
             // you could inspect the data to see
             if(data == true)
             {
-                $scope.m_oController.m_sWorkSpace = $scope.m_oController.m_oConstantsService.getActiveWorkspace();
-                $scope.m_oController.m_oUser = $scope.m_oController.m_oConstantsService.getUser();
+                $scope.m_oController.m_aoProcessesRunning = $scope.m_oController.m_oProcessesLaunchedService.getProcesses();
+                //$scope.m_oController.m_sWorkSpace = $scope.m_oController.m_oConstantsService.getActiveWorkspace();
+                //$scope.m_oController.m_oUser = $scope.m_oController.m_oConstantsService.getUser();
+                //
+                //if(utilsIsObjectNullOrUndefined($scope.m_oController.m_oUser))//check if user is logged
+                //{
+                //    utilsVexDialogAlertTop("Error in RootController m_aoProcessesRunning:updated (user)");
+                //    $scope.m_oController.onClickLogOut();
+                //}
+                //
+                //if(utilsIsObjectNullOrUndefined($scope.m_oController.m_sWorkSpace))
+                //{
+                //    //if this.m_oState.params.workSpace in empty null or undefined create new workspace
+                //    if(!(utilsIsObjectNullOrUndefined(  $scope.m_oController.m_oState.params.workSpace) && utilsIsStrNullOrEmpty(  $scope.m_oController.m_oState.params.workSpace)))
+                //    {
+                //        $scope.m_oController.openWorkspace(  $scope.m_oController.m_oState.params.workSpace);
+                //        //$scope.m_oController.m_oActiveWorkspace =   $scope.m_oController.m_oConstantsService.getActiveWorkspace();
+                //    }
+                //    else
+                //    {
+                //        utilsVexDialogAlertTop("Error in RootController m_aoProcessesRunning:updated (StateParams)");
+                //        $scope.m_oController.onClickLogOut();
+                //    }
+                //}
+                //else
+                //{
+                //    //take processes
+                    //$scope.m_oController.m_aoProcessesRunning = $scope.m_oController.m_oProcessesLaunchedService.getProcessesByLocalStorage(
+                    //    $scope.m_oController.m_sWorkSpace.workspaceId, $scope.m_oController.m_oUser.userId);
 
-                if(utilsIsObjectNullOrUndefined($scope.m_oController.m_oUser))//check if user is logged
-                {
-                    utilsVexDialogAlertTop("Error in RootController m_aoProcessesRunning:updated (user)");
-                    $scope.m_oController.onClickLogOut();
-                }
-
-                if(utilsIsObjectNullOrUndefined(  $scope.m_oController.m_sWorkSpace) && utilsIsStrNullOrEmpty(   $scope.m_oController.m_sWorkSpace))
-                {
-                    //if this.m_oState.params.workSpace in empty null or undefined create new workspace
-                    if(!(utilsIsObjectNullOrUndefined(  $scope.m_oController.m_oState.params.workSpace) && utilsIsStrNullOrEmpty(  $scope.m_oController.m_oState.params.workSpace)))
-                    {
-                        $scope.m_oController.openWorkspace(  $scope.m_oController.m_oState.params.workSpace);
-                        //$scope.m_oController.m_oActiveWorkspace =   $scope.m_oController.m_oConstantsService.getActiveWorkspace();
-                    }
-                    else
-                    {
-                        utilsVexDialogAlertTop("Error in RootController m_aoProcessesRunning:updated (StateParams)");
-                        $scope.m_oController.onClickLogOut();
-                    }
-                }
-                else
-                {
-                    //take processes
-                    $scope.m_oController.m_aoProcessesRunning = $scope.m_oController.m_oProcessesLaunchedService.getProcessesByLocalStorage(
-                        $scope.m_oController.m_sWorkSpace.workspaceId, $scope.m_oController.m_oUser.userId);
-
-                }
+                //}
 
                 //It's a fix i don't know it's a good idea but it's the only idea i did
-                setTimeout(function () {
-                    //i need to use $scope.$apply(); if i don't use it the upload of processes queue doesn't work
-                    //without the setTimeout the $scope.$apply(); return errors.
-                    $scope.$apply();
-                }, 2000);
+                //setTimeout(function () {
+                //    //i need to use $scope.$apply(); if i don't use it the upload of processes queue doesn't work
+                //    //without the setTimeout the $scope.$apply(); return errors.
+                //    $scope.$apply();
+                //}, 2000);
 
                 //if(!utilsIsObjectNullOrUndefined( $scope.m_oController.m_sWorkSpace) && !utilsIsObjectNullOrUndefined( $scope.m_oController.m_oUser))
                 //{i
@@ -157,7 +156,7 @@ var RootController = (function() {
                 {
                     oController.m_oConstantsService.setActiveWorkspace(data);
                     oController.m_sWorkspace = oController.m_oConstantsService.getActiveWorkspace();
-                    oController.m_aoProcessesRunning = oController.m_oProcessesLaunchedService.getProcessesByLocalStorage(oController.m_sWorkspace.workspaceId, oController.m_oUser.userId);
+                    //oController.m_aoProcessesRunning = oController.m_oProcessesLaunchedService.getProcessesByLocalStorage(oController.m_sWorkspace.workspaceId, oController.m_oUser.userId);
                 }
             }
         }).error(function (data,status) {

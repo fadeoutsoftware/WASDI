@@ -28,7 +28,7 @@ var SearchOrbitController = (function() {
 
         this.m_oActiveWorkspace = this.m_oConstantsService.getActiveWorkspace();
         this.m_oUser = this.m_oConstantsService.getUser();
-        this.m_oProcessesLaunchedService.updateProcessesBar();
+        //this.m_oProcessesLaunchedService.updateProcessesBar();
         //if there isn't workspace
         if(utilsIsObjectNullOrUndefined( this.m_oActiveWorkspace) && utilsIsStrNullOrEmpty( this.m_oActiveWorkspace))
         {
@@ -45,9 +45,9 @@ var SearchOrbitController = (function() {
         }
         else
         {
-
+            this.m_oProcessesLaunchedService.loadProcessesFromServer(this.m_oActiveWorkspace.workspaceId);
         }
-
+        this.m_oRabbitStompService.initWebStomp(this.m_oActiveWorkspace,"EditorController",this);
         this.initOrbitSearch = function(){
             //init orbit search
             this.m_oOrbitSearch = new Object();
@@ -249,6 +249,7 @@ var SearchOrbitController = (function() {
                     oController.m_oActiveWorkspace = oController.m_oConstantsService.getActiveWorkspace();
                     /*Start Rabbit WebStomp*/
                     oController.m_oRabbitStompService.initWebStomp(oController.m_oActiveWorkspace,"SearchOrbitController",oController);
+                    oController.m_oProcessesLaunchedService.loadProcessesFromServer(oController.m_oActiveWorkspace.workspaceId);
 
                 }
             }
@@ -274,7 +275,7 @@ var SearchOrbitController = (function() {
                 //if there is saved in orbit the FootPrintRectangle we don't need to create it
                 if(!utilsIsObjectNullOrUndefined(oOrbit.FootPrintRectangle))
                 {
-                   break;
+                   continue;
                 }
                 var sSwath = oOrbit.SwathFootPrint;
                 var aasNewContent = [];

@@ -30,15 +30,15 @@ var HomeController = (function() {
         oLoginInfo.userPassword = oController.m_sUserPassword;
 
         var oConstantsService = oController.m_oConstantsService;
-
+        this.m_oConstantsService.setUser(null);
         this.m_oAuthService.login(oLoginInfo).success(function (data, status) {
             if (data != null)
             {
                 if (data != undefined)
                 {
-                    if (data.userId != null)
+                    if (data.userId != null || data.userId != "")
                     {
-                        if (data.userId != "")
+                        if(!utilsIsObjectNullOrUndefined(data.sessionId)|| !utilsIsStrNullOrEmpty(data.sessionId))
                         {
                             oConstantsService.setUser(data);//set user
                             oController.m_oState.go("root.workspaces");// go workspaces
@@ -49,6 +49,7 @@ var HomeController = (function() {
         }).error(function (data,status) {
             //alert('error');
             utilsVexDialogAlertTop("Error in login. HomeCotroller.js");
+
         });
     }
 

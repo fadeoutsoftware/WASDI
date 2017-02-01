@@ -74,7 +74,10 @@ var ImportController = (function() {
         /* Active Workspace */
         this.m_oActiveWorkspace = this.m_oConstantsService.getActiveWorkspace();
         this.m_oUser = this.m_oConstantsService.getUser();
-        this.m_oProcessesLaunchedService.updateProcessesBar();
+        //this.m_oProcessesLaunchedService.updateProcessesBar(this.m_oActiveWorkspace);
+
+
+
         //if there isn't workspace
         if(utilsIsObjectNullOrUndefined(this.m_oActiveWorkspace) && utilsIsStrNullOrEmpty( this.m_oActiveWorkspace))
         {
@@ -92,6 +95,7 @@ var ImportController = (function() {
         else
         {
             /*Load elements by Service if there was a previous search i load*/
+            this.m_oProcessesLaunchedService.loadProcessesFromServer(this.m_oActiveWorkspace.workspaceId);
             this.loadOpenSearchParamsByResultsOfSearchServices(this);
         }
 
@@ -528,10 +532,12 @@ var ImportController = (function() {
         this.m_oFileBufferService.download(url,oWorkSpace.workspaceId).success(function (data, status) {
             //TODO CHECK DATA-STATUS
             var oDialog = utilsVexDialogAlertBottomRightCorner("Product just start the download ");
-            oController.m_oProcessesLaunchedService.addProcessesByLocalStorage(oLayer.title,
-                                                                                null,
-                                                                                oController.m_oProcessesLaunchedService.getTypeOfProcessProductDownload()
-                                                                                ,oWorkSpace.workspaceId,oController.m_oUser.userId);
+            //oController.m_oProcessesLaunchedService.addProcessesByLocalStorage(oLayer.title,
+            //                                                                    null,
+            //                                                                    oController.m_oProcessesLaunchedService.getTypeOfProcessProductDownload()
+            //                                                                    ,oWorkSpace.workspaceId,oController.m_oUser.userId);
+            oController.m_oProcessesLaunchedService.loadProcessesFromServer(oWorkSpace.workspaceId);
+
             utilsVexCloseDialogAfterFewSeconds("3000",oDialog);
             /*
             * {processName:oLayer.title, nodeId:null,
@@ -1049,8 +1055,9 @@ var ImportController = (function() {
         this.m_oProductService.addProductToWorkspace(oMessage.payload.fileName,this.m_oActiveWorkspace.workspaceId).success(function (data, status) {
             utilsVexDialogAlertBottomRightCorner('Product added to the ws')
             //console.log('Product added to the ws');
-            oController.m_oProcessesLaunchedService.removeProcessByPropertySubstringVersion("processName",oMessage.payload.fileName,
-                oController.m_oActiveWorkspace.workspaceId,oController.m_oUser.userId);
+            //oController.m_oProcessesLaunchedService.removeProcessByPropertySubstringVersion("processName",oMessage.payload.fileName,
+            //    oController.m_oActiveWorkspace.workspaceId,oController.m_oUser.userId);
+            oController.m_oProcessesLaunchedService.loadProcessesFromServer(oController.m_oActiveWorkspace.workspaceId);
         }).error(function (data,status) {
             utilsVexDialogAlertTop('Error adding product to the ws');
             //console.log('Error adding product to the ws');
@@ -1072,6 +1079,7 @@ var ImportController = (function() {
                     /*Start Rabbit WebStomp*/
                     oController.m_oRabbitStompServive.initWebStomp(oController.m_oActiveWorkspace,"ImportController",oController);
                     oController.loadOpenSearchParamsByResultsOfSearchServices(oController);
+                    oController.m_oProcessesLaunchedService.loadProcessesFromServer(oController.m_oActiveWorkspace.workspaceId);
                 }
             }
         }).error(function (data,status) {
@@ -1102,7 +1110,7 @@ var ImportController = (function() {
     {
         if(utilsIsObjectNullOrUndefined(oLayer))
             return false;
-        return this.m_oProcessesLaunchedService.checkIfFileIsDownloading(oLayer.title,null,this.m_oProcessesLaunchedService.getTypeOfProcessProductDownload(), this.m_oActiveWorkspace.workspaceId,this.m_oUser.userId);
+        return this.m_oProcessesLaunchedService.checkIfFileIsDownloading(oLayer.title,this.m_oProcessesLaunchedService.getTypeOfProcessProductDownload());
     }
 
     ImportController.$inject = [

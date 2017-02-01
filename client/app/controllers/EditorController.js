@@ -58,7 +58,7 @@ var EditorController = (function () {
         // Here a Workpsace is needed... if it is null create a new one..
         this.m_oActiveWorkspace = this.m_oConstantsService.getActiveWorkspace();
         this.m_oUser = this.m_oConstantsService.getUser();
-        this.m_oProcessesLaunchedService.updateProcessesBar();
+
         //if there isn't workspace
         if(utilsIsObjectNullOrUndefined( this.m_oActiveWorkspace) && utilsIsStrNullOrEmpty( this.m_oActiveWorkspace))
         {
@@ -70,11 +70,13 @@ var EditorController = (function () {
             }
             else
             {
+
                 //TODO CREATE NEW WORKSPACE OR GO HOME
             }
         }
         else
         {
+            this.m_oProcessesLaunchedService.loadProcessesFromServer(this.m_oActiveWorkspace.workspaceId);
             this.getProductListByWorkspace();
         }
         this.m_sDownloadFilePath = "";
@@ -272,8 +274,11 @@ var EditorController = (function () {
             oController.m_aoProducts.push(oMessage.payload);
             //oController.getProductListByWorkspace();
             oController.m_oTree = oController.generateTree();
-            oController.m_oProcessesLaunchedService.removeProcessByPropertySubstringVersion("processName",oMessage.payload.fileName,
-                oController.m_oActiveWorkspace.workspaceId,oController.m_oUser.userId);
+            //oController.m_oProcessesLaunchedService.removeProcessByPropertySubstringVersion("processName",oMessage.payload.fileName,
+            //    oController.m_oActiveWorkspace.workspaceId,oController.m_oUser.userId);
+
+            oController.m_oProcessesLaunchedService.loadProcessesFromServer(oController.m_oActiveWorkspace.workspaceId);
+
             //oController.m_aoProcessesRunning =  this.m_oProcessesLaunchedService.getProcesses();
 
         }).error(function (data,status) {
@@ -319,8 +324,8 @@ var EditorController = (function () {
         this.addLayerMap3D(oLayerId);
         //this.removeProcessInListOfRunningProcesses(oLayerId);
         //TODO REMOVE PROCESS IN LIST
-        this.m_oProcessesLaunchedService.removeProcessByPropertySubstringVersion("processName",oLayerId,
-            this.m_oActiveWorkspace.workspaceId,this.m_oUser.userId);
+        //this.m_oProcessesLaunchedService.removeProcessByPropertySubstringVersion("processName",oLayerId,
+        //    this.m_oActiveWorkspace.workspaceId,this.m_oUser.userId);
         //this.m_aoProcessesRunning =  this.m_oProcessesLaunchedService.getProcessesByLocalStorage(
         //    this.m_oActiveWorkspace.workspaceId,this.m_oUser.userId);//TODO
         //this.m_oScope.$apply();
@@ -379,7 +384,8 @@ var EditorController = (function () {
         var wmsLayer = L.tileLayer.wms(sUrl, {
             layers: 'wasdi:' + sLayerId,
             format: 'image/png',
-            transparent: true
+            transparent: true,
+            noWrap:true,
         }).addTo(oMap);
 
     }
@@ -506,11 +512,12 @@ var EditorController = (function () {
                 if(data.messageCode == "PUBLISHBAND" )
                     oController.receivedPublishBandMessage(data.payload);
                 else
-                    oController.m_oProcessesLaunchedService.addProcessesByLocalStorage(oBand.productName + "_" + oBand.name,
-                                                                        oIdBandNodeInTree,
-                                                                        oController.m_oProcessesLaunchedService.getTypeOfProcessPublishingBand(),
-                                                                        oController.m_oActiveWorkspace.workspaceId,
-                                                                        oController.m_oUser.userId);
+                    oController.m_oProcessesLaunchedService.loadProcessesFromServer(oController.m_oActiveWorkspace.workspaceId);
+                    //oController.m_oProcessesLaunchedService.addProcessesByLocalStorage(oBand.productName + "_" + oBand.name,
+                    //                                                    oIdBandNodeInTree,
+                    //                                                    oController.m_oProcessesLaunchedService.getTypeOfProcessPublishingBand(),
+                    //                                                    oController.m_oActiveWorkspace.workspaceId,
+                    //                                                    oController.m_oUser.userId);
 
                 /*{processName:oBand.productName + "_" + oBand.name,
                  nodeId:oIdBandNodeInTree,
@@ -702,6 +709,7 @@ var EditorController = (function () {
                     /*Start Rabbit WebStomp*/
                     oController.m_oRabbitStompServive.initWebStomp(oController.m_oActiveWorkspace,"EditorController",oController);
                     oController.getProductListByWorkspace();
+                    oController.m_oProcessesLaunchedService.loadProcessesFromServer(oController.m_oActiveWorkspace.workspaceId);
                 }
             }
         }).error(function (data,status) {
