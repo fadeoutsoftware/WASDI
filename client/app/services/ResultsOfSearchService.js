@@ -18,6 +18,7 @@ service('ResultsOfSearchService', ['$http',  'ConstantsService', function ($http
     this.m_aoMissions  = [];
     this.m_oSensingPeriodFrom = '';
     this.m_oSensingPeriodTo='';
+    this.m_aoMissions = [];
     /************************ Set methods ***************************/
     this.setDefaults  = function()
     {
@@ -33,7 +34,17 @@ service('ResultsOfSearchService', ['$http',  'ConstantsService', function ($http
         this.m_aoMissions  = [];
         this.m_oSensingPeriodFrom = '';
         this.m_oSensingPeriodTo='';
+        this.m_aoMissions = [];
     }
+
+    this.setMissions = function(oMissions)
+    {
+        if(utilsIsObjectNullOrUndefined(oMissions))
+            return false;
+        this.m_aoMissions = oMissions;
+        return true;
+    }
+
     this.setSensingPeriodTo  = function(oSensingPeriodTo)
     {
         if(utilsIsObjectNullOrUndefined(oSensingPeriodTo))
@@ -169,9 +180,14 @@ service('ResultsOfSearchService', ['$http',  'ConstantsService', function ($http
     {
         return this.m_oSensingPeriodFrom;
     }
+
     this.getSensingPeriodTo  = function()
     {
-
         return this.m_oSensingPeriodTo;
+    }
+
+    this.getMissions = function()
+    {
+        return this.m_aoMissions;
     }
 }]);

@@ -269,17 +269,27 @@ var EditorController = (function () {
         }
         var oController = this;
         this.m_oProductService.addProductToWorkspace(oMessage.payload.fileName,this.m_oActiveWorkspace.workspaceId).success(function (data, status) {
-            //console.log('Product added to the ws');
-            utilsVexDialogAlertBottomRightCorner('Product added to the ws');
-            oController.m_aoProducts.push(oMessage.payload);
-            //oController.getProductListByWorkspace();
-            oController.m_oTree = oController.generateTree();
-            //oController.m_oProcessesLaunchedService.removeProcessByPropertySubstringVersion("processName",oMessage.payload.fileName,
-            //    oController.m_oActiveWorkspace.workspaceId,oController.m_oUser.userId);
+            if(data == true )
+            {
+                //console.log('Product added to the ws');
+                utilsVexDialogAlertBottomRightCorner('Product added to the ws');
+                oController.getProductListByWorkspace();
 
-            oController.m_oProcessesLaunchedService.loadProcessesFromServer(oController.m_oActiveWorkspace.workspaceId);
+                //oController.m_aoProducts.push(oMessage.payload);
+                ////oController.getProductListByWorkspace();
+                //oController.m_oTree = oController.generateTree();
+                //oController.m_oProcessesLaunchedService.removeProcessByPropertySubstringVersion("processName",oMessage.payload.fileName,
+                //    oController.m_oActiveWorkspace.workspaceId,oController.m_oUser.userId);
 
-            //oController.m_aoProcessesRunning =  this.m_oProcessesLaunchedService.getProcesses();
+                oController.m_oProcessesLaunchedService.loadProcessesFromServer(oController.m_oActiveWorkspace.workspaceId);
+
+                //oController.m_aoProcessesRunning =  this.m_oProcessesLaunchedService.getProcesses();
+            }
+            else
+            {
+                utilsVexDialogAlertTop("Error in add product to workspace");
+            }
+
 
         }).error(function (data,status) {
             utilsVexDialogAlertTop('Error adding product to the ws')
@@ -385,7 +395,7 @@ var EditorController = (function () {
             layers: 'wasdi:' + sLayerId,
             format: 'image/png',
             transparent: true,
-            noWrap:true,
+            noWrap:true
         }).addTo(oMap);
 
     }

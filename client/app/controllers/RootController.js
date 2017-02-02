@@ -122,8 +122,15 @@ var RootController = (function() {
     RootController.prototype.onClickLogOut = function()
     {
         var oController=this;
-        oController.m_oConstantsService.logOut();
-        oController.m_oState.go("home");
+
+        this.m_oAuthService.logout().success(function (data, status) {
+            oController.m_oConstantsService.logOut();
+            oController.m_oState.go("home");
+        }).error(function (data,status) {
+            utilsVexDialogAlertTop("Error in Logout");
+        });
+
+
     }
     RootController.prototype.getActiveWorkspace = function()
     {

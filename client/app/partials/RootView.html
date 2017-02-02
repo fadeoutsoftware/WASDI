@@ -115,7 +115,7 @@
     <!------------------ STATUS BAR ------------------->
     <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 status-bar " ng-show="m_oController.isVisibleProcessesBar() == true">
         <div ng-repeat="oProcess in m_oController.m_aoProcessesRunning track by $index">
-            <i class="fa fa-spinner fa-pulse fa-fw"></i> {{oProcess.operationType}} : {{oProcess.productName}} - {{oProcess.operationDate}}
+            <i class="fa fa-spinner fa-pulse fa-fw"></i> {{oProcess.operationDate}} - {{oProcess.operationType}} : {{oProcess.productName}}
         </div>
     </div>
 

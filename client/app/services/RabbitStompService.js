@@ -56,7 +56,9 @@ service('RabbitStompService', ['$http',  'ConstantsService','$interval','Process
                 if (oMessageResult == null) return;
                 if (oMessageResult.messageResult == "KO") {
                     //TODO REMOVE ELEMENT IN PROCESS QUEUE
-                    utilsVexDialogAlertTop("There was an error in the RabbitCallback")
+                    utilsVexDialogAlertTop("There was an error in the RabbitCallback");
+                    oController.m_oProcessesLaunchedService.loadProcessesFromServer(oController.m_oActiveWorkspace.workspaceId);
+
                     //alert('There was an error in the RabbitCallback');
                     return;
                 }
@@ -109,7 +111,7 @@ service('RabbitStompService', ['$http',  'ConstantsService','$interval','Process
                     if(sControllerName == "EditorController" || sControllerName == "ImportController")
                     {
                         oControllerActive.receivedDownloadMessage(oMessageResult);
-                        oController.m_oProcessesLaunchedService.loadProcessesFromServer();
+                        oController.m_oProcessesLaunchedService.loadProcessesFromServer(oController.m_oActiveWorkspace.workspaceId);
                         var oDialog = utilsVexDialogAlertBottomRightCorner("The download is ended");
                         utilsVexCloseDialogAfterFewSeconds(3000,oDialog);
                     }
@@ -118,23 +120,29 @@ service('RabbitStompService', ['$http',  'ConstantsService','$interval','Process
                     if(sControllerName == "EditorController" )
                     {
                         oControllerActive.receivedPublishMessage(oMessageResult);
-                        oController.m_oProcessesLaunchedService.loadProcessesFromServer();
+                        oController.m_oProcessesLaunchedService.loadProcessesFromServer(oController.m_oActiveWorkspace.workspaceId);
                         var oDialog = utilsVexDialogAlertBottomRightCorner("The publish is ended");
                         utilsVexCloseDialogAfterFewSeconds(3000,oDialog);
                     }
                     break;
                 case "PUBLISHBAND":
-                    if(sControllerName == "EditorController" || sControllerName == "ImportController")
+                    if(sControllerName == "EditorController" )
                     {
                         oControllerActive.receivedPublishBandMessage(oMessageResult.payload.layerId);
-                        oController.m_oProcessesLaunchedService.loadProcessesFromServer();
-                        var oDialog = utilsVexDialogAlertBottomRightCorner("The publish is ended");
-                        utilsVexCloseDialogAfterFewSeconds(3000,oDialog);
+                        oController.m_oProcessesLaunchedService.loadProcessesFromServer(oController.m_oActiveWorkspace.workspaceId);
+                        var oDialog = utilsVexDialogAlertBottomRightCorner("The publish is ended. Product:" + oMessageResult.payload.fileName);
+                        //utilsVexCloseDialogAfterFewSeconds(3000,oDialog);
 
+                    }
+                    if( sControllerName == "ImportController")
+                    {
+                        oController.m_oProcessesLaunchedService.loadProcessesFromServer(oController.m_oActiveWorkspace.workspaceId);
+                        var oDialog = utilsVexDialogAlertBottomRightCorner("The publish is ended. Product:" + oMessageResult.payload.fileName);
+                        //utilsVexCloseDialogAfterFewSeconds(3000,oDialog);
                     }
                     break;
                 case "UPDATEPROCESSES":
-                    oController.m_oProcessesLaunchedService.loadProcessesFromServer();
+                    oController.m_oProcessesLaunchedService.loadProcessesFromServer(oController.m_oActiveWorkspace.workspaceId);
                     break;
                 default:
                     console.log("got empty message");

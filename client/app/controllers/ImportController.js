@@ -397,6 +397,7 @@ var ImportController = (function() {
         this.m_oResultsOfSearchService.setProductsPerPageSelected(this.m_iProductsPerPageSelected);
         this.m_oResultsOfSearchService.setSensingPeriodFrom(this.m_oModel.sensingPeriodFrom);
         this.m_oResultsOfSearchService.setSensingPeriodTo(this.m_oModel.sensingPeriodTo);
+        this.m_oResultsOfSearchService.setMissions(this.m_aoMissions);
         //this.m_oResultsOfSearchService.setMissions(this.m_aoMissions);
 
         //this.m_oSearchService.getProductsCount().then(function(result){
@@ -1053,7 +1054,8 @@ var ImportController = (function() {
         }
         var oController = this;
         this.m_oProductService.addProductToWorkspace(oMessage.payload.fileName,this.m_oActiveWorkspace.workspaceId).success(function (data, status) {
-            utilsVexDialogAlertBottomRightCorner('Product added to the ws')
+            var oDialog = utilsVexDialogAlertBottomRightCorner('Product added to the ws');
+            utilsVexCloseDialogAfterFewSeconds(3000,oDialog);
             //console.log('Product added to the ws');
             //oController.m_oProcessesLaunchedService.removeProcessByPropertySubstringVersion("processName",oMessage.payload.fileName,
             //    oController.m_oActiveWorkspace.workspaceId,oController.m_oUser.userId);
@@ -1102,10 +1104,22 @@ var ImportController = (function() {
         oController.m_iTotalOfProducts = oController.m_oResultsOfSearchService.getTotalOfProducts();
         oController.m_oModel.sensingPeriodFrom = oController.m_oResultsOfSearchService.getSensingPeriodFrom();
         oController.m_oModel.sensingPeriodTo = oController.m_oResultsOfSearchService.getSensingPeriodTo();
+        oController.m_oAdvancedFilterService.setAdvancedFilter(oController.m_oResultsOfSearchService.getMissions());
         //oController.m_aoMissions = oController.m_oResultsOfSearchService.getMissions();
         return true;
     }
 
+    ImportController.prototype.setPaginationVariables = function()
+    {
+        this.m_iTotalOfProducts = 0;
+        this.m_iCurrentPage = 1;
+        this.m_iProductsPerPageSelected = 5;
+        this.m_iTotalPages = 1;
+        this.m_oResultsOfSearchService.setTotalPages(1);
+        this.m_oResultsOfSearchService.setProductsPerPageSelected(5);
+        this.m_oResultsOfSearchService.setCurrentPage(1);
+        this.m_oResultsOfSearchService.setTotalOfProducts(0);
+    }
     ImportController.prototype.isPossibleDoDownload = function(oLayer)
     {
         if(utilsIsObjectNullOrUndefined(oLayer))
