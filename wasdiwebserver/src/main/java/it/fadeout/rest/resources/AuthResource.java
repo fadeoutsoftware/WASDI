@@ -59,7 +59,9 @@ public class AuthResource {
 				oSession.setLastTouch((double) new Date().getTime());
 				
 				SessionRepository oSessionRepository = new SessionRepository();
-				oSessionRepository.InsertSession(oSession);
+				Boolean bRet = oSessionRepository.InsertSession(oSession);
+				if (!bRet)
+					return oUserVM;
 				
 				oUserVM.setSessionId(sSessionId);
 				System.out.println("AuthService.Login: access succeeded");

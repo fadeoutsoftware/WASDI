@@ -26,7 +26,7 @@ public class ProductResource {
 	@Path("addtows")
 	@Produces({"application/xml", "application/json", "text/xml"})	
 	public PrimitiveResult AddProductToWorkspace(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sProductName") String sProductName, @QueryParam("sWorkspaceId") String sWorkspaceId ) {
-		
+
 		// Validate Session
 		User oUser = Wasdi.GetUserFromSession(sSessionId);
 		if (oUser == null) return null;
@@ -36,32 +36,42 @@ public class ProductResource {
 		ProductWorkspace oProductWorkspace = new ProductWorkspace();
 		oProductWorkspace.setProductName(sProductName);
 		oProductWorkspace.setWorkspaceId(sWorkspaceId);
-		
+
 		ProductWorkspaceRepository oProductWorkspaceRepository = new ProductWorkspaceRepository();
-		
+
+		//check if product is in workspace
+		List<ProductWorkspace> oProductWorkspaces = oProductWorkspaceRepository.GetProductsByWorkspace(sWorkspaceId);
+		if (oProductWorkspaces == null || oProductWorkspaces.size() == 0)
+		{
+			//product already exists into workspace
+			PrimitiveResult oResult = new PrimitiveResult();
+			oResult.setBoolValue(true);
+			return oResult;
+		}
+
 		// Try to insert
 		if (oProductWorkspaceRepository.InsertProductWorkspace(oProductWorkspace)) {
 			// Ok done
 			PrimitiveResult oResult = new PrimitiveResult();
 			oResult.setBoolValue(true);
-			
+
 			return oResult;
 		}
 		else {
 			// There was a problem
 			PrimitiveResult oResult = new PrimitiveResult();
 			oResult.setBoolValue(false);
-			
+
 			return oResult;
 		}
 	}
-	
+
 
 	@GET
 	@Path("byname")
 	@Produces({"application/xml", "application/json", "text/xml"})	
 	public ProductViewModel GetByProductName(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sProductName") String sProductName) {
-		
+
 		// Validate Session
 		User oUser = Wasdi.GetUserFromSession(sSessionId);
 		if (oUser == null) return null;
@@ -70,7 +80,7 @@ public class ProductResource {
 		// Read the product from db
 		DownloadedFilesRepository oDownloadedFilesRepository = new DownloadedFilesRepository();
 		DownloadedFile oDownloadedFile = oDownloadedFilesRepository.GetDownloadedFile(sProductName);
-		
+
 		if (oDownloadedFile != null) {
 			// Ok read
 			return oDownloadedFile.getProductViewModel();
@@ -81,18 +91,18 @@ public class ProductResource {
 		}
 	}
 
-	
+
 	@GET
 	@Path("/byws")
 	@Produces({"application/xml", "application/json", "text/xml"})
 	public ArrayList<ProductViewModel> GetListByWorkspace(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sWorkspaceId") String sWorkspaceId) {
-		
+
 		User oUser = Wasdi.GetUserFromSession(sSessionId);
-		
+
 		ArrayList<ProductViewModel> aoProductList = new ArrayList<>();
-		
+
 		try {
-			
+
 			// Domain Check
 			if (oUser == null) {
 				return aoProductList;
@@ -100,35 +110,35 @@ public class ProductResource {
 			if (Utils.isNullOrEmpty(oUser.getUserId())) {
 				return aoProductList;
 			}
-			
-			
+
+
 			System.out.println("ProductResource.GetListByWorkspace: products for " + sWorkspaceId);
-			
+
 			// Create repo
 			ProductWorkspaceRepository oProductWorkspaceRepository = new ProductWorkspaceRepository();
 			DownloadedFilesRepository oDownloadedFilesRepository = new DownloadedFilesRepository();
-						
+
 			// Get Product List
 			List<ProductWorkspace> aoProductWorkspace = oProductWorkspaceRepository.GetProductsByWorkspace(sWorkspaceId);
-			
+
 			// For each
 			for (int iProducts=0; iProducts<aoProductWorkspace.size(); iProducts++) {
-				
+
 				// Get the downloaded file
 				DownloadedFile oDownloaded = oDownloadedFilesRepository.GetDownloadedFile(aoProductWorkspace.get(iProducts).getProductName());
-				
+
 				// Add View model to return list
 				if (oDownloaded != null) {
 					aoProductList.add(oDownloaded.getProductViewModel());
 				}
-				
+
 			}
-				
+
 		}
 		catch (Exception oEx) {
 			oEx.toString();
 		}
-		
+
 		return aoProductList;
 	}
 }

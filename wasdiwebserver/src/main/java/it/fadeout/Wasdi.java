@@ -1,5 +1,7 @@
 package it.fadeout;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
@@ -49,6 +51,7 @@ public class Wasdi extends Application {
 	
 	@PostConstruct
 	public void initWasdi() {
+		
 		if (m_oServletConfig.getInitParameter("DebugVersion").equalsIgnoreCase("true")) {
 			s_bDebug = true;
 		}
@@ -58,6 +61,12 @@ public class Wasdi extends Application {
 	{
 		return UUID.randomUUID().toString();
 	}
+	
+	public static String GetFormatDate(Date oDate){
+		
+		return new SimpleDateFormat("yyyy-MM-dd HH:mm").format(oDate);
+	}
+	
 	
 	/**
 	 * Get the User object from the session Id
@@ -91,6 +100,9 @@ public class Wasdi extends Application {
 				
 				return oUser;
 			}
+			
+			//Session not valid
+			oSessionRepo.DeleteSession(oSession);
 			
 			// No Session, No User
 			return null;

@@ -11,13 +11,17 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 
 import it.fadeout.Wasdi;
+import it.fadeout.viewmodels.OrbitSearchViewModel;
+import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.business.User;
 import wasdi.shared.business.Workspace;
 import wasdi.shared.business.WorkspaceSharing;
+import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.data.WorkspaceRepository;
 import wasdi.shared.data.WorkspaceSharingRepository;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.PrimitiveResult;
+import wasdi.shared.viewmodels.ProcessWorkspaceViewModel;
 import wasdi.shared.viewmodels.WorkspaceEditorViewModel;
 import wasdi.shared.viewmodels.WorkspaceListInfoViewModel;
 
@@ -87,6 +91,56 @@ public class WorkspaceResource {
 		
 		return aoWSList;
 	}
+	
+	@GET
+	@Path("/processbyws")
+	@Produces({"application/xml", "application/json", "text/xml"})
+	public ArrayList<ProcessWorkspaceViewModel> GetProcessByWorkspace(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sWorkspaceId") String sWorkspaceId) {
+		
+		User oUser = Wasdi.GetUserFromSession(sSessionId);
+		
+		ArrayList<ProcessWorkspaceViewModel> aoProcessList = new ArrayList<ProcessWorkspaceViewModel>();
+		
+		try {
+			// Domain Check
+			if (oUser == null) {
+				return aoProcessList;
+			}
+			if (Utils.isNullOrEmpty(oUser.getUserId())) {
+				return aoProcessList;
+			}
+			
+			System.out.println("WorkspaceResource.GetProcessByWorkspace: process for ws " + sWorkspaceId);
+			
+			// Create repo
+			ProcessWorkspaceRepository oRepository = new ProcessWorkspaceRepository();
+			
+			// Get Process List
+			List<ProcessWorkspace> aoProcess = oRepository.GetProcessByWorkspace(sWorkspaceId);
+			
+			// For each
+			for (int iProcess=0; iProcess<aoProcess.size(); iProcess++) {
+				// Create View Model
+				ProcessWorkspaceViewModel oViewModel = new ProcessWorkspaceViewModel();
+				ProcessWorkspace oProcess = aoProcess.get(iProcess);
+				
+				oViewModel.setOperationDate(oProcess.getOperationDate());
+				oViewModel.setOperationType(oProcess.getOperationType());
+				oViewModel.setProductName(oProcess.getProductName());
+				
+				aoProcessList.add(oViewModel);
+				
+			}
+				
+		}
+		catch (Exception oEx) {
+			System.out.println("WorkspaceResource.GetProcessByWorkspace: error retrieving process " + oEx.getMessage());
+			oEx.toString();
+		}
+				
+		return aoProcessList;
+	}
+	
 	
 	@GET
 	@Path("")
@@ -173,6 +227,40 @@ public class WorkspaceResource {
 			oResult.setStringValue(oWorkspace.getWorkspaceId());
 			
 			return oResult;			
+		}
+		else {
+			return null;
+		}
+		
+	}
+	
+	@GET
+	@Path("update")
+	@Produces({"application/xml", "application/json", "text/xml"})	
+	public WorkspaceEditorViewModel UpdateWorkspace(@HeaderParam("x-session-token") String sSessionId, WorkspaceEditorViewModel oViewModel) {
+		
+		// Validate Session
+		User oUser = Wasdi.GetUserFromSession(sSessionId);
+		if (oUser == null) return null;
+		if (Utils.isNullOrEmpty(oUser.getUserId())) return null;
+		
+		// Create New Workspace
+		Workspace oWorkspace = new Workspace();
+		
+		// Default values
+		oWorkspace.setCreationDate((double)oViewModel.getCreationDate().getTime());
+		oWorkspace.setLastEditDate((double)oViewModel.getLastEditDate().getTime());
+		oWorkspace.setName(oViewModel.getName());
+		oWorkspace.setUserId(oViewModel.getUserId());
+		oWorkspace.setWorkspaceId(oViewModel.getWorkspaceId());
+		
+		WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
+		if (oWorkspaceRepository.UpdateWorkspace(oWorkspace)) {
+			
+			PrimitiveResult oResult = new PrimitiveResult();
+			oResult.setStringValue(oWorkspace.getWorkspaceId());
+			
+			return oViewModel;			
 		}
 		else {
 			return null;
