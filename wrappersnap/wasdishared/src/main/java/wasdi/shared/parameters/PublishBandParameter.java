@@ -10,6 +10,8 @@ public class PublishBandParameter {
     private String userId;
     private String workspace;
     private String bandName;
+    private String exchange;
+    private String processObjId;
 
     public String getFileName() {
         return fileName;
@@ -49,5 +51,21 @@ public class PublishBandParameter {
 
     public void setBandName(String bandName) {
         this.bandName = bandName;
+    }
+
+    public String getExchange() {
+        return exchange;
+    }
+
+    public void setExchange(String exchange) {
+        this.exchange = exchange;
+    }
+
+    public String getProcessObjId() {
+        return processObjId;
+    }
+
+    public void setProcessObjId(String processObjId) {
+        this.processObjId = processObjId;
     }
 }

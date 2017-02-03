@@ -12,6 +12,8 @@ public class DownloadFileParameter {
     private String queue;
     private String userId;
     private String workspace;
+    private String exchange;
+    private String processObjId;
 
     public String getUrl() { return url; }
 
@@ -41,5 +43,21 @@ public class DownloadFileParameter {
 
     public void setUserId(String userId) {
         this.userId = userId;
+    }
+
+    public String getExchange() {
+        return exchange;
+    }
+
+    public void setExchange(String exchange) {
+        this.exchange = exchange;
+    }
+
+    public String getProcessObjId() {
+        return processObjId;
+    }
+
+    public void setProcessObjId(String processObjId) {
+        this.processObjId = processObjId;
     }
 }

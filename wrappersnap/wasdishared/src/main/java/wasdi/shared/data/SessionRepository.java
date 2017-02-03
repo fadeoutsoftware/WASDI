@@ -2,14 +2,20 @@ package wasdi.shared.data;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.mongodb.Block;
+import com.mongodb.client.FindIterable;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.Updates;
 import com.mongodb.client.result.UpdateResult;
 import org.bson.Document;
 import wasdi.shared.business.User;
 import wasdi.shared.business.UserSession;
+import wasdi.shared.business.Workspace;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 /**
  * Created by p.campanella on 21/10/2016.
@@ -44,6 +50,32 @@ public class SessionRepository extends MongoRepository {
         }
 
         return  null;
+    }
+
+    public List<UserSession> GetAllActiveSession(String sUserId) {
+        final ArrayList<UserSession> aoReturnList = new ArrayList<>();
+        try {
+            long lNow = new Date().getTime();
+            FindIterable<Document> oWSDocuments = getCollection("sessions").find(Filters.and(Filters.gte("lastTouch", lNow - 24*60*60*1000), Filters.eq("userId", sUserId)));
+
+            oWSDocuments.forEach(new Block<Document>() {
+                public void apply(Document document) {
+                    String sJSON = document.toJson();
+                    UserSession oUserSession = null;
+                    try {
+                        oUserSession = s_oMapper.readValue(sJSON, UserSession.class);
+                        aoReturnList.add(oUserSession);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+
+                }
+            });
+        } catch (Exception oEx) {
+            oEx.printStackTrace();
+        }
+
+        return aoReturnList;
     }
 
     public boolean TouchSession(UserSession oSession) {

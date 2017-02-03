@@ -9,6 +9,8 @@ public class PublishParameters {
     private String queue;
     private String userId;
     private String workspace;
+    private String exchange;
+    private String processObjId;
 
     public String getFileName() {
         return fileName;
@@ -40,5 +42,21 @@ public class PublishParameters {
 
     public void setWorkspace(String workspace) {
         this.workspace = workspace;
+    }
+
+    public String getExchange() {
+        return exchange;
+    }
+
+    public void setExchange(String exchange) {
+        this.exchange = exchange;
+    }
+
+    public String getProcessObjId() {
+        return processObjId;
+    }
+
+    public void setProcessObjId(String processObjId) {
+        this.processObjId = processObjId;
     }
 }

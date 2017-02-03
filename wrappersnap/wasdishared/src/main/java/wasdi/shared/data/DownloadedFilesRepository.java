@@ -1,8 +1,13 @@
 package wasdi.shared.data;
 
+import com.mongodb.client.model.Filters;
+import com.mongodb.client.model.Updates;
+import com.mongodb.client.result.UpdateResult;
 import org.bson.Document;
 import wasdi.shared.business.DownloadedFile;
 import wasdi.shared.business.UserSession;
+
+import java.util.Date;
 
 /**
  * Created by p.campanella on 11/11/2016.
@@ -21,6 +26,19 @@ public class DownloadedFilesRepository extends MongoRepository {
         }
 
         return false;
+    }
+
+    public boolean UpdateDownloadedFile(DownloadedFile oFile) {
+        try {
+            UpdateResult oResult = getCollection("downloadedfiles").updateOne(Filters.eq("fileName", oFile.getFileName()), Updates.set("productViewModel", oFile.getProductViewModel()));
+
+            if (oResult.getModifiedCount()==1) return  true;
+        }
+        catch (Exception oEx) {
+            oEx.printStackTrace();
+        }
+
+        return  false;
     }
 
     public DownloadedFile GetDownloadedFile(String sFileName) {

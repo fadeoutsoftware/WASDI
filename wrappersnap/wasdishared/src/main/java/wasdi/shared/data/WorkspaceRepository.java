@@ -1,19 +1,16 @@
 package wasdi.shared.data;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mongodb.Block;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.result.DeleteResult;
 import org.bson.Document;
-import org.bson.json.JsonMode;
-import org.bson.json.JsonWriterSettings;
-import wasdi.shared.business.User;
 import wasdi.shared.business.Workspace;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.mongodb.client.model.Filters.eq;
 
 /**
  * Created by p.campanella on 25/10/2016.
@@ -34,6 +31,21 @@ public class WorkspaceRepository extends  MongoRepository{
 
         return false;
     }
+
+    public boolean UpdateWorkspace(Workspace oWorkspace) {
+
+        try {
+            getCollection("workspaces").updateOne(eq("workspaceId", oWorkspace.getWorkspaceId()), new Document("$set", new Document("name",oWorkspace.getName())));
+
+            return true;
+
+        } catch (Exception oEx) {
+            oEx.printStackTrace();
+        }
+
+        return false;
+    }
+
 
     public Workspace GetWorkspace(String sWorkspaceId) {
 
