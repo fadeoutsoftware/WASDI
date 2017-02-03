@@ -4,17 +4,14 @@ import com.bc.ceres.glevel.MultiLevelImage;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.apache.log4j.xml.DOMConfigurator;
-import org.esa.snap.core.dataio.ProductIO;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.GeoCoding;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.quicklooks.Quicklook;
-import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.core.util.geotiff.GeoCoding2GeoTIFFMetadata;
 import org.esa.snap.core.util.geotiff.GeoTIFF;
 import org.esa.snap.core.util.geotiff.GeoTIFFMetadata;
 import org.esa.snap.engine_utilities.util.MemUtils;
-import org.esa.snap.runtime.EngineConfig;
 import wasdi.filebuffer.DownloadFile;
 import org.apache.commons.cli.*;
 import wasdi.geoserver.Publisher;
@@ -24,6 +21,7 @@ import wasdi.shared.business.DownloadedFile;
 import wasdi.shared.business.PublishedBand;
 import wasdi.shared.data.DownloadedFilesRepository;
 import wasdi.shared.data.MongoRepository;
+import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.data.PublishedBandsRepository;
 import wasdi.shared.parameters.DownloadFileParameter;
 import wasdi.shared.parameters.PublishBandParameter;
@@ -38,9 +36,6 @@ import wasdi.snapopearations.*;
 import javax.media.jai.JAI;
 import java.awt.image.BufferedImage;
 import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 
 
 /**
@@ -140,9 +135,13 @@ public class LauncherMain {
             Publisher.GDALBasePath = ConfigReader.getPropValue("GDAL_PATH")+"/"+ConfigReader.getPropValue("GDAL_RETILE");
             Publisher.PYRAMYD_ENV_OPTIONS = ConfigReader.getPropValue("PYRAMYD_ENV_OPTIONS");
             MongoRepository.SERVER_ADDRESS = ConfigReader.getPropValue("MONGO_ADDRESS");
+            MongoRepository.SERVER_PORT = Integer.parseInt(ConfigReader.getPropValue("MONGO_PORT"));
+            MongoRepository.DB_NAME = ConfigReader.getPropValue("MONGO_DBNAME");
 
         } catch (IOException e) {
             e.printStackTrace();
+
+            //TODO: Set default configuration??
         }
     }
 
@@ -215,10 +214,27 @@ public class LauncherMain {
         }
     }
 
+
     public String Download(DownloadFileParameter oParameter, String sDownloadPath) {
         String sFileName = "";
+        // Rabbit Sender
+        Send oSendToRabbit = new Send();
+
         try {
             s_oLogger.debug("LauncherMain.Download: Download Start");
+
+            //Init rabbit exchange and queue
+            if (oSendToRabbit.Init(oParameter.getWorkspace(), oParameter.getUserId()) == false)
+            {
+                s_oLogger.debug("LauncherMain.Download: Failed initializing RabbitMQ");
+                return sFileName;
+            }
+
+            //send update process message
+            if (oSendToRabbit.SendUpdateProcessMessage(oParameter.getWorkspace()) == false)
+            {
+                s_oLogger.debug("LauncherMain.Download: Error sending rabbitmq message to update process list");
+            }
 
             if (!sDownloadPath.endsWith("/")) sDownloadPath+="/";
 
@@ -286,6 +302,21 @@ public class LauncherMain {
 
                 sFileName = sDownloadPath + File.separator + ConfigReader.getPropValue("DOWNLOAD_FAKE_FILE");
 
+            }
+
+            if (Utils.isNullOrEmpty(sFileName)) {
+                s_oLogger.debug("LauncherMain.Download: file is null there must be an error");
+
+                RabbitMessageViewModel oMessageViewModel = new RabbitMessageViewModel();
+                oMessageViewModel.setMessageCode(LauncherOperations.DOWNLOAD);
+                oMessageViewModel.setMessageResult("KO");
+                String sJSON = MongoRepository.s_oMapper.writeValueAsString(oMessageViewModel);
+
+                oSendToRabbit.SendMsgOnExchange(oParameter.getExchange(), sJSON);
+
+            }
+            else {
+
                 s_oLogger.debug("LauncherMain.Download: File Name = " + sFileName);
 
                 // Get The product view Model
@@ -317,22 +348,7 @@ public class LauncherMain {
                 oDownloadedRepo.InsertDownloadedFile(oAlreadyDownloaded);
 
                 s_oLogger.debug("OK DONE");
-            }
 
-            // Rabbit Sender
-            Send oSendToRabbit = new Send();
-
-            if (Utils.isNullOrEmpty(sFileName)) {
-                s_oLogger.debug("LauncherMain.Download: file is null there must be an error");
-
-                RabbitMessageViewModel oMessageViewModel = new RabbitMessageViewModel();
-                oMessageViewModel.setMessageCode(LauncherOperations.DOWNLOAD);
-                oMessageViewModel.setMessageResult("KO");
-                String sJSON = MongoRepository.s_oMapper.writeValueAsString(oMessageViewModel);
-
-                oSendToRabbit.SendMsg(oParameter.getQueue(),sJSON);
-            }
-            else {
                 s_oLogger.debug("LauncherMain.Download: Image downloaded. Send Rabbit Message");
 
                 if (oVM!=null) {
@@ -346,7 +362,7 @@ public class LauncherMain {
 
                     String sJSON = MongoRepository.s_oMapper.writeValueAsString(oMessageViewModel);
 
-                    if (oSendToRabbit.SendMsg(oParameter.getQueue(),sJSON)==false) {
+                    if (oSendToRabbit.SendMsgOnExchange(oParameter.getExchange(), sJSON)==false) {
                         s_oLogger.debug("LauncherMain.Download: Error sending Rabbit Message");
                     }
                 }
@@ -358,25 +374,34 @@ public class LauncherMain {
                     oMessageViewModel.setMessageResult("KO");
                     String sJSON = MongoRepository.s_oMapper.writeValueAsString(oMessageViewModel);
 
-                    oSendToRabbit.SendMsg(oParameter.getQueue(),sJSON);
+                    oSendToRabbit.SendMsgOnExchange(oParameter.getExchange(), sJSON);
                 }
 
             }
         }
         catch (Exception oEx) {
             s_oLogger.debug("LauncherMain.Download: Exception " + oEx.toString());
-            // Rabbit Sender
-            Send oSendToRabbit = new Send();
+
             RabbitMessageViewModel oMessageViewModel = new RabbitMessageViewModel();
             oMessageViewModel.setMessageCode(LauncherOperations.DOWNLOAD);
             oMessageViewModel.setMessageResult("KO");
 
             try {
                 String sJSON = MongoRepository.s_oMapper.writeValueAsString(oMessageViewModel);
-                oSendToRabbit.SendMsg(oParameter.getQueue(),sJSON);
+                oSendToRabbit.SendMsgOnExchange(oParameter.getExchange(), sJSON);
             }
             catch (Exception oEx2) {
                 s_oLogger.debug("LauncherMain.Download: Inner Exception " + oEx2.toString());
+            }
+        }
+        finally{
+            //delete process from list
+            try{
+                ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
+                oProcessWorkspaceRepository.DeleteProcessWorkspace(oParameter.getProcessObjId());
+            }
+            catch (Exception oEx) {
+                s_oLogger.debug("LauncherMain.Download: Exception deleting process " + oEx.toString());
             }
         }
 
@@ -395,10 +420,24 @@ public class LauncherMain {
         JAI.getDefaultInstance().getTileScheduler().setParallelism(Runtime.getRuntime().availableProcessors());
         MemUtils.configureJaiTileCache();
 
-
         String sLayerId = "";
+        // Rabbit Sender
+        Send oSendToRabbit = new Send();
 
         try {
+            //Init rabbit exchange and queue
+            if (oSendToRabbit.Init(oParameter.getWorkspace(), oParameter.getUserId()) == false)
+            {
+                s_oLogger.debug("LauncherMain.Publish: Failed initializing RabbitMQ");
+                return sLayerId;
+            }
+
+            //send update process message
+            if (oSendToRabbit.SendUpdateProcessMessage(oParameter.getWorkspace()) == false)
+            {
+                s_oLogger.debug("LauncherMain.Publish: Error sending rabbitmq message to update process list");
+            }
+
             // Read File Name
             String sFile = oParameter.getFileName();
 
@@ -533,7 +572,7 @@ public class LauncherMain {
             oMessageViewModel.setMessageResult("OK");
             String sJSON = MongoRepository.s_oMapper.writeValueAsString(oMessageViewModel);
 
-            if (oSendLayerId.SendMsg(oParameter.getQueue(), sJSON) == false) {
+            if (oSendLayerId.SendMsgOnExchange(oParameter.getExchange(), sJSON) == false) {
                 s_oLogger.debug("LauncherMain.publish: Error sending Rabbit Message");
             }
 
@@ -547,18 +586,26 @@ public class LauncherMain {
         catch (Exception oEx) {
             s_oLogger.debug("LauncherMain.Publish: exception " + oEx.toString());
 
-            // Rabbit Sender
-            Send oSendToRabbit = new Send();
             RabbitMessageViewModel oMessageViewModel = new RabbitMessageViewModel();
             oMessageViewModel.setMessageCode(LauncherOperations.PUBLISH);
             oMessageViewModel.setMessageResult("KO");
 
             try {
                 String sJSON = MongoRepository.s_oMapper.writeValueAsString(oMessageViewModel);
-                oSendToRabbit.SendMsg(oParameter.getQueue(),sJSON);
+                oSendToRabbit.SendMsgOnExchange(oParameter.getExchange(), sJSON);
             }
             catch (Exception oEx2) {
                 s_oLogger.debug("LauncherMain.Publish: Inner Exception " + oEx2.toString());
+            }
+        }
+        finally{
+            //delete process from list
+            try{
+                ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
+                oProcessWorkspaceRepository.DeleteProcessWorkspace(oParameter.getProcessObjId());
+            }
+            catch (Exception oEx) {
+                s_oLogger.debug("LauncherMain.Publish: Exception deleting process " + oEx.toString());
             }
         }
 
@@ -581,7 +628,24 @@ public class LauncherMain {
         JAI.getDefaultInstance().getTileScheduler().setParallelism(Runtime.getRuntime().availableProcessors());
         MemUtils.configureJaiTileCache();
 
+        // Rabbit Sender
+        Send oSendToRabbit = new Send();
+
         try {
+
+            //Init rabbit exchange and queue
+            if (oSendToRabbit.Init(oParameter.getWorkspace(), oParameter.getUserId()) == false)
+            {
+                s_oLogger.debug("LauncherMain.PublishBandImage: Failed initializing RabbitMQ");
+                return sLayerId;
+            }
+
+            //send update process message
+            if (oSendToRabbit.SendUpdateProcessMessage(oParameter.getWorkspace()) == false)
+            {
+                s_oLogger.debug("LauncherMain.PublishBandImage: Error sending rabbitmq message to update process list");
+            }
+
             // Read File Name
             String sFile = oParameter.getFileName();
 
@@ -601,15 +665,13 @@ public class LauncherMain {
                 // File not good!!
                 s_oLogger.debug( "LauncherMain.PublishBandImage: file is null or empty");
 
-                // Send KO to rabbit
-                Send oSendToRabbit = new Send();
                 RabbitMessageViewModel oRabbitVM = new RabbitMessageViewModel();
                 oRabbitVM.setMessageCode(LauncherOperations.PUBLISHBAND);
                 oRabbitVM.setMessageResult("KO");
 
                 try {
                     String sJSON = MongoRepository.s_oMapper.writeValueAsString(oRabbitVM);
-                    oSendToRabbit.SendMsg(oParameter.getQueue(),sJSON);
+                    oSendToRabbit.SendMsgOnExchange(oParameter.getExchange(), sJSON);
                 }
                 catch (Exception oEx2) {
                     s_oLogger.debug("LauncherMain.Download: Inner Exception " + oEx2.toString());
@@ -652,7 +714,7 @@ public class LauncherMain {
 
                 Send oSendLayerId = new Send();
 
-                if (oSendLayerId.SendMsg(oParameter.getQueue(),sJSON)==false) {
+                if (oSendLayerId.SendMsgOnExchange(oParameter.getExchange(), sJSON)==false) {
                     s_oLogger.debug("LauncherMain.PublishBandImage: Error sending Rabbit Message");
                 }
 
@@ -749,7 +811,7 @@ public class LauncherMain {
             String sJSON = MongoRepository.s_oMapper.writeValueAsString(oRabbitVM);
 
             // Send it
-            if (oSendLayerId.SendMsg(oParameter.getQueue(),sJSON)==false) {
+            if (oSendLayerId.SendMsgOnExchange(oParameter.getExchange(), sJSON)==false) {
                 s_oLogger.debug("LauncherMain.PublishBandImage: Error sending Rabbit Message");
             }
         }
@@ -759,18 +821,26 @@ public class LauncherMain {
 
             oEx.printStackTrace();
 
-            // Rabbit Sender
-            Send oSendToRabbit = new Send();
             RabbitMessageViewModel oMessageViewModel = new RabbitMessageViewModel();
             oMessageViewModel.setMessageCode(LauncherOperations.PUBLISHBAND);
             oMessageViewModel.setMessageResult("KO");
 
             try {
                 String sJSON = MongoRepository.s_oMapper.writeValueAsString(oMessageViewModel);
-                oSendToRabbit.SendMsg(oParameter.getQueue(),sJSON);
+                oSendToRabbit.SendMsgOnExchange(oParameter.getExchange(), sJSON);
             }
             catch (Exception oEx2) {
                 s_oLogger.debug("LauncherMain.Download: Inner Exception " + oEx2.toString());
+            }
+        }
+        finally{
+            //delete process from list
+            try{
+                ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
+                oProcessWorkspaceRepository.DeleteProcessWorkspace(oParameter.getProcessObjId());
+            }
+            catch (Exception oEx) {
+                s_oLogger.debug("LauncherMain.PublishBandImage: Exception deleting process " + oEx.toString());
             }
         }
 
