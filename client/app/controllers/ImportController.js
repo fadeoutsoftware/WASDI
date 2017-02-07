@@ -96,7 +96,14 @@ var ImportController = (function() {
         {
             /*Load elements by Service if there was a previous search i load*/
             this.m_oProcessesLaunchedService.loadProcessesFromServer(this.m_oActiveWorkspace.workspaceId);
+
+            var oWorkspaceByResultService = this.m_oResultsOfSearchService.getActiveWorkspace();
+            //if the workspace id saved in ResultService but the id it's differet to actual workspace id clean ResultService
+            if(utilsIsObjectNullOrUndefined(oWorkspaceByResultService) || (oWorkspaceByResultService.workspaceId != this.m_oActiveWorkspace.workspaceId))
+                this.m_oResultsOfSearchService.setDefaults();
+
             this.loadOpenSearchParamsByResultsOfSearchServices(this);
+
         }
 
 
@@ -111,14 +118,26 @@ var ImportController = (function() {
         this.m_oRabbitStompServive.initWebStomp(this.m_oActiveWorkspace,"ImportController",this);
 
         var oController = this;
-        //get configuration
-        this.m_oConfigurationService.getConfiguration().then(function(configuration){
-            oController.m_oConfiguration = configuration;
-            oController.m_aoMissions = oController.m_oConfiguration.missions;
-            oController.m_bShowsensingfilter = oController.m_oConfiguration.settings.showsensingfilter;
-            oController.m_oScope.$apply();
-        });
 
+        //get configuration
+
+            this.m_oConfigurationService.getConfiguration().then(function(configuration){
+
+                oController.m_oConfiguration = configuration;
+                var oMissions = oController.m_oResultsOfSearchService.getMissions();
+
+                if(!utilsIsObjectNullOrUndefined(oMissions) && oMissions.length != 0)
+                {
+                    oController.m_aoMissions = oMissions;
+                }
+                else
+                {
+                    oController.m_aoMissions = oController.m_oConfiguration.missions;
+                }
+
+                oController.m_bShowsensingfilter = oController.m_oConfiguration.settings.showsensingfilter;
+                oController.m_oScope.$apply();
+            });
 
 
         this.m_DatePickerPosition = function($event){
@@ -375,7 +394,6 @@ var ImportController = (function() {
             this.m_aoMissions[parentIndex].filters[index].indexvalue = "";
         }
 
-
     };
 
     ImportController.prototype.search = function() {
@@ -398,6 +416,7 @@ var ImportController = (function() {
         this.m_oResultsOfSearchService.setSensingPeriodFrom(this.m_oModel.sensingPeriodFrom);
         this.m_oResultsOfSearchService.setSensingPeriodTo(this.m_oModel.sensingPeriodTo);
         this.m_oResultsOfSearchService.setMissions(this.m_aoMissions);
+        this.m_oResultsOfSearchService.setActiveWorkspace(this.m_oActiveWorkspace);
         //this.m_oResultsOfSearchService.setMissions(this.m_aoMissions);
 
         //this.m_oSearchService.getProductsCount().then(function(result){
@@ -433,12 +452,15 @@ var ImportController = (function() {
                     }
                     else
                     {
-                        utilsVexDialogAlertTop("Error in open search request...");
-                        //console.log("Error in open search request...");
-                        ////TODO REMOVE IT (use it only with fake data)
-                        //oController.generateLayersList(sResults.data.feed);
+                        utilsVexDialogAlertTop("The result is empty...");
+                        oController.m_bIsVisibleListOfLayers = false; //visualize filter list
+                        oController.m_oResultsOfSearchService.setIsVisibleListOfProducts(oController.m_bIsVisibleListOfLayers );
                     }
                 }
+            }, function errorCallback(response) {
+                utilsVexDialogAlertTop("Error in open search request...");
+                oController.m_bIsVisibleListOfLayers = false;//visualize filter list
+                oController.m_oResultsOfSearchService.setIsVisibleListOfProducts(oController.m_bIsVisibleListOfLayers );
             });
         //});
 
@@ -1078,6 +1100,7 @@ var ImportController = (function() {
                 {
                     oController.m_oConstantsService.setActiveWorkspace(data);
                     oController.m_oActiveWorkspace = oController.m_oConstantsService.getActiveWorkspace();
+
                     /*Start Rabbit WebStomp*/
                     oController.m_oRabbitStompServive.initWebStomp(oController.m_oActiveWorkspace,"ImportController",oController);
                     oController.loadOpenSearchParamsByResultsOfSearchServices(oController);
@@ -1104,7 +1127,7 @@ var ImportController = (function() {
         oController.m_iTotalOfProducts = oController.m_oResultsOfSearchService.getTotalOfProducts();
         oController.m_oModel.sensingPeriodFrom = oController.m_oResultsOfSearchService.getSensingPeriodFrom();
         oController.m_oModel.sensingPeriodTo = oController.m_oResultsOfSearchService.getSensingPeriodTo();
-        oController.m_oAdvancedFilterService.setAdvancedFilter(oController.m_oResultsOfSearchService.getMissions());
+        //oController.m_oAdvancedFilterService.setAdvancedFilter(oController.m_oResultsOfSearchService.getMissions());
         //oController.m_aoMissions = oController.m_oResultsOfSearchService.getMissions();
         return true;
     }

@@ -127,7 +127,7 @@ service('MapService', ['$http','$rootScope', 'ConstantsService', function ($http
             zoomControl: false,
             layers: [this.m_oOSMBasic],
             keyboard: false,
-            // maxZoom: 22
+             //maxZoom: 22
         });
 
 
@@ -322,5 +322,11 @@ service('MapService', ['$http','$rootScope', 'ConstantsService', function ($http
         this.m_oDrawItems.clearLayers();
     }
 
+    this.getHome = function()
+    {
+        //var oCenter = this.m_oWasdiMap.getCenter();
+        //this.m_oWasdiMap.setView(oCenter,5,maxZoom);
+        this.m_oWasdiMap.fitWorld();
+    }
 
 }]);

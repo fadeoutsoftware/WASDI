@@ -396,7 +396,8 @@ var EditorController = (function () {
             format: 'image/png',
             transparent: true,
             noWrap:true
-        }).addTo(oMap);
+        });
+        wmsLayer.addTo(oMap);
 
     }
 
@@ -644,7 +645,26 @@ var EditorController = (function () {
         var oTree =
         {
             'core': {'data': [], "check_callback": true},
-
+            "plugins" : [ "contextmenu" ],  // all plugin i use
+            "contextmenu" : { // my right click menu
+                "items" : function ($node)
+                {
+                    return {
+                        "prova1" : {
+                            "label" : "operazione1",
+                            "action" : function (obj) {  }
+                        },
+                        "prova2" : {
+                            "label" : "operazione2",
+                            "action" : function (obj) {  }
+                        },
+                        "prova3" : {
+                            "label" : "operazione3",
+                            "action" : function (obj) {  }
+                        }
+                    };
+                }
+            }
         }
 
 
@@ -801,6 +821,41 @@ var EditorController = (function () {
         }
     }
 
+    /*
+
+     */
+    EditorController.prototype.synchronize3DMap = function() {
+
+        var oMap = this.m_oMapService.getMap();
+        var oBoundsMap = oMap.getBounds();/* it take the edge of 2d map*/
+
+        var oGlobe = this.m_oGlobeService.getGlobe();
+        /* set view of globe*/
+        oGlobe.camera.setView({
+            destination: Cesium.Rectangle.fromDegrees(oBoundsMap.getWest(), oBoundsMap.getSouth(), oBoundsMap.getEast(), oBoundsMap.getNorth()),
+            orientation: {
+                heading: 0.0,
+                pitch: -Cesium.Math.PI_OVER_TWO,
+                roll: 0.0
+            }
+
+        });
+
+    }
+    EditorController.prototype.synchronize2DMap = function() {
+
+        var oMap = this.m_oMapService.getMap();
+        var oGlobe = this.m_oGlobeService.getGlobe();
+        var oCenter = this.m_oGlobeService.getMapCenter();
+        oMap.flyTo(oCenter);
+        //var oRectangle = oGlobe.scene.camera.computeViewRectangle(oGlobe.scene.globe.ellipsoid);
+        //if(utilsIsObjectNullOrUndefined(oRectangle))
+        //    return false;
+        //// center map
+        //var oBoundaries = L.latLngBounds(oRectangle.south,oRectangle.west,oRectangle.north,oRectangle.east);
+        //oMap.fitBounds(oBoundaries);
+        return true;
+    }
     /* Push process in List of Running Processes (in server)
     * */
 

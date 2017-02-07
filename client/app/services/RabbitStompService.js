@@ -63,47 +63,10 @@ service('RabbitStompService', ['$http',  'ConstantsService','$interval','Process
                     return;
                 }
 
+                //Reject the messages for an other workspace
+                if(oMessageResult.workspaceId != oController.m_oActiveWorkspace.workspaceId)
+                    return false;
                 // Route the message
-            //    if (oMessageResult.messageCode == "DOWNLOAD")
-            //    {
-            //
-            //        if(sControllerName == "EditorController" || sControllerName == "ImportController")
-            //        {
-            //            oControllerActive.receivedDownloadMessage(oMessageResult);
-            //            oController.m_oProcessesLaunchedService.loadProcessesFromServer();
-            //            var oDialog = utilsVexDialogAlertBottomRightCorner("The download is ended");
-            //            utilsVexCloseDialogAfterFewSeconds(3000,oDialog);
-            //        }
-            //        //TODO ERRROR CASE
-            //    }
-            //    else if (oMessageResult.messageCode == "PUBLISH") {
-            //        if(sControllerName == "EditorController" )
-            //        {
-            //            oControllerActive.receivedPublishMessage(oMessageResult);
-            //            oController.m_oProcessesLaunchedService.loadProcessesFromServer();
-            //            var oDialog = utilsVexDialogAlertBottomRightCorner("The publish is ended");
-            //            utilsVexCloseDialogAfterFewSeconds(3000,oDialog);
-            //        }
-            //        //TODO ERRROR CASE
-            //
-            //    }
-            //    else if (oMessageResult.messageCode == "PUBLISHBAND") {
-            //
-            //        if(sControllerName == "EditorController" || sControllerName == "ImportController")
-            //        {
-            //            oControllerActive.receivedPublishBandMessage(oMessageResult.payload.layerId);
-            //            oController.m_oProcessesLaunchedService.loadProcessesFromServer();
-            //            var oDialog = utilsVexDialogAlertBottomRightCorner("The publish is ended");
-            //            utilsVexCloseDialogAfterFewSeconds(3000,oDialog);
-            //
-            //        }
-            //        //TODO ERRROR CASE
-            //
-            //    }
-            //
-            //} else {
-            //    console.log("got empty message");
-            //}
 
             switch(oMessageResult.messageCode)
             {

@@ -62,5 +62,16 @@ service('GlobeService', ['$http',  'ConstantsService', function ($http, oConstan
         return this.m_aoLayers;
     }
 
+    this.getMapCenter=function() {
+        var windowPosition = new Cesium.Cartesian2(this.m_oWasdiGlobe.container.clientWidth / 2, this.m_oWasdiGlobe.container.clientHeight / 2);
+        var pickRay = this.m_oWasdiGlobe.scene.camera.getPickRay(windowPosition);
+        var pickPosition = this.m_oWasdiGlobe.scene.globe.pick(pickRay, this.m_oWasdiGlobe.scene);
+        var pickPositionCartographic = this.m_oWasdiGlobe.scene.globe.ellipsoid.cartesianToCartographic(pickPosition);
+        console.log(pickPositionCartographic.longitude * (180/Math.PI));
+        console.log(pickPositionCartographic.latitude * (180/Math.PI));
+        return [pickPositionCartographic.latitude * (180/Math.PI),pickPositionCartographic.longitude * (180/Math.PI)];
+    }
+
+
 }]);
 

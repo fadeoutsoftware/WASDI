@@ -1,0 +1,71 @@
+.search-orbit-view
+{
+  .left-side-bar
+  {
+    font-family: sans-serif;
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 1.42857;
+    font-weight: 400;
+    /*PANEL WITH FILTERS*/
+    .my-panel
+    {
+
+      //OVERRIDING
+      .panel-body
+      {
+        padding: 0;
+      }
+      //override bootstrap
+      .panel-heading {
+        border-bottom: 0;
+      }
+
+      //background-color: $wasdi-sidebar-background-color;
+      .panel-default {
+        border-color: $waddi-sidebar-color-border-panel;
+        margin-bottom: 5px;
+      }
+      .panel-default > .panel-heading
+      {
+        background-color:$wasdi-sidebar-color-title-panel ;
+        color:$wasdi-title-color;
+      }
+
+      .time-picker-container
+      {
+        margin-top: 10px;
+        margin-bottom: 10px;
+      }
+      .my-button
+      {
+        padding: 10px 20px;
+        //position: absolute;
+        //bottom: 70px;
+        //right: 20px;
+      }
+      .well
+      {
+        border: 1px solid $wasdi-blue-logo;
+      }
+
+    }
+
+    /*TABLE SEARCH ORBIT */
+    .table-container
+    {
+      height: 350px;       /* Just for the demo          */
+      overflow-y: auto;    /* Trigger vertical scroll    */
+      overflow-x: hidden;  /* Hide the horizontal scroll */
+      .table-search-orbit
+      {
+
+      }
+    }
+
+  }
+  .map-container
+  {
+
+  }
+}

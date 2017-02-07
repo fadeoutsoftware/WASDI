@@ -57,6 +57,12 @@
                 <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
                     <ul class="nav navbar-nav navbar-right">
                         <li>
+                            <a ui-sref="root.workspaces" ><i class="fa fa-list-ol" aria-hidden="true"></i>
+                                {{"ROOT_VIEW_NAV_BAR_LINK_WORKSPACES"|translate}}
+                            </a>
+                        </li>
+
+                        <li>
                             <!--<a  ng-click="m_oController.openImportPage()"> <i class="fa fa-download fa-lg" aria-hidden="true"></i>&lt;!&ndash;ui-sref="root.import"&ndash;&gt;-->
 
                             <a ng-click="m_oController.openSearchorbit()"><i class="fa fa-search" aria-hidden="true"></i>
@@ -74,15 +80,12 @@
                             </a>
                         </li>
                         <li>
-                            <a  ><i class="fa fa-upload fa-lg" aria-hidden="true"></i><!--ui-sref="root.editor"-->
+                            <a >
+                                <i class="fa fa-upload fa-lg" aria-hidden="true"></i><!--ui-sref="root.editor"-->
                                 {{"ROOT_VIEW_NAV_BAR_LINK_PUBLISH"|translate}}
                             </a>
                         </li>
-                        <li>
-                            <a ui-sref="root.workspaces" ><i class="fa fa-list-ol" aria-hidden="true"></i>
-                                {{"ROOT_VIEW_NAV_BAR_LINK_WORKSPACES"|translate}}
-                            </a>
-                        </li>
+
                     </ul>
                 </div>
 

@@ -30,11 +30,18 @@
         <div class="panel panel-default small-map-container">
             <div class="panel-heading">
                 <div class="my-button" ng-click="m_oController.onClickChangeMap()" data-toggle="tooltip" data-placement="top" title="{{'EDITOR_TOOLTIP_SWITCH_3D_2D'|translate}}">
-                    <i ng-show="m_oController.m_b2DMapModeOn == true" class="fa fa-map " aria-hidden="true"></i>
+                    <i ng-show="m_oController.m_b2DMapModeOn == true" class="fa fa-map-o" aria-hidden="true"></i>
                     <i  ng-show="m_oController.m_b3DMapModeOn == true" class="fa fa-globe " aria-hidden="true"></i>
                 </div>
-                <div class="my-button" ng-click="m_oController.m_oConstantsService.removeLocalStorageItem('m_aoProcessesRunning'+m_oController.m_oActiveWorkspace.workspaceId+m_oController.m_oUser.userId)"><!--m_oController.m_oConstantsService.deleteCookie('m_aoProcessesRunning');-->
-                    <i class="fa fa-times-circle" aria-hidden="true"></i>
+                <!-- 2D map button-->
+                <div class="my-button" ng-click="m_oController.synchronize2DMap()" data-toggle="tooltip" data-placement="top" title="{{'EDITOR_TOOLTIP_SYNCHRONIZE_MAP_2D'|translate}}"
+                     ng-show="m_oController.m_b2DMapModeOn == false && m_oController.m_b3DMapModeOn == true  "><!--m_oController.m_oConstantsService.deleteCookie('m_aoProcessesRunning');-->
+                    <i class="fa fa-location-arrow" aria-hidden="true"></i>
+                </div>
+                <!-- 3D map button-->
+                <div class="my-button" ng-click="m_oController.synchronize3DMap()" data-toggle="tooltip" data-placement="top" title="{{'EDITOR_TOOLTIP_SYNCHRONIZE_MAP_3D'|translate}}"
+                     ng-show="m_oController.m_b2DMapModeOn == true && m_oController.m_b3DMapModeOn == false" ><!--m_oController.m_oConstantsService.deleteCookie('m_aoProcessesRunning');-->
+                    <i class="fa fa-location-arrow" aria-hidden="true"></i>
                 </div>
             </div>
             <!--<globe ng-if="m_oController.m_b2DMapModeOn == true && m_oController.m_b3DMapModeOn == false  "></globe>-->
@@ -48,8 +55,31 @@
     </div>
 
     <!--------------- MAP CONTAINER --------------->
+
     <div class="col-lg-8 col-md-8 col-sm-8 col-xs-12 map-container">
-        <div class="map" id = "wasdiMap" ng-show="m_oController.m_b2DMapModeOn == true && m_oController.m_b3DMapModeOn == false  "></div>
+
+        <div class="btn-group" role="group" >
+
+            <button type="button" class="btn btn-default" ng-click="m_oController.m_oMapService.getHome();"  data-toggle="tooltip"
+                    data-placement="bottom"  title="{{'EDITOR_TOOLTIP_HOME'|translate}}" ng-show="m_oController.m_b2DMapModeOn == true && m_oController.m_b3DMapModeOn == false">
+                <i class="fa fa-home fa-lg" aria-hidden="true"></i>
+            </button>
+            <!-- 2D map button-->
+            <button type="button" class="btn btn-default" ng-click="m_oController.synchronize2DMap();"  data-toggle="tooltip"
+                    data-placement="bottom"  title="{{'EDITOR_TOOLTIP_SYNCHRONIZE_MAP_2D'|translate}}" ng-show="m_oController.m_b2DMapModeOn == true && m_oController.m_b3DMapModeOn == false">
+                <i class="fa fa-location-arrow" aria-hidden="true"></i>
+            </button>
+            <!-- 3D map button-->
+            <button type="button" class="btn btn-default" ng-click="m_oController.synchronize3DMap();"  data-toggle="tooltip"
+                    data-placement="bottom"  title="{{'EDITOR_TOOLTIP_SYNCHRONIZE_MAP_3D'|translate}}" ng-show="m_oController.m_b2DMapModeOn == false && m_oController.m_b3DMapModeOn == true  ">
+                <i class="fa fa-location-arrow" aria-hidden="true"></i>
+            </button>
+        </div>
+
+        <div class="map" id = "wasdiMap" ng-show="m_oController.m_b2DMapModeOn == true && m_oController.m_b3DMapModeOn == false">
+            <!-- button inside map-->
+
+        </div>
         <!--<globe ng-if="m_oController.m_b2DMapModeOn == false && m_oController.m_b3DMapModeOn == true  "></globe>-->
         <div id="cesiumContainer" class="map" ng-show="m_oController.m_b2DMapModeOn == false && m_oController.m_b3DMapModeOn == true  "></div>
     </div>

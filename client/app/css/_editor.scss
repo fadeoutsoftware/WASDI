@@ -68,6 +68,24 @@
     padding-left: 0;
     padding-right: 0px;
     border: 1px solid $wasdi-blue-logo;
+    //BUTTONS ON MAP
+    .btn-group
+    {
+      z-index: 1001;
+      .btn-default
+      {
+        background-color: $wasdi-blue-logo;
+        color: $wasdi-white;
+        opacity: 0.9;
+      }
+      .btn-default:hover
+      {
+        color: $wasdi-green-logo;
+      }
+      position: absolute;
+      top: 2px;
+      left: 2px;
+    }
     //margin-bottom: 35px;
     //leaflet
     .map
@@ -75,6 +93,8 @@
       //DIMENSIONS MAP
       width: auto;//500px
       height: $wasdi-map-height;
+
+
 
     }
 

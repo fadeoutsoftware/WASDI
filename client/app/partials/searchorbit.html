@@ -66,7 +66,7 @@
                         <div class="well well-sm">
                             <div ng-repeat="satellite in m_oController.m_oConfiguration.orbitsearch.satelliteNames">
                                 <input type="checkbox" checklist-model="m_oController.m_oSelectedSatellite"
-                                       checklist-value="satellite"/> <span>{{satellite}}</span>
+                                       checklist-value="satellite" ng-checked="true" /> <span>{{satellite}}</span>
                             </div>
                         </div>
                     </div>

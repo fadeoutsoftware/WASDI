@@ -13,17 +13,18 @@
     }
   }
 
-  // SIDEBAR
-  .sidenav-animated{
+
+   //SIDEBAR
+  .side-panel{
 
     //change font family
     font-family: $wasdi-font-web-normal;
     font-weight:$wasdi-font-weight-normal;
-    overflow:auto;
-    height: 100%;
+
     font-size:14px;
     line-height: 1.42857;
     font-weight: 400;
+
 
     h1
     {
@@ -46,23 +47,76 @@
       font-weight:$wasdi-font-weight-normal;
     }
 
-    .sidenav {
-      height: 100%;
-      width: 35%;
-      position: fixed;
-      z-index: 1001;
-      top: 0;
-      left: 0;
-      background-color:$wasdi-grey;
-      //border-right: 20px solid $wasdi-blue-logo;
-      border-right: 1px solid $wasdi-blue-logo;
-
-      overflow-x: hidden;
-      transition: 0.5s;
-      padding-top: 30px;
-      color:black;
+    //override bootstrap
+    .panel-heading {
+      border-bottom: 0;
     }
 
+    //background-color: $wasdi-sidebar-background-color;
+    .panel-default {
+      border-color: $waddi-sidebar-color-border-panel;
+      margin-bottom: 5px;
+
+
+
+    }
+    .panel-default > .panel-heading
+    {
+      background-color:$wasdi-sidebar-color-title-panel ;
+      color:$wasdi-title-color;
+    }
+    .panel-body {
+
+      padding: 0;
+      background-color:$wasdi-grey;
+      //border-right: 20px solid $wasdi-blue-logo;
+      //border: 1px solid $wasdi-blue-logo;
+      overflow: auto;
+      height: 670px;
+      max-height: 670px;
+      color:black;
+    }
+    .search-button {
+      cursor:pointer;
+      display: inline;
+      // top: 10%;
+      background: $wasdi-import-left-side-navbar-color-background;
+      color:white;
+      padding:15px 15px;
+
+      margin-top: 15px;
+      //border: 1px solid white;
+      //z-index: 1000;
+      opacity: 1;
+      i
+      {
+        color: white;
+      }
+
+    }
+
+    .search-button:hover
+    {
+      background-color: $wasdi-green-logo;
+    }
+
+    .backbtn {
+
+      //position: absolute;
+      //top: 0;
+      //left: 10px;
+      //font-size: 25px;
+      //margin-right: 50px;
+
+      color: $wasdi-white;
+      cursor:pointer;
+
+
+    }
+    .backbtn:hover{
+      color: $wasdi-button-over-color;
+      background-color:transparent;
+    }
     /*MISSIONS CSS */
     .missions
     {
@@ -135,7 +189,7 @@
      });
       */
       height:100%;
-      overflow: auto;
+      //overflow: auto;
       /***************************/
       //Over TR
       .table-hover tbody:hover{
@@ -230,9 +284,9 @@
     /****************** INPUT FORM SEARCH CONTAINER********************/
     #advanced-search-container{
 
-      background-color: white;
-      margin: 10px;
-      box-shadow: 3px 5px 19px 0 rgba(49,50,50,.62);
+      //background-color: white;
+      //margin: 10px;
+      //box-shadow: 3px 5px 19px 0 rgba(49,50,50,.62);
       padding: 8px;
     }
     #advanced-search-close-button{
@@ -244,7 +298,7 @@
       position: relative;
       height: 100%;
       width: 100%;
-      background-color: white;
+      //background-color: white;
       overflow-y: auto;
       overflow-x: hidden;
     }
@@ -281,30 +335,7 @@
         width:60%;
         display:inline-flex;
       }
-      .search-button {
-        cursor:pointer;
-        display: inline;
-        // top: 10%;
-        background: $wasdi-import-left-side-navbar-color-background;
-        color:white;
-        padding:15px 15px;
 
-        margin-top: 5px;
-        //border: 1px solid white;
-        z-index: 1000;
-        opacity: 0.9;
-        i
-        {
-          color: white;
-        }
-
-
-      }
-
-      .search-button:hover
-      {
-        background-color: $wasdi-green-logo;
-      }
     }
 
     /* input text override my class in style*/
@@ -630,34 +661,22 @@
     //.sidenav a:hover, .offcanvas a:focus{
     //  color: #f1f1f1;
     //}
-
-    .sidenav .closebtn {
-
-      position: absolute;
-      top: 0;
-      left: 10px;
-      //font-size: 25px;
-      //margin-left: 50px;
-
-        color: $wasdi-import-left-side-navbar-color-background;
-        cursor:pointer;
-
-
-    }
-
-    .sidenav .backbtn {
-
-      position: absolute;
-      top: 0;
-      right: 10px;
-      //font-size: 25px;
-      //margin-right: 50px;
-
-        color: $wasdi-import-left-side-navbar-color-background;
-        cursor:pointer;
+    //
+    //.sidenav .closebtn {
+    //
+    //  position: absolute;
+    //  top: 0;
+    //  left: 10px;
+    //  //font-size: 25px;
+    //  //margin-left: 50px;
+    //
+    //    color: $wasdi-import-left-side-navbar-color-background;
+    //    cursor:pointer;
+    //
+    //
+    //}
 
 
-    }
 
     @media screen and (max-height: 450px) {
       .sidenav {padding-top: 15px;}
