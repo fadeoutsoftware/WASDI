@@ -467,6 +467,7 @@ var EditorController = (function () {
 
             var oProductItem = [];
             oProductItem.name = oProduct.name;
+            oProductItem.fileName = oProduct.fileName;
             oProductItem.index = i;
             aoProductItems.push(oProductItem);
         }
@@ -652,7 +653,24 @@ var EditorController = (function () {
                     return {
                         "prova1" : {
                             "label" : "operazione1",
-                            "action" : function (obj) {  }
+                            "action" : function (obj) {
+
+                                utilsVexDialogConfirm("Deleting product. Do you want to delete files on file system?", function(value) {
+                                    var bDeleteFile = false;
+                                    if (value)
+                                        bDeleteFile = true;
+
+                                    oController.m_oProductService.deleteProductFromWorkspace($node.original.fileName, oController.m_oActiveWorkspace.workspaceId, bDeleteFile)
+                                        .success(function (data) {
+
+                                        }).error(function (error) {
+
+                                    });
+
+                                });
+
+
+                            }
                         },
                         "prova2" : {
                             "label" : "operazione2",
@@ -676,6 +694,7 @@ var EditorController = (function () {
             //product node
             var oNode = new Object();
             oNode.text=productList[iIndexProduct].name;//LABEL NODE
+            oNode.fileName=productList[iIndexProduct].fileName;//LABEL NODE
             oNode.children=[{"text": "metadata"},{"text":"Bands", "children": []}];//CHILDREN
             oTree.core.data.push(oNode);
 
