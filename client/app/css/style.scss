@@ -18,15 +18,18 @@ body
   font-size: $wasdi-font-size;
   line-height: $wasdi-line-height;
   font-weight: $wasdi-font-weight;
+  height: 100vh;
+  width: 100vw;
 }
 //LEAFLET MAP 100% "SCREEN"
-html, body, #map {
+html, body, #wasdiMap {
   //height:100%;
   //width:100%;
   //height: 100vh;
   //width: 100vw;
   padding:0px;
   margin:0px;
+
 }
 ////CESIUM GLOBE 100% "SCREEN"
 html, body, #cesiumContainer {
@@ -34,6 +37,8 @@ html, body, #cesiumContainer {
   //height: 100%;
   margin: 0;
   padding: 0;
+  //height: 100vh;
+  //width: 100vw;
 }
 
 h1

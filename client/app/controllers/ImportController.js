@@ -44,7 +44,7 @@ var ImportController = (function() {
         this.m_bIsOpen=true;
         this.m_bIsVisibleListOfLayers = false;
         this.m_oMapService.initMapWithDrawSearch('wasdiMapImport');
-        this.m_aoProductsList= []; /* LAYERS LIST == PRODUCTS LIST */
+        this.m_aoProductsList = []; /* LAYERS LIST == PRODUCTS LIST */
         this.m_aoMissions;
         /* number of possible products per pages and number of products per pages selected */
         this.m_iProductsPerPageSelected = 5;//default value
@@ -287,6 +287,7 @@ var ImportController = (function() {
                         /* change view on table , when the pointer of mouse is on a rectangle the table scroll, the row will become visible(if it isn't) */
                         var container = $('#div-container-table'), scrollTo = $('#'+sId);
 
+                        //http://stackoverflow.com/questions/2905867/how-to-scroll-to-specific-item-using-jquery
                         container.animate({
                             scrollTop: scrollTo.offset().top - container.offset().top + container.scrollTop()
                         });
@@ -495,25 +496,42 @@ var ImportController = (function() {
     // change actual page
     ImportController.prototype.changePage = function(iNewPage)
     {
+        iNewPage = parseInt(iNewPage);
 
-        if(!utilsIsObjectNullOrUndefined(iNewPage) && isNaN(iNewPage) == false && iNewPage >= 0 && iNewPage <= this.m_iTotalPages)
+        if(!utilsIsObjectNullOrUndefined(iNewPage) && isNaN(iNewPage) == false && utilsIsInteger(iNewPage) && iNewPage >= 0 && iNewPage <= this.m_iTotalPages)
         {
             this.m_iCurrentPage = iNewPage;
             this.search();
         }
-
+        else
+        {
+            return false ;
+        }
+        return true;
     }
 
     // +1 page
     ImportController.prototype.plusOnePage = function()
     {
-        this.changePage(this.m_iCurrentPage+1);
+        iNewPage = parseInt(this.m_iCurrentPage);
+
+        if(!utilsIsObjectNullOrUndefined(iNewPage) && isNaN(iNewPage) == false && utilsIsInteger(iNewPage) && iNewPage >= 0 && iNewPage <= this.m_iTotalPages)
+        {
+            this.m_iCurrentPage = iNewPage;
+            this.changePage(this.m_iCurrentPage + 1);
+        }
     }
 
     // -1 page
     ImportController.prototype.minusOnePage = function()
     {
-        this.changePage(this.m_iCurrentPage-1);
+        iNewPage = parseInt(this.m_iCurrentPage);
+
+        if(!utilsIsObjectNullOrUndefined(iNewPage) && isNaN(iNewPage) == false && utilsIsInteger(iNewPage) && iNewPage >= 0 && iNewPage <= this.m_iTotalPages)
+        {
+            this.m_iCurrentPage = iNewPage;
+            this.changePage(this.m_iCurrentPage-1);
+        }
     }
 
     //last page
@@ -767,6 +785,7 @@ var ImportController = (function() {
 
         if (utilsIsObjectNullOrUndefined(aData.entry)) {
             // TODO: Qui interrompere l'attesa della ricerca e comunicare No Result Found
+            this.m_bIsVisibleListOfLayers = false;
             utilsVexDialogAlertBottomRightCorner('no layers found');
             //console.log('no layers found');
             return;
@@ -786,11 +805,29 @@ var ImportController = (function() {
 
         for(var iIndexLayers = 0; iIndexLayers < iLength; iIndexLayers++)
         {
-
+            //CREATE RECTANGLE
             var oRectangle = null;
             var aasBounds = oController.getBoundsByLayerFootPrint(aoLayers[iIndexLayers]);
             oRectangle = oController.m_oMapService.addRectangleOnMap(aasBounds ,null,iIndexLayers);
+            var sLink = "";
+            //TAKE LINK IMAGE
+            if(!utilsIsObjectNullOrUndefined(aoLayers[iIndexLayers].link))
+            {
 
+                for(var iIndexLink = 0 ;iIndexLink < aoLayers[iIndexLayers].link.length ;iIndexLink++)
+                {
+                    if(utilsIsObjectNullOrUndefined(aoLayers[iIndexLayers].link[iIndexLink].rel) && !utilsIsObjectNullOrUndefined(aoLayers[iIndexLayers].link[iIndexLink].href))
+                    {
+                        //find it!!
+                        sLink = aoLayers[iIndexLayers].link[iIndexLink].href;
+                        break;
+                    }
+                }
+            }
+
+            //TAKE SUMMARY
+            /*TODO CHANGE stringToObjectSummary() WITH JSON.parse() */
+            var oSummary = this.stringToObjectSummary(aoLayers[iIndexLayers].summary.content);
             /*
              m_aoProductsList[i]={
                                     layerProperty:
@@ -802,8 +839,8 @@ var ImportController = (function() {
                                   }
             * */
 
-            /*TODO CHANGE stringToObjectSummary() WITH JSON.parse() */
-            var oSummary = this.stringToObjectSummary(aoLayers[iIndexLayers].summary.content);
+
+            //PUSH PRODUCT
             oController.m_aoProductsList.push(
                 {
                     layerProperty:aoLayers[iIndexLayers],
@@ -811,7 +848,8 @@ var ImportController = (function() {
                     id:aoLayers[iIndexLayers].id,
                     rectangle:oRectangle,
                     title:aoLayers[iIndexLayers].title.content,
-                    preview:oController.getPreviewLayer(aoLayers[iIndexLayers])
+                    preview:oController.getPreviewLayer(aoLayers[iIndexLayers]),
+                    link:sLink
                 });
         }
 
@@ -1041,7 +1079,7 @@ var ImportController = (function() {
         /* remove rectangle in map*/
         for(var iIndexLayersList = 0; iIndexLayersList < iLengththLayersList; iIndexLayersList++)
         {
-            var oRectangle = this.m_aoProductsList[iIndexLayersList].rectangle
+            var oRectangle = this.m_aoProductsList[iIndexLayersList].rectangle;
             if(!utilsIsObjectNullOrUndefined(oRectangle))
                 oRectangle.removeFrom(oMap);
 
@@ -1147,7 +1185,7 @@ var ImportController = (function() {
     {
         if(utilsIsObjectNullOrUndefined(oLayer))
             return false;
-        return this.m_oProcessesLaunchedService.checkIfFileIsDownloading(oLayer.title,this.m_oProcessesLaunchedService.getTypeOfProcessProductDownload());
+        return this.m_oProcessesLaunchedService.checkIfFileIsDownloading(oLayer.link,this.m_oProcessesLaunchedService.getTypeOfProcessProductDownload());
     }
 
     ImportController.$inject = [

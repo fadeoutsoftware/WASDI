@@ -91,10 +91,10 @@ service('RabbitStompService', ['$http',  'ConstantsService','$interval','Process
                 case "PUBLISHBAND":
                     if(sControllerName == "EditorController" )
                     {
-                        oControllerActive.receivedPublishBandMessage(oMessageResult.payload.layerId);
+                        oControllerActive.receivedPublishBandMessage(oMessageResult.payload);
                         oController.m_oProcessesLaunchedService.loadProcessesFromServer(oController.m_oActiveWorkspace.workspaceId);
-                        var oDialog = utilsVexDialogAlertBottomRightCorner("The publish is ended. Product:" + oMessageResult.payload.fileName);
-                        //utilsVexCloseDialogAfterFewSeconds(3000,oDialog);
+                        var oDialog = utilsVexDialogAlertBottomRightCorner("The publish is ended.Product: " + oMessageResult.payload.productName);
+                        utilsVexCloseDialogAfterFewSeconds(3000,oDialog);
 
                     }
                     if( sControllerName == "ImportController")

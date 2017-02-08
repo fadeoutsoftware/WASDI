@@ -321,17 +321,20 @@ var EditorController = (function () {
      * @param oMessage
      */
     /* THIS FUNCTION ARE CALLED IN RABBIT SERVICE */
-    EditorController.prototype.receivedPublishBandMessage = function (oLayerId) {
+    EditorController.prototype.receivedPublishBandMessage = function (oLayer) {
 
-        if(utilsIsStrNullOrEmpty(oLayerId))
+        if(utilsIsObjectNullOrUndefined(oLayer))
         {
             console.log("Error LayerID is empty...");
             return false;
         }
+
         //add layer in list
-        this.m_aoLayersList.push(oLayerId);
-        this.addLayerMap2D(oLayerId);
-        this.addLayerMap3D(oLayerId);
+        this.m_aoLayersList.push(oLayer);
+        this.addLayerMap2D(oLayer.layerId);
+        this.addLayerMap3D(oLayer.layerId);
+        this.zoomOnLayer3DGlobe(oLayer.layerId);
+        this.zoomOnLayer2DMap(oLayer.layerId);
         //this.removeProcessInListOfRunningProcesses(oLayerId);
         //TODO REMOVE PROCESS IN LIST
         //this.m_oProcessesLaunchedService.removeProcessByPropertySubstringVersion("processName",oLayerId,
@@ -581,19 +584,19 @@ var EditorController = (function () {
         var oLayer = null;
         var bCondition = true;
         var iIndexLayer = 0;
-        //TODO DON'T REMOVE IT
-        //while(bCondition)
-        //{
-        //    oLayer = oGlobeLayers.get(iIndexLayer);
-        //
-        //    if(utilsIsStrNullOrEmpty(sLayerId) == false && utilsIsObjectNullOrUndefined(oLayer) == false
-        //        && oLayer.imageryProvider.layers == sLayerId)
-        //    {
-        //        bCondition=false;
-        //        oLayer=oGlobeLayers.remove(oLayer);
-        //    }
-        //    iIndexLayer++;
-        //}
+
+        while(bCondition)
+        {
+            oLayer = oGlobeLayers.get(iIndexLayer);
+
+            if(utilsIsStrNullOrEmpty(sLayerId) == false && utilsIsObjectNullOrUndefined(oLayer) == false
+                && oLayer.imageryProvider.layers == sLayerId)
+            {
+                bCondition=false;
+                oLayer=oGlobeLayers.remove(oLayer);
+            }
+            iIndexLayer++;
+        }
 
         //Remove layer from layers list
         var iLenghtLayersList;
@@ -604,7 +607,7 @@ var EditorController = (function () {
 
         for (var iIndex=0; iIndex < iLenghtLayersList ;iIndex++)
         {
-            if(utilsIsStrNullOrEmpty(sLayerId) == false && utilsIsSubstring(sLayerId,oController.m_aoLayersList[iIndex]))
+            if(utilsIsStrNullOrEmpty(sLayerId) == false && utilsIsSubstring(sLayerId,oController.m_aoLayersList[iIndex].layerId))
             {
                 oController.m_aoLayersList.splice(iIndex);
             }
@@ -650,37 +653,72 @@ var EditorController = (function () {
             "contextmenu" : { // my right click menu
                 "items" : function ($node)
                 {
-                    return {
-                        "prova1" : {
-                            "label" : "operazione1",
-                            "action" : function (obj) {
+                    //only the band has property $node.original.band
+                    var oReturnValue = null;
+                    if(utilsIsObjectNullOrUndefined($node.original.band) == false && $node.icon == "assets/icons/check.png")
+                    {
+                        //BAND
+                        var oBand=$node.original.band;
 
-                                utilsVexDialogConfirm("Deleting product. Do you want to delete files on file system?", function(value) {
-                                    var bDeleteFile = false;
-                                    if (value)
-                                        bDeleteFile = true;
+                        oReturnValue =
+                        {
+                            "Zoom2D" : {
+                                "label" : "Zoom Band 2D Map",
+                                "action" : function (obj) {
+                                    if(utilsIsObjectNullOrUndefined(oBand) == false)
+                                        oController.zoomOnLayer2DMap(oBand.productName+"_"+oBand.name);
+                                }
+                            },
+                            "Zoom3D" : {
+                                "label" : "Zoom Band 3D Map",
+                                "action" : function (obj) {
+                                    if(utilsIsObjectNullOrUndefined(oBand) == false)
+                                        oController.zoomOnLayer3DGlobe(oBand.productName+"_"+oBand.name);
+                                }
+                            }
 
-                                    oController.m_oProductService.deleteProductFromWorkspace($node.original.fileName, oController.m_oActiveWorkspace.workspaceId, bDeleteFile)
-                                        .success(function (data) {
+                        };
+                    }
+                    //only products has $node.original.fileName
+                    if(utilsIsObjectNullOrUndefined($node.original.fileName) == false)
+                    {
+                        //PRODUCT
+                        oReturnValue =
+                        {
+                            "prova1" : {
+                                "label" : "Delete Product",
+                                "action" : function (obj) {
 
-                                        }).error(function (error) {
+                                    utilsVexDialogConfirm("Deleting product. Do you want to delete files on file system?", function(value) {
+                                        var bDeleteFile = false;
+                                        if (value)
+                                            bDeleteFile = true;
+
+                                        oController.m_oProductService.deleteProductFromWorkspace($node.original.fileName, oController.m_oActiveWorkspace.workspaceId, bDeleteFile)
+                                            .success(function (data) {
+
+                                            }).error(function (error) {
+
+                                        });
 
                                     });
 
-                                });
 
-
+                                }
+                            },
+                            "prova2" : {
+                                "label" : "operazione2",
+                                "action" : function (obj) {  }
+                            },
+                            "prova3" : {
+                                "label" : "operazione3",
+                                "action" : function (obj) {  }
                             }
-                        },
-                        "prova2" : {
-                            "label" : "operazione2",
-                            "action" : function (obj) {  }
-                        },
-                        "prova3" : {
-                            "label" : "operazione3",
-                            "action" : function (obj) {  }
-                        }
-                    };
+                        };
+                    }
+
+
+                    return oReturnValue;
                 }
             }
         }
@@ -820,7 +858,7 @@ var EditorController = (function () {
 
         for(var iIndexLayers=0; iIndexLayers < oController.m_aoLayersList.length; iIndexLayers++)
         {
-            oController.addLayerMap2D(oController.m_aoLayersList[iIndexLayers]);
+            oController.addLayerMap2D(oController.m_aoLayersList[iIndexLayers].layerId);
         }
     }
 
@@ -836,12 +874,12 @@ var EditorController = (function () {
 
         for(var iIndexLayers=0; iIndexLayers < oController.m_aoLayersList.length; iIndexLayers++)
         {
-            oController.addLayerMap3D(oController.m_aoLayersList[iIndexLayers]);
+            oController.addLayerMap3D(oController.m_aoLayersList[iIndexLayers].layerId);
         }
     }
 
     /*
-
+        synchronize the 3D Map and 2D map
      */
     EditorController.prototype.synchronize3DMap = function() {
 
@@ -861,11 +899,16 @@ var EditorController = (function () {
         });
 
     }
+    /*
+     synchronize the 2D Map and 3D map
+     */
     EditorController.prototype.synchronize2DMap = function() {
 
         var oMap = this.m_oMapService.getMap();
         var oGlobe = this.m_oGlobeService.getGlobe();
         var oCenter = this.m_oGlobeService.getMapCenter();
+        if(utilsIsObjectNullOrUndefined(oCenter))
+            return false;
         oMap.flyTo(oCenter);
         //var oRectangle = oGlobe.scene.camera.computeViewRectangle(oGlobe.scene.globe.ellipsoid);
         //if(utilsIsObjectNullOrUndefined(oRectangle))
@@ -873,6 +916,74 @@ var EditorController = (function () {
         //// center map
         //var oBoundaries = L.latLngBounds(oRectangle.south,oRectangle.west,oRectangle.north,oRectangle.east);
         //oMap.fitBounds(oBoundaries);
+        return true;
+    }
+
+    EditorController.prototype.zoomOnLayer3DGlobe = function(oLayerId)
+    {
+        if(utilsIsObjectNullOrUndefined(oLayerId))
+            return false;
+        if(utilsIsObjectNullOrUndefined(this.m_aoLayersList))
+            return false
+        var iNumberOfLayers = this.m_aoLayersList.length;
+
+        for(var iIndexLayer = 0; iIndexLayer < iNumberOfLayers; iIndexLayer++)
+        {
+            if(this.m_aoLayersList[iIndexLayer].layerId == oLayerId)
+                break;
+        }
+
+        if( !(iIndexLayer < iNumberOfLayers))//there isn't layer in layerList
+            return false;
+
+        var oBoundingBox = JSON.parse(this.m_aoLayersList[iIndexLayer].boundingBox);
+
+        if(utilsIsObjectNullOrUndefined(oBoundingBox)== true)
+            return false;
+
+        var oGlobe = this.m_oGlobeService.getGlobe();
+        /* set view of globe*/
+        oGlobe.camera.setView({
+            destination:  Cesium.Rectangle.fromDegrees( oBoundingBox.minx , oBoundingBox.miny , oBoundingBox.maxx,oBoundingBox.maxy),
+            orientation: {
+                heading: 0.0,
+                pitch: -Cesium.Math.PI_OVER_TWO,
+                roll: 0.0
+            }
+
+        });
+
+        return true;
+    }
+
+    EditorController.prototype.zoomOnLayer2DMap = function(oLayerId)
+    {
+        if(utilsIsObjectNullOrUndefined(oLayerId))
+            return false;
+        if(utilsIsObjectNullOrUndefined(this.m_aoLayersList))
+            return false
+        var iNumberOfLayers = this.m_aoLayersList.length;
+
+        for(var iIndexLayer = 0; iIndexLayer < iNumberOfLayers; iIndexLayer++)
+        {
+            if(this.m_aoLayersList[iIndexLayer].layerId == oLayerId)
+                break;
+        }
+
+        if( !(iIndexLayer < iNumberOfLayers))//there isn't layer in layerList
+            return false;
+
+        var oBoundingBox = JSON.parse(this.m_aoLayersList[iIndexLayer].boundingBox);
+
+        if(utilsIsObjectNullOrUndefined(oBoundingBox)== true)
+            return false;
+
+        var oMap = this.m_oMapService.getMap();
+        var corner1 = L.latLng(oBoundingBox.maxy,oBoundingBox.maxx),
+            corner2 = L.latLng( oBoundingBox.miny,oBoundingBox.minx  ),
+            bounds = L.latLngBounds(corner1, corner2);
+        oMap.fitBounds(bounds);
+
         return true;
     }
     /* Push process in List of Running Processes (in server)

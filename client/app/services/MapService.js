@@ -224,7 +224,7 @@ service('MapService', ['$http','$rootScope', 'ConstantsService', function ($http
 
         if(!utilsIsObjectNullOrUndefined(iIndexLayers))//event on click
             oRectangle.on("click",function (event) {
-                $rootScope.$broadcast('on-mouse-click-rectangle',{rectangle:oRectangle});
+                $rootScope.$broadcast('on-mouse-click-rectangle',{rectangle:oRectangle});//SEND MESSAGE TO IMPORTCONTROLLER
             });
         //mouse over event change rectangle style
         oRectangle.on("mouseover", function (event) {//SEND MESSAGE TO IMPORT CONTROLLER

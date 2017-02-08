@@ -50,42 +50,42 @@
 
                 </div>
 
-                <div class="nav navbar-nav navbar-left name-workspace">
-                    <input type="text" value="{{m_oController.getActiveWorkspace()}}" placeholder="{{m_oController.getActiveWorkspace()}}">
-                </div>
+
 
                 <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                    <div class="nav navbar-nav navbar-left name-workspace">
+                        <input type="text" value="{{m_oController.getActiveWorkspace()}}" placeholder="{{m_oController.getActiveWorkspace()}}">
+                    </div>
                     <ul class="nav navbar-nav navbar-right">
-                        <li>
+                        <li ng-class="{active:m_oController.activePageCss('root.workspaces')}">
                             <a ui-sref="root.workspaces" ><i class="fa fa-list-ol" aria-hidden="true"></i>
                                 {{"ROOT_VIEW_NAV_BAR_LINK_WORKSPACES"|translate}}
                             </a>
                         </li>
 
-                        <li>
-                            <!--<a  ng-click="m_oController.openImportPage()"> <i class="fa fa-download fa-lg" aria-hidden="true"></i>&lt;!&ndash;ui-sref="root.import"&ndash;&gt;-->
-
-                            <a ng-click="m_oController.openSearchorbit()"><i class="fa fa-search" aria-hidden="true"></i>
+                        <li ng-class="{active:m_oController.activePageCss('root.searchorbit')}">
+                          <a ng-click="m_oController.openSearchorbit()" ><i class="fa fa-search" aria-hidden="true"></i>
                                 {{"ROOT_VIEW_NAV_BAR_LINK_SEARCH"|translate}}
                             </a>
                         </li>
-                        <li>
-                            <a ng-click="m_oController.openImportPage()"> <i class="fa fa-download fa-lg" aria-hidden="true"></i><!--ui-sref="root.import"-->
+                        <li ng-class="{active:m_oController.activePageCss('root.import')}">
+                            <a ng-click="m_oController.openImportPage()" > <i class="fa fa-download fa-lg" aria-hidden="true"></i><!--ui-sref="root.import"-->
                                 {{"ROOT_VIEW_NAV_BAR_LINK_IMPORT"|translate}}
                             </a>
                         </li>
-                        <li>
-                            <a ng-click="m_oController.onClickProcess();m_oController.openEditorPage()"><i class="fa fa-cogs fa-lg" aria-hidden="true"></i><!-- ui-sref="root.editor"-->
+                        <li ng-class="{active:m_oController.activePageCss('root.editor')}">
+                            <a ng-click="m_oController.onClickProcess();m_oController.openEditorPage()" ><i class="fa fa-cogs fa-lg" aria-hidden="true"></i><!-- ui-sref="root.editor"-->
                                 {{"ROOT_VIEW_NAV_BAR_LINK_PROCESS"|translate}}
                             </a>
                         </li>
-                        <li>
-                            <a >
+
+                        <!--TODO REMOVE JAVASCRIPT AT THE END OF FILE WHEN I LEAVE POPOVER-->
+                        <li style="cursor:no-drop;" data-toggle="popover"  data-content="Coming Soon" data-placement="left"  ng-class="{active:m_oController.activePageCss('root.workspaces')}">
+                            <a>
                                 <i class="fa fa-upload fa-lg" aria-hidden="true"></i><!--ui-sref="root.editor"-->
                                 {{"ROOT_VIEW_NAV_BAR_LINK_PUBLISH"|translate}}
                             </a>
                         </li>
-
                     </ul>
                 </div>
 
@@ -113,13 +113,54 @@
     <!--</div>-->
 
 
-    <div ui-view="maincontent" ></div>
+    <div ui-view="maincontent" id="main"></div>
 
     <!------------------ STATUS BAR ------------------->
-    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 status-bar " ng-show="m_oController.isVisibleProcessesBar() == true">
-        <div ng-repeat="oProcess in m_oController.m_aoProcessesRunning track by $index">
-            <i class="fa fa-spinner fa-pulse fa-fw"></i> {{oProcess.operationDate}} - {{oProcess.operationType}} : {{oProcess.productName}}
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 status-bar " ng-show="m_oController.isVisibleProcessesBar() == true" id="status-bar">
+
+
+        <!--&lt;!&ndash;<a class="openbtn"  ng-click="m_oController.openNav()">&#9776; </a>&ndash;&gt;-->
+        <div class="col-lg-10 col-md-10 col-sm-10 col-xs-10">
+            <div class="processes-list" ng-repeat="oProcess in m_oController.m_aoProcessesRunning track by $index">
+                <span class="label label-warning">Processes</span>
+                <i class="fa fa-spinner fa-pulse fa-fw"></i>
+                <span class="label label-default">Operation Data:</span> {{oProcess.operationDate}}
+                <span class="label label-default">Type of operation:</span> {{oProcess.operationType}}
+                <span class="label label-default">Name:</span> {{oProcess.productName}}
+            </div>
+
+            <div class="processes-list" ng-repeat="oLog in m_oController.m_aoLogProcesses track by $index">
+                <span class="label label-warning">Log</span>
+                <span class="label label-default">Operation Data:</span> {{oLog.operationDate}}
+                <span class="label label-default">Type of operation:</span> {{oLog.operationType}}
+                <span class="label label-default">Name:</span> {{oLog.productName}}
+            </div>
+        </div>
+        <!--<a href="javascript:void(0)" class="closebtn"  ng-click="m_oController.closeNav()">&times;</a>-->
+        <!--<div class="my-button openbtn" ng-click="m_oController.openNav()" ng-hide="m_oController.m_bIsOpenStatusBar"><i class="fa fa-arrow-up" aria-hidden="true"></i></div>-->
+        <!--<div class="my-button closebtn" ng-click="m_oController.closeNav()" ng-show="m_oController.m_bIsOpenStatusBar"><i class="fa fa-arrow-down" aria-hidden="true"></i> </div>-->
+        <div class="col-lg-2 col-md-2 col-sm-2 col-xs-2 ">
+            <div class="number-processes">
+                {{"ROOT_LABEL_NUMBER_OF_PROCESSES"|translate}} <span class="badge">{{m_oController.m_iNumberOfProcesses}}</span>
+            </div>
+            <div class="my-button openbtn" ng-click="m_oController.openNav()" ng-hide="m_oController.m_bIsOpenStatusBar"><i class="fa fa-arrow-up" aria-hidden="true"></i></div>
+            <div class="my-button closebtn" ng-click="m_oController.closeNav()" ng-show="m_oController.m_bIsOpenStatusBar"><i class="fa fa-arrow-down" aria-hidden="true"></i> </div>
         </div>
     </div>
 
 </div>
+
+<script>
+    $(function () {
+        $('[data-toggle="popover"]').popover()
+    })
+
+    $('body').on('click', function (e) {
+        $('[data-toggle=popover]').each(function () {
+            // hide any open popovers when the anywhere else in the body is clicked
+            if (!$(this).is(e.target) && $(this).has(e.target).length === 0 && $('.popover').has(e.target).length === 0) {
+                $(this).popover('hide');
+            }
+        });
+    });
+</script>

@@ -8,7 +8,9 @@ angular.module('wasdi.GlobeService', ['wasdi.ConstantsService']).
 service('GlobeService', ['$http',  'ConstantsService', function ($http, oConstantsService) {
     this.m_oWasdiGlobe=null;
     this.m_aoLayers=null;
-
+    this.LONG_HOME = 0;
+    this.LAT_HOME = 0;
+    this.HEIGHT_HOME = 15000000//zoom
     this.oGlobeOptions =
     {
 
@@ -22,6 +24,7 @@ service('GlobeService', ['$http',  'ConstantsService', function ($http, oConstan
         geocoder:false,
         navigationHelpButton:false,
         sceneModePicker:false,
+        homeButton:false,
         scene3DOnly:true
     }
 
@@ -71,7 +74,17 @@ service('GlobeService', ['$http',  'ConstantsService', function ($http, oConstan
         console.log(pickPositionCartographic.latitude * (180/Math.PI));
         return [pickPositionCartographic.latitude * (180/Math.PI),pickPositionCartographic.longitude * (180/Math.PI)];
     }
-
+    this.goHome = function()
+    {
+        this.m_oWasdiGlobe.camera.setView({
+            destination : Cesium.Cartesian3.fromDegrees(this.LONG_HOME, this.LAT_HOME, this.HEIGHT_HOME),
+            orientation: {
+                heading : 0.0,
+                pitch : -Cesium.Math.PI_OVER_TWO,
+                roll : 0.0
+            }
+        });
+    }
 
 }]);
 

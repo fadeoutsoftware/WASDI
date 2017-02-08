@@ -72,7 +72,7 @@ angular.module('wasdi.TreeDirective', [])
                 {
                     if(!utilsIsObjectNullOrUndefined(oldValue))
                     {
-                        /********************RELAODED TREE CASE ****************************/
+                        /********************RELOADED TREE CASE ****************************/
                         //if the tree is reloaded need  $('#jstree').jstree(true).refresh();
                         $('#jstree').jstree(true).settings.core.data = newValue.core.data;
                         $('#jstree').jstree(true).refresh();
@@ -89,7 +89,8 @@ angular.module('wasdi.TreeDirective', [])
                             /*CLICK ON PUBLIC BAND*/
                             // if there isn't running publish band processes AND the node it's a band do $scope.m_oController.openBandImage()
                             //change icons
-                            if(!utilsIsObjectNullOrUndefined(data.node))
+                            //data.event.type !="contextmenu" => discard right click of mouse (plugin)
+                            if(!utilsIsObjectNullOrUndefined(data.node) && data.event.type !="contextmenu")
                             {
                                 if($scope.m_oController.m_oProcessesLaunchedService.thereAreSomePublishBandProcess() == false && data.node.children.length == 0 && !utilsIsObjectNullOrUndefined(data.node.original.band))
                                 {

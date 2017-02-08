@@ -13,6 +13,9 @@ var RootController = (function() {
         this.m_oWorkspaceService = oWorkspaceService;
         this.m_oScope.m_oController=this;
         this.m_aoProcessesRunning=[];
+        this.m_aoLogProcesses = []
+        this.m_iNumberOfProcesses = 0;
+        this.m_bIsOpenStatusBar = false; //processes bar
         var oController = this;
         this.m_oAuthService.checkSession().success(function (data, status) {
             if (data == null || data == undefined || data == '')
@@ -62,51 +65,38 @@ var RootController = (function() {
             // you could inspect the data to see
             if(data == true)
             {
-                $scope.m_oController.m_aoProcessesRunning = $scope.m_oController.m_oProcessesLaunchedService.getProcesses();
-                //$scope.m_oController.m_sWorkSpace = $scope.m_oController.m_oConstantsService.getActiveWorkspace();
-                //$scope.m_oController.m_oUser = $scope.m_oController.m_oConstantsService.getUser();
-                //
-                //if(utilsIsObjectNullOrUndefined($scope.m_oController.m_oUser))//check if user is logged
-                //{
-                //    utilsVexDialogAlertTop("Error in RootController m_aoProcessesRunning:updated (user)");
-                //    $scope.m_oController.onClickLogOut();
-                //}
-                //
-                //if(utilsIsObjectNullOrUndefined($scope.m_oController.m_sWorkSpace))
-                //{
-                //    //if this.m_oState.params.workSpace in empty null or undefined create new workspace
-                //    if(!(utilsIsObjectNullOrUndefined(  $scope.m_oController.m_oState.params.workSpace) && utilsIsStrNullOrEmpty(  $scope.m_oController.m_oState.params.workSpace)))
-                //    {
-                //        $scope.m_oController.openWorkspace(  $scope.m_oController.m_oState.params.workSpace);
-                //        //$scope.m_oController.m_oActiveWorkspace =   $scope.m_oController.m_oConstantsService.getActiveWorkspace();
-                //    }
-                //    else
-                //    {
-                //        utilsVexDialogAlertTop("Error in RootController m_aoProcessesRunning:updated (StateParams)");
-                //        $scope.m_oController.onClickLogOut();
-                //    }
-                //}
-                //else
-                //{
-                //    //take processes
-                    //$scope.m_oController.m_aoProcessesRunning = $scope.m_oController.m_oProcessesLaunchedService.getProcessesByLocalStorage(
-                    //    $scope.m_oController.m_sWorkSpace.workspaceId, $scope.m_oController.m_oUser.userId);
+                //$scope.m_oController.m_aoProcessesRunning = $scope.m_oController.m_oProcessesLaunchedService.getProcesses();
+                //if(utilsIsObjectNullOrUndefined($scope.m_oController.m_aoProcessesRunning) == false)
+                //    $scope.m_oController.m_iNumberOfProcesses = $scope.m_oController.m_aoProcessesRunning.length;
 
-                //}
+                //TODO NEW PROCESSES
+                var aoProcessesRunning = $scope.m_oController.m_oProcessesLaunchedService.getProcesses();
+                var iNumberOfProcessesRunning = aoProcessesRunning.length;
+                var aoOldProcessesRunning = $scope.m_oController.m_aoProcessesRunning;
+                var iNumberOfOldProcessesRunning = aoOldProcessesRunning.length;
 
-                //It's a fix i don't know it's a good idea but it's the only idea i did
-                //setTimeout(function () {
-                //    //i need to use $scope.$apply(); if i don't use it the upload of processes queue doesn't work
-                //    //without the setTimeout the $scope.$apply(); return errors.
-                //    $scope.$apply();
-                //}, 2000);
+                if(utilsIsObjectNullOrUndefined($scope.m_oController.m_aoProcessesRunning) == false)
+                    $scope.m_oController.m_iNumberOfProcesses = iNumberOfProcessesRunning;
 
-                //if(!utilsIsObjectNullOrUndefined( $scope.m_oController.m_sWorkSpace) && !utilsIsObjectNullOrUndefined( $scope.m_oController.m_oUser))
-                //{i
-                //    $scope.m_oController.m_aoProcessesRunning = $scope.m_oController.m_oProcessesLaunchedService.getProcessesByLocalStorage(
-                //        $scope.m_oController.m_sWorkSpace.workspaceId, $scope.m_oController.m_oUser.userId);
-                //}
-                //$scope.m_oController.m_aoProcessesRunning = $scope.m_oController.m_oProcessesLaunchedService.getProcessesByLocalStorage();
+                for( var  iIndexOldProcess= 0; iIndexOldProcess < iNumberOfOldProcessesRunning; iIndexOldProcess++)
+                {
+                    for( var iIndexNewProcess = 0; iIndexNewProcess < iNumberOfProcessesRunning; iIndexNewProcess++)
+                    {
+                        if(aoProcessesRunning[iIndexNewProcess].operationType == aoOldProcessesRunning[iIndexOldProcess].operationType &&
+                            aoProcessesRunning[iIndexNewProcess].productName == aoOldProcessesRunning[iIndexOldProcess].productName)
+                        {
+                            break;
+                        }
+                    }
+                    if(!(iIndexNewProcess < iNumberOfProcessesRunning))
+                    {
+                        $scope.m_oController.m_aoLogProcesses.push(aoOldProcessesRunning[iIndexOldProcess])
+                    }
+
+                }
+
+                $scope.m_oController.m_aoProcessesRunning = aoProcessesRunning ;
+
             }
         });
 
@@ -232,6 +222,50 @@ var RootController = (function() {
         //TODO FEEDBACK IF U CAN'T CLICK ON IMPORT
     }
 
+    RootController.prototype.activePageCss = function(oPage)
+    {
+        switch(oPage) {
+            case "root.workspaces":
+                if(oPage == this.m_oState.current.name )
+                    return true;
+                else
+                    return false;
+                break;
+            case "root.editor":
+                if(oPage == this.m_oState.current.name )
+                    return true;
+                else
+                    return false;
+                break;
+            case "root.searchorbit":
+                if(oPage == this.m_oState.current.name )
+                    return true;
+                else
+                    return false;
+                break;
+            case "root.import":
+                if(oPage == this.m_oState.current.name )
+                    return true;
+                else
+                    return false;
+                break;
+            default:
+                return false;
+        }
+        return false;
+    }
+
+    RootController.prototype.openNav = function() {
+        document.getElementById("status-bar").style.height = "500px";
+        this.m_bIsOpenStatusBar = !this.m_bIsOpenStatusBar;
+
+    }
+    RootController.prototype.closeNav = function() {
+        document.getElementById("status-bar").style.height = "4.5%";
+        this.m_bIsOpenStatusBar = !this.m_bIsOpenStatusBar;
+
+
+    }
     /*********************************************************************/
     RootController.$inject = [
         '$scope',

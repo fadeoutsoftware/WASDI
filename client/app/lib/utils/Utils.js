@@ -1,7 +1,45 @@
 /**
  * Created by a.corrado on 17/11/2016.
  */
+/*
+ V1.0
+List of methods:
 
+ BOOTSTRAP
+ utilsFindBootstrapEnvironment
+
+ COOKIE
+ utilsSetCookie
+ utilsGetCookie
+
+ LOCAL STORAGE
+ utilsCheckIfBrowserSupportLocalStorage
+ utilsSetItemLocalStorage
+ utilsGetItemInLocalStorage
+ utilsRemoveLocalStorageItem
+
+ NUMBER
+ utilsIsANumber
+ utilsIsInteger
+
+ OBJECT
+ utilsIsObjectNullOrUndefined
+ utilsFindObjectInArray
+
+ STRING
+ utilsIsSubstring
+ utilsIsStrNullOrEmpty
+ utilsStrContainsCaseInsensitive
+ utilsIsString
+ utilsIsEmail
+
+* */
+
+/**
+ *
+ * @param sString
+ * @returns {boolean}
+ */
 function utilsIsStrNullOrEmpty(sString)
 {
     if( sString && typeof sString != 'string')
@@ -16,6 +54,11 @@ function utilsIsStrNullOrEmpty(sString)
         return true; // string is empty or null
 }
 
+/**
+ *
+ * @param oObject
+ * @returns {boolean}
+ */
 function utilsIsObjectNullOrUndefined(oObject)
 {
     if(oObject == null || oObject == undefined )
@@ -23,7 +66,11 @@ function utilsIsObjectNullOrUndefined(oObject)
     return false;
 
 }
-
+/**
+ *
+ * @param sValue
+ * @returns {boolean}
+ */
 function utilsIsEmail(sValue)
 {
     if(utilsIsStrNullOrEmpty( sValue) )
@@ -32,7 +79,12 @@ function utilsIsEmail(sValue)
     var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
     return re.test(sValue);
 }
-
+/**
+ *
+ * @param sString1
+ * @param sString2
+ * @returns {boolean}
+ */
 //sString1 contains sString2
 function utilsIsSubstring(sString1,sString2)
 {
@@ -46,7 +98,10 @@ function utilsIsSubstring(sString1,sString2)
     return true;
 }
 
-
+/**
+ *
+ * @returns {string}
+ */
 function utilsFindBootstrapEnvironment()
 {
     var envs = ["xs","sm","md","lg"];//extra small,small,medium,large screen
@@ -63,7 +118,12 @@ function utilsFindBootstrapEnvironment()
         }
     }
 }
-
+/**
+ *
+ * @param sSource
+ * @param sStrToSearch
+ * @returns {boolean}
+ */
 function utilsStrContainsCaseInsensitive(sSource, sStrToSearch)
 {
     if (sSource == null)
@@ -73,7 +133,11 @@ function utilsStrContainsCaseInsensitive(sSource, sStrToSearch)
     var s2 = sStrToSearch.toLowerCase();
     return (s1.indexOf(s2) > -1);
 }
-
+/**
+ *
+ * @param oValue
+ * @returns {boolean}
+ */
 function utilsIsANumber(oValue)
 {
 
@@ -100,6 +164,12 @@ function utilsIsANumber(oValue)
 * return index of object in array
 * return -1 if there are some error or the object isn't inside array
 * */
+/**
+ *
+ * @param oArray
+ * @param oObject
+ * @returns {number}
+ */
 function utilsFindObjectInArray(oArray,oObject)
 {
     //ERROR PARAMS == NULL OR UNDEFINED
@@ -118,7 +188,11 @@ function utilsFindObjectInArray(oArray,oObject)
     /* the object isn't inside array */
     return -1;
 }
-
+/**
+ *
+ * @param sString
+ * @returns {boolean}
+ */
 function utilsIsString(sString)
 {
     if( !sString && typeof sString == 'string')
@@ -129,9 +203,24 @@ function utilsIsString(sString)
 
 }
 
+/**
+ * isInteger
+ * @param oInput
+ * @returns {boolean}
+ */
 
+function utilsIsInteger(oInput)
+{
+    if(utilsIsANumber(oInput) == false)
+        return false;
+    return oInput % 1 === 0;
+}
 /*************** LOCAL STORAGE UTILS ********************/
 //TODO TEST LOCAL STORAGE FUNCTIONS
+/**
+ *
+ * @returns {boolean}
+ */
 function utilsCheckIfBrowserSupportLocalStorage()
 {
     if (typeof(Storage) !== "undefined")
@@ -153,6 +242,12 @@ function utilsCheckIfBrowserSupportLocalStorage()
 /*
  * Set local storage, if sName is empty or null return false
  * */
+/**
+ *
+ * @param sName
+ * @param sValue
+ * @returns {boolean}
+ */
 function utilsSetItemLocalStorage (sName,sValue)
 {
     if(utilsIsStrNullOrEmpty(sName))
@@ -164,7 +259,12 @@ function utilsSetItemLocalStorage (sName,sValue)
 
 /* Get local value
  * */
-function getItemInLocalStorage (sName)
+/**
+ *
+ * @param sName
+ * @returns {boolean}
+ */
+function utilsGetItemInLocalStorage (sName)
 {
     if(utilsIsStrNullOrEmpty(sName))
         return false;
@@ -174,7 +274,12 @@ function getItemInLocalStorage (sName)
 
 /* Remove Item
  * */
-function removeLocalStorageItem (sName)
+/**
+ *
+ * @param sName
+ * @returns {boolean}
+ */
+function utilsRemoveLocalStorageItem (sName)
 {
     if(utilsIsStrNullOrEmpty(sName))
         return false;
@@ -186,6 +291,12 @@ function removeLocalStorageItem (sName)
 
 //TODO TEST COOKIES functions !!
 //set by w3school.com
+/**
+ *
+ * @param cname
+ * @param cvalue
+ * @param exdays
+ */
 function utilsSetCookie(cname, cvalue, exdays) {
     var d = new Date();
     d.setTime(d.getTime() + (exdays*24*60*60*1000));
@@ -196,6 +307,11 @@ function utilsSetCookie(cname, cvalue, exdays) {
 }
 
 //get by w3school.com
+/**
+ *
+ * @param cname
+ * @returns {*}
+ */
 function utilsGetCookie(cname) {
     var name = cname + "=";
     var ca = document.cookie.split(';');
