@@ -162,6 +162,11 @@
     .processes-list
     {
       margin-top:10px;
+      .table-striped>tbody>tr:nth-of-type(odd)
+      {
+        background-color: $wasdi-blue-logo;
+
+      }
     }
     .my-button
     {

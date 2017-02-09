@@ -3,7 +3,7 @@
  */
 var RootController = (function() {
 
-    function RootController($scope, oConstantsService, oAuthService, $state, oProcessesLaunchedService, oWorkspaceService) {
+    function RootController($scope, oConstantsService, oAuthService, $state, oProcessesLaunchedService, oWorkspaceService,$timeout) {
         this.m_oScope = $scope;
         this.m_oScope.m_oController = this;
         this.m_oConstantsService = oConstantsService;
@@ -15,6 +15,8 @@ var RootController = (function() {
         this.m_aoProcessesRunning=[];
         this.m_aoLogProcesses = []
         this.m_iNumberOfProcesses = 0;
+        this.m_oLastProcesses = null;
+        this.m_bIsOpenNav = false;
         this.m_bIsOpenStatusBar = false; //processes bar
         var oController = this;
         this.m_oAuthService.checkSession().success(function (data, status) {
@@ -43,6 +45,7 @@ var RootController = (function() {
         //this.m_oUser = this.m_oConstantsService.getUser();
 
         this.m_sWorkSpace = this.m_oConstantsService.getActiveWorkspace();
+
         if(utilsIsObjectNullOrUndefined(this.m_sWorkSpace) && utilsIsStrNullOrEmpty( this.m_sWorkSpace))
         {
             //if this.m_oState.params.workSpace in empty null or undefined create new workspace
@@ -69,15 +72,15 @@ var RootController = (function() {
                 //if(utilsIsObjectNullOrUndefined($scope.m_oController.m_aoProcessesRunning) == false)
                 //    $scope.m_oController.m_iNumberOfProcesses = $scope.m_oController.m_aoProcessesRunning.length;
 
-                //TODO NEW PROCESSES
                 var aoProcessesRunning = $scope.m_oController.m_oProcessesLaunchedService.getProcesses();
                 var iNumberOfProcessesRunning = aoProcessesRunning.length;
                 var aoOldProcessesRunning = $scope.m_oController.m_aoProcessesRunning;
                 var iNumberOfOldProcessesRunning = aoOldProcessesRunning.length;
-
+                //number of processes
                 if(utilsIsObjectNullOrUndefined($scope.m_oController.m_aoProcessesRunning) == false)
                     $scope.m_oController.m_iNumberOfProcesses = iNumberOfProcessesRunning;
 
+                //FIND LOG
                 for( var  iIndexOldProcess= 0; iIndexOldProcess < iNumberOfOldProcessesRunning; iIndexOldProcess++)
                 {
                     for( var iIndexNewProcess = 0; iIndexNewProcess < iNumberOfProcessesRunning; iIndexNewProcess++)
@@ -88,17 +91,80 @@ var RootController = (function() {
                             break;
                         }
                     }
+                    //if you find a log push it in list
                     if(!(iIndexNewProcess < iNumberOfProcessesRunning))
                     {
-                        $scope.m_oController.m_aoLogProcesses.push(aoOldProcessesRunning[iIndexOldProcess])
+
+                        $scope.m_oController.m_aoLogProcesses.push(aoOldProcessesRunning[iIndexOldProcess]);
+                        $scope.m_oController.m_aoProcessesRunning.splice(iIndexOldProcess,1);
+                    }
+
+                }
+                //FIND LAST PROCESSES
+                if(utilsIsObjectNullOrUndefined(aoProcessesRunning) == false)
+                    $scope.m_oController.m_oLastProcesses = aoProcessesRunning[iNumberOfProcessesRunning-1];
+                else
+                    $scope.m_oController.m_oLastProcesses = null;
+
+
+                //ADD ONLY NEW PROCESS IN m_oController.m_aoProcessesRunning
+                for( var  iIndexNewProcess= 0; iIndexNewProcess < iNumberOfProcessesRunning; iIndexNewProcess++)
+                {
+                    for( var iIndexOldProcess = 0; iIndexOldProcess < iNumberOfOldProcessesRunning; iIndexOldProcess++)
+                    {
+                        if(aoProcessesRunning[iIndexNewProcess].operationType == aoOldProcessesRunning[iIndexOldProcess].operationType &&
+                            aoProcessesRunning[iIndexNewProcess].productName == aoOldProcessesRunning[iIndexOldProcess].productName)
+                        {
+                            break;
+                        }
+                    }
+                    //if the new processes there isn't in m_oController.m_aoProcessesRunning list add it!
+                    if(!(iIndexOldProcess < iNumberOfOldProcessesRunning))
+                    {
+                        //add running time
+                        aoProcessesRunning[iIndexNewProcess].timeRunning = 0;
+                        $scope.m_oController.m_aoProcessesRunning.push(aoProcessesRunning[iIndexNewProcess])
                     }
 
                 }
 
-                $scope.m_oController.m_aoProcessesRunning = aoProcessesRunning ;
+                //$scope.m_oController.m_aoProcessesRunning = aoProcessesRunning ;
 
             }
+
         });
+
+        /* WATCH  ACTIVE WORKSPACE IN CONSTANT SERVICE
+        * every time the workspace change, it clean the log list
+        * */
+        $scope.$watch('m_oController.m_oConstantsService.m_oActiveWorkspace', function(newValue, oldValue, scope) {
+            //utilsVexDialogAlertTop("il watch funziona");
+            $scope.m_oController.m_aoLogProcesses = []
+        });
+        /*COUNTDOWN METHODS*/
+
+        //this.time = 0;
+
+        $scope.onTimeout = function()
+        {
+            if(!utilsIsObjectNullOrUndefined($scope.m_oController.m_aoProcessesRunning) && $scope.m_oController.m_aoProcessesRunning.length != 0)
+            {
+                var iNumberOfProcesses = $scope.m_oController.m_aoProcessesRunning.length;
+
+                for(var iIndexProcess = 0; iIndexProcess < iNumberOfProcesses;iIndexProcess++ )
+                {
+                    $scope.m_oController.m_aoProcessesRunning[iIndexProcess].timeRunning = $scope.m_oController.m_aoProcessesRunning[iIndexProcess].timeRunning + 1 ;
+                }
+            }
+            //$scope.m_oController.time++;
+            mytimeout = $timeout($scope.onTimeout,1000);
+        }
+
+        var mytimeout = $timeout($scope.onTimeout,1000);
+        //
+        //$scope.stop = function(){
+        //    $timeout.cancel(mytimeout);
+        //}
 
     }
 
@@ -217,6 +283,7 @@ var RootController = (function() {
         if( this.m_oProcessesLaunchedService.thereAreSomePublishBandProcess() == false )
         {
             var sWorkSpace = this.m_oConstantsService.getActiveWorkspace();
+
             oController.m_oState.go("root.import", { workSpace : sWorkSpace.workspaceId });//use workSpace when reload editor page
         }
         //TODO FEEDBACK IF U CAN'T CLICK ON IMPORT
@@ -258,12 +325,13 @@ var RootController = (function() {
     RootController.prototype.openNav = function() {
         document.getElementById("status-bar").style.height = "500px";
         this.m_bIsOpenStatusBar = !this.m_bIsOpenStatusBar;
+        this.m_bIsOpenNav = true;
 
     }
     RootController.prototype.closeNav = function() {
         document.getElementById("status-bar").style.height = "4.5%";
         this.m_bIsOpenStatusBar = !this.m_bIsOpenStatusBar;
-
+        this.m_bIsOpenNav = false;
 
     }
     /*********************************************************************/
@@ -273,7 +341,8 @@ var RootController = (function() {
         'AuthService',
         '$state',
         'ProcessesLaunchedService',
-        'WorkspaceService'
+        'WorkspaceService',
+        '$timeout'
 
     ];
 

@@ -76,6 +76,8 @@ angular.module('wasdi.TreeDirective', [])
                         //if the tree is reloaded need  $('#jstree').jstree(true).refresh();
                         $('#jstree').jstree(true).settings.core.data = newValue.core.data;
                         $('#jstree').jstree(true).refresh();
+
+
                     }
                     else
                     {

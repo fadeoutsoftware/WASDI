@@ -18,6 +18,7 @@
     </div>
 
 
+
     <div class="col-lg-1 col-md-2 col-sm-2 col-xs-2 ">
         <a  ui-sref="root.workspaces">
             <!--<img class="navbar-brand-logo">-->
@@ -118,27 +119,17 @@
     <!------------------ STATUS BAR ------------------->
     <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 status-bar " ng-show="m_oController.isVisibleProcessesBar() == true" id="status-bar">
 
-
         <!--&lt;!&ndash;<a class="openbtn"  ng-click="m_oController.openNav()">&#9776; </a>&ndash;&gt;-->
-        <div class="col-lg-10 col-md-10 col-sm-10 col-xs-10">
-            <div class="processes-list" ng-repeat="oProcess in m_oController.m_aoProcessesRunning track by $index">
-                <span class="label label-warning">Processes</span>
+        <div class="col-lg-10 col-md-10 col-sm-10 col-xs-10 processes-list" >
+            <div ng-show="m_oController.m_oLastProcesses != null && !m_oController.m_bIsOpenNav" >
                 <i class="fa fa-spinner fa-pulse fa-fw"></i>
-                <span class="label label-default">Operation Data:</span> {{oProcess.operationDate}}
-                <span class="label label-default">Type of operation:</span> {{oProcess.operationType}}
-                <span class="label label-default">Name:</span> {{oProcess.productName}}
+                <span class="label label-default">{{"ROOT_LABEL_OPERATION_DATA"|translate}}</span> {{m_oController.m_oLastProcesses.operationDate}}
+                <span class="label label-default">{{"ROOT_LABEL_TYPE_OF_OPERATION"|translate}}</span> {{m_oController.m_oLastProcesses.operationType}}
+                <span class="label label-default">{{"ROOT_LABEL_NAME"|translate}}</span> {{m_oController.m_oLastProcesses.productName}}
             </div>
 
-            <div class="processes-list" ng-repeat="oLog in m_oController.m_aoLogProcesses track by $index">
-                <span class="label label-warning">Log</span>
-                <span class="label label-default">Operation Data:</span> {{oLog.operationDate}}
-                <span class="label label-default">Type of operation:</span> {{oLog.operationType}}
-                <span class="label label-default">Name:</span> {{oLog.productName}}
-            </div>
         </div>
-        <!--<a href="javascript:void(0)" class="closebtn"  ng-click="m_oController.closeNav()">&times;</a>-->
-        <!--<div class="my-button openbtn" ng-click="m_oController.openNav()" ng-hide="m_oController.m_bIsOpenStatusBar"><i class="fa fa-arrow-up" aria-hidden="true"></i></div>-->
-        <!--<div class="my-button closebtn" ng-click="m_oController.closeNav()" ng-show="m_oController.m_bIsOpenStatusBar"><i class="fa fa-arrow-down" aria-hidden="true"></i> </div>-->
+
         <div class="col-lg-2 col-md-2 col-sm-2 col-xs-2 ">
             <div class="number-processes">
                 {{"ROOT_LABEL_NUMBER_OF_PROCESSES"|translate}} <span class="badge">{{m_oController.m_iNumberOfProcesses}}</span>
@@ -146,14 +137,99 @@
             <div class="my-button openbtn" ng-click="m_oController.openNav()" ng-hide="m_oController.m_bIsOpenStatusBar"><i class="fa fa-arrow-up" aria-hidden="true"></i></div>
             <div class="my-button closebtn" ng-click="m_oController.closeNav()" ng-show="m_oController.m_bIsOpenStatusBar"><i class="fa fa-arrow-down" aria-hidden="true"></i> </div>
         </div>
+
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 processes-list" ng-show="m_oController.m_bIsOpenNav">
+
+            <table class="table table-striped " id="tableProcesses" >
+                <thead>
+                <tr>
+                    <th></th>
+                    <th>{{"ROOT_TABLE_HEAD_OPERATION_DATA"|translate}}</th>
+                    <th>{{"ROOT_TABLE_HEAD_TYPE_OF_OPERATION"|translate}}</th>
+                    <th>{{"ROOT_TABLE_HEAD_NAME"|translate}}</th>
+                    <th>{{"ROOT_TABLE_HEAD_ID_USER"|translate}}</th>
+                    <th>{{"ROOT_TABLE_HEAD_TIME"|translate}} </th>
+                    <th></th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr ng-repeat="oProcess in m_oController.m_aoProcessesRunning track by $index">
+                    <td>
+                        <i class="fa fa-spinner fa-pulse fa-fw"></i>
+                    </td>
+                    <td>
+                        {{oProcess.operationDate}}
+                    </td>
+                    <td>
+                        {{oProcess.operationType}}
+                    </td>
+                    <td>
+                        {{oProcess.productName}}
+                    </td>
+                    <td>
+                        {{oProcess.userId}}
+                    </td>
+                    <td>
+                        {{oProcess.timeRunning}} s
+                    </td>
+                    <td >
+                        <div class="my-button">
+                            <i class="fa fa-times-circle" aria-hidden="true" data-toggle="tooltip" title="Hide processes"  data-placement="bottom"></i>
+                        </div>
+                    </td>
+                </tr>
+
+                <tr ng-repeat="oLog in m_oController.m_aoLogProcesses track by $index">
+                    <td>
+                        <span class="label label-warning">Log</span>
+                    </td>
+                    <td>
+                        {{oLog.operationDate}}
+                    </td>
+                    <td>
+                        {{oLog.operationType}}
+                    </td>
+                    <td>
+                        {{oLog.productName}}
+                    </td>
+                    <td>
+                        {{oLog.userId}}
+                    </td>
+                    <td>
+                        {{oLog.timeRunning}} s
+                    </td>
+                    <td >
+                        <div class="my-button" aria-hidden="true" data-toggle="tooltip" title="Hide log"  data-placement="bottom">
+                            <i class="fa fa-times-circle" aria-hidden="true"></i>
+                        </div>
+
+                    </td>
+                </tr>
+
+                </tbody>
+            </table>
+
+        </div>
+        <!--<a href="javascript:void(0)" class="closebtn"  ng-click="m_oController.closeNav()">&times;</a>-->
+        <!--<div class="my-button openbtn" ng-click="m_oController.openNav()" ng-hide="m_oController.m_bIsOpenStatusBar"><i class="fa fa-arrow-up" aria-hidden="true"></i></div>-->
+        <!--<div class="my-button closebtn" ng-click="m_oController.closeNav()" ng-show="m_oController.m_bIsOpenStatusBar"><i class="fa fa-arrow-down" aria-hidden="true"></i> </div>-->
+
     </div>
 
 </div>
 
 <script>
     $(function () {
-        $('[data-toggle="popover"]').popover()
-    })
+        $('[data-toggle="popover"]').popover();
+    });
+
+    $(function() {
+        $('#tableProcesses').on('post-body.bs.table', function () {
+            $('[data-tooltip="true"]').tooltip({
+                container: 'body'
+            });
+        });
+    });
 
     $('body').on('click', function (e) {
         $('[data-toggle=popover]').each(function () {
@@ -163,4 +239,6 @@
             }
         });
     });
+
+
 </script>

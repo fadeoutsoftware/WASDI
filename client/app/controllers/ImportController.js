@@ -1114,12 +1114,20 @@ var ImportController = (function() {
         }
         var oController = this;
         this.m_oProductService.addProductToWorkspace(oMessage.payload.fileName,this.m_oActiveWorkspace.workspaceId).success(function (data, status) {
-            var oDialog = utilsVexDialogAlertBottomRightCorner('Product added to the ws');
-            utilsVexCloseDialogAfterFewSeconds(3000,oDialog);
-            //console.log('Product added to the ws');
-            //oController.m_oProcessesLaunchedService.removeProcessByPropertySubstringVersion("processName",oMessage.payload.fileName,
-            //    oController.m_oActiveWorkspace.workspaceId,oController.m_oUser.userId);
-            oController.m_oProcessesLaunchedService.loadProcessesFromServer(oController.m_oActiveWorkspace.workspaceId);
+            if(data.boolValue == true )
+            {
+                var oDialog = utilsVexDialogAlertBottomRightCorner('Product added to the ws');
+                utilsVexCloseDialogAfterFewSeconds(3000, oDialog);
+                //console.log('Product added to the ws');
+                //oController.m_oProcessesLaunchedService.removeProcessByPropertySubstringVersion("processName",oMessage.payload.fileName,
+                //    oController.m_oActiveWorkspace.workspaceId,oController.m_oUser.userId);
+                oController.m_oProcessesLaunchedService.loadProcessesFromServer(oController.m_oActiveWorkspace.workspaceId);
+            }
+            else
+            {
+                utilsVexDialogAlertTop("Error in add product to workspace");
+            }
+
         }).error(function (data,status) {
             utilsVexDialogAlertTop('Error adding product to the ws');
             //console.log('Error adding product to the ws');
