@@ -127,6 +127,7 @@ public class WorkspaceResource {
 				oViewModel.setOperationDate(oProcess.getOperationDate());
 				oViewModel.setOperationType(oProcess.getOperationType());
 				oViewModel.setProductName(oProcess.getProductName());
+				oViewModel.setUserId(oProcess.getUserId());
 				
 				aoProcessList.add(oViewModel);
 				

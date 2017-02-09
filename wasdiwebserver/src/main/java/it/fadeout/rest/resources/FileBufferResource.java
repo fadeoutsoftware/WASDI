@@ -25,6 +25,7 @@ import wasdi.shared.parameters.PublishBandParameter;
 import wasdi.shared.parameters.PublishParameters;
 import wasdi.shared.utils.SerializationUtils;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.viewmodels.PublishBandResultViewModel;
 import wasdi.shared.viewmodels.RabbitMessageViewModel;
 
 @Path("/filebuffer")
@@ -92,6 +93,7 @@ public class FileBufferResource {
 			if (oUser==null) return Response.status(401).build();
 			if (Utils.isNullOrEmpty(oUser.getUserId())) return Response.status(401).build();
 
+
 			String sUserId = oUser.getUserId();
 
 			//Update process list
@@ -104,6 +106,7 @@ public class FileBufferResource {
 				oProcess.setOperationType(LauncherOperations.DOWNLOAD);
 				oProcess.setProductName(sFileUrl);
 				oProcess.setWorkspaceId(sWorkspaceId);
+				oProcess.setUserId(sUserId);
 				sProcessId = oRepository.InsertProcessWorkspace(oProcess);
 			}
 			catch(Exception oEx){
@@ -132,6 +135,7 @@ public class FileBufferResource {
 
 			Process oProc = Runtime.getRuntime().exec(sShellExString);
 
+
 		} catch (IOException e) {
 			e.printStackTrace();
 		} catch (Exception e) {
@@ -157,7 +161,7 @@ public class FileBufferResource {
 			if (Utils.isNullOrEmpty(oUser.getUserId())) return Response.status(401).build();
 
 			String sUserId = oUser.getUserId();
-			
+
 			//Update process list
 			String sProcessId = "";
 			try
@@ -168,6 +172,7 @@ public class FileBufferResource {
 				oProcess.setOperationType(LauncherOperations.PUBLISH);
 				oProcess.setProductName(sFileUrl);
 				oProcess.setWorkspaceId(sWorkspaceId);
+				oProcess.setUserId(sUserId);
 				sProcessId = oRepository.InsertProcessWorkspace(oProcess);
 			}
 			catch(Exception oEx){
@@ -230,12 +235,16 @@ public class FileBufferResource {
 
 			if (oPublishBand != null)
 			{
+				PublishBandResultViewModel oPublishViewModel = new PublishBandResultViewModel();
+				oPublishViewModel.setBoundingBox(oPublishBand.getBoundingBox());
+				oPublishViewModel.setBandName(oPublishBand.getBandName());
+				oPublishViewModel.setLayerId(oPublishBand.getLayerId());
+				oPublishViewModel.setProductName(oPublishBand.getProductName());
 				oReturnValue.setMessageCode(LauncherOperations.PUBLISHBAND);
-				oReturnValue.setPayload(oPublishBand.getLayerId());
+				oReturnValue.setPayload(oPublishViewModel);
 				return oReturnValue;
 			}
-			
-			
+
 			//Update process list
 			String sProcessId = "";
 			try
@@ -246,6 +255,7 @@ public class FileBufferResource {
 				oProcess.setOperationType(LauncherOperations.PUBLISHBAND);
 				oProcess.setProductName(sFileUrl);
 				oProcess.setWorkspaceId(sWorkspaceId);
+				oProcess.setUserId(oUser.getUserId());
 				sProcessId = oRepository.InsertProcessWorkspace(oProcess);
 			}
 			catch(Exception oEx){
@@ -253,7 +263,7 @@ public class FileBufferResource {
 				oEx.printStackTrace();
 				return oReturnValue;
 			}
-			
+
 			String sUserId = oUser.getUserId();
 
 			String sPath = m_oServletConfig.getInitParameter("SerializationPath") + Wasdi.GetSerializationFileName();
@@ -277,7 +287,8 @@ public class FileBufferResource {
 
 			Process oProc = Runtime.getRuntime().exec(sShellExString);
 
-		} catch (IOException e) {
+
+		}catch (IOException e) {
 			e.printStackTrace();
 			return oReturnValue;
 

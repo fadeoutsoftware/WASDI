@@ -1,26 +1,36 @@
 package it.fadeout.rest.resources;
 
+import java.io.File;
+import java.io.FilenameFilter;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.servlet.ServletConfig;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.Response;
 
 import it.fadeout.Wasdi;
 import wasdi.shared.business.DownloadedFile;
 import wasdi.shared.business.ProductWorkspace;
+import wasdi.shared.business.PublishedBand;
 import wasdi.shared.business.User;
 import wasdi.shared.data.DownloadedFilesRepository;
 import wasdi.shared.data.ProductWorkspaceRepository;
+import wasdi.shared.data.PublishedBandsRepository;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.PrimitiveResult;
 import wasdi.shared.viewmodels.ProductViewModel;
 
 @Path("/product")
 public class ProductResource {
+
+	@Context
+	ServletConfig m_oServletConfig;
 
 	@GET
 	@Path("addtows")
@@ -39,22 +49,11 @@ public class ProductResource {
 
 		ProductWorkspaceRepository oProductWorkspaceRepository = new ProductWorkspaceRepository();
 
-		//check if product is in workspace
-		List<ProductWorkspace> oProductWorkspaces = oProductWorkspaceRepository.GetProductsByWorkspace(sWorkspaceId);
-		if (oProductWorkspaces == null || oProductWorkspaces.size() == 0)
-		{
-			//product already exists into workspace
-			PrimitiveResult oResult = new PrimitiveResult();
-			oResult.setBoolValue(true);
-			return oResult;
-		}
-
 		// Try to insert
 		if (oProductWorkspaceRepository.InsertProductWorkspace(oProductWorkspace)) {
 			// Ok done
 			PrimitiveResult oResult = new PrimitiveResult();
 			oResult.setBoolValue(true);
-
 			return oResult;
 		}
 		else {
@@ -141,4 +140,109 @@ public class ProductResource {
 
 		return aoProductList;
 	}
+
+
+	@GET
+	@Path("delete")
+	@Produces({"application/xml", "application/json", "text/xml"})	
+	public Response DeleteProduct(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sProductName") String sProductName, @QueryParam("bDeleteFile") Boolean bDeleteFile, @QueryParam("sWorkspaceId") String sWorkspace) 
+	{
+		User oUser = Wasdi.GetUserFromSession(sSessionId);
+		try {
+
+			// Domain Check
+			if (oUser == null) {
+				return null;
+			}
+			if (Utils.isNullOrEmpty(oUser.getUserId())) {
+				return null;
+			}
+
+			ProductWorkspaceRepository oProductWorkspaceRepository = new ProductWorkspaceRepository();
+			DownloadedFilesRepository oDownloadedFilesRepository = new DownloadedFilesRepository();
+
+			String sUserId = oUser.getUserId();
+
+			String sDownloadRootPath = "";
+			if (m_oServletConfig.getInitParameter("DownloadRootPath") != null) {
+				sDownloadRootPath = m_oServletConfig.getInitParameter("DownloadRootPath");
+				if (!m_oServletConfig.getInitParameter("DownloadRootPath").endsWith("/"))
+					sDownloadRootPath += "/";
+			}
+
+			String sDownloadPath = sDownloadRootPath + sUserId+ "/" + sWorkspace;
+			System.out.println("ProductResource.DeleteProduct: Download Path: " + sDownloadPath);
+			String sFilePath = sDownloadPath + "/" +  sProductName;
+			System.out.println("ProductResource.DeleteProduct: File Path: " + sFilePath);
+
+			PublishedBandsRepository oPublishedBandsRepository = new PublishedBandsRepository();
+			//get files that begin with the product name
+			if (bDeleteFile)
+			{
+				//Get all bands files
+
+				List<PublishedBand> aoPublishedBands = oPublishedBandsRepository.GetPublishedBandsByProductName(sProductName);
+
+				if (aoPublishedBands != null)
+					System.out.println("ProductResource.DeleteProduct: Number of published bands to delete " + aoPublishedBands.size());
+
+				File oFolder = new File(sDownloadPath);
+				FilenameFilter oFilter = new FilenameFilter() {
+
+					@Override
+					public boolean accept(File dir, String name) {
+						// TODO Auto-generated method stub
+						if (name.toLowerCase().equals(sProductName.toLowerCase()))
+							return true;
+
+						if (aoPublishedBands != null)
+						{
+							for (PublishedBand oPublishedBand : aoPublishedBands) {
+								if (name.toLowerCase().contains(oPublishedBand.getLayerId().toLowerCase()))
+									return true;
+							}
+						}
+
+						return false;
+					}
+				};
+				File[] aoFiles = oFolder.listFiles(oFilter);
+				if (aoFiles != null)
+				{
+					System.out.println("ProductResource.DeleteProduct: Number of files to delete " + aoFiles.length);
+					for (File oFile : aoFiles) {
+						try
+						{
+							if (!oFile.isDirectory())
+								oFile.delete();
+						}
+						catch(Exception oEx)
+						{
+							System.out.println("ProductResource.DeleteProduct: error deleting file product " + oEx.toString());
+						}
+					}
+				}
+			}
+
+			//delete record on db
+			try{
+				oProductWorkspaceRepository.DeleteByProductNameWorkspace(sProductName, sWorkspace);
+				oDownloadedFilesRepository.DeleteByFilePath(sFilePath);
+				oPublishedBandsRepository.DeleteByProductName(sProductName);
+			}
+			catch (Exception oEx) {
+				System.out.println("ProductResource.DeleteProduct: error deleting product " + oEx.toString());
+				return null;	
+			}
+		}
+		catch (Exception oEx) {
+			System.out.println("ProductResource.DeleteProduct: error deleting product " + oEx.toString());
+			return null;
+		}
+
+		return Response.ok().build();
+
+	}
+
+
 }

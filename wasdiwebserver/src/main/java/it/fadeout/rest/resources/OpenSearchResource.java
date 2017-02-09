@@ -5,11 +5,13 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import javax.servlet.ServletConfig;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Context;
 
 import it.fadeout.Wasdi;
 import it.fadeout.opensearch.OpenSearchQuery;
@@ -18,6 +20,9 @@ import wasdi.shared.utils.Utils;
 
 @Path("/search")
 public class OpenSearchResource {
+	
+	@Context
+	ServletConfig m_oServletConfig;
 
 	
 	@GET
@@ -45,6 +50,11 @@ public class OpenSearchResource {
 				asParameterMap.put("sortedby", sSortedBy);
 			if (sOrder != null)
 				asParameterMap.put("order", sOrder);
+			
+			
+			asParameterMap.put("provider", m_oServletConfig.getInitParameter("OSProvider"));
+			asParameterMap.put("OSUser", m_oServletConfig.getInitParameter("OSUser"));
+			asParameterMap.put("OSPwd", m_oServletConfig.getInitParameter("OSPwd"));
 			
 			System.out.println("Search Sentinel: execute query " + sQuery);
 			
@@ -75,7 +85,10 @@ public class OpenSearchResource {
 		
 		try {
 			System.out.println("OpenSearchResource.GetProductsCount: Query: " + sQuery);
-			return OpenSearchQuery.ExecuteQueryCount(sQuery);
+			return OpenSearchQuery.ExecuteQueryCount(sQuery, 
+					m_oServletConfig.getInitParameter("OSUser"), 
+					m_oServletConfig.getInitParameter("OSPwd"),
+					m_oServletConfig.getInitParameter("OSProvider"));
 		} catch (URISyntaxException | IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

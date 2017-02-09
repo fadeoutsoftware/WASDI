@@ -3,6 +3,7 @@ package it.fadeout;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -17,10 +18,14 @@ import it.fadeout.rest.resources.FileBufferResource;
 import it.fadeout.rest.resources.OpenSearchResource;
 import it.fadeout.rest.resources.OpportunitySearchResource;
 import it.fadeout.rest.resources.ProductResource;
+import it.fadeout.rest.resources.SnapOperationsResources;
 import it.fadeout.rest.resources.WasdiResource;
 import it.fadeout.rest.resources.WorkspaceResource;
+import wasdi.shared.LauncherOperations;
+import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.business.User;
 import wasdi.shared.business.UserSession;
+import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.data.SessionRepository;
 import wasdi.shared.data.UserRepository;
 import wasdi.shared.utils.Utils;
@@ -33,6 +38,8 @@ public class Wasdi extends Application {
 	ServletContext m_oContext;	
 	
 	private static boolean s_bDebug = false;
+	
+	private static String s_sDownloadRootPath = "";
 
 	@Override
 	public Set<Class<?>> getClasses() {
@@ -45,6 +52,7 @@ public class Wasdi extends Application {
 		classes.add(WorkspaceResource.class);
 		classes.add(ProductResource.class);
 		classes.add(OpportunitySearchResource.class);
+		classes.add(SnapOperationsResources.class);
 		return classes;
 	}
 	
@@ -55,6 +63,7 @@ public class Wasdi extends Application {
 		if (m_oServletConfig.getInitParameter("DebugVersion").equalsIgnoreCase("true")) {
 			s_bDebug = true;
 		}
+		
 	}
 	
 	public static String GetSerializationFileName()
@@ -64,7 +73,7 @@ public class Wasdi extends Application {
 	
 	public static String GetFormatDate(Date oDate){
 		
-		return new SimpleDateFormat("yyyy-MM-dd HH:mm").format(oDate);
+		return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(oDate);
 	}
 	
 	
@@ -109,5 +118,6 @@ public class Wasdi extends Application {
 			
 		}		
 	}
+	
 	
 }
