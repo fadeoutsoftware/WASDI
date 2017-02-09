@@ -2,6 +2,8 @@ package wasdi.snapopearations;
 
 import com.bc.ceres.glevel.MultiLevelImage;
 import org.esa.snap.core.dataio.ProductIO;
+import org.esa.snap.core.dataio.dimap.DimapProductConstants;
+import org.esa.snap.core.dataio.dimap.DimapProductWriterPlugIn;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.GeoCoding;
 import org.esa.snap.core.datamodel.Product;
@@ -9,6 +11,7 @@ import org.esa.snap.core.util.geotiff.GeoCoding2GeoTIFFMetadata;
 import org.esa.snap.core.util.geotiff.GeoTIFF;
 import org.esa.snap.core.util.geotiff.GeoTIFFMetadata;
 import org.esa.snap.dataio.bigtiff.BigGeoTiffProductReaderPlugIn;
+import org.esa.snap.dataio.netcdf.util.Constants;
 import org.esa.snap.engine_utilities.util.MemUtils;
 import wasdi.LauncherMain;
 
@@ -19,20 +22,14 @@ import java.io.*;
  */
 public class WriteProduct {
 
-    public String WriteBigTiff(Product oProduct, String sFilePath, String sFileName, String format) throws Exception
+    public String WriteBigTiff(Product oProduct, String sFilePath, String sFileName) throws Exception
     {
-        if (format == null) {
-            format = BigGeoTiffProductReaderPlugIn.FORMAT_NAME;
-        }
-        LauncherMain.s_oLogger.debug("WriteProduct: Format: " + format);
-        if (!sFilePath.endsWith("/")) sFilePath += "/";
-        File newFile = new File(sFilePath + sFileName + ".tif");
-        LauncherMain.s_oLogger.debug("WriteProduct: Otuput File: " + newFile.getAbsolutePath());
-        ProductIO.writeProduct(oProduct, newFile.getAbsolutePath(), format);
-        MemUtils.freeAllMemory();
-        return newFile.getAbsolutePath();
+        String sFormat = BigGeoTiffProductReaderPlugIn.FORMAT_NAME;
+
+        return WriteProduct(oProduct, sFilePath, sFileName, sFormat, ".tif");
     }
 
+    /*
     public String WriteBigTiff(Product oProduct, String sLayerId, String sPath) throws Exception
     {
         String sBandName = oProduct.getBandAt(0).getName();
@@ -49,31 +46,32 @@ public class WriteProduct {
         return sTiffFile;
 
     }
+    */
 
-    public void DumpProduct(Product oProduct, String sPathName) throws IOException {
-        ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        ObjectOutput out = null;
-        FileOutputStream fos = null;
+    private String WriteProduct(Product oProduct, String sFilePath, String sFileName, String sFormat, String sExtension)
+    {
         try {
-            out = new ObjectOutputStream(bos);
-            out.writeObject(oProduct);
-            out.flush();
-            byte[] abProduct = bos.toByteArray();
-
-            //dump to file
-            fos = new FileOutputStream(sPathName);
-            fos.write(abProduct);
-            fos.close();
-
-        } catch (IOException ex) {
-            // ignore close exception
-        }
-        finally {
-            bos.close();
-            fos.close();
+            if (!sFilePath.endsWith("/")) sFilePath += "/";
+            File newFile = new File(sFilePath + sFileName + sExtension);
+            LauncherMain.s_oLogger.debug("WriteProduct: Otuput File: " + newFile.getAbsolutePath());
+            ProductIO.writeProduct(oProduct, newFile.getAbsolutePath(), sFormat);
+            MemUtils.freeAllMemory();
+            return newFile.getAbsolutePath();
+        }catch (Exception oEx)
+        {
+            LauncherMain.s_oLogger.debug("WriteProduct: Error writing product. " + oEx.getMessage());
         }
 
+        return null;
     }
+
+    public String WriteBEAMDIMAP(Product oProduct, String sFilePath, String sFileName) throws Exception
+    {
+        String sFormat = DimapProductWriterPlugIn.DIMAP_FORMAT_NAME;
+
+        return WriteProduct(oProduct, sFilePath, sFileName, sFormat, ".dim");
+    }
+
 
 
 }

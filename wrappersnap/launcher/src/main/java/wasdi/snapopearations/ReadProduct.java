@@ -65,7 +65,6 @@ public class ReadProduct {
         return  false;
     }
 
-
     public ProductViewModel getProductViewModel(File oFile) throws IOException
     {
         LauncherMain.s_oLogger.debug("ReadProduct.getProductViewModel: start");
@@ -171,7 +170,7 @@ public class ReadProduct {
         String sBigTiff = "";
 
         try {
-            sBigTiff = oWriter.WriteBigTiff(oSentinelProduct, sWorkingPath, sFileNameWithoutExtension, null);
+            sBigTiff = oWriter.WriteBigTiff(oSentinelProduct, sWorkingPath, sFileNameWithoutExtension);
         }
         catch (Exception oEx) {
             oEx.printStackTrace();

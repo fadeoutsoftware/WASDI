@@ -8,6 +8,8 @@ import org.esa.snap.core.dataio.ProductIO;
 import org.esa.snap.engine_utilities.util.MemUtils;
 import org.esa.snap.dataio.bigtiff.BigGeoTiffProductReaderPlugIn;
 import wasdi.LauncherMain;
+import wasdi.shared.parameters.RangeDopplerGeocodingParameter;
+import wasdi.shared.parameters.RangeDopplerGeocodingSetting;
 
 import java.io.File;
 /**
@@ -15,24 +17,36 @@ import java.io.File;
  */
 public class TerrainCorrection {
 
-    public Product getTerrainCorrection(Product oProduct, String[] asBandName) throws Exception {
-        OperatorSpi spiTerrain = new RangeDopplerGeocodingOp.Spi();
-        RangeDopplerGeocodingOp opTerrain = (RangeDopplerGeocodingOp) spiTerrain.createOperator();
-        opTerrain.setParameterDefaultValues();
-        LauncherMain.s_oLogger.debug("LauncherMain.TerrainCorrection: Terrain setting dem elevation");
-        opTerrain.setParameter("demName", "SRTM 1Sec HGT");
-
-        if (opTerrain == null)
-        {
-            LauncherMain.s_oLogger.debug("LauncherMain.TerrainCorrection: Terrain operator null");
-            return null;
+    public Product getTerrainCorrection(Product oProduct, RangeDopplerGeocodingSetting oSetting) throws Exception {
+        Product oTerrainProduct = null;
+        try {
+            OperatorSpi spiTerrain = new RangeDopplerGeocodingOp.Spi();
+            RangeDopplerGeocodingOp opTerrain = (RangeDopplerGeocodingOp) spiTerrain.createOperator();
+            opTerrain.setSourceProduct(oProduct);
+            FillRangeDopplerGeocodingSettings(opTerrain, oSetting);
+            oTerrainProduct = opTerrain.getTargetProduct();
         }
-        opTerrain.setSourceProduct(oProduct);
-        if (asBandName != null)
-            opTerrain.setParameter("sourceBands", asBandName);
+        catch (Exception oEx)
+        {
+            LauncherMain.s_oLogger.debug("TerrainCorrection.getTerrainCorrection: error generating terrain product " + oEx.getMessage());
+        }
+        finally {
+            return oTerrainProduct;
+        }
 
-        Product terrainProduct = opTerrain.getTargetProduct();
+    }
 
-        return terrainProduct;
+    private void FillRangeDopplerGeocodingSettings(RangeDopplerGeocodingOp opTerrain, RangeDopplerGeocodingSetting oSetting) {
+
+        //set default value
+        opTerrain.setParameterDefaultValues();
+        // source band (FOR THE MOMENT WE SUPPORT ONLY ONE BAND AT TIME)
+        if (oSetting.getSourceBandNames() != null && oSetting.getSourceBandNames().length > 0) {
+            LauncherMain.s_oLogger.debug("TerrainCorrection.FillRangeDopplerGeocodingSettings: setting source band ");
+            opTerrain.setParameter("sourceBands", oSetting.getSourceBandNames());
+        }
+        // set dem (SRTM 1Sec HGT)
+        opTerrain.setParameter("demName", oSetting.getDemName());
+
     }
 }

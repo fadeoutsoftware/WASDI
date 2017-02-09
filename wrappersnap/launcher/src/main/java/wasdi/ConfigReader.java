@@ -3,11 +3,8 @@ package wasdi; /**
  */
 
 import java.io.*;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Properties;
 
 public class ConfigReader {
@@ -63,4 +60,5 @@ public class ConfigReader {
 
         return m_aoProperties.get(sValue);
     }
+
 }

@@ -218,6 +218,7 @@ public class Send {
         LauncherMain.s_oLogger.debug("Send.SendUpdateProcessMessage: Send update message");
         RabbitMessageViewModel oUpdateProcessMessage = new RabbitMessageViewModel();
         oUpdateProcessMessage.setMessageCode(LauncherOperations.UPDATEPROCESSES);
+        oUpdateProcessMessage.setWorkspaceId(sWorkspaceId);
         String sJSON = MongoRepository.s_oMapper.writeValueAsString(oUpdateProcessMessage);
         try {
             this.SendMsgOnExchange(sWorkspaceId, sJSON);
