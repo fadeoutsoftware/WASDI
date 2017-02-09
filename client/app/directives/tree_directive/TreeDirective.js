@@ -92,6 +92,8 @@ angular.module('wasdi.TreeDirective', [])
                             // if there isn't running publish band processes AND the node it's a band do $scope.m_oController.openBandImage()
                             //change icons
                             //data.event.type !="contextmenu" => discard right click of mouse (plugin)
+                            if (angular.isUndefined(data.event))
+                                return;
                             if(!utilsIsObjectNullOrUndefined(data.node) && data.event.type !="contextmenu")
                             {
                                 if($scope.m_oController.m_oProcessesLaunchedService.thereAreSomePublishBandProcess() == false && data.node.children.length == 0 && !utilsIsObjectNullOrUndefined(data.node.original.band))

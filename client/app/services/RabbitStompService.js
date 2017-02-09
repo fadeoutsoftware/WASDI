@@ -107,6 +107,12 @@ service('RabbitStompService', ['$http',  'ConstantsService','$interval','Process
                 case "UPDATEPROCESSES":
                     oController.m_oProcessesLaunchedService.loadProcessesFromServer(oController.m_oActiveWorkspace.workspaceId);
                     break;
+                case "TERRAIN":
+                    oControllerActive.receivedTerrainMessage(oMessageResult);
+                    oController.m_oProcessesLaunchedService.loadProcessesFromServer(oController.m_oActiveWorkspace.workspaceId);
+                    var oDialog = utilsVexDialogAlertBottomRightCorner("terrain Operation Completed");
+                    utilsVexCloseDialogAfterFewSeconds(3000,oDialog);
+                    break;
                 default:
                     console.log("got empty message");
             }

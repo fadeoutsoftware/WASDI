@@ -3,10 +3,11 @@
  */
 var EditorController = (function () {
     function EditorController($scope, $location, $interval, oConstantsService, oAuthService, oMapService, oFileBufferService,
-                              oProductService,$state,oWorkspaceService,oGlobeService,oProcessesLaunchedService, oRabbitStompService) {
+                              oProductService,$state,oWorkspaceService,oGlobeService,oProcessesLaunchedService, oRabbitStompService, oSnapOperationService) {
 
         // Reference to the needed Services
         this.m_oScope = $scope;
+        this.m_oScope.m_oController = this;
         this.m_oLocation = $location;
         this.m_oInterval = $interval;
         this.m_oConstantsService = oConstantsService;
@@ -14,7 +15,7 @@ var EditorController = (function () {
         this.m_oMapService = oMapService;
         this.m_oFileBufferService = oFileBufferService;
         this.m_oProductService = oProductService;
-        this.m_oScope.m_oController = this;
+        this.m_oSnapOperationService = oSnapOperationService;
         this.m_oGlobeService=oGlobeService;
         this.m_oState=$state;
         this.m_oProcessesLaunchedService=oProcessesLaunchedService;
@@ -22,7 +23,6 @@ var EditorController = (function () {
         this.m_oRabbitStompServive = oRabbitStompService;
         this.m_b2DMapModeOn=true;
         this.m_b3DMapModeOn=false;
-
         //layer list
         this.m_aoLayersList=[];//only id
         //this.m_aoProcessesRunning=[];
@@ -150,6 +150,10 @@ var EditorController = (function () {
 
         //this.m_oScope.$apply();
     }
+
+    EditorController.prototype.receivedTerrainMessage = function (oMessage) {
+        this.receivedDownloadMessage(oMessage);
+    };
 
 
     /**
@@ -529,30 +533,41 @@ var EditorController = (function () {
                         //PRODUCT
                         oReturnValue =
                         {
-                            "prova1" : {
+                            "DeleteProduct" : {
                                 "label" : "Delete Product",
                                 "action" : function (obj) {
 
-                                    utilsVexDialogConfirm("Deleting product. Do you want to delete files on file system?", function(value) {
+                                    utilsVexDialogConfirmWithCheckBox("Deleting product. Are you sure?", function(value) {
                                         var bDeleteFile = false;
-                                        if (value)
-                                            bDeleteFile = true;
+                                        if (value) {
+                                            if (value.checkbox == 'on')
+                                                bDeleteFile = true;
+                                        }
 
                                         oController.m_oProductService.deleteProductFromWorkspace($node.original.fileName, oController.m_oActiveWorkspace.workspaceId, bDeleteFile)
                                             .success(function (data) {
+                                                //reload product list
+                                                oController.getProductListByWorkspace();
 
                                             }).error(function (error) {
 
                                         });
 
                                     });
-
-
                                 }
                             },
-                            "prova2" : {
-                                "label" : "operazione2",
-                                "action" : function (obj) {  }
+                            "Terrain" : {
+                                "label" : "Terrain Correction",
+                                "action" : function (obj) {
+                                    var sSourceFileName = $node.original.fileName;
+                                    var sDestinationFileName = '';
+                                    oController.m_oSnapOperationService.TerrainCorrection(sSourceFileName, sDestinationFileName, oController.m_oActiveWorkspace.workspaceId)
+                                        .success(function(data){
+
+                                    }).error(function(error){
+
+                                    });
+                                }
                             },
                             "prova3" : {
                                 "label" : "operazione3",
@@ -960,7 +975,8 @@ var EditorController = (function () {
         'WorkspaceService',
         'GlobeService',
         'ProcessesLaunchedService',
-        'RabbitStompService'
+        'RabbitStompService',
+        'SnapOperationService'
     ];
 
     return EditorController;

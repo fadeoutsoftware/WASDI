@@ -20,6 +20,7 @@ var wasdiApp = angular.module('wasdi', [
     'wasdi.RabbitStompService',
     'wasdi.SearchOrbitService',
     'wasdi.ResultsOfSearchService',
+    'wasdi.SnapOperationService',
 
     'wasdi.SnakeDirective',
     'wasdi.TreeDirective',

@@ -21,6 +21,7 @@ service('ProductService', ['$http',  'ConstantsService', function ($http, oConst
     }
 
     this.deleteProductFromWorkspace = function (sProductName, sWorkspaceId, bDeleteFile) {
+        //return this.m_oHttp.get('http://localhost:8080/wasdiwebserver/rest/product/delete?sProductName='+sProductName+'&sWorkspaceId='+sWorkspaceId + '&bDeleteFile=' + bDeleteFile);
         return this.m_oHttp.get(this.APIURL + '/product/delete?sProductName='+sProductName+'&sWorkspaceId='+sWorkspaceId + '&bDeleteFile=' + bDeleteFile);
     }
 

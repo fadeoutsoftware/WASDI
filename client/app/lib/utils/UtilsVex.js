@@ -39,9 +39,46 @@ function utilsVexDialogConfirm(oMessage,oCallback)
     var oVexInstance = vex.dialog.confirm({
         message: oMessage,
         callback: oCallback,
+
     })
     return oVexInstance;
 }
+
+function utilsVexDialogConfirmWithCheckBox(oMessage,oCallback)
+{
+    if(utilsIsStrNullOrEmpty(oMessage))
+        oMessage = "Are you absolutely sure you want to destroy the alien planet?";//Default message
+
+    if(utilsIsObjectNullOrUndefined(oCallback))
+    {
+        /*Default CallBack*/
+        oCallback=function (value)
+        {
+            if (value)
+            {
+                console.log('Successfully destroyed the planet.')
+            }
+            else
+            {
+                console.log('Chicken.')
+            }
+        }
+    }
+
+    var oVexInstance = vex.dialog.confirm({
+        message: oMessage,
+        callback: oCallback,
+        input:['<div class="vex-custom-field-wrapper">',
+            '<label for="color">Delete files on file system</label>',
+            '<div class="vex-custom-input-wrapper">',
+            '<input name="checkbox" type="checkbox"/>',
+            '</div>',
+            '</div>'].join('')
+
+    })
+    return oVexInstance;
+}
+
 
 function utilsVexDialogAlertDefault(oMessage,oCallback)
 {
