@@ -7,6 +7,9 @@ public class PublishedBand {
     private String productName;
     private String bandName;
     private String layerId;
+    private String userId;
+    private String workspaceId;
+    private String boundingBox;
 
     public String getProductName() {
         return productName;
@@ -30,5 +33,29 @@ public class PublishedBand {
 
     public void setLayerId(String layerId) {
         this.layerId = layerId;
+    }
+
+    public String getBoundingBox() {
+        return boundingBox;
+    }
+
+    public void setBoundingBox(String boundingBox) {
+        this.boundingBox = boundingBox;
+    }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
+
+    public String getWorkspaceId() {
+        return workspaceId;
+    }
+
+    public void setWorkspaceId(String workspaceId) {
+        this.workspaceId = workspaceId;
     }
 }

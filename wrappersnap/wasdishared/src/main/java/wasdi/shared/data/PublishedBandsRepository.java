@@ -1,10 +1,15 @@
 package wasdi.shared.data;
 
 import com.mongodb.BasicDBObject;
+import com.mongodb.Block;
+import com.mongodb.client.FindIterable;
+import com.mongodb.client.model.Filters;
+import com.mongodb.client.result.DeleteResult;
 import org.bson.Document;
 import wasdi.shared.business.DownloadedFile;
 import wasdi.shared.business.PublishedBand;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -50,4 +55,51 @@ public class PublishedBandsRepository extends MongoRepository {
 
         return  null;
     }
+
+    public List<PublishedBand> GetPublishedBandsByProductName(String sProductName) {
+
+        final ArrayList<PublishedBand> aoReturnList = new ArrayList<PublishedBand>();
+        try {
+
+            FindIterable<Document> oWSDocuments = getCollection("publishedbands").find(Filters.eq("productName", sProductName));
+
+            oWSDocuments.forEach(new Block<Document>() {
+                public void apply(Document document) {
+                    String sJSON = document.toJson();
+                    PublishedBand oPublishedBand = null;
+                    try {
+                        oPublishedBand = s_oMapper.readValue(sJSON,PublishedBand.class);
+                        aoReturnList.add(oPublishedBand);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+
+                }
+            });
+
+        } catch (Exception oEx) {
+            oEx.printStackTrace();
+        }
+
+        return  aoReturnList;
+    }
+
+    public int DeleteByProductName(String sProductName) {
+
+        try {
+
+            DeleteResult oDeleteResult = getCollection("publishedbands").deleteMany(Filters.eq("productName", sProductName));
+
+            if (oDeleteResult != null)
+            {
+                return  (int) oDeleteResult.getDeletedCount();
+            }
+
+        } catch (Exception oEx) {
+            oEx.printStackTrace();
+        }
+
+        return 0;
+    }
+
 }

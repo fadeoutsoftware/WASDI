@@ -7,6 +7,7 @@ public class ProcessWorkspace {
 
     private String productName;
     private String workspaceId;
+    private String userId;
     private String operationType;
     private String operationDate;
     private String processObjId;
@@ -51,4 +52,11 @@ public class ProcessWorkspace {
         this.processObjId = processObjId;
     }
 
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
 }

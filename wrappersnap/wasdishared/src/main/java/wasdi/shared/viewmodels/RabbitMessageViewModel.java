@@ -7,6 +7,7 @@ public class RabbitMessageViewModel {
     private String messageCode;
     private String messageResult;
     private Object payload;
+    private String workspaceId;
 
     public String getMessageCode() {
         return messageCode;
@@ -30,5 +31,13 @@ public class RabbitMessageViewModel {
 
     public void setPayload(Object payload) {
         this.payload = payload;
+    }
+
+    public String getWorkspaceId() {
+        return workspaceId;
+    }
+
+    public void setWorkspaceId(String workspaceId) {
+        this.workspaceId = workspaceId;
     }
 }

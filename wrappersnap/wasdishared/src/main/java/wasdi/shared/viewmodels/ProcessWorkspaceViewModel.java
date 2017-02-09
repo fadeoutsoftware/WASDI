@@ -8,6 +8,7 @@ public class ProcessWorkspaceViewModel {
     private String productName;
     private String operationType;
     private String operationDate;
+    private String userId;
 
     public String getProductName() {
         return productName;
@@ -33,4 +34,11 @@ public class ProcessWorkspaceViewModel {
         this.operationDate = operationDate;
     }
 
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
 }

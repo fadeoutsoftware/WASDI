@@ -2,6 +2,7 @@ package wasdi.shared.data;
 
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.Updates;
+import com.mongodb.client.result.DeleteResult;
 import com.mongodb.client.result.UpdateResult;
 import org.bson.Document;
 import wasdi.shared.business.DownloadedFile;
@@ -30,7 +31,8 @@ public class DownloadedFilesRepository extends MongoRepository {
 
     public boolean UpdateDownloadedFile(DownloadedFile oFile) {
         try {
-            UpdateResult oResult = getCollection("downloadedfiles").updateOne(Filters.eq("fileName", oFile.getFileName()), Updates.set("productViewModel", oFile.getProductViewModel()));
+            String sJSON = s_oMapper.writeValueAsString(oFile);
+            UpdateResult oResult = getCollection("downloadedfiles").updateOne(Filters.eq("fileName", oFile.getFileName()), new Document(Document.parse(sJSON)));
 
             if (oResult.getModifiedCount()==1) return  true;
         }
@@ -57,5 +59,23 @@ public class DownloadedFilesRepository extends MongoRepository {
         }
 
         return  null;
+    }
+
+    public int DeleteByFilePath(String sFilePath) {
+
+        try {
+
+            DeleteResult oDeleteResult = getCollection("downloadedfiles").deleteOne(Filters.eq("filePath", sFilePath));
+
+            if (oDeleteResult != null)
+            {
+                return  (int) oDeleteResult.getDeletedCount();
+            }
+
+        } catch (Exception oEx) {
+            oEx.printStackTrace();
+        }
+
+        return 0;
     }
 }

@@ -7,6 +7,7 @@ public class PublishBandResultViewModel {
     private String layerId;
     private String bandName;
     private String productName;
+    private String boundingBox;
 
     public String getLayerId() {
         return layerId;
@@ -30,5 +31,13 @@ public class PublishBandResultViewModel {
 
     public void setProductName(String productName) {
         this.productName = productName;
+    }
+
+    public String getBoundingBox() {
+        return boundingBox;
+    }
+
+    public void setBoundingBox(String boundingBox) {
+        this.boundingBox = boundingBox;
     }
 }

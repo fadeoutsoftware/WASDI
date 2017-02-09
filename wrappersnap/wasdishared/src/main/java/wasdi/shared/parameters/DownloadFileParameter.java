@@ -8,12 +8,41 @@ package wasdi.shared.parameters;
 
 public class DownloadFileParameter {
 
+    /**
+     * Download url
+     */
     private String url;
+
+    /**
+     * SessionId
+     */
     private String queue;
+
+    /**
+     * UserId
+     */
     private String userId;
+
+    /**
+     * Workspace
+     */
     private String workspace;
+
+    /**
+     * Is workspace
+     */
     private String exchange;
+
+    /**
+     * Is ObjectId of MongoDb
+     */
     private String processObjId;
+
+    /**
+     * Open Search provider
+     */
+    private String openSearchProvider;
+
 
     public String getUrl() { return url; }
 
@@ -60,4 +89,13 @@ public class DownloadFileParameter {
     public void setProcessObjId(String processObjId) {
         this.processObjId = processObjId;
     }
+
+    public String getOpenSearchProvider() {
+        return openSearchProvider;
+    }
+
+    public void setOpenSearchProvider(String openSearchProvider) {
+        this.openSearchProvider = openSearchProvider;
+    }
+
 }
