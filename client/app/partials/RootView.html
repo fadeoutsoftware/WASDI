@@ -55,7 +55,7 @@
 
                 <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
                     <div class="nav navbar-nav navbar-left name-workspace">
-                        <input type="text" value="{{m_oController.getActiveWorkspace()}}" placeholder="{{m_oController.getActiveWorkspace()}}">
+                            <input type="text" value="{{m_oController.getWorkspaceName()}}" placeholder="{{m_oController.getWorkspaceName()}}" ng-model="m_oController.m_oConstantsService.getActiveWorkspace().name" ng-keyup="m_oController.UpdateWorkspace($event) " ng-blur="m_oController.UpdateWorkspace()">
                     </div>
                     <ul class="nav navbar-nav navbar-right">
                         <li ng-class="{active:m_oController.activePageCss('root.workspaces')}">

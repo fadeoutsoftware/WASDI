@@ -68,11 +68,21 @@ function utilsVexDialogConfirmWithCheckBox(oMessage,oCallback)
     var oVexInstance = vex.dialog.confirm({
         message: oMessage,
         callback: oCallback,
-        input:['<div class="vex-custom-field-wrapper">',
-            '<label for="color">Delete files on file system</label>',
-            '<div class="vex-custom-input-wrapper">',
-            '<input name="checkbox" type="checkbox"/>',
+        input:[
+            '<style>',
+            '.vex-custom-field-wrapper {',
+            'margin: 1em 0;',
+            '}',
+            '.vex-custom-field-wrapper > label {',
+            'display: inline-block;',
+            'margin-bottom: .2em;',
+            '}',
+            '</style>',
+            '<div class="vex-custom-field-wrapper">',
+                '<input name="files" type="checkbox" checked="checked" /> Delete files on file system',
             '</div>',
+            '<div class="vex-custom-field-wrapper">',
+                '<input name="geoserver" type="checkbox" checked="checked"/> Delete layers on geoserver',
             '</div>'].join('')
 
     })

@@ -29,6 +29,7 @@
                 <th>{{"WORKSPACES_THEAD_OWNER"|translate}}</th>
                 <th></th>
                 <th></th>
+                <th></th>
             </thead>
             <tr ng-repeat="oWSListItem in m_oController.getWorkspaceInfoList() | filter:searchWorkSpace"  ng-class="m_oController.isSelectedRowInWorkspaceTable(oWSListItem)">
                 <td>{{$index}}</td>
@@ -40,6 +41,7 @@
                 <td class="over-color" data-toggle="tooltip" data-placement="top" title="{{'WORKSPACES_TOOLTIP_INFO'|translate}}" ng-click="m_oController.loadProductList(oWSListItem)">
                     <i class="fa fa-info fa-lg" aria-hidden="true"></i>
                 </td>
+                <td class="over-color" ><i class="fa fa-times fa-lg" aria-hidden="true" ng-click="m_oController.DeleteWorkspace(oWSListItem.workspaceId)"></i></td>
             </tr>
 
         </table>

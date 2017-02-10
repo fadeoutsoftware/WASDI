@@ -43,7 +43,7 @@ var WorkspaceController = (function() {
             //alert('error');
             utilsVexDialogAlertTop('Error in create WorkSpace. WorkspaceController.js');
         });
-    }
+    };
 
 
     WorkspaceController.prototype.openWorkspace = function (sWorkspaceId) {
@@ -92,7 +92,7 @@ var WorkspaceController = (function() {
             }
         }
 
-    }
+    };
 
     WorkspaceController.prototype.loadProductList = function(oWorkspace)
     {
@@ -146,6 +146,19 @@ var WorkspaceController = (function() {
 
         return 'selected-row';
     }
+
+	WorkspaceController.prototype.DeleteWorkspace = function (sWorkspaceId) {
+
+        var oController = this;
+
+        this.m_oWorkspaceService.DeleteWorkspace(sWorkspaceId).success(function (data, status) {
+
+
+
+        }).error(function (data,status) {
+
+        });
+    };
 
     WorkspaceController.$inject = [
         '$scope',

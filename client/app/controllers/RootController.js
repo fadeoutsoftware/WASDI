@@ -174,7 +174,8 @@ var RootController = (function() {
     {
         var oController=this;
         oController.m_bProcessMenuIsVisible = !oController.m_bProcessMenuIsVisible;
-    }
+    };
+
     RootController.prototype.onClickLogOut = function()
     {
         var oController=this;
@@ -187,26 +188,27 @@ var RootController = (function() {
         });
 
 
-    }
-    RootController.prototype.getActiveWorkspace = function()
+    };
+
+    RootController.prototype.getWorkspaceName = function()
     {
-        var sWorkspace = this.m_oConstantsService.getActiveWorkspace();
-        if(utilsIsObjectNullOrUndefined(sWorkspace))
+        var oWorkspace = this.m_oConstantsService.getActiveWorkspace();
+        if(utilsIsObjectNullOrUndefined(oWorkspace))
             return "";
         else
         {
-            if(utilsIsObjectNullOrUndefined(sWorkspace.name))
-                return ""
+            if(utilsIsObjectNullOrUndefined(oWorkspace.name))
+                return "";
             else
-                return sWorkspace.name;
+                return oWorkspace.name;
         }
 
-    }
+    };
 
     RootController.prototype.noActiveLinkInNavBarCSS = function()
     {
         return ".not-active { pointer-events: none; cursor: default;}";
-    }
+    };
 
     RootController.prototype.openWorkspace = function (sWorkspaceId) {
 
@@ -225,7 +227,7 @@ var RootController = (function() {
         }).error(function (data,status) {
             utilsVexDialogAlertTop("Error in open WorkSPace by RootController.js");
         });
-    }
+    };
 
     /***************************** IS VISIBLE HTML ELEMENT ******************************/
     RootController.prototype.isVisibleProcessesBar = function ()
@@ -239,7 +241,7 @@ var RootController = (function() {
         }
 
         return true;
-    }
+    };
 
     RootController.prototype.isVisibleNavBar=function()
     {
@@ -252,7 +254,7 @@ var RootController = (function() {
         }
 
         return true;
-    }
+    };
     /*********************************************************************************/
     /* ***************** OPEN LINK *****************/
     RootController.prototype.openEditorPage = function () {
@@ -260,7 +262,7 @@ var RootController = (function() {
         var oController = this;
         var sWorkSpace = this.m_oConstantsService.getActiveWorkspace();
         oController.m_oState.go("root.editor", { workSpace : sWorkSpace.workspaceId });//use workSpace when reload editor page
-    }
+    };
 
 
     RootController.prototype.openSearchorbit = function()
@@ -274,7 +276,7 @@ var RootController = (function() {
         }
 
 
-    }
+    };
 
     RootController.prototype.openImportPage = function () {
 
@@ -287,7 +289,7 @@ var RootController = (function() {
             oController.m_oState.go("root.import", { workSpace : sWorkSpace.workspaceId });//use workSpace when reload editor page
         }
         //TODO FEEDBACK IF U CAN'T CLICK ON IMPORT
-    }
+    };
 
     RootController.prototype.activePageCss = function(oPage)
     {
@@ -320,20 +322,34 @@ var RootController = (function() {
                 return false;
         }
         return false;
-    }
+    };
 
     RootController.prototype.openNav = function() {
         document.getElementById("status-bar").style.height = "500px";
         this.m_bIsOpenStatusBar = !this.m_bIsOpenStatusBar;
         this.m_bIsOpenNav = true;
 
-    }
+    };
+
     RootController.prototype.closeNav = function() {
         document.getElementById("status-bar").style.height = "4.5%";
         this.m_bIsOpenStatusBar = !this.m_bIsOpenStatusBar;
         this.m_bIsOpenNav = false;
 
-    }
+    };
+
+    RootController.prototype.UpdateWorkspace = function($event) {
+        if ($event == null || $event.keyCode == 13) {
+            var oWorkspace = this.m_oConstantsService.getActiveWorkspace();
+            this.m_oWorkspaceService.UpdateWorkspace(oWorkspace).success(function (data) {
+
+            }).error(function (error){
+
+            });
+        }
+
+    };
+
     /*********************************************************************/
     RootController.$inject = [
         '$scope',

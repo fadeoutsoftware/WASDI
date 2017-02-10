@@ -539,12 +539,15 @@ var EditorController = (function () {
 
                                     utilsVexDialogConfirmWithCheckBox("Deleting product. Are you sure?", function(value) {
                                         var bDeleteFile = false;
+                                        var bDeleteLayer = false;
                                         if (value) {
-                                            if (value.checkbox == 'on')
+                                            if (value.files == 'on')
                                                 bDeleteFile = true;
+                                            if (value.geoserver == 'on')
+                                                bDeleteLayer = true;
                                         }
 
-                                        oController.m_oProductService.deleteProductFromWorkspace($node.original.fileName, oController.m_oActiveWorkspace.workspaceId, bDeleteFile)
+                                        oController.m_oProductService.deleteProductFromWorkspace($node.original.fileName, oController.m_oActiveWorkspace.workspaceId, bDeleteFile, bDeleteLayer)
                                             .success(function (data) {
                                                 //reload product list
                                                 oController.getProductListByWorkspace();
@@ -568,10 +571,6 @@ var EditorController = (function () {
 
                                     });
                                 }
-                            },
-                            "prova3" : {
-                                "label" : "operazione3",
-                                "action" : function (obj) {  }
                             }
                         };
                     }
@@ -846,6 +845,9 @@ var EditorController = (function () {
 
         return true;
     }
+
+
+
     /* Push process in List of Running Processes (in server)
     * */
 

@@ -20,9 +20,9 @@ service('ProductService', ['$http',  'ConstantsService', function ($http, oConst
         return this.m_oHttp.get(this.APIURL + '/product/addtows?sProductName='+sProductName+'&sWorkspaceId='+sWorkspaceId);
     }
 
-    this.deleteProductFromWorkspace = function (sProductName, sWorkspaceId, bDeleteFile) {
+    this.deleteProductFromWorkspace = function (sProductName, sWorkspaceId, bDeleteFile, bDeleteLayer) {
         //return this.m_oHttp.get('http://localhost:8080/wasdiwebserver/rest/product/delete?sProductName='+sProductName+'&sWorkspaceId='+sWorkspaceId + '&bDeleteFile=' + bDeleteFile);
-        return this.m_oHttp.get(this.APIURL + '/product/delete?sProductName='+sProductName+'&sWorkspaceId='+sWorkspaceId + '&bDeleteFile=' + bDeleteFile);
+        return this.m_oHttp.get(this.APIURL + '/product/delete?sProductName='+sProductName+'&sWorkspaceId='+sWorkspaceId + '&bDeleteFile=' + bDeleteFile + '&bDeleteLayer=' + bDeleteLayer);
     }
 
 }]);
