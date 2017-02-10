@@ -1,4 +1,4 @@
-  {
+{
     "LOGIN_PLACEHOLDER_EMAIL":"Email Address",
     "LOGIN_PLACEHOLDER_PASSWORD":"Password",
     "LOGIN_CHECK_BOX_LABEL":"Remember me",
@@ -30,6 +30,11 @@
     "WORKSPACES_TITLE_LABEL":"WorkSpaces",
     "WORKSPACES_PLACEHOLDER_SEARCH":"Search WorkSpace...",
     "WORKSPACES_BUTTON_NEW_WORKSPACE":"New Workspace",
+    "WORKSPACES_TOOLTIP_EDITOR":"Edit",
+    "WORKSPACES_TOOLTIP_INFO":"Info",
+    "WORKSPACES_THEAD_WORKSPACES":"Workspaces",
+    "WORKSPACES_THEAD_OWNER":"Owner",
+
 
     "EDITOR_TOOLTIP_SWITCH_3D_2D":"Switch 3D globe and 2D map",
     "EDITOR_TOOLTIP_HOME_2D":"Center of map",
@@ -52,4 +57,4 @@
     "SEARCH_TITLE_HEAD_ORBIT_TABLE_SATELLITE": "Satellite",
     "SEARCH_TITLE_HEAD_ORBIT_TABLE_ACQUISITION_START": "Acquisition Start",
     "SEARCH_TITLE_HEAD_ORBIT_TABLE_ACQUISITION_END": "Acquisition End"
-  }
+}

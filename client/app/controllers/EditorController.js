@@ -593,6 +593,7 @@ var EditorController = (function () {
             oNode.text=productList[iIndexProduct].name;//LABEL NODE
             oNode.fileName=productList[iIndexProduct].fileName;//LABEL NODE
             oNode.children=[{"text": "metadata"},{"text":"Bands", "children": []}];//CHILDREN
+            //oNode.icon = "assets/icons/product_20x20.svg";
             oTree.core.data.push(oNode);
 
 

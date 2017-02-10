@@ -3,7 +3,7 @@
  */
 
 var WorkspaceController = (function() {
-    function WorkspaceController($scope, $location, oConstantsService, oAuthService, oWorkspaceService,$state) {
+    function WorkspaceController($scope, $location, oConstantsService, oAuthService, oWorkspaceService,$state,oProductService) {
         this.m_oScope = $scope;
         this.m_oLocation  = $location;
         this.m_oAuthService = oAuthService;
@@ -11,9 +11,12 @@ var WorkspaceController = (function() {
         this.m_oConstantsService = oConstantsService;
         this.m_oScope.m_oController=this;
         this.m_aoWorkspaceList = [];
+        this.m_oProductService = oProductService;
         this.m_oState = $state;
         this.m_oScope.m_oController = this;
-
+        this.m_aoProducts = [];//the products of the workspace selected
+        this.m_bIsOpenInfo = false;
+        this.m_oWorkspaceSelected = null;
         this.fetchWorkspaceInfoList();
 
     }
@@ -91,13 +94,67 @@ var WorkspaceController = (function() {
 
     }
 
+    WorkspaceController.prototype.loadProductList = function(oWorkspace)
+    {
+        if(utilsIsObjectNullOrUndefined(oWorkspace))
+            return false;
+        if(utilsIsStrNullOrEmpty(oWorkspace.workspaceId))
+            return false;
+        var oController = this;
+        var oWorkspaceId = oWorkspace.workspaceId;
+        this.m_oWorkspaceSelected = oWorkspace;
+        this.m_oProductService.getProductListByWorkspace(oWorkspaceId).success(function (data, status) {
+            if(!utilsIsObjectNullOrUndefined(data))
+            {
+                oController.m_aoProducts = [];
+                for(var iIndex = 0; iIndex < data.length; iIndex++)
+                {
+                    oController.m_aoProducts.push(data[iIndex]);
+                }
+                oController.m_bIsOpenInfo = true;
+            }
+
+        }).error(function (data,status) {});
+
+        return true;
+    }
+    WorkspaceController.prototype.getProductList = function()
+    {
+        return this.m_aoProducts;
+    }
+    WorkspaceController.prototype.isEmptyProductList = function()
+    {
+        if(utilsIsObjectNullOrUndefined(this.m_aoProducts) || this.m_aoProducts.length == 0)
+            return true;
+        return false;
+    }
+
+    WorkspaceController.prototype.isSelectedRowInWorkspaceTable = function(oWorkspace)
+    {
+        if(utilsIsObjectNullOrUndefined(oWorkspace))
+            return '';
+        if(utilsIsStrNullOrEmpty(oWorkspace.workspaceId))
+            return '';
+
+        if(utilsIsObjectNullOrUndefined(this.m_oWorkspaceSelected))
+            return '';
+        if(utilsIsStrNullOrEmpty(this.m_oWorkspaceSelected.workspaceId))
+            return '';
+
+        if(oWorkspace.workspaceId != this.m_oWorkspaceSelected.workspaceId)
+            return '';
+
+        return 'selected-row';
+    }
+
     WorkspaceController.$inject = [
         '$scope',
         '$location',
         'ConstantsService',
         'AuthService',
         'WorkspaceService',
-        '$state'
+        '$state',
+        'ProductService'
     ];
     return WorkspaceController;
 }) ();

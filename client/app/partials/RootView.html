@@ -65,23 +65,23 @@
                         </li>
 
                         <li ng-class="{active:m_oController.activePageCss('root.searchorbit')}">
-                          <a ng-click="m_oController.openSearchorbit()" ><i class="fa fa-search" aria-hidden="true"></i>
+                          <a ng-click="m_oController.openSearchorbit()"  href=""><i class="fa fa-search" aria-hidden="true"></i>
                                 {{"ROOT_VIEW_NAV_BAR_LINK_SEARCH"|translate}}
                             </a>
                         </li>
                         <li ng-class="{active:m_oController.activePageCss('root.import')}">
-                            <a ng-click="m_oController.openImportPage()" > <i class="fa fa-download fa-lg" aria-hidden="true"></i><!--ui-sref="root.import"-->
+                            <a ng-click="m_oController.openImportPage()" href=""> <i class="fa fa-download fa-lg" aria-hidden="true"></i><!--ui-sref="root.import"-->
                                 {{"ROOT_VIEW_NAV_BAR_LINK_IMPORT"|translate}}
                             </a>
                         </li>
                         <li ng-class="{active:m_oController.activePageCss('root.editor')}">
-                            <a ng-click="m_oController.onClickProcess();m_oController.openEditorPage()" ><i class="fa fa-cogs fa-lg" aria-hidden="true"></i><!-- ui-sref="root.editor"-->
+                            <a ng-click="m_oController.onClickProcess();m_oController.openEditorPage()" href=""><i class="fa fa-cogs fa-lg" aria-hidden="true"></i><!-- ui-sref="root.editor"-->
                                 {{"ROOT_VIEW_NAV_BAR_LINK_PROCESS"|translate}}
                             </a>
                         </li>
 
                         <!--TODO REMOVE JAVASCRIPT AT THE END OF FILE WHEN I LEAVE POPOVER-->
-                        <li style="cursor:no-drop;" data-toggle="popover"  data-content="Coming Soon" data-placement="left"  ng-class="{active:m_oController.activePageCss('root.workspaces')}">
+                        <li style="cursor:no-drop;" data-toggle="popover"  data-content="Coming Soon" data-placement="left"  ng-class="{active:m_oController.activePageCss('root.workspaces')}" href="">
                             <a>
                                 <i class="fa fa-upload fa-lg" aria-hidden="true"></i><!--ui-sref="root.editor"-->
                                 {{"ROOT_VIEW_NAV_BAR_LINK_PUBLISH"|translate}}

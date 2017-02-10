@@ -20,98 +20,107 @@
     <!--</table>-->
 
     <!----------------------WORKSPACES LIST---------------------->
-    <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12 ">
+    <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12 workspace-list" >
 
-        <table class="table table-hover">
+        <table class="table table-hover"id="TableWorkspacesList">
             <thead>
                 <th>#</th>
-                <th>Workspaces</th>
+                <th>{{"WORKSPACES_THEAD_WORKSPACES"|translate}}</th>
+                <th>{{"WORKSPACES_THEAD_OWNER"|translate}}</th>
                 <th></th>
                 <th></th>
             </thead>
-            <tr ng-repeat="oWSListItem in m_oController.getWorkspaceInfoList() | filter:searchWorkSpace">
+            <tr ng-repeat="oWSListItem in m_oController.getWorkspaceInfoList() | filter:searchWorkSpace"  ng-class="m_oController.isSelectedRowInWorkspaceTable(oWSListItem)">
                 <td>{{$index}}</td>
-                <td> {{oWSListItem.workspaceName}} - {{oWSListItem.ownerUserId}}</td>
-                <td class="over-color" ng-click="m_oController.openWorkspace(oWSListItem.workspaceId)"><i class="fa fa-pencil fa-lg" aria-hidden="true"></i></td>
-                <td class="over-color" ><i class="fa fa-info fa-lg" aria-hidden="true"></i></td>
+                <td> {{oWSListItem.workspaceName}}</td>
+                <td>{{oWSListItem.ownerUserId}}</td>
+                <td class="over-color" ng-click="m_oController.openWorkspace(oWSListItem.workspaceId)"  data-toggle="tooltip" data-placement="top" title="{{'WORKSPACES_TOOLTIP_EDITOR'|translate}}">
+                    <i class="fa fa-pencil fa-lg" aria-hidden="true"></i>
+                </td>
+                <td class="over-color" data-toggle="tooltip" data-placement="top" title="{{'WORKSPACES_TOOLTIP_INFO'|translate}}" ng-click="m_oController.loadProductList(oWSListItem)">
+                    <i class="fa fa-info fa-lg" aria-hidden="true"></i>
+                </td>
             </tr>
-            <!--<tr ><td >1</td><td><i class="fa fa-globe" aria-hidden="true"></i> workspace name - <i class="fa fa-user" aria-hidden="true"></i> ownerID </td></tr>-->
-            <!--<tr><td>2</td><td><i class="fa fa-globe" aria-hidden="true"></i> workspace name - <i class="fa fa-user" aria-hidden="true"></i> ownerID </td></tr>-->
-            <!--<tr><td>3</td><td><i class="fa fa-globe" aria-hidden="true"></i> workspace name - <i class="fa fa-user" aria-hidden="true"></i> ownerID </td></tr>-->
+
         </table>
     </div>
 
     <!---------------------- LIST OF FILES---------------------->
-    <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12">
+    <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
 
-        <div class="panel-group list-files" id="accordion" role="tablist" aria-multiselectable="true"   >
+        <div class="panel-group list-files" id="accordion" role="tablist" aria-multiselectable="true" ng-show="m_oController.m_bIsOpenInfo" >
 
-            <div class="panel panel-default">
+            <div ng-show="m_oController.isEmptyProductList() == true">
+                <i class="fa fa-spinner fa-pulse fa-3x fa-fw"></i>
+                <span class="sr-only">Loading...</span>
+            </div>
+
+
+            <div class="panel panel-default" ng-repeat="product in m_oController.getProductList()" >
+
                 <div class="panel-heading" role="tab" id="headingOne">
                     <h4 class="panel-title">
-                        <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion"  data-target="#collapseOne" aria-expanded="false" aria-controls="collapseThree">
-                            <b><i class="fa fa-file" aria-hidden="true"></i> File #1</b>
+                        <i class="fa fa-file " aria-hidden="true"></i>
+                        <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" data-target="{{'#product' + $index}}" aria-expanded="false" aria-controls="collapseThree">
+                            <b>{{product.fileName}}</b>
                         </a>
                     </h4>
                 </div>
-                <div id="collapseOne" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingThree">
+                <div id="{{'product'+$index}}" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingThree">
 
                     <div class="list-group">
 
-                        <li class="list-group-item">file name</li>
-                        <li class="list-group-item">file path</li>
-                        <li class="list-group-item">description</li>
-                        <li class="list-group-item">type</li>
-                        <li class="list-group-item">file tree</li>
-                        <li class="list-group-item">size</li>
-                        <li class="list-group-item">wm server</li>
-                        <li class="list-group-item">wms layer id:list</li>
-                        <li class="list-group-item">origin</li>
+                        <li class="list-group-item"><h4>File name:</h4> {{product.fileName}}</li>
+                        <li class="list-group-item"><h4>Name:</h4> {{product.name}}</li>
+                        <li class="list-group-item">
+                            <h4>Bands:</h4>
+                            <div ng-repeat="band in product.bandsGroups.bands">{{band.name}}</div>
+                        </li>
+                        <!--<li class="list-group-item">file path</li>-->
+                        <!--<li class="list-group-item">description</li>-->
+                        <!--<li class="list-group-item">type</li>-->
+                        <!--<li class="list-group-item">file tree</li>-->
+                        <!--<li class="list-group-item">size</li>-->
+                        <!--<li class="list-group-item">wm server</li>-->
+                        <!--<li class="list-group-item">wms layer id:list</li>-->
+                        <!--<li class="list-group-item">origin</li>-->
 
                     </div>
 
                 </div>
             </div>
 
-            <div class="panel panel-default">
-                <div class="panel-heading" role="tab" id="headingThree">
-                    <h4 class="panel-title">
-                        <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion"  data-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
-                            <b><i class="fa fa-file" aria-hidden="true"></i> File #2</b>
-                        </a>
-                    </h4>
-                </div>
-                <div id="collapseThree" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingThree">
-
-                        <div class="list-group">
-
-                            <li class="list-group-item">file name</li>
-                            <li class="list-group-item">file path</li>
-                            <li class="list-group-item">description</li>
-                            <li class="list-group-item">type</li>
-                            <li class="list-group-item">file tree</li>
-                            <li class="list-group-item">size</li>
-                            <li class="list-group-item">wm server</li>
-                            <li class="list-group-item">wms layer id:list</li>
-                            <li class="list-group-item">origin</li>
-
-                        </div>
-
-                </div>
-            </div>
         </div>
 
     </div>
     <!--------------------LIST OF OWNERS----------------------->
-    <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12 ">
-        <table class="table">
+    <div class="col-lg-2 col-md-2 col-sm-2 col-xs-12 ">
+        <table class="table"ng-show="m_oController.m_bIsOpenInfo">
             <thead>
-
-                <th colspan="2">List of Users</th>
+                <th colspan="2">Shared users</th>
             </thead>
-            <tr><td><i class="fa fa-user" aria-hidden="true"></i></td><td>owner id</td></tr>
-            <tr><td><i class="fa fa-user" aria-hidden="true"></i></td><td>owner id</td></tr>
-            <tr><td><i class="fa fa-user" aria-hidden="true"></i></td><td>owner id</td></tr>
+            <tr ng-repeat="user in m_oController.m_oWorkspaceSelected.sharedUsers">
+                <td>
+                    <i class="fa fa-user" aria-hidden="true"></i>
+                </td>
+                <td>
+                    {user}}
+                </td>
+            </tr>
+            <tr><td><i class="fa fa-user" aria-hidden="true"></i></td><td>user id</td></tr>
+            <!--<tr><td><i class="fa fa-user" aria-hidden="true"></i></td><td>owner id</td></tr>-->
+            <!--<tr><td><i class="fa fa-user" aria-hidden="true"></i></td><td>owner id</td></tr>-->
         </table>
     </div>
 </div>
+
+
+<script>
+    $(function() {
+        $('#TableWorkspacesList').on('post-body.bs.table', function () {
+            $('[data-tooltip="true"]').tooltip({
+                container: 'body'
+            });
+        });
+    });
+</script>
