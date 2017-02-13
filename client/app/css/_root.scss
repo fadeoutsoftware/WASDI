@@ -144,7 +144,8 @@
   //}
   .status-bar
   {
-    height: 4.5%;
+    //height: 4.5%;
+    min-height: 4.5%;
     width: 100%;
     position: fixed;
     z-index: 1000;
@@ -152,6 +153,7 @@
     left: 0;
     background-color: $wasdi-nav-bar-color-background;
     overflow-x: hidden;
+    overflow-y: hidden;
     transition: 0.5s;
     color: $wasdi-white;
     padding: 2px;

@@ -16,6 +16,7 @@ var WorkspaceController = (function() {
         this.m_oScope.m_oController = this;
         this.m_aoProducts = [];//the products of the workspace selected
         this.m_bIsOpenInfo = false;
+        this.m_bIsVisibleFiles = false;
         this.m_oWorkspaceSelected = null;
         this.fetchWorkspaceInfoList();
 
@@ -83,8 +84,11 @@ var WorkspaceController = (function() {
                         if (data != undefined)
                         {
                             oController.m_aoWorkspaceList = data;
+
                         }
                     }
+                    //oController.m_bIsVisibleFiles = true;
+
                 }).error(function (data,status) {
                     //alert('error');
                     utilsVexDialogAlertTop('Error in WorkspacesInfo. WorkspaceController.js');
@@ -103,6 +107,8 @@ var WorkspaceController = (function() {
         var oController = this;
         var oWorkspaceId = oWorkspace.workspaceId;
         this.m_oWorkspaceSelected = oWorkspace;
+
+        this.m_bIsVisibleFiles = true;
         this.m_oProductService.getProductListByWorkspace(oWorkspaceId).success(function (data, status) {
             if(!utilsIsObjectNullOrUndefined(data))
             {
@@ -114,7 +120,12 @@ var WorkspaceController = (function() {
                 oController.m_bIsOpenInfo = true;
             }
 
-        }).error(function (data,status) {});
+            if(utilsIsObjectNullOrUndefined( oController.m_aoProducts) || oController.m_aoProducts.length == 0)
+                oController.m_bIsVisibleFiles=false;
+
+        }).error(function (data,status) {
+            utilsVexDialogAlertTop("Error: loading product fails");
+        });
 
         return true;
     }

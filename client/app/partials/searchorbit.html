@@ -66,7 +66,7 @@
                         <div class="well well-sm">
                             <div ng-repeat="satellite in m_oController.m_oConfiguration.orbitsearch.satelliteNames">
                                 <input type="checkbox" checklist-model="m_oController.m_oSelectedSatellite"
-                                       checklist-value="satellite" ng-checked="true" /> <span>{{satellite}}</span>
+                                       checklist-value="satellite"  /> <span>{{satellite}}</span><!--ng-checked="true"-->
                             </div>
                         </div>
                     </div>
@@ -80,7 +80,7 @@
         </div>
         <!------------------------------- TABLE ORBIT --------------------------------------->
         <div class="row col-lg-12 col-md-12 col-sm-12 col-xs-12 table-container">
-            <table class="table table-hover table-search-orbit">
+            <table class="table table-hover table-search-orbit my-table">
                 <thead>
                 <tr>
                     <th><input type="checkbox" ng-model="master" ng-click="m_oController.showAllSwath(master)"></th>
@@ -93,23 +93,36 @@
                     <th>
                         {{"SEARCH_TITLE_HEAD_ORBIT_TABLE_ACQUISITION_END"|translate}}
                     </th>
+                    <th>
+                        <!--Buttons-->
+                    </th>
                 </tr>
                 </thead>
                 <tbody>
-                    <tr ng-repeat="orbit in m_oController.getOrbits()" ng-mouseover="m_oController.mouseOverOrbitInTable(orbit)"
-                            ng-mouseleave="m_oController.mouseLeaveOrbitInTable(orbit)"><!--ng-click="m_oController.showSwath(orbit)"-->
-
+                    <tr ng-repeat="orbit in m_oController.getOrbits()" ><!--ng-mouseover="m_oController.mouseOverOrbitInTable(orbit)"
+                            ng-mouseleave="m_oController.mouseLeaveOrbitInTable(orbit)" ng-click="m_oController.showSwath(orbit)"-->
                         <td> <input type="checkbox" ng-checked="master" ng-click="m_oController.showSwath(orbit)"></td>
                         <td><span >{{orbit.SatelliteName}}</span></td>
                         <td><span >{{m_oController.getDateFromTimestamp(orbit.AcquisitionStartTime)}}</span></td>
                         <td><span >{{m_oController.getDateFromTimestamp(orbit.AcquisitionEndTime)}}</span></td>
-
+                        <td class="info-satellite">
+                            <div class="button-info">
+                                <i class="fa fa-info-circle fa-lg" aria-hidden="true"></i>
+                            </div>
+                        </td>
                     </tr>
                 </tbody>
             </table>
-        </div>
-    </div>
 
+            <div class="loading-orbits"  ng-show="m_oController.m_bIsVisibleLoadingIcon" >
+                <i class="fa fa-spinner fa-pulse fa-3x fa-fw"></i>
+                <span class="sr-only">Loading...</span>
+            </div>
+
+        </div>
+
+
+    </div>
 
     <!--------------- MAP CONTAINER --------------->
     <div class="col-lg-8 col-md-8 col-sm-8 col-xs-12 map-container">

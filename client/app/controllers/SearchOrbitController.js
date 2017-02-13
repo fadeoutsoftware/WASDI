@@ -20,7 +20,7 @@ var SearchOrbitController = (function() {
         this.m_oGeoJSON = null;
         this.m_oSelectedSensorType = null;
         this.m_oSelectedResolutionType = null;
-        this.m_oSelectedSatellite = null;
+        this.m_oSelectedSatellite = [];
         this.m_aoOrbits = null;
         this.m_oProcessesLaunchedService=oProcessesLaunchedService;
         this.m_oWorkspaceService = oWorkspaceService;
@@ -28,6 +28,7 @@ var SearchOrbitController = (function() {
 
         this.m_oActiveWorkspace = this.m_oConstantsService.getActiveWorkspace();
         this.m_oUser = this.m_oConstantsService.getUser();
+        this.m_bIsVisibleLoadingIcon = false;
         //this.m_oProcessesLaunchedService.updateProcessesBar();
         //if there isn't workspace
         if(utilsIsObjectNullOrUndefined( this.m_oActiveWorkspace) && utilsIsStrNullOrEmpty( this.m_oActiveWorkspace))
@@ -58,8 +59,27 @@ var SearchOrbitController = (function() {
         var oController = this;
 
         this.m_oConfigurationService.getConfiguration().then(function (configuration) {
-            oController.m_oConfiguration = configuration;
-            oController.m_oScope.$apply();
+            if(!utilsIsObjectNullOrUndefined(configuration))
+            {
+                oController.m_oConfiguration = configuration;
+                if(!utilsIsObjectNullOrUndefined(oController.m_oConfiguration.orbitsearch) && !utilsIsObjectNullOrUndefined(oController.m_oConfiguration.orbitsearch.satelliteNames))
+                {
+                    //check as selected all satellites
+                    for(var iIndexSatellite = 0; iIndexSatellite < oController.m_oConfiguration.orbitsearch.satelliteNames.length ; iIndexSatellite++ )
+                    {
+                        var sOrbit = oController.m_oConfiguration.orbitsearch.satelliteNames[iIndexSatellite];
+                        oController.m_oSelectedSatellite.push(sOrbit);
+                    }
+
+                }
+                    oController.m_oScope.$apply();
+            }
+            else
+            {
+                utilsVexDialogAlertTop("Error: impossible get configuration.");
+            }
+        },function error(data, status, header, config) {
+            utilsVexDialogAlertTop("Error: impossible get configuration.");
         });
 
         this.m_oMapService.initMapWithDrawSearch('orbitMap');
@@ -83,13 +103,30 @@ var SearchOrbitController = (function() {
 
     SearchOrbitController.prototype.searchOrbit = function() {
         var oController = this;
-
+        //if there isn't a selected area throw an error
         if(utilsIsObjectNullOrUndefined(oController.m_oGeoJSON))
         {
             utilsVexDialogAlertTop("You should select an area");
             return false;
         }
-
+        //if there isn't a resolution throw an error
+        if(utilsIsObjectNullOrUndefined(oController.m_oSelectedResolutionType))
+        {
+            utilsVexDialogAlertTop("You should select a resolution");
+            return false;
+        }
+        //if there isn't a sensor type throw an error
+        if(utilsIsObjectNullOrUndefined(oController.m_oSelectedSensorType))
+        {
+            utilsVexDialogAlertTop("You should select a sensor type");
+            return false;
+        }
+        //if there isn't a satellite throw an error
+        if(utilsIsObjectNullOrUndefined(oController.m_oSelectedSatellite) || oController.m_oSelectedSatellite.length == 0)
+        {
+            utilsVexDialogAlertTop("You should select a satellite");
+            return false;
+        }
         var oOrbitSearch = new Object();
         oOrbitSearch.orbitFilters = new Array();
         this.m_oOrbitSearch.orbitFilters = new Array();
@@ -110,7 +147,7 @@ var SearchOrbitController = (function() {
         for (var iSensorType = 0; iSensorType < iLengthSelectedSensorType; iSensorType++) {
 
             for (var iResolutionType = 0; iResolutionType < iLengthSelectedResolutionType; iResolutionType++) {
-
+                var oOrbitFilter = new Object();
                 oOrbitFilter.sensorType = this.m_oSelectedSensorType[iSensorType];
                 oOrbitFilter.sensorResolution = this.m_oSelectedResolutionType[iResolutionType];
                 oController.m_oOrbitSearch.orbitFilters.push(oOrbitFilter);
@@ -156,15 +193,24 @@ var SearchOrbitController = (function() {
         }
 
         oController.m_oOrbitSearch.polygon = sCoordinatesPolygon;
-
+        this.m_bIsVisibleLoadingIcon = true;
         //call search
         this.m_oSearchOrbitService.searchOrbit(oController.m_oOrbitSearch)
             .success(function (data, status, headers, config) {
-                oController.m_aoOrbits = data;
-
+                if(!utilsIsObjectNullOrUndefined(data))
+                {
+                    oController.m_aoOrbits = data;
+                    oController.m_bIsVisibleLoadingIcon = false;
+                }
+                else
+                {
+                    utilsVexDialogAlertTop("Error: search orbits fails.");
+                }
         })
             .error(function (data, status, header, config) {
+                utilsVexDialogAlertTop("Error: search orbits fails.");
                 oController.m_aoOrbits = null;
+                oController.m_bIsVisibleLoadingIcon = false;
             });
 
     };

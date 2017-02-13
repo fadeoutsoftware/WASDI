@@ -59,7 +59,24 @@
       overflow-x: hidden;  /* Hide the horizontal scroll */
       .table-search-orbit
       {
+        .info-satellite
+        {
+          .button-info
+          {
+            color: $wasdi-blue-logo;
+          }
+          .button-info:hover
+          {
+            color: $wasdi-blue-logo;
+          }
+        }
 
+      }
+      .loading-orbits
+      {
+        width: 50%;
+        margin: 0 auto;
+        text-align: center;
       }
     }
 

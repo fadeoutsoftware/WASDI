@@ -828,6 +828,9 @@ var ImportController = (function() {
             //TAKE SUMMARY
             /*TODO CHANGE stringToObjectSummary() WITH JSON.parse() */
             var oSummary = this.stringToObjectSummary(aoLayers[iIndexLayers].summary.content);
+            var oPreview = oController.getPreviewLayer(aoLayers[iIndexLayers]);
+            if(utilsIsObjectNullOrUndefined(oPreview))
+                oPreview = "assets/icons/ImageNotFound.svg";
             /*
              m_aoProductsList[i]={
                                     layerProperty:
@@ -848,7 +851,7 @@ var ImportController = (function() {
                     id:aoLayers[iIndexLayers].id,
                     rectangle:oRectangle,
                     title:aoLayers[iIndexLayers].title.content,
-                    preview:oController.getPreviewLayer(aoLayers[iIndexLayers]),
+                    preview:oPreview,
                     link:sLink
                 });
         }

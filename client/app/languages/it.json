@@ -34,7 +34,7 @@
   "WORKSPACES_TOOLTIP_INFO":"Info",
   "WORKSPACES_THEAD_WORKSPACES":"Workspaces",
   "WORKSPACES_THEAD_OWNER":"Owner",
-
+  "WORKSPACES_LABEL_NO_RESULTS":"No results",
 
   "EDITOR_TOOLTIP_SWITCH_3D_2D":"Switch 3D globe and 2D map",
   "EDITOR_TOOLTIP_HOME_2D":"Center of map",
@@ -49,6 +49,9 @@
   "IMPORT_OF_LABEL":"of",
   "IMPORT_PANEL_HEAD_TITLE_FILTERS":"Filters",
   "IMPORT_CLEAR_BUTTON":"Clear",
+  "IMPORT_TOOLTIP_ADD_PRODUCT":"Add product to workspace",
+  "IMPORT_TOOLTIP_ZOOM_ON_PRODUCT":"Zoom on product",
+  "IMPORT_TOOLTIP_INFO":"Info",
 
   "SEARCH_TITLE_CHECK_BOX_SENSOR_TYPE":"Sensor Type :",
   "SEARCH_TITLE_CHECK_BOX_SENSOR_RESOLUTION":"Sensor Resolution :",

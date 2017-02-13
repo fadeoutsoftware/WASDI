@@ -127,16 +127,16 @@
                             <!--&lt;!&ndash;</h4>&ndash;&gt;-->
                         <!--</div>-->
                         <span class="advanced-search-clear" ng-click="m_oController.clearFilter()" title="Clear Search Filter" >{{"IMPORT_CLEAR_BUTTON"|translate}}</span>
-                        <div style="overflow:visible;padding:15px 5px;"><!--id="section_2" class="panel-collapse collapse" role="tabpanel" aria-labelledby="section_2"-->
+                        <div style="overflow:visible;padding:15px 5px;" class="my-input-text"><!--id="section_2" class="panel-collapse collapse" role="tabpanel" aria-labelledby="section_2"-->
 
                             <div class="row" ng-if="m_oController.m_bShowsensingfilter">
 
-                                <div class="col-md-4 col-sd-12 col-xs-12 advanced-search-subtitle">&raquo; Sensing period
+                                <div class="col-md-2 col-sd-12 col-xs-12 advanced-search-subtitle"> Sensing period
                                 </div>
                                 <div class="col-md-1 col-sd-2 col-xs-4 advanced-calendar-label">
                                     From:
                                 </div>
-                                <div class="col-md-3 col-sd-4 col-xs-8">
+                                <div class="col-md-4 col-sd-4 col-xs-8">
                                     <p class="input-group">
                                         <input type="text" class="form-control advanced-calendar-date-input"
                                                uib-datepicker-popup="yyyy/MM/dd"
@@ -148,15 +148,14 @@
                                                close-text="Close"/>
                                     <span class="input-group-btn">
 							<button type="button" class="btn btn-default advanced-calendar-button"
-                                    ng-click="m_oController.openSensingPeriodFrom($event)"><i
-                                    class="glyphicon glyphicon-calendar"></i></button>
+                                    ng-click="m_oController.openSensingPeriodFrom($event)"><i class="fa fa-calendar" aria-hidden="true"></i></button>
 						  </span>
                                     </p>
                                 </div>
                                 <div class="col-md-1 col-sd-2 col-xs-4 advanced-calendar-label">
                                     to:
                                 </div>
-                                <div class="col-md-3 col-sd-4 col-xs-8">
+                                <div class="col-md-4 col-sd-4 col-xs-8">
                                     <p class="input-group">
                                         <input type="text" class="form-control advanced-calendar-date-input"
                                                uib-datepicker-popup="yyyy/MM/dd"
@@ -168,19 +167,18 @@
                                                readonly="true" data-container="body"/>
                                     <span class="input-group-btn">
 							<button type="button" class="btn btn-default advanced-calendar-button"
-                                    ng-click="m_oController.openSensingPeriodTo($event)"><i
-                                    class="glyphicon glyphicon-calendar"></i></button>
+                                    ng-click="m_oController.openSensingPeriodTo($event)"><i class="fa fa-calendar" aria-hidden="true"></i></button>
 						  </span>
                                     </p>
                                 </div>
                             </div>
                             <div class="row" ng-if="m_oController.m_bShowsensingfilter">
-                                <div class="col-md-4 col-sd-12 col-xs-12 avanced-search-subtitle">&raquo; Ingestion period
+                                <div class="col-md-2 col-sd-12 col-xs-12 avanced-search-subtitle"> Ingestion period
                                 </div>
                                 <div class="col-md-1 col-sd-2 col-xs-4 advanced-calendar-label">
                                     From:
                                 </div>
-                                <div class="col-md-3 col-sd-4 col-xs-8">
+                                <div class="col-md-4 col-sd-4 col-xs-8">
                                     <p class="input-group">
                                         <input type="text" class="form-control advanced-calendar-date-input"
                                                uib-datepicker-popup="yyyy/MM/dd"
@@ -192,15 +190,14 @@
                                                readonly="true" data-container="body"/>
                                     <span class="input-group-btn">
 							<button type="button" class="btn btn-default advanced-calendar-button"
-                                    ng-click="m_oController.openIngestionFrom($event)"><i
-                                    class="glyphicon glyphicon-calendar"></i></button>
+                                    ng-click="m_oController.openIngestionFrom($event)"><i class="fa fa-calendar" aria-hidden="true"></i></button>
 						  </span>
                                     </p>
                                 </div>
                                 <div class="col-md-1 col-sd-2 col-xs-4 advanced-calendar-label">
                                     to:
                                 </div>
-                                <div class="col-md-3 col-sd-4 col-xs-8">
+                                <div class="col-md-4 col-sd-4 col-xs-8">
                                     <p class="input-group">
                                         <input type="text" class="form-control advanced-calendar-date-input"
                                                uib-datepicker-popup="yyyy/MM/dd"
@@ -212,8 +209,7 @@
                                                readonly="true" data-container="body"/>
                                     <span class="input-group-btn">
 							<button type="button" class="btn btn-default advanced-calendar-button"
-                                    ng-click="m_oController.openIngestionTo($event)"><i
-                                    class="glyphicon glyphicon-calendar"></i></button>
+                                    ng-click="m_oController.openIngestionTo($event)"><i class="fa fa-calendar" aria-hidden="true"></i></button>
 						  </span>
                                     </p>
                                 </div>
@@ -302,7 +298,7 @@
 
 
 
-                <!--**************** Layers Table ----------------------->
+                <!--**************** Products-Layers Table ----------------------->
                 <!-- the table become visible after the user Search a layer -->
                 <div class="container-table-row" ng-show="m_oController.m_bIsVisibleListOfLayers" id="div-container-table" >
 
@@ -349,20 +345,22 @@
                             <!-- BUTTONS -->
                             <td>
                                 <div class="btn-group-vertical" role="group" >
-                                    <button type="button" class="btn btn btn-primary" ng-click="m_oController.downloadProduct(layer)" ng-disabled="m_oController.isPossibleDoDownload(layer)">
+                                    <button type="button" class="btn btn btn-primary" ng-click="m_oController.downloadProduct(layer)"
+                                            ng-disabled="m_oController.isPossibleDoDownload(layer)" data-toggle="tooltip" data-placement="top" title="{{'IMPORT_TOOLTIP_ADD_PRODUCT'|translate}}">
                                         <i class="fa fa-plus " aria-hidden="true"></i>
                                     </button>
-                                    <button type="button" class="btn btn btn-primary" ng-click="m_oController.zoomOnBounds(layer.rectangle)">
+                                    <button type="button" class="btn btn btn-primary" ng-click="m_oController.zoomOnBounds(layer.rectangle)"
+                                            data-toggle="tooltip" data-placement="top" title="{{'IMPORT_TOOLTIP_ZOOM_ON_PRODUCT'|translate}}">
                                         <i class="fa fa-search-plus" aria-hidden="true"></i>
                                     </button>
-                                    <button type="button" class="btn btn btn-primary" ng-click="m_oController.infoLayer()">
+                                    <button type="button" class="btn btn btn-primary" ng-click="m_oController.infoLayer()"
+                                            data-toggle="tooltip" data-placement="top" title="{{'IMPORT_TOOLTIP_INFO'|translate}}">
                                         <i class="fa fa-info-circle" aria-hidden="true"></i>
                                     </button>
                                 </div>
                             </td>
                             <!-- IMAGE CELL -->
                             <td class="image-cell">
-
                                 <span class="label label-success">{{layer.summary.Mode}}</span>&nbsp;<!--Mode-->
                                 <span class="label label-success"> {{layer.summary.Instrument}}</span><!--Instrument-->
                                 <div class="preview-layer-image" ><img src={{layer.preview}} alt="Image" style="height: 82px;width: 82px;"></div>
@@ -398,6 +396,16 @@
     </div>
 
 </div>
+
+<script>
+    $(function() {
+        $('#table_layers_list').on('post-body.bs.table', function () {
+            $('[data-tooltip="true"]').tooltip({
+                container: 'body'
+            });
+        });
+    });
+</script>
 
 <!--<script>-->
 <!--function openNav() {-->

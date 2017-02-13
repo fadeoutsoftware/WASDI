@@ -110,7 +110,25 @@ h4
   }
 
 }
-
+.my-loading
+{
+  //put the icon in the middle
+  width: 50%;
+  margin: 0 auto;
+  text-align: center;
+}
+.my-table
+{
+  thead
+  {
+    th{
+      background-color: #44536C;
+      color: white;
+    }
+  }
+  tr,th{}
+  tbody{}
+}
 // BUTTON
 .my-button {
   background-color: $wasdi-button-default-color;
@@ -129,3 +147,4 @@ h4
   background-color: $wasdi-button-over-color;
   color: white;
 }
+

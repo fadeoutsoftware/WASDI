@@ -4,6 +4,7 @@
   .my-title
   {
     text-align: center;
+    font-family: $wasdi-font-web;
   }
 
   // UTILS BAR
@@ -60,6 +61,13 @@
   // LIST OF FILES IN WORKSPACES
   .list-files
   {
+    .loading-files
+    {
+      width: 50%;
+      margin: 0 auto;
+      text-align: center;
+    }
+
     .panel-default
     {
       border-color: $wasdi-list-of-files-border-color;
@@ -79,10 +87,14 @@
           }
         }
       }
+
       .list-group-item
       {
         border-color: $wasdi-list-of-files-border-color;
       }
+
+
+
     }
 
   }

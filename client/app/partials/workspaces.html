@@ -32,7 +32,7 @@
                 <th></th>
             </thead>
             <tr ng-repeat="oWSListItem in m_oController.getWorkspaceInfoList() | filter:searchWorkSpace"  ng-class="m_oController.isSelectedRowInWorkspaceTable(oWSListItem)">
-                <td>{{$index}}</td>
+                <td>{{$index + 1}}</td>
                 <td> {{oWSListItem.workspaceName}}</td>
                 <td>{{oWSListItem.ownerUserId}}</td>
                 <td class="over-color" ng-click="m_oController.openWorkspace(oWSListItem.workspaceId)"  data-toggle="tooltip" data-placement="top" title="{{'WORKSPACES_TOOLTIP_EDITOR'|translate}}">
@@ -52,11 +52,13 @@
 
         <div class="panel-group list-files" id="accordion" role="tablist" aria-multiselectable="true" ng-show="m_oController.m_bIsOpenInfo" >
 
-            <div ng-show="m_oController.isEmptyProductList() == true">
+            <div class="loading-files" ng-show="m_oController.isEmptyProductList() == true && m_oController.m_bIsVisibleFiles == true">
                 <i class="fa fa-spinner fa-pulse fa-3x fa-fw"></i>
                 <span class="sr-only">Loading...</span>
             </div>
-
+            <div ng-show="m_oController.isEmptyProductList() == true && m_oController.m_bIsVisibleFiles == false">
+                <h4>{{"WORKSPACES_LABEL_NO_RESULTS"|translate}}</h4>
+            </div>
 
             <div class="panel panel-default" ng-repeat="product in m_oController.getProductList()" >
 
