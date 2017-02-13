@@ -194,6 +194,7 @@ var SearchOrbitController = (function() {
 
         oController.m_oOrbitSearch.polygon = sCoordinatesPolygon;
         this.m_bIsVisibleLoadingIcon = true;
+        this.m_aoOrbits = null;
         //call search
         this.m_oSearchOrbitService.searchOrbit(oController.m_oOrbitSearch)
             .success(function (data, status, headers, config) {
@@ -388,6 +389,26 @@ var SearchOrbitController = (function() {
         var oRectangle = oOrbit.FootPrintRectangle;
         oRectangle.setStyle({weight:1,fillOpacity:0.2,color:"#ff7800"});
         return true
+    }
+
+
+    /**
+     *
+     */
+    SearchOrbitController.prototype.openOrbitInfo =function(oOrbit)
+    {
+        if(utilsIsObjectNullOrUndefined(oOrbit))
+            return false;
+        var oMessage = "<div>"+oOrbit.Angle+"</div> " +
+            "<div>"+oOrbit.SatelliteName+"</div>" +
+            "<div>"+oOrbit.SensorMode+"</div>" +
+            "<div>"+oOrbit.SensorName+"</div> " +
+            "<div>"+oOrbit.SensorType+"</div> " +
+            "<div>"+oOrbit.SwathName+"</div>";
+        var oOptions ={unsafeMessage: oMessage };
+
+        vex.dialog.alert(oOptions);
+        return true;
     }
 
     SearchOrbitController.$inject = [

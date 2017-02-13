@@ -60,6 +60,15 @@ service('MapService', ['$http','$rootScope', 'ConstantsService', function ($http
             // this option disables loading tiles outside of the world bounds.
             noWrap: true
         });
+
+        this.m_oGoogleSatelite = L.tileLayer('http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}',{
+            maxZoom: 18,
+            subdomains:['mt0','mt1','mt2','mt3'],
+            // this map option disables world wrapping. by default, it is false.
+            continuousWorld: false,
+            // this option disables loading tiles outside of the world bounds.
+            noWrap: true
+        });
     }
 
     //init tile layer
@@ -68,7 +77,7 @@ service('MapService', ['$http','$rootScope', 'ConstantsService', function ($http
     this.m_oGoogleHybrid = new L.gridLayer.googleMutant('hybrid');
     this.m_oGoogleMap = new L.gridLayer.googleMutant('roadmap');
     this.m_oGoogleTerrain = new L.gridLayer.googleMutant('terrain');
-    this.m_oGoogleSatelite = new L.gridLayer.googleMutant('satellite');
+    //this.m_oGoogleSatelite = new L.gridLayer.googleMutant('satellite');// it doesn't work look at m_oGoogleSatelite in init layer
 
     /**
      * layers control

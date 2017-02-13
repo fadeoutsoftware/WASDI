@@ -61,14 +61,20 @@
       {
         .info-satellite
         {
+          cursor: pointer;
           .button-info
           {
             color: $wasdi-blue-logo;
           }
           .button-info:hover
           {
-            color: $wasdi-blue-logo;
+
+            color: $wasdi-green-logo;
           }
+        }
+        .info-satellite:hover
+        {
+          color: $wasdi-green-logo;
         }
 
       }

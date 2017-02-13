@@ -105,7 +105,7 @@
                         <td><span >{{orbit.SatelliteName}}</span></td>
                         <td><span >{{m_oController.getDateFromTimestamp(orbit.AcquisitionStartTime)}}</span></td>
                         <td><span >{{m_oController.getDateFromTimestamp(orbit.AcquisitionEndTime)}}</span></td>
-                        <td class="info-satellite">
+                        <td class="info-satellite" ng-click="m_oController.openOrbitInfo(orbit)">
                             <div class="button-info">
                                 <i class="fa fa-info-circle fa-lg" aria-hidden="true"></i>
                             </div>
