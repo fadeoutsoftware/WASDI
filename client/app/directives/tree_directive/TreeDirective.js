@@ -77,7 +77,6 @@ angular.module('wasdi.TreeDirective', [])
                         $('#jstree').jstree(true).settings.core.data = newValue.core.data;
                         $('#jstree').jstree(true).refresh();
 
-
                     }
                     else
                     {
@@ -99,13 +98,16 @@ angular.module('wasdi.TreeDirective', [])
                                 if($scope.m_oController.m_oProcessesLaunchedService.thereAreSomePublishBandProcess() == false && data.node.children.length == 0 && !utilsIsObjectNullOrUndefined(data.node.original.band))
                                 {
 
-                                    if(data.node.icon == 'assets/icons/check.png')
+                                    //if(data.node.icon == 'assets/icons/check.png')
+                                    if(data.node.original.bPubblish == true)
                                     {
+                                        data.node.original.bPubblish = false;
                                         $('#jstree').jstree(true).set_icon(data.node.id, 'assets/icons/uncheck.png');
                                         $scope.m_oController.removeBandImage(data.node.original.band);
                                     }
                                     else
                                     {
+                                        data.node.original.bPubblish = true;
                                         $('#jstree').jstree(true).set_icon(data.node.id, 'assets/icons/check.png');
                                         $scope.m_oController.openBandImage(data.node.original.band,data.node.id);
                                     }

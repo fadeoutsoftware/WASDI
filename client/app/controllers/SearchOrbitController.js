@@ -6,7 +6,9 @@
  */
 
 var SearchOrbitController = (function() {
-    function SearchOrbitController($scope, $location, oConstantsService, oAuthService,oState, oConfigurationService, oMapService, oSearchOrbitService,oProcessesLaunchedService,oWorkspaceService,oRabbitStompService) {
+    function SearchOrbitController($scope, $location, oConstantsService, oAuthService,oState, oConfigurationService,
+                                   oMapService, oSearchOrbitService,oProcessesLaunchedService,oWorkspaceService,
+                                   oRabbitStompService,oModalService) {
         this.m_oScope = $scope;
         this.m_oLocation = $location;
         this.m_oConstantsService = oConstantsService;
@@ -18,17 +20,19 @@ var SearchOrbitController = (function() {
         this.m_oSearchOrbitService = oSearchOrbitService;
         this.m_oConfiguration = null;
         this.m_oGeoJSON = null;
-        this.m_oSelectedSensorType = null;
-        this.m_oSelectedResolutionType = null;
+        this.m_oSelectedSensorType = [];
+        this.m_oSelectedResolutionType = [];
         this.m_oSelectedSatellite = [];
         this.m_aoOrbits = null;
         this.m_oProcessesLaunchedService=oProcessesLaunchedService;
         this.m_oWorkspaceService = oWorkspaceService;
         this.m_oRabbitStompService = oRabbitStompService;
+        this.m_oModalService = oModalService;
 
         this.m_oActiveWorkspace = this.m_oConstantsService.getActiveWorkspace();
         this.m_oUser = this.m_oConstantsService.getUser();
         this.m_bIsVisibleLoadingIcon = false;
+
         //this.m_oProcessesLaunchedService.updateProcessesBar();
         //if there isn't workspace
         if(utilsIsObjectNullOrUndefined( this.m_oActiveWorkspace) && utilsIsStrNullOrEmpty( this.m_oActiveWorkspace))
@@ -71,6 +75,27 @@ var SearchOrbitController = (function() {
                         oController.m_oSelectedSatellite.push(sOrbit);
                     }
 
+
+                }
+                if(!utilsIsObjectNullOrUndefined(oController.m_oConfiguration.orbitsearch) && !utilsIsObjectNullOrUndefined(oController.m_oConfiguration.orbitsearch.sensortypes))
+                {
+                    //check as selected all sensor type
+                    for(var iIndexSatellite = 0; iIndexSatellite < oController.m_oConfiguration.orbitsearch.sensortypes.length ; iIndexSatellite++ )
+                    {
+                        var sSensor = oController.m_oConfiguration.orbitsearch.sensortypes[iIndexSatellite];
+                        oController.m_oSelectedSensorType.push(sSensor);
+                    }
+
+                }
+                if(!utilsIsObjectNullOrUndefined(oController.m_oConfiguration.orbitsearch) && !utilsIsObjectNullOrUndefined(oController.m_oConfiguration.orbitsearch.sensorresolutions))
+                {
+                    //check as selected all sensor resolution
+                    for(var iIndexSatellite = 0; iIndexSatellite < oController.m_oConfiguration.orbitsearch.sensorresolutions.length ; iIndexSatellite++ )
+                    {
+                        var sSensor = oController.m_oConfiguration.orbitsearch.sensorresolutions[iIndexSatellite];
+                        oController.m_oSelectedResolutionType.push(sSensor);
+                    }
+
                 }
                     oController.m_oScope.$apply();
             }
@@ -110,13 +135,13 @@ var SearchOrbitController = (function() {
             return false;
         }
         //if there isn't a resolution throw an error
-        if(utilsIsObjectNullOrUndefined(oController.m_oSelectedResolutionType))
+        if(utilsIsObjectNullOrUndefined(oController.m_oSelectedResolutionType) || oController.m_oSelectedResolutionType.length == 0)
         {
             utilsVexDialogAlertTop("You should select a resolution");
             return false;
         }
         //if there isn't a sensor type throw an error
-        if(utilsIsObjectNullOrUndefined(oController.m_oSelectedSensorType))
+        if(utilsIsObjectNullOrUndefined(oController.m_oSelectedSensorType) || oController.m_oSelectedSensorType.length == 0)
         {
             utilsVexDialogAlertTop("You should select a sensor type");
             return false;
@@ -397,17 +422,32 @@ var SearchOrbitController = (function() {
      */
     SearchOrbitController.prototype.openOrbitInfo =function(oOrbit)
     {
+
         if(utilsIsObjectNullOrUndefined(oOrbit))
             return false;
-        var oMessage = "<div>"+oOrbit.Angle+"</div> " +
-            "<div>"+oOrbit.SatelliteName+"</div>" +
-            "<div>"+oOrbit.SensorMode+"</div>" +
-            "<div>"+oOrbit.SensorName+"</div> " +
-            "<div>"+oOrbit.SensorType+"</div> " +
-            "<div>"+oOrbit.SwathName+"</div>";
-        var oOptions ={unsafeMessage: oMessage };
 
-        vex.dialog.alert(oOptions);
+        var oController = this
+        this.m_oModalService.showModal({
+            templateUrl: "dialogs/orbit_info/OrbitInfoDialog.html",
+            controller: "OrbitInfoController",
+            inputs: {
+                extras: oOrbit
+            }
+        }).then(function(modal) {
+            modal.element.modal();
+            modal.close.then(function(result) {
+                oController.m_oScope.Result = result ;
+            });
+        });
+        //var oMessage = "<div>"+oOrbit.Angle+"</div> " +
+        //    "<div>"+oOrbit.SatelliteName+"</div>" +
+        //    "<div>"+oOrbit.SensorMode+"</div>" +
+        //    "<div>"+oOrbit.SensorName+"</div> " +
+        //    "<div>"+oOrbit.SensorType+"</div> " +
+        //    "<div>"+oOrbit.SwathName+"</div>";
+        //var oOptions ={unsafeMessage: oMessage };
+        //
+        //vex.dialog.alert(oOptions);
         return true;
     }
 
@@ -422,7 +462,8 @@ var SearchOrbitController = (function() {
         'SearchOrbitService',
         'ProcessesLaunchedService',
         'WorkspaceService',
-        'RabbitStompService'
+        'RabbitStompService',
+        'ModalService'
     ];
 
     return SearchOrbitController;

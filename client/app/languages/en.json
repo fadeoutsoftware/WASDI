@@ -42,6 +42,7 @@
     "EDITOR_TOOLTIP_SYNCHRONIZE_MAP_2D":"Synchronize map 2D",
     "EDITOR_TOOLTIP_HOME":"Home",
     "EDITOR_TITLE_PANEL_PRODUCTS":"Products",
+    "EDITOR_TOOLTIP_OPEN_BAND":"Expand published band",
 
     "IMPORT_ADVANCE_SEARCH_LABEL":"Advance search",
     "IMPORT_PRODUCTS_PER_PAGE_LABEL":"Products per page:",

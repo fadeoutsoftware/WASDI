@@ -36,6 +36,22 @@
       {
         margin-top: 10px;
         margin-bottom: 10px;
+        .my-input-text {
+          .form-control {
+            border-radius: 0;
+            border: 2px solid $wasdi-input-text-border-color;
+          }
+          .input-group-addon
+          {
+            background-color: $wasdi-blue-logo;
+            border-color: $wasdi-blue-logo;
+            color:white;
+          }
+          .input-group-addon:hover
+          {
+            background-color: $wasdi-green-logo;
+          }
+        }
       }
       .my-button
       {

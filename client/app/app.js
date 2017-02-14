@@ -27,7 +27,8 @@ var wasdiApp = angular.module('wasdi', [
 
     'ui.bootstrap',
     'checklist-model',
-    'moment-picker'
+    'moment-picker',
+    'angularModalService'
 
 ]);
 
@@ -122,3 +123,6 @@ wasdiApp.controller("EditorController", EditorController);
 wasdiApp.controller("RootController",RootController);
 wasdiApp.controller("ImportController",ImportController);
 wasdiApp.controller("SearchOrbitController",SearchOrbitController);
+
+//dialogs
+wasdiApp.controller("OrbitInfoController",OrbitInfoController);

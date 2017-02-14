@@ -94,7 +94,6 @@ var RootController = (function() {
                     //if you find a log push it in list
                     if(!(iIndexNewProcess < iNumberOfProcessesRunning))
                     {
-
                         $scope.m_oController.m_aoLogProcesses.push(aoOldProcessesRunning[iIndexOldProcess]);
                         $scope.m_oController.m_aoProcessesRunning.splice(iIndexOldProcess,1);
                     }
@@ -121,8 +120,21 @@ var RootController = (function() {
                     //if the new processes there isn't in m_oController.m_aoProcessesRunning list add it!
                     if(!(iIndexOldProcess < iNumberOfOldProcessesRunning))
                     {
+
+                        // add start time (useful if the page was reloaded)
+                        var sStartTime = new Date(aoProcessesRunning[iIndexNewProcess].operationDate);//time by server
+                        var test = new Date();//pick time
+                        var result =  Math.abs(test-sStartTime);
+                        var seconds = 0
+                        seconds = Math.ceil(result / 1000);//approximate result
+                        //var seconds = x % 60
+
+                        if(utilsIsObjectNullOrUndefined(seconds) || seconds < 0)
+                            seconds = 0;
+                        var oDate = new Date(1970, 0, 1);
+                        oDate.setSeconds(0 + seconds);
                         //add running time
-                        aoProcessesRunning[iIndexNewProcess].timeRunning = 0;
+                        aoProcessesRunning[iIndexNewProcess].timeRunning = oDate;
                         $scope.m_oController.m_aoProcessesRunning.push(aoProcessesRunning[iIndexNewProcess])
                     }
 
@@ -153,7 +165,8 @@ var RootController = (function() {
 
                 for(var iIndexProcess = 0; iIndexProcess < iNumberOfProcesses;iIndexProcess++ )
                 {
-                    $scope.m_oController.m_aoProcessesRunning[iIndexProcess].timeRunning = $scope.m_oController.m_aoProcessesRunning[iIndexProcess].timeRunning + 1 ;
+
+                    $scope.m_oController.m_aoProcessesRunning[iIndexProcess].timeRunning.setSeconds( $scope.m_oController.m_aoProcessesRunning[iIndexProcess].timeRunning.getSeconds() + 1) ;
                 }
             }
             //$scope.m_oController.time++;

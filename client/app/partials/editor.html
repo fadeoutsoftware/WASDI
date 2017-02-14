@@ -21,7 +21,12 @@
 
         <!--**************** TREE PANEL *****************-->
         <div class="panel panel-default ">
-            <div class="panel-heading">{{"EDITOR_TITLE_PANEL_PRODUCTS"|translate}}<button  ng-click="m_oController.test()">test</button> </div>
+            <div class="panel-heading">
+                {{"EDITOR_TITLE_PANEL_PRODUCTS"|translate}}
+                <div ng-click="m_oController.openPublishedBandsInTree()" class="my-button" data-toggle="tooltip" data-placement="top" title="{{'EDITOR_TOOLTIP_OPEN_BAND'|translate}}">
+                    <i class="fa fa-folder-open-o" aria-hidden="true"></i>
+                </div>
+            </div>
             <!-- MY TREE DIRECTIVE -->
             <div class="panel-body">
                 <tree ngModelTree="prova" ></tree>

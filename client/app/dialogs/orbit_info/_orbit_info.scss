@@ -1,0 +1,50 @@
+.orbit-info-modal
+{
+  .modal-dialog
+  {
+    width:50%;
+    .modal-content
+    {
+      .modal-header
+      {
+        color:$wasdi-white;
+        background-color: $wasdi-blue-logo;
+        .close
+        {
+          color: $wasdi-white;
+          opacity: 1;
+        }
+      }
+
+      .modal-body
+      {
+        .orbit-info-table
+        {
+          display: inline-block;
+          overflow-y: scroll;
+          max-height:400px;
+          table {
+            text-align: center;
+            margin: auto;
+
+            th
+            {
+              text-align: center;
+              margin: auto;
+            }
+
+          }
+        }
+      }
+
+      .modal-footer
+      {
+        border-top:1px solid $wasdi-blue-logo;
+        .my-button
+        {
+          padding: 10px 21px;
+        }
+      }
+    }
+  }
+}

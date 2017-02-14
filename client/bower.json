@@ -23,6 +23,7 @@
 	"leaflet-draw": "0.4.7",
     "vex":"3.0.0",
     "angular-paging":"~2.2.2",
-    "moment-picker":"0.6.8"
+    "moment-picker":"0.6.8",
+    "angular-modal-service":"~0.10.1"
   }
 }

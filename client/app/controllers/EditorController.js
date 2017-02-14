@@ -98,6 +98,7 @@ var EditorController = (function () {
     //{
     //
     //    var treeInst = $('#jstree').jstree(true);
+    //    var prova =   $('#jstree').jstree(true).settings.core.data;
     //    var m = treeInst._model.data;
     //    for(var i in m) {
     //        if(m[i].text =='S1A_WV_OCN__2SSV_20170209T012729_20170209T013605_015200_018E31_C98B' ) {
@@ -107,6 +108,18 @@ var EditorController = (function () {
     //    }
     //    //node = treeInst.get_node("[text='S1A_WV_OCN__2SSV_20170209T012729_20170209T013605_015200_018E31_C98B']");
     //}
+    EditorController.prototype.openPublishedBandsInTree = function()
+    {
+
+        var treeInst = $('#jstree').jstree(true);
+        var m = treeInst._model.data;
+        for(var i in m) {
+            if(!utilsIsObjectNullOrUndefined(m[i].original) && !utilsIsObjectNullOrUndefined(m[i].original.band) && m[i].original.bPubblish == true)
+            {
+                $("#jstree").jstree("_open_to", m[i].id);
+            }
+        }
+    };
     /**
      * Handler of the "download" message
      * @param oMessage Received Message
@@ -503,7 +516,7 @@ var EditorController = (function () {
                 {
                     //only the band has property $node.original.band
                     var oReturnValue = null;
-                    if(utilsIsObjectNullOrUndefined($node.original.band) == false && $node.icon == "assets/icons/check.png")
+                    if(utilsIsObjectNullOrUndefined($node.original.band) == false && $node.original.bPubblish == true)
                     {
                         //BAND
                         var oBand=$node.original.band;
@@ -595,17 +608,19 @@ var EditorController = (function () {
             //oNode.icon = "assets/icons/product_20x20.svg";
             oTree.core.data.push(oNode);
 
-
             var oaBandsItems = this.getBandsForProduct(productList[iIndexProduct]);
 
             for (var iIndexBandsItems = 0; iIndexBandsItems < oaBandsItems.length; iIndexBandsItems++)
             {
-                var oNode=new Object();
+                var oNode = new Object();
                 oNode.text = oaBandsItems[iIndexBandsItems].name;//LABEL NODE
                 oNode.band = oaBandsItems[iIndexBandsItems];//BAND
                 oNode.icon = "assets/icons/uncheck.png";
-                oTree.core.data[iIndexProduct].children[1].children.push(oNode);
 
+                //generate id for bands => ProductName+BandName
+                //oNode.id   = oTree.core.data[iIndexProduct].text + "_" + oaBandsItems[iIndexBandsItems].name;
+                oNode.bPubblish = false;
+                oTree.core.data[iIndexProduct].children[1].children.push(oNode);
             }
 
         }

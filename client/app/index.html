@@ -10,8 +10,11 @@
   <meta name="description" content="">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
+
+
   <!--Bootstrap css-->
   <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.min.css">
+
 
   <!-- CSS -->
   <link rel="stylesheet" href="css/style.css">
@@ -100,6 +103,8 @@
   <script src="controllers/RootController.js"></script>
   <script src="controllers/ImportController.js"></script>
   <script src="controllers/SearchOrbitController.js"></script>
+    <!--Dialogs controllers-->
+    <script src="dialogs/orbit_info/OrbitInfoController.js"></script>
 
   <script src="app.js"></script>
 
@@ -121,8 +126,8 @@
   <!-- cesium -->
   <script src="lib/Cesium/Cesium.js"></script>
   <!--  bootstrap js-->
-  <script src="bower_components/bootstrap-sass/assets/javascripts/bootstrap.min.js"></script>
-
+  <!--<script src="bower_components/bootstrap-sass/assets/javascripts/bootstrap.min.js"></script>-->
+  <script src="bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
   <!--VEX DIALOG-->
 
   <script src="bower_components/vex/dist/js/vex.combined.min.js"></script>
@@ -132,11 +137,13 @@
   <link rel="stylesheet" href="bower_components/vex/dist/css/vex-theme-top.css" />
   <script>vex.defaultOptions.className = 'vex-theme-default'</script>
 
+
   <!--LEAFLET MOUSE POSITION-->
   <script src="lib/leaflet-mouseposition/Leaflet.MousePosition-master/src/L.Control.MousePosition.js"></script>
   <link rel="stylesheet" href="lib/leaflet-mouseposition/Leaflet.MousePosition-master/src/L.Control.MousePosition.css" />
 
-
+  <!--Modal-->
+  <script src="bower_components/angular-modal-service/dst/angular-modal-service.min.js"></script>
 
 </body>
 </html>

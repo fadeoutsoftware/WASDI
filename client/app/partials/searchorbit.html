@@ -9,34 +9,38 @@
                     <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 time-picker-container ">
                         <i class="fa fa-calendar" aria-hidden="true"></i> Acquisition Start Time
 
-                        <div class="input-group"
+                        <div class="input-group my-input-text"
                              moment-picker="m_oController.m_oOrbitSearch.acquisitionStartTime"
                              format="YYYY-MM-DD HH:mm:ss"
                              today="true">
-                        <span class="input-group-addon">
-                            <i class="fa fa-calendar-o"></i>
-                        </span>
+
                             <input class="form-control"
                                    placeholder="Select acquisition start time"
                                    ng-model="m_oController.m_oOrbitSearch.acquisitionStartTime"
                                    ng-model-options="{ updateOn: 'blur' }">
+
+                            <span class="input-group-addon">
+                                <i class="fa fa-calendar"></i>
+                            </span>
                         </div>
                     </div>
 
                     <!---------------------- TIME PICKER END -------------------->
-                    <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 time-picker-container">
+                    <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 time-picker-container my-input-text">
                         <i class="fa fa-calendar" aria-hidden="true"></i> Acquisition End Time
-                        <div class="input-group"
+                        <div class="input-group my-input-text"
                              moment-picker="m_oController.m_oOrbitSearch.acquisitionEndTime"
                              format="YYYY-MM-DD HH:mm:ss"
                              today="true">
-                        <span class="input-group-addon">
-                            <i class="fa fa-calendar-o"></i>
-                        </span>
+
                             <input class="form-control"
                                    placeholder="Select acquisition end time"
                                    ng-model="m_oController.m_oOrbitSearch.acquisitionEndTime"
                                    ng-model-options="{ updateOn: 'blur' }">
+
+                            <span class="input-group-addon">
+                                <i class="fa fa-calendar"></i>
+                            </span>
                         </div>
                     </div>
 
