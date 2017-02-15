@@ -95,7 +95,8 @@ angular.module('wasdi.TreeDirective', [])
                                 return;
                             if(!utilsIsObjectNullOrUndefined(data.node) && data.event.type !="contextmenu")
                             {
-                                if($scope.m_oController.m_oProcessesLaunchedService.thereAreSomePublishBandProcess() == false && data.node.children.length == 0 && !utilsIsObjectNullOrUndefined(data.node.original.band))
+
+                                if($scope.m_oController.m_oProcessesLaunchedService.thereIsPublishBandProcessOfTheProduct(data.node.id) == false && data.node.children.length == 0 && !utilsIsObjectNullOrUndefined(data.node.original.band))
                                 {
 
                                     //if(data.node.icon == 'assets/icons/check.png')

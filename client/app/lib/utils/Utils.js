@@ -195,7 +195,7 @@ function utilsFindObjectInArray(oArray,oObject)
  */
 function utilsIsString(sString)
 {
-    if( !sString && typeof sString == 'string')
+    if( sString && typeof sString == 'string')
     {
         return true;
     }

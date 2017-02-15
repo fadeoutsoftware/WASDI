@@ -236,6 +236,36 @@ service('ProcessesLaunchedService', ['ConstantsService','$rootScope','$http', fu
         return false;
     }
 
+    this.thereIsPublishBandProcessOfTheProduct = function(sProductId)
+    {
+        if(utilsIsString(sProductId) == false)
+            return false;
+        if(utilsIsStrNullOrEmpty(sProductId) == true)
+            return false;
+
+        if(! (utilsIsObjectNullOrUndefined(this.m_aoProcessesRunning) || this.m_aoProcessesRunning.length == 0))
+        {
+            for(var iIndex = 0; iIndex < this.m_aoProcessesRunning.length; iIndex++)
+            {
+                if(this.m_aoProcessesRunning[iIndex].operationType != this.TYPE_OF_PROCESS[1] )//publish band
+                {
+                    var asProductNameSplit = this.m_aoProcessesRunning[iIndex].productName.split(".");// remove .zip .rar ....
+                    if(utilsIsObjectNullOrUndefined (asProductNameSplit) == false && asProductNameSplit.length != 0 )
+                    {
+                        var sProductName = asProductNameSplit[0];
+                        var oId = sProductName;
+                        if(utilsIsSubstring(sProductId,oId) == true)
+                            return true;
+                    }
+                }
+                //if(this.m_aoProcessesRunning[iIndex].operationType == this.getTypeOfProcessPublishingBand())
+                //    return true;
+            }
+            return false;
+        }
+        return false;
+    }
+
     this.checkIfFileIsDownloading = function(sProcessName,sTypeOfProcess)
     {
         if(utilsIsStrNullOrEmpty(sProcessName))
