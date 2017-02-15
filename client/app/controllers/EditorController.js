@@ -203,6 +203,10 @@ var EditorController = (function () {
         this.addLayerMap2D(oLayer.layerId);
         this.addLayerMap3D(oLayer.layerId);
 
+        /*CHANGE TREE */
+        var oNode = $('#jstree').jstree(true).get_node(oLayer.layerId);
+        oNode.original.bPubblish = true;
+        $('#jstree').jstree(true).set_icon(oLayer.layerId, 'assets/icons/check.png');
     }
 
     /**
@@ -618,7 +622,7 @@ var EditorController = (function () {
                 oNode.icon = "assets/icons/uncheck.png";
 
                 //generate id for bands => ProductName+BandName
-                //oNode.id   = oTree.core.data[iIndexProduct].text + "_" + oaBandsItems[iIndexBandsItems].name;
+                oNode.id   = oTree.core.data[iIndexProduct].text + "_" + oaBandsItems[iIndexBandsItems].name;
                 oNode.bPubblish = false;
                 oTree.core.data[iIndexProduct].children[1].children.push(oNode);
             }

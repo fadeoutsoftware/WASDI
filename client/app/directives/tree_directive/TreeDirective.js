@@ -107,8 +107,11 @@ angular.module('wasdi.TreeDirective', [])
                                     }
                                     else
                                     {
-                                        data.node.original.bPubblish = true;
-                                        $('#jstree').jstree(true).set_icon(data.node.id, 'assets/icons/check.png');
+                                        //the tree icon is change when it receive the "publishband" message by rabbit or
+                                        //when the band was pubblished (http request)
+                                        // method: receivedPublishBandMessage()
+                                        //data.node.original.bPubblish = true;
+                                        //$('#jstree').jstree(true).set_icon(data.node.id, 'assets/icons/check.png');
                                         $scope.m_oController.openBandImage(data.node.original.band,data.node.id);
                                     }
 
