@@ -24,8 +24,8 @@ service('WorkspaceService', ['$http',  'ConstantsService', function ($http, oCon
         return this.m_oHttp.post(this.APIURL + '/ws/update', oWorkspace);
     }
 
-    this.DeleteWorkspace = function (sWorkspaceId) {
-        return this.m_oHttp.delete(this.APIURL + '/ws/delete?sWorkspaceId=' + sWorkspaceId);
+    this.DeleteWorkspace = function (sWorkspaceId, bDeleteFile, bDeleteLayer) {
+        return this.m_oHttp.delete(this.APIURL + '/ws/delete?sWorkspaceId=' + sWorkspaceId + '&bDeleteFile=' + bDeleteFile + '&bDeleteLayer=' + bDeleteLayer);
     }
 
 }]);

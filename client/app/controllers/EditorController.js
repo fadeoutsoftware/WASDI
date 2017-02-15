@@ -558,16 +558,16 @@ var EditorController = (function () {
                                                 bDeleteFile = true;
                                             if (value.geoserver == 'on')
                                                 bDeleteLayer = true;
+
+                                            oController.m_oProductService.deleteProductFromWorkspace($node.original.fileName, oController.m_oActiveWorkspace.workspaceId, bDeleteFile, bDeleteLayer)
+                                                .success(function (data) {
+                                                    //reload product list
+                                                    oController.getProductListByWorkspace();
+
+                                                }).error(function (error) {
+
+                                            });
                                         }
-
-                                        oController.m_oProductService.deleteProductFromWorkspace($node.original.fileName, oController.m_oActiveWorkspace.workspaceId, bDeleteFile, bDeleteLayer)
-                                            .success(function (data) {
-                                                //reload product list
-                                                oController.getProductListByWorkspace();
-
-                                            }).error(function (error) {
-
-                                        });
 
                                     });
                                 }

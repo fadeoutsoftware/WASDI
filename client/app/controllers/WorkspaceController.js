@@ -162,12 +162,22 @@ var WorkspaceController = (function() {
 
         var oController = this;
 
-        this.m_oWorkspaceService.DeleteWorkspace(sWorkspaceId).success(function (data, status) {
+        utilsVexDialogConfirmWithCheckBox("Deleting product. Are you sure?", function (value) {
+            var bDeleteFile = false;
+            var bDeleteLayer = false;
+            if (value) {
+                if (value.files == 'on')
+                    bDeleteFile = true;
+                if (value.geoserver == 'on')
+                    bDeleteLayer = true;
 
+                oController.m_oWorkspaceService.DeleteWorkspace(sWorkspaceId, bDeleteFile, bDeleteLayer).success(function (data, status) {
+                    oController.fetchWorkspaceInfoList();
 
+                }).error(function (data, status) {
 
-        }).error(function (data,status) {
-
+                });
+            }
         });
     };
 
