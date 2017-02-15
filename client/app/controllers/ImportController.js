@@ -8,7 +8,7 @@ var ImportController = (function() {
     //**************************************************************************
     function ImportController($scope, oConstantsService, oAuthService,$state,oMapService, oSearchService, oAdvancedFilterService,
                               oAdvancedSearchService, oConfigurationService, oFileBufferService, oRabbitStompService, oProductService,
-                              oProcessesLaunchedService,oWorkspaceService,oResultsOfSearchService ) {
+                              oProcessesLaunchedService,oWorkspaceService,oResultsOfSearchService,oModalService ) {
         this.m_oScope = $scope;
         this.m_oScope.m_oController = this;
         this.m_oConstantsService = oConstantsService;
@@ -26,6 +26,7 @@ var ImportController = (function() {
         this.m_oProcessesLaunchedService = oProcessesLaunchedService;
         this.m_oWorkspaceService=oWorkspaceService;
         this.m_oResultsOfSearchService = oResultsOfSearchService;
+        this.m_oModalService = oModalService;
         //this.m_bPproductsPerPagePristine   = true;
         //this.m_iProductCount = 0;
         //this.m_bDisableField = true;
@@ -577,7 +578,7 @@ var ImportController = (function() {
             //                                                                    null,
             //                                                                    oController.m_oProcessesLaunchedService.getTypeOfProcessProductDownload()
             //                                                                    ,oWorkSpace.workspaceId,oController.m_oUser.userId);
-            oController.m_oProcessesLaunchedService.loadProcessesFromServer(oWorkSpace.workspaceId);
+            //oController.m_oProcessesLaunchedService.loadProcessesFromServer(oWorkSpace.workspaceId);
 
             utilsVexCloseDialogAfterFewSeconds("3000",oDialog);
             /*
@@ -1092,19 +1093,28 @@ var ImportController = (function() {
         return true;
     }
 
-    ImportController.prototype.infoLayer=function()
-    {
-        vex.dialog.confirm({
-            message: 'Are you absolutely sure you want to destroy the alien planet?',
-            callback: function (value) {
-                if (value) {
-                    console.log('Successfully destroyed the planet.')
-                } else {
-                    console.log('Chicken.')
-                }
-            }
-        })
 
+    ImportController.prototype.infoLayer=function(oProduct)
+    {
+
+        if(utilsIsObjectNullOrUndefined(oProduct))
+            return false;
+
+        var oController = this
+        this.m_oModalService.showModal({
+            templateUrl: "dialogs/product_info/ProductInfoDialog.html",
+            controller: "ProductInfoController",
+            inputs: {
+                extras: oProduct
+            }
+        }).then(function(modal) {
+            modal.element.modal();
+            modal.close.then(function(result) {
+                oController.m_oScope.Result = result ;
+            });
+        });
+
+        return true;
     }
 
     ImportController.prototype.receivedDownloadMessage = function (oMessage) {
@@ -1124,7 +1134,7 @@ var ImportController = (function() {
                 //console.log('Product added to the ws');
                 //oController.m_oProcessesLaunchedService.removeProcessByPropertySubstringVersion("processName",oMessage.payload.fileName,
                 //    oController.m_oActiveWorkspace.workspaceId,oController.m_oUser.userId);
-                oController.m_oProcessesLaunchedService.loadProcessesFromServer(oController.m_oActiveWorkspace.workspaceId);
+                //oController.m_oProcessesLaunchedService.loadProcessesFromServer(oController.m_oActiveWorkspace.workspaceId);
             }
             else
             {
@@ -1214,7 +1224,8 @@ var ImportController = (function() {
         'ProductService',
         'ProcessesLaunchedService',
         'WorkspaceService',
-        'ResultsOfSearchService'
+        'ResultsOfSearchService',
+        'ModalService'
 
     ];
 

@@ -135,6 +135,11 @@ var RootController = (function() {
                         oDate.setSeconds(0 + seconds);
                         //add running time
                         aoProcessesRunning[iIndexNewProcess].timeRunning = oDate;
+
+                        //it convert mb in gb
+                        var nSize = aoProcessesRunning[iIndexNewProcess].fileSize / 1024;
+                        nSize = Math.round(nSize * 10)/10;
+                        aoProcessesRunning[iIndexNewProcess].fileSize = nSize;
                         $scope.m_oController.m_aoProcessesRunning.push(aoProcessesRunning[iIndexNewProcess])
                     }
 

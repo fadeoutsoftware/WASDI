@@ -146,7 +146,7 @@ var EditorController = (function () {
                 //oController.m_oProcessesLaunchedService.removeProcessByPropertySubstringVersion("processName",oMessage.payload.fileName,
                 //    oController.m_oActiveWorkspace.workspaceId,oController.m_oUser.userId);
 
-                oController.m_oProcessesLaunchedService.loadProcessesFromServer(oController.m_oActiveWorkspace.workspaceId);
+                //oController.m_oProcessesLaunchedService.loadProcessesFromServer(oController.m_oActiveWorkspace.workspaceId);
 
                 //oController.m_aoProcessesRunning =  this.m_oProcessesLaunchedService.getProcesses();
             }
@@ -391,8 +391,8 @@ var EditorController = (function () {
                 /*if the band was published*/
                 if(data.messageCode == "PUBLISHBAND" )
                     oController.receivedPublishBandMessage(data.payload);
-                else
-                    oController.m_oProcessesLaunchedService.loadProcessesFromServer(oController.m_oActiveWorkspace.workspaceId);
+                //else
+                //    oController.m_oProcessesLaunchedService.loadProcessesFromServer(oController.m_oActiveWorkspace.workspaceId);
                     //oController.m_oProcessesLaunchedService.addProcessesByLocalStorage(oBand.productName + "_" + oBand.name,
                     //                                                    oIdBandNodeInTree,
                     //                                                    oController.m_oProcessesLaunchedService.getTypeOfProcessPublishingBand(),

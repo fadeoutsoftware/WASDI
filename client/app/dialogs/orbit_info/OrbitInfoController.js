@@ -1,11 +1,7 @@
 /**
  * Created by a.corrado on 14/02/2017.
  */
-//angular.module('wasdi').controller('OrbitInfoController', ['$scope', 'close', function($scope, close) {
-//
-//    $scope.close = close;
-//
-//}]);
+
 
 var OrbitInfoController = (function() {
 

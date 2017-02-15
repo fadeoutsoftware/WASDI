@@ -22,7 +22,7 @@ service('ProcessesLaunchedService', ['ConstantsService','$rootScope','$http', fu
     this.loadProcessesFromServer = function(sWorkSpaceId)
     {
         var oController = this;
-        this.m_oHttp.get(this.APIURL + '/ws/processbyws?sWorkspaceId='+sWorkSpaceId)
+        this.m_oHttp.get(this.APIURL + '/process/byws?sWorkspaceId='+sWorkSpaceId)// /ws/processbyws = /process/byws
             .success(function (data, status)
             {
                 if(!utilsIsObjectNullOrUndefined(data))

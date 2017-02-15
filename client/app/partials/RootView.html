@@ -148,6 +148,7 @@
                     <th>{{"ROOT_TABLE_HEAD_TYPE_OF_OPERATION"|translate}}</th>
                     <th>{{"ROOT_TABLE_HEAD_NAME"|translate}}</th>
                     <th>{{"ROOT_TABLE_HEAD_ID_USER"|translate}}</th>
+                    <th>Real size</th>
                     <th>{{"ROOT_TABLE_HEAD_TIME"|translate}} </th>
                     <th></th>
                 </tr>
@@ -168,6 +169,9 @@
                     </td>
                     <td>
                         {{oProcess.userId}}
+                    </td>
+                    <td>
+                        {{oProcess.fileSize}} gb
                     </td>
                     <td>
                         {{oProcess.timeRunning | date:'HH:mm:ss'}}
@@ -194,6 +198,9 @@
                     </td>
                     <td>
                         {{oLog.userId}}
+                    </td>
+                    <td>
+                        {{oLog.fileSize}} gb
                     </td>
                     <td>
                         {{oLog.timeRunning | date:'HH:mm:ss'}}
