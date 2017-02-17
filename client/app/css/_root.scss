@@ -144,8 +144,8 @@
   //}
   .status-bar
   {
-    //height: 4.5%;
-    min-height: 4.5%;
+    height: 4.5%;
+    //min-height: 4.5%;
     width: 100%;
     position: fixed;
     z-index: 1000;
@@ -196,6 +196,13 @@
       position: absolute;
       top: 0;
       right: 20px;
+
+      //position: absolute;
+      //left:50%;
+      ////bottom:70%;
+      //top:-10px;
+      //background-color: black;
+      //z-index: 5000;
       //font-size: 20px;
       //margin-left: 50px;
       //color: $wasdi-white;

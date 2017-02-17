@@ -113,6 +113,9 @@ h4
   }
 
 }
+
+
+
 .my-loading
 {
   //put the icon in the middle
@@ -149,5 +152,9 @@ h4
 .my-button:hover {
   background-color: $wasdi-button-over-color;
   color: white;
+}
+.my-button:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
 }
 

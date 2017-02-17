@@ -206,7 +206,8 @@ var EditorController = (function () {
         /*CHANGE TREE */
         var oNode = $('#jstree').jstree(true).get_node(oLayer.layerId);
         oNode.original.bPubblish = true;
-        $('#jstree').jstree(true).set_icon(oLayer.layerId, 'assets/icons/check.png');
+        $('#jstree').jstree(true).set_icon(oLayer.layerId, 'assets/icons/check_20x20.png');
+        //$('#jstree').jstree(true).set_icon(oLayer.layerId, 'assets/icons/check.png');
     }
 
     /**
@@ -608,7 +609,7 @@ var EditorController = (function () {
             var oNode = new Object();
             oNode.text=productList[iIndexProduct].name;//LABEL NODE
             oNode.fileName=productList[iIndexProduct].fileName;//LABEL NODE
-            oNode.children=[{"text": "metadata"},{"text":"Bands", "children": []}];//CHILDREN
+            oNode.children=[{"text": "metadata","icon":"assets/icons/folder_20x20.png"},{"text":"Bands","icon":"assets/icons/folder_20x20.png", "children": []}];//CHILDREN
             oNode.icon = "assets/icons/product_20x20.png";
             oTree.core.data.push(oNode);
 
@@ -619,7 +620,7 @@ var EditorController = (function () {
                 var oNode = new Object();
                 oNode.text = oaBandsItems[iIndexBandsItems].name;//LABEL NODE
                 oNode.band = oaBandsItems[iIndexBandsItems];//BAND
-                oNode.icon = "assets/icons/uncheck.png";
+                oNode.icon = "assets/icons/uncheck_20x20.png";
 
                 //generate id for bands => ProductName+BandName
                 oNode.id   = oTree.core.data[iIndexProduct].text + "_" + oaBandsItems[iIndexBandsItems].name;

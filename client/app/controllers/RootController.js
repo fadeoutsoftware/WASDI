@@ -138,7 +138,7 @@ var RootController = (function() {
 
                         //it convert mb in gb
                         var nSize = aoProcessesRunning[iIndexNewProcess].fileSize / 1024;
-                        nSize = Math.round(nSize * 10)/10;
+                        nSize = Math.round(nSize * 100)/100;
                         aoProcessesRunning[iIndexNewProcess].fileSize = nSize;
                         $scope.m_oController.m_aoProcessesRunning.push(aoProcessesRunning[iIndexNewProcess])
                     }
@@ -156,7 +156,8 @@ var RootController = (function() {
         * */
         $scope.$watch('m_oController.m_oConstantsService.m_oActiveWorkspace', function(newValue, oldValue, scope) {
             //utilsVexDialogAlertTop("il watch funziona");
-            $scope.m_oController.m_aoLogProcesses = []
+            $scope.m_oController.m_aoProcessesRunning = [];
+            $scope.m_oController.m_aoLogProcesses = [];
         });
         /*COUNTDOWN METHODS*/
 

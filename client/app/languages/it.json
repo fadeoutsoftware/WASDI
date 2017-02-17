@@ -53,6 +53,7 @@
   "IMPORT_TOOLTIP_ADD_PRODUCT":"Add product to workspace",
   "IMPORT_TOOLTIP_ZOOM_ON_PRODUCT":"Zoom on product",
   "IMPORT_TOOLTIP_INFO":"Info",
+  "IMPORT_SEARCH_BUTTON":"Search",
 
   "SEARCH_TITLE_CHECK_BOX_SENSOR_TYPE":"Sensor Type :",
   "SEARCH_TITLE_CHECK_BOX_SENSOR_RESOLUTION":"Sensor Resolution :",

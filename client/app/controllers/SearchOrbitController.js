@@ -450,7 +450,24 @@ var SearchOrbitController = (function() {
         //vex.dialog.alert(oOptions);
         return true;
     }
+    SearchOrbitController.prototype.isClickableSearchButton = function()
+    {
+        var oController = this;
+        if(utilsIsObjectNullOrUndefined(oController.m_oGeoJSON))
+            return false;
 
+        //if there isn't a resolution throw an error
+        if(utilsIsObjectNullOrUndefined(oController.m_oSelectedResolutionType) || oController.m_oSelectedResolutionType.length == 0)
+            return false;
+        //if there isn't a sensor type throw an error
+        if(utilsIsObjectNullOrUndefined(oController.m_oSelectedSensorType) || oController.m_oSelectedSensorType.length == 0)
+            return false;
+        //if there isn't a satellite throw an error
+        if(utilsIsObjectNullOrUndefined(oController.m_oSelectedSatellite) || oController.m_oSelectedSatellite.length == 0)
+            return false;
+
+        return true;
+    }
     SearchOrbitController.$inject = [
         '$scope',
         '$location',

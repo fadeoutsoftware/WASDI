@@ -2,7 +2,10 @@
     <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12 left-side-bar">
         <div class="my-panel">
             <div class="panel panel-default">
-                <div class="panel-heading">{{"SEARCH_TITLE_PANEL_HEADING_FILTERS"|translate}}</div>
+                <div class="panel-heading">
+                    {{"SEARCH_TITLE_PANEL_HEADING_FILTERS"|translate}}
+                </div>
+
                 <div class="panel-body">
 
                     <!------------------------- TIME PICKER START -------------------->
@@ -75,8 +78,9 @@
                         </div>
                     </div>
 
-                    <button class="my-button" ng-click="m_oController.searchOrbit()">Search</button>
-
+                    <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 buttom-collumn"   >
+                        <button class="my-button" ng-click="m_oController.searchOrbit()" ng-disabled=" !m_oController.isClickableSearchButton()" >Search</button>
+                    </div>
 
                 </div>
 
@@ -103,18 +107,18 @@
                 </tr>
                 </thead>
                 <tbody>
-                    <tr ng-repeat="orbit in m_oController.getOrbits()" ><!--ng-mouseover="m_oController.mouseOverOrbitInTable(orbit)"
+                <tr ng-repeat="orbit in m_oController.getOrbits()" ><!--ng-mouseover="m_oController.mouseOverOrbitInTable(orbit)"
                             ng-mouseleave="m_oController.mouseLeaveOrbitInTable(orbit)" ng-click="m_oController.showSwath(orbit)"-->
-                        <td> <input type="checkbox" ng-checked="master" ng-click="m_oController.showSwath(orbit)"></td>
-                        <td><span >{{orbit.SatelliteName}}</span></td>
-                        <td><span >{{m_oController.getDateFromTimestamp(orbit.AcquisitionStartTime)}}</span></td>
-                        <td><span >{{m_oController.getDateFromTimestamp(orbit.AcquisitionEndTime)}}</span></td>
-                        <td class="info-satellite" ng-click="m_oController.openOrbitInfo(orbit)">
-                            <div class="button-info">
-                                <i class="fa fa-info-circle fa-lg" aria-hidden="true"></i>
-                            </div>
-                        </td>
-                    </tr>
+                    <td> <input type="checkbox" ng-checked="master" ng-click="m_oController.showSwath(orbit)"></td>
+                    <td><span >{{orbit.SatelliteName}}</span></td>
+                    <td><span >{{m_oController.getDateFromTimestamp(orbit.AcquisitionStartTime)}}</span></td>
+                    <td><span >{{m_oController.getDateFromTimestamp(orbit.AcquisitionEndTime)}}</span></td>
+                    <td class="info-satellite" ng-click="m_oController.openOrbitInfo(orbit)">
+                        <div class="button-info">
+                            <i class="fa fa-info-circle fa-lg" aria-hidden="true"></i>
+                        </div>
+                    </td>
+                </tr>
                 </tbody>
             </table>
 

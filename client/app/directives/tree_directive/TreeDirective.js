@@ -103,7 +103,8 @@ angular.module('wasdi.TreeDirective', [])
                                     if(data.node.original.bPubblish == true)
                                     {
                                         data.node.original.bPubblish = false;
-                                        $('#jstree').jstree(true).set_icon(data.node.id, 'assets/icons/uncheck.png');
+                                        //$('#jstree').jstree(true).set_icon(data.node.id, 'assets/icons/uncheck.png');
+                                        $('#jstree').jstree(true).set_icon(data.node.id, 'assets/icons/uncheck_20x20.png');
                                         $scope.m_oController.removeBandImage(data.node.original.band);
                                     }
                                     else

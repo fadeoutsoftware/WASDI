@@ -24,7 +24,7 @@
                 <div ng-hide="m_oController.m_bIsVisibleListOfLayers">
                     <div id="coll-product-container" class="coll-product-container">
                         <div class="coll-product-list-container">
-                            <div class="coll-product-header">
+                            <div class=" coll-product-header">
                                 <!--<div ng-show="m_oController.m_iProductCount" class="col-md-6 coll-products-left">-->
                                 <!--<input type="checkbox" id="product-list-all-checkbox" class="coll-product-list-checkbox"-->
                                 <!--ng-disabled="m_oController.m_bDisableField"-->
@@ -36,7 +36,7 @@
                                 <!--ng-hide="m_oController.m_iProductCount">No products found.-->
                                 <!--</div>-->
 
-                                <div class="my-input-text">
+                                <div class="my-input-text col-lg-12 col-md-12 col-sm-12 col-xs-12">
                                     <input type="text" ng-model="m_oController.m_oModel.textQuery"
                                            id="coll-product-search" placeholder="Search..." ><!-- style="padding: 0px !important;"-->
                                 </div>
@@ -126,17 +126,18 @@
                                   <!--&lt;!&ndash;title="Clear Search Filter" ng-show="bIsAdvanceSearchOpen">Clear</span>&ndash;&gt;-->
                             <!--&lt;!&ndash;</h4>&ndash;&gt;-->
                         <!--</div>-->
-                        <span class="advanced-search-clear" ng-click="m_oController.clearFilter()" title="Clear Search Filter" >{{"IMPORT_CLEAR_BUTTON"|translate}}</span>
+
                         <div style="overflow:visible;padding:15px 5px;" class="my-input-text"><!--id="section_2" class="panel-collapse collapse" role="tabpanel" aria-labelledby="section_2"-->
 
                             <div class="row" ng-if="m_oController.m_bShowsensingfilter">
 
                                 <div class="col-md-2 col-sd-12 col-xs-12 advanced-search-subtitle"> Sensing period
                                 </div>
-                                <div class="col-md-1 col-sd-2 col-xs-4 advanced-calendar-label">
+                                <div class="col-md-1 col-sd-2 col-xs-4 advanced-calendar-label" >
                                     From:
                                 </div>
                                 <div class="col-md-4 col-sd-4 col-xs-8">
+
                                     <p class="input-group">
                                         <input type="text" class="form-control advanced-calendar-date-input"
                                                uib-datepicker-popup="yyyy/MM/dd"
@@ -146,16 +147,21 @@
                                                max-date="m_oController.m_oModel.sensingPeriodTo" ng-required="true"
                                                ng-blur="m_oController.updateAdvancedSearch()" readonly="true"
                                                close-text="Close"/>
+
                                     <span class="input-group-btn">
-							<button type="button" class="btn btn-default advanced-calendar-button"
-                                    ng-click="m_oController.openSensingPeriodFrom($event)"><i class="fa fa-calendar" aria-hidden="true"></i></button>
-						  </span>
+
+							        <button type="button" class="btn btn-default advanced-calendar-button"
+                                        ng-click="m_oController.openSensingPeriodFrom($event)"><i class="fa fa-calendar" aria-hidden="true"></i></button>
+						            </span>
+
                                     </p>
                                 </div>
-                                <div class="col-md-1 col-sd-2 col-xs-4 advanced-calendar-label">
-                                    to:
+
+                                <div class="col-md-1 col-sd-2 col-xs-4 advanced-calendar-label" >
+                                    To:
                                 </div>
-                                <div class="col-md-4 col-sd-4 col-xs-8">
+
+                                <div class="col-md-4 col-sd-4 col-xs-8 advanced-calendar-input" >
                                     <p class="input-group">
                                         <input type="text" class="form-control advanced-calendar-date-input"
                                                uib-datepicker-popup="yyyy/MM/dd"
@@ -195,9 +201,9 @@
                                     </p>
                                 </div>
                                 <div class="col-md-1 col-sd-2 col-xs-4 advanced-calendar-label">
-                                    to:
+                                    To:
                                 </div>
-                                <div class="col-md-4 col-sd-4 col-xs-8">
+                                <div class="col-md-4 col-sd-4 col-xs-8 advanced-calendar-input">
                                     <p class="input-group">
                                         <input type="text" class="form-control advanced-calendar-date-input"
                                                uib-datepicker-popup="yyyy/MM/dd"
@@ -275,21 +281,20 @@
                             </div>
                             <!---------------------------- SEARCH BUTTON -------------------->
                             <br/>
-                            <div class="search-button" ng-click="m_oController.search()" id="search-button">
+                            <div class="search-button-container" >
+                                <div class="my-button clear-button" ng-click="m_oController.clearFilter()"   ng-click="m_oController.clearFilter()" title="Clear Search Filter">
+                                    <!--<i class="fa fa-search fa-lg" aria-hidden="true"></i>-->
+                                    {{"IMPORT_CLEAR_BUTTON"|translate}}
+                                </div>
+                                <div class="search-button" ng-click="m_oController.search()" id="search-button">
+                                    <!--<i class="fa fa-search fa-lg" aria-hidden="true"></i>-->
+                                    {{"IMPORT_SEARCH_BUTTON"|translate}}
+                                </div>
 
-                                <i class="fa fa-search fa-lg" aria-hidden="true"></i>
+                                <!--<span class="advanced-search-clear" ng-click="m_oController.clearFilter()" title="Clear Search Filter" >{{"IMPORT_CLEAR_BUTTON"|translate}}</span>-->
                             </div>
                         </div>
 
-                        <!--<div class="search-button" ng-click="m_oController.search()" id="search-button">-->
-                        <!--<i class="fa fa-search fa-lg" aria-hidden="true"></i>-->
-                        <!--&lt;!&ndash;<svg viewBox="0 0 24 24" height="100%" width="100%" preserveAspectRatio="xMidYMid meet" fit=""&ndash;&gt;-->
-                        <!--&lt;!&ndash;style="pointer-events: none; display: block;">&ndash;&gt;-->
-                        <!--&lt;!&ndash;<g>&ndash;&gt;-->
-                        <!--&lt;!&ndash;<path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"></path>&ndash;&gt;-->
-                        <!--&lt;!&ndash;</g>&ndash;&gt;-->
-                        <!--&lt;!&ndash;</svg>&ndash;&gt;-->
-                        <!--</div>-->
 
                     </div>
                 </div>
@@ -390,7 +395,7 @@
         <!--<i class="fa fa-search fa-lg" aria-hidden="true"></i>-->
 
     <!--</div>-->
-
+    <!----------------------------------- MAP ------------------------------------------->
     <div class="col-lg-8 col-md-8 col-sm-8 col-xs-12 map-container">
         <div class="map" id="wasdiMapImport"></div>
     </div>
