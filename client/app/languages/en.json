@@ -35,6 +35,7 @@
     "WORKSPACES_THEAD_WORKSPACES":"Workspaces",
     "WORKSPACES_THEAD_OWNER":"Owner",
     "WORKSPACES_LABEL_NO_RESULTS":"No results",
+    "WORKSPACES_TOOLTIP_DELETE":"Delete workspace",
 
     "EDITOR_TOOLTIP_SWITCH_3D_2D":"Switch 3D globe and 2D map",
     "EDITOR_TOOLTIP_HOME_2D":"Center of map",

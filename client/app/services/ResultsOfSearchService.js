@@ -19,7 +19,11 @@ service('ResultsOfSearchService', ['$http',  'ConstantsService', function ($http
     this.m_oSensingPeriodFrom = '';
     this.m_oSensingPeriodTo='';
     this.m_aoMissions = [];
+    this.m_oIngestionPeriodFrom = '';
+    this.m_oIngestionPeriodTo = '';
+
     /************************ Set methods ***************************/
+
     this.setDefaults  = function()
     {
         this.m_sTextQuery = "";
@@ -35,106 +39,126 @@ service('ResultsOfSearchService', ['$http',  'ConstantsService', function ($http
         this.m_oSensingPeriodFrom = '';
         this.m_oSensingPeriodTo='';
         this.m_aoMissions = [];
+        this.m_oIngestionPeriodFrom = '';
+        this.m_oIngestionPeriodTo = '';
     }
 
+    this.setIngestionPeriodTo = function(oIngestionPeriodTo)
+    {
+        this.m_oIngestionPeriodTo = oIngestionPeriodTo;
+        return true;
+    }
+    this.setIngestionPeriodFrom = function(oIngestionPeriodFrom)
+    {
+        this.m_oIngestionPeriodFrom = oIngestionPeriodFrom;
+        return true;
+    }
     this.setMissions = function(oMissions)
     {
-        if(utilsIsObjectNullOrUndefined(oMissions))
-            return false;
+        //if(utilsIsObjectNullOrUndefined(oMissions))
+        //    return false;
         this.m_aoMissions = oMissions;
         return true;
     }
 
     this.setSensingPeriodTo  = function(oSensingPeriodTo)
     {
-        if(utilsIsObjectNullOrUndefined(oSensingPeriodTo))
-            return false;
+        //if(utilsIsObjectNullOrUndefined(oSensingPeriodTo))
+        //    return false;
         this.m_oSensingPeriodTo=oSensingPeriodTo;
         return true;
     }
 
     this.setSensingPeriodFrom = function(oSensingPeriodFrom)
     {
-        if(utilsIsObjectNullOrUndefined(oSensingPeriodFrom))
-            return false;
+        //if(utilsIsObjectNullOrUndefined(oSensingPeriodFrom))
+        //    return false;
         this.m_oSensingPeriodFrom=oSensingPeriodFrom;
         return true;
     }
 
     this.setTextQuery = function(sTextQuery)
     {
-        if(utilsIsStrNullOrEmpty(sTextQuery))
-            return false //TODO throw error
+        //if(utilsIsStrNullOrEmpty(sTextQuery))
+        //    return false //TODO throw error
         this.m_sTextQuery = sTextQuery;
         return true;
     }
     this.setGeoSelection = function(oGeoSelection)
     {
-        if(utilsIsStrNullOrEmpty(oGeoSelection))
-            return false //TODO throw error
+        //if(utilsIsStrNullOrEmpty(oGeoSelection))
+        //    return false //TODO throw error
         this.m_oGeoSelection = oGeoSelection;
         return true;
     }
     this.setCurrentPage = function(iCurrentPage)
     {
-        if(utilsIsObjectNullOrUndefined(iCurrentPage))
-            return false //TODO throw error
+        //if(utilsIsObjectNullOrUndefined(iCurrentPage))
+        //    return false //TODO throw error
         this.m_iCurrentPage = iCurrentPage;
         return true;
     }
     this.setProductsPerPageSelected = function(iProductsPerPageSelected)
     {
-        if(utilsIsObjectNullOrUndefined(iProductsPerPageSelected))
-            return false //TODO throw error
+        //if(utilsIsObjectNullOrUndefined(iProductsPerPageSelected))
+        //    return false //TODO throw error
         this.m_iProductsPerPageSelected = iProductsPerPageSelected;
         return true;
     }
     this.setProductList = function(aoProductList)
     {
-        if(utilsIsObjectNullOrUndefined(aoProductList))
-            return false //TODO throw error
+        //if(utilsIsObjectNullOrUndefined(aoProductList))
+        //    return false //TODO throw error
         this.m_aoProductList = aoProductList;
         return true;
     }
     this.setTotalPages = function(iTotalPages)
     {
-        if(utilsIsObjectNullOrUndefined(iTotalPages))
-            return false //TODO throw error
-        this.m_iTotalPages = iTotalPages;
+        //if(utilsIsObjectNullOrUndefined(iTotalPages))
+        //    return false //TODO throw error
+        //this.m_iTotalPages = iTotalPages;
         return true;
     }
 
     this.setIsVisibleListOfProducts = function(bIsVisibleListOfProducts)
     {
-        if(utilsIsObjectNullOrUndefined(bIsVisibleListOfProducts))
-            return false;//TODO throw error
+        //if(utilsIsObjectNullOrUndefined(bIsVisibleListOfProducts))
+        //    return false;//TODO throw error
         this.m_bIsVisibleListOfProducts = bIsVisibleListOfProducts;
         return true;
     }
     this.setTotalOfProducts = function(iTotalOfProducts)
     {
-        if(utilsIsObjectNullOrUndefined(iTotalOfProducts))
-            return false;//TODO throw error
+        //if(utilsIsObjectNullOrUndefined(iTotalOfProducts))
+        //    return false;//TODO throw error
         this.m_iTotalOfProducts = iTotalOfProducts;
         return true;
     }
 
     this.setActiveWorkspace = function(oActiveWorkspace)
     {
-        if(utilsIsObjectNullOrUndefined(oActiveWorkspace))
-            return false;//TODO throw error
+        //if(utilsIsObjectNullOrUndefined(oActiveWorkspace))
+        //    return false;//TODO throw error
         this.m_oActiveWorkspace = oActiveWorkspace;
         return true;
     }
 
     this.setMissions = function(aoMissions)
     {
-        if(utilsIsObjectNullOrUndefined(aoMissions))
-            return false;
+        //if(utilsIsObjectNullOrUndefined(aoMissions))
+        //    return false;
         this.m_aoMissions = aoMissions;
         return true;
     }
     /************************ Get methods ***************************/
+    this.getIngestionPeriodTo = function()
+    {
+        return this.m_oIngestionPeriodTo;
+    }
+    this.getIngestionPeriodFrom = function()
+    {
+        return  this.m_oIngestionPeriodFrom;
+    }
     this.getTextQuery = function()
     {
         return this.m_sTextQuery;

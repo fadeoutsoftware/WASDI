@@ -417,6 +417,8 @@ var ImportController = (function() {
         this.m_oResultsOfSearchService.setProductsPerPageSelected(this.m_iProductsPerPageSelected);
         this.m_oResultsOfSearchService.setSensingPeriodFrom(this.m_oModel.sensingPeriodFrom);
         this.m_oResultsOfSearchService.setSensingPeriodTo(this.m_oModel.sensingPeriodTo);
+        this.m_oResultsOfSearchService.setIngestionPeriodFrom(this.m_oModel.ingestionFrom);
+        this.m_oResultsOfSearchService.setIngestionPeriodTo(this.m_oModel.ingestionTo);
         this.m_oResultsOfSearchService.setMissions(this.m_aoMissions);
         this.m_oResultsOfSearchService.setActiveWorkspace(this.m_oActiveWorkspace);
         //this.m_oResultsOfSearchService.setMissions(this.m_aoMissions);
@@ -641,138 +643,7 @@ var ImportController = (function() {
     {
 
     }
-    //ImportController.prototype.checkUncheckAll = function() {
-    //    var oController = this;
-    //    this.m_oDetails.productIds=[];
-    //    this.m_aiAddedIds = [];
-    //    this.m_aiRemovedIds = [];
-    //    this.m_oScope.selectedAll = !this.m_oScope.selectedAll;
-    //    this.m_oSearchService
-    //        .getAllCollectionProducts(this.m_sFilter , this.m_oScope.offset, this.m_iProductCount)
-    //        .then(function(){
-    //            angular.forEach(oController.m_oSearchService.collectionAllProductsModel.list, function (item) {
-    //                //item.selected = scope.selectedAll;
-    //                if(oController.m_oScope.selectedAll) {
-    //                    oController.m_oDetails.productIds.push(item.id);
-    //                    oController.m_aiAddedIds.push(item.id);
-    //                }
-    //                else {
-    //                    oController.m_aiRemovedIds.push(item.id);
-    //                }
-    //                //console.warn('item.selected',item.selected);
-    //            });
-    //        });
-    //};
-    //
-    //ImportController.prototype.goToPage = function(pageNumber,free){
-    //    var oController = this;
-    //    if((pageNumber <= this.m_oScope.pageCount && pageNumber > 0) || free){
-    //
-    //        this.m_oScope.currentPage = pageNumber;
-    //        this.m_oScope.offset=(pageNumber * this.m_oScope.productsPerPage) - this.m_oScope.productsPerPage;
-    //        return SearchService
-    //            .getCollectionProductsList(this.m_sFilter, this.m_oScope.offset, this.m_oScope.productsPerPage)
-    //            .then(function(){
-    //                oController.m_aiAddedIds=[];
-    //                oController.m_aiRemovedIds=[];
-    //                oController.refreshCounters();
-    //                oController.m_oScope.currentPageCache = pageNumber;
-    //                oController.m_oScope.currentPage = pageNumber;
-    //                oController.m_aoProducts = oController.m_oSearchService.collectionProductsModel.list;
-    //
-    //                if(oController.m_oDetails && oController.m_oDetails.productIds && oController.m_oDetails.productIds.length == oController.m_iProductCount) {
-    //                    $("#product-list-all-checkbox").prop('checked', true);
-    //                    oController.m_oScope.selectedAll=true;
-    //                }
-    //                else {
-    //                    oController.m_oScope.selectedAll=false;
-    //                    $("#product-list-all-checkbox").prop('checked', false);
-    //                }
-    //
-    //            });
-    //    }else{
-    //        var deferred = $q.defer();
-    //        return deferred.promise;
-    //    }
-    //};
-    //
-    //ImportController.prototype.refreshCounters = function(){
-    //    this.m_oScope.productCount = this.m_oSearchService.collectionProductsModel.count;
-    //    this.m_oScope.pageCount =  Math.floor(this.m_oSearchService.collectionProductsModel.count / this.m_oScope.productsPerPage) + ((this.m_oSearchService.collectionProductsModel.count % this.m_oScope.productsPerPage)?1:0);
-    //    this.m_oScope.visualizedProductsFrom    = (this.m_oSearchService.collectionProductsModel.count) ? this.m_oScope.offset + 1:0;
-    //    this.m_oScope.visualizedProductsTo      =
-    //        (((this.m_oSearchService.collectionProductsModel.count)?
-    //            (this.m_oScope.currentPage * this.m_oScope.productsPerPage):1)> this.m_iProductCount)
-    //            ?this.m_iProductCount
-    //            :((this.m_oSearchService.collectionProductsModel.count)
-    //            ?(this.m_oScope.currentPage * this.m_oScope.productsPerPage)
-    //            :1);
-    //};
-    //
-    //ImportController.prototype.isChecked = function(product) {
-    //    if(this.m_oDetails && this.m_oDetails.productIds && _.indexOf(this.m_oDetails.productIds,product.id)>=0) {
-    //        //console.error('id found: ',product.id);
-    //        //product.selected=true;
-    //        return true;
-    //    }
-    //    else {
-    //        //console.error('id NOT found: ',product.id);
-    //        //product.selected=false;
-    //        return false;
-    //    }
-    //};
-    //
-    //ImportController.prototype.addRemoveProduct = function(product) {
-    //    //console.log('addRemoveProduct',product);
-    //    //console.log("isChecked", scope.isChecked(product));
-    //    if(this.isChecked(product)) {
-    //        var index = his.m_oDetails.productIds.indexOf(product.id);
-    //        if(index>=0)
-    //            this.m_oDetails.productIds.splice(index,1);
-    //        index = this.m_aiAddedIds.indexOf(product.id);
-    //        if(index>=0)
-    //            this.m_aiAddedIds.splice(index,1);
-    //        this.m_aiRemovedIds.push(product.id);
-    //    }
-    //    else {
-    //        this.m_aiAddedIds.push(product.id);
-    //        if(!this.m_oDetails.productIds)
-    //            this.m_oDetails.productIds=[];
-    //        this.m_oDetails.productIds.push(product.id);
-    //        var index = this.m_aiRemovedIds.indexOf(product.id);
-    //        if(index>=0)
-    //            this.m_aiRemovedIds.splice(index,1);
-    //    }
-    //};
-    //
-    //ImportController.prototype.updateValue = function(){
-    //    if(this.m_bPproductsPerPagePristine){
-    //        this.m_bPproductsPerPagePristine = false;
-    //        return;
-    //    }
-    //    this.goToPage(1, true);
-    //
-    //};
-    //
-    //ImportController.prototype.gotoFirstPage = function(){
-    //    this.goToPage(1, false);
-    //};
-    //
-    //ImportController.prototype.gotoPreviousPage = function(){
-    //    this.goToPage(this.m_oScope.currentPageCache - 1, false);
-    //};
-    //
-    //ImportController.prototype.gotoNextPage = function() {
-    //    this.goToPage(this.m_oScope.currentPageCache + 1, false);
-    //};
-    //
-    //ImportController.prototype.gotoLastPage = function(){
-    //    this.goToPage(this.m_oScope.pageCount, false);
-    //};
-    //
-    //ImportController.prototype.selectPageDidClicked = function(xx){
-    //
-    //};
+
 
 
 
@@ -1186,8 +1057,25 @@ var ImportController = (function() {
         oController.m_iTotalOfProducts = oController.m_oResultsOfSearchService.getTotalOfProducts();
         oController.m_oModel.sensingPeriodFrom = oController.m_oResultsOfSearchService.getSensingPeriodFrom();
         oController.m_oModel.sensingPeriodTo = oController.m_oResultsOfSearchService.getSensingPeriodTo();
-        //oController.m_oAdvancedFilterService.setAdvancedFilter(oController.m_oResultsOfSearchService.getMissions());
-        //oController.m_aoMissions = oController.m_oResultsOfSearchService.getMissions();
+        oController.m_oModel.ingestionFrom = oController.m_oResultsOfSearchService.getIngestionPeriodFrom();
+        oController.m_oModel.ingestionTo = oController.m_oResultsOfSearchService.getIngestionPeriodTo();
+
+        /* add rectangle in maps */
+
+        if(utilsIsObjectNullOrUndefined(oController.m_aoProductsList))
+            return true;
+
+        var iNumberOfProducts = oController.m_aoProductsList.length;
+
+        for(var iIndexProduct = 0; iIndexProduct < iNumberOfProducts ; iIndexProduct++) {
+            if (!utilsIsObjectNullOrUndefined(oController.m_aoProductsList[iIndexProduct].rectangle))
+            {
+                var oMap = oController.m_oMapService.getMap();
+                oController.m_aoProductsList[iIndexProduct].rectangle.addTo(oMap);
+
+            }
+        }
+
         return true;
     }
 
@@ -1197,10 +1085,14 @@ var ImportController = (function() {
         this.m_iCurrentPage = 1;
         this.m_iProductsPerPageSelected = 5;
         this.m_iTotalPages = 1;
+        this.m_bIsVisibleListOfLayers = false;
+
+        this.m_oResultsOfSearchService.setIsVisibleListOfProducts(false);
         this.m_oResultsOfSearchService.setTotalPages(1);
         this.m_oResultsOfSearchService.setProductsPerPageSelected(5);
         this.m_oResultsOfSearchService.setCurrentPage(1);
         this.m_oResultsOfSearchService.setTotalOfProducts(0);
+
     }
     ImportController.prototype.isPossibleDoDownload = function(oLayer)
     {

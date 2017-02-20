@@ -6,8 +6,7 @@
 
             <div class="panel-heading">
                 <!-- BACK -->
-                <i class="fa fa-arrow-left  backbtn" aria-hidden="true" ng-click="m_oController.m_bIsVisibleListOfLayers = false;
-                            m_oController.setPaginationVariables();" ng-show="m_oController.m_bIsVisibleListOfLayers"></i>
+                <i class="fa fa-arrow-left  backbtn" aria-hidden="true" ng-click=" m_oController.setPaginationVariables();" ng-show="m_oController.m_bIsVisibleListOfLayers"></i>
 
                 <span ng-hide="m_oController.m_bIsVisibleListOfLayers">{{"IMPORT_PANEL_HEAD_TITLE_FILTERS"|translate}}</span>
             </div>
@@ -136,7 +135,7 @@
                                 <div class="col-md-1 col-sd-2 col-xs-4 advanced-calendar-label" >
                                     From:
                                 </div>
-                                <div class="col-md-4 col-sd-4 col-xs-8">
+                                <div class="col-md-4 col-sd-4 col-xs-8 input-calendar-container">
 
                                     <p class="input-group">
                                         <input type="text" class="form-control advanced-calendar-date-input"
@@ -161,7 +160,7 @@
                                     To:
                                 </div>
 
-                                <div class="col-md-4 col-sd-4 col-xs-8 advanced-calendar-input" >
+                                <div class="col-md-4 col-sd-4 col-xs-8 advanced-calendar-input input-calendar-container" >
                                     <p class="input-group">
                                         <input type="text" class="form-control advanced-calendar-date-input"
                                                uib-datepicker-popup="yyyy/MM/dd"
@@ -184,7 +183,7 @@
                                 <div class="col-md-1 col-sd-2 col-xs-4 advanced-calendar-label">
                                     From:
                                 </div>
-                                <div class="col-md-4 col-sd-4 col-xs-8">
+                                <div class="col-md-4 col-sd-4 col-xs-8 input-calendar-container">
                                     <p class="input-group">
                                         <input type="text" class="form-control advanced-calendar-date-input"
                                                uib-datepicker-popup="yyyy/MM/dd"
@@ -203,7 +202,7 @@
                                 <div class="col-md-1 col-sd-2 col-xs-4 advanced-calendar-label">
                                     To:
                                 </div>
-                                <div class="col-md-4 col-sd-4 col-xs-8 advanced-calendar-input">
+                                <div class="col-md-4 col-sd-4 col-xs-8 advanced-calendar-input input-calendar-container">
                                     <p class="input-group">
                                         <input type="text" class="form-control advanced-calendar-date-input"
                                                uib-datepicker-popup="yyyy/MM/dd"
@@ -348,7 +347,7 @@
                         <!------------------------------- SUMMARY ------------------------------->
                         <tr class="info-layer" >
                             <!-- BUTTONS -->
-                            <td>
+                            <td class="button-cell">
                                 <div class="btn-group-vertical" role="group" >
                                     <button type="button" class="btn btn btn-primary" ng-click="m_oController.downloadProduct(layer)"
                                             ng-disabled="m_oController.isPossibleDoDownload(layer)" data-toggle="tooltip" data-placement="top" title="{{'IMPORT_TOOLTIP_ADD_PRODUCT'|translate}}">
@@ -368,7 +367,7 @@
                             <td class="image-cell">
                                 <span class="label label-success">{{layer.summary.Mode}}</span>&nbsp;<!--Mode-->
                                 <span class="label label-success"> {{layer.summary.Instrument}}</span><!--Instrument-->
-                                <div class="preview-layer-image" ><img src={{layer.preview}} alt="Image" style="height: 82px;width: 82px;"></div>
+                                <div class="preview-layer-image" ><img src={{layer.preview}} alt="Image" style="height: 82px;width: 82px; "></div>
                                 <span class="badge">{{layer.summary.Size}}</span><!--Size-->
                             </td>
                             <!-- INFO CELL -->

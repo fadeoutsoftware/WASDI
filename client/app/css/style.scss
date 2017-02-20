@@ -158,3 +158,65 @@ h4
   cursor: not-allowed;
 }
 
+// css calendar
+.input-calendar-container
+{
+  table
+  {
+    tr,th
+    {
+      color:$wasdi-blue-logo;
+    }
+
+    thead
+    {
+      color:$wasdi-blue-logo;
+    }
+
+    strong
+    {
+      color:$wasdi-blue-logo;
+    }
+
+    i
+    {
+      color:$wasdi-blue-logo;
+    }
+
+    .btn-default {
+      border-color: $wasdi-blue-logo;
+    }
+  }
+
+  .btn-info
+  {
+    background-color: $wasdi-blue-logo;
+    border-color: $wasdi-blue-logo;
+    opacity: 0.9;
+  }
+  .btn-info:hover
+  {
+    background-color: $wasdi-blue-logo;
+    border-color: $wasdi-blue-logo;
+    opacity: 1;
+  }
+  .btn-success {
+    background-color: $wasdi-green-logo;
+    border-color: $wasdi-green-logo;
+    opacity: 0.9;
+  }
+  .btn-success:hover {
+    background-color: $wasdi-green-logo;
+    border-color: $wasdi-green-logo;
+    opacity: 1;
+
+  }
+  .btn-info
+  {
+    .text-info
+    {
+      color:white;
+    }
+  }
+
+}

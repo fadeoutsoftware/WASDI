@@ -171,8 +171,11 @@
     }
     .loadIcon
     {
+      color:$wasdi-blue-logo;
       display: table;
       margin: 0 auto;
+      margin-top: 50px;
+
     }
     /************************TABLE**************************/
     //Over tr
@@ -203,19 +206,29 @@
             .form-control
             {
               display: inline;
-              width:10%;
+              width:15%;
+              border: 2px solid $wasdi-blue-logo;
             }
           }
           .form-control
           {
             display: inline;
             width: 10%;
+            border: 2px solid $wasdi-blue-logo;
           }
           form
           {
             display: inline;
           }
-
+          li
+          {
+            a
+            {
+              //color:$wasdi-blue-logo;
+              border: 2px solid $wasdi-blue-logo;
+              //border-color: $wasdi-blue-logo;
+            }
+          }
         }
 
       }
@@ -255,6 +268,7 @@
         tbody
         {
           border-top: 1px solid #ddd;//FIX TABLE
+          //border-top: 2px solid $wasdi-blue-logo;
         }
 
 
@@ -281,20 +295,25 @@
           //font-size:12px;
           //line-height: 1.42857;
           //font-weight: 500;
-          .btn-group-vertical
+          .button-cell
           {
-            .btn-primary
+            vertical-align: middle;
+            .btn-group-vertical
             {
-              background-color: $wasdi-blue-logo;
-              border-color: $wasdi-white;
-              //border-color: $wasdi-green-logo;
-            }
-            .btn:hover
-            {
-              background-color: $wasdi-green-logo;
-              color: $wasdi-white;
+              .btn-primary
+              {
+                background-color: $wasdi-blue-logo;
+                border-color: $wasdi-white;
+                //border-color: $wasdi-green-logo;
+              }
+              .btn:hover
+              {
+                background-color: $wasdi-green-logo;
+                color: $wasdi-white;
+              }
             }
           }
+
           .image-cell
           {
             vertical-align:middle;
@@ -305,7 +324,11 @@
               font-size: 12px;
               //font-size:90%;
             }
-
+            //OVERRIDE BOOTSTRAP METHOD
+            .label-success
+            {
+              background-color: $wasdi-green-logo;
+            }
             //PREVIEW IMAGE
             .preview-layer-image
             {
@@ -339,6 +362,8 @@
       //margin: 10px;
       //box-shadow: 3px 5px 19px 0 rgba(49,50,50,.62);
       padding: 8px;
+
+
     }
     #advanced-search-close-button{
       top:10px;
@@ -357,6 +382,69 @@
       {
         margin-left: 0;
         padding-left: 0;
+      }
+
+      // css calendar
+      .input-calendar-container
+      {
+        table
+        {
+          tr,th
+          {
+            color:$wasdi-blue-logo;
+          }
+
+          thead
+          {
+            color:$wasdi-blue-logo;
+          }
+
+          strong
+          {
+            color:$wasdi-blue-logo;
+          }
+
+          i
+          {
+            color:$wasdi-blue-logo;
+          }
+
+          .btn-default {
+            border-color: $wasdi-blue-logo;
+          }
+        }
+
+        .btn-info
+        {
+          background-color: $wasdi-blue-logo;
+          border-color: $wasdi-blue-logo;
+          opacity: 0.9;
+        }
+        .btn-info:hover
+        {
+          background-color: $wasdi-blue-logo;
+          border-color: $wasdi-blue-logo;
+          opacity: 1;
+        }
+        .btn-success {
+          background-color: $wasdi-green-logo;
+          border-color: $wasdi-green-logo;
+          opacity: 0.9;
+        }
+        .btn-success:hover {
+          background-color: $wasdi-green-logo;
+          border-color: $wasdi-green-logo;
+          opacity: 1;
+
+        }
+        .btn-info
+        {
+          .text-info
+          {
+            color:white;
+          }
+        }
+
       }
 
       .my-input-text
