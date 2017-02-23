@@ -3,7 +3,7 @@
  */
 var EditorController = (function () {
     function EditorController($scope, $location, $interval, oConstantsService, oAuthService, oMapService, oFileBufferService,
-                              oProductService,$state,oWorkspaceService,oGlobeService,oProcessesLaunchedService, oRabbitStompService, oSnapOperationService) {
+                              oProductService,$state,oWorkspaceService,oGlobeService,oProcessesLaunchedService, oRabbitStompService, oSnapOperationService, oModalService) {
 
         // Reference to the needed Services
         this.m_oScope = $scope;
@@ -16,13 +16,15 @@ var EditorController = (function () {
         this.m_oFileBufferService = oFileBufferService;
         this.m_oProductService = oProductService;
         this.m_oSnapOperationService = oSnapOperationService;
-        this.m_oGlobeService=oGlobeService;
-        this.m_oState=$state;
-        this.m_oProcessesLaunchedService=oProcessesLaunchedService;
+        this.m_oGlobeService = oGlobeService;
+        this.m_oState = $state;
+        this.m_oProcessesLaunchedService = oProcessesLaunchedService;
         this.m_oWorkspaceService = oWorkspaceService;
         this.m_oRabbitStompServive = oRabbitStompService;
-        this.m_b2DMapModeOn=true;
-        this.m_b3DMapModeOn=false;
+        this.m_b2DMapModeOn = true;
+        this.m_b3DMapModeOn = false;
+        this.m_bIsVisibleMapOfLeaflet = false;
+        this.m_oModalService = oModalService;
         //layer list
         this.m_aoLayersList=[];//only id
         //this.m_aoProcessesRunning=[];
@@ -71,43 +73,16 @@ var EditorController = (function () {
 
         // Initialize the map
 
-        oMapService.initMap('wasdiMap');
+        //oMapService.initMap('wasdiMap');
+        oMapService.initMapEditor('wasdiMap');
+        oMapService.removeLayersFromMap();
         this.m_oGlobeService.initGlobe('cesiumContainer2');
-
-        // Clean Up when exit!!
-        //this.m_oScope.$on('$destroy', function () {
-        //    // Is this a re-connection?
-        //    if (oController.m_oReconnectTimerPromise != null) {
-        //        // Yes it is: clear the timer
-        //        oController.m_oInterval.cancel(oController.m_oReconnectTimerPromise);
-        //        oController.m_oReconnectTimerPromise = null;
-        //    }
-        //    else {
-        //        if (oController.m_oClient != null) {
-        //            oController.m_oClient.disconnect();
-        //        }
-        //    }
-        //});
-
 
 
     }
 
     /********************METHODS********************/
-    //EditorController.prototype.test = function()
-    //{
-    //
-    //    var treeInst = $('#jstree').jstree(true);
-    //    var prova =   $('#jstree').jstree(true).settings.core.data;
-    //    var m = treeInst._model.data;
-    //    for(var i in m) {
-    //        if(m[i].text =='S1A_WV_OCN__2SSV_20170209T012729_20170209T013605_015200_018E31_C98B' ) {
-    //            treeInst.select_node(i);
-    //            break;
-    //        }
-    //    }
-    //    //node = treeInst.get_node("[text='S1A_WV_OCN__2SSV_20170209T012729_20170209T013605_015200_018E31_C98B']");
-    //}
+
     EditorController.prototype.openPublishedBandsInTree = function()
     {
 
@@ -199,14 +174,49 @@ var EditorController = (function () {
         }
 
         //add layer in list
-        this.m_aoLayersList.push(oLayer);
-        this.addLayerMap2D(oLayer.layerId);
-        this.addLayerMap3D(oLayer.layerId);
+
+
+
+        // check if the background is grey or there is a map
+        if(this.m_bIsVisibleMapOfLeaflet == true)
+        {
+            //if there is a map, add layers to it
+            this.addLayerMap2D(oLayer.layerId);
+            this.addLayerMap3D(oLayer.layerId);
+            this.m_aoLayersList.push(oLayer);
+        }
+        else
+        {
+            //if the backgrounds is grey
+            // remove all others bands in tree - map
+            var iNumberOfLayers = this.m_aoLayersList.length;
+            for(var iIndexLayer = 0; iIndexLayer < iNumberOfLayers; iIndexLayer++)
+            {
+                var oNode = $('#jstree').jstree(true).get_node(this.m_aoLayersList[iIndexLayer].layerId);
+                oNode.original.bPubblish = false;
+                $('#jstree').jstree(true).set_icon(this.m_aoLayersList[iIndexLayer].layerId, 'assets/icons/uncheck_20x20.png');
+            }
+            this.m_aoLayersList = [];
+            this.m_oMapService.removeLayersFromMap();
+            this.m_oGlobeService.clearGlobe();
+            this.m_oGlobeService.initGlobe('cesiumContainer2');
+
+            // so add the new bands
+            // and the bounding box in cesium
+            var oBounds = JSON.parse(oLayer.boundingBox);
+            this.m_oGlobeService.addRectangleOnGlobe([oBounds.minx,oBounds.miny,oBounds.maxx,oBounds.maxy]);
+            this.addLayerMap2D(oLayer.layerId);
+            this.m_aoLayersList.push(oLayer);
+            this.zoomOnLayer2DMap(oLayer.layerId);
+            this.zoomOnLayer3DGlobe(oLayer.layerId);
+        }
+
 
         /*CHANGE TREE */
         var oNode = $('#jstree').jstree(true).get_node(oLayer.layerId);
         oNode.original.bPubblish = true;
         $('#jstree').jstree(true).set_icon(oLayer.layerId, 'assets/icons/check_20x20.png');
+        var oNodet = $('#jstree').jstree(true).get_node(oLayer.layerId);
         //$('#jstree').jstree(true).set_icon(oLayer.layerId, 'assets/icons/check.png');
     }
 
@@ -258,15 +268,47 @@ var EditorController = (function () {
     EditorController.prototype.addLayerMap2D = function (sLayerId) {
         //
         var oMap = this.m_oMapService.getMap();
-        var sUrl=this.m_oConstantsService.getWmsUrlGeoserver();//'http://localhost:8080/geoserver/ows?'
+        var sUrl = this.m_oConstantsService.getWmsUrlGeoserver();//'http://localhost:8080/geoserver/ows?'
 
-        var wmsLayer = L.tileLayer.wms(sUrl, {
+        //var wmsLayer = L.tileLayer.wms(sUrl, {
+        //    layers: 'wasdi:' + sLayerId,
+        //    format: 'image/png',
+        //    transparent: true,
+        //    noWrap:true
+        //});
+
+        var wmsLayer = L.tileLayer.betterWms(sUrl, {
             layers: 'wasdi:' + sLayerId,
             format: 'image/png',
             transparent: true,
             noWrap:true
         });
         wmsLayer.addTo(oMap);
+
+
+        //
+        //var source = L.WMS.source(sUrl, {
+        //    layers: 'wasdi:' + sLayerId,
+        //    format: 'image/png',
+        //    transparent: true,
+        //    noWrap:true
+        //});
+        //source.getLayer('wasdi:' + sLayerId).addTo(oMap);
+
+
+        //var MySource = L.WMS.Source.extend({
+        //    'ajax': function(url, callback) {
+        //        $.ajax(url, {
+        //            'context': this,
+        //            'success': function(result) {
+        //                callback.call(this, result);
+        //            }
+        //        });
+        //    },
+        //    'showFeatureInfo': function(latlng, info) {
+        //        $('.output').html(info);
+        //    }
+        //});
 
     }
 
@@ -443,7 +485,11 @@ var EditorController = (function () {
         oMap2D.eachLayer(function(layer)
         {
             if(utilsIsStrNullOrEmpty(sLayerId) == false && layer.options.layers == sLayerId)
+            {
+                //oController.m_oMapService.removeLayerFromMap(layer)
                 oMap2D.removeLayer(layer);
+
+            }
         });
 
         //remove layer in 3D globe
@@ -451,17 +497,27 @@ var EditorController = (function () {
         var bCondition = true;
         var iIndexLayer = 0;
 
-        while(bCondition)
-        {
-            oLayer = oGlobeLayers.get(iIndexLayer);
 
-            if(utilsIsStrNullOrEmpty(sLayerId) == false && utilsIsObjectNullOrUndefined(oLayer) == false
-                && oLayer.imageryProvider.layers == sLayerId)
+        if( this.m_bIsVisibleMapOfLeaflet == true)
+        {
+            while(bCondition )
             {
-                bCondition=false;
-                oLayer=oGlobeLayers.remove(oLayer);
+                oLayer = oGlobeLayers.get(iIndexLayer);
+
+                if(utilsIsStrNullOrEmpty(sLayerId) == false && utilsIsObjectNullOrUndefined(oLayer) == false
+                    && oLayer.imageryProvider.layers == sLayerId)
+                {
+                    bCondition=false;
+                    oLayer=oGlobeLayers.remove(oLayer);
+                }
+                iIndexLayer++;
             }
-            iIndexLayer++;
+
+        }
+        else
+        {
+            this.m_oGlobeService.clearGlobe();
+            this.m_oGlobeService.initGlobe('cesiumContainer2');
         }
 
         //Remove layer from layers list
@@ -866,124 +922,58 @@ var EditorController = (function () {
         return true;
     }
 
+    EditorController.prototype.addOrRemoveMapLayer = function()
+    {
+        this.m_bIsVisibleMapOfLeaflet = !this.m_bIsVisibleMapOfLeaflet;
+        if(this.m_bIsVisibleMapOfLeaflet == true)
+        {
+            this.m_oGlobeService.clearGlobe();
+            this.m_oGlobeService.initGlobe('cesiumContainer2');
+
+            var iNumberOfLayers = this.m_aoLayersList.length;
+            for(var iIndexLayer = 0; iIndexLayer < iNumberOfLayers; iIndexLayer++)
+            {
+                this.addLayerMap3D(this.m_aoLayersList[iIndexLayer].layerId);
+            }
+
+            this.m_oMapService.setBasicMap();
+        }
+        else
+        {
+
+            this.m_oMapService.removeLayersFromMap();
+            this.m_oGlobeService.clearGlobe();
+            this.m_oGlobeService.initGlobe('cesiumContainer2');
+
+            var iNumberOfLayers = this.m_aoLayersList.length;
+            for(var iIndexLayer = 0; iIndexLayer < iNumberOfLayers; iIndexLayer++)
+            {
+                var oNode = $('#jstree').jstree(true).get_node(this.m_aoLayersList[iIndexLayer].layerId);
+                oNode.original.bPubblish = false;
+                $('#jstree').jstree(true).set_icon(this.m_aoLayersList[iIndexLayer].layerId, 'assets/icons/uncheck_20x20.png');
+            }
+            this.m_aoLayersList = [];
+        }
+
+    }
+
+    EditorController.prototype.openGetCapabilitiesDialog = function()
+    {
 
 
-    /* Push process in List of Running Processes (in server)
-    * */
+        var oController = this
+        this.m_oModalService.showModal({
+            templateUrl: "dialogs/get_capabilities_dialog/GetCapabilitiesDialog.html",
+            controller: "GetCapabilitiesController"
+        }).then(function(modal) {
+            modal.element.modal();
+            modal.close.then(function(result) {
+                oController.m_oScope.Result = result ;
+            });
+        });
 
-    //EditorController.prototype.pushProcessInListOfRunningProcesses=function(sProcess,oIdBandNodeInTree)
-    //{
-    //    //if str == null or == ""
-    //    if(utilsIsStrNullOrEmpty(sProcess))
-    //        return false;
-    //
-    //    var iNumberOfProcessesRunning;
-    //    var bFind=false;
-    //    var oController=this;
-    //
-    //    //check the number of processes
-    //    if(utilsIsObjectNullOrUndefined(oController.m_aoProcessesRunning)==true)
-    //    {
-    //        iNumberOfProcessesRunning = 0;
-    //    }
-    //    else
-    //    {
-    //        iNumberOfProcessesRunning = oController.m_aoProcessesRunning.length;
-    //    }
-    //    //it doesn't push the process if it already exist
-    //    for( var iIndexProcesses = 0; iIndexProcesses < iNumberOfProcessesRunning ; iIndexProcesses++)
-    //    {
-    //        // if it find a process in ProcessesRunningList it doesn't need to push it
-    //         if(oController.m_aoProcessesRunning[iIndexProcesses].processName == sProcess)
-    //         {
-    //             bFind=true;
-    //             break;
-    //         }
-    //    }
-    //
-    //    if(bFind == false) {
-    //
-    //        oController.m_aoProcessesRunning.push({processName:sProcess,nodeId:oIdBandNodeInTree});
-    //        //update cookie
-    //        oController.m_oConstantsService.setCookie("m_aoProcessesRunning", oController.m_aoProcessesRunning, 1);
-    //    }
-    //
-    //}
-
-    /*
-    Remove process in List of Running processes
-    * */
-    //EditorController.prototype.removeProcessInListOfRunningProcesses=function(sProcess)
-    //{
-    //    if(utilsIsStrNullOrEmpty(sProcess))
-    //        return false;
-    //
-    //    var oController=this;
-    //    var iLength;
-    //
-    //    if(utilsIsObjectNullOrUndefined(oController.m_aoProcessesRunning) == true )
-    //    {
-    //        iLength = 0;
-    //    }
-    //    else
-    //    {
-    //        iLength = oController.m_aoProcessesRunning.length;
-    //    }
-    //
-    //    for(var iIndex = 0;iIndex < iLength ;iIndex++ )
-    //    {
-    //        if(oController.m_aoProcessesRunning[iIndex].processName == sProcess)
-    //        {
-    //            oController.m_aoProcessesRunning.splice(iIndex);
-    //            //update cookie
-    //            oController.m_oConstantsService.setCookie("m_aoProcessesRunning", oController.m_aoProcessesRunning, 1);
-    //        }
-    //    }
-    //
-    //    //oController.m_oScope.$apply();CHECK IF WE NEED IT
-    //}
-
-    /*
-    * */
-    //EditorController.prototype.isEmptyListOfRunningProcesses = function()
-    //{
-    //    var oController = this;
-    //    if(utilsIsObjectNullOrUndefined(oController.m_aoProcessesRunning) == false)
-    //    {
-    //        if(oController.m_aoProcessesRunning.length == 0)
-    //            return true;
-    //        else
-    //            return false;
-    //    }
-    //    else
-    //    {
-    //        return true;
-    //    }
-    //
-    //
-
-    /* fetch (after a page reload)all the running processes, check all the uncheck nodes
-    *  corresponding to the process
-    * */
-
-    //TODO CHANGE IT
-    //EditorController.prototype.checkNodesInTree = function()
-    //{
-    //    var oController = this;
-    //
-    //    if(utilsIsObjectNullOrUndefined(oController.m_aoProcessesRunning) || oController.m_aoProcessesRunning.length == 0) {
-    //        return false;
-    //    }
-    //
-    //    var iLength = oController.m_aoProcessesRunning.length;
-    //    for(var iIndex = 0; iIndex < iLength; iIndex ++)
-    //    {
-    //        var sNodeId = oController.m_aoProcessesRunning[iIndex].nodeId;
-    //        $('#jstree').jstree(true).set_icon(sNodeId,"assets/icons/check.png");
-    //    }
-    //    return true;
-    //
-    //}
+        return true;
+    }
 
     EditorController.$inject = [
         '$scope',
@@ -999,7 +989,9 @@ var EditorController = (function () {
         'GlobeService',
         'ProcessesLaunchedService',
         'RabbitStompService',
-        'SnapOperationService'
+        'SnapOperationService',
+        'ModalService',
+
     ];
 
     return EditorController;
