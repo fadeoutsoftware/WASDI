@@ -17,12 +17,14 @@ import org.esa.snap.core.util.geotiff.GeoCoding2GeoTIFFMetadata;
 import org.esa.snap.core.util.geotiff.GeoTIFF;
 import org.esa.snap.core.util.geotiff.GeoTIFFMetadata;
 import org.esa.snap.engine_utilities.util.MemUtils;
+import sun.management.VMManagement;
 import wasdi.filebuffer.DownloadFile;
 import org.apache.commons.cli.*;
 import wasdi.geoserver.Publisher;
 import wasdi.rabbit.Send;
 import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.DownloadedFile;
+import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.business.PublishedBand;
 import wasdi.shared.data.DownloadedFilesRepository;
 import wasdi.shared.data.MongoRepository;
@@ -43,6 +45,10 @@ import javax.media.jai.JAI;
 import javax.media.jai.TileScheduler;
 import java.awt.image.BufferedImage;
 import java.io.*;
+import java.lang.management.ManagementFactory;
+import java.lang.management.RuntimeMXBean;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -153,6 +159,8 @@ public class LauncherMain {
             MongoRepository.SERVER_ADDRESS = ConfigReader.getPropValue("MONGO_ADDRESS");
             MongoRepository.SERVER_PORT = Integer.parseInt(ConfigReader.getPropValue("MONGO_PORT"));
             MongoRepository.DB_NAME = ConfigReader.getPropValue("MONGO_DBNAME");
+            MongoRepository.DB_USER = ConfigReader.getPropValue("MONGO_DBUSER");
+            MongoRepository.DB_PWD = ConfigReader.getPropValue("MONGO_DBPWD");
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -240,14 +248,51 @@ public class LauncherMain {
         }
     }
 
+    private Integer GetProcessId()
+    {
+        Integer iPid = 0;
+        try {
+            RuntimeMXBean runtimeMXBean = ManagementFactory.getRuntimeMXBean();
+            Field jvmField = runtimeMXBean.getClass().getDeclaredField("jvm");
+            jvmField.setAccessible(true);
+            VMManagement vmManagement = (VMManagement) jvmField.get(runtimeMXBean);
+            Method getProcessIdMethod = vmManagement.getClass().getDeclaredMethod("getProcessId");
+            getProcessIdMethod.setAccessible(true);
+            iPid = (Integer) getProcessIdMethod.invoke(vmManagement);
+
+        } catch (Exception oEx) {
+            s_oLogger.debug("LauncherMain.GetProcessId: Error getting processId: " + oEx.getMessage());
+        }
+
+        return iPid;
+    }
+
 
     public String Download(DownloadFileParameter oParameter, String sDownloadPath) {
         String sFileName = "";
         // Rabbit Sender
         Send oSendToRabbit = new Send();
+        // Download handler
+        DownloadFile oDownloadFile = new DownloadFile();
 
         try {
             s_oLogger.debug("LauncherMain.Download: Download Start");
+
+            ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
+            ProcessWorkspace oProcessWorkspace = oProcessWorkspaceRepository.GetProcessByProductName(oParameter.getUrl());
+            if (oProcessWorkspace != null) {
+                //get file size
+                long lFileSizeByte = oDownloadFile.GetDownloadFileSize(oParameter.getUrl());
+                long lFileSizeMega = lFileSizeByte / (1024 * 1024);
+                s_oLogger.debug("LauncherMain.Download: File size = " + lFileSizeMega);
+                //set file size
+                oProcessWorkspace.setFileSize(Long.toString(lFileSizeMega));
+                //get process pid
+                oProcessWorkspace.setPid(GetProcessId());
+                //update the process
+                if (!oProcessWorkspaceRepository.UpdateProcess(oProcessWorkspace))
+                    s_oLogger.debug("LauncherMain.Download: Error during process update");
+            }
 
             //Init rabbit exchange and queue
             if (oSendToRabbit.Init(oParameter.getWorkspace(), oParameter.getUserId()) == false)
@@ -276,8 +321,6 @@ public class LauncherMain {
             // Download file
             if (ConfigReader.getPropValue("DOWNLOAD_ACTIVE").equals("true")) {
 
-                // Download handler
-                DownloadFile oDownloadFile = new DownloadFile();
 
                 // Get the file name
                 String sFileNameWithoutPath = oDownloadFile.GetFileName(oParameter.getUrl());
@@ -350,71 +393,6 @@ public class LauncherMain {
             else {
 
                 ProductToViewModel(oVM, sFileName, oParameter.getWorkspace(), oParameter.getExchange(), LauncherOperations.DOWNLOAD);
-
-                /*
-                s_oLogger.debug("LauncherMain.Download: File Name = " + sFileName);
-
-                // Get The product view Model
-                ReadProduct oReadProduct = new ReadProduct();
-                s_oLogger.debug("LauncherMain.Download: call read product");
-                File oProductFile = new File(sFileName);
-                oVM = oReadProduct.getProductViewModel(new File(sFileName));
-                oVM.setMetadata(oReadProduct.getProductMetadataViewModel(oProductFile));
-
-                if (oVM.getBandsGroups() == null) s_oLogger.debug("LauncherMain.Download: Band Groups is NULL");
-                else if (oVM.getBandsGroups().getBands() == null) s_oLogger.debug("LauncherMain.Download: bands is NULL");
-                else {
-                    s_oLogger.debug("LauncherMain.Download: bands " + oVM.getBandsGroups().getBands().size());
-                }
-
-                s_oLogger.debug("LauncherMain.Download: done read product");
-
-                if (oVM == null) s_oLogger.debug("LauncherMain.Download VM is null!!!!!!!!!!");
-
-                s_oLogger.debug("Insert in db");
-                // Save it in the register
-                DownloadedFile oAlreadyDownloaded = new DownloadedFile();
-                File oFile = new File(sFileName);
-                oAlreadyDownloaded.setFileName(oFile.getName());
-                oAlreadyDownloaded.setFilePath(sFileName);
-                oAlreadyDownloaded.setProductViewModel(oVM);
-
-                DownloadedFilesRepository oDownloadedRepo = new DownloadedFilesRepository();
-                oDownloadedRepo.InsertDownloadedFile(oAlreadyDownloaded);
-
-                s_oLogger.debug("OK DONE");
-
-                s_oLogger.debug("LauncherMain.Download: Image downloaded. Send Rabbit Message");
-
-                if (oVM!=null) {
-
-                    s_oLogger.debug("LauncherMain.Download: Queue = " + oParameter.getQueue());
-
-                    RabbitMessageViewModel oMessageViewModel = new RabbitMessageViewModel();
-                    oMessageViewModel.setMessageCode(LauncherOperations.DOWNLOAD);
-                    oMessageViewModel.setWorkspaceId(oParameter.getWorkspace());
-                    oMessageViewModel.setMessageResult("OK");
-                    oMessageViewModel.setPayload(oVM);
-
-                    String sJSON = MongoRepository.s_oMapper.writeValueAsString(oMessageViewModel);
-
-                    if (oSendToRabbit.SendMsgOnExchange(oParameter.getExchange(), sJSON)==false) {
-                        s_oLogger.debug("LauncherMain.Download: Error sending Rabbit Message");
-                    }
-                }
-                else {
-                    s_oLogger.debug("LauncherMain.Download: Unable to read image. Send Rabbit Message");
-
-                    RabbitMessageViewModel oMessageViewModel = new RabbitMessageViewModel();
-                    oMessageViewModel.setMessageCode(LauncherOperations.DOWNLOAD);
-                    oMessageViewModel.setWorkspaceId(oParameter.getWorkspace());
-                    oMessageViewModel.setMessageResult("KO");
-                    String sJSON = MongoRepository.s_oMapper.writeValueAsString(oMessageViewModel);
-
-                    oSendToRabbit.SendMsgOnExchange(oParameter.getExchange(), sJSON);
-                }
-                */
-
             }
         }
         catch (Exception oEx) {
@@ -783,8 +761,7 @@ public class LauncherMain {
 
             if (oSourceProduct == null)
             {
-                s_oLogger.debug("LauncherMain.TerrainOperation: Source Product null");
-                return;
+                throw new Exception("LauncherMain.TerrainOperation: Source Product null");
             }
 
             //Terrain Operation
@@ -793,8 +770,7 @@ public class LauncherMain {
             Product oTerrainProduct = oTerrainCorrection.getTerrainCorrection(oSourceProduct, oParameter.getSettings());
             if (oTerrainProduct == null)
             {
-                s_oLogger.debug("LauncherMain.TerrainOperation: Terrain product null");
-                return;
+                throw new Exception("LauncherMain.TerrainOperation: Terrain product null");
             }
 
             s_oLogger.debug("LauncherMain.TerrainOperation: Write Big Tiff");
@@ -805,8 +781,7 @@ public class LauncherMain {
 
             if (Utils.isNullOrEmpty(sTiffFile))
             {
-                s_oLogger.debug("LauncherMain.TerrainOperation: Tiff not created ");
-                return;
+                throw new Exception("LauncherMain.TerrainOperation: Tiff not created");
             }
 
             s_oLogger.debug("LauncherMain.TerrainOperation: convert product to view model");
@@ -862,6 +837,15 @@ public class LauncherMain {
         Send oSendToRabbit = new Send();
 
         try {
+
+            ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
+            ProcessWorkspace oProcessWorkspace = oProcessWorkspaceRepository.GetProcessByProductName(oParameter.getFileName());
+            if (oProcessWorkspace != null) {
+                //get process pid
+                oProcessWorkspace.setPid(GetProcessId());
+                //update the process
+                oProcessWorkspaceRepository.UpdateProcess(oProcessWorkspace);
+            }
 
             //Init rabbit exchange and queue
             if (oSendToRabbit.Init(oParameter.getWorkspace(), oParameter.getUserId()) == false)
