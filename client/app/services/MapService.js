@@ -9,6 +9,7 @@ service('MapService', ['$http','$rootScope', 'ConstantsService', function ($http
     this.m_oHttp = $http;
     this.m_oRectangleOpenSearch = null;
     this.m_oDrawItems = null;
+    this.m_oConstantsService = oConstantsService;
     /**
      * base layers
      */
@@ -139,6 +140,7 @@ service('MapService', ['$http','$rootScope', 'ConstantsService', function ($http
              //maxZoom: 22
         });
 
+        //this.removeLayersFromMap();
 
         /* coordinates in map
         * find this plugin in lib folder
@@ -338,4 +340,33 @@ service('MapService', ['$http','$rootScope', 'ConstantsService', function ($http
         this.m_oWasdiMap.fitWorld();
     }
 
+    this.setBasicMap = function()
+    {
+        if(utilsIsObjectNullOrUndefined(this.m_oOSMBasic))
+            return false
+
+        this.m_oWasdiMap.addLayer(this.m_oOSMBasic,true);
+        return true;
+    }
+
+    this.removeBasicMap = function()
+    {
+        if(utilsIsObjectNullOrUndefined(this.m_oOSMBasic))
+            return false
+        this.removeLayerFromMap(this.m_oOSMBasic);
+        return true;
+    }
+
+    this.initMapEditor = function(sMapDiv)
+    {
+        if(utilsIsObjectNullOrUndefined(sMapDiv))
+            return false;
+        this.initMap(sMapDiv);
+
+        //this.m_oWasdiMap.on('click', function(e){
+        //    //// console.log(e);
+        //    //e.layer.bringToBack();
+        //});
+        return true;
+    }
 }]);

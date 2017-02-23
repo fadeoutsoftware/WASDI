@@ -85,6 +85,23 @@ service('GlobeService', ['$http',  'ConstantsService', function ($http, oConstan
             }
         });
     }
+    this.addRectangleOnGlobe = function (oRectangle)
+    {
+        if(utilsIsObjectNullOrUndefined(oRectangle))
+            return null;
+
+        var redRectangle =   this.m_oWasdiGlobe.entities.add({
+            name : 'Red translucent rectangle with outline',
+            rectangle : {
+                coordinates : Cesium.Rectangle.fromDegrees(oRectangle[0],oRectangle[1],oRectangle[2],oRectangle[3]),
+                material : Cesium.Color.RED.withAlpha(0.7),
+                outline : true,
+                outlineColor : Cesium.Color.RED
+            }
+        });
+
+        return redRectangle;
+    }
 
 }]);
 

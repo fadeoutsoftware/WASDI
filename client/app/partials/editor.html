@@ -2,17 +2,17 @@
     <div class="col-lg-1 col-md-2 col-sm-2 col-xs-2" ></div>
     <div class="col-lg-11 col-md-10 col-sm-10 col-xs-10 operations-bar" >
         <ul>
-            <li data-toggle="tooltip" data-placement="top" title="Coming soon" style="cursor:no-drop;"><!-- data-toggle="tooltip" data-placement="top" title="Operazione1"-->
+            <li data-toggle="tooltip" data-placement="top" title="Coming soon" style="cursor:no-drop;">
                 <a><i class="fa fa-grav fa-3x" aria-hidden="true"></i></a>
             </li>
-            <li data-toggle="tooltip" data-placement="top" title="Coming soon" style="cursor:no-drop;"><!-- data-toggle="tooltip" data-placement="top" title="Operazione1"-->
+            <li data-toggle="tooltip" data-placement="top" title="Coming soon" style="cursor:no-drop;">
                 <a><i class="fa fa-rocket fa-3x" aria-hidden="true"></i></a>
             </li>
-            <li data-toggle="tooltip" data-placement="top" title="Coming soon" style="cursor:no-drop;" ><!-- data-toggle="tooltip" data-placement="top" title="Operazione1"-->
-                <a><i class="fa fa-bar-chart fa-3x" aria-hidden="true"></i></a>
+            <li data-toggle="tooltip" data-placement="top" title="Coming soon" style="cursor:no-drop;" >
+                <a><i class="fa fa-wpexplorer fa-3x" aria-hidden="true"></i></a>
             </li>
-            <li data-toggle="tooltip" data-placement="top" title="Coming soon" style="cursor:no-drop;" ><!-- data-toggle="tooltip" data-placement="top" title="Operazione1"-->
-                <a><i class="fa fa-sitemap fa-3x" aria-hidden="true"></i></a>
+            <li data-toggle="tooltip" data-placement="top" title="Coming soon" style="cursor:no-drop;" >
+                <a><i class="fa fa-space-shuttle fa-3x" aria-hidden="true"></i></a>
             </li>
         </ul>
     </div>
@@ -37,18 +37,19 @@
         <!--**************** PANEL CESIUM GLOBE *********************-->
         <div class="panel panel-default small-map-container">
             <div class="panel-heading">
-                <div class="my-button" ng-click="m_oController.onClickChangeMap()" data-toggle="tooltip" data-placement="top" title="{{'EDITOR_TOOLTIP_SWITCH_3D_2D'|translate}}">
+                <div class="my-button" ng-click="m_oController.onClickChangeMap()" data-toggle="tooltip" data-placement="top"
+                     title="{{'EDITOR_TOOLTIP_SWITCH_3D_2D'|translate}}" ng-show=" m_oController.m_bIsVisibleMapOfLeaflet == true">
                     <i ng-show="m_oController.m_b2DMapModeOn == true" class="fa fa-map-o" aria-hidden="true"></i>
                     <i  ng-show="m_oController.m_b3DMapModeOn == true" class="fa fa-globe " aria-hidden="true"></i>
                 </div>
                 <!-- 2D map button-->
                 <div class="my-button" ng-click="m_oController.synchronize2DMap()" data-toggle="tooltip" data-placement="top" title="{{'EDITOR_TOOLTIP_SYNCHRONIZE_MAP_2D'|translate}}"
-                     ng-show="m_oController.m_b2DMapModeOn == false && m_oController.m_b3DMapModeOn == true  "><!--m_oController.m_oConstantsService.deleteCookie('m_aoProcessesRunning');-->
+                     ng-show="m_oController.m_b2DMapModeOn == false && m_oController.m_b3DMapModeOn == true && m_oController.m_bIsVisibleMapOfLeaflet == true "><!--m_oController.m_oConstantsService.deleteCookie('m_aoProcessesRunning');-->
                     <i class="fa fa-location-arrow" aria-hidden="true"></i>
                 </div>
                 <!-- 3D map button-->
                 <div class="my-button" ng-click="m_oController.synchronize3DMap()" data-toggle="tooltip" data-placement="top" title="{{'EDITOR_TOOLTIP_SYNCHRONIZE_MAP_3D'|translate}}"
-                     ng-show="m_oController.m_b2DMapModeOn == true && m_oController.m_b3DMapModeOn == false" ><!--m_oController.m_oConstantsService.deleteCookie('m_aoProcessesRunning');-->
+                     ng-show="m_oController.m_b2DMapModeOn == true && m_oController.m_b3DMapModeOn == false && m_oController.m_bIsVisibleMapOfLeaflet == true" ><!--m_oController.m_oConstantsService.deleteCookie('m_aoProcessesRunning');-->
                     <i class="fa fa-location-arrow" aria-hidden="true"></i>
                 </div>
                 <!--<img class="my-button" src="assets/icons/map2D.svg" alt="Map 2D" height="40" width="40">-->
@@ -71,24 +72,40 @@
         <div class="btn-group" role="group" >
             <!-- 2D map button-->
             <button type="button" class="btn btn-default" ng-click="m_oController.m_oMapService.getHome();"  data-toggle="tooltip"
-                    data-placement="bottom"  title="{{'EDITOR_TOOLTIP_HOME'|translate}}" ng-show="m_oController.m_b2DMapModeOn == true && m_oController.m_b3DMapModeOn == false">
+                    data-placement="bottom"  title="{{'EDITOR_TOOLTIP_HOME'|translate}}"
+                    ng-show="m_oController.m_b2DMapModeOn == true && m_oController.m_b3DMapModeOn == false && m_oController.m_bIsVisibleMapOfLeaflet == true">
                 <i class="fa fa-home fa-lg" aria-hidden="true"></i>
             </button>
             <!-- 2D map button-->
             <button type="button" class="btn btn-default" ng-click="m_oController.synchronize2DMap();"  data-toggle="tooltip"
-                    data-placement="bottom"  title="{{'EDITOR_TOOLTIP_SYNCHRONIZE_MAP_2D'|translate}}" ng-show="m_oController.m_b2DMapModeOn == true && m_oController.m_b3DMapModeOn == false">
+                    data-placement="bottom"  title="{{'EDITOR_TOOLTIP_SYNCHRONIZE_MAP_2D'|translate}}"
+                    ng-show="m_oController.m_b2DMapModeOn == true && m_oController.m_b3DMapModeOn == false && m_oController.m_bIsVisibleMapOfLeaflet == true">
                 <i class="fa fa-location-arrow" aria-hidden="true"></i>
             </button>
 
             <!-- 3D map button-->
             <button type="button" class="btn btn-default" ng-click="m_oController.m_oGlobeService.goHome()"  data-toggle="tooltip"
-                    data-placement="bottom"  title="{{'EDITOR_TOOLTIP_HOME'|translate}}" ng-show="m_oController.m_b2DMapModeOn == false && m_oController.m_b3DMapModeOn == true">
+                    data-placement="bottom"  title="{{'EDITOR_TOOLTIP_HOME'|translate}}"
+                    ng-show="m_oController.m_b2DMapModeOn == false && m_oController.m_b3DMapModeOn == true && m_oController.m_bIsVisibleMapOfLeaflet == true">
                 <i class="fa fa-home fa-lg" aria-hidden="true"></i>
             </button>
             <!-- 3D map button-->
             <button type="button" class="btn btn-default" ng-click="m_oController.synchronize3DMap();"  data-toggle="tooltip"
-                    data-placement="bottom"  title="{{'EDITOR_TOOLTIP_SYNCHRONIZE_MAP_3D'|translate}}" ng-show="m_oController.m_b2DMapModeOn == false && m_oController.m_b3DMapModeOn == true">
+                    data-placement="bottom"  title="{{'EDITOR_TOOLTIP_SYNCHRONIZE_MAP_3D'|translate}}"
+                    ng-show="m_oController.m_b2DMapModeOn == false && m_oController.m_b3DMapModeOn == true && m_oController.m_bIsVisibleMapOfLeaflet == true">
                 <i class="fa fa-location-arrow" aria-hidden="true"></i>
+            </button>
+
+            <button type="button" class="btn btn-default" ng-click="m_oController.addOrRemoveMapLayer()"  data-toggle="tooltip"
+                    data-placement="bottom"  title="{{'EDITOR_TOOLTIP_DELETE_ADD_LAYER_MAP'|translate}}"
+                    ng-hide="m_oController.m_b2DMapModeOn == false && m_oController.m_b3DMapModeOn == true && m_oController.m_bIsVisibleMapOfLeaflet == true">
+                <i class="fa fa-sticky-note" aria-hidden="true"></i>
+            </button>
+
+            <button type="button" class="btn btn-default" ng-click="m_oController.openGetCapabilitiesDialog()"  data-toggle="tooltip"
+                    data-placement="bottom"  title="{{'EDITOR_TOOLTIP_GET_CAPABILITIES'|translate}}"
+                    ng-hide="m_oController.m_b2DMapModeOn == false && m_oController.m_b3DMapModeOn == true && m_oController.m_bIsVisibleMapOfLeaflet == true">
+                <i class="fa fa-server" aria-hidden="true"></i>
             </button>
         </div>
 
@@ -100,12 +117,6 @@
         <div id="cesiumContainer" class="map" ng-show="m_oController.m_b2DMapModeOn == false && m_oController.m_b3DMapModeOn == true  "></div>
     </div>
 
-    <!--&lt;!&ndash;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45; STATUS BAR -&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&ndash;&gt;-->
-    <!--<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 status-bar ">-->
-        <!--<span ng-repeat="oProcess in m_oController.m_aoProcessesRunning track by $index">-->
-            <!--<i class="fa fa-spinner fa-pulse fa-fw"></i> {{oProcess.processName}}-->
-        <!--</span>-->
-    <!--</div>-->
 
 </div>
 

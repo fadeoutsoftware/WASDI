@@ -69,6 +69,8 @@
   <script src="bower_components/angular-ui-router/release/angular-ui-router.min.js"></script>
   <script src="bower_components/angular-bootstrap/ui-bootstrap-tpls.js"></script>
   <script src="bower_components/moment/moment.js"></script>
+  <!--<script src="bower_components/leaflet.wms/dist/leaflet.wms.js"></script>  &lt;!&ndash; LEAFLET.WMS&ndash;&gt;-->
+  <script src="bower_components/wms-capabilities/dist/wms-capabilities.min.js"></script> <!-- WMS CAPABILITIES-->
 
   <!--Datetime picker-->
   <script type="text/javascript" src="bower_components/moment-picker/src/angular-moment-picker.js"></script>
@@ -103,9 +105,12 @@
   <script src="controllers/RootController.js"></script>
   <script src="controllers/ImportController.js"></script>
   <script src="controllers/SearchOrbitController.js"></script>
+
+
     <!--Dialogs controllers-->
   <script src="dialogs/orbit_info/OrbitInfoController.js"></script>
   <script src="dialogs/product_info/ProductInfoController.js"></script>
+  <script src="dialogs/get_capabilities_dialog/GetCapabilitiesController.js"></script>
 
   <script src="app.js"></script>
 
@@ -146,5 +151,7 @@
   <!--Modal-->
   <script src="bower_components/angular-modal-service/dst/angular-modal-service.min.js"></script>
 
+  <!-- Better WMS leaflet-->
+  <script src="lib/leafletbetterWMS/L.TileLayer.BetterWMS.js"></script>
 </body>
 </html>

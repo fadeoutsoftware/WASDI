@@ -23,7 +23,7 @@
       min-height: 50px;
       min-width: 250px;
       max-width:512px;
-      max-height:102px;
+      //max-height:102px;
       //POSITIONING ELEMENT
       position: absolute;
       top: 85%;
@@ -46,6 +46,22 @@
     }
 
     .link-login:hover
+    {
+      color:$wasdi-green-logo;
+    }
+
+    .link-register
+    {
+      position: absolute;
+      right: 8%;
+      padding: 10px;
+      display: inline;
+      cursor:pointer;
+      color:$wasdi-white;
+
+    }
+
+    .link-register:hover
     {
       color:$wasdi-green-logo;
     }

@@ -127,3 +127,4 @@ wasdiApp.controller("SearchOrbitController",SearchOrbitController);
 //dialogs
 wasdiApp.controller("OrbitInfoController",OrbitInfoController);
 wasdiApp.controller("ProductInfoController",ProductInfoController);
+wasdiApp.controller("GetCapabilitiesController",GetCapabilitiesController);

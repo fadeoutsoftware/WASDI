@@ -1,0 +1,30 @@
+<div class="modal fade get-capabilities-info-modal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+
+            </div>
+            <div class="modal-body">
+            <button class="btn" ng-click="m_oController.loadLayers()">prova</button>
+                <!--{{m_oController.getLayers()}}-->
+                <div class="dropdown">
+                    <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                        Dropdown
+                        <span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu" aria-labelledby="dropdownMenu1" >
+                        <li ng-repeat=" layer in m_oController.getLayers()">{{layer}}</li>
+                        <!--<li><a href="#">Action</a></li>-->
+                        <!--<li><a href="#">Another action</a></li>-->
+                        <!--<li><a href="#">Something else here</a></li>-->
+                        <!--<li role="separator" class="divider"></li>-->
+                        <!--<li><a href="#">Separated link</a></li>-->
+                    </ul>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" ng-click="close('ok')" class="my-button" data-dismiss="modal">Ok</button>
+            </div>
+        </div>
+    </div>
+</div>
