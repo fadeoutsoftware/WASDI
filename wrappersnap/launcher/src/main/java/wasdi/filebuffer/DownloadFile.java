@@ -23,6 +23,52 @@ public class DownloadFile {
 
     private final int BUFFER_SIZE = 4096;
 
+    public long GetDownloadFileSize(String sFileURL) throws IOException {
+
+        long lLenght = 0L;
+
+        // Domain check
+        if (Utils.isNullOrEmpty(sFileURL)) {
+            LauncherMain.s_oLogger.debug("DownloadFile.GetDownloadSize: sFileURL is null");
+            return lLenght;
+        }
+
+        // TODO: Here we are assuming dhus authentication. But we have to find a general solution
+        Authenticator.setDefault(new Authenticator() {
+            protected PasswordAuthentication getPasswordAuthentication() {
+                try{
+                    return new PasswordAuthentication(ConfigReader.getPropValue("DHUS_USER"), ConfigReader.getPropValue("DHUS_PASSWORD").toCharArray());
+                }
+                catch (Exception oEx){
+                    LauncherMain.s_oLogger.debug("DownloadFile.GetDownloadSize: exception setting auth " + oEx.toString());
+                }
+                return null;
+            }
+        });
+
+        LauncherMain.s_oLogger.debug("DownloadFile.GetDownloadSize: FileUrl = " + sFileURL);
+
+        URL url = new URL(sFileURL);
+        HttpURLConnection httpConn = (HttpURLConnection) url.openConnection();
+        int responseCode = httpConn.getResponseCode();
+
+        // always check HTTP response code first
+        if (responseCode == HttpURLConnection.HTTP_OK) {
+
+            lLenght = httpConn.getHeaderFieldLong("Content-Length", 0L);
+
+            LauncherMain.s_oLogger.debug("DownloadFile.GetDownloadSize: File size = " + lLenght);
+
+            return lLenght;
+
+        } else {
+            LauncherMain.s_oLogger.debug("DownloadFile.GetDownloadSize: No file to download. Server replied HTTP code: " + responseCode);
+        }
+        httpConn.disconnect();
+
+        return lLenght;
+    }
+
     //https://scihub.copernicus.eu/dhus/odata/v1/Products('18f7993d-eae1-4f7f-9d81-d7cf19c18378')/$value
     public String ExecuteDownloadFile(String sFileURL, String sSaveDirOnServer) throws IOException {
 
@@ -42,7 +88,7 @@ public class DownloadFile {
         Authenticator.setDefault(new Authenticator() {
             protected PasswordAuthentication getPasswordAuthentication() {
                 try{
-                    return new PasswordAuthentication(ConfigReader.getPropValue("DHUS_USER"), ConfigReader.getPropValue("DHUS_PASSWORD") .toCharArray());
+                    return new PasswordAuthentication(ConfigReader.getPropValue("DHUS_USER"), ConfigReader.getPropValue("DHUS_PASSWORD").toCharArray());
                 }
                 catch (Exception oEx){
                     LauncherMain.s_oLogger.debug("DownloadFile.ExecuteDownloadFile: exception setting auth " + oEx.toString());

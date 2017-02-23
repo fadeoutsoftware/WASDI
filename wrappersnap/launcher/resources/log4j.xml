@@ -60,9 +60,21 @@
         <appender-ref ref="fileLauncher" />
     </logger>
 
+    <logger name="wasdi.shared.utils">
+        <level value="debug" />
+        <appender-ref ref="fileLauncher" />
+    </logger>
+
+    <logger name="wasdi.shared.rabbit">
+        <level value="debug" />
+        <appender-ref ref="fileLauncher" />
+    </logger>
+
     <logger name="wasdi.geoserver">
         <level value="debug" />
         <appender-ref ref="filePublisher" />
     </logger>
+
+
 
 </log4j:configuration>

@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.concurrent.TimeoutException;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
@@ -17,6 +18,7 @@ import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.UserSession;
 import wasdi.shared.data.MongoRepository;
 import wasdi.shared.data.SessionRepository;
+import wasdi.shared.data.WorkspaceRepository;
 import wasdi.shared.viewmodels.RabbitMessageViewModel;
 
 public class Send {
@@ -31,7 +33,7 @@ public class Send {
         try {
             //load all active session of userId
             SessionRepository oSessionRepo = new SessionRepository();
-            List<UserSession> aoUserSessions = oSessionRepo.GetAllActiveSession(sUserId);
+            List<UserSession> aoUserSessions = oSessionRepo.GetAllActiveSessions(sUserId);
             Connection oConnection = null;
             //Declare queue for send message then send it.
             String sExchangeType = "fanout"; //fanout indica in broadcasting
@@ -167,7 +169,7 @@ public class Send {
             return false;
         }
         //Create Channel
-        Channel oChannel=null;
+        Channel oChannel= null;
         try {
             oChannel = oConnection.createChannel();
         } catch (IOException e) {
@@ -230,5 +232,6 @@ public class Send {
 
         return true;
     }
+
 
 }
