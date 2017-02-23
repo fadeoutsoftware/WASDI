@@ -9,6 +9,8 @@ public class ProcessWorkspaceViewModel {
     private String operationType;
     private String operationDate;
     private String userId;
+    private String fileSize;
+    private int pid;
 
     public String getProductName() {
         return productName;
@@ -40,5 +42,22 @@ public class ProcessWorkspaceViewModel {
 
     public void setUserId(String userId) {
         this.userId = userId;
+    }
+
+    public String getFileSize() {
+        return fileSize;
+    }
+
+    public void setFileSize(String fileSize) {
+        this.fileSize = fileSize;
+    }
+
+
+    public int getPid() {
+        return pid;
+    }
+
+    public void setPid(int pid) {
+        this.pid = pid;
     }
 }

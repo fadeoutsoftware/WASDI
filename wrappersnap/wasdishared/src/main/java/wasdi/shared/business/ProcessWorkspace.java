@@ -11,6 +11,8 @@ public class ProcessWorkspace {
     private String operationType;
     private String operationDate;
     private String processObjId;
+    private String fileSize;
+    private int pid;
 
     public String getProductName() {
         return productName;
@@ -58,5 +60,21 @@ public class ProcessWorkspace {
 
     public void setUserId(String userId) {
         this.userId = userId;
+    }
+
+    public int getPid() {
+        return pid;
+    }
+
+    public void setPid(int pid) {
+        this.pid = pid;
+    }
+
+    public String getFileSize() {
+        return fileSize;
+    }
+
+    public void setFileSize(String fileSize) {
+        this.fileSize = fileSize;
     }
 }

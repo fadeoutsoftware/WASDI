@@ -11,6 +11,7 @@ import org.bson.Document;
 import wasdi.shared.business.User;
 import wasdi.shared.business.UserSession;
 import wasdi.shared.business.Workspace;
+import wasdi.shared.utils.Utils;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -40,11 +41,13 @@ public class SessionRepository extends MongoRepository {
         try {
             Document oSessionDocument = getCollection("sessions").find(new Document("sessionId", sSessionId)).first();
 
-            String sJSON = oSessionDocument.toJson();
+            if (oSessionDocument != null) {
+                String sJSON = oSessionDocument.toJson();
 
-            UserSession oUserSession = s_oMapper.readValue(sJSON,UserSession.class);
+                UserSession oUserSession = s_oMapper.readValue(sJSON, UserSession.class);
+                return oUserSession;
+            }
 
-            return oUserSession;
         } catch (Exception oEx) {
             oEx.printStackTrace();
         }
@@ -52,11 +55,37 @@ public class SessionRepository extends MongoRepository {
         return  null;
     }
 
-    public List<UserSession> GetAllActiveSession(String sUserId) {
+    public List<UserSession> GetAllActiveSessions(String sUserId) {
         final ArrayList<UserSession> aoReturnList = new ArrayList<>();
         try {
             long lNow = new Date().getTime();
             FindIterable<Document> oWSDocuments = getCollection("sessions").find(Filters.and(Filters.gte("lastTouch", lNow - 24*60*60*1000), Filters.eq("userId", sUserId)));
+
+            oWSDocuments.forEach(new Block<Document>() {
+                public void apply(Document document) {
+                    String sJSON = document.toJson();
+                    UserSession oUserSession = null;
+                    try {
+                        oUserSession = s_oMapper.readValue(sJSON, UserSession.class);
+                        aoReturnList.add(oUserSession);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+
+                }
+            });
+        } catch (Exception oEx) {
+            oEx.printStackTrace();
+        }
+
+        return aoReturnList;
+    }
+
+    public List<UserSession> GetAllExpiredSessions(String sUserId) {
+        final ArrayList<UserSession> aoReturnList = new ArrayList<>();
+        try {
+            long lNow = new Date().getTime();
+            FindIterable<Document> oWSDocuments = getCollection("sessions").find(Filters.and(Filters.lt("lastTouch", lNow - 24*60*60*1000), Filters.eq("userId", sUserId)));
 
             oWSDocuments.forEach(new Block<Document>() {
                 public void apply(Document document) {
@@ -93,6 +122,8 @@ public class SessionRepository extends MongoRepository {
 
     public boolean DeleteSession(UserSession oSession) {
         try {
+            if (oSession == null || Utils.isNullOrEmpty(oSession.getSessionId()))
+                return true;
             getCollection("sessions").deleteOne(new Document("sessionId", oSession.getSessionId()));
             return true;
 
