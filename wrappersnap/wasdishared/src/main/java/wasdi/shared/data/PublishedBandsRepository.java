@@ -102,4 +102,22 @@ public class PublishedBandsRepository extends MongoRepository {
         return 0;
     }
 
+    public int DeleteByProductNameLayerId(String sProductName, String sLayerId) {
+
+        try {
+
+            DeleteResult oDeleteResult = getCollection("publishedbands").deleteOne(Filters.and(Filters.eq("productName", sProductName), Filters.eq("layerId", sLayerId)));
+
+            if (oDeleteResult != null)
+            {
+                return  (int) oDeleteResult.getDeletedCount();
+            }
+
+        } catch (Exception oEx) {
+            oEx.printStackTrace();
+        }
+
+        return 0;
+    }
+
 }
