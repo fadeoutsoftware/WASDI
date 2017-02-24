@@ -10,6 +10,7 @@ import org.apache.abdera.protocol.client.AbderaClient;
 import org.apache.abdera.protocol.client.ClientResponse;
 import org.apache.abdera.protocol.client.RequestOptions;
 import org.apache.abdera.writer.Writer;
+import org.apache.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.XML;
@@ -25,6 +26,8 @@ import java.util.*;
  * Created by s.adamo on 20/02/2017.
  */
 public class SentinelSearch {
+
+    public static Logger s_oLogger = Logger.getLogger(SentinelSearch.class);
 
     private static final Template m_sSentinelTemplate =
             new Template(
@@ -61,6 +64,8 @@ public class SentinelSearch {
             Parser oParser = oAbdera.getParser();
             ParserOptions oParserOptions = oParser.getDefaultParserOptions();
 
+            s_oLogger.debug(String.format("SentinelSearch.ExecuteQuery: Created parser"));
+
             oParserOptions.setAutodetectCharset(true);
             oParserOptions.setCharset("UTF-8");
             //options.setCompressionCodecs(CompressionCodec.GZIP);
@@ -82,6 +87,8 @@ public class SentinelSearch {
 
                 oDocument = oParser.parse(response.getInputStream(), oParserOptions);
 
+                s_oLogger.debug(String.format("SentinelSearch.ExecuteQuery: Document parsed"));
+
                 if (oDocument == null) {
                     System.out.println("OpenSearchQuery.ExecuteQuery: Document response null");
                     return null;
@@ -102,6 +109,8 @@ public class SentinelSearch {
             oClient.setConnectionManagerTimeout(2000);
 
             JSONObject oFeedJSON = Atom2Json(oAbdera, new ByteArrayOutputStream(iStreamSize), oFeed);
+            if (oFeedJSON == null)
+                s_oLogger.debug(String.format("SentinelSearch.ExecuteQuery: FeedJSON null"));
 
             System.out.println("Search Done");
 
@@ -109,6 +118,7 @@ public class SentinelSearch {
 
         }
         catch (Exception e) {
+            s_oLogger.debug(String.format("SentinelSearch.ExecuteQuery: Exception: " + e.getMessage()));
             System.out.println("ExecuteQuery Exception " + e.toString());
         }
 
@@ -224,8 +234,10 @@ public class SentinelSearch {
     }
 
     private static JSONObject Atom2Json(Abdera oAbdera, ByteArrayOutputStream oOutputStream, Base oFeed) throws IOException{
-        Writer writer = oAbdera.getWriterFactory().getWriter("prettyxml");
-        writer.writeTo(oFeed, oOutputStream);
+        Writer oWriter = oAbdera.getWriterFactory().getWriter("prettyxml");
+        if (oWriter == null)
+            s_oLogger.debug("SentinelSearch.Atom2Json: writer prettyxml is null");
+        oWriter.writeTo(oFeed, oOutputStream);
         JSONObject oJson = XML.toJSONObject(oOutputStream.toString());
         return oJson;
     }
