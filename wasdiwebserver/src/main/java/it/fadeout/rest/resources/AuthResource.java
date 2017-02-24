@@ -1,6 +1,7 @@
 package it.fadeout.rest.resources;
 
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 
 import javax.ws.rs.GET;
@@ -14,6 +15,7 @@ import wasdi.shared.business.User;
 import wasdi.shared.business.UserSession;
 import wasdi.shared.data.SessionRepository;
 import wasdi.shared.data.UserRepository;
+import wasdi.shared.rabbit.RabbitMethods;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.LoginInfo;
 import wasdi.shared.viewmodels.PrimitiveResult;
@@ -47,6 +49,22 @@ public class AuthResource {
 			User oWasdiUser = oUserRepository.Login(oLoginInfo.getUserId(), oLoginInfo.getUserPassword());
 			
 			if (oWasdiUser != null) {
+				
+				//get all expired sessions
+				SessionRepository oSessionRepository = new SessionRepository();
+				List<UserSession> aoEspiredSessions = oSessionRepository.GetAllExpiredSessions(oWasdiUser.getUserId());
+				for (UserSession oUserSession : aoEspiredSessions) {
+					//delete data base session
+					if (oSessionRepository.DeleteSession(oUserSession))
+					{
+						//delete queue session on rabbit
+						if (!RabbitMethods.QueueDelete(oUserSession.getSessionId(), oUserSession.getUserId()))
+							System.out.println("AuthService.Login: Error deleting session queue rabbit.");
+						else
+							System.out.println("AuthService.Login: Queue deleted.");
+					}
+				}
+				
 				oUserVM.setName(oWasdiUser.getName());
 				oUserVM.setSurname(oWasdiUser.getSurname());
 				oUserVM.setUserId(oWasdiUser.getUserId());
@@ -58,7 +76,6 @@ public class AuthResource {
 				oSession.setLoginDate((double) new Date().getTime());
 				oSession.setLastTouch((double) new Date().getTime());
 				
-				SessionRepository oSessionRepository = new SessionRepository();
 				Boolean bRet = oSessionRepository.InsertSession(oSession);
 				if (!bRet)
 					return oUserVM;
@@ -109,8 +126,20 @@ public class AuthResource {
 		SessionRepository oSessionRepository = new SessionRepository();
 		UserSession oSession = oSessionRepository.GetSession(sSessionId);
 		if(oSession != null) {
-			oResult.setBoolValue(true);
-			oSessionRepository.DeleteSession(oSession);
+			if(oSessionRepository.DeleteSession(oSession))
+			{
+				System.out.println("AuthService.Logout: Session data base deleted.");
+				//delete queue session on rabbit
+				if (!RabbitMethods.QueueDelete(oSession.getSessionId(), oSession.getUserId()))
+					System.out.println("AuthService.Logout: Error deleting session queue rabbit.");
+				else
+					System.out.println("AuthService.Logout: Queue deleted.");
+				
+				oResult.setBoolValue(true);
+			}
+			else
+				System.out.println("AuthService.Logout: Error deleting session data base.");
+			
 		}
 		
 		return oResult;

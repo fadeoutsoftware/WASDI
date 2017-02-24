@@ -1,6 +1,7 @@
 package it.fadeout.rest.resources;
 
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -69,6 +70,7 @@ public class FileBufferResource {
 
 			Process oProc = Runtime.getRuntime().exec(sShellExString);
 
+
 		} catch (IOException e) {
 			e.printStackTrace();
 		} catch (Exception e) {
@@ -98,10 +100,11 @@ public class FileBufferResource {
 
 			//Update process list
 			String sProcessId = "";
+			ProcessWorkspace oProcess = null;
+			ProcessWorkspaceRepository oRepository = new ProcessWorkspaceRepository();
 			try
 			{
-				ProcessWorkspaceRepository oRepository = new ProcessWorkspaceRepository();
-				ProcessWorkspace oProcess = new ProcessWorkspace();
+				oProcess = new ProcessWorkspace();
 				oProcess.setOperationDate(Wasdi.GetFormatDate(new Date()));
 				oProcess.setOperationType(LauncherOperations.DOWNLOAD);
 				oProcess.setProductName(sFileUrl);
@@ -134,7 +137,19 @@ public class FileBufferResource {
 			System.out.println("DownloadResource.Download: shell exec " + sShellExString);
 
 			Process oProc = Runtime.getRuntime().exec(sShellExString);
-
+			
+			//Update process
+			if (oProc != null)
+			{
+				int iPID = getPIDProcess(oProc);
+				if (!Utils.isNullOrEmpty(sProcessId))
+				{
+					oProcess.setPid(iPID);
+					if (!oRepository.UpdateProcess(oProcess))
+						System.out.println("DownloadResource.Download: pid not saved");
+				}
+			}
+			
 
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -164,10 +179,12 @@ public class FileBufferResource {
 
 			//Update process list
 			String sProcessId = "";
+			ProcessWorkspaceRepository oRepository = new ProcessWorkspaceRepository();
+			ProcessWorkspace oProcess = null;
 			try
 			{
-				ProcessWorkspaceRepository oRepository = new ProcessWorkspaceRepository();
-				ProcessWorkspace oProcess = new ProcessWorkspace();
+				
+				oProcess = new ProcessWorkspace();
 				oProcess.setOperationDate(Wasdi.GetFormatDate(new Date()));
 				oProcess.setOperationType(LauncherOperations.PUBLISH);
 				oProcess.setProductName(sFileUrl);
@@ -200,6 +217,18 @@ public class FileBufferResource {
 			System.out.println("DownloadResource.Publish: shell exec " + sShellExString);
 
 			Process oProc = Runtime.getRuntime().exec(sShellExString);
+			
+			//Update process
+			if (oProc != null)
+			{
+				int iPID = getPIDProcess(oProc);
+				if (!Utils.isNullOrEmpty(sProcessId))
+				{
+					oProcess.setPid(iPID);
+					if (!oRepository.UpdateProcess(oProcess))
+						System.out.println("DownloadResource.Download: pid not saved");
+				}
+			}
 
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -247,10 +276,11 @@ public class FileBufferResource {
 
 			//Update process list
 			String sProcessId = "";
+			ProcessWorkspaceRepository oRepository = new ProcessWorkspaceRepository();
+			ProcessWorkspace oProcess = null;
 			try
 			{
-				ProcessWorkspaceRepository oRepository = new ProcessWorkspaceRepository();
-				ProcessWorkspace oProcess = new ProcessWorkspace();
+				oProcess = new ProcessWorkspace();
 				oProcess.setOperationDate(Wasdi.GetFormatDate(new Date()));
 				oProcess.setOperationType(LauncherOperations.PUBLISHBAND);
 				oProcess.setProductName(sFileUrl);
@@ -286,6 +316,18 @@ public class FileBufferResource {
 			System.out.println("DownloadResource.PublishBand: shell exec " + sShellExString);
 
 			Process oProc = Runtime.getRuntime().exec(sShellExString);
+			
+			//Update process
+			if (oProc != null)
+			{
+				int iPID = getPIDProcess(oProc);
+				if (!Utils.isNullOrEmpty(sProcessId))
+				{
+					oProcess.setPid(iPID);
+					if (!oRepository.UpdateProcess(oProcess))
+						System.out.println("DownloadResource.Download: pid not saved");
+				}
+			}
 
 
 		}catch (IOException e) {
@@ -300,6 +342,55 @@ public class FileBufferResource {
 		oReturnValue.setMessageCode("WAITFORRABBIT");
 		return oReturnValue;
 
-	}		
+	}
+	
+	@GET
+	@Path("kill")
+	@Produces({"application/xml", "application/json", "text/xml"})
+	public Response KillProcess(@HeaderParam("x-session-token") String sSessionId, @QueryParam("iPid") Integer iPid) throws IOException
+	{
+		Response oReturnValue = null;
+		try {
+
+			if (Utils.isNullOrEmpty(sSessionId)) return oReturnValue;
+
+			User oUser = Wasdi.GetUserFromSession(sSessionId);
+
+			if (oUser==null) return oReturnValue;
+			if (Utils.isNullOrEmpty(oUser.getUserId())) return oReturnValue;
+
+			//check if process exists
+			
+
+
+		}catch (Exception e) {
+			e.printStackTrace();
+			return oReturnValue;
+		}
+
+		return oReturnValue.ok().build();
+
+	}
+	
+	
+	
+	private Integer getPIDProcess(Process oProc)
+	{
+		Integer oPID = null;
+		
+		if(oProc.getClass().getName().equals("java.lang.UNIXProcess")) {
+			/* get the PID on unix/linux systems */
+			try {
+				Field oField = oProc.getClass().getDeclaredField("pid");
+				oField.setAccessible(true);
+				oPID = oField.getInt(oProc);
+				System.out.println("DownloadResource.DownloadAndPublish: PID " + oPID);
+			} catch (Throwable e) {
+				System.out.println("DownloadResource.DownloadAndPublish: Error getting PID " + e.getMessage());
+			}
+		}
+		
+		return oPID;
+	}
 
 }
