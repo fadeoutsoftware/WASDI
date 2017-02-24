@@ -5,17 +5,11 @@ import org.apache.commons.io.IOUtils;
 import org.esa.snap.core.dataio.ProductIO;
 import org.esa.snap.core.datamodel.GeoPos;
 import org.esa.snap.core.datamodel.Product;
-import org.esa.snap.core.gpf.common.ReadOp;
 import org.esa.snap.core.gpf.graph.GraphException;
 import org.esa.snap.core.util.ProductUtils;
-import org.esa.snap.graphbuilder.gpf.ui.SourceUI;
 import org.esa.snap.graphbuilder.rcp.dialogs.support.GraphExecuter;
-import org.esa.snap.graphbuilder.rcp.dialogs.support.GraphNode;
-import org.w3c.dom.Document;
 import search.SentinelInfo;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
 import java.beans.XMLEncoder;
 import java.io.*;
 import java.net.Authenticator;
@@ -50,23 +44,26 @@ public class SentinelThread implements Callable<Boolean> {
     public Boolean call() throws Exception {
 
         String sReturnFilePath = ExecuteDownloadFile(m_sDownloadLink, ConfigReader.getPropValue("DOWNLOAD_PATH"));
+        Main.s_oLogger.debug(String.format("SentinelTread.call: Downloaded file %s", sReturnFilePath));
         //read product
         Product oProduct = ProductIO.readProduct(new File(sReturnFilePath));
         //get centerscene
         GeoPos oCenterGeoPo = ProductUtils.getCenterGeoPos(oProduct);
-        Main.s_oLogger.debug("SentinelTread.call:" + String.format("Center Scene lat %s, Center Scene lon %s for product %s", oCenterGeoPo.getLatString(), oCenterGeoPo.getLonString(),oProduct.getName() ));
-        m_oSentinelInfo.setSceneCenterLat(oCenterGeoPo.getLatString());
-        m_oSentinelInfo.setSceneCenterLon(oCenterGeoPo.getLonString());
+        Main.s_oLogger.debug(String.format("SentinelTread.call: Center Scene lat %s, Center Scene lon %s for product %s", String.valueOf(oCenterGeoPo.getLat()), String.valueOf(oCenterGeoPo.getLonString()),oProduct.getName() ));
+        m_oSentinelInfo.setSceneCenterLat(String.valueOf(oCenterGeoPo.getLat()));
+        m_oSentinelInfo.setSceneCenterLon(String.valueOf(oCenterGeoPo.getLonString()));
         String sOutputElaborationPath = ConfigReader.getPropValue("MULESME_WASDI_PATH") + oProduct.getName() + "_TC";
         //load graph.xml
+        Main.s_oLogger.debug(String.format("SentinelTread.call: Destination output graph %s", sOutputElaborationPath));
         UpdateGraphXml(sReturnFilePath, sOutputElaborationPath);
         //execute graph
         m_oGraphEx.executeGraph(ProgressMonitor.NULL);
         //Serialize SentinelInfo
         SerializeObjectToXML(ConfigReader.getPropValue("MULESME_WASDI_PATH"), m_oSentinelInfo);
+        Main.s_oLogger.debug(String.format("SentinelTread.call: Serialized object on path %s", ConfigReader.getPropValue("MULESME_WASDI_PATH")));
         //move file
         SARToMulesmeFormat(oProduct.getName(), sOutputElaborationPath, ConfigReader.getPropValue("MULESME_WASDI_PATH"));
-
+        Main.s_oLogger.debug(String.format("SentinelTread.call: moved file %s from %s to %s", oProduct.getName(), sOutputElaborationPath, ConfigReader.getPropValue("MULESME_WASDI_PATH")));
         return new Boolean(true);
     }
 
