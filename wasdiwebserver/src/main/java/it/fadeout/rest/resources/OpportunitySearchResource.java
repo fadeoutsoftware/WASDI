@@ -70,7 +70,8 @@ public class OpportunitySearchResource {
 			int iIdCoverageCounter = 1;
 
 			// Foreach filter combination found
-			for (OrbitFilterViewModel oOrbitFilter : OrbitSearch.getOrbitFilters()) {
+			List<OrbitFilterViewModel> oOrbitFilters = OrbitSearch.getOrbitFilters();
+			for (OrbitFilterViewModel oOrbitFilter : oOrbitFilters) {
 
 				// Find the opportunities
 				ArrayList<CoverageSwathResult> aoCoverageSwathResult = new ArrayList<>();
@@ -95,9 +96,9 @@ public class OpportunitySearchResource {
 					}
 				}
 
-				return aoCoverageSwathResultViewModels;
-
 			}
+			
+			return aoCoverageSwathResultViewModels;
 		}
 		catch(Exception oEx){
 			System.out.println("OpportunitySearchResource.Search: Error searching opportunity " + oEx.getMessage());

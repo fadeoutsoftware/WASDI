@@ -22,6 +22,7 @@ import wasdi.shared.business.User;
 import wasdi.shared.data.DownloadedFilesRepository;
 import wasdi.shared.data.ProductWorkspaceRepository;
 import wasdi.shared.data.PublishedBandsRepository;
+import wasdi.shared.geoserver.GeoserverMethods;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.PrimitiveResult;
 import wasdi.shared.viewmodels.ProductViewModel;
@@ -145,7 +146,7 @@ public class ProductResource {
 	@GET
 	@Path("delete")
 	@Produces({"application/xml", "application/json", "text/xml"})	
-	public Response DeleteProduct(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sProductName") String sProductName, @QueryParam("bDeleteFile") Boolean bDeleteFile, @QueryParam("sWorkspaceId") String sWorkspace) 
+	public Response DeleteProduct(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sProductName") String sProductName, @QueryParam("bDeleteFile") Boolean bDeleteFile, @QueryParam("sWorkspaceId") String sWorkspace, @QueryParam("bDeleteLayer") Boolean bDeleteLayer) 
 	{
 		User oUser = Wasdi.GetUserFromSession(sSessionId);
 		try {
@@ -176,16 +177,16 @@ public class ProductResource {
 			System.out.println("ProductResource.DeleteProduct: File Path: " + sFilePath);
 
 			PublishedBandsRepository oPublishedBandsRepository = new PublishedBandsRepository();
+
+			List<PublishedBand> aoPublishedBands = null;
+			if (bDeleteFile || bDeleteLayer)
+				//Get all bands files
+				aoPublishedBands = oPublishedBandsRepository.GetPublishedBandsByProductName(sProductName);
+
 			//get files that begin with the product name
 			if (bDeleteFile)
 			{
-				//Get all bands files
-
-				List<PublishedBand> aoPublishedBands = oPublishedBandsRepository.GetPublishedBandsByProductName(sProductName);
-
-				if (aoPublishedBands != null)
-					System.out.println("ProductResource.DeleteProduct: Number of published bands to delete " + aoPublishedBands.size());
-
+				final List<PublishedBand> aoLocalPublishedBands = aoPublishedBands;
 				File oFolder = new File(sDownloadPath);
 				FilenameFilter oFilter = new FilenameFilter() {
 
@@ -195,9 +196,9 @@ public class ProductResource {
 						if (name.toLowerCase().equals(sProductName.toLowerCase()))
 							return true;
 
-						if (aoPublishedBands != null)
+						if (aoLocalPublishedBands != null)
 						{
-							for (PublishedBand oPublishedBand : aoPublishedBands) {
+							for (PublishedBand oPublishedBand : aoLocalPublishedBands) {
 								if (name.toLowerCase().contains(oPublishedBand.getLayerId().toLowerCase()))
 									return true;
 							}
@@ -220,20 +221,49 @@ public class ProductResource {
 						{
 							System.out.println("ProductResource.DeleteProduct: error deleting file product " + oEx.toString());
 						}
+
 					}
 				}
 			}
 
-			//delete record on db
+			if(bDeleteLayer)
+			{
+				//Delete layerId on Geoserver
+				for (PublishedBand publishedBand : aoPublishedBands) {
+					try
+					{
+						System.out.println("ProductResource.DeleteProduct: LayerId to delete " + publishedBand.getLayerId());
+						String sResult = GeoserverMethods.DeleteLayer(publishedBand.getLayerId(), "json");
+
+						try
+						{
+							//delete published band on data base
+							oPublishedBandsRepository.DeleteByProductNameLayerId(sProductName, publishedBand.getLayerId());
+						}
+						catch(Exception oEx)
+						{
+							System.out.println("ProductResource.DeleteProduct: error deleting published band on data base " + oEx.toString());
+						}
+
+					}
+					catch(Exception oEx)
+					{
+						System.out.println("ProductResource.DeleteProduct: error deleting layer id " + oEx.toString());
+					}
+				}
+			}
+
+			//delete product record on db
 			try{
 				oProductWorkspaceRepository.DeleteByProductNameWorkspace(sProductName, sWorkspace);
 				oDownloadedFilesRepository.DeleteByFilePath(sFilePath);
-				oPublishedBandsRepository.DeleteByProductName(sProductName);
 			}
 			catch (Exception oEx) {
 				System.out.println("ProductResource.DeleteProduct: error deleting product " + oEx.toString());
 				return null;	
 			}
+
+
 		}
 		catch (Exception oEx) {
 			System.out.println("ProductResource.DeleteProduct: error deleting product " + oEx.toString());
