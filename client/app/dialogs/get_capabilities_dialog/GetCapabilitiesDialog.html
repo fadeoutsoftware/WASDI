@@ -2,16 +2,32 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-
+                {{"DIALOG_GET_CAPABILITIES_TITLE"|translate}}
+                <button type="button" class="close" ng-click="close(false)" data-dismiss="modal" aria-hidden="true">&times;</button>
             </div>
+
             <div class="modal-body">
-            <button class="btn" ng-click="m_oController.loadLayers()">prova</button>
+
                 <!--{{m_oController.getLayers()}}-->
-                <div class="dropdown">
+
+                <div class="my-input-text" >
+                    <input type="text" class="form-control" placeholder="{{'DIALOG_GET_CAPABILITIES_SERVER'|translate}}" ng-model="input">
+                </div>
+
+
+                <div class="my-button" ng-click="m_oController.loadLayers(input)" >{{"DIALOG_GET_CAPABILITIES_SEARCH"|translate}}</div>
+
+                <div ng-show="m_oController.m_bIsVisibleLoadIcon == true">
+                    <i class="fa fa-spinner fa-pulse fa-3x fa-fw"></i>
+                    <span class="sr-only">Loading...</span>
+                </div>
+
+                <div class=" dropdown dropdown-layers" ng-show="m_oController.m_bIsVisibleLoadIcon == false && m_oController.isEmptyLayersList()==false">
                     <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
-                        Dropdown
+                        {{"DIALOG_GET_CAPABILITIES_LAYERS"|translate}}
                         <span class="caret"></span>
                     </button>
+
                     <ul class="dropdown-menu" aria-labelledby="dropdownMenu1" >
                         <li ng-repeat=" layer in m_oController.getLayers()">{{layer}}</li>
                         <!--<li><a href="#">Action</a></li>-->
@@ -21,9 +37,10 @@
                         <!--<li><a href="#">Separated link</a></li>-->
                     </ul>
                 </div>
+
             </div>
             <div class="modal-footer">
-                <button type="button" ng-click="close('ok')" class="my-button" data-dismiss="modal">Ok</button>
+                <button type="button" ng-click="close('ok')" class="my-button" data-dismiss="modal">{{"DIALOG_GET_CAPABILITIES_EXIT"|translate}}</button>
             </div>
         </div>
     </div>
