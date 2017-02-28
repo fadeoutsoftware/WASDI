@@ -101,19 +101,25 @@
                     ng-hide="m_oController.m_b2DMapModeOn == false && m_oController.m_b3DMapModeOn == true && m_oController.m_bIsVisibleMapOfLeaflet == true">
                 <i class="fa fa-sticky-note" aria-hidden="true"></i>
             </button>
-
+            <!-- BOTH -->
             <button type="button" class="btn btn-default" ng-click="m_oController.openGetCapabilitiesDialog()"  data-toggle="tooltip"
                     data-placement="bottom"  title="{{'EDITOR_TOOLTIP_GET_CAPABILITIES'|translate}}"
                     ng-hide="m_oController.m_b2DMapModeOn == false && m_oController.m_b3DMapModeOn == true && m_oController.m_bIsVisibleMapOfLeaflet == true">
                 <i class="fa fa-server" aria-hidden="true"></i>
             </button>
+
+            <button type="button" class="btn btn-default" ng-click="m_oController.hideOrShowPixelInfo()"  data-toggle="tooltip"
+                    data-placement="bottom"  title="Show/hide pixel info"
+                    ng-hide="m_oController.m_b2DMapModeOn == false && m_oController.m_b3DMapModeOn == true ">
+                <i class="fa fa-window-maximize" aria-hidden="true"></i>
+            </button>
+
         </div>
 
-        <div class="map" id = "wasdiMap" ng-show="m_oController.m_b2DMapModeOn == true && m_oController.m_b3DMapModeOn == false">
-            <!-- button inside map-->
+        <!-- 2D map -->
+        <div class="map" id = "wasdiMap"  ng-show="m_oController.m_b2DMapModeOn == true && m_oController.m_b3DMapModeOn == false"></div>
 
-        </div>
-        <!--<globe ng-if="m_oController.m_b2DMapModeOn == false && m_oController.m_b3DMapModeOn == true  "></globe>-->
+        <!-- 3D map -->
         <div id="cesiumContainer" class="map" ng-show="m_oController.m_b2DMapModeOn == false && m_oController.m_b3DMapModeOn == true  "></div>
     </div>
 

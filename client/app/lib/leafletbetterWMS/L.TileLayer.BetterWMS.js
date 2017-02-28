@@ -25,7 +25,16 @@ L.TileLayer.BetterWMS = L.TileLayer.WMS.extend({
             url: url,
             success: function (data, status, xhr) {
                 var err = typeof data === 'string' ? null : data;
-                showResults(err, evt.latlng, data);
+                var sSplit = data.split("body");
+                var sSplitBody = sSplit[1];
+                sSplitBody = sSplitBody.replace(/\r?\n|\r/g, "");
+                sSplitBody = sSplitBody.replace(" ", "");
+                if(sSplitBody != ">   </")
+                {
+                    showResults(err, evt.latlng, data);
+                }
+
+
             },
             error: function (xhr, status, error) {
                 showResults(error);
@@ -51,7 +60,7 @@ L.TileLayer.BetterWMS = L.TileLayer.WMS.extend({
                 width: size.x,
                 layers: this.wmsParams.layers,
                 query_layers: this.wmsParams.layers,
-                info_format: 'text/html'//application/json
+                info_format: 'text/html'//'application/json' //'text/html'
             };
 
         params[params.version === '1.3.0' ? 'i' : 'x'] = point.x;

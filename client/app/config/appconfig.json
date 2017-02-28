@@ -148,31 +148,6 @@
 
                 }
             ]
-        },
-        {
-            "name": "Mission: Sentinel-2",
-            "indexname": "platformname",
-            "indexvalue": "Sentinel-2",
-            "filters": [
-                {
-                    "indexname": "producttype",
-                    "indexlabel": "Product Type",
-                    "regex": ".*"
-
-                },
-                {
-                    "indexname": "cloudcoverpercentage",
-                    "indexlabel": "Cloud Coverage (%)",
-                    "regex": ".*"
-
-                },
-                {
-                    "indexname": "processingbaseline",
-                    "indexlabel": "Processing Baseline",
-                    "regex": ".*"
-
-                }
-            ]
         }
     ],
     "orbitsearch":{

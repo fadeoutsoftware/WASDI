@@ -344,7 +344,6 @@ service('MapService', ['$http','$rootScope', 'ConstantsService', function ($http
     {
         if(utilsIsObjectNullOrUndefined(this.m_oOSMBasic))
             return false
-
         this.m_oWasdiMap.addLayer(this.m_oOSMBasic,true);
         return true;
     }

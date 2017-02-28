@@ -25,6 +25,11 @@ var EditorController = (function () {
         this.m_b3DMapModeOn = false;
         this.m_bIsVisibleMapOfLeaflet = false;
         this.m_oModalService = oModalService;
+
+        //Pixel Info
+        this.m_bIsVisiblePixelInfo = false;
+        //this.hideOrShowPixelInfo()//set css
+
         //layer list
         this.m_aoLayersList=[];//only id
         //this.m_aoProcessesRunning=[];
@@ -76,6 +81,7 @@ var EditorController = (function () {
         //oMapService.initMap('wasdiMap');
         oMapService.initMapEditor('wasdiMap');
         oMapService.removeLayersFromMap();
+        //oMapService.removeBasicMap();
         this.m_oGlobeService.initGlobe('cesiumContainer2');
 
 
@@ -192,9 +198,13 @@ var EditorController = (function () {
             var iNumberOfLayers = this.m_aoLayersList.length;
             for(var iIndexLayer = 0; iIndexLayer < iNumberOfLayers; iIndexLayer++)
             {
-                var oNode = $('#jstree').jstree(true).get_node(this.m_aoLayersList[iIndexLayer].layerId);
-                oNode.original.bPubblish = false;
-                $('#jstree').jstree(true).set_icon(this.m_aoLayersList[iIndexLayer].layerId, 'assets/icons/uncheck_20x20.png');
+                //check if there is layerId if there isn't the layer was added by get capabilities
+                if(!utilsIsObjectNullOrUndefined(this.m_aoLayersList[iIndexLayer].layerId))
+                {
+                    var oNode = $('#jstree').jstree(true).get_node(this.m_aoLayersList[iIndexLayer].layerId);
+                    oNode.original.bPubblish = false;
+                    $('#jstree').jstree(true).set_icon(this.m_aoLayersList[iIndexLayer].layerId, 'assets/icons/uncheck_20x20.png');
+                }
             }
             this.m_aoLayersList = [];
             this.m_oMapService.removeLayersFromMap();
@@ -283,6 +293,7 @@ var EditorController = (function () {
             transparent: true,
             noWrap:true
         });
+        wmsLayer.setZIndex(1000);//it set the zindex of layer in map 
         wmsLayer.addTo(oMap);
 
 
@@ -575,6 +586,7 @@ var EditorController = (function () {
             "contextmenu" : { // my right click menu
                 "items" : function ($node)
                 {
+
                     //only the band has property $node.original.band
                     var oReturnValue = null;
                     if(utilsIsObjectNullOrUndefined($node.original.band) == false && $node.original.bPubblish == true)
@@ -601,6 +613,7 @@ var EditorController = (function () {
 
                         };
                     }
+
                     //only products has $node.original.fileName
                     if(utilsIsObjectNullOrUndefined($node.original.fileName) == false)
                     {
@@ -645,6 +658,12 @@ var EditorController = (function () {
 
                                     });
                                 }
+                            },
+                            "Merge" : {
+                                "label" : "Merge ",
+                                "action" : function (obj) {
+                                    oController.openMergeDialog();
+                                }
                             }
                         };
                     }
@@ -654,7 +673,6 @@ var EditorController = (function () {
                 }
             }
         }
-
 
 
         var productList = this.getProductList();
@@ -781,7 +799,7 @@ var EditorController = (function () {
         setTimeout(function(){ oController.m_oMapService.getMap().invalidateSize()}, 400);
     }
 
-    //Use it when switch mapd 2d/3d
+    //Use it when switch map 2d/3d
     EditorController.prototype.loadLayersMap2D=function()
     {
         var oController=this;
@@ -933,14 +951,16 @@ var EditorController = (function () {
             var iNumberOfLayers = this.m_aoLayersList.length;
             for(var iIndexLayer = 0; iIndexLayer < iNumberOfLayers; iIndexLayer++)
             {
-                this.addLayerMap3D(this.m_aoLayersList[iIndexLayer].layerId);
+                if(!utilsIsObjectNullOrUndefined(this.m_aoLayersList[iIndexLayer].layerId))
+                    this.addLayerMap3D(this.m_aoLayersList[iIndexLayer].layerId);
+                else
+                    this.addLayerMap3D(this.m_aoLayersList[iIndexLayer].Title);
             }
 
             this.m_oMapService.setBasicMap();
         }
         else
         {
-
             this.m_oMapService.removeLayersFromMap();
             this.m_oGlobeService.clearGlobe();
             this.m_oGlobeService.initGlobe('cesiumContainer2');
@@ -954,7 +974,6 @@ var EditorController = (function () {
             }
             this.m_aoLayersList = [];
         }
-
     }
 
     EditorController.prototype.openGetCapabilitiesDialog = function()
@@ -964,7 +983,10 @@ var EditorController = (function () {
         var oController = this
         this.m_oModalService.showModal({
             templateUrl: "dialogs/get_capabilities_dialog/GetCapabilitiesDialog.html",
-            controller: "GetCapabilitiesController"
+            controller: "GetCapabilitiesController",
+            inputs: {
+                extras: oController
+            }
         }).then(function(modal) {
             modal.element.modal();
             modal.close.then(function(result) {
@@ -975,6 +997,45 @@ var EditorController = (function () {
         return true;
     }
 
+    EditorController.prototype.hideOrShowPixelInfo = function()
+    {
+        this.m_bIsVisiblePixelInfo = !this.m_bIsVisiblePixelInfo;
+
+        if( this.m_bIsVisiblePixelInfo == true)
+        {
+            //$('.leaflet-popup-pane').css({"display":""});
+            $('.leaflet-popup-pane').css({"visibility":"visible"});
+            /*.leaflet-fade-anim .leaflet-map-pane .leaflet-popup*/
+        }
+        else
+        {
+            //$('.leaflet-popup-pane').css({"display":"none"});
+            $('.leaflet-popup-pane').css({"visibility":"hidden"});
+
+        }
+    }
+
+
+    EditorController.prototype.openMergeDialog = function()
+    {
+
+
+        var oController = this
+        this.m_oModalService.showModal({
+            templateUrl: "dialogs/merge_products_dialog/MergeProductsDialog.html",
+            controller: "MergeProductsController",
+            inputs: {
+                extras: oController
+            }
+        }).then(function(modal) {
+            modal.element.modal();
+            modal.close.then(function(result) {
+                oController.m_oScope.Result = result ;
+            });
+        });
+
+        return true;
+    }
     EditorController.$inject = [
         '$scope',
         '$location',

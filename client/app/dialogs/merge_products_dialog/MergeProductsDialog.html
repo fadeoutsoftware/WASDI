@@ -1,0 +1,31 @@
+<div class="modal fade merge-products-modal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" ng-click="close(false)" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title "> {{}}</h4>
+            </div>
+            <div class="modal-body">
+
+                <div class="drag-and-drop">
+                    Drop File:
+                    <div ngf-drop ngf-select ng-model="m_oController.m_oFile" class="drop-box"
+                         ngf-drag-over-class="'dragover'" ngf-multiple="true" ngf-allow-dir="true"
+                         accept="image/*,application/pdf"
+                         ngf-pattern="'image/*,application/pdf'">Drop pdfs or images here or click to upload</div>
+                    <div ngf-no-file-drop>File Drag/Drop is not supported for this browser</div>
+                    <!--Files:-->
+                    <!--<ul>-->
+                        <!--<li ng-repeat="f in files" >{{f.name}} {{f.$error}} {{f.$errorParam}}</li>-->
+                    <!--</ul>-->
+                    <!--Upload Log:-->
+                    <!--<pre>{{log}}</pre>-->
+                </div>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" ng-click="close('ok')" class="my-button" data-dismiss="modal">Ok</button>
+            </div>
+        </div>
+    </div>
+</div>

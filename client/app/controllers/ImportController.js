@@ -27,6 +27,7 @@ var ImportController = (function() {
         this.m_oWorkspaceService=oWorkspaceService;
         this.m_oResultsOfSearchService = oResultsOfSearchService;
         this.m_oModalService = oModalService;
+
         //this.m_bPproductsPerPagePristine   = true;
         //this.m_iProductCount = 0;
         //this.m_bDisableField = true;
@@ -39,6 +40,7 @@ var ImportController = (function() {
         this.m_aoProducts = [];
         //this.m_oScope.currentPage = 1;
         this.m_oConfiguration = null;
+        this.m_bisVisibleLocalStorageInputs = false;
         this.m_oStatus = {
             opened: false
         };
@@ -67,7 +69,13 @@ var ImportController = (function() {
             sensingPeriodFrom: '',
             sensingPeriodTo: '',
             ingestionFrom: '',
-            ingestionTo: ''
+            ingestionTo: '',
+        };
+
+        this.m_oMergeSearch =
+        {
+            "statusIsOpen":false,
+            period:''
         };
 
 
@@ -635,6 +643,13 @@ var ImportController = (function() {
         this.m_oStatus.openedIngestionTo = true;
         this.m_DatePickerPosition($event);
     };
+
+    ImportController.prototype.openPeriodForMergeSearch = function($event)
+    {
+        this.m_oMergeSearch.statusIsOpen = true;
+        this.m_DatePickerPosition($event);
+    };
+
     ImportController.prototype.disabled = function(date, mode) {
         return false;
     };
@@ -656,10 +671,8 @@ var ImportController = (function() {
         var oController = this;
 
         if (utilsIsObjectNullOrUndefined(aData.entry)) {
-            // TODO: Qui interrompere l'attesa della ricerca e comunicare No Result Found
             this.m_bIsVisibleListOfLayers = false;
             utilsVexDialogAlertBottomRightCorner('no layers found');
-            //console.log('no layers found');
             return;
         }
 
@@ -1099,6 +1112,24 @@ var ImportController = (function() {
         if(utilsIsObjectNullOrUndefined(oLayer))
             return false;
         return this.m_oProcessesLaunchedService.checkIfFileIsDownloading(oLayer.link,this.m_oProcessesLaunchedService.getTypeOfProcessProductDownload());
+    }
+
+    ImportController.prototype.visualizeLocalStorageInputs = function(bIsVisible)
+    {
+        this.m_bisVisibleLocalStorageInputs = !this.m_bisVisibleLocalStorageInputs;
+    }
+
+    ImportController.prototype.loadProductsInLocalStorage = function()
+    {
+        if(utilsIsObjectNullOrUndefined(this.m_oMergeSearch.period))
+            return false;
+        if(utilsIsString(this.m_oMergeSearch.period))
+            return false;
+        if(utilsIsObjectNullOrUndefined(this.m_oMergeSearch.period))
+            return false;
+
+        //TODO HTTP REQUEST
+        return true;
     }
 
     ImportController.$inject = [
