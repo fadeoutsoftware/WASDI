@@ -89,6 +89,7 @@ var GetCapabilitiesController = (function() {
             transparent: true,
             noWrap:true
         });
+        wmsLayer.setZIndex(1000);
         wmsLayer.addTo(oMap);
 
     }
@@ -152,6 +153,7 @@ var GetCapabilitiesController = (function() {
 
             // so add the new bands
             // and the bounding box in cesium
+            //TODO CHECK IF .BoundingBox[0] it's right
             var oBounds = (oLayer.BoundingBox[0].extent);
             this.m_oGlobeService.addRectangleOnGlobe([oBounds[0],oBounds[1],oBounds[2],oBounds[3]]);
             this.addLayerMap2D(oLayer.Name,this.m_sServerLink);
