@@ -293,7 +293,7 @@ var EditorController = (function () {
             transparent: true,
             noWrap:true
         });
-        wmsLayer.setZIndex(1000);//it set the zindex of layer in map 
+        wmsLayer.setZIndex(1000);//it set the zindex of layer in map
         wmsLayer.addTo(oMap);
 
 
@@ -943,36 +943,95 @@ var EditorController = (function () {
     EditorController.prototype.addOrRemoveMapLayer = function()
     {
         this.m_bIsVisibleMapOfLeaflet = !this.m_bIsVisibleMapOfLeaflet;
+        //If there is the map or grey background
         if(this.m_bIsVisibleMapOfLeaflet == true)
         {
+            //there is the map
+            //reinitialize the globe
             this.m_oGlobeService.clearGlobe();
             this.m_oGlobeService.initGlobe('cesiumContainer2');
 
+            //add layers in 3d map
             var iNumberOfLayers = this.m_aoLayersList.length;
             for(var iIndexLayer = 0; iIndexLayer < iNumberOfLayers; iIndexLayer++)
             {
                 if(!utilsIsObjectNullOrUndefined(this.m_aoLayersList[iIndexLayer].layerId))
-                    this.addLayerMap3D(this.m_aoLayersList[iIndexLayer].layerId);
+                    this.addLayerMap3D(this.m_aoLayersList[iIndexLayer].layerId);//import layer
                 else
-                    this.addLayerMap3D(this.m_aoLayersList[iIndexLayer].Title);
+                    this.addLayerMap3D(this.m_aoLayersList[iIndexLayer].Title);//get capabilities layer
             }
 
             this.m_oMapService.setBasicMap();
         }
         else
         {
-            this.m_oMapService.removeLayersFromMap();
-            this.m_oGlobeService.clearGlobe();
-            this.m_oGlobeService.initGlobe('cesiumContainer2');
+            //if there'isnt the map (grey background)
 
             var iNumberOfLayers = this.m_aoLayersList.length;
-            for(var iIndexLayer = 0; iIndexLayer < iNumberOfLayers; iIndexLayer++)
+            if(iNumberOfLayers == 1)//if there is only one layer
             {
-                var oNode = $('#jstree').jstree(true).get_node(this.m_aoLayersList[iIndexLayer].layerId);
-                oNode.original.bPubblish = false;
-                $('#jstree').jstree(true).set_icon(this.m_aoLayersList[iIndexLayer].layerId, 'assets/icons/uncheck_20x20.png');
+                //save layer and remove background map
+                this.m_oMapService.removeBasicMap();
+                //reinitialize the globe
+                this.m_oGlobeService.clearGlobe();
+                this.m_oGlobeService.initGlobe('cesiumContainer2');
+
+                //insert in globe rectangle
+
+                if(!utilsIsObjectNullOrUndefined(this.m_aoLayersList[0].boundingBox)) //if there is .boundingBox property, the layer was downloaded by copernicus server
+                {
+
+                    var oBounds = JSON.parse(this.m_aoLayersList[0].boundingBox);
+                    this.m_oGlobeService.addRectangleOnGlobe([oBounds.minx,oBounds.miny,oBounds.maxx,oBounds.maxy]);
+                }
+
+                if(!utilsIsObjectNullOrUndefined(this.m_aoLayersList[0].BoundingBox)) //if there is BoundingBox.extent property, the layer was downloaded by us server
+                {
+                    //TODO CHECK IF .BoundingBox[0] it's right
+                    var oBounds = (this.m_aoLayersList[0].BoundingBox[0].extent);
+                    this.m_oGlobeService.addRectangleOnGlobe([oBounds[0],oBounds[1],oBounds[2],oBounds[3]]);
+                }
             }
-            this.m_aoLayersList = [];
+            else
+            {
+                //remove all layers
+                //var oCallback = function(value){
+                //    if (value)
+                //    {
+                //        return true;
+                //    }
+                //    else
+                //    {
+                //        return false;
+                //    }
+                //}
+                //var bResponse = false;
+                //if(iNumberOfLayers!= 0)
+                //    bResponse = utilsVexDialogConfirm("Are you sure to delete layers?",oCallback);//ask user if he want delete layers
+                //
+                //if(bResponse == true)//if the user want delete all layers
+                //{
+                    //clear 2d map
+                    this.m_oMapService.removeLayersFromMap();
+                    //reinitialize the globe
+                    this.m_oGlobeService.clearGlobe();
+                    this.m_oGlobeService.initGlobe('cesiumContainer2');
+                    //for each layer reinitialize the tree
+
+                    for(var iIndexLayer = 0; iIndexLayer < iNumberOfLayers; iIndexLayer++)
+                    {
+                        if(!utilsIsObjectNullOrUndefined(this.m_aoLayersList[iIndexLayer].layerId))
+                        {
+                            var oNode = $('#jstree').jstree(true).get_node(this.m_aoLayersList[iIndexLayer].layerId);
+                            oNode.original.bPubblish = false;
+                            $('#jstree').jstree(true).set_icon(this.m_aoLayersList[iIndexLayer].layerId, 'assets/icons/uncheck_20x20.png');
+                        }
+                    }
+                    this.m_aoLayersList = [];//empty layer list
+                //}
+            }
+
+
         }
     }
 
