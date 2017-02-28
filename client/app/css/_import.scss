@@ -77,6 +77,40 @@
       height: $wasdi-heigt-panel-import;
       max-height:$wasdi-heigt-panel-import;
       color:black;
+      .my-input-text
+      {
+
+        .form-control
+        {
+          border-radius: 0;
+          border:2px solid $wasdi-input-text-border-color;
+        }
+        input[type=text] {
+          //width: 100%;
+          //padding: 12px 20px;
+          //margin: 8px 0;
+          //box-sizing: border-box;
+          //background-color: white;
+          //border-color: #2D394F;
+          margin:0;
+        }
+
+        .advanced-calendar-button {
+          color: $wasdi-white;
+          background-color: $wasdi-blue-logo;
+          border-color: $wasdi-blue-logo;
+          //border-radius: 0;
+          //border:1px solid $wasdi-input-text-border-color;
+        }
+        .advanced-calendar-button:hover
+        {
+          background-color: $wasdi-green-logo;
+        }
+      }
+      .merge-search
+      {
+        margin-top: 20px;
+      }
     }
 
     //SEARCH BUTTON
@@ -134,6 +168,17 @@
       }
     }
 
+    .localStoragebtn
+    {
+      margin-left: 10px;
+      color: $wasdi-white;
+      cursor:pointer;
+    }
+    .localStoragebtn:hover
+    {
+      color: $wasdi-button-over-color;
+      background-color:transparent;
+    }
 
     .backbtn {
 

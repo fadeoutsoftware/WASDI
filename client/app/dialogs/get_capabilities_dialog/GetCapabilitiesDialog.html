@@ -17,8 +17,8 @@
 
                 <div class="my-button" ng-click="m_oController.loadLayers(input)" >{{"DIALOG_GET_CAPABILITIES_SEARCH"|translate}}</div>
 
-                <div ng-show="m_oController.m_bIsVisibleLoadIcon == true">
-                    <i class="fa fa-spinner fa-pulse fa-3x fa-fw"></i>
+                <div ng-show="m_oController.m_bIsVisibleLoadIcon == true" class="my-loading" >
+                    <i class="fa fa-spinner fa-pulse fa-3x fa-fw" ></i>
                     <span class="sr-only">Loading...</span>
                 </div>
 
@@ -29,12 +29,8 @@
                     </button>
 
                     <ul class="dropdown-menu" aria-labelledby="dropdownMenu1" >
-                        <li ng-repeat=" layer in m_oController.getLayers()">{{layer}}</li>
-                        <!--<li><a href="#">Action</a></li>-->
-                        <!--<li><a href="#">Another action</a></li>-->
-                        <!--<li><a href="#">Something else here</a></li>-->
-                        <!--<li role="separator" class="divider"></li>-->
-                        <!--<li><a href="#">Separated link</a></li>-->
+                        <li ng-repeat=" layer in m_oController.getLayers()" ng-click="m_oController.publishLayer(layer)">{{layer.Name}}</li>
+
                     </ul>
                 </div>
 
