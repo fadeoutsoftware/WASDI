@@ -28,7 +28,7 @@ angular.module('wasdi.SnakeDirective', [])
                 var KEYCODE_DOWN = 40;
                 var KEYCODE_SPACE = 32;
 
-                var oDirection = { x: 0, y: -1};
+                var oDirection = { x: 0, y: 1};
 
                 var aoSnakePoints = [ { x:20,y:15}];
                 var oGoalPoint = {};
@@ -272,8 +272,11 @@ angular.module('wasdi.SnakeDirective', [])
                 }
 
                 function InitNewGame() {
-                    oDirection = { x: 0, y: -1};
-                    aoSnakePoints = [ { x:20,y:15}, { x:20,y:14}];
+                    oDirection = { x: 0, y: 1};
+                    aoSnakePoints = [ { x:15,y:15}, { x:16,y:15}, { x:17,y:15}, { x:18,y:15}, { x:19,y:15}, { x:20,y:15}, { x:20,y:14}, { x:20,y:13},
+                        { x:20,y:12}, { x:20,y:11}, { x:20,y:10}, { x:20,y:9}, { x:20,y:8}, { x:20,y:7}, { x:19,y:7}, { x:18,y:7}, { x:17,y:7}, { x:16,y:7},
+                        { x:15,y:7}, { x:14,y:7}, { x:13,y:7}, { x:12,y:7}, { x:12,y:8}, { x:12,y:9}, { x:12,y:10}, { x:12,y:11},{ x:12,y:12}, { x:12,y:13},
+                        { x:12,y:14}, { x:12,y:15}];
                     iPoints = 0;
                     oGoalPoint = GetGoalPoint();
                     iSlowLimit = 10;
