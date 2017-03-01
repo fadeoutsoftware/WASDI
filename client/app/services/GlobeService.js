@@ -103,5 +103,29 @@ service('GlobeService', ['$http',  'ConstantsService', function ($http, oConstan
         return redRectangle;
     }
 
+    this.zoomOnLayer = function(oArray)
+    {
+        var oBoundingBox = oArray;
+
+        if(utilsIsObjectNullOrUndefined(oBoundingBox) == true)
+            return false;
+
+        var oGlobe = this.m_oWasdiGlobe;
+        if(utilsIsObjectNullOrUndefined(oGlobe) == true)
+            return false;
+
+        /* set view of globe*/
+        oGlobe.camera.setView({
+            destination:  Cesium.Rectangle.fromDegrees( oArray[0], oArray[1] , oArray[2],oArray[3]),
+            orientation: {
+                heading: 0.0,
+                pitch: -Cesium.Math.PI_OVER_TWO,
+                roll: 0.0
+            }
+
+        });
+
+        return true;
+    }
 }]);
 

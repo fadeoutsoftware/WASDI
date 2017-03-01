@@ -946,7 +946,7 @@ var EditorController = (function () {
         //If there is the map or grey background
         if(this.m_bIsVisibleMapOfLeaflet == true)
         {
-            //there is the map
+            //if there is the map
             //reinitialize the globe
             this.m_oGlobeService.clearGlobe();
             this.m_oGlobeService.initGlobe('cesiumContainer2');
@@ -956,9 +956,19 @@ var EditorController = (function () {
             for(var iIndexLayer = 0; iIndexLayer < iNumberOfLayers; iIndexLayer++)
             {
                 if(!utilsIsObjectNullOrUndefined(this.m_aoLayersList[iIndexLayer].layerId))
+                {
                     this.addLayerMap3D(this.m_aoLayersList[iIndexLayer].layerId);//import layer
+                    var oBounds = JSON.parse(this.m_aoLayersList[iIndexLayer].boundingBox);
+                    this.m_oGlobeService.zoomOnLayer([oBounds.minx,oBounds.miny,oBounds.maxx,oBounds.maxy]);
+                }
                 else
+                {
                     this.addLayerMap3D(this.m_aoLayersList[iIndexLayer].Title);//get capabilities layer
+                    var oBounds = (this.m_aoLayersList[0].BoundingBox[0].extent);
+                    this.m_oGlobeService.zoomOnLayer([oBounds[0],oBounds[1],oBounds[2],oBounds[3]]);
+                }
+
+
             }
 
             this.m_oMapService.setBasicMap();
@@ -983,6 +993,7 @@ var EditorController = (function () {
 
                     var oBounds = JSON.parse(this.m_aoLayersList[0].boundingBox);
                     this.m_oGlobeService.addRectangleOnGlobe([oBounds.minx,oBounds.miny,oBounds.maxx,oBounds.maxy]);
+                    this.m_oGlobeService.zoomOnLayer([oBounds.minx,oBounds.miny,oBounds.maxx,oBounds.maxy]);
                 }
 
                 if(!utilsIsObjectNullOrUndefined(this.m_aoLayersList[0].BoundingBox)) //if there is BoundingBox.extent property, the layer was downloaded by us server
@@ -990,44 +1001,66 @@ var EditorController = (function () {
                     //TODO CHECK IF .BoundingBox[0] it's right
                     var oBounds = (this.m_aoLayersList[0].BoundingBox[0].extent);
                     this.m_oGlobeService.addRectangleOnGlobe([oBounds[0],oBounds[1],oBounds[2],oBounds[3]]);
+                    this.m_oGlobeService.zoomOnLayer([oBounds[0],oBounds[1],oBounds[2],oBounds[3]]);
                 }
+
             }
             else
             {
                 //remove all layers
-                //var oCallback = function(value){
-                //    if (value)
-                //    {
-                //        return true;
-                //    }
-                //    else
-                //    {
-                //        return false;
-                //    }
-                //}
-                //var bResponse = false;
-                //if(iNumberOfLayers!= 0)
-                //    bResponse = utilsVexDialogConfirm("Are you sure to delete layers?",oCallback);//ask user if he want delete layers
-                //
+                var oController = this;
+
+                var oCallback = function(value){
+                    if (value)
+                    {
+                        //clear 2d map
+                        oController.m_oMapService.removeLayersFromMap();
+                        //reinitialize the globe
+                        oController.m_oGlobeService.clearGlobe();
+                        oController.m_oGlobeService.initGlobe('cesiumContainer2');
+                        //for each layer reinitialize the tree
+
+                        for(var iIndexLayer = 0; iIndexLayer < iNumberOfLayers; iIndexLayer++)
+                        {
+                            if(!utilsIsObjectNullOrUndefined(oController.m_aoLayersList[iIndexLayer].layerId))
+                            {
+                                var oNode = $('#jstree').jstree(true).get_node(oController.m_aoLayersList[iIndexLayer].layerId);
+                                oNode.original.bPubblish = false;
+                                $('#jstree').jstree(true).set_icon(oController.m_aoLayersList[iIndexLayer].layerId, 'assets/icons/uncheck_20x20.png');
+                            }
+                        }
+                        oController.m_aoLayersList = [];//empty layer list
+                        return true;
+                    }
+                    else
+                    {
+                        return false;
+                    }
+                }
+
+                var bResponse = false;
+                if(iNumberOfLayers!= 0)
+                    bResponse = utilsVexDialogConfirm("Are you sure to delete layers?",oCallback);//ask user if he want delete layers
+
                 //if(bResponse == true)//if the user want delete all layers
                 //{
-                    //clear 2d map
-                    this.m_oMapService.removeLayersFromMap();
-                    //reinitialize the globe
-                    this.m_oGlobeService.clearGlobe();
-                    this.m_oGlobeService.initGlobe('cesiumContainer2');
-                    //for each layer reinitialize the tree
-
-                    for(var iIndexLayer = 0; iIndexLayer < iNumberOfLayers; iIndexLayer++)
-                    {
-                        if(!utilsIsObjectNullOrUndefined(this.m_aoLayersList[iIndexLayer].layerId))
-                        {
-                            var oNode = $('#jstree').jstree(true).get_node(this.m_aoLayersList[iIndexLayer].layerId);
-                            oNode.original.bPubblish = false;
-                            $('#jstree').jstree(true).set_icon(this.m_aoLayersList[iIndexLayer].layerId, 'assets/icons/uncheck_20x20.png');
-                        }
-                    }
-                    this.m_aoLayersList = [];//empty layer list
+                //    //clear 2d map
+                //    this.m_oMapService.removeLayersFromMap();
+                //    //reinitialize the globe
+                //    this.m_oGlobeService.clearGlobe();
+                //    this.m_oGlobeService.initGlobe('cesiumContainer2');
+                //    //for each layer reinitialize the tree
+                //
+                //    for(var iIndexLayer = 0; iIndexLayer < iNumberOfLayers; iIndexLayer++)
+                //    {
+                //        if(!utilsIsObjectNullOrUndefined(this.m_aoLayersList[iIndexLayer].layerId))
+                //        {
+                //            var oNode = $('#jstree').jstree(true).get_node(this.m_aoLayersList[iIndexLayer].layerId);
+                //            oNode.original.bPubblish = false;
+                //            $('#jstree').jstree(true).set_icon(this.m_aoLayersList[iIndexLayer].layerId, 'assets/icons/uncheck_20x20.png');
+                //        }
+                //    }
+                //    this.m_aoLayersList = [];//empty layer list
                 //}
             }
 
