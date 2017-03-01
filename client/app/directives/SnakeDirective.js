@@ -13,10 +13,10 @@ angular.module('wasdi.SnakeDirective', [])
             template: "<canvas width='800' height='600'></canvas>",
             link: function (scope, element, attribute) {
                 var w, h, iSquareWidth, iSquareHeight;
-                var iGridSizeX = 80;
-                var iGridSizeY = 60;
+                var iGridSizeX = 40;
+                var iGridSizeY = 30;
                 var iSlowCounter = 0;
-                var iSlowLimit = 10;
+                var iSlowLimit = 8;
                 var bGaming = false;
                 var bGameOver = false;
                 var iPoints = 0;
@@ -30,7 +30,7 @@ angular.module('wasdi.SnakeDirective', [])
 
                 var oDirection = { x: 0, y: -1};
 
-                var aoSnakePoints = [ { x:40,y:30}];
+                var aoSnakePoints = [ { x:20,y:15}];
                 var oGoalPoint = {};
 
                 var sSnakeColor = "#43526B";
@@ -273,7 +273,7 @@ angular.module('wasdi.SnakeDirective', [])
 
                 function InitNewGame() {
                     oDirection = { x: 0, y: -1};
-                    aoSnakePoints = [ { x:40,y:30}];
+                    aoSnakePoints = [ { x:20,y:15}, { x:20,y:14}];
                     iPoints = 0;
                     oGoalPoint = GetGoalPoint();
                     iSlowLimit = 10;
