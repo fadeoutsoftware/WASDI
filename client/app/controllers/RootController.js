@@ -3,7 +3,7 @@
  */
 var RootController = (function() {
 
-    function RootController($scope, oConstantsService, oAuthService, $state, oProcessesLaunchedService, oWorkspaceService,$timeout) {
+    function RootController($scope, oConstantsService, oAuthService, $state, oProcessesLaunchedService, oWorkspaceService,$timeout,oModalService) {
         this.m_oScope = $scope;
         this.m_oScope.m_oController = this;
         this.m_oConstantsService = oConstantsService;
@@ -18,6 +18,7 @@ var RootController = (function() {
         this.m_oLastProcesses = null;
         this.m_bIsOpenNav = false;
         this.m_bIsOpenStatusBar = false; //processes bar
+        this.m_oModalService = oModalService;
         var oController = this;
         this.m_oAuthService.checkSession().success(function (data, status) {
             if (data == null || data == undefined || data == '')
@@ -369,6 +370,23 @@ var RootController = (function() {
 
     };
 
+    RootController.prototype.openSnake = function()
+    {
+        var oController = this
+        this.m_oModalService.showModal({
+            templateUrl: "dialogs/snake_dialog/SnakeDialog.html",
+            controller: "RootController",
+
+        }).then(function(modal) {
+            modal.element.modal();
+            modal.close.then(function(result) {
+                oController.m_oScope.Result = result ;
+            });
+        });
+
+        return true;
+    }
+
     /*********************************************************************/
     RootController.$inject = [
         '$scope',
@@ -377,7 +395,8 @@ var RootController = (function() {
         '$state',
         'ProcessesLaunchedService',
         'WorkspaceService',
-        '$timeout'
+        '$timeout',
+        'ModalService'
 
     ];
 

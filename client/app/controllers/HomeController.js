@@ -36,13 +36,19 @@ var HomeController = (function() {
             {
                 if (data != undefined)
                 {
-                    if (data.userId != null || data.userId != "")
+                    if (data.userId != null && data.userId != "")
                     {
+                        //LOGIN OK
                         if(!utilsIsObjectNullOrUndefined(data.sessionId)|| !utilsIsStrNullOrEmpty(data.sessionId))
                         {
                             oConstantsService.setUser(data);//set user
                             oController.m_oState.go("root.workspaces");// go workspaces
                         }
+                    }
+                    else
+                    {
+                        //LOGIN FAIL
+                        utilsVexDialogAlertTop( "Wrong Credentials, try again");
                     }
                 }
             }
