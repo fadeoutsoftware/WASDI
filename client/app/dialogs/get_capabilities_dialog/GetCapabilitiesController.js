@@ -21,9 +21,9 @@ var GetCapabilitiesController = (function() {
     }
     GetCapabilitiesController.prototype.loadLayers = function(sServer)
     {
-        var myGeoserverUrl = this.m_oConstantsService.getWmsUrlGeoserver();
-        this.m_sServerLink = myGeoserverUrl;
-        sServer = myGeoserverUrl+"service=WMS&request=GetCapabilities";
+        //var myGeoserverUrl = this.m_oConstantsService.getWmsUrlGeoserver();
+        this.m_sServerLink =sServer;// myGeoserverUrl;
+        sServer = sServer+"service=WMS&request=GetCapabilities";
 
         if(utilsIsObjectNullOrUndefined(sServer))
             return false;
