@@ -84,7 +84,7 @@ public class FileBufferResource {
 	@GET
 	@Path("download")
 	@Produces({"application/xml", "application/json", "text/xml"})
-	public Response Download(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sFileUrl") String sFileUrl, @QueryParam("sWorkspaceId") String sWorkspaceId) throws IOException
+	public Response Download(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sFileUrl") String sFileUrl, @QueryParam("sWorkspaceId") String sWorkspaceId, @QueryParam("sBoundingBox") String sBoundingBox) throws IOException
 	{
 		try {
 
@@ -127,6 +127,7 @@ public class FileBufferResource {
 			oParameter.setUserId(sUserId);
 			oParameter.setExchange(sWorkspaceId);
 			oParameter.setProcessObjId(sProcessId);
+			oParameter.setBoundingBox(sBoundingBox);
 
 			SerializationUtils.serializeObjectToXML(sPath, oParameter);
 
