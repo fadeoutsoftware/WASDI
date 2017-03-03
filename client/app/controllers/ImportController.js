@@ -581,9 +581,17 @@ var ImportController = (function() {
             return false;
         }
 
-        this.m_oFileBufferService.download(url,oWorkSpace.workspaceId).success(function (data, status) {
+        //for(var iIndex = 0; iIndex < oLayer.length;iIndex++ )
+        //{
+        //    var swap;
+        //
+        //    swap = oLayer.bounds[iIndex][0];
+        //    oLayer.bounds[iIndex][0] = oLayer.bounds[iIndex][1];
+        //    oLayer.bounds[iIndex][1] = swap;
+        //}
+        this.m_oFileBufferService.download(url,oWorkSpace.workspaceId,oLayer.bounds.toString()).success(function (data, status) {
             //TODO CHECK DATA-STATUS
-            var oDialog = utilsVexDialogAlertBottomRightCorner("Product just start the download ");
+            var oDialog = utilsVexDialogAlertBottomRightCorner("Product just start the download");
             //oController.m_oProcessesLaunchedService.addProcessesByLocalStorage(oLayer.title,
             //                                                                    null,
             //                                                                    oController.m_oProcessesLaunchedService.getTypeOfProcessProductDownload()
@@ -732,6 +740,7 @@ var ImportController = (function() {
             oController.m_aoProductsList.push(
                 {
                     layerProperty:aoLayers[iIndexLayers],
+                    bounds:aasBounds,
                     summary:oSummary,
                     id:aoLayers[iIndexLayers].id,
                     rectangle:oRectangle,
