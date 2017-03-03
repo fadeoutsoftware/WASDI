@@ -8,11 +8,14 @@ service('FileBufferService', ['$http',  'ConstantsService', function ($http, oCo
     this.APIURL = oConstantsService.getAPIURL();
     this.m_oHttp = $http;
 
-    this.download = function(sUrl, sWorkspaceId) {
+    //this.download = function(sUrl, sWorkspaceId) {
+    //    //sUrl="https://scihub.copernicus.eu/dhus/odata/v1/Products('ed9c834d-0d8c-47d2-8337-3036bd14d0f3')/$value";
+    //    return this.m_oHttp.get(this.APIURL + '/filebuffer/download?sFileUrl='+sUrl+"&sWorkspaceId="+sWorkspaceId);
+    //}
+    this.download = function(sUrl, sWorkspaceId,sBounds) {
         //sUrl="https://scihub.copernicus.eu/dhus/odata/v1/Products('ed9c834d-0d8c-47d2-8337-3036bd14d0f3')/$value";
-        return this.m_oHttp.get(this.APIURL + '/filebuffer/download?sFileUrl='+sUrl+"&sWorkspaceId="+sWorkspaceId);
+        return this.m_oHttp.get(this.APIURL + '/filebuffer/download?sFileUrl='+sUrl+"&sWorkspaceId="+sWorkspaceId+"&sBoundingBox="+sBounds);
     }
-
     this.publish = function(sUrl, sWorkspaceId) {
         return this.m_oHttp.get(this.APIURL + '/filebuffer/publish?sFileUrl='+sUrl+"&sWorkspaceId="+sWorkspaceId);
     }

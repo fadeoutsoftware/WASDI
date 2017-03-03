@@ -213,12 +213,21 @@ var EditorController = (function () {
 
             // so add the new bands
             // and the bounding box in cesium
-            var oBounds = JSON.parse(oLayer.boundingBox);
-            this.m_oGlobeService.addRectangleOnGlobe([oBounds.minx,oBounds.miny,oBounds.maxx,oBounds.maxy]);
+            var aBounds = JSON.parse("["+oLayer.boundingBox+"]");
+
+            for(var iIndex = 0; iIndex < aBounds.length-1 ;iIndex=iIndex+2)
+            {
+                var iSwap;
+                iSwap = aBounds[iIndex];
+                aBounds[iIndex] = aBounds[iIndex+1];
+                aBounds[iIndex+1] = iSwap;
+            }
+
+            this.m_oGlobeService.addRectangleOnGlobeParamArray(aBounds);
             this.addLayerMap2D(oLayer.layerId);
             this.m_aoLayersList.push(oLayer);
-            this.zoomOnLayer2DMap(oLayer.layerId);
-            this.zoomOnLayer3DGlobe(oLayer.layerId);
+            //this.zoomOnLayer2DMap(oLayer.layerId);
+            //this.zoomOnLayer3DGlobe(oLayer.layerId);
         }
 
 
@@ -905,7 +914,18 @@ var EditorController = (function () {
             }
 
         });
-
+        //oBoundingBox = [[107.144188,77.391487],[90.454704,78.801079],[93.399925,80.717804],[112.501625,79.084023],[107.144188, 77.391487]];
+        //var oCartographic =  [new Cesium.Cartographic(77.391487,107.144188),new Cesium.Cartographic(78.801079,90.454704),new Cesium.Cartographic(80.717804,93.399925),new Cesium.Cartographic(79.084023,112.501625),new Cesium.Cartographic(77.391487,107.144188)]
+        //var prova =Cesium.Rectangle.fromCartographicArray(oCartographic);
+        //oGlobe.camera.setView({
+        //    destination: prova,
+        //    orientation: {
+        //        heading: 0.0,
+        //        pitch: -Cesium.Math.PI_OVER_TWO,
+        //        roll: 0.0
+        //    }
+        //
+        //});
         return true;
     }
 
@@ -959,16 +979,23 @@ var EditorController = (function () {
                 {
                     this.addLayerMap3D(this.m_aoLayersList[iIndexLayer].layerId);//import layer
                     var oBounds = JSON.parse(this.m_aoLayersList[iIndexLayer].boundingBox);
-                    this.m_oGlobeService.zoomOnLayer([oBounds.minx,oBounds.miny,oBounds.maxx,oBounds.maxy]);
+                    //var aBounds = JSON.parse("["+this.m_aoLayersList[iIndexLayer].boundingBox+"]");
+                    //
+                    //for(var iIndex = 0; iIndex < aBounds.length-1 ;iIndex=iIndex+2)
+                    //{
+                    //    var iSwap;
+                    //    iSwap = aBounds[iIndex];
+                    //    aBounds[iIndex] = aBounds[iIndex+1];
+                    //    aBounds[iIndex+1] = iSwap;
+                    //}
+                    this.m_oGlobeService.zoomOnLayerBoundingBox([oBounds.minx,oBounds.miny,oBounds.maxx,oBounds.maxy]);
                 }
                 else
                 {
                     this.addLayerMap3D(this.m_aoLayersList[iIndexLayer].Title);//get capabilities layer
                     var oBounds = (this.m_aoLayersList[0].BoundingBox[0].extent);
-                    this.m_oGlobeService.zoomOnLayer([oBounds[0],oBounds[1],oBounds[2],oBounds[3]]);
+                    this.m_oGlobeService.zoomOnLayerBoundingBox([oBounds[0],oBounds[1],oBounds[2],oBounds[3]]);
                 }
-
-
             }
 
             this.m_oMapService.setBasicMap();
@@ -991,17 +1018,37 @@ var EditorController = (function () {
                 if(!utilsIsObjectNullOrUndefined(this.m_aoLayersList[0].boundingBox)) //if there is .boundingBox property, the layer was downloaded by copernicus server
                 {
 
-                    var oBounds = JSON.parse(this.m_aoLayersList[0].boundingBox);
-                    this.m_oGlobeService.addRectangleOnGlobe([oBounds.minx,oBounds.miny,oBounds.maxx,oBounds.maxy]);
-                    this.m_oGlobeService.zoomOnLayer([oBounds.minx,oBounds.miny,oBounds.maxx,oBounds.maxy]);
+                    //var oBounds = JSON.parse(this.m_aoLayersList[0].boundingBox);
+                    //this.m_oGlobeService.addRectangleOnGlobe([oBounds.minx,oBounds.miny,oBounds.maxx,oBounds.maxy]);
+                    //this.m_oGlobeService.zoomOnLayer([oBounds.minx,oBounds.miny,oBounds.maxx,oBounds.maxy]);
+
+
+                    //var oBoundingBox = [[1.870018854971,1.35073626116],[1.57873240871,1.37533828267],[1.63013621236,1.40879144478],[1.963523770089,1.38027658707],[1.870018854971, 1.35073626116]];
+                    //var aoCartographic =  [new Cesium.Cartographic(107.144188,77.391487),new Cesium.Cartographic(90.454704,78.801079),new Cesium.Cartographic(93.399925,80.717804),new Cesium.Cartographic(112.501625,79.084023),new Cesium.Cartographic(107.144188,77.391487)]
+
+                    //var aoCartographic =  [new Cesium.Cartographic(1.35073626116,1.870018854971),new Cesium.Cartographic(1.37533828267,1.57873240871),new Cesium.Cartographic(1.40879144478,1.63013621236),new Cesium.Cartographic(1.38027658707,1.963523770089),new Cesium.Cartographic( 1.35073626116,1.870018854971)]
+                    //var aoCartographic =  [new Cesium.Cartographic.fromDegrees(107.144188,77.391487),new Cesium.Cartographic.fromDegrees(90.454704,78.801079),new Cesium.Cartographic.fromDegrees(93.399925,80.717804),new Cesium.Cartographic.fromDegrees(112.501625,79.084023),new Cesium.Cartographic.fromDegrees(107.144188,77.391487)]
+
+                    //var aoCartographic =  [new Cesium.Cartographic.fromDegrees(13.643888,43.863701),new Cesium.Cartographic.fromDegrees(10.388990,44.271336),new Cesium.Cartographic.fromDegrees(10.717404,45.770004),new Cesium.Cartographic.fromDegrees(14.057657,45.362556),new Cesium.Cartographic.fromDegrees(13.643888,43.863701)]
+                    var aBounds = JSON.parse("["+this.m_aoLayersList[0].boundingBox+"]");
+
+                    for(var iIndex = 0; iIndex < aBounds.length-1 ;iIndex=iIndex+2)
+                    {
+                        var iSwap;
+                        iSwap = aBounds[iIndex];
+                        aBounds[iIndex] = aBounds[iIndex+1];
+                        aBounds[iIndex+1] = iSwap;
+                    }
+                    this.m_oGlobeService.addRectangleOnGlobeParamArray(aBounds);
+                    this.m_oGlobeService.zoomOnLayerParamArray(aBounds);
                 }
 
-                if(!utilsIsObjectNullOrUndefined(this.m_aoLayersList[0].BoundingBox)) //if there is BoundingBox.extent property, the layer was downloaded by us server
+                if(!utilsIsObjectNullOrUndefined(this.m_aoLayersList[0].BoundingBox)) //if there is BoundingBox.extent property, the layer was downloaded by external server
                 {
                     //TODO CHECK IF .BoundingBox[0] it's right
                     var oBounds = (this.m_aoLayersList[0].BoundingBox[0].extent);
-                    this.m_oGlobeService.addRectangleOnGlobe([oBounds[0],oBounds[1],oBounds[2],oBounds[3]]);
-                    this.m_oGlobeService.zoomOnLayer([oBounds[0],oBounds[1],oBounds[2],oBounds[3]]);
+                    this.m_oGlobeService.addRectangleOnGlobeBoundingBox([oBounds[0],oBounds[1],oBounds[2],oBounds[3]]);
+                    this.m_oGlobeService.zoomOnLayerBoundingBox([oBounds[0],oBounds[1],oBounds[2],oBounds[3]]);
                 }
 
             }
@@ -1018,7 +1065,7 @@ var EditorController = (function () {
                         //reinitialize the globe
                         oController.m_oGlobeService.clearGlobe();
                         oController.m_oGlobeService.initGlobe('cesiumContainer2');
-                        //for each layer reinitialize the tree
+                        //for each layer update the node in tree
 
                         for(var iIndexLayer = 0; iIndexLayer < iNumberOfLayers; iIndexLayer++)
                         {
@@ -1042,26 +1089,6 @@ var EditorController = (function () {
                 if(iNumberOfLayers!= 0)
                     bResponse = utilsVexDialogConfirm("Are you sure to delete layers?",oCallback);//ask user if he want delete layers
 
-                //if(bResponse == true)//if the user want delete all layers
-                //{
-                //    //clear 2d map
-                //    this.m_oMapService.removeLayersFromMap();
-                //    //reinitialize the globe
-                //    this.m_oGlobeService.clearGlobe();
-                //    this.m_oGlobeService.initGlobe('cesiumContainer2');
-                //    //for each layer reinitialize the tree
-                //
-                //    for(var iIndexLayer = 0; iIndexLayer < iNumberOfLayers; iIndexLayer++)
-                //    {
-                //        if(!utilsIsObjectNullOrUndefined(this.m_aoLayersList[iIndexLayer].layerId))
-                //        {
-                //            var oNode = $('#jstree').jstree(true).get_node(this.m_aoLayersList[iIndexLayer].layerId);
-                //            oNode.original.bPubblish = false;
-                //            $('#jstree').jstree(true).set_icon(this.m_aoLayersList[iIndexLayer].layerId, 'assets/icons/uncheck_20x20.png');
-                //        }
-                //    }
-                //    this.m_aoLayersList = [];//empty layer list
-                //}
             }
 
 

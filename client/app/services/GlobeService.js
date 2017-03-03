@@ -85,7 +85,9 @@ service('GlobeService', ['$http',  'ConstantsService', function ($http, oConstan
             }
         });
     }
-    this.addRectangleOnGlobe = function (oRectangle)
+
+    /* ADD BOUNDING BOX */
+    this.addRectangleOnGlobeBoundingBox = function (oRectangle)
     {
         if(utilsIsObjectNullOrUndefined(oRectangle))
             return null;
@@ -103,7 +105,8 @@ service('GlobeService', ['$http',  'ConstantsService', function ($http, oConstan
         return redRectangle;
     }
 
-    this.zoomOnLayer = function(oArray)
+    /* ZOOM ON LAYER WITH BOUNDING BOX */
+    this.zoomOnLayerBoundingBox = function(oArray)
     {
         var oBoundingBox = oArray;
 
@@ -127,5 +130,74 @@ service('GlobeService', ['$http',  'ConstantsService', function ($http, oConstan
 
         return true;
     }
+    /**
+     * ZOOM ON LAYER BY POINTS
+     * @param oArray
+     * @returns {boolean}
+     */
+    this.zoomOnLayerParamArray = function(oArray)
+    {
+        if(utilsIsObjectNullOrUndefined(oArray) == true)
+            return false;
+
+        var oGlobe = this.m_oWasdiGlobe;
+        if(utilsIsObjectNullOrUndefined(oGlobe) == true)
+            return false;
+
+        var oZoom = Cesium.Rectangle.fromDegreesArray(oArray);
+
+        oGlobe.camera.setView({
+            destination: oZoom,
+            orientation: {
+                heading: 0.0,
+                pitch: -Cesium.Math.PI_OVER_TWO,
+                roll: 0.0
+            }
+
+        });
+    }
+    /**
+     * ADD RECTANGLE (PARAM ARRAY OF POINTS )
+     * @param aoArray
+     * @returns {boolean}
+     */
+    this.addRectangleOnGlobeParamArray = function (aArray)
+    {
+        if(utilsIsObjectNullOrUndefined(aArray) == true)
+            return false;
+
+        var oGlobe = this.m_oWasdiGlobe;
+        if(utilsIsObjectNullOrUndefined(oGlobe) == true)
+            return false;
+
+        //var stripeMaterial = new Cesium.StripeMaterialProperty({
+        //    evenColor : Cesium.Color.WHITE.withAlpha(0.5),
+        //    oddColor : Cesium.Color.BLUE.withAlpha(0.5),
+        //    repeat : 5.0
+        //});
+
+        //var oShape = Cesium.Rectangle.fromCartographicArray(aoArray);
+        //var oShape = Cesium.Cartesian3.fromDegreesArray(aoArray);
+        //var aoNewArray = [];
+        //for(var iIndex = 0; iIndex < aoArray.length; iIndex++)
+        //{
+        //    aoNewArray.push(aoArray[iIndex].longitude);
+        //    aoNewArray.push(aoArray[iIndex].latitude);
+        //
+        //}
+
+        var oRectangle = oGlobe.entities.add({
+            polygon : {
+                hierarchy : new Cesium.PolygonHierarchy(Cesium.Cartesian3.fromDegreesArray(aArray)),
+                outline : true,
+                outlineColor : Cesium.Color.WHITE,
+                outlineWidth : 4,
+                material : Cesium.Color.RED.withAlpha(0.7),
+            }
+        });
+
+        return oRectangle;
+    }
+
 }]);
 
