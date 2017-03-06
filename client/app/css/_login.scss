@@ -157,4 +157,28 @@
       color: $wasdi-blue-logo;
     }
   }
+  //striscia loghi
+  footer
+  {
+    .striscia_loghi
+    {
+      content: $wasdi-brand-logo-login-footer; // set 'src' attribute from CSS
+      width: $wasdi-brand-logo-login-size;
+      margin-top: 0px;
+      height: auto;
+      min-height: 50px;
+      min-width: 500px;
+      max-height: 250px;
+      max-width: 500px;
+
+      //POSITIONING ELEMENT
+      //position: absolute;
+      position:fixed;
+      top: 93%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+
+    }
+  }
+
 }

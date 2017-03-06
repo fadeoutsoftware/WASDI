@@ -223,11 +223,11 @@ var EditorController = (function () {
                 aBounds[iIndex+1] = iSwap;
             }
 
-            this.m_oGlobeService.addRectangleOnGlobeParamArray(aBounds);
+            this.m_oGlobeService.addRectangleOnGlobeBoundingBox(aBounds);
             this.addLayerMap2D(oLayer.layerId);
             this.m_aoLayersList.push(oLayer);
-            //this.zoomOnLayer2DMap(oLayer.layerId);
-            //this.zoomOnLayer3DGlobe(oLayer.layerId);
+            this.zoomOnLayer2DMap(oLayer.layerId);
+            this.zoomOnLayer3DGlobe(oLayer.layerId);
         }
 
 
@@ -671,7 +671,8 @@ var EditorController = (function () {
                             "Merge" : {
                                 "label" : "Merge ",
                                 "action" : function (obj) {
-                                    oController.openMergeDialog();
+                                    //$node.original.fileName;
+                                    oController.openMergeDialog($node.original.fileName);
                                 }
                             }
                         };
@@ -898,22 +899,24 @@ var EditorController = (function () {
         if( !(iIndexLayer < iNumberOfLayers))//there isn't layer in layerList
             return false;
 
-        var oBoundingBox = JSON.parse(this.m_aoLayersList[iIndexLayer].boundingBox);
+        var oBoundingBox = JSON.parse("[" + this.m_aoLayersList[iIndexLayer].boundingBox + "]");
 
         if(utilsIsObjectNullOrUndefined(oBoundingBox)== true)
             return false;
 
         var oGlobe = this.m_oGlobeService.getGlobe();
         /* set view of globe*/
-        oGlobe.camera.setView({
-            destination:  Cesium.Rectangle.fromDegrees( oBoundingBox.minx , oBoundingBox.miny , oBoundingBox.maxx,oBoundingBox.maxy),
-            orientation: {
-                heading: 0.0,
-                pitch: -Cesium.Math.PI_OVER_TWO,
-                roll: 0.0
-            }
+        this.m_oGlobeService.zoomOnLayerParamArray(oBoundingBox);
+        //oGlobe.camera.setView({
+        //    destination:  Cesium.Rectangle.fromDegrees( oBoundingBox.minx , oBoundingBox.miny , oBoundingBox.maxx,oBoundingBox.maxy),
+        //    orientation: {
+        //        heading: 0.0,
+        //        pitch: -Cesium.Math.PI_OVER_TWO,
+        //        roll: 0.0
+        //    }
+        //
+        //});
 
-        });
         //oBoundingBox = [[107.144188,77.391487],[90.454704,78.801079],[93.399925,80.717804],[112.501625,79.084023],[107.144188, 77.391487]];
         //var oCartographic =  [new Cesium.Cartographic(77.391487,107.144188),new Cesium.Cartographic(78.801079,90.454704),new Cesium.Cartographic(80.717804,93.399925),new Cesium.Cartographic(79.084023,112.501625),new Cesium.Cartographic(77.391487,107.144188)]
         //var prova =Cesium.Rectangle.fromCartographicArray(oCartographic);
@@ -946,16 +949,23 @@ var EditorController = (function () {
         if( !(iIndexLayer < iNumberOfLayers))//there isn't layer in layerList
             return false;
 
-        var oBoundingBox = JSON.parse(this.m_aoLayersList[iIndexLayer].boundingBox);
+        var aBoundingBox = JSON.parse("[" + this.m_aoLayersList[iIndexLayer].boundingBox + "]");
 
-        if(utilsIsObjectNullOrUndefined(oBoundingBox)== true)
+        if(utilsIsObjectNullOrUndefined(aBoundingBox)== true)
             return false;
 
-        var oMap = this.m_oMapService.getMap();
-        var corner1 = L.latLng(oBoundingBox.maxy,oBoundingBox.maxx),
-            corner2 = L.latLng( oBoundingBox.miny,oBoundingBox.minx  ),
-            bounds = L.latLngBounds(corner1, corner2);
-        oMap.fitBounds(bounds);
+        var aaBounds = [];
+        for( var iIndex = 0; iIndex < aBoundingBox.length-1 ;iIndex = iIndex + 2 )
+        {
+            aaBounds.push([aBoundingBox[iIndex],aBoundingBox[iIndex+1]]);
+
+        }
+        this.m_oMapService.zoomOnBounds(aaBounds);
+        //var oMap = this.m_oMapService.getMap();
+        //var corner1 = L.latLng(oBoundingBox.maxy,oBoundingBox.maxx),
+        //    corner2 = L.latLng( oBoundingBox.miny,oBoundingBox.minx  ),
+        //    bounds = L.latLngBounds(corner1, corner2);
+        //oMap.fitBounds(bounds);
 
         return true;
     }
@@ -975,7 +985,7 @@ var EditorController = (function () {
             var iNumberOfLayers = this.m_aoLayersList.length;
             for(var iIndexLayer = 0; iIndexLayer < iNumberOfLayers; iIndexLayer++)
             {
-                if(!utilsIsObjectNullOrUndefined(this.m_aoLayersList[iIndexLayer].layerId))
+                if(!utilsIsObjectNullOrUndefined(this.m_aoLayersList[iIndexLayer].layerId))//check if the layer was took with get capabilities
                 {
                     this.addLayerMap3D(this.m_aoLayersList[iIndexLayer].layerId);//import layer
                     var oBounds = JSON.parse(this.m_aoLayersList[iIndexLayer].boundingBox);
@@ -988,7 +998,8 @@ var EditorController = (function () {
                     //    aBounds[iIndex] = aBounds[iIndex+1];
                     //    aBounds[iIndex+1] = iSwap;
                     //}
-                    this.m_oGlobeService.zoomOnLayerBoundingBox([oBounds.minx,oBounds.miny,oBounds.maxx,oBounds.maxy]);
+                    this.m_oGlobeService.zoomOnLayerParamArray(aBounds);
+                    //this.m_oGlobeService.zoomOnLayerBoundingBox([oBounds.minx,oBounds.miny,oBounds.maxx,oBounds.maxy]);
                 }
                 else
                 {
@@ -1135,16 +1146,20 @@ var EditorController = (function () {
     }
 
 
-    EditorController.prototype.openMergeDialog = function()
+    EditorController.prototype.openMergeDialog = function(oSelectedProduct)
     {
 
+        var oController = this;
 
-        var oController = this
         this.m_oModalService.showModal({
             templateUrl: "dialogs/merge_products_dialog/MergeProductsDialog.html",
             controller: "MergeProductsController",
             inputs: {
-                extras: oController
+                extras:
+                {
+                    SelectedProduct: oSelectedProduct,
+                    ListOfProducts: oController.m_aoProducts
+                }
             }
         }).then(function(modal) {
             modal.element.modal();

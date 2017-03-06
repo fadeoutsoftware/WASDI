@@ -258,20 +258,25 @@ service('MapService', ['$http','$rootScope', 'ConstantsService', function ($http
     }
 
     // ZOOM
-    this.zoomOnBounds = function (aaBounds)
+    this.zoomOnBounds = function (aBounds)
     {
-        if(utilsIsObjectNullOrUndefined(aaBounds))
+        if(utilsIsObjectNullOrUndefined(aBounds))
             return false;
-        //check if there are 2 points
-        if(aaBounds.length != 2)
-            return false;
+        ////check if there are 2 points
+        //if(aaBounds.length != 2)
+        //    return false;
         //check if they are points [ax,ay],[bx,by] == good
         // [ax,ay,az,....],[bx,by,bz,....] == bad
-        if(aaBounds[0].length != 2 || aaBounds[1].length != 2)
+        //if(aaBounds[0].length != 2 || aaBounds[1].length != 2)
+        //    return false;
+        if( aBounds.length == 0 )
             return false;
-        this.m_oWasdiMap.fitBounds(aaBounds)
+
+        this.m_oWasdiMap.fitBounds([aBounds]);
         return true;
     }
+
+
 
     this.initMapWithDrawSearch = function(sMapDiv)
     {

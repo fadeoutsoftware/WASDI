@@ -7,7 +7,7 @@
             </div>
             <div class="modal-body">
 
-                <div class="drag-and-drop">
+                <div class="drag-and-drop ">
                     Drop File:
                     <div ngf-drop ngf-select ng-model="m_oController.m_oFile" class="drop-box"
                          ngf-drag-over-class="'dragover'" ngf-multiple="true" ngf-allow-dir="true"
@@ -20,6 +20,18 @@
                     <!--</ul>-->
                     <!--Upload Log:-->
                     <!--<pre>{{log}}</pre>-->
+                </div>
+
+                <div class=" dropdown dropdown-products " ng-show="m_oController.isVisibleDropDownMenu()">
+                    <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                        product
+                        <span class="caret"></span>
+                    </button>
+
+                    <ul class="dropdown-menu" aria-labelledby="dropdownMenu1" >
+                        <li ng-repeat=" layer in m_oController.getLayers()" ng-click="m_oController.publishLayer(layer)">{{layer.Name}}</li>
+
+                    </ul>
                 </div>
 
             </div>
