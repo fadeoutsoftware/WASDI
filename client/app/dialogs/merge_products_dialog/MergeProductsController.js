@@ -8,6 +8,9 @@ var MergeProductsController = (function() {
         this.m_oScope.m_oController = this;
         this.m_sLog = '';
         this.m_oFile = null;
+        this.m_aoProductsList =  oExtras.ListOfProducts;
+        this.m_oSelectedProduct = oExtras.SelectedProduct;
+
         //$scope.close = oClose;
         $scope.close = function(result) {
             oClose(result, 500); // close, but give 500ms for bootstrap to animate
@@ -23,6 +26,13 @@ var MergeProductsController = (function() {
         //        $scope.files = [$scope.file];
         //    }
         //});
+    }
+
+    MergeProductsController.prototype.isVisibleDropDownMenu = function()
+    {
+        if(utilsIsObjectNullOrUndefined(this.m_oSelectedProduct))
+            return true;
+        return false;
     }
 
     MergeProductsController.prototype.upload = function (oFile) {

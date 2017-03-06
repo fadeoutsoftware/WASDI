@@ -129,6 +129,13 @@
     li {
 
       float: right;
+      .icon
+      {
+        img
+        {
+          height: 42px;
+        }
+      }
     }
 
     li a {

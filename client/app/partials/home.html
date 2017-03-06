@@ -50,8 +50,8 @@
         <!--snake></snake-->
     </div>
 
+    <!-- LOGIN LOGO SNAKE (background color white )-->
     <div class="login-bottom">
-
         <!------------------------------- LOGO ------------------------------->
         <img class="logo" id="logo"  ng-show="!m_oController.m_bLoginIsVisible">
         <script>
@@ -66,8 +66,22 @@
                 oImage.attr("src",imageSrc);
             })
         </script>
-
         <div class="write"  ng-show="!m_oController.m_bLoginIsVisible"><h2>{{"LOGIN_WRITE"|translate}}</h2></div>
-
     </div>
+
+    <footer>
+        <img class="striscia_loghi" id="striscia_loghi"  ng-show="!m_oController.m_bLoginIsVisible">
+        <script>
+            // Script fix an error with Firefox which does not
+            // show image correctly if the 'SRC' is set from CSS
+            // via 'content' field
+            $(document).ready(function () {
+                var oImage = $("#striscia_loghi");
+                var imageSrc = oImage.css("content");
+                imageSrc = imageSrc.replace("url(\"","");
+                imageSrc = imageSrc.replace("\")","");
+                oImage.attr("src",imageSrc);
+            })
+        </script>
+    </footer>
 </div>
