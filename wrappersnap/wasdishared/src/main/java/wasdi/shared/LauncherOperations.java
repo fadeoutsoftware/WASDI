@@ -10,5 +10,6 @@ public class LauncherOperations {
     public static final String PUBLISHBAND = "PUBLISHBAND";
     public static final String TERRAIN = "TERRAIN";
     public static final String UPDATEPROCESSES = "UPDATEPROCESSES";
+    public static final String RASTERGEOMETRICRESAMPLE = "RASTERGEOMETRICRESAMPLE";
 
 }
