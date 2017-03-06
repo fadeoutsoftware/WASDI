@@ -1,5 +1,6 @@
 package search;
 
+
 /**
  * Created by s.adamo on 21/02/2017.
  */
@@ -14,6 +15,8 @@ public class SentinelInfo {
     private String sceneCenterLon;
 
     private String orbit;
+
+    private String productFilePath;
 
     public String getFileName() {
         return fileName;
@@ -53,5 +56,13 @@ public class SentinelInfo {
 
     public void setDownloadLink(String downloadLink) {
         this.downloadLink = downloadLink;
+    }
+
+    public String getProductFilePath() {
+        return productFilePath;
+    }
+
+    public void setProductFilePath(String filePath) {
+        this.productFilePath = filePath;
     }
 }

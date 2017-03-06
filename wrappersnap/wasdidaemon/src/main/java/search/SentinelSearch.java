@@ -127,8 +127,12 @@ public class SentinelSearch {
 
     public static List<SentinelInfo> GetSentinelinfos(JSONObject oJSONObject)
     {
-        String sLink = "https://scihub.copernicus.eu/apihub/odata/v1/Products('{uuid}')/$value";
         List<SentinelInfo> aoInfos = new ArrayList<>();
+
+        if (oJSONObject == null)
+            return aoInfos;
+
+        String sLink = "https://scihub.copernicus.eu/apihub/odata/v1/Products('{uuid}')/$value";
 
         if (oJSONObject.has("feed")) {
             JSONObject oFeed = oJSONObject.getJSONObject("feed");
@@ -152,7 +156,7 @@ public class SentinelSearch {
 
                                         JSONObject oStr = (JSONObject) oIt.next();
                                         //fileName
-                                        if (oStr.has("name") && oStr.get("name").equals("fileName")) {
+                                        if (oStr.has("name") && oStr.get("name").equals("filename")) {
                                             oSentinelInfo.setFileName(oStr.get("content").toString());
 
                                         }
