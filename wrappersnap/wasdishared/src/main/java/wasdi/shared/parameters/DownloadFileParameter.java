@@ -43,6 +43,7 @@ public class DownloadFileParameter {
      */
     private String openSearchProvider;
 
+    private String boundingBox;
 
     public String getUrl() { return url; }
 
@@ -98,4 +99,11 @@ public class DownloadFileParameter {
         this.openSearchProvider = openSearchProvider;
     }
 
+    public String getBoundingBox() {
+        return boundingBox;
+    }
+
+    public void setBoundingBox(String boundingBox) {
+        this.boundingBox = boundingBox;
+    }
 }
