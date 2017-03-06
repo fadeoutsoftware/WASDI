@@ -2,11 +2,19 @@ import com.bc.ceres.core.ProgressMonitor;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
+import org.esa.s1tbx.calibration.gpf.CalibrationOp;
+import org.esa.s1tbx.sar.gpf.MultilookOp;
+import org.esa.s1tbx.sar.gpf.geometric.RangeDopplerGeocodingOp;
+import org.esa.s1tbx.sar.gpf.orbits.ApplyOrbitFileOp;
 import org.esa.snap.core.dataio.ProductIO;
 import org.esa.snap.core.datamodel.GeoPos;
 import org.esa.snap.core.datamodel.Product;
+import org.esa.snap.core.gpf.Operator;
+import org.esa.snap.core.gpf.OperatorSpi;
 import org.esa.snap.core.gpf.graph.GraphException;
 import org.esa.snap.core.util.ProductUtils;
+import org.esa.snap.dataio.envi.EnviProductWriterPlugIn;
+import org.esa.snap.engine_utilities.util.MemUtils;
 import org.esa.snap.graphbuilder.rcp.dialogs.support.GraphExecuter;
 import search.SentinelInfo;
 
@@ -25,56 +33,147 @@ import java.util.concurrent.Callable;
  */
 public class SentinelThread implements Callable<Boolean> {
 
-    private String m_sDownloadLink;
-
     private GraphExecuter m_oGraphEx;
 
     private SentinelInfo m_oSentinelInfo;
 
+    private String m_sProductFilePath;
 
-    public SentinelThread(SentinelInfo oInfo)
+    public SentinelThread(String sProductFilePath)
     {
-        m_oGraphEx = new GraphExecuter();
-        m_sDownloadLink = oInfo.getDownloadLink();
-        m_oSentinelInfo = oInfo;
+        m_sProductFilePath = sProductFilePath;
     }
 
 
     @Override
     public Boolean call() throws Exception {
 
-        String sReturnFilePath = ExecuteDownloadFile(m_sDownloadLink, ConfigReader.getPropValue("DOWNLOAD_PATH"));
-        Main.s_oLogger.debug(String.format("SentinelTread.call: Downloaded file %s", sReturnFilePath));
         //read product
-        Product oProduct = ProductIO.readProduct(new File(sReturnFilePath));
+        Product oProduct = ProductIO.readProduct(new File(m_sProductFilePath));
+        if (oProduct == null)
+        {
+            //try to download
+            m_sProductFilePath = Main.ExecuteDownloadFile(getSentinelInfo().getDownloadLink(), ConfigReader.getPropValue("DOWNLOAD_PATH"), true);
+            Main.s_oLogger.debug(String.format("SentinelTread.call: Downloaded file %s", m_sProductFilePath));
+            //read product
+            oProduct = ProductIO.readProduct(new File(m_sProductFilePath));
+            if (oProduct == null)
+                return false;
+        }
+        Main.s_oLogger.debug(String.format("SentinelTread.call: Product %s has been read", m_sProductFilePath));
+
+        /*
+        String sMapProjection = null;
+        CoordinateReferenceSystem targetCRS = null;
+        CRSGeoCodingHandler crsHandler = null;
+
+
+        try {
+            crsHandler = new CRSGeoCodingHandler(oProduct, "WGS84(DD)",
+                    20, 20);
+
+
+            if (crsHandler == null) {
+                Main.s_oLogger.debug("SentinelTread.call: crsHandler is null");
+                return false;
+            }
+            Main.s_oLogger.debug(String.format("SentinelTread.call: crsHandler ok", sReturnFilePath));
+            targetCRS = crsHandler.getTargetCRS();
+            if (targetCRS == null) {
+                Main.s_oLogger.debug("SentinelTread.call: targetCRS is null");
+                return false;
+            }
+        }
+        catch(Exception oEX){
+
+        }
+
+        if(crsHandler != null)
+            sMapProjection = targetCRS.toString();
+        */
+
         //get centerscene
         GeoPos oCenterGeoPo = ProductUtils.getCenterGeoPos(oProduct);
-        Main.s_oLogger.debug(String.format("SentinelTread.call: Center Scene lat %s, Center Scene lon %s for product %s", String.valueOf(oCenterGeoPo.getLat()), String.valueOf(oCenterGeoPo.getLonString()),oProduct.getName() ));
-        m_oSentinelInfo.setSceneCenterLat(String.valueOf(oCenterGeoPo.getLat()));
-        m_oSentinelInfo.setSceneCenterLon(String.valueOf(oCenterGeoPo.getLonString()));
+        Main.s_oLogger.debug(String.format("SentinelTread.call: Center Scene lat %s, Center Scene lon %s for product %s", String.valueOf(oCenterGeoPo.getLat()), String.valueOf(oCenterGeoPo.getLon()),oProduct.getName() ));
+        getSentinelInfo().setSceneCenterLat(String.valueOf(oCenterGeoPo.getLat()));
+        getSentinelInfo().setSceneCenterLon(String.valueOf(oCenterGeoPo.getLon()));
         String sOutputElaborationPath = ConfigReader.getPropValue("MULESME_WASDI_PATH") + oProduct.getName() + "_TC";
-        //load graph.xml
-        Main.s_oLogger.debug(String.format("SentinelTread.call: Destination output graph %s", sOutputElaborationPath));
-        UpdateGraphXml(sReturnFilePath, sOutputElaborationPath);
+        Main.s_oLogger.debug(String.format("SentinelTread.call: Execute operation " + sOutputElaborationPath));
+        ExecuteSNAPOperation(oProduct, sOutputElaborationPath);
+        //UpdateGraphXml(sReturnFilePath, sOutputElaborationPath, null);
         //execute graph
-        m_oGraphEx.executeGraph(ProgressMonitor.NULL);
-        //Serialize SentinelInfo
-        SerializeObjectToXML(ConfigReader.getPropValue("MULESME_WASDI_PATH"), m_oSentinelInfo);
-        Main.s_oLogger.debug(String.format("SentinelTread.call: Serialized object on path %s", ConfigReader.getPropValue("MULESME_WASDI_PATH")));
+        //Main.s_oLogger.debug(String.format("SentinelTread.call: Execute graph for " + sOutputElaborationPath));
+        //getGraphEx().executeGraph(ProgressMonitor.NULL);
         //move file
         SARToMulesmeFormat(oProduct.getName(), sOutputElaborationPath, ConfigReader.getPropValue("MULESME_WASDI_PATH"));
         Main.s_oLogger.debug(String.format("SentinelTread.call: moved file %s from %s to %s", oProduct.getName(), sOutputElaborationPath, ConfigReader.getPropValue("MULESME_WASDI_PATH")));
         return new Boolean(true);
     }
 
-    private void SerializeObjectToXML(String xmlFileLocation, Object objectToSerialize) throws Exception {
-        FileOutputStream os = new FileOutputStream(xmlFileLocation);
+
+    public void ExecuteSNAPOperation(Product oSource, String sOutputFilePath) {
+        String sEnviFormatOutput = EnviProductWriterPlugIn.FORMAT_NAME;
+
+        //Apply Orbit
+        OperatorSpi oApplyOrbitFileOp = new ApplyOrbitFileOp.Spi();
+        ApplyOrbitFileOp oApplyOrbitOperator = (ApplyOrbitFileOp) oApplyOrbitFileOp.createOperator();
+        oApplyOrbitOperator.setSourceProduct(oSource);
+        Product oOrbitProduct = oApplyOrbitOperator.getTargetProduct();
+
+        //calibration
+        OperatorSpi spi = new CalibrationOp.Spi();
+        Operator op = spi.createOperator();
+        op.setSourceProduct(oOrbitProduct);
+        Product oCalibrateProduct = op.getTargetProduct();
+
+        //Multilooking
+        OperatorSpi spiMulti = new MultilookOp.Spi();
+        MultilookOp opMulti = (MultilookOp) spiMulti.createOperator();
+        opMulti.setSourceProduct(oCalibrateProduct);
+        opMulti.setNumRangeLooks(2);
+        opMulti.setNumAzimuthLooks(2);
+        MultilookOp.DerivedParams param = new MultilookOp.DerivedParams();
+        param.nRgLooks = 2;
+        param.nAzLooks = 2;
+        try {
+            opMulti.getDerivedParameters(oCalibrateProduct, param);//filterProduct
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        Product oMultiProduct = opMulti.getTargetProduct();
+
+        //Terrain Correction
+        OperatorSpi spiTerrain = new RangeDopplerGeocodingOp.Spi();
+        RangeDopplerGeocodingOp opTerrain = (RangeDopplerGeocodingOp) spiTerrain.createOperator();
+        opTerrain.setSourceProduct(oMultiProduct);
+        opTerrain.setParameter("pixelSpacingInMeter", 20.0);
+        opTerrain.setParameter("mapProjection", "EPSG:32632"); //UTM Zone 32
+        Product oTerrainProduct = opTerrain.getTargetProduct();
+
+        try {
+            ProductIO.writeProduct(oTerrainProduct, sOutputFilePath, sEnviFormatOutput);
+            MemUtils.freeAllMemory();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+
+    public void SerializeObjectToXML(String xmlFile, Object objectToSerialize) throws Exception {
+        FileOutputStream os = new FileOutputStream(xmlFile);
         XMLEncoder encoder = new XMLEncoder(os);
         encoder.writeObject(objectToSerialize);
         encoder.close();
     }
 
-    private String SARToMulesmeFormat(String sSentinelProductName, String sLocationSourcePath, String sLocationDestination) throws Exception {
+    public String SARToMulesmeFormat(String sSentinelProductName, String sLocationSourcePath, String sLocationDestination) throws Exception {
+
+        if (!sLocationSourcePath.endsWith("/"))
+            sLocationSourcePath += "/";
+
+        if (!sLocationDestination.endsWith("/"))
+            sLocationDestination += "/";
 
         String sMulesmeFormat = "";
         String[] sSplittedName = sSentinelProductName.split("_");
@@ -95,13 +194,19 @@ public class SentinelThread implements Callable<Boolean> {
         File[] aoListOfFiles = oFolder.listFiles();
         for (File oFile :
                 aoListOfFiles) {
-            String sFileName = oFile.getName();
-            String sExtension = FilenameUtils.getExtension(sFileName);
+            String sFileNameWithExtension = oFile.getName();
+            String sFileName = FilenameUtils.getBaseName(sFileNameWithExtension);
+            String sExtension = FilenameUtils.getExtension(sFileNameWithExtension);
             String[] asFileInfo = sFileName.split("_");
             String sPolarization = asFileInfo[1];
             sMulesmeFormat = sPrefix + "_" + sPolarization + "_" + sSuffix + "." + sExtension;
+            String sSentinelInfoFileName = sPrefix + "_" + sPolarization + "_" + sSuffix + ".sml";
+            //Serialize SentinelInfo
+            SerializeObjectToXML(sLocationDestination + sSentinelInfoFileName, getSentinelInfo());
+            Main.s_oLogger.debug(String.format("SentinelTread.call: Serialized object on path %s", ConfigReader.getPropValue("MULESME_WASDI_PATH")));
+            //Move files
             Main.s_oLogger.debug(String.format("Move %s to %s", sLocationSourcePath + sSentinelProductName, sLocationDestination + sMulesmeFormat));
-            Files.move(Paths.get(sLocationSourcePath + sSentinelProductName), Paths.get(sLocationDestination + sMulesmeFormat));
+            Files.move(Paths.get(sLocationSourcePath + sFileNameWithExtension), Paths.get(sLocationDestination + sMulesmeFormat));
         }
         Main.s_oLogger.debug(String.format("Deleting %s ", sLocationSourcePath));
         Files.delete(Paths.get(sLocationSourcePath));
@@ -110,7 +215,7 @@ public class SentinelThread implements Callable<Boolean> {
 
     }
 
-    private void UpdateGraphXml(String sInputFilePath, String sOutputFilePath)
+    private void UpdateGraphXml(String sInputFilePath, String sOutputFilePath, String sMapProjection)
     {
 
         File oFile = null;
@@ -122,107 +227,46 @@ public class SentinelThread implements Callable<Boolean> {
         }
         try {
 
+            Main.s_oLogger.debug("SentinelThread.UpdateGraphXml: Init Graph for " + sOutputFilePath);
             String fileContext = FileUtils.readFileToString(oFile, "UTF-8");
             fileContext = fileContext.replace("{InputFile}", sInputFilePath);
             fileContext = fileContext.replace("{OutputFile}", sOutputFilePath);
+            if (sMapProjection  != null && sMapProjection != "")
+                fileContext = fileContext.replace("{MPROJ}", sMapProjection);
             InputStream in = IOUtils.toInputStream(fileContext, "UTF-8");
-            m_oGraphEx.loadGraph(in, oFile, false);
-            m_oGraphEx.InitGraph();
+            getGraphEx().loadGraph(in, oFile, false);
+            getGraphEx().InitGraph();
+            Main.s_oLogger.debug("SentinelThread.UpdateGraphXml: Graph Initialized");
 
         } catch (FileNotFoundException e) {
             e.printStackTrace();
+            Main.s_oLogger.debug("SentinelThread.UpdateGraphXml: Error Initializing graph." + e.getMessage());
         } catch (IOException e) {
             e.printStackTrace();
+            Main.s_oLogger.debug("SentinelThread.UpdateGraphXml: Error Initializing graph." + e.getMessage());
         } catch (GraphException e) {
             e.printStackTrace();
+            Main.s_oLogger.debug("SentinelThread.UpdateGraphXml: Error Initializing graph." + e.getMessage());
         }
 
 
     }
 
-    private String ExecuteDownloadFile(String sFileURL, String sSaveDirOnServer) throws IOException {
-
-        // Domain check
-        if (sFileURL == null || sFileURL == "") {
-            return "";
-        }
-        if (sSaveDirOnServer == null || sSaveDirOnServer == "") {
-            return "";
-        }
-
-        String sReturnFilePath = "";
-
-        // TODO: Here we are assuming dhus authentication. But we have to find a general solution
-        Authenticator.setDefault(new Authenticator() {
-            protected PasswordAuthentication getPasswordAuthentication() {
-                try{
-                    return new PasswordAuthentication("sadamo", "***REMOVED***".toCharArray());
-                }
-                catch (Exception oEx){
-
-                }
-                return null;
-            }
-        });
 
 
-        URL url = new URL(sFileURL);
-        HttpURLConnection httpConn = (HttpURLConnection) url.openConnection();
-        int responseCode = httpConn.getResponseCode();
+    public GraphExecuter getGraphEx() {
+        return m_oGraphEx;
+    }
 
-        // always check HTTP response code first
-        if (responseCode == HttpURLConnection.HTTP_OK) {
+    public void setGraphEx(GraphExecuter m_oGraphEx) {
+        this.m_oGraphEx = m_oGraphEx;
+    }
 
+    public SentinelInfo getSentinelInfo() {
+        return m_oSentinelInfo;
+    }
 
-            String fileName = "";
-            String disposition = httpConn.getHeaderField("Content-Disposition");
-            String contentType = httpConn.getContentType();
-            int contentLength = httpConn.getContentLength();
-
-            if (disposition != null) {
-                // extracts file name from header field
-                int index = disposition.indexOf("filename=");
-                if (index > 0) {
-                    fileName = disposition.substring(index + 10,
-                            disposition.length() - 1);
-                }
-            } else {
-                // extracts file name from URL
-                fileName = sFileURL.substring(sFileURL.lastIndexOf("/") + 1,
-                        sFileURL.length());
-            }
-
-
-            // opens input stream from the HTTP connection
-            InputStream inputStream = httpConn.getInputStream();
-            String saveFilePath= sSaveDirOnServer + "/" + fileName;
-
-            if (Files.exists(Paths.get(saveFilePath)))
-                return saveFilePath;
-
-            File oTargetFile = new File(saveFilePath);
-            File oTargetDir = oTargetFile.getParentFile();
-            oTargetDir.mkdirs();
-
-            // opens an output stream to save into file
-            FileOutputStream outputStream = new FileOutputStream(saveFilePath);
-
-            int bytesRead = -1;
-            byte[] buffer = new byte[4096];
-            while ((bytesRead = inputStream.read(buffer)) != -1) {
-                outputStream.write(buffer, 0, bytesRead);
-            }
-
-            outputStream.close();
-            inputStream.close();
-
-            sReturnFilePath = saveFilePath;
-
-        } else {
-
-        }
-        httpConn.disconnect();
-
-        return  sReturnFilePath;
+    public void setSentinelInfo(SentinelInfo m_oSentinelInfo) {
+        this.m_oSentinelInfo = m_oSentinelInfo;
     }
 }
