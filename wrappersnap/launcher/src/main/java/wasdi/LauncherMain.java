@@ -1,32 +1,25 @@
 package wasdi;
-import com.bc.ceres.core.ProgressMonitor;
-import com.bc.ceres.core.runtime.RuntimeConfigException;
-import com.bc.ceres.core.runtime.internal.DefaultRuntimeConfig;
 import com.bc.ceres.glevel.MultiLevelImage;
-import com.bc.ceres.launcher.Launcher;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.apache.log4j.xml.DOMConfigurator;
-import org.esa.s2tbx.dataio.openjpeg.OpenJpegExecRetriever;
 import org.esa.s2tbx.dataio.s2.S2Config;
+import org.esa.s2tbx.dataio.s2.structure.S2ProductStructureFactory;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.GeoCoding;
 import org.esa.snap.core.datamodel.Product;
-import org.esa.snap.core.datamodel.quicklooks.Quicklook;
-import org.esa.snap.core.gpf.main.GPT;
-import org.esa.snap.core.util.ResourceInstaller;
 import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.core.util.geotiff.GeoCoding2GeoTIFFMetadata;
 import org.esa.snap.core.util.geotiff.GeoTIFF;
 import org.esa.snap.core.util.geotiff.GeoTIFFMetadata;
 import org.esa.snap.engine_utilities.util.MemUtils;
-import org.esa.snap.engine_utilities.util.Settings;
 import org.esa.snap.runtime.Config;
-import org.geotools.referencing.factory.epsg.HsqlEpsgDatabase;
+import org.esa.snap.runtime.Launcher;
 import sun.management.VMManagement;
 import wasdi.filebuffer.DownloadFile;
 import org.apache.commons.cli.*;
 import wasdi.geoserver.Publisher;
+import wasdi.rabbit.RabbitFactory;
 import wasdi.rabbit.Send;
 import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.DownloadedFile;
@@ -36,10 +29,7 @@ import wasdi.shared.data.DownloadedFilesRepository;
 import wasdi.shared.data.MongoRepository;
 import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.data.PublishedBandsRepository;
-import wasdi.shared.parameters.DownloadFileParameter;
-import wasdi.shared.parameters.PublishBandParameter;
-import wasdi.shared.parameters.PublishParameters;
-import wasdi.shared.parameters.RangeDopplerGeocodingParameter;
+import wasdi.shared.parameters.*;
 import wasdi.shared.utils.SerializationUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.ProductViewModel;
@@ -48,8 +38,6 @@ import wasdi.shared.viewmodels.RabbitMessageViewModel;
 import wasdi.snapopearations.*;
 
 import javax.media.jai.JAI;
-import javax.media.jai.TileScheduler;
-import java.awt.image.BufferedImage;
 import java.io.*;
 import java.lang.management.ManagementFactory;
 import java.lang.management.RuntimeMXBean;
@@ -60,11 +48,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.PosixFilePermission;
 import java.util.*;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.prefs.Preferences;
 import java.util.stream.Stream;
 
 import static org.apache.commons.lang.SystemUtils.IS_OS_UNIX;
@@ -106,15 +89,9 @@ public class LauncherMain {
         Options oOptions = new Options();
 
 
-        Option oOptOperation   = OptionBuilder.withArgName( "operation" )
-                .hasArg()
-                .withDescription(  "" )
-                .create( "operation" );
+        Option oOptOperation   = OptionBuilder.withArgName( "operation" ).hasArg().withDescription(  "" ).create( "operation" );
 
-        Option oOptParameter   = OptionBuilder.withArgName( "parameter" )
-                .hasArg()
-                .withDescription(  "" )
-                .create( "parameter" );
+        Option oOptParameter   = OptionBuilder.withArgName( "parameter" ).hasArg().withDescription(  "" ).create( "parameter" );
 
 
         oOptions.addOption(oOptOperation);
@@ -174,7 +151,6 @@ public class LauncherMain {
             MongoRepository.DB_PWD = ConfigReader.getPropValue("MONGO_DBPWD");
 
             System.setProperty("user.home", ConfigReader.getPropValue("USER_HOME"));
-            //System.setProperty("user.home", "c:");
 
             Path propFile = Paths.get(ConfigReader.getPropValue("SNAP_AUX_PROPERTIES"));
             Config.instance("snap.auxdata").load(propFile);
@@ -184,10 +160,9 @@ public class LauncherMain {
             s_oLogger.debug("OPJ_DECOMPRESSOR_EXE" + S2Config.OPJ_DECOMPRESSOR_EXE);
 
 
-        } catch (IOException e) {
+        }
+        catch (IOException e) {
             e.printStackTrace();
-
-            //TODO: Set default configuration??
         }
     }
 
@@ -241,47 +216,6 @@ public class LauncherMain {
                     String sFile = Download(oDownloadFileParameter, ConfigReader.getPropValue("DOWNLOAD_ROOT_PATH"));
                 }
                 break;
-                /*
-                case LauncherOperations.DOWNLOADANDPUBLISH: {
-
-                    // Deserialize Parameters
-                    DownloadFileParameter oDownloadFileParameter = (DownloadFileParameter) SerializationUtils.deserializeXMLToObject(sParameter);
-
-                    String sFile = Download(oDownloadFileParameter, ConfigReader.getPropValue("DOWNLOAD_ROOT_PATH"));
-
-                    // Check result
-                    if (Utils.isNullOrEmpty(sFile))
-                    {
-                        // File not downloaded
-                        String sUrl = oDownloadFileParameter.getUrl();
-                        String sText = "LauncherMain: file not downloaded URL = ";
-                        if (sUrl ==null) sText += " NULL";
-                        else sText += sUrl;
-                        s_oLogger.debug( sText);
-                    }
-                    else {
-                        // Ok file downloaded, let publish it
-
-
-                        // Recreate the download parameter
-                        PublishParameters oPublishParameter = new PublishParameters();
-                        oPublishParameter.setFileName(sFile);
-                        oPublishParameter.setUserId(oDownloadFileParameter.getUserId());
-                        oPublishParameter.setWorkspace(oDownloadFileParameter.getWorkspace());
-                        oPublishParameter.setQueue(oDownloadFileParameter.getQueue());
-
-                        Publish(oPublishParameter);
-                    }
-                }
-                break;
-                case LauncherOperations.PUBLISH: {
-
-                    // Deserialize Parameters
-                    PublishParameters oPublishParameter = (PublishParameters) SerializationUtils.deserializeXMLToObject(sParameter);
-                    Publish(oPublishParameter);
-                }
-                break;
-                */
                 case LauncherOperations.PUBLISHBAND: {
 
                     // Deserialize Parameters
@@ -294,6 +228,14 @@ public class LauncherMain {
                     // Deserialize Parameters
                     RangeDopplerGeocodingParameter oParameter = (RangeDopplerGeocodingParameter) SerializationUtils.deserializeXMLToObject(sParameter);
                     TerrainOperation(oParameter);
+
+                }
+                break;
+                case LauncherOperations.RASTERGEOMETRICRESAMPLE:{
+
+                    // Deserialize Parameters
+                    RasterGeometricResampleParameter oParameter = (RasterGeometricResampleParameter) SerializationUtils.deserializeXMLToObject(sParameter);
+                    RasterGeometricResample(oParameter);
 
                 }
                 break;
@@ -327,6 +269,12 @@ public class LauncherMain {
     }
 
 
+    /**
+     * Downloads a new product
+     * @param oParameter
+     * @param sDownloadPath
+     * @return
+     */
     public String Download(DownloadFileParameter oParameter, String sDownloadPath) {
         String sFileName = "";
         // Rabbit Sender
@@ -451,7 +399,7 @@ public class LauncherMain {
             }
             else {
 
-                ProductToViewModel(oVM, sFileName, oParameter.getWorkspace(), oParameter.getExchange(), LauncherOperations.DOWNLOAD, oParameter.getBoundingBox());
+                ConvertProductToViewModelAndSendToRabbit(oVM, sFileName, oParameter.getWorkspace(), oParameter.getExchange(), LauncherOperations.DOWNLOAD, oParameter.getBoundingBox());
             }
         }
         catch (Exception oEx) {
@@ -484,7 +432,16 @@ public class LauncherMain {
         return  sFileName;
     }
 
-    private void ProductToViewModel(ProductViewModel oVM, String sFileName, String sWorkspace, String sExchange, String sOperation, String sBBox)
+    /**
+     * Converts a product in a ViewModel and send it to the rabbit queue
+     * @param oVM View Model to fill
+     * @param sFileName File Name
+     * @param sWorkspace Workspace
+     * @param sExchange Queue Id
+     * @param sOperation Operation Done
+     * @param sBBox Bounding Box
+     */
+    private void ConvertProductToViewModelAndSendToRabbit(ProductViewModel oVM, String sFileName, String sWorkspace, String sExchange, String sOperation, String sBBox)
     {
         Send oSendToRabbit = new Send();
         try {
@@ -552,6 +509,451 @@ public class LauncherMain {
         catch(Exception oEx)
         {
 
+        }
+    }
+
+    /**
+     * Generic publish function. NOTE: probably will not be used, use publish band instead
+     * @param oParameter
+     * @return
+     */
+    public void TerrainOperation(RangeDopplerGeocodingParameter oParameter) {
+
+        JAI.getDefaultInstance().getTileScheduler().setParallelism(Runtime.getRuntime().availableProcessors());
+        MemUtils.configureJaiTileCache();
+
+        s_oLogger.debug("LauncherMain.TerrainOperation: Start");
+
+        // Rabbit Sender
+        Send oSendToRabbit = new Send();
+
+        try {
+            //Init rabbit exchange and queue
+            if (oSendToRabbit.Init(oParameter.getWorkspace(), oParameter.getUserId()) == false)
+            {
+                s_oLogger.debug("LauncherMain.TerrainOperation: Failed initializing RabbitMQ");
+                return;
+            }
+
+            //send update process message
+            if (oSendToRabbit.SendUpdateProcessMessage(oParameter.getWorkspace()) == false)
+            {
+                s_oLogger.debug("LauncherMain.TerrainOperation: Error sending rabbitmq message to update process list");
+            }
+
+            // Read File Name
+            String sFile = oParameter.getSourceProductName();
+
+            String sRootPath = ConfigReader.getPropValue("DOWNLOAD_ROOT_PATH");
+            if (!sRootPath.endsWith("/")) sRootPath += "/";
+            final String sPath = sRootPath + oParameter.getUserId() + "/" + oParameter.getWorkspace() + "/";
+            sFile = sPath + sFile;
+
+            // Check integrity
+            if (Utils.isNullOrEmpty(sFile)) {
+                s_oLogger.debug("LauncherMain.TerrainOperation: file is null or empty");
+                return;
+            }
+
+            File oSourceFile = new File(sFile);
+            WriteProduct oWriter = new WriteProduct();
+
+            ReadProduct oReadProduct = new ReadProduct();
+            s_oLogger.debug("LauncherMain.TerrainOperation: Read Product");
+            Product oSourceProduct = oReadProduct.ReadProduct(oSourceFile, null);
+
+            if (oSourceProduct == null)
+            {
+                throw new Exception("LauncherMain.TerrainOperation: Source Product null");
+            }
+
+            //Terrain Operation
+            s_oLogger.debug("LauncherMain.TerrainOperation: Terrain Product");
+            TerrainCorrection oTerrainCorrection = new TerrainCorrection();
+            Product oTerrainProduct = oTerrainCorrection.getTerrainCorrection(oSourceProduct, oParameter.getSettings());
+            if (oTerrainProduct == null)
+            {
+                throw new Exception("LauncherMain.TerrainOperation: Terrain product null");
+            }
+
+            s_oLogger.debug("LauncherMain.TerrainOperation: Write Big Tiff");
+            String sTargetFileName = oTerrainProduct.getName();
+            if (!Utils.isNullOrEmpty(oParameter.getDestinationProductName()))
+                sTargetFileName = oParameter.getDestinationProductName();
+            String sTiffFile = oWriter.WriteBigTiff(oTerrainProduct, sPath, sTargetFileName);
+
+            if (Utils.isNullOrEmpty(sTiffFile))
+            {
+                throw new Exception("LauncherMain.TerrainOperation: Tiff not created");
+            }
+
+            s_oLogger.debug("LauncherMain.TerrainOperation: convert product to view model");
+            ConvertProductToViewModelAndSendToRabbit(new ProductViewModel(), sTiffFile, oParameter.getWorkspace(), oParameter.getExchange(), LauncherOperations.TERRAIN, null);
+
+            //this.PublishOnGeoserver(oParameter.getPublishParameter(), oTerrainProduct.getName(), sBandName);
+
+        }
+        catch (Exception oEx) {
+            s_oLogger.debug("LauncherMain.TerrainOperation: exception " + oEx.toString());
+
+            RabbitMessageViewModel oMessageViewModel = new RabbitMessageViewModel();
+            oMessageViewModel.setMessageCode(LauncherOperations.TERRAIN);
+            oMessageViewModel.setWorkspaceId(oParameter.getWorkspace());
+            oMessageViewModel.setMessageResult("KO");
+
+            try {
+                String sJSON = MongoRepository.s_oMapper.writeValueAsString(oMessageViewModel);
+                oSendToRabbit.SendMsgOnExchange(oParameter.getExchange(), sJSON);
+            }
+            catch (Exception oEx2) {
+                s_oLogger.debug("LauncherMain.TerrainOperation: Inner Exception " + oEx2.toString());
+            }
+        }
+        finally{
+            s_oLogger.debug("LauncherMain.TerrainOperation: End");
+
+            //delete process from list
+            try{
+                ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
+                oProcessWorkspaceRepository.DeleteProcessWorkspace(oParameter.getProcessObjId());
+            }
+            catch (Exception oEx) {
+                s_oLogger.debug("LauncherMain.TerrainOperation: Exception deleting process " + oEx.toString());
+            }
+        }
+    }
+
+
+    /**
+     * Publish single band image
+     * @param oParameter
+     * @return
+     */
+    public String PublishBandImage(PublishBandParameter oParameter) {
+
+        String sLayerId = "";
+
+        JAI.getDefaultInstance().getTileScheduler().setParallelism(Runtime.getRuntime().availableProcessors());
+        MemUtils.configureJaiTileCache();
+
+        // Rabbit Sender
+        Send oSendToRabbit = new Send();
+
+        try {
+
+            ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
+            ProcessWorkspace oProcessWorkspace = oProcessWorkspaceRepository.GetProcessByProductName(oParameter.getFileName());
+
+            if (oProcessWorkspace != null) {
+                //get process pid
+                oProcessWorkspace.setPid(GetProcessId());
+                //update the process
+                oProcessWorkspaceRepository.UpdateProcess(oProcessWorkspace);
+            }
+
+            //Init rabbit exchange and queue
+            if (oSendToRabbit.Init(oParameter.getWorkspace(), oParameter.getUserId()) == false)
+            {
+                s_oLogger.debug("LauncherMain.PublishBandImage: Failed initializing RabbitMQ");
+                return sLayerId;
+            }
+
+            //send update process message
+            if (oSendToRabbit.SendUpdateProcessMessage(oParameter.getWorkspace()) == false)
+            {
+                s_oLogger.debug("LauncherMain.PublishBandImage: Error sending rabbitmq message to update process list");
+            }
+
+            // Read File Name
+            String sFile = oParameter.getFileName();
+
+            // Keep the product name
+            String sProductName = sFile;
+
+            // Generate full path name
+            String sPath = ConfigReader.getPropValue("DOWNLOAD_ROOT_PATH");
+            if (!sPath.endsWith("/")) sPath += "/";
+            sPath += oParameter.getUserId() + "/" + oParameter.getWorkspace()+ "/";
+            sFile = sPath + sFile;
+
+
+            // Check integrity
+            if (Utils.isNullOrEmpty(sFile))
+            {
+                // File not good!!
+                s_oLogger.debug( "LauncherMain.PublishBandImage: file is null or empty");
+
+                // Send KO to Rabbit
+                oSendToRabbit.SendRabbitMessage(false, LauncherOperations.PUBLISHBAND,oParameter.getWorkspace(),null,oParameter.getExchange());
+
+                return  sLayerId;
+            }
+
+            s_oLogger.debug( "LauncherMain.PublishBandImage:  File = " + sFile);
+
+            // Create file
+            File oFile = new File(sFile);
+            String sInputFileNameOnly = oFile.getName();
+
+            // Generate Layer Id
+            sLayerId = sInputFileNameOnly;
+            sLayerId = Utils.GetFileNameWithoutExtension(sFile);
+            sLayerId +=  "_" + oParameter.getBandName();
+
+            // Is already published?
+            PublishedBandsRepository oPublishedBandsRepository = new PublishedBandsRepository();
+            PublishedBand oAlreadyPublished = oPublishedBandsRepository.GetPublishedBand(oParameter.getFileName(),oParameter.getBandName());
+
+            if (oAlreadyPublished != null) {
+                // Yes !!
+                s_oLogger.debug( "LauncherMain.PublishBandImage:  Band already published. Return result");
+
+                // Generate the View Model
+                PublishBandResultViewModel oVM = new PublishBandResultViewModel();
+                oVM.setBandName(oParameter.getBandName());
+                oVM.setProductName(sProductName);
+                oVM.setLayerId(sLayerId);
+
+                boolean bRet = oSendToRabbit.SendRabbitMessage(true,LauncherOperations.PUBLISHBAND,oParameter.getWorkspace(),oVM,oParameter.getExchange());
+
+                if (!bRet) s_oLogger.debug("LauncherMain.PublishBandImage: Error sending Rabbit Message");
+
+                return sLayerId;
+            }
+
+            s_oLogger.debug( "LauncherMain.PublishBandImage:  Generating Band Image...");
+
+            // Read the product
+            ReadProduct oReadProduct = new ReadProduct();
+            Product oSentinel = oReadProduct.ReadProduct(oFile, null);
+
+            // Is this a Sentinel 2?
+            if (oSentinel.getProductType().startsWith("S2_")) {
+                // Need to resample to publish
+                RasterGeometricResampling oRasterGeometricResample = new RasterGeometricResampling();
+                Product oResampledProduct = oRasterGeometricResample.getResampledProduct(oSentinel, oParameter.getBandName());
+                oSentinel = oResampledProduct;
+            }
+
+            s_oLogger.debug( "LauncherMain.PublishBandImage:  Get GeoCoding");
+
+            // Get the Geocoding and Band
+            GeoCoding oGeoCoding = oSentinel.getSceneGeoCoding();
+
+            s_oLogger.debug( "LauncherMain.PublishBandImage:  Getting Band " + oParameter.getBandName());
+
+            Band oBand = oSentinel.getBand(oParameter.getBandName());
+
+            // Get Image
+            MultiLevelImage oBandImage = oBand.getSourceImage();
+            // Get TIFF Metadata
+            GeoTIFFMetadata oMetadata = GeoCoding2GeoTIFFMetadata.createGeoTIFFMetadata(oGeoCoding, oBandImage.getWidth(),oBandImage.getHeight());
+
+            // Generate file output name
+            String sOutputFilePath = sPath + sLayerId + ".tif";
+            File oOutputFile = new File(sOutputFilePath);
+
+            s_oLogger.debug( "LauncherMain.PublishBandImage:  Output file: " + sOutputFilePath);
+
+            // Write the Band Tiff
+            if (ConfigReader.getPropValue("CREATE_BAND_GEOTIFF_ACTIVE").equals("true")) {
+                s_oLogger.debug("LauncherMain.PublishBandImage:  Writing Image");
+                GeoTIFF.writeImage(oBandImage, oOutputFile, oMetadata);
+            }
+            else {
+                s_oLogger.debug( "LauncherMain.PublishBandImage:  Debug on. Jump GeoTiff Generate");
+            }
+
+            s_oLogger.debug( "LauncherMain.PublishBandImage:  Moving Band Image...");
+
+            // Copy fie to GeoServer Data Dir
+            String sGeoServerDataDir = ConfigReader.getPropValue("GEOSERVER_DATADIR");
+            String sTargetDir = sGeoServerDataDir;
+
+            if (!(sTargetDir.endsWith("/")||sTargetDir.endsWith("\\"))) sTargetDir+="/";
+            sTargetDir+=sLayerId+"/";
+
+            String sTargetFile = sTargetDir + oOutputFile.getName();
+
+            File oTargetFile = new File(sTargetFile);
+
+            s_oLogger.debug("LauncherMain.PublishBandImage: InputFile: " + sOutputFilePath + " TargetFile: " + sTargetFile + " LayerId " + sLayerId);
+
+            FileUtils.copyFile(oOutputFile,oTargetFile);
+
+            // Ok publish
+            s_oLogger.debug("LauncherMain.PublishBandImage: call PublishImage");
+            Publisher oPublisher = new Publisher();
+            sLayerId = oPublisher.publishGeoTiff(sTargetFile,ConfigReader.getPropValue("GEOSERVER_ADDRESS"),ConfigReader.getPropValue("GEOSERVER_USER"),ConfigReader.getPropValue("GEOSERVER_PASSWORD"),ConfigReader.getPropValue("GEOSERVER_WORKSPACE"), sLayerId);
+
+            s_oLogger.debug("LauncherMain.PublishBandImage: Image published. ");
+
+            s_oLogger.debug("LauncherMain.PublishBandImage: Get Image Bounding Box");
+
+            //get bounding box from data base
+            DownloadedFilesRepository oDownloadedFilesRepository = new DownloadedFilesRepository();
+            String sBBox = oDownloadedFilesRepository.GetDownloadedFile(oParameter.getFileName()).getBoundingBox();
+
+            s_oLogger.debug("LauncherMain.PublishBandImage: Bounding Box: " + sBBox);
+            s_oLogger.debug("LauncherMain.PublishBandImage: Update index and Send Rabbit Message");
+
+            // Create Entity
+            PublishedBand oPublishedBand = new PublishedBand();
+            oPublishedBand.setLayerId(sLayerId);
+            oPublishedBand.setProductName(sProductName);
+            oPublishedBand.setBandName(oParameter.getBandName());
+            //oPublishedBand.setUserId(oParameter.getUserId());
+            //oPublishedBand.setWorkspaceId(oParameter.getWorkspace());
+            oPublishedBand.setBoundingBox(sBBox);
+
+            // Add it the the db
+            oPublishedBandsRepository.InsertPublishedBand(oPublishedBand);
+
+            s_oLogger.debug("LauncherMain.PublishBandImage: Index Updated" );
+            s_oLogger.debug("LauncherMain.PublishBandImage: Queue = " + oParameter.getQueue() + " LayerId = " + sLayerId);
+
+            // Create the View Model
+            PublishBandResultViewModel oVM = new PublishBandResultViewModel();
+            oVM.setBandName(oParameter.getBandName());
+            oVM.setProductName(sProductName);
+            oVM.setLayerId(sLayerId);
+            oVM.setBoundingBox(sBBox);
+
+            boolean bRet = oSendToRabbit.SendRabbitMessage(true,LauncherOperations.PUBLISHBAND, oParameter.getWorkspace(),oVM,oParameter.getExchange());
+
+            if (bRet == false) {
+                s_oLogger.debug("LauncherMain.PublishBandImage: Error sending Rabbit Message");
+            }
+        }
+        catch (Exception oEx) {
+
+            s_oLogger.debug( "LauncherMain.PublishBandImage: Exception " + oEx.toString() + " " + oEx.getMessage());
+
+            oEx.printStackTrace();
+
+            boolean bRet = oSendToRabbit.SendRabbitMessage(false,LauncherOperations.PUBLISHBAND,oParameter.getWorkspace(),null,oParameter.getExchange());
+
+            if (bRet == false) {
+                s_oLogger.debug("LauncherMain.PublishBandImage:  Error sending exception Rabbit Message");
+            }
+        }
+        finally{
+            //delete process from list
+            try{
+                ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
+                oProcessWorkspaceRepository.DeleteProcessWorkspace(oParameter.getProcessObjId());
+            }
+            catch (Exception oEx) {
+                s_oLogger.debug("LauncherMain.PublishBandImage: Exception deleting process " + oEx.toString());
+            }
+        }
+
+        return  sLayerId;
+    }
+
+
+    /**
+     * Generic publish function. NOTE: probably will not be used, use publish band instead
+     * @param oParameter
+     * @return
+     */
+    public void RasterGeometricResample(RasterGeometricResampleParameter oParameter) {
+
+        JAI.getDefaultInstance().getTileScheduler().setParallelism(Runtime.getRuntime().availableProcessors());
+        MemUtils.configureJaiTileCache();
+
+        s_oLogger.debug("LauncherMain.RasterGeometricResample: Start");
+
+        // Rabbit Sender
+        Send oSendToRabbit = new Send();
+
+        try {
+            //Init rabbit exchange and queue
+            if (oSendToRabbit.Init(oParameter.getWorkspace(), oParameter.getUserId()) == false)
+            {
+                s_oLogger.debug("LauncherMain.RasterGeometricResample: Failed initializing RabbitMQ");
+                return;
+            }
+
+            //send update process message
+            if (oSendToRabbit.SendUpdateProcessMessage(oParameter.getWorkspace()) == false)
+            {
+                s_oLogger.debug("LauncherMain.RasterGeometricResample: Error sending rabbitmq message to update process list");
+            }
+
+            // Read File Name
+            String sFile = oParameter.getSourceProductName();
+            String sFileNameOnly = sFile;
+
+            String sRootPath = ConfigReader.getPropValue("DOWNLOAD_ROOT_PATH");
+            if (!sRootPath.endsWith("/")) sRootPath += "/";
+            final String sPath = sRootPath + oParameter.getUserId() + "/" + oParameter.getWorkspace() + "/";
+            sFile = sPath + sFile;
+
+            // Check integrity
+            if (Utils.isNullOrEmpty(sFile)) {
+                s_oLogger.debug("LauncherMain.RasterGeometricResample: file is null or empty");
+                return;
+            }
+
+            File oSourceFile = new File(sFile);
+
+            //FileUtils.copyFile(oDownloadedFile, oTargetFile);
+            WriteProduct oWriter = new WriteProduct();
+
+            ReadProduct oReadProduct = new ReadProduct();
+
+            s_oLogger.debug("LauncherMain.RasterGeometricResample: Read Product");
+            Product oSourceProduct = oReadProduct.ReadProduct(oSourceFile, null);
+
+            if (oSourceProduct == null)
+            {
+                throw new Exception("LauncherMain.RasterGeometricResample: Source Product null");
+            }
+
+            //Terrain Operation
+            s_oLogger.debug("LauncherMain.RasterGeometricResample: RasterGeometricResample");
+            RasterGeometricResampling oRasterGeometricResample = new RasterGeometricResampling();
+            Product oResampledProduct = oRasterGeometricResample.getResampledProduct(oSourceProduct, oParameter.getBandName());
+
+            if (oResampledProduct == null)
+            {
+                throw new Exception("LauncherMain.RasterGeometricResample: RasterGeometricResample product null");
+            }
+
+            s_oLogger.debug("LauncherMain.RasterGeometricResample: convert product to view model");
+            String sOutFile = oWriter.WriteBEAMDIMAP(oResampledProduct, sPath, sFileNameOnly+"_resampled");
+
+            ConvertProductToViewModelAndSendToRabbit(new ProductViewModel(), sOutFile, oParameter.getWorkspace(), oParameter.getExchange(), LauncherOperations.RASTERGEOMETRICRESAMPLE, null);
+
+        }
+        catch (Exception oEx) {
+            s_oLogger.debug("LauncherMain.RasterGeometricResample: exception " + oEx.toString());
+
+            RabbitMessageViewModel oMessageViewModel = new RabbitMessageViewModel();
+            oMessageViewModel.setMessageCode(LauncherOperations.RASTERGEOMETRICRESAMPLE);
+            oMessageViewModel.setWorkspaceId(oParameter.getWorkspace());
+            oMessageViewModel.setMessageResult("KO");
+
+            try {
+                String sJSON = MongoRepository.s_oMapper.writeValueAsString(oMessageViewModel);
+                oSendToRabbit.SendMsgOnExchange(oParameter.getExchange(), sJSON);
+            }
+            catch (Exception oEx2) {
+                s_oLogger.debug("LauncherMain.RasterGeometricResample: Inner Exception " + oEx2.toString());
+            }
+        }
+        finally{
+            s_oLogger.debug("LauncherMain.RasterGeometricResample: End");
+
+            //delete process from list
+            try{
+                ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
+                oProcessWorkspaceRepository.DeleteProcessWorkspace(oParameter.getProcessObjId());
+            }
+            catch (Exception oEx) {
+                s_oLogger.debug("LauncherMain.RasterGeometricResample: Exception deleting process " + oEx.toString());
+            }
         }
     }
 
@@ -763,380 +1165,6 @@ public class LauncherMain {
         return sLayerId;
     }
     */
-
-
-    /**
-     * Generic publish function. NOTE: probably will not be used, use publish band instead
-     * @param oParameter
-     * @return
-     */
-    public void TerrainOperation(RangeDopplerGeocodingParameter oParameter) {
-
-        JAI.getDefaultInstance().getTileScheduler().setParallelism(Runtime.getRuntime().availableProcessors());
-        MemUtils.configureJaiTileCache();
-
-        s_oLogger.debug("LauncherMain.TerrainOperation: Start");
-
-        // Rabbit Sender
-        Send oSendToRabbit = new Send();
-
-        try {
-            //Init rabbit exchange and queue
-            if (oSendToRabbit.Init(oParameter.getWorkspace(), oParameter.getUserId()) == false)
-            {
-                s_oLogger.debug("LauncherMain.TerrainOperation: Failed initializing RabbitMQ");
-                return;
-            }
-
-            //send update process message
-            if (oSendToRabbit.SendUpdateProcessMessage(oParameter.getWorkspace()) == false)
-            {
-                s_oLogger.debug("LauncherMain.TerrainOperation: Error sending rabbitmq message to update process list");
-            }
-
-            // Read File Name
-            String sFile = oParameter.getSourceProductName();
-
-            String sRootPath = ConfigReader.getPropValue("DOWNLOAD_ROOT_PATH");
-            if (!sRootPath.endsWith("/")) sRootPath += "/";
-            final String sPath = sRootPath + oParameter.getUserId() + "/" + oParameter.getWorkspace() + "/";
-            sFile = sPath + sFile;
-
-            // Check integrity
-            if (Utils.isNullOrEmpty(sFile)) {
-                s_oLogger.debug("LauncherMain.TerrainOperation: file is null or empty");
-                return;
-            }
-
-            File oSourceFile = new File(sFile);
-
-            //FileUtils.copyFile(oDownloadedFile, oTargetFile);
-            WriteProduct oWriter = new WriteProduct();
-
-            ReadProduct oReadProduct = new ReadProduct();
-            //TODO: Here recognize the file type and run the right procedure. At the moment assume Sentinel1A
-            s_oLogger.debug("LauncherMain.publish: Read Product");
-            Product oSourceProduct = oReadProduct.ReadProduct(oSourceFile, null);
-
-            if (oSourceProduct == null)
-            {
-                throw new Exception("LauncherMain.TerrainOperation: Source Product null");
-            }
-
-            //Terrain Operation
-            s_oLogger.debug("LauncherMain.publish: Terrain Product");
-            TerrainCorrection oTerrainCorrection = new TerrainCorrection();
-            Product oTerrainProduct = oTerrainCorrection.getTerrainCorrection(oSourceProduct, oParameter.getSettings());
-            if (oTerrainProduct == null)
-            {
-                throw new Exception("LauncherMain.TerrainOperation: Terrain product null");
-            }
-
-            s_oLogger.debug("LauncherMain.TerrainOperation: Write Big Tiff");
-            String sTargetFileName = oTerrainProduct.getName();
-            if (!Utils.isNullOrEmpty(oParameter.getDestinationProductName()))
-                sTargetFileName = oParameter.getDestinationProductName();
-            String sTiffFile = oWriter.WriteBigTiff(oTerrainProduct, sPath, sTargetFileName);
-
-            if (Utils.isNullOrEmpty(sTiffFile))
-            {
-                throw new Exception("LauncherMain.TerrainOperation: Tiff not created");
-            }
-
-            s_oLogger.debug("LauncherMain.TerrainOperation: convert product to view model");
-            ProductToViewModel(new ProductViewModel(), sTiffFile, oParameter.getWorkspace(), oParameter.getExchange(), LauncherOperations.TERRAIN, null);
-
-            //this.PublishOnGeoserver(oParameter.getPublishParameter(), oTerrainProduct.getName(), sBandName);
-
-        }
-        catch (Exception oEx) {
-            s_oLogger.debug("LauncherMain.TerrainOperation: exception " + oEx.toString());
-
-            RabbitMessageViewModel oMessageViewModel = new RabbitMessageViewModel();
-            oMessageViewModel.setMessageCode(LauncherOperations.PUBLISH);
-            oMessageViewModel.setWorkspaceId(oParameter.getWorkspace());
-            oMessageViewModel.setMessageResult("KO");
-
-            try {
-                String sJSON = MongoRepository.s_oMapper.writeValueAsString(oMessageViewModel);
-                oSendToRabbit.SendMsgOnExchange(oParameter.getExchange(), sJSON);
-            }
-            catch (Exception oEx2) {
-                s_oLogger.debug("LauncherMain.TerrainOperation: Inner Exception " + oEx2.toString());
-            }
-        }
-        finally{
-            s_oLogger.debug("LauncherMain.TerrainOperation: End");
-
-            //delete process from list
-            try{
-                ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
-                oProcessWorkspaceRepository.DeleteProcessWorkspace(oParameter.getProcessObjId());
-            }
-            catch (Exception oEx) {
-                s_oLogger.debug("LauncherMain.TerrainOperation: Exception deleting process " + oEx.toString());
-            }
-        }
-    }
-
-
-    /**
-     * Publish single band image
-     * @param oParameter
-     * @return
-     */
-    public String PublishBandImage(PublishBandParameter oParameter) {
-
-        String sLayerId = "";
-
-        JAI.getDefaultInstance().getTileScheduler().setParallelism(Runtime.getRuntime().availableProcessors());
-        MemUtils.configureJaiTileCache();
-
-        // Rabbit Sender
-        Send oSendToRabbit = new Send();
-
-        try {
-
-            ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
-            ProcessWorkspace oProcessWorkspace = oProcessWorkspaceRepository.GetProcessByProductName(oParameter.getFileName());
-            if (oProcessWorkspace != null) {
-                //get process pid
-                oProcessWorkspace.setPid(GetProcessId());
-                //update the process
-                oProcessWorkspaceRepository.UpdateProcess(oProcessWorkspace);
-            }
-
-            //Init rabbit exchange and queue
-            if (oSendToRabbit.Init(oParameter.getWorkspace(), oParameter.getUserId()) == false)
-            {
-                s_oLogger.debug("LauncherMain.PublishBandImage: Failed initializing RabbitMQ");
-                return sLayerId;
-            }
-
-            //send update process message
-            if (oSendToRabbit.SendUpdateProcessMessage(oParameter.getWorkspace()) == false)
-            {
-                s_oLogger.debug("LauncherMain.PublishBandImage: Error sending rabbitmq message to update process list");
-            }
-
-            // Read File Name
-            String sFile = oParameter.getFileName();
-
-            // Keep the product name
-            String sProductName = sFile;
-
-            // Generate full path name
-            String sPath = ConfigReader.getPropValue("DOWNLOAD_ROOT_PATH");
-            if (!sPath.endsWith("/")) sPath += "/";
-            sPath += oParameter.getUserId() + "/" + oParameter.getWorkspace()+ "/";
-            sFile = sPath + sFile;
-
-
-            // Check integrity
-            if (Utils.isNullOrEmpty(sFile))
-            {
-                // File not good!!
-                s_oLogger.debug( "LauncherMain.PublishBandImage: file is null or empty");
-
-                RabbitMessageViewModel oRabbitVM = new RabbitMessageViewModel();
-                oRabbitVM.setMessageCode(LauncherOperations.PUBLISHBAND);
-                oRabbitVM.setWorkspaceId(oParameter.getWorkspace());
-                oRabbitVM.setMessageResult("KO");
-
-                try {
-                    String sJSON = MongoRepository.s_oMapper.writeValueAsString(oRabbitVM);
-                    oSendToRabbit.SendMsgOnExchange(oParameter.getExchange(), sJSON);
-                }
-                catch (Exception oEx2) {
-                    s_oLogger.debug("LauncherMain.Download: Inner Exception " + oEx2.toString());
-                }
-
-                return  sLayerId;
-            }
-
-            s_oLogger.debug( "LauncherMain.PublishBandImage:  File = " + sFile);
-
-            // Create file
-            File oFile = new File(sFile);
-            String sInputFileNameOnly = oFile.getName();
-
-            // Generate Layer Id
-            sLayerId = sInputFileNameOnly;
-            sLayerId = Utils.GetFileNameWithoutExtension(sFile);
-            sLayerId +=  "_" + oParameter.getBandName();
-
-            // Is already published?
-            PublishedBandsRepository oPublishedBandsRepository = new PublishedBandsRepository();
-            PublishedBand oAlreadyPublished = oPublishedBandsRepository.GetPublishedBand(oParameter.getFileName(),oParameter.getBandName());
-
-            if (oAlreadyPublished != null) {
-                // Yes !!
-                s_oLogger.debug( "LauncherMain.PublishBandImage:  Band already published. Return result");
-
-                // Generate the View Model
-                PublishBandResultViewModel oVM = new PublishBandResultViewModel();
-                oVM.setBandName(oParameter.getBandName());
-                oVM.setProductName(sProductName);
-                oVM.setLayerId(sLayerId);
-
-                RabbitMessageViewModel oRabbitVM = new RabbitMessageViewModel();
-                oRabbitVM.setMessageCode(LauncherOperations.PUBLISHBAND);
-                oRabbitVM.setWorkspaceId(oParameter.getWorkspace());
-                oRabbitVM.setMessageResult("OK");
-                oRabbitVM.setPayload(oVM);
-
-                String sJSON = MongoRepository.s_oMapper.writeValueAsString(oRabbitVM);
-
-                Send oSendLayerId = new Send();
-
-                if (oSendLayerId.SendMsgOnExchange(oParameter.getExchange(), sJSON)==false) {
-                    s_oLogger.debug("LauncherMain.PublishBandImage: Error sending Rabbit Message");
-                }
-
-                return sLayerId;
-            }
-
-            s_oLogger.debug( "LauncherMain.PublishBandImage:  Generating Band Image...");
-
-            // Read the product
-            ReadProduct oReadProduct = new ReadProduct();
-            Product oSentinel = oReadProduct.ReadProduct(oFile, null);
-
-            s_oLogger.debug( "LauncherMain.PublishBandImage:  Get GeoCoding");
-
-            // Get the Geocoding and Band
-            GeoCoding oGeoCoding = oSentinel.getSceneGeoCoding();
-
-            s_oLogger.debug( "LauncherMain.PublishBandImage:  Getting Band " + oParameter.getBandName());
-
-            Band oBand = oSentinel.getBand(oParameter.getBandName());
-
-            // Get Image
-            MultiLevelImage oBandImage = oBand.getSourceImage();
-            // Get TIFF Metadata
-            GeoTIFFMetadata oMetadata = GeoCoding2GeoTIFFMetadata.createGeoTIFFMetadata(oGeoCoding, oBandImage.getWidth(),oBandImage.getHeight());
-
-            // Generate file output name
-            String sOutputFilePath = sPath + sLayerId + ".tif";
-            File oOutputFile = new File(sOutputFilePath);
-
-            s_oLogger.debug( "LauncherMain.PublishBandImage:  Output file: " + sOutputFilePath);
-
-            // Write the Band Tiff
-            if (ConfigReader.getPropValue("CREATE_BAND_GEOTIFF_ACTIVE").equals("true")) {
-                s_oLogger.debug("LauncherMain.PublishBandImage:  Writing Image");
-                GeoTIFF.writeImage(oBandImage, oOutputFile, oMetadata);
-            }
-            else {
-                s_oLogger.debug( "LauncherMain.PublishBandImage:  Debug on. Jump GeoTiff Generate");
-            }
-
-            s_oLogger.debug( "LauncherMain.PublishBandImage:  Moving Band Image...");
-
-            // Copy fie to GeoServer Data Dir
-            String sGeoServerDataDir = ConfigReader.getPropValue("GEOSERVER_DATADIR");
-            String sTargetDir = sGeoServerDataDir;
-
-            if (!(sTargetDir.endsWith("/")||sTargetDir.endsWith("\\"))) sTargetDir+="/";
-            sTargetDir+=sLayerId+"/";
-
-            String sTargetFile = sTargetDir + oOutputFile.getName();
-
-            File oTargetFile = new File(sTargetFile);
-
-            s_oLogger.debug("LauncherMain.PublishBandImage: InputFile: " + sOutputFilePath + " TargetFile: " + sTargetFile + " LayerId " + sLayerId);
-
-            FileUtils.copyFile(oOutputFile,oTargetFile);
-
-            // Ok publish
-            s_oLogger.debug("LauncherMain.PublishBandImage: call PublishImage");
-            Publisher oPublisher = new Publisher();
-            sLayerId = oPublisher.publishGeoTiff(sTargetFile,ConfigReader.getPropValue("GEOSERVER_ADDRESS"),ConfigReader.getPropValue("GEOSERVER_USER"),ConfigReader.getPropValue("GEOSERVER_PASSWORD"),ConfigReader.getPropValue("GEOSERVER_WORKSPACE"), sLayerId);
-
-            s_oLogger.debug("LauncherMain.PublishBandImage: Image published. ");
-
-            s_oLogger.debug("LauncherMain.PublishBandImage: Get Image Bounding Box");
-
-            //get bounding box from data base
-            DownloadedFilesRepository oDownloadedFilesRepository = new DownloadedFilesRepository();
-            String sBBox = oDownloadedFilesRepository.GetDownloadedFile(oParameter.getFileName()).getBoundingBox();
-
-            s_oLogger.debug("LauncherMain.PublishBandImage: Bounding Box: " + sBBox);
-
-            s_oLogger.debug("LauncherMain.PublishBandImage: Update index and Send Rabbit Message");
-
-            // Create Entity
-            PublishedBand oPublishedBand = new PublishedBand();
-            oPublishedBand.setLayerId(sLayerId);
-            oPublishedBand.setProductName(sProductName);
-            oPublishedBand.setBandName(oParameter.getBandName());
-            //oPublishedBand.setUserId(oParameter.getUserId());
-            //oPublishedBand.setWorkspaceId(oParameter.getWorkspace());
-            oPublishedBand.setBoundingBox(sBBox);
-
-            // Add it the the db
-            oPublishedBandsRepository.InsertPublishedBand(oPublishedBand);
-
-            s_oLogger.debug("LauncherMain.PublishBandImage: Index Updated" );
-
-            // Rabbit Sender
-            Send oSendLayerId = new Send();
-
-            s_oLogger.debug("LauncherMain.PublishBandImage: Queue = " + oParameter.getQueue() + " LayerId = " + sLayerId);
-
-            // Create the View Model
-            PublishBandResultViewModel oVM = new PublishBandResultViewModel();
-            oVM.setBandName(oParameter.getBandName());
-            oVM.setProductName(sProductName);
-            oVM.setLayerId(sLayerId);
-            oVM.setBoundingBox(sBBox);
-
-            RabbitMessageViewModel oRabbitVM = new RabbitMessageViewModel();
-            oRabbitVM.setMessageCode(LauncherOperations.PUBLISHBAND);
-            oRabbitVM.setWorkspaceId(oParameter.getWorkspace());
-            oRabbitVM.setMessageResult("OK");
-            oRabbitVM.setPayload(oVM);
-
-            // Convert in JSON
-            String sJSON = MongoRepository.s_oMapper.writeValueAsString(oRabbitVM);
-
-            // Send it
-            if (oSendLayerId.SendMsgOnExchange(oParameter.getExchange(), sJSON)==false) {
-                s_oLogger.debug("LauncherMain.PublishBandImage: Error sending Rabbit Message");
-            }
-        }
-        catch (Exception oEx) {
-
-            s_oLogger.debug( "LauncherMain.PublishBandImage: Exception " + oEx.toString() + " " + oEx.getMessage());
-
-            oEx.printStackTrace();
-
-            RabbitMessageViewModel oMessageViewModel = new RabbitMessageViewModel();
-            oMessageViewModel.setMessageCode(LauncherOperations.PUBLISHBAND);
-            oMessageViewModel.setWorkspaceId(oParameter.getWorkspace());
-            oMessageViewModel.setMessageResult("KO");
-
-            try {
-                String sJSON = MongoRepository.s_oMapper.writeValueAsString(oMessageViewModel);
-                oSendToRabbit.SendMsgOnExchange(oParameter.getExchange(), sJSON);
-            }
-            catch (Exception oEx2) {
-                s_oLogger.debug("LauncherMain.Download: Inner Exception " + oEx2.toString());
-            }
-        }
-        finally{
-            //delete process from list
-            try{
-                ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
-                oProcessWorkspaceRepository.DeleteProcessWorkspace(oParameter.getProcessObjId());
-            }
-            catch (Exception oEx) {
-                s_oLogger.debug("LauncherMain.PublishBandImage: Exception deleting process " + oEx.toString());
-            }
-        }
-
-        return  sLayerId;
-    }
 
 
 }

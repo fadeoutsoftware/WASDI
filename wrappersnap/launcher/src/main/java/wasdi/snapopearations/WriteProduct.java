@@ -29,24 +29,12 @@ public class WriteProduct {
         return WriteProduct(oProduct, sFilePath, sFileName, sFormat, ".tif");
     }
 
-    /*
-    public String WriteBigTiff(Product oProduct, String sLayerId, String sPath) throws Exception
+    public String WriteBEAMDIMAP(Product oProduct, String sFilePath, String sFileName) throws Exception
     {
-        String sBandName = oProduct.getBandAt(0).getName();
-        sLayerId += "_" + sBandName;
-        String sTiffFile = sPath + sLayerId + ".tif";
-        LauncherMain.s_oLogger.debug("LauncherMain.publish: get geocoding ");
-        GeoCoding oGeoCoding = oProduct.getSceneGeoCoding();
-        LauncherMain.s_oLogger.debug("LauncherMain.publish: get band image");
-        Band oBand = oProduct.getBand(oProduct.getBandAt(0).getName());
-        MultiLevelImage oBandImage = oBand.getSourceImage();
-        LauncherMain.s_oLogger.debug("LauncherMain.publish: get metadata");
-        GeoTIFFMetadata oMetadata = GeoCoding2GeoTIFFMetadata.createGeoTIFFMetadata(oGeoCoding, oBandImage.getWidth(),oBandImage.getHeight());
-        GeoTIFF.writeImage(oBandImage, new File(sTiffFile), oMetadata);
-        return sTiffFile;
+        String sFormat = DimapProductWriterPlugIn.DIMAP_FORMAT_NAME;
 
+        return WriteProduct(oProduct, sFilePath, sFileName, sFormat, ".dim");
     }
-    */
 
     private String WriteProduct(Product oProduct, String sFilePath, String sFileName, String sFormat, String sExtension)
     {
@@ -57,19 +45,13 @@ public class WriteProduct {
             ProductIO.writeProduct(oProduct, newFile.getAbsolutePath(), sFormat);
             MemUtils.freeAllMemory();
             return newFile.getAbsolutePath();
-        }catch (Exception oEx)
+        }
+        catch (Exception oEx)
         {
             LauncherMain.s_oLogger.debug("WriteProduct: Error writing product. " + oEx.getMessage());
         }
 
         return null;
-    }
-
-    public String WriteBEAMDIMAP(Product oProduct, String sFilePath, String sFileName) throws Exception
-    {
-        String sFormat = DimapProductWriterPlugIn.DIMAP_FORMAT_NAME;
-
-        return WriteProduct(oProduct, sFilePath, sFileName, sFormat, ".dim");
     }
 
 
