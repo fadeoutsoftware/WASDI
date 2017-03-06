@@ -8,6 +8,7 @@ import wasdi.shared.viewmodels.ProductViewModel;
 public class DownloadedFile {
     private String fileName;
     private String filePath;
+    private String boundingBox;
     // NOTE: Usually do not use View Models in entities. But this is more an entity that not a view model...
     private ProductViewModel productViewModel;
 
@@ -33,5 +34,13 @@ public class DownloadedFile {
 
     public void setProductViewModel(ProductViewModel productViewModel) {
         this.productViewModel = productViewModel;
+    }
+
+    public String getBoundingBox() {
+        return boundingBox;
+    }
+
+    public void setBoundingBox(String boundingBox) {
+        this.boundingBox = boundingBox;
     }
 }
