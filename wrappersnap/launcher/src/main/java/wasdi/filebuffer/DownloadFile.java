@@ -1,5 +1,6 @@
 package wasdi.filebuffer;
 
+import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.runtime.Config;
 import wasdi.ConfigReader;
 import wasdi.LauncherMain;
@@ -13,12 +14,12 @@ import java.net.Authenticator;
 import java.net.HttpURLConnection;
 import java.net.PasswordAuthentication;
 import java.net.URL;
+import java.util.prefs.Preferences;
 
 /**
  * Created by s.adamo on 06/10/2016.
  */
 public class DownloadFile {
-
 
 
     private final int BUFFER_SIZE = 4096;
