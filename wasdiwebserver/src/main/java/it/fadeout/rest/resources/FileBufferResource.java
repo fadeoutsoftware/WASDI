@@ -95,13 +95,24 @@ public class FileBufferResource {
 			if (oUser==null) return Response.status(401).build();
 			if (Utils.isNullOrEmpty(oUser.getUserId())) return Response.status(401).build();
 
-
 			String sUserId = oUser.getUserId();
 
 			//Update process list
 			String sProcessId = "";
 			ProcessWorkspace oProcess = null;
 			ProcessWorkspaceRepository oRepository = new ProcessWorkspaceRepository();
+			
+			String sPath = m_oServletConfig.getInitParameter("SerializationPath") + Wasdi.GetSerializationFileName();
+
+			DownloadFileParameter oParameter = new DownloadFileParameter();
+			oParameter.setQueue(sSessionId);
+			oParameter.setUrl(sFileUrl);
+			oParameter.setWorkspace(sWorkspaceId);
+			oParameter.setUserId(sUserId);
+			oParameter.setExchange(sWorkspaceId);
+			oParameter.setProcessObjId(sProcessId);
+			oParameter.setBoundingBox(sBoundingBox);
+			
 			try
 			{
 				oProcess = new ProcessWorkspace();
@@ -117,17 +128,6 @@ public class FileBufferResource {
 				oEx.printStackTrace();
 				return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
 			}
-
-			String sPath = m_oServletConfig.getInitParameter("SerializationPath") + Wasdi.GetSerializationFileName();
-
-			DownloadFileParameter oParameter = new DownloadFileParameter();
-			oParameter.setQueue(sSessionId);
-			oParameter.setUrl(sFileUrl);
-			oParameter.setWorkspace(sWorkspaceId);
-			oParameter.setUserId(sUserId);
-			oParameter.setExchange(sWorkspaceId);
-			oParameter.setProcessObjId(sProcessId);
-			oParameter.setBoundingBox(sBoundingBox);
 
 			SerializationUtils.serializeObjectToXML(sPath, oParameter);
 
