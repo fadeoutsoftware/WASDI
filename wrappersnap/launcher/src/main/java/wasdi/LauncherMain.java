@@ -7,16 +7,22 @@ import com.bc.ceres.launcher.Launcher;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.apache.log4j.xml.DOMConfigurator;
+import org.esa.s2tbx.dataio.openjpeg.OpenJpegExecRetriever;
+import org.esa.s2tbx.dataio.s2.S2Config;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.GeoCoding;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.quicklooks.Quicklook;
 import org.esa.snap.core.gpf.main.GPT;
+import org.esa.snap.core.util.ResourceInstaller;
 import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.core.util.geotiff.GeoCoding2GeoTIFFMetadata;
 import org.esa.snap.core.util.geotiff.GeoTIFF;
 import org.esa.snap.core.util.geotiff.GeoTIFFMetadata;
 import org.esa.snap.engine_utilities.util.MemUtils;
+import org.esa.snap.engine_utilities.util.Settings;
+import org.esa.snap.runtime.Config;
+import org.geotools.referencing.factory.epsg.HsqlEpsgDatabase;
 import sun.management.VMManagement;
 import wasdi.filebuffer.DownloadFile;
 import org.apache.commons.cli.*;
@@ -50,14 +56,18 @@ import java.lang.management.RuntimeMXBean;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.nio.file.attribute.PosixFilePermission;
+import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.prefs.Preferences;
+import java.util.stream.Stream;
+
+import static org.apache.commons.lang.SystemUtils.IS_OS_UNIX;
 
 
 /**
@@ -71,6 +81,7 @@ public class LauncherMain {
 
     //-operation <operation> -elaboratefile <file>
     public static void main(String[] args) throws Exception {
+
 
         try {
             //get jar directory
@@ -162,10 +173,58 @@ public class LauncherMain {
             MongoRepository.DB_USER = ConfigReader.getPropValue("MONGO_DBUSER");
             MongoRepository.DB_PWD = ConfigReader.getPropValue("MONGO_DBPWD");
 
+            System.setProperty("user.home", ConfigReader.getPropValue("USER_HOME"));
+            //System.setProperty("user.home", "c:");
+
+            Path propFile = Paths.get(ConfigReader.getPropValue("SNAP_AUX_PROPERTIES"));
+            Config.instance("snap.auxdata").load(propFile);
+            Config.instance().load();
+
+            s_oLogger.debug("OPJ_INFO_EXE" + S2Config.OPJ_INFO_EXE);
+            s_oLogger.debug("OPJ_DECOMPRESSOR_EXE" + S2Config.OPJ_DECOMPRESSOR_EXE);
+
+
         } catch (IOException e) {
             e.printStackTrace();
 
             //TODO: Set default configuration??
+        }
+    }
+
+    private static void fixUpPermissions(Path destPath) throws IOException {
+        Stream<Path> files = Files.list(destPath);
+        files.forEach(path -> {
+            if (Files.isDirectory(path)) {
+                try {
+                    fixUpPermissions(path);
+                } catch (IOException e) {
+                    SystemUtils.LOG.severe("OpenJPEG configuration error: failed to fix permissions on " + path);
+                }
+            }
+            else {
+                setExecutablePermissions(path);
+            }
+        });
+    }
+
+    private static void setExecutablePermissions(Path executablePathName) {
+        if (IS_OS_UNIX) {
+            Set<PosixFilePermission> permissions = new HashSet<>(Arrays.asList(
+                    PosixFilePermission.OWNER_READ,
+                    PosixFilePermission.OWNER_WRITE,
+                    PosixFilePermission.OWNER_EXECUTE,
+                    PosixFilePermission.GROUP_READ,
+                    PosixFilePermission.GROUP_EXECUTE,
+                    PosixFilePermission.OTHERS_READ,
+                    PosixFilePermission.OTHERS_EXECUTE));
+            try {
+                Files.setPosixFilePermissions(executablePathName, permissions);
+            } catch (IOException e) {
+                // can't set the permissions for this file, eg. the file was installed as root
+                // send a warning message, user will have to do that by hand.
+                SystemUtils.LOG.severe("Can't set execution permissions for executable " + executablePathName.toString() +
+                        ". If required, please ask an authorised user to make the file executable.");
+            }
         }
     }
 
@@ -346,7 +405,7 @@ public class LauncherMain {
                     oAlreadyDownloaded.setFileName(sFileNameWithoutPath);
                     oAlreadyDownloaded.setFilePath(sFileName);
                     oAlreadyDownloaded.setProductViewModel(oVM);
-
+                    oAlreadyDownloaded.setBoundingBox(oParameter.getBoundingBox());
                     oDownloadedRepo.InsertDownloadedFile(oAlreadyDownloaded);
                 }
                 else {
@@ -392,7 +451,7 @@ public class LauncherMain {
             }
             else {
 
-                ProductToViewModel(oVM, sFileName, oParameter.getWorkspace(), oParameter.getExchange(), LauncherOperations.DOWNLOAD);
+                ProductToViewModel(oVM, sFileName, oParameter.getWorkspace(), oParameter.getExchange(), LauncherOperations.DOWNLOAD, oParameter.getBoundingBox());
             }
         }
         catch (Exception oEx) {
@@ -425,7 +484,7 @@ public class LauncherMain {
         return  sFileName;
     }
 
-    private void ProductToViewModel(ProductViewModel oVM, String sFileName, String sWorkspace, String sExchange, String sOperation)
+    private void ProductToViewModel(ProductViewModel oVM, String sFileName, String sWorkspace, String sExchange, String sOperation, String sBBox)
     {
         Send oSendToRabbit = new Send();
         try {
@@ -455,7 +514,7 @@ public class LauncherMain {
             oAlreadyDownloaded.setFileName(oFile.getName());
             oAlreadyDownloaded.setFilePath(sFileName);
             oAlreadyDownloaded.setProductViewModel(oVM);
-
+            oAlreadyDownloaded.setBoundingBox(sBBox);
             DownloadedFilesRepository oDownloadedRepo = new DownloadedFilesRepository();
             oDownloadedRepo.InsertDownloadedFile(oAlreadyDownloaded);
 
@@ -785,7 +844,7 @@ public class LauncherMain {
             }
 
             s_oLogger.debug("LauncherMain.TerrainOperation: convert product to view model");
-            ProductToViewModel(new ProductViewModel(), sTiffFile, oParameter.getWorkspace(), oParameter.getExchange(), LauncherOperations.TERRAIN);
+            ProductToViewModel(new ProductViewModel(), sTiffFile, oParameter.getWorkspace(), oParameter.getExchange(), LauncherOperations.TERRAIN, null);
 
             //this.PublishOnGeoserver(oParameter.getPublishParameter(), oTerrainProduct.getName(), sBandName);
 
@@ -998,7 +1057,9 @@ public class LauncherMain {
 
             s_oLogger.debug("LauncherMain.PublishBandImage: Get Image Bounding Box");
 
-            String sBBox = GeoserverUtils.GetBoundingBox(sLayerId, "json");
+            //get bounding box from data base
+            DownloadedFilesRepository oDownloadedFilesRepository = new DownloadedFilesRepository();
+            String sBBox = oDownloadedFilesRepository.GetDownloadedFile(oParameter.getFileName()).getBoundingBox();
 
             s_oLogger.debug("LauncherMain.PublishBandImage: Bounding Box: " + sBBox);
 
