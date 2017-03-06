@@ -233,5 +233,32 @@ public class Send {
         return true;
     }
 
+    public boolean SendRabbitMessage(boolean bOk, String sMessageCode, String sWorkSpaceId, Object oPayload, String sQueueId) {
 
+        try {
+            RabbitMessageViewModel oRabbitVM = new RabbitMessageViewModel();
+            oRabbitVM.setMessageCode(sMessageCode);
+            oRabbitVM.setWorkspaceId(sWorkSpaceId);
+            if (bOk) oRabbitVM.setMessageResult("OK");
+            else  oRabbitVM.setMessageResult("KO");
+
+            oRabbitVM.setPayload(oPayload);
+
+            String sJSON = MongoRepository.s_oMapper.writeValueAsString(oRabbitVM);
+
+            Send oSendLayerId = new Send();
+
+            if (oSendLayerId.SendMsgOnExchange(sQueueId, sJSON)==false) {
+                LauncherMain.s_oLogger.debug("RabbitFactory.SendRabbitMessage: Error sending Rabbit Message");
+                return  false;
+            }
+        }
+        catch (Exception oEx) {
+            LauncherMain.s_oLogger.error("RabbitFactory.SendRabbitMessage: exception " +oEx.toString());
+            oEx.printStackTrace();
+            return  false;
+        }
+
+        return  true;
+    }
 }
