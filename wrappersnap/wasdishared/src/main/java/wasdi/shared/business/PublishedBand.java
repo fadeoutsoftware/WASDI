@@ -10,6 +10,7 @@ public class PublishedBand {
     private String userId;
     private String workspaceId;
     private String boundingBox;
+    private String geoserverBoundingBox;
 
     public String getProductName() {
         return productName;
@@ -57,5 +58,13 @@ public class PublishedBand {
 
     public void setWorkspaceId(String workspaceId) {
         this.workspaceId = workspaceId;
+    }
+
+    public String getGeoserverBoundingBox() {
+        return geoserverBoundingBox;
+    }
+
+    public void setGeoserverBoundingBox(String geoserverBoundingBox) {
+        this.geoserverBoundingBox = geoserverBoundingBox;
     }
 }

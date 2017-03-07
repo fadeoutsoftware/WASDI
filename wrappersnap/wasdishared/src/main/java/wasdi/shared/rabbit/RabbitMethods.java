@@ -3,7 +3,7 @@ package wasdi.shared.rabbit;
 import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
-import org.apache.log4j.Logger;
+//import org.apache.log4j.Logger;
 import wasdi.shared.business.Workspace;
 import wasdi.shared.data.WorkspaceRepository;
 
@@ -16,7 +16,7 @@ import java.util.concurrent.TimeoutException;
  */
 public class RabbitMethods {
 
-    static Logger s_oLogger = Logger.getLogger(RabbitMethods.class);
+    //static Logger s_oLogger = Logger.getLogger(RabbitMethods.class);
 
     /**
      *
@@ -30,7 +30,8 @@ public class RabbitMethods {
         try {
             oConnection = RabbitFactory.getConnectionFactory().newConnection();
         } catch (IOException | TimeoutException oEx) {
-            s_oLogger.debug("RabbitMethods.ExchangeDelete: Error creating connection" + oEx.getMessage());
+            oEx.printStackTrace();
+            //s_oLogger.debug("RabbitMethods.ExchangeDelete: Error creating connection" + oEx.getMessage());
             return false;
         }
         //Create Channel
@@ -38,7 +39,8 @@ public class RabbitMethods {
         try {
             oChannel = oConnection.createChannel();
         } catch (IOException oEx) {
-            s_oLogger.debug("RabbitMethods.ExchangeDelete: Error creating channel" + oEx.getMessage());
+            //s_oLogger.debug("RabbitMethods.ExchangeDelete: Error creating channel" + oEx.getMessage());
+            oEx.printStackTrace();
             return false;
         }
         try {
@@ -50,19 +52,22 @@ public class RabbitMethods {
             return true;
 
         } catch (IOException oEx) {
-            s_oLogger.debug("RabbitMethods.ExchangeDelete: Error deleting exchange" + oEx.getMessage());
+            //s_oLogger.debug("RabbitMethods.ExchangeDelete: Error deleting exchange" + oEx.getMessage());
+            oEx.printStackTrace();
         }
 
         try {
             oChannel.close();
         } catch (IOException | TimeoutException oEx) {
-            s_oLogger.debug("RabbitMethods.ExchangeDelete: Error closing channel" + oEx.getMessage());
+            //s_oLogger.debug("RabbitMethods.ExchangeDelete: Error closing channel" + oEx.getMessage());
+            oEx.printStackTrace();
         }
         try {
             // ATTENZIONE DEVE FARLO IN TUTTI I CASI
             oConnection.close();
         } catch (IOException oEx) {
-            s_oLogger.debug("RabbitMethods.ExchangeDelete: Error closing connection" + oEx.getMessage());
+            //s_oLogger.debug("RabbitMethods.ExchangeDelete: Error closing connection" + oEx.getMessage());
+            oEx.printStackTrace();
         }
 
         return false;
@@ -81,7 +86,8 @@ public class RabbitMethods {
         try {
             oConnection = RabbitFactory.getConnectionFactory().newConnection();
         } catch (IOException | TimeoutException oEx) {
-            s_oLogger.debug("RabbitMethods.QueueDelete: Error creating connection" + oEx.getMessage());
+            //s_oLogger.debug("RabbitMethods.QueueDelete: Error creating connection" + oEx.getMessage());
+            oEx.printStackTrace();
             return false;
         }
         //Create Channel
@@ -89,7 +95,8 @@ public class RabbitMethods {
         try {
             oChannel = oConnection.createChannel();
         } catch (IOException oEx) {
-            s_oLogger.debug("RabbitMethods.QueueDelete: Error creating channel" + oEx.getMessage());
+            //s_oLogger.debug("RabbitMethods.QueueDelete: Error creating channel" + oEx.getMessage());
+            oEx.printStackTrace();
             return false;
         }
         try {
@@ -112,26 +119,34 @@ public class RabbitMethods {
                     //unbind queue
                     oChannel.queueUnbind(sQueue, oWorkspace.getWorkspaceId(), sRoutingKey);
                 }catch (Exception oEx){
-                    s_oLogger.debug("RabbitMethods.QueueDelete: Error unbinding queue" + oEx.getMessage());
+                    //s_oLogger.debug("RabbitMethods.QueueDelete: Error unbinding queue" + oEx.getMessage());
+                    oEx.printStackTrace();
+
                 }
             }
 
             return true;
 
         } catch (IOException oEx) {
-            s_oLogger.debug("RabbitMethods.QueueDelete: Error deleting queue" + oEx.getMessage());
+            //s_oLogger.debug("RabbitMethods.QueueDelete: Error deleting queue" + oEx.getMessage());
+            oEx.printStackTrace();
+
         }
 
         try {
             oChannel.close();
         } catch (IOException | TimeoutException oEx) {
-            s_oLogger.debug("RabbitMethods.QueueDelete: Error closing channel" + oEx.getMessage());
+            //s_oLogger.debug("RabbitMethods.QueueDelete: Error closing channel" + oEx.getMessage());
+            oEx.printStackTrace();
+
         }
         try {
             // ATTENZIONE DEVE FARLO IN TUTTI I CASI
             oConnection.close();
         } catch (IOException oEx) {
-            s_oLogger.debug("RabbitMethods.QueueDelete: Error closing connection" + oEx.getMessage());
+            //s_oLogger.debug("RabbitMethods.QueueDelete: Error closing connection" + oEx.getMessage());
+            oEx.printStackTrace();
+
         }
 
         return false;
