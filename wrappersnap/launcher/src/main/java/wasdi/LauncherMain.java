@@ -564,7 +564,7 @@ public class LauncherMain {
         }
         catch (Exception oEx) {
             s_oLogger.debug("LauncherMain.TerrainOperation: exception " + oEx.toString());
-            oSendToRabbit.SendRabbitMessage(false,(LauncherOperations.TERRAIN,oParameter.getWorkspace(),null,oParameter.getExchange());
+            oSendToRabbit.SendRabbitMessage(false,LauncherOperations.TERRAIN,oParameter.getWorkspace(),null,oParameter.getExchange());
         }
         finally{
             s_oLogger.debug("LauncherMain.TerrainOperation: End");
