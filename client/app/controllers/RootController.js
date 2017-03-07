@@ -289,11 +289,11 @@ var RootController = (function() {
     {
         var oController = this;
         // if it publishing a band u can't go in import controller
-        if( this.m_oProcessesLaunchedService.thereAreSomePublishBandProcess() == false )
-        {
+        //if( this.m_oProcessesLaunchedService.thereAreSomePublishBandProcess() == false )
+        //{
             var sWorkSpace = this.m_oConstantsService.getActiveWorkspace();
             oController.m_oState.go("root.searchorbit", { workSpace : sWorkSpace.workspaceId });//use workSpace when reload editor page
-        }
+        //}
 
 
     };
@@ -302,12 +302,12 @@ var RootController = (function() {
 
         var oController = this;
         // if it publishing a band u can't go in import controller
-        if( this.m_oProcessesLaunchedService.thereAreSomePublishBandProcess() == false )
-        {
+        //if( this.m_oProcessesLaunchedService.thereAreSomePublishBandProcess() == false )
+        //{
             var sWorkSpace = this.m_oConstantsService.getActiveWorkspace();
 
             oController.m_oState.go("root.import", { workSpace : sWorkSpace.workspaceId });//use workSpace when reload editor page
-        }
+        //}
         //TODO FEEDBACK IF U CAN'T CLICK ON IMPORT
     };
 
