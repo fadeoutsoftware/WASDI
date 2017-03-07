@@ -19,5 +19,4 @@ public class WasdiResource {
 		oResult.setStringValue("Hello Wasdi!!");
 		return oResult;
 	}
-	
 }
