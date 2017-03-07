@@ -5,6 +5,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 import javax.servlet.ServletConfig;
 import javax.ws.rs.Consumes;
@@ -17,36 +19,53 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import com.sun.jersey.core.header.FormDataContentDisposition;
-import com.sun.jersey.multipart.FormDataParam;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.filefilter.FileFilterUtils;
+import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
+import org.glassfish.jersey.media.multipart.FormDataParam;
 
 import it.fadeout.Wasdi;
 import wasdi.shared.business.User;
 import wasdi.shared.utils.Utils;
 
+@Path("/catalog")
 public class CatalogResources {
 	
 	@Context
 	ServletConfig m_oServletConfig;
 	
 	@POST
-	@Path("/pdf")
-	@Consumes({MediaType.MULTIPART_FORM_DATA})
-	public Response uploadPdfFile(@HeaderParam("x-session-token") String sSessionId, @FormDataParam("file") InputStream fileInputStream,
-	                                @FormDataParam("file") FormDataContentDisposition fileMetaData) throws Exception
-	{
-	    User oUser = Wasdi.GetUserFromSession(sSessionId);
+	@Path("/upload")
+	@Consumes(MediaType.MULTIPART_FORM_DATA)
+	public Response uploadMapFile(@FormDataParam("file") InputStream fileInputStream,
+	                                @FormDataParam("file") FormDataContentDisposition fileMetaData, @HeaderParam("x-session-token") String sSessionId) throws Exception
+	{ 
+		User oUser = Wasdi.GetUserFromSession(sSessionId);
 	    if (oUser==null) return null;
 		if (Utils.isNullOrEmpty(oUser.getUserId())) return null;
 		
-		String sDownloadPath = m_oServletConfig.getInitParameter("DOWNLOAD_ROOT_PATH") + oUser.getUserId()+"/" + "CONTINUUM";
+		String sDownloadRootPath = m_oServletConfig.getInitParameter("DownloadRootPath");
+		if (!sDownloadRootPath.endsWith("/"))
+			sDownloadRootPath += "/";
+		
+		String sDownloadPath = sDownloadRootPath + oUser.getUserId()+"/" + "CONTINUUM";
+		
+		if(!Files.exists(Paths.get(sDownloadPath)))
+		{
+			if (Files.createDirectories(Paths.get(sDownloadPath))== null)
+			{
+				System.out.println("CatalogResources.uploadMapFile: Directory " + sDownloadPath + " not created");
+				return null;
+			}
+			
+		}
 		
 	    try
 	    {
 	        int read = 0;
 	        byte[] bytes = new byte[1024];
 	 
-	        OutputStream out = new FileOutputStream(new File(sDownloadPath + fileMetaData.getFileName()));
+	        OutputStream out = new FileOutputStream(new File(sDownloadPath + "/" + fileMetaData.getFileName()));
 	        while ((read = fileInputStream.read(bytes)) != -1) 
 	        {
 	            out.write(bytes, 0, read);
@@ -57,7 +76,7 @@ public class CatalogResources {
 	    {
 	        throw new WebApplicationException("Error while uploading file. Please try again !!");
 	    }
-	    return Response.ok("Data uploaded successfully !!").build();
+	    return Response.ok().build();
 	}
 
 }

@@ -14,6 +14,7 @@ import javax.ws.rs.core.Application;
 import javax.ws.rs.core.Context;
 
 import it.fadeout.rest.resources.AuthResource;
+import it.fadeout.rest.resources.CatalogResources;
 import it.fadeout.rest.resources.FileBufferResource;
 import it.fadeout.rest.resources.OpenSearchResource;
 import it.fadeout.rest.resources.OpportunitySearchResource;
@@ -55,6 +56,7 @@ public class Wasdi extends Application {
 		classes.add(OpportunitySearchResource.class);
 		classes.add(SnapOperationsResources.class);
 		classes.add(ProcessWorkspaceResource.class);
+		classes.add(CatalogResources.class);
 		return classes;
 	}
 	
