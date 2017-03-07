@@ -156,8 +156,8 @@ public class LauncherMain {
             Config.instance("snap.auxdata").load(propFile);
             Config.instance().load();
 
-            s_oLogger.debug("OPJ_INFO_EXE" + S2Config.OPJ_INFO_EXE);
-            s_oLogger.debug("OPJ_DECOMPRESSOR_EXE" + S2Config.OPJ_DECOMPRESSOR_EXE);
+            //s_oLogger.debug("OPJ_INFO_EXE" + S2Config.OPJ_INFO_EXE);
+            //s_oLogger.debug("OPJ_DECOMPRESSOR_EXE" + S2Config.OPJ_DECOMPRESSOR_EXE);
 
 
         }
@@ -388,13 +388,7 @@ public class LauncherMain {
             if (Utils.isNullOrEmpty(sFileName)) {
                 s_oLogger.debug("LauncherMain.Download: file is null there must be an error");
 
-                RabbitMessageViewModel oMessageViewModel = new RabbitMessageViewModel();
-                oMessageViewModel.setMessageCode(LauncherOperations.DOWNLOAD);
-                oMessageViewModel.setWorkspaceId(oParameter.getWorkspace());
-                oMessageViewModel.setMessageResult("KO");
-                String sJSON = MongoRepository.s_oMapper.writeValueAsString(oMessageViewModel);
-
-                oSendToRabbit.SendMsgOnExchange(oParameter.getExchange(), sJSON);
+                oSendToRabbit.SendRabbitMessage(false,LauncherOperations.DOWNLOAD,oParameter.getWorkspace(),null,oParameter.getExchange());
 
             }
             else {
@@ -405,18 +399,7 @@ public class LauncherMain {
         catch (Exception oEx) {
             s_oLogger.debug("LauncherMain.Download: Exception " + oEx.toString());
 
-            RabbitMessageViewModel oMessageViewModel = new RabbitMessageViewModel();
-            oMessageViewModel.setMessageCode(LauncherOperations.DOWNLOAD);
-            oMessageViewModel.setWorkspaceId(oParameter.getWorkspace());
-            oMessageViewModel.setMessageResult("KO");
-
-            try {
-                String sJSON = MongoRepository.s_oMapper.writeValueAsString(oMessageViewModel);
-                oSendToRabbit.SendMsgOnExchange(oParameter.getExchange(), sJSON);
-            }
-            catch (Exception oEx2) {
-                s_oLogger.debug("LauncherMain.Download: Inner Exception " + oEx2.toString());
-            }
+            oSendToRabbit.SendRabbitMessage(false,LauncherOperations.DOWNLOAD,oParameter.getWorkspace(),null,oParameter.getExchange());
         }
         finally{
             //delete process from list
@@ -483,32 +466,18 @@ public class LauncherMain {
 
                 s_oLogger.debug("LauncherMain.Download: Exchange = " + sExchange);
 
-                RabbitMessageViewModel oMessageViewModel = new RabbitMessageViewModel();
-                oMessageViewModel.setMessageCode(sOperation);
-                oMessageViewModel.setWorkspaceId(sWorkspace);
-                oMessageViewModel.setMessageResult("OK");
-                oMessageViewModel.setPayload(oVM);
+                oSendToRabbit.SendRabbitMessage(true,sOperation,sWorkspace,oVM,sExchange);
 
-                String sJSON = MongoRepository.s_oMapper.writeValueAsString(oMessageViewModel);
-
-                if (oSendToRabbit.SendMsgOnExchange(sExchange, sJSON) == false) {
-                    s_oLogger.debug("LauncherMain.Download: Error sending Rabbit Message");
-                }
             } else {
                 s_oLogger.debug("LauncherMain.Download: Unable to read image. Send Rabbit Message");
 
-                RabbitMessageViewModel oMessageViewModel = new RabbitMessageViewModel();
-                oMessageViewModel.setMessageCode(sOperation);
-                oMessageViewModel.setWorkspaceId(sWorkspace);
-                oMessageViewModel.setMessageResult("KO");
-                String sJSON = MongoRepository.s_oMapper.writeValueAsString(oMessageViewModel);
-
-                oSendToRabbit.SendMsgOnExchange(sExchange, sJSON);
+                oSendToRabbit.SendRabbitMessage(false,sOperation,sWorkspace,null,sExchange);
             }
         }
         catch(Exception oEx)
         {
-
+            s_oLogger.error(oEx.toString());
+            oEx.printStackTrace();
         }
     }
 
@@ -595,19 +564,7 @@ public class LauncherMain {
         }
         catch (Exception oEx) {
             s_oLogger.debug("LauncherMain.TerrainOperation: exception " + oEx.toString());
-
-            RabbitMessageViewModel oMessageViewModel = new RabbitMessageViewModel();
-            oMessageViewModel.setMessageCode(LauncherOperations.TERRAIN);
-            oMessageViewModel.setWorkspaceId(oParameter.getWorkspace());
-            oMessageViewModel.setMessageResult("KO");
-
-            try {
-                String sJSON = MongoRepository.s_oMapper.writeValueAsString(oMessageViewModel);
-                oSendToRabbit.SendMsgOnExchange(oParameter.getExchange(), sJSON);
-            }
-            catch (Exception oEx2) {
-                s_oLogger.debug("LauncherMain.TerrainOperation: Inner Exception " + oEx2.toString());
-            }
+            oSendToRabbit.SendRabbitMessage(false,(LauncherOperations.TERRAIN,oParameter.getWorkspace(),null,oParameter.getExchange());
         }
         finally{
             s_oLogger.debug("LauncherMain.TerrainOperation: End");
@@ -935,18 +892,7 @@ public class LauncherMain {
         catch (Exception oEx) {
             s_oLogger.debug("LauncherMain.RasterGeometricResample: exception " + oEx.toString());
 
-            RabbitMessageViewModel oMessageViewModel = new RabbitMessageViewModel();
-            oMessageViewModel.setMessageCode(LauncherOperations.RASTERGEOMETRICRESAMPLE);
-            oMessageViewModel.setWorkspaceId(oParameter.getWorkspace());
-            oMessageViewModel.setMessageResult("KO");
-
-            try {
-                String sJSON = MongoRepository.s_oMapper.writeValueAsString(oMessageViewModel);
-                oSendToRabbit.SendMsgOnExchange(oParameter.getExchange(), sJSON);
-            }
-            catch (Exception oEx2) {
-                s_oLogger.debug("LauncherMain.RasterGeometricResample: Inner Exception " + oEx2.toString());
-            }
+            oSendToRabbit.SendRabbitMessage(false,LauncherOperations.RASTERGEOMETRICRESAMPLE,oParameter.getWorkspace(),null,oParameter.getExchange());
         }
         finally{
             s_oLogger.debug("LauncherMain.RasterGeometricResample: End");
