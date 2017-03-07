@@ -137,9 +137,9 @@ angular.module('wasdi.SnakeDirective', [])
                         // Show Start Text
                         var oText = new createjs.Text();
                         oText.x = oText.y = 0;
-                        oText.font = "72px astronaut";
+                        oText.font = "68px astronaut";
                         oText.color = sFontColor;
-                        oText.text = "Press space to start!";
+                        oText.text = "Press Space to Play";
 
                         scope.stage.addChild(oText);
                     }
@@ -148,9 +148,9 @@ angular.module('wasdi.SnakeDirective', [])
                         // Show Game Over Text
                         var oText = new createjs.Text();
                         oText.x = oText.y = 0;
-                        oText.font = "72px astronaut";
+                        oText.font = "68px astronaut";
                         oText.color = sFontColor;
-                        oText.text = "Game Over!";
+                        oText.text = "Game Over";
 
                         scope.stage.addChild(oText);
                     }
