@@ -794,7 +794,10 @@ public class LauncherMain {
             DownloadedFilesRepository oDownloadedFilesRepository = new DownloadedFilesRepository();
             String sBBox = oDownloadedFilesRepository.GetDownloadedFile(oParameter.getFileName()).getBoundingBox();
 
+            String sGeoserverBBox = GeoserverUtils.GetBoundingBox(sLayerId, "json");
+
             s_oLogger.debug("LauncherMain.PublishBandImage: Bounding Box: " + sBBox);
+            s_oLogger.debug("LauncherMain.PublishBandImage: Geoserver Bounding Box: " + sGeoserverBBox);
             s_oLogger.debug("LauncherMain.PublishBandImage: Update index and Send Rabbit Message");
 
             // Create Entity
@@ -805,6 +808,7 @@ public class LauncherMain {
             //oPublishedBand.setUserId(oParameter.getUserId());
             //oPublishedBand.setWorkspaceId(oParameter.getWorkspace());
             oPublishedBand.setBoundingBox(sBBox);
+            oPublishedBand.setGeoserverBoundingBox(sGeoserverBBox);
 
             // Add it the the db
             oPublishedBandsRepository.InsertPublishedBand(oPublishedBand);
@@ -818,6 +822,7 @@ public class LauncherMain {
             oVM.setProductName(sProductName);
             oVM.setLayerId(sLayerId);
             oVM.setBoundingBox(sBBox);
+            oVM.setGeoserverBoundingBox(sGeoserverBBox);
 
             boolean bRet = oSendToRabbit.SendRabbitMessage(true,LauncherOperations.PUBLISHBAND, oParameter.getWorkspace(),oVM,oParameter.getExchange());
 
