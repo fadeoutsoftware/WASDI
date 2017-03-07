@@ -36,7 +36,7 @@ angular.module('wasdi.SnakeDirective', [])
                 var sSnakeColor = "#43526B";
                 var sGoalColor = "#009036";
                 var sBorderColor = "Black";
-                var sFontColor = "#FF7700";
+                var sFontColor = "#009036";
 
                 $document.on("keydown keypress", KeyPress);
 
@@ -137,7 +137,7 @@ angular.module('wasdi.SnakeDirective', [])
                         // Show Start Text
                         var oText = new createjs.Text();
                         oText.x = oText.y = 0;
-                        oText.font = "96px Dorsa";
+                        oText.font = "72px astronaut";
                         oText.color = sFontColor;
                         oText.text = "Press space to start!";
 
@@ -148,7 +148,7 @@ angular.module('wasdi.SnakeDirective', [])
                         // Show Game Over Text
                         var oText = new createjs.Text();
                         oText.x = oText.y = 0;
-                        oText.font = "96px Dorsa";
+                        oText.font = "72px astronaut";
                         oText.color = sFontColor;
                         oText.text = "Game Over!";
 
