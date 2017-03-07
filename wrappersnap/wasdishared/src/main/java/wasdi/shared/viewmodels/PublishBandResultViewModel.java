@@ -8,6 +8,7 @@ public class PublishBandResultViewModel {
     private String bandName;
     private String productName;
     private String boundingBox;
+    private String geoserverBoundingBox;
 
     public String getLayerId() {
         return layerId;
@@ -39,5 +40,13 @@ public class PublishBandResultViewModel {
 
     public void setBoundingBox(String boundingBox) {
         this.boundingBox = boundingBox;
+    }
+
+    public String getGeoserverBoundingBox() {
+        return geoserverBoundingBox;
+    }
+
+    public void setGeoserverBoundingBox(String geoserverBoundingBox) {
+        this.geoserverBoundingBox = geoserverBoundingBox;
     }
 }
