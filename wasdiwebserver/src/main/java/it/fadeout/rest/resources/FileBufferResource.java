@@ -267,9 +267,11 @@ public class FileBufferResource {
 			{
 				PublishBandResultViewModel oPublishViewModel = new PublishBandResultViewModel();
 				oPublishViewModel.setBoundingBox(oPublishBand.getBoundingBox());
+				oPublishViewModel.setGeoserverBoundingBox(oPublishBand.getGeoserverBoundingBox());
 				oPublishViewModel.setBandName(oPublishBand.getBandName());
 				oPublishViewModel.setLayerId(oPublishBand.getLayerId());
 				oPublishViewModel.setProductName(oPublishBand.getProductName());
+				oPublishViewModel.setGeoserverBoundingBox(oPublishBand.getGeoserverBoundingBox());
 				oReturnValue.setMessageCode(LauncherOperations.PUBLISHBAND);
 				oReturnValue.setPayload(oPublishViewModel);
 				return oReturnValue;
