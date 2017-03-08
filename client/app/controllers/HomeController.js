@@ -49,12 +49,15 @@ var HomeController = (function() {
                     {
                         //LOGIN FAIL
                         utilsVexDialogAlertTop( "Wrong Credentials, try again");
+
                     }
                 }
             }
         }).error(function (data,status) {
             //alert('error');
             utilsVexDialogAlertTop("Error in login. HomeCotroller.js");
+
+
 
         });
     }

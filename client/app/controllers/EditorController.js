@@ -190,6 +190,17 @@ var EditorController = (function () {
             this.addLayerMap2D(oLayer.layerId);
             this.addLayerMap3D(oLayer.layerId);
             this.m_aoLayersList.push(oLayer);
+            var oBounds = JSON.parse(oLayer.geoserverBoundingBox);
+            this.m_oGlobeService.zoomOnLayerBoundingBox([oBounds.minx,oBounds.miny,oBounds.maxx,oBounds.maxy]);
+            //this.m_oMapService.zoomOnBounds([oBounds.minx,oBounds.miny,oBounds.maxx,oBounds.maxy]);
+            /*Zoom on layer*/
+            var oMap = this.m_oMapService.getMap();
+            var corner1 = L.latLng(oBounds.maxy,oBounds.maxx),
+                corner2 = L.latLng( oBounds.miny,oBounds.minx  ),
+                bounds = L.latLngBounds(corner1, corner2);
+            oMap.fitBounds(bounds);
+
+
         }
         else
         {
@@ -225,9 +236,10 @@ var EditorController = (function () {
 
             this.m_oGlobeService.addRectangleOnGlobeBoundingBox(aBounds);
             this.addLayerMap2D(oLayer.layerId);
+
             this.m_aoLayersList.push(oLayer);
             this.zoomOnLayer2DMap(oLayer.layerId);
-            this.zoomOnLayer3DGlobe(oLayer.layerId);
+            //this.zoomOnLayer3DGlobe(oLayer.layerId);//TODO RESOLVE PROBELM WITH 3D zoom
         }
 
 
@@ -771,7 +783,7 @@ var EditorController = (function () {
     /**************** MAP 3D/2D MODE ON/OFF  (SWITCH)*************************/
     EditorController.prototype.onClickChangeMap=function()
     {
-        var oController=this;
+        var oController = this;
 
         oController.m_b2DMapModeOn = !oController.m_b2DMapModeOn;
         oController.m_b3DMapModeOn = !oController.m_b3DMapModeOn;
@@ -821,7 +833,8 @@ var EditorController = (function () {
 
         for(var iIndexLayers=0; iIndexLayers < oController.m_aoLayersList.length; iIndexLayers++)
         {
-            oController.addLayerMap2D(oController.m_aoLayersList[iIndexLayers].layerId);
+            if(!utilsIsObjectNullOrUndefined(oController.m_aoLayersList[iIndexLayers].layerId))//check if layer was downloaded from geoserver(get capabilities)
+                oController.addLayerMap2D(oController.m_aoLayersList[iIndexLayers].layerId);
         }
     }
 
@@ -837,7 +850,8 @@ var EditorController = (function () {
 
         for(var iIndexLayers=0; iIndexLayers < oController.m_aoLayersList.length; iIndexLayers++)
         {
-            oController.addLayerMap3D(oController.m_aoLayersList[iIndexLayers].layerId);
+            if(!utilsIsObjectNullOrUndefined(oController.m_aoLayersList[iIndexLayers].layerId))//check if layer was downloaded from geoserver(get capabilities)
+                oController.addLayerMap3D(oController.m_aoLayersList[iIndexLayers].layerId);
         }
     }
 
@@ -899,14 +913,21 @@ var EditorController = (function () {
         if( !(iIndexLayer < iNumberOfLayers))//there isn't layer in layerList
             return false;
 
-        var oBoundingBox = JSON.parse("[" + this.m_aoLayersList[iIndexLayer].boundingBox + "]");
+        var aBoundingBox = JSON.parse("[" + this.m_aoLayersList[iIndexLayer].boundingBox + "]");
 
-        if(utilsIsObjectNullOrUndefined(oBoundingBox)== true)
+        if(utilsIsObjectNullOrUndefined(aBoundingBox)== true)
             return false;
+
+        var aaBounds = [];
+        for( var iIndex = 0; iIndex < aBoundingBox.length-1 ;iIndex = iIndex + 2 )
+        {
+            aaBounds.push([aBoundingBox[iIndex],aBoundingBox[iIndex+1]]);
+
+        }
 
         var oGlobe = this.m_oGlobeService.getGlobe();
         /* set view of globe*/
-        this.m_oGlobeService.zoomOnLayerParamArray(oBoundingBox);
+        this.m_oGlobeService.zoomOnLayerParamArray(aBoundingBox);
         //oGlobe.camera.setView({
         //    destination:  Cesium.Rectangle.fromDegrees( oBoundingBox.minx , oBoundingBox.miny , oBoundingBox.maxx,oBoundingBox.maxy),
         //    orientation: {
@@ -949,23 +970,23 @@ var EditorController = (function () {
         if( !(iIndexLayer < iNumberOfLayers))//there isn't layer in layerList
             return false;
 
-        var aBoundingBox = JSON.parse("[" + this.m_aoLayersList[iIndexLayer].boundingBox + "]");
+        var oBoundingBox = JSON.parse( this.m_aoLayersList[iIndexLayer].geoserverBoundingBox );
 
-        if(utilsIsObjectNullOrUndefined(aBoundingBox)== true)
+        if(utilsIsObjectNullOrUndefined(oBoundingBox)== true)
             return false;
 
-        var aaBounds = [];
-        for( var iIndex = 0; iIndex < aBoundingBox.length-1 ;iIndex = iIndex + 2 )
-        {
-            aaBounds.push([aBoundingBox[iIndex],aBoundingBox[iIndex+1]]);
-
-        }
-        this.m_oMapService.zoomOnBounds(aaBounds);
-        //var oMap = this.m_oMapService.getMap();
-        //var corner1 = L.latLng(oBoundingBox.maxy,oBoundingBox.maxx),
-        //    corner2 = L.latLng( oBoundingBox.miny,oBoundingBox.minx  ),
-        //    bounds = L.latLngBounds(corner1, corner2);
-        //oMap.fitBounds(bounds);
+        //var aaBounds = [];
+        //for( var iIndex = 0; iIndex < aBoundingBox.length-1 ;iIndex = iIndex + 2 )
+        //{
+        //    aaBounds.push([aBoundingBox[iIndex],aBoundingBox[iIndex+1]]);
+        //
+        //}
+        //this.m_oMapService.zoomOnBounds(oBoundingBox);
+        var oMap = this.m_oMapService.getMap();
+        var corner1 = L.latLng(oBoundingBox.maxy,oBoundingBox.maxx),
+            corner2 = L.latLng( oBoundingBox.miny,oBoundingBox.minx  ),
+            bounds = L.latLngBounds(corner1, corner2);
+        oMap.fitBounds(bounds);
 
         return true;
     }
@@ -988,7 +1009,7 @@ var EditorController = (function () {
                 if(!utilsIsObjectNullOrUndefined(this.m_aoLayersList[iIndexLayer].layerId))//check if the layer was took with get capabilities
                 {
                     this.addLayerMap3D(this.m_aoLayersList[iIndexLayer].layerId);//import layer
-                    var oBounds = JSON.parse(this.m_aoLayersList[iIndexLayer].boundingBox);
+                    var oBounds = JSON.parse(this.m_aoLayersList[iIndexLayer].geoserverBoundingBox);
                     //var aBounds = JSON.parse("["+this.m_aoLayersList[iIndexLayer].boundingBox+"]");
                     //
                     //for(var iIndex = 0; iIndex < aBounds.length-1 ;iIndex=iIndex+2)
@@ -998,14 +1019,15 @@ var EditorController = (function () {
                     //    aBounds[iIndex] = aBounds[iIndex+1];
                     //    aBounds[iIndex+1] = iSwap;
                     //}
-                    this.m_oGlobeService.zoomOnLayerParamArray(aBounds);
-                    //this.m_oGlobeService.zoomOnLayerBoundingBox([oBounds.minx,oBounds.miny,oBounds.maxx,oBounds.maxy]);
+
+                    //this.m_oGlobeService.zoomOnLayerParamArray(aBounds);
+                    this.m_oGlobeService.zoomOnLayerBoundingBox([oBounds.minx,oBounds.miny,oBounds.maxx,oBounds.maxy]);
                 }
                 else
                 {
                     this.addLayerMap3D(this.m_aoLayersList[iIndexLayer].Title);//get capabilities layer
                     var oBounds = (this.m_aoLayersList[0].BoundingBox[0].extent);
-                    this.m_oGlobeService.zoomOnLayerBoundingBox([oBounds[0],oBounds[1],oBounds[2],oBounds[3]]);
+                    this.m_oGlobeService.zoomOnLayerBoundingBox([oBounds[0],oBounds[1],oBounds[2],oBounds[3]]);//TODO
                 }
             }
 
@@ -1051,7 +1073,8 @@ var EditorController = (function () {
                         aBounds[iIndex+1] = iSwap;
                     }
                     this.m_oGlobeService.addRectangleOnGlobeParamArray(aBounds);
-                    this.m_oGlobeService.zoomOnLayerParamArray(aBounds);
+                    //this.m_oGlobeService.zoomOnLayerParamArray(aBounds);//TODO RESOLVE PROBELM WITH 3D zoom
+
                 }
 
                 if(!utilsIsObjectNullOrUndefined(this.m_aoLayersList[0].BoundingBox)) //if there is BoundingBox.extent property, the layer was downloaded by external server
@@ -1059,7 +1082,7 @@ var EditorController = (function () {
                     //TODO CHECK IF .BoundingBox[0] it's right
                     var oBounds = (this.m_aoLayersList[0].BoundingBox[0].extent);
                     this.m_oGlobeService.addRectangleOnGlobeBoundingBox([oBounds[0],oBounds[1],oBounds[2],oBounds[3]]);
-                    this.m_oGlobeService.zoomOnLayerBoundingBox([oBounds[0],oBounds[1],oBounds[2],oBounds[3]]);
+                    this.m_oGlobeService.zoomOnLayerBoundingBox([oBounds[0],oBounds[1],oBounds[2],oBounds[3]]);//TODO
                 }
 
             }

@@ -53,11 +53,12 @@ var MergeProductsController = (function() {
         //}
         var successCallback = function(data, status)
         {
-            utilsVexDialogAlertTop("Ok");
+            //utilsVexDialogAlertTop("Ok");
         };
+
         var errorCallback = function (data, status)
         {
-            utilsVexDialogAlertTop("Non è ok");
+            utilsVexDialogAlertTop("Error in upload file");
         };
         //
         //oController.m_oHttp(oOptions).then(successCallback, errorCallback);

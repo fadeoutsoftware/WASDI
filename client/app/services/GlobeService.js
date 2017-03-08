@@ -135,16 +135,24 @@ service('GlobeService', ['$http',  'ConstantsService', function ($http, oConstan
      * @param oArray
      * @returns {boolean}
      */
-    this.zoomOnLayerParamArray = function(oArray)
+    this.zoomOnLayerParamArray = function(aArray)
     {
-        if(utilsIsObjectNullOrUndefined(oArray) == true)
+        if(utilsIsObjectNullOrUndefined(aArray) == true)
             return false;
 
         var oGlobe = this.m_oWasdiGlobe;
         if(utilsIsObjectNullOrUndefined(oGlobe) == true)
             return false;
 
-        var oZoom = Cesium.Rectangle.fromDegreesArray(oArray);
+        var newArray = [];
+        for(var iIndex = 0; iIndex < aArray.length - 1; iIndex += 2 )
+        {
+            newArray.push(new Cesium.Cartographic(aArray[iIndex+1],aArray[iIndex]));
+        }
+
+        var oZoom = Cesium.Rectangle.fromCartographicArray(newArray);
+        //var oZoom =  new Cesium.PolygonHierarchy(Cesium.Cartesian3.fromDegreesArray(aArray));
+        //var oZoom =  new Cesium.Cartesian3.fromDegreesArray(aArray);
 
         oGlobe.camera.setView({
             destination: oZoom,

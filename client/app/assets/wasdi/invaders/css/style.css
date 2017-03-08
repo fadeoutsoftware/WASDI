@@ -1,0 +1,129 @@
+body {
+background-color: black; 
+}
+.space {
+  float: left;
+  color: #fff;
+  width: 300px;
+  
+}
+.space>span {
+  margin-left: 20px;
+}
+.space-invader { 
+  border: 2px solid #fff;
+  background-color: #fff;
+  float: left;
+  width: 0.25em; 
+  height: 0.25em; 
+  margin: 40px 40px;
+  
+ 
+}
+
+
+
+.space-invader-1 {
+  box-shadow:
+    0 0 0 .25em #fff,
+    0 .25em 0 .25em #fff,
+    -.625em .375em 0 .125em #fff,
+    .625em .375em 0 .125em #fff,
+    -.75em -.75em 0 0 #fff,
+    .75em -.75em 0 0 #fff,
+    -.5em -.5em 0 0 #fff,
+    .5em -.5em 0 0 #fff,
+    -.75em -.25em 0 0 #fff,
+    -.5em -.25em 0 0 #fff,
+    .5em -.25em 0 0 #fff,
+    .75em -.25em 0 0 #fff,
+    -1em 0 0 0 #fff,
+    -.75em 0 0 0 #fff,
+    .75em 0 0 0 #fff,
+    1em 0 0 0 #fff,
+    -1em .25em 0 0 #fff,
+    1em .25em 0 0 #fff,
+    -.75em .75em 0 0 #fff,
+    .75em .75em 0 0 #fff,
+    /* Left Arm */
+    1.25em .25em 0 0 #fff,
+    1.25em .5em 0 0 #fff,
+    1.25em .75em 0 0 #fff,
+    /* Right Arm */
+    -1.25em .25em 0 0 #fff,
+    -1.25em .5em 0 0 #fff,
+    -1.25em .75em 0 0 #fff,
+    /* Left Foot */
+    -.25em 1em 0 0 #fff,
+    -.5em 1em 0 0 #fff,
+    /* Right Foot */
+    .25em 1em 0 0 #fff,
+    .5em 1em 0 0 #fff;
+}
+
+@keyframes space-invader-1 {
+  50% {
+    box-shadow: 
+      0 0 0 .25em #fff,
+      0 .25em 0 .25em #fff,
+      -.625em .375em 0 .125em #fff,
+      .625em .375em 0 .125em #fff,
+      -.75em -.75em 0 0 #fff,
+      .75em -.75em 0 0 #fff,
+      -.5em -.5em 0 0 #fff,
+      .5em -.5em 0 0 #fff,
+      -.75em -.25em 0 0 #fff,
+      -.5em -.25em 0 0 #fff,
+      .5em -.25em 0 0 #fff,
+      .75em -.25em 0 0 #fff,
+      -1em 0 0 0 #fff,
+      -.75em 0 0 0 #fff,
+      .75em 0 0 0 #fff,
+      1em 0 0 0 #fff,
+      -1em .25em 0 0 #fff,
+      1em .25em 0 0 #fff,
+      -.75em .75em 0 0 #fff,
+      .75em .75em 0 0 #fff,
+      /* Left Arm */
+      1.25em 0 0 0 #fff,
+      1.25em -.25em 0 0 #fff,
+      1.25em -.5em 0 0 #fff,
+      /* Right Arm */
+      -1.25em 0 0 0 #fff, 
+      -1.25em -.25em 0 0 #fff, 
+      -1.25em -.5em 0 0 #fff, 
+      /* Left Foot */
+      -1em 1em 0 0 #fff, 
+      -1em 1em 0 0 #fff, 
+      /* Right Foot */
+      1em 1em 0 0 #fff, 
+      1em 1em 0 0 #fff;
+  }
+}
+
+.space-invader.classic { 
+  animation: 1s step-end infinite;
+}
+.space-invader-1.classic { 
+  animation-name: space-invader-1;
+}
+
+
+
+#invader{
+  position:relative;
+    -webkit-animation-name: MOVE;
+    -webkit-animation-duration: 5s;
+    -webkit-animation-timing-function: step-end;
+    -webkit-animation-iteration-count: infinite;
+  }
+@-webkit-keyframes MOVE {
+  0%, 100% {    left: 0px;  }
+  10%, 90% {left:10%;}
+  20%, 80% {left:20%;}
+  30%, 70% {left:30%;}
+  40%, 60% {left:40%;}
+  50% {    left: 50%;  }
+  
+  
+}

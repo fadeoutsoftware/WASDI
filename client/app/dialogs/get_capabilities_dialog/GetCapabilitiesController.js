@@ -155,7 +155,7 @@ var GetCapabilitiesController = (function() {
             // and the bounding box in cesium
             //TODO CHECK IF .BoundingBox[0] it's right
             var oBounds = (oLayer.BoundingBox[0].extent);
-            this.m_oGlobeService.addRectangleOnGlobe([oBounds[0],oBounds[1],oBounds[2],oBounds[3]]);
+            this.m_oGlobeService.addRectangleOnGlobeBoundingBox([oBounds[0],oBounds[1],oBounds[2],oBounds[3]]);
             this.addLayerMap2D(oLayer.Name,this.m_sServerLink);
             this.m_oEditorController.m_aoLayersList.push(oLayer);
 
