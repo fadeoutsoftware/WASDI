@@ -5,6 +5,7 @@ import org.apache.log4j.Logger;
 import org.apache.log4j.xml.DOMConfigurator;
 import org.esa.s2tbx.dataio.s2.S2Config;
 import org.esa.s2tbx.dataio.s2.structure.S2ProductStructureFactory;
+import org.esa.snap.core.dataio.ProductIO;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.GeoCoding;
 import org.esa.snap.core.datamodel.Product;
@@ -12,6 +13,7 @@ import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.core.util.geotiff.GeoCoding2GeoTIFFMetadata;
 import org.esa.snap.core.util.geotiff.GeoTIFF;
 import org.esa.snap.core.util.geotiff.GeoTIFFMetadata;
+import org.esa.snap.dataio.geotiff.GeoTiffProductReaderPlugIn;
 import org.esa.snap.engine_utilities.util.MemUtils;
 import org.esa.snap.runtime.Config;
 import org.esa.snap.runtime.Launcher;
@@ -48,6 +50,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.PosixFilePermission;
 import java.util.*;
+import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 import static org.apache.commons.lang.SystemUtils.IS_OS_UNIX;
@@ -159,6 +162,8 @@ public class LauncherMain {
             //s_oLogger.debug("OPJ_INFO_EXE" + S2Config.OPJ_INFO_EXE);
             //s_oLogger.debug("OPJ_DECOMPRESSOR_EXE" + S2Config.OPJ_DECOMPRESSOR_EXE);
 
+            JAI.getDefaultInstance().getTileScheduler().setParallelism(Runtime.getRuntime().availableProcessors());
+            MemUtils.configureJaiTileCache();
 
         }
         catch (IOException e) {
@@ -488,9 +493,6 @@ public class LauncherMain {
      */
     public void TerrainOperation(RangeDopplerGeocodingParameter oParameter) {
 
-        JAI.getDefaultInstance().getTileScheduler().setParallelism(Runtime.getRuntime().availableProcessors());
-        MemUtils.configureJaiTileCache();
-
         s_oLogger.debug("LauncherMain.TerrainOperation: Start");
 
         // Rabbit Sender
@@ -590,9 +592,6 @@ public class LauncherMain {
 
         String sLayerId = "";
 
-        JAI.getDefaultInstance().getTileScheduler().setParallelism(Runtime.getRuntime().availableProcessors());
-        MemUtils.configureJaiTileCache();
-
         // Rabbit Sender
         Send oSendToRabbit = new Send();
 
@@ -661,9 +660,10 @@ public class LauncherMain {
             PublishedBandsRepository oPublishedBandsRepository = new PublishedBandsRepository();
             PublishedBand oAlreadyPublished = oPublishedBandsRepository.GetPublishedBand(oParameter.getFileName(),oParameter.getBandName());
 
+
             if (oAlreadyPublished != null) {
                 // Yes !!
-                s_oLogger.debug( "LauncherMain.PublishBandImage:  Band already published. Return result");
+                s_oLogger.debug( "LauncherMain.PublishBandImage:  Band already published. Return result" );
 
                 // Generate the View Model
                 PublishBandResultViewModel oVM = new PublishBandResultViewModel();
@@ -678,47 +678,150 @@ public class LauncherMain {
                 return sLayerId;
             }
 
+
             s_oLogger.debug( "LauncherMain.PublishBandImage:  Generating Band Image...");
 
             // Read the product
             ReadProduct oReadProduct = new ReadProduct();
             Product oSentinel = oReadProduct.ReadProduct(oFile, null);
 
-            // Is this a Sentinel 2?
-            if (oSentinel.getProductType().startsWith("S2_")) {
-                // Need to resample to publish
-                RasterGeometricResampling oRasterGeometricResample = new RasterGeometricResampling();
-                Product oResampledProduct = oRasterGeometricResample.getResampledProduct(oSentinel, oParameter.getBandName());
-                oSentinel = oResampledProduct;
-            }
-
-            s_oLogger.debug( "LauncherMain.PublishBandImage:  Get GeoCoding");
-
-            // Get the Geocoding and Band
-            GeoCoding oGeoCoding = oSentinel.getSceneGeoCoding();
-
-            s_oLogger.debug( "LauncherMain.PublishBandImage:  Getting Band " + oParameter.getBandName());
-
-            Band oBand = oSentinel.getBand(oParameter.getBandName());
-
-            // Get Image
-            MultiLevelImage oBandImage = oBand.getSourceImage();
-            // Get TIFF Metadata
-            GeoTIFFMetadata oMetadata = GeoCoding2GeoTIFFMetadata.createGeoTIFFMetadata(oGeoCoding, oBandImage.getWidth(),oBandImage.getHeight());
-
             // Generate file output name
             String sOutputFilePath = sPath + sLayerId + ".tif";
             File oOutputFile = new File(sOutputFilePath);
 
-            s_oLogger.debug( "LauncherMain.PublishBandImage:  Output file: " + sOutputFilePath);
+            boolean bS2 = false;
 
-            // Write the Band Tiff
-            if (ConfigReader.getPropValue("CREATE_BAND_GEOTIFF_ACTIVE").equals("true")) {
-                s_oLogger.debug("LauncherMain.PublishBandImage:  Writing Image");
-                GeoTIFF.writeImage(oBandImage, oOutputFile, oMetadata);
+            // Is this a Sentinel 2?
+            if (oSentinel.getProductType().startsWith("S2_")) {
+
+                bS2 = true;
+
+                // Need to resample to publish
+                s_oLogger.debug( "LauncherMain.PublishBandImage:  S2 Image");
+
+                //RasterGeometricResampling oRasterGeometricResample = new RasterGeometricResampling();
+                //Product oResampledProduct = oRasterGeometricResample.getResampledProduct(oSentinel, oParameter.getBandName());
+                //oSentinel = oResampledProduct;
+
+                try {
+
+                    // Get the file only name:
+                    String sFileOnly = oFile.getName();
+                    String [] asFileParts = sFileOnly.split(Pattern.quote("."));
+                    if (asFileParts != null) {
+                        if (asFileParts.length>0) sFileOnly = asFileParts[0];
+                    }
+
+                    s_oLogger.debug( "LauncherMain.PublishBandImage:  File Name without extension: " + sFileOnly);
+
+
+                    Runtime run = Runtime.getRuntime();
+
+                    // Check if has been already unzipped
+                    File oUnzippedFolder = new File(sPath+"/"+sFileOnly+".SAFE");
+
+                    if (oUnzippedFolder.exists() == false) {
+                        String sCmd = "unzip " + sFile + " -d " + sPath;
+
+                        s_oLogger.debug("S2 Image UNZIP: "+sCmd);
+                        Process oUnzipProcess = run.exec(sCmd);
+                        oUnzipProcess.waitFor();
+                        s_oLogger.debug("S2 Image UNZIP done ");
+
+                    }
+                    else {
+                        s_oLogger.debug("S2 Image already unzipped");
+                    }
+
+                    String sGranuleFolder = sPath+sFileOnly+".SAFE/GRANULE/";
+                    File oGranuleFolder = new File(sGranuleFolder);
+                    String [] asGranuleSubFolders = oGranuleFolder.list(new FilenameFilter() {
+                        @Override
+                        public boolean accept(File current, String name) {
+                            return new File(current, name).isDirectory();
+                        }
+                    });
+
+                    String sProductSubFolder = sFileOnly;
+
+                    if (asGranuleSubFolders != null) {
+                        if (asGranuleSubFolders.length > 0) {
+                            sProductSubFolder = asGranuleSubFolders[0];
+                        }
+                    }
+
+                    s_oLogger.debug("S2 Image detected product subfolder = " + sProductSubFolder);
+
+                    String sCompletePathOfFileToConvert = sGranuleFolder + sProductSubFolder + "/IMG_DATA/";
+
+                    File oCompletePathOfFileToConvert = new File(sCompletePathOfFileToConvert);
+
+                    String [] asBandImages = oCompletePathOfFileToConvert.list(new FilenameFilter() {
+                        @Override
+                        public boolean accept(File current, String name) {
+                            return new File(current, name).isFile();
+                        }
+                    });
+
+                    String sBandFile = sFileOnly;
+                    if (asBandImages != null) {
+                        if (asBandImages.length>0) {
+                            sBandFile = asBandImages[0];
+
+                            for (int iFiles=0; iFiles<asBandImages.length; iFiles++) {
+                                if (asBandImages[iFiles].endsWith(oParameter.getBandName()+".jp2")) {
+                                    s_oLogger.debug("S2 Image band image found");
+                                    sBandFile = asBandImages[iFiles];
+                                    break;
+                                }
+                            }
+                        }
+                    }
+
+                    s_oLogger.debug("S2 Image detected band image = " + sBandFile);
+
+                    String sFileToConvert = sCompletePathOfFileToConvert + sBandFile;
+
+                    s_oLogger.debug("FILE TO CONVERT = " + sFileToConvert);
+
+                    String sCmd = "gdal_translate -co TFW=YES  -co PROFILE=BASELINE " + sFileToConvert + " " + sFileToConvert+".tif";
+                    s_oLogger.debug("S2 Image Convert: "+sCmd);
+                    Process oTransformProcess = run.exec(sCmd);
+                    oTransformProcess .waitFor();
+                    s_oLogger.debug("S2 Image TRANSFORM done ");
+
+                    oOutputFile = new File(sFileToConvert+".tif");
+                }
+                catch (Exception oEx) {
+                    s_oLogger.error(oEx.toString());
+                    oEx.printStackTrace();
+                }
             }
             else {
-                s_oLogger.debug( "LauncherMain.PublishBandImage:  Debug on. Jump GeoTiff Generate");
+                s_oLogger.debug( "LauncherMain.PublishBandImage:  Get GeoCoding");
+
+                // Get the Geocoding and Band
+                GeoCoding oGeoCoding = oSentinel.getSceneGeoCoding();
+
+                s_oLogger.debug( "LauncherMain.PublishBandImage:  Getting Band " + oParameter.getBandName());
+
+                Band oBand = oSentinel.getBand(oParameter.getBandName());
+
+                // Get Image
+                MultiLevelImage oBandImage = oBand.getSourceImage();
+                // Get TIFF Metadata
+                GeoTIFFMetadata oMetadata = GeoCoding2GeoTIFFMetadata.createGeoTIFFMetadata(oGeoCoding, oBandImage.getWidth(),oBandImage.getHeight());
+
+                s_oLogger.debug( "LauncherMain.PublishBandImage:  Output file: " + sOutputFilePath);
+
+                // Write the Band Tiff
+                if (ConfigReader.getPropValue("CREATE_BAND_GEOTIFF_ACTIVE").equals("true")) {
+                    s_oLogger.debug("LauncherMain.PublishBandImage:  Writing Image");
+                    GeoTIFF.writeImage(oBandImage, oOutputFile, oMetadata);
+                }
+                else {
+                    s_oLogger.debug( "LauncherMain.PublishBandImage:  Debug on. Jump GeoTiff Generate");
+                }
             }
 
             s_oLogger.debug( "LauncherMain.PublishBandImage:  Moving Band Image...");
@@ -737,6 +840,18 @@ public class LauncherMain {
             s_oLogger.debug("LauncherMain.PublishBandImage: InputFile: " + sOutputFilePath + " TargetFile: " + sTargetFile + " LayerId " + sLayerId);
 
             FileUtils.copyFile(oOutputFile,oTargetFile);
+
+            if (bS2) {
+                String sS2OutputFileName = oOutputFile.getName();
+                sS2OutputFileName.replace(".tif",".tfw");
+                String sOutputFile2 = oOutputFile.getAbsolutePath().replace(".tif",".tfw");
+                oOutputFile = new File(sOutputFile2);
+                sTargetFile = sTargetDir + oOutputFile.getName();
+
+                s_oLogger.debug("LauncherMain.PublishBandImage: S2 IMAGE - 2 file - InputFile: " + sOutputFile2 + " TargetFile: " + sTargetFile);
+                oTargetFile = new File(sTargetFile);
+                FileUtils.copyFile(oOutputFile,oTargetFile);
+            }
 
             // Ok publish
             s_oLogger.debug("LauncherMain.PublishBandImage: call PublishImage");
@@ -820,9 +935,6 @@ public class LauncherMain {
      * @return
      */
     public void RasterGeometricResample(RasterGeometricResampleParameter oParameter) {
-
-        JAI.getDefaultInstance().getTileScheduler().setParallelism(Runtime.getRuntime().availableProcessors());
-        MemUtils.configureJaiTileCache();
 
         s_oLogger.debug("LauncherMain.RasterGeometricResample: Start");
 
