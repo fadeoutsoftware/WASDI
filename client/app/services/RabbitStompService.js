@@ -106,6 +106,7 @@ service('RabbitStompService', ['$http',  'ConstantsService','$interval','Process
                     break;
                 case "UPDATEPROCESSES":
                     oController.m_oProcessesLaunchedService.loadProcessesFromServer(oController.m_oActiveWorkspace.workspaceId);
+                    console.log("UPDATE PROCESSES");
                     break;
                 case "TERRAIN":
                     oControllerActive.receivedTerrainMessage(oMessageResult);

@@ -1,6 +1,7 @@
 //bootstrap
 //@import "../bower_components/bootstrap-sass/assets/stylesheets/bootstrap";
 
+
 @import "login";
 @import "main_theme";
 @import "root";
@@ -8,6 +9,8 @@
 @import "workspaces";
 @import "import";
 @import "search_orbit";
+
+
 //directive css
 @import "../directives/tree_directive/tree";
 
@@ -16,6 +19,8 @@
 @import "../dialogs/product_info/product_info";
 @import "../dialogs/get_capabilities_dialog/get_capabilities_dialog";
 @import "../dialogs/merge_products_dialog/merge_products_dialog";
+
+
 body
 {
 

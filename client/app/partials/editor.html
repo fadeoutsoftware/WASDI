@@ -15,9 +15,15 @@
                 <a><i class="fa fa-space-shuttle fa-3x" aria-hidden="true"></i></a>
             </li>
             <!-- MIDA MERGE -->
-            <li ng-click="m_oController.openMergeDialog()">
-                <a class="icon"><img src="assets/icons/iconMIDA.svg"></a>
+            <!--<li ng-click="m_oController.openMergeDialog()">-->
+                <!--<a class="icon"><img src="assets/icons/iconMIDA.svg"></a>-->
+            <!--</li>-->
+            <li ng-click="m_oController.openMergeDialog()" ng-init="m_oController.m_sSrc='assets/icons/iconMIDA.svg' "
+                ng-mouseover="m_oController.m_sSrc='assets/icons/iconMIDA_White.svg' " ng-mouseleave="m_oController.m_sSrc='assets/icons/iconMIDA.svg' ">
+                <!--<a class="icon"><img src="assets/icons/iconMIDA_White.svg"></a>-->
+                <a class="icon"><img src="{{m_oController.m_sSrc}}"></a>
             </li>
+
         </ul>
     </div>
 
