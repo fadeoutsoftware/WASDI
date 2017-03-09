@@ -765,13 +765,21 @@ public class LauncherMain {
                         }
                     });
 
+                    String sImageEnd = oParameter.getBandName();
+
+                    if (sImageEnd.length()==2) {
+                        sImageEnd.replace("B", "B0");
+                    }
+
+                    sImageEnd += ".jp2";
+
                     String sBandFile = sFileOnly;
                     if (asBandImages != null) {
                         if (asBandImages.length>0) {
                             sBandFile = asBandImages[0];
 
                             for (int iFiles=0; iFiles<asBandImages.length; iFiles++) {
-                                if (asBandImages[iFiles].endsWith(oParameter.getBandName()+".jp2")) {
+                                if (asBandImages[iFiles].endsWith(sImageEnd)) {
                                     s_oLogger.debug("S2 Image band image found");
                                     sBandFile = asBandImages[iFiles];
                                     break;
@@ -844,8 +852,7 @@ public class LauncherMain {
             FileUtils.copyFile(oOutputFile,oTargetFile);
 
             if (bS2) {
-                String sS2OutputFileName = oOutputFile.getName();
-                sS2OutputFileName.replace(".tif",".tfw");
+                // If it is a Sentinel 2 Image copy also tfw file
                 String sOutputFile2 = oOutputFile.getAbsolutePath().replace(".tif",".tfw");
                 oOutputFile = new File(sOutputFile2);
                 sTargetFile = sTargetDir + oOutputFile.getName();
@@ -879,8 +886,8 @@ public class LauncherMain {
             oPublishedBand.setLayerId(sLayerId);
             oPublishedBand.setProductName(sProductName);
             oPublishedBand.setBandName(oParameter.getBandName());
-            //oPublishedBand.setUserId(oParameter.getUserId());
-            //oPublishedBand.setWorkspaceId(oParameter.getWorkspace());
+            oPublishedBand.setUserId(oParameter.getUserId());
+            oPublishedBand.setWorkspaceId(oParameter.getWorkspace());
             oPublishedBand.setBoundingBox(sBBox);
             oPublishedBand.setGeoserverBoundingBox(sGeoserverBBox);
 
