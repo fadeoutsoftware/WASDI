@@ -720,7 +720,7 @@ var ImportController = (function() {
 
             //TAKE SUMMARY
             /*TODO CHANGE stringToObjectSummary() WITH JSON.parse() */
-            var oSummary = this.stringToObjectSummary(aoLayers[iIndexLayers].summary.content);
+            var oSummary = this.stringToObjectSummary(aoLayers[iIndexLayers].summary);//.content
             var oPreview = oController.getPreviewLayer(aoLayers[iIndexLayers]);
             if(utilsIsObjectNullOrUndefined(oPreview))
                 oPreview = "assets/icons/ImageNotFound.svg";
@@ -744,7 +744,7 @@ var ImportController = (function() {
                     summary:oSummary,
                     id:aoLayers[iIndexLayers].id,
                     rectangle:oRectangle,
-                    title:aoLayers[iIndexLayers].title.content,
+                    title:aoLayers[iIndexLayers].title,
                     preview:oPreview,
                     link:sLink
                 });
@@ -822,9 +822,9 @@ var ImportController = (function() {
         {
             if(aoStr[iIndexStr].name == sKeyWord)//we find bounds
             {
-                var sContent = aoStr[iIndexStr].content;
+                var sContent = aoStr[iIndexStr].text;/*.content TODO */
                 if(utilsIsObjectNullOrUndefined(sContent))
-                    null;
+                    return null;
                 sContent = sContent.replace("POLYGON ","");
                 sContent = sContent.replace("((","");
                 sContent = sContent.replace("))","");

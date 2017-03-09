@@ -10,6 +10,7 @@ var MergeProductsController = (function() {
         this.m_oFile = null;
         this.m_aoProductsList =  oExtras.ListOfProducts;
         this.m_oSelectedProduct = oExtras.SelectedProduct;
+        this.m_oWorkSpaceActive = oExtras.WorkSpaceId;
         this.m_oConstantService = oConstantService;
         this.m_oHttp = $http;
         //$scope.close = oClose;
@@ -39,9 +40,11 @@ var MergeProductsController = (function() {
     MergeProductsController.prototype.upload = function (oFile) {
         if(utilsIsObjectNullOrUndefined(oFile))
             return false;
+        if(utilsIsObjectNullOrUndefined(this.m_oWorkSpaceActive))
+            return false;
         var oController = this;
         var sUrl = oController.m_oConstantService.getAPIURL();
-        sUrl += "/catalog/upload";
+        sUrl += "/catalog/upload?sWorkspaceId=" + oController.m_oWorkSpaceActive.workspaceId;
 
         //var oOptions = {
         //    type: "POST" ,

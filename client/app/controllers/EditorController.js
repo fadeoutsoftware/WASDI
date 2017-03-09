@@ -190,16 +190,20 @@ var EditorController = (function () {
             this.addLayerMap2D(oLayer.layerId);
             this.addLayerMap3D(oLayer.layerId);
             this.m_aoLayersList.push(oLayer);
-            var oBounds = JSON.parse(oLayer.geoserverBoundingBox);
-            this.m_oGlobeService.zoomOnLayerBoundingBox([oBounds.minx,oBounds.miny,oBounds.maxx,oBounds.maxy]);
-            //this.m_oMapService.zoomOnBounds([oBounds.minx,oBounds.miny,oBounds.maxx,oBounds.maxy]);
-            /*Zoom on layer*/
-            var oMap = this.m_oMapService.getMap();
-            var corner1 = L.latLng(oBounds.maxy,oBounds.maxx),
-                corner2 = L.latLng( oBounds.miny,oBounds.minx  ),
-                bounds = L.latLngBounds(corner1, corner2);
-            oMap.fitBounds(bounds);
 
+            if(!utilsIsStrNullOrEmpty(oLayer.geoserverBoundingBox))//if there isn't boundiBox is impossible do zoom
+            {
+                var oBounds = JSON.parse(oLayer.geoserverBoundingBox);
+                this.m_oGlobeService.zoomOnLayerBoundingBox([oBounds.minx,oBounds.miny,oBounds.maxx,oBounds.maxy]);
+
+                //this.m_oMapService.zoomOnBounds([oBounds.minx,oBounds.miny,oBounds.maxx,oBounds.maxy]);
+                /*Zoom on layer*/
+                var oMap = this.m_oMapService.getMap();
+                var corner1 = L.latLng(oBounds.maxy,oBounds.maxx),
+                    corner2 = L.latLng( oBounds.miny,oBounds.minx  ),
+                    bounds = L.latLngBounds(corner1, corner2);
+                oMap.fitBounds(bounds);
+            }
 
         }
         else
@@ -913,6 +917,8 @@ var EditorController = (function () {
         if( !(iIndexLayer < iNumberOfLayers))//there isn't layer in layerList
             return false;
 
+        if(utilsIsStrNullOrEmpty(this.m_aoLayersList[iIndexLayer].boundingBox))
+            return false;
         var aBoundingBox = JSON.parse("[" + this.m_aoLayersList[iIndexLayer].boundingBox + "]");
 
         if(utilsIsObjectNullOrUndefined(aBoundingBox)== true)
@@ -970,6 +976,9 @@ var EditorController = (function () {
         if( !(iIndexLayer < iNumberOfLayers))//there isn't layer in layerList
             return false;
 
+        if( utilsIsStrNullOrEmpty(this.m_aoLayersList[iIndexLayer].geoserverBoundingBox) )
+            return false;
+
         var oBoundingBox = JSON.parse( this.m_aoLayersList[iIndexLayer].geoserverBoundingBox );
 
         if(utilsIsObjectNullOrUndefined(oBoundingBox)== true)
@@ -1009,25 +1018,33 @@ var EditorController = (function () {
                 if(!utilsIsObjectNullOrUndefined(this.m_aoLayersList[iIndexLayer].layerId))//check if the layer was took with get capabilities
                 {
                     this.addLayerMap3D(this.m_aoLayersList[iIndexLayer].layerId);//import layer
-                    var oBounds = JSON.parse(this.m_aoLayersList[iIndexLayer].geoserverBoundingBox);
-                    //var aBounds = JSON.parse("["+this.m_aoLayersList[iIndexLayer].boundingBox+"]");
-                    //
-                    //for(var iIndex = 0; iIndex < aBounds.length-1 ;iIndex=iIndex+2)
-                    //{
-                    //    var iSwap;
-                    //    iSwap = aBounds[iIndex];
-                    //    aBounds[iIndex] = aBounds[iIndex+1];
-                    //    aBounds[iIndex+1] = iSwap;
-                    //}
 
-                    //this.m_oGlobeService.zoomOnLayerParamArray(aBounds);
-                    this.m_oGlobeService.zoomOnLayerBoundingBox([oBounds.minx,oBounds.miny,oBounds.maxx,oBounds.maxy]);
+                    if(!utilsIsStrNullOrEmpty(this.m_aoLayersList[iIndexLayer].geoserverBoundingBox))//it dosen't do the zoom if there isn't bounding box
+                    {
+                        var oBounds = JSON.parse(this.m_aoLayersList[iIndexLayer].geoserverBoundingBox);
+                        //var aBounds = JSON.parse("["+this.m_aoLayersList[iIndexLayer].boundingBox+"]");
+                        //
+                        //for(var iIndex = 0; iIndex < aBounds.length-1 ;iIndex=iIndex+2)
+                        //{
+                        //    var iSwap;
+                        //    iSwap = aBounds[iIndex];
+                        //    aBounds[iIndex] = aBounds[iIndex+1];
+                        //    aBounds[iIndex+1] = iSwap;
+                        //}
+
+                        //this.m_oGlobeService.zoomOnLayerParamArray(aBounds);
+
+                        this.m_oGlobeService.zoomOnLayerBoundingBox([oBounds.minx,oBounds.miny,oBounds.maxx,oBounds.maxy]);
+                    }
                 }
                 else
                 {
                     this.addLayerMap3D(this.m_aoLayersList[iIndexLayer].Title);//get capabilities layer
                     var oBounds = (this.m_aoLayersList[0].BoundingBox[0].extent);
-                    this.m_oGlobeService.zoomOnLayerBoundingBox([oBounds[0],oBounds[1],oBounds[2],oBounds[3]]);//TODO
+                    if(!utilsIsObjectNullOrUndefined(oBounds))//check if possible do zoom
+                    {
+                        this.m_oGlobeService.zoomOnLayerBoundingBox([oBounds[0],oBounds[1],oBounds[2],oBounds[3]]);
+                    }
                 }
             }
 
@@ -1086,7 +1103,8 @@ var EditorController = (function () {
                 }
 
             }
-            else
+
+            if(iNumberOfLayers > 1)//if there is 2 or plus layers remove all layer
             {
                 //remove all layers
                 var oController = this;
@@ -1115,6 +1133,7 @@ var EditorController = (function () {
                     }
                     else
                     {
+                        oController.m_bIsVisibleMapOfLeaflet = !oController.m_bIsVisibleMapOfLeaflet;//revert status
                         return false;
                     }
                 }
@@ -1123,6 +1142,15 @@ var EditorController = (function () {
                 if(iNumberOfLayers!= 0)
                     bResponse = utilsVexDialogConfirm("Are you sure to delete layers?",oCallback);//ask user if he want delete layers
 
+            }
+
+            if(iNumberOfLayers == 0)//if there isn't layers
+            {
+                //clear 2d map
+                this.m_oMapService.removeLayersFromMap();
+                //reinitialize the globe
+                this.m_oGlobeService.clearGlobe();
+                this.m_oGlobeService.initGlobe('cesiumContainer2');
             }
 
 
@@ -1181,7 +1209,8 @@ var EditorController = (function () {
                 extras:
                 {
                     SelectedProduct: oSelectedProduct,
-                    ListOfProducts: oController.m_aoProducts
+                    ListOfProducts: oController.m_aoProducts,
+                    WorkSpaceId:oController.m_oActiveWorkspace
                 }
             }
         }).then(function(modal) {
