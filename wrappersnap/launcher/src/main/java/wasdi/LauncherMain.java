@@ -333,13 +333,15 @@ public class LauncherMain {
             // Download file
             if (ConfigReader.getPropValue("DOWNLOAD_ACTIVE").equals("true")) {
 
-
                 // Get the file name
                 String sFileNameWithoutPath = oDownloadFile.GetFileName(oParameter.getUrl());
-
-                // Check if it is already downloaded
+                s_oLogger.debug("LauncherMain.Download: File not already downloaded. File Name: " + sFileNameWithoutPath);
+                DownloadedFile oAlreadyDownloaded = null;
                 DownloadedFilesRepository oDownloadedRepo = new DownloadedFilesRepository();
-                DownloadedFile oAlreadyDownloaded = oDownloadedRepo.GetDownloadedFile(sFileNameWithoutPath);
+                if (!Utils.isNullOrEmpty(sFileNameWithoutPath)) {
+                    // Check if it is already downloaded
+                    oAlreadyDownloaded = oDownloadedRepo.GetDownloadedFile(sFileNameWithoutPath);
+                }
 
                 if (oAlreadyDownloaded == null) {
                     s_oLogger.debug("LauncherMain.Download: File not already downloaded. Download it on " + oParameter.getOpenSearchProvider() + " hub");
@@ -869,7 +871,7 @@ public class LauncherMain {
             String sGeoserverBBox = GeoserverUtils.GetBoundingBox(sLayerId, "json");
 
             s_oLogger.debug("LauncherMain.PublishBandImage: Bounding Box: " + sBBox);
-            s_oLogger.debug("LauncherMain.PublishBandImage: Geoserver Bounding Box: " + sGeoserverBBox);
+            s_oLogger.debug("LauncherMain.PublishBandImage: Geoserver Bounding Box: " + sGeoserverBBox + " for Layer Id " + sLayerId);
             s_oLogger.debug("LauncherMain.PublishBandImage: Update index and Send Rabbit Message");
 
             // Create Entity

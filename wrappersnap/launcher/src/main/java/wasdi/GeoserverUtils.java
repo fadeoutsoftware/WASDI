@@ -70,8 +70,15 @@ public class GeoserverUtils {
                     LauncherMain.s_oLogger.debug("GeoserverUtils.GetBoundingBox: latLonBoundingBox object found");
                     JSONObject oBBox = oCoverage.getJSONObject("latLonBoundingBox");
                     sBBox = oBBox.toString();
+                    LauncherMain.s_oLogger.debug("GeoserverUtils.GetBoundingBox: latLonBoundingBox " + sBBox);
                 }
             }
+            else {
+
+                LauncherMain.s_oLogger.debug("GeoserverUtils.GetBoundingBox: Json: " + oJSONObject.toString());
+                LauncherMain.s_oLogger.debug("GeoserverUtils.GetBoundingBox: Coverage not found");
+            }
+
 
 
         } catch (Exception e) {
