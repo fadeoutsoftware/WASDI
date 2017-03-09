@@ -239,7 +239,7 @@ var EditorController = (function () {
 
             this.m_aoLayersList.push(oLayer);
             this.zoomOnLayer2DMap(oLayer.layerId);
-            //this.zoomOnLayer3DGlobe(oLayer.layerId);//TODO RESOLVE PROBELM WITH 3D zoom
+            this.zoomOnLayer3DGlobe(oLayer.layerId);//TODO RESOLVE PROBLeM WITH 3D zoom
         }
 
 
@@ -882,11 +882,11 @@ var EditorController = (function () {
     EditorController.prototype.synchronize2DMap = function() {
 
         var oMap = this.m_oMapService.getMap();
-        var oGlobe = this.m_oGlobeService.getGlobe();
-        var oCenter = this.m_oGlobeService.getMapCenter();
-        if(utilsIsObjectNullOrUndefined(oCenter))
+        //var oGlobe = this.m_oGlobeService.getGlobe();
+        var aCenter = this.m_oGlobeService.getMapCenter();
+        if(utilsIsObjectNullOrUndefined(aCenter))
             return false;
-        oMap.flyTo(oCenter);
+        oMap.flyTo(aCenter);
         //var oRectangle = oGlobe.scene.camera.computeViewRectangle(oGlobe.scene.globe.ellipsoid);
         //if(utilsIsObjectNullOrUndefined(oRectangle))
         //    return false;
@@ -921,7 +921,7 @@ var EditorController = (function () {
         var aaBounds = [];
         for( var iIndex = 0; iIndex < aBoundingBox.length-1 ;iIndex = iIndex + 2 )
         {
-            aaBounds.push([aBoundingBox[iIndex],aBoundingBox[iIndex+1]]);
+            aaBounds.push([aBoundingBox[iIndex+1],aBoundingBox[iIndex]]);
 
         }
 
