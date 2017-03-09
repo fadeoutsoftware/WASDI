@@ -628,13 +628,13 @@ var EditorController = (function () {
                                         oController.zoomOnLayer2DMap(oBand.productName+"_"+oBand.name);
                                 }
                             },
-                            "Zoom3D" : {
-                                "label" : "Zoom Band 3D Map",
-                                "action" : function (obj) {
-                                    if(utilsIsObjectNullOrUndefined(oBand) == false)
-                                        oController.zoomOnLayer3DGlobe(oBand.productName+"_"+oBand.name);
-                                }
-                            }
+                            //"Zoom3D" : {
+                            //    "label" : "Zoom Band 3D Map",
+                            //    "action" : function (obj) {
+                            //        if(utilsIsObjectNullOrUndefined(oBand) == false)
+                            //            oController.zoomOnLayer3DGlobe(oBand.productName+"_"+oBand.name);
+                            //    }
+                            //}
 
                         };
                     }
@@ -1159,8 +1159,6 @@ var EditorController = (function () {
 
     EditorController.prototype.openGetCapabilitiesDialog = function()
     {
-
-
         var oController = this
         this.m_oModalService.showModal({
             templateUrl: "dialogs/get_capabilities_dialog/GetCapabilitiesDialog.html",
