@@ -1,8 +1,15 @@
 package wasdi.shared.data;
 
+import com.mongodb.Block;
+import com.mongodb.client.FindIterable;
 import org.bson.Document;
 import wasdi.shared.business.Catalog;
 import wasdi.shared.business.DownloadedFile;
+import wasdi.shared.business.ProcessWorkspace;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by s.adamo on 02/03/2017.
@@ -21,6 +28,54 @@ public class CatalogRepository extends MongoRepository{
         }
 
         return false;
+    }
+
+    public List<Catalog> GetCatalogs() {
+
+        final ArrayList<Catalog> aoReturnList = new ArrayList<Catalog>();
+        try {
+
+            FindIterable<Document> oWSDocuments = getCollection("catalog").find();
+
+            oWSDocuments.forEach(new Block<Document>() {
+                public void apply(Document document) {
+                    String sJSON = document.toJson();
+                    Catalog oCatalog = null;
+                    try {
+                        oCatalog = s_oMapper.readValue(sJSON,Catalog.class);
+                        aoReturnList.add(oCatalog);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+
+                }
+            });
+
+        } catch (Exception oEx) {
+            oEx.printStackTrace();
+        }
+
+        return aoReturnList;
+    }
+
+    public Catalog GetCatalogsByDate(String sDate) {
+
+        Catalog oCatalog = null;
+        try {
+
+            Document oWSDocument = getCollection("catalog").find(new Document("date", sDate)).first();
+            String sJSON = oWSDocument.toJson();
+            try {
+                oCatalog = s_oMapper.readValue(sJSON, Catalog.class);
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        } catch (Exception oEx) {
+            oEx.printStackTrace();
+        }
+
+        return oCatalog;
     }
 
 }
