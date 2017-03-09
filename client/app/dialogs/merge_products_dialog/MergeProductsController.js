@@ -56,7 +56,7 @@ var MergeProductsController = (function() {
         //}
         var successCallback = function(data, status)
         {
-            //utilsVexDialogAlertTop("Ok");
+            utilsVexDialogAlertTop("Uploaded file");
         };
 
         var errorCallback = function (data, status)
@@ -95,6 +95,24 @@ var MergeProductsController = (function() {
         //});
         return true;
     };
+
+    MergeProductsController.prototype.assimilation = function()
+    {
+        var oController = this;
+        var sUrl = oController.m_oConstantService.getAPIURL();
+        sApi="/catalog/assimilation";
+        sUrl += sApi;
+        this.m_oHttp.get(sUrl).success(function (data, status) {
+            if (!utilsIsObjectNullOrUndefined(data) )
+            {
+                utilsVexDialogAlertTop("successful");
+            }
+        }).error(function (data,status)
+        {
+            utilsVexDialogAlertTop("Error: assimilation doesn't work");
+        });
+
+    }
     MergeProductsController.$inject = [
         '$scope',
         'close',

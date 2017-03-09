@@ -122,6 +122,7 @@ var GetCapabilitiesController = (function() {
             return false;
         }
         //add layer in list
+        oLayer.sServerLink = this.m_sServerLink; // add property server link
 
         // check if the background is grey or there is a map
         if(this.m_oEditorController.m_bIsVisibleMapOfLeaflet == true)
