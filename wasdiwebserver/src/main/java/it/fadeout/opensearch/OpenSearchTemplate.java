@@ -20,7 +20,8 @@ public class OpenSearchTemplate {
 
 	private static final Template m_sCollaborativeTemplate =
 			new Template(
-					"{scheme}://{-append|.|host}collaborative.mt.asi.it{-opt|/|path}{-listjoin|/|path}{-prefix|/|page}{-opt|?|filter}{-join|&|filter,offset,limit,sortedby,order}");
+					//"{scheme}://{-append|.|host}collaborative.mt.asi.it{-opt|/|path}{-listjoin|/|path}{-prefix|/|page}{-opt|?|filter}{-join|&|filter,offset,limit,sortedby,order}");
+					"{scheme}://{-append|.|host}collaborative.mt.asi.it{-opt|/|path}{-listjoin|/|path}{-prefix|/|page}{-opt|?|q}{-join|&|q,start,rows,orderby}");
 
 	public OpenSearchTemplate()
 	{
@@ -40,7 +41,7 @@ public class OpenSearchTemplate {
 			oSentinelMap.put("orderby", sOrderBy + " " + sOrder);
 			oSentinelMap.put("q", qParams);
 			return m_sSentinelTemplate.expand(oSentinelMap);
-
+/*
 		case "MATERA":
 			Map<String,Object> oMateraMap = new HashMap<String, Object>();
 			oMateraMap.put("scheme","http");
@@ -50,6 +51,17 @@ public class OpenSearchTemplate {
 			oMateraMap.put("sortedby", sOrderBy);
 			oMateraMap.put("order", sOrder);
 			oMateraMap.put("filter", qParams);
+			return m_sCollaborativeTemplate.expand(oMateraMap);
+*/
+		case "MATERA":
+			Map<String,Object> oMateraMap = new HashMap<String, Object>();			
+			oMateraMap.put("scheme","http");
+			oMateraMap.put("path", new String[] {"search"});
+			oMateraMap.put("start", sStart);
+			oMateraMap.put("rows", sRows);
+			oMateraMap.put("orderby", sOrderBy + " " + sOrder);
+			oMateraMap.put("q", qParams);
+			
 			return m_sCollaborativeTemplate.expand(oMateraMap);
 
 		default:

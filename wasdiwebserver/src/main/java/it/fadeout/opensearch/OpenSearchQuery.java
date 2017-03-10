@@ -106,6 +106,8 @@ public class OpenSearchQuery{
 			if (response.getType() == ResponseType.SUCCESS)
 			{
 				System.out.println("Response Success");
+				
+				//String sRecivedResponse = response.getReader().;
 
 				oDocument = oParser.parse(response.getInputStream(), oParserOptions);
 
