@@ -160,12 +160,7 @@ public class SentinelThread implements Callable<Boolean> {
 
 
 
-    public void SerializeObjectToXML(String xmlFile, Object objectToSerialize) throws Exception {
-        FileOutputStream os = new FileOutputStream(xmlFile);
-        XMLEncoder encoder = new XMLEncoder(os);
-        encoder.writeObject(objectToSerialize);
-        encoder.close();
-    }
+
 
     public String SARToMulesmeFormat(String sSentinelProductName, String sLocationSourcePath, String sLocationDestination) throws Exception {
 
@@ -199,10 +194,13 @@ public class SentinelThread implements Callable<Boolean> {
             String sExtension = FilenameUtils.getExtension(sFileNameWithExtension);
             String[] asFileInfo = sFileName.split("_");
             String sPolarization = asFileInfo[1];
-            sMulesmeFormat = sPrefix + "_" + sPolarization + "_" + sSuffix + "." + sExtension;
+            if (!sExtension.equals("img"))
+                sMulesmeFormat = sPrefix + "_" + sPolarization + "_" + sSuffix + "." + sExtension;
+            else
+                sMulesmeFormat = sPrefix + "_" + sPolarization + "_" + sSuffix;
             String sSentinelInfoFileName = sPrefix + "_" + sPolarization + "_" + sSuffix + ".sml";
             //Serialize SentinelInfo
-            SerializeObjectToXML(sLocationDestination + sSentinelInfoFileName, getSentinelInfo());
+            Utils.SerializeObjectToXML(sLocationDestination + sSentinelInfoFileName, getSentinelInfo());
             Main.s_oLogger.debug(String.format("SentinelTread.call: Serialized object on path %s", ConfigReader.getPropValue("MULESME_WASDI_PATH")));
             //Move files
             Main.s_oLogger.debug(String.format("Move %s to %s", sLocationSourcePath + sSentinelProductName, sLocationDestination + sMulesmeFormat));
