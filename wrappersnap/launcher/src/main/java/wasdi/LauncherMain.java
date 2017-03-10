@@ -17,6 +17,7 @@ import org.esa.snap.dataio.geotiff.GeoTiffProductReaderPlugIn;
 import org.esa.snap.engine_utilities.util.MemUtils;
 import org.esa.snap.runtime.Config;
 import org.esa.snap.runtime.Launcher;
+import org.geotools.referencing.CRS;
 import sun.management.VMManagement;
 import wasdi.filebuffer.DownloadFile;
 import org.apache.commons.cli.*;
@@ -695,12 +696,8 @@ public class LauncherMain {
             String sOutputFilePath = sPath + sLayerId + ".tif";
             File oOutputFile = new File(sOutputFilePath);
 
-            boolean bS2 = false;
-
             // Is this a Sentinel 2?
-            if (oSentinel.getProductType().startsWith("S2_")) {
-
-                bS2 = true;
+            if (oSentinel.getProductType().startsWith("S2")) {
 
                 // Need to resample to publish
                 s_oLogger.debug( "LauncherMain.PublishBandImage:  S2 Image");
@@ -799,7 +796,7 @@ public class LauncherMain {
                     s_oLogger.debug("FILE TO CONVERT = " + sFileToConvert);
 
                     // Set EPSG
-                    sEPSG = "EPSG:32632";
+                    sEPSG = CRS.lookupIdentifier(oSentinel.getSceneGeoCoding().getMapCRS(),true);
 
                     String sCmd = "gdal_translate  -of GTiff -a_srs "+ sEPSG + " " + sFileToConvert + " " + sFileToConvert+".tif";
                     s_oLogger.debug("S2 Image Convert: "+sCmd);
