@@ -373,6 +373,56 @@ var EditorController = (function () {
     }
 
     /**
+     *
+     * @param sLayerId
+     */
+    EditorController.prototype.addLayerMap3DByServer = function (sLayerId,sServer) {
+
+        if(sServer == null)
+            return false;
+
+        var oGlobeLayers=this.m_oGlobeService.getGlobeLayers();
+        var sUrlGeoserver = sServer;
+        var oWMSOptions= { // wms options
+            transparent: true,
+            format: 'image/png',
+            //crossOriginKeyword: null
+        };//crossOriginKeyword: null
+
+        // WMS get GEOSERVER
+        var oProvider = new Cesium.WebMapServiceImageryProvider({
+            url : sUrlGeoserver,
+            layers:'wasdi:' + sLayerId,
+            parameters : oWMSOptions,
+
+        });
+        oGlobeLayers.addImageryProvider(oProvider);
+        //this.test=oGlobeLayers.addImageryProvider(oProvider);
+    }
+
+    /**
+     *
+     * @param sLayerId
+     */
+    EditorController.prototype.addLayerMap2DByServer = function (sLayerId,sServer) {
+        //
+        if(sServer == null)
+            return false;
+        var oMap = this.m_oMapService.getMap();
+        var sUrl = sServer//'http://localhost:8080/geoserver/ows?'
+
+
+        var wmsLayer = L.tileLayer.betterWms(sUrl, {
+            layers: 'wasdi:' + sLayerId,
+            format: 'image/png',
+            transparent: true,
+            noWrap:true
+        });
+        wmsLayer.setZIndex(1000);//it set the zindex of layer in map
+        wmsLayer.addTo(oMap);
+        return true;
+    }
+    /**
      * Call Download Image Service
      * @param sUrl
      */
@@ -839,6 +889,8 @@ var EditorController = (function () {
         {
             if(!utilsIsObjectNullOrUndefined(oController.m_aoLayersList[iIndexLayers].layerId))//check if layer was downloaded from geoserver(get capabilities)
                 oController.addLayerMap2D(oController.m_aoLayersList[iIndexLayers].layerId);
+            else
+                oController.addLayerMap2DByServer(oController.m_aoLayersList[iIndexLayers].Title,oController.m_aoLayersList[iIndexLayers].sServerLink);
         }
     }
 
@@ -856,6 +908,8 @@ var EditorController = (function () {
         {
             if(!utilsIsObjectNullOrUndefined(oController.m_aoLayersList[iIndexLayers].layerId))//check if layer was downloaded from geoserver(get capabilities)
                 oController.addLayerMap3D(oController.m_aoLayersList[iIndexLayers].layerId);
+            else
+                oController.addLayerMap3DByServer(oController.m_aoLayersList[iIndexLayers].Title,oController.m_aoLayersList[iIndexLayers].sServerLink);
         }
     }
 
@@ -905,7 +959,8 @@ var EditorController = (function () {
         if(utilsIsObjectNullOrUndefined(oLayerId))
             return false;
         if(utilsIsObjectNullOrUndefined(this.m_aoLayersList))
-            return false
+            return false;
+
         var iNumberOfLayers = this.m_aoLayersList.length;
 
         for(var iIndexLayer = 0; iIndexLayer < iNumberOfLayers; iIndexLayer++)
@@ -934,6 +989,8 @@ var EditorController = (function () {
         var oGlobe = this.m_oGlobeService.getGlobe();
         /* set view of globe*/
         this.m_oGlobeService.zoomOnLayerParamArray(aBoundingBox);
+
+
         //oGlobe.camera.setView({
         //    destination:  Cesium.Rectangle.fromDegrees( oBoundingBox.minx , oBoundingBox.miny , oBoundingBox.maxx,oBoundingBox.maxy),
         //    orientation: {
@@ -946,7 +1003,7 @@ var EditorController = (function () {
 
         //oBoundingBox = [[107.144188,77.391487],[90.454704,78.801079],[93.399925,80.717804],[112.501625,79.084023],[107.144188, 77.391487]];
         //var oCartographic =  [new Cesium.Cartographic(77.391487,107.144188),new Cesium.Cartographic(78.801079,90.454704),new Cesium.Cartographic(80.717804,93.399925),new Cesium.Cartographic(79.084023,112.501625),new Cesium.Cartographic(77.391487,107.144188)]
-        //var prova =Cesium.Rectangle.fromCartographicArray(oCartographic);
+        //var prova = Cesium.Rectangle.fromCartographicArray(oCartographic);
         //oGlobe.camera.setView({
         //    destination: prova,
         //    orientation: {
