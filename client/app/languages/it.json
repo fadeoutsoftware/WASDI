@@ -46,8 +46,8 @@
   "EDITOR_TOOLTIP_HOME":"Home",
   "EDITOR_TITLE_PANEL_PRODUCTS":"Products",
   "EDITOR_TOOLTIP_OPEN_BAND":"Expand published band",
-  "EDITOR_TOOLTIP_DELETE_ADD_LAYER_MAP":"Remove/Add map layer",
-  "EDITOR_TOOLTIP_GET_CAPABILITIES":"Get capabilities",
+  "EDITOR_TOOLTIP_DELETE_ADD_LAYER_MAP":"Switch Geographic/Image View",
+  "EDITOR_TOOLTIP_GET_CAPABILITIES":"Add External WMS Layer",
 
   "IMPORT_ADVANCE_SEARCH_LABEL":"Advance search",
   "IMPORT_PRODUCTS_PER_PAGE_LABEL":"Products per page:",

@@ -162,7 +162,7 @@ var WorkspaceController = (function() {
 
         var oController = this;
 
-        utilsVexDialogConfirmWithCheckBox("Deleting product. Are you sure?", function (value) {
+        utilsVexDialogConfirmWithCheckBox("Are you sure to delete the Workspace ?", function (value) {
             var bDeleteFile = false;
             var bDeleteLayer = false;
             if (value) {
