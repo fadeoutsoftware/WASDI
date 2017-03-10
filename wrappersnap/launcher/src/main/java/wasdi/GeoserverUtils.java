@@ -62,7 +62,8 @@ public class GeoserverUtils {
 
             }
             LauncherMain.s_oLogger.debug("GeoserverUtils.GetBoundingBox: response " + response.toString());
-            JSONObject oJSONObject = new JSONObject(response.toString());
+            String sResponse = response.toString();
+            JSONObject oJSONObject = new JSONObject(sResponse);
             if (oJSONObject.has("coverage")) {
                 LauncherMain.s_oLogger.debug("GeoserverUtils.GetBoundingBox: Coverage object found");
                 JSONObject oCoverage = oJSONObject.getJSONObject("coverage");
@@ -78,9 +79,6 @@ public class GeoserverUtils {
                 LauncherMain.s_oLogger.debug("GeoserverUtils.GetBoundingBox: Json: " + oJSONObject.toString());
                 LauncherMain.s_oLogger.debug("GeoserverUtils.GetBoundingBox: Coverage not found");
             }
-
-
-
         } catch (Exception e) {
             e.printStackTrace();
             LauncherMain.s_oLogger.debug("GeoserverUtils.GetBoundingBox: Exception getting bounding box " + e.toString());
