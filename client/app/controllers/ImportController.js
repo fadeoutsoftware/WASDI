@@ -720,7 +720,11 @@ var ImportController = (function() {
 
             //TAKE SUMMARY
             /*TODO CHANGE stringToObjectSummary() WITH JSON.parse() */
-            var oSummary = this.stringToObjectSummary(aoLayers[iIndexLayers].summary);//.content
+            if(this.m_oConstantsService.testMode() == true)
+                var oSummary = this.stringToObjectSummary(aoLayers[iIndexLayers].summary);//.content
+            else
+                var oSummary = this.stringToObjectSummary(aoLayers[iIndexLayers].summary.content);//.content
+
             var oPreview = oController.getPreviewLayer(aoLayers[iIndexLayers]);
             if(utilsIsObjectNullOrUndefined(oPreview))
                 oPreview = "assets/icons/ImageNotFound.svg";
@@ -735,7 +739,11 @@ var ImportController = (function() {
                                   }
             * */
 
-
+            //GET TITLE
+            if(this.m_oConstantsService.testMode() == true)
+                var sTitle = aoLayers[iIndexLayers].title;
+            else
+                var sTitle = aoLayers[iIndexLayers].title.content;
             //PUSH PRODUCT
             oController.m_aoProductsList.push(
                 {
@@ -744,7 +752,7 @@ var ImportController = (function() {
                     summary:oSummary,
                     id:aoLayers[iIndexLayers].id,
                     rectangle:oRectangle,
-                    title:aoLayers[iIndexLayers].title,
+                    title:sTitle,
                     preview:oPreview,
                     link:sLink
                 });
@@ -822,7 +830,11 @@ var ImportController = (function() {
         {
             if(aoStr[iIndexStr].name == sKeyWord)//we find bounds
             {
-                var sContent = aoStr[iIndexStr].text;/*.content TODO */
+                if(this.m_oConstantsService.testMode() == true)
+                    var sContent = aoStr[iIndexStr].text;/*.content TODO */
+                else
+                    var sContent = aoStr[iIndexStr].content;
+
                 if(utilsIsObjectNullOrUndefined(sContent))
                     return null;
                 sContent = sContent.replace("POLYGON ","");
