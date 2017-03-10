@@ -51,9 +51,9 @@ public class SentinelSearch {
                     asParams.getOrDefault("provider", "scihub.copernicus.eu"));
             //create abdera client
             AbderaClient oClient = new AbderaClient(oAbdera);
-            oClient.setConnectionTimeout(5000);
-            oClient.setSocketTimeout(20000);
-            oClient.setConnectionManagerTimeout(10000);
+            oClient.setConnectionTimeout(10000);
+            oClient.setSocketTimeout(30000);
+            oClient.setConnectionManagerTimeout(20000);
             oClient.setMaxConnectionsTotal(200);
             oClient.setMaxConnectionsPerHost(50);
 
@@ -100,15 +100,10 @@ public class SentinelSearch {
                 return null;
             }
 
-            int iStreamSize = 1000000;
+            //int iStreamSize = 1000000;
             Feed oFeed = (Feed) oDocument.getRoot();
 
-            //set new connction timeout
-            oClient.setConnectionTimeout(2000);
-            //oClient.setSocketTimeout(2000);
-            oClient.setConnectionManagerTimeout(2000);
-
-            JSONObject oFeedJSON = Atom2Json(oAbdera, new ByteArrayOutputStream(iStreamSize), oFeed);
+            JSONObject oFeedJSON = Atom2Json(oAbdera, new ByteArrayOutputStream(), oFeed);
             if (oFeedJSON == null)
                 s_oLogger.debug(String.format("SentinelSearch.ExecuteQuery: FeedJSON null"));
 
@@ -145,12 +140,13 @@ public class SentinelSearch {
                         JSONObject oEntry = (JSONObject) oEntryIterator.next();
                         if (oEntry != null)
                         {
+                            SentinelInfo oSentinelInfo = new SentinelInfo();
                             if (oEntry.has("str"))
                             {
                                 JSONArray aoStr = oEntry.getJSONArray("str");
                                 if (aoStr != null)
                                 {
-                                    SentinelInfo oSentinelInfo = new SentinelInfo();
+
                                     Iterator oIt = aoStr.iterator();
                                     while (oIt.hasNext()) {
 
@@ -173,16 +169,28 @@ public class SentinelSearch {
                                             oSentinelInfo.setSceneCenterLon(asCenter[1]);
                                         }
                                         */
-                                        //orbit
-                                        if (oStr.has("name") && oStr.get("name").equals("relativeorbitnumber")) {
-                                            oSentinelInfo.setOrbit(oStr.get("content").toString());
-                                        }
-
                                     }
 
-                                    aoInfos.add(oSentinelInfo);
                                 }
                             }
+                            JSONArray aoInt = oEntry.getJSONArray("int");
+                            if (oEntry.has("int"))
+                            {
+                                if (aoInt != null)
+                                {
+                                    Iterator oIt = aoInt.iterator();
+                                    while (oIt.hasNext()) {
+                                        JSONObject oInt = (JSONObject) oIt.next();
+
+                                        //orbit
+                                        if (oInt.has("name") && oInt.get("name").equals("relativeorbitnumber")) {
+                                            oSentinelInfo.setOrbit(oInt.get("content").toString());
+                                        }
+                                    }
+                                }
+                            }
+
+                            aoInfos.add(oSentinelInfo);
                         }
                     }
                 }
