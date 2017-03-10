@@ -203,8 +203,6 @@ var EditorController = (function () {
                 //check if there is layerId if there isn't the layer was added by get capabilities
                 if (!utilsIsObjectNullOrUndefined(this.m_aoLayersList[iIndexLayer].layerId)) {
                     var oNode = $('#jstree').jstree(true).get_node(this.m_aoLayersList[iIndexLayer].layerId);
-
-
                     oNode.original.bPubblish = false;
                     $('#jstree').jstree(true).set_icon(this.m_aoLayersList[iIndexLayer].layerId, 'assets/icons/uncheck_20x20.png');
                 }
@@ -225,7 +223,10 @@ var EditorController = (function () {
                 aBounds[iIndex + 1] = iSwap;
             }
 
-            this.m_oGlobeService.addRectangleOnGlobeBoundingBox(aBounds);
+            //this.m_oGlobeService.addRectangleOnGlobeBoundingBox(aBounds);
+
+            if(aBounds.length  > 1)
+                this.m_oGlobeService.addRectangleOnGlobeParamArray(aBounds);
             this.addLayerMap2D(oLayer.layerId);
 
             this.m_aoLayersList.push(oLayer);
@@ -590,10 +591,16 @@ var EditorController = (function () {
         else
             iLenghtLayersList = oController.m_aoLayersList.length;
 
-        for (var iIndex = 0; iIndex < iLenghtLayersList; iIndex++) {
+        for (var iIndex = 0; iIndex < iLenghtLayersList; ) {
             if (utilsIsStrNullOrEmpty(sLayerId) == false && utilsIsSubstring(sLayerId, oController.m_aoLayersList[iIndex].layerId)) {
-                oController.m_aoLayersList.splice(iIndex);
+                oController.m_aoLayersList.splice(iIndex,1);
+                iLenghtLayersList--;
             }
+            else
+            {
+                iIndex++;
+            }
+
         }
     }
 
@@ -942,15 +949,32 @@ var EditorController = (function () {
         if (utilsIsObjectNullOrUndefined(aBoundingBox) == true)
             return false;
 
+        //var aaBounds = [];
+        //for (var iIndex = 0; iIndex < aBoundingBox.length - 1; iIndex = iIndex + 2) {
+        //    aaBounds.push([aBoundingBox[iIndex + 1], aBoundingBox[iIndex]]);
+        //
+        //}
+
+        /* set view of globe*/
+        //this.m_oGlobeService.zoomOnLayerParamArray(aBoundingBox);
+
         var aaBounds = [];
         for (var iIndex = 0; iIndex < aBoundingBox.length - 1; iIndex = iIndex + 2) {
-            aaBounds.push([aBoundingBox[iIndex + 1], aBoundingBox[iIndex]]);
+            aaBounds.push(new Cesium.Cartographic.fromDegrees(aBoundingBox[iIndex + 1], aBoundingBox[iIndex ]));
 
         }
 
         var oGlobe = this.m_oGlobeService.getGlobe();
-        /* set view of globe*/
-        this.m_oGlobeService.zoomOnLayerParamArray(aBoundingBox);
+        var zoom = Cesium.Rectangle.fromCartographicArray(aaBounds);
+        oGlobe.camera.setView({
+            destination: zoom,
+            orientation: {
+                heading: 0.0,
+                pitch: -Cesium.Math.PI_OVER_TWO,
+                roll: 0.0
+            }
+        });
+
 
 
         //oGlobe.camera.setView({
