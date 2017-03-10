@@ -164,6 +164,14 @@ public class Publisher {
 
 
     private String PublishGeoTiffImage(String sFileName, String sGeoServerAddress, String sGeoServerUser, String sGeoServerPassword, String sWorkspace, String sStoreName) throws Exception {
+        return  PublishGeoTiffImage(sFileName,sGeoServerAddress,sGeoServerUser,sGeoServerPassword,sWorkspace,sStoreName, "EPSG:4326");
+    }
+
+    private String PublishGeoTiffImage(String sFileName, String sGeoServerAddress, String sGeoServerUser, String sGeoServerPassword, String sWorkspace, String sStoreName, String sEPSG) throws Exception {
+        return  PublishGeoTiffImage(sFileName,sGeoServerAddress,sGeoServerUser,sGeoServerPassword,sWorkspace,sStoreName, sEPSG, "raster");
+    }
+
+    private String PublishGeoTiffImage(String sFileName, String sGeoServerAddress, String sGeoServerUser, String sGeoServerPassword, String sWorkspace, String sStoreName, String sEPSG, String sStyle) throws Exception {
 
         File oFile = new File(sFileName);
 
@@ -180,24 +188,38 @@ public class Publisher {
 
             //Pubblico il layer
             String slLayerName = sFileName;
-            oManager.publishStandardGeoTiff(sWorkspace, sStoreName, oFile);
+            oManager.publishStandardGeoTiff(sWorkspace, sStoreName, oFile, sEPSG, sStyle);
 
             //configure coverage
             GSCoverageEncoder ce = new GSCoverageEncoder();
             ce.setEnabled(true); //abilito il coverage
-            ce.setSRS("EPSG:4326");
+            ce.setSRS(sEPSG);
+
             boolean exists = oManager.getReader().existsCoveragestore(sWorkspace, sStoreName);
             if (exists)
                 exists = oManager.getReader().existsCoverage(sWorkspace, sStoreName, slLayerName);
             if(exists)
                 oManager.getPublisher().configureCoverage(ce, sWorkspace, sStoreName, slLayerName);
-        }catch (Exception oEx){}
+        }
+        catch (Exception oEx)
+        {
+            oEx.printStackTrace();
+        }
 
         return sStoreName;
 
     }
 
     public String publishGeoTiff(String sFileName, String sGeoServerAddress, String sGeoServerUser, String sGeoServerPassword, String sWorkspace, String sStore) throws Exception {
+        return publishGeoTiff(sFileName, sGeoServerAddress, sGeoServerUser, sGeoServerPassword, sWorkspace, sStore, "EPSG:4326");
+    }
+
+    public String publishGeoTiff(String sFileName, String sGeoServerAddress, String sGeoServerUser, String sGeoServerPassword, String sWorkspace, String sStore, String sEPSG) throws Exception {
+        return publishGeoTiff(sFileName, sGeoServerAddress, sGeoServerUser, sGeoServerPassword, sWorkspace, sStore, sEPSG,"raster");
+    }
+
+
+    public String publishGeoTiff(String sFileName, String sGeoServerAddress, String sGeoServerUser, String sGeoServerPassword, String sWorkspace, String sStore, String sEPSG, String sStyle) throws Exception {
 
         // Domain Check
 
@@ -214,7 +236,6 @@ public class Publisher {
 
         // More than Gb => Pyramid, otherwise normal geotiff
         if (lFileLenght> lMaxSize) return this.PublishImagePyramidOnGeoServer(sFileName, sGeoServerAddress, sGeoServerUser, sGeoServerPassword, sWorkspace, sStore);
-        else  return this.PublishGeoTiffImage(sFileName,sGeoServerAddress,sGeoServerUser,sGeoServerPassword,sWorkspace,sStore);
+        else  return this.PublishGeoTiffImage(sFileName,sGeoServerAddress,sGeoServerUser,sGeoServerPassword,sWorkspace,sStore, sEPSG);
     }
-
 }
