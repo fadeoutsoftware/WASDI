@@ -264,6 +264,7 @@ public class FileBufferResource {
 
 			if (oPublishBand != null)
 			{
+				System.out.println("FileBufferResource.PublishBand: band already published " );
 				PublishBandResultViewModel oPublishViewModel = new PublishBandResultViewModel();
 				oPublishViewModel.setBoundingBox(oPublishBand.getBoundingBox());
 				oPublishViewModel.setBandName(oPublishBand.getBandName());
@@ -272,6 +273,8 @@ public class FileBufferResource {
 				oPublishViewModel.setGeoserverBoundingBox(oPublishBand.getGeoserverBoundingBox());
 				oReturnValue.setMessageCode(LauncherOperations.PUBLISHBAND);
 				oReturnValue.setPayload(oPublishViewModel);
+				
+				System.out.println("FileBufferResource.PublishBand: return published band" );
 				return oReturnValue;
 			}
 
