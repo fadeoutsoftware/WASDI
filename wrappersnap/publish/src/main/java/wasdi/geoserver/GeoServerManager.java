@@ -21,9 +21,9 @@ public class GeoServerManager {
     String RESTURL  = "http://localhost:8080/geoserver";
     String RESTUSER = "admin";
     String RESTPW   = "geoserver";
-    GeoServerRESTPublisher publisher;
-    GeoServerRESTReader reader;
-    GeoServerRESTStoreManager storeManager;
+    GeoServerRESTPublisher m_oGeoServerPublisher;
+    GeoServerRESTReader m_oGeoServerReader;
+    GeoServerRESTStoreManager m_oGeoServerStoreManager;
 
     public GeoServerManager() throws MalformedURLException {
         this.Init();
@@ -39,24 +39,24 @@ public class GeoServerManager {
 
     private void Init() throws MalformedURLException {
 
-        reader = new GeoServerRESTReader(RESTURL, RESTUSER, RESTPW);
-        publisher = new GeoServerRESTPublisher(RESTURL, RESTUSER, RESTPW);
-        storeManager = new GeoServerRESTStoreManager(new URL(RESTURL), RESTUSER, RESTPW);
+        m_oGeoServerReader = new GeoServerRESTReader(RESTURL, RESTUSER, RESTPW);
+        m_oGeoServerPublisher = new GeoServerRESTPublisher(RESTURL, RESTUSER, RESTPW);
+        m_oGeoServerStoreManager = new GeoServerRESTStoreManager(new URL(RESTURL), RESTUSER, RESTPW);
 
     }
 
 
     public GeoServerRESTPublisher getPublisher()
     {
-        return  publisher;
+        return m_oGeoServerPublisher;
     }
     public GeoServerRESTReader getReader()
     {
-        return  reader;
+        return m_oGeoServerReader;
     }
     public GeoServerRESTStoreManager getStoreManager()
     {
-        return  storeManager;
+        return m_oGeoServerStoreManager;
     }
 
 
@@ -180,9 +180,12 @@ public class GeoServerManager {
     }
 
 
-    public boolean publishStandardGeoTiff(String workspace, String storeName, File zipFile)
+    public boolean publishStandardGeoTiff(String workspace, String storeName, File zipFile, String sEPSG, String sStyle)
             throws FileNotFoundException {
 
-        return publisher.publishExternalGeoTIFF(workspace,storeName,zipFile, storeName, "EPSG:4326", GSResourceEncoder.ProjectionPolicy.FORCE_DECLARED,"raster");
+        if (sStyle == null) sStyle="raster";
+        if (sStyle.isEmpty()) sStyle = "raster";
+
+        return m_oGeoServerPublisher.publishExternalGeoTIFF(workspace,storeName,zipFile, storeName, sEPSG, GSResourceEncoder.ProjectionPolicy.FORCE_DECLARED,sStyle);
     }
 }
