@@ -680,6 +680,10 @@ public class LauncherMain {
                 return sLayerId;
             }
 
+            // Default EPSG: can be changed in the following lines if read from the Product
+            String sEPSG = "EPSG:4326";
+            // Default Style: can be changed in the following lines depending by the product
+            String sStyle = "raster";
 
             s_oLogger.debug( "LauncherMain.PublishBandImage:  Generating Band Image...");
 
@@ -794,12 +798,17 @@ public class LauncherMain {
 
                     s_oLogger.debug("FILE TO CONVERT = " + sFileToConvert);
 
-                    String sCmd = "gdal_translate -co TFW=YES  -co PROFILE=BASELINE " + sFileToConvert + " " + sFileToConvert+".tif";
+                    // Set EPSG
+                    sEPSG = "EPSG:32632";
+
+                    String sCmd = "gdal_translate  -of GTiff -a_srs "+ sEPSG + " " + sFileToConvert + " " + sFileToConvert+".tif";
                     s_oLogger.debug("S2 Image Convert: "+sCmd);
                     Process oTransformProcess = run.exec(sCmd);
                     oTransformProcess .waitFor();
                     s_oLogger.debug("S2 Image TRANSFORM done ");
 
+                    // Set S2 Style
+                    sStyle = "S2Test";
                     oOutputFile = new File(sFileToConvert+".tif");
                 }
                 catch (Exception oEx) {
@@ -851,21 +860,10 @@ public class LauncherMain {
 
             FileUtils.copyFile(oOutputFile,oTargetFile);
 
-            if (bS2) {
-                // If it is a Sentinel 2 Image copy also tfw file
-                String sOutputFile2 = oOutputFile.getAbsolutePath().replace(".tif",".tfw");
-                oOutputFile = new File(sOutputFile2);
-                sTargetFile = sTargetDir + oOutputFile.getName();
-
-                s_oLogger.debug("LauncherMain.PublishBandImage: S2 IMAGE - 2 file - InputFile: " + sOutputFile2 + " TargetFile: " + sTargetFile);
-                oTargetFile = new File(sTargetFile);
-                FileUtils.copyFile(oOutputFile,oTargetFile);
-            }
-
             // Ok publish
             s_oLogger.debug("LauncherMain.PublishBandImage: call PublishImage");
             Publisher oPublisher = new Publisher();
-            sLayerId = oPublisher.publishGeoTiff(sTargetFile,ConfigReader.getPropValue("GEOSERVER_ADDRESS"),ConfigReader.getPropValue("GEOSERVER_USER"),ConfigReader.getPropValue("GEOSERVER_PASSWORD"),ConfigReader.getPropValue("GEOSERVER_WORKSPACE"), sLayerId);
+            sLayerId = oPublisher.publishGeoTiff(sTargetFile,ConfigReader.getPropValue("GEOSERVER_ADDRESS"),ConfigReader.getPropValue("GEOSERVER_USER"),ConfigReader.getPropValue("GEOSERVER_PASSWORD"),ConfigReader.getPropValue("GEOSERVER_WORKSPACE"), sLayerId, sEPSG, sStyle);
 
             s_oLogger.debug("LauncherMain.PublishBandImage: Image published. ");
 
