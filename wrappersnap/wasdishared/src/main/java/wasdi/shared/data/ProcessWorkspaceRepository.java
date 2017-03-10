@@ -101,6 +101,9 @@ public class ProcessWorkspaceRepository extends MongoRepository {
         try {
 
             Document oWSDocument = getCollection("processworkpsace").find(new Document("productName", sProductName)).first();
+
+            if (oWSDocument==null) return  null;
+
             String sJSON = oWSDocument.toJson();
             try {
                 oProcessWorkspace = s_oMapper.readValue(sJSON, ProcessWorkspace.class);
