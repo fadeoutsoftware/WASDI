@@ -195,7 +195,7 @@ public class CatalogResources {
 
 	@GET
 	@Path("/assimilation")
-	@Produces({"application/xml", "application/json", "text/xml"})
+	@Produces(MediaType.APPLICATION_OCTET_STREAM)
 	public Response Assimilation(@HeaderParam("x-session-token") String sSessionId) {
 
 		User oUser = Wasdi.GetUserFromSession(sSessionId);
@@ -212,53 +212,44 @@ public class CatalogResources {
 			{
 				System.out.println("CatalogResources.Assimilation: Assimilation end with success ");
 				
-				StreamingOutput fileStream =  new StreamingOutput() 
+				System.out.println("CatalogResources.Assimilation: write output file ");
+				File oFileToDownload = null;
+				try
 				{
-					@Override
-					public void write(java.io.OutputStream output) throws IOException, WebApplicationException 
-					{
-						
-						System.out.println("CatalogResources.Assimilation: write output file ");
-						
-						try
-						{
-							String sAssimilationPath =   m_oServletConfig.getInitParameter("AssimilationPath");
-							if (!sAssimilationPath.endsWith("/"))
-								sAssimilationPath += "/";
+					String sAssimilationPath =   m_oServletConfig.getInitParameter("AssimilationPath");
+					if (!sAssimilationPath.endsWith("/"))
+						sAssimilationPath += "/";
 
-							File oFolder = new File(sAssimilationPath);
-							FilenameFilter oFilter = new FilenameFilter() {
+					File oFolder = new File(sAssimilationPath);
+					FilenameFilter oFilter = new FilenameFilter() {
 
-								@Override
-								public boolean accept(File dir, String name) {
-									// TODO Auto-generated method stub
-									if (name.toLowerCase().endsWith(".tif"))
-										return true;
+						@Override
+						public boolean accept(File dir, String name) {
+							// TODO Auto-generated method stub
+							if (name.toLowerCase().endsWith(".tif"))
+								return true;
 
-									return false;
-								}
-							};
-							File[] aoFiles = oFolder.listFiles(oFilter);
-							//take first 
-							if (aoFiles != null && aoFiles.length > 0)
-							{
-								System.out.println("CatalogResources.Assimilation: file to download " + aoFiles[0].getName());
-								java.nio.file.Path oPath = Paths.get(aoFiles[0].getPath());
-								byte[] data = Files.readAllBytes(oPath);
-								output.write(data);
-								output.flush();
-							}
-						} 
-						catch (Exception e) 
-						{
-							throw new WebApplicationException("File Not Found !!");
+							return false;
 						}
+					};
+					File[] aoFiles = oFolder.listFiles(oFilter);
+					//take first 
+					if (aoFiles != null && aoFiles.length > 0)
+					{
+						System.out.println("CatalogResources.Assimilation: file to download " + aoFiles[0].getName());
+						java.nio.file.Path oPath = Paths.get(aoFiles[0].getPath());
+						System.out.println("CatalogResources.Assimilation: file to download " + aoFiles[0].getPath());
+						oFileToDownload = new File(aoFiles[0].getPath());
 					}
-				};
-				
+				} 
+				catch (Exception e) 
+				{
+					throw new WebApplicationException("File Not Found !!");
+				}
+					
 				return Response
-						.ok(fileStream, MediaType.APPLICATION_OCTET_STREAM)
-						.header("content-disposition","attachment; filename = Assimilation.tif")
+						.ok(oFileToDownload, MediaType.APPLICATION_OCTET_STREAM)
+						.header("content-disposition","attachment; filename=Assimilation.tif")
 						.build();
 			}
 		}
