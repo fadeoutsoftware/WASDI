@@ -110,7 +110,6 @@ public class FileBufferResource {
 			oParameter.setWorkspace(sWorkspaceId);
 			oParameter.setUserId(sUserId);
 			oParameter.setExchange(sWorkspaceId);
-			oParameter.setProcessObjId(sProcessId);
 			oParameter.setBoundingBox(sBoundingBox);
 			
 			try
@@ -122,6 +121,8 @@ public class FileBufferResource {
 				oProcess.setWorkspaceId(sWorkspaceId);
 				oProcess.setUserId(sUserId);
 				sProcessId = oRepository.InsertProcessWorkspace(oProcess);
+				//set the process object Id to params
+				oParameter.setProcessObjId(sProcessId);
 			}
 			catch(Exception oEx){
 				System.out.println("DownloadResource.Download: Error updating process list " + oEx.getMessage());
@@ -250,9 +251,7 @@ public class FileBufferResource {
 		try {
 
 			if (Utils.isNullOrEmpty(sSessionId)) return oReturnValue;
-
 			User oUser = Wasdi.GetUserFromSession(sSessionId);
-
 			if (oUser==null) return oReturnValue;
 			if (Utils.isNullOrEmpty(oUser.getUserId())) return oReturnValue;
 
@@ -267,7 +266,6 @@ public class FileBufferResource {
 			{
 				PublishBandResultViewModel oPublishViewModel = new PublishBandResultViewModel();
 				oPublishViewModel.setBoundingBox(oPublishBand.getBoundingBox());
-				oPublishViewModel.setGeoserverBoundingBox(oPublishBand.getGeoserverBoundingBox());
 				oPublishViewModel.setBandName(oPublishBand.getBandName());
 				oPublishViewModel.setLayerId(oPublishBand.getLayerId());
 				oPublishViewModel.setProductName(oPublishBand.getProductName());
