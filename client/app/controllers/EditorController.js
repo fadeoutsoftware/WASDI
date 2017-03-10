@@ -1043,6 +1043,7 @@ var EditorController = (function () {
 
     EditorController.prototype.addOrRemoveMapLayer = function () {
         this.m_bIsVisibleMapOfLeaflet = !this.m_bIsVisibleMapOfLeaflet;
+
         //If there is the map or grey background
         if (this.m_bIsVisibleMapOfLeaflet == true) {
             //if there is the map
@@ -1117,16 +1118,18 @@ var EditorController = (function () {
 
                     //var aoCartographic =  [new Cesium.Cartographic.fromDegrees(13.643888,43.863701),new Cesium.Cartographic.fromDegrees(10.388990,44.271336),new Cesium.Cartographic.fromDegrees(10.717404,45.770004),new Cesium.Cartographic.fromDegrees(14.057657,45.362556),new Cesium.Cartographic.fromDegrees(13.643888,43.863701)]
                     var aBounds = JSON.parse("[" + this.m_aoLayersList[0].boundingBox + "]");
-
-                    for (var iIndex = 0; iIndex < aBounds.length - 1; iIndex = iIndex + 2) {
-                        var iSwap;
-                        iSwap = aBounds[iIndex];
-                        aBounds[iIndex] = aBounds[iIndex + 1];
-                        aBounds[iIndex + 1] = iSwap;
+                    if(aBounds.length > 1)
+                    {
+                        for (var iIndex = 0; iIndex < aBounds.length - 1; iIndex = iIndex + 2)
+                        {
+                            var iSwap;
+                            iSwap = aBounds[iIndex];
+                            aBounds[iIndex] = aBounds[iIndex + 1];
+                            aBounds[iIndex + 1] = iSwap;
+                        }
+                        this.m_oGlobeService.addRectangleOnGlobeParamArray(aBounds);
+                        //this.m_oGlobeService.zoomOnLayerParamArray(aBounds);//TODO RESOLVE PROBELM WITH 3D zoom
                     }
-                    this.m_oGlobeService.addRectangleOnGlobeParamArray(aBounds);
-                    //this.m_oGlobeService.zoomOnLayerParamArray(aBounds);//TODO RESOLVE PROBELM WITH 3D zoom
-
                 }
 
                 if (!utilsIsObjectNullOrUndefined(this.m_aoLayersList[0].BoundingBox)) //if there is BoundingBox.extent property, the layer was downloaded by external server

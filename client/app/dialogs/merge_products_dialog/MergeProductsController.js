@@ -102,12 +102,38 @@ var MergeProductsController = (function() {
         var sUrl = oController.m_oConstantService.getAPIURL();
         sApi="/catalog/assimilation";
         sUrl += sApi;
-        this.m_oHttp.get(sUrl).success(function (data, status) {
-            if (!utilsIsObjectNullOrUndefined(data) )
+
+        utilsVexDialogAlertTop("Getting started");
+
+        //this.m_oHttp.get(sUrl,"responseType: 'arraybuffer'")
+        this.m_oHttp({method: 'GET',url: sUrl, responseType: 'arraybuffer'})
+            .success(function (data, status,headers)
             {
-                utilsVexDialogAlertTop("successful");
-            }
-        }).error(function (data,status)
+                if (!utilsIsObjectNullOrUndefined(data) )
+                {
+                    //utilsVexDialogAlertTop("successful");
+
+                    //var file = new Blob([data], { type: 'image/tiff;'});//charset=utf-8
+                    //var fileURL = URL.createObjectURL(file);
+                    // saveAs(file, 'filename.tif');
+
+                    var contentType = headers['content-type'];
+                    var file = new Blob([data], { type: contentType});
+                    var linkElement = document.createElement('a');
+                    var url = window.URL.createObjectURL(file);
+
+                    linkElement.setAttribute('href', url);
+                    linkElement.setAttribute("download", "name.tif");
+
+                    var clickEvent = new MouseEvent("click", {
+                        "view": window,
+                        "bubbles": true,
+                        "cancelable": false
+                    });
+                    linkElement.dispatchEvent(clickEvent);
+
+                }
+            }).error(function (data,status)
         {
             utilsVexDialogAlertTop("Error: assimilation doesn't work");
         });
