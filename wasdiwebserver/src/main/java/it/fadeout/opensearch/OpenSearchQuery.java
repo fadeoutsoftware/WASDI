@@ -61,9 +61,9 @@ public class OpenSearchQuery{
 					asParams.getOrDefault("provider", "scihub.copernicus.eu"));
 			//create abdera client
 			AbderaClient oClient = new AbderaClient(oAbdera);
-			oClient.setConnectionTimeout(5000);
-			oClient.setSocketTimeout(20000);
-			oClient.setConnectionManagerTimeout(10000);
+			oClient.setConnectionTimeout(15000);
+			oClient.setSocketTimeout(40000);
+			oClient.setConnectionManagerTimeout(20000);
 			oClient.setMaxConnectionsTotal(200);
 			oClient.setMaxConnectionsPerHost(50);
 
