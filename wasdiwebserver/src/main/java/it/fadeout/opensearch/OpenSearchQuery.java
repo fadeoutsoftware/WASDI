@@ -6,6 +6,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.StringReader;
 import java.net.HttpURLConnection;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -67,28 +68,14 @@ public class OpenSearchQuery{
 			oClient.setMaxConnectionsTotal(200);
 			oClient.setMaxConnectionsPerHost(50);
 
-			//oClient.usePreemptiveAuthentication(true);
-			//AbderaClient.registerTrustManager();
-			//	create credentials (username e password SSO ESA)
-			//UsernamePasswordCredentials oCredential = new UsernamePasswordCredentials("sadamo","***REMOVED***");
 			// get default request option
-			RequestOptions oOptions = oClient.getDefaultRequestOptions();
-			//oOptions.setUseChunked(false);
-			// set content type accepted
-			//oOptions.setAccept("application/json, text/plain, */*");
-			// set accept encoding
-			//oOptions.setAcceptEncoding("gzip, deflate, sdch, br");
-			// set accept language
-			//oOptions.setAcceptLanguage("it-IT,it;q=0.8,en-US;q=0.6,en;q=0.4");
-			// set cache
-			//oOptions.setCacheControl("max-age=0");
-			// add credentials to request
-			//oClient.addCredentials("https://scihub.copernicus.eu","realm","BASIC", oCredential);
+			RequestOptions oOptions = oClient.getDefaultRequestOptions();			
+			
 			// execute request and get the document (atom+xml format)
+			
 			Parser oParser = oAbdera.getParser();
 			ParserOptions oParserOptions = oParser.getDefaultParserOptions();
 
-			oParserOptions.setAutodetectCharset(true);
 			oParserOptions.setCharset("UTF-8");
 			//options.setCompressionCodecs(CompressionCodec.GZIP);
 			oParserOptions.setFilterRestrictedCharacterReplacement('_');
@@ -100,16 +87,34 @@ public class OpenSearchQuery{
 			String sUserCredentials = asParams.getOrDefault("OSUser", "") + ":" + asParams.getOrDefault("OSPwd", "");
 			String sBasicAuth = "Basic " + Base64.getEncoder().encodeToString(sUserCredentials.getBytes());
 			oOptions.setAuthorization(sBasicAuth);
+			
+			
 			System.out.println("\nSending 'GET' request to URL : " + sUrl);
 			ClientResponse response = oClient.get(sUrl, oOptions);
+			
+			
 			Document<Feed> oDocument = null;
+			
+			
 			if (response.getType() == ResponseType.SUCCESS)
 			{
 				System.out.println("Response Success");
 				
-				//String sRecivedResponse = response.getReader().;
+				
+				// Get The Result as a string
+				BufferedReader oBuffRead = new BufferedReader(response.getReader());
+				String sResponseLine = null;
+				StringBuilder oResponseStringBuilder = new StringBuilder();
+				while ((sResponseLine = oBuffRead.readLine()) != null) {
+				    oResponseStringBuilder.append(sResponseLine);
+				}
+				
+				String sResultAsString = oResponseStringBuilder.toString();
+				
+				System.out.println(sResultAsString);
 
-				oDocument = oParser.parse(response.getInputStream(), oParserOptions);
+				oDocument = oParser.parse(new StringReader(sResultAsString), oParserOptions);
+				//oDocument = oParser.parse(response.getInputStream(), oParserOptions);
 
 				if (oDocument == null) {
 					System.out.println("OpenSearchQuery.ExecuteQuery: Document response null");
@@ -135,24 +140,30 @@ public class OpenSearchQuery{
 				System.out.println("Parsing new Entry");
 
 				Link oLink = oEntry.getLink("icon");
-				System.out.println("Icon Link: " + oLink.getHref().toString());
+				
+				if (oLink != null) {
+					System.out.println("Icon Link: " + oLink.getHref().toString());
 
-				try {
-					ClientResponse oImageResponse = oClient.get(oLink.getHref().toString(), oOptions);
-					System.out.println("Response Got from the client");
-					if (oImageResponse.getType() == ResponseType.SUCCESS)
-					{
-						System.out.println("Success: saving image preview");
-						InputStream oInputStreamImage = oImageResponse.getInputStream();
-						BufferedImage  oImage = ImageIO.read(oInputStreamImage);
-						ByteArrayOutputStream bas = new ByteArrayOutputStream();
-						ImageIO.write(oImage, "png", bas);
-						oLink.addSimpleExtension(new javax.xml.namespace.QName("image"), "data:image/png;base64," + Base64.getEncoder().encodeToString((bas.toByteArray())));
-						System.out.println("Image Saved");
-					}				
+					try {
+						ClientResponse oImageResponse = oClient.get(oLink.getHref().toString(), oOptions);
+						System.out.println("Response Got from the client");
+						if (oImageResponse.getType() == ResponseType.SUCCESS)
+						{
+							System.out.println("Success: saving image preview");
+							InputStream oInputStreamImage = oImageResponse.getInputStream();
+							BufferedImage  oImage = ImageIO.read(oInputStreamImage);
+							ByteArrayOutputStream bas = new ByteArrayOutputStream();
+							ImageIO.write(oImage, "png", bas);
+							oLink.addSimpleExtension(new javax.xml.namespace.QName("image"), "data:image/png;base64," + Base64.getEncoder().encodeToString((bas.toByteArray())));
+							System.out.println("Image Saved");
+						}				
+					}
+					catch (Exception e) {
+						System.out.println("Image Preview Cycle Exception " + e.toString());
+					}					
 				}
-				catch (Exception e) {
-					System.out.println("Image Preview Cycle Exception " + e.toString());
+				else {
+					System.out.println("Link Not Available" );
 				}
 			} 
 			JSONObject oFeedJSON = Atom2Json(oAbdera, new ByteArrayOutputStream(iStreamSize), oFeed);
@@ -212,7 +223,11 @@ public class OpenSearchQuery{
 	private static JSONObject Atom2Json(Abdera oAbdera, ByteArrayOutputStream oOutputStream, Base oFeed) throws IOException{
 		Writer writer = oAbdera.getWriterFactory().getWriter("prettyxml");
 		writer.writeTo(oFeed, oOutputStream);
-		JSONObject oJson = XML.toJSONObject(oOutputStream.toString());
+		
+		String sXML = oOutputStream.toString();
+		System.out.println(sXML);
+		
+		JSONObject oJson = XML.toJSONObject(sXML);
 		return oJson;
 	}
 
