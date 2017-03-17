@@ -229,11 +229,35 @@ public class LauncherMain {
                     PublishBandImage(oPublishBandParameter);
                 }
                 break;
+                case LauncherOperations.APPLYORBIT:{
+
+                    // Deserialize Parameters
+                    ApplyOrbitParameter oParameter = (ApplyOrbitParameter) SerializationUtils.deserializeXMLToObject(sParameter);
+                    ExecuteOperator(oParameter, new ApplyOrbit(), LauncherOperations.APPLYORBIT);
+
+                }
+                break;
+                case LauncherOperations.CALIBRATE:{
+
+                    // Deserialize Parameters
+                    CalibratorParameter oParameter = (CalibratorParameter) SerializationUtils.deserializeXMLToObject(sParameter);
+                    ExecuteOperator(oParameter, new Calibration(), LauncherOperations.CALIBRATE);
+
+                }
+                break;
+                case LauncherOperations.MULTILOOKING:{
+
+                    // Deserialize Parameters
+                    MultilookingParameter oParameter = (MultilookingParameter) SerializationUtils.deserializeXMLToObject(sParameter);
+                    ExecuteOperator(oParameter, new Multilooking(), LauncherOperations.MULTILOOKING);
+
+                }
+                break;
                 case LauncherOperations.TERRAIN:{
 
                     // Deserialize Parameters
                     RangeDopplerGeocodingParameter oParameter = (RangeDopplerGeocodingParameter) SerializationUtils.deserializeXMLToObject(sParameter);
-                    TerrainOperation(oParameter);
+                    ExecuteOperator(oParameter, new TerrainCorrection(), LauncherOperations.TERRAIN);
 
                 }
                 break;
@@ -494,9 +518,9 @@ public class LauncherMain {
      * @param oParameter
      * @return
      */
-    public void TerrainOperation(RangeDopplerGeocodingParameter oParameter) {
+    public void ExecuteOperator(OperatorParameter oParameter, BaseOperation oOperation, String sTypeOperation) {
 
-        s_oLogger.debug("LauncherMain.TerrainOperation: Start");
+        s_oLogger.debug("LauncherMain.ExecuteOperation: Start operation " + sTypeOperation);
 
         // Rabbit Sender
         Send oSendToRabbit = new Send();
@@ -505,14 +529,14 @@ public class LauncherMain {
             //Init rabbit exchange and queue
             if (oSendToRabbit.Init(oParameter.getWorkspace(), oParameter.getUserId()) == false)
             {
-                s_oLogger.debug("LauncherMain.TerrainOperation: Failed initializing RabbitMQ");
+                s_oLogger.debug("LauncherMain.ExecuteOperation: Failed initializing RabbitMQ");
                 return;
             }
 
             //send update process message
             if (oSendToRabbit.SendUpdateProcessMessage(oParameter.getWorkspace()) == false)
             {
-                s_oLogger.debug("LauncherMain.TerrainOperation: Error sending rabbitmq message to update process list");
+                s_oLogger.debug("LauncherMain.ExecuteOperation: Error sending rabbitmq message to update process list");
             }
 
             // Read File Name
@@ -525,7 +549,7 @@ public class LauncherMain {
 
             // Check integrity
             if (Utils.isNullOrEmpty(sFile)) {
-                s_oLogger.debug("LauncherMain.TerrainOperation: file is null or empty");
+                s_oLogger.debug("LauncherMain.ExecuteOperation: file is null or empty");
                 return;
             }
 
@@ -533,46 +557,45 @@ public class LauncherMain {
             WriteProduct oWriter = new WriteProduct();
 
             ReadProduct oReadProduct = new ReadProduct();
-            s_oLogger.debug("LauncherMain.TerrainOperation: Read Product");
+            s_oLogger.debug("LauncherMain.ExecuteOperation: Read Product");
             Product oSourceProduct = oReadProduct.ReadProduct(oSourceFile, null);
 
             if (oSourceProduct == null)
             {
-                throw new Exception("LauncherMain.TerrainOperation: Source Product null");
+                throw new Exception("LauncherMain.ExecuteOperation: Source Product null");
             }
 
-            //Terrain Operation
-            s_oLogger.debug("LauncherMain.TerrainOperation: Terrain Product");
-            TerrainCorrection oTerrainCorrection = new TerrainCorrection();
-            Product oTerrainProduct = oTerrainCorrection.getTerrainCorrection(oSourceProduct, oParameter.getSettings());
-            if (oTerrainProduct == null)
+            //Operation
+            s_oLogger.debug("LauncherMain.ExecuteOperation: Get Product");
+            Product oTargetProduct = oOperation.getOperation(oSourceProduct, oParameter.getSettings());
+            if (oTargetProduct == null)
             {
-                throw new Exception("LauncherMain.TerrainOperation: Terrain product null");
+                throw new Exception("LauncherMain.ExecuteOperation: Product null");
             }
 
-            s_oLogger.debug("LauncherMain.TerrainOperation: Write Big Tiff");
-            String sTargetFileName = oTerrainProduct.getName();
+            s_oLogger.debug("LauncherMain.ExecuteOperation: Write Big Tiff");
+            String sTargetFileName = oTargetProduct.getName();
             if (!Utils.isNullOrEmpty(oParameter.getDestinationProductName()))
                 sTargetFileName = oParameter.getDestinationProductName();
-            String sTiffFile = oWriter.WriteBigTiff(oTerrainProduct, sPath, sTargetFileName);
+            String sTiffFile = oWriter.WriteBigTiff(oTargetProduct, sPath, sTargetFileName);
 
             if (Utils.isNullOrEmpty(sTiffFile))
             {
-                throw new Exception("LauncherMain.TerrainOperation: Tiff not created");
+                throw new Exception("LauncherMain.ExecuteOperation: Tiff not created");
             }
 
             s_oLogger.debug("LauncherMain.TerrainOperation: convert product to view model");
-            ConvertProductToViewModelAndSendToRabbit(new ProductViewModel(), sTiffFile, oParameter.getWorkspace(), oParameter.getExchange(), LauncherOperations.TERRAIN, null);
+            ConvertProductToViewModelAndSendToRabbit(new ProductViewModel(), sTiffFile, oParameter.getWorkspace(), oParameter.getExchange(), sTypeOperation, null);
 
             //this.PublishOnGeoserver(oParameter.getPublishParameter(), oTerrainProduct.getName(), sBandName);
 
         }
         catch (Exception oEx) {
-            s_oLogger.debug("LauncherMain.TerrainOperation: exception " + oEx.toString());
-            oSendToRabbit.SendRabbitMessage(false,LauncherOperations.TERRAIN,oParameter.getWorkspace(),null,oParameter.getExchange());
+            s_oLogger.debug("LauncherMain.ExecuteOperation: exception " + oEx.toString());
+            oSendToRabbit.SendRabbitMessage(false,sTypeOperation,oParameter.getWorkspace(),null,oParameter.getExchange());
         }
         finally{
-            s_oLogger.debug("LauncherMain.TerrainOperation: End");
+            s_oLogger.debug("LauncherMain.ExecuteOperation: End");
 
             //delete process from list
             try{
@@ -580,7 +603,7 @@ public class LauncherMain {
                 oProcessWorkspaceRepository.DeleteProcessWorkspace(oParameter.getProcessObjId());
             }
             catch (Exception oEx) {
-                s_oLogger.debug("LauncherMain.TerrainOperation: Exception deleting process " + oEx.toString());
+                s_oLogger.debug("LauncherMain.ExecuteOperation: Exception deleting process " + oEx.toString());
             }
         }
     }
