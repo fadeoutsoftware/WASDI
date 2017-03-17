@@ -21,7 +21,7 @@ public class Test2 {
     public static void main(String[] args) throws Exception
     {
 
-
+/*
         final JFileChooser fc = new JFileChooser();
 
         //In response to a button click:
@@ -104,6 +104,8 @@ public class Test2 {
         {
 
         }
+        */
     }
+
 
 }
