@@ -22,6 +22,10 @@ public class OpenSearchTemplate {
 			new Template(
 					//"{scheme}://{-append|.|host}collaborative.mt.asi.it{-opt|/|path}{-listjoin|/|path}{-prefix|/|page}{-opt|?|filter}{-join|&|filter,offset,limit,sortedby,order}");
 					"{scheme}://{-append|.|host}collaborative.mt.asi.it{-opt|/|path}{-listjoin|/|path}{-prefix|/|page}{-opt|?|q}{-join|&|q,start,rows,orderby}");
+	
+	private static final Template m_sFedEOTemplate =
+			new Template(
+					"{scheme}://{-append|.|host}fedeo.esa.int{-opt|/|path}{-listjoin|/|path}{-prefix|/|page}{-opt|?|q}{-join|&|q,start,rows,orderby}");
 
 	public OpenSearchTemplate()
 	{
@@ -62,7 +66,16 @@ public class OpenSearchTemplate {
 			oMateraMap.put("orderby", sOrderBy + " " + sOrder);
 			oMateraMap.put("q", qParams);
 			
-			return m_sCollaborativeTemplate.expand(oMateraMap);
+		case "FEDEO":
+			Map<String,Object> oFedEOMap = new HashMap<String, Object>();			
+			oFedEOMap.put("scheme","http");
+			oFedEOMap.put("path", new String[] {"opensearch","request"});
+			oFedEOMap.put("start", sStart);
+			oFedEOMap.put("rows", sRows);
+			oFedEOMap.put("orderby", sOrderBy + " " + sOrder);
+			oFedEOMap.put("q", qParams);
+						
+			return m_sFedEOTemplate.expand(oFedEOMap);
 
 		default:
 			break;
