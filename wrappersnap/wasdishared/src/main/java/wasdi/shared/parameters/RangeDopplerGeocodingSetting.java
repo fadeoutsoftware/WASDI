@@ -7,90 +7,92 @@ import java.io.File;
 /**
  * Created by s.adamo on 08/02/2017.
  */
-public class RangeDopplerGeocodingSetting {
+public class RangeDopplerGeocodingSetting implements ISetting{
+
+    public static final String externalDEMStr = "External DEM";
 
     //@Parameter(description = "The list of source bands.", alias = "sourceBands",rasterDataNodeType = Band.class, label = "Source Bands")
-    private String[] sourceBandNames = null;
+    private String[] sourceBandNames;
 
     //@Parameter(description = "The digital elevation model.",defaultValue = "SRTM 3Sec", label = "Digital Elevation Model")
-    private String demName = "SRTM 3Sec";
+    private String demName;
 
     //@Parameter(label = "External DEM")
-    private String externalDEMFile = null;
+    private String externalDEMFile;
 
     //@Parameter(label = "External DEM No Data Value", defaultValue = "0")
-    private double externalDEMNoDataValue = 0;
+    private double externalDEMNoDataValue;
 
     //@Parameter(label = "External DEM Apply EGM", defaultValue = "true")
-    private Boolean externalDEMApplyEGM = true;
+    private Boolean externalDEMApplyEGM;
 
     //@Parameter(defaultValue = ResamplingFactory.BILINEAR_INTERPOLATION_NAME, label = "DEM Resampling Method")
-    private String demResamplingMethod = Constants.BILINEAR_INTERPOLATION_NAME;
+    private String demResamplingMethod;
 
     //@Parameter(defaultValue = ResamplingFactory.BILINEAR_INTERPOLATION_NAME, label = "Image Resampling Method")
-    private String imgResamplingMethod = Constants.BILINEAR_INTERPOLATION_NAME;
+    private String imgResamplingMethod;
 
     //@Parameter(description = "The pixel spacing in meters", defaultValue = "0", label = "Pixel Spacing (m)")
-    private double pixelSpacingInMeter = 0;
+    private double pixelSpacingInMeter;
 
     //@Parameter(description = "The pixel spacing in degrees", defaultValue = "0", label = "Pixel Spacing (deg)")
-    private double pixelSpacingInDegree = 0;
+    private double pixelSpacingInDegree;
 
     //@Parameter(description = "The coordinate reference system in well known text format", defaultValue = "WGS84(DD)")
-    private String mapProjection = "WGS84(DD)";
+    private String mapProjection;
 
     //@Parameter(defaultValue = "true", label = "Mask out areas with no elevation", description = "Mask the sea with no data value (faster)")
-    private boolean nodataValueAtSea = true;
+    private boolean nodataValueAtSea;
 
     //@Parameter(defaultValue = "false", label = "Save DEM as band")
-    private boolean saveDEM = false;
+    private boolean saveDEM;
 
     //@Parameter(defaultValue = "false", label = "Save latitude and longitude as band")
-    private boolean saveLatLon = false;
+    private boolean saveLatLon;
 
     //@Parameter(defaultValue = "false", label = "Save incidence angle from ellipsoid as band")
-    private boolean saveIncidenceAngleFromEllipsoid = false;
+    private boolean saveIncidenceAngleFromEllipsoid;
 
     //@Parameter(defaultValue = "false", label = "Save local incidence angle as band")
-    private boolean saveLocalIncidenceAngle = false;
+    private boolean saveLocalIncidenceAngle;
 
     //@Parameter(defaultValue = "false", label = "Save projected local incidence angle as band")
-    private boolean saveProjectedLocalIncidenceAngle = false;
+    private boolean saveProjectedLocalIncidenceAngle;
 
     //@Parameter(defaultValue = "true", label = "Save selected source band")
-    private boolean saveSelectedSourceBand = true;
+    private boolean saveSelectedSourceBand;
 
     //@Parameter(defaultValue = "false", label = "Output complex data")
-    private boolean outputComplex = false;
+    private boolean outputComplex;
 
     //@Parameter(defaultValue = "false", label = "Apply radiometric normalization")
-    private boolean applyRadiometricNormalization = false;
+    private boolean applyRadiometricNormalization;
 
     //@Parameter(defaultValue = "false", label = "Save Sigma0 as a band")
-    private boolean saveSigmaNought = false;
+    private boolean saveSigmaNought;
 
     //@Parameter(defaultValue = "false", label = "Save Gamma0 as a band")
-    private boolean saveGammaNought = false;
+    private boolean saveGammaNought;
 
     //@Parameter(defaultValue = "false", label = "Save Beta0 as a band")
-    private boolean saveBetaNought = false;
+    private boolean saveBetaNought;
 
     //@Parameter(valueSet = {Constants.USE_INCIDENCE_ANGLE_FROM_ELLIPSOID, Constants.USE_LOCAL_INCIDENCE_ANGLE_FROM_DEM,
     //        Constants.USE_PROJECTED_INCIDENCE_ANGLE_FROM_DEM},
     //        defaultValue = Constants.USE_PROJECTED_INCIDENCE_ANGLE_FROM_DEM, label = "")
-    private String incidenceAngleForSigma0 = Constants.USE_PROJECTED_INCIDENCE_ANGLE_FROM_DEM;
+    private String incidenceAngleForSigma0;
 
     //@Parameter(valueSet = {Constants.USE_INCIDENCE_ANGLE_FROM_ELLIPSOID, Constants.USE_LOCAL_INCIDENCE_ANGLE_FROM_DEM,
     //        Constants.USE_PROJECTED_INCIDENCE_ANGLE_FROM_DEM},
     //        defaultValue = Constants.USE_PROJECTED_INCIDENCE_ANGLE_FROM_DEM, label = "")
-    private String incidenceAngleForGamma0 = Constants.USE_PROJECTED_INCIDENCE_ANGLE_FROM_DEM;
+    private String incidenceAngleForGamma0;
 
     //@Parameter(valueSet = {CalibrationOp.LATEST_AUX, CalibrationOp.PRODUCT_AUX, CalibrationOp.EXTERNAL_AUX},
     //        description = "The auxiliary file", defaultValue = CalibrationOp.LATEST_AUX, label = "Auxiliary File")
-    private String auxFile = Constants.LATEST_AUX;
+    private String auxFile;
 
     //@Parameter(description = "The antenne elevation pattern gain auxiliary data file.", label = "External Aux File")
-    private String externalAuxFile = null;
+    private String externalAuxFile;
 
 
     public RangeDopplerGeocodingSetting(){

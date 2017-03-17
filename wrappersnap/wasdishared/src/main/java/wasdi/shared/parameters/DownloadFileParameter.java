@@ -6,7 +6,7 @@ package wasdi.shared.parameters;
 
 
 
-public class DownloadFileParameter {
+public class DownloadFileParameter extends BaseParameter{
 
     /**
      * Download url
@@ -17,21 +17,6 @@ public class DownloadFileParameter {
      * SessionId
      */
     private String queue;
-
-    /**
-     * UserId
-     */
-    private String userId;
-
-    /**
-     * Workspace
-     */
-    private String workspace;
-
-    /**
-     * Is workspace
-     */
-    private String exchange;
 
     /**
      * Is ObjectId of MongoDb
@@ -57,30 +42,6 @@ public class DownloadFileParameter {
 
     public void setQueue(String sQueue) {
         this.queue = sQueue;
-    }
-
-    public String getWorkspace() {
-        return workspace;
-    }
-
-    public void setWorkspace(String workspace) {
-        this.workspace = workspace;
-    }
-
-    public String getUserId() {
-        return userId;
-    }
-
-    public void setUserId(String userId) {
-        this.userId = userId;
-    }
-
-    public String getExchange() {
-        return exchange;
-    }
-
-    public void setExchange(String exchange) {
-        this.exchange = exchange;
     }
 
     public String getProcessObjId() {
