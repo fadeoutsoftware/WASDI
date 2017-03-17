@@ -1,24 +1,24 @@
 package wasdi.shared.parameters;
 
 /**
- * Created by p.campanella on 06/03/2017.
+ * Created by s.adamo on 17/03/2017.
  */
-public class RasterGeometricResampleParameter extends BaseParameter{
+public class OperatorParameter extends BaseParameter{
 
     private String sourceProductName;
 
     private String destinationProductName;
 
-    private String bandName;
-
     private String processObjId;
 
-    public String getBandName() {
-        return bandName;
+    private ISetting settings;
+
+    public ISetting getSettings() {
+        return settings;
     }
 
-    public void setBandName(String bandName) {
-        this.bandName = bandName;
+    public void setSettings(ISetting settings) {
+        this.settings = settings;
     }
 
     public String getSourceProductName() {
