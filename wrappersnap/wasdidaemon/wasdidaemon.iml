@@ -46,7 +46,6 @@
     <orderEntry type="library" name="Maven: xmlpull:xmlpull:1.1.3.1" level="project" />
     <orderEntry type="library" name="Maven: xpp3:xpp3_min:1.1.4c" level="project" />
     <orderEntry type="library" name="Maven: org.jdom:jdom2:2.0.4" level="project" />
-    <orderEntry type="library" name="Maven: commons-lang:commons-lang:2.6" level="project" />
     <orderEntry type="library" name="Maven: org.apache.commons:commons-math3:3.2" level="project" />
     <orderEntry type="library" name="Maven: commons-collections:commons-collections:3.2" level="project" />
     <orderEntry type="library" name="Maven: org.apache.velocity:velocity:1.7" level="project" />
@@ -152,12 +151,12 @@
     <orderEntry type="library" name="Maven: org.hamcrest:hamcrest-core:1.3" level="project" />
     <orderEntry type="module" module-name="s1tbx-op-calibration" />
     <orderEntry type="module" module-name="snap-envisat-reader" />
-    <orderEntry type="library" name="Maven: org.esa.snap:snap-graph-builder:5.0.0-SNAPSHOT" level="project" />
-    <orderEntry type="library" name="Maven: org.esa.snap:snap-ui:5.0.0-SNAPSHOT" level="project" />
+    <orderEntry type="module" module-name="snap-graph-builder" />
+    <orderEntry type="module" module-name="snap-ui" />
     <orderEntry type="library" name="Maven: org.netbeans.api:org-openide-explorer:RELEASE81" level="project" />
     <orderEntry type="library" name="Maven: org.netbeans.api:org-openide-nodes:RELEASE81" level="project" />
-    <orderEntry type="library" name="Maven: org.esa.snap:snap-gpf-ui:5.0.0-SNAPSHOT" level="project" />
-    <orderEntry type="library" name="Maven: org.esa.snap:snap-rcp:5.0.0-SNAPSHOT" level="project" />
+    <orderEntry type="module" module-name="snap-gpf-ui" />
+    <orderEntry type="module" module-name="snap-rcp" />
     <orderEntry type="library" name="Maven: org.netbeans.api:org-netbeans-modules-autoupdate-services:RELEASE81" level="project" />
     <orderEntry type="library" scope="RUNTIME" name="Maven: org.netbeans.modules:org-netbeans-bootstrap:RELEASE81" level="project" />
     <orderEntry type="library" scope="RUNTIME" name="Maven: org.netbeans.modules:org-netbeans-core-startup:RELEASE81" level="project" />
@@ -188,13 +187,13 @@
     <orderEntry type="library" name="Maven: org.netbeans.api:org-netbeans-swing-outline:RELEASE81" level="project" />
     <orderEntry type="library" name="Maven: org.netbeans.api:org-netbeans-modules-sendopts:RELEASE81" level="project" />
     <orderEntry type="library" name="Maven: org.netbeans.external:beansbinding-1.2.1:RELEASE81" level="project" />
-    <orderEntry type="library" name="Maven: org.esa.snap.netbeans:tiled-editors:1.0" level="project" />
-    <orderEntry type="library" name="Maven: org.esa.snap.netbeans:doc-windows:1.0" level="project" />
-    <orderEntry type="library" name="Maven: org.esa.snap:snap-main:5.0.0-SNAPSHOT" level="project" />
+    <orderEntry type="module" module-name="tiled-editors" />
+    <orderEntry type="module" module-name="doc-windows" />
+    <orderEntry type="module" module-name="snap-main" />
     <orderEntry type="module" module-name="snap-python" />
     <orderEntry type="library" name="Maven: org.jpy:jpy:0.8" level="project" />
     <orderEntry type="module" module-name="snap-statistics" />
-    <orderEntry type="library" name="Maven: org.esa.snap:snap-tango:5.0.0-SNAPSHOT" level="project" />
+    <orderEntry type="module" module-name="snap-tango" />
     <orderEntry type="library" name="Maven: org.netbeans.api:org-openide-modules:RELEASE81" level="project" />
     <orderEntry type="library" name="Maven: org.netbeans.api:org-openide-util:RELEASE81" level="project" />
     <orderEntry type="library" name="Maven: org.netbeans.api:org-openide-util-lookup:RELEASE81" level="project" />
@@ -213,6 +212,7 @@
     <orderEntry type="library" name="Maven: com.fasterxml.jackson.core:jackson-annotations:2.8.0" level="project" />
     <orderEntry type="library" name="Maven: com.fasterxml.jackson.core:jackson-core:2.8.4" level="project" />
     <orderEntry type="library" name="Maven: com.rabbitmq:amqp-client:3.6.5" level="project" />
+    <orderEntry type="library" name="Maven: commons-lang:commons-lang:2.6" level="project" />
     <orderEntry type="library" name="Maven: org.geotools:gt-coverage:2.7.4" level="project" />
     <orderEntry type="library" name="Maven: javax.media:jai_imageio:1.1" level="project" />
     <orderEntry type="library" name="Maven: it.geosolutions.imageio-ext:imageio-ext-tiff:1.0.8" level="project" />
