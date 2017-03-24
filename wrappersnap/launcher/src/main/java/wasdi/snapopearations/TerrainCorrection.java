@@ -94,7 +94,7 @@ public class TerrainCorrection extends BaseOperation{
 
             oOperator.setParameter("auxFile", oRangeDopplerGeocodingSetting.getAuxFile());
             final String extAuxFileStr = oRangeDopplerGeocodingSetting.getExternalAuxFile();
-            if (!extAuxFileStr.isEmpty()) {
+            if (!Utils.isNullOrEmpty(extAuxFileStr)) {
                 oOperator.setParameter("externalAuxFile", new File(extAuxFileStr));
             }
 

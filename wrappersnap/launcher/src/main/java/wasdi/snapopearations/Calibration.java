@@ -4,6 +4,7 @@ import org.esa.s1tbx.calibration.gpf.CalibrationOp;
 import org.esa.snap.core.gpf.Operator;
 import wasdi.shared.parameters.CalibratorSetting;
 import wasdi.shared.parameters.ISetting;
+import wasdi.shared.utils.Utils;
 
 import java.io.File;
 
@@ -29,7 +30,7 @@ public class Calibration extends BaseOperation{
         oOperator.setParameter("auxFile", oCalibratorSetting.getAuxFile());
 
         final String extFileStr = oCalibratorSetting.getExternalAuxFile();
-        if (!extFileStr.isEmpty()) {
+        if (!Utils.isNullOrEmpty(extFileStr)) {
             oOperator.setParameter("externalAuxFile", new File(extFileStr));
         }
 
