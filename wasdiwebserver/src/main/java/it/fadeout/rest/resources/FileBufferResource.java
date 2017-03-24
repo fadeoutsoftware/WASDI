@@ -315,7 +315,7 @@ public class FileBufferResource {
 
 			String sLauncherPath = m_oServletConfig.getInitParameter("LauncherPath");
 
-			String sShellExString = "java -Xmx4g -Xms256m -jar " + sLauncherPath +" -operation " + LauncherOperations.PUBLISHBAND + " -parameter " + sPath;
+			String sShellExString = "java -Xmx8g -Xms256m -jar " + sLauncherPath +" -operation " + LauncherOperations.PUBLISHBAND + " -parameter " + sPath;
 
 			System.out.println("DownloadResource.PublishBand: shell exec " + sShellExString);
 

@@ -17,9 +17,20 @@ import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.business.User;
 import wasdi.shared.data.ProcessWorkspaceRepository;
+import wasdi.shared.parameters.ApplyOrbitParameter;
+import wasdi.shared.parameters.ApplyOrbitSetting;
+import wasdi.shared.parameters.CalibratorParameter;
+import wasdi.shared.parameters.CalibratorSetting;
 import wasdi.shared.parameters.DownloadFileParameter;
+import wasdi.shared.parameters.ISetting;
+import wasdi.shared.parameters.MultilookingParameter;
+import wasdi.shared.parameters.MultilookingSetting;
+import wasdi.shared.parameters.NDVIParameter;
+import wasdi.shared.parameters.NDVISetting;
+import wasdi.shared.parameters.OperatorParameter;
 import wasdi.shared.parameters.PublishParameters;
 import wasdi.shared.parameters.RangeDopplerGeocodingParameter;
+import wasdi.shared.parameters.RangeDopplerGeocodingSetting;
 import wasdi.shared.utils.SerializationUtils;
 import wasdi.shared.utils.Utils;
 
@@ -32,20 +43,72 @@ public class SnapOperationsResources {
 	@GET
 	@Path("terrain")
 	@Produces({"application/xml", "application/json", "text/xml"})
-	public Response TerrainCorrection(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sSourceProductName") String sSourceProductName, @QueryParam("sDestinationProductName") String sDestinationProductName, @QueryParam("sWorkspaceId") String sWorkspaceId) throws IOException
+	public Response TerrainCorrection(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sSourceProductName") String sSourceProductName, @QueryParam("sDestinationProductName") String sDestinationProductName, @QueryParam("sWorkspaceId") String sWorkspaceId, RangeDopplerGeocodingSetting oSetting) throws IOException
 	{
+		
+		return ExecuteOperation(sSessionId, sSourceProductName, sDestinationProductName, sWorkspaceId, oSetting, LauncherOperations.TERRAIN);
+
+	}
+	
+	@GET
+	@Path("orbit")
+	@Produces({"application/xml", "application/json", "text/xml"})
+	public Response ApplyOrbit(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sSourceProductName") String sSourceProductName, @QueryParam("sDestinationProductName") String sDestinationProductName, @QueryParam("sWorkspaceId") String sWorkspaceId, ApplyOrbitSetting oSetting) throws IOException
+	{
+		
+		return ExecuteOperation(sSessionId, sSourceProductName, sDestinationProductName, sWorkspaceId, oSetting, LauncherOperations.APPLYORBIT);
+
+	}
+	
+	@GET
+	@Path("calibrate")
+	@Produces({"application/xml", "application/json", "text/xml"})
+	public Response Calibrate(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sSourceProductName") String sSourceProductName, @QueryParam("sDestinationProductName") String sDestinationProductName, @QueryParam("sWorkspaceId") String sWorkspaceId, CalibratorSetting oSetting) throws IOException
+	{
+		
+		return ExecuteOperation(sSessionId, sSourceProductName, sDestinationProductName, sWorkspaceId, oSetting, LauncherOperations.CALIBRATE);
+
+	}
+	
+	@GET
+	@Path("multilooking")
+	@Produces({"application/xml", "application/json", "text/xml"})
+	public Response Multilooking(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sSourceProductName") String sSourceProductName, @QueryParam("sDestinationProductName") String sDestinationProductName, @QueryParam("sWorkspaceId") String sWorkspaceId, MultilookingSetting oSetting) throws IOException
+	{
+		
+		return ExecuteOperation(sSessionId, sSourceProductName, sDestinationProductName, sWorkspaceId, oSetting, LauncherOperations.MULTILOOKING);
+
+	}
+	
+	@GET
+	@Path("ndvi")
+	@Produces({"application/xml", "application/json", "text/xml"})
+	public Response NDVI(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sSourceProductName") String sSourceProductName, @QueryParam("sDestinationProductName") String sDestinationProductName, @QueryParam("sWorkspaceId") String sWorkspaceId, NDVISetting oSetting) throws IOException
+	{
+		
+		return ExecuteOperation(sSessionId, sSourceProductName, sDestinationProductName, sWorkspaceId, oSetting, LauncherOperations.NDVI);
+
+	}
+
+
+	private String AcceptedUserAndSession(String sSessionId)
+	{
+		//Check user
+		if (Utils.isNullOrEmpty(sSessionId)) return null;
+		User oUser = Wasdi.GetUserFromSession(sSessionId);
+		if (oUser==null) return null;
+		if (Utils.isNullOrEmpty(oUser.getUserId())) return null;
+		
+		return oUser.getUserId();
+	}
+	
+	private Response ExecuteOperation(String sSessionId, String sSourceProductName, String sDestinationProductName, String sWorkspaceId, ISetting oSetting, String sOperator)
+	{
+		String sUserId = AcceptedUserAndSession(sSessionId);
+		if (Utils.isNullOrEmpty(sUserId))
+			return Response.status(401).build();
+		
 		try {
-
-			if (Utils.isNullOrEmpty(sSessionId)) return Response.status(401).build();
-
-			User oUser = Wasdi.GetUserFromSession(sSessionId);
-
-			if (oUser==null) return Response.status(401).build();
-			if (Utils.isNullOrEmpty(oUser.getUserId())) return Response.status(401).build();
-
-
-			String sUserId = oUser.getUserId();
-
 			//Update process list
 			String sProcessId = "";
 			try
@@ -53,7 +116,7 @@ public class SnapOperationsResources {
 				ProcessWorkspaceRepository oRepository = new ProcessWorkspaceRepository();
 				ProcessWorkspace oProcess = new ProcessWorkspace();
 				oProcess.setOperationDate(Wasdi.GetFormatDate(new Date()));
-				oProcess.setOperationType(LauncherOperations.TERRAIN);
+				oProcess.setOperationType(sOperator);
 				oProcess.setProductName(sSourceProductName);
 				oProcess.setWorkspaceId(sWorkspaceId);
 				oProcess.setUserId(sUserId);
@@ -67,19 +130,22 @@ public class SnapOperationsResources {
 
 			String sPath = m_oServletConfig.getInitParameter("SerializationPath") + Wasdi.GetSerializationFileName();
 
-			RangeDopplerGeocodingParameter oParameter = new RangeDopplerGeocodingParameter(); 
+			
+			OperatorParameter oParameter = GetParameter(sOperator); 
 			oParameter.setSourceProductName(sSourceProductName);
 			oParameter.setDestinationProductName(sDestinationProductName);
 			oParameter.setWorkspace(sWorkspaceId);
 			oParameter.setUserId(sUserId);
 			oParameter.setExchange(sWorkspaceId);
 			oParameter.setProcessObjId(sProcessId);
+			if (oSetting != null)
+				oParameter.setSettings(oSetting);	
 			
 			SerializationUtils.serializeObjectToXML(sPath, oParameter);
 
 			String sLauncherPath = m_oServletConfig.getInitParameter("LauncherPath");
 
-			String sShellExString = "java -jar " + sLauncherPath +" -operation " + LauncherOperations.TERRAIN + " -parameter " + sPath;
+			String sShellExString = "java -jar " + sLauncherPath +" -operation " + sOperator + " -parameter " + sPath;
 
 			System.out.println("DownloadResource.Download: shell exec " + sShellExString);
 
@@ -91,8 +157,30 @@ public class SnapOperationsResources {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-
+		
 		return Response.ok().build();
-
+		
+		
 	}
+	
+	private OperatorParameter GetParameter(String sOperation)
+	{
+		switch (sOperation) {
+		case LauncherOperations.APPLYORBIT:
+			return new ApplyOrbitParameter();
+		case LauncherOperations.CALIBRATE:
+			return new CalibratorParameter();
+		case LauncherOperations.MULTILOOKING:
+			return new MultilookingParameter();
+		case LauncherOperations.TERRAIN:
+			return new RangeDopplerGeocodingParameter();
+		case LauncherOperations.NDVI:
+			return new NDVIParameter();
+			
+		default:
+			return null;
+			
+		}
+	}
+	
 }
