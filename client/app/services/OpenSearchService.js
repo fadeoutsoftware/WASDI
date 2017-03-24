@@ -20,6 +20,7 @@ service('OpenSearchService', ['$http',  'ConstantsService', function ($http, oCo
 
     this.getApiProducts = function (query) {
         return this.APIURL + this.API_GET_PRODUCTS + query;
+        //return "http://localhost:8080/wasdiwebserver/rest/" + this.API_GET_PRODUCTS + query;
         //return "fake-data/feed.json";
         //return "fake-data/opensearch_fakeData.json";
     }

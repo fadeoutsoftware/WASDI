@@ -16,8 +16,33 @@ service('SnapOperationService', ['$http',  'ConstantsService', function ($http, 
 
     this.TerrainCorrection = function (sSourceProductName, sDestinationProductName, sWorkspaceId) {
 
-        return this.m_oHttp.get(this.APIURL + '/snap/terrain?sSourceProductName=' + sSourceProductName + '&sDestinationProductName=' + sDestinationProductName + '&sWorkspaceId=' + sWorkspaceId);
+        return this.Operation("terrain", sSourceProductName, sDestinationProductName, sWorkspaceId);
+    };
+
+    this.ApplyOrbit = function (sSourceProductName, sDestinationProductName, sWorkspaceId) {
+
+        return this.Operation("orbit", sSourceProductName, sDestinationProductName, sWorkspaceId);
+    };
+    this.Calibrate = function (sSourceProductName, sDestinationProductName, sWorkspaceId) {
+
+        return this.Operation("calibrate", sSourceProductName, sDestinationProductName, sWorkspaceId);
+    };
+    this.Multilooking = function (sSourceProductName, sDestinationProductName, sWorkspaceId) {
+
+        return this.Operation("multilooking", sSourceProductName, sDestinationProductName, sWorkspaceId);
+    };
+    this.NDVI = function (sSourceProductName, sDestinationProductName, sWorkspaceId) {
+
+        return this.Operation("ndvi", sSourceProductName, sDestinationProductName, sWorkspaceId);
+    };
+
+    this.Operation = function(sOperation, sSourceProductName, sDestinationProductName, sWorkspaceId)
+    {
+        var sUrl = this.APIURL + '/snap/{sOperation}?sSourceProductName=' + sSourceProductName + '&sDestinationProductName=' + sDestinationProductName + '&sWorkspaceId=' + sWorkspaceId;
+        sUrl = sUrl.replace("{sOperation}", sOperation);
+        return this.m_oHttp.get(sUrl);
     }
+
 
 }]);
 
