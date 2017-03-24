@@ -14,4 +14,6 @@ public class LauncherOperations {
     public static final String APPLYORBIT = "APPLYORBIT";
     public static final String CALIBRATE = "CALIBRATE";
     public static final String MULTILOOKING = "MULTILOOKING";
+    public static final String FILTER = "FILTER";
+    public static final String NDVI = "NDVI";
 }

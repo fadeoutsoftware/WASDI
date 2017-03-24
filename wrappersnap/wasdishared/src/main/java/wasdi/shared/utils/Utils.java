@@ -3,8 +3,13 @@ package wasdi.shared.utils;
 import wasdi.shared.business.UserSession;
 
 import java.io.File;
-import java.util.Date;
-import java.util.UUID;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.attribute.PosixFilePermission;
+import java.util.*;
+import java.util.stream.Stream;
+import static org.apache.commons.lang.SystemUtils.IS_OS_UNIX;
 
 /**
  * Created by p.campanella on 14/10/2016.
@@ -57,6 +62,41 @@ public class Utils {
         }
 
         return sReturn;
+    }
+
+    public static void fixUpPermissions(Path destPath) throws IOException {
+        Stream<Path> files = Files.list(destPath);
+        files.forEach(path -> {
+            if (Files.isDirectory(path)) {
+                try {
+                    fixUpPermissions(path);
+                } catch (IOException e) {
+                    e.printStackTrace();
+
+                }
+            }
+            else {
+                setExecutablePermissions(path);
+            }
+        });
+    }
+
+    private static void setExecutablePermissions(Path executablePathName) {
+        if (IS_OS_UNIX) {
+            Set<PosixFilePermission> permissions = new HashSet<>(Arrays.asList(
+                    PosixFilePermission.OWNER_READ,
+                    PosixFilePermission.OWNER_WRITE,
+                    PosixFilePermission.OWNER_EXECUTE,
+                    PosixFilePermission.GROUP_READ,
+                    PosixFilePermission.GROUP_EXECUTE,
+                    PosixFilePermission.OTHERS_READ,
+                    PosixFilePermission.OTHERS_EXECUTE));
+            try {
+                Files.setPosixFilePermissions(executablePathName, permissions);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
 }
