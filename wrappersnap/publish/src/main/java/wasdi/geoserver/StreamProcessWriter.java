@@ -1,0 +1,41 @@
+package wasdi.geoserver;
+
+import org.apache.log4j.Logger;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+
+/**
+ * Created by s.adamo on 22/03/2017.
+ */
+public class StreamProcessWriter extends Thread {
+
+    InputStream m_oInputStream;
+    String m_sType;
+
+    StreamProcessWriter(InputStream oIs, String sType)
+    {
+        this.m_oInputStream = oIs;
+        this.m_sType = sType;
+    }
+
+    public void run()
+    {
+        try
+        {
+            InputStreamReader oIsr = new InputStreamReader(m_oInputStream);
+            BufferedReader oBr = new BufferedReader(oIsr);
+            String line=null;
+            while ( (line = oBr.readLine()) != null) {
+                Publisher.s_oLogger.debug(m_sType + ">" + line);
+                System.out.println(m_sType + ">" + line);
+            }
+
+        } catch (IOException oEx)
+        {
+            Publisher.s_oLogger.debug("StreamProcessWriter.run: " +  oEx.getMessage());
+        }
+    }
+}

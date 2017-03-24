@@ -1,8 +1,6 @@
 package wasdi.geoserver;
 
-import it.geosolutions.geoserver.rest.GeoServerRESTPublisher;
 import it.geosolutions.geoserver.rest.encoder.coverage.GSCoverageEncoder;
-import org.apache.commons.httpclient.NameValuePair;
 import org.apache.log4j.Logger;
 import org.apache.log4j.xml.DOMConfigurator;
 import wasdi.shared.utils.Utils;
@@ -11,6 +9,8 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 
 
 /**
@@ -32,7 +32,7 @@ public class Publisher {
 
     public static String TARGET_DIR_PYRAMID = "c:\\temp\\ImagePyramidTest\\TempImagePyramidCreation\\";
 
-    public static String GDALBasePath = "\"C:\\Program Files\\GDAL\\bin\\gdal\\python\\scripts\\gdal_retile.py\"";
+    public static String GDAL_Retile_Path = "\"C:\\Program Files\\GDAL\\bin\\gdal\\python\\scripts\\gdal_retile.py\"";
 
     public static String PYRAMYD_ENV_OPTIONS = "PYTHONPATH=C:/Program Files/GDAL/bin/gdal/python|PROJ_LIB=C:/Program Files/GDAL/bin/proj/SHARE|GDAL_DATA=C:/Program Files/GDAL/bin/gdal-data|GDAL_DRIVER_PATH=C:/Program Files/GDAL/bin/gdal/plugins|PATH=C:/Program Files/GDAL/bin;C:/Program Files/GDAL/bin/gdal/python/osgeo;C:/Program Files/GDAL/bin/proj/apps;C:/Program Files/GDAL/bin/gdal/apps;C:/Program Files/GDAL/bin/ms/apps;C:/Program Files/GDAL/bin/gdal/csharp;C:/Program Files/GDAL/bin/ms/csharp;C:/Program Files/GDAL/bin/curl;C:/Python34";
 
@@ -57,7 +57,7 @@ public class Publisher {
     public Publisher(String sPyramidBaseFolder, String sGDALBasePath, String sPyramidEnvOptions)
     {
         TARGET_DIR_BASE = sPyramidBaseFolder;
-        GDALBasePath = sGDALBasePath;
+        GDAL_Retile_Path = sGDALBasePath;
         PYRAMYD_ENV_OPTIONS = sPyramidEnvOptions;
     }
 
@@ -68,6 +68,8 @@ public class Publisher {
     private boolean LaunchImagePyramidCreation(String sInputFile, Integer iLevel, Integer iWidth, Integer iHeight, String sPathName) {
 
         String sTargetDir = sPathName;
+        if (!sTargetDir.endsWith("/"))
+            sTargetDir += "/";
         Path oTargetPath = Paths.get(sTargetDir);
         if (!Files.exists(oTargetPath))
         {
@@ -79,44 +81,60 @@ public class Publisher {
         }
 
         try {
-
-            String sCmd = String.format("%s %s -v -r bilinear -levels %d -ps %s %s -co \"TILED=YES\" -targetDir %s %s", PYTHON_PATH, GDALBasePath, iLevel, iWidth, iHeight, "\""+sTargetDir +"\"","\""+ sInputFile+"\"");
+            //fix permission
+            Utils.fixUpPermissions(oTargetPath);
+            //String sCmd = String.format("%s %s -v -r bilinear -levels %d -ps %s %s -co \"TILED=YES\" -targetDir %s %s", PYTHON_PATH, GDAL_Retile_Path, iLevel, iWidth, iHeight, "\""+sTargetDir +"\"","\""+ sInputFile+"\"");
+            //String sCmd = String.format("%s %s -v -r bilinear -levels %d -ps %s %s -co TILED=YES -targetDir %s %s", PYTHON_PATH, GDAL_Retile_Path, iLevel, iWidth, iHeight, sTargetDir, sInputFile);
+            String sCmd = String.format("/usr/lib/wasdi/launcher/run_gdal_retile.sh %s %s", sTargetDir, sInputFile);
             String[] asEnvp = PYRAMYD_ENV_OPTIONS.split("\\|");
 
-            s_oLogger.debug(sCmd);
+            s_oLogger.debug("Publisher.LaunchImagePyramidCreation: Command: " + sCmd);
 
+            Process oProcess = null;
             try {
 
-                Process oProcess;
                 Runtime oRunTime = Runtime.getRuntime();
-                oProcess = oRunTime.exec(sCmd, asEnvp);
-                InputStream stdin = oProcess.getInputStream();
-                InputStreamReader isr = new InputStreamReader(stdin);
-                BufferedReader br = new BufferedReader(isr);
-                String line = null;
-                s_oLogger.debug("<OUTPUT>");
-                while ((line = br.readLine()) != null)
-                    s_oLogger.debug(line);
-                s_oLogger.debug("</OUTPUT>");
-                int exitVal = oProcess.waitFor();
-                oProcess.destroy();
+                oProcess = oRunTime.exec(sCmd);
+
+                // any error?
+                StreamProcessWriter oErrorWriter = new
+                        StreamProcessWriter(oProcess.getErrorStream(), "ERROR");
+
+                // any output?
+                StreamProcessWriter oOutputWriter = new
+                        StreamProcessWriter(oProcess.getInputStream(), "OUTPUT");
+
+                oErrorWriter.start();
+                oOutputWriter.start();
+
+                int iValue = oProcess.waitFor();
+
+                s_oLogger.debug("Publisher.LaunchImagePyramidCreation:  Exit Value " + iValue);
+
+                s_oLogger.debug("Publisher.LaunchImagePyramidCreation:  End ");
 
 
             } catch (IOException e) {
-                e.printStackTrace();
+                s_oLogger.debug("Publisher.LaunchImagePyramidCreation: Error generating pyramid image: " + e.getMessage());
 
                 return  false;
             } catch (InterruptedException e) {
                 e.printStackTrace();
+                s_oLogger.debug("Publisher.LaunchImagePyramidCreation: Error generating pyramid image: " + e.getMessage());
 
                 return  false;
+            }
+            finally {
+                if (oProcess != null)
+                    oProcess.destroy();
             }
 
         } catch (Exception e) {
             e.printStackTrace();
+            s_oLogger.debug("Publisher.LaunchImagePyramidCreation: Error generating pyramid image: " + e.getMessage());
             return  false;
         }
-
+        s_oLogger.debug("Publisher.LaunchImagePyramidCreation:  Return ");
         return  true;
 
     }
@@ -128,7 +146,10 @@ public class Publisher {
 
 
         // Create Pyramid
-        LaunchImagePyramidCreation(sFileName, LEVEL, WIDTH, HEIGHT, sPath);
+        if (!LaunchImagePyramidCreation(sFileName, LEVEL, WIDTH, HEIGHT, sPath))
+            return null;
+
+        s_oLogger.debug("Publisher.PublishImagePyramidOnGeoServer: Publish Image Pyramid");
 
         //Create GeoServer Manager
         GeoServerManager oManager = new GeoServerManager(sGeoServerAddress, sGeoServerUser, sGeoServerPassword);
