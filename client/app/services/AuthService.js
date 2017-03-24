@@ -10,6 +10,7 @@ service('AuthService', ['$http',  'ConstantsService', function ($http, oConstant
 
     this.login = function(oCredentials) {
         return this.m_oHttp.post(this.APIURL + '/auth/login',oCredentials);
+        //return this.m_oHttp.post('http://localhost:8080/wasdiwebserver/rest//auth/login',oCredentials);
     }
 
     this.logout = function() {

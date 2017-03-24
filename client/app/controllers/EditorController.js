@@ -699,6 +699,58 @@ var EditorController = (function () {
                                             });
                                         }
                                     },
+                                    "ApplyOrbit": {
+                                        "label": "Apply Orbit",
+                                        "action": function (obj) {
+                                            var sSourceFileName = $node.original.fileName;
+                                            var sDestinationFileName = '';
+                                            oController.m_oSnapOperationService.ApplyOrbit(sSourceFileName, sDestinationFileName, oController.m_oActiveWorkspace.workspaceId)
+                                                .success(function (data) {
+
+                                                }).error(function (error) {
+
+                                            });
+                                        }
+                                    },
+                                    "Calibrate": {
+                                        "label": "Calibrate",
+                                        "action": function (obj) {
+                                            var sSourceFileName = $node.original.fileName;
+                                            var sDestinationFileName = '';
+                                            oController.m_oSnapOperationService.Calibrate(sSourceFileName, sDestinationFileName, oController.m_oActiveWorkspace.workspaceId)
+                                                .success(function (data) {
+
+                                                }).error(function (error) {
+
+                                            });
+                                        }
+                                    },
+                                    "Multilooking": {
+                                        "label": "Multilooking",
+                                        "action": function (obj) {
+                                            var sSourceFileName = $node.original.fileName;
+                                            var sDestinationFileName = '';
+                                            oController.m_oSnapOperationService.Multilooking(sSourceFileName, sDestinationFileName, oController.m_oActiveWorkspace.workspaceId)
+                                                .success(function (data) {
+
+                                                }).error(function (error) {
+
+                                            });
+                                        }
+                                    },
+                                    "NDVI": {
+                                        "label": "NDVI",
+                                        "action": function (obj) {
+                                            var sSourceFileName = $node.original.fileName;
+                                            var sDestinationFileName = '';
+                                            oController.m_oSnapOperationService.NDVI(sSourceFileName, sDestinationFileName, oController.m_oActiveWorkspace.workspaceId)
+                                                .success(function (data) {
+
+                                                }).error(function (error) {
+
+                                            });
+                                        }
+                                    },
                                     "Terrain": {
                                         "label": "Terrain Correction",
                                         "action": function (obj) {

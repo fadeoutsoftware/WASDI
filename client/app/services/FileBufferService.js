@@ -22,6 +22,7 @@ service('FileBufferService', ['$http',  'ConstantsService', function ($http, oCo
 
     this.publishBand = function(sUrl, sWorkspaceId, sBand) {
         return this.m_oHttp.get(this.APIURL + '/filebuffer/publishband?sFileUrl='+sUrl+"&sWorkspaceId="+sWorkspaceId+'&sBand='+sBand);
+        //return this.m_oHttp.get('http://localhost:8080/wasdiwebserver/rest/filebuffer/publishband?sFileUrl='+sUrl+"&sWorkspaceId="+sWorkspaceId+'&sBand='+sBand);
     }
 
 

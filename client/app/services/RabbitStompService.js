@@ -108,10 +108,14 @@ service('RabbitStompService', ['$http',  'ConstantsService','$interval','Process
                     oController.m_oProcessesLaunchedService.loadProcessesFromServer(oController.m_oActiveWorkspace.workspaceId);
                     console.log("UPDATE PROCESSES");
                     break;
+                case "APPLYORBIT":
+                case "CALIBRATE":
+                case "MULTILOOKING":
+                case "NDVI":
                 case "TERRAIN":
                     oControllerActive.receivedTerrainMessage(oMessageResult);
                     oController.m_oProcessesLaunchedService.loadProcessesFromServer(oController.m_oActiveWorkspace.workspaceId);
-                    var oDialog = utilsVexDialogAlertBottomRightCorner("terrain Operation Completed");
+                    var oDialog = utilsVexDialogAlertBottomRightCorner("Operation Completed");
                     utilsVexCloseDialogAfterFewSeconds(3000,oDialog);
                     break;
                 default:
