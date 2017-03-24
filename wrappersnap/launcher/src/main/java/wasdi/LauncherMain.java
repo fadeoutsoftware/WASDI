@@ -3,26 +3,19 @@ import com.bc.ceres.glevel.MultiLevelImage;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.apache.log4j.xml.DOMConfigurator;
-import org.esa.s2tbx.dataio.s2.S2Config;
-import org.esa.s2tbx.dataio.s2.structure.S2ProductStructureFactory;
-import org.esa.snap.core.dataio.ProductIO;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.GeoCoding;
 import org.esa.snap.core.datamodel.Product;
-import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.core.util.geotiff.GeoCoding2GeoTIFFMetadata;
 import org.esa.snap.core.util.geotiff.GeoTIFF;
 import org.esa.snap.core.util.geotiff.GeoTIFFMetadata;
-import org.esa.snap.dataio.geotiff.GeoTiffProductReaderPlugIn;
 import org.esa.snap.engine_utilities.util.MemUtils;
 import org.esa.snap.runtime.Config;
-import org.esa.snap.runtime.Launcher;
 import org.geotools.referencing.CRS;
 import sun.management.VMManagement;
 import wasdi.filebuffer.DownloadFile;
 import org.apache.commons.cli.*;
 import wasdi.geoserver.Publisher;
-import wasdi.rabbit.RabbitFactory;
 import wasdi.rabbit.Send;
 import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.DownloadedFile;
@@ -37,7 +30,6 @@ import wasdi.shared.utils.SerializationUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.ProductViewModel;
 import wasdi.shared.viewmodels.PublishBandResultViewModel;
-import wasdi.shared.viewmodels.RabbitMessageViewModel;
 import wasdi.snapopearations.*;
 
 import javax.media.jai.JAI;
@@ -46,15 +38,11 @@ import java.lang.management.ManagementFactory;
 import java.lang.management.RuntimeMXBean;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.attribute.PosixFilePermission;
-import java.util.*;
 import java.util.regex.Pattern;
-import java.util.stream.Stream;
 
-import static org.apache.commons.lang.SystemUtils.IS_OS_UNIX;
+
 
 
 /**
@@ -146,7 +134,7 @@ public class LauncherMain {
             // Set Global Settings
             Publisher.PYTHON_PATH = ConfigReader.getPropValue("PYTHON_PATH");
             Publisher.TARGET_DIR_BASE = ConfigReader.getPropValue("PYRAMID_BASE_FOLDER");
-            Publisher.GDALBasePath = ConfigReader.getPropValue("GDAL_PATH")+"/"+ConfigReader.getPropValue("GDAL_RETILE");
+            Publisher.GDAL_Retile_Path = ConfigReader.getPropValue("GDAL_RETILE");
             Publisher.PYRAMYD_ENV_OPTIONS = ConfigReader.getPropValue("PYRAMYD_ENV_OPTIONS");
             MongoRepository.SERVER_ADDRESS = ConfigReader.getPropValue("MONGO_ADDRESS");
             MongoRepository.SERVER_PORT = Integer.parseInt(ConfigReader.getPropValue("MONGO_PORT"));
@@ -160,52 +148,12 @@ public class LauncherMain {
             Config.instance("snap.auxdata").load(propFile);
             Config.instance().load();
 
-            //s_oLogger.debug("OPJ_INFO_EXE" + S2Config.OPJ_INFO_EXE);
-            //s_oLogger.debug("OPJ_DECOMPRESSOR_EXE" + S2Config.OPJ_DECOMPRESSOR_EXE);
-
             JAI.getDefaultInstance().getTileScheduler().setParallelism(Runtime.getRuntime().availableProcessors());
             MemUtils.configureJaiTileCache();
 
         }
         catch (IOException e) {
             e.printStackTrace();
-        }
-    }
-
-    private static void fixUpPermissions(Path destPath) throws IOException {
-        Stream<Path> files = Files.list(destPath);
-        files.forEach(path -> {
-            if (Files.isDirectory(path)) {
-                try {
-                    fixUpPermissions(path);
-                } catch (IOException e) {
-                    SystemUtils.LOG.severe("OpenJPEG configuration error: failed to fix permissions on " + path);
-                }
-            }
-            else {
-                setExecutablePermissions(path);
-            }
-        });
-    }
-
-    private static void setExecutablePermissions(Path executablePathName) {
-        if (IS_OS_UNIX) {
-            Set<PosixFilePermission> permissions = new HashSet<>(Arrays.asList(
-                    PosixFilePermission.OWNER_READ,
-                    PosixFilePermission.OWNER_WRITE,
-                    PosixFilePermission.OWNER_EXECUTE,
-                    PosixFilePermission.GROUP_READ,
-                    PosixFilePermission.GROUP_EXECUTE,
-                    PosixFilePermission.OTHERS_READ,
-                    PosixFilePermission.OTHERS_EXECUTE));
-            try {
-                Files.setPosixFilePermissions(executablePathName, permissions);
-            } catch (IOException e) {
-                // can't set the permissions for this file, eg. the file was installed as root
-                // send a warning message, user will have to do that by hand.
-                SystemUtils.LOG.severe("Can't set execution permissions for executable " + executablePathName.toString() +
-                        ". If required, please ask an authorised user to make the file executable.");
-            }
         }
     }
 
@@ -258,6 +206,22 @@ public class LauncherMain {
                     // Deserialize Parameters
                     RangeDopplerGeocodingParameter oParameter = (RangeDopplerGeocodingParameter) SerializationUtils.deserializeXMLToObject(sParameter);
                     ExecuteOperator(oParameter, new TerrainCorrection(), LauncherOperations.TERRAIN);
+
+                }
+                break;
+                case LauncherOperations.FILTER:{
+
+                    // Deserialize Parameters
+                    FilterParameter oParameter = (FilterParameter) SerializationUtils.deserializeXMLToObject(sParameter);
+                    ExecuteOperator(oParameter, new Filter(), LauncherOperations.FILTER);
+
+                }
+                break;
+                case LauncherOperations.NDVI:{
+
+                    // Deserialize Parameters
+                    NDVIParameter oParameter = (NDVIParameter) SerializationUtils.deserializeXMLToObject(sParameter);
+                    ExecuteOperator(oParameter, new NDVI(), LauncherOperations.NDVI);
 
                 }
                 break;
@@ -573,7 +537,7 @@ public class LauncherMain {
                 throw new Exception("LauncherMain.ExecuteOperation: Product null");
             }
 
-            s_oLogger.debug("LauncherMain.ExecuteOperation: Write Big Tiff");
+            //s_oLogger.debug("LauncherMain.ExecuteOperation: Write Big Tiff");
             String sTargetFileName = oTargetProduct.getName();
             if (!Utils.isNullOrEmpty(oParameter.getDestinationProductName()))
                 sTargetFileName = oParameter.getDestinationProductName();
@@ -884,6 +848,11 @@ public class LauncherMain {
             s_oLogger.debug("LauncherMain.PublishBandImage: call PublishImage");
             Publisher oPublisher = new Publisher();
             sLayerId = oPublisher.publishGeoTiff(sTargetFile,ConfigReader.getPropValue("GEOSERVER_ADDRESS"),ConfigReader.getPropValue("GEOSERVER_USER"),ConfigReader.getPropValue("GEOSERVER_PASSWORD"),ConfigReader.getPropValue("GEOSERVER_WORKSPACE"), sLayerId, sEPSG, sStyle);
+            boolean bResultPublishBand = true;
+            if (sLayerId == null) {
+                bResultPublishBand = false;
+                s_oLogger.debug("LauncherMain.PublishBandImage: Image not published . ");
+            }
 
             s_oLogger.debug("LauncherMain.PublishBandImage: Image published. ");
 
@@ -923,7 +892,7 @@ public class LauncherMain {
             oVM.setBoundingBox(sBBox);
             oVM.setGeoserverBoundingBox(sGeoserverBBox);
 
-            boolean bRet = oSendToRabbit.SendRabbitMessage(true,LauncherOperations.PUBLISHBAND, oParameter.getWorkspace(),oVM,oParameter.getExchange());
+            boolean bRet = oSendToRabbit.SendRabbitMessage(bResultPublishBand,LauncherOperations.PUBLISHBAND, oParameter.getWorkspace(),oVM,oParameter.getExchange());
 
             if (bRet == false) {
                 s_oLogger.debug("LauncherMain.PublishBandImage: Error sending Rabbit Message");
