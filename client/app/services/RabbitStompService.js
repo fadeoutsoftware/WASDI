@@ -177,7 +177,7 @@ service('RabbitStompService', ['$http',  'ConstantsService','$interval','Process
 
                 // Connect again
                 //oController.oWebSocket = new WebSocket(oController.m_oConstantsService.getStompUrl());
-                oController.oWebSocket = new SockJS(this.m_oConstantsService.getStompUrl());
+                oController.oWebSocket = new SockJS(oController.m_oConstantsService.getStompUrl());
 
                 oController.m_oClient = Stomp.over(oController.oWebSocket);
                 oController.m_oClient.connect(oController.m_oConstantsService.getRabbitUser(), oController.m_oConstantsService.getRabbitPassword(), oController.m_oOn_Connect, oController.m_oOn_Error, '/');
