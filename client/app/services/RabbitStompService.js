@@ -36,7 +36,8 @@ service('RabbitStompService', ['$http',  'ConstantsService','$interval','Process
         this.m_oActiveWorkspace=oActiveWorkspace;
 
         // Web Socket to receive workspace messages
-        var oWebSocket = new WebSocket(this.m_oConstantsService.getStompUrl());
+        //var oWebSocket = new WebSocket(this.m_oConstantsService.getStompUrl());
+        var oWebSocket = new SockJS(this.m_oConstantsService.getStompUrl());
         var oController = this;
         this.m_oClient = Stomp.over(oWebSocket);
 
