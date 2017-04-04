@@ -27,9 +27,10 @@ var wasdiApp = angular.module('wasdi', [
 
     'ui.bootstrap',
     'checklist-model',
-    'moment-picker',
-    'angularModalService',
-    'ngFileUpload'
+    'moment-picker',//time picker
+    'angularModalService',//modal
+    'ngFileUpload',//upload
+    'btorfs.multiselect'//multi selecte
 
 ]);
 
@@ -130,3 +131,7 @@ wasdiApp.controller("OrbitInfoController",OrbitInfoController);
 wasdiApp.controller("ProductInfoController",ProductInfoController);
 wasdiApp.controller("GetCapabilitiesController",GetCapabilitiesController);
 wasdiApp.controller("MergeProductsController",MergeProductsController);
+wasdiApp.controller("ApplyOrbitController",ApplyOrbitController);
+wasdiApp.controller("RadiometricCalibrationController",RadiometricCalibrationController);
+wasdiApp.controller("MultilookingController",MultilookingController);
+wasdiApp.controller("NDVIController",NDVIController);
