@@ -1,0 +1,69 @@
+<div class="modal fade apply-orbit-modal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" ng-click="close(false)" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title "></h4>
+            </div>
+            <div class="modal-body">
+                <ul class="nav nav-tabs">
+                    <li class="active"><a data-toggle="tab" href="" ng-click="m_oController.tabOpen('tab1')">{{"DIALOG_APPLY_ORBIT_TAB_INPUT_OUTPUT"|translate}}</a></li>
+                    <li><a data-toggle="tab" href="" ng-click="m_oController.tabOpen('tab2')">{{"DIALOG_APPLY_ORBIT_TAB_PROCESSING"|translate}}</a></li>
+                </ul>
+                <!----------------------------- Include INPUT OUTPUT PARAMETERS ---------------------------------->
+                <div ng-include src="'dialogs/InputOutputParametersView.html'"></div>
+                <!------------------------------------ PROCESSING PARAMETERS -------------------------------------->
+                <div ng-show="m_oController.secondTabIsOpen()" >
+                    </br>
+                    <form>
+                        <fieldset>
+                            <div class="processing-parameters">
+                                <!--MULTISELECT-->
+                                {{"DIALOG_RADIOMETRIC_CALIBRATION_SOURCE_BANDS"|translate}}<multiselect  ng-model="m_oController.m_asSourceBandsSelected" options="m_oController.m_asSourceBands" show-select-all="true" show-unselect-all="true" show-search="true"></multiselect>
+
+                                <!-- DROPDOWN MENU-->
+                                <div class="dropdown">
+                                    <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu2"
+                                            data-toggle="dropdown">
+                                        {{"DIALOG_RADIOMETRIC_CALIBRATION_AUXILIARY_FILE"|translate}}
+                                        <span class="caret"></span>
+                                    </button>
+                                    <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu2">
+                                        <li role="presentation" ng-repeat="auxiliaryFile in m_oController.m_asAuxiliaryFile"><a role="menuitem" tabindex="-1" href="">{{auxiliaryFile}}</a></li>
+                                        <!--<li role="presentation"><a role="menuitem" tabindex="-1" href="">Action</a></li>-->
+                                        <!--<li role="presentation"><a role="menuitem" tabindex="-1" href="">Another action</a></li>-->
+                                    </ul>
+                                </div>
+
+                                <!--CHECK BOX-->
+                                <div class="checkbox">
+                                    <div>
+                                        <input type="checkbox" value="" >
+                                        {{"DIALOG_RADIOMETRIC_CALIBRATION_CHECKBOX_SAVE_COMPLEX_OUTPUT"|translate}}
+                                    </div>
+                                    <div>
+                                        <input type="checkbox" value="" >
+                                        {{"DIALOG_RADIOMETRIC_CALIBRATION_CHECKBOX_SAVE_DB"|translate}}
+                                    </div>
+                                    <div>
+                                        <input type="checkbox" value="" >
+                                        {{"DIALOG_RADIOMETRIC_CALIBRATION_CREATE_GAMMA"|translate}}
+                                    </div>
+                                    <div>
+                                        <input type="checkbox" value="" >
+                                        {{"DIALOG_RADIOMETRIC_CALIBRATION_CREATE_BETA"|translate}}
+                                    </div>
+                                </div>
+                            </div>
+                        </fieldset>
+                    </form>
+                </div>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" ng-click="close('ok')" class="my-button" data-dismiss="modal">Ok</button>
+            </div>
+
+        </div>
+    </div>
+</div>

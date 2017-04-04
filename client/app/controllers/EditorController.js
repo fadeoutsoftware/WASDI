@@ -656,7 +656,7 @@ var EditorController = (function () {
                                             if (utilsIsObjectNullOrUndefined(oBand) == false)
                                                 oController.zoomOnLayer2DMap(oBand.productName + "_" + oBand.name);
                                         }
-                                    },
+                                    },//TODO
                                     //"Zoom3D" : {
                                     //    "label" : "Zoom Band 3D Map",
                                     //    "action" : function (obj) {
@@ -673,6 +673,7 @@ var EditorController = (function () {
                             //PRODUCT
                             oReturnValue =
                                 {
+
                                     "DeleteProduct": {
                                         "label": "Delete Product",
                                         "action": function (obj) {
@@ -704,12 +705,13 @@ var EditorController = (function () {
                                         "action": function (obj) {
                                             var sSourceFileName = $node.original.fileName;
                                             var sDestinationFileName = '';
-                                            oController.m_oSnapOperationService.ApplyOrbit(sSourceFileName, sDestinationFileName, oController.m_oActiveWorkspace.workspaceId)
-                                                .success(function (data) {
-
-                                                }).error(function (error) {
-
-                                            });
+                                            oController.openApplyOrbitDialog();
+                                            //oController.m_oSnapOperationService.ApplyOrbit(sSourceFileName, sDestinationFileName, oController.m_oActiveWorkspace.workspaceId)
+                                            //    .success(function (data) {
+                                            //
+                                            //    }).error(function (error) {
+                                            //
+                                            //});
                                         }
                                     },
                                     "Calibrate": {
@@ -717,12 +719,13 @@ var EditorController = (function () {
                                         "action": function (obj) {
                                             var sSourceFileName = $node.original.fileName;
                                             var sDestinationFileName = '';
-                                            oController.m_oSnapOperationService.Calibrate(sSourceFileName, sDestinationFileName, oController.m_oActiveWorkspace.workspaceId)
-                                                .success(function (data) {
-
-                                                }).error(function (error) {
-
-                                            });
+                                            oController.openRadiometricCalibrationDialog();
+                                            // oController.m_oSnapOperationService.Calibrate(sSourceFileName, sDestinationFileName, oController.m_oActiveWorkspace.workspaceId)
+                                            //     .success(function (data) {
+                                            //
+                                            //     }).error(function (error) {
+                                            //
+                                            // });
                                         }
                                     },
                                     "Multilooking": {
@@ -730,12 +733,13 @@ var EditorController = (function () {
                                         "action": function (obj) {
                                             var sSourceFileName = $node.original.fileName;
                                             var sDestinationFileName = '';
-                                            oController.m_oSnapOperationService.Multilooking(sSourceFileName, sDestinationFileName, oController.m_oActiveWorkspace.workspaceId)
-                                                .success(function (data) {
-
-                                                }).error(function (error) {
-
-                                            });
+                                            oController.openMultilookingDialog();
+                                            // oController.m_oSnapOperationService.Multilooking(sSourceFileName, sDestinationFileName, oController.m_oActiveWorkspace.workspaceId)
+                                            //     .success(function (data) {
+                                            //
+                                            //     }).error(function (error) {
+                                            //
+                                            // });
                                         }
                                     },
                                     "NDVI": {
@@ -743,12 +747,13 @@ var EditorController = (function () {
                                         "action": function (obj) {
                                             var sSourceFileName = $node.original.fileName;
                                             var sDestinationFileName = '';
-                                            oController.m_oSnapOperationService.NDVI(sSourceFileName, sDestinationFileName, oController.m_oActiveWorkspace.workspaceId)
-                                                .success(function (data) {
-
-                                                }).error(function (error) {
-
-                                            });
+                                            oController.openNDVIDialog();
+                                            // oController.m_oSnapOperationService.NDVI(sSourceFileName, sDestinationFileName, oController.m_oActiveWorkspace.workspaceId)
+                                            //     .success(function (data) {
+                                            //
+                                            //     }).error(function (error) {
+                                            //
+                                            // });
                                         }
                                     },
                                     "Terrain": {
@@ -1242,7 +1247,7 @@ var EditorController = (function () {
 
         }
     }
-
+    // SHOW MODAL
     EditorController.prototype.openGetCapabilitiesDialog = function () {
         var oController = this
         this.m_oModalService.showModal({
@@ -1276,7 +1281,7 @@ var EditorController = (function () {
         }
     }
 
-
+    // SHOW MODAL
     EditorController.prototype.openMergeDialog = function (oSelectedProduct) {
 
         var oController = this;
@@ -1291,6 +1296,78 @@ var EditorController = (function () {
                     WorkSpaceId: oController.m_oActiveWorkspace
                 }
             }
+        }).then(function (modal) {
+            modal.element.modal();
+            modal.close.then(function (result) {
+                oController.m_oScope.Result = result;
+            });
+        });
+
+        return true;
+    }
+
+    //---------------------------------- SHOW MODALS
+    EditorController.prototype.openApplyOrbitDialog = function () {
+        var oController = this;
+        this.m_oModalService.showModal({
+            templateUrl: "dialogs/apply_orbit_operation/ApplyOrbitDialog.html",
+            controller: "ApplyOrbitController"
+        }).then(function (modal) {
+            modal.element.modal();
+            modal.close.then(function (result) {
+                oController.m_oScope.Result = result;
+            });
+        });
+
+        return true;
+    }
+    EditorController.prototype.openRadiometricCalibrationDialog = function () {
+        var oController = this;
+        this.m_oModalService.showModal({
+            templateUrl: "dialogs/radiometric_calibration_operation/RadiometricCalibrationDialog.html",
+            controller: "RadiometricCalibrationController"
+        }).then(function (modal) {
+            modal.element.modal();
+            modal.close.then(function (result) {
+                oController.m_oScope.Result = result;
+            });
+        });
+
+        return true;
+    }
+    EditorController.prototype.openMultilookingDialog = function () {
+        var oController = this;
+        this.m_oModalService.showModal({
+            templateUrl: "dialogs/multilooking_operation/MultilookingDialog.html",
+            controller: "MultilookingController"
+            // inputs: {
+            //     extras: {
+            //         SelectedProduct: oSelectedProduct,
+            //         ListOfProducts: oController.m_aoProducts,
+            //         WorkSpaceId: oController.m_oActiveWorkspace
+            //     }
+            // }
+        }).then(function (modal) {
+            modal.element.modal();
+            modal.close.then(function (result) {
+                oController.m_oScope.Result = result;
+            });
+        });
+
+        return true;
+    }
+    EditorController.prototype.openNDVIDialog = function () {
+        var oController = this;
+        this.m_oModalService.showModal({
+            templateUrl: "dialogs/NDVI_operation/NDVIDialog.html",
+            controller: "NDVIController"
+            // inputs: {
+            //     extras: {
+            //         SelectedProduct: oSelectedProduct,
+            //         ListOfProducts: oController.m_aoProducts,
+            //         WorkSpaceId: oController.m_oActiveWorkspace
+            //     }
+            // }
         }).then(function (modal) {
             modal.element.modal();
             modal.close.then(function (result) {

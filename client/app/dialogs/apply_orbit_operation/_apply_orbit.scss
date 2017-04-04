@@ -1,0 +1,63 @@
+.apply-orbit-modal
+{
+  .modal-dialog
+  {
+
+    .modal-content
+    {
+      //HEADER
+      .modal-header
+      {
+
+      }
+      //BODY
+      .modal-body
+      {
+        form
+        {
+          fieldset
+          {
+            border:2px solid $wasdi-blue-logo;
+            padding: 20px 20px;
+            legend
+            {
+              width: auto;
+              border-bottom: 0;
+            }
+            .my-input-text
+            {
+              .input-group
+              {
+                .input-group-btn
+                {
+                  .btn-default {
+                    color: $wasdi-blue-logo;
+                    background-color: $wasdi-grey;
+                    border-color: $wasdi-blue-logo;
+                  }
+                }
+              }
+            }
+            .inline
+            {
+              float: left;
+            }
+
+            .polynomial-degree
+            {
+              margin-top: 10px;
+            }
+
+
+        }
+      }
+
+    }
+    //FOOTER
+    .modal-footer
+    {
+
+    }
+  }
+}
+}

@@ -79,6 +79,9 @@
   <script src="bower_components/ng-file-upload/ng-file-upload.min.js"></script><!-- Upload file drang and drop-->
   <!-- file saver-->
   <script src="bower_components/file-saver/FileSaver.min.js"></script>
+  <!-- angular-bootstrap-multiselect -->
+  <script src="bower_components/angular-bootstrap-multiselect/dist/angular-bootstrap-multiselect.min.js"></script>
+  <script src="bower_components/angular-bootstrap-multiselect/dist/angular-bootstrap-multiselect-templates.jss"></script>
 
   <!--Datetime picker-->
   <script type="text/javascript" src="bower_components/moment-picker/src/angular-moment-picker.js"></script>
@@ -114,13 +117,17 @@
   <script src="controllers/ImportController.js"></script>
   <script src="controllers/SearchOrbitController.js"></script>
 
-
-    <!--Dialogs controllers-->
+  <!--Dialogs controllers-->
   <script src="dialogs/orbit_info/OrbitInfoController.js"></script>
   <script src="dialogs/product_info/ProductInfoController.js"></script>
   <script src="dialogs/get_capabilities_dialog/GetCapabilitiesController.js"></script>
   <script src="dialogs/merge_products_dialog/MergeProductsController.js"></script>
+  <script src="dialogs/apply_orbit_operation/ApplyOrbitController.js"></script>
+  <script src="dialogs/radiometric_calibration_operation/RadiometricCalibrationController.js"></script>
+  <script src="dialogs/multilooking_operation/MultilookingController.js"></script>
+  <script src="dialogs/NDVI_operation/NDVIController.js"></script>
 
+  <!--APP JS-->
   <script src="app.js"></script>
 
   <!--Wasdi service search-->
@@ -131,7 +138,7 @@
 
   <!-- Stomp js -->
   <!--<script src="lib/stomp/stomp.js"></script>-->
-  <script src="bower_components/bower-sockjs-client/sockjs.min.js"></script>
+  <script src="bower_components/bower-sockjs-client/sockjs.min.js"></script><!--min.-->
   <script src="bower_components/stomp-websocket/lib/stomp.js"></script>
 
   <!-- utils js -->
@@ -165,8 +172,6 @@
 
   <!-- Better WMS leaflet-->
   <script src="lib/leafletbetterWMS/L.TileLayer.BetterWMS.js"></script>
-
-
 
 </body>
 </html>

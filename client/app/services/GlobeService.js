@@ -66,6 +66,8 @@ service('GlobeService', ['$http',  'ConstantsService', function ($http, oConstan
     }
 
     this.getMapCenter=function() {
+        //if(utilsIsObjectNullOrUndefined(this.m_oWasdiGlobe))
+        //    return
         var windowPosition = new Cesium.Cartesian2(this.m_oWasdiGlobe.container.clientWidth / 2, this.m_oWasdiGlobe.container.clientHeight / 2);
         var pickRay = this.m_oWasdiGlobe.scene.camera.getPickRay(windowPosition);
         var pickPosition = this.m_oWasdiGlobe.scene.globe.pick(pickRay, this.m_oWasdiGlobe.scene);
