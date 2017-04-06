@@ -36,6 +36,11 @@ public class WriteProduct {
         return WriteProduct(oProduct, sFilePath, sFileName, sFormat, ".dim");
     }
 
+    public String WriteGeoTiff(Product oProduct, String sFilePath, String sFileName) throws Exception
+    {
+        return WriteProduct(oProduct, sFilePath, sFileName, "GeoTIFF", ".tif");
+    }
+
     private String WriteProduct(Product oProduct, String sFilePath, String sFileName, String sFormat, String sExtension)
     {
         try {
@@ -48,6 +53,7 @@ public class WriteProduct {
         }
         catch (Exception oEx)
         {
+        	oEx.printStackTrace();
             LauncherMain.s_oLogger.debug("WriteProduct: Error writing product. " + oEx.getMessage());
         }
 
