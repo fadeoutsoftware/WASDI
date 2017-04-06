@@ -85,7 +85,10 @@ public class Publisher {
             Utils.fixUpPermissions(oTargetPath);
             //String sCmd = String.format("%s %s -v -r bilinear -levels %d -ps %s %s -co \"TILED=YES\" -targetDir %s %s", PYTHON_PATH, GDAL_Retile_Path, iLevel, iWidth, iHeight, "\""+sTargetDir +"\"","\""+ sInputFile+"\"");
             //String sCmd = String.format("%s %s -v -r bilinear -levels %d -ps %s %s -co TILED=YES -targetDir %s %s", PYTHON_PATH, GDAL_Retile_Path, iLevel, iWidth, iHeight, sTargetDir, sInputFile);
-            String sCmd = String.format("/usr/lib/wasdi/launcher/run_gdal_retile.sh %s %s", sTargetDir, sInputFile);
+            //String sCmd = String.format("/usr/lib/wasdi/launcher/run_gdal_retile.sh %s %s", sTargetDir, sInputFile);
+                        
+            String sCmd = String.format("gdal_retile.py -v -r bilinear -levels %d -ps %d %d -co TILED=YES -targetDir %s %s", iLevel, iWidth, iHeight, sTargetDir, sInputFile);
+            
             String[] asEnvp = PYRAMYD_ENV_OPTIONS.split("\\|");
 
             s_oLogger.debug("Publisher.LaunchImagePyramidCreation: Command: " + sCmd);
@@ -166,7 +169,7 @@ public class Publisher {
 
             //Pubblico il layer
             String slLayerName = sFileName;
-            oManager.publishImagePyramid(sWorkspace, sStoreName, oSourceDir);
+            boolean bResult = oManager.publishImagePyramid(sWorkspace, sStoreName, oSourceDir);
 
             //configure coverage
             GSCoverageEncoder ce = new GSCoverageEncoder();
@@ -195,7 +198,6 @@ public class Publisher {
     private String PublishGeoTiffImage(String sFileName, String sGeoServerAddress, String sGeoServerUser, String sGeoServerPassword, String sWorkspace, String sStoreName, String sEPSG, String sStyle) throws Exception {
 
         File oFile = new File(sFileName);
-
 
         //Create GeoServer Manager
         GeoServerManager oManager = new GeoServerManager(sGeoServerAddress, sGeoServerUser, sGeoServerPassword);
@@ -239,7 +241,6 @@ public class Publisher {
         return publishGeoTiff(sFileName, sGeoServerAddress, sGeoServerUser, sGeoServerPassword, sWorkspace, sStore, sEPSG,"raster");
     }
 
-
     public String publishGeoTiff(String sFileName, String sGeoServerAddress, String sGeoServerUser, String sGeoServerPassword, String sWorkspace, String sStore, String sEPSG, String sStyle) throws Exception {
 
         // Domain Check
@@ -253,7 +254,8 @@ public class Publisher {
         if (oFile.exists()==false) return "";
 
         long lFileLenght = oFile.length();
-        long lMaxSize = 2L*1024L*1024L*1024L;
+        //long lMaxSize = 2L*1024L*1024L*1024L;
+        long lMaxSize = 50L*1024L*1024L;
 
         // More than Gb => Pyramid, otherwise normal geotiff
         if (lFileLenght> lMaxSize) return this.PublishImagePyramidOnGeoServer(sFileName, sGeoServerAddress, sGeoServerUser, sGeoServerPassword, sWorkspace, sStore);
