@@ -5,9 +5,11 @@ var wasdiApp = angular.module('wasdi', [
     'ngRoute',
     'ui.router',//library alternative for router
     'pascalprecht.translate',
+
+
+    //US SERVICE
     'wasdi.ConstantsService',
     'wasdi.sessionInjector',
-
     'wasdi.AuthService',
     'wasdi.MapService',
     'wasdi.GlobeService',
@@ -22,9 +24,12 @@ var wasdiApp = angular.module('wasdi', [
     'wasdi.ResultsOfSearchService',
     'wasdi.SnapOperationService',
 
+    //DIRECTIVE
     'wasdi.SnakeDirective',
     'wasdi.TreeDirective',
+    'wasdi.SpaceInvaderDirective',
 
+    //EXTERNAL LIB
     'ui.bootstrap',
     'checklist-model',
     'moment-picker',//time picker
@@ -135,3 +140,5 @@ wasdiApp.controller("ApplyOrbitController",ApplyOrbitController);
 wasdiApp.controller("RadiometricCalibrationController",RadiometricCalibrationController);
 wasdiApp.controller("MultilookingController",MultilookingController);
 wasdiApp.controller("NDVIController",NDVIController);
+wasdiApp.controller("ProductEditorInfoController",ProductEditorInfoController);
+wasdiApp.controller("RangeDopplerTerrainCorrectionController",RangeDopplerTerrainCorrectionController);

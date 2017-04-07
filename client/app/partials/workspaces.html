@@ -55,8 +55,9 @@
         <div class="panel-group " id="accordion" role="tablist" aria-multiselectable="true" ng-show="m_oController.m_bIsOpenInfo" >
 
             <div class="loading-files" ng-show="m_oController.isEmptyProductList() == true && m_oController.m_bIsVisibleFiles == true">
-                <i class="fa fa-spinner fa-pulse fa-3x fa-fw"></i>
-                <span class="sr-only">Loading...</span>
+                <!--<i class="fa fa-spinner fa-pulse fa-3x fa-fw"></i>-->
+                <!--<span class="sr-only">Loading...</span>-->
+                <invader></invader>
             </div>
             <div ng-show="m_oController.isEmptyProductList() == true && m_oController.m_bIsVisibleFiles == false">
                 <h4>{{"WORKSPACES_LABEL_NO_RESULTS"|translate}}</h4>
@@ -103,7 +104,7 @@
                     <i class="fa fa-user" aria-hidden="true"></i>
                 </td>
                 <td>
-                    {user}}
+                    {{user}}
                 </td>
             </tr>
             <tr><td><i class="fa fa-user" aria-hidden="true"></i></td><td>user id</td></tr>
@@ -111,6 +112,8 @@
             <!--<tr><td><i class="fa fa-user" aria-hidden="true"></i></td><td>owner id</td></tr>-->
         </table>
     </div>
+
+
 </div>
 
 

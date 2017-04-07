@@ -1,23 +1,23 @@
 /**
- * Created by a.corrado on 03/04/2017.
+ * Created by a.corrado on 06/04/2017.
  */
 
+var RangeDopplerTerrainCorrectionController = (function() {
 
-var RadiometricCalibrationController = (function() {
-
-    function RadiometricCalibrationController($scope, oClose) {
+    function RangeDopplerTerrainCorrectionController($scope, oClose) {
         //MEMBERS
         this.m_oScope = $scope;
         this.m_oScope.m_oController = this;
         this.m_oTabOpen = "tab1";
+        //m_asTypeOfData and m_asOrbitStateVectors are used in ng-include InputOutputParametersView.html
         this.m_asTypeOfData = ["GeoTIFF","NetCDF-BEAM","NetCDF4-CF","NetCDF-CF","CSV","Gamma","Generic Binary","GeoTIFF+XML",
             "NetCDF4-BEAM","BEAM-DIMAP","ENVI","PolSARPro","Snaphu","JP2","JPG","PNG","BMP","GIF","BTF","GeoTIFF-BIGTIFF","HDF5"];
         this.m_asOrbitStateVectors = ["Sentinel Precise(Auto Download)","Sentinel Restituted(Auto Download)","DORIS preliminary POR(ENVISAT)"
             ,"DORIS Precise Vor(ENVISAT)(Auto Download)","DELFT Precise(ENVISAT,ERS1&2)(Auto Download)","PRARE Precise(ERS1&2)(Auto Download)"];
         this.m_sSelectedExtension = this.m_asTypeOfData[0];
 
-        this.m_asAuxiliaryFile = ["Latest Auxiliary File","Product Auxiliary File","External Auxiliary File"];
-        this.m_sSelectedCalibration = this.m_asAuxiliaryFile[0];
+        // this.m_asAuxiliaryFile = ["Latest Auxiliary File","Product Auxiliary File","External Auxiliary File"];
+        // this.m_sSelectedCalibration = this.m_asAuxiliaryFile[0];
 
         this.m_asSourceBands =  ["Band1","Band2","Band3"];
 
@@ -29,21 +29,21 @@ var RadiometricCalibrationController = (function() {
         };
 
     };
-    RadiometricCalibrationController.prototype.tabOpen = function(sTabInput)
+    RangeDopplerTerrainCorrectionController.prototype.tabOpen = function(sTabInput)
     {
         if(utilsIsStrNullOrEmpty(sTabInput))
             return false;
         this.m_oTabOpen = sTabInput;
         return true;
     };
-    RadiometricCalibrationController.prototype.firstTabIsOpen = function()
+    RangeDopplerTerrainCorrectionController.prototype.firstTabIsOpen = function()
     {
         if( this.m_oTabOpen == "tab1")
             return true;
         else
             return false;
     };
-    RadiometricCalibrationController.prototype.secondTabIsOpen = function()
+    RangeDopplerTerrainCorrectionController.prototype.secondTabIsOpen = function()
     {
         if( this.m_oTabOpen == "tab2")
             return true;
@@ -51,10 +51,10 @@ var RadiometricCalibrationController = (function() {
             return false;
     };
 
-    RadiometricCalibrationController.$inject = [
+    RangeDopplerTerrainCorrectionController.$inject = [
         '$scope',
         'close',
 
     ];
-    return RadiometricCalibrationController;
+    return RangeDopplerTerrainCorrectionController;
 })();
