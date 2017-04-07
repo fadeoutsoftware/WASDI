@@ -44,51 +44,6 @@ function utilsVexDialogConfirm(oMessage,oCallback)
     return oVexInstance;
 }
 
-function utilsVexDialogConfirmWithCheckBox(oMessage,oCallback)
-{
-    if(utilsIsStrNullOrEmpty(oMessage))
-        oMessage = "Are you absolutely sure you want to destroy the alien planet?";//Default message
-
-    if(utilsIsObjectNullOrUndefined(oCallback))
-    {
-        /*Default CallBack*/
-        oCallback=function (value)
-        {
-            if (value)
-            {
-                console.log('Successfully destroyed the planet.')
-            }
-            else
-            {
-                console.log('Chicken.')
-            }
-        }
-    }
-
-    var oVexInstance = vex.dialog.confirm({
-        message: oMessage,
-        callback: oCallback,
-        input:[
-            '<style>',
-            '.vex-custom-field-wrapper {',
-            'margin: 1em 0;',
-            '}',
-            '.vex-custom-field-wrapper > label {',
-            'display: inline-block;',
-            'margin-bottom: .2em;',
-            '}',
-            '</style>',
-            '<div class="vex-custom-field-wrapper">',
-                '<input name="files" type="checkbox" checked="checked" /> Delete files on file system',
-            '</div>',
-            '<div class="vex-custom-field-wrapper">',
-                '<input name="geoserver" type="checkbox" checked="checked"/> Delete layers on geoserver',
-            '</div>'].join('')
-
-    })
-    return oVexInstance;
-}
-
 
 function utilsVexDialogAlertDefault(oMessage,oCallback)
 {
@@ -147,3 +102,84 @@ function utilsVexCloseDialogAfterFewSeconds(iSecond,oVexInstance)
     if(!utilsIsObjectNullOrUndefined (iSecond) && !utilsIsObjectNullOrUndefined (oVexInstance))
         setTimeout(function(){vex.close(oVexInstance) }, iSecond);
 }
+
+
+/******************************TODO REMOVE THEY ARE ONLY FOR WASDI ********************************/
+function utilsVexDialogConfirmWithCheckBox(oMessage,oCallback)
+{
+    if(utilsIsStrNullOrEmpty(oMessage))
+        oMessage = "Are you absolutely sure you want to destroy the alien planet?";//Default message
+
+    if(utilsIsObjectNullOrUndefined(oCallback))
+    {
+        /*Default CallBack*/
+        oCallback=function (value)
+        {
+            if (value)
+            {
+                console.log('Successfully destroyed the planet.')
+            }
+            else
+            {
+                console.log('Chicken.')
+            }
+        }
+    }
+
+    var oVexInstance = vex.dialog.confirm({
+        message: oMessage,
+        callback: oCallback,
+        input:[
+            '<style>',
+            '.vex-custom-field-wrapper {',
+            'margin: 1em 0;',
+            '}',
+            '.vex-custom-field-wrapper > label {',
+            'display: inline-block;',
+            'margin-bottom: .2em;',
+            '}',
+            '</style>',
+            '<div class="vex-custom-field-wrapper">',
+            '<input name="files" type="checkbox" checked="checked" /> Delete files on file system',
+            '</div>',
+            '<div class="vex-custom-field-wrapper">',
+            '<input name="geoserver" type="checkbox" checked="checked"/> Delete layers on geoserver',
+            '</div>'].join('')
+
+    })
+    return oVexInstance;
+}
+
+function utilsVexDialogChangeNameInTree(oMessage,oCallback,sOldName)
+{
+    if(utilsIsStrNullOrEmpty(oMessage))
+        oMessage = "Are you absolutely sure you want to destroy the alien planet?";//Default message
+
+    if(utilsIsObjectNullOrUndefined(oCallback))
+    {
+        /*Default CallBack*/
+        oCallback=function (value)
+        {
+            if (value)
+            {
+                console.log('Successfully destroyed the planet.')
+            }
+            else
+            {
+                console.log('Chicken.')
+            }
+        }
+    }
+
+    var oVexInstance = vex.dialog.confirm({
+        message: oMessage,
+        callback: oCallback,
+        input:[
+                '<div class="my-input-text"><input type="text" name="renameProduct"  class="form-control " value="' + sOldName + ' "title="" placeholder="New Name..." ></div>'
+                ].join('')
+
+    })
+    return oVexInstance;
+}
+
+

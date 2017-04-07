@@ -12,6 +12,8 @@ var MultilookingController = (function() {
             "NetCDF4-BEAM","BEAM-DIMAP","ENVI","PolSARPro","Snaphu","JP2","JPG","PNG","BMP","GIF","BTF","GeoTIFF-BIGTIFF","HDF5"];
         this.m_asOrbitStateVectors = ["Sentinel Precise(Auto Download)","Sentinel Restituted(Auto Download)","DORIS preliminary POR(ENVISAT)"
             ,"DORIS Precise Vor(ENVISAT)(Auto Download)","DELFT Precise(ENVISAT,ERS1&2)(Auto Download)","PRARE Precise(ERS1&2)(Auto Download)"];
+        this.m_sSelectedExtension = this.m_asTypeOfData[0];
+
         this.m_asSourceBands =  ["Band1","Band2","Band3"];
         this.m_asSourceBandsSelected = [];
 

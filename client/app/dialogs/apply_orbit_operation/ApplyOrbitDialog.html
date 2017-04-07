@@ -1,134 +1,64 @@
 <div class="modal fade apply-orbit-modal">
     <div class="modal-dialog">
         <div class="modal-content">
+            <!-- HEADER -->
             <div class="modal-header">
                 <button type="button" class="close" ng-click="close(false)" data-dismiss="modal" aria-hidden="true">&times;</button>
-                <h4 class="modal-title "></h4>
+                <h4 class="modal-title ">{{"DIALOG_APPLY_ORBIT_TITLE"|translate}}</h4>
             </div>
+            <!-- BODY -->
             <div class="modal-body">
-                <ul class="nav nav-tabs">
-                    <li class="active"><a data-toggle="tab" href="" ng-click="m_oController.tabOpen('tab1')">{{"DIALOG_APPLY_ORBIT_TAB_INPUT_OUTPUT"|translate}}</a></li>
-                    <li><a data-toggle="tab" href="" ng-click="m_oController.tabOpen('tab2')">{{"DIALOG_APPLY_ORBIT_TAB_PROCESSING"|translate}}</a></li>
-                </ul>
+                <h4>
+                    <ul class="nav nav-tabs">
+                        <li class="active"><a data-toggle="tab" href="" ng-click="m_oController.tabOpen('tab1')">{{"DIALOG_APPLY_ORBIT_TAB_INPUT_OUTPUT"|translate}}</a></li>
+                        <li><a data-toggle="tab" href="" ng-click="m_oController.tabOpen('tab2')">{{"DIALOG_APPLY_ORBIT_TAB_PROCESSING"|translate}}</a></li>
+                    </ul>
 
-                <!-------------------------------------------INPUT OUTPUT PARAMETERS-------------------------------->
-                <div ng-show="m_oController.firstTabIsOpen()">
-                    <!----------------- Source product ----------------->
-                    <form >
-                        <fieldset>
+                    <!-------------------------------------------INPUT OUTPUT PARAMETERS-------------------------------->
+                    <div ng-show="m_oController.firstTabIsOpen()">
+                        <div ng-include src="'dialogs/InputOutputParametersView.html'"></div>
+                    </div>
+                    <!------------------------------------ PROCESSING PARAMETERS -------------------------------------->
+                    <div ng-show="m_oController.secondTabIsOpen()">
+                        <form>
+                            <fieldset class="my-input-text">
+                                <div class="dropdown" >
+                                    {{"DIALOG_APPLY_ORBIT_ORBIT_STATE_VECTORS"|translate}}
+                                    <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu2"
+                                            data-toggle="dropdown">
+                                        {{m_oController.m_sSelectedOrbitStateVectors}}
+                                        <span class="caret"></span>
+                                    </button>
 
-                            <legend><h4>{{"DIALOG_APPLY_ORBIT_LEGEND_SOURCE_PRODUCT"|translate}}</h4></legend>
-                            <!--CHOOSE PRODUCT-->
-                            <div class="my-input-text"><!--my-input-text-->
+                                    <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu2">
+                                        <li role="presentation" ng-repeat="orbitState in m_oController.m_asOrbitStateVectors" ng-click="m_oController.m_sSelectedOrbitStateVectors = orbitState"><a role="menuitem" tabindex="-1" href="">{{orbitState}}</a></li>
+                                    </ul>
 
-                                <div class="input-group">
-                                    <input type="text" class="form-control" placeholder="Source">
-                                    <div class="input-group-btn">
-                                        <!--Dropdown-->
-
-                                            <button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown">
-                                                <span class="caret"></span></button>
-                                            <ul class="dropdown-menu">
-                                            </ul>
-
-                                        <!--Download file button-->
-                                        <button class="btn btn-default " ngf-select="uploadFiles($files, $invalidFiles)" accept="image/*" >...</button>
-                                    </div>
+                                </div>
+                                <!--<span class="label">{{"DIALOG_APPLY_ORBIT_POLYNOMIAL_DEGREE"|translate}}</span>-->
+                                <div class="form-group">
+                                    <label for="ApplyOrbitPolynomialDegree">{{'DIALOG_APPLY_ORBIT_POLYNOMIAL_DEGREE'|translate}}</label>
+                                    <input type="text" class="form-control" id="ApplyOrbitPolynomialDegree">
                                 </div>
 
-                            </div>
-                        </fieldset>
-                    </form>
-
-                    <!----------------- Target Product ----------------->
-                    <form >
-                        <fieldset>
-
-                            <legend><h4>{{"DIALOG_APPLY_ORBIT_LEGEND_TARGET_PRODUCT"|translate}}</h4></legend>
-                            <!--NAME-->
-                            <div class="my-input-text"><!--my-input-text-->
-                                <input type="text" class="form-control" placeholder="Name"><!--Name-->
-                            </div>
-
-                            <!--SAVE AS: -->
-                            <div class="checkbox inline" >
-                                <label>
-                                    <input type="checkbox" value="" >{{"DIALOG_APPLY_ORBIT_CHECKBOX_SAVE_AS"|translate}}
-                                </label>
-                            </div>
-                            <!--TYPE OF DATA-->
-                            <div class="dropdown inline" >
-                                <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1"
-                                        data-toggle="dropdown">
-                                    Dropdown
-                                    <span class="caret"></span>
-                                </button>
-                                <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1">
-                                    <li role="presentation" ng-repeat="type in m_oController.m_asTypeOfData"><a role="menuitem" tabindex="-1" href="">{{type}}</a></li>
-                                    <!--<li role="presentation"><a role="menuitem" tabindex="-1" href="#">Action</a></li>-->
-                                    <!--<li role="presentation"><a role="menuitem" tabindex="-1" href="#">Another action</a>-->
-                                </ul>
-                            </div>
-
-                            </br>
-                            </br>
-                            <!--&lt;!&ndash;SELECT DIRECTORY&ndash;&gt;-->
-                            <!--<div class="my-input-text">&lt;!&ndash;my-input-text&ndash;&gt;-->
-
-                                <!--<div class="input-group">-->
-                                    <!--<input type="text" class="form-control" placeholder="Source">-->
-                                    <!--<div class="input-group-btn">-->
-                                        <!--&lt;!&ndash;Download file button&ndash;&gt;-->
-                                        <!--<button class="btn btn-default " ngf-select="uploadFiles($files, $invalidFiles)" accept="image/*" >...</button>-->
-                                    <!--</div>-->
-                                <!--</div>-->
-
-                            <!--</div>-->
-                            <!---->
-                            <!--OPEN IN WASDI-->
-                            <div class="checkbox">
-                                <label>
-                                    <input type="checkbox" value="" >{{"DIALOG_APPLY_ORBIT_CHECKBOX_OPEN_IN_SNAP"|translate}}
-                                </label>
-                            </div>
-
-                        </fieldset>
-                    </form>
-                </div>
-
-                <!------------------------------------ PROCESSING PARAMETERS -------------------------------------->
-                <div ng-show="m_oController.secondTabIsOpen()">
-                    <form>
-                        <fieldset>
-                            <div class="dropdown" >
-
-                                <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu2"
-                                        data-toggle="dropdown">
-                                    {{"DIALOG_APPLY_ORBIT_ORBIT_STATE_VECTORS"|translate}}
-                                    <span class="caret"></span>
-                                </button>
-
-                                <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1">
-                                    <li role="presentation" ng-repeat="orbitState in m_oController.m_asOrbitStateVectors"><a role="menuitem" tabindex="-1" href="">{{orbitState}}</a></li>
-                                </ul>
-
-                            </div>
-                            <!--<span class="label">{{"DIALOG_APPLY_ORBIT_POLYNOMIAL_DEGREE"|translate}}</span>-->
-                            <input type="text"  class="my-input-text form-control polynomial-degree" placeholder="{{'DIALOG_APPLY_ORBIT_POLYNOMIAL_DEGREE'|translate}}">
-                            <div class="checkbox">
-                                <label>
-                                    <input type="checkbox" >
-                                    {{"DIALOG_APPLY_ORBIT_CHECKBOX_FAIL"|translate}}
-                                </label>
-                            </div>
-                        </fieldset>
-                    </form>
-                </div>
-
-
+                                <!--<input type="text"  class="my-input-text form-control polynomial-degree" placeholder="{{'DIALOG_APPLY_ORBIT_POLYNOMIAL_DEGREE'|translate}}">-->
+                                <div class="checkbox">
+                                    <label>
+                                        <input type="checkbox" >
+                                        {{"DIALOG_APPLY_ORBIT_CHECKBOX_FAIL"|translate}}
+                                    </label>
+                                </div>
+                            </fieldset>
+                        </form>
+                    </div>
+                </h4>
             </div>
+
+            <!-- FOOTER -->
             <div class="modal-footer">
-                <button type="button" ng-click="close('ok')" class="my-button" data-dismiss="modal">Ok</button>
+                <!--<button type="button" ng-click="close('ok')" class="my-button" data-dismiss="modal">Ok</button>-->
+                <button type="button" ng-click="close('Close')" class="my-button" data-dismiss="modal">{{"DIALOG_CLOSE_BUTTON"|translate}}</button>
+                <button type="button" ng-click="close('Run')" class="my-button" data-dismiss="modal">{{"DIALOG_RUN_BUTTON"|translate}}</button>
             </div>
 
         </div>

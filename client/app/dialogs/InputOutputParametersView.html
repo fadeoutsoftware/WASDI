@@ -1,10 +1,10 @@
-<!-------------------------------------------INPUT OUTPUT PARAMETERS-------------------------------->
-<div ng-show="m_oController.firstTabIsOpen()">
+<!--&lt;!&ndash;-&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;INPUT OUTPUT PARAMETERS&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&ndash;&gt;-->
+<!--<div ng-show="m_oController.firstTabIsOpen()">-->
     <!----------------- Source product ----------------->
     <form >
         <fieldset>
 
-            <legend><h4>{{"DIALOG_APPLY_ORBIT_LEGEND_SOURCE_PRODUCT"|translate}}</h4></legend>
+            <legend><h3>{{"DIALOG_APPLY_ORBIT_LEGEND_SOURCE_PRODUCT"|translate}}</h3></legend>
             <!--CHOOSE PRODUCT-->
             <div class="my-input-text"><!--my-input-text-->
 
@@ -31,7 +31,7 @@
     <form >
         <fieldset>
 
-            <legend><h4>{{"DIALOG_APPLY_ORBIT_LEGEND_TARGET_PRODUCT"|translate}}</h4></legend>
+            <legend><h3>{{"DIALOG_APPLY_ORBIT_LEGEND_TARGET_PRODUCT"|translate}}</h3></legend>
             <!--NAME-->
             <div class="my-input-text"><!--my-input-text-->
                 <input type="text" class="form-control" placeholder="Name"><!--Name-->
@@ -44,15 +44,14 @@
                 </label>
             </div>
             <!--TYPE OF DATA-->
-            <div class="dropdown inline" >
+            <div class="dropdown inline">
                 <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1"
-                        data-toggle="dropdown">
-                    Dropdown
+                        data-toggle="dropdown" >
+                    {{m_oController.m_sSelectedExtension}}
                     <span class="caret"></span>
                 </button>
                 <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1">
-                    <li role="presentation" ng-repeat="type in m_oController.m_asTypeOfData"><a role="menuitem" tabindex="-1" href="">{{type}}</a></li>
-
+                    <li role="presentation" ng-repeat="type in m_oController.m_asTypeOfData" ng-click="m_oController.m_sSelectedExtension = type"><a role="menuitem" tabindex="-1" href="" >{{type}}</a></li>
                 </ul>
             </div>
 
@@ -68,4 +67,4 @@
 
         </fieldset>
     </form>
-</div>
+<!--</div>-->

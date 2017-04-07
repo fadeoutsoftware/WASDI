@@ -13,6 +13,7 @@
 
 //directive css
 @import "../directives/tree_directive/tree";
+@import "../directives/space_invaders/space_invaders";
 
 //DIALOGS
 @import "../dialogs/orbit_info/orbit_info";
@@ -22,6 +23,7 @@
 @import "../dialogs/apply_orbit_operation/apply_orbit";
 @import "../dialogs/radiometric_calibration_operation/radiometric_calibration";
 @import "../dialogs/multilooking_operation/multilooking";
+@import "../dialogs/range_doppler_terrain_correction_operation/range_doppler_terrain_correction";
 
 body
 {
@@ -289,13 +291,25 @@ h4
           {
             float: left;
           }
+          .inline-right
+          {
+            float: right;
+          }
+
           .btn-block {
             display: block;
             width: 50%;
 
           }
-
-
+          .btn-default {
+            color: #333;
+            background-color: #fff;
+            border-color: $wasdi-blue-logo;
+          }
+          .dropdown
+          {
+            margin-left:10px;
+          }
         }
       }
     }

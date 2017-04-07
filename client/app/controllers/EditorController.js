@@ -95,6 +95,33 @@ var EditorController = (function () {
             }
         }
     };
+
+    EditorController.prototype.selectNodeByFileNameInTree = function (sFileName) {
+
+        var treeInst = $('#jstree').jstree(true);
+        var m = treeInst._model.data;
+        for (var i in m) {
+            if (!utilsIsObjectNullOrUndefined(m[i].original)  && m[i].original.fileName == sFileName) {//&& !utilsIsObjectNullOrUndefined(m[i].original.band)
+                $("#jstree").jstree(true).select_node(m[i].id);;
+            }
+        }
+    };
+
+    EditorController.prototype.renameNodeInTree = function (sFileName,sNewNameInput) {
+        if((utilsIsObjectNullOrUndefined(sNewNameInput) == true) || (utilsIsStrNullOrEmpty(sNewNameInput) == true))
+            return false;
+
+        var treeInst = $('#jstree').jstree(true);
+        var m = treeInst._model.data;
+        for (var i in m) {
+            if (!utilsIsObjectNullOrUndefined(m[i].original) && m[i].original.fileName == sFileName) {
+                $("#jstree").jstree(true).rename_node(m[i].id,sNewNameInput);
+                break;
+            }
+        }
+        return true;
+    };
+
     /**
      * Handler of the "download" message
      * @param oMessage Received Message
@@ -112,29 +139,23 @@ var EditorController = (function () {
             if (data.boolValue == true) {
                 //console.log('Product added to the ws');
                 utilsVexDialogAlertBottomRightCorner('Product added to the ws');
-                oController.getProductListByWorkspace();
+                oController.getProductListByWorkspace();//oMessage.payload.name
+               // oController.selectNodeByFileNameInTree(oMessage.payload.fileName);
 
-                //oController.m_aoProducts.push(oMessage.payload);
-                ////oController.getProductListByWorkspace();
-                //oController.m_oTree = oController.generateTree();
-                //oController.m_oProcessesLaunchedService.removeProcessByPropertySubstringVersion("processName",oMessage.payload.fileName,
-                //    oController.m_oActiveWorkspace.workspaceId,oController.m_oUser.userId);
-
-                //oController.m_oProcessesLaunchedService.loadProcessesFromServer(oController.m_oActiveWorkspace.workspaceId);
-
-                //oController.m_aoProcessesRunning =  this.m_oProcessesLaunchedService.getProcesses();
+                // $('#jstree').jstree(true).select_all();
+                // $('#jstree').jstree(true).select_node(oMessage.payload.fileName);
+                // $('#jstree').jstree(true).select_node(oMessage.payload.name);
+                // var oNode = $('#jstree').jstree(true).get_node(oMessage.payload.name);
+                //  $('#jstree').jstree(true).select_node('mn1');
             }
             else {
                 utilsVexDialogAlertTop("Error in add product to workspace");
             }
 
-
         }).error(function (data, status) {
             utilsVexDialogAlertTop('Error adding product to the ws')
-            //console.log('Error adding product to the ws');
         });
 
-        //this.m_oScope.$apply();
     }
 
     EditorController.prototype.receivedTerrainMessage = function (oMessage) {
@@ -239,7 +260,7 @@ var EditorController = (function () {
         var oNode = $('#jstree').jstree(true).get_node(oLayer.layerId);
         oNode.original.bPubblish = true;
         $('#jstree').jstree(true).set_icon(oLayer.layerId, 'assets/icons/check_20x20.png');
-        var oNodet = $('#jstree').jstree(true).get_node(oLayer.layerId);
+        // var oNodet = $('#jstree').jstree(true).get_node(oLayer.layerId);
         //$('#jstree').jstree(true).set_icon(oLayer.layerId, 'assets/icons/check.png');
     }
 
@@ -633,19 +654,20 @@ var EditorController = (function () {
     //    li_attr     : {}  // attributes for the generated LI node
     //    a_attr      : {}  // attributes for the generated A node
     //}
-    EditorController.prototype.generateTree = function () {
+    EditorController.prototype.generateTree = function (sSelectedNodeInput) {//sSelectedNodeInput
         var oController = this;
         var oTree =
             {
                 'core': {'data': [], "check_callback": true},
-                "plugins": ["contextmenu"],  // all plugin i use
+                "state" : { "key" : "state_tree" },
+                "plugins": ["contextmenu","state"],  // all plugin i use
                 "contextmenu": { // my right click menu
                     "items": function ($node) {
 
                         //only the band has property $node.original.band
                         var oReturnValue = null;
                         if (utilsIsObjectNullOrUndefined($node.original.band) == false && $node.original.bPubblish == true) {
-                            //BAND
+                            //******************************** BAND *************************************
                             var oBand = $node.original.band;
 
                             oReturnValue =
@@ -670,7 +692,7 @@ var EditorController = (function () {
 
                         //only products has $node.original.fileName
                         if (utilsIsObjectNullOrUndefined($node.original.fileName) == false) {
-                            //PRODUCT
+                            //***************************** PRODUCT ********************************************
                             oReturnValue =
                                 {
 
@@ -761,12 +783,13 @@ var EditorController = (function () {
                                         "action": function (obj) {
                                             var sSourceFileName = $node.original.fileName;
                                             var sDestinationFileName = '';
-                                            oController.m_oSnapOperationService.TerrainCorrection(sSourceFileName, sDestinationFileName, oController.m_oActiveWorkspace.workspaceId)
-                                                .success(function (data) {
-
-                                                }).error(function (error) {
-
-                                            });
+                                            oController.rangeDopplerTerrainCorrectionDialog();
+                                            // oController.m_oSnapOperationService.TerrainCorrection(sSourceFileName, sDestinationFileName, oController.m_oActiveWorkspace.workspaceId)
+                                            //     .success(function (data) {
+                                            //
+                                            //     }).error(function (error) {
+                                            //
+                                            // });
                                         }
                                     },
                                     "Merge": {
@@ -775,10 +798,35 @@ var EditorController = (function () {
                                             //$node.original.fileName;
                                             oController.openMergeDialog($node.original.fileName);
                                         }
+                                    },
+                                    "Info": {
+                                        "label": "Info ",
+                                        "action": function (obj) {
+                                            //$node.original.fileName;
+                                            oController.openProductInfoDialog();
+                                        }
+                                    },
+                                    "Rename": {
+                                        "label": "Rename",
+                                        "action": function (obj) {
+                                            //$node.original.fileName;
+                                            var oCallback = function(value){
+                                                if((utilsIsObjectNullOrUndefined(value.renameProduct) == true) ||(utilsIsStrNullOrEmpty(value.renameProduct) == true))
+                                                    return false;
+                                                var bResult = oController.renameNodeInTree($node.original.fileName,value.renameProduct);
+                                                if(bResult == false)
+                                                    console.log("Error: it's impossible rename the product");
+                                            }
+
+                                            utilsVexDialogChangeNameInTree("Insert new name",oCallback,$node.original.fileName);
+                                            // var bResult = oController.renameNodeInTree($node.original.fileName,"test");
+                                            // if(bResult == false)
+                                            //     console.log("Error: it's impossible rename the product");
+                                        }
                                     }
+
                                 };
                         }
-
 
                         return oReturnValue;
                     }
@@ -792,8 +840,17 @@ var EditorController = (function () {
 
             //product node
             var oNode = new Object();
+
             oNode.text = productList[iIndexProduct].name;//LABEL NODE
-            oNode.fileName = productList[iIndexProduct].fileName;//LABEL NODE
+
+            //usually the selected node is the node just download
+            // if( (utilsIsObjectNullOrUndefined(sSelectedNodeInput)==false) && (utilsIsStrNullOrEmpty(sSelectedNodeInput)==false) && productList[iIndexProduct].name == sSelectedNodeInput)
+            //     oNode.state = {"opened" :true, "disabled":false, "selected" :true };//'opened' :true, 'disabled':false,
+            // else
+            //     oNode.state = {"opened" :false, "disabled":false, "selected" :true };//default state
+
+            oNode.state = {"opened" :false, "disabled":false, "selected" :true };
+            oNode.fileName = productList[iIndexProduct].fileName;
             oNode.children = [{"text": "metadata", "icon": "assets/icons/folder_20x20.png"}, {
                 "text": "Bands",
                 "icon": "assets/icons/folder_20x20.png",
@@ -821,7 +878,14 @@ var EditorController = (function () {
         return oTree;
     }
 
-    EditorController.prototype.getProductListByWorkspace = function () {
+
+    /**
+     *
+     * @param sName == selected node (it's the name node with blue background)
+     */
+
+
+    EditorController.prototype.getProductListByWorkspace = function () {//sName
         var oController = this;
         oController.m_aoProducts = [];
 
@@ -832,8 +896,13 @@ var EditorController = (function () {
                     for (var iIndex = 0; iIndex < data.length; iIndex++) {
                         oController.m_aoProducts.push(data[iIndex]);
                     }
-                    // i need to make the tree after the products are loaded
-                    oController.m_oTree = oController.generateTree();
+
+                    // if( (utilsIsObjectNullOrUndefined(sName) == false) || (utilsIsStrNullOrEmpty(sName) == false) )
+                    //     oController.m_oTree = oController.generateTree(sName); // i need to make the tree after the products are loaded
+                    // else
+                        oController.m_oTree = oController.generateTree();   // i need to make the tree after the products are loaded
+
+
                     //oController.m_oScope.$apply();
                 }
             }
@@ -1377,6 +1446,52 @@ var EditorController = (function () {
 
         return true;
     }
+    EditorController.prototype.openProductInfoDialog = function ()
+    {
+        var oController = this;
+        this.m_oModalService.showModal({
+            templateUrl: "dialogs/product_editor_info/ProductEditorInfoDialog.html",
+            controller: "ProductEditorInfoController"
+            // inputs: {
+            //     extras: {
+            //         SelectedProduct: oSelectedProduct,
+            //         ListOfProducts: oController.m_aoProducts,
+            //         WorkSpaceId: oController.m_oActiveWorkspace
+            //     }
+            // }
+        }).then(function (modal) {
+            modal.element.modal();
+            modal.close.then(function (result) {
+                oController.m_oScope.Result = result;
+            });
+        });
+
+        return true;
+    }
+
+    EditorController.prototype.rangeDopplerTerrainCorrectionDialog = function ()
+    {
+        var oController = this;
+        this.m_oModalService.showModal({
+            templateUrl: "dialogs/range_doppler_terrain_correction_operation/RangeDopplerTerrainCorrectionDialog.html",
+            controller: "RangeDopplerTerrainCorrectionController"
+            // inputs: {
+            //     extras: {
+            //         SelectedProduct: oSelectedProduct,
+            //         ListOfProducts: oController.m_aoProducts,
+            //         WorkSpaceId: oController.m_oActiveWorkspace
+            //     }
+            // }
+        }).then(function (modal) {
+            modal.element.modal();
+            modal.close.then(function (result) {
+                oController.m_oScope.Result = result;
+            });
+        });
+
+        return true;
+    }
+
     EditorController.$inject = [
         '$scope',
         '$location',

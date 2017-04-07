@@ -72,9 +72,9 @@ angular.module('wasdi.TreeDirective', [])
                 {
                     if(!utilsIsObjectNullOrUndefined(oldValue))
                     {
-                        /********************RELOADED TREE CASE ****************************/
+                        /******************** RELOADED TREE CASE ****************************/
                         //if the tree is reloaded need  $('#jstree').jstree(true).refresh();
-                        $('#jstree').jstree(true).settings.core.data = newValue.core.data;
+                        $('#jstree').jstree(true).settings.core = newValue.core;
                         $('#jstree').jstree(true).refresh();
 
                     }
@@ -131,12 +131,13 @@ angular.module('wasdi.TreeDirective', [])
                         //bind event (event = after tree is loaded do checkTreeNode())
                         /*
                          * */
-                        //$('#jstree').on("loaded.jstree", function (e, data)
-                        //{
+                        // $('#jstree').on("loaded.jstree", function (e, data)
+                        // {
                         //    //if the page was reload it method check all nodes in tree,
                         //    //this nodes are processes running in server
                         //    //$scope.m_oController.checkNodesInTree();
-                        //});
+                        //
+                        // });
 
                     }
                 }
