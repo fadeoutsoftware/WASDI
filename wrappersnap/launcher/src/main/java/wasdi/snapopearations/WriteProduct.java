@@ -41,7 +41,7 @@ public class WriteProduct {
         return WriteProduct(oProduct, sFilePath, sFileName, "GeoTIFF", ".tif");
     }
 
-    private String WriteProduct(Product oProduct, String sFilePath, String sFileName, String sFormat, String sExtension)
+    public String WriteProduct(Product oProduct, String sFilePath, String sFileName, String sFormat, String sExtension)
     {
         try {
             if (!sFilePath.endsWith("/")) sFilePath += "/";
