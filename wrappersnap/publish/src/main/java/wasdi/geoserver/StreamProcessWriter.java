@@ -27,15 +27,19 @@ public class StreamProcessWriter extends Thread {
         {
             InputStreamReader oIsr = new InputStreamReader(m_oInputStream);
             BufferedReader oBr = new BufferedReader(oIsr);
-            String line=null;
-            while ( (line = oBr.readLine()) != null) {
-                Publisher.s_oLogger.debug(m_sType + ">" + line);
-                System.out.println(m_sType + ">" + line);
+
+            String sLine=null;
+            while ( (sLine = oBr.readLine()) != null) {
+                Publisher.s_oLogger.debug(m_sType + ">" + sLine);
+                System.out.println(m_sType + ">" + sLine);
             }
 
+            oBr.close();
         } catch (IOException oEx)
         {
             Publisher.s_oLogger.debug("StreamProcessWriter.run: " +  oEx.getMessage());
         }
+
+        Publisher.s_oLogger.debug("Stream Process Writer END");
     }
 }

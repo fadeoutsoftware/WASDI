@@ -100,17 +100,17 @@ public class Publisher {
                 oProcess = oRunTime.exec(sCmd);
 
                 // any error?
-                StreamProcessWriter oErrorWriter = new
-                        StreamProcessWriter(oProcess.getErrorStream(), "ERROR");
+                StreamProcessWriter oErrorWriter = new StreamProcessWriter(oProcess.getErrorStream(), "ERROR");
 
                 // any output?
-                StreamProcessWriter oOutputWriter = new
-                        StreamProcessWriter(oProcess.getInputStream(), "OUTPUT");
+                StreamProcessWriter oOutputWriter = new StreamProcessWriter(oProcess.getInputStream(), "OUTPUT");
 
                 oErrorWriter.start();
                 oOutputWriter.start();
 
                 int iValue = oProcess.waitFor();
+
+                if (oProcess.getOutputStream()!=null) oProcess.getOutputStream().flush();
 
                 s_oLogger.debug("Publisher.LaunchImagePyramidCreation:  Exit Value " + iValue);
 
