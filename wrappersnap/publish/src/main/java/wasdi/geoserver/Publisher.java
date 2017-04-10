@@ -110,7 +110,30 @@ public class Publisher {
 
                 int iValue = oProcess.waitFor();
 
-                if (oProcess.getOutputStream()!=null) oProcess.getOutputStream().flush();
+                try {
+                    if (oProcess.getOutputStream()!=null) oProcess.getOutputStream().flush();
+                    if (oProcess.getOutputStream()!=null) oProcess.getOutputStream().close();
+                    if (oProcess.getInputStream() !=null) oProcess.getInputStream().close();
+                    if (oProcess.getErrorStream() !=null) oProcess.getErrorStream().close();
+                }
+                catch (Exception oEx) {
+                    s_oLogger.debug("Publisher.LaunchImagePyramidCreation:  Exception closing Streams " + oEx.toString());
+                }
+
+
+                try  {
+                    oOutputWriter.interrupt();
+                }
+                catch (Exception oEx) {
+                    s_oLogger.debug("Publisher.LaunchImagePyramidCreation:  Exception interrupting Output Writer thread " + oEx.toString());
+                }
+                try  {
+                    oErrorWriter.interrupt();
+                }
+                catch (Exception oEx) {
+                    s_oLogger.debug("Publisher.LaunchImagePyramidCreation:  Exception interrupting Error Writer Thread " + oEx.toString());
+                }
+
 
                 s_oLogger.debug("Publisher.LaunchImagePyramidCreation:  Exit Value " + iValue);
 
@@ -128,8 +151,10 @@ public class Publisher {
                 return  false;
             }
             finally {
-                if (oProcess != null)
+                if (oProcess != null) {
+                    s_oLogger.debug("Publisher.LaunchImagePyramidCreation: finally destroy Process");
                     oProcess.destroy();
+                }
             }
 
         } catch (Exception e) {
@@ -137,9 +162,9 @@ public class Publisher {
             s_oLogger.debug("Publisher.LaunchImagePyramidCreation: Error generating pyramid image: " + e.getMessage());
             return  false;
         }
-        s_oLogger.debug("Publisher.LaunchImagePyramidCreation:  Return ");
-        return  true;
 
+        s_oLogger.debug("Publisher.LaunchImagePyramidCreation:  Return true");
+        return  true;
     }
 
     private String PublishImagePyramidOnGeoServer(String sFileName, String sGeoServerAddress, String sGeoServerUser, String sGeoServerPassword, String sWorkspace, String sStoreName) throws Exception {

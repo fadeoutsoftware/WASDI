@@ -40,6 +40,6 @@ public class StreamProcessWriter extends Thread {
             Publisher.s_oLogger.debug("StreamProcessWriter.run: " +  oEx.getMessage());
         }
 
-        Publisher.s_oLogger.debug("Stream Process Writer END");
+        Publisher.s_oLogger.debug("Stream Process Writer " + m_sType + " END");
     }
 }
