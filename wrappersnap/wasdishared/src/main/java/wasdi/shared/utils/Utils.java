@@ -64,6 +64,22 @@ public class Utils {
         return sReturn;
     }
 
+    public static String GetFileNameExtension(String sInputFile) {
+        String sReturn = "";
+        File oFile = new File(sInputFile);
+        String sInputFileNameOnly = oFile.getName();
+
+        // Create a clean layer id: the file name without any extension
+        String [] asLayerIdSplit = sInputFileNameOnly.split("\\.");
+        if (asLayerIdSplit!=null) {
+            if (asLayerIdSplit.length>0){
+                sReturn = asLayerIdSplit[asLayerIdSplit.length-1];
+            }
+        }
+
+        return sReturn;
+    }
+
     public static void fixUpPermissions(Path destPath) throws IOException {
         Stream<Path> files = Files.list(destPath);
         files.forEach(path -> {
