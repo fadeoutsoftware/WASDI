@@ -33,7 +33,7 @@ service('RabbitStompService', ['$http',  'ConstantsService','$interval','Process
             console.log("InitWebStomp some value are null");
             return false;
         }
-        this.m_oActiveWorkspace=oActiveWorkspace;
+        this.m_oActiveWorkspace = oActiveWorkspace;
 
         // Web Socket to receive workspace messages
         //var oWebSocket = new WebSocket(this.m_oConstantsService.getStompUrl());

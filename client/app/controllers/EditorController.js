@@ -25,7 +25,8 @@ var EditorController = (function () {
         this.m_b3DMapModeOn = false;
         this.m_bIsVisibleMapOfLeaflet = false;
         this.m_oModalService = oModalService;
-
+        /*Last file donloaded*/
+        this.m_oLastDownloadedProduct = null;
         //Pixel Info
         this.m_bIsVisiblePixelInfo = false;
         //this.hideOrShowPixelInfo()//set css
@@ -97,14 +98,19 @@ var EditorController = (function () {
     };
 
     EditorController.prototype.selectNodeByFileNameInTree = function (sFileName) {
-
+        if(utilsIsObjectNullOrUndefined(sFileName) == true)
+            return false;
         var treeInst = $('#jstree').jstree(true);
         var m = treeInst._model.data;
         for (var i in m) {
             if (!utilsIsObjectNullOrUndefined(m[i].original)  && m[i].original.fileName == sFileName) {//&& !utilsIsObjectNullOrUndefined(m[i].original.band)
-                $("#jstree").jstree(true).select_node(m[i].id);;
-            }
+                $("#jstree").jstree(true).deselect_all();
+                $("#jstree").jstree(true).select_node(m[i].id,true);
+                $("#jstree").jstree(true).open_node(m[i].id,true);
+                break;
+           }
         }
+        return true;
     };
 
     EditorController.prototype.renameNodeInTree = function (sFileName,sNewNameInput) {
@@ -140,7 +146,16 @@ var EditorController = (function () {
                 //console.log('Product added to the ws');
                 utilsVexDialogAlertBottomRightCorner('Product added to the ws');
                 oController.getProductListByWorkspace();//oMessage.payload.name
-               // oController.selectNodeByFileNameInTree(oMessage.payload.fileName);
+                oController.m_oLastDownloadedProduct = oMessage.payload.fileName; //the m_oLastDownloadedProduct will be select & open in jstree
+
+                //oController.selectNodeByFileNameInTree(oMessage.payload.fileName);
+                //TODO SELECT NEW NODE
+
+                // $("#jstree").on('loaded.jstree', function(e, data) {
+                //     //$treeview.jstree(true).select_all();
+                //     oController.selectNodeByFileNameInTree(oMessage.payload.fileName);
+                //
+                // });
 
                 // $('#jstree').jstree(true).select_all();
                 // $('#jstree').jstree(true).select_node(oMessage.payload.fileName);
@@ -849,7 +864,8 @@ var EditorController = (function () {
             // else
             //     oNode.state = {"opened" :false, "disabled":false, "selected" :true };//default state
 
-            oNode.state = {"opened" :false, "disabled":false, "selected" :true };
+            // oNode.state = { "opened" :false,"disabled":false,"selected " :true };//
+
             oNode.fileName = productList[iIndexProduct].fileName;
             oNode.children = [{"text": "metadata", "icon": "assets/icons/folder_20x20.png"}, {
                 "text": "Bands",
