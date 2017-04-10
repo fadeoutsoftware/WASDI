@@ -428,24 +428,24 @@ public class LauncherMain {
     {
         Send oSendToRabbit = new Send();
         try {
-            s_oLogger.debug("LauncherMain.Download: File Name = " + sFileName);
+            s_oLogger.debug("LauncherMain.ConvertProductToViewModelAndSendToRabbit: File Name = " + sFileName);
 
             // Get The product view Model
             ReadProduct oReadProduct = new ReadProduct();
-            s_oLogger.debug("LauncherMain.Download: call read product");
+            s_oLogger.debug("LauncherMain.ConvertProductToViewModelAndSendToRabbit: call read product");
             File oProductFile = new File(sFileName);
             oVM = oReadProduct.getProductViewModel(new File(sFileName));
             oVM.setMetadata(oReadProduct.getProductMetadataViewModel(oProductFile));
 
-            if (oVM.getBandsGroups() == null) s_oLogger.debug("LauncherMain.Download: Band Groups is NULL");
-            else if (oVM.getBandsGroups().getBands() == null) s_oLogger.debug("LauncherMain.Download: bands is NULL");
+            if (oVM.getBandsGroups() == null) s_oLogger.debug("LauncherMain.ConvertProductToViewModelAndSendToRabbit: Band Groups is NULL");
+            else if (oVM.getBandsGroups().getBands() == null) s_oLogger.debug("LauncherMain.ConvertProductToViewModelAndSendToRabbit: bands is NULL");
             else {
-                s_oLogger.debug("LauncherMain.Download: bands " + oVM.getBandsGroups().getBands().size());
+                s_oLogger.debug("LauncherMain.ConvertProductToViewModelAndSendToRabbit: bands " + oVM.getBandsGroups().getBands().size());
             }
 
-            s_oLogger.debug("LauncherMain.Download: done read product");
+            s_oLogger.debug("LauncherMain.ConvertProductToViewModelAndSendToRabbit: done read product");
 
-            if (oVM == null) s_oLogger.debug("LauncherMain.Download VM is null!!!!!!!!!!");
+            if (oVM == null) s_oLogger.debug("LauncherMain.ConvertProductToViewModelAndSendToRabbit VM is null!!!!!!!!!!");
 
             s_oLogger.debug("Insert in db");
             // Save it in the register
@@ -460,16 +460,16 @@ public class LauncherMain {
 
             s_oLogger.debug("OK DONE");
 
-            s_oLogger.debug("LauncherMain.Download: Image downloaded. Send Rabbit Message");
+            s_oLogger.debug("LauncherMain.ConvertProductToViewModelAndSendToRabbit: Image downloaded. Send Rabbit Message");
 
             if (oVM != null) {
 
-                s_oLogger.debug("LauncherMain.Download: Exchange = " + sExchange);
+                s_oLogger.debug("LauncherMain.ConvertProductToViewModelAndSendToRabbit: Exchange = " + sExchange);
 
                 oSendToRabbit.SendRabbitMessage(true,sOperation,sWorkspace,oVM,sExchange);
 
             } else {
-                s_oLogger.debug("LauncherMain.Download: Unable to read image. Send Rabbit Message");
+                s_oLogger.debug("LauncherMain.ConvertProductToViewModelAndSendToRabbit: Unable to read image. Send Rabbit Message");
 
                 oSendToRabbit.SendRabbitMessage(false,sOperation,sWorkspace,null,sExchange);
             }
@@ -482,7 +482,7 @@ public class LauncherMain {
     }
 
     /**
-     * Generic publish function. NOTE: probably will not be used, use publish band instead
+     * Generic Execute Operation Method
      * @param oParameter
      * @return
      */
@@ -518,6 +518,9 @@ public class LauncherMain {
             // Check integrity
             if (Utils.isNullOrEmpty(sFile)) {
                 s_oLogger.debug("LauncherMain.ExecuteOperation: file is null or empty");
+
+                oSendToRabbit.SendRabbitMessage(false,sTypeOperation,oParameter.getWorkspace(),null,oParameter.getExchange());
+
                 return;
             }
 
@@ -534,18 +537,24 @@ public class LauncherMain {
             }
 
             //Operation
-            s_oLogger.debug("LauncherMain.ExecuteOperation: Get Product");
+            s_oLogger.debug("LauncherMain.ExecuteOperation: Execute Operation");
             Product oTargetProduct = oOperation.getOperation(oSourceProduct, oParameter.getSettings());
             if (oTargetProduct == null)
             {
-                throw new Exception("LauncherMain.ExecuteOperation: Product null");
+                throw new Exception("LauncherMain.ExecuteOperation: Output Product is null");
             }
 
-            //s_oLogger.debug("LauncherMain.ExecuteOperation: Write Big Tiff");
+
             String sTargetFileName = oTargetProduct.getName();
+
             if (!Utils.isNullOrEmpty(oParameter.getDestinationProductName()))
                 sTargetFileName = oParameter.getDestinationProductName();
-            String sTiffFile = oWriter.WriteBigTiff(oTargetProduct, sPath, sTargetFileName);
+
+            s_oLogger.debug("LauncherMain.ExecuteOperation: Save Output Product " + sTargetFileName);
+
+            // P.Campanella 10/04/2017: changed big tiff with native format. NOT TESTED YET
+            String sTiffFile = oWriter.WriteProduct(oTargetProduct, sPath, sTargetFileName,oSourceProduct.getProductType(),Utils.GetFileNameExtension(sFile));
+            //String sTiffFile = oWriter.WriteBigTiff(oTargetProduct, sPath, sTargetFileName);
 
             if (Utils.isNullOrEmpty(sTiffFile))
             {
