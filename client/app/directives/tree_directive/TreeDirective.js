@@ -76,6 +76,7 @@ angular.module('wasdi.TreeDirective', [])
                         //if the tree is reloaded need  $('#jstree').jstree(true).refresh();
                         $('#jstree').jstree(true).settings.core = newValue.core;
                         $('#jstree').jstree(true).refresh();
+                        $scope.m_oController.selectNodeByFileNameInTree($scope.m_oController.m_oLastDownloadedProduct);
 
                     }
                     else
@@ -135,8 +136,7 @@ angular.module('wasdi.TreeDirective', [])
                         // {
                         //    //if the page was reload it method check all nodes in tree,
                         //    //this nodes are processes running in server
-                        //    //$scope.m_oController.checkNodesInTree();
-                        //
+                        //     $scope.m_oController.selectNodeByFileNameInTree($scope.m_oController.m_oLastDownloadedProduct);
                         // });
 
                     }

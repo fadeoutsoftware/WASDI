@@ -39,6 +39,7 @@ var GetCapabilitiesController = (function() {
                 var oResult = new WMSCapabilities().parse(data);
                 if(!utilsIsObjectNullOrUndefined(oResult.Capability) && !utilsIsObjectNullOrUndefined(oResult.Capability.Layer) && !utilsIsObjectNullOrUndefined(oResult.Capability.Layer.Layer))
                 {
+                    oController.m_aoLayers = [];
                     var iNumberOfLayers = oResult.Capability.Layer.Layer.length;
                    for(var iIndexLayer = 0; iIndexLayer < iNumberOfLayers; iIndexLayer++)
                    {
