@@ -8,6 +8,7 @@ import java.util.List;
 import javax.servlet.ServletConfig;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
@@ -141,6 +142,61 @@ public class ProductResource {
 
 		return aoProductList;
 	}
+	
+	@POST
+	@Path("/update")
+	@Produces({"application/xml", "application/json", "text/xml"})
+	public Response UpdateProductViewModel(@HeaderParam("x-session-token") String sSessionId, ProductViewModel oProductViewModel) {
+
+		User oUser = Wasdi.GetUserFromSession(sSessionId);
+
+		try {
+
+			// Domain Check
+			if (oUser == null) {
+				return Response.status(401).build();
+			}
+			if (Utils.isNullOrEmpty(oUser.getUserId())) {
+				return Response.status(401).build();
+			}
+			
+			if (oProductViewModel==null) {
+				return Response.status(500).build();
+			}
+
+
+			System.out.println("ProductResource.UpdateProductViewModel: product " + oProductViewModel.getFileName());
+
+			// Create repo
+			DownloadedFilesRepository oDownloadedFilesRepository = new DownloadedFilesRepository();
+			
+			DownloadedFile oDownlaoded = oDownloadedFilesRepository.GetDownloadedFile(oProductViewModel.getFileName());
+			
+			if (oDownlaoded == null) {
+				System.out.println("ProductResource.UpdateProductViewModel: Associated downloaded file not found.");
+				return Response.status(500).build();
+			}
+			
+			oDownlaoded.setProductViewModel(oProductViewModel);
+			
+			if (oDownloadedFilesRepository.UpdateDownloadedFile(oDownlaoded) == false) {
+				System.out.println("ProductResource.UpdateProductViewModel: There was an error updating Downloaded File.");
+				return Response.status(500).build();
+			}
+
+
+		}
+		catch (Exception oEx) {
+			System.out.println("ProductResource.UpdateProductViewModel: Exception " + oEx.toString());
+			oEx.toString();
+			return Response.status(500).build();
+		}
+		
+		System.out.println("ProductResource.UpdateProductViewModel: Updated ");
+
+		return Response.status(200).build();
+	}
+	
 
 
 	@GET
