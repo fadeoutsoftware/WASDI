@@ -43,4 +43,5 @@ public class DownloadedFile {
     public void setBoundingBox(String boundingBox) {
         this.boundingBox = boundingBox;
     }
+
 }

@@ -9,6 +9,8 @@ public class ProductViewModel {
 
     private String fileName;
 
+    private String productFriendlyName;
+
     private MetadataViewModel metadata;
 
     private NodeGroupViewModel bandsGroups;
@@ -21,7 +23,6 @@ public class ProductViewModel {
     public void setMetadata(MetadataViewModel metadata) {
         this.metadata = metadata;
     }
-
 
     public NodeGroupViewModel getBandsGroups() {
         return bandsGroups;
@@ -45,5 +46,13 @@ public class ProductViewModel {
 
     public void setFileName(String fileName) {
         this.fileName = fileName;
+    }
+
+    public String getProductFriendlyName() {
+        return productFriendlyName;
+    }
+
+    public void setProductFriendlyName(String productFriendlyName) {
+        this.productFriendlyName = productFriendlyName;
     }
 }
