@@ -6,6 +6,7 @@ import java.util.Date;
 import javax.servlet.ServletConfig;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
@@ -34,44 +35,38 @@ import wasdi.shared.parameters.RangeDopplerGeocodingSetting;
 import wasdi.shared.utils.SerializationUtils;
 import wasdi.shared.utils.Utils;
 
-@Path("/snap")
+@Path("/processing")
 public class SnapOperationsResources {
 	
 	@Context
 	ServletConfig m_oServletConfig;
 
-	@GET
-	@Path("terrain")
+	@POST
+	@Path("geometric/rangeDopplerTerrainCorrection")
 	@Produces({"application/xml", "application/json", "text/xml"})
 	public Response TerrainCorrection(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sSourceProductName") String sSourceProductName, @QueryParam("sDestinationProductName") String sDestinationProductName, @QueryParam("sWorkspaceId") String sWorkspaceId, RangeDopplerGeocodingSetting oSetting) throws IOException
 	{
-		
 		return ExecuteOperation(sSessionId, sSourceProductName, sDestinationProductName, sWorkspaceId, oSetting, LauncherOperations.TERRAIN);
-
 	}
 	
-	@GET
-	@Path("orbit")
+	@POST
+	@Path("radar/applyOrbit")
 	@Produces({"application/xml", "application/json", "text/xml"})
 	public Response ApplyOrbit(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sSourceProductName") String sSourceProductName, @QueryParam("sDestinationProductName") String sDestinationProductName, @QueryParam("sWorkspaceId") String sWorkspaceId, ApplyOrbitSetting oSetting) throws IOException
-	{
-		
+	{	
 		return ExecuteOperation(sSessionId, sSourceProductName, sDestinationProductName, sWorkspaceId, oSetting, LauncherOperations.APPLYORBIT);
-
 	}
 	
-	@GET
-	@Path("calibrate")
+	@POST
+	@Path("radar/radiometricCalibration")
 	@Produces({"application/xml", "application/json", "text/xml"})
 	public Response Calibrate(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sSourceProductName") String sSourceProductName, @QueryParam("sDestinationProductName") String sDestinationProductName, @QueryParam("sWorkspaceId") String sWorkspaceId, CalibratorSetting oSetting) throws IOException
 	{
-		
 		return ExecuteOperation(sSessionId, sSourceProductName, sDestinationProductName, sWorkspaceId, oSetting, LauncherOperations.CALIBRATE);
-
 	}
 	
-	@GET
-	@Path("multilooking")
+	@POST
+	@Path("radar/multilooking")
 	@Produces({"application/xml", "application/json", "text/xml"})
 	public Response Multilooking(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sSourceProductName") String sSourceProductName, @QueryParam("sDestinationProductName") String sDestinationProductName, @QueryParam("sWorkspaceId") String sWorkspaceId, MultilookingSetting oSetting) throws IOException
 	{
@@ -80,14 +75,12 @@ public class SnapOperationsResources {
 
 	}
 	
-	@GET
-	@Path("ndvi")
+	@POST
+	@Path("optical/ndvi")
 	@Produces({"application/xml", "application/json", "text/xml"})
 	public Response NDVI(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sSourceProductName") String sSourceProductName, @QueryParam("sDestinationProductName") String sDestinationProductName, @QueryParam("sWorkspaceId") String sWorkspaceId, NDVISetting oSetting) throws IOException
 	{
-		
 		return ExecuteOperation(sSessionId, sSourceProductName, sDestinationProductName, sWorkspaceId, oSetting, LauncherOperations.NDVI);
-
 	}
 
 
@@ -104,9 +97,10 @@ public class SnapOperationsResources {
 	
 	private Response ExecuteOperation(String sSessionId, String sSourceProductName, String sDestinationProductName, String sWorkspaceId, ISetting oSetting, String sOperator)
 	{
+		
 		String sUserId = AcceptedUserAndSession(sSessionId);
-		if (Utils.isNullOrEmpty(sUserId))
-			return Response.status(401).build();
+		
+		if (Utils.isNullOrEmpty(sUserId)) return Response.status(401).build();
 		
 		try {
 			//Update process list
@@ -123,7 +117,7 @@ public class SnapOperationsResources {
 				sProcessId = oRepository.InsertProcessWorkspace(oProcess);
 			}
 			catch(Exception oEx){
-				System.out.println("DownloadResource.Download: Error updating process list " + oEx.getMessage());
+				System.out.println("SnapOperations.ExecuteOperation: Error updating process list " + oEx.getMessage());
 				oEx.printStackTrace();
 				return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
 			}
@@ -159,9 +153,8 @@ public class SnapOperationsResources {
 		}
 		
 		return Response.ok().build();
-		
-		
 	}
+
 	
 	private OperatorParameter GetParameter(String sOperation)
 	{

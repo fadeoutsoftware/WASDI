@@ -32,12 +32,12 @@ public class OpenSearchResource {
 	{
 		System.out.println("OpenSearchResource: Search Sentinel");
 		
-		//if (Utils.isNullOrEmpty(sSessionId)) return null;
+		if (Utils.isNullOrEmpty(sSessionId)) return null;
 		
-		//User oUser = Wasdi.GetUserFromSession(sSessionId);
+		User oUser = Wasdi.GetUserFromSession(sSessionId);
 		
-		//if (oUser==null) return null;
-		//if (Utils.isNullOrEmpty(oUser.getUserId())) return null;
+		if (oUser==null) return null;
+		if (Utils.isNullOrEmpty(oUser.getUserId())) return null;
 		
 		try {
 			HashMap<String, String> asParameterMap = new HashMap<>();
