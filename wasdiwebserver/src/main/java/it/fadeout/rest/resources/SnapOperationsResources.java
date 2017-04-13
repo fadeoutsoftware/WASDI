@@ -138,8 +138,9 @@ public class SnapOperationsResources {
 			SerializationUtils.serializeObjectToXML(sPath, oParameter);
 
 			String sLauncherPath = m_oServletConfig.getInitParameter("LauncherPath");
+			String sJavaExe = m_oServletConfig.getInitParameter("JavaExe");
 
-			String sShellExString = "java -jar " + sLauncherPath +" -operation " + sOperator + " -parameter " + sPath;
+			String sShellExString = sJavaExe + " -jar " + sLauncherPath +" -operation " + sOperator + " -parameter " + sPath;
 
 			System.out.println("DownloadResource.Download: shell exec " + sShellExString);
 

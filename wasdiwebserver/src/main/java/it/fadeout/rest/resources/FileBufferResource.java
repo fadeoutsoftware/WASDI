@@ -63,8 +63,9 @@ public class FileBufferResource {
 			SerializationUtils.serializeObjectToXML(sPath, oParameter);
 
 			String sLauncherPath = m_oServletConfig.getInitParameter("LauncherPath");
+			String sJavaExe = m_oServletConfig.getInitParameter("JavaExe");
 
-			String sShellExString = "java -jar " + sLauncherPath +" -operation " + LauncherOperations.DOWNLOADANDPUBLISH + " -parameter " + sPath;
+			String sShellExString = sJavaExe + " -jar " + sLauncherPath +" -operation " + LauncherOperations.DOWNLOADANDPUBLISH + " -parameter " + sPath;
 
 			System.out.println("DownloadResource.DownloadAndPublish: shell exec " + sShellExString);
 
@@ -133,8 +134,9 @@ public class FileBufferResource {
 			SerializationUtils.serializeObjectToXML(sPath, oParameter);
 
 			String sLauncherPath = m_oServletConfig.getInitParameter("LauncherPath");
+			String sJavaExe = m_oServletConfig.getInitParameter("JavaExe");
 
-			String sShellExString = "java -jar " + sLauncherPath +" -operation " + LauncherOperations.DOWNLOAD + " -parameter " + sPath;
+			String sShellExString = sJavaExe + " -jar " + sLauncherPath +" -operation " + LauncherOperations.DOWNLOAD + " -parameter " + sPath;
 
 			System.out.println("DownloadResource.Download: shell exec " + sShellExString);
 
@@ -213,8 +215,9 @@ public class FileBufferResource {
 			SerializationUtils.serializeObjectToXML(sPath, oParameter);
 
 			String sLauncherPath = m_oServletConfig.getInitParameter("LauncherPath");
+			String sJavaExe = m_oServletConfig.getInitParameter("JavaExe");
 
-			String sShellExString = "java -jar " + sLauncherPath +" -operation " + LauncherOperations.PUBLISH + " -parameter " + sPath;
+			String sShellExString = sJavaExe + " -jar " + sLauncherPath +" -operation " + LauncherOperations.PUBLISH + " -parameter " + sPath;
 
 			System.out.println("DownloadResource.Publish: shell exec " + sShellExString);
 
@@ -314,8 +317,10 @@ public class FileBufferResource {
 			SerializationUtils.serializeObjectToXML(sPath, oParameter);
 
 			String sLauncherPath = m_oServletConfig.getInitParameter("LauncherPath");
+			String sJavaExe = m_oServletConfig.getInitParameter("JavaExe");
+			String sJavaExendMemoryParam = m_oServletConfig.getInitParameter("JavaExendMemoryParam");
 
-			String sShellExString = "java -Xmx8g -Xms256m -jar " + sLauncherPath +" -operation " + LauncherOperations.PUBLISHBAND + " -parameter " + sPath;
+			String sShellExString = sJavaExe + " " + sJavaExendMemoryParam + " -jar " + sLauncherPath +" -operation " + LauncherOperations.PUBLISHBAND + " -parameter " + sPath;
 
 			System.out.println("DownloadResource.PublishBand: shell exec " + sShellExString);
 
