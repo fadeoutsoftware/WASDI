@@ -7,7 +7,7 @@ import org.apache.abdera.parser.ParserOptions;
 import org.apache.abdera.writer.*;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.esa.s1tbx.sar.gpf.geometric.CRSGeoCodingHandler;
+//import org.esa.s1tbx.sar.gpf.geometric.CRSGeoCodingHandler;
 import org.esa.snap.core.dataio.ProductIO;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.gpf.graph.GraphException;
@@ -46,30 +46,30 @@ public class Test {
     private static void UpdateGraphXml()
     {
 
-        File oFile = new File("c:\\temp\\wasdi\\Graph.xml");
-        try {
-            GraphExecuter m_oGraphEx = new GraphExecuter();
-            String fileContext = FileUtils.readFileToString(oFile, "UTF-8");
-            Product oProduct = ProductIO.readProduct(new File("C:/Users/s.adamo/Documents/S1B_IW_GRDH_1SDV_20170302T050413_20170302T050438_004525_007E0D_0EB9.zip"));
-            final CRSGeoCodingHandler crsHandler = new CRSGeoCodingHandler(oProduct, "AUTO:42001", 20, 20);
-            CoordinateReferenceSystem targetCRS = crsHandler.getTargetCRS();
-            fileContext = fileContext.replace("{InputFile}", "C:/Users/s.adamo/Documents/S1B_IW_GRDH_1SDV_20170302T050413_20170302T050438_004525_007E0D_0EB9.zip");
-            fileContext = fileContext.replace("{OutputFile}", "C:\\temp\\wasdi\\" + oProduct.getName());
-            fileContext = fileContext.replace("{MPROJ}", targetCRS.toString());
-            InputStream in = IOUtils.toInputStream(fileContext, "UTF-8");
-            m_oGraphEx.loadGraph(in, oFile, false);
-            m_oGraphEx.InitGraph();
-            m_oGraphEx.executeGraph(ProgressMonitor.NULL);
-
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (GraphException e) {
-            e.printStackTrace();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+//        File oFile = new File("c:\\temp\\wasdi\\Graph.xml");
+//        try {
+//            GraphExecuter m_oGraphEx = new GraphExecuter();
+//            String fileContext = FileUtils.readFileToString(oFile, "UTF-8");
+//            Product oProduct = ProductIO.readProduct(new File("C:/Users/s.adamo/Documents/S1B_IW_GRDH_1SDV_20170302T050413_20170302T050438_004525_007E0D_0EB9.zip"));
+//            final CRSGeoCodingHandler crsHandler = new CRSGeoCodingHandler(oProduct, "AUTO:42001", 20, 20);
+//            CoordinateReferenceSystem targetCRS = crsHandler.getTargetCRS();
+//            fileContext = fileContext.replace("{InputFile}", "C:/Users/s.adamo/Documents/S1B_IW_GRDH_1SDV_20170302T050413_20170302T050438_004525_007E0D_0EB9.zip");
+//            fileContext = fileContext.replace("{OutputFile}", "C:\\temp\\wasdi\\" + oProduct.getName());
+//            fileContext = fileContext.replace("{MPROJ}", targetCRS.toString());
+//            InputStream in = IOUtils.toInputStream(fileContext, "UTF-8");
+//            m_oGraphEx.loadGraph(in, oFile, false, true);
+//            m_oGraphEx.InitGraph();
+//            m_oGraphEx.executeGraph(ProgressMonitor.NULL);
+//
+//        } catch (FileNotFoundException e) {
+//            e.printStackTrace();
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        } catch (GraphException e) {
+//            e.printStackTrace();
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
 
 
     }

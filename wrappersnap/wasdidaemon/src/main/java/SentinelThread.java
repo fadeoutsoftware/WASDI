@@ -232,7 +232,7 @@ public class SentinelThread implements Callable<Boolean> {
             if (sMapProjection  != null && sMapProjection != "")
                 fileContext = fileContext.replace("{MPROJ}", sMapProjection);
             InputStream in = IOUtils.toInputStream(fileContext, "UTF-8");
-            getGraphEx().loadGraph(in, oFile, false);
+            getGraphEx().loadGraph(in, oFile, false,true);
             getGraphEx().InitGraph();
             Main.s_oLogger.debug("SentinelThread.UpdateGraphXml: Graph Initialized");
 
