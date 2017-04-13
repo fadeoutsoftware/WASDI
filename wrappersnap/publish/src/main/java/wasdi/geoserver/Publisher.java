@@ -86,8 +86,10 @@ public class Publisher {
             //String sCmd = String.format("%s %s -v -r bilinear -levels %d -ps %s %s -co \"TILED=YES\" -targetDir %s %s", PYTHON_PATH, GDAL_Retile_Path, iLevel, iWidth, iHeight, "\""+sTargetDir +"\"","\""+ sInputFile+"\"");
             //String sCmd = String.format("%s %s -v -r bilinear -levels %d -ps %s %s -co TILED=YES -targetDir %s %s", PYTHON_PATH, GDAL_Retile_Path, iLevel, iWidth, iHeight, sTargetDir, sInputFile);
             //String sCmd = String.format("/usr/lib/wasdi/launcher/run_gdal_retile.sh %s %s", sTargetDir, sInputFile);
+            
+            s_oLogger.debug("Publisher.LaunchImagePyramidCreation: CIAO");
                         
-            String sCmd = String.format("gdal_retile.py -v -r bilinear -levels %d -ps %d %d -co TILED=YES -targetDir %s %s", iLevel, iWidth, iHeight, sTargetDir, sInputFile);
+            String sCmd = String.format("gdal_retile.py -r bilinear -levels %d -ps %d %d -co TILED=YES -targetDir %s %s", iLevel, iWidth, iHeight, sTargetDir, sInputFile);
             
             String[] asEnvp = PYRAMYD_ENV_OPTIONS.split("\\|");
 
