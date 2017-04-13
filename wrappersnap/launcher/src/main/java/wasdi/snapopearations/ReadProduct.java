@@ -69,13 +69,20 @@ public class ReadProduct {
     {
         LauncherMain.s_oLogger.debug("ReadProduct.getProductViewModel: start");
 
-        ProductViewModel oViewModel = new ProductViewModel();
         Product exportProduct = ReadProduct(oFile, null);
 
         if (exportProduct == null) {
             LauncherMain.s_oLogger.debug("ReadProduct.getProductViewModel: read product returns null");
             return null;
         }
+
+        ProductViewModel oViewModel = getProductViewModel(exportProduct);
+
+        return  oViewModel;
+    }
+
+	public ProductViewModel getProductViewModel(Product exportProduct) {
+		ProductViewModel oViewModel = new ProductViewModel();
 
         // P.Campanella: splitted bands and metadata view models
         //oViewModel.setMetadata(GetMetadataViewModel(exportProduct.getMetadataRoot(), new MetadataViewModel("Metadata")));
@@ -86,13 +93,14 @@ public class ReadProduct {
 
         LauncherMain.s_oLogger.debug("ReadProduct.getProductViewModel: setting Name and Path");
 
+        File oFile = exportProduct.getFileLocation();
+        
         oViewModel.setName(Utils.GetFileNameWithoutExtension(oFile.getAbsolutePath()));
         oViewModel.setFileName(oFile.getName());
 
         LauncherMain.s_oLogger.debug("ReadProduct.getProductViewModel: end");
-
-        return  oViewModel;
-    }
+		return oViewModel;
+	}
 
     public MetadataViewModel getProductMetadataViewModel(File oFile) throws IOException
     {
