@@ -417,7 +417,7 @@ public class LauncherMain {
 
     /**
      * Converts a product in a ViewModel and send it to the rabbit queue
-     * @param oVM View Model to fill
+     * @param oVM View Model... if null, read it from the product in sFileName
      * @param sFileName File Name
      * @param sWorkspace Workspace
      * @param sExchange Queue Id
@@ -430,23 +430,25 @@ public class LauncherMain {
         try {
             s_oLogger.debug("LauncherMain.ConvertProductToViewModelAndSendToRabbit: File Name = " + sFileName);
 
-            // Get The product view Model
-            ReadProduct oReadProduct = new ReadProduct();
-            s_oLogger.debug("LauncherMain.ConvertProductToViewModelAndSendToRabbit: call read product");
-            File oProductFile = new File(sFileName);
-            oVM = oReadProduct.getProductViewModel(new File(sFileName));
-            oVM.setMetadata(oReadProduct.getProductMetadataViewModel(oProductFile));
+            // Get The product view Model            
+            if (oVM == null) {
+	            ReadProduct oReadProduct = new ReadProduct();
+	            s_oLogger.debug("LauncherMain.ConvertProductToViewModelAndSendToRabbit: call read product");
+	            File oProductFile = new File(sFileName);
+	            oVM = oReadProduct.getProductViewModel(new File(sFileName));
+	            oVM.setMetadata(oReadProduct.getProductMetadataViewModel(oProductFile));
 
-            if (oVM.getBandsGroups() == null) s_oLogger.debug("LauncherMain.ConvertProductToViewModelAndSendToRabbit: Band Groups is NULL");
-            else if (oVM.getBandsGroups().getBands() == null) s_oLogger.debug("LauncherMain.ConvertProductToViewModelAndSendToRabbit: bands is NULL");
-            else {
-                s_oLogger.debug("LauncherMain.ConvertProductToViewModelAndSendToRabbit: bands " + oVM.getBandsGroups().getBands().size());
+	            if (oVM.getBandsGroups() == null) {
+	            	s_oLogger.debug("LauncherMain.ConvertProductToViewModelAndSendToRabbit: Band Groups is NULL");
+	            } else if (oVM.getBandsGroups().getBands() == null) {
+	            	s_oLogger.debug("LauncherMain.ConvertProductToViewModelAndSendToRabbit: bands is NULL");
+	            } else {
+	                s_oLogger.debug("LauncherMain.ConvertProductToViewModelAndSendToRabbit: bands " + oVM.getBandsGroups().getBands().size());
+	            }
+	
+	            s_oLogger.debug("LauncherMain.ConvertProductToViewModelAndSendToRabbit: done read product");
             }
-
-            s_oLogger.debug("LauncherMain.ConvertProductToViewModelAndSendToRabbit: done read product");
-
-            if (oVM == null) s_oLogger.debug("LauncherMain.ConvertProductToViewModelAndSendToRabbit VM is null!!!!!!!!!!");
-
+            
             s_oLogger.debug("Insert in db");
             // Save it in the register
             DownloadedFile oAlreadyDownloaded = new DownloadedFile();
@@ -462,17 +464,10 @@ public class LauncherMain {
 
             s_oLogger.debug("LauncherMain.ConvertProductToViewModelAndSendToRabbit: Image downloaded. Send Rabbit Message");
 
-            if (oVM != null) {
+            s_oLogger.debug("LauncherMain.ConvertProductToViewModelAndSendToRabbit: Exchange = " + sExchange);
 
-                s_oLogger.debug("LauncherMain.ConvertProductToViewModelAndSendToRabbit: Exchange = " + sExchange);
-
-                oSendToRabbit.SendRabbitMessage(true,sOperation,sWorkspace,oVM,sExchange);
-
-            } else {
-                s_oLogger.debug("LauncherMain.ConvertProductToViewModelAndSendToRabbit: Unable to read image. Send Rabbit Message");
-
-                oSendToRabbit.SendRabbitMessage(false,sOperation,sWorkspace,null,sExchange);
-            }
+            oSendToRabbit.SendRabbitMessage(true,sOperation,sWorkspace,oVM,sExchange);
+            
         }
         catch(Exception oEx)
         {
@@ -553,7 +548,7 @@ public class LauncherMain {
             s_oLogger.debug("LauncherMain.ExecuteOperation: Save Output Product " + sTargetFileName);
 
             // P.Campanella 10/04/2017: changed big tiff with native format. NOT TESTED YET
-            String sTiffFile = oWriter.WriteProduct(oTargetProduct, sPath, sTargetFileName,oSourceProduct.getProductType(),Utils.GetFileNameExtension(sFile));
+            String sTiffFile = oWriter.WriteProduct(oTargetProduct, sPath, sTargetFileName, oSourceProduct.getProductType(), Utils.GetFileNameExtension(sFile));
             //String sTiffFile = oWriter.WriteBigTiff(oTargetProduct, sPath, sTargetFileName);
 
             if (Utils.isNullOrEmpty(sTiffFile))
@@ -562,7 +557,8 @@ public class LauncherMain {
             }
 
             s_oLogger.debug("LauncherMain.TerrainOperation: convert product to view model");
-            ConvertProductToViewModelAndSendToRabbit(new ProductViewModel(), sTiffFile, oParameter.getWorkspace(), oParameter.getExchange(), sTypeOperation, null);
+            
+            ConvertProductToViewModelAndSendToRabbit(null, sTiffFile, oParameter.getWorkspace(), oParameter.getExchange(), sTypeOperation, null);
 
             //this.PublishOnGeoserver(oParameter.getPublishParameter(), oTerrainProduct.getName(), sBandName);
 
@@ -906,7 +902,7 @@ public class LauncherMain {
             s_oLogger.debug("LauncherMain.RasterGeometricResample: convert product to view model");
             String sOutFile = oWriter.WriteBEAMDIMAP(oResampledProduct, sPath, sFileNameOnly+"_resampled");
 
-            ConvertProductToViewModelAndSendToRabbit(new ProductViewModel(), sOutFile, oParameter.getWorkspace(), oParameter.getExchange(), LauncherOperations.RASTERGEOMETRICRESAMPLE, null);
+            ConvertProductToViewModelAndSendToRabbit(null, sOutFile, oParameter.getWorkspace(), oParameter.getExchange(), LauncherOperations.RASTERGEOMETRICRESAMPLE, null);
 
         }
         catch (Exception oEx) {
@@ -927,215 +923,6 @@ public class LauncherMain {
             }
         }
     }
-
-
-    /**
-     * Generic publish function. NOTE: probably will not be used, use publish band instead
-     * @param oParameter
-     * @return
-     */
-    /*
-    public String Publish(PublishParameters oParameter) {
-
-        //System.setProperty("snap.home", "C:\\Codice\\esa\\wasdi\\wrappersnap\\snap-desktop\\snap-application\\target\\snap\\etc\\snap.properties");
-
-        JAI.getDefaultInstance().getTileScheduler().setParallelism(Runtime.getRuntime().availableProcessors());
-        MemUtils.configureJaiTileCache();
-
-        String sLayerId = "";
-        // Rabbit Sender
-        Send oSendToRabbit = new Send();
-
-        try {
-            //Init rabbit exchange and queue
-            if (oSendToRabbit.Init(oParameter.getWorkspace(), oParameter.getUserId()) == false)
-            {
-                s_oLogger.debug("LauncherMain.Publish: Failed initializing RabbitMQ");
-                return sLayerId;
-            }
-
-            //send update process message
-            if (oSendToRabbit.SendUpdateProcessMessage(oParameter.getWorkspace()) == false)
-            {
-                s_oLogger.debug("LauncherMain.Publish: Error sending rabbitmq message to update process list");
-            }
-
-            // Read File Name
-            String sFile = oParameter.getFileName();
-
-            String sPath = ConfigReader.getPropValue("DOWNLOAD_ROOT_PATH");
-            if (!sPath.endsWith("/")) sPath += "/";
-            sPath += oParameter.getUserId() + "/" + oParameter.getWorkspace() + "/";
-            sFile = sPath + sFile;
-
-
-            // Check integrity
-            if (Utils.isNullOrEmpty(sFile)) {
-                s_oLogger.debug("LauncherMain.Publish: file is null or empty");
-                return sLayerId;
-            }
-
-            // Create a file object for the downloaded file
-            File oDownloadedFile = new File(sFile);
-            String sInputFileNameOnly = oDownloadedFile.getName();
-            sLayerId = sInputFileNameOnly;
-
-            sLayerId = Utils.GetFileNameWithoutExtension(sFile);
-
-            // Copy fie to GeoServer Data Dir
-            String sGeoServerDataDir = ConfigReader.getPropValue("GEOSERVER_DATADIR");
-            String sTargetDir = sGeoServerDataDir;
-
-            if (!(sTargetDir.endsWith("/") || sTargetDir.endsWith("\\"))) sTargetDir += "/";
-            sTargetDir += sLayerId + "/";
-
-            String sTargetFile = sTargetDir + sInputFileNameOnly;
-
-            File oTargetFile = new File(sTargetFile);
-
-            s_oLogger.debug("LauncherMain.publish: InputFile: " + sFile + " TargetFile: " + sTargetDir + " LayerId " + sLayerId);
-
-            //FileUtils.copyFile(oDownloadedFile, oTargetFile);
-            WriteProduct oWriter = new WriteProduct();
-
-            ReadProduct oReadProduct = new ReadProduct();
-            //TODO: Here recognize the file type and run the right procedure. At the moment assume Sentinel1A
-            s_oLogger.debug("LauncherMain.publish: Read Product");
-            Product oOriginProduct = oReadProduct.ReadProduct(oDownloadedFile, null);
-
-            //TODO: questo pezzo dell'anteprima bisognerà spostarlo nella lettura del prodotto, ora volevo vedere solo come funzionava
-            //Quicklook oQuickLook = oOriginProduct.getDefaultQuicklook();
-            //BufferedImage oImage = oQuickLook.getImage(ProgressMonitor.NULL);
-            //----------------------------------------------------------------------------------
-
-            if (oOriginProduct == null)
-            {
-                s_oLogger.debug("LauncherMain.publish: Product null");
-                return null;
-            }
-            //Calibration
-            s_oLogger.debug("LauncherMain.publish: Calibrate Product");
-            Calibration oCalibration = new Calibration();
-            String[] asBands = new String[]{oOriginProduct.getBandAt(0).getName()};
-            Product oCalibratedProduct = oCalibration.getCalibration(oOriginProduct, asBands);
-            String sCalibrateProduct = oWriter.WriteBigTiff(oCalibratedProduct, sPath, oCalibratedProduct.getName(), null);
-
-            oCalibratedProduct = oReadProduct.ReadProduct(new File(sCalibrateProduct), null);
-
-            if (oCalibratedProduct == null)
-            {
-                s_oLogger.debug("LauncherMain.publish: Calibrated Product null");
-                return null;
-            }
-            //oWriter.WriteBigTiff(oCalibratedProduct, oCalibratedProduct.getName(), sPath);
-            //Filter
-            s_oLogger.debug("LauncherMain.publish: Filter Product");
-            Filter oFilter = new Filter();
-            asBands[0] = oCalibratedProduct.getBandAt(0).getName();
-            Product oFilteredProduct = oFilter.getFilter(oCalibratedProduct, asBands);
-            String sFilterProduct = oWriter.WriteBigTiff(oFilteredProduct, sPath, oFilteredProduct.getName(), null);
-            if (oFilteredProduct == null)
-            {
-                s_oLogger.debug("LauncherMain.publish: Filtered Product null");
-                return null;
-            }
-            oFilteredProduct = oReadProduct.ReadProduct(new File(sFilterProduct), null);
-            //Multilooking
-            s_oLogger.debug("LauncherMain.publish: Multilooking Product");
-            Multilooking oMultilooking = new Multilooking();
-            asBands[0] = oFilteredProduct.getBandAt(0).getName();
-            Product oMultilookedProduct = oMultilooking.getMultilooking(oFilteredProduct, asBands);
-            String sMultiProduct = oWriter.WriteBigTiff(oMultilookedProduct, sPath, oMultilookedProduct.getName(), null);
-            if (oMultilookedProduct == null)
-            {
-                s_oLogger.debug("LauncherMain.publish: Multilook Product null");
-                return null;
-            }
-            oMultilookedProduct = oReadProduct.ReadProduct(new File(sMultiProduct), null);
-            //Terrain
-            s_oLogger.debug("LauncherMain.publish: Terrain Product");
-            TerrainCorrection oTerrainCorrection = new TerrainCorrection();
-            asBands[0] = oMultilookedProduct.getBandAt(0).getName();
-            Product oTerrainProduct = oTerrainCorrection.getTerrainCorrection(oMultilookedProduct, asBands);
-            if (oTerrainProduct == null)
-            {
-                s_oLogger.debug("LauncherMain.publish: Terrain product null");
-                return null;
-            }
-
-            //s_oLogger.debug("LauncherMain.publish: Write Big Tiff");
-            String sTiffFile = oWriter.WriteBigTiff(oTerrainProduct, sPath, oTerrainProduct.getName(), null);
-
-            // Generate file output name
-            sLayerId = Utils.GetFileNameWithoutExtension(oTerrainProduct.getName());
-            String sOutputFilePath = sPath + sLayerId + ".tif";
-            //File oOutputFile = new File(sOutputFilePath);
-
-
-            // Check result
-            if (Utils.isNullOrEmpty(sTiffFile)) {
-                s_oLogger.debug("LauncherMain.Publish: Tiff File is null or empty");
-                return sLayerId;
-            }
-
-            // Ok publish
-            //sLayerId = oTerrainProduct.getName();
-            s_oLogger.debug("LauncherMain.publish: Layer id " + sLayerId);
-            s_oLogger.debug("LauncherMain.publish: call PublishImage");
-            Publisher oPublisher = new Publisher();
-            sLayerId = oPublisher.publishGeoTiff(sOutputFilePath, ConfigReader.getPropValue("GEOSERVER_ADDRESS"), ConfigReader.getPropValue("GEOSERVER_USER"), ConfigReader.getPropValue("GEOSERVER_PASSWORD"), ConfigReader.getPropValue("GEOSERVER_WORKSPACE"), sLayerId);
-
-            s_oLogger.debug("LauncherMain.publish: Image published. Send Rabbit Message");
-            Send oSendLayerId = new Send();
-            s_oLogger.debug("LauncherMain.publish: Queue = " + oParameter.getQueue() + " LayerId = " + sLayerId);
-
-            RabbitMessageViewModel oMessageViewModel = new RabbitMessageViewModel();
-            oMessageViewModel.setMessageCode(LauncherOperations.PUBLISH);
-            oMessageViewModel.setWorkspaceId(oParameter.getWorkspace());
-            oMessageViewModel.setMessageResult("OK");
-            String sJSON = MongoRepository.s_oMapper.writeValueAsString(oMessageViewModel);
-
-            if (oSendLayerId.SendMsgOnExchange(oParameter.getExchange(), sJSON) == false) {
-                s_oLogger.debug("LauncherMain.publish: Error sending Rabbit Message");
-            }
-
-            // Deletes the copy of the Zip file
-            s_oLogger.debug("LauncherMain.publish: delete Zip File Copy " + oTargetFile.getPath());
-
-            if (oTargetFile.delete() == false) {
-                s_oLogger.debug("LauncherMain.publish: impossible to delete zip file");
-            }
-        }
-        catch (Exception oEx) {
-            s_oLogger.debug("LauncherMain.Publish: exception " + oEx.toString());
-
-            RabbitMessageViewModel oMessageViewModel = new RabbitMessageViewModel();
-            oMessageViewModel.setMessageCode(LauncherOperations.PUBLISH);
-            oMessageViewModel.setWorkspaceId(oParameter.getWorkspace());
-            oMessageViewModel.setMessageResult("KO");
-
-            try {
-                String sJSON = MongoRepository.s_oMapper.writeValueAsString(oMessageViewModel);
-                oSendToRabbit.SendMsgOnExchange(oParameter.getExchange(), sJSON);
-            }
-            catch (Exception oEx2) {
-                s_oLogger.debug("LauncherMain.Publish: Inner Exception " + oEx2.toString());
-            }
-        }
-        finally{
-            //delete process from list
-            try{
-                ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
-                oProcessWorkspaceRepository.DeleteProcessWorkspace(oParameter.getProcessObjId());
-            }
-            catch (Exception oEx) {
-                s_oLogger.debug("LauncherMain.Publish: Exception deleting process " + oEx.toString());
-            }
-        }
-
-        return sLayerId;
-    }
-    */
 
 
 }
