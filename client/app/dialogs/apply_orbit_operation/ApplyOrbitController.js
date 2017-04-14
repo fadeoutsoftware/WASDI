@@ -35,12 +35,23 @@ var ApplyOrbitController = (function() {
 
         this.m_sSelectedExtension = this.m_asTypeOfData[0];
         this.m_sSelectedOrbitStateVectors = this.m_asOrbitStateVectors[0];
-        //this.m_oOrbit = oExtras;
-        //$scope.close = oClose;
-        $scope.close = function(result) {
-            oClose(result, 500); // close, but give 500ms for bootstrap to animate
+        //TODO CHECK IF THERE IS sourceFileName && destinationFileName
+        this.m_oReturnValue = {
+            sourceFileName:this.m_oSelectedProduct.filename,
+            destinationFileName:this.m_sFriendlyName_Operation,
+            options:{}
         };
 
+
+        //this.m_oOrbit = oExtras;
+        //$scope.close = oClose;
+        $scope.close = function() {
+            oClose("close", 500); // close, but give 500ms for bootstrap to animate
+        };
+        $scope.run = function(oOptions) {
+            //TODO CHECK OPTIONS
+            oClose(oOptions, 500); // close, but give 500ms for bootstrap to animate
+        };
     };
     // ApplyOrbitController.prototype.tabOpen = function(sTabInput)
     // {
@@ -61,7 +72,19 @@ var ApplyOrbitController = (function() {
     //         return true;
     //     else
     //         return false;
-    // };stTabIsOpen = function()
+    // };stTabIsO
+    ApplyOrbitController.prototype.changeProduct = function(oNewSelectedProductInput)
+    {
+        if(utilsIsObjectNullOrUndefined(oNewSelectedProductInput) == true)
+            return false;
+        this.m_oSelectedProduct = oNewSelectedProductInput;
+        this.m_sFriendlyName_Operation = this.m_oSelectedProduct.productFriendlyName + "_ApplyOrbit";
+
+        this.m_oReturnValue.sourceFileName = this.m_oSelectedProduct.filename;
+        this.m_oReturnValue.destinationFileName = this.m_sFriendlyName_Operation;
+               
+        return true;
+    };
 
 
     ApplyOrbitController.$inject = [
