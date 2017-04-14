@@ -149,8 +149,10 @@ public class SnapOperationsResources {
 
 		} catch (IOException e) {
 			e.printStackTrace();
+			return Response.serverError().build();
 		} catch (Exception e) {
 			e.printStackTrace();
+			return Response.serverError().build();
 		}
 		
 		return Response.ok().build();
