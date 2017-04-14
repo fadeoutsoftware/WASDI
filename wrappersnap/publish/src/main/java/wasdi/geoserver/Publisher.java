@@ -199,7 +199,12 @@ public class Publisher {
                 exists = oManager.getReader().existsCoverage(sWorkspace, sStoreName, slLayerName);
             if(exists)
                 oManager.getPublisher().configureCoverage(ce, sWorkspace, sStoreName, slLayerName);
-        }catch (Exception oEx){}
+        }
+        catch (Exception oEx)
+        {
+            oEx.printStackTrace();
+            s_oLogger.debug(oEx.toString() + "  \n\n" + oEx.getMessage());
+        }
 
         return sStoreName;
 
