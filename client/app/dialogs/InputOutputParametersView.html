@@ -17,7 +17,7 @@
                         <span class="caret"></span></button>
 
                     <ul class="dropdown-menu productsDropDown" >
-                        <li role="presentation" ng-repeat="product in m_oController.m_aoProducts" ng-click="m_oController.m_oSelectedProduct = product">
+                        <li role="presentation" ng-repeat="product in m_oController.m_aoProducts" ng-click="m_oController.changeProduct(product);">
                             <a role="menuitem" tabindex="-1" href="">{{product.productFriendlyName}}</a>
                         </li>
                     </ul>

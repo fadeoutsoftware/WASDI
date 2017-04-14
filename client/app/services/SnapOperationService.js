@@ -10,9 +10,9 @@ service('SnapOperationService', ['$http',  'ConstantsService', function ($http, 
     this.m_oHttp = $http;
 
     /************************************ RADAR OPERATIONS ************************************/
-    this.ApplyOrbit = function (sSourceProductName, sDestinationProductName, sWorkspaceId) {
+    this.ApplyOrbit = function (sSourceProductName, sDestinationProductName, sWorkspaceId,sOptionsInput) {
 
-        return this.Operation("radar/applyOrbit", sSourceProductName, sDestinationProductName, sWorkspaceId);//orbit
+        return this.Operation("radar/applyOrbit", sSourceProductName, sDestinationProductName, sWorkspaceId, sOptionsInput);//orbit
     };
     this.Calibrate = function (sSourceProductName, sDestinationProductName, sWorkspaceId) {
 
@@ -35,12 +35,22 @@ service('SnapOperationService', ['$http',  'ConstantsService', function ($http, 
         return this.Operation("optical/ndvi", sSourceProductName, sDestinationProductName, sWorkspaceId);//ndvi
     };
 
-    this.Operation = function(sOperation, sSourceProductName, sDestinationProductName, sWorkspaceId)
+    this.Operation = function(sOperation, sSourceProductName, sDestinationProductName, sWorkspaceId, sOptionsInput)
     {
-        //'/snap/
-        var sUrl = this.APIURL + '/processing/{sOperation}?sSourceProductName=' + sSourceProductName + '&sDestinationProductName=' + sDestinationProductName + '&sWorkspaceId=' + sWorkspaceId;
+        // //'/snap/
+        // var sUrl = this.APIURL + '/processing/{sOperation}?sSourceProductName=' + sSourceProductName + '&sDestinationProductName=' + sDestinationProductName + '&sWorkspaceId=' + sWorkspaceId;
+        // sUrl = sUrl.replace("{sOperation}", sOperation);
+        // return this.m_oHttp.get(sUrl);
+        var oConfig = {header:""};
+        var oData = {
+            options:sOptionsInput,
+            surceProductName:sSourceProductName,
+            destinationProductName:sDestinationProductName,
+            workspaceId:sWorkspaceId
+        }
+        var sUrl = this.APIURL + '/processing/{sOperation}';
         sUrl = sUrl.replace("{sOperation}", sOperation);
-        return this.m_oHttp.get(sUrl);
+        return this.m_oHttp.post(sUrl,oData,oConfig);
     }
 
 
