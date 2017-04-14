@@ -10,7 +10,7 @@ service('SnapOperationService', ['$http',  'ConstantsService', function ($http, 
     this.m_oHttp = $http;
 
     /************************************ RADAR OPERATIONS ************************************/
-    this.ApplyOrbit = function (sSourceProductName, sDestinationProductName, sWorkspaceId,sOptionsInput) {
+    this.ApplyOrbit = function (sSourceProductName, sDestinationProductName, sWorkspaceId,oOptionsInput) {
 
         return this.Operation("radar/applyOrbit", sSourceProductName, sDestinationProductName, sWorkspaceId, oOptionsInput);//orbit
     };
