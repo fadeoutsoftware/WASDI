@@ -61,4 +61,14 @@ public class ConfigReader {
         return m_aoProperties.get(sValue);
     }
 
+    public static String getPropValue(String sValue, String sDefault) throws IOException
+    {
+        if (m_aoProperties == null) {
+            m_aoProperties = new HashMap<>();
+            loadPropValues();
+        }
+
+        String sRet = m_aoProperties.get(sValue);
+		return sRet==null ? sDefault : sRet;
+    }
 }

@@ -11,6 +11,8 @@ import wasdi.shared.viewmodels.MetadataViewModel;
 import wasdi.shared.viewmodels.NodeGroupViewModel;
 import wasdi.shared.viewmodels.ProductViewModel;
 import org.esa.snap.core.dataio.ProductIO;
+import org.esa.snap.core.dataio.ProductReader;
+import org.esa.snap.core.dataio.ProductReaderPlugIn;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.MetadataAttribute;
 import org.esa.snap.core.datamodel.MetadataElement;
@@ -56,6 +58,19 @@ public class ReadProduct {
         return m_oCacheProducts.get(oFile.getName());
     }
 
+    /**
+     * discover the format of the tproduct contained in oFile
+     * @param oFile
+     * @return the format name if the reader plugin manage one and only one format. null otherwise
+     */
+    public String getProductFormat(File oFile) {
+        ProductReader oProductReader = ProductIO.getProductReaderForInput(oFile);
+        ProductReaderPlugIn oPlugin = oProductReader.getReaderPlugIn();
+        String[] asFormats = oPlugin.getFormatNames();    	        
+        if (asFormats==null || asFormats.length != 1) return null;        
+        return asFormats[0];
+    }
+    
     private boolean RemoveFromCache(File oFile) {
         if (m_oCacheProducts.get(oFile.getName()) != null) {
             m_oCacheProducts.remove(oFile.getName());

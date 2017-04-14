@@ -45,7 +45,7 @@ public class WriteProduct {
     {
         try {
             if (!sFilePath.endsWith("/")) sFilePath += "/";
-            File newFile = new File(sFilePath + sFileName + sExtension);
+            File newFile = new File(sFilePath + sFileName + "." + sExtension);
             LauncherMain.s_oLogger.debug("WriteProduct: Otuput File: " + newFile.getAbsolutePath());
             ProductIO.writeProduct(oProduct, newFile.getAbsolutePath(), sFormat);
             MemUtils.freeAllMemory();
