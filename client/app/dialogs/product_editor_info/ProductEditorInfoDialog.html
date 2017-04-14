@@ -6,26 +6,40 @@
                 <h4 class="modal-title "></h4>
             </div>
             <div class="modal-body">
-                <!--<div class="product-info-table">-->
-                    <!--<h4>-->
-                        <!--<table class="table table-hover">-->
-                            <!--<thead>-->
-                            <!--<th>Property</th>-->
-                            <!--<th>Value</th>-->
-                            <!--</thead>-->
-                            <!--<tbod>-->
-                                <!--<tr ng-repeat="propertyName in m_oController.getSummaryPropertyNames()">-->
-                                    <!--<td> {{propertyName}}</td>-->
-                                    <!--<td>{{m_oController.m_oProduct.summary[propertyName]}}</td>-->
-                                <!--</tr>-->
-                            <!--</tbod>-->
-                            <!--<tfoot></tfoot>-->
-                        <!--</table>-->
-                    <!--</h4>-->
+                <h4 class="my-input-text">
+                    <table class="table table-hover">
+                        <thead>
+                        <tr>
+                            <th></th>
+                            <th></th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr>
+                            <td> <label>{{"DIALOG_PRODUCT_EDITOR_INFO_DIALOG_ORIGINAL_NAME_LABEL"|translate}}</label> </td>
+                            <td> {{m_oController.m_oProduct.name}} </td>
+                        </tr>
+                        <tr>
+                            <td> <label>{{"DIALOG_PRODUCT_EDITOR_INFO_DIALOG_FRIENDLY_NAME_LABEL"|translate}}</label> </td>
+                            <td> <input type="text" name="name" class="form-control" ng-model="m_oController.m_oProduct.productFriendlyName"> </td>
+                        </tr>
+                        <tr>
+                            <td>  <label>{{"DIALOG_PRODUCT_EDITOR_INFO_DIALOG_ADDED_DATA_LABEL"|translate}}</label></td>
+                            <td> </td>
+                        </tr>
+                        </tbody>
+                    </table>
 
-                <!--</div>-->
 
-                <!--<div class="preview-layer-image" ><img src={{m_oController.m_oProduct.preview}} alt="Image" ></div>-->
+
+                    <div class="friendly-name">
+
+
+                    </div>
+
+
+
+                </h4>
 
             </div>
             <div class="modal-footer">

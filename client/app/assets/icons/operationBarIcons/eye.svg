@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns="http://www.w3.org/2000/svg" xml:space="preserve" width="1024px" height="1024px" shape-rendering="geometricPrecision" text-rendering="geometricPrecision" image-rendering="optimizeQuality" fill-rule="evenodd" clip-rule="evenodd" viewBox="0 0 10240 10240" xmlns:xlink="http://www.w3.org/1999/xlink">
+	<title>eye icon</title>
+	<desc>eye icon from the IconExperience.com O-Collection. Copyright by INCORS GmbH (www.incors.com).</desc>
+	<path id="curve2" fill="#43516A" d="M5120 4160c530,0 960,430 960,960 0,530 -430,960 -960,960 -530,0 -960,-430 -960,-960 0,-68 7,-135 21,-199 65,27 136,42 211,42 305,0 552,-247 552,-552 0,-80 -17,-156 -48,-225 72,-17 147,-27 225,-27z"/>
+	<path id="curve1" fill="#43516A" d="M5120 2560c1414,0 2560,1146 2560,2560 0,1414 -1146,2560 -2560,2560 -1414,0 -2560,-1146 -2560,-2560 0,-1414 1146,-2560 2560,-2560zm0 1280c707,0 1280,573 1280,1280 0,707 -573,1280 -1280,1280 -707,0 -1280,-573 -1280,-1280 0,-151 26,-297 75,-431 -47,-81 -75,-176 -75,-277 0,-305 247,-552 552,-552 96,0 185,24 264,67 144,-56 301,-87 465,-87z"/>
+	<path id="curve0" fill="#43516A" d="M9854 5425c-842,1901 -2645,3215 -4734,3215 -2089,0 -3892,-1314 -4734,-3215 -88,-200 -88,-411 0,-611 842,-1901 2645,-3215 4734,-3215 2089,0 3892,1314 4734,3215 88,200 88,411 0,611zm-4734 2575c1578,0 2964,-894 3791,-2192 274,-430 274,-947 0,-1376 -827,-1298 -2213,-2192 -3791,-2192 -1578,0 -2964,894 -3791,2192 -274,430 -274,947 0,1376 825,1294 2209,2192 3791,2192z"/>
+</svg>

@@ -25,6 +25,14 @@ var EditorController = (function () {
         this.m_b3DMapModeOn = false;
         this.m_bIsVisibleMapOfLeaflet = false;
         this.m_oModalService = oModalService;
+
+        this.m_oAreHideBars = {
+            mainBar:false,
+            radarBar:true,
+            opticalBar:true
+
+        }
+
         /*Last file donloaded*/
         this.m_oLastDownloadedProduct = null;
         //Pixel Info
@@ -488,6 +496,7 @@ var EditorController = (function () {
 
             var oProductItem = [];
             oProductItem.name = oProduct.name;
+            oProductItem.productFriendlyName = oProduct.productFriendlyName;
             oProductItem.fileName = oProduct.fileName;
             oProductItem.index = i;
             aoProductItems.push(oProductItem);
@@ -737,76 +746,7 @@ var EditorController = (function () {
                                             });
                                         }
                                     },
-                                    "ApplyOrbit": {
-                                        "label": "Apply Orbit",
-                                        "action": function (obj) {
-                                            var sSourceFileName = $node.original.fileName;
-                                            var sDestinationFileName = '';
-                                            oController.openApplyOrbitDialog();
-                                            //oController.m_oSnapOperationService.ApplyOrbit(sSourceFileName, sDestinationFileName, oController.m_oActiveWorkspace.workspaceId)
-                                            //    .success(function (data) {
-                                            //
-                                            //    }).error(function (error) {
-                                            //
-                                            //});
-                                        }
-                                    },
-                                    "Calibrate": {
-                                        "label": "Calibrate",
-                                        "action": function (obj) {
-                                            var sSourceFileName = $node.original.fileName;
-                                            var sDestinationFileName = '';
-                                            oController.openRadiometricCalibrationDialog();
-                                            // oController.m_oSnapOperationService.Calibrate(sSourceFileName, sDestinationFileName, oController.m_oActiveWorkspace.workspaceId)
-                                            //     .success(function (data) {
-                                            //
-                                            //     }).error(function (error) {
-                                            //
-                                            // });
-                                        }
-                                    },
-                                    "Multilooking": {
-                                        "label": "Multilooking",
-                                        "action": function (obj) {
-                                            var sSourceFileName = $node.original.fileName;
-                                            var sDestinationFileName = '';
-                                            oController.openMultilookingDialog();
-                                            // oController.m_oSnapOperationService.Multilooking(sSourceFileName, sDestinationFileName, oController.m_oActiveWorkspace.workspaceId)
-                                            //     .success(function (data) {
-                                            //
-                                            //     }).error(function (error) {
-                                            //
-                                            // });
-                                        }
-                                    },
-                                    "NDVI": {
-                                        "label": "NDVI",
-                                        "action": function (obj) {
-                                            var sSourceFileName = $node.original.fileName;
-                                            var sDestinationFileName = '';
-                                            oController.openNDVIDialog();
-                                            // oController.m_oSnapOperationService.NDVI(sSourceFileName, sDestinationFileName, oController.m_oActiveWorkspace.workspaceId)
-                                            //     .success(function (data) {
-                                            //
-                                            //     }).error(function (error) {
-                                            //
-                                            // });
-                                        }
-                                    },
-                                    "Terrain": {
-                                        "label": "Terrain Correction",
-                                        "action": function (obj) {
-                                            var sSourceFileName = $node.original.fileName;
-                                            var sDestinationFileName = '';
-                                            oController.rangeDopplerTerrainCorrectionDialog();
-                                            // oController.m_oSnapOperationService.TerrainCorrection(sSourceFileName, sDestinationFileName, oController.m_oActiveWorkspace.workspaceId)
-                                            //     .success(function (data) {
-                                            //
-                                            //     }).error(function (error) {
-                                            //
-                                            // });
-                                        }
-                                    },
+
                                     "Merge": {
                                         "label": "Merge ",
                                         "action": function (obj) {
@@ -814,11 +754,25 @@ var EditorController = (function () {
                                             oController.openMergeDialog($node.original.fileName);
                                         }
                                     },
-                                    "Info": {
-                                        "label": "Info ",
+                                    "Properties": {
+                                        "label": "Properties ",
+                                        "icon":"fa fa-info",
                                         "action": function (obj) {
                                             //$node.original.fileName;
-                                            oController.openProductInfoDialog();
+                                            if( (utilsIsObjectNullOrUndefined($node.original.fileName) == false) && (utilsIsStrNullOrEmpty($node.original.fileName) == false) )
+                                            {
+                                                var iNumberOfProdcuts = oController.m_aoProducts.length;
+                                                for(var iIndexProduct = 0; iIndexProduct < iNumberOfProdcuts ; iIndexProduct++)
+                                                {
+                                                    if( oController.m_aoProducts[iIndexProduct].fileName == $node.original.fileName)
+                                                    {
+                                                        oController.openProductInfoDialog(oController.m_aoProducts[iIndexProduct]);
+                                                        break;
+                                                    }
+
+                                                }
+
+                                            }
                                         }
                                     },
                                     "Rename": {
@@ -838,7 +792,141 @@ var EditorController = (function () {
                                             // if(bResult == false)
                                             //     console.log("Error: it's impossible rename the product");
                                         }
-                                    }
+                                    },
+                                    //SUBMENU RADAR
+                                    "Radar": {
+                                        "label": "Radar",
+                                        "action": false,
+                                        "separator_before":true,
+                                        "submenu":
+                                            {
+                                                //APPLY ORBIT
+                                                "ApplyOrbit": {
+                                                    "label": "Apply Orbit",
+                                                    "action": function (obj) {
+                                                        var sSourceFileName = $node.original.fileName;
+                                                        var oFindedProduct = oController.findProductByFileName(sSourceFileName);
+                                                        var sDestinationFileName = '';
+
+                                                        if(utilsIsObjectNullOrUndefined(oFindedProduct) == false)
+                                                            oController.openApplyOrbitDialog(oFindedProduct);
+
+                                                        //oController.m_oSnapOperationService.ApplyOrbit(sSourceFileName, sDestinationFileName, oController.m_oActiveWorkspace.workspaceId)
+                                                        //    .success(function (data) {
+                                                        //
+                                                        //    }).error(function (error) {
+                                                        //
+                                                        //});
+                                                    }
+                                                },
+                                                "Multilooking": {
+                                                    "label": "Multilooking",
+                                                    "action": function (obj) {
+                                                        var sSourceFileName = $node.original.fileName;
+                                                        var sDestinationFileName = '';
+                                                        var oFindedProduct = oController.findProductByFileName(sSourceFileName);
+
+                                                        if(utilsIsObjectNullOrUndefined(oFindedProduct) == false)
+                                                            oController.openMultilookingDialog(oFindedProduct);
+                                                        // oController.m_oSnapOperationService.Multilooking(sSourceFileName, sDestinationFileName, oController.m_oActiveWorkspace.workspaceId)
+                                                        //     .success(function (data) {
+                                                        //
+                                                        //     }).error(function (error) {
+                                                        //
+                                                        // });
+                                                    }
+                                                },
+                                                //SUB-SUBMENU RADIOMETRIC
+                                                "Radiometric": {
+                                                    "label": "radiometric",
+                                                    "action": false,
+                                                    "separator_before":true,
+                                                    "submenu":
+                                                        {
+                                                            "Calibrate": {
+                                                                "label": "Calibrate",
+                                                                "action": function (obj) {
+                                                                    var sSourceFileName = $node.original.fileName;
+                                                                    var sDestinationFileName = '';
+                                                                    var oFindedProduct = oController.findProductByFileName(sSourceFileName);
+
+                                                                    if(utilsIsObjectNullOrUndefined(oFindedProduct) == false)
+                                                                        oController.openRadiometricCalibrationDialog(oFindedProduct);
+
+                                                                    // oController.m_oSnapOperationService.Calibrate(sSourceFileName, sDestinationFileName, oController.m_oActiveWorkspace.workspaceId)
+                                                                    //     .success(function (data) {
+                                                                    //
+                                                                    //     }).error(function (error) {
+                                                                    //
+                                                                    // });
+                                                                }
+                                                            },
+                                                        }
+                                                },
+                                                //SUB-SUBMENU GEOMETRIC
+                                                "Geometric": {
+                                                    "label": "Geometric",
+                                                    "action": false,
+                                                    "submenu":
+                                                        {
+                                                            //SUB-SUB-SUBMENU GEOMETRIC
+                                                            "Terrain correction": {
+                                                                "label": "Terrain correction",
+                                                                "action": false,
+                                                                "submenu":
+                                                                    {
+                                                                        "Range Doppler Terrain Correction": {
+                                                                            "label": "Range Doppler Terrain Correction",
+                                                                            "action": function (obj) {
+                                                                                var sSourceFileName = $node.original.fileName;
+                                                                                var sDestinationFileName = '';
+                                                                                var oFindedProduct = oController.findProductByFileName(sSourceFileName);
+
+                                                                                if(utilsIsObjectNullOrUndefined(oFindedProduct) == false)
+                                                                                    oController.rangeDopplerTerrainCorrectionDialog(oFindedProduct);
+                                                                                // oController.m_oSnapOperationService.TerrainCorrection(sSourceFileName, sDestinationFileName, oController.m_oActiveWorkspace.workspaceId)
+                                                                                //     .success(function (data) {
+                                                                                //
+                                                                                //     }).error(function (error) {
+                                                                                //
+                                                                                // });
+                                                                            }
+                                                                        },
+                                                                    }
+                                                            },
+
+                                                        }
+                                                },
+
+                                            }
+                                    },
+
+                                    //SUBMENU OPTICAL
+                                    "Optical": {
+                                        "label": "Optical",
+                                        "action": false,
+                                        "submenu":
+                                            {
+                                                "NDVI": {
+                                                    "label": "NDVI",
+                                                    "action": function (obj) {
+                                                        var sSourceFileName = $node.original.fileName;
+                                                        var sDestinationFileName = '';
+                                                        var oFindedProduct = oController.findProductByFileName(sSourceFileName);
+
+                                                        if(utilsIsObjectNullOrUndefined(oFindedProduct) == false)
+                                                            oController.openNDVIDialog(oFindedProduct);
+                                                        // oController.m_oSnapOperationService.NDVI(sSourceFileName, sDestinationFileName, oController.m_oActiveWorkspace.workspaceId)
+                                                        //     .success(function (data) {
+                                                        //
+                                                        //     }).error(function (error) {
+                                                        //
+                                                        // });
+                                                    }
+                                                },
+
+                                            }
+                                    },
 
                                 };
                         }
@@ -850,13 +938,16 @@ var EditorController = (function () {
 
 
         var productList = this.getProductList();
+      //  var productList = this.m_aoProducts;
         //for each product i generate sub-node
         for (var iIndexProduct = 0; iIndexProduct < productList.length; iIndexProduct++) {
 
             //product node
             var oNode = new Object();
-
-            oNode.text = productList[iIndexProduct].name;//LABEL NODE
+            if(utilsIsObjectNullOrUndefined( productList[iIndexProduct].productFriendlyName) == false)
+                oNode.text = productList[iIndexProduct].productFriendlyName;//LABEL NODE
+            else
+                oNode.text = productList[iIndexProduct].name;//LABEL NODE
 
             //usually the selected node is the node just download
             // if( (utilsIsObjectNullOrUndefined(sSelectedNodeInput)==false) && (utilsIsStrNullOrEmpty(sSelectedNodeInput)==false) && productList[iIndexProduct].name == sSelectedNodeInput)
@@ -910,6 +1001,11 @@ var EditorController = (function () {
                 if (data != undefined) {
                     //push all products
                     for (var iIndex = 0; iIndex < data.length; iIndex++) {
+                        //check if friendly file name isn't null
+                        if(utilsIsObjectNullOrUndefined(data[iIndex].productFriendlyName) == true)
+                        {
+                            data[iIndex].productFriendlyName =  data[iIndex].name;
+                        }
                         oController.m_aoProducts.push(data[iIndex]);
                     }
 
@@ -1389,14 +1485,40 @@ var EditorController = (function () {
         });
 
         return true;
-    }
+    };
 
-    //---------------------------------- SHOW MODALS
-    EditorController.prototype.openApplyOrbitDialog = function () {
+    EditorController.prototype.findProductByFileName = function(sFileNameInput)
+    {
+        if( (utilsIsObjectNullOrUndefined(sFileNameInput) == true) && (utilsIsStrNullOrEmpty(sFileNameInput) == true))
+            return null;
+        if(utilsIsObjectNullOrUndefined(this.m_aoProducts) == true)
+            return null;
+
+        var iNumberOfProducts = this.m_aoProducts.length;
+        if(this.m_aoProducts.length == 0)
+            return null;
+
+        for(var iIndexProduct = 0; iIndexProduct < iNumberOfProducts; iIndexProduct++)
+        {
+            if( this.m_aoProducts[iIndexProduct].fileName == sFileNameInput )
+            {
+                return this.m_aoProducts[iIndexProduct];
+            }
+        }
+        return null;
+    }
+    //---------------------------------- SHOW MODALS ------------------------------------
+    EditorController.prototype.openApplyOrbitDialog = function (oSelectedProduct) {
         var oController = this;
         this.m_oModalService.showModal({
             templateUrl: "dialogs/apply_orbit_operation/ApplyOrbitDialog.html",
-            controller: "ApplyOrbitController"
+            controller: "ApplyOrbitController",
+            inputs: {
+                extras: {
+                    products:oController.m_aoProducts,
+                    selectedProduct:oSelectedProduct
+                }
+            }
         }).then(function (modal) {
             modal.element.modal();
             modal.close.then(function (result) {
@@ -1405,12 +1527,19 @@ var EditorController = (function () {
         });
 
         return true;
-    }
-    EditorController.prototype.openRadiometricCalibrationDialog = function () {
+    };
+
+    EditorController.prototype.openRadiometricCalibrationDialog = function (oSelectedProduct) {
         var oController = this;
         this.m_oModalService.showModal({
             templateUrl: "dialogs/radiometric_calibration_operation/RadiometricCalibrationDialog.html",
-            controller: "RadiometricCalibrationController"
+            controller: "RadiometricCalibrationController",
+            inputs: {
+                extras: {
+                    products:oController.m_aoProducts,
+                    selectedProduct:oSelectedProduct
+                }
+            }
         }).then(function (modal) {
             modal.element.modal();
             modal.close.then(function (result) {
@@ -1420,18 +1549,17 @@ var EditorController = (function () {
 
         return true;
     }
-    EditorController.prototype.openMultilookingDialog = function () {
+    EditorController.prototype.openMultilookingDialog = function (oSelectedProduct) {
         var oController = this;
         this.m_oModalService.showModal({
             templateUrl: "dialogs/multilooking_operation/MultilookingDialog.html",
-            controller: "MultilookingController"
-            // inputs: {
-            //     extras: {
-            //         SelectedProduct: oSelectedProduct,
-            //         ListOfProducts: oController.m_aoProducts,
-            //         WorkSpaceId: oController.m_oActiveWorkspace
-            //     }
-            // }
+            controller: "MultilookingController",
+            inputs: {
+                extras: {
+                    products:oController.m_aoProducts,
+                    selectedProduct:oSelectedProduct
+                }
+            }
         }).then(function (modal) {
             modal.element.modal();
             modal.close.then(function (result) {
@@ -1441,18 +1569,17 @@ var EditorController = (function () {
 
         return true;
     }
-    EditorController.prototype.openNDVIDialog = function () {
+    EditorController.prototype.openNDVIDialog = function (oSelectedProduct) {
         var oController = this;
         this.m_oModalService.showModal({
             templateUrl: "dialogs/NDVI_operation/NDVIDialog.html",
-            controller: "NDVIController"
-            // inputs: {
-            //     extras: {
-            //         SelectedProduct: oSelectedProduct,
-            //         ListOfProducts: oController.m_aoProducts,
-            //         WorkSpaceId: oController.m_oActiveWorkspace
-            //     }
-            // }
+            controller: "NDVIController",
+            inputs: {
+                extras: {
+                    products:oController.m_aoProducts,
+                    selectedProduct:oSelectedProduct
+                }
+            }
         }).then(function (modal) {
             modal.element.modal();
             modal.close.then(function (result) {
@@ -1462,19 +1589,17 @@ var EditorController = (function () {
 
         return true;
     }
-    EditorController.prototype.openProductInfoDialog = function ()
+    EditorController.prototype.openProductInfoDialog = function (oProductInput)
     {
         var oController = this;
         this.m_oModalService.showModal({
             templateUrl: "dialogs/product_editor_info/ProductEditorInfoDialog.html",
-            controller: "ProductEditorInfoController"
-            // inputs: {
-            //     extras: {
-            //         SelectedProduct: oSelectedProduct,
-            //         ListOfProducts: oController.m_aoProducts,
-            //         WorkSpaceId: oController.m_oActiveWorkspace
-            //     }
-            // }
+            controller: "ProductEditorInfoController",
+            inputs: {
+                extras: {
+                    product:oProductInput
+                }
+            }
         }).then(function (modal) {
             modal.element.modal();
             modal.close.then(function (result) {
@@ -1485,19 +1610,18 @@ var EditorController = (function () {
         return true;
     }
 
-    EditorController.prototype.rangeDopplerTerrainCorrectionDialog = function ()
+    EditorController.prototype.rangeDopplerTerrainCorrectionDialog = function (oSelectedProduct)
     {
         var oController = this;
         this.m_oModalService.showModal({
             templateUrl: "dialogs/range_doppler_terrain_correction_operation/RangeDopplerTerrainCorrectionDialog.html",
-            controller: "RangeDopplerTerrainCorrectionController"
-            // inputs: {
-            //     extras: {
-            //         SelectedProduct: oSelectedProduct,
-            //         ListOfProducts: oController.m_aoProducts,
-            //         WorkSpaceId: oController.m_oActiveWorkspace
-            //     }
-            // }
+            controller: "RangeDopplerTerrainCorrectionController",
+            inputs: {
+                extras: {
+                    products:oController.m_aoProducts,
+                    selectedProduct:oSelectedProduct
+                }
+            }
         }).then(function (modal) {
             modal.element.modal();
             modal.close.then(function (result) {
@@ -1507,6 +1631,45 @@ var EditorController = (function () {
 
         return true;
     }
+    /*OPERATION MENU*/
+    EditorController.prototype.hideOperationMainBar= function()
+    {
+        this.m_oAreHideBars.mainBar = true;
+    }
+    EditorController.prototype.hideOperationRadarBar = function()
+    {
+        this.m_oAreHideBars.radarBar = true;
+    }
+    EditorController.prototype.hideOperationOpticalBar= function()
+    {
+        this.m_oAreHideBars.opticalBar = true;
+    }
+    EditorController.prototype.showOperationMainBar= function()
+    {
+        this.m_oAreHideBars.mainBar = false;
+    }
+    EditorController.prototype.showOperationRadarBar = function()
+    {
+        this.m_oAreHideBars.radarBar = false;
+    }
+    EditorController.prototype.showOperationOpticalBar= function()
+    {
+        this.m_oAreHideBars.opticalBar = false;
+    }
+
+    EditorController.prototype.isHiddenOperationMainBar= function()
+    {
+        return this.m_oAreHideBars.mainBar;
+    }
+    EditorController.prototype.isHiddenOperationRadarBar = function()
+    {
+        return this.m_oAreHideBars.radarBar;
+    }
+    EditorController.prototype.isHiddenOperationOpticalBar= function()
+    {
+        return this.m_oAreHideBars.opticalBar;
+    }
+
 
     EditorController.$inject = [
         '$scope',

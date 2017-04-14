@@ -116,7 +116,7 @@ service('ResultsOfSearchService', ['$http',  'ConstantsService', function ($http
     {
         //if(utilsIsObjectNullOrUndefined(iTotalPages))
         //    return false //TODO throw error
-        //this.m_iTotalPages = iTotalPages;
+        this.m_iTotalPages = iTotalPages;
         return true;
     }
 

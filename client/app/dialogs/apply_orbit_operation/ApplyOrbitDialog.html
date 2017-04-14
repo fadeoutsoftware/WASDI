@@ -9,48 +9,50 @@
             <!-- BODY -->
             <div class="modal-body">
                 <h4>
-                    <ul class="nav nav-tabs">
-                        <li class="active"><a data-toggle="tab" href="" ng-click="m_oController.tabOpen('tab1')">{{"DIALOG_APPLY_ORBIT_TAB_INPUT_OUTPUT"|translate}}</a></li>
-                        <li><a data-toggle="tab" href="" ng-click="m_oController.tabOpen('tab2')">{{"DIALOG_APPLY_ORBIT_TAB_PROCESSING"|translate}}</a></li>
-                    </ul>
+                    <!--<ul class="nav nav-tabs">-->
+                    <!--<li class="active"><a data-toggle="tab" href="" ng-click="m_oController.tabOpen('tab1')">{{"DIALOG_APPLY_ORBIT_TAB_INPUT_OUTPUT"|translate}}</a></li>-->
+                    <!--<li><a data-toggle="tab" href="" ng-click="m_oController.tabOpen('tab2')">{{"DIALOG_APPLY_ORBIT_TAB_PROCESSING"|translate}}</a></li>-->
+                    <!--</ul>-->
 
                     <!-------------------------------------------INPUT OUTPUT PARAMETERS-------------------------------->
-                    <div ng-show="m_oController.firstTabIsOpen()">
-                        <div ng-include src="'dialogs/InputOutputParametersView.html'"></div>
-                    </div>
+                    <!--<div ng-show="m_oController.firstTabIsOpen()">-->
+                    <div ng-include src="'dialogs/InputOutputParametersView.html'"></div>
+                    <!--</div>-->
                     <!------------------------------------ PROCESSING PARAMETERS -------------------------------------->
-                    <div ng-show="m_oController.secondTabIsOpen()">
-                        <form>
-                            <fieldset class="my-input-text">
-                                <div class="dropdown" >
-                                    {{"DIALOG_APPLY_ORBIT_ORBIT_STATE_VECTORS"|translate}}
-                                    <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu2"
-                                            data-toggle="dropdown">
-                                        {{m_oController.m_sSelectedOrbitStateVectors}}
-                                        <span class="caret"></span>
-                                    </button>
+                    <!--<div ng-show="m_oController.secondTabIsOpen()">-->
+                    <form>
+                        <fieldset class="my-input-text">
+                            <legend><h3>{{"DIALOG_APPLY_ORBIT_TAB_PROCESSING"|translate}}</h3></legend>
 
-                                    <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu2">
-                                        <li role="presentation" ng-repeat="orbitState in m_oController.m_asOrbitStateVectors" ng-click="m_oController.m_sSelectedOrbitStateVectors = orbitState"><a role="menuitem" tabindex="-1" href="">{{orbitState}}</a></li>
-                                    </ul>
+                            <div class="dropdown" >
+                                {{"DIALOG_APPLY_ORBIT_ORBIT_STATE_VECTORS"|translate}}
+                                <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu2"
+                                        data-toggle="dropdown">
+                                    {{m_oController.m_sSelectedOrbitStateVectors}}
+                                    <span class="caret"></span>
+                                </button>
 
-                                </div>
-                                <!--<span class="label">{{"DIALOG_APPLY_ORBIT_POLYNOMIAL_DEGREE"|translate}}</span>-->
-                                <div class="form-group">
-                                    <label for="ApplyOrbitPolynomialDegree">{{'DIALOG_APPLY_ORBIT_POLYNOMIAL_DEGREE'|translate}}</label>
-                                    <input type="text" class="form-control" id="ApplyOrbitPolynomialDegree">
-                                </div>
+                                <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu2">
+                                    <li role="presentation" ng-repeat="orbitState in m_oController.m_asOrbitStateVectors" ng-click="m_oController.m_sSelectedOrbitStateVectors = orbitState"><a role="menuitem" tabindex="-1" href="">{{orbitState}}</a></li>
+                                </ul>
 
-                                <!--<input type="text"  class="my-input-text form-control polynomial-degree" placeholder="{{'DIALOG_APPLY_ORBIT_POLYNOMIAL_DEGREE'|translate}}">-->
-                                <div class="checkbox">
-                                    <label>
-                                        <input type="checkbox" >
-                                        {{"DIALOG_APPLY_ORBIT_CHECKBOX_FAIL"|translate}}
-                                    </label>
-                                </div>
-                            </fieldset>
-                        </form>
-                    </div>
+                            </div>
+                            <!--<span class="label">{{"DIALOG_APPLY_ORBIT_POLYNOMIAL_DEGREE"|translate}}</span>-->
+                            <div class="form-group">
+                                <label for="ApplyOrbitPolynomialDegree">{{'DIALOG_APPLY_ORBIT_POLYNOMIAL_DEGREE'|translate}}</label>
+                                <input type="text" class="form-control" id="ApplyOrbitPolynomialDegree">
+                            </div>
+
+                            <!--<input type="text"  class="my-input-text form-control polynomial-degree" placeholder="{{'DIALOG_APPLY_ORBIT_POLYNOMIAL_DEGREE'|translate}}">-->
+                            <div class="checkbox">
+                                <label>
+                                    <input type="checkbox" >
+                                    {{"DIALOG_APPLY_ORBIT_CHECKBOX_FAIL"|translate}}
+                                </label>
+                            </div>
+                        </fieldset>
+                    </form>
+                    <!--</div>-->
                 </h4>
             </div>
 

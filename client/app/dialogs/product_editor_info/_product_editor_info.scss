@@ -18,38 +18,19 @@
 
       .modal-body
       {
-        //.product-info-table
-        //{
-        //  overflow-y: scroll;
-        //  max-height:400px;
-        //  table
-        //  {
-        //    text-align: center;
-        //    margin: auto;
-        //
-        //    th
-        //    {
-        //      text-align: center;
-        //      margin: auto;
-        //    }
-        //  }
-        //
-        //}
+        h4
+        {
 
-        //.preview-layer-image
-        //{
-        //  padding: 10px;
-        //  text-align: center;
-        //  border-top: 1px solid $wasdi-blue-logo;
-        //  max-height:400px;
-        //  img
-        //  {
-        //    //display: inline-block;
-        //    //height: 82px;
-        //    //width: 82px;
-        //
-        //  }
-        //}
+          //.friendly-name
+          //{
+          //  input[type=text]
+          //  {
+          //    width:60%;
+          //    display:inline;
+          //  }
+          //}
+        }
+
       }
 
       .modal-footer

@@ -4,10 +4,11 @@
 
 var ProductEditorInfoController = (function() {
 
-    function ProductEditorInfoController($scope, oClose) {//,oExtras
+    function ProductEditorInfoController($scope, oClose,oExtras) {//,
         this.m_oScope = $scope;
         this.m_oScope.m_oController = this;
-        // this.m_oProduct = oExtras;
+        this.m_oProduct = oExtras.product;
+
         //$scope.close = oClose;
         $scope.close = function(result) {
             oClose(result, 500); // close, but give 500ms for bootstrap to animate
@@ -31,7 +32,7 @@ var ProductEditorInfoController = (function() {
     ProductEditorInfoController.$inject = [
         '$scope',
         'close',
-        // 'extras',
+        'extras',
     ];
     return ProductEditorInfoController;
 })();

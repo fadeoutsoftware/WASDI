@@ -162,9 +162,11 @@
                 </tr>
                 </thead>
                 <tbody>
+
                 <tr ng-repeat="oProcess in m_oController.m_aoProcessesRunning track by $index">
                     <td>
-                        <i class="fa fa-spinner fa-pulse fa-fw"></i>
+                        <!--<i class="fa fa-spinner fa-pulse fa-fw"></i>-->
+                        <invaderfixed></invaderfixed>
                     </td>
                     <td>
                         {{oProcess.operationDate}}
@@ -193,7 +195,8 @@
 
                 <tr ng-repeat="oLog in m_oController.m_aoLogProcesses track by $index">
                     <td>
-                        <span class="label label-warning">Log</span>
+                        <!--<span class="label label-warning">Log</span>-->
+                        <invaderfixed></invaderfixed>
                     </td>
                     <td>
                         {{oLog.operationDate}}

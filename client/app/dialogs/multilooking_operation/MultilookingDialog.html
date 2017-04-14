@@ -7,56 +7,57 @@
             </div>
             <div class="modal-body">
                 <h4>
-                    <ul class="nav nav-tabs">
-                        <li class="active"><a data-toggle="tab" href="" ng-click="m_oController.tabOpen('tab1')">{{"DIALOG_APPLY_ORBIT_TAB_INPUT_OUTPUT"|translate}}</a></li>
-                        <li><a data-toggle="tab" href="" ng-click="m_oController.tabOpen('tab2')">{{"DIALOG_APPLY_ORBIT_TAB_PROCESSING"|translate}}</a></li>
-                    </ul>
+                    <!--<ul class="nav nav-tabs">-->
+                    <!--<li class="active"><a data-toggle="tab" href="" ng-click="m_oController.tabOpen('tab1')">{{"DIALOG_APPLY_ORBIT_TAB_INPUT_OUTPUT"|translate}}</a></li>-->
+                    <!--<li><a data-toggle="tab" href="" ng-click="m_oController.tabOpen('tab2')">{{"DIALOG_APPLY_ORBIT_TAB_PROCESSING"|translate}}</a></li>-->
+                    <!--</ul>-->
                     <!-------------------------------------------INPUT OUTPUT PARAMETERS-------------------------------->
-                    <div ng-show="m_oController.firstTabIsOpen()">
-                        <div ng-include src="'dialogs/InputOutputParametersView.html'"></div>
-                    </div>
+                    <!--<div ng-show="m_oController.firstTabIsOpen()">-->
+                    <div ng-include src="'dialogs/InputOutputParametersView.html'"></div>
+                    <!--</div>-->
                     <!------------------------------------ PROCESSING PARAMETERS -------------------------------------->
-                    <div ng-show="m_oController.secondTabIsOpen()" >
-                        </br>
-                        <form>
-                            <fieldset>
-                                <!--MULTISELECT-->
-                                {{"DIALOG_RADIOMETRIC_CALIBRATION_SOURCE_BANDS"|translate}}<multiselect  ng-model="m_oController.m_asSourceBandsSelected" options="m_oController.m_asSourceBands" show-select-all="true" show-unselect-all="true" show-search="true"></multiselect>
-                                <!--CHECK BOXS-->
-                                <div class="checkbox">
-                                    <label>
-                                        <input type="checkbox" value="" >
-                                        {{"DIALOG_MULTILOOKING_CHECKBOX_SQUARE_PIXEL"|translate}}
-                                    </label>
-                                    <label>
-                                        <input type="checkbox" value="" >
-                                        {{"DIALOG_MULTILOOKING_CHECKBOX_INDIPENDENT_LOOKS"|translate}}
-                                    </label>
-                                </div>
-                                <!--INPUTS-->
-
-                                <div class="form-group">
-                                    <label for="multilookingRange">{{"DIALOG_MULTILOOKING_NUMBER_OF_RANGE"|translate}}</label>
-                                    <input type="text" class="form-control" id="multilookingRange">
-                                </div>
-
-                                <div class="form-group">
-                                    <label for="multilookingAzimuth">{{"DIALOG_MULTILOOKING_NUMBER_OF_AZIMUTH"|translate}}</label>
-                                    <input type="text" class="form-control" id="multilookingAzimuth">
-                                </div>
-
-                                <div class="form-group">
-                                    <label for="multilookingSquarePixel">{{"DIALOG_MULTILOOKING_SQUARE_PIXEL"|translate}}</label>
-                                    <input type="text" class="form-control" id="multilookingSquarePixel">
-                                </div>
-
+                    <!--<div ng-show="m_oController.secondTabIsOpen()" >-->
+                    </br>
+                    <form>
+                        <fieldset>
+                            <legend><h3>{{"DIALOG_APPLY_ORBIT_TAB_PROCESSING"|translate}}</h3></legend>
+                            <!--MULTISELECT-->
+                            {{"DIALOG_RADIOMETRIC_CALIBRATION_SOURCE_BANDS"|translate}}<multiselect  ng-model="m_oController.m_asSourceBandsSelected" options="m_oController.m_asSourceBands" show-select-all="true" show-unselect-all="true" show-search="true"></multiselect>
+                            <!--CHECK BOXS-->
+                            <div class="checkbox">
                                 <label>
-                                    {{"DIALOG_MULTILOOKING_NOTE"|translate}}
+                                    <input type="checkbox" value="" >
+                                    {{"DIALOG_MULTILOOKING_CHECKBOX_SQUARE_PIXEL"|translate}}
                                 </label>
-                                <!--NOTE-->
-                            </fieldset>
-                        </form>
-                    </div>
+                                <label>
+                                    <input type="checkbox" value="" >
+                                    {{"DIALOG_MULTILOOKING_CHECKBOX_INDIPENDENT_LOOKS"|translate}}
+                                </label>
+                            </div>
+                            <!--INPUTS-->
+
+                            <div class="form-group">
+                                <label for="multilookingRange">{{"DIALOG_MULTILOOKING_NUMBER_OF_RANGE"|translate}}</label>
+                                <input type="text" class="form-control" id="multilookingRange">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="multilookingAzimuth">{{"DIALOG_MULTILOOKING_NUMBER_OF_AZIMUTH"|translate}}</label>
+                                <input type="text" class="form-control" id="multilookingAzimuth">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="multilookingSquarePixel">{{"DIALOG_MULTILOOKING_SQUARE_PIXEL"|translate}}</label>
+                                <input type="text" class="form-control" id="multilookingSquarePixel">
+                            </div>
+
+                            <label>
+                                {{"DIALOG_MULTILOOKING_NOTE"|translate}}
+                            </label>
+                            <!--NOTE-->
+                        </fieldset>
+                    </form>
+                    <!--</div>-->
                 </h4>
             </div>
             <div class="modal-footer">
