@@ -22,21 +22,21 @@ public class Publisher {
     // Logger instance named "MyApp".
     static Logger s_oLogger = Logger.getLogger(Publisher.class);
 
-    public static final int LEVEL = 4;
+//    public static final int LEVEL = 4;
 
-    public static final int WIDTH = 2048;
+//    public static final int WIDTH = 2048;
 
-    public static final int HEIGHT = 2048;
+//    public static final int HEIGHT = 2048;
 
-    public static String TARGET_DIR_BASE = "c:\\temp\\ImagePyramidTest\\";
+//    public static String TARGET_DIR_BASE = "c:\\temp\\ImagePyramidTest\\";
 
-    public static String TARGET_DIR_PYRAMID = "c:\\temp\\ImagePyramidTest\\TempImagePyramidCreation\\";
+//    public static String TARGET_DIR_PYRAMID = "c:\\temp\\ImagePyramidTest\\TempImagePyramidCreation\\";
 
-    public static String GDAL_Retile_Path = "\"C:\\Program Files\\GDAL\\bin\\gdal\\python\\scripts\\gdal_retile.py\"";
+    public static String GDAL_Retile_Command = "gdal_retile.py -r bilinear -levels 4 -ps 2048 2048 -co TILED=YES";
 
-    public static String PYRAMYD_ENV_OPTIONS = "PYTHONPATH=C:/Program Files/GDAL/bin/gdal/python|PROJ_LIB=C:/Program Files/GDAL/bin/proj/SHARE|GDAL_DATA=C:/Program Files/GDAL/bin/gdal-data|GDAL_DRIVER_PATH=C:/Program Files/GDAL/bin/gdal/plugins|PATH=C:/Program Files/GDAL/bin;C:/Program Files/GDAL/bin/gdal/python/osgeo;C:/Program Files/GDAL/bin/proj/apps;C:/Program Files/GDAL/bin/gdal/apps;C:/Program Files/GDAL/bin/ms/apps;C:/Program Files/GDAL/bin/gdal/csharp;C:/Program Files/GDAL/bin/ms/csharp;C:/Program Files/GDAL/bin/curl;C:/Python34";
+//    public static String PYRAMYD_ENV_OPTIONS = "PYTHONPATH=C:/Program Files/GDAL/bin/gdal/python|PROJ_LIB=C:/Program Files/GDAL/bin/proj/SHARE|GDAL_DATA=C:/Program Files/GDAL/bin/gdal-data|GDAL_DRIVER_PATH=C:/Program Files/GDAL/bin/gdal/plugins|PATH=C:/Program Files/GDAL/bin;C:/Program Files/GDAL/bin/gdal/python/osgeo;C:/Program Files/GDAL/bin/proj/apps;C:/Program Files/GDAL/bin/gdal/apps;C:/Program Files/GDAL/bin/ms/apps;C:/Program Files/GDAL/bin/gdal/csharp;C:/Program Files/GDAL/bin/ms/csharp;C:/Program Files/GDAL/bin/curl;C:/Python34";
 
-    public static String PYTHON_PATH = "c:/OSGeo4W64/bin/python";
+//    public static String PYTHON_PATH = "c:/OSGeo4W64/bin/python";
 
     public Publisher()
     {
@@ -54,18 +54,10 @@ public class Publisher {
         }
     }
 
-    public Publisher(String sPyramidBaseFolder, String sGDALBasePath, String sPyramidEnvOptions)
-    {
-        TARGET_DIR_BASE = sPyramidBaseFolder;
-        GDAL_Retile_Path = sGDALBasePath;
-        PYRAMYD_ENV_OPTIONS = sPyramidEnvOptions;
-    }
-
-
     /*
 
      */
-    private boolean LaunchImagePyramidCreation(String sInputFile, Integer iLevel, Integer iWidth, Integer iHeight, String sPathName) {
+    private boolean LaunchImagePyramidCreation(String sInputFile, String sPathName) {
 
         String sTargetDir = sPathName;
         if (!sTargetDir.endsWith("/"))
@@ -89,9 +81,9 @@ public class Publisher {
             
             s_oLogger.debug("Publisher.LaunchImagePyramidCreation: CIAO");
                         
-            String sCmd = String.format("gdal_retile.py -r bilinear -levels %d -ps %d %d -co TILED=YES -targetDir %s %s", iLevel, iWidth, iHeight, sTargetDir, sInputFile);
+            String sCmd = String.format("%s -targetDir %s %s", GDAL_Retile_Command, sTargetDir, sInputFile);
             
-            String[] asEnvp = PYRAMYD_ENV_OPTIONS.split("\\|");
+//            String[] asEnvp = PYRAMYD_ENV_OPTIONS.split("\\|");
 
             s_oLogger.debug("Publisher.LaunchImagePyramidCreation: Command: " + sCmd);
 
@@ -176,7 +168,7 @@ public class Publisher {
 
 
         // Create Pyramid
-        if (!LaunchImagePyramidCreation(sFileName, LEVEL, WIDTH, HEIGHT, sPath))
+        if (!LaunchImagePyramidCreation(sFileName, sPath))
             return null;
 
         s_oLogger.debug("Publisher.PublishImagePyramidOnGeoServer: Publish Image Pyramid");
