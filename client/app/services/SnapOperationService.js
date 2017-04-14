@@ -12,7 +12,7 @@ service('SnapOperationService', ['$http',  'ConstantsService', function ($http, 
     /************************************ RADAR OPERATIONS ************************************/
     this.ApplyOrbit = function (sSourceProductName, sDestinationProductName, sWorkspaceId,sOptionsInput) {
 
-        return this.Operation("radar/applyOrbit", sSourceProductName, sDestinationProductName, sWorkspaceId, sOptionsInput);//orbit
+        return this.Operation("radar/applyOrbit", sSourceProductName, sDestinationProductName, sWorkspaceId, oOptionsInput);//orbit
     };
     this.Calibrate = function (sSourceProductName, sDestinationProductName, sWorkspaceId) {
 
@@ -35,7 +35,7 @@ service('SnapOperationService', ['$http',  'ConstantsService', function ($http, 
         return this.Operation("optical/ndvi", sSourceProductName, sDestinationProductName, sWorkspaceId);//ndvi
     };
 
-    this.Operation = function(sOperation, sSourceProductName, sDestinationProductName, sWorkspaceId, sOptionsInput)
+    this.Operation = function(sOperation, sSourceProductName, sDestinationProductName, sWorkspaceId, oOptionsInput)
     {
         // //'/snap/
         // var sUrl = this.APIURL + '/processing/{sOperation}?sSourceProductName=' + sSourceProductName + '&sDestinationProductName=' + sDestinationProductName + '&sWorkspaceId=' + sWorkspaceId;
@@ -43,10 +43,10 @@ service('SnapOperationService', ['$http',  'ConstantsService', function ($http, 
         // return this.m_oHttp.get(sUrl);
         var oConfig = {header:""};
         var oData = {
-            options:sOptionsInput,
-            surceProductName:sSourceProductName,
-            destinationProductName:sDestinationProductName,
-            workspaceId:sWorkspaceId
+            oOptions:sOptionsInput,
+            sSourceProductName:sSourceProductName,
+            sDestinationProductName:sDestinationProductName,
+            sWorkspaceId:sWorkspaceId
         }
         var sUrl = this.APIURL + '/processing/{sOperation}';
         sUrl = sUrl.replace("{sOperation}", sOperation);
