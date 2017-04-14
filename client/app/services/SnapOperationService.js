@@ -48,7 +48,7 @@ service('SnapOperationService', ['$http',  'ConstantsService', function ($http, 
             destinationProductName:sDestinationProductName,
             workspaceId:sWorkspaceId,
             exchange: sWorkspaceId,
-            userId: oConstantsService.getUser().id,
+            userId: oConstantsService.getUser().userId,
         }
         var sUrl = this.APIURL + '/processing/{sOperation}';
         sUrl = sUrl.replace("{sOperation}", sOperation);
