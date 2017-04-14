@@ -1,9 +1,28 @@
 package wasdi;
-import com.bc.ceres.glevel.MultiLevelImage;
+import java.io.File;
+import java.io.IOException;
+import java.lang.management.ManagementFactory;
+import java.lang.management.RuntimeMXBean;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
+import javax.media.jai.JAI;
+
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.Option;
+import org.apache.commons.cli.OptionBuilder;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 import org.apache.log4j.xml.DOMConfigurator;
+import org.esa.snap.core.dataio.ProductIO;
+import org.esa.snap.core.dataio.ProductReader;
+import org.esa.snap.core.dataio.ProductReaderPlugIn;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.GeoCoding;
 import org.esa.snap.core.datamodel.Product;
@@ -13,12 +32,11 @@ import org.esa.snap.core.util.geotiff.GeoTIFFMetadata;
 import org.esa.snap.engine_utilities.util.MemUtils;
 import org.esa.snap.runtime.Config;
 import org.geotools.referencing.CRS;
-import org.json.JSONArray;
-import org.json.JSONObject;
+
+import com.bc.ceres.glevel.MultiLevelImage;
 
 import sun.management.VMManagement;
 import wasdi.filebuffer.DownloadFile;
-import org.apache.commons.cli.*;
 import wasdi.geoserver.Publisher;
 import wasdi.rabbit.Send;
 import wasdi.shared.LauncherOperations;
@@ -29,22 +47,30 @@ import wasdi.shared.data.DownloadedFilesRepository;
 import wasdi.shared.data.MongoRepository;
 import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.data.PublishedBandsRepository;
-import wasdi.shared.parameters.*;
+import wasdi.shared.parameters.ApplyOrbitParameter;
+import wasdi.shared.parameters.CalibratorParameter;
+import wasdi.shared.parameters.DownloadFileParameter;
+import wasdi.shared.parameters.FilterParameter;
+import wasdi.shared.parameters.MultilookingParameter;
+import wasdi.shared.parameters.NDVIParameter;
+import wasdi.shared.parameters.OperatorParameter;
+import wasdi.shared.parameters.PublishBandParameter;
+import wasdi.shared.parameters.RangeDopplerGeocodingParameter;
+import wasdi.shared.parameters.RasterGeometricResampleParameter;
 import wasdi.shared.utils.SerializationUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.ProductViewModel;
 import wasdi.shared.viewmodels.PublishBandResultViewModel;
-import wasdi.snapopearations.*;
-
-import javax.media.jai.JAI;
-import java.io.*;
-import java.lang.management.ManagementFactory;
-import java.lang.management.RuntimeMXBean;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.regex.Pattern;
+import wasdi.snapopearations.ApplyOrbit;
+import wasdi.snapopearations.BaseOperation;
+import wasdi.snapopearations.Calibration;
+import wasdi.snapopearations.Filter;
+import wasdi.snapopearations.Multilooking;
+import wasdi.snapopearations.NDVI;
+import wasdi.snapopearations.RasterGeometricResampling;
+import wasdi.snapopearations.ReadProduct;
+import wasdi.snapopearations.TerrainCorrection;
+import wasdi.snapopearations.WriteProduct;
 
 
 
@@ -136,10 +162,7 @@ public class LauncherMain {
         try {
 
             // Set Global Settings
-            Publisher.PYTHON_PATH = ConfigReader.getPropValue("PYTHON_PATH");
-            Publisher.TARGET_DIR_BASE = ConfigReader.getPropValue("PYRAMID_BASE_FOLDER");
-            Publisher.GDAL_Retile_Path = ConfigReader.getPropValue("GDAL_RETILE");
-            Publisher.PYRAMYD_ENV_OPTIONS = ConfigReader.getPropValue("PYRAMYD_ENV_OPTIONS");
+            Publisher.GDAL_Retile_Command = ConfigReader.getPropValue("GDAL_RETILE", Publisher.GDAL_Retile_Command);
             MongoRepository.SERVER_ADDRESS = ConfigReader.getPropValue("MONGO_ADDRESS");
             MongoRepository.SERVER_PORT = Integer.parseInt(ConfigReader.getPropValue("MONGO_PORT"));
             MongoRepository.DB_NAME = ConfigReader.getPropValue("MONGO_DBNAME");
@@ -539,7 +562,6 @@ public class LauncherMain {
                 throw new Exception("LauncherMain.ExecuteOperation: Output Product is null");
             }
 
-
             String sTargetFileName = oTargetProduct.getName();
 
             if (!Utils.isNullOrEmpty(oParameter.getDestinationProductName()))
@@ -547,18 +569,17 @@ public class LauncherMain {
 
             s_oLogger.debug("LauncherMain.ExecuteOperation: Save Output Product " + sTargetFileName);
 
-            // P.Campanella 10/04/2017: changed big tiff with native format. NOT TESTED YET
-            String sTiffFile = oWriter.WriteProduct(oTargetProduct, sPath, sTargetFileName, oSourceProduct.getProductType(), Utils.GetFileNameExtension(sFile));
-            //String sTiffFile = oWriter.WriteBigTiff(oTargetProduct, sPath, sTargetFileName);
+            //writing product in default snap format
+            String sTargetAbsFileName = oWriter.WriteBEAMDIMAP(oTargetProduct, sPath, sTargetFileName);
 
-            if (Utils.isNullOrEmpty(sTiffFile))
+            if (Utils.isNullOrEmpty(sTargetAbsFileName))
             {
                 throw new Exception("LauncherMain.ExecuteOperation: Tiff not created");
             }
 
             s_oLogger.debug("LauncherMain.TerrainOperation: convert product to view model");
             
-            ConvertProductToViewModelAndSendToRabbit(null, sTiffFile, oParameter.getWorkspace(), oParameter.getExchange(), sTypeOperation, null);
+            ConvertProductToViewModelAndSendToRabbit(null, sTargetAbsFileName, oParameter.getWorkspace(), oParameter.getExchange(), sTypeOperation, null);
 
             //this.PublishOnGeoserver(oParameter.getPublishParameter(), oTerrainProduct.getName(), sBandName);
 
