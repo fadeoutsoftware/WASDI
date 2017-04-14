@@ -25,7 +25,7 @@ var ApplyOrbitController = (function() {
         else
         {
             if( (utilsIsObjectNullOrUndefined(this.m_oSelectedProduct.productFriendlyName)== false) && (utilsIsStrNullOrEmpty(this.m_oSelectedProduct.productFriendlyName)== false))
-                this.m_sFriendlyName_Operation = this.m_oSelectedProduct.productFriendlyName + "_ApplyOrbit";
+                this.m_sFriendlyName_Operation = this.m_oSelectedProduct.productFriendlyName + "_ApplyOrbit.zip";
         }
         // this.m_oTabOpen = "tab1";
         this.m_asTypeOfData = ["GeoTIFF","NetCDF-BEAM","NetCDF4-CF","NetCDF-CF","CSV","Gamma","Generic Binary","GeoTIFF+XML",
@@ -37,7 +37,7 @@ var ApplyOrbitController = (function() {
         this.m_sSelectedOrbitStateVectors = this.m_asOrbitStateVectors[0];
         //TODO CHECK IF THERE IS sourceFileName && destinationFileName
         this.m_oReturnValue = {
-            sourceFileName:this.m_oSelectedProduct.filename,
+            sourceFileName:this.m_oSelectedProduct.fileName,
             destinationFileName:this.m_sFriendlyName_Operation,
             options:{
                     orbitType:"Sentinel Precise(Auto Download)",
@@ -81,9 +81,10 @@ var ApplyOrbitController = (function() {
         if(utilsIsObjectNullOrUndefined(oNewSelectedProductInput) == true)
             return false;
         this.m_oSelectedProduct = oNewSelectedProductInput;
-        this.m_sFriendlyName_Operation = this.m_oSelectedProduct.productFriendlyName + "_ApplyOrbit";
+        // TODO X ALE: Qui devi metterci il codice e non il friendly Name
+        this.m_sFriendlyName_Operation = this.m_oSelectedProduct.productFriendlyName + "_ApplyOrbit.zip";
 
-        this.m_oReturnValue.sourceFileName = this.m_oSelectedProduct.filename;
+        this.m_oReturnValue.sourceFileName = this.m_oSelectedProduct.fileName;
         this.m_oReturnValue.destinationFileName = this.m_sFriendlyName_Operation;
 
         return true;
