@@ -7,63 +7,64 @@
             </div>
             <div class="modal-body">
                 <h4>
-                    <ul class="nav nav-tabs">
-                        <li class="active"><a data-toggle="tab" href="" ng-click="m_oController.tabOpen('tab1')">{{"DIALOG_APPLY_ORBIT_TAB_INPUT_OUTPUT"|translate}}</a></li>
-                        <li><a data-toggle="tab" href="" ng-click="m_oController.tabOpen('tab2')">{{"DIALOG_APPLY_ORBIT_TAB_PROCESSING"|translate}}</a></li>
-                    </ul>
+                    <!--<ul class="nav nav-tabs">-->
+                    <!--<li class="active"><a data-toggle="tab" href="" ng-click="m_oController.tabOpen('tab1')">{{"DIALOG_APPLY_ORBIT_TAB_INPUT_OUTPUT"|translate}}</a></li>-->
+                    <!--<li><a data-toggle="tab" href="" ng-click="m_oController.tabOpen('tab2')">{{"DIALOG_APPLY_ORBIT_TAB_PROCESSING"|translate}}</a></li>-->
+                    <!--</ul>-->
                     <!-------------------------------------------INPUT OUTPUT PARAMETERS-------------------------------->
-                    <div ng-show="m_oController.firstTabIsOpen()">
-                        <div ng-include src="'dialogs/InputOutputParametersView.html'"></div>
-                    </div>
+                    <!--<div ng-show="m_oController.firstTabIsOpen()">-->
+                    <div ng-include src="'dialogs/InputOutputParametersView.html'"></div>
+                    <!--</div>-->
                     <!------------------------------------ PROCESSING PARAMETERS -------------------------------------->
-                    <div ng-show="m_oController.secondTabIsOpen()" >
-                        </br>
-                        <form>
-                            <fieldset class="my-input-text">
-                                <!--SIMPLE INPUTS-->
-                                <div class="form-group">
-                                    <label for="NDVIRedFactor">{{"DIALOG_NDVI_RED_FACTOR"|translate}}</label>
-                                    <input type="text" class="form-control" id="NDVIRedFactor">
-                                </div>
-                                <div class="form-group">
-                                    <label for="NDVINIRFactor">{{"DIALOG_NDVI_NIR_factor"|translate}}</label>
-                                    <input type="text" class="form-control" id="NDVINIRFactor">
-                                </div>
+                    <!--<div ng-show="m_oController.secondTabIsOpen()" >-->
+                    </br>
+                    <form>
+                        <fieldset class="my-input-text">
+                            <legend><h3>{{"DIALOG_APPLY_ORBIT_TAB_PROCESSING"|translate}}</h3></legend>
+                            <!--SIMPLE INPUTS-->
+                            <div class="form-group">
+                                <label for="NDVIRedFactor">{{"DIALOG_NDVI_RED_FACTOR"|translate}}</label>
+                                <input type="text" class="form-control" id="NDVIRedFactor">
+                            </div>
+                            <div class="form-group">
+                                <label for="NDVINIRFactor">{{"DIALOG_NDVI_NIR_factor"|translate}}</label>
+                                <input type="text" class="form-control" id="NDVINIRFactor">
+                            </div>
 
-                                <!--DROPDOWN MENUS-->
-                                <label>{{"DIALOG_NDVI_RED_SOURCE_BAND"|translate}}</label>
-                                <div class="dropdown">
-                                    <button class="btn btn-default dropdown-toggle" type="button" id="NDVIDropdownMenuRedSourceBand"
-                                            data-toggle="dropdown">
-                                        Dropdown
-                                        <span class="caret"></span>
-                                    </button>
+                            <!--DROPDOWN MENUS-->
+                            <label>{{"DIALOG_NDVI_RED_SOURCE_BAND"|translate}}</label>
+                            <div class="dropdown">
+                                <button class="btn btn-default dropdown-toggle" type="button" id="NDVIDropdownMenuRedSourceBand"
+                                        data-toggle="dropdown">
+                                    Dropdown
+                                    <span class="caret"></span>
+                                </button>
 
-                                    <ul class="dropdown-menu" role="menu" aria-labelledby="NDVIDropdownMenuRedSourceBand">
-                                        <li role="presentation"><a role="menuitem" tabindex="-1" href="">Action</a></li>
-                                        <li role="presentation"><a role="menuitem" tabindex="-1" href="">Another action</a></li>
-                                    </ul>
+                                <ul class="dropdown-menu" role="menu" aria-labelledby="NDVIDropdownMenuRedSourceBand">
+                                    <li role="presentation"><a role="menuitem" tabindex="-1" href="">Action</a></li>
+                                    <li role="presentation"><a role="menuitem" tabindex="-1" href="">Another action</a></li>
+                                </ul>
 
-                                </div>
+                            </div>
 
-                                <label>{{"DIALOG_NDVI_NIR_SOURCE_BAND"|translate}}</label>
-                                <div class="dropdown">
-                                    <button class="btn btn-default dropdown-toggle" type="button" id="NDVIDropdownMenuNIRSourceBand"
-                                            data-toggle="dropdown">
-                                        Dropdown
-                                        <span class="caret"></span>
-                                    </button>
+                            <label>{{"DIALOG_NDVI_NIR_SOURCE_BAND"|translate}}</label>
+                            <div class="dropdown">
+                                <button class="btn btn-default dropdown-toggle" type="button" id="NDVIDropdownMenuNIRSourceBand"
+                                        data-toggle="dropdown">
+                                    Dropdown
+                                    <span class="caret"></span>
+                                </button>
 
-                                    <ul class="dropdown-menu" role="menu" aria-labelledby="NDVIDropdownMenuNIRSourceBand">
-                                        <li role="presentation"><a role="menuitem" tabindex="-1" href="">Action</a></li>
-                                        <li role="presentation"><a role="menuitem" tabindex="-1" href="">Another action</a></li>
-                                    </ul>
+                                <ul class="dropdown-menu" role="menu" aria-labelledby="NDVIDropdownMenuNIRSourceBand">
+                                    <li role="presentation"><a role="menuitem" tabindex="-1" href="">Action</a></li>
+                                    <li role="presentation"><a role="menuitem" tabindex="-1" href="">Another action</a></li>
+                                </ul>
 
-                                </div>
+                            </div>
 
-                            </fieldset>
-                        </form>
-                    </div>
+                        </fieldset>
+                    </form>
+                    <!--</div>-->
                 </h4>
             </div>
             <div class="modal-footer">

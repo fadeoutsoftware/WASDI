@@ -1,0 +1,126 @@
+.space-invaders-fixed-class
+{
+  .space {
+    float: left;
+    color: white;
+    width: 0;
+
+  }
+  .space>span {
+    margin-left: 20px;
+  }
+  .space-invader {
+    border: 2px solid white;
+    background-color: white;
+    float: left;
+    width: 0.25em;
+    height: 0.25em;
+    margin: 40px 40px;
+
+
+  }
+
+  .space-invader-2 {
+    box-shadow:
+            0 0 0 .25em $wasdi-green-logo,
+            0 .25em 0 .25em $wasdi-green-logo,
+            -.625em .375em 0 .125em $wasdi-green-logo,
+            .625em .375em 0 .125em $wasdi-green-logo,
+            -.75em -.75em 0 0 $wasdi-green-logo,
+            .75em -.75em 0 0 $wasdi-green-logo,
+            -.5em -.5em 0 0 $wasdi-green-logo,
+            .5em -.5em 0 0 $wasdi-green-logo,
+            -.75em -.25em 0 0 $wasdi-green-logo,
+            -.5em -.25em 0 0 $wasdi-green-logo,
+            .5em -.25em 0 0 $wasdi-green-logo,
+            .75em -.25em 0 0 $wasdi-green-logo,
+            -1em 0 0 0 $wasdi-green-logo,
+            -.75em 0 0 0 $wasdi-green-logo,
+            .75em 0 0 0 $wasdi-green-logo,
+            1em 0 0 0 $wasdi-green-logo,
+            -1em .25em 0 0 $wasdi-green-logo,
+            1em .25em 0 0 $wasdi-green-logo,
+            -.75em .75em 0 0 $wasdi-green-logo,
+            .75em .75em 0 0 $wasdi-green-logo,
+              /* Left Arm */
+            1.25em .25em 0 0 $wasdi-green-logo,
+            1.25em .5em 0 0 $wasdi-green-logo,
+            1.25em .75em 0 0 $wasdi-green-logo,
+              /* Right Arm */
+            -1.25em .25em 0 0 $wasdi-green-logo,
+            -1.25em .5em 0 0 $wasdi-green-logo,
+            -1.25em .75em 0 0 $wasdi-green-logo,
+              /* Left Foot */
+            -.25em 1em 0 0 $wasdi-green-logo,
+            -.5em 1em 0 0 $wasdi-green-logo,
+              /* Right Foot */
+            .25em 1em 0 0 $wasdi-green-logo,
+            .5em 1em 0 0 $wasdi-green-logo;
+  }
+
+  @keyframes space-invader-2 {
+    50% {
+      box-shadow:
+              0 0 0 .25em $wasdi-green-logo,
+              0 .25em 0 .25em $wasdi-green-logo,
+              -.625em .375em 0 .125em $wasdi-green-logo,
+              .625em .375em 0 .125em $wasdi-green-logo,
+              -.75em -.75em 0 0 $wasdi-green-logo,
+              .75em -.75em 0 0 $wasdi-green-logo,
+              -.5em -.5em 0 0 $wasdi-green-logo,
+              .5em -.5em 0 0 $wasdi-green-logo,
+              -.75em -.25em 0 0 $wasdi-green-logo,
+              -.5em -.25em 0 0 $wasdi-green-logo,
+              .5em -.25em 0 0 $wasdi-green-logo,
+              .75em -.25em 0 0 $wasdi-green-logo,
+              -1em 0 0 0 $wasdi-green-logo,
+              -.75em 0 0 0 $wasdi-green-logo,
+              .75em 0 0 0 $wasdi-green-logo,
+              1em 0 0 0 $wasdi-green-logo,
+              -1em .25em 0 0 $wasdi-green-logo,
+              1em .25em 0 0 $wasdi-green-logo,
+              -.75em .75em 0 0 $wasdi-green-logo,
+              .75em .75em 0 0 $wasdi-green-logo,
+                /* Left Arm */
+              1.25em 0 0 0 $wasdi-green-logo,
+              1.25em -.25em 0 0 $wasdi-green-logo,
+              1.25em -.5em 0 0 $wasdi-green-logo,
+                /* Right Arm */
+              -1.25em 0 0 0 $wasdi-green-logo,
+              -1.25em -.25em 0 0 $wasdi-green-logo,
+              -1.25em -.5em 0 0 $wasdi-green-logo,
+                /* Left Foot */
+              -1em 1em 0 0 $wasdi-green-logo,
+              -1em 1em 0 0 $wasdi-green-logo,
+                /* Right Foot */
+              1em 1em 0 0 $wasdi-green-logo,
+              1em 1em 0 0 $wasdi-green-logo;
+    }
+  }
+
+  .space-invader.fixed {
+    animation: 1s step-end infinite;
+  }
+  .space-invader-2.fixed {
+    animation-name: space-invader-2;
+  }
+
+  #invader-fixed{
+    position:relative;
+    -webkit-animation-name: MOVE;
+    -webkit-animation-duration: 5s;
+    -webkit-animation-timing-function: step-end;
+    -webkit-animation-iteration-count: infinite;
+  }
+
+  @-webkit-keyframes MOVE {
+    0%, 100% {    left: 0px;  }
+    10%, 90% {left:10%;}
+    20%, 80% {left:20%;}
+    30%, 70% {left:30%;}
+    40%, 60% {left:40%;}
+    50% {    left: 50%;  }
+
+
+  }
+}

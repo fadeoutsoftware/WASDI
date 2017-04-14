@@ -3,6 +3,7 @@
 // Declare app level module which depends on views, and components
 var wasdiApp = angular.module('wasdi', [
     'ngRoute',
+    'ngAnimate',
     'ui.router',//library alternative for router
     'pascalprecht.translate',
 
@@ -28,6 +29,7 @@ var wasdiApp = angular.module('wasdi', [
     'wasdi.SnakeDirective',
     'wasdi.TreeDirective',
     'wasdi.SpaceInvaderDirective',
+    'wasdi.SpaceInvaderFixedDirective',
 
     //EXTERNAL LIB
     'ui.bootstrap',

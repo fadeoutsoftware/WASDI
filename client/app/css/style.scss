@@ -14,6 +14,8 @@
 //directive css
 @import "../directives/tree_directive/tree";
 @import "../directives/space_invaders/space_invaders";
+@import "../directives/space_invaders_fixed/space_invaders_fixed";
+
 
 //DIALOGS
 @import "../dialogs/orbit_info/orbit_info";
@@ -24,6 +26,7 @@
 @import "../dialogs/radiometric_calibration_operation/radiometric_calibration";
 @import "../dialogs/multilooking_operation/multilooking";
 @import "../dialogs/range_doppler_terrain_correction_operation/range_doppler_terrain_correction";
+@import "../dialogs/product_editor_info/product_editor_info";
 
 body
 {
@@ -177,6 +180,7 @@ h4
 
     //background-color:white;
     color:$wasdi-over-icon;
+
   }
 }
 
@@ -283,6 +287,11 @@ h4
                   color: $wasdi-blue-logo;
                   background-color: $wasdi-grey;
                   border-color: $wasdi-blue-logo;
+                  width:100%
+                }
+                .productsDropDown
+                {
+                  width:100%
                 }
               }
             }
@@ -323,4 +332,29 @@ h4
       }
     }
   }
+}
+
+//ANIMATE HIDE
+.animate-hide {
+  -webkit-transition:all cubic-bezier(0.250, 0.460, 0.450, 0.940) 2s;
+  -moz-transition:all cubic-bezier(0.250, 0.460, 0.450, 0.940) 2s;
+  -o-transition:all cubic-bezier(0.250, 0.460, 0.450, 0.940) 2s;
+  transition:all cubic-bezier(0.250, 0.460, 0.450, 0.940) 2s;
+  //line-height:20px;
+  //opacity:1;
+  //padding:10px;
+  //border:1px solid black;
+  //background:white;
+  position: absolute;
+  right: 0;
+}
+
+.animate-hide.ng-hide {
+  right: 100%;
+  opacity:0;
+  padding:0 10px;
+}
+.test:hover
+{
+  fill:white;
 }

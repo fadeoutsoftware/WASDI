@@ -10,6 +10,7 @@
     "angular-route": "~1.5",
     "angular-loader": "~1.5",
     "angular-mocks": "~1.5",
+    "angular-animate":"~1.5",
     "html5-boilerplate": "^5.3",
     "angular-translate": "~2.9",
     "angular-translate-loader-static-files": "~2.9",

@@ -1,30 +1,61 @@
 <div class="editor-view col-lg-12 col-md-12 col-sm-12 col-xs-12">
     <div class="col-lg-1 col-md-2 col-sm-2 col-xs-2" ></div>
-    <div class="col-lg-11 col-md-10 col-sm-10 col-xs-10 operations-bar" >
-        <ul>
-            <li data-toggle="tooltip" data-placement="top" title="Coming soon" style="cursor:no-drop;">
-                <a><i class="fa fa-grav fa-3x" aria-hidden="true"></i></a>
-            </li>
-            <li data-toggle="tooltip" data-placement="top" title="Coming soon" style="cursor:no-drop;">
-                <a><i class="fa fa-rocket fa-3x" aria-hidden="true"></i></a>
-            </li>
-            <li data-toggle="tooltip" data-placement="top" title="Coming soon" style="cursor:no-drop;" >
-                <a><i class="fa fa-wpexplorer fa-3x" aria-hidden="true"></i></a>
-            </li>
-            <li data-toggle="tooltip" data-placement="top" title="Coming soon" style="cursor:no-drop;" >
-                <a><i class="fa fa-space-shuttle fa-3x" aria-hidden="true"></i></a>
-            </li>
-            <!-- MIDA MERGE -->
-            <!--<li ng-click="m_oController.openMergeDialog()">-->
-                <!--<a class="icon"><img src="assets/icons/iconMIDA.svg"></a>-->
-            <!--</li>-->
-            <li ng-click="m_oController.openMergeDialog()" ng-init="m_oController.m_sSrc='assets/icons/iconMIDA.svg' "
-                ng-mouseover="m_oController.m_sSrc='assets/icons/iconMIDA_White.svg' " ng-mouseleave="m_oController.m_sSrc='assets/icons/iconMIDA.svg' ">
-                <!--<a class="icon"><img src="assets/icons/iconMIDA_White.svg"></a>-->
-                <a class="icon"><img src="{{m_oController.m_sSrc}}"></a>
-            </li>
+    <div class="col-lg-11 col-md-10 col-sm-10 col-xs-10 operations-bar"  ><!--style="height: 80px;"-->
+        <!--MAIN OPERATION BAR-->
+        <div  class='animate-hide'  ng-hide="m_oController.isHiddenOperationMainBar();">
+            <ul>
 
-        </ul>
+                <li data-toggle="tooltip" data-placement="top" title="{{'EDITOR_TOOLTIP_ICON_RADAR'|translate}}"  ng-click="m_oController.hideOperationMainBar(); m_oController.showOperationRadarBar();" >
+                    <a class="icon-radar"><i  aria-hidden="true"></i> </a>
+                </li>
+                <li data-toggle="tooltip" data-placement="top" title="{{'EDITOR_TOOLTIP_ICON_EYE'|translate}}"  ng-click="m_oController.hideOperationMainBar();m_oController.showOperationOpticalBar(); " >
+                    <a class="icon-eye"><i  aria-hidden="true"></i></a>
+                </li>
+
+                <!--<li data-toggle="tooltip" data-placement="top" title="Coming soon" style="cursor:no-drop;">-->
+                    <!--<a><i class="fa fa-grav fa-3x" aria-hidden="true"></i></a>-->
+                <!--</li>-->
+                <!--<li data-toggle="tooltip" data-placement="top" title="Coming soon" style="cursor:no-drop;">-->
+                    <!--<a><i class="fa fa-rocket fa-3x" aria-hidden="true"></i></a>-->
+                <!--</li>-->
+                <!--<li data-toggle="tooltip" data-placement="top" title="Coming soon" style="cursor:no-drop;" >-->
+                    <!--<a><i class="fa fa-wpexplorer fa-3x" aria-hidden="true"></i></a>-->
+                <!--</li>-->
+                <!--<li data-toggle="tooltip" data-placement="top" title="Coming soon" style="cursor:no-drop;" >-->
+                    <!--<a><i class="fa fa-space-shuttle fa-3x" aria-hidden="true"></i></a>-->
+                <!--</li>-->
+                <!-- MIDA MERGE -->
+                <!--<li ng-click="m_oController.openMergeDialog()">-->
+                <!--<a class="icon"><img src="assets/icons/iconMIDA.svg"></a>-->
+                <!--</li>-->
+                <li ng-click="m_oController.openMergeDialog()" ng-init="m_oController.m_sSrc='assets/icons/iconMIDA.svg' "
+                    ng-mouseover="m_oController.m_sSrc='assets/icons/iconMIDA_White.svg' " ng-mouseleave="m_oController.m_sSrc='assets/icons/iconMIDA.svg' ">
+                    <!--<a class="icon"><img src="assets/icons/iconMIDA_White.svg"></a>-->
+                    <a class="icon"><img src="{{m_oController.m_sSrc}}"></a>
+                </li>
+
+            </ul>
+        </div>
+
+        <!--RADAR BAR-->
+        <div  class='animate-hide'  ng-hide="m_oController.isHiddenOperationRadarBar();">
+            <ul>
+                <li data-toggle="tooltip" data-placement="top" title="{{'EDITOR_TOOLTIP_ICON_ARROW_BACK'|translate}}"  ng-click="m_oController.hideOperationRadarBar(); m_oController.showOperationMainBar(); " >
+                    <a><i class="fa fa-arrow-left fa-3x" aria-hidden="true"></i></a>
+                </li>
+            </ul>
+        </div>
+
+        <!--OPTICAL BAR-->
+        <div  class='animate-hide'  ng-hide="m_oController.isHiddenOperationOpticalBar();">
+            <ul>
+
+                <li data-toggle="tooltip" data-placement="top" title="{{'EDITOR_TOOLTIP_ICON_ARROW_BACK'|translate}}"  ng-click="m_oController.hideOperationOpticalBar(); m_oController.showOperationMainBar(); " >
+                    <a><i class="fa fa-arrow-left fa-3x" aria-hidden="true"></i></a>
+                </li>
+            </ul>
+        </div>
+
     </div>
 
     <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12 sidebar">
