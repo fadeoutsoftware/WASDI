@@ -82,7 +82,7 @@ var ApplyOrbitController = (function() {
 
         this.m_oReturnValue.sourceFileName = this.m_oSelectedProduct.filename;
         this.m_oReturnValue.destinationFileName = this.m_sFriendlyName_Operation;
-               
+
         return true;
     };
 
