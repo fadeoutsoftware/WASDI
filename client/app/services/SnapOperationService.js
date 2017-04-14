@@ -43,10 +43,12 @@ service('SnapOperationService', ['$http',  'ConstantsService', function ($http, 
         // return this.m_oHttp.get(sUrl);
         var oConfig = {header:""};
         var oData = {
-            oOptions:sOptionsInput,
-            sSourceProductName:sSourceProductName,
-            sDestinationProductName:sDestinationProductName,
-            sWorkspaceId:sWorkspaceId
+            settings:oOptionsInput,
+            sourceProductName:sSourceProductName,
+            destinationProductName:sDestinationProductName,
+            workspaceId:sWorkspaceId,
+            exchange: sWorkspaceId,
+            userId: oConstantsService.getUser().id,
         }
         var sUrl = this.APIURL + '/processing/{sOperation}';
         sUrl = sUrl.replace("{sOperation}", sOperation);
