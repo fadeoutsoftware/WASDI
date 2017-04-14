@@ -38,23 +38,22 @@ service('SnapOperationService', ['$http',  'ConstantsService', function ($http, 
     this.Operation = function(sOperation, sSourceProductName, sDestinationProductName, sWorkspaceId, oOptionsInput)
     {
         // //'/snap/
-        // var sUrl = this.APIURL + '/processing/{sOperation}?sSourceProductName=' + sSourceProductName + '&sDestinationProductName=' + sDestinationProductName + '&sWorkspaceId=' + sWorkspaceId;
-        // sUrl = sUrl.replace("{sOperation}", sOperation);
+        var sUrl = this.APIURL + '/processing/{sOperation}?sSourceProductName=' + sSourceProductName + '&sDestinationProductName=' + sDestinationProductName + '&sWorkspaceId=' + sWorkspaceId;
+        //sUrl = sUrl.replace("{sOperation}", sOperation);
         // return this.m_oHttp.get(sUrl);
         var oConfig = {header:""};
-        var oData = {
+        /*var oData = {
             settings:oOptionsInput,
             sourceProductName:sSourceProductName,
             destinationProductName:sDestinationProductName,
             workspaceId:sWorkspaceId,
             exchange: sWorkspaceId,
             userId: oConstantsService.getUser().userId,
-        }
-        var sUrl = this.APIURL + '/processing/{sOperation}';
+        }*/
+        //var sUrl = this.APIURL + '/processing/{sOperation}';
         sUrl = sUrl.replace("{sOperation}", sOperation);
-        return this.m_oHttp.post(sUrl,oData,oConfig);
+        return this.m_oHttp.post(sUrl,oOptionsInput,oConfig);
     }
-
 
 }]);
 
