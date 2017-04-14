@@ -39,7 +39,10 @@ var ApplyOrbitController = (function() {
         this.m_oReturnValue = {
             sourceFileName:this.m_oSelectedProduct.filename,
             destinationFileName:this.m_sFriendlyName_Operation,
-            options:{}
+            options:{
+                    orbitType:"Sentinel Precise(Auto Download)",
+                    polyDegree:3,
+                    continueOnFail:false}
         };
 
 
