@@ -18,9 +18,9 @@ service('SnapOperationService', ['$http',  'ConstantsService', function ($http, 
 
         return this.Operation("radar/radiometricCalibration", sSourceProductName, sDestinationProductName, sWorkspaceId);//calibrate
     };
-    this.Multilooking = function (sSourceProductName, sDestinationProductName, sWorkspaceId) {
+    this.Multilooking = function (sSourceProductName, sDestinationProductName, sWorkspaceId,oOptionsInput) {
 
-        return this.Operation("radar/multilooking", sSourceProductName, sDestinationProductName, sWorkspaceId);//multilooking
+        return this.Operation("radar/multilooking", sSourceProductName, sDestinationProductName, sWorkspaceId,oOptionsInput);//multilooking
     };
 
     /************************************ GEOMETRIC OPERATIONS ************************************/

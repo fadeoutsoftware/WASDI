@@ -1560,6 +1560,7 @@ var EditorController = (function () {
         }).then(function (modal) {
             modal.element.modal();
             modal.close.then(function (result) {
+
                 oController.m_oScope.Result = result;
             });
         });
@@ -1579,8 +1580,25 @@ var EditorController = (function () {
             }
         }).then(function (modal) {
             modal.element.modal();
-            modal.close.then(function (result) {
-                oController.m_oScope.Result = result;
+            modal.close.then(function (oResult) {
+
+                if(utilsIsObjectNullOrUndefined(oResult) == true)
+                {
+                    utilsVexDialogAlertTop("Error the multilooking options are wrong or empty!");
+                    return false;
+                }
+                if(oResult == "close")
+                    return false;
+
+                // oController.m_oScope.Result = oResult;
+                oController.m_oSnapOperationService.Multilooking(oResult.sourceFileName, oResult.destinationFileName, oController.m_oActiveWorkspace.workspaceId,oResult.options)
+                    .success(function (data) {
+
+                    }).error(function (error) {
+
+                });
+                return true;
+
             });
         });
 

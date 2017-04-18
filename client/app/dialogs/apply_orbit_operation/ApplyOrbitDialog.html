@@ -3,7 +3,7 @@
         <div class="modal-content">
             <!-- HEADER -->
             <div class="modal-header">
-                <button type="button" class="close" ng-click="close(false)" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <button type="button" class="close" ng-click="close(null)" data-dismiss="modal" aria-hidden="true">&times;</button>
                 <h4 class="modal-title ">{{"DIALOG_APPLY_ORBIT_TITLE"|translate}}</h4>
             </div>
             <!-- BODY -->
@@ -40,13 +40,13 @@
                             <!--<span class="label">{{"DIALOG_APPLY_ORBIT_POLYNOMIAL_DEGREE"|translate}}</span>-->
                             <div class="form-group">
                                 <label for="ApplyOrbitPolynomialDegree">{{'DIALOG_APPLY_ORBIT_POLYNOMIAL_DEGREE'|translate}}</label>
-                                <input type="text" class="form-control" id="ApplyOrbitPolynomialDegree">
+                                <input type="text" class="form-control" id="ApplyOrbitPolynomialDegree" ng-model="m_oController.m_oReturnValue.options.polyDegree">
                             </div>
 
                             <!--<input type="text"  class="my-input-text form-control polynomial-degree" placeholder="{{'DIALOG_APPLY_ORBIT_POLYNOMIAL_DEGREE'|translate}}">-->
                             <div class="checkbox">
                                 <label>
-                                    <input type="checkbox" >
+                                    <input type="checkbox" ng-model = "m_oController.m_oReturnValue.options.continueOnFail" >
                                     {{"DIALOG_APPLY_ORBIT_CHECKBOX_FAIL"|translate}}
                                 </label>
                             </div>
