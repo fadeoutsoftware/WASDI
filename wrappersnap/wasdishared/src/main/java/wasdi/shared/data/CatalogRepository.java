@@ -1,15 +1,15 @@
 package wasdi.shared.data;
 
-import com.mongodb.Block;
-import com.mongodb.client.FindIterable;
-import org.bson.Document;
-import wasdi.shared.business.Catalog;
-import wasdi.shared.business.DownloadedFile;
-import wasdi.shared.business.ProcessWorkspace;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
+import org.bson.Document;
+
+import com.mongodb.Block;
+import com.mongodb.client.FindIterable;
+
+import wasdi.shared.business.Catalog;
 
 /**
  * Created by s.adamo on 02/03/2017.

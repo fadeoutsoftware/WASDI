@@ -1,15 +1,10 @@
 package wasdi.shared.data;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mongodb.MongoClient;
-import com.mongodb.client.FindIterable;
-import com.mongodb.client.MongoDatabase;
-import com.mongodb.client.result.DeleteResult;
 import org.bson.Document;
-import wasdi.shared.business.User;
 
-import java.io.IOException;
+import com.mongodb.client.result.DeleteResult;
+
+import wasdi.shared.business.User;
 
 /**
  * Created by p.campanella on 21/10/2016.
