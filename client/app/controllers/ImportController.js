@@ -813,12 +813,10 @@ var ImportController = (function() {
         if(utilsIsObjectNullOrUndefined(oLayer))
             return null;
         var aoStr = oLayer.str;
-        if(utilsIsObjectNullOrUndefined(aoStr))
+        var iStrLength = 0;
+        if(!utilsIsObjectNullOrUndefined(aoStr))
         {
-            var iStrLength = 0;
-        }
-        {
-            var iStrLength = aoStr.length;
+            if(!utilsIsObjectNullOrUndefined(aoStr.length)) iStrLength = aoStr.length;
         }
 
         var sSourceProjection = "WGS84";

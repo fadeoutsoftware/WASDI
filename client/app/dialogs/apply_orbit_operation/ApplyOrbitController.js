@@ -30,8 +30,8 @@ var ApplyOrbitController = (function() {
         // this.m_oTabOpen = "tab1";
         // this.m_asTypeOfData = ["GeoTIFF","NetCDF-BEAM","NetCDF4-CF","NetCDF-CF","CSV","Gamma","Generic Binary","GeoTIFF+XML",
         //                         "NetCDF4-BEAM","BEAM-DIMAP","ENVI","PolSARPro","Snaphu","JP2","JPG","PNG","BMP","GIF","BTF","GeoTIFF-BIGTIFF","HDF5"];
-        this.m_asOrbitStateVectors = ["Sentinel Precise(Auto Download)","Sentinel Restituted(Auto Download)","DORIS preliminary POR(ENVISAT)"
-                                        ,"DORIS Precise Vor(ENVISAT)(Auto Download)","DELFT Precise(ENVISAT,ERS1&2)(Auto Download)","PRARE Precise(ERS1&2)(Auto Download)"];
+        this.m_asOrbitStateVectors = ["Sentinel Precise (Auto Download)","Sentinel Restituted (Auto Download)","DORIS preliminary POR (ENVISAT)"
+                                        ,"DORIS Precise Vor (ENVISAT) (Auto Download)","DELFT Precise (ENVISAT,ERS1&2) (Auto Download)","PRARE Precise (ERS1&2) (Auto Download)"];
 
         // this.m_sSelectedExtension = this.m_asTypeOfData[0];
         this.m_sSelectedOrbitStateVectors = this.m_asOrbitStateVectors[0];
