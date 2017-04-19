@@ -1,7 +1,5 @@
 package wasdi.shared.business;
 
-import java.util.Date;
-
 /**
  * Created by p.campanella on 25/10/2016.
  */

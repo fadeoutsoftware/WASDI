@@ -1,22 +1,20 @@
 package wasdi.shared.data;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
+import org.bson.Document;
+
 import com.mongodb.Block;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.Updates;
 import com.mongodb.client.result.UpdateResult;
-import org.bson.Document;
-import wasdi.shared.business.User;
-import wasdi.shared.business.UserSession;
-import wasdi.shared.business.Workspace;
-import wasdi.shared.utils.Utils;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import wasdi.shared.business.UserSession;
+import wasdi.shared.utils.Utils;
 
 /**
  * Created by p.campanella on 21/10/2016.

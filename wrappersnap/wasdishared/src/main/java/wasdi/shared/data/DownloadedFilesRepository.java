@@ -1,14 +1,12 @@
 package wasdi.shared.data;
 
+import org.bson.Document;
+
 import com.mongodb.client.model.Filters;
-import com.mongodb.client.model.Updates;
 import com.mongodb.client.result.DeleteResult;
 import com.mongodb.client.result.UpdateResult;
-import org.bson.Document;
-import wasdi.shared.business.DownloadedFile;
-import wasdi.shared.business.UserSession;
 
-import java.util.Date;
+import wasdi.shared.business.DownloadedFile;
 
 /**
  * Created by p.campanella on 11/11/2016.

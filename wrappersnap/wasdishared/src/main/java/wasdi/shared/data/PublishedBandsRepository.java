@@ -1,17 +1,18 @@
 package wasdi.shared.data;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.bson.Document;
+
 import com.mongodb.BasicDBObject;
 import com.mongodb.Block;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.result.DeleteResult;
-import org.bson.Document;
-import wasdi.shared.business.DownloadedFile;
-import wasdi.shared.business.PublishedBand;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import wasdi.shared.business.PublishedBand;
 
 /**
  * Created by p.campanella on 17/11/2016.
