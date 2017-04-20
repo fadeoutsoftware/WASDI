@@ -2,7 +2,7 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <button type="button" class="close" ng-click="close(false)" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <button type="button" class="close" ng-click="close(null)" data-dismiss="modal" aria-hidden="true">&times;</button>
                 <h4 class="modal-title">{{"DIALOG_RADIOMETRIC_CALIBRATION_TITLE"|translate}}</h4>
             </div>
             <div class="modal-body">
@@ -23,41 +23,46 @@
                             <div class="processing-parameters">
                                 <legend><h3>{{"DIALOG_APPLY_ORBIT_TAB_PROCESSING"|translate}}</h3></legend>
                                 <!--MULTISELECT-->
-                                {{"DIALOG_RADIOMETRIC_CALIBRATION_SOURCE_BANDS"|translate}}<multiselect  ng-model="m_oController.m_asSourceBandsSelected" options="m_oController.m_asSourceBands" show-select-all="true" show-unselect-all="true" show-search="true"></multiselect>
+                                <div class=" col-lg-6 col-md-6 col-sm-6 col-xs-6">
+                                    {{"DIALOG_RADIOMETRIC_CALIBRATION_POLARISATION"|translate}}
+                                </div>
+                                <div class=" col-lg-6 col-md-6 col-sm-6 col-xs-6">
+                                    <multiselect  ng-model="m_oController.m_asSourceBandsSelected" options="m_oController.m_asSourceBands" show-select-all="true" show-unselect-all="true" show-search="true"></multiselect>
+                                </div>
 
                                 <!-- DROPDOWN MENU-->
-                                {{"DIALOG_RADIOMETRIC_CALIBRATION_AUXILIARY_FILE"|translate}}
-                                <div class="dropdown">
-                                    <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu2"
-                                            data-toggle="dropdown">
-                                        {{m_oController.m_sSelectedCalibration}}
-                                        <span class="caret"></span>
-                                    </button>
-                                    <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu2">
-                                        <li role="presentation" ng-repeat="auxiliaryFile in m_oController.m_asAuxiliaryFile" ng-click="m_oController.m_sSelectedCalibration = auxiliaryFile">
-                                            <a role="menuitem" tabindex="-1" href="">{{auxiliaryFile}}</a>
-                                        </li>
-                                        <!--<li role="presentation"><a role="menuitem" tabindex="-1" href="">Action</a></li>-->
-                                        <!--<li role="presentation"><a role="menuitem" tabindex="-1" href="">Another action</a></li>-->
-                                    </ul>
-                                </div>
+                                <!--{{"DIALOG_RADIOMETRIC_CALIBRATION_AUXILIARY_FILE"|translate}}-->
+                                <!--<div class="dropdown">-->
+                                    <!--<button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu2"-->
+                                            <!--data-toggle="dropdown">-->
+                                        <!--{{m_oController.m_sSelectedAuxiliaryFile}}-->
+                                        <!--<span class="caret"></span>-->
+                                    <!--</button>-->
+                                    <!--<ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu2">-->
+                                        <!--<li role="presentation" ng-repeat="auxiliaryFile in m_oController.m_asAuxiliaryFile" ng-click="m_oController.m_sSelectedCalibration = auxiliaryFile">-->
+                                            <!--<a role="menuitem" tabindex="-1" href="">{{auxiliaryFile}}</a>-->
+                                        <!--</li>-->
+                                        <!--&lt;!&ndash;<li role="presentation"><a role="menuitem" tabindex="-1" href="">Action</a></li>&ndash;&gt;-->
+                                        <!--&lt;!&ndash;<li role="presentation"><a role="menuitem" tabindex="-1" href="">Another action</a></li>&ndash;&gt;-->
+                                    <!--</ul>-->
+                                <!--</div>-->
 
                                 <!--CHECK BOX-->
                                 <div class="checkbox">
-                                    <div>
-                                        <input type="checkbox" value="" >
+                                    <div class=" col-lg-3 col-md-3 col-sm-3 col-xs-3">
+                                        <input type="checkbox" value="" ng-model="m_oController.m_oReturnValue.options.outputImageInComplex">
                                         {{"DIALOG_RADIOMETRIC_CALIBRATION_CHECKBOX_SAVE_COMPLEX_OUTPUT"|translate}}
                                     </div>
-                                    <div>
-                                        <input type="checkbox" value="" >
+                                    <div class=" col-lg-3 col-md-3 col-sm-3 col-xs-3">
+                                        <input type="checkbox" value="" ng-model="m_oController.m_oReturnValue.options.outputImageScaleInDb">
                                         {{"DIALOG_RADIOMETRIC_CALIBRATION_CHECKBOX_SAVE_DB"|translate}}
                                     </div>
-                                    <div>
-                                        <input type="checkbox" value="" >
+                                    <div class=" col-lg-3 col-md-3 col-sm-3 col-xs-3">
+                                        <input type="checkbox" value="" ng-model="m_oController.m_oReturnValue.options.createGammaBand">
                                         {{"DIALOG_RADIOMETRIC_CALIBRATION_CREATE_GAMMA"|translate}}
                                     </div>
-                                    <div>
-                                        <input type="checkbox" value="" >
+                                    <div class=" col-lg-3 col-md-3 col-sm-3 col-xs-3">
+                                        <input type="checkbox" value="" ng-model="m_oController.m_oReturnValue.options.createBetaBand">
                                         {{"DIALOG_RADIOMETRIC_CALIBRATION_CREATE_BETA"|translate}}
                                     </div>
                                 </div>
@@ -68,8 +73,8 @@
                 </h4>
             </div>
             <div class="modal-footer">
-                <button type="button" ng-click="close('Close')" class="my-button" data-dismiss="modal">{{"DIALOG_CLOSE_BUTTON"|translate}}</button>
-                <button type="button" ng-click="close('Run')" class="my-button" data-dismiss="modal">{{"DIALOG_RUN_BUTTON"|translate}}</button>
+                <button type="button" ng-click="close(null)" class="my-button" data-dismiss="modal">{{"DIALOG_CLOSE_BUTTON"|translate}}</button>
+                <button type="button" ng-click="run(m_oController.m_oReturnValue)" class="my-button" data-dismiss="modal">{{"DIALOG_RUN_BUTTON"|translate}}</button>
             </div>
 
         </div>

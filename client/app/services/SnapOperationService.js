@@ -14,9 +14,9 @@ service('SnapOperationService', ['$http',  'ConstantsService', function ($http, 
 
         return this.Operation("radar/applyOrbit", sSourceProductName, sDestinationProductName, sWorkspaceId, oOptionsInput);//orbit
     };
-    this.Calibrate = function (sSourceProductName, sDestinationProductName, sWorkspaceId) {
+    this.Calibrate = function (sSourceProductName, sDestinationProductName, sWorkspaceId,oOptionsInput) {
 
-        return this.Operation("radar/radiometricCalibration", sSourceProductName, sDestinationProductName, sWorkspaceId);//calibrate
+        return this.Operation("radar/radiometricCalibration", sSourceProductName, sDestinationProductName, sWorkspaceId,oOptionsInput);//calibrate
     };
     this.Multilooking = function (sSourceProductName, sDestinationProductName, sWorkspaceId,oOptionsInput) {
 
@@ -30,9 +30,9 @@ service('SnapOperationService', ['$http',  'ConstantsService', function ($http, 
     };
 
     /************************************ NDVI OPERATIONS ************************************/
-    this.NDVI = function (sSourceProductName, sDestinationProductName, sWorkspaceId) {
+    this.NDVI = function (sSourceProductName, sDestinationProductName, sWorkspaceId,oOptionsInput) {
 
-        return this.Operation("optical/ndvi", sSourceProductName, sDestinationProductName, sWorkspaceId);//ndvi
+        return this.Operation("optical/ndvi", sSourceProductName, sDestinationProductName, sWorkspaceId,oOptionsInput);//ndvi
     };
 
     this.Operation = function(sOperation, sSourceProductName, sDestinationProductName, sWorkspaceId, oOptionsInput)

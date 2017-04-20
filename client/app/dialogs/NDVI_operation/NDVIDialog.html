@@ -2,7 +2,7 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <button type="button" class="close" ng-click="close(false)" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <button type="button" class="close" ng-click="close(null)" data-dismiss="modal" aria-hidden="true">&times;</button>
                 <h4 class="modal-title ">{{"DIALOG_NDVI_TITLE"|translate}}</h4>
             </div>
             <div class="modal-body">
@@ -24,11 +24,11 @@
                             <!--SIMPLE INPUTS-->
                             <div class="form-group">
                                 <label for="NDVIRedFactor">{{"DIALOG_NDVI_RED_FACTOR"|translate}}</label>
-                                <input type="text" class="form-control" id="NDVIRedFactor">
+                                <input type="text" class="form-control" id="NDVIRedFactor" ng-model="m_oController.m_oReturnValue.options.redFactor">
                             </div>
                             <div class="form-group">
                                 <label for="NDVINIRFactor">{{"DIALOG_NDVI_NIR_factor"|translate}}</label>
-                                <input type="text" class="form-control" id="NDVINIRFactor">
+                                <input type="text" class="form-control" id="NDVINIRFactor" ng-model="m_oController.m_oReturnValue.options.nirFactor">
                             </div>
 
                             <!--DROPDOWN MENUS-->
@@ -36,13 +36,14 @@
                             <div class="dropdown">
                                 <button class="btn btn-default dropdown-toggle" type="button" id="NDVIDropdownMenuRedSourceBand"
                                         data-toggle="dropdown">
-                                    Dropdown
+                                    {{m_oController.m_sRedSourceBandSelected}}
                                     <span class="caret"></span>
                                 </button>
 
                                 <ul class="dropdown-menu" role="menu" aria-labelledby="NDVIDropdownMenuRedSourceBand">
-                                    <li role="presentation"><a role="menuitem" tabindex="-1" href="">Action</a></li>
-                                    <li role="presentation"><a role="menuitem" tabindex="-1" href="">Another action</a></li>
+                                    <li role="presentation" ng-repeat="RedSourceBand in m_oController.m_asSourceBands">
+                                        <a role="menuitem" tabindex="-1" href="" ng-click="m_oController.m_sRedSourceBandSelected = RedSourceBand">{{RedSourceBand}}</a>
+                                    </li>
                                 </ul>
 
                             </div>
@@ -51,13 +52,14 @@
                             <div class="dropdown">
                                 <button class="btn btn-default dropdown-toggle" type="button" id="NDVIDropdownMenuNIRSourceBand"
                                         data-toggle="dropdown">
-                                    Dropdown
+                                    {{m_oController.m_sNIRSourceBandSelected}}
                                     <span class="caret"></span>
                                 </button>
 
                                 <ul class="dropdown-menu" role="menu" aria-labelledby="NDVIDropdownMenuNIRSourceBand">
-                                    <li role="presentation"><a role="menuitem" tabindex="-1" href="">Action</a></li>
-                                    <li role="presentation"><a role="menuitem" tabindex="-1" href="">Another action</a></li>
+                                    <li role="presentation" ng-repeat="NIRSourceBand in m_oController.m_asSourceBands">
+                                        <a role="menuitem" tabindex="-1" href="" ng-click="m_oController.m_sNIRSourceBandSelected = NIRSourceBand">{{NIRSourceBand}}</a>
+                                    </li>
                                 </ul>
 
                             </div>
@@ -69,8 +71,8 @@
             </div>
             <div class="modal-footer">
                 <!--<button type="button" ng-click="close('ok')" class="my-button" data-dismiss="modal">Ok</button>-->
-                <button type="button" ng-click="close('Close')" class="my-button" data-dismiss="modal">{{"DIALOG_CLOSE_BUTTON"|translate}}</button>
-                <button type="button" ng-click="close('Run')" class="my-button" data-dismiss="modal">{{"DIALOG_RUN_BUTTON"|translate}}</button>
+                <button type="button" ng-click="close(null)" class="my-button" data-dismiss="modal">{{"DIALOG_CLOSE_BUTTON"|translate}}</button>
+                <button type="button" ng-click="run(m_oController.m_oReturnValue)" class="my-button" data-dismiss="modal">{{"DIALOG_RUN_BUTTON"|translate}}</button>
             </div>
         </div>
     </div>
