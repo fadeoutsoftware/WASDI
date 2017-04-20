@@ -177,11 +177,13 @@
 
                                         <button class="btn btn-default dropdown-toggle" type="button" id="SaveSigmaDropdown"
                                                 data-toggle="dropdown">
-                                            Dropdown
+                                            {{m_oController.m_sSaveSigmaSelected}}
                                             <span class="caret"></span>
                                         </button>
                                         <ul class="dropdown-menu" role="menu" aria-labelledby="SaveSigmaDropdown">
-                                            <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Another action</a></li>
+                                            <li role="presentation" ng-repeat="saveSigma in m_oController.m_asSaveBand">
+                                                <a role="menuitem" tabindex="-1" href="" ng-click="m_oController.m_sSaveSigmaSelected = saveSigma">{{saveSigma}}</a>
+                                            </li>
                                         </ul>
 
                                     </div>
@@ -197,11 +199,13 @@
                                     <div class="dropdown " >
                                         <button class="btn btn-default dropdown-toggle" type="button" id="SaveGammaDropdown"
                                                 data-toggle="dropdown">
-                                            Dropdown
+                                            {{m_oController.m_sSaveGammaSelected}}
                                             <span class="caret"></span>
                                         </button>
                                         <ul class="dropdown-menu" role="menu" aria-labelledby="SaveGammaDropdown">
-                                            <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Another action</a></li>
+                                            <li role="presentation" ng-repeat="saveGamma in m_oController.m_asSaveBand">
+                                                <a role="menuitem" tabindex="-1" href="" ng-click="m_oController.m_sSaveGammaSelected=saveGamma">{{saveGamma}}</a>
+                                            </li>
                                         </ul>
                                     </div>
                                 </div>
@@ -212,6 +216,7 @@
                                 </label>
 
                             </div>
+
                             <div class="col-lg-12">
                                 <label class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
                                     {{"DIALOG_RANGE_DOPPLER_TERRAIN_CORRECTION_AUXILIARY_FILE_LABEL"|translate}}
@@ -220,11 +225,13 @@
                                     <div class="dropdown">
                                         <button class="btn btn-default dropdown-toggle" type="button" id="AuxiliaryFileDropdown"
                                                 data-toggle="dropdown">
-                                            Dropdown
+                                            {{m_oController.m_sLatestAuxiliaryFileSelected}}
                                             <span class="caret"></span>
                                         </button>
                                         <ul class="dropdown-menu" role="menu" aria-labelledby="AuxiliaryFileDropdown">
-                                            <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Another action</a></li>
+                                            <li role="presentation" ng-repeat="latestAuxiliaryFile in m_oController.m_asLatestAuxiliaryFile">
+                                                <a role="menuitem" tabindex="-1" href="#" ng-click="m_oController.m_sLatestAuxiliaryFileSelected = latestAuxiliaryFile">{{latestAuxiliaryFile}}</a>
+                                            </li>
                                         </ul>
                                     </div>
                                 </div>
