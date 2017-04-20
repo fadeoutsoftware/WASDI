@@ -60,6 +60,7 @@ var ApplyOrbitController = (function() {
         $scope.close = function() {
             oClose("close", 500); // close, but give 500ms for bootstrap to animate
         };
+
         var oController = this;
         $scope.run = function(oOptions) {
             //TODO CHECK OPTIONS

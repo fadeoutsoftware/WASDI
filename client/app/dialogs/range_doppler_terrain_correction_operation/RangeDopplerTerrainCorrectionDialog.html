@@ -3,7 +3,7 @@
         <div class="modal-content">
             <!--------------------------- HEADER -------------------->
             <div class="modal-header">
-                <button type="button" class="close" ng-click="close(false)" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <button type="button" class="close" ng-click="close(null)" data-dismiss="modal" aria-hidden="true">&times;</button>
                 <h4 class="modal-title"></h4>
             </div>
             <!-------------------------- BODY ------------------------->
@@ -26,46 +26,103 @@
 
                             <!-- MULTISELECT BANDS-->
                             <!-- Source Bands-->
-                            {{"DIALOG_RANGE_DOPPLER_TERRAIN_CORRECTION_SOURCE_BANDS_LABEL"|translate}}<multiselect  ng-model="m_oController.m_asSourceBandsSelected" options="m_oController.m_asSourceBands" show-select-all="true" show-unselect-all="true" show-search="true"></multiselect>
+                            <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
+                                {{"DIALOG_RANGE_DOPPLER_TERRAIN_CORRECTION_SOURCE_BANDS_LABEL"|translate}}
+                            </div>
+                            <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
+                                <multiselect  ng-model="m_oController.m_asSourceBandsSelected" options="m_oController.m_asSourceBands" show-select-all="true" show-unselect-all="true" show-search="true"></multiselect>
+                            </div>
 
                             <!-- INPUT -->
                             <!-- digital elevation model-->
-                            <div class="form-group">
-                                <label for="RangeDopplerTerrainCorrectionDigitalElevationModel">{{"DIALOG_RANGE_DOPPLER_TERRAIN_CORRECTION_DIGITAL_ELEVATION_MODEL_LABEL"|translate}}</label>
-                                <input type="text" class="form-control" id="RangeDopplerTerrainCorrectionDigitalElevationModel">
+
+                            <!--<div class="form-group">-->
+                            <!--<label for="RangeDopplerTerrainCorrectionDigitalElevationModel">{{"DIALOG_RANGE_DOPPLER_TERRAIN_CORRECTION_DIGITAL_ELEVATION_MODEL_LABEL"|translate}}</label>-->
+                            <!--<input type="text" class="form-control" id="RangeDopplerTerrainCorrectionDigitalElevationModel">-->
+                            <!--</div>-->
+                            <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6"> {{"DIALOG_RANGE_DOPPLER_TERRAIN_CORRECTION_DIGITAL_ELEVATION_MODEL_LABEL"|translate}}</div>
+
+                            <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
+
+                                <div class="dropdown ">
+                                    <button class="btn btn-default dropdown-toggle" type="button" id="RangeDopplerTerrainCorrectionDigitalElevationModel"
+                                            data-toggle="dropdown">
+                                        {{m_oController.m_sDigitalElevationModelSelected}}
+                                        <span class="caret"></span>
+                                    </button>
+                                    <ul class="dropdown-menu" role="menu" aria-labelledby="RangeDopplerTerrainCorrectionDigitalElevationModel">
+                                        <li role="presentation" ng-repeat="dem in m_oController.m_asDigitalElevationModel">
+                                            <a role="menuitem" tabindex="-1" href="" ng-click="m_oController.m_sDigitalElevationModelSelected = dem">{{dem}}</a>
+                                        </li>
+                                    </ul>
+                                </div>
                             </div>
+
                             <!--DEM Resamplig Method-->
-                            <div class="form-group">
-                                <label for="RangeDopplerTerrainCorrectionDEMResamplingMethod">{{"DIALOG_RANGE_DOPPLER_TERRAIN_CORRECTION_DEM_RESAMPLING_METHOD_LABEL"|translate}}</label>
-                                <input type="text" class="form-control" id="RangeDopplerTerrainCorrectionDEMResamplingMethod">
+                            <!--<div class="form-group">-->
+                                <!--<label for="RangeDopplerTerrainCorrectionDEMResamplingMethod">{{"DIALOG_RANGE_DOPPLER_TERRAIN_CORRECTION_DEM_RESAMPLING_METHOD_LABEL"|translate}}</label>-->
+                                <!--<input type="text" class="form-control" id="RangeDopplerTerrainCorrectionDEMResamplingMethod">-->
+                            <!--</div>-->
+                            <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">{{"DIALOG_RANGE_DOPPLER_TERRAIN_CORRECTION_DEM_RESAMPLING_METHOD_LABEL"|translate}}</div>
+                            <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
+
+                                <div class="dropdown ">
+                                    <button class="btn btn-default dropdown-toggle" type="button" id="RangeDopplerTerrainCorrectionDEMResamplingMethod"
+                                            data-toggle="dropdown">
+                                        {{m_oController.m_sDEMResamplingMethodSelected}}
+                                        <span class="caret"></span>
+                                    </button>
+                                    <ul class="dropdown-menu" role="menu" aria-labelledby="RangeDopplerTerrainCorrectionDEMResamplingMethod">
+                                        <li role="presentation" ng-repeat="DEMResamplingMethod in m_oController.m_asResamplingMethod">
+                                            <a role="menuitem" tabindex="-1" href="" ng-click="m_oController.m_sDEMResamplingMethodSelected = DEMResamplingMethod">{{DEMResamplingMethod}}</a>
+                                        </li>
+                                    </ul>
+                                </div>
                             </div>
                             <!-- Image resamplig Method-->
-                            <div class="form-group">
-                                <label for="RangeDopplerTerrainCorrectionImageResamplingMethod">{{"DIALOG_RANGE_DOPPLER_TERRAIN_CORRECTION_IMAGE_RESAMPLING_METHOD_LABEL"|translate}}</label>
-                                <input type="text" class="form-control" id="RangeDopplerTerrainCorrectionImageResamplingMethod">
+                            <!--<div class="form-group">-->
+                                <!--<label for="RangeDopplerTerrainCorrectionImageResamplingMethod">{{"DIALOG_RANGE_DOPPLER_TERRAIN_CORRECTION_IMAGE_RESAMPLING_METHOD_LABEL"|translate}}</label>-->
+                                <!--<input type="text" class="form-control" id="RangeDopplerTerrainCorrectionImageResamplingMethod">-->
+                            <!--</div>-->
+                            <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">{{"DIALOG_RANGE_DOPPLER_TERRAIN_CORRECTION_IMAGE_RESAMPLING_METHOD_LABEL"|translate}}</div>
+                            <div class=" col-lg-6 col-md-6 col-sm-6 col-xs-6">
+
+                                <div class="dropdown">
+                                    <button class="btn btn-default dropdown-toggle" type="button" id="RangeDopplerTerrainCorrectionImageResamplingMethod"
+                                            data-toggle="dropdown">
+                                        {{m_oController.m_sImageResamplingMethodSelected}}
+                                        <span class="caret"></span>
+                                    </button>
+                                    <ul class="dropdown-menu" role="menu" aria-labelledby="RangeDopplerTerrainCorrectionImageResamplingMethod">
+                                        <li role="presentation" ng-repeat="ImageResamplingMethod in m_oController.m_asResamplingMethod">
+                                            <a role="menuitem" tabindex="-1" href="" ng-click="m_oController.m_sImageResamplingMethodSelected = ImageResamplingMethod">{{ImageResamplingMethod}}</a>
+                                        </li>
+                                    </ul>
+                                </div>
                             </div>
+
                             <!--Source GR pixel spacings( az x rg)-->
                             <label>{{"DIALOG_RANGE_DOPPLER_TERRAIN_CORRECTION_SOURCE_GR_PIXEL_SPACINGS_LABEL"|translate}}</label>
                             <!-- Pixel spacing(m)-->
                             <div class="form-group">
                                 <label for="RangeDopplerTerrainCorrectionPixelSpacingM">{{"DIALOG_RANGE_DOPPLER_TERRAIN_CORRECTION_PIXEL_SPACING_M_LABEL"|translate}}</label>
-                                <input type="text" class="form-control" id="RangeDopplerTerrainCorrectionPixelSpacingM">
+                                <input type="text" class="form-control" id="RangeDopplerTerrainCorrectionPixelSpacingM" ng-model="m_oController.m_oReturnValue.options.pixelSpacingInMeter">
                             </div>
                             <!-- Pixel spacing(deg)-->
                             <div class="form-group">
                                 <label for="RangeDopplerTerrainCorrectionPixelSpacingDeg">{{"DIALOG_RANGE_DOPPLER_TERRAIN_CORRECTION_PIXEL_SPACING_DEG_LABEL"|translate}}</label>
-                                <input type="text" class="form-control" id="RangeDopplerTerrainCorrectionPixelSpacingDeg">
+                                <input type="text" class="form-control" id="RangeDopplerTerrainCorrectionPixelSpacingDeg" ng-model="m_oController.m_oReturnValue.options.pixelSpacingInDegree">
                             </div>
                             <!--Map Projection-->
                             <label>{{"DIALOG_RANGE_DOPPLER_TERRAIN_CORRECTION_MAP_PROJECTION_LABEL"|translate}}</label><button class="my-button">button</button>
 
                             <div class="checkbox">
                                 <label>
-                                    <input type="checkbox">
+                                    <input type="checkbox" ng-model="m_oController.m_oReturnValue.options.nodataValueAtSea">
                                     {{"DIALOG_RANGE_DOPPLER_TERRAIN_CORRECTION_MASK_OUT_AREAS_WITHOUT_ELEVATION_CHECKBOX"|translate}}
                                 </label>
                                 <label>
-                                    <input type="checkbox">
+                                    <input type="checkbox" ng-model="m_oController.m_oReturnValue.options.outputComplex">
                                     {{"DIALOG_RANGE_DOPPLER_TERRAIN_CORRECTION_OUTPUT_COMPLEX_DATA_CHECKBOX"|translate}}
                                 </label>
                             </div>
@@ -74,27 +131,27 @@
                                 <legend><h3> {{"DIALOG_RANGE_DOPPLER_TERRAIN_CORRECTION_OUTPUT_BANDS_FOR_LEGGEND"|translate}}</h3></legend>
                                 <div class="checkbox col-lg-12 col-md-12 col-sm-12 col-xs-12">
                                     <label class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
-                                        <input type="checkbox">
+                                        <input type="checkbox" ng-model="m_oController.m_oReturnValue.options.saveSelectedSourceBand">
                                         {{"DIALOG_RANGE_DOPPLER_TERRAIN_CORRECTION_SELECTED_SOURCE_BAND_CHECKBOX"|translate}}
                                     </label>
-                                    <label class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
-                                        <input type="checkbox">
+                                    <label class="col-lg-4 col-md-4 col-sm-4 col-xs-4" >
+                                        <input type="checkbox" ng-model="m_oController.m_oReturnValue.options.saveDEM">
                                         {{"DIALOG_RANGE_DOPPLER_TERRAIN_CORRECTION_DEM_CHECKBOX"|translate}}
                                     </label>
                                     <label class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
-                                        <input type="checkbox">
+                                        <input type="checkbox" ng-model="m_oController.m_oReturnValue.options.saveLatLon">
                                         {{"DIALOG_RANGE_DOPPLER_TERRAIN_CORRECTION_LATITUDINE_LONGITUDE_CHECKBOX"|translate}}
                                     </label>
                                     <label class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
-                                        <input type="checkbox">
+                                        <input type="checkbox" ng-model="m_oController.m_oReturnValue.options.saveIncidenceAngleFromEllipsoid">
                                         {{"DIALOG_RANGE_DOPPLER_TERRAIN_CORRECTION_INCIDENCE_ANGLE_FROM_ELLIPSOID_CHECKBOX"|translate}}
                                     </label>
                                     <label class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
-                                        <input type="checkbox">
+                                        <input type="checkbox" ng-model="m_oController.m_oReturnValue.options.saveLocalIncidenceAngle">
                                         {{"DIALOG_RANGE_DOPPLER_TERRAIN_CORRECTION_LOCAL_INCIDENCE_ANGLE_CHECKBOX"|translate}}
                                     </label>
                                     <label class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
-                                        <input type="checkbox">
+                                        <input type="checkbox" ng-model="m_oController.m_oReturnValue.options.saveProjectedLocalIncidenceAngle">
                                         {{"DIALOG_RANGE_DOPPLER_TERRAIN_CORRECTION_PROJECTED_LOCAL_INCIDENCE_ANGLE_CHECKBOX"|translate}}
                                     </label>
                                 </div>
@@ -180,8 +237,8 @@
             </div>
             <!--------------------------------- FOOTER ---------------------------->
             <div class="modal-footer">
-                <button type="button" ng-click="close('Close')" class="my-button" data-dismiss="modal">{{"DIALOG_CLOSE_BUTTON"|translate}}</button>
-                <button type="button" ng-click="close('Run')" class="my-button" data-dismiss="modal">{{"DIALOG_RUN_BUTTON"|translate}}</button>
+                <button type="button" ng-click="close(null)" class="my-button" data-dismiss="modal">{{"DIALOG_CLOSE_BUTTON"|translate}}</button>
+                <button type="button" ng-click="run(m_oController.m_oReturnValue)" class="my-button" data-dismiss="modal">{{"DIALOG_RUN_BUTTON"|translate}}</button>
             </div>
 
         </div>
