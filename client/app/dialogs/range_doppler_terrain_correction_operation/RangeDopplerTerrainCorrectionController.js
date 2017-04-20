@@ -61,7 +61,8 @@ var RangeDopplerTerrainCorrectionController = (function() {
         this.m_sDigitalElevationModelSelected = this.m_asDigitalElevationModel[6];
         this.m_sDEMResamplingMethodSelected = this.m_asResamplingMethod[0];
         this.m_sImageResamplingMethodSelected = this.m_asResamplingMethod[0];
-        this.m_s
+        this.m_sSaveSigmaSelected = this.m_asSaveBand[0];
+        this.m_sSaveGammaSelected = this.m_asSaveBand[0];
 
         this.m_asSourceBandsSelected = [];
 
