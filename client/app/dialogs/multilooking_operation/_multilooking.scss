@@ -11,7 +11,14 @@
 
       .modal-body
       {
+        fieldset
+        {
+          .btn-block {
+            display: block;
+            width: 100%;
+          }
 
+        }
       }
 
       .modal-footer

@@ -11,6 +11,30 @@
 
       .modal-body
       {
+        h4
+        {
+          form
+          {
+            fieldset
+            {
+              .dropdown
+              {
+                .btn-default {
+                  width: 100%;
+                }
+                ul{
+                  li{
+                    min-height: 26px;
+                    a{
+                      min-height: 20px;
+                    }
+                  }
+                }
+              }
+
+            }
+          }
+        }
 
       }
 

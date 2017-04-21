@@ -35,8 +35,8 @@ var NDVIController = (function() {
             sourceFileName:"",
             destinationFileName:"",
             options:{
-                redFactor:1,
-                nirFactor:1,
+                redFactor:"1.0",
+                nirFactor:"1.0",
                 redSourceBand:"",
                 nirSourceBand:""
             }
@@ -93,8 +93,8 @@ var NDVIController = (function() {
             sourceFileName:"",
             destinationFileName:"",
             options:{
-                redFactor:1,
-                nirFactor:1,
+                redFactor:"1.0",
+                nirFactor:"1.0",
                 redSourceBand:"",
                 nirSourceBand:""
             }
