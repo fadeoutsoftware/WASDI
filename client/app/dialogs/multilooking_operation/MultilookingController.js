@@ -55,7 +55,7 @@ var MultilookingController = (function() {
                 nRgLooks:1,
                 nAzLooks:1,
                 outputIntensity:false,//bool
-                grSquarePixel:false//bool
+                grSquarePixel:true//bool
 
             }
         };
@@ -124,6 +124,8 @@ var MultilookingController = (function() {
         else
             var iNumberOfBands = this.m_oSelectedProduct.bandsGroups.bands.length;
 
+
+
         this.m_asSourceBands = [];
         //load bands
         for(var iIndexBand = 0; iIndexBand < iNumberOfBands ;iIndexBand++)
@@ -132,9 +134,49 @@ var MultilookingController = (function() {
                 this.m_asSourceBands.push(this.m_oSelectedProduct.bandsGroups.bands[iIndexBand].name);
         }
 
-        // this.m_oScope.$apply;
+        this.m_oScope.$apply();
         return true;
     };
+    MultilookingController.prototype.changeInputAutomatically = function()
+    {
+        if( this.m_oReturnValue.options.grSquarePixel == true )
+        {
+            this.m_oReturnValue.options.nAzLooks = this.m_oReturnValue.options.nRgLooks;
+            this.m_iSquarePixel =  this.m_oReturnValue.options.nRgLooks * 10;
+        }
+        else
+        {
+            this.m_iSquarePixel = "";
+        }
+    };
+
+    MultilookingController.prototype.clickOnCheckBoxGrSquarePixel = function()
+    {
+        if(this.m_oReturnValue.options.grSquarePixel == true)
+        {
+            this.m_oReturnValue.options.outputIntensity = false;
+            this.changeInputAutomatically();
+            // this.m_iSquarePixel =  this.m_oReturnValue.options.nRgLooks * 10;
+        }
+
+        else
+            this.m_oReturnValue.options.outputIntensity = true;
+    }
+    MultilookingController.prototype.clickOnCheckBoxOutputIntensity = function()
+    {
+        if(this.m_oReturnValue.options.outputIntensity == true)
+        {
+            this.m_oReturnValue.options.grSquarePixel = false;
+            this.m_iSquarePixel = '';
+        }
+        else
+        {
+            this.m_oReturnValue.options.grSquarePixel = true;
+            this.changeInputAutomatically();
+            // this.m_iSquarePixel =  this.m_oReturnValue.options.nRgLooks * 10;
+        }
+
+    }
 
     MultilookingController.$inject = [
         '$scope',

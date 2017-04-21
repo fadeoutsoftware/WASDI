@@ -5,13 +5,14 @@
 
 var ApplyOrbitController = (function() {
 
-    function ApplyOrbitController($scope, oClose,oExtras) {
+    function ApplyOrbitController($scope, oClose,oExtras,oGetParametersOperationService) {
         //MEMBERS
         this.m_oScope = $scope;
         this.m_oScope.m_oController = this;
         this.m_oExtras = oExtras;
         this.m_aoProducts = this.m_oExtras.products;
         this.m_oSelectedProduct = this.m_oExtras.selectedProduct;
+        this.m_oGetParametersOperationService = oGetParametersOperationService;
 
         if(utilsIsObjectNullOrUndefined(this.m_aoProducts) == true)
         {
@@ -39,12 +40,15 @@ var ApplyOrbitController = (function() {
         this.m_oReturnValue={
              sourceFileName:"",
              destinationFileName:"",
-                options:{
-                    orbitType:"",
-                    polyDegree:3,
-                    continueOnFail:false
-                }
+                // options:{
+                //     orbitType:"",
+                //     polyDegree:3,
+                //     continueOnFail:false
+                // }
         };
+
+        this.m_oOptions ={};
+
         // this.m_oReturnValue = {
         //     sourceFileName:this.m_oSelectedProduct.fileName,
         //     destinationFileName:this.m_sFriendlyName_Operation,
@@ -88,6 +92,22 @@ var ApplyOrbitController = (function() {
             }
             oClose(oOptions, 500); // close, but give 500ms for bootstrap to animate
         };
+
+        this.m_oGetParametersOperationService.getparametersApplyOrbit()
+            .success(function (data) {
+                if(utilsIsObjectNullOrUndefined(data) == false)
+                {
+                    oController.m_oOptions = utilsProjectConvertJSONFromServerInOptions(data);
+                    oController.m_oReturnValue.options = oController.m_oOptions;
+                }
+                else
+                {
+                    utilsVexDialogAlertTop("Error in get parameters, there aren't data");
+                }
+            }).error(function (error) {
+                utilsVexDialogAlertTop("Error in get parameters");
+            });
+
     };
 
     ApplyOrbitController.prototype.changeProduct = function(oNewSelectedProductInput)
@@ -99,11 +119,7 @@ var ApplyOrbitController = (function() {
         this.m_oReturnValue={
             sourceFileName:"",
             destinationFileName:"",
-            options:{
-                orbitType:"",
-                polyDegree:3,
-                continueOnFail:false
-            }
+            options:this.m_oOptions,
         };
         // this.m_oReturnValue.sourceFileName = this.m_oSelectedProduct.fileName;
         // this.m_oReturnValue.destinationFileName = this.m_sFriendlyName_Operation;
@@ -115,7 +131,8 @@ var ApplyOrbitController = (function() {
     ApplyOrbitController.$inject = [
         '$scope',
         'close',
-        'extras'
+        'extras',
+        'GetParametersOperationService'
     ];
     return ApplyOrbitController;
 })();
