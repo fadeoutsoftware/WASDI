@@ -1,6 +1,13 @@
 package it.fadeout.rest.resources;
 
 import java.io.IOException;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 
 import javax.servlet.ServletConfig;
@@ -13,8 +20,12 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 
+import org.esa.s1tbx.sar.gpf.orbits.ApplyOrbitFileOp;
+import org.esa.snap.core.gpf.annotations.Parameter;
+
 import it.fadeout.Wasdi;
 import wasdi.shared.LauncherOperations;
+import wasdi.shared.SnapOperatorFactory;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.business.User;
 import wasdi.shared.data.ProcessWorkspaceRepository;
@@ -34,6 +45,7 @@ import wasdi.shared.parameters.RangeDopplerGeocodingParameter;
 import wasdi.shared.parameters.RangeDopplerGeocodingSetting;
 import wasdi.shared.utils.SerializationUtils;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.viewmodels.SnapOperatorParameterViewModel;
 
 @Path("/processing")
 public class SnapOperationsResources {
@@ -84,6 +96,52 @@ public class SnapOperationsResources {
 	}
 
 
+	@GET
+	@Path("parameters")
+	@Produces({"application/xml", "application/json", "text/xml"})
+	public SnapOperatorParameterViewModel[] OperatorParameters(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sOperation") String sOperation) throws IOException
+	{
+		ArrayList<SnapOperatorParameterViewModel> oChoices = new ArrayList<SnapOperatorParameterViewModel>();
+		
+		Class oOperatorClass = SnapOperatorFactory.getOperatorClass(sOperation);
+		
+		Field[] aoOperatorFields = oOperatorClass.getDeclaredFields();
+    	for (Field oOperatorField : aoOperatorFields) {
+			Annotation[] aoAnnotations = oOperatorField.getAnnotations();			
+			for (Annotation oAnnotation : aoAnnotations) {
+				
+				if (oAnnotation instanceof Parameter) {
+					Parameter oAnnotationParameter = (Parameter) oAnnotation;					
+					
+					SnapOperatorParameterViewModel oParameter = new SnapOperatorParameterViewModel();					
+					oParameter.setField(oOperatorField.getName());
+					
+				    oParameter.setAlias(oAnnotationParameter.alias());
+				    oParameter.setItemAlias(oAnnotationParameter.itemAlias());
+				    oParameter.setDefaultValue(oAnnotationParameter.defaultValue());
+				    oParameter.setLabel(oAnnotationParameter.label());
+				    oParameter.setUnit(oAnnotationParameter.unit());
+				    oParameter.setDescription(oAnnotationParameter.description());
+				    oParameter.setValueSet(oAnnotationParameter.valueSet());
+				    oParameter.setInterval(oAnnotationParameter.interval());
+				    oParameter.setCondition(oAnnotationParameter.condition());
+				    oParameter.setPattern(oAnnotationParameter.pattern());
+				    oParameter.setFormat(oAnnotationParameter.format());
+				    oParameter.setNotNull(oAnnotationParameter.notNull());
+				    oParameter.setNotEmpty(oAnnotationParameter.notEmpty());
+					
+					oChoices.add(oParameter);					
+				}
+			}
+		}
+		
+		
+		return oChoices.toArray(new SnapOperatorParameterViewModel[oChoices.size()]);
+	}
+	
+	
+	
+	
 	private String AcceptedUserAndSession(String sSessionId)
 	{
 		//Check user
