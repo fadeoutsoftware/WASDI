@@ -5,14 +5,14 @@
 
 var RadiometricCalibrationController = (function() {
 
-    function RadiometricCalibrationController($scope, oClose,oExtras) {
+    function RadiometricCalibrationController($scope, oClose,oExtras,oGetParametersOperationService) {
         //MEMBERS
         this.m_oScope = $scope;
         this.m_oScope.m_oController = this;
         this.m_oExtras = oExtras;
         this.m_aoProducts = this.m_oExtras.products;
         this.m_oSelectedProduct = this.m_oExtras.selectedProduct;
-
+        this.m_oGetParametersOperationService = oGetParametersOperationService;
         if(utilsIsObjectNullOrUndefined(this.m_aoProducts) == true)
         {
             this.m_aoProducts = [];
@@ -130,6 +130,21 @@ var RadiometricCalibrationController = (function() {
             }
             oClose(oOptions, 500); // close, but give 500ms for bootstrap to animate
         };
+
+        // this.m_oGetParametersOperationService.getParametersRadiometricCalibration()
+        //     .success(function (data) {
+        //         if(utilsIsObjectNullOrUndefined(data) == false)
+        //         {
+        //             oController.m_oOptions = utilsProjectConvertJSONFromServerInOptions(data);
+        //             oController.m_oReturnValue.options = oController.m_oOptions;
+        //         }
+        //         else
+        //         {
+        //             utilsVexDialogAlertTop("Error in get parameters, there aren't data");
+        //         }
+        //     }).error(function (error) {
+        //     utilsVexDialogAlertTop("Error in get parameters");
+        // });
     };
 
     RadiometricCalibrationController.prototype.changeProduct = function(oNewSelectedProductInput)
@@ -187,7 +202,8 @@ var RadiometricCalibrationController = (function() {
     RadiometricCalibrationController.$inject = [
         '$scope',
         'close',
-        'extras'
+        'extras',
+        'GetParametersOperationService'
     ];
     return RadiometricCalibrationController;
 })();
