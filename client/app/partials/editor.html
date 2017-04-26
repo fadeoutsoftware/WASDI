@@ -6,10 +6,10 @@
             <ul>
 
                 <li data-toggle="tooltip" data-placement="top" title="{{'EDITOR_TOOLTIP_ICON_RADAR'|translate}}"  ng-click="m_oController.hideOperationMainBar(); m_oController.showOperationRadarBar();" >
-                    <a class="icon-radar"><i  aria-hidden="true"></i> </a>
+                    <a class="icon-radar" href=""><i  aria-hidden="true"></i> </a>
                 </li>
                 <li data-toggle="tooltip" data-placement="top" title="{{'EDITOR_TOOLTIP_ICON_EYE'|translate}}"  ng-click="m_oController.hideOperationMainBar();m_oController.showOperationOpticalBar(); " >
-                    <a class="icon-eye"><i  aria-hidden="true"></i></a>
+                    <a class="icon-eye" href=""><i  aria-hidden="true"></i></a>
                 </li>
 
                 <!--<li data-toggle="tooltip" data-placement="top" title="Coming soon" style="cursor:no-drop;">-->
@@ -31,7 +31,7 @@
                 <li ng-click="m_oController.openMergeDialog()" ng-init="m_oController.m_sSrc='assets/icons/iconMIDA.svg' "
                     ng-mouseover="m_oController.m_sSrc='assets/icons/iconMIDA_White.svg' " ng-mouseleave="m_oController.m_sSrc='assets/icons/iconMIDA.svg' ">
                     <!--<a class="icon"><img src="assets/icons/iconMIDA_White.svg"></a>-->
-                    <a class="icon"><img src="{{m_oController.m_sSrc}}"></a>
+                    <a class="icon" href=""><img src="{{m_oController.m_sSrc}}"></a>
                 </li>
 
             </ul>
@@ -41,7 +41,20 @@
         <div  class='animate-hide'  ng-hide="m_oController.isHiddenOperationRadarBar();">
             <ul>
                 <li data-toggle="tooltip" data-placement="top" title="{{'EDITOR_TOOLTIP_ICON_ARROW_BACK'|translate}}"  ng-click="m_oController.hideOperationRadarBar(); m_oController.showOperationMainBar(); " >
-                    <a><i class="fa fa-arrow-left fa-3x" aria-hidden="true"></i></a>
+                    <a href=""><i class="fa fa-arrow-left fa-3x" aria-hidden="true"></i></a>
+                </li>
+
+                <li ng-click="m_oController.openApplyOrbitDialog();" >
+                    <a href="" ><h4>Apply Orbit</h4></a>
+                </li>
+                <li ng-click="m_oController.openMultilookingDialog();" >
+                    <a href=""><h4>Multilooking</h4></a>
+                </li>
+                <li ng-click="m_oController.openRadiometricCalibrationDialog();" >
+                    <a href=""><h4>Radiometric Calibrate</h4></a>
+                </li>
+                <li ng-click="m_oController.rangeDopplerTerrainCorrectionDialog();" >
+                    <a href=""><h4>Range Doppler Terrain Correction</h4></a>
                 </li>
             </ul>
         </div>
@@ -51,7 +64,10 @@
             <ul>
 
                 <li data-toggle="tooltip" data-placement="top" title="{{'EDITOR_TOOLTIP_ICON_ARROW_BACK'|translate}}"  ng-click="m_oController.hideOperationOpticalBar(); m_oController.showOperationMainBar(); " >
-                    <a><i class="fa fa-arrow-left fa-3x" aria-hidden="true"></i></a>
+                    <a href=""><i class="fa fa-arrow-left fa-3x" aria-hidden="true"></i></a>
+                </li>
+                <li ng-click="m_oController.openNDVIDialog();" >
+                    <a href=""><h4>NDVI</h4></a>
                 </li>
             </ul>
         </div>

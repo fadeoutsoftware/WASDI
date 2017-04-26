@@ -136,7 +136,15 @@ var NDVIController = (function() {
                 this.m_asSourceBands.push(this.m_oSelectedProduct.bandsGroups.bands[iIndexBand].name);
         }
 
-    }
+    };
+
+    NDVIController.prototype.selectedProductIsEmpty = function()
+    {
+        if(utilsIsObjectNullOrUndefined(this.m_oSelectedProduct) == true)
+            return true;
+        return false;
+    };
+
     NDVIController.$inject = [
         '$scope',
         'close',
