@@ -23,8 +23,9 @@
                             <legend><h3>{{"DIALOG_APPLY_ORBIT_TAB_PROCESSING"|translate}}</h3></legend>
                             <!--MULTISELECT-->
                             <div class=" col-lg-6 col-md-6 col-sm-6 col-xs-6">{{"DIALOG_RADIOMETRIC_CALIBRATION_SOURCE_BANDS"|translate}}</div>
-                            <div class=" col-lg-6 col-md-6 col-sm-6 col-xs-6">
-                                <multiselect  ng-model="m_oController.m_asSourceBandsSelected" options="m_oController.m_asSourceBands" show-select-all="true" show-unselect-all="true" show-search="true"></multiselect>
+                            <div class=" col-lg-6 col-md-6 col-sm-6 col-xs-6" id="test">
+                                <multiselect id="multiselectMultilooking" ng-model="m_oController.m_asSourceBandsSelected" options="m_oController.m_asSourceBands" show-select-all="true" show-unselect-all="true" show-search="true"></multiselect>
+
                             </div>
                             <!--CHECK BOXS-->
                             <div class="checkbox" >

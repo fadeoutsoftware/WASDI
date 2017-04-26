@@ -4,13 +4,13 @@
 
 var NDVIController = (function() {
 
-    function NDVIController($scope, oClose,oExtras) {//,oExtras
+    function NDVIController($scope, oClose,oExtras,oGetParametersOperationService) {//,oExtras
         this.m_oScope = $scope;
         this.m_oScope.m_oController = this;
         this.m_oExtras = oExtras;
         this.m_aoProducts = this.m_oExtras.products;
         this.m_oSelectedProduct = this.m_oExtras.selectedProduct;
-
+        this.m_oGetParametersOperationService = oGetParametersOperationService;
         if(utilsIsObjectNullOrUndefined(this.m_aoProducts) == true)
         {
             this.m_aoProducts = [];
@@ -34,14 +34,14 @@ var NDVIController = (function() {
         this.m_oReturnValue = {
             sourceFileName:"",
             destinationFileName:"",
-            options:{
-                redFactor:"1.0",
-                nirFactor:"1.0",
-                redSourceBand:"",
-                nirSourceBand:""
-            }
+            // options:{
+            //     redFactor:"1.0",
+            //     nirFactor:"1.0",
+            //     redSourceBand:"",
+            //     nirSourceBand:""
+            // }
         };
-
+        this.m_oOptions = {};
         //this.m_oOrbit = oExtras;
         //$scope.close = oClose;
         $scope.close = function() {
@@ -80,6 +80,22 @@ var NDVIController = (function() {
             }
             oClose(oOptions, 500); // close, but give 500ms for bootstrap to animate
         };
+
+        this.m_oGetParametersOperationService.getParametersNDVI()
+            .success(function (data) {
+                if(utilsIsObjectNullOrUndefined(data) == false)
+                {
+                    oController.m_oOptions = utilsProjectConvertJSONFromServerInOptions(data);
+                    oController.m_oReturnValue.options = oController.m_oOptions;
+                }
+                else
+                {
+                    utilsVexDialogAlertTop("Error in get parameters, there aren't data");
+                }
+            }).error(function (error) {
+            utilsVexDialogAlertTop("Error in get parameters");
+        });
+
     }
 
     NDVIController.prototype.changeProduct = function(oNewSelectedProductInput)
@@ -92,12 +108,13 @@ var NDVIController = (function() {
         this.m_oReturnValue={
             sourceFileName:"",
             destinationFileName:"",
-            options:{
-                redFactor:"1.0",
-                nirFactor:"1.0",
-                redSourceBand:"",
-                nirSourceBand:""
-            }
+            options: this.m_oOptions
+            //     {
+            //     redFactor:"1.0",
+            //     nirFactor:"1.0",
+            //     redSourceBand:"",
+            //     nirSourceBand:""
+            // }
         };
         this.loadBands();
 
@@ -123,7 +140,8 @@ var NDVIController = (function() {
     NDVIController.$inject = [
         '$scope',
         'close',
-        'extras'
+        'extras',
+        'GetParametersOperationService'
     ];//'extras',
     return NDVIController;
 })();

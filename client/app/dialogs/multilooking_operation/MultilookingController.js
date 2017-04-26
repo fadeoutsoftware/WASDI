@@ -4,13 +4,14 @@
 
 var MultilookingController = (function() {
 
-    function MultilookingController($scope, oClose,oExtras) {//,oExtras
+    function MultilookingController($scope, oClose,oExtras,oGetParametersOperationService) {//,oExtras
         this.m_oScope = $scope;
         this.m_oScope.m_oController = this;
         this.m_oExtras = oExtras;
         this.m_aoProducts = this.m_oExtras.products;
         this.m_oSelectedProduct = this.m_oExtras.selectedProduct;
-
+        this.m_asSourceBands = [];
+        this.m_oGetParametersOperationService = oGetParametersOperationService;
         if(utilsIsObjectNullOrUndefined(this.m_aoProducts) == true)
         {
             this.m_aoProducts = [];
@@ -50,15 +51,16 @@ var MultilookingController = (function() {
         this.m_oReturnValue={
             sourceFileName:"",
             destinationFileName:"",
-            options:{
-                sourceBandNames:"",
-                nRgLooks:1,
-                nAzLooks:1,
-                outputIntensity:false,//bool
-                grSquarePixel:true//bool
-
-            }
+            // options:{
+            //     sourceBandNames:"",
+            //     nRgLooks:1,
+            //     nAzLooks:1,
+            //     outputIntensity:false,//bool
+            //     grSquarePixel:true//bool
+            //
+            // }
         };
+        this.m_oOptions={};
 
         //this.m_oOrbit = oExtras;
         //$scope.close = oClose;
@@ -95,6 +97,21 @@ var MultilookingController = (function() {
             }
             oClose(oOptions, 500); // close, but give 500ms for bootstrap to animate
         };
+
+        this.m_oGetParametersOperationService.getParametersMultilooking()
+            .success(function (data) {
+                if(utilsIsObjectNullOrUndefined(data) == false)
+                {
+                    oController.m_oOptions = utilsProjectConvertJSONFromServerInOptions(data);
+                    oController.m_oReturnValue.options = oController.m_oOptions;
+                }
+                else
+                {
+                    utilsVexDialogAlertTop("Error in get parameters, there aren't data");
+                }
+            }).error(function (error) {
+            utilsVexDialogAlertTop("Error in get parameters");
+        });
     }
 
     MultilookingController.prototype.changeProduct = function(oNewSelectedProductInput)
@@ -107,15 +124,18 @@ var MultilookingController = (function() {
         this.m_oReturnValue={
             sourceFileName:"",
             destinationFileName:"",
-            options:{
-                sourceBandNames:"",
-                nRgLooks:1,
-                nAzLooks:1,
-                outputIntensity:false,//bool
-                grSquarePixel:false//bool
-
-            }
+            options:this.m_oOptions
+            //     {
+            //     sourceBandNames:"",
+            //     nRgLooks:1,
+            //     nAzLooks:1,
+            //     outputIntensity:false,//bool
+            //     grSquarePixel:false//bool
+            //
+            // }
         };
+
+        // angular.element("multiselectMultilooking").remove();
 
         this.m_asSourceBandsSelected = [];
 
@@ -134,7 +154,8 @@ var MultilookingController = (function() {
                 this.m_asSourceBands.push(this.m_oSelectedProduct.bandsGroups.bands[iIndexBand].name);
         }
 
-        this.m_oScope.$apply();
+        // this.m_oScope.$apply();
+        // angular.element("multiselectMultilooking").append(' <multiselect id="multiselectMultilooking" ng-model="m_oController.m_asSourceBandsSelected" options="m_oController.m_asSourceBands" show-select-all="true" show-unselect-all="true" show-search="true"></multiselect>');
         return true;
     };
     MultilookingController.prototype.changeInputAutomatically = function()
@@ -181,7 +202,8 @@ var MultilookingController = (function() {
     MultilookingController.$inject = [
         '$scope',
         'close',
-        'extras'
+        'extras',
+        'GetParametersOperationService'
 
     ];//'extras',
     return MultilookingController;
