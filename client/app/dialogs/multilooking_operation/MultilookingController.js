@@ -198,6 +198,12 @@ var MultilookingController = (function() {
         }
 
     }
+    MultilookingController.prototype.selectedProductIsEmpty = function()
+    {
+        if(utilsIsObjectNullOrUndefined(this.m_oSelectedProduct) == true)
+            return true;
+        return false;
+    }
 
     MultilookingController.$inject = [
         '$scope',

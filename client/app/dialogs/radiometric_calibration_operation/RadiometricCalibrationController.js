@@ -199,6 +199,12 @@ var RadiometricCalibrationController = (function() {
     //     return false;
     // }
 
+    RadiometricCalibrationController.prototype.selectedProductIsEmpty = function()
+    {
+        if(utilsIsObjectNullOrUndefined(this.m_oSelectedProduct) == true)
+            return true;
+        return false;
+    };
     RadiometricCalibrationController.$inject = [
         '$scope',
         'close',

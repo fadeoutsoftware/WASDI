@@ -227,6 +227,13 @@ var RangeDopplerTerrainCorrectionController = (function() {
         return true;
     };
 
+    RangeDopplerTerrainCorrectionController.prototype.selectedProductIsEmpty = function()
+    {
+        if(utilsIsObjectNullOrUndefined(this.m_oSelectedProduct) == true)
+            return true;
+        return false;
+    };
+
     RangeDopplerTerrainCorrectionController.$inject = [
         '$scope',
         'close',

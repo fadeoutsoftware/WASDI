@@ -127,6 +127,12 @@ var ApplyOrbitController = (function() {
         return true;
     };
 
+    ApplyOrbitController.prototype.selectedProductIsEmpty = function()
+    {
+        if(utilsIsObjectNullOrUndefined(this.m_oSelectedProduct) == true)
+            return true;
+        return false;
+    }
 
     ApplyOrbitController.$inject = [
         '$scope',
