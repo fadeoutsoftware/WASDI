@@ -135,7 +135,11 @@ var MultilookingController = (function() {
             // }
         };
 
-        // angular.element("multiselectMultilooking").remove();
+         // angular.element(document).find("#multiselectMultilooking").remove();
+        // childScope.$destroy();
+        // var myEl = angular.element( document.querySelector( '#divID' ) );
+        // myEl.empty();
+        // $('#test2').remove();
 
         this.m_asSourceBandsSelected = [];
 
@@ -155,7 +159,9 @@ var MultilookingController = (function() {
         }
 
         // this.m_oScope.$apply();
-        // angular.element("multiselectMultilooking").append(' <multiselect id="multiselectMultilooking" ng-model="m_oController.m_asSourceBandsSelected" options="m_oController.m_asSourceBands" show-select-all="true" show-unselect-all="true" show-search="true"></multiselect>');
+        //  angular.element(document).find("#test").append('<multiselect id="multiselectMultilooking" ng-model="m_oController.m_asSourceBandsSelected" options="m_oController.m_asSourceBands" show-select-all="true" show-unselect-all="true" show-search="true"></multiselect>');
+        // angular.element(document).find("#test").append('Puppami la fava');
+        // $('test').append('<multiselect id="multiselectMultilooking" ng-model="m_oController.m_asSourceBandsSelected" options="m_oController.m_asSourceBands" show-select-all="true" show-unselect-all="true" show-search="true"></multiselect>');
         return true;
     };
     MultilookingController.prototype.changeInputAutomatically = function()

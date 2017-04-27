@@ -22,49 +22,65 @@
                         <fieldset class="my-input-text">
                             <legend><h3>{{"DIALOG_APPLY_ORBIT_TAB_PROCESSING"|translate}}</h3></legend>
                             <!--SIMPLE INPUTS-->
-                            <div class="form-group">
-                                <label for="NDVIRedFactor">{{"DIALOG_NDVI_RED_FACTOR"|translate}}</label>
-                                <input type="text" class="form-control" id="NDVIRedFactor" ng-model="m_oController.m_oReturnValue.options.redFactor" >
-                            </div>
-                            <div class="form-group">
-                                <label for="NDVINIRFactor">{{"DIALOG_NDVI_NIR_factor"|translate}}</label>
-                                <input type="text" class="form-control" id="NDVINIRFactor" ng-model="m_oController.m_oReturnValue.options.nirFactor" >
-                            </div>
-
-                            <!--DROPDOWN MENUS-->
-                            <div class=" col-lg-6 col-md-6 col-sm-6 col-xs-6">
-                                <label>{{"DIALOG_NDVI_RED_SOURCE_BAND"|translate}}</label>
-                                <div class="dropdown">
-                                    <button class="btn btn-default dropdown-toggle" type="button" id="NDVIDropdownMenuRedSourceBand"
-                                            data-toggle="dropdown">
-                                        {{m_oController.m_sRedSourceBandSelected}}
-                                        <span class="caret"></span>
-                                    </button>
-
-                                    <ul class="dropdown-menu" role="menu" aria-labelledby="NDVIDropdownMenuRedSourceBand">
-                                        <li role="presentation" ng-repeat="RedSourceBand in m_oController.m_asSourceBands">
-                                            <a role="menuitem" tabindex="-1" href="" ng-click="m_oController.m_sRedSourceBandSelected = RedSourceBand">{{RedSourceBand}}</a>
-                                        </li>
-                                    </ul>
-
+                            <div class="row">
+                                <div class=" col-lg-2 col-md-2 col-sm-2 col-xs-2">
+                                    <div class="red-factor">{{"DIALOG_NDVI_RED_FACTOR"|translate}}</div>
+                                </div>
+                                <div  class="col-lg-10 col-md-10 col-sm-10 col-xs-10">
+                                    <div class="form-group">
+                                        <input type="text" class="form-control" id="NDVIRedFactor" ng-model="m_oController.m_oReturnValue.options.redFactor" >
+                                    </div>
                                 </div>
                             </div>
 
-                            <div class=" col-lg-6 col-md-6 col-sm-6 col-xs-6">
-                                <label>{{"DIALOG_NDVI_NIR_SOURCE_BAND"|translate}}</label>
-                                <div class="dropdown">
-                                    <button class="btn btn-default dropdown-toggle" type="button" id="NDVIDropdownMenuNIRSourceBand"
-                                            data-toggle="dropdown">
-                                        {{m_oController.m_sNIRSourceBandSelected}}
-                                        <span class="caret"></span>
-                                    </button>
+                            <div class="row">
+                                <div class=" col-lg-2 col-md-2 col-sm-2 col-xs-2">
+                                    <div class="nir-factor">{{"DIALOG_NDVI_NIR_factor"|translate}}</div>
+                                </div>
+                                <div class=" col-lg-10 col-md-10 col-sm-10 col-xs-10">
+                                    <div class="form-group">
+                                        <input type="text" class="form-control" id="NDVINIRFactor" ng-model="m_oController.m_oReturnValue.options.nirFactor" >
+                                    </div>
+                                </div>
+                            </div>
 
-                                    <ul class="dropdown-menu" role="menu" aria-labelledby="NDVIDropdownMenuNIRSourceBand">
-                                        <li role="presentation" ng-repeat="NIRSourceBand in m_oController.m_asSourceBands">
-                                            <a role="menuitem" tabindex="-1" href="" ng-click="m_oController.m_sNIRSourceBandSelected = NIRSourceBand">{{NIRSourceBand}}</a>
-                                        </li>
-                                    </ul>
 
+                            <!--DROPDOWN MENUS-->
+                            <div class="row">
+                                <div class=" col-lg-6 col-md-6 col-sm-6 col-xs-6">
+                                    <label>{{"DIALOG_NDVI_RED_SOURCE_BAND"|translate}}</label>
+                                    <div class="dropdown">
+                                        <button class="btn btn-default dropdown-toggle" type="button" id="NDVIDropdownMenuRedSourceBand"
+                                                data-toggle="dropdown">
+                                            {{m_oController.m_sRedSourceBandSelected}}
+                                            <span class="caret"></span>
+                                        </button>
+
+                                        <ul class="dropdown-menu" role="menu" aria-labelledby="NDVIDropdownMenuRedSourceBand">
+                                            <li role="presentation" ng-repeat="RedSourceBand in m_oController.m_asSourceBands">
+                                                <a role="menuitem" tabindex="-1" href="" ng-click="m_oController.m_sRedSourceBandSelected = RedSourceBand">{{RedSourceBand}}</a>
+                                            </li>
+                                        </ul>
+
+                                    </div>
+                                </div>
+
+                                <div class=" col-lg-6 col-md-6 col-sm-6 col-xs-6">
+                                    <label>{{"DIALOG_NDVI_NIR_SOURCE_BAND"|translate}}</label>
+                                    <div class="dropdown">
+                                        <button class="btn btn-default dropdown-toggle" type="button" id="NDVIDropdownMenuNIRSourceBand"
+                                                data-toggle="dropdown">
+                                            {{m_oController.m_sNIRSourceBandSelected}}
+                                            <span class="caret"></span>
+                                        </button>
+
+                                        <ul class="dropdown-menu" role="menu" aria-labelledby="NDVIDropdownMenuNIRSourceBand">
+                                            <li role="presentation" ng-repeat="NIRSourceBand in m_oController.m_asSourceBands">
+                                                <a role="menuitem" tabindex="-1" href="" ng-click="m_oController.m_sNIRSourceBandSelected = NIRSourceBand">{{NIRSourceBand}}</a>
+                                            </li>
+                                        </ul>
+
+                                    </div>
                                 </div>
                             </div>
                         </fieldset>
