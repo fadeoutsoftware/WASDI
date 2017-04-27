@@ -22,44 +22,73 @@
                         <fieldset class="my-input-text">
                             <legend><h3>{{"DIALOG_APPLY_ORBIT_TAB_PROCESSING"|translate}}</h3></legend>
                             <!--MULTISELECT-->
-                            <div class=" col-lg-6 col-md-6 col-sm-6 col-xs-6">{{"DIALOG_RADIOMETRIC_CALIBRATION_SOURCE_BANDS"|translate}}</div>
-                            <div class=" col-lg-6 col-md-6 col-sm-6 col-xs-6" id="test">
-                                <multiselect id="multiselectMultilooking" ng-model="m_oController.m_asSourceBandsSelected" options="m_oController.m_asSourceBands" show-select-all="true" show-unselect-all="true" show-search="true"></multiselect>
+                            <div class="row">
+                                <div class=" col-lg-3 col-md-3 col-sm-3 col-xs-3">
+                                    <div class="source-band">{{"DIALOG_RADIOMETRIC_CALIBRATION_SOURCE_BANDS"|translate}}</div>
+                                </div>
+                                <div class=" col-lg-9 col-md-9 col-sm-9 col-xs-9" id="test">
 
+                                    <multiselect id="multiselectMultilooking" ng-model="m_oController.m_asSourceBandsSelected" options="m_oController.m_asSourceBands" show-select-all="true" show-unselect-all="true" show-search="true"></multiselect>
+                                </div>
                             </div>
                             <!--CHECK BOXS-->
                             <div class="checkbox" >
-                                <div class=" col-lg-6 col-md-6 col-sm-6 col-xs-6">
-                                    <label>
-                                        <input type="checkbox" value="" ng-model="m_oController.m_oReturnValue.options.grSquarePixel" ng-click="m_oController.clickOnCheckBoxGrSquarePixel()"><!--m_oController.m_oReturnValue.options.outputIntensity=false-->
-                                        {{"DIALOG_MULTILOOKING_CHECKBOX_SQUARE_PIXEL"|translate}}
-                                    </label>
-                                </div>
-                                <div class=" col-lg-6 col-md-6 col-sm-6 col-xs-6">
-                                    <label>
-                                        <input type="checkbox" value="" ng-model="m_oController.m_oReturnValue.options.outputIntensity"
-                                               ng-click="m_oController.clickOnCheckBoxOutputIntensity()"><!--m_oController.m_oReturnValue.options.grSquarePixel=false; m_oController.m_iSquarePixel = '';-->
-                                        {{"DIALOG_MULTILOOKING_CHECKBOX_INDIPENDENT_LOOKS"|translate}}
-                                    </label>
+                                <div class="row">
+                                    <div class=" col-lg-6 col-md-6 col-sm-6 col-xs-6">
+                                        <label>
+                                            <input type="checkbox" value="" ng-model="m_oController.m_oReturnValue.options.grSquarePixel" ng-click="m_oController.clickOnCheckBoxGrSquarePixel()"><!--m_oController.m_oReturnValue.options.outputIntensity=false-->
+                                            {{"DIALOG_MULTILOOKING_CHECKBOX_SQUARE_PIXEL"|translate}}
+                                        </label>
+                                    </div>
+                                    <div class=" col-lg-6 col-md-6 col-sm-6 col-xs-6">
+                                        <label>
+                                            <input type="checkbox" value="" ng-model="m_oController.m_oReturnValue.options.outputIntensity"
+                                                   ng-click="m_oController.clickOnCheckBoxOutputIntensity()"><!--m_oController.m_oReturnValue.options.grSquarePixel=false; m_oController.m_iSquarePixel = '';-->
+                                            {{"DIALOG_MULTILOOKING_CHECKBOX_INDIPENDENT_LOOKS"|translate}}
+                                        </label>
+                                    </div>
                                 </div>
                             </div>
                             <!--INPUTS-->
-
-                            <div class="form-group">
-                                <label for="multilookingRange">{{"DIALOG_MULTILOOKING_NUMBER_OF_RANGE"|translate}}</label>
-                                <input type="text" class="form-control" id="multilookingRange" ng-model="m_oController.m_oReturnValue.options.nRgLooks"  ng-change="m_oController.changeInputAutomatically()">
+                            <div class="row">
+                                <div class="col-lg-3 col-md-3 col-sm-3 col-xs-3">
+                                    <div class="number-of-range">{{"DIALOG_MULTILOOKING_NUMBER_OF_RANGE"|translate}}</div>
+                                </div>
+                                <div class=" col-lg-9 col-md-9 col-sm-9 col-xs-9">
+                                    <div class="form-group">
+                                        <input type="text" class="form-control" id="multilookingRange" ng-model="m_oController.m_oReturnValue.options.nRgLooks"  ng-change="m_oController.changeInputAutomatically()">
+                                    </div>
+                                </div>
                             </div>
 
-                            <div class="form-group" >
-                                <label for="multilookingAzimuth">{{"DIALOG_MULTILOOKING_NUMBER_OF_AZIMUTH"|translate}}</label>
-                                <input type="text" class="form-control" id="multilookingAzimuth" ng-model="m_oController.m_oReturnValue.options.nAzLooks"
-                                       ng-disabled="m_oController.m_oReturnValue.options.grSquarePixel">
+                            <div class="row">
+                                <div class="col-lg-3 col-md-3 col-sm-3 col-xs-3">
+                                    <div class="number-of-azimuth">{{"DIALOG_MULTILOOKING_NUMBER_OF_AZIMUTH"|translate}}</div>
+                                </div>
+                                <div class=" col-lg-9 col-md-9 col-sm-9 col-xs-9">
+                                    <input type="text" class="form-control" id="multilookingAzimuth" ng-model="m_oController.m_oReturnValue.options.nAzLooks"
+                                           ng-disabled="m_oController.m_oReturnValue.options.grSquarePixel">
+                                </div>
                             </div>
-
-                            <div class="form-group">
-                                <label for="multilookingSquarePixel" >{{"DIALOG_MULTILOOKING_SQUARE_PIXEL"|translate}}</label>
-                                <input type="text" class="form-control" id="multilookingSquarePixel" ng-disabled="true" ng-model="m_oController.m_iSquarePixel">
+                            <!--<div class="form-group" >-->
+                                <!--<label for="multilookingAzimuth">{{"DIALOG_MULTILOOKING_NUMBER_OF_AZIMUTH"|translate}}</label>-->
+                                <!--<input type="text" class="form-control" id="multilookingAzimuth" ng-model="m_oController.m_oReturnValue.options.nAzLooks"-->
+                                       <!--ng-disabled="m_oController.m_oReturnValue.options.grSquarePixel">-->
+                            <!--</div>-->
+                            <div class="row">
+                                <div class="col-lg-3 col-md-3 col-sm-3 col-xs-3">
+                                    <div class="mean-gr-square-pixel">{{"DIALOG_MULTILOOKING_SQUARE_PIXEL"|translate}}</div>
+                                </div>
+                                <div class="col-lg-9 col-md-9 col-sm-9 col-xs-9">
+                                    <div class="form-group">
+                                        <input type="text" class="form-control" id="multilookingSquarePixel" ng-disabled="true" ng-model="m_oController.m_iSquarePixel">
+                                    </div>
+                                </div>
                             </div>
+                            <!--<div class="form-group">-->
+                                <!--<label for="multilookingSquarePixel" >{{"DIALOG_MULTILOOKING_SQUARE_PIXEL"|translate}}</label>-->
+                                <!--<input type="text" class="form-control" id="multilookingSquarePixel" ng-disabled="true" ng-model="m_oController.m_iSquarePixel">-->
+                            <!--</div>-->
 
                             <label>
                                 {{"DIALOG_MULTILOOKING_NOTE"|translate}}

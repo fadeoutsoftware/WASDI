@@ -23,12 +23,15 @@
                             <div class="processing-parameters">
                                 <legend><h3>{{"DIALOG_APPLY_ORBIT_TAB_PROCESSING"|translate}}</h3></legend>
                                 <!--MULTISELECT-->
-                                <div class=" col-lg-6 col-md-6 col-sm-6 col-xs-6">
-                                    {{"DIALOG_RADIOMETRIC_CALIBRATION_POLARISATION"|translate}}
+                                <div class="row">
+                                    <div class=" col-lg-3 col-md-3 col-sm-3 col-xs-3">
+                                        {{"DIALOG_RADIOMETRIC_CALIBRATION_POLARISATION"|translate}}
+                                    </div>
+                                    <div class=" col-lg-9 col-md-9 col-sm-9 col-xs-9">
+                                        <multiselect  ng-model="m_oController.m_asSourceBandsSelected" options="m_oController.m_asSourceBands" show-select-all="true" show-unselect-all="true" show-search="true"></multiselect>
+                                    </div>
                                 </div>
-                                <div class=" col-lg-6 col-md-6 col-sm-6 col-xs-6">
-                                    <multiselect  ng-model="m_oController.m_asSourceBandsSelected" options="m_oController.m_asSourceBands" show-select-all="true" show-unselect-all="true" show-search="true"></multiselect>
-                                </div>
+
 
                                 <!-- DROPDOWN MENU-->
                                 <!--{{"DIALOG_RADIOMETRIC_CALIBRATION_AUXILIARY_FILE"|translate}}-->
@@ -49,22 +52,27 @@
 
                                 <!--CHECK BOX-->
                                 <div class="checkbox">
-                                    <div class=" col-lg-3 col-md-3 col-sm-3 col-xs-3">
-                                        <input type="checkbox" value="" ng-model="m_oController.m_oReturnValue.options.outputImageInComplex">
-                                        {{"DIALOG_RADIOMETRIC_CALIBRATION_CHECKBOX_SAVE_COMPLEX_OUTPUT"|translate}}
+                                    <div class="row">
+                                        <div class=" col-lg-4 col-md-4 col-sm-4 col-xs-4">
+                                            <input type="checkbox" value="" ng-model="m_oController.m_oReturnValue.options.outputImageInComplex">
+                                            {{"DIALOG_RADIOMETRIC_CALIBRATION_CHECKBOX_SAVE_COMPLEX_OUTPUT"|translate}}
+                                        </div>
+                                        <div class=" col-lg-4 col-md-4 col-sm-4 col-xs-4">
+                                            <input type="checkbox" value="" ng-model="m_oController.m_oReturnValue.options.outputImageScaleInDb">
+                                            {{"DIALOG_RADIOMETRIC_CALIBRATION_CHECKBOX_SAVE_DB"|translate}}
+                                        </div>
+                                        <div class=" col-lg-4 col-md-4 col-sm-4 col-xs-4">
+                                            <input type="checkbox" value="" ng-model="m_oController.m_oReturnValue.options.createGammaBand">
+                                            {{"DIALOG_RADIOMETRIC_CALIBRATION_CREATE_GAMMA"|translate}}
+                                        </div>
                                     </div>
-                                    <div class=" col-lg-3 col-md-3 col-sm-3 col-xs-3">
-                                        <input type="checkbox" value="" ng-model="m_oController.m_oReturnValue.options.outputImageScaleInDb">
-                                        {{"DIALOG_RADIOMETRIC_CALIBRATION_CHECKBOX_SAVE_DB"|translate}}
+                                    <div class="row">
+                                        <div class=" col-lg-4 col-md-4 col-sm-4 col-xs-4">
+                                            <input type="checkbox" value="" ng-model="m_oController.m_oReturnValue.options.createBetaBand">
+                                            {{"DIALOG_RADIOMETRIC_CALIBRATION_CREATE_BETA"|translate}}
+                                        </div>
                                     </div>
-                                    <div class=" col-lg-3 col-md-3 col-sm-3 col-xs-3">
-                                        <input type="checkbox" value="" ng-model="m_oController.m_oReturnValue.options.createGammaBand">
-                                        {{"DIALOG_RADIOMETRIC_CALIBRATION_CREATE_GAMMA"|translate}}
-                                    </div>
-                                    <div class=" col-lg-3 col-md-3 col-sm-3 col-xs-3">
-                                        <input type="checkbox" value="" ng-model="m_oController.m_oReturnValue.options.createBetaBand">
-                                        {{"DIALOG_RADIOMETRIC_CALIBRATION_CREATE_BETA"|translate}}
-                                    </div>
+
                                 </div>
                             </div>
                         </fieldset>

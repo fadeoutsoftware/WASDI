@@ -17,7 +17,25 @@
             display: block;
             width: 100%;
           }
-
+          .row
+          {
+            .source-band
+            {
+              margin-top: 3px;
+            }
+            .number-of-range
+            {
+              margin: 5px 0 0 0;
+            }
+            .number-of-azimuth
+            {
+              margin:5px 0 0 0 ;
+            }
+            .mean-gr-square-pixel
+            {
+              margin:10px;
+            }
+          }
         }
       }
 
