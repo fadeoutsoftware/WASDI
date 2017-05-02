@@ -4,7 +4,7 @@
 
 var MultilookingController = (function() {
 
-    function MultilookingController($scope, oClose,oExtras,oGetParametersOperationService) {//,oExtras
+    function MultilookingController($scope, oClose,oExtras,oGetParametersOperationService,$q,$timeout) {//,oExtras
         this.m_oScope = $scope;
         this.m_oScope.m_oController = this;
         this.m_oExtras = oExtras;
@@ -40,12 +40,7 @@ var MultilookingController = (function() {
 
         }
 
-        // this.m_oTabOpen = "tab1";
-        // this.m_asOrbitStateVectors = ["Sentinel Precise(Auto Download)","Sentinel Restituted(Auto Download)","DORIS preliminary POR(ENVISAT)"
-        //     ,"DORIS Precise Vor(ENVISAT)(Auto Download)","DELFT Precise(ENVISAT,ERS1&2)(Auto Download)","PRARE Precise(ERS1&2)(Auto Download)"];
 
-
-        // this.m_asSourceBands =  ["Band1","Band2","Band3"];
         this.m_asSourceBandsSelected = [];
 
         this.m_oReturnValue={
@@ -159,11 +154,13 @@ var MultilookingController = (function() {
         }
 
         // this.m_oScope.$apply();
-        //  angular.element(document).find("#test").append('<multiselect id="multiselectMultilooking" ng-model="m_oController.m_asSourceBandsSelected" options="m_oController.m_asSourceBands" show-select-all="true" show-unselect-all="true" show-search="true"></multiselect>');
-        // angular.element(document).find("#test").append('Puppami la fava');
-        // $('test').append('<multiselect id="multiselectMultilooking" ng-model="m_oController.m_asSourceBandsSelected" options="m_oController.m_asSourceBands" show-select-all="true" show-unselect-all="true" show-search="true"></multiselect>');
+        // angular.element(document).find("#test").append('<multiselect id="multiselectMultilooking" ng-model="m_oController.m_asSourceBandsSelected" options="m_oController.m_asSourceBands" show-select-all="true" show-unselect-all="true" show-search="true"></multiselect>');
+        // this.m_oScope.$apply();
+         // angular.element(document).find("#test").append('Puppami la fava');
+        // $('#test').append('<multiselect id="multiselectMultilooking" ng-model="m_oController.m_asSourceBandsSelected" options="m_oController.m_asSourceBands" show-select-all="true" show-unselect-all="true" show-search="true"></multiselect>');
         return true;
     };
+
     MultilookingController.prototype.changeInputAutomatically = function()
     {
         if( this.m_oReturnValue.options.grSquarePixel == true )
@@ -211,11 +208,49 @@ var MultilookingController = (function() {
         return false;
     }
 
+    // MultilookingController.prototype.pushBandInSelectedList = function(sBandInput)
+    // {
+    //     if(utilsIsStrNullOrEmpty(sBandInput) == true)
+    //         return false;
+    //     var iNumberOfSelectedBand = this.m_asSourceBandsSelected.length;
+    //     var bFinded = false;
+    //     for(var iIndexBand = 0; iIndexBand < iNumberOfSelectedBand; iIndexBand++)
+    //     {
+    //         if(this.m_asSourceBandsSelected[iIndexBand] == sBandInput)
+    //         {
+    //             this.m_asSourceBandsSelected.splice(iIndexBand,1);
+    //             bFinded=true;
+    //             break;
+    //         }
+    //     }
+    //
+    //     if(bFinded == false)
+    //     {
+    //         this.m_asSourceBandsSelected.push(sBandInput);
+    //     }
+    //     return true;
+    // }
+    // MultilookingController.prototype.isBandSelected = function(sBandInput)
+    // {
+    //     if(utilsIsStrNullOrEmpty(sBandInput) == true)
+    //         return false;
+    //
+    //     var bResult=utilsFindObjectInArray(this.m_asSourceBandsSelected ,sBandInput);
+    //     if(utilsIsObjectNullOrUndefined(bResult) == true)
+    //         return false;
+    //     if(bResult == -1)
+    //         return false
+    //     else
+    //         return true;
+    // }
+
     MultilookingController.$inject = [
         '$scope',
         'close',
         'extras',
-        'GetParametersOperationService'
+        'GetParametersOperationService',
+        '$q',
+        '$timeout'
 
     ];//'extras',
     return MultilookingController;

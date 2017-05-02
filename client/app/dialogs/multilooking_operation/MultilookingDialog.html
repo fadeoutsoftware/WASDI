@@ -26,9 +26,12 @@
                                 <div class=" col-lg-3 col-md-3 col-sm-3 col-xs-3">
                                     <div class="source-band">{{"DIALOG_RADIOMETRIC_CALIBRATION_SOURCE_BANDS"|translate}}</div>
                                 </div>
-                                <div class=" col-lg-9 col-md-9 col-sm-9 col-xs-9" id="test">
-
-                                    <multiselect id="multiselectMultilooking" ng-model="m_oController.m_asSourceBandsSelected" options="m_oController.m_asSourceBands" show-select-all="true" show-unselect-all="true" show-search="true"></multiselect>
+                                <div class=" col-lg-9 col-md-9 col-sm-9 col-xs-9" ><!---->
+                                    <!--<div class="list-group" >-->
+                                        <!--<a href="" class="list-group-item" ng-class="{active: m_oController.isBandSelected(band)}"-->
+                                                <!--ng-repeat="band in m_oController.m_asSourceBands" ng-click="m_oController.pushBandInSelectedList(band);">{{band}}</a>-->
+                                    <!--</div>-->
+                                    <multiselect options="m_oController.m_asSourceBands" selected="m_oController.m_asSourceBandsSelected"></multiselect>
                                 </div>
                             </div>
                             <!--CHECK BOXS-->
