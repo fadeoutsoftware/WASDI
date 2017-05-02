@@ -30,14 +30,14 @@ var wasdiApp = angular.module('wasdi', [
     'wasdi.TreeDirective',
     'wasdi.SpaceInvaderDirective',
     'wasdi.SpaceInvaderFixedDirective',
-
+    'wasdi.MultiselectDirective',
     //EXTERNAL LIB
     'ui.bootstrap',
     'checklist-model',
     'moment-picker',//time picker
     'angularModalService',//modal
     'ngFileUpload',//upload
-    'btorfs.multiselect'//multi selecte
+    // 'btorfs.multiselect'//multi select
 
 ]);
 

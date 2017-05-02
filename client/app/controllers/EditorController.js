@@ -838,7 +838,7 @@ var EditorController = (function () {
                                                 },
                                                 //SUB-SUBMENU RADIOMETRIC
                                                 "Radiometric": {
-                                                    "label": "radiometric",
+                                                    "label": "Radiometric",
                                                     "action": false,
                                                     "separator_before":true,
                                                     "submenu":

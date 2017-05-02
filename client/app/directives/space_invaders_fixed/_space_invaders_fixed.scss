@@ -1,5 +1,8 @@
 .space-invaders-fixed-class
 {
+  width:50px;
+  height:50px;
+
   .space {
     float: left;
     color: white;
@@ -15,8 +18,8 @@
     float: left;
     width: 0.25em;
     height: 0.25em;
-    margin: 40px 40px;
-
+    //margin: 40px 40px;
+    margin:5px 0 0 40px;
 
   }
 

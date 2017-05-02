@@ -1,0 +1,14 @@
+.multiselect-directive
+{
+  .list-group
+  {
+    overflow-y: auto;
+    max-height:160px;
+
+    a
+    {
+      //color: $wasdi-blue-logo;
+      border-color: $wasdi-blue-logo;
+    }
+  }
+}
