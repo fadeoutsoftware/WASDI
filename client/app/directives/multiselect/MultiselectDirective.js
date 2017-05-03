@@ -14,7 +14,7 @@ angular.module('wasdi.MultiselectDirective', [])
             templateUrl:"directives/multiselect/MultiselectView.html",
             link: function(scope, elem, attrs) {
 
-                scope.pushBandInSelectedList = function(sBandInput)
+                scope.pushOptionInSelectedList = function(sBandInput)
                 {
 
                     if(utilsIsStrNullOrEmpty(sBandInput) == true)
@@ -37,7 +37,7 @@ angular.module('wasdi.MultiselectDirective', [])
                     }
                     return true;
                 };
-                scope.isBandSelected = function(sBandInput)
+                scope.isOptionSelected = function(sBandInput)
                 {
                     if(utilsIsStrNullOrEmpty(sBandInput) == true)
                         return false;

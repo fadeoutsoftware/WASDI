@@ -173,6 +173,7 @@ var RadiometricCalibrationController = (function() {
             }
         };
 
+        this.m_asSourceBandsSelected = [];
         //load band
         if(utilsIsObjectNullOrUndefined(this.m_oSelectedProduct.bandsGroups.bands) == true)
             var iNumberOfBands = 0;

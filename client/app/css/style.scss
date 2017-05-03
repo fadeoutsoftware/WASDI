@@ -267,6 +267,8 @@ h4
     .modal-body
     {
       /*css used in operation dialog*/
+      overflow-y: auto;
+      max-height:$wasdi-max-heigth-body;
       form
       {
         fieldset
