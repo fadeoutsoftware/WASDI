@@ -18,10 +18,19 @@
             .my-button
             {
               padding: 10px 30%;
-
+              width: 100%;
+              color:white;
             }
 
           }
+        }
+        .btn-default
+        {
+          width:100%;
+        }
+        .row
+        {
+          margin: 10px 0 10px 0;
         }
         /*second Tab*/
         .second-tab

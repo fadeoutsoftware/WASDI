@@ -4,7 +4,7 @@
             <!--------------------------- HEADER -------------------->
             <div class="modal-header">
                 <button type="button" class="close" ng-click="close(null)" data-dismiss="modal" aria-hidden="true">&times;</button>
-                <h4 class="modal-title"></h4>
+                <h4 class="modal-title">{{"DIALOG_RANGE_DOPPLER_TERRAIN_CORRECTION_TITLE"|translate}}</h4>
             </div>
             <!-------------------------- BODY ------------------------->
             <div class="modal-body">
@@ -26,13 +26,14 @@
 
                             <!-- MULTISELECT BANDS-->
                             <!-- Source Bands-->
-                            <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
-                                {{"DIALOG_RANGE_DOPPLER_TERRAIN_CORRECTION_SOURCE_BANDS_LABEL"|translate}}
+                            <div class="row">
+                                <div class="col-lg-3 col-md-3 col-sm-3 col-xs-3">
+                                    {{"DIALOG_RANGE_DOPPLER_TERRAIN_CORRECTION_SOURCE_BANDS_LABEL"|translate}}
+                                </div>
+                                <div class="col-lg-9 col-md-9 col-sm-9 col-xs-9">
+                                    <multiselect  selected="m_oController.m_asSourceBandsSelected" options="m_oController.m_asSourceBands" ></multiselect>
+                                </div>
                             </div>
-                            <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
-                                <multiselect  ng-model="m_oController.m_asSourceBandsSelected" options="m_oController.m_asSourceBands" show-select-all="true" show-unselect-all="true" show-search="true"></multiselect>
-                            </div>
-
                             <!-- INPUT -->
                             <!-- digital elevation model-->
 
@@ -40,43 +41,46 @@
                             <!--<label for="RangeDopplerTerrainCorrectionDigitalElevationModel">{{"DIALOG_RANGE_DOPPLER_TERRAIN_CORRECTION_DIGITAL_ELEVATION_MODEL_LABEL"|translate}}</label>-->
                             <!--<input type="text" class="form-control" id="RangeDopplerTerrainCorrectionDigitalElevationModel">-->
                             <!--</div>-->
-                            <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6"> {{"DIALOG_RANGE_DOPPLER_TERRAIN_CORRECTION_DIGITAL_ELEVATION_MODEL_LABEL"|translate}}</div>
+                            <div class="row">
+                                <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4"> {{"DIALOG_RANGE_DOPPLER_TERRAIN_CORRECTION_DIGITAL_ELEVATION_MODEL_LABEL"|translate}}</div>
 
-                            <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
+                                <div class="col-lg-8 col-md-8 col-sm-8 col-xs-8">
 
-                                <div class="dropdown ">
-                                    <button class="btn btn-default dropdown-toggle" type="button" id="RangeDopplerTerrainCorrectionDigitalElevationModel"
-                                            data-toggle="dropdown">
-                                        {{m_oController.m_sDigitalElevationModelSelected}}
-                                        <span class="caret"></span>
-                                    </button>
-                                    <ul class="dropdown-menu" role="menu" aria-labelledby="RangeDopplerTerrainCorrectionDigitalElevationModel">
-                                        <li role="presentation" ng-repeat="dem in m_oController.m_asDigitalElevationModel">
-                                            <a role="menuitem" tabindex="-1" href="" ng-click="m_oController.m_sDigitalElevationModelSelected = dem">{{dem}}</a>
-                                        </li>
-                                    </ul>
+                                    <div class="dropdown ">
+                                        <button class="btn btn-default dropdown-toggle" type="button" id="RangeDopplerTerrainCorrectionDigitalElevationModel"
+                                                data-toggle="dropdown">
+                                            {{m_oController.m_sDigitalElevationModelSelected}}
+                                            <span class="caret"></span>
+                                        </button>
+                                        <ul class="dropdown-menu" role="menu" aria-labelledby="RangeDopplerTerrainCorrectionDigitalElevationModel">
+                                            <li role="presentation" ng-repeat="dem in m_oController.m_asDigitalElevationModel">
+                                                <a role="menuitem" tabindex="-1" href="" ng-click="m_oController.m_sDigitalElevationModelSelected = dem">{{dem}}</a>
+                                            </li>
+                                        </ul>
+                                    </div>
                                 </div>
                             </div>
-
                             <!--DEM Resamplig Method-->
                             <!--<div class="form-group">-->
                                 <!--<label for="RangeDopplerTerrainCorrectionDEMResamplingMethod">{{"DIALOG_RANGE_DOPPLER_TERRAIN_CORRECTION_DEM_RESAMPLING_METHOD_LABEL"|translate}}</label>-->
                                 <!--<input type="text" class="form-control" id="RangeDopplerTerrainCorrectionDEMResamplingMethod">-->
                             <!--</div>-->
-                            <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">{{"DIALOG_RANGE_DOPPLER_TERRAIN_CORRECTION_DEM_RESAMPLING_METHOD_LABEL"|translate}}</div>
-                            <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
+                            <div class="row">
+                                <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">{{"DIALOG_RANGE_DOPPLER_TERRAIN_CORRECTION_DEM_RESAMPLING_METHOD_LABEL"|translate}}</div>
+                                <div class="col-lg-8 col-md-8 col-sm-8 col-xs-8">
 
-                                <div class="dropdown ">
-                                    <button class="btn btn-default dropdown-toggle" type="button" id="RangeDopplerTerrainCorrectionDEMResamplingMethod"
-                                            data-toggle="dropdown">
-                                        {{m_oController.m_sDEMResamplingMethodSelected}}
-                                        <span class="caret"></span>
-                                    </button>
-                                    <ul class="dropdown-menu" role="menu" aria-labelledby="RangeDopplerTerrainCorrectionDEMResamplingMethod">
-                                        <li role="presentation" ng-repeat="DEMResamplingMethod in m_oController.m_asResamplingMethod">
-                                            <a role="menuitem" tabindex="-1" href="" ng-click="m_oController.m_sDEMResamplingMethodSelected = DEMResamplingMethod">{{DEMResamplingMethod}}</a>
-                                        </li>
-                                    </ul>
+                                    <div class="dropdown ">
+                                        <button class="btn btn-default dropdown-toggle" type="button" id="RangeDopplerTerrainCorrectionDEMResamplingMethod"
+                                                data-toggle="dropdown">
+                                            {{m_oController.m_sDEMResamplingMethodSelected}}
+                                            <span class="caret"></span>
+                                        </button>
+                                        <ul class="dropdown-menu" role="menu" aria-labelledby="RangeDopplerTerrainCorrectionDEMResamplingMethod">
+                                            <li role="presentation" ng-repeat="DEMResamplingMethod in m_oController.m_asResamplingMethod">
+                                                <a role="menuitem" tabindex="-1" href="" ng-click="m_oController.m_sDEMResamplingMethodSelected = DEMResamplingMethod">{{DEMResamplingMethod}}</a>
+                                            </li>
+                                        </ul>
+                                    </div>
                                 </div>
                             </div>
                             <!-- Image resamplig Method-->
@@ -84,47 +88,158 @@
                                 <!--<label for="RangeDopplerTerrainCorrectionImageResamplingMethod">{{"DIALOG_RANGE_DOPPLER_TERRAIN_CORRECTION_IMAGE_RESAMPLING_METHOD_LABEL"|translate}}</label>-->
                                 <!--<input type="text" class="form-control" id="RangeDopplerTerrainCorrectionImageResamplingMethod">-->
                             <!--</div>-->
-                            <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">{{"DIALOG_RANGE_DOPPLER_TERRAIN_CORRECTION_IMAGE_RESAMPLING_METHOD_LABEL"|translate}}</div>
-                            <div class=" col-lg-6 col-md-6 col-sm-6 col-xs-6">
+                            <div class="row">
+                                <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">{{"DIALOG_RANGE_DOPPLER_TERRAIN_CORRECTION_IMAGE_RESAMPLING_METHOD_LABEL"|translate}}</div>
+                                <div class=" col-lg-8 col-md-8 col-sm-8 col-xs-8">
 
-                                <div class="dropdown">
-                                    <button class="btn btn-default dropdown-toggle" type="button" id="RangeDopplerTerrainCorrectionImageResamplingMethod"
-                                            data-toggle="dropdown">
-                                        {{m_oController.m_sImageResamplingMethodSelected}}
-                                        <span class="caret"></span>
-                                    </button>
-                                    <ul class="dropdown-menu" role="menu" aria-labelledby="RangeDopplerTerrainCorrectionImageResamplingMethod">
-                                        <li role="presentation" ng-repeat="ImageResamplingMethod in m_oController.m_asResamplingMethod">
-                                            <a role="menuitem" tabindex="-1" href="" ng-click="m_oController.m_sImageResamplingMethodSelected = ImageResamplingMethod">{{ImageResamplingMethod}}</a>
-                                        </li>
-                                    </ul>
+                                    <div class="dropdown">
+                                        <button class="btn btn-default dropdown-toggle" type="button" id="RangeDopplerTerrainCorrectionImageResamplingMethod"
+                                                data-toggle="dropdown">
+                                            {{m_oController.m_sImageResamplingMethodSelected}}
+                                            <span class="caret"></span>
+                                        </button>
+                                        <ul class="dropdown-menu" role="menu" aria-labelledby="RangeDopplerTerrainCorrectionImageResamplingMethod">
+                                            <li role="presentation" ng-repeat="ImageResamplingMethod in m_oController.m_asResamplingMethod">
+                                                <a role="menuitem" tabindex="-1" href="" ng-click="m_oController.m_sImageResamplingMethodSelected = ImageResamplingMethod">{{ImageResamplingMethod}}</a>
+                                            </li>
+                                        </ul>
+                                    </div>
                                 </div>
                             </div>
-
-                            <!--Source GR pixel spacings( az x rg)-->
-                            <label>{{"DIALOG_RANGE_DOPPLER_TERRAIN_CORRECTION_SOURCE_GR_PIXEL_SPACINGS_LABEL"|translate}}</label>
-                            <!-- Pixel spacing(m)-->
-                            <div class="form-group">
-                                <label for="RangeDopplerTerrainCorrectionPixelSpacingM">{{"DIALOG_RANGE_DOPPLER_TERRAIN_CORRECTION_PIXEL_SPACING_M_LABEL"|translate}}</label>
-                                <input type="text" class="form-control" id="RangeDopplerTerrainCorrectionPixelSpacingM" ng-model="m_oController.m_oReturnValue.options.pixelSpacingInMeter">
+                            <div class="row">
+                                <!--Source GR pixel spacings( az x rg)-->
+                                <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">{{"DIALOG_RANGE_DOPPLER_TERRAIN_CORRECTION_SOURCE_GR_PIXEL_SPACINGS_LABEL"|translate}}</div>
+                                <div class="col-lg-8 col-md-8 col-sm-8 col-xs-8"></div>
                             </div>
-                            <!-- Pixel spacing(deg)-->
-                            <div class="form-group">
-                                <label for="RangeDopplerTerrainCorrectionPixelSpacingDeg">{{"DIALOG_RANGE_DOPPLER_TERRAIN_CORRECTION_PIXEL_SPACING_DEG_LABEL"|translate}}</label>
-                                <input type="text" class="form-control" id="RangeDopplerTerrainCorrectionPixelSpacingDeg" ng-model="m_oController.m_oReturnValue.options.pixelSpacingInDegree">
-                            </div>
-                            <!--Map Projection-->
-                            <label>{{"DIALOG_RANGE_DOPPLER_TERRAIN_CORRECTION_MAP_PROJECTION_LABEL"|translate}}</label><button class="my-button">button</button>
 
-                            <div class="checkbox">
-                                <label>
-                                    <input type="checkbox" ng-model="m_oController.m_oReturnValue.options.nodataValueAtSea">
-                                    {{"DIALOG_RANGE_DOPPLER_TERRAIN_CORRECTION_MASK_OUT_AREAS_WITHOUT_ELEVATION_CHECKBOX"|translate}}
-                                </label>
-                                <label>
-                                    <input type="checkbox" ng-model="m_oController.m_oReturnValue.options.outputComplex">
-                                    {{"DIALOG_RANGE_DOPPLER_TERRAIN_CORRECTION_OUTPUT_COMPLEX_DATA_CHECKBOX"|translate}}
-                                </label>
+                            <div class="row">
+                                <!-- Pixel spacing(m)-->
+                                <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">{{"DIALOG_RANGE_DOPPLER_TERRAIN_CORRECTION_PIXEL_SPACING_M_LABEL"|translate}}</div>
+                                <div class="col-lg-8 col-md-8 col-sm-8 col-xs-8"><input type="text" class="form-control" id="RangeDopplerTerrainCorrectionPixelSpacingM" ng-model="m_oController.m_oReturnValue.options.pixelSpacingInMeter"></div>
+                            </div>
+
+                            <!--<div class="form-group">-->
+                                <!--<label for="RangeDopplerTerrainCorrectionPixelSpacingM">{{"DIALOG_RANGE_DOPPLER_TERRAIN_CORRECTION_PIXEL_SPACING_M_LABEL"|translate}}</label>-->
+                                <!--<input type="text" class="form-control" id="RangeDopplerTerrainCorrectionPixelSpacingM" ng-model="m_oController.m_oReturnValue.options.pixelSpacingInMeter">-->
+                            <!--</div>-->
+                            <div class="row">
+                                <!-- Pixel spacing(deg)-->
+                                <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">{{"DIALOG_RANGE_DOPPLER_TERRAIN_CORRECTION_PIXEL_SPACING_DEG_LABEL"|translate}}</div>
+                                <div class="col-lg-8 col-md-8 col-sm-8 col-xs-8"> <input type="text" class="form-control" id="RangeDopplerTerrainCorrectionPixelSpacingDeg" ng-model="m_oController.m_oReturnValue.options.pixelSpacingInDegree"></div>
+                            </div>
+
+                            <!--<div class="form-group">-->
+                                <!--<label for="RangeDopplerTerrainCorrectionPixelSpacingDeg">{{"DIALOG_RANGE_DOPPLER_TERRAIN_CORRECTION_PIXEL_SPACING_DEG_LABEL"|translate}}</label>-->
+                                <!--<input type="text" class="form-control" id="RangeDopplerTerrainCorrectionPixelSpacingDeg" ng-model="m_oController.m_oReturnValue.options.pixelSpacingInDegree">-->
+                            <!--</div>-->
+                            <div class="row">
+                                <!--Map Projection-->
+                                <div class="col-lg-3 col-md-3 col-sm-3 col-xs-3">{{"DIALOG_RANGE_DOPPLER_TERRAIN_CORRECTION_MAP_PROJECTION_LABEL"|translate}}</div>
+                                <div class="col-lg-9 col-md-9 col-sm-9 col-xs-9">
+                                    <button class="btn my-button" type="button"data-toggle="collapse" data-target="#collapseMapProjection" aria-expanded="false" aria-controls="collapseMapProjection">
+                                        button
+                                    </button>
+                                    <div class="collapse" id="collapseMapProjection">
+                                        <div class="well">
+                                            <div class="radio">
+                                                <div class="row">
+                                                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                                        <label>
+                                                            <input type="radio" name="name" id="CustomCRS" value=""
+                                                                   checked="checked">
+                                                            Custom CRS
+                                                        </label>
+                                                    </div>
+                                                </div>
+
+                                                <div class="row">
+                                                    <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
+                                                        Geodetic Datum
+                                                    </div>
+                                                    <div class="col-lg-8 col-md-8 col-sm-8 col-xs-8">
+                                                        <div class="dropdown">
+                                                            <button class="btn btn-default dropdown-toggle" type="button"
+                                                                    id="dropdownMenuGeodeticDatum" data-toggle="dropdown">
+                                                                Dropdown
+                                                                <span class="caret"></span>
+                                                            </button>
+                                                            <ul class="dropdown-menu" role="menu"
+                                                                aria-labelledby="dropdownMenuGeodeticDatum">
+                                                                <li role="presentation"><a role="menuitem" tabindex="-1"
+                                                                                           href="#">Action</a></li>
+                                                                <li role="presentation"><a role="menuitem" tabindex="-1"
+                                                                                           href="#">Another action</a></li>
+                                                            </ul>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
+                                                        Projection
+                                                    </div>
+                                                    <div class="col-lg-8 col-md-8 col-sm-8 col-xs-8">
+                                                        <div class="dropdown">
+                                                            <button class="btn btn-default dropdown-toggle" type="button"
+                                                                    id="dropdownMenuPredefinedCrs" data-toggle="dropdown">
+                                                                Dropdown
+                                                                <span class="caret"></span>
+                                                            </button>
+                                                            <ul class="dropdown-menu" role="menu"
+                                                                aria-labelledby="dropdownMenuPredefinedCrs">
+                                                                <li role="presentation"><a role="menuitem" tabindex="-1"
+                                                                                           href="#">Action</a></li>
+                                                                <li role="presentation"><a role="menuitem" tabindex="-1"
+                                                                                           href="#">Another action</a></li>
+                                                            </ul>
+                                                        </div>
+                                                    </div>
+
+                                                </div>
+                                                <div class="row">
+                                                    <div class="col-lg-5 col-md-5 col-sm-5 col-xs-5 col-lg-offset-7 col-md-offset-7 col-sm-offset-7 col-xs-offset-7 ">
+                                                        <button class="btn btn-default my-input-text">Projection Parameters...</button>
+                                                    </div>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
+                                                        <label>
+                                                            <input type="radio" name="name" id="PredefinedCRS" value=""
+                                                                   checked="checked">
+                                                            Predefined CRS
+                                                        </label>
+                                                    </div>
+                                                    <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
+                                                        <span >Label</span>
+                                                    </div>
+                                                    <div class="col-xs-2 col-sm-2 col-md-2 col-lg-2">
+                                                        <button type="button" class="btn btn-default">Select</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                            <!--<label>{{"DIALOG_RANGE_DOPPLER_TERRAIN_CORRECTION_MAP_PROJECTION_LABEL"|translate}}</label><button class="my-button">button</button>-->
+
+                            <!--CheckBoxs-->
+                            <div class="row">
+                                <div class="checkbox">
+                                    <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
+                                        <label>
+                                            <input type="checkbox" ng-model="m_oController.m_oReturnValue.options.nodataValueAtSea">
+                                            {{"DIALOG_RANGE_DOPPLER_TERRAIN_CORRECTION_MASK_OUT_AREAS_WITHOUT_ELEVATION_CHECKBOX"|translate}}
+                                        </label>
+                                    </div>
+                                    <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
+                                        <label>
+                                            <input type="checkbox" ng-model="m_oController.m_oReturnValue.options.outputComplex">
+                                            {{"DIALOG_RANGE_DOPPLER_TERRAIN_CORRECTION_OUTPUT_COMPLEX_DATA_CHECKBOX"|translate}}
+                                        </label>
+                                    </div>
+                                </div>
                             </div>
 
                             <fieldset>
@@ -157,56 +272,65 @@
                                 </div>
                             </fieldset>
 
-                            <div class="checkbox">
-                                <label>
-                                    <input type="checkbox">
-                                    {{"DIALOG_RANGE_DOPPLER_TERRAIN_CORRECTION_APPLY_RADIOMETRIC_NORMALIZATION_CHECKBOX"|translate}}
-                                </label>
+                            <div class="row">
+                                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                    <div class="checkbox">
+                                        <label>
+                                            <input type="checkbox">
+                                            {{"DIALOG_RANGE_DOPPLER_TERRAIN_CORRECTION_APPLY_RADIOMETRIC_NORMALIZATION_CHECKBOX"|translate}}
+                                        </label>
+                                    </div>
+                                </div>
                             </div>
 
                             <div class="checkbox col-lg-12 col-md-12 col-sm-12 col-xs-12">
-                                <!--Save sigma-->
-                                <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
-                                    <label>
-                                        <input type="checkbox">
-                                        {{"DIALOG_RANGE_DOPPLER_TERRAIN_CORRECTION_SAVE_SIGMA_CHECKBOX"|translate}}
-                                    </label>
-                                </div>
-                                <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 ">
-                                    <div class="dropdown ">
+                                <div class="row">
+                                    <!--Save sigma-->
+                                    <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
+                                        <label>
+                                            <input type="checkbox">
+                                            {{"DIALOG_RANGE_DOPPLER_TERRAIN_CORRECTION_SAVE_SIGMA_CHECKBOX"|translate}}
+                                        </label>
+                                    </div>
+                                    <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 ">
+                                        <div class="dropdown ">
 
-                                        <button class="btn btn-default dropdown-toggle" type="button" id="SaveSigmaDropdown"
-                                                data-toggle="dropdown">
-                                            {{m_oController.m_sSaveSigmaSelected}}
-                                            <span class="caret"></span>
-                                        </button>
-                                        <ul class="dropdown-menu" role="menu" aria-labelledby="SaveSigmaDropdown">
-                                            <li role="presentation" ng-repeat="saveSigma in m_oController.m_asSaveBand">
-                                                <a role="menuitem" tabindex="-1" href="" ng-click="m_oController.m_sSaveSigmaSelected = saveSigma">{{saveSigma}}</a>
-                                            </li>
-                                        </ul>
+                                            <button class="btn btn-default dropdown-toggle" type="button" id="SaveSigmaDropdown"
+                                                    data-toggle="dropdown">
+                                                {{m_oController.m_sSaveSigmaSelected}}
+                                                <span class="caret"></span>
+                                            </button>
+                                            <ul class="dropdown-menu" role="menu" aria-labelledby="SaveSigmaDropdown">
+                                                <li role="presentation" ng-repeat="saveSigma in m_oController.m_asSaveBand">
+                                                    <a role="menuitem" tabindex="-1" href="" ng-click="m_oController.m_sSaveSigmaSelected = saveSigma">{{saveSigma}}</a>
+                                                </li>
+                                            </ul>
 
+                                        </div>
                                     </div>
                                 </div>
-                                <!--Save gamma-->
-                                <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
-                                    <label >
-                                        <input type="checkbox">
-                                        {{"DIALOG_RANGE_DOPPLER_TERRAIN_CORRECTION_SAVE_GAMMA_CHECKBOX"|translate}}
-                                    </label>
-                                </div>
-                                <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
-                                    <div class="dropdown " >
-                                        <button class="btn btn-default dropdown-toggle" type="button" id="SaveGammaDropdown"
-                                                data-toggle="dropdown">
-                                            {{m_oController.m_sSaveGammaSelected}}
-                                            <span class="caret"></span>
-                                        </button>
-                                        <ul class="dropdown-menu" role="menu" aria-labelledby="SaveGammaDropdown">
-                                            <li role="presentation" ng-repeat="saveGamma in m_oController.m_asSaveBand">
-                                                <a role="menuitem" tabindex="-1" href="" ng-click="m_oController.m_sSaveGammaSelected=saveGamma">{{saveGamma}}</a>
-                                            </li>
-                                        </ul>
+
+                                <div class="row">
+                                    <!--Save gamma-->
+                                    <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
+                                        <label >
+                                            <input type="checkbox">
+                                            {{"DIALOG_RANGE_DOPPLER_TERRAIN_CORRECTION_SAVE_GAMMA_CHECKBOX"|translate}}
+                                        </label>
+                                    </div>
+                                    <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
+                                        <div class="dropdown " >
+                                            <button class="btn btn-default dropdown-toggle" type="button" id="SaveGammaDropdown"
+                                                    data-toggle="dropdown">
+                                                {{m_oController.m_sSaveGammaSelected}}
+                                                <span class="caret"></span>
+                                            </button>
+                                            <ul class="dropdown-menu" role="menu" aria-labelledby="SaveGammaDropdown">
+                                                <li role="presentation" ng-repeat="saveGamma in m_oController.m_asSaveBand">
+                                                    <a role="menuitem" tabindex="-1" href="" ng-click="m_oController.m_sSaveGammaSelected=saveGamma">{{saveGamma}}</a>
+                                                </li>
+                                            </ul>
+                                        </div>
                                     </div>
                                 </div>
                                 <!--save beta-->

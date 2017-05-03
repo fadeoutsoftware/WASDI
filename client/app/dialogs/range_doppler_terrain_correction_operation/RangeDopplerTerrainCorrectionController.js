@@ -211,6 +211,7 @@ var RangeDopplerTerrainCorrectionController = (function() {
                 externalAuxFile:""
             }
         };
+        this.m_asSourceBandsSelected = [];
 
         if(utilsIsObjectNullOrUndefined(this.m_oSelectedProduct.bandsGroups.bands) == true)
             var iNumberOfBands = 0;
@@ -224,6 +225,9 @@ var RangeDopplerTerrainCorrectionController = (function() {
             if( utilsIsObjectNullOrUndefined(this.m_oSelectedProduct.bandsGroups.bands[iIndexBand]) == false )
                 this.m_asSourceBands.push(this.m_oSelectedProduct.bandsGroups.bands[iIndexBand].name);
         }
+
+
+
         return true;
     };
 
