@@ -11,6 +11,8 @@
 
       .modal-body
       {
+        overflow-y: auto;
+        max-height:$wasdi-max-heigth-body;
         form
         {
           fieldset

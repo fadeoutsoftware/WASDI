@@ -775,24 +775,24 @@ var EditorController = (function () {
                                             }
                                         }
                                     },
-                                    "Rename": {
-                                        "label": "Rename",
-                                        "action": function (obj) {
-                                            //$node.original.fileName;
-                                            var oCallback = function(value){
-                                                if((utilsIsObjectNullOrUndefined(value.renameProduct) == true) ||(utilsIsStrNullOrEmpty(value.renameProduct) == true))
-                                                    return false;
-                                                var bResult = oController.renameNodeInTree($node.original.fileName,value.renameProduct);
-                                                if(bResult == false)
-                                                    console.log("Error: it's impossible rename the product");
-                                            }
-
-                                            utilsVexDialogChangeNameInTree("Insert new name",oCallback,$node.original.fileName);
-                                            // var bResult = oController.renameNodeInTree($node.original.fileName,"test");
-                                            // if(bResult == false)
-                                            //     console.log("Error: it's impossible rename the product");
-                                        }
-                                    },
+                                    // "Rename": {
+                                    //     "label": "Rename",
+                                    //     "action": function (obj) {
+                                    //         //$node.original.fileName;
+                                    //         var oCallback = function(value){
+                                    //             if((utilsIsObjectNullOrUndefined(value.renameProduct) == true) ||(utilsIsStrNullOrEmpty(value.renameProduct) == true))
+                                    //                 return false;
+                                    //             var bResult = oController.renameNodeInTree($node.original.fileName,value.renameProduct);
+                                    //             if(bResult == false)
+                                    //                 console.log("Error: it's impossible rename the product");
+                                    //         }
+                                    //
+                                    //         utilsVexDialogChangeNameInTree("Insert new name",oCallback,$node.original.fileName);
+                                    //         // var bResult = oController.renameNodeInTree($node.original.fileName,"test");
+                                    //         // if(bResult == false)
+                                    //         //     console.log("Error: it's impossible rename the product");
+                                    //     }
+                                    // },
                                     //SUBMENU RADAR
                                     "Radar": {
                                         "label": "Radar",

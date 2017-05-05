@@ -144,7 +144,8 @@
   //}
   .status-bar
   {
-    height: 4.5%;
+    //height: 4.5%;
+    height:45px;
     //min-height: 4.5%;
     width: 100%;
     position: fixed;
@@ -160,6 +161,8 @@
     .number-processes
     {
       margin-top: 10px;
+      position: absolute;
+      right:0;
     }
     .processes-list
     {
@@ -183,20 +186,11 @@
       color: $wasdi-button-over-color;
       background-color:transparent;
     }
-    .closebtn {
-      position: absolute;
-      top: 0;
-      right: 20px;
-      //font-size: 20px;
-      //margin-left: 50px;
 
-      //color: $wasdi-white;
-    }
     .openbtn {
       position: absolute;
-      top: 0;
+      //top: 0;
       right: 20px;
-
       //position: absolute;
       //left:50%;
       ////bottom:70%;

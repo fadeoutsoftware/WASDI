@@ -1,6 +1,7 @@
 <div class="editor-view col-lg-12 col-md-12 col-sm-12 col-xs-12">
-    <div class="col-lg-1 col-md-2 col-sm-2 col-xs-2" ></div>
-    <div class="col-lg-11 col-md-10 col-sm-10 col-xs-10 operations-bar"  ><!--style="height: 80px;"-->
+
+    <!--<div class="col-lg-1 col-md-2 col-sm-2 col-xs-2" ></div>-->
+    <div class="col-lg-11 col-md-10 col-sm-10 col-xs-10 col-lg-offset-1 col-md-offset-2 col-sm-offset-2 col-xs-offset-2 operations-bar"  ><!--style="height: 80px;"-->
         <!--MAIN OPERATION BAR-->
         <div  class='animate-hide'  ng-hide="m_oController.isHiddenOperationMainBar();">
             <ul>
@@ -28,7 +29,7 @@
                 <!--<li ng-click="m_oController.openMergeDialog()">-->
                 <!--<a class="icon"><img src="assets/icons/iconMIDA.svg"></a>-->
                 <!--</li>-->
-                <li ng-click="m_oController.openMergeDialog()" ng-init="m_oController.m_sSrc='assets/icons/iconMIDA.svg' "
+                <li ng-click="m_oController.openMergeDialog();" ng-init="m_oController.m_sSrc='assets/icons/iconMIDA.svg' "
                     ng-mouseover="m_oController.m_sSrc='assets/icons/iconMIDA_White.svg' " ng-mouseleave="m_oController.m_sSrc='assets/icons/iconMIDA.svg' ">
                     <!--<a class="icon"><img src="assets/icons/iconMIDA_White.svg"></a>-->
                     <a class="icon" href=""><img src="{{m_oController.m_sSrc}}"></a>
@@ -92,7 +93,7 @@
         </div>
 
         <!--**************** PANEL CESIUM GLOBE *********************-->
-        <div class="panel panel-default small-map-container">
+        <div class="panel panel-default small-map-container"  >
             <div class="panel-heading">
                 <div class="my-button" ng-click="m_oController.onClickChangeMap()" data-toggle="tooltip" data-placement="top"
                      title="{{'EDITOR_TOOLTIP_SWITCH_3D_2D'|translate}}" ng-show=" m_oController.m_bIsVisibleMapOfLeaflet == true">
@@ -116,68 +117,74 @@
 
             <div class="panel-body fixed-panel">
                 <div class="map" id = "wasdiMap2" ng-show="m_oController.m_b2DMapModeOn == false && m_oController.m_b3DMapModeOn == true  "></div>
-                <div class="map" id="cesiumContainer2"  ng-show="m_oController.m_b2DMapModeOn == true && m_oController.m_b3DMapModeOn == false  "></div>
+                <div class="map" id="cesiumContainer2"  ng-show="m_oController.m_b2DMapModeOn == true && m_oController.m_b3DMapModeOn == false  "  ></div>
             </div>
+            <!--<div class="panel-body fixed-panel">-->
+                <!--<div class="map" id = "wasdiMap2" ng-show="false"></div>-->
+                <!--<div class="map" id="cesiumContainer2"  ng-show="false"  ></div>-->
+            <!--</div>-->
+
         </div>
 
     </div>
 
     <!--------------- MAP CONTAINER --------------->
 
-    <div class="col-lg-8 col-md-8 col-sm-8 col-xs-12 map-container" >
+    <div class="col-lg-8 col-md-8 col-sm-8 col-xs-12 map-column" >
+        <div class="map-container">
+            <div class="btn-group" role="group" >
+                <!-- 2D map button-->
+                <button type="button" class="btn btn-default" ng-click="m_oController.m_oMapService.getHome();"  data-toggle="tooltip"
+                        data-placement="bottom"  title="{{'EDITOR_TOOLTIP_HOME'|translate}}"
+                        ng-show="m_oController.m_b2DMapModeOn == true && m_oController.m_b3DMapModeOn == false && m_oController.m_bIsVisibleMapOfLeaflet == true">
+                    <i class="fa fa-home fa-lg" aria-hidden="true"></i>
+                </button>
+                <!-- 2D map button-->
+                <button type="button" class="btn btn-default" ng-click="m_oController.synchronize2DMap();"  data-toggle="tooltip"
+                        data-placement="bottom"  title="{{'EDITOR_TOOLTIP_SYNCHRONIZE_MAP_2D'|translate}}"
+                        ng-show="m_oController.m_b2DMapModeOn == true && m_oController.m_b3DMapModeOn == false && m_oController.m_bIsVisibleMapOfLeaflet == true">
+                    <i class="fa fa-location-arrow" aria-hidden="true"></i>
+                </button>
 
-        <div class="btn-group" role="group" >
-            <!-- 2D map button-->
-            <button type="button" class="btn btn-default" ng-click="m_oController.m_oMapService.getHome();"  data-toggle="tooltip"
-                    data-placement="bottom"  title="{{'EDITOR_TOOLTIP_HOME'|translate}}"
-                    ng-show="m_oController.m_b2DMapModeOn == true && m_oController.m_b3DMapModeOn == false && m_oController.m_bIsVisibleMapOfLeaflet == true">
-                <i class="fa fa-home fa-lg" aria-hidden="true"></i>
-            </button>
-            <!-- 2D map button-->
-            <button type="button" class="btn btn-default" ng-click="m_oController.synchronize2DMap();"  data-toggle="tooltip"
-                    data-placement="bottom"  title="{{'EDITOR_TOOLTIP_SYNCHRONIZE_MAP_2D'|translate}}"
-                    ng-show="m_oController.m_b2DMapModeOn == true && m_oController.m_b3DMapModeOn == false && m_oController.m_bIsVisibleMapOfLeaflet == true">
-                <i class="fa fa-location-arrow" aria-hidden="true"></i>
-            </button>
+                <!-- 3D map button-->
+                <button type="button" class="btn btn-default" ng-click="m_oController.m_oGlobeService.goHome()"  data-toggle="tooltip"
+                        data-placement="bottom"  title="{{'EDITOR_TOOLTIP_HOME'|translate}}"
+                        ng-show="m_oController.m_b2DMapModeOn == false && m_oController.m_b3DMapModeOn == true && m_oController.m_bIsVisibleMapOfLeaflet == true">
+                    <i class="fa fa-home fa-lg" aria-hidden="true"></i>
+                </button>
+                <!-- 3D map button-->
+                <button type="button" class="btn btn-default" ng-click="m_oController.synchronize3DMap();"  data-toggle="tooltip"
+                        data-placement="bottom"  title="{{'EDITOR_TOOLTIP_SYNCHRONIZE_MAP_3D'|translate}}"
+                        ng-show="m_oController.m_b2DMapModeOn == false && m_oController.m_b3DMapModeOn == true && m_oController.m_bIsVisibleMapOfLeaflet == true">
+                    <i class="fa fa-location-arrow" aria-hidden="true"></i>
+                </button>
 
-            <!-- 3D map button-->
-            <button type="button" class="btn btn-default" ng-click="m_oController.m_oGlobeService.goHome()"  data-toggle="tooltip"
-                    data-placement="bottom"  title="{{'EDITOR_TOOLTIP_HOME'|translate}}"
-                    ng-show="m_oController.m_b2DMapModeOn == false && m_oController.m_b3DMapModeOn == true && m_oController.m_bIsVisibleMapOfLeaflet == true">
-                <i class="fa fa-home fa-lg" aria-hidden="true"></i>
-            </button>
-            <!-- 3D map button-->
-            <button type="button" class="btn btn-default" ng-click="m_oController.synchronize3DMap();"  data-toggle="tooltip"
-                    data-placement="bottom"  title="{{'EDITOR_TOOLTIP_SYNCHRONIZE_MAP_3D'|translate}}"
-                    ng-show="m_oController.m_b2DMapModeOn == false && m_oController.m_b3DMapModeOn == true && m_oController.m_bIsVisibleMapOfLeaflet == true">
-                <i class="fa fa-location-arrow" aria-hidden="true"></i>
-            </button>
+                <button type="button" class="btn btn-default" ng-click="m_oController.addOrRemoveMapLayer()"  data-toggle="tooltip"
+                        data-placement="bottom"  title="{{'EDITOR_TOOLTIP_DELETE_ADD_LAYER_MAP'|translate}}"
+                        ng-hide="m_oController.m_b2DMapModeOn == false && m_oController.m_b3DMapModeOn == true && m_oController.m_bIsVisibleMapOfLeaflet == true">
+                    <i class="fa fa-sticky-note" aria-hidden="true"></i>
+                </button>
+                <!-- BOTH -->
+                <button type="button" class="btn btn-default" ng-click="m_oController.openGetCapabilitiesDialog()"  data-toggle="tooltip"
+                        data-placement="bottom"  title="{{'EDITOR_TOOLTIP_GET_CAPABILITIES'|translate}}"
+                        ng-hide="m_oController.m_b2DMapModeOn == false && m_oController.m_b3DMapModeOn == true && m_oController.m_bIsVisibleMapOfLeaflet == true">
+                    <i class="fa fa-server" aria-hidden="true"></i>
+                </button>
 
-            <button type="button" class="btn btn-default" ng-click="m_oController.addOrRemoveMapLayer()"  data-toggle="tooltip"
-                    data-placement="bottom"  title="{{'EDITOR_TOOLTIP_DELETE_ADD_LAYER_MAP'|translate}}"
-                    ng-hide="m_oController.m_b2DMapModeOn == false && m_oController.m_b3DMapModeOn == true && m_oController.m_bIsVisibleMapOfLeaflet == true">
-                <i class="fa fa-sticky-note" aria-hidden="true"></i>
-            </button>
-            <!-- BOTH -->
-            <button type="button" class="btn btn-default" ng-click="m_oController.openGetCapabilitiesDialog()"  data-toggle="tooltip"
-                    data-placement="bottom"  title="{{'EDITOR_TOOLTIP_GET_CAPABILITIES'|translate}}"
-                    ng-hide="m_oController.m_b2DMapModeOn == false && m_oController.m_b3DMapModeOn == true && m_oController.m_bIsVisibleMapOfLeaflet == true">
-                <i class="fa fa-server" aria-hidden="true"></i>
-            </button>
+                <button type="button" class="btn btn-default" ng-click="m_oController.hideOrShowPixelInfo()"  data-toggle="tooltip"
+                        data-placement="bottom"  title="Show/hide pixel info"
+                        ng-hide="m_oController.m_b2DMapModeOn == false && m_oController.m_b3DMapModeOn == true ">
+                    <i class="fa fa-info-circle" aria-hidden="true"></i>
+                </button>
 
-            <button type="button" class="btn btn-default" ng-click="m_oController.hideOrShowPixelInfo()"  data-toggle="tooltip"
-                    data-placement="bottom"  title="Show/hide pixel info"
-                    ng-hide="m_oController.m_b2DMapModeOn == false && m_oController.m_b3DMapModeOn == true ">
-                <i class="fa fa-info-circle" aria-hidden="true"></i>
-            </button>
+            </div>
 
+            <!-- 2D map -->
+            <div class="map" id = "wasdiMap"  ng-show="m_oController.m_b2DMapModeOn == true && m_oController.m_b3DMapModeOn == false"></div>
+
+            <!-- 3D map -->
+            <div id="cesiumContainer" class="map" ng-show="m_oController.m_b2DMapModeOn == false && m_oController.m_b3DMapModeOn == true  "></div>
         </div>
-
-        <!-- 2D map -->
-        <div class="map" id = "wasdiMap"  ng-show="m_oController.m_b2DMapModeOn == true && m_oController.m_b3DMapModeOn == false"></div>
-
-        <!-- 3D map -->
-        <div id="cesiumContainer" class="map" ng-show="m_oController.m_b2DMapModeOn == false && m_oController.m_b3DMapModeOn == true  "></div>
     </div>
 
 

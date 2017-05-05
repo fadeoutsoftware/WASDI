@@ -3,16 +3,26 @@
   margin-top: 5px;
   padding: 0;
   // MAP CONTAINER
-  .map-container
-  {
+  .map-column{
     padding-left: 0;
-    padding-right: 0px;
-    border: 1px solid $wasdi-blue-logo;
-    .map
+    padding-right: 0;
+    .map-container
     {
-      //DIMENSIONS MAP
-      width: auto;//500px
-      height: $wasdi-map-heigth-import;//500px
+      //padding-left: 0;
+      //padding-right: 0px;
+      border: 1px solid $wasdi-blue-logo;
+      .map
+      {
+        //DIMENSIONS MAP
+        width: auto;//500px
+        height: $wasdi-map-heigth-import;//500px
+        ///* (1366x768) WXGA Display */
+        @media  screen and (max-width: 1366px)and (max-height: 768px) {
+          width:auto;
+          height: $wasdi-map-height-import-max-width-1366-max-height-768;
+        }
+
+      }
     }
   }
 
@@ -76,6 +86,11 @@
       overflow: auto;
       height: $wasdi-heigt-panel-import;
       max-height:$wasdi-heigt-panel-import;
+      ///* (1366x768) WXGA Display */
+      @media  screen and (max-width: 1366px)and (max-height: 768px) {
+        height: $wasdi-height-panel-import-max-width-1366-max-height-768;
+        max-height:$wasdi-height-panel-import-max-width-1366-max-height-768;
+      }
       color:black;
       .my-input-text
       {
