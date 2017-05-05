@@ -203,8 +203,9 @@ service('RabbitStompService', ['$http',  'ConstantsService','$interval','Process
                 oController.m_oReconnectTimerPromise = null;
             }
             else {
+
                 if (oController.m_oClient != null) {
-                    oController.m_oClient.disconnect();
+                    oController.m_oClient.disconnect();//TODO RESOLVE BUG IF THE USER SWITCH CONTROLLER
                 }
             }
         });

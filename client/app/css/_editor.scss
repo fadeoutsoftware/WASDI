@@ -23,6 +23,11 @@
     {
       padding: 0;
       height: $wasdi-heigth-panel;
+      @media  screen and (max-width: 1366px)and (max-height: 768px) {
+        height: $wasdi-height-panel-max-width-1366-max-height-768;
+
+      }
+
     }
     //override bootstrap
     .panel-heading {
@@ -51,11 +56,16 @@
       {
         width: auto;//500px
         height: $wasdi-heigth-panel;//500px
-        margin-bottom: 7%;
+        //margin-bottom: 7%;
+        margin-bottom: 50px;
 
+        @media  screen and (max-width: 1366px)and (max-height: 768px) {
+          width: auto;
+          height:$wasdi-height-panel-max-width-1366-max-height-768;
+        }
       }
     }
-    //override mybutton class in style.scss
+    //override my button class in style.scss
     .my-button
     {
       color:white;
@@ -70,44 +80,55 @@
   }
   /*************************************************/
   //map container leaflet
-  .map-container
-  {
+  .map-column{
     padding-left: 0;
-    padding-right: 0px;
-    border: 1px solid $wasdi-blue-logo;
-    //BUTTONS ON MAP
-    .btn-group
+    padding-right: 0;
+    .map-container
     {
-      z-index: 1001;
-      .btn-default
+      border: 1px solid $wasdi-blue-logo;
+      //BUTTONS ON MAP
+      .btn-group
       {
-        background-color: $wasdi-blue-logo;
-        color: $wasdi-white;
-        opacity: 0.9;
+        z-index: 1001;
+        .btn-default
+        {
+          background-color: $wasdi-blue-logo;
+          color: $wasdi-white;
+          opacity: 0.9;
+        }
+        .btn-default:hover
+        {
+          color: $wasdi-green-logo;
+        }
+        position: absolute;
+        top: 2px;
+        left: 20px;
       }
-      .btn-default:hover
+      //margin-bottom: 35px;
+      //leaflet
+      .map
       {
-        color: $wasdi-green-logo;
-      }
-      position: absolute;
-      top: 2px;
-      left: 2px;
-    }
-    //margin-bottom: 35px;
-    //leaflet
-    .map
-    {
-      //DIMENSIONS MAP
-      width: auto;//500px
-      height: $wasdi-map-height;
-      .leaflet-popup-pane
-      {
-        visibility:hidden;
-      }
-      //height: auto;
-    }
+        //DIMENSIONS MAP
+        width: auto;//500px
+        height: $wasdi-map-height;
 
+        ///* (1366x768) WXGA Display */
+        @media  screen and (max-width: 1366px)and (max-height: 768px) {
+          width:auto;
+          height: $wasdi-map-height-max-width-1366-max-height-768;
+        }
+
+
+        .leaflet-popup-pane
+        {
+          visibility:hidden;
+        }
+        //height: auto;
+      }
+
+    }
   }
+
   //map container leaflet in sidebar
 
 
