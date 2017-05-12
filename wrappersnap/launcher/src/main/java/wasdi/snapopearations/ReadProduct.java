@@ -42,12 +42,14 @@ public class ReadProduct {
 
                 if (sFormatName != null) {
                     exportProduct = ProductIO.readProduct(oFile, sFormatName);
-                } else {
+                } 
+                else {
                     exportProduct = ProductIO.readProduct(oFile);
                 }
+                
+                //put in cache dictionary
+                m_oCacheProducts.put(oFile.getName(), exportProduct);
             }
-            //put in cache dictionary
-            m_oCacheProducts.put(oFile.getName(), exportProduct);
         } catch (Exception oEx) {
             oEx.printStackTrace();
             LauncherMain.s_oLogger.debug(oEx.toString());

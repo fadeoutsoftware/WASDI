@@ -112,7 +112,6 @@ public class LauncherMain {
 
 
         Option oOptOperation   = OptionBuilder.withArgName( "operation" ).hasArg().withDescription(  "" ).create( "operation" );
-
         Option oOptParameter   = OptionBuilder.withArgName( "parameter" ).hasArg().withDescription(  "" ).create( "parameter" );
 
 
@@ -397,7 +396,8 @@ public class LauncherMain {
                             // Yes, make a copy
                             FileUtils.copyFile(new File(sFileName), new File(sDestinationFileWithPath));
                             sFileName = sDestinationFileWithPath;
-                        }}
+                        }
+                    }
 
                 }
             }
@@ -472,22 +472,36 @@ public class LauncherMain {
 	            s_oLogger.debug("LauncherMain.ConvertProductToViewModelAndSendToRabbit: done read product");
             }
             
-            s_oLogger.debug("Insert in db");
-            // Save it in the register
-            DownloadedFile oAlreadyDownloaded = new DownloadedFile();
-            File oFile = new File(sFileName);
-            oAlreadyDownloaded.setFileName(oFile.getName());
-            oAlreadyDownloaded.setFilePath(sFileName);
-            oAlreadyDownloaded.setProductViewModel(oVM);
-            oAlreadyDownloaded.setBoundingBox(sBBox);
+            
+            // P.Campanella 12/05/2017: it looks it is done before. Let leave here a check
             DownloadedFilesRepository oDownloadedRepo = new DownloadedFilesRepository();
-            oDownloadedRepo.InsertDownloadedFile(oAlreadyDownloaded);
+            
+            DownloadedFile oCheck = oDownloadedRepo.GetDownloadedFile(oVM.getFileName());
+            
+            if (oCheck == null) {
+            	s_oLogger.debug("Insert in db");
+            	
+                // Save it in the register
+                DownloadedFile oAlreadyDownloaded = new DownloadedFile();
+                File oFile = new File(sFileName);
+                oAlreadyDownloaded.setFileName(oFile.getName());
+                oAlreadyDownloaded.setFilePath(sFileName);
+                oAlreadyDownloaded.setProductViewModel(oVM);
+                oAlreadyDownloaded.setBoundingBox(sBBox);
+                
+                oDownloadedRepo.InsertDownloadedFile(oAlreadyDownloaded);            	
+            }
+            
 
             s_oLogger.debug("OK DONE");
 
             s_oLogger.debug("LauncherMain.ConvertProductToViewModelAndSendToRabbit: Image downloaded. Send Rabbit Message");
 
             s_oLogger.debug("LauncherMain.ConvertProductToViewModelAndSendToRabbit: Exchange = " + sExchange);
+            
+            //P.Campanella 12/05/2017: Metadata are saved in the DB but sent back to the client with a dedicated API. 
+            // So here metadata are nulled
+            oVM.setMetadata(null);
 
             oSendToRabbit.SendRabbitMessage(true,sOperation,sWorkspace,oVM,sExchange);
             
@@ -512,6 +526,21 @@ public class LauncherMain {
         Send oSendToRabbit = new Send();
 
         try {
+        	
+        	// P.Campanella 12/05/2017: add the process id to the table
+            ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
+            ProcessWorkspace oProcessWorkspace = oProcessWorkspaceRepository.GetProcessByProductName(oParameter.getSourceProductName());
+            
+            if (oProcessWorkspace != null) {
+            	
+                //get process pid
+                oProcessWorkspace.setPid(GetProcessId());
+                //update the process
+                if (!oProcessWorkspaceRepository.UpdateProcess(oProcessWorkspace))
+                    s_oLogger.debug("LauncherMain.ExecuteOperation: Error during process update (add PID)");
+            }        	
+        	
+        	
             //Init rabbit exchange and queue
             if (oSendToRabbit.Init(oParameter.getWorkspace(), oParameter.getUserId()) == false)
             {
@@ -578,8 +607,18 @@ public class LauncherMain {
             }
 
             s_oLogger.debug("LauncherMain.TerrainOperation: convert product to view model");
+
+            // P.Campanella 12/05/2017: get the BB from the orginal product
+            // Get the original Bounding Box
+            DownloadedFilesRepository oDownloadedRepo = new DownloadedFilesRepository();
+            DownloadedFile oAlreadyDownloaded = oDownloadedRepo.GetDownloadedFile(sFile) ;
+            String sBB = "";
             
-            ConvertProductToViewModelAndSendToRabbit(null, sTargetAbsFileName, oParameter.getWorkspace(), oParameter.getExchange(), sTypeOperation, null);
+            if (oAlreadyDownloaded != null) {
+            	sBB = oAlreadyDownloaded.getBoundingBox();
+            }
+            
+            ConvertProductToViewModelAndSendToRabbit(null, sTargetAbsFileName, oParameter.getWorkspace(), oParameter.getExchange(), sTypeOperation, sBB);
 
             //this.PublishOnGeoserver(oParameter.getPublishParameter(), oTerrainProduct.getName(), sBandName);
 
