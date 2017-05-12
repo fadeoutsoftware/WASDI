@@ -163,15 +163,17 @@ public class SnapOperationsResources {
 		try {
 			//Update process list
 			String sProcessId = "";
+			ProcessWorkspaceRepository oRepository = new ProcessWorkspaceRepository();
+			ProcessWorkspace oProcess = new ProcessWorkspace();
+			
 			try
 			{
-				ProcessWorkspaceRepository oRepository = new ProcessWorkspaceRepository();
-				ProcessWorkspace oProcess = new ProcessWorkspace();
 				oProcess.setOperationDate(Wasdi.GetFormatDate(new Date()));
 				oProcess.setOperationType(sOperator);
 				oProcess.setProductName(sSourceProductName);
 				oProcess.setWorkspaceId(sWorkspaceId);
 				oProcess.setUserId(sUserId);
+				oProcess.setProcessObjId(Utils.GetRandomName());
 				sProcessId = oRepository.InsertProcessWorkspace(oProcess);
 			}
 			catch(Exception oEx){
@@ -200,10 +202,21 @@ public class SnapOperationsResources {
 
 			String sShellExString = sJavaExe + " -jar " + sLauncherPath +" -operation " + sOperator + " -parameter " + sPath;
 
-			System.out.println("DownloadResource.Download: shell exec " + sShellExString);
+			System.out.println("SnapOperations.ExecuteOperation: shell exec " + sShellExString);
 
 			Process oProc = Runtime.getRuntime().exec(sShellExString);
 
+			//Update process
+			if (oProc != null)
+			{
+				int iPID = Wasdi.getPIDProcess(oProc);
+				if (!Utils.isNullOrEmpty(sProcessId))
+				{
+					oProcess.setPid(iPID);
+					if (!oRepository.UpdateProcess(oProcess))
+						System.out.println("SnapOperations.ExecuteOperation: pid not saved");
+				}
+			}			
 
 		} catch (IOException e) {
 			e.printStackTrace();
