@@ -207,7 +207,7 @@
                             {{oProcess.timeRunning | date:'HH:mm:ss'}}
                         </td>
                         <td >
-                            <div class="my-button">
+                            <div class="my-button" ng-click="m_oController.m_oProcessesLaunchedService.removeProcessInServer(oProcess.processObjId)">
                                 <i class="fa fa-times-circle" aria-hidden="true" data-toggle="tooltip" title="Hide processes"  data-placement="bottom"></i>
                             </div>
                         </td>
