@@ -32,7 +32,6 @@
 
 body
 {
-
   font-family: $wasdi-font-web;
   font-size: $wasdi-font-size;
   line-height: $wasdi-line-height;
@@ -40,6 +39,7 @@ body
   height: 100vh;
   width: 100vw;
 }
+
 //LEAFLET MAP 100% "SCREEN"
 html, body, #wasdiMap {
   //height:100%;

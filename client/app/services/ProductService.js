@@ -24,6 +24,10 @@ service('ProductService', ['$http',  'ConstantsService', function ($http, oConst
         //return this.m_oHttp.get('http://localhost:8080/wasdiwebserver/rest/product/delete?sProductName='+sProductName+'&sWorkspaceId='+sWorkspaceId + '&bDeleteFile=' + bDeleteFile);
         return this.m_oHttp.get(this.APIURL + '/product/delete?sProductName='+sProductName+'&sWorkspaceId='+sWorkspaceId + '&bDeleteFile=' + bDeleteFile + '&bDeleteLayer=' + bDeleteLayer);
     }
+    
+    this.updateProduct = function (oProductViewModel) {
+        return this.m_oHttp.post(this.APIURL + '/product/update', oProductViewModel);
+    }
 
 }]);
 
