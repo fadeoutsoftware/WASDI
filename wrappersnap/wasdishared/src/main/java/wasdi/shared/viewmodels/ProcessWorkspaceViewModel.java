@@ -10,6 +10,7 @@ public class ProcessWorkspaceViewModel {
     private String operationDate;
     private String userId;
     private String fileSize;
+    private String processObjId;
     private int pid;
 
     public String getProductName() {
@@ -60,4 +61,12 @@ public class ProcessWorkspaceViewModel {
     public void setPid(int pid) {
         this.pid = pid;
     }
+
+    public String getProcessObjId() {
+		return processObjId;
+	}
+
+    public void setProcessObjId(String processObjId) {
+		this.processObjId = processObjId;
+	}
 }

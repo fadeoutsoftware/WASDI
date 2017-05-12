@@ -1,6 +1,7 @@
 package wasdi.shared.data;
 
 import org.bson.Document;
+import org.bson.conversions.Bson;
 
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.result.DeleteResult;
@@ -30,7 +31,12 @@ public class DownloadedFilesRepository extends MongoRepository {
     public boolean UpdateDownloadedFile(DownloadedFile oFile) {
         try {
             String sJSON = s_oMapper.writeValueAsString(oFile);
-            UpdateResult oResult = getCollection("downloadedfiles").updateOne(Filters.eq("fileName", oFile.getFileName()), new Document(Document.parse(sJSON)));
+            
+            Bson oFilter = new Document("fileName", oFile.getFileName());
+            Bson oUpdateOperationDocument = new Document("$set", new Document(Document.parse(sJSON)));
+            
+            //UpdateResult oResult = getCollection("downloadedfiles").updateOne(Filters.eq("fileName", oFile.getFileName()), new Document(Document.parse(sJSON)));
+            UpdateResult oResult = getCollection("downloadedfiles").updateOne(oFilter, oUpdateOperationDocument);
 
             if (oResult.getModifiedCount()==1) return  true;
         }

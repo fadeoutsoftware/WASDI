@@ -64,6 +64,19 @@ public class ProcessWorkspaceRepository extends MongoRepository {
         return false;
     }
 
+    public boolean DeleteProcessWorkspaceByProcessObjId(String sProcessObjId) {
+
+        try {
+            getCollection("processworkpsace").deleteOne(new Document("processObjId", sProcessObjId));
+
+            return true;
+
+        } catch (Exception oEx) {
+            oEx.printStackTrace();
+        }
+
+        return false;
+    }    
 
     public List<ProcessWorkspace> GetProcessByWorkspace(String sWorkspaceId) {
 
@@ -115,6 +128,27 @@ public class ProcessWorkspaceRepository extends MongoRepository {
         return oProcessWorkspace;
     }
 
+    public ProcessWorkspace GetProcessByProcessObjId(String sProcessObjId) {
+        ProcessWorkspace oProcessWorkspace = null;
+        try {
+
+            Document oWSDocument = getCollection("processworkpsace").find(new Document("processObjId", sProcessObjId)).first();
+
+            if (oWSDocument==null) return  null;
+
+            String sJSON = oWSDocument.toJson();
+            try {
+                oProcessWorkspace = s_oMapper.readValue(sJSON, ProcessWorkspace.class);
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        } catch (Exception oEx) {
+            oEx.printStackTrace();
+        }
+
+        return oProcessWorkspace;
+    }
 
     public boolean UpdateProcess(ProcessWorkspace oProcessWorkspace) {
 
