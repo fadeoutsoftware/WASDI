@@ -112,12 +112,24 @@
       margin-top: 15px;
       input
       {
+
         border: 0;
         outline: 0;
         color: white;
         background: transparent;
         border-bottom: 2px solid $wasdi-green-logo;
         width: 400px;
+        background: url("../assets/icons/pencil_24x24.png")no-repeat scroll;
+        //background: url("../assets/icons/Satellite.svg")no-repeat scroll 7px 7px;
+        //background-repeat: no-repeat;
+        background-position: 370px 0;
+
+
+      }
+      input:hover
+      {
+        border-bottom: 2px solid rgba(255,255,255, 0.5);
+        //background:rgba(255,255,255, 0.1);
       }
     }
   }
@@ -167,10 +179,15 @@
     .processes-list
     {
       margin-top:10px;
+
       .table-striped>tbody>tr:nth-of-type(odd)
       {
         background-color: $wasdi-blue-logo;
 
+      }
+      .single-process
+      {
+        display: inline-grid;
       }
     }
     .my-button

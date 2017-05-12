@@ -42,7 +42,8 @@ service('GlobeService', ['$http',  'ConstantsService', function ($http, oConstan
         else
         {
             //TODO ERROR  browser doesn't support WebGL
-            console.log("Error in initGlobe miss WebGl");
+            console.log("Error in Cesium Globe miss WebGl");
+            utilsVexDialogAlertTop("Error in Cesium Globe miss WebGl, link: https://get.webgl.org/");
         }
     }
     //clear globe
@@ -98,7 +99,7 @@ service('GlobeService', ['$http',  'ConstantsService', function ($http, oConstan
             name : 'Red translucent rectangle with outline',
             rectangle : {
                 coordinates : Cesium.Rectangle.fromDegrees(oRectangle[0],oRectangle[1],oRectangle[2],oRectangle[3]),
-                material : Cesium.Color.RED.withAlpha(0.7),
+                material : Cesium.Color.RED.withAlpha(0.2),
                 outline : true,
                 outlineColor : Cesium.Color.RED
             }
@@ -200,9 +201,9 @@ service('GlobeService', ['$http',  'ConstantsService', function ($http, oConstan
             polygon : {
                 hierarchy : new Cesium.PolygonHierarchy(Cesium.Cartesian3.fromDegreesArray(aArray)),
                 outline : true,
-                outlineColor : Cesium.Color.WHITE,
-                outlineWidth : 4,
-                material : Cesium.Color.RED.withAlpha(0.7),
+                 outlineColor : Cesium.Color.RED.withAlpha(1),
+                outlineWidth : 10,
+                material : Cesium.Color.RED.withAlpha(0.2),
             }
         });
 

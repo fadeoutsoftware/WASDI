@@ -59,20 +59,20 @@ var RadiometricCalibrationController = (function() {
         this.m_oReturnValue = {
             sourceFileName:"",
             destinationFileName:"",
-            options:{
-                sourceBandNames:"",
-                auxFile:"Latest Auxiliary File",
-                // externalAuxFile:"",
-                outputImageInComplex:false,
-                outputImageScaleInDb:false,
-                createGammaBand:false,
-                createBetaBand:false,
-                // selectedPolarisations:"",
-                // outputSigmaBand:true,
-                // outputGammaBand:false,
-                // outputBetaBand:false,
-
-            }
+            // options:{
+            //     sourceBandNames:"",
+            //     auxFile:"Latest Auxiliary File",
+            //     // externalAuxFile:"",
+            //     outputImageInComplex:false,
+            //     outputImageScaleInDb:false,
+            //     createGammaBand:false,
+            //     createBetaBand:false,
+            //     // selectedPolarisations:"",
+            //     // outputSigmaBand:true,
+            //     // outputGammaBand:false,
+            //     // outputBetaBand:false,
+            //
+            // }
         };
         //this.m_oOrbit = oExtras;
         //$scope.close = oClose;
@@ -131,20 +131,20 @@ var RadiometricCalibrationController = (function() {
             oClose(oOptions, 500); // close, but give 500ms for bootstrap to animate
         };
 
-        // this.m_oGetParametersOperationService.getParametersRadiometricCalibration()
-        //     .success(function (data) {
-        //         if(utilsIsObjectNullOrUndefined(data) == false)
-        //         {
-        //             oController.m_oOptions = utilsProjectConvertJSONFromServerInOptions(data);
-        //             oController.m_oReturnValue.options = oController.m_oOptions;
-        //         }
-        //         else
-        //         {
-        //             utilsVexDialogAlertTop("Error in get parameters, there aren't data");
-        //         }
-        //     }).error(function (error) {
-        //     utilsVexDialogAlertTop("Error in get parameters");
-        // });
+        this.m_oGetParametersOperationService.getParametersRadiometricCalibration()
+            .success(function (data) {
+                if(utilsIsObjectNullOrUndefined(data) == false)
+                {
+                    oController.m_oOptions = utilsProjectConvertJSONFromServerInOptions(data);
+                    oController.m_oReturnValue.options = oController.m_oOptions;
+                }
+                else
+                {
+                    utilsVexDialogAlertTop("Error in get parameters, there aren't data");
+                }
+            }).error(function (error) {
+            utilsVexDialogAlertTop("Error in get parameters");
+        });
     };
 
     RadiometricCalibrationController.prototype.changeProduct = function(oNewSelectedProductInput)
@@ -157,21 +157,24 @@ var RadiometricCalibrationController = (function() {
         this.m_oReturnValue = {
             sourceFileName:"",
             destinationFileName:"",
-            options:{
-                sourceBandNames:"",
-                auxFile:"Latest Auxiliary File",
-                // externalAuxFile:"",
-                outputImageInComplex:false,
-                outputImageScaleInDb:false,
-                createGammaBand:false,
-                createBetaBand:false,
-                // selectedPolarisations:"",
-                // outputSigmaBand:true,
-                // outputGammaBand:false,
-                // outputBetaBand:false,
+            options:this.m_oOptions
 
-            }
+            // options:{
+            //     sourceBandNames:"",
+            //     auxFile:"Latest Auxiliary File",
+            //     // externalAuxFile:"",
+            //     outputImageInComplex:false,
+            //     outputImageScaleInDb:false,
+            //     createGammaBand:false,
+            //     createBetaBand:false,
+            //     // selectedPolarisations:"",
+            //     // outputSigmaBand:true,
+            //     // outputGammaBand:false,
+            //     // outputBetaBand:false,
+            //
+            // }
         };
+
 
         this.m_asSourceBandsSelected = [];
         //load band

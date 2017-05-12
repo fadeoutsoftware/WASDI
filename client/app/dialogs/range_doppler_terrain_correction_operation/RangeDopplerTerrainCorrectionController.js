@@ -4,13 +4,14 @@
 
 var RangeDopplerTerrainCorrectionController = (function() {
 
-    function RangeDopplerTerrainCorrectionController($scope, oClose,oExtras) {
+    function RangeDopplerTerrainCorrectionController($scope, oClose,oExtras,oGetParametersOperationService) {
         //MEMBERS
         this.m_oScope = $scope;
         this.m_oScope.m_oController = this;
         this.m_oExtras = oExtras;
         this.m_aoProducts = this.m_oExtras.products;
         this.m_oSelectedProduct = this.m_oExtras.selectedProduct;
+        this.m_oGetParametersOperationService = oGetParametersOperationService;
 
         if(utilsIsObjectNullOrUndefined(this.m_aoProducts) == true)
         {
@@ -49,55 +50,57 @@ var RangeDopplerTerrainCorrectionController = (function() {
 
         // this.m_asAuxiliaryFile = ["Latest Auxiliary File","Product Auxiliary File","External Auxiliary File"];
         // this.m_sSelectedCalibration = this.m_asAuxiliaryFile[0];
-        this.m_asDigitalElevationModel = ["ACE2_5Min(Auto Download)","ACE30(Auto Download)","ASTER 1sec GDEM","GETASSE30(Auto Download)","SRTM 1Sec Grid","SRTM 1Sec HGT (Auto Download)",
-                                            "SRTM 3Sec(Auto Download)","External DEM"];
-        this.m_asResamplingMethod = ["NEAREST_NEIGHBOUR","BILINEAR_INTERPOLATION","CUBIC_CONVOLUTION","BISINC_5_POINT_INTERPOLATION","BISINC_11_POINT_INTERPOLATION",
-                                        "BISINC_21_POINT_INTERPOLATION","BICUBIC_INTERPOLATION","DELAUNAY_INTERPOLATION"];
+        // this.m_asDigitalElevationModel = ["ACE2_5Min(Auto Download)","ACE30(Auto Download)","ASTER 1sec GDEM","GETASSE30(Auto Download)","SRTM 1Sec Grid","SRTM 1Sec HGT (Auto Download)",
+        //                                     "SRTM 3Sec(Auto Download)","External DEM"];
+        // this.m_asResamplingMethod = ["NEAREST_NEIGHBOUR","BILINEAR_INTERPOLATION","CUBIC_CONVOLUTION","BISINC_5_POINT_INTERPOLATION","BISINC_11_POINT_INTERPOLATION",
+        //                                 "BISINC_21_POINT_INTERPOLATION","BICUBIC_INTERPOLATION","DELAUNAY_INTERPOLATION"];
+        //
+        // this.m_asLatestAuxiliaryFile = ["Latest Auxiliary File","Product Auxiliary File","External Auxiliary File"];
+        // this.m_asSaveBand = ["Use projected local indicence angle from DEM","Use local indicence angle from DEM","Use indicence angle from Elipsoid"];
+        //
+        // this.m_sLatestAuxiliaryFileSelected =   this.m_asLatestAuxiliaryFile[0];
+        // this.m_sDigitalElevationModelSelected = this.m_asDigitalElevationModel[6];
+        // this.m_sDEMResamplingMethodSelected = this.m_asResamplingMethod[0];
+        // this.m_sImageResamplingMethodSelected = this.m_asResamplingMethod[0];
+        // this.m_sSaveSigmaSelected = this.m_asSaveBand[0];
+        // this.m_sSaveGammaSelected = this.m_asSaveBand[0];
+        //
 
-        this.m_asLatestAuxiliaryFile = ["Latest Auxiliary File","Product Auxiliary File","External Auxiliary File"];
-        this.m_asSaveBand = ["Use projected local indicence angle from DEM","Use local indicence angle from DEM","Use indicence angle from Elipsoid"];
-
-        this.m_sLatestAuxiliaryFileSelected =   this.m_asLatestAuxiliaryFile[0];
-        this.m_sDigitalElevationModelSelected = this.m_asDigitalElevationModel[6];
-        this.m_sDEMResamplingMethodSelected = this.m_asResamplingMethod[0];
-        this.m_sImageResamplingMethodSelected = this.m_asResamplingMethod[0];
-        this.m_sSaveSigmaSelected = this.m_asSaveBand[0];
-        this.m_sSaveGammaSelected = this.m_asSaveBand[0];
 
         this.m_asSourceBandsSelected = [];
 
         this.m_oReturnValue={
             sourceFileName:"",
             destinationFileName:"",
-            options:{
-                sourceBandNames:"",
-                demName:this.m_asDigitalElevationModel[6],
-                // externalDEMFile:"",
-                // externalDEMNoDataValue:0,
-                // externalDEMApplyEGM:true,
-                demResamplingMethod:this.m_asResamplingMethod[0],
-                imgResamplingMethod:this.m_asResamplingMethod[0],
-                pixelSpacingInMeter:0,
-                pixelSpacingInDegree:0,
-                // mapProjection:"WGS84(DD)",
-                nodataValueAtSea:true,
-                saveDEM:false,
-                saveLatLon:false,
-                saveIncidenceAngleFromEllipsoid:false,
-                saveLocalIncidenceAngle:false,
-                saveProjectedLocalIncidenceAngle:false,
-                saveSelectedSourceBand:true,
-                outputComplex:false,
-
-                applyRadiometricNormalization:false,
-                saveSigmaNought:false,
-                saveGammaNought:false,
-                saveBetaNought:false,
-                incidenceAngleForSigma0:"",
-                incidenceAngleForGamma0:"",
-                auxFile:"",
-                externalAuxFile:""
-            }
+            // options:{
+            //     sourceBandNames:"",
+            //     demName:this.m_asDigitalElevationModel[6],
+            //     // externalDEMFile:"",
+            //     // externalDEMNoDataValue:0,
+            //     // externalDEMApplyEGM:true,
+            //     demResamplingMethod:this.m_asResamplingMethod[0],
+            //     imgResamplingMethod:this.m_asResamplingMethod[0],
+            //     pixelSpacingInMeter:0,
+            //     pixelSpacingInDegree:0,
+            //     // mapProjection:"WGS84(DD)",
+            //     nodataValueAtSea:true,
+            //     saveDEM:false,
+            //     saveLatLon:false,
+            //     saveIncidenceAngleFromEllipsoid:false,
+            //     saveLocalIncidenceAngle:false,
+            //     saveProjectedLocalIncidenceAngle:false,
+            //     saveSelectedSourceBand:true,
+            //     outputComplex:false,
+            //
+            //     applyRadiometricNormalization:false,
+            //     saveSigmaNought:false,
+            //     saveGammaNought:false,
+            //     saveBetaNought:false,
+            //     incidenceAngleForSigma0:"",
+            //     incidenceAngleForGamma0:"",
+            //     auxFile:"",
+            //     externalAuxFile:""
+            // }
         };
 
 
@@ -123,34 +126,34 @@ var RangeDopplerTerrainCorrectionController = (function() {
                 bAreOkOptions = false;
             if( (utilsIsObjectNullOrUndefined(oController.m_sImageResamplingMethodSelected) == true) && (utilsIsStrNullOrEmpty(oController.m_sImageResamplingMethodSelected) == true) )
                 bAreOkOptions = false;
-            if( (utilsIsObjectNullOrUndefined(oController.options.pixelSpacingInMeter) == true) && (utilsIsANumber(oController.options.pixelSpacingInMeter) == false) )
+            if( (utilsIsObjectNullOrUndefined(oController.m_oReturnValue.options.pixelSpacingInMeter) == true) && (utilsIsANumber(oController.m_oReturnValue.options.pixelSpacingInMeter) == false) )
                 bAreOkOptions = false;
-            if( (utilsIsObjectNullOrUndefined(oController.options.pixelSpacingInDegree) == true) && (utilsIsANumber(oController.options.pixelSpacingInDegree) == false) )
+            if( (utilsIsObjectNullOrUndefined(oController.m_oReturnValue.options.pixelSpacingInDegree) == true) && (utilsIsANumber(oController.m_oReturnValue.options.pixelSpacingInDegree) == false) )
                 bAreOkOptions = false;
 
-            if( utilsIsObjectNullOrUndefined(oController.options.nodataValueAtSea) == true )
+            if( utilsIsObjectNullOrUndefined(oController.m_oReturnValue.options.nodataValueAtSea) == true )
                 bAreOkOptions = false;
-            if( utilsIsObjectNullOrUndefined(oController.options.saveDEM) == true )
+            if( utilsIsObjectNullOrUndefined(oController.m_oReturnValue.options.saveDEM) == true )
                 bAreOkOptions = false;
-            if( utilsIsObjectNullOrUndefined(oController.options.saveLatLon) == true )
+            if( utilsIsObjectNullOrUndefined(oController.m_oReturnValue.options.saveLatLon) == true )
                 bAreOkOptions = false;
-            if( utilsIsObjectNullOrUndefined(oController.options.saveIncidenceAngleFromEllipsoid) == true )
+            if( utilsIsObjectNullOrUndefined(oController.m_oReturnValue.options.saveIncidenceAngleFromEllipsoid) == true )
                 bAreOkOptions = false;
-            if( utilsIsObjectNullOrUndefined(oController.options.saveLocalIncidenceAngle) == true )
+            if( utilsIsObjectNullOrUndefined(oController.m_oReturnValue.options.saveLocalIncidenceAngle) == true )
                 bAreOkOptions = false;
-            if( utilsIsObjectNullOrUndefined(oController.options.saveProjectedLocalIncidenceAngle) == true )
+            if( utilsIsObjectNullOrUndefined(oController.m_oReturnValue.options.saveProjectedLocalIncidenceAngle) == true )
                 bAreOkOptions = false;
-            if( utilsIsObjectNullOrUndefined(oController.options.saveSelectedSourceBand) == true )
+            if( utilsIsObjectNullOrUndefined(oController.m_oReturnValue.options.saveSelectedSourceBand) == true )
                 bAreOkOptions = false;
-            if( utilsIsObjectNullOrUndefined(oController.options.outputComplex) == true )
+            if( utilsIsObjectNullOrUndefined(oController.m_oReturnValue.options.outputComplex) == true )
                 bAreOkOptions = false;
-            if( utilsIsObjectNullOrUndefined(oController.options.applyRadiometricNormalization) == true )
+            if( utilsIsObjectNullOrUndefined(oController.m_oReturnValue.options.applyRadiometricNormalization) == true )
                 bAreOkOptions = false;
-            if( utilsIsObjectNullOrUndefined(oController.options.saveSigmaNought) == true )
+            if( utilsIsObjectNullOrUndefined(oController.m_oReturnValue.options.saveSigmaNought) == true )
                 bAreOkOptions = false;
-            if( utilsIsObjectNullOrUndefined(oController.options.saveGammaNought) == true )
+            if( utilsIsObjectNullOrUndefined(oController.m_oReturnValue.options.saveGammaNought) == true )
                 bAreOkOptions = false;
-            if( utilsIsObjectNullOrUndefined(oController.options.saveBetaNought) == true )
+            if( utilsIsObjectNullOrUndefined(oController.m_oReturnValue.options.saveBetaNought) == true )
                 bAreOkOptions = false;
 
             if(bAreOkOptions != false)
@@ -170,6 +173,34 @@ var RangeDopplerTerrainCorrectionController = (function() {
             oClose(oOptions, 500); // close, but give 500ms for bootstrap to animate
         };
 
+        this.m_oGetParametersOperationService.getParametersRangeDopplerTerrainCorrection()
+            .success(function (data) {
+                if(utilsIsObjectNullOrUndefined(data) == false)
+                {
+                    oController.m_oOptions = utilsProjectConvertJSONFromServerInOptions(data);
+                    oController.m_oReturnValue.options = oController.m_oOptions;
+
+                    oController.m_sLatestAuxiliaryFileSelected = oController.m_oReturnValue.options.auxFile;
+                    oController.m_sDigitalElevationModelSelected = oController.m_oReturnValue.options.demName;
+                    oController.m_sDEMResamplingMethodSelected = oController.m_oReturnValue.options.demResamplingMethod;
+                    oController.m_sImageResamplingMethodSelected = oController.m_oReturnValue.options.imgResamplingMethod;
+                    oController.m_sSaveSigmaSelected = oController.m_oReturnValue.options.incidenceAngleForSigma0;
+                    oController.m_sSaveGammaSelected =oController.m_oReturnValue.options.incidenceAngleForGamma0;
+
+                     oController.m_asLatestAuxiliaryFile = utilsProjectGetArrayOfValuesForParameterInOperation(data,"auxFile");
+                     oController.m_asDigitalElevationModel = utilsProjectGetArrayOfValuesForParameterInOperation(data,"demName");
+                     oController.m_asResamplingMethod = utilsProjectGetArrayOfValuesForParameterInOperation(data,"demResamplingMethod");
+                     oController.m_asResamplingMethodImg = utilsProjectGetArrayOfValuesForParameterInOperation(data,"imgResamplingMethod");
+                     oController.m_asSaveBandSigma = utilsProjectGetArrayOfValuesForParameterInOperation(data,"incidenceAngleForSigma0");
+                     oController.m_asSaveBandGamma = utilsProjectGetArrayOfValuesForParameterInOperation(data,"incidenceAngleForGamma0");
+                }
+                else
+                {
+                    utilsVexDialogAlertTop("Error in get parameters, there aren't data");
+                }
+            }).error(function (error) {
+            utilsVexDialogAlertTop("Error in get parameters");
+        });
     };
 
     RangeDopplerTerrainCorrectionController.prototype.changeProduct = function(oNewSelectedProductInput)
@@ -181,35 +212,36 @@ var RangeDopplerTerrainCorrectionController = (function() {
         this.m_oReturnValue={
             sourceFileName:"",
             destinationFileName:"",
-            options:{
-                sourceBandNames:"",
-                demName:this.m_asDigitalElevationModel[6],
-                // externalDEMFile:"",
-                // externalDEMNoDataValue:0,
-                // externalDEMApplyEGM:true,
-                demResamplingMethod:this.m_asResamplingMethod[0],
-                imgResamplingMethod:this.m_asResamplingMethod[0],
-                pixelSpacingInMeter:0,
-                pixelSpacingInDegree:0,
-                // mapProjection:"WGS84(DD)",
-                nodataValueAtSea:true,
-                saveDEM:false,
-                saveLatLon:false,
-                saveIncidenceAngleFromEllipsoid:false,
-                saveLocalIncidenceAngle:false,
-                saveProjectedLocalIncidenceAngle:false,
-                saveSelectedSourceBand:true,
-                outputComplex:false,
-
-                applyRadiometricNormalization:false,
-                saveSigmaNought:false,
-                saveGammaNought:false,
-                saveBetaNought:false,
-                incidenceAngleForSigma0:"",
-                incidenceAngleForGamma0:"",
-                auxFile:"",
-                externalAuxFile:""
-            }
+            options:this.m_oOptions
+            // options:{
+            //     sourceBandNames:"",
+            //     demName:this.m_asDigitalElevationModel[6],
+            //     // externalDEMFile:"",
+            //     // externalDEMNoDataValue:0,
+            //     // externalDEMApplyEGM:true,
+            //     demResamplingMethod:this.m_asResamplingMethod[0],
+            //     imgResamplingMethod:this.m_asResamplingMethod[0],
+            //     pixelSpacingInMeter:0,
+            //     pixelSpacingInDegree:0,
+            //     // mapProjection:"WGS84(DD)",
+            //     nodataValueAtSea:true,
+            //     saveDEM:false,
+            //     saveLatLon:false,
+            //     saveIncidenceAngleFromEllipsoid:false,
+            //     saveLocalIncidenceAngle:false,
+            //     saveProjectedLocalIncidenceAngle:false,
+            //     saveSelectedSourceBand:true,
+            //     outputComplex:false,
+            //
+            //     applyRadiometricNormalization:false,
+            //     saveSigmaNought:false,
+            //     saveGammaNought:false,
+            //     saveBetaNought:false,
+            //     incidenceAngleForSigma0:"",
+            //     incidenceAngleForGamma0:"",
+            //     auxFile:"",
+            //     externalAuxFile:""
+            // }
         };
         this.m_asSourceBandsSelected = [];
 
@@ -241,7 +273,8 @@ var RangeDopplerTerrainCorrectionController = (function() {
     RangeDopplerTerrainCorrectionController.$inject = [
         '$scope',
         'close',
-        'extras'
+        'extras',
+        'GetParametersOperationService'
 
     ];
     return RangeDopplerTerrainCorrectionController;

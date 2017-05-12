@@ -16,6 +16,7 @@
 @import "../directives/space_invaders/space_invaders";
 @import "../directives/space_invaders_fixed/space_invaders_fixed";
 @import "../directives/multiselect/multiselect";
+@import "../directives/space_invaders_fixed_small_version/space_invaders_fixed_small_version";
 
 //DIALOGS
 @import "../dialogs/orbit_info/orbit_info";
@@ -344,10 +345,10 @@ h4
 
 //ANIMATE HIDE
 .animate-hide {
-  -webkit-transition:all cubic-bezier(0.250, 0.460, 0.450, 0.940) 2s;
-  -moz-transition:all cubic-bezier(0.250, 0.460, 0.450, 0.940) 2s;
-  -o-transition:all cubic-bezier(0.250, 0.460, 0.450, 0.940) 2s;
-  transition:all cubic-bezier(0.250, 0.460, 0.450, 0.940) 2s;
+  -webkit-transition:all cubic-bezier(0.250, 0.460, 0.450, 0.940) 1s;
+  -moz-transition:all cubic-bezier(0.250, 0.460, 0.450, 0.940) 1s;
+  -o-transition:all cubic-bezier(0.250, 0.460, 0.450, 0.940) 1s;
+  transition:all cubic-bezier(0.250, 0.460, 0.450, 0.940) 1s;
   //line-height:20px;
   //opacity:1;
   //padding:10px;
@@ -365,4 +366,15 @@ h4
 .test:hover
 {
   fill:white;
+}
+
+//CROP TEXT TOO LONG
+.ellipsis {
+  display: inline-grid;
+  max-width: 500px;
+  text-overflow: ellipsis;
+
+  /* Required for text-overflow to do anything */
+  white-space: nowrap;
+  overflow: hidden;
 }

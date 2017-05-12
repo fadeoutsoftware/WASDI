@@ -1,7 +1,7 @@
 /**
  * Created by a.corrado on 24/01/2017.
  */
-/*YOU MUST DOWNLOAD VEX LIBRARY FOR USE IT */
+/*YOU MUST DOWNLOAD VEX LIBRARY FOR USE UTILS VEX */
 
 /* version (in bower)
  "vex":"3.0.0"
@@ -104,7 +104,7 @@ function utilsVexCloseDialogAfterFewSeconds(iSecond,oVexInstance)
 }
 
 
-/******************************TODO REMOVE THEY ARE ONLY FOR WASDI ********************************/
+/*TODO REMOVE THEY ARE ONLY FOR WASDI **************************************************************/
 function utilsVexDialogConfirmWithCheckBox(oMessage,oCallback)
 {
     if(utilsIsStrNullOrEmpty(oMessage))

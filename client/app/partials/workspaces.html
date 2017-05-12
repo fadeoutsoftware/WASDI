@@ -2,6 +2,7 @@
 
     <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 my-title">
        {{"WORKSPACES_TITLE_LABEL"|translate}}
+
     </div>
 
     <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 utils-bar">
@@ -35,7 +36,8 @@
                 <td  ng-click="m_oController.loadProductList(oWSListItem)">{{$index + 1}}</td>
                 <td  ng-click="m_oController.loadProductList(oWSListItem)"> {{oWSListItem.workspaceName}}</td>
                 <td  ng-click="m_oController.loadProductList(oWSListItem)">{{oWSListItem.ownerUserId}}</td>
-                <td class="over-color" ng-click="m_oController.openWorkspace(oWSListItem.workspaceId)"  data-toggle="tooltip" data-placement="top" title="{{'WORKSPACES_TOOLTIP_EDITOR'|translate}}">
+
+                <td class="over-color cell-edit-button" ng-click="m_oController.openWorkspace(oWSListItem.workspaceId)"  data-toggle="tooltip" data-placement="top" title="{{'WORKSPACES_TOOLTIP_EDITOR'|translate}}">
                     <i class="fa fa-pencil fa-lg" aria-hidden="true"></i>
                 </td>
                 <!--<td class="over-color" data-toggle="tooltip" data-placement="top" title="{{'WORKSPACES_TOOLTIP_INFO'|translate}}" ng-click="m_oController.loadProductList(oWSListItem)">-->

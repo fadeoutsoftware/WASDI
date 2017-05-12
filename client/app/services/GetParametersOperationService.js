@@ -27,11 +27,11 @@ service('GetParametersOperationService', ['$http',  'ConstantsService', function
     };
     this.getParametersRadiometricCalibration = function () {
 
-        return this.operation("RADIOMETRICCALIBRATION");
+        return this.operation("CALIBRATE");
     };
     this.getParametersRangeDopplerTerrainCorrection = function () {
 
-        return this.operation("RANGEDOPPLERTERRAINCORRECTION");
+        return this.operation("TERRAIN");
     };
     this.operation = function(sOperationInput)
     {
