@@ -90,8 +90,18 @@
       .btn-group
       {
         z-index: 1001;
+        position: absolute;
+        top: 2px;
+        left: 20px;
+
+        //.btn{
+        //  height: 20px;
+        //  width: 20px;
+        //}
         .btn-default
         {
+          min-width: 46px;
+          min-height: 34px;
           background-color: $wasdi-blue-logo;
           color: $wasdi-white;
           opacity: 0.9;
@@ -100,10 +110,71 @@
         {
           color: $wasdi-green-logo;
         }
-        position: absolute;
-        top: 2px;
-        left: 20px;
+        .btn-default:disabled
+        {
+          color:grey;
+        }
+
+        .btn-switch-geographic
+        {
+          background-color: $wasdi-blue-logo;
+          background-image: url("../assets/icons/mapBar/globe_white.svg");
+          background-size: 20px;
+          background-repeat: no-repeat;
+          background-position: center;
+          //background-image: url("../assets/icons/pencil_24x24.png");
+          //i{background-image: url("../assets/icons/mapBar/globe_white.svg");}
+
+        }
+
+        .btn-switch-geographic:hover
+        {
+          background-color: $wasdi-blue-logo;
+          background-image: url("../assets/icons/mapBar/globe_green.svg");
+          background-size: 20px;
+          background-repeat: no-repeat;
+          background-position: center;
+            //background: url("../assets/icons/mapBar/globe_white.svg")left center no-repeat;;
+        }
+        .btn-switch-not-geographic
+        {
+          background-color: $wasdi-blue-logo;
+          background-image: url("../assets/icons/mapBar/map_route_white(NoGeoReference).svg");
+          background-size: 20px;
+          background-repeat: no-repeat;
+          background-position: center;
+          //background: url("../assets/icons/mapBar/globe_white.svg")left center no-repeat;;
+
+        }
+        .btn-switch-not-geographic:hover
+        {
+          background-color: $wasdi-blue-logo;
+          background-image: url("../assets/icons/mapBar/map_route_green(NoGeoReference).svg");
+          background-size: 20px;
+          background-repeat: no-repeat;
+          background-position: center;
+          //background: url("../assets/icons/mapBar/globe_white.svg")left center no-repeat;;
+
+        }
+
       }
+      //.btn-switch-map
+      //{
+      //  z-index: 1001;
+      //  position: absolute;
+      //  top: 2px;
+      //  right: 20px;
+      //  background-color: $wasdi-blue-logo;
+      //  color: $wasdi-white;
+      //}
+      //.btn-switch-map:hover
+      //{
+      //  color: $wasdi-green-logo;
+      //}
+      //.btn-switch-map:disabled
+      //{
+      //  color:grey;
+      //}
       //margin-bottom: 35px;
       //leaflet
       .map

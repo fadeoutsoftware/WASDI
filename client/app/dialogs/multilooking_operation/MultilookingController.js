@@ -99,6 +99,7 @@ var MultilookingController = (function() {
                 {
                     oController.m_oOptions = utilsProjectConvertJSONFromServerInOptions(data);
                     oController.m_oReturnValue.options = oController.m_oOptions;
+                    // oController.m_oScope.$apply();
                 }
                 else
                 {

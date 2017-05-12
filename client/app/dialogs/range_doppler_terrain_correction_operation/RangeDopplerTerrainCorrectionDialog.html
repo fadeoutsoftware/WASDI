@@ -132,6 +132,7 @@
                                 <!--<label for="RangeDopplerTerrainCorrectionPixelSpacingDeg">{{"DIALOG_RANGE_DOPPLER_TERRAIN_CORRECTION_PIXEL_SPACING_DEG_LABEL"|translate}}</label>-->
                                 <!--<input type="text" class="form-control" id="RangeDopplerTerrainCorrectionPixelSpacingDeg" ng-model="m_oController.m_oReturnValue.options.pixelSpacingInDegree">-->
                             <!--</div>-->
+
                             <div class="row">
                                 <!--Map Projection-->
                                 <div class="col-lg-3 col-md-3 col-sm-3 col-xs-3">{{"DIALOG_RANGE_DOPPLER_TERRAIN_CORRECTION_MAP_PROJECTION_LABEL"|translate}}</div>
@@ -139,6 +140,14 @@
                                     <button class="btn my-button" type="button"data-toggle="collapse" data-target="#collapseMapProjection" aria-expanded="false" aria-controls="collapseMapProjection">
                                         button
                                     </button>
+
+                                </div>
+
+                            </div>
+
+                            <!--Map projection options  -->
+                            <div class="row">
+                                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
                                     <div class="collapse" id="collapseMapProjection">
                                         <div class="well">
                                             <div class="radio">
@@ -153,10 +162,10 @@
                                                 </div>
 
                                                 <div class="row">
-                                                    <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
+                                                    <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4 col-lg-offset-1 col-md-offset-1 col-sm-offset-1 col-xs-offset-1">
                                                         Geodetic Datum
                                                     </div>
-                                                    <div class="col-lg-8 col-md-8 col-sm-8 col-xs-8">
+                                                    <div class="col-lg-7 col-md-7 col-sm-7 col-xs-7">
                                                         <div class="dropdown">
                                                             <button class="btn btn-default dropdown-toggle" type="button"
                                                                     id="dropdownMenuGeodeticDatum" data-toggle="dropdown">
@@ -174,10 +183,10 @@
                                                     </div>
                                                 </div>
                                                 <div class="row">
-                                                    <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
+                                                    <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4 col-md-offset-1 col-sm-offset-1 col-xs-offset-1">
                                                         Projection
                                                     </div>
-                                                    <div class="col-lg-8 col-md-8 col-sm-8 col-xs-8">
+                                                    <div class="col-lg-7 col-md-7 col-sm-7 col-xs-7">
                                                         <div class="dropdown">
                                                             <button class="btn btn-default dropdown-toggle" type="button"
                                                                     id="dropdownMenuPredefinedCrs" data-toggle="dropdown">
@@ -196,8 +205,8 @@
 
                                                 </div>
                                                 <div class="row">
-                                                    <div class="col-lg-5 col-md-5 col-sm-5 col-xs-5 col-lg-offset-7 col-md-offset-7 col-sm-offset-7 col-xs-offset-7 ">
-                                                        <button class="btn btn-default my-input-text">Projection Parameters...</button>
+                                                    <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4 col-lg-offset-8 col-md-offset-8 col-sm-offset-8 col-xs-offset-8 ">
+                                                        <button class="btn my-button">Projection Parameters...</button>
                                                     </div>
                                                 </div>
                                                 <div class="row">
@@ -212,14 +221,13 @@
                                                         <span >Label</span>
                                                     </div>
                                                     <div class="col-xs-2 col-sm-2 col-md-2 col-lg-2">
-                                                        <button type="button" class="btn btn-default">Select</button>
+                                                        <button type="button" class="btn my-button">Select</button>
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-
                             </div>
 
                             <!--<label>{{"DIALOG_RANGE_DOPPLER_TERRAIN_CORRECTION_MAP_PROJECTION_LABEL"|translate}}</label><button class="my-button">button</button>-->
@@ -301,7 +309,7 @@
                                                 <span class="caret"></span>
                                             </button>
                                             <ul class="dropdown-menu" role="menu" aria-labelledby="SaveSigmaDropdown">
-                                                <li role="presentation" ng-repeat="saveSigma in m_oController.m_asSaveBand">
+                                                <li role="presentation" ng-repeat="saveSigma in m_oController.m_asSaveBandSigma">
                                                     <a role="menuitem" tabindex="-1" href="" ng-click="m_oController.m_sSaveSigmaSelected = saveSigma">{{saveSigma}}</a>
                                                 </li>
                                             </ul>
@@ -326,7 +334,7 @@
                                                 <span class="caret"></span>
                                             </button>
                                             <ul class="dropdown-menu" role="menu" aria-labelledby="SaveGammaDropdown">
-                                                <li role="presentation" ng-repeat="saveGamma in m_oController.m_asSaveBand">
+                                                <li role="presentation" ng-repeat="saveGamma in m_oController.m_asSaveBandGamma">
                                                     <a role="menuitem" tabindex="-1" href="" ng-click="m_oController.m_sSaveGammaSelected=saveGamma">{{saveGamma}}</a>
                                                 </li>
                                             </ul>
@@ -342,21 +350,23 @@
                             </div>
 
                             <div class="col-lg-12">
-                                <label class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
-                                    {{"DIALOG_RANGE_DOPPLER_TERRAIN_CORRECTION_AUXILIARY_FILE_LABEL"|translate}}
-                                </label>
-                                <div class=" col-lg-6 col-md-6 col-sm-6 col-xs-6">
-                                    <div class="dropdown">
-                                        <button class="btn btn-default dropdown-toggle" type="button" id="AuxiliaryFileDropdown"
-                                                data-toggle="dropdown">
-                                            {{m_oController.m_sLatestAuxiliaryFileSelected}}
-                                            <span class="caret"></span>
-                                        </button>
-                                        <ul class="dropdown-menu" role="menu" aria-labelledby="AuxiliaryFileDropdown">
-                                            <li role="presentation" ng-repeat="latestAuxiliaryFile in m_oController.m_asLatestAuxiliaryFile">
-                                                <a role="menuitem" tabindex="-1" href="#" ng-click="m_oController.m_sLatestAuxiliaryFileSelected = latestAuxiliaryFile">{{latestAuxiliaryFile}}</a>
-                                            </li>
-                                        </ul>
+                                <div class="row">
+                                    <label class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
+                                        {{"DIALOG_RANGE_DOPPLER_TERRAIN_CORRECTION_AUXILIARY_FILE_LABEL"|translate}}
+                                    </label>
+                                    <div class=" col-lg-6 col-md-6 col-sm-6 col-xs-6">
+                                        <div class="dropup">
+                                            <button class="btn btn-default dropdown-toggle" type="button" id="AuxiliaryFileDropdown"
+                                                    data-toggle="dropdown">
+                                                {{m_oController.m_sLatestAuxiliaryFileSelected}}
+                                                <span class="caret"></span>
+                                            </button>
+                                            <ul class="dropdown-menu" role="menu" aria-labelledby="AuxiliaryFileDropdown">
+                                                <li role="presentation" ng-repeat="latestAuxiliaryFile in m_oController.m_asLatestAuxiliaryFile">
+                                                    <a role="menuitem" tabindex="-1" href="" ng-click="m_oController.m_sLatestAuxiliaryFileSelected = latestAuxiliaryFile">{{latestAuxiliaryFile}}</a>
+                                                </li>
+                                            </ul>
+                                        </div>
                                     </div>
                                 </div>
                             </div>

@@ -52,7 +52,9 @@ var SearchOrbitController = (function() {
         {
             this.m_oProcessesLaunchedService.loadProcessesFromServer(this.m_oActiveWorkspace.workspaceId);
         }
-        this.m_oRabbitStompService.initWebStomp(this.m_oActiveWorkspace,"EditorController",this);
+        //INIT RABBIT
+        this.m_oRabbitStompService.initWebStomp(this.m_oActiveWorkspace,"SearchOrbitController",this);
+
         this.initOrbitSearch = function(){
             //init orbit search
             this.m_oOrbitSearch = new Object();
@@ -467,6 +469,38 @@ var SearchOrbitController = (function() {
             return false;
 
         return true;
+    };
+
+    /* RABBIT MQ METHOD */
+    SearchOrbitController.prototype.receivedDownloadMessage = function (oMessage) {
+
+        if (oMessage == null) return;
+        if (oMessage.messageResult=="KO") {
+            //alert('There was an error in the download');
+            utilsVexDialogAlertTop('There was an error in the download')
+            return;
+        }
+        var oController = this;
+        this.m_oProductService.addProductToWorkspace(oMessage.payload.fileName,this.m_oActiveWorkspace.workspaceId).success(function (data, status) {
+            if(data.boolValue == true )
+            {
+                var oDialog = utilsVexDialogAlertBottomRightCorner('Product added to the ws');
+                utilsVexCloseDialogAfterFewSeconds(3000, oDialog);
+                //console.log('Product added to the ws');
+                //oController.m_oProcessesLaunchedService.removeProcessByPropertySubstringVersion("processName",oMessage.payload.fileName,
+                //    oController.m_oActiveWorkspace.workspaceId,oController.m_oUser.userId);
+                //oController.m_oProcessesLaunchedService.loadProcessesFromServer(oController.m_oActiveWorkspace.workspaceId);
+            }
+            else
+            {
+                utilsVexDialogAlertTop("Error in add product to workspace");
+            }
+
+        }).error(function (data,status) {
+            utilsVexDialogAlertTop('Error adding product to the ws');
+            //console.log('Error adding product to the ws');
+        });
+
     }
     SearchOrbitController.$inject = [
         '$scope',

@@ -4,7 +4,6 @@
 var EditorController = (function () {
     function EditorController($scope, $location, $interval, oConstantsService, oAuthService, oMapService, oFileBufferService,
                               oProductService, $state, oWorkspaceService, oGlobeService, oProcessesLaunchedService, oRabbitStompService, oSnapOperationService, oModalService) {
-
         // Reference to the needed Services
         this.m_oScope = $scope;
         this.m_oScope.m_oController = this;
@@ -29,8 +28,8 @@ var EditorController = (function () {
         this.m_oAreHideBars = {
             mainBar:false,
             radarBar:true,
-            opticalBar:true
-
+            opticalBar:true,
+            processorBar:true
         }
 
         /*Last file donloaded*/
@@ -113,8 +112,9 @@ var EditorController = (function () {
         for (var i in m) {
             if (!utilsIsObjectNullOrUndefined(m[i].original)  && m[i].original.fileName == sFileName) {//&& !utilsIsObjectNullOrUndefined(m[i].original.band)
                 $("#jstree").jstree(true).deselect_all();
+                // CARE WE CAN'T DO OPEN_NODE AND SELECET_NODE AT THE SAME TIME
                 $("#jstree").jstree(true).select_node(m[i].id,true);
-                $("#jstree").jstree(true).open_node(m[i].id,true);
+                // $("#jstree").jstree(true).open_node(m[i].id,true);
                 break;
            }
         }
@@ -152,7 +152,8 @@ var EditorController = (function () {
         this.m_oProductService.addProductToWorkspace(oMessage.payload.fileName, this.m_oActiveWorkspace.workspaceId).success(function (data, status) {
             if (data.boolValue == true) {
                 //console.log('Product added to the ws');
-                utilsVexDialogAlertBottomRightCorner('Product added to the ws');
+                var oDialog = utilsVexDialogAlertBottomRightCorner('Product added to the ws');
+                utilsVexCloseDialogAfterFewSeconds(3000, oDialog);
                 oController.getProductListByWorkspace();//oMessage.payload.name
                 oController.m_oLastDownloadedProduct = oMessage.payload.fileName; //the m_oLastDownloadedProduct will be select & open in jstree
 
@@ -181,9 +182,7 @@ var EditorController = (function () {
 
     }
 
-    EditorController.prototype.receivedTerrainMessage = function (oMessage) {
-        this.receivedDownloadMessage(oMessage);
-    };
+
 
 
     /**
@@ -722,6 +721,7 @@ var EditorController = (function () {
 
                                     "DeleteProduct": {
                                         "label": "Delete Product",
+                                        "icon":"fa fa-trash",
                                         "action": function (obj) {
 
                                             utilsVexDialogConfirmWithCheckBox("Deleting product. Are you sure?", function (value) {
@@ -1453,12 +1453,20 @@ var EditorController = (function () {
         if (this.m_bIsVisiblePixelInfo == true) {
             //$('.leaflet-popup-pane').css({"display":""});
             $('.leaflet-popup-pane').css({"visibility": "visible"});
+            $('.leaflet-container').css('cursor','crosshair');
+            // $("#wasdiMap").hover( function(){
+            //     $(this).css({"pointer":"crosshair"});//set pointer with cross
+            // });
             /*.leaflet-fade-anim .leaflet-map-pane .leaflet-popup*/
         }
         else {
             //$('.leaflet-popup-pane').css({"display":"none"});
             $('.leaflet-popup-pane').css({"visibility": "hidden"});
+            $('.leaflet-container').css('cursor','');
 
+            // $("#wasdiMap").hover( function(){
+            //     $(this).css({"pointer":"auto"});//set pointer withe default pointer
+            // });
         }
     }
 
@@ -1537,7 +1545,7 @@ var EditorController = (function () {
                     .success(function (data) {
 
                     }).error(function (error) {
-
+                        utilsVexDialogAlertTop("Error the operation Apply Orbit dosen't work");
                 });
                 return true;
             });
@@ -1574,7 +1582,7 @@ var EditorController = (function () {
                     .success(function (data) {
 
                     }).error(function (error) {
-
+                    utilsVexDialogAlertTop("Error the operation Radiometric Calibration dosen't work");
                 });
                 return true;
             });
@@ -1582,6 +1590,7 @@ var EditorController = (function () {
 
         return true;
     }
+
     EditorController.prototype.openMultilookingDialog = function (oSelectedProduct) {
         var oController = this;
         this.m_oModalService.showModal({
@@ -1610,7 +1619,7 @@ var EditorController = (function () {
                     .success(function (data) {
 
                     }).error(function (error) {
-
+                    utilsVexDialogAlertTop("Error the operation Multilooking dosen't work");
                 });
                 return true;
 
@@ -1643,11 +1652,11 @@ var EditorController = (function () {
                     return false;
 
                 // oController.m_oScope.Result = oResult;
-                oController.m_oSnapOperationService.Multilooking(oResult.sourceFileName, oResult.destinationFileName, oController.m_oActiveWorkspace.workspaceId,oResult.options)
+                oController.m_oSnapOperationService.NDVI(oResult.sourceFileName, oResult.destinationFileName, oController.m_oActiveWorkspace.workspaceId,oResult.options)
                     .success(function (data) {
 
                     }).error(function (error) {
-
+                    utilsVexDialogAlertTop("Error the operation NDVI dosen't work");
                 });
                 return true;
             });
@@ -1701,11 +1710,11 @@ var EditorController = (function () {
                     return false;
 
                 // oController.m_oScope.Result = oResult;
-                oController.m_oSnapOperationService.Multilooking(oResult.sourceFileName, oResult.destinationFileName, oController.m_oActiveWorkspace.workspaceId,oResult.options)
+                oController.m_oSnapOperationService.RangeDopplerTerrainCorrection(oResult.sourceFileName, oResult.destinationFileName, oController.m_oActiveWorkspace.workspaceId,oResult.options)
                     .success(function (data) {
 
                     }).error(function (error) {
-
+                    utilsVexDialogAlertTop("Error the operation Range dopplre terratin correction dosen't work");
                 });
                 return true;
             });
@@ -1713,44 +1722,58 @@ var EditorController = (function () {
 
         return true;
     }
-    /*OPERATION MENU*/
+
+    /************************** OPERATION MENU *************************/
     EditorController.prototype.hideOperationMainBar= function()
     {
         this.m_oAreHideBars.mainBar = true;
-    }
+    };
     EditorController.prototype.hideOperationRadarBar = function()
     {
         this.m_oAreHideBars.radarBar = true;
-    }
+    };
+    EditorController.prototype.hideProcessorBar = function()
+    {
+        this.m_oAreHideBars.processorBar = true;
+    };
     EditorController.prototype.hideOperationOpticalBar= function()
     {
         this.m_oAreHideBars.opticalBar = true;
-    }
+    };
     EditorController.prototype.showOperationMainBar= function()
     {
         this.m_oAreHideBars.mainBar = false;
-    }
+    };
     EditorController.prototype.showOperationRadarBar = function()
     {
         this.m_oAreHideBars.radarBar = false;
-    }
+    };
     EditorController.prototype.showOperationOpticalBar= function()
     {
         this.m_oAreHideBars.opticalBar = false;
-    }
+    };
+    EditorController.prototype.showOperationProcessor= function()
+    {
+        this.m_oAreHideBars.processorBar = false;
+    };
 
     EditorController.prototype.isHiddenOperationMainBar= function()
     {
         return this.m_oAreHideBars.mainBar;
-    }
+    };
     EditorController.prototype.isHiddenOperationRadarBar = function()
     {
         return this.m_oAreHideBars.radarBar;
-    }
+    };
+    EditorController.prototype.isHiddenProcessorBar = function()
+    {
+        return this.m_oAreHideBars.processorBar;
+    };
+
     EditorController.prototype.isHiddenOperationOpticalBar= function()
     {
         return this.m_oAreHideBars.opticalBar;
-    }
+    };
 
 
     EditorController.$inject = [

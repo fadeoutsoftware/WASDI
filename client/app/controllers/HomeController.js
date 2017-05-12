@@ -57,8 +57,6 @@ var HomeController = (function() {
             //alert('error');
             utilsVexDialogAlertTop("Error in login. HomeCotroller.js");
 
-
-
         });
     }
 

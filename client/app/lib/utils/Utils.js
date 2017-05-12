@@ -2,7 +2,8 @@
  * Created by a.corrado on 17/11/2016.
  */
 /*
- V1.0
+ V 1.0
+ V 1.1 (Added utilsGetTimeStamp & utilsBrowserSupportWebGl)
 List of methods:
 
  BOOTSTRAP
@@ -33,6 +34,11 @@ List of methods:
  utilsIsString
  utilsIsEmail
 
+ TIMESTAMP
+ utilsGetTimeStamp
+
+ WEBGL
+ utilsBrowserSupportWebGl
 * */
 
 /**
@@ -310,7 +316,7 @@ function utilsSetCookie(cname, cvalue, exdays) {
 /**
  *
  * @param cname
- * @returns {*}
+ * @returns {*}Whoops! Lost connection to undefined
  */
 function utilsGetCookie(cname) {
     var name = cname + "=";
@@ -326,4 +332,29 @@ function utilsGetCookie(cname) {
         }
     }
     return "";
+}
+/************************ TIMESTAMP ************************/
+function utilsGetTimeStamp()
+{
+    // return (new Date().getTime());
+    var currentdate = new Date();
+    var datetime = "Last Sync: " + currentdate.getDate() + "/"
+        + (currentdate.getMonth()+1)  + "/"
+        + currentdate.getFullYear() + " @ "
+        + currentdate.getHours() + ":"
+        + currentdate.getMinutes() + ":"
+        + currentdate.getSeconds();
+    return datetime;
+}
+
+/********************* WEBGL *********************/
+function utilsBrowserSupportWebGl(){
+    if (window.WebGLRenderingContext)//check if browser supports WebGL
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
 }

@@ -35,6 +35,9 @@ var RootController = (function() {
             //alert('error in check id session');
             oController.onClickLogOut();
             utilsVexDialogAlertTop('error in check id session');
+            // oController.m_oConstantsService.logOut();
+            // oController.m_oState.go("home");
+            // oController.m_oState.go("home");
         });
 
         //if user is logged
@@ -205,6 +208,7 @@ var RootController = (function() {
             oController.m_oState.go("home");
         }).error(function (data,status) {
             utilsVexDialogAlertTop("Error in Logout");
+            // oController.m_oState.go("home");
         });
 
 

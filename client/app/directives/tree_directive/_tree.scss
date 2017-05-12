@@ -8,4 +8,9 @@
   max-height: $wasdi-heigth-panel;
   height: 100%;
   //min-height: 30%;
+
+  //overlay default jstree css
+  .vakata-context, .vakata-context ul {
+    z-index: 1002;
+  }
 }

@@ -24,9 +24,9 @@ service('SnapOperationService', ['$http',  'ConstantsService', function ($http, 
     };
 
     /************************************ GEOMETRIC OPERATIONS ************************************/
-    this.TerrainCorrection = function (sSourceProductName, sDestinationProductName, sWorkspaceId) {
+    this.RangeDopplerTerrainCorrection = function (sSourceProductName, sDestinationProductName, sWorkspaceId,oOptionsInput) {
 
-        return this.Operation("geometric/rangeDopplerTerrainCorrection", sSourceProductName, sDestinationProductName, sWorkspaceId);//terrain
+        return this.Operation("geometric/rangeDopplerTerrainCorrection", sSourceProductName, sDestinationProductName, sWorkspaceId,oOptionsInput);//terrain
     };
 
     /************************************ NDVI OPERATIONS ************************************/
@@ -37,6 +37,12 @@ service('SnapOperationService', ['$http',  'ConstantsService', function ($http, 
 
     this.Operation = function(sOperation, sSourceProductName, sDestinationProductName, sWorkspaceId, oOptionsInput)
     {
+        //DEBUG LOG
+        console.log("OPERATION: " + sOperation);
+        console.log("SOURCE PRODUCT NAME: " + sSourceProductName);
+        console.log("DESTINATION PRODUCT NAME: " + sDestinationProductName);
+        console.log("WORKSPACE ID: " + sWorkspaceId);
+        console.log("OPTIONS: " + JSON.stringify(oOptionsInput));
         // //'/snap/
         var sUrl = this.APIURL + '/processing/{sOperation}?sSourceProductName=' + sSourceProductName + '&sDestinationProductName=' + sDestinationProductName + '&sWorkspaceId=' + sWorkspaceId;
         //sUrl = sUrl.replace("{sOperation}", sOperation);

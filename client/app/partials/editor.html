@@ -6,11 +6,17 @@
         <div  class='animate-hide'  ng-hide="m_oController.isHiddenOperationMainBar();">
             <ul>
 
-                <li data-toggle="tooltip" data-placement="top" title="{{'EDITOR_TOOLTIP_ICON_RADAR'|translate}}"  ng-click="m_oController.hideOperationMainBar(); m_oController.showOperationRadarBar();" >
-                    <a class="icon-radar" href=""><i  aria-hidden="true"></i> </a>
+                <li   ng-click="m_oController.hideOperationMainBar(); m_oController.showOperationRadarBar();" ><!--data-toggle="tooltip" data-placement="top" title="{{'EDITOR_TOOLTIP_ICON_RADAR'|translate}}"-->
+                    <!--<a class="icon-radar" href=""><i  aria-hidden="true"></i> </a>-->
+                    <a href="" ><h4>{{'EDITOR_TOOLTIP_ICON_RADAR'|translate}}</h4></a>
                 </li>
-                <li data-toggle="tooltip" data-placement="top" title="{{'EDITOR_TOOLTIP_ICON_EYE'|translate}}"  ng-click="m_oController.hideOperationMainBar();m_oController.showOperationOpticalBar(); " >
-                    <a class="icon-eye" href=""><i  aria-hidden="true"></i></a>
+                <li   ng-click="m_oController.hideOperationMainBar();m_oController.showOperationOpticalBar(); " ><!--data-toggle="tooltip" data-placement="top" title="{{'EDITOR_TOOLTIP_ICON_EYE'|translate}}"-->
+                    <!--<a class="icon-eye" href=""><i  aria-hidden="true"></i></a>-->
+                    <a href="" ><h4>{{'EDITOR_TOOLTIP_ICON_EYE'|translate}}</h4></a>
+                </li>
+                <li  ng-click="m_oController.hideOperationMainBar();m_oController.showOperationProcessor(); " >
+                    <!--<a class="icon-eye" href=""><i  aria-hidden="true"></i></a>-->
+                    <a href="" ><h4>{{'EDITOR_OPERATION_TITLE_APPLY_RADIOMETRIC_PROCESSOR'|translate}}</h4></a>
                 </li>
 
                 <!--<li data-toggle="tooltip" data-placement="top" title="Coming soon" style="cursor:no-drop;">-->
@@ -29,33 +35,46 @@
                 <!--<li ng-click="m_oController.openMergeDialog()">-->
                 <!--<a class="icon"><img src="assets/icons/iconMIDA.svg"></a>-->
                 <!--</li>-->
-                <li ng-click="m_oController.openMergeDialog();" ng-init="m_oController.m_sSrc='assets/icons/iconMIDA.svg' "
-                    ng-mouseover="m_oController.m_sSrc='assets/icons/iconMIDA_White.svg' " ng-mouseleave="m_oController.m_sSrc='assets/icons/iconMIDA.svg' ">
-                    <!--<a class="icon"><img src="assets/icons/iconMIDA_White.svg"></a>-->
-                    <a class="icon" href=""><img src="{{m_oController.m_sSrc}}"></a>
-                </li>
+
 
             </ul>
+        </div>
+
+        <!--PROCESSOR-->
+        <div  class='animate-hide' ng-hide="m_oController.isHiddenProcessorBar();">
+            <ul>
+                <li ng-click="m_oController.openMergeDialog();" ng-init="m_oController.m_sSrc='assets/icons/iconMIDA.svg' "
+                    ng-mouseover="m_oController.m_sSrc='assets/icons/iconMIDA_White.svg' " ng-mouseleave="m_oController.m_sSrc='assets/icons/iconMIDA.svg' ">
+                    <!--<a class="icon" href=""><img src="{{m_oController.m_sSrc}}"></a>-->
+                    <a href="" ><h4>{{"EDITOR_OPERATION_TITLE_MIDA"|translate}}</h4></a>
+                </li>
+
+                <li data-toggle="tooltip" data-placement="top" title="{{'EDITOR_TOOLTIP_ICON_ARROW_BACK'|translate}}"  ng-click="m_oController.hideProcessorBar(); m_oController.showOperationMainBar(); " >
+                    <a href=""><i class="fa fa-arrow-left fa-3x" aria-hidden="true"></i></a>
+                </li>
+            </ul>
+
         </div>
 
         <!--RADAR BAR-->
         <div  class='animate-hide'  ng-hide="m_oController.isHiddenOperationRadarBar();">
             <ul>
-                <li data-toggle="tooltip" data-placement="top" title="{{'EDITOR_TOOLTIP_ICON_ARROW_BACK'|translate}}"  ng-click="m_oController.hideOperationRadarBar(); m_oController.showOperationMainBar(); " >
-                    <a href=""><i class="fa fa-arrow-left fa-3x" aria-hidden="true"></i></a>
-                </li>
+
 
                 <li ng-click="m_oController.openApplyOrbitDialog();" >
-                    <a href="" ><h4>Apply Orbit</h4></a>
+                    <a href="" ><h4>{{"EDITOR_OPERATION_TITLE_APPLY_ORBIT"|translate}}</h4></a>
                 </li>
                 <li ng-click="m_oController.openMultilookingDialog();" >
-                    <a href=""><h4>Multilooking</h4></a>
+                    <a href=""><h4>{{"EDITOR_OPERATION_TITLE_APPLY_MULTILOOKING"|translate}}</h4></a>
                 </li>
                 <li ng-click="m_oController.openRadiometricCalibrationDialog();" >
-                    <a href=""><h4>Radiometric Calibrate</h4></a>
+                    <a href=""><h4>{{"EDITOR_OPERATION_TITLE_APPLY_RADIOMETRIC_CALIBRATE"|translate}}</h4></a>
                 </li>
                 <li ng-click="m_oController.rangeDopplerTerrainCorrectionDialog();" >
-                    <a href=""><h4>Range Doppler Terrain Correction</h4></a>
+                    <a href=""><h4>{{"EDITOR_OPERATION_TITLE_APPLY_RADIOMETRIC_RANGE_DOPPLER_TERRAIN_CORRECTION"|translate}}</h4></a>
+                </li>
+                <li data-toggle="tooltip" data-placement="top" title="{{'EDITOR_TOOLTIP_ICON_ARROW_BACK'|translate}}"  ng-click="m_oController.hideOperationRadarBar(); m_oController.showOperationMainBar(); " >
+                    <a href=""><i class="fa fa-arrow-left fa-3x" aria-hidden="true"></i></a>
                 </li>
             </ul>
         </div>
@@ -64,11 +83,11 @@
         <div  class='animate-hide'  ng-hide="m_oController.isHiddenOperationOpticalBar();">
             <ul>
 
+                <li ng-click="m_oController.openNDVIDialog();" >
+                    <a href=""><h4>{{"EDITOR_OPERATION_TITLE_APPLY_RADIOMETRIC_NDVI"|translate}}</h4></a>
+                </li>
                 <li data-toggle="tooltip" data-placement="top" title="{{'EDITOR_TOOLTIP_ICON_ARROW_BACK'|translate}}"  ng-click="m_oController.hideOperationOpticalBar(); m_oController.showOperationMainBar(); " >
                     <a href=""><i class="fa fa-arrow-left fa-3x" aria-hidden="true"></i></a>
-                </li>
-                <li ng-click="m_oController.openNDVIDialog();" >
-                    <a href=""><h4>NDVI</h4></a>
                 </li>
             </ul>
         </div>
@@ -133,51 +152,61 @@
     <div class="col-lg-8 col-md-8 col-sm-8 col-xs-12 map-column" >
         <div class="map-container">
             <div class="btn-group" role="group" >
+                <!-- Visualize map -->
+                <button type="button" class="btn btn-default btn-switch-geographic" ng-click="m_oController.addOrRemoveMapLayer()"  data-toggle="tooltip"
+                        data-placement="bottom"  title="{{'EDITOR_TOOLTIP_TO_GEO'|translate}}"
+                        ng-disabled="m_oController.m_b2DMapModeOn == false && m_oController.m_b3DMapModeOn == true ">
+                    <!--<i class="fa fa-sticky-note " aria-hidden="true"></i>-->
+                    <i></i>
+                </button>
                 <!-- 2D map button-->
                 <button type="button" class="btn btn-default" ng-click="m_oController.m_oMapService.getHome();"  data-toggle="tooltip"
                         data-placement="bottom"  title="{{'EDITOR_TOOLTIP_HOME'|translate}}"
-                        ng-show="m_oController.m_b2DMapModeOn == true && m_oController.m_b3DMapModeOn == false && m_oController.m_bIsVisibleMapOfLeaflet == true">
+                        ng-show="m_oController.m_b2DMapModeOn == true && m_oController.m_b3DMapModeOn == false " ng-disabled="m_oController.m_bIsVisibleMapOfLeaflet == false">
                     <i class="fa fa-home fa-lg" aria-hidden="true"></i>
                 </button>
                 <!-- 2D map button-->
                 <button type="button" class="btn btn-default" ng-click="m_oController.synchronize2DMap();"  data-toggle="tooltip"
                         data-placement="bottom"  title="{{'EDITOR_TOOLTIP_SYNCHRONIZE_MAP_2D'|translate}}"
-                        ng-show="m_oController.m_b2DMapModeOn == true && m_oController.m_b3DMapModeOn == false && m_oController.m_bIsVisibleMapOfLeaflet == true">
+                        ng-show="m_oController.m_b2DMapModeOn == true && m_oController.m_b3DMapModeOn == false " ng-disabled=" m_oController.m_bIsVisibleMapOfLeaflet == false">
                     <i class="fa fa-location-arrow" aria-hidden="true"></i>
                 </button>
 
                 <!-- 3D map button-->
                 <button type="button" class="btn btn-default" ng-click="m_oController.m_oGlobeService.goHome()"  data-toggle="tooltip"
                         data-placement="bottom"  title="{{'EDITOR_TOOLTIP_HOME'|translate}}"
-                        ng-show="m_oController.m_b2DMapModeOn == false && m_oController.m_b3DMapModeOn == true && m_oController.m_bIsVisibleMapOfLeaflet == true">
+                        ng-show="m_oController.m_b2DMapModeOn == false && m_oController.m_b3DMapModeOn == true " ng-disabled=" m_oController.m_bIsVisibleMapOfLeaflet == false">
                     <i class="fa fa-home fa-lg" aria-hidden="true"></i>
                 </button>
                 <!-- 3D map button-->
                 <button type="button" class="btn btn-default" ng-click="m_oController.synchronize3DMap();"  data-toggle="tooltip"
                         data-placement="bottom"  title="{{'EDITOR_TOOLTIP_SYNCHRONIZE_MAP_3D'|translate}}"
-                        ng-show="m_oController.m_b2DMapModeOn == false && m_oController.m_b3DMapModeOn == true && m_oController.m_bIsVisibleMapOfLeaflet == true">
+                        ng-show="m_oController.m_b2DMapModeOn == false && m_oController.m_b3DMapModeOn == true " ng-disabled=" m_oController.m_bIsVisibleMapOfLeaflet == false">
                     <i class="fa fa-location-arrow" aria-hidden="true"></i>
                 </button>
 
-                <button type="button" class="btn btn-default" ng-click="m_oController.addOrRemoveMapLayer()"  data-toggle="tooltip"
-                        data-placement="bottom"  title="{{'EDITOR_TOOLTIP_DELETE_ADD_LAYER_MAP'|translate}}"
-                        ng-hide="m_oController.m_b2DMapModeOn == false && m_oController.m_b3DMapModeOn == true && m_oController.m_bIsVisibleMapOfLeaflet == true">
-                    <i class="fa fa-sticky-note" aria-hidden="true"></i>
-                </button>
+
                 <!-- BOTH -->
                 <button type="button" class="btn btn-default" ng-click="m_oController.openGetCapabilitiesDialog()"  data-toggle="tooltip"
                         data-placement="bottom"  title="{{'EDITOR_TOOLTIP_GET_CAPABILITIES'|translate}}"
-                        ng-hide="m_oController.m_b2DMapModeOn == false && m_oController.m_b3DMapModeOn == true && m_oController.m_bIsVisibleMapOfLeaflet == true">
+                        ng-disabled="m_oController.m_b2DMapModeOn == false && m_oController.m_b3DMapModeOn == true" >
                     <i class="fa fa-server" aria-hidden="true"></i>
                 </button>
 
                 <button type="button" class="btn btn-default" ng-click="m_oController.hideOrShowPixelInfo()"  data-toggle="tooltip"
                         data-placement="bottom"  title="Show/hide pixel info"
-                        ng-hide="m_oController.m_b2DMapModeOn == false && m_oController.m_b3DMapModeOn == true ">
+                        ng-disabled="m_oController.m_b2DMapModeOn == false && m_oController.m_b3DMapModeOn == true ">
                     <i class="fa fa-info-circle" aria-hidden="true"></i>
                 </button>
 
             </div>
+
+            <!--&lt;!&ndash; Visualize map &ndash;&gt;-->
+            <!--<button type="button" class="btn btn-default btn-switch-map" ng-click="m_oController.addOrRemoveMapLayer()"  data-toggle="tooltip"-->
+                    <!--data-placement="bottom"  title="{{'EDITOR_TOOLTIP_DELETE_ADD_LAYER_MAP'|translate}}"-->
+                    <!--ng-disabled="m_oController.m_b2DMapModeOn == false && m_oController.m_b3DMapModeOn == true " >-->
+                <!--<i class="fa fa-sticky-note fa-2x" aria-hidden="true"></i>-->
+            <!--</button>-->
 
             <!-- 2D map -->
             <div class="map" id = "wasdiMap"  ng-show="m_oController.m_b2DMapModeOn == true && m_oController.m_b3DMapModeOn == false"></div>

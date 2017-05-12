@@ -38,7 +38,7 @@
                                         </button>
 
                                         <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu2">
-                                            <li role="presentation" ng-repeat="orbitState in m_oController.m_asOrbitStateVectors" ng-click="m_oController.m_sSelectedOrbitStateVectors = orbitState"><a role="menuitem" tabindex="-1" href="">{{orbitState}}</a></li>
+                                            <li role="presentation" ng-repeat="orbitState in m_oController.getOrbitStateVector()" ng-click="m_oController.m_sSelectedOrbitStateVectors = orbitState"><a role="menuitem" tabindex="-1" href="">{{orbitState}}</a></li>
                                         </ul>
 
                                     </div>

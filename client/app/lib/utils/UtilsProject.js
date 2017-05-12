@@ -65,7 +65,7 @@
  ]
 
  i must convert it in this format
- {
+    {
     orbitType:"Sentinel Precise (Auto Download)"
     polyDegree:3,
     continueOnFail:false,
@@ -89,8 +89,55 @@ function utilsProjectConvertJSONFromServerInOptions(oJSONInput)
         }
         else
         {
-            oNewObjectOutput[oJSONInput[iIndexParameter].field] = oJSONInput[iIndexParameter].defaultValue;//create
+            switch(oJSONInput[iIndexParameter].defaultValue)
+            {
+                case "true":oNewObjectOutput[oJSONInput[iIndexParameter].field] = true;//convert string in boolean
+                            break;
+                case "false":oNewObjectOutput[oJSONInput[iIndexParameter].field] = false;//convert string in boolean
+                            break;
+                default: oNewObjectOutput[oJSONInput[iIndexParameter].field] = oJSONInput[iIndexParameter].defaultValue;
+            }
+
+
+                //create
+            // if(oJSONInput[iIndexParameter].valueSet.length !== 0)// if it's an array of values, set the default value as first one
+            // {
+            //     var aMyValueSet = [];
+            //  }
+            // else
+            // {
+                // no array
+                // oNewObjectOutput[oJSONInput[iIndexParameter].field] = oJSONInput[iIndexParameter].defaultValue;//create
+            // }
         }
     }
     return oNewObjectOutput;
+}
+
+function utilsProjectGetArrayOfValuesForParameterInOperation(oJSONInput,sProperty)
+{
+    if( utilsIsObjectNullOrUndefined(oJSONInput) === true ) {
+        return null;
+    }
+    var iNumberOfParameters = oJSONInput.length;
+    if( iNumberOfParameters === 0)
+        return null;
+    if(utilsIsObjectNullOrUndefined(sProperty) === true)
+        return null;
+
+    var oReturnArray = [];
+    for(var iIndexParameter = 0; iIndexParameter < iNumberOfParameters; iIndexParameter++ )
+    {
+        // if field === sProperty
+        if( ( utilsIsObjectNullOrUndefined(oJSONInput[iIndexParameter]) === false )&&(utilsIsObjectNullOrUndefined(oJSONInput[iIndexParameter].field) === false)
+                                                                                 &&(oJSONInput[iIndexParameter].field === sProperty) )
+        {
+
+            if(oJSONInput[iIndexParameter].valueSet.length !== 0)
+            {
+                // if valueSet isn't empty
+                return oJSONInput[iIndexParameter].valueSet;
+            }
+        }
+    }
 }
