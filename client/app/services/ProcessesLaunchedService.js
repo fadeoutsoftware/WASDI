@@ -28,7 +28,7 @@ service('ProcessesLaunchedService', ['ConstantsService','$rootScope','$http', fu
                 if(!utilsIsObjectNullOrUndefined(data))
                 {
                     oController.m_aoProcessesRunning = data;
-                    oController.updateProcessesBar();
+                    // oController.updateProcessesBar();Aggiungere update della lista dei processi
                 }
             })
             .error(function (data,status)
@@ -37,6 +37,23 @@ service('ProcessesLaunchedService', ['ConstantsService','$rootScope','$http', fu
             });
     }
 
+    this.removeProcessInServer = function(sPidInput)
+    {
+        if(utilsIsObjectNullOrUndefined(sPidInput)===true)
+            return false;
+
+        var oController = this;
+        this.m_oHttp.get(this.APIURL + '/process/delete?sProcessObjId=' + sPidInput)// /ws/processbyws = /process/byws
+            .success(function (data, status)
+            {
+                oController.loadProcessesFromServer()
+            })
+            .error(function (data,status)
+            {
+                utilsVexDialogAlertTop("Error: impossible kill the process Pid: "+sPidInput);
+            });
+        return true;
+    }
     /****************************************************/
 
     ///*LOCAL STORAGE METHODS */

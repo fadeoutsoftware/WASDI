@@ -25,6 +25,8 @@ var EditorController = (function () {
         this.m_bIsVisibleMapOfLeaflet = false;
         this.m_oModalService = oModalService;
 
+        this.m_sClassBtnSwitchGeographic = "btn-switch-not-geographic";
+
         this.m_oAreHideBars = {
             mainBar:false,
             radarBar:true,
@@ -1678,6 +1680,9 @@ var EditorController = (function () {
         }).then(function (modal) {
             modal.element.modal();
             modal.close.then(function (result) {
+                if(utilsIsObjectNullOrUndefined(result)===true)
+                    return false;
+                //TODO ADD FILENAME = RESULT
                 oController.m_oScope.Result = result;
             });
         });
@@ -1775,7 +1780,14 @@ var EditorController = (function () {
         return this.m_oAreHideBars.opticalBar;
     };
 
-
+    /***************** CSS CHANGE ****************/
+    EditorController.prototype.changeClassBtnSwitchGeographic = function()
+    {
+        if(this.m_sClassBtnSwitchGeographic === "btn-switch-not-geographic"  )
+            this.m_sClassBtnSwitchGeographic = "btn-switch-geographic";
+        else
+            this.m_sClassBtnSwitchGeographic = "btn-switch-not-geographic";
+    }
     EditorController.$inject = [
         '$scope',
         '$location',
