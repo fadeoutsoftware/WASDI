@@ -25,6 +25,7 @@ import wasdi.shared.data.ProductWorkspaceRepository;
 import wasdi.shared.data.PublishedBandsRepository;
 import wasdi.shared.geoserver.GeoserverMethods;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.viewmodels.MetadataViewModel;
 import wasdi.shared.viewmodels.PrimitiveResult;
 import wasdi.shared.viewmodels.ProductViewModel;
 
@@ -91,7 +92,36 @@ public class ProductResource {
 			return null;
 		}
 	}
+	
+	
 
+	@GET
+	@Path("metadatabyname")
+	@Produces({"application/xml", "application/json", "text/xml"})	
+	public MetadataViewModel GetMetadataByProductName(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sProductName") String sProductName) {
+
+		// Validate Session
+		User oUser = Wasdi.GetUserFromSession(sSessionId);
+		if (oUser == null) return null;
+		if (Utils.isNullOrEmpty(oUser.getUserId())) return null;
+
+		// Read the product from db
+		DownloadedFilesRepository oDownloadedFilesRepository = new DownloadedFilesRepository();
+		DownloadedFile oDownloadedFile = oDownloadedFilesRepository.GetDownloadedFile(sProductName);
+
+		if (oDownloadedFile != null) {
+			if (oDownloadedFile.getProductViewModel() != null) {
+				// Ok read
+				return oDownloadedFile.getProductViewModel().getMetadata();
+				
+			}
+		}
+		
+		// There was a problem
+		return null;
+	}
+	
+	
 
 	@GET
 	@Path("/byws")

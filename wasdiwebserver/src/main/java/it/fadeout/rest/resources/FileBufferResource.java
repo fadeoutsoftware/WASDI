@@ -121,6 +121,7 @@ public class FileBufferResource {
 				oProcess.setProductName(sFileUrl);
 				oProcess.setWorkspaceId(sWorkspaceId);
 				oProcess.setUserId(sUserId);
+				oProcess.setProcessObjId(Utils.GetRandomName());
 				sProcessId = oRepository.InsertProcessWorkspace(oProcess);
 				//set the process object Id to params
 				oParameter.setProcessObjId(sProcessId);
@@ -145,7 +146,7 @@ public class FileBufferResource {
 			//Update process
 			if (oProc != null)
 			{
-				int iPID = getPIDProcess(oProc);
+				int iPID = Wasdi.getPIDProcess(oProc);
 				if (!Utils.isNullOrEmpty(sProcessId))
 				{
 					oProcess.setPid(iPID);
@@ -194,6 +195,7 @@ public class FileBufferResource {
 				oProcess.setProductName(sFileUrl);
 				oProcess.setWorkspaceId(sWorkspaceId);
 				oProcess.setUserId(sUserId);
+				oProcess.setProcessObjId(Utils.GetRandomName());
 				sProcessId = oRepository.InsertProcessWorkspace(oProcess);
 			}
 			catch(Exception oEx){
@@ -226,7 +228,7 @@ public class FileBufferResource {
 			//Update process
 			if (oProc != null)
 			{
-				int iPID = getPIDProcess(oProc);
+				int iPID = Wasdi.getPIDProcess(oProc);
 				if (!Utils.isNullOrEmpty(sProcessId))
 				{
 					oProcess.setPid(iPID);
@@ -293,6 +295,7 @@ public class FileBufferResource {
 				oProcess.setProductName(sFileUrl);
 				oProcess.setWorkspaceId(sWorkspaceId);
 				oProcess.setUserId(oUser.getUserId());
+				oProcess.setProcessObjId(Utils.GetRandomName());
 				sProcessId = oRepository.InsertProcessWorkspace(oProcess);
 			}
 			catch(Exception oEx){
@@ -329,7 +332,7 @@ public class FileBufferResource {
 			//Update process
 			if (oProc != null)
 			{
-				int iPID = getPIDProcess(oProc);
+				int iPID = Wasdi.getPIDProcess(oProc);
 				if (!Utils.isNullOrEmpty(sProcessId))
 				{
 					oProcess.setPid(iPID);
@@ -353,6 +356,7 @@ public class FileBufferResource {
 
 	}
 	
+/*	Paolo: dovrebbero essere obsolete. La cancellazione è nel ProcessWorkspaceResource
 	@GET
 	@Path("kill")
 	@Produces({"application/xml", "application/json", "text/xml"})
@@ -381,25 +385,7 @@ public class FileBufferResource {
 
 	}
 	
+	*/
 	
-	
-	private Integer getPIDProcess(Process oProc)
-	{
-		Integer oPID = null;
-		
-		if(oProc.getClass().getName().equals("java.lang.UNIXProcess")) {
-			/* get the PID on unix/linux systems */
-			try {
-				Field oField = oProc.getClass().getDeclaredField("pid");
-				oField.setAccessible(true);
-				oPID = oField.getInt(oProc);
-				System.out.println("DownloadResource.DownloadAndPublish: PID " + oPID);
-			} catch (Throwable e) {
-				System.out.println("DownloadResource.DownloadAndPublish: Error getting PID " + e.getMessage());
-			}
-		}
-		
-		return oPID;
-	}
 
 }

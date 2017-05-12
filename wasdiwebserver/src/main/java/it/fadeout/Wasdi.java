@@ -1,5 +1,6 @@
 package it.fadeout;
 
+import java.lang.reflect.Field;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashSet;
@@ -122,6 +123,25 @@ public class Wasdi extends Application {
 			
 		}		
 	}
+	
+	public static Integer getPIDProcess(Process oProc)
+	{
+		Integer oPID = null;
+		
+		if(oProc.getClass().getName().equals("java.lang.UNIXProcess")) {
+			// get the PID on unix/linux systems
+			try {
+				Field oField = oProc.getClass().getDeclaredField("pid");
+				oField.setAccessible(true);
+				oPID = oField.getInt(oProc);
+				System.out.println("DownloadResource.DownloadAndPublish: PID " + oPID);
+			} catch (Throwable e) {
+				System.out.println("DownloadResource.DownloadAndPublish: Error getting PID " + e.getMessage());
+			}
+		}
+		
+		return oPID;
+	}	
 	
 	
 }

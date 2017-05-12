@@ -3,11 +3,13 @@ package it.fadeout.rest.resources;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.servlet.ServletConfig;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 
 import it.fadeout.Wasdi;
@@ -20,6 +22,9 @@ import wasdi.shared.viewmodels.ProcessWorkspaceViewModel;
 
 @Path("/process")
 public class ProcessWorkspaceResource {
+	
+	@Context
+	ServletConfig m_oServletConfig;	
 	
 	@GET
 	@Path("/byws")
@@ -59,6 +64,7 @@ public class ProcessWorkspaceResource {
 				oViewModel.setUserId(oProcess.getUserId());
 				oViewModel.setFileSize(oProcess.getFileSize());
 				oViewModel.setPid(oProcess.getPid());
+				oViewModel.setProcessObjId(oProcess.getProcessObjId());
 
 				aoProcessList.add(oViewModel);
 
@@ -76,37 +82,47 @@ public class ProcessWorkspaceResource {
 	@GET
 	@Path("/delete")
 	@Produces({"application/xml", "application/json", "text/xml"})
-	public Response DeleteProcess(@HeaderParam("x-session-token") String sSessionId, @QueryParam("iPid") Integer iPid) {
+	public Response DeleteProcess(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sProcessObjId") String sProcessObjId) {
 
 		User oUser = Wasdi.GetUserFromSession(sSessionId);
-
-		Response oReturnValue = null;
 
 		try {
 			// Domain Check
 			if (oUser == null) {
-				return oReturnValue;
+				return Response.status(401).build();
 			}
 			if (Utils.isNullOrEmpty(oUser.getUserId())) {
-				return oReturnValue;
+				return Response.status(401).build();
 			}
 
 			// Create repo
 			ProcessWorkspaceRepository oRepository = new ProcessWorkspaceRepository();
+			ProcessWorkspace oProcessToDelete = oRepository.GetProcessByProcessObjId(sProcessObjId);
 			
-			if (iPid != null && oRepository.ExistsPidProcessWorkspace(iPid))
+			if (oProcessToDelete != null)
 			{
+				
+				int iPid = oProcessToDelete.getPid();
+				
 				// Exists Pid, kill process
-				String sShellExString = "kill -9 " + iPid;
+				String sShellExString = m_oServletConfig.getInitParameter("KillCommand") + iPid;
+				
 				System.out.println("ProcessWorkspaceResource.DeleteProcess: shell exec " + sShellExString);
+				
 				Process oProc = Runtime.getRuntime().exec(sShellExString);
 
 				//delete process on database
 				if (oRepository.DeleteProcessWorkspaceByPid(iPid))
 				{
-					oReturnValue = Response.ok().build();
+					return Response.ok().build();
+				}
+				else {
+					return Response.status(400).build();
 				}
 				
+			}
+			else {
+				return Response.status(400).build();
 			}
 						
 		}
@@ -115,7 +131,7 @@ public class ProcessWorkspaceResource {
 			oEx.printStackTrace();
 		}
 
-		return oReturnValue;
+		return Response.status(500).build();
 	}
 
 	
