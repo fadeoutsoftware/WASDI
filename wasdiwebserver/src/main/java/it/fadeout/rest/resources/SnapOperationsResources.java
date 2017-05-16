@@ -98,7 +98,7 @@ public class SnapOperationsResources {
 
 	@GET
 	@Path("parameters")
-	@Produces({"application/xml", "application/json", "text/xml"})
+	@Produces({"application/json"})
 	public SnapOperatorParameterViewModel[] OperatorParameters(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sOperation") String sOperation) throws IOException
 	{
 		ArrayList<SnapOperatorParameterViewModel> oChoices = new ArrayList<SnapOperatorParameterViewModel>();
@@ -107,6 +107,11 @@ public class SnapOperationsResources {
 		
 		Field[] aoOperatorFields = oOperatorClass.getDeclaredFields();
     	for (Field oOperatorField : aoOperatorFields) {
+    		
+    		if (oOperatorField.getName().equals("mapProjection")) {
+    			System.out.println("ciao");
+    		}
+    		
 			Annotation[] aoAnnotations = oOperatorField.getAnnotations();			
 			for (Annotation oAnnotation : aoAnnotations) {
 				
