@@ -447,70 +447,70 @@ public class LauncherMain {
      * @param sOperation Operation Done
      * @param sBBox Bounding Box
      */
-    private void ConvertProductToViewModelAndSendToRabbit(ProductViewModel oVM, String sFileName, String sWorkspace, String sExchange, String sOperation, String sBBox)
+    private void ConvertProductToViewModelAndSendToRabbit(ProductViewModel oVM, String sFileName, String sWorkspace, String sExchange, String sOperation, String sBBox) throws Exception
     {
         Send oSendToRabbit = new Send();
-        try {
-            s_oLogger.debug("LauncherMain.ConvertProductToViewModelAndSendToRabbit: File Name = " + sFileName);
+//        try {
+        s_oLogger.debug("LauncherMain.ConvertProductToViewModelAndSendToRabbit: File Name = " + sFileName);
 
-            // Get The product view Model            
-            if (oVM == null) {
-	            ReadProduct oReadProduct = new ReadProduct();
-	            s_oLogger.debug("LauncherMain.ConvertProductToViewModelAndSendToRabbit: call read product");
-	            File oProductFile = new File(sFileName);
-	            oVM = oReadProduct.getProductViewModel(new File(sFileName));
-	            oVM.setMetadata(oReadProduct.getProductMetadataViewModel(oProductFile));
+        // Get The product view Model            
+        if (oVM == null) {
+            ReadProduct oReadProduct = new ReadProduct();
+            s_oLogger.debug("LauncherMain.ConvertProductToViewModelAndSendToRabbit: call read product");
+            File oProductFile = new File(sFileName);
+            oVM = oReadProduct.getProductViewModel(new File(sFileName));
+            oVM.setMetadata(oReadProduct.getProductMetadataViewModel(oProductFile));
 
-	            if (oVM.getBandsGroups() == null) {
-	            	s_oLogger.debug("LauncherMain.ConvertProductToViewModelAndSendToRabbit: Band Groups is NULL");
-	            } else if (oVM.getBandsGroups().getBands() == null) {
-	            	s_oLogger.debug("LauncherMain.ConvertProductToViewModelAndSendToRabbit: bands is NULL");
-	            } else {
-	                s_oLogger.debug("LauncherMain.ConvertProductToViewModelAndSendToRabbit: bands " + oVM.getBandsGroups().getBands().size());
-	            }
-	
-	            s_oLogger.debug("LauncherMain.ConvertProductToViewModelAndSendToRabbit: done read product");
+            if (oVM.getBandsGroups() == null) {
+            	s_oLogger.debug("LauncherMain.ConvertProductToViewModelAndSendToRabbit: Band Groups is NULL");
+            } else if (oVM.getBandsGroups().getBands() == null) {
+            	s_oLogger.debug("LauncherMain.ConvertProductToViewModelAndSendToRabbit: bands is NULL");
+            } else {
+                s_oLogger.debug("LauncherMain.ConvertProductToViewModelAndSendToRabbit: bands " + oVM.getBandsGroups().getBands().size());
             }
-            
-            
-            // P.Campanella 12/05/2017: it looks it is done before. Let leave here a check
-            DownloadedFilesRepository oDownloadedRepo = new DownloadedFilesRepository();
-            
-            DownloadedFile oCheck = oDownloadedRepo.GetDownloadedFile(oVM.getFileName());
-            
-            if (oCheck == null) {
-            	s_oLogger.debug("Insert in db");
-            	
-                // Save it in the register
-                DownloadedFile oAlreadyDownloaded = new DownloadedFile();
-                File oFile = new File(sFileName);
-                oAlreadyDownloaded.setFileName(oFile.getName());
-                oAlreadyDownloaded.setFilePath(sFileName);
-                oAlreadyDownloaded.setProductViewModel(oVM);
-                oAlreadyDownloaded.setBoundingBox(sBBox);
-                
-                oDownloadedRepo.InsertDownloadedFile(oAlreadyDownloaded);            	
-            }
-            
 
-            s_oLogger.debug("OK DONE");
-
-            s_oLogger.debug("LauncherMain.ConvertProductToViewModelAndSendToRabbit: Image downloaded. Send Rabbit Message");
-
-            s_oLogger.debug("LauncherMain.ConvertProductToViewModelAndSendToRabbit: Exchange = " + sExchange);
-            
-            //P.Campanella 12/05/2017: Metadata are saved in the DB but sent back to the client with a dedicated API. 
-            // So here metadata are nulled
-            oVM.setMetadata(null);
-
-            oSendToRabbit.SendRabbitMessage(true,sOperation,sWorkspace,oVM,sExchange);
-            
+            s_oLogger.debug("LauncherMain.ConvertProductToViewModelAndSendToRabbit: done read product");
         }
-        catch(Exception oEx)
-        {
-            s_oLogger.error(oEx.toString());
-            oEx.printStackTrace();
+        
+        
+        // P.Campanella 12/05/2017: it looks it is done before. Let leave here a check
+        DownloadedFilesRepository oDownloadedRepo = new DownloadedFilesRepository();
+        
+        DownloadedFile oCheck = oDownloadedRepo.GetDownloadedFile(oVM.getFileName());
+        
+        if (oCheck == null) {
+        	s_oLogger.debug("Insert in db");
+        	
+            // Save it in the register
+            DownloadedFile oAlreadyDownloaded = new DownloadedFile();
+            File oFile = new File(sFileName);
+            oAlreadyDownloaded.setFileName(oFile.getName());
+            oAlreadyDownloaded.setFilePath(sFileName);
+            oAlreadyDownloaded.setProductViewModel(oVM);
+            oAlreadyDownloaded.setBoundingBox(sBBox);
+            
+            oDownloadedRepo.InsertDownloadedFile(oAlreadyDownloaded);            	
         }
+        
+
+        s_oLogger.debug("OK DONE");
+
+        s_oLogger.debug("LauncherMain.ConvertProductToViewModelAndSendToRabbit: Image downloaded. Send Rabbit Message");
+
+        s_oLogger.debug("LauncherMain.ConvertProductToViewModelAndSendToRabbit: Exchange = " + sExchange);
+        
+        //P.Campanella 12/05/2017: Metadata are saved in the DB but sent back to the client with a dedicated API. 
+        // So here metadata are nulled
+        oVM.setMetadata(null);
+
+        oSendToRabbit.SendRabbitMessage(true,sOperation,sWorkspace,oVM,sExchange);
+            
+//        }
+//        catch(Exception oEx)
+//        {
+//            s_oLogger.error(oEx.toString());
+//            oEx.printStackTrace();
+//        }
     }
 
     /**
@@ -753,7 +753,7 @@ public class LauncherMain {
             File oOutputFile = new File(sOutputFilePath);
 
             
-            if (oSentinel.getProductType().startsWith("S2")) {
+            if (oSentinel.getProductType().startsWith("S2") && oSentinel.getProductReader().getClass().getName().startsWith("org.esa.s2tbx")) {
             	
             	s_oLogger.debug( "LauncherMain.PublishBandImage:  Managing S2 Product");
             	
@@ -767,7 +767,7 @@ public class LauncherMain {
 				
             } else {
             	
-            	s_oLogger.debug( "LauncherMain.PublishBandImage:  Managing S1 Product");
+            	s_oLogger.debug( "LauncherMain.PublishBandImage:  Managing NON S2 Product");
             	
                 s_oLogger.debug( "LauncherMain.PublishBandImage:  Get GeoCoding");
     			
