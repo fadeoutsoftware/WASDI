@@ -15,6 +15,9 @@ import static org.apache.commons.lang.SystemUtils.IS_OS_UNIX;
  * Created by p.campanella on 14/10/2016.
  */
 public class Utils {
+	
+	public static int m_iSessionValidityMinutes = 24*60;
+	
     public static boolean isNullOrEmpty(String sString) {
         if (sString == null) return true;
         if (sString.isEmpty()) return  true;
@@ -43,7 +46,7 @@ public class Utils {
         long lNow = new Date().getTime();
         long lLastTouch = oLastTouch.getTime();
 
-        if ((lNow-lLastTouch)> 24*60*60*1000) return  false;
+        if ((lNow-lLastTouch)> m_iSessionValidityMinutes*60*1000) return  false;
 
         return  true;
     }
