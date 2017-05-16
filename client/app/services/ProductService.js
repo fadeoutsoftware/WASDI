@@ -28,6 +28,8 @@ service('ProductService', ['$http',  'ConstantsService', function ($http, oConst
     this.updateProduct = function (oProductViewModel) {
         return this.m_oHttp.post(this.APIURL + '/product/update', oProductViewModel);
     }
-
+    this.getMetadata = function(sProductName){
+        return this.m_oHttp.get(this.APIURL+"/product/metadatabyname?sProductName="+sProductName);
+    }
 }]);
 

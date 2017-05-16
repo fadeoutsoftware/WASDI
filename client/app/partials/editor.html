@@ -155,10 +155,10 @@
             <div class="btn-group" role="group" >
                 <!-- Visualize map -->
                 <button type="button" class="btn btn-default " ng-class="m_oController.m_sClassBtnSwitchGeographic" ng-click="m_oController.addOrRemoveMapLayer();m_oController.changeClassBtnSwitchGeographic();"  data-toggle="tooltip"
-                        data-placement="bottom"  title="{{'EDITOR_TOOLTIP_TO_GEO'|translate}}"
-                        ng-disabled="m_oController.m_b2DMapModeOn == false && m_oController.m_b3DMapModeOn == true ">
+                        data-placement="bottom"  title="{{m_oController.m_sToolTipBtnSwitchGeographic|translate}}"
+                        ng-disabled="m_oController.m_b2DMapModeOn == false && m_oController.m_b3DMapModeOn == true "><!--{{'EDITOR_TOOLTIP_TO_GEO'|translate}}-->
                     <!--<i class="fa fa-sticky-note " aria-hidden="true"></i>-->
-                    <i></i>
+                    <!--<i></i>-->
                 </button>
                 <!-- 2D map button-->
                 <button type="button" class="btn btn-default" ng-click="m_oController.m_oMapService.getHome();"  data-toggle="tooltip"
@@ -222,6 +222,8 @@
 
 <script>
     $(function () {
-    $('[data-toggle="tooltip"]').tooltip()
+    $('[data-toggle="tooltip"]').tooltip({
+            trigger : 'hover'
+        })
     })
 </script>

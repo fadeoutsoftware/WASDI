@@ -38,11 +38,11 @@ service('SnapOperationService', ['$http',  'ConstantsService', function ($http, 
     this.Operation = function(sOperation, sSourceProductName, sDestinationProductName, sWorkspaceId, oOptionsInput)
     {
         //DEBUG LOG
-        console.log("OPERATION: " + sOperation);
-        console.log("SOURCE PRODUCT NAME: " + sSourceProductName);
-        console.log("DESTINATION PRODUCT NAME: " + sDestinationProductName);
-        console.log("WORKSPACE ID: " + sWorkspaceId);
-        console.log("OPTIONS: " + JSON.stringify(oOptionsInput));
+        // console.log("OPERATION: " + sOperation);
+        // console.log("SOURCE PRODUCT NAME: " + sSourceProductName);
+        // console.log("DESTINATION PRODUCT NAME: " + sDestinationProductName);
+        // console.log("WORKSPACE ID: " + sWorkspaceId);
+        // console.log("OPTIONS: " + JSON.stringify(oOptionsInput));
         // //'/snap/
         var sUrl = this.APIURL + '/processing/{sOperation}?sSourceProductName=' + sSourceProductName + '&sDestinationProductName=' + sDestinationProductName + '&sWorkspaceId=' + sWorkspaceId;
         //sUrl = sUrl.replace("{sOperation}", sOperation);

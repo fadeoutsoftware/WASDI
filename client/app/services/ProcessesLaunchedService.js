@@ -28,7 +28,7 @@ service('ProcessesLaunchedService', ['ConstantsService','$rootScope','$http', fu
                 if(!utilsIsObjectNullOrUndefined(data))
                 {
                     oController.m_aoProcessesRunning = data;
-                    // oController.updateProcessesBar();Aggiungere update della lista dei processi
+                    oController.updateProcessesBar();//Aggiungere update della lista dei processi
                 }
             })
             .error(function (data,status)
@@ -46,7 +46,7 @@ service('ProcessesLaunchedService', ['ConstantsService','$rootScope','$http', fu
         this.m_oHttp.get(this.APIURL + '/process/delete?sProcessObjId=' + sPidInput)// /ws/processbyws = /process/byws
             .success(function (data, status)
             {
-                oController.loadProcessesFromServer()
+                // oController.loadProcessesFromServer()
             })
             .error(function (data,status)
             {

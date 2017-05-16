@@ -163,7 +163,7 @@ var RootController = (function() {
             $scope.m_oController.m_aoProcessesRunning = [];
             $scope.m_oController.m_aoLogProcesses = [];
         });
-        /*COUNTDOWN METHODS*/
+        /*COUNTDOWN METHOD*/
 
         //this.time = 0;
 

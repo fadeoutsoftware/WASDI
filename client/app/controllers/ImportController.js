@@ -744,6 +744,7 @@ var ImportController = (function() {
                 var sTitle = aoLayers[iIndexLayers].title;
             else
                 var sTitle = aoLayers[iIndexLayers].title.content;
+
             //PUSH PRODUCT
             oController.m_aoProductsList.push(
                 {
@@ -754,13 +755,32 @@ var ImportController = (function() {
                     rectangle:oRectangle,
                     title:sTitle,
                     preview:oPreview,
-                    link:sLink
+                    link:sLink,
+                    relativeOrbit: oController.getRelativeOrbit(aoLayers[iIndexLayers].int),
                 });
         }
 
         //save open search params in service
         oController.m_oResultsOfSearchService.setProductList(oController.m_aoProductsList);
 
+    }
+
+    /*GetRelativeOrbit*/
+    ImportController.prototype.getRelativeOrbit = function (aArrayInput) {
+        if(utilsIsObjectNullOrUndefined(aArrayInput) === true)
+            return null;
+        var iLengthArray = aArrayInput.length;
+
+        for(var iIndexArray = 0 ; iIndexArray < iLengthArray; iIndexArray++)
+        {
+            //if there are property name & name == relativeorbitnumber
+            if( (utilsIsObjectNullOrUndefined(aArrayInput[iIndexArray].name)!== true ) && ( aArrayInput[iIndexArray].name ==="relativeorbitnumber"))
+            {
+                return aArrayInput[iIndexArray].content;//return relative orbit
+            }
+
+        }
+        return null;
     }
 
     /*Get Download link */
