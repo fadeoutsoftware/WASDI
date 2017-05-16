@@ -63,12 +63,23 @@ public class Wasdi extends Application {
 	
 	
 	@PostConstruct
-	public void initWasdi() {
+	public void initWasdi() {		
 		
-		if (m_oServletConfig.getInitParameter("DebugVersion").equalsIgnoreCase("true")) {
+		if (getInitParameter("DebugVersion", "false").equalsIgnoreCase("true")) {
 			s_bDebug = true;
 		}
+
+		try {
+			Utils.m_iSessionValidityMinutes = Integer.parseInt(getInitParameter("SessionValidityMinutes", ""+Utils.m_iSessionValidityMinutes));
+		} catch (NumberFormatException e) {
+			e.printStackTrace();
+		}
 		
+	}
+
+	private String getInitParameter(String sParmaneter, String sDefault) {		
+		String sParameterValue = m_oServletConfig.getInitParameter(sParmaneter);		
+		return sParameterValue==null ? sDefault : sParameterValue;
 	}
 	
 	public static String GetSerializationFileName()
