@@ -18,10 +18,12 @@
 
       .modal-body
       {
+        max-height:400px;
+        overflow: auto;
         .product-info-table
         {
-          overflow-y: scroll;
-          max-height:400px;
+          //overflow-y: scroll;
+
           table
           {
             text-align: center;

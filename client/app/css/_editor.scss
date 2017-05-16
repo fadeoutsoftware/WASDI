@@ -124,18 +124,22 @@
           background-position: center;
           //background-image: url("../assets/icons/pencil_24x24.png");
           //i{background-image: url("../assets/icons/mapBar/globe_white.svg");}
+          &:hover,&:active{
+            background-color: $wasdi-blue-logo;
+            //background-image: url("../assets/icons/mapBar/globe_green.svg");
+            background-image: url("../assets/icons/mapBar/map_route_green(NoGeoReference).svg");
+            background-size: 20px;
+            background-repeat: no-repeat;
+            background-position: center;
+
+            //background: url("../assets/icons/mapBar/globe_white.svg")left center no-repeat;;
+          }
         }
 
-        .btn-switch-geographic:hover
-        {
-          background-color: $wasdi-blue-logo;
-          //background-image: url("../assets/icons/mapBar/globe_green.svg");
-          background-image: url("../assets/icons/mapBar/map_route_green(NoGeoReference).svg");
-          background-size: 20px;
-          background-repeat: no-repeat;
-          background-position: center;
-            //background: url("../assets/icons/mapBar/globe_white.svg")left center no-repeat;;
-        }
+        //.btn-switch-geographic //hover
+        //{
+        //
+        //}
 
         .btn-switch-not-geographic
         {
@@ -145,19 +149,21 @@
           background-repeat: no-repeat;
           background-position: center;
           //background: url("../assets/icons/mapBar/globe_white.svg")left center no-repeat;;
-
+          &:hover,&:active {
+            background-color: $wasdi-blue-logo;
+            //background-image: url("../assets/icons/mapBar/map_route_green(NoGeoReference).svg");
+            background-image: url("../assets/icons/mapBar/globe_green.svg");
+            background-size: 20px;
+            background-repeat: no-repeat;
+            background-position: center;
+          }
         }
 
-        .btn-switch-not-geographic:hover
-        {
-          background-color: $wasdi-blue-logo;
-          //background-image: url("../assets/icons/mapBar/map_route_green(NoGeoReference).svg");
-          background-image: url("../assets/icons/mapBar/globe_green.svg");
-          background-size: 20px;
-          background-repeat: no-repeat;
-          background-position: center;
-          //background: url("../assets/icons/mapBar/globe_white.svg")left center no-repeat;;
-        }
+        //.btn-switch-not-geographic//hover
+        //{
+        //
+        //  //background: url("../assets/icons/mapBar/globe_white.svg")left center no-repeat;;
+        //}
 
       }
       //.btn-switch-map

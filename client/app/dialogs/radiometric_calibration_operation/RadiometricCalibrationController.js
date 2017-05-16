@@ -121,6 +121,7 @@ var RadiometricCalibrationController = (function() {
                 oController.m_oReturnValue.sourceFileName = oController.m_oSelectedProduct.fileName;
                 oController.m_oReturnValue.destinationFileName = oController.m_sFileName_Operation;
                 oController.m_oReturnValue.options.sourceBandNames = oController.m_asSourceBandsSelected;
+                oController.m_oReturnValue.options.selectedPolarisations = [];
                 oController.m_oReturnValue.options.auxFile = oController.m_sSelectedAuxiliaryFile;
                 // oController.m_oReturnValue.options.externalAuxFile = "";
             }

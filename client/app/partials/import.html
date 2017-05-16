@@ -23,15 +23,10 @@
                     <div id="coll-product-container" class="coll-product-container">
                         <div class="coll-product-list-container">
                             <div class=" coll-product-header">
-
-
-
                                 <div class="my-input-text col-lg-12 col-md-12 col-sm-12 col-xs-12">
                                     <input type="text" ng-model="m_oController.m_oModel.textQuery"
                                            id="coll-product-search" placeholder="Search..." ><!-- style="padding: 0px !important;"-->
                                 </div>
-
-
                             </div>
 
 
@@ -333,9 +328,21 @@
 
                                 <div>{{layer.summary.Date|date:'medium'}}</div><!--Date-->
                                 </br>
-                                <div>{{"layer"+layer.id}}</div>
-                                </br>
-                                <div>{{layer.title}}</div>
+
+                                <div>
+                                    <span>Mode: </span>
+                                    <span><b>{{layer.summary.Mode}}</b></span>
+                                </div>
+                                <div>
+                                    <span>Relative Orbit: </span>
+                                    <span><b>{{layer.relativeOrbit}}</b></span>
+                                </div>
+
+                                <!--<div>{{"layer"+layer.id}}</div>-->
+                                <div>
+                                    <span>Name: </span>
+                                    <span><b>{{layer.title}}</b></span>
+                                </div>
 
                             </td>
 

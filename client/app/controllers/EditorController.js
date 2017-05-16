@@ -25,8 +25,8 @@ var EditorController = (function () {
         this.m_bIsVisibleMapOfLeaflet = false;
         this.m_oModalService = oModalService;
 
+        this.m_sToolTipBtnSwitchGeographic="EDITOR_TOOLTIP_TO_GEO";
         this.m_sClassBtnSwitchGeographic = "btn-switch-not-geographic";
-
         this.m_oAreHideBars = {
             mainBar:false,
             radarBar:true,
@@ -772,6 +772,28 @@ var EditorController = (function () {
                                                         break;
                                                     }
 
+                                                }
+
+                                            }
+                                        }
+                                    },
+                                    "Test-Metadata": {
+                                        "label": "Test-Metadata ",
+                                        "icon":"fa fa-info",
+                                        "action": function (obj) {
+                                            //$node.original.fileName;
+                                            if( (utilsIsObjectNullOrUndefined($node.original.fileName) == false) && (utilsIsStrNullOrEmpty($node.original.fileName) == false) )
+                                            {
+                                                var iNumberOfProdcuts = oController.m_aoProducts.length;
+                                                for(var iIndexProduct = 0; iIndexProduct < iNumberOfProdcuts ; iIndexProduct++)
+                                                {
+                                                    oController.m_oProductService.getMetadata($node.original.fileName)
+                                                        .success(function (data) {
+                                                            //reload product list
+                                                            var test=data;
+                                                        }).error(function (error) {
+
+                                                    });
                                                 }
 
                                             }
@@ -1784,9 +1806,17 @@ var EditorController = (function () {
     EditorController.prototype.changeClassBtnSwitchGeographic = function()
     {
         if(this.m_sClassBtnSwitchGeographic === "btn-switch-not-geographic"  )
+        {
             this.m_sClassBtnSwitchGeographic = "btn-switch-geographic";
+            this.m_sToolTipBtnSwitchGeographic = "EDITOR_TOOLTIP_TO_EDITOR";
+        }
+
         else
+        {
             this.m_sClassBtnSwitchGeographic = "btn-switch-not-geographic";
+            this.m_sToolTipBtnSwitchGeographic = "EDITOR_TOOLTIP_TO_GEO";
+
+        }
     }
     EditorController.$inject = [
         '$scope',
