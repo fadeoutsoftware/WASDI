@@ -45,7 +45,7 @@ var EditorController = (function () {
         //this.m_aoProcessesRunning=[];
         // Array of products to show
         this.m_aoProducts = [];
-
+        this.m_bIsModeOnPixelInfo = false;
         // Here a Workpsace is needed... if it is null create a new one..
         this.m_oActiveWorkspace = this.m_oConstantsService.getActiveWorkspace();
         this.m_oUser = this.m_oConstantsService.getUser();
@@ -785,20 +785,23 @@ var EditorController = (function () {
                                             if( (utilsIsObjectNullOrUndefined($node.original.fileName) == false) && (utilsIsStrNullOrEmpty($node.original.fileName) == false) )
                                             {
                                                 var iNumberOfProdcuts = oController.m_aoProducts.length;
-                                                for(var iIndexProduct = 0; iIndexProduct < iNumberOfProdcuts ; iIndexProduct++)
-                                                {
+                                                // for(var iIndexProductjstree = 0; iIndexProduct < iNumberOfProdcuts ; iIndexProduct++)
+                                                // {
                                                     oController.m_oProductService.getMetadata($node.original.fileName)
                                                         .success(function (data) {
                                                             //reload product list
-                                                            var test=data;
+                                                            var temp=[];
+                                                            oController.generateMetadatadTree(data,temp,0);
+                                                            var test=temp;
                                                         }).error(function (error) {
 
                                                     });
-                                                }
+                                                // }
 
                                             }
                                         }
                                     },
+
                                     // "Rename": {
                                     //     "label": "Rename",
                                     //     "action": function (obj) {
@@ -980,9 +983,22 @@ var EditorController = (function () {
             //     oNode.state = {"opened" :false, "disabled":false, "selected" :true };//default state
 
             // oNode.state = { "opened" :false,"disabled":false,"selected " :true };//
-
             oNode.fileName = productList[iIndexProduct].fileName;
-            oNode.children = [{"text": "metadata", "icon": "assets/icons/folder_20x20.png"}, {
+
+            var oController=this;
+
+
+            // oController.m_oProductService.getMetadata(oNode.fileName )
+            //     .success(function (data) {
+            //         //reload product list
+            //         var temp=[];
+            //         oController.generateMetadatadTree(data,temp,0);
+            //         oController.test=temp[0];
+            //     }).error(function (error) {
+            //
+            // });
+
+            oNode.children = [  {"text": "metadata", "icon": "assets/icons/folder_20x20.png"}, {
                 "text": "Bands",
                 "icon": "assets/icons/folder_20x20.png",
                 "children": []
@@ -1818,6 +1834,63 @@ var EditorController = (function () {
 
         }
     }
+
+    /* Generate tree for metadata */
+
+    EditorController.prototype.generateMetadatadTree = function(oElement,oNewTree,iIndexNewTreeAttribute)
+    {
+
+
+        if (typeof oElement != "undefined" && oElement != null)
+        {
+            /* i generate new object
+             {
+             *       'text':'name'
+             *       'Children':[]
+             * }
+             * */
+
+            var oNode = new Object();
+            oNode.text=oElement.name;
+            oNode.children= [];
+            oNewTree.push(oNode);
+
+            if(oElement.elements != null)// if is a leaf
+            {
+                // i call the algorithm for all child
+                for (var iIndexNumberElements = 0; iIndexNumberElements < (oElement.elements.length); iIndexNumberElements++)
+                {
+                    this.generateMetadatadTree(oElement.elements[iIndexNumberElements] ,oNewTree[iIndexNewTreeAttribute].children, iIndexNumberElements);
+                }
+            }
+
+            /*
+             if(oElement.bands != null)// if is a leaf
+             {
+             // i call the algorithm for all child
+             for (var iIndexNumberElements = 0; iIndexNumberElements < (oElement.elements.length); iIndexNumberElements++)
+             {
+             this.generateWellFormedTree(oElement.bands[iIndexNumberElements] ,oNewTree[iIndexNewTreeAttribute].children, iIndexNumberElements);
+             }
+             }*/
+        }
+
+    };
+
+    EditorController.prototype.changeModeOnOffPixelInfo = function()
+    {
+        this.m_bIsModeOnPixelInfo = !this.m_bIsModeOnPixelInfo;
+
+    };
+
+    EditorController.prototype.getClassPixelInfo = function()
+    {
+        if( this.m_bIsModeOnPixelInfo )
+            return "#5F6C82";//green
+        else
+            return "#43516A";//white
+
+    };
     EditorController.$inject = [
         '$scope',
         '$location',

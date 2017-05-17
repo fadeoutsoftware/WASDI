@@ -8,7 +8,7 @@ var ImportController = (function() {
     //**************************************************************************
     function ImportController($scope, oConstantsService, oAuthService,$state,oMapService, oSearchService, oAdvancedFilterService,
                               oAdvancedSearchService, oConfigurationService, oFileBufferService, oRabbitStompService, oProductService,
-                              oProcessesLaunchedService,oWorkspaceService,oResultsOfSearchService,oModalService ) {
+                              oProcessesLaunchedService,oWorkspaceService,oResultsOfSearchService,oModalService,oOpenSearchService ) {
         this.m_oScope = $scope;
         this.m_oScope.m_oController = this;
         this.m_oConstantsService = oConstantsService;
@@ -27,7 +27,7 @@ var ImportController = (function() {
         this.m_oWorkspaceService=oWorkspaceService;
         this.m_oResultsOfSearchService = oResultsOfSearchService;
         this.m_oModalService = oModalService;
-
+        this.m_oOpenSearchService = oOpenSearchService;
         //this.m_bPproductsPerPagePristine   = true;
         //this.m_iProductCount = 0;
         //this.m_bDisableField = true;
@@ -52,7 +52,7 @@ var ImportController = (function() {
         /* number of possible products per pages and number of products per pages selected */
         this.m_iProductsPerPageSelected = 5;//default value
         this.m_iProductsPerPage=[5,10,15,20,25];
-
+        this.m_aListOfProvider = []; //LIST OF PROVIDERS
         //Page
         this.m_iCurrentPage = 1;
         this.m_iTotalPages = 1;
@@ -185,16 +185,7 @@ var ImportController = (function() {
             return result;
         };
 
-        //vex.dialog.confirm({
-        //    message: 'Are you absolutely sure you want to destroy the alien planet?',
-        //    callback: function (value) {
-        //        if (value) {
-        //            console.log('Successfully destroyed the planet.')
-        //        } else {
-        //            console.log('Chicken.')
-        //        }
-        //    }
-        //})
+
         $scope.$on('rectangle-created-for-opensearch', function(event, args) {
 
             var oLayer = args.layer;
@@ -311,6 +302,23 @@ var ImportController = (function() {
 
             }
         });
+
+        var oController = this;
+        this.m_oOpenSearchService.getListOfProvider().success(function (data) {
+            if(utilsIsObjectNullOrUndefined(data) === false && data.length > 0)
+            {
+                var iLengthData = data.length;
+                for(var iIndexProvider = 0; iIndexProvider < iLengthData; iIndexProvider++)
+                {
+                    oController.m_aListOfProvider[iIndexProvider] = {"name":data[iIndexProvider], "selected":true};
+                }
+                // oController.m_aListOfProvider = data;
+            }
+
+        }).error(function (data) {
+
+        });
+
     }
 
     /***************** METHODS ***************/
@@ -408,6 +416,8 @@ var ImportController = (function() {
 
     ImportController.prototype.search = function() {
         var oController = this;
+        if(this.thereIsAtLeastOneProvider() === false)
+            return false;
 
         this.deleteLayers();/*delete layers (if it isn't the first search) and relatives rectangles in map*/
         this.m_bIsVisibleListOfLayers = true;//change view on left side bar
@@ -416,6 +426,7 @@ var ImportController = (function() {
         // SearchService.setAdvancedFilter(scope.model.advancedFilter);
         this.m_oSearchService.setOffset(this.calcOffset());//default 0 (index page)
         this.m_oSearchService.setLimit(this.m_iProductsPerPageSelected);// default 10 (total of element per page)
+        this.m_oSearchService.setProviders(this.m_aListOfProvider);
 
         /* SAVE OPENSEARCH PARAMS IN SERVICE*/
         this.m_oResultsOfSearchService.setIsVisibleListOfProducts(this.m_bIsVisibleListOfLayers);
@@ -1171,6 +1182,18 @@ var ImportController = (function() {
         return true;
     }
 
+    ImportController.prototype.thereIsAtLeastOneProvider = function()
+    {
+        var iLengthListOfProvider = this.m_aListOfProvider.length;
+        for(var iIndexProvider = 0; iIndexProvider < iLengthListOfProvider; iIndexProvider++)
+        {
+            if(this.m_aListOfProvider[iIndexProvider].selected === true )
+                return true;
+
+        }
+        return false;
+    }
+
     ImportController.$inject = [
         '$scope',
         'ConstantsService',
@@ -1187,7 +1210,8 @@ var ImportController = (function() {
         'ProcessesLaunchedService',
         'WorkspaceService',
         'ResultsOfSearchService',
-        'ModalService'
+        'ModalService',
+        'OpenSearchService'
 
     ];
 

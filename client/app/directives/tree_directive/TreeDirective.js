@@ -19,9 +19,9 @@ angular.module('wasdi.TreeDirective', [])
              *                         }
              * }
              * */
-
-            //this.generateWellFormedTree=function(oElement,oNewTree,iIndexNewTreeAttribute)
-            //{
+            //
+            // this.generateWellFormedTree=function(oElement,oNewTree,iIndexNewTreeAttribute)
+            // {
             //
             //
             //    if (typeof oElement != "undefined" && oElement != null)
@@ -58,7 +58,7 @@ angular.module('wasdi.TreeDirective', [])
             //         }*/
             //    }
             //
-            //}
+            // }
 
 
             /*

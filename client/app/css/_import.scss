@@ -74,7 +74,7 @@
     }
     .panel-default > .panel-heading
     {
-      background-color:$wasdi-sidebar-color-title-panel ;
+      background-color:$wasdi-sidebar-color-title-panel;
       color:$wasdi-title-color;
     }
     .panel-body {
@@ -107,6 +107,7 @@
           //box-sizing: border-box;
           //background-color: white;
           //border-color: #2D394F;
+          border-color: $wasdi-blue-logo;
           margin:0;
         }
 
@@ -126,6 +127,19 @@
       {
         margin-top: 20px;
       }
+
+      form {
+        fieldset {
+          border: 2px solid $wasdi-blue-logo;
+          padding: 20px 20px;
+
+          legend {
+            width: auto;
+            border-bottom: 0;
+          }
+        }
+      }
+
     }
 
     //SEARCH BUTTON
@@ -156,7 +170,20 @@
       {
         background-color: $wasdi-green-logo;
       }
-
+      .search-button-disabled
+      {
+        background-color: $wasdi-blue-logo-complementary-1;
+        cursor:not-allowed;
+        display: inline;
+        color:white;
+        padding:15px 15px;
+        margin-top: 15px;
+        opacity: 1;
+        i
+        {
+          color: white;
+        }
+      }
       .clear-button {
         cursor:pointer;
         display: inline;
