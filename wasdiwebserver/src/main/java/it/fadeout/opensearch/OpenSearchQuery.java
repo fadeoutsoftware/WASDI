@@ -48,11 +48,11 @@ public class OpenSearchQuery{
 	public static String ExecuteQuery(String sQuery, HashMap<String, String> asParams) throws URISyntaxException, IOException
 	{
 		try {
-			String sParameter = URLEncoder.encode(sQuery, "UTF-8");
+//			String sParameter = URLEncoder.encode(sQuery, "UTF-8");
 			//String sParameter = "'( beginPosition:[2016-10-03T00:00:00.000Z TO 2016-10-06T23:59:59.999Z] AND endPosition:[2016-10-03T00:00:00.000Z TO 2016-10-06T23:59:59.999Z] ) AND   (platformname:Sentinel-1 AND filename:S1A_* AND producttype:SLC)'";
-			sParameter = URLEncoder.encode(sParameter, "UTF-8");
+//			sParameter = URLEncoder.encode(sParameter, "UTF-8");
 			Abdera oAbdera = new Abdera();
-			String sJsonResult = new String("");
+//			String sJsonResult = new String("");
 			//create url passing search parameters
 			String sUrl = OpenSearchTemplate.getHttpUrl(sQuery, 
 					asParams.getOrDefault("offset", "0"), 

@@ -9,12 +9,15 @@ import javax.servlet.ServletConfig;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 
 import it.fadeout.Wasdi;
 import it.fadeout.opensearch.OpenSearchQuery;
+import it.fadeout.opensearch.QueryExecutor;
+import it.fadeout.viewmodels.QueryResultViewModel;
 import wasdi.shared.business.User;
 import wasdi.shared.utils.Utils;
 
@@ -97,4 +100,57 @@ public class OpenSearchResource {
 		return null;
 		
 	}
+	
+	@GET
+	@Path("/query")
+	@Produces({"application/json", "text/html"})
+	public QueryResultViewModel[] Search(@HeaderParam("x-session-token") String sSessionId, @QueryParam("providers") String sProviders,   
+			@QueryParam("sQuery") String sQuery, @QueryParam("offset") String sOffset, @QueryParam("limit") String sLimit, 
+			@QueryParam("sortedby") String sSortedBy, @QueryParam("order") String sOrder ) {
+		
+		
+//		if (Utils.isNullOrEmpty(sSessionId)) return null;
+//		User oUser = Wasdi.GetUserFromSession(sSessionId);
+//		if (oUser==null) return null;
+//		if (Utils.isNullOrEmpty(oUser.getUserId())) return null;
+		
+		if (sProviders!=null) {
+			ArrayList<QueryResultViewModel> aoResults = new ArrayList<QueryResultViewModel>();
+			String asProviders[] = sProviders.split(",|;");
+			for (String sProvider : asProviders) {
+				String sUser = m_oServletConfig.getInitParameter(sProvider+".OSUser");
+				String sPassword = m_oServletConfig.getInitParameter(sProvider+".OSPwd");
+				QueryExecutor oExecutor = QueryExecutor.newInstance(sProvider, sUser, sPassword, sOffset, sLimit, sSortedBy, sOrder);
+				try {
+					aoResults.addAll(oExecutor.execute(sQuery));
+				} catch (IOException e) {
+					e.printStackTrace();
+				}				
+			}
+			return aoResults.toArray(new QueryResultViewModel[aoResults.size()]);
+		}
+		
+		return null;
+	}
+	
+	
+	@GET
+	@Path("/providers")
+	@Produces({"application/json", "text/html"})
+	public String[] GetSearchProviders(@HeaderParam("x-session-token") String sSessionId) {
+		
+//		if (Utils.isNullOrEmpty(sSessionId)) return null;
+//		User oUser = Wasdi.GetUserFromSession(sSessionId);
+//		if (oUser==null) return null;
+//		if (Utils.isNullOrEmpty(oUser.getUserId())) return null;
+
+		String sProviders = m_oServletConfig.getInitParameter("SearchProviders");
+		if (sProviders!=null && sProviders.length()>0) {
+			return sProviders.split(",|;");
+		}
+		
+		return null;
+	}
+	
+	
 }
