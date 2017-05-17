@@ -27,6 +27,7 @@ angular
         var ConstantsService = $injector.get('ConstantsService');
         var OpenSearchService = $injector.get('OpenSearchService');
         return {
+            providers:'',
             textQuery: '',
             geoselection: '',
             advancedFilter: '',
@@ -45,6 +46,23 @@ angular
 
             goToPage: function () {
 
+            },
+            setProviders:function(sProvidersInput){
+                var iLengthProviders = sProvidersInput.length;
+
+                var sProviderSelected = '';
+                for(var iIndexProvider = 0; iIndexProvider < iLengthProviders; iIndexProvider++)
+                {
+                    if((utilsIsObjectNullOrUndefined(sProvidersInput[iIndexProvider]) === false) && (sProvidersInput[iIndexProvider].selected == true )  )
+                        sProviderSelected += sProvidersInput[iIndexProvider].name + ',';
+                }
+                if( (sProviderSelected.length-1) < 0)
+                    this.providers = '';
+                else
+                {
+                    this.providers = sProviderSelected.substring(0,sProviderSelected.length-1);//remove last letter == ,
+                    this.providers = this.providers.toUpperCase();
+                }
             },
             setTextQuery: function (textQuery) {
                 this.textQuery = textQuery;
@@ -71,11 +89,13 @@ angular
                 query += ")))\")";
                 return query;
             },
-            createSearchRequest: function (filter, offset, limit) {
-                var searchUrl = ":filter&offset=:offset&limit=:limit"
+            createSearchRequest: function (filter, offset, limit,providers) {
+                var searchUrl = ":filter&offset=:offset&limit=:limit&providers=:providers"
                 searchUrl = searchUrl.replace(":filter", (filter) ? filter : '*');
                 searchUrl = searchUrl.replace(":offset", (offset) ? offset : '0');
                 searchUrl = searchUrl.replace(":limit", (limit) ? limit : '10');
+                searchUrl = searchUrl.replace(":providers", (providers) ? providers : '');
+
                 this.doneRequest = filter;
                 return searchUrl;
             },
@@ -113,7 +133,8 @@ angular
                         self.advancedFilter, self.missionFilter);
                 //console.log('filter xx',filter);
                 return $http({
-                    url: OpenSearchService.getApiProducts(self.createSearchRequest(filter, self.offset, self.limit)),
+                    // url: OpenSearchService.getApiProducts(self.createSearchRequest(filter, self.offset, self.limit)),
+                    url: OpenSearchService.getApiProductsWithProviders(self.createSearchRequest(filter, self.offset, self.limit,self.providers)),
                     method: "GET"
                 });
             },

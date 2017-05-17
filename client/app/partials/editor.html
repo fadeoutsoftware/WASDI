@@ -194,10 +194,11 @@
                     <i class="fa fa-server" aria-hidden="true"></i>
                 </button>
 
-                <button type="button" class="btn btn-default" ng-click="m_oController.hideOrShowPixelInfo()"  data-toggle="tooltip"
+                <button type="button" class="btn btn-default" ng-click="m_oController.changeModeOnOffPixelInfo();m_oController.hideOrShowPixelInfo();"  data-toggle="tooltip"
                         data-placement="bottom"  title="Show/hide pixel info"
-                        ng-disabled="m_oController.m_b2DMapModeOn == false && m_oController.m_b3DMapModeOn == true ">
+                        ng-disabled="m_oController.m_b2DMapModeOn == false && m_oController.m_b3DMapModeOn == true" ng-style="{'background-color': m_oController.getClassPixelInfo()}">  <!--ng-class="{'active' : m_oController.Mode}"-->
                     <i class="fa fa-info-circle" aria-hidden="true"></i>
+                    <!--<pre>{{m_oController.m_bIsModeOnPixelInfo|json}}</pre>-->
                 </button>
 
             </div>

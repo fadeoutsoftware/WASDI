@@ -37,7 +37,7 @@ service('ProcessesLaunchedService', ['ConstantsService','$rootScope','$http', fu
             });
     }
 
-    this.removeProcessInServer = function(sPidInput)
+    this.removeProcessInServer = function(sPidInput,sWorkSpaceId)
     {
         if(utilsIsObjectNullOrUndefined(sPidInput)===true)
             return false;
@@ -46,6 +46,9 @@ service('ProcessesLaunchedService', ['ConstantsService','$rootScope','$http', fu
         this.m_oHttp.get(this.APIURL + '/process/delete?sProcessObjId=' + sPidInput)// /ws/processbyws = /process/byws
             .success(function (data, status)
             {
+                if(utilsIsObjectNullOrUndefined(sWorkSpaceId) === false )
+                    oController.loadProcessesFromServer(sWorkSpaceId);
+
                 // oController.loadProcessesFromServer()
             })
             .error(function (data,status)

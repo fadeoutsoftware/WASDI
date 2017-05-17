@@ -23,10 +23,39 @@
                     <div id="coll-product-container" class="coll-product-container">
                         <div class="coll-product-list-container">
                             <div class=" coll-product-header">
-                                <div class="my-input-text col-lg-12 col-md-12 col-sm-12 col-xs-12">
-                                    <input type="text" ng-model="m_oController.m_oModel.textQuery"
-                                           id="coll-product-search" placeholder="Search..." ><!-- style="padding: 0px !important;"-->
+
+                                <div class="row">
+                                    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 ">
+                                        <div class="checkbox">
+                                            <form>
+                                                <fieldset>
+
+                                                    <legend>
+                                                        <h4>
+                                                            Providers
+                                                        </h4>
+                                                    </legend>
+
+                                                    <label ng-repeat="provider in m_oController.m_aListOfProvider" ng-click="provider.selected = !provider.selected">
+                                                        <!--<input type="checkbox" value="" class="">-->
+                                                        <div type="checkbox" class="glyphicon" ng-class="{ ' glyphicon-unchecked': !provider.selected, 'glyphicon-check': provider.selected  } "></div>
+                                                        {{provider.name}}
+
+                                                    </label>
+
+                                                </fieldset>
+                                            </form>
+                                        </div>
+                                    </div>
                                 </div>
+
+                                <div class="row">
+                                    <div class="my-input-text col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                        <input type="text" ng-model="m_oController.m_oModel.textQuery"
+                                               id="coll-product-search" placeholder="Search..." ><!-- style="padding: 0px !important;"-->
+                                    </div>
+                                </div>
+
                             </div>
 
 
@@ -139,7 +168,6 @@
                                         <div class="glyphicon mission-checkbox"
                                              ng-class="{ ' glyphicon-unchecked': !mission.selected, 'glyphicon-check': mission.selected }"
                                              ng-click="mission.selected = !mission.selected; m_oController.updateMissionSelection($index);"></div>
-
                                     </div>
                                     <div class="col-md-11 col-xs-8 col-sd-8">{{mission.name}}</div>
                                 </div>
@@ -198,7 +226,8 @@
                                     <!--<i class="fa fa-search fa-lg" aria-hidden="true"></i>-->
                                     {{"IMPORT_CLEAR_BUTTON"|translate}}
                                 </div>
-                                <div class="search-button" ng-click="m_oController.search()" id="search-button">
+                                <div class="search-button" ng-click="m_oController.search()" id="search-button"
+                                     ng-class="{'search-button-disabled': m_oController.thereIsAtLeastOneProvider() === false,'search-button': m_oController.thereIsAtLeastOneProvider() === true }" >
                                     <!--<i class="fa fa-search fa-lg" aria-hidden="true"></i>-->
                                     {{"IMPORT_SEARCH_BUTTON"|translate}}
                                 </div>
