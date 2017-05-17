@@ -14,6 +14,8 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 
+import org.jsoup.select.Evaluator.IsEmpty;
+
 import it.fadeout.Wasdi;
 import it.fadeout.opensearch.OpenSearchQuery;
 import it.fadeout.opensearch.QueryExecutor;
@@ -122,7 +124,13 @@ public class OpenSearchResource {
 				String sPassword = m_oServletConfig.getInitParameter(sProvider+".OSPwd");
 				QueryExecutor oExecutor = QueryExecutor.newInstance(sProvider, sUser, sPassword, sOffset, sLimit, sSortedBy, sOrder);
 				try {
-					aoResults.addAll(oExecutor.execute(sQuery));
+					ArrayList<QueryResultViewModel> aoTmp = oExecutor.execute(sQuery);
+					if (aoTmp!=null && !aoTmp.isEmpty()) {
+						aoResults.addAll(aoTmp);
+						System.out.println("Found " + aoTmp.size() + " results for " + sProvider);
+					} else {
+						System.out.println("No results found for sProvider");
+					}
 				} catch (IOException e) {
 					e.printStackTrace();
 				}				
