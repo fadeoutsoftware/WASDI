@@ -2,7 +2,7 @@
  * Created by a.corrado on 22/11/2016.
  */
 angular.module('wasdi.TreeDirective', [])
-    .directive('tree', function () {
+    .directive('tree', ['ProductService','$http',function (oProductService,$http) {
         "use strict";
 
         function linkFunction($scope, element, attr){
@@ -19,48 +19,59 @@ angular.module('wasdi.TreeDirective', [])
              *                         }
              * }
              * */
-            //
-            // this.generateWellFormedTree=function(oElement,oNewTree,iIndexNewTreeAttribute)
-            // {
-            //
-            //
-            //    if (typeof oElement != "undefined" && oElement != null)
-            //    {
-            //        /* i generate new object
-            //         {
-            //         *       'text':'name'
-            //         *       'Children':[]
-            //         * }
-            //         * */
-            //
-            //        var oNode = new Object();
-            //        oNode.text=oElement.name;
-            //        oNode.children= [];
-            //        oNewTree.push(oNode);
-            //
-            //        if(oElement.elements != null)// if is a leaf
-            //        {
-            //            // i call the algorithm for all child
-            //            for (var iIndexNumberElements = 0; iIndexNumberElements < (oElement.elements.length); iIndexNumberElements++)
-            //            {
-            //                this.generateWellFormedTree(oElement.elements[iIndexNumberElements] ,oNewTree[iIndexNewTreeAttribute].children, iIndexNumberElements);
-            //            }
-            //        }
-            //
-            //        /*
-            //         if(oElement.bands != null)// if is a leaf
-            //         {
-            //         // i call the algorithm for all child
-            //         for (var iIndexNumberElements = 0; iIndexNumberElements < (oElement.elements.length); iIndexNumberElements++)
-            //         {
-            //         this.generateWellFormedTree(oElement.bands[iIndexNumberElements] ,oNewTree[iIndexNewTreeAttribute].children, iIndexNumberElements);
-            //         }
-            //         }*/
-            //    }
-            //
-            // }
+            this.generateMetadataTree = function(oElement,oNewTree,iIndexNewTreeAttribute)
+            {
 
 
+                if (typeof oElement != "undefined" && oElement != null)
+                {
+                    /* i generate new object
+                     {
+                     *       'text':'name'
+                     *       'Children':[]
+                     * }
+                     * */
+
+                    var oNode = new Object();
+                    oNode.text=oElement.name;
+                    oNode.children= [];
+                    oNode.icon= "assets/icons/folder_20x20.png",
+                    oNewTree.push(oNode);
+
+                    if(oElement.elements != null)// if is a leaf
+                    {
+                        // i call the algorithm for all child
+                        for (var iIndexNumberElements = 0; iIndexNumberElements < (oElement.elements.length); iIndexNumberElements++)
+                        {
+                            this.generateMetadataTree(oElement.elements[iIndexNumberElements] ,oNewTree[iIndexNewTreeAttribute].children, iIndexNumberElements);
+                        }
+                    }
+                }
+
+            };
+            this.myDisableNode = function(sIdInput)
+            {
+                if(utilsIsObjectNullOrUndefined(sIdInput) === true)
+                    return false;
+                $("#jstree").jstree().disable_node(sIdInput);
+                $('#jstree').jstree(true).set_icon(sIdInput, 'fa fa-spinner fa-spin');
+                return true;
+            };
+
+            this.myEnableNode = function(sIdInput,sIcon)
+            {
+                if(utilsIsObjectNullOrUndefined(sIdInput) === true)
+                    return false;
+
+                if(utilsIsObjectNullOrUndefined(sIcon)=== true || utilsIsStrNullOrEmpty(sIcon) === true)
+                    sIcon='fa fa-spinner fa-spin';
+
+                $("#jstree").jstree().enable_node(sIdInput);
+                $('#jstree').jstree(true).set_icon(sIdInput,sIcon );
+                return true;
+            };
+
+            var oController = this;
             /*
             *  NOTE: $SCOPE = EDITOR SCOPE
             * */
@@ -96,8 +107,8 @@ angular.module('wasdi.TreeDirective', [])
                                 return;
                             if(!utilsIsObjectNullOrUndefined(data.node) && data.event.type !="contextmenu")
                             {
-
-                                if($scope.m_oController.m_oProcessesLaunchedService.thereIsPublishBandProcessOfTheProduct(data.node.id) == false && data.node.children.length == 0 && !utilsIsObjectNullOrUndefined(data.node.original.band))
+                                //$scope.m_oController.m_oProcessesLaunchedService.thereIsPublishBandProcessOfTheProduct(data.node.id) == false &&
+                                if( data.node.children.length == 0 && !utilsIsObjectNullOrUndefined(data.node.original.band))
                                 {
 
                                     //if(data.node.icon == 'assets/icons/check.png')
@@ -110,6 +121,7 @@ angular.module('wasdi.TreeDirective', [])
                                     }
                                     else
                                     {
+                                        oController.myDisableNode(data.node.id);
                                         //the tree icon is change when it receive the "publishband" message by rabbit or
                                         //when the band was pubblished (http request)
                                         // method: receivedPublishBandMessage()
@@ -118,6 +130,46 @@ angular.module('wasdi.TreeDirective', [])
                                         $scope.m_oController.openBandImage(data.node.original.band,data.node.id);
                                     }
 
+                                }
+                            }
+                            /* CLICK ON METADATA */
+                            if( (utilsIsObjectNullOrUndefined(data.node)=== false) && (data.node.text==="Metadata") && (data.node.original.clicked === false) )
+                            {
+
+                                if( (utilsIsObjectNullOrUndefined(data.node.original.url)=== false) && (utilsIsStrNullOrEmpty(data.node.original.url) === false) && (data.node.children.length === 0))
+                                {
+                                    data.node.original.clicked = true;//lock click on metadata  semaphore
+                                    // var test=$("#tree").jstree().get_node(  data.node.id);
+                                    $("#jstree").jstree().disable_node( data.node.id);
+                                    $('#jstree').jstree(true).set_icon( data.node.id, 'fa fa-spinner fa-spin');
+                                    //if url != 0 AND (children IS empty == true)
+                                    $http.get(data.node.original.url)
+                                        .success(function (result_data) {
+                                            //reload product list
+                                            if(result_data !== "")
+                                            {
+                                                var temp=[];
+                                                oController.generateMetadataTree(result_data,temp,0);
+
+                                                var iLengthChildren = temp[0].children.length;
+
+                                                /* Draw new nodes */
+                                                for( var iIndexChildren = 0; iIndexChildren < iLengthChildren; iIndexChildren++)
+                                                {
+                                                    $('#jstree').jstree().create_node(data.node.id, temp[0].children[iIndexChildren]);
+                                                }
+
+                                            }
+                                            data.node.original.clicked = false; //release semaphore
+                                            $("#jstree").jstree().enable_node(data.node);
+                                            $('#jstree').jstree(true).set_icon( data.node.id, 'assets/icons/folder_20x20.png');
+
+                                        }).error(function (error) {
+                                            console.log("Error in: " + data.node.original.url + " the request doesn't work");
+                                            data.node.original.clicked = false; //release semaphore
+                                            $("#jstree").jstree().enable_node(data.node);
+                                            $('#jstree').jstree(true).set_icon( data.node.id, 'assets/icons/folder_20x20.png');
+                                    });
                                 }
                             }
                         });
@@ -153,4 +205,4 @@ angular.module('wasdi.TreeDirective', [])
             template:'<div id="jstree"class="jstree" ></div>',
             link: linkFunction
         };
-});
+}]);

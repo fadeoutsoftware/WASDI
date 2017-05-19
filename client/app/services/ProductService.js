@@ -31,5 +31,8 @@ service('ProductService', ['$http',  'ConstantsService', function ($http, oConst
     this.getMetadata = function(sProductName){
         return this.m_oHttp.get(this.APIURL+"/product/metadatabyname?sProductName="+sProductName);
     }
+    this.getApiMetadata= function(sProductName){
+        return this.APIURL+"/product/metadatabyname?sProductName="+sProductName;
+    }
 }]);
 

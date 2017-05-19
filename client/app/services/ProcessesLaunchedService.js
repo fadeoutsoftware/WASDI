@@ -53,7 +53,7 @@ service('ProcessesLaunchedService', ['ConstantsService','$rootScope','$http', fu
             })
             .error(function (data,status)
             {
-                utilsVexDialogAlertTop("Error: impossible kill the process Pid: "+sPidInput);
+                utilsVexDialogAlertTop("Error while kill the process ");
             });
         return true;
     }
