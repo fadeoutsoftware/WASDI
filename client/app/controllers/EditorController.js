@@ -284,6 +284,7 @@ var EditorController = (function () {
         var oNode = $('#jstree').jstree(true).get_node(oLayer.layerId);
         oNode.original.bPubblish = true;
         $('#jstree').jstree(true).set_icon(oLayer.layerId, 'assets/icons/check_20x20.png');
+        $("#jstree").jstree().enable_node(oLayer.layerId);
         // var oNodet = $('#jstree').jstree(true).get_node(oLayer.layerId);
         //$('#jstree').jstree(true).set_icon(oLayer.layerId, 'assets/icons/check.png');
     }
@@ -575,10 +576,11 @@ var EditorController = (function () {
                 utilsVexDialogAlertTop("Error in publish band");
                 //console.log("Error in publish band");
             }
-
+            $("#jstree").jstree().enable_node(oBand.name);
         }).error(function (data, status) {
             console.log('publish band error');
             utilsVexDialogAlertTop("Error in publish band");
+            $("#jstree").jstree().enable_node(oBand.name);
             //TODO ERROR
         });
     }
@@ -591,7 +593,10 @@ var EditorController = (function () {
         }
 
         var oController = this;
-        var sLayerId = "wasdi:" + oBand.productName + "_" + oBand.name;
+        if(utilsIsObjectNullOrUndefined(oBand.name) === false)
+            var sLayerId = "wasdi:" + oBand.productName + "_" + oBand.name;// band removed
+        else
+            var sLayerId = "wasdi:" + oBand.layerId + "_" + oBand.bandName;//remove bands after a product was deleted
 
         var oMap2D = oController.m_oMapService.getMap();
         var oGlobeLayers = oController.m_oGlobeService.getGlobeLayers();
@@ -734,14 +739,33 @@ var EditorController = (function () {
                                                         bDeleteFile = true;
                                                     if (value.geoserver == 'on')
                                                         bDeleteLayer = true;
-
+                                                    this.temp = $node;
+                                                    var that = this;
                                                     oController.m_oProductService.deleteProductFromWorkspace($node.original.fileName, oController.m_oActiveWorkspace.workspaceId, bDeleteFile, bDeleteLayer)
                                                         .success(function (data) {
+                                                            var iLengthLayer = oController.m_aoLayersList.length;
+                                                            var iLengthChildren_d = that.temp.children_d.length;
+
+                                                            for(var iIndexChildren = 0; iIndexChildren < iLengthChildren_d; iIndexChildren++)
+                                                            {
+                                                                for(var iIndexLayer = 0; iIndexLayer < iLengthLayer; iIndexLayer++)
+                                                                {
+                                                                    if( that.temp.children_d[iIndexChildren] ===  oController.m_aoLayersList[iIndexChildren].layerId)
+                                                                    {
+                                                                        oController.removeBandImage(oController.m_aoLayersList[iIndexChildren]);
+                                                                        break;
+                                                                    }
+
+                                                                }
+
+                                                            }
+
                                                             //reload product list
                                                             oController.getProductListByWorkspace();
 
-                                                        }).error(function (error) {
 
+                                                        }).error(function (error) {
+                                                            utilsVexDialogAlertTop("Error in delete product.");
                                                     });
                                                 }
 
@@ -965,8 +989,8 @@ var EditorController = (function () {
 
 
         var productList = this.getProductList();
-      //  var productList = this.m_aoProducts;
-        //for each product i generate sub-node
+        // var productList = this.m_aoProducts;
+        // for each product i generate sub-node
         for (var iIndexProduct = 0; iIndexProduct < productList.length; iIndexProduct++) {
 
             //product node
@@ -976,33 +1000,24 @@ var EditorController = (function () {
             else
                 oNode.text = productList[iIndexProduct].name;//LABEL NODE
 
-            //usually the selected node is the node just download
-            // if( (utilsIsObjectNullOrUndefined(sSelectedNodeInput)==false) && (utilsIsStrNullOrEmpty(sSelectedNodeInput)==false) && productList[iIndexProduct].name == sSelectedNodeInput)
-            //     oNode.state = {"opened" :true, "disabled":false, "selected" :true };//'opened' :true, 'disabled':false,
-            // else
-            //     oNode.state = {"opened" :false, "disabled":false, "selected" :true };//default state
-
-            // oNode.state = { "opened" :false,"disabled":false,"selected " :true };//
             oNode.fileName = productList[iIndexProduct].fileName;
 
             var oController=this;
 
 
-            // oController.m_oProductService.getMetadata(oNode.fileName )
-            //     .success(function (data) {
-            //         //reload product list
-            //         var temp=[];
-            //         oController.generateMetadatadTree(data,temp,0);
-            //         oController.test=temp[0];
-            //     }).error(function (error) {
-            //
-            // });
-
-            oNode.children = [  {"text": "metadata", "icon": "assets/icons/folder_20x20.png"}, {
+            oNode.children = [
+                {"text":"Metadata",
+                 "icon": "assets/icons/folder_20x20.png",
+                 "children": [],
+                 "clicked":false,//semaphore
+                    "url" : oController.m_oProductService.getApiMetadata(oNode.fileName),
+            }, {
                 "text": "Bands",
                 "icon": "assets/icons/folder_20x20.png",
                 "children": []
-            }];//CHILDREN
+            },
+
+            ];
             oNode.icon = "assets/icons/product_20x20.png";
             oTree.core.data.push(oNode);
 
@@ -1014,8 +1029,11 @@ var EditorController = (function () {
                 oNode.band = oaBandsItems[iIndexBandsItems];//BAND
                 oNode.icon = "assets/icons/uncheck_20x20.png";
 
-                //generate id for bands => ProductName+BandName
-                oNode.id = oTree.core.data[iIndexProduct].text + "_" + oaBandsItems[iIndexBandsItems].name;
+                //generate id for bands => fileName+BandName
+                // var fileNameWithoutExtension = oTree.core.data[iIndexProduct].fileName;
+                // fileNameWithoutExtension = fileNameWithoutExtension.match(/(.*)\.[^.]+$/);
+
+                oNode.id = productList[iIndexProduct].name + "_" + oaBandsItems[iIndexBandsItems].name;
                 oNode.bPubblish = false;
                 oTree.core.data[iIndexProduct].children[1].children.push(oNode);
             }

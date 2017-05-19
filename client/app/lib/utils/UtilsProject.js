@@ -141,3 +141,13 @@ function utilsProjectGetArrayOfValuesForParameterInOperation(oJSONInput,sPropert
         }
     }
 }
+//test
+String.prototype.distance = function (char) {
+    var index = this.indexOf(char);
+
+    if (index === -1) {
+        alert(char + " does not appear in " + this);
+    } else {
+        alert(char + " is " + (this.length - index) + " characters from the end of the string!");
+    }
+}
