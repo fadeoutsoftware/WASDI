@@ -66,6 +66,8 @@ public class OpenSearchTemplate {
 			oMateraMap.put("orderby", sOrderBy + " " + sOrder);
 			oMateraMap.put("q", qParams);
 			
+			return m_sCollaborativeTemplate.expand(oMateraMap);
+			
 		case "FEDEO":
 			Map<String,Object> oFedEOMap = new HashMap<String, Object>();			
 			oFedEOMap.put("scheme","http");
