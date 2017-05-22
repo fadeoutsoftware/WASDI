@@ -606,7 +606,7 @@ public class LauncherMain {
                 throw new Exception("LauncherMain.ExecuteOperation: Tiff not created");
             }
 
-            s_oLogger.debug("LauncherMain.TerrainOperation: convert product to view model");
+            s_oLogger.debug("LauncherMain.ExecuteOperation: convert product to view model");
 
             // P.Campanella 12/05/2017: get the BB from the orginal product
             // Get the original Bounding Box
