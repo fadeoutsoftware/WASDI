@@ -18,6 +18,7 @@ import org.jsoup.select.Evaluator.IsEmpty;
 
 import it.fadeout.Wasdi;
 import it.fadeout.opensearch.OpenSearchQuery;
+import it.fadeout.opensearch.OpenSearchTemplate;
 import it.fadeout.opensearch.QueryExecutor;
 import it.fadeout.viewmodels.QueryResultViewModel;
 import wasdi.shared.business.User;
@@ -122,6 +123,14 @@ public class OpenSearchResource {
 			for (String sProvider : asProviders) {
 				String sUser = m_oServletConfig.getInitParameter(sProvider+".OSUser");
 				String sPassword = m_oServletConfig.getInitParameter(sProvider+".OSPwd");
+				
+
+				if (sOffset == null) sOffset = "0";
+				if (sLimit == null) sLimit = "25";
+				if (sSortedBy == null) sSortedBy = "ingestiondate";
+				if (sOrder == null) sOrder = "asc";
+								
+				
 				QueryExecutor oExecutor = QueryExecutor.newInstance(sProvider, sUser, sPassword, sOffset, sLimit, sSortedBy, sOrder);
 				try {
 					ArrayList<QueryResultViewModel> aoTmp = oExecutor.execute(sQuery);
