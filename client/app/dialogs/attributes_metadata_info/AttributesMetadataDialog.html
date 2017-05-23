@@ -1,0 +1,38 @@
+<div class="modal fade attributes-metadata-modal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" ng-click="close(false)" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title ">Metadata Attributes {{m_oController.m_sNameNode}}</h4>
+            </div>
+            <div class="modal-body">
+                <div class="attributes-metadata-table">
+                    <h4>
+
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Description</th>
+                                </tr>
+                            </thead>
+
+                            <tbody >
+                                <tr ng-repeat="attribute in m_oController.m_aoAttributes ">
+                                    <td>{{attribute.name}} </td>
+                                    <td>{{attribute.description}}</td>
+                                </tr>
+                            </tbody>
+
+                            <tfoot></tfoot>
+                        </table>
+
+                    </h4>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" ng-click="close('ok')" class="my-button" data-dismiss="modal">Ok</button>
+            </div>
+        </div>
+    </div>
+</div>

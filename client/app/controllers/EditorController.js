@@ -552,8 +552,25 @@ var EditorController = (function () {
             //console.log('publishing band ' + oBand.name);
             if (!utilsIsObjectNullOrUndefined(data) && data.messageResult != "KO" && utilsIsObjectNullOrUndefined(data.messageResult)) {
                 /*if the band was published*/
-                if (data.messageCode == "PUBLISHBAND")
+
+                if (data.messageCode === "PUBLISHBAND")
+                {
                     oController.receivedPublishBandMessage(data.payload);
+
+                }
+                else
+                {
+                    if (data.messageCode !== "WAITFORRABBIT")//"PUBLISHBAND"
+                    {
+                        // oController.receivedPublishBandMessage(data.payload);
+                        $("#jstree").jstree().enable_node(oBand.productName+"_"+oBand.name);
+                        $('#jstree').jstree(true).set_icon(oBand.productName+"_"+oBand.name,'assets/icons/uncheck_20x20.png');
+                    }
+                }
+                // else
+                // {
+                //
+                // }
                 //else
                 //    oController.m_oProcessesLaunchedService.loadProcessesFromServer(oController.m_oActiveWorkspace.workspaceId);
                 //oController.m_oProcessesLaunchedService.addProcessesByLocalStorage(oBand.productName + "_" + oBand.name,
@@ -575,14 +592,16 @@ var EditorController = (function () {
                 //TODO ERROR
                 utilsVexDialogAlertTop("Error in publish band");
                 //console.log("Error in publish band");
+                $("#jstree").jstree().enable_node(oBand.productName+"_"+oBand.name);
+                $('#jstree').jstree(true).set_icon(oBand.productName+"_"+oBand.name,'assets/icons/uncheck_20x20.png');
             }
-            $("#jstree").jstree().enable_node(oBand.name);
+
         }).error(function (data, status) {
             console.log('publish band error');
             utilsVexDialogAlertTop("Error in publish band");
-            $("#jstree").jstree().enable_node(oBand.name);
-            //TODO ERROR
-        });
+            $("#jstree").jstree().enable_node(oBand.productName+"_"+oBand.name);
+            $('#jstree').jstree(true).set_icon(oBand.productName+"_"+oBand.name,'assets/icons/uncheck_20x20.png');
+          });
     }
 
     //REMOVE BAND
@@ -596,7 +615,7 @@ var EditorController = (function () {
         if(utilsIsObjectNullOrUndefined(oBand.name) === false)
             var sLayerId = "wasdi:" + oBand.productName + "_" + oBand.name;// band removed
         else
-            var sLayerId = "wasdi:" + oBand.layerId + "_" + oBand.bandName;//remove bands after a product was deleted
+            var sLayerId = "wasdi:" + oBand.layerId;  // + "_" + oBand.bandName;//remove bands after a product was deleted
 
         var oMap2D = oController.m_oMapService.getMap();
         var oGlobeLayers = oController.m_oGlobeService.getGlobeLayers();
@@ -725,130 +744,10 @@ var EditorController = (function () {
                             //***************************** PRODUCT ********************************************
                             oReturnValue =
                                 {
-
-                                    "DeleteProduct": {
-                                        "label": "Delete Product",
-                                        "icon":"fa fa-trash",
-                                        "action": function (obj) {
-
-                                            utilsVexDialogConfirmWithCheckBox("Deleting product. Are you sure?", function (value) {
-                                                var bDeleteFile = false;
-                                                var bDeleteLayer = false;
-                                                if (value) {
-                                                    if (value.files == 'on')
-                                                        bDeleteFile = true;
-                                                    if (value.geoserver == 'on')
-                                                        bDeleteLayer = true;
-                                                    this.temp = $node;
-                                                    var that = this;
-                                                    oController.m_oProductService.deleteProductFromWorkspace($node.original.fileName, oController.m_oActiveWorkspace.workspaceId, bDeleteFile, bDeleteLayer)
-                                                        .success(function (data) {
-                                                            var iLengthLayer = oController.m_aoLayersList.length;
-                                                            var iLengthChildren_d = that.temp.children_d.length;
-
-                                                            for(var iIndexChildren = 0; iIndexChildren < iLengthChildren_d; iIndexChildren++)
-                                                            {
-                                                                for(var iIndexLayer = 0; iIndexLayer < iLengthLayer; iIndexLayer++)
-                                                                {
-                                                                    if( that.temp.children_d[iIndexChildren] ===  oController.m_aoLayersList[iIndexChildren].layerId)
-                                                                    {
-                                                                        oController.removeBandImage(oController.m_aoLayersList[iIndexChildren]);
-                                                                        break;
-                                                                    }
-
-                                                                }
-
-                                                            }
-
-                                                            //reload product list
-                                                            oController.getProductListByWorkspace();
-
-
-                                                        }).error(function (error) {
-                                                            utilsVexDialogAlertTop("Error in delete product.");
-                                                    });
-                                                }
-
-                                            });
-                                        }
-                                    },
-
-                                    "Merge": {
-                                        "label": "Merge ",
-                                        "action": function (obj) {
-                                            //$node.original.fileName;
-                                            oController.openMergeDialog($node.original.fileName);
-                                        }
-                                    },
-                                    "Properties": {
-                                        "label": "Properties ",
-                                        "icon":"fa fa-info",
-                                        "action": function (obj) {
-                                            //$node.original.fileName;
-                                            if( (utilsIsObjectNullOrUndefined($node.original.fileName) == false) && (utilsIsStrNullOrEmpty($node.original.fileName) == false) )
-                                            {
-                                                var iNumberOfProdcuts = oController.m_aoProducts.length;
-                                                for(var iIndexProduct = 0; iIndexProduct < iNumberOfProdcuts ; iIndexProduct++)
-                                                {
-                                                    if( oController.m_aoProducts[iIndexProduct].fileName == $node.original.fileName)
-                                                    {
-                                                        oController.openProductInfoDialog(oController.m_aoProducts[iIndexProduct]);
-                                                        break;
-                                                    }
-
-                                                }
-
-                                            }
-                                        }
-                                    },
-                                    "Test-Metadata": {
-                                        "label": "Test-Metadata ",
-                                        "icon":"fa fa-info",
-                                        "action": function (obj) {
-                                            //$node.original.fileName;
-                                            if( (utilsIsObjectNullOrUndefined($node.original.fileName) == false) && (utilsIsStrNullOrEmpty($node.original.fileName) == false) )
-                                            {
-                                                var iNumberOfProdcuts = oController.m_aoProducts.length;
-                                                // for(var iIndexProductjstree = 0; iIndexProduct < iNumberOfProdcuts ; iIndexProduct++)
-                                                // {
-                                                    oController.m_oProductService.getMetadata($node.original.fileName)
-                                                        .success(function (data) {
-                                                            //reload product list
-                                                            var temp=[];
-                                                            oController.generateMetadatadTree(data,temp,0);
-                                                            var test=temp;
-                                                        }).error(function (error) {
-
-                                                    });
-                                                // }
-
-                                            }
-                                        }
-                                    },
-
-                                    // "Rename": {
-                                    //     "label": "Rename",
-                                    //     "action": function (obj) {
-                                    //         //$node.original.fileName;
-                                    //         var oCallback = function(value){
-                                    //             if((utilsIsObjectNullOrUndefined(value.renameProduct) == true) ||(utilsIsStrNullOrEmpty(value.renameProduct) == true))
-                                    //                 return false;
-                                    //             var bResult = oController.renameNodeInTree($node.original.fileName,value.renameProduct);
-                                    //             if(bResult == false)
-                                    //                 console.log("Error: it's impossible rename the product");
-                                    //         }
-                                    //
-                                    //         utilsVexDialogChangeNameInTree("Insert new name",oCallback,$node.original.fileName);
-                                    //         // var bResult = oController.renameNodeInTree($node.original.fileName,"test");
-                                    //         // if(bResult == false)
-                                    //         //     console.log("Error: it's impossible rename the product");
-                                    //     }
-                                    // },
-                                    //SUBMENU RADAR
                                     "Radar": {
                                         "label": "Radar",
                                         "action": false,
-                                        "separator_before":true,
+
                                         "submenu":
                                             {
                                                 //APPLY ORBIT
@@ -951,8 +850,6 @@ var EditorController = (function () {
 
                                             }
                                     },
-
-                                    //SUBMENU OPTICAL
                                     "Optical": {
                                         "label": "Optical",
                                         "action": false,
@@ -978,6 +875,107 @@ var EditorController = (function () {
 
                                             }
                                     },
+                                    "Properties": {
+                                        "label": "Properties ",
+                                        "icon":"fa fa-info",
+                                        "separator_before":true,
+                                        "action": function (obj) {
+                                            //$node.original.fileName;
+                                            if( (utilsIsObjectNullOrUndefined($node.original.fileName) == false) && (utilsIsStrNullOrEmpty($node.original.fileName) == false) )
+                                            {
+                                                var iNumberOfProdcuts = oController.m_aoProducts.length;
+                                                for(var iIndexProduct = 0; iIndexProduct < iNumberOfProdcuts ; iIndexProduct++)
+                                                {
+                                                    if( oController.m_aoProducts[iIndexProduct].fileName == $node.original.fileName)
+                                                    {
+                                                        oController.openProductInfoDialog(oController.m_aoProducts[iIndexProduct]);
+                                                        break;
+                                                    }
+
+                                                }
+
+                                            }
+                                        }
+                                    },
+                                    "DeleteProduct": {
+                                        "label": "Delete Product",
+                                        "icon":"fa fa-trash",
+
+                                        "action": function (obj) {
+
+                                            utilsVexDialogConfirmWithCheckBox("Deleting product. Are you sure?", function (value) {
+                                                var bDeleteFile = false;
+                                                var bDeleteLayer = false;
+                                                if (value) {
+                                                    if (value.files == 'on')
+                                                        bDeleteFile = true;
+                                                    if (value.geoserver == 'on')
+                                                        bDeleteLayer = true;
+                                                    this.temp = $node;
+                                                    var that = this;
+                                                    oController.m_oProductService.deleteProductFromWorkspace($node.original.fileName, oController.m_oActiveWorkspace.workspaceId, bDeleteFile, bDeleteLayer)
+                                                        .success(function (data) {
+                                                            var iLengthLayer = oController.m_aoLayersList.length;
+                                                            var iLengthChildren_d = that.temp.children_d.length;
+
+                                                            for(var iIndexChildren = 0; iIndexChildren < iLengthChildren_d; iIndexChildren++)
+                                                            {
+                                                                for(var iIndexLayer = 0; iIndexLayer < iLengthLayer; iIndexLayer++)
+                                                                {
+                                                                    if( that.temp.children_d[iIndexChildren] ===  oController.m_aoLayersList[iIndexLayer].layerId)
+                                                                    {
+                                                                        oController.removeBandImage(oController.m_aoLayersList[iIndexChildren]);
+                                                                        break;
+                                                                    }
+
+                                                                }
+
+                                                            }
+
+                                                            //reload product list
+                                                            oController.getProductListByWorkspace();
+
+
+                                                        }).error(function (error) {
+                                                            utilsVexDialogAlertTop("Error in delete product.");
+                                                    });
+                                                }
+
+                                            });
+                                        }
+                                    },
+
+                                    // "Merge": {
+                                    //     "label": "Merge ",
+                                    //     "action": function (obj) {
+                                    //         //$node.original.fileName;
+                                    //         oController.openMergeDialog($node.original.fileName);
+                                    //     }
+                                    // },
+
+                                    // "Rename": {
+                                    //     "label": "Rename",
+                                    //     "action": function (obj) {
+                                    //         //$node.original.fileName;
+                                    //         var oCallback = function(value){
+                                    //             if((utilsIsObjectNullOrUndefined(value.renameProduct) == true) ||(utilsIsStrNullOrEmpty(value.renameProduct) == true))
+                                    //                 return false;
+                                    //             var bResult = oController.renameNodeInTree($node.original.fileName,value.renameProduct);
+                                    //             if(bResult == false)
+                                    //                 console.log("Error: it's impossible rename the product");
+                                    //         }
+                                    //
+                                    //         utilsVexDialogChangeNameInTree("Insert new name",oCallback,$node.original.fileName);
+                                    //         // var bResult = oController.renameNodeInTree($node.original.fileName,"test");
+                                    //         // if(bResult == false)
+                                    //         //     console.log("Error: it's impossible rename the product");
+                                    //     }
+                                    // },
+                                    //SUBMENU RADAR
+
+
+                                    //SUBMENU OPTICAL
+
 
                                 };
                         }

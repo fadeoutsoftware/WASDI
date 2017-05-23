@@ -2,7 +2,7 @@
  * Created by a.corrado on 22/11/2016.
  */
 angular.module('wasdi.TreeDirective', [])
-    .directive('tree', ['ProductService','$http',function (oProductService,$http) {
+    .directive('tree', ['ProductService','ModalService','$http',function (oProductService,oModalService,$http) {
         "use strict";
 
         function linkFunction($scope, element, attr){
@@ -33,9 +33,13 @@ angular.module('wasdi.TreeDirective', [])
                      * */
 
                     var oNode = new Object();
-                    oNode.text=oElement.name;
-                    oNode.children= [];
-                    oNode.icon= "assets/icons/folder_20x20.png",
+                    oNode.text = oElement.name;
+                    oNode.attributes = oElement.attributes;
+                    oNode.children = [];
+                    if(!oNode.attributes)
+                        oNode.icon = "assets/icons/folder_20x20.png";
+                    else
+                        oNode.icon = "fa fa-info-circle fa-lg";
                     oNewTree.push(oNode);
 
                     if(oElement.elements != null)// if is a leaf
@@ -105,6 +109,7 @@ angular.module('wasdi.TreeDirective', [])
                             //data.event.type !="contextmenu" => discard right click of mouse (plugin)
                             if (angular.isUndefined(data.event))
                                 return;
+
                             if(!utilsIsObjectNullOrUndefined(data.node) && data.event.type !="contextmenu")
                             {
                                 //$scope.m_oController.m_oProcessesLaunchedService.thereIsPublishBandProcessOfTheProduct(data.node.id) == false &&
@@ -175,11 +180,32 @@ angular.module('wasdi.TreeDirective', [])
                         });
 
                         ///* BIND EVENT DOUBLE CLICK */
-                        //$("#jstree").delegate("a","dblclick", function(e) {
-                        //    var instance = $.jstree.reference(this);
-                        //    var node = instance.get_node(this);
-                        //
-                        //});
+                        $("#jstree").delegate("a","dblclick", function(e) {
+                           var instance = $.jstree.reference(this);
+                           var node = instance.get_node(this);
+                            if( (utilsIsObjectNullOrUndefined(node.original.attributes) === false) && (node.original.attributes.length > 0))
+                            {
+                                oModalService.showModal({
+                                    templateUrl: "dialogs/attributes_metadata_info/AttributesMetadataDialog.html",
+                                    controller: "AttributesMetadataController",
+                                    inputs: {
+                                        extras: {
+                                            metadataAttributes:node.original.attributes,
+                                            nameNode:node.text
+                                        }
+                                    }
+                                }).then(function (modal) {
+                                    modal.element.modal();
+                                    modal.close.then(function (result) {
+                                        if(utilsIsObjectNullOrUndefined(result)===true)
+                                            return false;
+                                        oController.m_oScope.Result = result;
+                                    });
+                                });
+
+                                return true;
+                            }
+                        });
 
                         //bind event (event = after tree is loaded do checkTreeNode())
                         /*
