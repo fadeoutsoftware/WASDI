@@ -4,13 +4,22 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
+import javax.servlet.ServletConfig;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 
 import it.fadeout.Wasdi;
+import it.fadeout.mercurius.business.Message;
+import it.fadeout.mercurius.client.MercuriusAPI;
+import it.fadeout.sftp.SFTPManager;
 import wasdi.shared.business.User;
 import wasdi.shared.business.UserSession;
 import wasdi.shared.data.SessionRepository;
@@ -23,6 +32,9 @@ import wasdi.shared.viewmodels.UserViewModel;
 
 @Path("/auth")
 public class AuthResource {
+	
+	@Context
+	ServletConfig m_oServletConfig;
 	
 	@POST
 	@Path("/login")
@@ -144,5 +156,112 @@ public class AuthResource {
 		
 		return oResult;
 	}	
+
 	
+	@POST
+	@Path("/upload/createaccount")
+	@Produces({"application/json", "text/xml"})
+	public Response CreateSftpAccount(@HeaderParam("x-session-token") String sSessionId, String sEmail) {
+		
+		User oUser = Wasdi.GetUserFromSession(sSessionId);
+		if (oUser == null || Utils.isNullOrEmpty(oUser.getUserId())) return Response.status(Status.UNAUTHORIZED).build();
+		String sAccount = oUser.getUserId();
+		
+		String wsAddress = m_oServletConfig.getInitParameter("sftpManagementWSServiceAddress");
+		if (wsAddress==null) wsAddress = "ws://localhost:6703"; 
+		SFTPManager oManager = new SFTPManager(wsAddress);
+		String sPassword = UUID.randomUUID().toString().split("-")[0];
+		
+		if (!oManager.createAccount(sAccount, sPassword)) return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+		
+		sendPasswordEmail(sEmail, sAccount, sPassword);
+	    
+		return Response.ok().build();
+	}
+	
+	
+	@GET
+	@Path("/upload/existsaccount")
+	@Produces({"application/json", "text/xml"})
+	public boolean ExixtsSftpAccount(@HeaderParam("x-session-token") String sSessionId) {
+		
+		User oUser = Wasdi.GetUserFromSession(sSessionId);
+		if (oUser == null || Utils.isNullOrEmpty(oUser.getUserId())) return false;		
+		String sAccount = oUser.getUserId();		
+		
+		String wsAddress = m_oServletConfig.getInitParameter("sftpManagementWSServiceAddress");
+		if (wsAddress==null) wsAddress = "ws://localhost:6703"; 
+		SFTPManager oManager = new SFTPManager(wsAddress);
+
+		return oManager.checkUser(sAccount);
+	}
+
+
+	@GET
+	@Path("/upload/list")
+	@Produces({"application/json", "text/xml"})
+	public String[] ListSftpAccount(@HeaderParam("x-session-token") String sSessionId) {
+		
+		User oUser = Wasdi.GetUserFromSession(sSessionId);
+		if (oUser == null || Utils.isNullOrEmpty(oUser.getUserId())) return null;		
+		String sAccount = oUser.getUserId();		
+		
+		String wsAddress = m_oServletConfig.getInitParameter("sftpManagementWSServiceAddress");
+		if (wsAddress==null) wsAddress = "ws://localhost:6703"; 
+		SFTPManager oManager = new SFTPManager(wsAddress);
+
+		return oManager.list(sAccount);
+	}
+
+	@DELETE
+	@Path("/upload/removeaccount")
+	@Produces({"application/json", "text/xml"})
+	public Response RemoveSftpAccount(@HeaderParam("x-session-token") String sSessionId) {
+		
+		User oUser = Wasdi.GetUserFromSession(sSessionId);
+		if (oUser == null || Utils.isNullOrEmpty(oUser.getUserId())) return Response.status(Status.UNAUTHORIZED).build();		
+		String sAccount = oUser.getUserId();
+		
+		String wsAddress = m_oServletConfig.getInitParameter("sftpManagementWSServiceAddress");
+		if (wsAddress==null) wsAddress = "ws://localhost:6703"; 
+		SFTPManager oManager = new SFTPManager(wsAddress);
+
+		return oManager.removeAccount(sAccount) ? Response.ok().build() : Response.status(Status.INTERNAL_SERVER_ERROR).build();
+	}
+
+
+	@POST
+	@Path("/upload/updatepassword")
+	@Produces({"application/json", "text/xml"})
+	public Response UpdateSftpPassword(@HeaderParam("x-session-token") String sSessionId, String sEmail) {
+		
+		User oUser = Wasdi.GetUserFromSession(sSessionId);
+		if (oUser == null || Utils.isNullOrEmpty(oUser.getUserId())) return Response.status(Status.UNAUTHORIZED).build();		
+		String sAccount = oUser.getUserId();
+		
+		String wsAddress = m_oServletConfig.getInitParameter("sftpManagementWSServiceAddress");
+		if (wsAddress==null) wsAddress = "ws://localhost:6703"; 
+		SFTPManager oManager = new SFTPManager(wsAddress);
+		
+		String sPassword = UUID.randomUUID().toString().split("-")[0];
+		
+		if (!oManager.updatePassword(sAccount, sPassword)) return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+		
+		sendPasswordEmail(sEmail, sAccount, sPassword);
+
+		return Response.ok().build();
+	}
+
+	private void sendPasswordEmail(String sEmail, String sAccount, String sPassword) {
+		//send email with new password
+		MercuriusAPI oAPI = new MercuriusAPI("http://***REMOVED***/it.fadeout.mercurius.webapi");			
+		Message oMessage = new Message();
+		oMessage.setTilte("Wasdi sftp account");
+		String sSenser = m_oServletConfig.getInitParameter("sftpManagementMailSenser");
+		if (sSenser==null) sSenser = "adminwasdi@wasdi.org";
+		oMessage.setSender(sSenser);
+		oMessage.setMessage("USER: " + sAccount + " - PASSWORD: " + sPassword);
+		oAPI.sendMailDirect(sEmail, oMessage);
+	}
+
 }
