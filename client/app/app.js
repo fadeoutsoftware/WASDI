@@ -145,3 +145,4 @@ wasdiApp.controller("MultilookingController",MultilookingController);
 wasdiApp.controller("NDVIController",NDVIController);
 wasdiApp.controller("ProductEditorInfoController",ProductEditorInfoController);
 wasdiApp.controller("RangeDopplerTerrainCorrectionController",RangeDopplerTerrainCorrectionController);
+wasdiApp.controller("AttributesMetadataController",AttributesMetadataController);

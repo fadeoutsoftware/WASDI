@@ -1,0 +1,54 @@
+.attributes-metadata-modal
+{
+  .modal-dialog
+  {
+    width:50%;
+    .modal-content
+    {
+      .modal-header
+      {
+        color:$wasdi-white;
+        background-color: $wasdi-blue-logo;
+        .close
+        {
+          color: $wasdi-white;
+          opacity: 1;
+        }
+      }
+
+      .modal-body
+      {
+        .attributes-metadata-table
+        {
+          display: inline-block;
+          overflow-y: scroll;
+          max-height:400px;
+          width: 100%;
+          table {
+            text-align: center;
+            margin: auto;
+            thead
+            {
+              font-weight: bold;
+            }
+            th
+            {
+              text-align: center;
+              margin: auto;
+            }
+
+          }
+        }
+      }
+
+      .modal-footer
+      {
+        border-top:1px solid $wasdi-blue-logo;
+        .my-button
+        {
+          padding: 10px 21px;
+        }
+      }
+    }
+  }
+}

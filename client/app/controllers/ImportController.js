@@ -460,18 +460,19 @@ var ImportController = (function() {
                     //        oController.countPages();
                     //        oController.generateLayersList(aoData.feed);
                     //    }
-                    //TODO CHECK IF DATA == "" sometimes the opensearch doesnt work
+
                     if (!utilsIsObjectNullOrUndefined(sResults.data) && sResults.data != "" ) {
 
                         var aoData = sResults.data;
-                        oController.m_iTotalOfProducts = aoData.feed['opensearch:totalResults'];
+                        //TODO WHERE IS TOTAL OF PRODUCTS?
+                        oController.m_iTotalOfProducts = aoData.length;//aoData.feed['opensearch:totalResults'];
 
                         //save open search params in service
                         oController.m_oResultsOfSearchService.setTotalOfProducts(oController.m_iTotalOfProducts);
                         oController.countPages();
                         //save open search params in service
                         oController.m_oResultsOfSearchService.setTotalPages(oController.m_iTotalPages);
-                        oController.generateLayersList(aoData.feed);
+                        oController.generateLayersList(aoData)//.feed;
                     }
                     else
                     {
@@ -583,7 +584,7 @@ var ImportController = (function() {
             console.log("Error there isn't workspaceID or layer");
             return false;
         }
-        var url = this.getDownloadLink(oLayer.layerProperty);
+        var url = oLayer.link;
         if(utilsIsObjectNullOrUndefined(url))
         {
             //TODO CHECK THIS POSSIBLE CASE
@@ -685,91 +686,113 @@ var ImportController = (function() {
     * Generate layers list
     * */
 
-    ImportController.prototype.generateLayersList=function(aData)
+    ImportController.prototype.generateLayersList = function(aData)
     {
         var oController = this;
-
-        if (utilsIsObjectNullOrUndefined(aData.entry)) {
-            this.m_bIsVisibleListOfLayers = false;
-            utilsVexDialogAlertBottomRightCorner('no layers found');
-            return;
-        }
-
-        var aoLayers =  aData.entry;
-
-        if( ! Array.isArray(aoLayers))// if the later is alone it'isnt a array but a object
+        if(utilsIsObjectNullOrUndefined(aData) === true)
+            return false;
+        var iDataLength = aData.length;
+        for(var iIndexData = 0; iIndexData < iDataLength; iIndexData++)
         {
-            aoLayers = [aoLayers];
+            var oSummary =  this.stringToObjectSummary(aData[iIndexData].summary);//change summary string to array
+            aData[iIndexData].summary = oSummary;
+
+            if(utilsIsObjectNullOrUndefined( aData[iIndexData].preview) || utilsIsStrNullOrEmpty( aData[iIndexData].preview))
+                aData[iIndexData].preview = "assets/icons/ImageNotFound.svg";//default value ( set it if there isn't the image)
+
+            //get bounds
+            var aaBounds = oController.polygonToBounds( aData[iIndexData].footprint);
+            oRectangle = oController.m_oMapService.addRectangleOnMap(aaBounds ,null,iIndexData);
+            aData[iIndexData].rectangle = oRectangle;
+            aData[iIndexData].bounds = aaBounds;
+            /*create rectangle*/
+            // var oRectangle = null;
+            // var aasBounds = oController.getBoundsByLayerFootPrint(aoLayers[iIndexLayers]);
+            // oRectangle = oController.m_oMapService.addRectangleOnMap(aasBounds ,null,iIndexLayers);
+
+            oController.m_aoProductsList.push(aData[iIndexData]);
         }
-
-        if(utilsIsObjectNullOrUndefined(aoLayers))
-            var iLength = 0;
-        else
-            var iLength = aoLayers.length;
-
-        for(var iIndexLayers = 0; iIndexLayers < iLength; iIndexLayers++)
-        {
-            //CREATE RECTANGLE
-            var oRectangle = null;
-            var aasBounds = oController.getBoundsByLayerFootPrint(aoLayers[iIndexLayers]);
-            oRectangle = oController.m_oMapService.addRectangleOnMap(aasBounds ,null,iIndexLayers);
-            var sLink = "";
-            //TAKE LINK IMAGE
-            if(!utilsIsObjectNullOrUndefined(aoLayers[iIndexLayers].link))
-            {
-
-                for(var iIndexLink = 0 ;iIndexLink < aoLayers[iIndexLayers].link.length ;iIndexLink++)
-                {
-                    if(utilsIsObjectNullOrUndefined(aoLayers[iIndexLayers].link[iIndexLink].rel) && !utilsIsObjectNullOrUndefined(aoLayers[iIndexLayers].link[iIndexLink].href))
-                    {
-                        //find it!!
-                        sLink = aoLayers[iIndexLayers].link[iIndexLink].href;
-                        break;
-                    }
-                }
-            }
-
-            //TAKE SUMMARY
-            /*TODO CHANGE stringToObjectSummary() WITH JSON.parse() */
-            if(this.m_oConstantsService.testMode() == true)
-                var oSummary = this.stringToObjectSummary(aoLayers[iIndexLayers].summary);//.content
-            else
-                var oSummary = this.stringToObjectSummary(aoLayers[iIndexLayers].summary.content);//.content
-
-            var oPreview = oController.getPreviewLayer(aoLayers[iIndexLayers]);
-            if(utilsIsObjectNullOrUndefined(oPreview))
-                oPreview = "assets/icons/ImageNotFound.svg";
-            /*
-             m_aoProductsList[i]={
-                                    layerProperty:
-                                    summary:
-                                    id:
-                                    rectangle:
-                                    title:
-                                    preview:
-                                  }
-            * */
-
-            //GET TITLE
-            if(this.m_oConstantsService.testMode() == true)
-                var sTitle = aoLayers[iIndexLayers].title;
-            else
-                var sTitle = aoLayers[iIndexLayers].title.content;
-
-            //PUSH PRODUCT
-            oController.m_aoProductsList.push(
-                {
-                    layerProperty:aoLayers[iIndexLayers],
-                    bounds:aasBounds,
-                    summary:oSummary,
-                    id:aoLayers[iIndexLayers].id,
-                    rectangle:oRectangle,
-                    title:sTitle,
-                    preview:oPreview,
-                    link:sLink,
-                    relativeOrbit: oController.getRelativeOrbit(aoLayers[iIndexLayers].int),
-                });
-        }
+        // if (utilsIsObjectNullOrUndefined(aData.entry)) {
+        //     this.m_bIsVisibleListOfLayers = false;
+        //     utilsVexDialogAlertBottomRightCorner('no layers found');
+        //     return;
+        // }
+        //
+        // var aoLayers =  aData.entry;
+        //
+        // if( ! Array.isArray(aoLayers))// if the later is alone it'isnt a array but a object
+        // {
+        //     aoLayers = [aoLayers];
+        // }
+        //
+        // if(utilsIsObjectNullOrUndefined(aoLayers))
+        //     var iLength = 0;
+        // else
+        //     var iLength = aoLayers.length;
+        //
+        // for(var iIndexLayers = 0; iIndexLayers < iLength; iIndexLayers++)
+        // {
+        //     //CREATE RECTANGLE
+        //     var oRectangle = null;
+        //     var aasBounds = oController.getBoundsByLayerFootPrint(aoLayers[iIndexLayers]);
+        //     oRectangle = oController.m_oMapService.addRectangleOnMap(aasBounds ,null,iIndexLayers);
+        //     var sLink = "";
+        //     //TAKE LINK IMAGE
+        //     if(!utilsIsObjectNullOrUndefined(aoLayers[iIndexLayers].link))
+        //     {
+        //
+        //         for(var iIndexLink = 0 ;iIndexLink < aoLayers[iIndexLayers].link.length ;iIndexLink++)
+        //         {
+        //             if(utilsIsObjectNullOrUndefined(aoLayers[iIndexLayers].link[iIndexLink].rel) && !utilsIsObjectNullOrUndefined(aoLayers[iIndexLayers].link[iIndexLink].href))
+        //             {
+        //                 //find it!!
+        //                 sLink = aoLayers[iIndexLayers].link[iIndexLink].href;
+        //                 break;
+        //             }
+        //         }
+        //     }
+        //
+        //     //TAKE SUMMARY
+        //     /*TODO CHANGE stringToObjectSummary() WITH JSON.parse() */
+        //     if(this.m_oConstantsService.testMode() == true)
+        //         var oSummary = this.stringToObjectSummary(aoLayers[iIndexLayers].summary);//.content
+        //     else
+        //         var oSummary = this.stringToObjectSummary(aoLayers[iIndexLayers].summary.content);//.content
+        //
+        //     var oPreview = oController.getPreviewLayer(aoLayers[iIndexLayers]);
+        //     if(utilsIsObjectNullOrUndefined(oPreview))
+        //         oPreview = "assets/icons/ImageNotFound.svg";
+        //     /*
+        //      m_aoProductsList[i]={
+        //                             layerProperty:
+        //                             summary:
+        //                             id:
+        //                             rectangle:
+        //                             title:
+        //                             preview:
+        //                           }
+        //     * */
+        //
+        //     //GET TITLE
+        //     if(this.m_oConstantsService.testMode() == true)
+        //         var sTitle = aoLayers[iIndexLayers].title;
+        //     else
+        //         var sTitle = aoLayers[iIndexLayers].title.content;
+        //
+        //     //PUSH PRODUCT
+        //     oController.m_aoProductsList.push(
+        //         {
+        //             layerProperty:aoLayers[iIndexLayers],
+        //             bounds:aasBounds,
+        //             summary:oSummary,
+        //             id:aoLayers[iIndexLayers].id,
+        //             rectangle:oRectangle,
+        //             title:sTitle,
+        //             preview:oPreview,
+        //             link:sLink,
+        //             relativeOrbit: oController.getRelativeOrbit(aoLayers[iIndexLayers].int),
+        //         });
+        // }
 
         //save open search params in service
         oController.m_oResultsOfSearchService.setProductList(oController.m_aoProductsList);
@@ -897,6 +920,38 @@ var ImportController = (function() {
 
         return aasNewContent;
     }
+
+
+    /* CONVERT POLYGON FORMAT TO BOUND FORMAT */
+    ImportController.prototype.polygonToBounds=function (sContent) {
+        sContent = sContent.replace("POLYGON ","");
+        sContent = sContent.replace("((","");
+        sContent = sContent.replace("))","");
+        sContent = sContent.split(",");
+        var aasNewContent = [];
+        for (var iIndexBounds = 0; iIndexBounds < sContent.length; iIndexBounds++)
+        {
+            var aBounds = sContent[iIndexBounds];
+            var aNewBounds = aBounds.split(" ");
+
+            //var aoOutputPoint = proj4(sSourceProjection,sDestinationProjection,aNewBounds);
+
+            //var aBounds = sContent[iIndexBounds];
+            //var aNewBounds = aBounds.split(" ");
+
+            var oLatLonArray = [];
+
+            oLatLonArray[0] = JSON.parse(aNewBounds[1]); //Lat
+            oLatLonArray[1] = JSON.parse(aNewBounds[0]); //Lon
+
+
+            //var aoOutputPoint = proj4(sSourceProjection,sDestinationProjection,aNewBounds);
+
+            aasNewContent.push(oLatLonArray);
+        }
+        return aasNewContent;
+    }
+
     /*
         Usually the summary format is a string = "date:...,instrument:...,mode:...,satellite:...,size:...";
      */
