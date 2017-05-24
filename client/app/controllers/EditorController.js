@@ -143,45 +143,34 @@ var EditorController = (function () {
      * @param oMessage Received Message
      */
     /* THIS FUNCTION ARE CALLED IN RABBIT SERVICE */
-    EditorController.prototype.receivedDownloadMessage = function (oMessage) {
+    EditorController.prototype.receivedRabbitMessage = function (oMessage, sOperation) {
+
         if (oMessage == null) return;
+
         if (oMessage.messageResult == "KO") {
-            //alert('There was an error in the download');
-            utilsVexDialogAlertTop('There was an error in the download');
+            utilsVexDialogAlertTop('There was an error in the ' + oMessage.messageCode);
             return;
         }
         var oController = this;
+
         this.m_oProductService.addProductToWorkspace(oMessage.payload.fileName, this.m_oActiveWorkspace.workspaceId).success(function (data, status) {
+
             if (data.boolValue == true) {
                 //console.log('Product added to the ws');
                 var oDialog = utilsVexDialogAlertBottomRightCorner('Product added to the ws');
                 utilsVexCloseDialogAfterFewSeconds(3000, oDialog);
-                oController.getProductListByWorkspace();//oMessage.payload.name
-                oController.m_oLastDownloadedProduct = oMessage.payload.fileName; //the m_oLastDownloadedProduct will be select & open in jstree
+                oController.getProductListByWorkspace();
 
-                //oController.selectNodeByFileNameInTree(oMessage.payload.fileName);
-                //TODO SELECT NEW NODE
-
-                // $("#jstree").on('loaded.jstree', function(e, data) {
-                //     //$treeview.jstree(true).select_all();
-                //     oController.selectNodeByFileNameInTree(oMessage.payload.fileName);
-                //
-                // });
-
-                // $('#jstree').jstree(true).select_all();
-                // $('#jstree').jstree(true).select_node(oMessage.payload.fileName);
-                // $('#jstree').jstree(true).select_node(oMessage.payload.name);
-                // var oNode = $('#jstree').jstree(true).get_node(oMessage.payload.name);
-                //  $('#jstree').jstree(true).select_node('mn1');
+                //the m_oLastDownloadedProduct will be select & open in jstree
+                oController.m_oLastDownloadedProduct = oMessage.payload.fileName;
             }
             else {
-                utilsVexDialogAlertTop("Error in add product to workspace");
+                utilsVexDialogAlertTop("Error adding product to workspace");
             }
 
         }).error(function (data, status) {
-            utilsVexDialogAlertTop('Error adding product to the ws')
+            utilsVexDialogAlertTop('There was an error adding product to the ws')
         });
-
     }
 
 
@@ -1044,15 +1033,13 @@ var EditorController = (function () {
 
     /**
      *
-     * @param sName == selected node (it's the name node with blue background)
      */
-
-
-    EditorController.prototype.getProductListByWorkspace = function () {//sName
+    EditorController.prototype.getProductListByWorkspace = function () {
         var oController = this;
         oController.m_aoProducts = [];
 
         this.m_oProductService.getProductListByWorkspace(oController.m_oActiveWorkspace.workspaceId).success(function (data, status) {
+
             if (data != null) {
                 if (data != undefined) {
                     //push all products
@@ -1062,25 +1049,20 @@ var EditorController = (function () {
                         {
                             data[iIndex].productFriendlyName =  data[iIndex].name;
                         }
+
+                        // Add the product to the list
                         oController.m_aoProducts.push(data[iIndex]);
                     }
 
-                    // if( (utilsIsObjectNullOrUndefined(sName) == false) || (utilsIsStrNullOrEmpty(sName) == false) )
-                    //     oController.m_oTree = oController.generateTree(sName); // i need to make the tree after the products are loaded
-                    // else
-                        oController.m_oTree = oController.generateTree();   // i need to make the tree after the products are loaded
-
-
-                    //oController.m_oScope.$apply();
+                    // i need to make the tree after the products are loaded
+                    oController.m_oTree = oController.generateTree();
                 }
             }
         }).error(function (data, status) {
             utilsVexDialogAlertTop('Error reading product list');
-            //console.log('Error reading product list');
         });
     }
-    /* Search element in tree
-     * */
+
 
     //---------------- OPENWORKSPACE -----------------------
     // ReLOAD workspace when reload page
@@ -1093,6 +1075,7 @@ var EditorController = (function () {
                 if (data != undefined) {
                     oController.m_oConstantsService.setActiveWorkspace(data);
                     oController.m_oActiveWorkspace = oController.m_oConstantsService.getActiveWorkspace();
+
                     /*Start Rabbit WebStomp*/
                     oController.m_oRabbitStompServive.initWebStomp(oController.m_oActiveWorkspace, "EditorController", oController);
                     oController.getProductListByWorkspace();

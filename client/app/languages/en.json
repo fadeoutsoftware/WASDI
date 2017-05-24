@@ -115,7 +115,7 @@
     "DIALOG_MULTILOOKING_CHECKBOX_INDIPENDENT_LOOKS":"Indipendent Looks",
     "DIALOG_MULTILOOKING_NUMBER_OF_RANGE":"Number of Range Looks",
     "DIALOG_MULTILOOKING_NUMBER_OF_AZIMUTH":"Number of Azimuth Looks",
-    "DIALOG_MULTILOOKING_SQUARE_PIXEL":"Mean GR Squae Pixel",
+    "DIALOG_MULTILOOKING_SQUARE_PIXEL":"Mean GR Square Pixel",
     "DIALOG_MULTILOOKING_NOTE":"Note: Detection for complex data is done without resampling",
 
     "DIALOG_NDVI_TITLE":"NDVI",
