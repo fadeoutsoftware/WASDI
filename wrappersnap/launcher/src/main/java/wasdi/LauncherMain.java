@@ -26,11 +26,13 @@ import org.esa.snap.core.dataio.ProductReaderPlugIn;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.GeoCoding;
 import org.esa.snap.core.datamodel.Product;
+import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.core.util.geotiff.GeoCoding2GeoTIFFMetadata;
 import org.esa.snap.core.util.geotiff.GeoTIFF;
 import org.esa.snap.core.util.geotiff.GeoTIFFMetadata;
 import org.esa.snap.engine_utilities.util.MemUtils;
 import org.esa.snap.runtime.Config;
+import org.esa.snap.runtime.Engine;
 import org.geotools.referencing.CRS;
 
 import com.bc.ceres.glevel.MultiLevelImage;
@@ -174,8 +176,11 @@ public class LauncherMain {
             Config.instance("snap.auxdata").load(propFile);
             Config.instance().load();
 
-            JAI.getDefaultInstance().getTileScheduler().setParallelism(Runtime.getRuntime().availableProcessors());
-            MemUtils.configureJaiTileCache();
+            //JAI.getDefaultInstance().getTileScheduler().setParallelism(Runtime.getRuntime().availableProcessors());
+            //MemUtils.configureJaiTileCache();
+            
+            SystemUtils.init3rdPartyLibs(null);
+            Engine.start(false);
 
         }
         catch (IOException e) {
