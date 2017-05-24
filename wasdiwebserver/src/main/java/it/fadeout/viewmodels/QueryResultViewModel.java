@@ -14,6 +14,7 @@ public class QueryResultViewModel {
 	String id;
 	String link;
 	String footprint;
+	String provider;
 	Map<String, String> properties = new HashMap<String, String>();
 	
 	public String getPreview() {
@@ -57,5 +58,11 @@ public class QueryResultViewModel {
 	}
 	public void setProperties(Map<String, String> properties) {
 		this.properties = properties;
+	}
+	public String getProvider() {
+		return provider;
+	}
+	public void setProvider(String provider) {
+		this.provider = provider;
 	}
 }

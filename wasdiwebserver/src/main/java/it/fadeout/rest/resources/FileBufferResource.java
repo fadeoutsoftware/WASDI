@@ -85,7 +85,8 @@ public class FileBufferResource {
 	@GET
 	@Path("download")
 	@Produces({"application/xml", "application/json", "text/xml"})
-	public Response Download(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sFileUrl") String sFileUrl, @QueryParam("sWorkspaceId") String sWorkspaceId, @QueryParam("sBoundingBox") String sBoundingBox) throws IOException
+	public Response Download(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sFileUrl") String sFileUrl, @QueryParam("sProvider") String sProvider, 
+			@QueryParam("sWorkspaceId") String sWorkspaceId, @QueryParam("sBoundingBox") String sBoundingBox) throws IOException
 	{
 		try {
 
@@ -112,7 +113,8 @@ public class FileBufferResource {
 			oParameter.setUserId(sUserId);
 			oParameter.setExchange(sWorkspaceId);
 			oParameter.setBoundingBox(sBoundingBox);
-			
+			oParameter.setDownloadUser(m_oServletConfig.getInitParameter(sProvider+".OSUser"));
+			oParameter.setDownloadPassword(m_oServletConfig.getInitParameter(sProvider+".OSPwd"));
 			try
 			{
 				oProcess = new ProcessWorkspace();
