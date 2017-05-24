@@ -6,6 +6,7 @@
 angular.module('wasdi.ProcessesLaunchedService', ['wasdi.ProcessesLaunchedService']).
 service('ProcessesLaunchedService', ['ConstantsService','$rootScope','$http', function (oConstantsService,$rootScope,$http) {
     this.m_aoProcessesRunning = [];
+    this.m_aoProcessesStopped = []
     /*
     * this.m_aoProcessesRunning  is a list of object
     * {processName: , nodeId:,typeOfProcess: }
@@ -37,7 +38,7 @@ service('ProcessesLaunchedService', ['ConstantsService','$rootScope','$http', fu
             });
     }
 
-    this.removeProcessInServer = function(sPidInput,sWorkSpaceId)
+    this.removeProcessInServer = function(sPidInput,sWorkSpaceId,oProcess)
     {
         if(utilsIsObjectNullOrUndefined(sPidInput)===true)
             return false;
@@ -46,8 +47,14 @@ service('ProcessesLaunchedService', ['ConstantsService','$rootScope','$http', fu
         this.m_oHttp.get(this.APIURL + '/process/delete?sProcessObjId=' + sPidInput)// /ws/processbyws = /process/byws
             .success(function (data, status)
             {
+
                 if(utilsIsObjectNullOrUndefined(sWorkSpaceId) === false )
+                {
+                    oProcess.status = "stopped";
+                    oController.m_aoProcessesStopped.push(oProcess);
                     oController.loadProcessesFromServer(sWorkSpaceId);
+
+                }
 
                 // oController.loadProcessesFromServer()
             })
@@ -325,6 +332,23 @@ service('ProcessesLaunchedService', ['ConstantsService','$rootScope','$http', fu
         return this.TYPE_OF_PROCESS[1];
     }
 
+    this.checkIfProcessWasStopped = function(oProcessInput)
+    {
+        if(!this.m_aoProcessesStopped)
+            return false;
+        var iLengthProcessesStopped = this.m_aoProcessesStopped.length;
+        for(var iIndexProcess = 0; iIndexProcess < iLengthProcessesStopped;  iIndexProcess++)
+        {
+            if( (this.m_aoProcessesStopped[iIndexProcess].processObjId === oProcessInput.processObjId) && (this.m_aoProcessesStopped[iIndexProcess].operationType === oProcessInput.operationType)
+                &&(this.m_aoProcessesStopped[iIndexProcess].operationDate === oProcessInput.operationDate) && (this.m_aoProcessesStopped[iIndexProcess].pid === oProcessInput.pid)
+                &&(this.m_aoProcessesStopped[iIndexProcess].product_name === oProcessInput.product_name) )
+            {
+                return true;
+            }
+
+        }
+        return false;
+    }
     //this.addProcessToList= function (sProcessName,sTypeOfProcess,sTimeStamp)
     //{
     //    if(utilsIsObjectNullOrUndefined(sProcessName))

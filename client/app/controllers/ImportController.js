@@ -441,7 +441,13 @@ var ImportController = (function() {
         this.m_oResultsOfSearchService.setMissions(this.m_aoMissions);
         this.m_oResultsOfSearchService.setActiveWorkspace(this.m_oActiveWorkspace);
         //this.m_oResultsOfSearchService.setMissions(this.m_aoMissions);
-
+        this.m_oSearchService.getProductsCount().then(
+            function(result)
+            {
+                var temp=result;
+            }, function errorCallback(response) {
+                var temp=response;
+            });
         //this.m_oSearchService.getProductsCount().then(function(result){
         //    //TODO CHECK DATA
         //    oController.m_iTotalOfProducts = result.data;
@@ -601,7 +607,7 @@ var ImportController = (function() {
         //    oLayer.bounds[iIndex][0] = oLayer.bounds[iIndex][1];
         //    oLayer.bounds[iIndex][1] = swap;
         //}
-        this.m_oFileBufferService.download(url,oWorkSpace.workspaceId,oLayer.bounds.toString()).success(function (data, status) {
+        this.m_oFileBufferService.download(url,oWorkSpace.workspaceId,oLayer.bounds.toString(),oLayer.provider).success(function (data, status) {
             //TODO CHECK DATA-STATUS
             var oDialog = utilsVexDialogAlertBottomRightCorner("Product just start the download");
             //oController.m_oProcessesLaunchedService.addProcessesByLocalStorage(oLayer.title,
@@ -795,7 +801,7 @@ var ImportController = (function() {
         // }
 
         //save open search params in service
-        oController.m_oResultsOfSearchService.setProductList(oController.m_aoProductsList);
+        // oController.m_oResultsOfSearchService.setProductList(oController.m_aoProductsList);
 
     }
 

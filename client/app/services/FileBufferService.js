@@ -12,15 +12,16 @@ service('FileBufferService', ['$http',  'ConstantsService', function ($http, oCo
     //    //sUrl="https://scihub.copernicus.eu/dhus/odata/v1/Products('ed9c834d-0d8c-47d2-8337-3036bd14d0f3')/$value";
     //    return this.m_oHttp.get(this.APIURL + '/filebuffer/download?sFileUrl='+sUrl+"&sWorkspaceId="+sWorkspaceId);
     //}
-    this.download = function(sUrl, sWorkspaceId,sBounds) {
+    this.download = function(sUrl, sWorkspaceId,sBounds,sProvider) {
         //sUrl="https://scihub.copernicus.eu/dhus/odata/v1/Products('ed9c834d-0d8c-47d2-8337-3036bd14d0f3')/$value";
-        return this.m_oHttp.get(this.APIURL + '/filebuffer/download?sFileUrl='+sUrl+"&sWorkspaceId="+sWorkspaceId+"&sBoundingBox="+sBounds);
+        return this.m_oHttp.get(this.APIURL + '/filebuffer/download?sFileUrl='+sUrl+"&sWorkspaceId="+sWorkspaceId+"&sBoundingBox="+sBounds+'&sProvider='+sProvider);
     }
     this.publish = function(sUrl, sWorkspaceId) {
         return this.m_oHttp.get(this.APIURL + '/filebuffer/publish?sFileUrl='+sUrl+"&sWorkspaceId="+sWorkspaceId);
     }
 
     this.publishBand = function(sUrl, sWorkspaceId, sBand) {
+
         return this.m_oHttp.get(this.APIURL + '/filebuffer/publishband?sFileUrl='+sUrl+"&sWorkspaceId="+sWorkspaceId+'&sBand='+sBand);
         //return this.m_oHttp.get('http://localhost:8080/wasdiwebserver/rest/filebuffer/publishband?sFileUrl='+sUrl+"&sWorkspaceId="+sWorkspaceId+'&sBand='+sBand);
     }

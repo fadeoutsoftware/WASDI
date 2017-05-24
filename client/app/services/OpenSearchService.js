@@ -13,6 +13,7 @@ service('OpenSearchService', ['$http',  'ConstantsService', function ($http, oCo
     this.API_GET_PRODUCTS = "/search/sentinel/result?sQuery=";
     this.API_GET_PROVIDERS = "/search/providers";
     this.API_GET_SEARCH = "/search/query?sQuery=";
+
     //-------------------------------------
 
     this.getApiProductsCount = function (query) {
@@ -32,8 +33,11 @@ service('OpenSearchService', ['$http',  'ConstantsService', function ($http, oCo
         //return "http://localhost:8080/wasdiwebserver/rest/" + this.API_GET_PRODUCTS + query;
         //return "fake-data/feed.json";
         //return "fake-data/opensearch_fakeData.json";
-    }
-
+    };
+    this.getApiProductCountWithProviders = function(sQueryInput,sProvidersInput)
+    {
+        return this.APIURL + '/search/query/count?sQuery=' + sQueryInput +"&sProviders="+sProvidersInput;
+    };
     this.getListOfProvider = function()
     {
         return this.m_oHttp.get(this.APIURL + this.API_GET_PROVIDERS);

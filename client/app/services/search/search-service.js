@@ -152,7 +152,8 @@ angular
                 //console.log('filter prodcount',filter);
                 var prodCountUrl = ':filter';
                 prodCountUrl = prodCountUrl.replace(":filter", (filter) ? filter : '*');
-                return $http({url: OpenSearchService.getApiProductsCount(prodCountUrl), method: "GET"});
+               // return $http({url: OpenSearchService.getApiProductsCount(prodCountUrl), method: "GET"});
+                return $http({url: OpenSearchService.getApiProductCountWithProviders(prodCountUrl,this.providers), method: "GET"});
 
             },
             getSuggestions: function (query) {

@@ -1742,6 +1742,29 @@ var EditorController = (function () {
         });
 
         return true;
+    };
+    EditorController.prototype.openSFTPDialog = function (oProductInput)
+    {
+        var oController = this;
+        this.m_oModalService.showModal({
+            templateUrl: "dialogs/sftp_upload/SftpUploadDialog.html",
+            controller: "SftpUploadController",
+            inputs: {
+                extras: {
+                    product:oProductInput
+                }
+            }
+        }).then(function (modal) {
+            modal.element.modal();
+            modal.close.then(function (result) {
+                if(utilsIsObjectNullOrUndefined(result)===true)
+                    return false;
+                //TODO ADD FILENAME = RESULT
+                oController.m_oScope.Result = result;
+            });
+        });
+
+        return true;
     }
 
     EditorController.prototype.rangeDopplerTerrainCorrectionDialog = function (oSelectedProduct)
