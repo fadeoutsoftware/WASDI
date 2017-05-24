@@ -86,6 +86,7 @@ public class DownloadFile {
         String sReturnFilePath = "";
 
         // TODO: Here we are assuming dhus authentication. But we have to find a general solution
+        LauncherMain.s_oLogger.debug("DownloadFile.ExecuteDownloadFile: sDownloadUser = " + sDownloadUser + " - sDownloadPassword = " + sDownloadPassword);
         if (sDownloadUser!=null) {
             Authenticator.setDefault(new Authenticator() {
                 protected PasswordAuthentication getPasswordAuthentication() {
