@@ -359,10 +359,10 @@ public class LauncherMain {
                 }
 
                 if (oAlreadyDownloaded == null) {
-                    s_oLogger.debug("LauncherMain.Download: File not already downloaded. Download it on " + oParameter.getOpenSearchProvider() + " hub");
+                    s_oLogger.debug("LauncherMain.Download: File not already downloaded. Download it");
 
                     // No: it isn't: download it
-                    sFileName = oDownloadFile.ExecuteDownloadFile(oParameter.getUrl(), sDownloadPath);
+                    sFileName = oDownloadFile.ExecuteDownloadFile(oParameter.getUrl(), oParameter.getDownloadUser(), oParameter.getDownloadPassword(), sDownloadPath);
 
                     // Get The product view Model
                     ReadProduct oReadProduct = new ReadProduct();

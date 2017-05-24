@@ -71,7 +71,7 @@ public class DownloadFile {
     }
 
     //https://scihub.copernicus.eu/dhus/odata/v1/Products('18f7993d-eae1-4f7f-9d81-d7cf19c18378')/$value
-    public String ExecuteDownloadFile(String sFileURL, String sSaveDirOnServer) throws IOException {
+    public String ExecuteDownloadFile(String sFileURL, String sDownloadUser, String sDownloadPassword, String sSaveDirOnServer) throws IOException {
 
         // Domain check
         if (Utils.isNullOrEmpty(sFileURL)) {
@@ -86,17 +86,20 @@ public class DownloadFile {
         String sReturnFilePath = "";
 
         // TODO: Here we are assuming dhus authentication. But we have to find a general solution
-        Authenticator.setDefault(new Authenticator() {
-            protected PasswordAuthentication getPasswordAuthentication() {
-                try{
-                    return new PasswordAuthentication(ConfigReader.getPropValue("DHUS_USER"), ConfigReader.getPropValue("DHUS_PASSWORD").toCharArray());
+        if (sDownloadUser!=null) {
+            Authenticator.setDefault(new Authenticator() {
+                protected PasswordAuthentication getPasswordAuthentication() {
+                    try{
+//                        return new PasswordAuthentication(ConfigReader.getPropValue("DHUS_USER"), ConfigReader.getPropValue("DHUS_PASSWORD").toCharArray());
+                    	return new PasswordAuthentication(sDownloadUser, sDownloadPassword.toCharArray());
+                    }
+                    catch (Exception oEx){
+                        LauncherMain.s_oLogger.debug("DownloadFile.ExecuteDownloadFile: exception setting auth " + oEx.toString());
+                    }
+                    return null;
                 }
-                catch (Exception oEx){
-                    LauncherMain.s_oLogger.debug("DownloadFile.ExecuteDownloadFile: exception setting auth " + oEx.toString());
-                }
-                return null;
-            }
-        });
+            });        	
+        }
 
         LauncherMain.s_oLogger.debug("DownloadFile.ExecuteDownloadFile: FileUrl = " + sFileURL);
 
