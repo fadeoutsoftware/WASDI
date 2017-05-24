@@ -47,11 +47,13 @@ service('RabbitStompService', ['$http',  'ConstantsService','$interval','Process
 
 
         /**
+         * Called when the client receives a STOMP message from the server
          * Rabbit Callback: receives the Messages
          * @param message
          */
         var oRabbitCallback = function (message) {
-            // called when the client receives a STOMP message from the server
+
+            // Check message Body
             if (message.body)
             {
                 console.log("got message with body " + message.body)
@@ -63,10 +65,15 @@ service('RabbitStompService', ['$http',  'ConstantsService','$interval','Process
                 // oMessageResult.messageResult = "KO";
 
                 if (oMessageResult == null) return;
+
                 if (oMessageResult.messageResult == "KO") {
 
                     // utilsVexDialogAlertTop("There was an error in the RabbitCallback");
-                    oController.m_aoErrorsList.push({text:"There was an error in the RabbitCallback"});
+
+                    var sOperation = "null";
+                    if (utilsIsStrNullOrEmpty(oMessageResult.messageCode) == false  ) sOperation = oMessageResult.messageCode;
+
+                    oController.m_aoErrorsList.push({text:"There was an error in the " + sOperation + " operation"});
                     oController.m_oProcessesLaunchedService.loadProcessesFromServer(oController.m_oActiveWorkspace.workspaceId);
 
                     //alert('There was an error in the RabbitCallback');
@@ -74,23 +81,23 @@ service('RabbitStompService', ['$http',  'ConstantsService','$interval','Process
                 }
 
                 //Reject the messages for an other workspace
-                if(oMessageResult.workspaceId != oController.m_oActiveWorkspace.workspaceId)
-                    return false;
-                // Route the message
+                if(oMessageResult.workspaceId != oController.m_oActiveWorkspace.workspaceId) return false;
 
+
+                // Route the message
                 switch(oMessageResult.messageCode)
                 {
                     case "DOWNLOAD":
                         if(sControllerName == "EditorController" || sControllerName == "ImportController" || sControllerName === "SearchOrbitController")
                         {
-                            oControllerActive.receivedDownloadMessage(oMessageResult);
+                            oControllerActive.receivedRabbitMessage(oMessageResult, oMessageResult.messageCode);
                             oController.m_oProcessesLaunchedService.loadProcessesFromServer(oController.m_oActiveWorkspace.workspaceId);
                             var oDialog = utilsVexDialogAlertBottomRightCorner("The download is ended");
                             utilsVexCloseDialogAfterFewSeconds(3000,oDialog);
                         }
                         break;
                     case "PUBLISH":
-                        if(sControllerName == "EditorController" )
+                        if(sControllerName == "EditorController")
                         {
                             oControllerActive.receivedPublishMessage(oMessageResult);
                             oController.m_oProcessesLaunchedService.loadProcessesFromServer(oController.m_oActiveWorkspace.workspaceId);
@@ -119,14 +126,14 @@ service('RabbitStompService', ['$http',  'ConstantsService','$interval','Process
                         console.log("UPDATE PROCESSES"+" " +utilsGetTimeStamp());
                         break;
                     case "APPLYORBIT":
-                        oControllerActive.receivedDownloadMessage(oMessageResult);
+                        oControllerActive.receivedRabbitMessage (oMessageResult, oMessageResult.messageCode);
 
                         oController.m_oProcessesLaunchedService.loadProcessesFromServer(oController.m_oActiveWorkspace.workspaceId);
                         var oDialog = utilsVexDialogAlertBottomRightCorner("Apply orbit Completed");
                         utilsVexCloseDialogAfterFewSeconds(6000,oDialog);
                         break;
                     case "CALIBRATE":
-                        oControllerActive.receivedDownloadMessage(oMessageResult);
+                        oControllerActive.receivedRabbitMessage (oMessageResult, oMessageResult.messageCode);
 
                         oController.m_oProcessesLaunchedService.loadProcessesFromServer(oController.m_oActiveWorkspace.workspaceId);
                         var oDialog = utilsVexDialogAlertBottomRightCorner("Radiometric Calibrate Completed");
@@ -134,7 +141,7 @@ service('RabbitStompService', ['$http',  'ConstantsService','$interval','Process
                         break;
                     case "MULTILOOKING":
 
-                        oControllerActive.receivedDownloadMessage(oMessageResult);
+                        oControllerActive.receivedRabbitMessage (oMessageResult, oMessageResult.messageCode);
 
                         oController.m_oProcessesLaunchedService.loadProcessesFromServer(oController.m_oActiveWorkspace.workspaceId);
                         var oDialog = utilsVexDialogAlertBottomRightCorner("Multilooking Completed");
@@ -142,7 +149,7 @@ service('RabbitStompService', ['$http',  'ConstantsService','$interval','Process
                         break;
                     case "NDVI":
 
-                        oControllerActive.receivedDownloadMessage(oMessageResult);
+                        oControllerActive.receivedRabbitMessage (oMessageResult, oMessageResult.messageCode);
 
                         oController.m_oProcessesLaunchedService.loadProcessesFromServer(oController.m_oActiveWorkspace.workspaceId);
                         var oDialog = utilsVexDialogAlertBottomRightCorner("NDVI Completed");
@@ -150,7 +157,7 @@ service('RabbitStompService', ['$http',  'ConstantsService','$interval','Process
                         break;
                     case "TERRAIN":
 
-                         oControllerActive.receivedDownloadMessage(oMessageResult);
+                         oControllerActive.receivedRabbitMessage (oMessageResult, oMessageResult.messageCode);
 
                         oController.m_oProcessesLaunchedService.loadProcessesFromServer(oController.m_oActiveWorkspace.workspaceId);
                         var oDialog = utilsVexDialogAlertBottomRightCorner("Range doppler terrain correction Completed");

@@ -35,9 +35,14 @@ service('GlobeService', ['$http',  'ConstantsService', function ($http, oConstan
         {
             // browser supports WebGL
             // default globe
-            this.m_oWasdiGlobe = new Cesium.Viewer(sGlobeDiv, this.oGlobeOptions);
+            try {
+                this.m_oWasdiGlobe = new Cesium.Viewer(sGlobeDiv, this.oGlobeOptions);
+                this.m_aoLayers = this.m_oWasdiGlobe.imageryLayers;
+            }
+            catch(err) {
+                console.log("Error in Cesium Globe: " + err);
 
-            this.m_aoLayers = this.m_oWasdiGlobe.imageryLayers;
+            }
         }
         else
         {

@@ -1112,7 +1112,7 @@ var ImportController = (function() {
         return true;
     }
 
-    ImportController.prototype.receivedDownloadMessage = function (oMessage) {
+    ImportController.prototype.receivedRabbitMessage  = function (oMessage, sOperation) {
 
         if (oMessage == null) return;
         if (oMessage.messageResult=="KO") {
@@ -1126,10 +1126,6 @@ var ImportController = (function() {
             {
                 var oDialog = utilsVexDialogAlertBottomRightCorner('Product added to the ws');
                 utilsVexCloseDialogAfterFewSeconds(3000, oDialog);
-                //console.log('Product added to the ws');
-                //oController.m_oProcessesLaunchedService.removeProcessByPropertySubstringVersion("processName",oMessage.payload.fileName,
-                //    oController.m_oActiveWorkspace.workspaceId,oController.m_oUser.userId);
-                //oController.m_oProcessesLaunchedService.loadProcessesFromServer(oController.m_oActiveWorkspace.workspaceId);
             }
             else
             {

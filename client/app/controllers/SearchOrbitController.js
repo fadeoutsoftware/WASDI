@@ -472,7 +472,7 @@ var SearchOrbitController = (function() {
     };
 
     /* RABBIT MQ METHOD */
-    SearchOrbitController.prototype.receivedDownloadMessage = function (oMessage) {
+    SearchOrbitController.prototype.receivedRabbitMessage  = function (oMessage, sOperation) {
 
         if (oMessage == null) return;
         if (oMessage.messageResult=="KO") {
@@ -486,10 +486,6 @@ var SearchOrbitController = (function() {
             {
                 var oDialog = utilsVexDialogAlertBottomRightCorner('Product added to the ws');
                 utilsVexCloseDialogAfterFewSeconds(3000, oDialog);
-                //console.log('Product added to the ws');
-                //oController.m_oProcessesLaunchedService.removeProcessByPropertySubstringVersion("processName",oMessage.payload.fileName,
-                //    oController.m_oActiveWorkspace.workspaceId,oController.m_oUser.userId);
-                //oController.m_oProcessesLaunchedService.loadProcessesFromServer(oController.m_oActiveWorkspace.workspaceId);
             }
             else
             {
