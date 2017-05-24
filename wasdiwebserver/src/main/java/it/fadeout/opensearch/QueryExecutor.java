@@ -107,18 +107,22 @@ public abstract class QueryExecutor {
 
 	private String buildUrl(String sQuery) {
 		Template oTemplate = getTemplate();
-		Map<String,Object> oParamsMap = new HashMap<String, Object>();
+		Map<String,Object> oParamsMap = new HashMap<String, Object>();		
 		oParamsMap.put("scheme", getUrlSchema());
 		oParamsMap.put("path", getUrlPath());
 		oParamsMap.put("start", m_sOffset);
 		oParamsMap.put("rows", m_sLimit);
 		oParamsMap.put("orderby", m_sSortedBy + " " + m_sOrder);
 		oParamsMap.put("q", sQuery);
+		addUrlParams(oParamsMap);
 		return oTemplate.expand(oParamsMap);
 		
 	}
-
 	
+	protected void addUrlParams(Map<String, Object> oParamsMap) {
+	}
+
+
 	protected String getUrlSchema() {
 		return "http";
 	}
@@ -144,7 +148,7 @@ public abstract class QueryExecutor {
 		for (Entry oEntry : oFeed.getEntries()) {
 
 			QueryResultViewModel oResult = new QueryResultViewModel();
-			
+			oResult.setProvider(m_sProvider);
 //			System.out.println("Parsing new Entry");
 			
 			//retrive the title
