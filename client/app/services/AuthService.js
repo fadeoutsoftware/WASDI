@@ -23,4 +23,39 @@ service('AuthService', ['$http',  'ConstantsService', function ($http, oConstant
         return this.m_oHttp.get(this.APIURL + '/auth/checksession');
     }
 
+    /* USER UPLOAD AUTH API */
+    this.createAccountUpload = function(sEmailInput)
+    {
+        if(utilsIsEmail(sEmailInput) === false)
+            return null;
+
+        return this.m_oHttp.post(this.APIURL + '/auth/upload/createaccount',sEmailInput );
+    };
+
+    this.deleteAccountUpload = function(sIdInput)
+    {
+        if(utilsIsObjectNullOrUndefined(sIdInput))
+            return null;
+
+        return this.m_oHttp.delete(this.APIURL + '/auth/upload/removeaccount',sIdInput);
+    };
+
+    this.updatePasswordUpload = function(sEmailInput)
+    {
+        if(utilsIsEmail(sEmailInput) === false)
+            return null;
+
+        return this.m_oHttp.post(this.APIURL + '/auth/upload/updatepassword',sEmailInput);
+    };
+
+    this.isCreatedAccountUpload = function()
+    {
+        return this.m_oHttp.get(this.APIURL + 'rest/auth/upload/existsaccount');
+    };
+
+    this.getListFilesUpload = function()
+    {
+        return this.m_oHttp.get(this.APIURL + 'auth/upload/list');
+    };
+
 }]);

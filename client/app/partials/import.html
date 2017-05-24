@@ -319,7 +319,6 @@
 
 
                     <!--********************************* TABLE **********************************-->
-
                     <table class="table table-hover layers " id="table_layers_list" ng-show="m_oController.m_bIsVisibleListOfLayers && m_oController.isEmptyLayersList() == false" >
 
                         <tbody ng-repeat="layer in m_oController.m_aoProductsList"
@@ -359,9 +358,15 @@
                                 </br>
 
                                 <div>
+                                    <span>Name: </span>
+                                    <span><b>{{layer.title}}</b></span>
+                                </div>
+
+                                <div>
                                     <span>Mode: </span>
                                     <span><b>{{layer.summary.Mode}}</b></span>
                                 </div>
+
                                 <div>
                                     <span>Relative Orbit: </span>
                                     <span><b>{{layer.properties.relativeorbitnumber}}</b></span>
@@ -369,10 +374,9 @@
 
                                 <!--<div>{{"layer"+layer.id}}</div>-->
                                 <div>
-                                    <span>Name: </span>
-                                    <span><b>{{layer.title}}</b></span>
+                                    <span>Provider:</span>
+                                    <span><b>{{layer.provider}}</b></span>
                                 </div>
-
                             </td>
 
                         </tr>

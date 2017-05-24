@@ -3,7 +3,7 @@
  */
 var RootController = (function() {
 
-    function RootController($scope, oConstantsService, oAuthService, $state, oProcessesLaunchedService, oWorkspaceService,$timeout,oModalService) {
+    function RootController($scope, oConstantsService, oAuthService, $state, oProcessesLaunchedService, oWorkspaceService,$timeout,oModalService,oRabbitStompService) {
         this.m_oScope = $scope;
         this.m_oScope.m_oController = this;
         this.m_oConstantsService = oConstantsService;
@@ -19,6 +19,7 @@ var RootController = (function() {
         this.m_bIsOpenNav = false;
         this.m_bIsOpenStatusBar = false; //processes bar
         this.m_oModalService = oModalService;
+        this.m_oRabbitStompService = oRabbitStompService;
         var oController = this;
         this.m_oAuthService.checkSession().success(function (data, status) {
             if (data == null || data == undefined || data == '')
@@ -66,7 +67,6 @@ var RootController = (function() {
 
         this.m_aoProcessesRunning = this.m_oProcessesLaunchedService.getProcesses();
 
-        /*TODO WATCH OR SIMILAR THINGS */
         /*when ProccesLaunchedservice reload the m_aoProcessesRunning rootController reload m_aoProcessesRunning */
         $scope.$on('m_aoProcessesRunning:updated', function(event,data) {
             // you could inspect the data to see
@@ -84,7 +84,7 @@ var RootController = (function() {
                 if(utilsIsObjectNullOrUndefined($scope.m_oController.m_aoProcessesRunning) == false)
                     $scope.m_oController.m_iNumberOfProcesses = iNumberOfProcessesRunning;
 
-                //FIND LOG
+                //FIND LOG or STOPPED PROCESS
                 for( var  iIndexOldProcess= 0; iIndexOldProcess < iNumberOfOldProcessesRunning; iIndexOldProcess++)
                 {
                     for( var iIndexNewProcess = 0; iIndexNewProcess < iNumberOfProcessesRunning; iIndexNewProcess++)
@@ -95,9 +95,19 @@ var RootController = (function() {
                             break;
                         }
                     }
-                    //if you find a log push it in list
+                    //if you find a log or ended process push it in list
                     if(!(iIndexNewProcess < iNumberOfProcessesRunning))
                     {
+                        var sStatusProcess ;
+                        if($scope.m_oController.m_oProcessesLaunchedService.checkIfProcessWasStopped( aoOldProcessesRunning[iIndexOldProcess]) === true)
+                        {
+                            sStatusProcess = "stopped";
+                        }
+                        else
+                        {
+                            sStatusProcess = "log";
+                        }
+                        aoOldProcessesRunning[iIndexOldProcess].status = sStatusProcess;
                         $scope.m_oController.m_aoLogProcesses.push(aoOldProcessesRunning[iIndexOldProcess]);
                         $scope.m_oController.m_aoProcessesRunning.splice(iIndexOldProcess,1);
                     }
@@ -391,6 +401,27 @@ var RootController = (function() {
         return true;
     }
 
+    RootController.prototype.deleteProcess = function(oProcessInput)
+    {
+        var oController = this
+        this.m_oModalService.showModal({
+            templateUrl: "dialogs/delete_process/DeleteProcessDialog.html",
+            controller: "DeleteProcessController",
+
+
+        }).then(function(modal) {
+            modal.element.modal();
+            modal.close.then(function(result) {
+                oController.m_oScope.Result = result ;
+
+                if(result === 'delete')
+                    oController.m_oProcessesLaunchedService.removeProcessInServer(oProcessInput.processObjId,oController.m_sWorkspace.workspaceId,oProcessInput)
+            });
+        });
+
+        return true;
+    }
+
     /*********************************************************************/
     RootController.$inject = [
         '$scope',
@@ -400,7 +431,8 @@ var RootController = (function() {
         'ProcessesLaunchedService',
         'WorkspaceService',
         '$timeout',
-        'ModalService'
+        'ModalService',
+        'RabbitStompService'
 
     ];
 

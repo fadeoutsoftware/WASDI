@@ -22,6 +22,7 @@ service('RabbitStompService', ['$http',  'ConstantsService','$interval','Process
     this.m_oSubscription = null;
     this.m_oUser = null;
 
+    this.m_aoErrorsList = [];
     /*@Params: WorkspaceID, Name of controller, Controller
     * it need the Controller for call the methods (the methods are inside the active controllers)
     * the methods are call in oRabbitCallback
@@ -64,7 +65,8 @@ service('RabbitStompService', ['$http',  'ConstantsService','$interval','Process
                 if (oMessageResult == null) return;
                 if (oMessageResult.messageResult == "KO") {
 
-                    utilsVexDialogAlertTop("There was an error in the RabbitCallback");
+                    // utilsVexDialogAlertTop("There was an error in the RabbitCallback");
+                    oController.m_aoErrorsList.push({text:"There was an error in the RabbitCallback"});
                     oController.m_oProcessesLaunchedService.loadProcessesFromServer(oController.m_oActiveWorkspace.workspaceId);
 
                     //alert('There was an error in the RabbitCallback');

@@ -146,3 +146,5 @@ wasdiApp.controller("NDVIController",NDVIController);
 wasdiApp.controller("ProductEditorInfoController",ProductEditorInfoController);
 wasdiApp.controller("RangeDopplerTerrainCorrectionController",RangeDopplerTerrainCorrectionController);
 wasdiApp.controller("AttributesMetadataController",AttributesMetadataController);
+wasdiApp.controller("SftpUploadController",SftpUploadController);
+wasdiApp.controller("DeleteProcessController",DeleteProcessController);

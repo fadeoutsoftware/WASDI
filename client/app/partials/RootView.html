@@ -207,15 +207,17 @@
                             {{oProcess.timeRunning | date:'HH:mm:ss'}}
                         </td>
                         <td >
-                            <div class="my-button" ng-click="m_oController.m_oProcessesLaunchedService.removeProcessInServer(oProcess.processObjId,m_oController.m_sWorkspace.workspaceId)">
-                                <i class="fa fa-times-circle" aria-hidden="true" data-toggle="tooltip" title="Hide processes"  data-placement="bottom"></i>
+                            <!--ng-click="m_oController.m_oProcessesLaunchedService.removeProcessInServer(oProcess.processObjId,m_oController.m_sWorkspace.workspaceId,oProcess)"-->
+                            <div class="my-button" ng-click="m_oController.deleteProcess(oProcess)">
+                                <i class="fa fa-times-circle" aria-hidden="true" data-toggle="tooltip" title="Stop processes"  data-placement="bottom"></i>
                             </div>
                         </td>
                     </tr>
 
                     <tr ng-repeat="oLog in m_oController.m_aoLogProcesses track by $index">
                         <td>
-                            <span class="label label-warning">Log</span>
+                            <span class="label label-warning" ng-show="oLog.status === 'log'">Log</span>
+                            <span class="label label-danger" ng-show="oLog.status === 'stopped'">Stopped</span>
                             <!--<invaderfixed></invaderfixed>-->
                         </td>
                         <td>
@@ -244,6 +246,11 @@
                         </td>
                     </tr>
 
+                    <tr ng-repeat="error in m_oController.m_oRabbitStompService.m_aoErrorsList ">
+                        <td > <span class="label label-danger" >Error</span> </td>
+                        <td colspan="7">{{error.text}}</td>
+                        <!--<pre>{{m_oController.m_oRabbitStompService.m_aoErrorsList|json}}</pre>-->
+                    </tr>
                     </tbody>
                 </table>
 
