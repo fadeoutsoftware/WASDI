@@ -145,9 +145,9 @@ public class Wasdi extends Application {
 				Field oField = oProc.getClass().getDeclaredField("pid");
 				oField.setAccessible(true);
 				oPID = oField.getInt(oProc);
-				System.out.println("DownloadResource.DownloadAndPublish: PID " + oPID);
+				System.out.println("WASDI.getPIDProcess: found PID " + oPID);
 			} catch (Throwable e) {
-				System.out.println("DownloadResource.DownloadAndPublish: Error getting PID " + e.getMessage());
+				System.out.println("WASDI.getPIDProcess: Error getting PID " + e.getMessage());
 			}
 		}
 		

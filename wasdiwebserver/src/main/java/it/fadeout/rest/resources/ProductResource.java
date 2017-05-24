@@ -160,7 +160,9 @@ public class ProductResource {
 
 				// Add View model to return list
 				if (oDownloaded != null) {
-					aoProductList.add(oDownloaded.getProductViewModel());
+					ProductViewModel oProductVM = oDownloaded.getProductViewModel();
+					oProductVM.setMetadata(null);
+					aoProductList.add(oProductVM);
 				}
 
 			}

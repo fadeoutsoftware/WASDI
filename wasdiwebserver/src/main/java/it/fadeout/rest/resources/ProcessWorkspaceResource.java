@@ -104,21 +104,27 @@ public class ProcessWorkspaceResource {
 				
 				int iPid = oProcessToDelete.getPid();
 				
-				// Exists Pid, kill process
-				String sShellExString = m_oServletConfig.getInitParameter("KillCommand") + iPid;
-				
-				System.out.println("ProcessWorkspaceResource.DeleteProcess: shell exec " + sShellExString);
-				
-				Process oProc = Runtime.getRuntime().exec(sShellExString);
+				if (iPid>0) {
+					// Exists Pid, kill process
+					String sShellExString = m_oServletConfig.getInitParameter("KillCommand") + " " + iPid;
+					
+					System.out.println("ProcessWorkspaceResource.DeleteProcess: shell exec " + sShellExString);
+					
+					Process oProc = Runtime.getRuntime().exec(sShellExString);
 
-				//delete process on database
-				if (oRepository.DeleteProcessWorkspaceByPid(iPid))
-				{
-					return Response.ok().build();
+					//delete process on database
+					if (oRepository.DeleteProcessWorkspaceByPid(iPid))
+					{
+						return Response.ok().build();
+					}
+					else {
+						return Response.status(400).build();
+					}					
 				}
 				else {
 					return Response.status(400).build();
 				}
+				
 				
 			}
 			else {
