@@ -14,6 +14,16 @@ public class DownloadFileParameter extends BaseParameter{
     private String url;
 
     /**
+     * download user
+     */
+    private String downloadUser;
+    
+    /**
+     * download password
+     */
+    private String downloadPassword;
+    
+    /**
      * SessionId
      */
     private String queue;
@@ -22,11 +32,6 @@ public class DownloadFileParameter extends BaseParameter{
      * Is ObjectId of MongoDb
      */
     private String processObjId;
-
-    /**
-     * Open Search provider
-     */
-    private String openSearchProvider;
 
     private String boundingBox;
 
@@ -52,14 +57,6 @@ public class DownloadFileParameter extends BaseParameter{
         this.processObjId = processObjId;
     }
 
-    public String getOpenSearchProvider() {
-        return openSearchProvider;
-    }
-
-    public void setOpenSearchProvider(String openSearchProvider) {
-        this.openSearchProvider = openSearchProvider;
-    }
-
     public String getBoundingBox() {
         return boundingBox;
     }
@@ -67,4 +64,21 @@ public class DownloadFileParameter extends BaseParameter{
     public void setBoundingBox(String boundingBox) {
         this.boundingBox = boundingBox;
     }
+
+	public String getDownloadUser() {
+		return downloadUser;
+	}
+
+	public void setDownloadUser(String downloadUser) {
+		this.downloadUser = downloadUser;
+	}
+
+	public String getDownloadPassword() {
+		return downloadPassword;
+	}
+
+	public void setDownloadPassword(String downloadPassword) {
+		this.downloadPassword = downloadPassword;
+	}    
+    
 }
