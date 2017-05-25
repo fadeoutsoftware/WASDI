@@ -3,11 +3,12 @@
  */
 
 var HomeController = (function() {
-    function HomeController($scope, $location, oConstantsService, oAuthService,oState) {
+    function HomeController($scope, $location, oConstantsService, oAuthService, oRabbitStompService,oState) {
         this.m_oScope = $scope;
         this.m_oLocation  = $location;
         this.m_oConstantsService = oConstantsService;
         this.m_oAuthService = oAuthService;
+        this.m_oRabbitStompService = oRabbitStompService;
         this.m_oState=oState;
         this.m_oScope.m_oController=this;
         this.m_bLoginIsVisible = false;//Login in visible after click on logo
@@ -95,6 +96,7 @@ var HomeController = (function() {
         '$location',
         'ConstantsService',
         'AuthService',
+        'RabbitStompService',
         '$state'
     ];
 

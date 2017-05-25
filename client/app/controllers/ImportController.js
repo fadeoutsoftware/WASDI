@@ -21,7 +21,7 @@ var ImportController = (function() {
         this.m_oConfigurationService = oConfigurationService;
         this.m_oFileBufferService = oFileBufferService;
         this.m_bShowsensingfilter = true;
-        this.m_oRabbitStompServive = oRabbitStompService;
+        this.m_oRabbitStompService = oRabbitStompService;
         this.m_oProductService = oProductService;
         this.m_oProcessesLaunchedService = oProcessesLaunchedService;
         this.m_oWorkspaceService=oWorkspaceService;
@@ -123,30 +123,32 @@ var ImportController = (function() {
         //else
         //    this.m_oState.go("login");
 
-        /*Start Rabbit WebStomp*/
-        this.m_oRabbitStompServive.initWebStomp(this.m_oActiveWorkspace,"ImportController",this);
+        /*Hook to Rabbit WebStomp Service*/
+        this.m_oRabbitStompService.setMessageCallback(this.receivedRabbitMessage);
+        this.m_oRabbitStompService.setActiveController(this);
+
 
         var oController = this;
 
         //get configuration
 
-            this.m_oConfigurationService.getConfiguration().then(function(configuration){
+        this.m_oConfigurationService.getConfiguration().then(function(configuration){
 
-                oController.m_oConfiguration = configuration;
-                var oMissions = oController.m_oResultsOfSearchService.getMissions();
+            oController.m_oConfiguration = configuration;
+            var oMissions = oController.m_oResultsOfSearchService.getMissions();
 
-                if(!utilsIsObjectNullOrUndefined(oMissions) && oMissions.length != 0)
-                {
-                    oController.m_aoMissions = oMissions;
-                }
-                else
-                {
-                    oController.m_aoMissions = oController.m_oConfiguration.missions;
-                }
+            if(!utilsIsObjectNullOrUndefined(oMissions) && oMissions.length != 0)
+            {
+                oController.m_aoMissions = oMissions;
+            }
+            else
+            {
+                oController.m_aoMissions = oController.m_oConfiguration.missions;
+            }
 
-                oController.m_bShowsensingfilter = oController.m_oConfiguration.settings.showsensingfilter;
-                oController.m_oScope.$apply();
-            });
+            oController.m_bShowsensingfilter = oController.m_oConfiguration.settings.showsensingfilter;
+            oController.m_oScope.$apply();
+        });
 
 
         this.m_DatePickerPosition = function($event){
@@ -609,7 +611,7 @@ var ImportController = (function() {
         //}
         this.m_oFileBufferService.download(url,oWorkSpace.workspaceId,oLayer.bounds.toString(),oLayer.provider).success(function (data, status) {
             //TODO CHECK DATA-STATUS
-            var oDialog = utilsVexDialogAlertBottomRightCorner("Product just start the download");
+            var oDialog = utilsVexDialogAlertBottomRightCorner("Importing Image in WASDI...");
             //oController.m_oProcessesLaunchedService.addProcessesByLocalStorage(oLayer.title,
             //                                                                    null,
             //                                                                    oController.m_oProcessesLaunchedService.getTypeOfProcessProductDownload()
@@ -624,7 +626,7 @@ var ImportController = (function() {
             * */
 
         }).error(function (data,status) {
-            utilsVexDialogAlertTop('Product error in file buffer');
+            utilsVexDialogAlertTop('There was an error importing the Image in the workspace');
         });
         return true;
     }
@@ -1112,7 +1114,7 @@ var ImportController = (function() {
         return true;
     }
 
-    ImportController.prototype.receivedRabbitMessage  = function (oMessage, sOperation) {
+    ImportController.prototype.receivedRabbitMessage  = function (oMessage, oController) {
 
         if (oMessage == null) return;
         if (oMessage.messageResult=="KO") {
@@ -1120,8 +1122,29 @@ var ImportController = (function() {
             utilsVexDialogAlertTop('There was an error in the download')
             return;
         }
-        var oController = this;
-        this.m_oProductService.addProductToWorkspace(oMessage.payload.fileName,this.m_oActiveWorkspace.workspaceId).success(function (data, status) {
+
+        switch(oMessage.messageCode)
+        {
+            case "PUBLISH":
+            case "PUBLISHBAND":
+            case "UPDATEPROCESSES":
+                break;
+            case "APPLYORBIT":
+            case "CALIBRATE":
+            case "MULTILOOKING":
+            case "NDVI":
+            case "TERRAIN":
+            case "DOWNLOAD":
+                oController.receivedNewProductMessage(oMessage,oController);
+                break;
+            default:
+                console.log("RABBIT ERROR: got empty message ");
+        }
+
+    }
+
+    ImportController.prototype.receivedNewProductMessage = function (oMessage, oController) {
+        oController.m_oProductService.addProductToWorkspace(oMessage.payload.fileName,oController.m_oActiveWorkspace.workspaceId).success(function (data, status) {
             if(data.boolValue == true )
             {
                 var oDialog = utilsVexDialogAlertBottomRightCorner('Product added to the ws');
@@ -1134,9 +1157,7 @@ var ImportController = (function() {
 
         }).error(function (data,status) {
             utilsVexDialogAlertTop('Error adding product to the ws');
-            //console.log('Error adding product to the ws');
         });
-
     }
 
     ImportController.prototype.openWorkspace = function (sWorkspaceId) {
@@ -1152,7 +1173,7 @@ var ImportController = (function() {
                     oController.m_oActiveWorkspace = oController.m_oConstantsService.getActiveWorkspace();
 
                     /*Start Rabbit WebStomp*/
-                    oController.m_oRabbitStompServive.initWebStomp(oController.m_oActiveWorkspace,"ImportController",oController);
+                    oController.m_oRabbitStompService.initWebStomp("ImportController",oController);
                     oController.loadOpenSearchParamsByResultsOfSearchServices(oController);
                     oController.m_oProcessesLaunchedService.loadProcessesFromServer(oController.m_oActiveWorkspace.workspaceId);
                 }
