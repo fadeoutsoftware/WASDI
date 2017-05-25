@@ -7,43 +7,57 @@ service('RabbitStompService', ['$http',  'ConstantsService','$interval','Process
 
     // Reconnection promise to stop the timer if the reconnection succeed or if the user change page
     this.m_oInterval = $interval;
+    // Reference to the Constant Service
     this.m_oConstantsService = oConstantsService;
+    // Scope
     this.m_oScope = $scope;
-    this.m_oActiveWorkspace=null;
 
     this.m_oReconnectTimerPromise = null;
     this.m_oRabbitReconnect = null;
+
+    // STOMP Client
     this.m_oClient = null;
+    // Rabbit Connect Callback
     this.m_oOn_Connect = null;
+    // Rabbit Error Callback
     this.m_oOn_Error = null;
+    // Rabbit Reconnect Callback
     this.m_oRabbitReconnect = null;
+
+    // Reference to the ProcessLaunched Service
     this.m_oProcessesLaunchedService = oProcessesLaunchedService;
 
     this.m_oSubscription = null;
     this.m_oUser = null;
 
     this.m_aoErrorsList = [];
+
+    this.m_fMessageCallBack = null;
+
+    this.m_oActiveController = null;
+
+    this.setMessageCallback = function (fCallback) {
+        this.m_fMessageCallBack = fCallback;
+    }
+
+    this.setActiveController = function (oController) {
+        this.m_oActiveController = oController;
+    }
+
     /*@Params: WorkspaceID, Name of controller, Controller
     * it need the Controller for call the methods (the methods are inside the active controllers)
     * the methods are call in oRabbitCallback
     * */
-    this.initWebStomp = function(oActiveWorkspace,sControllerName,oControllerActive)
+    this.initWebStomp = function()
     {
-        if(utilsIsObjectNullOrUndefined(oActiveWorkspace) || utilsIsObjectNullOrUndefined(oControllerActive) || utilsIsStrNullOrEmpty(sControllerName) )
-        {
-            console.log("InitWebStomp some value are null");
-            return false;
-        }
-        this.m_oActiveWorkspace = oActiveWorkspace;
-
         // Web Socket to receive workspace messages
         //var oWebSocket = new WebSocket(this.m_oConstantsService.getStompUrl());
         var oWebSocket = new SockJS(this.m_oConstantsService.getStompUrl());
-        var oController = this;
+        var oThisService = this;
         this.m_oClient = Stomp.over(oWebSocket);
         this.m_oClient.heartbeat.outgoing = 0;
         this.m_oClient.heartbeat.incoming = 0;
-        this.m_oClient.debug = null
+        this.m_oClient.debug = null;
 
 
         /**
@@ -56,141 +70,122 @@ service('RabbitStompService', ['$http',  'ConstantsService','$interval','Process
             // Check message Body
             if (message.body)
             {
-                console.log("got message with body " + message.body)
+                console.log("RabbitStompService: got message with body " + message.body)
 
                 // Get The Message View Model
                 var oMessageResult = JSON.parse(message.body);
 
-                // TEST:
-                // oMessageResult.messageResult = "KO";
-
-                if (oMessageResult == null) return;
-
-                if (oMessageResult.messageResult == "KO") {
-
-                    // utilsVexDialogAlertTop("There was an error in the RabbitCallback");
-
-                    var sOperation = "null";
-                    if (utilsIsStrNullOrEmpty(oMessageResult.messageCode) == false  ) sOperation = oMessageResult.messageCode;
-
-                    oController.m_aoErrorsList.push({text:"There was an error in the " + sOperation + " operation"});
-                    oController.m_oProcessesLaunchedService.loadProcessesFromServer(oController.m_oActiveWorkspace.workspaceId);
-
-                    //alert('There was an error in the RabbitCallback');
+                // Check parsed object
+                if (oMessageResult == null) {
+                    console.log("RabbitStompService: there was an error parsing result in JSON. Message lost")
                     return;
                 }
 
-                //Reject the messages for an other workspace
-                if(oMessageResult.workspaceId != oController.m_oActiveWorkspace.workspaceId) return false;
+                // Get the Active Workspace Id
+                var sActiveWorkspaceId = "";
+
+                if (!utilsIsObjectNullOrUndefined(this.m_oConstantsService.getActiveWorkspace())) {
+                    sActiveWorkspaceId = this.m_oConstantsService.getActiveWorkspace().workspaceId;
+                }
+                else {
+                    console.log("Rabbit Stomp Service: Active Workspace is null.")
+                }
 
 
-                // Route the message
+
+                if (oMessageResult.messageResult == "KO") {
+
+                    // Get the operation NAme
+                    var sOperation = "null";
+                    if (utilsIsStrNullOrEmpty(oMessageResult.messageCode) == false  ) sOperation = oMessageResult.messageCode;
+
+                    // Add an error Message
+                    oThisService.m_aoErrorsList.push({text:"There was an error in the " + sOperation + " operation"});
+                    // Update Process Messages
+                    oThisService.m_oProcessesLaunchedService.loadProcessesFromServer(sActiveWorkspaceId);
+
+                    return;
+                }
+
+                //Reject the message if it is for another workspace
+                if(oMessageResult.workspaceId != sActiveWorkspaceId) return false;
+
+
+                var sUserMessage = "";
+
+                if(!utilsIsObjectNullOrUndefined(oThisService.m_fMessageCallBack)) {
+                    // Call the Message Callback
+                    oThisService.m_fMessageCallBack(oMessageResult, oThisService.m_oActiveController);
+                }
+                // Update the process List
+                oThisService.m_oProcessesLaunchedService.loadProcessesFromServer(sActiveWorkspaceId);
+
+                // Get extra operations
                 switch(oMessageResult.messageCode)
                 {
                     case "DOWNLOAD":
-                        if(sControllerName == "EditorController" || sControllerName == "ImportController" || sControllerName === "SearchOrbitController")
-                        {
-                            oControllerActive.receivedRabbitMessage(oMessageResult, oMessageResult.messageCode);
-                            oController.m_oProcessesLaunchedService.loadProcessesFromServer(oController.m_oActiveWorkspace.workspaceId);
-                            var oDialog = utilsVexDialogAlertBottomRightCorner("The download is ended");
-                            utilsVexCloseDialogAfterFewSeconds(3000,oDialog);
-                        }
+                        sUserMessage = "File now available on WASDI Server";
                         break;
                     case "PUBLISH":
-                        if(sControllerName == "EditorController")
-                        {
-                            oControllerActive.receivedPublishMessage(oMessageResult);
-                            oController.m_oProcessesLaunchedService.loadProcessesFromServer(oController.m_oActiveWorkspace.workspaceId);
-                            var oDialog = utilsVexDialogAlertBottomRightCorner("The publish is ended");
-                            utilsVexCloseDialogAfterFewSeconds(3000,oDialog);
-                        }
+                        sUserMessage = "Publish done";
                         break;
                     case "PUBLISHBAND":
-                        if(sControllerName == "EditorController" )
-                        {
-                            oControllerActive.receivedPublishBandMessage(oMessageResult.payload);
-                            oController.m_oProcessesLaunchedService.loadProcessesFromServer(oController.m_oActiveWorkspace.workspaceId);
-                            var oDialog = utilsVexDialogAlertBottomRightCorner("The publish is ended.Product: " + oMessageResult.payload.productName);
-                            utilsVexCloseDialogAfterFewSeconds(3000,oDialog);
-
-                        }
-                        if( sControllerName == "ImportController" || sControllerName === "SearchOrbitController")
-                        {
-                            oController.m_oProcessesLaunchedService.loadProcessesFromServer(oController.m_oActiveWorkspace.workspaceId);
-                            var oDialog = utilsVexDialogAlertBottomRightCorner("The publish is ended. Product:" + oMessageResult.payload.fileName);
-                            //utilsVexCloseDialogAfterFewSeconds(3000,oDialog);
-                        }
+                        sUserMessage = "Band published. Product: " + oMessageResult.payload.productName;
                         break;
                     case "UPDATEPROCESSES":
-                        oController.m_oProcessesLaunchedService.loadProcessesFromServer(oController.m_oActiveWorkspace.workspaceId);
                         console.log("UPDATE PROCESSES"+" " +utilsGetTimeStamp());
                         break;
                     case "APPLYORBIT":
-                        oControllerActive.receivedRabbitMessage (oMessageResult, oMessageResult.messageCode);
-
-                        oController.m_oProcessesLaunchedService.loadProcessesFromServer(oController.m_oActiveWorkspace.workspaceId);
-                        var oDialog = utilsVexDialogAlertBottomRightCorner("Apply orbit Completed");
-                        utilsVexCloseDialogAfterFewSeconds(6000,oDialog);
+                        sUserMessage = "Apply orbit Completed";
                         break;
                     case "CALIBRATE":
-                        oControllerActive.receivedRabbitMessage (oMessageResult, oMessageResult.messageCode);
-
-                        oController.m_oProcessesLaunchedService.loadProcessesFromServer(oController.m_oActiveWorkspace.workspaceId);
-                        var oDialog = utilsVexDialogAlertBottomRightCorner("Radiometric Calibrate Completed");
-                        utilsVexCloseDialogAfterFewSeconds(6000,oDialog);
+                        sUserMessage = "Radiometric Calibrate Completed";
                         break;
                     case "MULTILOOKING":
-
-                        oControllerActive.receivedRabbitMessage (oMessageResult, oMessageResult.messageCode);
-
-                        oController.m_oProcessesLaunchedService.loadProcessesFromServer(oController.m_oActiveWorkspace.workspaceId);
-                        var oDialog = utilsVexDialogAlertBottomRightCorner("Multilooking Completed");
-                        utilsVexCloseDialogAfterFewSeconds(6000,oDialog);
+                        sUserMessage = "Multilooking Completed";
                         break;
                     case "NDVI":
-
-                        oControllerActive.receivedRabbitMessage (oMessageResult, oMessageResult.messageCode);
-
-                        oController.m_oProcessesLaunchedService.loadProcessesFromServer(oController.m_oActiveWorkspace.workspaceId);
-                        var oDialog = utilsVexDialogAlertBottomRightCorner("NDVI Completed");
-                        utilsVexCloseDialogAfterFewSeconds(6000,oDialog);
+                        sUserMessage = "NDVI Completed";
                         break;
                     case "TERRAIN":
-
-                         oControllerActive.receivedRabbitMessage (oMessageResult, oMessageResult.messageCode);
-
-                        oController.m_oProcessesLaunchedService.loadProcessesFromServer(oController.m_oActiveWorkspace.workspaceId);
-                        var oDialog = utilsVexDialogAlertBottomRightCorner("Range doppler terrain correction Completed");
-                        utilsVexCloseDialogAfterFewSeconds(6000,oDialog);
+                        sUserMessage = "Range doppler terrain correction Completed";
                         break;
+
                     default:
                         console.log("RABBIT ERROR: got empty message ");
                 }
 
+                // Is there a feedback for the user?
+                if (!utilsIsStrNullOrEmpty(sUserMessage)) {
+                    // Give the short message
+                    var oDialog = utilsVexDialogAlertBottomRightCorner(sUserMessage);
+                    utilsVexCloseDialogAfterFewSeconds(3000,oDialog);
+                }
+
             }
         }
-        //oController.addTestLayer(message.body);
+
+
         /**
          * Callback of the Rabbit On Connect
          */
-
         var on_connect = function () {
             console.log('Web Stomp connected');
 
-            //CHECK IF sWorkSpaceId is null
-            var oSessioId = oController.m_oConstantsService.getSessionId();
-            if(utilsIsObjectNullOrUndefined(oSessioId))
+            //CHECK IF the session is valid
+            var oSessionId = oThisService.m_oConstantsService.getSessionId();
+            if(utilsIsObjectNullOrUndefined(oSessionId))
             {
                 console.log("Error session id Null in on_connect");
                 return false;
             }
-            oController.m_oSubscription = oController.m_oClient.subscribe(oSessioId, oRabbitCallback);
+            oThisService.m_oSubscription = oThisService.m_oClient.subscribe(oSessionId, oRabbitCallback);
 
             // Is this a re-connection?
-            if (oController.m_oReconnectTimerPromise != null) {
+            if (oThisService.m_oReconnectTimerPromise != null) {
                 // Yes it is: clear the timer
-                oController.m_oInterval.cancel(oController.m_oReconnectTimerPromise);
-                oController.m_oReconnectTimerPromise = null;
+                oThisService.m_oInterval.cancel(oThisService.m_oReconnectTimerPromise);
+                oThisService.m_oReconnectTimerPromise = null;
             }
         };
 
@@ -199,23 +194,25 @@ service('RabbitStompService', ['$http',  'ConstantsService','$interval','Process
          * Callback for the Rabbit On Error
          */
         var on_error = function (sMessage) {
+
             console.log('WEB STOMP ERROR, message:'+" "+utilsGetTimeStamp());
             //TODO OLD VERSION REMOVE IT
             if (sMessage == "LOST_CONNECTION") {
                 console.log('LOST Connection');
 
-                if (oController.m_oReconnectTimerPromise == null) {
+                if (oThisService.m_oReconnectTimerPromise == null) {
                     // Try to Reconnect
-                    oController.m_oReconnectTimerPromise = oController.m_oInterval(oController.m_oRabbitReconnect, 5000);
+                    oThisService.m_oReconnectTimerPromise = oThisService.m_oInterval(oThisService.m_oRabbitReconnect, 5000);
                 }
             }
+
             //TODO new version of error remove comment
             if (sMessage == "Whoops! Lost connection to undefined") {
                 console.log('Whoops! Lost connection to undefined');
 
-                if (oController.m_oReconnectTimerPromise == null) {
+                if (oThisService.m_oReconnectTimerPromise == null) {
                     // Try to Reconnect
-                    oController.m_oReconnectTimerPromise = oController.m_oInterval(oController.m_oRabbitReconnect, 5000);
+                    oThisService.m_oReconnectTimerPromise = oThisService.m_oInterval(oThisService.m_oRabbitReconnect, 5000);
                 }
             }
         };
@@ -230,38 +227,44 @@ service('RabbitStompService', ['$http',  'ConstantsService','$interval','Process
             console.log('Web Stomp Reconnection Attempt');
 
             // Connect again
-            //oController.oWebSocket = new WebSocket(oController.m_oConstantsService.getStompUrl());
-            oController.oWebSocket = new SockJS(oController.m_oConstantsService.getStompUrl());
-            oController.m_oClient = Stomp.over(oController.oWebSocket);
-            oController.m_oClient.heartbeat.outgoing = 0;
-            oController.m_oClient.heartbeat.incoming = 0;
-            oController.m_oClient.debug = null;
+            //oThisService.oWebSocket = new WebSocket(oThisService.m_oConstantsService.getStompUrl());
+            oThisService.oWebSocket = new SockJS(oThisService.m_oConstantsService.getStompUrl());
+            oThisService.m_oClient = Stomp.over(oThisService.oWebSocket);
+            oThisService.m_oClient.heartbeat.outgoing = 0;
+            oThisService.m_oClient.heartbeat.incoming = 0;
+            oThisService.m_oClient.debug = null;
 
-            oController.m_oClient.connect(oController.m_oConstantsService.getRabbitUser(), oController.m_oConstantsService.getRabbitPassword(), oController.m_oOn_Connect, oController.m_oOn_Error, '/');
+            oThisService.m_oClient.connect(oThisService.m_oConstantsService.getRabbitUser(), oThisService.m_oConstantsService.getRabbitPassword(), oThisService.m_oOn_Connect, oThisService.m_oOn_Error, '/');
         };
+
+
         this.m_oRabbitReconnect = rabbit_reconnect;
         //connect to the queue
-        this.m_oClient.connect(oController.m_oConstantsService.getRabbitUser(), oController.m_oConstantsService.getRabbitPassword(), on_connect, on_error, '/');
+        this.m_oClient.connect(oThisService.m_oConstantsService.getRabbitUser(), oThisService.m_oConstantsService.getRabbitPassword(), on_connect, on_error, '/');
 
 
+        /*
         //// Clean Up when exit!!
         oControllerActive.m_oScope.$on('$destroy', function () {
             // Is this a re-connection?
-            if (oController.m_oReconnectTimerPromise != null) {
+            if (oThisService.m_oReconnectTimerPromise != null) {
                 // Yes it is: clear the timer
-                oController.m_oInterval.cancel(oController.m_oReconnectTimerPromise);
-                oController.m_oReconnectTimerPromise = null;
+                oThisService.m_oInterval.cancel(oThisService.m_oReconnectTimerPromise);
+                oThisService.m_oReconnectTimerPromise = null;
             }
             else {
 
-                if (oController.m_oClient != null) {
-                    oController.m_oClient.disconnect();//TODO RESOLVE BUG IF THE USER SWITCH CONTROLLER
+                if (oThisService.m_oClient != null) {
+                    oThisService.m_oClient.disconnect();//TODO RESOLVE BUG IF THE USER SWITCH CONTROLLER
                 }
             }
         });
+        */
 
         return true;
     }
+
+    this.initWebStomp();
 
     //This method remove a message in all queues
     //this.removeMessageInQueues = function(oMessage)

@@ -52,8 +52,10 @@ var SearchOrbitController = (function() {
         {
             this.m_oProcessesLaunchedService.loadProcessesFromServer(this.m_oActiveWorkspace.workspaceId);
         }
-        //INIT RABBIT
-        this.m_oRabbitStompService.initWebStomp(this.m_oActiveWorkspace,"SearchOrbitController",this);
+
+        /*Hook to Rabbit WebStomp Service*/
+        this.m_oRabbitStompService.setMessageCallback(this.receivedRabbitMessage);
+        this.m_oRabbitStompService.setActiveController(this);
 
         this.initOrbitSearch = function(){
             //init orbit search
@@ -322,7 +324,7 @@ var SearchOrbitController = (function() {
                     oController.m_oConstantsService.setActiveWorkspace(data);
                     oController.m_oActiveWorkspace = oController.m_oConstantsService.getActiveWorkspace();
                     /*Start Rabbit WebStomp*/
-                    oController.m_oRabbitStompService.initWebStomp(oController.m_oActiveWorkspace,"SearchOrbitController",oController);
+                    oController.m_oRabbitStompService.initWebStomp("SearchOrbitController",oController);
                     oController.m_oProcessesLaunchedService.loadProcessesFromServer(oController.m_oActiveWorkspace.workspaceId);
 
                 }
@@ -471,17 +473,41 @@ var SearchOrbitController = (function() {
         return true;
     };
 
-    /* RABBIT MQ METHOD */
-    SearchOrbitController.prototype.receivedRabbitMessage  = function (oMessage, sOperation) {
+    /**
+     * Rabbit Message Callback
+     * @param oMessage
+     * @param oController
+     */
+    SearchOrbitController.prototype.receivedRabbitMessage  = function (oMessage, oController) {
 
         if (oMessage == null) return;
         if (oMessage.messageResult=="KO") {
-            //alert('There was an error in the download');
-            utilsVexDialogAlertTop('There was an error in the download')
+            utilsVexDialogAlertTop('There was an error in the ' + oMessage.messageCode + ' Process');
             return;
         }
-        var oController = this;
-        this.m_oProductService.addProductToWorkspace(oMessage.payload.fileName,this.m_oActiveWorkspace.workspaceId).success(function (data, status) {
+
+        switch(oMessage.messageCode)
+        {
+            case "PUBLISH":
+            case "PUBLISHBAND":
+            case "UPDATEPROCESSES":
+                break;
+            case "APPLYORBIT":
+            case "CALIBRATE":
+            case "MULTILOOKING":
+            case "NDVI":
+            case "TERRAIN":
+            case "DOWNLOAD":
+                oController.receivedNewProductMessage(oMessage,oController);
+                break;
+            default:
+                console.log("RABBIT ERROR: got empty message ");
+        }
+
+    }
+
+    SearchOrbitController.prototype.receivedNewProductMessage = function (oMessage, oController) {
+        oController.m_oProductService.addProductToWorkspace(oMessage.payload.fileName,oController.m_oActiveWorkspace.workspaceId).success(function (data, status) {
             if(data.boolValue == true )
             {
                 var oDialog = utilsVexDialogAlertBottomRightCorner('Product added to the ws');
@@ -489,15 +515,15 @@ var SearchOrbitController = (function() {
             }
             else
             {
-                utilsVexDialogAlertTop("Error in add product to workspace");
+                utilsVexDialogAlertTop("Error adding product to workspace");
             }
 
         }).error(function (data,status) {
             utilsVexDialogAlertTop('Error adding product to the ws');
-            //console.log('Error adding product to the ws');
         });
-
     }
+
+
     SearchOrbitController.$inject = [
         '$scope',
         '$location',

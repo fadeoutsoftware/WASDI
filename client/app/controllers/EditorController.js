@@ -19,7 +19,7 @@ var EditorController = (function () {
         this.m_oState = $state;
         this.m_oProcessesLaunchedService = oProcessesLaunchedService;
         this.m_oWorkspaceService = oWorkspaceService;
-        this.m_oRabbitStompServive = oRabbitStompService;
+        this.m_oRabbitStompService = oRabbitStompService;
         this.m_b2DMapModeOn = true;
         this.m_b3DMapModeOn = false;
         this.m_bIsVisibleMapOfLeaflet = false;
@@ -78,8 +78,9 @@ var EditorController = (function () {
         //Set default value tree
         this.m_oTree = null;//IMPORTANT NOTE: there's a 'WATCH' for this.m_oTree in TREE DIRECTIVE
 
-        /*Start Rabbit WebStomp*/
-        this.m_oRabbitStompServive.initWebStomp(this.m_oActiveWorkspace, "EditorController", this);
+        /*Hook to Rabbit WebStomp Service*/
+        this.m_oRabbitStompService.setMessageCallback(this.receivedRabbitMessage);
+        this.m_oRabbitStompService.setActiveController(this);
 
 
         // Initialize the map
@@ -143,16 +144,48 @@ var EditorController = (function () {
      * @param oMessage Received Message
      */
     /* THIS FUNCTION ARE CALLED IN RABBIT SERVICE */
-    EditorController.prototype.receivedRabbitMessage = function (oMessage, sOperation) {
+    EditorController.prototype.receivedRabbitMessage = function (oMessage, oController) {
 
+        // Check if the message is valid
         if (oMessage == null) return;
 
+        // Check the Result
         if (oMessage.messageResult == "KO") {
-            utilsVexDialogAlertTop('There was an error in the ' + oMessage.messageCode);
+            utilsVexDialogAlertTop('There was an error in the ' + oMessage.messageCode + ' Process');
             return;
         }
+
+        // Switch the Code
+        switch(oMessageResult.messageCode) {
+            case "PUBLISH":
+                oController.receivedPublishMessage(oMessage);
+                break;
+            case "PUBLISHBAND":
+                oController.receivedPublishBandMessage(oMessage);
+                break;
+            case "UPDATEPROCESSES":
+                break;
+            case "DOWNLOAD":
+            case "APPLYORBIT":
+            case "CALIBRATE":
+            case "MULTILOOKING":
+            case "NDVI":
+            case "TERRAIN":
+                oController.receivedNewProductMessage(oMessage);
+                break;
+        }
+    }
+
+    /**
+     * Callback for messages that adds a new product to the Workspace
+     * @param oMessage
+     */
+    EditorController.prototype.receivedNewProductMessage = function (oMessage) {
+
+        // Save the controller
         var oController = this;
 
+        // Add the product to the workspace
         this.m_oProductService.addProductToWorkspace(oMessage.payload.fileName, this.m_oActiveWorkspace.workspaceId).success(function (data, status) {
 
             if (data.boolValue == true) {
@@ -171,9 +204,8 @@ var EditorController = (function () {
         }).error(function (data, status) {
             utilsVexDialogAlertTop('There was an error adding product to the ws')
         });
+
     }
-
-
 
 
     /**
@@ -197,7 +229,8 @@ var EditorController = (function () {
      * @param oMessage
      */
     /* THIS FUNCTION ARE CALLED IN RABBIT SERVICE */
-    EditorController.prototype.receivedPublishBandMessage = function (oLayer) {
+    EditorController.prototype.receivedPublishBandMessage = function (oMessage) {
+        var oLayer = oMessage.payload;
 
         if (utilsIsObjectNullOrUndefined(oLayer)) {
             console.log("Error LayerID is empty...");
@@ -1077,7 +1110,7 @@ var EditorController = (function () {
                     oController.m_oActiveWorkspace = oController.m_oConstantsService.getActiveWorkspace();
 
                     /*Start Rabbit WebStomp*/
-                    oController.m_oRabbitStompServive.initWebStomp(oController.m_oActiveWorkspace, "EditorController", oController);
+                    oController.m_oRabbitStompService.initWebStomp("EditorController", oController);
                     oController.getProductListByWorkspace();
                     oController.m_oProcessesLaunchedService.loadProcessesFromServer(oController.m_oActiveWorkspace.workspaceId);
                 }
