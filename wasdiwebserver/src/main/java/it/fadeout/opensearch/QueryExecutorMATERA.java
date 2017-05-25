@@ -14,4 +14,9 @@ public class QueryExecutorMATERA extends QueryExecutor {
 		return new Template("{scheme}://{-append|.|host}collaborative.mt.asi.it{-opt|/|path}{-listjoin|/|path}{-prefix|/|page}{-opt|?|q}{-join|&|q,start,rows,orderby}");
 	}
 
+	@Override
+	protected String getCountUrl(String sQuery) {
+		return "http://collaborative.mt.asi.it/api/stub/products/count?filter=" + sQuery;
+	}
+
 }

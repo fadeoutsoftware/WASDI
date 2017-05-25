@@ -42,5 +42,10 @@ public class QueryExecutorSENTINEL extends QueryExecutor {
 	protected String getUrlSchema() {
 		return "https";
 	}
+
+	@Override
+	protected String getCountUrl(String sQuery) {
+		return "https://scihub.copernicus.eu/dhus/api/stub/products/count?filter=" + sQuery;
+	}
 	
 }
