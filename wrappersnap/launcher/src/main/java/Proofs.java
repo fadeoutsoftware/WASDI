@@ -1,25 +1,13 @@
+import java.awt.geom.GeneralPath;
+import java.awt.geom.Rectangle2D;
 import java.io.File;
 
-import org.apache.commons.io.IOUtils;
-import org.esa.snap.core.dataio.ProductIO;
-import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.GeoCoding;
 import org.esa.snap.core.datamodel.Product;
-import org.esa.snap.core.util.geotiff.GeoCoding2GeoTIFFMetadata;
-import org.esa.snap.core.util.geotiff.GeoTIFF;
-import org.esa.snap.core.util.geotiff.GeoTIFFMetadata;
-import org.esa.snap.dataio.bigtiff.BigGeoTiffProductWriterPlugIn;
-import org.esa.snap.dataio.geotiff.GeoTiffProductReaderPlugIn;
+import org.esa.snap.core.util.ProductUtils;
 import org.geotools.referencing.CRS;
-import org.json.JSONArray;
-import org.json.JSONObject;
 
-import com.bc.ceres.core.ProgressMonitor;
-import com.bc.ceres.glevel.MultiLevelImage;
-
-import wasdi.ConfigReader;
 import wasdi.snapopearations.ReadProduct;
-import wasdi.snapopearations.WriteProduct;
 
 public class Proofs {
 
@@ -38,40 +26,46 @@ public class Proofs {
         
         System.out.println("EPSG");
         
-        String sEPSG = CRS.lookupIdentifier(oSentinel.getSceneGeoCoding().getMapCRS(),true);
-        
-        String[] asBandNames = oSentinel.getBandNames();
-        for (String sBandName : asBandNames) {
-        	
-        	
-        	
-        	// Get the Geocoding and Band
-			GeoCoding oGeoCoding = oSentinel.getSceneGeoCoding();
-			
-			Band oBand = oSentinel.getBand(sBandName);
-			
-			// Get Image
-			MultiLevelImage oBandImage = oBand.getSourceImage();
-			// Get TIFF Metadata
-			GeoTIFFMetadata oMetadata = GeoCoding2GeoTIFFMetadata.createGeoTIFFMetadata(oGeoCoding, oBandImage.getWidth(),oBandImage.getHeight());
-			File oOutputFile = new File(oDirDst, sBandName + ".tif");
-		    GeoTIFF.writeImage(oBandImage, oOutputFile, oMetadata);
-        	
-        	
-//            Band oBand = oSentinel.getBand(sBandName);
-//            
-//            System.out.println("exctractinb band " + oBand.getDisplayName() + " - " + oBand.getDescription());
-//            
-//            Product oGeotiffProduct = new Product("band_geotiff_" + sBandName, "GEOTIFF");
-//            oGeotiffProduct.addBand(oBand);
-//            
-//            String sFileName = new WriteProduct().WriteGeoTiff(oGeotiffProduct, oDirDst.getAbsolutePath(), sBandName);
-            
-//            File oFileDst = new File(oDirDst, sBandName + ".tif");
-//            ProductIO.writeProduct(oGeotiffProduct, oFileDst.getAbsolutePath(), "GeoTIFF");
-            
-            break;
+        GeoCoding oGeoCoding = oSentinel.getSceneGeoCoding();
+		String sEPSG = CRS.lookupIdentifier(oGeoCoding.getMapCRS(),true);
+		
+		GeneralPath[] oPath = ProductUtils.createGeoBoundaryPaths(oSentinel);
+		for (GeneralPath p : oPath) {
+			Rectangle2D bounds = p.getBounds2D();
+			System.out.println(bounds);
 		}
+//        String[] asBandNames = oSentinel.getBandNames();
+//        for (String sBandName : asBandNames) {
+//        	
+//        	
+//        	
+//        	// Get the Geocoding and Band
+//			GeoCoding oGeoCoding = oSentinel.getSceneGeoCoding();
+//			
+//			Band oBand = oSentinel.getBand(sBandName);
+//			
+//			// Get Image
+//			MultiLevelImage oBandImage = oBand.getSourceImage();
+//			// Get TIFF Metadata
+//			GeoTIFFMetadata oMetadata = GeoCoding2GeoTIFFMetadata.createGeoTIFFMetadata(oGeoCoding, oBandImage.getWidth(),oBandImage.getHeight());
+//			File oOutputFile = new File(oDirDst, sBandName + ".tif");
+//		    GeoTIFF.writeImage(oBandImage, oOutputFile, oMetadata);
+//        	
+//        	
+////            Band oBand = oSentinel.getBand(sBandName);
+////            
+////            System.out.println("exctractinb band " + oBand.getDisplayName() + " - " + oBand.getDescription());
+////            
+////            Product oGeotiffProduct = new Product("band_geotiff_" + sBandName, "GEOTIFF");
+////            oGeotiffProduct.addBand(oBand);
+////            
+////            String sFileName = new WriteProduct().WriteGeoTiff(oGeotiffProduct, oDirDst.getAbsolutePath(), sBandName);
+//            
+////            File oFileDst = new File(oDirDst, sBandName + ".tif");
+////            ProductIO.writeProduct(oGeotiffProduct, oFileDst.getAbsolutePath(), "GeoTIFF");
+//            
+//            break;
+//		}
         
 		
         System.out.println("ciao");

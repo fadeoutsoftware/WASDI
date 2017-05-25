@@ -8,8 +8,6 @@ import java.lang.reflect.Method;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import javax.media.jai.JAI;
-
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
@@ -20,9 +18,6 @@ import org.apache.commons.cli.ParseException;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.apache.log4j.xml.DOMConfigurator;
-import org.esa.snap.core.dataio.ProductIO;
-import org.esa.snap.core.dataio.ProductReader;
-import org.esa.snap.core.dataio.ProductReaderPlugIn;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.GeoCoding;
 import org.esa.snap.core.datamodel.Product;
@@ -30,7 +25,6 @@ import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.core.util.geotiff.GeoCoding2GeoTIFFMetadata;
 import org.esa.snap.core.util.geotiff.GeoTIFF;
 import org.esa.snap.core.util.geotiff.GeoTIFFMetadata;
-import org.esa.snap.engine_utilities.util.MemUtils;
 import org.esa.snap.runtime.Config;
 import org.esa.snap.runtime.Engine;
 import org.geotools.referencing.CRS;
@@ -85,6 +79,8 @@ public class LauncherMain {
     // Define a static s_oLogger variable so that it references the
     // Logger instance named "MyApp".
     public static Logger s_oLogger = Logger.getLogger(LauncherMain.class);
+    
+    public static Send oSendToRabbit = null;
 
     //-operation <operation> -elaboratefile <file>
     public static void main(String[] args) throws Exception {
@@ -140,6 +136,7 @@ public class LauncherMain {
             }
 
             // Create Launcher Instance
+            LauncherMain.oSendToRabbit = new Send();
             LauncherMain oLauncher = new LauncherMain();
 
             s_oLogger.debug("Executing " + sOperation + " Parameter " + sParameter);
@@ -148,6 +145,7 @@ public class LauncherMain {
             oLauncher.ExecuteOperation(sOperation,sParameter);
 
             s_oLogger.debug("Operation Done, bye");
+            LauncherMain.oSendToRabbit.Free();
 
         }
         catch( ParseException exp ) {
@@ -292,8 +290,7 @@ public class LauncherMain {
 
         return iPid;
     }
-
-
+    
     /**
      * Downloads a new product
      * @param oParameter
@@ -302,8 +299,6 @@ public class LauncherMain {
      */
     public String Download(DownloadFileParameter oParameter, String sDownloadPath) {
         String sFileName = "";
-        // Rabbit Sender
-        Send oSendToRabbit = new Send();
         // Download handler
         DownloadFile oDownloadFile = new DownloadFile();
 
@@ -326,16 +321,8 @@ public class LauncherMain {
                     s_oLogger.debug("LauncherMain.Download: Error during process update");
             }
 
-            //Init rabbit exchange and queue
-            if (oSendToRabbit.Init(oParameter.getWorkspace(), oParameter.getUserId()) == false)
-            {
-                s_oLogger.debug("LauncherMain.Download: Failed initializing RabbitMQ");
-                return sFileName;
-            }
-
             //send update process message
-            if (oSendToRabbit.SendUpdateProcessMessage(oParameter.getWorkspace()) == false)
-            {
+            if (!oSendToRabbit.SendUpdateProcessMessage(oParameter.getWorkspace())) {
                 s_oLogger.debug("LauncherMain.Download: Error sending rabbitmq message to update process list");
             }
 
@@ -443,6 +430,70 @@ public class LauncherMain {
         return  sFileName;
     }
 
+    
+    
+    /**
+     * Acquire a file in a workspace. Normally used for an uploaded file
+     * @param oParameter
+     * @param sDownloadPath
+     * @return
+     */
+    public String Acquire(DownloadFileParameter oParameter, String sAcquisitionBasePath, String sLocalFilePath) {
+        String sFileName = "";
+
+        try {
+            s_oLogger.debug("LauncherMain.Acquire: Start");
+
+            //send update process message
+            if (oSendToRabbit.SendUpdateProcessMessage(oParameter.getWorkspace()) == false) {
+                s_oLogger.debug("LauncherMain.Download: Error sending rabbitmq message to update process list");
+            }
+
+            
+            File oAcquisitionPath = new File(new File(sAcquisitionBasePath), oParameter.getUserId()+"/"+oParameter.getWorkspace());
+            File oFileToAcquire = new File(sLocalFilePath);
+            
+            s_oLogger.debug("LauncherMain.AcquisitionPath: " + oAcquisitionPath.getAbsolutePath());
+
+            // Product view Model
+            ProductViewModel oVM = null;
+
+            s_oLogger.debug("LauncherMain.AcquisitionPath: Check if file exists");
+            
+            if (!oAcquisitionPath.isDirectory() || !oFileToAcquire.canRead()) {
+                s_oLogger.debug("LauncherMain.AcquisitionPath: acquisition path is not a directory or cannot read local file " + oFileToAcquire.getAbsolutePath());
+                oSendToRabbit.SendRabbitMessage(false,LauncherOperations.DOWNLOAD,oParameter.getWorkspace(),null,oParameter.getExchange());
+            }
+            
+            File oDstFile = new File(oAcquisitionPath, oFileToAcquire.getName());
+			FileUtils.copyFile(oFileToAcquire, oDstFile);
+            sFileName = oDstFile.getAbsolutePath();
+
+            ConvertProductToViewModelAndSendToRabbit(oVM, sFileName, oParameter.getWorkspace(), oParameter.getExchange(), LauncherOperations.DOWNLOAD, oParameter.getBoundingBox());
+        }
+        catch (Exception oEx) {
+            s_oLogger.debug("LauncherMain.Download: Exception " + oEx.toString());
+
+            oSendToRabbit.SendRabbitMessage(false,LauncherOperations.DOWNLOAD,oParameter.getWorkspace(),null,oParameter.getExchange());
+        }
+        finally{
+            //delete process from list
+            try{
+                ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
+                oProcessWorkspaceRepository.DeleteProcessWorkspace(oParameter.getProcessObjId());
+            }
+            catch (Exception oEx) {
+                s_oLogger.debug("LauncherMain.Download: Exception deleting process " + oEx.toString());
+            }
+        }
+
+        return  sFileName;
+    }
+    
+    
+    
+    
+    
     /**
      * Converts a product in a ViewModel and send it to the rabbit queue
      * @param oVM View Model... if null, read it from the product in sFileName
@@ -454,8 +505,6 @@ public class LauncherMain {
      */
     private void ConvertProductToViewModelAndSendToRabbit(ProductViewModel oVM, String sFileName, String sWorkspace, String sExchange, String sOperation, String sBBox) throws Exception
     {
-        Send oSendToRabbit = new Send();
-//        try {
         s_oLogger.debug("LauncherMain.ConvertProductToViewModelAndSendToRabbit: File Name = " + sFileName);
 
         // Get The product view Model            
@@ -527,9 +576,6 @@ public class LauncherMain {
 
         s_oLogger.debug("LauncherMain.ExecuteOperation: Start operation " + sTypeOperation);
 
-        // Rabbit Sender
-        Send oSendToRabbit = new Send();
-
         try {
         	
         	// P.Campanella 12/05/2017: add the process id to the table
@@ -546,16 +592,8 @@ public class LauncherMain {
             }        	
         	
         	
-            //Init rabbit exchange and queue
-            if (oSendToRabbit.Init(oParameter.getWorkspace(), oParameter.getUserId()) == false)
-            {
-                s_oLogger.debug("LauncherMain.ExecuteOperation: Failed initializing RabbitMQ");
-                return;
-            }
-
             //send update process message
-            if (oSendToRabbit.SendUpdateProcessMessage(oParameter.getWorkspace()) == false)
-            {
+            if (!oSendToRabbit.SendUpdateProcessMessage(oParameter.getWorkspace())) {
                 s_oLogger.debug("LauncherMain.ExecuteOperation: Error sending rabbitmq message to update process list");
             }
 
@@ -656,9 +694,6 @@ public class LauncherMain {
 
         String sLayerId = "";
 
-        // Rabbit Sender
-        Send oSendToRabbit = new Send();
-
         try {
 
             ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
@@ -671,16 +706,8 @@ public class LauncherMain {
                 oProcessWorkspaceRepository.UpdateProcess(oProcessWorkspace);
             }
 
-            //Init rabbit exchange and queue
-            if (oSendToRabbit.Init(oParameter.getWorkspace(), oParameter.getUserId()) == false)
-            {
-                s_oLogger.debug("LauncherMain.PublishBandImage: Failed initializing RabbitMQ");
-                return sLayerId;
-            }
-
             //send update process message
-            if (oSendToRabbit.SendUpdateProcessMessage(oParameter.getWorkspace()) == false)
-            {
+            if (!oSendToRabbit.SendUpdateProcessMessage(oParameter.getWorkspace())) {
                 s_oLogger.debug("LauncherMain.PublishBandImage: Error sending rabbitmq message to update process list");
             }
 
@@ -907,20 +934,10 @@ public class LauncherMain {
 
         s_oLogger.debug("LauncherMain.RasterGeometricResample: Start");
 
-        // Rabbit Sender
-        Send oSendToRabbit = new Send();
-
         try {
-            //Init rabbit exchange and queue
-            if (oSendToRabbit.Init(oParameter.getWorkspace(), oParameter.getUserId()) == false)
-            {
-                s_oLogger.debug("LauncherMain.RasterGeometricResample: Failed initializing RabbitMQ");
-                return;
-            }
 
             //send update process message
-            if (oSendToRabbit.SendUpdateProcessMessage(oParameter.getWorkspace()) == false)
-            {
+            if (!oSendToRabbit.SendUpdateProcessMessage(oParameter.getWorkspace())) {
                 s_oLogger.debug("LauncherMain.RasterGeometricResample: Error sending rabbitmq message to update process list");
             }
 
