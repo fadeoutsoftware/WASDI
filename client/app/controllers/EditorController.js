@@ -156,7 +156,7 @@ var EditorController = (function () {
         }
 
         // Switch the Code
-        switch(oMessageResult.messageCode) {
+        switch(oMessage.messageCode) {
             case "PUBLISH":
                 oController.receivedPublishMessage(oMessage);
                 break;

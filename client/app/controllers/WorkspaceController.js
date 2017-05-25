@@ -3,7 +3,7 @@
  */
 
 var WorkspaceController = (function() {
-    function WorkspaceController($scope, $location, oConstantsService, oAuthService, oWorkspaceService,$state,oProductService) {
+    function WorkspaceController($scope, $location, oConstantsService, oAuthService, oWorkspaceService,$state,oProductService, oRabbitStompService) {
         this.m_oScope = $scope;
         this.m_oLocation  = $location;
         this.m_oAuthService = oAuthService;
@@ -18,7 +18,10 @@ var WorkspaceController = (function() {
         this.m_bIsOpenInfo = false;
         this.m_bIsVisibleFiles = false;
         this.m_oWorkspaceSelected = null;
+        this.m_oRabbitStompService = oRabbitStompService;
         this.fetchWorkspaceInfoList();
+
+        this.m_oRabbitStompService.unsubscribe();
 
     }
 
@@ -57,6 +60,7 @@ var WorkspaceController = (function() {
                 if (data != undefined)
                 {
                     oController.m_oConstantsService.setActiveWorkspace(data);
+                    oController.m_oRabbitStompService.subscribe(sWorkspaceId);
                     oController.m_oState.go("root.editor", { workSpace : sWorkspaceId });//use workSpace when reload editor page
                     //oController.m_oLocation.path('editor');
                 }
@@ -188,7 +192,8 @@ var WorkspaceController = (function() {
         'AuthService',
         'WorkspaceService',
         '$state',
-        'ProductService'
+        'ProductService',
+        'RabbitStompService'
     ];
     return WorkspaceController;
 }) ();

@@ -44,28 +44,13 @@ service('RabbitStompService', ['$http',  'ConstantsService','$interval','Process
         this.m_oActiveController = oController;
     }
 
-    /*@Params: WorkspaceID, Name of controller, Controller
-    * it need the Controller for call the methods (the methods are inside the active controllers)
-    * the methods are call in oRabbitCallback
-    * */
-    this.initWebStomp = function()
-    {
-        // Web Socket to receive workspace messages
-        //var oWebSocket = new WebSocket(this.m_oConstantsService.getStompUrl());
-        var oWebSocket = new SockJS(this.m_oConstantsService.getStompUrl());
-        var oThisService = this;
-        this.m_oClient = Stomp.over(oWebSocket);
-        this.m_oClient.heartbeat.outgoing = 0;
-        this.m_oClient.heartbeat.incoming = 0;
-        this.m_oClient.debug = null;
+    this.subscribe = function (workspaceId) {
+        this.unsubscribe();
 
-
-        /**
-         * Called when the client receives a STOMP message from the server
-         * Rabbit Callback: receives the Messages
-         * @param message
-         */
-        var oRabbitCallback = function (message) {
+        var subscriptionString = "/exchange/amq.topic/" + workspaceId;
+        console.log("subscribing to " + subscriptionString);
+        var oThisService = this
+        this.m_oSubscription = this.m_oClient.subscribe(subscriptionString, function (message) {
 
             // Check message Body
             if (message.body)
@@ -84,14 +69,12 @@ service('RabbitStompService', ['$http',  'ConstantsService','$interval','Process
                 // Get the Active Workspace Id
                 var sActiveWorkspaceId = "";
 
-                if (!utilsIsObjectNullOrUndefined(this.m_oConstantsService.getActiveWorkspace())) {
-                    sActiveWorkspaceId = this.m_oConstantsService.getActiveWorkspace().workspaceId;
+                if (!utilsIsObjectNullOrUndefined(oThisService.m_oConstantsService.getActiveWorkspace())) {
+                    sActiveWorkspaceId = oThisService.m_oConstantsService.getActiveWorkspace().workspaceId;
                 }
                 else {
                     console.log("Rabbit Stomp Service: Active Workspace is null.")
                 }
-
-
 
                 if (oMessageResult.messageResult == "KO") {
 
@@ -161,10 +144,28 @@ service('RabbitStompService', ['$http',  'ConstantsService','$interval','Process
                     var oDialog = utilsVexDialogAlertBottomRightCorner(sUserMessage);
                     utilsVexCloseDialogAfterFewSeconds(3000,oDialog);
                 }
-
             }
-        }
+        });
+    }
 
+    this.unsubscribe = function () {
+        if (this.m_oSubscription) this.m_oSubscription.unsubscribe()
+    }
+
+    /*@Params: WorkspaceID, Name of controller, Controller
+    * it need the Controller for call the methods (the methods are inside the active controllers)
+    * the methods are call in oRabbitCallback
+    * */
+    this.initWebStomp = function()
+    {
+        // Web Socket to receive workspace messages
+        //var oWebSocket = new WebSocket(this.m_oConstantsService.getStompUrl());
+        var oWebSocket = new SockJS(this.m_oConstantsService.getStompUrl());
+        var oThisService = this;
+        this.m_oClient = Stomp.over(oWebSocket);
+        this.m_oClient.heartbeat.outgoing = 0;
+        this.m_oClient.heartbeat.incoming = 0;
+        this.m_oClient.debug = null;
 
         /**
          * Callback of the Rabbit On Connect
@@ -179,7 +180,6 @@ service('RabbitStompService', ['$http',  'ConstantsService','$interval','Process
                 console.log("Error session id Null in on_connect");
                 return false;
             }
-            oThisService.m_oSubscription = oThisService.m_oClient.subscribe(oSessionId, oRabbitCallback);
 
             // Is this a re-connection?
             if (oThisService.m_oReconnectTimerPromise != null) {
