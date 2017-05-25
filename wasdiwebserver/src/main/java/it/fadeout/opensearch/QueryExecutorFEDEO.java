@@ -14,5 +14,11 @@ public class QueryExecutorFEDEO extends QueryExecutor {
 		return new String[] {"opensearch","request"};
 	}
 
+	@Override
+	protected String getCountUrl(String sQuery) {
+		//TODO
+		return null;
+	}
+
 	
 }

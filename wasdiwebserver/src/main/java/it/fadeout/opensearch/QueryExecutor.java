@@ -5,7 +5,11 @@ import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.StringReader;
+import java.net.HttpURLConnection;
+import java.net.ProtocolException;
+import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Base64;
@@ -119,6 +123,7 @@ public abstract class QueryExecutor {
 		
 	}
 	
+	
 	protected void addUrlParams(Map<String, Object> oParamsMap) {
 	}
 
@@ -133,6 +138,7 @@ public abstract class QueryExecutor {
 	
 	protected abstract Template getTemplate();
 	
+	protected abstract String getCountUrl(String sQuery);	
 	
 	protected ArrayList<QueryResultViewModel> buildResultViewModel(Document<Feed> oDocument, AbderaClient oClient, RequestOptions oOptions) {
 		int iStreamSize = 1000000;
@@ -215,6 +221,49 @@ public abstract class QueryExecutor {
 	}
 	
 	
+	public int executeCount(String sQuery) throws IOException {
+		
+		String sUrl = getCountUrl(URLEncoder.encode(sQuery, "UTF-8"));
+//		if (sProvider.equals("SENTINEL"))
+//			sUrl = "https://scihub.copernicus.eu/dhus/api/stub/products/count?filter=";
+//		if (sProvider.equals("MATERA"))
+//			sUrl = "https://collaborative.mt.asi.it/api/stub/products/count?filter=";
+
+		final String USER_AGENT = "Mozilla/5.0";
+
+		URL obj = new URL(sUrl);
+		HttpURLConnection con = (HttpURLConnection) obj.openConnection();
+
+		// optional default is GET
+		con.setRequestMethod("GET");
+
+		//add request header
+		con.setRequestProperty("User-Agent", USER_AGENT);
+		if (m_sUser!=null && m_sPassword!=null) {
+			String sUserCredentials = m_sUser + ":" + m_sPassword;
+			String sBasicAuth = "Basic " + Base64.getEncoder().encodeToString(sUserCredentials.getBytes("UTF-8"));
+			con.setRequestProperty ("Authorization", sBasicAuth);
+		}
+		
+		System.out.println("\nSending 'GET' request to URL : " + sUrl);
+		int responseCode = con.getResponseCode();
+		System.out.println("Response Code : " + responseCode);
+
+		BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+		String inputLine;
+		StringBuffer response = new StringBuffer();
+
+		while ((inputLine = in.readLine()) != null) {
+			response.append(inputLine);
+		}
+		in.close();
+
+		//print result
+		System.out.println("Count Done: Response " + response.toString());
+				
+		return Integer.parseInt(response.toString());
+	}
+	
 	public ArrayList<QueryResultViewModel> execute(String sQuery) throws IOException {
 		
 		String sUrl = buildUrl(sQuery);
@@ -286,26 +335,29 @@ public abstract class QueryExecutor {
 
 	public static void main(String[] args) {
 //		QueryExecutor oExecutor = QueryExecutor.newInstance("SENTINEL", "sadamo", "***REMOVED***", "0", "10", "ingestiondate", "asc"); 
-//		QueryExecutor oExecutor = QueryExecutor.newInstance("MATERA", "p.campanella", "***REMOVED***", "0", "10", "ingestiondate", "asc");
-		QueryExecutor oExecutor = QueryExecutor.newInstance("FEDEO", null, null, "0", "10", "ingestiondate", "asc");
+		QueryExecutor oExecutor = QueryExecutor.newInstance("MATERA", "p.campanella", "***REMOVED***", "0", "10", "ingestiondate", "asc");
+//		QueryExecutor oExecutor = QueryExecutor.newInstance("FEDEO", null, null, "0", "10", "ingestiondate", "asc");
 		
 		try {
 			String sQuery = "( beginPosition:[2017-05-15T00:00:00.000Z TO 2017-05-15T23:59:59.999Z] AND endPosition:[2017-05-15T00:00:00.000Z TO 2017-05-15T23:59:59.999Z] ) AND   (platformname:Sentinel-1 AND filename:S1A_* AND producttype:GRD)";
-			String sParameter = URLEncoder.encode(sQuery, "UTF-8");
-			ArrayList<QueryResultViewModel> aoResults = oExecutor.execute(sQuery);
-			if (aoResults!=null) {
-				for (QueryResultViewModel oResult : aoResults) {
-					System.out.println(oResult.getTitle());
-					System.out.println("    ID: " + oResult.getId());
-					System.out.println("    SUMMARY: " + oResult.getSummary());
-					System.out.println("    LINK: " + oResult.getLink());
-					if (oResult.getPreview()!=null) System.out.println("    PREVIEW-LEN:" + oResult.getPreview().length());
-					System.out.println("    FOOTPPRINT:" + oResult.getFootprint());
-					for (String sKey : oResult.getProperties().keySet()) {
-						System.out.println("        PROPERTY: " + sKey + " --> " + oResult.getProperties().get(sKey));
-					}
-				}				
-			}
+			
+			System.out.println(oExecutor.executeCount(sQuery));
+			
+//			String sParameter = URLEncoder.encode(sQuery, "UTF-8");
+//			ArrayList<QueryResultViewModel> aoResults = oExecutor.execute(sQuery);
+//			if (aoResults!=null) {
+//				for (QueryResultViewModel oResult : aoResults) {
+//					System.out.println(oResult.getTitle());
+//					System.out.println("    ID: " + oResult.getId());
+//					System.out.println("    SUMMARY: " + oResult.getSummary());
+//					System.out.println("    LINK: " + oResult.getLink());
+//					if (oResult.getPreview()!=null) System.out.println("    PREVIEW-LEN:" + oResult.getPreview().length());
+//					System.out.println("    FOOTPPRINT:" + oResult.getFootprint());
+//					for (String sKey : oResult.getProperties().keySet()) {
+//						System.out.println("        PROPERTY: " + sKey + " --> " + oResult.getProperties().get(sKey));
+//					}
+//				}				
+//			}
 			
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
