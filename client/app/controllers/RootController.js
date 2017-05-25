@@ -404,6 +404,7 @@ var RootController = (function() {
     RootController.prototype.deleteProcess = function(oProcessInput)
     {
         var oController = this
+        var oWorkspace = this.m_oConstantsService.getActiveWorkspace();
         this.m_oModalService.showModal({
             templateUrl: "dialogs/delete_process/DeleteProcessDialog.html",
             controller: "DeleteProcessController",
@@ -415,7 +416,7 @@ var RootController = (function() {
                 oController.m_oScope.Result = result ;
 
                 if(result === 'delete')
-                    oController.m_oProcessesLaunchedService.removeProcessInServer(oProcessInput.processObjId,oController.m_sWorkspace.workspaceId,oProcessInput)
+                    oController.m_oProcessesLaunchedService.removeProcessInServer(oProcessInput.processObjId,oWorkspace.workspaceId,oProcessInput)
             });
         });
 
