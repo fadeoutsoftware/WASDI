@@ -25,6 +25,7 @@ import wasdi.shared.data.ProductWorkspaceRepository;
 import wasdi.shared.data.PublishedBandsRepository;
 import wasdi.shared.geoserver.GeoserverMethods;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.viewmodels.BandViewModel;
 import wasdi.shared.viewmodels.MetadataViewModel;
 import wasdi.shared.viewmodels.PrimitiveResult;
 import wasdi.shared.viewmodels.ProductViewModel;
@@ -148,6 +149,7 @@ public class ProductResource {
 			// Create repo
 			ProductWorkspaceRepository oProductWorkspaceRepository = new ProductWorkspaceRepository();
 			DownloadedFilesRepository oDownloadedFilesRepository = new DownloadedFilesRepository();
+			PublishedBandsRepository oPublishedBandsRepository = new PublishedBandsRepository();			
 
 			// Get Product List
 			List<ProductWorkspace> aoProductWorkspace = oProductWorkspaceRepository.GetProductsByWorkspace(sWorkspaceId);
@@ -161,6 +163,24 @@ public class ProductResource {
 				// Add View model to return list
 				if (oDownloaded != null) {
 					ProductViewModel oProductVM = oDownloaded.getProductViewModel();
+					
+					ArrayList<BandViewModel> aoBands = oProductVM.getBandsGroups().getBands(); 
+					
+					for (int iBands=0; iBands<aoBands.size(); iBands++) {
+						
+						BandViewModel oBand = aoBands.get(iBands);
+						
+						if (oBand != null) {
+							PublishedBand oPublishBand = oPublishedBandsRepository.GetPublishedBand(oProductVM.getFileName(), oBand.getName());
+
+							if (oPublishBand != null)
+							{
+								oBand.setPublished(true);
+							}
+						}
+							
+					}
+					
 					oProductVM.setMetadata(null);
 					aoProductList.add(oProductVM);
 				}
@@ -209,8 +229,12 @@ public class ProductResource {
 				return Response.status(500).build();
 			}
 			
+			// P.Campanella 26/05/2017: keep safe the metadata view model that is not exchanged in the API
+			oProductViewModel.setMetadata(oDownlaoded.getProductViewModel().getMetadata());
+			// Set the updated one
 			oDownlaoded.setProductViewModel(oProductViewModel);
 			
+			// Save
 			if (oDownloadedFilesRepository.UpdateDownloadedFile(oDownlaoded) == false) {
 				System.out.println("ProductResource.UpdateProductViewModel: There was an error updating Downloaded File.");
 				return Response.status(500).build();
