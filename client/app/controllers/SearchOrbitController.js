@@ -8,7 +8,7 @@
 var SearchOrbitController = (function() {
     function SearchOrbitController($scope, $location, oConstantsService, oAuthService,oState, oConfigurationService,
                                    oMapService, oSearchOrbitService,oProcessesLaunchedService,oWorkspaceService,
-                                   oRabbitStompService,oModalService) {
+                                   oRabbitStompService,oModalService, oProductService) {
         this.m_oScope = $scope;
         this.m_oLocation = $location;
         this.m_oConstantsService = oConstantsService;
@@ -28,6 +28,7 @@ var SearchOrbitController = (function() {
         this.m_oWorkspaceService = oWorkspaceService;
         this.m_oRabbitStompService = oRabbitStompService;
         this.m_oModalService = oModalService;
+        this.m_oProductService = oProductService;
 
         this.m_oActiveWorkspace = this.m_oConstantsService.getActiveWorkspace();
         this.m_oUser = this.m_oConstantsService.getUser();
@@ -364,7 +365,7 @@ var SearchOrbitController = (function() {
                 for (var iIndexBounds = 0; iIndexBounds < sSwath.length; iIndexBounds++)
                 {
                     var aBounds = sSwath[iIndexBounds];
-                    console.log(aBounds);
+                    //console.log(aBounds);
                     var aNewBounds = aBounds.split(" ");
 
                     var oLatLonArray = [];
@@ -504,6 +505,8 @@ var SearchOrbitController = (function() {
                 console.log("RABBIT ERROR: got empty message ");
         }
 
+        utilsProjectShowRabbitMessageUserFeedBack(oMessage);
+
     }
 
     SearchOrbitController.prototype.receivedNewProductMessage = function (oMessage, oController) {
@@ -536,7 +539,8 @@ var SearchOrbitController = (function() {
         'ProcessesLaunchedService',
         'WorkspaceService',
         'RabbitStompService',
-        'ModalService'
+        'ModalService',
+        'ProductService'
     ];
 
     return SearchOrbitController;

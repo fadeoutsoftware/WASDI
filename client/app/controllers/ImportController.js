@@ -1148,6 +1148,8 @@ var ImportController = (function() {
                 console.log("RABBIT ERROR: got empty message ");
         }
 
+        utilsProjectShowRabbitMessageUserFeedBack(oMessage);
+
     }
 
     ImportController.prototype.receivedNewProductMessage = function (oMessage, oController) {

@@ -38,9 +38,14 @@ var ProductEditorInfoController = (function() {
         if(utilsIsObjectNullOrUndefined(this.m_oProduct) === true)
             return false;
         var oController=this;
+
+        var oOldMetadata = this.m_oProduct.metadata;
+        this.m_oProduct.metadata = null;
+
         this.m_oProductService.updateProduct(this.m_oProduct).success(function (data, status)
         {
             if(data === "") {
+                oController.m_oProduct.metadata = oOldMetadata;
                 oController.m_oReturnProduct = oController.m_oProduct;
                 console.log("Product Updated");
             }

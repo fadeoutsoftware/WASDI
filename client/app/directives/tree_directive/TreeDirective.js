@@ -147,9 +147,9 @@ angular.module('wasdi.TreeDirective', [])
                                     // var test=$("#tree").jstree().get_node(  data.node.id);
                                     $("#jstree").jstree().disable_node( data.node.id);
                                     $('#jstree').jstree(true).set_icon( data.node.id, 'fa fa-spinner fa-spin');
+
                                     //if url != 0 AND (children IS empty == true)
-                                    $http.get(data.node.original.url)
-                                        .success(function (result_data) {
+                                    $http.get(data.node.original.url).success(function (result_data) {
                                             //reload product list
                                             if(result_data !== "")
                                             {
@@ -197,9 +197,8 @@ angular.module('wasdi.TreeDirective', [])
                                 }).then(function (modal) {
                                     modal.element.modal();
                                     modal.close.then(function (result) {
-                                        if(utilsIsObjectNullOrUndefined(result)===true)
-                                            return false;
-                                        oController.m_oScope.Result = result;
+                                        if(utilsIsObjectNullOrUndefined(result)===true) return false;
+                                        //oController.m_oScope.Result = result;
                                     });
                                 });
 
