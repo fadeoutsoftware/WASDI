@@ -14,6 +14,8 @@ public class BandViewModel {
     }
 
     private String name;
+    
+    private Boolean published = false;
 
     public String getName() {
         return name;
@@ -22,4 +24,10 @@ public class BandViewModel {
     public void setName(String name) {
         this.name = name;
     }
+	public Boolean getPublished() {
+		return published;
+	}
+	public void setPublished(Boolean published) {
+		this.published = published;
+	}
 }
