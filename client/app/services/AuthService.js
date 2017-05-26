@@ -50,12 +50,12 @@ service('AuthService', ['$http',  'ConstantsService', function ($http, oConstant
 
     this.isCreatedAccountUpload = function()
     {
-        return this.m_oHttp.get(this.APIURL + 'rest/auth/upload/existsaccount');
+        return this.m_oHttp.get(this.APIURL + '/auth/upload/existsaccount');
     };
 
     this.getListFilesUpload = function()
     {
-        return this.m_oHttp.get(this.APIURL + 'auth/upload/list');
+        return this.m_oHttp.get(this.APIURL + '/auth/upload/list');
     };
 
 }]);

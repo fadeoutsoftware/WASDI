@@ -147,7 +147,7 @@ var EditorController = (function () {
     EditorController.prototype.receivedRabbitMessage = function (oMessage, oController) {
 
         // Check if the message is valid
-        if (oMessage == null) return;
+       if (oMessage == null) return;
 
         // Check the Result
         if (oMessage.messageResult == "KO") {
@@ -158,12 +158,14 @@ var EditorController = (function () {
         // Switch the Code
         switch(oMessage.messageCode) {
             case "PUBLISH":
+                // oController.receivedPublishBandMessage(oMessage);
                 oController.receivedPublishMessage(oMessage);
                 break;
             case "PUBLISHBAND":
                 oController.receivedPublishBandMessage(oMessage);
                 break;
             case "UPDATEPROCESSES":
+                oController.m_oProcessesLaunchedService.loadProcessesFromServer(oController.m_oActiveWorkspace.workspaceId);
                 break;
             case "DOWNLOAD":
             case "APPLYORBIT":
@@ -230,9 +232,9 @@ var EditorController = (function () {
      */
     /* THIS FUNCTION ARE CALLED IN RABBIT SERVICE */
     EditorController.prototype.receivedPublishBandMessage = function (oMessage) {
-        var oLayer = oMessage.payload;
+        var oLayer = oMessage;//.payload;
 
-        if (utilsIsObjectNullOrUndefined(oLayer)) {
+         if (utilsIsObjectNullOrUndefined(oLayer)) {
             console.log("Error LayerID is empty...");
             return false;
         }
@@ -589,31 +591,11 @@ var EditorController = (function () {
                         $('#jstree').jstree(true).set_icon(oBand.productName+"_"+oBand.name,'assets/icons/uncheck_20x20.png');
                     }
                 }
-                // else
-                // {
-                //
-                // }
-                //else
-                //    oController.m_oProcessesLaunchedService.loadProcessesFromServer(oController.m_oActiveWorkspace.workspaceId);
-                //oController.m_oProcessesLaunchedService.addProcessesByLocalStorage(oBand.productName + "_" + oBand.name,
-                //                                                    oIdBandNodeInTree,
-                //                                                    oController.m_oProcessesLaunchedService.getTypeOfProcessPublishingBand(),
-                //                                                    oController.m_oActiveWorkspace.workspaceId,
-                //                                                    oController.m_oUser.userId);
 
-                /*{processName:oBand.productName + "_" + oBand.name,
-                 nodeId:oIdBandNodeInTree,
-                 typeOfProcess:oController.m_oProcessesLaunchedService.getTypeOfProcessPublishingBand()}
-                 *
-                 * */
-                //else
-                //    oController.pushProcessInListOfRunningProcesses(oBand.productName + "_" + oBand.name,oIdBandNodeInTree);
-                //TODO PUSH PROCESS WITH SERVICE
             }
             else {
-                //TODO ERROR
+
                 utilsVexDialogAlertTop("Error in publish band");
-                //console.log("Error in publish band");
                 $("#jstree").jstree().enable_node(oBand.productName+"_"+oBand.name);
                 $('#jstree').jstree(true).set_icon(oBand.productName+"_"+oBand.name,'assets/icons/uncheck_20x20.png');
             }

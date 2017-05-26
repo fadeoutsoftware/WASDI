@@ -446,9 +446,15 @@ var ImportController = (function() {
         this.m_oSearchService.getProductsCount().then(
             function(result)
             {
-                var temp=result;
+                if(result)
+                {
+                    if(result.data)
+                        oController.m_iTotalOfProducts = result.data;
+                }
+
             }, function errorCallback(response) {
-                var temp=response;
+                // var temp=response;
+                console.log("Impossible get products number");
             });
         //this.m_oSearchService.getProductsCount().then(function(result){
         //    //TODO CHECK DATA
@@ -473,7 +479,7 @@ var ImportController = (function() {
 
                         var aoData = sResults.data;
                         //TODO WHERE IS TOTAL OF PRODUCTS?
-                        oController.m_iTotalOfProducts = aoData.length;//aoData.feed['opensearch:totalResults'];
+                        // oController.m_iTotalOfProducts = aoData.length;//aoData.feed['opensearch:totalResults'];
 
                         //save open search params in service
                         oController.m_oResultsOfSearchService.setTotalOfProducts(oController.m_iTotalOfProducts);
@@ -1128,6 +1134,7 @@ var ImportController = (function() {
             case "PUBLISH":
             case "PUBLISHBAND":
             case "UPDATEPROCESSES":
+                oController.m_oProcessesLaunchedService.loadProcessesFromServer(oController.m_oActiveWorkspace.workspaceId);
                 break;
             case "APPLYORBIT":
             case "CALIBRATE":

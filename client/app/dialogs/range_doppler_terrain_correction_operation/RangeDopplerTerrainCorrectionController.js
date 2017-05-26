@@ -12,7 +12,7 @@ var RangeDopplerTerrainCorrectionController = (function() {
         this.m_aoProducts = this.m_oExtras.products;
         this.m_oSelectedProduct = this.m_oExtras.selectedProduct;
         this.m_oGetParametersOperationService = oGetParametersOperationService;
-
+        this.m_bSaveSigmaGammaBeta = false;
         if(utilsIsObjectNullOrUndefined(this.m_aoProducts) == true)
         {
             this.m_aoProducts = [];
@@ -40,31 +40,7 @@ var RangeDopplerTerrainCorrectionController = (function() {
             }
         }
 
-        // this.m_oTabOpen = "tab1";
-        //m_asTypeOfData and m_asOrbitStateVectors are used in ng-include InputOutputParametersView.html
-        // this.m_asTypeOfData = ["GeoTIFF","NetCDF-BEAM","NetCDF4-CF","NetCDF-CF","CSV","Gamma","Generic Binary","GeoTIFF+XML",
-        //     "NetCDF4-BEAM","BEAM-DIMAP","ENVI","PolSARPro","Snaphu","JP2","JPG","PNG","BMP","GIF","BTF","GeoTIFF-BIGTIFF","HDF5"];
-        // this.m_asOrbitStateVectors = ["Sentinel Precise(Auto Download)","Sentinel Restituted(Auto Download)","DORIS preliminary POR(ENVISAT)"
-        //     ,"DORIS Precise Vor(ENVISAT)(Auto Download)","DELFT Precise(ENVISAT,ERS1&2)(Auto Download)","PRARE Precise(ERS1&2)(Auto Download)"];
-        // this.m_sSelectedExtension = this.m_asTypeOfData[0];
 
-        // this.m_asAuxiliaryFile = ["Latest Auxiliary File","Product Auxiliary File","External Auxiliary File"];
-        // this.m_sSelectedCalibration = this.m_asAuxiliaryFile[0];
-        // this.m_asDigitalElevationModel = ["ACE2_5Min(Auto Download)","ACE30(Auto Download)","ASTER 1sec GDEM","GETASSE30(Auto Download)","SRTM 1Sec Grid","SRTM 1Sec HGT (Auto Download)",
-        //                                     "SRTM 3Sec(Auto Download)","External DEM"];
-        // this.m_asResamplingMethod = ["NEAREST_NEIGHBOUR","BILINEAR_INTERPOLATION","CUBIC_CONVOLUTION","BISINC_5_POINT_INTERPOLATION","BISINC_11_POINT_INTERPOLATION",
-        //                                 "BISINC_21_POINT_INTERPOLATION","BICUBIC_INTERPOLATION","DELAUNAY_INTERPOLATION"];
-        //
-        // this.m_asLatestAuxiliaryFile = ["Latest Auxiliary File","Product Auxiliary File","External Auxiliary File"];
-        // this.m_asSaveBand = ["Use projected local indicence angle from DEM","Use local indicence angle from DEM","Use indicence angle from Elipsoid"];
-        //
-        // this.m_sLatestAuxiliaryFileSelected =   this.m_asLatestAuxiliaryFile[0];
-        // this.m_sDigitalElevationModelSelected = this.m_asDigitalElevationModel[6];
-        // this.m_sDEMResamplingMethodSelected = this.m_asResamplingMethod[0];
-        // this.m_sImageResamplingMethodSelected = this.m_asResamplingMethod[0];
-        // this.m_sSaveSigmaSelected = this.m_asSaveBand[0];
-        // this.m_sSaveGammaSelected = this.m_asSaveBand[0];
-        //
 
 
         this.m_asSourceBandsSelected = [];
@@ -72,35 +48,7 @@ var RangeDopplerTerrainCorrectionController = (function() {
         this.m_oReturnValue={
             sourceFileName:"",
             destinationFileName:"",
-            // options:{
-            //     sourceBandNames:"",
-            //     demName:this.m_asDigitalElevationModel[6],
-            //     // externalDEMFile:"",
-            //     // externalDEMNoDataValue:0,
-            //     // externalDEMApplyEGM:true,
-            //     demResamplingMethod:this.m_asResamplingMethod[0],
-            //     imgResamplingMethod:this.m_asResamplingMethod[0],
-            //     pixelSpacingInMeter:0,
-            //     pixelSpacingInDegree:0,
-            //     // mapProjection:"WGS84(DD)",
-            //     nodataValueAtSea:true,
-            //     saveDEM:false,
-            //     saveLatLon:false,
-            //     saveIncidenceAngleFromEllipsoid:false,
-            //     saveLocalIncidenceAngle:false,
-            //     saveProjectedLocalIncidenceAngle:false,
-            //     saveSelectedSourceBand:true,
-            //     outputComplex:false,
-            //
-            //     applyRadiometricNormalization:false,
-            //     saveSigmaNought:false,
-            //     saveGammaNought:false,
-            //     saveBetaNought:false,
-            //     incidenceAngleForSigma0:"",
-            //     incidenceAngleForGamma0:"",
-            //     auxFile:"",
-            //     externalAuxFile:""
-            // }
+
         };
 
 

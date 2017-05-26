@@ -12,6 +12,7 @@ var MultilookingController = (function() {
         this.m_oSelectedProduct = this.m_oExtras.selectedProduct;
         this.m_asSourceBands = [];
         this.m_oGetParametersOperationService = oGetParametersOperationService;
+        this.m_iSquarePixel = 10;
         if(utilsIsObjectNullOrUndefined(this.m_aoProducts) == true)
         {
             this.m_aoProducts = [];
