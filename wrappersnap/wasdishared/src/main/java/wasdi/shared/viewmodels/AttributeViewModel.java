@@ -9,6 +9,8 @@ public class AttributeViewModel {
     private long numElems;
     private String name;
     private String description;
+    private String data;
+    
     public int getDataType() {
         return dataType;
     }
@@ -33,4 +35,10 @@ public class AttributeViewModel {
     public void setDescription(String description) {
         this.description = description;
     }
+	public String getData() {
+		return data;
+	}
+	public void setData(String data) {
+		this.data = data;
+	}
 }
