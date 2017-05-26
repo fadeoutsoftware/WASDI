@@ -151,3 +151,54 @@ String.prototype.distance = function (char) {
         alert(char + " is " + (this.length - index) + " characters from the end of the string!");
     }
 }
+
+
+
+
+function utilsProjectShowRabbitMessageUserFeedBack(oMessage) {
+
+    var sMessageCode = oMessage.messageCode;
+    var sUserMessage = "";
+    // Get extra operations
+    switch(sMessageCode)
+    {
+        case "DOWNLOAD":
+            sUserMessage = "File now available on WASDI Server";
+            break;
+        case "PUBLISH":
+            sUserMessage = "Publish done";
+            break;
+        case "PUBLISHBAND":
+            sUserMessage = "Band published. Product: " + oMessage.payload.productName;
+            break;
+        case "UPDATEPROCESSES":
+            console.log("UPDATE PROCESSES"+" " +utilsGetTimeStamp());
+            break;
+        case "APPLYORBIT":
+            sUserMessage = "Apply orbit Completed";
+            break;
+        case "CALIBRATE":
+            sUserMessage = "Radiometric Calibrate Completed";
+            break;
+        case "MULTILOOKING":
+            sUserMessage = "Multilooking Completed";
+            break;
+        case "NDVI":
+            sUserMessage = "NDVI Completed";
+            break;
+        case "TERRAIN":
+            sUserMessage = "Range doppler terrain correction Completed";
+            break;
+
+        default:
+            console.log("RABBIT ERROR: got empty message ");
+    }
+
+    // Is there a feedback for the user?
+    if (!utilsIsStrNullOrEmpty(sUserMessage)) {
+        // Give the short message
+        var oDialog = utilsVexDialogAlertBottomRightCorner(sUserMessage);
+        utilsVexCloseDialogAfterFewSeconds(3000,oDialog);
+    }
+
+}

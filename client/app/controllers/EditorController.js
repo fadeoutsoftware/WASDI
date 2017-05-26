@@ -140,10 +140,9 @@ var EditorController = (function () {
     };
 
     /**
-     * Handler of the "download" message
+     * Handler of the Rabbit message
      * @param oMessage Received Message
      */
-    /* THIS FUNCTION ARE CALLED IN RABBIT SERVICE */
     EditorController.prototype.receivedRabbitMessage = function (oMessage, oController) {
 
         // Check if the message is valid
@@ -176,6 +175,8 @@ var EditorController = (function () {
                 oController.receivedNewProductMessage(oMessage);
                 break;
         }
+
+        utilsProjectShowRabbitMessageUserFeedBack(oMessage);
     }
 
     /**
@@ -230,9 +231,8 @@ var EditorController = (function () {
      * Handler of the "PUBLISHBAND" message
      * @param oMessage
      */
-    /* THIS FUNCTION ARE CALLED IN RABBIT SERVICE */
     EditorController.prototype.receivedPublishBandMessage = function (oMessage) {
-        var oLayer = oMessage;//.payload;
+        var oLayer = oMessage.payload;
 
          if (utilsIsObjectNullOrUndefined(oLayer)) {
             console.log("Error LayerID is empty...");
@@ -546,16 +546,24 @@ var EditorController = (function () {
         var oProduct = this.m_aoProducts[oProductItem.index];
 
         var aoBands = oProduct.bandsGroups.bands;
-        if (!utilsIsObjectNullOrUndefined(aoBands))
-            var iBandCount = aoBands.length;
-        else
-            var iBandCount = 0;
+
+        var iBandCount = 0;
+
+        if (!utilsIsObjectNullOrUndefined(aoBands)) {
+            iBandCount = aoBands.length;
+        }
 
         for (var i = 0; i < iBandCount; i++) {
             var oBandItem = {};
             oBandItem.name = aoBands[i].name;
             oBandItem.productName = oProductItem.name;
             oBandItem.productIndex = oProductItem.index;
+            oBandItem.published = false;
+
+            if (!utilsIsObjectNullOrUndefined(aoBands[i].published)) {
+                oBandItem.published = aoBands[i].published;
+            }
+
 
             asBands.push(oBandItem);
         }
@@ -579,7 +587,7 @@ var EditorController = (function () {
 
                 if (data.messageCode === "PUBLISHBAND")
                 {
-                    oController.receivedPublishBandMessage(data.payload);
+                    oController.receivedPublishBandMessage(data);
 
                 }
                 else
@@ -1007,19 +1015,19 @@ var EditorController = (function () {
             var oController=this;
 
 
-            oNode.children = [
-                {"text":"Metadata",
-                 "icon": "assets/icons/folder_20x20.png",
-                 "children": [],
-                 "clicked":false,//semaphore
-                    "url" : oController.m_oProductService.getApiMetadata(oNode.fileName),
-            }, {
-                "text": "Bands",
-                "icon": "assets/icons/folder_20x20.png",
-                "children": []
-            },
+                oNode.children = [
+                    {"text":"Metadata",
+                     "icon": "assets/icons/folder_20x20.png",
+                     "children": [],
+                     "clicked":false,//semaphore
+                        "url" : oController.m_oProductService.getApiMetadata(oNode.fileName),
+                }, {
+                    "text": "Bands",
+                    "icon": "assets/icons/folder_20x20.png",
+                    "children": []
+                },
 
-            ];
+                ];
             oNode.icon = "assets/icons/product_20x20.png";
             oTree.core.data.push(oNode);
 
@@ -1027,7 +1035,15 @@ var EditorController = (function () {
 
             for (var iIndexBandsItems = 0; iIndexBandsItems < oaBandsItems.length; iIndexBandsItems++) {
                 var oNode = new Object();
-                oNode.text = oaBandsItems[iIndexBandsItems].name;//LABEL NODE
+
+                //LABEL NODE
+                if (oaBandsItems[iIndexBandsItems].published) {
+                    oNode.text = oaBandsItems[iIndexBandsItems].name;
+                }
+                else {
+                    oNode.text = "<i>" + oaBandsItems[iIndexBandsItems].name + "</i>";
+                }
+
                 oNode.band = oaBandsItems[iIndexBandsItems];//BAND
                 oNode.icon = "assets/icons/uncheck_20x20.png";
 
@@ -1923,7 +1939,7 @@ var EditorController = (function () {
     EditorController.prototype.getClassPixelInfo = function()
     {
         if( this.m_bIsModeOnPixelInfo )
-            return "#5F6C82";//green
+            return "#009036";//green
         else
             return "#43516A";//white
 
