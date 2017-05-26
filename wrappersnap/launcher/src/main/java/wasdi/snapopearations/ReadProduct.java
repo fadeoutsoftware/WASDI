@@ -131,19 +131,28 @@ public class ReadProduct {
     private MetadataViewModel GetMetadataViewModel(MetadataElement oElement, MetadataViewModel oSourceViewModel) {
 
         for (MetadataAttribute oMetadataAttribute : oElement.getAttributes()) {
+        	
             AttributeViewModel oAttributeViewModel = new AttributeViewModel();
             oAttributeViewModel.setName(oMetadataAttribute.getName());
             oAttributeViewModel.setDescription(oMetadataAttribute.getDescription());
-            if (oSourceViewModel.getAttributes() == null)
-                oSourceViewModel.setAttributes(new ArrayList<AttributeViewModel>());
+            
+            if (oMetadataAttribute.getData() != null) {
+            	oAttributeViewModel.setData(oMetadataAttribute.getData().toString());
+            }
+            
+            if (oSourceViewModel.getAttributes() == null) oSourceViewModel.setAttributes(new ArrayList<AttributeViewModel>());
+            
             oSourceViewModel.getAttributes().add(oAttributeViewModel);
         }
 
 
         for (MetadataElement oMetadataElement : oElement.getElements()) {
             MetadataViewModel oElementViewModel = new MetadataViewModel(oMetadataElement.getName());
-            if (oSourceViewModel.getElements() == null)
-                oSourceViewModel.setElements(new ArrayList<MetadataViewModel>());
+            
+            if (oSourceViewModel.getElements() == null) {
+            	oSourceViewModel.setElements(new ArrayList<MetadataViewModel>());
+            }
+            
             oSourceViewModel.getElements().add(GetMetadataViewModel(oMetadataElement, oElementViewModel));
         }
 
