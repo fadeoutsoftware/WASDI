@@ -18,6 +18,7 @@ import org.nfs.orbits.sat.CoverageSwathResult;
 import org.nfs.orbits.sat.ISatellite;
 import org.nfs.orbits.sat.SatSensor;
 import org.nfs.orbits.sat.Satellite;
+import org.nfs.orbits.sat.SatFactory;
 import org.nfs.orbits.sat.SensorMode;
 import org.nfs.orbits.sat.SwathArea;
 import org.nfs.orbits.sat.test.TestSat;
@@ -33,7 +34,10 @@ public class InstanceFinder {
 			"/org/nfs/orbits/sat/resource/cosmosky1.xml",
 			"/org/nfs/orbits/sat/resource/cosmosky2.xml",
 			"/org/nfs/orbits/sat/resource/cosmosky3.xml",
-			"/org/nfs/orbits/sat/resource/cosmosky4.xml"
+			"/org/nfs/orbits/sat/resource/cosmosky4.xml",
+			"/org/nfs/orbits/sat/resource/sentinel_1a.xml",
+			"/org/nfs/orbits/sat/resource/sentinel_1b.xml",
+			"/org/nfs/orbits/sat/resource/landsat8.xml"
 
 	};
 
@@ -43,6 +47,9 @@ public class InstanceFinder {
 			put("COSMOSKY2", "/org/nfs/orbits/sat/resource/cosmosky2.xml");
 			put("COSMOSKY3", "/org/nfs/orbits/sat/resource/cosmosky3.xml");
 			put("COSMOSKY4", "/org/nfs/orbits/sat/resource/cosmosky4.xml");
+			put("SENTINEL1A", "/org/nfs/orbits/sat/resource/sentinel_1a.xml");
+			put("SENTINEL1B", "/org/nfs/orbits/sat/resource/sentinel_1b.xml");
+			put("LANDSAT8", "/org/nfs/orbits/sat/resource/landsat8.xml");
 		}
 	};
 
@@ -73,11 +80,12 @@ public class InstanceFinder {
 
 		// use all cosmo skymed satellites
 		for (int i = 0; i < s_sOrbitSats.length; i++) {
-			InputStream oInputStream = TestSat.class.getResourceAsStream(s_sOrbitSats[i]);
+			//InputStream oInputStream = TestSat.class.getResourceAsStream(s_sOrbitSats[i]);
 
 			Satellite oSatellite;
 			try {
-				oSatellite = new Satellite(oInputStream);
+				//oSatellite = new Satellite(oInputStream);
+				oSatellite=SatFactory.buildSat(s_sOrbitSats[i]);
 			} catch (Throwable oEx) {
 				oEx.printStackTrace();
 				System.out.println("InstanceFinder::findSwats: unable to instantiate satellite " + s_sOrbitSats[i] + " - " + oEx);
@@ -210,11 +218,12 @@ public class InstanceFinder {
 			for (int i = 0; i < s_sOrbitSats.length; i++) {
 
 				System.out.println("findSwats: cerco satellite: " + s_sOrbitSats[i]);
-				InputStream oInputStream = TestSat.class.getResourceAsStream(s_sOrbitSats[i]);
+				//InputStream oInputStream = TestSat.class.getResourceAsStream(s_sOrbitSats[i]);
 
 				Satellite oSatellite;
 				try {
-					oSatellite = new Satellite(oInputStream);
+					//oSatellite = new Satellite(oInputStream);
+					oSatellite=SatFactory.buildSat(s_sOrbitSats[i]);
 					System.out.println("costruito");
 				} catch (Throwable oEx) {
 					oEx.printStackTrace();
@@ -383,11 +392,12 @@ public class InstanceFinder {
 		for (int i = 0; i < asSatelliteNames.size(); i++) {
 
 			System.out.println("InstanceFinder::findSwatsByFilters: cerco satellite: " + asSatelliteNames.get(i));
-			InputStream oInputStream = TestSat.class.getResourceAsStream(s_sOrbitSatsMap.get(asSatelliteNames.get(i)));
+			//InputStream oInputStream = TestSat.class.getResourceAsStream(s_sOrbitSatsMap.get(asSatelliteNames.get(i)));
 
 			Satellite oSatellite;
 			try {
-				oSatellite = new Satellite(oInputStream);
+				//oSatellite = new Satellite(oInputStream);
+				oSatellite=SatFactory.buildSat(s_sOrbitSatsMap.get(asSatelliteNames.get(i)));
 				System.out.println("costruito");
 			} catch (Throwable oEx) {
 				oEx.printStackTrace();
@@ -525,11 +535,12 @@ public class InstanceFinder {
 		ArrayList<ISatellite> satelliti = new ArrayList<ISatellite>();
 
 		for (int i = 0; i < s_sOrbitSats.length; i++) {
-			InputStream strm = TestSat.class
-					.getResourceAsStream(s_sOrbitSats[i]);
+//			InputStream strm = TestSat.class
+//					.getResourceAsStream(s_sOrbitSats[i]);
 			Satellite sat;
 			try {
-				sat = new Satellite(strm);
+				//sat = new Satellite(strm);
+				sat=SatFactory.buildSat(s_sOrbitSats[i]);
 			} catch (Throwable oEx) {
 				// TODO Auto-generated catch block
 				oEx.printStackTrace();
