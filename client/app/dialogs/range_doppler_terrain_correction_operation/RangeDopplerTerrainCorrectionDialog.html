@@ -109,7 +109,9 @@
                             <div class="row">
                                 <!--Source GR pixel spacings( az x rg)-->
                                 <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">{{"DIALOG_RANGE_DOPPLER_TERRAIN_CORRECTION_SOURCE_GR_PIXEL_SPACINGS_LABEL"|translate}}</div>
-                                <div class="col-lg-8 col-md-8 col-sm-8 col-xs-8"></div>
+                                <div class="col-lg-8 col-md-8 col-sm-8 col-xs-8">
+                                    {{m_oController.m_oReturnValue.options.standardGridOriginX +"(m) x " + m_oController.m_oReturnValue.options.standardGridOriginY+"(m)"}}
+                                </div>
                             </div>
 
                             <div class="row">
@@ -284,7 +286,7 @@
                                 <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
                                     <div class="checkbox">
                                         <label>
-                                            <input type="checkbox">
+                                            <input type="checkbox" ng-model="m_oController.m_oReturnValue.options.applyRadiometricNormalization">
                                             {{"DIALOG_RANGE_DOPPLER_TERRAIN_CORRECTION_APPLY_RADIOMETRIC_NORMALIZATION_CHECKBOX"|translate}}
                                         </label>
                                     </div>
@@ -296,7 +298,8 @@
                                     <!--Save sigma-->
                                     <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
                                         <label>
-                                            <input type="checkbox">
+                                            <input type="checkbox"  ng-model="m_oController.m_oReturnValue.options.saveSigmaNought"
+                                                   ng-disabled="m_oController.m_oReturnValue.options.applyRadiometricNormalization == false">
                                             {{"DIALOG_RANGE_DOPPLER_TERRAIN_CORRECTION_SAVE_SIGMA_CHECKBOX"|translate}}
                                         </label>
                                     </div>
@@ -304,7 +307,7 @@
                                         <div class="dropdown ">
 
                                             <button class="btn btn-default dropdown-toggle" type="button" id="SaveSigmaDropdown"
-                                                    data-toggle="dropdown">
+                                                    data-toggle="dropdown" ng-disabled="m_oController.m_oReturnValue.options.applyRadiometricNormalization == false">
                                                 {{m_oController.m_sSaveSigmaSelected}}
                                                 <span class="caret"></span>
                                             </button>
@@ -322,14 +325,15 @@
                                     <!--Save gamma-->
                                     <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
                                         <label >
-                                            <input type="checkbox">
+                                            <input type="checkbox" ng-model="m_oController.m_oReturnValue.options.saveGammaNought"
+                                                   ng-disabled="m_oController.m_oReturnValue.options.applyRadiometricNormalization == false">
                                             {{"DIALOG_RANGE_DOPPLER_TERRAIN_CORRECTION_SAVE_GAMMA_CHECKBOX"|translate}}
                                         </label>
                                     </div>
                                     <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
                                         <div class="dropdown " >
                                             <button class="btn btn-default dropdown-toggle" type="button" id="SaveGammaDropdown"
-                                                    data-toggle="dropdown">
+                                                    data-toggle="dropdown" ng-disabled="m_oController.m_oReturnValue.options.applyRadiometricNormalization == false">
                                                 {{m_oController.m_sSaveGammaSelected}}
                                                 <span class="caret"></span>
                                             </button>
@@ -342,14 +346,16 @@
                                     </div>
                                 </div>
                                 <!--save beta-->
-                                <label class="col-lg-12">
-                                    <input type="checkbox">
-                                    {{"DIALOG_RANGE_DOPPLER_TERRAIN_CORRECTION_SAVE_BETA_CHECKBOX"|translate}}
-                                </label>
-
+                                <div class="row save-beta">
+                                    <label class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                        <input type="checkbox" ng-model="m_oController.m_oReturnValue.options.saveBetaNought"
+                                               ng-disabled="m_oController.m_oReturnValue.options.applyRadiometricNormalization == false">
+                                        {{"DIALOG_RANGE_DOPPLER_TERRAIN_CORRECTION_SAVE_BETA_CHECKBOX"|translate}}
+                                    </label>
+                                </div>
                             </div>
 
-                            <div class="col-lg-12">
+                            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
                                 <div class="row">
                                     <label class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
                                         {{"DIALOG_RANGE_DOPPLER_TERRAIN_CORRECTION_AUXILIARY_FILE_LABEL"|translate}}

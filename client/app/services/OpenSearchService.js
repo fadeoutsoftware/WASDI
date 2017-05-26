@@ -36,7 +36,7 @@ service('OpenSearchService', ['$http',  'ConstantsService', function ($http, oCo
     };
     this.getApiProductCountWithProviders = function(sQueryInput,sProvidersInput)
     {
-        return this.APIURL + '/search/query/count?sQuery=' + sQueryInput +"&sProviders="+sProvidersInput;
+        return this.APIURL + '/search/query/count?sQuery=' + sQueryInput +"&providers="+sProvidersInput;
     };
     this.getListOfProvider = function()
     {

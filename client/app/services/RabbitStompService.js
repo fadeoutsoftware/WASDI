@@ -49,7 +49,7 @@ service('RabbitStompService', ['$http',  'ConstantsService','$interval','Process
 
         var subscriptionString = "/exchange/amq.topic/" + workspaceId;
         console.log("subscribing to " + subscriptionString);
-        var oThisService = this
+        var oThisService = this;
         this.m_oSubscription = this.m_oClient.subscribe(subscriptionString, function (message) {
 
             // Check message Body
