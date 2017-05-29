@@ -1,6 +1,7 @@
 package wasdi;
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.lang.management.ManagementFactory;
 import java.lang.management.RuntimeMXBean;
 import java.lang.reflect.Field;
@@ -38,10 +39,12 @@ import wasdi.rabbit.Send;
 import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.DownloadedFile;
 import wasdi.shared.business.ProcessWorkspace;
+import wasdi.shared.business.ProductWorkspace;
 import wasdi.shared.business.PublishedBand;
 import wasdi.shared.data.DownloadedFilesRepository;
 import wasdi.shared.data.MongoRepository;
 import wasdi.shared.data.ProcessWorkspaceRepository;
+import wasdi.shared.data.ProductWorkspaceRepository;
 import wasdi.shared.data.PublishedBandsRepository;
 import wasdi.shared.parameters.ApplyOrbitParameter;
 import wasdi.shared.parameters.CalibratorParameter;
@@ -55,6 +58,7 @@ import wasdi.shared.parameters.RangeDopplerGeocodingParameter;
 import wasdi.shared.parameters.RasterGeometricResampleParameter;
 import wasdi.shared.utils.SerializationUtils;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.viewmodels.PrimitiveResult;
 import wasdi.shared.viewmodels.ProductViewModel;
 import wasdi.shared.viewmodels.PublishBandResultViewModel;
 import wasdi.snapopearations.ApplyOrbit;
@@ -149,7 +153,7 @@ public class LauncherMain {
 
         }
         catch( ParseException exp ) {
-            s_oLogger.debug("Launcher Main Exception " + exp.toString());
+            s_oLogger.error("Launcher Main Exception " + exp.toString());
             // oops, something went wrong
             System.err.println( "Parsing failed.  Reason: " + exp.getMessage() );
             System.exit(-1);
@@ -268,7 +272,7 @@ public class LauncherMain {
             }
         }
         catch (Exception oEx) {
-            s_oLogger.debug("ExecuteOperation Exception " + oEx.toString());
+            s_oLogger.error("ExecuteOperation Exception " + oEx.toString());
         }
     }
 
@@ -285,7 +289,7 @@ public class LauncherMain {
             iPid = (Integer) getProcessIdMethod.invoke(vmManagement);
 
         } catch (Exception oEx) {
-            s_oLogger.debug("LauncherMain.GetProcessId: Error getting processId: " + oEx.getMessage());
+            s_oLogger.error("LauncherMain.GetProcessId: Error getting processId: " + oEx.getMessage());
         }
 
         return iPid;
@@ -407,12 +411,12 @@ public class LauncherMain {
 
             }
             else {
-
-                ConvertProductToViewModelAndSendToRabbit(oVM, sFileName, oParameter.getWorkspace(), oParameter.getExchange(), LauncherOperations.DOWNLOAD, oParameter.getBoundingBox());
+            	
+                AddProductToDbAndSendToRabbit(oVM, sFileName, oParameter.getWorkspace(), oParameter.getExchange(), LauncherOperations.DOWNLOAD, oParameter.getBoundingBox());
             }
         }
         catch (Exception oEx) {
-            s_oLogger.debug("LauncherMain.Download: Exception " + oEx.toString());
+            s_oLogger.error("LauncherMain.Download: Exception " + oEx.toString());
 
             oSendToRabbit.SendRabbitMessage(false,LauncherOperations.DOWNLOAD,oParameter.getWorkspace(),null,oParameter.getExchange());
         }
@@ -429,68 +433,6 @@ public class LauncherMain {
 
         return  sFileName;
     }
-
-    
-    
-    /**
-     * Acquire a file in a workspace. Normally used for an uploaded file
-     * @param oParameter
-     * @param sDownloadPath
-     * @return
-     */
-    public String Acquire(DownloadFileParameter oParameter, String sAcquisitionBasePath, String sLocalFilePath) {
-        String sFileName = "";
-
-        try {
-            s_oLogger.debug("LauncherMain.Acquire: Start");
-
-            //send update process message
-            if (oSendToRabbit.SendUpdateProcessMessage(oParameter.getWorkspace()) == false) {
-                s_oLogger.debug("LauncherMain.Download: Error sending rabbitmq message to update process list");
-            }
-
-            
-            File oAcquisitionPath = new File(new File(sAcquisitionBasePath), oParameter.getUserId()+"/"+oParameter.getWorkspace());
-            File oFileToAcquire = new File(sLocalFilePath);
-            
-            s_oLogger.debug("LauncherMain.AcquisitionPath: " + oAcquisitionPath.getAbsolutePath());
-
-            // Product view Model
-            ProductViewModel oVM = null;
-
-            s_oLogger.debug("LauncherMain.AcquisitionPath: Check if file exists");
-            
-            if (!oAcquisitionPath.isDirectory() || !oFileToAcquire.canRead()) {
-                s_oLogger.debug("LauncherMain.AcquisitionPath: acquisition path is not a directory or cannot read local file " + oFileToAcquire.getAbsolutePath());
-                oSendToRabbit.SendRabbitMessage(false,LauncherOperations.DOWNLOAD,oParameter.getWorkspace(),null,oParameter.getExchange());
-            }
-            
-            File oDstFile = new File(oAcquisitionPath, oFileToAcquire.getName());
-			FileUtils.copyFile(oFileToAcquire, oDstFile);
-            sFileName = oDstFile.getAbsolutePath();
-
-            ConvertProductToViewModelAndSendToRabbit(oVM, sFileName, oParameter.getWorkspace(), oParameter.getExchange(), LauncherOperations.DOWNLOAD, oParameter.getBoundingBox());
-        }
-        catch (Exception oEx) {
-            s_oLogger.debug("LauncherMain.Download: Exception " + oEx.toString());
-
-            oSendToRabbit.SendRabbitMessage(false,LauncherOperations.DOWNLOAD,oParameter.getWorkspace(),null,oParameter.getExchange());
-        }
-        finally{
-            //delete process from list
-            try{
-                ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
-                oProcessWorkspaceRepository.DeleteProcessWorkspace(oParameter.getProcessObjId());
-            }
-            catch (Exception oEx) {
-                s_oLogger.debug("LauncherMain.Download: Exception deleting process " + oEx.toString());
-            }
-        }
-
-        return  sFileName;
-    }
-    
-    
     
     
     
@@ -503,7 +445,7 @@ public class LauncherMain {
      * @param sOperation Operation Done
      * @param sBBox Bounding Box
      */
-    private void ConvertProductToViewModelAndSendToRabbit(ProductViewModel oVM, String sFileName, String sWorkspace, String sExchange, String sOperation, String sBBox) throws Exception
+    private void AddProductToDbAndSendToRabbit(ProductViewModel oVM, String sFileName, String sWorkspace, String sExchange, String sOperation, String sBBox) throws Exception
     {
         s_oLogger.debug("LauncherMain.ConvertProductToViewModelAndSendToRabbit: File Name = " + sFileName);
 
@@ -531,13 +473,14 @@ public class LauncherMain {
         DownloadedFilesRepository oDownloadedRepo = new DownloadedFilesRepository();
         
         DownloadedFile oCheck = oDownloadedRepo.GetDownloadedFile(oVM.getFileName());
+        File oFile = new File(sFileName);
         
         if (oCheck == null) {
         	s_oLogger.debug("Insert in db");
         	
             // Save it in the register
             DownloadedFile oAlreadyDownloaded = new DownloadedFile();
-            File oFile = new File(sFileName);
+            
             oAlreadyDownloaded.setFileName(oFile.getName());
             oAlreadyDownloaded.setFilePath(sFileName);
             oAlreadyDownloaded.setProductViewModel(oVM);
@@ -546,7 +489,8 @@ public class LauncherMain {
             oDownloadedRepo.InsertDownloadedFile(oAlreadyDownloaded);            	
         }
         
-
+        AddProductToWorkspace(oFile.getName(), sWorkspace);
+        
         s_oLogger.debug("OK DONE");
 
         s_oLogger.debug("LauncherMain.ConvertProductToViewModelAndSendToRabbit: Image downloaded. Send Rabbit Message");
@@ -558,13 +502,6 @@ public class LauncherMain {
         oVM.setMetadata(null);
 
         oSendToRabbit.SendRabbitMessage(true,sOperation,sWorkspace,oVM,sExchange);
-            
-//        }
-//        catch(Exception oEx)
-//        {
-//            s_oLogger.error(oEx.toString());
-//            oEx.printStackTrace();
-//        }
     }
 
     /**
@@ -661,13 +598,13 @@ public class LauncherMain {
             	sBB = oAlreadyDownloaded.getBoundingBox();
             }
             
-            ConvertProductToViewModelAndSendToRabbit(null, sTargetAbsFileName, oParameter.getWorkspace(), oParameter.getExchange(), sTypeOperation, sBB);
+            AddProductToDbAndSendToRabbit(null, sTargetAbsFileName, oParameter.getWorkspace(), oParameter.getExchange(), sTypeOperation, sBB);
 
             //this.PublishOnGeoserver(oParameter.getPublishParameter(), oTerrainProduct.getName(), sBandName);
 
         }
         catch (Exception oEx) {
-            s_oLogger.debug("LauncherMain.ExecuteOperation: exception " + oEx.toString());
+            s_oLogger.error("LauncherMain.ExecuteOperation: exception " + oEx.toString());
             oSendToRabbit.SendRabbitMessage(false,sTypeOperation,oParameter.getWorkspace(),null,oParameter.getExchange());
         }
         finally{
@@ -900,14 +837,14 @@ public class LauncherMain {
         }
         catch (Exception oEx) {
 
-            s_oLogger.debug( "LauncherMain.PublishBandImage: Exception " + oEx.toString() + " " + oEx.getMessage());
+            s_oLogger.error( "LauncherMain.PublishBandImage: Exception " + oEx.toString() + " " + oEx.getMessage());
 
             oEx.printStackTrace();
 
             boolean bRet = oSendToRabbit.SendRabbitMessage(false,LauncherOperations.PUBLISHBAND,oParameter.getWorkspace(),null,oParameter.getExchange());
 
             if (bRet == false) {
-                s_oLogger.debug("LauncherMain.PublishBandImage:  Error sending exception Rabbit Message");
+                s_oLogger.error("LauncherMain.PublishBandImage:  Error sending exception Rabbit Message");
             }
         }
         finally{
@@ -984,11 +921,11 @@ public class LauncherMain {
             s_oLogger.debug("LauncherMain.RasterGeometricResample: convert product to view model");
             String sOutFile = oWriter.WriteBEAMDIMAP(oResampledProduct, sPath, sFileNameOnly+"_resampled");
 
-            ConvertProductToViewModelAndSendToRabbit(null, sOutFile, oParameter.getWorkspace(), oParameter.getExchange(), LauncherOperations.RASTERGEOMETRICRESAMPLE, null);
+            AddProductToDbAndSendToRabbit(null, sOutFile, oParameter.getWorkspace(), oParameter.getExchange(), LauncherOperations.RASTERGEOMETRICRESAMPLE, null);
 
         }
         catch (Exception oEx) {
-            s_oLogger.debug("LauncherMain.RasterGeometricResample: exception " + oEx.toString());
+            s_oLogger.error("LauncherMain.RasterGeometricResample: exception " + oEx.toString());
 
             oSendToRabbit.SendRabbitMessage(false,LauncherOperations.RASTERGEOMETRICRESAMPLE,oParameter.getWorkspace(),null,oParameter.getExchange());
         }
@@ -1004,6 +941,51 @@ public class LauncherMain {
                 s_oLogger.debug("LauncherMain.RasterGeometricResample: Exception deleting process " + oEx.toString());
             }
         }
+    }
+    
+    /**
+     * Adds a product to a Workspace. If it is alredy added it will not be duplicated.
+     * @param sProductName Product to Add
+     * @param sWorkspaceId Workspace Id
+     * @return True if the product is already or have been added to the WS. False otherwise
+     */
+    public boolean AddProductToWorkspace(String sProductName, String sWorkspaceId) {
+    	
+    	try {
+    		
+    		// Create Repository
+    		ProductWorkspaceRepository oProductWorkspaceRepository = new ProductWorkspaceRepository();
+    		
+    		// Check if product is already in the Workspace
+    		if (oProductWorkspaceRepository.ExistsProductWorkspace(sProductName, sWorkspaceId) == false) {
+    			
+        		// Create the entity
+        		ProductWorkspace oProductWorkspace = new ProductWorkspace();
+        		oProductWorkspace.setProductName(sProductName);
+        		oProductWorkspace.setWorkspaceId(sWorkspaceId);
+        		
+        		// Try to insert
+        		if (oProductWorkspaceRepository.InsertProductWorkspace(oProductWorkspace)) {
+        			
+        			s_oLogger.debug("LauncherMain.AddProductToWorkspace:  Inserted [" +sProductName + "] in WS: [" + sWorkspaceId+ "]");
+        			return true;
+        		}
+        		else {
+        			
+        			s_oLogger.debug("LauncherMain.AddProductToWorkspace:  Error adding ["  +sProductName + "] in WS: [" + sWorkspaceId+ "]");
+        			return false;
+        		}
+    		}
+    		else {
+    			s_oLogger.debug("LauncherMain.AddProductToWorkspace: Product [" +sProductName + "] Already exists in WS: [" + sWorkspaceId+ "]");
+    			return true;
+    		}
+    	}
+    	catch (Exception e) {
+    		s_oLogger.error("LauncherMain.AddProductToWorkspace: Exception " + e.toString() );
+		}
+    	
+    	return false;
     }
 
 
