@@ -185,6 +185,7 @@ var EditorController = (function () {
      */
     EditorController.prototype.receivedNewProductMessage = function (oMessage) {
 
+        /*
         // Save the controller
         var oController = this;
 
@@ -207,6 +208,16 @@ var EditorController = (function () {
         }).error(function (data, status) {
             utilsVexDialogAlertTop('There was an error adding product to the ws')
         });
+        */
+
+        // P.Campanella 29/05/2017: Moved Add Product To WS in the launcher server side: TEST this
+
+        var oDialog = utilsVexDialogAlertBottomRightCorner('Product added to the ws');
+        utilsVexCloseDialogAfterFewSeconds(3000, oDialog);
+        this.getProductListByWorkspace();
+
+        //the m_oLastDownloadedProduct will be select & open in jstree
+        this.m_oLastDownloadedProduct = oMessage.payload.fileName;
 
     }
 
