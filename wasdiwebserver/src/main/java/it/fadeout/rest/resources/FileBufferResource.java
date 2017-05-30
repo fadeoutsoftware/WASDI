@@ -29,58 +29,12 @@ import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.PublishBandResultViewModel;
 import wasdi.shared.viewmodels.RabbitMessageViewModel;
 
+
 @Path("/filebuffer")
 public class FileBufferResource {
 
 	@Context
 	ServletConfig m_oServletConfig;	
-
-	@GET
-	@Path("downloadandpublish")
-	@Produces({"application/xml", "application/json", "text/xml"})
-	public Response DownloadAndPublish(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sFileUrl") String sFileUrl, @QueryParam("sWorkspace") String sWorkspace) throws IOException
-	{
-		try {
-
-			if (Utils.isNullOrEmpty(sSessionId)) return Response.status(401).build();
-
-			User oUser = Wasdi.GetUserFromSession(sSessionId);
-
-			if (oUser==null) return Response.status(401).build();
-			if (Utils.isNullOrEmpty(oUser.getUserId())) return Response.status(401).build();
-
-			String sUserId = oUser.getUserId();			
-
-			String sPath = m_oServletConfig.getInitParameter("SerializationPath") + Wasdi.GetSerializationFileName();
-
-			DownloadFileParameter oParameter = new DownloadFileParameter();
-			oParameter.setQueue("TestWuaue");
-			oParameter.setUrl(sFileUrl);
-			oParameter.setWorkspace(sWorkspace);
-			oParameter.setUserId(sUserId);
-			oParameter.setExchange(sWorkspace);
-
-			SerializationUtils.serializeObjectToXML(sPath, oParameter);
-
-			String sLauncherPath = m_oServletConfig.getInitParameter("LauncherPath");
-			String sJavaExe = m_oServletConfig.getInitParameter("JavaExe");
-
-			String sShellExString = sJavaExe + " -jar " + sLauncherPath +" -operation " + LauncherOperations.DOWNLOADANDPUBLISH + " -parameter " + sPath;
-
-			System.out.println("DownloadResource.DownloadAndPublish: shell exec " + sShellExString);
-
-			Process oProc = Runtime.getRuntime().exec(sShellExString);
-
-
-		} catch (IOException e) {
-			e.printStackTrace();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-
-		return Response.ok().build();
-
-	}
 
 	@GET
 	@Path("download")
@@ -168,6 +122,7 @@ public class FileBufferResource {
 
 	}	
 
+	
 	@GET
 	@Path("publish")
 	@Produces({"application/xml", "application/json", "text/xml"})

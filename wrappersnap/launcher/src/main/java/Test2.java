@@ -11,7 +11,6 @@ import wasdi.snapopearations.TerrainCorrection;
 import org.esa.snap.core.dataio.ProductIO;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.dataio.bigtiff.BigGeoTiffProductReaderPlugIn;
-import org.esa.snap.engine_utilities.util.MemUtils;
 
 import javax.swing.*;
 import java.io.File;

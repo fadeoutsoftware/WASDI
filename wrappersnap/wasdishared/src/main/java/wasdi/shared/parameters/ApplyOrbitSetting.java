@@ -1,5 +1,7 @@
 package wasdi.shared.parameters;
 
+import org.esa.s1tbx.io.orbits.sentinel1.SentinelPODOrbitFile;
+
 /**
  * Created by s.adamo on 16/03/2017.
  */
@@ -24,7 +26,7 @@ public class ApplyOrbitSetting implements ISetting{
     private Boolean continueOnFail;
 
     public ApplyOrbitSetting(){
-        setOrbitType(null);
+        setOrbitType(SentinelPODOrbitFile.PRECISE + " (Auto Download)");
         setPolyDegree(3);
         setContinueOnFail(false);
     }

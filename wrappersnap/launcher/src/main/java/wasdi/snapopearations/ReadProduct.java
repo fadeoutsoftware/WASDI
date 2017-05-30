@@ -185,38 +185,6 @@ public class ReadProduct {
 
     }
 
-    public String writeBigTiff(String sFileName, String sWorkingPath, String sFileNameWithoutExtension) throws Exception {
-
-        File oFile = new File (sFileName);
-
-        LauncherMain.s_oLogger.debug("ReadProduct.writeBigTiff: Read Product FILE = " + sFileName);
-
-        Product oSentinelProduct = ReadProduct(oFile, null);
-
-        if (oSentinelProduct == null) LauncherMain.s_oLogger.debug("ReadProduct.writeBigTiff: Sentinel Product is null " + oFile.getAbsolutePath());
-
-        LauncherMain.s_oLogger.debug("ReadProduct.writeBigTiff: Create Writer");
-
-        WriteProduct oWriter = new WriteProduct();
-
-        LauncherMain.s_oLogger.debug("ReadProduct.writeBigTiff: WriteTiff");
-
-        String sBigTiff = "";
-
-        try {
-            sBigTiff = oWriter.WriteBigTiff(oSentinelProduct, sWorkingPath, sFileNameWithoutExtension);
-        }
-        catch (Exception oEx) {
-            oEx.printStackTrace();
-        }
-
-        // Close product IO
-        RemoveFromCache(oFile);
-        oSentinelProduct.closeIO();
-
-        return sBigTiff;
-    }
-
     public Product ReadProduct(File oFile) throws IOException, ClassNotFoundException {
         ByteArrayOutputStream ous = null;
         InputStream ios = null;

@@ -1,7 +1,10 @@
 
 //import publish.Publisher;
-import wasdi.snapopearations.ReadProduct;
-import wasdi.shared.viewmodels.ProductViewModel;
+import java.io.File;
+import java.io.IOException;
+
+import javax.swing.JFileChooser;
+
 import org.esa.s1tbx.calibration.gpf.CalibrationOp;
 import org.esa.s1tbx.sar.gpf.MultilookOp;
 import org.esa.s1tbx.sar.gpf.filtering.SpeckleFilterOp;
@@ -13,11 +16,9 @@ import org.esa.snap.core.gpf.Operator;
 import org.esa.snap.core.gpf.OperatorSpi;
 import org.esa.snap.core.util.io.FileUtils;
 import org.esa.snap.dataio.bigtiff.BigGeoTiffProductReaderPlugIn;
-import org.esa.snap.engine_utilities.util.MemUtils;
 
-import javax.swing.*;
-import java.io.File;
-import java.io.IOException;
+import wasdi.shared.viewmodels.ProductViewModel;
+import wasdi.snapopearations.ReadProduct;
 
 /**
  * Created by s.adamo on 18/05/2016.
@@ -72,7 +73,6 @@ public class Test {
                 ProductIO.writeProduct(calibrateProduct, calFile.getAbsolutePath(), bigGeoTiffFormatName);
                 //System.setProperty("com.sun.media.jai.disableMediaLib", "true");
 
-                MemUtils.freeAllMemory();
                /* String bigGeoTiffFormatName = BigGeoTiffProductReaderPlugIn.FORMAT_NAME;
                 Calibration oCalibration= new Calibration();
                 Product calibrateProduct=oCalibration.getCalibration(exportProduct,"C:\\Users\\a.corrado\\Documents\\");
@@ -90,7 +90,6 @@ public class Test {
                 File filterFile = new File("C:\\Users\\a.corrado\\Documents\\test_filter.tif");
                 //ProductIO.writeProduct(filterProduct, filterFile.getAbsolutePath(), bigGeoTiffFormatName)<
                 ProductIO.writeProduct(calibrateProduct, filterFile.getAbsolutePath(), bigGeoTiffFormatName);
-                MemUtils.freeAllMemory();
                 exportProduct = ProductIO.readProduct(filterFile, bigGeoTiffFormatName);
 
                 //Multilooking
@@ -107,7 +106,6 @@ public class Test {
                 Product multiProduct = opMulti.getTargetProduct();
                 File multiFile = new File("C:\\Users\\a.corrado\\Documents\\test_multi.tif");
                 ProductIO.writeProduct(multiProduct, multiFile.getAbsolutePath(), bigGeoTiffFormatName);
-                MemUtils.freeAllMemory();
 
                 //Terrain Correction
                 OperatorSpi spiTerrain = new RangeDopplerGeocodingOp.Spi();
@@ -119,7 +117,6 @@ public class Test {
                 //File newFile = new File("C:\\Users\\s.adamo\\Documents\\test.tif");
                 File terrainFile = new File("C:\\Users\\a.corrado\\Documents\\test_terrain.tif");
                 ProductIO.writeProduct(terrainProduct, terrainFile.getAbsolutePath(), bigGeoTiffFormatName);
-                MemUtils.freeAllMemory();
 
             } catch (IOException e) {
                 // TODO Auto-generated catch block

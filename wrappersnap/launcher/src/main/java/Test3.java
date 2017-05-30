@@ -1,5 +1,9 @@
 
-import wasdi.geoserver.Publisher;
+import java.io.File;
+import java.io.IOException;
+
+import javax.swing.JFileChooser;
+
 import org.esa.s1tbx.calibration.gpf.CalibrationOp;
 import org.esa.s1tbx.sar.gpf.MultilookOp;
 import org.esa.s1tbx.sar.gpf.filtering.SpeckleFilterOp;
@@ -11,11 +15,6 @@ import org.esa.snap.core.gpf.Operator;
 import org.esa.snap.core.gpf.OperatorSpi;
 import org.esa.snap.core.util.io.FileUtils;
 import org.esa.snap.dataio.bigtiff.BigGeoTiffProductReaderPlugIn;
-import org.esa.snap.engine_utilities.util.MemUtils;
-
-import javax.swing.*;
-import java.io.File;
-import java.io.IOException;
 
 /**
  * Created by s.adamo on 18/05/2016.
@@ -67,7 +66,6 @@ public class Test3 {
                 File calFile = new File("C:\\Users\\s.adamo\\Documents\\test_cal.tif");
                 //File calFile = new File("C:\\Users\\a.corrado\\Documents\\test_cal.tif");
                 ProductIO.writeProduct(calibrateProduct, calFile.getAbsolutePath(), bigGeoTiffFormatName);
-                MemUtils.freeAllMemory();
 
                 exportProduct = ProductIO.readProduct(calFile, bigGeoTiffFormatName);
 
@@ -82,7 +80,6 @@ public class Test3 {
                 //File filterFile = new File("C:\\Users\\a.corrado\\Documents\\test_filter.tif");
                 //calibrateProduct
                 ProductIO.writeProduct(exportProduct, filterFile.getAbsolutePath(), bigGeoTiffFormatName);
-                MemUtils.freeAllMemory();
 
                 exportProduct = ProductIO.readProduct(filterFile, bigGeoTiffFormatName);
 
@@ -100,7 +97,6 @@ public class Test3 {
                 //multi look product
                 File multiFile = new File("C:\\Users\\s.adamo\\Documents\\test_multi.tif");
                 ProductIO.writeProduct(exportProduct, multiFile.getAbsolutePath(), bigGeoTiffFormatName);
-                MemUtils.freeAllMemory();
 
                 exportProduct = ProductIO.readProduct(multiFile, bigGeoTiffFormatName);
                 //Terrain Correction
