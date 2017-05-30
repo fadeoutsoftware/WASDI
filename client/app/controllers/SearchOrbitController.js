@@ -510,6 +510,8 @@ var SearchOrbitController = (function() {
     }
 
     SearchOrbitController.prototype.receivedNewProductMessage = function (oMessage, oController) {
+
+        /*
         oController.m_oProductService.addProductToWorkspace(oMessage.payload.fileName,oController.m_oActiveWorkspace.workspaceId).success(function (data, status) {
             if(data.boolValue == true )
             {
@@ -524,6 +526,10 @@ var SearchOrbitController = (function() {
         }).error(function (data,status) {
             utilsVexDialogAlertTop('Error adding product to the ws');
         });
+        */
+
+        var oDialog = utilsVexDialogAlertBottomRightCorner('Product added to the ws');
+        utilsVexCloseDialogAfterFewSeconds(3000, oDialog);
     }
 
 
