@@ -416,7 +416,7 @@ public class LauncherMain {
             }
         }
         catch (Exception oEx) {
-            s_oLogger.error("LauncherMain.Download: Exception " + oEx.toString());
+            s_oLogger.error("LauncherMain.Download: Exception " + oEx.getMessage());
 
             oSendToRabbit.SendRabbitMessage(false,LauncherOperations.DOWNLOAD,oParameter.getWorkspace(),null,oParameter.getExchange());
         }
