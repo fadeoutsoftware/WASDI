@@ -41,7 +41,7 @@ public class DownloadFile {
                     return new PasswordAuthentication(ConfigReader.getPropValue("DHUS_USER"), ConfigReader.getPropValue("DHUS_PASSWORD").toCharArray());
                 }
                 catch (Exception oEx){
-                    LauncherMain.s_oLogger.debug("DownloadFile.GetDownloadSize: exception setting auth " + oEx.toString());
+                    LauncherMain.s_oLogger.error("DownloadFile.GetDownloadSize: exception setting auth " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
                 }
                 return null;
             }
@@ -95,7 +95,7 @@ public class DownloadFile {
                     	return new PasswordAuthentication(sDownloadUser, sDownloadPassword.toCharArray());
                     }
                     catch (Exception oEx){
-                        LauncherMain.s_oLogger.debug("DownloadFile.ExecuteDownloadFile: exception setting auth " + oEx.toString());
+                        LauncherMain.s_oLogger.error("DownloadFile.ExecuteDownloadFile: exception setting auth " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
                     }
                     return null;
                 }
@@ -190,7 +190,7 @@ public class DownloadFile {
                         return new PasswordAuthentication(ConfigReader.getPropValue("DHUS_USER"), ConfigReader.getPropValue("DHUS_PASSWORD") .toCharArray());
                     }
                     catch (Exception oEx){
-                        LauncherMain.s_oLogger.debug("DownloadFile.GetFileName: exception setting auth " + oEx.toString());
+                        LauncherMain.s_oLogger.error("DownloadFile.GetFileName: exception setting auth " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
                     }
                     return null;
                 }
@@ -208,13 +208,13 @@ public class DownloadFile {
                 iConnectionTimeOut = Integer.parseInt(sConnectionTimeout);
             }
             catch (Exception oEx) {
-                LauncherMain.s_oLogger.error(oEx.toString());
+                LauncherMain.s_oLogger.error(org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
             }
             try {
                 iReadTimeOut = Integer.parseInt(sReadTimeOut);
             }
             catch (Exception oEx) {
-                LauncherMain.s_oLogger.error(oEx.toString());
+                LauncherMain.s_oLogger.error(org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
             }
 
             URL url = new URL(sFileURL);
@@ -262,7 +262,7 @@ public class DownloadFile {
             return  sReturnFilePath;
         }
         catch (Exception oEx) {
-            LauncherMain.s_oLogger.error(oEx.toString());
+            LauncherMain.s_oLogger.error(org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
         }
 
         return  "";

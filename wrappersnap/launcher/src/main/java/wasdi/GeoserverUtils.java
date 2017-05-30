@@ -81,7 +81,7 @@ public class GeoserverUtils {
             }
         } catch (Exception e) {
             e.printStackTrace();
-            LauncherMain.s_oLogger.debug("GeoserverUtils.GetBoundingBox: Exception getting bounding box " + e.toString());
+            LauncherMain.s_oLogger.debug("GeoserverUtils.GetBoundingBox: Exception getting bounding box " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(e));
         }
         finally {
             return sBBox.toString();
@@ -138,7 +138,7 @@ public class GeoserverUtils {
 
         } catch (Exception e) {
             e.printStackTrace();
-            LauncherMain.s_oLogger.debug("GeoserverUtils.DeleteLayer: Exception deleting layer " + e.toString());
+            LauncherMain.s_oLogger.debug("GeoserverUtils.DeleteLayer: Exception deleting layer " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(e));
         }
         finally {
             return response.toString();

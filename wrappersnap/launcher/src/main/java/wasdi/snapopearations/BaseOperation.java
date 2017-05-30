@@ -40,7 +40,7 @@ public abstract class BaseOperation {
         catch(Exception oEx)
         {
         	oEx.printStackTrace();
-            LauncherMain.s_oLogger.debug("BaseOperation.getOperation: error executing operation " + oEx.getMessage());
+            LauncherMain.s_oLogger.debug("BaseOperation.getOperation: error executing operation " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
         }
         finally {
             return oTargetProduct;
