@@ -40,4 +40,5 @@ public class RabbitMessageViewModel {
     public void setWorkspaceId(String workspaceId) {
         this.workspaceId = workspaceId;
     }
+
 }

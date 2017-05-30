@@ -12,6 +12,8 @@ public class ProcessWorkspace {
     private String operationDate;
     private String processObjId;
     private String fileSize;
+    private String status;
+    private int progressPerc;
     private int pid;
 
     public String getProductName() {
@@ -77,4 +79,21 @@ public class ProcessWorkspace {
     public void setFileSize(String fileSize) {
         this.fileSize = fileSize;
     }
+
+	public String getStatus() {
+		return status;
+	}
+
+	public void setStatus(String status) {
+		this.status = status;
+	}
+
+	public int getProgressPerc() {
+		return progressPerc;
+	}
+
+	public void setProgressPerc(int progressPerc) {
+		this.progressPerc = progressPerc;
+	}
+    
 }

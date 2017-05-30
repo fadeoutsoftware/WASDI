@@ -38,6 +38,7 @@ import wasdi.geoserver.Publisher;
 import wasdi.rabbit.Send;
 import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.DownloadedFile;
+import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.business.ProductWorkspace;
 import wasdi.shared.business.PublishedBand;
@@ -185,7 +186,7 @@ public class LauncherMain {
             Engine.start(false);
 
         }
-        catch (IOException e) {
+        catch (Throwable e) {
             e.printStackTrace();
         }
     }
@@ -305,12 +306,12 @@ public class LauncherMain {
         String sFileName = "";
         // Download handler
         DownloadFile oDownloadFile = new DownloadFile();
+        ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
+        ProcessWorkspace oProcessWorkspace = oProcessWorkspaceRepository.GetProcessByProcessObjId(oParameter.getProcessObjId());
 
         try {
             s_oLogger.debug("LauncherMain.Download: Download Start");
 
-            ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
-            ProcessWorkspace oProcessWorkspace = oProcessWorkspaceRepository.GetProcessByProductName(oParameter.getUrl());
             if (oProcessWorkspace != null) {
                 //get file size
                 long lFileSizeByte = oDownloadFile.GetDownloadFileSize(oParameter.getUrl());
@@ -320,15 +321,21 @@ public class LauncherMain {
                 oProcessWorkspace.setFileSize(Long.toString(lFileSizeMega));
                 //get process pid
                 oProcessWorkspace.setPid(GetProcessId());
+                
+                oProcessWorkspace.setStatus(ProcessStatus.RUNNING.name());
+                oProcessWorkspace.setProgressPerc(0);
                 //update the process
                 if (!oProcessWorkspaceRepository.UpdateProcess(oProcessWorkspace))
                     s_oLogger.debug("LauncherMain.Download: Error during process update");
+
+                //send update process message
+                if (!oSendToRabbit.SendUpdateProcessMessage(oProcessWorkspace)) {
+                    s_oLogger.debug("LauncherMain.Download: Error sending rabbitmq message to update process list");
+                }
+            } else {
+            	s_oLogger.debug("LauncherMain.Download: process not found: " + oParameter.getProcessObjId());
             }
 
-            //send update process message
-            if (!oSendToRabbit.SendUpdateProcessMessage(oParameter.getWorkspace())) {
-                s_oLogger.debug("LauncherMain.Download: Error sending rabbitmq message to update process list");
-            }
 
             if (!sDownloadPath.endsWith("/")) sDownloadPath+="/";
 
@@ -406,33 +413,43 @@ public class LauncherMain {
 
             if (Utils.isNullOrEmpty(sFileName)) {
                 s_oLogger.debug("LauncherMain.Download: file is null there must be an error");
-
                 oSendToRabbit.SendRabbitMessage(false,LauncherOperations.DOWNLOAD,oParameter.getWorkspace(),null,oParameter.getExchange());
-
-            }
-            else {
-            	
+                if (oProcessWorkspace != null) oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
+            } else {
                 AddProductToDbAndSendToRabbit(oVM, sFileName, oParameter.getWorkspace(), oParameter.getExchange(), LauncherOperations.DOWNLOAD, oParameter.getBoundingBox());
+                if (oProcessWorkspace != null) oProcessWorkspace.setStatus(ProcessStatus.DONE.name());                
             }
         }
         catch (Exception oEx) {
+        	oEx.printStackTrace();
             s_oLogger.error("LauncherMain.Download: Exception " + oEx.getMessage());
-
+            if (oProcessWorkspace != null) oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
             oSendToRabbit.SendRabbitMessage(false,LauncherOperations.DOWNLOAD,oParameter.getWorkspace(),null,oParameter.getExchange());
         }
         finally{
-            //delete process from list
-            try{
-                ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
-                oProcessWorkspaceRepository.DeleteProcessWorkspace(oParameter.getProcessObjId());
-            }
-            catch (Exception oEx) {
-                s_oLogger.debug("LauncherMain.Download: Exception deleting process " + oEx.toString());
-            }
+            //update process status and send rabbit updateProcess message
+            CloseProcessWorkspace(oProcessWorkspaceRepository, oProcessWorkspace);
         }
 
         return  sFileName;
     }
+
+	private void CloseProcessWorkspace(ProcessWorkspaceRepository oProcessWorkspaceRepository, ProcessWorkspace oProcessWorkspace) {
+		try{
+			if (oProcessWorkspace != null) {
+		        //update the process
+				oProcessWorkspace.setProgressPerc(100);
+		        if (!oProcessWorkspaceRepository.UpdateProcess(oProcessWorkspace))
+		            s_oLogger.debug("LauncherMain: Error during process update (terminated)");
+		        //send update process message
+				if (!oSendToRabbit.SendUpdateProcessMessage(oProcessWorkspace)) {
+				    s_oLogger.debug("LauncherMain: Error sending rabbitmq message to update process list");
+				}
+			}
+		} catch (Exception oEx) {
+		    s_oLogger.debug("LauncherMain: Exception deleting process " + oEx.toString());
+		}
+	}
     
     
     
@@ -513,24 +530,26 @@ public class LauncherMain {
 
         s_oLogger.debug("LauncherMain.ExecuteOperation: Start operation " + sTypeOperation);
 
+        ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
+        ProcessWorkspace oProcessWorkspace = oProcessWorkspaceRepository.GetProcessByProcessObjId(oParameter.getProcessObjId());
+        
         try {
         	
-        	// P.Campanella 12/05/2017: add the process id to the table
-            ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
-            ProcessWorkspace oProcessWorkspace = oProcessWorkspaceRepository.GetProcessByProductName(oParameter.getSourceProductName());
             
             if (oProcessWorkspace != null) {
             	
                 //get process pid
                 oProcessWorkspace.setPid(GetProcessId());
+                oProcessWorkspace.setStatus(ProcessStatus.RUNNING.name());
+                oProcessWorkspace.setProgressPerc(0);
                 //update the process
                 if (!oProcessWorkspaceRepository.UpdateProcess(oProcessWorkspace))
-                    s_oLogger.debug("LauncherMain.ExecuteOperation: Error during process update (add PID)");
+                    s_oLogger.debug("LauncherMain.ExecuteOperation: Error during process update (starting)");
             }        	
         	
         	
             //send update process message
-            if (!oSendToRabbit.SendUpdateProcessMessage(oParameter.getWorkspace())) {
+            if (!oSendToRabbit.SendUpdateProcessMessage(oProcessWorkspace)) {
                 s_oLogger.debug("LauncherMain.ExecuteOperation: Error sending rabbitmq message to update process list");
             }
 
@@ -552,7 +571,7 @@ public class LauncherMain {
             }
 
             File oSourceFile = new File(sFile);
-            WriteProduct oWriter = new WriteProduct();
+            WriteProduct oWriter = new WriteProduct(oProcessWorkspaceRepository, oProcessWorkspace);
 
             ReadProduct oReadProduct = new ReadProduct();
             s_oLogger.debug("LauncherMain.ExecuteOperation: Read Product");
@@ -601,23 +620,20 @@ public class LauncherMain {
             AddProductToDbAndSendToRabbit(null, sTargetAbsFileName, oParameter.getWorkspace(), oParameter.getExchange(), sTypeOperation, sBB);
 
             //this.PublishOnGeoserver(oParameter.getPublishParameter(), oTerrainProduct.getName(), sBandName);
+            if (oProcessWorkspace != null) oProcessWorkspace.setStatus(ProcessStatus.DONE.name());
 
         }
         catch (Exception oEx) {
             s_oLogger.error("LauncherMain.ExecuteOperation: exception " + oEx.toString());
             oSendToRabbit.SendRabbitMessage(false,sTypeOperation,oParameter.getWorkspace(),null,oParameter.getExchange());
+
+            if (oProcessWorkspace != null) oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
         }
         finally{
             s_oLogger.debug("LauncherMain.ExecuteOperation: End");
 
-            //delete process from list
-            try{
-                ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
-                oProcessWorkspaceRepository.DeleteProcessWorkspace(oParameter.getProcessObjId());
-            }
-            catch (Exception oEx) {
-                s_oLogger.debug("LauncherMain.ExecuteOperation: Exception deleting process " + oEx.toString());
-            }
+            CloseProcessWorkspace(oProcessWorkspaceRepository, oProcessWorkspace);
+            
         }
     }
 
@@ -630,21 +646,22 @@ public class LauncherMain {
     public String PublishBandImage(PublishBandParameter oParameter) {
 
         String sLayerId = "";
-
+        ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
+        ProcessWorkspace oProcessWorkspace = oProcessWorkspaceRepository.GetProcessByProcessObjId(oParameter.getProcessObjId());
         try {
 
-            ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
-            ProcessWorkspace oProcessWorkspace = oProcessWorkspaceRepository.GetProcessByProductName(oParameter.getFileName());
 
             if (oProcessWorkspace != null) {
                 //get process pid
                 oProcessWorkspace.setPid(GetProcessId());
+                oProcessWorkspace.setStatus(ProcessStatus.RUNNING.name());
+                oProcessWorkspace.setProgressPerc(0);
                 //update the process
                 oProcessWorkspaceRepository.UpdateProcess(oProcessWorkspace);
             }
 
             //send update process message
-            if (!oSendToRabbit.SendUpdateProcessMessage(oParameter.getWorkspace())) {
+            if (!oSendToRabbit.SendUpdateProcessMessage(oProcessWorkspace)) {
                 s_oLogger.debug("LauncherMain.PublishBandImage: Error sending rabbitmq message to update process list");
             }
 
@@ -730,7 +747,7 @@ public class LauncherMain {
 				Band oBand = oSentinel.getBand(oParameter.getBandName());            
 				Product oGeotiffProduct = new Product(oParameter.getBandName(), "GEOTIFF");
 				oGeotiffProduct.addBand(oBand);                 
-				sOutputFilePath = new WriteProduct().WriteGeoTiff(oGeotiffProduct, sPath, sLayerId);
+				sOutputFilePath = new WriteProduct(oProcessWorkspaceRepository, oProcessWorkspace).WriteGeoTiff(oGeotiffProduct, sPath, sLayerId);
 				oOutputFile = new File(sOutputFilePath);
 				s_oLogger.debug( "LauncherMain.PublishBandImage:  Geotiff File Created (EPSG=" + sEPSG + "): " + sOutputFilePath);
 				
@@ -834,6 +851,10 @@ public class LauncherMain {
             if (bRet == false) {
                 s_oLogger.debug("LauncherMain.PublishBandImage: Error sending Rabbit Message");
             }
+            
+
+            if (oProcessWorkspace != null) oProcessWorkspace.setStatus(ProcessStatus.DONE.name());
+            
         }
         catch (Exception oEx) {
 
@@ -846,16 +867,11 @@ public class LauncherMain {
             if (bRet == false) {
                 s_oLogger.error("LauncherMain.PublishBandImage:  Error sending exception Rabbit Message");
             }
+
+            if (oProcessWorkspace != null) oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
         }
         finally{
-            //delete process from list
-            try{
-                ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
-                oProcessWorkspaceRepository.DeleteProcessWorkspace(oParameter.getProcessObjId());
-            }
-            catch (Exception oEx) {
-                s_oLogger.debug("LauncherMain.PublishBandImage: Exception deleting process " + oEx.toString());
-            }
+            CloseProcessWorkspace(oProcessWorkspaceRepository, oProcessWorkspace);
         }
 
         return  sLayerId;
@@ -870,13 +886,24 @@ public class LauncherMain {
     public void RasterGeometricResample(RasterGeometricResampleParameter oParameter) {
 
         s_oLogger.debug("LauncherMain.RasterGeometricResample: Start");
+        ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
+        ProcessWorkspace oProcessWorkspace = oProcessWorkspaceRepository.GetProcessByProcessObjId(oParameter.getProcessObjId());
 
         try {
 
-            //send update process message
-            if (!oSendToRabbit.SendUpdateProcessMessage(oParameter.getWorkspace())) {
-                s_oLogger.debug("LauncherMain.RasterGeometricResample: Error sending rabbitmq message to update process list");
+        	if (oProcessWorkspace != null) {
+                //get process pid
+                oProcessWorkspace.setPid(GetProcessId());
+                oProcessWorkspace.setStatus(ProcessStatus.RUNNING.name());
+                oProcessWorkspace.setProgressPerc(0);
+                //update the process
+                oProcessWorkspaceRepository.UpdateProcess(oProcessWorkspace);
+                //send update process message
+                if (!oSendToRabbit.SendUpdateProcessMessage(oProcessWorkspace)) {
+                    s_oLogger.debug("LauncherMain.RasterGeometricResample: Error sending rabbitmq message to update process list");
+                }
             }
+        	
 
             // Read File Name
             String sFile = oParameter.getSourceProductName();
@@ -896,7 +923,7 @@ public class LauncherMain {
             File oSourceFile = new File(sFile);
 
             //FileUtils.copyFile(oDownloadedFile, oTargetFile);
-            WriteProduct oWriter = new WriteProduct();
+            WriteProduct oWriter = new WriteProduct(oProcessWorkspaceRepository, oProcessWorkspace);
 
             ReadProduct oReadProduct = new ReadProduct();
 
@@ -922,24 +949,18 @@ public class LauncherMain {
             String sOutFile = oWriter.WriteBEAMDIMAP(oResampledProduct, sPath, sFileNameOnly+"_resampled");
 
             AddProductToDbAndSendToRabbit(null, sOutFile, oParameter.getWorkspace(), oParameter.getExchange(), LauncherOperations.RASTERGEOMETRICRESAMPLE, null);
+            if (oProcessWorkspace != null) oProcessWorkspace.setStatus(ProcessStatus.DONE.name());
 
         }
         catch (Exception oEx) {
             s_oLogger.error("LauncherMain.RasterGeometricResample: exception " + oEx.toString());
-
+            if (oProcessWorkspace != null) oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
             oSendToRabbit.SendRabbitMessage(false,LauncherOperations.RASTERGEOMETRICRESAMPLE,oParameter.getWorkspace(),null,oParameter.getExchange());
+        	
         }
         finally{
             s_oLogger.debug("LauncherMain.RasterGeometricResample: End");
-
-            //delete process from list
-            try{
-                ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
-                oProcessWorkspaceRepository.DeleteProcessWorkspace(oParameter.getProcessObjId());
-            }
-            catch (Exception oEx) {
-                s_oLogger.debug("LauncherMain.RasterGeometricResample: Exception deleting process " + oEx.toString());
-            }
+            CloseProcessWorkspace(oProcessWorkspaceRepository, oProcessWorkspace);
         }
     }
     

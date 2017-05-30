@@ -16,6 +16,7 @@ import javax.ws.rs.core.Response;
 
 import it.fadeout.Wasdi;
 import wasdi.shared.LauncherOperations;
+import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.business.PublishedBand;
 import wasdi.shared.business.User;
@@ -78,9 +79,10 @@ public class FileBufferResource {
 				oProcess.setWorkspaceId(sWorkspaceId);
 				oProcess.setUserId(sUserId);
 				oProcess.setProcessObjId(Utils.GetRandomName());
+				oProcess.setStatus(ProcessStatus.CREATED.name());
 				sProcessId = oRepository.InsertProcessWorkspace(oProcess);
 				//set the process object Id to params
-				oParameter.setProcessObjId(sProcessId);
+				oParameter.setProcessObjId(oProcess.getProcessObjId());
 			}
 			catch(Exception oEx){
 				System.out.println("DownloadResource.Download: Error updating process list " + oEx.getMessage());
@@ -153,6 +155,7 @@ public class FileBufferResource {
 				oProcess.setWorkspaceId(sWorkspaceId);
 				oProcess.setUserId(sUserId);
 				oProcess.setProcessObjId(Utils.GetRandomName());
+				oProcess.setStatus(ProcessStatus.CREATED.name());
 				sProcessId = oRepository.InsertProcessWorkspace(oProcess);
 			}
 			catch(Exception oEx){
@@ -169,7 +172,7 @@ public class FileBufferResource {
 			oParameter.setWorkspace(sWorkspaceId);
 			oParameter.setUserId(sUserId);
 			oParameter.setExchange(sWorkspaceId);
-			oParameter.setProcessObjId(sProcessId);
+			oParameter.setProcessObjId(oProcess.getProcessObjId());
 
 			SerializationUtils.serializeObjectToXML(sPath, oParameter);
 
@@ -253,6 +256,7 @@ public class FileBufferResource {
 				oProcess.setWorkspaceId(sWorkspaceId);
 				oProcess.setUserId(oUser.getUserId());
 				oProcess.setProcessObjId(Utils.GetRandomName());
+				oProcess.setStatus(ProcessStatus.CREATED.name());
 				sProcessId = oRepository.InsertProcessWorkspace(oProcess);
 			}
 			catch(Exception oEx){
@@ -272,7 +276,7 @@ public class FileBufferResource {
 			oParameter.setUserId(sUserId);
 			oParameter.setBandName(sBand);
 			oParameter.setExchange(sWorkspaceId);
-			oParameter.setProcessObjId(sProcessId);
+			oParameter.setProcessObjId(oProcess.getProcessObjId());
 
 			SerializationUtils.serializeObjectToXML(sPath, oParameter);
 
