@@ -45,7 +45,7 @@ public class ConfigReader {
             }
 
         } catch (Exception e) {
-            System.out.println("Exception: " + e);
+            e.printStackTrace();
         } finally {
             inputStream.close();
         }

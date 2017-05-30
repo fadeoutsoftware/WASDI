@@ -100,7 +100,7 @@ public class LauncherMain {
         }catch(Exception exp)
         {
             //no log4j configuration
-            System.err.println( "Error loading log.  Reason: " + exp.getMessage() );
+            System.err.println( "Error loading log.  Reason: " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(exp) );
             System.exit(-1);
         }
 
@@ -154,7 +154,7 @@ public class LauncherMain {
 
         }
         catch( ParseException exp ) {
-            s_oLogger.error("Launcher Main Exception " + exp.toString());
+            s_oLogger.error("Launcher Main Exception " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(exp));
             // oops, something went wrong
             System.err.println( "Parsing failed.  Reason: " + exp.getMessage() );
             System.exit(-1);
@@ -273,7 +273,7 @@ public class LauncherMain {
             }
         }
         catch (Exception oEx) {
-            s_oLogger.error("ExecuteOperation Exception " + oEx.toString());
+            s_oLogger.error("ExecuteOperation Exception " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
         }
     }
 
@@ -290,7 +290,7 @@ public class LauncherMain {
             iPid = (Integer) getProcessIdMethod.invoke(vmManagement);
 
         } catch (Exception oEx) {
-            s_oLogger.error("LauncherMain.GetProcessId: Error getting processId: " + oEx.getMessage());
+            s_oLogger.error("LauncherMain.GetProcessId: Error getting processId: " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
         }
 
         return iPid;
@@ -422,7 +422,7 @@ public class LauncherMain {
         }
         catch (Exception oEx) {
         	oEx.printStackTrace();
-            s_oLogger.error("LauncherMain.Download: Exception " + oEx.getMessage());
+            s_oLogger.error("LauncherMain.Download: Exception " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
             if (oProcessWorkspace != null) oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
             oSendToRabbit.SendRabbitMessage(false,LauncherOperations.DOWNLOAD,oParameter.getWorkspace(),null,oParameter.getExchange());
         }
@@ -447,7 +447,7 @@ public class LauncherMain {
 				}
 			}
 		} catch (Exception oEx) {
-		    s_oLogger.debug("LauncherMain: Exception deleting process " + oEx.toString());
+		    s_oLogger.debug("LauncherMain: Exception deleting process " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
 		}
 	}
     
@@ -624,7 +624,7 @@ public class LauncherMain {
 
         }
         catch (Exception oEx) {
-            s_oLogger.error("LauncherMain.ExecuteOperation: exception " + oEx.toString());
+            s_oLogger.error("LauncherMain.ExecuteOperation: exception " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
             oSendToRabbit.SendRabbitMessage(false,sTypeOperation,oParameter.getWorkspace(),null,oParameter.getExchange());
 
             if (oProcessWorkspace != null) oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
@@ -858,7 +858,7 @@ public class LauncherMain {
         }
         catch (Exception oEx) {
 
-            s_oLogger.error( "LauncherMain.PublishBandImage: Exception " + oEx.toString() + " " + oEx.getMessage());
+            s_oLogger.error( "LauncherMain.PublishBandImage: Exception " + oEx.toString() + " " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
 
             oEx.printStackTrace();
 
@@ -953,7 +953,7 @@ public class LauncherMain {
 
         }
         catch (Exception oEx) {
-            s_oLogger.error("LauncherMain.RasterGeometricResample: exception " + oEx.toString());
+            s_oLogger.error("LauncherMain.RasterGeometricResample: exception " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
             if (oProcessWorkspace != null) oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
             oSendToRabbit.SendRabbitMessage(false,LauncherOperations.RASTERGEOMETRICRESAMPLE,oParameter.getWorkspace(),null,oParameter.getExchange());
         	
@@ -1003,7 +1003,7 @@ public class LauncherMain {
     		}
     	}
     	catch (Exception e) {
-    		s_oLogger.error("LauncherMain.AddProductToWorkspace: Exception " + e.toString() );
+    		s_oLogger.error("LauncherMain.AddProductToWorkspace: Exception " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(e) );
 		}
     	
     	return false;

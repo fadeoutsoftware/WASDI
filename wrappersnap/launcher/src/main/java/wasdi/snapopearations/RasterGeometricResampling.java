@@ -27,7 +27,7 @@ public class RasterGeometricResampling {
         }
         catch (Exception oEx)
         {
-            LauncherMain.s_oLogger.debug("RasterGeometricResampling.getResampledProduct: error resampling product " + oEx.getMessage());
+            LauncherMain.s_oLogger.debug("RasterGeometricResampling.getResampledProduct: error resampling product " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
         }
         finally {
             return oResampledProduct;

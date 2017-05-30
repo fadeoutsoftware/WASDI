@@ -52,7 +52,7 @@ public class ReadProduct {
             }
         } catch (Exception oEx) {
             oEx.printStackTrace();
-            LauncherMain.s_oLogger.debug(oEx.toString());
+            LauncherMain.s_oLogger.debug("ReadProduct.ReadProduct: excetpion: " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
 
         }
 
@@ -201,12 +201,14 @@ public class ReadProduct {
                 if (ous != null)
                     ous.close();
             } catch (IOException e) {
+            	e.printStackTrace();
             }
 
             try {
                 if (ios != null)
                     ios.close();
             } catch (IOException e) {
+            	e.printStackTrace();
             }
         }
         Object oObjectProduct = null;

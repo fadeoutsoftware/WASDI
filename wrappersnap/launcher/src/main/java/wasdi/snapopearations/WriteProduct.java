@@ -51,7 +51,7 @@ public class WriteProduct implements ProgressMonitor {
 						LauncherMain.oSendToRabbit.SendUpdateProcessMessage(m_oProcessWorkspace);
 					} catch (JsonProcessingException e) {
 						e.printStackTrace();
-						LauncherMain.s_oLogger.debug("WriteProduct: Error during SendUpdateProcessMessage: " + e.getMessage());
+						LauncherMain.s_oLogger.error("WriteProduct: Error during SendUpdateProcessMessage: " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(e));
 					}
 	                    
 	            }        	
@@ -141,7 +141,7 @@ public class WriteProduct implements ProgressMonitor {
         catch (Exception oEx)
         {
         	oEx.printStackTrace();
-            LauncherMain.s_oLogger.debug("WriteProduct: Error writing product. " + oEx.getMessage());
+            LauncherMain.s_oLogger.error("WriteProduct: Error writing product. " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
         }
 
         return null;
