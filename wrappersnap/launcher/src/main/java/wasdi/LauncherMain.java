@@ -1,7 +1,5 @@
 package wasdi;
 import java.io.File;
-import java.io.IOException;
-import java.io.PrintWriter;
 import java.lang.management.ManagementFactory;
 import java.lang.management.RuntimeMXBean;
 import java.lang.reflect.Field;
@@ -59,7 +57,6 @@ import wasdi.shared.parameters.RangeDopplerGeocodingParameter;
 import wasdi.shared.parameters.RasterGeometricResampleParameter;
 import wasdi.shared.utils.SerializationUtils;
 import wasdi.shared.utils.Utils;
-import wasdi.shared.viewmodels.PrimitiveResult;
 import wasdi.shared.viewmodels.ProductViewModel;
 import wasdi.shared.viewmodels.PublishBandResultViewModel;
 import wasdi.snapopearations.ApplyOrbit;
@@ -492,6 +489,8 @@ public class LauncherMain {
         DownloadedFile oCheck = oDownloadedRepo.GetDownloadedFile(oVM.getFileName());
         File oFile = new File(sFileName);
         
+        boolean bAddProductToWS = true;
+        
         if (oCheck == null) {
         	s_oLogger.debug("Insert in db");
         	
@@ -503,19 +502,34 @@ public class LauncherMain {
             oAlreadyDownloaded.setProductViewModel(oVM);
             oAlreadyDownloaded.setBoundingBox(sBBox);
             
-            oDownloadedRepo.InsertDownloadedFile(oAlreadyDownloaded);            	
+            if (!oDownloadedRepo.InsertDownloadedFile(oAlreadyDownloaded)) {
+
+            	s_oLogger.error("Impossible to Insert the new Product " + oFile.getName() + " in the database. Try With out Metadata");
+            	
+            	oAlreadyDownloaded.getProductViewModel().setMetadata(null);
+            	
+                if (!oDownloadedRepo.InsertDownloadedFile(oAlreadyDownloaded)) {
+                	bAddProductToWS = false;
+                	s_oLogger.error("Impossible to Insert the new Product " + oFile.getName() + " in the database also out Metadata");                	
+                }
+                else {
+                	s_oLogger.error("Inserted WITHOUT METADATA");
+                }
+            }
         }
         
-        AddProductToWorkspace(oFile.getName(), sWorkspace);
+        if (bAddProductToWS) {
+        	AddProductToWorkspace(oFile.getName(), sWorkspace);
+        }
+        else {
+        	s_oLogger.error("Product NOT added to the Workspace");
+        }
         
         s_oLogger.debug("OK DONE");
 
-        s_oLogger.debug("LauncherMain.ConvertProductToViewModelAndSendToRabbit: Image downloaded. Send Rabbit Message");
-
-        s_oLogger.debug("LauncherMain.ConvertProductToViewModelAndSendToRabbit: Exchange = " + sExchange);
+        s_oLogger.debug("LauncherMain.ConvertProductToViewModelAndSendToRabbit: Image downloaded. Send Rabbit Message Exchange = " + sExchange);
         
-        //P.Campanella 12/05/2017: Metadata are saved in the DB but sent back to the client with a dedicated API. 
-        // So here metadata are nulled
+        //P.Campanella 12/05/2017: Metadata are saved in the DB but sent back to the client with a dedicated API. So here metadata are nulled
         oVM.setMetadata(null);
 
         oSendToRabbit.SendRabbitMessage(true,sOperation,sWorkspace,oVM,sExchange);
