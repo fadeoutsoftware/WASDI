@@ -41,6 +41,9 @@ public class ProductResource {
 	@Produces({"application/xml", "application/json", "text/xml"})	
 	public PrimitiveResult AddProductToWorkspace(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sProductName") String sProductName, @QueryParam("sWorkspaceId") String sWorkspaceId ) {
 
+
+		System.out.println("ProductResource.AddProductToWorkspace:  called WS: " + sWorkspaceId + " Product " + sProductName);
+		
 		// Validate Session
 		User oUser = Wasdi.GetUserFromSession(sSessionId);
 		if (oUser == null) return null;
@@ -55,12 +58,17 @@ public class ProductResource {
 
 		// Try to insert
 		if (oProductWorkspaceRepository.InsertProductWorkspace(oProductWorkspace)) {
+			
+			System.out.println("ProductResource.AddProductToWorkspace:  Inserted");
+			
 			// Ok done
 			PrimitiveResult oResult = new PrimitiveResult();
 			oResult.setBoolValue(true);
 			return oResult;
 		}
 		else {
+			System.out.println("ProductResource.AddProductToWorkspace:  Error");
+			
 			// There was a problem
 			PrimitiveResult oResult = new PrimitiveResult();
 			oResult.setBoolValue(false);
@@ -183,6 +191,9 @@ public class ProductResource {
 					
 					oProductVM.setMetadata(null);
 					aoProductList.add(oProductVM);
+				}
+				else {
+					System.out.println("WARNING: the product " + aoProductWorkspace.get(iProducts).getProductName() + " should be in WS " + sWorkspaceId + " but is not a Downloaded File" );
 				}
 
 			}
