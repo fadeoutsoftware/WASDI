@@ -7,7 +7,7 @@ public class AttributeViewModel {
 
     private int dataType;
     private long numElems;
-    private String name;
+    //private String name;
     private String description;
     private String data;
     
@@ -17,18 +17,18 @@ public class AttributeViewModel {
     public void setDataType(int dataType) {
         this.dataType = dataType;
     }
-    public long getNumElems() {
+    public long getNumElems() { 
         return numElems;
     }
     public void setNumElems(long numElems) {
         this.numElems = numElems;
     }
-    public String getName() {
-        return name;
-    }
-    public void setName(String name) {
-        this.name = name;
-    }
+//    public String getName() {
+//        return name;
+//    }
+//    public void setName(String name) {
+//        this.name = name;
+//    }
     public String getDescription() {
         return description;
     }
