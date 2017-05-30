@@ -1,15 +1,16 @@
 package wasdi.snapopearations;
 
-import org.apache.commons.net.io.Util;
-import org.esa.s1tbx.io.sentinel1.Sentinel1ProductReader;
-import org.esa.snap.core.util.SystemUtils;
-import wasdi.LauncherMain;
-import wasdi.shared.utils.Utils;
-import wasdi.shared.viewmodels.AttributeViewModel;
-import wasdi.shared.viewmodels.BandViewModel;
-import wasdi.shared.viewmodels.MetadataViewModel;
-import wasdi.shared.viewmodels.NodeGroupViewModel;
-import wasdi.shared.viewmodels.ProductViewModel;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.ObjectInput;
+import java.io.ObjectInputStream;
+import java.util.ArrayList;
+import java.util.HashMap;
+
 import org.esa.snap.core.dataio.ProductIO;
 import org.esa.snap.core.dataio.ProductReader;
 import org.esa.snap.core.dataio.ProductReaderPlugIn;
@@ -18,9 +19,13 @@ import org.esa.snap.core.datamodel.MetadataAttribute;
 import org.esa.snap.core.datamodel.MetadataElement;
 import org.esa.snap.core.datamodel.Product;
 
-import java.io.*;
-import java.util.ArrayList;
-import java.util.HashMap;
+import wasdi.LauncherMain;
+import wasdi.shared.utils.Utils;
+import wasdi.shared.viewmodels.AttributeViewModel;
+import wasdi.shared.viewmodels.BandViewModel;
+import wasdi.shared.viewmodels.MetadataViewModel;
+import wasdi.shared.viewmodels.NodeGroupViewModel;
+import wasdi.shared.viewmodels.ProductViewModel;
 
 /**
  * Created by s.adamo on 18/05/2016.
@@ -29,10 +34,13 @@ public class ReadProduct {
 
     public  static HashMap<String, Product> m_oCacheProducts = new HashMap<String, Product>();
 
-
+    /**
+     * Read a Satellite Product 
+     * @param oFile File to open
+     * @param sFormatName Format, if known.
+     * @return Product object
+     */
     public Product ReadProduct(File oFile, String sFormatName) {
-        //Per ora ipotizziamo solo dati Sentinel-1
-        //read product
         Product exportProduct = null;
 
         try {
@@ -73,6 +81,11 @@ public class ReadProduct {
         return asFormats[0];
     }
     
+    /**
+     * Remove a file from the cache
+     * @param oFile
+     * @return
+     */
     private boolean RemoveFromCache(File oFile) {
         if (m_oCacheProducts.get(oFile.getName()) != null) {
             m_oCacheProducts.remove(oFile.getName());
@@ -82,6 +95,12 @@ public class ReadProduct {
         return  false;
     }
 
+    /**
+     * Converts a product in a View Model
+     * @param oFile
+     * @return
+     * @throws IOException
+     */
     public ProductViewModel getProductViewModel(File oFile) throws IOException
     {
         LauncherMain.s_oLogger.debug("ReadProduct.getProductViewModel: start");
@@ -98,20 +117,26 @@ public class ReadProduct {
         return  oViewModel;
     }
 
+    /**
+     * Converts a product in a View Model
+     * @param exportProduct
+     * @return
+     */
 	public ProductViewModel getProductViewModel(Product exportProduct) {
+		
+		// Create View Model
 		ProductViewModel oViewModel = new ProductViewModel();
-
-        // P.Campanella: splitted bands and metadata view models
-        //oViewModel.setMetadata(GetMetadataViewModel(exportProduct.getMetadataRoot(), new MetadataViewModel("Metadata")));
 
         LauncherMain.s_oLogger.debug("ReadProduct.getProductViewModel: call fill bands view model");
 
+        // Get Bands
         this.FillBandsViewModel(oViewModel, exportProduct);
 
         LauncherMain.s_oLogger.debug("ReadProduct.getProductViewModel: setting Name and Path");
 
         File oFile = exportProduct.getFileLocation();
         
+        // Set name and path
         oViewModel.setName(Utils.GetFileNameWithoutExtension(oFile.getAbsolutePath()));
         oViewModel.setFileName(oFile.getName());
 
@@ -119,6 +144,12 @@ public class ReadProduct {
 		return oViewModel;
 	}
 
+	/**
+	 * Get the metadata View Model of a Product
+	 * @param oFile
+	 * @return
+	 * @throws IOException
+	 */
     public MetadataViewModel getProductMetadataViewModel(File oFile) throws IOException
     {
         Product exportProduct = ReadProduct(oFile, null);
@@ -128,21 +159,39 @@ public class ReadProduct {
         return  GetMetadataViewModel(exportProduct.getMetadataRoot(), new MetadataViewModel("Metadata"));
     }
 
+    /**
+     * Recursive Metadata Explorer Function
+     * @param oElement
+     * @param oSourceViewModel
+     * @return
+     */
     private MetadataViewModel GetMetadataViewModel(MetadataElement oElement, MetadataViewModel oSourceViewModel) {
 
+    	// For Each Attribute
         for (MetadataAttribute oMetadataAttribute : oElement.getAttributes()) {
         	
-            AttributeViewModel oAttributeViewModel = new AttributeViewModel();
-            //oAttributeViewModel.setName(oMetadataAttribute.getName());
-            oAttributeViewModel.setDescription(oMetadataAttribute.getDescription());
-            
+        	// Data Exists ?
             if (oMetadataAttribute.getData() != null) {
+            	
+            	// Create Attribute View Model
+                AttributeViewModel oAttributeViewModel = new AttributeViewModel();
+                
+                // Leave the name: this is a code...
+                //oAttributeViewModel.setName(oMetadataAttribute.getName());
+                
+                if (!Utils.isNullOrEmpty(oMetadataAttribute.getDescription())) {
+                	oAttributeViewModel.setDescription(oMetadataAttribute.getDescription());
+                }
+                else if (!Utils.isNullOrEmpty(oMetadataAttribute.getName())) {
+                	oAttributeViewModel.setDescription(oMetadataAttribute.getName());
+                }
+                
             	oAttributeViewModel.setData(oMetadataAttribute.getData().toString());
+            	
+                if (oSourceViewModel.getAttributes() == null) oSourceViewModel.setAttributes(new ArrayList<AttributeViewModel>());
+                
+                oSourceViewModel.getAttributes().add(oAttributeViewModel);
             }
-            
-            if (oSourceViewModel.getAttributes() == null) oSourceViewModel.setAttributes(new ArrayList<AttributeViewModel>());
-            
-            oSourceViewModel.getAttributes().add(oAttributeViewModel);
         }
 
 
