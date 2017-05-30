@@ -26,6 +26,7 @@ import org.esa.snap.core.gpf.annotations.Parameter;
 import it.fadeout.Wasdi;
 import wasdi.shared.LauncherOperations;
 import wasdi.shared.SnapOperatorFactory;
+import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.business.User;
 import wasdi.shared.data.ProcessWorkspaceRepository;
@@ -179,6 +180,7 @@ public class SnapOperationsResources {
 				oProcess.setWorkspaceId(sWorkspaceId);
 				oProcess.setUserId(sUserId);
 				oProcess.setProcessObjId(Utils.GetRandomName());
+				oProcess.setStatus(ProcessStatus.CREATED.name());
 				sProcessId = oRepository.InsertProcessWorkspace(oProcess);
 			}
 			catch(Exception oEx){
@@ -196,7 +198,7 @@ public class SnapOperationsResources {
 			oParameter.setWorkspace(sWorkspaceId);
 			oParameter.setUserId(sUserId);
 			oParameter.setExchange(sWorkspaceId);
-			oParameter.setProcessObjId(sProcessId);
+			oParameter.setProcessObjId(oProcess.getProcessObjId());
 			if (oSetting != null)
 				oParameter.setSettings(oSetting);	
 			

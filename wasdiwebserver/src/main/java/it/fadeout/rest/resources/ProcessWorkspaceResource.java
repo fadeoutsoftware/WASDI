@@ -64,6 +64,8 @@ public class ProcessWorkspaceResource {
 				oViewModel.setUserId(oProcess.getUserId());
 				oViewModel.setFileSize(oProcess.getFileSize());
 				oViewModel.setPid(oProcess.getPid());
+				oViewModel.setStatus(oProcess.getStatus());
+				oViewModel.setProgressPerc(oProcess.getProgressPerc());
 				oViewModel.setProcessObjId(oProcess.getProcessObjId());
 
 				aoProcessList.add(oViewModel);

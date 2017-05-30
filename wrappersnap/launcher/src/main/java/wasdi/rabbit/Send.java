@@ -14,6 +14,7 @@ import com.rabbitmq.client.Connection;
 import wasdi.ConfigReader;
 import wasdi.LauncherMain;
 import wasdi.shared.LauncherOperations;
+import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.data.MongoRepository;
 import wasdi.shared.viewmodels.RabbitMessageViewModel;
 
@@ -62,16 +63,22 @@ public class Send {
 
     }
 
-    public boolean SendUpdateProcessMessage(String sWorkspaceId) throws JsonProcessingException {
-        LauncherMain.s_oLogger.debug("Send.SendUpdateProcessMessage: Send update message");
+    public boolean SendUpdateProcessMessage(ProcessWorkspace oProcess) throws JsonProcessingException {  
+    	
+    	if (oProcess==null) return false;
+    	
         RabbitMessageViewModel oUpdateProcessMessage = new RabbitMessageViewModel();
         oUpdateProcessMessage.setMessageCode(LauncherOperations.UPDATEPROCESSES);
-        oUpdateProcessMessage.setWorkspaceId(sWorkspaceId);
+        oUpdateProcessMessage.setWorkspaceId(oProcess.getWorkspaceId());
+        oUpdateProcessMessage.setPayload(oProcess.getProcessObjId() + ";" + oProcess.getStatus() + ";" + oProcess.getProgressPerc());
+        
+        LauncherMain.s_oLogger.debug("Send.SendUpdateProcessMessage: Send update message for process " + oProcess.getProcessObjId() + ": " + oUpdateProcessMessage.getPayload());
+        
         String sJSON = MongoRepository.s_oMapper.writeValueAsString(oUpdateProcessMessage);
-        return SendMsg(sWorkspaceId, sJSON);
+        return SendMsg(oProcess.getWorkspaceId(), sJSON);
     }
 
-    public boolean SendRabbitMessage(boolean bOk, String sMessageCode, String sWorkSpaceId, Object oPayload, String sQueueId) {
+    public boolean SendRabbitMessage(boolean bOk, String sMessageCode, String sWorkSpaceId, Object oPayload, String sWorkspaceId) {
 
         try {
             RabbitMessageViewModel oRabbitVM = new RabbitMessageViewModel();
@@ -84,7 +91,7 @@ public class Send {
 
             String sJSON = MongoRepository.s_oMapper.writeValueAsString(oRabbitVM);
 
-            return SendMsg(sQueueId, sJSON);
+            return SendMsg(sWorkspaceId, sJSON);
         }
         catch (Exception oEx) {
             LauncherMain.s_oLogger.log(Level.ERROR, "Send.SendRabbitMessage: ERROR", oEx);

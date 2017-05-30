@@ -10,6 +10,8 @@ public class ProcessWorkspaceViewModel {
     private String operationDate;
     private String userId;
     private String fileSize;
+    private String status;
+    private int progressPerc;
     private String processObjId;
     private int pid;
 
@@ -69,4 +71,21 @@ public class ProcessWorkspaceViewModel {
     public void setProcessObjId(String processObjId) {
 		this.processObjId = processObjId;
 	}
+
+	public String getStatus() {
+		return status;
+	}
+
+	public void setStatus(String status) {
+		this.status = status;
+	}
+
+	public int getProgressPerc() {
+		return progressPerc;
+	}
+
+	public void setProgressPerc(int progressPerc) {
+		this.progressPerc = progressPerc;
+	}
+    
 }
