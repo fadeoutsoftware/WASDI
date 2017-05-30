@@ -133,7 +133,7 @@ public class ReadProduct {
         for (MetadataAttribute oMetadataAttribute : oElement.getAttributes()) {
         	
             AttributeViewModel oAttributeViewModel = new AttributeViewModel();
-            oAttributeViewModel.setName(oMetadataAttribute.getName());
+            //oAttributeViewModel.setName(oMetadataAttribute.getName());
             oAttributeViewModel.setDescription(oMetadataAttribute.getDescription());
             
             if (oMetadataAttribute.getData() != null) {
