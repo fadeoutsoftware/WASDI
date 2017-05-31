@@ -306,8 +306,8 @@ service('ProcessesLaunchedService', ['ConstantsService','$rootScope','$http', fu
             return false;
 
         var aoProcesses = this.getProcesses();
-        if(utilsIsObjectNullOrUndefined(aoProcesses))
-            return false;
+        if(utilsIsObjectNullOrUndefined(aoProcesses)) return false;
+
         var iNumberOfProcesses = aoProcesses.length;
 
         for(var iIndex = 0; iIndex < iNumberOfProcesses; iIndex++ )

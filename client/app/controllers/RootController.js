@@ -76,53 +76,21 @@ var RootController = (function() {
                 //if(utilsIsObjectNullOrUndefined($scope.m_oController.m_aoProcessesRunning) == false)
                 //    $scope.m_oController.m_iNumberOfProcesses = $scope.m_oController.m_aoProcessesRunning.length;
 
-
-
                 var aoProcessesRunning = $scope.m_oController.m_oProcessesLaunchedService.getProcesses();
                 var iNumberOfProcessesRunning = aoProcessesRunning.length;
                 var aoOldProcessesRunning = $scope.m_oController.m_aoProcessesRunning;
                 var iNumberOfOldProcessesRunning = aoOldProcessesRunning.length;
+
                 //number of processes
                 if(utilsIsObjectNullOrUndefined($scope.m_oController.m_aoProcessesRunning) == false) {
                     $scope.m_oController.m_iNumberOfProcesses = iNumberOfProcessesRunning;
                 }
-                /*
-
-                //FIND LOG or STOPPED PROCESS
-                for( var  iIndexOldProcess= 0; iIndexOldProcess < iNumberOfOldProcessesRunning; iIndexOldProcess++)
-                {
-                    for( var iIndexNewProcess = 0; iIndexNewProcess < iNumberOfProcessesRunning; iIndexNewProcess++)
-                    {
-                        if(aoProcessesRunning[iIndexNewProcess].operationType == aoOldProcessesRunning[iIndexOldProcess].operationType &&
-                            aoProcessesRunning[iIndexNewProcess].productName == aoOldProcessesRunning[iIndexOldProcess].productName)
-                        {
-                            break;
-                        }
-                    }
-                    //if you find a log or ended process push it in list
-                    if(!(iIndexNewProcess < iNumberOfProcessesRunning))
-                    {
-                        var sStatusProcess ;
-                        if($scope.m_oController.m_oProcessesLaunchedService.checkIfProcessWasStopped( aoOldProcessesRunning[iIndexOldProcess]) === true)
-                        {
-                            sStatusProcess = "stopped";
-                        }
-                        else
-                        {
-                            sStatusProcess = "log";
-                        }
-                        aoOldProcessesRunning[iIndexOldProcess].status = sStatusProcess;
-                        $scope.m_oController.m_aoLogProcesses.push(aoOldProcessesRunning[iIndexOldProcess]);
-                        $scope.m_oController.m_aoProcessesRunning.splice(iIndexOldProcess,1);
-                    }
-
-                }
-
-                 */
 
                 //FIND LAST PROCESSES
-                if(utilsIsObjectNullOrUndefined(aoProcessesRunning) == false)
+                if(utilsIsObjectNullOrUndefined(aoProcessesRunning) == false) {
+                    if (aoProcessesRunning[iNumberOfProcessesRunning-1].status === "CREATED" || aoProcessesRunning[iNumberOfProcessesRunning-1].status === "RUNNING")
                     $scope.m_oController.m_oLastProcesses = aoProcessesRunning[iNumberOfProcessesRunning-1];
+                }
                 else
                     $scope.m_oController.m_oLastProcesses = null;
 
