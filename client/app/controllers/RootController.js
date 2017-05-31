@@ -76,13 +76,17 @@ var RootController = (function() {
                 //if(utilsIsObjectNullOrUndefined($scope.m_oController.m_aoProcessesRunning) == false)
                 //    $scope.m_oController.m_iNumberOfProcesses = $scope.m_oController.m_aoProcessesRunning.length;
 
+
+
                 var aoProcessesRunning = $scope.m_oController.m_oProcessesLaunchedService.getProcesses();
                 var iNumberOfProcessesRunning = aoProcessesRunning.length;
                 var aoOldProcessesRunning = $scope.m_oController.m_aoProcessesRunning;
                 var iNumberOfOldProcessesRunning = aoOldProcessesRunning.length;
                 //number of processes
-                if(utilsIsObjectNullOrUndefined($scope.m_oController.m_aoProcessesRunning) == false)
+                if(utilsIsObjectNullOrUndefined($scope.m_oController.m_aoProcessesRunning) == false) {
                     $scope.m_oController.m_iNumberOfProcesses = iNumberOfProcessesRunning;
+                }
+                /*
 
                 //FIND LOG or STOPPED PROCESS
                 for( var  iIndexOldProcess= 0; iIndexOldProcess < iNumberOfOldProcessesRunning; iIndexOldProcess++)
@@ -113,6 +117,9 @@ var RootController = (function() {
                     }
 
                 }
+
+                 */
+
                 //FIND LAST PROCESSES
                 if(utilsIsObjectNullOrUndefined(aoProcessesRunning) == false)
                     $scope.m_oController.m_oLastProcesses = aoProcessesRunning[iNumberOfProcessesRunning-1];
@@ -156,7 +163,6 @@ var RootController = (function() {
                         aoProcessesRunning[iIndexNewProcess].fileSize = nSize;
                         $scope.m_oController.m_aoProcessesRunning.push(aoProcessesRunning[iIndexNewProcess])
                     }
-
                 }
 
                 //$scope.m_oController.m_aoProcessesRunning = aoProcessesRunning ;
@@ -186,7 +192,10 @@ var RootController = (function() {
                 for(var iIndexProcess = 0; iIndexProcess < iNumberOfProcesses;iIndexProcess++ )
                 {
 
-                    $scope.m_oController.m_aoProcessesRunning[iIndexProcess].timeRunning.setSeconds( $scope.m_oController.m_aoProcessesRunning[iIndexProcess].timeRunning.getSeconds() + 1) ;
+                    if ($scope.m_oController.m_aoProcessesRunning[iIndexProcess].status==="RUNNING") {
+                        $scope.m_oController.m_aoProcessesRunning[iIndexProcess].timeRunning.setSeconds( $scope.m_oController.m_aoProcessesRunning[iIndexProcess].timeRunning.getSeconds() + 1) ;
+                    }
+
                 }
             }
             //$scope.m_oController.time++;
@@ -227,14 +236,12 @@ var RootController = (function() {
     RootController.prototype.getWorkspaceName = function()
     {
         var oWorkspace = this.m_oConstantsService.getActiveWorkspace();
-        if(utilsIsObjectNullOrUndefined(oWorkspace))
-            return "";
+
+        if(utilsIsObjectNullOrUndefined(oWorkspace)) return "";
         else
         {
-            if(utilsIsObjectNullOrUndefined(oWorkspace.name))
-                return "";
-            else
-                return oWorkspace.name;
+            if(utilsIsObjectNullOrUndefined(oWorkspace.name)) return "";
+            else return oWorkspace.name;
         }
 
     };
