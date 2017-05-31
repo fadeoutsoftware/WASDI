@@ -169,7 +169,7 @@ var EditorController = (function () {
                 oController.receivedPublishBandMessage(oMessage);
                 break;
             case "UPDATEPROCESSES":
-                oController.m_oProcessesLaunchedService.loadProcessesFromServer(oController.m_oActiveWorkspace.workspaceId);
+                //oController.m_oProcessesLaunchedService.loadProcessesFromServer(oController.m_oActiveWorkspace.workspaceId);
                 break;
             case "DOWNLOAD":
             case "APPLYORBIT":
@@ -189,31 +189,6 @@ var EditorController = (function () {
      * @param oMessage
      */
     EditorController.prototype.receivedNewProductMessage = function (oMessage) {
-
-        /*
-        // Save the controller
-        var oController = this;
-
-        // Add the product to the workspace
-        this.m_oProductService.addProductToWorkspace(oMessage.payload.fileName, this.m_oActiveWorkspace.workspaceId).success(function (data, status) {
-
-            if (data.boolValue == true) {
-                //console.log('Product added to the ws');
-                var oDialog = utilsVexDialogAlertBottomRightCorner('Product added to the ws');
-                utilsVexCloseDialogAfterFewSeconds(3000, oDialog);
-                oController.getProductListByWorkspace();
-
-                //the m_oLastDownloadedProduct will be select & open in jstree
-                oController.m_oLastDownloadedProduct = oMessage.payload.fileName;
-            }
-            else {
-                utilsVexDialogAlertTop("Error adding product to workspace");
-            }
-
-        }).error(function (data, status) {
-            utilsVexDialogAlertTop('There was an error adding product to the ws')
-        });
-        */
 
         // P.Campanella 29/05/2017: Moved Add Product To WS in the launcher server side: TEST this
 
