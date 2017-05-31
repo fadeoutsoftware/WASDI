@@ -28,6 +28,12 @@ service('ProcessesLaunchedService', ['ConstantsService','$rootScope','$http', fu
             {
                 if(!utilsIsObjectNullOrUndefined(data))
                 {
+                    console.log("PROCESSES:")
+                    data.forEach(function (i) {
+                        console.log(i.operationType + ": " + i.status + " " + i.progressPerc + "%")
+                    })
+
+
                     oService.m_aoProcessesRunning = data;
                     oService.updateProcessesBar();//Aggiungere update della lista dei processi
                 }
