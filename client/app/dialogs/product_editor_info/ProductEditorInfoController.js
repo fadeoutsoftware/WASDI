@@ -35,6 +35,7 @@ var ProductEditorInfoController = (function() {
     }
     ProductEditorInfoController.prototype.updateProduct = function()
     {
+
         if(utilsIsObjectNullOrUndefined(this.m_oProduct) === true)
             return false;
         var oController=this;
@@ -47,6 +48,7 @@ var ProductEditorInfoController = (function() {
             if(data === "") {
                 oController.m_oProduct.metadata = oOldMetadata;
                 oController.m_oReturnProduct = oController.m_oProduct;
+                utilsJstreeUpdateLabelNode(oController.m_oReturnProduct.fileName, oController.m_oReturnProduct.productFriendlyName);
                 console.log("Product Updated");
             }
             else

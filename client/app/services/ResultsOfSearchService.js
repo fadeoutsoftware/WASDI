@@ -5,11 +5,12 @@
 
 'use strict';
 angular.module('wasdi.ResultsOfSearchService', ['wasdi.ConstantsService']).
-service('ResultsOfSearchService', ['$http',  'ConstantsService', function ($http, oConstantsService) {
+service('ResultsOfSearchService', ['$http',  'ConstantsService','OpenSearchService', function ($http, oConstantsService,oOpenSearchService) {
+    this.m_oOpenSearchService = oOpenSearchService;
     this.m_sTextQuery = "";
     this.m_oGeoSelection = '';
     this.m_iCurrentPage = 1;
-    this.m_iProductsPerPageSelected = 5;
+    this.m_iProductsPerPageSelected = 10;
     this.m_aoProductList = [];
     this.m_iTotalPages = 1;
     this.m_iTotalOfProducts = 0;
@@ -21,6 +22,7 @@ service('ResultsOfSearchService', ['$http',  'ConstantsService', function ($http
     this.m_aoMissions = [];
     this.m_oIngestionPeriodFrom = '';
     this.m_oIngestionPeriodTo = '';
+    // this.m_aoProviders = [];
 
     /************************ Set methods ***************************/
 
@@ -29,7 +31,7 @@ service('ResultsOfSearchService', ['$http',  'ConstantsService', function ($http
         this.m_sTextQuery = "";
         this.m_oGeoSelection = '';
         this.m_iCurrentPage = 1;
-        this.m_iProductsPerPageSelected = 5;
+        this.m_iProductsPerPageSelected = 10;
         this.m_aoProductList = [];
         this.m_iTotalPages = 1;
         this.m_iTotalOfProducts = 0;
@@ -38,16 +40,22 @@ service('ResultsOfSearchService', ['$http',  'ConstantsService', function ($http
         this.m_aoMissions  = [];
         this.m_oSensingPeriodFrom = '';
         this.m_oSensingPeriodTo='';
-        this.m_aoMissions = [];
         this.m_oIngestionPeriodFrom = '';
         this.m_oIngestionPeriodTo = '';
-    }
+        // this.getDefaultValueOfProvidersByServer();
+    };
+
+    // this.setProviders = function(aoProvidersInput)
+    // {
+    //     this.m_aoProviders = aoProvidersInput;
+    // };
 
     this.setIngestionPeriodTo = function(oIngestionPeriodTo)
     {
         this.m_oIngestionPeriodTo = oIngestionPeriodTo;
         return true;
-    }
+    };
+
     this.setIngestionPeriodFrom = function(oIngestionPeriodFrom)
     {
         this.m_oIngestionPeriodFrom = oIngestionPeriodFrom;
@@ -214,4 +222,30 @@ service('ResultsOfSearchService', ['$http',  'ConstantsService', function ($http
     {
         return this.m_aoMissions;
     }
+
+    // this.getProviders = function()
+    // {
+    //
+    //     return this.m_aoProviders;
+    // };
+
+    // this.getDefaultValueOfProvidersByServer = function()
+    // {
+    //     var oController = this;
+    //     this.m_oOpenSearchService.getListOfProvider().success(function (data) {
+    //         if(utilsIsObjectNullOrUndefined(data) === false && data.length > 0)
+    //         {
+    //             var iLengthData = data.length;
+    //             for(var iIndexProvider = 0; iIndexProvider < iLengthData; iIndexProvider++)
+    //             {
+    //                 oController.m_aoProviders[iIndexProvider] = {"name":data[iIndexProvider], "selected":true};
+    //             }
+    //             // oController.m_aListOfProvider = data;
+    //         }
+    //
+    //     }).error(function (data) {
+    //
+    //     });
+    // };
+
 }]);

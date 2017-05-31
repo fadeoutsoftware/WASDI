@@ -34,6 +34,7 @@
                                                         <h4>
                                                             Providers
                                                         </h4>
+
                                                     </legend>
 
                                                     <label ng-repeat="provider in m_oController.m_aListOfProvider" ng-click="provider.selected = !provider.selected">
@@ -42,7 +43,7 @@
                                                         {{provider.name}}
 
                                                     </label>
-
+                                                    <!--<pre>{{provider.name|json}}</pre>-->
                                                 </fieldset>
                                             </form>
                                         </div>
@@ -303,15 +304,15 @@
                                 </select>
                             </div>
 
-                            <li ng-click="m_oController.firstPage()"><a><i class="fa fa-angle-double-left" aria-hidden="true"></i></a></li>
-                            <li ng-click="m_oController.minusOnePage()"><a><i class="fa fa-angle-left" aria-hidden="true"></i></a></li>
+                            <li ng-click="m_oController.firstPage()" ><a><i class="fa fa-angle-double-left" aria-hidden="true"></i></a></li>
+                            <li ng-click="m_oController.minusOnePage()" ><a><i class="fa fa-angle-left" aria-hidden="true"></i></a></li>
                             <form ng-submit="m_oController.changePage(m_oController.m_iCurrentPage)">
                                 {{"IMPORT_PAGE_LABEL"|translate}}
                                 <input type="text" class="form-control" ng-model="m_oController.m_iCurrentPage">
                                 {{"IMPORT_OF_LABEL"|translate}} {{m_oController.m_iTotalPages}}
                             </form>
-                            <li ng-click="m_oController.plusOnePage()"><a><i class="fa fa-angle-right" aria-hidden="true"></i></a></li>
-                            <li ng-click="m_oController.lastPage()"><a><i class="fa fa-angle-double-right" aria-hidden="true"></i></a></li>
+                            <li ng-click="m_oController.plusOnePage()" ><a><i class="fa fa-angle-right" aria-hidden="true"></i></a></li>
+                            <li ng-click="m_oController.lastPage()" ><a><i class="fa fa-angle-double-right" aria-hidden="true"></i></a></li>
 
                         </ul>
 
@@ -376,6 +377,7 @@
                                 <div>
                                     <span>Provider:</span>
                                     <span><b>{{layer.provider}}</b></span>
+
                                 </div>
                             </td>
 

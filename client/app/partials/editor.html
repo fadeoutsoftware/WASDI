@@ -4,19 +4,41 @@
     <div class="col-lg-11 col-md-10 col-sm-10 col-xs-10 col-lg-offset-1 col-md-offset-2 col-sm-offset-2 col-xs-offset-2 operations-bar"  ><!--style="height: 80px;"-->
         <!--MAIN OPERATION BAR-->
         <div  class='animate-hide'  ng-hide="m_oController.isHiddenOperationMainBar();">
-            <ul>
+            <ul class="button-menu-with-icons">
 
                 <li   ng-click="m_oController.hideOperationMainBar(); m_oController.showOperationRadarBar();" ><!--data-toggle="tooltip" data-placement="top" title="{{'EDITOR_TOOLTIP_ICON_RADAR'|translate}}"-->
                     <!--<a class="icon-radar" href=""><i  aria-hidden="true"></i> </a>-->
-                    <a href="" ><h4>{{'EDITOR_TOOLTIP_ICON_RADAR'|translate}}</h4></a>
+                    <a href="" class="icon-radar ">
+                        <div>
+                            <h4>{{'EDITOR_TOOLTIP_ICON_RADAR'|translate}}</h4>
+                        </div>
+                        <div  >
+                            <i  aria-hidden="true"></i> <!--RADAR ICON -->
+                        </div>
+                    </a>
                 </li>
                 <li   ng-click="m_oController.hideOperationMainBar();m_oController.showOperationOpticalBar(); " ><!--data-toggle="tooltip" data-placement="top" title="{{'EDITOR_TOOLTIP_ICON_EYE'|translate}}"-->
                     <!--<a class="icon-eye" href=""><i  aria-hidden="true"></i></a>-->
-                    <a href="" ><h4>{{'EDITOR_TOOLTIP_ICON_EYE'|translate}}</h4></a>
+                    <a href="" class="icon-eye">
+                        <div>
+                            <h4>{{'EDITOR_TOOLTIP_ICON_EYE'|translate}}</h4>
+                        </div>
+                        <div  >
+                            <i  aria-hidden="true"></i> <!--OPTICAL ICON -->
+                        </div>
+                    </a>
+
                 </li>
                 <li  ng-click="m_oController.hideOperationMainBar();m_oController.showOperationProcessor(); " >
                     <!--<a class="icon-eye" href=""><i  aria-hidden="true"></i></a>-->
-                    <a href="" ><h4>{{'EDITOR_OPERATION_TITLE_APPLY_RADIOMETRIC_PROCESSOR'|translate}}</h4></a>
+                    <a href="" class="icon-document-gear">
+                        <div>
+                            <h4>{{'EDITOR_OPERATION_TITLE_APPLY_RADIOMETRIC_PROCESSOR'|translate}}</h4>
+                        </div>
+                        <div  >
+                            <i  aria-hidden="true"></i> <!--PROCESSOR ICON -->
+                        </div>
+                    </a>
                 </li>
 
                 <!--<li data-toggle="tooltip" data-placement="top" title="Coming soon" style="cursor:no-drop;">-->

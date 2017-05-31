@@ -99,16 +99,6 @@ function utilsProjectConvertJSONFromServerInOptions(oJSONInput)
             }
 
 
-                //create
-            // if(oJSONInput[iIndexParameter].valueSet.length !== 0)// if it's an array of values, set the default value as first one
-            // {
-            //     var aMyValueSet = [];
-            //  }
-            // else
-            // {
-                // no array
-                // oNewObjectOutput[oJSONInput[iIndexParameter].field] = oJSONInput[iIndexParameter].defaultValue;//create
-            // }
         }
     }
     return oNewObjectOutput;
@@ -201,4 +191,17 @@ function utilsProjectShowRabbitMessageUserFeedBack(oMessage) {
         utilsVexCloseDialogAfterFewSeconds(3000,oDialog);
     }
 
+}
+
+function utilsJstreeUpdateLabelNode (sIdNodeInput, sNewLabelNodeInput)
+{
+    if(utilsIsObjectNullOrUndefined(sIdNodeInput) === true)return false;
+
+    if(utilsIsObjectNullOrUndefined(sNewLabelNodeInput) === true)return false;
+
+    var oNode = null;
+    oNode = $('#jstree').jstree(true).get_node(sIdNodeInput);
+    $('#jstree').jstree(true).rename_node(oNode,sNewLabelNodeInput);
+
+    return true;
 }

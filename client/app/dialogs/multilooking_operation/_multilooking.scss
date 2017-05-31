@@ -7,6 +7,12 @@
     {
       .modal-header
       {
+        .icon-multi-looking {
+          content:$wasdi-radar-icon-white-version;
+          width: $wasdi-size-icon-title-dialogs;
+          height: auto;
+        }
+
       }
 
       .modal-body

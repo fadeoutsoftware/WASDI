@@ -26,10 +26,10 @@ service('AuthService', ['$http',  'ConstantsService', function ($http, oConstant
     /* USER UPLOAD AUTH API */
     this.createAccountUpload = function(sEmailInput)
     {
-        if(utilsIsEmail(sEmailInput) === false)
-            return null;
+        // if(utilsIsEmail() === false)
+        //     return null;
 
-        return this.m_oHttp.post(this.APIURL + '/auth/upload/createaccount',sEmailInput );
+        return this.m_oHttp.post(this.APIURL + '/auth/upload/createaccount', sEmailInput);//JSON.stringify({"sEmail":sEmailInput})
     };
 
     this.deleteAccountUpload = function(sIdInput)

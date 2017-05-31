@@ -8,7 +8,11 @@
       //HEADER
       .modal-header
       {
-
+        .icon-apply-orbit {
+          content:$wasdi-radar-icon-white-version;
+          width: $wasdi-size-icon-title-dialogs;
+          height: auto;
+        }
       }
       //BODY
       .modal-body

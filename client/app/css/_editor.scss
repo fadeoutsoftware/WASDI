@@ -7,8 +7,7 @@
   //SIDEBAR
   .sidebar
   {
-    //height:100vh;
-    //height:$wasdi-map-height;
+
 
     background-color: #f5f5f5;//black;
     border-right: 1px solid #eee;
@@ -56,7 +55,7 @@
       {
         width: auto;//500px
         height: $wasdi-heigth-panel;//500px
-        //margin-bottom: 7%;
+
         margin-bottom: 50px;
 
         @media  screen and (max-width: 1366px)and (max-height: 768px) {
@@ -94,10 +93,7 @@
         top: 2px;
         left: 20px;
 
-        //.btn{
-        //  height: 20px;
-        //  width: 20px;
-        //}
+
         .btn-default
         {
           min-width: 46px;
@@ -122,24 +118,18 @@
           background-size: 20px;
           background-repeat: no-repeat;
           background-position: center;
-          //background-image: url("../assets/icons/pencil_24x24.png");
-          //i{background-image: url("../assets/icons/mapBar/globe_white.svg");}
+
           &:hover,&:active{
             background-color: $wasdi-blue-logo;
-            //background-image: url("../assets/icons/mapBar/globe_green.svg");
             background-image: url("../assets/icons/mapBar/map_route_green(NoGeoReference).svg");
             background-size: 20px;
             background-repeat: no-repeat;
             background-position: center;
 
-            //background: url("../assets/icons/mapBar/globe_white.svg")left center no-repeat;;
           }
         }
 
-        //.btn-switch-geographic //hover
-        //{
-        //
-        //}
+
 
         .btn-switch-not-geographic
         {
@@ -159,31 +149,8 @@
           }
         }
 
-        //.btn-switch-not-geographic//hover
-        //{
-        //
-        //  //background: url("../assets/icons/mapBar/globe_white.svg")left center no-repeat;;
-        //}
-
       }
-      //.btn-switch-map
-      //{
-      //  z-index: 1001;
-      //  position: absolute;
-      //  top: 2px;
-      //  right: 20px;
-      //  background-color: $wasdi-blue-logo;
-      //  color: $wasdi-white;
-      //}
-      //.btn-switch-map:hover
-      //{
-      //  color: $wasdi-green-logo;
-      //}
-      //.btn-switch-map:disabled
-      //{
-      //  color:grey;
-      //}
-      //margin-bottom: 35px;
+
       //leaflet
       .map
       {
@@ -202,7 +169,6 @@
         {
           visibility:hidden;
         }
-        //height: auto;
       }
 
     }
@@ -221,11 +187,11 @@
     height: 80px;
     ul {
       list-style-type: none;
-      //margin-bottom: 0;
-      //margin-top: -20px;
       padding: 0;
       overflow: hidden;
       background-color: $wasdi-operation-bar-backgroud;
+
+
     }
 
     li {
@@ -246,6 +212,7 @@
       color: $wasdi-operation-bar-color-icon;
       text-align: center;
       padding: 14px 16px;
+      //padding:2px 16px 14px 16px;
       text-decoration: none;
     }
 
@@ -258,17 +225,23 @@
       background-color: $wasdi-nav-bar-color-selected;
     }
 
+    .button-menu-with-icons{
+      li a {
+        padding:2px 16px 14px 16px;
+      }
+    }
+
   }
 
   /********************************* ICONS *********************************/
+  //RADAR ICON
+
   .icon-radar {
     i {
       content: $wasdi-radar-icon;
       width: $wasdi-size-icon;
-      //margin-top: -20px;
       height: auto;
-      //min-height: 50px;
-      //min-width: 50px;
+
     }
   }
   .icon-radar:hover {
@@ -281,16 +254,13 @@
       //min-width: 50px;
     }
   }
-
+  //OPTICAL ICON
   .icon-eye
   {
     i{
       content: $wasdi-eye-icon;
       width: $wasdi-size-icon;
-      //margin-top: -20px;
       height: auto;
-      //min-height: 50px;
-      //min-width: 50px;
     }
   }
   .icon-eye:hover
@@ -298,37 +268,30 @@
     i{
       content: $wasdi-eye-icon-white-version;
       width: $wasdi-size-icon;
-      //margin-top: -20px;
       height: auto;
-      //min-height: 50px;
-      //min-width: 50px;
+
+    }
+  }
+  //PROCESSOR ICON
+  .icon-document-gear
+  {
+    i{
+      content: $wasdi-document-gear-icon-version;
+      width: $wasdi-size-icon;
+      height: auto;
+
+    }
+  }
+  .icon-document-gear:hover
+  {
+    i{
+      content: $wasdi-document-gear-icon-white-version;
+      width: $wasdi-size-icon;
+      height: auto;
+
     }
   }
 
-  //STATUS BAR - FOOTER
-  //.status-bar
-  //{
-  //  position:fixed;
-  //  bottom: 0;
-  //  padding:0;
-  //  height: $wasdi-status-bar-heigth;
-  //  z-index: 1000;
-  //  background-color: $wasdi-status-bar-color;
-  //  border-style: solid;
-  //  border-width: 1px;
-  //  color:black;
-  //  vertical-align: center;
-  //  //center text same value as height
-  //  line-height: 31px;
-  //  span
-  //  {
-  //    // limit width of span
-  //    display: block;
-  //    width: 200px;
-  //    overflow: hidden;
-  //    white-space: nowrap;
-  //    text-overflow: ellipsis;
-  //  }
-  //}
+
 
 }
