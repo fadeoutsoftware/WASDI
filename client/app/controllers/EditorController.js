@@ -78,6 +78,11 @@ var EditorController = (function () {
         //Set default value tree
         this.m_oTree = null;//IMPORTANT NOTE: there's a 'WATCH' for this.m_oTree in TREE DIRECTIVE
 
+
+        if (this.m_oRabbitStompService.isSubscrbed() == false) {
+            this.m_oRabbitStompService.subscribe(this.m_oActiveWorkspace.workspaceId);
+        }
+
         /*Hook to Rabbit WebStomp Service*/
         this.m_oRabbitStompService.setMessageCallback(this.receivedRabbitMessage);
         this.m_oRabbitStompService.setActiveController(this);

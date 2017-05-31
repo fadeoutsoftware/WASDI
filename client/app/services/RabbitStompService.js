@@ -46,6 +46,10 @@ service('RabbitStompService', ['$http',  'ConstantsService','$interval','Process
         this.m_oActiveController = oController;
     }
 
+    this.isSubscrbed = function() {
+        return !utilsIsStrNullOrEmpty(this.m_sWorkspaceId);
+    }
+
 
     this.subscribe = function (workspaceId) {
         this.unsubscribe();
