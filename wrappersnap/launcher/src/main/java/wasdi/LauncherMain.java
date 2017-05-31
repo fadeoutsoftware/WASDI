@@ -360,6 +360,20 @@ public class LauncherMain {
 
                 if (oAlreadyDownloaded == null) {
                     s_oLogger.debug("LauncherMain.Download: File not already downloaded. Download it");
+                    
+                    String sProcessFileName = sFileNameWithoutPath;
+                    if (Utils.isNullOrEmpty(sProcessFileName)) sProcessFileName = "ND";
+                    
+                    oProcessWorkspace.setProductName(sProcessFileName);
+                    //update the process
+                    if (!oProcessWorkspaceRepository.UpdateProcess(oProcessWorkspace))
+                        s_oLogger.debug("LauncherMain.Download: Error during process update with file name");
+
+                    //send update process message
+                    if (!oSendToRabbit.SendUpdateProcessMessage(oProcessWorkspace)) {
+                        s_oLogger.debug("LauncherMain.Download: Error sending rabbitmq message to update process list");
+                    }
+                    
 
                     // No: it isn't: download it
                     sFileName = oDownloadFile.ExecuteDownloadFile(oParameter.getUrl(), oParameter.getDownloadUser(), oParameter.getDownloadPassword(), sDownloadPath);
