@@ -114,7 +114,6 @@ service('RabbitStompService', ['$http',  'ConstantsService','$interval','Process
 
                 // Update the process List
                 oThisService.m_oProcessesLaunchedService.loadProcessesFromServer(sActiveWorkspaceId);
-
             }
         });
     }

@@ -154,6 +154,7 @@
                         <th>{{"ROOT_TABLE_HEAD_NAME"|translate}}</th>
                         <th>{{"ROOT_TABLE_HEAD_ID_USER"|translate}}</th>
                         <th>Real size</th>
+                        <th>Progress</th>
                         <th>{{"ROOT_TABLE_HEAD_TIME"|translate}} </th>
                         <th></th>
                     </tr>
@@ -181,6 +182,9 @@
                         </td>
                         <td>
                             {{oProcess.fileSize}} gb
+                        </td>
+                        <td>
+                            {{oProcess.progressPerc}} %
                         </td>
                         <td>
                             {{oProcess.timeRunning | date:'HH:mm:ss'}}
