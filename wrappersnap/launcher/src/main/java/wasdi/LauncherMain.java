@@ -516,6 +516,9 @@ public class LauncherMain {
                 	s_oLogger.error("Inserted WITHOUT METADATA");
                 }
             }
+            else {
+            	s_oLogger.error("Product Inserted with Metadata");
+            }
         }
         
         if (bAddProductToWS) {
