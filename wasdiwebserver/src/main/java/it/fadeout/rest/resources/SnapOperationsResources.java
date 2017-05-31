@@ -213,17 +213,20 @@ public class SnapOperationsResources {
 
 			Process oProc = Runtime.getRuntime().exec(sShellExString);
 
-			//Update process
-			if (oProc != null)
-			{
-				int iPID = Wasdi.getPIDProcess(oProc);
-				if (!Utils.isNullOrEmpty(sProcessId))
-				{
-					oProcess.setPid(iPID);
-					if (!oRepository.UpdateProcess(oProcess))
-						System.out.println("SnapOperations.ExecuteOperation: pid not saved");
-				}
-			}			
+//			//Update process
+//			if (oProc != null)
+//			{
+//				int iPID = Wasdi.getPIDProcess(oProc);
+//				if (!Utils.isNullOrEmpty(sProcessId))
+//				{
+//					oProcess.setPid(iPID);
+//					System.out.println("SnapOperations.ExecuteOperation: Updating process pid: " + sProcessId);
+//					if (!oRepository.UpdateProcess(oProcess)) {
+//						System.out.println("SnapOperations.ExecuteOperation: pid not saved");
+//					}
+//					
+//				}
+//			}			
 
 		} catch (IOException e) {
 			e.printStackTrace();
