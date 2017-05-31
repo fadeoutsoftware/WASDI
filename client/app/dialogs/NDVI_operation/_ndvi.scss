@@ -7,6 +7,11 @@
     {
       .modal-header
       {
+        .icon-ndvi {
+          content:$wasdi-eye-icon-white-version;
+          width: $wasdi-size-icon-title-dialogs;
+          height: auto;
+        }
       }
 
       .modal-body

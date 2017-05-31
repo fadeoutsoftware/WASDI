@@ -7,6 +7,11 @@
     {
       .modal-header
       {
+        .icon-range-doppler-terrain-correction {
+          content:$wasdi-radar-icon-white-version;
+          width: $wasdi-size-icon-title-dialogs;
+          height: auto;
+        }
       }
 
       .modal-body

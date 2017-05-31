@@ -105,24 +105,6 @@
             </div>
         </nav>
     </div>
-    <!--<div class="col-lg-1 col-md-1 col-sm-1 col-xs-1 logo">qui ci va il logo</div>-->
-
-    <!--<div class="col-lg-10 col-md-10 col-sm-10 col-xs-10 my-nav-bar">-->
-        <!--<ul>-->
-            <!--<li><a class="active" href="#news">Process</a></li>-->
-            <!--<li><a href="#contact">Import</a></li>-->
-            <!--<li><a href="#about">Publish</a></li>-->
-
-        <!--</ul>-->
-    <!--</div>-->
-    <!---->
-    <!--&lt;!&ndash;SEARCH BAR&ndash;&gt;-->
-
-    <!--<div class="col-lg-1 col-md-1 col-sm-1 col-xs-1">-->
-        <!--<div class="form-group">-->
-            <!--<input type="text" class="form-control" id="usr">-->
-        <!--</div>-->
-    <!--</div>-->
 
 
     <div ui-view="maincontent" id="main"></div>
@@ -130,16 +112,13 @@
     <!------------------ STATUS BAR ------------------->
     <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 status-bar " ng-show="m_oController.isVisibleProcessesBar() == true" id="status-bar">
         <div class="row">
-            <!--&lt;!&ndash;<a class="openbtn"  ng-click="m_oController.openNav()">&#9776; </a>&ndash;&gt;-->
             <div class="col-xs-1 col-sm-1 col-md-1 col-lg-1 processes-list">
                 <div ng-show="m_oController.m_oLastProcesses != null && !m_oController.m_bIsOpenNav" >
-                    <!--<i class="fa fa-spinner fa-pulse fa-fw"></i>-->
                     <span><smallinvaderfixed></smallinvaderfixed></span>
                 </div>
             </div>
             <div class="col-lg-8 col-md-8 col-sm-8 col-xs-8 processes-list" >
                 <div ng-show="m_oController.m_oLastProcesses != null && !m_oController.m_bIsOpenNav" >
-                    <!--<i class="fa fa-spinner fa-pulse fa-fw"></i>-->
                     <span class="label label-default">{{"ROOT_LABEL_OPERATION_DATA"|translate}}</span><div class="single-process" >{{m_oController.m_oLastProcesses.operationDate}}</div>
                     <span class="label label-default">{{"ROOT_LABEL_TYPE_OF_OPERATION"|translate}}</span> <div class="single-process">{{m_oController.m_oLastProcesses.operationType}}</div>
                     <span class="label label-default">{{"ROOT_LABEL_NAME"|translate}}</span> <div class="single-process">{{m_oController.m_oLastProcesses.productName}}</div>
@@ -154,8 +133,6 @@
                     {{"ROOT_LABEL_NUMBER_OF_PROCESSES"|translate}} <span class="badge">{{m_oController.m_iNumberOfProcesses}}</span>
                 </div>
 
-                <!--<div class="my-button openbtn" ng-click="m_oController.openNav()" ng-hide="m_oController.m_bIsOpenStatusBar"><i class="fa fa-arrow-up" aria-hidden="true"></i></div>-->
-                <!--<div class="my-button closebtn" ng-click="m_oController.closeNav()" ng-show="m_oController.m_bIsOpenStatusBar"><i class="fa fa-arrow-down" aria-hidden="true"></i> </div>-->
             </div>
             <div class="col-xs-1 col-sm-1 col-md-1 col-lg-1">
                 <div class="my-button openbtn" ng-click="m_oController.openNav()" ng-hide="m_oController.m_bIsOpenStatusBar"><i class="fa fa-arrow-up" aria-hidden="true"></i></div>
@@ -185,7 +162,6 @@
 
                     <tr ng-repeat="oProcess in m_oController.m_aoProcessesRunning track by $index">
                         <td>
-                            <!--<i class="fa fa-spinner fa-pulse fa-fw"></i>-->
                             <invaderfixed></invaderfixed>
                         </td>
                         <td>
@@ -207,7 +183,6 @@
                             {{oProcess.timeRunning | date:'HH:mm:ss'}}
                         </td>
                         <td >
-                            <!--ng-click="m_oController.m_oProcessesLaunchedService.removeProcessInServer(oProcess.processObjId,m_oController.m_sWorkspace.workspaceId,oProcess)"-->
                             <div class="my-button" ng-click="m_oController.deleteProcess(oProcess)">
                                 <i class="fa fa-times-circle" aria-hidden="true" data-toggle="tooltip" title="Stop processes"  data-placement="bottom"></i>
                             </div>
@@ -218,7 +193,6 @@
                         <td>
                             <span class="label label-warning" ng-show="oLog.status === 'log'">Log</span>
                             <span class="label label-danger" ng-show="oLog.status === 'stopped'">Stopped</span>
-                            <!--<invaderfixed></invaderfixed>-->
                         </td>
                         <td>
                             {{oLog.operationDate}}
@@ -239,9 +213,6 @@
                             {{oLog.timeRunning | date:'HH:mm:ss'}}
                         </td>
                         <td >
-                            <!--<div class="my-button" aria-hidden="true" data-toggle="tooltip" title="Hide log"  data-placement="bottom">-->
-                                <!--<i class="fa fa-times-circle" aria-hidden="true"></i>-->
-                            <!--</div>-->
 
                         </td>
                     </tr>
@@ -249,16 +220,13 @@
                     <tr ng-repeat="error in m_oController.m_oRabbitStompService.m_aoErrorsList ">
                         <td > <span class="label label-danger" >Error</span> </td>
                         <td colspan="7">{{error.text}}</td>
-                        <!--<pre>{{m_oController.m_oRabbitStompService.m_aoErrorsList|json}}</pre>-->
                     </tr>
                     </tbody>
                 </table>
 
             </div>
         </div>
-        <!--<a href="javascript:void(0)" class="closebtn"  ng-click="m_oController.closeNav()">&times;</a>-->
-        <!--<div class="my-button openbtn" ng-click="m_oController.openNav()" ng-hide="m_oController.m_bIsOpenStatusBar"><i class="fa fa-arrow-up" aria-hidden="true"></i></div>-->
-        <!--<div class="my-button closebtn" ng-click="m_oController.closeNav()" ng-show="m_oController.m_bIsOpenStatusBar"><i class="fa fa-arrow-down" aria-hidden="true"></i> </div>-->
+
 
     </div>
 

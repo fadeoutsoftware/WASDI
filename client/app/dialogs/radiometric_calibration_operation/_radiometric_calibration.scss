@@ -8,6 +8,11 @@
       //HEADER
       .modal-header
       {
+        .icon-radiometric-calibration {
+          content:$wasdi-radar-icon-white-version;
+          width: $wasdi-size-icon-title-dialogs;
+          height: auto;
+        }
 
       }
       //BODY

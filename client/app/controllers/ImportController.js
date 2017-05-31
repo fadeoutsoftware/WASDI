@@ -50,8 +50,8 @@ var ImportController = (function() {
         this.m_aoProductsList = []; /* LAYERS LIST == PRODUCTS LIST */
         this.m_aoMissions;
         /* number of possible products per pages and number of products per pages selected */
-        this.m_iProductsPerPageSelected = 5;//default value
-        this.m_iProductsPerPage=[5,10,15,20,25];
+        this.m_iProductsPerPageSelected = 10;//default value
+        this.m_iProductsPerPage=[10,15,20,25,50];
         this.m_aListOfProvider = []; //LIST OF PROVIDERS
         //Page
         this.m_iCurrentPage = 1;
@@ -442,6 +442,8 @@ var ImportController = (function() {
         this.m_oResultsOfSearchService.setIngestionPeriodTo(this.m_oModel.ingestionTo);
         this.m_oResultsOfSearchService.setMissions(this.m_aoMissions);
         this.m_oResultsOfSearchService.setActiveWorkspace(this.m_oActiveWorkspace);
+        // this.m_oResultsOfSearchService.setProviders(this.m_aListOfProvider);
+
         //this.m_oResultsOfSearchService.setMissions(this.m_aoMissions);
         this.m_oSearchService.getProductsCount().then(
             function(result)
@@ -449,7 +451,19 @@ var ImportController = (function() {
                 if(result)
                 {
                     if(result.data)
+                    {
                         oController.m_iTotalOfProducts = result.data;
+                        oController.m_oResultsOfSearchService.setTotalOfProducts(oController.m_iTotalOfProducts);
+
+                        //calc number of pages
+                        var remainder = oController.m_iTotalOfProducts % oController.m_iProductsPerPageSelected;
+                        oController.m_iTotalPages =  Math.floor(oController.m_iTotalOfProducts / oController.m_iProductsPerPageSelected);
+                        if(remainder !== 0)
+                            oController.m_iTotalPages += 1;
+
+
+                        oController.m_oResultsOfSearchService.setTotalPages(oController.m_iTotalPages);
+                    }
                 }
 
             }, function errorCallback(response) {
@@ -478,14 +492,7 @@ var ImportController = (function() {
                     if (!utilsIsObjectNullOrUndefined(sResults.data) && sResults.data != "" ) {
 
                         var aoData = sResults.data;
-                        //TODO WHERE IS TOTAL OF PRODUCTS?
-                        // oController.m_iTotalOfProducts = aoData.length;//aoData.feed['opensearch:totalResults'];
 
-                        //save open search params in service
-                        oController.m_oResultsOfSearchService.setTotalOfProducts(oController.m_iTotalOfProducts);
-                        oController.countPages();
-                        //save open search params in service
-                        oController.m_oResultsOfSearchService.setTotalPages(oController.m_iTotalPages);
                         oController.generateLayersList(aoData)//.feed;
                     }
                     else
@@ -564,7 +571,7 @@ var ImportController = (function() {
     {
         iNewPage = parseInt(this.m_iCurrentPage);
 
-        if(!utilsIsObjectNullOrUndefined(iNewPage) && isNaN(iNewPage) == false && utilsIsInteger(iNewPage) && iNewPage >= 0 && iNewPage <= this.m_iTotalPages)
+        if(!utilsIsObjectNullOrUndefined(iNewPage) && isNaN(iNewPage) == false && utilsIsInteger(iNewPage) && iNewPage > 1 && iNewPage <= this.m_iTotalPages)
         {
             this.m_iCurrentPage = iNewPage;
             this.changePage(this.m_iCurrentPage-1);
@@ -1216,6 +1223,7 @@ var ImportController = (function() {
         oController.m_oModel.sensingPeriodTo = oController.m_oResultsOfSearchService.getSensingPeriodTo();
         oController.m_oModel.ingestionFrom = oController.m_oResultsOfSearchService.getIngestionPeriodFrom();
         oController.m_oModel.ingestionTo = oController.m_oResultsOfSearchService.getIngestionPeriodTo();
+        // oController.m_aListOfProvider = oController.m_oResultsOfSearchService.getProviders();
 
         /* add rectangle in maps */
 
@@ -1240,13 +1248,13 @@ var ImportController = (function() {
     {
         this.m_iTotalOfProducts = 0;
         this.m_iCurrentPage = 1;
-        this.m_iProductsPerPageSelected = 5;
+        this.m_iProductsPerPageSelected = 10;
         this.m_iTotalPages = 1;
         this.m_bIsVisibleListOfLayers = false;
 
         this.m_oResultsOfSearchService.setIsVisibleListOfProducts(false);
         this.m_oResultsOfSearchService.setTotalPages(1);
-        this.m_oResultsOfSearchService.setProductsPerPageSelected(5);
+        this.m_oResultsOfSearchService.setProductsPerPageSelected(10);
         this.m_oResultsOfSearchService.setCurrentPage(1);
         this.m_oResultsOfSearchService.setTotalOfProducts(0);
 

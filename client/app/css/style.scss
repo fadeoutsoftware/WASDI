@@ -273,6 +273,7 @@ h4
       /*css used in operation dialog*/
       //overflow-y: auto;
       //max-height:$wasdi-max-heigth-body;
+      overflow-x: auto;
       form
       {
         fieldset
@@ -380,4 +381,32 @@ h4
   /* Required for text-overflow to do anything */
   white-space: nowrap;
   overflow: hidden;
+}
+
+
+/*CONTEXT MENU JSTREE ICONS */
+
+.radar-icon-context-menu-jstree
+{
+  content: $wasdi-radar-icon-black-version;
+  width: $wasdi-size-icon-context-menu-jstree ;
+  height: auto ;
+}
+.optical-icon-context-menu-jstree
+{
+  content: $wasdi-eye-icon-black-version;
+  width: $wasdi-size-icon-context-menu-jstree ;
+  height: auto ;
+}
+.delete-icon-context-menu-jstree
+{
+  content: $wasdi-garbage-icon-black-version;
+  width: $wasdi-size-icon-context-menu-jstree ;
+  height: auto ;
+}
+.info-icon-context-menu-jstree
+{
+  content: $wasdi-info-icon-black-version;
+  width: $wasdi-size-icon-context-menu-jstree ;
+  height: auto ;
 }

@@ -770,7 +770,7 @@ var EditorController = (function () {
                                     "Radar": {
                                         "label": "Radar",
                                         "action": false,
-
+                                        "icon":"radar-icon-context-menu-jstree",
                                         "submenu":
                                             {
                                                 //APPLY ORBIT
@@ -876,6 +876,7 @@ var EditorController = (function () {
                                     "Optical": {
                                         "label": "Optical",
                                         "action": false,
+                                        "icon":"optical-icon-context-menu-jstree",
                                         "submenu":
                                             {
                                                 "NDVI": {
@@ -900,7 +901,7 @@ var EditorController = (function () {
                                     },
                                     "Properties": {
                                         "label": "Properties ",
-                                        "icon":"fa fa-info",
+                                        "icon":"info-icon-context-menu-jstree",
                                         "separator_before":true,
                                         "action": function (obj) {
                                             //$node.original.fileName;
@@ -922,7 +923,7 @@ var EditorController = (function () {
                                     },
                                     "DeleteProduct": {
                                         "label": "Delete Product",
-                                        "icon":"fa fa-trash",
+                                        "icon":"delete-icon-context-menu-jstree",
 
                                         "action": function (obj) {
 
@@ -976,28 +977,6 @@ var EditorController = (function () {
                                     //     }
                                     // },
 
-                                    // "Rename": {
-                                    //     "label": "Rename",
-                                    //     "action": function (obj) {
-                                    //         //$node.original.fileName;
-                                    //         var oCallback = function(value){
-                                    //             if((utilsIsObjectNullOrUndefined(value.renameProduct) == true) ||(utilsIsStrNullOrEmpty(value.renameProduct) == true))
-                                    //                 return false;
-                                    //             var bResult = oController.renameNodeInTree($node.original.fileName,value.renameProduct);
-                                    //             if(bResult == false)
-                                    //                 console.log("Error: it's impossible rename the product");
-                                    //         }
-                                    //
-                                    //         utilsVexDialogChangeNameInTree("Insert new name",oCallback,$node.original.fileName);
-                                    //         // var bResult = oController.renameNodeInTree($node.original.fileName,"test");
-                                    //         // if(bResult == false)
-                                    //         //     console.log("Error: it's impossible rename the product");
-                                    //     }
-                                    // },
-                                    //SUBMENU RADAR
-
-
-                                    //SUBMENU OPTICAL
 
 
                                 };
@@ -1022,6 +1001,7 @@ var EditorController = (function () {
                 oNode.text = productList[iIndexProduct].name;//LABEL NODE
 
             oNode.fileName = productList[iIndexProduct].fileName;
+            oNode.id = productList[iIndexProduct].fileName;
 
             var oController=this;
 
@@ -1762,7 +1742,7 @@ var EditorController = (function () {
                 if(utilsIsObjectNullOrUndefined(result)===true)
                     return false;
                 //TODO ADD FILENAME = RESULT
-                oController.m_oScope.Result = result;
+                // oController.m_oScope.Result = result;
             });
         });
 
