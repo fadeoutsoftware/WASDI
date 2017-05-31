@@ -6,7 +6,8 @@
 angular.module('wasdi.ProcessesLaunchedService', ['wasdi.ProcessesLaunchedService']).
 service('ProcessesLaunchedService', ['ConstantsService','$rootScope','$http', function (oConstantsService,$rootScope,$http) {
     this.m_aoProcessesRunning = [];
-    this.m_aoProcessesStopped = []
+    this.m_aoProcessesStopped = [];
+
     /*
     * this.m_aoProcessesRunning  is a list of object
     * {processName: , nodeId:,typeOfProcess: }
@@ -23,22 +24,20 @@ service('ProcessesLaunchedService', ['ConstantsService','$rootScope','$http', fu
     this.loadProcessesFromServer = function(sWorkSpaceId)
     {
         var oService = this;
-        this.m_oHttp.get(this.APIURL + '/process/byws?sWorkspaceId='+sWorkSpaceId)// /ws/processbyws = /process/byws
-            .success(function (data, status)
+
+        this.m_oHttp.get(this.APIURL + '/process/byws?sWorkspaceId='+sWorkSpaceId).success(function (data, status)
             {
                 if(!utilsIsObjectNullOrUndefined(data))
                 {
-                    console.log("PROCESSES:")
+                    console.log("ProcessLaunchedService.loadProcessesFromServer PROCESSES LOG:")
                     data.forEach(function (i) {
                         console.log(i.operationType + ": " + i.status + " " + i.progressPerc + "%")
-                    })
-
+                    });
 
                     oService.m_aoProcessesRunning = data;
-                    oService.updateProcessesBar();//Aggiungere update della lista dei processi
+                    oService.updateProcessesBar();
                 }
-            })
-            .error(function (data,status)
+            }).error(function (data,status)
             {
                 utilsVexDialogAlertTop("Error in load Processes");
             });
@@ -46,215 +45,37 @@ service('ProcessesLaunchedService', ['ConstantsService','$rootScope','$http', fu
 
     this.removeProcessInServer = function(sPidInput,sWorkSpaceId,oProcess)
     {
-        if(utilsIsObjectNullOrUndefined(sPidInput)===true)
-            return false;
+        if(utilsIsObjectNullOrUndefined(sPidInput)===true) return false;
 
         var oService = this;
-        this.m_oHttp.get(this.APIURL + '/process/delete?sProcessObjId=' + sPidInput)// /ws/processbyws = /process/byws
-            .success(function (data, status)
+        this.m_oHttp.get(this.APIURL + '/process/delete?sProcessObjId=' + sPidInput).success(function (data, status)
             {
-
                 if(utilsIsObjectNullOrUndefined(sWorkSpaceId) === false )
                 {
                     oProcess.status = "stopped";
                     oService.m_aoProcessesStopped.push(oProcess);
                     oService.loadProcessesFromServer(sWorkSpaceId);
-
                 }
-
-                // oController.loadProcessesFromServer()
-            })
-            .error(function (data,status)
+            }).error(function (data,status)
             {
                 utilsVexDialogAlertTop("Error while kill the process ");
             });
         return true;
     }
-    /****************************************************/
 
-    ///*LOCAL STORAGE METHODS */
-    //this.getProcessesRunningListByLocalStorage = function(sWorkSpaceId,sUserId)
-    //{
-    //    if(utilsIsStrNullOrEmpty(sWorkSpaceId))
-    //        return null;
-    //    if(utilsIsStrNullOrEmpty(sUserId))
-    //        return null;
-    //    return JSON.parse(this.m_oConstantsService.getItemInLocalStorage("m_aoProcessesRunning"+sWorkSpaceId+sUserId));
-    //}
-    //
-    //this.setProcessesRunningListByLocalStorage  = function(oValue,sWorkSpaceId,sUserId)
-    //{
-    //    if(utilsIsObjectNullOrUndefined(oValue))
-    //        return false;
-    //    if(utilsIsStrNullOrEmpty(sWorkSpaceId))
-    //        return false;
-    //    if(utilsIsStrNullOrEmpty(sUserId))
-    //        return false;
-    //    var sValue = JSON.stringify(oValue);
-    //    this.m_oConstantsService.setItemLocalStorage("m_aoProcessesRunning"+sWorkSpaceId+sUserId,sValue);
-    //
-    //    return true;
-    //
-    //}
-    ///****************************************************/
-    //
-    //
-    //this.loadProcessesByLocalStorage = function(sWorkSpaceId,sUserId)
-    //{
-    //    if(utilsIsStrNullOrEmpty(sWorkSpaceId))
-    //        return false;
-    //    if(utilsIsStrNullOrEmpty(sUserId))
-    //        return false;
-    //
-    //    this.m_aoProcessesRunning =  this.getProcessesRunningListByLocalStorage (sWorkSpaceId,sUserId);
-    //    if(utilsIsObjectNullOrUndefined(this.m_aoProcessesRunning))
-    //        this.m_aoProcessesRunning = [];
-    //    return true;
-    //}
-    //
-    //
-    ////GET Processes by local storage
     this.getProcesses = function()
     {
         return this.m_aoProcessesRunning;
     }
-    //
-    //this.addProcessesByLocalStorage = function(sProcessName,iIdBandNodeInTree,sTypeOfProcess,sWorkSpaceId,sUserId)
-    //{
-    //    if(utilsIsStrNullOrEmpty(sProcessName))
-    //        return false;
-    //    if(utilsIsStrNullOrEmpty(sTypeOfProcess))
-    //        return false;
-    //
-    //    var sProcess = {"processName":sProcessName,"nodeId":iIdBandNodeInTree,"typeOfProcess":sTypeOfProcess};
-    //
-    //    if(utilsIsObjectNullOrUndefined(sProcess))
-    //        return false;
-    //    if(utilsIsStrNullOrEmpty(sWorkSpaceId))
-    //        return false;
-    //    if(utilsIsStrNullOrEmpty(sUserId))
-    //        return false;
-    //    var asProcess = this.getProcessesByLocalStorage(sWorkSpaceId,sUserId);
-    //    if(utilsIsObjectNullOrUndefined(asProcess))
-    //        return false;
-    //    asProcess.push(sProcess);
-    //    this.setProcessesRunningListByLocalStorage(asProcess,sWorkSpaceId,sUserId);
-    //    this.loadProcessesByLocalStorage(sWorkSpaceId,sUserId);
-    //    this.updateProcessesBar();
-    //    return true;
-    //}
-    //
+
+
     this.updateProcessesBar = function()
     {
         //send a message to RootController for update the bar of processes
         $rootScope.$broadcast('m_aoProcessesRunning:updated',true);
     }
-    //
-    //this.isEmptyProcessesRunningList = function()
-    //{
-    //    if(utilsIsObjectNullOrUndefined( this.m_aoProcessesRunning) || this.m_aoProcessesRunning.length == 0)
-    //        return true;
-    //    return false;
-    //}
-    //
-    //
-    //
-    //this.indexProcess = function(sProcess)
-    //{
-    //    if(utilsIsObjectNullOrUndefined(sProcess))
-    //        return -1;
-    //
-    //    var iNumberOfProcesses = this.m_aoProcessesRunning.length;
-    //    for(var iIndex=0; iIndex < iNumberOfProcesses; iIndex++)
-    //    {
-    //        if(this.m_aoProcessesRunning[iIndex] == sProcess)
-    //            return iIndex
-    //
-    //    }
-    //
-    //    return -1;
-    //}
-    //
-    //
-    //this.indexProcessFindByProperty = function(oProperty,oValue)
-    //{
-    //    if(utilsIsObjectNullOrUndefined(oProperty) ||utilsIsObjectNullOrUndefined(oProperty))
-    //        return -1;
-    //
-    //    var iNumberOfProcesses = this.m_aoProcessesRunning.length;
-    //    for(var iIndex=0; iIndex < iNumberOfProcesses; iIndex++)
-    //    {
-    //        if(this.m_aoProcessesRunning[iIndex][oProperty] == oValue)
-    //            return iIndex
-    //
-    //    }
-    //    return -1;
-    //}
-    //
-    //this.indexProcessFindByPropertySubstringVersion = function(oProperty,oValue)
-    //{
-    //    if(utilsIsObjectNullOrUndefined(oProperty) ||utilsIsObjectNullOrUndefined(oProperty))
-    //        return -1;
-    //
-    //    var iNumberOfProcesses = this.m_aoProcessesRunning.length;
-    //    for(var iIndex=0; iIndex < iNumberOfProcesses; iIndex++)
-    //    {
-    //        if(utilsIsSubstring(oValue,this.m_aoProcessesRunning[iIndex][oProperty]) == true)
-    //            return iIndex
-    //
-    //    }
-    //    return -1;
-    //}
-    //
-    //this.removeProcess = function(sProcess,sWorkSpaceId,sUserId)
-    //{
-    //    if(utilsIsObjectNullOrUndefined(sProcess))
-    //        return false;
-    //    if(utilsIsStrNullOrEmpty(sWorkSpaceId))
-    //        return false;
-    //    if(utilsIsStrNullOrEmpty(sUserId))
-    //        return false;
-    //
-    //    var iIndexProcess =  this.indexProcess(sProcess);
-    //
-    //    this.m_aoProcessesRunning.splice(iIndexProcess,1);
-    //    this.setProcessesRunningListByLocalStorage(this.m_aoProcessesRunning,sWorkSpaceId,sUserId);
-    //}
-    //
-    //this.removeProcessByProperty = function(oProperty,oValue,sWorkSpaceId,sUserId)
-    //{
-    //    if(utilsIsObjectNullOrUndefined(oProperty) )
-    //        return false;
-    //    if(utilsIsStrNullOrEmpty(sWorkSpaceId))
-    //        return false;
-    //    if(utilsIsStrNullOrEmpty(sUserId))
-    //        return false;
-    //
-    //    var iIndexProcess =  this.indexProcessFindByProperty(oProperty,oValue);
-    //    if(iIndexProcess == -1)
-    //        return false;
-    //    this.m_aoProcessesRunning.splice(iIndexProcess,1);
-    //    this.setProcessesRunningListByLocalStorage(this.m_aoProcessesRunning,sWorkSpaceId,sUserId);
-    //    return true;
-    //}
-    //
-    //this.removeProcessByPropertySubstringVersion = function(oProperty,oValue,sWorkSpaceId,sUserId)
-    //{
-    //    if(utilsIsObjectNullOrUndefined(oProperty) )
-    //        return false;
-    //    if(utilsIsStrNullOrEmpty(sWorkSpaceId))
-    //        return false;
-    //    if(utilsIsStrNullOrEmpty(sUserId))
-    //        return false;
-    //    var iIndexProcess =  this.indexProcessFindByPropertySubstringVersion(oProperty,oValue);
-    //    if(iIndexProcess == -1)
-    //        return false;
-    //    this.m_aoProcessesRunning.splice(iIndexProcess,1);
-    //    this.setProcessesRunningListByLocalStorage(this.m_aoProcessesRunning,sWorkSpaceId,sUserId);
-    //    this.updateProcessesBar();
-    //    return true;
-    //}
-    //
+
+
     this.thereAreSomePublishBandProcess = function()
     {
         if(! (utilsIsObjectNullOrUndefined(this.m_aoProcessesRunning) || this.m_aoProcessesRunning.length == 0))
@@ -271,10 +92,9 @@ service('ProcessesLaunchedService', ['ConstantsService','$rootScope','$http', fu
 
     this.thereIsPublishBandProcessOfTheProduct = function(sProductId)
     {
-        if(utilsIsString(sProductId) == false)
-            return false;
-        if(utilsIsStrNullOrEmpty(sProductId) == true)
-            return false;
+        if(utilsIsString(sProductId) == false) return false;
+
+        if(utilsIsStrNullOrEmpty(sProductId) == true) return false;
 
         if(! (utilsIsObjectNullOrUndefined(this.m_aoProcessesRunning) || this.m_aoProcessesRunning.length == 0))
         {
@@ -287,12 +107,10 @@ service('ProcessesLaunchedService', ['ConstantsService','$rootScope','$http', fu
                     {
                         var sProductName = asProductNameSplit[0];
                         var oId = sProductName;
-                        if(utilsIsSubstring(sProductId,oId) == true)
-                            return true;
+
+                        if(utilsIsSubstring(sProductId,oId) == true) return true;
                     }
                 }
-                //if(this.m_aoProcessesRunning[iIndex].operationType == this.getTypeOfProcessPublishingBand())
-                //    return true;
             }
             return false;
         }
@@ -355,15 +173,5 @@ service('ProcessesLaunchedService', ['ConstantsService','$rootScope','$http', fu
         }
         return false;
     }
-    //this.addProcessToList= function (sProcessName,sTypeOfProcess,sTimeStamp)
-    //{
-    //    if(utilsIsObjectNullOrUndefined(sProcessName))
-    //        return false;
-    //    if(utilsIsObjectNullOrUndefined(sTypeOfProcess))
-    //        return false;
-    //    if(utilsIsObjectNullOrUndefined(sTimeStamp))
-    //        return false;
-    //    var oProcess = {"processName":sProcessName,"timeStamp":iIdBandNodeInTree,"typeOfProcess":sTypeOfProcess};
-    //    this.m_aoProcessesRunning.push(oProcess);
-    //}
+
 }]);

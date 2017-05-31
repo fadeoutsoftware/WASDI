@@ -13,7 +13,6 @@ var RootController = (function() {
         this.m_oWorkspaceService = oWorkspaceService;
         this.m_oScope.m_oController=this;
         this.m_aoProcessesRunning=[];
-        this.m_aoLogProcesses = []
         this.m_iNumberOfProcesses = 0;
         this.m_oLastProcesses = null;
         this.m_bIsOpenNav = false;
@@ -72,73 +71,72 @@ var RootController = (function() {
             // you could inspect the data to see
             if(data == true)
             {
-                //$scope.m_oController.m_aoProcessesRunning = $scope.m_oController.m_oProcessesLaunchedService.getProcesses();
-                //if(utilsIsObjectNullOrUndefined($scope.m_oController.m_aoProcessesRunning) == false)
-                //    $scope.m_oController.m_iNumberOfProcesses = $scope.m_oController.m_aoProcessesRunning.length;
-
                 var aoProcessesRunning = $scope.m_oController.m_oProcessesLaunchedService.getProcesses();
-                var iNumberOfProcessesRunning = aoProcessesRunning.length;
-                var aoOldProcessesRunning = $scope.m_oController.m_aoProcessesRunning;
-                var iNumberOfOldProcessesRunning = aoOldProcessesRunning.length;
+                var iTotalProcessesNumber = aoProcessesRunning.length;
 
-                //number of processes
-                if(utilsIsObjectNullOrUndefined($scope.m_oController.m_aoProcessesRunning) == false) {
-                    $scope.m_oController.m_iNumberOfProcesses = iNumberOfProcessesRunning;
+                // get the number of active processes
+                if(utilsIsObjectNullOrUndefined(aoProcessesRunning) == false) {
+
+                    var iActiveCount = 0;
+
+                    aoProcessesRunning.forEach(function (oProcess) {
+                        if (oProcess.status == "RUNNING" || oProcess.status == "CREATED") {
+                            iActiveCount++;
+                        }
+                    });
+
+                    $scope.m_oController.m_iNumberOfProcesses = iActiveCount;
                 }
+
+                $scope.m_oController.m_oLastProcesses = null;
 
                 //FIND LAST PROCESSES
                 if(utilsIsObjectNullOrUndefined(aoProcessesRunning) == false) {
 
                     if (aoProcessesRunning.length>0) {
-                        if (aoProcessesRunning[iNumberOfProcessesRunning-1].status === "CREATED" || aoProcessesRunning[iNumberOfProcessesRunning-1].status === "RUNNING") {
-                            $scope.m_oController.m_oLastProcesses = aoProcessesRunning[iNumberOfProcessesRunning-1];
+                        if (aoProcessesRunning[iTotalProcessesNumber-1].status === "CREATED" || aoProcessesRunning[iTotalProcessesNumber-1].status === "RUNNING") {
+                            $scope.m_oController.m_oLastProcesses = aoProcessesRunning[iTotalProcessesNumber-1];
                         }
                     }
                 }
-                else
-                    $scope.m_oController.m_oLastProcesses = null;
 
-
-                //ADD ONLY NEW PROCESS IN m_oController.m_aoProcessesRunning
-                for( var  iIndexNewProcess= 0; iIndexNewProcess < iNumberOfProcessesRunning; iIndexNewProcess++)
+                // Initialize the time counter for new processes
+                for( var  iIndexNewProcess= 0; iIndexNewProcess < iTotalProcessesNumber; iIndexNewProcess++)
                 {
-                    for( var iIndexOldProcess = 0; iIndexOldProcess < iNumberOfOldProcessesRunning; iIndexOldProcess++)
+                    if (aoProcessesRunning[iIndexNewProcess].status == "CREATED" || aoProcessesRunning[iIndexNewProcess].status == "RUNNING" )
                     {
-                        if(aoProcessesRunning[iIndexNewProcess].operationType == aoOldProcessesRunning[iIndexOldProcess].operationType &&
-                            aoProcessesRunning[iIndexNewProcess].productName == aoOldProcessesRunning[iIndexOldProcess].productName)
-                        {
-                            break;
+                        if (utilsIsObjectNullOrUndefined(aoProcessesRunning[iIndexNewProcess].timeRunning)) {
+                            // add start time (useful if the page was reloaded)
+
+                            //time by server
+                            var sStartTime = new Date(aoProcessesRunning[iIndexNewProcess].operationDate);
+                            //pick time
+                            var oNow = new Date();
+                            var result =  Math.abs(oNow-sStartTime);
+                            //approximate result
+                            var seconds = Math.ceil(result / 1000);
+
+                            if(utilsIsObjectNullOrUndefined(seconds) || seconds < 0) seconds = 0;
+
+                            var oDate = new Date(1970, 0, 1);
+                            oDate.setSeconds(0 + seconds);
+                            //add running time
+                            aoProcessesRunning[iIndexNewProcess].timeRunning = oDate;
+
+                            //it convert mb in gb
+                            var nSize = aoProcessesRunning[iIndexNewProcess].fileSize / 1024;
+                            nSize = Math.round(nSize * 100)/100;
+                            aoProcessesRunning[iIndexNewProcess].fileSize = nSize;
                         }
                     }
-                    //if the new processes there isn't in m_oController.m_aoProcessesRunning list add it!
-                    if(!(iIndexOldProcess < iNumberOfOldProcessesRunning))
-                    {
-
-                        // add start time (useful if the page was reloaded)
-                        var sStartTime = new Date(aoProcessesRunning[iIndexNewProcess].operationDate);//time by server
-                        var test = new Date();//pick time
-                        var result =  Math.abs(test-sStartTime);
-                        var seconds = 0
-                        seconds = Math.ceil(result / 1000);//approximate result
-                        //var seconds = x % 60
-
-                        if(utilsIsObjectNullOrUndefined(seconds) || seconds < 0)
-                            seconds = 0;
-                        var oDate = new Date(1970, 0, 1);
-                        oDate.setSeconds(0 + seconds);
-                        //add running time
-                        aoProcessesRunning[iIndexNewProcess].timeRunning = oDate;
-
-                        //it convert mb in gb
-                        var nSize = aoProcessesRunning[iIndexNewProcess].fileSize / 1024;
-                        nSize = Math.round(nSize * 100)/100;
-                        aoProcessesRunning[iIndexNewProcess].fileSize = nSize;
-                        $scope.m_oController.m_aoProcessesRunning.push(aoProcessesRunning[iIndexNewProcess])
+                    else {
+                        if (utilsIsObjectNullOrUndefined(aoProcessesRunning[iIndexNewProcess].timeRunning)) {
+                            aoProcessesRunning[iIndexNewProcess].timeRunning = 0;
+                        }
                     }
                 }
 
-                //$scope.m_oController.m_aoProcessesRunning = aoProcessesRunning ;
-
+                $scope.m_oController.m_aoProcessesRunning = aoProcessesRunning;
             }
 
         });
@@ -149,8 +147,8 @@ var RootController = (function() {
         $scope.$watch('m_oController.m_oConstantsService.m_oActiveWorkspace', function(newValue, oldValue, scope) {
             //utilsVexDialogAlertTop("il watch funziona");
             $scope.m_oController.m_aoProcessesRunning = [];
-            $scope.m_oController.m_aoLogProcesses = [];
         });
+
         /*COUNTDOWN METHOD*/
 
         //this.time = 0;
