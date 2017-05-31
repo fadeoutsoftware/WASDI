@@ -90,10 +90,7 @@ public class ProcessWorkspaceResource {
 
 		try {
 			// Domain Check
-			if (oUser == null) {
-				return Response.status(401).build();
-			}
-			if (Utils.isNullOrEmpty(oUser.getUserId())) {
+			if (oUser == null || Utils.isNullOrEmpty(oUser.getUserId())) {
 				return Response.status(401).build();
 			}
 
@@ -113,24 +110,22 @@ public class ProcessWorkspaceResource {
 					System.out.println("ProcessWorkspaceResource.DeleteProcess: shell exec " + sShellExString);
 					
 					Process oProc = Runtime.getRuntime().exec(sShellExString);
+					
+					System.out.println("ProcessWorkspaceResource.DeleteProcess: kill result: " + oProc.waitFor());
 
-					//delete process on database
-					if (oRepository.DeleteProcessWorkspaceByPid(iPid))
-					{
-						return Response.ok().build();
-					}
-					else {
-						return Response.status(400).build();
-					}					
-				}
-				else {
-					return Response.status(400).build();
+				} else {
+					
+					System.out.println("ProcessWorkspaceResource. Process pid not in data");
+					
 				}
 				
+				return Response.ok().build();
 				
-			}
-			else {
-				return Response.status(400).build();
+			} else {
+				
+				System.out.println("ProcessWorkspaceResource. Process not found in DB");
+				return Response.status(404).build();
+				
 			}
 						
 		}

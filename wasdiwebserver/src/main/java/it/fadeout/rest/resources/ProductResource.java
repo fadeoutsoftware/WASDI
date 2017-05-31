@@ -15,6 +15,8 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 
+import org.apache.commons.io.FileUtils;
+
 import it.fadeout.Wasdi;
 import wasdi.shared.business.DownloadedFile;
 import wasdi.shared.business.ProductWorkspace;
@@ -315,9 +317,17 @@ public class ProductResource {
 
 					@Override
 					public boolean accept(File dir, String name) {
-						// TODO Auto-generated method stub
-						if (name.toLowerCase().equals(sProductName.toLowerCase()))
+
+						if (name.equalsIgnoreCase(sProductName)) {
 							return true;
+						}
+						
+						if (sProductName.endsWith(".dim")) {
+							String baseName = sProductName.substring(0, sProductName.length()-4);
+							if (name.equalsIgnoreCase(baseName + ".data")) {
+								return true;
+							}
+						}
 
 						if (aoLocalPublishedBands != null)
 						{
@@ -331,19 +341,24 @@ public class ProductResource {
 					}
 				};
 				File[] aoFiles = oFolder.listFiles(oFilter);
-				if (aoFiles != null)
-				{
+				if (aoFiles != null) {
 					System.out.println("ProductResource.DeleteProduct: Number of files to delete " + aoFiles.length);
 					for (File oFile : aoFiles) {
-						try
-						{
-							if (!oFile.isDirectory())
-								oFile.delete();
+						
+						System.out.print("ProductResource.DeleteProduct: deleting file product " + oFile.getAbsolutePath() + "...");
+						if (!FileUtils.deleteQuietly(oFile)) {
+							System.out.println("    ERROR");
+						} else {
+							System.out.println("    OK");
 						}
-						catch(Exception oEx)
-						{
-							System.out.println("ProductResource.DeleteProduct: error deleting file product " + oEx.toString());
-						}
+						
+//						try {
+//							if (!oFile.isDirectory()) {
+//								oFile.delete();
+//							} 
+//						} catch(Exception oEx) {
+//							System.out.println("ProductResource.DeleteProduct: error deleting file product " + oEx.toString());
+//						}
 
 					}
 				}
