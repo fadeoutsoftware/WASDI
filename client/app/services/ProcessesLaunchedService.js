@@ -22,14 +22,14 @@ service('ProcessesLaunchedService', ['ConstantsService','$rootScope','$http', fu
 
     this.loadProcessesFromServer = function(sWorkSpaceId)
     {
-        var oController = this;
+        var oService = this;
         this.m_oHttp.get(this.APIURL + '/process/byws?sWorkspaceId='+sWorkSpaceId)// /ws/processbyws = /process/byws
             .success(function (data, status)
             {
                 if(!utilsIsObjectNullOrUndefined(data))
                 {
-                    oController.m_aoProcessesRunning = data;
-                    oController.updateProcessesBar();//Aggiungere update della lista dei processi
+                    oService.m_aoProcessesRunning = data;
+                    oService.updateProcessesBar();//Aggiungere update della lista dei processi
                 }
             })
             .error(function (data,status)
@@ -43,7 +43,7 @@ service('ProcessesLaunchedService', ['ConstantsService','$rootScope','$http', fu
         if(utilsIsObjectNullOrUndefined(sPidInput)===true)
             return false;
 
-        var oController = this;
+        var oService = this;
         this.m_oHttp.get(this.APIURL + '/process/delete?sProcessObjId=' + sPidInput)// /ws/processbyws = /process/byws
             .success(function (data, status)
             {
@@ -51,8 +51,8 @@ service('ProcessesLaunchedService', ['ConstantsService','$rootScope','$http', fu
                 if(utilsIsObjectNullOrUndefined(sWorkSpaceId) === false )
                 {
                     oProcess.status = "stopped";
-                    oController.m_aoProcessesStopped.push(oProcess);
-                    oController.loadProcessesFromServer(sWorkSpaceId);
+                    oService.m_aoProcessesStopped.push(oProcess);
+                    oService.loadProcessesFromServer(sWorkSpaceId);
 
                 }
 
