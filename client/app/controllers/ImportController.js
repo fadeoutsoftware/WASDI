@@ -1164,7 +1164,7 @@ var ImportController = (function() {
         var oDialog = utilsVexDialogAlertBottomRightCorner('Product added to the ws');
         utilsVexCloseDialogAfterFewSeconds(3000, oDialog);
 
-        this.m_oProcessesLaunchedService.loadProcessesFromServer(this.m_oActiveWorkspace.workspaceId);
+        //this.m_oProcessesLaunchedService.loadProcessesFromServer(this.m_oActiveWorkspace.workspaceId);
 
     }
 

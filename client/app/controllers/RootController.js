@@ -88,8 +88,12 @@ var RootController = (function() {
 
                 //FIND LAST PROCESSES
                 if(utilsIsObjectNullOrUndefined(aoProcessesRunning) == false) {
-                    if (aoProcessesRunning[iNumberOfProcessesRunning-1].status === "CREATED" || aoProcessesRunning[iNumberOfProcessesRunning-1].status === "RUNNING")
-                    $scope.m_oController.m_oLastProcesses = aoProcessesRunning[iNumberOfProcessesRunning-1];
+
+                    if (aoProcessesRunning.length()>0) {
+                        if (aoProcessesRunning[iNumberOfProcessesRunning-1].status === "CREATED" || aoProcessesRunning[iNumberOfProcessesRunning-1].status === "RUNNING") {
+                            $scope.m_oController.m_oLastProcesses = aoProcessesRunning[iNumberOfProcessesRunning-1];
+                        }
+                    }
                 }
                 else
                     $scope.m_oController.m_oLastProcesses = null;
