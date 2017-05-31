@@ -26,7 +26,7 @@ public class WriteProduct implements ProgressMonitor {
 	private int totalSteps = 0;
 	private int computedStep = 0;
 	private int computedIntervals = 0;
-	private int intervalPercStep = 10;
+	private int intervalPercStep = 5;
 	
 	@Override
 	public void worked(int work) {
@@ -123,8 +123,6 @@ public class WriteProduct implements ProgressMonitor {
             File newFile = new File(sFilePath + sFileName + sExtension);
             LauncherMain.s_oLogger.debug("WriteProduct: Output File: " + newFile.getAbsolutePath());
             
-            
-            
             WriteOp writeOp = new WriteOp(oProduct, newFile, sFormat);
             writeOp.setDeleteOutputOnFailure(true);
             writeOp.setWriteEntireTileRows(true);
@@ -133,9 +131,6 @@ public class WriteProduct implements ProgressMonitor {
             final OperatorExecutor executor = OperatorExecutor.create(writeOp);
             executor.execute(this);        
 
-            
-            
-            ProductIO.writeProduct(oProduct, newFile.getAbsolutePath(), sFormat);
             return newFile.getAbsolutePath();
         }
         catch (Exception oEx)
