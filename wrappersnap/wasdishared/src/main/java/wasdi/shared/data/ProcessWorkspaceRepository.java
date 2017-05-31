@@ -24,6 +24,9 @@ public class ProcessWorkspaceRepository extends MongoRepository {
     public String InsertProcessWorkspace(ProcessWorkspace oProcessWorkspace) {
 
         try {
+        	
+        	System.out.println("Inserting Process " + oProcessWorkspace.getProcessObjId() + " - status: " + oProcessWorkspace.getStatus());
+        	
             String sJSON = s_oMapper.writeValueAsString(oProcessWorkspace);
             Document oDocument = Document.parse(sJSON);
             getCollection("processworkpsace").insertOne(oDocument);
@@ -153,8 +156,13 @@ public class ProcessWorkspaceRepository extends MongoRepository {
     public boolean UpdateProcess(ProcessWorkspace oProcessWorkspace) {
 
         try {
+        	
+        	System.out.println("Updating Process " + oProcessWorkspace.getProcessObjId() + " - status: " + oProcessWorkspace.getStatus());
+        	
             String sJSON = s_oMapper.writeValueAsString(oProcessWorkspace);
-            getCollection("processworkpsace").updateOne(and(eq("workspaceId", oProcessWorkspace.getWorkspaceId()), eq("operationType", oProcessWorkspace.getOperationType()), eq("productName", oProcessWorkspace.getProductName())), new Document("$set", new Document(Document.parse(sJSON))));
+            Document filter = new Document("processObjId", oProcessWorkspace.getProcessObjId());
+			Document update = new Document("$set", new Document(Document.parse(sJSON)));
+			getCollection("processworkpsace").updateOne(filter, update);
 
             return true;
 
