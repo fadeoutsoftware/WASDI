@@ -163,6 +163,8 @@ public class ProductResource {
 
 			// Get Product List
 			List<ProductWorkspace> aoProductWorkspace = oProductWorkspaceRepository.GetProductsByWorkspace(sWorkspaceId);
+			
+			System.out.println("ProductResource.GetListByWorkspace: found " + aoProductWorkspace.size());
 
 			// For each
 			for (int iProducts=0; iProducts<aoProductWorkspace.size(); iProducts++) {
@@ -172,27 +174,46 @@ public class ProductResource {
 
 				// Add View model to return list
 				if (oDownloaded != null) {
+					
+					System.out.println("ProductResource.GetListByWorkspace: Product [" + iProducts + "] = " + oDownloaded.getFileName());
+					
 					ProductViewModel oProductVM = oDownloaded.getProductViewModel();
 					
-					ArrayList<BandViewModel> aoBands = oProductVM.getBandsGroups().getBands(); 
-					
-					for (int iBands=0; iBands<aoBands.size(); iBands++) {
+					if (oProductVM != null) {
 						
-						BandViewModel oBand = aoBands.get(iBands);
-						
-						if (oBand != null) {
-							PublishedBand oPublishBand = oPublishedBandsRepository.GetPublishedBand(oProductVM.getFileName(), oBand.getName());
-
-							if (oPublishBand != null)
-							{
-								oBand.setPublished(true);
-							}
-						}
+						if (oProductVM.getBandsGroups() != null) {
+							ArrayList<BandViewModel> aoBands = oProductVM.getBandsGroups().getBands();
 							
+							if (aoBands != null) {
+								for (int iBands=0; iBands<aoBands.size(); iBands++) {
+									
+									BandViewModel oBand = aoBands.get(iBands);
+									
+									if (oBand != null) {
+										PublishedBand oPublishBand = oPublishedBandsRepository.GetPublishedBand(oProductVM.getFileName(), oBand.getName());
+
+										if (oPublishBand != null)
+										{
+											oBand.setPublished(true);
+										}
+									}
+										
+								}								
+							}
+							
+						}
+
+						oProductVM.setMetadata(null);
+						aoProductList.add(oProductVM);
+						
+						System.out.println("ProductResource.GetListByWorkspace: added to return list");		
+
+					}
+					else {
+						System.out.println("ProductResource.GetListByWorkspace: ProductViewModel is Null: jump product");
 					}
 					
-					oProductVM.setMetadata(null);
-					aoProductList.add(oProductVM);
+
 				}
 				else {
 					System.out.println("WARNING: the product " + aoProductWorkspace.get(iProducts).getProductName() + " should be in WS " + sWorkspaceId + " but is not a Downloaded File" );
