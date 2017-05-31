@@ -547,6 +547,8 @@ public class LauncherMain {
         ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
         ProcessWorkspace oProcessWorkspace = oProcessWorkspaceRepository.GetProcessByProcessObjId(oParameter.getProcessObjId());
         
+        s_oLogger.debug("LauncherMain.ExecuteOperation: Process found: " + oParameter.getProcessObjId() + " == " + oProcessWorkspace.getProcessObjId());
+        
         try {
         	
             
@@ -557,8 +559,11 @@ public class LauncherMain {
                 oProcessWorkspace.setStatus(ProcessStatus.RUNNING.name());
                 oProcessWorkspace.setProgressPerc(0);
                 //update the process
-                if (!oProcessWorkspaceRepository.UpdateProcess(oProcessWorkspace))
-                    s_oLogger.debug("LauncherMain.ExecuteOperation: Error during process update (starting)");
+                if (!oProcessWorkspaceRepository.UpdateProcess(oProcessWorkspace)) {
+                	s_oLogger.debug("LauncherMain.ExecuteOperation: Error during process update (starting)");
+                } else {
+                	s_oLogger.debug("LauncherMain.ExecuteOperation: Updated process  " + oProcessWorkspace.getProcessObjId());
+                }
             }        	
         	
         	

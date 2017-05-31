@@ -45,6 +45,8 @@ public class WriteProduct implements ProgressMonitor {
 	                //update the process
 	                if (!m_oProcessWorkspaceRepository.UpdateProcess(m_oProcessWorkspace)) {
 	                	LauncherMain.s_oLogger.debug("WriteProduct: Error during process update (starting)");
+	                } else {
+	                	LauncherMain.s_oLogger.debug("WriteProduct: updated progress for process " + m_oProcessWorkspace.getProcessObjId() + " : " + computedIntervals);
 	                }
 	                
 	                try {
