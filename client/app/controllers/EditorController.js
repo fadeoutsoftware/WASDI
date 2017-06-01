@@ -572,10 +572,13 @@ var EditorController = (function () {
     EditorController.prototype.openBandImage = function (oBand, oIdBandNodeInTree) {
         var oController = this;
         var sFileName = this.m_aoProducts[oBand.productIndex].fileName;
+        var bAlreadyPublished = oBand.published;
 
         this.m_oFileBufferService.publishBand(sFileName, this.m_oActiveWorkspace.workspaceId, oBand.name).success(function (data, status) {
-            var oDialog = utilsVexDialogAlertBottomRightCorner('publishing band ' + oBand.name);
-            utilsVexCloseDialogAfterFewSeconds(3000, oDialog);
+            if (!bAlreadyPublished) {
+                var oDialog = utilsVexDialogAlertBottomRightCorner('publishing band ' + oBand.name);
+                utilsVexCloseDialogAfterFewSeconds(3000, oDialog);
+            }
             //console.log('publishing band ' + oBand.name);
             if (!utilsIsObjectNullOrUndefined(data) && data.messageResult != "KO" && utilsIsObjectNullOrUndefined(data.messageResult)) {
                 /*if the band was published*/
