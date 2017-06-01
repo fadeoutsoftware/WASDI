@@ -14,6 +14,7 @@ import javax.ws.rs.core.Response;
 
 import it.fadeout.Wasdi;
 import wasdi.shared.LauncherOperations;
+import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.business.User;
 import wasdi.shared.data.ProcessWorkspaceRepository;
@@ -118,6 +119,21 @@ public class ProcessWorkspaceResource {
 					System.out.println("ProcessWorkspaceResource. Process pid not in data");
 					
 				}
+								
+				// set process state to STOPPED only if CREATED or RUNNING
+				String sPrecSatus = oProcessToDelete.getStatus();
+				if (sPrecSatus.equalsIgnoreCase(ProcessStatus.CREATED.name()) || 
+						sPrecSatus.equalsIgnoreCase(ProcessStatus.RUNNING.name())) {
+					
+					oProcessToDelete.setStatus(ProcessStatus.STOPPED.name());
+					if (!oRepository.UpdateProcess(oProcessToDelete)) {
+						System.out.println("ProcessWorkspaceResource.DeleteProcess: Unable to update process status");
+					}
+					
+				} else {
+					System.out.println("ProcessWorkspaceResource.DeleteProcess: Process already terminated: " + sPrecSatus);
+				}
+				
 				
 				return Response.ok().build();
 				
