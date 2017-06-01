@@ -239,13 +239,11 @@ public class DownloadFile {
                     // extracts file name from header field
                     int index = disposition.indexOf("filename=");
                     if (index > 0) {
-                        fileName = disposition.substring(index + 10,
-                                disposition.length() - 1);
+                        fileName = disposition.substring(index + 10,  disposition.length() - 1);
                     }
                 } else {
                     // extracts file name from URL
-                    fileName = sFileURL.substring(sFileURL.lastIndexOf("/") + 1,
-                            sFileURL.length());
+                    fileName = sFileURL.substring(sFileURL.lastIndexOf("/") + 1, sFileURL.length());
                 }
 
                 sReturnFilePath = fileName;
