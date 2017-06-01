@@ -65,6 +65,10 @@ var EditorController = (function () {
         else {
             this.m_oProcessesLaunchedService.loadProcessesFromServer(this.m_oActiveWorkspace.workspaceId);
             this.getProductListByWorkspace();
+            if (this.m_oRabbitStompService.isSubscrbed() == false) {
+                this.m_oRabbitStompService.subscribe(this.m_oActiveWorkspace.workspaceId);
+            }
+
         }
         this.m_sDownloadFilePath = "";
 
@@ -79,9 +83,9 @@ var EditorController = (function () {
         this.m_oTree = null;//IMPORTANT NOTE: there's a 'WATCH' for this.m_oTree in TREE DIRECTIVE
 
 
-        if (this.m_oRabbitStompService.isSubscrbed() == false) {
-            this.m_oRabbitStompService.subscribe(this.m_oActiveWorkspace.workspaceId);
-        }
+        // if (this.m_oRabbitStompService.isSubscrbed() == false) {
+        //     this.m_oRabbitStompService.subscribe(this.m_oActiveWorkspace.workspaceId);
+        // }
 
         /*Hook to Rabbit WebStomp Service*/
         this.m_oRabbitStompService.setMessageCallback(this.receivedRabbitMessage);
@@ -1078,10 +1082,14 @@ var EditorController = (function () {
                     oController.m_oConstantsService.setActiveWorkspace(data);
                     oController.m_oActiveWorkspace = oController.m_oConstantsService.getActiveWorkspace();
 
-                    /*Start Rabbit WebStomp*/
-                    oController.m_oRabbitStompService.initWebStomp("EditorController", oController);
                     oController.getProductListByWorkspace();
                     oController.m_oProcessesLaunchedService.loadProcessesFromServer(oController.m_oActiveWorkspace.workspaceId);
+                    /*Subscribe Rabbit WebStomp*/
+                    //TODO CHECK THE SUBSCRIBE ERROR
+                    if (oController.m_oRabbitStompService.isSubscrbed() == false) {
+                        oController.m_oRabbitStompService.subscribe(oController.m_oActiveWorkspace.workspaceId);
+                    }
+
                 }
             }
         }).error(function (data, status) {

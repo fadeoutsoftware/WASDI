@@ -325,7 +325,7 @@ var SearchOrbitController = (function() {
                     oController.m_oConstantsService.setActiveWorkspace(data);
                     oController.m_oActiveWorkspace = oController.m_oConstantsService.getActiveWorkspace();
                     /*Start Rabbit WebStomp*/
-                    oController.m_oRabbitStompService.initWebStomp("SearchOrbitController",oController);
+                    // oController.m_oRabbitStompService.initWebStomp("SearchOrbitController",oController);
                     oController.m_oProcessesLaunchedService.loadProcessesFromServer(oController.m_oActiveWorkspace.workspaceId);
 
                 }

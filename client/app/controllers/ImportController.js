@@ -1181,7 +1181,7 @@ var ImportController = (function() {
                     oController.m_oActiveWorkspace = oController.m_oConstantsService.getActiveWorkspace();
 
                     /*Start Rabbit WebStomp*/
-                    oController.m_oRabbitStompService.initWebStomp("ImportController",oController);
+                    // oController.m_oRabbitStompService.initWebStomp("ImportController",oController);
                     oController.loadOpenSearchParamsByResultsOfSearchServices(oController);
                     oController.m_oProcessesLaunchedService.loadProcessesFromServer(oController.m_oActiveWorkspace.workspaceId);
                 }
