@@ -18,7 +18,23 @@
 
       .modal-body
       {
+        //FORM FOR NEW USER
+        form{
+          fieldset{
+            .column-email{
+              label{
+                margin-top: 10px;
+              }
+            }
+          }
+        }
 
+        .my-button{
+          margin:0;
+          margin-top: 5px;
+          padding: 10px 10px;
+
+        }
       }
 
       .modal-footer

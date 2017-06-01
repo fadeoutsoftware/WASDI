@@ -3,10 +3,72 @@
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" ng-click="close(false)" data-dismiss="modal" aria-hidden="true">&times;</button>
-                <h4 class="modal-title "></h4>
+                <h4 class="modal-title ">{{"DIALOG_SFTP_UPLOAD_TITLE"|translate}}</h4>
             </div>
             <div class="modal-body">
-                <div ng-repeat="file in m_oController.m_aoListOfFiles">{{file}}</div>
+                <h4>
+                    <!-- ICON -->
+                    <invader ng-show="m_oController.isVisibleLoadIcon()"></invader>
+                    <!-- NEW USER -->
+                    <form ng-hide="m_oController.isVisibleLoadIcon() || m_oController.isAccountCreated()">
+                        <fieldset class="my-input-text">
+                            <legend><h3>{{ "DIALOG_SFTP_UPLOAD_REGISTER_LABEL"|translate}}</h3></legend>
+                            <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                                <div class="col-xs-2 col-sm-2 col-md-2 col-lg-2 column-email" >
+                                    <label>{{"DIALOG_SFTP_UPLOAD_EMAIL_LABEL"|translate}}</label>
+                                </div>
+                                <div class="col-xs-9 col-sm-9 col-md-9 col-lg-9">
+                                    <input type="text" name="name"  class="form-control" value="" title=""
+                                           required="required" placeholder="{{'DIALOG_SFTP_UPLOAD_EMAIL_PLACEHOLDER'|translate}}" ng-model="m_oController.m_sEmailNewUser">
+                                </div>
+                                <div class="col-xs-1 col-sm-1 col-md-1 col-lg-1">
+                                    <button type="button" class="btn my-button" ng-click="m_oController.createAccountUpload()" >
+                                        {{"DIALOG_SFTP_UPLOAD_REGISTER_LABEL"|translate}}
+                                        <!--<i class="fa fa-paper-plane" aria-hidden="true"></i>-->
+                                    </button>
+                                </div>
+                            </div>
+                        </fieldset>
+                    </form>
+                    <form ng-hide="m_oController.isVisibleLoadIcon() || (!m_oController.isAccountCreated())">
+                        <fieldset class="my-input-text">
+                            <legend><h3>{{"DIALOG_SFTP_UPLOAD_LEGEND_USER_OPTIONS"|translate}}</h3></legend>
+                            <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                                <!--Get new password-->
+                                <div class="row">
+                                    <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4 column-email" >
+                                        <label>{{"DIALOG_SFTP_UPLOAD_REGENERATE_PASSWORD_LABEL"|translate}}</label>
+                                    </div>
+                                    <div class="col-xs-7 col-sm-7 col-md-7 col-lg-7">
+                                        <input type="text" name="name"  class="form-control" value="" title=""
+                                               required="required" placeholder="{{'DIALOG_SFTP_UPLOAD_EMAIL_PLACEHOLDER'|translate}}" ng-model="m_oController.m_sEmailNewPassword">
+
+                                    </div>
+                                    <div class="col-xs-1 col-sm-1 col-md-1 col-lg-1">
+                                        <button type="button" class="btn  my-button" ng-click="m_oController.updateSftpPassword()">
+                                            {{"DIALOG_SFTP_UPLOAD_SEND_BUTTON"|translate}}
+                                            <!--<i class="fa fa-paper-plane" aria-hidden="true"></i>-->
+                                        </button>
+                                    </div>
+                                </div>
+                                <!--Delete account sftp-->
+                                <div class="row">
+                                    <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4 column-email" >
+                                        {{"DIALOG_SFTP_UPLOAD_DELETE_ACCOUNT_LABEL"|translate}}
+                                    </div>
+                                    <div class="col-xs-8 col-sm-8 col-md-8 col-lg-8">
+                                        <button type="button" class="btn  my-button" ng-click="m_oController.deleteSftpAccount()">
+                                            {{"DIALOG_SFTP_UPLOAD_DELETE_ACCOUNT_BUTTON"|translate}}
+                                        </button>
+
+                                    </div>
+                                </div>
+                            </div>
+                        </fieldset>
+                    </form>
+
+                    <!--<div ng-repeat="file in m_oController.m_aoListOfFiles">{{file}}</div>-->
+                </h4>
             </div>
             <div class="modal-footer">
                 <button type="button" ng-click="close('ok')" class="my-button" data-dismiss="modal">Ok</button>
