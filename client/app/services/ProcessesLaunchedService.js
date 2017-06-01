@@ -29,10 +29,13 @@ service('ProcessesLaunchedService', ['ConstantsService','$rootScope','$http', fu
             {
                 if(!utilsIsObjectNullOrUndefined(data))
                 {
+                    /*
+                    // Full Process Log for extreme debug
                     console.log("ProcessLaunchedService.loadProcessesFromServer PROCESSES LOG:")
                     data.forEach(function (i) {
                         console.log(i.operationType + ": " + i.status + " " + i.progressPerc + "%")
                     });
+                    */
 
                     oService.m_aoProcessesRunning = data;
                     oService.updateProcessesBar();
