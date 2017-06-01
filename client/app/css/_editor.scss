@@ -234,8 +234,8 @@
   }
 
   /********************************* ICONS *********************************/
-  //RADAR ICON
 
+  //RADAR ICON
   .icon-radar {
     i {
       content: $wasdi-radar-icon;
@@ -292,6 +292,39 @@
     }
   }
 
+  //MULTILOOKING ICON
+  .icon-multilooking-operations{
+    i{
+      content: $wasdi-telescope-icon-multilooking-blue-version;
+      width: $wasdi-size-icon;
+      height: auto;
 
+    }
+  }
+  .icon-multilooking-operations:hover{
+    i{
+      content: $wasdi-telescope-icon-multilooking-white-version;
+      width: $wasdi-size-icon;
+      height: auto;
+
+    }
+  }
+  //EARTH ICON
+  .icon-range-doppler-terrain-correction-operations{
+    i{
+      content: $wasdi-earth-icon-range-doppler-terrain-correction-blue-version;
+      width: $wasdi-size-icon;
+      height: auto;
+
+    }
+  }
+  .icon-range-doppler-terrain-correction-operations:hover{
+    i{
+      content: $wasdi-earth-icon-range-doppler-terrain-correction-white-version;
+      width: $wasdi-size-icon;
+      height: auto;
+
+    }
+  }
 
 }
