@@ -30,6 +30,7 @@
                             </div>
                         </fieldset>
                     </form>
+
                     <form ng-hide="m_oController.isVisibleLoadIcon() || (!m_oController.isAccountCreated())">
                         <fieldset class="my-input-text">
                             <legend><h3>{{"DIALOG_SFTP_UPLOAD_LEGEND_USER_OPTIONS"|translate}}</h3></legend>
@@ -64,14 +65,31 @@
                                     </div>
                                 </div>
                             </div>
+
                         </fieldset>
                     </form>
 
-                    <!--<div ng-repeat="file in m_oController.m_aoListOfFiles">{{file}}</div>-->
+                    <form ng-hide="m_oController.isVisibleLoadIcon() || (!m_oController.isAccountCreated())">
+                        <fieldset class="my-input-text">
+                            <legend><h3>{{"DIALOG_SFTP_UPLOAD_LIST_OF_FILES"|translate}} </h3></legend>
+                            <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                                <div class="row">
+                                    <!-- LIST OF FILES -->
+                                    <multiselect options="m_oController.m_aoListOfFiles" selected="m_oController.m_aoSelectedFiles"></multiselect>
+                                    <button type="button" class="btn  my-button" ng-click="">
+                                        {{"DIALOG_SFTP_UPLOAD_ADD_TO_WORKSPACE_BUTTON"|translate}}
+                                    </button>
+                                    <!--<div ng-repeat="file in m_oController.m_aoListOfFiles">{{file}}</div>-->
+                                </div>
+                            </div>
+                        </fieldset>
+                    </form>
+
+
                 </h4>
             </div>
             <div class="modal-footer">
-                <button type="button" ng-click="close('ok')" class="my-button" data-dismiss="modal">Ok</button>
+                <button type="button" ng-click="close('ok')" class="my-button" data-dismiss="modal">{{"DIALOG_SFTP_UPLOAD_CLOSE_BUTTON"|translate}}</button>
             </div>
         </div>
     </div>
