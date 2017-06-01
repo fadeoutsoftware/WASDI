@@ -35,7 +35,7 @@
                         <div>
                             <h4>{{'EDITOR_OPERATION_TITLE_APPLY_RADIOMETRIC_PROCESSOR'|translate}}</h4>
                         </div>
-                        <div  >
+                        <div>
                             <i  aria-hidden="true"></i> <!--PROCESSOR ICON -->
                         </div>
                     </a>
@@ -64,7 +64,7 @@
 
         <!--PROCESSOR-->
         <div  class='animate-hide' ng-hide="m_oController.isHiddenProcessorBar();">
-            <ul>
+            <ul >
                 <li ng-click="m_oController.openMergeDialog();" ng-init="m_oController.m_sSrc='assets/icons/iconMIDA.svg' "
                     ng-mouseover="m_oController.m_sSrc='assets/icons/iconMIDA_White.svg' " ng-mouseleave="m_oController.m_sSrc='assets/icons/iconMIDA.svg' ">
                     <!--<a class="icon" href=""><img src="{{m_oController.m_sSrc}}"></a>-->
@@ -90,20 +90,36 @@
 
         <!--RADAR BAR-->
         <div  class='animate-hide'  ng-hide="m_oController.isHiddenOperationRadarBar();">
-            <ul>
+            <ul class="button-menu-with-icons">
 
 
                 <li ng-click="m_oController.openApplyOrbitDialog();" >
                     <a href="" ><h4>{{"EDITOR_OPERATION_TITLE_APPLY_ORBIT"|translate}}</h4></a>
                 </li>
                 <li ng-click="m_oController.openMultilookingDialog();" >
-                    <a href=""><h4>{{"EDITOR_OPERATION_TITLE_APPLY_MULTILOOKING"|translate}}</h4></a>
+                    <a href="" class="icon-multilooking-operations">
+                        <div>
+                            <h4>
+                                {{"EDITOR_OPERATION_TITLE_APPLY_MULTILOOKING"|translate}}
+                            </h4>
+                        </div>
+                        <div>
+                            <i  aria-hidden="true"></i> <!--PROCESSOR ICON -->
+                        </div>
+                    </a>
                 </li>
                 <li ng-click="m_oController.openRadiometricCalibrationDialog();" >
                     <a href=""><h4>{{"EDITOR_OPERATION_TITLE_APPLY_RADIOMETRIC_CALIBRATE"|translate}}</h4></a>
                 </li>
                 <li ng-click="m_oController.rangeDopplerTerrainCorrectionDialog();" >
-                    <a href=""><h4>{{"EDITOR_OPERATION_TITLE_APPLY_RADIOMETRIC_RANGE_DOPPLER_TERRAIN_CORRECTION"|translate}}</h4></a>
+                    <a href="" class="icon-range-doppler-terrain-correction-operations">
+                        <div>
+                            <h4>{{"EDITOR_OPERATION_TITLE_APPLY_RADIOMETRIC_RANGE_DOPPLER_TERRAIN_CORRECTION"|translate}}</h4>
+                        </div>
+                        <div>
+                            <i  aria-hidden="true"></i> <!--PROCESSOR ICON -->
+                        </div>
+                    </a>
                 </li>
                 <li data-toggle="tooltip" data-placement="top" title="{{'EDITOR_TOOLTIP_ICON_ARROW_BACK'|translate}}"  ng-click="m_oController.hideOperationRadarBar(); m_oController.showOperationMainBar(); " >
                     <a href=""><i class="fa fa-arrow-left fa-3x" aria-hidden="true"></i></a>
