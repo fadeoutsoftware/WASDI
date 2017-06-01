@@ -122,11 +122,6 @@ var RootController = (function() {
                             oDate.setSeconds(0 + seconds);
                             //add running time
                             aoProcessesRunning[iIndexNewProcess].timeRunning = oDate;
-
-                            //it convert mb in gb
-                            var nSize = aoProcessesRunning[iIndexNewProcess].fileSize / 1024;
-                            nSize = Math.round(nSize * 100)/100;
-                            aoProcessesRunning[iIndexNewProcess].fileSize = nSize;
                         }
                     }
                     else {
