@@ -50,7 +50,7 @@ public class WriteProduct implements ProgressMonitor {
 	                }
 	                
 	                try {
-						LauncherMain.oSendToRabbit.SendUpdateProcessMessage(m_oProcessWorkspace);
+						LauncherMain.s_oSendToRabbit.SendUpdateProcessMessage(m_oProcessWorkspace);
 					} catch (JsonProcessingException e) {
 						e.printStackTrace();
 						LauncherMain.s_oLogger.error("WriteProduct: Error during SendUpdateProcessMessage: " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(e));
