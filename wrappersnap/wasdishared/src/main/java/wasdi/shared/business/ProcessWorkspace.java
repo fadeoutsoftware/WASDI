@@ -10,6 +10,7 @@ public class ProcessWorkspace {
     private String userId;
     private String operationType;
     private String operationDate;
+    private String operationEndDate;
     private String processObjId;
     private String fileSize;
     private String status;
@@ -94,6 +95,14 @@ public class ProcessWorkspace {
 
 	public void setProgressPerc(int progressPerc) {
 		this.progressPerc = progressPerc;
+	}
+
+	public String getOperationEndDate() {
+		return operationEndDate;
+	}
+
+	public void setOperationEndDate(String operationEndDate) {
+		this.operationEndDate = operationEndDate;
 	}
     
 }
