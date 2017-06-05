@@ -8,6 +8,7 @@ public class ProcessWorkspaceViewModel {
     private String productName;
     private String operationType;
     private String operationDate;
+    private String operationEndDate;
     private String userId;
     private String fileSize;
     private String status;
@@ -86,6 +87,14 @@ public class ProcessWorkspaceViewModel {
 
 	public void setProgressPerc(int progressPerc) {
 		this.progressPerc = progressPerc;
+	}
+
+	public String getOperationEndDate() {
+		return operationEndDate;
+	}
+
+	public void setOperationEndDate(String operationEndDate) {
+		this.operationEndDate = operationEndDate;
 	}
     
 }

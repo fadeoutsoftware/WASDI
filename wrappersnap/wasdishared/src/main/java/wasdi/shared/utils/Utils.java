@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.PosixFilePermission;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Stream;
 import static org.apache.commons.lang.SystemUtils.IS_OS_UNIX;
@@ -117,5 +118,10 @@ public class Utils {
             }
         }
     }
+    
+	public static String GetFormatDate(Date oDate){
+		
+		return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(oDate);
+	}
 
 }
