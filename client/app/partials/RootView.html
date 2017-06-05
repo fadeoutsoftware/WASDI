@@ -60,9 +60,19 @@
                     </div>
                     <div class="nav navbar-nav navbar-left name-workspace">
                         <div class="form-group">
+                            <!--<input type="text" value="{{m_oController.getWorkspaceName()}}" placeholder="{{m_oController.getWorkspaceName()}}"-->
+                            <!--ng-model="m_oController.m_oConstantsService.getActiveWorkspace().name" ng-keyup="m_oController.UpdateWorkspace($event) " ng-blur="m_oController.UpdateWorkspace()">-->
+                            <input type="text" ng-model="m_oController.m_oConstantsService.getActiveWorkspace().name" placeholder="..."
+                                   ng-disabled = "(!m_oController.m_bIsEditModelWorkspaceNameActive)"
+                                   ng-class="{'input-mydisable': !m_oController.m_bIsEditModelWorkspaceNameActive,'input-myenable': m_oController.m_bIsEditModelWorkspaceNameActive}"
+                                   ng-keyup="m_oController.UpdateWorkspace($event)" >
 
-                            <input type="text" value="{{m_oController.getWorkspaceName()}}" placeholder="{{m_oController.getWorkspaceName()}}"
-                                   ng-model="m_oController.m_oConstantsService.getActiveWorkspace().name" ng-keyup="m_oController.UpdateWorkspace($event) " ng-blur="m_oController.UpdateWorkspace()">
+                            <button class="btn btn-edit" type="button" ng-click="m_oController.UpdateWorkspace();m_oController.editModelWorkspaceName();"
+                                    title="{{'ROOT_TOOLTIP_EDIT_WORKSPACE_NAME'|translate}}">
+                                <i class="fa fa-pencil fa-lg" aria-hidden="true"
+                                   ng-class="{'btn-edit-mode-on':m_oController.m_bIsEditModelWorkspaceNameActive,'btn-edit-mode-off':!m_oController.m_bIsEditModelWorkspaceNameActive}"></i>
+
+                            </button>
                         </div>
 
                     </div>
@@ -143,7 +153,7 @@
         <br/>
 
         <div class="row">
-            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 processes-list" ng-show="m_oController.m_bIsOpenNav" style="height: 80px">
+            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 processes-list" ng-show="m_oController.m_bIsOpenNav" style="height: 400px" ><!--style="height: 80px"-->
 
                 <table class="table table-striped " id="tableProcesses" >
                     <thead>
@@ -181,7 +191,7 @@
                             {{oProcess.userId}}
                         </td>
                         <td>
-                            {{oProcess.fileSize}} gb
+                            {{oProcess.fileSize}} mb
                         </td>
                         <td>
                             <!--{{oProcess.progressPerc}} %-->

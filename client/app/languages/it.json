@@ -28,6 +28,7 @@
   "ROOT_LABEL_TYPE_OF_OPERATION":"Type of operation:",
   "ROOT_LABEL_NAME":"Name:",
   "ROOT_VIEW_NAV_BAR_LINK_SHARE":"Share",
+  "ROOT_TOOLTIP_EDIT_WORKSPACE_NAME":"Edit workspace name",
 
   "WORKSPACES_TITLE_LABEL":"WorkSpaces",
   "WORKSPACES_PLACEHOLDER_SEARCH":"Search WorkSpace...",
