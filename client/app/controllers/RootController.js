@@ -19,6 +19,7 @@ var RootController = (function() {
         this.m_bIsOpenStatusBar = false; //processes bar
         this.m_oModalService = oModalService;
         this.m_oRabbitStompService = oRabbitStompService;
+        this.m_bIsEditModelWorkspaceNameActive = false;
         var oController = this;
         this.m_oAuthService.checkSession().success(function (data, status) {
             if (data == null || data == undefined || data == '')
@@ -137,11 +138,13 @@ var RootController = (function() {
         });
 
         /* WATCH  ACTIVE WORKSPACE IN CONSTANT SERVICE
-        * every time the workspace change, it clean the log list
+        * every time the workspace change, it clean the log list &&
+        * set m_bIsEditModelWorkspaceNameActive = false
         * */
         $scope.$watch('m_oController.m_oConstantsService.m_oActiveWorkspace', function(newValue, oldValue, scope) {
             //utilsVexDialogAlertTop("il watch funziona");
             $scope.m_oController.m_aoProcessesRunning = [];
+            $scope.m_oController.m_bIsEditModelWorkspaceNameActive = false;
         });
 
         /*COUNTDOWN METHOD*/
@@ -345,13 +348,19 @@ var RootController = (function() {
     };
 
     RootController.prototype.UpdateWorkspace = function($event) {
-        if ($event == null || $event.keyCode == 13) {
+        if ( ($event == null || $event.keyCode === 13) && this.m_bIsEditModelWorkspaceNameActive === true) {
             var oWorkspace = this.m_oConstantsService.getActiveWorkspace();
             this.m_oWorkspaceService.UpdateWorkspace(oWorkspace).success(function (data) {
 
             }).error(function (error){
 
             });
+
+            if( $event != null && $event.keyCode === 13)
+            {
+                //disable work space name active
+                this.m_bIsEditModelWorkspaceNameActive = false;
+            }
         }
 
     };
@@ -375,7 +384,7 @@ var RootController = (function() {
 
     RootController.prototype.deleteProcess = function(oProcessInput)
     {
-        var oController = this
+        var oController = this;
         var oWorkspace = this.m_oConstantsService.getActiveWorkspace();
         this.m_oModalService.showModal({
             templateUrl: "dialogs/delete_process/DeleteProcessDialog.html",
@@ -393,7 +402,12 @@ var RootController = (function() {
         });
 
         return true;
-    }
+    };
+
+    RootController.prototype.editModelWorkspaceName = function(){
+
+        this.m_bIsEditModelWorkspaceNameActive = !this.m_bIsEditModelWorkspaceNameActive;
+    };
 
     /*********************************************************************/
     RootController.$inject = [
