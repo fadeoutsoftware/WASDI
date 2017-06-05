@@ -60,6 +60,64 @@ public class ProcessWorkspaceResource {
 				ProcessWorkspace oProcess = aoProcess.get(iProcess);
 
 				oViewModel.setOperationDate(oProcess.getOperationDate());
+				oViewModel.setOperationEndDate(oProcess.getOperationEndDate());
+				oViewModel.setOperationType(oProcess.getOperationType());
+				oViewModel.setProductName(oProcess.getProductName());
+				oViewModel.setUserId(oProcess.getUserId());
+				oViewModel.setFileSize(oProcess.getFileSize());
+				oViewModel.setPid(oProcess.getPid());
+				oViewModel.setStatus(oProcess.getStatus());
+				oViewModel.setProgressPerc(oProcess.getProgressPerc());
+				oViewModel.setProcessObjId(oProcess.getProcessObjId());
+
+				aoProcessList.add(oViewModel);
+
+			}
+
+		}
+		catch (Exception oEx) {
+			System.out.println("ProcessWorkspaceResource.GetProcessByWorkspace: error retrieving process " + oEx.getMessage());
+			oEx.printStackTrace();
+		}
+
+		return aoProcessList;
+	}
+	
+	
+	@GET
+	@Path("/lastbyws")
+	@Produces({"application/xml", "application/json", "text/xml"})
+	public ArrayList<ProcessWorkspaceViewModel> GetLastProcessByWorkspace(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sWorkspaceId") String sWorkspaceId) {
+
+		User oUser = Wasdi.GetUserFromSession(sSessionId);
+
+		ArrayList<ProcessWorkspaceViewModel> aoProcessList = new ArrayList<ProcessWorkspaceViewModel>();
+
+		try {
+			// Domain Check
+			if (oUser == null) {
+				return aoProcessList;
+			}
+			if (Utils.isNullOrEmpty(oUser.getUserId())) {
+				return aoProcessList;
+			}
+
+			System.out.println("ProcessWorkspaceResource.GetProcessByWorkspace: process for ws " + sWorkspaceId);
+
+			// Create repo
+			ProcessWorkspaceRepository oRepository = new ProcessWorkspaceRepository();
+
+			// Get Process List
+			List<ProcessWorkspace> aoProcess = oRepository.GetProcessByWorkspace(sWorkspaceId);
+
+			// For each
+			for (int iProcess=0; iProcess<aoProcess.size(); iProcess++) {
+				// Create View Model
+				ProcessWorkspaceViewModel oViewModel = new ProcessWorkspaceViewModel();
+				ProcessWorkspace oProcess = aoProcess.get(iProcess);
+
+				oViewModel.setOperationDate(oProcess.getOperationDate());
+				oViewModel.setOperationEndDate(oProcess.getOperationEndDate());
 				oViewModel.setOperationType(oProcess.getOperationType());
 				oViewModel.setProductName(oProcess.getProductName());
 				oViewModel.setUserId(oProcess.getUserId());

@@ -254,13 +254,18 @@ public class AuthResource {
 
 	private void sendPasswordEmail(String sEmail, String sAccount, String sPassword) {
 		//send email with new password
-		MercuriusAPI oAPI = new MercuriusAPI("http://***REMOVED***/it.fadeout.mercurius.webapi");			
+		String sMercuriusAPIAddress = m_oServletConfig.getInitParameter("mercuriusAPIAddress");
+		MercuriusAPI oAPI = new MercuriusAPI(sMercuriusAPIAddress);			
 		Message oMessage = new Message();
-		oMessage.setTilte("Wasdi sftp account");
+		String sTitle = m_oServletConfig.getInitParameter("sftpMailTitle");
+		oMessage.setTilte(sTitle);
 		String sSenser = m_oServletConfig.getInitParameter("sftpManagementMailSenser");
 		if (sSenser==null) sSenser = "adminwasdi@wasdi.org";
 		oMessage.setSender(sSenser);
-		oMessage.setMessage("USER: " + sAccount + " - PASSWORD: " + sPassword);
+		
+		String sMessage = m_oServletConfig.getInitParameter("sftpMailText");
+		sMessage += "\n\nUSER: " + sAccount + " - PASSWORD: " + sPassword;
+		oMessage.setMessage(sMessage);
 		oAPI.sendMailDirect(sEmail, oMessage);
 	}
 
