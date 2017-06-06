@@ -110,10 +110,10 @@ var RootController = (function() {
                             // add start time (useful if the page was reloaded)
 
                             //time by server
-                            var sStartTime = new Date(aoProcessesRunning[iIndexNewProcess].operationDate);
+                            var oStartTime = new Date(aoProcessesRunning[iIndexNewProcess].operationDate);
                             //pick time
                             var oNow = new Date();
-                            var result =  Math.abs(oNow-sStartTime);
+                            var result =  Math.abs(oNow-oStartTime);
                             //approximate result
                             var seconds = Math.ceil(result / 1000);
 
@@ -128,6 +128,21 @@ var RootController = (function() {
                     else {
                         if (utilsIsObjectNullOrUndefined(aoProcessesRunning[iIndexNewProcess].timeRunning)) {
                             aoProcessesRunning[iIndexNewProcess].timeRunning = 0;
+
+                            //time by server
+                            var oStartTime = new Date(aoProcessesRunning[iIndexNewProcess].operationDate);
+                            var oEndTime = new Date(aoProcessesRunning[iIndexNewProcess].operationEndDate);
+                            //pick time
+                            var result =  Math.abs(oEndTime-oStartTime);
+                            //approximate result
+                            var seconds = Math.ceil(result / 1000);
+
+                            if(utilsIsObjectNullOrUndefined(seconds) || seconds < 0) seconds = 0;
+
+                            var oDate = new Date(1970, 0, 1);
+                            oDate.setSeconds(0 + seconds);
+                            //add running time
+                            aoProcessesRunning[iIndexNewProcess].timeRunning = oDate;
                         }
                     }
                 }
@@ -370,8 +385,7 @@ var RootController = (function() {
         var oController = this
         this.m_oModalService.showModal({
             templateUrl: "dialogs/snake_dialog/SnakeDialog.html",
-            controller: "RootController",
-
+            controller: "RootController"
         }).then(function(modal) {
             modal.element.modal();
             modal.close.then(function(result) {
