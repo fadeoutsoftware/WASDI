@@ -5,6 +5,8 @@ import static com.mongodb.client.model.Filters.eq;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import org.bson.Document;
@@ -115,7 +117,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
         final ArrayList<ProcessWorkspace> aoReturnList = new ArrayList<ProcessWorkspace>();
         try {
 
-            FindIterable<Document> oWSDocuments = getCollection("processworkpsace").find(new Document("workspaceId", sWorkspaceId));
+            FindIterable<Document> oWSDocuments = getCollection("processworkpsace").find(new Document("workspaceId", sWorkspaceId)).sort(new Document("_id", -1)).limit(5);
 
             oWSDocuments.forEach(new Block<Document>() {
                 public void apply(Document document) {
@@ -134,6 +136,9 @@ public class ProcessWorkspaceRepository extends MongoRepository {
         } catch (Exception oEx) {
             oEx.printStackTrace();
         }
+        
+        // The client expects the most recent last
+        Collections.reverse(aoReturnList);
 
         return aoReturnList;
     }
