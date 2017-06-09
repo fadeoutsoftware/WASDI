@@ -1,6 +1,7 @@
 package it.fadeout.rest.resources;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import javax.servlet.ServletConfig;
@@ -180,10 +181,12 @@ public class ProcessWorkspaceResource {
 								
 				// set process state to STOPPED only if CREATED or RUNNING
 				String sPrecSatus = oProcessToDelete.getStatus();
-				if (sPrecSatus.equalsIgnoreCase(ProcessStatus.CREATED.name()) || 
-						sPrecSatus.equalsIgnoreCase(ProcessStatus.RUNNING.name())) {
+				
+				if (sPrecSatus.equalsIgnoreCase(ProcessStatus.CREATED.name()) || sPrecSatus.equalsIgnoreCase(ProcessStatus.RUNNING.name())) {
 					
 					oProcessToDelete.setStatus(ProcessStatus.STOPPED.name());
+					oProcessToDelete.setOperationEndDate(Utils.GetFormatDate(new Date()));
+					
 					if (!oRepository.UpdateProcess(oProcessToDelete)) {
 						System.out.println("ProcessWorkspaceResource.DeleteProcess: Unable to update process status");
 					}

@@ -21,7 +21,7 @@ import it.fadeout.rest.resources.OpenSearchResource;
 import it.fadeout.rest.resources.OpportunitySearchResource;
 import it.fadeout.rest.resources.ProcessWorkspaceResource;
 import it.fadeout.rest.resources.ProductResource;
-import it.fadeout.rest.resources.SnapOperationsResources;
+import it.fadeout.rest.resources.ProcessingResources;
 import it.fadeout.rest.resources.WasdiResource;
 import it.fadeout.rest.resources.WorkspaceResource;
 import wasdi.shared.LauncherOperations;
@@ -55,7 +55,7 @@ public class Wasdi extends Application {
 		classes.add(WorkspaceResource.class);
 		classes.add(ProductResource.class);
 		classes.add(OpportunitySearchResource.class);
-		classes.add(SnapOperationsResources.class);
+		classes.add(ProcessingResources.class);
 		classes.add(ProcessWorkspaceResource.class);
 		classes.add(CatalogResources.class);
 		return classes;
