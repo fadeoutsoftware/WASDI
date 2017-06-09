@@ -6,6 +6,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.text.DecimalFormat;
 import java.util.Date;
 
 import org.apache.commons.cli.CommandLine;
@@ -993,9 +994,11 @@ public class LauncherMain {
     	}
     	
         long lFileSizeByte = lSize;
-        long lFileSizeGiga = lFileSizeByte / (1024L * 1024L * 1024L);
-        s_oLogger.debug("LauncherMain.SetFileSizeToProcess: File size [Gb] = " + lFileSizeGiga);
-        oProcessWorkspace.setFileSize(Long.toString(lFileSizeGiga));
+        double lFileSizeGiga = ( (double) lFileSizeByte )/ (1024.0 * 1024.0 * 1024.0);
+        DecimalFormat oDecimalFormat = new DecimalFormat("#.00"); 
+        
+        s_oLogger.debug("LauncherMain.SetFileSizeToProcess: File size [Gb] = " + oDecimalFormat.format(lFileSizeGiga));
+        oProcessWorkspace.setFileSize(oDecimalFormat.format(lFileSizeGiga));
     }
     
     
