@@ -51,69 +51,114 @@
         </table>
     </div>
 
-    <!---------------------- LIST OF FILES---------------------->
-    <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12 list-files">
+    <!------------------------ GLOBE ----------------------->
+    <div class="col-xs-12 col-sm-4 col-md-4 col-lg-4" >
+        <!-- Graphic trick with form+fieldset+legend -->
+        <form>
+            <fieldset class="my-input-text">
+                <legend><h3>Map</h3></legend>
+                <div class="globe-style " id="cesiumContainer3"></div>
+            </fieldset>
+        </form>
 
-        <div class="panel-group " id="accordion" role="tablist" aria-multiselectable="true" ng-show="m_oController.m_bIsOpenInfo" >
-
-            <div class="loading-files" ng-show="m_oController.isEmptyProductList() == true && m_oController.m_bIsVisibleFiles == true">
-                <!--<i class="fa fa-spinner fa-pulse fa-3x fa-fw"></i>-->
-                <!--<span class="sr-only">Loading...</span>-->
-                <invader></invader>
-            </div>
-            <div ng-show="m_oController.isEmptyProductList() == true && m_oController.m_bIsVisibleFiles == false">
-                <h4>{{"WORKSPACES_LABEL_NO_RESULTS"|translate}}</h4>
-            </div>
-
-            <div class="panel panel-default" ng-repeat="product in m_oController.getProductList()" >
-
-                <div class="panel-heading" role="tab" id="headingOne">
-                    <h4 class="panel-title">
-                        <i class="fa fa-file " aria-hidden="true"></i>
-                        <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" data-target="{{'#product' + $index}}" aria-expanded="false" aria-controls="collapseThree">
-                            <b>{{product.fileName}}</b>
-                        </a>
-                    </h4>
+        <!-- Graphic trick with form+fieldset+legend -->
+        <!-- List of users-->
+        <form>
+            <fieldset class="my-input-text">
+                <legend><h3>List of user</h3></legend>
+                <div class="" ng-show="m_oController.m_bIsOpenInfo">
+                    <table class="table">
+                        <thead>
+                        <th >Shared users</th>
+                        <th class="over-icon" data-toggle="tooltip" data-placement="top" title="Coming soon">
+                            <i class="fa fa-plus-circle fa-lg" aria-hidden="true"></i>
+                        </th>
+                        </thead>
+                        <tr ng-repeat="user in m_oController.m_oWorkspaceSelected.sharedUsers">
+                            <td>
+                                <i class="fa fa-user" aria-hidden="true"></i>
+                            </td>
+                            <td>
+                                {{user}}
+                            </td>
+                        </tr>
+                        <tr><td><i class="fa fa-user" aria-hidden="true"></i></td><td>user id</td></tr>
+                        <!--<tr><td><i class="fa fa-user" aria-hidden="true"></i></td><td>owner id</td></tr>-->
+                        <!--<tr><td><i class="fa fa-user" aria-hidden="true"></i></td><td>owner id</td></tr>-->
+                    </table>
                 </div>
-                <div id="{{'product'+$index}}" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingThree">
+            </fieldset>
+        </form>
+    </div>
 
-                    <div class="list-group">
-                        <li class="list-group-item"><h4>File name:</h4> {{product.fileName}}</li>
-                        <li class="list-group-item"><h4>Name:</h4> {{product.name}}</li>
-                        <li class="list-group-item">
-                            <h4>Bands:</h4>
-                            <div ng-repeat="band in product.bandsGroups.bands">{{band.name}}</div>
-                        </li>
+    <!---------------------- LIST OF FILES---------------------->
+    <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12 ">
+        <form>
+            <fieldset class="my-input-text fieldset-list-files">
+                <legend><h3>List of files</h3></legend>
+                <!-- LOADING ICON -->
+                <div class="loading-files"ng-show="m_oController.isEmptyProductList() == true && m_oController.m_bIsVisibleFiles == true" ><!--ng-show="m_oController.isEmptyProductList() == true && m_oController.m_bIsVisibleFiles == true" -->
+                    <invader></invader>
+                </div>
+                <!-- IF THERE ISN'T FILES-->
+                <!--<div ng-show="m_oController.isEmptyProductList() == true && m_oController.m_bIsVisibleFiles == false">-->
+                    <!--<h4>{{"WORKSPACES_LABEL_NO_RESULTS"|translate}}</h4>-->
+                <!--</div>-->
+
+                <!--LIST OF FILES-->
+                <div class="panel-group list-files " id="accordion" role="tablist" aria-multiselectable="true" ng-show="m_oController.m_bIsOpenInfo" >
+
+                    <div class="panel panel-default" ng-repeat="product in m_oController.getProductList()" >
+
+                        <div class="panel-heading" role="tab" id="headingOne">
+                            <span class="panel-title">
+                                <i class="fa fa-file " aria-hidden="true"></i>
+                                <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" data-target="{{'#product' + $index}}" aria-expanded="false" aria-controls="collapseThree">
+                                    <b>{{product.fileName}}</b>
+                                </a>
+                            </span>
+                        </div>
+
+                        <div id="{{'product'+$index}}" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingThree">
+
+                            <div class="list-group">
+                                <li class="list-group-item"><h4>File name:</h4> {{product.fileName}}</li>
+                                <li class="list-group-item"><h4>Name:</h4> {{product.name}}</li>
+                                <li class="list-group-item">
+                                    <h4>Bands:</h4>
+                                    <div ng-repeat="band in product.bandsGroups.bands">{{band.name}}</div>
+                                </li>
+                            </div>
+
+                        </div>
                     </div>
 
                 </div>
-            </div>
-
-        </div>
-
+            </fieldset>
+        </form>
     </div>
     <!--------------------LIST OF OWNERS----------------------->
-    <div class="col-lg-2 col-md-2 col-sm-2 col-xs-12 ">
-        <table class="table"ng-show="m_oController.m_bIsOpenInfo">
-            <thead>
-                <th >Shared users</th>
-                <th class="over-icon" data-toggle="tooltip" data-placement="top" title="Coming soon">
-                    <i class="fa fa-plus-circle fa-lg" aria-hidden="true"></i>
-                </th>
-            </thead>
-            <tr ng-repeat="user in m_oController.m_oWorkspaceSelected.sharedUsers">
-                <td>
-                    <i class="fa fa-user" aria-hidden="true"></i>
-                </td>
-                <td>
-                    {{user}}
-                </td>
-            </tr>
-            <tr><td><i class="fa fa-user" aria-hidden="true"></i></td><td>user id</td></tr>
-            <!--<tr><td><i class="fa fa-user" aria-hidden="true"></i></td><td>owner id</td></tr>-->
-            <!--<tr><td><i class="fa fa-user" aria-hidden="true"></i></td><td>owner id</td></tr>-->
-        </table>
-    </div>
+    <!--<div class="col-lg-2 col-md-2 col-sm-2 col-xs-12 ">-->
+        <!--<table class="table"ng-show="m_oController.m_bIsOpenInfo">-->
+            <!--<thead>-->
+                <!--<th >Shared users</th>-->
+                <!--<th class="over-icon" data-toggle="tooltip" data-placement="top" title="Coming soon">-->
+                    <!--<i class="fa fa-plus-circle fa-lg" aria-hidden="true"></i>-->
+                <!--</th>-->
+            <!--</thead>-->
+            <!--<tr ng-repeat="user in m_oController.m_oWorkspaceSelected.sharedUsers">-->
+                <!--<td>-->
+                    <!--<i class="fa fa-user" aria-hidden="true"></i>-->
+                <!--</td>-->
+                <!--<td>-->
+                    <!--{{user}}-->
+                <!--</td>-->
+            <!--</tr>-->
+            <!--<tr><td><i class="fa fa-user" aria-hidden="true"></i></td><td>user id</td></tr>-->
+            <!--&lt;!&ndash;<tr><td><i class="fa fa-user" aria-hidden="true"></i></td><td>owner id</td></tr>&ndash;&gt;-->
+            <!--&lt;!&ndash;<tr><td><i class="fa fa-user" aria-hidden="true"></i></td><td>owner id</td></tr>&ndash;&gt;-->
+        <!--</table>-->
+    <!--</div>-->
 
 
 </div>

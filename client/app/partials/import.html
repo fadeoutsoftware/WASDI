@@ -332,7 +332,8 @@
                             <td class="button-cell">
                                 <div class="btn-group-vertical" role="group" >
                                     <button type="button" class="btn btn btn-primary" ng-click="m_oController.downloadProduct(layer)"
-                                            ng-disabled="m_oController.isPossibleDoDownload(layer)" data-toggle="tooltip" data-placement="top" title="{{'IMPORT_TOOLTIP_ADD_PRODUCT'|translate}}">
+                                            ng-disabled="m_oController.isPossibleDoDownload(layer) || (layer.isDisabledToDoDownload != null && layer.isDisabledToDoDownload)" data-toggle="tooltip" data-placement="top" title="{{'IMPORT_TOOLTIP_ADD_PRODUCT'|translate}}">
+
                                         <i class="fa fa-plus " aria-hidden="true"></i>
                                     </button>
                                     <button type="button" class="btn btn btn-primary" ng-click="m_oController.zoomOnBounds(layer.rectangle)"

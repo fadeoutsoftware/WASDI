@@ -10,6 +10,7 @@ var ProductEditorInfoController = (function() {
         this.m_oProduct = oExtras.product;
         this.m_oProductService = oProductService;
         this.m_oReturnProduct = oExtras.product;
+        this.m_oOldFriendlyName = oExtras.product.productFriendlyName;
         //$scope.close = oClose;
 
         var oController=this;
@@ -43,6 +44,8 @@ var ProductEditorInfoController = (function() {
         var oOldMetadata = this.m_oProduct.metadata;
         this.m_oProduct.metadata = null;
 
+        if(this.m_oProduct.productFriendlyName === this.m_oOldFriendlyName)
+            return false;
         this.m_oProductService.updateProduct(this.m_oProduct).success(function (data, status)
         {
             if(data === "") {
@@ -52,7 +55,7 @@ var ProductEditorInfoController = (function() {
                 console.log("Product Updated");
             }
             else
-                console.log("Error: impossible to update the product");
+                console.log("Error update product: there was an error to the server");
 
         }).error(function (data,status) {
             //alert('error');

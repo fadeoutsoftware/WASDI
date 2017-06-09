@@ -1,0 +1,94 @@
+<div class="modal fade processes-logs-modal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" ng-click="close(false)" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title ">{{"DIALOG_PROCESSES_LOGS_TITLE"|translate}}</h4>
+            </div>
+            <div class="modal-body">
+                <div class="row" ng-hide="m_oController.m_bAreProcessesLoaded">
+                    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 ">
+                        <invader></invader>
+                    </div>
+                </div>
+
+                <div class="row" ng-show="m_oController.m_bAreProcessesLoaded">
+                    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 my-input-text">
+                        <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
+                            <input type="text" class="" ng-model="m_oController.filterTable" placeholder="Search...">
+                        </div>
+
+                    </div>
+                </div>
+
+                <div class="row" ng-show="m_oController.m_bAreProcessesLoaded">
+                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" ><!--style="height: 80px"-->
+
+                        <table class="table table-responsive table-striped " id="tableProcesses" >
+                            <thead>
+                            <tr>
+                                <th></th>
+                                <th>{{"ROOT_TABLE_HEAD_OPERATION_DATA"|translate}}</th>
+                                <th>{{"ROOT_TABLE_HEAD_TYPE_OF_OPERATION"|translate}}</th>
+                                <th>{{"ROOT_TABLE_HEAD_NAME"|translate}}</th>
+                                <th>{{"ROOT_TABLE_HEAD_ID_USER"|translate}}</th>
+                                <th>Real size</th>
+                                <th>Progress</th>
+                                <th>{{"ROOT_TABLE_HEAD_TIME"|translate}} </th>
+                                <!--<th></th>-->
+                            </tr>
+                            </thead>
+                            <tbody>
+
+                            <tr ng-repeat="oProcess in m_oController.m_aoProcessesLogs  | orderBy:'-' | filter: m_oController.filterTable track by $index ">
+                                <td>
+                                    <invaderfixed ng-show="oProcess.status === 'RUNNING' || oProcess.status === 'CREATED'"></invaderfixed>
+                                    <span class="label label-warning" ng-show="oProcess.status === 'DONE'">Log</span>
+                                    <span class="label label-danger" ng-show="oProcess.status === 'STOPPED'">Stopped</span>
+                                    <span class="label label-danger" ng-show="oProcess.status === 'ERROR'" >Error</span>
+                                </td>
+                                <td>
+                                    {{oProcess.operationDate}}
+                                </td>
+                                <td>
+                                    {{oProcess.operationType}}
+                                </td>
+                                <td class="text" data-toggle="tooltip" title="{{oProcess.productName}}"  data-placement="bottom">
+                                    <span>{{oProcess.productName}}</span>
+                                </td>
+                                <td>
+                                    {{oProcess.userId}}
+                                </td>
+                                <td>
+                                    {{oProcess.fileSize}} mb
+                                </td>
+                                <td>
+                                    <!--{{oProcess.progressPerc}} %-->
+                                    <div class="progress">
+                                        <div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="40" aria-valuemin="0" aria-valuemax="100" ng-style="{width:oProcess.progressPerc+'%' }">
+                                            <span class="">{{oProcess.progressPerc}} %</span><!-- class="sr-only " for hide {{oProcess.progressPerc}} % Complete (success) -->
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    {{oProcess.operationEndDate}}
+                                </td>
+                                <!--<td >-->
+                                    <!--<div class="my-button" ng-click="m_oController.deleteProcess(oProcess)" ng-show="oProcess.status === 'RUNNING' || oProcess.status === 'CREATED'">-->
+                                        <!--<i class="fa fa-times-circle" aria-hidden="true" data-toggle="tooltip" title="Stop processes"  data-placement="bottom"></i>-->
+                                    <!--</div>-->
+                                <!--</td>-->
+                            </tr>
+
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+            <!--<div class="modal-footer">-->
+                <!--<button type="button" ng-click="close('ok')" class="my-button" data-dismiss="modal">Ok</button>-->
+            <!--</div>-->
+        </div>
+    </div>
+</div>

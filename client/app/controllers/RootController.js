@@ -244,7 +244,7 @@ var RootController = (function() {
                 if (data != undefined)
                 {
                     oController.m_oConstantsService.setActiveWorkspace(data);
-                    oController.m_sWorkspace = oController.m_oConstantsService.getActiveWorkspace();
+                    oController.m_sWorkSpace = oController.m_oConstantsService.getActiveWorkspace();
                     //oController.m_aoProcessesRunning = oController.m_oProcessesLaunchedService.getProcessesByLocalStorage(oController.m_sWorkspace.workspaceId, oController.m_oUser.userId);
                 }
             }
@@ -412,6 +412,35 @@ var RootController = (function() {
 
                 if(result === 'delete')
                     oController.m_oProcessesLaunchedService.removeProcessInServer(oProcessInput.processObjId,oWorkspace.workspaceId,oProcessInput)
+            });
+        });
+
+        return true;
+    };
+
+    /**
+     * openProcessLogsDialog
+     * @returns {boolean}
+     */
+    RootController.prototype.openProcessLogsDialog = function()
+    {
+        var oController = this;
+        // var oWorkspace = this.m_oConstantsService.getActiveWorkspace();
+        this.m_oModalService.showModal({
+            templateUrl: "dialogs/processes_logs/ProcessesLogsDialog.html",
+            controller: "ProcessesLogsController",
+            // inputs: {
+            //     extras: {
+            //         workspaceId:
+            //     }
+            // }
+
+        }).then(function(modal) {
+            modal.element.modal();
+            modal.close.then(function(result) {
+                oController.m_oScope.Result = result ;
+
+
             });
         });
 

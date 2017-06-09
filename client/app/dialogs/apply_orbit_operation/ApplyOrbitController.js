@@ -13,7 +13,6 @@ var ApplyOrbitController = (function() {
         this.m_aoProducts = this.m_oExtras.products;
         this.m_oSelectedProduct = this.m_oExtras.selectedProduct;
         this.m_oGetParametersOperationService = oGetParametersOperationService;
-
         if(utilsIsObjectNullOrUndefined(this.m_aoProducts) == true)
         {
             this.m_aoProducts = [];
@@ -99,6 +98,7 @@ var ApplyOrbitController = (function() {
             .success(function (data) {
                 if(utilsIsObjectNullOrUndefined(data) == false)
                 {
+
                     oController.m_oOptions = utilsProjectConvertJSONFromServerInOptions(data);
                     oController.m_oReturnValue.options = oController.m_oOptions;
 
@@ -111,6 +111,7 @@ var ApplyOrbitController = (function() {
                 {
                     utilsVexDialogAlertTop("Error in get parameters, there aren't data");
                 }
+
             }).error(function (error) {
                 utilsVexDialogAlertTop("Error in get parameters");
             });

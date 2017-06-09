@@ -38,6 +38,7 @@ service('GlobeService', ['$http',  'ConstantsService', function ($http, oConstan
             try {
                 this.m_oWasdiGlobe = new Cesium.Viewer(sGlobeDiv, this.oGlobeOptions);
                 this.m_aoLayers = this.m_oWasdiGlobe.imageryLayers;
+
             }
             catch(err) {
                 console.log("Error in Cesium Globe: " + err);
@@ -50,7 +51,35 @@ service('GlobeService', ['$http',  'ConstantsService', function ($http, oConstan
             console.log("Error in Cesium Globe miss WebGl");
             utilsVexDialogAlertTop("Error in Cesium Globe miss WebGl, link: https://get.webgl.org/");
         }
-    }
+    };
+
+    this.initRotateGlobe = function(sGlobeDiv)
+    {
+
+        if (window.WebGLRenderingContext)//check if browser supports WebGL
+        {
+            // browser supports WebGL
+            // default globe
+            try {
+                this.m_oWasdiGlobe = new Cesium.Viewer(sGlobeDiv, this.oGlobeOptions);
+                this.m_aoLayers = this.m_oWasdiGlobe.imageryLayers;
+
+                //rotate globe
+                this.m_oWasdiGlobe.camera.flyHome(0);
+                this.m_oWasdiGlobe.clock.multiplier = 3 * 60 * 60;
+            }
+            catch(err) {
+                console.log("Error in Cesium Globe: " + err);
+
+            }
+        }
+        else
+        {
+            //TODO ERROR  browser doesn't support WebGL
+            console.log("Error in Cesium Globe miss WebGl");
+            utilsVexDialogAlertTop("Error in Cesium Globe miss WebGl, link: https://get.webgl.org/");
+        }
+    };
     //clear globe
     this.clearGlobe=function()
     {

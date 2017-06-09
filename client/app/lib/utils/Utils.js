@@ -347,6 +347,14 @@ function utilsGetTimeStamp()
     return datetime;
 }
 
+function utilsSleep(milliseconds) {
+    var start = new Date().getTime();
+    for (var i = 0; i < 1e7; i++) {
+        if ((new Date().getTime() - start) > milliseconds){
+            break;
+        }
+    }
+}
 /********************* WEBGL *********************/
 function utilsBrowserSupportWebGl(){
     if (window.WebGLRenderingContext)//check if browser supports WebGL

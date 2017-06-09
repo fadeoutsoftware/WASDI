@@ -32,6 +32,8 @@
 @import "../dialogs/attributes_metadata_info/attributes_metadata";
 @import "../dialogs/sftp_upload/sftp_upload";
 @import "../dialogs/delete_process/delete_process";
+@import "../dialogs/snake_dialog/snake_dialog";
+@import "../dialogs/processes_logs/processes_logs";
 
 body
 {
@@ -274,12 +276,22 @@ h4
       //overflow-y: auto;
       //max-height:$wasdi-max-heigth-body;
       overflow-x: auto;
+
+      //FIX FIREFOX
+      input[type=text]
+      {
+        padding: 6px 12px;
+      }
+
       form
       {
         fieldset
         {
           border:2px solid $wasdi-blue-logo;
           padding: 20px 20px;
+
+
+
           legend
           {
             width: auto;

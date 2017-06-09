@@ -24,7 +24,32 @@ service('ProcessesLaunchedService', ['ConstantsService','$rootScope','$http', fu
     this.loadProcessesFromServer = function(sWorkSpaceId)
     {
         var oService = this;
+        console.log("Last loadProcessesFromServer():"+utilsGetTimeStamp());
+        this.m_oHttp.get(this.APIURL + '/process/lastbyws?sWorkspaceId='+sWorkSpaceId).success(function (data, status)
+            {
+                if(!utilsIsObjectNullOrUndefined(data))
+                {
+                    /*
+                    // Full Process Log for extreme debug
+                    console.log("ProcessLaunchedService.loadProcessesFromServer PROCESSES LOG:")
+                    data.forEach(function (i) {
+                        console.log(i.operationType + ": " + i.status + " " + i.progressPerc + "%")
+                    });
+                    */
 
+                    oService.m_aoProcessesRunning = data;
+                    oService.updateProcessesBar();
+                }
+            }).error(function (data,status)
+            {
+                utilsVexDialogAlertTop("Error in load Processes");
+            });
+    }
+
+    this.loadAllProcessesFromServer = function(sWorkSpaceId)
+    {
+        var oService = this;
+        console.log("Last loadProcessesFromServer():"+utilsGetTimeStamp());
         this.m_oHttp.get(this.APIURL + '/process/byws?sWorkspaceId='+sWorkSpaceId).success(function (data, status)
             {
                 if(!utilsIsObjectNullOrUndefined(data))
@@ -44,6 +69,11 @@ service('ProcessesLaunchedService', ['ConstantsService','$rootScope','$http', fu
             {
                 utilsVexDialogAlertTop("Error in load Processes");
             });
+    }
+
+    this.getAllProcessesFromServer = function(sWorkSpaceId)
+    {
+        return this.m_oHttp.get(this.APIURL + '/process/byws?sWorkspaceId='+sWorkSpaceId);
     }
 
     this.removeProcessInServer = function(sPidInput,sWorkSpaceId,oProcess)
@@ -120,14 +150,18 @@ service('ProcessesLaunchedService', ['ConstantsService','$rootScope','$http', fu
         return false;
     }
 
-    this.checkIfFileIsDownloading = function(sProcessName,sTypeOfProcess)
+    this.checkIfFileIsDownloading = function(oLayer,sTypeOfProcess)
     {
+        if(utilsIsObjectNullOrUndefined(oLayer)=== true)
+            return false;
+        var sProcessName = oLayer.title;
+        var sLink = oLayer.link;
         if(utilsIsStrNullOrEmpty(sProcessName))
             return false;
         if(utilsIsStrNullOrEmpty(sTypeOfProcess))
             return false;
 
-        var sProcess = {"productName":sProcessName,"operationType":sTypeOfProcess};
+        var sProcess = {"productName":sProcessName,"operationType":sTypeOfProcess, "link":sLink};
 
         if(utilsIsObjectNullOrUndefined(sProcess))
             return false;
@@ -140,7 +174,9 @@ service('ProcessesLaunchedService', ['ConstantsService','$rootScope','$http', fu
         for(var iIndex = 0; iIndex < iNumberOfProcesses; iIndex++ )
         {
             /*check if the processes are equals*/
-            if(aoProcesses[iIndex].productName == sProcess.productName && aoProcesses[iIndex].operationType == sProcess.operationType)
+            //aoProcesses[iIndex].productName == sProcess.productName
+            if( (utilsIsSubstring(aoProcesses[iIndex].productName, sProcess.productName)===true || utilsIsSubstring(aoProcesses[iIndex].productName, sProcess.link)===true)
+                && aoProcesses[iIndex].operationType == sProcess.operationType && aoProcesses[iIndex].status=== "RUNNING")
             {
                 return true;
             }
