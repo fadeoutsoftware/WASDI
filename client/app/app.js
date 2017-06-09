@@ -148,3 +148,4 @@ wasdiApp.controller("RangeDopplerTerrainCorrectionController",RangeDopplerTerrai
 wasdiApp.controller("AttributesMetadataController",AttributesMetadataController);
 wasdiApp.controller("SftpUploadController",SftpUploadController);
 wasdiApp.controller("DeleteProcessController",DeleteProcessController);
+wasdiApp.controller("ProcessesLogsController",ProcessesLogsController);

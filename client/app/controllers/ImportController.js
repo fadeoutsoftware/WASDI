@@ -596,8 +596,9 @@ var ImportController = (function() {
     /* us server Download the product in geoserver, the parameter oLayer = product*/
     ImportController.prototype.downloadProduct = function(oLayer)
     {
+        oLayer.isDisabledToDoDownload = true;
         var oWorkSpace = this.m_oActiveWorkspace;
-        var oController=this
+        var oController = this;
         if(utilsIsObjectNullOrUndefined(oWorkSpace) || utilsIsObjectNullOrUndefined(oLayer))
         {
             //TODO CHEK THIS POSSIBLE CASE
@@ -614,32 +615,15 @@ var ImportController = (function() {
             return false;
         }
 
-        //for(var iIndex = 0; iIndex < oLayer.length;iIndex++ )
-        //{
-        //    var swap;
-        //
-        //    swap = oLayer.bounds[iIndex][0];
-        //    oLayer.bounds[iIndex][0] = oLayer.bounds[iIndex][1];
-        //    oLayer.bounds[iIndex][1] = swap;
-        //}
         this.m_oFileBufferService.download(url,oWorkSpace.workspaceId,oLayer.bounds.toString(),oLayer.provider).success(function (data, status) {
             //TODO CHECK DATA-STATUS
             var oDialog = utilsVexDialogAlertBottomRightCorner("Importing Image in WASDI...");
-            //oController.m_oProcessesLaunchedService.addProcessesByLocalStorage(oLayer.title,
-            //                                                                    null,
-            //                                                                    oController.m_oProcessesLaunchedService.getTypeOfProcessProductDownload()
-            //                                                                    ,oWorkSpace.workspaceId,oController.m_oUser.userId);
-            //oController.m_oProcessesLaunchedService.loadProcessesFromServer(oWorkSpace.workspaceId);
-
             utilsVexCloseDialogAfterFewSeconds("3000",oDialog);
-            /*
-            * {processName:oLayer.title, nodeId:null,
-            * typeOfProcess:oController.m_oProcessesLaunchedService.getTypeOfProcessProductDownload()}
-            *
-            * */
+
 
         }).error(function (data,status) {
             utilsVexDialogAlertTop('There was an error importing the Image in the workspace');
+            oLayer.isDisabledToDoDownload = false;
         });
         return true;
     }
@@ -1141,6 +1125,7 @@ var ImportController = (function() {
             case "PUBLISH":
             case "PUBLISHBAND":
             case "UPDATEPROCESSES":
+                console.log("import switch case update process");
                 oController.m_oProcessesLaunchedService.loadProcessesFromServer(oController.m_oActiveWorkspace.workspaceId);
                 break;
             case "APPLYORBIT":
@@ -1246,9 +1231,21 @@ var ImportController = (function() {
     }
     ImportController.prototype.isPossibleDoDownload = function(oLayer)
     {
+        var bReturnValue = false;
         if(utilsIsObjectNullOrUndefined(oLayer))
             return false;
-        return this.m_oProcessesLaunchedService.checkIfFileIsDownloading(oLayer.link,this.m_oProcessesLaunchedService.getTypeOfProcessProductDownload());
+        // if(oLayer.isDisabledToDoDownload)
+        if(this.m_oProcessesLaunchedService.checkIfFileIsDownloading(oLayer,this.m_oProcessesLaunchedService.getTypeOfProcessProductDownload()) === true)
+        {
+            bReturnValue = true;
+            oLayer.isDisabledToDoDownload = false;
+        }
+        else
+        {
+            bReturnValue = false;
+
+        }
+        return bReturnValue;
     }
 
     ImportController.prototype.visualizeLocalStorageInputs = function(bIsVisible)

@@ -1,0 +1,41 @@
+.processes-logs-modal
+{
+  .modal-dialog
+  {
+    width:95%;//100vw
+    height: 90%;//100vh
+
+    .modal-content
+    {
+      .modal-header
+      {
+        color:$wasdi-white;
+        background-color: $wasdi-blue-logo;
+        .close
+        {
+          color: $wasdi-white;
+          opacity: 1;
+        }
+      }
+
+      .modal-body
+      {
+        overflow-y: auto;
+        overflow-x: auto;
+        //override my input tex
+        //.my-input-text{
+        //  width: 50%;
+        //}
+      }
+
+      .modal-footer
+      {
+        border-top:1px solid $wasdi-blue-logo;
+        .my-button
+        {
+          padding: 10px 21px;
+        }
+      }
+    }
+  }
+}

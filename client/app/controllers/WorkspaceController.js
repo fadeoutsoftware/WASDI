@@ -3,7 +3,7 @@
  */
 
 var WorkspaceController = (function() {
-    function WorkspaceController($scope, $location, oConstantsService, oAuthService, oWorkspaceService,$state,oProductService, oRabbitStompService) {
+    function WorkspaceController($scope, $location, oConstantsService, oAuthService, oWorkspaceService,$state,oProductService, oRabbitStompService,oGlobeService) {
         this.m_oScope = $scope;
         this.m_oLocation  = $location;
         this.m_oAuthService = oAuthService;
@@ -19,9 +19,11 @@ var WorkspaceController = (function() {
         this.m_bIsVisibleFiles = false;
         this.m_oWorkspaceSelected = null;
         this.m_oRabbitStompService = oRabbitStompService;
+        this.m_oGlobeService = oGlobeService;
         this.fetchWorkspaceInfoList();
 
         this.m_oRabbitStompService.unsubscribe();
+        this.m_oGlobeService.initGlobe('cesiumContainer3');
 
     }
 
@@ -193,7 +195,8 @@ var WorkspaceController = (function() {
         'WorkspaceService',
         '$state',
         'ProductService',
-        'RabbitStompService'
+        'RabbitStompService',
+        'GlobeService'
     ];
     return WorkspaceController;
 }) ();

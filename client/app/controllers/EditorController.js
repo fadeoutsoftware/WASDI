@@ -228,7 +228,7 @@ var EditorController = (function () {
      */
     EditorController.prototype.receivedPublishBandMessage = function (oMessage) {
         var oLayer = oMessage.payload;
-
+        var sLabelText = "";
          if (utilsIsObjectNullOrUndefined(oLayer)) {
             console.log("Error LayerID is empty...");
             return false;
@@ -304,8 +304,12 @@ var EditorController = (function () {
         oNode.original.bPubblish = true;
         $('#jstree').jstree(true).set_icon(oLayer.layerId, 'assets/icons/check_20x20.png');
         $("#jstree").jstree().enable_node(oLayer.layerId);
-        // var oNodet = $('#jstree').jstree(true).get_node(oLayer.layerId);
-        //$('#jstree').jstree(true).set_icon(oLayer.layerId, 'assets/icons/check.png');
+        sLabelText = $("#jstree").jstree().get_text(oLayer.layerId);
+        sLabelText = sLabelText.split("<i>");
+        sLabelText = sLabelText[1].split("</i>");
+        sLabelText = sLabelText[0];
+        utilsJstreeUpdateLabelNode(oLayer.layerId,sLabelText);
+
     }
 
     /**
@@ -926,11 +930,12 @@ var EditorController = (function () {
                                                     var that = this;
                                                     oController.m_oProductService.deleteProductFromWorkspace($node.original.fileName, oController.m_oActiveWorkspace.workspaceId, bDeleteFile, bDeleteLayer)
                                                         .success(function (data) {
-                                                            var iLengthLayer = oController.m_aoLayersList.length;
+                                                            var iLengthLayer;
                                                             var iLengthChildren_d = that.temp.children_d.length;
 
                                                             for(var iIndexChildren = 0; iIndexChildren < iLengthChildren_d; iIndexChildren++)
                                                             {
+                                                                iLengthLayer = oController.m_aoLayersList.length;
                                                                 for(var iIndexLayer = 0; iIndexLayer < iLengthLayer; iIndexLayer++)
                                                                 {
                                                                     if( that.temp.children_d[iIndexChildren] ===  oController.m_aoLayersList[iIndexLayer].layerId)

@@ -1,5 +1,12 @@
 .workspaces-view
 {
+  //GLOBE
+  .globe-style
+  {
+    width: auto;//500px
+    height: $wasdi-heigth-panel;//500px
+    border: 2px solid black;
+  }
   //TITLE
   .my-title
   {
@@ -62,46 +69,71 @@
     }
   }
   // LIST OF FILES IN WORKSPACES
-  .list-files
-  {
-    height: $wasdi-max-height-workspaces;
-    overflow-y: auto;
-    .loading-files
+  .fieldset-list-files{
+    //overflow-y: auto;
+    //overflow-x: hidden;
+    //height: $wasdi-max-height-workspaces;
+    .list-files
     {
-      width: 50%;
-      margin: 0 auto;
-      text-align: center;
-    }
+      height: $wasdi-max-height-workspaces;
+      overflow-y: auto;
+      overflow-x: hidden;
 
-    .panel-default
-    {
-      border-color: $wasdi-list-of-files-border-color;
-      border-width: 2px;
-      .panel-heading
+      .loading-files
       {
-        .panel-title
-        {
-          /*color icon*/
-          i
-          {
-            color:$wasdi-blue-logo;
-          }
-          //no underline
-          a, u {
-            text-decoration: none;
-          }
-        }
+        width: 50%;
+        margin: 0 auto;
+        text-align: center;
       }
 
-      .list-group-item
+      .panel-default
       {
         border-color: $wasdi-list-of-files-border-color;
+        border-width: 2px;
+        .panel-heading
+        {
+          //font-size:
+          .panel-title
+          {
+            /*color icon*/
+            font-size: 14px;
+            i
+            {
+              color:$wasdi-blue-logo;
+            }
+            //no underline
+            a, u {
+              text-decoration: none;
+            }
+          }
+        }
+
+        .list-group-item
+        {
+          border-color: $wasdi-list-of-files-border-color;
+        }
+
+
+
+
       }
 
-
-
     }
-
   }
 
+
+  //Graphic trick
+  form
+  {
+    fieldset
+    {
+      border:2px solid $wasdi-blue-logo;
+      padding: 20px 20px;
+    }
+    legend
+    {
+      width: auto;
+      border-bottom: 0;
+    }
+  }
 }

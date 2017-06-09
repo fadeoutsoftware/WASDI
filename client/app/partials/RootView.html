@@ -20,9 +20,9 @@
 
 
     <div class="col-lg-1 col-md-2 col-sm-2 col-xs-2 ">
-        <a  ui-sref="root.workspaces"  >
+        <a  href=""  ng-click="m_oController.openSnake()"><!--ui-sref="root.workspaces"-->
             <!--<img class="navbar-brand-logo">-->
-            <img class="brand-logo" id="brand-logo" ng-dblclick="m_oController.openSnake()">
+            <img class="brand-logo" id="brand-logo" >
             <script>
                 // Script fix an error with Firefox which does not
                 // show image correctly if the 'SRC' is set from CSS
@@ -153,9 +153,9 @@
         <br/>
 
         <div class="row">
-            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 processes-list" ng-show="m_oController.m_bIsOpenNav" style="height: 400px" ><!--style="height: 80px"-->
+            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 processes-list" ng-show="m_oController.m_bIsOpenNav" style="height: 350px" ><!--style="height: 80px"-->
 
-                <table class="table table-striped " id="tableProcesses" >
+                <table class="table table-responsive table-striped " id="tableProcesses" >
                     <thead>
                     <tr>
                         <th></th>
@@ -184,8 +184,8 @@
                         <td>
                             {{oProcess.operationType}}
                         </td>
-                        <td>
-                            {{oProcess.productName}}
+                        <td class="text" data-toggle="tooltip" title="{{oProcess.productName}}"  data-placement="bottom">
+                            <span>{{oProcess.productName}}</span>
                         </td>
                         <td>
                             {{oProcess.userId}}
@@ -213,8 +213,15 @@
 
                     </tbody>
                 </table>
-
             </div>
+
+            <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4 col-xs-offset-6 col-sm-offset-6 col-md-offset-6 col-lg-offset-6">
+                <button class="btn my-button" ng-click="m_oController.openProcessLogsDialog()">
+                    <i class="fa fa-refresh fa-2x" aria-hidden="true"></i>
+                    <h4>Load more...</h4>
+                </button>
+            </div>
+
         </div>
 
 

@@ -191,13 +191,25 @@
     .processes-list
     {
       margin-top:10px;
-      overflow-y: auto;
+      //overflow-y: auto;
       //height: 400px;
+      min-height: 40px;
 
       .table-striped>tbody>tr:nth-of-type(odd)
       {
         background-color: $wasdi-blue-logo;
+      }
 
+      //If the name it's too long cut it!
+      .table td.text {
+        max-width: 350px;
+        span {
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          display: inline-block;
+          max-width: 100%;
+        }
       }
       .single-process
       {
