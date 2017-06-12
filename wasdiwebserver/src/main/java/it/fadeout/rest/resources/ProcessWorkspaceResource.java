@@ -109,7 +109,7 @@ public class ProcessWorkspaceResource {
 			ProcessWorkspaceRepository oRepository = new ProcessWorkspaceRepository();
 
 			// Get Process List
-			List<ProcessWorkspace> aoProcess = oRepository.GetProcessByWorkspace(sWorkspaceId);
+			List<ProcessWorkspace> aoProcess = oRepository.GetLastProcessByWorkspace(sWorkspaceId);
 
 			// For each
 			for (int iProcess=0; iProcess<aoProcess.size(); iProcess++) {
