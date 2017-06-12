@@ -108,7 +108,7 @@ public class OpenSearchResource {
 	@GET
 	@Path("/query/count")
 	@Produces({"application/xml", "application/json", "text/html"})
-	public int GetProductsCountSentinel(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sQuery") String sQuery, @QueryParam("providers") String sProviders)
+	public int GetProductsCount(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sQuery") String sQuery, @QueryParam("providers") String sProviders)
 	{
 		System.out.println("OpenSearchResource: GetProductsCount");
 		
@@ -170,7 +170,18 @@ public class OpenSearchResource {
 			}			
 			int iProviderLimit = iLimit / asProviders.length;
 			boolean bIncreaseLimit = asProviders.length * iProviderLimit < iLimit;
-
+			
+//			//compute the correct offset
+//			int iOffset = 25;
+//			try {
+//				iOffset = Integer.parseInt(sOffset);
+//			} catch (NumberFormatException e1) {
+//				e1.printStackTrace();
+//			}			
+//			int iProviderOffset = iOffset / asProviders.length;
+//			//boolean bIncreaseLimit = asProviders.length * iProviderLimit < iLimit;
+			
+			
 			for (String sProvider : asProviders) {
 				
 				if (bIncreaseLimit) {
