@@ -9,7 +9,6 @@ import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
@@ -24,7 +23,6 @@ import wasdi.shared.business.User;
 import wasdi.shared.business.UserSession;
 import wasdi.shared.data.SessionRepository;
 import wasdi.shared.data.UserRepository;
-import wasdi.shared.rabbit.RabbitMethods;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.LoginInfo;
 import wasdi.shared.viewmodels.PrimitiveResult;
@@ -67,13 +65,8 @@ public class AuthResource {
 				List<UserSession> aoEspiredSessions = oSessionRepository.GetAllExpiredSessions(oWasdiUser.getUserId());
 				for (UserSession oUserSession : aoEspiredSessions) {
 					//delete data base session
-					if (oSessionRepository.DeleteSession(oUserSession))
-					{
-						//delete queue session on rabbit
-						if (!RabbitMethods.QueueDelete(oUserSession.getSessionId(), oUserSession.getUserId()))
-							System.out.println("AuthService.Login: Error deleting session queue rabbit.");
-						else
-							System.out.println("AuthService.Login: Queue deleted.");
+					if (!oSessionRepository.DeleteSession(oUserSession)) {
+						System.out.println("AuthService.Login: Error deleting session.");
 					}
 				}
 				
@@ -138,19 +131,13 @@ public class AuthResource {
 		SessionRepository oSessionRepository = new SessionRepository();
 		UserSession oSession = oSessionRepository.GetSession(sSessionId);
 		if(oSession != null) {
-			if(oSessionRepository.DeleteSession(oSession))
-			{
+			if(oSessionRepository.DeleteSession(oSession)) {
 				System.out.println("AuthService.Logout: Session data base deleted.");
-				//delete queue session on rabbit
-				if (!RabbitMethods.QueueDelete(oSession.getSessionId(), oSession.getUserId()))
-					System.out.println("AuthService.Logout: Error deleting session queue rabbit.");
-				else
-					System.out.println("AuthService.Logout: Queue deleted.");
-				
 				oResult.setBoolValue(true);
 			}
-			else
+			else {
 				System.out.println("AuthService.Logout: Error deleting session data base.");
+			}
 			
 		}
 		

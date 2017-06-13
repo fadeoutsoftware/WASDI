@@ -1,16 +1,17 @@
 package wasdi.geoserver;
 
-import it.geosolutions.geoserver.rest.encoder.coverage.GSCoverageEncoder;
-import org.apache.log4j.Logger;
-import org.apache.log4j.xml.DOMConfigurator;
-import wasdi.shared.utils.Utils;
-
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
+
+import org.apache.log4j.Logger;
+import org.apache.log4j.xml.DOMConfigurator;
+
+import it.geosolutions.geoserver.rest.encoder.coverage.GSCoverageEncoder;
+import wasdi.shared.geoserver.GeoServerManager;
+import wasdi.shared.utils.Utils;
 
 
 /**
@@ -22,41 +23,22 @@ public class Publisher {
     // Logger instance named "MyApp".
     static Logger s_oLogger = Logger.getLogger(Publisher.class);
 
-//    public static final int LEVEL = 4;
-
-//    public static final int WIDTH = 2048;
-
-//    public static final int HEIGHT = 2048;
-
-//    public static String TARGET_DIR_BASE = "c:\\temp\\ImagePyramidTest\\";
-
-//    public static String TARGET_DIR_PYRAMID = "c:\\temp\\ImagePyramidTest\\TempImagePyramidCreation\\";
-
     public static String GDAL_Retile_Command = "gdal_retile.py -r bilinear -levels 4 -ps 2048 2048 -co TILED=YES";
 
-//    public static String PYRAMYD_ENV_OPTIONS = "PYTHONPATH=C:/Program Files/GDAL/bin/gdal/python|PROJ_LIB=C:/Program Files/GDAL/bin/proj/SHARE|GDAL_DATA=C:/Program Files/GDAL/bin/gdal-data|GDAL_DRIVER_PATH=C:/Program Files/GDAL/bin/gdal/plugins|PATH=C:/Program Files/GDAL/bin;C:/Program Files/GDAL/bin/gdal/python/osgeo;C:/Program Files/GDAL/bin/proj/apps;C:/Program Files/GDAL/bin/gdal/apps;C:/Program Files/GDAL/bin/ms/apps;C:/Program Files/GDAL/bin/gdal/csharp;C:/Program Files/GDAL/bin/ms/csharp;C:/Program Files/GDAL/bin/curl;C:/Python34";
-
-//    public static String PYTHON_PATH = "c:/OSGeo4W64/bin/python";
-
-    public Publisher()
-    {
+    public Publisher() {
         try {
             //get jar directory
             File oCurrentFile = new File(Publisher.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath());
             //configure log
             DOMConfigurator.configure(oCurrentFile.getParentFile().getPath() + "/log4j.xml");
 
-        }catch(Exception exp)
-        {
+        } catch(Exception exp) {
             //no log4j configuration
             System.err.println( "Error loading log.  Reason: " + exp.getMessage() );
             System.exit(-1);
         }
     }
 
-    /*
-
-     */
     private boolean LaunchImagePyramidCreation(String sInputFile, String sPathName) {
 
         String sTargetDir = sPathName;
@@ -75,15 +57,10 @@ public class Publisher {
         try {
             //fix permission
             Utils.fixUpPermissions(oTargetPath);
-            //String sCmd = String.format("%s %s -v -r bilinear -levels %d -ps %s %s -co \"TILED=YES\" -targetDir %s %s", PYTHON_PATH, GDAL_Retile_Path, iLevel, iWidth, iHeight, "\""+sTargetDir +"\"","\""+ sInputFile+"\"");
-            //String sCmd = String.format("%s %s -v -r bilinear -levels %d -ps %s %s -co TILED=YES -targetDir %s %s", PYTHON_PATH, GDAL_Retile_Path, iLevel, iWidth, iHeight, sTargetDir, sInputFile);
-            //String sCmd = String.format("/usr/lib/wasdi/launcher/run_gdal_retile.sh %s %s", sTargetDir, sInputFile);
             
             s_oLogger.debug("Publisher.LaunchImagePyramidCreation: CIAO");
                         
             String sCmd = String.format("%s -targetDir %s %s", GDAL_Retile_Command, sTargetDir, sInputFile);
-            
-//            String[] asEnvp = PYRAMYD_ENV_OPTIONS.split("\\|");
 
             s_oLogger.debug("Publisher.LaunchImagePyramidCreation: Command: " + sCmd);
 
@@ -161,24 +138,16 @@ public class Publisher {
         return  true;
     }
 
-    private String PublishImagePyramidOnGeoServer(String sFileName, String sGeoServerAddress, String sGeoServerUser, String sGeoServerPassword, String sWorkspace, String sStoreName) throws Exception {
+    private String PublishImagePyramidOnGeoServer(String sFileName, String sStoreName, String sStyle, GeoServerManager oManager) throws Exception {
 
         File oFile = new File(sFileName);
         String sPath = oFile.getParent();
-
 
         // Create Pyramid
         if (!LaunchImagePyramidCreation(sFileName, sPath))
             return null;
 
-        s_oLogger.debug("Publisher.PublishImagePyramidOnGeoServer: Publish Image Pyramid");
-
-        //Create GeoServer Manager
-        GeoServerManager oManager = new GeoServerManager(sGeoServerAddress, sGeoServerUser, sGeoServerPassword);
-
-        if (!oManager.getReader().existsWorkspace(sWorkspace)) {
-            oManager.getPublisher().createWorkspace(sWorkspace);
-        }
+        s_oLogger.debug("Publisher.PublishImagePyramidOnGeoServer: Publish Image Pyramid With Geoserver Manager");
 
         //publish image pyramid
         try {
@@ -187,86 +156,51 @@ public class Publisher {
             File oSourceDir = new File(sPath);
 
             //Pubblico il layer
-            String slLayerName = sFileName;
-            boolean bResult = oManager.publishImagePyramid(sWorkspace, sStoreName, oSourceDir);
+            //TODO check the epsg specification
+            if (!oManager.publishImagePyramid(sStoreName, sStyle, "EPSG:4326", oSourceDir)) {
+            	s_oLogger.error("Publisher.PublishImagePyramidOnGeoServer: unable to publish image mosaic " + sStoreName);
+            	return null;
+            }
+            
+            s_oLogger.info("Publisher.PublishImagePyramidOnGeoServer: image mosaic published " + sStoreName);
 
-            //configure coverage
-            GSCoverageEncoder ce = new GSCoverageEncoder();
-            ce.setEnabled(true); //abilito il coverage
-            ce.setSRS("EPSG:4326");
-            boolean exists = oManager.getReader().existsCoveragestore(sWorkspace, sStoreName);
-            if (exists)
-                exists = oManager.getReader().existsCoverage(sWorkspace, sStoreName, slLayerName);
-            if(exists)
-                oManager.getPublisher().configureCoverage(ce, sWorkspace, sStoreName, slLayerName);
-        }catch (Exception oEx){}
+        }catch (Exception oEx) {
+        	s_oLogger.error("Publisher.PublishImagePyramidOnGeoServer: unable to publish image mosaic " + sStoreName, oEx);
+        	return null;
+        }
 
         return sStoreName;
 
     }
 
 
-    private String PublishGeoTiffImage(String sFileName, String sGeoServerAddress, String sGeoServerUser, String sGeoServerPassword, String sWorkspace, String sStoreName) throws Exception {
-        return  PublishGeoTiffImage(sFileName,sGeoServerAddress,sGeoServerUser,sGeoServerPassword,sWorkspace,sStoreName, "EPSG:4326");
-    }
-
-    private String PublishGeoTiffImage(String sFileName, String sGeoServerAddress, String sGeoServerUser, String sGeoServerPassword, String sWorkspace, String sStoreName, String sEPSG) throws Exception {
-        return  PublishGeoTiffImage(sFileName,sGeoServerAddress,sGeoServerUser,sGeoServerPassword,sWorkspace,sStoreName, sEPSG, "raster");
-    }
-
-    private String PublishGeoTiffImage(String sFileName, String sGeoServerAddress, String sGeoServerUser, String sGeoServerPassword, String sWorkspace, String sStoreName, String sEPSG, String sStyle) throws Exception {
+    private String PublishGeoTiffImage(String sFileName, String sStoreName, String sEPSG, String sStyle, GeoServerManager oManager) throws Exception {
 
         File oFile = new File(sFileName);
 
-        //Create GeoServer Manager
-        GeoServerManager oManager = new GeoServerManager(sGeoServerAddress, sGeoServerUser, sGeoServerPassword);
-
-        if (!oManager.getReader().existsWorkspace(sWorkspace)) {
-            oManager.getPublisher().createWorkspace(sWorkspace);
-        }
-
         //publish image pyramid
         try {
-
             //Pubblico il layer
-            String slLayerName = sFileName;
-            oManager.publishStandardGeoTiff(sWorkspace, sStoreName, oFile, sEPSG, sStyle);
+            if (!oManager.publishStandardGeoTiff(sStoreName, oFile, sEPSG, sStyle)) {
+            	s_oLogger.error("Publisher.PublishGeoTiffImage: unable to publish geotiff " + sStoreName);
+            	return null;
+            }
+            s_oLogger.info("Publisher.PublishGeoTiffImage: geotiff published " + sStoreName);
 
-            //configure coverage
-            GSCoverageEncoder ce = new GSCoverageEncoder();
-            ce.setEnabled(true); //abilito il coverage
-            ce.setSRS(sEPSG);
-
-            boolean exists = oManager.getReader().existsCoveragestore(sWorkspace, sStoreName);
-            if (exists)
-                exists = oManager.getReader().existsCoverage(sWorkspace, sStoreName, slLayerName);
-            if(exists)
-                oManager.getPublisher().configureCoverage(ce, sWorkspace, sStoreName, slLayerName);
-        }
-        catch (Exception oEx)
-        {
-            oEx.printStackTrace();
+        } catch (Exception oEx) {
+        	s_oLogger.error("Publisher.PublishGeoTiffImage: unable to publish geotiff " + sStoreName, oEx);
+        	return null;
         }
 
         return sStoreName;
 
     }
 
-    public String publishGeoTiff(String sFileName, String sGeoServerAddress, String sGeoServerUser, String sGeoServerPassword, String sWorkspace, String sStore) throws Exception {
-        return publishGeoTiff(sFileName, sGeoServerAddress, sGeoServerUser, sGeoServerPassword, sWorkspace, sStore, "EPSG:4326");
-    }
-
-    public String publishGeoTiff(String sFileName, String sGeoServerAddress, String sGeoServerUser, String sGeoServerPassword, String sWorkspace, String sStore, String sEPSG) throws Exception {
-        return publishGeoTiff(sFileName, sGeoServerAddress, sGeoServerUser, sGeoServerPassword, sWorkspace, sStore, sEPSG,"raster");
-    }
-
-    public String publishGeoTiff(String sFileName, String sGeoServerAddress, String sGeoServerUser, String sGeoServerPassword, String sWorkspace, String sStore, String sEPSG, String sStyle) throws Exception {
+    public String publishGeoTiff(String sFileName, String sStore, String sEPSG, String sStyle, GeoServerManager oManager) throws Exception {
 
         // Domain Check
 
         if (Utils.isNullOrEmpty(sFileName)) return  "";
-        if (Utils.isNullOrEmpty(sGeoServerAddress)) return "";
-        if (Utils.isNullOrEmpty(sWorkspace)) return "";
         if (Utils.isNullOrEmpty(sStore)) return  "";
 
         File oFile = new File(sFileName);
@@ -277,7 +211,7 @@ public class Publisher {
         long lMaxSize = 50L*1024L*1024L;
 
         // More than Gb => Pyramid, otherwise normal geotiff
-        if (lFileLenght> lMaxSize) return this.PublishImagePyramidOnGeoServer(sFileName, sGeoServerAddress, sGeoServerUser, sGeoServerPassword, sWorkspace, sStore);
-        else  return this.PublishGeoTiffImage(sFileName,sGeoServerAddress,sGeoServerUser,sGeoServerPassword,sWorkspace,sStore, sEPSG);
+        if (lFileLenght> lMaxSize) return this.PublishImagePyramidOnGeoServer(sFileName, sStore, sStyle, oManager);
+        else  return this.PublishGeoTiffImage(sFileName, sStore, sEPSG, sStyle, oManager);
     }
 }

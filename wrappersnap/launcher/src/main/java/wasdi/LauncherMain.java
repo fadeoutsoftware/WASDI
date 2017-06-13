@@ -47,6 +47,7 @@ import wasdi.shared.data.MongoRepository;
 import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.data.ProductWorkspaceRepository;
 import wasdi.shared.data.PublishedBandsRepository;
+import wasdi.shared.geoserver.GeoServerManager;
 import wasdi.shared.parameters.ApplyOrbitParameter;
 import wasdi.shared.parameters.CalibratorParameter;
 import wasdi.shared.parameters.DownloadFileParameter;
@@ -726,8 +727,11 @@ public class LauncherMain {
 
             // Ok publish
             s_oLogger.debug("LauncherMain.PublishBandImage: call PublishImage");
+            
+            GeoServerManager manager = new GeoServerManager(ConfigReader.getPropValue("GEOSERVER_ADDRESS"),ConfigReader.getPropValue("GEOSERVER_USER"),ConfigReader.getPropValue("GEOSERVER_PASSWORD"));            
+            
             Publisher oPublisher = new Publisher();
-            sLayerId = oPublisher.publishGeoTiff(sTargetFile,ConfigReader.getPropValue("GEOSERVER_ADDRESS"),ConfigReader.getPropValue("GEOSERVER_USER"),ConfigReader.getPropValue("GEOSERVER_PASSWORD"),ConfigReader.getPropValue("GEOSERVER_WORKSPACE"), sLayerId, sEPSG, sStyle);
+            sLayerId = oPublisher.publishGeoTiff(sTargetFile, sLayerId, sEPSG, sStyle, manager);
             
             boolean bResultPublishBand = true;
             
@@ -746,7 +750,8 @@ public class LauncherMain {
             DownloadedFilesRepository oDownloadedFilesRepository = new DownloadedFilesRepository();
             String sBBox = oDownloadedFilesRepository.GetDownloadedFile(oParameter.getFileName()).getBoundingBox();
 
-            String sGeoserverBBox = GeoserverUtils.GetBoundingBox(sLayerId, "json");
+            String sGeoserverBBox = manager.getLayerBBox(sLayerId);//GeoserverUtils.GetBoundingBox(sLayerId, "json");
+            		
 
             s_oLogger.debug("LauncherMain.PublishBandImage: Bounding Box: " + sBBox);
             s_oLogger.debug("LauncherMain.PublishBandImage: Geoserver Bounding Box: " + sGeoserverBBox + " for Layer Id " + sLayerId);
