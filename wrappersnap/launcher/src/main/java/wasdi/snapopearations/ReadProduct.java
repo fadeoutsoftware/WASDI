@@ -1,5 +1,6 @@
 package wasdi.snapopearations;
 
+import java.awt.Dimension;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -15,9 +16,15 @@ import org.esa.snap.core.dataio.ProductIO;
 import org.esa.snap.core.dataio.ProductReader;
 import org.esa.snap.core.dataio.ProductReaderPlugIn;
 import org.esa.snap.core.datamodel.Band;
+import org.esa.snap.core.datamodel.GeoCoding;
+import org.esa.snap.core.datamodel.GeoPos;
 import org.esa.snap.core.datamodel.MetadataAttribute;
 import org.esa.snap.core.datamodel.MetadataElement;
+import org.esa.snap.core.datamodel.PixelPos;
 import org.esa.snap.core.datamodel.Product;
+import org.geotools.referencing.CRS;
+import org.opengis.referencing.FactoryException;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 import wasdi.LauncherMain;
 import wasdi.shared.utils.Utils;
@@ -144,6 +151,35 @@ public class ReadProduct {
 		return oViewModel;
 	}
 
+	public String getProductBoundingBox(File oProductFile) {
+		
+		try {
+			Product oProduct = ProductIO.readProduct(oProductFile);
+			
+//			CoordinateReferenceSystem crs = oProduct.getSceneCRS();
+			GeoCoding geocoding = oProduct.getSceneGeoCoding();
+			Dimension dim = oProduct.getSceneRasterSize();		
+			GeoPos min = geocoding.getGeoPos(new PixelPos(0,0), null);
+			GeoPos max = geocoding.getGeoPos(new PixelPos(dim.getWidth(), dim.getHeight()), null);
+			float minX = (float) Math.min(min.lon, max.lon);
+			float minY = (float) Math.min(min.lat, max.lat);
+			float maxX = (float) Math.max(min.lon, max.lon);
+			float maxY = (float) Math.max(min.lat, max.lat);
+			
+//			Integer epsgCode = CRS.lookupEpsgCode(crs, true);
+//			String epsg = "EPSG:" + (epsgCode==null ? 4326 : epsgCode);
+//			return String.format("{\"miny\":%f,\"minx\":%f,\"crs\":\"%s\",\"maxy\":%f,\"maxx\":%f}", minY, minX, epsg, maxY, maxX);
+			
+			return String.format("%f,%f,%f,%f,%f,%f,%f,%f,%f,%f}", minY, minX, minY, maxX, maxY, maxX, maxY, minX, minY, minX);
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		return "";
+	}
+	
+	
 	/**
 	 * Get the metadata View Model of a Product
 	 * @param oFile
