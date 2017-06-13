@@ -96,11 +96,6 @@
             <version>6.0.0-SNAPSHOT</version>
         </dependency>
         <dependency>
-            <groupId>it.geosolutions</groupId>
-            <artifactId>geoserver-manager</artifactId>
-            <version>1.7.0</version>
-        </dependency>
-        <dependency>
             <groupId>org.esa.snap</groupId>
             <artifactId>snap-bigtiff</artifactId>
             <version>6.0.0-SNAPSHOT</version>
