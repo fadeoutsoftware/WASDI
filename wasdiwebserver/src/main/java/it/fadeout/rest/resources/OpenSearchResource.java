@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.servlet.ServletConfig;
 import javax.ws.rs.GET;
@@ -119,23 +121,32 @@ public class OpenSearchResource {
 		int iCounter = 0;
 		
 		if (sProviders!=null) {
-			String asProviders[] = sProviders.split(",|;");
-			for (String sProvider : asProviders) {
-				String sUser = m_oServletConfig.getInitParameter(sProvider+".OSUser");
-				String sPassword = m_oServletConfig.getInitParameter(sProvider+".OSPwd");
-
-				QueryExecutor oExecutor = QueryExecutor.newInstance(sProvider, sUser, sPassword, null, null, null, null);
-				try {
-					iCounter += oExecutor.executeCount(sQuery);
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-				
+			Map<String, Integer> pMap = getQueryCounters(sQuery, sProviders);
+			for (Integer count : pMap.values()) {
+				iCounter += count;
 			}
 		}
 		
 		return iCounter;
 		
+	}
+
+	private Map<String, Integer> getQueryCounters(String sQuery, String sProviders) {
+		Map<String, Integer> pMap = new HashMap<String,Integer>();
+		String asProviders[] = sProviders.split(",|;");
+		for (String sProvider : asProviders) {
+			String sUser = m_oServletConfig.getInitParameter(sProvider+".OSUser");
+			String sPassword = m_oServletConfig.getInitParameter(sProvider+".OSPwd");
+
+			QueryExecutor oExecutor = QueryExecutor.newInstance(sProvider, sUser, sPassword, null, null, null, null);
+			try {
+				pMap.put(sProvider, oExecutor.executeCount(sQuery));
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			
+		}		
+		return pMap ;
 	}
 	
 	@GET
@@ -145,8 +156,6 @@ public class OpenSearchResource {
 			@QueryParam("sQuery") String sQuery, @QueryParam("offset") String sOffset, @QueryParam("limit") String sLimit, 
 			@QueryParam("sortedby") String sSortedBy, @QueryParam("order") String sOrder ) {
 		
-		
-//		if (Utils.isNullOrEmpty(sSessionId)) return null;
 //		User oUser = Wasdi.GetUserFromSession(sSessionId);
 //		if (oUser==null) return null;
 //		if (Utils.isNullOrEmpty(oUser.getUserId())) return null;
@@ -157,44 +166,48 @@ public class OpenSearchResource {
 			if (sLimit == null) sLimit = "25";
 			if (sSortedBy == null) sSortedBy = "ingestiondate";
 			if (sOrder == null) sOrder = "asc";
-
+			
+			Map<String, Integer> counterMap = getQueryCounters(sQuery, sProviders);			
 			
 			ArrayList<QueryResultViewModel> aoResults = new ArrayList<QueryResultViewModel>();
-			String asProviders[] = sProviders.split(",|;");
 			
-			int iLimit = 25;
+			int iLimit = 25;			
 			try {
 				iLimit = Integer.parseInt(sLimit);
 			} catch (NumberFormatException e1) {
 				e1.printStackTrace();
-			}			
-			int iProviderLimit = iLimit / asProviders.length;
-			boolean bIncreaseLimit = asProviders.length * iProviderLimit < iLimit;
+			}
 			
-//			//compute the correct offset
-//			int iOffset = 25;
-//			try {
-//				iOffset = Integer.parseInt(sOffset);
-//			} catch (NumberFormatException e1) {
-//				e1.printStackTrace();
-//			}			
-//			int iProviderOffset = iOffset / asProviders.length;
-//			//boolean bIncreaseLimit = asProviders.length * iProviderLimit < iLimit;
+			int iOffset = 0;
+			try {
+				iOffset = Integer.parseInt(sOffset);
+			} catch (NumberFormatException e1) {
+				e1.printStackTrace();
+			}
 			
+			int iSkipped = 0;
 			
-			for (String sProvider : asProviders) {
+			for (Entry<String, Integer> entry : counterMap.entrySet()) {
+
+				String sProvider = entry.getKey();				
+				int iCount = entry.getValue();
 				
-				if (bIncreaseLimit) {
-					sLimit = ""+(iProviderLimit+1);
-					bIncreaseLimit = false;
-				} else {
-					sLimit = ""+iProviderLimit;
+				if (iCount < iOffset) {
+					iSkipped += iCount;
+					continue;
 				}
+				
+				int iActualLimit = iLimit-aoResults.size();				
+				if (iActualLimit<=0) break;
+				String sActualLimit = ""+iActualLimit;
+				
+				int iActualOffset = iSkipped==0 ? 0 : Math.max(0, iOffset-iSkipped);
+				String sActualOffset = ""+iActualOffset;
 				
 				String sUser = m_oServletConfig.getInitParameter(sProvider+".OSUser");
 				String sPassword = m_oServletConfig.getInitParameter(sProvider+".OSPwd");
 
-				QueryExecutor oExecutor = QueryExecutor.newInstance(sProvider, sUser, sPassword, sOffset, sLimit, sSortedBy, sOrder);
+				QueryExecutor oExecutor = QueryExecutor.newInstance(sProvider, sUser, sPassword, sActualOffset, sActualLimit, sSortedBy, sOrder);
 				try {
 					ArrayList<QueryResultViewModel> aoTmp = oExecutor.execute(sQuery);
 					if (aoTmp!=null && !aoTmp.isEmpty()) {
@@ -203,10 +216,14 @@ public class OpenSearchResource {
 					} else {
 						System.out.println("No results found for sProvider");
 					}
+					
 				} catch (IOException e) {
 					e.printStackTrace();
 				}				
+				
+				
 			}
+			
 			return aoResults.toArray(new QueryResultViewModel[aoResults.size()]);
 		}
 		
