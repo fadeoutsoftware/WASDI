@@ -19,23 +19,19 @@ import javax.ws.rs.core.Response;
 import org.apache.commons.io.FileUtils;
 
 import it.fadeout.Wasdi;
-import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.business.ProductWorkspace;
 import wasdi.shared.business.PublishedBand;
 import wasdi.shared.business.User;
 import wasdi.shared.business.Workspace;
 import wasdi.shared.business.WorkspaceSharing;
 import wasdi.shared.data.DownloadedFilesRepository;
-import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.data.ProductWorkspaceRepository;
 import wasdi.shared.data.PublishedBandsRepository;
 import wasdi.shared.data.WorkspaceRepository;
 import wasdi.shared.data.WorkspaceSharingRepository;
-import wasdi.shared.geoserver.GeoserverMethods;
-import wasdi.shared.rabbit.RabbitMethods;
+import wasdi.shared.geoserver.GeoServerManager;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.PrimitiveResult;
-import wasdi.shared.viewmodels.ProcessWorkspaceViewModel;
 import wasdi.shared.viewmodels.WorkspaceEditorViewModel;
 import wasdi.shared.viewmodels.WorkspaceListInfoViewModel;
 
@@ -259,28 +255,19 @@ public class WorkspaceResource {
 		if (oUser == null) return null;
 		if (Utils.isNullOrEmpty(oUser.getUserId())) return null;
 
-		try
-		{
+		try {
 			//repositories
 			ProductWorkspaceRepository oProductRepository = new ProductWorkspaceRepository();
 			PublishedBandsRepository oPublishRepository = new PublishedBandsRepository();
 			WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
 			DownloadedFilesRepository oDownloadedFilesRepository = new DownloadedFilesRepository();
 
-			if (oWorkspaceRepository.DeleteWorkspace(sWorkspaceId))
-			{
-				//delete exchange on rabbit
-				if (!RabbitMethods.ExchangeDelete(sWorkspaceId))
-					System.out.println("AuthService.Logout: Error deleting session queue rabbit.");
-				
-				
+			if (oWorkspaceRepository.DeleteWorkspace(sWorkspaceId)) {
 				//get all product in workspace
 				List<ProductWorkspace> aoProducts = oProductRepository.GetProductsByWorkspace(sWorkspaceId);
 
-				if (bDeleteFile)
-				{
-					try
-					{
+				if (bDeleteFile) {
+					try {
 						//get workspace path
 						String sDownloadRootPath = "";
 						if (m_oServletConfig.getInitParameter("DownloadRootPath") != null) {
@@ -295,47 +282,43 @@ public class WorkspaceResource {
 						FileUtils.deleteDirectory(new File(sDownloadPath));
 						//delete download on data base
 						for (ProductWorkspace oProductWorkspace : aoProducts) {
-							try
-							{
+							try {
 								String sFilePath = sDownloadPath + oProductWorkspace.getProductName();
 								oDownloadedFilesRepository.DeleteByFilePath(sFilePath);
-							}
-							catch(Exception oEx)
-							{
+							} catch(Exception oEx) {
 								System.out.println("WorkspaceResource.DeleteWorkspace: Error deleting download on data base: " + oEx.getMessage());
 							}
 						}
 
 					}
-					catch(Exception oEx)
-					{
+					catch(Exception oEx) {
 						System.out.println("WorkspaceResource.DeleteWorkspace: Error deleting workspace directory: " + oEx.getMessage());
 					}
 				}
 
-				if (bDeleteLayer)
-				{
+				if (bDeleteLayer) {
+					
+					GeoServerManager gsManager = new GeoServerManager(m_oServletConfig.getInitParameter("GS_URL"), m_oServletConfig.getInitParameter("GS_USER"), 
+							m_oServletConfig.getInitParameter("GS_PASSWORD"));
+					String gsWorkspace = m_oServletConfig.getInitParameter("GS_WORKSPACE");
+					
 					for (ProductWorkspace oProductWorkspace : aoProducts) {
 						List<PublishedBand> aoPublishedBands = oPublishRepository.GetPublishedBandsByProductName(oProductWorkspace.getProductName());
 						for (PublishedBand oPublishedBand : aoPublishedBands) {
-							try
-							{
-								System.out.println("WorkspaceResource.DeleteWorkspace: LayerId to delete " + oPublishedBand.getLayerId());
-								String sResult = GeoserverMethods.DeleteLayer(oPublishedBand.getLayerId(), "json");
+							try {
 
-								try
-								{
+								if (!gsManager.removeLayer(oPublishedBand.getLayerId())) {
+									System.out.println("ProductResource.DeleteProduct: error deleting layer " + oPublishedBand.getLayerId() + " from geoserver");
+								}
+
+								try {
 									//delete published band on data base
 									oPublishRepository.DeleteByProductNameLayerId(oProductWorkspace.getProductName(), oPublishedBand.getLayerId());
-								}
-								catch(Exception oEx)
-								{
+								} catch(Exception oEx) {
 									System.out.println("WorkspaceResource.DeleteWorkspace: error deleting published band on data base " + oEx.toString());
 								}
 
-							}
-							catch(Exception oEx)
-							{
+							} catch(Exception oEx) {
 								System.out.println("WorkspaceResource.DeleteWorkspace: error deleting layer id " + oEx.toString());
 							}
 
@@ -345,13 +328,11 @@ public class WorkspaceResource {
 				}
 
 				return Response.ok().build();
-			}
-			else
+			} else
 				System.out.println("WorkspaceResource.DeleteWorkspace: Error deleting workspace on data base");	
 
 
-		}
-		catch(Exception oEx){
+		} catch(Exception oEx){
 			oEx.printStackTrace();
 			System.out.println("WorkspaceResource.DeleteWorkspace: Error deleting workspace: " + oEx.getMessage());
 		}

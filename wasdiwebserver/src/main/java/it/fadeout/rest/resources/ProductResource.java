@@ -25,7 +25,7 @@ import wasdi.shared.business.User;
 import wasdi.shared.data.DownloadedFilesRepository;
 import wasdi.shared.data.ProductWorkspaceRepository;
 import wasdi.shared.data.PublishedBandsRepository;
-import wasdi.shared.geoserver.GeoserverMethods;
+import wasdi.shared.geoserver.GeoServerManager;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.BandViewModel;
 import wasdi.shared.viewmodels.MetadataViewModel;
@@ -388,19 +388,23 @@ public class ProductResource {
 			if(bDeleteLayer)
 			{
 				//Delete layerId on Geoserver
+				
+				GeoServerManager gsManager = new GeoServerManager(m_oServletConfig.getInitParameter("GS_URL"), m_oServletConfig.getInitParameter("GS_USER"), 
+						m_oServletConfig.getInitParameter("GS_PASSWORD"));
+				
 				for (PublishedBand publishedBand : aoPublishedBands) {
 					try
 					{
 						System.out.println("ProductResource.DeleteProduct: LayerId to delete " + publishedBand.getLayerId());
-						String sResult = GeoserverMethods.DeleteLayer(publishedBand.getLayerId(), "json");
 
-						try
-						{
+						if (!gsManager.removeLayer(publishedBand.getLayerId())) {
+							System.out.println("ProductResource.DeleteProduct: error deleting layer " + publishedBand.getLayerId() + " from geoserver");
+						}
+
+						try {
 							//delete published band on data base
 							oPublishedBandsRepository.DeleteByProductNameLayerId(sProductName, publishedBand.getLayerId());
-						}
-						catch(Exception oEx)
-						{
+						} catch(Exception oEx) {
 							System.out.println("ProductResource.DeleteProduct: error deleting published band on data base " + oEx.toString());
 						}
 
