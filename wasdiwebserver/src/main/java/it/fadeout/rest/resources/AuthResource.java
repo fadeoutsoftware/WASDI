@@ -1,5 +1,6 @@
 package it.fadeout.rest.resources;
 
+import java.io.File;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -9,8 +10,10 @@ import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
@@ -19,10 +22,16 @@ import it.fadeout.Wasdi;
 import it.fadeout.mercurius.business.Message;
 import it.fadeout.mercurius.client.MercuriusAPI;
 import it.fadeout.sftp.SFTPManager;
+import wasdi.shared.LauncherOperations;
+import wasdi.shared.business.ProcessStatus;
+import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.business.User;
 import wasdi.shared.business.UserSession;
+import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.data.SessionRepository;
 import wasdi.shared.data.UserRepository;
+import wasdi.shared.parameters.IngestFileParameter;
+import wasdi.shared.utils.SerializationUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.LoginInfo;
 import wasdi.shared.viewmodels.PrimitiveResult;
@@ -198,6 +207,73 @@ public class AuthResource {
 		SFTPManager oManager = new SFTPManager(wsAddress);
 
 		return oManager.list(sAccount);
+	}
+	
+	
+	@PUT
+	@Path("/upload/ingest")
+	@Produces({"application/json", "text/xml"})
+	public Response IngestFile(@HeaderParam("x-session-token") String sSessionId, @QueryParam("file") String sFile, @QueryParam("workspace") String sWorkspace) {
+		
+		User oUser = Wasdi.GetUserFromSession(sSessionId);
+		if (oUser == null || Utils.isNullOrEmpty(oUser.getUserId())) return null;		
+		String sAccount = oUser.getUserId();		
+		
+		String sUserBaseDir = m_oServletConfig.getInitParameter("sftpManagementUserDir");
+		File oUserBaseDir = new File(sUserBaseDir);
+		File oFilePath = new File(new File(new File(oUserBaseDir, sAccount), "uploads"), sFile);
+		if (!oFilePath.canRead()) {
+			System.out.println("AuthResource.IngestFile: ERROR: unable to access uploaded file " + oFilePath.getAbsolutePath());
+			return Response.serverError().build();
+		}
+		try {
+			ProcessWorkspace oProcess = null;
+			ProcessWorkspaceRepository oRepository = new ProcessWorkspaceRepository();
+			IngestFileParameter oParameter = new IngestFileParameter();
+			oParameter.setWorkspace(sWorkspace);
+			oParameter.setUserId(sAccount);
+			oParameter.setExchange(sWorkspace);
+			oParameter.setFilePath(oFilePath.getAbsolutePath());
+			try
+			{
+				oProcess = new ProcessWorkspace();
+				oProcess.setOperationDate(Wasdi.GetFormatDate(new Date()));
+				oProcess.setOperationType(LauncherOperations.INGEST);
+				oProcess.setProductName(oFilePath.getName());
+				oProcess.setWorkspaceId(sWorkspace);
+				oProcess.setUserId(sAccount);
+				oProcess.setProcessObjId(Utils.GetRandomName());
+				oProcess.setStatus(ProcessStatus.CREATED.name());
+				oRepository.InsertProcessWorkspace(oProcess);
+				//set the process object Id to params
+				oParameter.setProcessObjId(oProcess.getProcessObjId());
+			}
+			catch(Exception oEx){
+				System.out.println("DownloadResource.Download: Error updating process list " + oEx.getMessage());
+				oEx.printStackTrace();
+				return Response.serverError().build();
+			}
+	
+			String sPath = m_oServletConfig.getInitParameter("SerializationPath") + Wasdi.GetSerializationFileName();
+			SerializationUtils.serializeObjectToXML(sPath, oParameter);
+	
+			String sLauncherPath = m_oServletConfig.getInitParameter("LauncherPath");
+			String sJavaExe = m_oServletConfig.getInitParameter("JavaExe");
+	
+			String sShellExString = sJavaExe + " -jar " + sLauncherPath +" -operation " + LauncherOperations.INGEST + " -parameter " + sPath;
+	
+			System.out.println("DownloadResource.Download: shell exec " + sShellExString);
+	
+			Process oProc = Runtime.getRuntime().exec(sShellExString);
+			
+			return Response.ok().build();
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		return Response.serverError().build();
+		
 	}
 
 	@DELETE

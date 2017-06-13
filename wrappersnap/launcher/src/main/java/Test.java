@@ -17,6 +17,10 @@ import org.esa.snap.core.gpf.OperatorSpi;
 import org.esa.snap.core.util.io.FileUtils;
 import org.esa.snap.dataio.bigtiff.BigGeoTiffProductReaderPlugIn;
 
+import com.sun.medialib.codec.jp2k.Params;
+
+import wasdi.LauncherMain;
+import wasdi.shared.parameters.IngestFileParameter;
 import wasdi.shared.viewmodels.ProductViewModel;
 import wasdi.snapopearations.ReadProduct;
 
@@ -24,138 +28,21 @@ import wasdi.snapopearations.ReadProduct;
  * Created by s.adamo on 18/05/2016.
  */
 public class Test {
-    public static void main(String[] args) throws Exception {
 
-        /*---Test-------------------------------*/
-
-        String sPath = "C:\\temp\\ImagePyramidTest\\Dati Sentinel\\";
-        //String sPath = "C:\\temp\\";
-
-        String sName = "S1A_IW_GRDH_1SDV_20160217T170557_20160217T170622_009989_00EAE9_507D.zip";
-
-        ReadProduct oRead = new ReadProduct();
-        ProductViewModel oProductViewModel = oRead.getProductViewModel(new File(sPath+sName));
-
-        //oRead.writeBigTiff(sName);
-
-     /*   Publisher oPublisher = new Publisher();
-
-
-        oPublisher.publishPyramidImage(sName + ".tif");*/
-
-        /*-------------------------------------*/
-
-        final JFileChooser fc = new JFileChooser();
-
-        //In response to a button click:
-        int returnVal = fc.showOpenDialog(null);
-
-        if (returnVal == JFileChooser.APPROVE_OPTION) {
-
-            String formatName = "SENTINEL-1";
-            File file = fc.getSelectedFile();
-            //This is where a real application would open the file.
-            Product exportProduct = null;
-            Product terrainProduct = null;
-            try {
-                //read product
-                exportProduct = ProductIO.readProduct(file, formatName);
-                //calibration
-                OperatorSpi spi = new CalibrationOp.Spi();
-                Operator op = spi.createOperator();
-                op.setSourceProduct(exportProduct);
-                Product calibrateProduct = op.getTargetProduct();
-
-                String bigGeoTiffFormatName = BigGeoTiffProductReaderPlugIn.FORMAT_NAME;
-
-                //File calFile = new File("C:\\Users\\s.adamo\\Documents\\test_cal.tif");
-                File calFile = new File("C:\\Users\\a.corrado\\Documents\\test_cal.tif");
-                ProductIO.writeProduct(calibrateProduct, calFile.getAbsolutePath(), bigGeoTiffFormatName);
-                //System.setProperty("com.sun.media.jai.disableMediaLib", "true");
-
-               /* String bigGeoTiffFormatName = BigGeoTiffProductReaderPlugIn.FORMAT_NAME;
-                Calibration oCalibration= new Calibration();
-                Product calibrateProduct=oCalibration.getCalibration(exportProduct,"C:\\Users\\a.corrado\\Documents\\");
-                */
-                exportProduct = ProductIO.readProduct(calFile, bigGeoTiffFormatName);
-
-                //filter
-                OperatorSpi spiFilter = new SpeckleFilterOp.Spi();
-                SpeckleFilterOp opFilter = (SpeckleFilterOp) spiFilter.createOperator();
-                opFilter.setSourceProduct(calibrateProduct);
-                opFilter.SetFilter("Refined Lee");
-                Product filterProduct = opFilter.getTargetProduct();
-
-                //File filterFile = new File("C:\\Users\\s.adamo\\Documents\\test_filter.tif");
-                File filterFile = new File("C:\\Users\\a.corrado\\Documents\\test_filter.tif");
-                //ProductIO.writeProduct(filterProduct, filterFile.getAbsolutePath(), bigGeoTiffFormatName)<
-                ProductIO.writeProduct(calibrateProduct, filterFile.getAbsolutePath(), bigGeoTiffFormatName);
-                exportProduct = ProductIO.readProduct(filterFile, bigGeoTiffFormatName);
-
-                //Multilooking
-                OperatorSpi spiMulti = new MultilookOp.Spi();
-                MultilookOp opMulti = (MultilookOp) spiMulti.createOperator();
-                opMulti.setSourceProduct(filterProduct);
-                opMulti.setNumRangeLooks(4);
-                MultilookOp.DerivedParams param = new MultilookOp.DerivedParams();
-                param.nRgLooks = 4;
-                MultilookOp.getDerivedParameters(filterProduct, param);
-                //opMulti.setNumAzimuthLooks(param.nAzLooks);
-
-
-                Product multiProduct = opMulti.getTargetProduct();
-                File multiFile = new File("C:\\Users\\a.corrado\\Documents\\test_multi.tif");
-                ProductIO.writeProduct(multiProduct, multiFile.getAbsolutePath(), bigGeoTiffFormatName);
-
-                //Terrain Correction
-                OperatorSpi spiTerrain = new RangeDopplerGeocodingOp.Spi();
-                RangeDopplerGeocodingOp opTerrain = (RangeDopplerGeocodingOp) spiTerrain.createOperator();
-                opTerrain.setSourceProduct(multiProduct);
-                terrainProduct = opTerrain.getTargetProduct();
-
-                //String bigGeoTiffFormatName = BigGeoTiffProductReaderPlugIn.FORMAT_NAME;
-                //File newFile = new File("C:\\Users\\s.adamo\\Documents\\test.tif");
-                File terrainFile = new File("C:\\Users\\a.corrado\\Documents\\test_terrain.tif");
-                ProductIO.writeProduct(terrainProduct, terrainFile.getAbsolutePath(), bigGeoTiffFormatName);
-
-            } catch (IOException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-            //formatName = "GeoTIFF-BigTIFF";
-            //File newFile = new File("C:\\Users\\s.adamo\\Documents\\test.tif");
-            //WriteProductOperation operation = new WriteProductOperation(terrainProduct, newFile, formatName, false);
-            //operation.run();
-            //new java.lang.Thread(operation).start();
-        } else {
-
-        }
-
+	public static void main(String[] args) throws Exception {
+		
+		LauncherMain theMain = new  LauncherMain();
+		IngestFileParameter params = new IngestFileParameter();
+		params.setUserId("paolo");
+		params.setExchange("8e91a84c-3dcf-470d-8e36-3ad40de80d54");
+		params.setWorkspace("8e91a84c-3dcf-470d-8e36-3ad40de80d54");
+		params.setProcessObjId("PPPP");
+		params.setFilePath("/home/doy/tmp/wasdi/prova_snap/S1A_IW_GRDH_1SDV_20160802T051857_20160802T051922_012417_013615_C75B.zip");
+		theMain.Ingest(params, "/home/doy/tmp/wasdi/data/download");
+		
+		
     }
 
 
 
-    private static int within(final int val, final int max) {
-        return Math.max(0, Math.min(val, max));
-    }
-
-    private static String createNewProductName(String sourceProductName, int productIndex) {
-        String newNameBase = "";
-        if (sourceProductName != null && sourceProductName.length() > 0) {
-            newNameBase = FileUtils.exchangeExtension(sourceProductName, "");
-        }
-        String newNamePrefix = "subset";
-        String newProductName;
-        if (newNameBase.length() > 0) {
-            newProductName = newNamePrefix + "_" + productIndex + "_" + newNameBase;
-        } else {
-            newProductName = newNamePrefix + "_" + productIndex;
-        }
-        return newProductName;
-    }
-
-    private static void updateSubsetDefRegion(ProductSubsetDef productSubsetDef, int x1, int y1, int x2, int y2, int sx, int sy) {
-        productSubsetDef.setRegion(x1, y1, x2 - x1 + 1, y2 - y1 + 1);
-        productSubsetDef.setSubSampling(sx, sy);
-    }
 }

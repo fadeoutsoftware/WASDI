@@ -1,14 +1,5 @@
 package it.fadeout.sftp;
 
-import java.util.UUID;
-
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
-
-import cern.colt.Arrays;
-import it.fadeout.mercurius.business.Message;
-import it.fadeout.mercurius.client.MercuriusAPI;
-
 /**
  * class for sftp account management
  * @author doy
