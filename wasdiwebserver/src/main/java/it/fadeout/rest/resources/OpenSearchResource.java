@@ -23,6 +23,7 @@ import it.fadeout.opensearch.OpenSearchQuery;
 import it.fadeout.opensearch.OpenSearchTemplate;
 import it.fadeout.opensearch.QueryExecutor;
 import it.fadeout.viewmodels.QueryResultViewModel;
+import net.coobird.thumbnailator.makers.ScaledThumbnailMaker;
 import wasdi.shared.business.User;
 import wasdi.shared.utils.Utils;
 
@@ -201,12 +202,14 @@ public class OpenSearchResource {
 				if (iActualLimit<=0) break;
 				String sActualLimit = ""+iActualLimit;
 				
-				int iActualOffset = iSkipped==0 ? 0 : Math.max(0, iOffset-iSkipped);
+				int iActualOffset = Math.max(0, iOffset-iSkipped-aoResults.size());
 				String sActualOffset = ""+iActualOffset;
 				
 				String sUser = m_oServletConfig.getInitParameter(sProvider+".OSUser");
 				String sPassword = m_oServletConfig.getInitParameter(sProvider+".OSPwd");
-
+				
+				System.out.println("Executing query for " + sProvider + ": offset=" + sActualOffset + ": limit=" + sActualLimit);
+				
 				QueryExecutor oExecutor = QueryExecutor.newInstance(sProvider, sUser, sPassword, sActualOffset, sActualLimit, sSortedBy, sOrder);
 				try {
 					ArrayList<QueryResultViewModel> aoTmp = oExecutor.execute(sQuery);
@@ -215,12 +218,11 @@ public class OpenSearchResource {
 						System.out.println("Found " + aoTmp.size() + " results for " + sProvider);
 					} else {
 						System.out.println("No results found for sProvider");
-					}
-					
+					}					
 				} catch (IOException e) {
 					e.printStackTrace();
 				}				
-				
+				iSkipped += iCount;
 				
 			}
 			
