@@ -119,7 +119,7 @@ public class ReadProduct {
             return null;
         }
 
-        ProductViewModel oViewModel = getProductViewModel(exportProduct);
+        ProductViewModel oViewModel = getProductViewModel(exportProduct, oFile);
 
         return  oViewModel;
     }
@@ -129,7 +129,7 @@ public class ReadProduct {
      * @param exportProduct
      * @return
      */
-	public ProductViewModel getProductViewModel(Product exportProduct) {
+	public ProductViewModel getProductViewModel(Product exportProduct, File oFile) {
 		
 		// Create View Model
 		ProductViewModel oViewModel = new ProductViewModel();
@@ -141,11 +141,11 @@ public class ReadProduct {
 
         LauncherMain.s_oLogger.debug("ReadProduct.getProductViewModel: setting Name and Path");
 
-        File oFile = exportProduct.getFileLocation();
+//        File oFile = exportProduct.getFileLocation();
         
         // Set name and path
-        oViewModel.setName(Utils.GetFileNameWithoutExtension(oFile.getAbsolutePath()));
-        oViewModel.setFileName(oFile.getName());
+        oViewModel.setName(exportProduct.getName());
+        if (oFile!=null) oViewModel.setFileName(oFile.getName());
 
         LauncherMain.s_oLogger.debug("ReadProduct.getProductViewModel: end");
 		return oViewModel;
@@ -158,19 +158,21 @@ public class ReadProduct {
 			
 //			CoordinateReferenceSystem crs = oProduct.getSceneCRS();
 			GeoCoding geocoding = oProduct.getSceneGeoCoding();
-			Dimension dim = oProduct.getSceneRasterSize();		
-			GeoPos min = geocoding.getGeoPos(new PixelPos(0,0), null);
-			GeoPos max = geocoding.getGeoPos(new PixelPos(dim.getWidth(), dim.getHeight()), null);
-			float minX = (float) Math.min(min.lon, max.lon);
-			float minY = (float) Math.min(min.lat, max.lat);
-			float maxX = (float) Math.max(min.lon, max.lon);
-			float maxY = (float) Math.max(min.lat, max.lat);
-			
-//			Integer epsgCode = CRS.lookupEpsgCode(crs, true);
-//			String epsg = "EPSG:" + (epsgCode==null ? 4326 : epsgCode);
-//			return String.format("{\"miny\":%f,\"minx\":%f,\"crs\":\"%s\",\"maxy\":%f,\"maxx\":%f}", minY, minX, epsg, maxY, maxX);
-			
-			return String.format("%f,%f,%f,%f,%f,%f,%f,%f,%f,%f}", minY, minX, minY, maxX, maxY, maxX, maxY, minX, minY, minX);
+			if (geocoding!=null) {
+				Dimension dim = oProduct.getSceneRasterSize();		
+				GeoPos min = geocoding.getGeoPos(new PixelPos(0,0), null);
+				GeoPos max = geocoding.getGeoPos(new PixelPos(dim.getWidth(), dim.getHeight()), null);
+				float minX = (float) Math.min(min.lon, max.lon);
+				float minY = (float) Math.min(min.lat, max.lat);
+				float maxX = (float) Math.max(min.lon, max.lon);
+				float maxY = (float) Math.max(min.lat, max.lat);
+				
+//				Integer epsgCode = CRS.lookupEpsgCode(crs, true);
+//				String epsg = "EPSG:" + (epsgCode==null ? 4326 : epsgCode);
+//				return String.format("{\"miny\":%f,\"minx\":%f,\"crs\":\"%s\",\"maxy\":%f,\"maxx\":%f}", minY, minX, epsg, maxY, maxX);
+				
+				return String.format("%f,%f,%f,%f,%f,%f,%f,%f,%f,%f}", minY, minX, minY, maxX, maxY, maxX, maxY, minX, minY, minX);
+			}
 			
 		} catch (Exception e) {
 			e.printStackTrace();

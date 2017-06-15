@@ -53,6 +53,7 @@ import wasdi.shared.parameters.ApplyOrbitParameter;
 import wasdi.shared.parameters.CalibratorParameter;
 import wasdi.shared.parameters.DownloadFileParameter;
 import wasdi.shared.parameters.FilterParameter;
+import wasdi.shared.parameters.GraphParameter;
 import wasdi.shared.parameters.IngestFileParameter;
 import wasdi.shared.parameters.MultilookingParameter;
 import wasdi.shared.parameters.NDVIParameter;
@@ -73,6 +74,7 @@ import wasdi.snapopearations.NDVI;
 import wasdi.snapopearations.RasterGeometricResampling;
 import wasdi.snapopearations.ReadProduct;
 import wasdi.snapopearations.TerrainCorrection;
+import wasdi.snapopearations.WasdiGraph;
 import wasdi.snapopearations.WriteProduct;
 
 
@@ -209,29 +211,30 @@ public class LauncherMain {
     public void ExecuteOperation(String sOperation, String sParameter) {
 
         try {
-            switch (sOperation)
+        	LauncherOperations op = LauncherOperations.valueOf(sOperation);
+            switch (op)
             {
-	            case LauncherOperations.INGEST: {
+	            case INGEST: {
 	
 	                // Deserialize Parameters
 	                IngestFileParameter oIngestFileParameter = (IngestFileParameter) SerializationUtils.deserializeXMLToObject(sParameter);
 	                Ingest(oIngestFileParameter, ConfigReader.getPropValue("DOWNLOAD_ROOT_PATH"));
 	            }
-                case LauncherOperations.DOWNLOAD: {
+                case DOWNLOAD: {
 
                     // Deserialize Parameters
                     DownloadFileParameter oDownloadFileParameter = (DownloadFileParameter) SerializationUtils.deserializeXMLToObject(sParameter);
                     Download(oDownloadFileParameter, ConfigReader.getPropValue("DOWNLOAD_ROOT_PATH"));
                 }
                 break;
-                case LauncherOperations.PUBLISHBAND: {
+                case PUBLISHBAND: {
 
                     // Deserialize Parameters
                     PublishBandParameter oPublishBandParameter = (PublishBandParameter) SerializationUtils.deserializeXMLToObject(sParameter);
                     PublishBandImage(oPublishBandParameter);
                 }
                 break;
-                case LauncherOperations.APPLYORBIT:{
+                case APPLYORBIT:{
 
                     // Deserialize Parameters
                     ApplyOrbitParameter oParameter = (ApplyOrbitParameter) SerializationUtils.deserializeXMLToObject(sParameter);
@@ -239,7 +242,7 @@ public class LauncherMain {
 
                 }
                 break;
-                case LauncherOperations.CALIBRATE:{
+                case CALIBRATE:{
 
                     // Deserialize Parameters
                     CalibratorParameter oParameter = (CalibratorParameter) SerializationUtils.deserializeXMLToObject(sParameter);
@@ -247,7 +250,7 @@ public class LauncherMain {
 
                 }
                 break;
-                case LauncherOperations.MULTILOOKING:{
+                case MULTILOOKING:{
 
                     // Deserialize Parameters
                     MultilookingParameter oParameter = (MultilookingParameter) SerializationUtils.deserializeXMLToObject(sParameter);
@@ -255,7 +258,7 @@ public class LauncherMain {
 
                 }
                 break;
-                case LauncherOperations.TERRAIN:{
+                case TERRAIN:{
 
                     // Deserialize Parameters
                     RangeDopplerGeocodingParameter oParameter = (RangeDopplerGeocodingParameter) SerializationUtils.deserializeXMLToObject(sParameter);
@@ -263,7 +266,7 @@ public class LauncherMain {
 
                 }
                 break;
-                case LauncherOperations.FILTER:{
+                case FILTER:{
 
                     // Deserialize Parameters
                     FilterParameter oParameter = (FilterParameter) SerializationUtils.deserializeXMLToObject(sParameter);
@@ -271,7 +274,7 @@ public class LauncherMain {
 
                 }
                 break;
-                case LauncherOperations.NDVI:{
+                case NDVI:{
 
                     // Deserialize Parameters
                     NDVIParameter oParameter = (NDVIParameter) SerializationUtils.deserializeXMLToObject(sParameter);
@@ -279,12 +282,19 @@ public class LauncherMain {
 
                 }
                 break;
-                case LauncherOperations.RASTERGEOMETRICRESAMPLE:{
+                case RASTERGEOMETRICRESAMPLE:{
 
                     // Deserialize Parameters
                     RasterGeometricResampleParameter oParameter = (RasterGeometricResampleParameter) SerializationUtils.deserializeXMLToObject(sParameter);
                     RasterGeometricResample(oParameter);
 
+                }
+                break;
+                case GRAPH: {
+                	
+                	GraphParameter params = (GraphParameter) SerializationUtils.deserializeXMLToObject(sParameter);
+                	ExecuteGraph(params);
+                	
                 }
                 break;
                 default:
@@ -293,9 +303,14 @@ public class LauncherMain {
             }
         }
         catch (Exception oEx) {
-            s_oLogger.error("ExecuteOperation Exception " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
+        	s_oLogger.error("ExecuteOperation Exception", oEx);
         }
     }
+
+	public void ExecuteGraph(GraphParameter params) throws Exception {
+		WasdiGraph graphManager = new WasdiGraph(params, s_oSendToRabbit);
+		graphManager.execute();
+	}
     
     /**
      * Downloads a new product
@@ -424,10 +439,10 @@ public class LauncherMain {
 
             if (Utils.isNullOrEmpty(sFileName)) {
                 s_oLogger.debug("LauncherMain.Download: file is null there must be an error");
-                if (s_oSendToRabbit!=null) s_oSendToRabbit.SendRabbitMessage(false,LauncherOperations.DOWNLOAD,oParameter.getWorkspace(),null,oParameter.getExchange());
+                if (s_oSendToRabbit!=null) s_oSendToRabbit.SendRabbitMessage(false,LauncherOperations.DOWNLOAD.name(),oParameter.getWorkspace(),null,oParameter.getExchange());
                 if (oProcessWorkspace != null) oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
             } else {
-                AddProductToDbAndSendToRabbit(oVM, sFileName, oParameter.getWorkspace(), oParameter.getExchange(), LauncherOperations.DOWNLOAD, oParameter.getBoundingBox());
+                AddProductToDbAndSendToRabbit(oVM, sFileName, oParameter.getWorkspace(), oParameter.getExchange(), LauncherOperations.DOWNLOAD.name(), oParameter.getBoundingBox());
                 if (oProcessWorkspace != null) oProcessWorkspace.setStatus(ProcessStatus.DONE.name());                
             }
         }
@@ -435,7 +450,7 @@ public class LauncherMain {
         	oEx.printStackTrace();
             s_oLogger.error("LauncherMain.Download: Exception " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
             if (oProcessWorkspace != null) oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
-            if (s_oSendToRabbit!=null) s_oSendToRabbit.SendRabbitMessage(false,LauncherOperations.DOWNLOAD,oParameter.getWorkspace(),null,oParameter.getExchange());
+            if (s_oSendToRabbit!=null) s_oSendToRabbit.SendRabbitMessage(false,LauncherOperations.DOWNLOAD.name(),oParameter.getWorkspace(),null,oParameter.getExchange());
         }
         finally{
             //update process status and send rabbit updateProcess message
@@ -510,7 +525,7 @@ public class LauncherMain {
             updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 90);
             
             //add product to db
-            AddProductToDbAndSendToRabbit(oVM, oFilePath.getAbsolutePath(), oParameter.getWorkspace(), oParameter.getExchange(), LauncherOperations.DOWNLOAD, oBB);
+            AddProductToDbAndSendToRabbit(oVM, oFilePath.getAbsolutePath(), oParameter.getWorkspace(), oParameter.getExchange(), LauncherOperations.DOWNLOAD.name(), oBB);
             if (oProcessWorkspace != null) oProcessWorkspace.setStatus(ProcessStatus.DONE.name());                
 			
 			return oDstFile.getAbsolutePath();
@@ -549,9 +564,9 @@ public class LauncherMain {
      * @param oParameter
      * @return
      */
-    public void ExecuteOperator(OperatorParameter oParameter, BaseOperation oOperation, String sTypeOperation) {
+    public void ExecuteOperator(OperatorParameter oParameter, BaseOperation oOperation, LauncherOperations operation) {
 
-        s_oLogger.debug("LauncherMain.ExecuteOperation: Start operation " + sTypeOperation);
+        s_oLogger.debug("LauncherMain.ExecuteOperation: Start operation " + operation);
 
         ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
         ProcessWorkspace oProcessWorkspace = oProcessWorkspaceRepository.GetProcessByProcessObjId(oParameter.getProcessObjId());
@@ -593,7 +608,7 @@ public class LauncherMain {
             if (Utils.isNullOrEmpty(sFile)) {
                 s_oLogger.debug("LauncherMain.ExecuteOperation: file is null or empty");
 
-                if (s_oSendToRabbit!=null) s_oSendToRabbit.SendRabbitMessage(false,sTypeOperation,oParameter.getWorkspace(),null,oParameter.getExchange());
+                if (s_oSendToRabbit!=null) s_oSendToRabbit.SendRabbitMessage(false,operation.name(),oParameter.getWorkspace(),null,oParameter.getExchange());
 
                 return;
             }
@@ -649,7 +664,7 @@ public class LauncherMain {
             	sBB = oAlreadyDownloaded.getBoundingBox();
             }
             
-            AddProductToDbAndSendToRabbit(null, sTargetAbsFileName, oParameter.getWorkspace(), oParameter.getExchange(), sTypeOperation, sBB);
+            AddProductToDbAndSendToRabbit(null, sTargetAbsFileName, oParameter.getWorkspace(), oParameter.getExchange(), operation.name(), sBB);
 
             //this.PublishOnGeoserver(oParameter.getPublishParameter(), oTerrainProduct.getName(), sBandName);
             if (oProcessWorkspace != null) oProcessWorkspace.setStatus(ProcessStatus.DONE.name());
@@ -657,7 +672,7 @@ public class LauncherMain {
         }
         catch (Exception oEx) {
             s_oLogger.error("LauncherMain.ExecuteOperation: exception " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
-            if (s_oSendToRabbit!=null) s_oSendToRabbit.SendRabbitMessage(false,sTypeOperation,oParameter.getWorkspace(),null,oParameter.getExchange());
+            if (s_oSendToRabbit!=null) s_oSendToRabbit.SendRabbitMessage(false,operation.name(),oParameter.getWorkspace(),null,oParameter.getExchange());
 
             if (oProcessWorkspace != null) oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
         }
@@ -709,7 +724,7 @@ public class LauncherMain {
                 s_oLogger.debug( "LauncherMain.PublishBandImage: file is null or empty");
 
                 // Send KO to Rabbit
-                if (s_oSendToRabbit!=null) s_oSendToRabbit.SendRabbitMessage(false, LauncherOperations.PUBLISHBAND,oParameter.getWorkspace(),null,oParameter.getExchange());
+                if (s_oSendToRabbit!=null) s_oSendToRabbit.SendRabbitMessage(false, LauncherOperations.PUBLISHBAND.name(),oParameter.getWorkspace(),null,oParameter.getExchange());
 
                 return  sLayerId;
             }
@@ -745,7 +760,7 @@ public class LauncherMain {
                 oVM.setProductName(sProductName);
                 oVM.setLayerId(sLayerId);
 
-                boolean bRet = s_oSendToRabbit!=null && s_oSendToRabbit.SendRabbitMessage(true,LauncherOperations.PUBLISHBAND,oParameter.getWorkspace(),oVM,oParameter.getExchange());
+                boolean bRet = s_oSendToRabbit!=null && s_oSendToRabbit.SendRabbitMessage(true,LauncherOperations.PUBLISHBAND.name(),oParameter.getWorkspace(),oVM,oParameter.getExchange());
 
                 if (!bRet) s_oLogger.debug("LauncherMain.PublishBandImage: Error sending Rabbit Message");
 
@@ -761,20 +776,20 @@ public class LauncherMain {
 
             // Read the product
             ReadProduct oReadProduct = new ReadProduct();
-            Product oSentinel = oReadProduct.ReadProduct(oFile, null);
-            String sEPSG = CRS.lookupIdentifier(oSentinel.getSceneGeoCoding().getMapCRS(),true);
+            Product oProduct = oReadProduct.ReadProduct(oFile, null);            
+            String sEPSG = CRS.lookupIdentifier(oProduct.getSceneCRS(),true);
             
             updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 20);
 
             String sOutputFilePath = sPath + sLayerId + ".tif";
             File oOutputFile = new File(sOutputFilePath);
 
-            if (oSentinel.getProductType().startsWith("S2") && oSentinel.getProductReader().getClass().getName().startsWith("org.esa.s2tbx")) {
+            if (oProduct.getProductType().startsWith("S2") && oProduct.getProductReader().getClass().getName().startsWith("org.esa.s2tbx")) {
             	
             	s_oLogger.debug( "LauncherMain.PublishBandImage:  Managing S2 Product");
 				s_oLogger.debug( "LauncherMain.PublishBandImage:  Getting Band " + oParameter.getBandName());
 				
-				Band oBand = oSentinel.getBand(oParameter.getBandName());            
+				Band oBand = oProduct.getBand(oParameter.getBandName());            
 				Product oGeotiffProduct = new Product(oParameter.getBandName(), "GEOTIFF");
 				oGeotiffProduct.addBand(oBand);                 
 				sOutputFilePath = new WriteProduct(oProcessWorkspaceRepository, oProcessWorkspace).WriteGeoTiff(oGeotiffProduct, sPath, sLayerId);
@@ -787,8 +802,9 @@ public class LauncherMain {
             	s_oLogger.debug( "LauncherMain.PublishBandImage:  Getting Band " + oParameter.getBandName());
             	
     			// Get the Geocoding and Band
-    			GeoCoding oGeoCoding = oSentinel.getSceneGeoCoding();
-    			Band oBand = oSentinel.getBand(oParameter.getBandName());
+    			GeoCoding oGeoCoding = oProduct.getSceneGeoCoding();;
+    			if (oGeoCoding==null) throw new Exception("unable to obtain scene geocoding from product " + oProduct.getName());
+    			Band oBand = oProduct.getBand(oParameter.getBandName());
     			
     			// Get Image
     			MultiLevelImage oBandImage = oBand.getSourceImage();
@@ -884,7 +900,7 @@ public class LauncherMain {
             oVM.setBoundingBox(sBBox);
             oVM.setGeoserverBoundingBox(sGeoserverBBox);
 
-            boolean bRet = s_oSendToRabbit!=null && s_oSendToRabbit.SendRabbitMessage(bResultPublishBand,LauncherOperations.PUBLISHBAND, oParameter.getWorkspace(),oVM,oParameter.getExchange());
+            boolean bRet = s_oSendToRabbit!=null && s_oSendToRabbit.SendRabbitMessage(bResultPublishBand,LauncherOperations.PUBLISHBAND.name(), oParameter.getWorkspace(),oVM,oParameter.getExchange());
 
             if (bRet == false) {
                 s_oLogger.debug("LauncherMain.PublishBandImage: Error sending Rabbit Message");
@@ -898,7 +914,7 @@ public class LauncherMain {
 
             oEx.printStackTrace();
 
-            boolean bRet = s_oSendToRabbit!=null && s_oSendToRabbit.SendRabbitMessage(false,LauncherOperations.PUBLISHBAND,oParameter.getWorkspace(),null,oParameter.getExchange());
+            boolean bRet = s_oSendToRabbit!=null && s_oSendToRabbit.SendRabbitMessage(false,LauncherOperations.PUBLISHBAND.name(),oParameter.getWorkspace(),null,oParameter.getExchange());
 
             if (bRet == false) {
                 s_oLogger.error("LauncherMain.PublishBandImage:  Error sending exception Rabbit Message");
@@ -984,14 +1000,14 @@ public class LauncherMain {
             s_oLogger.debug("LauncherMain.RasterGeometricResample: convert product to view model");
             String sOutFile = oWriter.WriteBEAMDIMAP(oResampledProduct, sPath, sFileNameOnly+"_resampled");
 
-            AddProductToDbAndSendToRabbit(null, sOutFile, oParameter.getWorkspace(), oParameter.getExchange(), LauncherOperations.RASTERGEOMETRICRESAMPLE, null);
+            AddProductToDbAndSendToRabbit(null, sOutFile, oParameter.getWorkspace(), oParameter.getExchange(), LauncherOperations.RASTERGEOMETRICRESAMPLE.name(), null);
             if (oProcessWorkspace != null) oProcessWorkspace.setStatus(ProcessStatus.DONE.name());
 
         }
         catch (Exception oEx) {
             s_oLogger.error("LauncherMain.RasterGeometricResample: exception " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
             if (oProcessWorkspace != null) oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
-            if (s_oSendToRabbit!=null) s_oSendToRabbit.SendRabbitMessage(false,LauncherOperations.RASTERGEOMETRICRESAMPLE,oParameter.getWorkspace(),null,oParameter.getExchange());
+            if (s_oSendToRabbit!=null) s_oSendToRabbit.SendRabbitMessage(false,LauncherOperations.RASTERGEOMETRICRESAMPLE.name(),oParameter.getWorkspace(),null,oParameter.getExchange());
         	
         }
         finally{
