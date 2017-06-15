@@ -1,16 +1,16 @@
 package it.fadeout.rest.resources;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Type;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 
 import javax.servlet.ServletConfig;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
@@ -18,10 +18,14 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import org.esa.s1tbx.sar.gpf.orbits.ApplyOrbitFileOp;
+import org.apache.commons.io.IOUtils;
 import org.esa.snap.core.gpf.annotations.Parameter;
+import org.esa.snap.core.gpf.graph.Graph;
+import org.esa.snap.core.gpf.graph.GraphIO;
+import org.glassfish.jersey.media.multipart.FormDataParam;
 
 import it.fadeout.Wasdi;
 import wasdi.shared.LauncherOperations;
@@ -34,14 +38,14 @@ import wasdi.shared.parameters.ApplyOrbitParameter;
 import wasdi.shared.parameters.ApplyOrbitSetting;
 import wasdi.shared.parameters.CalibratorParameter;
 import wasdi.shared.parameters.CalibratorSetting;
-import wasdi.shared.parameters.DownloadFileParameter;
+import wasdi.shared.parameters.GraphParameter;
+import wasdi.shared.parameters.GraphSetting;
 import wasdi.shared.parameters.ISetting;
 import wasdi.shared.parameters.MultilookingParameter;
 import wasdi.shared.parameters.MultilookingSetting;
 import wasdi.shared.parameters.NDVIParameter;
 import wasdi.shared.parameters.NDVISetting;
 import wasdi.shared.parameters.OperatorParameter;
-import wasdi.shared.parameters.PublishParameters;
 import wasdi.shared.parameters.RangeDopplerGeocodingParameter;
 import wasdi.shared.parameters.RangeDopplerGeocodingSetting;
 import wasdi.shared.utils.SerializationUtils;
@@ -147,6 +151,22 @@ public class ProcessingResources {
 	
 	
 	
+	@POST
+	@Path("/graph")
+	@Consumes(MediaType.MULTIPART_FORM_DATA)
+	public Response executeGraph(@FormDataParam("file") InputStream fileInputStream, @HeaderParam("x-session-token") String sessionId, 
+			@QueryParam("workspace") String workspace, @QueryParam("source") String sourceProductName, @QueryParam("destination") String destinationProdutName) throws Exception {
+						
+		Graph graph = GraphIO.read(new InputStreamReader(fileInputStream));
+
+		GraphSetting settings = new GraphSetting();		
+		String graphXml = IOUtils.toString(fileInputStream, Charset.defaultCharset());
+		settings.setGraphXml(graphXml);
+		
+		return ExecuteOperation(sessionId, sourceProductName, destinationProdutName, workspace, settings, LauncherOperations.GRAPH);
+		
+	}
+	
 	
 	private String AcceptedUserAndSession(String sSessionId)
 	{
@@ -159,7 +179,7 @@ public class ProcessingResources {
 		return oUser.getUserId();
 	}
 	
-	private Response ExecuteOperation(String sSessionId, String sSourceProductName, String sDestinationProductName, String sWorkspaceId, ISetting oSetting, String sOperator)
+	private Response ExecuteOperation(String sSessionId, String sSourceProductName, String sDestinationProductName, String sWorkspaceId, ISetting oSetting, LauncherOperations operation)
 	{
 		
 		String sUserId = AcceptedUserAndSession(sSessionId);
@@ -175,7 +195,7 @@ public class ProcessingResources {
 			try
 			{
 				oProcess.setOperationDate(Wasdi.GetFormatDate(new Date()));
-				oProcess.setOperationType(sOperator);
+				oProcess.setOperationType(operation.name());
 				oProcess.setProductName(sSourceProductName);
 				oProcess.setWorkspaceId(sWorkspaceId);
 				oProcess.setUserId(sUserId);
@@ -192,7 +212,7 @@ public class ProcessingResources {
 			String sPath = m_oServletConfig.getInitParameter("SerializationPath") + Wasdi.GetSerializationFileName();
 
 			
-			OperatorParameter oParameter = GetParameter(sOperator); 
+			OperatorParameter oParameter = GetParameter(operation); 
 			oParameter.setSourceProductName(sSourceProductName);
 			oParameter.setDestinationProductName(sDestinationProductName);
 			oParameter.setWorkspace(sWorkspaceId);
@@ -207,7 +227,7 @@ public class ProcessingResources {
 			String sLauncherPath = m_oServletConfig.getInitParameter("LauncherPath");
 			String sJavaExe = m_oServletConfig.getInitParameter("JavaExe");
 
-			String sShellExString = sJavaExe + " -jar " + sLauncherPath +" -operation " + sOperator + " -parameter " + sPath;
+			String sShellExString = sJavaExe + " -jar " + sLauncherPath +" -operation " + operation + " -parameter " + sPath;
 
 			System.out.println("SnapOperations.ExecuteOperation: shell exec " + sShellExString);
 
@@ -240,20 +260,22 @@ public class ProcessingResources {
 	}
 
 	
-	private OperatorParameter GetParameter(String sOperation)
+	private OperatorParameter GetParameter(LauncherOperations op)
 	{
-		switch (sOperation) {
-		case LauncherOperations.APPLYORBIT:
+		switch (op) {
+		case APPLYORBIT:
 			return new ApplyOrbitParameter();
-		case LauncherOperations.CALIBRATE:
+		case CALIBRATE:
 			return new CalibratorParameter();
-		case LauncherOperations.MULTILOOKING:
+		case MULTILOOKING:
 			return new MultilookingParameter();
-		case LauncherOperations.TERRAIN:
+		case TERRAIN:
 			return new RangeDopplerGeocodingParameter();
-		case LauncherOperations.NDVI:
+		case NDVI:
 			return new NDVIParameter();
 			
+		case GRAPH:
+			return new GraphParameter();
 		default:
 			return null;
 			

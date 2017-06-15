@@ -13,16 +13,18 @@ import org.esa.snap.core.gpf.OperatorSpi;
 public class SnapOperatorFactory {
 
 	public static Class getOperatorClass(String sOperation) {
-		switch (sOperation) {
-		case LauncherOperations.APPLYORBIT:			
+		
+		LauncherOperations op = LauncherOperations.valueOf(sOperation);
+		switch (op) {
+		case APPLYORBIT:			
 			return ApplyOrbitFileOp.class;
-		case LauncherOperations.CALIBRATE:
+		case CALIBRATE:
 			return CalibrationOp.class;
-		case LauncherOperations.MULTILOOKING:
+		case MULTILOOKING:
 			return MultilookOp.class;
-		case LauncherOperations.TERRAIN:
+		case TERRAIN:
 			return RangeDopplerGeocodingOp.class;
-		case LauncherOperations.NDVI:
+		case NDVI:
 			return TndviOp.class;			
 		default:
 			return null;			

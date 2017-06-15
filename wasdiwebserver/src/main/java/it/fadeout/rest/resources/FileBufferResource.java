@@ -74,7 +74,7 @@ public class FileBufferResource {
 			{
 				oProcess = new ProcessWorkspace();
 				oProcess.setOperationDate(Wasdi.GetFormatDate(new Date()));
-				oProcess.setOperationType(LauncherOperations.DOWNLOAD);
+				oProcess.setOperationType(LauncherOperations.DOWNLOAD.name());
 				oProcess.setProductName(sFileUrl);
 				oProcess.setWorkspaceId(sWorkspaceId);
 				oProcess.setUserId(sUserId);
@@ -150,7 +150,7 @@ public class FileBufferResource {
 				
 				oProcess = new ProcessWorkspace();
 				oProcess.setOperationDate(Wasdi.GetFormatDate(new Date()));
-				oProcess.setOperationType(LauncherOperations.PUBLISH);
+				oProcess.setOperationType(LauncherOperations.PUBLISH.name());
 				oProcess.setProductName(sFileUrl);
 				oProcess.setWorkspaceId(sWorkspaceId);
 				oProcess.setUserId(sUserId);
@@ -236,7 +236,7 @@ public class FileBufferResource {
 				oPublishViewModel.setLayerId(oPublishBand.getLayerId());
 				oPublishViewModel.setProductName(oPublishBand.getProductName());
 				oPublishViewModel.setGeoserverBoundingBox(oPublishBand.getGeoserverBoundingBox());
-				oReturnValue.setMessageCode(LauncherOperations.PUBLISHBAND);
+				oReturnValue.setMessageCode(LauncherOperations.PUBLISHBAND.name());
 				oReturnValue.setPayload(oPublishViewModel);
 				
 				System.out.println("FileBufferResource.PublishBand: return published band" );
@@ -251,7 +251,7 @@ public class FileBufferResource {
 			{
 				oProcess = new ProcessWorkspace();
 				oProcess.setOperationDate(Wasdi.GetFormatDate(new Date()));
-				oProcess.setOperationType(LauncherOperations.PUBLISHBAND);
+				oProcess.setOperationType(LauncherOperations.PUBLISHBAND.name());
 				oProcess.setProductName(sFileUrl);
 				oProcess.setWorkspaceId(sWorkspaceId);
 				oProcess.setUserId(oUser.getUserId());

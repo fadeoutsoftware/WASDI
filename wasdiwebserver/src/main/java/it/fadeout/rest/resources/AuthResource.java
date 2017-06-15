@@ -238,7 +238,7 @@ public class AuthResource {
 			{
 				oProcess = new ProcessWorkspace();
 				oProcess.setOperationDate(Wasdi.GetFormatDate(new Date()));
-				oProcess.setOperationType(LauncherOperations.INGEST);
+				oProcess.setOperationType(LauncherOperations.INGEST.name());
 				oProcess.setProductName(oFilePath.getName());
 				oProcess.setWorkspaceId(sWorkspace);
 				oProcess.setUserId(sAccount);

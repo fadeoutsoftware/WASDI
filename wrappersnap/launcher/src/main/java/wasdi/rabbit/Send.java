@@ -68,7 +68,7 @@ public class Send {
     	if (oProcess==null) return false;
     	
         RabbitMessageViewModel oUpdateProcessMessage = new RabbitMessageViewModel();
-        oUpdateProcessMessage.setMessageCode(LauncherOperations.UPDATEPROCESSES);
+        oUpdateProcessMessage.setMessageCode(LauncherOperations.UPDATEPROCESSES.name());
         oUpdateProcessMessage.setWorkspaceId(oProcess.getWorkspaceId());
         oUpdateProcessMessage.setPayload(oProcess.getProcessObjId() + ";" + oProcess.getStatus() + ";" + oProcess.getProgressPerc());
         
