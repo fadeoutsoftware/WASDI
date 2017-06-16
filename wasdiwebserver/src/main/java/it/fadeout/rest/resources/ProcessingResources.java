@@ -156,8 +156,6 @@ public class ProcessingResources {
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
 	public Response executeGraph(@FormDataParam("file") InputStream fileInputStream, @HeaderParam("x-session-token") String sessionId, 
 			@QueryParam("workspace") String workspace, @QueryParam("source") String sourceProductName, @QueryParam("destination") String destinationProdutName) throws Exception {
-						
-		Graph graph = GraphIO.read(new InputStreamReader(fileInputStream));
 
 		GraphSetting settings = new GraphSetting();		
 		String graphXml = IOUtils.toString(fileInputStream, Charset.defaultCharset());
@@ -219,8 +217,7 @@ public class ProcessingResources {
 			oParameter.setUserId(sUserId);
 			oParameter.setExchange(sWorkspaceId);
 			oParameter.setProcessObjId(oProcess.getProcessObjId());
-			if (oSetting != null)
-				oParameter.setSettings(oSetting);	
+			if (oSetting != null) oParameter.setSettings(oSetting);	
 			
 			SerializationUtils.serializeObjectToXML(sPath, oParameter);
 
