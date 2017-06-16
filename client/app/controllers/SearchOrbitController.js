@@ -499,6 +499,7 @@ var SearchOrbitController = (function() {
             case "NDVI":
             case "TERRAIN":
             case "DOWNLOAD":
+            case "GRAPH":
                 oController.receivedNewProductMessage(oMessage,oController);
                 break;
             default:
