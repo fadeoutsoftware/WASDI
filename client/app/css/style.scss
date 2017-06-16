@@ -34,6 +34,7 @@
 @import "../dialogs/delete_process/delete_process";
 @import "../dialogs/snake_dialog/snake_dialog";
 @import "../dialogs/processes_logs/processes_logs";
+@import "../dialogs/workflow_operation/workflow";
 
 body
 {
@@ -421,4 +422,44 @@ h4
   content: $wasdi-info-icon-black-version;
   width: $wasdi-size-icon-context-menu-jstree ;
   height: auto ;
+}
+
+//CONTEXT MENU JS TREE (override)
+.vakata-context li>a>i:empty{
+  width: 1.8em !important;
+}
+.vakata-context li>a>i {
+
+  width: 1.8em !important;
+  height: 2.4em;
+}
+
+//DRAG AND DROP CSS
+.drag-and-drop
+{
+  .button {
+    -moz-appearance: button;
+    /* Firefox */
+    -webkit-appearance: button;
+    /* Safari and Chrome */
+    padding: 10px;
+    margin: 10px;
+    width: 70px;
+  }
+  .drop-box {
+    background: #F8F8F8;
+    border: 5px dashed $wasdi-blue-logo;
+    width: 90%;
+    height: 100px;
+    text-align: center;
+    padding-top: 25px;
+    margin: 10px;
+  }
+  .drop-box:hover{
+    background: #F8F8F8;
+    border: 5px dashed $wasdi-green-logo;
+  }
+  .dragover {
+    border: 5px dashed blue;
+  }
 }

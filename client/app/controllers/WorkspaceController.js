@@ -23,8 +23,8 @@ var WorkspaceController = (function() {
         this.fetchWorkspaceInfoList();
 
         this.m_oRabbitStompService.unsubscribe();
-        this.m_oGlobeService.initGlobe('cesiumContainer3');
-
+        // this.m_oGlobeService.initGlobe('cesiumContainer3');
+        this.m_oGlobeService.initRotateGlobe('cesiumContainer3');
     }
 
     WorkspaceController.prototype.moveTo = function (sPath) {
@@ -55,6 +55,8 @@ var WorkspaceController = (function() {
     WorkspaceController.prototype.openWorkspace = function (sWorkspaceId) {
 
         var oController = this;
+
+
 
         this.m_oWorkspaceService.getWorkspaceEditorViewModel(sWorkspaceId).success(function (data, status) {
             if (data != null)
@@ -111,6 +113,11 @@ var WorkspaceController = (function() {
         if(utilsIsStrNullOrEmpty(oWorkspace.workspaceId))
             return false;
         var oController = this;
+
+        this.m_bIsVisibleFiles = true;
+        this.m_bIsOpenInfo = false;
+        this.m_aoProducts = [];
+
         var oWorkspaceId = oWorkspace.workspaceId;
         this.m_oWorkspaceSelected = oWorkspace;
 

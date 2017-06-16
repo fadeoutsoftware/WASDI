@@ -65,17 +65,27 @@
         <!--PROCESSOR-->
         <div  class='animate-hide' ng-hide="m_oController.isHiddenProcessorBar();">
             <ul >
+                <!--merge dialog-->
                 <li ng-click="m_oController.openMergeDialog();" ng-init="m_oController.m_sSrc='assets/icons/iconMIDA.svg' "
                     ng-mouseover="m_oController.m_sSrc='assets/icons/iconMIDA_White.svg' " ng-mouseleave="m_oController.m_sSrc='assets/icons/iconMIDA.svg' ">
                     <!--<a class="icon" href=""><img src="{{m_oController.m_sSrc}}"></a>-->
                     <a href="" ><h4>{{"EDITOR_OPERATION_TITLE_MIDA"|translate}}</h4></a>
                 </li>
 
-
+                <!--sftp dialog-->
                 <li ng-click="m_oController.openSFTPDialog()" >
                     <a href="" >
                         <h4>
                             {{"EDITOR_OPERATION_TITLE_SFTP"|translate}}
+                        </h4>
+                    </a>
+                </li>
+
+                <!--workflow dialog-->
+                <li ng-click="m_oController.openWorkflowDialog()" >
+                    <a href="" >
+                        <h4>
+                            {{"EDITOR_OPERATION_TITLE_WORKFLOW"|translate}}
                         </h4>
                     </a>
                 </li>
@@ -251,13 +261,18 @@
 
             </div>
 
-            <!--&lt;!&ndash; Visualize map &ndash;&gt;-->
-            <!--<button type="button" class="btn btn-default btn-switch-map" ng-click="m_oController.addOrRemoveMapLayer()"  data-toggle="tooltip"-->
-                    <!--data-placement="bottom"  title="{{'EDITOR_TOOLTIP_DELETE_ADD_LAYER_MAP'|translate}}"-->
-                    <!--ng-disabled="m_oController.m_b2DMapModeOn == false && m_oController.m_b3DMapModeOn == true " >-->
-                <!--<i class="fa fa-sticky-note fa-2x" aria-hidden="true"></i>-->
-            <!--</button>-->
+            <!--<div class="layers-list">-->
+                <!--<div class="checkbox">-->
+                    <!--<h5><b>Layers visible:</b></h5>-->
+                    <!--<div ng-repeat="layer in m_oController.m_aoLayersList">-->
+                        <!--<label title ="{{layer.layerId}}" ng-click="m_oController.hideBandInLayerList(layer)">-->
+                        <!--<input type="checkbox" ng-model="layer.isVisibleInMap">-->
+                        <!--{{layer.layerId}}-->
+                        <!--</label>-->
+                    <!--</div>-->
 
+                <!--</div>-->
+            <!--</div>-->
             <!-- 2D map -->
             <div class="map" id = "wasdiMap"  ng-show="m_oController.m_b2DMapModeOn == true && m_oController.m_b3DMapModeOn == false"></div>
 

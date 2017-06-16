@@ -93,7 +93,6 @@
         top: 2px;
         left: 20px;
 
-
         .btn-default
         {
           min-width: 46px;
@@ -151,6 +150,22 @@
 
       }
 
+      //layers list
+      .layers-list{
+        z-index: 1001;
+        position: absolute;
+        bottom: 2px;
+        left: 20px;
+        background-color: white;
+        overflow-y: auto;
+        overflow-x: hidden;
+        height: 100px;
+        width: 300px;
+        border:2px solid $wasdi-blue-logo;
+        .checkbox{
+          margin: 10px;
+        }
+      }
       //leaflet
       .map
       {

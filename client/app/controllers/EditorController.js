@@ -233,7 +233,7 @@ var EditorController = (function () {
             console.log("Error LayerID is empty...");
             return false;
         }
-
+        oLayer.isVisibleInMap = true;
         //add layer in list
 
 
@@ -306,7 +306,9 @@ var EditorController = (function () {
         $("#jstree").jstree().enable_node(oLayer.layerId);
         sLabelText = $("#jstree").jstree().get_text(oLayer.layerId);
         sLabelText = sLabelText.split("<i>");
-        sLabelText = sLabelText[1].split("</i>");
+
+        //if there is <i> sLabelText.length === 2
+        sLabelText = (sLabelText.length === 2) ? sLabelText[1].split("</i>") : sLabelText ;
         sLabelText = sLabelText[0];
         utilsJstreeUpdateLabelNode(oLayer.layerId,sLabelText);
 
@@ -358,16 +360,9 @@ var EditorController = (function () {
      * @param sLayerId
      */
     EditorController.prototype.addLayerMap2D = function (sLayerId) {
-        //
+
         var oMap = this.m_oMapService.getMap();
         var sUrl = this.m_oConstantsService.getWmsUrlGeoserver();//'http://localhost:8080/geoserver/ows?'
-
-        //var wmsLayer = L.tileLayer.wms(sUrl, {
-        //    layers: 'wasdi:' + sLayerId,
-        //    format: 'image/png',
-        //    transparent: true,
-        //    noWrap:true
-        //});
 
         var wmsLayer = L.tileLayer.betterWms(sUrl, {
             layers: 'wasdi:' + sLayerId,
@@ -378,30 +373,6 @@ var EditorController = (function () {
         wmsLayer.setZIndex(1000);//it set the zindex of layer in map
         wmsLayer.addTo(oMap);
 
-
-        //
-        //var source = L.WMS.source(sUrl, {
-        //    layers: 'wasdi:' + sLayerId,
-        //    format: 'image/png',
-        //    transparent: true,
-        //    noWrap:true
-        //});
-        //source.getLayer('wasdi:' + sLayerId).addTo(oMap);
-
-
-        //var MySource = L.WMS.Source.extend({
-        //    'ajax': function(url, callback) {
-        //        $.ajax(url, {
-        //            'context': this,
-        //            'success': function(result) {
-        //                callback.call(this, result);
-        //            }
-        //        });
-        //    },
-        //    'showFeatureInfo': function(latlng, info) {
-        //        $('.output').html(info);
-        //    }
-        //});
 
     }
 
@@ -741,14 +712,14 @@ var EditorController = (function () {
                                             if (utilsIsObjectNullOrUndefined(oBand) == false)
                                                 oController.zoomOnLayer2DMap(oBand.productName + "_" + oBand.name);
                                         }
-                                    },//TODO
-                                    //"Zoom3D" : {
-                                    //    "label" : "Zoom Band 3D Map",
-                                    //    "action" : function (obj) {
-                                    //        if(utilsIsObjectNullOrUndefined(oBand) == false)
-                                    //            oController.zoomOnLayer3DGlobe(oBand.productName+"_"+oBand.name);
-                                    //    }
-                                    //}
+                                    },
+                                    "Zoom3D" : {
+                                       "label" : "Zoom Band 3D Map",
+                                       "action" : function (obj) {
+                                           if(utilsIsObjectNullOrUndefined(oBand) == false)
+                                               oController.zoomOnLayer3DGlobe(oBand.productName+"_"+oBand.name);
+                                       }
+                                    }
 
                                 };
                         }
@@ -801,12 +772,12 @@ var EditorController = (function () {
                                                     }
                                                 },
                                                 //SUB-SUBMENU RADIOMETRIC
-                                                "Radiometric": {
-                                                    "label": "Radiometric",
-                                                    "action": false,
-                                                    "separator_before":true,
-                                                    "submenu":
-                                                        {
+                                                // "Radiometric": {
+                                                //     "label": "Radiometric",
+                                                //     "action": false,
+                                                //     "separator_before":true,
+                                                //     "submenu":
+                                                //         {
                                                             "Calibrate": {
                                                                 "label": "Calibrate",
                                                                 "action": function (obj) {
@@ -825,20 +796,20 @@ var EditorController = (function () {
                                                                     // });
                                                                 }
                                                             },
-                                                        }
-                                                },
+                                                //         }
+                                                // },
                                                 //SUB-SUBMENU GEOMETRIC
-                                                "Geometric": {
-                                                    "label": "Geometric",
-                                                    "action": false,
-                                                    "submenu":
-                                                        {
+                                                // "Geometric": {
+                                                //     "label": "Geometric",
+                                                //     "action": false,
+                                                //     "submenu":
+                                                //         {
                                                             //SUB-SUB-SUBMENU GEOMETRIC
-                                                            "Terrain correction": {
-                                                                "label": "Terrain correction",
-                                                                "action": false,
-                                                                "submenu":
-                                                                    {
+                                                            // "Terrain correction": {
+                                                            //     "label": "Terrain correction",
+                                                            //     "action": false,
+                                                            //     "submenu":
+                                                            //         {
                                                                         "Range Doppler Terrain Correction": {
                                                                             "label": "Range Doppler Terrain Correction",
                                                                             "action": function (obj) {
@@ -856,11 +827,11 @@ var EditorController = (function () {
                                                                                 // });
                                                                             }
                                                                         },
-                                                                    }
-                                                            },
+                                                            //         }
+                                                            // },
 
-                                                        }
-                                                },
+                                                //         }
+                                                // },
 
                                             }
                                     },
@@ -1573,6 +1544,28 @@ var EditorController = (function () {
         return null;
     }
     //---------------------------------- SHOW MODALS ------------------------------------
+
+    EditorController.prototype.openWorkflowDialog = function(){
+        var oController = this;
+        this.m_oModalService.showModal({
+            templateUrl: "dialogs/workflow_operation/WorkFlowView.html",
+            controller: "WorkFlowController",
+            inputs: {
+                extras: {
+                    products:oController.m_aoProducts,
+                }
+            }
+        }).then(function (modal) {
+            modal.element.modal();
+            modal.close.then(function (oResult) {
+
+
+            });
+        });
+
+        return true;
+    };
+
     EditorController.prototype.openApplyOrbitDialog = function (oSelectedProduct) {
         var oController = this;
         this.m_oModalService.showModal({
@@ -1931,6 +1924,77 @@ var EditorController = (function () {
             return "#43516A";//white
 
     };
+
+    //hide band in layer list
+    EditorController.prototype.hideBandInLayerList = function (oBand) {
+        if (utilsIsObjectNullOrUndefined(oBand) == true) {
+            console.log("Error in removeBandImage")
+            return false;
+        }
+
+        var oController = this;
+        if(utilsIsObjectNullOrUndefined(oBand.name) === false)
+            var sLayerId = "wasdi:" + oBand.productName + "_" + oBand.name;// band removed
+        else
+            var sLayerId = "wasdi:" + oBand.layerId;  // + "_" + oBand.bandName;//remove bands after a product was deleted
+
+        var oMap2D = oController.m_oMapService.getMap();
+        var oGlobeLayers = oController.m_oGlobeService.getGlobeLayers();
+
+
+        //remove layer in 2D map
+        oMap2D.eachLayer(function (layer) {
+            if (utilsIsStrNullOrEmpty(sLayerId) == false && layer.options.layers == sLayerId) {
+                //oController.m_oMapService.removeLayerFromMap(layer)
+                oMap2D.removeLayer(layer);
+
+            }
+        });
+
+        //remove layer in 3D globe
+        var oLayer = null;
+        var bCondition = true;
+        var iIndexLayer = 0;
+
+        //TODO CHECK EVERY TIME WHILE(TRUE)
+        if (this.m_bIsVisibleMapOfLeaflet == true) {
+            while (bCondition) {
+                oLayer = oGlobeLayers.get(iIndexLayer);
+
+                if (utilsIsStrNullOrEmpty(sLayerId) == false && utilsIsObjectNullOrUndefined(oLayer) == false
+                    && oLayer.imageryProvider.layers == sLayerId) {
+                    bCondition = false;
+                    oLayer = oGlobeLayers.remove(oLayer);
+                }
+                iIndexLayer++;
+            }
+
+        }
+        else {
+            this.m_oGlobeService.clearGlobe();
+            this.m_oGlobeService.initGlobe('cesiumContainer2');
+        }
+        oBand.isVisibleInMap = false;
+        //Remove layer from layers list
+        // var iLenghtLayersList;
+        // if (utilsIsObjectNullOrUndefined(oController.m_aoLayersList))
+        //     iLenghtLayersList = 0;
+        // else
+        //     iLenghtLayersList = oController.m_aoLayersList.length;
+
+        // for (var iIndex = 0; iIndex < iLenghtLayersList; ) {
+        //     if (utilsIsStrNullOrEmpty(sLayerId) == false && utilsIsSubstring(sLayerId, oController.m_aoLayersList[iIndex].layerId)) {
+        //         oController.m_aoLayersList.splice(iIndex,1);
+        //         iLenghtLayersList--;
+        //     }
+        //     else
+        //     {
+        //         iIndex++;
+        //     }
+        //
+        // }
+    }
+
     EditorController.$inject = [
         '$scope',
         '$location',

@@ -149,3 +149,4 @@ wasdiApp.controller("AttributesMetadataController",AttributesMetadataController)
 wasdiApp.controller("SftpUploadController",SftpUploadController);
 wasdiApp.controller("DeleteProcessController",DeleteProcessController);
 wasdiApp.controller("ProcessesLogsController",ProcessesLogsController);
+wasdiApp.controller("WorkFlowController",WorkFlowController);
