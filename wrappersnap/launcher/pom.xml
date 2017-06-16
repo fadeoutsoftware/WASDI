@@ -189,11 +189,5 @@
 
     </dependencies>
 
-    <repositories>
-        <repository>
-            <id>GeoSolutions</id>
-            <url>http://maven.geo-solutions.it/</url>
-        </repository>
-    </repositories>
 
 </project>
