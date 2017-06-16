@@ -1112,18 +1112,13 @@ public class LauncherMain {
      */
     public void SetFileSizeToProcess(Long lSize, ProcessWorkspace oProcessWorkspace) {
     	
-    	
     	if (oProcessWorkspace == null) {
     		s_oLogger.error("LauncherMain.SetFileSizeToProcess: input process is null");
     		return;
     	}
     	
-        long lFileSizeByte = lSize;
-        double lFileSizeGiga = ( (double) lFileSizeByte )/ (1024.0 * 1024.0 * 1024.0);
-        DecimalFormat oDecimalFormat = new DecimalFormat("#.00"); 
-        
-        s_oLogger.debug("LauncherMain.SetFileSizeToProcess: File size [Gb] = " + oDecimalFormat.format(lFileSizeGiga));
-        oProcessWorkspace.setFileSize(oDecimalFormat.format(lFileSizeGiga));
+        s_oLogger.debug("LauncherMain.SetFileSizeToProcess: File size  = " + Utils.GetFormatFileDimension(lSize));
+        oProcessWorkspace.setFileSize(Utils.GetFormatFileDimension(lSize));
     }
     
     
