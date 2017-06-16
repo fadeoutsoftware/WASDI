@@ -1090,7 +1090,7 @@ public class LauncherMain {
      * @param oFile File to read the size from
      * @param oProcessWorkspace Process to update
      */
-    public void SetFileSizeToProcess(File oFile, ProcessWorkspace oProcessWorkspace) {
+    public static void SetFileSizeToProcess(File oFile, ProcessWorkspace oProcessWorkspace) {
     	
     	if (oFile== null) {
     		s_oLogger.error("LauncherMain.SetFileSizeToProcess: input file is null");
@@ -1110,7 +1110,7 @@ public class LauncherMain {
      * @param lSize Size
      * @param oProcessWorkspace Process to update
      */
-    public void SetFileSizeToProcess(Long lSize, ProcessWorkspace oProcessWorkspace) {
+    public static void SetFileSizeToProcess(Long lSize, ProcessWorkspace oProcessWorkspace) {
     	
     	if (oProcessWorkspace == null) {
     		s_oLogger.error("LauncherMain.SetFileSizeToProcess: input process is null");
