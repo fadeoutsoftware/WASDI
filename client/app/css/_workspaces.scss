@@ -4,7 +4,7 @@
   .globe-style
   {
     width: auto;//500px
-    height: $wasdi-heigth-panel;//500px
+    height: $wasdi-heigth-globe-workspaces;//500px
     border: 2px solid black;
   }
   //TITLE
@@ -38,34 +38,37 @@
   //}
   .workspace-list
   {
-    height: $wasdi-max-height-workspaces;
-    thead
-    {
-      th{
+    height: $wasdi-heigth-panel;
+    .table-workspaces{
+      height: $wasdi-max-height-workspaces;
+      thead
+      {
+        th{
+          background-color: #44536C;
+          color: white;
+        }
+      }
+
+      .table-hover tbody tr:hover td, .table-hover tbody tr:hover th {
+        background-color: #44536C;
+        color: white;
+        cursor:pointer;
+      }
+      // COLOR OVER A TD
+      .over-color:hover
+      {
+        cursor:pointer;
+        i:hover {
+
+          //background-color:white;
+          color:$wasdi-over-icon;
+        }
+      }
+      .selected-row
+      {
         background-color: #44536C;
         color: white;
       }
-    }
-
-    .table-hover tbody tr:hover td, .table-hover tbody tr:hover th {
-      background-color: #44536C;
-      color: white;
-      cursor:pointer;
-    }
-    // COLOR OVER A TD
-    .over-color:hover
-    {
-      cursor:pointer;
-      i:hover {
-
-        //background-color:white;
-        color:$wasdi-over-icon;
-      }
-    }
-    .selected-row
-    {
-      background-color: #44536C;
-      color: white;
     }
   }
   // LIST OF FILES IN WORKSPACES
