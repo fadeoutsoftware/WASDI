@@ -3,7 +3,7 @@
  */
 
 var WorkspaceController = (function() {
-    function WorkspaceController($scope, $location, oConstantsService, oAuthService, oWorkspaceService,$state,oProductService, oRabbitStompService,oGlobeService) {
+    function WorkspaceController($scope, $location, oConstantsService, oAuthService, oWorkspaceService,$state,oProductService, oRabbitStompService,oGlobeService,$rootScope) {
         this.m_oScope = $scope;
         this.m_oLocation  = $location;
         this.m_oAuthService = oAuthService;
@@ -20,6 +20,7 @@ var WorkspaceController = (function() {
         this.m_oWorkspaceSelected = null;
         this.m_oRabbitStompService = oRabbitStompService;
         this.m_oGlobeService = oGlobeService;
+        this.m_oRootScope = $rootScope;
         this.fetchWorkspaceInfoList();
 
         this.m_oRabbitStompService.unsubscribe();
@@ -43,6 +44,7 @@ var WorkspaceController = (function() {
                 {
                     var sWorkspaceId = data.stringValue;
                     oController.openWorkspace(sWorkspaceId);
+
                 }
             }
         }).error(function (data,status) {
@@ -203,7 +205,8 @@ var WorkspaceController = (function() {
         '$state',
         'ProductService',
         'RabbitStompService',
-        'GlobeService'
+        'GlobeService',
+        '$rootScope'
     ];
     return WorkspaceController;
 }) ();

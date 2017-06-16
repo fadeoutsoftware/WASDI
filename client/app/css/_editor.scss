@@ -198,19 +198,19 @@
 
     text-align: right;
     margin-top: -45px;
-    background-color: $wasdi-operation-bar-backgroud;
-    height: 80px;
+
+
     ul {
       list-style-type: none;
       padding: 0;
       overflow: hidden;
-      background-color: $wasdi-operation-bar-backgroud;
+
 
 
     }
 
     li {
-
+      height:40px ;
       float: right;
       .icon
       {
@@ -222,12 +222,13 @@
     }
 
     li a {
-
+      //margin-top: 5px;
       display: block;
       color: $wasdi-operation-bar-color-icon;
       text-align: center;
-      padding: 14px 16px;
+      //padding: 14px 16px;
       //padding:2px 16px 14px 16px;
+      padding: 3px 5px 5px 5px ;
       text-decoration: none;
     }
 
@@ -240,11 +241,11 @@
       background-color: $wasdi-nav-bar-color-selected;
     }
 
-    .button-menu-with-icons{
-      li a {
-        padding:2px 16px 14px 16px;
-      }
-    }
+    //.button-menu-with-icons{
+    //  li a {
+    //    padding: 0 5px 0 5px ;
+    //  }
+    //}
 
   }
 
