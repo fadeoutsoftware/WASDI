@@ -181,5 +181,8 @@
 
   "DIALOG_PROCESSES_LOGS_TITLE":"Processes Logs",
 
-  "DIALOG_WORKFLOW_TITLE":"Workflow"
+  "DIALOG_WORKFLOW_TITLE":"Workflow",
+  "DIALOG_WORKFLOW_INPUTFILE": "Select Input File: ",
+  "DIALOG_WORKFLOW_OUTPUTFILE": "Output File: "
+
 }

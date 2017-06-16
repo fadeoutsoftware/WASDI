@@ -32,28 +32,18 @@ var MergeProductsController = (function() {
 
     MergeProductsController.prototype.isVisibleDropDownMenu = function()
     {
-        if(utilsIsObjectNullOrUndefined(this.m_oSelectedProduct))
-            return true;
+        if(utilsIsObjectNullOrUndefined(this.m_oSelectedProduct)) return true;
         return false;
     }
 
     MergeProductsController.prototype.upload = function (oFile) {
-        if(utilsIsObjectNullOrUndefined(oFile))
-            return false;
-        if(utilsIsObjectNullOrUndefined(this.m_oWorkSpaceActive))
-            return false;
+        if(utilsIsObjectNullOrUndefined(oFile)) return false;
+        if(utilsIsObjectNullOrUndefined(this.m_oWorkSpaceActive)) return false;
+
         var oController = this;
         var sUrl = oController.m_oConstantService.getAPIURL();
         sUrl += "/catalog/upload?sWorkspaceId=" + oController.m_oWorkSpaceActive.workspaceId;
 
-        //var oOptions = {
-        //    type: "POST" ,
-        //    url : sUrl,
-        //    data : oFile,
-        //    headers: {
-        //        'Content-Type': "multipart/form-data;"
-        //    },
-        //}
         var successCallback = function(data, status)
         {
             utilsVexDialogAlertTop("Uploaded file");
@@ -63,8 +53,6 @@ var MergeProductsController = (function() {
         {
             utilsVexDialogAlertTop("Error in upload file");
         };
-        //
-        //oController.m_oHttp(oOptions).then(successCallback, errorCallback);
 
         var fd = new FormData();
         fd.append('file', oFile);
@@ -73,26 +61,6 @@ var MergeProductsController = (function() {
             headers: {'Content-Type': undefined}
         }).then(successCallback, errorCallback);
 
-        //$.ajax({
-        //    type: "POST" ,
-        //    url : sUrl,
-        //    data : oFile,
-        //    contentType: false,
-        //    processData: false,
-        //    crossDomain : true,
-        //    'x-session-token': oController.m_oConstantService.getSessionId(),
-        //    xhrFields: {
-        //        withCredentials: true
-        //    },
-        //    success: function(data, status)
-        //    {
-        //        utilsVexDialogAlertTop("Ok");
-        //    },
-        //    error: function (jqXHR, textStatus, errorThrown)
-        //    {
-        //        utilsVexDialogAlertTop("Non è ok");
-        //    }
-        //});
         return true;
     };
 
@@ -111,12 +79,6 @@ var MergeProductsController = (function() {
             {
                 if (!utilsIsObjectNullOrUndefined(data) )
                 {
-                    //utilsVexDialogAlertTop("successful");
-
-                    //var file = new Blob([data], { type: 'image/tiff;'});//charset=utf-8
-                    //var fileURL = URL.createObjectURL(file);
-                    // saveAs(file, 'filename.tif');
-
                     var contentType = headers['content-type'];
                     var file = new Blob([data], { type: contentType});
                     var linkElement = document.createElement('a');
