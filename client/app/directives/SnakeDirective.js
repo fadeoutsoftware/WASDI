@@ -136,7 +136,8 @@ angular.module('wasdi.SnakeDirective', [])
                     if (bGaming == false && bGameOver == false) {
                         // Show Start Text
                         var oText = new createjs.Text();
-                        oText.x = oText.y = 0;
+                        oText.x = 90;
+                        oText.y = 0;
                         oText.font = "68px astronaut";
                         oText.color = sFontColor;
                         oText.text = "Press Space to Play";
@@ -147,7 +148,10 @@ angular.module('wasdi.SnakeDirective', [])
 
                         // Show Game Over Text
                         var oText = new createjs.Text();
-                        oText.x = oText.y = 0;
+
+                        oText.x = 260;
+                        oText.y = 0;
+
                         oText.font = "68px astronaut";
                         oText.color = sFontColor;
                         oText.text = "Game Over";
@@ -273,10 +277,20 @@ angular.module('wasdi.SnakeDirective', [])
 
                 function InitNewGame() {
                     oDirection = { x: 0, y: 1};
+                    /*
                     aoSnakePoints = [ { x:15,y:15}, { x:16,y:15}, { x:17,y:15}, { x:18,y:15}, { x:19,y:15}, { x:20,y:15}, { x:20,y:14}, { x:20,y:13},
                         { x:20,y:12}, { x:20,y:11}, { x:20,y:10}, { x:20,y:9}, { x:20,y:8}, { x:20,y:7}, { x:19,y:7}, { x:18,y:7}, { x:17,y:7}, { x:16,y:7},
                         { x:15,y:7}, { x:14,y:7}, { x:13,y:7}, { x:12,y:7}, { x:12,y:8}, { x:12,y:9}, { x:12,y:10}, { x:12,y:11},{ x:12,y:12}, { x:12,y:13},
                         { x:12,y:14}, { x:12,y:15}];
+                    */
+
+                    var iXStart = 19;
+                    var iYStart = 18;
+                    aoSnakePoints = [ { x:iXStart,y:iYStart}, { x:iXStart+1,y:iYStart}, { x:iXStart+2,y:iYStart}, { x:iXStart+3,y:iYStart}, { x:iXStart+4,y:iYStart}, { x:iXStart+5,y:iYStart}, { x:iXStart+5,y:iYStart-1}, { x:iXStart+5,y:iYStart-2},
+                        { x:iXStart+5,y:iYStart-3}, { x:iXStart+5,y:iYStart-4}, { x:iXStart+5,y:iYStart-5}, { x:iXStart+5,y:iYStart-6}, { x:iXStart+5,y:iYStart-7}, { x:iXStart+5,y:iYStart-8}, { x:iXStart+4,y:iYStart-8}, { x:iXStart+3,y:iYStart-8}, { x:iXStart+2,y:iYStart-8}, { x:iXStart+1,y:iYStart-8},
+                        { x:iXStart,y:iYStart-8}, { x:iXStart-1,y:iYStart-8}, { x:iXStart-2,y:iYStart-8}, { x:iXStart-3,y:iYStart-8}, { x:iXStart-3,y:iYStart-7}, { x:iXStart-3,y:iYStart-6}, { x:iXStart-3,y:iYStart-5}, { x:iXStart-3,y:iYStart-4},{ x:iXStart-3,y:iYStart-3}, { x:iXStart-3,y:iYStart-2},
+                        { x:iXStart-3,y:iYStart-1}, { x:iXStart-3,y:iYStart}];
+
                     iPoints = 0;
                     oGoalPoint = GetGoalPoint();
                     iSlowLimit = 10;
