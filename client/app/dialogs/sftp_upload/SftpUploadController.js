@@ -145,7 +145,41 @@ var SftpUploadController = (function() {
             return false;
         }
 
-    }
+    };
+
+    SftpUploadController.prototype.ingestAllSelectedFiles = function () {
+        var iSelectedFilesLength = this.m_aoSelectedFiles.length;
+
+        for(var iIndexSelectedFile = 0; iIndexSelectedFile < iSelectedFilesLength ; iIndexSelectedFile++){
+            if(this.ingestFile(this.m_aoSelectedFiles[iIndexSelectedFile]) === false)
+                console.log("Something doesn't work during ingest File, indexFile:" + iIndexSelectedFile);
+        }
+    };
+
+    /**
+     * ingestFile
+     * @param oSelectedFile
+     * @returns {boolean}
+     */
+    SftpUploadController.prototype.ingestFile = function(oSelectedFile){
+        if(utilsIsObjectNullOrUndefined(oSelectedFile)=== true )
+            return false;
+        this.m_oAuthService.ingestFile(oSelectedFile,this.m_oConstantsService.getActiveWorkspace).success(function (data, status) {
+            if (data != null) {
+                if (data != undefined) {
+
+                }
+            }
+        }).error(function (data, status) {
+            if(data)
+            {
+                console.log("SftpUploadController error during ingest file");
+                utilsVexDialogAlertTop("During the ingestion file there was an error, file:" + oSelectedFile);
+            }
+        });
+        return true;
+    };
+
     SftpUploadController.$inject = [
         '$scope',
         'close',

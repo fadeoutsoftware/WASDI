@@ -13,5 +13,12 @@
   .vakata-context, .vakata-context ul {
     z-index: 1002;
   }
+  .vakata-context li>a>i:empty{
+    width: 1.8em !important;
+  }
+  .vakata-context li>a>i {
 
+    width: 1.8em !important;
+    height: 2.4em;
+  }
 }

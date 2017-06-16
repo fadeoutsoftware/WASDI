@@ -7,6 +7,7 @@
 angular.module('wasdi.GlobeService', ['wasdi.ConstantsService']).
 service('GlobeService', ['$http',  'ConstantsService', function ($http, oConstantsService) {
     this.m_oWasdiGlobe=null;
+    var oController = this;
     this.m_aoLayers=null;
     this.LONG_HOME = 0;
     this.LAT_HOME = 0;
@@ -53,33 +54,7 @@ service('GlobeService', ['$http',  'ConstantsService', function ($http, oConstan
         }
     };
 
-    this.initRotateGlobe = function(sGlobeDiv)
-    {
 
-        if (window.WebGLRenderingContext)//check if browser supports WebGL
-        {
-            // browser supports WebGL
-            // default globe
-            try {
-                this.m_oWasdiGlobe = new Cesium.Viewer(sGlobeDiv, this.oGlobeOptions);
-                this.m_aoLayers = this.m_oWasdiGlobe.imageryLayers;
-
-                //rotate globe
-                this.m_oWasdiGlobe.camera.flyHome(0);
-                this.m_oWasdiGlobe.clock.multiplier = 3 * 60 * 60;
-            }
-            catch(err) {
-                console.log("Error in Cesium Globe: " + err);
-
-            }
-        }
-        else
-        {
-            //TODO ERROR  browser doesn't support WebGL
-            console.log("Error in Cesium Globe miss WebGl");
-            utilsVexDialogAlertTop("Error in Cesium Globe miss WebGl, link: https://get.webgl.org/");
-        }
-    };
     //clear globe
     this.clearGlobe=function()
     {
@@ -243,6 +218,75 @@ service('GlobeService', ['$http',  'ConstantsService', function ($http, oConstan
 
         return oRectangle;
     }
+
+    /*INIT ROTATE GLOBE*/
+    this.initRotateGlobe = function(sGlobeDiv)
+    {
+        if (window.WebGLRenderingContext)//check if browser supports WebGL
+        {
+            // browser supports WebGL
+
+            // default globe
+            try {
+                this.m_oWasdiGlobe = new Cesium.Viewer(sGlobeDiv, this.oGlobeOptions);
+                this.m_aoLayers = this.m_oWasdiGlobe.imageryLayers;
+
+                //rotate globe
+                this.m_oWasdiGlobe.camera.flyHome(0);
+                this.m_oWasdiGlobe.clock.multiplier = 3 * 60 * 60;
+
+                this.m_oWasdiGlobe.scene.preRender.addEventListener(this.icrf);
+                // this.m_oWasdiGlobe.scene.preRender.addEventListener(function(scene, time) {
+                //
+                //     if (scene.mode !== Cesium.SceneMode.SCENE3D) {
+                //         return;
+                //     }
+                //     var icrfToFixed = Cesium.Transforms.computeIcrfToFixedMatrix(time);
+                //     if (Cesium.defined(icrfToFixed)) {
+                //         // console.log(test);
+                //         var camera =  oController.m_oWasdiGlobe.camera;
+                //         var offset = Cesium.Cartesian3.clone(camera.position);
+                //         var transform = Cesium.Matrix4.fromRotationTranslation(icrfToFixed);
+                //         camera.lookAtTransform(transform, offset);
+                //     }
+                //
+                // });
+            }
+            catch(err) {
+                console.log("Error in Cesium Globe: " + err);
+
+            }
+        }
+        else
+        {
+            //TODO ERROR  browser doesn't support WebGL
+            console.log("Error in Cesium Globe miss WebGl");
+            utilsVexDialogAlertTop("Error in Cesium Globe miss WebGl, link: https://get.webgl.org/");
+        }
+    };
+    /*ROTATION GLOBE*/
+    this.icrf = function(scene, time) {
+
+        if (scene.mode !== Cesium.SceneMode.SCENE3D) {
+            return;
+        }
+        var icrfToFixed = Cesium.Transforms.computeIcrfToFixedMatrix(time);
+        if (Cesium.defined(icrfToFixed)) {
+
+            var camera =  oController.m_oWasdiGlobe.camera;
+            var offset = Cesium.Cartesian3.clone(camera.position);
+            var transform = Cesium.Matrix4.fromRotationTranslation(icrfToFixed);
+            camera.lookAtTransform(transform, offset);
+        }
+    };
+    /*Stop rotation*/
+    this.stopRotationGlobe = function(){
+        this.m_oWasdiGlobe.clock.multiplier = 0;
+    };
+    /*Start rotation*/
+    this.startRotationGlobe = function(){
+        this.m_oWasdiGlobe.clock.multiplier = 3 * 60 * 60;
+    };
 
 }]);
 

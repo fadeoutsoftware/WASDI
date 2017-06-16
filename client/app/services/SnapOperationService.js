@@ -35,6 +35,12 @@ service('SnapOperationService', ['$http',  'ConstantsService', function ($http, 
         return this.Operation("optical/ndvi", sSourceProductName, sDestinationProductName, sWorkspaceId,oOptionsInput);//ndvi
     };
 
+    /************************************ Workflow **************************************************/
+    this.postWorkFlow =  function(oFileXmlInput,sWorkspaceInput,sSourceInput,sDestinationInput){
+
+        return this.m_oHttp.post(this.APIURL + '/processing/graph?workspace=' + sWorkspaceInput + '&source=' + sSourceInput + '&destination=' + sDestinationInput, oFileXmlInput);
+    };
+
     this.Operation = function(sOperation, sSourceProductName, sDestinationProductName, sWorkspaceId, oOptionsInput)
     {
         //DEBUG LOG

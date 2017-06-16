@@ -196,7 +196,7 @@ var ImportController = (function() {
             {
                 var iNumberOfPoints = oLayer._latlngs[0].length;
                 var aaLatLngs = oLayer._latlngs[0];
-                /*open search want the first poit as end poit */
+                /*open search want the first point as end point */
                 var iLastlat=aaLatLngs[0].lat;
                 var iLastlng=aaLatLngs[0].lng;
                 for(var iIndexBounds = 0; iIndexBounds < iNumberOfPoints; iIndexBounds++)
@@ -453,7 +453,7 @@ var ImportController = (function() {
                     if(result.data)
                     {
                         oController.m_iTotalOfProducts = result.data;
-                        oController.m_oResultsOfSearchService.setTotalOfProducts(oController.m_iTotalOfProducts);
+                        oController.m_oResultsOfSearchService.setTotalOfProducts(result.data);
 
                         //calc number of pages
                         var remainder = oController.m_iTotalOfProducts % oController.m_iProductsPerPageSelected;
@@ -500,6 +500,9 @@ var ImportController = (function() {
                         utilsVexDialogAlertTop("The result is empty...");
                         oController.m_bIsVisibleListOfLayers = false; //visualize filter list
                         oController.m_oResultsOfSearchService.setIsVisibleListOfProducts(oController.m_bIsVisibleListOfLayers );
+                        oController.setPaginationVariables();
+                        // oController.m_iCurrentPage = 1;
+                        // oController.m_oResultsOfSearchService.setCurrentPage(oController.m_iCurrentPage);
                     }
                 }
             }, function errorCallback(response) {

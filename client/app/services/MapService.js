@@ -155,7 +155,6 @@ service('MapService', ['$http','$rootScope', 'ConstantsService', function ($http
             imperial: false
         }).addTo(this.m_oWasdiMap);
 
-
         /**
          * layers control
          */
@@ -372,5 +371,6 @@ service('MapService', ['$http','$rootScope', 'ConstantsService', function ($http
         //    //e.layer.bringToBack();
         //});
         return true;
-    }
+    };
+
 }]);

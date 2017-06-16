@@ -94,7 +94,8 @@ service('RabbitStompService', ['$http',  'ConstantsService','$interval','Process
                     if (utilsIsStrNullOrEmpty(oMessageResult.messageCode) == false  ) sOperation = oMessageResult.messageCode;
 
                     // Add an error Message
-                    oThisService.m_aoErrorsList.push({text:"There was an error in the " + sOperation + " operation"});
+                    var oDialog = utilsVexDialogAlertBottomRightCorner("There was an error in the " + sOperation + " operation");
+                    utilsVexCloseDialogAfterFewSeconds(3000, oDialog);
                     // Update Process Messages
                     oThisService.m_oProcessesLaunchedService.loadProcessesFromServer(sActiveWorkspaceId);
 
