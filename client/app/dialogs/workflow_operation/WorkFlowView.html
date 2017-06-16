@@ -9,6 +9,9 @@
                 <h4>
                     <div class="row">
                         <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
+                            <h4 class="modal-title ">{{"DIALOG_WORKFLOW_INPUTFILE"|translate}}</h4>
+                        </div>
+                        <div class="col-xs-8 col-sm-8 col-md-8 col-lg-8 my-input-text">
                             <div class="dropdown">
                                 <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1"
                                         data-toggle="dropdown">
@@ -17,14 +20,17 @@
                                 </button>
                                 <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1">
                                     <li role="presentation" ng_repeat="product in m_oController.m_aoProducts" ng-click="m_oController.m_oSelectedFile = product" ><a role="menuitem" tabindex="-1" href="">{{product.productFriendlyName}}</a></li>
-                                    <!--<li role="presentation" class="dropdown-header">Dropdown header</li>-->
-                                    <!--<li role="presentation"><a role="menuitem" tabindex="-1" href="#">Action</a></li>-->
                                 </ul>
                             </div>
                         </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
+                            <h4 class="modal-title ">{{"DIALOG_WORKFLOW_OUTPUTFILE"|translate}}</h4>
+                        </div>
 
                         <div class="col-xs-8 col-sm-8 col-md-8 col-lg-8 my-input-text">
-                            <input type="text" class="" placeholder="Product..." ng-model="m_oController.m_oSelectedFile.productFriendlyName">
+                            <input type="text" class="" placeholder="Output File..." ng-model="m_oController.m_sOutputFile">
                         </div>
                     </div>
                     <div class="drag-and-drop ">
