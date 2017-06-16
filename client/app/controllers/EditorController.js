@@ -181,6 +181,7 @@ var EditorController = (function () {
             case "MULTILOOKING":
             case "NDVI":
             case "TERRAIN":
+            case "GRAPH":
                 oController.receivedNewProductMessage(oMessage);
                 break;
         }
