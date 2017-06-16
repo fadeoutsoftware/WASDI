@@ -92,6 +92,10 @@ public class WasdiGraph {
 				throw new Exception("Error setting input/output file");
 			}
 			
+			// P.Campanella 16/06/2017: Still not tested, should add real file size to the Process Log
+            //set file size     
+            LauncherMain.SetFileSizeToProcess(inputFile, process);
+			
 			//build the snap graph context and processor
 			GraphContext context = new GraphContext(graph);		
 			GraphProcessor processor = new GraphProcessor();
@@ -245,7 +249,7 @@ public class WasdiGraph {
 			
     		// Create the entity
     		ProductWorkspace productEntity = new ProductWorkspace();
-    		productEntity.setProductName(params.getDestinationProductName());
+    		productEntity.setProductName(params.getDestinationProductName() + ".dim");
     		productEntity.setWorkspaceId(params.getWorkspace());
     		
     		// Try to insert
