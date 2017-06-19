@@ -28,7 +28,7 @@
 
         <!--TIME-->
         <div class="time-container" ng-hide="m_oController.m_bIsVisibleListOfLayers || m_oController.m_bisVisibleLocalStorageInputs">
-            <div  ng-if="m_oController.m_bShowsensingfilter">
+            <div  class="my-input-text" ng-if="m_oController.m_bShowsensingfilter">
 
                 <div class="description-label" >
                     Sensing period
@@ -78,50 +78,16 @@
                     </p>
                 </div>
 
-                <div class="description-label" >
-                    Ingestion period
-                </div>
-                <div class="description-label" >
-                    From:
-                </div>
-                <div class="nput-calendar-container col-slim" >
-                    <p class="input-group">
-                        <input type="text" class="form-control advanced-calendar-date-input"
-                               uib-datepicker-popup="yyyy/MM/dd"
-                               ng-model="m_oController.m_oModel.ingestionFrom"
-                               is-open="m_oController.m_oStatus.openedIngestionFrom"
-                               date-disabled="m_oController.disabled(date, mode)"
-                               max-date="m_oController.m_oModel.ingestionTo" ng-required="true"
-                               ng-blur="m_oController.updateAdvancedSearch()" close-text="Close"
-                               readonly="true" data-container="body"/>
-                        <span class="input-group-btn">
-							<button type="button" class="btn btn-default advanced-calendar-button"
-                                    ng-click="m_oController.openIngestionFrom($event)"><i class="fa fa-calendar" aria-hidden="true"></i></button>
-						  </span>
-                    </p>
-                </div>
-                <div class="description-label">
-                    To:
-                </div>
-                <div class="advanced-calendar-input input-calendar-container" >
-                    <p class="input-group">
-                        <input type="text" class="form-control advanced-calendar-date-input"
-                               uib-datepicker-popup="yyyy/MM/dd"
-                               ng-model="m_oController.m_oModel.ingestionTo"
-                               is-open="m_oController.m_oStatus.openedIngestionTo"
-                               date-disabled="m_oController.disabled(date, mode)"
-                               min-date="m_oController.m_oModel.ingestionFrom" ng-required="true"
-                               close-text="Close" ng-blur="m_oController.updateAdvancedSearch()"
-                               readonly="true" data-container="body"/>
-                        <span class="input-group-btn">
-							<button type="button" class="btn btn-default advanced-calendar-button"
-                                    ng-click="m_oController.openIngestionTo($event)"><i class="fa fa-calendar" aria-hidden="true"></i></button>
-						  </span>
-                    </p>
-                </div>
 
             </div>
         </div>
+        <!--search button-->
+        <div class="search-button" ng-click="m_oController.search()" id="search-button"
+             ng-class="{'search-button-disabled': m_oController.thereIsAtLeastOneProvider() === false,'search-button': m_oController.thereIsAtLeastOneProvider() === true }" >
+            <!--<i class="fa fa-search fa-lg" aria-hidden="true"></i>-->
+            {{"IMPORT_SEARCH_BUTTON"|translate}}
+        </div>
+
     </div>
 
         <!-- SIDEBAR -->
@@ -145,10 +111,67 @@
 
 
                 <!---------------------ADVANCE SEARCH------------------------->
-                <div id="advanced-search-container" ng-hide="m_oController.m_bIsVisibleListOfLayers || m_oController.m_bisVisibleLocalStorageInputs">
+                <div  class="advance-search" id="advanced-search-container" ng-hide="m_oController.m_bIsVisibleListOfLayers || m_oController.m_bisVisibleLocalStorageInputs">
                     <div id="advanced-search-content">
 
                         <div style="overflow:visible;padding:15px 5px;" class="my-input-text"><!--id="section_2" class="panel-collapse collapse" role="tabpanel" aria-labelledby="section_2"-->
+                            <div class="ingestion-time">
+                                <div class="description-label" >
+                                    <h4>Ingestion period:</h4>
+                                </div>
+                                <div class="col-xs-1 col-sm-1 col-md-1 col-lg-1">
+                                    <div class="description-label" >
+                                        From:
+                                    </div>
+                                </div>
+
+                                <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
+                                    <div class="input-calendar-container" >
+                                        <p class="input-group">
+                                            <input type="text" class="form-control advanced-calendar-date-input"
+                                                   uib-datepicker-popup="yyyy/MM/dd"
+                                                   ng-model="m_oController.m_oModel.ingestionFrom"
+                                                   is-open="m_oController.m_oStatus.openedIngestionFrom"
+                                                   date-disabled="m_oController.disabled(date, mode)"
+                                                   max-date="m_oController.m_oModel.ingestionTo" ng-required="true"
+                                                   ng-blur="m_oController.updateAdvancedSearch()" close-text="Close"
+                                                   readonly="true" data-container="body"/>
+
+                                            <span class="input-group-btn">
+							                <button type="button" class="btn btn-default advanced-calendar-button"
+                                                    ng-click="m_oController.openIngestionFrom($event)"><i class="fa fa-calendar" aria-hidden="true"></i></button>
+						                </span>
+                                        </p>
+                                    </div>
+                                </div>
+
+
+                                <div class="col-xs-1 col-sm-1 col-md-1 col-lg-1">
+                                    <div class="description-label">
+                                        To:
+                                    </div>
+                                </div>
+
+                                <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
+                                    <div class="advanced-calendar-input input-calendar-container" >
+                                        <p class="input-group">
+                                            <input type="text" class="form-control advanced-calendar-date-input"
+                                                   uib-datepicker-popup="yyyy/MM/dd"
+                                                   ng-model="m_oController.m_oModel.ingestionTo"
+                                                   is-open="m_oController.m_oStatus.openedIngestionTo"
+                                                   date-disabled="m_oController.disabled(date, mode)"
+                                                   min-date="m_oController.m_oModel.ingestionFrom" ng-required="true"
+                                                   close-text="Close" ng-blur="m_oController.updateAdvancedSearch()"
+                                                   readonly="true" data-container="body"/>
+                                            <span class="input-group-btn">
+							                    <button type="button" class="btn btn-default advanced-calendar-button"
+                                                    ng-click="m_oController.openIngestionTo($event)"><i class="fa fa-calendar" aria-hidden="true"></i></button>
+						                    </span>
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
 
                             <!--*********************** MISSIONS LIST ********************************-->
                             <ul class="nav nav-tabs nav-justified">
@@ -223,11 +246,11 @@
                                     <!--<i class="fa fa-search fa-lg" aria-hidden="true"></i>-->
                                     {{"IMPORT_CLEAR_BUTTON"|translate}}
                                 </div>
-                                <div class="search-button" ng-click="m_oController.search()" id="search-button"
-                                     ng-class="{'search-button-disabled': m_oController.thereIsAtLeastOneProvider() === false,'search-button': m_oController.thereIsAtLeastOneProvider() === true }" >
-                                    <!--<i class="fa fa-search fa-lg" aria-hidden="true"></i>-->
-                                    {{"IMPORT_SEARCH_BUTTON"|translate}}
-                                </div>
+                                <!--<div class="search-button" ng-click="m_oController.search()" id="search-button"-->
+                                     <!--ng-class="{'search-button-disabled': m_oController.thereIsAtLeastOneProvider() === false,'search-button': m_oController.thereIsAtLeastOneProvider() === true }" >-->
+                                    <!--&lt;!&ndash;<i class="fa fa-search fa-lg" aria-hidden="true"></i>&ndash;&gt;-->
+                                    <!--{{"IMPORT_SEARCH_BUTTON"|translate}}-->
+                                <!--</div>-->
 
                                 <!--<span class="advanced-search-clear" ng-click="m_oController.clearFilter()" title="Clear Search Filter" >{{"IMPORT_CLEAR_BUTTON"|translate}}</span>-->
                             </div>
