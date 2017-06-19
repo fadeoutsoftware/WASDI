@@ -18,8 +18,17 @@
 
       .modal-body
       {
+        .select-input-label{
+          margin-top: 10px;
+        }
+
+        .output-file-label{
+          margin-top: 10px;
+        }
+
         .drag-and-drop
         {
+          margin-top: 10px;
           .button {
             -moz-appearance: button;
             /* Firefox */

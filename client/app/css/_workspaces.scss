@@ -1,34 +1,45 @@
 .workspaces-view
 {
-  //GLOBE
-  .globe-style
-  {
-    width: auto;//500px
-    height: $wasdi-heigth-globe-workspaces;//500px
-    border: 2px solid black;
+  //OPERATION BAR
+  .operations-bar {
+
+    text-align: right;
+    margin-top: -45px;
+    .my-input-text
+    {
+      width: 30%;
+      float: right;
+      margin-left: 20px;
+    }
+    .my-button{
+      padding: 12px 20px;
+      margin: 9px 2px;
+    }
   }
+
+    //GLOBE
+  .globe-container{
+    margin-top: 10px;
+    .globe-style
+    {
+      width: auto;//500px
+      height: $wasdi-heigth-globe-workspaces;//500px
+      border: 2px solid black;
+    }
+    .toolbar-right-bottom {
+      display: block;
+      position: absolute;
+      right: 20px;
+      bottom: 5px;
+
+    }
+  }
+
   //TITLE
   .my-title
   {
     text-align: center;
     font-family: $wasdi-font-web;
-  }
-
-  // UTILS BAR
-  /*
-   *  search plus buttons
-  */
-  .utils-bar
-  {
-    margin-top: 20px;
-    margin-bottom: 20px;
-
-    .my-input-text
-    {
-      width: 30%;
-      float: left;
-      margin-right: 20px;
-    }
   }
 
   //TABLE WORKSPACES
@@ -38,9 +49,10 @@
   //}
   .workspace-list
   {
-    height: $wasdi-heigth-panel;
+      margin-top: 10px;
+      //height: $wasdi-heigth-panel;
     .table-workspaces{
-      height: $wasdi-max-height-workspaces;
+      height: $wasdi-heigth-panel-workspaces-page;
       thead
       {
         th{
@@ -76,9 +88,10 @@
     //overflow-y: auto;
     //overflow-x: hidden;
     //height: $wasdi-max-height-workspaces;
+    height: $wasdi-heigth-panel-workspaces-page;
     .list-files
     {
-      height: $wasdi-max-height-workspaces;
+      height: $wasdi-heigth-workspace-list;
       overflow-y: auto;
       overflow-x: hidden;
 

@@ -1,5 +1,130 @@
 <div class="import-view col-lg-12 col-md-12 col-sm-12 col-xs-12">
-    <!-- SIDEBAR -->
+
+    <!--Operation bar-->
+    <div class="col-lg-11 col-md-10 col-sm-10 col-xs-10 col-lg-offset-1 col-md-offset-2 col-sm-offset-2 col-xs-offset-2 operations-bar my-input-text"  ><!--style="height: 80px;"-->
+        <!--PROVIDERS-->
+        <div class="providers-container " ng-hide="m_oController.m_bIsVisibleListOfLayers || m_oController.m_bisVisibleLocalStorageInputs">
+            <div class="checkbox">
+                <label ng-repeat="provider in m_oController.m_aListOfProvider" ng-click="provider.selected = !provider.selected">
+                    <!--<input type="checkbox" value="" class="">-->
+                    <div type="checkbox" class="glyphicon" ng-class="{ ' glyphicon-unchecked': !provider.selected, 'glyphicon-check': provider.selected  } "></div>
+                    {{provider.name}}
+
+                </label>
+
+            </div>
+        </div>
+
+
+
+        <!--SEARCH-->
+
+        <div class="my-input-text " ng-hide="m_oController.m_bIsVisibleListOfLayers || m_oController.m_bisVisibleLocalStorageInputs" >
+
+            <input type="text" ng-model="m_oController.m_oModel.textQuery"
+                   placeholder="Search..." ><!-- style="padding: 0px !important;"-->
+
+        </div>
+
+        <!--TIME-->
+        <div class="time-container" ng-hide="m_oController.m_bIsVisibleListOfLayers || m_oController.m_bisVisibleLocalStorageInputs">
+            <div  ng-if="m_oController.m_bShowsensingfilter">
+
+                <div class="description-label" >
+                    Sensing period
+                </div>
+                <div class="description-label" >
+                    From:
+                </div>
+                <div class="input-calendar-container" >
+
+                    <p class="input-group">
+                        <input type="text" class="form-control advanced-calendar-date-input"
+                               uib-datepicker-popup="yyyy/MM/dd"
+                               ng-model="m_oController.m_oModel.sensingPeriodFrom"
+                               is-open="m_oController.m_oStatus.openedSensingPeriodFrom"
+                               date-disabled="m_oController.disabled(date, mode)"
+                               max-date="m_oController.m_oModel.sensingPeriodTo" ng-required="true"
+                               ng-blur="m_oController.updateAdvancedSearch()" readonly="true"
+                               close-text="Close"/>
+
+                        <span class="input-group-btn">
+
+							        <button type="button" class="btn btn-default advanced-calendar-button"
+                                            ng-click="m_oController.openSensingPeriodFrom($event)"><i class="fa fa-calendar" aria-hidden="true"></i></button>
+						            </span>
+
+                    </p>
+                </div>
+
+                <div class="description-label" >
+                    To:
+                </div>
+
+                <div class=" advanced-calendar-input input-calendar-container " >
+                    <p class="input-group">
+                        <input type="text" class="form-control advanced-calendar-date-input"
+                               uib-datepicker-popup="yyyy/MM/dd"
+                               ng-model="m_oController.m_oModel.sensingPeriodTo"
+                               is-open="m_oController.m_oStatus.openedSensingPeriodTo"
+                               date-disabled="m_oController.disabled(date, mode)" ng-required="true"
+                               min-date="m_oController.m_oModel.sensingPeriodFrom"
+                               ng-blur="m_oController.updateAdvancedSearch()" close-text="Close"
+                               readonly="true" data-container="body"/>
+                        <span class="input-group-btn">
+							<button type="button" class="btn btn-default advanced-calendar-button"
+                                    ng-click="m_oController.openSensingPeriodTo($event)"><i class="fa fa-calendar" aria-hidden="true"></i></button>
+						  </span>
+                    </p>
+                </div>
+
+                <div class="description-label" >
+                    Ingestion period
+                </div>
+                <div class="description-label" >
+                    From:
+                </div>
+                <div class="nput-calendar-container col-slim" >
+                    <p class="input-group">
+                        <input type="text" class="form-control advanced-calendar-date-input"
+                               uib-datepicker-popup="yyyy/MM/dd"
+                               ng-model="m_oController.m_oModel.ingestionFrom"
+                               is-open="m_oController.m_oStatus.openedIngestionFrom"
+                               date-disabled="m_oController.disabled(date, mode)"
+                               max-date="m_oController.m_oModel.ingestionTo" ng-required="true"
+                               ng-blur="m_oController.updateAdvancedSearch()" close-text="Close"
+                               readonly="true" data-container="body"/>
+                        <span class="input-group-btn">
+							<button type="button" class="btn btn-default advanced-calendar-button"
+                                    ng-click="m_oController.openIngestionFrom($event)"><i class="fa fa-calendar" aria-hidden="true"></i></button>
+						  </span>
+                    </p>
+                </div>
+                <div class="description-label">
+                    To:
+                </div>
+                <div class="advanced-calendar-input input-calendar-container" >
+                    <p class="input-group">
+                        <input type="text" class="form-control advanced-calendar-date-input"
+                               uib-datepicker-popup="yyyy/MM/dd"
+                               ng-model="m_oController.m_oModel.ingestionTo"
+                               is-open="m_oController.m_oStatus.openedIngestionTo"
+                               date-disabled="m_oController.disabled(date, mode)"
+                               min-date="m_oController.m_oModel.ingestionFrom" ng-required="true"
+                               close-text="Close" ng-blur="m_oController.updateAdvancedSearch()"
+                               readonly="true" data-container="body"/>
+                        <span class="input-group-btn">
+							<button type="button" class="btn btn-default advanced-calendar-button"
+                                    ng-click="m_oController.openIngestionTo($event)"><i class="fa fa-calendar" aria-hidden="true"></i></button>
+						  </span>
+                    </p>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+        <!-- SIDEBAR -->
     <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12 side-panel">
         <div class="panel panel-default">
 
@@ -10,160 +135,31 @@
 
                 <span ng-hide="m_oController.m_bIsVisibleListOfLayers">{{"IMPORT_PANEL_HEAD_TITLE_FILTERS"|translate}}</span>
                 <!-- VISUALIZE LOCAL STORAGE INPUTS -->
-                <i class="fa fa-archive fa-lg localStoragebtn" aria-hidden="true" ng-click="m_oController.visualizeLocalStorageInputs();" ng-hide="m_oController.m_bIsVisibleListOfLayers" ></i>
+                <!--<i class="fa fa-archive fa-lg localStoragebtn" aria-hidden="true" ng-click="m_oController.visualizeLocalStorageInputs();" ng-hide="m_oController.m_bIsVisibleListOfLayers" ></i>-->
 
             </div>
             <div  class="panel-body"><!--id="mySidenav"-->
 
 
-                <!-- CLOSE SIDE NAVBAR BUTTON -->
-
-                <!----------------------------- SEARCH -------------------------->
-                <div ng-hide="m_oController.m_bIsVisibleListOfLayers || m_oController.m_bisVisibleLocalStorageInputs">
-                    <div id="coll-product-container" class="coll-product-container">
-                        <div class="coll-product-list-container">
-                            <div class=" coll-product-header">
-
-                                <div class="row">
-                                    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 ">
-                                        <div class="checkbox">
-                                            <form>
-                                                <fieldset>
-
-                                                    <legend>
-                                                        <h4>
-                                                            Providers
-                                                        </h4>
-
-                                                    </legend>
-
-                                                    <label ng-repeat="provider in m_oController.m_aListOfProvider" ng-click="provider.selected = !provider.selected">
-                                                        <!--<input type="checkbox" value="" class="">-->
-                                                        <div type="checkbox" class="glyphicon" ng-class="{ ' glyphicon-unchecked': !provider.selected, 'glyphicon-check': provider.selected  } "></div>
-                                                        {{provider.name}}
-
-                                                    </label>
-                                                    <!--<pre>{{provider.name|json}}</pre>-->
-                                                </fieldset>
-                                            </form>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="row">
-                                    <div class="my-input-text col-lg-12 col-md-12 col-sm-12 col-xs-12">
-                                        <input type="text" ng-model="m_oController.m_oModel.textQuery"
-                                               id="coll-product-search" placeholder="Search..." ><!-- style="padding: 0px !important;"-->
-                                    </div>
-                                </div>
-
-                            </div>
 
 
-                        </div>
-                    </div>
-                </div >
+
                 <!---------------------ADVANCE SEARCH------------------------->
                 <div id="advanced-search-container" ng-hide="m_oController.m_bIsVisibleListOfLayers || m_oController.m_bisVisibleLocalStorageInputs">
                     <div id="advanced-search-content">
 
                         <div style="overflow:visible;padding:15px 5px;" class="my-input-text"><!--id="section_2" class="panel-collapse collapse" role="tabpanel" aria-labelledby="section_2"-->
 
-                            <div class="row" ng-if="m_oController.m_bShowsensingfilter">
-
-                                <div class="col-md-2 col-sd-12 col-xs-12 advanced-search-subtitle"> Sensing period
-                                </div>
-                                <div class="col-md-1 col-sd-2 col-xs-4 advanced-calendar-label" >
-                                    From:
-                                </div>
-                                <div class="col-md-4 col-sd-4 col-xs-8 input-calendar-container">
-
-                                    <p class="input-group">
-                                        <input type="text" class="form-control advanced-calendar-date-input"
-                                               uib-datepicker-popup="yyyy/MM/dd"
-                                               ng-model="m_oController.m_oModel.sensingPeriodFrom"
-                                               is-open="m_oController.m_oStatus.openedSensingPeriodFrom"
-                                               date-disabled="m_oController.disabled(date, mode)"
-                                               max-date="m_oController.m_oModel.sensingPeriodTo" ng-required="true"
-                                               ng-blur="m_oController.updateAdvancedSearch()" readonly="true"
-                                               close-text="Close"/>
-
-                                    <span class="input-group-btn">
-
-							        <button type="button" class="btn btn-default advanced-calendar-button"
-                                        ng-click="m_oController.openSensingPeriodFrom($event)"><i class="fa fa-calendar" aria-hidden="true"></i></button>
-						            </span>
-
-                                    </p>
-                                </div>
-
-                                <div class="col-md-1 col-sd-2 col-xs-4 advanced-calendar-label" >
-                                    To:
-                                </div>
-
-                                <div class="col-md-4 col-sd-4 col-xs-8 advanced-calendar-input input-calendar-container" >
-                                    <p class="input-group">
-                                        <input type="text" class="form-control advanced-calendar-date-input"
-                                               uib-datepicker-popup="yyyy/MM/dd"
-                                               ng-model="m_oController.m_oModel.sensingPeriodTo"
-                                               is-open="m_oController.m_oStatus.openedSensingPeriodTo"
-                                               date-disabled="m_oController.disabled(date, mode)" ng-required="true"
-                                               min-date="m_oController.m_oModel.sensingPeriodFrom"
-                                               ng-blur="m_oController.updateAdvancedSearch()" close-text="Close"
-                                               readonly="true" data-container="body"/>
-                                    <span class="input-group-btn">
-							<button type="button" class="btn btn-default advanced-calendar-button"
-                                    ng-click="m_oController.openSensingPeriodTo($event)"><i class="fa fa-calendar" aria-hidden="true"></i></button>
-						  </span>
-                                    </p>
-                                </div>
-                            </div>
-                            <div class="row" ng-if="m_oController.m_bShowsensingfilter">
-                                <div class="col-md-2 col-sd-12 col-xs-12 avanced-search-subtitle"> Ingestion period
-                                </div>
-                                <div class="col-md-1 col-sd-2 col-xs-4 advanced-calendar-label">
-                                    From:
-                                </div>
-                                <div class="col-md-4 col-sd-4 col-xs-8 input-calendar-container">
-                                    <p class="input-group">
-                                        <input type="text" class="form-control advanced-calendar-date-input"
-                                               uib-datepicker-popup="yyyy/MM/dd"
-                                               ng-model="m_oController.m_oModel.ingestionFrom"
-                                               is-open="m_oController.m_oStatus.openedIngestionFrom"
-                                               date-disabled="m_oController.disabled(date, mode)"
-                                               max-date="m_oController.m_oModel.ingestionTo" ng-required="true"
-                                               ng-blur="m_oController.updateAdvancedSearch()" close-text="Close"
-                                               readonly="true" data-container="body"/>
-                                    <span class="input-group-btn">
-							<button type="button" class="btn btn-default advanced-calendar-button"
-                                    ng-click="m_oController.openIngestionFrom($event)"><i class="fa fa-calendar" aria-hidden="true"></i></button>
-						  </span>
-                                    </p>
-                                </div>
-                                <div class="col-md-1 col-sd-2 col-xs-4 advanced-calendar-label">
-                                    To:
-                                </div>
-                                <div class="col-md-4 col-sd-4 col-xs-8 advanced-calendar-input input-calendar-container">
-                                    <p class="input-group">
-                                        <input type="text" class="form-control advanced-calendar-date-input"
-                                               uib-datepicker-popup="yyyy/MM/dd"
-                                               ng-model="m_oController.m_oModel.ingestionTo"
-                                               is-open="m_oController.m_oStatus.openedIngestionTo"
-                                               date-disabled="m_oController.disabled(date, mode)"
-                                               min-date="m_oController.m_oModel.ingestionFrom" ng-required="true"
-                                               close-text="Close" ng-blur="m_oController.updateAdvancedSearch()"
-                                               readonly="true" data-container="body"/>
-                                    <span class="input-group-btn">
-							<button type="button" class="btn btn-default advanced-calendar-button"
-                                    ng-click="m_oController.openIngestionTo($event)"><i class="fa fa-calendar" aria-hidden="true"></i></button>
-						  </span>
-                                    </p>
-                                </div>
-
-                            </div>
-
                             <!--*********************** MISSIONS LIST ********************************-->
-                            <div ng-repeat="mission in m_oController.getMissions()" class="missions">
+                            <ul class="nav nav-tabs nav-justified">
+                                <!--<li class="active"><a href="#">{{mission.name}}</a></li>-->
+                                <li ng-class="{active: m_oController.m_activeTab === $index}" ng-repeat="mission in m_oController.getMissions()" ng-click="m_oController.m_activeTab = $index"><a href="">{{mission.name}}</a></li>
+                            </ul>
+
+                            <div ng-repeat="mission in m_oController.getMissions()" class="missions" ng-show="m_oController.m_activeTab === $index">
+                                <!--<pre> {{$index| json}}</pre>-->
+
+
                                 <div>
                                     <div class="col-md-1 col-xs-4 col-sd-4">
                                         <div class="glyphicon mission-checkbox"
