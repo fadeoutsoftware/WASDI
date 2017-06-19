@@ -28,11 +28,10 @@ var ImportController = (function() {
         this.m_oResultsOfSearchService = oResultsOfSearchService;
         this.m_oModalService = oModalService;
         this.m_oOpenSearchService = oOpenSearchService;
-        //this.m_bPproductsPerPagePristine   = true;
-        //this.m_iProductCount = 0;
-        //this.m_bDisableField = true;
-        //this.m_aiAddedIds=[];
-        //this.m_aiRemovedIds=[];
+
+        //tab index
+        this.m_activeTab = 0;
+
         this.m_oDetails = {};
         this.m_oDetails.productIds = [];
         this.m_oScope.selectedAll = false;

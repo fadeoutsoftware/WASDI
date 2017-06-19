@@ -1,5 +1,41 @@
 .import-view
 {
+
+  //OPERATION BAR
+  .operations-bar
+  {
+    text-align: right;
+    margin-top: -45px;
+    .providers-container{
+      margin-top: 10px;
+      float: left;
+    }
+    .my-input-text{
+      input[type=text]{
+        width: 20%;
+        float:left;
+        margin-left: 10px;
+        padding: 10px 10px;
+      }
+    }
+    .time-container{
+      margin-left: 20px;
+      //float:left;
+      .input-group{
+        float:left;
+        width: 10%;
+      }
+      .description-label{
+        float:left;
+        margin:13px 5px 0px 5px ;
+
+      }
+      button{
+        border-color: $wasdi-blue-logo;
+      }
+    }
+  }
+
   margin-top: 5px;
   padding: 0;
   // MAP CONTAINER
@@ -94,14 +130,13 @@
       color:black;
       .my-input-text
       {
-
         .form-control
         {
           border-radius: 0;
           border:2px solid $wasdi-input-text-border-color;
         }
         input[type=text] {
-          //width: 100%;
+
           //padding: 12px 20px;
           //margin: 8px 0;
           //box-sizing: border-box;

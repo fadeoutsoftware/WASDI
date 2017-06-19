@@ -279,6 +279,23 @@ var RootController = (function() {
 
         return true;
     };
+
+    RootController.prototype.isWorkspacesPageOpen = function(){
+        var sState=this.m_oState.current.name;
+        if(sState === "root.workspaces")
+            return true;
+        return false;
+    }
+
+    RootController.prototype.cursorCss = function(){
+        var sState=this.m_oState.current.name;
+        switch(sState) {
+            case "root.workspaces":
+                return "no-drop";
+                break;
+            default: return "auto";
+        }
+    }
     /*********************************************************************************/
     /* ***************** OPEN LINK *****************/
     RootController.prototype.openEditorPage = function () {

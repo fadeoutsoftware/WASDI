@@ -37,7 +37,7 @@
             </script>
         </a>
     </div>
-
+    <!--------------------------- NAVBAR -------------------------------->
     <div class="col-lg-11 col-md-10 col-sm-10 col-xs-10 my-nav-bar">
         <nav class="navbar navbar-default" ><!--ng-show="m_oController.isVisibleNavBar()"-->
             <div class="container-fluid">
@@ -51,14 +51,16 @@
                 </div>
 
                 <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-                    <div class="nav navbar-nav navbar-left ">
-                        <li ng-class="{active:m_oController.activePageCss('root.workspaces')}">
-                            <a ui-sref="root.workspaces" ><i class="fa fa-arrow-left" aria-hidden="true"></i>
-                                {{"ROOT_VIEW_NAV_BAR_LINK_WORKSPACES"|translate}}
-                            </a>
-                        </li>
-                    </div>
-                    <div class="nav navbar-nav navbar-left name-workspace">
+                    <!--&lt;!&ndash; BACK BUTTON&ndash;&gt;-->
+                    <!--<div class="nav navbar-nav navbar-left " ng-hide="m_oController.isWorkspacesPageOpen()">-->
+                        <!--<li ng-class="{active:m_oController.activePageCss('root.workspaces')}">-->
+                            <!--<a ui-sref="root.workspaces" ><i class="fa fa-arrow-left" aria-hidden="true"></i>-->
+                                <!--{{"ROOT_VIEW_NAV_BAR_LINK_WORKSPACES"|translate}}-->
+                            <!--</a>-->
+                        <!--</li>-->
+                    <!--</div>-->
+                    <!-- EDIT NAME -->
+                    <div class="nav navbar-nav navbar-left name-workspace" ng-hide="m_oController.isWorkspacesPageOpen()">
                         <div class="form-group">
                             <!--<input type="text" value="{{m_oController.getWorkspaceName()}}" placeholder="{{m_oController.getWorkspaceName()}}"-->
                             <!--ng-model="m_oController.m_oConstantsService.getActiveWorkspace().name" ng-keyup="m_oController.UpdateWorkspace($event) " ng-blur="m_oController.UpdateWorkspace()">-->
@@ -78,34 +80,39 @@
                     </div>
 
                     <ul class="nav navbar-nav navbar-right">
+                        <!-- BACK BUTTON-->
+                        <li ng-class="{active:m_oController.activePageCss('root.workspaces')}">
+                            <a ui-sref="root.workspaces" ><i class="fa fa-arrow-left" aria-hidden="true"></i>
+                                {{"ROOT_VIEW_NAV_BAR_LINK_WORKSPACES"|translate}}
+                            </a>
+                        </li>
 
-                        <li ng-class="{active:m_oController.activePageCss('root.searchorbit')}">
-                          <a ng-click="m_oController.openSearchorbit()"  href=""><i class="fa fa-calendar-o fa-lg" aria-hidden="true"></i>
+                        <li   ng-class="{active:m_oController.activePageCss('root.searchorbit')}" ng-disabled="m_oController.isWorkspacesPageOpen()"  >
+                          <a ng-click="m_oController.openSearchorbit()"  href="" ng-style="{cursor:m_oController.cursorCss()}"><i class="fa fa-calendar-o fa-lg" aria-hidden="true" ></i>
                                 {{"ROOT_VIEW_NAV_BAR_LINK_SEARCH"|translate}}
                             </a>
                         </li>
-                        <li ng-class="{active:m_oController.activePageCss('root.import')}">
-                            <a ng-click="m_oController.openImportPage()" href=""> <i class="fa fa-search fa-lg" aria-hidden="true"></i><!--ui-sref="root.import"-->
+                        <li   ng-class="{active:m_oController.activePageCss('root.import')}"  ng-disabled="m_oController.isWorkspacesPageOpen()"  >
+                            <a ng-click="m_oController.openImportPage()" href="" ng-style="{cursor:m_oController.cursorCss()}"> <i class="fa fa-search fa-lg" aria-hidden="true"></i><!--ui-sref="root.import"-->
                                 {{"ROOT_VIEW_NAV_BAR_LINK_IMPORT"|translate}}
                             </a>
                         </li>
-                        <li ng-class="{active:m_oController.activePageCss('root.editor')}">
-                            <a ng-click="m_oController.onClickProcess();m_oController.openEditorPage()" href=""><i class="fa fa-cogs fa-lg" aria-hidden="true"></i><!-- ui-sref="root.editor"-->
+                        <li    ng-class="{active:m_oController.activePageCss('root.editor')}" ng-disabled="m_oController.isWorkspacesPageOpen()" >
+                            <a ng-click="m_oController.onClickProcess();m_oController.openEditorPage()" href="" ng-style="{cursor:m_oController.cursorCss()}"><i class="fa fa-cogs fa-lg" aria-hidden="true"></i><!-- ui-sref="root.editor"-->
                                 {{"ROOT_VIEW_NAV_BAR_LINK_PROCESS"|translate}}
                             </a>
                         </li>
 
                         <!--TODO REMOVE JAVASCRIPT AT THE END OF FILE WHEN I LEAVE POPOVER-->
-                        <li style="cursor:no-drop;" data-toggle="popover"  data-content="Coming Soon" data-placement="left"  ng-class="{active:m_oController.activePageCss('root.workspaces')}" href="">
+                        <li style="cursor:no-drop;" data-toggle="popover"  data-content="Coming Soon" data-placement="left"   href="">
                             <a>
-                                <i class="fa fa-upload fa-lg" aria-hidden="true"></i><!--ui-sref="root.editor"-->
+                                <i class="fa fa-upload fa-lg" aria-hidden="true"></i>
                                 {{"ROOT_VIEW_NAV_BAR_LINK_PUBLISH"|translate}}
                             </a>
                         </li>
-                        <li style="cursor:no-drop;" data-toggle="popover"  data-content="Coming Soon" data-placement="left"  ng-class="{active:m_oController.activePageCss('root.workspaces')}" href="">
+                        <li style="cursor:no-drop;" data-toggle="popover"  data-content="Coming Soon" data-placement="left"   href="">
                             <a>
-                                <i class="fa fa-share-alt fa-lg" aria-hidden="true"></i><!--ui-sref="root.editor"-->
-                                {{"ROOT_VIEW_NAV_BAR_LINK_SHARE"|translate}}
+                                <i class="fa fa-share-alt fa-lg" aria-hidden="true"></i>
                             </a>
                         </li>
                     </ul>
@@ -125,6 +132,7 @@
             <div class="col-xs-1 col-sm-1 col-md-1 col-lg-1 processes-list">
                 <div ng-show="m_oController.m_oLastProcesses != null && !m_oController.m_bIsOpenNav" >
                     <span><smallinvaderfixed></smallinvaderfixed></span>
+
                 </div>
             </div>
             <div class="col-lg-8 col-md-8 col-sm-8 col-xs-8 processes-list" >
@@ -132,6 +140,12 @@
                     <span class="label label-default">{{"ROOT_LABEL_OPERATION_DATA"|translate}}</span><div class="single-process" >{{m_oController.m_oLastProcesses.operationDate}}</div>
                     <span class="label label-default">{{"ROOT_LABEL_TYPE_OF_OPERATION"|translate}}</span> <div class="single-process">{{m_oController.m_oLastProcesses.operationType}}</div>
                     <span class="label label-default">{{"ROOT_LABEL_NAME"|translate}}</span> <div class="single-process">{{m_oController.m_oLastProcesses.productName}}</div>
+                    <!--{{oProcess.progressPerc}} %-->
+                    <div class="progress-single-process" >
+                        <div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="40" aria-valuemin="0" aria-valuemax="100" ng-style="{width:m_oController.m_oLastProcesses.progressPerc+'%' }">
+                            <span class="">{{m_oController.m_oLastProcesses.progressPerc}} %</span><!-- class="sr-only " for hide {{oProcess.progressPerc}} % Complete (success) -->
+                        </div>
+                    </div>
                 </div>
 
             </div>

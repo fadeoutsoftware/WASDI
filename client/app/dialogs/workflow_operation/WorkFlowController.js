@@ -68,6 +68,15 @@ var WorkFlowController = (function() {
         if(utilsIsObjectNullOrUndefined(this.m_oSelectedFile) === true ) return false;
         return true;
     };
+    /**
+     *
+     * @param oProductInput
+     */
+    WorkFlowController.prototype.selectedProduct = function (oProductInput) {
+        this.m_oSelectedFile = oProductInput;
+        this.m_sOutputFile = oProductInput.productFriendlyName + "_workflow";
+
+    };
 
     WorkFlowController.$inject = [
         '$scope',
