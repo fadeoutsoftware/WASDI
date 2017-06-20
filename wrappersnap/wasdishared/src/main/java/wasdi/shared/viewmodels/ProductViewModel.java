@@ -15,6 +15,18 @@ public class ProductViewModel {
 
     private NodeGroupViewModel bandsGroups;
 
+    
+    public ProductViewModel() {
+	}
+    
+    public ProductViewModel(ProductViewModel base) {
+		setBandsGroups(base.getBandsGroups());
+		setFileName(base.getFileName());
+		setMetadata(base.getMetadata());
+		setName(base.getName());
+		setProductFriendlyName(base.getProductFriendlyName());
+    }
+
 
     public MetadataViewModel getMetadata() {
         return metadata;

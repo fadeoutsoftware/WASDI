@@ -28,6 +28,7 @@ import wasdi.shared.data.PublishedBandsRepository;
 import wasdi.shared.geoserver.GeoServerManager;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.BandViewModel;
+import wasdi.shared.viewmodels.GeorefProductViewModel;
 import wasdi.shared.viewmodels.MetadataViewModel;
 import wasdi.shared.viewmodels.PrimitiveResult;
 import wasdi.shared.viewmodels.ProductViewModel;
@@ -137,11 +138,11 @@ public class ProductResource {
 	@GET
 	@Path("/byws")
 	@Produces({"application/xml", "application/json", "text/xml"})
-	public ArrayList<ProductViewModel> GetListByWorkspace(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sWorkspaceId") String sWorkspaceId) {
+	public ArrayList<GeorefProductViewModel> GetListByWorkspace(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sWorkspaceId") String sWorkspaceId) {
 
 		User oUser = Wasdi.GetUserFromSession(sSessionId);
 
-		ArrayList<ProductViewModel> aoProductList = new ArrayList<>();
+		ArrayList<GeorefProductViewModel> aoProductList = new ArrayList<GeorefProductViewModel>();
 
 		try {
 
@@ -177,12 +178,15 @@ public class ProductResource {
 					
 					System.out.println("ProductResource.GetListByWorkspace: Product [" + iProducts + "] = " + oDownloaded.getFileName());
 					
-					ProductViewModel oProductVM = oDownloaded.getProductViewModel();
+					ProductViewModel pVM = oDownloaded.getProductViewModel();
 					
-					if (oProductVM != null) {
+					
+					if (pVM != null) {
+						GeorefProductViewModel geoPVM = new GeorefProductViewModel(pVM);
+						geoPVM.setBbox(oDownloaded.getBoundingBox());
 						
-						if (oProductVM.getBandsGroups() != null) {
-							ArrayList<BandViewModel> aoBands = oProductVM.getBandsGroups().getBands();
+						if (geoPVM.getBandsGroups() != null) {
+							ArrayList<BandViewModel> aoBands = geoPVM.getBandsGroups().getBands();
 							
 							if (aoBands != null) {
 								for (int iBands=0; iBands<aoBands.size(); iBands++) {
@@ -190,10 +194,9 @@ public class ProductResource {
 									BandViewModel oBand = aoBands.get(iBands);
 									
 									if (oBand != null) {
-										PublishedBand oPublishBand = oPublishedBandsRepository.GetPublishedBand(oProductVM.getFileName(), oBand.getName());
+										PublishedBand oPublishBand = oPublishedBandsRepository.GetPublishedBand(geoPVM.getFileName(), oBand.getName());
 
-										if (oPublishBand != null)
-										{
+										if (oPublishBand != null) {
 											oBand.setPublished(true);
 										}
 									}
@@ -203,26 +206,20 @@ public class ProductResource {
 							
 						}
 
-						oProductVM.setMetadata(null);
-						aoProductList.add(oProductVM);
+						geoPVM.setMetadata(null);
+						aoProductList.add(geoPVM);
 						
 						System.out.println("ProductResource.GetListByWorkspace: added to return list");		
 
-					}
-					else {
+					} else {
 						System.out.println("ProductResource.GetListByWorkspace: ProductViewModel is Null: jump product");
 					}
-					
 
-				}
-				else {
+				} else {
 					System.out.println("WARNING: the product " + aoProductWorkspace.get(iProducts).getProductName() + " should be in WS " + sWorkspaceId + " but is not a Downloaded File" );
 				}
-
 			}
-
-		}
-		catch (Exception oEx) {
+		} catch (Exception oEx) {
 			oEx.toString();
 		}
 
