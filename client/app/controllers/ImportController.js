@@ -56,6 +56,8 @@ var ImportController = (function() {
         this.m_iCurrentPage = 1;
         this.m_iTotalPages = 1;
         this.m_iTotalOfProducts = 0;
+
+        // var dateObj = new Date();
         this.m_oModel = {
             textQuery:'',
             list: '',
@@ -66,10 +68,26 @@ var ImportController = (function() {
             missionFilter: '',
             doneRequest: '',
             sensingPeriodFrom: '',
-            sensingPeriodTo: '',
+            sensingPeriodTo:'' ,
             ingestionFrom: '',
             ingestionTo: '',
         };
+
+        this.m_fUtcDateConverter = function(date){
+            var result = date;
+            if(date != undefined) {
+                var day =  moment(date).get('date');
+                var month = moment(date).get('month');
+                var year = moment(date).get('year');
+                var utcDate = moment(year+ "-" + (parseInt(month)+1) +"-" +day+ " 00:00 +0000", "YYYY-MM-DD HH:mm Z"); // parsed as 4:30 UTC
+                result =  utcDate;
+            }
+
+            return result;
+        };
+
+        this.updateAdvancedSearch();
+        this.setDefaultData();
 
         this.m_oMergeSearch =
         {
@@ -172,19 +190,6 @@ var ImportController = (function() {
             */
         };
 
-
-        this.m_fUtcDateConverter = function(date){
-            var result = date;
-            if(date != undefined) {
-                var day =  moment(date).get('date');
-                var month = moment(date).get('month');
-                var year = moment(date).get('year');
-                var utcDate = moment(year+ "-" + (parseInt(month)+1) +"-" +day+ " 00:00 +0000", "YYYY-MM-DD HH:mm Z"); // parsed as 4:30 UTC
-                result =  utcDate;
-            }
-
-            return result;
-        };
 
 
         $scope.$on('rectangle-created-for-opensearch', function(event, args) {
@@ -638,6 +643,11 @@ var ImportController = (function() {
         }
         this.setFilter();
 
+        /* clear date */
+        this.updateAdvancedSearch();
+        this.setDefaultData();
+
+
         /* remove rectangle in map */
         if(!utilsIsObjectNullOrUndefined(this.m_aoProductsList))
         {
@@ -652,6 +662,9 @@ var ImportController = (function() {
         }
 
         this.m_oMapService.deleteDrawShapeEditToolbar();
+
+        /* go back */
+        this.setPaginationVariables();
     }
 
     ImportController.prototype.openSensingPeriodFrom = function($event) {
@@ -1116,9 +1129,15 @@ var ImportController = (function() {
     ImportController.prototype.receivedRabbitMessage  = function (oMessage, oController) {
 
         if (oMessage == null) return;
-        if (oMessage.messageResult=="KO") {
-            //alert('There was an error in the download');
-            utilsVexDialogAlertTop('There was an error in the download')
+        // Check the Result
+        if (oMessage.messageResult == "KO") {
+
+            var sOperation = "null";
+            if (utilsIsStrNullOrEmpty(oMessage.messageCode) === false  )
+                sOperation = oMessage.messageCode;
+            var oDialog = utilsVexDialogAlertTop('There was an error in the ' + oMessage.messageCode + ' Process');
+            utilsVexCloseDialogAfterFewSeconds(3000, oDialog);
+            this.m_oProcessesLaunchedService.loadProcessesFromServer(this.m_oActiveWorkspace);
             return;
         }
 
@@ -1279,7 +1298,18 @@ var ImportController = (function() {
 
         }
         return false;
-    }
+    };
+
+    /**
+     * setDefaultData
+     */
+    ImportController.prototype.setDefaultData = function(){
+        var dateObj = new Date();
+        this.m_oResultsOfSearchService.setSensingPeriodFrom(dateObj);
+        this.m_oResultsOfSearchService.setSensingPeriodTo(dateObj);
+        this.m_oModel.sensingPeriodFrom = this.m_oResultsOfSearchService.getSensingPeriodFrom();
+        this.m_oModel.sensingPeriodTo = this.m_oResultsOfSearchService.getSensingPeriodTo();
+    };
 
     ImportController.$inject = [
         '$scope',

@@ -3,38 +3,22 @@
     <!--Operation bar-->
     <div class="col-lg-11 col-md-10 col-sm-10 col-xs-10 col-lg-offset-1 col-md-offset-2 col-sm-offset-2 col-xs-offset-2 operations-bar my-input-text"  ><!--style="height: 80px;"-->
         <!--PROVIDERS-->
-        <div class="providers-container " ng-hide="m_oController.m_bIsVisibleListOfLayers || m_oController.m_bisVisibleLocalStorageInputs">
-            <div class="checkbox">
-                <label ng-repeat="provider in m_oController.m_aListOfProvider" ng-click="provider.selected = !provider.selected">
-                    <!--<input type="checkbox" value="" class="">-->
-                    <div type="checkbox" class="glyphicon" ng-class="{ ' glyphicon-unchecked': !provider.selected, 'glyphicon-check': provider.selected  } "></div>
-                    {{provider.name}}
-
-                </label>
-
-            </div>
-        </div>
-
-
+        <multiselectdropdownmenu options="m_oController.m_aListOfProvider"></multiselectdropdownmenu>
 
         <!--SEARCH-->
-
-        <div class="my-input-text " ng-hide="m_oController.m_bIsVisibleListOfLayers || m_oController.m_bisVisibleLocalStorageInputs" >
-
+        <div class="my-input-text "  >
             <input type="text" ng-model="m_oController.m_oModel.textQuery"
                    placeholder="Search..." ><!-- style="padding: 0px !important;"-->
-
         </div>
-
         <!--TIME-->
-        <div class="time-container" ng-hide="m_oController.m_bIsVisibleListOfLayers || m_oController.m_bisVisibleLocalStorageInputs">
+        <div class="time-container" >
             <div  class="my-input-text" ng-if="m_oController.m_bShowsensingfilter">
 
                 <div class="description-label" >
                     Sensing period
                 </div>
                 <div class="description-label" >
-                    From:
+                    From:{{ this.m_oModel.sensingPeriodFrom}}
                 </div>
                 <div class="input-calendar-container" >
 
@@ -82,10 +66,13 @@
             </div>
         </div>
         <!--search button-->
-        <div class="search-button" ng-click="m_oController.search()" id="search-button"
-             ng-class="{'search-button-disabled': m_oController.thereIsAtLeastOneProvider() === false,'search-button': m_oController.thereIsAtLeastOneProvider() === true }" >
-            <!--<i class="fa fa-search fa-lg" aria-hidden="true"></i>-->
-            {{"IMPORT_SEARCH_BUTTON"|translate}}
+        <div class="search-button-container" >
+            <div class="search-button" ng-click="m_oController.search()" id="search-button"
+                 ng-class="{'search-button-disabled': m_oController.thereIsAtLeastOneProvider() === false || (m_oController.m_bIsVisibleListOfLayers || m_oController.m_bisVisibleLocalStorageInputs),
+                            'search-button': m_oController.thereIsAtLeastOneProvider() === true }" >
+                <!--<i class="fa fa-search fa-lg" aria-hidden="true"></i>-->
+                {{"IMPORT_SEARCH_BUTTON"|translate}}
+            </div>
         </div>
 
     </div>
@@ -100,8 +87,12 @@
                 <i class="fa fa-arrow-left fa-lg backbtn" aria-hidden="true" ng-click=" m_oController.setPaginationVariables()" ng-show="m_oController.m_bIsVisibleListOfLayers"></i>
 
                 <span ng-hide="m_oController.m_bIsVisibleListOfLayers">{{"IMPORT_PANEL_HEAD_TITLE_FILTERS"|translate}}</span>
-                <!-- VISUALIZE LOCAL STORAGE INPUTS -->
-                <!--<i class="fa fa-archive fa-lg localStoragebtn" aria-hidden="true" ng-click="m_oController.visualizeLocalStorageInputs();" ng-hide="m_oController.m_bIsVisibleListOfLayers" ></i>-->
+                <div class="my-button clear-button" ng-click="m_oController.clearFilter()"   ng-click="m_oController.clearFilter()" title="Clear Search Filter">
+                    <!--<i class="fa fa-search fa-lg" aria-hidden="true"></i>-->
+                    <!--{{"IMPORT_CLEAR_BUTTON"|translate}}-->
+                    <i class="fa fa-bath" aria-hidden="true"></i>
+
+                </div>
 
             </div>
             <div  class="panel-body"><!--id="mySidenav"-->
@@ -176,7 +167,15 @@
                             <!--*********************** MISSIONS LIST ********************************-->
                             <ul class="nav nav-tabs nav-justified">
                                 <!--<li class="active"><a href="#">{{mission.name}}</a></li>-->
-                                <li ng-class="{active: m_oController.m_activeTab === $index}" ng-repeat="mission in m_oController.getMissions()" ng-click="m_oController.m_activeTab = $index"><a href="">{{mission.name}}</a></li>
+                                <li ng-class="{active: m_oController.m_activeTab === $index}" ng-repeat="mission in m_oController.getMissions()" ng-click="m_oController.m_activeTab = $index">
+                                    <a href="">
+                                        <i class="fa fa-check-circle" aria-hidden="true" ng-show="mission.selected"></i>
+                                        <i class="fa fa-times-circle" aria-hidden="true" ng-hide="mission.selected"></i>
+                                        {{mission.name}}
+
+                                    </a>
+                                </li>
+
                             </ul>
 
                             <div ng-repeat="mission in m_oController.getMissions()" class="missions" ng-show="m_oController.m_activeTab === $index">
@@ -239,21 +238,6 @@
                                 </div>
                             </div>
 
-                            <!---------------------------- SEARCH BUTTON -------------------->
-                            <br/>
-                            <div class="search-button-container" >
-                                <div class="my-button clear-button" ng-click="m_oController.clearFilter()"   ng-click="m_oController.clearFilter()" title="Clear Search Filter">
-                                    <!--<i class="fa fa-search fa-lg" aria-hidden="true"></i>-->
-                                    {{"IMPORT_CLEAR_BUTTON"|translate}}
-                                </div>
-                                <!--<div class="search-button" ng-click="m_oController.search()" id="search-button"-->
-                                     <!--ng-class="{'search-button-disabled': m_oController.thereIsAtLeastOneProvider() === false,'search-button': m_oController.thereIsAtLeastOneProvider() === true }" >-->
-                                    <!--&lt;!&ndash;<i class="fa fa-search fa-lg" aria-hidden="true"></i>&ndash;&gt;-->
-                                    <!--{{"IMPORT_SEARCH_BUTTON"|translate}}-->
-                                <!--</div>-->
-
-                                <!--<span class="advanced-search-clear" ng-click="m_oController.clearFilter()" title="Clear Search Filter" >{{"IMPORT_CLEAR_BUTTON"|translate}}</span>-->
-                            </div>
                         </div>
 
 

@@ -14,7 +14,6 @@ service('GlobeService', ['$http',  'ConstantsService', function ($http, oConstan
     this.HEIGHT_HOME = 15000000//zoom
     this.oGlobeOptions =
     {
-
         imageryProvider : Cesium.createOpenStreetMapImageryProvider(),
         timeline: false,
         animation: false,
@@ -96,7 +95,7 @@ service('GlobeService', ['$http',  'ConstantsService', function ($http, oConstan
                 roll : 0.0
             }
         });
-    }
+    };
 
     /* ADD BOUNDING BOX */
     this.addRectangleOnGlobeBoundingBox = function (oRectangle)

@@ -21,11 +21,15 @@ var WorkspaceController = (function() {
         this.m_oRabbitStompService = oRabbitStompService;
         this.m_oGlobeService = oGlobeService;
         this.m_oRootScope = $rootScope;
-        this.fetchWorkspaceInfoList();
+        this.m_oSelectedProduct = null;
+        this.m_oWorkspaceSelected = null;
 
+        this.fetchWorkspaceInfoList();
         this.m_oRabbitStompService.unsubscribe();
         // this.m_oGlobeService.initGlobe('cesiumContainer3');
+
         this.m_oGlobeService.initRotateGlobe('cesiumContainer3');
+        this.m_oGlobeService.goHome();
     }
 
     WorkspaceController.prototype.moveTo = function (sPath) {
@@ -55,10 +59,7 @@ var WorkspaceController = (function() {
 
 
     WorkspaceController.prototype.openWorkspace = function (sWorkspaceId) {
-
         var oController = this;
-
-
 
         this.m_oWorkspaceService.getWorkspaceEditorViewModel(sWorkspaceId).success(function (data, status) {
             if (data != null)
@@ -110,10 +111,17 @@ var WorkspaceController = (function() {
 
     WorkspaceController.prototype.loadProductList = function(oWorkspace)
     {
+        /*start rotate globe position home*/
+        this.m_oGlobeService.goHome();
+        this.m_oGlobeService.startRotationGlobe();
+
         if(utilsIsObjectNullOrUndefined(oWorkspace))
             return false;
         if(utilsIsStrNullOrEmpty(oWorkspace.workspaceId))
             return false;
+
+        this.m_oWorkspaceSelected = oWorkspace;
+
         var oController = this;
 
         this.m_bIsVisibleFiles = true;
@@ -136,7 +144,14 @@ var WorkspaceController = (function() {
             }
 
             if(utilsIsObjectNullOrUndefined( oController.m_aoProducts) || oController.m_aoProducts.length == 0)
-                oController.m_bIsVisibleFiles=false;
+            {
+                oController.m_bIsVisibleFiles = false;
+            }else{
+                //add globe bounding box
+                oController.createBoundingBoxInGlobe();
+            }
+
+
 
         }).error(function (data,status) {
             utilsVexDialogAlertTop("Error: loading product fails");
@@ -144,10 +159,106 @@ var WorkspaceController = (function() {
 
         return true;
     }
+
+    WorkspaceController.prototype.createBoundingBoxInGlobe = function () {
+        var oRectangle = null;
+        var aArraySplit = [];
+        var iArraySplitLength = 0;
+        var iInvertedArraySplit = [];
+        if(utilsIsObjectNullOrUndefined(this.m_aoProducts) === true)
+            return false;
+        var iProductsLength = this.m_aoProducts.length;
+        for(var iIndexProduct = 0; iIndexProduct < iProductsLength; iIndexProduct++){
+            iInvertedArraySplit = [];
+            aArraySplit = [];
+            // skip if there isn't the product bounding box
+            if(utilsIsObjectNullOrUndefined(this.m_aoProducts[iIndexProduct].bbox) === true )
+                continue;
+            aArraySplit = this.m_aoProducts[iIndexProduct].bbox.split(",");
+            iArraySplitLength = aArraySplit.length;
+
+            if(iArraySplitLength !== 10)
+                continue;
+
+            for(var iIndex = 0; iIndex < iArraySplitLength-1; iIndex = iIndex + 2){
+                iInvertedArraySplit.push(aArraySplit[iIndex+1]);
+                iInvertedArraySplit.push(aArraySplit[iIndex]);
+                //     = aArraySplit[iIndex];
+                // aArraySplit[iIndex] = aArraySplit[iIndex+1];
+                // aArraySplit[iIndex+1] = temp;
+            }
+
+            oRectangle = this.m_oGlobeService.addRectangleOnGlobeParamArray(iInvertedArraySplit);
+            this.m_aoProducts[iIndexProduct].oRectangle = oRectangle;
+            this.m_aoProducts[iIndexProduct].aBounds = iInvertedArraySplit;
+
+        }
+
+
+    };
+
+    WorkspaceController.prototype.clickOnProduct = function (oProductInput) {
+        if(this.m_oSelectedProduct === oProductInput)
+        {
+            this.m_oSelectedProduct = null;
+            return false;
+        }
+        if(utilsIsObjectNullOrUndefined(oProductInput.aBounds) === true)
+            return false;
+        this.m_oSelectedProduct = oProductInput;
+        var aBounds = oProductInput.aBounds;
+        var aBoundsLength = aBounds.length;
+        var aoRectangleBounds = [];
+        var oGlobe = this.m_oGlobeService.getGlobe();
+
+        // var temp = null;
+        if(utilsIsObjectNullOrUndefined(oProductInput) === true)
+            return false;
+        if(utilsIsObjectNullOrUndefined( oProductInput.oRectangle) === true)
+            return false;
+        this.m_oGlobeService.stopRotationGlobe();
+
+        // for(var iIndexBounds = 0, iIndexRectangle = 0; iIndexBounds < aBoundsLength; iIndexBounds++){
+        //     temp.push(aBounds[iIndexBounds])
+        //
+        //     if( ( ( iIndexBounds + 1 ) % 2 )  === 0)
+        //     {
+        //         aaRectangle[iIndexRectangle] = temp;
+        //         temp = [];
+        //         iIndexRectangle++;
+        //     }
+        //
+        // }
+        //
+        // this.m_oGlobeService.zoomOnLayerBoundingBox(aaRectangle);
+        for(var iIndexBound = 0; iIndexBound < aBoundsLength-1; iIndexBound = iIndexBound + 2){
+            // temp = aBounds[iIndexBound];
+            // aBounds[iIndexBound] = aBounds[iIndexBound+1];
+            // aBounds[iIndexBound+1] = temp;
+            aoRectangleBounds.push(new Cesium.Cartographic.fromDegrees(aBounds[iIndexBound ],aBounds[iIndexBound + 1]));
+
+        }
+
+
+        var zoom = Cesium.Rectangle.fromCartographicArray(aoRectangleBounds);
+        oGlobe.camera.setView({
+            destination: zoom,
+            orientation: {
+                heading: 0.0,
+                pitch: -Cesium.Math.PI_OVER_TWO,
+                roll: 0.0
+            }
+        });
+
+
+        // this.m_oGlobeService.zoomOnLayerParamArray(aBounds);// this.m_oGlobeService.zoomOnLayerBoundingBox(aaRectangle);
+        return true;
+    };
+
     WorkspaceController.prototype.getProductList = function()
     {
         return this.m_aoProducts;
-    }
+    };
     WorkspaceController.prototype.isEmptyProductList = function()
     {
         if(utilsIsObjectNullOrUndefined(this.m_aoProducts) || this.m_aoProducts.length == 0)
