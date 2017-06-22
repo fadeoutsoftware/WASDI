@@ -29,6 +29,7 @@ var SearchOrbitController = (function() {
         this.m_oRabbitStompService = oRabbitStompService;
         this.m_oModalService = oModalService;
         this.m_oProductService = oProductService;
+        this.m_bMasterCheck = false;
 
         this.m_oActiveWorkspace = this.m_oConstantsService.getActiveWorkspace();
         this.m_oUser = this.m_oConstantsService.getUser();
@@ -131,8 +132,26 @@ var SearchOrbitController = (function() {
       return moment.unix(timestamp / 1000).format("YYYY-MM-DD HH:mm:ss");
     };
 
+    SearchOrbitController.prototype.clearMapAndRemoveOrbits = function(){
+        if(utilsIsObjectNullOrUndefined(this.m_aoOrbits) === true )
+            return false;
+        var iOrbitsLength = this.m_aoOrbits.length;
+        var oRectangle = null;
+        for(var iOrbitIndex = 0; iOrbitIndex < iOrbitsLength; iOrbitIndex++){
+            oRectangle = this.m_aoOrbits[iOrbitIndex ].FootPrintRectangle
+            this.m_oMapService.removeLayerFromMap(oRectangle);
+        }
+        this.m_aoOrbits = [];
+        return true;
+    };
+
     SearchOrbitController.prototype.searchOrbit = function() {
         var oController = this;
+
+        //clear map and remove orbits and set check as false
+        this.m_bMasterCheck = false;
+        this.clearMapAndRemoveOrbits();
+
         //if there isn't a selected area throw an error
         if(utilsIsObjectNullOrUndefined(oController.m_oGeoJSON))
         {
@@ -482,11 +501,17 @@ var SearchOrbitController = (function() {
     SearchOrbitController.prototype.receivedRabbitMessage  = function (oMessage, oController) {
 
         if (oMessage == null) return;
-        if (oMessage.messageResult=="KO") {
-            utilsVexDialogAlertTop('There was an error in the ' + oMessage.messageCode + ' Process');
+        // Check the Result
+        if (oMessage.messageResult == "KO") {
+
+            var sOperation = "null";
+            if (utilsIsStrNullOrEmpty(oMessage.messageCode) === false  )
+                sOperation = oMessage.messageCode;
+            var oDialog = utilsVexDialogAlertTop('There was an error in the ' + oMessage.messageCode + ' Process');
+            utilsVexCloseDialogAfterFewSeconds(3000, oDialog);
+            this.m_oProcessesLaunchedService.loadProcessesFromServer(this.m_oActiveWorkspace);
             return;
         }
-
         switch(oMessage.messageCode)
         {
             case "PUBLISH":

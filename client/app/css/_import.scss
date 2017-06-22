@@ -51,16 +51,18 @@
     .search-button-container
     {
       text-align: right;
-
+      margin-top: 15px;
+      margin-left: 10px;
+      float: left;
       .search-button {
         cursor:pointer;
         display: inline;
         // top: 10%;
         background: $wasdi-import-left-side-navbar-color-background;
         color:white;
-        padding:15px 15px;
+        padding:10px 10px;
 
-        margin-top: 15px;
+        //margin-top: 15px;
         //border: 1px solid white;
         //z-index: 1000;
         opacity: 1;
@@ -81,7 +83,7 @@
         cursor:not-allowed;
         display: inline;
         color:white;
-        padding:15px 15px;
+        padding:10px 10px;
         margin-top: 15px;
         opacity: 1;
         i
@@ -155,6 +157,31 @@
     //override bootstrap
     .panel-heading {
       border-bottom: 0;
+
+      .clear-button {
+        cursor:pointer;
+        display: inline;
+        // top: 10%;
+        //background: $wasdi-blue-logo-complementary-3;
+        color:white;
+        padding:5px 5px;
+
+        //margin-top: 15px;
+        //margin-right: 15px;
+        //border: 1px solid white;
+        //z-index: 1000;
+        opacity: 1;
+        i
+        {
+          color: white;
+        }
+
+      }
+
+      .clear-button:hover
+      {
+        background-color: $wasdi-green-logo;
+      }
     }
 
     //background-color: $wasdi-sidebar-background-color;
@@ -248,72 +275,9 @@
     }
 
     //SEARCH BUTTON
-    .search-button-container
-    {
-      //text-align: right;
-      //
-      //.search-button {
-      //  cursor:pointer;
-      //  display: inline;
-      //  // top: 10%;
-      //  background: $wasdi-import-left-side-navbar-color-background;
-      //  color:white;
-      //  padding:15px 15px;
-      //
-      //  margin-top: 15px;
-      //  //border: 1px solid white;
-      //  //z-index: 1000;
-      //  opacity: 1;
-      //  i
-      //  {
-      //    color: white;
-      //  }
-      //
-      //}
-      //
-      //.search-button:hover
-      //{
-      //  background-color: $wasdi-green-logo;
-      //}
-      //.search-button-disabled
-      //{
-      //  background-color: $wasdi-blue-logo-complementary-1;
-      //  cursor:not-allowed;
-      //  display: inline;
-      //  color:white;
-      //  padding:15px 15px;
-      //  margin-top: 15px;
-      //  opacity: 1;
-      //  i
-      //  {
-      //    color: white;
-      //  }
-      //}
-      .clear-button {
-        cursor:pointer;
-        display: inline;
-        // top: 10%;
-        background: $wasdi-import-left-side-navbar-color-background;
-        color:white;
-        padding:15px 15px;
 
-        margin-top: 15px;
-        margin-right: 15px;
-        //border: 1px solid white;
-        //z-index: 1000;
-        opacity: 1;
-        i
-        {
-          color: white;
-        }
 
-      }
 
-      .clear-button:hover
-      {
-        background-color: $wasdi-green-logo;
-      }
-    }
 
     .localStoragebtn
     {

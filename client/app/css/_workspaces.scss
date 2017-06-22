@@ -54,6 +54,7 @@
       //height: $wasdi-heigth-panel;
     .table-workspaces{
       height: $wasdi-heigth-panel-workspaces-page;
+      overflow: auto;
       thead
       {
         th{

@@ -87,20 +87,20 @@ service('RabbitStompService', ['$http',  'ConstantsService','$interval','Process
                     console.log("RabbitStompService: Active Workspace is null.")
                 }
 
-                if (oMessageResult.messageResult == "KO") {
-
-                    // Get the operation NAme
-                    var sOperation = "null";
-                    if (utilsIsStrNullOrEmpty(oMessageResult.messageCode) == false  ) sOperation = oMessageResult.messageCode;
-
-                    // Add an error Message
-                    var oDialog = utilsVexDialogAlertBottomRightCorner("There was an error in the " + sOperation + " operation");
-                    utilsVexCloseDialogAfterFewSeconds(3000, oDialog);
-                    // Update Process Messages
-                    oThisService.m_oProcessesLaunchedService.loadProcessesFromServer(sActiveWorkspaceId);
-
-                    return;
-                }
+                // if (oMessageResult.messageResult == "KO") {
+                //
+                //     // Get the operation NAme
+                //     var sOperation = "null";
+                //     if (utilsIsStrNullOrEmpty(oMessageResult.messageCode) == false  ) sOperation = oMessageResult.messageCode;
+                //
+                //     // Add an error Message
+                //     var oDialog = utilsVexDialogAlertBottomRightCorner("There was an error in the " + sOperation + " operation");
+                //     utilsVexCloseDialogAfterFewSeconds(3000, oDialog);
+                //     // Update Process Messages
+                //     oThisService.m_oProcessesLaunchedService.loadProcessesFromServer(sActiveWorkspaceId);
+                //
+                //     return;
+                // }
 
                 //Reject the message if it is for another workspace
                 if(oMessageResult.workspaceId != sActiveWorkspaceId) return false;

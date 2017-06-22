@@ -1,0 +1,36 @@
+<!-- Example : https://stackoverflow.com/questions/25089297/twitter-bootstrap-avoid-dropdown-menu-close-on-click-inside-->
+<div class="MultiselectDropdownMenuDirective">
+    <ul class="nav navbar-nav">
+        <li class="dropdown mega-dropdown ">
+            <a href="javascript:;" class="dropdown-toggle">
+                <i class="fa fa-"></i>Providers
+                <span class="fa fa-chevron-down pull-right"></span>
+            </a>
+
+            <ul class="dropdown-menu mega-dropdown-menu">
+                <li>
+                    <div class="checkbox" ng-repeat="option in optionsDirective" >
+                        <label>
+                            <input type="checkbox" value="" ng-model="option.selected">
+                            {{option.name}}
+                        </label>
+                    </div>
+                </li>
+            </ul>
+        </li>
+    </ul>
+</div>
+
+
+<script>
+    //OVERRIDE BOOTSTRAP3 CLICK
+    $('li.dropdown.mega-dropdown a').on('click', function (event) {
+        $(this).parent().toggleClass("open");
+    });
+
+    $('body').on('click', function (e) {
+        if (!$('li.dropdown.mega-dropdown').is(e.target) && $('li.dropdown.mega-dropdown').has(e.target).length === 0 && $('.open').has(e.target).length === 0) {
+            $('li.dropdown.mega-dropdown').removeClass('open');
+        }
+    });
+</script>

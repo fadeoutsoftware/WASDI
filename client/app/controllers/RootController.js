@@ -299,6 +299,8 @@ var RootController = (function() {
     /*********************************************************************************/
     /* ***************** OPEN LINK *****************/
     RootController.prototype.openEditorPage = function () {
+        if(this.isWorkspacesPageOpen() === true)
+            return false;
 
         var oController = this;
         var sWorkSpace = this.m_oConstantsService.getActiveWorkspace();
@@ -308,6 +310,8 @@ var RootController = (function() {
 
     RootController.prototype.openSearchorbit = function()
     {
+        if(this.isWorkspacesPageOpen() === true)
+            return false;
         var oController = this;
         // if it publishing a band u can't go in import controller
         //if( this.m_oProcessesLaunchedService.thereAreSomePublishBandProcess() == false )
@@ -320,6 +324,8 @@ var RootController = (function() {
     };
 
     RootController.prototype.openImportPage = function () {
+        if(this.isWorkspacesPageOpen() === true)
+            return false;
 
         var oController = this;
         // if it publishing a band u can't go in import controller
@@ -381,6 +387,11 @@ var RootController = (function() {
 
     RootController.prototype.UpdateWorkspace = function($event) {
         if ( ($event == null || $event.keyCode === 13) && this.m_bIsEditModelWorkspaceNameActive === true) {
+
+            //change color of textbox and pencil
+            if(utilsIsObjectNullOrUndefined($event )=== true )
+                this.editModelWorkspaceName();
+
             var oWorkspace = this.m_oConstantsService.getActiveWorkspace();
             this.m_oWorkspaceService.UpdateWorkspace(oWorkspace).success(function (data) {
 
@@ -388,11 +399,17 @@ var RootController = (function() {
 
             });
 
+
             if( $event != null && $event.keyCode === 13)
             {
                 //disable work space name active
                 this.m_bIsEditModelWorkspaceNameActive = false;
             }
+        }
+        else{
+            //change color of textbox and pencil
+            if(this.m_bIsEditModelWorkspaceNameActive === false)
+                this.editModelWorkspaceName();
         }
 
     };
@@ -467,6 +484,9 @@ var RootController = (function() {
     RootController.prototype.editModelWorkspaceName = function(){
 
         this.m_bIsEditModelWorkspaceNameActive = !this.m_bIsEditModelWorkspaceNameActive;
+    };
+    RootController.prototype.editModelWorkspaceNameSetTrue = function(){
+        this.m_bIsEditModelWorkspaceNameActive =true;
     };
 
     /*********************************************************************/

@@ -5,8 +5,12 @@
             <input type="text" placeholder="{{'WORKSPACES_PLACEHOLDER_SEARCH'|translate}}" ng-model="searchWorkSpace" >
         </div>
 
-        <button class="my-button" ng-click="m_oController.createWorkspace()">{{"WORKSPACES_BUTTON_NEW_WORKSPACE"|translate}}</button>
+        <!--<td class="over-color cell-edit-button" ng-click="m_oController.openWorkspace(oWSListItem.workspaceId)"  data-toggle="tooltip" data-placement="top" title="{{'WORKSPACES_TOOLTIP_EDITOR'|translate}}">-->
+            <!--<i class="fa fa-pencil fa-lg" aria-hidden="true"></i>-->
+        <!--</td>-->
 
+        <button class="my-button" ng-click="m_oController.createWorkspace()">{{"WORKSPACES_BUTTON_NEW_WORKSPACE"|translate}}</button>
+        <button class="my-button" ng-click="m_oController.openWorkspace(m_oController.m_oWorkspaceSelected.workspaceId)" ng-disabled="m_oController.m_oWorkspaceSelected === null"> Edit Workspace</button>
     </div>
 
 
@@ -18,8 +22,6 @@
                 <th>#</th>
                 <th>{{"WORKSPACES_THEAD_WORKSPACES"|translate}}</th>
                 <th>{{"WORKSPACES_THEAD_OWNER"|translate}}</th>
-
-                <th></th>
                 <th></th>
                 </thead>
                 <tr ng-repeat="oWSListItem in m_oController.getWorkspaceInfoList() | filter:searchWorkSpace"  ng-class="m_oController.isSelectedRowInWorkspaceTable(oWSListItem)">
@@ -27,12 +29,10 @@
                     <td  ng-click="m_oController.loadProductList(oWSListItem)"> {{oWSListItem.workspaceName}}</td>
                     <td  ng-click="m_oController.loadProductList(oWSListItem)">{{oWSListItem.ownerUserId}}</td>
 
-                    <td class="over-color cell-edit-button" ng-click="m_oController.openWorkspace(oWSListItem.workspaceId)"  data-toggle="tooltip" data-placement="top" title="{{'WORKSPACES_TOOLTIP_EDITOR'|translate}}">
-                        <i class="fa fa-pencil fa-lg" aria-hidden="true"></i>
-                    </td>
-                    <!--<td class="over-color" data-toggle="tooltip" data-placement="top" title="{{'WORKSPACES_TOOLTIP_INFO'|translate}}" ng-click="m_oController.loadProductList(oWSListItem)">-->
-                    <!--<i class="fa fa-info fa-lg" aria-hidden="true"></i>-->
+                    <!--<td class="over-color cell-edit-button" ng-click="m_oController.openWorkspace(oWSListItem.workspaceId)"  data-toggle="tooltip" data-placement="top" title="{{'WORKSPACES_TOOLTIP_EDITOR'|translate}}">-->
+                        <!--<i class="fa fa-pencil fa-lg" aria-hidden="true"></i>-->
                     <!--</td>-->
+
                     <td class="over-color" data-toggle="tooltip" data-placement="top" title="{{'WORKSPACES_TOOLTIP_DELETE'|translate}}" >
                         <i class="fa fa-times fa-lg" aria-hidden="true" ng-click="m_oController.DeleteWorkspace(oWSListItem.workspaceId)"></i>
                     </td>
@@ -62,7 +62,8 @@
                         <div class="panel-heading" role="tab" id="headingOne">
                             <span class="panel-title">
                                 <i class="fa fa-file " aria-hidden="true"></i>
-                                <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" data-target="{{'#product' + $index}}" aria-expanded="false" aria-controls="collapseThree">
+                                <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" data-target="{{'#product' + $index}}"
+                                   aria-expanded="false" aria-controls="collapseThree" ng-click="m_oController.clickOnProduct(product)">
                                     <b>{{product.fileName}}</b>
                                 </a>
                             </span>
