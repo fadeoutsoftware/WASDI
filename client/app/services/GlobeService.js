@@ -232,7 +232,7 @@ service('GlobeService', ['$http',  'ConstantsService', function ($http, oConstan
 
                 //rotate globe
                 this.m_oWasdiGlobe.camera.flyHome(0);
-                this.m_oWasdiGlobe.clock.multiplier = 3 * 60 * 60;
+                this.m_oWasdiGlobe.clock.multiplier = 1 * 60 * 60;
 
                 this.m_oWasdiGlobe.scene.preRender.addEventListener(this.icrf);
                 // this.m_oWasdiGlobe.scene.preRender.addEventListener(function(scene, time) {
@@ -284,7 +284,7 @@ service('GlobeService', ['$http',  'ConstantsService', function ($http, oConstan
     };
     /*Start rotation*/
     this.startRotationGlobe = function(){
-        this.m_oWasdiGlobe.clock.multiplier = 3 * 60 * 60;
+        this.m_oWasdiGlobe.clock.multiplier = 1 * 60 * 60;
     };
 
 }]);
