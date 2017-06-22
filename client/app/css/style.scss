@@ -363,10 +363,10 @@ h4
 
 //ANIMATE HIDE
 .animate-hide {
-  -webkit-transition:all cubic-bezier(0.250, 0.460, 0.450, 0.940) 1s;
-  -moz-transition:all cubic-bezier(0.250, 0.460, 0.450, 0.940) 1s;
-  -o-transition:all cubic-bezier(0.250, 0.460, 0.450, 0.940) 1s;
-  transition:all cubic-bezier(0.250, 0.460, 0.450, 0.940) 1s;
+  -webkit-transition:all cubic-bezier(0.250, 0.460, 0.450, 0.940) 0.2s;
+  -moz-transition:all cubic-bezier(0.250, 0.460, 0.450, 0.940) 0.2s;
+  -o-transition:all cubic-bezier(0.250, 0.460, 0.450, 0.940) 0.2s;
+  transition:all cubic-bezier(0.250, 0.460, 0.450, 0.940) 0.2s;
   //line-height:20px;
   //opacity:1;
   //padding:10px;
@@ -377,7 +377,7 @@ h4
 }
 
 .animate-hide.ng-hide {
-  right: 100%;
+  right: 0;
   opacity:0;
   padding:0 10px;
 }
