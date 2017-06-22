@@ -657,7 +657,7 @@ public class LauncherMain {
             // P.Campanella 12/05/2017: get the BB from the orginal product
             // Get the original Bounding Box
             DownloadedFilesRepository oDownloadedRepo = new DownloadedFilesRepository();
-            DownloadedFile oAlreadyDownloaded = oDownloadedRepo.GetDownloadedFile(sFile) ;
+            DownloadedFile oAlreadyDownloaded = oDownloadedRepo.GetDownloadedFile(oParameter.getSourceProductName()) ;
             String sBB = "";
             
             if (oAlreadyDownloaded != null) {
@@ -1190,7 +1190,7 @@ public class LauncherMain {
                 }
             }
             else {
-            	s_oLogger.error("Product Inserted with Metadata");
+            	s_oLogger.info("Product Inserted with Metadata");
             }
         }
         
