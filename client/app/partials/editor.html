@@ -116,8 +116,13 @@
 
 
                 <li ng-click="m_oController.openApplyOrbitDialog();" >
-                    <a href="" >
-                        <h4>{{"EDITOR_OPERATION_TITLE_APPLY_ORBIT"|translate}}</h4>
+                    <a href="" class="icon-applyorbit-operations" >
+                        <div>
+
+                            <h4><i  aria-hidden="true"></i>{{"EDITOR_OPERATION_TITLE_APPLY_ORBIT"|translate}}</h4>
+                        </div>
+
+
                     </a>
                 </li>
                 <li ng-click="m_oController.openMultilookingDialog();" >
@@ -135,7 +140,8 @@
                     </a>
                 </li>
                 <li ng-click="m_oController.openRadiometricCalibrationDialog();" >
-                    <a href=""><h4>{{"EDITOR_OPERATION_TITLE_APPLY_RADIOMETRIC_CALIBRATE"|translate}}</h4></a>
+                    <a href="" class="icon-radiometriccalibrate-operations">
+                        <h4><i aria-hidden="true"></i>{{"EDITOR_OPERATION_TITLE_APPLY_RADIOMETRIC_CALIBRATE"|translate}}</h4></a>
                 </li>
                 <li ng-click="m_oController.rangeDopplerTerrainCorrectionDialog();" >
                     <a href="" class="icon-range-doppler-terrain-correction-operations">
