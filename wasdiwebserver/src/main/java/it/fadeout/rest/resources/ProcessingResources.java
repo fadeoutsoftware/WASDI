@@ -158,7 +158,8 @@ public class ProcessingResources {
 			@QueryParam("workspace") String workspace, @QueryParam("source") String sourceProductName, @QueryParam("destination") String destinationProdutName) throws Exception {
 
 		GraphSetting settings = new GraphSetting();		
-		String graphXml = IOUtils.toString(fileInputStream, Charset.defaultCharset());
+		String graphXml;
+		graphXml = IOUtils.toString(fileInputStream, Charset.defaultCharset().name());
 		settings.setGraphXml(graphXml);
 		
 		return ExecuteOperation(sessionId, sourceProductName, destinationProdutName, workspace, settings, LauncherOperations.GRAPH);
