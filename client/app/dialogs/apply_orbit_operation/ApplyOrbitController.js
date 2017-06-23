@@ -25,7 +25,7 @@ var ApplyOrbitController = (function() {
         else
         {
             if( (utilsIsObjectNullOrUndefined(this.m_oSelectedProduct.productFriendlyName)== false) && (utilsIsStrNullOrEmpty(this.m_oSelectedProduct.productFriendlyName)== false))
-                this.m_sFileName_Operation = this.m_oSelectedProduct.name + "_ApplyOrbit.zip";
+                this.m_sFileName_Operation = this.m_oSelectedProduct.name + "_ApplyOrbit";
         }
         // this.m_oTabOpen = "tab1";
         // this.m_asTypeOfData = ["GeoTIFF","NetCDF-BEAM","NetCDF4-CF","NetCDF-CF","CSV","Gamma","Generic Binary","GeoTIFF+XML",

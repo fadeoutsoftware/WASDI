@@ -24,7 +24,7 @@ var MultilookingController = (function() {
         else
         {
             if( (utilsIsObjectNullOrUndefined(this.m_oSelectedProduct.productFriendlyName)== false) && (utilsIsStrNullOrEmpty(this.m_oSelectedProduct.productFriendlyName)== false))
-                this.m_sFileName_Operation = this.m_oSelectedProduct.name + "_Multilooking.zip";
+                this.m_sFileName_Operation = this.m_oSelectedProduct.name + "_Multilooking";
 
             if(utilsIsObjectNullOrUndefined(this.m_oSelectedProduct.bandsGroups.bands) == true)
                 var iNumberOfBands = 0;
