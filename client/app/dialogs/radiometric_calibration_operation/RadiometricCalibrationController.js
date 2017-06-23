@@ -25,7 +25,7 @@ var RadiometricCalibrationController = (function() {
         else
         {
             if( (utilsIsObjectNullOrUndefined(this.m_oSelectedProduct.productFriendlyName)== false) && (utilsIsStrNullOrEmpty(this.m_oSelectedProduct.productFriendlyName)== false))
-                this.m_sFileName_Operation = this.m_oSelectedProduct.name + "_RadiometricCalibration.zip";
+                this.m_sFileName_Operation = this.m_oSelectedProduct.name + "_RadiometricCalibration";
 
             //laod band
             if(utilsIsObjectNullOrUndefined(this.m_oSelectedProduct.bandsGroups.bands) == true)
