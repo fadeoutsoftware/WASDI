@@ -466,7 +466,7 @@ public class LauncherMain {
         
     	File oFilePath = new File(oParameter.getFilePath());
     	if (!oFilePath.canRead()) {
-			System.out.println("AuthResource.IngestFile: ERROR: unable to access uploaded file " + oFilePath.getAbsolutePath());
+			System.out.println("LauncherMain.Ingest: ERROR: unable to access uploaded file " + oFilePath.getAbsolutePath());
 			return "";
 		}
 
@@ -475,7 +475,7 @@ public class LauncherMain {
         ProcessWorkspace oProcessWorkspace = oProcessWorkspaceRepository.GetProcessByProcessObjId(oParameter.getProcessObjId());
 	
 		try {
-	        s_oLogger.debug("LauncherMain.Download: Download Start");
+	        s_oLogger.debug("LauncherMain.Ingest: Download Start");
 	
 	        if (oProcessWorkspace != null) {
 	            //get file size
@@ -488,13 +488,13 @@ public class LauncherMain {
 	            
 	            updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 0);
 	        } else {
-	        	s_oLogger.debug("LauncherMain.Download: process not found: " + oParameter.getProcessObjId());
+	        	s_oLogger.debug("LauncherMain.Ingest: process not found: " + oParameter.getProcessObjId());
 	        }
 	
 			File oRootPath = new File(sDownloadPath);
 			File oDstDir = new File(new File(oRootPath, oParameter.getUserId()), oParameter.getWorkspace());
 			if (!oDstDir.isDirectory() || !oDstDir.canWrite()) {
-				System.out.println("AuthResource.IngestFile: ERROR: unable to access destnation directory " + oDstDir.getAbsolutePath());
+				System.out.println("LauncherMain.Ingest: ERROR: unable to access destination directory " + oDstDir.getAbsolutePath());
 				return "";
 			}
 			
@@ -531,7 +531,7 @@ public class LauncherMain {
 			return oDstFile.getAbsolutePath();
 			
 		} catch (Exception e) {
-			System.out.println("AuthResource.IngestFile: ERROR: Exception occurrend during file ingestion");
+			System.out.println("LauncherMain.Ingest: ERROR: Exception occurrend during file ingestion");
 			e.printStackTrace();
 		} finally{
             //update process status and send rabbit updateProcess message
@@ -1102,7 +1102,29 @@ public class LauncherMain {
     		return;
     	}
     	
-    	SetFileSizeToProcess(oFile.length(),oProcessWorkspace);
+    	// Take file size
+    	long lSize = oFile.length();
+    	
+    	// Check if it is a ".dim" file
+    	if (oFile.getName().endsWith(".dim")) {
+    		try {
+    			// Ok so the real size is the folder
+        		String sFolder = oFile.getAbsolutePath();
+        		
+        		// Get folder path 
+        		sFolder = sFolder.replace(".dim", ".data");
+        		File oDataFolder = new File(sFolder);
+        		
+        		// Get folder size
+        		lSize = FileUtils.sizeOfDirectory(oDataFolder);    			
+    		}
+    		catch (Exception oEx) {
+    			s_oLogger.error("LauncherMain.SetFileSizeToProcess: Error computing folder size");
+    			oEx.printStackTrace();
+			}
+    	}
+    	
+    	SetFileSizeToProcess(lSize, oProcessWorkspace);
     }
 
     /**
