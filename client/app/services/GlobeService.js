@@ -4,8 +4,8 @@
 
 
 'use strict';
-angular.module('wasdi.GlobeService', ['wasdi.ConstantsService']).
-service('GlobeService', ['$http',  'ConstantsService', function ($http, oConstantsService) {
+angular.module('wasdi.GlobeService', ['wasdi.ConstantsService','wasdi.SatelliteService']).
+service('GlobeService', ['$http',  'ConstantsService','SatelliteService', function ($http, oConstantsService,oSatelliteService) {
     this.m_oWasdiGlobe=null;
     var oController = this;
     this.m_aoLayers=null;
@@ -232,24 +232,24 @@ service('GlobeService', ['$http',  'ConstantsService', function ($http, oConstan
 
                 //rotate globe
                 this.m_oWasdiGlobe.camera.flyHome(0);
-                this.m_oWasdiGlobe.clock.multiplier = 1 * 60 * 60;
+                // this.m_oWasdiGlobe.camera.flyTo({
+                //     destination : Cesium.Cartesian3.fromDegrees(-75.5, 40.0,1000000)
+                // });
+                this.startRotationGlobe(1);
+                // this.m_oWasdiGlobe.dataSources.add(Cesium.CzmlDataSource.load('fake-data/simple.czml'));
+                // this.m_oWasdiGlobe.dataSources.add(Cesium.CzmlDataSource.load([
+                //     // packet one
+                //     {
+                //         "id": "GroundControlStation",
+                //         "position": { "cartographicDegrees": [-75.5, 40.0,1000000] },
+                //         "point": {
+                //             "color": { "rgba": [0, 255, 255, 255] },
+                //         }
+                //     },
+                // ]));
 
                 this.m_oWasdiGlobe.scene.preRender.addEventListener(this.icrf);
-                // this.m_oWasdiGlobe.scene.preRender.addEventListener(function(scene, time) {
-                //
-                //     if (scene.mode !== Cesium.SceneMode.SCENE3D) {
-                //         return;
-                //     }
-                //     var icrfToFixed = Cesium.Transforms.computeIcrfToFixedMatrix(time);
-                //     if (Cesium.defined(icrfToFixed)) {
-                //         // console.log(test);
-                //         var camera =  oController.m_oWasdiGlobe.camera;
-                //         var offset = Cesium.Cartesian3.clone(camera.position);
-                //         var transform = Cesium.Matrix4.fromRotationTranslation(icrfToFixed);
-                //         camera.lookAtTransform(transform, offset);
-                //     }
-                //
-                // });
+                // this.trackSentinel1A();
             }
             catch(err) {
                 console.log("Error in Cesium Globe: " + err);
@@ -278,14 +278,32 @@ service('GlobeService', ['$http',  'ConstantsService', function ($http, oConstan
             camera.lookAtTransform(transform, offset);
         }
     };
+
     /*Stop rotation*/
     this.stopRotationGlobe = function(){
         this.m_oWasdiGlobe.clock.multiplier = 0;
     };
+
     /*Start rotation*/
-    this.startRotationGlobe = function(){
-        this.m_oWasdiGlobe.clock.multiplier = 1 * 60 * 60;
+    this.startRotationGlobe = function(iRotationValue){
+        if(utilsIsANumber(iRotationValue) === false)
+            return false;
+        this.m_oWasdiGlobe.clock.multiplier = iRotationValue * 60 * 60;
+        return true;
     };
 
+    this.trackSentinel1A = function(){
+
+        oSatelliteService.getTrackSatellite("SENTINEL1A").success(function (data, status) {
+
+            if (data != null) {
+                if (data != undefined) {
+
+                }
+            }
+        }).error(function (data, status) {
+            utilsVexDialogAlertTop('Error ');
+        });
+    };
 }]);
 

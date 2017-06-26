@@ -1,11 +1,12 @@
 <div class="editor-view col-lg-12 col-md-12 col-sm-12 col-xs-12 search-orbit-view">
 
     <div class="col-lg-11 col-md-10 col-sm-10 col-xs-10 col-lg-offset-1 col-md-offset-2 col-sm-offset-2 col-xs-offset-2 operations-bar "  >
-        <!------------------------- TIME PICKER START -------------------->
-        <div class="description">
-            <i class="fa fa-calendar" aria-hidden="true"></i>
-            Acquisition Start Time:
+        <!--SEARCH BUTTON -->
+        <div class="buttom-collumn">
+            <button class="my-button" ng-click="m_oController.searchOrbit()" ng-disabled=" !m_oController.isClickableSearchButton()" >Search</button>
         </div>
+        <!------------------------- TIME PICKER START -------------------->
+
         <div class=" time-picker-container ">
 
 
@@ -24,12 +25,12 @@
                             </span>
             </div>
         </div>
-
-        <!---------------------- TIME PICKER END -------------------->
         <div class="description">
             <i class="fa fa-calendar" aria-hidden="true"></i>
-            Acquisition End Time:
+            Acquisition Start Time:
         </div>
+        <!---------------------- TIME PICKER END -------------------->
+
         <div class=" time-picker-container">
 
             <div class="input-group my-input-text"
@@ -47,9 +48,11 @@
                             </span>
             </div>
         </div>
-        <div class="buttom-collumn"   >
-        <button class="my-button" ng-click="m_oController.searchOrbit()" ng-disabled=" !m_oController.isClickableSearchButton()" >Search</button>
+        <div class="description">
+            <i class="fa fa-calendar" aria-hidden="true"></i>
+            Acquisition End Time:
         </div>
+
     </div>
 
     <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12 left-side-bar">

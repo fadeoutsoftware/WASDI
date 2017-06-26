@@ -5,21 +5,47 @@
         <!--PROVIDERS-->
         <multiselectdropdownmenu options="m_oController.m_aListOfProvider"></multiselectdropdownmenu>
 
-        <!--SEARCH-->
+        <!--SEARCH INPUT-->
         <div class="my-input-text "  >
             <input type="text" ng-model="m_oController.m_oModel.textQuery"
                    placeholder="Search..." ><!-- style="padding: 0px !important;"-->
         </div>
+
+        <!--search button-->
+        <div class="search-button-container" >
+            <div class="search-button" ng-click="m_oController.search()" id="search-button"
+                 ng-class="{'search-button-disabled': m_oController.thereIsAtLeastOneProvider() === false || (m_oController.m_bIsVisibleListOfLayers || m_oController.m_bisVisibleLocalStorageInputs),
+                            'search-button': m_oController.thereIsAtLeastOneProvider() === true }" >
+                <!--<i class="fa fa-search fa-lg" aria-hidden="true"></i>-->
+                {{"IMPORT_SEARCH_BUTTON"|translate}}
+            </div>
+        </div>
         <!--TIME-->
         <div class="time-container" >
+            <!-- TO:-->
             <div  class="my-input-text" ng-if="m_oController.m_bShowsensingfilter">
 
-                <div class="description-label" >
-                    Sensing period
+                <div class=" advanced-calendar-input input-calendar-container " >
+                    <p class="input-group" >
+                        <input type="text" class="form-control advanced-calendar-date-input"
+                               uib-datepicker-popup="yyyy/MM/dd"
+                               ng-model="m_oController.m_oModel.sensingPeriodTo"
+                               is-open="m_oController.m_oStatus.openedSensingPeriodTo"
+                               date-disabled="m_oController.disabled(date, mode)" ng-required="true"
+                               min-date="m_oController.m_oModel.sensingPeriodFrom"
+                               ng-blur="m_oController.updateAdvancedSearch()" close-text="Close"
+                               readonly="true" data-container="body"/>
+                        <span class="input-group-btn">
+							<button type="button" class="btn btn-default advanced-calendar-button"
+                                    ng-click="m_oController.openSensingPeriodTo($event)"><i class="fa fa-calendar" aria-hidden="true"></i></button>
+						  </span>
+                    </p>
                 </div>
+
                 <div class="description-label" >
-                    From:{{ this.m_oModel.sensingPeriodFrom}}
+                    To:
                 </div>
+                <!-- FROM: -->
                 <div class="input-calendar-container" >
 
                     <p class="input-group">
@@ -42,38 +68,14 @@
                 </div>
 
                 <div class="description-label" >
-                    To:
+                    From:{{ this.m_oModel.sensingPeriodFrom}}
                 </div>
-
-                <div class=" advanced-calendar-input input-calendar-container " >
-                    <p class="input-group">
-                        <input type="text" class="form-control advanced-calendar-date-input"
-                               uib-datepicker-popup="yyyy/MM/dd"
-                               ng-model="m_oController.m_oModel.sensingPeriodTo"
-                               is-open="m_oController.m_oStatus.openedSensingPeriodTo"
-                               date-disabled="m_oController.disabled(date, mode)" ng-required="true"
-                               min-date="m_oController.m_oModel.sensingPeriodFrom"
-                               ng-blur="m_oController.updateAdvancedSearch()" close-text="Close"
-                               readonly="true" data-container="body"/>
-                        <span class="input-group-btn">
-							<button type="button" class="btn btn-default advanced-calendar-button"
-                                    ng-click="m_oController.openSensingPeriodTo($event)"><i class="fa fa-calendar" aria-hidden="true"></i></button>
-						  </span>
-                    </p>
+                <div class="description-label" >
+                    Sensing period
                 </div>
-
-
             </div>
         </div>
-        <!--search button-->
-        <div class="search-button-container" >
-            <div class="search-button" ng-click="m_oController.search()" id="search-button"
-                 ng-class="{'search-button-disabled': m_oController.thereIsAtLeastOneProvider() === false || (m_oController.m_bIsVisibleListOfLayers || m_oController.m_bisVisibleLocalStorageInputs),
-                            'search-button': m_oController.thereIsAtLeastOneProvider() === true }" >
-                <!--<i class="fa fa-search fa-lg" aria-hidden="true"></i>-->
-                {{"IMPORT_SEARCH_BUTTON"|translate}}
-            </div>
-        </div>
+
 
     </div>
 

@@ -25,6 +25,8 @@ var wasdiApp = angular.module('wasdi', [
     'wasdi.ResultsOfSearchService',
     'wasdi.SnapOperationService',
     'wasdi.GetParametersOperationService',
+    'wasdi.SatelliteService',
+
     //DIRECTIVE
     'wasdi.SnakeDirective',
     'wasdi.TreeDirective',

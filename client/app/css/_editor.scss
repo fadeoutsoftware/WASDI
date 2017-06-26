@@ -386,5 +386,21 @@
 
     }
   }
+  // MIDA ICON
+  .icon-mida-merge-operations{
+    i{
+      content: $wasdi-mida-merge-operations-blue;
+      width: $wasdi-size-icon;
+      height: auto;
 
+    }
+  }
+  .icon-mida-merge-operations:hover{
+    i{
+      content: $wasdi-mida-merge-operations-white;
+      width: $wasdi-size-icon;
+      height: auto;
+
+    }
+  }
 }
