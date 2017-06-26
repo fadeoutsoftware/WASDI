@@ -163,7 +163,7 @@ var EditorController = (function () {
             var sOperation = "null";
             if (utilsIsStrNullOrEmpty(oMessage.messageCode) === false  )
                 sOperation = oMessage.messageCode;
-            var oDialog = utilsVexDialogAlertTop('There was an error in the ' + oMessage.messageCode + ' Process');
+            var oDialog = utilsVexDialogAlertTop('There was an error in the ' + sOperation + ' Process');
             utilsVexCloseDialogAfterFewSeconds(3000, oDialog);
             this.m_oProcessesLaunchedService.loadProcessesFromServer(this.m_oActiveWorkspace);
             return;

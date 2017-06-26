@@ -76,11 +76,22 @@
         <div  class='animate-hide' ng-hide="m_oController.isHiddenProcessorBar();">
             <ul >
                 <!--merge dialog-->
-                <li ng-click="m_oController.openMergeDialog();" ng-init="m_oController.m_sSrc='assets/icons/iconMIDA.svg' "
-                    ng-mouseover="m_oController.m_sSrc='assets/icons/iconMIDA_White.svg' " ng-mouseleave="m_oController.m_sSrc='assets/icons/iconMIDA.svg' ">
-                    <!--<a class="icon" href=""><img src="{{m_oController.m_sSrc}}"></a>-->
+                <!--<li ng-click="m_oController.openMergeDialog();" ng-init="m_oController.m_sSrc='assets/icons/iconMIDA.svg' "-->
+                    <!--ng-mouseover="m_oController.m_sSrc='assets/icons/iconMIDA_White.svg' " ng-mouseleave="m_oController.m_sSrc='assets/icons/iconMIDA.svg' ">-->
+                    <!--&lt;!&ndash;<a class="icon" href=""><img src="{{m_oController.m_sSrc}}"></a>&ndash;&gt;-->
+                    <!--<a href="" >-->
+                        <!--<h4>{{"EDITOR_OPERATION_TITLE_MIDA"|translate}}</h4>-->
+                    <!--</a>-->
+                <!--</li>        -->
+                <!--merge dialog-->
+                <li ng-click="m_oController.openMergeDialog();" class="icon-mida-merge-operations">
                     <a href="" >
-                        <h4>{{"EDITOR_OPERATION_TITLE_MIDA"|translate}}</h4>
+                        <div>
+                            <h4>
+                                <i  aria-hidden="true"></i>
+                                {{"EDITOR_OPERATION_TITLE_MIDA"|translate}}
+                            </h4>
+                        </div>
                     </a>
                 </li>
 
@@ -88,6 +99,7 @@
                 <li ng-click="m_oController.openSFTPDialog()" >
                     <a href="" >
                         <h4>
+                            <i class="fa fa-server" aria-hidden="true"></i>
                             {{"EDITOR_OPERATION_TITLE_SFTP"|translate}}
                         </h4>
                     </a>
@@ -97,6 +109,7 @@
                 <li ng-click="m_oController.openWorkflowDialog()" >
                     <a href="" >
                         <h4>
+                            <i class="fa fa-file-code-o" aria-hidden="true"></i>
                             {{"EDITOR_OPERATION_TITLE_WORKFLOW"|translate}}
                         </h4>
                     </a>
@@ -141,7 +154,11 @@
                 </li>
                 <li ng-click="m_oController.openRadiometricCalibrationDialog();" >
                     <a href="" class="icon-radiometriccalibrate-operations">
-                        <h4><i aria-hidden="true"></i>{{"EDITOR_OPERATION_TITLE_APPLY_RADIOMETRIC_CALIBRATE"|translate}}</h4></a>
+                        <h4>
+                            <i aria-hidden="true"></i>
+                            {{"EDITOR_OPERATION_TITLE_APPLY_RADIOMETRIC_CALIBRATE"|translate}}
+                        </h4>
+                    </a>
                 </li>
                 <li ng-click="m_oController.rangeDopplerTerrainCorrectionDialog();" >
                     <a href="" class="icon-range-doppler-terrain-correction-operations">
