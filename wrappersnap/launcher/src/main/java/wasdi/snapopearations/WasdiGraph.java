@@ -124,8 +124,6 @@ public class WasdiGraph {
             
             addProductToDb(product, bbox);
 			
-	        //this.PublishOnGeoserver(oParameter.getPublishParameter(), oTerrainProduct.getName(), sBandName);
-	        if (process != null) process.setStatus(ProcessStatus.DONE.name());
         
 		} finally {
             closeProcess();
@@ -169,6 +167,7 @@ public class WasdiGraph {
 			if (process != null) {
 		        //update the process
 				process.setProgressPerc(100);
+				process.setStatus(ProcessStatus.DONE.name());
 				process.setOperationEndDate(Utils.GetFormatDate(new Date()));
 		        if (!processRepository.UpdateProcess(process)) {
 		        	logger.error("WasdiGraph: Error during process update (terminated)");
