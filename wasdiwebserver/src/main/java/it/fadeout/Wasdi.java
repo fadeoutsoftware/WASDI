@@ -74,7 +74,7 @@ public class Wasdi extends Application {
 		} catch (NumberFormatException e) {
 			e.printStackTrace();
 		}
-		
+				
 	}
 
 	private String getInitParameter(String sParmaneter, String sDefault) {		
