@@ -10,7 +10,7 @@ service('SatelliteService', ['$http',  'ConstantsService', function ($http, oCon
 
     this.getTrackSatellite = function(sNameInput){
 
-        return this.m_oHttp.get(this.APIURL + '/satellite/track/' + sNameInput);
+        return this.m_oHttp.get(this.APIURL + '/searchorbit/track/' + sNameInput);
     }
 }]);
 

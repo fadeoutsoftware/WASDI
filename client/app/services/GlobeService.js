@@ -413,5 +413,54 @@ service('GlobeService', ['$http',  'ConstantsService','SatelliteService', functi
     };
 
 
+    this.getSatelliteTrackInputList = function () {
+        var aoOutList = [
+            {
+                name : "SENTINEL1A",
+                icon : "assets/icons/globeIcons/SAT1.png",
+                label : "S1A",
+                description : "ESA Sentinel 1 A "
+            },
+            {
+                name : "SENTINEL1B",
+                icon : "assets/icons/globeIcons/SAT1.png",
+                label : "S1B",
+                description : "ESA Sentinel 1 B"
+            },
+            {
+                name : "COSMOSKY1",
+                icon : "assets/icons/globeIcons/SAT2.png",
+                label : "CSK1",
+                description : "ASI COSMO-SKYMED 1"
+            },
+            {
+                name : "COSMOSKY2",
+                icon : "assets/icons/globeIcons/SAT2.png",
+                label : "CSK2",
+                description : "ASI COSMO-SKYMED 2"
+            },
+            {
+                name : "COSMOSKY3",
+                icon : "assets/icons/globeIcons/SAT2.png",
+                label : "CSK3",
+                description : "ASI COSMO-SKYMED 3"
+            },
+            {
+                name : "COSMOSKY4",
+                icon : "assets/icons/globeIcons/SAT2.png",
+                label : "CSK4",
+                description : "ASI COSMO-SKYMED 4"
+            },
+            {
+                name : "LANDSAT8",
+                icon : "assets/icons/globeIcons/SAT3.png",
+                label : "LS8",
+                description : "NASA LANDSAT 8"
+            }
+        ]
+
+        return aoOutList;
+    }
+
 }]);
 
