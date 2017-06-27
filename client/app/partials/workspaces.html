@@ -46,7 +46,7 @@
             <fieldset class="my-input-text fieldset-list-files">
                 <legend><h3>List of files</h3></legend>
                 <!-- LOADING ICON -->
-                <div class="loading-files"ng-show="m_oController.isEmptyProductList() == true && m_oController.m_bIsVisibleFiles == true" ><!--ng-show="m_oController.isEmptyProductList() == true && m_oController.m_bIsVisibleFiles == true" -->
+                <div class="loading-files"ng-show="m_oController.m_bLoadingWSFiles == true && m_oController.m_bIsVisibleFiles == true" ><!--ng-show="m_oController.isEmptyProductList() == true && m_oController.m_bIsVisibleFiles == true" -->
                     <invader></invader>
                 </div>
                 <!-- IF THERE ISN'T FILES-->
@@ -98,13 +98,13 @@
             <div class="checkbox" style="background: white;padding:5px">
                 <label>
                     <input type="checkbox" ng-model="value" ng-init="value = true" ng-click ="m_oController.deleteSentinel1a(value)">
-                    Sentinel 1a
+                    Show Satellite
                 </label>
             </div>
             <div class="btn-group" role="group" aria-label="...">
 
                 <button type="button" class="btn btn-default" ng-click="m_oController.m_oGlobeService.stopRotationGlobe()"><i class="fa fa-stop" aria-hidden="true" title="stop rotation" ></i></button>
-                <button type="button" class="btn btn-default" ng-click="m_oController.m_oGlobeService.startRotationGlobe()"><i class="fa fa-play" aria-hidden="true" title="start rotation" ></i></button>
+                <button type="button" class="btn btn-default" ng-click="m_oController.m_oGlobeService.startRotationGlobe(1)"><i class="fa fa-play" aria-hidden="true" title="start rotation" ></i></button>
             </div>
         </div>
     </div>

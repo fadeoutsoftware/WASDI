@@ -48,6 +48,23 @@ var ProcessesLogsController = (function() {
         return true;
     }
 
+    ProcessesLogsController.prototype.getProcessDuration = function (oProcess) {
+        //time by server
+        var oStartTime = new Date(oProcess.operationDate);
+        var oEndTime = new Date(oProcess.operationEndDate);
+        //pick time
+        var result =  Math.abs(oEndTime-oStartTime);
+        //approximate result
+        var seconds = Math.ceil(result / 1000);
+
+        if(utilsIsObjectNullOrUndefined(seconds) || seconds < 0) seconds = 0;
+
+        var oDate = new Date(1970, 0, 1);
+        oDate.setSeconds(0 + seconds);
+
+        return oDate;
+    }
+
     ProcessesLogsController.$inject = [
         '$scope',
         'close',
