@@ -206,7 +206,8 @@
             </div>
             <!-- MY TREE DIRECTIVE -->
             <div class="panel-body">
-                <tree ngModelTree="prova" ></tree>
+                <invader ng-show="m_oController.m_bIsLoadingTree"></invader>
+                <tree ngModelTree="prova" ng-hide="m_oController.m_bIsLoadingTree" ></tree>
             </div>
 
         </div>

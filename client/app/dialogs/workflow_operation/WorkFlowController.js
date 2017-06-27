@@ -42,12 +42,15 @@ var WorkFlowController = (function() {
 
         var successCallback = function(data, status)
         {
-            utilsVexDialogAlertTop("Uploaded file");
+            //utilsVexDialogAlertTop();
+            var oDialog = utilsVexDialogAlertBottomRightCorner("Workflow uploaded: processing will start in a while");
+            utilsVexCloseDialogAfterFewSeconds(3000,oDialog);
+
         };
 
         var errorCallback = function (data, status)
         {
-            utilsVexDialogAlertTop("Error in upload file");
+            utilsVexDialogAlertTop("There was an error uploading workflow description file");
         };
 
 

@@ -4,8 +4,8 @@
 
 
 'use strict';
-angular.module('wasdi.GlobeService', ['wasdi.ConstantsService','wasdi.SatelliteService']).
-service('GlobeService', ['$http',  'ConstantsService','SatelliteService', function ($http, oConstantsService,oSatelliteService) {
+angular.module('wasdi.GlobeService', ['wasdi.ConstantsService']).
+service('GlobeService', ['$http',  'ConstantsService','SatelliteService', function ($http, oConstantsService) {
     this.m_oWasdiGlobe=null;
     var oController = this;
     this.m_aoLayers=null;
@@ -27,6 +27,7 @@ service('GlobeService', ['$http',  'ConstantsService','SatelliteService', functi
         homeButton:false,
         scene3DOnly:true
     }
+
 
     this.initGlobe = function(sGlobeDiv)
     {
@@ -216,7 +217,13 @@ service('GlobeService', ['$http',  'ConstantsService','SatelliteService', functi
         });
 
         return oRectangle;
-    }
+    };
+
+    this.removeAllEntities = function ()
+    {
+        var oGlobe = this.m_oWasdiGlobe;
+        oGlobe.entities.removeAll();
+    };
 
     /*INIT ROTATE GLOBE*/
     this.initRotateGlobe = function(sGlobeDiv)
@@ -227,29 +234,28 @@ service('GlobeService', ['$http',  'ConstantsService','SatelliteService', functi
 
             // default globe
             try {
-                this.m_oWasdiGlobe = new Cesium.Viewer(sGlobeDiv, this.oGlobeOptions);
+                var oGlobeOptions =
+                    {
+                        imageryProvider : Cesium.createOpenStreetMapImageryProvider(),
+                        timeline: false,
+                        animation: false,
+                        baseLayerPicker:false,
+                        fullscreenButton:false,
+                        infoBox:true,
+                        selectionIndicator:true,
+                        geocoder:false,
+                        navigationHelpButton:false,
+                        sceneModePicker:false,
+                        homeButton:false,
+                        scene3DOnly:true
+                    }
+                this.m_oWasdiGlobe = new Cesium.Viewer(sGlobeDiv, oGlobeOptions);
                 this.m_aoLayers = this.m_oWasdiGlobe.imageryLayers;
 
                 //rotate globe
                 this.m_oWasdiGlobe.camera.flyHome(0);
-                // this.m_oWasdiGlobe.camera.flyTo({
-                //     destination : Cesium.Cartesian3.fromDegrees(-75.5, 40.0,1000000)
-                // });
                 this.startRotationGlobe(1);
-                // this.m_oWasdiGlobe.dataSources.add(Cesium.CzmlDataSource.load('fake-data/simple.czml'));
-                // this.m_oWasdiGlobe.dataSources.add(Cesium.CzmlDataSource.load([
-                //     // packet one
-                //     {
-                //         "id": "GroundControlStation",
-                //         "position": { "cartographicDegrees": [-75.5, 40.0,1000000] },
-                //         "point": {
-                //             "color": { "rgba": [0, 255, 255, 255] },
-                //         }
-                //     },
-                // ]));
-
                 this.m_oWasdiGlobe.scene.preRender.addEventListener(this.icrf);
-                // this.trackSentinel1A();
             }
             catch(err) {
                 console.log("Error in Cesium Globe: " + err);
@@ -292,18 +298,120 @@ service('GlobeService', ['$http',  'ConstantsService','SatelliteService', functi
         return true;
     };
 
-    this.trackSentinel1A = function(){
+    /**
+     * drawOutLined
+     * @param aPositions
+     * @param sName
+     * @param sColor
+     */
+    this.drawOutLined = function(aPositions,sColor,sName){
 
-        oSatelliteService.getTrackSatellite("SENTINEL1A").success(function (data, status) {
-
-            if (data != null) {
-                if (data != undefined) {
-
-                }
+        if(utilsIsObjectNullOrUndefined(aPositions) === true )
+            return null;
+        if(utilsIsStrNullOrEmpty(sName)=== true)
+            sName="";
+        if(utilsIsObjectNullOrUndefined(sColor) === true )
+            sColor = Cesium.Color.ORANGE;
+        var oOutLined = this.m_oWasdiGlobe.entities.add({
+            name : sName,
+            polyline : {
+                positions : Cesium.Cartesian3.fromDegreesArrayHeights(aPositions),
+                width : 5,
+                material : new Cesium.PolylineOutlineMaterialProperty({
+                    color : sColor,
+                    outlineWidth : 2,
+                    outlineColor : Cesium.Color.BLACK
+                })
             }
-        }).error(function (data, status) {
-            utilsVexDialogAlertTop('Error ');
         });
+
+        return oOutLined;
+
     };
+
+    /***
+     * drawGlowingLine
+     * @param aPositions
+     * @param sColor
+     * @param sName
+     * @returns {null}
+     */
+    this.drawGlowingLine = function(aPositions,sColor,sName){
+        if(utilsIsObjectNullOrUndefined(aPositions) === true )
+            return null;
+        if(utilsIsStrNullOrEmpty(sName)=== true)
+            sName="";
+        if(utilsIsObjectNullOrUndefined(sColor) )
+            sColor = Cesium.Color.ORANGE;
+
+        var oGlowingLine = this.m_oWasdiGlobe.entities.add({
+            name : sName,
+            polyline : {
+                positions : Cesium.Cartesian3.fromDegreesArrayHeights(aPositions),
+                width : 10,
+                material : new Cesium.PolylineGlowMaterialProperty({
+                    glowPower : 0.2,
+                    color : sColor
+                })
+            }
+        });
+
+
+        return oGlowingLine;
+
+    };
+
+    /**
+     * drawPointWithImage
+     * @param aPositionInput
+     * @param sImageInput
+     * @returns {null}
+     */
+    this.drawPointWithImage = function(aPositionInput,sImageInput,sName,sDescription)
+    {
+        if(utilsIsObjectNullOrUndefined(aPositionInput) === true)
+            return null;
+        if(utilsIsStrNullOrEmpty(sImageInput) === true )
+            return null;
+        if(utilsIsStrNullOrEmpty(sName) === true)
+            return false;
+        if(utilsIsStrNullOrEmpty(sDescription) === true)
+            return false;
+
+        var oPoint =  this.m_oWasdiGlobe.entities.add({
+            name : sName,
+            position : Cesium.Cartesian3.fromDegrees(aPositionInput[0],aPositionInput[1],aPositionInput[2]),
+            billboard : {
+                image : sImageInput,
+                width : 64,
+                height : 64
+            } , label : {
+                text : sDescription,
+                font : '14pt monospace',
+                style: Cesium.LabelStyle.FILL_AND_OUTLINE,
+                outlineWidth : 2,
+                verticalOrigin : Cesium.VerticalOrigin.BOTTOM,
+                pixelOffset : new Cesium.Cartesian2(0, -9)
+            }
+        });
+
+        return oPoint;
+    };
+
+    /**
+     * removeEntity
+     * @param oEntity
+     * @returns {boolean}
+     */
+    this.removeEntity = function (oEntity)
+    {
+        if(utilsIsObjectNullOrUndefined(oEntity) === true)
+            return false;
+        var oGlobe = this.m_oWasdiGlobe;
+        oGlobe.entities.remove(oEntity);
+        return true;
+    };
+
+
 }]);
 

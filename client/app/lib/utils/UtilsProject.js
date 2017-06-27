@@ -204,4 +204,43 @@ function utilsJstreeUpdateLabelNode (sIdNodeInput, sNewLabelNodeInput)
     $('#jstree').jstree(true).rename_node(oNode,sNewLabelNodeInput);
 
     return true;
+};
+
+function utilsProjectConvertPositionsSatelliteFromServerInCesiumArray(aaArrayInput)
+{
+    if(utilsIsObjectNullOrUndefined(aaArrayInput) === true)
+        return [];
+    if(aaArrayInput.length === 0 )
+        return [];
+
+    var iLengthArray = aaArrayInput.length;
+    var aReturnArray = [];
+    var aTemp = [];
+    for( var iIndexArray = 0; iIndexArray < iLengthArray; iIndexArray++)
+    {
+        aTemp = aaArrayInput[iIndexArray].split(";");
+
+        // skip if aTemp is wrong
+        if(utilsIsObjectNullOrUndefined(aTemp)=== true ||  aTemp.length !== 4)
+            continue;
+
+        aReturnArray.push(aTemp[1]);//push log
+        aReturnArray.push(aTemp[0]);//push lat
+        aReturnArray.push(aTemp[2]);//push alt
+    }
+
+    return aReturnArray;
+};
+
+function utilsProjectConvertCurrentPositionFromServerInCesiumDegrees(sInput)
+{
+    if(utilsIsStrNullOrEmpty(sInput) === true)
+        return [];
+
+    var aSplitedInput = sInput.split(";")
+    var aReturnValue = [];
+    aReturnValue.push(aSplitedInput[1]);
+    aReturnValue.push(aSplitedInput[0]);
+    aReturnValue.push(aSplitedInput[2]);
+    return aReturnValue;
 }
