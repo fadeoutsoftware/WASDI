@@ -217,7 +217,7 @@ public class OpenSearchResource {
 						aoResults.addAll(aoTmp);
 						System.out.println("Found " + aoTmp.size() + " results for " + sProvider);
 					} else {
-						System.out.println("No results found for sProvider");
+						System.out.println("No results found for " + sProvider);
 					}					
 				} catch (IOException e) {
 					e.printStackTrace();
