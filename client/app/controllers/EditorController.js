@@ -24,7 +24,7 @@ var EditorController = (function () {
         this.m_b3DMapModeOn = false;
         this.m_bIsVisibleMapOfLeaflet = false;
         this.m_oModalService = oModalService;
-
+        this.m_bIsLoadingTree = true;
         this.m_sToolTipBtnSwitchGeographic="EDITOR_TOOLTIP_TO_GEO";
         this.m_sClassBtnSwitchGeographic = "btn-switch-not-geographic";
         this.m_oAreHideBars = {
@@ -1048,6 +1048,8 @@ var EditorController = (function () {
 
                     // i need to make the tree after the products are loaded
                     oController.m_oTree = oController.generateTree();
+                    oController.m_bIsLoadingTree = false;
+
                 }
             }
         }).error(function (data, status) {

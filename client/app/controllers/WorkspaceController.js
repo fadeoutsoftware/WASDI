@@ -3,7 +3,7 @@
  */
 
 var WorkspaceController = (function() {
-    function WorkspaceController($scope, $location, oConstantsService, oAuthService, oWorkspaceService,$state,oProductService, oRabbitStompService,oGlobeService,$rootScope) {
+    function WorkspaceController($scope, $location, oConstantsService, oAuthService, oWorkspaceService,$state,oProductService, oRabbitStompService,oGlobeService,$rootScope,oSatelliteService) {
         this.m_oScope = $scope;
         this.m_oLocation  = $location;
         this.m_oAuthService = oAuthService;
@@ -23,6 +23,10 @@ var WorkspaceController = (function() {
         this.m_oRootScope = $rootScope;
         this.m_oSelectedProduct = null;
         this.m_oWorkspaceSelected = null;
+        this.m_oSatelliteService = oSatelliteService;
+        this.m_oSentinel_1a_position = {"lastPositions":"",
+                                        "nextPositions":"",
+                                        "actualPosition":""};
 
         this.fetchWorkspaceInfoList();
         this.m_oRabbitStompService.unsubscribe();
@@ -30,6 +34,8 @@ var WorkspaceController = (function() {
 
         this.m_oGlobeService.initRotateGlobe('cesiumContainer3');
         this.m_oGlobeService.goHome();
+
+        this.getTrackSatellite();
     }
 
     WorkspaceController.prototype.moveTo = function (sPath) {
@@ -148,6 +154,7 @@ var WorkspaceController = (function() {
                 oController.m_bIsVisibleFiles = false;
             }else{
                 //add globe bounding box
+                oController.m_oGlobeService.removeAllEntities();
                 oController.createBoundingBoxInGlobe();
             }
 
@@ -264,7 +271,7 @@ var WorkspaceController = (function() {
         if(utilsIsObjectNullOrUndefined(this.m_aoProducts) || this.m_aoProducts.length == 0)
             return true;
         return false;
-    }
+    };
 
     WorkspaceController.prototype.isSelectedRowInWorkspaceTable = function(oWorkspace)
     {
@@ -282,7 +289,7 @@ var WorkspaceController = (function() {
             return '';
 
         return 'selected-row';
-    }
+    };
 
 	WorkspaceController.prototype.DeleteWorkspace = function (sWorkspaceId) {
 
@@ -307,6 +314,41 @@ var WorkspaceController = (function() {
         });
     };
 
+    WorkspaceController.prototype.getTrackSatellite = function ()
+    {
+        var oController = this;
+        this.m_oSatelliteService.getTrackSatellite("SENTINEL1A").then(function successCallback(response) {
+            if(utilsIsObjectNullOrUndefined(response) === false)
+            {
+                var oData = response.data;
+
+                if(utilsIsObjectNullOrUndefined(oData) === false)
+                {
+                    oController.m_oSentinel_1a_position.lastPositions = oController.m_oGlobeService.drawOutLined(utilsProjectConvertPositionsSatelliteFromServerInCesiumArray(oData.lastPositions),Cesium.Color.DARKBLUE,"Past track");
+                    oController.m_oSentinel_1a_position.nextPositions = oController.m_oGlobeService.drawOutLined(utilsProjectConvertPositionsSatelliteFromServerInCesiumArray(oData.nextPositions),Cesium.Color.CHARTREUSE,"Future track");
+                    oController.m_oSentinel_1a_position.actualPosition = oController.m_oGlobeService.drawPointWithImage(utilsProjectConvertCurrentPositionFromServerInCesiumDegrees(oData.currentPosition),"assets/icons/globeIcons/alien.png","U.F.O","SENTINEL 1A");
+                }
+            }
+        }, function errorCallback(response) {
+            // called asynchronously if an error occurs
+            // or server returns response with an error status.
+        });
+    };
+
+    WorkspaceController.prototype.deleteSentinel1a = function(value){
+        if(value)
+        {
+            this.getTrackSatellite();
+        }
+        else
+        {
+            this.m_oGlobeService.removeEntity(this.m_oSentinel_1a_position.lastPositions);
+            this.m_oGlobeService.removeEntity(this.m_oSentinel_1a_position.nextPositions);
+            this.m_oGlobeService.removeEntity(this.m_oSentinel_1a_position.actualPosition);
+        }
+
+    };
+
     WorkspaceController.$inject = [
         '$scope',
         '$location',
@@ -317,7 +359,8 @@ var WorkspaceController = (function() {
         'ProductService',
         'RabbitStompService',
         'GlobeService',
-        '$rootScope'
+        '$rootScope',
+        'SatelliteService'
     ];
     return WorkspaceController;
 }) ();
