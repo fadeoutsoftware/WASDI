@@ -9,6 +9,7 @@
     -moz-osx-font-smoothing: grayscale;
     height: 50vh;
     width: 100vw;
+
     background-color: $wasdi-login-color-background;
     position: relative;//for center login content element
 
@@ -36,8 +37,9 @@
 
     .link-login
     {
-      position: absolute;
-      right: 12%;
+      //position: absolute;
+      //right: 12%;
+      margin-right: 2em;
       padding: 10px;
       display: inline;
       cursor:pointer;
@@ -52,8 +54,9 @@
 
     .link-register
     {
-      position: absolute;
-      right: 8%;
+      //position: absolute;
+      //right: 8%;
+
       padding: 10px;
       display: inline;
       cursor:pointer;
