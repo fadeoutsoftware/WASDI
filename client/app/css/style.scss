@@ -1,5 +1,5 @@
 //bootstrap
-//@import "../bower_components/bootstrap-sass/assets/stylesheets/bootstrap";
+@import "../bower_components/bootstrap-sass/assets/stylesheets/bootstrap";
 
 
 @import "login";
@@ -44,7 +44,10 @@ body
   line-height: $wasdi-line-height;
   font-weight: $wasdi-font-weight;
   height: 100vh;
+  height: 100%;
   width: 100vw;
+  width: 100%;
+  overflow-x: hidden;
 }
 
 //LEAFLET MAP 100% "SCREEN"
@@ -192,6 +195,8 @@ h4
 
   }
 }
+// nav spaces
+.nav>li>a {padding:13px 10px;}
 
 // css calendar
 .input-calendar-container
@@ -474,3 +479,4 @@ h4
 .fa-2_5x{
 font-size: 2.5em !important;
 }
+

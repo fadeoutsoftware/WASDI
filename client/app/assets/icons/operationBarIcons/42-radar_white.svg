@@ -1,65 +1,36 @@
-<?xml version="1.0" encoding="iso-8859-1"?>
-<!-- Generator: Adobe Illustrator 18.0.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
-<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-<svg version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
-	 viewBox="0 0 398.999 398.999" style="enable-background:new 0 0 398.999 398.999;" xml:space="preserve">
-<g>
-	<polyline style="fill:none;stroke:#FFFFFF;stroke-width:8;stroke-linejoin:round;stroke-miterlimit:10;" points="126.625,112.442 
-		199.502,39.565 272.38,112.442 	"/>
-	<polyline style="fill:none;stroke:#FFFFFF;stroke-width:8;stroke-linejoin:round;stroke-miterlimit:10;" points="172.796,112.442 
-		199.502,39.565 226.209,112.442 	"/>
-	
-		<polyline style="fill:none;stroke:#FFFFFF;stroke-width:8;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;" points="
-		199.503,25.308 199.503,39.563 199.503,45.476 	"/>
-	<path style="fill:none;stroke:#FFFFFF;stroke-width:8;stroke-linejoin:round;stroke-miterlimit:10;" d="M177.374,212.966
-		c-54.122-8.651-97.803-48.497-112.058-100.53h61.324h46.153h53.419h46.153h61.313c-13.957,51.011-56.221,90.324-108.851,99.998"/>
-	<path style="fill:none;stroke:#FFFFFF;stroke-width:8;stroke-linejoin:round;stroke-miterlimit:10;" d="M179.197,208.814
-		c7.753-17.693,32.852-17.693,40.605,0l13.437,30.664l33.74,76.995h-67.48h-67.48l33.74-76.995L179.197,208.814z"/>
-	
-		<rect x="112.386" y="316.474" style="fill:none;stroke:#FFFFFF;stroke-width:8;stroke-linejoin:round;stroke-miterlimit:10;" width="174.228" height="34.355"/>
-	<polyline style="fill:none;stroke:#FFFFFF;stroke-width:8;stroke-linejoin:round;stroke-miterlimit:10;" points="266.818,350.828 
-		266.818,394.999 132.181,394.999 132.181,350.828 	"/>
-	
-		<line style="fill:none;stroke:#FFFFFF;stroke-width:8;stroke-linejoin:round;stroke-miterlimit:10;" x1="69.77" y1="125.455" x2="328.66" y2="125.455"/>
-	
-		<circle style="fill:none;stroke:#FFFFFF;stroke-width:8;stroke-linejoin:round;stroke-miterlimit:10;" cx="199.499" cy="220.275" r="10.654"/>
-	
-		<circle style="fill:none;stroke:#FFFFFF;stroke-width:8;stroke-linejoin:round;stroke-miterlimit:10;" cx="199.499" cy="14.654" r="10.654"/>
-	
-		<line style="fill:none;stroke:#FFFFFF;stroke-width:8;stroke-linejoin:round;stroke-miterlimit:10;" x1="199.499" y1="230.928" x2="199.499" y2="312.964"/>
-	
-		<line style="fill:none;stroke:#FFFFFF;stroke-width:8;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;" x1="56.737" y1="394.999" x2="342.262" y2="394.999"/>
-	
-		<line style="fill:none;stroke:#FFFFFF;stroke-width:8;stroke-linejoin:round;stroke-miterlimit:10;" x1="132.628" y1="371.56" x2="264.737" y2="371.56"/>
-</g>
-<g>
-</g>
-<g>
-</g>
-<g>
-</g>
-<g>
-</g>
-<g>
-</g>
-<g>
-</g>
-<g>
-</g>
-<g>
-</g>
-<g>
-</g>
-<g>
-</g>
-<g>
-</g>
-<g>
-</g>
-<g>
-</g>
-<g>
-</g>
-<g>
-</g>
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generator: Adobe Illustrator 21.1.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	 viewBox="0 0 1024 1024" style="enable-background:new 0 0 1024 1024;" xml:space="preserve">
+<style type="text/css">
+	.st0{fill:#FFFFFF;}
+</style>
+<title>radar_white</title>
+<path class="st0" d="M671.4,317.5L512,158.1L352.7,317.5l-42.4-42.4L490.8,94.5c5.6-5.6,13.3-8.8,21.2-8.8s15.6,3.2,21.2,8.8
+	l180.6,180.6L671.4,317.5z"/>
+<path class="st0" d="M474,306.6L417.7,286l66.2-180.6c4.3-11.8,15.6-19.7,28.2-19.7c12.6,0,23.8,7.9,28.2,19.7L606.4,286L550,306.6
+	l-38-103.7L474,306.6z"/>
+<path class="st0" d="M512,160.4c-16.6,0-30-13.4-30-30v-50c0-16.6,13.4-30,30-30c16.6,0,30,13.4,30,30v50
+	C542,146.9,528.6,160.4,512,160.4z"/>
+<path class="st0" d="M452.5,575c-144.6-23.1-263.1-129.4-301.8-270.8c-2.5-9-0.6-18.7,5.1-26.1c5.7-7.4,14.5-11.8,23.9-11.8h664.9
+	c9.4,0,18.2,4.4,23.8,11.8c5.7,7.4,7.6,17.1,5.1,26.1c-18.5,67.6-55.7,128.6-107.5,176.4c-52.1,48-116.3,80.2-185.7,92.9l-10.8-59
+	c104.7-19.2,192.6-91.4,233.1-188.3H221.6c41.5,99.5,132.3,172.2,240.4,189.5L452.5,575z"/>
+<path class="st0" d="M679.2,831.8H344.9c-10.1,0-19.6-5.1-25.1-13.6c-5.5-8.5-6.4-19.2-2.4-28.5l116.4-265.5
+	c0.2-0.4,0.3-0.8,0.5-1.2c13.7-31.4,43.5-50.8,77.8-50.8c34.2,0,64,19.5,77.8,50.8l116.9,266.7c4.1,9.3,3.2,20-2.4,28.5
+	S689.4,831.8,679.2,831.8z M390.8,771.8h242.6l-98.5-224.7c-6.1-13.8-19-14.9-22.8-14.9c-3.7,0-16.2,1-22.4,14.1
+	c-0.1,0.3-0.2,0.6-0.4,0.8L390.8,771.8z"/>
+<path class="st0" d="M727.8,916.9H296.2c-16.6,0-30-13.4-30-30v-85.1c0-16.6,13.4-30,30-30h431.7c16.6,0,30,13.4,30,30v85.1
+	C757.8,903.5,744.4,916.9,727.8,916.9z M326.2,856.9h371.7v-25.1H326.2V856.9z"/>
+<path class="st0" d="M678.8,1026.4H345.2c-16.6,0-30-13.4-30-30V886.9h60v79.5h273.6v-79.5h60v109.5
+	C708.8,1013,695.4,1026.4,678.8,1026.4z"/>
+<rect x="190.6" y="298.5" class="st0" width="641.4" height="60"/>
+<path class="st0" d="M512,619.8c-31.1,0-56.4-25.3-56.4-56.4c0-31.1,25.3-56.4,56.4-56.4s56.4,25.3,56.4,56.4
+	C568.4,594.5,543.1,619.8,512,619.8z M512,559.8c-2,0-3.6,1.6-3.6,3.6c0,2,1.6,3.6,3.6,3.6c2,0,3.6-1.6,3.6-3.6
+	C515.6,561.4,514,559.8,512,559.8z"/>
+<path class="st0" d="M512,110.4c-31.1,0-56.4-25.3-56.4-56.4S480.9-2.4,512-2.4s56.4,25.3,56.4,56.4S543.1,110.4,512,110.4z
+	 M512,50.4c-2,0-3.6,1.6-3.6,3.6c0,2,1.6,3.6,3.6,3.6c2,0,3.6-1.6,3.6-3.6C515.6,52,514,50.4,512,50.4z"/>
+<rect x="482" y="589.9" class="st0" width="60" height="203.2"/>
+<path class="st0" d="M865.7,1026.4H158.3c-16.6,0-30-13.4-30-30s13.4-30,30-30h707.4c16.6,0,30,13.4,30,30
+	S882.3,1026.4,865.7,1026.4z"/>
+<rect x="346.3" y="908.3" class="st0" width="327.3" height="60"/>
 </svg>

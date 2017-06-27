@@ -4,17 +4,19 @@
   height:50px;
 
   .space {
-    float: left;
-    color: white;
-    width: 0;
+    color: #fff;
+    width: 100%;
+    overflow:hidden;
+    min-height: 100vh;
+    padding-top: 15px;
 
   }
   .space>span {
     margin-left: 20px;
   }
   .space-invader {
-    border: 2px solid white;
-    background-color: white;
+    border: 2px solid $wasdi-green-logo;
+    //background-color: white;
     float: left;
     width: 0.25em;
     height: 0.25em;
