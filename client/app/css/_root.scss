@@ -125,7 +125,7 @@
         margin-bottom: 5px;
 
         input{
-          border: 0;
+          border: inherit;
           outline: 0;
           width: 400px;
           background: transparent;
@@ -138,8 +138,8 @@
         .input-mydisable{
 
           //color: white;
-          color:rgba(255,255,255, 0.5);
-          border-bottom: 2px solid  rgba(255,255,255, 0.5);//$wasdi-green-logo;
+          //color:rgba(255,255,255, 0.5);
+          //border-bottom: 2px solid  rgba(255,255,255, 0.5);//$wasdi-green-logo;
 
           //background: url("../assets/icons/pencil_24x24.png")no-repeat scroll;
           //background-position: 370px 0;
@@ -148,8 +148,8 @@
         }
         .input-myenable
         {
-          color:white;
-          border-bottom: 2px solid  $wasdi-green-logo;
+          //color:$wasdi-green-logo;
+          //border-bottom: 2px solid  $wasdi-green-logo;
         }
 
 
@@ -271,21 +271,39 @@
 }
 
 
-.name-workspace {opacity: 1;}
+//.name-workspace {opacity: 1;}
 
 .name-workspace:hover {
-  opacity:0.9;
+  //opacity:0.9;
   transform:scale(1.05);
+  input {border-bottom-width:3px;}
 }
+.name-workspace input ,
+.root-view .my-nav-bar .name-workspace .form-group input {
+
+  border-style:solid;
+  border-bottom-width: 2px;
+}
+.name-workspace .form-group {
+  input.input-mydisable {
+    color:$wasdi-white;
+    border-color: $wasdi-white;
+  }
+  input.input-myenable {
+    color:$wasdi-green-logo;
+    border-color: $wasdi-green-logo;
+  }
+}
+.name-workspace:hover .input-myenable ~ .cursor {  display: none;}
 
 .name-workspace:hover,
-.name-workspace {
-  transition: all 0.2s ease;
-}
+.name-workspace {  transition: all 0.2s ease;}
 
 .name-workspace .form-group {display:flex;}
 .name-workspace .cursor {display:none;}
 .name-workspace:hover .cursor {display:block;}
+
+
 
 .cursor {
   font-size:1em;
@@ -309,6 +327,6 @@
     background-color: transparent;
   }
   50% {
-    background-color: white;
+    background-color: $wasdi-white;
   }
 }
