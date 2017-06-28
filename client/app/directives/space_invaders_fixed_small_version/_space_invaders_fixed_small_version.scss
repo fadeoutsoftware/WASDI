@@ -1,3 +1,24 @@
+.table > tbody > tr > td{
+
+  vertical-align:middle;
+}
+.space {
+  height:50px;
+  left:0;
+}
+.space-invader-2 {
+  position:absolute;
+  right:calc(100% - 20px)!important;
+}
+
+
+#tableProcesses.table > tbody > tr > td {
+  padding:10px;
+}
+#tableProcesses.table > tbody > tr > td:first-child {
+  min-width:80px;
+}
+
 .space-invaders-small-version-fixed-class
 {
   //width:50px;
@@ -8,8 +29,8 @@
     color: #fff;
     width: 100%;
     overflow:hidden;
-    min-height: 100vh;
-    padding-top: 15px;
+    //min-height: 100vh;
+    padding-top: 10px;
 
   }
   .space>span {
