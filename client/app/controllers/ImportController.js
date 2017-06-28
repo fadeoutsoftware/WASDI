@@ -57,6 +57,8 @@ var ImportController = (function() {
         this.m_iTotalPages = 1;
         this.m_iTotalOfProducts = 0;
 
+        this.m_bClearFiltersEnabled = true;
+
         // var dateObj = new Date();
         this.m_oModel = {
             textQuery:'',
@@ -422,10 +424,11 @@ var ImportController = (function() {
     };
 
     ImportController.prototype.search = function() {
-        var oController = this;
-        if(this.thereIsAtLeastOneProvider() === false)
-            return false;
 
+        var oController = this;
+        if(this.thereIsAtLeastOneProvider() === false) return false;
+
+        this.m_bClearFiltersEnabled = false;
         this.deleteLayers();/*delete layers (if it isn't the first search) and relatives rectangles in map*/
         this.m_bIsVisibleListOfLayers = true;//change view on left side bar
         this.m_oSearchService.setTextQuery(this.m_oModel.textQuery);
@@ -1239,6 +1242,7 @@ var ImportController = (function() {
 
     ImportController.prototype.setPaginationVariables = function()
     {
+        this.m_bClearFiltersEnabled = true;
         this.m_iTotalOfProducts = 0;
         this.m_iCurrentPage = 1;
         this.m_iProductsPerPageSelected = 10;

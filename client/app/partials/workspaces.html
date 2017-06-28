@@ -9,8 +9,8 @@
             <!--<i class="fa fa-pencil fa-lg" aria-hidden="true"></i>-->
         <!--</td>-->
 
-        <button class="my-button" ng-click="m_oController.createWorkspace()">{{"WORKSPACES_BUTTON_NEW_WORKSPACE"|translate}}</button>
         <button class="my-button" ng-click="m_oController.openWorkspace(m_oController.m_oWorkspaceSelected.workspaceId)" ng-disabled="m_oController.m_oWorkspaceSelected === null"> Edit Workspace</button>
+        <button class="my-button" ng-click="m_oController.createWorkspace()">{{"WORKSPACES_BUTTON_NEW_WORKSPACE"|translate}}</button>
     </div>
 
 
@@ -104,7 +104,7 @@
             <div class="btn-group" role="group" aria-label="...">
 
                 <button type="button" class="btn btn-default" ng-click="m_oController.m_oGlobeService.stopRotationGlobe()"><i class="fa fa-stop" aria-hidden="true" title="stop rotation" ></i></button>
-                <button type="button" class="btn btn-default" ng-click="m_oController.m_oGlobeService.startRotationGlobe(1)"><i class="fa fa-play" aria-hidden="true" title="start rotation" ></i></button>
+                <button type="button" class="btn btn-default" ng-click="m_oController.m_oGlobeService.startRotationGlobe(3)"><i class="fa fa-play" aria-hidden="true" title="start rotation" ></i></button>
             </div>
         </div>
     </div>

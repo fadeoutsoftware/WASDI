@@ -34,12 +34,12 @@
                         </div>
                     </div>
                     <div class="drag-and-drop ">
-                        Upload workflow xml:
+                        {{"DIALOG_WORKFLOW_DROP_OR_CLICK"|translate}}
                         <div ngf-drop ngf-select ng-model="m_oController.m_oFile" class="drop-box"
                              ngf-drag-over-class="'dragover'" ngf-multiple="true" ngf-allow-dir="true"
                              accept="text/xml"
                              ngf-pattern="'text/xml'">
-                            <!--{{"DIALOG_WORKFLOW_DROP_OR_CLICK"|translate}}-->
+                            <!---->
                             <div ng-show="m_oController.m_oFile">File: {{m_oController.m_oFile[0].name}}</div>
                         </div>
 

@@ -167,7 +167,7 @@ var WorkspaceController = (function() {
                 this.m_bIsOpenInfo = false;
 
                 this.m_oGlobeService.flyHome();
-                this.m_oGlobeService.startRotationGlobe(1);
+                this.m_oGlobeService.startRotationGlobe(3);
 
                 return;
             }
@@ -428,7 +428,7 @@ var WorkspaceController = (function() {
 
                         var sDescription = oActualSat.description;
                         sDescription += "\n";
-                        sDescription += new Date().toISOString().slice(0, 16);
+                        sDescription += oData.currentTime;
 
                         var oActualPosition = oController.m_oGlobeService.drawPointWithImage(utilsProjectConvertCurrentPositionFromServerInCesiumDegrees(oData.currentPosition),oActualSat.icon,sDescription,oActualSat.label);
                         oController.m_aoSatellitePositions.push(oActualPosition);
@@ -440,7 +440,7 @@ var WorkspaceController = (function() {
 
                                 oController.m_oFakePosition = oData.lastPositions[iFakeIndex];
 
-                                oController.m_oUfoPointer = oController.m_oGlobeService.drawPointWithImage(utilsProjectConvertCurrentPositionFromServerInCesiumDegrees(oController.m_oFakePosition),"assets/icons/globeIcons/alien_original.png","U.F.O.","?");
+                                oController.m_oUfoPointer = oController.m_oGlobeService.drawPointWithImage(utilsProjectConvertCurrentPositionFromServerInCesiumDegrees(oController.m_oFakePosition),"assets/icons/alien.svg","U.F.O.","?");
                             }
                         }
                     }

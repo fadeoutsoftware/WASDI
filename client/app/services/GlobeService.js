@@ -252,7 +252,7 @@ service('GlobeService', ['$http',  'ConstantsService','SatelliteService', functi
 
                 //rotate globe
                 this.m_oWasdiGlobe.camera.flyHome(0);
-                this.startRotationGlobe(1);
+                this.startRotationGlobe(3);
                 this.m_oWasdiGlobe.scene.preRender.addEventListener(this.icrf);
             }
             catch(err) {
@@ -292,7 +292,7 @@ service('GlobeService', ['$http',  'ConstantsService','SatelliteService', functi
     this.startRotationGlobe = function(iRotationValue){
         if(utilsIsANumber(iRotationValue) === false)
             return false;
-        this.m_oWasdiGlobe.clock.multiplier = iRotationValue * 60 * 60;
+        this.m_oWasdiGlobe.clock.multiplier = iRotationValue * 600 ;
         return true;
     };
 
@@ -387,6 +387,7 @@ service('GlobeService', ['$http',  'ConstantsService','SatelliteService', functi
                 text : sDescription,
                 font : '14pt monospace',
                 style: Cesium.LabelStyle.FILL_AND_OUTLINE,
+                fillColor: Cesium.Color.CHARTREUSE,
                 outlineWidth : 2,
                 verticalOrigin : Cesium.VerticalOrigin.BOTTOM,
                 pixelOffset : new Cesium.Cartesian2(0, -9)
@@ -415,43 +416,43 @@ service('GlobeService', ['$http',  'ConstantsService','SatelliteService', functi
         var aoOutList = [
             {
                 name : "SENTINEL1A",
-                icon : "assets/icons/sat_01@2x.png",
+                icon : "assets/icons/sat_01.svg",
                 label : "S1A",
                 description : "ESA Sentinel 1 A "
             },
             {
                 name : "SENTINEL1B",
-                icon : "assets/icons/sat_01@2x.png",
+                icon : "assets/icons/sat_01.svg",
                 label : "S1B",
                 description : "ESA Sentinel 1 B"
             },
             {
                 name : "COSMOSKY1",
-                icon : "assets/icons/sat_02@2x.png",
+                icon : "assets/icons/sat_02.svg",
                 label : "CSK1",
                 description : "ASI COSMO-SKYMED 1"
             },
             {
                 name : "COSMOSKY2",
-                icon : "assets/icons/sat_02@2x.png",
+                icon : "assets/icons/sat_02.svg",
                 label : "CSK2",
                 description : "ASI COSMO-SKYMED 2"
             },
             {
                 name : "COSMOSKY3",
-                icon : "assets/icons/sat_02@2x.png",
+                icon : "assets/icons/sat_02.svg",
                 label : "CSK3",
                 description : "ASI COSMO-SKYMED 3"
             },
             {
                 name : "COSMOSKY4",
-                icon : "assets/icons/sat_02@2x.png",
+                icon : "assets/icons/sat_02.svg",
                 label : "CSK4",
                 description : "ASI COSMO-SKYMED 4"
             },
             {
                 name : "LANDSAT8",
-                icon : "assets/icons/globeIcons/sat_03@2x.png",
+                icon : "assets/icons/sat_03.svg",
                 label : "LS8",
                 description : "NASA LANDSAT 8"
             }

@@ -1001,10 +1001,10 @@ var EditorController = (function () {
 
                 //LABEL NODE
                 if (oaBandsItems[iIndexBandsItems].published) {
-                    oNode.text = oaBandsItems[iIndexBandsItems].name;
+                    oNode.text = "<span class='band-published-label'>" + oaBandsItems[iIndexBandsItems].name + "</span>";
                 }
                 else {
-                    oNode.text = "<i>" + oaBandsItems[iIndexBandsItems].name + "</i>";
+                    oNode.text = "<span class='band-not-published-label'>" +  oaBandsItems[iIndexBandsItems].name + "</span>";
                 }
 
                 oNode.band = oaBandsItems[iIndexBandsItems];//BAND

@@ -89,10 +89,10 @@
                 <i class="fa fa-arrow-left fa-lg backbtn" aria-hidden="true" ng-click=" m_oController.setPaginationVariables()" ng-show="m_oController.m_bIsVisibleListOfLayers"></i>
 
                 <span ng-hide="m_oController.m_bIsVisibleListOfLayers">{{"IMPORT_PANEL_HEAD_TITLE_FILTERS"|translate}}</span>
-                <div class="my-button clear-button" ng-click="m_oController.clearFilter()"   ng-click="m_oController.clearFilter()" title="Clear Search Filter">
+                <div class="my-button clear-button" ng-click="m_oController.clearFilter()"   ng-click="m_oController.clearFilter()" title="Clear Search Filter" ng-show="m_oController.m_bClearFiltersEnabled">
                     <!--<i class="fa fa-search fa-lg" aria-hidden="true"></i>-->
                     <!--{{"IMPORT_CLEAR_BUTTON"|translate}}-->
-                    <i class="fa fa-bath" aria-hidden="true"></i>
+                    <i class="fa fa-bath" aria-hidden="true" ></i>
 
                 </div>
 
@@ -108,7 +108,7 @@
                     <div id="advanced-search-content">
 
                         <div style="overflow:visible;padding:15px 5px;" class="my-input-text"><!--id="section_2" class="panel-collapse collapse" role="tabpanel" aria-labelledby="section_2"-->
-                            <div class="ingestion-time">
+                            <!--div class="ingestion-time">
                                 <div class="description-label" >
                                     <h4>Ingestion period:</h4>
                                 </div>
@@ -163,7 +163,7 @@
                                         </p>
                                     </div>
                                 </div>
-                            </div>
+                            </div-->
 
 
                             <!--*********************** MISSIONS LIST ********************************-->

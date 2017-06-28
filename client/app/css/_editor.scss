@@ -402,7 +402,15 @@
       content: $wasdi-mida-merge-operations-white;
       width: $wasdi-size-icon;
       height: auto;
-
     }
+  }
+
+  .band-published-label {
+    color: #00A707;
+  }
+
+  .band-not-published-label {
+    color: #0a6aa1;
+    font-style: italic;
   }
 }
