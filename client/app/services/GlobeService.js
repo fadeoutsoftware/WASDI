@@ -40,7 +40,6 @@ service('GlobeService', ['$http',  'ConstantsService','SatelliteService', functi
             try {
                 this.m_oWasdiGlobe = new Cesium.Viewer(sGlobeDiv, this.oGlobeOptions);
                 this.m_aoLayers = this.m_oWasdiGlobe.imageryLayers;
-
             }
             catch(err) {
                 console.log("Error in Cesium Globe: " + err);

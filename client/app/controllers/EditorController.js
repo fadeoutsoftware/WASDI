@@ -36,17 +36,16 @@ var EditorController = (function () {
 
         this.GLOBE_DEFAULT_ZOOM = 2000000;
 
-        /*Last file donloaded*/
+        //Last file downloaded
         this.m_oLastDownloadedProduct = null;
         //Pixel Info
         this.m_bIsVisiblePixelInfo = false;
-        //this.hideOrShowPixelInfo()//set css
-
         //layer list
         this.m_aoLayersList = [];//only id
         //this.m_aoProcessesRunning=[];
         // Array of products to show
         this.m_aoProducts = [];
+        // Flag to know if we are in Info mode on 2d map
         this.m_bIsModeOnPixelInfo = false;
         // Here a Workpsace is needed... if it is null create a new one..
         this.m_oActiveWorkspace = this.m_oConstantsService.getActiveWorkspace();
@@ -72,37 +71,20 @@ var EditorController = (function () {
             }
 
         }
-        this.m_sDownloadFilePath = "";
-
-        // Rabbit subscription
-        //var m_oSubscription = {};
-
-
-        // Self reference for callbacks
-        var oController = this;
 
         //Set default value tree
         this.m_oTree = null;//IMPORTANT NOTE: there's a 'WATCH' for this.m_oTree in TREE DIRECTIVE
-
-
-        // if (this.m_oRabbitStompService.isSubscrbed() == false) {
-        //     this.m_oRabbitStompService.subscribe(this.m_oActiveWorkspace.workspaceId);
-        // }
 
         /*Hook to Rabbit WebStomp Service*/
         this.m_oRabbitStompService.setMessageCallback(this.receivedRabbitMessage);
         this.m_oRabbitStompService.setActiveController(this);
 
-
         // Initialize the map
 
-        //oMapService.initMap('wasdiMap');
         oMapService.initMapEditor('wasdiMap');
         oMapService.removeLayersFromMap();
-        //oMapService.removeBasicMap();
+
         this.m_oGlobeService.initGlobe('cesiumContainer2');
-
-
     }
 
     /********************METHODS********************/
@@ -190,6 +172,7 @@ var EditorController = (function () {
             case "NDVI":
             case "TERRAIN":
             case "GRAPH":
+            case "INGEST":
                 oController.receivedNewProductMessage(oMessage);
                 break;
         }
@@ -276,8 +259,15 @@ var EditorController = (function () {
                 //check if there is layerId if there isn't the layer was added by get capabilities
                 if (!utilsIsObjectNullOrUndefined(this.m_aoLayersList[iIndexLayer].layerId)) {
                     var oNode = $('#jstree').jstree(true).get_node(this.m_aoLayersList[iIndexLayer].layerId);
-                    oNode.original.bPubblish = false;
-                    $('#jstree').jstree(true).set_icon(this.m_aoLayersList[iIndexLayer].layerId, 'assets/icons/uncheck_20x20.png');
+
+                    if (utilsIsObjectNullOrUndefined(oNode.original)==false) {
+                        oNode.original.bPubblish = false;
+                        $('#jstree').jstree(true).set_icon(this.m_aoLayersList[iIndexLayer].layerId, 'assets/icons/uncheck_20x20.png');
+                    }
+                    else {
+                        console.log("Editor Controller: ERROR oNode.original not defined");
+                    }
+
                 }
             }
             this.m_aoLayersList = [];
@@ -310,17 +300,23 @@ var EditorController = (function () {
 
         /*CHANGE TREE */
         var oNode = $('#jstree').jstree(true).get_node(oLayer.layerId);
-        oNode.original.bPubblish = true;
-        $('#jstree').jstree(true).set_icon(oLayer.layerId, 'assets/icons/check_20x20.png');
-        $("#jstree").jstree().enable_node(oLayer.layerId);
-        sLabelText = $("#jstree").jstree().get_text(oLayer.layerId);
-        sLabelText = sLabelText.split("<i>");
 
-        //if there is <i> sLabelText.length === 2
-        sLabelText = (sLabelText.length === 2) ? sLabelText[1].split("</i>") : sLabelText ;
-        sLabelText = sLabelText[0];
-        utilsJstreeUpdateLabelNode(oLayer.layerId,sLabelText);
+        if (utilsIsObjectNullOrUndefined(oNode.original) == false) {
+            oNode.original.bPubblish = true;
 
+            $('#jstree').jstree(true).set_icon(oLayer.layerId, 'assets/icons/check_20x20.png');
+            $("#jstree").jstree().enable_node(oLayer.layerId);
+            sLabelText = $("#jstree").jstree().get_text(oLayer.layerId);
+            sLabelText = sLabelText.split("<i>");
+
+            //if there is <i> sLabelText.length === 2
+            sLabelText = (sLabelText.length === 2) ? sLabelText[1].split("</i>") : sLabelText ;
+            sLabelText = sLabelText[0];
+            utilsJstreeUpdateLabelNode(oLayer.layerId,sLabelText);
+        }
+        else {
+            console.log ("EditorController: ERROR NODE " + oLayer.layerId + " does not exists in the Tree!!")
+        }
     }
 
     /**
@@ -752,15 +748,8 @@ var EditorController = (function () {
                                                         var oFindedProduct = oController.findProductByFileName(sSourceFileName);
                                                         var sDestinationFileName = '';
 
-                                                        if(utilsIsObjectNullOrUndefined(oFindedProduct) == false)
-                                                            oController.openApplyOrbitDialog(oFindedProduct);
+                                                        if(utilsIsObjectNullOrUndefined(oFindedProduct) == false)  oController.openApplyOrbitDialog(oFindedProduct);
 
-                                                        // oController.m_oSnapOperationService.ApplyOrbit(sSourceFileName, sDestinationFileName, oController.m_oActiveWorkspace.workspaceId)
-                                                        //    .success(function (data) {
-                                                        //
-                                                        //    }).error(function (error) {
-                                                        //
-                                                        // });
                                                     }
                                                 },
                                                 "Multilooking": {
@@ -770,14 +759,7 @@ var EditorController = (function () {
                                                         var sDestinationFileName = '';
                                                         var oFindedProduct = oController.findProductByFileName(sSourceFileName);
 
-                                                        if(utilsIsObjectNullOrUndefined(oFindedProduct) == false)
-                                                            oController.openMultilookingDialog(oFindedProduct);
-                                                        // oController.m_oSnapOperationService.Multilooking(sSourceFileName, sDestinationFileName, oController.m_oActiveWorkspace.workspaceId)
-                                                        //     .success(function (data) {
-                                                        //
-                                                        //     }).error(function (error) {
-                                                        //
-                                                        // });
+                                                        if(utilsIsObjectNullOrUndefined(oFindedProduct) == false)  oController.openMultilookingDialog(oFindedProduct);
                                                     }
                                                 },
                                                 //SUB-SUBMENU RADIOMETRIC
@@ -794,15 +776,8 @@ var EditorController = (function () {
                                                                     var sDestinationFileName = '';
                                                                     var oFindedProduct = oController.findProductByFileName(sSourceFileName);
 
-                                                                    if(utilsIsObjectNullOrUndefined(oFindedProduct) == false)
-                                                                        oController.openRadiometricCalibrationDialog(oFindedProduct);
+                                                                    if(utilsIsObjectNullOrUndefined(oFindedProduct) == false) oController.openRadiometricCalibrationDialog(oFindedProduct);
 
-                                                                    // oController.m_oSnapOperationService.Calibrate(sSourceFileName, sDestinationFileName, oController.m_oActiveWorkspace.workspaceId)
-                                                                    //     .success(function (data) {
-                                                                    //
-                                                                    //     }).error(function (error) {
-                                                                    //
-                                                                    // });
                                                                 }
                                                             },
                                                 //         }
@@ -826,14 +801,7 @@ var EditorController = (function () {
                                                                                 var sDestinationFileName = '';
                                                                                 var oFindedProduct = oController.findProductByFileName(sSourceFileName);
 
-                                                                                if(utilsIsObjectNullOrUndefined(oFindedProduct) == false)
-                                                                                    oController.rangeDopplerTerrainCorrectionDialog(oFindedProduct);
-                                                                                // oController.m_oSnapOperationService.TerrainCorrection(sSourceFileName, sDestinationFileName, oController.m_oActiveWorkspace.workspaceId)
-                                                                                //     .success(function (data) {
-                                                                                //
-                                                                                //     }).error(function (error) {
-                                                                                //
-                                                                                // });
+                                                                                if(utilsIsObjectNullOrUndefined(oFindedProduct) == false) oController.rangeDopplerTerrainCorrectionDialog(oFindedProduct);
                                                                             }
                                                                         },
                                                             //         }
@@ -857,14 +825,7 @@ var EditorController = (function () {
                                                         var sDestinationFileName = '';
                                                         var oFindedProduct = oController.findProductByFileName(sSourceFileName);
 
-                                                        if(utilsIsObjectNullOrUndefined(oFindedProduct) == false)
-                                                            oController.openNDVIDialog(oFindedProduct);
-                                                        // oController.m_oSnapOperationService.NDVI(sSourceFileName, sDestinationFileName, oController.m_oActiveWorkspace.workspaceId)
-                                                        //     .success(function (data) {
-                                                        //
-                                                        //     }).error(function (error) {
-                                                        //
-                                                        // });
+                                                        if(utilsIsObjectNullOrUndefined(oFindedProduct) == false) oController.openNDVIDialog(oFindedProduct);
                                                     }
                                                 },
 
@@ -940,16 +901,6 @@ var EditorController = (function () {
                                             });
                                         }
                                     },
-
-                                    // "Merge": {
-                                    //     "label": "Merge ",
-                                    //     "action": function (obj) {
-                                    //         //$node.original.fileName;
-                                    //         oController.openMergeDialog($node.original.fileName);
-                                    //     }
-                                    // },
-
-
 
                                 };
                         }
@@ -1172,7 +1123,7 @@ var EditorController = (function () {
 
         var oGlobe = this.m_oGlobeService.getGlobe();
         /* set view of globe*/
-        oGlobe.camera.setView({
+        oGlobe.camera.flyTo({
             destination: Cesium.Rectangle.fromDegrees(oBoundsMap.getWest(), oBoundsMap.getSouth(), oBoundsMap.getEast(), oBoundsMap.getNorth()),
             orientation: {
                 heading: 0.0,

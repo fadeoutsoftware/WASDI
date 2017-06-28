@@ -164,7 +164,7 @@ var SftpUploadController = (function() {
     SftpUploadController.prototype.ingestFile = function(oSelectedFile){
         if(utilsIsObjectNullOrUndefined(oSelectedFile)=== true )
             return false;
-        this.m_oAuthService.ingestFile(oSelectedFile,this.m_oConstantsService.getActiveWorkspace).success(function (data, status) {
+        this.m_oAuthService.ingestFile(oSelectedFile,this.m_oConstantsService.getActiveWorkspace().workspaceId).success(function (data, status) {
             if (data != null) {
                 if (data != undefined) {
 
