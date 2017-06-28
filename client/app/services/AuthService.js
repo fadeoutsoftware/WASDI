@@ -59,7 +59,7 @@ service('AuthService', ['$http',  'ConstantsService', function ($http, oConstant
     };
 
     this.ingestFile = function(sSelectedFile,sWorkspace){
-        return this.m_oHttp.put(this.APIURL + 'auth/upload/ingest+?file=' + sSelectedFile + '&workspace=' + sWorkspace);
+        return this.m_oHttp.put(this.APIURL + '/auth/upload/ingest?file=' + sSelectedFile + '&workspace=' + sWorkspace);
     };
 
 }]);

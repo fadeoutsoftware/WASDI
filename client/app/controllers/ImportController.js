@@ -1160,6 +1160,7 @@ var ImportController = (function() {
             case "TERRAIN":
             case "DOWNLOAD":
             case "GRAPH":
+            case "INGEST":
                 oController.receivedNewProductMessage(oMessage,oController);
                 break;
             default:
