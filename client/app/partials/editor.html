@@ -80,8 +80,11 @@
                     <li ng-click="m_oController.openMergeDialog();" ng-init="m_oController.m_sSrc='assets/icons/iconMIDA.svg' "
                         ng-mouseover="m_oController.m_sSrc='assets/icons/iconMIDA_White.svg' " ng-mouseleave="m_oController.m_sSrc='assets/icons/iconMIDA.svg' ">
                         <!--<a class="icon" href=""><img src="{{m_oController.m_sSrc}}"></a>-->
-                        <a href="" >
-                            <h4>{{"EDITOR_OPERATION_TITLE_MIDA"|translate}}</h4>
+                        <a href="" class="icon-mida-merge-operations">
+                            <h4>
+                                <i  aria-hidden="true"></i>
+                                {{"EDITOR_OPERATION_TITLE_MIDA"|translate}}
+                            </h4>
                         </a>
                     </li>
 
@@ -89,6 +92,7 @@
                     <li ng-click="m_oController.openSFTPDialog()" >
                         <a href="" >
                             <h4>
+                                <i class="fa fa-server" aria-hidden="true"></i>
                                 {{"EDITOR_OPERATION_TITLE_SFTP"|translate}}
                             </h4>
                         </a>
@@ -98,6 +102,7 @@
                     <li ng-click="m_oController.openWorkflowDialog()" >
                         <a href="" >
                             <h4>
+                                <i class="fa fa-file-code-o" aria-hidden="true"></i>
                                 {{"EDITOR_OPERATION_TITLE_WORKFLOW"|translate}}
                             </h4>
                         </a>
@@ -190,9 +195,11 @@
                         <i class="fa fa-folder-open-o" aria-hidden="true"></i>
                     </div>
                 </div>
+
                 <!-- MY TREE DIRECTIVE -->
                 <div class="panel-body">
-                    <tree ngModelTree="prova" ></tree>
+                    <invader ng-show="m_oController.m_bIsLoadingTree"></invader>
+                    <tree ngModelTree="prova" ng-hide="m_oController.m_bIsLoadingTree"></tree>
                 </div>
 
             </div>
