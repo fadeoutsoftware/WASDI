@@ -229,6 +229,7 @@ public class OpportunitySearchResource {
 		return aoResults;
 	}
 	
+	
 	@GET
 	@Path("/track/{satellitename}")
 	@Produces({"application/xml", "application/json", "text/html"})
@@ -247,7 +248,6 @@ public class OpportunitySearchResource {
 		try {
 		
 			Time tconv = new Time();
-			double k=180.0/Math.PI;
 		    tconv.setDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
 			Satellite sat = SatFactory.buildSat(satres);
 			
@@ -255,32 +255,21 @@ public class OpportunitySearchResource {
 			
 			ret.satelliteName=sat.getDescription();
 			sat.getSatController().moveToNow();
-			ret.currentPosition=(sat.getOrbitCore().getLatitude()*k)+";"+(sat.getOrbitCore().getLongitude()*k)+";"+sat.getOrbitCore().getAltitude();
+			ret.currentTime=tconv.convertJD2String(sat.getOrbitCore().getCurrentJulDate());
+			ret.setCurrentPosition(sat.getOrbitCore().getLLA());
+			
 			sat.getOrbitCore().setShowGroundTrack(true);
-			//lead
-			double[] tm = sat.getOrbitCore().getTimeLead();
-			int num=sat.getOrbitCore().getNumGroundTrackLeadPts();
-			for(int i=0; i<num; i++){
-				ret.nextPositions.add(
-						(sat.getOrbitCore().getGroundTrackLlaLeadPt(i)[0]*k)+";"+
-						(sat.getOrbitCore().getGroundTrackLlaLeadPt(i)[1]*k)+";"+
-						sat.getOrbitCore().getGroundTrackLlaLeadPt(i)[2]+";"
-						);
-				ret.nextPositionsTime.add(tconv.convertJD2String(tm[i]));
-			}
+			
 			//lag
-			tm = sat.getOrbitCore().getTimeLag();
-			num=sat.getOrbitCore().getNumGroundTrackLagPts();
-			for(int i=0; i<num; i++){
-				ret.lastPositions.add(
-						(sat.getOrbitCore().getGroundTrackLlaLagPt(i)[0]*k)+";"+
-						(sat.getOrbitCore().getGroundTrackLlaLagPt(i)[1]*k)+";"+
-						sat.getOrbitCore().getGroundTrackLlaLagPt(i)[2]+";"
-						);
-				ret.lastPositionsTime.add(tconv.convertJD2String(tm[i]));
-			}
+			double[] tm = sat.getOrbitCore().getTimeLag();
+			for(int i=sat.getOrbitCore().getNumGroundTrackLagPts()-1; i>=0; i--)
+				ret.addPosition(sat.getOrbitCore().getGroundTrackLlaLagPt(i), tconv.convertJD2String(tm[i]));
+
+			//lead
+			tm = sat.getOrbitCore().getTimeLead();
+			for(int i=0; i<sat.getOrbitCore().getNumGroundTrackLeadPts(); i++)
+				ret.addPosition(sat.getOrbitCore().getGroundTrackLlaLeadPt(i),tconv.convertJD2String(tm[i]));
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return ret;
