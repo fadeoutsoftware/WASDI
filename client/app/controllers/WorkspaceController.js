@@ -38,6 +38,8 @@ var WorkspaceController = (function() {
         this.m_oGlobeService.initRotateGlobe('cesiumContainer3');
         this.m_oGlobeService.goHome();
 
+        this.GLOBE_WORKSPACE_ZOOM = 4000000;
+
         this.getTrackSatellite();
 
 
@@ -145,10 +147,31 @@ var WorkspaceController = (function() {
        // this.m_oGlobeService.goHome();
         //this.m_oGlobeService.startRotationGlobe(1);
 
-        if(utilsIsObjectNullOrUndefined(oWorkspace))
-            return false;
-        if(utilsIsStrNullOrEmpty(oWorkspace.workspaceId))
-            return false;
+        if(utilsIsObjectNullOrUndefined(oWorkspace)) return false;
+        if(utilsIsStrNullOrEmpty(oWorkspace.workspaceId)) return false;
+
+
+        if (utilsIsObjectNullOrUndefined(this.m_oWorkspaceSelected) == false) {
+
+            if (this.m_oWorkspaceSelected.workspaceId == oWorkspace.workspaceId) {
+
+                //DESELECT:
+                for (var i =0; i<this.m_aoProducts.length; i++) {
+                    this.m_oGlobeService.removeEntity(this.m_aoProducts[i].oRectangle)
+                }
+
+
+                this.m_oWorkspaceSelected = null;
+                this.m_bIsVisibleFiles = false;
+                this.m_bLoadingWSFiles = false;
+                this.m_bIsOpenInfo = false;
+
+                this.m_oGlobeService.flyHome();
+                this.m_oGlobeService.startRotationGlobe(1);
+
+                return;
+            }
+        }
 
         this.m_oWorkspaceSelected = oWorkspace;
 
@@ -197,18 +220,29 @@ var WorkspaceController = (function() {
     }
 
     WorkspaceController.prototype.createBoundingBoxInGlobe = function () {
+
         var oRectangle = null;
         var aArraySplit = [];
         var iArraySplitLength = 0;
         var iInvertedArraySplit = [];
+
+        var aoTotalArray = [];
+
+        // Check we have products
         if(utilsIsObjectNullOrUndefined(this.m_aoProducts) === true) return false;
+
         var iProductsLength = this.m_aoProducts.length;
+
+        // For each product
         for(var iIndexProduct = 0; iIndexProduct < iProductsLength; iIndexProduct++){
             iInvertedArraySplit = [];
             aArraySplit = [];
             // skip if there isn't the product bounding box
             if(utilsIsObjectNullOrUndefined(this.m_aoProducts[iIndexProduct].bbox) === true ) continue;
+
+            // Split bbox string
             aArraySplit = this.m_aoProducts[iIndexProduct].bbox.split(",");
+            aoTotalArray.push.apply(aoTotalArray,aArraySplit);
             iArraySplitLength = aArraySplit.length;
 
             if(iArraySplitLength !== 10) continue;
@@ -224,9 +258,28 @@ var WorkspaceController = (function() {
             oRectangle = this.m_oGlobeService.addRectangleOnGlobeParamArray(iInvertedArraySplit);
             this.m_aoProducts[iIndexProduct].oRectangle = oRectangle;
             this.m_aoProducts[iIndexProduct].aBounds = iInvertedArraySplit;
-
         }
 
+
+        var aoBounds = [];
+        for (var iIndex = 0; iIndex < aoTotalArray.length - 1; iIndex = iIndex + 2) {
+            aoBounds.push(new Cesium.Cartographic.fromDegrees(aoTotalArray[iIndex + 1], aoTotalArray[iIndex ]));
+        }
+
+        var oWSRectangle = Cesium.Rectangle.fromCartographicArray(aoBounds);
+        var oWSCenter = Cesium.Rectangle.center(oWSRectangle);
+
+        //oGlobe.camera.setView({
+        this.m_oGlobeService.getGlobe().camera.flyTo({
+            destination : Cesium.Cartesian3.fromRadians(oWSCenter.longitude, oWSCenter.latitude, this.GLOBE_WORKSPACE_ZOOM),
+            orientation: {
+                heading: 0.0,
+                pitch: -Cesium.Math.PI_OVER_TWO,
+                roll: 0.0
+            }
+        });
+
+        this.m_oGlobeService.stopRotationGlobe();
 
     };
 

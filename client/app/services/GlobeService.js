@@ -11,7 +11,8 @@ service('GlobeService', ['$http',  'ConstantsService','SatelliteService', functi
     this.m_aoLayers=null;
     this.LONG_HOME = 0;
     this.LAT_HOME = 0;
-    this.HEIGHT_HOME = 15000000//zoom
+    this.HEIGHT_HOME = 45000000; //zoom
+    this.GLOBE_LAYER_ZOOM = 2000000;
     this.oGlobeOptions =
     {
         imageryProvider : Cesium.createOpenStreetMapImageryProvider(),
@@ -70,6 +71,7 @@ service('GlobeService', ['$http',  'ConstantsService','SatelliteService', functi
     {
         return this.m_oWasdiGlobe;
     }
+
     this.getGlobeLayers = function()
     {
         return this.m_aoLayers;
@@ -86,9 +88,23 @@ service('GlobeService', ['$http',  'ConstantsService','SatelliteService', functi
         console.log(pickPositionCartographic.latitude * (180/Math.PI));
         return [pickPositionCartographic.latitude * (180/Math.PI),pickPositionCartographic.longitude * (180/Math.PI)];
     }
+
     this.goHome = function()
     {
         this.m_oWasdiGlobe.camera.setView({
+            destination : Cesium.Cartesian3.fromDegrees(this.LONG_HOME, this.LAT_HOME, this.HEIGHT_HOME),
+            orientation: {
+                heading : 0.0,
+                pitch : -Cesium.Math.PI_OVER_TWO,
+                roll : 0.0
+            }
+        });
+    };
+
+
+    this.flyHome = function()
+    {
+        this.m_oWasdiGlobe.camera.flyTo({
             destination : Cesium.Cartesian3.fromDegrees(this.LONG_HOME, this.LAT_HOME, this.HEIGHT_HOME),
             orientation: {
                 heading : 0.0,
@@ -121,17 +137,18 @@ service('GlobeService', ['$http',  'ConstantsService','SatelliteService', functi
     this.zoomOnLayerBoundingBox = function(oArray)
     {
         var oBoundingBox = oArray;
-
-        if(utilsIsObjectNullOrUndefined(oBoundingBox) == true)
-            return false;
+        if(utilsIsObjectNullOrUndefined(oBoundingBox) == true) return false;
 
         var oGlobe = this.m_oWasdiGlobe;
-        if(utilsIsObjectNullOrUndefined(oGlobe) == true)
-            return false;
+        if(utilsIsObjectNullOrUndefined(oGlobe) == true) return false;
+
+
+        var oRectangle =  Cesium.Rectangle.fromDegrees( oArray[0], oArray[1] , oArray[2],oArray[3]);
+        var oCenter = Cesium.Rectangle.center(oRectangle);
 
         /* set view of globe*/
         oGlobe.camera.setView({
-            destination:  Cesium.Rectangle.fromDegrees( oArray[0], oArray[1] , oArray[2],oArray[3]),
+            destination: Cesium.Cartesian3.fromRadians(oCenter.longitude, oCenter.latitude, this.GLOBE_LAYER_ZOOM),
             orientation: {
                 heading: 0.0,
                 pitch: -Cesium.Math.PI_OVER_TWO,
@@ -183,30 +200,11 @@ service('GlobeService', ['$http',  'ConstantsService','SatelliteService', functi
      */
     this.addRectangleOnGlobeParamArray = function (aArray)
     {
-        if(utilsIsObjectNullOrUndefined(aArray) == true)
-            return false;
 
-        var oGlobe = this.m_oWasdiGlobe;
-        if(utilsIsObjectNullOrUndefined(oGlobe) == true)
-            return false;
+        if(utilsIsObjectNullOrUndefined(aArray) == true) return false;
+        if(utilsIsObjectNullOrUndefined(this.m_oWasdiGlobe) == true) return false;
 
-        //var stripeMaterial = new Cesium.StripeMaterialProperty({
-        //    evenColor : Cesium.Color.WHITE.withAlpha(0.5),
-        //    oddColor : Cesium.Color.BLUE.withAlpha(0.5),
-        //    repeat : 5.0
-        //});
-
-        //var oShape = Cesium.Rectangle.fromCartographicArray(aoArray);
-        //var oShape = Cesium.Cartesian3.fromDegreesArray(aoArray);
-        //var aoNewArray = [];
-        //for(var iIndex = 0; iIndex < aoArray.length; iIndex++)
-        //{
-        //    aoNewArray.push(aoArray[iIndex].longitude);
-        //    aoNewArray.push(aoArray[iIndex].latitude);
-        //
-        //}
-
-        var oRectangle = oGlobe.entities.add({
+        var oRectangle = this.m_oWasdiGlobe.entities.add({
             polygon : {
                 hierarchy : new Cesium.PolygonHierarchy(Cesium.Cartesian3.fromDegreesArray(aArray)),
                 outline : true,
@@ -417,43 +415,43 @@ service('GlobeService', ['$http',  'ConstantsService','SatelliteService', functi
         var aoOutList = [
             {
                 name : "SENTINEL1A",
-                icon : "assets/icons/globeIcons/SAT1.png",
+                icon : "assets/icons/sat_01@2x.png",
                 label : "S1A",
                 description : "ESA Sentinel 1 A "
             },
             {
                 name : "SENTINEL1B",
-                icon : "assets/icons/globeIcons/SAT1.png",
+                icon : "assets/icons/sat_01@2x.png",
                 label : "S1B",
                 description : "ESA Sentinel 1 B"
             },
             {
                 name : "COSMOSKY1",
-                icon : "assets/icons/globeIcons/SAT2.png",
+                icon : "assets/icons/sat_02@2x.png",
                 label : "CSK1",
                 description : "ASI COSMO-SKYMED 1"
             },
             {
                 name : "COSMOSKY2",
-                icon : "assets/icons/globeIcons/SAT2.png",
+                icon : "assets/icons/sat_02@2x.png",
                 label : "CSK2",
                 description : "ASI COSMO-SKYMED 2"
             },
             {
                 name : "COSMOSKY3",
-                icon : "assets/icons/globeIcons/SAT2.png",
+                icon : "assets/icons/sat_02@2x.png",
                 label : "CSK3",
                 description : "ASI COSMO-SKYMED 3"
             },
             {
                 name : "COSMOSKY4",
-                icon : "assets/icons/globeIcons/SAT2.png",
+                icon : "assets/icons/sat_02@2x.png",
                 label : "CSK4",
                 description : "ASI COSMO-SKYMED 4"
             },
             {
                 name : "LANDSAT8",
-                icon : "assets/icons/globeIcons/SAT3.png",
+                icon : "assets/icons/globeIcons/sat_03@2x.png",
                 label : "LS8",
                 description : "NASA LANDSAT 8"
             }
