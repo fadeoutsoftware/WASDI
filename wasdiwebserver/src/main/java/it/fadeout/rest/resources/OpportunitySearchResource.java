@@ -239,9 +239,12 @@ public class OpportunitySearchResource {
 		//set nfs properties download
 		String userHome = System.getProperty( "user.home");
 		String Nfs = System.getProperty( "nfs.data.download" );
-		if (Nfs == null) System.setProperty( "nfs.data.download", userHome + "/nfs/download");
+		if (Nfs == null) {
+			System.setProperty( "nfs.data.download", userHome + "/nfs/download");
+			System.out.println("init wasdi: nfs dir " + System.getProperty( "nfs.data.download" ));
+		}
 
-		System.out.println("init wasdi: nfs dir " + System.getProperty( "nfs.data.download" ));
+		
 
 		SatelliteOrbitResultViewModel ret = new SatelliteOrbitResultViewModel();
 		String satres=InstanceFinder.s_sOrbitSatsMap.get(satname);
