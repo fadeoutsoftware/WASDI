@@ -69,12 +69,15 @@
                                    ng-class="{'input-mydisable': !m_oController.m_bIsEditModelWorkspaceNameActive,'input-myenable': m_oController.m_bIsEditModelWorkspaceNameActive}"
                                    ng-keyup="m_oController.UpdateWorkspace($event)"  ng-click="m_oController.editModelWorkspaceNameSetTrue()">
                                 <!--ng-disabled = "(!m_oController.m_bIsEditModelWorkspaceNameActive)"-->
+
                             <button class="btn btn-edit" type="button" ng-click="m_oController.UpdateWorkspace();"
                                     title="{{'ROOT_TOOLTIP_EDIT_WORKSPACE_NAME'|translate}}">
                                 <i class="fa fa-pencil fa-lg" aria-hidden="true"
-                                   ng-class="{'btn-edit-mode-on':m_oController.m_bIsEditModelWorkspaceNameActive,'btn-edit-mode-off':!m_oController.m_bIsEditModelWorkspaceNameActive}"></i>
+                                ng-class="{'btn-edit-mode-on':m_oController.m_bIsEditModelWorkspaceNameActive,'btn-edit-mode-off':!m_oController.m_bIsEditModelWorkspaceNameActive}"></i>
 
                             </button>
+                            <b class="cursor" id="cursor">H</b>
+
                         </div>
 
                     </div>
@@ -221,7 +224,8 @@
 
                         <tr ng-repeat="oProcess in m_oController.m_aoProcessesRunning  | orderBy:'-' track by $index ">
                             <td>
-                                <invaderfixed ng-show="oProcess.status === 'RUNNING' || oProcess.status === 'CREATED'"></invaderfixed>
+                                <!--<invaderfixed ng-show="oProcess.status === 'RUNNING' || oProcess.status === 'CREATED'"></invaderfixed>-->
+                                <smallinvaderfixed ng-show="oProcess.status === 'RUNNING' || oProcess.status === 'CREATED'"></smallinvaderfixed>
                                 <span class="label label-warning" ng-show="oProcess.status === 'DONE'">Log</span>
                                 <span class="label label-danger" ng-show="oProcess.status === 'STOPPED'">Stopped</span>
                                 <span class="label label-danger" ng-show="oProcess.status === 'ERROR'" >Error</span>

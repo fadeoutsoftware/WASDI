@@ -269,3 +269,46 @@
   }
 
 }
+
+
+.name-workspace {opacity: 1;}
+
+.name-workspace:hover {
+  opacity:0.9;
+  transform:scale(1.05);
+}
+
+.name-workspace:hover,
+.name-workspace {
+  transition: all 0.2s ease;
+}
+
+.name-workspace .form-group {display:flex;}
+.name-workspace .cursor {display:none;}
+.name-workspace:hover .cursor {display:block;}
+
+.cursor {
+  font-size:1em;
+  margin:4px;
+  width:20px;
+  color: transparent;
+  animation: 1s blink step-end infinite;
+  position: relative;
+  //margin-left:-300px;
+  /*   height:30px; */
+  margin-left: -60px;
+  width:15px;;
+  //@media screen and (max-width: $screen-lg) {         margin-left:-100px;        }
+  //@media screen and (max-width: 1024px) {         margin-left:-10px;        }
+
+}
+@keyframes blink {
+  from,
+  to {
+    background-color: rgba(0, 0, 0, .0);
+    background-color: transparent;
+  }
+  50% {
+    background-color: white;
+  }
+}
