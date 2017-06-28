@@ -220,6 +220,7 @@ public class LauncherMain {
 	                IngestFileParameter oIngestFileParameter = (IngestFileParameter) SerializationUtils.deserializeXMLToObject(sParameter);
 	                Ingest(oIngestFileParameter, ConfigReader.getPropValue("DOWNLOAD_ROOT_PATH"));
 	            }
+	            break;
                 case DOWNLOAD: {
 
                     // Deserialize Parameters
@@ -525,7 +526,7 @@ public class LauncherMain {
             updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 90);
             
             //add product to db
-            AddProductToDbAndSendToRabbit(oVM, oFilePath.getAbsolutePath(), oParameter.getWorkspace(), oParameter.getExchange(), LauncherOperations.DOWNLOAD.name(), oBB);
+            AddProductToDbAndSendToRabbit(oVM, oFilePath.getAbsolutePath(), oParameter.getWorkspace(), oParameter.getExchange(), LauncherOperations.INGEST.name(), oBB);
             if (oProcessWorkspace != null) oProcessWorkspace.setStatus(ProcessStatus.DONE.name());                
 			
 			return oDstFile.getAbsolutePath();
@@ -1156,25 +1157,25 @@ public class LauncherMain {
      */
     private void AddProductToDbAndSendToRabbit(ProductViewModel oVM, String sFileName, String sWorkspace, String sExchange, String sOperation, String sBBox) throws Exception
     {
-        s_oLogger.debug("LauncherMain.ConvertProductToViewModelAndSendToRabbit: File Name = " + sFileName);
+        s_oLogger.debug("LauncherMain.AddProductToDbAndSendToRabbit: File Name = " + sFileName);
 
         // Get The product view Model            
         if (oVM == null) {
             ReadProduct oReadProduct = new ReadProduct();
-            s_oLogger.debug("LauncherMain.ConvertProductToViewModelAndSendToRabbit: call read product");
+            s_oLogger.debug("LauncherMain.AddProductToDbAndSendToRabbit: call read product");
             File oProductFile = new File(sFileName);
             oVM = oReadProduct.getProductViewModel(new File(sFileName));
             oVM.setMetadata(oReadProduct.getProductMetadataViewModel(oProductFile));
 
             if (oVM.getBandsGroups() == null) {
-            	s_oLogger.debug("LauncherMain.ConvertProductToViewModelAndSendToRabbit: Band Groups is NULL");
+            	s_oLogger.debug("LauncherMain.AddProductToDbAndSendToRabbit: Band Groups is NULL");
             } else if (oVM.getBandsGroups().getBands() == null) {
-            	s_oLogger.debug("LauncherMain.ConvertProductToViewModelAndSendToRabbit: bands is NULL");
+            	s_oLogger.debug("LauncherMain.AddProductToDbAndSendToRabbit: bands is NULL");
             } else {
-                s_oLogger.debug("LauncherMain.ConvertProductToViewModelAndSendToRabbit: bands " + oVM.getBandsGroups().getBands().size());
+                s_oLogger.debug("LauncherMain.AddProductToDbAndSendToRabbit: bands " + oVM.getBandsGroups().getBands().size());
             }
 
-            s_oLogger.debug("LauncherMain.ConvertProductToViewModelAndSendToRabbit: done read product");
+            s_oLogger.debug("LauncherMain.AddProductToDbAndSendToRabbit: done read product");
         }
         
         
@@ -1187,7 +1188,7 @@ public class LauncherMain {
         boolean bAddProductToWS = true;
         
         if (oCheck == null) {
-        	s_oLogger.debug("Insert in db");
+        	s_oLogger.debug("AddProductToDbAndSendToRabbit: Insert in db");
         	
             // Save it in the register
             DownloadedFile oAlreadyDownloaded = new DownloadedFile();
@@ -1225,7 +1226,7 @@ public class LauncherMain {
         
         s_oLogger.debug("OK DONE");
 
-        s_oLogger.debug("LauncherMain.ConvertProductToViewModelAndSendToRabbit: Image downloaded. Send Rabbit Message Exchange = " + sExchange);
+        s_oLogger.debug("LauncherMain.AddProductToDbAndSendToRabbit: Image added. Send Rabbit Message Exchange = " + sExchange);
         
         //P.Campanella 12/05/2017: Metadata are saved in the DB but sent back to the client with a dedicated API. So here metadata are nulled
         oVM.setMetadata(null);
