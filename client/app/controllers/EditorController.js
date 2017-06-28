@@ -34,6 +34,8 @@ var EditorController = (function () {
             processorBar:true
         }
 
+        this.GLOBE_DEFAULT_ZOOM = 2000000;
+
         /*Last file donloaded*/
         this.m_oLastDownloadedProduct = null;
         //Pixel Info
@@ -280,8 +282,9 @@ var EditorController = (function () {
             }
             this.m_aoLayersList = [];
             this.m_oMapService.removeLayersFromMap();
-            this.m_oGlobeService.clearGlobe();
-            this.m_oGlobeService.initGlobe('cesiumContainer2');
+            //this.m_oGlobeService.clearGlobe();
+            //this.m_oGlobeService.initGlobe('cesiumContainer2');
+            this.m_oGlobeService.removeAllEntities();
 
             // so add the new bands
             // and the bounding box in cesium
@@ -296,8 +299,7 @@ var EditorController = (function () {
 
             //this.m_oGlobeService.addRectangleOnGlobeBoundingBox(aBounds);
 
-            if(aBounds.length  > 1)
-                this.m_oGlobeService.addRectangleOnGlobeParamArray(aBounds);
+            if(aBounds.length  > 1) this.m_oGlobeService.addRectangleOnGlobeParamArray(aBounds);
             this.addLayerMap2D(oLayer.layerId);
 
             this.m_aoLayersList.push(oLayer);
@@ -1202,47 +1204,36 @@ var EditorController = (function () {
     }
 
     EditorController.prototype.zoomOnLayer3DGlobe = function (oLayerId) {
-        if (utilsIsObjectNullOrUndefined(oLayerId))
-            return false;
-        if (utilsIsObjectNullOrUndefined(this.m_aoLayersList))
-            return false;
+        if (utilsIsObjectNullOrUndefined(oLayerId)) return false;
+        if (utilsIsObjectNullOrUndefined(this.m_aoLayersList)) return false;
 
         var iNumberOfLayers = this.m_aoLayersList.length;
 
         for (var iIndexLayer = 0; iIndexLayer < iNumberOfLayers; iIndexLayer++) {
-            if (this.m_aoLayersList[iIndexLayer].layerId == oLayerId)
-                break;
+            if (this.m_aoLayersList[iIndexLayer].layerId == oLayerId) break;
         }
 
-        if (!(iIndexLayer < iNumberOfLayers))//there isn't layer in layerList
-            return false;
+        //there isn't layer in layerList
+        if (!(iIndexLayer < iNumberOfLayers)) return false;
 
-        if (utilsIsStrNullOrEmpty(this.m_aoLayersList[iIndexLayer].boundingBox))
-            return false;
+        if (utilsIsStrNullOrEmpty(this.m_aoLayersList[iIndexLayer].boundingBox)) return false;
+
         var aBoundingBox = JSON.parse("[" + this.m_aoLayersList[iIndexLayer].boundingBox + "]");
 
-        if (utilsIsObjectNullOrUndefined(aBoundingBox) == true)
-            return false;
-
-        //var aaBounds = [];
-        //for (var iIndex = 0; iIndex < aBoundingBox.length - 1; iIndex = iIndex + 2) {
-        //    aaBounds.push([aBoundingBox[iIndex + 1], aBoundingBox[iIndex]]);
-        //
-        //}
-
-        /* set view of globe*/
-        //this.m_oGlobeService.zoomOnLayerParamArray(aBoundingBox);
+        if (utilsIsObjectNullOrUndefined(aBoundingBox) == true) return false;
 
         var aaBounds = [];
         for (var iIndex = 0; iIndex < aBoundingBox.length - 1; iIndex = iIndex + 2) {
             aaBounds.push(new Cesium.Cartographic.fromDegrees(aBoundingBox[iIndex + 1], aBoundingBox[iIndex ]));
-
         }
 
         var oGlobe = this.m_oGlobeService.getGlobe();
         var zoom = Cesium.Rectangle.fromCartographicArray(aaBounds);
-        oGlobe.camera.setView({
-            destination: zoom,
+        var oCenter = Cesium.Rectangle.center(zoom);
+
+        //oGlobe.camera.setView({
+        oGlobe.camera.flyTo({
+            destination : Cesium.Cartesian3.fromRadians(oCenter.longitude, oCenter.latitude, this.GLOBE_DEFAULT_ZOOM),
             orientation: {
                 heading: 0.0,
                 pitch: -Cesium.Math.PI_OVER_TWO,
@@ -1250,55 +1241,27 @@ var EditorController = (function () {
             }
         });
 
-
-
-        //oGlobe.camera.setView({
-        //    destination:  Cesium.Rectangle.fromDegrees( oBoundingBox.minx , oBoundingBox.miny , oBoundingBox.maxx,oBoundingBox.maxy),
-        //    orientation: {
-        //        heading: 0.0,
-        //        pitch: -Cesium.Math.PI_OVER_TWO,
-        //        roll: 0.0
-        //    }
-        //
-        //});
-
-        //oBoundingBox = [[107.144188,77.391487],[90.454704,78.801079],[93.399925,80.717804],[112.501625,79.084023],[107.144188, 77.391487]];
-        //var oCartographic =  [new Cesium.Cartographic(77.391487,107.144188),new Cesium.Cartographic(78.801079,90.454704),new Cesium.Cartographic(80.717804,93.399925),new Cesium.Cartographic(79.084023,112.501625),new Cesium.Cartographic(77.391487,107.144188)]
-        //var prova = Cesium.Rectangle.fromCartographicArray(oCartographic);
-        //oGlobe.camera.setView({
-        //    destination: prova,
-        //    orientation: {
-        //        heading: 0.0,
-        //        pitch: -Cesium.Math.PI_OVER_TWO,
-        //        roll: 0.0
-        //    }
-        //
-        //});
         return true;
     }
 
     EditorController.prototype.zoomOnLayer2DMap = function (oLayerId) {
-        if (utilsIsObjectNullOrUndefined(oLayerId))
-            return false;
-        if (utilsIsObjectNullOrUndefined(this.m_aoLayersList))
-            return false
+        if (utilsIsObjectNullOrUndefined(oLayerId)) return false;
+        if (utilsIsObjectNullOrUndefined(this.m_aoLayersList)) return false
+
         var iNumberOfLayers = this.m_aoLayersList.length;
 
         for (var iIndexLayer = 0; iIndexLayer < iNumberOfLayers; iIndexLayer++) {
-            if (this.m_aoLayersList[iIndexLayer].layerId == oLayerId)
-                break;
+            if (this.m_aoLayersList[iIndexLayer].layerId == oLayerId) break;
         }
 
-        if (!(iIndexLayer < iNumberOfLayers))//there isn't layer in layerList
-            return false;
+        //there isn't layer in layerList
+        if (!(iIndexLayer < iNumberOfLayers)) return false;
 
-        if (utilsIsStrNullOrEmpty(this.m_aoLayersList[iIndexLayer].geoserverBoundingBox))
-            return false;
+        if (utilsIsStrNullOrEmpty(this.m_aoLayersList[iIndexLayer].geoserverBoundingBox)) return false;
 
         var oBoundingBox = JSON.parse(this.m_aoLayersList[iIndexLayer].geoserverBoundingBox);
 
-        if (utilsIsObjectNullOrUndefined(oBoundingBox) == true)
-            return false;
+        if (utilsIsObjectNullOrUndefined(oBoundingBox) == true) return false;
 
         //var aaBounds = [];
         //for( var iIndex = 0; iIndex < aBoundingBox.length-1 ;iIndex = iIndex + 2 )
