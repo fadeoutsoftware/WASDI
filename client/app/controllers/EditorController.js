@@ -220,14 +220,17 @@ var EditorController = (function () {
      */
     EditorController.prototype.receivedPublishBandMessage = function (oMessage) {
         var oLayer = oMessage.payload;
-        var sLabelText = "";
+
          if (utilsIsObjectNullOrUndefined(oLayer)) {
             console.log("Error LayerID is empty...");
             return false;
         }
-        oLayer.isVisibleInMap = true;
-        //add layer in list
 
+        var sLabelText = "";
+
+        oLayer.isVisibleInMap = true;
+
+        //add layer in list
 
         // check if the background is grey or there is a map
         if (this.m_bIsVisibleMapOfLeaflet == true) {
@@ -236,33 +239,41 @@ var EditorController = (function () {
             this.addLayerMap3D(oLayer.layerId);
             this.m_aoLayersList.push(oLayer);
 
-            if (!utilsIsStrNullOrEmpty(oLayer.geoserverBoundingBox))//if there isn't boundiBox is impossible do zoom
+            //if there isn't Bounding Box is impossible do zoom
+            if (!utilsIsStrNullOrEmpty(oLayer.geoserverBoundingBox))
             {
                 var oBounds = JSON.parse(oLayer.geoserverBoundingBox);
+
                 this.m_oGlobeService.zoomOnLayerBoundingBox([oBounds.minx, oBounds.miny, oBounds.maxx, oBounds.maxy]);
 
-                //this.m_oMapService.zoomOnBounds([oBounds.minx,oBounds.miny,oBounds.maxx,oBounds.maxy]);
-                /*Zoom on layer*/
+                //Zoom on layer
                 var oMap = this.m_oMapService.getMap();
                 var corner1 = L.latLng(oBounds.maxy, oBounds.maxx),
                     corner2 = L.latLng(oBounds.miny, oBounds.minx),
                     bounds = L.latLngBounds(corner1, corner2);
+
                 oMap.fitBounds(bounds);
             }
-
         }
         else {
-            //if the backgrounds is grey
-            // remove all others bands in tree - map
+            //if the backgrounds is grey remove all others bands in tree - map
             var iNumberOfLayers = this.m_aoLayersList.length;
+
+            // CLOSE ALL THE NODES
             for (var iIndexLayer = 0; iIndexLayer < iNumberOfLayers; iIndexLayer++) {
+
                 //check if there is layerId if there isn't the layer was added by get capabilities
                 if (!utilsIsObjectNullOrUndefined(this.m_aoLayersList[iIndexLayer].layerId)) {
-                    var oNode = $('#jstree').jstree(true).get_node(this.m_aoLayersList[iIndexLayer].layerId);
+
+                    var sNodeId = this.m_aoLayersList[iIndexLayer].productName + "_" + this.m_aoLayersList[iIndexLayer].bandName;
+
+                    var oNode = $('#jstree').jstree(true).get_node(sNodeId);
 
                     if (utilsIsObjectNullOrUndefined(oNode.original)==false) {
+
                         oNode.original.bPubblish = false;
-                        $('#jstree').jstree(true).set_icon(this.m_aoLayersList[iIndexLayer].layerId, 'assets/icons/uncheck_20x20.png');
+                        $('#jstree').jstree(true).set_icon(sNodeId, 'assets/icons/uncheck_20x20.png');
+
                     }
                     else {
                         console.log("Editor Controller: ERROR oNode.original not defined");
@@ -270,14 +281,12 @@ var EditorController = (function () {
 
                 }
             }
+
             this.m_aoLayersList = [];
             this.m_oMapService.removeLayersFromMap();
-            //this.m_oGlobeService.clearGlobe();
-            //this.m_oGlobeService.initGlobe('cesiumContainer2');
             this.m_oGlobeService.removeAllEntities();
 
-            // so add the new bands
-            // and the bounding box in cesium
+            // so add the new bands and the bounding box in cesium
             var aBounds = JSON.parse("[" + oLayer.boundingBox + "]");
 
             for (var iIndex = 0; iIndex < aBounds.length - 1; iIndex = iIndex + 2) {
@@ -287,32 +296,31 @@ var EditorController = (function () {
                 aBounds[iIndex + 1] = iSwap;
             }
 
-            //this.m_oGlobeService.addRectangleOnGlobeBoundingBox(aBounds);
-
             if(aBounds.length  > 1) this.m_oGlobeService.addRectangleOnGlobeParamArray(aBounds);
-            this.addLayerMap2D(oLayer.layerId);
 
+            this.addLayerMap2D(oLayer.layerId);
             this.m_aoLayersList.push(oLayer);
             this.zoomOnLayer2DMap(oLayer.layerId);
-            this.zoomOnLayer3DGlobe(oLayer.layerId);//TODO RESOLVE PROBLeM WITH 3D zoom
+            this.zoomOnLayer3DGlobe(oLayer.layerId);
         }
 
 
+        var sNodeID = oLayer.productName + "_" + oLayer.bandName;
+
         /*CHANGE TREE */
-        var oNode = $('#jstree').jstree(true).get_node(oLayer.layerId);
+        var oNode = $('#jstree').jstree(true).get_node(sNodeID); //oLayer.layerId
 
         if (utilsIsObjectNullOrUndefined(oNode.original) == false) {
+
             oNode.original.bPubblish = true;
+            oNode.original.band.layerId = oLayer.layerId;
 
-            $('#jstree').jstree(true).set_icon(oLayer.layerId, 'assets/icons/check_20x20.png');
-            $("#jstree").jstree().enable_node(oLayer.layerId);
-            sLabelText = $("#jstree").jstree().get_text(oLayer.layerId);
-            sLabelText = sLabelText.split("<i>");
+            $('#jstree').jstree(true).set_icon(sNodeID, 'assets/icons/check_20x20.png');
+            $("#jstree").jstree().enable_node(sNodeID);
+            sLabelText = $("#jstree").jstree().get_text(sNodeID);
+            sLabelText = sLabelText.replace("band-not-published-label", "band-published-label");
 
-            //if there is <i> sLabelText.length === 2
-            sLabelText = (sLabelText.length === 2) ? sLabelText[1].split("</i>") : sLabelText ;
-            sLabelText = sLabelText[0];
-            utilsJstreeUpdateLabelNode(oLayer.layerId,sLabelText);
+            utilsJstreeUpdateLabelNode(sNodeID,sLabelText);
         }
         else {
             console.log ("EditorController: ERROR NODE " + oLayer.layerId + " does not exists in the Tree!!")
@@ -550,6 +558,7 @@ var EditorController = (function () {
     // oIdBandNodeInTree is the node id in tree, in some case when the page is reload
     // we need know the node id for change the icon
     EditorController.prototype.openBandImage = function (oBand, oIdBandNodeInTree) {
+
         var oController = this;
         var sFileName = this.m_aoProducts[oBand.productIndex].fileName;
         var bAlreadyPublished = oBand.published;
@@ -596,71 +605,55 @@ var EditorController = (function () {
 
     //REMOVE BAND
     EditorController.prototype.removeBandImage = function (oBand) {
+
         if (utilsIsObjectNullOrUndefined(oBand) == true) {
             console.log("Error in removeBandImage")
             return false;
         }
 
-        var oController = this;
-        if(utilsIsObjectNullOrUndefined(oBand.name) === false)
-            var sLayerId = "wasdi:" + oBand.productName + "_" + oBand.name;// band removed
-        else
-            var sLayerId = "wasdi:" + oBand.layerId;  // + "_" + oBand.bandName;//remove bands after a product was deleted
-
-        var oMap2D = oController.m_oMapService.getMap();
-        var oGlobeLayers = oController.m_oGlobeService.getGlobeLayers();
+        var sLayerId = "wasdi:" + oBand.layerId;
+        var oMap2D = this.m_oMapService.getMap();
+        var aoGlobeLayers = this.m_oGlobeService.getGlobeLayers();
 
 
         //remove layer in 2D map
         oMap2D.eachLayer(function (layer) {
             if (utilsIsStrNullOrEmpty(sLayerId) == false && layer.options.layers == sLayerId) {
-                //oController.m_oMapService.removeLayerFromMap(layer)
                 oMap2D.removeLayer(layer);
-
             }
         });
 
         //remove layer in 3D globe
         var oLayer = null;
-        var bCondition = true;
-        var iIndexLayer = 0;
-
 
         if (this.m_bIsVisibleMapOfLeaflet == true) {
-            while (bCondition) {
-                oLayer = oGlobeLayers.get(iIndexLayer);
 
-                if (utilsIsStrNullOrEmpty(sLayerId) == false && utilsIsObjectNullOrUndefined(oLayer) == false
-                    && oLayer.imageryProvider.layers == sLayerId) {
-                    bCondition = false;
-                    oLayer = oGlobeLayers.remove(oLayer);
+            for (var iIndexLayer=0; iIndexLayer<aoGlobeLayers.length; iIndexLayer++) {
+                oLayer = aoGlobeLayers.get(iIndexLayer);
+
+                if (utilsIsStrNullOrEmpty(sLayerId) == false && utilsIsObjectNullOrUndefined(oLayer) == false && oLayer.imageryProvider.layers == sLayerId) {
+                    oLayer = aoGlobeLayers.remove(oLayer);
+                    break;
                 }
-                iIndexLayer++;
             }
-
         }
         else {
-            this.m_oGlobeService.clearGlobe();
-            this.m_oGlobeService.initGlobe('cesiumContainer2');
+            this.m_oGlobeService.removeAllEntities();
+            this.m_oGlobeService.flyHome();
         }
 
         //Remove layer from layers list
-        var iLenghtLayersList;
-        if (utilsIsObjectNullOrUndefined(oController.m_aoLayersList))
-            iLenghtLayersList = 0;
-        else
-            iLenghtLayersList = oController.m_aoLayersList.length;
+        var iLenghtLayersList = 0;
+        if (utilsIsObjectNullOrUndefined(this.m_aoLayersList) == false) iLenghtLayersList = this.m_aoLayersList.length;
 
-        for (var iIndex = 0; iIndex < iLenghtLayersList; ) {
-            if (utilsIsStrNullOrEmpty(sLayerId) == false && utilsIsSubstring(sLayerId, oController.m_aoLayersList[iIndex].layerId)) {
-                oController.m_aoLayersList.splice(iIndex,1);
-                iLenghtLayersList--;
+        if (utilsIsStrNullOrEmpty(sLayerId) == false) {
+            for (var iIndex = 0; iIndex < iLenghtLayersList; ) {
+                if (utilsIsSubstring(sLayerId, this.m_aoLayersList[iIndex].layerId)) {
+                    this.m_aoLayersList.splice(iIndex,1);
+                    iLenghtLayersList--;
+                }
+                else iIndex++;
             }
-            else
-            {
-                iIndex++;
-            }
-
         }
     }
 
@@ -1250,17 +1243,6 @@ var EditorController = (function () {
                     if (!utilsIsStrNullOrEmpty(this.m_aoLayersList[iIndexLayer].geoserverBoundingBox))//it dosen't do the zoom if there isn't bounding box
                     {
                         var oBounds = JSON.parse(this.m_aoLayersList[iIndexLayer].geoserverBoundingBox);
-                        //var aBounds = JSON.parse("["+this.m_aoLayersList[iIndexLayer].boundingBox+"]");
-                        //
-                        //for(var iIndex = 0; iIndex < aBounds.length-1 ;iIndex=iIndex+2)
-                        //{
-                        //    var iSwap;
-                        //    iSwap = aBounds[iIndex];
-                        //    aBounds[iIndex] = aBounds[iIndex+1];
-                        //    aBounds[iIndex+1] = iSwap;
-                        //}
-
-                        //this.m_oGlobeService.zoomOnLayerParamArray(aBounds);
 
                         this.m_oGlobeService.zoomOnLayerBoundingBox([oBounds.minx, oBounds.miny, oBounds.maxx, oBounds.maxy]);
                     }
@@ -1293,19 +1275,6 @@ var EditorController = (function () {
 
                 if (!utilsIsObjectNullOrUndefined(this.m_aoLayersList[0].boundingBox)) //if there is .boundingBox property, the layer was downloaded by copernicus server
                 {
-
-                    //var oBounds = JSON.parse(this.m_aoLayersList[0].boundingBox);
-                    //this.m_oGlobeService.addRectangleOnGlobe([oBounds.minx,oBounds.miny,oBounds.maxx,oBounds.maxy]);
-                    //this.m_oGlobeService.zoomOnLayer([oBounds.minx,oBounds.miny,oBounds.maxx,oBounds.maxy]);
-
-
-                    //var oBoundingBox = [[1.870018854971,1.35073626116],[1.57873240871,1.37533828267],[1.63013621236,1.40879144478],[1.963523770089,1.38027658707],[1.870018854971, 1.35073626116]];
-                    //var aoCartographic =  [new Cesium.Cartographic(107.144188,77.391487),new Cesium.Cartographic(90.454704,78.801079),new Cesium.Cartographic(93.399925,80.717804),new Cesium.Cartographic(112.501625,79.084023),new Cesium.Cartographic(107.144188,77.391487)]
-
-                    //var aoCartographic =  [new Cesium.Cartographic(1.35073626116,1.870018854971),new Cesium.Cartographic(1.37533828267,1.57873240871),new Cesium.Cartographic(1.40879144478,1.63013621236),new Cesium.Cartographic(1.38027658707,1.963523770089),new Cesium.Cartographic( 1.35073626116,1.870018854971)]
-                    //var aoCartographic =  [new Cesium.Cartographic.fromDegrees(107.144188,77.391487),new Cesium.Cartographic.fromDegrees(90.454704,78.801079),new Cesium.Cartographic.fromDegrees(93.399925,80.717804),new Cesium.Cartographic.fromDegrees(112.501625,79.084023),new Cesium.Cartographic.fromDegrees(107.144188,77.391487)]
-
-                    //var aoCartographic =  [new Cesium.Cartographic.fromDegrees(13.643888,43.863701),new Cesium.Cartographic.fromDegrees(10.388990,44.271336),new Cesium.Cartographic.fromDegrees(10.717404,45.770004),new Cesium.Cartographic.fromDegrees(14.057657,45.362556),new Cesium.Cartographic.fromDegrees(13.643888,43.863701)]
                     var aBounds = JSON.parse("[" + this.m_aoLayersList[0].boundingBox + "]");
                     if(aBounds.length > 1)
                     {
@@ -1317,7 +1286,6 @@ var EditorController = (function () {
                             aBounds[iIndex + 1] = iSwap;
                         }
                         this.m_oGlobeService.addRectangleOnGlobeParamArray(aBounds);
-                        //this.m_oGlobeService.zoomOnLayerParamArray(aBounds);//TODO RESOLVE PROBELM WITH 3D zoom
                     }
                 }
 
