@@ -13,6 +13,8 @@ service('GlobeService', ['$http',  'ConstantsService','SatelliteService', functi
     this.LAT_HOME = 0;
     this.HEIGHT_HOME = 20000000; //zoom
     this.GLOBE_LAYER_ZOOM = 2000000;
+    this.GLOBE_WORKSPACE_ZOOM = 4000000;
+
     this.m_aoLayers = [];
     this.oGlobeOptions =
     {
@@ -70,6 +72,12 @@ service('GlobeService', ['$http',  'ConstantsService','SatelliteService', functi
     this.getGlobe = function()
     {
         return this.m_oWasdiGlobe;
+    }
+
+    // get globe
+    this.getWorkspaceZoom = function()
+    {
+        return this.GLOBE_WORKSPACE_ZOOM;
     }
 
     this.getGlobeLayers = function()
@@ -425,6 +433,73 @@ service('GlobeService', ['$http',  'ConstantsService','SatelliteService', functi
         var oGlobe = this.m_oWasdiGlobe;
         oGlobe.entities.remove(oEntity);
         return true;
+    };
+
+
+    /**
+     * Fly to Workspace Global Bounding Box
+     * @param m_aoProducts
+     * @returns {boolean}
+     */
+    this.flyToWorkspaceBoundingBox = function (m_aoProducts) {
+
+        var oRectangle = null;
+        var aArraySplit = [];
+        var iArraySplitLength = 0;
+        var iInvertedArraySplit = [];
+
+        var aoTotalArray = [];
+
+        // Check we have products
+        if(utilsIsObjectNullOrUndefined(m_aoProducts) === true) return false;
+
+        var iProductsLength = m_aoProducts.length;
+
+        // For each product
+        for(var iIndexProduct = 0; iIndexProduct < iProductsLength; iIndexProduct++){
+            iInvertedArraySplit = [];
+            aArraySplit = [];
+            // skip if there isn't the product bounding box
+            if(utilsIsObjectNullOrUndefined(m_aoProducts[iIndexProduct].bbox) === true ) continue;
+
+            // Split bbox string
+            aArraySplit = m_aoProducts[iIndexProduct].bbox.split(",");
+            aoTotalArray.push.apply(aoTotalArray,aArraySplit);
+            iArraySplitLength = aArraySplit.length;
+
+            if(iArraySplitLength !== 10) continue;
+
+            for(var iIndex = 0; iIndex < iArraySplitLength-1; iIndex = iIndex + 2){
+                iInvertedArraySplit.push(aArraySplit[iIndex+1]);
+                iInvertedArraySplit.push(aArraySplit[iIndex]);
+            }
+
+            oRectangle = this.addRectangleOnGlobeParamArray(iInvertedArraySplit);
+            m_aoProducts[iIndexProduct].oRectangle = oRectangle;
+            m_aoProducts[iIndexProduct].aBounds = iInvertedArraySplit;
+        }
+
+
+        var aoBounds = [];
+        for (var iIndex = 0; iIndex < aoTotalArray.length - 1; iIndex = iIndex + 2) {
+            aoBounds.push(new Cesium.Cartographic.fromDegrees(aoTotalArray[iIndex + 1], aoTotalArray[iIndex ]));
+        }
+
+        var oWSRectangle = Cesium.Rectangle.fromCartographicArray(aoBounds);
+        var oWSCenter = Cesium.Rectangle.center(oWSRectangle);
+
+        //oGlobe.camera.setView({
+        this.getGlobe().camera.flyTo({
+            destination : Cesium.Cartesian3.fromRadians(oWSCenter.longitude, oWSCenter.latitude, this.GLOBE_WORKSPACE_ZOOM),
+            orientation: {
+                heading: 0.0,
+                pitch: -Cesium.Math.PI_OVER_TWO,
+                roll: 0.0
+            }
+        });
+
+        this.m_oGlobeService.stopRotationGlobe();
+
     };
 
 

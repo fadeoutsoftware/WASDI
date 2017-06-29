@@ -51,6 +51,13 @@ var EditorController = (function () {
         this.m_oActiveWorkspace = this.m_oConstantsService.getActiveWorkspace();
         this.m_oUser = this.m_oConstantsService.getUser();
 
+        // Initialize the map
+        oMapService.initMapEditor('wasdiMap');
+        oMapService.removeLayersFromMap();
+
+        this.m_oGlobeService.initGlobe('cesiumContainer2');
+
+
         //if there isn't workspace
         if (utilsIsObjectNullOrUndefined(this.m_oActiveWorkspace) && utilsIsStrNullOrEmpty(this.m_oActiveWorkspace)) {
             //if this.m_oState.params.workSpace in empty null or undefined create new workspace
@@ -79,12 +86,6 @@ var EditorController = (function () {
         this.m_oRabbitStompService.setMessageCallback(this.receivedRabbitMessage);
         this.m_oRabbitStompService.setActiveController(this);
 
-        // Initialize the map
-
-        oMapService.initMapEditor('wasdiMap');
-        oMapService.removeLayersFromMap();
-
-        this.m_oGlobeService.initGlobe('cesiumContainer2');
     }
 
     /********************METHODS********************/
@@ -145,11 +146,24 @@ var EditorController = (function () {
         if (oMessage.messageResult == "KO") {
 
             var sOperation = "null";
-            if (utilsIsStrNullOrEmpty(oMessage.messageCode) === false  )
-                sOperation = oMessage.messageCode;
+            if (utilsIsStrNullOrEmpty(oMessage.messageCode) === false  ) sOperation = oMessage.messageCode;
+
             var oDialog = utilsVexDialogAlertTop('There was an error in the ' + sOperation + ' Process');
             utilsVexCloseDialogAfterFewSeconds(3000, oDialog);
             this.m_oProcessesLaunchedService.loadProcessesFromServer(this.m_oActiveWorkspace);
+
+            if (oMessage.messageCode =="PUBLISHBAND") {
+                if (utilsIsObjectNullOrUndefined(oMessage.payload)==false) {
+                    if (utilsIsObjectNullOrUndefined(oMessage.payload.productName) == false && utilsIsObjectNullOrUndefined(oMessage.payload.bandName) == false) {
+                        var sNodeName = oMessage.payload.productName + "_" + oMessage.payload.bandName;
+
+                        $("#jstree").jstree().enable_node(sNodeName);
+                        $('#jstree').jstree(true).set_icon(sNodeName,'assets/icons/uncheck_20x20.png');
+
+                    }
+                }
+            }
+
             return;
         }
 
@@ -639,7 +653,7 @@ var EditorController = (function () {
         }
         else {
             this.m_oGlobeService.removeAllEntities();
-            this.m_oGlobeService.flyHome();
+            this.m_oGlobeService.flyToWorkspaceBoundingBox(this.m_aoProducts);
         }
 
         //Remove layer from layers list
@@ -995,6 +1009,7 @@ var EditorController = (function () {
                     // i need to make the tree after the products are loaded
                     oController.m_oTree = oController.generateTree();
                     oController.m_bIsLoadingTree = false;
+                    oController.m_oGlobeService.flyToWorkspaceBoundingBox(oController.m_aoProducts);
 
                 }
             }
@@ -1203,7 +1218,13 @@ var EditorController = (function () {
 
         if (utilsIsStrNullOrEmpty(this.m_aoLayersList[iIndexLayer].geoserverBoundingBox)) return false;
 
-        var oBoundingBox = JSON.parse(this.m_aoLayersList[iIndexLayer].geoserverBoundingBox);
+        var oBoundingBox = null;
+        try {
+            oBoundingBox = JSON.parse(this.m_aoLayersList[iIndexLayer].geoserverBoundingBox);
+        } catch (e) {
+            console.log(e);
+        }
+
 
         if (utilsIsObjectNullOrUndefined(oBoundingBox) == true) return false;
 

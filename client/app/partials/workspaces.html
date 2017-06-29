@@ -26,7 +26,7 @@
                 </thead>
                 <tr ng-repeat="oWSListItem in m_oController.getWorkspaceInfoList() | filter:searchWorkSpace"  ng-class="m_oController.isSelectedRowInWorkspaceTable(oWSListItem)">
                     <td  ng-click="m_oController.loadProductList(oWSListItem)" ng-dblclick="m_oController.openWorkspace(oWSListItem.workspaceId)">{{$index + 1}}</td>
-                    <td  ng-click="m_oController.loadProductList(oWSListItem)" ng-dblclick="m_oController.openWorkspace(oWSListItem.workspaceId)"> {{oWSListItem.workspaceName}}</td>
+                    <td  ng-click="m_oController.loadProductList(oWSListItem)" ng-dblclick="m_oController.openWorkspace(oWSListItem.workspaceId)"> {{oWSListItem.workspaceName}} <i class="fa fa-cogs fa-lg" style="margin-left: 10px;" aria-hidden="true" ng-show="m_oController.showCursorOnWSRow(oWSListItem.workspaceId)" ng-click="m_oController.openWorkspace(oWSListItem.workspaceId)" ></i> <!--b class="cursor" style="margin-left: 0px" ng-show="m_oController.showCursorOnWSRow(oWSListItem.workspaceId)" id="cursor">H</b--></td>
                     <td  ng-click="m_oController.loadProductList(oWSListItem)" ng-dblclick="m_oController.openWorkspace(oWSListItem.workspaceId)">{{oWSListItem.ownerUserId}}</td>
 
                     <!--<td class="over-color cell-edit-button" ng-click="m_oController.openWorkspace(oWSListItem.workspaceId)"  data-toggle="tooltip" data-placement="top" title="{{'WORKSPACES_TOOLTIP_EDITOR'|translate}}">-->

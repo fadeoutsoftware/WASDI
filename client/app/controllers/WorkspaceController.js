@@ -38,8 +38,6 @@ var WorkspaceController = (function() {
         this.m_oGlobeService.initRotateGlobe('cesiumContainer3');
         this.m_oGlobeService.goHome();
 
-        this.GLOBE_WORKSPACE_ZOOM = 4000000;
-
         this.getTrackSatellite();
 
 
@@ -108,7 +106,7 @@ var WorkspaceController = (function() {
             }
         }).error(function (data,status) {
             //alert('error');
-            utilsVexDialogAlertTop('Error OpenWorkspace. WorkSpaceController.js');
+            utilsVexDialogAlertTop('Error Opening the Workspace');
         });
     }
 
@@ -219,6 +217,13 @@ var WorkspaceController = (function() {
         return true;
     }
 
+    WorkspaceController.prototype.showCursorOnWSRow = function (sWorkspaceId) {
+        if (utilsIsObjectNullOrUndefined(this.m_oWorkspaceSelected)) return false;
+        if (utilsIsObjectNullOrUndefined(this.m_oWorkspaceSelected.workspaceId))  return false;
+        if (this.m_oWorkspaceSelected.workspaceId  == sWorkspaceId) return true;
+        else return false;
+    }
+
     WorkspaceController.prototype.createBoundingBoxInGlobe = function () {
 
         var oRectangle = null;
@@ -250,9 +255,6 @@ var WorkspaceController = (function() {
             for(var iIndex = 0; iIndex < iArraySplitLength-1; iIndex = iIndex + 2){
                 iInvertedArraySplit.push(aArraySplit[iIndex+1]);
                 iInvertedArraySplit.push(aArraySplit[iIndex]);
-                //     = aArraySplit[iIndex];
-                // aArraySplit[iIndex] = aArraySplit[iIndex+1];
-                // aArraySplit[iIndex+1] = temp;
             }
 
             oRectangle = this.m_oGlobeService.addRectangleOnGlobeParamArray(iInvertedArraySplit);
@@ -271,7 +273,7 @@ var WorkspaceController = (function() {
 
         //oGlobe.camera.setView({
         this.m_oGlobeService.getGlobe().camera.flyTo({
-            destination : Cesium.Cartesian3.fromRadians(oWSCenter.longitude, oWSCenter.latitude, this.GLOBE_WORKSPACE_ZOOM),
+            destination : Cesium.Cartesian3.fromRadians(oWSCenter.longitude, oWSCenter.latitude, this.m_oGlobeService.getWorkspaceZoom()),
             orientation: {
                 heading: 0.0,
                 pitch: -Cesium.Math.PI_OVER_TWO,
@@ -440,7 +442,16 @@ var WorkspaceController = (function() {
 
                                 oController.m_oFakePosition = oData.lastPositions[iFakeIndex];
 
-                                oController.m_oUfoPointer = oController.m_oGlobeService.drawPointWithImage(utilsProjectConvertCurrentPositionFromServerInCesiumDegrees(oController.m_oFakePosition),"assets/icons/alien.svg","U.F.O.","?");
+                                var aoUfoPosition = utilsProjectConvertCurrentPositionFromServerInCesiumDegrees(oController.m_oFakePosition);
+                                aoUfoPosition[2] = aoUfoPosition[2]*2;
+                                oController.m_oUfoPointer = oController.m_oGlobeService.drawPointWithImage(aoUfoPosition,"assets/icons/alien.svg","U.F.O.","?");
+
+                                iFakeIndex =  Math.floor(Math.random() * (oData.lastPositions.length));
+                                var aoMoonPosition = utilsProjectConvertCurrentPositionFromServerInCesiumDegrees(oData.lastPositions[iFakeIndex]);
+                                aoMoonPosition[2] = 384400000;
+
+                                oController.m_oGlobeService.drawPointWithImage(aoMoonPosition,"assets/icons/sat_death.svg","Moon","-");
+
                             }
                         }
                     }
