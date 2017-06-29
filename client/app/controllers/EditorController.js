@@ -1263,9 +1263,14 @@ var EditorController = (function () {
 
                     if (!utilsIsStrNullOrEmpty(this.m_aoLayersList[iIndexLayer].geoserverBoundingBox))//it dosen't do the zoom if there isn't bounding box
                     {
-                        var oBounds = JSON.parse(this.m_aoLayersList[iIndexLayer].geoserverBoundingBox);
+                        try {
+                            var oBounds = JSON.parse(this.m_aoLayersList[iIndexLayer].geoserverBoundingBox);
 
-                        this.m_oGlobeService.zoomOnLayerBoundingBox([oBounds.minx, oBounds.miny, oBounds.maxx, oBounds.maxy]);
+                            this.m_oGlobeService.zoomOnLayerBoundingBox([oBounds.minx, oBounds.miny, oBounds.maxx, oBounds.maxy]);
+                        }
+                        catch (e) {
+                            console.log(e);
+                        }
                     }
                 }
                 else {
