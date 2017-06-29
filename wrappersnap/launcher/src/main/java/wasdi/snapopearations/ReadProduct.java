@@ -169,9 +169,9 @@ public class ReadProduct {
 				
 //				Integer epsgCode = CRS.lookupEpsgCode(crs, true);
 //				String epsg = "EPSG:" + (epsgCode==null ? 4326 : epsgCode);
-//				return String.format("{\"miny\":%f,\"minx\":%f,\"crs\":\"%s\",\"maxy\":%f,\"maxx\":%f}", minY, minX, epsg, maxY, maxX);
+//				return String.format("{\"miny\":%f,\"minx\":%f,\"crs\":\"%s\",\"maxy\":%f,\"maxx\":%f", minY, minX, epsg, maxY, maxX);
 				
-				return String.format("%f,%f,%f,%f,%f,%f,%f,%f,%f,%f}", minY, minX, minY, maxX, maxY, maxX, maxY, minX, minY, minX);
+				return String.format("%f,%f,%f,%f,%f,%f,%f,%f,%f,%f", minY, minX, minY, maxX, maxY, maxX, maxY, minX, minY, minX);
 			}
 			
 		} catch (Exception e) {
