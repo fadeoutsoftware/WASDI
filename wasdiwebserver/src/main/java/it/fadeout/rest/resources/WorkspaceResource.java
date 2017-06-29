@@ -19,6 +19,7 @@ import javax.ws.rs.core.Response;
 import org.apache.commons.io.FileUtils;
 
 import it.fadeout.Wasdi;
+import wasdi.shared.business.DownloadedFile;
 import wasdi.shared.business.ProductWorkspace;
 import wasdi.shared.business.PublishedBand;
 import wasdi.shared.business.User;
@@ -312,8 +313,10 @@ public class WorkspaceResource {
 								}
 
 								try {
+									
+									DownloadedFile oDownloadedFile = oDownloadedFilesRepository.GetDownloadedFile(oProductWorkspace.getProductName());
 									//delete published band on data base
-									oPublishRepository.DeleteByProductNameLayerId(oProductWorkspace.getProductName(), oPublishedBand.getLayerId());
+									oPublishRepository.DeleteByProductNameLayerId(oDownloadedFile.getProductViewModel().getName(), oPublishedBand.getLayerId());
 								} catch(Exception oEx) {
 									System.out.println("WorkspaceResource.DeleteWorkspace: error deleting published band on data base " + oEx.toString());
 								}

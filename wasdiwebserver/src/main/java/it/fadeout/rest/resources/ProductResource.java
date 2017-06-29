@@ -194,7 +194,7 @@ public class ProductResource {
 									BandViewModel oBand = aoBands.get(iBands);
 									
 									if (oBand != null) {
-										PublishedBand oPublishBand = oPublishedBandsRepository.GetPublishedBand(geoPVM.getFileName(), oBand.getName());
+										PublishedBand oPublishBand = oPublishedBandsRepository.GetPublishedBand(geoPVM.getName(), oBand.getName());
 
 										if (oPublishBand != null) {
 											oBand.setPublished(true);
@@ -304,6 +304,7 @@ public class ProductResource {
 
 			ProductWorkspaceRepository oProductWorkspaceRepository = new ProductWorkspaceRepository();
 			DownloadedFilesRepository oDownloadedFilesRepository = new DownloadedFilesRepository();
+			DownloadedFile oDownloadedFile = oDownloadedFilesRepository.GetDownloadedFile(sProductName);
 
 			String sUserId = oUser.getUserId();
 
@@ -400,7 +401,7 @@ public class ProductResource {
 
 						try {
 							//delete published band on data base
-							oPublishedBandsRepository.DeleteByProductNameLayerId(sProductName, publishedBand.getLayerId());
+							oPublishedBandsRepository.DeleteByProductNameLayerId(oDownloadedFile.getProductViewModel().getName(), publishedBand.getLayerId());
 						} catch(Exception oEx) {
 							System.out.println("ProductResource.DeleteProduct: error deleting published band on data base " + oEx.toString());
 						}
