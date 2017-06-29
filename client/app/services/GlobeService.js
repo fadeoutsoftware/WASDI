@@ -11,8 +11,9 @@ service('GlobeService', ['$http',  'ConstantsService','SatelliteService', functi
     this.m_aoLayers=null;
     this.LONG_HOME = 0;
     this.LAT_HOME = 0;
-    this.HEIGHT_HOME = 45000000; //zoom
+    this.HEIGHT_HOME = 20000000; //zoom
     this.GLOBE_LAYER_ZOOM = 2000000;
+    this.m_aoLayers = [];
     this.oGlobeOptions =
     {
         imageryProvider : Cesium.createOpenStreetMapImageryProvider(),
@@ -90,6 +91,11 @@ service('GlobeService', ['$http',  'ConstantsService','SatelliteService', functi
 
     this.goHome = function()
     {
+        this.goHome(this.HEIGHT_HOME);
+    }
+
+    this.goHome = function()
+    {
         this.m_oWasdiGlobe.camera.setView({
             destination : Cesium.Cartesian3.fromDegrees(this.LONG_HOME, this.LAT_HOME, this.HEIGHT_HOME),
             orientation: {
@@ -100,6 +106,17 @@ service('GlobeService', ['$http',  'ConstantsService','SatelliteService', functi
         });
     };
 
+    this.flyTo = function(long, lat, height)
+    {
+        this.m_oWasdiGlobe.camera.flyTo({
+            destination : Cesium.Cartesian3.fromDegrees(long, lat, height),
+            orientation: {
+                heading : 0.0,
+                pitch : -Cesium.Math.PI_OVER_TWO,
+                roll : 0.0
+            }
+        });
+    }
 
     this.flyHome = function()
     {
