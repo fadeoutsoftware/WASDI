@@ -42,8 +42,8 @@ public class Publisher {
     private boolean LaunchImagePyramidCreation(String sInputFile, String sPathName) {
 
         String sTargetDir = sPathName;
-        if (!sTargetDir.endsWith("/"))
-            sTargetDir += "/";
+        if (!sTargetDir.endsWith("/")) sTargetDir += "/";
+        
         Path oTargetPath = Paths.get(sTargetDir);
         if (!Files.exists(oTargetPath))
         {
@@ -57,9 +57,7 @@ public class Publisher {
         try {
             //fix permission
             Utils.fixUpPermissions(oTargetPath);
-            
-            s_oLogger.debug("Publisher.LaunchImagePyramidCreation: CIAO");
-                        
+                            
             String sCmd = String.format("%s -targetDir %s %s", GDAL_Retile_Command, sTargetDir, sInputFile);
 
             s_oLogger.debug("Publisher.LaunchImagePyramidCreation: Command: " + sCmd);
@@ -108,12 +106,8 @@ public class Publisher {
 
                 s_oLogger.debug("Publisher.LaunchImagePyramidCreation:  Exit Value " + iValue);
 
-                s_oLogger.debug("Publisher.LaunchImagePyramidCreation:  End ");
-
-
             } catch (IOException e) {
                 s_oLogger.debug("Publisher.LaunchImagePyramidCreation: Error generating pyramid image: " + e.getMessage());
-
                 return  false;
             } catch (InterruptedException e) {
                 e.printStackTrace();
@@ -123,7 +117,6 @@ public class Publisher {
             }
             finally {
                 if (oProcess != null) {
-                    s_oLogger.debug("Publisher.LaunchImagePyramidCreation: finally destroy Process");
                     oProcess.destroy();
                 }
             }
@@ -144,8 +137,7 @@ public class Publisher {
         String sPath = oFile.getParent();
 
         // Create Pyramid
-        if (!LaunchImagePyramidCreation(sFileName, sPath))
-            return null;
+        if (!LaunchImagePyramidCreation(sFileName, sPath)) return null;
 
         s_oLogger.debug("Publisher.PublishImagePyramidOnGeoServer: Publish Image Pyramid With Geoserver Manager");
 
