@@ -82,6 +82,9 @@ public class GeoServerManager {
     public boolean publishImagePyramid(String storeName, String style, String epsg, File baseDir)
             throws FileNotFoundException {
     	
+    	RESTLayer layer = gsReader.getLayer(workspace, storeName);
+    	if (layer != null) removeLayer(storeName);
+    	
     	//layer encoder
     	final GSLayerEncoder layerEnc = new GSLayerEncoder();
     	if (style==null || style.isEmpty()) style="raster";
@@ -114,7 +117,10 @@ public class GeoServerManager {
     public boolean publishStandardGeoTiff(String storeName, File geotiffFile, String epsg, String style)
             throws FileNotFoundException {
 
-        if (style == null || style.isEmpty()) style = "raster";
+    	RESTLayer layer = gsReader.getLayer(workspace, storeName);
+    	if (layer != null) removeLayer(storeName);
+
+    	if (style == null || style.isEmpty()) style = "raster";
         
         boolean res = gsPublisher.publishExternalGeoTIFF(workspace,storeName,geotiffFile, storeName, epsg, GSResourceEncoder.ProjectionPolicy.FORCE_DECLARED,style);
         
