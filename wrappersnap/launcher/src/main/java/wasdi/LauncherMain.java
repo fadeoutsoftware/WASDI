@@ -309,8 +309,14 @@ public class LauncherMain {
     }
 
 	public void ExecuteGraph(GraphParameter params) throws Exception {
-		WasdiGraph graphManager = new WasdiGraph(params, s_oSendToRabbit);
-		graphManager.execute();
+		try {
+			WasdiGraph graphManager = new WasdiGraph(params, s_oSendToRabbit);
+			graphManager.execute();			
+		}
+		catch (Exception oEx) {
+			s_oLogger.error("ExecuteGraph Exception", oEx);
+			if (s_oSendToRabbit!=null) s_oSendToRabbit.SendRabbitMessage(false, LauncherOperations.GRAPH.name(), params.getWorkspace(),null,params.getExchange());			
+		}
 	}
     
     /**
@@ -694,8 +700,11 @@ public class LauncherMain {
         String sLayerId = "";
         ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
         ProcessWorkspace oProcessWorkspace = oProcessWorkspaceRepository.GetProcessByProcessObjId(oParameter.getProcessObjId());
+        
+        // Create the View Model
+        PublishBandResultViewModel oErrorPaylod = new PublishBandResultViewModel();
+        
         try {
-
 
             if (oProcessWorkspace != null) {
                 //get process pid
@@ -711,6 +720,13 @@ public class LauncherMain {
 
             // Keep the product name
             String sProductName = oDownloadedFile.getProductViewModel().getName();
+            
+            oErrorPaylod.setBandName(oParameter.getBandName());
+            oErrorPaylod.setProductName(sProductName);
+            oErrorPaylod.setLayerId(sLayerId);
+            oErrorPaylod.setBoundingBox("");
+            oErrorPaylod.setGeoserverBoundingBox("");
+
 
             // Generate full path name
             String sPath = ConfigReader.getPropValue("DOWNLOAD_ROOT_PATH");
@@ -726,7 +742,7 @@ public class LauncherMain {
                 s_oLogger.debug( "LauncherMain.PublishBandImage: file is null or empty");
 
                 // Send KO to Rabbit
-                if (s_oSendToRabbit!=null) s_oSendToRabbit.SendRabbitMessage(false, LauncherOperations.PUBLISHBAND.name(),oParameter.getWorkspace(),null,oParameter.getExchange());
+                if (s_oSendToRabbit!=null) s_oSendToRabbit.SendRabbitMessage(false, LauncherOperations.PUBLISHBAND.name(),oParameter.getWorkspace(),oErrorPaylod,oParameter.getExchange());
 
                 return  sLayerId;
             }
@@ -915,7 +931,7 @@ public class LauncherMain {
 
             oEx.printStackTrace();
 
-            boolean bRet = s_oSendToRabbit!=null && s_oSendToRabbit.SendRabbitMessage(false,LauncherOperations.PUBLISHBAND.name(),oParameter.getWorkspace(),null,oParameter.getExchange());
+            boolean bRet = s_oSendToRabbit!=null && s_oSendToRabbit.SendRabbitMessage(false,LauncherOperations.PUBLISHBAND.name(),oParameter.getWorkspace(),oErrorPaylod,oParameter.getExchange());
 
             if (bRet == false) {
                 s_oLogger.error("LauncherMain.PublishBandImage:  Error sending exception Rabbit Message");

@@ -19,6 +19,7 @@ import org.esa.snap.core.gpf.graph.GraphProcessor;
 import org.esa.snap.core.gpf.graph.Node;
 
 import com.bc.ceres.binding.dom.DomElement;
+import com.bc.ceres.binding.dom.XppDomElement;
 import com.fasterxml.jackson.core.JsonProcessingException;
 
 import sun.management.VMManagement;
@@ -81,7 +82,8 @@ public class WasdiGraph {
 		
 			//set the input and output files to the graph snap object
 			Node nodeReader = graph.getNode("Read");
-			Node nodeWriter = graph.getNode("Write");		
+			Node nodeWriter = graph.getNode("Write");
+			
 			if (nodeReader==null || nodeWriter==null) {
 				logger.error("WasdiGraph.execute: Reader node and Wroter node are mandatory!!");
 				throw new Exception("Reader node and Wroter node are mandatory");
@@ -92,7 +94,7 @@ public class WasdiGraph {
 				throw new Exception("Error setting input/output file");
 			}
 			
-			// P.Campanella 16/06/2017: Still not tested, should add real file size to the Process Log
+			// P.Campanella 16/06/2017: should add real file size to the Process Log
             //set file size     
             LauncherMain.SetFileSizeToProcess(inputFile, process);
 			
@@ -279,10 +281,19 @@ public class WasdiGraph {
 		DomElement el = node.getConfiguration();
 		DomElement[] children = el.getChildren(childName);
 		if (children==null || children.length!=1) {
-			logger.error("WasdiGraph.setNodeFileValue: Cannot find child " + childName + " in node " + node.getId());
-			return false;
+			
+			XppDomElement oFileElement = new XppDomElement("file");
+			oFileElement.setValue(value);
+			el.addChild(oFileElement);
+			
+			logger.debug("WasdiGraph.setNodeFileValue: Added child " + childName + " in node " + node.getId());
+			return true;
 		}
-		children[0].setValue(value);
+		else {
+			children[0].setValue(value);
+		}
+		
+		
 		return true;
 	}
 	
