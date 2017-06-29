@@ -475,9 +475,7 @@ public class LauncherMain {
         ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
         ProcessWorkspace oProcessWorkspace = oProcessWorkspaceRepository.GetProcessByProcessObjId(oParameter.getProcessObjId());
 	
-		try {
-	        s_oLogger.debug("LauncherMain.Ingest: Download Start");
-	
+		try {	
 	        if (oProcessWorkspace != null) {
 	            //get file size
 	            long lFileSizeByte = oFilePath.length(); 
@@ -494,11 +492,11 @@ public class LauncherMain {
 	
 			File oRootPath = new File(sDownloadPath);
 			File oDstDir = new File(new File(oRootPath, oParameter.getUserId()), oParameter.getWorkspace());
+			
 			if (!oDstDir.isDirectory() || !oDstDir.canWrite()) {
 				System.out.println("LauncherMain.Ingest: ERROR: unable to access destination directory " + oDstDir.getAbsolutePath());
 				return "";
 			}
-			
 			
 	        // Product view Model
 	        ReadProduct oReadProduct = new ReadProduct();
@@ -707,9 +705,12 @@ public class LauncherMain {
 
             // Read File Name
             String sFile = oParameter.getFileName();
+            
+            DownloadedFilesRepository oDownloadedFilesRepository = new DownloadedFilesRepository();
+            DownloadedFile oDownloadedFile = oDownloadedFilesRepository.GetDownloadedFile(sFile);
 
             // Keep the product name
-            String sProductName = sFile;
+            String sProductName = oDownloadedFile.getProductViewModel().getName();
 
             // Generate full path name
             String sPath = ConfigReader.getPropValue("DOWNLOAD_ROOT_PATH");
@@ -745,8 +746,8 @@ public class LauncherMain {
             sLayerId +=  "_" + oParameter.getBandName();
 
             // Is already published?
-            PublishedBandsRepository oPublishedBandsRepository = new PublishedBandsRepository();
-            PublishedBand oAlreadyPublished = oPublishedBandsRepository.GetPublishedBand(oParameter.getFileName(),oParameter.getBandName());
+            PublishedBandsRepository oPublishedBandsRepository = new PublishedBandsRepository();            
+            PublishedBand oAlreadyPublished = oPublishedBandsRepository.GetPublishedBand(sProductName,oParameter.getBandName());
 
 
             updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 10);
@@ -796,7 +797,7 @@ public class LauncherMain {
 				sOutputFilePath = new WriteProduct(oProcessWorkspaceRepository, oProcessWorkspace).WriteGeoTiff(oGeotiffProduct, sPath, sLayerId);
 				oOutputFile = new File(sOutputFilePath);
 				s_oLogger.debug( "LauncherMain.PublishBandImage:  Geotiff File Created (EPSG=" + sEPSG + "): " + sOutputFilePath);
-				
+			
             } else {
             	
             	s_oLogger.debug( "LauncherMain.PublishBandImage:  Managing NON S2 Product");
@@ -823,7 +824,7 @@ public class LauncherMain {
     			    s_oLogger.debug( "LauncherMain.PublishBandImage:  Debug on. Jump GeoTiff Generate");
     			}
             }
-
+			
             updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 50);
             
             s_oLogger.debug( "LauncherMain.PublishBandImage:  Moving Band Image...");
@@ -867,8 +868,7 @@ public class LauncherMain {
             s_oLogger.debug("LauncherMain.PublishBandImage: Get Image Bounding Box");
 
             //get bounding box from data base
-            DownloadedFilesRepository oDownloadedFilesRepository = new DownloadedFilesRepository();
-            String sBBox = oDownloadedFilesRepository.GetDownloadedFile(oParameter.getFileName()).getBoundingBox();
+            String sBBox = oDownloadedFile.getBoundingBox();
 
             String sGeoserverBBox = manager.getLayerBBox(sLayerId);//GeoserverUtils.GetBoundingBox(sLayerId, "json");
             		
