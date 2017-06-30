@@ -7,6 +7,6 @@ angular.module('wasdi.SpaceInvaderFixedSmallVersionDirective', [])
         "use strict";
         return{
             restrict:"E",
-            templateUrl:"directives/space_invaders_fixed_small_version/SpaceInvadersFixedSmallVersionView.html"
+            templateUrl:"directives/space_invaders/SpaceInvadersView.html"
         };
     });

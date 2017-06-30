@@ -448,7 +448,8 @@ var WorkspaceController = (function() {
 
                                 iFakeIndex =  Math.floor(Math.random() * (oData.lastPositions.length));
                                 var aoMoonPosition = utilsProjectConvertCurrentPositionFromServerInCesiumDegrees(oData.lastPositions[iFakeIndex]);
-                                aoMoonPosition[2] = 384400000;
+                                //aoMoonPosition[2] = 384400000;
+                                aoMoonPosition[2] = 3844000;
 
                                 oController.m_oGlobeService.drawPointWithImage(aoMoonPosition,"assets/icons/sat_death.svg","Moon","-");
 

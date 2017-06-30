@@ -13,11 +13,13 @@
 
 //directive css
 @import "../directives/tree_directive/tree";
-@import "../directives/space_invaders/space_invaders";
-@import "../directives/space_invaders_fixed/space_invaders_fixed";
+//$color_space: $wasdi-white;
+//@import "../directives/space_invaders/space_invaders";
+//@import "../directives/space_invaders_fixed/space_invaders_fixed";
 @import "../directives/multiselect/multiselect";
-@import "../directives/space_invaders_fixed_small_version/space_invaders_fixed_small_version";
+//@import "../directives/space_invaders_fixed_small_version/space_invaders_fixed_small_version";
 @import "../directives/multiselect_dropdown_menu/multiselect_dropdown_menu";
+@import "../css/_dialog";
 
 //DIALOGS
 @import "../dialogs/orbit_info/orbit_info";
