@@ -505,7 +505,7 @@ var ImportController = (function() {
                     }
                     else
                     {
-                        utilsVexDialogAlertTop("The result is empty...");
+                        utilsVexDialogAlertTop("EMPTY RESULT...");
                         oController.m_bIsVisibleListOfLayers = false; //visualize filter list
                         oController.m_oResultsOfSearchService.setIsVisibleListOfProducts(oController.m_bIsVisibleListOfLayers );
                         oController.setPaginationVariables();
@@ -514,7 +514,7 @@ var ImportController = (function() {
                     }
                 }
             }, function errorCallback(response) {
-                utilsVexDialogAlertTop("Error in open search request...");
+                utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN OPEN SEARCH REQUEST...");
                 oController.m_bIsVisibleListOfLayers = false;//visualize filter list
                 oController.m_oResultsOfSearchService.setIsVisibleListOfProducts(oController.m_bIsVisibleListOfLayers );
             });
@@ -628,12 +628,12 @@ var ImportController = (function() {
 
         this.m_oFileBufferService.download(url,oWorkSpace.workspaceId,oLayer.bounds.toString(),oLayer.provider).success(function (data, status) {
             //TODO CHECK DATA-STATUS
-            var oDialog = utilsVexDialogAlertBottomRightCorner("Importing Image in WASDI...");
+            var oDialog = utilsVexDialogAlertBottomRightCorner("IMPORTING IMAGE IN WASDI...");
             utilsVexCloseDialogAfterFewSeconds("3000",oDialog);
 
 
         }).error(function (data,status) {
-            utilsVexDialogAlertTop('There was an error importing the Image in the workspace');
+            utilsVexDialogAlertTop('GURU MEDITATION<br>THERE WAS AN ERROR IMPORTING THE IMAGE IN THE WORKSPACE');
             oLayer.isDisabledToDoDownload = false;
         });
         return true;
@@ -1139,7 +1139,7 @@ var ImportController = (function() {
             var sOperation = "null";
             if (utilsIsStrNullOrEmpty(oMessage.messageCode) === false  )
                 sOperation = oMessage.messageCode;
-            var oDialog = utilsVexDialogAlertTop('There was an error in the ' + sOperation + ' Process');
+            var oDialog = utilsVexDialogAlertTop('GURU MEDITATION<br>THERE WAS AN ERROR IN THE ' + sOperation + ' PROCESS');
             utilsVexCloseDialogAfterFewSeconds(3000, oDialog);
             this.m_oProcessesLaunchedService.loadProcessesFromServer(this.m_oActiveWorkspace);
             return;
@@ -1173,7 +1173,7 @@ var ImportController = (function() {
 
     ImportController.prototype.receivedNewProductMessage = function (oMessage, oController) {
 
-        var oDialog = utilsVexDialogAlertBottomRightCorner('Product added to the ws');
+        var oDialog = utilsVexDialogAlertBottomRightCorner('PRODUCT ADDED TO THE WORKSPACE<br>READY');
         utilsVexCloseDialogAfterFewSeconds(3000, oDialog);
 
         //this.m_oProcessesLaunchedService.loadProcessesFromServer(this.m_oActiveWorkspace.workspaceId);
@@ -1199,7 +1199,7 @@ var ImportController = (function() {
                 }
             }
         }).error(function (data,status) {
-            utilsVexDialogAlertTop("Error in openWorkspace. ImportController.js ");
+            utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN OPEN WORKSPACE");
         });
     }
     ImportController.prototype.loadOpenSearchParamsByResultsOfSearchServices = function(oController)

@@ -51,7 +51,7 @@ var GetCapabilitiesController = (function() {
             oController.m_bIsVisibleLoadIcon = false;
         }).error(function (data,status)
         {
-            utilsVexDialogAlertTop("Error: the get capabilities doesn't work");
+            utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR: THE GET CAPABILITIES DOESN'T WORK");
             oController.m_bIsVisibleLoadIcon = false;
         });
 

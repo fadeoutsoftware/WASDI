@@ -85,7 +85,7 @@ var WorkspaceController = (function() {
             }
         }).error(function (data,status) {
             //alert('error');
-            utilsVexDialogAlertTop('Error in create WorkSpace. WorkspaceController.js');
+            utilsVexDialogAlertTop('GURU MEDITATION<br>ERROR IN CREATE WORKSPACE');
         });
     };
 
@@ -106,7 +106,7 @@ var WorkspaceController = (function() {
             }
         }).error(function (data,status) {
             //alert('error');
-            utilsVexDialogAlertTop('Error Opening the Workspace');
+            utilsVexDialogAlertTop('GURU MEDITATION<br>ERROR OPENING THE WORKSPACE');
         });
     }
 
@@ -131,7 +131,7 @@ var WorkspaceController = (function() {
                     }
                 }).error(function (data,status) {
                     //alert('error');
-                    utilsVexDialogAlertTop('Error in WorkspacesInfo. WorkspaceController.js');
+                    utilsVexDialogAlertTop('GURU MEDITATION<br>ERROR IN WORKSPACESINFO');
                 });
             }
         }
@@ -211,7 +211,7 @@ var WorkspaceController = (function() {
             oController.m_bLoadingWSFiles = false;
         }).error(function (data,status) {
             oController.m_bLoadingWSFiles = false;
-            utilsVexDialogAlertTop("Error loading Workspace products");
+            utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR LOADING WORKSPACE PRODUCTS");
         });
 
         return true;
@@ -375,7 +375,7 @@ var WorkspaceController = (function() {
 
         var oController = this;
 
-        utilsVexDialogConfirmWithCheckBox("Are you sure to delete the Workspace ?", function (value) {
+        utilsVexDialogConfirmWithCheckBox("DELETING WORKSPACE<br>ARE YOU SURE?", function (value) {
             var bDeleteFile = false;
             var bDeleteLayer = false;
             if (value) {
@@ -432,7 +432,7 @@ var WorkspaceController = (function() {
                         sDescription += "\n";
                         sDescription += oData.currentTime;
 
-                        var oActualPosition = oController.m_oGlobeService.drawPointWithImage(utilsProjectConvertCurrentPositionFromServerInCesiumDegrees(oData.currentPosition),oActualSat.icon,sDescription,oActualSat.label);
+                        var oActualPosition = oController.m_oGlobeService.drawPointWithImage(utilsProjectConvertCurrentPositionFromServerInCesiumDegrees(oData.currentPosition),oActualSat.icon,sDescription,oActualSat.label, 32, 32);
                         oController.m_aoSatellitePositions.push(oActualPosition);
 
                         if (oController.m_oFakePosition === null) {
@@ -443,13 +443,13 @@ var WorkspaceController = (function() {
                                 oController.m_oFakePosition = oData.lastPositions[iFakeIndex];
 
                                 var aoUfoPosition = utilsProjectConvertCurrentPositionFromServerInCesiumDegrees(oController.m_oFakePosition);
-                                aoUfoPosition[2] = aoUfoPosition[2]*2;
+                                aoUfoPosition[2] = aoUfoPosition[2]*4;
                                 oController.m_oUfoPointer = oController.m_oGlobeService.drawPointWithImage(aoUfoPosition,"assets/icons/alien.svg","U.F.O.","?");
 
                                 iFakeIndex =  Math.floor(Math.random() * (oData.lastPositions.length));
                                 var aoMoonPosition = utilsProjectConvertCurrentPositionFromServerInCesiumDegrees(oData.lastPositions[iFakeIndex]);
-                                //aoMoonPosition[2] = 384400000;
-                                aoMoonPosition[2] = 3844000;
+                                aoMoonPosition[2] = 384400000;
+                                //aoMoonPosition[2] = 3844000;
 
                                 oController.m_oGlobeService.drawPointWithImage(aoMoonPosition,"assets/icons/sat_death.svg","Moon","-");
 

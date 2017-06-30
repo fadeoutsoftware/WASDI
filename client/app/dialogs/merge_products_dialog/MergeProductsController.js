@@ -46,12 +46,12 @@ var MergeProductsController = (function() {
 
         var successCallback = function(data, status)
         {
-            utilsVexDialogAlertTop("Uploaded file");
+            utilsVexDialogAlertTop("FILE UPLOADED");
         };
 
         var errorCallback = function (data, status)
         {
-            utilsVexDialogAlertTop("Error in upload file");
+            utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN UPLOAD FILE");
         };
 
         var fd = new FormData();
@@ -71,7 +71,7 @@ var MergeProductsController = (function() {
         sApi="/catalog/assimilation";
         sUrl += sApi;
 
-        utilsVexDialogAlertTop("Getting started");
+        utilsVexDialogAlertTop("GURU MEDITATION<br>GETTING STARTED");
 
         //this.m_oHttp.get(sUrl,"responseType: 'arraybuffer'")
         this.m_oHttp({method: 'GET',url: sUrl, responseType: 'arraybuffer'})
@@ -97,7 +97,7 @@ var MergeProductsController = (function() {
                 }
             }).error(function (data,status)
         {
-            utilsVexDialogAlertTop("Error: assimilation doesn't work");
+            utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR: ASSIMILATION DOESN'T WORK");
         });
 
     }

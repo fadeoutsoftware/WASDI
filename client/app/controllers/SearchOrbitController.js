@@ -107,10 +107,10 @@ var SearchOrbitController = (function() {
             }
             else
             {
-                utilsVexDialogAlertTop("Error: impossible get configuration.");
+                utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR: IMPOSSIBLE GET CONFIGURATION.");
             }
         },function error(data, status, header, config) {
-            utilsVexDialogAlertTop("Error: impossible get configuration.");
+            utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR: IMPOSSIBLE GET CONFIGURATION.");
         });
 
         this.m_oMapService.initMapWithDrawSearch('orbitMap');
@@ -155,25 +155,25 @@ var SearchOrbitController = (function() {
         //if there isn't a selected area throw an error
         if(utilsIsObjectNullOrUndefined(oController.m_oGeoJSON))
         {
-            utilsVexDialogAlertTop("You should select an area");
+            utilsVexDialogAlertTop("SELECT AREA");
             return false;
         }
         //if there isn't a resolution throw an error
         if(utilsIsObjectNullOrUndefined(oController.m_oSelectedResolutionType) || oController.m_oSelectedResolutionType.length == 0)
         {
-            utilsVexDialogAlertTop("You should select a resolution");
+            utilsVexDialogAlertTop("SELECT RESOLUTION");
             return false;
         }
         //if there isn't a sensor type throw an error
         if(utilsIsObjectNullOrUndefined(oController.m_oSelectedSensorType) || oController.m_oSelectedSensorType.length == 0)
         {
-            utilsVexDialogAlertTop("You should select a sensor type");
+            utilsVexDialogAlertTop("SELECT SENSOR TYPE");
             return false;
         }
         //if there isn't a satellite throw an error
         if(utilsIsObjectNullOrUndefined(oController.m_oSelectedSatellite) || oController.m_oSelectedSatellite.length == 0)
         {
-            utilsVexDialogAlertTop("You should select a satellite");
+            utilsVexDialogAlertTop("YOU SHOULD SELECT A SATELLITE");
             return false;
         }
         var oOrbitSearch = new Object();
@@ -254,11 +254,11 @@ var SearchOrbitController = (function() {
                 }
                 else
                 {
-                    utilsVexDialogAlertTop("Error: search orbits fails.");
+                    utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR: SEARCH ORBITS FAILS.");
                 }
         })
             .error(function (data, status, header, config) {
-                utilsVexDialogAlertTop("Error: search orbits fails.");
+                utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR: SEARCH ORBITS FAILS.");
                 oController.m_aoOrbits = null;
                 oController.m_bIsVisibleLoadingIcon = false;
             });
@@ -323,7 +323,7 @@ var SearchOrbitController = (function() {
             var oRectangle = this.m_oMapService.addRectangleOnMap(aasNewContent, null, 0);
             if(utilsIsObjectNullOrUndefined(oRectangle))
             {
-                utilsVexDialogAlertTop("Impossible visualize orbit");
+                utilsVexDialogAlertTop("IMPOSSIBLE TO VISUALIZE ORBIT");
                 return false;
             }
             this.m_aoOrbits[iIndexOrbitInOrbitsList].FootPrintRectangle = oRectangle;
@@ -351,7 +351,7 @@ var SearchOrbitController = (function() {
             }
         }).error(function (data,status) {
             //alert('error');
-            utilsVexDialogAlertTop('error Impossible get workspace in editorController.js')
+            utilsVexDialogAlertTop('GURU MEDITATION<br>ERROR IMPOSSIBLE GET WORKSPACE')
         });
     }
 
@@ -397,7 +397,7 @@ var SearchOrbitController = (function() {
                 var oRectangle = this.m_oMapService.addRectangleOnMap(aasNewContent, null, 0);
                 if(utilsIsObjectNullOrUndefined(oRectangle))
                 {
-                    utilsVexDialogAlertTop("Impossible visualize orbit");
+                    utilsVexDialogAlertTop("IMPOSSIBLE VISUALIZE ORBIT");
                     return false;
                 }
                 this.m_aoOrbits[iIndexOrbit].FootPrintRectangle = oRectangle;
@@ -507,7 +507,7 @@ var SearchOrbitController = (function() {
             var sOperation = "null";
             if (utilsIsStrNullOrEmpty(oMessage.messageCode) === false  )
                 sOperation = oMessage.messageCode;
-            var oDialog = utilsVexDialogAlertTop('There was an error in the ' + sOperation + ' Process');
+            var oDialog = utilsVexDialogAlertTop('GURU MEDITATION<br>THERE WAS AN ERROR IN THE ' + sOperation + ' PROCESS');
             utilsVexCloseDialogAfterFewSeconds(3000, oDialog);
             this.m_oProcessesLaunchedService.loadProcessesFromServer(this.m_oActiveWorkspace);
             return;
@@ -555,7 +555,7 @@ var SearchOrbitController = (function() {
         });
         */
 
-        var oDialog = utilsVexDialogAlertBottomRightCorner('Product added to the ws');
+        var oDialog = utilsVexDialogAlertBottomRightCorner('PRODUCT ADDED TO THE WORKSPACE<br>READY');
         utilsVexCloseDialogAfterFewSeconds(3000, oDialog);
     }
 

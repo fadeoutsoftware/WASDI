@@ -153,42 +153,42 @@ function utilsProjectShowRabbitMessageUserFeedBack(oMessage) {
     switch(sMessageCode)
     {
         case "DOWNLOAD":
-            sUserMessage = "File now available on WASDI Server";
+            sUserMessage = "FILE NOW AVAILABLE ON WASDI SERVER<br>READY";
             break;
         case "PUBLISH":
-            sUserMessage = "Publish done";
+            sUserMessage = "PUBLISH DONE<br>READY";
             break;
         case "PUBLISHBAND":
-            sUserMessage = "Band published. Product: " + oMessage.payload.productName;
+            sUserMessage = "BAND PUBLISHED: " + Message.payload.bandName + "<br>PRODUCT: <br> " + oMessage.payload.productName + "<br>READY";
             break;
         case "UPDATEPROCESSES":
             console.log("UPDATE PROCESSES"+" " +utilsGetTimeStamp());
             break;
         case "APPLYORBIT":
-            sUserMessage = "Apply orbit Completed";
+            sUserMessage = "APPLY ORBIT COMPLETED<br>READY";
             break;
         case "CALIBRATE":
-            sUserMessage = "Radiometric Calibrate Completed";
+            sUserMessage = "RADIOMETRIC CALIBRATE COMPLETE<br>READY";
             break;
         case "MULTILOOKING":
-            sUserMessage = "Multilooking Completed";
+            sUserMessage = "Multilooking Completed<br>READY";
             break;
         case "NDVI":
-            sUserMessage = "NDVI Completed";
+            sUserMessage = "NDVI Completed<br>READY";
             break;
         case "TERRAIN":
-            sUserMessage = "Range doppler terrain correction Completed";
+            sUserMessage = "RANGE DOPPLER TERRAIN CORRECTION COMPLETED<br>READY";
             break;
 
         default:
-            console.log("RABBIT ERROR: got empty message ");
+            console.log("RABBIT ERROR: GOT EMPTY MESSAGE<br>READY");
     }
 
     // Is there a feedback for the user?
     if (!utilsIsStrNullOrEmpty(sUserMessage)) {
         // Give the short message
         var oDialog = utilsVexDialogAlertBottomRightCorner(sUserMessage);
-        utilsVexCloseDialogAfterFewSeconds(3000,oDialog);
+        utilsVexCloseDialogAfterFewSeconds(4000,oDialog);
     }
 
 }

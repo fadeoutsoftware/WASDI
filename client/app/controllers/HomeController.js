@@ -49,14 +49,14 @@ var HomeController = (function() {
                     else
                     {
                         //LOGIN FAIL
-                        utilsVexDialogAlertTop( "Wrong Credentials, try again");
+                        utilsVexDialogAlertTop( "GURU MEDITATION<br>WRONG CREDENTIALS, TRY AGAIN");
 
                     }
                 }
             }
         }).error(function (data,status) {
             //alert('error');
-            utilsVexDialogAlertTop("Error in login. HomeCotroller.js");
+            utilsVexDialogAlertTop("GURU MEDITATION<br>LOGIN ERROR");
 
         });
     }

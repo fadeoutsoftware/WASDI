@@ -59,7 +59,7 @@ var ProductEditorInfoController = (function() {
 
         }).error(function (data,status) {
             //alert('error');
-            utilsVexDialogAlertTop("Error: impossible to update the product");
+            utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR: IMPOSSIBLE TO UPDATE THE PRODUCT");
 
         });
 

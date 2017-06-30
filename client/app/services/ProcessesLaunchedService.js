@@ -42,7 +42,7 @@ service('ProcessesLaunchedService', ['ConstantsService','$rootScope','$http', fu
                 }
             }).error(function (data,status)
             {
-                utilsVexDialogAlertTop("Error in load Processes");
+                utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN LOAD PROCESSES");
             });
     }
 
@@ -67,7 +67,7 @@ service('ProcessesLaunchedService', ['ConstantsService','$rootScope','$http', fu
                 }
             }).error(function (data,status)
             {
-                utilsVexDialogAlertTop("Error in load Processes");
+                utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN LOAD PROCESSES");
             });
     }
 
@@ -91,7 +91,7 @@ service('ProcessesLaunchedService', ['ConstantsService','$rootScope','$http', fu
                 }
             }).error(function (data,status)
             {
-                utilsVexDialogAlertTop("Error while kill the process ");
+                utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR WHILE KILLING THE PROCESS");
             });
         return true;
     }

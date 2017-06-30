@@ -36,9 +36,11 @@ function utilsVexDialogConfirm(oMessage,oCallback)
         }
     }
 
+    oMessage+="<br>";
+
     var oVexInstance = vex.dialog.confirm({
         message: oMessage,
-        callback: oCallback,
+        unsafeMessage: oCallback,
 
     })
     return oVexInstance;
@@ -55,7 +57,10 @@ function utilsVexDialogAlertDefault(oMessage,oCallback)
         /*Default CallBack*/
         oCallback=function (value){return "ok"; }
     }
-    var oVexInstance = vex.dialog.alert({message:oMessage,
+
+    oMessage += "<br>";
+
+    var oVexInstance = vex.dialog.alert({unsafeMessage:oMessage,
                     callback:oCallback});
     return oVexInstance;
 }
@@ -71,11 +76,14 @@ function utilsVexDialogAlertBottomRightCorner(oMessage,oCallback)
         oCallback=function (value){return "ok"; }
     }
 
+    oMessage += "<br>";
+
     var oVexInstance = vex.dialog.alert({
-                        message:oMessage,
-                        className:'vex-theme-bottom-right-corner',// Overwrites defaultOptions
-                        callback:oCallback
-                        });
+        unsafeMessage:oMessage,
+        showCloseButton: false,
+        className:'vex-theme-bottom-right-corner',// Overwrites defaultOptions
+        callback:oCallback
+    });
     return oVexInstance;
 }
 
@@ -89,8 +97,10 @@ function utilsVexDialogAlertTop(oMessage,oCallback)
         /*Default CallBack*/
         oCallback=function (value){return "ok"; }
     }
+
+    oMessage += "<br>";
     var oVexInstance = vex.dialog.alert({
-        message:oMessage,
+        unsafeMessage:oMessage,
         className:'vex-theme-top',// Overwrites defaultOptions
         callback:oCallback
     });
@@ -126,8 +136,10 @@ function utilsVexDialogConfirmWithCheckBox(oMessage,oCallback)
         }
     }
 
+    oMessage+="<br>";
+
     var oVexInstance = vex.dialog.confirm({
-        message: oMessage,
+        unsafeMessage: oMessage,
         callback: oCallback,
         input:[
             '<style>',
@@ -140,10 +152,10 @@ function utilsVexDialogConfirmWithCheckBox(oMessage,oCallback)
             '}',
             '</style>',
             '<div class="vex-custom-field-wrapper">',
-            '<input name="files" type="checkbox" checked="checked" /> Delete files on file system',
+            '<input name="files" type="checkbox" checked="checked" /> DELETE ON FILE SYSTEM',
             '</div>',
             '<div class="vex-custom-field-wrapper">',
-            '<input name="geoserver" type="checkbox" checked="checked"/> Delete layers on geoserver',
+            '<input name="geoserver" type="checkbox" checked="checked"/> DELETE LAYERS ON GEOSERVER',
             '</div>'].join('')
 
     })

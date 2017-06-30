@@ -53,7 +53,7 @@ service('GlobeService', ['$http',  'ConstantsService','SatelliteService', functi
         {
             //TODO ERROR  browser doesn't support WebGL
             console.log("Error in Cesium Globe miss WebGl");
-            utilsVexDialogAlertTop("Error in Cesium Globe miss WebGl, link: https://get.webgl.org/");
+            utilsVexDialogAlertTop("ERROR IN CESIUM GLOBE MISS WEBGL<br>PLEASE UPADETE<br>LINK: HTTPS://GET.WEBGL.ORG/");
         }
     };
 
@@ -288,7 +288,7 @@ service('GlobeService', ['$http',  'ConstantsService','SatelliteService', functi
         {
             //TODO ERROR  browser doesn't support WebGL
             console.log("Error in Cesium Globe miss WebGl");
-            utilsVexDialogAlertTop("Error in Cesium Globe miss WebGl, link: https://get.webgl.org/");
+            utilsVexDialogAlertTop("ERROR IN CESIUM GLOBE MISS WEBGL<br>PLEASE UPADETE<br>LINK: HTTPS://GET.WEBGL.ORG/");
         }
     };
     /*ROTATION GLOBE*/
@@ -389,24 +389,23 @@ service('GlobeService', ['$http',  'ConstantsService','SatelliteService', functi
      * @param sImageInput
      * @returns {null}
      */
-    this.drawPointWithImage = function(aPositionInput,sImageInput,sName,sDescription)
+    this.drawPointWithImage = function(aPositionInput,sImageInput,sName,sDescription, iWidth, iHeight)
     {
-        if(utilsIsObjectNullOrUndefined(aPositionInput) === true)
-            return null;
-        if(utilsIsStrNullOrEmpty(sImageInput) === true )
-            return null;
-        if(utilsIsStrNullOrEmpty(sName) === true)
-            return false;
-        if(utilsIsStrNullOrEmpty(sDescription) === true)
-            return false;
+        if(utilsIsObjectNullOrUndefined(aPositionInput) === true) return null;
+        if(utilsIsStrNullOrEmpty(sImageInput) === true ) return null;
+        if(utilsIsStrNullOrEmpty(sName) === true) return false;
+        if(utilsIsStrNullOrEmpty(sDescription) === true) return false;
+
+        if (utilsIsObjectNullOrUndefined(iWidth)) iWidth = 64;
+        if (utilsIsObjectNullOrUndefined(iHeight)) iHeight = 64;
 
         var oPoint =  this.m_oWasdiGlobe.entities.add({
             name : sName,
             position : Cesium.Cartesian3.fromDegrees(aPositionInput[0],aPositionInput[1],aPositionInput[2]),
             billboard : {
                 image : sImageInput,
-                width : 64,
-                height : 64
+                width : iWidth,
+                height : iHeight
             } , label : {
                 text : sDescription,
                 font : '14pt monospace',
@@ -498,7 +497,7 @@ service('GlobeService', ['$http',  'ConstantsService','SatelliteService', functi
             }
         });
 
-        this.m_oGlobeService.stopRotationGlobe();
+        this.stopRotationGlobe();
 
     };
 
