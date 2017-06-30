@@ -148,7 +148,7 @@ var EditorController = (function () {
             var sOperation = "null";
             if (utilsIsStrNullOrEmpty(oMessage.messageCode) === false  ) sOperation = oMessage.messageCode;
 
-            var oDialog = utilsVexDialogAlertTop('There was an error in the ' + sOperation + ' Process');
+            var oDialog = utilsVexDialogAlertTop('GURU MEDITATION<br>THERE WAS AN ERROR IN THE ' + sOperation + ' PROCESS');
             utilsVexCloseDialogAfterFewSeconds(3000, oDialog);
             this.m_oProcessesLaunchedService.loadProcessesFromServer(this.m_oActiveWorkspace);
 
@@ -202,7 +202,7 @@ var EditorController = (function () {
 
         // P.Campanella 29/05/2017: Moved Add Product To WS in the launcher server side: TEST this
 
-        var oDialog = utilsVexDialogAlertBottomRightCorner('Product added to the ws');
+        var oDialog = utilsVexDialogAlertBottomRightCorner('PRODUCT ADDED TO THE WS<br>READY');
         utilsVexCloseDialogAfterFewSeconds(3000, oDialog);
         this.getProductListByWorkspace();
 
@@ -221,7 +221,7 @@ var EditorController = (function () {
         if (oMessage == null) return;
         if (oMessage.messageResult == "KO") {
             //alert('There was an error in the publish');
-            utilsVexDialogAlertTop('There was an error in the publish');
+            utilsVexDialogAlertTop('GURU MEDITATION<br>THERE WAS AN ERROR IN THE PUBLISH');
             return;
         }
 
@@ -328,6 +328,7 @@ var EditorController = (function () {
 
             oNode.original.bPubblish = true;
             oNode.original.band.layerId = oLayer.layerId;
+            oNode.original.band.published=true;
 
             $('#jstree').jstree(true).set_icon(sNodeID, 'assets/icons/check_20x20.png');
             $("#jstree").jstree().enable_node(sNodeID);
@@ -483,10 +484,10 @@ var EditorController = (function () {
      */
     EditorController.prototype.downloadEOImage = function (sUrl) {
         this.m_oFileBufferService.download(sUrl, this.m_oActiveWorkspace.workspaceId).success(function (data, status) {
-            utilsVexDialogAlertBottomRightCorner('downloading');
+            utilsVexDialogAlertBottomRightCorner('DOWNLOADING');
             //console.log('downloading');
         }).error(function (data, status) {
-            utilsVexDialogAlertTop('download error');
+            utilsVexDialogAlertTop('GURU MEDITATION<br>DOWNLOAD ERROR');
             //console.log('download error');
         });
     }
@@ -497,10 +498,10 @@ var EditorController = (function () {
      */
     EditorController.prototype.publish = function (sUrl) {
         this.m_oFileBufferService.publish(sUrl, this.m_oActiveWorkspace.workspaceId).success(function (data, status) {
-            utilsVexDialogAlertBottomRightCorner('publishing');
+            utilsVexDialogAlertBottomRightCorner('PUBLISHING');
             //console.log('publishing');
         }).error(function (data, status) {
-            utilsVexDialogAlertTop('publish error');
+            utilsVexDialogAlertTop('GURU MEDITATION<br>PUBLISH ERROR');
             //console.log('publish error');
         });
     }
@@ -579,7 +580,7 @@ var EditorController = (function () {
 
         this.m_oFileBufferService.publishBand(sFileName, this.m_oActiveWorkspace.workspaceId, oBand.name).success(function (data, status) {
             if (!bAlreadyPublished) {
-                var oDialog = utilsVexDialogAlertBottomRightCorner('publishing band ' + oBand.name);
+                var oDialog = utilsVexDialogAlertBottomRightCorner('PUBLISHING BAND ' + oBand.name);
                 utilsVexCloseDialogAfterFewSeconds(3000, oDialog);
             }
             //console.log('publishing band ' + oBand.name);
@@ -604,14 +605,14 @@ var EditorController = (function () {
             }
             else {
 
-                utilsVexDialogAlertTop("Error in publish band");
+                utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN PUBLISH BAND");
                 $("#jstree").jstree().enable_node(oBand.productName+"_"+oBand.name);
                 $('#jstree').jstree(true).set_icon(oBand.productName+"_"+oBand.name,'assets/icons/uncheck_20x20.png');
             }
 
         }).error(function (data, status) {
             console.log('publish band error');
-            utilsVexDialogAlertTop("Error in publish band");
+            utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN PUBLISH BAND");
             $("#jstree").jstree().enable_node(oBand.productName+"_"+oBand.name);
             $('#jstree').jstree(true).set_icon(oBand.productName+"_"+oBand.name,'assets/icons/uncheck_20x20.png');
           });
@@ -866,7 +867,7 @@ var EditorController = (function () {
 
                                         "action": function (obj) {
 
-                                            utilsVexDialogConfirmWithCheckBox("Deleting product. Are you sure?", function (value) {
+                                            utilsVexDialogConfirmWithCheckBox("DELETING PRODUCT.<br>ARE YOU SURE?", function (value) {
                                                 var bDeleteFile = false;
                                                 var bDeleteLayer = false;
                                                 if (value) {
@@ -901,7 +902,7 @@ var EditorController = (function () {
 
 
                                                         }).error(function (error) {
-                                                            utilsVexDialogAlertTop("Error in delete product.");
+                                                            utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN DELETE PRODUCT");
                                                     });
                                                 }
 
@@ -1014,7 +1015,7 @@ var EditorController = (function () {
                 }
             }
         }).error(function (data, status) {
-            utilsVexDialogAlertTop('Error reading product list');
+            utilsVexDialogAlertTop('GURU MEDITATION<br>ERROR READING PRODUCT LIST');
         });
     }
 
@@ -1043,7 +1044,7 @@ var EditorController = (function () {
             }
         }).error(function (data, status) {
             //alert('error');
-            utilsVexDialogAlertTop('error Impossible get workspace in editorController.js')
+            utilsVexDialogAlertTop('GURU MEDITATION<br>ERROR IMPOSSIBLE GET WORKSPACE IN EDITORCONTROLLER')
         });
     }
 
@@ -1357,7 +1358,7 @@ var EditorController = (function () {
 
                 var bResponse = false;
                 if (iNumberOfLayers != 0)
-                    bResponse = utilsVexDialogConfirm("Going in Image-Mode: open layers will be closed. Are you sure?", oCallback);//ask user if he want delete layers
+                    bResponse = utilsVexDialogConfirm("GOING IN IMAGE-MODE:<br>GEO MAP WILL BE CLOSED<br>ARE YOU SURE?", oCallback);//ask user if he want delete layers
 
             }
 
@@ -1501,7 +1502,7 @@ var EditorController = (function () {
 
                 if(utilsIsObjectNullOrUndefined(oResult) == true)
                 {
-                    utilsVexDialogAlertTop("Error the apply orbit options are wrong or empty!");
+                    utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR THE APPLY ORBIT OPTIONS ARE WRONG OR EMPTY!");
                     return false;
                 }
                 if(oResult == "close")
@@ -1512,7 +1513,7 @@ var EditorController = (function () {
                     .success(function (data) {
 
                     }).error(function (error) {
-                        utilsVexDialogAlertTop("Error the operation Apply Orbit dosen't work");
+                        utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR THE OPERATION APPLY ORBIT DOSEN'T WORK");
                 });
                 return true;
             });
@@ -1538,7 +1539,7 @@ var EditorController = (function () {
 
                 if(utilsIsObjectNullOrUndefined(oResult) == true)
                 {
-                    utilsVexDialogAlertTop("Error the NDVI options are wrong or empty!");
+                    utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR THE NDVI OPTIONS ARE WRONG OR EMPTY!");
                     return false;
                 }
                 if(oResult == "close")
@@ -1549,7 +1550,7 @@ var EditorController = (function () {
                     .success(function (data) {
 
                     }).error(function (error) {
-                    utilsVexDialogAlertTop("Error the operation Radiometric Calibration dosen't work");
+                    utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR THE OPERATION RADIOMETRIC CALIBRATION DOESN'T WORK");
                 });
                 return true;
             });
@@ -1575,7 +1576,7 @@ var EditorController = (function () {
 
                 if(utilsIsObjectNullOrUndefined(oResult) == true)
                 {
-                    utilsVexDialogAlertTop("Error the multilooking options are wrong or empty!");
+                    utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR THE MULTILOOKING OPTIONS ARE WRONG OR EMPTY!");
                     return false;
                 }
                 if(oResult == "close")
@@ -1586,7 +1587,7 @@ var EditorController = (function () {
                     .success(function (data) {
 
                     }).error(function (error) {
-                    utilsVexDialogAlertTop("Error the operation Multilooking dosen't work");
+                    utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR THE OPERATION MULTILOOKING DOSEN'T WORK");
                 });
                 return true;
 
@@ -1612,7 +1613,7 @@ var EditorController = (function () {
 
                 if(utilsIsObjectNullOrUndefined(oResult) == true)
                 {
-                    utilsVexDialogAlertTop("Error the NDVI options are wrong or empty!");
+                    utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR THE NDVI OPTIONS ARE WRONG OR EMPTY!");
                     return false;
                 }
                 if(oResult == "close")
@@ -1623,7 +1624,7 @@ var EditorController = (function () {
                     .success(function (data) {
 
                     }).error(function (error) {
-                    utilsVexDialogAlertTop("Error the operation NDVI dosen't work");
+                    utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR THE OPERATION NDVI DOESN'T WORK");
                 });
                 return true;
             });
@@ -1696,7 +1697,7 @@ var EditorController = (function () {
 
                 if(utilsIsObjectNullOrUndefined(oResult) == true)
                 {
-                    utilsVexDialogAlertTop("Error the Range Doppler Terrain Correction options are wrong or empty!");
+                    utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR THE RANGE DOPPLER TERRAIN CORRECTION OPTIONS ARE WRONG OR EMPTY!");
                     return false;
                 }
                 if(oResult == "close")
@@ -1707,7 +1708,7 @@ var EditorController = (function () {
                     .success(function (data) {
 
                     }).error(function (error) {
-                    utilsVexDialogAlertTop("Error the operation Range dopplre terratin correction dosen't work");
+                    utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR THE OPERATION RANGE DOPPLER TERRATIN CORRECTION DOESN'T WORK");
                 });
                 return true;
             });

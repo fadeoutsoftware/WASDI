@@ -90,10 +90,10 @@ var NDVIController = (function() {
                 }
                 else
                 {
-                    utilsVexDialogAlertTop("Error in get parameters, there aren't data");
+                    utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN GET PARAMETERS, THERE AREN'T DATA");
                 }
             }).error(function (error) {
-            utilsVexDialogAlertTop("Error in get parameters");
+            utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN GET PARAMETERS");
         });
 
     }

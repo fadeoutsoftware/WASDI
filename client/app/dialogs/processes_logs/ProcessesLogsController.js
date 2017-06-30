@@ -42,7 +42,7 @@ var ProcessesLogsController = (function() {
         }).error(function (data,status)
         {
 
-            utilsVexDialogAlertTop("Error in processes logs dialog: it's impossible load all processes logs from server");
+            utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN PROCESSES LOGS DIALOG<br>UNABLE TO LOAD ALL PROCESSES LOGS FROM SERVER");
         });
 
         return true;

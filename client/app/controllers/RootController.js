@@ -35,7 +35,7 @@ var RootController = (function() {
             //TODO use vex for error message
             //alert('error in check id session');
             oController.onClickLogOut();
-            utilsVexDialogAlertTop('error in check id session');
+            utilsVexDialogAlertTop('ERROR IN CHECK ID SESSION');
             // oController.m_oConstantsService.logOut();
             // oController.m_oState.go("home");
             // oController.m_oState.go("home");
@@ -209,7 +209,7 @@ var RootController = (function() {
             oController.m_oConstantsService.logOut();
             oController.m_oState.go("home");
         }).error(function (data,status) {
-            utilsVexDialogAlertTop("Error in Logout");
+            utilsVexDialogAlertTop("ERROR IN LOGOUT");
             // oController.m_oState.go("home");
         });
 
@@ -249,7 +249,7 @@ var RootController = (function() {
                 }
             }
         }).error(function (data,status) {
-            utilsVexDialogAlertTop("Error in open WorkSPace by RootController.js");
+            utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN OPEN WORKSPACE");
         });
     };
 

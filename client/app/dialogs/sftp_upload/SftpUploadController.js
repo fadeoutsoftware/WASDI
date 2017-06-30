@@ -174,7 +174,7 @@ var SftpUploadController = (function() {
             if(data)
             {
                 console.log("SftpUploadController error during ingest file");
-                utilsVexDialogAlertTop("During the ingestion file there was an error, file:" + oSelectedFile);
+                utilsVexDialogAlertTop("GURU MEDITATION<br>INGESTION ERROR FILE:<br>" + oSelectedFile);
             }
         });
         return true;
