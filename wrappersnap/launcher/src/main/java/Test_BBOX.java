@@ -3,8 +3,13 @@
 import java.io.File;
 import java.io.FileInputStream;
 import java.nio.charset.Charset;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import org.apache.commons.io.IOUtils;
+import org.esa.snap.core.util.SystemUtils;
+import org.esa.snap.runtime.Config;
+import org.esa.snap.runtime.Engine;
 
 import wasdi.LauncherMain;
 import wasdi.shared.LauncherOperations;
@@ -16,15 +21,32 @@ import wasdi.snapopearations.ReadProduct;
 /**
  * Created by s.adamo on 18/05/2016.
  */
-public class Test {
+public class Test_BBOX {
 
 	public static void main(String[] args) throws Exception {
 
 		
-		String s = new ReadProduct().getProductBoundingBox(new File("/home/doy/tmp/wasdi/tmp/CSKS4_SCS_B_HI_05_HH_RA_SF_20141130050141_20141130050148.h5"));
+		Path propFile = Paths.get(args[0]);
+        Config.instance("snap.auxdata").load(propFile);
+        Config.instance().load();
+
+        //JAI.getDefaultInstance().getTileScheduler().setParallelism(Runtime.getRuntime().availableProcessors());
+        //MemUtils.configureJaiTileCache();
+        
+        SystemUtils.init3rdPartyLibs(null);
+        Engine.start(false);
+
 		
 		
+		//String s = new ReadProduct().getProductBoundingBox(new File("/home/doy/tmp/wasdi/tmp/S2A_MSIL2A_20170626T102021_N0205_R065_T32TMQ_20170626T102321.zip"));
 		
+		System.out.println(args[0]);
+		String s = new ReadProduct().getProductBoundingBox(new File(args[1]));
+		
+//		String s = "GEOGCS[\"WGS84(DD)\",DATUM[\"WGS84\",SPHEROID[\"WGS84\", 6378137.0, 298.257223563]],PRIMEM[\"Greenwich\", 0.0],UNIT[\"degree\", 0.017453292519943295],AXIS[\"Geodetic longitude\", EAST],AXIS[\"Geodetic latitude\", NORTH]]";
+//		s = s.replace("\"", "\\\\\\\"");
+//		String ret = String.format("{\"miny\":1,\"minx\":1,\"crs\":\"%s\",\"maxy\":1,\"maxx\":1}", s);
+//		System.out.println(ret);
 		
 //		LauncherMain theMain = new  LauncherMain();
 //		
@@ -43,7 +65,7 @@ public class Test {
 //		
 //		theMain.ExecuteGraph(params);
 		
-		System.out.println("CIAO");
+		System.out.println(s);
 		
 //		LauncherMain theMain = new  LauncherMain();
 //		IngestFileParameter params = new IngestFileParameter();
