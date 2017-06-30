@@ -1,0 +1,261 @@
+//fonts
+@import url('https://fonts.googleapis.com/css?family=VT323');
+
+// wasdi
+/*
+$wasdi-green-logo: #009036;
+$wasdi-blue-logo:#43516A;
+$wasdi-blue-logo-complementary-1:#848E9F;
+$wasdi-blue-logo-complementary-2:#5F6C82;
+$wasdi-blue-logo-complementary-3:#2D394F;
+$wasdi-blue-logo-complementary-4:#1B2B46;
+*/
+
+//colors
+$black_0: rgba(0, 0, 0, .0);
+$black: #000;
+$color_pumice_approx: rgb(194,197,198);
+$color_silver_sand_approx: rgb(191,194,195);
+$color_silver_approx: rgb(186,189,190);
+$color_pink_swan_approx: rgb(183,186,187);
+$color_bombay_approx: rgb(180,183,184);
+$color_silver_chalice_approx: rgb(172,175,176);
+$color_shady_lady_approx: rgb(164,167,168);
+$color_delta_approx: rgb(161,164,165);
+$color_star_dust_approx: rgb(158,161,162);
+$color_mountain_mist_approx: rgb(150,153,154);
+$black_15: rgba(0,0,0,0.15);
+$black_50: rgba(0,0,0,0.5);
+$black_20: rgba(0,0,0,.2);
+$color_jordy_blue_approx: $wasdi-green-logo;
+$color_hunter_green_60_approx: rgba(21,21,20,0.3);
+$black_97: rgba(0,0,0,0.57);
+$color_mirage_approx: #07130b;
+//$color_mirage_approx: darken($wasdi-green-logo, 80%);
+$color_malibu_approx: $wasdi-green-logo;
+$white: #fff;
+$color_alto_approx: #ddd;
+
+
+//@extend-elements
+//original selectors
+//#wargames pre code, .cursor
+%extend_1,
+[class*="vex-"]:not(body) {
+  //Instead of the line below you could use @include box-shadow($shadow-1, $shadow-2, $shadow-3, $shadow-4, $shadow-5, $shadow-6, $shadow-7, $shadow-8, $shadow-9, $shadow-10)
+  box-shadow: none;
+  background-color: transparent;
+  border-style: none;
+  font: 400 19px VT323, monospace;
+}
+
+
+//body {  background: $white;}
+
+.vex-content,
+.dialog-content {
+  transform:scaleY(1.25) translateY(calc(0.6 * 10px));
+  // border:5px solid grey;
+  position: relative;
+  padding: 10px 25px 20px;
+  text-align: left;
+
+  .vex-dialog-form,
+  .dialog-form {
+    overflow: hidden;
+    position: relative;
+    color: $color_jordy_blue_approx;
+    padding: 1.5em 1.5em 1.5em 5em;
+    box-shadow: inset 0 0 0 9px $color_hunter_green_60_approx,
+    0 1px 60px 10px rgba(40,46,40,0.4), inset 0 1px 80px 5px $black_97;
+    background-color: $color_mirage_approx;
+    text-shadow: $color_malibu_approx 0 -1px 35px;
+    border-radius:20px;
+
+    &:before {
+      content: "";
+      width: 100%;
+      height: 30%;
+      position: absolute;
+      top: 0;
+      left: 0;
+      background:-webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(40,66,25,0.2)), color-stop(70%,rgba(32,57,17,0)), color-stop(99%,rgba(28,53,13,0)));
+      -webkit-animation:scan 6.5s 1.0s infinite ease-in-out  forwards;
+      -moz-animation:scan 6.5s 1.0s infinite ease-in-out  forwards;
+      -ms-animation:scan 6.5s 1.0s infinite ease-in-out  forwards;
+      -o-animation:scan 6.5s 1.0s infinite ease-in-out  forwards;
+      animation:scan 6.5s 1.0s infinite ease-in-out  forwards;
+    }
+    .vex-dialog-message,
+    .dialog-message {
+
+      // background: $white;
+      // border: 1px solid $color_alto_approx;
+      padding: 0.1em 0.2em;
+      @extend %extend_1;
+      &:after {
+        content: "\220E";
+        // content: "\2588";
+        animation: cursor .95s ease-in-out infinite;
+        font-size: 120%;
+
+      }
+    }
+  }
+}
+
+
+// start override vex css standard
+
+.vex-dialog-buttons,
+.dialog-buttons {
+
+  .vex-dialog-button-primary,
+  .vex-dialog-button-secondary {
+    background-color:inherit!important;
+    border-radius:0!important;
+    border-width:2px!important;
+    border-style: solid!important;
+    border:none!important;
+  }
+  .vex-dialog-button-primary,
+  .vex-dialog-button-secondary {
+    &:after {content:' ]';}
+    &:before {content:'[ ';}
+    // border-color: $color_jordy_blue_approx!important;
+    color: $wasdi-green-logo!important;
+    &:hover {
+      color: $wasdi-green-logo*2!important;
+      // content: "\220E";
+      animation: cursor .95s ease-in-out infinite;
+      // font-size: 120%;
+    }
+  }
+  /* .vex-dialog-button-secondary {
+    border-color: $color_mountain_mist_approx!important;
+    color: $wasdi-green-logo!important;
+  } */
+}
+
+.vex.vex-theme-default .vex-dialog-button:focus {
+  animation: none!important;
+  -webkit-animation: none!important;
+  -moz-animation: none!important;
+  -ms-animation: none!important;
+  -o-animation: none!important;
+  -webkit-backface-visibility: hidden;
+}
+
+.vex.vex-theme-default .vex-content,
+.vex-content { background: none!important;}
+
+.vex.vex-theme-default .vex-dialog-form .vex-dialog-buttons {
+  font-size: 1.2em;
+  margin-top: -0.5em;
+}
+
+.vex-dialog-buttons,
+.dialog-buttons {
+  position:absolute;
+  z-index:1;
+  right:1em;
+}
+//End override
+
+
+.vex-dialog-form:after {
+  content: "";
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  opacity: 1;
+  background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAAECAYAAABP2FU6AAAAE0lEQVQIHWP4//8/AxMDFMiDWQA2wAMhzy0v7QAAAABJRU5ErkJggg==);
+  -webkit-filter:drop-shadow(15.32px 2.18px 7.35px rgba(20, 184, 189, 1));
+  // background-repeat: repeat-x;
+  overflow: hidden;
+  border-radius: 25px;
+}
+
+
+.cursor {  @extend %extend_1;}
+
+
+@keyframes blink {
+  from {    background-color: transparent;  }
+  to {    background-color: transparent;  }
+  50% {
+    background-color: $white;
+  }
+}
+@-webkit-keyframes scan {
+  from {    top: -50%;    left: 0;
+  }  to {    top: 150%;    left: 0;  }
+}
+@keyframes scan {
+  from {    top: -50%;    left: 0;
+  }  to {    top: 150%;    left: 0;  }
+}
+
+@-webkit-keyframes cursor {
+  from {    opacity: 1.0;  }
+  to {    opacity: 0.0;  }
+}
+@-moz-keyframes cursor {
+  from {    opacity: 1.0;  }
+  to {    opacity: 0.0;  }
+}
+@-ms-keyframes cursor {
+  from {    opacity: 1.0;  }
+  to {    opacity: 0.0;  }
+}
+@-o-keyframes cursor {
+  from {    opacity: 1.0;  }
+  to {    opacity: 0.0;  }
+}
+@keyframes cursor {
+  from {    opacity: 1.0;  }
+  to {    opacity: 0.0;  }
+}
+
+
+
+.vex:after {
+  // animation: flicker 0.30s infinite;
+  background: rgba(16, 16, 16, 0.2);
+  content: "";
+  display: block;
+  pointer-events: none;
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 2;
+}
+
+
+@keyframes flicker {
+  0% { opacity: 0.15795 }
+  5% { opacity: 0.31511 }
+  10% { opacity: 0.94554 }
+  15% { opacity: 0.2469 }
+  20% { opacity: 0.62031 }
+  25% { opacity: 0.0293 }
+  30% { opacity: 0.00899 }
+  35% { opacity: 0.5344 }
+  40% { opacity: 0.12778 }
+  45% { opacity: 0.52042 }
+  50% { opacity: 0.3823 }
+  55% { opacity: 0.2198 }
+  60% { opacity: 0.9383 }
+  65% { opacity: 0.86615 }
+  70% { opacity: 0.68695 }
+  75% { opacity: 0.55749 }
+  80% { opacity: 0.96984 }
+  85% { opacity: 0.0361 }
+  90% { opacity: 0.24467 }
+  95% { opacity: 0.08351 }
+  100% { opacity: 0.54813 }
+}

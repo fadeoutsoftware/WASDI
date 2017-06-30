@@ -1,10 +1,22 @@
-<div class="space-invader-classic">
-    <div id="space-invader"></div>
-
-    <div class="space">
-        <div id="invader">
-            <div class="space-invader space-invader-1 classic"></div>
-        </div>
-
+<!--<div class="space">-->
+    <div id="invader">
+        <!--<div class="space-invader space-invader-1 classic"></div>-->
+        <div class="invader invader_b step1"></div>
     </div>
-</div>
+
+
+<!--</div>-->
+
+
+<script type="text/javascript">
+    // @TODO: Use css for animation
+
+    var _intervalId;
+    var _intervalDuration = 1500;
+    var _intervalFn = function() {
+        $('.invader').toggleClass('step2');
+    };
+
+    _intervalId = setInterval(_intervalFn, _intervalDuration);
+
+</script>

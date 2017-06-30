@@ -189,6 +189,16 @@
 
   <!-- Leaflet Control Custom-->
   <script src="lib/leafletControlCustomMaster/Leaflet.Control.Custom.js"></script>
+  <script>
+      var _intervalId;
+      var _intervalDuration = 1000;
+      var _intervalFn = function() {
+          $('.invader').toggleClass('step2');
+      };
+
+      _intervalId = setInterval(_intervalFn, _intervalDuration);
+
+  </script>
 
 </body>
 </html>

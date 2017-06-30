@@ -1,3 +1,4 @@
+
 .root-view
 {
 
@@ -271,6 +272,44 @@
 }
 
 
+.table > tbody > tr > td{
+
+  vertical-align:middle;
+}
+
+#tableProcesses.table > tbody > tr > td {
+  padding:10px;
+
+}
+.panel {
+  $color_space: $wasdi-blue-logo;
+  $dotsize: 8px;
+  @import "../directives/space_invaders/space_invaders";
+
+  #invader {margin-top: calc(100% / 3);}
+}
+.table  {
+  $color_space: $wasdi-white;
+  $dotsize: 4px;
+  @import "../directives/space_invaders/space_invaders";
+  &.ng-hide {
+    //.space {min-height: 100vh;}
+  }
+  /*#invader {
+    height:60px!important;
+    margin-top:20px!important;
+  }*/
+
+}
+
+#tableProcesses.table > tbody > tr > td:first-child {
+  min-width:80px;
+}
+
+
+
+//.name-workspace effect + cursor
+
 //.name-workspace {opacity: 1;}
 
 .name-workspace:hover {
@@ -329,4 +368,34 @@
   50% {
     background-color: $wasdi-white;
   }
+}
+
+
+@-webkit-keyframes cursor {
+  from { opacity: 1.0;  }
+  to {    opacity: 0.0;  }
+}
+
+
+@-moz-keyframes cursor {
+  from { opacity: 1.0;  }
+  to {    opacity: 0.0;  }
+}
+
+
+@-ms-keyframes cursor {
+  from { opacity: 1.0;  }
+  to {    opacity: 0.0;  }
+}
+
+
+@-o-keyframes cursor {
+  from { opacity: 1.0;  }
+  to {    opacity: 0.0;  }
+}
+
+
+@keyframes cursor {
+  from { opacity: 1.0;  }
+  to {    opacity: 0.0;  }
 }
