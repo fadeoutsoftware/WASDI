@@ -49,7 +49,7 @@ public class GeoServerManager {
     	RESTBoundingBox bbox = res.getLatLonBoundingBox();
     	
     	String ret = String.format("{\"miny\":%f,\"minx\":%f,\"crs\":\"%s\",\"maxy\":%f,\"maxx\":%f}", 
-    			bbox.getMinY(), bbox.getMinX(), bbox.getCRS(), bbox.getMaxY(), bbox.getMaxX());
+    			bbox.getMinY(), bbox.getMinX(), bbox.getCRS().replace("\"", "\\\\\\\""), bbox.getMaxY(), bbox.getMaxX());
     	
     	return ret;
     	
