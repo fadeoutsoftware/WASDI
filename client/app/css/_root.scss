@@ -281,15 +281,20 @@
   padding:10px;
 
 }
-.panel {
+.panel,
+.loadIcon,
+.loading-files  {
+  width:100%;
   $color_space: $wasdi-blue-logo;
   $dotsize: 8px;
   @import "../directives/space_invaders/space_invaders";
-
-  #invader {margin-top: calc(100% / 3);}
+  #invader {
+    margin-top: calc(100% / 3);
+  }
 }
-.table  {
-  $color_space: $wasdi-white;
+.table,
+.processes-list {
+  $color_space: $wasdi-green-logo;
   $dotsize: 4px;
   @import "../directives/space_invaders/space_invaders";
   &.ng-hide {
@@ -301,6 +306,8 @@
   }*/
 
 }
+.processes-list #invader {margin-top:20px;}
+#tableProcesses #invader {margin-top:-20px;}
 
 #tableProcesses.table > tbody > tr > td:first-child {
   min-width:80px;

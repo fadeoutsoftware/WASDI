@@ -54,7 +54,7 @@ $color_alto_approx: #ddd;
 
 .vex-content,
 .dialog-content {
-  transform:scaleY(1.25) translateY(calc(0.6 * 10px));
+  transform:scaleY(1.25) translateY(-50px);
   // border:5px solid grey;
   position: relative;
   padding: 10px 25px 20px;
@@ -65,7 +65,7 @@ $color_alto_approx: #ddd;
     overflow: hidden;
     position: relative;
     color: $color_jordy_blue_approx;
-    padding: 1.5em 1.5em 1.5em 5em;
+    padding: 1.5em 2.5em;
     box-shadow: inset 0 0 0 9px $color_hunter_green_60_approx,
     0 1px 60px 10px rgba(40,46,40,0.4), inset 0 1px 80px 5px $black_97;
     background-color: $color_mirage_approx;
@@ -104,9 +104,31 @@ $color_alto_approx: #ddd;
   }
 }
 
-
+.vex-overlay {background:rgba(0,0,0,0.3)!important;}
+.vex.vex-theme-bottom-right-corner .vex-overlay {background:inherit!important;}
 // start override vex css standard
+//.vex-overlay {
+//  background: inherit!important;
+//}
+.vex.vex-theme-bottom-right-corner .dialog-buttons,
+.vex.vex-theme-bottom-right-corner .vex-dialog-form .vex-dialog-buttons {
+  display:none;
+}
 
+.vex.vex-theme-default .vex-dialog-button:focus,
+.vex.vex-theme-bottom-right-corner .vex-dialog-button:focus {
+  animation: none!important;
+  -webkit-animation: none!important;
+  -moz-animation: none!important;
+  -ms-animation: none!important;
+  -o-animation: none!important;
+  -webkit-backface-visibility: hidden;
+}
+
+.vex.vex-theme-default .vex-content,
+.vex-content { background: none!important;}
+
+.vex.vex-theme-bottom-right-corner,
 .vex-dialog-buttons,
 .dialog-buttons {
 
@@ -137,17 +159,6 @@ $color_alto_approx: #ddd;
   } */
 }
 
-.vex.vex-theme-default .vex-dialog-button:focus {
-  animation: none!important;
-  -webkit-animation: none!important;
-  -moz-animation: none!important;
-  -ms-animation: none!important;
-  -o-animation: none!important;
-  -webkit-backface-visibility: hidden;
-}
-
-.vex.vex-theme-default .vex-content,
-.vex-content { background: none!important;}
 
 .vex.vex-theme-default .vex-dialog-form .vex-dialog-buttons {
   font-size: 1.2em;
@@ -221,20 +232,21 @@ $color_alto_approx: #ddd;
 
 
 
+/*
 .vex:after {
-  // animation: flicker 0.30s infinite;
-  background: rgba(16, 16, 16, 0.2);
-  content: "";
-  display: block;
-  pointer-events: none;
-  position: fixed;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  z-index: 2;
+// animation: flicker 0.30s infinite;
+background: rgba(16, 16, 16, 0.2);
+ content: "";
+ display: block;
+ pointer-events: none;
+ position: fixed;
+ top: 0;
+ right: 0;
+ bottom: 0;
+ left: 0;
+ z-index: 1;
 }
-
+*/
 
 @keyframes flicker {
   0% { opacity: 0.15795 }
