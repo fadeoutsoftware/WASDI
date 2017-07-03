@@ -62,20 +62,17 @@
                     <!-- EDIT NAME -->
                     <div class="nav navbar-nav navbar-left name-workspace" ng-hide="m_oController.isWorkspacesPageOpen()">
                         <div class="form-group">
-                            <!--<input type="text" value="{{m_oController.getWorkspaceName()}}" placeholder="{{m_oController.getWorkspaceName()}}"-->
-                            <!--ng-model="m_oController.m_oConstantsService.getActiveWorkspace().name" ng-keyup="m_oController.UpdateWorkspace($event) " ng-blur="m_oController.UpdateWorkspace()">-->
-                            <input type="text" ng-model="m_oController.m_oConstantsService.getActiveWorkspace().name" placeholder="..."
+                            <input type="text" readonly ng-model="m_oController.m_oConstantsService.getActiveWorkspace().name" placeholder="..."
 
                                    ng-class="{'input-mydisable': !m_oController.m_bIsEditModelWorkspaceNameActive,'input-myenable': m_oController.m_bIsEditModelWorkspaceNameActive}"
-                                   ng-keyup="m_oController.UpdateWorkspace($event)"  ng-click="m_oController.editModelWorkspaceNameSetTrue()">
-                                <!--ng-disabled = "(!m_oController.m_bIsEditModelWorkspaceNameActive)"-->
+                                   ng-click="m_oController.editModelWorkspaceNameSetTrue()" style="height: 36px">
 
-                            <button class="btn btn-edit" type="button" ng-click="m_oController.UpdateWorkspace();"
+                            <!--button class="btn btn-edit" type="button" ng-click="m_oController.UpdateWorkspace();"
                                     title="{{'ROOT_TOOLTIP_EDIT_WORKSPACE_NAME'|translate}}">
                                 <i class="fa fa-pencil fa-lg" aria-hidden="true"
                                 ng-class="{'btn-edit-mode-on':m_oController.m_bIsEditModelWorkspaceNameActive,'btn-edit-mode-off':!m_oController.m_bIsEditModelWorkspaceNameActive}"></i>
 
-                            </button>
+                            </button-->
                             <b class="cursor" ></b>
 
                         </div>
@@ -91,8 +88,8 @@
                             </a>
                         </li>
 
-                        <li ng-class="{active:m_oController.activePageCss('root.searchorbit')}" ng-disabled="m_oController.isWorkspacesPageOpen()"  >
-                          <a ng-click="m_oController.openSearchorbit()"  href="" ng-style="{cursor:m_oController.cursorCss()}" >
+                        <li ng-class="{active:m_oController.activePageCss('root.searchorbit')}"  ng-disabled="m_oController.isWorkspacesPageOpen()"> <!-- -->
+                          <a ng-click="m_oController.openSearchorbit()"  href=""  ng-style="{cursor:m_oController.cursorCss()}"> <!---->
                               <i class="fa fa-calendar-o fa-lg" aria-hidden="true" ></i>
                                 {{"ROOT_VIEW_NAV_BAR_LINK_SEARCH"|translate}}
                             </a>

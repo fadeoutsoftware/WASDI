@@ -310,17 +310,13 @@ var RootController = (function() {
 
     RootController.prototype.openSearchorbit = function()
     {
-        if(this.isWorkspacesPageOpen() === true)
-            return false;
-        var oController = this;
-        // if it publishing a band u can't go in import controller
-        //if( this.m_oProcessesLaunchedService.thereAreSomePublishBandProcess() == false )
-        //{
-            var sWorkSpace = this.m_oConstantsService.getActiveWorkspace();
-            oController.m_oState.go("root.searchorbit", { workSpace : sWorkSpace.workspaceId });//use workSpace when reload editor page
-        //}
+        if(this.isWorkspacesPageOpen() === true) return false;
 
-
+        //var oController = this;
+        //var sWorkSpace = this.m_oConstantsService.getActiveWorkspace();
+        //use workSpace when reload editor page
+        //oController.m_oState.go("root.searchorbit", { workSpace : sWorkSpace.workspaceId });
+        this.m_oState.go("root.searchorbit", { });
     };
 
     RootController.prototype.openImportPage = function () {
@@ -385,6 +381,7 @@ var RootController = (function() {
 
     };
 
+    /*
     RootController.prototype.UpdateWorkspace = function($event) {
         if ( ($event == null || $event.keyCode === 13) && this.m_bIsEditModelWorkspaceNameActive === true) {
 
@@ -412,7 +409,7 @@ var RootController = (function() {
                 this.editModelWorkspaceName();
         }
 
-    };
+    };*/
 
     RootController.prototype.openSnake = function()
     {
@@ -486,6 +483,24 @@ var RootController = (function() {
         this.m_bIsEditModelWorkspaceNameActive = !this.m_bIsEditModelWorkspaceNameActive;
     };
     RootController.prototype.editModelWorkspaceNameSetTrue = function(){
+
+        var oController = this;
+        if  (utilsIsObjectNullOrUndefined(oController.m_oConstantsService.getActiveWorkspace())) return;
+
+        var oCallback = function (value) {
+
+            if (utilsIsObjectNullOrUndefined(value)) return;
+
+            var oWorkspace = oController.m_oConstantsService.getActiveWorkspace();
+            oWorkspace.name = value;
+
+            oController.m_oWorkspaceService.UpdateWorkspace(oWorkspace).success(function (data) {
+                oWorkspace.name = data.name;
+                oController.m_bIsEditModelWorkspaceNameActive = false;
+            });
+        };
+        utilsVexPrompt("Insert Workspace Name:<br>", oController.m_oConstantsService.getActiveWorkspace().name, oCallback);
+
         this.m_bIsEditModelWorkspaceNameActive =true;
     };
 
