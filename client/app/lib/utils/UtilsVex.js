@@ -81,6 +81,7 @@ function utilsVexDialogAlertBottomRightCorner(oMessage,oCallback)
     var oVexInstance = vex.dialog.alert({
         unsafeMessage:oMessage,
         showCloseButton: false,
+        escapeButtonCloses: false,
         className:'vex-theme-bottom-right-corner',// Overwrites defaultOptions
         callback:oCallback
     });
@@ -152,10 +153,12 @@ function utilsVexDialogConfirmWithCheckBox(oMessage,oCallback)
             '}',
             '</style>',
             '<div class="vex-custom-field-wrapper">',
-            '<input name="files" type="checkbox" checked="checked" /> DELETE ON FILE SYSTEM',
+            '<input name="files" type="checkbox" checked="checked" /> ',
+            '<label>DELETE ON FILE SYSTEM</label>',
             '</div>',
             '<div class="vex-custom-field-wrapper">',
-            '<input name="geoserver" type="checkbox" checked="checked"/> DELETE LAYERS ON GEOSERVER',
+            '<input name="geoserver" type="checkbox" checked="checked"/> ',
+            '<label>DELETE LAYERS ON GEOSERVER</label>',
             '</div>'].join('')
 
     })
