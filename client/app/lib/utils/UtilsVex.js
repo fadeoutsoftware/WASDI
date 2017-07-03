@@ -114,8 +114,6 @@ function utilsVexCloseDialogAfterFewSeconds(iSecond,oVexInstance)
         setTimeout(function(){vex.close(oVexInstance) }, iSecond);
 }
 
-
-/*TODO REMOVE THEY ARE ONLY FOR WASDI **************************************************************/
 function utilsVexDialogConfirmWithCheckBox(oMessage,oCallback)
 {
     if(utilsIsStrNullOrEmpty(oMessage))
@@ -153,7 +151,7 @@ function utilsVexDialogConfirmWithCheckBox(oMessage,oCallback)
             '}',
             '</style>',
             '<div class="vex-custom-field-wrapper">',
-            '<input name="files" type="checkbox" checked="checked" /> ',
+            '<input name="files" type="checkbox" checked="checked" ng-click="console.log(\'Evviva\')" /> ',
             '<label>DELETE ON FILE SYSTEM</label>',
             '</div>',
             '<div class="vex-custom-field-wrapper">',
@@ -198,3 +196,23 @@ function utilsVexDialogChangeNameInTree(oMessage,oCallback,sOldName)
 }
 
 
+function utilsVexPrompt(oMessage, sInitialValue, oCallback)
+{
+    if(utilsIsStrNullOrEmpty(oMessage))
+        oMessage = "Are you absolutely sure you want to destroy the alien planet?";//Default message
+
+    if(utilsIsObjectNullOrUndefined(oCallback))
+    {
+        /*Default CallBack*/
+        oCallback=function (value){return "ok"; }
+    }
+
+    oMessage += "<br>";
+    var oVexInstance = vex.dialog.prompt({
+        unsafeMessage:oMessage,
+        value: sInitialValue,
+        //className:'vex-theme-top',// Overwrites defaultOptions
+        callback:oCallback
+    });
+    return oVexInstance;
+}

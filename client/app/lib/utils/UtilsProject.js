@@ -159,7 +159,7 @@ function utilsProjectShowRabbitMessageUserFeedBack(oMessage) {
             sUserMessage = "PUBLISH DONE<br>READY";
             break;
         case "PUBLISHBAND":
-            sUserMessage = "BAND PUBLISHED: " + Message.payload.bandName + "<br>PRODUCT: <br> " + oMessage.payload.productName + "<br>READY";
+            sUserMessage = "BAND PUBLISHED: " + oMessage.payload.bandName + "<br>PRODUCT: <br> " + oMessage.payload.productName + "<br>READY";
             break;
         case "UPDATEPROCESSES":
             console.log("UPDATE PROCESSES"+" " +utilsGetTimeStamp());

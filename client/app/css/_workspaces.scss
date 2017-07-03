@@ -154,4 +154,12 @@
       border-bottom: 0;
     }
   }
+
+  button.cesium-infoBox-camera {
+    display: none;
+  }
+
+  div.cesium-infoBox-title {
+    color: #22EE22;
+  }
 }
