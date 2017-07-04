@@ -169,8 +169,8 @@ $color_alto_approx: #ddd;
   } */
 }
 
-.vex.vex-theme-default .vex-content {  margin-top: 10%;}
-.vex.vex-theme-bottom-right-corner .vex-content {margin-top: inherit;}
+.vex.vex-theme-bottom-right-corner .vex-content {margin-top: inherit!important;}
+.vex.vex-theme-default .vex-content {  margin-top: 10%!important;}
 .vex.vex-theme-default .vex-dialog-form .vex-dialog-buttons {
   font-size: 1.2em;
   margin-top: -0.5em;
