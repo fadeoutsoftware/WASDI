@@ -284,7 +284,8 @@
 .panel,
 .loadIcon,
 .loading-files  {
-  width:100%;
+  width:90%;
+  padding:0 15px;
   $color_space: $wasdi-blue-logo;
   $dotsize: 8px;
   @import "../directives/space_invaders/space_invaders";
@@ -300,14 +301,13 @@
   &.ng-hide {
     //.space {min-height: 100vh;}
   }
-  /*#invader {
-    height:60px!important;
-    margin-top:20px!important;
-  }*/
+  #invader {
+    width:calc(100% - 32px);
+  }
 
 }
 .processes-list #invader {margin-top:20px;}
-#tableProcesses #invader {margin-top:-20px;}
+#tableProcesses #invader {margin-top:-20px; }
 
 #tableProcesses.table > tbody > tr > td:first-child {
   min-width:80px;
