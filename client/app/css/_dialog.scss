@@ -47,6 +47,8 @@ $color_alto_approx: #ddd;
   background-color: transparent;
   border-style: none;
   font: 400 19px VT323, monospace;
+  text-overflow: ellipsis;
+  overflow: hidden;
 }
 
 
@@ -106,10 +108,15 @@ $color_alto_approx: #ddd;
 
 .vex-overlay {background:rgba(0,0,0,0.3)!important;}
 .vex.vex-theme-bottom-right-corner .vex-overlay {background:inherit!important;}
+
 // start override vex css standard
-//.vex-overlay {
-//  background: inherit!important;
-//}
+
+.vex-custom-field-wrapper,
+.vex-dialog-input {
+  input {z-index: 2; position: absolute;}
+  label {padding-left: 2em;}
+}
+
 .vex.vex-theme-bottom-right-corner .dialog-buttons,
 .vex.vex-theme-bottom-right-corner .vex-dialog-form .vex-dialog-buttons {
   display:none;
@@ -139,6 +146,8 @@ $color_alto_approx: #ddd;
     border-width:2px!important;
     border-style: solid!important;
     border:none!important;
+    padding: .2em!important;
+    //padding:2px 3px;
   }
   .vex-dialog-button-primary,
   .vex-dialog-button-secondary {
@@ -147,10 +156,11 @@ $color_alto_approx: #ddd;
     // border-color: $color_jordy_blue_approx!important;
     color: $wasdi-green-logo!important;
     &:hover {
-      color: $wasdi-green-logo*2!important;
-      // content: "\220E";
-      animation: cursor .95s ease-in-out infinite;
-      // font-size: 120%;
+      background: $wasdi-green-logo!important;
+      color: $black!important;
+      //animation: cursor .95s ease-in-out infinite;
+      transition: all .15s ease-in-out;
+
     }
   }
   /* .vex-dialog-button-secondary {
@@ -159,7 +169,8 @@ $color_alto_approx: #ddd;
   } */
 }
 
-
+.vex.vex-theme-default .vex-content {  margin-top: 10%;}
+.vex.vex-theme-bottom-right-corner .vex-content {margin-top: inherit;}
 .vex.vex-theme-default .vex-dialog-form .vex-dialog-buttons {
   font-size: 1.2em;
   margin-top: -0.5em;
@@ -171,8 +182,35 @@ $color_alto_approx: #ddd;
   z-index:1;
   right:1em;
 }
+
 //End override
 
+
+
+//start override input form
+
+.vex-dialog-prompt-input {position:absolute;}
+.vex-dialog-input input {  position: relative;}
+
+.vex-custom-field-wrapper input,
+.vex.vex-theme-default .vex-dialog-form .vex-dialog-input input[type="text"] {
+  background:none!important;
+  border-radius:0!important;
+  padding:2px;
+  line-height:1;
+  min-height:25px!important;
+  opacity: 0.8;
+  color:$wasdi-green-logo;
+  &:focus {
+    background: $wasdi-green-logo!important;
+    opacity: 0.85;
+    color:$black;
+    transition: all .15s ease-in-out;
+    box-shadow:none!important;
+  }
+}
+
+//End override
 
 .vex-dialog-form:after {
   content: "";
@@ -188,6 +226,9 @@ $color_alto_approx: #ddd;
   overflow: hidden;
   border-radius: 25px;
 }
+
+
+
 
 
 .cursor {  @extend %extend_1;}
