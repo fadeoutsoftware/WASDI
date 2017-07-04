@@ -8,7 +8,9 @@ $fgColor: $color_space;
 //body {
 //  background-color: $bgColor;
 //}
-#invader {  width:100%;}
+#invader {
+        //width:100%;
+        display: flex;}
 .invader {
   width: $dotsize;
   height: $dotsize;
@@ -19,16 +21,41 @@ $fgColor: $color_space;
 }
 
 .invader {
-  position:relative;
-  -webkit-animation-name: MOVE;
-  -webkit-animation-duration: 6000ms;
+  //position:relative;
+  /*-webkit-animation-name: MOVE;
+  -webkit-animation-duration: 6s;
   -webkit-animation-timing-function: step-end;
   -webkit-animation-iteration-count: infinite;
-  //-webkit-animation-fill-mode:both;
-  -webkit-animation-direction: alternate;
+  -webkit-animation-direction: alternate;*/
+        //-webkit-animation-fill-mode:both;
+
+        //animation: SPRITE_A 1s step-start infinite alternate, MOVE 6s step-end infinite alternate;
+
+}
+.invader {position: relative;}
+.step1 {
+        animation: MOVE 6s step-end infinite alternate, STEP_A 6s step-end infinite;
+}
+.step2 {
+        animation: MOVE 6s step-end infinite alternate, STEP_B 6s step-end infinite;
 }
 
-
+@-webkit-keyframes STEP_A {
+        0% {opacity:0;}
+        20% {opacity:1;}
+        40% {opacity:0;}
+        60% {opacity:1;}
+        80% {opacity:0;}
+        100% {opacity:1;}
+}
+@-webkit-keyframes STEP_B {
+        0% {opacity:1;}
+        20% {opacity:0;}
+        40% {opacity:1;}
+        60% {opacity:0;}
+        80% {opacity:1;}
+        100% {opacity:0;}
+}
 @-webkit-keyframes MOVE {
 
   0% {left:0;}
@@ -38,11 +65,112 @@ $fgColor: $color_space;
   80% {left:80%;}
   100% {left:100%;}
 
-  // 60% {margin-left:60%;}
-  // 50% {    left: 50%;  }
-
 }
 
+
+/*
+@-webkit-keyframes SPRITE {
+        0% {
+                box-shadow:
+                0 $dotsize*4 $fgColor,
+                0 $dotsize*5 $fgColor,
+                0 $dotsize*6 $fgColor,
+                $dotsize $dotsize*3 $fgColor,
+                $dotsize $dotsize*4 $fgColor,
+                $dotsize*2 0 $fgColor,
+                $dotsize*2 $dotsize*2 $fgColor,
+                $dotsize*2 $dotsize*3 $fgColor,
+                $dotsize*2 $dotsize*4 $fgColor,
+                $dotsize*2 $dotsize*5 $fgColor,
+                $dotsize*2 $dotsize*6 $fgColor,
+                $dotsize*3 $dotsize $fgColor,
+                $dotsize*3 $dotsize*2 $fgColor,
+                $dotsize*3 $dotsize*4 $fgColor,
+                $dotsize*3 $dotsize*5 $fgColor,
+                $dotsize*3 $dotsize*7 $fgColor,
+                $dotsize*4 $dotsize*2 $fgColor,
+                $dotsize*4 $dotsize*3 $fgColor,
+                $dotsize*4 $dotsize*4 $fgColor,
+                $dotsize*4 $dotsize*5 $fgColor,
+                $dotsize*4 $dotsize*7 $fgColor,
+                $dotsize*5 $dotsize*2 $fgColor,
+                $dotsize*5 $dotsize*3 $fgColor,
+                $dotsize*5 $dotsize*4 $fgColor,
+                $dotsize*5 $dotsize*5 $fgColor,
+                $dotsize*6 $dotsize*2 $fgColor,
+                $dotsize*6 $dotsize*3 $fgColor,
+                $dotsize*6 $dotsize*4 $fgColor,
+                $dotsize*6 $dotsize*5 $fgColor,
+                $dotsize*6 $dotsize*7 $fgColor,
+                $dotsize*7 $dotsize $fgColor,
+                $dotsize*7 $dotsize*2 $fgColor,
+                $dotsize*7 $dotsize*4 $fgColor,
+                $dotsize*7 $dotsize*5 $fgColor,
+                $dotsize*7 $dotsize*7 $fgColor,
+                $dotsize*8 0 $fgColor,
+                $dotsize*8 $dotsize*2 $fgColor,
+                $dotsize*8 $dotsize*3 $fgColor,
+                $dotsize*8 $dotsize*4 $fgColor,
+                $dotsize*8 $dotsize*5 $fgColor,
+                $dotsize*8 $dotsize*6 $fgColor,
+                $dotsize*9 $dotsize*3 $fgColor,
+                $dotsize*9 $dotsize*4 $fgColor,
+                $dotsize*10 $dotsize*4 $fgColor,
+                $dotsize*10 $dotsize*5 $fgColor,
+                $dotsize*10 $dotsize*6 $fgColor;}
+        100% {
+                box-shadow:
+                        0 $dotsize $fgColor,
+                        0 $dotsize*2 $fgColor,
+                        0 $dotsize*3 $fgColor,
+                        0 $dotsize*4 $fgColor,
+                        $dotsize $dotsize*3 $fgColor,
+                        $dotsize $dotsize*4 $fgColor,
+                        $dotsize $dotsize*5 $fgColor,
+                        $dotsize $dotsize*7 $fgColor,
+                        $dotsize*2 0 $fgColor,
+                        $dotsize*2 $dotsize*2 $fgColor,
+                        $dotsize*2 $dotsize*3 $fgColor,
+                        $dotsize*2 $dotsize*4 $fgColor,
+                        $dotsize*2 $dotsize*5 $fgColor,
+                        $dotsize*2 $dotsize*6 $fgColor,
+                        $dotsize*3 $dotsize $fgColor,
+                        $dotsize*3 $dotsize*2 $fgColor,
+                        $dotsize*3 $dotsize*4 $fgColor,
+                        $dotsize*3 $dotsize*5 $fgColor,
+                        $dotsize*4 $dotsize*2 $fgColor,
+                        $dotsize*4 $dotsize*3 $fgColor,
+                        $dotsize*4 $dotsize*4 $fgColor,
+                        $dotsize*4 $dotsize*5 $fgColor,
+                        $dotsize*5 $dotsize*2 $fgColor,
+                        $dotsize*5 $dotsize*3 $fgColor,
+                        $dotsize*5 $dotsize*4 $fgColor,
+                        $dotsize*5 $dotsize*5 $fgColor,
+                        $dotsize*6 $dotsize*2 $fgColor,
+                        $dotsize*6 $dotsize*3 $fgColor,
+                        $dotsize*6 $dotsize*4 $fgColor,
+                        $dotsize*6 $dotsize*5 $fgColor,
+                        $dotsize*7 $dotsize $fgColor,
+                        $dotsize*7 $dotsize*2 $fgColor,
+                        $dotsize*7 $dotsize*4 $fgColor,
+                        $dotsize*7 $dotsize*5 $fgColor,
+                        $dotsize*8 0 $fgColor,
+                        $dotsize*8 $dotsize*2 $fgColor,
+                        $dotsize*8 $dotsize*3 $fgColor,
+                        $dotsize*8 $dotsize*4 $fgColor,
+                        $dotsize*8 $dotsize*5 $fgColor,
+                        $dotsize*8 $dotsize*6 $fgColor,
+                        $dotsize*9 $dotsize*3 $fgColor,
+                        $dotsize*9 $dotsize*4 $fgColor,
+                        $dotsize*9 $dotsize*5 $fgColor,
+                        $dotsize*9 $dotsize*7 $fgColor,
+                        $dotsize*10 $dotsize $fgColor,
+                        $dotsize*10 $dotsize*2 $fgColor,
+                        $dotsize*10 $dotsize*3 $fgColor,
+                        $dotsize*10 $dotsize*4 $fgColor;
+        }
+}
+*/
 
 .invader_b {
   margin:  -$dotsize*4 0 0 -$dotsize*5.5;
