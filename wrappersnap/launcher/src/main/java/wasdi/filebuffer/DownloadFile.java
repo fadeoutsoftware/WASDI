@@ -24,6 +24,7 @@ public class DownloadFile {
 
 
     private final int BUFFER_SIZE = 4096;
+    private final int MAX_NUM_ZEORES_DURING_READ = 20;
 
     public long GetDownloadFileSize(String sFileURL) throws IOException {
 
@@ -119,6 +120,8 @@ public class DownloadFile {
             String sDisposition = httpConn.getHeaderField("Content-Disposition");
             String sContentType = httpConn.getContentType();
             int iContentLength = httpConn.getContentLength();
+            
+            LauncherMain.s_oLogger.debug("ExecuteDownloadFile. ContentLenght: " + iContentLength);
 
             if (sDisposition != null) {
                 // extracts file name from header field
@@ -158,21 +161,33 @@ public class DownloadFile {
             
             int iBytesRead = -1;
             byte[] abBuffer = new byte[BUFFER_SIZE];
+            int nZeroes = MAX_NUM_ZEORES_DURING_READ;
             while ((iBytesRead = oInputStream.read(abBuffer)) != -1) {
+            	
+            	if (iBytesRead <= 0) {
+            		LauncherMain.s_oLogger.debug("ExecuteDownloadFile. Read 0 bytes from stream. Counter: " + nZeroes);
+            		nZeroes--;
+            	} else {
+            		nZeroes = MAX_NUM_ZEORES_DURING_READ;
+            	}
+            	if (nZeroes <=0 ) break;
+            	
+//            	LauncherMain.s_oLogger.debug("ExecuteDownloadFile. Read " + iBytesRead +  " bytes from stream");
+            	
                 oOutputStream.write(abBuffer, 0, iBytesRead);
                 
                 // Sum bytes
                 iTotalBytes += iBytesRead;
                 
                 // Overcome a 10% limit?
-                if(iTotalBytes>= iTenPercent) {
+                if(iContentLength>BUFFER_SIZE && iTotalBytes>= iTenPercent && iFilePercent<=100) {
                 	// Increase the file
                 	iFilePercent += 10;
                 	if (iFilePercent>100) iFilePercent = 100;
                 	// Reset the count
                 	iTotalBytes = 0;
                 	// Update the progress
-                	UpdateProcessProgress(oProcessWorkspace, iFilePercent);
+                	if (nZeroes == MAX_NUM_ZEORES_DURING_READ) UpdateProcessProgress(oProcessWorkspace, iFilePercent);
                 }
             }
 
