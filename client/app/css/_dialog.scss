@@ -183,6 +183,10 @@ $color_alto_approx: #ddd;
   right:1em;
 }
 
+.vex.vex-theme-top {
+  padding-top: 20%; /* override top position error VEX dialog*/
+}
+
 //End override
 
 
