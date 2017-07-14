@@ -675,7 +675,7 @@ public class LauncherMain {
             if (oProcessWorkspace != null) oProcessWorkspace.setStatus(ProcessStatus.DONE.name());
 
         }
-        catch (Exception oEx) {
+        catch (Throwable oEx) {
             s_oLogger.error("LauncherMain.ExecuteOperation: exception " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
             if (s_oSendToRabbit!=null) s_oSendToRabbit.SendRabbitMessage(false,operation.name(),oParameter.getWorkspace(),null,oParameter.getExchange());
 
