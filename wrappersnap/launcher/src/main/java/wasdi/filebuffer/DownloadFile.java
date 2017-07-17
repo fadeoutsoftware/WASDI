@@ -9,7 +9,7 @@ import java.net.HttpURLConnection;
 import java.net.PasswordAuthentication;
 import java.net.URL;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
+import org.apache.log4j.Logger;
 
 import wasdi.ConfigReader;
 import wasdi.LauncherMain;
@@ -22,17 +22,25 @@ import wasdi.shared.utils.Utils;
  */
 public class DownloadFile {
 
-
     private final int BUFFER_SIZE = 4096;
     private final int MAX_NUM_ZEORES_DURING_READ = 20;
+	private Logger logger;
 
-    public long GetDownloadFileSize(String sFileURL) throws IOException {
+    public DownloadFile() {
+		logger = LauncherMain.s_oLogger;
+	}
+    
+    public DownloadFile(Logger logger) {
+		this.logger = logger;
+	}
+
+	public long GetDownloadFileSize(String sFileURL) throws IOException {
 
         long lLenght = 0L;
 
         // Domain check
         if (Utils.isNullOrEmpty(sFileURL)) {
-            LauncherMain.s_oLogger.debug("DownloadFile.GetDownloadSize: sFileURL is null");
+            logger.debug("DownloadFile.GetDownloadSize: sFileURL is null");
             return lLenght;
         }
 
@@ -43,13 +51,13 @@ public class DownloadFile {
                     return new PasswordAuthentication(ConfigReader.getPropValue("DHUS_USER"), ConfigReader.getPropValue("DHUS_PASSWORD").toCharArray());
                 }
                 catch (Exception oEx){
-                    LauncherMain.s_oLogger.error("DownloadFile.GetDownloadSize: exception setting auth " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
+                    logger.error("DownloadFile.GetDownloadSize: exception setting auth " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
                 }
                 return null;
             }
         });
 
-        LauncherMain.s_oLogger.debug("DownloadFile.GetDownloadSize: FileUrl = " + sFileURL);
+        logger.debug("DownloadFile.GetDownloadSize: FileUrl = " + sFileURL);
 
         URL url = new URL(sFileURL);
         HttpURLConnection httpConn = (HttpURLConnection) url.openConnection();
@@ -60,12 +68,12 @@ public class DownloadFile {
 
             lLenght = httpConn.getHeaderFieldLong("Content-Length", 0L);
 
-            LauncherMain.s_oLogger.debug("DownloadFile.GetDownloadSize: File size = " + lLenght);
+            logger.debug("DownloadFile.GetDownloadSize: File size = " + lLenght);
 
             return lLenght;
 
         } else {
-            LauncherMain.s_oLogger.debug("DownloadFile.GetDownloadSize: No file to download. Server replied HTTP code: " + responseCode);
+            logger.debug("DownloadFile.GetDownloadSize: No file to download. Server replied HTTP code: " + responseCode);
         }
         httpConn.disconnect();
 
@@ -77,18 +85,18 @@ public class DownloadFile {
 
         // Domain check
         if (Utils.isNullOrEmpty(sFileURL)) {
-            LauncherMain.s_oLogger.debug("DownloadFile.ExecuteDownloadFile: sFileURL is null");
+            logger.debug("DownloadFile.ExecuteDownloadFile: sFileURL is null");
             return "";
         }
         if (Utils.isNullOrEmpty(sSaveDirOnServer)) {
-            LauncherMain.s_oLogger.debug("DownloadFile.ExecuteDownloadFile: sSaveDirOnServer is null");
+            logger.debug("DownloadFile.ExecuteDownloadFile: sSaveDirOnServer is null");
             return "";
         }
 
         String sReturnFilePath = "";
 
         // TODO: Here we are assuming dhus authentication. But we have to find a general solution
-        LauncherMain.s_oLogger.debug("DownloadFile.ExecuteDownloadFile: sDownloadUser = " + sDownloadUser + " - sDownloadPassword = " + sDownloadPassword);
+        logger.debug("DownloadFile.ExecuteDownloadFile: sDownloadUser = " + sDownloadUser + " - sDownloadPassword = " + sDownloadPassword);
         
         if (sDownloadUser!=null) {
             Authenticator.setDefault(new Authenticator() {
@@ -98,14 +106,14 @@ public class DownloadFile {
                     	return new PasswordAuthentication(sDownloadUser, sDownloadPassword.toCharArray());
                     }
                     catch (Exception oEx){
-                        LauncherMain.s_oLogger.error("DownloadFile.ExecuteDownloadFile: exception setting auth " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
+                        logger.error("DownloadFile.ExecuteDownloadFile: exception setting auth " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
                     }
                     return null;
                 }
             });        	
         }
 
-        LauncherMain.s_oLogger.debug("DownloadFile.ExecuteDownloadFile: FileUrl = " + sFileURL);
+        logger.debug("DownloadFile.ExecuteDownloadFile: FileUrl = " + sFileURL);
 
         URL url = new URL(sFileURL);
         HttpURLConnection httpConn = (HttpURLConnection) url.openConnection();
@@ -114,14 +122,14 @@ public class DownloadFile {
         // always check HTTP response code first
         if (responseCode == HttpURLConnection.HTTP_OK) {
 
-            LauncherMain.s_oLogger.debug("DownloadFile.ExecuteDownloadFile: Connected");
+            logger.debug("DownloadFile.ExecuteDownloadFile: Connected");
 
             String sFileName = "";
             String sDisposition = httpConn.getHeaderField("Content-Disposition");
             String sContentType = httpConn.getContentType();
             int iContentLength = httpConn.getContentLength();
             
-            LauncherMain.s_oLogger.debug("ExecuteDownloadFile. ContentLenght: " + iContentLength);
+            logger.debug("ExecuteDownloadFile. ContentLenght: " + iContentLength);
 
             if (sDisposition != null) {
                 // extracts file name from header field
@@ -134,16 +142,16 @@ public class DownloadFile {
                 sFileName = sFileURL.substring(sFileURL.lastIndexOf("/") + 1,sFileURL.length());
             }
 
-            LauncherMain.s_oLogger.debug("Content-Type = " + sContentType);
-            LauncherMain.s_oLogger.debug("Content-Disposition = " + sDisposition);
-            LauncherMain.s_oLogger.debug("Content-Length = " + iContentLength);
-            LauncherMain.s_oLogger.debug("fileName = " + sFileName);
+            logger.debug("Content-Type = " + sContentType);
+            logger.debug("Content-Disposition = " + sDisposition);
+            logger.debug("Content-Length = " + iContentLength);
+            logger.debug("fileName = " + sFileName);
 
             // opens input stream from the HTTP connection
             InputStream oInputStream = httpConn.getInputStream();
             String saveFilePath= sSaveDirOnServer + "/" + sFileName;
 
-            LauncherMain.s_oLogger.debug("DownloadFile.ExecuteDownloadFile: Create Save File Path = " + saveFilePath);
+            logger.debug("DownloadFile.ExecuteDownloadFile: Create Save File Path = " + saveFilePath);
 
             File oTargetFile = new File(saveFilePath);
             File oTargetDir = oTargetFile.getParentFile();
@@ -165,14 +173,14 @@ public class DownloadFile {
             while ((iBytesRead = oInputStream.read(abBuffer)) != -1) {
             	
             	if (iBytesRead <= 0) {
-            		LauncherMain.s_oLogger.debug("ExecuteDownloadFile. Read 0 bytes from stream. Counter: " + nZeroes);
+            		logger.debug("ExecuteDownloadFile. Read 0 bytes from stream. Counter: " + nZeroes);
             		nZeroes--;
             	} else {
             		nZeroes = MAX_NUM_ZEORES_DURING_READ;
             	}
             	if (nZeroes <=0 ) break;
             	
-//            	LauncherMain.s_oLogger.debug("ExecuteDownloadFile. Read " + iBytesRead +  " bytes from stream");
+//            	logger.debug("ExecuteDownloadFile. Read " + iBytesRead +  " bytes from stream");
             	
                 oOutputStream.write(abBuffer, 0, iBytesRead);
                 
@@ -180,7 +188,7 @@ public class DownloadFile {
                 iTotalBytes += iBytesRead;
                 
                 // Overcome a 10% limit?
-                if(iContentLength>BUFFER_SIZE && iTotalBytes>= iTenPercent && iFilePercent<=100) {
+                if(oProcessWorkspace!=null && iContentLength>BUFFER_SIZE && iTotalBytes>=iTenPercent && iFilePercent<=100) {
                 	// Increase the file
                 	iFilePercent += 10;
                 	if (iFilePercent>100) iFilePercent = 100;
@@ -196,9 +204,9 @@ public class DownloadFile {
 
             sReturnFilePath = saveFilePath;
 
-            LauncherMain.s_oLogger.debug("File downloaded " + sReturnFilePath);
+            logger.debug("File downloaded " + sReturnFilePath);
         } else {
-            LauncherMain.s_oLogger.debug("No file to download. Server replied HTTP code: " + responseCode);
+            logger.debug("No file to download. Server replied HTTP code: " + responseCode);
         }
         httpConn.disconnect();
 
@@ -212,15 +220,15 @@ public class DownloadFile {
 	        oProcessWorkspace.setProgressPerc(iProgress);
 	        //update the process
 	        if (!oProcessWorkspaceRepository.UpdateProcess(oProcessWorkspace))
-	            LauncherMain.s_oLogger.debug("LauncherMain.DownloadFile: Error during process update with process Perc");
+	            logger.debug("LauncherMain.DownloadFile: Error during process update with process Perc");
 	
 	        //send update process message
 
 			if (!LauncherMain.s_oSendToRabbit.SendUpdateProcessMessage(oProcessWorkspace)) {
-				LauncherMain.s_oLogger.debug("LauncherMain.DownloadFile: Error sending rabbitmq message to update process list");
+				logger.debug("LauncherMain.DownloadFile: Error sending rabbitmq message to update process list");
 			}
 		} catch (Exception oEx) {
-			LauncherMain.s_oLogger.error("LauncherMain.DownloadFile: Exception " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
+			logger.error("LauncherMain.DownloadFile: Exception " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
 			oEx.printStackTrace();
 		}
     }
@@ -233,7 +241,7 @@ public class DownloadFile {
         try {
             // Domain check
             if (Utils.isNullOrEmpty(sFileURL)) {
-                LauncherMain.s_oLogger.debug("DownloadFile.GetFileName: sFileURL is null or Empty");
+                logger.debug("DownloadFile.GetFileName: sFileURL is null or Empty");
                 return "";
             }
 
@@ -246,13 +254,13 @@ public class DownloadFile {
                         return new PasswordAuthentication(ConfigReader.getPropValue("DHUS_USER"), ConfigReader.getPropValue("DHUS_PASSWORD") .toCharArray());
                     }
                     catch (Exception oEx){
-                        LauncherMain.s_oLogger.error("DownloadFile.GetFileName: exception setting auth " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
+                        logger.error("DownloadFile.GetFileName: exception setting auth " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
                     }
                     return null;
                 }
             });
 
-            LauncherMain.s_oLogger.debug("DownloadFile.GetFileName: FileUrl = " + sFileURL);
+            logger.debug("DownloadFile.GetFileName: FileUrl = " + sFileURL);
 
             String sConnectionTimeout = ConfigReader.getPropValue("CONNECTION_TIMEOUT");
             String sReadTimeOut = ConfigReader.getPropValue("READ_TIMEOUT");
@@ -264,27 +272,27 @@ public class DownloadFile {
                 iConnectionTimeOut = Integer.parseInt(sConnectionTimeout);
             }
             catch (Exception oEx) {
-                LauncherMain.s_oLogger.error(org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
+                logger.error(org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
             }
             try {
                 iReadTimeOut = Integer.parseInt(sReadTimeOut);
             }
             catch (Exception oEx) {
-                LauncherMain.s_oLogger.error(org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
+                logger.error(org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
             }
 
             URL url = new URL(sFileURL);
             HttpURLConnection httpConn = (HttpURLConnection) url.openConnection();
-            LauncherMain.s_oLogger.debug("DownloadFile.GetFileName: Connection Created");
+            logger.debug("DownloadFile.GetFileName: Connection Created");
             httpConn.setConnectTimeout(iConnectionTimeOut);
             httpConn.setReadTimeout(iReadTimeOut);
-            LauncherMain.s_oLogger.debug("DownloadFile.GetFileName: Timeout Setted: waiting response");
+            logger.debug("DownloadFile.GetFileName: Timeout Setted: waiting response");
             int responseCode = httpConn.getResponseCode();
 
             // always check HTTP response code first
             if (responseCode == HttpURLConnection.HTTP_OK) {
 
-                LauncherMain.s_oLogger.debug("DownloadFile.GetFileName: Connected");
+                logger.debug("DownloadFile.GetFileName: Connected");
 
                 String fileName = "";
                 String disposition = httpConn.getHeaderField("Content-Disposition");
@@ -304,19 +312,19 @@ public class DownloadFile {
 
                 sReturnFilePath = fileName;
 
-                LauncherMain.s_oLogger.debug("Content-Type = " + contentType);
-                LauncherMain.s_oLogger.debug("Content-Disposition = " + disposition);
-                LauncherMain.s_oLogger.debug("Content-Length = " + contentLength);
-                LauncherMain.s_oLogger.debug("fileName = " + fileName);
+                logger.debug("Content-Type = " + contentType);
+                logger.debug("Content-Disposition = " + disposition);
+                logger.debug("Content-Length = " + contentLength);
+                logger.debug("fileName = " + fileName);
             } else {
-                LauncherMain.s_oLogger.debug("No file to download. Server replied HTTP code: " + responseCode);
+                logger.debug("No file to download. Server replied HTTP code: " + responseCode);
             }
             httpConn.disconnect();
 
             return  sReturnFilePath;
         }
         catch (Exception oEx) {
-            LauncherMain.s_oLogger.error(org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
+            logger.error(org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
         }
 
         return  "";

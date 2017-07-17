@@ -20,7 +20,6 @@ import org.esa.snap.core.gpf.graph.Node;
 
 import com.bc.ceres.binding.dom.DomElement;
 import com.bc.ceres.binding.dom.XppDomElement;
-import com.fasterxml.jackson.core.JsonProcessingException;
 
 import sun.management.VMManagement;
 import wasdi.ConfigReader;
@@ -277,7 +276,7 @@ public class WasdiGraph {
         return (int)getProcessIdMethod.invoke(vmManagement);
     }
 	
-	private boolean setNodeValue(Node node, String childName, String value) {
+	public static boolean setNodeValue(Node node, String childName, String value) {
 		DomElement el = node.getConfiguration();
 		DomElement[] children = el.getChildren(childName);
 		if (children==null || children.length!=1) {
@@ -286,7 +285,6 @@ public class WasdiGraph {
 			oFileElement.setValue(value);
 			el.addChild(oFileElement);
 			
-			logger.debug("WasdiGraph.setNodeFileValue: Added child " + childName + " in node " + node.getId());
 			return true;
 		}
 		else {

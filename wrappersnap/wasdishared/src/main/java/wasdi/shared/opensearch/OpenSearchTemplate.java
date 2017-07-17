@@ -1,10 +1,7 @@
-package it.fadeout.opensearch;
+package wasdi.shared.opensearch;
 
 import java.util.HashMap;
 import java.util.Map;
-
-import javax.servlet.ServletConfig;
-import javax.ws.rs.core.Context;
 
 import org.apache.abdera.i18n.templates.Template;
 

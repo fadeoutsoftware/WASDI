@@ -1,4 +1,4 @@
-package it.fadeout.opensearch;
+package wasdi.shared.opensearch;
 
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
@@ -15,8 +15,6 @@ import java.util.HashMap;
 import java.util.Base64;
 
 import javax.imageio.ImageIO;
-import javax.servlet.ServletConfig;
-import javax.ws.rs.core.Context;
 
 import org.apache.abdera.Abdera;
 import org.apache.abdera.model.Base;
@@ -31,11 +29,6 @@ import org.apache.abdera.protocol.client.AbderaClient;
 import org.apache.abdera.protocol.client.ClientResponse;
 import org.apache.abdera.protocol.client.RequestOptions;
 import org.apache.abdera.writer.Writer;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.XML;
 

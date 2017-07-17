@@ -11,21 +11,16 @@ import javax.servlet.ServletConfig;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 
-import org.jsoup.select.Evaluator.IsEmpty;
-
 import it.fadeout.Wasdi;
-import it.fadeout.opensearch.OpenSearchQuery;
-import it.fadeout.opensearch.OpenSearchTemplate;
-import it.fadeout.opensearch.QueryExecutor;
-import it.fadeout.viewmodels.QueryResultViewModel;
-import net.coobird.thumbnailator.makers.ScaledThumbnailMaker;
 import wasdi.shared.business.User;
+import wasdi.shared.opensearch.OpenSearchQuery;
+import wasdi.shared.opensearch.QueryExecutor;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.viewmodels.QueryResultViewModel;
 
 @Path("/search")
 public class OpenSearchResource {
