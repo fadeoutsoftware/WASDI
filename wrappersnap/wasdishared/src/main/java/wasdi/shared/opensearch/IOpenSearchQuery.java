@@ -1,4 +1,4 @@
-package it.fadeout.opensearch;
+package wasdi.shared.opensearch;
 
 import java.net.URISyntaxException;
 

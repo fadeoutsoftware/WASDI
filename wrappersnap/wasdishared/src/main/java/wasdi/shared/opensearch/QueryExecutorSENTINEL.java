@@ -1,4 +1,4 @@
-package it.fadeout.opensearch;
+package wasdi.shared.opensearch;
 
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
@@ -23,8 +23,6 @@ import org.apache.abdera.protocol.client.AbderaClient;
 import org.apache.abdera.protocol.client.ClientResponse;
 import org.apache.abdera.protocol.client.RequestOptions;
 import org.json.JSONObject;
-
-import it.fadeout.viewmodels.QueryResultViewModel;
 
 public class QueryExecutorSENTINEL extends QueryExecutor {
 

@@ -1,4 +1,4 @@
-package it.fadeout.viewmodels;
+package wasdi.shared.viewmodels;
 
 import java.util.HashMap;
 import java.util.Map;

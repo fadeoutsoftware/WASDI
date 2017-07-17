@@ -1,0 +1,204 @@
+package wasdi.mulesme;
+
+import java.io.File;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+
+import org.geotools.data.shapefile.ShapefileDataStore;
+import org.geotools.data.store.ContentFeatureCollection;
+import org.geotools.data.store.ContentFeatureSource;
+import org.geotools.feature.FeatureIterator;
+import org.opengis.feature.simple.SimpleFeature;
+
+import com.vividsolutions.jts.geom.MultiPolygon;
+import com.vividsolutions.jts.geom.Polygon;
+
+import wasdi.filebuffer.DownloadFile;
+import wasdi.shared.opensearch.QueryExecutor;
+import wasdi.shared.viewmodels.QueryResultViewModel;
+
+
+public class DownloadManager {
+	
+//	public static Logger logger = Logger.getLogger(DownloadManager.class);
+
+    private static String QUERY_TEMPLATE = "( footprint:\"intersects(__FOOTPRINT__)\" ) AND ( beginPosition:[__FROM__ TO __TO__] AND endPosition:[__FROM__ TO __TO__] ) AND (platformname:__PLATFORM__ AND producttype:__PRODUCTTYPE__)";
+    private static SimpleDateFormat QUERY_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+
+    /**
+     * footprints used to filter products
+     */
+	private ArrayList<String> footprints = new ArrayList<>();
+	/**
+	 * download destination folder
+	 */
+	private File destinationDir = null;
+	
+	private String platformName = "Sentinel-1";
+	private String productType = "GRD";
+    private String queryLimit = "5";
+    private String querySortedBy = "ingestiondate";
+    private String queryOrder = "desc";	
+    private String providerName = "SENTINEL";
+    private String providerUser = "sadamo";
+    private String providerPassword = "***REMOVED***";
+    
+    /**
+     * constructor with the fottprints shape file and the download destination folder 
+     * @param footprintShp
+     * @param destinationDir
+     * @throws Exception
+     */
+	public DownloadManager(File footprintShp, File destinationDir) throws Exception{
+		
+		this.destinationDir = destinationDir;
+		
+		ShapefileDataStore ds = new ShapefileDataStore(footprintShp.toURI().toURL());
+		ContentFeatureSource fs = ds.getFeatureSource();
+		ContentFeatureCollection fc = fs.getFeatures();
+		FeatureIterator<SimpleFeature> fit = fc.features();		
+		while (fit.hasNext()) {
+			SimpleFeature f = fit.next();
+			Object o = f.getDefaultGeometry();
+			String wkt = null;
+			if (o instanceof MultiPolygon) {
+				MultiPolygon mp = (MultiPolygon) o;
+				Polygon p = (Polygon)mp.getGeometryN(0);
+				wkt = p.toText();				
+			}
+			if (o instanceof Polygon) {
+				Polygon p = (Polygon) o;
+				wkt = p.toText();
+			}
+			System.out.println(wkt);				
+			if (wkt!=null) footprints.add(wkt);
+		}
+		ds.dispose();
+	}
+	
+	/**
+	 * search and download the products in the specified period
+	 * @param from
+	 * @param to
+	 */
+	public void download(Date from, Date to) {
+		String query = QUERY_TEMPLATE
+				.replaceAll("__FROM__", QUERY_DATE_FORMAT.format(from))
+				.replaceAll("__TO__", QUERY_DATE_FORMAT.format(to))
+				.replaceAll("__PLATFORM__", platformName)
+				.replaceAll("__PRODUCTTYPE__", productType);
+		
+		QueryExecutor executor = QueryExecutor.newInstance(providerName, providerUser, providerPassword, "0", queryLimit, querySortedBy, queryOrder);
+		DownloadFile downloader = new DownloadFile();
+		
+		for (String footprint : footprints) {
+			String footprintQuery = query.replaceAll("__FOOTPRINT__", footprint);
+			
+			System.out.println("managing footprint " + footprint);
+			
+			try {
+				ArrayList<QueryResultViewModel> results = executor.execute(footprintQuery);
+				if (results == null) {
+					System.out.println("\tno results found");
+					continue;
+				}
+				for (QueryResultViewModel result : results) {
+					
+					if (result.getTitle().contains("S1B")) continue;
+					
+					System.out.println("\tdownloading " + result.getSummary() + " --> " + result.getLink());
+					
+					downloader.ExecuteDownloadFile(result.getLink(), providerUser, providerPassword, destinationDir.getAbsolutePath(), null);
+					
+					System.out.println("\t\tdone");
+				}					
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			
+			System.out.println("end");
+		}
+	}
+	
+	public String getPlatformName() {
+		return platformName;
+	}
+
+	public void setPlatformName(String platformName) {
+		this.platformName = platformName;
+	}
+
+	public String getProductType() {
+		return productType;
+	}
+
+	public void setProductType(String productType) {
+		this.productType = productType;
+	}
+
+	public String getQueryLimit() {
+		return queryLimit;
+	}
+
+	public void setQueryLimit(String queryLimit) {
+		this.queryLimit = queryLimit;
+	}
+
+	public String getQuerySortedBy() {
+		return querySortedBy;
+	}
+
+	public void setQuerySortedBy(String querySortedBy) {
+		this.querySortedBy = querySortedBy;
+	}
+
+	public String getQueryOrder() {
+		return queryOrder;
+	}
+
+	public void setQueryOrder(String queryOrder) {
+		this.queryOrder = queryOrder;
+	}
+
+	public String getProviderName() {
+		return providerName;
+	}
+
+	public void setProviderName(String providerName) {
+		this.providerName = providerName;
+	}
+
+	public String getProviderUser() {
+		return providerUser;
+	}
+
+	public void setProviderUser(String providerUser) {
+		this.providerUser = providerUser;
+	}
+
+	public String getProviderPassword() {
+		return providerPassword;
+	}
+
+	public void setProviderPassword(String providerPassword) {
+		this.providerPassword = providerPassword;
+	}
+
+	public static void main(String[] args) throws Exception {
+		Calendar from = Calendar.getInstance();
+		from.add(Calendar.HOUR_OF_DAY, -24);
+		from.set(Calendar.HOUR_OF_DAY, 0);
+		from.set(Calendar.MINUTE, 0);
+		from.set(Calendar.SECOND, 0);
+		from.set(Calendar.MILLISECOND, 0);
+		Calendar to = Calendar.getInstance();
+		to.set(Calendar.HOUR_OF_DAY, 0);
+		to.set(Calendar.MINUTE, 0);
+		to.set(Calendar.SECOND, 0);
+		to.set(Calendar.MILLISECOND, 0);
+		new DownloadManager(new File(args[0]), new File(args[1])).download(from.getTime(), to.getTime());
+	}
+}

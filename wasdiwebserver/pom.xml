@@ -83,11 +83,6 @@
 		</dependency>
 		<!-- https://mvnrepository.com/artifact/org.json/json -->
 		<dependency>
-		    <groupId>org.json</groupId>
-		    <artifactId>json</artifactId>
-		    <version>20160810</version>
-		</dependency>
-		<dependency>
 			<groupId>com.owlike</groupId>
 		  	<artifactId>genson</artifactId>
 		  	<version>1.4</version>

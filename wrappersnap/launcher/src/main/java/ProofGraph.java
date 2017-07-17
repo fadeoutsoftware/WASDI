@@ -104,10 +104,8 @@ public class ProofGraph {
 		File graphXmlFile = new File("/home/doy/tmp/wasdi/graph/myGraph.xml");
 		File inputFile = new File("/home/doy/tmp/wasdi/graph/S1A_IW_GRDH_1SDV_20160802T051857_20160802T051922_012417_013615_C75B.zip");
 		File outputFile = new File("/home/doy/tmp/wasdi/graph/output_product");
-		
-		
-		System.setProperty("user.home", "/home/doy");
 
+		System.setProperty("user.home", "/home/doy");
         Path propFile = Paths.get("/home/doy/workspaces/wasdi/server/launcher/target/config.properties");
         Config.instance("snap.auxdata").load(propFile);
         Config.instance().load();
