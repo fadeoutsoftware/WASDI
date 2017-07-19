@@ -27,7 +27,8 @@ public class DownloadManager {
 
     private static String QUERY_TEMPLATE = "( footprint:\"intersects(__FOOTPRINT__)\" ) AND ( beginPosition:[__FROM__ TO __TO__] AND endPosition:[__FROM__ TO __TO__] ) AND (platformname:__PLATFORM__ AND producttype:__PRODUCTTYPE__)";
     private static SimpleDateFormat QUERY_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-
+    private static SimpleDateFormat ARGS_DATE_FORMAT = new SimpleDateFormat("yyyyMMddHHmm");
+    
     /**
      * footprints used to filter products
      */
@@ -39,7 +40,7 @@ public class DownloadManager {
 	
 	private String platformName = "Sentinel-1";
 	private String productType = "GRD";
-    private String queryLimit = "5";
+    private String queryLimit = "2";
     private String querySortedBy = "ingestiondate";
     private String queryOrder = "desc";	
     private String providerName = "SENTINEL";
@@ -73,9 +74,10 @@ public class DownloadManager {
 				Polygon p = (Polygon) o;
 				wkt = p.toText();
 			}
-			System.out.println(wkt);				
+//			System.out.println(wkt);				
 			if (wkt!=null) footprints.add(wkt);
 		}
+		fit.close();
 		ds.dispose();
 	}
 	
@@ -94,10 +96,12 @@ public class DownloadManager {
 		QueryExecutor executor = QueryExecutor.newInstance(providerName, providerUser, providerPassword, "0", queryLimit, querySortedBy, queryOrder);
 		DownloadFile downloader = new DownloadFile();
 		
+		System.out.println("searching products between " + from + " and " + to + " for " + footprints.size() + " regions ");
+		
 		for (String footprint : footprints) {
 			String footprintQuery = query.replaceAll("__FOOTPRINT__", footprint);
 			
-			System.out.println("managing footprint " + footprint);
+//			System.out.println("managing footprint " + footprint);
 			
 			try {
 				ArrayList<QueryResultViewModel> results = executor.execute(footprintQuery);
@@ -187,18 +191,13 @@ public class DownloadManager {
 		this.providerPassword = providerPassword;
 	}
 
-	public static void main(String[] args) throws Exception {
-		Calendar from = Calendar.getInstance();
-		from.add(Calendar.HOUR_OF_DAY, -24);
-		from.set(Calendar.HOUR_OF_DAY, 0);
-		from.set(Calendar.MINUTE, 0);
-		from.set(Calendar.SECOND, 0);
-		from.set(Calendar.MILLISECOND, 0);
-		Calendar to = Calendar.getInstance();
-		to.set(Calendar.HOUR_OF_DAY, 0);
-		to.set(Calendar.MINUTE, 0);
-		to.set(Calendar.SECOND, 0);
-		to.set(Calendar.MILLISECOND, 0);
-		new DownloadManager(new File(args[0]), new File(args[1])).download(from.getTime(), to.getTime());
+	public static void main(String[] args) throws Exception {		
+		Date from = ARGS_DATE_FORMAT.parse(args[2]);
+		Date to = ARGS_DATE_FORMAT.parse(args[3]);
+		
+		DownloadManager manager = new DownloadManager(new File(args[0]), new File(args[1]));
+		
+		if (args.length > 4) manager.setQueryLimit(args[4]);
+		manager.download(from, to);
 	}
 }

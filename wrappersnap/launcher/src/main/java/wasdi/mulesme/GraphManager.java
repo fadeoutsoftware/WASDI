@@ -19,6 +19,7 @@ import org.esa.snap.runtime.Engine;
 
 import com.bc.ceres.core.ProgressMonitor;
 
+import wasdi.ConfigReader;
 import wasdi.snapopearations.WasdiGraph;
 
 public class GraphManager {
@@ -79,12 +80,20 @@ public class GraphManager {
 	
 	public static void main(String[] args) throws Exception{
 		
-		System.setProperty("user.home", "/home/doy");
-		Path propFile = Paths.get("/home/doy/workspaces/wasdi/server/launcher/target/config.properties");
+		
+		System.setProperty("user.home", ConfigReader.getPropValue("USER_HOME"));
+        Path propFile = Paths.get(ConfigReader.getPropValue("SNAP_AUX_PROPERTIES"));
         Config.instance("snap.auxdata").load(propFile);
         Config.instance().load();
         SystemUtils.init3rdPartyLibs(null);
         Engine.start(false);
+		
+//		System.setProperty("user.home", "/home/doy");
+//		Path propFile = Paths.get("/home/doy/workspaces/wasdi/server/launcher/target/config.properties");
+//		Config.instance("snap.auxdata").load(propFile);
+//		Config.instance().load();
+//		SystemUtils.init3rdPartyLibs(null);
+//		Engine.start(false);
 		
 		String dateYesterday = args[0];
 		

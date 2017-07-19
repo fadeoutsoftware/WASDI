@@ -295,7 +295,7 @@ public abstract class QueryExecutor {
 			oOptions.setAuthorization(sBasicAuth);			
 		}
 		
-		System.out.println("\nSending 'GET' request to URL : " + sUrl);
+//		System.out.println("\nSending 'GET' request to URL : " + sUrl);
 		ClientResponse response = oClient.get(sUrl, oOptions);
 		
 		Document<Feed> oDocument = null;
