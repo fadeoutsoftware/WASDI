@@ -111,7 +111,7 @@ public class DownloadManager {
 				}
 				for (QueryResultViewModel result : results) {
 					
-					if (result.getTitle().contains("S1B")) continue;
+//					if (result.getTitle().contains("S1B")) continue;
 					
 					System.out.println("\tdownloading " + result.getSummary() + " --> " + result.getLink());
 					
