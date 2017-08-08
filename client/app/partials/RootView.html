@@ -130,7 +130,7 @@
 
     <div ui-view="maincontent" id="main"></div>
 
-    <!------------------ STATUS BAR ------------------->
+    <!------------------ PROCESSES BAR ------------------->
     <div class=" status-bar " id="status-bar" ng-show="m_oController.isVisibleProcessesBar() == true" >
         <div class="row"  >
                 <div class="col-xs-1 col-sm-1 col-md-1 col-lg-1 processes-list" style="margin:0; padding:0;" >
@@ -156,7 +156,9 @@
                                         <!-- class="sr-only " for hide {{oProcess.progressPerc}} % Complete (success) -->
                                     </div>
                                 </div>
+
                             </div>
+
                             <div class="flex-container">
                                 <span class="label label-default">{{"ROOT_LABEL_NAME"|translate}}</span>
                                 <div class="single-process">{{m_oController.m_oLastProcesses.productName}}</div>

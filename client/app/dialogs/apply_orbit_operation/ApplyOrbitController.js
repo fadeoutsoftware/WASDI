@@ -27,41 +27,17 @@ var ApplyOrbitController = (function() {
             if( (utilsIsObjectNullOrUndefined(this.m_oSelectedProduct.productFriendlyName)== false) && (utilsIsStrNullOrEmpty(this.m_oSelectedProduct.productFriendlyName)== false))
                 this.m_sFileName_Operation = this.m_oSelectedProduct.name + "_ApplyOrbit";
         }
-        // this.m_oTabOpen = "tab1";
-        // this.m_asTypeOfData = ["GeoTIFF","NetCDF-BEAM","NetCDF4-CF","NetCDF-CF","CSV","Gamma","Generic Binary","GeoTIFF+XML",
-        //                         "NetCDF4-BEAM","BEAM-DIMAP","ENVI","PolSARPro","Snaphu","JP2","JPG","PNG","BMP","GIF","BTF","GeoTIFF-BIGTIFF","HDF5"];
 
-        // this.m_asOrbitStateVectors = ["Sentinel Precise (Auto Download)","Sentinel Restituted (Auto Download)","DORIS preliminary POR (ENVISAT)"
-        //                                 ,"DORIS Precise Vor (ENVISAT) (Auto Download)","DELFT Precise (ENVISAT,ERS1&2) (Auto Download)","PRARE Precise (ERS1&2) (Auto Download)"];
-
-        // this.m_sSelectedExtension = this.m_asTypeOfData[0];
-        // this.m_sSelectedOrbitStateVectors = this.m_asOrbitStateVectors[0];
         this.m_sSelectedOrbitStateVectors = "";
         //TODO CHECK IF THERE IS sourceFileName && destinationFileName
         this.m_oReturnValue={
              sourceFileName:"",
              destinationFileName:"",
-                // options:{
-                //     orbitType:"",
-                //     polyDegree:3,
-                //     continueOnFail:false
-                // }
+
         };
 
         this.m_oOptions ={};
 
-        // this.m_oReturnValue = {
-        //     sourceFileName:this.m_oSelectedProduct.fileName,
-        //     destinationFileName:this.m_sFriendlyName_Operation,
-        //     options:{
-        //             orbitType:"Sentinel Precise(Auto Download)",
-        //             polyDegree:3,
-        //             continueOnFail:false}
-        // };
-
-
-        //this.m_oOrbit = oExtras;
-        //$scope.close = oClose;
         $scope.close = function() {
             oClose("close", 500); // close, but give 500ms for bootstrap to animate
         };
@@ -129,8 +105,6 @@ var ApplyOrbitController = (function() {
             destinationFileName:"",
             options:this.m_oOptions,
         };
-        // this.m_oReturnValue.sourceFileName = this.m_oSelectedProduct.fileName;
-        // this.m_oReturnValue.destinationFileName = this.m_sFriendlyName_Operation;
 
         return true;
     };

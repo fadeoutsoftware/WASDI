@@ -235,6 +235,9 @@
       .progress-single-process{
         float: right;
         width:10%;
+        background-color:$wasdi-white ;
+        .progress-bar{}
+        padding: 0 4em 0 0em;
       }
     }
     .my-button
@@ -281,7 +284,7 @@
   padding:10px;
 
 }
-.panel,
+//.panel,
 .loadIcon,
 .loading-files  {
   width:90%;

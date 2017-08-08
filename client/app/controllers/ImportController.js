@@ -325,9 +325,9 @@ var ImportController = (function() {
         });
 
         /*SET DEFAULT VALUE OF PERIOD */
-        this.updateAdvancedSearch();
-        this.setDefaultData();
 
+        this.setDefaultData();
+        this.updateAdvancedSearch();
     }
 
     /***************** METHODS ***************/
