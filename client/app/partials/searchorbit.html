@@ -6,11 +6,32 @@
             <div class="buttom-collumn">
                 <button class="my-button" ng-click="m_oController.searchOrbit()" ng-disabled=" !m_oController.isClickableSearchButton()" >Search</button>
             </div>
+
+            <!---------------------- TIME PICKER END -------------------->
+            <div class=" time-picker-container">
+
+                <div class="input-group my-input-text"
+                     moment-picker="m_oController.m_oOrbitSearch.acquisitionEndTime"
+                     format="YYYY-MM-DD HH:mm:ss"
+                     today="true">
+
+                    <input class="form-control"
+                           placeholder="Select acquisition end time"
+                           ng-model="m_oController.m_oOrbitSearch.acquisitionEndTime"
+                           ng-model-options="{ updateOn: 'blur' }">
+
+                    <span class="input-group-addon">
+                                <i class="fa fa-calendar"></i>
+                            </span>
+                </div>
+            </div>
+
+            <div class="description">
+                <i class="fa fa-calendar" aria-hidden="true"></i>
+                Acquisition End Time:
+            </div>
+
             <!------------------------- TIME PICKER START -------------------->
-            <!--<div class="description">-->
-                <!--<i class="fa fa-calendar" aria-hidden="true"></i>-->
-                <!--Acquisition Start Time:-->
-            <!--</div>-->
             <div class=" time-picker-container ">
 
 
@@ -30,34 +51,9 @@
                 </div>
             </div>
 
-            <!---------------------- TIME PICKER END -------------------->
             <div class="description">
                 <i class="fa fa-calendar" aria-hidden="true"></i>
-                Acquisition End Time:
-            </div>
-            <div class=" time-picker-container">
-
-                <div class="input-group my-input-text"
-                     moment-picker="m_oController.m_oOrbitSearch.acquisitionEndTime"
-                     format="YYYY-MM-DD HH:mm:ss"
-                     today="true">
-
-                    <input class="form-control"
-                           placeholder="Select acquisition end time"
-                           ng-model="m_oController.m_oOrbitSearch.acquisitionEndTime"
-                           ng-model-options="{ updateOn: 'blur' }">
-
-                    <span class="input-group-addon">
-                                <i class="fa fa-calendar"></i>
-                            </span>
-                </div>
-            </div>
-            <!--<div class="buttom-collumn"   >-->
-                <!--<button class="my-button" ng-click="m_oController.searchOrbit()" ng-disabled=" !m_oController.isClickableSearchButton()" >Search</button>-->
-            <!--</div>-->
-            <div class="description">
-                <i class="fa fa-calendar" aria-hidden="true"></i>
-                Acquisition End Time:
+                Acquisition Start Time:
             </div>
         </div>
 
@@ -144,8 +140,7 @@
                 </table>
 
                 <div class="loading-orbits"  ng-show="m_oController.m_bIsVisibleLoadingIcon" >
-                    <!--<i class="fa fa-spinner fa-pulse fa-3x fa-fw"></i>-->
-                    <!--<span class="sr-only">Loading...</span>-->
+
                     <invader></invader>
 
                 </div>

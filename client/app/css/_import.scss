@@ -16,6 +16,7 @@
         float:left;
         margin-left: 10px;
         padding: 10px 10px;
+
       }
     }
 
@@ -25,6 +26,7 @@
       input[type=text]{
         width: 100%;
         border: 2px solid $wasdi-blue-logo;
+
       }
       .input-group{
         float:right;
@@ -220,15 +222,12 @@
         }
         input[type=text] {
 
-          //padding: 12px 20px;
-          //margin: 8px 0;
-          //box-sizing: border-box;
-          //background-color: white;
-          //border-color: #2D394F;
           border-color: $wasdi-blue-logo;
           margin:0;
         }
         .advance-search{
+
+
           .ingestion-time{
             .description-label{
               margin-top: 7px;
@@ -251,8 +250,15 @@
               width: 20%;
             }
           }
-        }
 
+        }
+        .search-input{
+          margin-bottom: 15px;
+          .my-label{
+            margin-bottom: 8px;
+          }
+
+        }
 
       }
       .merge-search
@@ -516,11 +522,7 @@
     /****************** INPUT FORM SEARCH CONTAINER********************/
     #advanced-search-container{
 
-      //background-color: white;
-      //margin: 10px;
-      //box-shadow: 3px 5px 19px 0 rgba(49,50,50,.62);
       padding: 8px;
-
 
     }
     #advanced-search-close-button{
@@ -535,6 +537,7 @@
       //background-color: white;
       overflow-y: auto;
       overflow-x: hidden;
+
 
       .advanced-calendar-input
       {
@@ -614,13 +617,7 @@
           border:2px solid $wasdi-input-text-border-color;
         }
         input[type=text] {
-          //width: 100%;
-          //padding: 12px 20px;
-          //margin: 8px 0;
-          //box-sizing: border-box;
-          //background-color: white;
-          //border-color: #2D394F;
-          margin:0;
+          margin:0px;
         }
 
         .advanced-calendar-button {

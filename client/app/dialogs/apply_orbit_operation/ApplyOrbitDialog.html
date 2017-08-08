@@ -80,7 +80,7 @@
                     {{"DIALOG_CLOSE_BUTTON"|translate}}
                 </button>
                 <button type="button" ng-click="run(m_oController.m_oReturnValue)" class="my-button" data-dismiss="modal"
-                        ng-disabled="m_oController.selectedProductIsEmpty() && oController.m_bThereAreParameters === false " >
+                        ng-disabled="m_oController.selectedProductIsEmpty() " ><!--&& m_oController.m_bThereAreParameters === false -->
                     {{"DIALOG_RUN_BUTTON"|translate}}
                 </button>
             </div>
