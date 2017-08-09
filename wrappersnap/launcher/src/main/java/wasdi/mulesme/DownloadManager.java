@@ -119,7 +119,7 @@ public class DownloadManager {
 					
 					System.out.println("\t\tdone");
 				}					
-			} catch (IOException e) {
+			} catch (Exception e) {
 				e.printStackTrace();
 			}
 			
