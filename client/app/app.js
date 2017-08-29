@@ -152,3 +152,4 @@ wasdiApp.controller("SftpUploadController",SftpUploadController);
 wasdiApp.controller("DeleteProcessController",DeleteProcessController);
 wasdiApp.controller("ProcessesLogsController",ProcessesLogsController);
 wasdiApp.controller("WorkFlowController",WorkFlowController);
+wasdiApp.controller("SnakeController",SnakeController);

@@ -413,12 +413,15 @@ var RootController = (function() {
 
     RootController.prototype.openSnake = function()
     {
-        var oController = this
+        var oController = this;
+        console.log("miao");
         this.m_oModalService.showModal({
-            templateUrl: "dialogs/snake_dialog/SnakeDialog.html",
-            controller: "RootController"
+            // templateUrl: "dialogs/snake_dialog/SnakeDialog.html",
+            templateUrl: "dialogs/snake_dialog/SnakeDialogV2.html",
+            controller: "SnakeController"
         }).then(function(modal) {
             modal.element.modal();
+
             modal.close.then(function(result) {
                 oController.m_oScope.Result = result ;
             });
@@ -482,6 +485,7 @@ var RootController = (function() {
 
         this.m_bIsEditModelWorkspaceNameActive = !this.m_bIsEditModelWorkspaceNameActive;
     };
+
     RootController.prototype.editModelWorkspaceNameSetTrue = function(){
 
         var oController = this;
@@ -504,6 +508,7 @@ var RootController = (function() {
         this.m_bIsEditModelWorkspaceNameActive =true;
     };
 
+
     /*********************************************************************/
     RootController.$inject = [
         '$scope',
@@ -514,7 +519,8 @@ var RootController = (function() {
         'WorkspaceService',
         '$timeout',
         'ModalService',
-        'RabbitStompService'
+        'RabbitStompService',
+
 
     ];
 
