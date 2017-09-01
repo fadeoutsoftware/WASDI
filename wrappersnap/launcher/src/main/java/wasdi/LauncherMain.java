@@ -39,6 +39,7 @@ import wasdi.geoserver.Publisher;
 import wasdi.rabbit.Send;
 import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.DownloadedFile;
+import wasdi.shared.business.DownloadedFileCategory;
 import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.business.ProductWorkspace;
@@ -401,7 +402,8 @@ public class LauncherMain {
                     // Get The product view Model
                     ReadProduct oReadProduct = new ReadProduct();
                     File oProductFile = new File(sFileName);
-                    oVM = oReadProduct.getProductViewModel(oProductFile);
+                    Product oProduct = oReadProduct.ReadProduct(oProductFile);
+                    oVM = oReadProduct.getProductViewModel(oProduct, oProductFile);
                     oVM.setMetadata(oReadProduct.getProductMetadataViewModel(oProductFile));
 
                     // Save it in the register
@@ -410,6 +412,8 @@ public class LauncherMain {
                     oAlreadyDownloaded.setFilePath(sFileName);
                     oAlreadyDownloaded.setProductViewModel(oVM);
                     oAlreadyDownloaded.setBoundingBox(oParameter.getBoundingBox());
+                    oAlreadyDownloaded.setRefDate(oProduct.getStartTime().getAsDate());
+                    oAlreadyDownloaded.setCategory(DownloadedFileCategory.DOWNLOAD.name());
                     oDownloadedRepo.InsertDownloadedFile(oAlreadyDownloaded);
                 }
                 else {
@@ -523,9 +527,11 @@ public class LauncherMain {
             oAlreadyDownloaded.setFileName(oFilePath.getName());
             oAlreadyDownloaded.setFilePath(oDstFile.getAbsolutePath());
             oAlreadyDownloaded.setProductViewModel(oVM);
+            oAlreadyDownloaded.setRefDate(new Date());
+            oAlreadyDownloaded.setCategory(DownloadedFileCategory.INGESTION.name());
             String oBB = oReadProduct.getProductBoundingBox(oFilePath);
 			oAlreadyDownloaded.setBoundingBox(oBB);
-            oDownloadedRepo.InsertDownloadedFile(oAlreadyDownloaded);
+            oDownloadedRepo.InsertDownloadedFile(oAlreadyDownloaded);            
             
             updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 90);
             
@@ -1213,6 +1219,8 @@ public class LauncherMain {
             oAlreadyDownloaded.setFilePath(sFileName);
             oAlreadyDownloaded.setProductViewModel(oVM);
             oAlreadyDownloaded.setBoundingBox(sBBox);
+            oAlreadyDownloaded.setRefDate(new Date());
+            oAlreadyDownloaded.setCategory(DownloadedFileCategory.COMPUTED.name());
             
             if (!oDownloadedRepo.InsertDownloadedFile(oAlreadyDownloaded)) {
 

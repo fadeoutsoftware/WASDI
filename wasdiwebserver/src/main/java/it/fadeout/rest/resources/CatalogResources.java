@@ -10,11 +10,11 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.ServletConfig;
 import javax.ws.rs.Consumes;
@@ -29,26 +29,22 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
-import javax.ws.rs.core.Response.StatusType;
-import javax.ws.rs.core.StreamingOutput;
 
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.filefilter.FileFilterUtils;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 
 import it.fadeout.Wasdi;
-import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.Catalog;
-import wasdi.shared.business.ProcessWorkspace;
-import wasdi.shared.business.PublishedBand;
+import wasdi.shared.business.DownloadedFile;
+import wasdi.shared.business.DownloadedFileCategory;
 import wasdi.shared.business.User;
+import wasdi.shared.business.Workspace;
 import wasdi.shared.data.CatalogRepository;
-import wasdi.shared.data.ProcessWorkspaceRepository;
+import wasdi.shared.data.DownloadedFilesRepository;
+import wasdi.shared.data.ProductWorkspaceRepository;
+import wasdi.shared.data.WorkspaceRepository;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.CatalogViewModel;
-import wasdi.shared.viewmodels.PrimitiveResult;
-import wasdi.shared.viewmodels.ProcessWorkspaceViewModel;
 
 @Path("/catalog")
 public class CatalogResources {
@@ -56,6 +52,77 @@ public class CatalogResources {
 	@Context
 	ServletConfig m_oServletConfig;
 
+	
+	@GET
+	@Path("categories")
+	@Produces({"application/json"})
+	public ArrayList<String> GetCategories(@HeaderParam("x-session-token") String sSessionId) {
+		ArrayList<String> categories = new ArrayList<String>();
+		for ( DownloadedFileCategory c : DownloadedFileCategory.values()) {
+			categories.add(c.name());
+		}
+		return categories; 
+	}
+	
+	
+	@GET
+	@Path("entries")
+	@Produces({"application/json"})
+	public ArrayList<DownloadedFile> GetEntries(@HeaderParam("x-session-token") String sSessionId, 
+			@QueryParam("from") Date from, 
+			@QueryParam("to") Date to,
+			@QueryParam("freetext") String freeText,
+			@QueryParam("category") String category
+			) {
+		
+		User me = Wasdi.GetUserFromSession(sSessionId);
+		String userId = me.getUserId();
+		
+		ArrayList<DownloadedFile> entries = searchEntries(from, to, freeText, category, userId);
+		
+		return entries;
+	}
+
+
+	private ArrayList<DownloadedFile> searchEntries(Date from, Date to, String freeText, String category, String userId) {
+		ArrayList<DownloadedFile> entries = new ArrayList<DownloadedFile>();
+		
+		WorkspaceRepository wksRepo = new WorkspaceRepository();
+		ProductWorkspaceRepository prodWksRepo = new ProductWorkspaceRepository();
+		DownloadedFilesRepository downFilesRepo = new DownloadedFilesRepository();
+
+		//get all my workspaces
+		List<Workspace> myWorkspacesList = wksRepo.GetWorkspaceByUser(userId);
+		Map<String, Workspace> myWorkspaces = new HashMap<String, Workspace>();
+		for (Workspace wks : myWorkspacesList) {
+			myWorkspaces.put(wks.getWorkspaceId(), wks);
+		}
+		
+		//retrieve all compabile files
+		List<DownloadedFile> files = downFilesRepo.Search(from, to, freeText, category);
+		
+		for (DownloadedFile df : files) {
+			
+			//check if the product is in my workspace
+			List<String> fileWorkspaces = prodWksRepo.getWorkspaces(df.getProductViewModel().getFileName()); //TODO check if productName should be used
+			boolean isPublic = fileWorkspaces.isEmpty();
+			boolean isMine = false;			
+			for (String wks : fileWorkspaces) {
+				if (myWorkspaces.containsKey(wks)) {
+					isMine = true;
+					break;
+				}
+			}
+			
+			if (isMine || isPublic) {
+				entries.add(df);
+			}
+			
+		}
+		return entries;
+	}
+	
+	
 	@POST
 	@Path("/upload")
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
@@ -286,4 +353,15 @@ public class CatalogResources {
 		return true;
 	}
 
+	
+	
+	public static void main(String[] args) {
+		ArrayList<DownloadedFile> entries = new CatalogResources().searchEntries(null, null, "S2A", DownloadedFileCategory.DOWNLOAD.name(), "paolo");
+		
+		for (DownloadedFile df : entries) {
+			System.out.println(df.getFilePath());
+		}
+		
+	}
+	
 }

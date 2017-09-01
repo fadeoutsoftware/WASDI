@@ -67,6 +67,25 @@ public class ProductWorkspaceRepository extends MongoRepository {
         return aoReturnList;
     }
 
+    public List<String> getWorkspaces(String productId) {    	
+    	List<String> workspaces = new ArrayList<String>();
+    	
+    	FindIterable<Document> documents = getCollection("productworkpsace").find(new Document("productName", productId));
+    	documents.forEach(new Block<Document>() {
+    		public void apply(Document document) {
+                String json = document.toJson();
+                try {
+                	ProductWorkspace pw = s_oMapper.readValue(json,ProductWorkspace.class);
+                    workspaces.add(pw.getWorkspaceId());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+            }
+		});
+    	
+		return workspaces ;
+    }
 
     public boolean ExistsProductWorkspace(String sProductId, String sWorkspaceId) {
 
