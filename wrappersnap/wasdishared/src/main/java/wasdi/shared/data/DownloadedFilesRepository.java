@@ -1,13 +1,22 @@
 package wasdi.shared.data;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.regex.Pattern;
+
 import org.bson.Document;
 import org.bson.conversions.Bson;
 
+import com.mongodb.Block;
+import com.mongodb.client.FindIterable;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.result.DeleteResult;
 import com.mongodb.client.result.UpdateResult;
 
 import wasdi.shared.business.DownloadedFile;
+import wasdi.shared.business.ProductWorkspace;
 
 /**
  * Created by p.campanella on 11/11/2016.
@@ -65,6 +74,47 @@ public class DownloadedFilesRepository extends MongoRepository {
         return  null;
     }
 
+    public List<DownloadedFile> Search(Date from, Date to, String freeText, String category) {
+    	List<DownloadedFile> files = new ArrayList<DownloadedFile>();    	
+    	List<Bson> filters = new ArrayList<Bson>();
+    	
+    	if (from!=null && to!=null) {
+    		filters.add(Filters.and(Filters.gte("refDate", from), Filters.lte("refDate", to)));
+    	}
+    	
+    	if (freeText!=null && !freeText.isEmpty()) {
+    		Document regQuery = new Document();
+    		regQuery.append("$regex", Pattern.quote(freeText));
+    		regQuery.append("$options", "i");
+    		Document findQuery = new Document();
+    		findQuery.append("fileName", regQuery);
+    		filters.add(findQuery);
+    	}
+    	
+    	if (category!=null && !category.isEmpty()) {
+    		filters.add(Filters.eq("category", category));
+    	}
+    	
+    	Bson filter = Filters.and(filters);
+    	FindIterable<Document> docs = filters.isEmpty() ? getCollection("downloadedfiles").find() : getCollection("downloadedfiles").find(filter);
+    	
+    	docs.forEach(new Block<Document>() {
+            public void apply(Document document) {
+                String json = document.toJson();
+                try {
+                    DownloadedFile df = s_oMapper.readValue(json, DownloadedFile.class);
+                    files.add(df);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+            }
+        });
+    	
+		return files ;
+    }
+    
+    
     public int DeleteByFilePath(String sFilePath) {
 
         try {

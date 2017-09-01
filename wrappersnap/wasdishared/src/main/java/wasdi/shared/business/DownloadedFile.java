@@ -1,5 +1,7 @@
 package wasdi.shared.business;
 
+import java.util.Date;
+
 import wasdi.shared.viewmodels.ProductViewModel;
 
 /**
@@ -9,6 +11,9 @@ public class DownloadedFile {
     private String fileName;
     private String filePath;
     private String boundingBox;
+    private Date refDate;
+    private String category = DownloadedFileCategory.PUBLIC.name();
+    
     // NOTE: Usually do not use View Models in entities. But this is more an entity that not a view model...
     private ProductViewModel productViewModel;
 
@@ -44,4 +49,20 @@ public class DownloadedFile {
         this.boundingBox = boundingBox;
     }
 
+	public Date getRefDate() {
+		return refDate;
+	}
+
+	public void setRefDate(Date refDate) {
+		this.refDate = refDate;
+	}
+
+	public String getCategory() {
+		return category;
+	}
+
+	public void setCategory(String category) {
+		this.category = category;
+	}
+    
 }
