@@ -1,0 +1,199 @@
+.catalog-view
+{
+  .page
+  {
+    margin-top:5px;
+    padding-left: 0;
+    padding-right: 0;
+
+
+    .operations-bar
+    {
+      .loadIcon
+      {
+        color:$wasdi-blue-logo;
+        display: table;
+        margin: 0 auto;
+        margin-top: 50px;
+
+      }
+      .search-input-query
+      {
+        width: 20%;
+        float: left;
+        margin-left: 20px;
+        input[type=text]{
+          width: 100%;
+        }
+
+
+      }
+
+      text-align: right;
+      margin-top: -45px;
+      //data description
+      .description{
+        float:right;
+        width: 13%;
+        margin:15px 5px 5px 0;
+      }
+      //data
+      .time-picker-container
+      {
+        float: right;
+        margin-top: 10px;
+        margin-bottom: 10px;
+        width:12%;
+
+        .my-input-text {
+          width: 100%;
+          //input{
+          //  width:20%;
+          //}
+          .form-control {
+            border-radius: 0;
+            border: 2px solid $wasdi-input-text-border-color;
+          }
+          .input-group-addon
+          {
+            background-color: $wasdi-blue-logo;
+            border-color: $wasdi-blue-logo;
+            color:white;
+          }
+          .input-group-addon:hover
+          {
+            background-color: $wasdi-green-logo;
+          }
+        }
+
+        .moment-picker .moment-picker-container {
+          z-index: 1005;
+        }
+      }
+      //search button
+      .buttom-collumn
+      {
+        text-align: right;
+        float:right;
+        margin-left: 10px;
+        .my-button{
+          padding:10px 10px;
+          margin-top: 5px;
+        }
+
+      }
+
+    }
+    .left-column
+    {
+
+      background-color: #f5f5f5;//black;
+      border-right: 1px solid #eee;
+      position: relative;
+      bottom: 0;
+      left:0;
+      padding-right: 5px;
+      padding-left: 5px;
+
+
+      //leaflet
+      .map
+      {
+        //DIMENSIONS MAP
+        width: auto;//500px
+        height: 100%;
+        ///* (1366x768) WXGA Display */
+        //@media  screen and (max-width: 1366px)and (max-height: 768px) {
+        //  width:auto;
+        //  height: $wasdi-map-height-max-width-1366-max-height-768;
+        //}
+        .leaflet-popup-pane
+        {
+          visibility:hidden;
+        }
+      }
+
+      .panel-default > .panel-heading
+      {
+        background-color:$wasdi-sidebar-color-title-panel ;
+        color:$wasdi-title-color;
+      }
+      .panel-body
+      {
+        padding: 5px 10px 5px 5px;
+        height: $wasdi-heigth-panel;
+        @media  screen and (max-width: 1366px)and (max-height: 768px) {
+          height: $wasdi-height-panel-max-width-1366-max-height-768;
+
+
+        }
+
+      }
+      //override bootstrap
+      .panel-heading {
+        border-bottom: 0;
+        min-height: 40px;
+      }
+
+      //background-color: $wasdi-sidebar-background-color;
+      .panel-default {
+        border-color: $waddi-sidebar-color-border-panel;
+        margin-bottom: 5px;
+
+
+      }
+
+    }
+    .right-column
+    {
+      .table-hover tbody:hover{
+        //background-color: $wasdi;
+        //color:$wasdi-green-logo;
+        border-top: 2px solid $wasdi-green-logo;
+        border-bottom: 2px solid $wasdi-green-logo;
+
+      }
+      .table-products {
+
+        thead {
+          background-color: $wasdi-import-table-head-background-color;
+          color: $wasdi-import-table-head-color;
+        }
+
+        th {
+          text-align: center;
+          vertical-align: middle;
+        }
+
+        td
+        {
+          &:hover{
+            i{
+              color:$wasdi-green-logo;
+            }
+          }
+        }
+
+        tbody {
+          border-top: 1px solid #ddd; //FIX TABLE
+          //border-top: 2px solid $wasdi-blue-logo;
+        }
+
+        .operation-button {
+          cursor: pointer;
+
+        }
+        .operation-button:hover {
+          background-color: $wasdi-import-cell-background-color-over-button;
+
+          i {
+
+            color: $wasdi-import-cell-color-over-button;
+          }
+
+        }
+      }
+    }
+
+  }
+}
