@@ -1,0 +1,139 @@
+<div class="container-fluid catalog-view">
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 page">
+
+        <div class="col-lg-11 col-md-10 col-sm-10 col-xs-10 col-lg-offset-1 col-md-offset-2 col-sm-offset-2 col-xs-offset-2 operations-bar "  >
+
+
+
+            <div class=" time-picker-container">
+
+                <div class="input-group my-input-text"
+                     moment-picker="m_oController.m_oDataTo"
+                     format="YYYY-MM-DD "
+                     today="true">
+
+                    <input class="form-control"
+                           placeholder="To"
+                           ng-model="m_oController.m_oDataTo"
+                           ng-model-options="{ updateOn: 'blur' }">
+
+                    <span class="input-group-addon">
+                                <i class="fa fa-calendar"></i>
+                            </span>
+                </div>
+            </div>
+
+            <div class="description">
+                <i class="fa fa-calendar" aria-hidden="true"></i>
+                 To:
+            </div>
+
+
+            <div class=" time-picker-container">
+
+                <div class="input-group my-input-text"
+                     moment-picker="m_oController.m_oDataFrom"
+                     format="YYYY-MM-DD "
+                     today="true">
+
+                    <input class="form-control"
+                           placeholder="From"
+                           ng-model="m_oController.m_oDataFrom"
+                           ng-model-options="{ updateOn: 'blur' }">
+
+                    <span class="input-group-addon">
+                                <i class="fa fa-calendar"></i>
+                            </span>
+                </div>
+            </div>
+
+            <div class="description">
+                <i class="fa fa-calendar" aria-hidden="true"></i>
+                From:
+            </div>
+
+            <div class="search-input-query my-input-text">
+                <input type="text" ng-model="m_oController.m_sInputQuery"
+                       placeholder="Search..." >
+
+
+            </div>
+
+        </div>
+
+        <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4 left-column">
+
+            <div class="panel panel-default filters" >
+                <div class="panel-heading">
+                    Filters
+                </div>
+
+                <!--CHECKBOXES-->
+                <div class="panel-body">
+                    <div class="checkbox" ng-repeat="category in m_oController.m_asCategories track by $index">
+                        <label >
+                            <input type="checkbox" value="" ng-model="category.isSelected">
+                            {{category.name}}
+                        </label>
+                    </div>
+
+                    <button class="my-button" ng-click="m_oController.searchEntries()" ng-disabled="!m_oController.m_bIsLoadedTable">Search</button>
+
+                </div>
+
+
+
+            </div>
+
+            <div class="panel panel-default map" >
+                <div class="panel-heading">
+                    Map
+                </div>
+
+                <!-- MY TREE DIRECTIVE -->
+                <div class="panel-body">
+                    <div id="catalogMap" class="map" ></div>
+                </div>
+
+            </div>
+        </div>
+        <div class="col-xs-8 col-sm-8 col-md-8 col-lg-8 right-column">
+            <!--<div id="testGeosearch"></div>-->
+
+            <div ng-hide="m_oController.m_bIsLoadedTable" class="loadIcon">
+                <invader></invader>
+            </div>
+
+            <table class="table table-hover table-products"  ng-show="m_oController.m_bIsLoadedTable" >
+                <thead>
+                    <tr>
+                        <th>File Name</th>
+                        <th>Category</th>
+                        <th>
+                            Info
+                        </th>
+                        <th>
+                            Add
+                        </th>
+                    </tr>
+                </thead>
+
+                <tbody ng-repeat="entry in m_oController.m_aoEntries" id="{{'product'+$index}}"
+                       ng-mouseover="m_oController.m_oMapService.changeStyleRectangleMouseOver(entry.rectangle)"
+                       ng-mouseleave="m_oController.m_oMapService.changeStyleRectangleMouseLeave(entry.rectangle)">
+                    <tr >
+                        <td>{{entry.fileName}}</td>
+                        <td>{{entry.category}}</td>
+                        <td ng-click="m_oController.getInfoProduct(entry)">
+                            <i class="fa fa-info-circle fa-lg" aria-hidden="true"></i>
+                        </td>
+                        <td ng-click="m_oController.addProductToWorkspace(entry)">
+                            <i class="fa fa-plus-circle fa-lg" aria-hidden="true"></i>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+        </div>
+    </div>
+</div>

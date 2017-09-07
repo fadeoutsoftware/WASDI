@@ -1,0 +1,28 @@
+<div class="modal fade add-product-dialog-catalog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <!-- HEADER -->
+            <div class=" modal-header">
+                Select workspace
+            </div>
+            <!-- BODY -->
+            <div class="modal-body ">
+                File: {{m_oController.m_sFileName}}
+
+                <multiselect selected="m_oController.m_aoSelectedWorkspaces" options="m_oController.m_aWorkspacesName"></multiselect>
+
+            </div>
+
+            <!-- FOOTER -->
+            <div class="modal-footer">
+                <button type="button" ng-click="close(null)" class="my-button" data-dismiss="modal">
+                    {{"DIALOG_CLOSE_BUTTON"|translate}}
+                </button>
+                <button type="button" ng-click="close(null)" class="my-button" data-dismiss="modal">
+                    Add
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>

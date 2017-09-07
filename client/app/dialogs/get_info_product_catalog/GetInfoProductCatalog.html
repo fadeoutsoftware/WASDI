@@ -1,0 +1,36 @@
+<div class="modal fade get-info-dialog-catalog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <!-- HEADER -->
+            <div class=" modal-header">
+                Info {{m_oController.m_oProductChecked.filePath}}
+            </div>
+            <!-- BODY -->
+            <div class="modal-body ">
+                <div>
+                    <label>File Name:</label>
+                    {{m_oController.m_oProductChecked.fileName}}
+                </div>
+                <div>
+                    <label>Category:</label>
+                    {{m_oController.m_oProductChecked.category}}
+                </div>
+                <div>
+                    <label>Bounding box:</label>
+                    {{m_oController.m_oProductChecked.boundingBox}}
+                </div>
+
+
+            </div>
+
+            <!-- FOOTER -->
+            <div class="modal-footer">
+                <button type="button" ng-click="close(null)" class="my-button" data-dismiss="modal">
+                    {{"DIALOG_CLOSE_BUTTON"|translate}}
+                </button>
+
+            </div>
+
+        </div>
+    </div>
+</div>
