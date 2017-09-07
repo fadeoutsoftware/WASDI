@@ -26,6 +26,7 @@ var wasdiApp = angular.module('wasdi', [
     'wasdi.SnapOperationService',
     'wasdi.GetParametersOperationService',
     'wasdi.SatelliteService',
+    'wasdi.CatalogService',
 
     //DIRECTIVE
     'wasdi.SnakeDirective',
@@ -126,6 +127,15 @@ wasdiApp.config(['$stateProvider', '$urlRouterProvider', function($stateProvider
             'maincontent' : { templateUrl : 'partials/searchorbit.html', controller  : 'SearchOrbitController'}
         },
     });
+    //CATALOG
+    $stateProvider.state('root.catalog',{
+        url: '/{workSpace}/catalog',
+
+        views:{
+            'maincontent' : { templateUrl : 'partials/catalog.html', controller  : 'CatalogController'}
+        },
+    });
+
 
 }]);
 
@@ -153,3 +163,6 @@ wasdiApp.controller("DeleteProcessController",DeleteProcessController);
 wasdiApp.controller("ProcessesLogsController",ProcessesLogsController);
 wasdiApp.controller("WorkFlowController",WorkFlowController);
 wasdiApp.controller("SnakeController",SnakeController);
+wasdiApp.controller("CatalogController",CatalogController);
+wasdiApp.controller("AddProductInCatalogController",AddProductInCatalogController);
+wasdiApp.controller("GetInfoProductCatalogController",GetInfoProductCatalogController);

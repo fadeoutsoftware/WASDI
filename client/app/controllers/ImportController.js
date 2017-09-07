@@ -45,7 +45,10 @@ var ImportController = (function() {
         };
         this.m_bIsOpen=true;
         this.m_bIsVisibleListOfLayers = false;
+
         this.m_oMapService.initMapWithDrawSearch('wasdiMapImport');
+        this.m_oMapService.initGeoSearchPluginForOpenStreetMap();
+
         this.m_aoProductsList = []; /* LAYERS LIST == PRODUCTS LIST */
         this.m_aoMissions;
         /* number of possible products per pages and number of products per pages selected */

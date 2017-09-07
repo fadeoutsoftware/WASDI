@@ -9,6 +9,7 @@
 @import "workspaces";
 @import "import";
 @import "search_orbit";
+@import "catalog";
 
 
 //directive css
@@ -20,6 +21,7 @@
 //@import "../directives/space_invaders_fixed_small_version/space_invaders_fixed_small_version";
 @import "../directives/multiselect_dropdown_menu/multiselect_dropdown_menu";
 @import "../css/_dialog";
+
 
 //DIALOGS
 @import "../dialogs/orbit_info/orbit_info";
@@ -38,6 +40,8 @@
 @import "../dialogs/snake_dialog/snake_dialog";
 @import "../dialogs/processes_logs/processes_logs";
 @import "../dialogs/workflow_operation/workflow";
+@import "../dialogs/add_product_catalog/add_product_catalog";
+@import "../dialogs/get_info_product_catalog/get_info_product_catalog";
 
 body
 {

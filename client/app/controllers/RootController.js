@@ -307,6 +307,13 @@ var RootController = (function() {
         oController.m_oState.go("root.editor", { workSpace : sWorkSpace.workspaceId });//use workSpace when reload editor page
     };
 
+    RootController.prototype.openCatalogPage = function()
+    {
+        if(this.isWorkspacesPageOpen() === true)
+            return false;
+
+        this.m_oState.go("root.catalog", { });
+    };
 
     RootController.prototype.openSearchorbit = function()
     {
@@ -356,6 +363,12 @@ var RootController = (function() {
                     return false;
                 break;
             case "root.import":
+                if(oPage == this.m_oState.current.name )
+                    return true;
+                else
+                    return false;
+                break;
+            case "root.catalog":
                 if(oPage == this.m_oState.current.name )
                     return true;
                 else
