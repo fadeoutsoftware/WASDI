@@ -280,6 +280,7 @@ service('MapService', ['$http','$rootScope', 'ConstantsService', function ($http
     this.initMapWithDrawSearch = function(sMapDiv)
     {
         var oController=this;
+
         //Init standard map
         this.initMap(sMapDiv);
 
@@ -372,5 +373,36 @@ service('MapService', ['$http','$rootScope', 'ConstantsService', function ($http
         //});
         return true;
     };
+
+    this.initGeoSearchPluginForOpenStreetMap = function()
+    {
+        var geocoder = L.Control.Geocoder.mapzen('search-DopSHJw');
+        var control = L.Control.geocoder({
+            geocoder: geocoder,
+            position:'topleft'
+        }).addTo(this.m_oWasdiMap);
+    };
+
+    this.changeStyleRectangleMouseOver=function(oRectangle)
+    {
+        if(utilsIsObjectNullOrUndefined(oRectangle))
+        {
+            console.log("Error: rectangle is undefined ");
+            return false;
+        }
+        oRectangle.setStyle({weight:3,fillOpacity:0.7});
+    }
+    /*
+     *   Change style of rectangle when the mouse is leave the layer (TABLE CASE)
+     * */
+    this.changeStyleRectangleMouseLeave=function(oRectangle)
+    {
+        if(utilsIsObjectNullOrUndefined(oRectangle))
+        {
+            console.log("Error: rectangle is undefined ");
+            return false;
+        }
+        oRectangle.setStyle({weight:1,fillOpacity:0.2});
+    }
 
 }]);

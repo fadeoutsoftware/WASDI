@@ -30,6 +30,8 @@
   <link rel="stylesheet" href="bower_components/jstree/dist/themes/default/style.min.css">
   <!--Cesium css-->
   <link rel="stylesheet" href="lib/Cesium/Widgets/widgets.css">
+  <!--Geocoder-->
+  <link rel="stylesheet" href="bower_components/leaflet-control-geocoder/Control.Geocoder.css">
 
   <!--script src="lib/jquery/jquery-1.10.2.js"></script-->
   <script src="//code.jquery.com/jquery-1.11.0.min.js"></script>
@@ -87,6 +89,7 @@
   <script src="bower_components/angular-animate/angular-animate.min.js"></script>
   <!--Datetime picker-->
   <script type="text/javascript" src="bower_components/moment-picker/src/angular-moment-picker.js"></script>
+  <script type="text/javascript" src="bower_components/leaflet-geosearch/"></script>
 
   <!-- Wasdi Services -->
   <script src="services/ConstantsService.js"></script>
@@ -106,6 +109,7 @@
   <script src="services/SnapOperationService.js"></script>
   <script src="services/GetParametersOperationService.js"></script>
   <script src="services/SatelliteService.js"></script>
+  <script src="services/CatalogService.js"></script>
 
   <!-- Wasdi Directives -->
   <script src="directives/SnakeDirective.js"></script>
@@ -123,6 +127,7 @@
   <script src="controllers/RootController.js"></script>
   <script src="controllers/ImportController.js"></script>
   <script src="controllers/SearchOrbitController.js"></script>
+  <script src="controllers/CatalogController.js"></script>
 
   <!--Dialogs controllers-->
   <script src="dialogs/orbit_info/OrbitInfoController.js"></script>
@@ -141,6 +146,9 @@
   <script src="dialogs/processes_logs/ProcessesLogsController.js"></script>
   <script src="dialogs/workflow_operation/WorkFlowController.js"></script>
   <script src="dialogs/snake_dialog/SnakeController.js"></script>
+  <script src="dialogs/add_product_catalog/AddProductInCatalogController.js"></script>
+  <script src="dialogs/get_info_product_catalog/GetInfoProductCatalog.js"></script>
+
   <!--APP JS-->
   <script src="app.js"></script>
 
@@ -190,6 +198,7 @@
   <!-- Leaflet Control Custom-->
   <script src="lib/leafletControlCustomMaster/Leaflet.Control.Custom.js"></script>
 
-
+  <!--GEOSEARCH -->
+  <script src="bower_components/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
 </body>
 </html>

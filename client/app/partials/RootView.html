@@ -100,10 +100,17 @@
                                 {{"ROOT_VIEW_NAV_BAR_LINK_IMPORT"|translate}}
                             </a>
                         </li>
-                        <li    ng-class="{active:m_oController.activePageCss('root.editor')}" ng-disabled="m_oController.isWorkspacesPageOpen()" >
+                        <li ng-class="{active:m_oController.activePageCss('root.editor')}" ng-disabled="m_oController.isWorkspacesPageOpen()" >
                             <a ng-click="m_oController.onClickProcess();m_oController.openEditorPage()" href="" ng-style="{cursor:m_oController.cursorCss()}"  >
                                 <i class="fa fa-cogs fa-lg" aria-hidden="true"></i><!-- ui-sref="root.editor"-->
                                 {{"ROOT_VIEW_NAV_BAR_LINK_PROCESS"|translate}}
+                            </a>
+                        </li>
+
+                        <li ng-class="{active:m_oController.activePageCss('root.catalog')}" ng-disabled="m_oController.isWorkspacesPageOpen()" >
+                            <a ng-click="m_oController.openCatalogPage()" href="" ng-style="{cursor:m_oController.cursorCss()}"  >
+                                <i class="fa fa-archive fa-lg" aria-hidden="true"></i>
+                                {{"ROOT_VIEW_NAV_BAR_LINK_CATALOG"|translate}}
                             </a>
                         </li>
 

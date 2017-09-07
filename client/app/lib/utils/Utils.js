@@ -221,6 +221,12 @@ function utilsIsInteger(oInput)
         return false;
     return oInput % 1 === 0;
 }
+
+ function utilsIsOdd(num)
+ {
+     return (num % 2) == 1;
+ }
+
 /*************** LOCAL STORAGE UTILS ********************/
 //TODO TEST LOCAL STORAGE FUNCTIONS
 /**
