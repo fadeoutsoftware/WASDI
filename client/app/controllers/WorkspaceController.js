@@ -11,6 +11,7 @@ var WorkspaceController = (function() {
         this.m_oConstantsService = oConstantsService;
         this.m_oScope.m_oController=this;
         this.m_aoWorkspaceList = [];
+        this.m_bIsLoading = true;
         this.m_oProductService = oProductService;
         this.m_oState = $state;
         this.m_oScope.m_oController = this;
@@ -127,11 +128,14 @@ var WorkspaceController = (function() {
                         if (data != undefined)
                         {
                             oController.m_aoWorkspaceList = data;
+                            oController.m_bIsLoading = false;
                         }
                     }
+                    oController.m_bIsLoading = false;
                 }).error(function (data,status) {
                     //alert('error');
                     utilsVexDialogAlertTop('GURU MEDITATION<br>ERROR IN WORKSPACESINFO');
+                    oController.m_bIsLoading = false;
                 });
             }
         }

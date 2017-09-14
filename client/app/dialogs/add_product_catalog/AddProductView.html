@@ -3,13 +3,19 @@
         <div class="modal-content">
             <!-- HEADER -->
             <div class=" modal-header">
-                Select workspace
+                Select workspaces
             </div>
             <!-- BODY -->
             <div class="modal-body ">
-                File: {{m_oController.m_sFileName}}
-
-                <multiselect selected="m_oController.m_aoSelectedWorkspaces" options="m_oController.m_aWorkspacesName"></multiselect>
+                <h4>
+                    <div>
+                        <label>File name selected:</label> {{m_oController.m_sFileName}}
+                    </div>
+                    <div>
+                        <label>List of Workspaces</label>
+                    </div>
+                    <multiselect selected="m_oController.m_aoSelectedWorkspaces" options="m_oController.m_aWorkspacesName"></multiselect>
+                </h4>
 
             </div>
 
@@ -18,7 +24,7 @@
                 <button type="button" ng-click="close(null)" class="my-button" data-dismiss="modal">
                     {{"DIALOG_CLOSE_BUTTON"|translate}}
                 </button>
-                <button type="button" ng-click="close(null)" class="my-button" data-dismiss="modal">
+                <button type="button" ng-click="add(null)" class="my-button" data-dismiss="modal">
                     Add
                 </button>
             </div>

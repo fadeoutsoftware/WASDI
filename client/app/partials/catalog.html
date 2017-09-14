@@ -3,13 +3,16 @@
 
         <div class="col-lg-11 col-md-10 col-sm-10 col-xs-10 col-lg-offset-1 col-md-offset-2 col-sm-offset-2 col-xs-offset-2 operations-bar "  >
 
+            <div class="content-button-submit">
+                <button class="my-button" ng-click="m_oController.searchEntries()" ng-disabled="!m_oController.m_bIsLoadedTable">Search</button>
 
+            </div>
 
             <div class=" time-picker-container">
 
                 <div class="input-group my-input-text"
                      moment-picker="m_oController.m_oDataTo"
-                     format="YYYY-MM-DD "
+                     format="YYYY-MM-DD"
                      today="true">
 
                     <input class="form-control"
@@ -47,17 +50,19 @@
                 </div>
             </div>
 
+
             <div class="description">
                 <i class="fa fa-calendar" aria-hidden="true"></i>
                 From:
             </div>
 
-            <div class="search-input-query my-input-text">
-                <input type="text" ng-model="m_oController.m_sInputQuery"
-                       placeholder="Search..." >
+
+            <!--<div class="search-input-query my-input-text">-->
+                <!--<input type="text" ng-model="m_oController.m_sInputQuery"-->
+                       <!--placeholder="Search..." >-->
 
 
-            </div>
+            <!--</div>-->
 
         </div>
 
@@ -70,6 +75,13 @@
 
                 <!--CHECKBOXES-->
                 <div class="panel-body">
+                    <div class="search-input-query my-input-text">
+                        <input type="text" ng-model="m_oController.m_sInputQuery"
+                               placeholder="Search..." >
+
+
+                    </div>
+
                     <div class="checkbox" ng-repeat="category in m_oController.m_asCategories track by $index">
                         <label >
                             <input type="checkbox" value="" ng-model="category.isSelected">
@@ -77,7 +89,7 @@
                         </label>
                     </div>
 
-                    <button class="my-button" ng-click="m_oController.searchEntries()" ng-disabled="!m_oController.m_bIsLoadedTable">Search</button>
+                    <!--<button class="my-button" ng-click="m_oController.searchEntries()" ng-disabled="!m_oController.m_bIsLoadedTable">Search</button>-->
 
                 </div>
 

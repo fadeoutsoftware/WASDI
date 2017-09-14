@@ -55,6 +55,10 @@
     .table-workspaces{
       height: $wasdi-heigth-panel-workspaces-page;
       overflow: auto;
+      .wizards{
+        margin: 30px 5px 5px 10px;
+      }
+
       thead
       {
         th{

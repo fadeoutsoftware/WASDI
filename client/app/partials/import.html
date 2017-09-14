@@ -120,7 +120,7 @@
                             <!--*********************** MISSIONS LIST ********************************-->
                             <ul class="nav nav-tabs nav-justified">
                                 <!--<li class="active"><a href="#">{{mission.name}}</a></li>-->
-                                <li ng-class="{active: m_oController.m_activeTab === $index}" ng-repeat="mission in m_oController.getMissions()" ng-click="m_oController.m_activeTab = $index">
+                                <li ng-class="{active: m_oController.m_activeMissionTab === $index}" ng-repeat="mission in m_oController.getMissions()" ng-click="m_oController.m_activeMissionTab = $index">
                                     <a href="">
                                         <i class="fa fa-check-circle" aria-hidden="true" ng-show="mission.selected"></i>
                                         <i class="fa fa-times-circle" aria-hidden="true" ng-hide="mission.selected"></i>
@@ -131,7 +131,7 @@
 
                             </ul>
 
-                            <div ng-repeat="mission in m_oController.getMissions()" class="missions" ng-show="m_oController.m_activeTab === $index">
+                            <div ng-repeat="mission in m_oController.getMissions()" class="missions" ng-show="m_oController.m_activeMissionTab === $index">
                                 <!--<pre> {{$index| json}}</pre>-->
 
 
@@ -275,7 +275,23 @@
                     </div>
 
 
-                    <!--********************************* TABLE **********************************-->
+                    <!--&lt;!&ndash; TAB NAVIGATION TODO  USE THIS PART FOR TABS PROVIDERS &ndash;&gt;-->
+                    <!--<ul class="nav nav-tabs" role="tablist">-->
+                        <!--<li ng-class="{active: m_oController.m_iActiveProvidersTab === $index}" ng-repeat="provider in m_oController.m_aListOfProvider"  ng-click="m_oController.m_iActiveProvidersTab = $index">-->
+                            <!--<a href="" role="tab" data-toggle="tab">{{provider.name}}</a>-->
+                        <!--</li>-->
+                    <!--</ul>-->
+                    <!--&lt;!&ndash; TAB CONTENT &ndash;&gt;-->
+                    <!--<div class="tab-content">-->
+                        <!--<div ng-repeat="provider in m_oController.m_aListOfProvider" class="missions" ng-show="m_oController.m_iActiveProvidersTab === $index">-->
+                            <!--<h2>{{provider.name}}</h2>-->
+
+                        <!--</div>-->
+
+                    <!--</div>-->
+
+
+            <!--********************************* TABLE **********************************-->
                     <table class="table table-hover layers " id="table_layers_list" ng-show="m_oController.m_bIsVisibleListOfLayers && m_oController.isEmptyLayersList() == false" >
 
                         <tbody ng-repeat="layer in m_oController.m_aoProductsList"

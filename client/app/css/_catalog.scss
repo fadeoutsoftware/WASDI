@@ -9,6 +9,19 @@
 
     .operations-bar
     {
+      text-align: right;
+      margin-top: -45px;
+
+      .content-button-submit{
+        float:right;
+
+        .my-button{
+
+          padding: 10px 20px;
+          margin: 4px 8px 4px 20px;
+        }
+      }
+
       .loadIcon
       {
         color:$wasdi-blue-logo;
@@ -17,20 +30,7 @@
         margin-top: 50px;
 
       }
-      .search-input-query
-      {
-        width: 20%;
-        float: left;
-        margin-left: 20px;
-        input[type=text]{
-          width: 100%;
-        }
 
-
-      }
-
-      text-align: right;
-      margin-top: -45px;
       //data description
       .description{
         float:right;
@@ -120,11 +120,10 @@
       }
       .panel-body
       {
-        padding: 5px 10px 5px 5px;
+        padding: 5px 15px 5px 15px;
         height: $wasdi-heigth-panel;
         @media  screen and (max-width: 1366px)and (max-height: 768px) {
           height: $wasdi-height-panel-max-width-1366-max-height-768;
-
 
         }
 

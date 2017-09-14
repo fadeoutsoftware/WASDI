@@ -24,9 +24,13 @@
       height: $wasdi-heigth-panel;
       @media  screen and (max-width: 1366px)and (max-height: 768px) {
         height: $wasdi-height-panel-max-width-1366-max-height-768;
-
       }
-
+      .wizards{
+        margin:5px 5px 5px 10px;
+        div{
+          margin:10px 0px 10px 0px;
+        }
+      }
     }
     //override bootstrap
     .panel-heading {

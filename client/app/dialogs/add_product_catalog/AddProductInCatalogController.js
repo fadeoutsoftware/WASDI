@@ -5,23 +5,27 @@
 
 var AddProductInCatalogController = (function() {
 
-    function AddProductInCatalogController($scope, oClose,oExtras,oWorkspaceService) {
+    function AddProductInCatalogController($scope, oClose,oExtras,oWorkspaceService,oProductService) {
         //MEMBERS
         this.m_oScope = $scope;
         this.m_oScope.m_oController = this;
         this.m_oExtras = oExtras;
         this.m_aoProduct = this.m_oExtras.product;
         this.m_oWorkspaceService = oWorkspaceService;
+        this.m_oProductService = oProductService;
         this.m_aoWorkspaceList = [];
         this.m_aWorkspacesName = [];
         this.m_aoSelectedWorkspaces = [];
         this.m_sFileName = "";
-        // this.m_oSelectedProduct = this.m_oExtras.selectedProduct;
-        // this.m_oGetParametersOperationService = oGetParametersOperationService;
+
+        var oController = this;
         $scope.close = function(result) {
             oClose(result, 300); // close, but give 500ms for bootstrap to animate
         };
-
+        $scope.add = function(result) {
+            oController.addProductInWorkspaces();
+            oClose(result, 300); // close, but give 500ms for bootstrap to animate
+        };
         this.getWorkspaces();
         this.checkExtras();
     };
@@ -65,11 +69,34 @@ var AddProductInCatalogController = (function() {
         return aNames
     };
 
+
+    AddProductInCatalogController.prototype.addProductInWorkspaces = function()
+    {
+        var iNumberOfSelectedWorkspaces = this.m_aoSelectedWorkspaces.length;
+        for(var iIndexSelectedWorkspace = 0 ;iIndexSelectedWorkspace < iNumberOfSelectedWorkspaces; iIndexSelectedWorkspace++)
+        {
+            var aWorkspaceId = this.m_aoSelectedWorkspaces[iIndexSelectedWorkspace].split("Id:");
+            var sProductFileNameViewModel = this.m_aoProduct.productViewModel.fileName;
+            this.m_oProductService.addProductToWorkspace(sProductFileNameViewModel,aWorkspaceId[1]).success(function (data) {
+                if(utilsIsObjectNullOrUndefined(data) == false)
+                {
+
+                }
+                else
+                {
+                }
+            }).error(function (error) {
+                utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN ADD PRODUCT IN WORKSPACES");
+            });
+        }
+    };
+
     AddProductInCatalogController.$inject = [
         '$scope',
         'close',
         'extras',
-        'WorkspaceService'
+        'WorkspaceService',
+        'ProductService'
 
     ];
     return AddProductInCatalogController;
