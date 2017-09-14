@@ -1911,7 +1911,19 @@ var EditorController = (function () {
         //     }
         //
         // }
-    }
+    };
+
+    EditorController.prototype.isHideTree = function()
+    {
+        return ( (this.m_oTree === null) || (this.m_oTree.core.data.length === 0) );
+    };
+
+    EditorController.prototype.goSearch = function()
+    {
+        this.m_oState.go("root.import", { });
+    };
+
+
 
     EditorController.$inject = [
         '$scope',

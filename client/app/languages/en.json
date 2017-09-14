@@ -40,6 +40,7 @@
     "WORKSPACES_THEAD_OWNER":"Owner",
     "WORKSPACES_LABEL_NO_RESULTS":"No results",
     "WORKSPACES_TOOLTIP_DELETE":"Delete workspace",
+    "WORKSPACES_ADD_NEW_WORKSPSACE":"Add new workspace:",
 
     "EDITOR_TOOLTIP_SWITCH_3D_2D":"Switch 3D globe and 2D map",
     "EDITOR_TOOLTIP_HOME_2D":"Center of map",
@@ -63,6 +64,8 @@
     "EDITOR_OPERATION_TITLE_APPLY_RADIOMETRIC_PROCESSOR":"Processor",
     "EDITOR_OPERATION_TITLE_SFTP":"SFTP",
     "EDITOR_OPERATION_TITLE_WORKFLOW":"Workflow",
+    "EDITOR_WIZARDS_TREE_SEARCH":"If you want search a new product:",
+    "EDITOR_WIZARDS_TREE_SFTP":"If you want add a product by SFTP:",
 
     "IMPORT_ADVANCE_SEARCH_LABEL":"Advance search",
     "IMPORT_PRODUCTS_PER_PAGE_LABEL":"Products per page:",

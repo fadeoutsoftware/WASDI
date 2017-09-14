@@ -3,22 +3,25 @@
         <div class="modal-content">
             <!-- HEADER -->
             <div class=" modal-header">
-                Info {{m_oController.m_oProductChecked.filePath}}
+                {{m_oController.m_oProductChecked.filePath}}
             </div>
             <!-- BODY -->
             <div class="modal-body ">
-                <div>
-                    <label>File Name:</label>
-                    {{m_oController.m_oProductChecked.fileName}}
-                </div>
-                <div>
-                    <label>Category:</label>
-                    {{m_oController.m_oProductChecked.category}}
-                </div>
-                <div>
-                    <label>Bounding box:</label>
-                    {{m_oController.m_oProductChecked.boundingBox}}
-                </div>
+                <h4>
+                    <div>
+                       <label>File Name:</label>
+                        {{m_oController.m_oProductChecked.fileName}}
+                    </div>
+                    <div>
+                        <label>Category:</label>
+                        {{m_oController.m_oProductChecked.category}}
+                    </div>
+                    <div>
+                        <label>Bounding box:</label>
+                        {{m_oController.m_oProductChecked.boundingBox}}
+                    </div>
+
+                </h4>
 
 
             </div>

@@ -199,7 +199,14 @@
                 <!-- MY TREE DIRECTIVE -->
                 <div class="panel-body">
                     <invader ng-show="m_oController.m_bIsLoadingTree"></invader>
-                    <tree ngModelTree="prova" ng-hide="m_oController.m_bIsLoadingTree"></tree>
+                    <tree ngModelTree="prova" ng-hide="m_oController.isHideTree() || (m_oController.m_bIsLoadingTree === true)" ></tree>
+                    <!--|| (m_oController.m_oTree === null)||(m_oController.m_oTree.core.data.length === 0)-->
+                    <div class = "wizards" ng-show="m_oController.isHideTree() && (m_oController.m_bIsLoadingTree === false)">
+                        <h4>
+                            <div>{{"EDITOR_WIZARDS_TREE_SEARCH"|translate}} <a ng-click="m_oController.goSearch()" href="">Search</a></div>
+                            <div>{{"EDITOR_WIZARDS_TREE_SFTP"|translate}} <a ng-click="m_oController.openSFTPDialog()" href="">SFTP</a></div>
+                        </h4>
+                    </div>
                 </div>
 
             </div>

@@ -252,6 +252,7 @@ var CatalogController = (function() {
         });
 
     };
+
     CatalogController.$inject = [
         '$scope',
         'ConstantsService',

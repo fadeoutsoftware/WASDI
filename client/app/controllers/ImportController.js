@@ -30,7 +30,8 @@ var ImportController = (function() {
         this.m_oOpenSearchService = oOpenSearchService;
 
         //tab index
-        this.m_activeTab = 0;
+        this.m_activeMissionTab = 0;
+        this.m_iActiveProvidersTab = 0;
 
         this.m_oDetails = {};
         this.m_oDetails.productIds = [];
@@ -51,10 +52,11 @@ var ImportController = (function() {
 
         this.m_aoProductsList = []; /* LAYERS LIST == PRODUCTS LIST */
         this.m_aoMissions;
+        this.m_aListOfProvider = []; //LIST OF PROVIDERS
+
         /* number of possible products per pages and number of products per pages selected */
         this.m_iProductsPerPageSelected = 10;//default value
         this.m_iProductsPerPage=[10,15,20,25,50];
-        this.m_aListOfProvider = []; //LIST OF PROVIDERS
         //Page
         this.m_iCurrentPage = 1;
         this.m_iTotalPages = 1;
@@ -1175,7 +1177,11 @@ var ImportController = (function() {
     }
 
     ImportController.prototype.receivedNewProductMessage = function (oMessage, oController) {
-
+        var oController = this;
+        // var oCallback = function(value){
+        //
+        //     oController.m_oState.go("root.editor", { workSpace : sWorkSpace.workspaceId });
+        // }
         var oDialog = utilsVexDialogAlertBottomRightCorner('PRODUCT ADDED TO THE WORKSPACE<br>READY');
         utilsVexCloseDialogAfterFewSeconds(3000, oDialog);
 
