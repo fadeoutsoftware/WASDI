@@ -88,14 +88,14 @@
                             </a>
                         </li>
 
-                        <li ng-class="{active:m_oController.activePageCss('root.searchorbit')}"  ng-disabled="m_oController.isWorkspacesPageOpen()"> <!-- -->
-                          <a ng-click="m_oController.openSearchorbit()"  href=""  ng-style="{cursor:m_oController.cursorCss()}"> <!---->
+                        <li ng-class="{active:m_oController.activePageCss('root.searchorbit')}"  > <!-- -->
+                          <a ng-click="m_oController.openSearchorbit()"  href="" > <!---->
                               <i class="fa fa-calendar-o fa-lg" aria-hidden="true" ></i>
                                 {{"ROOT_VIEW_NAV_BAR_LINK_SEARCH"|translate}}
                             </a>
                         </li>
-                        <li   ng-class="{active:m_oController.activePageCss('root.import')}"  ng-disabled="m_oController.isWorkspacesPageOpen()"  >
-                            <a ng-click="m_oController.openImportPage()" href="" ng-style="{cursor:m_oController.cursorCss()}"  >
+                        <li   ng-class="{active:m_oController.activePageCss('root.import')}"    >
+                            <a ng-click="m_oController.openImportPage()" href=""   >
                                 <i class="fa fa-search fa-lg" aria-hidden="true"></i><!--ui-sref="root.import"-->
                                 {{"ROOT_VIEW_NAV_BAR_LINK_IMPORT"|translate}}
                             </a>
@@ -107,25 +107,25 @@
                             </a>
                         </li>
 
-                        <li ng-class="{active:m_oController.activePageCss('root.catalog')}" ng-disabled="m_oController.isWorkspacesPageOpen()" >
-                            <a ng-click="m_oController.openCatalogPage()" href="" ng-style="{cursor:m_oController.cursorCss()}"  >
+                        <li ng-class="{active:m_oController.activePageCss('root.catalog')}"  >
+                            <a ng-click="m_oController.openCatalogPage()" href=""  >
                                 <i class="fa fa-archive fa-lg" aria-hidden="true"></i>
                                 {{"ROOT_VIEW_NAV_BAR_LINK_CATALOG"|translate}}
                             </a>
                         </li>
 
                         <!--TODO REMOVE JAVASCRIPT AT THE END OF FILE WHEN I LEAVE POPOVER-->
-                        <li style="cursor:no-drop;" data-toggle="popover"  data-content="Coming Soon" data-placement="left"   href="">
-                            <a>
-                                <i class="fa fa-upload fa-lg" aria-hidden="true"></i>
-                                {{"ROOT_VIEW_NAV_BAR_LINK_PUBLISH"|translate}}
-                            </a>
-                        </li>
-                        <li style="cursor:no-drop;" data-toggle="popover"  data-content="Coming Soon" data-placement="left"   href="">
-                            <a>
-                                <i class="fa fa-share-alt fa-lg" aria-hidden="true"></i>
-                            </a>
-                        </li>
+                        <!--<li style="cursor:no-drop;" data-toggle="popover"  data-content="Coming Soon" data-placement="left"   href="">-->
+                            <!--<a>-->
+                                <!--<i class="fa fa-upload fa-lg" aria-hidden="true"></i>-->
+                                <!--{{"ROOT_VIEW_NAV_BAR_LINK_PUBLISH"|translate}}-->
+                            <!--</a>-->
+                        <!--</li>-->
+                        <!--<li style="cursor:no-drop;" data-toggle="popover"  data-content="Coming Soon" data-placement="left"   href="">-->
+                            <!--<a>-->
+                                <!--<i class="fa fa-share-alt fa-lg" aria-hidden="true"></i>-->
+                            <!--</a>-->
+                        <!--</li>-->
                     </ul>
                 </div>
 

@@ -1,0 +1,46 @@
+.download-product-in-workspace-modal
+{
+  .modal-dialog
+  {
+    width:50%;
+    .modal-content
+    {
+      .modal-header
+      {
+        color:$wasdi-white;
+        background-color: $wasdi-blue-logo;
+        .close
+        {
+          color: $wasdi-white;
+          opacity: 1;
+        }
+      }
+
+      .modal-body
+      {
+        label{
+          color: $wasdi-green-logo;
+        }
+        .over-icon
+        {
+          cursor:pointer;
+          i:hover {
+
+            //background-color:white;
+            color:$wasdi-over-icon;
+
+          }
+        }
+      }
+
+      .modal-footer
+      {
+        border-top:1px solid $wasdi-blue-logo;
+        .my-button
+        {
+          padding: 10px 21px;
+        }
+      }
+    }
+  }
+}

@@ -165,7 +165,17 @@ function utilsIsANumber(oValue)
     return false;
 }
 
+//TODO TEST IT
+function utilsRemoveObjectInArray(iIndex,aArray)
+{
+    if (iIndex > -1) {
+        aArray.splice(iIndex, 1);
+        return true;
+    }else{
+        return false;
+    }
 
+}
 /*
 * return index of object in array
 * return -1 if there are some error or the object isn't inside array

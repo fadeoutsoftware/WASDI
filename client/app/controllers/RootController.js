@@ -281,7 +281,7 @@ var RootController = (function() {
     };
 
     RootController.prototype.isWorkspacesPageOpen = function(){
-        var sState=this.m_oState.current.name;
+        var sState = this.m_oState.current.name;
         if(sState === "root.workspaces")
             return true;
         return false;
@@ -289,12 +289,13 @@ var RootController = (function() {
 
     RootController.prototype.cursorCss = function(){
         var sState=this.m_oState.current.name;
-        switch(sState) {
-            case "root.workspaces":
-                return "no-drop";
-                break;
-            default: return "auto";
-        }
+        var oWorkspace = this.m_oConstantsService.getActiveWorkspace();
+        if(utilsIsObjectNullOrUndefined(oWorkspace) === true || utilsIsObjectNullOrUndefined(oWorkspace.workspaceId)=== true )
+            return "no-drop";
+        else
+            return "auto";
+
+
     }
     /*********************************************************************************/
     /* ***************** OPEN LINK *****************/
@@ -302,6 +303,9 @@ var RootController = (function() {
         if(this.isWorkspacesPageOpen() === true)
             return false;
 
+        var oWorkspace = this.m_oConstantsService.getActiveWorkspace();
+        if(utilsIsObjectNullOrUndefined(oWorkspace.workspaceId))
+            return false;
         var oController = this;
         var sWorkSpace = this.m_oConstantsService.getActiveWorkspace();
         oController.m_oState.go("root.editor", { workSpace : sWorkSpace.workspaceId });//use workSpace when reload editor page
@@ -309,15 +313,15 @@ var RootController = (function() {
 
     RootController.prototype.openCatalogPage = function()
     {
-        if(this.isWorkspacesPageOpen() === true)
-            return false;
+        // if(this.isWorkspacesPageOpen() === true)
+        //     return false;
 
         this.m_oState.go("root.catalog", { });
     };
 
     RootController.prototype.openSearchorbit = function()
     {
-        if(this.isWorkspacesPageOpen() === true) return false;
+        // if(this.isWorkspacesPageOpen() === true) return false;
 
         //var oController = this;
         //var sWorkSpace = this.m_oConstantsService.getActiveWorkspace();
@@ -327,18 +331,13 @@ var RootController = (function() {
     };
 
     RootController.prototype.openImportPage = function () {
-        if(this.isWorkspacesPageOpen() === true)
-            return false;
 
         var oController = this;
-        // if it publishing a band u can't go in import controller
-        //if( this.m_oProcessesLaunchedService.thereAreSomePublishBandProcess() == false )
-        //{
-            var sWorkSpace = this.m_oConstantsService.getActiveWorkspace();
 
-            oController.m_oState.go("root.import", { workSpace : sWorkSpace.workspaceId });//use workSpace when reload editor page
-        //}
-        //TODO FEEDBACK IF U CAN'T CLICK ON IMPORT
+        //     var sWorkSpace = this.m_oConstantsService.getActiveWorkspace();
+
+        oController.m_oState.go("root.import", { });// workSpace : sWorkSpace.workspaceId use workSpace when reload editor page
+
     };
 
     RootController.prototype.activePageCss = function(oPage)

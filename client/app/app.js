@@ -27,6 +27,7 @@ var wasdiApp = angular.module('wasdi', [
     'wasdi.GetParametersOperationService',
     'wasdi.SatelliteService',
     'wasdi.CatalogService',
+    'wasdi.PagesService',
 
     //DIRECTIVE
     'wasdi.SnakeDirective',
@@ -166,3 +167,4 @@ wasdiApp.controller("SnakeController",SnakeController);
 wasdiApp.controller("CatalogController",CatalogController);
 wasdiApp.controller("AddProductInCatalogController",AddProductInCatalogController);
 wasdiApp.controller("GetInfoProductCatalogController",GetInfoProductCatalogController);
+wasdiApp.controller("DownloadProductInWorkspaceController",DownloadProductInWorkspaceController);

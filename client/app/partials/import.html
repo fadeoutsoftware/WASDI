@@ -13,7 +13,7 @@
 
         <!--search button-->
         <div class="search-button-container" >
-            <div class="search-button" ng-click="m_oController.search()" id="search-button"
+            <div class="search-button" ng-click="m_oController.searchAllSelectedProviders()" id="search-button"
                  ng-class="{'search-button-disabled': m_oController.thereIsAtLeastOneProvider() === false || (m_oController.m_bIsVisibleListOfLayers || m_oController.m_bisVisibleLocalStorageInputs),
                             'search-button': m_oController.thereIsAtLeastOneProvider() === true }" >
                 <!--<i class="fa fa-search fa-lg" aria-hidden="true"></i>-->
@@ -132,7 +132,6 @@
                             </ul>
 
                             <div ng-repeat="mission in m_oController.getMissions()" class="missions" ng-show="m_oController.m_activeMissionTab === $index">
-                                <!--<pre> {{$index| json}}</pre>-->
 
 
                                 <div>
@@ -143,15 +142,10 @@
                                     </div>
                                     <div class="col-md-11 col-xs-8 col-sd-8">{{mission.name}}</div>
                                 </div>
-                                <!--<div class="checkbox filter-checkbox">
-                                    <label class="filter-checkbox-label"><input  type="checkbox" ng-model="mission.selected" value="mission.selected" ng-change="updateMissionSelection($index)">{{mission.name}}</label>
-                                </div>-->
+
                                 <div class="row">
                                     <div ng-repeat="filter in mission.filters">
-                                        <!--<div class="row">
-                                            <div >{{filter.indexlabel}}</div>
-                                            <div ><input type="text" value="{{filter.indexvalue}}"></div>
-                                        </div>-->
+
                                         <div class="col-md-6"
                                              ng-if="!(filter.indexvalues && filter.indexvalues.split('|').length > 0)">
                                             <div class="group">
@@ -250,113 +244,202 @@
 
 
                     <!--PAGINATION-->
-                    <div class="pages" ng-hide="m_oController.m_bIsVisibleListOfLayers && m_oController.isEmptyLayersList() == true">
-                        <ul class="pager">
+                    <!--<div class="pages" ng-hide="m_oController.m_bIsVisibleListOfLayers && m_oController.isEmptyLayersList() == true">-->
+                        <!--<ul class="pager">-->
 
-                            <div class="form-group">
-                                <label for="selectPages">{{"IMPORT_PRODUCTS_PER_PAGE_LABEL"|translate}}</label>
-                                <select class="form-control" id="selectPages" ng-model="m_oController.m_iProductsPerPageSelected"
-                                        ng-options="product for product in m_oController.m_iProductsPerPage" ng-change="m_oController.search()">
-                                </select>
-                            </div>
+                            <!--<div class="form-group">-->
+                                <!--<label for="selectPages">{{"IMPORT_PRODUCTS_PER_PAGE_LABEL"|translate}}</label>-->
+                                <!--<select class="form-control" id="selectPages" ng-model="m_oController.m_iProductsPerPageSelected"-->
+                                        <!--ng-options="product for product in m_oController.m_iProductsPerPage" ng-change="m_oController.search()">-->
+                                <!--</select>-->
+                            <!--</div>-->
 
-                            <li ng-click="m_oController.firstPage()" ><a><i class="fa fa-angle-double-left" aria-hidden="true"></i></a></li>
-                            <li ng-click="m_oController.minusOnePage()" ><a><i class="fa fa-angle-left" aria-hidden="true"></i></a></li>
-                            <form ng-submit="m_oController.changePage(m_oController.m_iCurrentPage)">
-                                {{"IMPORT_PAGE_LABEL"|translate}}
-                                <input type="text" class="form-control" ng-model="m_oController.m_iCurrentPage">
-                                {{"IMPORT_OF_LABEL"|translate}} {{m_oController.m_iTotalPages}}
-                            </form>
-                            <li ng-click="m_oController.plusOnePage()" ><a><i class="fa fa-angle-right" aria-hidden="true"></i></a></li>
-                            <li ng-click="m_oController.lastPage()" ><a><i class="fa fa-angle-double-right" aria-hidden="true"></i></a></li>
+                            <!--<li ng-click="m_oController.firstPage()" ><a><i class="fa fa-angle-double-left" aria-hidden="true"></i></a></li>-->
+                            <!--<li ng-click="m_oController.minusOnePage()" ><a><i class="fa fa-angle-left" aria-hidden="true"></i></a></li>-->
+                            <!--<form ng-submit="m_oController.changePage(m_oController.m_iCurrentPage)">-->
+                                <!--{{"IMPORT_PAGE_LABEL"|translate}}-->
+                                <!--<input type="text" class="form-control" ng-model="m_oController.m_iCurrentPage">-->
+                                <!--{{"IMPORT_OF_LABEL"|translate}} {{m_oController.m_iTotalPages}}-->
+                            <!--</form>-->
+                            <!--<li ng-click="m_oController.plusOnePage()" ><a><i class="fa fa-angle-right" aria-hidden="true"></i></a></li>-->
+                            <!--<li ng-click="m_oController.lastPage()" ><a><i class="fa fa-angle-double-right" aria-hidden="true"></i></a></li>-->
 
-                        </ul>
-
-                    </div>
-
-
-                    <!--&lt;!&ndash; TAB NAVIGATION TODO  USE THIS PART FOR TABS PROVIDERS &ndash;&gt;-->
-                    <!--<ul class="nav nav-tabs" role="tablist">-->
-                        <!--<li ng-class="{active: m_oController.m_iActiveProvidersTab === $index}" ng-repeat="provider in m_oController.m_aListOfProvider"  ng-click="m_oController.m_iActiveProvidersTab = $index">-->
-                            <!--<a href="" role="tab" data-toggle="tab">{{provider.name}}</a>-->
-                        <!--</li>-->
-                    <!--</ul>-->
-                    <!--&lt;!&ndash; TAB CONTENT &ndash;&gt;-->
-                    <!--<div class="tab-content">-->
-                        <!--<div ng-repeat="provider in m_oController.m_aListOfProvider" class="missions" ng-show="m_oController.m_iActiveProvidersTab === $index">-->
-                            <!--<h2>{{provider.name}}</h2>-->
-
-                        <!--</div>-->
+                        <!--</ul>-->
 
                     <!--</div>-->
 
 
+                    <!-- TAB NAVIGATION -->
+                    <ul class="nav nav-tabs" role="tablist" ng-hide="m_oController.m_bIsVisibleListOfLayers && m_oController.isEmptyLayersList() == true">
+                        <li ng-class="{active: m_oController.m_iActiveProvidersTab === $index}" ng-repeat="provider in m_oController.m_aListOfProvider | filter:{ selected: true }"  ng-click="m_oController.m_iActiveProvidersTab = $index">
+                            <a href="" role="tab" data-toggle="tab">{{provider.name}}</a>
+                        </li>
+                    </ul>
+                    <!-- TAB CONTENT -->
+                    <div class="tab-content" ng-hide="m_oController.m_bIsVisibleListOfLayers && m_oController.isEmptyLayersList() == true">
+                        <div ng-repeat="provider in m_oController.m_aListOfProvider | filter:{ selected: true }" class="missions" ng-show="m_oController.m_iActiveProvidersTab === $index">
+
+                            <!--PAGES-->
+                            <div class="pages" ng-hide="m_oController.m_bIsVisibleListOfLayers && m_oController.isEmptyLayersList() == true">
+                                <ul class="pager">
+
+                                    <div class="form-group">
+                                        <label for="selectPages">{{"IMPORT_PRODUCTS_PER_PAGE_LABEL"|translate}}</label>
+                                        <select class="form-control" id="selectPages" ng-model="m_oController.m_oPageService.getProviderObject(provider.name).productsPerPageSelected"
+                                                ng-options="product for product in m_oController.m_oPageService.m_iProductsPerPage" ng-change="m_oController.search(provider.name)">
+                                        </select>
+                                    </div>
+                                    <li ng-click="m_oController.m_oPageService.firstPage(provider.name,m_oController)" ><a><i class="fa fa-angle-double-left" aria-hidden="true"></i></a></li>
+                                    <li ng-click="m_oController.m_oPageService.minusOnePage(provider.name,m_oController)" ><a><i class="fa fa-angle-left" aria-hidden="true"></i></a></li>
+                                    <form ng-submit="m_oController.m_oPageService.changePage(m_oController.m_oPageService.getProviderObject(provider.name).currentPage,provider.name)">
+                                        {{"IMPORT_PAGE_LABEL"|translate}}
+                                        <input type="text" class="form-control" ng-model="m_oController.m_oPageService.getProviderObject(provider.name).currentPage">
+                                        {{"IMPORT_OF_LABEL"|translate}} {{m_oController.m_oPageService.getProviderObject(provider.name).totalPages}}
+                                    </form>
+                                    <li ng-click="m_oController.m_oPageService.plusOnePage(provider.name, m_oController)" ><a><i class="fa fa-angle-right" aria-hidden="true"></i></a></li>
+                                    <li ng-click="m_oController.m_oPageService.lastPage(provider.name,m_oController)" ><a><i class="fa fa-angle-double-right" aria-hidden="true"></i></a></li>
+
+                                </ul>
+
+                            </div>
+
+
+                            <table class="table table-hover layers " id="table_layers_list" ng-show="m_oController.m_bIsVisibleListOfLayers && m_oController.isEmptyLayersList() == false" >
+
+                                <tbody ng-repeat="layer in m_oController.m_aoProductsList | filter:{ provider: provider.name } "
+                                       ng-mouseover="m_oController.changeStyleRectangleMouseOver(layer.rectangle)"
+                                       ng-mouseleave="m_oController.changeStyleRectangleMouseLeave(layer.rectangle)"
+                                       id='{{"layer"+layer.id}}'> <!--id='{{"layer:"+$index}}' layer.id-->
+                                <!------------------------------- SUMMARY ------------------------------->
+                                <tr class="info-layer" >
+                                    <!-- BUTTONS -->
+                                    <td class="button-cell">
+                                        <div class="btn-group-vertical" role="group" >
+                                            <button type="button" class="btn btn btn-primary" ng-click="m_oController.downloadProduct(layer)"
+                                                    ng-disabled="m_oController.isPossibleDoDownload(layer) || (layer.isDisabledToDoDownload != null && layer.isDisabledToDoDownload)" data-toggle="tooltip" data-placement="top" title="{{'IMPORT_TOOLTIP_ADD_PRODUCT'|translate}}">
+
+                                                <i class="fa fa-plus " aria-hidden="true"></i>
+                                            </button>
+                                            <button type="button" class="btn btn btn-primary" ng-click="m_oController.zoomOnBounds(layer.rectangle)"
+                                                    data-toggle="tooltip" data-placement="top" title="{{'IMPORT_TOOLTIP_ZOOM_ON_PRODUCT'|translate}}">
+                                                <i class="fa fa-search-plus" aria-hidden="true"></i>
+                                            </button>
+                                            <button type="button" class="btn btn btn-primary" ng-click="m_oController.infoLayer(layer)"
+                                                    data-toggle="tooltip" data-placement="top" title="{{'IMPORT_TOOLTIP_INFO'|translate}}">
+                                                <i class="fa fa-info-circle" aria-hidden="true"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                    <!-- IMAGE CELL -->
+                                    <td class="image-cell">
+                                        <span class="label label-success">{{layer.summary.Mode}}</span>&nbsp;<!--Mode-->
+                                        <span class="label label-success"> {{layer.summary.Instrument}}</span><!--Instrument-->
+                                        <div class="preview-layer-image" ><img src={{layer.preview}} alt="Image" style="height: 82px;width: 82px; "></div>
+                                        <span class="badge">{{layer.summary.Size}}</span><!--Size-->
+                                    </td>
+                                    <!-- INFO CELL -->
+                                    <td class="info-cell">
+
+                                        <div>{{layer.summary.Date|date:'medium'}}</div><!--Date-->
+                                        </br>
+
+                                        <div>
+                                            <span>Name: </span>
+                                            <span><b>{{layer.title}}</b></span>
+                                        </div>
+
+                                        <div>
+                                            <span>Mode: </span>
+                                            <span><b>{{layer.summary.Mode}}</b></span>
+                                        </div>
+
+                                        <div>
+                                            <span>Relative Orbit: </span>
+                                            <span><b>{{layer.properties.relativeorbitnumber}}</b></span>
+                                        </div>
+
+                                        <!--<div>{{"layer"+layer.id}}</div>-->
+                                        <div>
+                                            <span>Provider:</span>
+                                            <span><b>{{layer.provider}}</b></span>
+
+                                        </div>
+                                    </td>
+
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                    </div>
+
+
             <!--********************************* TABLE **********************************-->
-                    <table class="table table-hover layers " id="table_layers_list" ng-show="m_oController.m_bIsVisibleListOfLayers && m_oController.isEmptyLayersList() == false" >
+                    <!--<table class="table table-hover layers " id="table_layers_list" ng-show="m_oController.m_bIsVisibleListOfLayers && m_oController.isEmptyLayersList() == false" >-->
 
-                        <tbody ng-repeat="layer in m_oController.m_aoProductsList"
-                               ng-mouseover="m_oController.changeStyleRectangleMouseOver(layer.rectangle)"
-                               ng-mouseleave="m_oController.changeStyleRectangleMouseLeave(layer.rectangle)"
-                               id='{{"layer"+layer.id}}'> <!--id='{{"layer:"+$index}}' layer.id-->
-                        <!------------------------------- SUMMARY ------------------------------->
-                        <tr class="info-layer" >
-                            <!-- BUTTONS -->
-                            <td class="button-cell">
-                                <div class="btn-group-vertical" role="group" >
-                                    <button type="button" class="btn btn btn-primary" ng-click="m_oController.downloadProduct(layer)"
-                                            ng-disabled="m_oController.isPossibleDoDownload(layer) || (layer.isDisabledToDoDownload != null && layer.isDisabledToDoDownload)" data-toggle="tooltip" data-placement="top" title="{{'IMPORT_TOOLTIP_ADD_PRODUCT'|translate}}">
+                        <!--<tbody ng-repeat="layer in m_oController.m_aoProductsList"-->
+                               <!--ng-mouseover="m_oController.changeStyleRectangleMouseOver(layer.rectangle)"-->
+                               <!--ng-mouseleave="m_oController.changeStyleRectangleMouseLeave(layer.rectangle)"-->
+                               <!--id='{{"layer"+layer.id}}'> &lt;!&ndash;id='{{"layer:"+$index}}' layer.id&ndash;&gt;-->
+                        <!--&lt;!&ndash;-&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45; SUMMARY -&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&ndash;&gt;-->
+                        <!--<tr class="info-layer" >-->
+                            <!--&lt;!&ndash; BUTTONS &ndash;&gt;-->
+                            <!--<td class="button-cell">-->
+                                <!--<div class="btn-group-vertical" role="group" >-->
+                                    <!--<button type="button" class="btn btn btn-primary" ng-click="m_oController.downloadProduct(layer)"-->
+                                            <!--ng-disabled="m_oController.isPossibleDoDownload(layer) || (layer.isDisabledToDoDownload != null && layer.isDisabledToDoDownload)" data-toggle="tooltip" data-placement="top" title="{{'IMPORT_TOOLTIP_ADD_PRODUCT'|translate}}">-->
 
-                                        <i class="fa fa-plus " aria-hidden="true"></i>
-                                    </button>
-                                    <button type="button" class="btn btn btn-primary" ng-click="m_oController.zoomOnBounds(layer.rectangle)"
-                                            data-toggle="tooltip" data-placement="top" title="{{'IMPORT_TOOLTIP_ZOOM_ON_PRODUCT'|translate}}">
-                                        <i class="fa fa-search-plus" aria-hidden="true"></i>
-                                    </button>
-                                    <button type="button" class="btn btn btn-primary" ng-click="m_oController.infoLayer(layer)"
-                                            data-toggle="tooltip" data-placement="top" title="{{'IMPORT_TOOLTIP_INFO'|translate}}">
-                                        <i class="fa fa-info-circle" aria-hidden="true"></i>
-                                    </button>
-                                </div>
-                            </td>
-                            <!-- IMAGE CELL -->
-                            <td class="image-cell">
-                                <span class="label label-success">{{layer.summary.Mode}}</span>&nbsp;<!--Mode-->
-                                <span class="label label-success"> {{layer.summary.Instrument}}</span><!--Instrument-->
-                                <div class="preview-layer-image" ><img src={{layer.preview}} alt="Image" style="height: 82px;width: 82px; "></div>
-                                <span class="badge">{{layer.summary.Size}}</span><!--Size-->
-                            </td>
-                            <!-- INFO CELL -->
-                            <td class="info-cell">
+                                        <!--<i class="fa fa-plus " aria-hidden="true"></i>-->
+                                    <!--</button>-->
+                                    <!--<button type="button" class="btn btn btn-primary" ng-click="m_oController.zoomOnBounds(layer.rectangle)"-->
+                                            <!--data-toggle="tooltip" data-placement="top" title="{{'IMPORT_TOOLTIP_ZOOM_ON_PRODUCT'|translate}}">-->
+                                        <!--<i class="fa fa-search-plus" aria-hidden="true"></i>-->
+                                    <!--</button>-->
+                                    <!--<button type="button" class="btn btn btn-primary" ng-click="m_oController.infoLayer(layer)"-->
+                                            <!--data-toggle="tooltip" data-placement="top" title="{{'IMPORT_TOOLTIP_INFO'|translate}}">-->
+                                        <!--<i class="fa fa-info-circle" aria-hidden="true"></i>-->
+                                    <!--</button>-->
+                                <!--</div>-->
+                            <!--</td>-->
+                            <!--&lt;!&ndash; IMAGE CELL &ndash;&gt;-->
+                            <!--<td class="image-cell">-->
+                                <!--<span class="label label-success">{{layer.summary.Mode}}</span>&nbsp;&lt;!&ndash;Mode&ndash;&gt;-->
+                                <!--<span class="label label-success"> {{layer.summary.Instrument}}</span>&lt;!&ndash;Instrument&ndash;&gt;-->
+                                <!--<div class="preview-layer-image" ><img src={{layer.preview}} alt="Image" style="height: 82px;width: 82px; "></div>-->
+                                <!--<span class="badge">{{layer.summary.Size}}</span>&lt;!&ndash;Size&ndash;&gt;-->
+                            <!--</td>-->
+                            <!--&lt;!&ndash; INFO CELL &ndash;&gt;-->
+                            <!--<td class="info-cell">-->
 
-                                <div>{{layer.summary.Date|date:'medium'}}</div><!--Date-->
-                                </br>
+                                <!--<div>{{layer.summary.Date|date:'medium'}}</div>&lt;!&ndash;Date&ndash;&gt;-->
+                                <!--</br>-->
 
-                                <div>
-                                    <span>Name: </span>
-                                    <span><b>{{layer.title}}</b></span>
-                                </div>
+                                <!--<div>-->
+                                    <!--<span>Name: </span>-->
+                                    <!--<span><b>{{layer.title}}</b></span>-->
+                                <!--</div>-->
 
-                                <div>
-                                    <span>Mode: </span>
-                                    <span><b>{{layer.summary.Mode}}</b></span>
-                                </div>
+                                <!--<div>-->
+                                    <!--<span>Mode: </span>-->
+                                    <!--<span><b>{{layer.summary.Mode}}</b></span>-->
+                                <!--</div>-->
 
-                                <div>
-                                    <span>Relative Orbit: </span>
-                                    <span><b>{{layer.properties.relativeorbitnumber}}</b></span>
-                                </div>
+                                <!--<div>-->
+                                    <!--<span>Relative Orbit: </span>-->
+                                    <!--<span><b>{{layer.properties.relativeorbitnumber}}</b></span>-->
+                                <!--</div>-->
 
-                                <!--<div>{{"layer"+layer.id}}</div>-->
-                                <div>
-                                    <span>Provider:</span>
-                                    <span><b>{{layer.provider}}</b></span>
+                                <!--&lt;!&ndash;<div>{{"layer"+layer.id}}</div>&ndash;&gt;-->
+                                <!--<div>-->
+                                    <!--<span>Provider:</span>-->
+                                    <!--<span><b>{{layer.provider}}</b></span>-->
 
-                                </div>
-                            </td>
+                                <!--</div>-->
+                            <!--</td>-->
 
-                        </tr>
-                        </tbody>
-                    </table>
+                        <!--</tr>-->
+                        <!--</tbody>-->
+                    <!--</table>-->
 
                 </div>
             </div>
