@@ -8,7 +8,7 @@ var ImportController = (function() {
     //**************************************************************************
     function ImportController($scope, oConstantsService, oAuthService,$state,oMapService, oSearchService, oAdvancedFilterService,
                               oAdvancedSearchService, oConfigurationService, oFileBufferService, oRabbitStompService, oProductService,
-                              oProcessesLaunchedService,oWorkspaceService,oResultsOfSearchService,oModalService,oOpenSearchService ) {
+                              oProcessesLaunchedService,oWorkspaceService,oResultsOfSearchService,oModalService,oOpenSearchService,oPageservice ) {
         this.m_oScope = $scope;
         this.m_oScope.m_oController = this;
         this.m_oConstantsService = oConstantsService;
@@ -28,6 +28,10 @@ var ImportController = (function() {
         this.m_oResultsOfSearchService = oResultsOfSearchService;
         this.m_oModalService = oModalService;
         this.m_oOpenSearchService = oOpenSearchService;
+        this.m_oPageService = oPageservice;
+
+        //set Page service
+        this.m_oPageService.setFunction(this.search);
 
         //tab index
         this.m_activeMissionTab = 0;
@@ -313,24 +317,24 @@ var ImportController = (function() {
             }
         });
 
-        var oController = this;
-        this.m_oOpenSearchService.getListOfProvider().success(function (data) {
-            if(utilsIsObjectNullOrUndefined(data) === false && data.length > 0)
-            {
-                var iLengthData = data.length;
-                for(var iIndexProvider = 0; iIndexProvider < iLengthData; iIndexProvider++)
-                {
-                    oController.m_aListOfProvider[iIndexProvider] = {"name":data[iIndexProvider], "selected":true};
-                }
-                // oController.m_aListOfProvider = data;
-            }
-
-        }).error(function (data) {
-
-        });
+        // var oController = this;
+        // this.m_oOpenSearchService.getListOfProvider().success(function (data) {
+        //     if(utilsIsObjectNullOrUndefined(data) === false && data.length > 0)
+        //     {
+        //         var iLengthData = data.length;
+        //         for(var iIndexProvider = 0; iIndexProvider < iLengthData; iIndexProvider++)
+        //         {
+        //             oController.m_aListOfProvider[iIndexProvider] = {"name":data[iIndexProvider], "selected":true};
+        //         }
+        //         // oController.m_aListOfProvider = data;
+        //     }
+        //
+        // }).error(function (data) {
+        //
+        // });
 
         /*SET DEFAULT VALUE OF PERIOD */
-
+        this.m_aListOfProvider = this.m_oPageService.getProviders();
         this.setDefaultData();
         this.updateAdvancedSearch();
     }
@@ -427,81 +431,75 @@ var ImportController = (function() {
         }
 
     };
+    ImportController.prototype.searchAllSelectedProviders = function()
+    {
+        var iNumberOfProviders = this.m_aListOfProvider.length;
 
-    ImportController.prototype.search = function() {
-
-        var oController = this;
-        if(this.thereIsAtLeastOneProvider() === false) return false;
-
-        this.m_bClearFiltersEnabled = false;
-        this.deleteLayers();/*delete layers (if it isn't the first search) and relatives rectangles in map*/
-        this.m_bIsVisibleListOfLayers = true;//change view on left side bar
-        this.m_oSearchService.setTextQuery(this.m_oModel.textQuery);
-        this.m_oSearchService.setGeoselection(this.m_oModel.geoselection); // todo: refactor setting by map
-        // SearchService.setAdvancedFilter(scope.model.advancedFilter);
-        this.m_oSearchService.setOffset(this.calcOffset());//default 0 (index page)
-        this.m_oSearchService.setLimit(this.m_iProductsPerPageSelected);// default 10 (total of element per page)
-        this.m_oSearchService.setProviders(this.m_aListOfProvider);
-
-        /* SAVE OPENSEARCH PARAMS IN SERVICE*/
-        this.m_oResultsOfSearchService.setIsVisibleListOfProducts(this.m_bIsVisibleListOfLayers);
-        this.m_oResultsOfSearchService.setTextQuery(this.m_oModel.textQuery);
-        this.m_oResultsOfSearchService.setGeoSelection(this.m_oModel.geoselection);
-        this.m_oResultsOfSearchService.setCurrentPage(this.m_iCurrentPage);
-        this.m_oResultsOfSearchService.setProductsPerPageSelected(this.m_iProductsPerPageSelected);
-        this.m_oResultsOfSearchService.setSensingPeriodFrom(this.m_oModel.sensingPeriodFrom);
-        this.m_oResultsOfSearchService.setSensingPeriodTo(this.m_oModel.sensingPeriodTo);
-        this.m_oResultsOfSearchService.setIngestionPeriodFrom(this.m_oModel.ingestionFrom);
-        this.m_oResultsOfSearchService.setIngestionPeriodTo(this.m_oModel.ingestionTo);
-        this.m_oResultsOfSearchService.setMissions(this.m_aoMissions);
-        this.m_oResultsOfSearchService.setActiveWorkspace(this.m_oActiveWorkspace);
-        // this.m_oResultsOfSearchService.setProviders(this.m_aListOfProvider);
-
-        //this.m_oResultsOfSearchService.setMissions(this.m_aoMissions);
-        this.m_oSearchService.getProductsCount().then(
-            function(result)
+        for(var iIndexProvider = 0 ; iIndexProvider < iNumberOfProviders; iIndexProvider++)
+        {
+            if(this.m_aListOfProvider[iIndexProvider].selected === true)
             {
-                if(result)
+                this.search(this.m_aListOfProvider[iIndexProvider]);
+            }
+        }
+    };
+
+    ImportController.prototype.search = function(oProvider, oThat)
+    {
+
+        if(utilsIsObjectNullOrUndefined(oThat) === true)
+        {
+            var oController = this;
+        }
+        else
+        {
+            var oController = oThat;
+        }
+
+        if(oController.thereIsAtLeastOneProvider() === false)
+            return false;
+        if(utilsIsObjectNullOrUndefined(oProvider) === true)
+            return false;
+        oController.m_bClearFiltersEnabled = false;
+        oController.deleteLayers(oProvider.name);/*delete layers and relatives rectangles in map*/
+        oController.m_bIsVisibleListOfLayers = true;//hide previously results
+        oController.m_oSearchService.setTextQuery(oController.m_oModel.textQuery);
+        oController.m_oSearchService.setGeoselection(oController.m_oModel.geoselection);
+        var aoProviders = [];
+        aoProviders.push(oProvider);
+        oController.m_oSearchService.setProviders(aoProviders);//this.m_aListOfProvider
+
+        var oProvider = oController.m_oPageService.getProviderObject(oProvider.name);
+        var iOffset = oController.m_oPageService.calcOffset(oProvider.name);
+        oController.m_oSearchService.setOffset(iOffset);//default 0 (index page)
+        oController.m_oSearchService.setLimit(oProvider.productsPerPageSelected);// default 10 (total of element per page)
+
+
+        oController.m_oSearchService.getProductsCount().then(
+                function(result)
                 {
-                    if(result.data)
+                    if(result)
                     {
-                        oController.m_iTotalOfProducts = result.data;
-                        oController.m_oResultsOfSearchService.setTotalOfProducts(result.data);
-
-                        //calc number of pages
-                        var remainder = oController.m_iTotalOfProducts % oController.m_iProductsPerPageSelected;
-                        oController.m_iTotalPages =  Math.floor(oController.m_iTotalOfProducts / oController.m_iProductsPerPageSelected);
-                        if(remainder !== 0)
-                            oController.m_iTotalPages += 1;
-
-
-                        oController.m_oResultsOfSearchService.setTotalPages(oController.m_iTotalPages);
+                        if(result.data)
+                        {
+                            oProvider.totalOfProducts = result.data;
+                            //calc number of pages
+                            var remainder = oProvider.totalOfProducts % oProvider.productsPerPageSelected;
+                            oProvider.totalPages =  Math.floor(oProvider.totalOfProducts / oProvider.productsPerPageSelected);
+                            if(remainder !== 0)
+                                oProvider.totalPages += 1;
+                        }
                     }
-                }
 
-            }, function errorCallback(response) {
-                // var temp=response;
-                console.log("Impossible get products number");
-            });
-        //this.m_oSearchService.getProductsCount().then(function(result){
-        //    //TODO CHECK DATA
-        //    oController.m_iTotalOfProducts = result.data;
-        //    oController.countPages();
-            oController.m_oSearchService.search().then(function(result){
+                }, function errorCallback(response) {
+                    console.log("Impossible get products number");
+                });
+
+        oController.m_oSearchService.search().then(function(result){
                 var sResults = result;
 
                 if(!utilsIsObjectNullOrUndefined(sResults))
                 {
-
-                    //if (typeof sResults.data == 'string')
-                    //{
-                    //    if (!utilsIsStrNullOrEmpty(sResults.data)) {
-                    //        var aoData = JSON.parse(sResults.data);
-                    //        oController.m_iTotalOfProducts = aoData.feed['opensearch:totalResults'];
-                    //        oController.countPages();
-                    //        oController.generateLayersList(aoData.feed);
-                    //    }
-
                     if (!utilsIsObjectNullOrUndefined(sResults.data) && sResults.data != "" ) {
 
                         var aoData = sResults.data;
@@ -514,8 +512,7 @@ var ImportController = (function() {
                         oController.m_bIsVisibleListOfLayers = false; //visualize filter list
                         oController.m_oResultsOfSearchService.setIsVisibleListOfProducts(oController.m_bIsVisibleListOfLayers );
                         oController.setPaginationVariables();
-                        // oController.m_iCurrentPage = 1;
-                        // oController.m_oResultsOfSearchService.setCurrentPage(oController.m_iCurrentPage);
+
                     }
                 }
             }, function errorCallback(response) {
@@ -523,9 +520,105 @@ var ImportController = (function() {
                 oController.m_bIsVisibleListOfLayers = false;//visualize filter list
                 oController.m_oResultsOfSearchService.setIsVisibleListOfProducts(oController.m_bIsVisibleListOfLayers );
             });
-        //});
+
 
     };
+
+    // ImportController.prototype.search = function() {
+    //
+    //     var oController = this;
+    //     if(this.thereIsAtLeastOneProvider() === false) return false;
+    //
+    //     this.m_bClearFiltersEnabled = false;
+    //     this.deleteLayers();/*delete layers (if it isn't the first search) and relatives rectangles in map*/
+    //     this.m_bIsVisibleListOfLayers = true;//change view on left side bar
+    //     this.m_oSearchService.setTextQuery(this.m_oModel.textQuery);
+    //     this.m_oSearchService.setGeoselection(this.m_oModel.geoselection); // todo: refactor setting by map
+    //     // SearchService.setAdvancedFilter(scope.model.advancedFilter);
+    //     this.m_oSearchService.setOffset(this.calcOffset());//default 0 (index page)
+    //     this.m_oSearchService.setLimit(this.m_iProductsPerPageSelected);// default 10 (total of element per page)
+    //     this.m_oSearchService.setProviders(this.m_aListOfProvider);
+    //
+    //     /* SAVE OPENSEARCH PARAMS IN SERVICE*/
+    //     this.m_oResultsOfSearchService.setIsVisibleListOfProducts(this.m_bIsVisibleListOfLayers);
+    //     this.m_oResultsOfSearchService.setTextQuery(this.m_oModel.textQuery);
+    //     this.m_oResultsOfSearchService.setGeoSelection(this.m_oModel.geoselection);
+    //     this.m_oResultsOfSearchService.setCurrentPage(this.m_iCurrentPage);
+    //     this.m_oResultsOfSearchService.setProductsPerPageSelected(this.m_iProductsPerPageSelected);
+    //     this.m_oResultsOfSearchService.setSensingPeriodFrom(this.m_oModel.sensingPeriodFrom);
+    //     this.m_oResultsOfSearchService.setSensingPeriodTo(this.m_oModel.sensingPeriodTo);
+    //     this.m_oResultsOfSearchService.setIngestionPeriodFrom(this.m_oModel.ingestionFrom);
+    //     this.m_oResultsOfSearchService.setIngestionPeriodTo(this.m_oModel.ingestionTo);
+    //     this.m_oResultsOfSearchService.setMissions(this.m_aoMissions);
+    //     this.m_oResultsOfSearchService.setActiveWorkspace(this.m_oActiveWorkspace);
+    //     // this.m_oResultsOfSearchService.setProviders(this.m_aListOfProvider);
+    //
+    //     //this.m_oResultsOfSearchService.setMissions(this.m_aoMissions);
+    //     this.m_oSearchService.getProductsCount().then(
+    //         function(result)
+    //         {
+    //             if(result)
+    //             {
+    //                 if(result.data)
+    //                 {
+    //                     oController.m_iTotalOfProducts = result.data;
+    //                     oController.m_oResultsOfSearchService.setTotalOfProducts(result.data);
+    //
+    //                     //calc number of pages
+    //                     var remainder = oController.m_iTotalOfProducts % oController.m_iProductsPerPageSelected;
+    //                     oController.m_iTotalPages =  Math.floor(oController.m_iTotalOfProducts / oController.m_iProductsPerPageSelected);
+    //                     if(remainder !== 0)
+    //                         oController.m_iTotalPages += 1;
+    //
+    //
+    //                     oController.m_oResultsOfSearchService.setTotalPages(oController.m_iTotalPages);
+    //                 }
+    //             }
+    //
+    //         }, function errorCallback(response) {
+    //             // var temp=response;
+    //             console.log("Impossible get products number");
+    //     });
+    //
+    //     oController.m_oSearchService.search().then(function(result){
+    //             var sResults = result;
+    //
+    //             if(!utilsIsObjectNullOrUndefined(sResults))
+    //             {
+    //
+    //                 //if (typeof sResults.data == 'string')
+    //                 //{
+    //                 //    if (!utilsIsStrNullOrEmpty(sResults.data)) {
+    //                 //        var aoData = JSON.parse(sResults.data);
+    //                 //        oController.m_iTotalOfProducts = aoData.feed['opensearch:totalResults'];
+    //                 //        oController.countPages();
+    //                 //        oController.generateLayersList(aoData.feed);
+    //                 //    }
+    //
+    //                 if (!utilsIsObjectNullOrUndefined(sResults.data) && sResults.data != "" ) {
+    //
+    //                     var aoData = sResults.data;
+    //
+    //                     oController.generateLayersList(aoData)//.feed;
+    //                 }
+    //                 else
+    //                 {
+    //                     utilsVexDialogAlertTop("EMPTY RESULT...");
+    //                     oController.m_bIsVisibleListOfLayers = false; //visualize filter list
+    //                     oController.m_oResultsOfSearchService.setIsVisibleListOfProducts(oController.m_bIsVisibleListOfLayers );
+    //                     oController.setPaginationVariables();
+    //                     // oController.m_iCurrentPage = 1;
+    //                     // oController.m_oResultsOfSearchService.setCurrentPage(oController.m_iCurrentPage);
+    //                 }
+    //             }
+    //         }, function errorCallback(response) {
+    //             utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN OPEN SEARCH REQUEST...");
+    //             oController.m_bIsVisibleListOfLayers = false;//visualize filter list
+    //             oController.m_oResultsOfSearchService.setIsVisibleListOfProducts(oController.m_bIsVisibleListOfLayers );
+    //     });
+    //     //});
+    //
+    // };
     /*+++++++++++++++++++++ PAGINATION ++++++++++++++++++++++++*/
     //count total number of pages
     ImportController.prototype.countPages = function()
@@ -612,36 +705,61 @@ var ImportController = (function() {
     /* us server Download the product in geoserver, the parameter oLayer = product*/
     ImportController.prototype.downloadProduct = function(oLayer)
     {
-        oLayer.isDisabledToDoDownload = true;
-        var oWorkSpace = this.m_oActiveWorkspace;
-        var oController = this;
-        if(utilsIsObjectNullOrUndefined(oWorkSpace) || utilsIsObjectNullOrUndefined(oLayer))
-        {
-            //TODO CHEK THIS POSSIBLE CASE
-            //utilsVexDialogAlertTop("Error there isn't workspaceID or layer")
-            console.log("Error there isn't workspaceID or layer");
+
+        if(utilsIsObjectNullOrUndefined(oLayer))
             return false;
-        }
-        var url = oLayer.link;
-        if(utilsIsObjectNullOrUndefined(url))
-        {
-            //TODO CHECK THIS POSSIBLE CASE
-            //utilsVexDialogAlertTop("Error there isn't workspaceID or layer")
-            console.log("Error there isn't workspaceID or layer")
-            return false;
-        }
 
-        this.m_oFileBufferService.download(url,oWorkSpace.workspaceId,oLayer.bounds.toString(),oLayer.provider).success(function (data, status) {
-            //TODO CHECK DATA-STATUS
-            var oDialog = utilsVexDialogAlertBottomRightCorner("IMPORTING IMAGE IN WASDI...");
-            utilsVexCloseDialogAfterFewSeconds("3000",oDialog);
+        var oThat = this
+        this.m_oModalService.showModal({
+            templateUrl: "dialogs/downloadProductInWorkspace/DownloadProductInWorkspaceView.html",
+            controller: "DownloadProductInWorkspaceController",
+            inputs: {
+                extras: oLayer
+            }
+        }).then(function(modal) {
+            modal.element.modal();
+
+            modal.close.then(function(result) {
+
+                if(utilsIsObjectNullOrUndefined(result))
+                    return false;
+                oLayer.isDisabledToDoDownload = true;
+                var oWorkSpace = result;
+                var oController = this;
+                if(utilsIsObjectNullOrUndefined(oWorkSpace) || utilsIsObjectNullOrUndefined(oLayer))
+                {
+                    //TODO CHEK THIS POSSIBLE CASE
+                    //utilsVexDialogAlertTop("Error there isn't workspaceID or layer")
+                    console.log("Error there isn't workspaceID or layer");
+                    return false;
+                }
+                var url = oLayer.link;
+                if(utilsIsObjectNullOrUndefined(url))
+                {
+                    //TODO CHECK THIS POSSIBLE CASE
+                    //utilsVexDialogAlertTop("Error there isn't workspaceID or layer")
+                    console.log("Error there isn't workspaceID or layer")
+                    return false;
+                }
+
+                oThat.m_oFileBufferService.download(url,oWorkSpace.workspaceId,oLayer.bounds.toString(),oLayer.provider).success(function (data, status) {
+                    //TODO CHECK DATA-STATUS
+                    var oDialog = utilsVexDialogAlertBottomRightCorner("IMPORTING IMAGE IN WASDI...");
+                    utilsVexCloseDialogAfterFewSeconds("3000",oDialog);
 
 
-        }).error(function (data,status) {
-            utilsVexDialogAlertTop('GURU MEDITATION<br>THERE WAS AN ERROR IMPORTING THE IMAGE IN THE WORKSPACE');
-            oLayer.isDisabledToDoDownload = false;
+                }).error(function (data,status) {
+                    utilsVexDialogAlertTop('GURU MEDITATION<br>THERE WAS AN ERROR IMPORTING THE IMAGE IN THE WORKSPACE');
+                    oLayer.isDisabledToDoDownload = false;
+                });
+                return true;
+            });
         });
+
         return true;
+
+
+
     }
 
     ImportController.prototype.clearFilter = function() {
@@ -1091,23 +1209,32 @@ var ImportController = (function() {
         return false;
     }
 
-    ImportController.prototype.deleteLayers = function()
+    ImportController.prototype.deleteLayers = function(sProvider)
     {
         //check if layers list is empty
         if(this.isEmptyLayersList())
             return false;
-        var iLengththLayersList = this.m_aoProductsList.length;
+        var iLengthLayersList = this.m_aoProductsList.length;
         var oMap = this.m_oMapService.getMap();
         /* remove rectangle in map*/
-        for(var iIndexLayersList = 0; iIndexLayersList < iLengththLayersList; iIndexLayersList++)
+        for(var iIndexLayersList = 0; iIndexLayersList < iLengthLayersList; iIndexLayersList++)
         {
-            var oRectangle = this.m_aoProductsList[iIndexLayersList].rectangle;
-            if(!utilsIsObjectNullOrUndefined(oRectangle))
-                oRectangle.removeFrom(oMap);
+            if( (utilsIsObjectNullOrUndefined(this.m_aoProductsList[iIndexLayersList].provider)=== false) && (this.m_aoProductsList[iIndexLayersList].provider === sProvider))
+            {
+                var oRectangle = this.m_aoProductsList[iIndexLayersList].rectangle;
+                if(!utilsIsObjectNullOrUndefined(oRectangle))
+                    oRectangle.removeFrom(oMap);
+                if (iIndexLayersList > -1) {
+                    this.m_aoProductsList.splice(iIndexLayersList, 1);
+                    iLengthLayersList--;
+                    iIndexLayersList--;
+                }
+            }
+
 
         }
         //delete layers list
-        this.m_aoProductsList = [];
+        //this.m_aoProductsList = [];
         return true;
     }
 
@@ -1343,8 +1470,8 @@ var ImportController = (function() {
         'WorkspaceService',
         'ResultsOfSearchService',
         'ModalService',
-        'OpenSearchService'
-
+        'OpenSearchService',
+        'PagesService'
     ];
 
     return ImportController;
