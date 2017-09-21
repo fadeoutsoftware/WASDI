@@ -11,10 +11,12 @@ import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import javax.servlet.ServletConfig;
 import javax.ws.rs.Consumes;
@@ -98,7 +100,7 @@ public class CatalogResources {
 			myWorkspaces.put(wks.getWorkspaceId(), wks);
 		}
 		
-		//retrieve all compabile files
+		//retrieve all compatible files
 		List<DownloadedFile> files = downFilesRepo.Search(from, to, freeText, category);
 		
 		for (DownloadedFile df : files) {
@@ -120,6 +122,146 @@ public class CatalogResources {
 			
 		}
 		return entries;
+	}
+	
+
+	@POST
+	@Path("/assimilation")
+	@Consumes(MediaType.MULTIPART_FORM_DATA)
+	@Produces(MediaType.APPLICATION_OCTET_STREAM)
+	public Response Assimilation(
+			@FormDataParam("humidity") InputStream humidityFile,
+			@FormDataParam("humidity") FormDataContentDisposition humidityFileMetaData,
+			@HeaderParam("x-session-token") String sessionId,
+			@QueryParam("midapath") String midaPath) {
+
+		User user = Wasdi.GetUserFromSession(sessionId);
+		try {
+
+//			//check authentication
+//			if (user == null || Utils.isNullOrEmpty(user.getUserId())) {
+//				return Response.status(Status.UNAUTHORIZED).build();				
+//			}
+			
+			//build and check paths
+			File assimilationWD = new File(m_oServletConfig.getInitParameter("AssimilationWDPath"));
+			if (!assimilationWD.isDirectory()) {
+				System.out.println("CatalogResources.Assimilation: ERROR: Invalid directory: " + assimilationWD.getAbsolutePath());
+				return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+			}						
+			File midaTifFile = new File(midaPath);
+			if (!midaTifFile.canRead()) {
+				System.out.println("CatalogResources.Assimilation: ERROR: Invalid mida path: " + midaTifFile.getAbsolutePath());
+				return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+			}						
+			File humidityTifFile = new File(assimilationWD, UUID.randomUUID().toString() + ".tif");
+			File resultTifFile = new File(assimilationWD, UUID.randomUUID().toString() + ".tif");
+			
+			
+			//save uploaded file			
+			int read = 0;
+			byte[] bytes = new byte[1024];
+			OutputStream out = new FileOutputStream(humidityTifFile);
+			while ((read = humidityFile.read(bytes)) != -1) {
+				out.write(bytes, 0, read);
+			}
+			out.flush();
+			out.close();
+
+			//execute assimilation
+			if (launchAssimilation(midaTifFile, humidityTifFile, resultTifFile)) {
+				
+				return Response
+						.ok(resultTifFile, MediaType.APPLICATION_OCTET_STREAM)
+						.header("content-disposition","attachment; filename=assimilation.tif")
+						.build();
+				
+			}
+			
+			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+			
+		} catch (Exception oEx) {
+			System.out.println("CatalogResources.Assimilation: error launching assimilation " + oEx.getMessage());
+			oEx.printStackTrace();
+			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+		}
+
+	}
+
+	private boolean launchAssimilation(File midaTifFile, File humidityTifFile, File resultTifFile) {
+
+		try {
+			
+			String cmd[] = new String[] {
+					m_oServletConfig.getInitParameter("AssimilationScript"),
+					midaTifFile.getAbsolutePath(),
+					humidityTifFile.getAbsolutePath(),
+					resultTifFile.getAbsolutePath()
+			};
+			
+			System.out.println("CatalogResources.LaunchAssimilation: shell exec " + Arrays.toString(cmd));
+
+			Process proc = Runtime.getRuntime().exec(cmd);
+			BufferedReader input = new BufferedReader(new InputStreamReader(proc.getInputStream()));
+            String line;
+            while((line=input.readLine()) != null) {
+            	System.out.println("CatalogResources.LaunchAssimilation: Assimilation stdout: " + line);
+            }
+			if (proc.waitFor() != 0) return false;
+		} catch (Exception oEx) {
+			System.out.println("CatalogResources.LaunchAssimilation: error during assimilation process " + oEx.getMessage());
+			oEx.printStackTrace();
+			return false;
+		}
+
+		return true;
+	}
+
+	@GET
+	@Path("")
+	@Produces({"application/xml", "application/json", "text/xml"})
+	public ArrayList<CatalogViewModel> GetCatalogs(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sWorkspaceId") String sWorkspaceId) {
+
+		User oUser = Wasdi.GetUserFromSession(sSessionId);
+
+		ArrayList<CatalogViewModel> aoCatalogList = new ArrayList<CatalogViewModel>();
+
+		try {
+			// Domain Check
+			if (oUser == null) {
+				return aoCatalogList;
+			}
+			if (Utils.isNullOrEmpty(oUser.getUserId())) {
+				return aoCatalogList;
+			}
+
+			// Create repo
+			CatalogRepository oRepository = new CatalogRepository();
+
+			// Get Process List
+			List<Catalog> aoCatalogs = oRepository.GetCatalogs();
+
+			// For each
+			for (int iCatalog=0; iCatalog<aoCatalogs.size(); iCatalog++) {
+				// Create View Model
+				CatalogViewModel oViewModel = new CatalogViewModel();
+				Catalog oCatalog = aoCatalogs.get(iCatalog);
+
+				oViewModel.setDate(oCatalog.getDate());
+				oViewModel.setFilePath(oCatalog.getFilePath());
+				oViewModel.setFileName(oCatalog.getFileName());
+
+				aoCatalogList.add(oViewModel);
+
+			}
+
+		}
+		catch (Exception oEx) {
+			System.out.println("CatalogResources.GetCatalogs: error retrieving catalogs " + oEx.getMessage());
+			oEx.printStackTrace();
+		}
+
+		return aoCatalogList;
 	}
 	
 	
@@ -212,149 +354,6 @@ public class CatalogResources {
 		return Response.ok().build();
 	}
 
-	@GET
-	@Path("")
-	@Produces({"application/xml", "application/json", "text/xml"})
-	public ArrayList<CatalogViewModel> GetCatalogs(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sWorkspaceId") String sWorkspaceId) {
-
-		User oUser = Wasdi.GetUserFromSession(sSessionId);
-
-		ArrayList<CatalogViewModel> aoCatalogList = new ArrayList<CatalogViewModel>();
-
-		try {
-			// Domain Check
-			if (oUser == null) {
-				return aoCatalogList;
-			}
-			if (Utils.isNullOrEmpty(oUser.getUserId())) {
-				return aoCatalogList;
-			}
-
-			// Create repo
-			CatalogRepository oRepository = new CatalogRepository();
-
-			// Get Process List
-			List<Catalog> aoCatalogs = oRepository.GetCatalogs();
-
-			// For each
-			for (int iCatalog=0; iCatalog<aoCatalogs.size(); iCatalog++) {
-				// Create View Model
-				CatalogViewModel oViewModel = new CatalogViewModel();
-				Catalog oCatalog = aoCatalogs.get(iCatalog);
-
-				oViewModel.setDate(oCatalog.getDate());
-				oViewModel.setFilePath(oCatalog.getFilePath());
-				oViewModel.setFileName(oCatalog.getFileName());
-
-				aoCatalogList.add(oViewModel);
-
-			}
-
-		}
-		catch (Exception oEx) {
-			System.out.println("CatalogResources.GetCatalogs: error retrieving catalogs " + oEx.getMessage());
-			oEx.printStackTrace();
-		}
-
-		return aoCatalogList;
-	}
-
-
-	@GET
-	@Path("/assimilation")
-	@Produces(MediaType.APPLICATION_OCTET_STREAM)
-	public Response Assimilation(@HeaderParam("x-session-token") String sSessionId) {
-
-		User oUser = Wasdi.GetUserFromSession(sSessionId);
-		try {
-			// Domain Check
-			if (oUser == null) {
-				Response.status(Status.UNAUTHORIZED).build();
-			}
-			if (Utils.isNullOrEmpty(oUser.getUserId())) {
-				Response.status(Status.UNAUTHORIZED).build();
-			}
-
-			if (LaunchAssimilation())
-			{
-				System.out.println("CatalogResources.Assimilation: Assimilation end with success ");
-				
-				System.out.println("CatalogResources.Assimilation: write output file ");
-				File oFileToDownload = null;
-				try
-				{
-					String sAssimilationPath =   m_oServletConfig.getInitParameter("AssimilationPath");
-					if (!sAssimilationPath.endsWith("/"))
-						sAssimilationPath += "/";
-
-					File oFolder = new File(sAssimilationPath);
-					FilenameFilter oFilter = new FilenameFilter() {
-
-						@Override
-						public boolean accept(File dir, String name) {
-							// TODO Auto-generated method stub
-							if (name.toLowerCase().endsWith(".tif"))
-								return true;
-
-							return false;
-						}
-					};
-					File[] aoFiles = oFolder.listFiles(oFilter);
-					//take first 
-					if (aoFiles != null && aoFiles.length > 0)
-					{
-						System.out.println("CatalogResources.Assimilation: file to download " + aoFiles[0].getName());
-						java.nio.file.Path oPath = Paths.get(aoFiles[0].getPath());
-						System.out.println("CatalogResources.Assimilation: file to download " + aoFiles[0].getPath());
-						oFileToDownload = new File(aoFiles[0].getPath());
-					}
-				} 
-				catch (Exception e) 
-				{
-					throw new WebApplicationException("File Not Found !!");
-				}
-					
-				return Response
-						.ok(oFileToDownload, MediaType.APPLICATION_OCTET_STREAM)
-						.header("content-disposition","attachment; filename=Assimilation.tif")
-						.build();
-			}
-		}
-		catch (Exception oEx) {
-			System.out.println("CatalogResources.Assimilation: error launching assimilation " + oEx.getMessage());
-			oEx.printStackTrace();
-		}
-
-		return Response.ok().build();
-	}
-
-	private boolean LaunchAssimilation() {
-
-		try {
-
-			System.out.println("CatalogResources.LaunchAssimilation: shell exec " + m_oServletConfig.getInitParameter("AssimilationCommandPath"));
-
-			Process oProc = Runtime.getRuntime().exec(m_oServletConfig.getInitParameter("AssimilationCommandPath"));
-			BufferedReader input = new BufferedReader(new InputStreamReader(oProc.getInputStream()));
-            String sLine;
-
-            while((sLine=input.readLine()) != null) {
-            	System.out.println("CatalogResources.LaunchAssimilation: " + sLine);
-            }
-			if (oProc.waitFor() != 0)
-				return false;
-
-		}
-		catch (Exception oEx) {
-			System.out.println("CatalogResources.LaunchAssimilation: error during assimilation process " + oEx.getMessage());
-			oEx.printStackTrace();
-		}
-
-		return true;
-	}
-
-	
-	
 	public static void main(String[] args) {
 		ArrayList<DownloadedFile> entries = new CatalogResources().searchEntries(null, null, "S2A", DownloadedFileCategory.DOWNLOAD.name(), "paolo");
 		
