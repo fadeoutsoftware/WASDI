@@ -1,6 +1,9 @@
 package wasdi.shared.business;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.TimeZone;
 
 import wasdi.shared.viewmodels.ProductViewModel;
 
@@ -11,7 +14,7 @@ public class DownloadedFile {
     private String fileName;
     private String filePath;
     private String boundingBox;
-    private Date refDate;
+    private String refDate;
     private String category = DownloadedFileCategory.PUBLIC.name();
     
     // NOTE: Usually do not use View Models in entities. But this is more an entity that not a view model...
@@ -49,12 +52,19 @@ public class DownloadedFile {
         this.boundingBox = boundingBox;
     }
 
-	public Date getRefDate() {
+	public String getRefDate() {
 		return refDate;
 	}
 
-	public void setRefDate(Date refDate) {
+	public void setRefDate(String refDate) {
 		this.refDate = refDate;
+	}
+
+	public void setRefDate(Date refDate) {
+		TimeZone tz = TimeZone.getTimeZone("UTC");
+		DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm'Z'");
+		df.setTimeZone(tz);
+		this.refDate = df.format(refDate);
 	}
 
 	public String getCategory() {
