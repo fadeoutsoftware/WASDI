@@ -10,6 +10,8 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -22,6 +24,7 @@ import javax.servlet.ServletConfig;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
+import javax.ws.rs.InternalServerErrorException;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -47,6 +50,7 @@ import wasdi.shared.data.ProductWorkspaceRepository;
 import wasdi.shared.data.WorkspaceRepository;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.CatalogViewModel;
+import wasdi.shared.viewmodels.ProductViewModel;
 
 @Path("/catalog")
 public class CatalogResources {
@@ -71,18 +75,25 @@ public class CatalogResources {
 	@Path("entries")
 	@Produces({"application/json"})
 	public ArrayList<DownloadedFile> GetEntries(@HeaderParam("x-session-token") String sSessionId, 
-			@QueryParam("from") Date from, 
-			@QueryParam("to") Date to,
+			@QueryParam("from") String from, 
+			@QueryParam("to") String to,
 			@QueryParam("freetext") String freeText,
 			@QueryParam("category") String category
 			) {
 		
 		User me = Wasdi.GetUserFromSession(sSessionId);
 		String userId = me.getUserId();
-		
-		ArrayList<DownloadedFile> entries = searchEntries(from, to, freeText, category, userId);
-		
-		return entries;
+//		String userId = "paolo";
+
+		SimpleDateFormat format = new SimpleDateFormat("yyyyMMddHHmm");
+		try {
+			Date dtFrom = (from==null || from.isEmpty())?null:format.parse(from);
+			Date dtTo = (to==null || to.isEmpty())?null:format.parse(to);
+			return searchEntries(dtFrom, dtTo, freeText, category, userId);
+		} catch (ParseException e) {
+			e.printStackTrace();
+			throw new InternalServerErrorException("invalid date: " + e.getMessage());
+		}		
 	}
 
 
@@ -106,7 +117,11 @@ public class CatalogResources {
 		for (DownloadedFile df : files) {
 			
 			//check if the product is in my workspace
-			List<String> fileWorkspaces = prodWksRepo.getWorkspaces(df.getProductViewModel().getFileName()); //TODO check if productName should be used
+			ProductViewModel pvm = df.getProductViewModel();
+			List<String> fileWorkspaces = new ArrayList<String>();
+			if (pvm != null) {
+				fileWorkspaces = prodWksRepo.getWorkspaces(pvm.getFileName()); //TODO check if productName should be used				
+			}
 			boolean isPublic = fileWorkspaces.isEmpty();
 			boolean isMine = false;			
 			for (String wks : fileWorkspaces) {
@@ -129,7 +144,7 @@ public class CatalogResources {
 	@Path("/assimilation")
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
 	@Produces(MediaType.APPLICATION_OCTET_STREAM)
-	public Response Assimilation(
+	public String Assimilation(
 			@FormDataParam("humidity") InputStream humidityFile,
 			@FormDataParam("humidity") FormDataContentDisposition humidityFileMetaData,
 			@HeaderParam("x-session-token") String sessionId,
@@ -145,17 +160,18 @@ public class CatalogResources {
 			
 			//build and check paths
 			File assimilationWD = new File(m_oServletConfig.getInitParameter("AssimilationWDPath"));
-			if (!assimilationWD.isDirectory()) {
+			if (!assimilationWD.isDirectory()) {				
 				System.out.println("CatalogResources.Assimilation: ERROR: Invalid directory: " + assimilationWD.getAbsolutePath());
-				return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+				throw new InternalServerErrorException("invalid directory in assimilation settings");				
 			}						
 			File midaTifFile = new File(midaPath);
 			if (!midaTifFile.canRead()) {
 				System.out.println("CatalogResources.Assimilation: ERROR: Invalid mida path: " + midaTifFile.getAbsolutePath());
-				return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+				throw new InternalServerErrorException("invalid path in assimilation settings");
 			}						
 			File humidityTifFile = new File(assimilationWD, UUID.randomUUID().toString() + ".tif");
-			File resultTifFile = new File(assimilationWD, UUID.randomUUID().toString() + ".tif");
+			File resultDir = new File(m_oServletConfig.getInitParameter("AssimilationResultPath"));
+			File resultTifFile = new File(resultDir, UUID.randomUUID().toString() + ".tif");
 			
 			
 			//save uploaded file			
@@ -170,20 +186,16 @@ public class CatalogResources {
 
 			//execute assimilation
 			if (launchAssimilation(midaTifFile, humidityTifFile, resultTifFile)) {
-				
-				return Response
-						.ok(resultTifFile, MediaType.APPLICATION_OCTET_STREAM)
-						.header("content-disposition","attachment; filename=assimilation.tif")
-						.build();
-				
+				String url = "wasdidownloads/" + resultTifFile.getName();
+				return url;				
 			}
 			
-			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+			throw new InternalServerErrorException("unable to execute assimilation");
 			
-		} catch (Exception oEx) {
-			System.out.println("CatalogResources.Assimilation: error launching assimilation " + oEx.getMessage());
-			oEx.printStackTrace();
-			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+		} catch (Exception e) {
+			System.out.println("CatalogResources.Assimilation: error launching assimilation " + e.getMessage());
+			e.printStackTrace();
+			throw new InternalServerErrorException("error launching assimilation: " + e.getMessage());
 		}
 
 	}
@@ -355,7 +367,7 @@ public class CatalogResources {
 	}
 
 	public static void main(String[] args) {
-		ArrayList<DownloadedFile> entries = new CatalogResources().searchEntries(null, null, "S2A", DownloadedFileCategory.DOWNLOAD.name(), "paolo");
+		ArrayList<DownloadedFile> entries = new CatalogResources().searchEntries(null, null, null, DownloadedFileCategory.PUBLIC.name(), "paolo");
 		
 		for (DownloadedFile df : entries) {
 			System.out.println(df.getFilePath());
