@@ -402,7 +402,7 @@ public class LauncherMain {
                     // Get The product view Model
                     ReadProduct oReadProduct = new ReadProduct();
                     File oProductFile = new File(sFileName);
-                    Product oProduct = oReadProduct.ReadProduct(oProductFile);
+                    Product oProduct = oReadProduct.ReadProduct(oProductFile, null);
                     oVM = oReadProduct.getProductViewModel(oProduct, oProductFile);
                     oVM.setMetadata(oReadProduct.getProductMetadataViewModel(oProductFile));
 
