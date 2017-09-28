@@ -128,7 +128,7 @@ var CatalogController = (function() {
                     for(var iIndexCategory = 0;iIndexCategory < iNumberOfCategories; iIndexCategory++)
                     {
                         var oCategory = {name:data[iIndexCategory],
-                                        isSelected:true};
+                                        isSelected:false};
                         oController.m_asCategories.push(oCategory);
                     }
                 }
@@ -143,8 +143,13 @@ var CatalogController = (function() {
 
     CatalogController.prototype.searchEntries = function()
     {
-        var sFrom =  this.m_oDataFrom ;
-        var sTo =  this.m_oDataTo;
+        var sFrom="";
+        var sTo="";
+        if(utilsIsStrNullOrEmpty(this.m_oDataFrom) === false)
+            var sFrom = this.m_oDataFrom.replace(/-/g,'');
+        if(utilsIsStrNullOrEmpty(this.m_oDataTo) === false)
+            var sTo =  this.m_oDataTo.replace(/-/g,'');
+
         var sFreeText = this.m_sInputQuery;
         var sCategory = this.getSelectedCategoriesAsString() ;
         var oController = this;
@@ -206,9 +211,14 @@ var CatalogController = (function() {
         var iNumberOfEntries = this.m_aoEntries.length;
         for( var iIndexEntry = 0; iIndexEntry < iNumberOfEntries; iIndexEntry++ )
         {
-            var aBoundariesArray = this.convertBoundaries(this.m_aoEntries[iIndexEntry].boundingBox);
-            var oRectangle = this.m_oMapService.addRectangleOnMap(aBoundariesArray,"#ff7800","product"+iIndexEntry);
-            this.m_aoEntries[iIndexEntry].rectangle = oRectangle;
+            var sBoundaries = this.m_aoEntries[iIndexEntry].boundingBox;
+            if( (utilsIsObjectNullOrUndefined(sBoundaries) === false)&&(utilsIsStrNullOrEmpty(sBoundaries) === false) )
+            {
+                var aBoundariesArray = this.convertBoundaries(sBoundaries);
+                var oRectangle = this.m_oMapService.addRectangleOnMap(aBoundariesArray,"#ff7800","product"+iIndexEntry);
+                this.m_aoEntries[iIndexEntry].rectangle = oRectangle;
+            }
+
         }
         return true;
     };
@@ -252,7 +262,18 @@ var CatalogController = (function() {
         });
 
     };
+    CatalogController.prototype.radioButtonOnCLick = function(oCategory){
+        oCategory.isSelected = true;
+        var iNumberOfCategories =  this.m_asCategories.length;
 
+        for(var iIndexCategory = 0; iIndexCategory < iNumberOfCategories; iIndexCategory++)
+        {
+            if(this.m_asCategories[iIndexCategory].name !== oCategory.name)
+            {
+                this.m_asCategories[iIndexCategory].isSelected = false;
+            }
+        }
+    };
     CatalogController.$inject = [
         '$scope',
         'ConstantsService',

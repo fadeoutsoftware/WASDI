@@ -12,7 +12,7 @@
 
                 <div class="input-group my-input-text"
                      moment-picker="m_oController.m_oDataTo"
-                     format="YYYY-MM-DD"
+                     format="YYYY-MM-DD-HH-mm"
                      today="true">
 
                     <input class="form-control"
@@ -36,7 +36,7 @@
 
                 <div class="input-group my-input-text"
                      moment-picker="m_oController.m_oDataFrom"
-                     format="YYYY-MM-DD "
+                     format="YYYY-MM-DD-HH-mm"
                      today="true">
 
                     <input class="form-control"
@@ -82,13 +82,18 @@
 
                     </div>
 
-                    <div class="checkbox" ng-repeat="category in m_oController.m_asCategories track by $index">
+                    <!--<div class="checkbox" ng-repeat="category in m_oController.m_asCategories track by $index">-->
+                        <!--<label >-->
+                            <!--<input type="checkbox" value="" ng-model="category.isSelected">-->
+                            <!--{{category.name}}-->
+                        <!--</label>-->
+                    <!--</div>-->
+                    <div class="radio" ng-repeat="category in m_oController.m_asCategories ">
                         <label >
-                            <input type="checkbox" value="" ng-model="category.isSelected">
+                            <input type="radio" name="pageNumber" ng-value="category.isSelected" ng-click="m_oController.radioButtonOnCLick(category)"><!-- ng-model="category.isSelected"-->
                             {{category.name}}
                         </label>
                     </div>
-
                     <!--<button class="my-button" ng-click="m_oController.searchEntries()" ng-disabled="!m_oController.m_bIsLoadedTable">Search</button>-->
 
                 </div>

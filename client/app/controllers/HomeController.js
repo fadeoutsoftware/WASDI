@@ -14,11 +14,25 @@ var HomeController = (function() {
         this.m_bLoginIsVisible = false;//Login in visible after click on logo
         this.m_sUserName = "";
         this.m_sUserPassword = "";
-
+        this.m_bRegisterIsVisible = false;
         if(this.m_oConstantsService.isUserLogged())
             this.m_oState.go("root.workspaces");// go workspaces
 
     }
+
+    HomeController.prototype.changeVisibilityLoginRegister = function(sStatus){
+        if(sStatus === "Login")
+        {
+            this.m_bLoginIsVisible = true;
+            this.m_bRegisterIsVisible = false;
+        }
+
+        if(sStatus === "Register")
+        {
+            this.m_bLoginIsVisible = false;
+            this.m_bRegisterIsVisible = true;
+        }
+    };
 
     HomeController.prototype.moveTo = function (sPath) {
         this.m_oLocation.path(sPath);

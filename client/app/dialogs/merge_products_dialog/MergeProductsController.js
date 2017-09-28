@@ -3,7 +3,7 @@
  */
 var MergeProductsController = (function() {
 
-    function MergeProductsController($scope, oClose,oExtras,Upload,oConstantService,$http) {
+    function MergeProductsController($scope, oClose,oExtras,Upload,oConstantService,$http,oCatalogService) {
         this.m_oScope = $scope;
         this.m_oScope.m_oController = this;
         this.m_sLog = '';
@@ -13,7 +13,12 @@ var MergeProductsController = (function() {
         this.m_oWorkSpaceActive = oExtras.WorkSpaceId;
         this.m_oConstantService = oConstantService;
         this.m_oHttp = $http;
-        //$scope.close = oClose;
+        this.m_oCatalogService = oCatalogService;
+        this.m_aoEntries = [];
+        this.m_oSelectedEntry = null;
+        this.m_oClose = oClose;       //$scope.close = oClose;
+        this.searchEntries();
+
         $scope.close = function(result) {
             oClose(result, 500); // close, but give 500ms for bootstrap to animate
         };
@@ -34,19 +39,64 @@ var MergeProductsController = (function() {
     {
         if(utilsIsObjectNullOrUndefined(this.m_oSelectedProduct)) return true;
         return false;
-    }
+    };
 
-    MergeProductsController.prototype.upload = function (oFile) {
-        if(utilsIsObjectNullOrUndefined(oFile)) return false;
-        if(utilsIsObjectNullOrUndefined(this.m_oWorkSpaceActive)) return false;
+    // MergeProductsController.prototype.uploadv2 = function (oFile) {
+    //     if(utilsIsObjectNullOrUndefined(oFile)) return false;
+    //     if(utilsIsObjectNullOrUndefined(this.m_oWorkSpaceActive)) return false;
+    //
+    //     var oController = this;
+    //     var sUrl = oController.m_oConstantService.getAPIURL();
+    //     sUrl += "/catalog/upload?sWorkspaceId=" + oController.m_oWorkSpaceActive.workspaceId;
+    //
+    //     var successCallback = function(data, status)
+    //     {
+    //         utilsVexDialogAlertTop("FILE UPLOADED");
+    //     };
+    //
+    //     var errorCallback = function (data, status)
+    //     {
+    //         utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN UPLOAD FILE");
+    //     };
+    //
+    //     var fd = new FormData();
+    //     fd.append('file', oFile);
+    //     oController.m_oHttp.post(sUrl, fd, {
+    //          transformRequest: angular.identity,
+    //          headers: {'Content-Type': undefined}
+    //     }).then(successCallback, errorCallback);
+    //
+    //     return true;
+    // };
+
+    MergeProductsController.prototype.upload = function(oFile){
+
+        if(utilsIsObjectNullOrUndefined(oFile))
+            return false;
+        if(utilsIsObjectNullOrUndefined(this.m_oWorkSpaceActive))
+            return false;
+        if(utilsIsObjectNullOrUndefined(this.m_oSelectedEntry) === true)
+            return false;
+        if((utilsIsStrNullOrEmpty(this.m_oSelectedEntry.filePath)===true)||(utilsIsObjectNullOrUndefined(this.m_oSelectedEntry.filePath) === true) )
+        {
+            utilsVexDialogAlertTop("the delected entry file path is invalid");
+            return false;
+        }
+
 
         var oController = this;
         var sUrl = oController.m_oConstantService.getAPIURL();
-        sUrl += "/catalog/upload?sWorkspaceId=" + oController.m_oWorkSpaceActive.workspaceId;
+        // sUrl += "/catalog/assimilation?midapath=" +"/data/wasdi/catalogue/mulesme/2017/09/19/SMCItaly_20170919.tif";
+        sUrl += "/catalog/assimilation?midapath=" + this.m_oSelectedEntry.filePath;
 
         var successCallback = function(data, status)
         {
+
+            var url = 'http://178.22.66.96/' + data.data;
+            //download
+            window.open(url,'_self');
             utilsVexDialogAlertTop("FILE UPLOADED");
+
         };
 
         var errorCallback = function (data, status)
@@ -55,59 +105,95 @@ var MergeProductsController = (function() {
         };
 
         var fd = new FormData();
-        fd.append('file', oFile);
+        fd.append('humidity', oFile);
         oController.m_oHttp.post(sUrl, fd, {
             transformRequest: angular.identity,
             headers: {'Content-Type': undefined}
         }).then(successCallback, errorCallback);
-
-        return true;
+        //utilsVexDialogAlertBottomRightCorner();
+        utilsVexDialogAlertDefault("Successful upload request");
+        //this.closeDialog();
     };
 
-    MergeProductsController.prototype.assimilation = function()
+    // MergeProductsController.prototype.assimilation = function()
+    // {
+    //     var oController = this;
+    //     var sUrl = oController.m_oConstantService.getAPIURL();
+    //     sApi="/catalog/assimilation";
+    //     sUrl += sApi;
+    //
+    //     utilsVexDialogAlertTop("GURU MEDITATION<br>GETTING STARTED");
+    //
+    //     //this.m_oHttp.get(sUrl,"responseType: 'arraybuffer'")
+    //     this.m_oHttp({method: 'GET',url: sUrl, responseType: 'arraybuffer'})
+    //         .success(function (data, status,headers)
+    //         {
+    //             if (!utilsIsObjectNullOrUndefined(data) )
+    //             {
+    //                 var contentType = headers['content-type'];
+    //                 var file = new Blob([data], { type: contentType});
+    //                 var linkElement = document.createElement('a');
+    //                 var url = window.URL.createObjectURL(file);
+    //
+    //                 linkElement.setAttribute('href', url);
+    //                 linkElement.setAttribute("download", "name.tif");
+    //
+    //                 var clickEvent = new MouseEvent("click", {
+    //                     "view": window,
+    //                     "bubbles": true,
+    //                     "cancelable": false
+    //                 });
+    //                 linkElement.dispatchEvent(clickEvent);
+    //
+    //             }
+    //         }).error(function (data,status)
+    //     {
+    //         utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR: ASSIMILATION DOESN'T WORK");
+    //     });
+    // };
+
+    MergeProductsController.prototype.searchEntries = function()
     {
+        var sFrom="";
+        var sTo="";
+        // if(utilsIsStrNullOrEmpty(this.m_oDataFrom) === false)
+        //     var sFrom = this.m_oDataFrom.replace(/-/g,'');
+        // if(utilsIsStrNullOrEmpty(this.m_oDataTo) === false)
+        //     var sTo =  this.m_oDataTo.replace(/-/g,'');
+
+        //var sFreeText = "mida";
+        var sFreeText = "";
+        var sCategory = "PUBLIC";
         var oController = this;
-        var sUrl = oController.m_oConstantService.getAPIURL();
-        sApi="/catalog/assimilation";
-        sUrl += sApi;
-
-        utilsVexDialogAlertTop("GURU MEDITATION<br>GETTING STARTED");
-
-        //this.m_oHttp.get(sUrl,"responseType: 'arraybuffer'")
-        this.m_oHttp({method: 'GET',url: sUrl, responseType: 'arraybuffer'})
-            .success(function (data, status,headers)
+        this.m_bIsLoadedTable = false;
+        this.m_oCatalogService.getEntries(sFrom,sTo,sFreeText,sCategory).success(function (data) {
+            if(utilsIsObjectNullOrUndefined(data) == false)
             {
-                if (!utilsIsObjectNullOrUndefined(data) )
-                {
-                    var contentType = headers['content-type'];
-                    var file = new Blob([data], { type: contentType});
-                    var linkElement = document.createElement('a');
-                    var url = window.URL.createObjectURL(file);
-
-                    linkElement.setAttribute('href', url);
-                    linkElement.setAttribute("download", "name.tif");
-
-                    var clickEvent = new MouseEvent("click", {
-                        "view": window,
-                        "bubbles": true,
-                        "cancelable": false
-                    });
-                    linkElement.dispatchEvent(clickEvent);
-
-                }
-            }).error(function (data,status)
-        {
-            utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR: ASSIMILATION DOESN'T WORK");
+                oController.m_aoEntries = data;
+            }
+        }).error(function (error) {
+            utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN GET ENTRIES");
         });
+    };
+    MergeProductsController.prototype.selectedEntry = function(oEntry){
+        if(utilsIsObjectNullOrUndefined(oEntry) === true)
+            return false;
+        this.m_oSelectedEntry = oEntry;
+        return true;
+    };
+    MergeProductsController.prototype.closeDialog=function (sResult)
+    {
+        this.m_oScope.close(sResult, 500); // close, but give 500ms for bootstrap to animate
+    };
 
-    }
     MergeProductsController.$inject = [
         '$scope',
         'close',
         'extras',
         'Upload',
         'ConstantsService',
-        '$http'
+        '$http',
+        'CatalogService'
     ];
     return MergeProductsController;
 })();

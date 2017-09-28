@@ -303,6 +303,13 @@
 
                             </div>
 
+                            <div ng-show = "m_oController.isEmptyProviderLayerList(provider.name)" style="padding-left: 10px">
+                                <h2>
+                                    <i class="fa fa-exclamation" aria-hidden="true"></i>
+                                    Empty list
+                                    <i class="fa fa-exclamation" aria-hidden="true"></i>
+                                </h2>
+                            </div>
 
                             <table class="table table-hover layers " id="table_layers_list" ng-show="m_oController.m_bIsVisibleListOfLayers && m_oController.isEmptyLayersList() == false" >
 

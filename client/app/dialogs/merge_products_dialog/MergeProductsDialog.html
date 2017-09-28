@@ -7,13 +7,39 @@
             </div>
             <div class="modal-body">
 
+                <div class="dropdown dropdown-products">
+                    <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenuentries"
+                            data-toggle="dropdown">
+
+                            <span ng-show=" m_oController.m_oSelectedEntry == null"> Select MIDA Map from catalogue</span>
+                            <span ng-hide=" m_oController.m_oSelectedEntry == null">{{m_oController.m_oSelectedEntry.fileName}}  </span>
+                            <span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenuentries">
+                        <li role="presentation" ng-repeat="entry in m_oController.m_aoEntries">
+                            <a role="menuitem" tabindex="-1" href="" ng-click="m_oController.selectedEntry(entry)">{{entry.fileName}}</a>
+                        </li>
+
+                    </ul>
+                </div>
+
+
                 <div class="drag-and-drop ">
-                    Upload Soil Moisture Map to be Merged with the MIDA Satellite Based Soil Mosture Map:
+                    <h4>Upload Soil Moisture Map to be Merged with the MIDA Satellite Based Soil Mosture Map:</h4>
+
                     <div ngf-drop ngf-select ng-model="m_oController.m_oFile" class="drop-box"
                          ngf-drag-over-class="'dragover'" ngf-multiple="true" ngf-allow-dir="true"
                          accept="image/*"
-                         ngf-pattern="'image/*'">Drop Soil Moisture Map here or click to upload</div>
+                         ngf-pattern="'image/*'"  ng-disabled="m_oController.m_oSelectedEntry == null">
+                        <span ng-hide="m_oController.m_oSelectedEntry == null">
+                            Drop Soil Moisture Map here or click to upload
+                        </span>
+                        <span ng-show="m_oController.m_oSelectedEntry == null">
+                            You should select an element form catalogue
+                        </span>
+                    </div>
                     <div ngf-no-file-drop>File Drag/Drop is not supported for this browser</div>
+
                     <!--Files:-->
                     <!--<ul>-->
                         <!--<li ng-repeat="f in files" >{{f.name}} {{f.$error}} {{f.$errorParam}}</li>-->
@@ -22,21 +48,22 @@
                     <!--<pre>{{log}}</pre>-->
                 </div>
 
-                <div class=" dropdown dropdown-products " ng-show="m_oController.isVisibleDropDownMenu()">
-                    <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
-                        Select MIDA Map from catalogue
-                        <span class="caret"></span>
-                    </button>
-                    <!-- TODO TEMPORARY DISABLED -->
-                    <!--<ul class="dropdown-menu" aria-labelledby="dropdownMenu1" >-->
-                        <!--<li ng-repeat=" layer in m_oController.getLayers()" ng-click="m_oController.publishLayer(layer)">{{layer.Name}}</li>-->
-                    <!--</ul>-->
-                </div>
+                <!--<div class=" dropdown dropdown-products " ng-show="m_oController.isVisibleDropDownMenu()">-->
+                    <!--<button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">-->
+                        <!--Select MIDA Map from catalogue-->
+                        <!--<span class="caret"></span>-->
+                    <!--</button>-->
+                    <!--&lt;!&ndash; TODO TEMPORARY DISABLED &ndash;&gt;-->
+                    <!--&lt;!&ndash;<ul class="dropdown-menu" aria-labelledby="dropdownMenu1" >&ndash;&gt;-->
+                        <!--&lt;!&ndash;<li ng-repeat=" layer in m_oController.getLayers()" ng-click="m_oController.publishLayer(layer)">{{layer.Name}}</li>&ndash;&gt;-->
+                    <!--&lt;!&ndash;</ul>&ndash;&gt;-->
+                <!--</div>-->
+
 
             </div>
             <div class="modal-footer">
-                <button type="button" class="my-button" ng-click="m_oController.assimilation()">Assimilation</button>
-                <button type="button" ng-click="close('ok')" class="my-button" data-dismiss="modal">Close</button>
+                <!--<button type="button" class="my-button" ng-click="m_oController.assimilation()">Assimilation</button>-->
+                <button type="button" ng-click="this.closeDialog('ok')" class="my-button" data-dismiss="modal">Close</button>
             </div>
         </div>
     </div>
