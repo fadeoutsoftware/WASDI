@@ -508,10 +508,10 @@ var ImportController = (function() {
                     }
                     else
                     {
-                        utilsVexDialogAlertTop("EMPTY RESULT...");
-                        oController.m_bIsVisibleListOfLayers = false; //visualize filter list
-                        oController.m_oResultsOfSearchService.setIsVisibleListOfProducts(oController.m_bIsVisibleListOfLayers );
-                        oController.setPaginationVariables();
+                        // utilsVexDialogAlertTop("EMPTY RESULT...");
+                        // oController.m_bIsVisibleListOfLayers = false; //visualize filter list
+                        // oController.m_oResultsOfSearchService.setIsVisibleListOfProducts(oController.m_bIsVisibleListOfLayers );
+                        //oController.setPaginationVariables();
 
                     }
                 }
@@ -1451,6 +1451,22 @@ var ImportController = (function() {
         this.m_oResultsOfSearchService.setSensingPeriodTo(dateObj);
         this.m_oModel.sensingPeriodFrom = this.m_oResultsOfSearchService.getSensingPeriodFrom();
         this.m_oModel.sensingPeriodTo = this.m_oResultsOfSearchService.getSensingPeriodTo();
+    };
+
+
+    ImportController.prototype.isEmptyProviderLayerList = function(sProvider)
+    {
+        var iNumberOfProduct = this.m_aoProductsList.length;
+        var bIsEmpty = true;
+
+        for(var iIndexProduct = 0 ; iIndexProduct < iNumberOfProduct; iIndexProduct++)
+        {
+            if(this.m_aoProductsList[iIndexProduct].provider === sProvider){
+                bIsEmpty = false;
+                return bIsEmpty;
+            }
+        }
+        return bIsEmpty;
     };
 
     ImportController.$inject = [

@@ -1,16 +1,16 @@
 <div class="container-fluid">
     <div class="login-view row">
         <div class="login-top">
-            <div class="link-login pull-right" ng-click="m_oController.m_bLoginIsVisible= (!m_oController.m_bLoginIsVisible)" ng-show="!m_oController.m_bLoginIsVisible">
+            <div class="link-login pull-right" ng-click="m_oController.changeVisibilityLoginRegister('Login')" >
                 {{"LOGIN_LINK_FORM"|translate}}
 
             </div>
-            <div class="link-register pull-right" ng-click="" ng-show="!m_oController.m_bLoginIsVisible">
+            <div class="link-register pull-right" ng-click="m_oController.changeVisibilityLoginRegister('Register')" >
                 {{"LOGIN_LINK_REGISTER"|translate}}
 
             </div>
             <!------------------------------- LOGO(write) ------------------------------->
-            <div  ng-show="!m_oController.m_bLoginIsVisible">
+            <div  ng-show="(!m_oController.m_bLoginIsVisible) && (!m_oController.m_bRegisterIsVisible)">
 
                 <img class="write-logo" id="write-logo">
                 <script>
@@ -48,13 +48,17 @@
                 </a>
             </div>
 
+            <div class="login-content" ng-show="m_oController.m_bRegisterIsVisible" >
+                Work in progress... If you want a test account contact us: wasdi@fadeout.it
+            </div>
+
             <!--snake></snake-->
         </div>
 
         <!-- LOGIN LOGO SNAKE (background color white )-->
         <div class="login-bottom">
             <!------------------------------- LOGO ------------------------------->
-            <img class="logo" id="logo"  ng-show="!m_oController.m_bLoginIsVisible">
+            <img class="logo" id="logo"  ng-show="(!m_oController.m_bLoginIsVisible) && (!m_oController.m_bRegisterIsVisible)">
             <script>
                 // Script fix an error with Firefox which does not
                 // show image correctly if the 'SRC' is set from CSS
@@ -67,11 +71,11 @@
                     oImage.attr("src",imageSrc);
                 })
             </script>
-            <div class="write"  ng-show="!m_oController.m_bLoginIsVisible"><h2>{{"LOGIN_WRITE"|translate}}</h2></div>
+            <div class="write"  ng-show="(!m_oController.m_bLoginIsVisible) && (!m_oController.m_bRegisterIsVisible)"><h2>{{"LOGIN_WRITE"|translate}}</h2></div>
         </div>
 
         <footer>
-            <img class="striscia_loghi" id="striscia_loghi"  ng-show="!m_oController.m_bLoginIsVisible">
+            <img class="striscia_loghi" id="striscia_loghi"  ng-show="(!m_oController.m_bLoginIsVisible) && (!m_oController.m_bRegisterIsVisible)">
             <script>
                 // Script fix an error with Firefox which does not
                 // show image correctly if the 'SRC' is set from CSS
