@@ -14,6 +14,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -46,6 +47,7 @@ import wasdi.shared.business.User;
 import wasdi.shared.business.Workspace;
 import wasdi.shared.data.CatalogRepository;
 import wasdi.shared.data.DownloadedFilesRepository;
+import wasdi.shared.data.MongoRepository;
 import wasdi.shared.data.ProductWorkspaceRepository;
 import wasdi.shared.data.WorkspaceRepository;
 import wasdi.shared.utils.Utils;
@@ -120,7 +122,8 @@ public class CatalogResources {
 			ProductViewModel pvm = df.getProductViewModel();
 			List<String> fileWorkspaces = new ArrayList<String>();
 			if (pvm != null) {
-				fileWorkspaces = prodWksRepo.getWorkspaces(pvm.getFileName()); //TODO check if productName should be used				
+				fileWorkspaces = prodWksRepo.getWorkspaces(pvm.getFileName()); //TODO check if productName should be used
+				pvm.setMetadata(null);
 			}
 			boolean isPublic = fileWorkspaces.isEmpty();
 			boolean isMine = false;			
@@ -132,6 +135,7 @@ public class CatalogResources {
 			}
 			
 			if (isMine || isPublic) {
+				
 				entries.add(df);
 			}
 			
@@ -366,11 +370,23 @@ public class CatalogResources {
 		return Response.ok().build();
 	}
 
-	public static void main(String[] args) {
-		ArrayList<DownloadedFile> entries = new CatalogResources().searchEntries(null, null, null, DownloadedFileCategory.PUBLIC.name(), "paolo");
+	public static void main(String[] args) throws Exception {
+		
+		MongoRepository.SERVER_PORT = 27018;
+		
+		String userId = "PAOLO";
+		String from = "201709200000";
+		String to = "201709222200";
+		String freeText = "";
+		String category = "PUBLIC";
+
+		SimpleDateFormat format = new SimpleDateFormat("yyyyMMddHHmm");
+		Date dtFrom = (from==null || from.isEmpty())?null:format.parse(from);
+		Date dtTo = (to==null || to.isEmpty())?null:format.parse(to);
+		ArrayList<DownloadedFile> entries = new CatalogResources().searchEntries(dtFrom, dtTo, freeText, category, userId);
 		
 		for (DownloadedFile df : entries) {
-			System.out.println(df.getFilePath());
+			System.out.println(df.getRefDate() + " --> " + df.getFilePath());
 		}
 		
 	}

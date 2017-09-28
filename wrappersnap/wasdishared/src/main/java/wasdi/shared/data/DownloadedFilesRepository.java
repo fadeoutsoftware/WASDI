@@ -1,6 +1,8 @@
 package wasdi.shared.data;
 
 import java.io.IOException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -79,7 +81,10 @@ public class DownloadedFilesRepository extends MongoRepository {
     	List<Bson> filters = new ArrayList<Bson>();
     	
     	if (from!=null && to!=null) {
-    		filters.add(Filters.and(Filters.gte("refDate", from), Filters.lte("refDate", to)));
+    		
+    		DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm'Z'");
+    		
+    		filters.add(Filters.and(Filters.gte("refDate", df.format(from)), Filters.lte("refDate", df.format(to))));
     	}
     	
     	if (freeText!=null && !freeText.isEmpty()) {
