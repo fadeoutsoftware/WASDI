@@ -127,8 +127,11 @@ var CatalogController = (function() {
                     var iNumberOfCategories = data.length;
                     for(var iIndexCategory = 0;iIndexCategory < iNumberOfCategories; iIndexCategory++)
                     {
-                        var oCategory = {name:data[iIndexCategory],
-                                        isSelected:false};
+                        var isSelected = false;
+                        if(iIndexCategory === 0)
+                            isSelected = true;
+                        var oCategory = {   name:data[iIndexCategory],
+                                            isSelected:isSelected};
                         oController.m_asCategories.push(oCategory);
                     }
                 }

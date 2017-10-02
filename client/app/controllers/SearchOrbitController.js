@@ -537,25 +537,15 @@ var SearchOrbitController = (function() {
     }
 
     SearchOrbitController.prototype.receivedNewProductMessage = function (oMessage, oController) {
+        var sMessage = 'PRODUCT ADDED TO THE WORKSPACE<br>READY';
 
-        /*
-        oController.m_oProductService.addProductToWorkspace(oMessage.payload.fileName,oController.m_oActiveWorkspace.workspaceId).success(function (data, status) {
-            if(data.boolValue == true )
-            {
-                var oDialog = utilsVexDialogAlertBottomRightCorner('Product added to the ws');
-                utilsVexCloseDialogAfterFewSeconds(3000, oDialog);
-            }
-            else
-            {
-                utilsVexDialogAlertTop("Error adding product to workspace");
-            }
+        // this.test=function(){
+        //     this.m_oState.go("root.catalog", { })
+        // };
+        // if(oMessage.messageCode !== "DOWNLOAD" )
+        //     sMessage += " <a href='' ng-click='this.test()'> Link </a>"
 
-        }).error(function (data,status) {
-            utilsVexDialogAlertTop('Error adding product to the ws');
-        });
-        */
-
-        var oDialog = utilsVexDialogAlertBottomRightCorner('PRODUCT ADDED TO THE WORKSPACE<br>READY');
+        var oDialog = utilsVexDialogAlertBottomRightCorner(sMessage);
         utilsVexCloseDialogAfterFewSeconds(3000, oDialog);
     }
 

@@ -469,6 +469,14 @@ var WorkspaceController = (function() {
 
     };
 
+    WorkspaceController.prototype.test=function()
+    {
+        var iNumberOfSatellitePositions = this.m_aoSatellitePositions.length;
+        for(var iIndexPosition = 0; iIndexPosition < iNumberOfSatellitePositions; iIndexPosition++)
+        {
+
+        }
+    }
     //
 
     WorkspaceController.prototype.deleteSentinel1a = function(value){

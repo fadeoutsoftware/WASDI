@@ -396,6 +396,9 @@
         }
 
       }
+      .badge{
+        margin-left: 5px;
+      }
       /************* TABLE css*****************/
       /*pls doesn't change it,  need it for on-mouse-click-rectangle event:
       *  var container = $('#div-container-table'), scrollTo = $("#"+sId);

@@ -70,15 +70,18 @@
 
             <div class="panel panel-default filters" >
                 <div class="panel-heading">
-                    Filters
+                    <h4>Filters</h4>
                 </div>
 
                 <!--CHECKBOXES-->
                 <div class="panel-body">
-                    <div class="search-input-query my-input-text">
-                        <input type="text" ng-model="m_oController.m_sInputQuery"
-                               placeholder="Search..." >
+                    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                        <div class="search-input-query my-input-text">
+                            <input type="text" ng-model="m_oController.m_sInputQuery"
+                                   placeholder="Search..." >
 
+
+                        </div>
 
                     </div>
 
@@ -88,12 +91,21 @@
                             <!--{{category.name}}-->
                         <!--</label>-->
                     <!--</div>-->
-                    <div class="radio" ng-repeat="category in m_oController.m_asCategories ">
-                        <label >
-                            <input type="radio" name="pageNumber" ng-value="category.isSelected" ng-click="m_oController.radioButtonOnCLick(category)"><!-- ng-model="category.isSelected"-->
-                            {{category.name}}
-                        </label>
+                    <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+                        <i class="fa fa-filter" aria-hidden="true"></i>
+                        Filters:
+                        <div class="well well-sm">
+                            <div class="radio" ng-repeat="category in m_oController.m_asCategories ">
+                                <label >
+                                    <input type="radio" name="pageNumber" ng-value="category.isSelected"
+                                           ng-click="m_oController.radioButtonOnCLick(category)" ng-checked="category.isSelected"><!-- ng-model="category.isSelected"-->
+                                    {{category.name}}
+                                </label>
+                            </div>
+                        </div>
                     </div>
+
+
                     <!--<button class="my-button" ng-click="m_oController.searchEntries()" ng-disabled="!m_oController.m_bIsLoadedTable">Search</button>-->
 
                 </div>
