@@ -236,43 +236,18 @@
                 <div class="container-table-row" ng-show="m_oController.m_bIsVisibleListOfLayers" id="div-container-table" >
 
                     <div ng-show="m_oController.m_bIsVisibleListOfLayers && m_oController.isEmptyLayersList() == true" class="loadIcon">
-                    <!--<div ng-show="m_oController.m_bIsVisibleListOfLayers && m_oController.isEmptyLayersList() == false">-->
-                        <!--<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>-->
-                        <!--<span class="sr-only">Loading...</span>-->
                         <invader></invader>
                     </div>
-
-
-                    <!--PAGINATION-->
-                    <!--<div class="pages" ng-hide="m_oController.m_bIsVisibleListOfLayers && m_oController.isEmptyLayersList() == true">-->
-                        <!--<ul class="pager">-->
-
-                            <!--<div class="form-group">-->
-                                <!--<label for="selectPages">{{"IMPORT_PRODUCTS_PER_PAGE_LABEL"|translate}}</label>-->
-                                <!--<select class="form-control" id="selectPages" ng-model="m_oController.m_iProductsPerPageSelected"-->
-                                        <!--ng-options="product for product in m_oController.m_iProductsPerPage" ng-change="m_oController.search()">-->
-                                <!--</select>-->
-                            <!--</div>-->
-
-                            <!--<li ng-click="m_oController.firstPage()" ><a><i class="fa fa-angle-double-left" aria-hidden="true"></i></a></li>-->
-                            <!--<li ng-click="m_oController.minusOnePage()" ><a><i class="fa fa-angle-left" aria-hidden="true"></i></a></li>-->
-                            <!--<form ng-submit="m_oController.changePage(m_oController.m_iCurrentPage)">-->
-                                <!--{{"IMPORT_PAGE_LABEL"|translate}}-->
-                                <!--<input type="text" class="form-control" ng-model="m_oController.m_iCurrentPage">-->
-                                <!--{{"IMPORT_OF_LABEL"|translate}} {{m_oController.m_iTotalPages}}-->
-                            <!--</form>-->
-                            <!--<li ng-click="m_oController.plusOnePage()" ><a><i class="fa fa-angle-right" aria-hidden="true"></i></a></li>-->
-                            <!--<li ng-click="m_oController.lastPage()" ><a><i class="fa fa-angle-double-right" aria-hidden="true"></i></a></li>-->
-
-                        <!--</ul>-->
-
-                    <!--</div>-->
-
 
                     <!-- TAB NAVIGATION -->
                     <ul class="nav nav-tabs" role="tablist" ng-hide="m_oController.m_bIsVisibleListOfLayers && m_oController.isEmptyLayersList() == true">
                         <li ng-class="{active: m_oController.m_iActiveProvidersTab === $index}" ng-repeat="provider in m_oController.m_aListOfProvider | filter:{ selected: true }"  ng-click="m_oController.m_iActiveProvidersTab = $index">
-                            <a href="" role="tab" data-toggle="tab">{{provider.name}}</a>
+                            <a href="" role="tab" data-toggle="tab">
+                                {{provider.name }}
+                                <span class="badge pull-right">{{ m_oController.m_oPageService.getNumberOfProductByProvider(provider.name)}}</span>
+                            </a>
+
+
                         </li>
                     </ul>
                     <!-- TAB CONTENT -->
@@ -286,12 +261,13 @@
                                     <div class="form-group">
                                         <label for="selectPages">{{"IMPORT_PRODUCTS_PER_PAGE_LABEL"|translate}}</label>
                                         <select class="form-control" id="selectPages" ng-model="m_oController.m_oPageService.getProviderObject(provider.name).productsPerPageSelected"
-                                                ng-options="product for product in m_oController.m_oPageService.m_iProductsPerPage" ng-change="m_oController.search(provider.name)">
+                                                ng-options="product for product in m_oController.m_oPageService.m_iProductsPerPage"
+                                                ng-change="m_oController.m_oPageService.changeNumberOfProductsPerPage(provider.name,m_oController)"><!--ng-change="m_oController.search(provider.name)">-->
                                         </select>
                                     </div>
                                     <li ng-click="m_oController.m_oPageService.firstPage(provider.name,m_oController)" ><a><i class="fa fa-angle-double-left" aria-hidden="true"></i></a></li>
                                     <li ng-click="m_oController.m_oPageService.minusOnePage(provider.name,m_oController)" ><a><i class="fa fa-angle-left" aria-hidden="true"></i></a></li>
-                                    <form ng-submit="m_oController.m_oPageService.changePage(m_oController.m_oPageService.getProviderObject(provider.name).currentPage,provider.name)">
+                                    <form ng-submit="m_oController.m_oPageService.changePage(m_oController.m_oPageService.getProviderObject(provider.name).currentPage,provider.name,m_oController)">
                                         {{"IMPORT_PAGE_LABEL"|translate}}
                                         <input type="text" class="form-control" ng-model="m_oController.m_oPageService.getProviderObject(provider.name).currentPage">
                                         {{"IMPORT_OF_LABEL"|translate}} {{m_oController.m_oPageService.getProviderObject(provider.name).totalPages}}
@@ -303,12 +279,17 @@
 
                             </div>
 
-                            <div ng-show = "m_oController.isEmptyProviderLayerList(provider.name)" style="padding-left: 10px">
+                            <!------------ IF THE LIST OF LAYERS IS EMPTY ------------>
+                            <div ng-show = "m_oController.isEmptyProviderLayerList(provider.name) && m_oController.m_bIsVisibleListOfLayers === false" style=" padding-left: 10px">
                                 <h2>
                                     <i class="fa fa-exclamation" aria-hidden="true"></i>
-                                    Empty list
+                                    There aren't any results for {{provider.name}} provide
                                     <i class="fa fa-exclamation" aria-hidden="true"></i>
                                 </h2>
+                            </div>
+                            <!----------------- LOADING LIST OF LAYERS ---------------------->
+                            <div ng-show = "m_oController.isEmptyProviderLayerList(provider.name) && m_oController.m_bIsVisibleListOfLayers === true" class="loadIcon">
+                                <invader></invader>
                             </div>
 
                             <table class="table table-hover layers " id="table_layers_list" ng-show="m_oController.m_bIsVisibleListOfLayers && m_oController.isEmptyLayersList() == false" >

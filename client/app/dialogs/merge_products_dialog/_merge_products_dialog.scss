@@ -42,9 +42,17 @@
             background: #F8F8F8;
             border: 5px dashed $wasdi-green-logo;
           }
+          .drop-box-disabled:hover{
+            background: #F8F8F8;
+            border: 5px dashed red;
+
+          }
           .dragover {
             border: 5px dashed blue;
           }
+
+
+
         }
 
         .dropdown-products

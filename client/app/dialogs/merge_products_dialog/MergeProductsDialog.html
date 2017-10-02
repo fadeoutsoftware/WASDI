@@ -28,6 +28,7 @@
                     <h4>Upload Soil Moisture Map to be Merged with the MIDA Satellite Based Soil Mosture Map:</h4>
 
                     <div ngf-drop ngf-select ng-model="m_oController.m_oFile" class="drop-box"
+                         ng-class="{'drop-box-disabled': m_oController.m_oSelectedEntry == null}"
                          ngf-drag-over-class="'dragover'" ngf-multiple="true" ngf-allow-dir="true"
                          accept="image/*"
                          ngf-pattern="'image/*'"  ng-disabled="m_oController.m_oSelectedEntry == null">
@@ -35,7 +36,7 @@
                             Drop Soil Moisture Map here or click to upload
                         </span>
                         <span ng-show="m_oController.m_oSelectedEntry == null">
-                            You should select an element form catalogue
+                            You should select an element from catalogue
                         </span>
                     </div>
                     <div ngf-no-file-drop>File Drag/Drop is not supported for this browser</div>

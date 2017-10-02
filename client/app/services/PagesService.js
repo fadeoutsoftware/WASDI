@@ -166,5 +166,34 @@ service('PagesService', ['$http',  'ConstantsService','OpenSearchService', funct
     this.firstPage = function(sProvider,oThat){
         this.changePage(1,sProvider,oThat);
     };
+
+    this.getNumberOfProductByProvider = function(sProvider){
+        if(utilsIsStrNullOrEmpty(sProvider) === true )
+            return -1;
+        var aoProviders = this.getProviders();
+        var iNumberOfProviders = aoProviders.length;
+
+        for(var iIndexProvider = 0; iIndexProvider < iNumberOfProviders; iIndexProvider++)
+        {
+            if(aoProviders[iIndexProvider].name === sProvider)
+                return aoProviders[iIndexProvider].totalOfProducts;
+        };
+
+        return -1;
+    };
+
+    this.changeNumberOfProductsPerPage = function(sProvider,oThat)
+    {
+        var oFunction = this.getFunction();
+        if( (utilsIsObjectNullOrUndefined(sProvider) === false) && (utilsIsObjectNullOrUndefined(oThat) === false) && (utilsIsObjectNullOrUndefined(oFunction) === false) )
+        {
+            //countPages
+            var oProvider = this.getProviderObject(sProvider);
+            oFunction(oProvider,oThat);
+            return true;
+        }
+        return false;
+    };
+
 }]);
 
