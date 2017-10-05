@@ -120,11 +120,11 @@ public class CatalogResources {
 			
 			//check if the product is in my workspace
 			ProductViewModel pvm = df.getProductViewModel();
-			pvm.setMetadata(null);			
 			//boolean isPublic = category.equals(DownloadedFileCategory.PUBLIC)fileWorkspaces.isEmpty();
 			boolean isMine = category.equals(DownloadedFileCategory.PUBLIC.name());
 			if (!isMine) {
 				if (pvm != null) {
+					pvm.setMetadata(null);
 					List<String> fileWorkspaces = prodWksRepo.getWorkspaces(pvm.getFileName()); //TODO check if productName should be used					
 					for (String wks : fileWorkspaces) {
 						if (myWorkspaces.containsKey(wks)) {
@@ -380,7 +380,7 @@ public class CatalogResources {
 		String from = "";//"201709200000";
 		String to = "";//"201709222200";
 		String freeText = "";
-		String category = "DOWNLOAD";//"PUBLIC";
+		String category = "PUBLIC";
 
 		SimpleDateFormat format = new SimpleDateFormat("yyyyMMddHHmm");
 		Date dtFrom = (from==null || from.isEmpty())?null:format.parse(from);
