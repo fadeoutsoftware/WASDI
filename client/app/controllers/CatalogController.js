@@ -157,7 +157,6 @@ var CatalogController = (function() {
         var sCategory = this.getSelectedCategoriesAsString() ;
         var oController = this;
         this.m_bIsLoadedTable = false;
-        //TODO CHANGE GET REQUEST (PROBLEM WITH DATAs)
         this.m_oCatalogService.getEntries(sFrom,sTo,sFreeText,sCategory).success(function (data) {
             if(utilsIsObjectNullOrUndefined(data) == false)
             {

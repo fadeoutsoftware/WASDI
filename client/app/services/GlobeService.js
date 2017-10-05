@@ -501,6 +501,12 @@ service('GlobeService', ['$http',  'ConstantsService','SatelliteService', functi
 
     };
 
+    this.updateEntityPosition = function(oEntity,oNewPosition){
+        if( (utilsIsObjectNullOrUndefined(oEntity) === false) && (utilsIsObjectNullOrUndefined(oNewPosition) === false ) )
+        {
+            oEntity.position = oNewPosition;
+        }
+    };
 
     this.getSatelliteTrackInputList = function () {
         var aoOutList = [

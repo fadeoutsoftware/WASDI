@@ -317,22 +317,6 @@ var ImportController = (function() {
             }
         });
 
-        // var oController = this;
-        // this.m_oOpenSearchService.getListOfProvider().success(function (data) {
-        //     if(utilsIsObjectNullOrUndefined(data) === false && data.length > 0)
-        //     {
-        //         var iLengthData = data.length;
-        //         for(var iIndexProvider = 0; iIndexProvider < iLengthData; iIndexProvider++)
-        //         {
-        //             oController.m_aListOfProvider[iIndexProvider] = {"name":data[iIndexProvider], "selected":true};
-        //         }
-        //         // oController.m_aListOfProvider = data;
-        //     }
-        //
-        // }).error(function (data) {
-        //
-        // });
-
         /*SET DEFAULT VALUE OF PERIOD */
         this.m_aListOfProvider = this.m_oPageService.getProviders();
         this.setDefaultData();
@@ -433,6 +417,8 @@ var ImportController = (function() {
     };
     ImportController.prototype.searchAllSelectedProviders = function()
     {
+        if( (this.thereIsAtLeastOneProvider() === false) || (this.m_bIsVisibleListOfLayers || this.m_bisVisibleLocalStorageInputs))
+            return false;
         var iNumberOfProviders = this.m_aListOfProvider.length;
 
         for(var iIndexProvider = 0 ; iIndexProvider < iNumberOfProviders; iIndexProvider++)
@@ -442,6 +428,7 @@ var ImportController = (function() {
                 this.search(this.m_aListOfProvider[iIndexProvider]);
             }
         }
+        return true;
     };
 
     ImportController.prototype.search = function(oProvider, oThat)
@@ -473,14 +460,14 @@ var ImportController = (function() {
         var iOffset = oController.m_oPageService.calcOffset(oProvider.name);
         oController.m_oSearchService.setOffset(iOffset);//default 0 (index page)
         oController.m_oSearchService.setLimit(oProvider.productsPerPageSelected);// default 10 (total of element per page)
-
+        oProvider.isLoaded = false;
 
         oController.m_oSearchService.getProductsCount().then(
                 function(result)
                 {
                     if(result)
                     {
-                        if(result.data)
+                        if(utilsIsObjectNullOrUndefined(result.data) === false )
                         {
                             oProvider.totalOfProducts = result.data;
                             //calc number of pages
@@ -489,6 +476,7 @@ var ImportController = (function() {
                             if(remainder !== 0)
                                 oProvider.totalPages += 1;
                         }
+
                     }
 
                 }, function errorCallback(response) {
@@ -509,11 +497,13 @@ var ImportController = (function() {
                     else
                     {
                         // utilsVexDialogAlertTop("EMPTY RESULT...");
-                        // oController.m_bIsVisibleListOfLayers = false; //visualize filter list
+                         //oController.m_bIsVisibleListOfLayers = false; //visualize filter list
                         // oController.m_oResultsOfSearchService.setIsVisibleListOfProducts(oController.m_bIsVisibleListOfLayers );
                         //oController.setPaginationVariables();
-
+                        //oController.m_bIsVisibleListOfLayers = true;
                     }
+
+                    oProvider.isLoaded = true;
                 }
             }, function errorCallback(response) {
                 utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN OPEN SEARCH REQUEST...");

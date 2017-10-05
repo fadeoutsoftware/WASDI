@@ -16,12 +16,19 @@
 
     <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12 workspace-list" >
         <!----------------------WORKSPACES LIST---------------------->
+
         <div class="table-workspaces" >
             <div class="wizards" ng-show="(m_oController.getWorkspaceInfoList().length === 0) && (m_oController.m_bIsLoading === false)">
                 <h4>
                     {{"WORKSPACES_ADD_NEW_WORKSPSACE"|translate}}<a href="" ng-click="m_oController.createWorkspace()">{{"WORKSPACES_BUTTON_NEW_WORKSPACE"|translate}}</a>
                 </h4>
             </div>
+
+            <div class="loadIcon" ng-hide="( (m_oController.getWorkspaceInfoList().length) > 0 && (m_oController.m_bIsLoading === false) )||
+                                            ( (m_oController.getWorkspaceInfoList().length === 0) && (m_oController.m_bIsLoading === false) )">
+                <invader> </invader>
+            </div>
+
             <table class="table table-hover"id="TableWorkspacesList" ng-show="m_oController.getWorkspaceInfoList().length > 0 && (m_oController.m_bIsLoading === false)">
                 <thead>
                 <th>#</th>

@@ -235,12 +235,14 @@
                  <!--the table become visible after the user Search a layer -->
                 <div class="container-table-row" ng-show="m_oController.m_bIsVisibleListOfLayers" id="div-container-table" >
 
-                    <div ng-show="m_oController.m_bIsVisibleListOfLayers && m_oController.isEmptyLayersList() == true" class="loadIcon">
-                        <invader></invader>
-                    </div>
-
+                    <!--<div ng-show="m_oController.m_bIsVisibleListOfLayers && m_oController.isEmptyLayersList() == true" class="loadIcon">-->
+                        <!--<invader></invader>-->
+                    <!--</div>-->
+                    <!--{{m_oController.m_bIsVisibleListOfLayers && m_oController.isEmptyLayersList() == true}}-->
+                    <!--{{m_oController.m_bIsVisibleListOfLayers }}-->
+                    <!--{{ m_oController.isEmptyLayersList() == true}}-->
                     <!-- TAB NAVIGATION -->
-                    <ul class="nav nav-tabs" role="tablist" ng-hide="m_oController.m_bIsVisibleListOfLayers && m_oController.isEmptyLayersList() == true">
+                    <ul class="nav nav-tabs" role="tablist" ><!-- ng-hide="m_oController.m_bIsVisibleListOfLayers " && m_oController.isEmptyLayersList() == true-->
                         <li ng-class="{active: m_oController.m_iActiveProvidersTab === $index}" ng-repeat="provider in m_oController.m_aListOfProvider | filter:{ selected: true }"  ng-click="m_oController.m_iActiveProvidersTab = $index">
                             <a href="" role="tab" data-toggle="tab">
                                 {{provider.name }}
@@ -251,7 +253,7 @@
                         </li>
                     </ul>
                     <!-- TAB CONTENT -->
-                    <div class="tab-content" ng-hide="m_oController.m_bIsVisibleListOfLayers && m_oController.isEmptyLayersList() == true">
+                    <div class="tab-content" ><!--ng-hide="m_oController.m_bIsVisibleListOfLayers && m_oController.isEmptyLayersList() == true"-->
                         <div ng-repeat="provider in m_oController.m_aListOfProvider | filter:{ selected: true }" class="missions" ng-show="m_oController.m_iActiveProvidersTab === $index">
 
                             <!--PAGES-->
@@ -280,7 +282,7 @@
                             </div>
 
                             <!------------ IF THE LIST OF LAYERS IS EMPTY ------------>
-                            <div ng-show = "m_oController.isEmptyProviderLayerList(provider.name) && m_oController.m_bIsVisibleListOfLayers === false" style=" padding-left: 10px">
+                            <div ng-show = "m_oController.isEmptyProviderLayerList(provider.name) && provider.isLoaded === true" style=" padding-left: 10px">
                                 <h2>
                                     <i class="fa fa-exclamation" aria-hidden="true"></i>
                                     There aren't any results for {{provider.name}} provide
@@ -288,7 +290,7 @@
                                 </h2>
                             </div>
                             <!----------------- LOADING LIST OF LAYERS ---------------------->
-                            <div ng-show = "m_oController.isEmptyProviderLayerList(provider.name) && m_oController.m_bIsVisibleListOfLayers === true" class="loadIcon">
+                            <div ng-show = "m_oController.isEmptyProviderLayerList(provider.name) && m_oController.m_bIsVisibleListOfLayers === true &&  provider.isLoaded === false" class="loadIcon">
                                 <invader></invader>
                             </div>
 
@@ -362,72 +364,6 @@
                     </div>
 
 
-            <!--********************************* TABLE **********************************-->
-                    <!--<table class="table table-hover layers " id="table_layers_list" ng-show="m_oController.m_bIsVisibleListOfLayers && m_oController.isEmptyLayersList() == false" >-->
-
-                        <!--<tbody ng-repeat="layer in m_oController.m_aoProductsList"-->
-                               <!--ng-mouseover="m_oController.changeStyleRectangleMouseOver(layer.rectangle)"-->
-                               <!--ng-mouseleave="m_oController.changeStyleRectangleMouseLeave(layer.rectangle)"-->
-                               <!--id='{{"layer"+layer.id}}'> &lt;!&ndash;id='{{"layer:"+$index}}' layer.id&ndash;&gt;-->
-                        <!--&lt;!&ndash;-&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45; SUMMARY -&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&ndash;&gt;-->
-                        <!--<tr class="info-layer" >-->
-                            <!--&lt;!&ndash; BUTTONS &ndash;&gt;-->
-                            <!--<td class="button-cell">-->
-                                <!--<div class="btn-group-vertical" role="group" >-->
-                                    <!--<button type="button" class="btn btn btn-primary" ng-click="m_oController.downloadProduct(layer)"-->
-                                            <!--ng-disabled="m_oController.isPossibleDoDownload(layer) || (layer.isDisabledToDoDownload != null && layer.isDisabledToDoDownload)" data-toggle="tooltip" data-placement="top" title="{{'IMPORT_TOOLTIP_ADD_PRODUCT'|translate}}">-->
-
-                                        <!--<i class="fa fa-plus " aria-hidden="true"></i>-->
-                                    <!--</button>-->
-                                    <!--<button type="button" class="btn btn btn-primary" ng-click="m_oController.zoomOnBounds(layer.rectangle)"-->
-                                            <!--data-toggle="tooltip" data-placement="top" title="{{'IMPORT_TOOLTIP_ZOOM_ON_PRODUCT'|translate}}">-->
-                                        <!--<i class="fa fa-search-plus" aria-hidden="true"></i>-->
-                                    <!--</button>-->
-                                    <!--<button type="button" class="btn btn btn-primary" ng-click="m_oController.infoLayer(layer)"-->
-                                            <!--data-toggle="tooltip" data-placement="top" title="{{'IMPORT_TOOLTIP_INFO'|translate}}">-->
-                                        <!--<i class="fa fa-info-circle" aria-hidden="true"></i>-->
-                                    <!--</button>-->
-                                <!--</div>-->
-                            <!--</td>-->
-                            <!--&lt;!&ndash; IMAGE CELL &ndash;&gt;-->
-                            <!--<td class="image-cell">-->
-                                <!--<span class="label label-success">{{layer.summary.Mode}}</span>&nbsp;&lt;!&ndash;Mode&ndash;&gt;-->
-                                <!--<span class="label label-success"> {{layer.summary.Instrument}}</span>&lt;!&ndash;Instrument&ndash;&gt;-->
-                                <!--<div class="preview-layer-image" ><img src={{layer.preview}} alt="Image" style="height: 82px;width: 82px; "></div>-->
-                                <!--<span class="badge">{{layer.summary.Size}}</span>&lt;!&ndash;Size&ndash;&gt;-->
-                            <!--</td>-->
-                            <!--&lt;!&ndash; INFO CELL &ndash;&gt;-->
-                            <!--<td class="info-cell">-->
-
-                                <!--<div>{{layer.summary.Date|date:'medium'}}</div>&lt;!&ndash;Date&ndash;&gt;-->
-                                <!--</br>-->
-
-                                <!--<div>-->
-                                    <!--<span>Name: </span>-->
-                                    <!--<span><b>{{layer.title}}</b></span>-->
-                                <!--</div>-->
-
-                                <!--<div>-->
-                                    <!--<span>Mode: </span>-->
-                                    <!--<span><b>{{layer.summary.Mode}}</b></span>-->
-                                <!--</div>-->
-
-                                <!--<div>-->
-                                    <!--<span>Relative Orbit: </span>-->
-                                    <!--<span><b>{{layer.properties.relativeorbitnumber}}</b></span>-->
-                                <!--</div>-->
-
-                                <!--&lt;!&ndash;<div>{{"layer"+layer.id}}</div>&ndash;&gt;-->
-                                <!--<div>-->
-                                    <!--<span>Provider:</span>-->
-                                    <!--<span><b>{{layer.provider}}</b></span>-->
-
-                                <!--</div>-->
-                            <!--</td>-->
-
-                        <!--</tr>-->
-                        <!--</tbody>-->
-                    <!--</table>-->
 
                 </div>
             </div>

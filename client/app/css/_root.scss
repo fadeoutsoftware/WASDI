@@ -232,16 +232,21 @@
       {
         display: inline-grid;
       }
-      .progress-single-process{
-        float: right;
-        width:10%;
-        background-color:$wasdi-white ;
-        .progress-bar{}
-        padding: 0 4em 0 0em;
+      .progress-single-process
+      {
+      //  float: right;
+      //  width:10%;
+      //  background-color:$wasdi-white ;
+      //  .progress-bar{}
+        width: 15%;
+        padding: 0 0 0 0;
+        background: $wasdi-white;
+
       }
     }
     .my-button
     {
+      color:white;
       color:white;
       padding: 0;
       margin: 0;
@@ -289,6 +294,7 @@
 .loading-files  {
   width:90%;
   padding:0 15px;
+  margin-top : -5px;
   $color_space: $wasdi-blue-logo;
   $dotsize: 8px;
   @import "../directives/space_invaders/space_invaders";
