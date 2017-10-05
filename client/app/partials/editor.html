@@ -198,7 +198,10 @@
 
                 <!-- MY TREE DIRECTIVE -->
                 <div class="panel-body">
-                    <invader ng-show="m_oController.m_bIsLoadingTree"></invader>
+                    <div class="loadIcon" ng-show="m_oController.m_bIsLoadingTree">
+                        <invader ></invader>
+                    </div>
+
                     <tree ngModelTree="prova" ng-hide="m_oController.isHideTree() || (m_oController.m_bIsLoadingTree === true)" ></tree>
                     <!--|| (m_oController.m_oTree === null)||(m_oController.m_oTree.core.data.length === 0)-->
                     <div class = "wizards" ng-show="m_oController.isHideTree() && (m_oController.m_bIsLoadingTree === false)">

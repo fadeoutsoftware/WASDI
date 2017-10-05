@@ -140,15 +140,15 @@
     <!------------------ PROCESSES BAR ------------------->
     <div class=" status-bar " id="status-bar" ng-show="m_oController.isVisibleProcessesBar() == true" >
         <div class="row"  >
-                <div class="col-xs-1 col-sm-1 col-md-1 col-lg-1 processes-list" style="margin:0; padding:0;" >
-                    <div ng-show="m_oController.m_oLastProcesses != null && !m_oController.m_bIsOpenNav">
+                <div class="col-xs-1 col-sm-1 col-md-1 col-lg-1 processes-list" ><!--style="margin:0; padding:0;" -->
+                    <div class="loadIcon" ng-show="m_oController.m_oLastProcesses != null && !m_oController.m_bIsOpenNav"><!---->
                         <smallinvaderfixed></smallinvaderfixed>
-
+                        <!--<invader></invader>-->
                     </div>
                 </div>
 
                 <div class="col-lg-8 col-md-8 col-sm-8 col-xs-8 processes-list" >
-                    <div ng-show="m_oController.m_oLastProcesses != null && !m_oController.m_bIsOpenNav" >
+                    <div ng-show="m_oController.m_oLastProcesses != null && !m_oController.m_bIsOpenNav"><!--ng-show="m_oController.m_oLastProcesses != null && !m_oController.m_bIsOpenNav"-->
                         <div class="flex-container column">
                             <div class="flex-container">
                                 <span class="label label-default">{{"ROOT_LABEL_OPERATION_DATA"|translate}}</span>
@@ -158,10 +158,13 @@
 
 
                                 <div class="progress-single-process" >
-                                    <div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="40" aria-valuemin="0" aria-valuemax="100" ng-style="{width:m_oController.m_oLastProcesses.progressPerc+'%' }">
+                                    <div class="progress-bar progress-bar-success" role="progressbar"  aria-valuemin="0" aria-valuemax="100" ng-style="{width:m_oController.m_oLastProcesses.progressPerc+'%' }">
                                         <span class="">{{m_oController.m_oLastProcesses.progressPerc}} %</span>
                                         <!-- class="sr-only " for hide {{oProcess.progressPerc}} % Complete (success) -->
                                     </div>
+                                    <!--<div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="40" aria-valuemin="0" aria-valuemax="100" ng-style="{width:oProcess.progressPerc+'%' }" style="width: 100%;">-->
+                                        <!--<span class="ng-binding">100 %</span>&lt;!&ndash; class="sr-only " for hide {{oProcess.progressPerc}} % Complete (success) &ndash;&gt;-->
+                                    <!--</div>-->
                                 </div>
 
                             </div>
@@ -242,7 +245,7 @@
                             <td>
                                 {{oProcess.operationType}}
                             </td>
-                            <td class="text" data-toggle="tooltip" title="{{oProcess.productName}}"  data-placement="bottom">
+                            <td class="text"  title="{{oProcess.productName}}"  ><!--data-toggle="tooltip" data-placement="bottom"-->
                                 <span>{{oProcess.productName}}</span>
                             </td>
                             <td>

@@ -21,7 +21,8 @@ service('PagesService', ['$http',  'ConstantsService','OpenSearchService', funct
                             "totalPages":1,
                             "currentPage":1,
                             "productsPerPageSelected":10,
-                            "selected":true
+                            "selected":true,
+                            "isLoaded":false,
                             };
             }
             // oController.m_aListOfProvider = data;

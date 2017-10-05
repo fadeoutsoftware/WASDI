@@ -113,7 +113,7 @@ wasdiApp.config(['$stateProvider', '$urlRouterProvider', function($stateProvider
 
     //IMPORT
     $stateProvider.state('root.import',{
-        url: '/{workSpace}/import',
+        url: '/import', // /{workSpace}
 
         views:{
             'maincontent' : { templateUrl : 'partials/import.html', controller  : 'ImportController'}
@@ -122,7 +122,7 @@ wasdiApp.config(['$stateProvider', '$urlRouterProvider', function($stateProvider
 
     //SEARCH ORBIT
     $stateProvider.state('root.searchorbit',{
-        url: '/{workSpace}/searchorbit',
+        url: '/searchorbit',// /{workSpace}
 
         views:{
             'maincontent' : { templateUrl : 'partials/searchorbit.html', controller  : 'SearchOrbitController'}
@@ -130,7 +130,7 @@ wasdiApp.config(['$stateProvider', '$urlRouterProvider', function($stateProvider
     });
     //CATALOG
     $stateProvider.state('root.catalog',{
-        url: '/{workSpace}/catalog',
+        url: '/catalog',// /{workSpace}
 
         views:{
             'maincontent' : { templateUrl : 'partials/catalog.html', controller  : 'CatalogController'}
