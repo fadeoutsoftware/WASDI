@@ -120,21 +120,23 @@ public class CatalogResources {
 			
 			//check if the product is in my workspace
 			ProductViewModel pvm = df.getProductViewModel();
-			List<String> fileWorkspaces = new ArrayList<String>();
-			if (pvm != null) {
-				fileWorkspaces = prodWksRepo.getWorkspaces(pvm.getFileName()); //TODO check if productName should be used
-				pvm.setMetadata(null);
-			}
-			boolean isPublic = fileWorkspaces.isEmpty();
-			boolean isMine = false;			
-			for (String wks : fileWorkspaces) {
-				if (myWorkspaces.containsKey(wks)) {
-					isMine = true;
-					break;
+			pvm.setMetadata(null);			
+			//boolean isPublic = category.equals(DownloadedFileCategory.PUBLIC)fileWorkspaces.isEmpty();
+			boolean isMine = category.equals(DownloadedFileCategory.PUBLIC.name());
+			if (!isMine) {
+				if (pvm != null) {
+					List<String> fileWorkspaces = prodWksRepo.getWorkspaces(pvm.getFileName()); //TODO check if productName should be used					
+					for (String wks : fileWorkspaces) {
+						if (myWorkspaces.containsKey(wks)) {
+							isMine = true;
+							break;
+						}
+					}
 				}
 			}
 			
-			if (isMine || isPublic) {
+//			if (isMine || isPublic) {
+			if (isMine) {
 				
 				entries.add(df);
 			}
@@ -374,11 +376,11 @@ public class CatalogResources {
 		
 		MongoRepository.SERVER_PORT = 27018;
 		
-		String userId = "PAOLO";
-		String from = "201709200000";
-		String to = "201709222200";
+		String userId = "paolo";
+		String from = "";//"201709200000";
+		String to = "";//"201709222200";
 		String freeText = "";
-		String category = "PUBLIC";
+		String category = "DOWNLOAD";//"PUBLIC";
 
 		SimpleDateFormat format = new SimpleDateFormat("yyyyMMddHHmm");
 		Date dtFrom = (from==null || from.isEmpty())?null:format.parse(from);
