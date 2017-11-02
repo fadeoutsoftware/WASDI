@@ -37,6 +37,7 @@ var wasdiApp = angular.module('wasdi', [
     'wasdi.MultiselectDirective',
     'wasdi.SpaceInvaderFixedSmallVersionDirective',
     'wasdi.MultiselectDropdownMenuDirective',
+    'wasdi.SquaresDirective',
     //EXTERNAL LIB
     'ui.bootstrap',
     'checklist-model',
@@ -168,3 +169,4 @@ wasdiApp.controller("CatalogController",CatalogController);
 wasdiApp.controller("AddProductInCatalogController",AddProductInCatalogController);
 wasdiApp.controller("GetInfoProductCatalogController",GetInfoProductCatalogController);
 wasdiApp.controller("DownloadProductInWorkspaceController",DownloadProductInWorkspaceController);
+wasdiApp.controller("FilterBandController",FilterBandController);

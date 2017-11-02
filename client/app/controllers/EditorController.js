@@ -732,8 +732,14 @@ var EditorController = (function () {
                                            if(utilsIsObjectNullOrUndefined(oBand) == false)
                                                oController.zoomOnLayer3DGlobe(oBand.productName+"_"+oBand.name);
                                        }
+                                    },
+                                    "Filter Band":{
+                                        "label": "Filter Band",
+                                        "action" : function(pbj){
+                                            if(utilsIsObjectNullOrUndefined(oBand) == false)
+                                                oController.filterBandDialog();
+                                        }
                                     }
-
                                 };
                         }
 
@@ -770,24 +776,7 @@ var EditorController = (function () {
                                                         if(utilsIsObjectNullOrUndefined(oFindedProduct) == false)  oController.openMultilookingDialog(oFindedProduct);
                                                     }
                                                 },
-                                                //SUB-SUBMENU RADIOMETRIC
-                                                // "Radiometric": {
-                                                //     "label": "Radiometric",
-                                                //     "action": false,
-                                                //     "separator_before":true,
-                                                //     "submenu":
-                                                //         {
-                                                            "Calibrate": {
-                                                                "label": "Calibrate",
-                                                                "action": function (obj) {
-                                                                    var sSourceFileName = $node.original.fileName;
-                                                                    var sDestinationFileName = '';
-                                                                    var oFindedProduct = oController.findProductByFileName(sSourceFileName);
 
-                                                                    if(utilsIsObjectNullOrUndefined(oFindedProduct) == false) oController.openRadiometricCalibrationDialog(oFindedProduct);
-
-                                                                }
-                                                            },
                                                 //         }
                                                 // },
                                                 //SUB-SUBMENU GEOMETRIC
@@ -796,27 +785,47 @@ var EditorController = (function () {
                                                 //     "action": false,
                                                 //     "submenu":
                                                 //         {
-                                                            //SUB-SUB-SUBMENU GEOMETRIC
-                                                            // "Terrain correction": {
-                                                            //     "label": "Terrain correction",
-                                                            //     "action": false,
-                                                            //     "submenu":
-                                                            //         {
-                                                                        "Range Doppler Terrain Correction": {
-                                                                            "label": "Range Doppler Terrain Correction",
-                                                                            "action": function (obj) {
-                                                                                var sSourceFileName = $node.original.fileName;
-                                                                                var sDestinationFileName = '';
-                                                                                var oFindedProduct = oController.findProductByFileName(sSourceFileName);
-
-                                                                                if(utilsIsObjectNullOrUndefined(oFindedProduct) == false) oController.rangeDopplerTerrainCorrectionDialog(oFindedProduct);
-                                                                            }
-                                                                        },
-                                                            //         }
-                                                            // },
+                                                //SUB-SUB-SUBMENU GEOMETRIC
+                                                // "Terrain correction": {
+                                                //     "label": "Terrain correction",
+                                                //     "action": false,
+                                                //     "submenu":
+                                                //         {
 
                                                 //         }
                                                 // },
+
+                                                //         }
+                                                // },
+                                                "Range Doppler Terrain Correction": {
+                                                    "label": "Range Doppler Terrain Correction",
+                                                    "action": function (obj) {
+                                                        var sSourceFileName = $node.original.fileName;
+                                                        var sDestinationFileName = '';
+                                                        var oFindedProduct = oController.findProductByFileName(sSourceFileName);
+
+                                                        if(utilsIsObjectNullOrUndefined(oFindedProduct) == false) oController.rangeDopplerTerrainCorrectionDialog(oFindedProduct);
+                                                    }
+                                                },
+                                                //SUB-SUBMENU RADIOMETRIC
+                                                // "Radiometric": {
+                                                //     "label": "Radiometric",
+                                                //     "action": false,
+                                                //     "separator_before":true,
+                                                //     "submenu":
+                                                //         {
+
+                                                "Calibrate": {
+                                                    "label": "Calibrate",
+                                                    "action": function (obj) {
+                                                        var sSourceFileName = $node.original.fileName;
+                                                        var sDestinationFileName = '';
+                                                        var oFindedProduct = oController.findProductByFileName(sSourceFileName);
+
+                                                        if(utilsIsObjectNullOrUndefined(oFindedProduct) == false) oController.openRadiometricCalibrationDialog(oFindedProduct);
+
+                                                    }
+                                                },
 
                                             }
                                     },
@@ -1711,6 +1720,24 @@ var EditorController = (function () {
                     utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR THE OPERATION RANGE DOPPLER TERRATIN CORRECTION DOESN'T WORK");
                 });
                 return true;
+            });
+        });
+
+        return true;
+    }
+    EditorController.prototype.filterBandDialog = function (oSelectedProduct)
+    {
+        var oController = this;
+        this.m_oModalService.showModal({
+            templateUrl: "dialogs/filter_band_operation/FilterBandDialog.html",
+            controller: "FilterBandController",
+            inputs: {
+                extras: null,
+            }
+        }).then(function (modal) {
+            modal.element.modal();
+            modal.close.then(function (oResult) {
+
             });
         });
 

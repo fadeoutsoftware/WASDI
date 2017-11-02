@@ -20,6 +20,7 @@
 @import "../directives/multiselect/multiselect";
 //@import "../directives/space_invaders_fixed_small_version/space_invaders_fixed_small_version";
 @import "../directives/multiselect_dropdown_menu/multiselect_dropdown_menu";
+@import "../directives/DrawSquares/squares";
 @import "../css/_dialog";
 
 
@@ -43,6 +44,7 @@
 @import "../dialogs/add_product_catalog/add_product_catalog";
 @import "../dialogs/get_info_product_catalog/get_info_product_catalog";
 @import "../dialogs/downloadProductInWorkspace/downloadProductInWorkspace";
+@import "../dialogs/filter_band_operation/filter_band";
 
 body
 {
