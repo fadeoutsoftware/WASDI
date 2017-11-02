@@ -1,0 +1,16 @@
+<div class="squares">
+    <!--<label>SONO UN QUADRATO</label>-->
+    <!--{{inputMatrix}}-->
+    {{inputBorderColor }}
+    <table class="table table-hover">
+        <tbody>
+        <tr ng-repeat="row in inputMatrix">
+            <td ng-style="{'background-color': cell.color, 'color':cell.fontcolor, 'border-color':inputBorderColor ,
+                'height':inputSide+'px','width':inputSide+'px'}" align="center" ng-repeat="cell in row" ng-click="cell.click">
+                {{cell.value}}
+            </td>
+
+        </tr>
+        </tbody>
+    </table>
+</div>

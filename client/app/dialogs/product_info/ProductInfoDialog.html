@@ -13,16 +13,42 @@
                             <th>Property</th>
                             <th>Value</th>
                             </thead>
-                            <tbod>
-                                <tr ng-repeat="propertyName in m_oController.getSummaryPropertyNames()">
-                                    <td> {{propertyName}}</td>
-                                    <td>{{m_oController.m_oProduct.summary[propertyName]}}</td>
+                            <tbody>
+                                <!--<tr ng-repeat="propertyName in m_oController.getSummaryPropertyNames()">-->
+                                    <!--<td> {{propertyName}}</td>-->
+                                    <!--<td>{{m_oController.m_oProduct.summary[propertyName]}}</td>-->
+                                <!--</tr>-->
+                                <tr>
+                                    <td>Date</td>
+                                    <td>{{m_oController.m_oProduct.properties.beginposition}}</td>
+                                </tr>
+                                <tr>
+                                    <td>Instrument</td>
+                                    <td>{{m_oController.m_oProduct.properties.instrumentshortname}}</td>
+                                </tr>
+                                <tr>
+                                    <td>Satellite</td>
+                                    <td>{{m_oController.m_oProduct.properties.platformname}}</td>
+                                </tr>
+                                <tr>
+                                    <td>Mode</td>
+                                    <td>{{m_oController.m_oProduct.properties.sensoroperationalmode}}</td>
                                 </tr>
                                 <tr>
                                     <td>Relative orbit</td>
                                     <td>{{m_oController.m_oProduct.properties.relativeorbitnumber}}</td>
                                 </tr>
-                            </tbod>
+                                <tr>
+                                    <td>Size</td>
+                                    <td>{{m_oController.m_oProduct.properties.size}}</td>
+                                </tr>
+                                <tr>
+                                    <td>Polarisation</td>
+                                    <td>{{m_oController.m_oProduct.properties.polarisationmode}}</td>
+                                </tr>
+
+
+                            </tbody>
                             <tfoot></tfoot>
                         </table>
                     </h4>

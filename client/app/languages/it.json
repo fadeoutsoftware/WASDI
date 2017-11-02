@@ -189,5 +189,9 @@
   "DIALOG_WORKFLOW_INPUTFILE": "Select Input File: ",
   "DIALOG_WORKFLOW_OUTPUTFILE": "Output File: ",
   "DIALOG_WORKFLOW_DROP_OR_CLICK":"Drop workflow xml here or click to upload",
-  "DIALOG_WORKFLOW_DRAG_DROP_NOT_SUPPORTED":"File Drag/Drop is not supported for this browser"
+  "DIALOG_WORKFLOW_DRAG_DROP_NOT_SUPPORTED":"File Drag/Drop is not supported for this browser",
+
+  "DIALOG_FILTER_BAND_TITLE":"Filter Band",
+  "DIALOG_FILTER_BAND_TAB_NAME_SYSTEM":"System",
+  "DIALOG_FILTER_BAND_TAB_NAME_USER":"User"
 }
