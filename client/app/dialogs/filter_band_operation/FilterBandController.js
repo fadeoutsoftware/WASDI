@@ -131,8 +131,16 @@ var FilterBandController = (function() {
 
     };
 
-    FilterBandController.prototype.addUserFilterOptions = function(){
-        var aaoEmptyMatrix = this.makeEmptyMatrix(5,5,{color:"white" ,fontcolor:"black", value:"0", click:function(){console.log('hello')}});
+    FilterBandController.prototype.addUserFilterOptions = function()
+    {
+        var oThat = this;
+        var oDefaultValue = {
+            color:"white" ,
+            fontcolor:"black",
+            value:"0",
+            click:function(){this.value = oThat.m_iSelectedValue;}//
+        };
+        var aaoEmptyMatrix = this.makeEmptyMatrix(4,4,oDefaultValue);
         this.m_aoUserFilterOptions[0].options.push( {name:"NewFilter", matrix:aaoEmptyMatrix});
     };
 
@@ -140,41 +148,128 @@ var FilterBandController = (function() {
     FilterBandController.prototype.removeUserFilterOptions = function(){
     };
 
-    //TODO MAKE
     FilterBandController.prototype.makeEmptyMatrix = function(iNumberOfCollumns,iNumberOfRows,iDefaultValue){
         if( utilsIsObjectNullOrUndefined(iNumberOfCollumns) || utilsIsObjectNullOrUndefined(iNumberOfRows)|| utilsIsObjectNullOrUndefined(iDefaultValue) )
             return null;
         var aaMatrix = [];
         for(iIndexRows = 0; iIndexRows <  iNumberOfRows; iIndexRows++)
         {
-            aaMatrix[iIndexRows] =  [];
+
+            var aoRow = [];
             for(iIndexCollumns = 0; iIndexCollumns <  iNumberOfCollumns; iIndexCollumns++)
             {
-                aaMatrix[iIndexRows].push(iDefaultValue);
+               //aoRow.push(iDefaultValue);
+               aoRow[iIndexCollumns] =  {color: iDefaultValue.color ,fontcolor:iDefaultValue.fontcolor, value:iDefaultValue.value, click:iDefaultValue.click};
             }
+
+            aaMatrix[iIndexRows] = aoRow;
+
         }
+
         return aaMatrix;
-
-
-       // var testMatrix=[
-       //      [
-       //          {color:"blue" ,fontcolor:"black", value:"1", click:function(){console.log('hello')}},
-       //          {color:"red" ,fontcolor:"black", value:"0" , click:function(){console.log('hello')}},
-       //          {color:"yellow" ,fontcolor:"black", value:"0" , click:function(){console.log('hello')}},
-       //          {color:"yellow" ,fontcolor:"black", value:"0"}
-       //      ],
-       //      [
-       //          {color:"white",fontcolor:"black",value:"0" , click:function(){console.log('hello')}},
-       //          {color:"red" ,fontcolor:"black", value:"1"},
-       //          {color:"black" , fontcolor:"white",value:"0"},
-       //          {color:"yellow" ,fontcolor:"black", value:"0"}
-       //      ],
-       //      [{color:"blue" ,fontcolor:"black", value:"1", click:function(){console.log('hello')}},{color:"red" ,fontcolor:"black", value:"0"},{color:"yellow" ,fontcolor:"black", value:"0"},{color:"yellow" ,fontcolor:"black", value:"0"}],
-       //      [{color:"blue" ,fontcolor:"black", value:"1", click:function(){console.log('hello')}},{color:"red" ,fontcolor:"black", value:"0"},{color:"yellow" ,fontcolor:"black", value:"0"},{color:"yellow" ,fontcolor:"black", value:"0"}],
-       //
-       //  ];
-       //  return testMatrix;
     };
+    FilterBandController.prototype.numberOfRows = function(aaoMatrix)
+    {
+        if(utilsIsObjectNullOrUndefined(aaoMatrix))
+            return 0;
+        return aaoMatrix.length;
+    };
+
+    FilterBandController.prototype.numberOfCollumns = function(aaoMatrix)
+    {
+        if(utilsIsObjectNullOrUndefined(aaoMatrix) || aaoMatrix.length <= 0)
+            return 0;
+        return aaoMatrix[0].length;
+    };
+
+
+    FilterBandController.prototype.addRowInMatrix = function(aaoMatrix,oElementRow)
+    {
+        if(utilsIsObjectNullOrUndefined(aaoMatrix) || utilsIsObjectNullOrUndefined(oElementRow)  )
+            return false;
+
+        if(aaoMatrix.length === 0)
+            var iNumberOfRowValues = 5;//default value
+        else
+            var iNumberOfRowValues = aaoMatrix[0].length;
+
+        var aoRow = [];
+        for(var iIndexRow = 0; iIndexRow < iNumberOfRowValues; iIndexRow++)
+        {
+            aoRow[iIndexRow]=({
+                color:oElementRow.color ,
+                fontcolor:oElementRow.fontcolor,
+                value:oElementRow.value,
+                click:oElementRow.click
+            });
+
+        }
+
+        aaoMatrix.push(aoRow);
+        return true;
+    };
+
+    FilterBandController.prototype.addDefaultRowInMatrix = function(aaoMatrix)
+    {
+        var oThat=this;
+        var oDefaultValue = {
+            color:"white" ,
+            fontcolor:"black",
+            value:"0",
+            click:function(){this.value = oThat.m_iSelectedValue;}
+        };
+        return this.addRowInMatrix(aaoMatrix,oDefaultValue)
+    };
+
+    FilterBandController.prototype.removeRowInMatrix = function(aaoMatrix)
+    {
+        if(utilsIsObjectNullOrUndefined(aaoMatrix) || aaoMatrix.length <= 0)
+            return false;
+        aaoMatrix.pop();
+        return true;
+    };
+
+    FilterBandController.prototype.addColumnInMatrix = function(aaoMatrix,oDefaultValue)
+    {
+        if(utilsIsObjectNullOrUndefined(aaoMatrix) || utilsIsObjectNullOrUndefined(oDefaultValue) )
+            return false;
+
+        var iNumberOfRows = aaoMatrix.length;
+
+        for(var iIndexRows=0; iIndexRows < iNumberOfRows; iIndexRows++)
+        {
+            //var iIndexNumberOf = aaoMatrix[iIndexRows].length;
+            aaoMatrix[iIndexRows].push({color: oDefaultValue.color ,fontcolor:oDefaultValue.fontcolor, value:oDefaultValue.value, click:oDefaultValue.click});
+        }
+
+
+
+        return true;
+    };
+    FilterBandController.prototype.addDefaultColumnInMatrix = function(aaoMatrix)
+    {
+        var oThat=this;
+        var oDefaultValue = {
+            color:"white" ,
+            fontcolor:"black",
+            value:"0",
+            click:function(){this.value = oThat.m_iSelectedValue;}
+        };
+        return this.addColumnInMatrix(aaoMatrix,oDefaultValue)
+    };
+    FilterBandController.prototype.removeColumnInMatrix = function(aaoMatrix)
+    {
+        if(utilsIsObjectNullOrUndefined(aaoMatrix))
+            return false;
+        var iNumberOfRows = aaoMatrix.length;
+        for(var iIndexRows=0; iIndexRows < iNumberOfRows; iIndexRows++)
+        {
+            //var iIndexNumberOf = aaoMatrix[iIndexRows].length;
+            aaoMatrix[iIndexRows].pop();
+        }
+        return true;
+    };
+
     FilterBandController.$inject = [
         '$scope',
         'close',

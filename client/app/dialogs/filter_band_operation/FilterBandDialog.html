@@ -22,12 +22,12 @@
                     <div ng-show="m_oController.m_iActiveProvidersTab === 0" >
                         <h2>{{"DIALOG_FILTER_BAND_TAB_NAME_SYSTEM"|translate}}</h2>
                         <p>
-                            <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 system-content" ng-repeat="system in m_oController.m_aoSystemFilterOptions">
+                            <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 system-content" ng-repeat="system in m_oController.m_aoSystemFilterOptions track by $index">
                                 <label>
                                     {{system.name}}
                                 </label>
 
-                                <div ng-repeat="options in system.options"  class=" options">
+                                <div ng-repeat="options in system.options track by $index"  class=" options">
                                     <h4>
                                         <div class="operation" data-toggle="collapse" data-target="#collapseoption{{$index}}" aria-expanded="false"
                                              aria-controls="collapsemapprojection" >
@@ -37,7 +37,7 @@
 
                                     <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 collapse well" id="collapseoption{{$index}}">
                                         <div class="col-xs-8 col-sm-8 col-md-8 col-lg-8">
-                                            <div ng-repeat="filterproperties in m_oController.m_aoFilterProperties" class="filter-properties">
+                                            <div ng-repeat="filterproperties in m_oController.m_aoFilterProperties track by $index" class="filter-properties">
                                                 <label>
                                                     {{filterproperties.name}}
                                                 </label>
@@ -80,13 +80,13 @@
                         </div>
 
                         <p>
-                        <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 system-content" ng-repeat="system in m_oController.m_aoUserFilterOptions">
+                        <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 system-content" ng-repeat="system in m_oController.m_aoUserFilterOptions track by $index">
 
                             <label>
                                 {{system.name}}
                             </label>
 
-                            <div ng-repeat="options in system.options"  class=" options">
+                            <div ng-repeat="options in system.options track by $index"  class=" options">
                                 <h4>
                                     <div class="operation" data-toggle="collapse" data-target="#usercollapseoption{{$index}}" aria-expanded="false"
                                          aria-controls="collapsemapprojection" >
@@ -96,7 +96,7 @@
 
                                 <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 collapse well" id="usercollapseoption{{$index}}">
                                     <div class="col-xs-7 col-sm-7 col-md-7 col-lg-7">
-                                        <div ng-repeat="filterproperties in m_oController.m_aoFilterProperties" class="filter-properties">
+                                        <div ng-repeat="filterproperties in m_oController.m_aoFilterProperties track by $index" class="filter-properties">
                                             <label>
                                                 {{filterproperties.name}}
                                             </label>
@@ -120,7 +120,7 @@
 
                                                 <ul class="dropdown-menu">
                                                     <li>
-                                                        <a href="" ng-repeat=" fillOption in m_oController.m_aiFillOptions" ng-click="m_oController.m_iSelectedValue = fillOption">
+                                                        <a href="" ng-repeat=" fillOption in m_oController.m_aiFillOptions track by $index" ng-click="m_oController.m_iSelectedValue = fillOption">
                                                             {{fillOption}}
                                                         </a>
                                                     </li>
@@ -131,15 +131,15 @@
 
                                         <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
                                             <div class="col-xs-9 col-sm-9 col-md-9 col-lg-9">
-                                                Width: <input type="text" class="" placeholder="">
+                                                Width: <input type="text" class="" placeholder="" ng-value="m_oController.numberOfCollumns(options.matrix)">
                                                 <!-- Height:<input type="text" class="" placeholder="">-->
                                             </div>
                                             <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
                                                 <div class="btn-group-vertical increase-buttons">
-                                                    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+                                                    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" ng-click="m_oController.addDefaultColumnInMatrix(options.matrix)" >
                                                         <i class="fa fa-caret-up" aria-hidden="true"></i>
                                                     </button>
-                                                    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+                                                    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" ng-click="m_oController.removeColumnInMatrix(options.matrix)">
                                                         <i class="fa fa-caret-down" aria-hidden="true"></i>
                                                     </button>
                                                 </div>
@@ -157,7 +157,7 @@
                                         <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
                                             <div class="col-xs-9 col-sm-9 col-md-9 col-lg-9">
                                                 <!--Width: <input type="text" class="" placeholder="">-->
-                                                Height:<input type="text" class="" placeholder="">
+                                                Height:<input type="text" class="" placeholder="" ng-value="m_oController.numberOfRows(options.matrix)">
                                             </div>
                                             <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
                                                 <!--<div class="btn-group-vertical increase-buttons">-->
@@ -169,10 +169,10 @@
                                                 <!--</button>-->
                                                 <!--</div>-->
                                                 <div class="btn-group-vertical increase-buttons">
-                                                    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+                                                    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" ng-click="m_oController.addDefaultRowInMatrix(options.matrix)">
                                                         <i class="fa fa-caret-up" aria-hidden="true"></i>
                                                     </button>
-                                                    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+                                                    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" ng-click="m_oController.removeRowInMatrix(options.matrix)">
                                                         <i class="fa fa-caret-down" aria-hidden="true"></i>
                                                     </button>
                                                 </div>
@@ -187,9 +187,8 @@
                                                 <!--<i class="fa fa-caret-down" aria-hidden="true"></i>-->
                                             <!--</button>-->
                                         <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
-                                            <squares matrix = "options.matrix"  bordercolor="black" side="50"></squares>
+                                            <squares matrix = "options.matrix"  borderColor="black" side="50" cursor="pointer"></squares>
                                         </div>
-
                                     </div>
 
                                 </div>

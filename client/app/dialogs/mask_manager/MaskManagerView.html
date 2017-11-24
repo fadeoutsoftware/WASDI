@@ -1,0 +1,272 @@
+<div class="modal fade mask-manager-dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <!-- HEADER -->
+            <div class=" modal-header">
+                {{"DIALOG_MASK_MANAGER_TITLE"|translate}}
+            </div>
+            <!-- BODY -->
+            <div class="modal-body ">
+                <h4>
+                    <div class="col-xs-10 col-sm-10 col-md-10 col-lg-10">
+                        <!----------------------------------- RANGE MASK ----------------------------------->
+                        <div class="dialog-operation-animation" ng-show="m_oController.m_oWindowsOpened.rangeMask">
+                            <div class="row">
+                                <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                                    <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
+                                        <div> <label>Min value:</label></div>
+                                        <input type="text" name="name"  class="my-input-text" value="" title="" required="required" ng-model="m_oController.m_sRangeMinValue"> <h3>&lt; =</h3>
+                                    </div>
+                                    <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
+                                        <div class="dropdown">
+                                            <label>Raster :</label>
+                                            <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1"
+                                                    data-toggle="dropdown">
+                                                Dropdown
+                                                <span class="caret"></span>
+                                            </button>
+                                            <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1">
+                                                <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Action</a></li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                    <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
+                                        <div><label>Max value:</label></div>
+                                        <h3> &lt; =</h3> <input type="text" name="name"  class="my-input-text" value="" title="" required="required" ng-model="m_oController.m_sRangeMaxValue">
+                                    </div>
+
+                                </div>
+                            </div>
+                            <!--<div class="row">-->
+                                <!--<div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">-->
+                                    <!--<div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">-->
+
+                                    <!--</div>-->
+                                    <!--<div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">-->
+                                        <!---->
+                                    <!--</div>-->
+                                    <!--<div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">-->
+
+                                    <!--</div>-->
+                                <!--</div>-->
+                            <!--</div>-->
+                            <div class="row">
+                                <div class="col-xs-offset-8 col-sm-offset-8 col-md-offset-8 col-lg-offset-8 col-xs-4 col-sm-4 col-md-4 col-lg-4">
+                                    <button type="button" class="my-button " ng-click="m_oController.saveRangeMaskAndClose()">Save</button>
+                                    <button type="button" class="my-button " ng-click="m_oController.closeAllWindows()">Cancel</button>
+                                </div>
+                            </div>
+
+                        </div>
+                        <!----------------------------------- Logical Mask ----------------------------------->
+                        <div class="dialog-operation-animation" ng-show="m_oController.m_oWindowsOpened.logicalMask">
+                            <div class="row logical-mask">
+                                <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                                    <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
+                                        {{"DIALOG_MASK_MANAGER_DATA_SOURCES_LABEL"|translate}}
+                                        <div class="list-group" >
+                                            <a href="" class="list-group-item" ng-repeat="data in m_oController.m_asDataSources track by $index"
+                                                ng-click="m_oController.addOperationOrConstantOrFunctionLogicalMask(data,'textAreaLogicalMask')">
+                                                <!--ng-class="{active: isOptionSelected(band)}" ng-click="pushOptionInSelectedList(band);"-->
+                                                {{data}}
+                                            </a>
+                                        </div>
+                                        <div class="checkbox">
+                                            <label>
+                                                <input type="checkbox" ng-model="m_oController.m_oCheckboxs.bands"
+                                                       ng-click="m_oController.checkedDataSource('band',m_oController.m_oCheckboxs.bands)">
+                                                {{"DIALOG_MASK_MANAGER_SHOW_BANDS_CHECKBOX_LABEL"|translate}}
+                                            </label>
+                                        </div>
+                                        <div class="checkbox">
+                                            <label>
+                                                <input type="checkbox"  ng-model="m_oController.m_oCheckboxs.masks"
+                                                       ng-click="m_oController.checkedDataSource('masks',m_oController.m_oCheckboxs.masks)" >
+                                                {{"DIALOG_MASK_MANAGER_SHOW_MASKS_CHECKBOX_LABEL"|translate}}
+                                            </label>
+                                        </div>
+                                        <div class="checkbox">
+                                            <label>
+                                                <input type="checkbox" ng-model="m_oController.m_oCheckboxs.tiePoint"
+                                                       ng-click="m_oController.checkedDataSource('tie-point',m_oController.m_oCheckboxs.tiePoint)">
+                                                {{"DIALOG_MASK_MANAGER_SHOW_TIE_POINT_GRIDS_CHECKBOX_LABEL"|translate}}
+                                            </label>
+                                        </div>
+
+                                    </div>
+                                    <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
+                                        <div class="btn-group-vertical">
+                                            <button type="button" class="btn btn-default"
+                                                    ng-click="m_oController.addOperationOrConstantOrFunctionLogicalMask('@ and @','textAreaLogicalMask')">
+                                                @ and @
+                                            </button>
+                                            <button type="button" class="btn btn-default"
+                                                    ng-click="m_oController.addOperationOrConstantOrFunctionLogicalMask('@ or @','textAreaLogicalMask')">
+                                                @ or @
+                                            </button>
+                                            <button type="button" class="btn btn-default"
+                                                    ng-click="m_oController.addOperationOrConstantOrFunctionLogicalMask('not @','textAreaLogicalMask')">
+                                                not @
+                                            </button>
+                                            <button type="button" class="btn btn-default"
+                                                    ng-click="m_oController.addOperationOrConstantOrFunctionLogicalMask('(@)','textAreaLogicalMask')">
+                                                (@)
+                                            </button>
+                                            <div class="btn-group">
+                                                <button id="constantsBtnGroupVerticalDrop" type="button"
+                                                        class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+                                                    Constants...
+                                                    <span class="caret"></span>
+                                                </button>
+                                                <ul class="dropdown-menu" role="menu"
+                                                    aria-labelledby="constantsBtnGroupVerticalDrop">
+                                                    <li ng-repeat="constant in m_oController.m_asContants">
+                                                        <a href="" ng-click="m_oController.addOperationOrConstantOrFunctionLogicalMask(constant,'textAreaLogicalMask')">
+                                                           {{constant}}
+                                                        </a>
+                                                    </li>
+                                                    <!--<li><a href="#">Dropdown link</a></li>-->
+                                                </ul>
+                                            </div>
+                                            <div class="btn-group">
+                                                <button id="operatorsBtnGroupVerticalDrop" type="button"
+                                                        class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+                                                    Operators...
+                                                    <span class="caret"></span>
+                                                </button>
+                                                <ul class="dropdown-menu" role="menu"
+                                                    aria-labelledby="operatorsBtnGroupVerticalDrop">
+                                                    <li ng-repeat="operator in m_oController.m_asOperators">
+                                                        <a href="" ng-click="m_oController.addOperationOrConstantOrFunctionLogicalMask(operator,'textAreaLogicalMask')">
+                                                            {{operator}}
+                                                        </a>
+                                                    </li>
+
+                                                </ul>
+                                            </div>
+                                            <div class="btn-group">
+                                                <button id="functionsBtnGroupVerticalDrop" type="button"
+                                                        class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+                                                    Functions...
+                                                    <span class="caret"></span>
+                                                </button>
+                                                <ul class="dropdown-menu" role="menu"
+                                                    aria-labelledby="functionsBtnGroupVerticalDrop">
+                                                    <li ng-repeat="function in m_oController.m_asFunction">
+                                                        <a href="" ng-click="m_oController.addOperationOrConstantOrFunctionLogicalMask(function,'textAreaLogicalMask')">
+                                                            {{function}}
+                                                        </a>
+                                                    </li>
+
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
+                                        {{"DIALOG_MASK_MANAGER_EXPRESSION_LABEL"|translate}}
+                                        <div class="form-group">
+                                            <textarea class="form-control" rows="10" cols="70" id="textAreaLogicalMask"
+                                                      ng-model = "m_oController.m_sTextAreaLogicalMask" ></textarea>
+                                            {{m_oController.m_sTextAreaLogicalMask}}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-xs-offset-8 col-sm-offset-8 col-md-offset-8 col-lg-offset-8 col-xs-4 col-sm-4 col-md-4 col-lg-4">
+                                    <button type="button" class="my-button " ng-click="m_oController.saveLogicalMask()">Save</button>
+                                    <button type="button" class="my-button " ng-click="m_oController.closeAllWindows()">Cancel</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!----------------------------------- MASKS ----------------------------------->
+                        <table class="table table-hover">
+                            <thead>
+                            <tr>
+                                <th></th>
+                                <th>Name</th>
+                                <th>Type</th>
+                                <th>Colour</th>
+                                <th>Transparency</th>
+                                <th>Description</th>
+                                <th></th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr ng-repeat="mask in m_oController.m_aoMasks">
+                                <td>
+                                    <div class="checkbox">
+                                        <label>
+                                            <input type="checkbox" value="" id="">
+
+                                        </label>
+                                    </div>
+                                </td>
+                                <td>
+                                    <input type="text" name="name"  class="my-input-text"  ng-model="mask.name">
+                                </td>
+                                <td>
+                                   {{mask.type}}
+                                </td>
+                                <td ><!--class="color-td" ng-style="{'background-color': mask.colour}"-->
+                                    <div class="dropdown">
+                                        <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenuColour"
+                                                data-toggle="dropdown"  ng-style="{'background-color': mask.colour}">
+
+                                            <span class="caret"></span>
+                                        </button>
+                                        <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenuColour">
+                                            <!--<li role="presentation">-->
+                                                <!--<a role="menuitem" tabindex="-1" href="#">-->
+                                                    <!--Action-->
+                                                <!--</a>-->
+                                            <!--</li>-->
+                                            <li role="presentation" ng-repeat="color in m_oController.m_asColors">
+                                                <a role="menuitem" tabindex="-1" ng-style="{'background-color': color}"
+                                                   ng-click="mask.colour=color">
+
+                                                </a>
+                                            </li>
+
+                                        </ul>
+                                    </div>
+
+                                </td>
+
+                                <td>
+                                    <input type="text" name="name"  class="my-input-text"  ng-model="mask.transparency">
+                                </td>
+                                <td>
+                                    <input type="text" name="name"  class="my-input-text"  ng-model="mask.description">
+                                </td>
+
+                                <td class="over-icon">
+                                    <i class="fa fa-window-close fa-lg" aria-hidden="true"> </i>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="col-xs-2 col-sm-2 col-md-2 col-lg-2">
+                        <div class="btn-group-vertical">
+                            <button type="button" class="btn btn-default" ng-click="m_oController.changeWindowsOpened('rangeMask')">Range Mask</button>
+                            <button type="button" class="btn btn-default"  ng-click="m_oController.changeWindowsOpened('logicalMask')">Logical Mask</button>
+                            <!--<button type="button" class="btn btn-default">Button</button>-->
+                        </div>
+
+                    </div>
+                </h4>
+            </div>
+
+            <!-- FOOTER -->
+            <div class="modal-footer">
+                <button type="button" ng-click="close(null)" class="my-button" data-dismiss="modal">
+                    {{"DIALOG_CLOSE_BUTTON"|translate}}
+                </button>
+
+            </div>
+
+        </div>
+    </div>
+</div>

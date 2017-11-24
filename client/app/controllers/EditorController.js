@@ -33,7 +33,7 @@ var EditorController = (function () {
             opticalBar:true,
             processorBar:true
         }
-
+        this.m_iActiveMapPanelTab = 0;
         this.GLOBE_DEFAULT_ZOOM = 2000000;
 
         //Last file downloaded
@@ -85,7 +85,7 @@ var EditorController = (function () {
         /*Hook to Rabbit WebStomp Service*/
         this.m_oRabbitStompService.setMessageCallback(this.receivedRabbitMessage);
         this.m_oRabbitStompService.setActiveController(this);
-
+        this.drawColourManipulationHistogram("colourManipulationDiv")
     }
 
     /********************METHODS********************/
@@ -1254,6 +1254,10 @@ var EditorController = (function () {
         return true;
     }
 
+    /*
+        this method check if there is a band, if there is the band
+        is removed else the band is add
+     */
     EditorController.prototype.addOrRemoveMapLayer = function () {
         this.m_bIsVisibleMapOfLeaflet = !this.m_bIsVisibleMapOfLeaflet;
 
@@ -1480,6 +1484,27 @@ var EditorController = (function () {
             inputs: {
                 extras: {
                     products:oController.m_aoProducts,
+                }
+            }
+        }).then(function (modal) {
+            modal.element.modal();
+            modal.close.then(function (oResult) {
+
+
+            });
+        });
+
+        return true;
+    };
+
+    EditorController.prototype.openMaskManager = function(){
+        var oController = this;
+        this.m_oModalService.showModal({
+            templateUrl: "dialogs/mask_manager/MaskManagerView.html",
+            controller: "MaskManagerController",
+            inputs: {
+                extras: {
+                    //products:oController.m_aoProducts,
                 }
             }
         }).then(function (modal) {
@@ -1949,9 +1974,74 @@ var EditorController = (function () {
     {
         this.m_oState.go("root.import", { });
     };
+    /************************ COLOUR MANIPOLATION ****************************/
+    EditorController.prototype.drawColourManipulationHistogram = function(sNameDiv)
+    {
+        if(utilsIsStrNullOrEmpty(sNameDiv) === true)
+            return false;
 
+        var x = [];
+        for (var i = 0; i < 500; i ++) {
+            x[i] = Math.random();
+        }
 
+        var trace = {
+            x: x,
+            type: 'histogram',
+        };
+        var data = [trace];
+        var layout = {
+            //title: "Colour Manipolation",
+            showlegend: false,
+            height:200,
+            margin: {
+                l: 5,
+                r: 5,
+                b: 5,
+                t: 5,
+                pad: 4
+            },
+        };
+        Plotly.newPlot(sNameDiv, data, layout,{staticPlot: true});
 
+        return true;
+    };
+    EditorController.prototype.adjust95percentageColourManipulation = function()
+    {
+        //TODO NEW BAND
+    };
+    EditorController.prototype.adjust100percentageColourManipulation = function()
+    {
+        //TODO NEW BAND
+    };
+    EditorController.prototype.resetColourManipulation = function()
+    {
+        //TODO REMOVE NEW BAND
+        this.removeBandImage(oBand)
+        //TODO ADD OLD BAND
+        this.addLayerMap2D(sLayerId);
+    };
+    EditorController.prototype.modifyColourManipulation = function(iMin,iMax,iAverage,sLayerId,oBand)
+    {
+        //TODO REQUEST
+        //send iMin iMax iAverage to the server
+        //TODO REMOVE OLD BAND
+        this.removeBandImage(oBand)
+        //TODO ADD NEW BAND
+        this.addLayerMap2D(sLayerId);
+    };
+    EditorController.prototype.minSliderColourManipulation = function(iMin,iMax,iAverage)
+    {
+        this.modifyColourManipulation(iMin,iMax,iAverage,sLayerId,oBand);
+    };
+    EditorController.prototype.maxSliderColourManipulation = function(iMin,iMax,iAverage)
+    {
+        this.modifyColourManipulation(iMin,iMax,iAverage,sLayerId,oBand);
+    };
+    EditorController.prototype.averageSliderColourManipulation = function(iMin,iMax,iAverage)
+    {
+        this.modifyColourManipulation(iMin,iMax,iAverage,sLayerId,oBand);
+    };
     EditorController.$inject = [
         '$scope',
         '$location',
