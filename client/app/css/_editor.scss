@@ -7,8 +7,6 @@
   //SIDEBAR
   .sidebar
   {
-
-
     background-color: #f5f5f5;//black;
     border-right: 1px solid #eee;
     position: relative;
@@ -36,6 +34,28 @@
     .panel-heading {
       border-bottom: 0;
       min-height: 40px;
+      .active{
+        color:black;
+      }
+
+      .nav-tabs{
+        li{
+          //color:white;
+          a{
+            padding-top: 3px;
+            padding-bottom: 3px;
+            color:white;
+            &:hover{
+              color:black;
+            }
+          }
+
+        }
+        .active a{
+          color: black !important;
+        }
+
+      }
     }
 
     //background-color: $wasdi-sidebar-background-color;
@@ -66,6 +86,9 @@
           width: auto;
           height:$wasdi-height-panel-max-width-1366-max-height-768;
         }
+      }
+      .panel-body{
+        overflow: scroll;
       }
     }
     //override my button class in style.scss
@@ -409,6 +432,21 @@
     }
   }
 
+  // ICON  MASK MENAGER
+  .icon-mask-manager{
+    i{
+      content: $wasdi-mask-manager-blue;
+      width: $wasdi-size-icon;
+      height: auto;
+    }
+  }
+  .icon-mask-manager:hover{
+    i{
+      content: $wasdi-mask-manager-white;
+      width: $wasdi-size-icon;
+      height: auto;
+    }
+  }
   .band-published-label {
     color: #00A707;
   }

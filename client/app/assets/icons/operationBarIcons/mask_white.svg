@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns="http://www.w3.org/2000/svg" xml:space="preserve" width="1024px" height="1024px" shape-rendering="geometricPrecision" text-rendering="geometricPrecision" image-rendering="optimizeQuality" fill-rule="evenodd" clip-rule="evenodd" viewBox="0 0 10240 10240" xmlns:xlink="http://www.w3.org/1999/xlink">
+	<title>mask icon</title>
+	<desc>mask icon from the IconExperience.com O-Collection. Copyright by INCORS GmbH (www.incors.com).</desc>
+	<path id="curve1" fill="#ffffff" d="M8960 5152l0 3488c0,176 -144,320 -320,320l0 0c-176,0 -320,-144 -320,-320l0 -2990c199,-117 385,-258 556,-417 28,-26 56,-53 84,-81z"/>
+	<path id="curve0" fill="#ffffff" d="M9600 3013c0,1354 -1117,2747 -2560,2747 -1157,0 -1173,-794 -1920,-794 -747,0 -761,794 -1920,794 -1443,0 -2560,-1520 -2560,-2747 0,-1481 2959,-1189 3866,-773 412,189 842,189 1254,0 907,-416 3840,-581 3840,773zm-2720 -133c619,0 1120,358 1120,800 0,442 -501,800 -1120,800 -619,0 -1120,-358 -1120,-800 0,-442 501,-800 1120,-800zm-3520 0c619,0 1120,358 1120,800 0,442 -501,800 -1120,800 -619,0 -1120,-358 -1120,-800 0,-442 501,-800 1120,-800z"/>
+</svg>

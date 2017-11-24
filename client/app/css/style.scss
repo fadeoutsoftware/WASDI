@@ -45,6 +45,10 @@
 @import "../dialogs/get_info_product_catalog/get_info_product_catalog";
 @import "../dialogs/downloadProductInWorkspace/downloadProductInWorkspace";
 @import "../dialogs/filter_band_operation/filter_band";
+@import "../dialogs/mask_manager/mask_manager";
+
+//COMPONENTS
+@import "components/range_slider";
 
 body
 {

@@ -8,14 +8,19 @@ angular.module('wasdi.SquaresDirective', [])
             restrict:"E",
             scope :{
                 inputMatrix:'=matrix',
-                inputBorderColor:"=borderColor",
-                inputSide:"=side"
+                inputBorderColor:"@borderColor",
+                inputSide:"@side",
+                inputCursor:"@cursor"
+                // * Text binding ('@' or '@?') *
+                // * One-way binding ('<' or '<?') *
+                // * Two-way binding ('=' or '=?') *
+                // * Function binding ('&' or '&?') *
             },
 
             templateUrl:"directives/DrawSquares/SquaresView.html",
             link: function(scope, elem, attrs) {
-
-
+                // console.log("ci sono");
+                // scope.inputMatrix[0][0].click();
             }
         };
     });

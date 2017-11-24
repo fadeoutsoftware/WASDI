@@ -170,3 +170,4 @@ wasdiApp.controller("AddProductInCatalogController",AddProductInCatalogControlle
 wasdiApp.controller("GetInfoProductCatalogController",GetInfoProductCatalogController);
 wasdiApp.controller("DownloadProductInWorkspaceController",DownloadProductInWorkspaceController);
 wasdiApp.controller("FilterBandController",FilterBandController);
+wasdiApp.controller("MaskManagerController",MaskManagerController);
