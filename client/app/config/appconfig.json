@@ -154,15 +154,17 @@
             "indexname": "platformname",
             "indexvalue": "Sentinel-2",
             "filters": [
+
                 {
                     "indexname": "producttype",
                     "indexlabel": "Product Type",
+                    "indexvalues":"S2MSL1C|S2MSL2Ap",
                     "regex": ".*"
 
                 },
                 {
                     "indexname": "cloudcoverpercentage",
-                    "indexlabel": "Cloud Coverage (%)",
+                    "indexlabel": "Cloud Coverage(%)(e.g.[0 TO 9.4])",
                     "regex": ".*"
 
                 },

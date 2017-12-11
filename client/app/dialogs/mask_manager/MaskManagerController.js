@@ -392,9 +392,21 @@ var MaskManagerController = (function() {
             return true;
         };
 
-        MaskManagerController.prototype.deleteMaskByIndex = function(iIndex )
+        MaskManagerController.prototype.deleteMaskByIndex = function(iIndex)
         {
+            this.m_aoMasks.splice(iIndex,1);
+        };
 
+        MaskManagerController.prototype.addDataSourceLogicalMask = function(sText,sIdTextArea)
+        {
+            if(utilsIsStrNullOrEmpty(sIdTextArea))
+                return false;
+            var sString =  this.m_sTextAreaLogicalMask.replace('@',sText);
+            if(sString === "")
+                this.insertAtCaret(sIdTextArea,sText);
+            else
+                this.m_sTextAreaLogicalMask = sString;
+            return true;
         };
 
         MaskManagerController.$inject = [

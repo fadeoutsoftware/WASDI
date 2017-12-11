@@ -1,11 +1,11 @@
 <div class="container-fluid">
     <div class="login-view row">
         <div class="login-top">
-            <div class="link-login pull-right" ng-click="m_oController.changeVisibilityLoginRegister('Login')" >
+            <div class="link-login pull-right" ng-show="m_oController.m_bVisualizeLink === true" ng-click="m_oController.changeVisibilityLoginRegister('Login')" >
                 {{"LOGIN_LINK_FORM"|translate}}
 
             </div>
-            <div class="link-register pull-right" ng-click="m_oController.changeVisibilityLoginRegister('Register')" >
+            <div class="link-register pull-right" ng-show="m_oController.m_bVisualizeLink === true" ng-click="m_oController.changeVisibilityLoginRegister('Register')" >
                 {{"LOGIN_LINK_REGISTER"|translate}}
 
             </div>

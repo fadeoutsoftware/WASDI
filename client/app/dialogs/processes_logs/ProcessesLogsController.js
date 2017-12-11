@@ -19,8 +19,8 @@ var ProcessesLogsController = (function() {
         };
 
         this.getAllProcessesLogs();
-
-    }
+        this.m_sHrefLogFile = "";
+;    }
 
     /**
      * getAllProcessesLogs
@@ -38,6 +38,7 @@ var ProcessesLogsController = (function() {
             {
                 oController.m_aoProcessesLogs = data;
                 oController.m_bAreProcessesLoaded = true;
+                oController.m_sHrefLogFile = oController.generateLogFile();
             }
         }).error(function (data,status)
         {
@@ -63,7 +64,51 @@ var ProcessesLogsController = (function() {
         oDate.setSeconds(0 + seconds);
 
         return oDate;
+    };
+
+    ProcessesLogsController.prototype.generateFile = function(sText)
+    {
+        var textFile = null;
+        textFile = utilsMakeFile(sText,textFile);
+        return textFile;
+    };
+
+    ProcessesLogsController.prototype.makeStringLogFile = function()
+    {
+        if(utilsIsObjectNullOrUndefined(this.m_aoProcessesLogs) === true)
+            return null;
+        // m_aoProcessesLogs
+        var iNumberOfProcessesLogs = this.m_aoProcessesLogs.length;
+        var sText = "";
+        for(var iIndexProcessLog = 0; iIndexProcessLog < iNumberOfProcessesLogs; iIndexProcessLog++)
+        {
+            // sText += this.m_aoProcessesLogs[iIndexProcessLog] + "/n";
+            var sOperationDate = this.m_aoProcessesLogs[iIndexProcessLog].operationDate;
+            var sFileSize = this.m_aoProcessesLogs[iIndexProcessLog].fileSize;
+            var sOperationEndDate = this.m_aoProcessesLogs[iIndexProcessLog].operationEndDate;
+            var sOperationType = this.m_aoProcessesLogs[iIndexProcessLog].operationType;
+            var sPid = this.m_aoProcessesLogs[iIndexProcessLog].pid;
+            // var sProcessObjId = this.m_aoProcessesLogs[iIndexProcessLog].processObjId;
+            var sProductName = this.m_aoProcessesLogs[iIndexProcessLog].productName;
+            var sProgressPerc = this.m_aoProcessesLogs[iIndexProcessLog].progressPerc;
+            var sStatus = this.m_aoProcessesLogs[iIndexProcessLog].status;
+            var sUserId = this.m_aoProcessesLogs[iIndexProcessLog].userId;
+
+
+            sText += iIndexProcessLog +") "+ "Id: "+ sPid +",Product Name: "+sProductName +",Operation Type: " + sOperationType +
+                ",User: "+ sUserId + ",Status: " + sStatus + ",Progress: " + sProgressPerc +"%" +
+                ",Operation date: "+ sOperationDate +",Operation end date: "+ sOperationEndDate + ",File size: " + sFileSize + "\r\n";
+        };
+
+        return sText;
     }
+
+    ProcessesLogsController.prototype.generateLogFile = function()
+    {
+        var sText = this.makeStringLogFile();
+        var oFile = this.generateFile(sText)
+        return oFile;
+    };
 
     ProcessesLogsController.$inject = [
         '$scope',

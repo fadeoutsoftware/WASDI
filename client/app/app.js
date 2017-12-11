@@ -38,6 +38,7 @@ var wasdiApp = angular.module('wasdi', [
     'wasdi.SpaceInvaderFixedSmallVersionDirective',
     'wasdi.MultiselectDropdownMenuDirective',
     'wasdi.SquaresDirective',
+    'wasdi.MultiRadioButtonDropdownMenuDirective',
     //EXTERNAL LIB
     'ui.bootstrap',
     'checklist-model',

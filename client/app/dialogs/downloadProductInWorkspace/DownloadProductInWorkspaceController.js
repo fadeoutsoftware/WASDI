@@ -40,6 +40,25 @@ var DownloadProductInWorkspaceController = (function() {
         });
     };
 
+    DownloadProductInWorkspaceController.prototype.createWorkspace = function () {
+
+        var oController = this;
+
+        this.m_oWorkspaceService.createWorkspace().success(function (data, status) {
+            if (data != null)
+            {
+                if (data != undefined)
+                {
+                    //var sWorkspaceId = data.stringValue;
+                   // oController.openWorkspace(sWorkspaceId);
+                    oController.getWorkspaces();
+                }
+            }
+        }).error(function (data,status) {
+            //alert('error');
+            utilsVexDialogAlertTop('GURU MEDITATION<br>ERROR IN CREATE WORKSPACE');
+        });
+    };
     DownloadProductInWorkspaceController.$inject = [
         '$scope',
         'close',

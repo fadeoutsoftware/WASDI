@@ -30,6 +30,15 @@ var ImportController = (function() {
         this.m_oOpenSearchService = oOpenSearchService;
         this.m_oPageService = oPageservice;
 
+        this.m_aoSeason = [
+            {name:"Spring"},
+            {name:"Winter"},
+            {name:"Summer"},
+            {name:"Autumn"}
+
+        ];
+
+
         //set Page service
         this.m_oPageService.setFunction(this.search);
 
@@ -489,15 +498,14 @@ var ImportController = (function() {
                 if(!utilsIsObjectNullOrUndefined(sResults))
                 {
                     if (!utilsIsObjectNullOrUndefined(sResults.data) && sResults.data != "" ) {
-
+                     //TODO MANTIS 658-------------------------------------------
                         var aoData = sResults.data;
-
                         oController.generateLayersList(aoData)//.feed;
                     }
                     else
                     {
                         // utilsVexDialogAlertTop("EMPTY RESULT...");
-                         //oController.m_bIsVisibleListOfLayers = false; //visualize filter list
+                        //oController.m_bIsVisibleListOfLayers = false; //visualize filter list
                         // oController.m_oResultsOfSearchService.setIsVisibleListOfProducts(oController.m_bIsVisibleListOfLayers );
                         //oController.setPaginationVariables();
                         //oController.m_bIsVisibleListOfLayers = true;
@@ -526,7 +534,7 @@ var ImportController = (function() {
         if(utilsIsObjectNullOrUndefined(oLayer))
             return false;
 
-        var oThat = this
+        var oThat = this;
         this.m_oModalService.showModal({
             templateUrl: "dialogs/downloadProductInWorkspace/DownloadProductInWorkspaceView.html",
             controller: "DownloadProductInWorkspaceController",
@@ -1201,6 +1209,86 @@ var ImportController = (function() {
             }
         }
         return bIsEmpty;
+    };
+    ImportController.prototype.seasonSpring = function(){
+
+        //sensingPeriodFrom; 21/03
+        //sensingPeriodTo; 20/06
+        var dateSensingPeriodFrom = new Date();
+        var dateSensingPeriodTo = new Date();
+        dateSensingPeriodFrom.setMonth(02);
+        dateSensingPeriodFrom.setDate(21);
+        dateSensingPeriodTo.setMonth(05)
+        dateSensingPeriodTo.setDate(20);
+        this.m_oResultsOfSearchService.setSensingPeriodFrom(dateSensingPeriodFrom);
+        this.m_oResultsOfSearchService.setSensingPeriodTo(dateSensingPeriodTo);
+        this.m_oModel.sensingPeriodFrom = this.m_oResultsOfSearchService.getSensingPeriodFrom();
+        this.m_oModel.sensingPeriodTo = this.m_oResultsOfSearchService.getSensingPeriodTo();
+        this.updateAdvancedSearch();
+    };
+    ImportController.prototype.seasonSummer = function(){
+        //sensingPeriodFrom; //21/06
+        //sensingPeriodTo; //22/09
+        var dateSensingPeriodFrom = new Date();
+        var dateSensingPeriodTo = new Date();
+        dateSensingPeriodFrom.setMonth(05);
+        dateSensingPeriodFrom.setDate(21);
+        dateSensingPeriodTo.setMonth(08)
+        dateSensingPeriodTo.setDate(22);
+        this.m_oResultsOfSearchService.setSensingPeriodFrom(dateSensingPeriodFrom);
+        this.m_oResultsOfSearchService.setSensingPeriodTo(dateSensingPeriodTo);
+        this.m_oModel.sensingPeriodFrom = this.m_oResultsOfSearchService.getSensingPeriodFrom();
+        this.m_oModel.sensingPeriodTo = this.m_oResultsOfSearchService.getSensingPeriodTo();
+        this.updateAdvancedSearch();
+    };
+    ImportController.prototype.seasonAutumn = function(){
+        //sensingPeriodFrom; //23/09
+        //sensingPeriodTo; //20/12
+        var dateSensingPeriodFrom = new Date();
+        var dateSensingPeriodTo = new Date();
+        dateSensingPeriodFrom.setMonth(08);
+        dateSensingPeriodFrom.setDate(23);
+        dateSensingPeriodTo.setMonth(11);
+        dateSensingPeriodTo.setDate(20);
+        this.m_oResultsOfSearchService.setSensingPeriodFrom(dateSensingPeriodFrom);
+        this.m_oResultsOfSearchService.setSensingPeriodTo(dateSensingPeriodTo);
+        this.m_oModel.sensingPeriodFrom = this.m_oResultsOfSearchService.getSensingPeriodFrom();
+        this.m_oModel.sensingPeriodTo = this.m_oResultsOfSearchService.getSensingPeriodTo();
+        this.updateAdvancedSearch();
+     };
+    ImportController.prototype.seasonWinter = function(){
+        //sensingPeriodFrom; //21/12
+        //sensingPeriodTo; //20/03
+        var dateSensingPeriodFrom = new Date();
+        var dateSensingPeriodTo = new Date();
+        dateSensingPeriodFrom.setMonth(11);
+        dateSensingPeriodFrom.setDate(21);
+        dateSensingPeriodTo.setMonth(02)
+        dateSensingPeriodTo.setDate(20);
+        this.m_oResultsOfSearchService.setSensingPeriodFrom(dateSensingPeriodFrom);
+        this.m_oResultsOfSearchService.setSensingPeriodTo(dateSensingPeriodTo);
+        this.m_oModel.sensingPeriodFrom = this.m_oResultsOfSearchService.getSensingPeriodFrom();
+        this.m_oModel.sensingPeriodTo = this.m_oResultsOfSearchService.getSensingPeriodTo();
+        this.updateAdvancedSearch();
+    };
+
+    ImportController.prototype.changeSeason = function(sSeason)
+    {
+        switch(sSeason) {
+            case "Spring":
+                this.seasonSpring();
+                break;
+            case "Summer":
+                this.seasonSummer();
+                break;
+            case "Autumn":
+                this.seasonAutumn();
+                break;
+            case "Winter":
+                this.seasonWinter();
+                break;
+        }
+
     };
 
     ImportController.$inject = [

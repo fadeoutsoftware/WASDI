@@ -5,10 +5,43 @@
         <!--PROVIDERS-->
         <multiselectdropdownmenu options="m_oController.m_aListOfProvider"></multiselectdropdownmenu>
 
-        <!--&lt;!&ndash;SEARCH INPUT&ndash;&gt;-->
-        <!--<div class="my-input-text "  >-->
-            <!--<input type="text" ng-model="m_oController.m_oModel.textQuery"-->
-                   <!--placeholder="Search..." >&lt;!&ndash; style="padding: 0px !important;"&ndash;&gt;-->
+        <multiradiobuttondropdownmenu options="m_oController.m_aoSeason" name="Seasons" on-click="m_oController.changeSeason(sSeason)"><!--functionOnClick="m_oController.test"-->
+
+        </multiradiobuttondropdownmenu>
+
+        <!--<div>&lt;!&ndash; class="multiRadioButtonDropdownMenu" &ndash;&gt;-->
+            <!--<button class="multiRadioButtonDropdownMenu" type="button" id="seasons"-->
+                    <!--data-toggle="dropdown">-->
+                <!--Dropdown-->
+                <!--<span class="caret"></span>-->
+            <!--</button>-->
+            <!--<ul class="dropdown-menu radio" role="menu" aria-labelledby="seasons">-->
+                <!--<li  >-->
+                    <!--<label>-->
+                        <!--<input type="radio" name="name" value="" checked="checked">-->
+                        <!--{{"IMPORT_SEASON_SPRING_RADIO_BUTTON"|translate}}-->
+                    <!--</label>-->
+                <!--</li>-->
+                <!--<li  >-->
+                    <!--<label>-->
+                        <!--<input type="radio" name="name"  value="" checked="checked">-->
+                        <!--{{"IMPORT_SEASON_SUMMER_RADIO_BUTTON"|translate}}-->
+                    <!--</label>-->
+                <!--</li>-->
+                <!--<li  >-->
+                    <!--<label>-->
+                        <!--<input type="radio" name="name" value="" checked="checked">-->
+                        <!--{{"IMPORT_SEASON_WINTER_RADIO_BUTTON"|translate}}-->
+                    <!--</label>-->
+                <!--</li>-->
+                <!--<li  >-->
+                    <!--<label>-->
+                        <!--<input type="radio" name="name"  value="" checked="checked">-->
+                        <!--{{"IMPORT_SEASON_AUTUMN_RADIO_BUTTON"|translate}}-->
+                    <!--</label>-->
+                <!--</li>-->
+
+            <!--</ul>-->
         <!--</div>-->
 
         <!--search button-->
@@ -183,6 +216,25 @@
                                         </div>
                                     </div>
                                 </div>
+
+                                <!--<div class="radio">-->
+                                    <!--<label>-->
+                                        <!--<input type="radio" name="name" value="" checked="checked">-->
+                                        <!--{{"IMPORT_SEASON_SPRING_RADIO_BUTTON"|translate}}-->
+                                    <!--</label>-->
+                                    <!--<label>-->
+                                        <!--<input type="radio" name="name"  value="" checked="checked">-->
+                                        <!--{{"IMPORT_SEASON_SUMMER_RADIO_BUTTON"|translate}}-->
+                                    <!--</label>-->
+                                    <!--<label>-->
+                                        <!--<input type="radio" name="name" value="" checked="checked">-->
+                                        <!--{{"IMPORT_SEASON_WINTER_RADIO_BUTTON"|translate}}-->
+                                    <!--</label>-->
+                                    <!--<label>-->
+                                        <!--<input type="radio" name="name"  value="" checked="checked">-->
+                                        <!--{{"IMPORT_SEASON_AUTUMN_RADIO_BUTTON"|translate}}-->
+                                    <!--</label>-->
+                                <!--</div>-->
                             </div>
 
                         </div>
@@ -352,7 +404,15 @@
                                         <div>
                                             <span>Provider:</span>
                                             <span><b>{{layer.provider}}</b></span>
+                                        </div>
 
+                                        <div>
+                                            <span>Platform name:</span>
+                                            <span><b>{{layer.properties.platformname}}</b></span>
+                                        </div>
+                                        <div>
+                                            <span>Sensor Operational mode:</span>
+                                            <span><b>{{layer.properties.sensoroperationalmode}}</b></span>
                                         </div>
                                     </td>
 
