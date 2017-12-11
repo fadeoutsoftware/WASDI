@@ -458,3 +458,37 @@ function utilsAddTextInCursorPosition(areaId, text) {
         ngModel = utilsInsertSubstringIntoString(ngModel,strPos,0,text);
 
     }
+
+function utilsMakeFile(sText,textFile){
+
+    var data = new Blob([sText], {type: 'text/plain'});
+
+    // If we are replacing a previously generated file we need to
+    // manually revoke the object URL to avoid memory leaks.
+    if (textFile !== null) {
+        window.URL.revokeObjectURL(textFile);
+    }
+
+    textFile = window.URL.createObjectURL(data);
+
+    return textFile;
+};
+
+function utilsUserUseIEBrowser()
+{
+    var ua = window.navigator.userAgent;
+    var msie = ua.indexOf("MSIE ");
+
+    if (msie > 0 || !!navigator.userAgent.match(/Trident.*rv\:11\./)) // If Internet Explorer, return version number
+    {
+        return true;
+       // alert(parseInt(ua.substring(msie + 5, ua.indexOf(".", msie))));
+    }
+    else  // If another browser, return 0
+    {
+        return false;
+       //alert('otherbrowser');
+    }
+
+    return false;
+}

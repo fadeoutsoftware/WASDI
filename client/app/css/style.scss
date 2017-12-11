@@ -22,7 +22,7 @@
 @import "../directives/multiselect_dropdown_menu/multiselect_dropdown_menu";
 @import "../directives/DrawSquares/squares";
 @import "../css/_dialog";
-
+@import "../directives/multiradiobutton_dropdown_menu/multi_radiobutton_dropdown_menu";
 
 //DIALOGS
 @import "../dialogs/orbit_info/orbit_info";
@@ -197,6 +197,7 @@ h4
   opacity: 0.65;
   cursor: not-allowed;
 }
+
 // ICON OVER
 .over-icon
 {

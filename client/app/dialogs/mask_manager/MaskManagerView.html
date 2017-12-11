@@ -66,7 +66,7 @@
                                         {{"DIALOG_MASK_MANAGER_DATA_SOURCES_LABEL"|translate}}
                                         <div class="list-group" >
                                             <a href="" class="list-group-item" ng-repeat="data in m_oController.m_asDataSources track by $index"
-                                                ng-click="m_oController.addOperationOrConstantOrFunctionLogicalMask(data,'textAreaLogicalMask')">
+                                                ng-click="m_oController.addDataSourceLogicalMask(data,'textAreaLogicalMask')">
                                                 <!--ng-class="{active: isOptionSelected(band)}" ng-click="pushOptionInSelectedList(band);"-->
                                                 {{data}}
                                             </a>
@@ -167,7 +167,6 @@
                                         <div class="form-group">
                                             <textarea class="form-control" rows="10" cols="70" id="textAreaLogicalMask"
                                                       ng-model = "m_oController.m_sTextAreaLogicalMask" ></textarea>
-                                            {{m_oController.m_sTextAreaLogicalMask}}
                                         </div>
                                     </div>
                                 </div>
@@ -241,7 +240,7 @@
                                     <input type="text" name="name"  class="my-input-text"  ng-model="mask.description">
                                 </td>
 
-                                <td class="over-icon">
+                                <td class="over-icon" ng-click="m_oController.deleteMaskByIndex($index)">
                                     <i class="fa fa-window-close fa-lg" aria-hidden="true"> </i>
                                 </td>
                             </tr>

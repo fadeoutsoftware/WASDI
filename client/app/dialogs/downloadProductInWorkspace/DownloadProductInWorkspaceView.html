@@ -24,12 +24,18 @@
                         </tr>
                         </thead>
                         <tbody>
-                        <tr ng-repeat="workspace in m_oController.m_aoWorkspaceList">
+                        <tr ng-repeat="workspace in m_oController.m_aoWorkspaceList" ng-hide="m_oController.m_aoWorkspaceList.length === 0">
                             <td>{{workspace.workspaceId}}</td>
                             <td>{{workspace.workspaceName}}</td>
                             <td>{{workspace.ownerUserId}}</td>
                             <td class="over-icon">
                                 <button type="button" ng-click="close(workspace)" class="my-button" data-dismiss="modal">Download</button>
+                            </td>
+                        </tr>
+                        <tr ng-show="m_oController.m_aoWorkspaceList.length === 0">
+                            <td colspan="4" class="over-icon">
+                                Create new workspace
+                                <i class="fa fa-plus fa-lg" aria-hidden="true" ng-click="m_oController.createWorkspace()"></i>
                             </td>
                         </tr>
                         </tbody>
