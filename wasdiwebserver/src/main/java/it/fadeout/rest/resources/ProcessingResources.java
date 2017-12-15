@@ -2,12 +2,13 @@ package it.fadeout.rest.resources;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.servlet.ServletConfig;
 import javax.ws.rs.Consumes;
@@ -23,8 +24,8 @@ import javax.ws.rs.core.Response;
 
 import org.apache.commons.io.IOUtils;
 import org.esa.snap.core.gpf.annotations.Parameter;
-import org.esa.snap.core.gpf.graph.Graph;
-import org.esa.snap.core.gpf.graph.GraphIO;
+import org.esa.snap.rcp.imgfilter.model.Filter;
+import org.esa.snap.rcp.imgfilter.model.StandardFilters;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 
 import it.fadeout.Wasdi;
@@ -50,6 +51,7 @@ import wasdi.shared.parameters.RangeDopplerGeocodingParameter;
 import wasdi.shared.parameters.RangeDopplerGeocodingSetting;
 import wasdi.shared.utils.SerializationUtils;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.viewmodels.FilterBandViewModel;
 import wasdi.shared.viewmodels.SnapOperatorParameterViewModel;
 
 @Path("/processing")
@@ -166,9 +168,33 @@ public class ProcessingResources {
 		
 	}
 	
+	@GET
+	@Path("/standardfilters")
+	@Produces({"application/json"})
+	public Map<String, Filter[]> getStandardFilters(@HeaderParam("x-session-token") String sSessionId) {
+		Map<String, Filter[]> filtersMap = new HashMap<String, Filter[]>();
+		filtersMap.put("Detect Lines", StandardFilters.LINE_DETECTION_FILTERS);
+		filtersMap.put("Detect Gradients (Emboss)", StandardFilters.GRADIENT_DETECTION_FILTERS);
+		filtersMap.put("Smooth and Blurr", StandardFilters.SMOOTHING_FILTERS);
+		filtersMap.put("Sharpen", StandardFilters.SHARPENING_FILTERS);
+		filtersMap.put("Enhance Discontinuities", StandardFilters.LAPLACIAN_FILTERS);
+		filtersMap.put("Non-Linear Filters", StandardFilters.NON_LINEAR_FILTERS);
+		filtersMap.put("Morphological Filters", StandardFilters.MORPHOLOGICAL_FILTERS);
+		return filtersMap;
+	}
 	
-	private String AcceptedUserAndSession(String sSessionId)
-	{
+	@POST
+	@Path("/applyfilter")
+	@Produces({"application/xml", "application/json", "text/xml"})
+	public Response applyFilters(@HeaderParam("x-session-token") String sSessionId, FilterBandViewModel filterViewModel) throws IOException {
+		
+		Filter filter = filterViewModel.getFilter();
+		
+		return Response.status(200).build();
+	}
+	
+	
+	private String AcceptedUserAndSession(String sSessionId) {
 		//Check user
 		if (Utils.isNullOrEmpty(sSessionId)) return null;
 		User oUser = Wasdi.GetUserFromSession(sSessionId);
@@ -178,8 +204,7 @@ public class ProcessingResources {
 		return oUser.getUserId();
 	}
 	
-	private Response ExecuteOperation(String sSessionId, String sSourceProductName, String sDestinationProductName, String sWorkspaceId, ISetting oSetting, LauncherOperations operation)
-	{
+	private Response ExecuteOperation(String sSessionId, String sSourceProductName, String sDestinationProductName, String sWorkspaceId, ISetting oSetting, LauncherOperations operation) {
 		
 		String sUserId = AcceptedUserAndSession(sSessionId);
 		
@@ -279,5 +304,6 @@ public class ProcessingResources {
 			
 		}
 	}
+	
 	
 }
