@@ -34,10 +34,12 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
+import org.glassfish.jersey.server.internal.process.RespondingContext;
 
 import it.fadeout.Wasdi;
 import wasdi.shared.business.Catalog;
@@ -98,6 +100,28 @@ public class CatalogResources {
 		}		
 	}
 
+	
+	@POST
+	@Path("downloadentry")
+	@Produces(MediaType.APPLICATION_OCTET_STREAM)
+	public Response DownloadEntry(@HeaderParam("x-session-token") String sSessionId,
+			DownloadedFile entry
+			) {
+		
+		User me = Wasdi.GetUserFromSession(sSessionId);
+		String userId = me.getUserId();
+
+		File file = new File(entry.getFilePath());
+		ResponseBuilder resp = null;
+		if (!file.canRead()) {
+			resp = Response.serverError();
+		} else {
+			resp = Response.ok(file);
+			resp.header("Content-Disposition", "attachment; filename=\""+ entry.getFileName() + "\"");
+		}
+		return resp.build();
+	}
+	
 
 	private ArrayList<DownloadedFile> searchEntries(Date from, Date to, String freeText, String category, String userId) {
 		ArrayList<DownloadedFile> entries = new ArrayList<DownloadedFile>();
