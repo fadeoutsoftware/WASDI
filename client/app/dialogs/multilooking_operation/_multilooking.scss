@@ -17,6 +17,10 @@
 
       .modal-body
       {
+
+        .name-is-used{
+          border-color: red;
+        }
         fieldset
         {
           //.list-group
@@ -59,7 +63,7 @@
 
       .modal-footer
       {
-
+        text-align: left;
       }
     }
   }

@@ -12,7 +12,7 @@
 
                 <div class="input-group my-input-text"
                      moment-picker="m_oController.m_oDataTo"
-                     format="YYYY-MM-DD-HH-mm"
+                     format="YYYY-MM-DD-HH"
                      today="true">
 
                     <input class="form-control"
@@ -36,7 +36,7 @@
 
                 <div class="input-group my-input-text"
                      moment-picker="m_oController.m_oDataFrom"
-                     format="YYYY-MM-DD-HH-mm"
+                     format="YYYY-MM-DD-HH"
                      today="true">
 
                     <input class="form-control"
@@ -136,13 +136,20 @@
             <table class="table table-hover table-products"  ng-show="m_oController.m_bIsLoadedTable" >
                 <thead>
                     <tr>
-                        <th>File Name</th>
-                        <th>Category</th>
+                        <th>
+                            File Name
+                        </th>
+                        <th>
+                            Category
+                        </th>
                         <th>
                             Info
                         </th>
                         <th>
                             Add
+                        </th>
+                        <th>
+                            Download
                         </th>
                     </tr>
                 </thead>
@@ -158,6 +165,9 @@
                         </td>
                         <td ng-click="m_oController.addProductToWorkspace(entry)">
                             <i class="fa fa-plus-circle fa-lg" aria-hidden="true"></i>
+                        </td>
+                        <td ng-click="m_oController.downloadEntry(entry)">
+                            <i class="fa fa-download" aria-hidden="true"></i>
                         </td>
                     </tr>
                 </tbody>

@@ -492,3 +492,14 @@ function utilsUserUseIEBrowser()
 
     return false;
 }
+
+function utilsGetPropertiesObject (obj)
+{
+    if(utilsIsObjectNullOrUndefined(obj))
+        return [];
+    var aProperties = [];
+    for(var property in obj){
+        aProperties.push(property);
+    }
+    return aProperties;
+}

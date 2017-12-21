@@ -244,3 +244,16 @@ function utilsProjectConvertCurrentPositionFromServerInCesiumDegrees(sInput)
     aReturnValue.push(aSplitedInput[2]);
     return aReturnValue;
 }
+
+function utilsProjectCheckInDialogIfProductNameIsInUsed(sProductName, aoListOfProducts)
+{
+    if(aoListOfProducts === null || sProductName === null )
+        return false;
+    var iNumberOfProducts = aoListOfProducts.length;
+    for(var iIndexProduct = 0; iIndexProduct < iNumberOfProducts ; iIndexProduct++)
+    {
+        if(aoListOfProducts[iIndexProduct].name === sProductName)
+            return true;
+    }
+    return false;
+}

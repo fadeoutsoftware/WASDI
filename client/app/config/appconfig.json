@@ -165,6 +165,9 @@
                 {
                     "indexname": "cloudcoverpercentage",
                     "indexlabel": "Cloud Coverage(%)(e.g.[0 TO 9.4])",
+                    "indexvalues":"",
+                    "indexmin":"0",
+                    "indexmax":"100",
                     "regex": ".*"
 
                 },

@@ -98,6 +98,11 @@ var NDVIController = (function() {
 
     }
 
+    NDVIController.prototype.nameIsUsed = function()
+    {
+        return utilsProjectCheckInDialogIfProductNameIsInUsed( this.m_sFileName_Operation  , this.m_aoProducts );
+    };
+
     NDVIController.prototype.changeProduct = function(oNewSelectedProductInput)
     {
         if(utilsIsObjectNullOrUndefined(oNewSelectedProductInput) == true)

@@ -157,6 +157,8 @@ var CatalogController = (function() {
         var sCategory = this.getSelectedCategoriesAsString() ;
         var oController = this;
         this.m_bIsLoadedTable = false;
+        sFrom += "00";
+        sTo += "00"
         this.m_oCatalogService.getEntries(sFrom,sTo,sFreeText,sCategory).success(function (data) {
             if(utilsIsObjectNullOrUndefined(data) == false)
             {
@@ -168,6 +170,41 @@ var CatalogController = (function() {
             utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN GET ENTRIES");
             oController.m_bIsLoadedTable = true;
         });
+    };
+
+    CatalogController.prototype.downloadEntry = function(oEntry)
+    {
+        if(utilsIsObjectNullOrUndefined(oEntry))
+            return false;
+        var oJson = {
+            boundingBox:oEntry.boundingBox,
+            category: oEntry.category,
+            fileName: oEntry.fileName,
+            filePath: oEntry.filePath,
+            productViewModel : oEntry.productViewModel,
+            refDate: oEntry.refDate
+
+        };
+        var sEntryJson = JSON.stringify(oJson);
+        this.m_oCatalogService.downloadEntry(sEntryJson).success(function (data) {
+            if(utilsIsObjectNullOrUndefined(data) == false)
+            {
+                // var json = JSON.stringify(data),
+                //     blob = new Blob([json], {type: "octet/stream"}),
+                //     url = window.URL.createObjectURL(blob);
+                // a.href = url;
+                // a.download = fileName;
+                // a.click();
+                // window.URL.revokeObjectURL(url);
+                var blob = new Blob([data], {type: "octet/stream"});
+                var objectUrl = URL.createObjectURL(blob);
+                window.open(objectUrl);
+            }
+        }).error(function (error) {
+            utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN DOWNLOAD ENTRIES");
+        });
+
+        return true;
     };
 
     CatalogController.prototype.getSelectedCategoriesAsString = function()
