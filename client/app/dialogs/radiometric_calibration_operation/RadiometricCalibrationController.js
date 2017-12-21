@@ -148,6 +148,12 @@ var RadiometricCalibrationController = (function() {
         });
     };
 
+
+    RadiometricCalibrationController.prototype.nameIsUsed = function()
+    {
+        return utilsProjectCheckInDialogIfProductNameIsInUsed( this.m_sFileName_Operation  , this.m_aoProducts );
+    };
+
     RadiometricCalibrationController.prototype.changeProduct = function(oNewSelectedProductInput)
     {
         if(utilsIsObjectNullOrUndefined(oNewSelectedProductInput) == true)

@@ -5,7 +5,7 @@
 
 var FilterBandController = (function() {
 
-    function FilterBandController($scope, oClose,oExtras,oWorkspaceService) {
+    function FilterBandController($scope, oClose,oExtras,oWorkspaceService,oFilterService) {
         this.m_oScope = $scope;
         this.m_oScope.m_oController = this;
         this.m_oExtras = oExtras;
@@ -14,6 +14,8 @@ var FilterBandController = (function() {
         this.m_oClose = oClose;
         this.m_iActiveProvidersTab = 0;
         this.m_iSelectedValue = 0 ;
+        this.m_oFilterService = oFilterService;
+
         this.m_aoFilterProperties = [
             {name:"Operation:",value:""},
             {name:"Name:",value:""},
@@ -43,81 +45,83 @@ var FilterBandController = (function() {
             [{color:"blue" ,fontcolor:"black", value:"1", click:function(){console.log('hello')}},{color:"red" ,fontcolor:"black", value:"0"},{color:"yellow" ,fontcolor:"black", value:"0"},{color:"yellow" ,fontcolor:"black", value:"0"}],
 
         ];
-        this.m_aoSystemFilterOptions = [
-            {name:"Detect Lines" ,options:[
-                    {name:"Horizontal Edges",actions:function(){}},
-                    {name:"Vertical Edges",actions:function(){}},
-                    {name:"Left Diagonal Edges",actions:function(){}},
-                    {name:"Compass Edge Detector",actions:function(){}},
-                    {name:"Diagonal Compass Edges Detector",actions:function(){}},
-                    {name:"Roberts Cross North-West",actions:function(){}},
-                    {name:"Roberts Cross North-East",actions:function(){}},
-
-                ]},
-            {name:"Detect Gradients" ,options:[
-                    {name:"Sobel North",actions:function(){}},
-                    {name:"Sobel South",actions:function(){}},
-                    {name:"Sobel West",actions:function(){}},
-                    {name:"Sobel East",actions:function(){}},
-                    {name:"Sobel North East",actions:function(){}},
-                ]},
-            {name:"Smooth and Blurr" ,options:[
-                {name:"Arithmetic Mean 3x3",actions:function(){}},
-                {name:"Arithmetic Mean 4x4",actions:function(){}},
-                {name:"Arithmetic Mean 5x5",actions:function(){}},
-                {name:"Low-Pass 3x3",actions:function(){}},
-                {name:"Low-Pass 5x5",actions:function(){}},
-
-
-            ]},
-            {name:"Sharpen" ,options:[
-                {name:"High-Pass 3x3 #1",actions:function(){}},
-                {name:"High-Pass 3x3 #2",actions:function(){}},
-                {name:"High-Pass 3x3 5x5",actions:function(){}},
-
-            ]},
-            {name:"Enhance Discontinuities" ,options:[
-                {name:"Laplace 3x3(a)",actions:function(){}},
-                {name:"Laplace 3x3(b)",actions:function(){}},
-                {name:"Laplace 5x5(a)",actions:function(){}},
-                {name:"Laplace 5x5(b)",actions:function(){}},
-            ]},
-            {name:"Non-linear Filters" ,options:[
-                {name:"Minimum 3x3",actions:function(){}},
-                {name:"Minimum 5x5",actions:function(){}},
-                {name:"Minimum 7x7",actions:function(){}},
-                {name:"Maximum 3x3",actions:function(){}},
-                {name:"Maximum 5x5",actions:function(){}},
-                {name:"Maximum 7x7",actions:function(){}},
-                {name:"Mean 3x3",actions:function(){}},
-                {name:"Mean 5x5",actions:function(){}},
-                {name:"Mean 7x7",actions:function(){}},
-                {name:"Median 3x3",actions:function(){}},
-                {name:"Median 5x5",actions:function(){}},
-                {name:"Median 7x7",actions:function(){}},
-                {name:"Standard Deviation 3x3",actions:function(){}},
-                {name:"Standard Deviation 5x5",actions:function(){}},
-                {name:"Standard Deviation 7x7",actions:function(){}},
-            ]},
-            {name:"Morphological Filters" ,options:[
-                {name:"Erosion 3x3",actions:function(){}},
-                {name:"Erosion 5x5",actions:function(){}},
-                {name:"Erosion 7x7",actions:function(){}},
-                {name:"Dilation 3x3",actions:function(){}},
-                {name:"Dilation 5x5",actions:function(){}},
-                {name:"Dilation 7x7",actions:function(){}},
-                {name:"Opening 3x3",actions:function(){}},
-                {name:"Opening 5x5",actions:function(){}},
-                {name:"Opening 7x7",actions:function(){}},
-                {name:"Closing 3x3",actions:function(){}},
-                {name:"Closing 5x5",actions:function(){}},
-                {name:"Closing 7x7",actions:function(){}},
-            ]},
-        ];
-
+        // this.m_aoSystemFilterOptions = [
+        //     {name:"Detect Lines" ,options:[
+        //             {name:"Horizontal Edges",actions:function(){}},
+        //             {name:"Vertical Edges",actions:function(){}},
+        //             {name:"Left Diagonal Edges",actions:function(){}},
+        //             {name:"Compass Edge Detector",actions:function(){}},
+        //             {name:"Diagonal Compass Edges Detector",actions:function(){}},
+        //             {name:"Roberts Cross North-West",actions:function(){}},
+        //             {name:"Roberts Cross North-East",actions:function(){}},
+        //
+        //         ]},
+        //     {name:"Detect Gradients" ,options:[
+        //             {name:"Sobel North",actions:function(){}},
+        //             {name:"Sobel South",actions:function(){}},
+        //             {name:"Sobel West",actions:function(){}},
+        //             {name:"Sobel East",actions:function(){}},
+        //             {name:"Sobel North East",actions:function(){}},
+        //         ]},
+        //     {name:"Smooth and Blurr" ,options:[
+        //         {name:"Arithmetic Mean 3x3",actions:function(){}},
+        //         {name:"Arithmetic Mean 4x4",actions:function(){}},
+        //         {name:"Arithmetic Mean 5x5",actions:function(){}},
+        //         {name:"Low-Pass 3x3",actions:function(){}},
+        //         {name:"Low-Pass 5x5",actions:function(){}},
+        //
+        //
+        //     ]},
+        //     {name:"Sharpen" ,options:[
+        //         {name:"High-Pass 3x3 #1",actions:function(){}},
+        //         {name:"High-Pass 3x3 #2",actions:function(){}},
+        //         {name:"High-Pass 3x3 5x5",actions:function(){}},
+        //
+        //     ]},
+        //     {name:"Enhance Discontinuities" ,options:[
+        //         {name:"Laplace 3x3(a)",actions:function(){}},
+        //         {name:"Laplace 3x3(b)",actions:function(){}},
+        //         {name:"Laplace 5x5(a)",actions:function(){}},
+        //         {name:"Laplace 5x5(b)",actions:function(){}},
+        //     ]},
+        //     {name:"Non-linear Filters" ,options:[
+        //         {name:"Minimum 3x3",actions:function(){}},
+        //         {name:"Minimum 5x5",actions:function(){}},
+        //         {name:"Minimum 7x7",actions:function(){}},
+        //         {name:"Maximum 3x3",actions:function(){}},
+        //         {name:"Maximum 5x5",actions:function(){}},
+        //         {name:"Maximum 7x7",actions:function(){}},
+        //         {name:"Mean 3x3",actions:function(){}},
+        //         {name:"Mean 5x5",actions:function(){}},
+        //         {name:"Mean 7x7",actions:function(){}},
+        //         {name:"Median 3x3",actions:function(){}},
+        //         {name:"Median 5x5",actions:function(){}},
+        //         {name:"Median 7x7",actions:function(){}},
+        //         {name:"Standard Deviation 3x3",actions:function(){}},
+        //         {name:"Standard Deviation 5x5",actions:function(){}},
+        //         {name:"Standard Deviation 7x7",actions:function(){}},
+        //     ]},
+        //     {name:"Morphological Filters" ,options:[
+        //         {name:"Erosion 3x3",actions:function(){}},
+        //         {name:"Erosion 5x5",actions:function(){}},
+        //         {name:"Erosion 7x7",actions:function(){}},
+        //         {name:"Dilation 3x3",actions:function(){}},
+        //         {name:"Dilation 5x5",actions:function(){}},
+        //         {name:"Dilation 7x7",actions:function(){}},
+        //         {name:"Opening 3x3",actions:function(){}},
+        //         {name:"Opening 5x5",actions:function(){}},
+        //         {name:"Opening 7x7",actions:function(){}},
+        //         {name:"Closing 3x3",actions:function(){}},
+        //         {name:"Closing 5x5",actions:function(){}},
+        //         {name:"Closing 7x7",actions:function(){}},
+        //     ]},
+        // ];
+        this.m_aoSystemFilterOptions = [];
         this.m_aoUserFilterOptions = [
             {name:"User" ,options:[]},
         ];
+
+        this.getFilters();
 
         //$scope.close = oClose;
         $scope.close = function(result) {
@@ -168,6 +172,23 @@ var FilterBandController = (function() {
 
         return aaMatrix;
     };
+
+    FilterBandController.prototype.getFilters = function()
+    {
+        var oController = this;
+        this.m_oFilterService.getFilters().success(function (data, status) {
+            if (data != null)
+            {
+                if (data != undefined)
+                {
+                    oController.generateFiltersListFromServer(data);
+                }
+            }
+        }).error(function (data,status) {
+            utilsVexDialogAlertTop('GURU MEDITATION<br>ERROR IN GET FILTERS');
+        });
+    };
+
     FilterBandController.prototype.numberOfRows = function(aaoMatrix)
     {
         if(utilsIsObjectNullOrUndefined(aaoMatrix))
@@ -270,11 +291,48 @@ var FilterBandController = (function() {
         return true;
     };
 
+    FilterBandController.prototype.generateFiltersListFromServer = function(oData)
+    {
+        if(utilsIsObjectNullOrUndefined(oData))
+            return false;
+
+        var asProperties = utilsGetPropertiesObject(oData);
+
+        if(asProperties === [])
+            return false;
+
+        for(var iIndexProperty = 0; iIndexProperty < asProperties.length; iIndexProperty++)
+        {
+            for(var iIndexOptions = 0 ; iIndexOptions < oData[asProperties[iIndexProperty]].length ; iIndexOptions++)
+            {
+                var iNumerOfRows = oData[asProperties[iIndexProperty]][iIndexOptions].kernelHeight;
+                var iNumerOfCollums = oData[asProperties[iIndexProperty]][iIndexOptions].kernelWidth;
+                var oThat = this;
+                var oDefaultValue = {
+                    color:"white" ,
+                    fontcolor:"black",
+                    value:"0",
+                    click:function(){this.value = oThat.m_iSelectedValue;}//
+                };
+                oData[asProperties[iIndexProperty]][iIndexOptions].matrix =  this.makeEmptyMatrix(iNumerOfCollums,iNumerOfRows,oDefaultValue);
+            };
+
+            var oObject = {
+                name:asProperties[iIndexProperty],
+                options:oData[asProperties[iIndexProperty]],
+
+            };
+            this.m_aoSystemFilterOptions.push(oObject);
+        }
+        return true;
+    };
+
     FilterBandController.$inject = [
         '$scope',
         'close',
         'extras',
-        'WorkspaceService'
+        'WorkspaceService',
+        'FilterService'
     ];
     return FilterBandController;
 })();

@@ -13,6 +13,7 @@ var MultilookingController = (function() {
         this.m_asSourceBands = [];
         this.m_oGetParametersOperationService = oGetParametersOperationService;
         this.m_iSquarePixel = 10;
+        // this.m_sMessage = "";
         if(utilsIsObjectNullOrUndefined(this.m_aoProducts) == true)
         {
             this.m_aoProducts = [];
@@ -70,6 +71,12 @@ var MultilookingController = (function() {
             //TODO CHECK OPTIONS
             var bAreOkOptions = true;
 
+            // check if the name is used by other products
+            if(oController.nameIsUsed())
+            {
+                // oController.m_sMessage = "Error";
+                return;
+            }
             if( (utilsIsObjectNullOrUndefined(oController.m_asSourceBandsSelected) == true) )
                 bAreOkOptions = false;
             if( (utilsIsObjectNullOrUndefined(oController.m_oReturnValue.options.nRgLooks) == true) && (utilsIsANumber(oController.m_oReturnValue.options.nRgLooks) == false) )
@@ -109,7 +116,13 @@ var MultilookingController = (function() {
             }).error(function (error) {
             utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN GET PARAMETERS");
         });
-    }
+
+    };
+
+    MultilookingController.prototype.nameIsUsed = function()
+    {
+        return utilsProjectCheckInDialogIfProductNameIsInUsed( this.m_sFileName_Operation  , this.m_aoProducts );
+    };
 
     MultilookingController.prototype.changeProduct = function(oNewSelectedProductInput)
     {

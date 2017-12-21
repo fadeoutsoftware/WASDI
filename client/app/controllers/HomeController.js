@@ -16,39 +16,36 @@ var HomeController = (function() {
         this.m_sUserPassword = "";
         this.m_bRegisterIsVisible = false;
         this.m_bBrowserIsIE = utilsUserUseIEBrowser();
-        this.m_bVisualizeLink = true;
+        this.m_bVisualizeLink = false;
         if(this.m_oConstantsService.isUserLogged())
             this.m_oState.go("root.workspaces");// go workspaces
 
         if(this.m_bBrowserIsIE === true)
         {
             this.m_bVisualizeLink = false;
-            alert("Wasdi doesn't work on IE");
+            alert("Wasdi doesn't work on IE" + this.m_bVisualizeLink);
+        }
+        else
+        {
+            this.m_bVisualizeLink = true;
         }
 
     }
 
     HomeController.prototype.changeVisibilityLoginRegister = function(sStatus){
 
-        if(this.m_bBrowserIsIE === true)
+        if(sStatus === "Login")
         {
-            this.m_bLoginIsVisible = false;
+            this.m_bLoginIsVisible = true;
             this.m_bRegisterIsVisible = false;
         }
-        else
-        {
-            if(sStatus === "Login")
-            {
-                this.m_bLoginIsVisible = true;
-                this.m_bRegisterIsVisible = false;
-            }
 
-            if(sStatus === "Register")
-            {
-                this.m_bLoginIsVisible = false;
-                this.m_bRegisterIsVisible = true;
-            }
+        if(sStatus === "Register")
+        {
+            this.m_bLoginIsVisible = false;
+            this.m_bRegisterIsVisible = true;
         }
+
 
     };
 

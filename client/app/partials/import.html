@@ -9,6 +9,7 @@
 
         </multiradiobuttondropdownmenu>
 
+
         <!--<div>&lt;!&ndash; class="multiRadioButtonDropdownMenu" &ndash;&gt;-->
             <!--<button class="multiRadioButtonDropdownMenu" type="button" id="seasons"-->
                     <!--data-toggle="dropdown">-->
@@ -92,10 +93,11 @@
                                close-text="Close"/>
 
                         <span class="input-group-btn">
-
-							        <button type="button" class="btn btn-default advanced-calendar-button"
-                                            ng-click="m_oController.openSensingPeriodFrom($event)"><i class="fa fa-calendar" aria-hidden="true"></i></button>
-						            </span>
+        			        <button type="button" class="btn btn-default advanced-calendar-button"
+                                ng-click="m_oController.openSensingPeriodFrom($event)">
+                                <i class="fa fa-calendar" aria-hidden="true"></i>
+                            </button>
+                        </span>
 
                     </p>
                 </div>
@@ -108,8 +110,6 @@
                 </div>
             </div>
         </div>
-
-
     </div>
 
         <!-- SIDEBAR -->
@@ -165,8 +165,6 @@
                             </ul>
 
                             <div ng-repeat="mission in m_oController.getMissions()" class="missions" ng-show="m_oController.m_activeMissionTab === $index">
-
-
                                 <div>
                                     <div class="col-md-1 col-xs-4 col-sd-4">
                                         <div class="glyphicon mission-checkbox"
@@ -178,9 +176,8 @@
 
                                 <div class="row">
                                     <div ng-repeat="filter in mission.filters">
-
-                                        <div class="col-md-6"
-                                             ng-if="!(filter.indexvalues && filter.indexvalues.split('|').length > 0)">
+                                        <!-- INPUT -->
+                                        <div class="col-md-6" ng-if="!(filter.indexvalues && filter.indexvalues.split('|').length > 0)">
                                             <div class="group">
                                                 <div class="my-input-text" >
                                                     <label class="filter-label">{{filter.indexlabel}}</label>
@@ -189,11 +186,24 @@
                                                            ng-value="filter.indexvalue" class=" filter-input"
                                                            ng-blur="m_oController.updateFilter($parent.$parent.$index)"
                                                            ng-pattern="filter.regex">
+
                                                     <span class="highlight filter-highlight"></span>
                                                     <span class="bar filter-bar"></span>
                                                 </div>
                                             </div>
                                         </div>
+                                        <!-- INPUT NUMBER-->
+                                        <!--TODO IT 659 su mantis-->
+                                        <!--<div class="col-md-6" ng-if="(filter.indexmin && filter.indexmax && filter.indexvalues === '')">-->
+                                            <!--<div class="group">-->
+                                                <!--<div class="my-input-text" >-->
+                                                    <!--<label class="filter-label">{{filter.indexlabel}}</label>-->
+                                                    <!--<input type="number" ng-model="filter.indexvalue" ng-value="filter.indexvalue"-->
+                                                           <!--name="points" min="filter.indexmin" max="filter.indexmax" ng-blur="m_oController.updateFilter($parent.$parent.$index)">-->
+                                                <!--</div>-->
+                                            <!--</div>-->
+                                        <!--</div>-->
+                                        <!-- LIST OF OPTIONS-->
                                         <div id="adv-options" class="group col-md-6 my-input-text"
                                              ng-if="(filter.indexvalues && filter.indexvalues.split('|').length > 0)">
                                             <label class="filter-label">{{filter.indexlabel}}</label>

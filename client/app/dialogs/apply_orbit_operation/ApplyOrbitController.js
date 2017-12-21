@@ -94,6 +94,11 @@ var ApplyOrbitController = (function() {
 
     };
 
+    ApplyOrbitController.prototype.nameIsUsed = function()
+    {
+        return utilsProjectCheckInDialogIfProductNameIsInUsed( this.m_sFileName_Operation  , this.m_aoProducts );
+    };
+
     ApplyOrbitController.prototype.changeProduct = function(oNewSelectedProductInput)
     {
         if(utilsIsObjectNullOrUndefined(oNewSelectedProductInput) == true)

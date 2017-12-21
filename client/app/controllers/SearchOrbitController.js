@@ -145,7 +145,8 @@ var SearchOrbitController = (function() {
         return true;
     };
 
-    SearchOrbitController.prototype.searchOrbit = function() {
+    SearchOrbitController.prototype.searchOrbit = function()
+    {
         var oController = this;
 
         //clear map and remove orbits and set check as false
@@ -244,6 +245,8 @@ var SearchOrbitController = (function() {
         oController.m_oOrbitSearch.polygon = sCoordinatesPolygon;
         this.m_bIsVisibleLoadingIcon = true;
         this.m_aoOrbits = null;
+        oController.m_oOrbitSearch.acquisitionStartTime += ":00:00";
+        oController.m_oOrbitSearch.acquisitionEndTime += ":00:00";
         //call search
         this.m_oSearchOrbitService.searchOrbit(oController.m_oOrbitSearch)
             .success(function (data, status, headers, config) {

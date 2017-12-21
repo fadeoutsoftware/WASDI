@@ -151,6 +151,12 @@ var RangeDopplerTerrainCorrectionController = (function() {
         });
     };
 
+
+    RangeDopplerTerrainCorrectionController.prototype.nameIsUsed = function()
+    {
+        return utilsProjectCheckInDialogIfProductNameIsInUsed( this.m_sFileName_Operation  , this.m_aoProducts );
+    };
+
     RangeDopplerTerrainCorrectionController.prototype.changeProduct = function(oNewSelectedProductInput)
     {
         if(utilsIsObjectNullOrUndefined(oNewSelectedProductInput) == true)
