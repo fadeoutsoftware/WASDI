@@ -8,6 +8,8 @@ import java.util.Calendar;
 import java.util.Date;
 
 import org.geotools.data.shapefile.ShapefileDataStore;
+import org.geotools.data.simple.SimpleFeatureCollection;
+import org.geotools.data.simple.SimpleFeatureSource;
 import org.geotools.data.store.ContentFeatureCollection;
 import org.geotools.data.store.ContentFeatureSource;
 import org.geotools.feature.FeatureIterator;
@@ -58,8 +60,8 @@ public class DownloadManager {
 		this.destinationDir = destinationDir;
 		
 		ShapefileDataStore ds = new ShapefileDataStore(footprintShp.toURI().toURL());
-		ContentFeatureSource fs = ds.getFeatureSource();
-		ContentFeatureCollection fc = fs.getFeatures();
+		SimpleFeatureSource fs = ds.getFeatureSource();
+		SimpleFeatureCollection fc = fs.getFeatures();
 		FeatureIterator<SimpleFeature> fit = fc.features();		
 		while (fit.hasNext()) {
 			SimpleFeature f = fit.next();

@@ -1,8 +1,6 @@
 package it.fadeout.rest.resources;
 
 import java.io.IOException;
-import java.lang.reflect.Field;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import javax.servlet.ServletConfig;
@@ -39,6 +37,37 @@ public class FileBufferResource {
 	@Context
 	ServletConfig m_oServletConfig;	
 
+	
+//	@GET
+//	@Path("test")
+//	@Produces({"application/xml", "application/json", "text/xml"})
+//	public Response testd() throws IOException
+//	{
+//		String sProcessId = "";
+//		ProcessWorkspace oProcess = null;
+//		ProcessWorkspaceRepository oRepository = new ProcessWorkspaceRepository();
+//		try
+//		{
+//			oProcess = new ProcessWorkspace();
+//			oProcess.setOperationDate(Wasdi.GetFormatDate(new Date()));
+//			oProcess.setOperationType(LauncherOperations.DOWNLOAD.name());
+//			oProcess.setProductName("test");
+//			oProcess.setWorkspaceId("test");
+//			oProcess.setUserId("paolo");
+//			oProcess.setProcessObjId(Utils.GetRandomName());
+//			oProcess.setStatus(ProcessStatus.CREATED.name());
+//			sProcessId = oRepository.InsertProcessWorkspace(oProcess);
+//		}
+//		catch(Exception oEx) {
+//			System.out.println("DownloadResource.Download: Error updating process list " + oEx.getMessage());
+//			oEx.printStackTrace();
+//			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+//		}
+//		return Response.ok().build();
+//	}
+
+	
+	
 	@GET
 	@Path("download")
 	@Produces({"application/xml", "application/json", "text/xml"})
@@ -94,26 +123,26 @@ public class FileBufferResource {
 
 			SerializationUtils.serializeObjectToXML(sPath, oParameter);
 
-			String sLauncherPath = m_oServletConfig.getInitParameter("LauncherPath");
-			String sJavaExe = m_oServletConfig.getInitParameter("JavaExe");
-
-			String sShellExString = sJavaExe + " -jar " + sLauncherPath +" -operation " + LauncherOperations.DOWNLOAD + " -parameter " + sPath;
-
-			System.out.println("DownloadResource.Download: shell exec " + sShellExString);
-
-			Process oProc = Runtime.getRuntime().exec(sShellExString);
+//			String sLauncherPath = m_oServletConfig.getInitParameter("LauncherPath");
+//			String sJavaExe = m_oServletConfig.getInitParameter("JavaExe");
+//
+//			String sShellExString = sJavaExe + " -jar " + sLauncherPath +" -operation " + LauncherOperations.DOWNLOAD + " -parameter " + sPath;
+//
+//			System.out.println("DownloadResource.Download: shell exec " + sShellExString);
+//
+//			Process oProc = Runtime.getRuntime().exec(sShellExString);
 			
-			//Update process
-			if (oProc != null)
-			{
-				int iPID = Wasdi.getPIDProcess(oProc);
-				if (!Utils.isNullOrEmpty(sProcessId))
-				{
-					oProcess.setPid(iPID);
-					if (!oRepository.UpdateProcess(oProcess))
-						System.out.println("DownloadResource.Download: pid not saved");
-				}
-			}
+//			//Update process
+//			if (oProc != null)
+//			{
+//				int iPID = Wasdi.getPIDProcess(oProc);
+//				if (!Utils.isNullOrEmpty(sProcessId))
+//				{
+//					oProcess.setPid(iPID);
+//					if (!oRepository.UpdateProcess(oProcess))
+//						System.out.println("DownloadResource.Download: pid not saved");
+//				}
+//			}
 			
 
 		} catch (IOException e) {
@@ -166,7 +195,7 @@ public class FileBufferResource {
 				return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
 			}
 
-			String sPath = m_oServletConfig.getInitParameter("SerializationPath") + Wasdi.GetSerializationFileName();
+			String sPath = m_oServletConfig.getInitParameter("SerializationPath") + oProcess.getProcessObjId();
 
 			PublishParameters oParameter = new PublishParameters();
 			oParameter.setQueue(sSessionId);
@@ -178,26 +207,26 @@ public class FileBufferResource {
 
 			SerializationUtils.serializeObjectToXML(sPath, oParameter);
 
-			String sLauncherPath = m_oServletConfig.getInitParameter("LauncherPath");
-			String sJavaExe = m_oServletConfig.getInitParameter("JavaExe");
-
-			String sShellExString = sJavaExe + " -jar " + sLauncherPath +" -operation " + LauncherOperations.PUBLISH + " -parameter " + sPath;
-
-			System.out.println("DownloadResource.Publish: shell exec " + sShellExString);
-
-			Process oProc = Runtime.getRuntime().exec(sShellExString);
+//			String sLauncherPath = m_oServletConfig.getInitParameter("LauncherPath");
+//			String sJavaExe = m_oServletConfig.getInitParameter("JavaExe");
+//
+//			String sShellExString = sJavaExe + " -jar " + sLauncherPath +" -operation " + LauncherOperations.PUBLISH + " -parameter " + sPath;
+//
+//			System.out.println("DownloadResource.Publish: shell exec " + sShellExString);
+//
+//			Process oProc = Runtime.getRuntime().exec(sShellExString);
 			
-			//Update process
-			if (oProc != null)
-			{
-				int iPID = Wasdi.getPIDProcess(oProc);
-				if (!Utils.isNullOrEmpty(sProcessId))
-				{
-					oProcess.setPid(iPID);
-					if (!oRepository.UpdateProcess(oProcess))
-						System.out.println("DownloadResource.Download: pid not saved");
-				}
-			}
+//			//Update process
+//			if (oProc != null)
+//			{
+//				int iPID = Wasdi.getPIDProcess(oProc);
+//				if (!Utils.isNullOrEmpty(sProcessId))
+//				{
+//					oProcess.setPid(iPID);
+//					if (!oRepository.UpdateProcess(oProcess))
+//						System.out.println("DownloadResource.Download: pid not saved");
+//				}
+//			}
 
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -285,27 +314,27 @@ public class FileBufferResource {
 
 			SerializationUtils.serializeObjectToXML(sPath, oParameter);
 
-			String sLauncherPath = m_oServletConfig.getInitParameter("LauncherPath");
-			String sJavaExe = m_oServletConfig.getInitParameter("JavaExe");
-			String sJavaExendMemoryParam = m_oServletConfig.getInitParameter("JavaExendMemoryParam");
-
-			String sShellExString = sJavaExe + " " + sJavaExendMemoryParam + " -jar " + sLauncherPath +" -operation " + LauncherOperations.PUBLISHBAND + " -parameter " + sPath;
-
-			System.out.println("DownloadResource.PublishBand: shell exec " + sShellExString);
-
-			Process oProc = Runtime.getRuntime().exec(sShellExString);
+//			String sLauncherPath = m_oServletConfig.getInitParameter("LauncherPath");
+//			String sJavaExe = m_oServletConfig.getInitParameter("JavaExe");
+//			String sJavaExendMemoryParam = m_oServletConfig.getInitParameter("JavaExendMemoryParam");
+//
+//			String sShellExString = sJavaExe + " " + sJavaExendMemoryParam + " -jar " + sLauncherPath +" -operation " + LauncherOperations.PUBLISHBAND + " -parameter " + sPath;
+//
+//			System.out.println("DownloadResource.PublishBand: shell exec " + sShellExString);
+//
+//			Process oProc = Runtime.getRuntime().exec(sShellExString);
 			
-			//Update process
-			if (oProc != null)
-			{
-				int iPID = Wasdi.getPIDProcess(oProc);
-				if (!Utils.isNullOrEmpty(sProcessId))
-				{
-					oProcess.setPid(iPID);
-					if (!oRepository.UpdateProcess(oProcess))
-						System.out.println("DownloadResource.Download: pid not saved");
-				}
-			}
+//			//Update process
+//			if (oProc != null)
+//			{
+//				int iPID = Wasdi.getPIDProcess(oProc);
+//				if (!Utils.isNullOrEmpty(sProcessId))
+//				{
+//					oProcess.setPid(iPID);
+//					if (!oRepository.UpdateProcess(oProcess))
+//						System.out.println("DownloadResource.Download: pid not saved");
+//				}
+//			}
 
 
 		}catch (IOException e) {
@@ -321,37 +350,5 @@ public class FileBufferResource {
 		return oReturnValue;
 
 	}
-	
-/*	Paolo: dovrebbero essere obsolete. La cancellazione è nel ProcessWorkspaceResource
-	@GET
-	@Path("kill")
-	@Produces({"application/xml", "application/json", "text/xml"})
-	public Response KillProcess(@HeaderParam("x-session-token") String sSessionId, @QueryParam("iPid") Integer iPid) throws IOException
-	{
-		Response oReturnValue = null;
-		try {
-
-			if (Utils.isNullOrEmpty(sSessionId)) return oReturnValue;
-
-			User oUser = Wasdi.GetUserFromSession(sSessionId);
-
-			if (oUser==null) return oReturnValue;
-			if (Utils.isNullOrEmpty(oUser.getUserId())) return oReturnValue;
-
-			//check if process exists
-			
-
-
-		}catch (Exception e) {
-			e.printStackTrace();
-			return oReturnValue;
-		}
-
-		return oReturnValue.ok().build();
-
-	}
-	
-	*/
-	
 
 }

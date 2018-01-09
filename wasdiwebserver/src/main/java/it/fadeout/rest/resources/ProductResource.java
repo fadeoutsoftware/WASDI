@@ -31,6 +31,7 @@ import wasdi.shared.viewmodels.BandViewModel;
 import wasdi.shared.viewmodels.GeorefProductViewModel;
 import wasdi.shared.viewmodels.MetadataViewModel;
 import wasdi.shared.viewmodels.PrimitiveResult;
+import wasdi.shared.viewmodels.ProductInfoViewModel;
 import wasdi.shared.viewmodels.ProductViewModel;
 
 @Path("/product")
@@ -134,6 +135,30 @@ public class ProductResource {
 	}
 	
 	
+	@GET
+	@Path("info")
+	@Produces({"application/xml", "application/json", "text/xml"})
+	ProductInfoViewModel GetInfo(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sProductName") String sProductName) {
+
+		// Validate Session
+		User oUser = Wasdi.GetUserFromSession(sSessionId);
+		if (oUser == null) return null;
+		if (Utils.isNullOrEmpty(oUser.getUserId())) return null;
+
+		// Read the product from db
+		DownloadedFilesRepository oDownloadedFilesRepository = new DownloadedFilesRepository();
+		DownloadedFile oDownloadedFile = oDownloadedFilesRepository.GetDownloadedFile(sProductName);
+
+		if (oDownloadedFile != null) {
+			if (oDownloadedFile.getProductViewModel() != null) {
+				// Ok read
+				MetadataViewModel metadata = oDownloadedFile.getProductViewModel().getMetadata();
+			}
+		}		
+		// There was a problem
+		return null;
+	}
+
 
 	@GET
 	@Path("/byws")
