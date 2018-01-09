@@ -19,7 +19,7 @@ public class Proofs {
 	public static void main(String[] args) throws Exception {
 		
 		
-		File file = new File("/home/doy/tmp/wasdi/data/download/paolo/8e91a84c-3dcf-470d-8e36-3ad40de80d54/S1A_IW_GRDH_1SDV_20160802T051857_20160802T051922_012417_013615_C75B_Grapth.dim");
+		File file = new File("/home/doy/tmp/wasdi/tmp/S1A_IW_GRDH_1SDV_20171128T054335_20171128T054400_019461_02104F_DFC1.zip");
 		
 		Product oProduct = ProductIO.readProduct(file);
 		
@@ -61,7 +61,7 @@ public class Proofs {
 		String sEPSG = CRS.lookupIdentifier(oProduct.getSceneCRS(),true);
 		System.out.println("EPSG --> " + sEPSG);
 		
-		String bandName = "QLK";
+		String bandName = "Amplitude_VH";
 		Band band = oProduct.getBand(bandName);            
 		Product geotiffProduct = new Product(bandName, "GEOTIFF");
 		geotiffProduct.addBand(band);                 

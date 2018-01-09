@@ -59,7 +59,16 @@ public class ProcessingResources {
 	
 	@Context
 	ServletConfig m_oServletConfig;
-
+		
+//	@GET
+//	@Path("test")
+//	@Produces({"application/xml", "application/json", "text/xml"})
+//	public Response test() throws IOException
+//	{
+//		return ExecuteOperation("ciao", "test", "test", "test", null, LauncherOperations.TERRAIN);
+//	}
+	
+	
 	@POST
 	@Path("geometric/rangeDopplerTerrainCorrection")
 	@Produces({"application/xml", "application/json", "text/xml"})
@@ -233,7 +242,7 @@ public class ProcessingResources {
 				return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
 			}
 
-			String sPath = m_oServletConfig.getInitParameter("SerializationPath") + Wasdi.GetSerializationFileName();
+			String sPath = m_oServletConfig.getInitParameter("SerializationPath") + oProcess.getProcessObjId();
 
 			
 			OperatorParameter oParameter = GetParameter(operation); 
@@ -247,29 +256,15 @@ public class ProcessingResources {
 			
 			SerializationUtils.serializeObjectToXML(sPath, oParameter);
 
-			String sLauncherPath = m_oServletConfig.getInitParameter("LauncherPath");
-			String sJavaExe = m_oServletConfig.getInitParameter("JavaExe");
+//			String sLauncherPath = m_oServletConfig.getInitParameter("LauncherPath");
+//			String sJavaExe = m_oServletConfig.getInitParameter("JavaExe");
+//
+//			String sShellExString = sJavaExe + " -jar " + sLauncherPath +" -operation " + operation + " -parameter " + sPath;
+//
+//			System.out.println("SnapOperations.ExecuteOperation: shell exec " + sShellExString);
+//
+//			Process oProc = Runtime.getRuntime().exec(sShellExString);
 
-			String sShellExString = sJavaExe + " -jar " + sLauncherPath +" -operation " + operation + " -parameter " + sPath;
-
-			System.out.println("SnapOperations.ExecuteOperation: shell exec " + sShellExString);
-
-			Process oProc = Runtime.getRuntime().exec(sShellExString);
-
-//			//Update process
-//			if (oProc != null)
-//			{
-//				int iPID = Wasdi.getPIDProcess(oProc);
-//				if (!Utils.isNullOrEmpty(sProcessId))
-//				{
-//					oProcess.setPid(iPID);
-//					System.out.println("SnapOperations.ExecuteOperation: Updating process pid: " + sProcessId);
-//					if (!oRepository.UpdateProcess(oProcess)) {
-//						System.out.println("SnapOperations.ExecuteOperation: pid not saved");
-//					}
-//					
-//				}
-//			}			
 
 		} catch (IOException e) {
 			e.printStackTrace();

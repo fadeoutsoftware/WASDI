@@ -14,7 +14,6 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 
 import it.fadeout.Wasdi;
-import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.business.User;
@@ -57,22 +56,8 @@ public class ProcessWorkspaceResource {
 			// For each
 			for (int iProcess=0; iProcess<aoProcess.size(); iProcess++) {
 				// Create View Model
-				ProcessWorkspaceViewModel oViewModel = new ProcessWorkspaceViewModel();
 				ProcessWorkspace oProcess = aoProcess.get(iProcess);
-
-				oViewModel.setOperationDate(oProcess.getOperationDate());
-				oViewModel.setOperationEndDate(oProcess.getOperationEndDate());
-				oViewModel.setOperationType(oProcess.getOperationType());
-				oViewModel.setProductName(oProcess.getProductName());
-				oViewModel.setUserId(oProcess.getUserId());
-				oViewModel.setFileSize(oProcess.getFileSize());
-				oViewModel.setPid(oProcess.getPid());
-				oViewModel.setStatus(oProcess.getStatus());
-				oViewModel.setProgressPerc(oProcess.getProgressPerc());
-				oViewModel.setProcessObjId(oProcess.getProcessObjId());
-
-				aoProcessList.add(oViewModel);
-
+				aoProcessList.add(buildProcessWorkspaceViewModel(oProcess));
 			}
 
 		}
@@ -82,6 +67,22 @@ public class ProcessWorkspaceResource {
 		}
 
 		return aoProcessList;
+	}
+
+
+	private ProcessWorkspaceViewModel buildProcessWorkspaceViewModel(ProcessWorkspace oProcess) {
+		ProcessWorkspaceViewModel oViewModel = new ProcessWorkspaceViewModel();
+		oViewModel.setOperationDate(oProcess.getOperationDate());
+		oViewModel.setOperationEndDate(oProcess.getOperationEndDate());
+		oViewModel.setOperationType(oProcess.getOperationType());
+		oViewModel.setProductName(oProcess.getProductName());
+		oViewModel.setUserId(oProcess.getUserId());
+		oViewModel.setFileSize(oProcess.getFileSize());
+		oViewModel.setPid(oProcess.getPid());
+		oViewModel.setStatus(oProcess.getStatus());
+		oViewModel.setProgressPerc(oProcess.getProgressPerc());
+		oViewModel.setProcessObjId(oProcess.getProcessObjId());
+		return oViewModel;
 	}
 	
 	
@@ -114,22 +115,8 @@ public class ProcessWorkspaceResource {
 			// For each
 			for (int iProcess=0; iProcess<aoProcess.size(); iProcess++) {
 				// Create View Model
-				ProcessWorkspaceViewModel oViewModel = new ProcessWorkspaceViewModel();
 				ProcessWorkspace oProcess = aoProcess.get(iProcess);
-
-				oViewModel.setOperationDate(oProcess.getOperationDate());
-				oViewModel.setOperationEndDate(oProcess.getOperationEndDate());
-				oViewModel.setOperationType(oProcess.getOperationType());
-				oViewModel.setProductName(oProcess.getProductName());
-				oViewModel.setUserId(oProcess.getUserId());
-				oViewModel.setFileSize(oProcess.getFileSize());
-				oViewModel.setPid(oProcess.getPid());
-				oViewModel.setStatus(oProcess.getStatus());
-				oViewModel.setProgressPerc(oProcess.getProgressPerc());
-				oViewModel.setProcessObjId(oProcess.getProcessObjId());
-
-				aoProcessList.add(oViewModel);
-
+				aoProcessList.add(buildProcessWorkspaceViewModel(oProcess));
 			}
 
 		}

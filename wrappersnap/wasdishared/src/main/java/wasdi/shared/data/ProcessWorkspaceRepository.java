@@ -1,11 +1,7 @@
 package wasdi.shared.data;
 
-import static com.mongodb.client.model.Filters.and;
-import static com.mongodb.client.model.Filters.eq;
-
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -16,6 +12,8 @@ import com.mongodb.Block;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.model.Filters;
 
+import wasdi.shared.LauncherOperations;
+import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
 
 /**
@@ -89,20 +87,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
         try {
 
             FindIterable<Document> oWSDocuments = getCollection("processworkpsace").find(new Document("workspaceId", sWorkspaceId));
-
-            oWSDocuments.forEach(new Block<Document>() {
-                public void apply(Document document) {
-                    String sJSON = document.toJson();
-                    ProcessWorkspace oProcessWorkspace = null;
-                    try {
-                        oProcessWorkspace = s_oMapper.readValue(sJSON,ProcessWorkspace.class);
-                        aoReturnList.add(oProcessWorkspace);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-
-                }
-            });
+            fillList(aoReturnList, oWSDocuments);
 
         } catch (Exception oEx) {
             oEx.printStackTrace();
@@ -111,6 +96,65 @@ public class ProcessWorkspaceRepository extends MongoRepository {
         return aoReturnList;
     }
     
+    public List<ProcessWorkspace> GetQueuedProcess() {
+
+        final ArrayList<ProcessWorkspace> aoReturnList = new ArrayList<ProcessWorkspace>();
+        try {
+
+            FindIterable<Document> oWSDocuments = getCollection("processworkpsace").find(
+            		Filters.and(
+            				Filters.eq("status", ProcessStatus.CREATED.name()),
+            				Filters.not(Filters.eq("operationType", LauncherOperations.DOWNLOAD.name()))
+            				)
+            		)
+            		.sort(new Document("operationDate", -1));
+            fillList(aoReturnList, oWSDocuments);
+
+        } catch (Exception oEx) {
+            oEx.printStackTrace();
+        }
+
+        return aoReturnList;
+    }
+
+
+    public List<ProcessWorkspace> GetQueuedDownloads() {
+
+        final ArrayList<ProcessWorkspace> aoReturnList = new ArrayList<ProcessWorkspace>();
+        try {
+
+            FindIterable<Document> oWSDocuments = getCollection("processworkpsace").find(
+            		Filters.and(
+            				Filters.eq("status", ProcessStatus.CREATED.name()),
+            				Filters.eq("operationType", LauncherOperations.DOWNLOAD.name())
+            				)
+            		)
+            		.sort(new Document("operationDate", -1));
+            fillList(aoReturnList, oWSDocuments);
+
+        } catch (Exception oEx) {
+            oEx.printStackTrace();
+        }
+
+        return aoReturnList;
+    }
+
+    
+	private void fillList(final ArrayList<ProcessWorkspace> aoReturnList, FindIterable<Document> oWSDocuments) {
+		oWSDocuments.forEach(new Block<Document>() {
+		    public void apply(Document document) {
+		        String sJSON = document.toJson();
+		        ProcessWorkspace oProcessWorkspace = null;
+		        try {
+		            oProcessWorkspace = s_oMapper.readValue(sJSON,ProcessWorkspace.class);
+		            aoReturnList.add(oProcessWorkspace);
+		        } catch (IOException e) {
+		            e.printStackTrace();
+		        }
+
+		    }
+		});
+	}
 
     public List<ProcessWorkspace> GetLastProcessByWorkspace(String sWorkspaceId) {
 
@@ -118,20 +162,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
         try {
 
             FindIterable<Document> oWSDocuments = getCollection("processworkpsace").find(new Document("workspaceId", sWorkspaceId)).sort(new Document("_id", -1)).limit(5);
-
-            oWSDocuments.forEach(new Block<Document>() {
-                public void apply(Document document) {
-                    String sJSON = document.toJson();
-                    ProcessWorkspace oProcessWorkspace = null;
-                    try {
-                        oProcessWorkspace = s_oMapper.readValue(sJSON,ProcessWorkspace.class);
-                        aoReturnList.add(oProcessWorkspace);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-
-                }
-            });
+            fillList(aoReturnList, oWSDocuments);
 
         } catch (Exception oEx) {
             oEx.printStackTrace();

@@ -14,6 +14,8 @@ import javax.servlet.ServletContext;
 import javax.ws.rs.core.Application;
 import javax.ws.rs.core.Context;
 
+import it.fadeout.business.DownloadsThread;
+import it.fadeout.business.ProcessingThread;
 import it.fadeout.rest.resources.AuthResource;
 import it.fadeout.rest.resources.CatalogResources;
 import it.fadeout.rest.resources.FileBufferResource;
@@ -81,6 +83,18 @@ public class Wasdi extends Application {
 		if (Nfs == null) System.setProperty( "nfs.data.download", userHome + "/nfs/download");
 
 		System.out.println("init wasdi: nfs dir " + System.getProperty( "nfs.data.download" ));
+		
+		//start the processing and downloads thread
+		try {
+			new ProcessingThread(m_oServletConfig).start();
+			System.out.println("init wasdi: processing thread started");
+			
+			new DownloadsThread(m_oServletConfig).start();
+			System.out.println("init wasdi: downloads thread started");
+		} catch (Exception e) {
+			e.printStackTrace();
+			System.out.println("init wasdi: ERROR: CANNOT START PROCESSING THREAD!!!");
+		}
 				
 	}
 
