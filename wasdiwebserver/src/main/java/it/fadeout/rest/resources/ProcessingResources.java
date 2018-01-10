@@ -1,5 +1,9 @@
 package it.fadeout.rest.resources;
 
+import java.awt.Dimension;
+import java.awt.Rectangle;
+import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.annotation.Annotation;
@@ -23,7 +27,13 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.apache.commons.io.IOUtils;
+import org.esa.snap.core.dataio.ProductIO;
+import org.esa.snap.core.datamodel.Band;
+import org.esa.snap.core.datamodel.FilterBand;
+import org.esa.snap.core.datamodel.Product;
+import org.esa.snap.core.datamodel.RasterDataNode;
 import org.esa.snap.core.gpf.annotations.Parameter;
+import org.esa.snap.rcp.imgfilter.FilteredBandAction;
 import org.esa.snap.rcp.imgfilter.model.Filter;
 import org.esa.snap.rcp.imgfilter.model.StandardFilters;
 import org.glassfish.jersey.media.multipart.FormDataParam;
@@ -49,9 +59,10 @@ import wasdi.shared.parameters.NDVISetting;
 import wasdi.shared.parameters.OperatorParameter;
 import wasdi.shared.parameters.RangeDopplerGeocodingParameter;
 import wasdi.shared.parameters.RangeDopplerGeocodingSetting;
+import wasdi.shared.utils.BandImageManager;
 import wasdi.shared.utils.SerializationUtils;
 import wasdi.shared.utils.Utils;
-import wasdi.shared.viewmodels.FilterBandViewModel;
+import wasdi.shared.viewmodels.BandImageViewModel;
 import wasdi.shared.viewmodels.SnapOperatorParameterViewModel;
 
 @Path("/processing")
@@ -193,13 +204,46 @@ public class ProcessingResources {
 	}
 	
 	@POST
-	@Path("/applyfilter")
-	@Produces({"application/xml", "application/json", "text/xml"})
-	public Response applyFilters(@HeaderParam("x-session-token") String sSessionId, FilterBandViewModel filterViewModel) throws IOException {
+	@Path("/bandimage")
+	@Produces(MediaType.APPLICATION_OCTET_STREAM)
+	public Response getBandImage(@HeaderParam("x-session-token") String sSessionId,
+			@QueryParam("workspace") String workspace,
+			BandImageViewModel model) throws IOException {
 		
-		Filter filter = filterViewModel.getFilter();
+		String userId = AcceptedUserAndSession(sSessionId);
+		if (Utils.isNullOrEmpty(userId)) return Response.status(401).build();
 		
-		return Response.status(200).build();
+        String downloadPath = m_oServletConfig.getInitParameter("DownloadRootPath");
+        File productFile = new File(new File(new File(downloadPath, userId), workspace), model.getProductFileName());
+        
+        if (!productFile.exists()) {
+        	System.out.println("ProcessingResource.ApplyFilters: FILE NOT FOUND: " + productFile.getAbsolutePath());
+        	return Response.status(500).build();
+        }
+        
+        Product product = ProductIO.readProduct(productFile);
+        
+		BandImageManager manager = new BandImageManager(product);
+		
+		RasterDataNode raster = null;
+		if (model.getFilterVM() != null) {
+			Filter filter = model.getFilterVM().getFilter();
+			FilterBand filteredBand = manager.getFilterBand(model.getBandName(), filter, model.getFilterIterationCount());
+			if (filteredBand == null) {
+	        	System.out.println("ProcessingResource.ApplyFilters: CANNOT APPLY FILTER TO BAND " + model.getBandName());
+	        	return Response.status(500).build();
+			}
+			raster = filteredBand.getSource();
+		} else {
+			raster = product.getBand(model.getBandName());
+		}
+		
+		Rectangle vp = new Rectangle(model.getVp_x(), model.getVp_y(), model.getVp_w(), model.getVp_h());
+		Dimension imgSize = new Dimension(model.getImg_w(), model.getImg_h());
+		
+		BufferedImage img = manager.buildImage(raster, imgSize, vp);
+		
+		return Response.ok(img).build();
 	}
 	
 	
