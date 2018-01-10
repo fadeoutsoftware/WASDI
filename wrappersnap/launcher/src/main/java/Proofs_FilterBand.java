@@ -1,5 +1,16 @@
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
+import java.awt.image.BufferedImage;
+import java.awt.image.RenderedImage;
 import java.io.File;
-import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
+import javax.imageio.ImageIO;
+import javax.media.jai.RenderedOp;
+import javax.media.jai.operator.SubsampleAverageDescriptor;
 
 import org.esa.snap.core.dataio.ProductIO;
 import org.esa.snap.core.datamodel.Band;
@@ -9,11 +20,23 @@ import org.esa.snap.core.datamodel.GeneralFilterBand;
 import org.esa.snap.core.datamodel.Kernel;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.RasterDataNode;
+import org.esa.snap.core.image.ColoredBandImageMultiLevelSource;
+import org.esa.snap.core.util.Debug;
 import org.esa.snap.core.util.ProductUtils;
+import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.rcp.imgfilter.model.Filter;
 import org.esa.snap.rcp.imgfilter.model.StandardFilters;
+import org.esa.snap.runtime.Config;
+import org.esa.snap.runtime.Engine;
 
+import com.bc.ceres.core.Assert;
 import com.bc.ceres.core.ProgressMonitor;
+import com.bc.ceres.core.SubProgressMonitor;
+import com.bc.ceres.glayer.support.ImageLayer;
+import com.bc.ceres.glevel.MultiLevelSource;
+import com.bc.ceres.grender.Viewport;
+import com.bc.ceres.grender.support.BufferedImageRendering;
+import com.bc.ceres.grender.support.DefaultViewport;
 
 public class Proofs_FilterBand {
 
@@ -21,12 +44,12 @@ public class Proofs_FilterBand {
 	public static void main(String[] args) throws Exception {
 		
 		
-//		System.setProperty("user.home", "/home/doy");
-//        Path propFile = Paths.get("/home/doy/workspaces/wasdi/server/launcher/resources/config.properties");
-//        Config.instance("snap.auxdata").load(propFile);
-//        Config.instance().load();
-//        SystemUtils.init3rdPartyLibs(null);
-//        Engine.start(false);
+		System.setProperty("user.home", "/home/doy");
+        Path propFile = Paths.get("/home/doy/workspaces/wasdi/server/launcher/resources/config.properties");
+        Config.instance("snap.auxdata").load(propFile);
+        Config.instance().load();
+        SystemUtils.init3rdPartyLibs(null);
+        Engine.start(false);
 
 		File file = new File("/home/doy/tmp/wasdi/tmp/S1A_IW_GRDH_1SDV_20171128T054335_20171128T054400_019461_02104F_DFC1.zip");
 
@@ -39,95 +62,27 @@ public class Proofs_FilterBand {
 		String newBandName = bandName + "_" + filter.getShorthand();
 		File fileOut = new File("/home/doy/tmp/wasdi/tmp/" + newBandName + ".tif");
 		
-		FilterBand computedBand = getFilterBand(node, newBandName, filter, 10);
-		
-		Band realBand = new Band(newBandName, computedBand.getDataType(), computedBand.getRasterWidth(), computedBand.getRasterHeight());
-		realBand.setSourceImage(computedBand.getSourceImage());
-		
-		System.out.println("filter band created");
-		
-		// Get TIFF Metadata
-		System.out.println("create product");
 		Product outProduct = new Product(newBandName, "GEOTIFF");
 		ProductUtils.copyGeoCoding(product, outProduct);
-		outProduct.addBand(realBand);
-		System.out.println("create geotiff");
-		ProductIO.writeProduct(outProduct, fileOut, "GEOTIFF", true, new ProgressMonitor() {
-			
-			@Override
-			public void worked(int work) {
-				System.out.println("worked: " + work);
-			}
-			
-			@Override
-			public void setTaskName(String taskName) {
-				System.out.println("task name: " + taskName);				
-			}
-			
-			@Override
-			public void setSubTaskName(String subTaskName) {
-				System.out.println("sub task name: " + subTaskName);
-			}
-			
-			@Override
-			public void setCanceled(boolean canceled) {
-				System.out.println("cancelled: " + canceled);
-			}
-			
-			@Override
-			public boolean isCanceled() {
-				return false;
-			}
-			
-			@Override
-			public void internalWorked(double work) {
-				System.out.println("internal worked: " + work);
-			}
-			
-			@Override
-			public void done() {
-				System.out.println("done");
-			}
-			
-			@Override
-			public void beginTask(String taskName, int totalWork) {
-				System.out.println("begin task " + taskName + ". work: " + totalWork);
-			}
-		} );
-		System.out.println("geotiff created");
+		
+		FilterBand computedBand = getFilterBand(node, newBandName, filter, 1, outProduct);
+		System.out.println("filter band created");
 		
 		
-		
-//		MultiLevelImage bandImage = computedBand.getSourceImage();
-//		System.out.println("surce image created");
-//		GeoTIFFMetadata metadata = ProductUtils.createGeoTIFFMetadata(product);
-//		System.out.println("geotiff metadata created");
-//	    GeoTIFF.writeImage(bandImage, fileOut, metadata);
-//	    System.out.println("geotiff created");
+		long t = System.currentTimeMillis();
+		RasterDataNode raster = computedBand.getSource();
+//		ColoredBandImageMultiLevelSource imgSource = ColoredBandImageMultiLevelSource.create(raster, ProgressMonitor.NULL);
+//		System.out.println("image created: " + (System.currentTimeMillis()-t) + " ms");
+//		RenderedImage img = scale(imgSource.getImage(0), 0.25F);
+		RenderedImage img = createThumbNailImage(new Dimension(6601, 4168), raster);
+		System.out.println("image scaled: " + (System.currentTimeMillis()-t) + " ms");
+		ImageIO.write(img, "jpg", new File("/home/doy/tmp/wasdi/tmp/" + newBandName + ".jpg"));
+		System.out.println("jpg created: " + (System.currentTimeMillis()-t) + " ms");
 
 		
-		
-//		System.out.println("create product");
-//		Product outProduct = new Product(newBandName, "GEOTIFF");
-//		ProductUtils.copyGeoCoding(product, outProduct);
-//		outProduct.addBand(computedBand);
 //		System.out.println("create geotiff");
-//		ProductIO.writeProduct(outProduct, fileOut, "GEOTIFF", true);
-//		System.out.println("geotiff created");
-
-		
-		
-		
-		
-		
-		
-		
-		
-//		Band realBand = new Band(newBandName, computedBand.getDataType(), computedBand.getRasterWidth(), computedBand.getRasterHeight());
-//        realBand.setSourceImage(computedBand.getSourceImage());
-////        realBand.setModified(true);
-//        realBand.ensureRasterData();
-//        realBand.readRasterDataFully(new ProgressMonitor() {
+//		t = System.currentTimeMillis();
+//		ProductIO.writeProduct(outProduct, fileOut, "GEOTIFF", true, new ProgressMonitor() {
 //			
 //			@Override
 //			public void worked(int work) {
@@ -156,7 +111,7 @@ public class Proofs_FilterBand {
 //			
 //			@Override
 //			public void internalWorked(double work) {
-//				System.out.println("internal worked: " + work);
+//				//System.out.println("internal worked: " + work);
 //			}
 //			
 //			@Override
@@ -168,71 +123,42 @@ public class Proofs_FilterBand {
 //			public void beginTask(String taskName, int totalWork) {
 //				System.out.println("begin task " + taskName + ". work: " + totalWork);
 //			}
-//		});
+//		} );
+//		System.out.println("geotiff created: " + (System.currentTimeMillis()-t) + " ms");
 		
-        
-        
-//		ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-//		ImageOutputStream output = ImageIO.createImageOutputStream(bytes);
-//		ProductData data = realBand.getData();
-//		
-//		
-//		System.out.println("writing...");
-//		data.writeTo(output);
-//		System.out.println("written");
-//		
-//		
-//		
-//		
-//		System.out.println("size = " + dataStream.size());
-		
-
-		
-		
-		
-//		RasterDataNode raster = fb.getSource();
-//		ColoredBandImageMultiLevelSource imgSource = ColoredBandImageMultiLevelSource.create(raster, ProgressMonitor.NULL);
-//		RenderedImage img = imgSource.getImage(0);
-
-//		ImageIO.write(img, "jpg", new File("/home/doy/tmp/wasdi/tmp/" + newBandName + ".jpg"));
-//		System.out.println("jpg created");
-		
-//		GeoTIFFMetadata metadata = ProductUtils.createGeoTIFFMetadata(product);//GeoCoding2GeoTIFFMetadata.createGeoTIFFMetadata(geoCoding, bandImage.getWidth(),bandImage.getHeight());
-//		System.out.println("geotiff metadata created");
-//	    GeoTIFF.writeImage(img, fileOut, metadata);
-//	    System.out.println("geotiff created");
-		
-//		writeBandGeotiff(product, newBandName, fileOut, realBand);
-		
-		
-//		MultiLevelImage bandImage = fb.getSourceImage();
-//		
-//		System.out.println("surce image created");
-//		
-//		// Get TIFF Metadata
-//		GeoTIFFMetadata metadata = ProductUtils.createGeoTIFFMetadata(product);//GeoCoding2GeoTIFFMetadata.createGeoTIFFMetadata(geoCoding, bandImage.getWidth(),bandImage.getHeight());
-//		
-//		System.out.println("geotiff metadata created");
-//		
-//	    GeoTIFF.writeImage(bandImage, fileOut, metadata);
-//	    
-//	    System.out.println("geotiff created");
-	
-	}
-
-
-	private static void writeBandGeotiff(Product product, String name, File fileOut, Band band) throws IOException {
-		System.out.println("create product");
-		Product outProduct = new Product(name, "GEOTIFF");
-		ProductUtils.copyGeoCoding(product, outProduct);
-		outProduct.addBand(band);
-//		GeoTiffProductWriter writer = (GeoTiffProductWriter)new GeoTiffProductWriterPlugIn().createWriterInstance();
-		System.out.println("create geotiff");
-//		writer.writeProductNodes(outProduct, fileOut);
-		ProductIO.writeProduct(outProduct, fileOut, "GEOTIFF", true);
-		System.out.println("geotiff created");
 	}
 	
+	private static BufferedImage createThumbNailImage(Dimension imgSize, RasterDataNode thumbNailBand) {
+        BufferedImage image = null;
+        MultiLevelSource multiLevelSource = ColoredBandImageMultiLevelSource.create(thumbNailBand, ProgressMonitor.NULL);
+        final ImageLayer imageLayer = new ImageLayer(multiLevelSource);
+        final int imageWidth = imgSize.width;
+        final int imageHeight = imgSize.height;
+        final int imageType = BufferedImage.TYPE_3BYTE_BGR;
+        image = new BufferedImage(imageWidth, imageHeight, imageType);
+        Viewport snapshotVp = new DefaultViewport(isModelYAxisDown(imageLayer));
+        final BufferedImageRendering imageRendering = new BufferedImageRendering(image, snapshotVp);
+
+        final Graphics2D graphics = imageRendering.getGraphics();
+        graphics.setColor(Color.BLACK);
+        graphics.fillRect(0, 0, imageWidth, imageHeight);
+
+        snapshotVp.zoom(imageLayer.getModelBounds());
+        snapshotVp.moveViewDelta(snapshotVp.getViewBounds().x, snapshotVp.getViewBounds().y);
+        imageLayer.render(imageRendering);
+        return image;
+    }
+	
+	private static boolean isModelYAxisDown(ImageLayer baseImageLayer) {
+        return baseImageLayer.getImageToModelTransform().getDeterminant() > 0.0;
+    }
+	
+	public static RenderedImage scale(RenderedImage image, float scaleFactor) {
+	    RenderingHints hints = new RenderingHints(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+	    RenderedOp resizeOp = SubsampleAverageDescriptor.create(image, Double.valueOf(scaleFactor), Double.valueOf(scaleFactor), hints);
+	    BufferedImage bufferedResizedImage = resizeOp.getAsBufferedImage();
+	    return bufferedResizedImage;
+	}	
 	
 	static GeneralFilterBand.OpType getOpType(Filter.Operation operation) {
         if (operation == Filter.Operation.OPEN) {
@@ -258,7 +184,7 @@ public class Proofs_FilterBand {
         }
     }
 	
-    private static FilterBand getFilterBand(RasterDataNode sourceRaster, String bandName, Filter filter, int iterationCount) {
+    private static FilterBand getFilterBand(RasterDataNode sourceRaster, String bandName, Filter filter, int iterationCount, Product outProduct) {
         FilterBand targetBand;
 
         if (filter.getOperation() == Filter.Operation.CONVOLVE) {
@@ -279,6 +205,9 @@ public class Proofs_FilterBand {
             ProductUtils.copySpectralBandProperties((Band) sourceRaster, targetBand);
         }
         
+        Band realBand = new Band(bandName, targetBand.getDataType(), targetBand.getRasterWidth(), targetBand.getRasterHeight());
+		realBand.setSourceImage(targetBand.getSourceImage());
+        outProduct.addBand(realBand);
         ProductUtils.copyImageGeometry(sourceRaster, targetBand, false);
         targetBand.fireProductNodeDataChanged();
         
