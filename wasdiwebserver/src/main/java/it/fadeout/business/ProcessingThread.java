@@ -153,10 +153,11 @@ public class ProcessingThread extends Thread {
 	protected List<ProcessWorkspace> getQueuedProcess() {
 		List<ProcessWorkspace> queuedProcess = repo.GetQueuedProcess();
 		
-		System.out.println("ProcessingThread: read process queue. size: " + queuedProcess.size());
-		for (ProcessWorkspace p : queuedProcess) {
-			System.out.println("ProcessingThread:      " + p.getProcessObjId());
-		}
+//		System.out.println("ProcessingThread: read process queue. size: " + queuedProcess.size());
+//		for (ProcessWorkspace p : queuedProcess) {
+//			System.out.println("ProcessingThread:      " + p.getProcessObjId());
+//		}
+		
 		return queuedProcess;
 	}
 

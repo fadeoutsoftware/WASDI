@@ -3,6 +3,7 @@ package it.fadeout.rest.resources;
 import java.awt.Dimension;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -14,6 +15,10 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.imageio.ImageIO;
+import javax.media.jai.JAI;
+import javax.media.jai.OperationRegistry;
+import javax.media.jai.RegistryElementDescriptor;
 import javax.servlet.ServletConfig;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -37,6 +42,8 @@ import org.esa.snap.rcp.imgfilter.FilteredBandAction;
 import org.esa.snap.rcp.imgfilter.model.Filter;
 import org.esa.snap.rcp.imgfilter.model.StandardFilters;
 import org.glassfish.jersey.media.multipart.FormDataParam;
+
+import com.bc.ceres.jai.operator.PaintDescriptor;
 
 import it.fadeout.Wasdi;
 import wasdi.shared.LauncherOperations;
@@ -210,11 +217,17 @@ public class ProcessingResources {
 			@QueryParam("workspace") String workspace,
 			BandImageViewModel model) throws IOException {
 		
-		String userId = AcceptedUserAndSession(sSessionId);
-		if (Utils.isNullOrEmpty(userId)) return Response.status(401).build();
+		
+		OperationRegistry operationRegistry = JAI.getDefaultInstance().getOperationRegistry();
+		RegistryElementDescriptor a = operationRegistry.getDescriptor("rendered", "Paint");
+		System.out.println(a);
+		
+//		String userId = AcceptedUserAndSession(sSessionId);
+//		if (Utils.isNullOrEmpty(userId)) return Response.status(401).build();
 		
         String downloadPath = m_oServletConfig.getInitParameter("DownloadRootPath");
-        File productFile = new File(new File(new File(downloadPath, userId), workspace), model.getProductFileName());
+//        File productFile = new File(new File(new File(downloadPath, userId), workspace), model.getProductFileName());
+        File productFile = new File("/home/doy/tmp/wasdi/tmp/S1A_IW_GRDH_1SDV_20171128T054335_20171128T054400_019461_02104F_DFC1.zip");
         
         if (!productFile.exists()) {
         	System.out.println("ProcessingResource.ApplyFilters: FILE NOT FOUND: " + productFile.getAbsolutePath());
@@ -243,7 +256,11 @@ public class ProcessingResources {
 		
 		BufferedImage img = manager.buildImage(raster, imgSize, vp);
 		
-		return Response.ok(img).build();
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+	    ImageIO.write(img, "jpg", baos);
+	    byte[] imageData = baos.toByteArray();
+		
+		return Response.ok(imageData).build();
 	}
 	
 	
