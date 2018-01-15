@@ -218,16 +218,11 @@ public class ProcessingResources {
 			BandImageViewModel model) throws IOException {
 		
 		
-		OperationRegistry operationRegistry = JAI.getDefaultInstance().getOperationRegistry();
-		RegistryElementDescriptor a = operationRegistry.getDescriptor("rendered", "Paint");
-		System.out.println(a);
-		
-//		String userId = AcceptedUserAndSession(sSessionId);
-//		if (Utils.isNullOrEmpty(userId)) return Response.status(401).build();
+		String userId = AcceptedUserAndSession(sSessionId);
+		if (Utils.isNullOrEmpty(userId)) return Response.status(401).build();
 		
         String downloadPath = m_oServletConfig.getInitParameter("DownloadRootPath");
-//        File productFile = new File(new File(new File(downloadPath, userId), workspace), model.getProductFileName());
-        File productFile = new File("/home/doy/tmp/wasdi/tmp/S1A_IW_GRDH_1SDV_20171128T054335_20171128T054400_019461_02104F_DFC1.zip");
+        File productFile = new File(new File(new File(downloadPath, userId), workspace), model.getProductFileName());
         
         if (!productFile.exists()) {
         	System.out.println("ProcessingResource.ApplyFilters: FILE NOT FOUND: " + productFile.getAbsolutePath());
