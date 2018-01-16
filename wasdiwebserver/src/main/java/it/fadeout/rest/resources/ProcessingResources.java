@@ -5,6 +5,7 @@ import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.annotation.Annotation;
@@ -179,7 +180,6 @@ public class ProcessingResources {
 	}
 	
 	
-	
 	@POST
 	@Path("/graph")
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
@@ -195,6 +195,23 @@ public class ProcessingResources {
 		
 	}
 	
+	@POST
+	@Path("/graph_file")
+	public Response executeGraphFromFile(@HeaderParam("x-session-token") String sessionId, 
+			@QueryParam("workspace") String workspace, @QueryParam("source") String sourceProductName, @QueryParam("destination") String destinationProdutName) throws Exception {
+
+		GraphSetting settings = new GraphSetting();		
+		String graphXml;
+		
+		FileInputStream fileInputStream = new FileInputStream("/usr/lib/wasdi/S1_GRD_preprocessing.xml");
+		
+		graphXml = IOUtils.toString(fileInputStream, Charset.defaultCharset().name());
+		settings.setGraphXml(graphXml);
+		
+		return ExecuteOperation(sessionId, sourceProductName, destinationProdutName, workspace, settings, LauncherOperations.GRAPH);
+		
+	}
+
 	@GET
 	@Path("/standardfilters")
 	@Produces({"application/json"})
