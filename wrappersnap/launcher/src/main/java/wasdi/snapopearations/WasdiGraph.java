@@ -84,8 +84,8 @@ public class WasdiGraph {
 			Node nodeWriter = graph.getNode("Write");
 			
 			if (nodeReader==null || nodeWriter==null) {
-				logger.error("WasdiGraph.execute: Reader node and Wroter node are mandatory!!");
-				throw new Exception("Reader node and Wroter node are mandatory");
+				logger.error("WasdiGraph.execute: Reader node and Writer node are mandatory!!");
+				throw new Exception("Reader node and Writer node are mandatory");
 			}		
 			if (!setNodeValue(nodeReader, "file", inputFile.getAbsolutePath()) || 
 					!setNodeValue(nodeWriter, "file", outputFile.getAbsolutePath()) ||
