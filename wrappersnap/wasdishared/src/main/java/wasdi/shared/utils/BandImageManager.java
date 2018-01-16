@@ -8,6 +8,11 @@ import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.esa.snap.core.dataio.ProductIO;
 import org.esa.snap.core.datamodel.Band;
@@ -31,6 +36,49 @@ import com.bc.ceres.grender.support.DefaultViewport;
 public class BandImageManager {
 
 	Product product;
+	
+	private static class CachedSource {
+		public CachedSource(ColoredBandImageMultiLevelSource source) {
+			this.source = source;
+			this.ts = System.currentTimeMillis();
+		}
+		MultiLevelSource source;
+		long ts;
+	}
+	
+	private static Map<String, CachedSource> sourceCache = new ConcurrentHashMap<String, CachedSource>();
+	private static Object cacheSyncObj = new Object();
+	
+	static {
+		new Thread(new Runnable() {
+			
+			@Override
+			public void run() {
+				while (true) {
+					try {
+						synchronized (cacheSyncObj) {
+							long ts = System.currentTimeMillis();
+							ArrayList<String> toRemove = new ArrayList<String>();
+							for (Entry<String, CachedSource> entry : sourceCache.entrySet()) {
+								if (ts - entry.getValue().ts > 1000L) { //not accessed by 10 minutes
+									toRemove.add(entry.getKey());
+								}
+							}
+							for (String key : toRemove) {
+								CachedSource removed = sourceCache.remove(key);
+								removed.source = null;
+								System.out.println("BandImageManager.buildImage: removed from cache: " + key);
+							}
+						}
+						Thread.sleep(10000); //sleep for 10 seconds
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+				}
+			}
+		}).start();
+	}
+	
 
 	public BandImageManager(Product product) {
 		this.product = product;
@@ -38,17 +86,17 @@ public class BandImageManager {
 	
 	public FilterBand getFilterBand(String bandName, Filter filter, int iterationCount) {
         FilterBand targetBand;
-
+        String newBandName = bandName + "_" + filter.getShorthand();
         RasterDataNode sourceRaster = product.getRasterDataNode(bandName); 
         
         if (filter.getOperation() == Filter.Operation.CONVOLVE) {
-            targetBand = new ConvolutionFilterBand(bandName, sourceRaster, getKernel(filter), iterationCount);
+            targetBand = new ConvolutionFilterBand(newBandName, sourceRaster, getKernel(filter), iterationCount);
             if (sourceRaster instanceof Band) {
                 ProductUtils.copySpectralBandProperties((Band) sourceRaster, targetBand);
             }
         } else {
             GeneralFilterBand.OpType opType = getOpType(filter.getOperation());
-            targetBand = new GeneralFilterBand(bandName, sourceRaster, opType, getKernel(filter), iterationCount);
+            targetBand = new GeneralFilterBand(newBandName, sourceRaster, opType, getKernel(filter), iterationCount);
             if (sourceRaster instanceof Band) {
                 ProductUtils.copySpectralBandProperties((Band) sourceRaster, targetBand);
             }
@@ -59,11 +107,11 @@ public class BandImageManager {
             ProductUtils.copySpectralBandProperties((Band) sourceRaster, targetBand);
         }
         
-        Band realBand = new Band(bandName, targetBand.getDataType(), targetBand.getRasterWidth(), targetBand.getRasterHeight());
-		realBand.setSourceImage(targetBand.getSourceImage());
+//        Band realBand = new Band(newBandName, targetBand.getDataType(), targetBand.getRasterWidth(), targetBand.getRasterHeight());
+//		realBand.setSourceImage(targetBand.getSourceImage());
         ProductUtils.copyImageGeometry(sourceRaster, targetBand, false);
         targetBand.fireProductNodeDataChanged();
-        
+        product.addBand(targetBand);
         return targetBand;
     }
 	
@@ -84,28 +132,47 @@ public class BandImageManager {
 		return buildImage(band, imgSize, vp);
 	}
 	
-	public BufferedImage buildImage(RasterDataNode band, Dimension imgSize, Rectangle vp) {		
+	public BufferedImage buildImage(RasterDataNode band, Dimension imgSize, Rectangle vp) {
+		
 		BufferedImage image = null;
-		long t = System.currentTimeMillis();
-        MultiLevelSource multiLevelSource = ColoredBandImageMultiLevelSource.create(band, ProgressMonitor.NULL);
-        System.out.println("multi level source created: " + (System.currentTimeMillis() - t) + " ms");
-        final ImageLayer imageLayer = new ImageLayer(multiLevelSource);
-        final int imageWidth = imgSize.width;
-        final int imageHeight = imgSize.height;
-        final int imageType = BufferedImage.TYPE_3BYTE_BGR;
-        image = new BufferedImage(imageWidth, imageHeight, imageType);
-//        Viewport snapshotVp = vp==null ? new DefaultViewport(isModelYAxisDown(imageLayer)) : new DefaultViewport(vp, isModelYAxisDown(imageLayer));
-        Viewport snapshotVp = new DefaultViewport(isModelYAxisDown(imageLayer));
-        final BufferedImageRendering imageRendering = new BufferedImageRendering(image, snapshotVp);
+		
+		synchronized (cacheSyncObj) {
+			
+			long t = System.currentTimeMillis();
 
-        final Graphics2D graphics = imageRendering.getGraphics();
-        graphics.setColor(Color.BLACK);
-        graphics.fillRect(0, 0, imageWidth, imageHeight);
+			//check if MultiLevelSource has already computed
+			String key = band.getProduct().getName() + "_" + band.getName();
+	        CachedSource cachedObj = sourceCache.get(key); 
+	        if (cachedObj == null) {	        	
+	        	cachedObj = new CachedSource(ColoredBandImageMultiLevelSource.create(band, ProgressMonitor.NULL));
+	        	System.out.println("BandImageManager.buildImage: multi level source not found in cache... created: " + (System.currentTimeMillis() - t) + " ms");
+	        	sourceCache.put(key, cachedObj);
+	        }
+	        MultiLevelSource multiLevelSource = cachedObj.source;
+	        
+	        System.out.println("BandImageManager.buildImage: multi level source obtained: " + (System.currentTimeMillis() - t) + " ms");
+	        final ImageLayer imageLayer = new ImageLayer(multiLevelSource);
+	        System.out.println("BandImageManager.buildImage: imageLayer created: " + (System.currentTimeMillis() - t) + " ms");
+	        final int imageWidth = imgSize.width;
+	        final int imageHeight = imgSize.height;
+	        final int imageType = BufferedImage.TYPE_3BYTE_BGR;
+	        image = new BufferedImage(imageWidth, imageHeight, imageType);
+//	        Viewport snapshotVp = vp==null ? new DefaultViewport(isModelYAxisDown(imageLayer)) : new DefaultViewport(vp, isModelYAxisDown(imageLayer));
+	        Viewport snapshotVp = new DefaultViewport(isModelYAxisDown(imageLayer));
+	        final BufferedImageRendering imageRendering = new BufferedImageRendering(image, snapshotVp);
 
-        snapshotVp.zoom(imageLayer.getModelBounds());
-        snapshotVp.moveViewDelta(snapshotVp.getViewBounds().x, snapshotVp.getViewBounds().y);
-        if (vp!=null) imageRendering.getViewport().zoom(vp);
-        imageLayer.render(imageRendering);
+	        final Graphics2D graphics = imageRendering.getGraphics();
+	        graphics.setColor(Color.BLACK);
+	        graphics.fillRect(0, 0, imageWidth, imageHeight);
+
+	        snapshotVp.zoom(imageLayer.getModelBounds());
+	        snapshotVp.moveViewDelta(snapshotVp.getViewBounds().x, snapshotVp.getViewBounds().y);
+	        if (vp!=null) imageRendering.getViewport().zoom(vp);
+	        System.out.println("BandImageManager.buildImage: init render: " + (System.currentTimeMillis() - t) + " ms");
+	        imageLayer.render(imageRendering);
+	        System.out.println("BandImageManager.buildImage: render done: " + (System.currentTimeMillis() - t) + " ms");			
+		}
+		
         return image;
 	}
 	
