@@ -3,6 +3,7 @@ import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.IOException;
 
 import javax.imageio.ImageIO;
 import javax.media.jai.JAI;
@@ -10,7 +11,10 @@ import javax.media.jai.OperationRegistry;
 import javax.media.jai.RegistryElementDescriptor;
 
 import org.esa.snap.core.dataio.ProductIO;
+import org.esa.snap.core.datamodel.Band;
+import org.esa.snap.core.datamodel.FilterBand;
 import org.esa.snap.core.datamodel.Product;
+import org.esa.snap.core.datamodel.RasterDataNode;
 import org.esa.snap.rcp.imgfilter.model.Filter;
 import org.esa.snap.rcp.imgfilter.model.StandardFilters;
 
@@ -27,44 +31,17 @@ public class Proofs_FilterBand2 {
 //        SystemUtils.init3rdPartyLibs(null);
 //        Engine.start(false);
 		
+		createJpg(new Dimension(600, 600), null, "preview");
 		
-		OperationRegistry operationRegistry = JAI.getDefaultInstance().getOperationRegistry();
-		RegistryElementDescriptor a = operationRegistry.getDescriptor("rendered", "Paint");		
-		System.out.println(a);
+		System.out.println("-------------------------------------------------------------------------");
 		
+		createJpg(new Dimension(600, 600), new Rectangle(new Point(6000, 6000), new Dimension(2000, 2000)), "cut");
 		
-		File file = new File("/home/doy/tmp/wasdi/tmp/S1A_IW_GRDH_1SDV_20171128T054335_20171128T054400_019461_02104F_DFC1.zip");
-		Product product = ProductIO.readProduct(file);
-		String bandName = "Amplitude_VH";
-		Filter filter = StandardFilters.SMOOTHING_FILTERS[0];
-		String newBandName = bandName + "_" + filter.getShorthand();
-		
-		long t = System.currentTimeMillis();
-		
-		BandImageManager manager = new BandImageManager(product);		
-//		FilterBand filteredBand = manager.getFilterBand(bandName, filter, 1);
-//		RasterDataNode raster = filteredBand.getSource();
-		
-		System.out.println("filtered band created: " + (System.currentTimeMillis()-t) + " ms");
-		BufferedImage img;
-		Dimension d;
-		
-//		img = manager.buildImageScaled(raster, 10, null);				
-//		System.out.println("full image scaled created: " + (System.currentTimeMillis()-t) + " ms");		
-//		ImageIO.write(img, "jpg", new File("/home/doy/tmp/wasdi/tmp/" + newBandName + ".jpg"));		
-//		System.out.println("full image jpg created: " + (System.currentTimeMillis()-t) + " ms");
-//		
 //		d = new Dimension(200, 200);
-//		img = manager.buildImage(raster, d, new Rectangle(new Point(6000, 6000), new Dimension(2000, 2000)));
+//		img = manager.buildImage(product.getBand(bandName), d, new Rectangle(new Point(6000, 6000), new Dimension(2000, 2000)));
 //		System.out.println("cut image scaled created: " + (System.currentTimeMillis()-t) + " ms");		
-//		ImageIO.write(img, "jpg", new File("/home/doy/tmp/wasdi/tmp/" + newBandName + "_cutted.jpg"));		
+//		ImageIO.write(img, "jpg", new File("/home/doy/tmp/wasdi/tmp/" + bandName + "_cutted.jpg"));		
 //		System.out.println("cut image jpg created: " + (System.currentTimeMillis()-t) + " ms");
-
-		d = new Dimension(200, 200);
-		img = manager.buildImage(product.getBand(bandName), d, new Rectangle(new Point(6000, 6000), new Dimension(2000, 2000)));
-		System.out.println("cut image scaled created: " + (System.currentTimeMillis()-t) + " ms");		
-		ImageIO.write(img, "jpg", new File("/home/doy/tmp/wasdi/tmp/" + bandName + "_cutted.jpg"));		
-		System.out.println("cut image jpg created: " + (System.currentTimeMillis()-t) + " ms");
 
 //		System.out.println("create geotiff");
 //		manager.saveGeotiff(filteredBand, new File("/home/doy/tmp/wasdi/tmp/pippo.tif"), new ProgressMonitor() {
@@ -111,5 +88,29 @@ public class Proofs_FilterBand2 {
 //		});
 //		System.out.println("geotiff created: " + (System.currentTimeMillis()-t) + " ms");
     }
+
+	private static void createJpg(Dimension d, Rectangle vp, String suffix) throws IOException, InterruptedException {
+		File file = new File("/home/doy/tmp/wasdi/tmp/S1B_IW_GRDH_1SDV_20170621T052711_20170621T052736_006144_00ACB6_75AA.zip");
+		Product product = ProductIO.readProduct(file);
+		String bandName = "Amplitude_VH";
+		Filter filter = StandardFilters.SMOOTHING_FILTERS[0];
+		
+		Band band = product.getBand(bandName);
+		
+		long t = System.currentTimeMillis();
+		
+		BandImageManager manager = new BandImageManager(product);		
+		FilterBand filteredBand = manager.getFilterBand(bandName, filter, 1);
+		RasterDataNode raster = filteredBand;//.getSource();
+		
+		System.out.println("filtered band created: " + (System.currentTimeMillis()-t) + " ms");
+		BufferedImage img;
+		
+//		d = new Dimension(600, 600);
+		if (vp==null) vp = new Rectangle(new Point(0, 0), raster.getRasterSize());
+		img = manager.buildImage(raster, d, vp);				
+		ImageIO.write(img, "jpg", new File("/home/doy/tmp/wasdi/tmp/" + filteredBand.getName() + "_" + suffix + ".jpg"));		
+		
+	}
 	
 }
