@@ -10,6 +10,7 @@ public class DownloadsThread extends ProcessingThread {
 
 	public DownloadsThread(ServletConfig servletConfig) throws Exception {
 		super(servletConfig, "ConcurrentDownloads");
+		logPrefix = "DownloadsThread: ";
 	}
 
 	@Override

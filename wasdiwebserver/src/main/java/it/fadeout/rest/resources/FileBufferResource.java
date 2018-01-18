@@ -90,8 +90,6 @@ public class FileBufferResource {
 			ProcessWorkspace oProcess = null;
 			ProcessWorkspaceRepository oRepository = new ProcessWorkspaceRepository();
 			
-			String sPath = m_oServletConfig.getInitParameter("SerializationPath") + Wasdi.GetSerializationFileName();
-
 			DownloadFileParameter oParameter = new DownloadFileParameter();
 			oParameter.setQueue(sSessionId);
 			oParameter.setUrl(sFileUrl);
@@ -120,7 +118,8 @@ public class FileBufferResource {
 				oEx.printStackTrace();
 				return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
 			}
-
+			
+			String sPath = m_oServletConfig.getInitParameter("SerializationPath") + oProcess.getProcessObjId();
 			SerializationUtils.serializeObjectToXML(sPath, oParameter);
 
 //			String sLauncherPath = m_oServletConfig.getInitParameter("LauncherPath");
@@ -301,7 +300,7 @@ public class FileBufferResource {
 
 			String sUserId = oUser.getUserId();
 
-			String sPath = m_oServletConfig.getInitParameter("SerializationPath") + Wasdi.GetSerializationFileName();
+			String sPath = m_oServletConfig.getInitParameter("SerializationPath") + oProcess.getProcessObjId();
 
 			PublishBandParameter oParameter = new PublishBandParameter();
 			oParameter.setQueue(sSessionId);

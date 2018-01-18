@@ -20,6 +20,7 @@ import javax.imageio.ImageIO;
 import javax.media.jai.JAI;
 import javax.media.jai.OperationRegistry;
 import javax.media.jai.RegistryElementDescriptor;
+import javax.media.jai.operator.FormatDescriptor;
 import javax.servlet.ServletConfig;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -47,6 +48,8 @@ import org.glassfish.jersey.media.multipart.FormDataParam;
 import com.bc.ceres.jai.operator.PaintDescriptor;
 
 import it.fadeout.Wasdi;
+import it.fadeout.business.DownloadsThread;
+import it.fadeout.business.ProcessingThread;
 import wasdi.shared.LauncherOperations;
 import wasdi.shared.SnapOperatorFactory;
 import wasdi.shared.business.ProcessStatus;
@@ -234,7 +237,19 @@ public class ProcessingResources {
 			@QueryParam("workspace") String workspace,
 			BandImageViewModel model) throws IOException {
 		
-		
+		OperationRegistry operationRegistry = JAI.getDefaultInstance().getOperationRegistry();
+		RegistryElementDescriptor a = operationRegistry.getDescriptor("rendered", "Paint");
+		if (a==null) {
+			System.out.println("REGISTER!!!!");
+			try {
+				operationRegistry.registerServices(this.getClass().getClassLoader());
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			a = operationRegistry.getDescriptor("rendered", "Paint");
+		}
+		System.out.println(a);
+
 		String userId = AcceptedUserAndSession(sSessionId);
 		if (Utils.isNullOrEmpty(userId)) return Response.status(401).build();
 		

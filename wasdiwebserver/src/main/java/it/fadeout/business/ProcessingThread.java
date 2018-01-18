@@ -54,6 +54,8 @@ public class ProcessingThread extends Thread {
 	 */
 	protected Map<String, Date> launched = new HashMap<String, Date>();
 	
+	protected String logPrefix = "ProcessingThread: ";
+	
 	/**
 	 * constructor with parameters
 	 * @param parametersFolder folder for the file containing the process parmeters
@@ -92,7 +94,7 @@ public class ProcessingThread extends Thread {
 	@Override
 	public void run() {
 		
-		System.out.println("ProcessingThread: run!");
+		System.out.println(logPrefix + "run!");
 		
 		while (true) {
 			
@@ -105,7 +107,7 @@ public class ProcessingThread extends Thread {
 				}
 				for (String key : toClear) {
 					launched.remove(key);
-					System.out.println("ProcessingThread: removing " + key + " from launched");
+					System.out.println(logPrefix + "removing " + key + " from launched");
 				}
 				
 				List<ProcessWorkspace> queuedProcess = null;
@@ -127,7 +129,7 @@ public class ProcessingThread extends Thread {
 							if (!launched.containsKey(process.getProcessObjId())) {
 								executedProcessId = executeProcess(process);
 							} else {
-								System.out.println("ProcessingThread: process lauched before: " + process.getProcessObjId());
+								System.out.println(logPrefix + "process lauched before: " + process.getProcessObjId());
 							}
 							procIdx++;
 						}
@@ -153,9 +155,9 @@ public class ProcessingThread extends Thread {
 	protected List<ProcessWorkspace> getQueuedProcess() {
 		List<ProcessWorkspace> queuedProcess = repo.GetQueuedProcess();
 		
-//		System.out.println("ProcessingThread: read process queue. size: " + queuedProcess.size());
+//		System.out.println(logPrefix + "read process queue. size: " + queuedProcess.size());
 //		for (ProcessWorkspace p : queuedProcess) {
-//			System.out.println("ProcessingThread:      " + p.getProcessObjId());
+//			System.out.println(logPrefix + "     " + p.getProcessObjId());
 //		}
 		
 		return queuedProcess;
@@ -172,12 +174,12 @@ public class ProcessingThread extends Thread {
 
 		String shellExString = javaExe + " -jar " + launcherPath +" -operation " + process.getOperationType() + " -parameter " + parPath.getAbsolutePath();
 
-		System.out.println("ProcessingThread: executing command for process " + process.getProcessObjId() + ": " + shellExString);
+		System.out.println(logPrefix + "executing command for process " + process.getProcessObjId() + ": " + shellExString);
 
 		try {
-//			Process proc = Runtime.getRuntime().exec(shellExString);
-			Runtime.getRuntime().exec("ls");
-			System.out.println("ProcessingThread: executed!!!");
+			Process proc = Runtime.getRuntime().exec(shellExString);
+//			Runtime.getRuntime().exec("ls");
+			System.out.println(logPrefix + "executed!!!");
 			launched.put(process.getProcessObjId(), new Date());
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -196,7 +198,7 @@ public class ProcessingThread extends Thread {
 		boolean ret = process==null || process.getStatus().equalsIgnoreCase(ProcessStatus.DONE.name());
 		if (ret) runningProcess[i] = null;
 		
-		System.out.println("ProcessingThread: process " + procId + " DONE: " + ret);
+		System.out.println(logPrefix + "process " + procId + " DONE: " + ret);
 		
 		return ret;
 	}

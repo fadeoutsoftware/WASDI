@@ -254,7 +254,7 @@ public class AuthResource {
 				return Response.serverError().build();
 			}
 	
-			String sPath = m_oServletConfig.getInitParameter("SerializationPath") + Wasdi.GetSerializationFileName();
+			String sPath = m_oServletConfig.getInitParameter("SerializationPath") + oProcess.getProcessObjId();
 			SerializationUtils.serializeObjectToXML(sPath, oParameter);
 	
 			String sLauncherPath = m_oServletConfig.getInitParameter("LauncherPath");

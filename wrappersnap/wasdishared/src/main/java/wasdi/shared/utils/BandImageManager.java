@@ -50,6 +50,9 @@ public class BandImageManager {
 	private static Object cacheSyncObj = new Object();
 	
 	static {
+		
+		System.out.println("BandImageManager.buildImage: laucnhing cached sources thread!");
+		
 		new Thread(new Runnable() {
 			
 			@Override
@@ -168,7 +171,7 @@ public class BandImageManager {
 	        snapshotVp.zoom(imageLayer.getModelBounds());
 	        snapshotVp.moveViewDelta(snapshotVp.getViewBounds().x, snapshotVp.getViewBounds().y);
 	        if (vp!=null) imageRendering.getViewport().zoom(vp);
-	        System.out.println("BandImageManager.buildImage: init render: " + (System.currentTimeMillis() - t) + " ms");
+	        System.out.println("BandImageManager.buildImage: init render: " + (System.currentTimeMillis() - t) + " ms + (" + imageLayer.getClass().getName() + ")");
 	        imageLayer.render(imageRendering);
 	        System.out.println("BandImageManager.buildImage: render done: " + (System.currentTimeMillis() - t) + " ms");			
 		}

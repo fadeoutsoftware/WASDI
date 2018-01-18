@@ -68,7 +68,7 @@ public class OpportunitySearchResource {
 			if (Nfs == null)
 				System.setProperty( "nfs.data.download", userHome + "/nfs/download");
 
-			System.out.println("init wasdi: nfs dir " + System.getProperty( "nfs.data.download" ));
+			System.out.println("nfs dir " + System.getProperty( "nfs.data.download" ));
 
 			Date dtDate = new Date(); 
 			String sArea = OrbitSearch.getPolygon();
@@ -241,7 +241,7 @@ public class OpportunitySearchResource {
 		String Nfs = System.getProperty( "nfs.data.download" );
 		if (Nfs == null) {
 			System.setProperty( "nfs.data.download", userHome + "/nfs/download");
-			System.out.println("init wasdi: nfs dir " + System.getProperty( "nfs.data.download" ));
+			System.out.println("nfs dir " + System.getProperty( "nfs.data.download" ));
 		}
 
 		

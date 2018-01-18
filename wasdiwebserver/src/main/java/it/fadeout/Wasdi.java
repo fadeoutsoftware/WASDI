@@ -46,6 +46,11 @@ public class Wasdi extends Application {
 	
 	private static String s_sDownloadRootPath = "";
 
+	private static ProcessingThread processingThread = null;
+
+	private static DownloadsThread downloadsThread = null;
+
+	
 	@Override
 	public Set<Class<?>> getClasses() {
 		final Set<Class<?>> classes = new HashSet<Class<?>>();
@@ -67,6 +72,8 @@ public class Wasdi extends Application {
 	@PostConstruct
 	public void initWasdi() {		
 		
+		System.out.println("-----------init wasdi!!!!");
+
 		if (getInitParameter("DebugVersion", "false").equalsIgnoreCase("true")) {
 			s_bDebug = true;
 		}
@@ -83,19 +90,24 @@ public class Wasdi extends Application {
 		if (Nfs == null) System.setProperty( "nfs.data.download", userHome + "/nfs/download");
 
 		System.out.println("init wasdi: nfs dir " + System.getProperty( "nfs.data.download" ));
-		
-		//start the processing and downloads thread
-		try {
-			new ProcessingThread(m_oServletConfig).start();
-			System.out.println("init wasdi: processing thread started");
-			
-			new DownloadsThread(m_oServletConfig).start();
-			System.out.println("init wasdi: downloads thread started");
-		} catch (Exception e) {
-			e.printStackTrace();
-			System.out.println("init wasdi: ERROR: CANNOT START PROCESSING THREAD!!!");
-		}
+
+		if (processingThread==null) {
+			try {
 				
+				System.out.println("init wasdi: starting processing and download threads...");
+				
+				processingThread = new ProcessingThread(m_oServletConfig);
+				processingThread.start();
+				System.out.println("init wasdi: processing thread started");
+				
+				downloadsThread = new DownloadsThread(m_oServletConfig);
+				downloadsThread.start();
+				System.out.println("init wasdi: downloads thread started");
+			} catch (Exception e) {
+				e.printStackTrace();
+				System.out.println("init wasdi: ERROR: CANNOT START PROCESSING THREAD!!!");
+			}
+		}
 	}
 
 	private String getInitParameter(String sParmaneter, String sDefault) {		
@@ -103,13 +115,11 @@ public class Wasdi extends Application {
 		return sParameterValue==null ? sDefault : sParameterValue;
 	}
 	
-	public static String GetSerializationFileName()
-	{
+	public static String GetSerializationFileName() {
 		return UUID.randomUUID().toString();
 	}
 	
-	public static String GetFormatDate(Date oDate){
-		
+	public static String GetFormatDate(Date oDate) {
 		return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(oDate);
 	}
 	
@@ -156,8 +166,7 @@ public class Wasdi extends Application {
 		}		
 	}
 	
-	public static Integer getPIDProcess(Process oProc)
-	{
+	public static Integer getPIDProcess(Process oProc) {
 		Integer oPID = null;
 		
 		if(oProc.getClass().getName().equals("java.lang.UNIXProcess")) {
