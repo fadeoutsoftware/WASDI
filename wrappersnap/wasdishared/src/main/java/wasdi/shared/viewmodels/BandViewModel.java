@@ -16,6 +16,9 @@ public class BandViewModel {
     private String name;
     
     private Boolean published = false;
+    
+    private int width = 0;
+    private int height = 0;
 
     public String getName() {
         return name;
@@ -29,5 +32,17 @@ public class BandViewModel {
 	}
 	public void setPublished(Boolean published) {
 		this.published = published;
+	}
+	public int getHeight() {
+		return height;
+	}
+	public void setHeight(int height) {
+		this.height = height;
+	}
+	public int getWidth() {
+		return width;
+	}
+	public void setWidth(int width) {
+		this.width = width;
 	}
 }

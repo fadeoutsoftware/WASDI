@@ -18,6 +18,7 @@ import com.mongodb.client.result.DeleteResult;
 import com.mongodb.client.result.UpdateResult;
 
 import wasdi.shared.business.DownloadedFile;
+import wasdi.shared.business.Workspace;
 import wasdi.shared.viewmodels.AttributeViewModel;
 import wasdi.shared.viewmodels.MetadataViewModel;
 
@@ -137,6 +138,33 @@ public class DownloadedFilesRepository extends MongoRepository {
         }
 
         return 0;
+    }
+    
+    public List<DownloadedFile> getList() {
+        final ArrayList<DownloadedFile> aoReturnList = new ArrayList<DownloadedFile>();
+        try {
+
+            FindIterable<Document> oDFDocuments = getCollection("downloadedfiles").find();
+
+            oDFDocuments.forEach(new Block<Document>() {
+                public void apply(Document document) {
+                    String sJSON = document.toJson();
+                    DownloadedFile oDwFile = null;
+                    try {
+                        oDwFile = s_oMapper.readValue(sJSON,DownloadedFile.class);
+                        aoReturnList.add(oDwFile);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+
+                }
+            });
+
+        } catch (Exception oEx) {
+            oEx.printStackTrace();
+        }
+
+        return aoReturnList;    	
     }
     
     public static void main(String[] args) {
