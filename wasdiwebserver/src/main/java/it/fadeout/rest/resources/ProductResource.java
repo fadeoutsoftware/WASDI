@@ -26,6 +26,7 @@ import wasdi.shared.data.DownloadedFilesRepository;
 import wasdi.shared.data.ProductWorkspaceRepository;
 import wasdi.shared.data.PublishedBandsRepository;
 import wasdi.shared.geoserver.GeoServerManager;
+import wasdi.shared.utils.SerializationUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.BandViewModel;
 import wasdi.shared.viewmodels.GeorefProductViewModel;
@@ -124,8 +125,35 @@ public class ProductResource {
 
 		if (oDownloadedFile != null) {
 			if (oDownloadedFile.getProductViewModel() != null) {
-				// Ok read
-				return oDownloadedFile.getProductViewModel().getMetadata();
+				
+				try {				
+					String sMetadataPath = "";
+					
+					if (m_oServletConfig.getInitParameter("MetadataPath") != null) {
+						sMetadataPath = m_oServletConfig.getInitParameter("MetadataPath");
+						if (!m_oServletConfig.getInitParameter("MetadataPath").endsWith("/"))
+							sMetadataPath += "/";
+					}
+					
+					
+					String sMetadataFile = oDownloadedFile.getProductViewModel().getMetadataFileReference();
+					
+					if (sMetadataFile == null) {
+						System.out.println("ProductResource.GetMetadataByProductName: MetadataFile = null for product " + oDownloadedFile.getFilePath());
+						return null;
+					}
+					
+					MetadataViewModel oReloaded = (MetadataViewModel) SerializationUtils.deserializeXMLToObject(sMetadataPath+sMetadataFile);
+					System.out.println("ProductResource.GetMetadataByProductName: return Metadata for product " + oDownloadedFile.getFilePath());
+					// Ok return Metadata
+					return oReloaded;					
+				}
+				catch (Exception oEx) {
+					System.out.println("ProductResource.GetMetadataByProductName: exception");
+					oEx.printStackTrace();
+					return null;
+				}
+				
 				
 			}
 		}

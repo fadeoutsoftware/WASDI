@@ -238,17 +238,19 @@ public class ProcessingResources {
 			BandImageViewModel model) throws IOException {
 		
 		OperationRegistry operationRegistry = JAI.getDefaultInstance().getOperationRegistry();
-		RegistryElementDescriptor a = operationRegistry.getDescriptor("rendered", "Paint");
-		if (a==null) {
-			System.out.println("REGISTER!!!!");
+		RegistryElementDescriptor oDescriptor = operationRegistry.getDescriptor("rendered", "Paint");
+		
+		if (oDescriptor==null) {
+			System.out.println("getBandImage: REGISTER Descriptor!!!!");
 			try {
 				operationRegistry.registerServices(this.getClass().getClassLoader());
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-			a = operationRegistry.getDescriptor("rendered", "Paint");
+			oDescriptor = operationRegistry.getDescriptor("rendered", "Paint");
 		}
-		System.out.println(a);
+		
+		//System.out.println(oDescriptor);
 
 		String userId = AcceptedUserAndSession(sSessionId);
 		if (Utils.isNullOrEmpty(userId)) return Response.status(401).build();
@@ -257,7 +259,7 @@ public class ProcessingResources {
         File productFile = new File(new File(new File(downloadPath, userId), workspace), model.getProductFileName());
         
         if (!productFile.exists()) {
-        	System.out.println("ProcessingResource.ApplyFilters: FILE NOT FOUND: " + productFile.getAbsolutePath());
+        	System.out.println("ProcessingResource.getBandImage: FILE NOT FOUND: " + productFile.getAbsolutePath());
         	return Response.status(500).build();
         }
         
@@ -270,7 +272,7 @@ public class ProcessingResources {
 			Filter filter = model.getFilterVM().getFilter();
 			FilterBand filteredBand = manager.getFilterBand(model.getBandName(), filter, model.getFilterIterationCount());
 			if (filteredBand == null) {
-	        	System.out.println("ProcessingResource.ApplyFilters: CANNOT APPLY FILTER TO BAND " + model.getBandName());
+	        	System.out.println("ProcessingResource.getBandImage: CANNOT APPLY FILTER TO BAND " + model.getBandName());
 	        	return Response.status(500).build();
 			}
 			raster = filteredBand.getSource();
@@ -282,6 +284,8 @@ public class ProcessingResources {
 		Dimension imgSize = new Dimension(model.getImg_w(), model.getImg_h());
 		
 		BufferedImage img = manager.buildImage(raster, imgSize, vp);
+		
+		System.out.println("ProcessingResource.getBandImage: Generated image for band " + model.getBandName() + " X= " + model.getVp_x() + " Y= " + model.getVp_y() + " W= " + model.getVp_w() + " H= "  + model.getVp_h());
 		
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 	    ImageIO.write(img, "jpg", baos);
