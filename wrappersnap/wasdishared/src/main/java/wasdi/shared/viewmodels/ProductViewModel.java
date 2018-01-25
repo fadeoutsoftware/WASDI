@@ -14,6 +14,8 @@ public class ProductViewModel {
     private MetadataViewModel metadata;
 
     private NodeGroupViewModel bandsGroups;
+    
+    private String metadataFileReference;
 
     
     public ProductViewModel() {
@@ -67,4 +69,12 @@ public class ProductViewModel {
     public void setProductFriendlyName(String productFriendlyName) {
         this.productFriendlyName = productFriendlyName;
     }
+
+	public String getMetadataFileReference() {
+		return metadataFileReference;
+	}
+
+	public void setMetadataFileReference(String metadataFileReference) {
+		this.metadataFileReference = metadataFileReference;
+	}
 }

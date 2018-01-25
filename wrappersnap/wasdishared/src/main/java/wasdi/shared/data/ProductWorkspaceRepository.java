@@ -11,6 +11,7 @@ import com.mongodb.client.FindIterable;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.result.DeleteResult;
 
+import wasdi.shared.business.DownloadedFile;
 import wasdi.shared.business.ProductWorkspace;
 
 /**
@@ -153,5 +154,51 @@ public class ProductWorkspaceRepository extends MongoRepository {
         }
 
         return 0;
+    }
+    
+    public int DeleteByProductName(String sProductName) {
+
+        try {
+
+            DeleteResult oDeleteResult = getCollection("productworkpsace").deleteMany(Filters.and(Filters.eq("productName", sProductName)));
+
+            if (oDeleteResult != null)
+            {
+                return  (int) oDeleteResult.getDeletedCount();
+            }
+
+        } catch (Exception oEx) {
+            oEx.printStackTrace();
+        }
+
+        return 0;
+    }    
+    
+    
+    public List<ProductWorkspace> getList() {
+        final ArrayList<ProductWorkspace> aoReturnList = new ArrayList<ProductWorkspace>();
+        try {
+
+            FindIterable<Document> oDFDocuments = getCollection("productworkpsace").find();
+
+            oDFDocuments.forEach(new Block<Document>() {
+                public void apply(Document document) {
+                    String sJSON = document.toJson();
+                    ProductWorkspace oProductWS = null;
+                    try {
+                        oProductWS = s_oMapper.readValue(sJSON,ProductWorkspace.class);
+                        aoReturnList.add(oProductWS);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+
+                }
+            });
+
+        } catch (Exception oEx) {
+            oEx.printStackTrace();
+        }
+
+        return aoReturnList;    	
     }
 }
