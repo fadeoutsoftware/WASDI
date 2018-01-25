@@ -44,22 +44,22 @@
       <dependency>
          <groupId>org.esa.snap</groupId>
          <artifactId>snap-core</artifactId>
-         <version>5.0.0-SNAPSHOT</version>
+         <version>6.0.0</version>
       </dependency>
       <dependency>
          <groupId>org.esa.snap</groupId>
          <artifactId>snap-gpf</artifactId>
-         <version>5.0.0-SNAPSHOT</version>
+         <version>6.0.0</version>
       </dependency>
       <dependency>
          <groupId>org.esa.s1tbx</groupId>
          <artifactId>s1tbx-op-sar-processing</artifactId>
-         <version>5.0.0-SNAPSHOT</version>
+         <version>6.0.0</version>
       </dependency>
       <dependency>
          <groupId>org.esa.s1tbx</groupId>
          <artifactId>s1tbx-op-calibration</artifactId>
-         <version>5.0.0-SNAPSHOT</version>
+         <version>6.0.0</version>
       </dependency>
       <dependency>
          <groupId>org.json</groupId>
@@ -69,7 +69,7 @@
       <dependency>
          <groupId>org.esa.snap</groupId>
          <artifactId>snap-graph-builder</artifactId>
-         <version>5.0.0-SNAPSHOT</version>
+         <version>6.0.0</version>
       </dependency>
       <dependency>
          <groupId>wasdi.shared</groupId>
@@ -92,6 +92,16 @@
          <version>1.3.1</version>
       </dependency>
    </dependencies>
+   <repositories>
+   	<repository>
+    	<id>GeoSolutions</id>
+        <url>http://maven.geo-solutions.it/</url>
+	</repository>
+   	<repository>
+    	<id>OSGEO</id>
+        <url>http://download.osgeo.org/webdav/geotools/</url>
+	</repository>	
+   </repositories>
    <modelVersion>4.0.0</modelVersion>
    <groupId>fadeout.software</groupId>
    <artifactId>wasdidaemon</artifactId>
