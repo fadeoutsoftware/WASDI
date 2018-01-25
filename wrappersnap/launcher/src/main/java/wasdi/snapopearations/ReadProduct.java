@@ -267,6 +267,8 @@ public class ReadProduct {
                 oProductViewModel.getBandsGroups().setBands(new ArrayList<BandViewModel>());
 
             BandViewModel oViewModel = new BandViewModel(oBand.getName());
+            oViewModel.setWidth(oBand.getRasterWidth());
+            oViewModel.setHeight(oBand.getRasterHeight());
             oProductViewModel.getBandsGroups().getBands().add(oViewModel);
         }
 

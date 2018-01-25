@@ -1,6 +1,7 @@
 package wasdi.snapopearations;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.StringReader;
 import java.lang.management.ManagementFactory;
 import java.lang.management.RuntimeMXBean;
@@ -35,6 +36,7 @@ import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.data.ProductWorkspaceRepository;
 import wasdi.shared.parameters.GraphParameter;
 import wasdi.shared.parameters.GraphSetting;
+import wasdi.shared.utils.SerializationUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.ProductViewModel;
 
@@ -197,29 +199,35 @@ public class WasdiGraph {
         	logger.debug("Insert in db");
         	
             // Save it in the register
-            DownloadedFile oAlreadyDownloaded = new DownloadedFile();
+            DownloadedFile oOutputProduct = new DownloadedFile();
             
-            oAlreadyDownloaded.setFileName(productFile.getName());
-            oAlreadyDownloaded.setFilePath(productFile.getAbsolutePath());
-            oAlreadyDownloaded.setProductViewModel(oVM);
-            oAlreadyDownloaded.setBoundingBox(sBBox);
+            oOutputProduct.setFileName(productFile.getName());
+            oOutputProduct.setFilePath(productFile.getAbsolutePath());
+            oOutputProduct.setProductViewModel(oVM);
+            oOutputProduct.setBoundingBox(sBBox);
             
-            if (!oDownloadedRepo.InsertDownloadedFile(oAlreadyDownloaded)) {
+    		// Write Metadata to file system
+            try {
+                // Get Metadata Path a Random File Name
+                String sMetadataPath = ConfigReader.getPropValue("METADATA_PATH");
+        		if (!sMetadataPath.endsWith("/")) sMetadataPath += "/";
+        		String sMetadataFileName = Utils.GetRandomName();
 
-            	logger.error("Impossible to Insert the new Product " + outputFile.getName() + " in the database. Try With out Metadata");
-            	
-            	oAlreadyDownloaded.getProductViewModel().setMetadata(null);
-            	
-                if (!oDownloadedRepo.InsertDownloadedFile(oAlreadyDownloaded)) {
-                	bAddProductToWS = false;
-                	logger.error("Impossible to Insert the new Product " + outputFile.getName() + " in the database also out Metadata");                	
-                }
-                else {
-                	logger.error("Inserted WITHOUT METADATA");
-                }
+    			SerializationUtils.serializeObjectToXML(sMetadataPath+sMetadataFileName, readProduct.getProductMetadataViewModel(productFile));
+    			
+    			oOutputProduct.getProductViewModel().setMetadataFileReference(sMetadataFileName);
+    			
+    		} catch (IOException e) {
+    			e.printStackTrace();
+    		} catch (Exception e) {
+    			e.printStackTrace();
+    		}            
+            
+            if (!oDownloadedRepo.InsertDownloadedFile(oOutputProduct)) {
+            	logger.error("Impossible to Insert the new Product " + outputFile.getName() + " in the database.");            	
             }
             else {
-            	logger.error("Product Inserted with Metadata");
+            	logger.error("Product Inserted " + outputFile.getName());
             }
         }
         
@@ -233,7 +241,7 @@ public class WasdiGraph {
         logger.debug("OK DONE");
         
         //P.Campanella 12/05/2017: Metadata are saved in the DB but sent back to the client with a dedicated API. So here metadata are nulled
-        oVM.setMetadata(null);
+        //oVM.setMetadata(null);
 
         if (rabbitSender!=null) rabbitSender.SendRabbitMessage(true, LauncherOperations.GRAPH.name(), params.getWorkspace(), oVM, params.getExchange());
     }
