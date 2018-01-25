@@ -32,8 +32,10 @@ var EditorController = (function () {
         this.m_sClassBtnSwitchGeographic = "btn-switch-not-geographic";
 
         /******* band without georeference members: ********/
-        this.m_sPreviewUrlSelectedBand = "assets/img/test_image.jpg";
-        this.m_sViewUrlSelectedBand = "assets/img/test_image.jpg";
+        // this.m_sPreviewUrlSelectedBand = "assets/img/test_image.jpg";
+        // this.m_sViewUrlSelectedBand = "assets/img/test_image.jpg";
+        this.m_sPreviewUrlSelectedBand = "";
+        this.m_sViewUrlSelectedBand = "";
         this.m_oBodyMapContainer = {
             "productFileName": "",
             "bandName": "",
