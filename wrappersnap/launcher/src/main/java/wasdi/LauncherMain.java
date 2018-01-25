@@ -1,5 +1,6 @@
 package wasdi;
 import java.io.File;
+import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.lang.management.RuntimeMXBean;
 import java.lang.reflect.Field;
@@ -404,7 +405,9 @@ public class LauncherMain {
                     File oProductFile = new File(sFileName);
                     Product oProduct = oReadProduct.ReadProduct(oProductFile, null);
                     oVM = oReadProduct.getProductViewModel(oProduct, oProductFile);
-                    oVM.setMetadata(oReadProduct.getProductMetadataViewModel(oProductFile));
+	                // Save Metadata
+	                oVM.setMetadataFileReference(SaveMetadata(oReadProduct,oProductFile));
+
 
                     // Save it in the register
                     oAlreadyDownloaded = new DownloadedFile();
@@ -470,6 +473,29 @@ public class LauncherMain {
 
         return  sFileName;
     }
+    
+    
+    public String SaveMetadata(ReadProduct oReadProduct, File oProductFile) {
+    			
+		// Write Metadata to file system
+        try {
+            // Get Metadata Path a Random File Name
+            String sMetadataPath = ConfigReader.getPropValue("METADATA_PATH");
+    		if (!sMetadataPath.endsWith("/")) sMetadataPath += "/";
+    		String sMetadataFileName = Utils.GetRandomName();
+
+			SerializationUtils.serializeObjectToXML(sMetadataPath+sMetadataFileName, oReadProduct.getProductMetadataViewModel(oProductFile));
+			
+			return sMetadataFileName;
+			
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+        // There was an error...
+        return "";
+    }
 
 
     
@@ -511,7 +537,9 @@ public class LauncherMain {
 	        // Product view Model
 	        ReadProduct oReadProduct = new ReadProduct();
 	        ProductViewModel oVM = oReadProduct.getProductViewModel(oFilePath);
-	        oVM.setMetadata(oReadProduct.getProductMetadataViewModel(oFilePath));
+	        
+            // Save Metadata
+            oVM.setMetadataFileReference(SaveMetadata(oReadProduct, oFilePath));
         
 	        updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 25);	        
 	        
@@ -1186,9 +1214,9 @@ public class LauncherMain {
             ReadProduct oReadProduct = new ReadProduct();
             s_oLogger.debug("LauncherMain.AddProductToDbAndSendToRabbit: call read product");
             File oProductFile = new File(sFileName);
-            oVM = oReadProduct.getProductViewModel(new File(sFileName));
-            oVM.setMetadata(oReadProduct.getProductMetadataViewModel(oProductFile));
-
+            oVM = oReadProduct.getProductViewModel(oProductFile);
+            oVM.setMetadataFileReference(SaveMetadata(oReadProduct, oProductFile));
+            
             if (oVM.getBandsGroups() == null) {
             	s_oLogger.debug("LauncherMain.AddProductToDbAndSendToRabbit: Band Groups is NULL");
             } else if (oVM.getBandsGroups().getBands() == null) {
@@ -1223,21 +1251,10 @@ public class LauncherMain {
             oAlreadyDownloaded.setCategory(DownloadedFileCategory.COMPUTED.name());
             
             if (!oDownloadedRepo.InsertDownloadedFile(oAlreadyDownloaded)) {
-
-            	s_oLogger.error("Impossible to Insert the new Product " + oFile.getName() + " in the database. Try With out Metadata");
-            	
-            	oAlreadyDownloaded.getProductViewModel().setMetadata(null);
-            	
-                if (!oDownloadedRepo.InsertDownloadedFile(oAlreadyDownloaded)) {
-                	bAddProductToWS = false;
-                	s_oLogger.error("Impossible to Insert the new Product " + oFile.getName() + " in the database also out Metadata");                	
-                }
-                else {
-                	s_oLogger.error("Inserted WITHOUT METADATA");
-                }
+            	s_oLogger.error("Impossible to Insert the new Product " + oFile.getName() + " in the database.");
             }
             else {
-            	s_oLogger.info("Product Inserted with Metadata");
+            	s_oLogger.info("Product Inserted");
             }
         }
         
@@ -1251,9 +1268,6 @@ public class LauncherMain {
         s_oLogger.debug("OK DONE");
 
         s_oLogger.debug("LauncherMain.AddProductToDbAndSendToRabbit: Image added. Send Rabbit Message Exchange = " + sExchange);
-        
-        //P.Campanella 12/05/2017: Metadata are saved in the DB but sent back to the client with a dedicated API. So here metadata are nulled
-        oVM.setMetadata(null);
 
         if (s_oSendToRabbit!=null) s_oSendToRabbit.SendRabbitMessage(true,sOperation,sWorkspace,oVM,sExchange);
     }
