@@ -10,40 +10,7 @@
         </multiradiobuttondropdownmenu>
 
 
-        <!--<div>&lt;!&ndash; class="multiRadioButtonDropdownMenu" &ndash;&gt;-->
-            <!--<button class="multiRadioButtonDropdownMenu" type="button" id="seasons"-->
-                    <!--data-toggle="dropdown">-->
-                <!--Dropdown-->
-                <!--<span class="caret"></span>-->
-            <!--</button>-->
-            <!--<ul class="dropdown-menu radio" role="menu" aria-labelledby="seasons">-->
-                <!--<li  >-->
-                    <!--<label>-->
-                        <!--<input type="radio" name="name" value="" checked="checked">-->
-                        <!--{{"IMPORT_SEASON_SPRING_RADIO_BUTTON"|translate}}-->
-                    <!--</label>-->
-                <!--</li>-->
-                <!--<li  >-->
-                    <!--<label>-->
-                        <!--<input type="radio" name="name"  value="" checked="checked">-->
-                        <!--{{"IMPORT_SEASON_SUMMER_RADIO_BUTTON"|translate}}-->
-                    <!--</label>-->
-                <!--</li>-->
-                <!--<li  >-->
-                    <!--<label>-->
-                        <!--<input type="radio" name="name" value="" checked="checked">-->
-                        <!--{{"IMPORT_SEASON_WINTER_RADIO_BUTTON"|translate}}-->
-                    <!--</label>-->
-                <!--</li>-->
-                <!--<li  >-->
-                    <!--<label>-->
-                        <!--<input type="radio" name="name"  value="" checked="checked">-->
-                        <!--{{"IMPORT_SEASON_AUTUMN_RADIO_BUTTON"|translate}}-->
-                    <!--</label>-->
-                <!--</li>-->
 
-            <!--</ul>-->
-        <!--</div>-->
 
         <!--search button-->
         <div class="search-button-container" >
@@ -114,6 +81,9 @@
 
         <!-- SIDEBAR -->
     <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12 side-panel">
+
+
+
         <div class="panel panel-default">
 
 
@@ -136,8 +106,14 @@
 
 
 
-                <!---------------------ADVANCE SEARCH------------------------->
+                <!--------------------- SEARCH------------------------->
                 <div  class="advance-search" id="advanced-search-container" ng-hide="m_oController.m_bIsVisibleListOfLayers || m_oController.m_bisVisibleLocalStorageInputs">
+
+                    <div class="chip">
+                        John Doe
+                        <span class="closebtn" onclick="this.parentElement.style.display='none'">&times;</span>
+                    </div>
+
                     <div id="advanced-search-content">
 
                         <div style="overflow:visible;padding:15px 5px;" class="my-input-text"><!--id="section_2" class="panel-collapse collapse" role="tabpanel" aria-labelledby="section_2"-->
@@ -227,24 +203,7 @@
                                     </div>
                                 </div>
 
-                                <!--<div class="radio">-->
-                                    <!--<label>-->
-                                        <!--<input type="radio" name="name" value="" checked="checked">-->
-                                        <!--{{"IMPORT_SEASON_SPRING_RADIO_BUTTON"|translate}}-->
-                                    <!--</label>-->
-                                    <!--<label>-->
-                                        <!--<input type="radio" name="name"  value="" checked="checked">-->
-                                        <!--{{"IMPORT_SEASON_SUMMER_RADIO_BUTTON"|translate}}-->
-                                    <!--</label>-->
-                                    <!--<label>-->
-                                        <!--<input type="radio" name="name" value="" checked="checked">-->
-                                        <!--{{"IMPORT_SEASON_WINTER_RADIO_BUTTON"|translate}}-->
-                                    <!--</label>-->
-                                    <!--<label>-->
-                                        <!--<input type="radio" name="name"  value="" checked="checked">-->
-                                        <!--{{"IMPORT_SEASON_AUTUMN_RADIO_BUTTON"|translate}}-->
-                                    <!--</label>-->
-                                <!--</div>-->
+
                             </div>
 
                         </div>
@@ -297,12 +256,6 @@
                  <!--the table become visible after the user Search a layer -->
                 <div class="container-table-row" ng-show="m_oController.m_bIsVisibleListOfLayers" id="div-container-table" >
 
-                    <!--<div ng-show="m_oController.m_bIsVisibleListOfLayers && m_oController.isEmptyLayersList() == true" class="loadIcon">-->
-                        <!--<invader></invader>-->
-                    <!--</div>-->
-                    <!--{{m_oController.m_bIsVisibleListOfLayers && m_oController.isEmptyLayersList() == true}}-->
-                    <!--{{m_oController.m_bIsVisibleListOfLayers }}-->
-                    <!--{{ m_oController.isEmptyLayersList() == true}}-->
                     <!-- TAB NAVIGATION -->
                     <ul class="nav nav-tabs" role="tablist" ><!-- ng-hide="m_oController.m_bIsVisibleListOfLayers " && m_oController.isEmptyLayersList() == true-->
                         <li ng-class="{active: m_oController.m_iActiveProvidersTab === $index}" ng-repeat="provider in m_oController.m_aListOfProvider | filter:{ selected: true }"  ng-click="m_oController.m_iActiveProvidersTab = $index">

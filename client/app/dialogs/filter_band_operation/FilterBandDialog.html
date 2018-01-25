@@ -29,13 +29,14 @@
 
                                 <div ng-repeat="options in system.options track by $index"  class=" options">
                                     <h4>
-                                        <div class="operation" data-toggle="collapse" data-target="'#collapse'+{{system.name}}+'_'+{{$index}}"
+                                        <div class="operation" data-toggle="collapse" data-target="#collapse{{ (system.name + $index) |lowercase | removeSpaces}}"
                                              aria-expanded="false" aria-controls="collapsemapprojection" >
                                             {{options.name}}
                                         </div>
                                     </h4>
 
-                                    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 collapse well" id="'#collapse'+{{system.name}}+'_'+{{$index}}"><!--collapseoption{{$index}}-->
+                                    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 collapse well"
+                                         id="collapse{{system.name + $index |lowercase | removeSpaces}}"><!-- #collapse{{system.name + $index |lowercase | removeSpaces}} collapseoption{{$index}}-->
                                         <div class="col-xs-8 col-sm-8 col-md-8 col-lg-8">
                                             <div ng-repeat="filterproperties in m_oController.m_aoFilterProperties track by $index" class="filter-properties">
                                                 <label>
@@ -207,6 +208,7 @@
             <div class="modal-footer">
                 <!--<button type="button" ng-click="close('download')" class="my-button" data-dismiss="modal">download</button>-->
                 <button type="button" ng-click="close(null)" class="my-button" data-dismiss="modal">close</button>
+                <button type="button" ng-click="applyFilterOnClose(null)" class="my-button" data-dismiss="modal">apply filter</button>
             </div>
         </div>
     </div>

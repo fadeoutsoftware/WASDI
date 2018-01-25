@@ -198,7 +198,7 @@ var CatalogController = (function() {
                 // window.URL.revokeObjectURL(url);
                 var blob = new Blob([data], {type: "octet/stream"});
                 var objectUrl = URL.createObjectURL(blob);
-                window.open(objectUrl);
+                window.open(objectUrl,'_self');
             }
         }).error(function (error) {
             utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN DOWNLOAD ENTRIES");

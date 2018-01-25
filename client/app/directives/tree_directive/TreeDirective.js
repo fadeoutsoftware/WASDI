@@ -96,7 +96,7 @@ angular.module('wasdi.TreeDirective', [])
                     }
                     else
                     {
-                        //****************** INIT JS TREE  *************************
+                        /****************** INIT JS TREE  *************************/
                         //load tree
                         $('#jstree').jstree($scope.m_oController.m_oTree);
 

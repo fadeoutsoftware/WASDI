@@ -123,9 +123,21 @@ var FilterBandController = (function() {
 
         this.getFilters();
 
+        var oController = this;
         //$scope.close = oClose;
         $scope.close = function(result) {
             oClose(result, 200); // close, but give 500ms for bootstrap to animate
+        };
+
+        $scope.applyFilterOnClose = function(result) {
+            var oOption = oController.getSelectedOptionsObject('Arithmetic Mean 3x3');
+            if(utilsIsObjectNullOrUndefined(oOption) === false)
+            {
+                //apply filter if there is an option
+                oController.applyFilter(oOption);
+            }
+            oClose(result, 200); // close, but give 500ms for bootstrap to animate
+
         };
 
     }
@@ -262,9 +274,6 @@ var FilterBandController = (function() {
             //var iIndexNumberOf = aaoMatrix[iIndexRows].length;
             aaoMatrix[iIndexRows].push({color: oDefaultValue.color ,fontcolor:oDefaultValue.fontcolor, value:oDefaultValue.value, click:oDefaultValue.click});
         }
-
-
-
         return true;
     };
     FilterBandController.prototype.addDefaultColumnInMatrix = function(aaoMatrix)
@@ -315,6 +324,8 @@ var FilterBandController = (function() {
                     click:function(){this.value = oThat.m_iSelectedValue;}//
                 };
                 oData[asProperties[iIndexProperty]][iIndexOptions].matrix =  this.makeEmptyMatrix(iNumerOfCollums,iNumerOfRows,oDefaultValue);
+                var aiArray = this.generateArrayOptionsValues(oData[asProperties[iIndexProperty]][iIndexOptions].kernelElements);
+                this.initMatrix(oData[asProperties[iIndexProperty]][iIndexOptions].matrix,aiArray );
             };
 
             var oObject = {
@@ -325,6 +336,102 @@ var FilterBandController = (function() {
             this.m_aoSystemFilterOptions.push(oObject);
         }
         return true;
+    };
+
+    FilterBandController.prototype.generateArrayOptionsValues = function(aArrayValues)
+    {
+        if(utilsIsObjectNullOrUndefined(aArrayValues) === true)
+            return [];
+        var oThat = this;
+
+        var aReturnArray = [];
+        var iNumberOfValues =  aArrayValues.length;
+        for(var iIndexArrayValues = 0 ; iIndexArrayValues < iNumberOfValues; iIndexArrayValues++ )
+        {
+            var oDefaultValue = {
+                color:"white" ,
+                fontcolor:"black",
+                value:"0",
+                click:function(){this.value = oThat.m_iSelectedValue;}//
+            };
+            var iValue = aArrayValues[iIndexArrayValues];
+            oDefaultValue.value = iValue;
+            aReturnArray.push(oDefaultValue);
+        }
+
+        return aReturnArray;
+    };
+
+    FilterBandController.prototype.initMatrix = function(aaoMatrix,aoValues)
+    {
+        if(utilsIsObjectNullOrUndefined(aaoMatrix) === true || utilsIsObjectNullOrUndefined(aoValues) === true )
+            return false;
+        var iNumberOfRows = aaoMatrix.length;
+        var iNumberOfValues = aoValues.length;
+        var iIndexValue = 0;
+
+        for(var iIndexRow = 0; iIndexRow < iNumberOfRows ; iIndexRow++)
+        {
+            if(iIndexValue >= iNumberOfValues)
+                return false;
+
+            var iNumberOfColumns = aaoMatrix[iIndexRow].length;
+            for(var iIndexColumn = 0; iIndexColumn < iNumberOfColumns ; iIndexColumn++)
+            {
+                aaoMatrix[iIndexRow][iIndexColumn] = aoValues[iIndexValue];
+                iIndexValue++;
+            }
+        }
+        return true;
+    };
+
+    FilterBandController.prototype.applyFilter = function(oOption)
+    {
+        if( utilsIsObjectNullOrUndefined(oOption) === true )
+            return false;
+        var oController = this;
+        this.m_oFilterService.applyFilter(oOption).success(function (data, status) {
+            if (data != null)
+            {
+                if (data != undefined)
+                {
+                    //TODO IT
+                    // oController.generateFiltersListFromServer(data);
+                }
+            }
+        }).error(function (data,status) {
+            utilsVexDialogAlertTop('GURU MEDITATION<br>ERROR IN GET APPLY FILTER');
+        });
+        return true;
+    };
+
+    FilterBandController.prototype.getSelectedOptionsObject = function(sName)
+    {
+        if(utilsIsStrNullOrEmpty(sName)=== true)
+            return null;
+        //TODO IT
+        var iNumberOfSystemFilters = this.m_aoSystemFilterOptions.length;
+        for(var iIndexSystemFilter = 0; iIndexSystemFilter < iNumberOfSystemFilters; iIndexSystemFilter++)
+        {
+
+            // var asSystemProperties = utilsGetPropertiesObject(this.m_aoSystemFilterOptions);
+            // var iNumberOfOptions = asSystemProperties.length;
+
+            var aoOptions = this.m_aoSystemFilterOptions[iIndexSystemFilter].options;
+            var iNumberOfOptions = aoOptions.length;
+
+            for(var iIndexOptions = 0; iIndexOptions < iNumberOfOptions; iIndexOptions++)
+            {
+                var oOption = this.m_aoSystemFilterOptions[iIndexSystemFilter];
+                var sOptionName = oOption.options[iIndexOptions].name;
+                if( sOptionName === sName)
+                {
+                    return oOption.options[iIndexOptions];
+                }
+
+            }
+        }
+        return null;
     };
 
     FilterBandController.$inject = [
