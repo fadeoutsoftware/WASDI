@@ -1,0 +1,9 @@
+<div class="image-preview-container">
+    <canvas id='imagepreviewcanvas'  width='560px' height='280px'></canvas><!-- width='800' height='600'-->
+    <!--<button ng-click="changeZoomSquareSize()"> resize </button>-->
+    <!--<button ng-click="onClick()"> Zoom </button>-->
+
+    <div class="range-container"><!-- style="width: 100%;"-->
+        <input type="range" min="1" max="100" value="50" class="slider" ng-model="selectedValue" ng-change="changeZoomSquareSize(selectedValue)"><!--ng-change="m_oController.maxSliderColourManipulation()"-->
+    </div>
+</div>

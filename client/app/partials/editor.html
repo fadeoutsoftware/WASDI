@@ -125,7 +125,9 @@
 
 
                     <li data-toggle="tooltip" data-placement="top" title="{{'EDITOR_TOOLTIP_ICON_ARROW_BACK'|translate}}"  ng-click="m_oController.hideProcessorBar(); m_oController.showOperationMainBar(); " >
-                        <a href=""><i class="fa fa-arrow-left fa-2x" aria-hidden="true"></i></a>
+                        <a href="">
+                            <i class="fa fa-arrow-left fa-2x" aria-hidden="true"></i>
+                        </a>
                     </li>
                 </ul>
 
@@ -241,6 +243,10 @@
                             ng-click="m_oController.m_iActiveMapPanelTab = 1">
                             <a href="">Colour Manipulation</a>
                         </li>
+                        <li role="presentation"  ng-class="{active: m_oController.m_iActiveMapPanelTab === 2}"
+                            ng-click="m_oController.m_iActiveMapPanelTab = 2">
+                            <a href="">New navigation</a>
+                        </li>
 
                         <!--<li role="presentation"><a href="#">Messages</a></li>-->
                     </ul>
@@ -333,6 +339,13 @@
                         </div>
                     </div>
 
+                    <!----------------------------------------------- TAB 2 ----------------------------------------------->
+                    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12" ng-show="m_oController.m_iActiveMapPanelTab === 2">
+                        <imagepreview url-image="m_oController.m_sPreviewUrlSelectedBand" body = "m_oController.m_oBodyMapContainer"></imagepreview>
+                        <button ng-click="m_oController.processingViewBandImage(m_oController.m_oActiveWorkspace.workspaceId)">Zoom</button>
+                        <!-- on-click="m_oController.processingViewBandImage()"-->
+                    </div>
+
                 </div>
                 <!--<div class="panel-body fixed-panel">-->
                 <!--<div class="map" id = "wasdiMap2" ng-show="false"></div>-->
@@ -346,7 +359,7 @@
         <!--------------- MAP CONTAINER --------------->
 
         <div class="col-lg-8 col-md-8 col-sm-8 col-xs-12 map-column" >
-            <div class="map-container">
+            <div class="map-container" id="mapcontainer">
 
                 <div class="btn-group" role="group" >
                     <!-- Visualize map -->
@@ -411,8 +424,14 @@
 
                 <!--</div>-->
                 <!--</div>-->
+
+                <!-- BAND 2d-->
+                <img ng-src="{{m_oController.m_sViewUrlSelectedBand}}" ng-show="m_oController.m_b2DMapModeOn == true &&
+                                m_oController.m_b3DMapModeOn == false && m_oController.m_bPreviewBandNotGeoreferenced === true">
                 <!-- 2D map -->
-                <div class="map" id = "wasdiMap"  ng-show="m_oController.m_b2DMapModeOn == true && m_oController.m_b3DMapModeOn == false"></div>
+                <!--<div class="map" id = "wasdiMap"  ng-show="m_oController.m_b2DMapModeOn == true && m_oController.m_b3DMapModeOn == false"></div>-->
+                <div class="map" id = "wasdiMap" ng-show="m_oController.m_b2DMapModeOn == true && m_oController.m_b3DMapModeOn == false &&
+                                m_oController.m_bPreviewBandNotGeoreferenced === false"></div>
 
                 <!-- 3D map -->
                 <div id="cesiumContainer" class="map" ng-show="m_oController.m_b2DMapModeOn == false && m_oController.m_b3DMapModeOn == true  "></div>

@@ -3,7 +3,8 @@
  */
 var EditorController = (function () {
     function EditorController($scope, $location, $interval, oConstantsService, oAuthService, oMapService, oFileBufferService,
-                              oProductService, $state, oWorkspaceService, oGlobeService, oProcessesLaunchedService, oRabbitStompService, oSnapOperationService, oModalService) {
+                              oProductService, $state, oWorkspaceService, oGlobeService, oProcessesLaunchedService, oRabbitStompService,
+                              oSnapOperationService, oModalService, oFilterService) {
         // Reference to the needed Services
         this.m_oScope = $scope;
         this.m_oScope.m_oController = this;
@@ -20,13 +21,34 @@ var EditorController = (function () {
         this.m_oProcessesLaunchedService = oProcessesLaunchedService;
         this.m_oWorkspaceService = oWorkspaceService;
         this.m_oRabbitStompService = oRabbitStompService;
+        this.m_oFilterService = oFilterService;
         this.m_b2DMapModeOn = true;
         this.m_b3DMapModeOn = false;
+        this.m_bPreviewBandNotGeoreferenced = true;
         this.m_bIsVisibleMapOfLeaflet = false;
         this.m_oModalService = oModalService;
         this.m_bIsLoadingTree = true;
-        this.m_sToolTipBtnSwitchGeographic="EDITOR_TOOLTIP_TO_GEO";
+        this.m_sToolTipBtnSwitchGeographic = "EDITOR_TOOLTIP_TO_GEO";
         this.m_sClassBtnSwitchGeographic = "btn-switch-not-geographic";
+
+        /******* band without georeference members: ********/
+        this.m_sPreviewUrlSelectedBand = "assets/img/test_image.jpg";
+        this.m_sViewUrlSelectedBand = "assets/img/test_image.jpg";
+        this.m_oBodyMapContainer = {
+            "productFileName": "",
+            "bandName": "",
+            "filterVM": "",
+            "vp_x": 0,
+            "vp_y": 0,
+            "vp_w": 10363,
+            "vp_h": 10861,
+            "img_w": 500,
+            "img_h": 200
+        };
+
+        /****************/
+
+        // this.m_sUrlSelectedBand = "";
         this.m_oAreHideBars = {
             mainBar:false,
             radarBar:true,
@@ -538,7 +560,7 @@ var EditorController = (function () {
         var asBands = [];
 
         var iProductsCount = this.m_aoProducts.length;
-
+5
         if (oProductItem.index >= iProductsCount) return asBands;
 
         var oProduct = this.m_aoProducts[oProductItem.index];
@@ -591,6 +613,39 @@ var EditorController = (function () {
                 {
                     oController.receivedPublishBandMessage(data);
 
+                    var elementMapContainer = angular.element(document.querySelector('#mapcontainer'));
+                    var heightMapContainer = elementMapContainer[0].offsetHeight;
+                    var widthMapContainer = elementMapContainer[0].offsetWidth;
+
+                    var elementImagePreview = angular.element(document.querySelector('#imagepreviewcanvas'));
+                    var heightImagePreview = elementImagePreview[0].offsetHeight;
+                    var widthImagePreview = elementImagePreview[0].offsetWidth;
+
+                    oController.m_oBodyMapContainer = {
+                        "productFileName": sFileName,
+                        "bandName": oBand.name,
+                        // "filterVM": "",
+                            "vp_x": 0,
+                            "vp_y": 0,
+                            "vp_w": 10363,
+                            "vp_h": 10861,
+                            "img_w": widthMapContainer,
+                            "img_h": heightMapContainer
+                    };
+                    var oBodyImagePreview = {
+                        "productFileName": sFileName,
+                        "bandName": oBand.name,
+                        // "filterVM": "",
+                            "vp_x": 0,
+                            "vp_y": 0,
+                            "vp_w": 10363,
+                            "vp_h": 10861,
+                            "img_w": widthImagePreview,
+                            "img_h": heightImagePreview
+                    };
+
+                    oController.processingViewBandImage(oController.m_oActiveWorkspace.workspaceId);
+                    oController.processingPreviewBandImage(oBodyImagePreview,oController.m_oActiveWorkspace.workspaceId);
                 }
                 else
                 {
@@ -1057,6 +1112,88 @@ var EditorController = (function () {
         });
     }
 
+    /********************** PROCESSING BAND **********************/
+    /*
+    *
+    {
+        "productFileName": "S1B_IW_GRDH_1SDV_20170621T052711_20170621T052736_006144_00ACB6_75AA.zip",
+        "bandName": "Amplitude_VH",
+        "filterVM": <filter>,
+        "vp_x": 6000,
+        "vp_y": 6000,
+        "vp_w": 2000,
+        "vp_h": 2000,
+        "img_w": 200,
+        "img_h": 200
+    }
+        filterVM è l'oggetto che rappresenta l'eventuale filtro da applicare (può anche non essere passato) ed è lo stesso oggetto ritornato dall'API "standardfilters"
+
+        vp_x, vp_y, vp_w, vp_h rappresentano in viewport (in pixel) di ritaglio dell'immagine
+
+        img_w, img_h rappresentano la dimensione dell'immagine jpg ritornata
+    * */
+    EditorController.prototype.processingPreviewBandImage = function(oBody,workspaceId)
+    {
+
+        if(utilsIsObjectNullOrUndefined(oBody) === true)
+            return false;
+        if(utilsIsStrNullOrEmpty(workspaceId) === true)
+            return false;
+
+        var oController = this;
+        this.m_oFilterService.getProductBand(oBody,workspaceId).success(function (data, status) {
+            if (data != null)
+            {
+                if (data != undefined)
+                {
+                    var blob = new Blob([data], {type: "octet/stream"});
+                    var objectUrl = URL.createObjectURL(blob);
+                    // document.querySelector("#previewimage").src = objectUrl;
+                    oController.m_sPreviewUrlSelectedBand = objectUrl;
+                    // window.open(objectUrl,'_self');
+                }
+            }
+        }).error(function (data, status) {
+            //alert('error');
+            utilsVexDialogAlertTop('GURU MEDITATION<br>ERROR IMPOSSIBLE PROCESSING BAND IMAGE ')
+        });
+
+        return true;
+    };
+
+    EditorController.prototype.processingViewBandImage = function(workspaceId)
+    {
+
+        // if(utilsIsObjectNullOrUndefined(oBody) === true)
+        //     return false;
+        if(utilsIsStrNullOrEmpty(workspaceId) === true)
+            return false;
+
+        var oController = this;
+        this.m_oFilterService.getProductBand(this.m_oBodyMapContainer,workspaceId).success(function (data, status) {
+            if (data != null)
+            {
+                if (data != undefined)
+                {
+                    var blob = new Blob([data], {type: "octet/stream"});
+                    var objectUrl = URL.createObjectURL(blob);
+                    // document.querySelector("#previewimage").src = objectUrl;
+                    oController.m_sViewUrlSelectedBand = objectUrl;
+                    // window.open(objectUrl,'_self');
+                }
+            }
+        }).error(function (data, status) {
+            //alert('error');
+            utilsVexDialogAlertTop('GURU MEDITATION<br>ERROR IMPOSSIBLE PROCESSING BAND IMAGE ')
+        });
+
+        return true;
+    };
+
+    EditorController.prototype.createBodyForprocessingBandImage = function(){
+
+    }
+
     /**************** MAP 3D/2D MODE ON/OFF  (SWITCH)*************************/
     EditorController.prototype.onClickChangeMap = function () {
         var oController = this;
@@ -1260,6 +1397,9 @@ var EditorController = (function () {
      */
     EditorController.prototype.addOrRemoveMapLayer = function () {
         this.m_bIsVisibleMapOfLeaflet = !this.m_bIsVisibleMapOfLeaflet;
+
+        //switch leaflet map mode and img preview mode
+        this.m_bPreviewBandNotGeoreferenced = !this.m_bPreviewBandNotGeoreferenced;
 
         //If there is the map or grey background
         if (this.m_bIsVisibleMapOfLeaflet == true) {
@@ -1473,7 +1613,8 @@ var EditorController = (function () {
             }
         }
         return null;
-    }
+    };
+
     //---------------------------------- SHOW MODALS ------------------------------------
 
     EditorController.prototype.openWorkflowDialog = function(){
@@ -2058,6 +2199,7 @@ var EditorController = (function () {
         'RabbitStompService',
         'SnapOperationService',
         'ModalService',
+        'FilterService'
 
     ];
 

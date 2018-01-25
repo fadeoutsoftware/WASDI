@@ -10,29 +10,30 @@ service('ProductService', ['$http',  'ConstantsService', function ($http, oConst
 
     this.getProductByName = function(sProductName) {
         return this.m_oHttp.get(this.APIURL + '/product/byname?sProductName='+sProductName);
-    }
+    };
 
     this.getProductListByWorkspace = function (sWorkspaceId) {
         return this.m_oHttp.get(this.APIURL + '/product/byws?sWorkspaceId='+sWorkspaceId);
-    }
+    };
 
     this.addProductToWorkspace = function (sProductName, sWorkspaceId) {
         return this.m_oHttp.get(this.APIURL + '/product/addtows?sProductName='+sProductName+'&sWorkspaceId='+sWorkspaceId);
-    }
+    };
 
     this.deleteProductFromWorkspace = function (sProductName, sWorkspaceId, bDeleteFile, bDeleteLayer) {
         //return this.m_oHttp.get('http://localhost:8080/wasdiwebserver/rest/product/delete?sProductName='+sProductName+'&sWorkspaceId='+sWorkspaceId + '&bDeleteFile=' + bDeleteFile);
         return this.m_oHttp.get(this.APIURL + '/product/delete?sProductName='+sProductName+'&sWorkspaceId='+sWorkspaceId + '&bDeleteFile=' + bDeleteFile + '&bDeleteLayer=' + bDeleteLayer);
-    }
+    };
     
     this.updateProduct = function (oProductViewModel) {
         return this.m_oHttp.post(this.APIURL + '/product/update', oProductViewModel);
-    }
+    };
     this.getMetadata = function(sProductName){
         return this.m_oHttp.get(this.APIURL+"/product/metadatabyname?sProductName="+sProductName);
-    }
+    };
     this.getApiMetadata= function(sProductName){
         return this.APIURL+"/product/metadatabyname?sProductName="+sProductName;
-    }
+    };
+
 }]);
 

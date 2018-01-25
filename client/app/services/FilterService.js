@@ -13,7 +13,11 @@ service('FilterService', ['$http',  'ConstantsService', function ($http, oConsta
     this.applyFilter = function(oFilter)
     {
         return this.m_oHttp.post(this.APIURL + "/processing/applyfilter",oFilter);
-
     };
+
+    this.getProductBand = function(oBody,sWorkspaceId){
+        return this.m_oHttp.post(this.APIURL + '/processing/bandimage?workspace=' + sWorkspaceId, oBody,{responseType: 'arraybuffer'});
+    };
+
 }]);
 
