@@ -87,6 +87,8 @@ public class ProductResource {
 	@Path("byname")
 	@Produces({"application/xml", "application/json", "text/xml"})	
 	public ProductViewModel GetByProductName(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sProductName") String sProductName) {
+		
+		Wasdi.DebugLog("ProductResource.GetByProductName");
 
 		// Validate Session
 		User oUser = Wasdi.GetUserFromSession(sSessionId);
@@ -113,6 +115,8 @@ public class ProductResource {
 	@Path("metadatabyname")
 	@Produces({"application/xml", "application/json", "text/xml"})	
 	public MetadataViewModel GetMetadataByProductName(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sProductName") String sProductName) {
+		
+		Wasdi.DebugLog("ProductResource.GetMetadataByProductName");
 
 		// Validate Session
 		User oUser = Wasdi.GetUserFromSession(sSessionId);
@@ -167,6 +171,8 @@ public class ProductResource {
 	@Path("info")
 	@Produces({"application/xml", "application/json", "text/xml"})
 	ProductInfoViewModel GetInfo(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sProductName") String sProductName) {
+		
+		Wasdi.DebugLog("ProductResource.GetInfo");
 
 		// Validate Session
 		User oUser = Wasdi.GetUserFromSession(sSessionId);
@@ -192,6 +198,8 @@ public class ProductResource {
 	@Path("/byws")
 	@Produces({"application/xml", "application/json", "text/xml"})
 	public ArrayList<GeorefProductViewModel> GetListByWorkspace(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sWorkspaceId") String sWorkspaceId) {
+		
+		Wasdi.DebugLog("ProductResource.GetListByWorkspace");
 
 		User oUser = Wasdi.GetUserFromSession(sSessionId);
 
@@ -283,6 +291,8 @@ public class ProductResource {
 	@Path("/update")
 	@Produces({"application/xml", "application/json", "text/xml"})
 	public Response UpdateProductViewModel(@HeaderParam("x-session-token") String sSessionId, ProductViewModel oProductViewModel) {
+		
+		Wasdi.DebugLog("ProductResource.UpdateProductViewModel");
 
 		User oUser = Wasdi.GetUserFromSession(sSessionId);
 
@@ -344,6 +354,8 @@ public class ProductResource {
 	@Produces({"application/xml", "application/json", "text/xml"})	
 	public Response DeleteProduct(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sProductName") String sProductName, @QueryParam("bDeleteFile") Boolean bDeleteFile, @QueryParam("sWorkspaceId") String sWorkspace, @QueryParam("bDeleteLayer") Boolean bDeleteLayer) 
 	{
+		Wasdi.DebugLog("ProductResource.DeleteProduct");
+		
 		User oUser = Wasdi.GetUserFromSession(sSessionId);
 		try {
 

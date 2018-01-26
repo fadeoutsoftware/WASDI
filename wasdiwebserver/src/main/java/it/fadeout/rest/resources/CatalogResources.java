@@ -67,6 +67,8 @@ public class CatalogResources {
 	@Path("categories")
 	@Produces({"application/json"})
 	public ArrayList<String> GetCategories(@HeaderParam("x-session-token") String sSessionId) {
+		Wasdi.DebugLog("CatalogResources.GetCategories");
+		
 		ArrayList<String> categories = new ArrayList<String>();
 		for ( DownloadedFileCategory c : DownloadedFileCategory.values()) {
 			categories.add(c.name());
@@ -84,6 +86,8 @@ public class CatalogResources {
 			@QueryParam("freetext") String freeText,
 			@QueryParam("category") String category
 			) {
+		
+		Wasdi.DebugLog("CatalogResources.GetEntries");
 		
 		User me = Wasdi.GetUserFromSession(sSessionId);
 		String userId = me.getUserId();
@@ -104,9 +108,9 @@ public class CatalogResources {
 	@POST
 	@Path("downloadentry")
 	@Produces(MediaType.APPLICATION_OCTET_STREAM)
-	public Response DownloadEntry(@HeaderParam("x-session-token") String sSessionId,
-			DownloadedFile entry
-			) {
+	public Response DownloadEntry(@HeaderParam("x-session-token") String sSessionId, DownloadedFile entry) {
+		
+		Wasdi.DebugLog("CatalogResources.DownloadEntry");
 		
 		User me = Wasdi.GetUserFromSession(sSessionId);
 		String userId = me.getUserId();
@@ -114,11 +118,15 @@ public class CatalogResources {
 		File file = new File(entry.getFilePath());
 		ResponseBuilder resp = null;
 		if (!file.canRead()) {
+			Wasdi.DebugLog("CatalogResources.DownloadEntry: file not readable");
 			resp = Response.serverError();
 		} else {
+			Wasdi.DebugLog("CatalogResources.DownloadEntry: file ok return content");
 			resp = Response.ok(file);
 			resp.header("Content-Disposition", "attachment; filename=\""+ entry.getFileName() + "\"");
 		}
+		
+		Wasdi.DebugLog("CatalogResources.DownloadEntry: done, return");
 		return resp.build();
 	}
 	
@@ -179,6 +187,8 @@ public class CatalogResources {
 			@FormDataParam("humidity") FormDataContentDisposition humidityFileMetaData,
 			@HeaderParam("x-session-token") String sessionId,
 			@QueryParam("midapath") String midaPath) {
+		
+		Wasdi.DebugLog("CatalogResources.Assimilation");
 
 		User user = Wasdi.GetUserFromSession(sessionId);
 		try {
@@ -263,6 +273,8 @@ public class CatalogResources {
 	@Path("")
 	@Produces({"application/xml", "application/json", "text/xml"})
 	public ArrayList<CatalogViewModel> GetCatalogs(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sWorkspaceId") String sWorkspaceId) {
+		
+		Wasdi.DebugLog("CatalogResources.GetCatalogues");
 
 		User oUser = Wasdi.GetUserFromSession(sSessionId);
 
@@ -313,6 +325,8 @@ public class CatalogResources {
 	public Response uploadModel(@FormDataParam("file") InputStream fileInputStream,
 			@FormDataParam("file") FormDataContentDisposition fileMetaData, @HeaderParam("x-session-token") String sSessionId, @QueryParam("sWorkspaceId") String sWorkspaceId) throws Exception
 	{ 
+		Wasdi.DebugLog("CatalogResources.UploadModel");
+		
 		User oUser = Wasdi.GetUserFromSession(sSessionId);
 		if (oUser==null) return Response.status(Status.UNAUTHORIZED).build();
 		if (Utils.isNullOrEmpty(oUser.getUserId())) return Response.status(Status.UNAUTHORIZED).build();

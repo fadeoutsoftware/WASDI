@@ -47,6 +47,8 @@ public class AuthResource {
 	@Path("/login")
 	@Produces({"application/xml", "application/json", "text/xml"})
 	public UserViewModel Login(LoginInfo oLoginInfo) {
+		Wasdi.DebugLog("AuthResource.Login");
+			
 		UserViewModel oUserVM = new UserViewModel();
 		oUserVM.setUserId("");
 		
@@ -131,6 +133,9 @@ public class AuthResource {
 	@Path("/logout")
 	@Produces({"application/xml", "application/json", "text/xml"})
 	public PrimitiveResult Logout(@HeaderParam("x-session-token") String sSessionId) {
+		
+		Wasdi.DebugLog("AuthResource.Logout");
+		
 		PrimitiveResult oResult = new PrimitiveResult();
 		oResult.setBoolValue(false);
 		
@@ -159,6 +164,8 @@ public class AuthResource {
 	@Produces({"application/json", "text/xml"})
 	public Response CreateSftpAccount(@HeaderParam("x-session-token") String sSessionId, String sEmail) {
 		
+		Wasdi.DebugLog("AuthService.CreateSftpAccount: Called for Mail " + sEmail);
+		
 		User oUser = Wasdi.GetUserFromSession(sSessionId);
 		if (oUser == null || Utils.isNullOrEmpty(oUser.getUserId())) return Response.status(Status.UNAUTHORIZED).build();
 		String sAccount = oUser.getUserId();
@@ -168,7 +175,10 @@ public class AuthResource {
 		SFTPManager oManager = new SFTPManager(wsAddress);
 		String sPassword = UUID.randomUUID().toString().split("-")[0];
 		
-		if (!oManager.createAccount(sAccount, sPassword)) return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+		if (!oManager.createAccount(sAccount, sPassword)) {
+			System.out.println("AuthService.CreateSftpAccount: error creating sftp account");
+			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+		}
 		
 		sendPasswordEmail(sEmail, sAccount, sPassword);
 	    
@@ -180,6 +190,8 @@ public class AuthResource {
 	@Path("/upload/existsaccount")
 	@Produces({"application/json", "text/xml"})
 	public boolean ExixtsSftpAccount(@HeaderParam("x-session-token") String sSessionId) {
+		
+		Wasdi.DebugLog("AuthService.ExistsSftpAccount");
 		
 		User oUser = Wasdi.GetUserFromSession(sSessionId);
 		if (oUser == null || Utils.isNullOrEmpty(oUser.getUserId())) return false;		
@@ -198,6 +210,8 @@ public class AuthResource {
 	@Produces({"application/json", "text/xml"})
 	public String[] ListSftpAccount(@HeaderParam("x-session-token") String sSessionId) {
 		
+		Wasdi.DebugLog("AuthService.ListSftpAccount");
+		
 		User oUser = Wasdi.GetUserFromSession(sSessionId);
 		if (oUser == null || Utils.isNullOrEmpty(oUser.getUserId())) return null;		
 		String sAccount = oUser.getUserId();		
@@ -214,6 +228,8 @@ public class AuthResource {
 	@Path("/upload/ingest")
 	@Produces({"application/json", "text/xml"})
 	public Response IngestFile(@HeaderParam("x-session-token") String sSessionId, @QueryParam("file") String sFile, @QueryParam("workspace") String sWorkspace) {
+		
+		Wasdi.DebugLog("AuthService.IngestFile");
 		
 		User oUser = Wasdi.GetUserFromSession(sSessionId);
 		if (oUser == null || Utils.isNullOrEmpty(oUser.getUserId())) return null;		
@@ -281,6 +297,8 @@ public class AuthResource {
 	@Produces({"application/json", "text/xml"})
 	public Response RemoveSftpAccount(@HeaderParam("x-session-token") String sSessionId) {
 		
+		Wasdi.DebugLog("AuthService.RemoveSftpAccount");
+		
 		User oUser = Wasdi.GetUserFromSession(sSessionId);
 		if (oUser == null || Utils.isNullOrEmpty(oUser.getUserId())) return Response.status(Status.UNAUTHORIZED).build();		
 		String sAccount = oUser.getUserId();
@@ -297,6 +315,8 @@ public class AuthResource {
 	@Path("/upload/updatepassword")
 	@Produces({"application/json", "text/xml"})
 	public Response UpdateSftpPassword(@HeaderParam("x-session-token") String sSessionId, String sEmail) {
+		
+		Wasdi.DebugLog("AuthService.UpdateSftpPassword");
 		
 		User oUser = Wasdi.GetUserFromSession(sSessionId);
 		if (oUser == null || Utils.isNullOrEmpty(oUser.getUserId())) return Response.status(Status.UNAUTHORIZED).build();		

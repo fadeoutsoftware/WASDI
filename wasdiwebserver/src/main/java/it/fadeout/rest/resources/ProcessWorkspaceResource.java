@@ -31,6 +31,8 @@ public class ProcessWorkspaceResource {
 	@Path("/byws")
 	@Produces({"application/xml", "application/json", "text/xml"})
 	public ArrayList<ProcessWorkspaceViewModel> GetProcessByWorkspace(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sWorkspaceId") String sWorkspaceId) {
+		
+		Wasdi.DebugLog("ProcessWorkspaceResource.GetProcessByWorkspace");
 
 		User oUser = Wasdi.GetUserFromSession(sSessionId);
 
@@ -90,6 +92,8 @@ public class ProcessWorkspaceResource {
 	@Path("/lastbyws")
 	@Produces({"application/xml", "application/json", "text/xml"})
 	public ArrayList<ProcessWorkspaceViewModel> GetLastProcessByWorkspace(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sWorkspaceId") String sWorkspaceId) {
+		
+		Wasdi.DebugLog("ProcessWorkspaceResource.GetLastProcessByWS");
 
 		User oUser = Wasdi.GetUserFromSession(sSessionId);
 
@@ -132,6 +136,8 @@ public class ProcessWorkspaceResource {
 	@Path("/delete")
 	@Produces({"application/xml", "application/json", "text/xml"})
 	public Response DeleteProcess(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sProcessObjId") String sProcessObjId) {
+		
+		Wasdi.DebugLog("ProcessWorkspaceResource.DeleteProcess");
 
 		User oUser = Wasdi.GetUserFromSession(sSessionId);
 

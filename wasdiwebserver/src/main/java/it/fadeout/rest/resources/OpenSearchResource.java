@@ -34,7 +34,7 @@ public class OpenSearchResource {
 	@Produces({"application/xml", "application/json", "text/html"})
 	public String SearchSentinel(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sQuery") String sQuery, @QueryParam("offset") String sOffset, @QueryParam("limit") String sLimit, @QueryParam("sortedby") String sSortedBy, @QueryParam("order") String sOrder )
 	{
-		System.out.println("OpenSearchResource: Search Sentinel");
+		Wasdi.DebugLog("OpenSearchResource.SearchSentinel");
 		
 		if (Utils.isNullOrEmpty(sSessionId)) return null;
 		
@@ -78,7 +78,7 @@ public class OpenSearchResource {
 	@Produces({"application/xml", "application/json", "text/html"})
 	public String GetProductsCountSentinel(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sQuery") String sQuery)
 	{
-		System.out.println("OpenSearchResource: GetProductsCountSentinel");
+		Wasdi.DebugLog("OpenSearchResource.GetProductsCountSentinel");
 		
 		if (Utils.isNullOrEmpty(sSessionId)) return null;
 		
@@ -108,7 +108,7 @@ public class OpenSearchResource {
 	@Produces({"application/xml", "application/json", "text/html"})
 	public int GetProductsCount(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sQuery") String sQuery, @QueryParam("providers") String sProviders)
 	{
-		System.out.println("OpenSearchResource: GetProductsCount");
+		Wasdi.DebugLog("OpenSearchResource.GetProductsCount");
 		
 //		if (Utils.isNullOrEmpty(sSessionId)) return 0;		
 //		User oUser = Wasdi.GetUserFromSession(sSessionId);		
@@ -155,6 +155,7 @@ public class OpenSearchResource {
 //		User oUser = Wasdi.GetUserFromSession(sSessionId);
 //		if (oUser==null) return null;
 //		if (Utils.isNullOrEmpty(oUser.getUserId())) return null;
+		Wasdi.DebugLog("OpenSearchResource.Search");
 		
 		if (sProviders!=null) {
 
@@ -232,6 +233,7 @@ public class OpenSearchResource {
 	@Path("/providers")
 	@Produces({"application/json", "text/html"})
 	public String[] GetSearchProviders(@HeaderParam("x-session-token") String sSessionId) {
+		Wasdi.DebugLog("OpenSearchResource.GetSearchProviders");
 		
 //		if (Utils.isNullOrEmpty(sSessionId)) return null;
 //		User oUser = Wasdi.GetUserFromSession(sSessionId);

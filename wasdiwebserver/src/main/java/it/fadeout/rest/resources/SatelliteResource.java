@@ -1,7 +1,10 @@
 package it.fadeout.rest.resources;
 
+import it.fadeout.Wasdi;
 import it.fadeout.business.InstanceFinder;
 import it.fadeout.viewmodels.SatelliteOrbitResultViewModel;
+
+import java.util.ArrayList;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -16,6 +19,7 @@ import org.nfs.orbits.sat.SatFactory;
 import org.nfs.orbits.sat.Satellite;
 
 import satLib.astro.time.Time;
+import wasdi.shared.utils.Utils;
 
 
 @Path("/satellite")
@@ -27,6 +31,9 @@ public class SatelliteResource {
 	@Produces({"application/xml", "application/json", "text/html"})
 	@Consumes(MediaType.APPLICATION_JSON)
 	public SatelliteOrbitResultViewModel getSatelliteTrack(@HeaderParam("x-session-token") String sSessionId,@PathParam("satellitename")String satname){
+		
+		Wasdi.DebugLog("SatelliteResource.getSatelliteTrack");
+		
 		SatelliteOrbitResultViewModel ret = new SatelliteOrbitResultViewModel();
 		String satres=InstanceFinder.s_sOrbitSatsMap.get(satname);
 		try {
@@ -62,9 +69,11 @@ public class SatelliteResource {
 				ret.lastPositionsTime.add(tconv.convertJD2String(tm[i]));
 			}
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return ret;
 	}
+	
+
+	
 }

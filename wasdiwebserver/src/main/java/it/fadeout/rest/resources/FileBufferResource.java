@@ -35,38 +35,7 @@ import wasdi.shared.viewmodels.RabbitMessageViewModel;
 public class FileBufferResource {
 
 	@Context
-	ServletConfig m_oServletConfig;	
-
-	
-//	@GET
-//	@Path("test")
-//	@Produces({"application/xml", "application/json", "text/xml"})
-//	public Response testd() throws IOException
-//	{
-//		String sProcessId = "";
-//		ProcessWorkspace oProcess = null;
-//		ProcessWorkspaceRepository oRepository = new ProcessWorkspaceRepository();
-//		try
-//		{
-//			oProcess = new ProcessWorkspace();
-//			oProcess.setOperationDate(Wasdi.GetFormatDate(new Date()));
-//			oProcess.setOperationType(LauncherOperations.DOWNLOAD.name());
-//			oProcess.setProductName("test");
-//			oProcess.setWorkspaceId("test");
-//			oProcess.setUserId("paolo");
-//			oProcess.setProcessObjId(Utils.GetRandomName());
-//			oProcess.setStatus(ProcessStatus.CREATED.name());
-//			sProcessId = oRepository.InsertProcessWorkspace(oProcess);
-//		}
-//		catch(Exception oEx) {
-//			System.out.println("DownloadResource.Download: Error updating process list " + oEx.getMessage());
-//			oEx.printStackTrace();
-//			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
-//		}
-//		return Response.ok().build();
-//	}
-
-	
+	ServletConfig m_oServletConfig;		
 	
 	@GET
 	@Path("download")
@@ -75,6 +44,8 @@ public class FileBufferResource {
 			@QueryParam("sWorkspaceId") String sWorkspaceId, @QueryParam("sBoundingBox") String sBoundingBox) throws IOException
 	{
 		try {
+			
+			Wasdi.DebugLog("FileBufferResource.Download");
 
 			if (Utils.isNullOrEmpty(sSessionId)) return Response.status(401).build();
 
@@ -161,6 +132,8 @@ public class FileBufferResource {
 	public Response Publish(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sFileUrl") String sFileUrl, @QueryParam("sWorkspaceId") String sWorkspaceId) throws IOException
 	{
 		try {
+			
+			Wasdi.DebugLog("FileBufferResource.Publish");
 
 			if (Utils.isNullOrEmpty(sSessionId)) return Response.status(401).build();
 
@@ -244,6 +217,8 @@ public class FileBufferResource {
 	{
 		RabbitMessageViewModel oReturnValue = null;
 		try {
+			
+			Wasdi.DebugLog("FileBufferResource.PublishBand");
 
 			if (Utils.isNullOrEmpty(sSessionId)) return oReturnValue;
 			User oUser = Wasdi.GetUserFromSession(sSessionId);

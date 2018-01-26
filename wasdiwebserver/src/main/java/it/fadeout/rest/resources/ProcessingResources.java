@@ -96,6 +96,7 @@ public class ProcessingResources {
 	@Produces({"application/xml", "application/json", "text/xml"})
 	public Response TerrainCorrection(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sSourceProductName") String sSourceProductName, @QueryParam("sDestinationProductName") String sDestinationProductName, @QueryParam("sWorkspaceId") String sWorkspaceId, RangeDopplerGeocodingSetting oSetting) throws IOException
 	{
+		Wasdi.DebugLog("ProcessingResources.TerrainCorrection");
 		return ExecuteOperation(sSessionId, sSourceProductName, sDestinationProductName, sWorkspaceId, oSetting, LauncherOperations.TERRAIN);
 	}
 	
@@ -104,6 +105,7 @@ public class ProcessingResources {
 	@Produces({"application/xml", "application/json", "text/xml"})
 	public Response ApplyOrbit(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sSourceProductName") String sSourceProductName, @QueryParam("sDestinationProductName") String sDestinationProductName, @QueryParam("sWorkspaceId") String sWorkspaceId, ApplyOrbitSetting oSetting) throws IOException
 	{	
+		Wasdi.DebugLog("ProcessingResources.ApplyOrbit");
 		return ExecuteOperation(sSessionId, sSourceProductName, sDestinationProductName, sWorkspaceId, oSetting, LauncherOperations.APPLYORBIT);
 	}
 	
@@ -112,6 +114,7 @@ public class ProcessingResources {
 	@Produces({"application/xml", "application/json", "text/xml"})
 	public Response Calibrate(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sSourceProductName") String sSourceProductName, @QueryParam("sDestinationProductName") String sDestinationProductName, @QueryParam("sWorkspaceId") String sWorkspaceId, CalibratorSetting oSetting) throws IOException
 	{
+		Wasdi.DebugLog("ProcessingResources.Calibrate");
 		return ExecuteOperation(sSessionId, sSourceProductName, sDestinationProductName, sWorkspaceId, oSetting, LauncherOperations.CALIBRATE);
 	}
 	
@@ -120,7 +123,7 @@ public class ProcessingResources {
 	@Produces({"application/xml", "application/json", "text/xml"})
 	public Response Multilooking(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sSourceProductName") String sSourceProductName, @QueryParam("sDestinationProductName") String sDestinationProductName, @QueryParam("sWorkspaceId") String sWorkspaceId, MultilookingSetting oSetting) throws IOException
 	{
-		
+		Wasdi.DebugLog("ProcessingResources.Multilooking");
 		return ExecuteOperation(sSessionId, sSourceProductName, sDestinationProductName, sWorkspaceId, oSetting, LauncherOperations.MULTILOOKING);
 
 	}
@@ -130,6 +133,7 @@ public class ProcessingResources {
 	@Produces({"application/xml", "application/json", "text/xml"})
 	public Response NDVI(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sSourceProductName") String sSourceProductName, @QueryParam("sDestinationProductName") String sDestinationProductName, @QueryParam("sWorkspaceId") String sWorkspaceId, NDVISetting oSetting) throws IOException
 	{
+		Wasdi.DebugLog("ProcessingResources.NDVI");
 		return ExecuteOperation(sSessionId, sSourceProductName, sDestinationProductName, sWorkspaceId, oSetting, LauncherOperations.NDVI);
 	}
 
@@ -139,6 +143,7 @@ public class ProcessingResources {
 	@Produces({"application/json"})
 	public SnapOperatorParameterViewModel[] OperatorParameters(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sOperation") String sOperation) throws IOException
 	{
+		Wasdi.DebugLog("ProcessingResources.OperatorParameters");
 		ArrayList<SnapOperatorParameterViewModel> oChoices = new ArrayList<SnapOperatorParameterViewModel>();
 		
 		Class oOperatorClass = SnapOperatorFactory.getOperatorClass(sOperation);
@@ -189,6 +194,8 @@ public class ProcessingResources {
 	public Response executeGraph(@FormDataParam("file") InputStream fileInputStream, @HeaderParam("x-session-token") String sessionId, 
 			@QueryParam("workspace") String workspace, @QueryParam("source") String sourceProductName, @QueryParam("destination") String destinationProdutName) throws Exception {
 
+		Wasdi.DebugLog("ProcessingResources.ExecuteGraph");
+		
 		GraphSetting settings = new GraphSetting();		
 		String graphXml;
 		graphXml = IOUtils.toString(fileInputStream, Charset.defaultCharset().name());
@@ -203,6 +210,8 @@ public class ProcessingResources {
 	public Response executeGraphFromFile(@HeaderParam("x-session-token") String sessionId, 
 			@QueryParam("workspace") String workspace, @QueryParam("source") String sourceProductName, @QueryParam("destination") String destinationProdutName) throws Exception {
 
+		Wasdi.DebugLog("ProcessingResources.executeGraphFromFile");
+		
 		GraphSetting settings = new GraphSetting();		
 		String graphXml;
 		
@@ -219,6 +228,9 @@ public class ProcessingResources {
 	@Path("/standardfilters")
 	@Produces({"application/json"})
 	public Map<String, Filter[]> getStandardFilters(@HeaderParam("x-session-token") String sSessionId) {
+		
+		Wasdi.DebugLog("ProcessingResources.GetStandardFilters");
+		
 		Map<String, Filter[]> filtersMap = new HashMap<String, Filter[]>();
 		filtersMap.put("Detect Lines", StandardFilters.LINE_DETECTION_FILTERS);
 		filtersMap.put("Detect Gradients (Emboss)", StandardFilters.GRADIENT_DETECTION_FILTERS);
@@ -237,6 +249,8 @@ public class ProcessingResources {
 			@QueryParam("workspace") String workspace,
 			BandImageViewModel model) throws IOException {
 		
+		Wasdi.DebugLog("ProcessingResources.getBandImage");
+		
 		OperationRegistry operationRegistry = JAI.getDefaultInstance().getOperationRegistry();
 		RegistryElementDescriptor oDescriptor = operationRegistry.getDescriptor("rendered", "Paint");
 		
@@ -249,8 +263,6 @@ public class ProcessingResources {
 			}
 			oDescriptor = operationRegistry.getDescriptor("rendered", "Paint");
 		}
-		
-		//System.out.println(oDescriptor);
 
 		String userId = AcceptedUserAndSession(sSessionId);
 		if (Utils.isNullOrEmpty(userId)) return Response.status(401).build();
@@ -263,11 +275,17 @@ public class ProcessingResources {
         	return Response.status(500).build();
         }
         
-        Product product = ProductIO.readProduct(productFile);
+        Product oSNAPProduct = ProductIO.readProduct(productFile);
         
-		BandImageManager manager = new BandImageManager(product);
+        if (oSNAPProduct == null) {
+        	Wasdi.DebugLog("ProcessingResources.getBandImage: SNAP product is null, impossibile to read. Return");
+        	return Response.status(500).build();
+        }
+        
+		BandImageManager manager = new BandImageManager(oSNAPProduct);
 		
 		RasterDataNode raster = null;
+		
 		if (model.getFilterVM() != null) {
 			Filter filter = model.getFilterVM().getFilter();
 			FilterBand filteredBand = manager.getFilterBand(model.getBandName(), filter, model.getFilterIterationCount());
@@ -277,7 +295,12 @@ public class ProcessingResources {
 			}
 			raster = filteredBand.getSource();
 		} else {
-			raster = product.getBand(model.getBandName());
+			raster = oSNAPProduct.getBand(model.getBandName());
+		}
+		
+		if (model.getVp_x()<0||model.getVp_x()>=model.getVp_w()||model.getVp_y()<0||model.getVp_y()>=model.getVp_h()||model.getImg_w()<=0||model.getImg_h()<=0) {
+			Wasdi.DebugLog("ProcessingResources.getBandImage: Invalid Parameters: VPX= " + model.getVp_x() +" VPY= "+ model.getVp_y() +" VPW= "+ model.getVp_w() +" VPH= "+ model.getVp_h() + " OUTW = " + model.getImg_w() + " OUTH = " +model.getImg_h() );
+			return Response.status(500).build();
 		}
 		
 		Rectangle vp = new Rectangle(model.getVp_x(), model.getVp_y(), model.getVp_w(), model.getVp_h());
