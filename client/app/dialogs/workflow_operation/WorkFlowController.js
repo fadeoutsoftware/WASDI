@@ -44,7 +44,7 @@ var WorkFlowController = (function() {
         {
             //utilsVexDialogAlertTop();
             var oDialog = utilsVexDialogAlertBottomRightCorner("WORKFLOW UPLOADED<br>PROCESSING WILL START IN A WHILE");
-            utilsVexCloseDialogAfterFewSeconds(3000,oDialog);
+            utilsVexCloseDialogAfterFewSeconds(4000,oDialog);
 
         };
 

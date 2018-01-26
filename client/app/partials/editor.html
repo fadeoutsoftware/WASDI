@@ -236,16 +236,16 @@
                 <div class="panel-heading">
                     <ul class="nav nav-tabs">
                         <li role="presentation"  ng-class="{active: m_oController.m_iActiveMapPanelTab === 0}"
-                            ng-click="m_oController.m_iActiveMapPanelTab = 0">
+                            ng-click="m_oController.setActiveTab(0)">
                             <a href="">Navigation</a>
                         </li>
                         <li role="presentation"  ng-class="{active: m_oController.m_iActiveMapPanelTab === 1}"
-                            ng-click="m_oController.m_iActiveMapPanelTab = 1">
+                            ng-click="m_oController.setActiveTab(1)">
                             <a href="">Colour Manipulation</a>
                         </li>
                         <li role="presentation"  ng-class="{active: m_oController.m_iActiveMapPanelTab === 2}"
-                            ng-click="m_oController.m_iActiveMapPanelTab = 2">
-                            <a href="">New navigation</a>
+                            ng-click="m_oController.setActiveTab(2)">
+                            <a href="">Preview</a>
                         </li>
 
                         <!--<li role="presentation"><a href="#">Messages</a></li>-->

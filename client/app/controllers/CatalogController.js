@@ -177,16 +177,12 @@ var CatalogController = (function() {
         if(utilsIsObjectNullOrUndefined(oEntry))
             return false;
         var oJson = {
-            boundingBox:oEntry.boundingBox,
-            category: oEntry.category,
             fileName: oEntry.fileName,
-            filePath: oEntry.filePath,
-            productViewModel : oEntry.productViewModel,
-            refDate: oEntry.refDate
-
+            filePath: oEntry.filePath
         };
-        var sEntryJson = JSON.stringify(oJson);
-        this.m_oCatalogService.downloadEntry(sEntryJson).success(function (data) {
+
+        //var sEntryJson = JSON.stringify(oJson);
+       this.m_oCatalogService.downloadEntry(oJson).success(function (data) {
             if(utilsIsObjectNullOrUndefined(data) == false)
             {
                 // var json = JSON.stringify(data),
@@ -201,7 +197,7 @@ var CatalogController = (function() {
                 window.open(objectUrl,'_self');
             }
         }).error(function (error) {
-            utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN DOWNLOAD ENTRIES");
+            utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR DOWNLOADING FILE FROM THE CATALOGUE");
         });
 
         return true;

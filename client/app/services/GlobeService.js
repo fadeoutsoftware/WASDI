@@ -504,6 +504,7 @@ service('GlobeService', ['$http',  'ConstantsService','SatelliteService', functi
     this.updateEntityPosition = function(oEntity,oNewPosition){
         if( (utilsIsObjectNullOrUndefined(oEntity) === false) && (utilsIsObjectNullOrUndefined(oNewPosition) === false ) )
         {
+            //oEntity.go(oNewPosition);
             oEntity.position = oNewPosition;
         }
     };

@@ -33,7 +33,6 @@ var WorkspaceController = (function() {
 
         this.fetchWorkspaceInfoList();
         this.m_oRabbitStompService.unsubscribe();
-        // this.m_oGlobeService.initGlobe('cesiumContainer3');
 
         this.m_oGlobeService.initRotateGlobe('cesiumContainer3');
         this.m_oGlobeService.goHome();
@@ -42,7 +41,6 @@ var WorkspaceController = (function() {
 
 
         this.m_oUpdatePositionSatellite = $interval(function () {
-            // $scope.m_oController.getTrackSatellite();
             $scope.m_oController.updatePositionsSatellites();
         }, 5000);
 
@@ -129,7 +127,6 @@ var WorkspaceController = (function() {
                     }
                     oController.m_bIsLoading = false;
                 }).error(function (data,status) {
-                    //alert('error');
                     utilsVexDialogAlertTop('GURU MEDITATION<br>ERROR IN WORKSPACESINFO');
                     oController.m_bIsLoading = false;
                 });
@@ -140,11 +137,8 @@ var WorkspaceController = (function() {
 
     WorkspaceController.prototype.loadProductList = function(oWorkspace)
     {
-        /*start rotate globe position home*/
         this.m_bLoadingWSFiles = true;
         this.m_oWorkspaceSelected = null;
-        // this.m_oGlobeService.goHome();
-        //this.m_oGlobeService.startRotationGlobe(1);
 
         if(utilsIsObjectNullOrUndefined(oWorkspace)) return false;
         if(utilsIsStrNullOrEmpty(oWorkspace.workspaceId)) return false;
@@ -305,27 +299,9 @@ var WorkspaceController = (function() {
             return false;
         this.m_oGlobeService.stopRotationGlobe();
 
-        // for(var iIndexBounds = 0, iIndexRectangle = 0; iIndexBounds < aBoundsLength; iIndexBounds++){
-        //     temp.push(aBounds[iIndexBounds])
-        //
-        //     if( ( ( iIndexBounds + 1 ) % 2 )  === 0)
-        //     {
-        //         aaRectangle[iIndexRectangle] = temp;
-        //         temp = [];
-        //         iIndexRectangle++;
-        //     }
-        //
-        // }
-        //
-        // this.m_oGlobeService.zoomOnLayerBoundingBox(aaRectangle);
         for(var iIndexBound = 0; iIndexBound < aBoundsLength-1; iIndexBound = iIndexBound + 2){
-            // temp = aBounds[iIndexBound];
-            // aBounds[iIndexBound] = aBounds[iIndexBound+1];
-            // aBounds[iIndexBound+1] = temp;
             aoRectangleBounds.push(new Cesium.Cartographic.fromDegrees(aBounds[iIndexBound ],aBounds[iIndexBound + 1]));
-
         }
-
 
         var zoom = Cesium.Rectangle.fromCartographicArray(aoRectangleBounds);
         oGlobe.camera.setView({
@@ -337,8 +313,6 @@ var WorkspaceController = (function() {
             }
         });
 
-
-        // this.m_oGlobeService.zoomOnLayerParamArray(aBounds);// this.m_oGlobeService.zoomOnLayerBoundingBox(aaRectangle);
         return true;
     };
 
@@ -399,6 +373,7 @@ var WorkspaceController = (function() {
         var iSat;
 
         this.m_aoSateliteInputTraks = this.m_oGlobeService.getSatelliteTrackInputList();
+
         //Remove all old Entities from the map
         this.m_oGlobeService.removeAllEntities();
 
@@ -466,39 +441,45 @@ var WorkspaceController = (function() {
 
     WorkspaceController.prototype.updatePositionsSatellites = function()
     {
-        if(utilsIsObjectNullOrUndefined(this.m_aoSatellitePositions ))
-            return false;
+        if(utilsIsObjectNullOrUndefined(this.m_aoSatellitePositions ))  return false;
         var oController = this;
 
         this.m_aoSateliteInputTraks = this.m_oGlobeService.getSatelliteTrackInputList();
 
-        for (var iSat=0; iSat<this.m_aoSateliteInputTraks.length; iSat++)
-        {
+        this.updatePosition();
 
-            var oActualSat = this.m_aoSateliteInputTraks[iSat];
-            this.updatePosition(oActualSat,iSat);
-        }
         return true;
     }
 
-    WorkspaceController.prototype.updatePosition = function(oActualSat,iSat)
+    WorkspaceController.prototype.updatePosition = function()
     {
+        var sSatellites = "";
+        for (var iSat=0; iSat<this.m_aoSateliteInputTraks.length; iSat++)
+        {
+            sSatellites += this.m_aoSateliteInputTraks[iSat].name + "-";
+        }
+
         var oController = this;
 
-        this.m_oSatelliteService.getTrackSatellite(this.m_aoSateliteInputTraks[iSat].name).then( function successCallback(response)
+        this.m_oSatelliteService.getUpdatedTrackSatellite(sSatellites).then( function successCallback(response)
         {
             if(utilsIsObjectNullOrUndefined(response) === false)
             {
                 var oData = response.data;
                 if(utilsIsObjectNullOrUndefined(oData) === false)
                 {
-                    var iIndexActualSatellitePosition = oController.getIndexActualSatellitePositions(oActualSat);
-                    var oSatellite = oController.m_aoSatellitePositions[iIndexActualSatellitePosition];
-                    var aPosition = utilsProjectConvertCurrentPositionFromServerInCesiumDegrees(oData.currentPosition);
-                    var oCesiumBoundaries = Cesium.Cartesian3.fromDegrees(aPosition[0],aPosition[1],aPosition[2]);
-                    //console.log(oActualSat.description +" 0:" +aPosition[0]+ " 1:" +aPosition[1]+ " 2:"+ aPosition[2]);
-                    var oActualPosition = oController.m_oGlobeService.updateEntityPosition(oSatellite,oCesiumBoundaries);
-                    //oController.m_aoSatellitePositions.push(oActualPosition);
+                    for (var iSatellites =0; iSatellites<oData.length; iSatellites++) {
+                        var oActualDataByServer = oData[iSatellites];
+
+                        var iIndexActualSatellitePosition = oController.getIndexActualSatellitePositions(oData[iSatellites].code);
+
+                        if (iIndexActualSatellitePosition>=0) {
+                            var oSatellite = oController.m_aoSatellitePositions[iIndexActualSatellitePosition];
+                            var aPosition = utilsProjectConvertCurrentPositionFromServerInCesiumDegrees(oActualDataByServer.currentPosition);
+                            var oCesiumBoundaries = Cesium.Cartesian3.fromDegrees(aPosition[0],aPosition[1],aPosition[2]);
+                            oController.m_oGlobeService.updateEntityPosition(oSatellite,oCesiumBoundaries);
+                        }
+                    }
                 }
             }
         }, function errorCallback(response) {
@@ -507,16 +488,11 @@ var WorkspaceController = (function() {
         return true;
     };
 
-    WorkspaceController.prototype.getIndexActualSatellitePositions = function(oActualSat)
+    WorkspaceController.prototype.getIndexActualSatellitePositions = function(sCode)
     {
-        var sSubString = oActualSat.description;
-        var iNumberOfSatellites = this.m_aoSatellitePositions.length
-        for(var iIndexSatellite = 0; iIndexSatellite < iNumberOfSatellites; iIndexSatellite++)
-        {
-            var name= this.m_aoSatellitePositions[iIndexSatellite]._name;
-            if(name.indexOf(sSubString) !== -1)
-            {
-                return iIndexSatellite;
+        for (var iOriginalSat=0; iOriginalSat<this.m_aoSateliteInputTraks.length; iOriginalSat++) {
+            if (this.m_aoSateliteInputTraks[iOriginalSat].name === sCode) {
+                return iOriginalSat;
             }
         }
         return -1
