@@ -32,8 +32,6 @@ var EditorController = (function () {
         this.m_sClassBtnSwitchGeographic = "btn-switch-not-geographic";
 
         /******* band without georeference members: ********/
-        // this.m_sPreviewUrlSelectedBand = "assets/img/test_image.jpg";
-        // this.m_sViewUrlSelectedBand = "assets/img/test_image.jpg";
         this.m_sPreviewUrlSelectedBand = "";
         this.m_sViewUrlSelectedBand = "";
         this.m_oBodyMapContainer = {
@@ -47,6 +45,8 @@ var EditorController = (function () {
             "img_w": 500,
             "img_h": 200
         };
+
+        this.m_oActiveBand = null;
 
         /****************/
 
@@ -173,7 +173,7 @@ var EditorController = (function () {
             if (utilsIsStrNullOrEmpty(oMessage.messageCode) === false  ) sOperation = oMessage.messageCode;
 
             var oDialog = utilsVexDialogAlertTop('GURU MEDITATION<br>THERE WAS AN ERROR IN THE ' + sOperation + ' PROCESS');
-            utilsVexCloseDialogAfterFewSeconds(3000, oDialog);
+            utilsVexCloseDialogAfterFewSeconds(4000, oDialog);
             this.m_oProcessesLaunchedService.loadProcessesFromServer(this.m_oActiveWorkspace);
 
             if (oMessage.messageCode =="PUBLISHBAND") {
@@ -227,7 +227,7 @@ var EditorController = (function () {
         // P.Campanella 29/05/2017: Moved Add Product To WS in the launcher server side: TEST this
 
         var oDialog = utilsVexDialogAlertBottomRightCorner('PRODUCT ADDED TO THE WS<br>READY');
-        utilsVexCloseDialogAfterFewSeconds(3000, oDialog);
+        utilsVexCloseDialogAfterFewSeconds(4000, oDialog);
         this.getProductListByWorkspace();
 
         //the m_oLastDownloadedProduct will be select & open in jstree
@@ -581,6 +581,8 @@ var EditorController = (function () {
             oBandItem.productName = oProductItem.name;
             oBandItem.productIndex = oProductItem.index;
             oBandItem.published = false;
+            oBandItem.height = aoBands[i].height;
+            oBandItem.width = aoBands[i].width;
 
             if (!utilsIsObjectNullOrUndefined(aoBands[i].published)) {
                 oBandItem.published = aoBands[i].published;
@@ -602,10 +604,12 @@ var EditorController = (function () {
         var sFileName = this.m_aoProducts[oBand.productIndex].fileName;
         var bAlreadyPublished = oBand.published;
 
+        this.m_oActiveBand = oBand;
+
         this.m_oFileBufferService.publishBand(sFileName, this.m_oActiveWorkspace.workspaceId, oBand.name).success(function (data, status) {
             if (!bAlreadyPublished) {
                 var oDialog = utilsVexDialogAlertBottomRightCorner('PUBLISHING BAND ' + oBand.name);
-                utilsVexCloseDialogAfterFewSeconds(3000, oDialog);
+                utilsVexCloseDialogAfterFewSeconds(4000, oDialog);
             }
             //console.log('publishing band ' + oBand.name);
             if (!utilsIsObjectNullOrUndefined(data) && data.messageResult != "KO" && utilsIsObjectNullOrUndefined(data.messageResult)) {
@@ -629,8 +633,8 @@ var EditorController = (function () {
                         // "filterVM": "",
                             "vp_x": 0,
                             "vp_y": 0,
-                            "vp_w": 10363,
-                            "vp_h": 10861,
+                            "vp_w": oBand.width,
+                            "vp_h": oBand.height,
                             "img_w": widthMapContainer,
                             "img_h": heightMapContainer
                     };
@@ -640,14 +644,18 @@ var EditorController = (function () {
                         // "filterVM": "",
                             "vp_x": 0,
                             "vp_y": 0,
-                            "vp_w": 10363,
-                            "vp_h": 10861,
+                            "vp_w": oBand.width,
+                            "vp_h": oBand.height,
                             "img_w": widthImagePreview,
                             "img_h": heightImagePreview
                     };
 
                     oController.processingViewBandImage(oController.m_oActiveWorkspace.workspaceId);
-                    oController.processingPreviewBandImage(oBodyImagePreview,oController.m_oActiveWorkspace.workspaceId);
+                    if (widthImagePreview>0 && heightImagePreview>0)
+                    {
+                        // Show Preview Only if it is visible
+                        oController.processingPreviewBandImage(oBodyImagePreview,oController.m_oActiveWorkspace.workspaceId);
+                    }
                 }
                 else
                 {
@@ -682,6 +690,8 @@ var EditorController = (function () {
             console.log("Error in removeBandImage")
             return false;
         }
+
+        this.m_oActiveBand = null;
 
         var sLayerId = "wasdi:" + oBand.layerId;
         var oMap2D = this.m_oMapService.getMap();
@@ -727,6 +737,7 @@ var EditorController = (function () {
                 else iIndex++;
             }
         }
+
     }
 
     // GENERATE TREE
@@ -1157,7 +1168,7 @@ var EditorController = (function () {
             }
         }).error(function (data, status) {
             //alert('error');
-            utilsVexDialogAlertTop('GURU MEDITATION<br>ERROR IMPOSSIBLE PROCESSING BAND IMAGE ')
+            utilsVexDialogAlertTop('GURU MEDITATION<br>ERROR PROCESSING BAND IMAGE ')
         });
 
         return true;
@@ -1186,7 +1197,7 @@ var EditorController = (function () {
             }
         }).error(function (data, status) {
             //alert('error');
-            utilsVexDialogAlertTop('GURU MEDITATION<br>ERROR IMPOSSIBLE PROCESSING BAND IMAGE ')
+            utilsVexDialogAlertTop('GURU MEDITATION<br>ERROR PROCESSING BAND IMAGE ')
         });
 
         return true;
@@ -2185,6 +2196,45 @@ var EditorController = (function () {
     {
         this.modifyColourManipulation(iMin,iMax,iAverage,sLayerId,oBand);
     };
+
+
+    EditorController.prototype.setActiveTab = function (iTab) {
+        if (this.m_iActiveMapPanelTab == iTab) return;
+
+        this.m_iActiveMapPanelTab = iTab;
+
+        if (iTab == 2 && this.m_oActiveBand != null) {
+            // Initialize Image Preview
+
+            var oBand = this.m_oActiveBand;
+            var sFileName = this.m_aoProducts[oBand.productIndex].fileName;
+
+            var elementImagePreview = angular.element(document.querySelector('#imagepreviewcanvas'));
+            var heightImagePreview = elementImagePreview[0].offsetHeight;
+            var widthImagePreview = elementImagePreview[0].offsetWidth;
+
+            // TODO: here the tab is not shown yet. So H and W are still 0.
+            // This code should run after the tab is shown
+            if (heightImagePreview==0) heightImagePreview = 280;//default value canvas
+            if (widthImagePreview==0) widthImagePreview = 560;//default value canvas
+
+
+            var oBodyImagePreview = {
+                "productFileName": sFileName,
+                "bandName": oBand.name,
+                // "filterVM": "",
+                "vp_x": 0,
+                "vp_y": 0,
+                "vp_w": oBand.width,
+                "vp_h": oBand.height,
+                "img_w": widthImagePreview,
+                "img_h": heightImagePreview
+            };
+
+            this.processingPreviewBandImage(oBodyImagePreview,this.m_oActiveWorkspace.workspaceId);
+        }
+    };
+
     EditorController.$inject = [
         '$scope',
         '$location',

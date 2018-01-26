@@ -511,7 +511,7 @@ var SearchOrbitController = (function() {
             if (utilsIsStrNullOrEmpty(oMessage.messageCode) === false  )
                 sOperation = oMessage.messageCode;
             var oDialog = utilsVexDialogAlertTop('GURU MEDITATION<br>THERE WAS AN ERROR IN THE ' + sOperation + ' PROCESS');
-            utilsVexCloseDialogAfterFewSeconds(3000, oDialog);
+            utilsVexCloseDialogAfterFewSeconds(4000, oDialog);
             this.m_oProcessesLaunchedService.loadProcessesFromServer(this.m_oActiveWorkspace);
             return;
         }
@@ -549,7 +549,7 @@ var SearchOrbitController = (function() {
         //     sMessage += " <a href='' ng-click='this.test()'> Link </a>"
 
         var oDialog = utilsVexDialogAlertBottomRightCorner(sMessage);
-        utilsVexCloseDialogAfterFewSeconds(3000, oDialog);
+        utilsVexCloseDialogAfterFewSeconds(4000, oDialog);
     }
 
 
