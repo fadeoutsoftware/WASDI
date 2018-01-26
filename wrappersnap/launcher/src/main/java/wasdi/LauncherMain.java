@@ -483,16 +483,23 @@ public class LauncherMain {
             String sMetadataPath = ConfigReader.getPropValue("METADATA_PATH");
     		if (!sMetadataPath.endsWith("/")) sMetadataPath += "/";
     		String sMetadataFileName = Utils.GetRandomName();
+    		
+    		s_oLogger.debug("SaveMetadata: file = " + sMetadataFileName);
 
 			SerializationUtils.serializeObjectToXML(sMetadataPath+sMetadataFileName, oReadProduct.getProductMetadataViewModel(oProductFile));
+			
+			s_oLogger.debug("SaveMetadata: file = saved");
 			
 			return sMetadataFileName;
 			
 		} catch (IOException e) {
+			s_oLogger.debug("SaveMetadata: Exception = " + e.toString());
 			e.printStackTrace();
 		} catch (Exception e) {
+			s_oLogger.debug("SaveMetadata: Exception = " + e.toString());
 			e.printStackTrace();
 		}
+        
         // There was an error...
         return "";
     }
