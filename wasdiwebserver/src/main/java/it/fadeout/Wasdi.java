@@ -44,6 +44,8 @@ public class Wasdi extends Application {
 	
 	private static boolean s_bDebug = false;
 	
+	private static boolean s_bDebugLog = false;
+	
 	private static String s_sDownloadRootPath = "";
 
 	private static ProcessingThread processingThread = null;
@@ -77,6 +79,11 @@ public class Wasdi extends Application {
 		if (getInitParameter("DebugVersion", "false").equalsIgnoreCase("true")) {
 			s_bDebug = true;
 		}
+		
+		if (getInitParameter("DebugLog", "false").equalsIgnoreCase("true")) {
+			s_bDebugLog = true;
+		}
+
 
 		try {
 			Utils.m_iSessionValidityMinutes = Integer.parseInt(getInitParameter("SessionValidityMinutes", ""+Utils.m_iSessionValidityMinutes));
@@ -182,7 +189,13 @@ public class Wasdi extends Application {
 		}
 		
 		return oPID;
-	}	
+	}
+	
+	public static void DebugLog(String s) {
+		if (s_bDebugLog) {
+			System.out.println(s);
+		}
+	}
 	
 	
 }

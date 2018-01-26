@@ -47,6 +47,8 @@ public class WorkspaceResource {
 	@Path("/byuser")
 	@Produces({"application/xml", "application/json", "text/xml"})
 	public ArrayList<WorkspaceListInfoViewModel> GetListByUser(@HeaderParam("x-session-token") String sSessionId) {
+		
+		Wasdi.DebugLog("WorkspaceResource.GetListByUser");
 
 		User oUser = Wasdi.GetUserFromSession(sSessionId);
 
@@ -115,6 +117,8 @@ public class WorkspaceResource {
 	@Path("")
 	@Produces({"application/xml", "application/json", "text/xml"})
 	public WorkspaceEditorViewModel GetWorkspaceEditorViewModel(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sWorkspaceId") String sWorkspaceId) {
+		
+		Wasdi.DebugLog("WorkspaceResource.GetWorkspaceEditorViewModel");
 
 		WorkspaceEditorViewModel oVM = new WorkspaceEditorViewModel();
 
@@ -173,6 +177,8 @@ public class WorkspaceResource {
 	@Path("create")
 	@Produces({"application/xml", "application/json", "text/xml"})	
 	public PrimitiveResult CreateWorkspace(@HeaderParam("x-session-token") String sSessionId) {
+		
+		Wasdi.DebugLog("WorkspaceResource.CreateWorkspace");
 
 		// Validate Session
 		User oUser = Wasdi.GetUserFromSession(sSessionId);
@@ -207,6 +213,8 @@ public class WorkspaceResource {
 	@Path("update")
 	@Produces({"application/xml", "application/json", "text/xml"})	
 	public WorkspaceEditorViewModel UpdateWorkspace(@HeaderParam("x-session-token") String sSessionId, WorkspaceEditorViewModel oViewModel) {
+		
+		Wasdi.DebugLog("WorkspaceResource.UpdateWorkspace");
 
 		// Validate Session
 		User oUser = Wasdi.GetUserFromSession(sSessionId);
@@ -250,6 +258,8 @@ public class WorkspaceResource {
 	@Path("delete")
 	@Produces({"application/xml", "application/json", "text/xml"})	
 	public Response DeleteWorkspace(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sWorkspaceId") String sWorkspaceId, @QueryParam("bDeleteLayer") Boolean bDeleteLayer, @QueryParam("bDeleteFile") Boolean bDeleteFile) {
+		
+		Wasdi.DebugLog("WorkspaceResource.DeleteWorkspace");
 
 		// Validate Session
 		User oUser = Wasdi.GetUserFromSession(sSessionId);
