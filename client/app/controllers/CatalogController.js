@@ -192,9 +192,9 @@ var CatalogController = (function() {
                 // a.download = fileName;
                 // a.click();
                 // window.URL.revokeObjectURL(url);
-                var blob = new Blob([data], {type: "octet/stream"});
+                var blob = new Blob([data], {type: "application/octet-stream"});
                 var objectUrl = URL.createObjectURL(blob);
-                window.open(objectUrl,'_self');
+                window.open(objectUrl,'_blank');
             }
         }).error(function (error) {
             utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR DOWNLOADING FILE FROM THE CATALOGUE");

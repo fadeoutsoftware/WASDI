@@ -19,9 +19,7 @@ service('CatalogService', ['$http',  'ConstantsService', function ($http, oConst
 
     this.downloadEntry = function(oEntry)
     {
-          return this.m_oHttp.post(this.APIURL + "/catalog/downloadentry",oEntry);
-         // return this.m_oHttp.get(this.APIURL + "/catalog/entries?from=" + sFrom + "&to=" + sTo + "&category=" + sCategory);
-         // return this.m_oHttp.get(this.APIURL + "/catalog/entries");
+          return this.m_oHttp.post(this.APIURL + "/catalog/downloadentry",oEntry,{responseType: 'arraybuffer'});
     };
 
 }]);
