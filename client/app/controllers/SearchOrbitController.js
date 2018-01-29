@@ -63,8 +63,8 @@ var SearchOrbitController = (function() {
             //init orbit search
             this.m_oOrbitSearch = new Object();
             this.m_oOrbitSearch.acquisitionStartTime = moment();
-            this.m_oOrbitSearch.acquisitionEndTime = moment().add(1, 'd');
-        }
+            this.m_oOrbitSearch.acquisitionEndTime = moment().add(7, 'd');
+        };
 
         var oController = this;
 

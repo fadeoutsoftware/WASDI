@@ -1179,9 +1179,19 @@ var ImportController = (function() {
      * setDefaultData
      */
     ImportController.prototype.setDefaultData = function(){
-        var dateObj = new Date();
-        this.m_oResultsOfSearchService.setSensingPeriodFrom(dateObj);
-        this.m_oResultsOfSearchService.setSensingPeriodTo(dateObj);
+
+        // Set Till today
+        var oToDate = new Date();
+        this.m_oResultsOfSearchService.setSensingPeriodTo(oToDate);
+
+        // From last week
+        var oFromDate = new Date();
+        var dayOfMonth = oFromDate.getDate();
+        oFromDate.setDate(dayOfMonth - 7);
+
+        this.m_oResultsOfSearchService.setSensingPeriodFrom(oFromDate);
+
+
         this.m_oModel.sensingPeriodFrom = this.m_oResultsOfSearchService.getSensingPeriodFrom();
         this.m_oModel.sensingPeriodTo = this.m_oResultsOfSearchService.getSensingPeriodTo();
     };

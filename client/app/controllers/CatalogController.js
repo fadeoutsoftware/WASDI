@@ -20,29 +20,32 @@ var CatalogController = (function() {
         this.m_oDataTo = "";
         this.m_aoEntries = [];
         this.m_bIsLoadedTable = true;
+        this.m_sOrderBy = 'fileName';
+        this.m_bReverseOrder = false;
 
         this.m_oMapService.initMap('catalogMap');
         this.GetCategories();
+        this.setDefaultData();
 
         $scope.$on('on-mouse-over-rectangle', function(event, args) {
+
+            if (utilsIsObjectNullOrUndefined(args.rectangle)) return;
 
             var oRectangle = args.rectangle;
             if(!utilsIsObjectNullOrUndefined(oRectangle))
             {
-                if(utilsIsObjectNullOrUndefined($scope.m_oController.m_aoEntries.length))
-                    var iLengthLayersList = 0;
-                else
-                    var iLengthLayersList = $scope.m_oController.m_aoEntries.length;
+
+                var iLengthLayersList = 0;
+
+                if(!utilsIsObjectNullOrUndefined($scope.m_oController.m_aoEntries.length)) iLengthLayersList = $scope.m_oController.m_aoEntries.length;
 
                 for(var iIndex = 0; iIndex < iLengthLayersList; iIndex++)
                 {
-
                     if($scope.m_oController.m_aoEntries[iIndex].rectangle == oRectangle)
                     {
                         var sId = "layer"+iIndex;
                         //change css of table
                         jQuery("#"+sId).css({"border-top": "2px solid green", "border-bottom": "2px solid green"});
-
 
                     }
                 }
@@ -53,32 +56,31 @@ var CatalogController = (function() {
         /*When mouse leaves rectangle layer (change css)*/
         $scope.$on('on-mouse-leave-rectangle', function(event, args) {
 
+            if (utilsIsObjectNullOrUndefined(args.rectangle)) return;
+
             var oRectangle = args.rectangle;
             if(!utilsIsObjectNullOrUndefined(oRectangle))
             {
-                if(utilsIsObjectNullOrUndefined($scope.m_oController.m_aoEntries.length))
-                    var iLengthLayersList = 0;
-                else
-                    var iLengthLayersList = $scope.m_oController.m_aoEntries.length;
+                var iLengthLayersList = 0;
+                if(!utilsIsObjectNullOrUndefined($scope.m_oController.m_aoEntries.length)) iLengthLayersList = $scope.m_oController.m_aoEntries.length;
 
                 for(var iIndex = 0; iIndex < iLengthLayersList; iIndex++)
                 {
-
                     if($scope.m_oController.m_aoEntries[iIndex].rectangle == oRectangle)
                     {
                         var sId = "layer"+iIndex;
                         //return default css of table
                         jQuery("#"+sId).css({"border-top": "", "border-bottom": ""});
-
                     }
                 }
-
             }
 
         });
 
         /*When rectangle was clicked (change focus on table)*/
         $scope.$on('on-mouse-click-rectangle', function(event, args) {
+
+            if (utilsIsObjectNullOrUndefined(args.rectangle)) return;
 
             var oRectangle = args.rectangle;
 
@@ -104,17 +106,23 @@ var CatalogController = (function() {
                             scrollTop: scrollTo.offset().top - container.offset().top + container.scrollTop()
                         });
 
-                        //container.animate({scrollTop: 485}, 2000);
-                        //container.scrollTop(
-                        //    scrollTo.offset().top - container.offset().top + container.scrollTop()
-                        //);
-
                     }
                 }
 
             }
         });
     }
+
+    CatalogController.prototype.setDefaultData = function(){
+        // Set Till today
+        var oToDate = new Date();
+        this.m_oDataTo = oToDate;
+        // From last year
+        var oFromDate = new Date();
+        var dayOfMonth = oFromDate.getDate();
+        oFromDate.setDate(dayOfMonth - 365);
+        this.m_oDataFrom = oFromDate;
+    };
 
     CatalogController.prototype.GetCategories = function()
     {
@@ -128,10 +136,10 @@ var CatalogController = (function() {
                     for(var iIndexCategory = 0;iIndexCategory < iNumberOfCategories; iIndexCategory++)
                     {
                         var isSelected = false;
-                        if(iIndexCategory === 0)
-                            isSelected = true;
+                        if(iIndexCategory === 0) isSelected = true;
                         var oCategory = {   name:data[iIndexCategory],
-                                            isSelected:isSelected};
+                                            isSelected:isSelected
+                        };
                         oController.m_asCategories.push(oCategory);
                     }
                 }
@@ -158,7 +166,7 @@ var CatalogController = (function() {
         var oController = this;
         this.m_bIsLoadedTable = false;
         sFrom += "00";
-        sTo += "00"
+        sTo += "00";
         this.m_oCatalogService.getEntries(sFrom,sTo,sFreeText,sCategory).success(function (data) {
             if(utilsIsObjectNullOrUndefined(data) == false)
             {
@@ -167,7 +175,7 @@ var CatalogController = (function() {
             }
             oController.m_bIsLoadedTable = true;
         }).error(function (error) {
-            utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN GET ENTRIES");
+            utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR SEARCHING THE CATALOGUE");
             oController.m_bIsLoadedTable = true;
         });
     };
@@ -181,20 +189,22 @@ var CatalogController = (function() {
             filePath: oEntry.filePath
         };
 
+        var sFileName = oEntry.fileName;
+
         //var sEntryJson = JSON.stringify(oJson);
-       this.m_oCatalogService.downloadEntry(oJson).success(function (data) {
+       this.m_oCatalogService.downloadEntry(oJson).success(function (data, status, headers, config) {
             if(utilsIsObjectNullOrUndefined(data) == false)
             {
-                // var json = JSON.stringify(data),
-                //     blob = new Blob([json], {type: "octet/stream"}),
-                //     url = window.URL.createObjectURL(blob);
-                // a.href = url;
-                // a.download = fileName;
-                // a.click();
-                // window.URL.revokeObjectURL(url);
-                var blob = new Blob([data], {type: "application/octet-stream"});
+
+
+                /*var blob = new Blob([data], {type: "application/octet-stream"});
                 var objectUrl = URL.createObjectURL(blob);
                 window.open(objectUrl,'_blank');
+*/
+
+                //var FileSaver = require('file-saver');
+                var blob = new Blob([data], {type: "application/octet-stream"});
+                saveAs(blob, sFileName);
             }
         }).error(function (error) {
             utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR DOWNLOADING FILE FROM THE CATALOGUE");
@@ -241,8 +251,8 @@ var CatalogController = (function() {
     };
     CatalogController.prototype.drawEntriesBoundariesInMap = function()
     {
-        if(utilsIsObjectNullOrUndefined(this.m_aoEntries) === true)
-            return false;
+        if(utilsIsObjectNullOrUndefined(this.m_aoEntries) === true) return false;
+
         var iNumberOfEntries = this.m_aoEntries.length;
         for( var iIndexEntry = 0; iIndexEntry < iNumberOfEntries; iIndexEntry++ )
         {

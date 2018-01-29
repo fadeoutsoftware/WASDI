@@ -387,7 +387,7 @@ service('MapService', ['$http','$rootScope', 'ConstantsService', function ($http
     {
         if(utilsIsObjectNullOrUndefined(oRectangle))
         {
-            console.log("Error: rectangle is undefined ");
+            //console.log("Error: rectangle is undefined ");
             return false;
         }
         oRectangle.setStyle({weight:3,fillOpacity:0.7});
@@ -399,7 +399,7 @@ service('MapService', ['$http','$rootScope', 'ConstantsService', function ($http
     {
         if(utilsIsObjectNullOrUndefined(oRectangle))
         {
-            console.log("Error: rectangle is undefined ");
+            //console.log("Error: rectangle is undefined ");
             return false;
         }
         oRectangle.setStyle({weight:1,fillOpacity:0.2});

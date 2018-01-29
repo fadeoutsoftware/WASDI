@@ -136,10 +136,13 @@
             <table class="table table-hover table-products"  ng-show="m_oController.m_bIsLoadedTable" >
                 <thead>
                     <tr>
-                        <th>
+                        <th ng-click="m_oController.m_sOrderBy = 'fileName'; m_oController.m_bReverseOrder=!m_oController.m_bReverseOrder">
                             File Name
                         </th>
-                        <th>
+                        <th ng-click="m_oController.m_sOrderBy = 'refDate'; m_oController.m_bReverseOrder=!m_oController.m_bReverseOrder">
+                            Date
+                        </th>
+                        <th ng-click="m_oController.m_sOrderBy = 'category'; m_oController.m_bReverseOrder=!m_oController.m_bReverseOrder">
                             Category
                         </th>
                         <th>
@@ -154,11 +157,12 @@
                     </tr>
                 </thead>
 
-                <tbody ng-repeat="entry in m_oController.m_aoEntries" id="{{'product'+$index}}"
-                       ng-mouseover="m_oController.m_oMapService.changeStyleRectangleMouseOver(entry.rectangle)"
-                       ng-mouseleave="m_oController.m_oMapService.changeStyleRectangleMouseLeave(entry.rectangle)">
-                    <tr >
+                <tbody >
+                    <tr ng-repeat="entry in m_oController.m_aoEntries | orderBy:m_oController.m_sOrderBy:m_oController.m_bReverseOrder | filter:search" id="{{'product'+$index}}"
+                        ng-mouseover="m_oController.m_oMapService.changeStyleRectangleMouseOver(entry.rectangle)"
+                        ng-mouseleave="m_oController.m_oMapService.changeStyleRectangleMouseLeave(entry.rectangle)">
                         <td>{{entry.fileName}}</td>
+                        <td>{{entry.refDate}}</td>
                         <td>{{entry.category}}</td>
                         <td ng-click="m_oController.getInfoProduct(entry)">
                             <i class="fa fa-info-circle fa-lg" aria-hidden="true"></i>
