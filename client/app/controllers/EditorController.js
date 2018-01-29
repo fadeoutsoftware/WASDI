@@ -635,6 +635,8 @@ var EditorController = (function () {
                             "vp_y": 0,
                             "vp_w": oBand.width,
                             "vp_h": oBand.height,
+                            "vp_w_original": oBand.width,
+                            "vp_h_original": oBand.height,
                             "img_w": widthMapContainer,
                             "img_h": heightMapContainer
                     };
@@ -651,7 +653,7 @@ var EditorController = (function () {
                     };
 
                     oController.processingViewBandImage(oController.m_oActiveWorkspace.workspaceId);
-                    if (widthImagePreview>0 && heightImagePreview>0)
+                    if ( (widthImagePreview > 0) && (heightImagePreview > 0) )
                     {
                         // Show Preview Only if it is visible
                         oController.processingPreviewBandImage(oBodyImagePreview,oController.m_oActiveWorkspace.workspaceId);
