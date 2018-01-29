@@ -104,7 +104,7 @@ angular.module('wasdi.TreeDirective', [])
                         $('#jstree').on("changed.jstree", function (e, data) {
 
                             /*CLICK ON PUBLIC BAND*/
-                            // if there isn't running publish band processes AND the node it's a band do $scope.m_oController.openBandImage()
+                            // if there aren't running publish band processes AND the node it's a band do $scope.m_oController.openBandImage()
                             //change icons
                             //data.event.type !="contextmenu" => discard right click of mouse (plugin)
                             if (angular.isUndefined(data.event))

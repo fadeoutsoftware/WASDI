@@ -55,6 +55,7 @@ angular.module('wasdi.ImagePreviewDirective', [])
                     // keep a record on the offset between the mouse position and the container
                     // position. currentTarget will be the container that the event listener was added to:
                     evt.currentTarget.offset = {x: this.x - evt.stageX, y: this.y - evt.stageY};
+                    // scope.zoom();
                 });
 
                 dragger.on("pressmove",function(evt) {
@@ -63,6 +64,8 @@ angular.module('wasdi.ImagePreviewDirective', [])
                     evt.currentTarget.y = evt.stageY + evt.currentTarget.offset.y;
                     // make sure to redraw the stage to show the change:
                     stage.update();
+                    scope.zoom();
+
                 });
 
                 //create tick
@@ -82,6 +85,7 @@ angular.module('wasdi.ImagePreviewDirective', [])
                 scope.iDefaultHeight = iDefaultHeight;
                 scope.iDefaultWidth = iDefaultWidth;
 
+
                 scope.zoom = function()
                 {
                     var element = angular.element(document.querySelector('#imagepreviewcanvas'));
@@ -91,6 +95,7 @@ angular.module('wasdi.ImagePreviewDirective', [])
                     var iWidthSquare = scope.Square.graphics.command.w;
                     var iAx = scope.Dragger.x;
                     var iAy = scope.Dragger.y;
+
                     // iHeightSquare = (iHeightSquare*100)/ iCanvasHeight;
                     // iWidthSquare = (iWidthSquare*100)/ iCanvasWidth;
                     // iAx = (iAx*100) / iCanvasWidth;
@@ -108,13 +113,18 @@ angular.module('wasdi.ImagePreviewDirective', [])
                     // this.body.vp_y = iAy * this.body.vp_y;
                     // this.body.vp_w = iWidthSquare * this.body.vp_w;
                     // this.body.vp_h = iHeightSquare * this.body.vp_h;
-                    scope.body.vp_x = iAx * this.body.vp_x;
-                    scope.body.vp_y = iAy * this.body.vp_y;
-                    scope.body.vp_w = iWidthSquare * this.body.vp_w;
-                    scope.body.vp_h = iHeightSquare * this.body.vp_h;
+
+                    // scope.body.vp_x = iAx * this.body.vp_x;
+                    // scope.body.vp_y = iAy * this.body.vp_y;
+                    scope.body.vp_x = iAx * this.body.vp_w_original;
+                    scope.body.vp_y = iAy *  this.body.vp_h_original;
+                    scope.body.vp_w = iWidthSquare * this.body.vp_w_original;
+                    scope.body.vp_h = iHeightSquare * this.body.vp_h_original;
 
                     // onClick({sSeason:body});
-                }
+                };
+
+
 
                 scope.changeZoomSquareSize = function(valueOfZoom){
                     if(utilsIsObjectNullOrUndefined(valueOfZoom) === true)
@@ -204,6 +214,7 @@ angular.module('wasdi.ImagePreviewDirective', [])
                         var oBitmap =  new createjs.Bitmap(newValue);
                         scope.Stage.addChild(oBitmap);
                         scope.Stage.addChild(scope.Dragger);
+                        scope.zoom();
                     }
 
                     // if(utilsIsStrNullOrEmpty(oldValue) === true)
