@@ -30,7 +30,8 @@ var EditorController = (function () {
         this.m_bIsLoadingTree = true;
         this.m_sToolTipBtnSwitchGeographic = "EDITOR_TOOLTIP_TO_GEO";
         this.m_sClassBtnSwitchGeographic = "btn-switch-not-geographic";
-
+        this.m_bIsLoadedPreviewBandImage = true;
+        this.m_bIsLoadedViewBandImage = true;
         /******* band without georeference members: ********/
         this.m_sPreviewUrlSelectedBand = "";
         this.m_sViewUrlSelectedBand = "";
@@ -1156,6 +1157,7 @@ var EditorController = (function () {
             return false;
 
         var oController = this;
+        this.m_bIsLoadedPreviewBandImage = false;
         this.m_oFilterService.getProductBand(oBody,workspaceId).success(function (data, status) {
             if (data != null)
             {
@@ -1165,6 +1167,7 @@ var EditorController = (function () {
                     var objectUrl = URL.createObjectURL(blob);
                     // document.querySelector("#previewimage").src = objectUrl;
                     oController.m_sPreviewUrlSelectedBand = objectUrl;
+                    oController.m_bIsLoadedPreviewBandImage = true;
                     // window.open(objectUrl,'_self');
                 }
             }
@@ -1185,6 +1188,7 @@ var EditorController = (function () {
             return false;
 
         var oController = this;
+        this.m_bIsLoadedViewBandImage = false;
         this.m_oFilterService.getProductBand(this.m_oBodyMapContainer,workspaceId).success(function (data, status) {
             if (data != null)
             {
@@ -1194,6 +1198,7 @@ var EditorController = (function () {
                     var objectUrl = URL.createObjectURL(blob);
                     // document.querySelector("#previewimage").src = objectUrl;
                     oController.m_sViewUrlSelectedBand = objectUrl;
+                    oController.m_bIsLoadedViewBandImage = true;
                     // window.open(objectUrl,'_self');
                 }
             }

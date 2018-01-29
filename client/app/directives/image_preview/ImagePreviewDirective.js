@@ -7,8 +7,9 @@ angular.module('wasdi.ImagePreviewDirective', [])
             templateUrl:"directives/image_preview/ImagePreviewView.html",
             scope :{
                 // onClick: '&',
-                urlImage: '=',
-                body: '='
+                urlImage : '=',
+                body : '=',
+                isLoaded : '='
                 // * Text binding ('@' or '@?') *
                 // * One-way binding ('<' or '<?') *
                 // * Two-way binding ('=' or '=?') *
