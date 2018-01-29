@@ -90,7 +90,7 @@ var ImportController = (function() {
             sensingPeriodFrom: '',
             sensingPeriodTo:'' ,
             ingestionFrom: '',
-            ingestionTo: '',
+            ingestionTo: ''
         };
 
         this.m_fUtcDateConverter = function(date){
@@ -149,14 +149,6 @@ var ImportController = (function() {
 
         }
 
-
-
-        //if user is logged
-        //if(!utilsIsObjectNullOrUndefined(this.m_oConstantsService.getUser()))
-        //    this.m_oUser = this.m_oConstantsService.getUser();
-        //else
-        //    this.m_oState.go("login");
-
         /*Hook to Rabbit WebStomp Service*/
         this.m_oRabbitStompService.setMessageCallback(this.receivedRabbitMessage);
         this.m_oRabbitStompService.setActiveController(this);
@@ -165,7 +157,6 @@ var ImportController = (function() {
         var oController = this;
 
         //get configuration
-
         this.m_oConfigurationService.getConfiguration().then(function(configuration){
 
             oController.m_oConfiguration = configuration;
