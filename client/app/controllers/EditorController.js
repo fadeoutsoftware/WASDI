@@ -599,7 +599,7 @@ var EditorController = (function () {
     // OPEN BAND
     // oIdBandNodeInTree is the node id in tree, in some case when the page is reload
     // we need know the node id for change the icon
-    EditorController.prototype.openBandImage = function (oBand, oIdBandNodeInTree) {
+    EditorController.prototype.openBandImage = function (oBand ) {//oIdBandNodeInTree
 
         var oController = this;
         var sFileName = this.m_aoProducts[oBand.productIndex].fileName;
@@ -631,7 +631,7 @@ var EditorController = (function () {
                     oController.m_oBodyMapContainer = {
                         "productFileName": sFileName,
                         "bandName": oBand.name,
-                        // "filterVM": "",
+                        // "filterVM": oFilter,
                             "vp_x": 0,
                             "vp_y": 0,
                             "vp_w": oBand.width,
@@ -644,7 +644,7 @@ var EditorController = (function () {
                     var oBodyImagePreview = {
                         "productFileName": sFileName,
                         "bandName": oBand.name,
-                        // "filterVM": "",
+                        // "filterVM": oFilter,
                             "vp_x": 0,
                             "vp_y": 0,
                             "vp_w": oBand.width,
@@ -652,6 +652,7 @@ var EditorController = (function () {
                             "img_w": widthImagePreview,
                             "img_h": heightImagePreview
                     };
+
 
                     oController.processingViewBandImage(oController.m_oActiveWorkspace.workspaceId);
                     if ( (widthImagePreview > 0) && (heightImagePreview > 0) )
@@ -808,7 +809,7 @@ var EditorController = (function () {
                                         "label": "Filter Band",
                                         "action" : function(pbj){
                                             if(utilsIsObjectNullOrUndefined(oBand) == false)
-                                                oController.filterBandDialog();
+                                                oController.filterBandDialog(oBand);
                                         }
                                     }
                                 };
@@ -1910,20 +1911,74 @@ var EditorController = (function () {
         });
 
         return true;
-    }
-    EditorController.prototype.filterBandDialog = function (oSelectedProduct)
+    };
+
+    EditorController.prototype.filterBandDialog = function (oSelectedBand)
     {
+        if(utilsIsObjectNullOrUndefined(oSelectedBand) === true)
+            return false;
         var oController = this;
         this.m_oModalService.showModal({
             templateUrl: "dialogs/filter_band_operation/FilterBandDialog.html",
             controller: "FilterBandController",
             inputs: {
-                extras: null,
+                extras: {
+                    workspaceId : this.m_oActiveWorkspace.workspaceId,
+                    selectedBand:oSelectedBand
+                },
             }
         }).then(function (modal) {
             modal.element.modal();
             modal.close.then(function (oResult) {
+                if(utilsIsObjectNullOrUndefined(oResult) === true)
+                    return false;
+                if(utilsIsObjectNullOrUndefined(oResult.filter) === true)
+                    return false;
+                var elementMapContainer = angular.element(document.querySelector('#mapcontainer'));
+                var heightMapContainer = elementMapContainer[0].offsetHeight;
+                var widthMapContainer = elementMapContainer[0].offsetWidth;
 
+                var elementImagePreview = angular.element(document.querySelector('#imagepreviewcanvas'));
+                var heightImagePreview = elementImagePreview[0].offsetHeight;
+                var widthImagePreview = elementImagePreview[0].offsetWidth;
+
+                var sFileName = oController.m_aoProducts[oResult.band.productIndex].fileName;
+                var sFilter = JSON.stringify(oResult.filter);
+
+                oController.m_oBodyMapContainer = {
+                    "productFileName": sFileName,
+                    "bandName": oResult.band.name,
+                    "filterVM": sFilter,
+                    "vp_x": 0,
+                    "vp_y": 0,
+                    "vp_w": oResult.band.width,
+                    "vp_h": oResult.band.height,
+                    "vp_w_original": oResult.band.width,
+                    "vp_h_original": oResult.band.height,
+                    "img_w": widthMapContainer,
+                    "img_h": heightMapContainer
+                };
+                var oBodyImagePreview = {
+                    "productFileName": sFileName,
+                    "bandName": oResult.band.name,
+                    "filterVM": sFilter,
+                    "vp_x": 0,
+                    "vp_y": 0,
+                    "vp_w": oResult.band.width,
+                    "vp_h": oResult.band.height,
+                    "img_w": widthImagePreview,
+                    "img_h": heightImagePreview
+                };
+
+                oController.processingViewBandImage(oController.m_oActiveWorkspace.workspaceId);
+                if ( (widthImagePreview > 0) && (heightImagePreview > 0) )
+                {
+                    // Show Preview Only if it is visible
+                    oController.processingPreviewBandImage(oBodyImagePreview,oController.m_oActiveWorkspace.workspaceId);
+                }
+
+                // oController.openBandImage(oResult.band,oResult.filter);
+                return true;
             });
         });
 
