@@ -30,7 +30,7 @@
                                 <div ng-repeat="options in system.options track by $index"  class=" options">
                                     <h4>
                                         <div class="operation" data-toggle="collapse" data-target="#collapse{{ (system.name + $index) |lowercase | removeSpaces}}"
-                                             aria-expanded="false" aria-controls="collapsemapprojection" >
+                                             aria-expanded="false" aria-controls="collapsemapprojection" ng-click="m_oController.m_sSelectedFilter = options.name">
                                             {{options.name}}
                                         </div>
                                     </h4>

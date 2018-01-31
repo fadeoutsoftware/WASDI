@@ -67,6 +67,11 @@
   "EDITOR_OPERATION_TITLE_MASK_MANAGER":"Mask manager",
   "EDITOR_WIZARDS_TREE_SEARCH":"If you want search a new product:",
   "EDITOR_WIZARDS_TREE_SFTP":"If you want add a product by SFTP:",
+  "EDITOR_ADVANCE_FILTERS_TITLE":"Advance filters",
+  "EDITOR_SEASONS_SPRING_BUTTON":"Spring",
+  "EDITOR_SEASONS_WINTER_BUTTON":"Winter",
+  "EDITOR_SEASONS_SUMMER_BUTTON":"Summer",
+  "EDITOR_SEASONS_AUTUMN_BUTTON":"Autumn",
 
   "IMPORT_ADVANCE_SEARCH_LABEL":"Advance search",
   "IMPORT_PRODUCTS_PER_PAGE_LABEL":"Products per page:",

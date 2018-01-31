@@ -132,7 +132,7 @@ angular.module('wasdi.TreeDirective', [])
                                         // method: receivedPublishBandMessage()
                                         //data.node.original.bPubblish = true;
                                         //$('#jstree').jstree(true).set_icon(data.node.id, 'assets/icons/check.png');
-                                        $scope.m_oController.openBandImage(data.node.original.band,data.node.id);
+                                        $scope.m_oController.openBandImage(data.node.original.band);
                                     }
 
                                 }

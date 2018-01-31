@@ -5,9 +5,9 @@
         <!--PROVIDERS-->
         <multiselectdropdownmenu options="m_oController.m_aListOfProvider"></multiselectdropdownmenu>
 
-        <multiradiobuttondropdownmenu options="m_oController.m_aoSeason" name="Seasons" on-click="m_oController.changeSeason(sSeason)"><!--functionOnClick="m_oController.test"-->
+        <!--<multiradiobuttondropdownmenu options="m_oController.m_aoSeason" name="Seasons" on-click="m_oController.changeSeason(sSeason)">&lt;!&ndash;functionOnClick="m_oController.test"&ndash;&gt;-->
 
-        </multiradiobuttondropdownmenu>
+        <!--</multiradiobuttondropdownmenu>-->
 
 
 
@@ -82,10 +82,7 @@
         <!-- SIDEBAR -->
     <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12 side-panel">
 
-
-
         <div class="panel panel-default">
-
 
             <div class="panel-heading">
                 <!-- BACK -->
@@ -102,17 +99,90 @@
             </div>
             <div  class="panel-body"><!--id="mySidenav"-->
 
-
-
-
-
                 <!--------------------- SEARCH------------------------->
                 <div  class="advance-search" id="advanced-search-container" ng-hide="m_oController.m_bIsVisibleListOfLayers || m_oController.m_bisVisibleLocalStorageInputs">
 
-                    <div class="chip">
-                        John Doe
-                        <span class="closebtn" onclick="this.parentElement.style.display='none'">&times;</span>
+                    <div class="panel panel-default ">
+                        <div class="panel-heading">
+                            <h4 class="panel-title">
+                                <a href="javascript:;" data-toggle="collapse" data-parent="#accordion" data-target="#advanceFilter"
+                                   ng-model="chevronUp" ng-init="chevronUp=false" ng-click="chevronUp=!chevronUp">
+                                    {{"EDITOR_ADVANCE_FILTERS_TITLE"|translate}}
+                                    <i ng-hide="chevronUp" class="fa fa-chevron-down" aria-hidden="true"></i>
+                                    <i ng-show="chevronUp" class="fa fa-chevron-up" aria-hidden="true"></i>
+                                </a>
+                            </h4>
+                        </div>
+                        <div id="advanceFilter" class="panel-collapse collapse">
+                            <div class="panel-body">
+                                <div class="container">
+                                    <div class="row">
+                                        <div class="col-xs-2 col-sm-2 col-md-2 col-lg-2">
+                                            <div class="btn-group-vertical ">
+                                                <button type="button" class="btn btn-default" ng-click="m_oController.m_oAdvanceFilter.selectedSeason = 'spring'">
+                                                    <i class="fa fa-sun-o" aria-hidden="true"></i>
+                                                    {{"EDITOR_SEASONS_SPRING_BUTTON"|translate}}
+                                                </button>
+                                                <button type="button" class="btn btn-default" ng-click="m_oController.m_oAdvanceFilter.selectedSeason = 'summer'">
+                                                    <i class="fa fa-thermometer-full" aria-hidden="true"></i>
+                                                    {{"EDITOR_SEASONS_SUMMER_BUTTON"|translate}}
+                                                </button>
+                                                <button type="button" class="btn btn-default" ng-click="m_oController.m_oAdvanceFilter.selectedSeason = 'autumn'">
+                                                    <i class="fa fa-cloud" aria-hidden="true"></i>
+                                                    {{"EDITOR_SEASONS_AUTUMN_BUTTON"|translate}}
+                                                </button>
+                                                <button type="button" class="btn btn-default" ng-click="m_oController.m_oAdvanceFilter.selectedSeason = 'winter'">
+                                                    <i class="fa fa-snowflake-o" aria-hidden="true"></i>
+                                                    {{"EDITOR_SEASONS_WINTER_BUTTON"|translate}}
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div class="col-xs-10 col-sm-10 col-md-10 col-lg-10">
+                                            <!--<div uib-datepicker ng-model="m_oController.m_oAdvanceFilter.selectedSeasonYear "  datepicker-options="m_oController.datePickerYears" ></div>-->
+                                            <multiselect options="m_oController.m_oAdvanceFilter.listOfYears" selected="m_oController.m_oAdvanceFilter.selectedSeasonYears"></multiselect>
+
+                                            <button ng-click="m_oController.addSeason()"> TEST </button>
+
+                                            <div class="chip" ng-repeat="data in m_oController.m_oAdvanceFilter.savedData">
+                                                {{data.name}}
+                                                <span class="closebtn" onclick="this.parentElement.style.display='none'">&times;</span>
+                                            </div>
+                                            <!--<div class="chip">-->
+                                                <!--John Doe-->
+                                                <!--<span class="closebtn" onclick="this.parentElement.style.display='none'">&times;</span>-->
+                                            <!--</div>-->
+                                        </div>
+
+
+                                    </div>
+                                </div>
+
+
+                                <!--<div class=" advanced-calendar-input input-calendar-container " >-->
+                                    <!--<p class="input-group" >-->
+                                        <!--<input type="text" class="form-control advanced-calendar-date-input"-->
+                                               <!--uib-datepicker-popup="yyyy/MM/dd"-->
+                                               <!--ng-model="m_oController.m_oModel.sensingPeriodTo"-->
+                                               <!--is-open="m_oController.m_oStatus.openedSensingPeriodTo"-->
+                                               <!--date-disabled="m_oController.disabled(date, mode)" ng-required="true"-->
+                                               <!--min-date="m_oController.m_oModel.sensingPeriodFrom"-->
+                                               <!--ng-blur="m_oController.updateAdvancedSearch()" close-text="Close"-->
+                                               <!--readonly="true" data-container="body"/>-->
+                                        <!---->
+                                        <!--<span class="input-group-btn">-->
+							                <!--<button type="button" class="btn btn-default advanced-calendar-button"-->
+                                                 <!--ng-click="m_oController.openSensingPeriodTo($event)">-->
+                                                <!--<i class="fa fa-calendar" aria-hidden="true"></i>-->
+                                            <!--</button>-->
+						                <!--</span>-->
+                                    <!--</p>-->
+                                <!--</div>-->
+
+
+                            </div>
+                        </div>
                     </div>
+
 
                     <div id="advanced-search-content">
 

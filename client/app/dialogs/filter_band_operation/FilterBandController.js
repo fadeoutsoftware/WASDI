@@ -15,7 +15,9 @@ var FilterBandController = (function() {
         this.m_iActiveProvidersTab = 0;
         this.m_iSelectedValue = 0 ;
         this.m_oFilterService = oFilterService;
-
+        this.m_sWorkspaceId =  this.m_oExtras.workspaceId;
+        this.m_oSelectedBand = this.m_oExtras.selectedBand;
+        this.m_sSelectedFilter = "";
         this.m_aoFilterProperties = [
             {name:"Operation:",value:""},
             {name:"Name:",value:""},
@@ -130,13 +132,44 @@ var FilterBandController = (function() {
         };
 
         $scope.applyFilterOnClose = function(result) {
-            var oOption = oController.getSelectedOptionsObject('Arithmetic Mean 3x3');
-            if(utilsIsObjectNullOrUndefined(oOption) === false)
-            {
-                //apply filter if there is an option
-                oController.applyFilter(oOption);
-            }
-            oClose(result, 200); // close, but give 500ms for bootstrap to animate
+            // var oOption = oController.getSelectedOptionsObject('Arithmetic Mean 3x3');
+            var oOption = oController.getSelectedOptionsObject(oController.m_sSelectedFilter);
+            delete oOption.matrix;
+            //TODO REMOVE THIS TEST JSON
+            oOption = {
+                "editable": false,
+                "kernelElements": [
+                    -1,
+                    -2,
+                    -1,
+                    0,
+                    0,
+                    0,
+                    1,
+                    2,
+                    1
+                ],
+                "kernelElementsAsText": "-1\t-2\t-1\n0\t0\t0\n1\t2\t1",
+                "kernelHeight": 3,
+                "kernelOffsetX": 1,
+                "kernelOffsetY": 1,
+                "kernelQuotient": 1,
+                "kernelWidth": 3,
+                "name": "Sobel North",
+                "operation": "CONVOLVE",
+                "shorthand": "sn",
+                "tags": []
+            };
+            // if(utilsIsObjectNullOrUndefined(oOption) === false)
+            // {
+            //     //apply filter if there is an option
+            //     // oController.applyFilter(oOption);
+            // }
+            var oReturnValue = {
+                band: oController.m_oSelectedBand,
+                filter: oOption
+            };
+            oClose(oReturnValue, 200); // close, but give 500ms for bootstrap to animate
 
         };
 
@@ -314,16 +347,16 @@ var FilterBandController = (function() {
         {
             for(var iIndexOptions = 0 ; iIndexOptions < oData[asProperties[iIndexProperty]].length ; iIndexOptions++)
             {
-                var iNumerOfRows = oData[asProperties[iIndexProperty]][iIndexOptions].kernelHeight;
-                var iNumerOfCollums = oData[asProperties[iIndexProperty]][iIndexOptions].kernelWidth;
+                var iNumberOfRows = oData[asProperties[iIndexProperty]][iIndexOptions].kernelHeight;
+                var iNumberOfColumns = oData[asProperties[iIndexProperty]][iIndexOptions].kernelWidth;
                 var oThat = this;
                 var oDefaultValue = {
                     color:"white" ,
                     fontcolor:"black",
                     value:"0",
-                    click:function(){this.value = oThat.m_iSelectedValue;}//
+                    click:function(){this.value = oThat.m_iSelectedValue;}
                 };
-                oData[asProperties[iIndexProperty]][iIndexOptions].matrix =  this.makeEmptyMatrix(iNumerOfCollums,iNumerOfRows,oDefaultValue);
+                oData[asProperties[iIndexProperty]][iIndexOptions].matrix =  this.makeEmptyMatrix(iNumberOfColumns,iNumberOfRows,oDefaultValue);
                 var aiArray = this.generateArrayOptionsValues(oData[asProperties[iIndexProperty]][iIndexOptions].kernelElements);
                 this.initMatrix(oData[asProperties[iIndexProperty]][iIndexOptions].matrix,aiArray );
             };
@@ -385,25 +418,41 @@ var FilterBandController = (function() {
         return true;
     };
 
-    FilterBandController.prototype.applyFilter = function(oOption)
-    {
-        if( utilsIsObjectNullOrUndefined(oOption) === true )
-            return false;
-        var oController = this;
-        this.m_oFilterService.applyFilter(oOption).success(function (data, status) {
-            if (data != null)
-            {
-                if (data != undefined)
-                {
-                    //TODO IT
-                    // oController.generateFiltersListFromServer(data);
-                }
-            }
-        }).error(function (data,status) {
-            utilsVexDialogAlertTop('GURU MEDITATION<br>ERROR IN GET APPLY FILTER');
-        });
-        return true;
-    };
+    // FilterBandController.prototype.applyFilter = function()
+    // {
+    //     if( utilsIsStrNullOrEmpty(this.m_sWorkspaceId) === true)
+    //         return false;
+    //     var oBand = this.m_oSelectedBand;
+    //     // if( utilsIsObjectNullOrUndefined(oBody) === true)
+    //     //     return false;
+    //     var oController = this;
+    //     var oBody = {
+    //         "productFileName": sFileName,
+    //         "bandName": oBand.name,
+    //         // "filterVM": "",
+    //         "vp_x": 0,
+    //         "vp_y": 0,
+    //         "vp_w": oBand.width,
+    //         "vp_h": oBand.height,
+    //         "vp_w_original": oBand.width,
+    //         "vp_h_original": oBand.height,
+    //         "img_w": widthMapContainer,
+    //         "img_h": heightMapContainer
+    //     };
+    //     this.m_oFilterService.getProductBand(oBody,this.m_sWorkspaceId).success(function (data, status) {
+    //         if (data != null)
+    //         {
+    //             if (data != undefined)
+    //             {
+    //                 //TODO IT
+    //                 // oController.generateFiltersListFromServer(data);
+    //             }
+    //         }
+    //     }).error(function (data,status) {
+    //         utilsVexDialogAlertTop('GURU MEDITATION<br>ERROR IN GET APPLY FILTER');
+    //     });
+    //     return true;
+    // };
 
     FilterBandController.prototype.getSelectedOptionsObject = function(sName)
     {
