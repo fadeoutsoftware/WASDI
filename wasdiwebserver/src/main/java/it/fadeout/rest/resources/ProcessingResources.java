@@ -280,6 +280,8 @@ public class ProcessingResources {
         if (oSNAPProduct == null) {
         	Wasdi.DebugLog("ProcessingResources.getBandImage: SNAP product is null, impossibile to read. Return");
         	return Response.status(500).build();
+        } else {
+        	Wasdi.DebugLog("ProcessingResources.getBandImage: product read");
         }
         
 		BandImageManager manager = new BandImageManager(oSNAPProduct);
@@ -290,7 +292,7 @@ public class ProcessingResources {
 			Filter filter = model.getFilterVM().getFilter();
 			FilterBand filteredBand = manager.getFilterBand(model.getBandName(), filter, model.getFilterIterationCount());
 			if (filteredBand == null) {
-	        	System.out.println("ProcessingResource.getBandImage: CANNOT APPLY FILTER TO BAND " + model.getBandName());
+				Wasdi.DebugLog("ProcessingResource.getBandImage: CANNOT APPLY FILTER TO BAND " + model.getBandName());
 	        	return Response.status(500).build();
 			}
 			raster = filteredBand.getSource();
@@ -298,17 +300,30 @@ public class ProcessingResources {
 			raster = oSNAPProduct.getBand(model.getBandName());
 		}
 		
-		if (model.getVp_x()<0||model.getVp_x()>=model.getVp_w()||model.getVp_y()<0||model.getVp_y()>=model.getVp_h()||model.getImg_w()<=0||model.getImg_h()<=0) {
+		if (model.getVp_x()<0||model.getVp_y()<0||model.getImg_w()<=0||model.getImg_h()<=0) {
 			Wasdi.DebugLog("ProcessingResources.getBandImage: Invalid Parameters: VPX= " + model.getVp_x() +" VPY= "+ model.getVp_y() +" VPW= "+ model.getVp_w() +" VPH= "+ model.getVp_h() + " OUTW = " + model.getImg_w() + " OUTH = " +model.getImg_h() );
 			return Response.status(500).build();
+		} else {
+			Wasdi.DebugLog("ProcessingResources.getBandImage: parameters OK");
 		}
 		
 		Rectangle vp = new Rectangle(model.getVp_x(), model.getVp_y(), model.getVp_w(), model.getVp_h());
 		Dimension imgSize = new Dimension(model.getImg_w(), model.getImg_h());
 		
-		BufferedImage img = manager.buildImage(raster, imgSize, vp);
+		BufferedImage img;
+		try {
+			img = manager.buildImage(raster, imgSize, vp);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return Response.status(500).build();
+		}
 		
-		System.out.println("ProcessingResource.getBandImage: Generated image for band " + model.getBandName() + " X= " + model.getVp_x() + " Y= " + model.getVp_y() + " W= " + model.getVp_w() + " H= "  + model.getVp_h());
+		if (img == null) {
+			Wasdi.DebugLog("ProcessingResource.getBandImage: img null");
+			return Response.status(500).build();
+		}
+		
+		Wasdi.DebugLog("ProcessingResource.getBandImage: Generated image for band " + model.getBandName() + " X= " + model.getVp_x() + " Y= " + model.getVp_y() + " W= " + model.getVp_w() + " H= "  + model.getVp_h());
 		
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 	    ImageIO.write(img, "jpg", baos);
