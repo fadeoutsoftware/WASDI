@@ -433,7 +433,7 @@
 
                 <!-- BAND 2d-->
                 <img ng-src="{{m_oController.m_sViewUrlSelectedBand}}" ng-show="m_oController.m_b2DMapModeOn === true &&
-                                m_oController.m_b3DMapModeOn === false && m_oController.m_bPreviewBandNotGeoreferenced === true
+                                m_oController.m_b3DMapModeOn === false && m_oController.m_bIsVisibleMapOfLeaflet === false
                                 && m_oController.m_bIsLoadedViewBandImage">
                 <div class="loadIcon" ng-hide="m_oController.m_bIsLoadedViewBandImage && (m_oController.m_bIsLoadedViewBandImage === true) ">
                     <invader></invader>
@@ -443,7 +443,7 @@
                 <!-- 2D map -->
                 <!--<div class="map" id = "wasdiMap"  ng-show="m_oController.m_b2DMapModeOn == true && m_oController.m_b3DMapModeOn == false"></div>-->
                 <div class="map" id = "wasdiMap" ng-show="m_oController.m_b2DMapModeOn == true && m_oController.m_b3DMapModeOn == false &&
-                                m_oController.m_bPreviewBandNotGeoreferenced === false"></div>
+                                m_oController.m_bIsVisibleMapOfLeaflet === true"></div>
 
                 <!-- 3D map -->
                 <div id="cesiumContainer" class="map" ng-show="m_oController.m_b2DMapModeOn == false && m_oController.m_b3DMapModeOn == true  "></div>

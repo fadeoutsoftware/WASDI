@@ -24,7 +24,7 @@ var EditorController = (function () {
         this.m_oFilterService = oFilterService;
         this.m_b2DMapModeOn = true;
         this.m_b3DMapModeOn = false;
-        this.m_bPreviewBandNotGeoreferenced = true;
+        //this.m_bPreviewBandNotGeoreferenced = true;
         this.m_bIsVisibleMapOfLeaflet = false;
         this.m_oModalService = oModalService;
         this.m_bIsLoadingTree = true;
@@ -1159,6 +1159,7 @@ var EditorController = (function () {
 
         var oController = this;
         this.m_bIsLoadedPreviewBandImage = false;
+
         this.m_oFilterService.getProductBand(oBody,workspaceId).success(function (data, status) {
             if (data != null)
             {
@@ -1420,7 +1421,7 @@ var EditorController = (function () {
         this.m_bIsVisibleMapOfLeaflet = !this.m_bIsVisibleMapOfLeaflet;
 
         //switch leaflet map mode and img preview mode
-        this.m_bPreviewBandNotGeoreferenced = !this.m_bPreviewBandNotGeoreferenced;
+        //this.m_bPreviewBandNotGeoreferenced = !this.m_bPreviewBandNotGeoreferenced;
 
         //If there is the map or grey background
         if (this.m_bIsVisibleMapOfLeaflet == true) {
@@ -1536,7 +1537,7 @@ var EditorController = (function () {
 
             }
 
-            if (iNumberOfLayers == 0)//if there isn't layers
+            if (iNumberOfLayers == 0)//if there aren't layers
             {
                 //clear 2d map
                 this.m_oMapService.removeLayersFromMap();
