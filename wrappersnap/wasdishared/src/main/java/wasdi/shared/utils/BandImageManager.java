@@ -139,6 +139,15 @@ public class BandImageManager {
 		
 		BufferedImage image = null;
 		
+		if (band==null) {
+			System.out.println("BandImageManager.buildImage: band null");
+			return null;
+		}
+		if (band.getProduct()==null) {
+			System.out.println("BandImageManager.buildImage: band product null");
+			return null;
+		}
+		
 		synchronized (cacheSyncObj) {
 			
 			long t = System.currentTimeMillis();

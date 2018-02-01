@@ -1,18 +1,24 @@
 package it.fadeout;
 
 import java.lang.reflect.Field;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.logging.Level;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 import javax.ws.rs.core.Application;
 import javax.ws.rs.core.Context;
+
+import org.esa.snap.core.util.SystemUtils;
+import org.esa.snap.runtime.Config;
+import org.esa.snap.runtime.Engine;
 
 import it.fadeout.business.DownloadsThread;
 import it.fadeout.business.ProcessingThread;
@@ -22,15 +28,12 @@ import it.fadeout.rest.resources.FileBufferResource;
 import it.fadeout.rest.resources.OpenSearchResource;
 import it.fadeout.rest.resources.OpportunitySearchResource;
 import it.fadeout.rest.resources.ProcessWorkspaceResource;
-import it.fadeout.rest.resources.ProductResource;
 import it.fadeout.rest.resources.ProcessingResources;
+import it.fadeout.rest.resources.ProductResource;
 import it.fadeout.rest.resources.WasdiResource;
 import it.fadeout.rest.resources.WorkspaceResource;
-import wasdi.shared.LauncherOperations;
-import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.business.User;
 import wasdi.shared.business.UserSession;
-import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.data.SessionRepository;
 import wasdi.shared.data.UserRepository;
 import wasdi.shared.utils.Utils;
@@ -115,6 +118,27 @@ public class Wasdi extends Application {
 				System.out.println("init wasdi: ERROR: CANNOT START PROCESSING THREAD!!!");
 			}
 		}
+		
+		System.out.println("initializing snap...");        
+		try {
+			String snapAuxPropPath = getInitParameter("SNAP_AUX_PROPERTIES", null);
+			System.out.println("snap aux properties file: " + snapAuxPropPath);
+			Path propFile = Paths.get(snapAuxPropPath);
+			Config.instance("snap.auxdata").load(propFile);
+			Config.instance().load();
+
+			//JAI.getDefaultInstance().getTileScheduler().setParallelism(Runtime.getRuntime().availableProcessors());
+			//MemUtils.configureJaiTileCache();
+			
+			SystemUtils.init3rdPartyLibs(null);
+			SystemUtils.LOG.setLevel(Level.ALL);
+			Engine.start(false);
+			
+			
+		} catch (Throwable e) {
+			e.printStackTrace();
+		}
+		
 	}
 
 	private String getInitParameter(String sParmaneter, String sDefault) {		
