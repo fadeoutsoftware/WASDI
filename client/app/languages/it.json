@@ -33,14 +33,14 @@
 
   "WORKSPACES_TITLE_LABEL":"WorkSpaces",
   "WORKSPACES_PLACEHOLDER_SEARCH":"Search WorkSpace...",
-  "WORKSPACES_BUTTON_NEW_WORKSPACE":"New Workspace",
+  "WORKSPACES_BUTTON_NEW_WORKSPACE":"Create your first new Workspace!",
   "WORKSPACES_TOOLTIP_EDITOR":"Edit",
   "WORKSPACES_TOOLTIP_INFO":"Info",
   "WORKSPACES_THEAD_WORKSPACES":"Workspaces",
   "WORKSPACES_THEAD_OWNER":"Owner",
   "WORKSPACES_LABEL_NO_RESULTS":"No results",
   "WORKSPACES_TOOLTIP_DELETE":"Delete workspace",
-  "WORKSPACES_ADD_NEW_WORKSPSACE":"Add new workspace:",
+  "WORKSPACES_ADD_NEW_WORKSPSACE":"You still don't have any Workspace: ",
 
   "EDITOR_TOOLTIP_SWITCH_3D_2D":"Switch 3D globe and 2D map",
   "EDITOR_TOOLTIP_HOME_2D":"Center of map",

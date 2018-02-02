@@ -40,7 +40,7 @@
     "WORKSPACES_THEAD_OWNER":"Owner",
     "WORKSPACES_LABEL_NO_RESULTS":"No results",
     "WORKSPACES_TOOLTIP_DELETE":"Delete workspace",
-    "WORKSPACES_ADD_NEW_WORKSPSACE":"Add new workspace:",
+    "WORKSPACES_ADD_NEW_WORKSPSACE":"You still don't have any Workspace: Create your first ",
 
     "EDITOR_TOOLTIP_SWITCH_3D_2D":"Switch 3D globe and 2D map",
     "EDITOR_TOOLTIP_HOME_2D":"Center of map",

@@ -16,16 +16,13 @@ angular.module('wasdi.ImagePreviewDirective', [])
                 // * Function binding ('&' or '&?') *
             },
             link: function(scope, elem, attrs) {
-                var iDefaultValueZoom = 50;
-                var iDefaultHeight = 280;//default value canvas
-                var iDefaultWidth = 560;//default value canvas
+                var iDefaultValueZoom = 100;
+                //default value canvas
+                var iDefaultHeight = 280;
+                //default value canvas
+                var iDefaultWidth = 560;
                 var stage = new createjs.Stage("imagepreviewcanvas");
-                // var oBitmap = new createjs.Bitmap("assets/img/test_image.jpg");
                 var oBitmap = new createjs.Bitmap(scope.urlImage);
-                // var oImage = new Image();
-                // oImage.src = "/test_image.jpg";
-                // var oBitmap = new createjs.Bitmap(oImage);
-
 
                 // For mobile devices.
                 createjs.Touch.enable(stage);
@@ -38,16 +35,13 @@ angular.module('wasdi.ImagePreviewDirective', [])
 
                  var iHeight = (iDefaultHeight *iDefaultValueZoom )/100;
                  var iWidth = (iDefaultWidth *iDefaultValueZoom )/100;
+
                 square.graphics.setStrokeStyle(2).beginStroke("#000").beginFill("grey").drawRect(0, 0, iWidth, iHeight);
                 square.alpha = 0.5;
-                // square.graphics.setStrokeStyle(1).beginStroke("#000");
-
-                // var label = new createjs.Text("drag me", "bold 14px Arial", "#FFFFFF");
-               // label.textAlign = "center";
-                //label.y = -7;
 
                 var dragger = new createjs.Container();
-                dragger.x = dragger.y = 100;
+                dragger.x = dragger.y = 0;
+
                 stage.addChild(oBitmap);
                 dragger.addChild(square); //, label
                 stage.addChild(dragger);
@@ -97,10 +91,8 @@ angular.module('wasdi.ImagePreviewDirective', [])
                     var iAx = scope.Dragger.x;
                     var iAy = scope.Dragger.y;
 
-                    // iHeightSquare = (iHeightSquare*100)/ iCanvasHeight;
-                    // iWidthSquare = (iWidthSquare*100)/ iCanvasWidth;
-                    // iAx = (iAx*100) / iCanvasWidth;
-                    // iAy = (iAy*100) / iCanvasHeight;
+                    if (iCanvasHeight == 0 || iCanvasWidth == 0) return;
+
                     iHeightSquare = iHeightSquare/iCanvasHeight;
                     iWidthSquare = iWidthSquare/iCanvasWidth;
                     iAx = iAx/iCanvasWidth;
@@ -117,10 +109,10 @@ angular.module('wasdi.ImagePreviewDirective', [])
 
                     // scope.body.vp_x = iAx * this.body.vp_x;
                     // scope.body.vp_y = iAy * this.body.vp_y;
-                    scope.body.vp_x = iAx * this.body.vp_w_original;
-                    scope.body.vp_y = iAy *  this.body.vp_h_original;
-                    scope.body.vp_w = iWidthSquare * this.body.vp_w_original;
-                    scope.body.vp_h = iHeightSquare * this.body.vp_h_original;
+                    scope.body.vp_x = iAx * this.body.vp_w;
+                    scope.body.vp_y = iAy *  this.body.vp_h;
+                    scope.body.vp_w = iWidthSquare * this.body.vp_w;
+                    scope.body.vp_h = iHeightSquare * this.body.vp_h;
 
                     // onClick({sSeason:body});
                 };
@@ -128,8 +120,8 @@ angular.module('wasdi.ImagePreviewDirective', [])
 
 
                 scope.changeZoomSquareSize = function(valueOfZoom){
-                    if(utilsIsObjectNullOrUndefined(valueOfZoom) === true)
-                        return false;
+
+                    if(utilsIsObjectNullOrUndefined(valueOfZoom) === true)  return false;
 
                     var element = angular.element(document.querySelector('#imagepreviewcanvas'));
                     var iCanvasHeight = element[0].offsetHeight;
@@ -143,7 +135,7 @@ angular.module('wasdi.ImagePreviewDirective', [])
                     this.zoom();
 
                     return true;
-                }
+                };
 
                 // scope.takePositionSquare = function(){
                 //
@@ -200,34 +192,19 @@ angular.module('wasdi.ImagePreviewDirective', [])
 
                 scope.$watch('urlImage', function (newValue, oldValue, scope)
                 {
-                    if(utilsIsObjectNullOrUndefined(newValue) === false && newValue !== "assets/img/test_image.jpg")
+                    if(utilsIsObjectNullOrUndefined(newValue) === false && newValue !== "empty")
                     {
-                        // scope.Bitmap.image = newValue;
-
-                        // scope.Bitmap =  new createjs.Bitmap(newValue);
-                        // scope.Stage.addChild(scope.Bitmap);
-                        // scope.Stage.update();
-
-                        //TEST #1
-                        // var oBitmap =  new createjs.Bitmap("assets/img/test_image2.jpeg");
-                        // scope.Stage.addChild(oBitmap);
-                        //TEST #2
                         var oBitmap =  new createjs.Bitmap(newValue);
                         scope.Stage.addChild(oBitmap);
                         scope.Stage.addChild(scope.Dragger);
                         scope.zoom();
                     }
+                    else {
+                        scope.Stage.autoClear = true;
+                        scope.Stage.removeAllChildren();
+                        scope.Stage.update();
+                    }
 
-                    // if(utilsIsStrNullOrEmpty(oldValue) === true)
-                    // {
-                    //     var oBitmap = new createjs.Bitmap(newValue);
-                    //     $scope.Stage.addChild(oBitmap);
-                    //
-                    // }
-                    // else
-                    // {
-                    //
-                    // }
                 });
 
             }
