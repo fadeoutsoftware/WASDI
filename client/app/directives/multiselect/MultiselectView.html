@@ -1,6 +1,6 @@
 <div class="multiselect-directive">
     <div class="list-group" >
-        <a href="" class="list-group-item" ng-repeat="option in optionsDirective" ng-class="{active: isOptionSelected(option)}" ng-click="pushOptionInSelectedList(option);">
+        <a href="" class="list-group-item" ng-repeat="option in optionsDirective track by $index " ng-class="{active: isOptionSelected(option)}" ng-click="pushOptionInSelectedList(option);">
             {{option}}
         </a>
     </div>

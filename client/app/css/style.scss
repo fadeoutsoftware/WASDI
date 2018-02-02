@@ -494,25 +494,30 @@ h4
 
 .chip {
   display: inline-block;
-  padding: 0 25px;
-  height: 50px;
-  font-size: 18px;
-  line-height: 50px;
+  padding: 0 15px;
+  height: 35px;
+  font-size: 14px;
+  line-height: 35px;
   border-radius: 25px;
-  background-color: #f1f1f1;
-
-  .closebtn {
+  background-color: $wasdi-blue-logo;
+  color: $wasdi-white;
+  cursor: pointer;
+  &:hover{
+    color:$wasdi-green-logo;
+  }
+  .closebtn{
     padding-left: 10px;
-    color: #888;
+    //color: #888;
+    color:$wasdi-white;
     font-weight: bold;
     float: right;
     font-size: 20px;
     cursor: pointer;
+    &:hover{
+      color:$wasdi-green-logo;
+    }
   }
 
-  .closebtn:hover {
-    color: #000;
-  }
 }
 
 //.chip img {
@@ -528,3 +533,40 @@ h4
 font-size: 2.5em !important;
 }
 
+//DROPDOWN
+.DropdownMenu{
+  float: left;
+  border-style: solid;
+  border-color: #2D394F;
+  border-width: 2px;
+  margin-top: 8px;
+
+  .mega-dropdown-menu{
+    overflow: scroll;
+    max-height: 200px;
+  }
+
+  .checkbox, .radio {
+    margin-left: 5px;
+  }
+
+  .value-selected{
+    color: $wasdi-white;
+    background-color: $wasdi-green-logo;
+  }
+  .value-visualized{
+    padding: 7px;
+    cursor: pointer;
+    &:hover{
+      color: $wasdi-white;
+      background-color: $wasdi-green-logo;
+
+    }
+  }
+  a{
+    color: black;
+  }
+  .nav > li > a {
+    padding: 10px 10px;
+  }
+}
