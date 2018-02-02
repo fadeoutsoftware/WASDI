@@ -22,11 +22,13 @@ var EditorController = (function () {
         this.m_oWorkspaceService = oWorkspaceService;
         this.m_oRabbitStompService = oRabbitStompService;
         this.m_oFilterService = oFilterService;
-        this.m_b2DMapModeOn = true;
-        this.m_b3DMapModeOn = false;
-        //this.m_bPreviewBandNotGeoreferenced = true;
-        this.m_bIsVisibleMapOfLeaflet = false;
         this.m_oModalService = oModalService;
+
+        // Flag to know if in the big map is 2d (true) or 3d (false)
+        this.m_b2DMapModeOn = true;
+        // Flag to know if the big map is the Geographical Mode (true) or in the Editor Mode (false)
+        this.m_bIsVisibleMapOfLeaflet = false;
+
         this.m_bIsLoadingTree = true;
         this.m_sToolTipBtnSwitchGeographic = "EDITOR_TOOLTIP_TO_GEO";
         this.m_sClassBtnSwitchGeographic = "btn-switch-not-geographic";
@@ -35,21 +37,9 @@ var EditorController = (function () {
         /******* band without georeference members: ********/
         this.m_sPreviewUrlSelectedBand = "";
         this.m_sViewUrlSelectedBand = "";
-        this.m_oBodyMapContainer = {
-            "productFileName": "",
-            "bandName": "",
-            "filterVM": "",
-            "vp_x": 0,
-            "vp_y": 0,
-            "vp_w": 10363,
-            "vp_h": 10861,
-            "img_w": 500,
-            "img_h": 200
-        };
-
+        // Reference to the actual active Band
         this.m_oActiveBand = null;
 
-        /****************/
 
         // this.m_sUrlSelectedBand = "";
         this.m_oAreHideBars = {
@@ -58,6 +48,8 @@ var EditorController = (function () {
             opticalBar:true,
             processorBar:true
         }
+
+        // Index of the actual Active Tab
         this.m_iActiveMapPanelTab = 0;
         this.GLOBE_DEFAULT_ZOOM = 2000000;
 
@@ -74,30 +66,30 @@ var EditorController = (function () {
         this.m_bIsModeOnPixelInfo = false;
         // Here a Workpsace is needed... if it is null create a new one..
         this.m_oActiveWorkspace = this.m_oConstantsService.getActiveWorkspace();
+        // Actual User
         this.m_oUser = this.m_oConstantsService.getUser();
 
         // Initialize the map
         oMapService.initMapEditor('wasdiMap');
         oMapService.removeLayersFromMap();
-
+        // Initialize the globe
         this.m_oGlobeService.initGlobe('cesiumContainer2');
-
 
         //if there isn't workspace
         if (utilsIsObjectNullOrUndefined(this.m_oActiveWorkspace) && utilsIsStrNullOrEmpty(this.m_oActiveWorkspace)) {
             //if this.m_oState.params.workSpace in empty null or undefined create new workspace
             if (!(utilsIsObjectNullOrUndefined(this.m_oState.params.workSpace) && utilsIsStrNullOrEmpty(this.m_oState.params.workSpace))) {
+                // Open workspace
                 this.openWorkspace(this.m_oState.params.workSpace);
-                //this.m_oActiveWorkspace = this.m_oConstantsService.getActiveWorkspace();
             }
             else {
-
                 //TODO CREATE NEW WORKSPACE OR GO HOME
             }
         }
         else {
             this.m_oProcessesLaunchedService.loadProcessesFromServer(this.m_oActiveWorkspace.workspaceId);
             this.getProductListByWorkspace();
+
             if (this.m_oRabbitStompService.isSubscrbed() == false) {
                 this.m_oRabbitStompService.subscribe(this.m_oActiveWorkspace.workspaceId);
             }
@@ -107,9 +99,10 @@ var EditorController = (function () {
         //Set default value tree
         this.m_oTree = null;//IMPORTANT NOTE: there's a 'WATCH' for this.m_oTree in TREE DIRECTIVE
 
-        /*Hook to Rabbit WebStomp Service*/
+        // Hook to Rabbit WebStomp Service
         this.m_oRabbitStompService.setMessageCallback(this.receivedRabbitMessage);
         this.m_oRabbitStompService.setActiveController(this);
+
         this.drawColourManipulationHistogram("colourManipulationDiv")
     }
 
@@ -127,8 +120,8 @@ var EditorController = (function () {
     };
 
     EditorController.prototype.selectNodeByFileNameInTree = function (sFileName) {
-        if(utilsIsObjectNullOrUndefined(sFileName) == true)
-            return false;
+        if(utilsIsObjectNullOrUndefined(sFileName) == true)  return false;
+
         var treeInst = $('#jstree').jstree(true);
         var m = treeInst._model.data;
         for (var i in m) {
@@ -144,8 +137,7 @@ var EditorController = (function () {
     };
 
     EditorController.prototype.renameNodeInTree = function (sFileName,sNewNameInput) {
-        if((utilsIsObjectNullOrUndefined(sNewNameInput) == true) || (utilsIsStrNullOrEmpty(sNewNameInput) == true))
-            return false;
+        if((utilsIsObjectNullOrUndefined(sNewNameInput) == true) || (utilsIsStrNullOrEmpty(sNewNameInput) == true)) return false;
 
         var treeInst = $('#jstree').jstree(true);
         var m = treeInst._model.data;
@@ -181,10 +173,7 @@ var EditorController = (function () {
                 if (utilsIsObjectNullOrUndefined(oMessage.payload)==false) {
                     if (utilsIsObjectNullOrUndefined(oMessage.payload.productName) == false && utilsIsObjectNullOrUndefined(oMessage.payload.bandName) == false) {
                         var sNodeName = oMessage.payload.productName + "_" + oMessage.payload.bandName;
-
-                        $("#jstree").jstree().enable_node(sNodeName);
-                        $('#jstree').jstree(true).set_icon(sNodeName,'assets/icons/uncheck_20x20.png');
-
+                        this.setTreeNodeAsDeselected(sNodeName);
                     }
                 }
             }
@@ -225,10 +214,11 @@ var EditorController = (function () {
      */
     EditorController.prototype.receivedNewProductMessage = function (oMessage) {
 
-        // P.Campanella 29/05/2017: Moved Add Product To WS in the launcher server side: TEST this
-
+        // Alert the user
         var oDialog = utilsVexDialogAlertBottomRightCorner('PRODUCT ADDED TO THE WS<br>READY');
         utilsVexCloseDialogAfterFewSeconds(4000, oDialog);
+
+        // Update product list
         this.getProductListByWorkspace();
 
         //the m_oLastDownloadedProduct will be select & open in jstree
@@ -245,8 +235,7 @@ var EditorController = (function () {
     EditorController.prototype.receivedPublishMessage = function (oMessage) {
         if (oMessage == null) return;
         if (oMessage.messageResult == "KO") {
-            //alert('There was an error in the publish');
-            utilsVexDialogAlertTop('GURU MEDITATION<br>THERE WAS AN ERROR IN THE PUBLISH');
+            utilsVexDialogAlertTop('GURU MEDITATION<br>THERE WAS AN ERROR PUBLISHING THE PRODUCT');
             return;
         }
 
@@ -258,10 +247,11 @@ var EditorController = (function () {
      * @param oMessage
      */
     EditorController.prototype.receivedPublishBandMessage = function (oMessage) {
+
         var oLayer = oMessage.payload;
 
          if (utilsIsObjectNullOrUndefined(oLayer)) {
-            console.log("Error LayerID is empty...");
+            console.log("EditorController.receivedPublishBandMessage: Error LayerID is empty...");
             return false;
         }
 
@@ -271,14 +261,14 @@ var EditorController = (function () {
 
         //add layer in list
 
-        // check if the background is grey or there is a map
+        // check if the background is in Editor Mode or in Georeferenced Mode
         if (this.m_bIsVisibleMapOfLeaflet == true) {
             //if there is a map, add layers to it
             this.addLayerMap2D(oLayer.layerId);
             this.addLayerMap3D(oLayer.layerId);
             this.m_aoLayersList.push(oLayer);
 
-            //if there isn't Bounding Box is impossible do zoom
+            //if there isn't Bounding Box is impossible to zoom
             if (!utilsIsStrNullOrEmpty(oLayer.geoserverBoundingBox))
             {
                 var oBounds = JSON.parse(oLayer.geoserverBoundingBox);
@@ -295,7 +285,7 @@ var EditorController = (function () {
             }
         }
         else {
-            //if the backgrounds is grey remove all others bands in tree - map
+            //if the backgrounds is in Editor Mode close all others bands in tree - map
             var iNumberOfLayers = this.m_aoLayersList.length;
 
             // CLOSE ALL THE NODES
@@ -309,10 +299,8 @@ var EditorController = (function () {
                     var oNode = $('#jstree').jstree(true).get_node(sNodeId);
 
                     if (utilsIsObjectNullOrUndefined(oNode.original)==false) {
-
                         oNode.original.bPubblish = false;
-                        $('#jstree').jstree(true).set_icon(sNodeId, 'assets/icons/uncheck_20x20.png');
-
+                        this.setTreeNodeAsDeselected(sNodeId);
                     }
                     else {
                         console.log("Editor Controller: ERROR oNode.original not defined");
@@ -355,8 +343,8 @@ var EditorController = (function () {
             oNode.original.band.layerId = oLayer.layerId;
             oNode.original.band.published=true;
 
-            $('#jstree').jstree(true).set_icon(sNodeID, 'assets/icons/check_20x20.png');
-            $("#jstree").jstree().enable_node(sNodeID);
+            this.setTreeNodeAsSelected(sNodeID);
+
             sLabelText = $("#jstree").jstree().get_text(sNodeID);
             sLabelText = sLabelText.replace("band-not-published-label", "band-published-label");
 
@@ -520,7 +508,7 @@ var EditorController = (function () {
     /**
      * Call publish service
      * @param sUrl
-     */
+
     EditorController.prototype.publish = function (sUrl) {
         this.m_oFileBufferService.publish(sUrl, this.m_oActiveWorkspace.workspaceId).success(function (data, status) {
             utilsVexDialogAlertBottomRightCorner('PUBLISHING');
@@ -530,6 +518,7 @@ var EditorController = (function () {
             //console.log('publish error');
         });
     }
+    */
 
     /**
      * Get a list of product items with only name and index linked to the m_aoProducts ProductViewModel array
@@ -596,10 +585,12 @@ var EditorController = (function () {
         return asBands;
     }
 
-    // OPEN BAND
-    // oIdBandNodeInTree is the node id in tree, in some case when the page is reload
-    // we need know the node id for change the icon
-    EditorController.prototype.openBandImage = function (oBand ) {//oIdBandNodeInTree
+    /**
+     * OPEN BAND IMAGE
+     * Called from the tree to open a band
+     * @param oBand
+     */
+    EditorController.prototype.openBandImage = function (oBand ) {
 
         var oController = this;
         var sFileName = this.m_aoProducts[oBand.productIndex].fileName;
@@ -607,84 +598,65 @@ var EditorController = (function () {
 
         this.m_oActiveBand = oBand;
 
-        this.m_oFileBufferService.publishBand(sFileName, this.m_oActiveWorkspace.workspaceId, oBand.name).success(function (data, status) {
-            if (!bAlreadyPublished) {
-                var oDialog = utilsVexDialogAlertBottomRightCorner('PUBLISHING BAND ' + oBand.name);
-                utilsVexCloseDialogAfterFewSeconds(4000, oDialog);
-            }
-            //console.log('publishing band ' + oBand.name);
-            if (!utilsIsObjectNullOrUndefined(data) && data.messageResult != "KO" && utilsIsObjectNullOrUndefined(data.messageResult)) {
-                /*if the band was published*/
+        // CHECK THE ACTUAL MODE
+        if (this.m_bIsVisibleMapOfLeaflet || this.m_b2DMapModeOn == false) {
 
-                if (data.messageCode === "PUBLISHBAND")
-                {
-                    oController.receivedPublishBandMessage(data);
+            // Geographical Mode On: geoserver publish band
+            this.m_oFileBufferService.publishBand(sFileName, this.m_oActiveWorkspace.workspaceId, oBand.name).success(function (data, status) {
 
-                    var elementMapContainer = angular.element(document.querySelector('#mapcontainer'));
-                    var heightMapContainer = elementMapContainer[0].offsetHeight;
-                    var widthMapContainer = elementMapContainer[0].offsetWidth;
-
-                    var elementImagePreview = angular.element(document.querySelector('#imagepreviewcanvas'));
-                    var heightImagePreview = elementImagePreview[0].offsetHeight;
-                    var widthImagePreview = elementImagePreview[0].offsetWidth;
-
-                    oController.m_oBodyMapContainer = {
-                        "productFileName": sFileName,
-                        "bandName": oBand.name,
-                        // "filterVM": oFilter,
-                            "vp_x": 0,
-                            "vp_y": 0,
-                            "vp_w": oBand.width,
-                            "vp_h": oBand.height,
-                            "vp_w_original": oBand.width,
-                            "vp_h_original": oBand.height,
-                            "img_w": widthMapContainer,
-                            "img_h": heightMapContainer
-                    };
-                    var oBodyImagePreview = {
-                        "productFileName": sFileName,
-                        "bandName": oBand.name,
-                        // "filterVM": oFilter,
-                            "vp_x": 0,
-                            "vp_y": 0,
-                            "vp_w": oBand.width,
-                            "vp_h": oBand.height,
-                            "img_w": widthImagePreview,
-                            "img_h": heightImagePreview
-                    };
-
-
-                    oController.processingViewBandImage(oController.m_oActiveWorkspace.workspaceId);
-                    if ( (widthImagePreview > 0) && (heightImagePreview > 0) )
-                    {
-                        // Show Preview Only if it is visible
-                        oController.processingPreviewBandImage(oBodyImagePreview,oController.m_oActiveWorkspace.workspaceId);
-                    }
-                }
-                else
-                {
-                    if (data.messageCode !== "WAITFORRABBIT")//"PUBLISHBAND"
-                    {
-                        // oController.receivedPublishBandMessage(data.payload);
-                        $("#jstree").jstree().enable_node(oBand.productName+"_"+oBand.name);
-                        $('#jstree').jstree(true).set_icon(oBand.productName+"_"+oBand.name,'assets/icons/uncheck_20x20.png');
-                    }
+                if (!bAlreadyPublished) {
+                    var oDialog = utilsVexDialogAlertBottomRightCorner('PUBLISHING BAND ' + oBand.name);
+                    utilsVexCloseDialogAfterFewSeconds(4000, oDialog);
                 }
 
-            }
-            else {
+                if (!utilsIsObjectNullOrUndefined(data) && data.messageResult != "KO" && utilsIsObjectNullOrUndefined(data.messageResult)) {
+                    /*if the band was published*/
 
+                    if (data.messageCode === "PUBLISHBAND")
+                    {
+                        // Already published: we already have the View Model
+                        oController.receivedPublishBandMessage(data);
+                    }
+                    else
+                    {
+                        // It is publishing: we will receive Rabbit Message
+                        if (data.messageCode !== "WAITFORRABBIT") oController.setTreeNodeAsDeselected(oBand.productName+"_"+oBand.name);
+                    }
+
+                }
+                else {
+                    utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN PUBLISHING BAND " + oBand.name);
+                    oController.setTreeNodeAsDeselected(oBand.productName+"_"+oBand.name);
+                }
+            }).error(function (data, status) {
+                console.log('publish band error');
                 utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN PUBLISH BAND");
-                $("#jstree").jstree().enable_node(oBand.productName+"_"+oBand.name);
-                $('#jstree').jstree(true).set_icon(oBand.productName+"_"+oBand.name,'assets/icons/uncheck_20x20.png');
-            }
+                oController.setTreeNodeAsDeselected(oBand.productName+"_"+oBand.name);
+            });
+        }
+        else {
 
-        }).error(function (data, status) {
-            console.log('publish band error');
-            utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN PUBLISH BAND");
-            $("#jstree").jstree().enable_node(oBand.productName+"_"+oBand.name);
-            $('#jstree').jstree(true).set_icon(oBand.productName+"_"+oBand.name,'assets/icons/uncheck_20x20.png');
-          });
+            var elementMapContainer = angular.element(document.querySelector('#mapcontainer'));
+            var heightMapContainer = elementMapContainer[0].offsetHeight;
+            var widthMapContainer = elementMapContainer[0].offsetWidth;
+
+            var elementImagePreview = angular.element(document.querySelector('#imagepreviewcanvas'));
+            var heightImagePreview = elementImagePreview[0].offsetHeight;
+            var widthImagePreview = elementImagePreview[0].offsetWidth;
+
+            var oBodyMapContainer = this.createBodyForProcessingBandImage(sFileName,oBand.name, null, 0,0,oBand.width,oBand.height,widthMapContainer, heightMapContainer);
+
+            oController.processingViewBandImage(oBodyMapContainer, oController.m_oActiveWorkspace.workspaceId);
+
+            if ( (widthImagePreview > 0) && (heightImagePreview > 0) )
+            {
+                var oBodyImagePreview = this.createBodyForProcessingBandImage(sFileName,oBand.name, null, 0,0,oBand.width,oBand.height,widthImagePreview, heightImagePreview);
+                // Show Preview Only if it is visible
+                oController.processingPreviewBandImage(oBodyImagePreview,oController.m_oActiveWorkspace.workspaceId);
+            }
+        }
+
+
     }
 
     //REMOVE BAND
@@ -724,6 +696,9 @@ var EditorController = (function () {
             }
         }
         else {
+            this.m_sPreviewUrlSelectedBand = "empty";
+            // TODO: non riesco a fare scomparire l'immagine!!
+            this.m_sViewUrlSelectedBand = "";
             this.m_oGlobeService.removeAllEntities();
             this.m_oGlobeService.flyToWorkspaceBoundingBox(this.m_aoProducts);
         }
@@ -742,6 +717,19 @@ var EditorController = (function () {
             }
         }
 
+    }
+
+
+    /***************************** TREE FUNCTIONS ****************************************/
+
+    EditorController.prototype.setTreeNodeAsDeselected = function(sNode) {
+        $("#jstree").jstree().enable_node(sNode);
+        $('#jstree').jstree(true).set_icon(sNode,'assets/icons/uncheck_20x20.png');
+    }
+
+    EditorController.prototype.setTreeNodeAsSelected = function(sNode) {
+        $("#jstree").jstree().enable_node(sNode);
+        $('#jstree').jstree(true).set_icon(sNode,'assets/icons/check_20x20.png');
     }
 
     // GENERATE TREE
@@ -849,26 +837,6 @@ var EditorController = (function () {
                                                     }
                                                 },
 
-                                                //         }
-                                                // },
-                                                //SUB-SUBMENU GEOMETRIC
-                                                // "Geometric": {
-                                                //     "label": "Geometric",
-                                                //     "action": false,
-                                                //     "submenu":
-                                                //         {
-                                                //SUB-SUB-SUBMENU GEOMETRIC
-                                                // "Terrain correction": {
-                                                //     "label": "Terrain correction",
-                                                //     "action": false,
-                                                //     "submenu":
-                                                //         {
-
-                                                //         }
-                                                // },
-
-                                                //         }
-                                                // },
                                                 "Range Doppler Terrain Correction": {
                                                     "label": "Range Doppler Terrain Correction",
                                                     "action": function (obj) {
@@ -879,22 +847,14 @@ var EditorController = (function () {
                                                         if(utilsIsObjectNullOrUndefined(oFindedProduct) == false) oController.rangeDopplerTerrainCorrectionDialog(oFindedProduct);
                                                     }
                                                 },
-                                                //SUB-SUBMENU RADIOMETRIC
-                                                // "Radiometric": {
-                                                //     "label": "Radiometric",
-                                                //     "action": false,
-                                                //     "separator_before":true,
-                                                //     "submenu":
-                                                //         {
 
                                                 "Calibrate": {
                                                     "label": "Calibrate",
                                                     "action": function (obj) {
                                                         var sSourceFileName = $node.original.fileName;
-                                                        var sDestinationFileName = '';
-                                                        var oFindedProduct = oController.findProductByFileName(sSourceFileName);
+                                                        var oFound = oController.findProductByFileName(sSourceFileName);
 
-                                                        if(utilsIsObjectNullOrUndefined(oFindedProduct) == false) oController.openRadiometricCalibrationDialog(oFindedProduct);
+                                                        if(utilsIsObjectNullOrUndefined(oFound) == false) oController.openRadiometricCalibrationDialog(oFound);
 
                                                     }
                                                 },
@@ -911,10 +871,9 @@ var EditorController = (function () {
                                                     "label": "NDVI",
                                                     "action": function (obj) {
                                                         var sSourceFileName = $node.original.fileName;
-                                                        var sDestinationFileName = '';
-                                                        var oFindedProduct = oController.findProductByFileName(sSourceFileName);
+                                                        var oFound = oController.findProductByFileName(sSourceFileName);
 
-                                                        if(utilsIsObjectNullOrUndefined(oFindedProduct) == false) oController.openNDVIDialog(oFindedProduct);
+                                                        if(utilsIsObjectNullOrUndefined(oFound) == false) oController.openNDVIDialog(oFound);
                                                     }
                                                 },
 
@@ -1017,20 +976,21 @@ var EditorController = (function () {
 
             var oController=this;
 
-
-                oNode.children = [
-                    {"text":"Metadata",
-                     "icon": "assets/icons/folder_20x20.png",
-                     "children": [],
-                     "clicked":false,//semaphore
-                        "url" : oController.m_oProductService.getApiMetadata(oNode.fileName),
-                }, {
+            oNode.children = [
+                {
+                    "text":"Metadata",
+                    "icon": "assets/icons/folder_20x20.png",
+                    "children": [],
+                    "clicked":false,//semaphore
+                    "url" : oController.m_oProductService.getApiMetadata(oNode.fileName),
+                },
+                {
                     "text": "Bands",
                     "icon": "assets/icons/folder_20x20.png",
                     "children": []
-                },
+                }
+            ];
 
-                ];
             oNode.icon = "assets/icons/product_20x20.png";
             oTree.core.data.push(oNode);
 
@@ -1130,32 +1090,17 @@ var EditorController = (function () {
     }
 
     /********************** PROCESSING BAND **********************/
-    /*
-    *
-    {
-        "productFileName": "S1B_IW_GRDH_1SDV_20170621T052711_20170621T052736_006144_00ACB6_75AA.zip",
-        "bandName": "Amplitude_VH",
-        "filterVM": <filter>,
-        "vp_x": 6000,
-        "vp_y": 6000,
-        "vp_w": 2000,
-        "vp_h": 2000,
-        "img_w": 200,
-        "img_h": 200
-    }
-        filterVM è l'oggetto che rappresenta l'eventuale filtro da applicare (può anche non essere passato) ed è lo stesso oggetto ritornato dall'API "standardfilters"
 
-        vp_x, vp_y, vp_w, vp_h rappresentano in viewport (in pixel) di ritaglio dell'immagine
-
-        img_w, img_h rappresentano la dimensione dell'immagine jpg ritornata
-    * */
+    /**
+     * Generates and shows the Band Image Preview
+     * @param oBody
+     * @param workspaceId
+     * @returns {boolean}
+     */
     EditorController.prototype.processingPreviewBandImage = function(oBody,workspaceId)
     {
-
-        if(utilsIsObjectNullOrUndefined(oBody) === true)
-            return false;
-        if(utilsIsStrNullOrEmpty(workspaceId) === true)
-            return false;
+        if(utilsIsObjectNullOrUndefined(oBody) === true) return false;
+        if(utilsIsStrNullOrEmpty(workspaceId) === true) return false;
 
         var oController = this;
         this.m_bIsLoadedPreviewBandImage = false;
@@ -1167,53 +1112,66 @@ var EditorController = (function () {
                 {
                     var blob = new Blob([data], {type: "octet/stream"});
                     var objectUrl = URL.createObjectURL(blob);
-                    // document.querySelector("#previewimage").src = objectUrl;
                     oController.m_sPreviewUrlSelectedBand = objectUrl;
                     oController.m_bIsLoadedPreviewBandImage = true;
-                    // window.open(objectUrl,'_self');
                 }
             }
         }).error(function (data, status) {
-            //alert('error');
-            utilsVexDialogAlertTop('GURU MEDITATION<br>ERROR PROCESSING BAND IMAGE ')
+            utilsVexDialogAlertTop('GURU MEDITATION<br>ERROR PROCESSING BAND PREVIEW IMAGE ')
         });
 
         return true;
     };
 
-    EditorController.prototype.processingViewBandImage = function(workspaceId)
+    EditorController.prototype.processingViewBandImage = function(oBody, workspaceId)
     {
-
-        // if(utilsIsObjectNullOrUndefined(oBody) === true)
-        //     return false;
-        if(utilsIsStrNullOrEmpty(workspaceId) === true)
-            return false;
+        if(utilsIsStrNullOrEmpty(workspaceId) === true) return false;
 
         var oController = this;
         this.m_bIsLoadedViewBandImage = false;
-        this.m_oFilterService.getProductBand(this.m_oBodyMapContainer,workspaceId).success(function (data, status) {
+        this.m_oFilterService.getProductBand(oBody,workspaceId).success(function (data, status) {
             if (data != null)
             {
                 if (data != undefined)
                 {
+                    // Create the link to the stream
                     var blob = new Blob([data], {type: "octet/stream"});
                     var objectUrl = URL.createObjectURL(blob);
-                    // document.querySelector("#previewimage").src = objectUrl;
                     oController.m_sViewUrlSelectedBand = objectUrl;
+
+                    // Stop the waiter
                     oController.m_bIsLoadedViewBandImage = true;
-                    // window.open(objectUrl,'_self');
+
+                    // Set the node as selected
+                    var sNodeID = oController.m_oActiveBand.productName + "_" + oController.m_oActiveBand.name;
+                    oController.setTreeNodeAsSelected(sNodeID);
+
+                    var oNode = $('#jstree').jstree(true).get_node(sNodeID); //oLayer.layerId
+                    if (utilsIsObjectNullOrUndefined(oNode.original) == false) oNode.original.bPubblish = true;
                 }
             }
         }).error(function (data, status) {
-            //alert('error');
             utilsVexDialogAlertTop('GURU MEDITATION<br>ERROR PROCESSING BAND IMAGE ')
         });
 
         return true;
     };
 
-    EditorController.prototype.createBodyForprocessingBandImage = function(){
+    EditorController.prototype.createBodyForProcessingBandImage = function(sFileName, sBandName, sFilters, iRectangleX, iRectangleY, iRectangleWidth, iRectangleHeight, iOutputWidth, iOutputHeight){
 
+        var oBandImageBody = {
+            "productFileName": sFileName,
+            "bandName": sBandName,
+            "filterVM": sFilters,
+            "vp_x": iRectangleX,
+            "vp_y": iRectangleY,
+            "vp_w": iRectangleWidth,
+            "vp_h": iRectangleHeight,
+            "img_w": iOutputWidth,
+            "img_h": iOutputHeight
+        };
+
+        return oBandImageBody;
     }
 
     /**************** MAP 3D/2D MODE ON/OFF  (SWITCH)*************************/
@@ -1221,10 +1179,10 @@ var EditorController = (function () {
         var oController = this;
 
         oController.m_b2DMapModeOn = !oController.m_b2DMapModeOn;
-        oController.m_b3DMapModeOn = !oController.m_b3DMapModeOn;
+        //oController.m_b3DMapModeOn = !oController.m_b3DMapModeOn;
 
         //3D MAP
-        if (oController.m_b2DMapModeOn == false && oController.m_b3DMapModeOn == true) {
+        if (oController.m_b2DMapModeOn == false /*&& oController.m_b3DMapModeOn == true*/) {
             oController.m_oMapService.clearMap();
             oController.m_oGlobeService.clearGlobe();
             oController.m_oGlobeService.initGlobe('cesiumContainer');
@@ -1236,7 +1194,7 @@ var EditorController = (function () {
             oController.loadLayersMap2D();
             oController.loadLayersMap3D();
         }//2D MAP
-        else if (oController.m_b2DMapModeOn == true && oController.m_b3DMapModeOn == false) {
+        else if (oController.m_b2DMapModeOn == true /*&& oController.m_b3DMapModeOn == false*/) {
             oController.m_oMapService.clearMap();
             oController.m_oGlobeService.clearGlobe();
             oController.m_oMapService.initMap('wasdiMap');
@@ -1289,8 +1247,8 @@ var EditorController = (function () {
         }
     }
 
-    /*
-     synchronize the 3D Map and 2D map
+    /**
+     * synchronize the 3D Map and 2D map
      */
     EditorController.prototype.synchronize3DMap = function () {
 
@@ -1311,23 +1269,20 @@ var EditorController = (function () {
         });
 
     }
-    /*
-     synchronize the 2D Map and 3D map
+
+    /**
+     * synchronize the 2D Map and 3D map
+     * @returns {boolean}
      */
     EditorController.prototype.synchronize2DMap = function () {
 
         var oMap = this.m_oMapService.getMap();
-        //var oGlobe = this.m_oGlobeService.getGlobe();
         var aCenter = this.m_oGlobeService.getMapCenter();
-        if (utilsIsObjectNullOrUndefined(aCenter))
-            return false;
+
+        if (utilsIsObjectNullOrUndefined(aCenter)) return false;
+
         oMap.flyTo(aCenter);
-        //var oRectangle = oGlobe.scene.camera.computeViewRectangle(oGlobe.scene.globe.ellipsoid);
-        //if(utilsIsObjectNullOrUndefined(oRectangle))
-        //    return false;
-        //// center map
-        //var oBoundaries = L.latLngBounds(oRectangle.south,oRectangle.west,oRectangle.north,oRectangle.east);
-        //oMap.fitBounds(oBoundaries);
+
         return true;
     }
 
@@ -1397,13 +1352,6 @@ var EditorController = (function () {
 
         if (utilsIsObjectNullOrUndefined(oBoundingBox) == true) return false;
 
-        //var aaBounds = [];
-        //for( var iIndex = 0; iIndex < aBoundingBox.length-1 ;iIndex = iIndex + 2 )
-        //{
-        //    aaBounds.push([aBoundingBox[iIndex],aBoundingBox[iIndex+1]]);
-        //
-        //}
-        //this.m_oMapService.zoomOnBounds(oBoundingBox);
         var oMap = this.m_oMapService.getMap();
         var corner1 = L.latLng(oBoundingBox.maxy, oBoundingBox.maxx),
             corner2 = L.latLng(oBoundingBox.miny, oBoundingBox.minx),
@@ -1413,19 +1361,22 @@ var EditorController = (function () {
         return true;
     }
 
-    /*
-        this method check if there is a band, if there is the band
-        is removed else the band is add
+    /**
+     * This method changes the editing mode from Editor to Geographical and Vice Versa
      */
-    EditorController.prototype.addOrRemoveMapLayer = function () {
+    EditorController.prototype.switchEditorGeoReferencedMode = function () {
+        // This should be impossible, but just to be sure:
+        if (this.m_b2DMapModeOn == false) {
+            console.log("EditorController.switchEditorGeoReferencedMode: impossible to switch 3d/2d mode in editor mode");
+            return;
+        }
+
+        // Switch the flag
         this.m_bIsVisibleMapOfLeaflet = !this.m_bIsVisibleMapOfLeaflet;
 
-        //switch leaflet map mode and img preview mode
-        //this.m_bPreviewBandNotGeoreferenced = !this.m_bPreviewBandNotGeoreferenced;
-
-        //If there is the map or grey background
+        //If we are in Geographical Mode
         if (this.m_bIsVisibleMapOfLeaflet == true) {
-            //if there is the map
+
             //reinitialize the globe
             this.m_oGlobeService.clearGlobe();
             this.m_oGlobeService.initGlobe('cesiumContainer2');
@@ -1433,15 +1384,18 @@ var EditorController = (function () {
             //add layers in 3d map
             var iNumberOfLayers = this.m_aoLayersList.length;
             for (var iIndexLayer = 0; iIndexLayer < iNumberOfLayers; iIndexLayer++) {
-                if (!utilsIsObjectNullOrUndefined(this.m_aoLayersList[iIndexLayer].layerId))//check if the layer was took with get capabilities
-                {
-                    this.addLayerMap3D(this.m_aoLayersList[iIndexLayer].layerId);//import layer
 
-                    if (!utilsIsStrNullOrEmpty(this.m_aoLayersList[iIndexLayer].geoserverBoundingBox))//it dosen't do the zoom if there isn't bounding box
+                //check if the layer was took with get capabilities
+                if (!utilsIsObjectNullOrUndefined(this.m_aoLayersList[iIndexLayer].layerId))
+                {
+                    //import layer
+                    this.addLayerMap3D(this.m_aoLayersList[iIndexLayer].layerId);
+
+                    //it dosen't do the zoom if there isn't bounding box
+                    if (!utilsIsStrNullOrEmpty(this.m_aoLayersList[iIndexLayer].geoserverBoundingBox))
                     {
                         try {
                             var oBounds = JSON.parse(this.m_aoLayersList[iIndexLayer].geoserverBoundingBox);
-
                             this.m_oGlobeService.zoomOnLayerBoundingBox([oBounds.minx, oBounds.miny, oBounds.maxx, oBounds.maxy]);
                         }
                         catch (e) {
@@ -1462,7 +1416,7 @@ var EditorController = (function () {
             this.m_oMapService.setBasicMap();
         }
         else {
-            //if there'isnt the map (grey background)
+            //if we are in Editor Mode
 
             var iNumberOfLayers = this.m_aoLayersList.length;
             if (iNumberOfLayers == 1)//if there is only one layer
@@ -1475,7 +1429,8 @@ var EditorController = (function () {
 
                 //insert in globe rectangle
 
-                if (!utilsIsObjectNullOrUndefined(this.m_aoLayersList[0].boundingBox)) //if there is .boundingBox property, the layer was downloaded by copernicus server
+                //if there is .boundingBox property, the layer was downloaded by copernicus server
+                if (!utilsIsObjectNullOrUndefined(this.m_aoLayersList[0].boundingBox))
                 {
                     var aBounds = JSON.parse("[" + this.m_aoLayersList[0].boundingBox + "]");
                     if(aBounds.length > 1)
@@ -1549,7 +1504,44 @@ var EditorController = (function () {
 
         }
     }
-    // SHOW MODAL
+
+    EditorController.prototype.hideOrShowPixelInfo = function () {
+        this.m_bIsVisiblePixelInfo = !this.m_bIsVisiblePixelInfo;
+
+        if (this.m_bIsVisiblePixelInfo == true) {
+            $('.leaflet-popup-pane').css({"visibility": "visible"});
+            $('.leaflet-container').css('cursor','crosshair');
+        }
+        else {
+            $('.leaflet-popup-pane').css({"visibility": "hidden"});
+            $('.leaflet-container').css('cursor','');
+        }
+    }
+
+
+    EditorController.prototype.findProductByFileName = function(sFileNameInput)
+    {
+        if ( (utilsIsObjectNullOrUndefined(sFileNameInput) == true) && (utilsIsStrNullOrEmpty(sFileNameInput) == true))  return null;
+        if (utilsIsObjectNullOrUndefined(this.m_aoProducts) == true)  return null;
+
+        var iNumberOfProducts = this.m_aoProducts.length;
+
+        if(this.m_aoProducts.length == 0) return null;
+
+        for(var iIndexProduct = 0; iIndexProduct < iNumberOfProducts; iIndexProduct++)
+        {
+            if( this.m_aoProducts[iIndexProduct].fileName == sFileNameInput )
+            {
+                return this.m_aoProducts[iIndexProduct];
+            }
+        }
+
+        return null;
+    };
+
+    //---------------------------------- SHOW MODALS ------------------------------------
+
+
     EditorController.prototype.openGetCapabilitiesDialog = function () {
         var oController = this
         this.m_oModalService.showModal({
@@ -1568,30 +1560,7 @@ var EditorController = (function () {
         return true;
     }
 
-    EditorController.prototype.hideOrShowPixelInfo = function () {
-        this.m_bIsVisiblePixelInfo = !this.m_bIsVisiblePixelInfo;
 
-        if (this.m_bIsVisiblePixelInfo == true) {
-            //$('.leaflet-popup-pane').css({"display":""});
-            $('.leaflet-popup-pane').css({"visibility": "visible"});
-            $('.leaflet-container').css('cursor','crosshair');
-            // $("#wasdiMap").hover( function(){
-            //     $(this).css({"pointer":"crosshair"});//set pointer with cross
-            // });
-            /*.leaflet-fade-anim .leaflet-map-pane .leaflet-popup*/
-        }
-        else {
-            //$('.leaflet-popup-pane').css({"display":"none"});
-            $('.leaflet-popup-pane').css({"visibility": "hidden"});
-            $('.leaflet-container').css('cursor','');
-
-            // $("#wasdiMap").hover( function(){
-            //     $(this).css({"pointer":"auto"});//set pointer withe default pointer
-            // });
-        }
-    }
-
-    // SHOW MODAL
     EditorController.prototype.openMergeDialog = function (oSelectedProduct) {
 
         var oController = this;
@@ -1615,29 +1584,6 @@ var EditorController = (function () {
 
         return true;
     };
-
-    EditorController.prototype.findProductByFileName = function(sFileNameInput)
-    {
-        if( (utilsIsObjectNullOrUndefined(sFileNameInput) == true) && (utilsIsStrNullOrEmpty(sFileNameInput) == true))
-            return null;
-        if(utilsIsObjectNullOrUndefined(this.m_aoProducts) == true)
-            return null;
-
-        var iNumberOfProducts = this.m_aoProducts.length;
-        if(this.m_aoProducts.length == 0)
-            return null;
-
-        for(var iIndexProduct = 0; iIndexProduct < iNumberOfProducts; iIndexProduct++)
-        {
-            if( this.m_aoProducts[iIndexProduct].fileName == sFileNameInput )
-            {
-                return this.m_aoProducts[iIndexProduct];
-            }
-        }
-        return null;
-    };
-
-    //---------------------------------- SHOW MODALS ------------------------------------
 
     EditorController.prototype.openWorkflowDialog = function(){
         var oController = this;
@@ -1916,8 +1862,8 @@ var EditorController = (function () {
 
     EditorController.prototype.filterBandDialog = function (oSelectedBand)
     {
-        if(utilsIsObjectNullOrUndefined(oSelectedBand) === true)
-            return false;
+        if(utilsIsObjectNullOrUndefined(oSelectedBand) === true) return false;
+
         var oController = this;
         this.m_oModalService.showModal({
             templateUrl: "dialogs/filter_band_operation/FilterBandDialog.html",
@@ -1931,10 +1877,9 @@ var EditorController = (function () {
         }).then(function (modal) {
             modal.element.modal();
             modal.close.then(function (oResult) {
-                if(utilsIsObjectNullOrUndefined(oResult) === true)
-                    return false;
-                if(utilsIsObjectNullOrUndefined(oResult.filter) === true)
-                    return false;
+                if(utilsIsObjectNullOrUndefined(oResult) === true)  return false;
+                if(utilsIsObjectNullOrUndefined(oResult.filter) === true) return false;
+
                 var elementMapContainer = angular.element(document.querySelector('#mapcontainer'));
                 var heightMapContainer = elementMapContainer[0].offsetHeight;
                 var widthMapContainer = elementMapContainer[0].offsetWidth;
@@ -1946,32 +1891,11 @@ var EditorController = (function () {
                 var sFileName = oController.m_aoProducts[oResult.band.productIndex].fileName;
                 var sFilter = JSON.stringify(oResult.filter);
 
-                oController.m_oBodyMapContainer = {
-                    "productFileName": sFileName,
-                    "bandName": oResult.band.name,
-                    "filterVM": sFilter,
-                    "vp_x": 0,
-                    "vp_y": 0,
-                    "vp_w": oResult.band.width,
-                    "vp_h": oResult.band.height,
-                    "vp_w_original": oResult.band.width,
-                    "vp_h_original": oResult.band.height,
-                    "img_w": widthMapContainer,
-                    "img_h": heightMapContainer
-                };
-                var oBodyImagePreview = {
-                    "productFileName": sFileName,
-                    "bandName": oResult.band.name,
-                    "filterVM": sFilter,
-                    "vp_x": 0,
-                    "vp_y": 0,
-                    "vp_w": oResult.band.width,
-                    "vp_h": oResult.band.height,
-                    "img_w": widthImagePreview,
-                    "img_h": heightImagePreview
-                };
+                var oBodyMapContainer = this.createBodyForProcessingBandImage(sFileName,oResult.band.name,sFilter,0,0,oResult.band.width, oResult.band.height,widthMapContainer, heightMapContainer);
 
-                oController.processingViewBandImage(oController.m_oActiveWorkspace.workspaceId);
+                var oBodyImagePreview = this.createBodyForProcessingBandImage(sFileName,oResult.band.name,sFilter,0,0,oResult.band.width, oResult.band.height,widthImagePreview, heightImagePreview);
+
+                oController.processingViewBandImage(oBodyMapContainer, oController.m_oActiveWorkspace.workspaceId);
                 if ( (widthImagePreview > 0) && (heightImagePreview > 0) )
                 {
                     // Show Preview Only if it is visible
@@ -2063,13 +1987,6 @@ var EditorController = (function () {
 
         if (typeof oElement != "undefined" && oElement != null)
         {
-            /* i generate new object
-             {
-             *       'text':'name'
-             *       'Children':[]
-             * }
-             * */
-
             var oNode = new Object();
             oNode.text=oElement.name;
             oNode.children= [];
@@ -2083,16 +2000,6 @@ var EditorController = (function () {
                     this.generateMetadatadTree(oElement.elements[iIndexNumberElements] ,oNewTree[iIndexNewTreeAttribute].children, iIndexNumberElements);
                 }
             }
-
-            /*
-             if(oElement.bands != null)// if is a leaf
-             {
-             // i call the algorithm for all child
-             for (var iIndexNumberElements = 0; iIndexNumberElements < (oElement.elements.length); iIndexNumberElements++)
-             {
-             this.generateWellFormedTree(oElement.bands[iIndexNumberElements] ,oNewTree[iIndexNewTreeAttribute].children, iIndexNumberElements);
-             }
-             }*/
         }
 
     };
@@ -2161,25 +2068,8 @@ var EditorController = (function () {
             this.m_oGlobeService.clearGlobe();
             this.m_oGlobeService.initGlobe('cesiumContainer2');
         }
-        oBand.isVisibleInMap = false;
-        //Remove layer from layers list
-        // var iLenghtLayersList;
-        // if (utilsIsObjectNullOrUndefined(oController.m_aoLayersList))
-        //     iLenghtLayersList = 0;
-        // else
-        //     iLenghtLayersList = oController.m_aoLayersList.length;
 
-        // for (var iIndex = 0; iIndex < iLenghtLayersList; ) {
-        //     if (utilsIsStrNullOrEmpty(sLayerId) == false && utilsIsSubstring(sLayerId, oController.m_aoLayersList[iIndex].layerId)) {
-        //         oController.m_aoLayersList.splice(iIndex,1);
-        //         iLenghtLayersList--;
-        //     }
-        //     else
-        //     {
-        //         iIndex++;
-        //     }
-        //
-        // }
+        oBand.isVisibleInMap = false;
     };
 
     EditorController.prototype.isHideTree = function()
@@ -2191,7 +2081,9 @@ var EditorController = (function () {
     {
         this.m_oState.go("root.import", { });
     };
-    /************************ COLOUR MANIPOLATION ****************************/
+
+
+    /************************ COLOUR MANIPULATION ****************************/
     EditorController.prototype.drawColourManipulationHistogram = function(sNameDiv)
     {
         if(utilsIsStrNullOrEmpty(sNameDiv) === true)
