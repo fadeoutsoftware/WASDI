@@ -503,3 +503,24 @@ function utilsGetPropertiesObject (obj)
     }
     return aProperties;
 }
+
+//CHECK IF FEBRUARY HAS 29 DAYS
+function utilsLeapYear(year)
+{
+    return ((year % 4 == 0) && (year % 100 != 0)) || (year % 400 == 0);
+}
+
+function utilsGenerateArrayWithFirstNIntValue (iValue)
+{
+    if(utilsIsObjectNullOrUndefined(iValue) === true || (utilsIsInteger(iValue) === false) )
+    {
+        return null;
+    }
+    var aiReturnArray = [];
+    for(var iIndexArray = 0; iIndexArray < iValue; iIndexArray++)
+    {
+        aiReturnArray[iIndexArray] = iIndexArray+1;
+    }
+    return aiReturnArray;
+}
+

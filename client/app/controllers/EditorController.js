@@ -1925,7 +1925,7 @@ var EditorController = (function () {
             inputs: {
                 extras: {
                     workspaceId : this.m_oActiveWorkspace.workspaceId,
-                    selectedBand:oSelectedBand
+                    selectedBand: oSelectedBand
                 },
             }
         }).then(function (modal) {
