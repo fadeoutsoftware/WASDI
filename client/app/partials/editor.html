@@ -323,15 +323,21 @@
 
                     <!----------------------------------------------- TAB 2 ----------------------------------------------->
                     <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12" ng-show="m_oController.m_iActiveMapPanelTab === 2">
-                        <imagepreview is-loaded="m_oController.m_bIsLoadedPreviewBandImage" url-image="m_oController.m_sPreviewUrlSelectedBand"
-                                      body = "m_oController.m_oBodyMapContainer">
-                        </imagepreview>
+                        <div class="col-xs-10 col-sm-10 col-md-10 col-lg-10">
+                            <imagepreview is-loaded="m_oController.m_bIsLoadedPreviewBandImage" url-image="m_oController.m_sPreviewUrlSelectedBand"
+                                          body = "m_oController.m_oBodyMapContainer">
+                            </imagepreview>
 
-                        <button ng-click="m_oController.processingViewBandImage(m_oController.m_oActiveWorkspace.workspaceId)"
-                                ng-disabled = " (m_oController.m_bIsLoadedPreviewBandImage === false) || (m_oController.m_bIsLoadedViewBandImage === false)">
-                            Zoom
-                        </button>
-                        <!-- on-click="m_oController.processingViewBandImage()"-->
+                        </div>
+
+                        <div class="col-xs-2 col-sm-2 col-md-2 col-lg-2">
+
+                            <button ng-click="m_oController.processingViewBandImage(m_oController.m_oActiveWorkspace.workspaceId)"
+                                    ng-disabled = " (m_oController.m_bIsLoadedPreviewBandImage === false) || (m_oController.m_bIsLoadedViewBandImage === false)">
+                                Zoom
+                            </button>
+                            <!-- on-click="m_oController.processingViewBandImage()"-->
+                        </div>
                     </div>
 
                 </div>

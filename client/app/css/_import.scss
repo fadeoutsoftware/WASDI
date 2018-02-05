@@ -228,6 +228,26 @@
         height: $wasdi-height-panel-import-max-width-1366-max-height-768;
         max-height:$wasdi-height-panel-import-max-width-1366-max-height-768;
       }
+
+      .DropdownMenu
+      {
+        width: 120px;
+        ul
+        {
+          width:100%;
+          .mega-dropdown
+          {
+            width:100%;
+
+          }
+        }
+
+      }
+
+      .add-filter-button{
+        padding: 10px 20px;
+      }
+
       .btn-group-vertical{
         .btn-default{
           color:white;
