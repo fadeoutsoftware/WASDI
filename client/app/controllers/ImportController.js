@@ -31,6 +31,7 @@ var ImportController = (function() {
         this.m_oPageService = oPageservice;
 
         // this.m_aiYears=[];//default years
+
         this.m_oAdvanceFilter = {
             savedData:[],
             selectedSeasonYears:[],
@@ -43,6 +44,8 @@ var ImportController = (function() {
             selectedDayTo:"",
             selectedMonthFrom:"",
             selectedMonthTo:"",
+            selectedYearsSearchForMonths:[],
+            selectedMonthsSearchForMonths:[],
         };
         //this.m_aiYears
         this.initDefaultDays();
@@ -1617,6 +1620,7 @@ var ImportController = (function() {
             var dateSensingPeriodTo = new Date();
             dateSensingPeriodFrom.setYear(this.m_oAdvanceFilter.selectedYears[iIndexYear]);
             dateSensingPeriodFrom.setMonth(this.convertNameMonthInNumber(this.m_oAdvanceFilter.selectedMonthFrom));
+            // TODO CHECK LEAP YEAS (29 DAYS FEBRUARY)
             dateSensingPeriodFrom.setDate( this.m_oAdvanceFilter.selectedDayFrom);
             dateSensingPeriodTo.setYear(this.m_oAdvanceFilter.selectedYears[iIndexYear]);
             dateSensingPeriodTo.setMonth(this.convertNameMonthInNumber(this.m_oAdvanceFilter.selectedMonthTo));
@@ -1628,7 +1632,8 @@ var ImportController = (function() {
             this.saveDataInAdvanceFilter(sName,oData);
         }
 
-    }
+    };
+
     ImportController.prototype.convertNameMonthInNumber = function(sName){
         if(utilsIsStrNullOrEmpty(sName) === true)
             return -1;
@@ -1675,6 +1680,39 @@ var ImportController = (function() {
         }
         return -1;
     }
+
+    ImportController.prototype.addFilterMonths = function()
+    {
+        if( (utilsIsObjectNullOrUndefined(this.m_oAdvanceFilter.selectedYearsSearchForMonths) === true) || (utilsIsObjectNullOrUndefined(this.m_oAdvanceFilter.selectedMonthsSearchForMonths) === true) )
+        {
+            return false;
+        }
+        var iNumberOfSelectedYears = this.m_oAdvanceFilter.selectedYearsSearchForMonths.length;
+        var iNumberOfSelectedMonths = this.m_oAdvanceFilter.selectedMonthsSearchForMonths.length;
+
+        for(var iIndexYear = 0; iIndexYear < iNumberOfSelectedYears; iIndexYear++)
+        {
+            for(var iIndexMonth = 0; iIndexMonth < iNumberOfSelectedMonths; iIndexMonth++)
+            {
+                var sName = this.m_oAdvanceFilter.selectedYearsSearchForMonths[iIndexYear].toString() +" "+  this.m_oAdvanceFilter.selectedMonthsSearchForMonths[iIndexMonth];
+                var dateSensingPeriodFrom = new Date();
+                var dateSensingPeriodTo = new Date();
+                dateSensingPeriodFrom.setYear(this.m_oAdvanceFilter.selectedYearsSearchForMonths[iIndexYear]);
+                dateSensingPeriodFrom.setMonth(this.convertNameMonthInNumber(this.m_oAdvanceFilter.selectedMonthsSearchForMonths[iIndexMonth]));
+                dateSensingPeriodFrom.setDate(1);
+                dateSensingPeriodTo.setYear(this.m_oAdvanceFilter.selectedYearsSearchForMonths[iIndexYear]);
+                dateSensingPeriodTo.setMonth(this.convertNameMonthInNumber(this.m_oAdvanceFilter.selectedMonthsSearchForMonths[iIndexMonth]));
+                dateSensingPeriodTo.setDate(this.getMonthDays(this.m_oAdvanceFilter.selectedMonthsSearchForMonths[iIndexMonth],this.m_oAdvanceFilter.selectedYearsSearchForMonths[iIndexYear]));
+                var oData={
+                    dateSensingPeriodFrom:dateSensingPeriodFrom,
+                    dateSensingPeriodTo:dateSensingPeriodTo
+                };
+                this.saveDataInAdvanceFilter(sName,oData);
+            }
+        }
+        return true;
+    };
+
     //TODO THINK ABOUT CHANGE API BECAUSE THE REQUEST NEED TO SENDS N DATAS
     // ImportController.prototype.setDataToSend = function(dateSensingPeriodFrom,dateSensingPeriodTo){
     //     if(utilsIsObjectNullOrUndefined(dateSensingPeriodFrom) === true || utilsIsObjectNullOrUndefined(dateSensingPeriodTo))
