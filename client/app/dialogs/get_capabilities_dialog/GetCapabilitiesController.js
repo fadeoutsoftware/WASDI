@@ -126,7 +126,7 @@ var GetCapabilitiesController = (function() {
         oLayer.sServerLink = this.m_sServerLink; // add property server link
 
         // check if the background is grey or there is a map
-        if(this.m_oEditorController.m_bIsVisibleMapOfLeaflet == true)
+        if(this.m_oEditorController.m_bIsActiveGeoraphicalMode == true)
         {
             //if there is a map, add layers to it
             this.addLayerMap2D(oLayer.Name,this.m_sServerLink);
@@ -144,7 +144,7 @@ var GetCapabilitiesController = (function() {
                 if(!utilsIsObjectNullOrUndefined(this.m_oEditorController.m_aoLayersList[iIndexLayer].layerId))
                 {
                     var oNode = $('#jstree').jstree(true).get_node(this.m_oEditorController.m_aoLayersList[iIndexLayer].layerId);
-                    oNode.original.bPubblish = false;
+                    oNode.original.bVisibleNow = false;
                     $('#jstree').jstree(true).set_icon(this.m_oEditorController.m_aoLayersList[iIndexLayer].layerId, 'assets/icons/uncheck_20x20.png');
                 }
             }

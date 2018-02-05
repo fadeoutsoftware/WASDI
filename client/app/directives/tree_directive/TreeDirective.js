@@ -116,9 +116,9 @@ angular.module('wasdi.TreeDirective', [])
                                 {
 
                                     //if(data.node.icon == 'assets/icons/check.png')
-                                    if(data.node.original.bPubblish == true)
+                                    if(data.node.original.bVisibleNow == true)
                                     {
-                                        data.node.original.bPubblish = false;
+                                        data.node.original.bVisibleNow = false;
                                         //$('#jstree').jstree(true).set_icon(data.node.id, 'assets/icons/uncheck.png');
                                         $('#jstree').jstree(true).set_icon(data.node.id, 'assets/icons/uncheck_20x20.png');
                                         $scope.m_oController.removeBandImage(data.node.original.band);
@@ -129,7 +129,7 @@ angular.module('wasdi.TreeDirective', [])
                                         //the tree icon is change when it receive the "publishband" message by rabbit or
                                         //when the band was pubblished (http request)
                                         // method: receivedPublishBandMessage()
-                                        //data.node.original.bPubblish = true;
+                                        //data.node.original.bVisibleNow = true;
                                         //$('#jstree').jstree(true).set_icon(data.node.id, 'assets/icons/check.png');
                                         $scope.m_oController.openBandImage(data.node.original.band);
                                     }
