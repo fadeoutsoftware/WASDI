@@ -27,6 +27,7 @@ import wasdi.shared.parameters.PublishBandParameter;
 import wasdi.shared.parameters.PublishParameters;
 import wasdi.shared.utils.SerializationUtils;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.viewmodels.PrimitiveResult;
 import wasdi.shared.viewmodels.PublishBandResultViewModel;
 import wasdi.shared.viewmodels.RabbitMessageViewModel;
 
@@ -324,5 +325,50 @@ public class FileBufferResource {
 		return oReturnValue;
 
 	}
+	
+	
+	@GET
+	@Path("getbandlayerid")
+	@Produces({"application/xml", "application/json", "text/xml"})
+	public PrimitiveResult GetBandLayerId(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sFileUrl") String sFileUrl, @QueryParam("sWorkspaceId") String sWorkspaceId, @QueryParam("sBand") String sBand) throws IOException
+	{
+		PrimitiveResult oReturnValue = null;
+		try {
+			
+			Wasdi.DebugLog("FileBufferResource.GetBandLayerId");
+
+			if (Utils.isNullOrEmpty(sSessionId)) return oReturnValue;
+			User oUser = Wasdi.GetUserFromSession(sSessionId);
+			if (oUser==null) return oReturnValue;
+			if (Utils.isNullOrEmpty(oUser.getUserId())) return oReturnValue;
+
+			Wasdi.DebugLog("FileBufferResource.GetBandLayerId: read product workspaces " + sWorkspaceId);
+
+			oReturnValue = new PrimitiveResult();
+			// Get Product List
+			DownloadedFilesRepository oDownloadedFilesRepository = new DownloadedFilesRepository();
+			DownloadedFile oDownloadedFile = oDownloadedFilesRepository.GetDownloadedFile(sFileUrl);
+			
+			PublishedBandsRepository oPublishedBandsRepository = new PublishedBandsRepository();
+			PublishedBand oPublishBand = oPublishedBandsRepository.GetPublishedBand(oDownloadedFile.getProductViewModel().getName(), sBand);
+
+			if (oPublishBand != null)
+			{
+				Wasdi.DebugLog("FileBufferResource.GetBandLayerId: band already published return " +oPublishBand.getLayerId() );
+				oReturnValue.setStringValue(oPublishBand.getLayerId());
+			}
+			else {
+				Wasdi.DebugLog("FileBufferResource.GetBandLayerId: band never published");
+			}
+			
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			return oReturnValue;
+		}
+
+		return oReturnValue;
+
+	}	
 
 }
