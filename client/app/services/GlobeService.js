@@ -66,8 +66,7 @@ service('GlobeService', ['$http',  'ConstantsService','SatelliteService', functi
         {
             this.m_oWasdiGlobe.destroy();
             this.m_oWasdiGlobe=null;
-        }
-    }
+        }    }
     // get globe
     this.getGlobe = function()
     {
@@ -183,40 +182,7 @@ service('GlobeService', ['$http',  'ConstantsService','SatelliteService', functi
 
         return true;
     }
-    /**
-     * ZOOM ON LAYER BY POINTS
-     * @param oArray
-     * @returns {boolean}
-     */
-    this.zoomOnLayerParamArray = function(aArray)
-    {
-        if(utilsIsObjectNullOrUndefined(aArray) == true)
-            return false;
 
-        var oGlobe = this.m_oWasdiGlobe;
-        if(utilsIsObjectNullOrUndefined(oGlobe) == true)
-            return false;
-
-        var newArray = [];
-        for(var iIndex = 0; iIndex < aArray.length - 1; iIndex += 2 )
-        {
-            newArray.push(new Cesium.Cartographic(aArray[iIndex+1],aArray[iIndex]));
-        }
-
-        var oZoom = Cesium.Rectangle.fromCartographicArray(newArray);
-        //var oZoom =  new Cesium.PolygonHierarchy(Cesium.Cartesian3.fromDegreesArray(aArray));
-        //var oZoom =  new Cesium.Cartesian3.fromDegreesArray(aArray);
-
-        oGlobe.camera.setView({
-            destination: oZoom,
-            orientation: {
-                heading: 0.0,
-                pitch: -Cesium.Math.PI_OVER_TWO,
-                roll: 0.0
-            }
-
-        });
-    }
     /**
      * ADD RECTANGLE (PARAM ARRAY OF POINTS )
      * @param aoArray
@@ -443,9 +409,9 @@ service('GlobeService', ['$http',  'ConstantsService','SatelliteService', functi
     this.flyToWorkspaceBoundingBox = function (m_aoProducts) {
 
         var oRectangle = null;
-        var aArraySplit = [];
+        var aoArraySplit = [];
         var iArraySplitLength = 0;
-        var iInvertedArraySplit = [];
+        var aiInvertedArraySplit = [];
 
         var aoTotalArray = [];
 
@@ -456,26 +422,18 @@ service('GlobeService', ['$http',  'ConstantsService','SatelliteService', functi
 
         // For each product
         for(var iIndexProduct = 0; iIndexProduct < iProductsLength; iIndexProduct++){
-            iInvertedArraySplit = [];
-            aArraySplit = [];
-            // skip if there isn't the product bounding box
-            if(utilsIsObjectNullOrUndefined(m_aoProducts[iIndexProduct].bbox) === true ) continue;
 
             // Split bbox string
-            aArraySplit = m_aoProducts[iIndexProduct].bbox.split(",");
-            aoTotalArray.push.apply(aoTotalArray,aArraySplit);
-            iArraySplitLength = aArraySplit.length;
+            aoArraySplit = m_aoProducts[iIndexProduct].bbox.split(",");
+            aoTotalArray.push.apply(aoTotalArray,aoArraySplit);
 
-            if(iArraySplitLength !== 10) continue;
+            // Get the array representing the bounding box
+            aiInvertedArraySplit = this.fromBboxToRectangleArray(m_aoProducts[iIndexProduct].bbox);
 
-            for(var iIndex = 0; iIndex < iArraySplitLength-1; iIndex = iIndex + 2){
-                iInvertedArraySplit.push(aArraySplit[iIndex+1]);
-                iInvertedArraySplit.push(aArraySplit[iIndex]);
-            }
-
-            oRectangle = this.addRectangleOnGlobeParamArray(iInvertedArraySplit);
+            // Add the rectangle to the globe
+            oRectangle = this.addRectangleOnGlobeParamArray(aiInvertedArraySplit);
             m_aoProducts[iIndexProduct].oRectangle = oRectangle;
-            m_aoProducts[iIndexProduct].aBounds = iInvertedArraySplit;
+            m_aoProducts[iIndexProduct].aBounds = aiInvertedArraySplit;
         }
 
 
@@ -498,8 +456,69 @@ service('GlobeService', ['$http',  'ConstantsService','SatelliteService', functi
         });
 
         this.stopRotationGlobe();
-
     };
+
+    /**
+     * ZOOM ON LAYER BY POINTS
+     * @param oArray
+     * @returns {boolean}
+     */
+    this.zoomOnLayerParamArray = function(aArray)
+    {
+        // Check input data
+        if(utilsIsObjectNullOrUndefined(aArray) == true) return false;
+        if(utilsIsObjectNullOrUndefined(this.m_oWasdiGlobe) == true) return false;
+
+        // create a new points array
+        var newArray = [];
+        for(var iIndex = 0; iIndex < aArray.length - 1; iIndex += 2 )
+        {
+            newArray.push(new Cesium.Cartographic.fromDegrees(aArray[iIndex+1],aArray[iIndex]));
+        }
+
+        // Get a rectangle from the array
+        var oZoom = Cesium.Rectangle.fromCartographicArray(newArray);
+        var oWSCenter = Cesium.Rectangle.center(oZoom);
+
+        // Fly there
+        this.m_oWasdiGlobe.camera.flyTo({
+            destination: Cesium.Cartesian3.fromRadians(oWSCenter.latitude, oWSCenter.longitude, this.GLOBE_LAYER_ZOOM),
+            orientation: {
+                heading: 0.0,
+                pitch: -Cesium.Math.PI_OVER_TWO,
+                roll: 0.0
+            }
+
+        });
+    };
+
+    /**
+     * Convert the string with bbox expressed like PointX,PointY,PointX,PointY,... in a rectangle array to use as globe bounding box
+     * @param bbox
+     * @returns {*}
+     */
+    this.fromBboxToRectangleArray = function (bbox) {
+
+        // skip if there isn't the product bounding box
+        if(utilsIsObjectNullOrUndefined(bbox) === true ) return null;
+
+        var aiInvertedArraySplit = [];
+        var  aoArraySplit;
+
+        // Split bbox string
+        aoArraySplit = bbox.split(",");
+
+        var iArraySplitLength = aoArraySplit.length;
+
+        if(iArraySplitLength !== 10) return null;
+
+        for(var iIndex = 0; iIndex < iArraySplitLength-1; iIndex = iIndex + 2){
+            aiInvertedArraySplit.push(aoArraySplit[iIndex+1]);
+            aiInvertedArraySplit.push(aoArraySplit[iIndex]);
+        }
+
+        return aiInvertedArraySplit;
+    }
 
     this.updateEntityPosition = function(oEntity,oNewPosition){
         if( (utilsIsObjectNullOrUndefined(oEntity) === false) && (utilsIsObjectNullOrUndefined(oNewPosition) === false ) )
