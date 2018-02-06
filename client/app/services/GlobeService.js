@@ -156,10 +156,16 @@ service('GlobeService', ['$http',  'ConstantsService','SatelliteService', functi
     };
 
     /* ADD BOUNDING BOX */
-    this.addRectangleOnGlobeBoundingBox = function (oRectangle)
+    this.addRectangleOnGlobeBoundingBox = function (bbox)
     {
-        if(utilsIsObjectNullOrUndefined(oRectangle))
-            return null;
+        // Get the array representing the bounding box
+        var aiInvertedArraySplit = this.fromBboxToRectangleArray(bbox);
+
+        // Add the rectangle to the globe
+        var oRectangle = this.addRectangleOnGlobeParamArray(aiInvertedArraySplit);
+
+
+        if(utilsIsObjectNullOrUndefined(oRectangle)) return null;
 
         var redRectangle =   this.m_oWasdiGlobe.entities.add({
             name : 'Red translucent rectangle with outline',

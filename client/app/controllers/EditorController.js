@@ -500,74 +500,27 @@ var EditorController = (function () {
             //add layer in list
 
             // check if the background is in Editor Mode or in Georeferenced Mode
-            if (this.m_b2DMapModeOn == true) {
-                //if there is a map, add layers to it
-                this.addLayerMap2D(oBand.layerId);
+            if (this.m_b2DMapModeOn == false) {
+                //if we are in 3D put the layer also on the globe
                 this.addLayerMap3D(oBand.layerId);
+            }
 
-                this.m_aoVisibleBands.push(oBand);
+            //if there is a map, add layers to it
+            this.addLayerMap2D(oBand.layerId);
 
-                //if there isn't Bounding Box is impossible to zoom
-                if (!utilsIsStrNullOrEmpty(oBand.geoserverBoundingBox))
-                {
-                    this.m_oGlobeService.zoomBandImageOnGeoserverBoundingBox(oBand.geoserverBoundingBox);
-                    this.m_oMapService.zoomBandImageOnGeoserverBoundingBox(oBand.geoserverBoundingBox);
-                }
+            this.m_aoVisibleBands.push(oBand);
+
+            //if there isn't Bounding Box is impossible to zoom
+            if (!utilsIsStrNullOrEmpty(oBand.geoserverBoundingBox))
+            {
+                this.m_oGlobeService.zoomBandImageOnGeoserverBoundingBox(oBand.geoserverBoundingBox);
+                this.m_oMapService.zoomBandImageOnGeoserverBoundingBox(oBand.geoserverBoundingBox);
             }
             else {
-                //if the backgrounds is in Editor Mode close all others bands in tree - map
-                var iNumberOfLayers = this.m_aoVisibleBands.length;
-
-                // CLOSE ALL THE NODES
-                for (var iIndexLayer = 0; iIndexLayer < iNumberOfLayers; iIndexLayer++) {
-
-                    //check if there is layerId if there isn't the layer was added by get capabilities
-                    if (!utilsIsObjectNullOrUndefined(this.m_aoVisibleBands[iIndexLayer].layerId)) {
-
-                        var sNodeId = this.m_aoVisibleBands[iIndexLayer].productName + "_" + this.m_aoVisibleBands[iIndexLayer].bandName;
-
-                        var oNode = $('#jstree').jstree(true).get_node(sNodeId);
-
-                        if (utilsIsObjectNullOrUndefined(oNode.original)==false) {
-                            oNode.original.band.bVisibleNow = false;
-                            this.setTreeNodeAsDeselected(sNodeId);
-                        }
-                        else {
-                            console.log("Editor Controller: ERROR oNode.original not defined");
-                        }
-
-                    }
-                }
-
-                this.m_aoVisibleBands = [];
-                this.m_oMapService.removeLayersFromMap();
-                this.m_oGlobeService.removeAllEntities();
-
-                // so add the new bands and the bounding box in cesium
-                var aBounds = JSON.parse("[" + oPublishedBand.boundingBox + "]");
-
-                for (var iIndex = 0; iIndex < aBounds.length - 1; iIndex = iIndex + 2) {
-                    var iSwap;
-                    iSwap = aBounds[iIndex];
-                    aBounds[iIndex] = aBounds[iIndex + 1];
-                    aBounds[iIndex + 1] = iSwap;
-                }
-
-                if(aBounds.length  > 1) this.m_oGlobeService.addRectangleOnGlobeParamArray(aBounds);
-
-                this.addLayerMap2D(oPublishedBand.layerId);
-                this.m_aoVisibleBands.push(oPublishedBand);
-
-                if (!utilsIsStrNullOrEmpty(oBand.geoserverBoundingBox))
-                {
-                    this.m_oGlobeService.zoomBandImageOnGeoserverBoundingBox(oBand.geoserverBoundingBox);
-                    this.m_oMapService.zoomBandImageOnGeoserverBoundingBox(oBand.geoserverBoundingBox);
-                }
-                else {
-                    this.m_oMapService.zoomBandImageOnBBOX(oPublishedBand.bbox);
-                    this.m_oGlobeService.zoomBandImageOnBBOX(oPublishedBand.bbox);
-                }
+                this.m_oMapService.zoomBandImageOnBBOX(oPublishedBand.bbox);
+                this.m_oGlobeService.zoomBandImageOnBBOX(oPublishedBand.bbox);
             }
+
         }
 
     };
