@@ -231,7 +231,9 @@
 
       .DropdownMenu
       {
-        width: 120px;
+        //width: 120px;
+        width: 100%;
+
         ul
         {
           width:100%;
@@ -334,7 +336,16 @@
       }
 
     }
-
+    .body-advance-filters{
+      height: 100%;
+      .row{
+        margin-right: 0px;
+        margin-left: 0px;
+        .my-button{
+          padding: 10px 20px;
+        }
+      }
+    }
     //SEARCH BUTTON
 
 

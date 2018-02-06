@@ -109,10 +109,15 @@ angular.module('wasdi.ImagePreviewDirective', [])
 
                     // scope.body.vp_x = iAx * this.body.vp_x;
                     // scope.body.vp_y = iAy * this.body.vp_y;
-                    scope.body.vp_x = iAx * this.body.vp_w;
-                    scope.body.vp_y = iAy *  this.body.vp_h;
-                    scope.body.vp_w = iWidthSquare * this.body.vp_w;
-                    scope.body.vp_h = iHeightSquare * this.body.vp_h;
+                    scope.body.viewportX = iAx * this.body.originalBandWidth;
+                    scope.body.viewportY = iAy *  this.body.originalBandHeight;
+                    scope.body.viewportWidth = iWidthSquare * this.body.originalBandWidth;
+                    scope.body.viewportHeight = iHeightSquare * this.body.originalBandHeight;
+
+                    // scope.body.vp_x = iAx * this.body.vp_w;
+                    // scope.body.vp_y = iAy *  this.body.vp_h;
+                    // scope.body.vp_w = iWidthSquare * this.body.vp_w;
+                    // scope.body.vp_h = iHeightSquare * this.body.vp_h;
 
                     // onClick({sSeason:body});
                 };
