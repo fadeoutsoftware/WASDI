@@ -259,6 +259,11 @@ public class ProductResource {
 
 										if (oPublishBand != null) {
 											oBand.setPublished(true);
+											oBand.setLayerId(oPublishBand.getLayerId());
+											oBand.setGeoserverBoundingBox(oPublishBand.getGeoserverBoundingBox());
+										}
+										else {
+											oBand.setPublished(false);
 										}
 									}
 										
