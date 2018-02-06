@@ -14,11 +14,11 @@ public class BandViewModel {
     }
 
     private String name;
-    
     private Boolean published = false;
-    
     private int width = 0;
     private int height = 0;
+    private String layerId;
+    private String geoserverBoundingBox;
 
     public String getName() {
         return name;
@@ -44,5 +44,17 @@ public class BandViewModel {
 	}
 	public void setWidth(int width) {
 		this.width = width;
+	}
+	public String getLayerId() {
+		return layerId;
+	}
+	public void setLayerId(String layerId) {
+		this.layerId = layerId;
+	}
+	public String getGeoserverBoundingBox() {
+		return geoserverBoundingBox;
+	}
+	public void setGeoserverBoundingBox(String geoserverBoundingBox) {
+		this.geoserverBoundingBox = geoserverBoundingBox;
 	}
 }

@@ -63,7 +63,7 @@ public class BandImageManager {
 							long ts = System.currentTimeMillis();
 							ArrayList<String> toRemove = new ArrayList<String>();
 							for (Entry<String, CachedSource> entry : sourceCache.entrySet()) {
-								if (ts - entry.getValue().ts > 1000L) { //not accessed by 10 minutes
+								if (ts - entry.getValue().ts > 600000L) { //not accessed by 10 minutes
 									toRemove.add(entry.getKey());
 								}
 							}
@@ -160,7 +160,10 @@ public class BandImageManager {
 	        	System.out.println("BandImageManager.buildImage: multi level source not found in cache... created: " + (System.currentTimeMillis() - t) + " ms");
 	        	sourceCache.put(key, cachedObj);
 	        }
+	        
 	        MultiLevelSource multiLevelSource = cachedObj.source;
+	        // P.Campanella 05/02/2018: update cache timestamp
+	        cachedObj.ts = System.currentTimeMillis();
 	        
 	        System.out.println("BandImageManager.buildImage: multi level source obtained: " + (System.currentTimeMillis() - t) + " ms");
 	        final ImageLayer imageLayer = new ImageLayer(multiLevelSource);
