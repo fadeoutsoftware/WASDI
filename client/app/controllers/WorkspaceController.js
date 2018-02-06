@@ -31,6 +31,8 @@ var WorkspaceController = (function() {
         this.m_oFakePosition = null;
         this.m_oUfoPointer = null;
 
+        this.m_bOpeningWorkspace = false;
+
         this.fetchWorkspaceInfoList();
         this.m_oRabbitStompService.unsubscribe();
 
@@ -86,6 +88,8 @@ var WorkspaceController = (function() {
 
 
     WorkspaceController.prototype.openWorkspace = function (sWorkspaceId) {
+        // Stop loading new workspaces.. we are leaving!
+        this.m_bOpeningWorkspace = true;
         var oController = this;
 
         this.m_oWorkspaceService.getWorkspaceEditorViewModel(sWorkspaceId).success(function (data, status) {
@@ -137,8 +141,11 @@ var WorkspaceController = (function() {
 
     WorkspaceController.prototype.loadProductList = function(oWorkspace)
     {
+        // View is leaving...
+        if (this.m_bOpeningWorkspace) return;
+
         this.m_bLoadingWSFiles = true;
-        this.m_oWorkspaceSelected = null;
+        //this.m_oWorkspaceSelected = null;
 
         if(utilsIsObjectNullOrUndefined(oWorkspace)) return false;
         if(utilsIsStrNullOrEmpty(oWorkspace.workspaceId)) return false;

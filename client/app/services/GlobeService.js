@@ -66,24 +66,39 @@ service('GlobeService', ['$http',  'ConstantsService','SatelliteService', functi
         {
             this.m_oWasdiGlobe.destroy();
             this.m_oWasdiGlobe=null;
-        }    }
-    // get globe
+        }
+    };
+
+    /**
+     * get globe
+     */
     this.getGlobe = function()
     {
         return this.m_oWasdiGlobe;
     }
 
-    // get globe
+    /**
+     * Get Workspace Zoom
+     * @returns {number}
+     */
     this.getWorkspaceZoom = function()
     {
         return this.GLOBE_WORKSPACE_ZOOM;
     }
 
+    /**
+     * Get Globe Layers
+     * @returns {null|Array|*}
+     */
     this.getGlobeLayers = function()
     {
         return this.m_aoLayers;
     }
 
+    /**
+     * Get Map Center
+     * @returns {*[]}
+     */
     this.getMapCenter=function() {
         //if(utilsIsObjectNullOrUndefined(this.m_oWasdiGlobe))
         //    return
@@ -96,6 +111,9 @@ service('GlobeService', ['$http',  'ConstantsService','SatelliteService', functi
         return [pickPositionCartographic.latitude * (180/Math.PI),pickPositionCartographic.longitude * (180/Math.PI)];
     }
 
+    /**
+     * Go Home
+     */
     this.goHome = function()
     {
         this.goHome(this.HEIGHT_HOME);
@@ -154,34 +172,8 @@ service('GlobeService', ['$http',  'ConstantsService','SatelliteService', functi
         });
 
         return redRectangle;
-    }
+    };
 
-    /* ZOOM ON LAYER WITH BOUNDING BOX */
-    this.zoomOnLayerBoundingBox = function(oArray)
-    {
-        var oBoundingBox = oArray;
-        if(utilsIsObjectNullOrUndefined(oBoundingBox) == true) return false;
-
-        var oGlobe = this.m_oWasdiGlobe;
-        if(utilsIsObjectNullOrUndefined(oGlobe) == true) return false;
-
-
-        var oRectangle =  Cesium.Rectangle.fromDegrees( oArray[0], oArray[1] , oArray[2],oArray[3]);
-        var oCenter = Cesium.Rectangle.center(oRectangle);
-
-        /* set view of globe*/
-        oGlobe.camera.setView({
-            destination: Cesium.Cartesian3.fromRadians(oCenter.longitude, oCenter.latitude, this.GLOBE_LAYER_ZOOM),
-            orientation: {
-                heading: 0.0,
-                pitch: -Cesium.Math.PI_OVER_TWO,
-                roll: 0.0
-            }
-
-        });
-
-        return true;
-    }
 
     /**
      * ADD RECTANGLE (PARAM ARRAY OF POINTS )
@@ -402,97 +394,6 @@ service('GlobeService', ['$http',  'ConstantsService','SatelliteService', functi
 
 
     /**
-     * Fly to Workspace Global Bounding Box
-     * @param m_aoProducts
-     * @returns {boolean}
-     */
-    this.flyToWorkspaceBoundingBox = function (m_aoProducts) {
-
-        var oRectangle = null;
-        var aoArraySplit = [];
-        var iArraySplitLength = 0;
-        var aiInvertedArraySplit = [];
-
-        var aoTotalArray = [];
-
-        // Check we have products
-        if(utilsIsObjectNullOrUndefined(m_aoProducts) === true) return false;
-
-        var iProductsLength = m_aoProducts.length;
-
-        // For each product
-        for(var iIndexProduct = 0; iIndexProduct < iProductsLength; iIndexProduct++){
-
-            // Split bbox string
-            aoArraySplit = m_aoProducts[iIndexProduct].bbox.split(",");
-            aoTotalArray.push.apply(aoTotalArray,aoArraySplit);
-
-            // Get the array representing the bounding box
-            aiInvertedArraySplit = this.fromBboxToRectangleArray(m_aoProducts[iIndexProduct].bbox);
-
-            // Add the rectangle to the globe
-            oRectangle = this.addRectangleOnGlobeParamArray(aiInvertedArraySplit);
-            m_aoProducts[iIndexProduct].oRectangle = oRectangle;
-            m_aoProducts[iIndexProduct].aBounds = aiInvertedArraySplit;
-        }
-
-
-        var aoBounds = [];
-        for (var iIndex = 0; iIndex < aoTotalArray.length - 1; iIndex = iIndex + 2) {
-            aoBounds.push(new Cesium.Cartographic.fromDegrees(aoTotalArray[iIndex + 1], aoTotalArray[iIndex ]));
-        }
-
-        var oWSRectangle = Cesium.Rectangle.fromCartographicArray(aoBounds);
-        var oWSCenter = Cesium.Rectangle.center(oWSRectangle);
-
-        //oGlobe.camera.setView({
-        this.getGlobe().camera.flyTo({
-            destination : Cesium.Cartesian3.fromRadians(oWSCenter.longitude, oWSCenter.latitude, this.GLOBE_WORKSPACE_ZOOM),
-            orientation: {
-                heading: 0.0,
-                pitch: -Cesium.Math.PI_OVER_TWO,
-                roll: 0.0
-            }
-        });
-
-        this.stopRotationGlobe();
-    };
-
-    /**
-     * ZOOM ON LAYER BY POINTS
-     * @param oArray
-     * @returns {boolean}
-     */
-    this.zoomOnLayerParamArray = function(aArray)
-    {
-        // Check input data
-        if(utilsIsObjectNullOrUndefined(aArray) == true) return false;
-        if(utilsIsObjectNullOrUndefined(this.m_oWasdiGlobe) == true) return false;
-
-        // create a new points array
-        var newArray = [];
-        for(var iIndex = 0; iIndex < aArray.length - 1; iIndex += 2 )
-        {
-            newArray.push(new Cesium.Cartographic.fromDegrees(aArray[iIndex+1],aArray[iIndex]));
-        }
-
-        // Get a rectangle from the array
-        var oZoom = Cesium.Rectangle.fromCartographicArray(newArray);
-        var oWSCenter = Cesium.Rectangle.center(oZoom);
-
-        // Fly there
-        this.m_oWasdiGlobe.camera.flyTo({
-            destination: Cesium.Cartesian3.fromRadians(oWSCenter.latitude, oWSCenter.longitude, this.GLOBE_LAYER_ZOOM),
-            orientation: {
-                heading: 0.0,
-                pitch: -Cesium.Math.PI_OVER_TWO,
-                roll: 0.0
-            }
-
-        });
-    };
-
-    /**
      * Convert the string with bbox expressed like PointX,PointY,PointX,PointY,... in a rectangle array to use as globe bounding box
      * @param bbox
      * @returns {*}
@@ -572,9 +473,220 @@ service('GlobeService', ['$http',  'ConstantsService','SatelliteService', functi
                 label : "LS8",
                 description : "NASA LANDSAT 8"
             }
-        ]
+        ];
 
         return aoOutList;
+    };
+
+
+    /********************************************ZOOM FUNCTIONS**********************************************/
+
+
+    /**
+     * Fly to Workspace Global Bounding Box
+     * @param m_aoProducts
+     * @returns {boolean}
+     */
+    this.flyToWorkspaceBoundingBox = function (m_aoProducts) {
+        try {
+            var oRectangle = null;
+            var aoArraySplit = [];
+            var iArraySplitLength = 0;
+            var aiInvertedArraySplit = [];
+
+            var aoTotalArray = [];
+
+            // Check we have products
+            if(utilsIsObjectNullOrUndefined(m_aoProducts) === true) return false;
+
+            var iProductsLength = m_aoProducts.length;
+
+            // For each product
+            for(var iIndexProduct = 0; iIndexProduct < iProductsLength; iIndexProduct++){
+
+                // Split bbox string
+                aoArraySplit = m_aoProducts[iIndexProduct].bbox.split(",");
+                aoTotalArray.push.apply(aoTotalArray,aoArraySplit);
+
+                // Get the array representing the bounding box
+                aiInvertedArraySplit = this.fromBboxToRectangleArray(m_aoProducts[iIndexProduct].bbox);
+
+                // Add the rectangle to the globe
+                oRectangle = this.addRectangleOnGlobeParamArray(aiInvertedArraySplit);
+                m_aoProducts[iIndexProduct].oRectangle = oRectangle;
+                m_aoProducts[iIndexProduct].aBounds = aiInvertedArraySplit;
+            }
+
+
+            var aoBounds = [];
+            for (var iIndex = 0; iIndex < aoTotalArray.length - 1; iIndex = iIndex + 2) {
+                aoBounds.push(new Cesium.Cartographic.fromDegrees(aoTotalArray[iIndex + 1], aoTotalArray[iIndex ]));
+            }
+
+            var oWSRectangle = Cesium.Rectangle.fromCartographicArray(aoBounds);
+            var oWSCenter = Cesium.Rectangle.center(oWSRectangle);
+
+            //oGlobe.camera.setView({
+            this.getGlobe().camera.flyTo({
+                destination : Cesium.Cartesian3.fromRadians(oWSCenter.longitude, oWSCenter.latitude, this.GLOBE_WORKSPACE_ZOOM),
+                orientation: {
+                    heading: 0.0,
+                    pitch: -Cesium.Math.PI_OVER_TWO,
+                    roll: 0.0
+                }
+            });
+
+            this.stopRotationGlobe();
+        }
+        catch (e) {
+            console.log(e);
+        }
+
+    };
+
+    /**
+     * ZOOM ON LAYER BY POINTS
+     * @param oArray
+     * @returns {boolean}
+     */
+    this.zoomOnLayerParamArray = function(aArray) {
+        try {
+            // Check input data
+            if(utilsIsObjectNullOrUndefined(aArray) == true) return false;
+            if(utilsIsObjectNullOrUndefined(this.m_oWasdiGlobe) == true) return false;
+
+            // create a new points array
+            var newArray = [];
+            for(var iIndex = 0; iIndex < aArray.length - 1; iIndex += 2 )
+            {
+                newArray.push(new Cesium.Cartographic.fromDegrees(aArray[iIndex+1],aArray[iIndex]));
+            }
+
+            // Get a rectangle from the array
+            var oZoom = Cesium.Rectangle.fromCartographicArray(newArray);
+            var oWSCenter = Cesium.Rectangle.center(oZoom);
+
+            // Fly there
+            this.m_oWasdiGlobe.camera.flyTo({
+                destination: Cesium.Cartesian3.fromRadians(oWSCenter.latitude, oWSCenter.longitude, this.GLOBE_LAYER_ZOOM),
+                orientation: {
+                    heading: 0.0,
+                    pitch: -Cesium.Math.PI_OVER_TWO,
+                    roll: 0.0
+                }
+
+            });
+        }
+        catch (e) {
+            console.log(e);
+        }
+    };
+
+    /**
+     * Zoom on layer with the geoserver bounding box
+     * @param geoserverBoundingBox
+     * @returns {boolean}
+     */
+    this.zoomBandImageOnGeoserverBoundingBox = function(geoserverBoundingBox) {
+        try {
+            // Check the input
+            if (utilsIsObjectNullOrUndefined(geoserverBoundingBox)) {
+                console.log("GlobeService.zoomBandImageOnGeoserverBoundingBox: geoserverBoundingBox is null");
+                return false;
+            }
+
+            // Parse the bounding box
+            var oBoundingBox = JSON.parse(geoserverBoundingBox);
+            if(utilsIsObjectNullOrUndefined(oBoundingBox)) {
+                console.log("GlobeService.zoomBandImageOnGeoserverBoundingBox: parsing bouning box is null");
+                return false;
+            }
+
+            // Get the Globe
+            var oGlobe = this.m_oWasdiGlobe;
+            if(utilsIsObjectNullOrUndefined(oGlobe)) {
+                console.log("GlobeService.zoomBandImageOnGeoserverBoundingBox: globe is null");
+                return false;
+            }
+
+
+            var oRectangle =  Cesium.Rectangle.fromDegrees( oBoundingBox.minx, oBoundingBox.miny , oBoundingBox.maxx,oBoundingBox.maxy);
+            var oCenter = Cesium.Rectangle.center(oRectangle);
+
+            /* set view of globe*/
+            oGlobe.camera.flyTo({
+                destination: Cesium.Cartesian3.fromRadians(oCenter.longitude, oCenter.latitude, this.GLOBE_LAYER_ZOOM),
+                orientation: {
+                    heading: 0.0,
+                    pitch: -Cesium.Math.PI_OVER_TWO,
+                    roll: 0.0
+                }
+
+            });
+
+            return true;
+        }
+        catch (e) {
+            console.log(e);
+        }
+    };
+
+
+    /**
+     * Zoom on a Band Image starting from the bbox property (points, not the geoserver formatted one)
+     * @param bbox
+     */
+    this.zoomBandImageOnBBOX = function (bbox) {
+        try {
+            if (utilsIsObjectNullOrUndefined(bbox)) {
+                console.log("GlobeService.zoomBandImageOnBBOX: invalid bbox ");
+                return;
+            }
+
+            if (utilsIsStrNullOrEmpty(bbox)) {
+                console.log("GlobeService.zoomBandImageOnBBOX: invalid bbox ");
+                return;
+            }
+
+            var aiRectangle = this.fromBboxToRectangleArray(bbox);
+
+            if (utilsIsObjectNullOrUndefined(aiRectangle) == false) {
+                this.zoomOnLayerParamArray(aiRectangle);
+            }
+        }
+        catch (e) {
+            console.log(e);
+        }
+    };
+
+
+    /**
+     * Zoom on an External Layer
+     * @param oLayer
+     * @returns {boolean}
+     */
+    this.zoomOnExternalLayer = function (oLayer) {
+        try {
+            if (utilsIsObjectNullOrUndefined(oLayer) == true) return false;
+
+            var oBoundingBox = (oLayer.BoundingBox[0].extent);
+
+            if(utilsIsObjectNullOrUndefined(oBoundingBox)== true) return false;
+
+            var oGlobe = this.m_oGlobeService.getGlobe();
+            /* set view of globe*/
+            oGlobe.camera.flyTo({
+                destination:  Cesium.Rectangle.fromDegrees(oBoundingBox[0], oBoundingBox[1], oBoundingBox[2], oBoundingBox[3]),
+                orientation: {
+                    heading: 0.0,
+                    pitch: -Cesium.Math.PI_OVER_TWO,
+                    roll: 0.0
+                }
+            });
+        }
+        catch (e) {
+            console.log(e);
+        }
     }
 
 }]);

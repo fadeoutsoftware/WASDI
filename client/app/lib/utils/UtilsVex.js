@@ -39,10 +39,10 @@ function utilsVexDialogConfirm(oMessage,oCallback)
     oMessage+="<br>";
 
     var oVexInstance = vex.dialog.confirm({
-        message: oMessage,
-        unsafeMessage: oCallback,
+        unsafeMessage: oMessage,
+        callback: oCallback
+    });
 
-    })
     return oVexInstance;
 }
 
