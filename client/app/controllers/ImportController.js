@@ -33,12 +33,13 @@ var ImportController = (function() {
         // this.m_aiYears=[];//default years
 
         this.m_oAdvanceFilter = {
+            filterActive:"Seasons",//Seasons,Range,Months
             savedData:[],
             selectedSeasonYears:[],
             selectedSeason:"",
             listOfYears:[],
             listOfMonths:[],
-            listOfDays:[],
+            // listOfDays:[],
             selectedYears:[],
             selectedDayFrom:"",
             selectedDayTo:"",
@@ -48,7 +49,7 @@ var ImportController = (function() {
             selectedMonthsSearchForMonths:[],
         };
         //this.m_aiYears
-        this.initDefaultDays();
+        // this.initDefaultDays();
         this.initDefaultYears();
         this.initDefaultMonths();
         this.datePickerYears={
@@ -1479,16 +1480,16 @@ var ImportController = (function() {
         }
 
     };
-    ImportController.prototype.initDefaultDays = function()
-    {
-
-        for(var iIndex = 0 ; iIndex < 31; iIndex++)
-        {
-            var sIndex = (iIndex + 1).toString();
-            this.m_oAdvanceFilter.listOfDays.push(sIndex);
-        }
-
-    };
+    // ImportController.prototype.initDefaultDays = function()
+    // {
+    //
+    //     for(var iIndex = 0 ; iIndex < 31; iIndex++)
+    //     {
+    //         var sIndex = (iIndex + 1).toString();
+    //         this.m_oAdvanceFilter.listOfDays.push(sIndex);
+    //     }
+    //
+    // };
     ImportController.prototype.initDefaultMonths = function()
     {
         /*
@@ -1681,6 +1682,10 @@ var ImportController = (function() {
         return -1;
     }
 
+    /**
+     *
+     * @returns {boolean}
+     */
     ImportController.prototype.addFilterMonths = function()
     {
         if( (utilsIsObjectNullOrUndefined(this.m_oAdvanceFilter.selectedYearsSearchForMonths) === true) || (utilsIsObjectNullOrUndefined(this.m_oAdvanceFilter.selectedMonthsSearchForMonths) === true) )
@@ -1713,6 +1718,20 @@ var ImportController = (function() {
         return true;
     };
 
+
+    ImportController.prototype.cleanAdvanceFilters = function()
+    {
+
+        this.m_oAdvanceFilter.selectedSeasonYears = [];
+        this.m_oAdvanceFilter.selectedYears = [];
+        this.m_oAdvanceFilter.selectedDayFrom = "";
+        this.m_oAdvanceFilter.selectedDayTo = "";
+        this.m_oAdvanceFilter.selectedMonthFrom = "";
+        this.m_oAdvanceFilter.selectedMonthTo = "";
+        this.m_oAdvanceFilter.selectedYearsSearchForMonths = [];
+        this.m_oAdvanceFilter.selectedMonthsSearchForMonths = [];
+
+    }
     //TODO THINK ABOUT CHANGE API BECAUSE THE REQUEST NEED TO SENDS N DATAS
     // ImportController.prototype.setDataToSend = function(dateSensingPeriodFrom,dateSensingPeriodTo){
     //     if(utilsIsObjectNullOrUndefined(dateSensingPeriodFrom) === true || utilsIsObjectNullOrUndefined(dateSensingPeriodTo))
