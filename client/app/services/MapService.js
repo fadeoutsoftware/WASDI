@@ -5,15 +5,19 @@
 'use strict';
 angular.module('wasdi.MapService', ['wasdi.ConstantsService']).
 service('MapService', ['$http','$rootScope', 'ConstantsService', function ($http,$rootScope, oConstantsService) {
+    // API URL
     this.APIURL = oConstantsService.getAPIURL();
+
+    // Service references
     this.m_oHttp = $http;
+    this.m_oConstantsService = oConstantsService;
     this.m_oRectangleOpenSearch = null;
     this.m_oDrawItems = null;
-    this.m_oConstantsService = oConstantsService;
-    /**
-     * base layers
-     */
 
+
+    /**
+     * Init base layers
+     */
     this.initTileLayer= function(){
         this.m_oOSMBasic = L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution:
@@ -70,7 +74,7 @@ service('MapService', ['$http','$rootScope', 'ConstantsService', function ($http
             // this option disables loading tiles outside of the world bounds.
             noWrap: true
         });
-    }
+    };
 
     //init tile layer
     this.initTileLayer();
@@ -106,6 +110,9 @@ service('MapService', ['$http','$rootScope', 'ConstantsService', function ($http
 
     this.m_oActiveBaseLayer = this.m_oOSMBasic;
 
+    /**
+     * Clear Map
+     */
     this.clearMap = function () {
         if (this.m_oWasdiMap) {
             this.m_oWasdiMap.remove();
@@ -114,12 +121,13 @@ service('MapService', ['$http','$rootScope', 'ConstantsService', function ($http
     }
 
 
+    /**
+     * Init the Map
+     * @param sMapDiv
+     */
     this.initMap = function(sMapDiv) {
 
-
-        /**
-         * the map
-         */
+        //the map
         if(this.m_oWasdiMap != null)
         {
             this.initTileLayer();
@@ -140,29 +148,19 @@ service('MapService', ['$http','$rootScope', 'ConstantsService', function ($http
              //maxZoom: 22
         });
 
-        //this.removeLayersFromMap();
 
-        /* coordinates in map
-        * find this plugin in lib folder
-        * */
+        // coordinates in map find this plugin in lib folder
         L.control.mousePosition().addTo(this.m_oWasdiMap);
 
-        /**
-         * scale control
-         */
+        //scale control
         L.control.scale({
             position: "bottomright",
             imperial: false
         }).addTo(this.m_oWasdiMap);
 
-        /**
-         * layers control
-         */
+        //layers control
         this.m_oLayersControl.addTo(this.m_oWasdiMap);
 
-        ///**
-        // * fitBounds
-        //
         // center map
         var southWest = L.latLng(0, 0),
             northEast = L.latLng(0, 0),
@@ -176,37 +174,44 @@ service('MapService', ['$http','$rootScope', 'ConstantsService', function ($http
         //add event on base change
         this.m_oWasdiMap.on('baselayerchange', function(e){
             // console.log(e);
-            e.layer.bringToBack()
+            e.layer.bringToBack();
             oActiveBaseLayer = e;
         });
 
+    };
 
-        //add event on base change
-        //this.m_oWasdiMap.on('load', function(e){
-        //    oWasdiMap.invalidateSize();
-        //});
-    }
-
-    //remove layer layer.remove()
+    /**
+     * Remove a layer from the map
+     * @param oLayer
+     * @returns {boolean}
+     */
     this.removeLayerFromMap = function(oLayer)
     {
         if(utilsIsObjectNullOrUndefined(oLayer))
             return false;
         oLayer.remove();
         return true;
-    }
-    /*remove layerS */
+    };
+
+    /**
+     * Remove all layers from the map
+     */
     this.removeLayersFromMap = function()
     {
         var oController = this;
         oController.m_oWasdiMap.eachLayer(function (layer) {
             oController.m_oWasdiMap.removeLayer(layer);
         });
-    }
+    };
 
 
-
-    //Add rectangle shape
+    /**
+     * Add a rectangle shape on the map
+     * @param aaBounds
+     * @param sColor
+     * @param iIndexLayers
+     * @returns {null}
+     */
     this.addRectangleOnMap = function (aaBounds,sColor,iIndexLayers)
     {
         if(utilsIsObjectNullOrUndefined(aaBounds))
@@ -214,19 +219,11 @@ service('MapService', ['$http','$rootScope', 'ConstantsService', function ($http
 
         for(var iIndex = 0; iIndex < aaBounds.length; iIndex++ )
         {
-            if(utilsIsObjectNullOrUndefined(aaBounds[iIndex]))
-                return null;
-
-            ///* if the LatLng coordinates are "outside the map" return the right coordinates */
-            //var adLatLng = L.latLng(aaBounds[iIndex]);
-            //aaBounds[iIndex] = this.m_oWasdiMap.wrapLatLng(adLatLng);
-
+            if(utilsIsObjectNullOrUndefined(aaBounds[iIndex])) return null;
         }
 
-
-        if(utilsIsStrNullOrEmpty(sColor))
-            sColor="#ff7800";//default color
-
+        //default color
+        if(utilsIsStrNullOrEmpty(sColor)) sColor="#ff7800";
 
         // create an colored rectangle
         // weight = line thickness
@@ -250,33 +247,13 @@ service('MapService', ['$http','$rootScope', 'ConstantsService', function ($http
             $rootScope.$broadcast('on-mouse-leave-rectangle',{rectangle:oRectangle});// TODO SEND MASSAGE FOR CHANGE CSS in LAYER LIST TABLE
         });
 
-        ////TODO REMOVE IT USED ONLY FOR TEST
-        //this.m_oWasdiMap.fitBounds(aaBounds);//zoom on rectangle
-
         return oRectangle;
-    }
+    };
 
-    // ZOOM
-    this.zoomOnBounds = function (aBounds)
-    {
-        if(utilsIsObjectNullOrUndefined(aBounds))
-            return false;
-        ////check if there are 2 points
-        //if(aaBounds.length != 2)
-        //    return false;
-        //check if they are points [ax,ay],[bx,by] == good
-        // [ax,ay,az,....],[bx,by,bz,....] == bad
-        //if(aaBounds[0].length != 2 || aaBounds[1].length != 2)
-        //    return false;
-        if( aBounds.length == 0 )
-            return false;
-
-        this.m_oWasdiMap.fitBounds([aBounds]);
-        return true;
-    }
-
-
-
+    /**
+     *
+     * @param sMapDiv
+     */
     this.initMapWithDrawSearch = function(sMapDiv)
     {
         var oController=this;
@@ -328,52 +305,71 @@ service('MapService', ['$http','$rootScope', 'ConstantsService', function ($http
         //    var layer = event.layers;
         //});
 
-    }
+    };
 
+    /**
+     * Get the Map object
+     * @returns {null|*}
+     */
     this.getMap = function () {
         return this.m_oWasdiMap;
     }
+
+    /**
+     *
+     */
     this.deleteDrawShapeEditToolbar = function()
     {
         this.m_oDrawItems.clearLayers();
     }
 
+    /**
+     * Center the world
+     */
     this.getHome = function()
     {
-        //var oCenter = this.m_oWasdiMap.getCenter();
-        //this.m_oWasdiMap.setView(oCenter,5,maxZoom);
         this.m_oWasdiMap.fitWorld();
     }
 
+    /**
+     * Set basic map
+     * @returns {boolean}
+     */
     this.setBasicMap = function()
     {
-        if(utilsIsObjectNullOrUndefined(this.m_oOSMBasic))
-            return false
+        if(utilsIsObjectNullOrUndefined(this.m_oOSMBasic)) return false;
         this.m_oWasdiMap.addLayer(this.m_oOSMBasic,true);
         return true;
-    }
+    };
 
+    /**
+     * Remove basic map
+     * @returns {boolean}
+     */
     this.removeBasicMap = function()
     {
         if(utilsIsObjectNullOrUndefined(this.m_oOSMBasic))
             return false
         this.removeLayerFromMap(this.m_oOSMBasic);
         return true;
-    }
+    };
 
+    /**
+     * Init map editor
+     * @param sMapDiv
+     * @returns {boolean}
+     */
     this.initMapEditor = function(sMapDiv)
     {
-        if(utilsIsObjectNullOrUndefined(sMapDiv))
-            return false;
+        if(utilsIsObjectNullOrUndefined(sMapDiv)) return false;
         this.initMap(sMapDiv);
 
-        //this.m_oWasdiMap.on('click', function(e){
-        //    //// console.log(e);
-        //    //e.layer.bringToBack();
-        //});
         return true;
     };
 
+    /**
+     * Init geo search plugin
+     */
     this.initGeoSearchPluginForOpenStreetMap = function()
     {
         var geocoder = L.Control.Geocoder.mapzen('search-DopSHJw');
@@ -383,6 +379,11 @@ service('MapService', ['$http','$rootScope', 'ConstantsService', function ($http
         }).addTo(this.m_oWasdiMap);
     };
 
+    /**
+     *
+     * @param oRectangle
+     * @returns {boolean}
+     */
     this.changeStyleRectangleMouseOver=function(oRectangle)
     {
         if(utilsIsObjectNullOrUndefined(oRectangle))
@@ -391,18 +392,92 @@ service('MapService', ['$http','$rootScope', 'ConstantsService', function ($http
             return false;
         }
         oRectangle.setStyle({weight:3,fillOpacity:0.7});
-    }
-    /*
-     *   Change style of rectangle when the mouse is leave the layer (TABLE CASE)
-     * */
+    };
+
+    /**
+     * Change style of rectangle when the mouse is leave the layer (TABLE CASE)
+     * @param oRectangle
+     * @returns {boolean}
+     */
     this.changeStyleRectangleMouseLeave=function(oRectangle)
     {
-        if(utilsIsObjectNullOrUndefined(oRectangle))
-        {
-            //console.log("Error: rectangle is undefined ");
-            return false;
-        }
+        if(utilsIsObjectNullOrUndefined(oRectangle)) return false;
         oRectangle.setStyle({weight:1,fillOpacity:0.2});
-    }
+    };
+
+    /********************************************ZOOM FUNCTIONS**********************************************/
+    /**
+     * Zoom on bounds
+     * @param aBounds
+     * @returns {boolean}
+     */
+    this.zoomOnBounds = function (aBounds)
+    {
+        try {
+            if(utilsIsObjectNullOrUndefined(aBounds)) return false;
+            if( aBounds.length == 0 ) return false;
+
+            this.m_oWasdiMap.fitBounds([aBounds]);
+            return true;
+        }
+        catch (e) {
+            console.log(e);
+        }
+    };
+
+
+    this.zoomBandImageOnBBOX = function (bbox) {
+        try {
+            // TODO
+        }
+        catch (e) {
+            console.log(e);
+        }
+
+    };
+
+    this.zoomBandImageOnGeoserverBoundingBox = function (geoserverBoundingBox) {
+        try {
+            if (utilsIsObjectNullOrUndefined(geoserverBoundingBox)) {
+                console.log("MapService.zoomBandImageOnGeoserverBoundingBox: geoserverBoundingBox is null or empty ");
+                return;
+            }
+
+            var oBounds = JSON.parse(geoserverBoundingBox);
+
+            //Zoom on layer
+            var corner1 = L.latLng(oBounds.maxy, oBounds.maxx),
+                corner2 = L.latLng(oBounds.miny, oBounds.minx),
+                bounds = L.latLngBounds(corner1, corner2);
+
+            this.m_oWasdiMap.fitBounds(bounds);
+        }
+        catch (e) {
+            console.log(e);
+        }
+    };
+
+    /**
+     * Zoom on an external layer
+     * @param oLayer
+     * @returns {boolean}
+     */
+    this.zoomOnExternalLayer = function (oLayer) {
+
+        try {
+            if (utilsIsObjectNullOrUndefined(oLayer) == true) return false;
+            var oBoundingBox = (oLayer.BoundingBox[0].extent);
+            if (utilsIsObjectNullOrUndefined(oBoundingBox) == true) return false;
+
+            var corner1 = L.latLng(oBoundingBox[1], oBoundingBox[2]),
+                corner2 = L.latLng(oBoundingBox[3], oBoundingBox[0]),
+                bounds = L.latLngBounds(corner1, corner2);
+
+            this.getMap().fitBounds(bounds);
+        }
+        catch (e) {
+            console.log(e);
+        }
+   };
 
 }]);

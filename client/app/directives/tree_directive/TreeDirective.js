@@ -116,9 +116,9 @@ angular.module('wasdi.TreeDirective', [])
                                 {
 
                                     //if(data.node.icon == 'assets/icons/check.png')
-                                    if(data.node.original.bVisibleNow == true)
+                                    if(data.node.original.band.bVisibleNow == true)
                                     {
-                                        data.node.original.bVisibleNow = false;
+                                        data.node.original.band.bVisibleNow = false;
                                         //$('#jstree').jstree(true).set_icon(data.node.id, 'assets/icons/uncheck.png');
                                         $('#jstree').jstree(true).set_icon(data.node.id, 'assets/icons/uncheck_20x20.png');
                                         $scope.m_oController.removeBandImage(data.node.original.band);
