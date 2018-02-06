@@ -132,6 +132,7 @@ public class Wasdi extends Application {
 			
 			SystemUtils.init3rdPartyLibs(null);
 			SystemUtils.LOG.setLevel(Level.ALL);
+			
 			Engine.start(false);
 			
 			
