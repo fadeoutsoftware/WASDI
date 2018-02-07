@@ -691,7 +691,7 @@ var ImportController = (function() {
 
             //get bounds
             var aaBounds = oController.polygonToBounds( aData[iIndexData].footprint);
-            oRectangle = oController.m_oMapService.addRectangleOnMap(aaBounds ,null,iIndexData);
+            oRectangle = oController.m_oMapService.addRectangleByBoundsArrayOnMap(aaBounds ,null,iIndexData);
             aData[iIndexData].rectangle = oRectangle;
             aData[iIndexData].bounds = aaBounds;
             /*create rectangle*/

@@ -1674,9 +1674,9 @@ var EditorController = (function () {
                 var sFileName = oController.m_aoProducts[oResult.band.productIndex].fileName;
                 var sFilter = JSON.stringify(oResult.filter);
 
-                var oBodyMapContainer = this.createBodyForProcessingBandImage(sFileName,oResult.band.name,sFilter,0,0,oResult.band.width, oResult.band.height,widthMapContainer, heightMapContainer);
+                var oBodyMapContainer = oController.createBodyForProcessingBandImage(sFileName,oResult.band.name,sFilter,0,0,oResult.band.width, oResult.band.height,widthMapContainer, heightMapContainer);
 
-                var oBodyImagePreview = this.createBodyForProcessingBandImage(sFileName,oResult.band.name,sFilter,0,0,oResult.band.width, oResult.band.height,widthImagePreview, heightImagePreview);
+                var oBodyImagePreview = oController.createBodyForProcessingBandImage(sFileName,oResult.band.name,sFilter,0,0,oResult.band.width, oResult.band.height,widthImagePreview, heightImagePreview);
 
                 oController.processingGetBandImage(oBodyMapContainer, oController.m_oActiveWorkspace.workspaceId);
                 if ( (widthImagePreview > 0) && (heightImagePreview > 0) )
