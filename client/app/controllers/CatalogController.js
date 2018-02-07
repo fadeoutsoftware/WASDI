@@ -6,6 +6,7 @@ var CatalogController = (function() {
 
     function CatalogController($scope, oConstantsService, oAuthService,$state,oCatalogService,oMapService,oModalService )
     {
+        // Service referenc
         this.m_oScope = $scope;
         this.m_oScope.m_oController = this;
         this.m_oConstantsService = oConstantsService;
@@ -14,27 +15,36 @@ var CatalogController = (function() {
         this.m_oMapService = oMapService;
         this.m_oCatalogService = oCatalogService;
         this.m_oModalService = oModalService;
+
+        // File Types
         this.m_asCategories = [];
+        // Free text query
         this.m_sInputQuery = "";
+        // Start Date
         this.m_oDataFrom="";
+        // End Date
         this.m_oDataTo = "";
+        // Found Entries
         this.m_aoEntries = [];
+        // Flag to know if the table was loaded
         this.m_bIsLoadedTable = true;
+        // Result grid order column
         this.m_sOrderBy = 'fileName';
+        // Result grid order direction
         this.m_bReverseOrder = false;
 
         this.m_oMapService.initMap('catalogMap');
         this.GetCategories();
         this.setDefaultData();
 
+        // Select a row on the over rectangle event
         $scope.$on('on-mouse-over-rectangle', function(event, args) {
 
             if (utilsIsObjectNullOrUndefined(args.rectangle)) return;
-
             var oRectangle = args.rectangle;
+
             if(!utilsIsObjectNullOrUndefined(oRectangle))
             {
-
                 var iLengthLayersList = 0;
 
                 if(!utilsIsObjectNullOrUndefined($scope.m_oController.m_aoEntries.length)) iLengthLayersList = $scope.m_oController.m_aoEntries.length;
@@ -46,7 +56,6 @@ var CatalogController = (function() {
                         var sId = "layer"+iIndex;
                         //change css of table
                         jQuery("#"+sId).css({"border-top": "2px solid green", "border-bottom": "2px solid green"});
-
                     }
                 }
 
@@ -81,19 +90,15 @@ var CatalogController = (function() {
         $scope.$on('on-mouse-click-rectangle', function(event, args) {
 
             if (utilsIsObjectNullOrUndefined(args.rectangle)) return;
-
             var oRectangle = args.rectangle;
 
             if(!utilsIsObjectNullOrUndefined(oRectangle))
             {
-                if(utilsIsObjectNullOrUndefined($scope.m_oController.m_aoEntries))
-                    var iLengthLayersList = 0;
-                else
-                    var iLengthLayersList = $scope.m_oController.m_aoEntries.length;
+                var iLengthLayersList = 0;
+                if (!utilsIsObjectNullOrUndefined($scope.m_oController.m_aoEntries))iLengthLayersList = $scope.m_oController.m_aoEntries.length;
 
                 for(var iIndex = 0; iIndex < iLengthLayersList; iIndex++)
                 {
-
                     if($scope.m_oController.m_aoEntries[iIndex].rectangle == oRectangle)
                     {
                         var sId = "layer"+iIndex;
@@ -105,14 +110,15 @@ var CatalogController = (function() {
                         container.animate({
                             scrollTop: scrollTo.offset().top - container.offset().top + container.scrollTop()
                         });
-
                     }
                 }
-
             }
         });
     }
 
+    /**
+     * Reset query input parameters
+     */
     CatalogController.prototype.setDefaultData = function(){
         // Set Till today
         var oToDate = new Date();
@@ -124,6 +130,10 @@ var CatalogController = (function() {
         this.m_oDataFrom = oFromDate;
     };
 
+    /**
+     * Fetch the categories from the server
+     * @constructor
+     */
     CatalogController.prototype.GetCategories = function()
     {
         var oController = this;
@@ -137,8 +147,9 @@ var CatalogController = (function() {
                     {
                         var isSelected = false;
                         if(iIndexCategory === 0) isSelected = true;
-                        var oCategory = {   name:data[iIndexCategory],
-                                            isSelected:isSelected
+                        var oCategory = {
+                            name:data[iIndexCategory],
+                            isSelected:isSelected
                         };
                         oController.m_asCategories.push(oCategory);
                     }
@@ -152,14 +163,15 @@ var CatalogController = (function() {
         });
     };
 
+    /**
+     * Make the real query
+     */
     CatalogController.prototype.searchEntries = function()
     {
         var sFrom="";
         var sTo="";
-        if(utilsIsStrNullOrEmpty(this.m_oDataFrom) === false)
-            var sFrom = this.m_oDataFrom.replace(/-/g,'');
-        if(utilsIsStrNullOrEmpty(this.m_oDataTo) === false)
-            var sTo =  this.m_oDataTo.replace(/-/g,'');
+        if(utilsIsStrNullOrEmpty(this.m_oDataFrom) === false) sFrom = this.m_oDataFrom.replace(/-/g,'');
+        if(utilsIsStrNullOrEmpty(this.m_oDataTo) === false) sTo =  this.m_oDataTo.replace(/-/g,'');
 
         var sFreeText = this.m_sInputQuery;
         var sCategory = this.getSelectedCategoriesAsString() ;
@@ -167,6 +179,7 @@ var CatalogController = (function() {
         this.m_bIsLoadedTable = false;
         sFrom += "00";
         sTo += "00";
+
         this.m_oCatalogService.getEntries(sFrom,sTo,sFreeText,sCategory).success(function (data) {
             if(utilsIsObjectNullOrUndefined(data) == false)
             {
@@ -180,10 +193,14 @@ var CatalogController = (function() {
         });
     };
 
+    /**
+     * Download of a product
+     * @param oEntry
+     * @returns {boolean}
+     */
     CatalogController.prototype.downloadEntry = function(oEntry)
     {
-        if(utilsIsObjectNullOrUndefined(oEntry))
-            return false;
+        if(utilsIsObjectNullOrUndefined(oEntry)) return false;
         var oJson = {
             fileName: oEntry.fileName,
             filePath: oEntry.filePath
@@ -191,17 +208,9 @@ var CatalogController = (function() {
 
         var sFileName = oEntry.fileName;
 
-        //var sEntryJson = JSON.stringify(oJson);
        this.m_oCatalogService.downloadEntry(oJson).success(function (data, status, headers, config) {
             if(utilsIsObjectNullOrUndefined(data) == false)
             {
-
-
-                /*var blob = new Blob([data], {type: "application/octet-stream"});
-                var objectUrl = URL.createObjectURL(blob);
-                window.open(objectUrl,'_blank');
-*/
-
                 //var FileSaver = require('file-saver');
                 var blob = new Blob([data], {type: "application/octet-stream"});
                 saveAs(blob, sFileName);
@@ -213,10 +222,13 @@ var CatalogController = (function() {
         return true;
     };
 
+    /**
+     * Get the selected category
+     * @returns {string}
+     */
     CatalogController.prototype.getSelectedCategoriesAsString = function()
     {
-        if(utilsIsObjectNullOrUndefined(this.m_asCategories) === true )
-            return "";
+        if(utilsIsObjectNullOrUndefined(this.m_asCategories) === true ) return "";
         var iNumberOfSelectedCategories = this.m_asCategories.length;
         var sReturnValue = "";
         for(var iIndexCategory = 0 ; iIndexCategory < iNumberOfSelectedCategories; iIndexCategory++)
@@ -228,39 +240,30 @@ var CatalogController = (function() {
 
         }
         //remove last ,
-        if(utilsIsStrNullOrEmpty(sReturnValue) === false)
-            sReturnValue = sReturnValue.substring(0, sReturnValue.length - 1);
+        if(utilsIsStrNullOrEmpty(sReturnValue) === false) sReturnValue = sReturnValue.substring(0, sReturnValue.length - 1);
+
         return sReturnValue;
     };
 
-    CatalogController.prototype.convertBoundaries = function(sBoundaries)
-    {
-        var asBoundaries = sBoundaries.split(",");
-        var iNumberOfBoundaries = asBoundaries.length;
-        var aasReturnValues = [];
-        var iIndexReturnValues = 0;
-        for(var iBoundaryIndex = 0 ; iBoundaryIndex < iNumberOfBoundaries; iBoundaryIndex++)
-        {
-            if(utilsIsOdd(iBoundaryIndex) === false)
-            {
-                aasReturnValues[iIndexReturnValues] = [asBoundaries[iBoundaryIndex],asBoundaries[iBoundaryIndex+1]];
-                iIndexReturnValues++;
-            }
-        }
-        return aasReturnValues;
-    };
+
+
+
+    /**
+     * Draw all the boundaries on the map
+     * @returns {boolean}
+     */
     CatalogController.prototype.drawEntriesBoundariesInMap = function()
     {
         if(utilsIsObjectNullOrUndefined(this.m_aoEntries) === true) return false;
 
         var iNumberOfEntries = this.m_aoEntries.length;
+
         for( var iIndexEntry = 0; iIndexEntry < iNumberOfEntries; iIndexEntry++ )
         {
-            var sBoundaries = this.m_aoEntries[iIndexEntry].boundingBox;
-            if( (utilsIsObjectNullOrUndefined(sBoundaries) === false)&&(utilsIsStrNullOrEmpty(sBoundaries) === false) )
+            var sBBox = this.m_aoEntries[iIndexEntry].boundingBox;
+            if( (utilsIsObjectNullOrUndefined(sBBox) === false)&&(utilsIsStrNullOrEmpty(sBBox) === false) )
             {
-                var aBoundariesArray = this.convertBoundaries(sBoundaries);
-                var oRectangle = this.m_oMapService.addRectangleOnMap(aBoundariesArray,"#ff7800","product"+iIndexEntry);
+                var oRectangle = this.m_oMapService.addRectangleOnMap(sBBox,"#ff7800","product"+iIndexEntry);
                 this.m_aoEntries[iIndexEntry].rectangle = oRectangle;
             }
 
@@ -268,6 +271,10 @@ var CatalogController = (function() {
         return true;
     };
 
+    /**
+     * Add a product to a specific workspace
+     * @param oProduct
+     */
     CatalogController.prototype.addProductToWorkspace = function(oProduct)
     {
         var oController=this;
@@ -288,6 +295,10 @@ var CatalogController = (function() {
 
     };
 
+    /**
+     * Get info about a product
+     * @param oProduct
+     */
     CatalogController.prototype.getInfoProduct = function(oProduct)
     {
         var oController=this;
@@ -307,6 +318,11 @@ var CatalogController = (function() {
         });
 
     };
+
+    /**
+     * Handle change category event
+     * @param oCategory
+     */
     CatalogController.prototype.radioButtonOnCLick = function(oCategory){
         oCategory.isSelected = true;
         var iNumberOfCategories =  this.m_asCategories.length;
@@ -319,6 +335,7 @@ var CatalogController = (function() {
             }
         }
     };
+
     CatalogController.$inject = [
         '$scope',
         'ConstantsService',
