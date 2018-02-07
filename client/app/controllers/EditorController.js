@@ -901,6 +901,10 @@ var EditorController = (function () {
                 }
             }
         }).error(function (data, status) {
+            // Clear the preview
+            oController.m_sPreviewUrlSelectedBand = "empty";
+            // Clear the Editor Image
+            oController.m_sViewUrlSelectedBand = "//:0";
             oController.m_bIsLoadedPreviewBandImage = true;
             utilsVexDialogAlertTop('GURU MEDITATION<br>ERROR PROCESSING BAND PREVIEW IMAGE ');
         });
@@ -950,6 +954,12 @@ var EditorController = (function () {
             // Set the node as selected
             var sNodeID = oController.m_oActiveBand.productName + "_" + oController.m_oActiveBand.name;
             oController.setTreeNodeAsDeselected(sNodeID);
+
+            // Clear the preview
+            oController.m_sPreviewUrlSelectedBand = "empty";
+            // Clear the Editor Image
+            oController.m_sViewUrlSelectedBand = "//:0";
+
             // Stop the waiter
             oController.m_bIsLoadedViewBandImage = true;
         });
