@@ -416,18 +416,27 @@ var EditorController = (function () {
         }
     };
 
-    /**
-     * Handler of the "Home" button of the view
-     */
-    EditorController.prototype.goWorkspaceHome = function () {
-        if (this.m_b2DMapModeOn) {
-            this.m_oMapService.flyToWorkspaceBoundingBox(this.m_aoProducts);
-        }
-        else {
-            this.m_oGlobeService.flyToWorkspaceBoundingBox(this.m_aoProducts);
-        }
-    };
 
+    EditorController.prototype.applyEditorPreviewImageUpdate = function () {
+
+        if (utilsIsObjectNullOrUndefined(this.m_oActiveBand)) return;
+
+        var sFileName = this.m_aoProducts[this.m_oActiveBand.productIndex].fileName;
+
+        // Get Dimension of the Canvas
+        var elementMapContainer = angular.element(document.querySelector('#mapcontainer'));
+        var heightMapContainer = elementMapContainer[0].offsetHeight;
+        var widthMapContainer = elementMapContainer[0].offsetWidth;
+
+        var oGetBandImageBody = this.createBodyForProcessingBandImage(sFileName, this.m_oActiveBand.name,null,
+            this.m_oImagePreviewDirectivePayload.viewportX, this.m_oImagePreviewDirectivePayload.viewportY,this.m_oImagePreviewDirectivePayload.viewportWidth,
+            this.m_oImagePreviewDirectivePayload.viewportHeight,widthMapContainer,heightMapContainer);
+
+        // Remove the image from visibile layers: it will be added later by processingGetBandImage
+        this.removeBandFromVisibleList(this.m_oActiveBand);
+        // Call the API and display the image
+        this.processingGetBandImage(oGetBandImageBody, this.m_oActiveWorkspace.workspaceId);
+    };
 
 
     /*********************************************************** MESSAGE HANDLING **********************************************************/
@@ -892,7 +901,8 @@ var EditorController = (function () {
                 }
             }
         }).error(function (data, status) {
-            utilsVexDialogAlertTop('GURU MEDITATION<br>ERROR PROCESSING BAND PREVIEW IMAGE ')
+            oController.m_bIsLoadedPreviewBandImage = true;
+            utilsVexDialogAlertTop('GURU MEDITATION<br>ERROR PROCESSING BAND PREVIEW IMAGE ');
         });
 
         return true;
@@ -1219,6 +1229,20 @@ var EditorController = (function () {
             $('.leaflet-container').css('cursor','');
         }
     };
+
+
+    /**
+     * Handler of the "Home" button of the view
+     */
+    EditorController.prototype.goWorkspaceHome = function () {
+        if (this.m_b2DMapModeOn) {
+            this.m_oMapService.flyToWorkspaceBoundingBox(this.m_aoProducts);
+        }
+        else {
+            this.m_oGlobeService.flyToWorkspaceBoundingBox(this.m_aoProducts);
+        }
+    };
+
 
     /*********************************************************** SHOW MODALS ***********************************************************/
 
