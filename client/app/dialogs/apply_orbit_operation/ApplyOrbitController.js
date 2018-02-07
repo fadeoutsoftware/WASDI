@@ -13,10 +13,12 @@ var ApplyOrbitController = (function() {
         this.m_aoProducts = this.m_oExtras.products;
         this.m_oSelectedProduct = this.m_oExtras.selectedProduct;
         this.m_oGetParametersOperationService = oGetParametersOperationService;
+        this.m_asSelectedProducts = [];
         if(utilsIsObjectNullOrUndefined(this.m_aoProducts) == true)
         {
             this.m_aoProducts = [];
         }
+        this.m_asProductsName = this.getProductsName();
 
         if(utilsIsObjectNullOrUndefined(this.m_oSelectedProduct) == true)
         {
@@ -29,7 +31,6 @@ var ApplyOrbitController = (function() {
         }
 
         this.m_sSelectedOrbitStateVectors = "";
-        //TODO CHECK IF THERE IS sourceFileName && destinationFileName
         this.m_oReturnValue={
              sourceFileName:"",
              destinationFileName:"",
@@ -43,31 +44,73 @@ var ApplyOrbitController = (function() {
         };
 
         var oController = this;
-        $scope.run = function(oOptions) {
-            //TODO CHECK OPTIONS
-            var bAreOkOptions = true;
-            if( (utilsIsObjectNullOrUndefined(oController.m_oSelectedProduct.fileName) == true) && (utilsIsStrNullOrEmpty(oController.m_oSelectedProduct.fileName) == true) )
-                bAreOkOptions = false;
-            if( (utilsIsObjectNullOrUndefined(oController.m_sFileName_Operation) == true) && (utilsIsStrNullOrEmpty(oController.m_sFileName_Operation) == true) )
-                bAreOkOptions = false;
-            if( (utilsIsObjectNullOrUndefined(oController.m_sSelectedOrbitStateVectors) == true) && (utilsIsStrNullOrEmpty(oController.m_sSelectedOrbitStateVectors) == true) )
-                bAreOkOptions = false;
-            if( (utilsIsObjectNullOrUndefined(oController.m_oReturnValue.options.polyDegree) == true) && (utilsIsANumber(oController.m_oReturnValue.options.polyDegree) == false) )
-                bAreOkOptions = false;
-            if( utilsIsObjectNullOrUndefined(oController.m_oReturnValue.options.continueOnFail) == true )
-                bAreOkOptions = false;
+        // $scope.run = function(oOptions) {
+        //
+        //     // CHECK OPTIONS
+        //     var bAreOkOptions = true;
+        //     if( (utilsIsObjectNullOrUndefined(oController.m_oSelectedProduct.fileName) == true) && (utilsIsStrNullOrEmpty(oController.m_oSelectedProduct.fileName) == true) )
+        //         bAreOkOptions = false;
+        //     if( (utilsIsObjectNullOrUndefined(oController.m_sFileName_Operation) == true) && (utilsIsStrNullOrEmpty(oController.m_sFileName_Operation) == true) )
+        //         bAreOkOptions = false;
+        //     if( (utilsIsObjectNullOrUndefined(oController.m_sSelectedOrbitStateVectors) == true) && (utilsIsStrNullOrEmpty(oController.m_sSelectedOrbitStateVectors) == true) )
+        //         bAreOkOptions = false;
+        //     if( (utilsIsObjectNullOrUndefined(oController.m_oReturnValue.options.polyDegree) == true) && (utilsIsANumber(oController.m_oReturnValue.options.polyDegree) == false) )
+        //         bAreOkOptions = false;
+        //     if( utilsIsObjectNullOrUndefined(oController.m_oReturnValue.options.continueOnFail) == true )
+        //         bAreOkOptions = false;
+        //
+        //     if(bAreOkOptions != false)
+        //     {
+        //         //
+        //         oController.m_oReturnValue.sourceFileName = oController.m_oSelectedProduct.fileName;
+        //         oController.m_oReturnValue.destinationFileName = oController.m_sFileName_Operation;
+        //         oController.m_oReturnValue.options.orbitType = oController.m_sSelectedOrbitStateVectors;
+        //     }
+        //     else
+        //     {
+        //         oOptions = null;
+        //     }
+        //     oClose(oOptions, 500); // close, but give 500ms for bootstrap to animate
+        // };
+        $scope.run = function() {
 
-            if(bAreOkOptions != false)
+            // CHECK OPTIONS
+            var iNumberOfSelectedProducts = oController.m_asSelectedProducts.length;
+            var aoReturnValue = [];
+            var bAreOkOptions = true;
+            for(var iIndexSelectedProduct = 0; iIndexSelectedProduct < iNumberOfSelectedProducts ; iIndexSelectedProduct++)
             {
-                oController.m_oReturnValue.sourceFileName = oController.m_oSelectedProduct.fileName;
-                oController.m_oReturnValue.destinationFileName = oController.m_sFileName_Operation;
-                oController.m_oReturnValue.options.orbitType = oController.m_sSelectedOrbitStateVectors;
+                var oProduct = oController.getProductByName(oController.m_asSelectedProducts[iIndexSelectedProduct]);
+
+                if( (utilsIsObjectNullOrUndefined(oProduct.fileName) == true) && (utilsIsStrNullOrEmpty(oProduct.fileName) == true) )
+                    bAreOkOptions = false;
+                //TODO CHECK IT
+                if( (utilsIsObjectNullOrUndefined(oController.m_sFileName_Operation) == true) && (utilsIsStrNullOrEmpty(oController.m_sFileName_Operation) == true) )
+                    bAreOkOptions = false;
+                if( (utilsIsObjectNullOrUndefined(oController.m_sSelectedOrbitStateVectors) == true) && (utilsIsStrNullOrEmpty(oController.m_sSelectedOrbitStateVectors) == true) )
+                    bAreOkOptions = false;
+                if( (utilsIsObjectNullOrUndefined(oController.m_oReturnValue.options.polyDegree) == true) && (utilsIsANumber(oController.m_oReturnValue.options.polyDegree) == false) )
+                    bAreOkOptions = false;
+                if( utilsIsObjectNullOrUndefined(oController.m_oReturnValue.options.continueOnFail) == true )
+                    bAreOkOptions = false;
+                if(bAreOkOptions != false)
+                {
+                    // oController.m_oReturnValue.sourceFileName = oController.m_oSelectedProduct.fileName;
+                    // oController.m_oReturnValue.destinationFileName = oController.m_sFileName_Operation;
+                    oController.m_oReturnValue.sourceFileName = oController.m_asSelectedProducts[iIndexSelectedProduct].fileName;
+                    oController.m_oReturnValue.destinationFileName = oController.m_sFileName_Operation;
+                    oController.m_oReturnValue.options.orbitType = oController.m_sSelectedOrbitStateVectors;
+
+                }
+                else
+                {
+                    oController.m_oReturnValue = null;
+                }
             }
-            else
-            {
-                oOptions = null;
-            }
-            oClose(oOptions, 500); // close, but give 500ms for bootstrap to animate
+
+
+
+            oClose(oController.m_oReturnValue, 500); // close, but give 500ms for bootstrap to animate
         };
 
         this.m_oGetParametersOperationService.getparametersApplyOrbit()
@@ -116,14 +159,43 @@ var ApplyOrbitController = (function() {
 
     ApplyOrbitController.prototype.selectedProductIsEmpty = function()
     {
-        if(utilsIsObjectNullOrUndefined(this.m_oSelectedProduct) == true)
+        if(utilsIsObjectNullOrUndefined(this.m_asSelectedProducts))
             return true;
+        // if(utilsIsObjectNullOrUndefined(this.m_oSelectedProduct) == true)
+        //     return true;
         return false;
     }
 
     ApplyOrbitController.prototype.getOrbitStateVector = function()
     {
         return this.m_asOrbitStateVectors;
+    }
+
+    ApplyOrbitController.prototype.getProductsName = function(){
+        if(utilsIsObjectNullOrUndefined(this.m_aoProducts) === true)
+            return null;
+        var iNumberOfProducts = this.m_aoProducts.length;
+        var asProductsName = [];
+        for(var iIndexProduct = 0; iIndexProduct < iNumberOfProducts ; iIndexProduct++)
+        {
+            asProductsName.push(this.m_aoProducts[iIndexProduct].name);
+        }
+        return asProductsName;
+    }
+
+    ApplyOrbitController.prototype.getProductByName = function(sName){
+        if(utilsIsStrNullOrEmpty(sName) === true)
+            return null;
+        var iNumberOfProducts = this.m_aoProducts.length;
+        ;
+        for(var iIndexProduct = 0; iIndexProduct < iNumberOfProducts ; iIndexProduct++)
+        {
+            if( this.m_aoProducts[iIndexProduct].name === sName)
+            {
+                return this.m_aoProducts[iIndexProduct];
+            }
+        }
+        return null;
     }
 
     ApplyOrbitController.$inject = [

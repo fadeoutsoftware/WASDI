@@ -1279,6 +1279,21 @@ var EditorController = (function () {
             modal.close.then(function (oResult) {
 
 
+                // if(utilsIsObjectNullOrUndefined(oResult) == true)
+                // {
+                //     utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR THE APPLY ORBIT OPTIONS ARE WRONG OR EMPTY!");
+                //     return false;
+                // }
+                // if(oResult == "close")
+                //     return false;
+                //
+                // // oController.m_oScope.Result = oResult;
+                // oController.m_oSnapOperationService.ApplyOrbit(oResult.sourceFileName, oResult.destinationFileName, oController.m_oActiveWorkspace.workspaceId,oResult.options)
+                //     .success(function (data) {
+                //
+                //     }).error(function (error) {
+                //         utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR THE OPERATION APPLY ORBIT DOSEN'T WORK");
+                // });
                 if(utilsIsObjectNullOrUndefined(oResult) == true)
                 {
                     utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR THE APPLY ORBIT OPTIONS ARE WRONG OR EMPTY!");
@@ -1286,14 +1301,19 @@ var EditorController = (function () {
                 }
                 if(oResult == "close")
                     return false;
+                var iNumberOfProduct = oResult.length;
+                for(var iIndexProduct = 0; iIndexProduct < iNumberOfProduct;iIndexProduct ++)
+                {
+                    // oController.m_oScope.Result = oResult;
+                    oController.m_oSnapOperationService.ApplyOrbit(oResult[iIndexProduct].sourceFileName, oResult[iIndexProduct].destinationFileName,
+                                                                    oController.m_oActiveWorkspace.workspaceId,oResult[iIndexProduct].options)
+                        .success(function (data) {
 
-                // oController.m_oScope.Result = oResult;
-                oController.m_oSnapOperationService.ApplyOrbit(oResult.sourceFileName, oResult.destinationFileName, oController.m_oActiveWorkspace.workspaceId,oResult.options)
-                    .success(function (data) {
-
-                    }).error(function (error) {
+                        }).error(function (error) {
                         utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR THE OPERATION APPLY ORBIT DOSEN'T WORK");
-                });
+                    });
+                }
+
                 return true;
             });
         });
