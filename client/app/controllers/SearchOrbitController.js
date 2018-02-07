@@ -323,7 +323,7 @@ var SearchOrbitController = (function() {
 
                 aasNewContent.push(oLatLonArray);
             }
-            var oRectangle = this.m_oMapService.addRectangleOnMap(aasNewContent, null, 0);
+            var oRectangle = this.m_oMapService.addRectangleByBoundsArrayOnMap(aasNewContent, null, 0);
             if(utilsIsObjectNullOrUndefined(oRectangle))
             {
                 utilsVexDialogAlertTop("IMPOSSIBLE TO VISUALIZE ORBIT");
@@ -397,7 +397,7 @@ var SearchOrbitController = (function() {
 
                     aasNewContent.push(oLatLonArray);
                 }
-                var oRectangle = this.m_oMapService.addRectangleOnMap(aasNewContent, null, 0);
+                var oRectangle = this.m_oMapService.addRectangleByBoundsArrayOnMap(aasNewContent, null, 0);
                 if(utilsIsObjectNullOrUndefined(oRectangle))
                 {
                     utilsVexDialogAlertTop("IMPOSSIBLE VISUALIZE ORBIT");

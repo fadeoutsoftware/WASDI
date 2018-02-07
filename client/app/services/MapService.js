@@ -400,6 +400,50 @@ service('MapService', ['$http','$rootScope', 'ConstantsService', function ($http
 
     };
 
+    /**
+     * Add a rectangle shape on the map
+     * @param aaBounds
+     * @param sColor
+     * @param iIndexLayers
+     * @returns {null}
+     */
+    this.addRectangleByBoundsArrayOnMap = function (aaBounds,sColor,iIndexLayers)
+    {
+        if(utilsIsObjectNullOrUndefined(aaBounds)) return null;
+
+        for(var iIndex = 0; iIndex < aaBounds.length; iIndex++ )
+        {
+            if(utilsIsObjectNullOrUndefined(aaBounds[iIndex])) return null;
+        }
+
+        //default color
+        if(utilsIsStrNullOrEmpty(sColor)) sColor="#ff7800";
+
+        // create an colored rectangle
+        // weight = line thickness
+        var oRectangle = L.polygon(aaBounds, {color: sColor, weight: 1}).addTo(this.m_oWasdiMap);
+
+        if(!utilsIsObjectNullOrUndefined(iIndexLayers))//event on click
+            oRectangle.on("click",function (event) {
+                $rootScope.$broadcast('on-mouse-click-rectangle',{rectangle:oRectangle});//SEND MESSAGE TO IMPORTCONTROLLER
+            });
+        //mouse over event change rectangle style
+        oRectangle.on("mouseover", function (event) {//SEND MESSAGE TO IMPORT CONTROLLER
+            oRectangle.setStyle({weight:3,fillOpacity:0.7});
+            $rootScope.$broadcast('on-mouse-over-rectangle',{rectangle:oRectangle});// TODO SEND MASSAGE FOR CHANGE CSS in LAYER LIST TABLE
+            var temp = oRectangle.getBounds()
+
+
+        });
+        //mouse out event set default value of style
+        oRectangle.on("mouseout", function (event) {//SEND MESSAGE TO IMPORT CONTROLLER
+            oRectangle.setStyle({weight:1,fillOpacity:0.2});
+            $rootScope.$broadcast('on-mouse-leave-rectangle',{rectangle:oRectangle});// TODO SEND MASSAGE FOR CHANGE CSS in LAYER LIST TABLE
+        });
+
+        return oRectangle;
+    };
+
         /**
      * Add a rectangle shape on the map
      * @param aaBounds
