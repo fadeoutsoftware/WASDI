@@ -2227,7 +2227,7 @@ var EditorController = (function () {
             oNode.fileName = this.m_aoProducts[iIndexProduct].fileName;
             oNode.id = this.m_aoProducts[iIndexProduct].fileName;
 
-            oNode.product = this.m_aoProducts[iIndexProduct];
+            //oNode.product = this.m_aoProducts[iIndexProduct];
             this.m_aoProducts[iIndexProduct].selfIndex = iIndexProduct;
             oNode.productIndex = iIndexProduct;
 
