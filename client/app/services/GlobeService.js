@@ -188,7 +188,6 @@ service('GlobeService', ['$http',  'ConstantsService','SatelliteService', functi
      */
     this.addRectangleOnGlobeParamArray = function (aArray)
     {
-
         if(utilsIsObjectNullOrUndefined(aArray) == true) return false;
         if(utilsIsObjectNullOrUndefined(this.m_oWasdiGlobe) == true) return false;
 
@@ -198,7 +197,7 @@ service('GlobeService', ['$http',  'ConstantsService','SatelliteService', functi
                 outline : true,
                  outlineColor : Cesium.Color.RED.withAlpha(1),
                 outlineWidth : 10,
-                material : Cesium.Color.RED.withAlpha(0.2),
+                material : Cesium.Color.RED.withAlpha(0.2)
             }
         });
 
@@ -489,40 +488,30 @@ service('GlobeService', ['$http',  'ConstantsService','SatelliteService', functi
 
 
     /**
-     * Fly to Workspace Global Bounding Box
-     * @param m_aoProducts
+     * Fly to Workspace Global Bounding Box.
+     * Takes in input the list of Products of the Workspace.
+     * bCreateRectangle can be undefined, null, true or false: it is not false the method will add
+     * a bounding box rectangle for each product if it is still not on the globe.
+     * In bCreateRectangle is false no rectangle will be added
+     * @param aoProducts List of the workspace products
      * @returns {boolean}
      */
-    this.flyToWorkspaceBoundingBox = function (m_aoProducts) {
+    this.flyToWorkspaceBoundingBox = function (aoProducts) {
         try {
-            var oRectangle = null;
             var aoArraySplit = [];
-            var iArraySplitLength = 0;
-            var aiInvertedArraySplit = [];
-
             var aoTotalArray = [];
 
             // Check we have products
-            if(utilsIsObjectNullOrUndefined(m_aoProducts) === true) return false;
+            if(utilsIsObjectNullOrUndefined(aoProducts) === true) return false;
 
-            var iProductsLength = m_aoProducts.length;
+            var iProductsLength = aoProducts.length;
 
             // For each product
             for(var iIndexProduct = 0; iIndexProduct < iProductsLength; iIndexProduct++){
-
                 // Split bbox string
-                aoArraySplit = m_aoProducts[iIndexProduct].bbox.split(",");
+                aoArraySplit = aoProducts[iIndexProduct].bbox.split(",");
                 aoTotalArray.push.apply(aoTotalArray,aoArraySplit);
-
-                // Get the array representing the bounding box
-                aiInvertedArraySplit = this.fromBboxToRectangleArray(m_aoProducts[iIndexProduct].bbox);
-
-                // Add the rectangle to the globe
-                oRectangle = this.addRectangleOnGlobeParamArray(aiInvertedArraySplit);
-                m_aoProducts[iIndexProduct].oRectangle = oRectangle;
-                m_aoProducts[iIndexProduct].aBounds = aiInvertedArraySplit;
             }
-
 
             var aoBounds = [];
             for (var iIndex = 0; iIndex < aoTotalArray.length - 1; iIndex = iIndex + 2) {
@@ -549,6 +538,41 @@ service('GlobeService', ['$http',  'ConstantsService','SatelliteService', functi
         }
 
     };
+
+    this.addAllWorkspaceRectanglesOnMap = function (aoProducts) {
+        try {
+
+            var oRectangle = null;
+            var aoArraySplit = [];
+            var aiInvertedArraySplit = [];
+
+            var aoTotalArray = [];
+
+            // Check we have products
+            if(utilsIsObjectNullOrUndefined(aoProducts) === true) return false;
+
+            var iProductsLength = aoProducts.length;
+
+            // For each product
+            for(var iIndexProduct = 0; iIndexProduct < iProductsLength; iIndexProduct++){
+
+                // Split bbox string
+                aoArraySplit = aoProducts[iIndexProduct].bbox.split(",");
+                aoTotalArray.push.apply(aoTotalArray,aoArraySplit);
+
+                // Get the array representing the bounding box
+                aiInvertedArraySplit = this.fromBboxToRectangleArray(aoProducts[iIndexProduct].bbox);
+                // Add the rectangle to the globe
+                oRectangle = this.addRectangleOnGlobeParamArray(aiInvertedArraySplit);
+                aoProducts[iIndexProduct].oRectangle = oRectangle;
+                aoProducts[iIndexProduct].aBounds = aiInvertedArraySplit;
+            }
+        }
+        catch (e) {
+            console.log(e);
+        }
+    };
+
 
     /**
      * ZOOM ON LAYER BY POINTS
@@ -602,6 +626,7 @@ service('GlobeService', ['$http',  'ConstantsService','SatelliteService', functi
             }
 
             // Parse the bounding box
+            geoserverBoundingBox = geoserverBoundingBox.replace(/\n/g,"");
             var oBoundingBox = JSON.parse(geoserverBoundingBox);
             if(utilsIsObjectNullOrUndefined(oBoundingBox)) {
                 console.log("GlobeService.zoomBandImageOnGeoserverBoundingBox: parsing bouning box is null");

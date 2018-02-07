@@ -44,8 +44,8 @@
 
   "EDITOR_TOOLTIP_SWITCH_3D_2D":"Switch 3D globe and 2D map",
   "EDITOR_TOOLTIP_HOME_2D":"Center of map",
-  "EDITOR_TOOLTIP_SYNCHRONIZE_MAP_3D":"Synchronize map 3D",
-  "EDITOR_TOOLTIP_SYNCHRONIZE_MAP_2D":"Synchronize map 2D",
+  "EDITOR_TOOLTIP_SYNCHRONIZE_MAP_3D":"Synchronize this globe to the 2D Navigation View",
+  "EDITOR_TOOLTIP_SYNCHRONIZE_MAP_2D":"Synchronize this map to the 3D Navigation View",
   "EDITOR_TOOLTIP_HOME":"Home",
   "EDITOR_TITLE_PANEL_PRODUCTS":"Products",
   "EDITOR_TOOLTIP_OPEN_BAND":"Expand published band",

@@ -254,7 +254,7 @@
 
                 <div class="panel-body fixed-panel">
                     <!--TODO: SLIDER-->
-                    <!---------------------- TAB 0 ------------------>
+                    <!---------------------- TAB 0 NAVIGATION------------------>
                     <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12"  ng-show="m_oController.m_iActiveMapPanelTab === 0">
                         <div class="col-xs-11 col-sm-11 col-md-11 col-lg-11">
                             <div class="map" id = "wasdiMap2" ng-show="m_oController.m_b2DMapModeOn == false"></div>
@@ -363,29 +363,22 @@
                         <!--<i class="fa fa-sticky-note " aria-hidden="true"></i>-->
                         <!--<i></i>-->
                     </button>
-                    <!-- 2D map button-->
-                    <button type="button" class="btn btn-default" ng-click="m_oController.m_oMapService.getHome();"  data-toggle="tooltip"
+                    <!-- 2D map Home button-->
+                    <button type="button" class="btn btn-default" ng-click="m_oController.goWorkspaceHome();"  data-toggle="tooltip"
                             data-placement="bottom"  title="{{'EDITOR_TOOLTIP_HOME'|translate}}"
-                            ng-show="m_oController.m_b2DMapModeOn == true" ng-disabled="m_oController.m_bIsVisibleMapOfLeaflet == false">
+                            ng-disabled="m_oController.m_bIsActiveGeoraphicalMode == false">
                         <i class="fa fa-home fa-lg" aria-hidden="true"></i>
                     </button>
                     <!-- 2D map button-->
                     <button type="button" class="btn btn-default" ng-click="m_oController.synchronize2DMap();"  data-toggle="tooltip"
                             data-placement="bottom"  title="{{'EDITOR_TOOLTIP_SYNCHRONIZE_MAP_2D'|translate}}"
-                            ng-show="m_oController.m_b2DMapModeOn == true" ng-disabled=" m_oController.m_bIsVisibleMapOfLeaflet == false">
+                            ng-show="m_oController.m_b2DMapModeOn == true" ng-disabled="m_oController.m_bIsActiveGeoraphicalMode == false">
                         <i class="fa fa-location-arrow" aria-hidden="true"></i>
-                    </button>
-
-                    <!-- 3D map button-->
-                    <button type="button" class="btn btn-default" ng-click="m_oController.m_oGlobeService.goHome()"  data-toggle="tooltip"
-                            data-placement="bottom"  title="{{'EDITOR_TOOLTIP_HOME'|translate}}"
-                            ng-show="m_oController.m_b2DMapModeOn == false" ng-disabled=" m_oController.m_bIsVisibleMapOfLeaflet == false">
-                        <i class="fa fa-home fa-lg" aria-hidden="true"></i>
                     </button>
                     <!-- 3D map button-->
                     <button type="button" class="btn btn-default" ng-click="m_oController.synchronize3DMap();"  data-toggle="tooltip"
                             data-placement="bottom"  title="{{'EDITOR_TOOLTIP_SYNCHRONIZE_MAP_3D'|translate}}"
-                            ng-show="m_oController.m_b2DMapModeOn == false" ng-disabled=" m_oController.m_bIsVisibleMapOfLeaflet == false">
+                            ng-show="m_oController.m_b2DMapModeOn == false" ng-disabled=" m_oController.m_bIsActiveGeoraphicalMode == false">
                         <i class="fa fa-location-arrow" aria-hidden="true"></i>
                     </button>
 
@@ -393,38 +386,23 @@
                     <!-- BOTH -->
                     <button type="button" class="btn btn-default" ng-click="m_oController.openGetCapabilitiesDialog()"  data-toggle="tooltip"
                             data-placement="bottom"  title="{{'EDITOR_TOOLTIP_GET_CAPABILITIES'|translate}}"
-                            ng-disabled="m_oController.m_b2DMapModeOn == false" >
+                            ng-disabled="m_oController.m_bIsActiveGeoraphicalMode == false" >
                         <i class="fa fa-server" aria-hidden="true"></i>
                     </button>
 
                     <button type="button" class="btn btn-default" ng-click="m_oController.changeModeOnOffPixelInfo();m_oController.hideOrShowPixelInfo();"  data-toggle="tooltip"
                             data-placement="bottom"  title="Show/hide pixel info"
-                            ng-disabled="m_oController.m_b2DMapModeOn == false" ng-style="{'background-color': m_oController.getClassPixelInfo()}">  <!--ng-class="{'active' : m_oController.Mode}"-->
+                            ng-disabled="m_oController.m_bIsActiveGeoraphicalMode == false" ng-style="{'background-color': m_oController.getClassPixelInfo()}">  <!--ng-class="{'active' : m_oController.Mode}"-->
                         <i class="fa fa-info-circle" aria-hidden="true"></i>
                         <!--<pre>{{m_oController.m_bIsModeOnPixelInfo|json}}</pre>-->
                     </button>
-
                 </div>
-
-                <!--<div class="layers-list">-->
-                <!--<div class="checkbox">-->
-                <!--<h5><b>Layers visible:</b></h5>-->
-                <!--<div ng-repeat="layer in m_oController.m_aoLayersList">-->
-                <!--<label title ="{{layer.layerId}}" ng-click="m_oController.hideBandInLayerList(layer)">-->
-                <!--<input type="checkbox" ng-model="layer.isVisibleInMap">-->
-                <!--{{layer.layerId}}-->
-                <!--</label>-->
-                <!--</div>-->
-
-                <!--</div>-->
-                <!--</div>-->
 
                 <!-- BAND 2d-->
                 <img ng-src="{{m_oController.m_sViewUrlSelectedBand}}" ng-show="m_oController.m_b2DMapModeOn === true && m_oController.m_bIsActiveGeoraphicalMode === false && m_oController.m_bIsLoadedViewBandImage">
                 <div class="loadIcon" ng-hide="m_oController.m_bIsLoadedViewBandImage && (m_oController.m_bIsLoadedViewBandImage === true) ">
                     <invader></invader>
                 </div>
-
 
                 <!-- 2D map -->
                 <div class="map" id = "wasdiMap" ng-show="m_oController.m_b2DMapModeOn == true && m_oController.m_bIsActiveGeoraphicalMode === true"></div>

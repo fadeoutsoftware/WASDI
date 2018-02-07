@@ -82,7 +82,6 @@ service('MapService', ['$http','$rootScope', 'ConstantsService', function ($http
     this.m_oGoogleHybrid = new L.gridLayer.googleMutant('hybrid');
     this.m_oGoogleMap = new L.gridLayer.googleMutant('roadmap');
     this.m_oGoogleTerrain = new L.gridLayer.googleMutant('terrain');
-    //this.m_oGoogleSatelite = new L.gridLayer.googleMutant('satellite');// it doesn't work look at m_oGoogleSatelite in init layer
 
     /**
      * layers control
@@ -104,22 +103,16 @@ service('MapService', ['$http','$rootScope', 'ConstantsService', function ($http
         }
     );
 
-    //************** MAP *********************
+    /**
+     * Map Object
+     * @type {null}
+     */
     this.m_oWasdiMap = null;
 
-
-    this.m_oActiveBaseLayer = this.m_oOSMBasic;
-
     /**
-     * Clear Map
+     * Actual base Layer
      */
-    this.clearMap = function () {
-        if (this.m_oWasdiMap) {
-            this.m_oWasdiMap.remove();
-            this.m_oWasdiMap = null;
-        }
-    }
-
+    this.m_oActiveBaseLayer = this.m_oOSMBasic;
 
     /**
      * Init the Map
@@ -144,10 +137,9 @@ service('MapService', ['$http','$rootScope', 'ConstantsService', function ($http
         this.m_oWasdiMap = L.map(sMapDiv, {
             zoomControl: false,
             layers: [this.m_oOSMBasic],
-            keyboard: false,
+            keyboard: false
              //maxZoom: 22
         });
-
 
         // coordinates in map find this plugin in lib folder
         L.control.mousePosition().addTo(this.m_oWasdiMap);
@@ -181,74 +173,13 @@ service('MapService', ['$http','$rootScope', 'ConstantsService', function ($http
     };
 
     /**
-     * Remove a layer from the map
-     * @param oLayer
-     * @returns {boolean}
+     * Get the Map object
+     * @returns {null|*}
      */
-    this.removeLayerFromMap = function(oLayer)
-    {
-        if(utilsIsObjectNullOrUndefined(oLayer))
-            return false;
-        oLayer.remove();
-        return true;
+    this.getMap = function () {
+        return this.m_oWasdiMap;
     };
 
-    /**
-     * Remove all layers from the map
-     */
-    this.removeLayersFromMap = function()
-    {
-        var oController = this;
-        oController.m_oWasdiMap.eachLayer(function (layer) {
-            oController.m_oWasdiMap.removeLayer(layer);
-        });
-    };
-
-
-    /**
-     * Add a rectangle shape on the map
-     * @param aaBounds
-     * @param sColor
-     * @param iIndexLayers
-     * @returns {null}
-     */
-    this.addRectangleOnMap = function (aaBounds,sColor,iIndexLayers)
-    {
-        if(utilsIsObjectNullOrUndefined(aaBounds))
-            return null;
-
-        for(var iIndex = 0; iIndex < aaBounds.length; iIndex++ )
-        {
-            if(utilsIsObjectNullOrUndefined(aaBounds[iIndex])) return null;
-        }
-
-        //default color
-        if(utilsIsStrNullOrEmpty(sColor)) sColor="#ff7800";
-
-        // create an colored rectangle
-        // weight = line thickness
-        var oRectangle = L.polygon(aaBounds, {color: sColor, weight: 1}).addTo(this.m_oWasdiMap);
-
-        if(!utilsIsObjectNullOrUndefined(iIndexLayers))//event on click
-            oRectangle.on("click",function (event) {
-                $rootScope.$broadcast('on-mouse-click-rectangle',{rectangle:oRectangle});//SEND MESSAGE TO IMPORTCONTROLLER
-            });
-        //mouse over event change rectangle style
-        oRectangle.on("mouseover", function (event) {//SEND MESSAGE TO IMPORT CONTROLLER
-            oRectangle.setStyle({weight:3,fillOpacity:0.7});
-            $rootScope.$broadcast('on-mouse-over-rectangle',{rectangle:oRectangle});// TODO SEND MASSAGE FOR CHANGE CSS in LAYER LIST TABLE
-            var temp = oRectangle.getBounds()
-
-
-        });
-        //mouse out event set default value of style
-        oRectangle.on("mouseout", function (event) {//SEND MESSAGE TO IMPORT CONTROLLER
-            oRectangle.setStyle({weight:1,fillOpacity:0.2});
-            $rootScope.$broadcast('on-mouse-leave-rectangle',{rectangle:oRectangle});// TODO SEND MASSAGE FOR CHANGE CSS in LAYER LIST TABLE
-        });
-
-        return oRectangle;
-    };
 
     /**
      *
@@ -308,53 +239,6 @@ service('MapService', ['$http','$rootScope', 'ConstantsService', function ($http
     };
 
     /**
-     * Get the Map object
-     * @returns {null|*}
-     */
-    this.getMap = function () {
-        return this.m_oWasdiMap;
-    }
-
-    /**
-     *
-     */
-    this.deleteDrawShapeEditToolbar = function()
-    {
-        this.m_oDrawItems.clearLayers();
-    }
-
-    /**
-     * Center the world
-     */
-    this.getHome = function()
-    {
-        this.m_oWasdiMap.fitWorld();
-    }
-
-    /**
-     * Set basic map
-     * @returns {boolean}
-     */
-    this.setBasicMap = function()
-    {
-        if(utilsIsObjectNullOrUndefined(this.m_oOSMBasic)) return false;
-        this.m_oWasdiMap.addLayer(this.m_oOSMBasic,true);
-        return true;
-    };
-
-    /**
-     * Remove basic map
-     * @returns {boolean}
-     */
-    this.removeBasicMap = function()
-    {
-        if(utilsIsObjectNullOrUndefined(this.m_oOSMBasic))
-            return false
-        this.removeLayerFromMap(this.m_oOSMBasic);
-        return true;
-    };
-
-    /**
      * Init map editor
      * @param sMapDiv
      * @returns {boolean}
@@ -377,6 +261,24 @@ service('MapService', ['$http','$rootScope', 'ConstantsService', function ($http
             geocoder: geocoder,
             position:'topleft'
         }).addTo(this.m_oWasdiMap);
+    };
+
+    /**
+     * Clear Map
+     */
+    this.clearMap = function () {
+        if (this.m_oWasdiMap) {
+            this.m_oWasdiMap.remove();
+            this.m_oWasdiMap = null;
+        }
+    };
+
+    /**
+     *
+     */
+    this.deleteDrawShapeEditToolbar = function()
+    {
+        this.m_oDrawItems.clearLayers();
     };
 
     /**
@@ -405,7 +307,180 @@ service('MapService', ['$http','$rootScope', 'ConstantsService', function ($http
         oRectangle.setStyle({weight:1,fillOpacity:0.2});
     };
 
-    /********************************************ZOOM FUNCTIONS**********************************************/
+
+    /******************************************************LAYER HANDLERS***********************************************/
+
+    /**
+     * Set basic map
+     * @returns {boolean}
+     */
+    this.setBasicMap = function()
+    {
+        if(utilsIsObjectNullOrUndefined(this.m_oOSMBasic)) return false;
+        this.m_oWasdiMap.addLayer(this.m_oOSMBasic,true);
+        return true;
+    };
+
+    /**
+     * Remove basic map
+     * @returns {boolean}
+     */
+    this.removeBasicMap = function()
+    {
+        if(utilsIsObjectNullOrUndefined(this.m_oOSMBasic)) return false;
+        this.removeLayerFromMap(this.m_oOSMBasic);
+        return true;
+    };
+
+
+    /**
+     * Remove a layer from the map
+     * @param oLayer
+     * @returns {boolean}
+     */
+    this.removeLayerFromMap = function(oLayer)
+    {
+        if(utilsIsObjectNullOrUndefined(oLayer))
+            return false;
+        oLayer.remove();
+        return true;
+    };
+
+    /**
+     * Remove all layers from the map
+     */
+    this.removeLayersFromMap = function()
+    {
+        var oController = this;
+        oController.m_oWasdiMap.eachLayer(function (layer) {
+            oController.m_oWasdiMap.removeLayer(layer);
+        });
+    };
+
+
+    /**
+     * Convert boundaries
+     * @param sBoundaries
+     * @returns {Array}
+     */
+    this.convertBboxInBoundariesArray = function(sBbox)
+    {
+        var asBoundaries = sBbox.split(",");
+        var iNumberOfBoundaries = asBoundaries.length;
+        var aoReturnValues = [];
+        var iIndexReturnValues = 0;
+        for(var iBoundaryIndex = 0 ; iBoundaryIndex < iNumberOfBoundaries; iBoundaryIndex++)
+        {
+            if(utilsIsOdd(iBoundaryIndex) === false)
+            {
+                aoReturnValues[iIndexReturnValues] = [asBoundaries[iBoundaryIndex],asBoundaries[iBoundaryIndex+1]];
+                iIndexReturnValues++;
+            }
+        }
+        return aoReturnValues;
+    };
+
+    /**
+     * Add to the 2D Map all the bounding box rectangles of a workspace
+     * @param aoProducts
+     */
+    this.addAllWorkspaceRectanglesOnMap = function (aoProducts, sColor) {
+        if (utilsIsObjectNullOrUndefined(aoProducts)) return;
+        if(utilsIsStrNullOrEmpty(sColor)) sColor="#ff7800";
+
+        try {
+
+            for (var iProduct = 0; iProduct<aoProducts.length; iProduct++) {
+                this.addRectangleOnMap(aoProducts[iProduct].bbox, sColor, aoProducts[iProduct].fileName);
+            }
+        }
+        catch (e) {
+            console.log(e);
+        }
+
+    };
+
+        /**
+     * Add a rectangle shape on the map
+     * @param aaBounds
+     * @param sColor
+     * @param sReferenceName
+     * @returns {null}
+     */
+    this.addRectangleOnMap = function (sBbox,sColor,sReferenceName)
+    {
+        if(utilsIsObjectNullOrUndefined(sBbox)) return null;
+
+        var aoBounds = this.convertBboxInBoundariesArray(sBbox);
+
+        for(var iIndex = 0; iIndex < aoBounds.length; iIndex++ )
+        {
+            if(utilsIsObjectNullOrUndefined(aoBounds[iIndex])) return null;
+        }
+
+        //default color
+        if(utilsIsStrNullOrEmpty(sColor)) sColor="#ff7800";
+
+        // create an colored rectangle
+        // weight = line thickness
+        var oRectangle = L.polygon(aoBounds, {color: sColor, weight: 1}).addTo(this.m_oWasdiMap);
+
+        //event on click
+        if(!utilsIsObjectNullOrUndefined(sReferenceName)) {
+            oRectangle.on("click",function (event) {
+                $rootScope.$broadcast('on-mouse-click-rectangle',{rectangle:oRectangle});
+            });
+        }
+
+        //mouse over event change rectangle style
+        oRectangle.on("mouseover", function (event) {
+            oRectangle.setStyle({weight:3,fillOpacity:0.7});
+            $rootScope.$broadcast('on-mouse-over-rectangle',{rectangle:oRectangle});// TODO SEND MASSAGE FOR CHANGE CSS in LAYER LIST TABLE
+            var temp = oRectangle.getBounds()
+        });
+
+        //mouse out event set default value of style
+        oRectangle.on("mouseout", function (event) {
+            oRectangle.setStyle({weight:1,fillOpacity:0.2});
+            $rootScope.$broadcast('on-mouse-leave-rectangle',{rectangle:oRectangle});// TODO SEND MASSAGE FOR CHANGE CSS in LAYER LIST TABLE
+        });
+
+        return oRectangle;
+    };
+
+
+    /********************************************ZOOM AND NAVIGATION FUNCTIONS**********************************************/
+
+    /**
+     * Center the world
+     */
+    this.goHome = function()
+    {
+        this.m_oWasdiMap.fitWorld();
+    };
+
+
+    this.flyToWorkspaceBoundingBox = function (aoProducts) {
+        try {
+            if(utilsIsObjectNullOrUndefined(aoProducts)) return;
+            if( aoProducts.length == 0 ) return;
+
+            var aoBounds = [];
+
+            for (var iProducts = 0; iProducts<aoProducts.length; iProducts++) {
+                var oProduct = aoProducts[iProducts];
+                var aoProductBounds = this.convertBboxInBoundariesArray(oProduct.bbox);
+                aoBounds = aoBounds.concat(aoProductBounds);
+            }
+
+            this.m_oWasdiMap.flyToBounds([aoBounds]);
+            return true;
+        }
+        catch (e) {
+            console.log(e);
+        }
+    };
+
     /**
      * Zoom on bounds
      * @param aBounds
@@ -417,7 +492,7 @@ service('MapService', ['$http','$rootScope', 'ConstantsService', function ($http
             if(utilsIsObjectNullOrUndefined(aBounds)) return false;
             if( aBounds.length == 0 ) return false;
 
-            this.m_oWasdiMap.fitBounds([aBounds]);
+            this.m_oWasdiMap.flyToBounds([aBounds]);
             return true;
         }
         catch (e) {
@@ -426,9 +501,23 @@ service('MapService', ['$http','$rootScope', 'ConstantsService', function ($http
     };
 
 
-    this.zoomBandImageOnBBOX = function (bbox) {
+    /**
+     * Zoom 2d map based on the bbox string form server
+     * @param sBbox
+     * @returns {null}
+     */
+    this.zoomBandImageOnBBOX = function (sBbox) {
         try {
-            // TODO
+            if(utilsIsObjectNullOrUndefined(sBbox)) return null;
+
+            var aoBounds = this.convertBboxInBoundariesArray(sBbox);
+
+            for(var iIndex = 0; iIndex < aoBounds.length; iIndex++ )
+            {
+                if(utilsIsObjectNullOrUndefined(aoBounds[iIndex])) return null;
+            }
+
+            this.m_oWasdiMap.flyToBounds(aoBounds);
         }
         catch (e) {
             console.log(e);
@@ -436,6 +525,10 @@ service('MapService', ['$http','$rootScope', 'ConstantsService', function ($http
 
     };
 
+    /**
+     * Zoom 2d Map on a geoserver Bounding box string from server
+     * @param geoserverBoundingBox
+     */
     this.zoomBandImageOnGeoserverBoundingBox = function (geoserverBoundingBox) {
         try {
             if (utilsIsObjectNullOrUndefined(geoserverBoundingBox)) {
@@ -443,6 +536,7 @@ service('MapService', ['$http','$rootScope', 'ConstantsService', function ($http
                 return;
             }
 
+            geoserverBoundingBox = geoserverBoundingBox.replace(/\n/g,"");
             var oBounds = JSON.parse(geoserverBoundingBox);
 
             //Zoom on layer
@@ -450,7 +544,7 @@ service('MapService', ['$http','$rootScope', 'ConstantsService', function ($http
                 corner2 = L.latLng(oBounds.miny, oBounds.minx),
                 bounds = L.latLngBounds(corner1, corner2);
 
-            this.m_oWasdiMap.fitBounds(bounds);
+            this.m_oWasdiMap.flyToBounds(bounds);
         }
         catch (e) {
             console.log(e);
@@ -473,7 +567,7 @@ service('MapService', ['$http','$rootScope', 'ConstantsService', function ($http
                 corner2 = L.latLng(oBoundingBox[3], oBoundingBox[0]),
                 bounds = L.latLngBounds(corner1, corner2);
 
-            this.getMap().fitBounds(bounds);
+            this.getMap().flyToBounds(bounds);
         }
         catch (e) {
             console.log(e);
