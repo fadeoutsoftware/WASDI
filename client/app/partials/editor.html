@@ -262,12 +262,12 @@
                         </div>
                         <div class="col-xs-1 col-sm-1 col-md-1 col-lg-1">
                             <div class="btn-group-vertical">
-                                <button type="button" class="btn btn-primary" ng-click="m_oController.switch2D3DMode()"
+                                <!--button type="button" class="btn btn-primary" ng-click="m_oController.switch2D3DMode()"
                                         data-toggle="tooltip" data-placement="top" title="{{'EDITOR_TOOLTIP_SWITCH_3D_2D'|translate}}"
                                         ng-show=" m_oController.m_bIsActiveGeoraphicalMode == true">
                                     <i ng-show="m_oController.m_b2DMapModeOn == true" class="fa fa-map-o" aria-hidden="true"></i>
                                     <i  ng-show="m_oController.m_b2DMapModeOn == false" class="fa fa-globe " aria-hidden="true"></i>
-                                </button>
+                                </button-->
                                 <button type="button" class="btn btn-primary" ng-click="m_oController.synchronize2DMap()"
                                         data-toggle="tooltip" data-placement="top" title="{{'EDITOR_TOOLTIP_SYNCHRONIZE_MAP_2D'|translate}}"
                                         ng-show="m_oController.m_b2DMapModeOn == false && m_oController.m_bIsActiveGeoraphicalMode == true ">
@@ -281,7 +281,7 @@
                             </div>
                         </div>
                     </div>
-                    <!---------------------- TAB 1 ------------------>
+                    <!---------------------- TAB 1 COLOURS------------------>
                     <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12" ng-show="m_oController.m_iActiveMapPanelTab === 1">
                         <div class="col-xs-10 col-sm-10 col-md-10 col-lg-10">
                             <div id="colourManipulationDiv">
@@ -321,8 +321,8 @@
                         </div>
                     </div>
 
-                    <!----------------------------------------------- TAB 2 ----------------------------------------------->
-                    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12" ng-show="m_oController.m_iActiveMapPanelTab === 2">
+                    <!----------------------------------------------- TAB 2  PREVIEW---------------------------------------------->
+                    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12" ng-show="m_oController.m_iActiveMapPanelTab === 2" style="margin-bottom: 50px;">
                         <div class="col-xs-10 col-sm-10 col-md-10 col-lg-10">
                             <imagepreview is-loaded="m_oController.m_bIsLoadedPreviewBandImage" url-image="m_oController.m_sPreviewUrlSelectedBand"
                                           body = "m_oController.m_oImagePreviewDirectivePayload">
@@ -331,8 +331,7 @@
                         </div>
 
                         <div class="col-xs-2 col-sm-2 col-md-2 col-lg-2">
-
-                            <button ng-click="m_oController.processingGetBandImage(m_oController.m_oActiveWorkspace.workspaceId)"
+                            <button ng-click="m_oController.applyEditorPreviewImageUpdate()"
                                     ng-disabled = " (m_oController.m_bIsLoadedPreviewBandImage === false) || (m_oController.m_bIsLoadedViewBandImage === false)">
                                 Apply
                             </button>
@@ -356,12 +355,17 @@
             <div class="map-container" id="mapcontainer">
 
                 <div class="btn-group" role="group" >
-                    <!-- Visualize map -->
+                    <!-- Switch 2D/3D Mode-->
+                    <button type="button" class="btn btn-primary" ng-click="m_oController.switch2D3DMode()"
+                            data-toggle="tooltip" data-placement="bottom" title="{{'EDITOR_TOOLTIP_SWITCH_3D_2D'|translate}}"
+                            ng-disabled=" m_oController.m_bIsActiveGeoraphicalMode == false">
+                        <i ng-show="m_oController.m_b2DMapModeOn == true" aria-hidden="true">2D</i>
+                        <i  ng-show="m_oController.m_b2DMapModeOn == false" aria-hidden="true">3D</i>
+                    </button>
+                    <!-- Switch Image Editor / Geographical Mode-->
                     <button type="button" class="btn btn-default " ng-class="m_oController.m_sClassBtnSwitchGeographic" ng-click="m_oController.switchEditorGeoReferencedMode();m_oController.changeClassBtnSwitchGeographic();" data-toggle="tooltip"
                             data-placement="bottom" title="{{m_oController.m_sToolTipBtnSwitchGeographic|translate}}"
-                            ng-disabled="m_oController.m_b2DMapModeOn == false"><!--{{'EDITOR_TOOLTIP_TO_GEO'|translate}}-->
-                        <!--<i class="fa fa-sticky-note " aria-hidden="true"></i>-->
-                        <!--<i></i>-->
+                            ng-disabled="m_oController.m_b2DMapModeOn == false">
                     </button>
                     <!-- 2D map Home button-->
                     <button type="button" class="btn btn-default" ng-click="m_oController.goWorkspaceHome();"  data-toggle="tooltip"

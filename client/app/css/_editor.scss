@@ -149,7 +149,8 @@
 
           &:hover,&:active{
             background-color: $wasdi-blue-logo;
-            background-image: url("../assets/icons/mapBar/map_route_green(NoGeoReference).svg");
+            //background-image: url("../assets/icons/mapBar/map_route_green(NoGeoReference).svg");
+            background-image: url("../assets/icons/mapBar/pictureModeGreen.svg");
             background-size: 20px;
             background-repeat: no-repeat;
             background-position: center;
@@ -162,7 +163,8 @@
         .btn-switch-not-geographic
         {
           background-color: $wasdi-blue-logo;
-          background-image: url("../assets/icons/mapBar/map_route_white(NoGeoReference).svg");
+          //background-image: url("../assets/icons/mapBar/map_route_white(NoGeoReference).svg");
+          background-image: url("../assets/icons/mapBar/pictureModeWhite.svg");
           background-size: 20px;
           background-repeat: no-repeat;
           background-position: center;

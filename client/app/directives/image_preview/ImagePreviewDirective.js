@@ -36,7 +36,7 @@ angular.module('wasdi.ImagePreviewDirective', [])
                  var iHeight = (iDefaultHeight *iDefaultValueZoom )/100;
                  var iWidth = (iDefaultWidth *iDefaultValueZoom )/100;
 
-                square.graphics.setStrokeStyle(2).beginStroke("#000").beginFill("grey").drawRect(0, 0, iWidth, iHeight);
+                square.graphics.setStrokeStyle(2).beginStroke("#009036").beginFill("#43516A").drawRect(0, 0, iWidth, iHeight);
                 square.alpha = 0.5;
 
                 var dragger = new createjs.Container();
@@ -83,45 +83,35 @@ angular.module('wasdi.ImagePreviewDirective', [])
 
                 scope.zoom = function()
                 {
+                    // Take the Preview Canvas Dimensions
                     var element = angular.element(document.querySelector('#imagepreviewcanvas'));
                     var iCanvasHeight = element[0].offsetHeight;
                     var iCanvasWidth = element[0].offsetWidth;
+                    // Take position and dimensions of the over rectangle
                     var iHeightSquare = scope.Square.graphics.command.h;
                     var iWidthSquare = scope.Square.graphics.command.w;
                     var iAx = scope.Dragger.x;
                     var iAy = scope.Dragger.y;
 
+                    // Data check
                     if (iCanvasHeight == 0 || iCanvasWidth == 0) return;
+                    if (iAx<0) iAx = 0;
+                    if (iAy<0) iAy = 0;
+                    if (iHeightSquare <=0) iHeightSquare = 1;
+                    if (iWidthSquare <= 0) iWidthSquare = 1;
 
+                    // Calculate Percentage
                     iHeightSquare = iHeightSquare/iCanvasHeight;
                     iWidthSquare = iWidthSquare/iCanvasWidth;
                     iAx = iAx/iCanvasWidth;
                     iAy = iAy/iCanvasHeight;
-                    // iHeightSquare = (iHeightSquare*iCanvasHeight)/100 ;
-                    // iWidthSquare = (iWidthSquare* iCanvasWidth)/100;
-                    // iAx = (iAx*iCanvasWidth) /100 ;
-                    // iAy = (iAy*iCanvasHeight) /100 ;
 
-                    // this.body.vp_x = iAx * this.body.vp_x;
-                    // this.body.vp_y = iAy * this.body.vp_y;
-                    // this.body.vp_w = iWidthSquare * this.body.vp_w;
-                    // this.body.vp_h = iHeightSquare * this.body.vp_h;
-
-                    // scope.body.vp_x = iAx * this.body.vp_x;
-                    // scope.body.vp_y = iAy * this.body.vp_y;
-                    scope.body.viewportX = iAx * this.body.originalBandWidth;
-                    scope.body.viewportY = iAy *  this.body.originalBandHeight;
-                    scope.body.viewportWidth = iWidthSquare * this.body.originalBandWidth;
-                    scope.body.viewportHeight = iHeightSquare * this.body.originalBandHeight;
-
-                    // scope.body.vp_x = iAx * this.body.vp_w;
-                    // scope.body.vp_y = iAy *  this.body.vp_h;
-                    // scope.body.vp_w = iWidthSquare * this.body.vp_w;
-                    // scope.body.vp_h = iHeightSquare * this.body.vp_h;
-
-                    // onClick({sSeason:body});
+                    // Apply to the real band dimension
+                    scope.body.viewportX = Math.round(iAx * this.body.originalBandWidth);
+                    scope.body.viewportY = Math.round(iAy *  this.body.originalBandHeight);
+                    scope.body.viewportWidth = Math.round(iWidthSquare * this.body.originalBandWidth);
+                    scope.body.viewportHeight = Math.round(iHeightSquare * this.body.originalBandHeight);
                 };
-
 
 
                 scope.changeZoomSquareSize = function(valueOfZoom){
@@ -134,66 +124,13 @@ angular.module('wasdi.ImagePreviewDirective', [])
                     var iNewHeight = (iCanvasHeight * valueOfZoom)/100;
                     var iNewWidth = (iCanvasWidth  * valueOfZoom )/100;
 
-                    scope.Square.graphics.clear().setStrokeStyle(2).beginStroke("#000").beginFill("grey").drawRect(0, 0, iNewWidth, iNewHeight);
+                    scope.Square.graphics.clear().setStrokeStyle(2).beginStroke("#009036").beginFill("#43516A").drawRect(0, 0, iNewWidth, iNewHeight);
                     scope.Stage.update();
 
                     this.zoom();
 
                     return true;
                 };
-
-                // scope.takePositionSquare = function(){
-                //
-                //     var element = angular.element(document.querySelector('#imagepreviewcanvas'));
-                //     var iCanvasHeight = element[0].offsetHeight;
-                //     var iCanvasWidth = element[0].offsetWidth;
-                //     var iHeightSquare = scope.Square.graphics.command.h;
-                //     var iWidthSquare = scope.Square.graphics.command.w;
-                //
-                //     /*
-                //     *  (Ax,Ay)                                   (Bx,By)
-                //     *       ---------------------------------------
-                //     *       |                                     |
-                //     *       |               SQUARE                |
-                //     *       |                                     |
-                //     *       ---------------------------------------
-                //     *  (Dx,Dy)                                   (Cx,Cy)
-                //     *
-                //     * */
-                //
-                //     var iAx = scope.Dragger.x;
-                //     var iAy = scope.Dragger.y;
-                //     var iBx = scope.Dragger.x + iHeightSquare;
-                //     var iBy = scope.Dragger.y;
-                //     var iCx = scope.Dragger.x + iHeightSquare;
-                //     var iCy = scope.Dragger.y - iWidthSquare;
-                //     var iDx = scope.Dragger.x;
-                //     var iDy = scope.Dragger.y - iWidthSquare;
-                //
-                //     /*
-                //     *   Example X:
-                //     *   (Ax,Ay) = (280,10)
-                //     *   280 : 560 = x : 100
-                //     *   x = 560 / (280*100)
-                //     *   transform points in percents
-                //     *
-                //     *   Example Y:
-                //     *   (Ax,Ay) = (10,140)
-                //     *   140 : 280 = y : 100
-                //     *   y = 280 / (140*100)
-                //     *   transform points in percents
-                //     * */
-                //
-                //     var iAyPercent = (iAy*100)/iCanvasHeight;
-                //     var iAxPercent = (iAx*100)/iCanvasWidth;
-                //     var iByPercent = (iBy*100)/iCanvasHeight;
-                //     var iBxPercent = (iBx*100)/iCanvasWidth;
-                //     var iCyPercent = (iCy*100)/iCanvasHeight;
-                //     var iCxPercent = (iCx*100)/iCanvasWidth;
-                //     var iDyPercent = (iDy*100)/iCanvasHeight;
-                //     var iDxPercent = (iDx*100)/iCanvasWidth;
-                //
-                // }
 
                 scope.$watch('urlImage', function (newValue, oldValue, scope)
                 {
