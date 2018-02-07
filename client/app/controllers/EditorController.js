@@ -168,53 +168,104 @@ var EditorController = (function () {
      * Switch from 2D Mode to 3D Mode and viceversa
      */
     EditorController.prototype.switch2D3DMode = function () {
+
+        // Revert the flag
+        this.m_b2DMapModeOn = !this.m_b2DMapModeOn;
+        // Take a reference to the controller
         var oController = this;
 
-        oController.m_b2DMapModeOn = !oController.m_b2DMapModeOn;
+        if (this.m_b2DMapModeOn == false) {
 
-        //3D MAP
-        if (oController.m_b2DMapModeOn == false) {
+            // We are going in 3D MAP
+            this.m_oMapService.clearMap();
+            this.m_oGlobeService.clearGlobe();
+            this.m_oGlobeService.initGlobe('cesiumContainer');
+            this.m_oMapService.initMap('wasdiMap2');
 
-            oController.m_oMapService.clearMap();
-            oController.m_oGlobeService.clearGlobe();
-            oController.m_oGlobeService.initGlobe('cesiumContainer');
-            oController.m_oMapService.initMap('wasdiMap2');
+            // Due to the problems of Leaflet initialization, let's do the subsequent steps a little bit later
+            setTimeout(function () {
+                oController.m_oMapService.getMap().invalidateSize();
 
+                // Load Layers
+                for (var iIndexLayers = 0; iIndexLayers < oController.m_aoVisibleBands.length; iIndexLayers++) {
+                    // Check if it is a valid layer
+                    if (!utilsIsObjectNullOrUndefined(oController.m_aoVisibleBands[iIndexLayers].layerId)) {
+                        oController.addLayerMap3D(oController.m_aoVisibleBands[iIndexLayers].layerId);
+                    }
+
+                    var sNodeId = oController.m_aoVisibleBands[iIndexLayers].productName + "_" + oController.m_aoVisibleBands[iIndexLayers].bandName;
+                    oController.setTreeNodeAsSelected(sNodeId);
+                }
+
+                // Load External Layers
+                for (var iExternals = 0; iExternals < oController.m_aoExternalLayers.length; iExternals++) {
+                    if (!utilsIsObjectNullOrUndefined(oController.m_aoExternalLayers[iExternals].Name)){
+                        oController.addLayerMap3DByServer(oController.m_aoExternalLayers[iExternals].Name,oController.m_aoExternalLayers[iExternals].sServerLink);
+                    }
+                }
+
+                // Add all bounding boxes to 2D Map
+                oController.m_oMapService.addAllWorkspaceRectanglesOnMap(oController.m_aoProducts);
+
+                // Zoom on the active band
+                if (utilsIsObjectNullOrUndefined(oController.m_oActiveBand)==false) {
+                    oController.m_oGlobeService.zoomBandImageOnGeoserverBoundingBox(oController.m_oActiveBand.geoserverBoundingBox);
+                    oController.m_oMapService.zoomBandImageOnGeoserverBoundingBox(oController.m_oActiveBand.geoserverBoundingBox);
+                }
+                else {
+                    // Zoom on the workspace
+                    oController.m_oGlobeService.flyToWorkspaceBoundingBox(oController.m_aoProducts);
+                    oController.m_oMapService.flyToWorkspaceBoundingBox(oController.m_aoProducts);
+                }
+            }, 400);
         }
-        else if (oController.m_b2DMapModeOn == true) {
+        else {
             //We are going in 2D MAP
-            oController.m_oMapService.clearMap();
-            oController.m_oGlobeService.clearGlobe();
-            oController.m_oMapService.initMap('wasdiMap');
-            oController.m_oGlobeService.initGlobe('cesiumContainer2');
-        }
+            this.m_oMapService.clearMap();
+            this.m_oGlobeService.clearGlobe();
+            this.m_oMapService.initMap('wasdiMap');
+            this.m_oGlobeService.initGlobe('cesiumContainer2');
 
-        oController.delayInLoadMaps();
+            // Due to the problems of Leaflet initialization, let's do the subsequent steps a little bit later
+            setTimeout(function () {
+                oController.m_oMapService.getMap().invalidateSize();
 
-        // Load Layers
-        for (var iIndexLayers = 0; iIndexLayers < oController.m_aoVisibleBands.length; iIndexLayers++) {
-            // Check if it is a valid layer
-            if (!utilsIsObjectNullOrUndefined(oController.m_aoVisibleBands[iIndexLayers].layerId)) {
-                oController.addLayerMap2D(oController.m_aoVisibleBands[iIndexLayers].layerId);
-                oController.addLayerMap3D(oController.m_aoVisibleBands[iIndexLayers].layerId);
-            }
+                // Load Layers
+                for (var iIndexLayers = 0; iIndexLayers < oController.m_aoVisibleBands.length; iIndexLayers++) {
+                    // Check if it is a valid layer
+                    if (!utilsIsObjectNullOrUndefined(oController.m_aoVisibleBands[iIndexLayers].layerId)) {
+                        oController.addLayerMap2D(oController.m_aoVisibleBands[iIndexLayers].layerId);
+                    }
 
-            var sNodeId = oController.m_aoVisibleBands[iIndexLayers].productName + "_" + oController.m_aoVisibleBands[iIndexLayers].bandName;
-            oController.setTreeNodeAsSelected(sNodeId);
-        }
+                    var sNodeId = oController.m_aoVisibleBands[iIndexLayers].productName + "_" + oController.m_aoVisibleBands[iIndexLayers].bandName;
+                    oController.setTreeNodeAsSelected(sNodeId);
+                }
 
-        for (var iExternals = 0; iExternals < oController.m_aoExternalLayers.length; iExternals++) {
-            if (!utilsIsObjectNullOrUndefined(oController.m_aoExternalLayers[iExternals].Name)){
-                oController.addLayerMap3DByServer(oController.m_aoExternalLayers[iExternals].Name,oController.m_aoExternalLayers[iExternals].sServerLink);
-                oController.addLayerMap2DByServer(oController.m_aoExternalLayers[iExternals].Name,oController.m_aoExternalLayers[iExternals].sServerLink);
-            }
-        }
+                // Load External Layers
+                for (var iExternals = 0; iExternals < oController.m_aoExternalLayers.length; iExternals++) {
+                    if (!utilsIsObjectNullOrUndefined(oController.m_aoExternalLayers[iExternals].Name)){
+                        oController.addLayerMap2DByServer(oController.m_aoExternalLayers[iExternals].Name,oController.m_aoExternalLayers[iExternals].sServerLink);
+                    }
+                }
 
-        if (utilsIsObjectNullOrUndefined(oController.m_oActiveBand)==false) {
-            oController.m_oGlobeService.zoomBandImageOnGeoserverBoundingBox(oController.m_oActiveBand.geoserverBoundingBox);
-            oController.m_oMapService.zoomBandImageOnGeoserverBoundingBox(oController.m_oActiveBand.geoserverBoundingBox);
+                //  Add all bounding boxes to 3D Map
+                oController.m_oGlobeService.addAllWorkspaceRectanglesOnMap(oController.m_aoProducts);
+
+                // Zoom on the active band
+                if (utilsIsObjectNullOrUndefined(oController.m_oActiveBand)==false) {
+                    oController.m_oGlobeService.zoomBandImageOnGeoserverBoundingBox(oController.m_oActiveBand.geoserverBoundingBox);
+                    oController.m_oMapService.zoomBandImageOnGeoserverBoundingBox(oController.m_oActiveBand.geoserverBoundingBox);
+                }
+                else {
+                    // Zoom on the workspace
+                    oController.m_oMapService.flyToWorkspaceBoundingBox(oController.m_aoProducts);
+                    oController.m_oGlobeService.flyToWorkspaceBoundingBox(oController.m_aoProducts)
+                }
+
+            }, 400);
         }
     };
+
 
     /**
      * Switch 2D from Editor Mode to Geographical Mode and Vice Versa
@@ -284,7 +335,6 @@ var EditorController = (function () {
                     //ask user if he want to publish the band
                     utilsVexDialogConfirm("GOING IN GEOGRAPHICAL-MODE WITH A BAND STILL NOT PUBLISHED:<br>DO YOU WANT TO PUBLISH IT?", oPublishBandCallback);
                 }
-
             }
 
             // Show the external Layers
@@ -298,6 +348,10 @@ var EditorController = (function () {
 
             // Set the base maps
             this.m_oMapService.setBasicMap();
+
+            if (this.m_aoVisibleBands.length == 0) {
+                this.m_oMapService.flyToWorkspaceBoundingBox(this.m_aoProducts);
+            }
         }
         else {
             // We are going in Editor Mode
@@ -361,6 +415,20 @@ var EditorController = (function () {
             }
         }
     };
+
+    /**
+     * Handler of the "Home" button of the view
+     */
+    EditorController.prototype.goWorkspaceHome = function () {
+        if (this.m_b2DMapModeOn) {
+            this.m_oMapService.flyToWorkspaceBoundingBox(this.m_aoProducts);
+        }
+        else {
+            this.m_oGlobeService.flyToWorkspaceBoundingBox(this.m_aoProducts);
+        }
+    };
+
+
 
     /*********************************************************** MESSAGE HANDLING **********************************************************/
 
@@ -485,7 +553,7 @@ var EditorController = (function () {
         oBand.bVisibleNow = true;
         oBand.layerId = oPublishedBand.layerId;
         oBand.published=true;
-        oBand.bbox = oPublishedBand.bbox;
+        oBand.bbox = oPublishedBand.boundingBox;
         oBand.geoserverBoundingBox = oPublishedBand.geoserverBoundingBox;
 
         // Set the tree node as selected and published
@@ -501,12 +569,13 @@ var EditorController = (function () {
 
             // check if the background is in Editor Mode or in Georeferenced Mode
             if (this.m_b2DMapModeOn == false) {
-                //if we are in 3D put the layer also on the globe
+                //if we are in 3D put the layer on the globe
                 this.addLayerMap3D(oBand.layerId);
             }
-
-            //if there is a map, add layers to it
-            this.addLayerMap2D(oBand.layerId);
+            else {
+                //if we are in 2D put it on the map
+                this.addLayerMap2D(oBand.layerId);
+            }
 
             this.m_aoVisibleBands.push(oBand);
 
@@ -517,8 +586,8 @@ var EditorController = (function () {
                 this.m_oMapService.zoomBandImageOnGeoserverBoundingBox(oBand.geoserverBoundingBox);
             }
             else {
-                this.m_oMapService.zoomBandImageOnBBOX(oPublishedBand.bbox);
-                this.m_oGlobeService.zoomBandImageOnBBOX(oPublishedBand.bbox);
+                this.m_oMapService.zoomBandImageOnBBOX(oBand.bbox);
+                this.m_oGlobeService.zoomBandImageOnBBOX(oBand.bbox);
             }
 
         }
@@ -633,6 +702,8 @@ var EditorController = (function () {
                 // i need to make the tree after the products are loaded
                 oController.m_oTree = oController.generateTree();
                 oController.m_bIsLoadingTree = false;
+
+                oController.m_oGlobeService.addAllWorkspaceRectanglesOnMap(oController.m_aoProducts);
                 oController.m_oGlobeService.flyToWorkspaceBoundingBox(oController.m_aoProducts);
             }
         }).error(function (data, status) {
@@ -941,6 +1012,8 @@ var EditorController = (function () {
                     }
                 });
 
+                this.m_oGlobeService.flyToWorkspaceBoundingBox(this.m_aoProducts);
+                this.m_oMapService.flyToWorkspaceBoundingBox(this.m_aoProducts);
             }
             else {
 
@@ -951,8 +1024,7 @@ var EditorController = (function () {
                 // Clear the Editor Image
                 this.m_sViewUrlSelectedBand = "//:0";
 
-                // Clear the globe
-                this.m_oGlobeService.removeAllEntities();
+                // Fly Home
                 this.m_oGlobeService.flyToWorkspaceBoundingBox(this.m_aoProducts);
             }
         }
@@ -969,6 +1041,9 @@ var EditorController = (function () {
                     break;
                 }
             }
+
+            this.m_oGlobeService.flyToWorkspaceBoundingBox(this.m_aoProducts);
+            this.m_oMapService.flyToWorkspaceBoundingBox(this.m_aoProducts);
         }
 
         // Deselect the node
@@ -1092,16 +1167,6 @@ var EditorController = (function () {
         wmsLayer.setZIndex(1000);//it set the zindex of layer in map
         wmsLayer.addTo(oMap);
         return true;
-    };
-
-    /**
-     * utility function to let the 2s map redraw
-     */
-    EditorController.prototype.delayInLoadMaps = function () {
-        var oController = this;
-        setTimeout(function () {
-            oController.m_oMapService.getMap().invalidateSize()
-        }, 400);
     };
 
     /**
@@ -1938,10 +2003,9 @@ var EditorController = (function () {
      *}
      *
      *
-     * @param sSelectedNodeInput
      * @returns {{core: {data: Array, check_callback: boolean}, state: {key: string}, plugins: string[], contextmenu: {items: items}}}
      */
-    EditorController.prototype.generateTree = function (sSelectedNodeInput) {//sSelectedNodeInput
+    EditorController.prototype.generateTree = function () {
         var oController = this;
         var oTree =
             {
