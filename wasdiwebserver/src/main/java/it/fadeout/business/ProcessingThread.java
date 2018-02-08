@@ -190,12 +190,16 @@ public class ProcessingThread extends Thread {
 		return process.getProcessObjId();
 	}
 
-
+	/**
+	 * Check if a Process is Done (or finished some way, also Error or Stopped)
+	 * @param i
+	 * @return
+	 */
 	private boolean isProcessDone(int i) {
 		String procId = runningProcess[i];
 		checkRepo();
 		ProcessWorkspace process = repo.GetProcessByProcessObjId(procId);
-		boolean ret = process==null || process.getStatus().equalsIgnoreCase(ProcessStatus.DONE.name());
+		boolean ret = process==null || process.getStatus().equalsIgnoreCase(ProcessStatus.DONE.name()) || process.getStatus().equalsIgnoreCase(ProcessStatus.ERROR.name()) || process.getStatus().equalsIgnoreCase(ProcessStatus.STOPPED.name());
 		if (ret) runningProcess[i] = null;
 		
 		System.out.println(logPrefix + "process " + procId + " DONE: " + ret);
