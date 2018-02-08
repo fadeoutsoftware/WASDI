@@ -21,6 +21,7 @@ import wasdi.shared.opensearch.OpenSearchQuery;
 import wasdi.shared.opensearch.QueryExecutor;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.QueryResultViewModel;
+import wasdi.shared.viewmodels.SearchProviderViewModel;
 
 @Path("/search")
 public class OpenSearchResource {
@@ -110,9 +111,9 @@ public class OpenSearchResource {
 	{
 		Wasdi.DebugLog("OpenSearchResource.GetProductsCount");
 		
-//		if (Utils.isNullOrEmpty(sSessionId)) return 0;		
-//		User oUser = Wasdi.GetUserFromSession(sSessionId);		
-//		if (oUser==null || Utils.isNullOrEmpty(oUser.getUserId())) return 0;
+		if (Utils.isNullOrEmpty(sSessionId)) return 0;		
+		User oUser = Wasdi.GetUserFromSession(sSessionId);		
+		if (oUser==null || Utils.isNullOrEmpty(oUser.getUserId())) return 0;
 		
 		int iCounter = 0;
 		
@@ -152,10 +153,12 @@ public class OpenSearchResource {
 			@QueryParam("sQuery") String sQuery, @QueryParam("offset") String sOffset, @QueryParam("limit") String sLimit, 
 			@QueryParam("sortedby") String sSortedBy, @QueryParam("order") String sOrder ) {
 		
-//		User oUser = Wasdi.GetUserFromSession(sSessionId);
-//		if (oUser==null) return null;
-//		if (Utils.isNullOrEmpty(oUser.getUserId())) return null;
 		Wasdi.DebugLog("OpenSearchResource.Search");
+		
+		User oUser = Wasdi.GetUserFromSession(sSessionId);
+		if (oUser==null) return null;
+		if (Utils.isNullOrEmpty(oUser.getUserId())) return null;
+		
 		
 		if (sProviders!=null) {
 
@@ -232,20 +235,35 @@ public class OpenSearchResource {
 	@GET
 	@Path("/providers")
 	@Produces({"application/json", "text/html"})
-	public String[] GetSearchProviders(@HeaderParam("x-session-token") String sSessionId) {
+	public ArrayList<SearchProviderViewModel> GetSearchProviders(@HeaderParam("x-session-token") String sSessionId) {
+		if (Utils.isNullOrEmpty(sSessionId)) return null;
+		User oUser = Wasdi.GetUserFromSession(sSessionId);
+		if (oUser==null) return null;
+		if (Utils.isNullOrEmpty(oUser.getUserId())) return null;
+
+		ArrayList<SearchProviderViewModel> aoRetProviders = new ArrayList<>();
+		
+		
 		Wasdi.DebugLog("OpenSearchResource.GetSearchProviders");
 		
-//		if (Utils.isNullOrEmpty(sSessionId)) return null;
-//		User oUser = Wasdi.GetUserFromSession(sSessionId);
-//		if (oUser==null) return null;
-//		if (Utils.isNullOrEmpty(oUser.getUserId())) return null;
 
 		String sProviders = m_oServletConfig.getInitParameter("SearchProviders");
 		if (sProviders!=null && sProviders.length()>0) {
-			return sProviders.split(",|;");
+			String [] asProviders = sProviders.split(",|;");
+			
+			for (int iProviders = 0; iProviders<asProviders.length; iProviders++) {
+				SearchProviderViewModel oSearchProvider = new SearchProviderViewModel();
+				oSearchProvider.setCode(asProviders[iProviders]);
+				String sDescription = m_oServletConfig.getInitParameter(asProviders[iProviders]+".Description");
+				if (Utils.isNullOrEmpty(sDescription)) sDescription = asProviders[iProviders];
+				oSearchProvider.setDescription(sDescription);
+				String sLink = m_oServletConfig.getInitParameter(asProviders[iProviders]+".Link");
+				oSearchProvider.setLink(sLink);
+				aoRetProviders.add(oSearchProvider);
+			}
 		}
 		
-		return null;
+		return aoRetProviders;
 	}
 	
 	
