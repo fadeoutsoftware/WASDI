@@ -114,7 +114,8 @@ var EditorController = (function () {
         }
 
         //Set default value tree
-        this.m_oTree = null;//IMPORTANT NOTE: there's a 'WATCH' for this.m_oTree in TREE DIRECTIVE
+        //IMPORTANT NOTE: there's a 'WATCH' for this.m_oTree in TREE DIRECTIVE
+        this.m_oTree = null;
 
         // Hook to Rabbit WebStomp Service
         this.m_oRabbitStompService.setMessageCallback(this.receivedRabbitMessage);
@@ -1490,14 +1491,27 @@ var EditorController = (function () {
                 if(oResult == "close")
                     return false;
 
-                // oController.m_oScope.Result = oResult;
-                oController.m_oSnapOperationService.Multilooking(oResult.sourceFileName, oResult.destinationFileName, oController.m_oActiveWorkspace.workspaceId,oResult.options)
-                    .success(function (data) {
+                var iNumberOfProduct = oResult.length;
+                for(var iIndexProduct = 0; iIndexProduct < iNumberOfProduct;iIndexProduct ++)
+                {
+                    oController.m_oSnapOperationService.Multilooking(oResult[iIndexProduct].sourceFileName, oResult[iIndexProduct].destinationFileName,
+                                            oController.m_oActiveWorkspace.workspaceId,oResult[[iIndexProduct]].options)
+                        .success(function (data) {
 
-                    }).error(function (error) {
-                    utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR THE OPERATION MULTILOOKING DOSEN'T WORK");
-                });
+                        }).error(function (error) {
+                        utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR THE OPERATION MULTILOOKING DOSEN'T WORK");
+                    });
+                }
+
                 return true;
+                    // oController.m_oScope.Result = oResult;
+                // oController.m_oSnapOperationService.Multilooking(oResult.sourceFileName, oResult.destinationFileName, oController.m_oActiveWorkspace.workspaceId,oResult.options)
+                //     .success(function (data) {
+                //
+                //     }).error(function (error) {
+                //     utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR THE OPERATION MULTILOOKING DOSEN'T WORK");
+                // });
+                // return true;
 
             });
         });

@@ -7,8 +7,13 @@ angular.module('wasdi.MultiselectDirective', [])
         return{
             restrict:"E",
             scope :{
-                optionsDirective:'=options',
+                 optionsDirective:'=options',
+                //options:'=',
                 selectedDirective:'=selected'
+                // * Text binding ('@' or '@?') *
+                // * One-way binding ('<' or '<?') *
+                // * Two-way binding ('=' or '=?') *
+                // * Function binding ('&' or '&?') *
             },
 
             templateUrl:"directives/multiselect/MultiselectView.html",

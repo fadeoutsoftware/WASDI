@@ -17,6 +17,8 @@ var RadiometricCalibrationController = (function() {
         {
             this.m_aoProducts = [];
         }
+        this.m_asProductsName = this.getProductsName();
+        this.m_asSelectedProducts = [];
 
         if(utilsIsObjectNullOrUndefined(this.m_oSelectedProduct) == true)
         {
@@ -210,12 +212,53 @@ var RadiometricCalibrationController = (function() {
     //     return false;
     // }
 
+    /**
+     *
+     * @returns {boolean}
+     */
     RadiometricCalibrationController.prototype.selectedProductIsEmpty = function()
     {
         if(utilsIsObjectNullOrUndefined(this.m_oSelectedProduct) == true)
             return true;
         return false;
     };
+
+    /**
+     *
+     * @returns {*}
+     */
+    RadiometricCalibrationController.prototype.getProductsName = function(){
+        if(utilsIsObjectNullOrUndefined(this.m_aoProducts) === true)
+            return null;
+        var iNumberOfProducts = this.m_aoProducts.length;
+        var asProductsName = [];
+        for(var iIndexProduct = 0; iIndexProduct < iNumberOfProducts ; iIndexProduct++)
+        {
+            asProductsName.push(this.m_aoProducts[iIndexProduct].name);
+        }
+        return asProductsName;
+    }
+
+    /**
+     *
+     * @param sName
+     * @returns {*}
+     */
+    RadiometricCalibrationController.prototype.getProductByName = function(sName){
+        if(utilsIsStrNullOrEmpty(sName) === true)
+            return null;
+        var iNumberOfProducts = this.m_aoProducts.length;
+        ;
+        for(var iIndexProduct = 0; iIndexProduct < iNumberOfProducts ; iIndexProduct++)
+        {
+            if( this.m_aoProducts[iIndexProduct].name === sName)
+            {
+                return this.m_aoProducts[iIndexProduct];
+            }
+        }
+        return null;
+    }
+
     RadiometricCalibrationController.$inject = [
         '$scope',
         'close',
