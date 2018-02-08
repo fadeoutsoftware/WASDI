@@ -1696,11 +1696,20 @@ var EditorController = (function () {
                 var widthImagePreview = elementImagePreview[0].offsetWidth;
 
                 var sFileName = oController.m_aoProducts[oResult.band.productIndex].fileName;
-                var sFilter = JSON.stringify(oResult.filter);
 
-                var oBodyMapContainer = oController.createBodyForProcessingBandImage(sFileName,oResult.band.name,sFilter,0,0,oResult.band.width, oResult.band.height,widthMapContainer, heightMapContainer);
+                /*
+                var sFilter = {
+                    "name": oResult.filter.name,
+                    "shorthand": oResult.filter.shorthand,
+                    "operation": oResult.filter.operation,
+                    "editable": oResult.filter.editable,
+                    "tags": oResult.filter.tags,
+                    "kernelElements": oResult.filter.kernelElements
+                };
+                */
+                var oBodyMapContainer = oController.createBodyForProcessingBandImage(sFileName,oResult.band.name,oResult.filter,0,0,oResult.band.width, oResult.band.height,widthMapContainer, heightMapContainer);
 
-                var oBodyImagePreview = oController.createBodyForProcessingBandImage(sFileName,oResult.band.name,sFilter,0,0,oResult.band.width, oResult.band.height,widthImagePreview, heightImagePreview);
+                var oBodyImagePreview = oController.createBodyForProcessingBandImage(sFileName,oResult.band.name,oResult.filter,0,0,oResult.band.width, oResult.band.height,widthImagePreview, heightImagePreview);
 
                 oController.processingGetBandImage(oBodyMapContainer, oController.m_oActiveWorkspace.workspaceId);
                 if ( (widthImagePreview > 0) && (heightImagePreview > 0) )

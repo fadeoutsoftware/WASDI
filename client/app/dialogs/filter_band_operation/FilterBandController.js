@@ -27,7 +27,7 @@ var FilterBandController = (function() {
             {name:"Kernel offset X:",value:""},
             {name:"Kernel offset Y:",value:""},
             {name:"Kernel width:",value:""},
-            {name:"Kernel height:",value:""},
+            {name:"Kernel height:",value:""}
         ];
         this.m_aiFillOptions=[-2,-1,0,1,2,3,4,5];
         this.testMatrix=[
@@ -47,80 +47,10 @@ var FilterBandController = (function() {
             [{color:"blue" ,fontcolor:"black", value:"1", click:function(){console.log('hello')}},{color:"red" ,fontcolor:"black", value:"0"},{color:"yellow" ,fontcolor:"black", value:"0"},{color:"yellow" ,fontcolor:"black", value:"0"}],
 
         ];
-        // this.m_aoSystemFilterOptions = [
-        //     {name:"Detect Lines" ,options:[
-        //             {name:"Horizontal Edges",actions:function(){}},
-        //             {name:"Vertical Edges",actions:function(){}},
-        //             {name:"Left Diagonal Edges",actions:function(){}},
-        //             {name:"Compass Edge Detector",actions:function(){}},
-        //             {name:"Diagonal Compass Edges Detector",actions:function(){}},
-        //             {name:"Roberts Cross North-West",actions:function(){}},
-        //             {name:"Roberts Cross North-East",actions:function(){}},
-        //
-        //         ]},
-        //     {name:"Detect Gradients" ,options:[
-        //             {name:"Sobel North",actions:function(){}},
-        //             {name:"Sobel South",actions:function(){}},
-        //             {name:"Sobel West",actions:function(){}},
-        //             {name:"Sobel East",actions:function(){}},
-        //             {name:"Sobel North East",actions:function(){}},
-        //         ]},
-        //     {name:"Smooth and Blurr" ,options:[
-        //         {name:"Arithmetic Mean 3x3",actions:function(){}},
-        //         {name:"Arithmetic Mean 4x4",actions:function(){}},
-        //         {name:"Arithmetic Mean 5x5",actions:function(){}},
-        //         {name:"Low-Pass 3x3",actions:function(){}},
-        //         {name:"Low-Pass 5x5",actions:function(){}},
-        //
-        //
-        //     ]},
-        //     {name:"Sharpen" ,options:[
-        //         {name:"High-Pass 3x3 #1",actions:function(){}},
-        //         {name:"High-Pass 3x3 #2",actions:function(){}},
-        //         {name:"High-Pass 3x3 5x5",actions:function(){}},
-        //
-        //     ]},
-        //     {name:"Enhance Discontinuities" ,options:[
-        //         {name:"Laplace 3x3(a)",actions:function(){}},
-        //         {name:"Laplace 3x3(b)",actions:function(){}},
-        //         {name:"Laplace 5x5(a)",actions:function(){}},
-        //         {name:"Laplace 5x5(b)",actions:function(){}},
-        //     ]},
-        //     {name:"Non-linear Filters" ,options:[
-        //         {name:"Minimum 3x3",actions:function(){}},
-        //         {name:"Minimum 5x5",actions:function(){}},
-        //         {name:"Minimum 7x7",actions:function(){}},
-        //         {name:"Maximum 3x3",actions:function(){}},
-        //         {name:"Maximum 5x5",actions:function(){}},
-        //         {name:"Maximum 7x7",actions:function(){}},
-        //         {name:"Mean 3x3",actions:function(){}},
-        //         {name:"Mean 5x5",actions:function(){}},
-        //         {name:"Mean 7x7",actions:function(){}},
-        //         {name:"Median 3x3",actions:function(){}},
-        //         {name:"Median 5x5",actions:function(){}},
-        //         {name:"Median 7x7",actions:function(){}},
-        //         {name:"Standard Deviation 3x3",actions:function(){}},
-        //         {name:"Standard Deviation 5x5",actions:function(){}},
-        //         {name:"Standard Deviation 7x7",actions:function(){}},
-        //     ]},
-        //     {name:"Morphological Filters" ,options:[
-        //         {name:"Erosion 3x3",actions:function(){}},
-        //         {name:"Erosion 5x5",actions:function(){}},
-        //         {name:"Erosion 7x7",actions:function(){}},
-        //         {name:"Dilation 3x3",actions:function(){}},
-        //         {name:"Dilation 5x5",actions:function(){}},
-        //         {name:"Dilation 7x7",actions:function(){}},
-        //         {name:"Opening 3x3",actions:function(){}},
-        //         {name:"Opening 5x5",actions:function(){}},
-        //         {name:"Opening 7x7",actions:function(){}},
-        //         {name:"Closing 3x3",actions:function(){}},
-        //         {name:"Closing 5x5",actions:function(){}},
-        //         {name:"Closing 7x7",actions:function(){}},
-        //     ]},
-        // ];
+
         this.m_aoSystemFilterOptions = [];
         this.m_aoUserFilterOptions = [
-            {name:"User" ,options:[]},
+            {name:"User" ,options:[]}
         ];
 
         this.getFilters();
@@ -135,36 +65,7 @@ var FilterBandController = (function() {
             // var oOption = oController.getSelectedOptionsObject('Arithmetic Mean 3x3');
             var oOption = oController.getSelectedOptionsObject(oController.m_sSelectedFilter);
             delete oOption.matrix;
-            //TODO REMOVE THIS TEST JSON
-            oOption = {
-                "editable": false,
-                "kernelElements": [
-                    -1,
-                    -2,
-                    -1,
-                    0,
-                    0,
-                    0,
-                    1,
-                    2,
-                    1
-                ],
-                "kernelElementsAsText": "-1\t-2\t-1\n0\t0\t0\n1\t2\t1",
-                "kernelHeight": 3,
-                "kernelOffsetX": 1,
-                "kernelOffsetY": 1,
-                "kernelQuotient": 1,
-                "kernelWidth": 3,
-                "name": "Sobel North",
-                "operation": "CONVOLVE",
-                "shorthand": "sn",
-                "tags": []
-            };
-            // if(utilsIsObjectNullOrUndefined(oOption) === false)
-            // {
-            //     //apply filter if there is an option
-            //     // oController.applyFilter(oOption);
-            // }
+
             var oReturnValue = {
                 band: oController.m_oSelectedBand,
                 filter: oOption
@@ -174,6 +75,7 @@ var FilterBandController = (function() {
         };
 
     }
+
     FilterBandController.prototype.closeAndDonwloadProduct= function(result){
 
         this.m_oClose(result, 500); // close, but give 500ms for bootstrap to animate
@@ -335,13 +237,11 @@ var FilterBandController = (function() {
 
     FilterBandController.prototype.generateFiltersListFromServer = function(oData)
     {
-        if(utilsIsObjectNullOrUndefined(oData))
-            return false;
+        if(utilsIsObjectNullOrUndefined(oData)) return false;
 
         var asProperties = utilsGetPropertiesObject(oData);
 
-        if(asProperties === [])
-            return false;
+        if(asProperties === []) return false;
 
         for(var iIndexProperty = 0; iIndexProperty < asProperties.length; iIndexProperty++)
         {
@@ -456,8 +356,7 @@ var FilterBandController = (function() {
 
     FilterBandController.prototype.getSelectedOptionsObject = function(sName)
     {
-        if(utilsIsStrNullOrEmpty(sName)=== true)
-            return null;
+        if(utilsIsStrNullOrEmpty(sName)=== true) return null;
         //TODO IT
         var iNumberOfSystemFilters = this.m_aoSystemFilterOptions.length;
         for(var iIndexSystemFilter = 0; iIndexSystemFilter < iNumberOfSystemFilters; iIndexSystemFilter++)

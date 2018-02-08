@@ -35,17 +35,33 @@
                                         </div>
                                     </h4>
 
-                                    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 collapse well"
-                                         id="collapse{{system.name + $index |lowercase | removeSpaces}}"><!-- #collapse{{system.name + $index |lowercase | removeSpaces}} collapseoption{{$index}}-->
+                                    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 collapse well" id="collapse{{system.name + $index |lowercase | removeSpaces}}">
                                         <div class="col-xs-8 col-sm-8 col-md-8 col-lg-8">
-                                            <div ng-repeat="filterproperties in m_oController.m_aoFilterProperties track by $index" class="filter-properties">
+                                            <div class="filter-properties">
                                                 <label>
-                                                    {{filterproperties.name}}
+                                                    Name:&nbsp;{{m_oController.getSelectedOptionsObject(m_oController.m_sSelectedFilter).name}}
+                                                </label><br>
+                                                <label>
+                                                    Shorthand:&nbsp;{{m_oController.getSelectedOptionsObject(m_oController.m_sSelectedFilter).shorthand}}
+                                                </label><br>
+                                                <label>
+                                                    Operation:&nbsp;{{m_oController.getSelectedOptionsObject(m_oController.m_sSelectedFilter).operation}}
+                                                </label><br>
+                                                <label>
+                                                    Kernel Width:&nbsp;{{m_oController.getSelectedOptionsObject(m_oController.m_sSelectedFilter).kernelWidth}}
+                                                </label><br>
+                                                <label>
+                                                    Kernel Height:&nbsp;{{m_oController.getSelectedOptionsObject(m_oController.m_sSelectedFilter).kernelHeight}}
+                                                </label><br>
+                                                <label>
+                                                    Kernel Quotient:&nbsp;{{m_oController.getSelectedOptionsObject(m_oController.m_sSelectedFilter).kernelQuotient}}
+                                                </label><br>
+                                                <label>
+                                                    Kernel Offset X:&nbsp;{{m_oController.getSelectedOptionsObject(m_oController.m_sSelectedFilter).kernelOffsetX}}
+                                                </label><br>
+                                                <label>
+                                                    Kernel Offset Y:&nbsp;{{m_oController.getSelectedOptionsObject(m_oController.m_sSelectedFilter).kernelOffsetY}}
                                                 </label>
-                                                <div class="my-input-text">
-                                                    <input type="text" name="name"  class=""  >
-                                                </div>
-
                                             </div>
                                         </div>
                                         <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
