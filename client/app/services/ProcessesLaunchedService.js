@@ -152,19 +152,15 @@ service('ProcessesLaunchedService', ['ConstantsService','$rootScope','$http', fu
 
     this.checkIfFileIsDownloading = function(oLayer,sTypeOfProcess)
     {
-        if(utilsIsObjectNullOrUndefined(oLayer)=== true)
-            return false;
+        if(utilsIsObjectNullOrUndefined(oLayer)=== true) return false;
         var sProcessName = oLayer.title;
         var sLink = oLayer.link;
-        if(utilsIsStrNullOrEmpty(sProcessName))
-            return false;
-        if(utilsIsStrNullOrEmpty(sTypeOfProcess))
-            return false;
+        if(utilsIsStrNullOrEmpty(sProcessName)) return false;
+        if(utilsIsStrNullOrEmpty(sTypeOfProcess)) return false;
 
         var sProcess = {"productName":sProcessName,"operationType":sTypeOfProcess, "link":sLink};
 
-        if(utilsIsObjectNullOrUndefined(sProcess))
-            return false;
+        if(utilsIsObjectNullOrUndefined(sProcess)) return false;
 
         var aoProcesses = this.getProcesses();
         if(utilsIsObjectNullOrUndefined(aoProcesses)) return false;

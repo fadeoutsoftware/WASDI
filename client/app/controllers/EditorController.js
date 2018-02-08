@@ -457,8 +457,13 @@ var EditorController = (function () {
             var sOperation = "null";
             if (utilsIsStrNullOrEmpty(oMessage.messageCode) === false  ) sOperation = oMessage.messageCode;
 
-            var oDialog = utilsVexDialogAlertTop('GURU MEDITATION<br>THERE WAS AN ERROR IN THE ' + sOperation + ' PROCESS');
-            utilsVexCloseDialogAfterFewSeconds(4000, oDialog);
+            var sErrorDescription = "";
+
+            if (utilsIsStrNullOrEmpty(oMessage.payload) === false) sErrorDescription = oMessage.payload;
+            if (utilsIsStrNullOrEmpty(sErrorDescription) === false) sErrorDescription = "<br>"+sErrorDescription;
+
+            var oDialog = utilsVexDialogAlertTop('GURU MEDITATION<br>THERE WAS AN ERROR IN THE ' + sOperation + ' PROCESS'+ sErrorDescription);
+            utilsVexCloseDialogAfterFewSeconds(10000, oDialog);
             this.m_oProcessesLaunchedService.loadProcessesFromServer(this.m_oActiveWorkspace);
 
             if (oMessage.messageCode =="PUBLISHBAND") {
@@ -746,7 +751,7 @@ var EditorController = (function () {
                 }
             }
         }).error(function (data, status) {
-            utilsVexDialogAlertTop('GURU MEDITATION<br>ERROR IMPOSSIBLE GET WORKSPACE IN EDITORCONTROLLER')
+            utilsVexDialogAlertTop('GURU MEDITATION<br>ERROR IMPOSSIBLE GET WORKSPACE IN EDITOR')
         });
     };
 
@@ -814,6 +819,7 @@ var EditorController = (function () {
                     }
                     else
                     {
+                        oController.m_oProcessesLaunchedService.loadProcessesFromServer(oController.m_oActiveWorkspace);
                         // It is publishing: we will receive Rabbit Message
                         if (data.messageCode !== "WAITFORRABBIT") oController.setTreeNodeAsDeselected(oBand.productName+"_"+oBand.name);
                     }
@@ -1319,13 +1325,13 @@ var EditorController = (function () {
             controller: "WorkFlowController",
             inputs: {
                 extras: {
-                    products:oController.m_aoProducts,
+                    products:oController.m_aoProducts
                 }
             }
         }).then(function (modal) {
             modal.element.modal();
             modal.close.then(function (oResult) {
-
+                oController.m_oProcessesLaunchedService.loadProcessesFromServer(oController.m_oActiveWorkspace);
 
             });
         });
@@ -1408,9 +1414,9 @@ var EditorController = (function () {
                     oController.m_oSnapOperationService.ApplyOrbit(oResult[iIndexProduct].sourceFileName, oResult[iIndexProduct].destinationFileName,
                                                                     oController.m_oActiveWorkspace.workspaceId,oResult[iIndexProduct].options)
                         .success(function (data) {
-
+                            oController.m_oProcessesLaunchedService.loadProcessesFromServer(oController.m_oActiveWorkspace);
                         }).error(function (error) {
-                        utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR THE OPERATION APPLY ORBIT DOSEN'T WORK");
+                            utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR THE OPERATION APPLY ORBIT DOSEN'T WORK");
                     });
                 }
 
@@ -1452,7 +1458,7 @@ var EditorController = (function () {
                 // oController.m_oScope.Result = oResult;
                 oController.m_oSnapOperationService.Calibrate(oResult.sourceFileName, oResult.destinationFileName, oController.m_oActiveWorkspace.workspaceId,oResult.options)
                     .success(function (data) {
-
+                        oController.m_oProcessesLaunchedService.loadProcessesFromServer(oController.m_oActiveWorkspace);
                     }).error(function (error) {
                     utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR THE OPERATION RADIOMETRIC CALIBRATION DOESN'T WORK");
                 });
@@ -1497,7 +1503,7 @@ var EditorController = (function () {
                     oController.m_oSnapOperationService.Multilooking(oResult[iIndexProduct].sourceFileName, oResult[iIndexProduct].destinationFileName,
                                             oController.m_oActiveWorkspace.workspaceId,oResult[[iIndexProduct]].options)
                         .success(function (data) {
-
+                            oController.m_oProcessesLaunchedService.loadProcessesFromServer(oController.m_oActiveWorkspace);
                         }).error(function (error) {
                         utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR THE OPERATION MULTILOOKING DOSEN'T WORK");
                     });
@@ -1550,7 +1556,7 @@ var EditorController = (function () {
                 // oController.m_oScope.Result = oResult;
                 oController.m_oSnapOperationService.NDVI(oResult.sourceFileName, oResult.destinationFileName, oController.m_oActiveWorkspace.workspaceId,oResult.options)
                     .success(function (data) {
-
+                        oController.m_oProcessesLaunchedService.loadProcessesFromServer(oController.m_oActiveWorkspace);
                     }).error(function (error) {
                     utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR THE OPERATION NDVI DOESN'T WORK");
                 });
@@ -1651,7 +1657,7 @@ var EditorController = (function () {
                 // oController.m_oScope.Result = oResult;
                 oController.m_oSnapOperationService.RangeDopplerTerrainCorrection(oResult.sourceFileName, oResult.destinationFileName, oController.m_oActiveWorkspace.workspaceId,oResult.options)
                     .success(function (data) {
-
+                        oController.m_oProcessesLaunchedService.loadProcessesFromServer(oController.m_oActiveWorkspace);
                     }).error(function (error) {
                     utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR THE OPERATION RANGE DOPPLER TERRATIN CORRECTION DOESN'T WORK");
                 });
@@ -1697,16 +1703,6 @@ var EditorController = (function () {
 
                 var sFileName = oController.m_aoProducts[oResult.band.productIndex].fileName;
 
-                /*
-                var sFilter = {
-                    "name": oResult.filter.name,
-                    "shorthand": oResult.filter.shorthand,
-                    "operation": oResult.filter.operation,
-                    "editable": oResult.filter.editable,
-                    "tags": oResult.filter.tags,
-                    "kernelElements": oResult.filter.kernelElements
-                };
-                */
                 var oBodyMapContainer = oController.createBodyForProcessingBandImage(sFileName,oResult.band.name,oResult.filter,0,0,oResult.band.width, oResult.band.height,widthMapContainer, heightMapContainer);
 
                 var oBodyImagePreview = oController.createBodyForProcessingBandImage(sFileName,oResult.band.name,oResult.filter,0,0,oResult.band.width, oResult.band.height,widthImagePreview, heightImagePreview);
