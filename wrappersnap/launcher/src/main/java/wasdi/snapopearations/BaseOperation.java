@@ -41,11 +41,10 @@ public abstract class BaseOperation {
         {
         	oEx.printStackTrace();
             LauncherMain.s_oLogger.debug("BaseOperation.getOperation: error executing operation " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
-        }
-        finally {
-            return oTargetProduct;
+            throw new Exception(org.apache.commons.lang.exception.ExceptionUtils.getMessage(oEx));
         }
 
+        return oTargetProduct;
     }
 
     public abstract void FillSettings(Operator oOperator, ISetting oSetting);
