@@ -9,6 +9,7 @@ service('PagesService', ['$http',  'ConstantsService','OpenSearchService', funct
     this.m_iProductsPerPage = [10,15,20,25,50];
     this.m_oFunction = null;
     var oController = this;
+
     this.m_oOpenSearchService.getListOfProvider().success(function (data) {
         if(utilsIsObjectNullOrUndefined(data) === false && data.length > 0)
         {
@@ -16,14 +17,16 @@ service('PagesService', ['$http',  'ConstantsService','OpenSearchService', funct
             for(var iIndexProvider = 0; iIndexProvider < iLengthData; iIndexProvider++)
             {
                 oController.m_aListOfProvider[iIndexProvider] = {
-                            "name":data[iIndexProvider],
-                            "totalOfProducts":0,
-                            "totalPages":1,
-                            "currentPage":1,
-                            "productsPerPageSelected":10,
-                            "selected":true,
-                            "isLoaded":false,
-                            };
+                    "name": data[iIndexProvider].code,
+                    "totalOfProducts":0,
+                    "totalPages":1,
+                    "currentPage":1,
+                    "productsPerPageSelected":10,
+                    "selected":true,
+                    "isLoaded":false,
+                    "description": data[iIndexProvider].description,
+                    "link": data[iIndexProvider].link
+                };
             }
             // oController.m_aListOfProvider = data;
         }

@@ -52,62 +52,46 @@
                 </div>
 
                 <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-                    <!--&lt;!&ndash; BACK BUTTON&ndash;&gt;-->
-                    <!--<div class="nav navbar-nav navbar-left " ng-hide="m_oController.isWorkspacesPageOpen()">-->
-                        <!--<li ng-class="{active:m_oController.activePageCss('root.workspaces')}">-->
-                            <!--<a ui-sref="root.workspaces" ><i class="fa fa-arrow-left" aria-hidden="true"></i>-->
-                                <!--{{"ROOT_VIEW_NAV_BAR_LINK_WORKSPACES"|translate}}-->
-                            <!--</a>-->
-                        <!--</li>-->
-                    <!--</div>-->
                     <!-- EDIT NAME -->
-                    <div class="nav navbar-nav navbar-left name-workspace" ng-hide="m_oController.isWorkspacesPageOpen()">
+                    <div class="nav navbar-nav navbar-left name-workspace" ng-hide="m_oController.hideWorkspaceName()">
                         <div class="form-group">
                             <input type="text" readonly ng-model="m_oController.m_oConstantsService.getActiveWorkspace().name" placeholder="..."
-
                                    ng-class="{'input-mydisable': !m_oController.m_bIsEditModelWorkspaceNameActive,'input-myenable': m_oController.m_bIsEditModelWorkspaceNameActive}"
                                    ng-click="m_oController.editModelWorkspaceNameSetTrue()" style="height: 36px">
-
-                            <!--button class="btn btn-edit" type="button" ng-click="m_oController.UpdateWorkspace();"
-                                    title="{{'ROOT_TOOLTIP_EDIT_WORKSPACE_NAME'|translate}}">
-                                <i class="fa fa-pencil fa-lg" aria-hidden="true"
-                                ng-class="{'btn-edit-mode-on':m_oController.m_bIsEditModelWorkspaceNameActive,'btn-edit-mode-off':!m_oController.m_bIsEditModelWorkspaceNameActive}"></i>
-
-                            </button-->
                             <b class="cursor" ></b>
 
                         </div>
-
                     </div>
 
                     <ul class="nav navbar-nav navbar-right">
-                        <!-- BACK BUTTON-->
-
+                        <!-- WORKSPACES BUTTON-->
                         <li ng-class="{active:m_oController.activePageCss('root.workspaces')}">
                             <a ui-sref="root.workspaces" ><i class="fa fa-list-ul" aria-hidden="true"></i>
                                 {{"ROOT_VIEW_NAV_BAR_LINK_WORKSPACES"|translate}}
                             </a>
                         </li>
-
+                        <!-- PLAN BUTTON-->
                         <li ng-class="{active:m_oController.activePageCss('root.searchorbit')}"  > <!-- -->
                           <a ng-click="m_oController.openSearchorbit()"  href="" > <!---->
                               <i class="fa fa-calendar-o fa-lg" aria-hidden="true" ></i>
                                 {{"ROOT_VIEW_NAV_BAR_LINK_SEARCH"|translate}}
                             </a>
                         </li>
+                        <!-- SEARCH BUTTON-->
                         <li   ng-class="{active:m_oController.activePageCss('root.import')}"    >
                             <a ng-click="m_oController.openImportPage()" href=""   >
                                 <i class="fa fa-search fa-lg" aria-hidden="true"></i><!--ui-sref="root.import"-->
                                 {{"ROOT_VIEW_NAV_BAR_LINK_IMPORT"|translate}}
                             </a>
                         </li>
-                        <li ng-class="{active:m_oController.activePageCss('root.editor')}" ng-disabled="m_oController.isWorkspacesPageOpen()" >
+                        <!-- EDITOR BUTTON-->
+                        <li ng-class="{active:m_oController.activePageCss('root.editor')}" ng-disabled="m_oController.disableEditorButton()" >
                             <a ng-click="m_oController.onClickProcess();m_oController.openEditorPage()" href="" ng-style="{cursor:m_oController.cursorCss()}"  >
                                 <i class="fa fa-cogs fa-lg" aria-hidden="true"></i><!-- ui-sref="root.editor"-->
                                 {{"ROOT_VIEW_NAV_BAR_LINK_PROCESS"|translate}}
                             </a>
                         </li>
-
+                        <!-- CATALOGUE BUTTON-->
                         <li ng-class="{active:m_oController.activePageCss('root.catalog')}"  >
                             <a ng-click="m_oController.openCatalogPage()" href=""  >
                                 <i class="fa fa-archive fa-lg" aria-hidden="true"></i>

@@ -21,6 +21,10 @@ var RootController = (function() {
         this.m_oRabbitStompService = oRabbitStompService;
         this.m_bIsEditModelWorkspaceNameActive = false;
         var oController = this;
+
+        /**
+         * Check user session
+         */
         this.m_oAuthService.checkSession().success(function (data, status) {
             if (data == null || data == undefined || data == '')
             {
@@ -42,12 +46,8 @@ var RootController = (function() {
         });
 
         //if user is logged
-        if(!utilsIsObjectNullOrUndefined(this.m_oConstantsService.getUser()))
-            this.m_oUser = this.m_oConstantsService.getUser();
-        else
-            this.m_oState.go("login");
-
-        //this.m_oUser = this.m_oConstantsService.getUser();
+        if(!utilsIsObjectNullOrUndefined(this.m_oConstantsService.getUser()))  this.m_oUser = this.m_oConstantsService.getUser();
+        else this.m_oState.go("login");
 
         this.m_sWorkSpace = this.m_oConstantsService.getActiveWorkspace();
 
@@ -157,7 +157,6 @@ var RootController = (function() {
         * set m_bIsEditModelWorkspaceNameActive = false
         * */
         $scope.$watch('m_oController.m_oConstantsService.m_oActiveWorkspace', function(newValue, oldValue, scope) {
-            //utilsVexDialogAlertTop("il watch funziona");
             $scope.m_oController.m_aoProcessesRunning = [];
             $scope.m_oController.m_bIsEditModelWorkspaceNameActive = false;
         });
@@ -174,23 +173,16 @@ var RootController = (function() {
 
                 for(var iIndexProcess = 0; iIndexProcess < iNumberOfProcesses;iIndexProcess++ )
                 {
-
                     if ($scope.m_oController.m_aoProcessesRunning[iIndexProcess].status==="RUNNING") {
                         $scope.m_oController.m_aoProcessesRunning[iIndexProcess].timeRunning.setSeconds( $scope.m_oController.m_aoProcessesRunning[iIndexProcess].timeRunning.getSeconds() + 1) ;
                     }
-
                 }
             }
             //$scope.m_oController.time++;
             mytimeout = $timeout($scope.onTimeout,1000);
-        }
+        };
 
         var mytimeout = $timeout($scope.onTimeout,1000);
-        //
-        //$scope.stop = function(){
-        //    $timeout.cancel(mytimeout);
-        //}
-
     }
 
     /*********************************** METHODS **************************************/
@@ -245,7 +237,6 @@ var RootController = (function() {
                 {
                     oController.m_oConstantsService.setActiveWorkspace(data);
                     oController.m_sWorkSpace = oController.m_oConstantsService.getActiveWorkspace();
-                    //oController.m_aoProcessesRunning = oController.m_oProcessesLaunchedService.getProcessesByLocalStorage(oController.m_sWorkspace.workspaceId, oController.m_oUser.userId);
                 }
             }
         }).error(function (data,status) {
@@ -280,12 +271,21 @@ var RootController = (function() {
         return true;
     };
 
-    RootController.prototype.isWorkspacesPageOpen = function(){
-        var sState = this.m_oState.current.name;
-        if(sState === "root.workspaces")
+    RootController.prototype.disableEditorButton = function(){
+        if (utilsIsObjectNullOrUndefined(this.m_oConstantsService.getActiveWorkspace())) {
             return true;
+        }
+        else {
+            return false;
+        }
+    };
+
+    RootController.prototype.hideWorkspaceName = function(){
+        var sState = this.m_oState.current.name;
+        if(sState !== "root.editor") return true;
         return false;
-    }
+    };
+
 
     RootController.prototype.cursorCss = function(){
         var sState=this.m_oState.current.name;
@@ -293,19 +293,17 @@ var RootController = (function() {
         if(utilsIsObjectNullOrUndefined(oWorkspace) === true || utilsIsObjectNullOrUndefined(oWorkspace.workspaceId)=== true )
             return "no-drop";
         else
-            return "auto";
+            return "pointer";
+    };
 
-
-    }
     /*********************************************************************************/
     /* ***************** OPEN LINK *****************/
     RootController.prototype.openEditorPage = function () {
-        if(this.isWorkspacesPageOpen() === true)
-            return false;
+
+        //if(this.isWorkspacesPageOpen() === true) return false;
 
         var oWorkspace = this.m_oConstantsService.getActiveWorkspace();
-        if(utilsIsObjectNullOrUndefined(oWorkspace.workspaceId))
-            return false;
+        if(utilsIsObjectNullOrUndefined(oWorkspace.workspaceId)) return false;
         var oController = this;
         var sWorkSpace = this.m_oConstantsService.getActiveWorkspace();
         oController.m_oState.go("root.editor", { workSpace : sWorkSpace.workspaceId });//use workSpace when reload editor page
@@ -313,70 +311,24 @@ var RootController = (function() {
 
     RootController.prototype.openCatalogPage = function()
     {
-        // if(this.isWorkspacesPageOpen() === true)
-        //     return false;
-
         this.m_oState.go("root.catalog", { });
     };
 
     RootController.prototype.openSearchorbit = function()
     {
-        // if(this.isWorkspacesPageOpen() === true) return false;
-
-        //var oController = this;
-        //var sWorkSpace = this.m_oConstantsService.getActiveWorkspace();
-        //use workSpace when reload editor page
-        //oController.m_oState.go("root.searchorbit", { workSpace : sWorkSpace.workspaceId });
         this.m_oState.go("root.searchorbit", { });
     };
 
     RootController.prototype.openImportPage = function () {
-
         var oController = this;
 
-        //     var sWorkSpace = this.m_oConstantsService.getActiveWorkspace();
-
         oController.m_oState.go("root.import", { });// workSpace : sWorkSpace.workspaceId use workSpace when reload editor page
-
     };
 
     RootController.prototype.activePageCss = function(oPage)
     {
-        switch(oPage) {
-            case "root.workspaces":
-                if(oPage == this.m_oState.current.name )
-                    return true;
-                else
-                    return false;
-                break;
-            case "root.editor":
-                if(oPage == this.m_oState.current.name )
-                    return true;
-                else
-                    return false;
-                break;
-            case "root.searchorbit":
-                if(oPage == this.m_oState.current.name )
-                    return true;
-                else
-                    return false;
-                break;
-            case "root.import":
-                if(oPage == this.m_oState.current.name )
-                    return true;
-                else
-                    return false;
-                break;
-            case "root.catalog":
-                if(oPage == this.m_oState.current.name )
-                    return true;
-                else
-                    return false;
-                break;
-            default:
-                return false;
-        }
-        return false;
+        if(oPage == this.m_oState.current.name ) return true;
+        else return false;
     };
 
     RootController.prototype.openNav = function() {
@@ -393,35 +345,6 @@ var RootController = (function() {
 
     };
 
-    /*
-    RootController.prototype.UpdateWorkspace = function($event) {
-        if ( ($event == null || $event.keyCode === 13) && this.m_bIsEditModelWorkspaceNameActive === true) {
-
-            //change color of textbox and pencil
-            if(utilsIsObjectNullOrUndefined($event )=== true )
-                this.editModelWorkspaceName();
-
-            var oWorkspace = this.m_oConstantsService.getActiveWorkspace();
-            this.m_oWorkspaceService.UpdateWorkspace(oWorkspace).success(function (data) {
-
-            }).error(function (error){
-
-            });
-
-
-            if( $event != null && $event.keyCode === 13)
-            {
-                //disable work space name active
-                this.m_bIsEditModelWorkspaceNameActive = false;
-            }
-        }
-        else{
-            //change color of textbox and pencil
-            if(this.m_bIsEditModelWorkspaceNameActive === false)
-                this.editModelWorkspaceName();
-        }
-
-    };*/
 
     RootController.prototype.openSnake = function()
     {
@@ -448,9 +371,7 @@ var RootController = (function() {
         var oWorkspace = this.m_oConstantsService.getActiveWorkspace();
         this.m_oModalService.showModal({
             templateUrl: "dialogs/delete_process/DeleteProcessDialog.html",
-            controller: "DeleteProcessController",
-
-
+            controller: "DeleteProcessController"
         }).then(function(modal) {
             modal.element.modal();
             modal.close.then(function(result) {
@@ -474,13 +395,7 @@ var RootController = (function() {
         // var oWorkspace = this.m_oConstantsService.getActiveWorkspace();
         this.m_oModalService.showModal({
             templateUrl: "dialogs/processes_logs/ProcessesLogsDialog.html",
-            controller: "ProcessesLogsController",
-            // inputs: {
-            //     extras: {
-            //         workspaceId:
-            //     }
-            // }
-
+            controller: "ProcessesLogsController"
         }).then(function(modal) {
             modal.element.modal();
             modal.close.then(function(result) {
@@ -491,11 +406,6 @@ var RootController = (function() {
         });
 
         return true;
-    };
-
-    RootController.prototype.editModelWorkspaceName = function(){
-
-        this.m_bIsEditModelWorkspaceNameActive = !this.m_bIsEditModelWorkspaceNameActive;
     };
 
     RootController.prototype.editModelWorkspaceNameSetTrue = function(){
@@ -531,9 +441,7 @@ var RootController = (function() {
         'WorkspaceService',
         '$timeout',
         'ModalService',
-        'RabbitStompService',
-
-
+        'RabbitStompService'
     ];
 
     return RootController;

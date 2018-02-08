@@ -9,8 +9,8 @@ var ImportController = (function() {
     function ImportController($scope, oConstantsService, oAuthService,$state,oMapService, oSearchService, oAdvancedFilterService,
                               oAdvancedSearchService, oConfigurationService, oFileBufferService, oRabbitStompService, oProductService,
                               oProcessesLaunchedService,oWorkspaceService,oResultsOfSearchService,oModalService,oOpenSearchService,oPageservice ) {
+        // Service references
         this.m_oScope = $scope;
-        this.m_oScope.m_oController = this;
         this.m_oConstantsService = oConstantsService;
         this.m_oAuthService = oAuthService;
         this.m_oState = $state;
@@ -20,7 +20,6 @@ var ImportController = (function() {
         this.m_oAdvancedSearchService = oAdvancedSearchService;
         this.m_oConfigurationService = oConfigurationService;
         this.m_oFileBufferService = oFileBufferService;
-        this.m_bShowsensingfilter = true;
         this.m_oRabbitStompService = oRabbitStompService;
         this.m_oProductService = oProductService;
         this.m_oProcessesLaunchedService = oProcessesLaunchedService;
@@ -31,6 +30,10 @@ var ImportController = (function() {
         this.m_oPageService = oPageservice;
 
         // this.m_aiYears=[];//default years
+        // Self link for the scope
+        this.m_oScope.m_oController = this;
+
+        this.m_bShowsensingfilter = true;
 
         this.m_oAdvanceFilter = {
             filterActive:"Seasons",//Seasons,Range,Months
@@ -46,22 +49,19 @@ var ImportController = (function() {
             selectedMonthFrom:"",
             selectedMonthTo:"",
             selectedYearsSearchForMonths:[],
-            selectedMonthsSearchForMonths:[],
+            selectedMonthsSearchForMonths:[]
         };
-        //this.m_aiYears
-        // this.initDefaultDays();
+
         this.initDefaultYears();
         this.initDefaultMonths();
         this.datePickerYears={
-            datepickerMode: "year",
-
+            datepickerMode: "year"
         };
         this.m_aoSeason = [
             {name:"Spring"},
             {name:"Winter"},
             {name:"Summer"},
             {name:"Autumn"}
-
         ];
 
 
@@ -76,7 +76,8 @@ var ImportController = (function() {
         this.m_oDetails.productIds = [];
         this.m_oScope.selectedAll = false;
         //this.m_sFilter='';
-        this.m_aoProducts = [];
+        // P.Campanella Sembra non usato
+        //this.m_aoProducts = [];
         //this.m_oScope.currentPage = 1;
         this.m_oConfiguration = null;
         this.m_bisVisibleLocalStorageInputs = false;
@@ -89,9 +90,12 @@ var ImportController = (function() {
         this.m_oMapService.initMapWithDrawSearch('wasdiMapImport');
         this.m_oMapService.initGeoSearchPluginForOpenStreetMap();
 
-        this.m_aoProductsList = []; /* LAYERS LIST == PRODUCTS LIST */
-        this.m_aoMissions;
-        this.m_aListOfProvider = []; //LIST OF PROVIDERS
+        // layers list == products list
+        this.m_aoProductsList = [];
+        // List of missions
+        this.m_aoMissions = [];
+        // list of providers
+        this.m_aListOfProvider = [];
 
         /* number of possible products per pages and number of products per pages selected */
         this.m_iProductsPerPageSelected = 10;//default value
@@ -138,14 +142,9 @@ var ImportController = (function() {
             period:''
         };
 
-
-
         /* Active Workspace */
         this.m_oActiveWorkspace = this.m_oConstantsService.getActiveWorkspace();
         this.m_oUser = this.m_oConstantsService.getUser();
-        //this.m_oProcessesLaunchedService.updateProcessesBar(this.m_oActiveWorkspace);
-
-
 
         //if there isn't workspace
         if(utilsIsObjectNullOrUndefined(this.m_oActiveWorkspace) && utilsIsStrNullOrEmpty( this.m_oActiveWorkspace))
@@ -168,17 +167,16 @@ var ImportController = (function() {
 
             var oWorkspaceByResultService = this.m_oResultsOfSearchService.getActiveWorkspace();
             //if the workspace id saved in ResultService but the id it's differet to actual workspace id clean ResultService
-            if(utilsIsObjectNullOrUndefined(oWorkspaceByResultService) || (oWorkspaceByResultService.workspaceId != this.m_oActiveWorkspace.workspaceId))
+            if(utilsIsObjectNullOrUndefined(oWorkspaceByResultService) || (oWorkspaceByResultService.workspaceId != this.m_oActiveWorkspace.workspaceId)) {
                 this.m_oResultsOfSearchService.setDefaults();
+            }
 
             this.loadOpenSearchParamsByResultsOfSearchServices(this);
-
         }
 
         /*Hook to Rabbit WebStomp Service*/
         this.m_oRabbitStompService.setMessageCallback(this.receivedRabbitMessage);
         this.m_oRabbitStompService.setActiveController(this);
-
 
         var oController = this;
 
@@ -343,23 +341,33 @@ var ImportController = (function() {
             }
         });
 
-        /*SET DEFAULT VALUE OF PERIOD */
+        // Set search default values:
         this.m_aListOfProvider = this.m_oPageService.getProviders();
         this.setDefaultData();
         this.updateAdvancedSearch();
     }
 
     /***************** METHODS ***************/
-    //OPEN LEFT NAV-BAR
+
+
+    /**
+     * Get the list of available missions
+     * @returns {Array|*}
+     */
     ImportController.prototype.getMissions= function() {
         return this.m_aoMissions;
     }
 
-    //OPEN LEFT NAV-BAR
+    /**
+     * Open Navigation Bar
+     */
     ImportController.prototype.openNav= function() {
         document.getElementById("mySidenav").style.width = "30%";
     }
-    //CLOSE LEFT NAV-BAR
+
+    /**
+     * Close Navigation Bar
+     */
     ImportController.prototype.closeNav=function() {
         document.getElementById("mySidenav").style.width = "0";
     }
@@ -469,10 +477,9 @@ var ImportController = (function() {
             var oController = oThat;
         }
 
-        if(oController.thereIsAtLeastOneProvider() === false)
-            return false;
-        if(utilsIsObjectNullOrUndefined(oProvider) === true)
-            return false;
+        if(oController.thereIsAtLeastOneProvider() === false) return false;
+        if(utilsIsObjectNullOrUndefined(oProvider) === true) return false;
+
         oController.m_bClearFiltersEnabled = false;
         oController.deleteLayers(oProvider.name);/*delete layers and relatives rectangles in map*/
         oController.m_bIsVisibleListOfLayers = true;//hide previously results
