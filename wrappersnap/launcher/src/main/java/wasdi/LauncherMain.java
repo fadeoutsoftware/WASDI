@@ -52,6 +52,7 @@ import wasdi.shared.data.ProductWorkspaceRepository;
 import wasdi.shared.data.PublishedBandsRepository;
 import wasdi.shared.geoserver.GeoServerManager;
 import wasdi.shared.parameters.ApplyOrbitParameter;
+import wasdi.shared.parameters.BaseParameter;
 import wasdi.shared.parameters.CalibratorParameter;
 import wasdi.shared.parameters.DownloadFileParameter;
 import wasdi.shared.parameters.FilterParameter;
@@ -212,12 +213,25 @@ public class LauncherMain {
      */
     public void ExecuteOperation(String sOperation, String sParameter) {
 
+    	String sWorkspace = "";
+    	String sExchange = "";
+    	
+    	try {
+			BaseParameter oBaseParameter = (BaseParameter) SerializationUtils.deserializeXMLToObject(sParameter);
+			sWorkspace = oBaseParameter.getWorkspace();
+			sExchange = oBaseParameter.getExchange();
+		} catch (Exception e) {
+			String sError = "Impossible to deserialize Operation Parameters: operation aborted";
+			if (s_oSendToRabbit!=null) s_oSendToRabbit.SendRabbitMessage(false, sOperation, sWorkspace,sError,sExchange);			
+        	s_oLogger.error("ExecuteOperation Exception", e);
+        	return;
+		}
+    	
         try {
         	LauncherOperations op = LauncherOperations.valueOf(sOperation);
             switch (op)
             {
 	            case INGEST: {
-	
 	                // Deserialize Parameters
 	                IngestFileParameter oIngestFileParameter = (IngestFileParameter) SerializationUtils.deserializeXMLToObject(sParameter);
 	                Ingest(oIngestFileParameter, ConfigReader.getPropValue("DOWNLOAD_ROOT_PATH"));
@@ -231,73 +245,56 @@ public class LauncherMain {
                 }
                 break;
                 case PUBLISHBAND: {
-
                     // Deserialize Parameters
                     PublishBandParameter oPublishBandParameter = (PublishBandParameter) SerializationUtils.deserializeXMLToObject(sParameter);
                     PublishBandImage(oPublishBandParameter);
                 }
                 break;
                 case APPLYORBIT:{
-
                     // Deserialize Parameters
                     ApplyOrbitParameter oParameter = (ApplyOrbitParameter) SerializationUtils.deserializeXMLToObject(sParameter);
                     ExecuteOperator(oParameter, new ApplyOrbit(), LauncherOperations.APPLYORBIT);
-
                 }
                 break;
                 case CALIBRATE:{
-
                     // Deserialize Parameters
                     CalibratorParameter oParameter = (CalibratorParameter) SerializationUtils.deserializeXMLToObject(sParameter);
                     ExecuteOperator(oParameter, new Calibration(), LauncherOperations.CALIBRATE);
-
                 }
                 break;
                 case MULTILOOKING:{
-
                     // Deserialize Parameters
                     MultilookingParameter oParameter = (MultilookingParameter) SerializationUtils.deserializeXMLToObject(sParameter);
                     ExecuteOperator(oParameter, new Multilooking(), LauncherOperations.MULTILOOKING);
-
                 }
                 break;
                 case TERRAIN:{
-
                     // Deserialize Parameters
                     RangeDopplerGeocodingParameter oParameter = (RangeDopplerGeocodingParameter) SerializationUtils.deserializeXMLToObject(sParameter);
                     ExecuteOperator(oParameter, new TerrainCorrection(), LauncherOperations.TERRAIN);
-
                 }
                 break;
                 case FILTER:{
-
                     // Deserialize Parameters
                     FilterParameter oParameter = (FilterParameter) SerializationUtils.deserializeXMLToObject(sParameter);
                     ExecuteOperator(oParameter, new Filter(), LauncherOperations.FILTER);
-
                 }
                 break;
                 case NDVI:{
-
                     // Deserialize Parameters
                     NDVIParameter oParameter = (NDVIParameter) SerializationUtils.deserializeXMLToObject(sParameter);
                     ExecuteOperator(oParameter, new NDVI(), LauncherOperations.NDVI);
-
                 }
                 break;
                 case RASTERGEOMETRICRESAMPLE:{
-
                     // Deserialize Parameters
                     RasterGeometricResampleParameter oParameter = (RasterGeometricResampleParameter) SerializationUtils.deserializeXMLToObject(sParameter);
                     RasterGeometricResample(oParameter);
-
                 }
                 break;
                 case GRAPH: {
-                	
-                	GraphParameter params = (GraphParameter) SerializationUtils.deserializeXMLToObject(sParameter);
-                	ExecuteGraph(params);
-                	
+                	GraphParameter oParameter = (GraphParameter) SerializationUtils.deserializeXMLToObject(sParameter);
+                	ExecuteGraph(oParameter);                	
                 }
                 break;
                 default:
@@ -306,6 +303,8 @@ public class LauncherMain {
             }
         }
         catch (Exception oEx) {
+			String sError = org.apache.commons.lang.exception.ExceptionUtils.getMessage(oEx);
+			if (s_oSendToRabbit!=null) s_oSendToRabbit.SendRabbitMessage(false, sOperation, sWorkspace,sError,sExchange);			
         	s_oLogger.error("ExecuteOperation Exception", oEx);
         }
     }
@@ -317,7 +316,8 @@ public class LauncherMain {
 		}
 		catch (Exception oEx) {
 			s_oLogger.error("ExecuteGraph Exception", oEx);
-			if (s_oSendToRabbit!=null) s_oSendToRabbit.SendRabbitMessage(false, LauncherOperations.GRAPH.name(), params.getWorkspace(),null,params.getExchange());			
+			String sError = org.apache.commons.lang.exception.ExceptionUtils.getMessage(oEx);
+			if (s_oSendToRabbit!=null) s_oSendToRabbit.SendRabbitMessage(false, LauncherOperations.GRAPH.name(), params.getWorkspace(),sError,params.getExchange());			
 		}
 	}
     
@@ -453,7 +453,9 @@ public class LauncherMain {
 
             if (Utils.isNullOrEmpty(sFileName)) {
                 s_oLogger.debug("LauncherMain.Download: file is null there must be an error");
-                if (s_oSendToRabbit!=null) s_oSendToRabbit.SendRabbitMessage(false,LauncherOperations.DOWNLOAD.name(),oParameter.getWorkspace(),null,oParameter.getExchange());
+                
+                String sError = "The name of the file to download result null";
+                if (s_oSendToRabbit!=null) s_oSendToRabbit.SendRabbitMessage(false,LauncherOperations.DOWNLOAD.name(),oParameter.getWorkspace(),sError,oParameter.getExchange());
                 if (oProcessWorkspace != null) oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
             } else {
                 AddProductToDbAndSendToRabbit(oVM, sFileName, oParameter.getWorkspace(), oParameter.getExchange(), LauncherOperations.DOWNLOAD.name(), oParameter.getBoundingBox());
@@ -506,15 +508,14 @@ public class LauncherMain {
 
 
     
-    public String Ingest(IngestFileParameter oParameter, String sDownloadPath) {
+    public String Ingest(IngestFileParameter oParameter, String sDownloadPath) throws Exception {
         
     	File oFilePath = new File(oParameter.getFilePath());
     	if (!oFilePath.canRead()) {
 			System.out.println("LauncherMain.Ingest: ERROR: unable to access uploaded file " + oFilePath.getAbsolutePath());
-			return "";
+			throw new Exception("unable to access uploaded file " + oFilePath.getName());
 		}
 
-    	
         ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
         ProcessWorkspace oProcessWorkspace = oProcessWorkspaceRepository.GetProcessByProcessObjId(oParameter.getProcessObjId());
 	
@@ -538,7 +539,7 @@ public class LauncherMain {
 			
 			if (!oDstDir.isDirectory() || !oDstDir.canWrite()) {
 				System.out.println("LauncherMain.Ingest: ERROR: unable to access destination directory " + oDstDir.getAbsolutePath());
-				return "";
+				throw new Exception("Unable to access destination directory for the Workspace");
 			}
 			
 	        // Product view Model
@@ -653,8 +654,9 @@ public class LauncherMain {
             // Check integrity
             if (Utils.isNullOrEmpty(sFile)) {
                 s_oLogger.debug("LauncherMain.ExecuteOperation: file is null or empty");
-
-                if (s_oSendToRabbit!=null) s_oSendToRabbit.SendRabbitMessage(false,operation.name(),oParameter.getWorkspace(),null,oParameter.getExchange());
+                
+                String sError = "The name of input file for the operation is null";
+                if (s_oSendToRabbit!=null) s_oSendToRabbit.SendRabbitMessage(false,operation.name(),oParameter.getWorkspace(),sError,oParameter.getExchange());
 
                 return;
             }
@@ -718,7 +720,10 @@ public class LauncherMain {
         }
         catch (Throwable oEx) {
             s_oLogger.error("LauncherMain.ExecuteOperation: exception " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
-            if (s_oSendToRabbit!=null) s_oSendToRabbit.SendRabbitMessage(false,operation.name(),oParameter.getWorkspace(),null,oParameter.getExchange());
+            
+            String sErrorMessage = org.apache.commons.lang.exception.ExceptionUtils.getMessage(oEx);
+            
+            if (s_oSendToRabbit!=null) s_oSendToRabbit.SendRabbitMessage(false,operation.name(),oParameter.getWorkspace(),sErrorMessage,oParameter.getExchange());
 
             if (oProcessWorkspace != null) oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
         }
@@ -781,7 +786,7 @@ public class LauncherMain {
             {
                 // File not good!!
                 s_oLogger.debug( "LauncherMain.PublishBandImage: file is null or empty");
-
+                
                 // Send KO to Rabbit
                 if (s_oSendToRabbit!=null) s_oSendToRabbit.SendRabbitMessage(false, LauncherOperations.PUBLISHBAND.name(),oParameter.getWorkspace(),oErrorPaylod,oParameter.getExchange());
 
@@ -1065,7 +1070,9 @@ public class LauncherMain {
         catch (Exception oEx) {
             s_oLogger.error("LauncherMain.RasterGeometricResample: exception " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
             if (oProcessWorkspace != null) oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
-            if (s_oSendToRabbit!=null) s_oSendToRabbit.SendRabbitMessage(false,LauncherOperations.RASTERGEOMETRICRESAMPLE.name(),oParameter.getWorkspace(),null,oParameter.getExchange());
+            
+            String sError = org.apache.commons.lang.exception.ExceptionUtils.getMessage(oEx);
+            if (s_oSendToRabbit!=null) s_oSendToRabbit.SendRabbitMessage(false,LauncherOperations.RASTERGEOMETRICRESAMPLE.name(),oParameter.getWorkspace(),sError,oParameter.getExchange());
         	
         }
         finally{
