@@ -13,7 +13,7 @@ angular.module('wasdi.TreeDirectiveV2', [])
         return{
             restrict:"E",
 
-            template:'<div id="jstree"class="jstree" ></div>',
+            template:'<div id="jstree" class="jstree" ></div>',
             scope: {
                 customerInfo: '=oTree'
             },

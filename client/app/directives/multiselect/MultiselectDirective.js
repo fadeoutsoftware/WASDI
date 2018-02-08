@@ -44,16 +44,13 @@ angular.module('wasdi.MultiselectDirective', [])
                 };
                 scope.isOptionSelected = function(sBandInput)
                 {
-                    if(utilsIsStrNullOrEmpty(sBandInput) == true)
-                        return false;
+                    if(utilsIsStrNullOrEmpty(sBandInput) == true) return false;
 
                     var bResult=utilsFindObjectInArray(scope.selectedDirective ,sBandInput);
-                    if(utilsIsObjectNullOrUndefined(bResult) == true)
-                        return false;
-                    if(bResult == -1)
-                        return false
-                    else
-                        return true;
+                    if(utilsIsObjectNullOrUndefined(bResult) == true) return false;
+
+                    if(bResult == -1) return false;
+                    else return true;
                 }
             }
         };

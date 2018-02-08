@@ -11,7 +11,7 @@ angular.module('wasdi.MultiselectDropdownMenuDirective', [])
                 // selectedDirective:'=selected'
             },
 
-            templateUrl:"directives/multiselect_dropdown_menu/MultiselectDropdownMenuView.html",
+            templateUrl:"directives/multiselect_dropdown_menu/MultiselectDropdownMenuView.html"
 
         };
     });
