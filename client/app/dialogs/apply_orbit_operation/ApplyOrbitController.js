@@ -85,8 +85,8 @@ var ApplyOrbitController = (function() {
                 if( (utilsIsObjectNullOrUndefined(oProduct.fileName) == true) && (utilsIsStrNullOrEmpty(oProduct.fileName) == true) )
                     bAreOkOptions = false;
                 //TODO CHECK IT
-                if( (utilsIsObjectNullOrUndefined(oController.m_sFileName_Operation) == true) && (utilsIsStrNullOrEmpty(oController.m_sFileName_Operation) == true) )
-                    bAreOkOptions = false;
+                // if( (utilsIsObjectNullOrUndefined(oController.m_sFileName_Operation) == true) && (utilsIsStrNullOrEmpty(oController.m_sFileName_Operation) == true) )
+                //     bAreOkOptions = false;
                 if( (utilsIsObjectNullOrUndefined(oController.m_sSelectedOrbitStateVectors) == true) && (utilsIsStrNullOrEmpty(oController.m_sSelectedOrbitStateVectors) == true) )
                     bAreOkOptions = false;
                 if( (utilsIsObjectNullOrUndefined(oController.m_oReturnValue.options.polyDegree) == true) && (utilsIsANumber(oController.m_oReturnValue.options.polyDegree) == false) )
@@ -97,8 +97,8 @@ var ApplyOrbitController = (function() {
                 {
                     // oController.m_oReturnValue.sourceFileName = oController.m_oSelectedProduct.fileName;
                     // oController.m_oReturnValue.destinationFileName = oController.m_sFileName_Operation;
-                    oController.m_oReturnValue.sourceFileName = oController.m_asSelectedProducts[iIndexSelectedProduct].fileName;
-                    oController.m_oReturnValue.destinationFileName = oController.m_sFileName_Operation;
+                    oController.m_oReturnValue.sourceFileName = oProduct.fileName;
+                    oController.m_oReturnValue.destinationFileName = oProduct.name + "_ApplyOrbit";
                     oController.m_oReturnValue.options.orbitType = oController.m_sSelectedOrbitStateVectors;
 
                 }
@@ -106,11 +106,13 @@ var ApplyOrbitController = (function() {
                 {
                     oController.m_oReturnValue = null;
                 }
+
+                aoReturnValue.push(oController.m_oReturnValue);
             }
 
 
 
-            oClose(oController.m_oReturnValue, 500); // close, but give 500ms for bootstrap to animate
+            oClose(aoReturnValue, 500); // close, but give 500ms for bootstrap to animate
         };
 
         this.m_oGetParametersOperationService.getparametersApplyOrbit()
