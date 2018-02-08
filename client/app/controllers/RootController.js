@@ -400,8 +400,6 @@ var RootController = (function() {
             modal.element.modal();
             modal.close.then(function(result) {
                 oController.m_oScope.Result = result ;
-
-
             });
         });
 

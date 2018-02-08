@@ -176,7 +176,6 @@ service('RabbitStompService', ['$http',  'ConstantsService','$interval','Process
 
             console.log('RabbitStompService: WEB STOMP ERROR, message:' + sMessage + ' [' +utilsGetTimeStamp() + ']');
 
-
             if (sMessage == "LOST_CONNECTION" || sMessage == "Whoops! Lost connection to undefined") {
                 console.log('RabbitStompService: Web Socket Connection Lost');
 
@@ -214,7 +213,7 @@ service('RabbitStompService', ['$http',  'ConstantsService','$interval','Process
 
 
         return true;
-    }
+    };
 
     this.initWebStomp();
 
