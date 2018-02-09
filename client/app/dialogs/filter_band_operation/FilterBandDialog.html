@@ -19,7 +19,7 @@
                 <!--------------------------------------- TAB CONTENT ------------------------------------------>
                 <div class="tab-content">
                     <!---------------------------------- SYSTEM TAB --------------------------------->
-                    <div ng-show="m_oController.m_iActiveProvidersTab === 0" >
+                    <div ng-show="m_oController.m_iActiveProvidersTab === 0">
                         <h2>{{"DIALOG_FILTER_BAND_TAB_NAME_SYSTEM"|translate}}</h2>
                         <p>
                             <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 system-content" ng-repeat="system in m_oController.m_aoSystemFilterOptions track by $index">
@@ -29,8 +29,9 @@
 
                                 <div ng-repeat="options in system.options track by $index"  class=" options">
                                     <h4>
-                                        <div class="operation" data-toggle="collapse" data-target="#collapse{{ (system.name + $index) |lowercase | removeSpaces}}"
-                                             aria-expanded="false" aria-controls="collapsemapprojection" ng-click="m_oController.m_sSelectedFilter = options.name">
+                                        <div class="operation"  data-toggle="collapse"  data-target="#collapse{{ (system.name + $index) |lowercase | removeSpaces}}"
+                                             aria-expanded="false" aria-controls="collapsemapprojection" ng-click="m_oController.m_sSelectedFilter = options.name;
+                                                                                                                                m_oController.collapsePanels()" >
                                             {{options.name}}
                                         </div>
                                     </h4>
