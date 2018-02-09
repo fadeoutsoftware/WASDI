@@ -524,3 +524,11 @@ function utilsGenerateArrayWithFirstNIntValue (iValue)
     return aiReturnArray;
 }
 
+/*
+    bind this function in ng-click html element when you want open a
+    collapse panel, with this function the others panel it will close
+ */
+function utilsBootstrapCloseCollapsePanel ()
+{
+    jQuery('.collapse').collapse('hide');
+}
