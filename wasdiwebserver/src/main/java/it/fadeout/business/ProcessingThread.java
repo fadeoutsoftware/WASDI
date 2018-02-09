@@ -56,6 +56,8 @@ public class ProcessingThread extends Thread {
 	
 	protected String logPrefix = "ProcessingThread: ";
 	
+	 private volatile boolean m_bRunning = true;
+	
 	/**
 	 * constructor with parameters
 	 * @param parametersFolder folder for the file containing the process parmeters
@@ -96,7 +98,7 @@ public class ProcessingThread extends Thread {
 		
 		System.out.println(logPrefix + "run!");
 		
-		while (true) {
+		while (getIsRunning()) {
 			
 			try {
 				//remove from lauched map all process older than 1 hour
@@ -146,10 +148,19 @@ public class ProcessingThread extends Thread {
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
-			}
-			
+			}	
 		}
 		
+		System.out.println(logPrefix + " STOPPED");
+	}
+	
+	public synchronized boolean getIsRunning() {
+		return m_bRunning;
+	}
+	
+	public synchronized void stopThread() {
+		interrupt();
+		m_bRunning = false;
 	}
 
 	protected List<ProcessWorkspace> getQueuedProcess() {

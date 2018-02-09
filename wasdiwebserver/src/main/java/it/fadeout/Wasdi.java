@@ -34,6 +34,7 @@ import it.fadeout.rest.resources.WasdiResource;
 import it.fadeout.rest.resources.WorkspaceResource;
 import wasdi.shared.business.User;
 import wasdi.shared.business.UserSession;
+import wasdi.shared.data.MongoRepository;
 import wasdi.shared.data.SessionRepository;
 import wasdi.shared.data.UserRepository;
 import wasdi.shared.utils.Utils;
@@ -45,14 +46,24 @@ public class Wasdi extends Application {
 	@Context
 	ServletContext m_oContext;	
 	
+	/**
+	 * Flag for Debug Log: if true Authentication is disabled
+	 */
 	private static boolean s_bDebug = false;
 	
+	/**
+	 * Flag to activate debug logs	
+	 */
 	private static boolean s_bDebugLog = false;
-	
-	private static String s_sDownloadRootPath = "";
 
+	/**
+	 * Process queue scheduler
+	 */
 	private static ProcessingThread processingThread = null;
 
+	/**
+	 * Downloads queue scheduler
+	 */
 	private static DownloadsThread downloadsThread = null;
 
 	
@@ -106,13 +117,27 @@ public class Wasdi extends Application {
 				
 				System.out.println("init wasdi: starting processing and download threads...");
 				
-				processingThread = new ProcessingThread(m_oServletConfig);
-				processingThread.start();
-				System.out.println("init wasdi: processing thread started");
 				
-				downloadsThread = new DownloadsThread(m_oServletConfig);
-				downloadsThread.start();
-				System.out.println("init wasdi: downloads thread started");
+				if (getInitParameter("EnableProcessingScheduler", "true").toLowerCase().equals("true")) {
+					processingThread = new ProcessingThread(m_oServletConfig);
+					processingThread.start();
+					System.out.println("init wasdi: processing thread started");
+				}
+				else {
+					System.out.println("init wasdi: processing thread DISABLED");
+				}
+				
+				
+				if (getInitParameter("EnableDownloadScheduler", "true").toLowerCase().equals("true")) {
+					downloadsThread = new DownloadsThread(m_oServletConfig);
+					downloadsThread.start();
+					System.out.println("init wasdi: downloads thread started");
+				}
+				else {
+					System.out.println("init wasdi: downloads thread DISABLED");
+				}
+				
+				
 			} catch (Exception e) {
 				e.printStackTrace();
 				System.out.println("init wasdi: ERROR: CANNOT START PROCESSING THREAD!!!");
@@ -135,11 +160,23 @@ public class Wasdi extends Application {
 			
 			Engine.start(false);
 			
-			
 		} catch (Throwable e) {
 			e.printStackTrace();
 		}
-		
+	}
+	
+	public static void shutDown() {
+		try {
+			Wasdi.DebugLog("Shutting Down Wasdi");
+			
+			processingThread.stopThread();
+			downloadsThread.stopThread();
+			MongoRepository.shutDownConnection();
+		}
+		catch (Exception e) {
+			System.out.println("WASDI SHUTDOWN EXCEPTION: " + e.getMessage());
+			e.printStackTrace();
+		}
 	}
 
 	private String getInitParameter(String sParmaneter, String sDefault) {		
