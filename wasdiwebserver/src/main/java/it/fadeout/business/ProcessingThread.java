@@ -3,6 +3,7 @@ package it.fadeout.business;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -103,29 +104,41 @@ public class ProcessingThread extends Thread {
 			try {
 				//remove from lauched map all process older than 1 hour
 				long tNow = System.currentTimeMillis();
+				
+				// List of array to clear
 				ArrayList<String> toClear = new ArrayList<String>();
+				
+				// For each running entry
 				for (Entry<String, Date> entry : launched.entrySet()) {
+					// If if is so old, kill it
 					if (tNow - entry.getValue().getTime() > 3600000L) toClear.add(entry.getKey());
 				}
+				
+				// Clear every killed process
 				for (String key : toClear) {
 					launched.remove(key);
 					System.out.println(logPrefix + "removing " + key + " from launched");
 				}
 				
 				List<ProcessWorkspace> queuedProcess = null;
+				
 				int procIdx = 0;
+				
+				// For all the running available slots
 				for (int i = 0; i < runningProcess.length; i++) {
+					
+					// If a slot is free now
 					if (runningProcess[i]==null || isProcessDone(i)) {
 						
-						//if not yed loaded, load the list of process to execute
+						//if not yet loaded, load the list of process to execute
 						if (queuedProcess==null) {
 							checkRepo();
 							queuedProcess = getQueuedProcess();
-							
 						}
 						
 						//try to execute a process
 						String executedProcessId = null;
+						
 						while (procIdx<queuedProcess.size() && executedProcessId==null) {
 							ProcessWorkspace process = queuedProcess.get(procIdx);
 							if (!launched.containsKey(process.getProcessObjId())) {
@@ -164,12 +177,16 @@ public class ProcessingThread extends Thread {
 	}
 
 	protected List<ProcessWorkspace> getQueuedProcess() {
+		checkRepo();
 		List<ProcessWorkspace> queuedProcess = repo.GetQueuedProcess();
 		
 //		System.out.println(logPrefix + "read process queue. size: " + queuedProcess.size());
 //		for (ProcessWorkspace p : queuedProcess) {
 //			System.out.println(logPrefix + "     " + p.getProcessObjId());
 //		}
+		
+		// Reverse the collection, otherwise the olders will dead of starvation
+		Collections.reverse(queuedProcess);
 		
 		return queuedProcess;
 	}
@@ -208,12 +225,11 @@ public class ProcessingThread extends Thread {
 	 */
 	private boolean isProcessDone(int i) {
 		String procId = runningProcess[i];
-		checkRepo();
 		ProcessWorkspace process = repo.GetProcessByProcessObjId(procId);
 		boolean ret = process==null || process.getStatus().equalsIgnoreCase(ProcessStatus.DONE.name()) || process.getStatus().equalsIgnoreCase(ProcessStatus.ERROR.name()) || process.getStatus().equalsIgnoreCase(ProcessStatus.STOPPED.name());
 		if (ret) runningProcess[i] = null;
 		
-		System.out.println(logPrefix + "process " + procId + " DONE: " + ret);
+		//System.out.println(logPrefix + "process " + procId + " DONE: " + ret);
 		
 		return ret;
 	}
