@@ -11,127 +11,109 @@ var RadiometricCalibrationController = (function() {
         this.m_oScope.m_oController = this;
         this.m_oExtras = oExtras;
         this.m_aoProducts = this.m_oExtras.products;
-        this.m_oSelectedProduct = this.m_oExtras.selectedProduct;
+        this.m_oClickedProduct = this.m_oExtras.selectedProduct;
         this.m_oGetParametersOperationService = oGetParametersOperationService;
         if(utilsIsObjectNullOrUndefined(this.m_aoProducts) == true)
         {
             this.m_aoProducts = [];
         }
+        // Don't remove it!
         this.m_asProductsName = this.getProductsName();
         this.m_asSelectedProducts = [];
 
-        if(utilsIsObjectNullOrUndefined(this.m_oSelectedProduct) == true)
+        if(utilsIsObjectNullOrUndefined(this.m_oClickedProduct) == true)
         {
-            this.m_oSelectedProduct = null;
+            this.m_oClickedProduct = null;
         }
         else
         {
-            if( (utilsIsObjectNullOrUndefined(this.m_oSelectedProduct.productFriendlyName)== false) && (utilsIsStrNullOrEmpty(this.m_oSelectedProduct.productFriendlyName)== false))
-                this.m_sFileName_Operation = this.m_oSelectedProduct.name + "_RadiometricCalibration";
-
-            //laod band
-            if(utilsIsObjectNullOrUndefined(this.m_oSelectedProduct.bandsGroups.bands) == true)
-                var iNumberOfBands = 0;
-            else
-                var iNumberOfBands = this.m_oSelectedProduct.bandsGroups.bands.length;
-
-            this.m_asSourceBands = [];
-            //load bands
-            for(var iIndexBand = 0; iIndexBand < iNumberOfBands ;iIndexBand++)
-            {
-                if( utilsIsObjectNullOrUndefined(this.m_oSelectedProduct.bandsGroups.bands[iIndexBand]) == false )
-                    this.m_asSourceBands.push(this.m_oSelectedProduct.bandsGroups.bands[iIndexBand].name);
-            }
-
+            this.m_asSelectedProducts.push(this.m_oClickedProduct.name);
+            // if( (utilsIsObjectNullOrUndefined(this.m_oSelectedProduct.productFriendlyName)== false) && (utilsIsStrNullOrEmpty(this.m_oSelectedProduct.productFriendlyName)== false))
+            //     this.m_sFileName_Operation = this.m_oSelectedProduct.name + "_RadiometricCalibration";
+            //
+            // //laod band
+            // if(utilsIsObjectNullOrUndefined(this.m_oSelectedProduct.bandsGroups.bands) == true)
+            //     var iNumberOfBands = 0;
+            // else
+            //     var iNumberOfBands = this.m_oSelectedProduct.bandsGroups.bands.length;
+            //
+            // this.m_asSourceBands = [];
+            // //load bands
+            // for(var iIndexBand = 0; iIndexBand < iNumberOfBands ;iIndexBand++)
+            // {
+            //     if( utilsIsObjectNullOrUndefined(this.m_oSelectedProduct.bandsGroups.bands[iIndexBand]) == false )
+            //         this.m_asSourceBands.push(this.m_oSelectedProduct.bandsGroups.bands[iIndexBand].name);
+            // }
 
         }
-        // this.m_oTabOpen = "tab1";
-        // this.m_asTypeOfData = ["GeoTIFF","NetCDF-BEAM","NetCDF4-CF","NetCDF-CF","CSV","Gamma","Generic Binary","GeoTIFF+XML",
-        //     "NetCDF4-BEAM","BEAM-DIMAP","ENVI","PolSARPro","Snaphu","JP2","JPG","PNG","BMP","GIF","BTF","GeoTIFF-BIGTIFF","HDF5"];
-        // this.m_asOrbitStateVectors = ["Sentinel Precise(Auto Download)","Sentinel Restituted(Auto Download)","DORIS preliminary POR(ENVISAT)"
-        //     ,"DORIS Precise Vor(ENVISAT)(Auto Download)","DELFT Precise(ENVISAT,ERS1&2)(Auto Download)","PRARE Precise(ERS1&2)(Auto Download)"];
-        // this.m_sSelectedExtension = this.m_asTypeOfData[0];
 
         this.m_asAuxiliaryFile = ["Latest Auxiliary File","Product Auxiliary File","External Auxiliary File"];
         this.m_sSelectedAuxiliaryFile = this.m_asAuxiliaryFile[0];
-        // this.m_asSourceBands =  ["Band1","Band2","Band3"];
-
         this.m_asSourceBandsSelected = [];
-
         this.m_oReturnValue = {
             sourceFileName:"",
             destinationFileName:"",
-            // options:{
-            //     sourceBandNames:"",
-            //     auxFile:"Latest Auxiliary File",
-            //     // externalAuxFile:"",
-            //     outputImageInComplex:false,
-            //     outputImageScaleInDb:false,
-            //     createGammaBand:false,
-            //     createBetaBand:false,
-            //     // selectedPolarisations:"",
-            //     // outputSigmaBand:true,
-            //     // outputGammaBand:false,
-            //     // outputBetaBand:false,
-            //
-            // }
+
         };
-        //this.m_oOrbit = oExtras;
-        //$scope.close = oClose;
+
         $scope.close = function() {
             oClose("close", 500); // close, but give 500ms for bootstrap to animate
         };
 
         var oController = this;
-        $scope.run = function(oOptions) {
+
+        $scope.run = function() {
             //TODO CHECK OPTIONS
+            var iNumberOfSelectedProducts = oController.m_asSelectedProducts.length;
+            var aoReturnValue = [];
             var bAreOkOptions = true;
-
-            if( (utilsIsObjectNullOrUndefined(oController.m_oSelectedProduct.fileName) == true) && (utilsIsStrNullOrEmpty(oController.m_oSelectedProduct.fileName) == true) )
-                bAreOkOptions = false;
-            if( (utilsIsObjectNullOrUndefined(oController.m_sFileName_Operation) == true) && (utilsIsStrNullOrEmpty(oController.m_sFileName_Operation) == true) )
-                bAreOkOptions = false;
-            // if( (utilsIsObjectNullOrUndefined(oController. m_sSelectedAuxiliaryFile) == true) && (utilsIsStrNullOrEmpty(oController. m_sSelectedAuxiliaryFile) == true) )
-            //     bAreOkOptions = false;
-
-            if( (utilsIsObjectNullOrUndefined(oController.m_asSourceBandsSelected) == true) )
-                bAreOkOptions = false;
-            // if( utilsIsObjectNullOrUndefined(oController.m_oReturnValue.options.continueOnFail) == true )
-            //     bAreOkOptions = false;
-            if( utilsIsObjectNullOrUndefined(oController.m_oReturnValue.options.externalAuxFile) == true  && (utilsIsStrNullOrEmpty(oController.m_oReturnValue.options.externalAuxFile) == false) )
-                bAreOkOptions = false;
-            if( utilsIsObjectNullOrUndefined(oController.m_oReturnValue.options.outputImageInComplex) == true )
-                bAreOkOptions = false;
-            if( utilsIsObjectNullOrUndefined(oController.m_oReturnValue.options.outputImageScaleInDb) == true )
-                bAreOkOptions = false;
-
-            if( (utilsIsObjectNullOrUndefined(oController.m_oReturnValue.options.createGammaBand) == true) )
-                bAreOkOptions = false;
-            if( utilsIsObjectNullOrUndefined(oController.m_oReturnValue.options.createBetaBand) == true )
-                bAreOkOptions = false;
-            // if( (utilsIsObjectNullOrUndefined(oController.m_oReturnValue.options.selectedPolarisations) == true ) && (utilsIsStrNullOrEmpty(oController.m_oReturnValue.options.selectedPolarisations) == false))
-            //     bAreOkOptions = false;
-            // if( utilsIsObjectNullOrUndefined(oController.m_oReturnValue.options.outputSigmaBand) == true )
-            //     bAreOkOptions = false;
-            // if( utilsIsObjectNullOrUndefined(oController.m_oReturnValue.options.outputGammaBand) == true )
-            //     bAreOkOptions = false;
-            // if( utilsIsObjectNullOrUndefined(oController.m_oReturnValue.options.outputBetaBand) == true )
-            //     bAreOkOptions = false;
-
-            if(bAreOkOptions != false)
+            for(var iIndexSelectedProduct = 0; iIndexSelectedProduct < iNumberOfSelectedProducts ; iIndexSelectedProduct++)
             {
-                oController.m_oReturnValue.sourceFileName = oController.m_oSelectedProduct.fileName;
-                oController.m_oReturnValue.destinationFileName = oController.m_sFileName_Operation;
-                oController.m_oReturnValue.options.sourceBandNames = oController.m_asSourceBandsSelected;
-                oController.m_oReturnValue.options.selectedPolarisations = [];
-                oController.m_oReturnValue.options.auxFile = oController.m_sSelectedAuxiliaryFile;
-                // oController.m_oReturnValue.options.externalAuxFile = "";
+                var oProduct = oController.getProductByName(oController.m_asSelectedProducts[iIndexSelectedProduct]);
+
+                if( (utilsIsObjectNullOrUndefined(oProduct.fileName) == true) && (utilsIsStrNullOrEmpty(oProduct.fileName) == true) )
+                    bAreOkOptions = false;
+                // if( (utilsIsObjectNullOrUndefined(oController.m_sFileName_Operation) == true) && (utilsIsStrNullOrEmpty(oController.m_sFileName_Operation) == true) )
+                //     bAreOkOptions = false;
+                // if( (utilsIsObjectNullOrUndefined(oController. m_sSelectedAuxiliaryFile) == true) && (utilsIsStrNullOrEmpty(oController. m_sSelectedAuxiliaryFile) == true) )
+                //     bAreOkOptions = false;
+
+                // if( (utilsIsObjectNullOrUndefined(oController.m_asSourceBandsSelected) == true) )
+                //     bAreOkOptions = false;
+                // if( utilsIsObjectNullOrUndefined(oController.m_oReturnValue.options.continueOnFail) == true )
+                //     bAreOkOptions = false;
+                if( utilsIsObjectNullOrUndefined(oController.m_oReturnValue.options.externalAuxFile) == true  && (utilsIsStrNullOrEmpty(oController.m_oReturnValue.options.externalAuxFile) == false) )
+                    bAreOkOptions = false;
+                if( utilsIsObjectNullOrUndefined(oController.m_oReturnValue.options.outputImageInComplex) == true )
+                    bAreOkOptions = false;
+                if( utilsIsObjectNullOrUndefined(oController.m_oReturnValue.options.outputImageScaleInDb) == true )
+                    bAreOkOptions = false;
+
+                if( (utilsIsObjectNullOrUndefined(oController.m_oReturnValue.options.createGammaBand) == true) )
+                    bAreOkOptions = false;
+                if( utilsIsObjectNullOrUndefined(oController.m_oReturnValue.options.createBetaBand) == true )
+                    bAreOkOptions = false;
+
+
+                if(bAreOkOptions != false)
+                {
+                    oController.m_oReturnValue.sourceFileName = oProduct.fileName;
+                    oController.m_oReturnValue.destinationFileName =  oProduct.name + "_RadiometricCalibration";
+                    // oController.m_oReturnValue.options.sourceBandNames = oController.m_asSourceBandsSelected;
+                    oController.m_oReturnValue.options.sourceBandNames = oController.getSelectedBandsByProductName(oProduct.name, oController.m_asSourceBandsSelected);
+                    oController.m_oReturnValue.options.selectedPolarisations = [];
+                    oController.m_oReturnValue.options.auxFile = oController.m_sSelectedAuxiliaryFile;
+                    // oController.m_oReturnValue.options.externalAuxFile = "";
+                }
+                else
+                {
+                    oController.m_oReturnValue = null;
+                }
+                aoReturnValue.push(oController.m_oReturnValue);
             }
-            else
-            {
-                oOptions = null;
-            }
-            oClose(oOptions, 500); // close, but give 500ms for bootstrap to animate
+
+
+            oClose(aoReturnValue, 500); // close, but give 500ms for bootstrap to animate
         };
 
         this.m_oGetParametersOperationService.getParametersRadiometricCalibration()
@@ -148,6 +130,11 @@ var RadiometricCalibrationController = (function() {
             }).error(function (error) {
             utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN GET PARAMETERS");
         });
+
+        $scope.$watch('m_oController.m_asSelectedProducts', function (newValue, oldValue, scope)
+        {
+            $scope.m_oController.m_asSourceBands = $scope.m_oController.getBandsFromSelectedProducts();
+        },true);
     };
 
 
@@ -168,20 +155,6 @@ var RadiometricCalibrationController = (function() {
             destinationFileName:"",
             options:this.m_oOptions
 
-            // options:{
-            //     sourceBandNames:"",
-            //     auxFile:"Latest Auxiliary File",
-            //     // externalAuxFile:"",
-            //     outputImageInComplex:false,
-            //     outputImageScaleInDb:false,
-            //     createGammaBand:false,
-            //     createBetaBand:false,
-            //     // selectedPolarisations:"",
-            //     // outputSigmaBand:true,
-            //     // outputGammaBand:false,
-            //     // outputBetaBand:false,
-            //
-            // }
         };
 
 
@@ -204,13 +177,6 @@ var RadiometricCalibrationController = (function() {
         return true;
     };
 
-    // RadiometricCalibrationController.prototype.isSelectedExternalAuxiliaryFile = function()
-    // {
-    //     if(this.m_sSelectedAuxiliaryFile == "External Auxiliary File")
-    //         return true;
-    //
-    //     return false;
-    // }
 
     /**
      *
@@ -218,7 +184,7 @@ var RadiometricCalibrationController = (function() {
      */
     RadiometricCalibrationController.prototype.selectedProductIsEmpty = function()
     {
-        if(utilsIsObjectNullOrUndefined(this.m_oSelectedProduct) == true)
+        if(utilsIsObjectNullOrUndefined(this.m_asSelectedProducts) == true)
             return true;
         return false;
     };
@@ -228,15 +194,8 @@ var RadiometricCalibrationController = (function() {
      * @returns {*}
      */
     RadiometricCalibrationController.prototype.getProductsName = function(){
-        if(utilsIsObjectNullOrUndefined(this.m_aoProducts) === true)
-            return null;
-        var iNumberOfProducts = this.m_aoProducts.length;
-        var asProductsName = [];
-        for(var iIndexProduct = 0; iIndexProduct < iNumberOfProducts ; iIndexProduct++)
-        {
-            asProductsName.push(this.m_aoProducts[iIndexProduct].name);
-        }
-        return asProductsName;
+
+        return utilsProjectGetProductsName(this.m_aoProducts);
     }
 
     /**
@@ -245,19 +204,18 @@ var RadiometricCalibrationController = (function() {
      * @returns {*}
      */
     RadiometricCalibrationController.prototype.getProductByName = function(sName){
-        if(utilsIsStrNullOrEmpty(sName) === true)
-            return null;
-        var iNumberOfProducts = this.m_aoProducts.length;
-        ;
-        for(var iIndexProduct = 0; iIndexProduct < iNumberOfProducts ; iIndexProduct++)
-        {
-            if( this.m_aoProducts[iIndexProduct].name === sName)
-            {
-                return this.m_aoProducts[iIndexProduct];
-            }
-        }
-        return null;
-    }
+        return utilsProjectGetProductByName(sName,this.m_aoProducts);
+    };
+
+    RadiometricCalibrationController.prototype.getBandsFromSelectedProducts = function()
+    {
+        return utilsProjectGetBandsFromSelectedProducts(this.m_asSelectedProducts,this.m_aoProducts);
+    };
+
+    RadiometricCalibrationController.prototype.getSelectedBandsByProductName = function(sProductName, asSelectedBands)
+    {
+        return utilsProjectGetSelectedBandsByProductName(sProductName, asSelectedBands);
+    };
 
     RadiometricCalibrationController.$inject = [
         '$scope',

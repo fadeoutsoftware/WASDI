@@ -257,3 +257,79 @@ function utilsProjectCheckInDialogIfProductNameIsInUsed(sProductName, aoListOfPr
     }
     return false;
 }
+
+function utilsProjectGetSelectedBandsByProductName(sProductName, asSelectedBands)
+{
+    if(utilsIsObjectNullOrUndefined(asSelectedBands) === true)
+        return null;
+
+    var iNumberOfSelectedBands = asSelectedBands.length;
+    var asReturnBandsName = [];
+    for( var iIndexSelectedBand = 0 ; iIndexSelectedBand < iNumberOfSelectedBands; iIndexSelectedBand++ )
+    {
+        //check if the asSelectedBands[iIndexSelectedBand] is a sProductName band
+        if(utilsIsSubstring(asSelectedBands[iIndexSelectedBand] , sProductName))
+        {
+            var sBandName=  asSelectedBands[iIndexSelectedBand].replace(sProductName + "_","");
+            asReturnBandsName.push(sBandName);
+        }
+    }
+
+    return asReturnBandsName;
+}
+
+function utilsProjectGetProductsName (aoProducts){
+    if(utilsIsObjectNullOrUndefined(aoProducts) === true)
+        return null;
+    var iNumberOfProducts = aoProducts.length;
+    var asProductsName = [];
+    for(var iIndexProduct = 0; iIndexProduct < iNumberOfProducts ; iIndexProduct++)
+    {
+        asProductsName.push(aoProducts[iIndexProduct].name);
+    }
+    return asProductsName;
+}
+
+function utilsProjectGetProductByName(sName,aoProducts){
+    if(utilsIsStrNullOrEmpty(sName) === true)
+        return null;
+    var iNumberOfProducts = aoProducts.length;
+
+    for(var iIndexProduct = 0; iIndexProduct < iNumberOfProducts ; iIndexProduct++)
+    {
+        if( aoProducts[iIndexProduct].name === sName)
+        {
+            return aoProducts[iIndexProduct];
+        }
+    }
+    return null;
+};
+
+function utilsProjectGetBandsFromSelectedProducts(asSelectedProducts,aoProducts)
+{
+    if( utilsIsObjectNullOrUndefined(asSelectedProducts) === true)
+        return null;
+    var iNumberOfSelectedProducts = asSelectedProducts.length;
+    var asProductsBands=[];
+    for(var iIndexSelectedProduct = 0; iIndexSelectedProduct < iNumberOfSelectedProducts; iIndexSelectedProduct++)
+    {
+        var oProduct = utilsProjectGetProductByName(asSelectedProducts[iIndexSelectedProduct],aoProducts);
+        var iNumberOfBands;
+
+        if(utilsIsObjectNullOrUndefined(oProduct.bandsGroups.bands) === true)
+            iNumberOfBands = 0;
+        else
+            iNumberOfBands = oProduct.bandsGroups.bands.length;
+
+        for(var iIndexBand = 0; iIndexBand < iNumberOfBands; iIndexBand++)
+        {
+            if( utilsIsObjectNullOrUndefined(oProduct.bandsGroups.bands[iIndexBand]) === false )
+            {
+                asProductsBands.push(oProduct.name + "_" + oProduct.bandsGroups.bands[iIndexBand].name);
+            }
+        }
+    }
+    return asProductsBands;
+    // return ["test","secondo"];
+};
+

@@ -380,8 +380,12 @@ var FilterBandController = (function() {
             }
         }
         return null;
-    };
+    }
 
+    FilterBandController.prototype.collapsePanels = function()
+    {
+        jQuery('.collapse').collapse('hide');
+    };
     FilterBandController.$inject = [
         '$scope',
         'close',
