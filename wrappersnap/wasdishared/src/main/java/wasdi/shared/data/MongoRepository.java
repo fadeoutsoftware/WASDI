@@ -44,4 +44,16 @@ public class MongoRepository {
     public MongoCollection<Document> getCollection(String sCollection) {
         return getMongoDatabase().getCollection(sCollection);
     }
+    
+    public static void shutDownConnection() {
+    	if (s_oMongoClient != null) {
+    		try {
+    			s_oMongoClient.close();
+    		}
+    		catch (Exception e) {
+				System.out.println("MongoRepository.shutDownConnection: exception " + e.getMessage());
+				e.printStackTrace();
+			}
+    	}
+    }
 }
