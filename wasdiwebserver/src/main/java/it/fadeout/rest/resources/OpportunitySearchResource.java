@@ -286,8 +286,7 @@ public class OpportunitySearchResource {
 		Wasdi.DebugLog("OpportunitySearchResource.getUpdatedSatelliteTrack");
 
 		// Check if we have codes
-		if (Utils.isNullOrEmpty(satname))
-			return null;
+		if (Utils.isNullOrEmpty(satname)) return null;
 
 		// Return array
 		ArrayList<SatelliteOrbitResultViewModel> aoRet = new ArrayList<SatelliteOrbitResultViewModel>();

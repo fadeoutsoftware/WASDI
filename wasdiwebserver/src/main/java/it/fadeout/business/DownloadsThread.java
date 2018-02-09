@@ -1,5 +1,6 @@
 package it.fadeout.business;
 
+import java.util.Collections;
 import java.util.List;
 
 import javax.servlet.ServletConfig;
@@ -21,6 +22,8 @@ public class DownloadsThread extends ProcessingThread {
 //		for (ProcessWorkspace p : queuedProcess) {
 //			System.out.println("DownloadsThread:      " + p.getProcessObjId());
 //		}
+		// Reverse the collection, otherwise the older will dead of starvation
+		Collections.reverse(queuedProcess);
 
 		return queuedProcess;
 		
