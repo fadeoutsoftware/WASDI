@@ -28,10 +28,8 @@ public class TerrainCorrection extends BaseOperation{
 
         //set default value
         oOperator.setParameterDefaultValues();
-        if (oSetting == null)
-            return;
-        if (!(oSetting instanceof RangeDopplerGeocodingSetting))
-            return;
+        if (oSetting == null) return;
+        if (!(oSetting instanceof RangeDopplerGeocodingSetting))return;
 
         RangeDopplerGeocodingSetting oRangeDopplerGeocodingSetting = (RangeDopplerGeocodingSetting) oSetting;
 
@@ -65,17 +63,36 @@ public class TerrainCorrection extends BaseOperation{
                 oOperator.setParameter("externalDEMApplyEGM", oRangeDopplerGeocodingSetting.getExternalDEMApplyEGM());
             }
 
-            //TODO: Questo pezzo di codice è da verificare
+            /*
+            // P.Campanella 09/02/2018: this code required the UI version of SNAP and it is a problem on the server
+            // Replaced with a likely equivalent code to get the mapProjection 
+            
             MapProjectionHandler oMapHandler = new MapProjectionHandler();
             Product[] aoProducts = {oOperator.getSourceProduct()};
+            
             oMapHandler.initParameters(oRangeDopplerGeocodingSetting.getMapProjection(), aoProducts);
             if (oMapHandler.getCRS() != null) {
                 final CoordinateReferenceSystem crs = oMapHandler.getCRS();
                 try {
+                	
+                	String sWKT = crs.toWKT();
+                	//System.out.println(sWKT);
+                	
                     oOperator.setParameter("mapProjection", crs.toWKT());
                 } catch (UnformattableObjectException e) {        // if too complex to convert using strict
                     oOperator.setParameter("mapProjection", crs.toString());
                 }
+            }
+            */
+            Product oProduct = oOperator.getSourceProduct();
+            
+            //String sWKT = oProduct.getSceneGeoCoding().getGeoCRS().toWKT();
+            //System.out.println(sWKT);
+            
+            try {
+                oOperator.setParameter("mapProjection", oProduct.getSceneGeoCoding().getGeoCRS().toWKT());
+            } catch (UnformattableObjectException e) {        // if too complex to convert using strict
+                oOperator.setParameter("mapProjection", oProduct.getSceneGeoCoding().getGeoCRS().toString());
             }
 
             //Nell'interfaccia di SNAP questo checkbox si chiama Mask out areas without elevation

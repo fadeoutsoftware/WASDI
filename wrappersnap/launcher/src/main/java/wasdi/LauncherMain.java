@@ -7,7 +7,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.text.DecimalFormat;
 import java.util.Date;
 
 import org.apache.commons.cli.CommandLine;
@@ -363,7 +362,6 @@ public class LauncherMain {
             // Product view Model
             ProductViewModel oVM = null;
 
-
             // Download file
             if (ConfigReader.getPropValue("DOWNLOAD_ACTIVE").equals("true")) {
 
@@ -465,8 +463,11 @@ public class LauncherMain {
         catch (Exception oEx) {
         	oEx.printStackTrace();
             s_oLogger.error("LauncherMain.Download: Exception " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
+            
+            String sError = org.apache.commons.lang.exception.ExceptionUtils.getMessage(oEx);
+            
             if (oProcessWorkspace != null) oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
-            if (s_oSendToRabbit!=null) s_oSendToRabbit.SendRabbitMessage(false,LauncherOperations.DOWNLOAD.name(),oParameter.getWorkspace(),null,oParameter.getExchange());
+            if (s_oSendToRabbit!=null) s_oSendToRabbit.SendRabbitMessage(false,LauncherOperations.DOWNLOAD.name(),oParameter.getWorkspace(),sError,oParameter.getExchange());
         }
         finally{
             //update process status and send rabbit updateProcess message
@@ -546,16 +547,18 @@ public class LauncherMain {
 	        ReadProduct oReadProduct = new ReadProduct();
 	        ProductViewModel oVM = oReadProduct.getProductViewModel(oFilePath);
 	        
+	        updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 25);
+	        
             // Save Metadata
             oVM.setMetadataFileReference(SaveMetadata(oReadProduct, oFilePath));
         
-	        updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 25);	        
+	        updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 50);	        
 	        
 			//copy file to workspace directory
 			FileUtils.copyFileToDirectory(oFilePath, oDstDir);
 			File oDstFile = new File(oDstDir, oFilePath.getName());
 			
-			updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 50);
+			updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 75);
 			
             // Save it in the register
 			DownloadedFilesRepository oDownloadedRepo = new DownloadedFilesRepository();
@@ -573,13 +576,22 @@ public class LauncherMain {
             
             //add product to db
             AddProductToDbAndSendToRabbit(oVM, oFilePath.getAbsolutePath(), oParameter.getWorkspace(), oParameter.getExchange(), LauncherOperations.INGEST.name(), oBB);
-            if (oProcessWorkspace != null) oProcessWorkspace.setStatus(ProcessStatus.DONE.name());                
+            
+            if (oProcessWorkspace != null) {
+            	oProcessWorkspace.setStatus(ProcessStatus.DONE.name());
+            }
 			
 			return oDstFile.getAbsolutePath();
 			
 		} catch (Exception e) {
 			System.out.println("LauncherMain.Ingest: ERROR: Exception occurrend during file ingestion");
 			e.printStackTrace();
+			                        
+            String sError = org.apache.commons.lang.exception.ExceptionUtils.getMessage(e);
+    
+            if (oProcessWorkspace != null) oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
+            if (s_oSendToRabbit!=null) s_oSendToRabbit.SendRabbitMessage(false,LauncherOperations.INGEST.name(),oParameter.getWorkspace(),sError,oParameter.getExchange());
+
 		} finally{
             //update process status and send rabbit updateProcess message
             CloseProcessWorkspace(oProcessWorkspaceRepository, oProcessWorkspace);
@@ -621,8 +633,6 @@ public class LauncherMain {
         s_oLogger.debug("LauncherMain.ExecuteOperation: Process found: " + oParameter.getProcessObjId() + " == " + oProcessWorkspace.getProcessObjId());
         
         try {
-        	
-            
             if (oProcessWorkspace != null) {
             	
                 //get process pid
@@ -720,11 +730,9 @@ public class LauncherMain {
         }
         catch (Throwable oEx) {
             s_oLogger.error("LauncherMain.ExecuteOperation: exception " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
-            
             String sErrorMessage = org.apache.commons.lang.exception.ExceptionUtils.getMessage(oEx);
             
             if (s_oSendToRabbit!=null) s_oSendToRabbit.SendRabbitMessage(false,operation.name(),oParameter.getWorkspace(),sErrorMessage,oParameter.getExchange());
-
             if (oProcessWorkspace != null) oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
         }
         finally{
@@ -746,10 +754,7 @@ public class LauncherMain {
         String sLayerId = "";
         ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
         ProcessWorkspace oProcessWorkspace = oProcessWorkspaceRepository.GetProcessByProcessObjId(oParameter.getProcessObjId());
-        
-        // Create the View Model
-        PublishBandResultViewModel oErrorPaylod = new PublishBandResultViewModel();
-        
+                
         try {
 
             if (oProcessWorkspace != null) {
@@ -767,13 +772,6 @@ public class LauncherMain {
             // Keep the product name
             String sProductName = oDownloadedFile.getProductViewModel().getName();
             
-            oErrorPaylod.setBandName(oParameter.getBandName());
-            oErrorPaylod.setProductName(sProductName);
-            oErrorPaylod.setLayerId(sLayerId);
-            oErrorPaylod.setBoundingBox("");
-            oErrorPaylod.setGeoserverBoundingBox("");
-
-
             // Generate full path name
             String sPath = ConfigReader.getPropValue("DOWNLOAD_ROOT_PATH");
             if (!sPath.endsWith("/")) sPath += "/";
@@ -786,9 +784,10 @@ public class LauncherMain {
             {
                 // File not good!!
                 s_oLogger.debug( "LauncherMain.PublishBandImage: file is null or empty");
+                String sError = "Input File path is null";
                 
                 // Send KO to Rabbit
-                if (s_oSendToRabbit!=null) s_oSendToRabbit.SendRabbitMessage(false, LauncherOperations.PUBLISHBAND.name(),oParameter.getWorkspace(),oErrorPaylod,oParameter.getExchange());
+                if (s_oSendToRabbit!=null) s_oSendToRabbit.SendRabbitMessage(false, LauncherOperations.PUBLISHBAND.name(),oParameter.getWorkspace(),sError,oParameter.getExchange());
 
                 return  sLayerId;
             }
@@ -972,12 +971,12 @@ public class LauncherMain {
             if (oProcessWorkspace != null) oProcessWorkspace.setStatus(ProcessStatus.DONE.name());
         }
         catch (Exception oEx) {
-
             s_oLogger.error( "LauncherMain.PublishBandImage: Exception " + oEx.toString() + " " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
-
             oEx.printStackTrace();
+            
+            String sError = org.apache.commons.lang.exception.ExceptionUtils.getMessage(oEx);
 
-            boolean bRet = s_oSendToRabbit!=null && s_oSendToRabbit.SendRabbitMessage(false,LauncherOperations.PUBLISHBAND.name(),oParameter.getWorkspace(),oErrorPaylod,oParameter.getExchange());
+            boolean bRet = s_oSendToRabbit!=null && s_oSendToRabbit.SendRabbitMessage(false,LauncherOperations.PUBLISHBAND.name(),oParameter.getWorkspace(),sError,oParameter.getExchange());
 
             if (bRet == false) {
                 s_oLogger.error("LauncherMain.PublishBandImage:  Error sending exception Rabbit Message");
