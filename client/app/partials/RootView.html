@@ -159,20 +159,18 @@
                                 <div class="single-process">{{m_oController.m_oLastProcesses.productName}}</div>
                             </div>
                             <!--{{oProcess.progressPerc}} %-->
-
-
                         </div>
-
-
                     </div>
-
                 </div>
 
-                <div class="col-lg-3 col-md-3 col-sm-3 col-xs-3 ">
 
+                <div class="col-lg-3 col-md-3 col-sm-3 col-xs-3 ">
                     <!--<div class="number-processes">-->
                     <div class="flex-container end">
-                        <p class="number-processes">{{"ROOT_LABEL_NUMBER_OF_PROCESSES"|translate}}
+                        <p class="number-processes">{{"ROOT_LABEL_NUMBER_OF_WAITING_PROCESSES"|translate}}
+                            <span class="badge">{{m_oController.m_iWaitingProcesses}}</span>
+                        </p>&nbsp;&nbsp;
+                        <p class="number-processes">{{"ROOT_LABEL_NUMBER_OF_RUNNING_PROCESSES"|translate}}
                             <span class="badge">{{m_oController.m_iNumberOfProcesses}}</span>
                         </p>
                         <div  class="my-button openbtn" ng-click="m_oController.openNav()" ng-hide="m_oController.m_bIsOpenStatusBar">
@@ -219,7 +217,8 @@
                         <tr ng-repeat="oProcess in m_oController.m_aoProcessesRunning  | orderBy:'-' track by $index ">
                             <td>
                                 <!--<invaderfixed ng-show="oProcess.status === 'RUNNING' || oProcess.status === 'CREATED'"></invaderfixed>-->
-                                <smallinvaderfixed ng-show="oProcess.status === 'RUNNING' || oProcess.status === 'CREATED'"></smallinvaderfixed>
+                                <smallinvaderfixed ng-show="oProcess.status === 'RUNNING'"></smallinvaderfixed>
+                                <span class="label label-info" ng-show="oProcess.status === 'CREATED'">Waiting</span>
                                 <span class="label label-warning" ng-show="oProcess.status === 'DONE'">Log</span>
                                 <span class="label label-danger" ng-show="oProcess.status === 'STOPPED'">Stopped</span>
                                 <span class="label label-danger" ng-show="oProcess.status === 'ERROR'" >Error</span>
@@ -251,7 +250,7 @@
                                 {{oProcess.timeRunning | date:'HH:mm:ss'}}
                             </td>
                             <td >
-                                <div class="my-button" ng-click="m_oController.deleteProcess(oProcess)" ng-show="oProcess.status === 'RUNNING' || oProcess.status === 'CREATED'">
+                                <div class="my-button" ng-click="m_oController.deleteProcess(oProcess)" ng-show="oProcess.status === 'RUNNING'">
                                     <i class="fa fa-times-circle" aria-hidden="true" data-toggle="tooltip" title="Stop processes"  data-placement="bottom"></i>
                                 </div>
                             </td>

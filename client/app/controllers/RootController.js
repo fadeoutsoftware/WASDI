@@ -14,6 +14,7 @@ var RootController = (function() {
         this.m_oScope.m_oController=this;
         this.m_aoProcessesRunning=[];
         this.m_iNumberOfProcesses = 0;
+        this.m_iWaitingProcesses = 0;
         this.m_oLastProcesses = null;
         this.m_bIsOpenNav = false;
         this.m_bIsOpenStatusBar = false; //processes bar
@@ -72,34 +73,41 @@ var RootController = (function() {
             // you could inspect the data to see
             if(data == true)
             {
+
                 var aoProcessesRunning = $scope.m_oController.m_oProcessesLaunchedService.getProcesses();
+
+                if(utilsIsObjectNullOrUndefined(aoProcessesRunning) == true) return;
+
                 var iTotalProcessesNumber = aoProcessesRunning.length;
 
-                // get the number of active processes
-                if(utilsIsObjectNullOrUndefined(aoProcessesRunning) == false) {
+                // get the number of active and waiting processes
+                var iActiveCount = 0;
+                var iWaitingCount = 0;
+                aoProcessesRunning.forEach(function (oProcess) {
+                    if (oProcess.status == "RUNNING") {
+                        iActiveCount++;
+                    }
+                    else if (oProcess.status == "CREATED") {
+                        iWaitingCount++;
+                    }
+                });
 
-                    var iActiveCount = 0;
+                // Set the number of running processes
+                $scope.m_oController.m_iNumberOfProcesses = iActiveCount;
+                $scope.m_oController.m_iWaitingProcesses = iWaitingCount;
 
-                    aoProcessesRunning.forEach(function (oProcess) {
-                        if (oProcess.status == "RUNNING" || oProcess.status == "CREATED") {
-                            iActiveCount++;
-                        }
-                    });
+                //FIND LAST RUNNING PROCESSES
+                var oLastProcessRunning = null;
 
-                    $scope.m_oController.m_iNumberOfProcesses = iActiveCount;
-                }
-
-                $scope.m_oController.m_oLastProcesses = null;
-
-                //FIND LAST PROCESSES
-                if(utilsIsObjectNullOrUndefined(aoProcessesRunning) == false) {
-
-                    if (aoProcessesRunning.length>0) {
-                        if (aoProcessesRunning[iTotalProcessesNumber-1].status === "CREATED" || aoProcessesRunning[iTotalProcessesNumber-1].status === "RUNNING") {
-                            $scope.m_oController.m_oLastProcesses = aoProcessesRunning[iTotalProcessesNumber-1];
-                        }
+                // Search the last one that is in running state
+                for( var  iIndexNewProcess= 0; iIndexNewProcess < iTotalProcessesNumber; iIndexNewProcess++) {
+                    if (aoProcessesRunning[iIndexNewProcess].status === "RUNNING") {
+                        oLastProcessRunning = aoProcessesRunning[iIndexNewProcess];
                     }
                 }
+
+                // Set the variable: it will be null if there aren't running processes or the last one otherwise
+                $scope.m_oController.m_oLastProcesses = oLastProcessRunning;
 
                 // Initialize the time counter for new processes
                 for( var  iIndexNewProcess= 0; iIndexNewProcess < iTotalProcessesNumber; iIndexNewProcess++)
