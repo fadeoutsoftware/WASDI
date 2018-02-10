@@ -219,6 +219,52 @@ public abstract class QueryExecutor {
 		return aoResults;
 	}
 	
+	protected ArrayList<QueryResultViewModel> buildResultLightViewModel(Document<Feed> oDocument, AbderaClient oClient, RequestOptions oOptions) {
+		
+		Feed oFeed = (Feed) oDocument.getRoot();
+
+		ArrayList<QueryResultViewModel> aoResults = new ArrayList<QueryResultViewModel>();
+		
+		for (Entry oEntry : oFeed.getEntries()) {
+
+			QueryResultViewModel oResult = new QueryResultViewModel();
+			oResult.setProvider(m_sProvider);
+			
+			//retrive the title
+			oResult.setTitle(oEntry.getTitle());			
+			
+			//retrive the summary
+			oResult.setSummary(oEntry.getSummary());
+			
+			//retrieve the id
+			oResult.setId(oEntry.getId().toString());
+			
+			//retrieve the link
+			Link oLink = oEntry.getAlternateLink();
+			if (oLink != null)oResult.setLink(oLink.getHref().toString());
+			
+			//retrieve the footprint and all others properties
+			List<Element> aoElements = oEntry.getElements();
+			for (Element element : aoElements) {
+				String sName = element.getAttributeValue("name");
+				if (sName != null) {
+					if (sName.equals("footprint")) {
+						oResult.setFootprint(element.getText());
+					} else {
+						oResult.getProperties().put(sName, element.getText());
+					}
+				}
+			}
+			
+			oResult.setPreview(null);
+			
+			aoResults.add(oResult);
+		} 
+
+		System.out.println("Search Done: found " + aoResults.size() + " results");
+
+		return aoResults;
+	}
 	
 	public int executeCount(String sQuery) throws IOException {
 		
@@ -263,8 +309,7 @@ public abstract class QueryExecutor {
 		return Integer.parseInt(response.toString());
 	}
 	
-	public ArrayList<QueryResultViewModel> execute(String sQuery) throws IOException {
-		
+	public ArrayList<QueryResultViewModel> execute(String sQuery, boolean bFullViewModel) throws IOException {
 		String sUrl = buildUrl(sQuery);
 		
 		//create abdera client
@@ -327,7 +372,12 @@ public abstract class QueryExecutor {
 			return null;
 		}
 		
-		return buildResultViewModel(oDocument, oClient, oOptions);
+		if (bFullViewModel) return buildResultViewModel(oDocument, oClient, oOptions);
+		else return buildResultLightViewModel(oDocument, oClient, oOptions);
+	}
+	
+	public ArrayList<QueryResultViewModel> execute(String sQuery) throws IOException {
+		return execute(sQuery,true);
 	}
 
 	
