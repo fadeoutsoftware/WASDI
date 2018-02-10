@@ -207,8 +207,7 @@ var CatalogController = (function() {
         };
 
         var sFileName = oEntry.fileName;
-
-       this.m_oCatalogService.downloadEntry(oJson).success(function (data, status, headers, config) {
+        this.m_oCatalogService.downloadEntry(oJson).success(function (data, status, headers, config) {
             if(utilsIsObjectNullOrUndefined(data) == false)
             {
                 //var FileSaver = require('file-saver');

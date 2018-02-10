@@ -13,31 +13,36 @@ service('OpenSearchService', ['$http',  'ConstantsService', function ($http, oCo
     this.API_GET_PRODUCTS = "/search/sentinel/result?sQuery=";
     this.API_GET_PROVIDERS = "/search/providers";
     this.API_GET_SEARCH = "/search/query?sQuery=";
+    this.API_GET_SEARCHLIST = "/search/querylist?sQuery=";
 
     //-------------------------------------
 
     this.getApiProductsCount = function (query) {
         return this.APIURL + this.API_GET_PRODUCTS_COUNT + query;
-        //return "fake-data/products_count.json";
-    }
+    };
 
     this.getApiProducts = function (query) {
         return this.APIURL + this.API_GET_PRODUCTS + query;
-        //return "http://localhost:8080/wasdiwebserver/rest/" + this.API_GET_PRODUCTS + query;
-        //return "fake-data/feed.json";
-        //return "fake-data/opensearch_fakeData.json";
-    }
+    };
 
     this.getApiProductsWithProviders = function (query) {
         return this.APIURL + this.API_GET_SEARCH + query;
-        //return "http://localhost:8080/wasdiwebserver/rest/" + this.API_GET_PRODUCTS + query;
-        //return "fake-data/feed.json";
-        //return "fake-data/opensearch_fakeData.json";
     };
+
+    this.getApiProductsListWithProviders = function (query) {
+        return this.APIURL + this.API_GET_SEARCHLIST + query;
+    };
+
     this.getApiProductCountWithProviders = function(sQueryInput,sProvidersInput)
     {
         return this.APIURL + '/search/query/count?sQuery=' + sQueryInput +"&providers="+sProvidersInput;
     };
+
+    this.getApiProductListCountWithProviders = function(sQueryInput,sProvidersInput)
+    {
+        return this.APIURL + '/search/query/countlist?sQuery=' + sQueryInput +"&providers="+sProvidersInput;
+    };
+
     this.getListOfProvider = function()
     {
         return this.m_oHttp.get(this.APIURL + this.API_GET_PROVIDERS);

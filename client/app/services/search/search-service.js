@@ -90,7 +90,7 @@ angular
                 return query;
             },
             createSearchRequest: function (filter, offset, limit,providers) {
-                var searchUrl = ":filter&offset=:offset&limit=:limit&providers=:providers"
+                var searchUrl = ":filter&offset=:offset&limit=:limit&providers=:providers";
                 searchUrl = searchUrl.replace(":filter", (filter) ? filter : '*');
                 searchUrl = searchUrl.replace(":offset", (offset) ? offset : '0');
                 searchUrl = searchUrl.replace(":limit", (limit) ? limit : '10');
@@ -137,6 +137,59 @@ angular
                     url: OpenSearchService.getApiProductsWithProviders(self.createSearchRequest(filter, self.offset, self.limit,self.providers)),
                     method: "GET"
                 });
+            },
+            /**
+             * Light version of search for multi-periods and long result list
+             * @param asTimeQueries Array of string of time filters to apply
+             * @returns {*}
+             */
+            searchList: function (asTimeQueries) {
+
+                if (utilsIsObjectNullOrUndefined(asTimeQueries)) asTimeQueries = [];
+                // Auto reference
+                var self = this;
+                // Array of filters to pass to the server
+                var asFilters = [];
+
+                // If there aren't advanced periods
+                if (asTimeQueries.length==0) {
+                    // Use standard dates
+                    var filter = self.createSearchFilter(self.textQuery, self.geoselection, self.advancedFilter, self.missionFilter);
+                    asFilters.push(filter);
+                }
+                else {
+                    // Put all the time filters in the array
+                    for (var iPeriods = 0; iPeriods<asTimeQueries.length; iPeriods++) {
+                        var filter = self.createSearchFilter(self.textQuery, self.geoselection, asTimeQueries[iPeriods], self.missionFilter);
+                        asFilters.push(filter);
+                    }
+                }
+
+                // Call the API with the list of queries
+                return $http.post(OpenSearchService.getApiProductsListWithProviders(self.createSearchRequest(filter, self.offset, self.limit,self.providers)), asFilters);
+            },
+            getProductsListCount: function (asTimeQueries) {
+
+                if (utilsIsObjectNullOrUndefined(asTimeQueries)) asTimeQueries = [];
+                // Auto reference
+                var self = this;
+                // Array of filters to pass to the server
+                var asFilters = [];
+
+                // If there aren't advanced periods
+                if (asTimeQueries.length==0) {
+                    // Use standard dates
+                    var filter = self.createSearchFilter(self.textQuery, self.geoselection, self.advancedFilter, self.missionFilter);
+                    asFilters.push(filter);
+                }
+                else {
+                    // Put all the time filters in the array
+                    for (var iPeriods = 0; iPeriods<asTimeQueries.length; iPeriods++) {
+                        var filter = self.createSearchFilter(self.textQuery, self.geoselection, asTimeQueries[iPeriods], self.missionFilter);
+                        asFilters.push(filter);
+                    }
+                }
+                return $http.post(OpenSearchService.getApiProductListCountWithProviders("*",this.providers), asFilters);
             },
             gotoPage: function (pageNumber) {
                 this.setOffset((pageNumber * this.limit) - this.limit);

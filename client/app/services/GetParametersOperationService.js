@@ -11,7 +11,7 @@ angular.module('wasdi.GetParametersOperationService', ['wasdi.GetParametersOpera
 service('GetParametersOperationService', ['$http',  'ConstantsService', function ($http, oConstantsService) {
     this.APIURL = oConstantsService.getAPIURL();
     this.m_oHttp = $http;
-    this.URLGET = "/processing/parameters?sOperation="
+    this.URLGET = "/processing/parameters?sOperation=";
 
     this.getParametersMultilooking = function () {
         //MULTILOOKING

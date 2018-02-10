@@ -43,7 +43,8 @@ var WorkspaceController = (function() {
 
 
         this.m_oUpdatePositionSatellite = $interval(function () {
-            $scope.m_oController.updatePositionsSatellites();
+            console.log("Update Sat Position")
+            //$scope.m_oController.updatePositionsSatellites();
         }, 5000);
 
         /*
