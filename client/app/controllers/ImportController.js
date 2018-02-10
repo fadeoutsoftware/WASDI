@@ -29,7 +29,6 @@ var ImportController = (function() {
         this.m_oOpenSearchService = oOpenSearchService;
         this.m_oPageService = oPageservice;
 
-        // this.m_aiYears=[];//default years
         // Self link for the scope
         this.m_oScope.m_oController = this;
 
@@ -75,17 +74,16 @@ var ImportController = (function() {
         this.m_oDetails = {};
         this.m_oDetails.productIds = [];
         this.m_oScope.selectedAll = false;
-        //this.m_sFilter='';
-        // P.Campanella Sembra non usato
-        //this.m_aoProducts = [];
-        //this.m_oScope.currentPage = 1;
         this.m_oConfiguration = null;
         this.m_bisVisibleLocalStorageInputs = false;
         this.m_oStatus = {
             opened: false
         };
         this.m_bIsOpen=true;
+        // Flag to know if we are in the result page (true) or in the filter page (false)
         this.m_bIsVisibleListOfLayers = false;
+        // Flag to know if we are in a Paginated Search (true) or full list search (false)
+        this.m_bIsPaginatedList = true;
 
         this.m_oMapService.initMapWithDrawSearch('wasdiMapImport');
         this.m_oMapService.initGeoSearchPluginForOpenStreetMap();
@@ -356,21 +354,21 @@ var ImportController = (function() {
      */
     ImportController.prototype.getMissions= function() {
         return this.m_aoMissions;
-    }
+    };
 
     /**
      * Open Navigation Bar
      */
     ImportController.prototype.openNav= function() {
         document.getElementById("mySidenav").style.width = "30%";
-    }
+    };
 
     /**
      * Close Navigation Bar
      */
     ImportController.prototype.closeNav=function() {
         document.getElementById("mySidenav").style.width = "0";
-    }
+    };
 
     //ALTERNATIVE METHODS
     ImportController.prototype.openCloseNav=function()
@@ -407,20 +405,78 @@ var ImportController = (function() {
 
     };
 
+
+    ImportController.prototype.getAdvancedDateFilterQuery = function(searchFilter){
+
+        var sFilter='';
+
+        if (utilsIsObjectNullOrUndefined(searchFilter)) return sFilter;
+
+        if(!utilsIsObjectNullOrUndefined(searchFilter.sensingPeriodFrom) && !utilsIsObjectNullOrUndefined(searchFilter.sensingPeriodTo))
+        {
+            sFilter += '( beginPosition:['+ this.m_oAdvancedSearchService.formatDateFrom_(searchFilter.sensingPeriodFrom) +
+                ' TO ' + this.m_oAdvancedSearchService.formatToDate(searchFilter.sensingPeriodTo) + '] AND endPosition:[' +
+                this.m_oAdvancedSearchService.formatDateFrom_(searchFilter.sensingPeriodFrom) + ' TO ' + this.m_oAdvancedSearchService.formatDateTo_(searchFilter.sensingPeriodTo) + '] )';
+        }
+        else if (!utilsIsObjectNullOrUndefined(searchFilter.sensingPeriodFrom))
+        {
+            sFilter += '( beginPosition:['+ this.m_oAdvancedSearchService.formatDateFrom_(searchFilter.sensingPeriodFrom) +
+                ' TO NOW] AND endPosition:[' + this.m_oAdvancedSearchService.formatDateFrom_(searchFilter.sensingPeriodFrom) + ' TO NOW] )';
+        }
+        else if(!utilsIsObjectNullOrUndefined(searchFilter.sensingPeriodTo))
+        {
+            sFilter += '( beginPosition:[ * TO ' + this.m_oAdvancedSearchService.formatDateTo_(searchFilter.sensingPeriodTo) + '] AND endPosition:[* TO ' + this.m_oAdvancedSearchService.formatToDate(searchfilter.sensingPeriodTo) + ' ] )';
+        }
+        if(!utilsIsObjectNullOrUndefined(searchFilter.ingestionFrom) && !utilsIsObjectNullOrUndefined(searchFilter.ingestionTo))
+        {
+            sFilter += ((sFilter)?' AND':'') + '( ingestionDate:['+ this.m_oAdvancedSearchService.formatDateFrom_(searchFilter.ingestionFrom) +
+                ' TO ' + this.m_oAdvancedSearchService.formatDateTo_(searchFilter.ingestionTo) + ' ] )';
+        }
+        else if (!utilsIsObjectNullOrUndefined(searchFilter.ingestionFrom))
+        {
+            sFilter += ((sFilter)?' AND':'') + '( ingestionDate:['+ this.m_oAdvancedSearchService.formatDateFrom_(searchFilter.ingestionFrom) +' TO NOW] )';
+        }
+        else if(!utilsIsObjectNullOrUndefined(searchFilter.ingestionTo))
+        {
+            sFilter += ((sFilter)?' AND':'') + '( ingestionDate:[ * TO ' + this.m_oAdvancedSearchService.formatDateTo_(searchFilter.ingestionTo) + ' ] )';
+        }
+
+        return sFilter;
+    };
+
+
     ImportController.prototype.updateAdvancedSearch = function(){
         //console.log('called updatefilter advancedFilter');
+
+        var oAdvancedSensingFrom = null;
+        if (!utilsIsObjectNullOrUndefined(this.m_oModel.sensingPeriodFrom) && this.m_oModel.sensingPeriodFrom!=="") {
+            oAdvancedSensingFrom = this.m_fUtcDateConverter(this.m_oModel.sensingPeriodFrom);
+        }
+        var oAdvancedSensingTo = null;
+        if (!utilsIsObjectNullOrUndefined(this.m_oModel.sensingPeriodTo) && this.m_oModel.sensingPeriodTo !=="") {
+            oAdvancedSensingTo = this.m_fUtcDateConverter(this.m_oModel.sensingPeriodTo);
+        }
+        var oAdvancedIngestionFrom = null;
+        if (!utilsIsObjectNullOrUndefined(this.m_oModel.ingestionFrom) && this.m_oModel.ingestionFrom !== "") {
+            oAdvancedIngestionFrom = this.m_fUtcDateConverter(this.m_oModel.ingestionFrom);
+        }
+        var oAdvancedIngestionTo = null;
+        if (!utilsIsObjectNullOrUndefined(this.m_oModel.ingestionTo) && this.m_oModel.ingestionTo !== "") {
+            oAdvancedIngestionTo = this.m_fUtcDateConverter(this.m_oModel.ingestionTo);
+        }
+
         var advancedFilter = {
-            sensingPeriodFrom : this.m_fUtcDateConverter(this.m_oModel.sensingPeriodFrom),
-            sensingPeriodTo: this.m_fUtcDateConverter(this.m_oModel.sensingPeriodTo),
-            ingestionFrom: this.m_fUtcDateConverter(this.m_oModel.ingestionFrom),
-            ingestionTo: this.m_fUtcDateConverter(this.m_oModel.ingestionTo)
+            sensingPeriodFrom : oAdvancedSensingFrom,
+            sensingPeriodTo: oAdvancedSensingTo,
+            ingestionFrom: oAdvancedIngestionFrom,
+            ingestionTo: oAdvancedIngestionTo
         };
 
+        var sFilterQuery = this.getAdvancedDateFilterQuery(advancedFilter);
 
         // update advanced filter for save search
-        this.m_oAdvancedSearchService.setAdvancedSearchFilter(advancedFilter, this.m_oModel);
-        this.m_oSearchService.setAdvancedFilter(this.m_oAdvancedSearchService.getAdvancedSearchFilter());
-
+        //this.m_oAdvancedSearchService.setAdvancedSearchFilter(advancedFilter, this.m_oModel);
+        this.m_oSearchService.setAdvancedFilter(sFilterQuery); //this.m_oAdvancedSearchService.getAdvancedSearchFilter()
 
     };
 
@@ -449,10 +505,10 @@ var ImportController = (function() {
         }
 
     };
+
     ImportController.prototype.searchAllSelectedProviders = function()
     {
-        if( (this.thereIsAtLeastOneProvider() === false) || (this.m_bIsVisibleListOfLayers || this.m_bisVisibleLocalStorageInputs))
-            return false;
+        if( (this.thereIsAtLeastOneProvider() === false) || (this.m_bIsVisibleListOfLayers || this.m_bisVisibleLocalStorageInputs)) return false;
         var iNumberOfProviders = this.m_aListOfProvider.length;
 
         for(var iIndexProvider = 0 ; iIndexProvider < iNumberOfProviders; iIndexProvider++)
@@ -468,26 +524,27 @@ var ImportController = (function() {
     ImportController.prototype.search = function(oProvider, oThat)
     {
 
-        if(utilsIsObjectNullOrUndefined(oThat) === true)
+        var oController = this;
+
+        if(utilsIsObjectNullOrUndefined(oThat) === false)
         {
-            var oController = this;
-        }
-        else
-        {
-            var oController = oThat;
+            oController = oThat;
         }
 
         if(oController.thereIsAtLeastOneProvider() === false) return false;
         if(utilsIsObjectNullOrUndefined(oProvider) === true) return false;
 
         oController.m_bClearFiltersEnabled = false;
-        oController.deleteLayers(oProvider.name);/*delete layers and relatives rectangles in map*/
-        oController.m_bIsVisibleListOfLayers = true;//hide previously results
+        //delete layers and relatives rectangles in map
+        oController.deleteLayers(oProvider.name);
+        //hide previous results
+        oController.m_bIsVisibleListOfLayers = true;
+        oController.m_bIsPaginatedList = true;
         oController.m_oSearchService.setTextQuery(oController.m_oModel.textQuery);
         oController.m_oSearchService.setGeoselection(oController.m_oModel.geoselection);
         var aoProviders = [];
         aoProviders.push(oProvider);
-        oController.m_oSearchService.setProviders(aoProviders);//this.m_aListOfProvider
+        oController.m_oSearchService.setProviders(aoProviders);
 
         var oProvider = oController.m_oPageService.getProviderObject(oProvider.name);
         var iOffset = oController.m_oPageService.calcOffset(oProvider.name);
@@ -506,12 +563,9 @@ var ImportController = (function() {
                             //calc number of pages
                             var remainder = oProvider.totalOfProducts % oProvider.productsPerPageSelected;
                             oProvider.totalPages =  Math.floor(oProvider.totalOfProducts / oProvider.productsPerPageSelected);
-                            if(remainder !== 0)
-                                oProvider.totalPages += 1;
+                            if(remainder !== 0) oProvider.totalPages += 1;
                         }
-
                     }
-
                 }, function errorCallback(response) {
                     console.log("Impossible get products number");
                 });
@@ -546,6 +600,134 @@ var ImportController = (function() {
 
     };
 
+
+
+    ImportController.prototype.searchListAllSelectedProviders = function()
+    {
+        if( (this.thereIsAtLeastOneProvider() === false) || (this.m_bIsVisibleListOfLayers || this.m_bisVisibleLocalStorageInputs)) return false;
+        var iNumberOfProviders = this.m_aListOfProvider.length;
+
+        for(var iIndexProvider = 0 ; iIndexProvider < iNumberOfProviders; iIndexProvider++)
+        {
+            if(this.m_aListOfProvider[iIndexProvider].selected === true)
+            {
+                this.searchList(this.m_aListOfProvider[iIndexProvider]);
+            }
+        }
+        return true;
+    };
+
+    /**
+     * Executes a not-paginated query for a multi period search
+     * @param oProvider
+     * @param oThat
+     * @returns {boolean}
+     */
+    ImportController.prototype.searchList = function(oProvider, oThat)
+    {
+        // Take reference to the controller
+        var oController = this;
+
+        if(utilsIsObjectNullOrUndefined(oThat) === false)
+        {
+            oController = oThat;
+        }
+
+        // Check input data
+        if(oController.thereIsAtLeastOneProvider() === false) return false;
+        if(utilsIsObjectNullOrUndefined(oProvider) === true) return false;
+
+        oController.m_bClearFiltersEnabled = false;
+        //delete layers and relatives rectangles in map
+        oController.deleteLayers(oProvider.name);
+        //hide previous results
+        oController.m_bIsVisibleListOfLayers = true;
+        oController.m_bIsPaginatedList = false;
+        oController.m_oSearchService.setTextQuery(oController.m_oModel.textQuery);
+        oController.m_oSearchService.setGeoselection(oController.m_oModel.geoselection);
+        var aoProviders = [];
+        aoProviders.push(oProvider);
+        oController.m_oSearchService.setProviders(aoProviders);
+
+        // Pagination Info: should be refactored, not needed in the list version
+        var oProvider = oController.m_oPageService.getProviderObject(oProvider.name);
+        var iOffset = oController.m_oPageService.calcOffset(oProvider.name);
+        oController.m_oSearchService.setOffset(iOffset);//default 0 (index page)
+        oController.m_oSearchService.setLimit(oProvider.productsPerPageSelected);// default 10 (total of element per page)
+        oProvider.isLoaded = false;
+
+        // Generation of different time filters
+        var asTimePeriodsFilters = [];
+
+        // For each saved period
+        for (var iPeriods = 0; iPeriods<this.m_oAdvanceFilter.savedData.length; iPeriods++) {
+
+            // Prepare input data for date conversion
+            var oAdvancedSensingFrom = null;
+            if (!utilsIsObjectNullOrUndefined(this.m_oAdvanceFilter.savedData[iPeriods].data.dateSensingPeriodFrom) && this.m_oAdvanceFilter.savedData[iPeriods].data.dateSensingPeriodFrom!=="") {
+                oAdvancedSensingFrom = this.m_fUtcDateConverter(this.m_oAdvanceFilter.savedData[iPeriods].data.dateSensingPeriodFrom);
+            }
+            var oAdvancedSensingTo = null;
+            if (!utilsIsObjectNullOrUndefined(this.m_oAdvanceFilter.savedData[iPeriods].data.dateSensingPeriodTo) && this.m_oAdvanceFilter.savedData[iPeriods].data.dateSensingPeriodTo !=="") {
+                oAdvancedSensingTo = this.m_fUtcDateConverter(this.m_oAdvanceFilter.savedData[iPeriods].data.dateSensingPeriodTo);
+            }
+            var oAdvancedIngestionFrom = null;
+            var oAdvancedIngestionTo = null;
+
+            var advancedFilter = {
+                sensingPeriodFrom : oAdvancedSensingFrom,
+                sensingPeriodTo: oAdvancedSensingTo,
+                ingestionFrom: oAdvancedIngestionFrom,
+                ingestionTo: oAdvancedIngestionTo
+            };
+
+            // Get the time filter object
+            var sTimeFilter = this.getAdvancedDateFilterQuery(advancedFilter);
+            // Push it to the queries list
+            asTimePeriodsFilters.push(sTimeFilter);
+        }
+
+        // Call the complete Get Product Count for all the queries of this provider
+        oController.m_oSearchService.getProductsListCount(asTimePeriodsFilters).then(
+            function(result)
+            {
+                if(result)
+                {
+                    if(utilsIsObjectNullOrUndefined(result.data) === false )
+                    {
+                        oProvider.totalOfProducts = result.data;
+                        //calc number of pages
+                        var remainder = oProvider.totalOfProducts % oProvider.productsPerPageSelected;
+                        oProvider.totalPages =  Math.floor(oProvider.totalOfProducts / oProvider.productsPerPageSelected);
+                        if(remainder !== 0) oProvider.totalPages += 1;
+                    }
+                }
+            }, function errorCallback(response) {
+                console.log("Impossible get products number");
+            });
+
+
+        // Call the complete Search for all the queries of this provider
+        oController.m_oSearchService.searchList(asTimePeriodsFilters).then(function(result){
+            var sResults = result;
+
+            if(!utilsIsObjectNullOrUndefined(sResults))
+            {
+                if (!utilsIsObjectNullOrUndefined(sResults.data) && sResults.data != "" ) {
+                    var aoData = sResults.data;
+                    oController.generateLayersList(aoData)//.feed;
+                }
+
+                oProvider.isLoaded = true;
+            }
+        }, function errorCallback(response) {
+            utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN OPEN SEARCH REQUEST...");
+            oController.m_bIsVisibleListOfLayers = false;//visualize filter list
+            oController.m_oResultsOfSearchService.setIsVisibleListOfProducts(oController.m_bIsVisibleListOfLayers );
+        });
+
+
+    };
 
 
     //+++++++++++++++++++++++++++++++++++++++++++++++++
@@ -708,14 +890,12 @@ var ImportController = (function() {
 
             oController.m_aoProductsList.push(aData[iIndexData]);
         }
-
-
-    }
+    };
 
     /*GetRelativeOrbit*/
     ImportController.prototype.getRelativeOrbit = function (aArrayInput) {
-        if(utilsIsObjectNullOrUndefined(aArrayInput) === true)
-            return null;
+
+        if(utilsIsObjectNullOrUndefined(aArrayInput) === true) return null;
         var iLengthArray = aArrayInput.length;
 
         for(var iIndexArray = 0 ; iIndexArray < iLengthArray; iIndexArray++)
@@ -728,7 +908,7 @@ var ImportController = (function() {
 
         }
         return null;
-    }
+    };
 
     /*Get Download link */
     ImportController.prototype.getDownloadLink = function(oLayer)
@@ -748,8 +928,8 @@ var ImportController = (function() {
             }
         }
             return null;
+    };
 
-    }
     /*
     * Get preview in layer
     * If method return null somethings doesn't works
@@ -757,17 +937,17 @@ var ImportController = (function() {
     * */
     ImportController.prototype.getPreviewLayer = function(oLayer)
     {
-        if(utilsIsObjectNullOrUndefined(oLayer))
-            return null;
-        if(utilsIsObjectNullOrUndefined(oLayer.link))
-            return null;
+        if(utilsIsObjectNullOrUndefined(oLayer)) return null;
+        if(utilsIsObjectNullOrUndefined(oLayer.link)) return null;
         var iLinkLength = oLayer.link.length;
 
         for(var iIndex = 0; iIndex < iLinkLength; iIndex++)
         {
-            if(oLayer.link[iIndex].rel == "icon")
-                if( (!utilsIsObjectNullOrUndefined(oLayer.link[iIndex].image) ) && ( !utilsIsObjectNullOrUndefined(oLayer.link[iIndex].image.content) ) )
+            if(oLayer.link[iIndex].rel == "icon"){
+                if( (!utilsIsObjectNullOrUndefined(oLayer.link[iIndex].image) ) && ( !utilsIsObjectNullOrUndefined(oLayer.link[iIndex].image.content) ) ){
                     return oLayer.link[iIndex].image.content;
+                }
+            }
         }
         return null;
     }
@@ -832,7 +1012,7 @@ var ImportController = (function() {
         }
 
         return aasNewContent;
-    }
+    };
 
 
     /* CONVERT POLYGON FORMAT TO BOUND FORMAT */
@@ -863,21 +1043,21 @@ var ImportController = (function() {
             aasNewContent.push(oLatLonArray);
         }
         return aasNewContent;
-    }
+    };
 
     /*
         Usually the summary format is a string = "date:...,instrument:...,mode:...,satellite:...,size:...";
      */
     ImportController.prototype.stringToObjectSummary = function(sSummary)
     {
-        if(utilsIsObjectNullOrUndefined(sSummary))
-            return null;
-        if(utilsIsStrNullOrEmpty(sSummary))
-            return null;
+        if(utilsIsObjectNullOrUndefined(sSummary)) return null;
+        if(utilsIsStrNullOrEmpty(sSummary)) return null;
 
-        var aSplit = sSummary.split(",");//split summary
-        var oNewSummary = {Date:"",Instrument:"",Mode:"",Satellite:"",Size:""}//make object summary
-        var asSummary = ["Date","Instrument","Mode","Satellite","Size"]
+        //split summary
+        var aSplit = sSummary.split(",");
+        //make object summary
+        var oNewSummary = {Date:"",Instrument:"",Mode:"",Satellite:"",Size:""};
+        var asSummary = ["Date","Instrument","Mode","Satellite","Size"];
         var iSplitLength=aSplit.length;
         var iSummaryLength = asSummary.length;
 
@@ -899,7 +1079,8 @@ var ImportController = (function() {
         }
 
         return oNewSummary;
-    }
+    };
+
     /*********************** CHANGE CSS RECTANGLE (LEAFLET MAP) ****************************/
     /*
     *   Change style of rectangle when the mouse is over the layer (TABLE CASE)
@@ -912,7 +1093,8 @@ var ImportController = (function() {
             return false;
         }
         oRectangle.setStyle({weight:3,fillOpacity:0.7});
-    }
+    };
+
     /*
      *   Change style of rectangle when the mouse is leave the layer (TABLE CASE)
      * */
@@ -924,7 +1106,8 @@ var ImportController = (function() {
             return false;
         }
         oRectangle.setStyle({weight:1,fillOpacity:0.2});
-    }
+    };
+
     /************************************************************/
 
     /* the method take in input a rectangle, return the layer index Bound with rectangle
@@ -944,7 +1127,7 @@ var ImportController = (function() {
                 return iIndex; // I FIND IT !!
         }
         return -1;//the method doesn't find the Rectangle in LayersList.
-    }
+    };
 
     // Set bounds then call m_oMapService.zoomOnBounds(aaBounds)
     ImportController.prototype.zoomOnBounds = function(oRectangle)
@@ -961,25 +1144,21 @@ var ImportController = (function() {
         {
             var aaBounds = [[oNorthEast.lat,oNorthEast.lng],[oSouthWest.lat,oSouthWest.lng]];
             var oController = this;
-            if(oController.m_oMapService.zoomOnBounds(aaBounds) == false)
-                console.log("Error in zoom on bounds");
+            if(oController.m_oMapService.zoomOnBounds(aaBounds) == false) console.log("Error in zoom on bounds");
         }
-    }
+    };
 
     ImportController.prototype.isEmptyLayersList = function(){
-        if(utilsIsObjectNullOrUndefined(this.m_aoProductsList) )
-            return true;
-        if( this.m_aoProductsList.length == 0)
-            return true;
+        if(utilsIsObjectNullOrUndefined(this.m_aoProductsList) ) return true;
+        if( this.m_aoProductsList.length == 0) return true;
 
         return false;
-    }
+    };
 
     ImportController.prototype.deleteLayers = function(sProvider)
     {
         //check if layers list is empty
-        if(this.isEmptyLayersList())
-            return false;
+        if(this.isEmptyLayersList()) return false;
         var iLengthLayersList = this.m_aoProductsList.length;
         var oMap = this.m_oMapService.getMap();
         /* remove rectangle in map*/
@@ -1002,16 +1181,14 @@ var ImportController = (function() {
         //delete layers list
         //this.m_aoProductsList = [];
         return true;
-    }
+    };
 
 
     ImportController.prototype.infoLayer=function(oProduct)
     {
+        if(utilsIsObjectNullOrUndefined(oProduct)) return false;
 
-        if(utilsIsObjectNullOrUndefined(oProduct))
-            return false;
-
-        var oController = this
+        var oController = this;
         this.m_oModalService.showModal({
             templateUrl: "dialogs/product_info/ProductInfoDialog.html",
             controller: "ProductInfoController",
@@ -1026,7 +1203,7 @@ var ImportController = (function() {
         });
 
         return true;
-    }
+    };
 
     ImportController.prototype.receivedRabbitMessage  = function (oMessage, oController) {
 
@@ -1035,8 +1212,7 @@ var ImportController = (function() {
         if (oMessage.messageResult == "KO") {
 
             var sOperation = "null";
-            if (utilsIsStrNullOrEmpty(oMessage.messageCode) === false  )
-                sOperation = oMessage.messageCode;
+            if (utilsIsStrNullOrEmpty(oMessage.messageCode) === false) sOperation = oMessage.messageCode;
             var oDialog = utilsVexDialogAlertTop('GURU MEDITATION<br>THERE WAS AN ERROR IN THE ' + sOperation + ' PROCESS');
             utilsVexCloseDialogAfterFewSeconds(3000, oDialog);
             this.m_oProcessesLaunchedService.loadProcessesFromServer(this.m_oActiveWorkspace);
@@ -1048,7 +1224,6 @@ var ImportController = (function() {
             case "PUBLISH":
             case "PUBLISHBAND":
             case "UPDATEPROCESSES":
-                console.log("import switch case update process");
                 oController.m_oProcessesLaunchedService.loadProcessesFromServer(oController.m_oActiveWorkspace.workspaceId);
                 break;
             case "APPLYORBIT":
@@ -1066,8 +1241,7 @@ var ImportController = (function() {
         }
 
         utilsProjectShowRabbitMessageUserFeedBack(oMessage);
-
-    }
+    };
 
     ImportController.prototype.receivedNewProductMessage = function (oMessage, oController) {
         var oController = this;
@@ -1079,8 +1253,7 @@ var ImportController = (function() {
         utilsVexCloseDialogAfterFewSeconds(3000, oDialog);
 
         //this.m_oProcessesLaunchedService.loadProcessesFromServer(this.m_oActiveWorkspace.workspaceId);
-
-    }
+    };
 
     ImportController.prototype.openWorkspace = function (sWorkspaceId) {
 
@@ -1103,11 +1276,11 @@ var ImportController = (function() {
         }).error(function (data,status) {
             utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN OPEN WORKSPACE");
         });
-    }
+    };
+
     ImportController.prototype.loadOpenSearchParamsByResultsOfSearchServices = function(oController)
     {
-        if(utilsIsObjectNullOrUndefined(oController))
-            return false;
+        if(utilsIsObjectNullOrUndefined(oController)) return false;
 
         /*Load elements by Service if there was a previous search i load*/
         oController.m_oModel.textQuery = oController.m_oResultsOfSearchService.getTextQuery();
@@ -1126,8 +1299,7 @@ var ImportController = (function() {
 
         /* add rectangle in maps */
 
-        if(utilsIsObjectNullOrUndefined(oController.m_aoProductsList))
-            return true;
+        if(utilsIsObjectNullOrUndefined(oController.m_aoProductsList)) return true;
 
         var iNumberOfProducts = oController.m_aoProductsList.length;
 
@@ -1141,7 +1313,7 @@ var ImportController = (function() {
         }
 
         return true;
-    }
+    };
 
     ImportController.prototype.setPaginationVariables = function()
     {
@@ -1157,8 +1329,8 @@ var ImportController = (function() {
         this.m_oResultsOfSearchService.setProductsPerPageSelected(10);
         this.m_oResultsOfSearchService.setCurrentPage(1);
         this.m_oResultsOfSearchService.setTotalOfProducts(0);
+    };
 
-    }
     ImportController.prototype.isPossibleDoDownload = function(oLayer)
     {
         var bReturnValue = false;
@@ -1176,25 +1348,22 @@ var ImportController = (function() {
 
         }
         return bReturnValue;
-    }
+    };
 
     ImportController.prototype.visualizeLocalStorageInputs = function(bIsVisible)
     {
         this.m_bisVisibleLocalStorageInputs = !this.m_bisVisibleLocalStorageInputs;
-    }
+    };
 
     ImportController.prototype.loadProductsInLocalStorage = function()
     {
-        if(utilsIsObjectNullOrUndefined(this.m_oMergeSearch.period))
-            return false;
-        if(utilsIsString(this.m_oMergeSearch.period))
-            return false;
-        if(utilsIsObjectNullOrUndefined(this.m_oMergeSearch.period))
-            return false;
+        if(utilsIsObjectNullOrUndefined(this.m_oMergeSearch.period)) return false;
+        if(utilsIsString(this.m_oMergeSearch.period)) return false;
+        if(utilsIsObjectNullOrUndefined(this.m_oMergeSearch.period)) return false;
 
         //TODO HTTP REQUEST
         return true;
-    }
+    };
 
     ImportController.prototype.thereIsAtLeastOneProvider = function()
     {
@@ -1334,13 +1503,14 @@ var ImportController = (function() {
         var dateSensingPeriodTo = new Date();
         dateSensingPeriodFrom.setMonth(iMonthFrom);
         dateSensingPeriodFrom.setDate(iDayFrom);
-        dateSensingPeriodTo.setMonth(iMonthTo)
+        dateSensingPeriodTo.setMonth(iMonthTo);
         dateSensingPeriodTo.setDate(iDayTo);
         return{
             dateSensingPeriodFrom:dateSensingPeriodFrom,
             dateSensingPeriodTo:dateSensingPeriodTo
         }
-    }
+    };
+
     ImportController.prototype.getPeriodSpring = function()
     {
         return this.getPeriod(02,21,05,20)
@@ -1364,73 +1534,62 @@ var ImportController = (function() {
 
         switch(sSeason) {
             case "spring":
-                var oDataPeriod = this.getPeriodSpring();
-                if(utilsIsObjectNullOrUndefined(oDataPeriod) === false)
+                if(utilsIsObjectNullOrUndefined(this.m_oAdvanceFilter.selectedSeasonYears) === false)
                 {
-                    if(utilsIsObjectNullOrUndefined(this.m_oAdvanceFilter.selectedSeasonYears) === false)
+                    for(var iIndexYear = 0 ; iIndexYear < this.m_oAdvanceFilter.selectedSeasonYears.length; iIndexYear++ )
                     {
-                        for(var iIndexYear = 0 ; iIndexYear < this.m_oAdvanceFilter.selectedSeasonYears.length; iIndexYear++ )
-                        {
-                            oDataPeriod.dateSensingPeriodFrom.setYear(this.m_oAdvanceFilter.selectedSeasonYears[iIndexYear]);
-                            oDataPeriod.dateSensingPeriodTo.setYear(this.m_oAdvanceFilter.selectedSeasonYears[iIndexYear]);
-                            var sName = this.m_oAdvanceFilter.selectedSeasonYears[iIndexYear] + " Spring";
-                            this.saveDataInAdvanceFilter(sName, oDataPeriod);
-                        }
-
+                        var oDataPeriod = this.getPeriodSpring();
+                        oDataPeriod.dateSensingPeriodFrom.setYear(this.m_oAdvanceFilter.selectedSeasonYears[iIndexYear]);
+                        oDataPeriod.dateSensingPeriodTo.setYear(this.m_oAdvanceFilter.selectedSeasonYears[iIndexYear]);
+                        var sName = this.m_oAdvanceFilter.selectedSeasonYears[iIndexYear] + " Spring";
+                        this.saveDataInAdvanceFilter(sName, oDataPeriod);
                     }
 
                 }
+
                 break;
             case "summer":
-                var oDataPeriod = this.getPeriodSummer();
-                if(utilsIsObjectNullOrUndefined(oDataPeriod) === false)
+
+                if(utilsIsObjectNullOrUndefined(this.m_oAdvanceFilter.selectedSeasonYears) === false)
                 {
-                    if(utilsIsObjectNullOrUndefined(this.m_oAdvanceFilter.selectedSeasonYears) === false)
+                    for(var iIndexYear = 0 ; iIndexYear < this.m_oAdvanceFilter.selectedSeasonYears.length; iIndexYear++ )
                     {
-                        for(var iIndexYear = 0 ; iIndexYear < this.m_oAdvanceFilter.selectedSeasonYears.length; iIndexYear++ )
-                        {
-                            oDataPeriod.dateSensingPeriodFrom.setYear(this.m_oAdvanceFilter.selectedSeasonYears[iIndexYear]);
-                            oDataPeriod.dateSensingPeriodTo.setYear(this.m_oAdvanceFilter.selectedSeasonYears[iIndexYear]);
-                            var sName = this.m_oAdvanceFilter.selectedSeasonYears[iIndexYear] + " Summer";
-                            this.saveDataInAdvanceFilter(sName, oDataPeriod);
-                        }
+                        var oDataPeriod = this.getPeriodSummer();
+                        oDataPeriod.dateSensingPeriodFrom.setYear(this.m_oAdvanceFilter.selectedSeasonYears[iIndexYear]);
+                        oDataPeriod.dateSensingPeriodTo.setYear(this.m_oAdvanceFilter.selectedSeasonYears[iIndexYear]);
+                        var sName = this.m_oAdvanceFilter.selectedSeasonYears[iIndexYear] + " Summer";
+                        this.saveDataInAdvanceFilter(sName, oDataPeriod);
                     }
                 }
                 break;
             case "autumn":
-                var oDataPeriod = this.getPeriodAutumn();
-                if(utilsIsObjectNullOrUndefined(oDataPeriod) === false)
+                if(utilsIsObjectNullOrUndefined(this.m_oAdvanceFilter.selectedSeasonYears) === false)
                 {
-                    if(utilsIsObjectNullOrUndefined(this.m_oAdvanceFilter.selectedSeasonYears) === false)
+                    for(var iIndexYear = 0 ; iIndexYear < this.m_oAdvanceFilter.selectedSeasonYears.length; iIndexYear++ )
                     {
-                        for(var iIndexYear = 0 ; iIndexYear < this.m_oAdvanceFilter.selectedSeasonYears.length; iIndexYear++ )
-                        {
-                            oDataPeriod.dateSensingPeriodFrom.setYear(this.m_oAdvanceFilter.selectedSeasonYears[iIndexYear]);
-                            oDataPeriod.dateSensingPeriodTo.setYear(this.m_oAdvanceFilter.selectedSeasonYears[iIndexYear]);
-                            var sName = this.m_oAdvanceFilter.selectedSeasonYears[iIndexYear] + " Autumn";
-                            this.saveDataInAdvanceFilter(sName, oDataPeriod);
-                        }
+                        var oDataPeriod = this.getPeriodAutumn();
+                        oDataPeriod.dateSensingPeriodFrom.setYear(this.m_oAdvanceFilter.selectedSeasonYears[iIndexYear]);
+                        oDataPeriod.dateSensingPeriodTo.setYear(this.m_oAdvanceFilter.selectedSeasonYears[iIndexYear]);
+                        var sName = this.m_oAdvanceFilter.selectedSeasonYears[iIndexYear] + " Autumn";
+                        this.saveDataInAdvanceFilter(sName, oDataPeriod);
                     }
                 }
                 break;
             case "winter":
-                var oDataPeriod = this.getPeriodWinter();
-                if(utilsIsObjectNullOrUndefined(oDataPeriod) === false)
+                if(utilsIsObjectNullOrUndefined(this.m_oAdvanceFilter.selectedSeasonYears) === false)
                 {
-                    if(utilsIsObjectNullOrUndefined(this.m_oAdvanceFilter.selectedSeasonYears) === false)
+                    for(var iIndexYear = 0 ; iIndexYear < this.m_oAdvanceFilter.selectedSeasonYears.length; iIndexYear++ )
                     {
-                        for(var iIndexYear = 0 ; iIndexYear < this.m_oAdvanceFilter.selectedSeasonYears.length; iIndexYear++ )
-                        {
-                            oDataPeriod.dateSensingPeriodFrom.setYear(this.m_oAdvanceFilter.selectedSeasonYears[iIndexYear]);
-                            oDataPeriod.dateSensingPeriodTo.setYear(this.m_oAdvanceFilter.selectedSeasonYears[iIndexYear]);
-                            var sName = this.m_oAdvanceFilter.selectedSeasonYears[iIndexYear] + " Winter";
-                            this.saveDataInAdvanceFilter(sName, oDataPeriod);
-                        }
+                        var oDataPeriod = this.getPeriodWinter();
+                        // P.Campanella 10/02/2018: the winter start in yyyy and ends in yyyy+1. Or viceversa yyyy-1 to yyyyy
+                        oDataPeriod.dateSensingPeriodFrom.setYear(this.m_oAdvanceFilter.selectedSeasonYears[iIndexYear]-1);
+                        oDataPeriod.dateSensingPeriodTo.setYear(this.m_oAdvanceFilter.selectedSeasonYears[iIndexYear]);
+                        var sName = this.m_oAdvanceFilter.selectedSeasonYears[iIndexYear] + " Winter";
+                        this.saveDataInAdvanceFilter(sName, oDataPeriod);
                     }
                 }
                 break;
         }
-
     };
 
     ImportController.prototype.saveDataInAdvanceFilter = function(sName,oData)
@@ -1571,7 +1730,7 @@ var ImportController = (function() {
                 break;
 
         }
-    }
+    };
 
     ImportController.prototype.getMonthDaysFromRangeOfMonths = function(sMonth, asYears)
     {
@@ -1598,10 +1757,10 @@ var ImportController = (function() {
         }
         return utilsGenerateArrayWithFirstNIntValue(iReturnValue);
         //check leap year
-    }
+    };
     ImportController.prototype.getMonthDaysFrom = function(){
         return this.getMonthDaysFromRangeOfMonths(this.m_oAdvanceFilter.selectedMonthFrom, this.m_oAdvanceFilter.selectedYears)
-    }
+    };
     ImportController.prototype.getMonthDaysTo = function(){
         return this.getMonthDaysFromRangeOfMonths(this.m_oAdvanceFilter.selectedMonthTo, this.m_oAdvanceFilter.selectedYears)
     };
@@ -1614,15 +1773,14 @@ var ImportController = (function() {
     };
 
     ImportController.prototype.addFilterDataFromTo = function(){
-        if(utilsIsObjectNullOrUndefined(this.m_oAdvanceFilter.selectedYears) === true )
-            return false;
+        if(utilsIsObjectNullOrUndefined(this.m_oAdvanceFilter.selectedYears) === true ) return false;
         var iNumberOfSelectedYears = this.m_oAdvanceFilter.selectedYears.length;
         for(var iIndexYear = 0; iIndexYear < iNumberOfSelectedYears; iIndexYear++ )
         {
             var sName="";
             sName +=   this.m_oAdvanceFilter.selectedDayFrom.toString() + "/" + this.m_oAdvanceFilter.selectedMonthFrom.toString();
             sName +=  " - " +this.m_oAdvanceFilter.selectedDayTo.toString() + "/" + this.m_oAdvanceFilter.selectedMonthTo.toString();
-            sName += " " + this.m_oAdvanceFilter.selectedYears[iIndexYear].toString()
+            sName += " " + this.m_oAdvanceFilter.selectedYears[iIndexYear].toString();
 
             var dateSensingPeriodFrom = new Date();
             var dateSensingPeriodTo = new Date();
@@ -1652,7 +1810,7 @@ var ImportController = (function() {
                 return 0;
                 break;
             case "february":
-                return 1
+                return 1;
                 break;
             case "march":
                 return 2;
@@ -1687,7 +1845,7 @@ var ImportController = (function() {
 
         }
         return -1;
-    }
+    };
 
     /**
      *
@@ -1738,7 +1896,8 @@ var ImportController = (function() {
         this.m_oAdvanceFilter.selectedYearsSearchForMonths = [];
         this.m_oAdvanceFilter.selectedMonthsSearchForMonths = [];
 
-    }
+    };
+
     //TODO THINK ABOUT CHANGE API BECAUSE THE REQUEST NEED TO SENDS N DATAS
     // ImportController.prototype.setDataToSend = function(dateSensingPeriodFrom,dateSensingPeriodTo){
     //     if(utilsIsObjectNullOrUndefined(dateSensingPeriodFrom) === true || utilsIsObjectNullOrUndefined(dateSensingPeriodTo))

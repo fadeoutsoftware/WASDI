@@ -102,14 +102,16 @@ var EditorController = (function () {
                 this.m_oState.go("root.workspaces");
             }
         }
+        else {
+            // Load Processes
+            this.m_oProcessesLaunchedService.loadProcessesFromServer(this.m_oActiveWorkspace.workspaceId);
+        }
 
-        // Load Processes
-        this.m_oProcessesLaunchedService.loadProcessesFromServer(this.m_oActiveWorkspace.workspaceId);
         // Load products
         this.getProductListByWorkspace();
 
         // Subscribe Rabbit
-        if (this.m_oRabbitStompService.isSubscrbed() == false) {
+        if (this.m_oRabbitStompService.isSubscrbed() == false && !utilsIsObjectNullOrUndefined(this.m_oActiveWorkspace)) {
             this.m_oRabbitStompService.subscribe(this.m_oActiveWorkspace.workspaceId);
         }
 
@@ -289,8 +291,7 @@ var EditorController = (function () {
             for (var iIndexLayer = 0; iIndexLayer < this.m_aoVisibleBands.length; iIndexLayer++) {
 
                 //check if the layer has the layer Id
-                if (!utilsIsObjectNullOrUndefined(this.m_aoVisibleBands[iIndexLayer].layerId))
-                {
+                if (!utilsIsObjectNullOrUndefined(this.m_aoVisibleBands[iIndexLayer].layerId)) {
                     // And if it is valid
                     if (!utilsIsStrNullOrEmpty(this.m_aoVisibleBands[iIndexLayer].layerId)) {
 
@@ -318,9 +319,9 @@ var EditorController = (function () {
 
                     // Band Not Yet Published !!
                     var oPublishBandCallback = function (value) {
-                        if (value) {
-                            var oBand = oController.m_aoVisibleBands[iProductIndex];
+                        var oBand = oController.m_aoVisibleBands[iProductIndex];
 
+                        if (value) {
                             // Remove it from Visible Layer List
                             oController.removeBandFromVisibleList(oBand);
                             // Publish the band
@@ -328,7 +329,9 @@ var EditorController = (function () {
                             return true;
                         }
                         else {
-
+                            oController.removeBandFromVisibleList(oBand);
+                            var sNode = oBand.productName+"_"+oBand.bandName;
+                            oController.setTreeNodeAsDeselected(sNode);
                             return false;
                         }
                     };
@@ -698,6 +701,8 @@ var EditorController = (function () {
         var oController = this;
         oController.m_aoProducts = [];
 
+        if (utilsIsObjectNullOrUndefined(oController.m_oActiveWorkspace)) return;
+
         this.m_oProductService.getProductListByWorkspace(oController.m_oActiveWorkspace.workspaceId).success(function (data, status) {
 
             if (utilsIsObjectNullOrUndefined(data) == false) {
@@ -857,6 +862,10 @@ var EditorController = (function () {
 
             // Create body to get big image
             var oBodyMapContainer = this.createBodyForProcessingBandImage(sFileName,oBand.name, null, 0,0,oBand.width,oBand.height,widthMapContainer, heightMapContainer);
+
+            // Disable the not till the end of the API
+            var sNode = this.m_aoProducts[oBand.productIndex].productName + "_" + oBand.bandName;
+            this.setTreeNodeDisabled(sNode);
 
             // Call the API and display the image
             oController.processingGetBandImage(oBodyMapContainer, oController.m_oActiveWorkspace.workspaceId);
@@ -1932,7 +1941,7 @@ var EditorController = (function () {
         // It is no more visible now
         var oNode = $('#jstree').jstree(true).get_node(sNode);
         if (utilsIsObjectNullOrUndefined(oNode.original) == false) oNode.original.band.bVisibleNow = false;
-    }
+    };
 
 
     /**
@@ -1956,6 +1965,23 @@ var EditorController = (function () {
         var sLabelText = $("#jstree").jstree().get_text(sNode);
         sLabelText = sLabelText.replace("band-not-published-label", "band-published-label");
         utilsJstreeUpdateLabelNode(sNode,sLabelText);
+    };
+
+
+    /**
+     * Enable a Node (is possible to click)
+     * @param sNode
+     */
+    EditorController.prototype.setTreeNodeEnabled = function(sNode) {
+        $("#jstree").jstree().enable_node(sNode);
+    };
+
+    /**
+     * Disable a Node (impossible to click)
+     * @param sNode
+     */
+    EditorController.prototype.setTreeNodeDisabled = function(sNode) {
+        $("#jstree").jstree().disable_node(sNode);
     };
 
     /**

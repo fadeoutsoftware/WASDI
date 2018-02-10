@@ -13,6 +13,14 @@
                 <!--<i class="fa fa-search fa-lg" aria-hidden="true"></i>-->
                 {{"IMPORT_SEARCH_BUTTON"|translate}}
             </div>
+
+            <div class="search-button" ng-click="m_oController.searchListAllSelectedProviders()" id="search-button-list"
+                 ng-class="{'search-button-disabled': m_oController.thereIsAtLeastOneProvider() === false || (m_oController.m_bIsVisibleListOfLayers || m_oController.m_bisVisibleLocalStorageInputs),
+                            'search-button': m_oController.thereIsAtLeastOneProvider() === true }" >
+                <!--<i class="fa fa-search fa-lg" aria-hidden="true"></i>-->
+                {{"IMPORT_SEARCHLIST_BUTTON"|translate}}
+            </div>
+
         </div>
 
         <!--TIME-->
@@ -516,7 +524,7 @@
                         <div ng-repeat="provider in m_oController.m_aListOfProvider | filter:{ selected: true }" class="missions" ng-show="m_oController.m_iActiveProvidersTab === $index">
 
                             <!--PAGES-->
-                            <div class="pages" ng-hide="m_oController.m_bIsVisibleListOfLayers && m_oController.isEmptyLayersList() == true">
+                            <div class="pages" ng-hide="m_oController.m_bIsVisibleListOfLayers && m_oController.isEmptyLayersList() == true && m_oController.m_bIsPaginatedList === false">
                                 <ul class="pager">
 
                                     <div class="form-group">
@@ -525,7 +533,7 @@
                                                 ng-options="product for product in m_oController.m_oPageService.m_iProductsPerPage"
                                                 ng-change="m_oController.m_oPageService.changeNumberOfProductsPerPage(provider.name,m_oController)"><!--ng-change="m_oController.search(provider.name)">-->
                                         </select>
-                                    </div>
+                                    </div><br>
                                     <li ng-click="m_oController.m_oPageService.firstPage(provider.name,m_oController)" ><a><i class="fa fa-angle-double-left" aria-hidden="true"></i></a></li>
                                     <li ng-click="m_oController.m_oPageService.minusOnePage(provider.name,m_oController)" ><a><i class="fa fa-angle-left" aria-hidden="true"></i></a></li>
                                     <form ng-submit="m_oController.m_oPageService.changePage(m_oController.m_oPageService.getProviderObject(provider.name).currentPage,provider.name,m_oController)">
@@ -542,11 +550,10 @@
 
                             <!------------ IF THE LIST OF LAYERS IS EMPTY ------------>
                             <div ng-show = "m_oController.isEmptyProviderLayerList(provider.name) && provider.isLoaded === true" style=" padding-left: 10px">
-                                <h2>
+                                <h3>
+                                    No results for {{provider.description}} provider
                                     <i class="fa fa-exclamation" aria-hidden="true"></i>
-                                    There aren't any results for {{provider.name}} provide
-                                    <i class="fa fa-exclamation" aria-hidden="true"></i>
-                                </h2>
+                                </h3>
                             </div>
                             <!----------------- LOADING LIST OF LAYERS ---------------------->
                             <div ng-show = "m_oController.isEmptyProviderLayerList(provider.name) && m_oController.m_bIsVisibleListOfLayers === true &&  provider.isLoaded === false" class="loadIcon">
