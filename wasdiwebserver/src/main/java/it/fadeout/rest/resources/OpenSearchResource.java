@@ -10,6 +10,7 @@ import java.util.Map.Entry;
 import javax.servlet.ServletConfig;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
@@ -125,7 +126,6 @@ public class OpenSearchResource {
 		}
 		
 		return iCounter;
-		
 	}
 
 	private Map<String, Integer> getQueryCounters(String sQuery, String sProviders) {
@@ -266,5 +266,112 @@ public class OpenSearchResource {
 		return aoRetProviders;
 	}
 	
+	
+	
+	@POST
+	@Path("/query/countlist")
+	@Produces({"application/xml", "application/json", "text/html"})
+	public int GetListProductsCount(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sQuery") String sQuery, @QueryParam("providers") String sProviders, ArrayList<String> asQueries)
+	{
+		Wasdi.DebugLog("OpenSearchResource.GetListProductsCount");
+		
+		if (Utils.isNullOrEmpty(sSessionId)) return 0;		
+		User oUser = Wasdi.GetUserFromSession(sSessionId);		
+		if (oUser==null || Utils.isNullOrEmpty(oUser.getUserId())) return 0;
+		
+		int iCounter = 0;
+		
+		for (int iQueries = 0; iQueries<asQueries.size(); iQueries++) {
+			sQuery = asQueries.get(iQueries);
+			if (sProviders!=null) {
+				Map<String, Integer> pMap = getQueryCounters(sQuery, sProviders);
+				for (Integer count : pMap.values()) {
+					iCounter += count;
+				}
+			}			
+		}
+				
+		return iCounter;
+	}
+
+	
+	
+	@POST
+	@Path("/querylist")
+	@Produces({"application/json", "text/html"})
+	public QueryResultViewModel[] SearchList(@HeaderParam("x-session-token") String sSessionId, @QueryParam("providers") String sProviders,   
+			@QueryParam("sQuery") String sQuery, @QueryParam("offset") String sOffset, @QueryParam("limit") String sLimit, 
+			@QueryParam("sortedby") String sSortedBy, @QueryParam("order") String sOrder, ArrayList<String> asQueries) {
+		
+		Wasdi.DebugLog("OpenSearchResource.SearchList");
+		
+		User oUser = Wasdi.GetUserFromSession(sSessionId);
+		if (oUser==null) return null;
+		if (Utils.isNullOrEmpty(oUser.getUserId())) return null;
+		
+		if (sProviders!=null) {
+			
+			if (sSortedBy == null) sSortedBy = "ingestiondate";
+			if (sOrder == null) sOrder = "asc";
+			
+			Wasdi.DebugLog("OpenSearchResource.SearchList: Providers = " + sProviders + " Queries " + asQueries.size());
+			
+			ArrayList<QueryResultViewModel> aoResults = new ArrayList<QueryResultViewModel>();
+						
+			for (int iQueries = 0; iQueries<asQueries.size(); iQueries++) {
+				
+				sQuery = asQueries.get(iQueries);
+				
+				Wasdi.DebugLog("OpenSearchResource.SearchList: [" + sProviders + "] Query["+iQueries+"] = " + asQueries.get(iQueries));
+				
+				Map<String, Integer> counterMap = getQueryCounters(sQuery, sProviders);			
+				
+				for (Entry<String, Integer> entry : counterMap.entrySet()) {
+
+					String sProvider = entry.getKey();				
+					int iTotalResultsForProviders = entry.getValue();
+					int iObtainedResults = 0;
+					
+					while (iObtainedResults<iTotalResultsForProviders) {
+						
+						String sActualOffset = ""+iObtainedResults;
+						// NOTE: This limit should be a Provider Parameter
+						int iLimit = 100;
+						
+						if ((iTotalResultsForProviders-iObtainedResults)<iLimit) {
+							iLimit = iTotalResultsForProviders-iObtainedResults;
+						}
+						
+						String sActualLimit = "" + iLimit;
+						
+						String sUser = m_oServletConfig.getInitParameter(sProvider+".OSUser");
+						String sPassword = m_oServletConfig.getInitParameter(sProvider+".OSPwd");
+												
+						QueryExecutor oExecutor = QueryExecutor.newInstance(sProvider, sUser, sPassword, sActualOffset, sActualLimit, sSortedBy, sOrder);
+						try {
+							ArrayList<QueryResultViewModel> aoTmp = oExecutor.execute(sQuery, false);
+							
+							if (aoTmp!=null && !aoTmp.isEmpty()) {
+								iObtainedResults += aoTmp.size();
+								aoResults.addAll(aoTmp);
+								System.out.println("Found " + aoTmp.size() + " results for Query#"+ iQueries + " for " + sProvider);
+							} else {
+								System.out.println("No results found for " + sProvider);
+							}					
+						} catch (IOException e) {
+							e.printStackTrace();
+						}				
+					}
+					
+
+				}
+				
+			}
+
+			return aoResults.toArray(new QueryResultViewModel[aoResults.size()]);
+		}
+		
+		return null;
+	}
 	
 }

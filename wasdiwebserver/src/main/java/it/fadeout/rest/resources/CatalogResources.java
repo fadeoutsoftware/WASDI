@@ -22,6 +22,8 @@ import java.util.Map;
 import java.util.UUID;
 
 import javax.servlet.ServletConfig;
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
@@ -31,14 +33,18 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.container.AsyncResponse;
+import javax.ws.rs.container.Suspended;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.core.StreamingOutput;
 
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
+import org.glassfish.jersey.server.internal.process.AsyncContext;
 import org.glassfish.jersey.server.internal.process.RespondingContext;
 
 import it.fadeout.Wasdi;
@@ -112,25 +118,29 @@ public class CatalogResources {
 		
 		Wasdi.DebugLog("CatalogResources.DownloadEntry");
 		
-		User me = Wasdi.GetUserFromSession(sSessionId);
-		String userId = me.getUserId();
+		User oUser = Wasdi.GetUserFromSession(sSessionId);
+		
+		if (oUser == null) {
+			Wasdi.DebugLog("CatalogResources.DownloadEntry: user not authorized");
+			return Response.status(Status.UNAUTHORIZED).build();
+		}
 
 		File file = new File(entry.getFilePath());
 		ResponseBuilder resp = null;
 		if (!file.canRead()) {
 			Wasdi.DebugLog("CatalogResources.DownloadEntry: file not readable");
 			resp = Response.serverError();
-		} else {
+		} 
+		else {
 			Wasdi.DebugLog("CatalogResources.DownloadEntry: file ok return content");
 			resp = Response.ok(file);
-			resp.header("Content-Disposition", "attachment; filename=\""+ entry.getFileName() + "\"");
+			resp.header("Content-Disposition", "attachment; filename="+ entry.getFileName());
 		}
 		
 		Wasdi.DebugLog("CatalogResources.DownloadEntry: done, return");
 		return resp.build();
 	}
 	
-
 	private ArrayList<DownloadedFile> searchEntries(Date from, Date to, String freeText, String category, String userId) {
 		ArrayList<DownloadedFile> entries = new ArrayList<DownloadedFile>();
 		
