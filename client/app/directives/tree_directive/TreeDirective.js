@@ -166,13 +166,13 @@ angular.module('wasdi.TreeDirective', [])
                                             }
                                             data.node.original.clicked = false; //release semaphore
                                             $("#jstree").jstree().enable_node(data.node);
-                                            $('#jstree').jstree(true).set_icon( data.node.id, 'assets/icons/folder_20x20.png');
+                                            $('#jstree').jstree(true).set_icon( data.node.id, 'assets/icons/metadata-24.png');
 
                                         }).error(function (error) {
                                             console.log("Error in: " + data.node.original.url + " the request doesn't work");
                                             data.node.original.clicked = false; //release semaphore
                                             $("#jstree").jstree().enable_node(data.node);
-                                            $('#jstree').jstree(true).set_icon( data.node.id, 'assets/icons/folder_20x20.png');
+                                            $('#jstree').jstree(true).set_icon( data.node.id, 'assets/icons/metadata-24.png');
                                     });
                                 }
                             }
