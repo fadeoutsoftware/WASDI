@@ -330,7 +330,7 @@ var EditorController = (function () {
                         }
                         else {
                             oController.removeBandFromVisibleList(oBand);
-                            var sNode = oBand.productName+"_"+oBand.bandName;
+                            var sNode = oBand.productName+"_"+oBand.name;
                             oController.setTreeNodeAsDeselected(sNode);
                             return false;
                         }
@@ -2088,27 +2088,75 @@ var EditorController = (function () {
 
                         //only the band has property $node.original.band
                         var oReturnValue = null;
-                        if (utilsIsObjectNullOrUndefined($node.original.band) == false && $node.original.band.bVisibleNow == true) {
+                        if (utilsIsObjectNullOrUndefined($node.original.band) == false) {
                             //******************************** BAND *************************************
                             var oBand = $node.original.band;
 
                             oReturnValue =
                                 {
-                                    "Zoom2D": {
-                                        "label": "Zoom Band 2D Map",
-                                        "action": function (obj) {
-                                            if (utilsIsObjectNullOrUndefined(oBand) == false) {
-                                                oController.m_oMapService.zoomBandImageOnGeoserverBoundingBox(oBand.geoserverBoundingBox);
-                                            }
-                                        }
-                                    },
-                                    "Zoom3D" : {
-                                        "label" : "Zoom Band 3D Map",
-                                        "action" : function (obj) {
-                                            if(utilsIsObjectNullOrUndefined(oBand) == false) {
-                                                oController.m_oGlobeService.zoomBandImageOnBBOX(oBand.bbox);
-                                            }
+                                    "Radar": {
+                                        "label": "Radar",
+                                        "action": false,
+                                        "icon":"radar-icon-context-menu-jstree",
+                                        "submenu":
+                                            {
+                                                //APPLY ORBIT
+                                                "ApplyOrbit": {
+                                                    "label": "Apply Orbit",
+                                                    "action": function (obj) {
+                                                        var oFoundProduct = oController.m_aoProducts[$node.original.band.productIndex];
+                                                        if(utilsIsObjectNullOrUndefined(oFoundProduct) == false)  oController.openApplyOrbitDialog(oFoundProduct);
+                                                    }
+                                                },
+                                                "Multilooking": {
+                                                    "label": "Multilooking",
+                                                    "action": function (obj) {
+                                                        var oFoundProduct = oController.m_aoProducts[$node.original.band.productIndex];
+                                                        if(utilsIsObjectNullOrUndefined(oFoundProduct) == false)  oController.openMultilookingDialog(oFoundProduct);
+                                                    }
+                                                },
 
+                                                "Range Doppler Terrain Correction": {
+                                                    "label": "Range Doppler Terrain Correction",
+                                                    "action": function (obj) {
+                                                        var oFoundProduct = oController.m_aoProducts[$node.original.band.productIndex];
+
+                                                        if(utilsIsObjectNullOrUndefined(oFoundProduct) == false) oController.rangeDopplerTerrainCorrectionDialog(oFoundProduct);
+                                                    }
+                                                },
+
+                                                "Calibrate": {
+                                                    "label": "Calibrate",
+                                                    "action": function (obj) {
+                                                        var oFoundProduct = oController.m_aoProducts[$node.original.band.productIndex];
+                                                        if(utilsIsObjectNullOrUndefined(oFoundProduct) == false) oController.openRadiometricCalibrationDialog(oFoundProduct);
+
+                                                    }
+                                                }
+                                            }
+                                    },
+                                    "Optical": {
+                                        "label": "Optical",
+                                        "action": false,
+                                        "icon":"optical-icon-context-menu-jstree",
+                                        "submenu":
+                                            {
+                                                "NDVI": {
+                                                    "label": "NDVI",
+                                                    "action": function (obj) {
+                                                        var oFoundProduct = oController.m_aoProducts[$node.original.band.productIndex];
+                                                        if(utilsIsObjectNullOrUndefined(oFoundProduct) == false) oController.openNDVIDialog(oFoundProduct);
+                                                    }
+                                                }
+                                            }
+                                    },
+                                    "Workflow":{
+                                        "label": "Workflow",
+                                        "icon" : "workflow-icon-context-menu-jstree",
+                                        "action": function (obj) {
+                                            var oFoundProduct = oController.m_aoProducts[$node.original.band.productIndex];
+
+                                            if(utilsIsObjectNullOrUndefined(oFoundProduct) == false) oController.openWorkflowDialog();
                                         }
                                     },
                                     "Filter Band":{
@@ -2116,6 +2164,79 @@ var EditorController = (function () {
                                         "action" : function(pbj){
                                             if(utilsIsObjectNullOrUndefined(oBand) == false)
                                                 oController.filterBandDialog(oBand);
+                                        },
+                                        "_disabled": !$node.original.band.bVisibleNow
+                                    },
+                                    "Zoom2D": {
+                                        "label": "Zoom Band 2D Map",
+                                        "action": function (obj) {
+                                            if (utilsIsObjectNullOrUndefined(oBand) == false) {
+                                                oController.m_oMapService.zoomBandImageOnGeoserverBoundingBox(oBand.geoserverBoundingBox);
+                                            }
+                                        },
+                                        "_disabled": !$node.original.band.bVisibleNow
+                                    },
+                                    "Zoom3D" : {
+                                        "label" : "Zoom Band 3D Map",
+                                        "action" : function (obj) {
+                                            if(utilsIsObjectNullOrUndefined(oBand) == false) {
+                                                oController.m_oGlobeService.zoomBandImageOnBBOX(oBand.bbox);
+                                            }
+                                        },
+                                        "_disabled": !$node.original.band.bVisibleNow
+                                    },
+                                    "Properties": {
+                                        "label": "Properties ",
+                                        "icon":"info-icon-context-menu-jstree",
+                                        "separator_before":true,
+                                        "action": function (obj) {
+                                            var oFoundProduct = oController.m_aoProducts[$node.original.band.productIndex];
+                                            if (utilsIsObjectNullOrUndefined(oFoundProduct)==false) oController.openProductInfoDialog(oFoundProduct);
+                                        }
+                                    },
+                                    "DeleteProduct": {
+                                        "label": "Delete Product",
+                                        "icon":"delete-icon-context-menu-jstree",
+
+                                        "action": function (obj) {
+
+                                            utilsVexDialogConfirmWithCheckBox("DELETING PRODUCT.<br>ARE YOU SURE?", function (value) {
+                                                var bDeleteFile = false;
+                                                var bDeleteLayer = false;
+                                                if (value) {
+                                                    if (value.files == 'on')  bDeleteFile = true;
+                                                    if (value.geoserver == 'on') bDeleteLayer = true;
+                                                    this.temp = $node.parents[1];
+                                                    var that = this;
+
+                                                    var oFoundProduct = oController.m_aoProducts[$node.original.band.productIndex];
+
+                                                    oController.m_oProductService.deleteProductFromWorkspace(oFoundProduct.fileName, oController.m_oActiveWorkspace.workspaceId, bDeleteFile, bDeleteLayer).success(function (data) {
+                                                        var iLengthLayer = oController.m_aoVisibleBands.length;
+                                                        var iLengthChildren_d = that.temp.children_d.length;
+
+                                                        for(var iIndexChildren = 0; iIndexChildren < iLengthChildren_d; iIndexChildren++)
+                                                        {
+                                                            for(var iIndexLayer = 0; iIndexLayer < iLengthLayer; iIndexLayer++)
+                                                            {
+                                                                if( that.temp.children_d[iIndexChildren] ===  oController.m_aoVisibleBands[iIndexLayer].layerId)
+                                                                {
+                                                                    oController.removeBandImage(oController.m_aoVisibleBands[iIndexChildren]);
+                                                                    break;
+                                                                }
+
+                                                            }
+
+                                                        }
+
+                                                        //reload product list
+                                                        oController.getProductListByWorkspace();
+
+                                                    }).error(function (error) {
+                                                        utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN DELETE PRODUCT");
+                                                    });
+                                                }
+                                            });
                                         }
                                     }
                                 };
@@ -2191,6 +2312,27 @@ var EditorController = (function () {
                                                     }
                                                 }
                                             }
+                                    },
+                                    "Workflow":{
+                                        "label": "Workflow",
+                                        "action": function (obj) {
+                                            var sSourceFileName = $node.original.fileName;
+                                            var oFound = oController.findProductByFileName(sSourceFileName);
+
+                                            if(utilsIsObjectNullOrUndefined(oFound) == false) oController.openWorkflowDialog();
+                                        }
+                                    },
+                                    "Filter Band":{
+                                        "label": "Filter Band",
+                                        "_disabled": true
+                                    },
+                                    "Zoom2D": {
+                                        "label": "Zoom Band 2D Map",
+                                        "_disabled": true
+                                    },
+                                    "Zoom3D" : {
+                                        "label" : "Zoom Band 3D Map",
+                                        "_disabled": true
                                     },
                                     "Properties": {
                                         "label": "Properties ",
@@ -2283,14 +2425,14 @@ var EditorController = (function () {
             oNode.children = [
                 {
                     "text":"Metadata",
-                    "icon": "assets/icons/folder_20x20.png",
+                    "icon": "assets/icons/metadata-24.png",
                     "children": [],
                     "clicked":false,//semaphore
                     "url" : oController.m_oProductService.getApiMetadata(oNode.fileName)
                 },
                 {
                     "text": "Bands",
-                    "icon": "assets/icons/folder_20x20.png",
+                    "icon": "assets/icons/bandsTree.png",
                     "children": []
                 }
             ];
