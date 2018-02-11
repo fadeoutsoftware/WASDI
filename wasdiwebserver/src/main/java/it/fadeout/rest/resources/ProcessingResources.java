@@ -6,15 +6,19 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import javax.imageio.ImageIO;
 import javax.imageio.spi.IIORegistry;
@@ -33,6 +37,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 
 import org.apache.commons.io.IOUtils;
 import org.esa.snap.core.dataio.ProductIO;
@@ -55,8 +60,10 @@ import wasdi.shared.LauncherOperations;
 import wasdi.shared.SnapOperatorFactory;
 import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
+import wasdi.shared.business.SnapWorkflow;
 import wasdi.shared.business.User;
 import wasdi.shared.data.ProcessWorkspaceRepository;
+import wasdi.shared.data.SnapWorkflowRepository;
 import wasdi.shared.parameters.ApplyOrbitParameter;
 import wasdi.shared.parameters.ApplyOrbitSetting;
 import wasdi.shared.parameters.CalibratorParameter;
@@ -76,6 +83,7 @@ import wasdi.shared.utils.SerializationUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.BandImageViewModel;
 import wasdi.shared.viewmodels.SnapOperatorParameterViewModel;
+import wasdi.shared.viewmodels.SnapWorkflowViewModel;
 
 @Path("/processing")
 public class ProcessingResources {
@@ -189,6 +197,140 @@ public class ProcessingResources {
 	}
 	
 	
+	/**
+	 * Save a SNAP Workflow XML
+	 * @param fileInputStream
+	 * @param sSessionId
+	 * @param workspace
+	 * @param name
+	 * @param description
+	 * @return
+	 * @throws Exception
+	 */
+	@POST
+	@Path("/uploadgraph")
+	@Consumes(MediaType.MULTIPART_FORM_DATA)
+	public Response uploadGraph(@FormDataParam("file") InputStream fileInputStream, @HeaderParam("x-session-token") String sSessionId, 
+			@QueryParam("workspace") String workspace, @QueryParam("name") String name, @QueryParam("description") String description) throws Exception {
+
+		Wasdi.DebugLog("ProcessingResources.uploadGraph");
+		
+		if (Utils.isNullOrEmpty(sSessionId)) return Response.status(401).build();
+		User oUser = Wasdi.GetUserFromSession(sSessionId);
+
+		if (oUser==null) return Response.status(401).build();
+		if (Utils.isNullOrEmpty(oUser.getUserId())) return Response.status(401).build();
+
+		String sUserId = oUser.getUserId();
+		
+		String sDownloadRootPath = m_oServletConfig.getInitParameter("DownloadRootPath");
+		if (!sDownloadRootPath.endsWith("/")) sDownloadRootPath = sDownloadRootPath + "/";
+		
+		String sWorkflowId =  UUID.randomUUID().toString();
+		File humidityTifFile = new File(sDownloadRootPath+sUserId+ "/workflows/" + sWorkflowId + ".xml");
+		
+		Wasdi.DebugLog("ProcessingResources.uploadGraph: workflow file Path: " + humidityTifFile.getPath());
+		
+		//save uploaded file
+		int read = 0;
+		byte[] bytes = new byte[1024];
+		OutputStream out = new FileOutputStream(humidityTifFile);
+		while ((read = fileInputStream.read(bytes)) != -1) {
+			out.write(bytes, 0, read);
+		}
+		out.flush();
+		out.close();
+		
+		SnapWorkflow oWorkflow = new SnapWorkflow();
+		oWorkflow.setName(name);
+		oWorkflow.setDescription(description);
+		oWorkflow.setFilePath(humidityTifFile.getPath());
+		oWorkflow.setUserId(sUserId);
+		oWorkflow.setWorkflowId(sWorkflowId);
+		
+		SnapWorkflowRepository oSnapWorkflowRepository = new SnapWorkflowRepository();
+		oSnapWorkflowRepository.InsertSnapWorkflow(oWorkflow);
+				
+		return Response.ok().build();
+	}
+	
+	/**
+	 * Get workflow list by user id
+	 * @param sSessionId
+	 * @return
+	 */
+	@GET
+	@Path("/getgraphsbyusr")
+	public ArrayList<SnapWorkflowViewModel> getWorkflowsByUser(@HeaderParam("x-session-token") String sSessionId) {
+		Wasdi.DebugLog("ProcessingResources.getWorkflowsByUser");
+		
+		if (Utils.isNullOrEmpty(sSessionId)) return null;
+		User oUser = Wasdi.GetUserFromSession(sSessionId);
+
+		if (oUser==null) return null;
+		if (Utils.isNullOrEmpty(oUser.getUserId())) return null;
+
+		String sUserId = oUser.getUserId();
+		
+		SnapWorkflowRepository oSnapWorkflowRepository = new SnapWorkflowRepository();
+		ArrayList<SnapWorkflowViewModel> aoRetWorkflows = new ArrayList<>();
+		
+		List<SnapWorkflow> aoDbWorkflows = oSnapWorkflowRepository.GetSnapWorkflowByUser(sUserId);
+		
+		for (int i=0; i<aoDbWorkflows.size(); i++) {
+			SnapWorkflowViewModel oVM = new SnapWorkflowViewModel();
+			oVM.setName(aoDbWorkflows.get(i).getName());
+			oVM.setDescription(aoDbWorkflows.get(i).getDescription());
+			oVM.setWorkflowId(aoDbWorkflows.get(i).getWorkflowId());
+			
+			aoRetWorkflows.add(oVM);
+		}
+		
+		return aoRetWorkflows;
+	}
+	
+	/**
+	 * Delete a workflow from id
+	 * @param sSessionId
+	 * @param sWorkflowId
+	 * @return
+	 */
+	@GET
+	@Path("/deletegraph")
+	public Response deleteWorkflow(@HeaderParam("x-session-token") String sSessionId, @QueryParam("workflowId") String sWorkflowId) {
+		Wasdi.DebugLog("ProcessingResources.deleteWorkflow");
+		
+		if (Utils.isNullOrEmpty(sSessionId)) return Response.status(Status.UNAUTHORIZED).build();
+		User oUser = Wasdi.GetUserFromSession(sSessionId);
+
+		if (oUser==null) return Response.status(Status.UNAUTHORIZED).build();
+		if (Utils.isNullOrEmpty(oUser.getUserId())) return Response.status(Status.UNAUTHORIZED).build();
+
+		String sUserId = oUser.getUserId();
+		
+		SnapWorkflowRepository oSnapWorkflowRepository = new SnapWorkflowRepository();
+		
+		SnapWorkflow oWorkflow = oSnapWorkflowRepository.GetSnapWorkflow(sWorkflowId);
+		 
+		if (oWorkflow == null) return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+		
+		if (oWorkflow.getUserId().equals(sUserId) == false)  return Response.status(Status.UNAUTHORIZED).build();
+
+		oSnapWorkflowRepository.DeleteSnapWorkflow(sWorkflowId);
+	
+		return Response.ok().build();
+	}
+	
+	/**
+	 * Executes a workflow from a file stream
+	 * @param fileInputStream
+	 * @param sessionId
+	 * @param workspace
+	 * @param sourceProductName
+	 * @param destinationProdutName
+	 * @return
+	 * @throws Exception
+	 */
 	@POST
 	@Path("/graph")
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
@@ -197,7 +339,13 @@ public class ProcessingResources {
 
 		Wasdi.DebugLog("ProcessingResources.ExecuteGraph");
 		
-		GraphSetting settings = new GraphSetting();		
+		if (Utils.isNullOrEmpty(sessionId)) return Response.status(Status.UNAUTHORIZED).build();
+		User oUser = Wasdi.GetUserFromSession(sessionId);
+
+		if (oUser==null) return Response.status(Status.UNAUTHORIZED).build();
+		if (Utils.isNullOrEmpty(oUser.getUserId())) return Response.status(Status.UNAUTHORIZED).build();
+
+		GraphSetting settings = new GraphSetting();
 		String graphXml;
 		graphXml = IOUtils.toString(fileInputStream, Charset.defaultCharset().name());
 		settings.setGraphXml(graphXml);
@@ -212,6 +360,12 @@ public class ProcessingResources {
 			@QueryParam("workspace") String workspace, @QueryParam("source") String sourceProductName, @QueryParam("destination") String destinationProdutName) throws Exception {
 
 		Wasdi.DebugLog("ProcessingResources.executeGraphFromFile");
+
+		if (Utils.isNullOrEmpty(sessionId)) return Response.status(Status.UNAUTHORIZED).build();
+		User oUser = Wasdi.GetUserFromSession(sessionId);
+
+		if (oUser==null) return Response.status(Status.UNAUTHORIZED).build();
+		if (Utils.isNullOrEmpty(oUser.getUserId())) return Response.status(Status.UNAUTHORIZED).build();
 		
 		GraphSetting settings = new GraphSetting();		
 		String graphXml;
@@ -222,7 +376,48 @@ public class ProcessingResources {
 		settings.setGraphXml(graphXml);
 		
 		return ExecuteOperation(sessionId, sourceProductName, destinationProdutName, workspace, settings, LauncherOperations.GRAPH);
+	}
+	
+	/**
+	 * Exectues a Workflow from workflow Id
+	 * @param sessionId
+	 * @param workspace
+	 * @param sourceProductName
+	 * @param destinationProdutName
+	 * @param workflowId
+	 * @return
+	 * @throws Exception
+	 */
+	@POST
+	@Path("/graph_id")
+	public Response executeGraphFromWorkflowId(@HeaderParam("x-session-token") String sessionId, 
+			@QueryParam("workspace") String workspace, @QueryParam("source") String sourceProductName, @QueryParam("destination") String destinationProdutName, @QueryParam("workflowId") String workflowId) throws Exception {
+
+		Wasdi.DebugLog("ProcessingResources.executeGraphFromWorkflowId");
 		
+		if (Utils.isNullOrEmpty(sessionId)) return Response.status(Status.UNAUTHORIZED).build();
+		User oUser = Wasdi.GetUserFromSession(sessionId);
+
+		if (oUser==null) return Response.status(Status.UNAUTHORIZED).build();
+		if (Utils.isNullOrEmpty(oUser.getUserId())) return Response.status(Status.UNAUTHORIZED).build();
+
+		String sUserId = oUser.getUserId();
+		
+		GraphSetting settings = new GraphSetting();		
+		String graphXml;
+		
+		SnapWorkflowRepository oSnapWorkflowRepository = new SnapWorkflowRepository();
+		SnapWorkflow oWF = oSnapWorkflowRepository.GetSnapWorkflow(workflowId);
+		
+		if (oWF == null) return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+		if (oWF.getUserId().equals(sUserId)==false) return Response.status(Status.UNAUTHORIZED).build();
+		
+		FileInputStream fileInputStream = new FileInputStream(oWF.getFilePath());
+		
+		graphXml = IOUtils.toString(fileInputStream, Charset.defaultCharset().name());
+		settings.setGraphXml(graphXml);
+		
+		return ExecuteOperation(sessionId, sourceProductName, destinationProdutName, workspace, settings, LauncherOperations.GRAPH);
 	}
 
 	@GET
