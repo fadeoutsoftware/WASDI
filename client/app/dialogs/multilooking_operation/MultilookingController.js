@@ -59,27 +59,23 @@ var MultilookingController = (function() {
                     bAreOkOptions = false;
                 if( (utilsIsObjectNullOrUndefined(oController.m_oReturnValue.options.nAzLooks) == true) && (utilsIsANumber(oController.m_oReturnValue.options.nAzLooks) == false) )
                     bAreOkOptions = false;
-                if( (utilsIsObjectNullOrUndefined(oController.m_oReturnValue.options.outputIntensity) == true)  )
-                    bAreOkOptions = false;
-                if( (utilsIsObjectNullOrUndefined(oController.m_oReturnValue.options.grSquarePixel) == true)  )
-                    bAreOkOptions = false;
+                if( (utilsIsObjectNullOrUndefined(oController.m_oReturnValue.options.outputIntensity) == true)  ) bAreOkOptions = false;
+                if( (utilsIsObjectNullOrUndefined(oController.m_oReturnValue.options.grSquarePixel) == true)  ) bAreOkOptions = false;
+
+                var oRetValue = null;
 
                 if(bAreOkOptions != false)
                 {
-                    oController.m_oReturnValue.sourceFileName = oProduct.fileName;
-                    oController.m_oReturnValue.destinationFileName = oProduct.name + "_Multilooking";
-                    // oController.m_oReturnValue.options.sourceBandNames = oController.m_asSourceBandsSelected;
-                    oController.m_oReturnValue.options.sourceBandNames = oController.getSelectedBandsByProductName(oProduct.name, oController.m_asSourceBandsSelected);
-                }
-                else
-                {
-                    oController.m_oReturnValue = null;
+                    oRetValue.sourceFileName = oProduct.fileName;
+                    oRetValue.destinationFileName = oProduct.name + "_Multilooking";
+                    // oRetValue.options.sourceBandNames = oController.m_asSourceBandsSelected;
+                    oRetValue.options.sourceBandNames = oController.getSelectedBandsByProductName(oProduct.name, oController.m_asSourceBandsSelected);
                 }
 
-                aoReturnValue.push(oController.m_oReturnValue);
-
+                if (!utilsIsObjectNullOrUndefined(oRetValue)) {
+                    aoReturnValue.push(oRetValue);
+                }
             }
-
             oClose(aoReturnValue, 500); // close, but give 500ms for bootstrap to animate
         };
 

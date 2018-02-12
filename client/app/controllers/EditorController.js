@@ -275,17 +275,14 @@ var EditorController = (function () {
      */
     EditorController.prototype.switchEditorGeoReferencedMode = function () {
 
-        // This should be impossible, but just to be sure:
-        if (this.m_b2DMapModeOn == false) {
-            console.log("EditorController.switchEditorGeoReferencedMode: impossible to switch 3d/2d mode in editor mode");
-            return;
-        }
-
         // Switch the flag
         this.m_bIsActiveGeoraphicalMode = !this.m_bIsActiveGeoraphicalMode;
 
         //If we are going in Geographical Mode
         if (this.m_bIsActiveGeoraphicalMode == true) {
+
+            // Clear the Image editor
+            this.clearImageEditor();
 
             //Check if there is a visible layer and if it is already published
             for (var iIndexLayer = 0; iIndexLayer < this.m_aoVisibleBands.length; iIndexLayer++) {
@@ -296,7 +293,8 @@ var EditorController = (function () {
                     if (!utilsIsStrNullOrEmpty(this.m_aoVisibleBands[iIndexLayer].layerId)) {
 
                         // show the layer
-                        this.addLayerMap2D(this.m_aoVisibleBands[iIndexLayer].layerId);
+                        if (this.m_b2DMapModeOn) this.addLayerMap2D(this.m_aoVisibleBands[iIndexLayer].layerId);
+                        else this.addLayerMap3D(this.m_aoVisibleBands[iIndexLayer].layerId);
 
                         // Check for geoserver bounding box
                         if (!utilsIsStrNullOrEmpty(this.m_aoVisibleBands[iIndexLayer].geoserverBoundingBox))
@@ -364,16 +362,16 @@ var EditorController = (function () {
 
             // With more than one layer visible the user can cancel the action. So it will be cleared in the callback
             if (iNumberOfLayers<=1) {
-                // Clear the 2D Map
-                this.m_oMapService.removeBasicMap();
-                this.m_oMapService.removeLayersFromMap();
+                // Clear the Map
+                if (this.m_b2DMapModeOn) this.m_oMapService.removeLayersFromMap();
+                else this.m_oGlobeService.removeAllEntities();
             }
-
 
             if (iNumberOfLayers == 0)
             {
                 // If there are no layers go to the workspace bounding box
-                this.m_oGlobeService.flyToWorkspaceBoundingBox(this.m_aoProducts);
+                if (this.m_b2DMapModeOn) this.m_oGlobeService.flyToWorkspaceBoundingBox(this.m_aoProducts);
+                else this.m_oMapService.flyToWorkspaceBoundingBox(this.m_aoProducts);
             }
             else if (iNumberOfLayers == 1)
             {
@@ -387,9 +385,9 @@ var EditorController = (function () {
 
                 var oRemoveOtherLayersCallback = function (value) {
                     if (value) {
-                        // Clear the 2D Map
-                        oController.m_oMapService.removeBasicMap();
-                        oController.m_oMapService.removeLayersFromMap();
+                        // Clear the Map
+                        if (oController.m_b2DMapModeOn) oController.m_oMapService.removeLayersFromMap();
+                        else oController.m_oGlobeService.removeAllEntities();
 
 
                         // Close all the layers
@@ -804,7 +802,7 @@ var EditorController = (function () {
         this.m_oActiveBand = oBand;
 
         // CHECK THE ACTUAL MODE
-        if (this.m_bIsActiveGeoraphicalMode || this.m_b2DMapModeOn == false) {
+        if (this.m_bIsActiveGeoraphicalMode) {
 
             // Geographical Mode On: geoserver publish band
             this.m_oFileBufferService.publishBand(sFileName, this.m_oActiveWorkspace.workspaceId, oBand.name).success(function (data, status) {
@@ -892,6 +890,16 @@ var EditorController = (function () {
     };
 
     /**
+     * Clears the image editor both versions: the big image and the image preview
+     */
+    EditorController.prototype.clearImageEditor = function() {
+        // Clear the preview
+        this.m_sPreviewUrlSelectedBand = "empty";
+        // Clear the Editor Image
+        this.m_sViewUrlSelectedBand = "//:0";
+    };
+
+    /**
      * Generates and shows the Band Image Preview (Editor Mode)
      * @param oBody
      * @param workspaceId
@@ -917,10 +925,8 @@ var EditorController = (function () {
                 }
             }
         }).error(function (data, status) {
-            // Clear the preview
-            oController.m_sPreviewUrlSelectedBand = "empty";
-            // Clear the Editor Image
-            oController.m_sViewUrlSelectedBand = "//:0";
+            // Clear the editor
+            oController.clearImageEditor();
             oController.m_bIsLoadedPreviewBandImage = true;
             utilsVexDialogAlertTop('GURU MEDITATION<br>ERROR PROCESSING BAND PREVIEW IMAGE ');
         });
@@ -971,10 +977,8 @@ var EditorController = (function () {
             var sNodeID = oController.m_oActiveBand.productName + "_" + oController.m_oActiveBand.name;
             oController.setTreeNodeAsDeselected(sNodeID);
 
-            // Clear the preview
-            oController.m_sPreviewUrlSelectedBand = "empty";
-            // Clear the Editor Image
-            oController.m_sViewUrlSelectedBand = "//:0";
+            // Clear the editor
+            oController.clearImageEditor();
 
             // Stop the waiter
             oController.m_bIsLoadedViewBandImage = true;
