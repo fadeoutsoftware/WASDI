@@ -520,11 +520,11 @@
                         </li>
                     </ul>
                     <!-- TAB CONTENT -->
-                    <div class="tab-content" ><!--ng-hide="m_oController.m_bIsVisibleListOfLayers && m_oController.isEmptyLayersList() == true"-->
+                    <div class="tab-content" >
                         <div ng-repeat="provider in m_oController.m_aListOfProvider | filter:{ selected: true }" class="missions" ng-show="m_oController.m_iActiveProvidersTab === $index">
 
-                            <!--PAGES-->
-                            <div class="pages" ng-hide="m_oController.m_bIsVisibleListOfLayers && m_oController.isEmptyLayersList() == true && m_oController.m_bIsPaginatedList === false">
+                            <!--PAGING CONTROL-->
+                            <div class="pages" ng-hide="(m_oController.m_bIsVisibleListOfLayers && m_oController.m_bIsPaginatedList === false) || m_oController.isEmptyLayersList() == true">
                                 <ul class="pager">
 
                                     <div class="form-group">

@@ -199,25 +199,7 @@ var ImportController = (function() {
 
 
         this.m_DatePickerPosition = function($event){
-            /*
-            var element = document.getElementsByClassName("dropdown-menu");
-            setTimeout(function(){
-                var element = document.getElementsByClassName("dropdown-menu");
-                element[0].style.visibility =  'hidden';
-                var top = 0;
-                var DATEPICKER_HEIGHT= 280;
-                if(($event.originalEvent.pageY + DATEPICKER_HEIGHT ) > window.innerHeight ){
-                    top = parseInt(window.innerHeight  - DATEPICKER_HEIGHT ) + "px" ;
-                }
-                else{
-                    top = $event.originalEvent.pageY + "px";
-                }
-                element[0].style.top =  top;
-                var left = parseInt($event.originalEvent.pageX) - parseInt(element[0].offsetWidth) ;
-                element[0].style.left = ((left >0)?left:10) + "px ";
-                element[0].style.visibility =  'visible';
-            },100);
-            */
+
         };
 
 
@@ -338,6 +320,14 @@ var ImportController = (function() {
 
             }
         });
+
+        /*
+        // P.Campanella 11/02/2018: tentativo NON finito di mostrare solo i footprint del provider selezionato
+        $scope.$watch('m_oController.m_iActiveProvidersTab', function (newVal) {
+            oController.updateLayerListForActiveTab(newVal);
+        });
+        */
+
 
         // Set search default values:
         this.m_aListOfProvider = this.m_oPageService.getProviders();
@@ -523,13 +513,8 @@ var ImportController = (function() {
 
     ImportController.prototype.search = function(oProvider, oThat)
     {
-
         var oController = this;
-
-        if(utilsIsObjectNullOrUndefined(oThat) === false)
-        {
-            oController = oThat;
-        }
+        if(utilsIsObjectNullOrUndefined(oThat) === false) oController = oThat;
 
         if(oController.thereIsAtLeastOneProvider() === false) return false;
         if(utilsIsObjectNullOrUndefined(oProvider) === true) return false;
@@ -551,6 +536,7 @@ var ImportController = (function() {
         oController.m_oSearchService.setOffset(iOffset);//default 0 (index page)
         oController.m_oSearchService.setLimit(oProvider.productsPerPageSelected);// default 10 (total of element per page)
         oProvider.isLoaded = false;
+        oProvider.totalOfProducts = 0;
 
         oController.m_oSearchService.getProductsCount().then(
                 function(result)
@@ -576,17 +562,8 @@ var ImportController = (function() {
                 if(!utilsIsObjectNullOrUndefined(sResults))
                 {
                     if (!utilsIsObjectNullOrUndefined(sResults.data) && sResults.data != "" ) {
-                     //TODO MANTIS 658-------------------------------------------
                         var aoData = sResults.data;
-                        oController.generateLayersList(aoData)//.feed;
-                    }
-                    else
-                    {
-                        // utilsVexDialogAlertTop("EMPTY RESULT...");
-                        //oController.m_bIsVisibleListOfLayers = false; //visualize filter list
-                        // oController.m_oResultsOfSearchService.setIsVisibleListOfProducts(oController.m_bIsVisibleListOfLayers );
-                        //oController.setPaginationVariables();
-                        //oController.m_bIsVisibleListOfLayers = true;
+                        oController.generateLayersList(aoData);
                     }
 
                     oProvider.isLoaded = true;
@@ -655,6 +632,7 @@ var ImportController = (function() {
         oController.m_oSearchService.setOffset(iOffset);//default 0 (index page)
         oController.m_oSearchService.setLimit(oProvider.productsPerPageSelected);// default 10 (total of element per page)
         oProvider.isLoaded = false;
+        oProvider.totalOfProducts = 0;
 
         // Generation of different time filters
         var asTimePeriodsFilters = [];
@@ -788,10 +766,7 @@ var ImportController = (function() {
         });
 
         return true;
-
-
-
-    }
+    };
 
     ImportController.prototype.clearFilter = function() {
         for(var i=0; i < this.m_aoMissions.length; i++)
@@ -855,20 +830,44 @@ var ImportController = (function() {
     ImportController.prototype.changeProductsPerPage = function()
     {
 
-    }
+    };
 
 
+/*
+// P.Campanella 11/02/2018: tentativo NON finito di mostrare solo i footprint del provider selezionato
+    ImportController.prototype.updateLayerListForActiveTab = function(iActiveTab) {
+        var oController = this;
 
+        if (utilsIsObjectNullOrUndefined(oController.m_aListOfProvider)) return;
+        if (iActiveTab >= oController.m_aListOfProvider.length) return;
 
+        var sProvider = oController.m_aListOfProvider[iActiveTab].name;
+        var aaoAllBounds = [];
+
+        oController.deleteLayers(sProvider);
+
+        for(var iIndexData = 0; iIndexData < oController.m_aoProductsList.length; iIndexData++)
+        {
+            if (oController.m_aoProductsList[iIndexData].provider !== sProvider) continue;
+
+            oController.m_oMapService.addRectangleByBoundsArrayOnMap(oController.m_aoProductsList[iIndexData].bounds ,null,iIndexData);
+
+            aaoAllBounds.push(oController.m_aoProductsList[iIndexData].bounds);
+        }
+
+        oController.m_oMapService.zoomOnBounds(aaoAllBounds);
+    };
+*/
     /*
     * Generate layers list
     * */
-
     ImportController.prototype.generateLayersList = function(aData)
     {
         var oController = this;
-        if(utilsIsObjectNullOrUndefined(aData) === true)
-            return false;
+        if(utilsIsObjectNullOrUndefined(aData) === true) return false;
+
+        var aaoAllBounds = [];
+
         var iDataLength = aData.length;
         for(var iIndexData = 0; iIndexData < iDataLength; iIndexData++)
         {
@@ -879,17 +878,17 @@ var ImportController = (function() {
                 aData[iIndexData].preview = "assets/icons/ImageNotFound.svg";//default value ( set it if there isn't the image)
 
             //get bounds
-            var aaBounds = oController.polygonToBounds( aData[iIndexData].footprint);
-            oRectangle = oController.m_oMapService.addRectangleByBoundsArrayOnMap(aaBounds ,null,iIndexData);
+            var aoBounds = oController.polygonToBounds( aData[iIndexData].footprint);
+            var oRectangle = oController.m_oMapService.addRectangleByBoundsArrayOnMap(aoBounds ,null,iIndexData);
             aData[iIndexData].rectangle = oRectangle;
-            aData[iIndexData].bounds = aaBounds;
-            /*create rectangle*/
-            // var oRectangle = null;
-            // var aasBounds = oController.getBoundsByLayerFootPrint(aoLayers[iIndexLayers]);
-            // oRectangle = oController.m_oMapService.addRectangleOnMap(aasBounds ,null,iIndexLayers);
+            aData[iIndexData].bounds = aoBounds;
+
+            aaoAllBounds.push(aoBounds);
 
             oController.m_aoProductsList.push(aData[iIndexData]);
         }
+
+        oController.m_oMapService.zoomOnBounds(aaoAllBounds);
     };
 
     /*GetRelativeOrbit*/
