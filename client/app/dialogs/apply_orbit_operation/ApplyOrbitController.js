@@ -66,21 +66,25 @@ var ApplyOrbitController = (function() {
                     bAreOkOptions = false;
                 if( utilsIsObjectNullOrUndefined(oController.m_oReturnValue.options.continueOnFail) == true )
                     bAreOkOptions = false;
+
+                var oRetValue = null;
+
                 if(bAreOkOptions != false)
                 {
+                    oRetValue = {
+                        options:{}
+                    }
                     // oController.m_oReturnValue.sourceFileName = oController.m_oSelectedProduct.fileName;
                     // oController.m_oReturnValue.destinationFileName = oController.m_sFileName_Operation;
-                    oController.m_oReturnValue.sourceFileName = oProduct.fileName;
-                    oController.m_oReturnValue.destinationFileName = oProduct.name + "_ApplyOrbit";
-                    oController.m_oReturnValue.options.orbitType = oController.m_sSelectedOrbitStateVectors;
+                    oRetValue.sourceFileName = oProduct.fileName;
+                    oRetValue.destinationFileName = oProduct.name + "_ApplyOrbit";
+                    oRetValue.options.orbitType = oController.m_sSelectedOrbitStateVectors;
 
                 }
-                else
-                {
-                    oController.m_oReturnValue = null;
-                }
 
-                aoReturnValue.push(oController.m_oReturnValue);
+                if (!utilsIsObjectNullOrUndefined(oRetValue)) {
+                    aoReturnValue.push(oRetValue);
+                }
             }
 
 

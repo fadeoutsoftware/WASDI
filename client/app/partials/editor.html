@@ -352,36 +352,47 @@
         <!--------------- MAP CONTAINER --------------->
 
         <div class="col-lg-8 col-md-8 col-sm-8 col-xs-12 map-column" >
-            <div class="map-container" id="mapcontainer">
 
-                <div class="btn-group" role="group" >
+
+            <div class="map-container" id="mapcontainer">
+                <div class="btn-group btn-group-left" role="group" >
+                    <button type="button" class="btn btn-default " ng-class="m_oController.m_sClassBtnSwitchGeographic"
+                        ng-click="m_oController.switchEditorGeoReferencedMode();m_oController.changeClassBtnSwitchGeographic();" data-toggle="tooltip"
+                        data-placement="bottom" title="{{m_oController.m_sToolTipBtnSwitchGeographic|translate}}"> <!--ng-disabled="m_oController.m_b2DMapModeOn == false"-->
+                    </button>
+                </div>
+
+                <div class="btn-group btn-group-right" role="group" >
                     <!-- Switch 2D/3D Mode-->
                     <button type="button" class="btn btn-primary" ng-click="m_oController.switch2D3DMode()"
                             data-toggle="tooltip" data-placement="bottom" title="{{'EDITOR_TOOLTIP_SWITCH_3D_2D'|translate}}"
-                            ng-disabled=" m_oController.m_bIsActiveGeoraphicalMode == false">
+                            ng-hide=" m_oController.m_bIsActiveGeoraphicalMode == false">
                         <i ng-show="m_oController.m_b2DMapModeOn == true" aria-hidden="true">2D</i>
                         <i  ng-show="m_oController.m_b2DMapModeOn == false" aria-hidden="true">3D</i>
                     </button>
+
+
                     <!-- Switch Image Editor / Geographical Mode-->
-                    <button type="button" class="btn btn-default " ng-class="m_oController.m_sClassBtnSwitchGeographic" ng-click="m_oController.switchEditorGeoReferencedMode();m_oController.changeClassBtnSwitchGeographic();" data-toggle="tooltip"
-                            data-placement="bottom" title="{{m_oController.m_sToolTipBtnSwitchGeographic|translate}}"> <!--ng-disabled="m_oController.m_b2DMapModeOn == false"-->
-                    </button>
+                    <!--<button type="button" class="btn btn-default " ng-class="m_oController.m_sClassBtnSwitchGeographic" ng-click="m_oController.switchEditorGeoReferencedMode();m_oController.changeClassBtnSwitchGeographic();" data-toggle="tooltip"-->
+                            <!--data-placement="bottom" title="{{m_oController.m_sToolTipBtnSwitchGeographic|translate}}"> &lt;!&ndash;ng-disabled="m_oController.m_b2DMapModeOn == false"&ndash;&gt;-->
+                    <!--</button>-->
+
                     <!-- 2D map Home button-->
                     <button type="button" class="btn btn-default" ng-click="m_oController.goWorkspaceHome();"  data-toggle="tooltip"
                             data-placement="bottom"  title="{{'EDITOR_TOOLTIP_HOME'|translate}}"
-                            ng-disabled="m_oController.m_bIsActiveGeoraphicalMode == false">
+                            ng-hide="m_oController.m_bIsActiveGeoraphicalMode == false">
                         <i class="fa fa-home fa-lg" aria-hidden="true"></i>
                     </button>
                     <!-- 2D map button-->
                     <button type="button" class="btn btn-default" ng-click="m_oController.synchronize2DMap();"  data-toggle="tooltip"
                             data-placement="bottom"  title="{{'EDITOR_TOOLTIP_SYNCHRONIZE_MAP_2D'|translate}}"
-                            ng-show="m_oController.m_b2DMapModeOn == true" ng-disabled="m_oController.m_bIsActiveGeoraphicalMode == false">
+                            ng-show="m_oController.m_b2DMapModeOn == true && m_oController.m_bIsActiveGeoraphicalMode == true">
                         <i class="fa fa-location-arrow" aria-hidden="true"></i>
                     </button>
                     <!-- 3D map button-->
                     <button type="button" class="btn btn-default" ng-click="m_oController.synchronize3DMap();"  data-toggle="tooltip"
                             data-placement="bottom"  title="{{'EDITOR_TOOLTIP_SYNCHRONIZE_MAP_3D'|translate}}"
-                            ng-show="m_oController.m_b2DMapModeOn == false" ng-disabled=" m_oController.m_bIsActiveGeoraphicalMode == false">
+                            ng-show="m_oController.m_b2DMapModeOn == false && m_oController.m_bIsActiveGeoraphicalMode == true">
                         <i class="fa fa-location-arrow" aria-hidden="true"></i>
                     </button>
 
@@ -389,16 +400,27 @@
                     <!-- BOTH -->
                     <button type="button" class="btn btn-default" ng-click="m_oController.openGetCapabilitiesDialog()"  data-toggle="tooltip"
                             data-placement="bottom"  title="{{'EDITOR_TOOLTIP_GET_CAPABILITIES'|translate}}"
-                            ng-disabled="m_oController.m_bIsActiveGeoraphicalMode == false" >
+                            ng-hide="m_oController.m_bIsActiveGeoraphicalMode == false" >
                         <i class="fa fa-server" aria-hidden="true"></i>
                     </button>
 
                     <button type="button" class="btn btn-default" ng-click="m_oController.changeModeOnOffPixelInfo();m_oController.hideOrShowPixelInfo();"  data-toggle="tooltip"
                             data-placement="bottom"  title="Show/hide pixel info"
-                            ng-disabled="m_oController.m_bIsActiveGeoraphicalMode == false" ng-style="{'background-color': m_oController.getClassPixelInfo()}">  <!--ng-class="{'active' : m_oController.Mode}"-->
+                            ng-hide="m_oController.m_bIsActiveGeoraphicalMode == false" ng-style="{'background-color': m_oController.getClassPixelInfo()}">  <!--ng-class="{'active' : m_oController.Mode}"-->
                         <i class="fa fa-info-circle" aria-hidden="true"></i>
                         <!--<pre>{{m_oController.m_bIsModeOnPixelInfo|json}}</pre>-->
                     </button>
+
+                    <button type="button" class="btn btn-default"  data-toggle="tooltip" data-placement="bottom"  title="{{'EDITOR_TOOLTIP_ZOOM_ON'|translate}}"
+                            ng-hide="m_oController.m_bIsActiveGeoraphicalMode == true">
+                        <i class="fa fa-search-plus" aria-hidden="true"></i>
+                    </button>
+
+                    <button type="button" class="btn btn-default"  data-toggle="tooltip" data-placement="bottom"  title="{{'EDITOR_TOOLTIP_RESET_ZOOM'|translate}}"
+                            ng-hide="m_oController.m_bIsActiveGeoraphicalMode == true">
+                        <i class="fa fa-search-minus" aria-hidden="true"></i>
+                    </button>
+
                 </div>
 
                 <!-- BAND 2d m_oController.m_b2DMapModeOn === true && -->

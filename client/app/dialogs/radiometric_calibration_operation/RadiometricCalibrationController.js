@@ -94,22 +94,26 @@ var RadiometricCalibrationController = (function() {
                 if( utilsIsObjectNullOrUndefined(oController.m_oReturnValue.options.createBetaBand) == true )
                     bAreOkOptions = false;
 
+                var oRetValue = null;
 
                 if(bAreOkOptions != false)
                 {
-                    oController.m_oReturnValue.sourceFileName = oProduct.fileName;
-                    oController.m_oReturnValue.destinationFileName =  oProduct.name + "_RadiometricCalibration";
+                    oRetValue = {
+                        options:{}
+                    };
+
+                    oRetValue.sourceFileName = oProduct.fileName;
+                    oRetValue.destinationFileName =  oProduct.name + "_RadiometricCalibration";
                     // oController.m_oReturnValue.options.sourceBandNames = oController.m_asSourceBandsSelected;
-                    oController.m_oReturnValue.options.sourceBandNames = oController.getSelectedBandsByProductName(oProduct.name, oController.m_asSourceBandsSelected);
-                    oController.m_oReturnValue.options.selectedPolarisations = [];
-                    oController.m_oReturnValue.options.auxFile = oController.m_sSelectedAuxiliaryFile;
+                    oRetValue.options.sourceBandNames = oController.getSelectedBandsByProductName(oProduct.name, oController.m_asSourceBandsSelected);
+                    oRetValue.options.selectedPolarisations = [];
+                    oRetValue.options.auxFile = oController.m_sSelectedAuxiliaryFile;
                     // oController.m_oReturnValue.options.externalAuxFile = "";
                 }
-                else
-                {
-                    oController.m_oReturnValue = null;
+
+                if (!utilsIsObjectNullOrUndefined(oRetValue)) {
+                    aoReturnValue.push(oRetValue);
                 }
-                aoReturnValue.push(oController.m_oReturnValue);
             }
 
 

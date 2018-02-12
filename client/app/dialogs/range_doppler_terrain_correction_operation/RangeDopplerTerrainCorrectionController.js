@@ -109,23 +109,27 @@ var RangeDopplerTerrainCorrectionController = (function() {
                 if( utilsIsObjectNullOrUndefined(oController.m_oReturnValue.options.saveBetaNought) == true )
                     bAreOkOptions = false;
 
+                var oRetValue = null;
+
                 if(bAreOkOptions != false)
                 {
+                    oRetValue = {
+                        options:{}
+                    };
 
-                    oController.m_oReturnValue.sourceFileName =  oProduct.fileName;
-                    oController.m_oReturnValue.destinationFileName = oProduct.name + "_RangeDopplerTerrainCorrection";
+                    oRetValue.sourceFileName =  oProduct.fileName;
+                    oRetValue.destinationFileName = oProduct.name + "_RangeDopplerTerrainCorrection";
                     // oController.m_oReturnValue.options.sourceBandNames = oController.m_asSourceBandsSelected;
-                    oController.m_oReturnValue.options.sourceBandNames = oController.getSelectedBandsByProductName(oProduct.name, oController.m_asSourceBandsSelected);
-                    oController.m_oReturnValue.options.demName = oController.m_sDigitalElevationModelSelected;
-                    oController.m_oReturnValue.options.demResamplingMethod = oController.m_sDEMResamplingMethodSelected;
-                    oController.m_oReturnValue.options.imgResamplingMethod = oController.m_sImageResamplingMethodSelected;
+                    oRetValue.options.sourceBandNames = oController.getSelectedBandsByProductName(oProduct.name, oController.m_asSourceBandsSelected);
+                    oRetValue.options.demName = oController.m_sDigitalElevationModelSelected;
+                    oRetValue.options.demResamplingMethod = oController.m_sDEMResamplingMethodSelected;
+                    oRetValue.options.imgResamplingMethod = oController.m_sImageResamplingMethodSelected;
 
                 }
-                else
-                {
-                    oController.m_oReturnValue = null;
+
+                if (!utilsIsObjectNullOrUndefined(oRetValue)) {
+                    aoReturnValue.push(oRetValue);
                 }
-                aoReturnValue.push(oController.m_oReturnValue);
             }
 
             oClose(aoReturnValue, 500); // close, but give 500ms for bootstrap to animate
