@@ -114,13 +114,27 @@
 
       height: 78vh;
       border: 1px solid $wasdi-blue-logo;
+
       //BUTTONS ON MAP
-      .btn-group
+      .btn-group-left
       {
         z-index: 1001;
         position: absolute;
         top: 2px;
         left: 20px;
+
+      }
+      .btn-group-right
+      {
+        z-index: 1001;
+        position: absolute;
+        top: 2px;
+        right: 20px;
+
+      }
+
+      .btn-group
+      {
 
         .btn-default
         {

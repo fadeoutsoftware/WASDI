@@ -41,7 +41,7 @@ var wasdiApp = angular.module('wasdi', [
     'wasdi.SquaresDirective',
     'wasdi.MultiRadioButtonDropdownMenuDirective',
     'wasdi.ImagePreviewDirective',
-
+    'wasdi.ToggleSwitch',
     //FILTERS
     'wasdi.stringUtils',
 

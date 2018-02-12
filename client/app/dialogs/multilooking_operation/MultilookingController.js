@@ -66,11 +66,15 @@ var MultilookingController = (function() {
 
                 if(bAreOkOptions != false)
                 {
+                    oRetValue = {
+                        options:{}
+                    };
                     oRetValue.sourceFileName = oProduct.fileName;
                     oRetValue.destinationFileName = oProduct.name + "_Multilooking";
                     // oRetValue.options.sourceBandNames = oController.m_asSourceBandsSelected;
                     oRetValue.options.sourceBandNames = oController.getSelectedBandsByProductName(oProduct.name, oController.m_asSourceBandsSelected);
                 }
+
 
                 if (!utilsIsObjectNullOrUndefined(oRetValue)) {
                     aoReturnValue.push(oRetValue);
