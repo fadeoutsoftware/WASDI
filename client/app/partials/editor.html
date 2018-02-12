@@ -364,8 +364,7 @@
                     </button>
                     <!-- Switch Image Editor / Geographical Mode-->
                     <button type="button" class="btn btn-default " ng-class="m_oController.m_sClassBtnSwitchGeographic" ng-click="m_oController.switchEditorGeoReferencedMode();m_oController.changeClassBtnSwitchGeographic();" data-toggle="tooltip"
-                            data-placement="bottom" title="{{m_oController.m_sToolTipBtnSwitchGeographic|translate}}"
-                            ng-disabled="m_oController.m_b2DMapModeOn == false">
+                            data-placement="bottom" title="{{m_oController.m_sToolTipBtnSwitchGeographic|translate}}"> <!--ng-disabled="m_oController.m_b2DMapModeOn == false"-->
                     </button>
                     <!-- 2D map Home button-->
                     <button type="button" class="btn btn-default" ng-click="m_oController.goWorkspaceHome();"  data-toggle="tooltip"
@@ -402,8 +401,8 @@
                     </button>
                 </div>
 
-                <!-- BAND 2d-->
-                <img ng-src="{{m_oController.m_sViewUrlSelectedBand}}" ng-show="m_oController.m_b2DMapModeOn === true && m_oController.m_bIsActiveGeoraphicalMode === false && m_oController.m_bIsLoadedViewBandImage">
+                <!-- BAND 2d m_oController.m_b2DMapModeOn === true && -->
+                <img ng-src="{{m_oController.m_sViewUrlSelectedBand}}" ng-show="m_oController.m_bIsActiveGeoraphicalMode === false && m_oController.m_bIsLoadedViewBandImage">
                 <div class="loadIcon" ng-hide="m_oController.m_bIsLoadedViewBandImage && (m_oController.m_bIsLoadedViewBandImage === true) ">
                     <invader></invader>
                 </div>
@@ -412,7 +411,7 @@
                 <div class="map" id = "wasdiMap" ng-show="m_oController.m_b2DMapModeOn == true && m_oController.m_bIsActiveGeoraphicalMode === true"></div>
 
                 <!-- 3D map -->
-                <div id="cesiumContainer" class="map" ng-show="m_oController.m_b2DMapModeOn == false "></div>
+                <div id="cesiumContainer" class="map" ng-show="m_oController.m_b2DMapModeOn == false && m_oController.m_bIsActiveGeoraphicalMode === true"></div>
             </div>
         </div>
 
