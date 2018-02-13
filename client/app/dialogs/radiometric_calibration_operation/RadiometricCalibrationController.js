@@ -108,6 +108,14 @@ var RadiometricCalibrationController = (function() {
                     oRetValue.options.sourceBandNames = oController.getSelectedBandsByProductName(oProduct.name, oController.m_asSourceBandsSelected);
                     oRetValue.options.selectedPolarisations = [];
                     oRetValue.options.auxFile = oController.m_sSelectedAuxiliaryFile;
+                    oRetValue.options.createBetaBand = oController.m_oReturnValue.options.createBetaBand;
+                    oRetValue.options.createGammaBand = oController.m_oReturnValue.options.createGammaBand;
+                    oRetValue.options.externalAuxFile = oController.m_oReturnValue.options.externalAuxFile;
+                    oRetValue.options.outputBetaBand = oController.m_oReturnValue.options.outputBetaBand;
+                    oRetValue.options.outputGammaBand = oController.m_oReturnValue.options.outputGammaBand;
+                    oRetValue.options.outputImageInComplex = oController.m_oReturnValue.options.outputImageInComplex;
+                    oRetValue.options.outputImageScaleInDb = oController.m_oReturnValue.options.outputImageScaleInDb;
+                    oRetValue.options.outputSigmaBand = oController.m_oReturnValue.options.outputSigmaBand;
                     // oController.m_oReturnValue.options.externalAuxFile = "";
                 }
 

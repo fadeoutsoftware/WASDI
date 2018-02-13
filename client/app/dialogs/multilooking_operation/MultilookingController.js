@@ -73,6 +73,10 @@ var MultilookingController = (function() {
                     oRetValue.destinationFileName = oProduct.name + "_Multilooking";
                     // oRetValue.options.sourceBandNames = oController.m_asSourceBandsSelected;
                     oRetValue.options.sourceBandNames = oController.getSelectedBandsByProductName(oProduct.name, oController.m_asSourceBandsSelected);
+                    oRetValue.options.outputIntensity = oController.m_oReturnValue.options.outputIntensity;
+                    oRetValue.options.nRgLooks = oController.m_oReturnValue.options.nRgLooks;
+                    oRetValue.options.nAzLooks = oController.m_oReturnValue.options.nAzLooks;
+                    oRetValue.options.grSquarePixel = oController.m_oReturnValue.options.grSquarePixel;
                 }
 
 

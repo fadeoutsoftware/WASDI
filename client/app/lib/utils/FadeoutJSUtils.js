@@ -532,3 +532,8 @@ function utilsBootstrapCloseCollapsePanel ()
 {
     jQuery('.collapse').collapse('hide');
 }
+
+function utilsVariableIsAnArray (variable)
+{
+    return    variable.constructor === Array
+}

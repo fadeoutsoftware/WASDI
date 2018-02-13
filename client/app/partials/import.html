@@ -11,14 +11,21 @@
                  ng-class="{'search-button-disabled': m_oController.thereIsAtLeastOneProvider() === false || (m_oController.m_bIsVisibleListOfLayers || m_oController.m_bisVisibleLocalStorageInputs),
                             'search-button': m_oController.thereIsAtLeastOneProvider() === true }" >
                 <!--<i class="fa fa-search fa-lg" aria-hidden="true"></i>-->
-                {{"IMPORT_SEARCH_BUTTON"|translate}}
+                {{"IMPORT_SEARCH_BUTTON"|translate}} <i class="fa fa-search" aria-hidden="true"></i>
+
             </div>
 
             <div class="search-button" ng-click="m_oController.searchListAllSelectedProviders()" id="search-button-list"
                  ng-class="{'search-button-disabled': m_oController.thereIsAtLeastOneProvider() === false || (m_oController.m_bIsVisibleListOfLayers || m_oController.m_bisVisibleLocalStorageInputs),
                             'search-button': m_oController.thereIsAtLeastOneProvider() === true }" >
                 <!--<i class="fa fa-search fa-lg" aria-hidden="true"></i>-->
-                {{"IMPORT_SEARCHLIST_BUTTON"|translate}}
+                {{"IMPORT_SEARCHLIST_BUTTON"|translate}} <i class="fa fa-search" aria-hidden="true"></i>
+            </div>
+
+            <div class="search-button" ng-class="{'search-button-disabled': (m_oController.m_bIsVisibleListOfLayers === false)}"
+                                       ng-click="m_oController.downloadAllSelectedProducts()" >
+                <!--<i class="fa fa-search fa-lg" aria-hidden="true"></i>-->
+                Download all <i class="fa fa-download" aria-hidden="true"></i>
             </div>
 
         </div>
@@ -91,12 +98,20 @@
                 <i class="fa fa-arrow-left fa-lg backbtn" aria-hidden="true" ng-click=" m_oController.setPaginationVariables()" ng-show="m_oController.m_bIsVisibleListOfLayers"></i>
 
                 <span ng-hide="m_oController.m_bIsVisibleListOfLayers">{{"IMPORT_PANEL_HEAD_TITLE_FILTERS"|translate}}</span>
-                <div class="my-button clear-button" ng-click="m_oController.clearFilter()"   ng-click="m_oController.clearFilter()" title="Clear Search Filter" ng-show="m_oController.m_bClearFiltersEnabled">
+                <div class="my-button header-button" ng-click="m_oController.clearFilter()"   ng-click="m_oController.clearFilter()" title="Clear Search Filter" ng-show="m_oController.m_bClearFiltersEnabled">
                     <!--<i class="fa fa-search fa-lg" aria-hidden="true"></i>-->
                     <!--{{"IMPORT_CLEAR_BUTTON"|translate}}-->
                     <i class="fa fa-bath" aria-hidden="true" ></i>
 
                 </div>
+                <button class="my-button header-button " ng-show="m_oController.m_bIsVisibleListOfLayers"
+                        ng-click="m_oController.deselectAllProducts()">
+                    <i class="fa fa-square-o" aria-hidden="true"></i>
+                </button>
+                <button class="my-button header-button " ng-show="m_oController.m_bIsVisibleListOfLayers"
+                        ng-click="m_oController.selectAllProducts()">
+                    <i class="fa fa-check-square-o" aria-hidden="true"></i>
+                </button>
 
             </div>
 
@@ -571,9 +586,9 @@
                                     <!-- BUTTONS -->
                                     <td class="button-cell">
                                         <div class="btn-group-vertical" role="group" >
-                                            <button type="button" class="btn btn btn-primary" ng-click="m_oController.downloadProduct(layer)"
-                                                    ng-disabled="m_oController.isPossibleDoDownload(layer) || (layer.isDisabledToDoDownload != null && layer.isDisabledToDoDownload)" data-toggle="tooltip" data-placement="top" title="{{'IMPORT_TOOLTIP_ADD_PRODUCT'|translate}}">
-
+                                            <button type="button" class="btn btn btn-primary" ng-click="m_oController.downloadProductInWorkspace(layer)"
+                                                    ng-disabled="m_oController.isPossibleDoDownload(layer) || (layer.isDisabledToDoDownload != null && layer.isDisabledToDoDownload)"
+                                                    data-toggle="tooltip" data-placement="top" title="{{'IMPORT_TOOLTIP_ADD_PRODUCT'|translate}}">
                                                 <i class="fa fa-plus " aria-hidden="true"></i>
                                             </button>
                                             <button type="button" class="btn btn btn-primary" ng-click="m_oController.zoomOnBounds(layer.rectangle)"
@@ -584,6 +599,18 @@
                                                     data-toggle="tooltip" data-placement="top" title="{{'IMPORT_TOOLTIP_INFO'|translate}}">
                                                 <i class="fa fa-info-circle" aria-hidden="true"></i>
                                             </button>
+
+                                            <!-- CHECK PRODUCT-->
+                                            <button type="button" class="btn btn btn-primary" ng-show="layer.checked" ng-click="layer.checked= !layer.checked"
+                                                    data-toggle="tooltip" data-placement="top" title="{{'IMPORT_TOOLTIP_CHECK'|translate}}">
+                                                <i class="fa fa-check-square-o" aria-hidden="true"></i>
+                                            </button>
+                                            <!-- UNCHECK PRODUCT-->
+                                            <button type="button" class="btn btn btn-primary" ng-hide="layer.checked" ng-click="layer.checked= !layer.checked "
+                                                    data-toggle="tooltip" data-placement="top" title="{{'IMPORT_TOOLTIP_UNCHECK'|translate}}">
+                                                <i class="fa fa-square-o" aria-hidden="true"></i>
+                                            </button>
+
                                         </div>
                                     </td>
                                     <!-- IMAGE CELL -->

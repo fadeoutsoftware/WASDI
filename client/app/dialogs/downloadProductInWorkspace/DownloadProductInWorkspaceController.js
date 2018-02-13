@@ -5,10 +5,10 @@
 
 var DownloadProductInWorkspaceController = (function() {
 
-    function DownloadProductInWorkspaceController($scope, oClose,oExtras,oWorkspaceService) {
+    function DownloadProductInWorkspaceController($scope, oClose,oWorkspaceService) {
         this.m_oScope = $scope;
         this.m_oScope.m_oController = this;
-        this.m_oExtras = oExtras;
+         // this.m_oExtras = oExtras;
         this.m_oWorkspaceService = oWorkspaceService;
         this.m_aoWorkspaceList = [];
         this.m_oClose = oClose;
@@ -62,7 +62,7 @@ var DownloadProductInWorkspaceController = (function() {
     DownloadProductInWorkspaceController.$inject = [
         '$scope',
         'close',
-        'extras',
+        // 'extras',
         'WorkspaceService'
     ];
     return DownloadProductInWorkspaceController;
