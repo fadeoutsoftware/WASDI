@@ -512,7 +512,7 @@ var SearchOrbitController = (function() {
                 sOperation = oMessage.messageCode;
             var oDialog = utilsVexDialogAlertTop('GURU MEDITATION<br>THERE WAS AN ERROR IN THE ' + sOperation + ' PROCESS');
             utilsVexCloseDialogAfterFewSeconds(4000, oDialog);
-            this.m_oProcessesLaunchedService.loadProcessesFromServer(this.m_oActiveWorkspace);
+            this.m_oProcessesLaunchedService.loadProcessesFromServer(this.m_oActiveWorkspace.workspaceId);
             return;
         }
         switch(oMessage.messageCode)
