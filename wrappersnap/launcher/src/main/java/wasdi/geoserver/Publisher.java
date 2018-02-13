@@ -24,6 +24,8 @@ public class Publisher {
     static Logger s_oLogger = Logger.getLogger(Publisher.class);
 
     public static String GDAL_Retile_Command = "gdal_retile.py -r bilinear -levels 4 -ps 2048 2048 -co TILED=YES";
+    
+    public long m_lMaxMbTiffPyramid = 50L;
 
     public Publisher() {
         try {
@@ -199,8 +201,7 @@ public class Publisher {
         if (oFile.exists()==false) return "";
 
         long lFileLenght = oFile.length();
-        //long lMaxSize = 2L*1024L*1024L*1024L;
-        long lMaxSize = 50L*1024L*1024L;
+        long lMaxSize = m_lMaxMbTiffPyramid*1024L*1024L;
 
         // More than Gb => Pyramid, otherwise normal geotiff
         if (lFileLenght> lMaxSize) return this.PublishImagePyramidOnGeoServer(sFileName, sStore, sStyle, oManager);

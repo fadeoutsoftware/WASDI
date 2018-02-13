@@ -25,6 +25,10 @@ public class DownloadFile {
     private final int BUFFER_SIZE = 4096;
     private final int MAX_NUM_ZEORES_DURING_READ = 20;
 	private Logger logger;
+	int m_iLastError = 0;
+	
+	private String m_sProviderUser;
+	private String m_sProviderPassword;
 
     public DownloadFile() {
 		logger = LauncherMain.s_oLogger;
@@ -43,12 +47,21 @@ public class DownloadFile {
             logger.debug("DownloadFile.GetDownloadSize: sFileURL is null");
             return lLenght;
         }
+        
+        String sUser = ConfigReader.getPropValue("DHUS_USER");
+        String sPassword = ConfigReader.getPropValue("DHUS_PASSWORD");
+        
+        if (!Utils.isNullOrEmpty(m_sProviderUser)) sUser = m_sProviderUser;
+        if (!Utils.isNullOrEmpty(m_sProviderPassword)) sPassword = m_sProviderPassword;
 
+        final String sFinalUser = sUser;
+        final String sFinalPassword = sPassword;
+        
         // TODO: Here we are assuming dhus authentication. But we have to find a general solution
         Authenticator.setDefault(new Authenticator() {
             protected PasswordAuthentication getPasswordAuthentication() {
                 try{
-                    return new PasswordAuthentication(ConfigReader.getPropValue("DHUS_USER"), ConfigReader.getPropValue("DHUS_PASSWORD").toCharArray());
+                    return new PasswordAuthentication(sFinalUser, sFinalPassword.toCharArray());
                 }
                 catch (Exception oEx){
                     logger.error("DownloadFile.GetDownloadSize: exception setting auth " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
@@ -74,6 +87,7 @@ public class DownloadFile {
 
         } else {
             logger.debug("DownloadFile.GetDownloadSize: No file to download. Server replied HTTP code: " + responseCode);
+            m_iLastError = responseCode;
         }
         httpConn.disconnect();
 
@@ -96,13 +110,12 @@ public class DownloadFile {
         String sReturnFilePath = "";
 
         // TODO: Here we are assuming dhus authentication. But we have to find a general solution
-        logger.debug("DownloadFile.ExecuteDownloadFile: sDownloadUser = " + sDownloadUser + " - sDownloadPassword = " + sDownloadPassword);
+        logger.debug("DownloadFile.ExecuteDownloadFile: sDownloadUser = " + sDownloadUser);
         
         if (sDownloadUser!=null) {
             Authenticator.setDefault(new Authenticator() {
                 protected PasswordAuthentication getPasswordAuthentication() {
                     try{
-//                        return new PasswordAuthentication(ConfigReader.getPropValue("DHUS_USER"), ConfigReader.getPropValue("DHUS_PASSWORD").toCharArray());
                     	return new PasswordAuthentication(sDownloadUser, sDownloadPassword.toCharArray());
                     }
                     catch (Exception oEx){
@@ -207,6 +220,7 @@ public class DownloadFile {
             logger.debug("File downloaded " + sReturnFilePath);
         } else {
             logger.debug("No file to download. Server replied HTTP code: " + responseCode);
+            m_iLastError = responseCode;
         }
         httpConn.disconnect();
 
@@ -246,12 +260,21 @@ public class DownloadFile {
             }
 
             String sReturnFilePath = "";
+            
+            String sUser = ConfigReader.getPropValue("DHUS_USER");
+            String sPassword = ConfigReader.getPropValue("DHUS_PASSWORD");
+            
+            if (!Utils.isNullOrEmpty(m_sProviderUser)) sUser = m_sProviderUser;
+            if (!Utils.isNullOrEmpty(m_sProviderPassword)) sPassword = m_sProviderPassword;
+
+            final String sFinalUser = sUser;
+            final String sFinalPassword = sPassword;
 
             // TODO: Here we are assuming dhus authentication. But we have to find a general solution
             Authenticator.setDefault(new Authenticator() {
                 protected PasswordAuthentication getPasswordAuthentication() {
                     try{
-                        return new PasswordAuthentication(ConfigReader.getPropValue("DHUS_USER"), ConfigReader.getPropValue("DHUS_PASSWORD") .toCharArray());
+                        return new PasswordAuthentication(sFinalUser, sFinalPassword.toCharArray());
                     }
                     catch (Exception oEx){
                         logger.error("DownloadFile.GetFileName: exception setting auth " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
@@ -318,6 +341,7 @@ public class DownloadFile {
                 logger.debug("fileName = " + fileName);
             } else {
                 logger.debug("No file to download. Server replied HTTP code: " + responseCode);
+                m_iLastError = responseCode;
             }
             httpConn.disconnect();
 
@@ -329,4 +353,24 @@ public class DownloadFile {
 
         return  "";
     }
+    
+    public int getLastServerError() {
+    	return m_iLastError;
+    }
+
+    public String getProviderUser() {
+		return m_sProviderUser;
+	}
+
+	public void setProviderUser(String m_sProviderUser) {
+		this.m_sProviderUser = m_sProviderUser;
+	}
+
+	public String getProviderPassword() {
+		return m_sProviderPassword;
+	}
+
+	public void setProviderPassword(String m_sProviderPassword) {
+		this.m_sProviderPassword = m_sProviderPassword;
+	}
 }

@@ -336,6 +336,9 @@ public class LauncherMain {
         try {
             s_oLogger.debug("LauncherMain.Download: Download Start");
 
+            oDownloadFile.setProviderUser(oParameter.getDownloadUser());
+            oDownloadFile.setProviderPassword(oParameter.getDownloadPassword());
+            
             if (oProcessWorkspace != null) {
                 //get file size
                 long lFileSizeByte = oDownloadFile.GetDownloadFileSize(oParameter.getUrl());
@@ -397,6 +400,13 @@ public class LauncherMain {
 
                     // No: it isn't: download it
                     sFileName = oDownloadFile.ExecuteDownloadFile(oParameter.getUrl(), oParameter.getDownloadUser(), oParameter.getDownloadPassword(), sDownloadPath, oProcessWorkspace);
+                    
+                    if (Utils.isNullOrEmpty(sFileName)) {
+                    	int iLastError = oDownloadFile.getLastServerError();
+                    	String sError = "There was an error contacting the provider";
+                    	if (iLastError>0) sError+=": query obtained HTTP Erro Code " + iLastError;
+                    	throw new Exception(sError);
+                    }
 
                     // Get The product view Model
                     ReadProduct oReadProduct = new ReadProduct();
@@ -843,9 +853,22 @@ public class LauncherMain {
             String sEPSG = CRS.lookupIdentifier(oProduct.getSceneCRS(),true);
             
             updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 20);
+            
+            // P.Campanella 13/02/2018: write the data directly to GeoServer Data Dir
+            String sGeoServerDataDir = ConfigReader.getPropValue("GEOSERVER_DATADIR");
+            String sTargetDir = sGeoServerDataDir;
 
-            String sOutputFilePath = sPath + sLayerId + ".tif";
+            if (!(sTargetDir.endsWith("/")||sTargetDir.endsWith("\\"))) sTargetDir+="/";
+            sTargetDir+=sLayerId+"/";
+
+            File oTargetDir = new File(sTargetDir);
+            if (!oTargetDir.exists()) oTargetDir.mkdirs();
+            
+            String sOutputFilePath = sTargetDir + sLayerId + ".tif";
+
             File oOutputFile = new File(sOutputFilePath);
+
+            s_oLogger.debug("LauncherMain.PublishBandImage: to " + sOutputFilePath + " [LayerId] = " + sLayerId);
 
             if (oProduct.getProductType().startsWith("S2") && oProduct.getProductReader().getClass().getName().startsWith("org.esa.s2tbx")) {
             	
@@ -855,7 +878,7 @@ public class LauncherMain {
 				Band oBand = oProduct.getBand(oParameter.getBandName());            
 				Product oGeotiffProduct = new Product(oParameter.getBandName(), "GEOTIFF");
 				oGeotiffProduct.addBand(oBand);                 
-				sOutputFilePath = new WriteProduct(oProcessWorkspaceRepository, oProcessWorkspace).WriteGeoTiff(oGeotiffProduct, sPath, sLayerId);
+				sOutputFilePath = new WriteProduct(oProcessWorkspaceRepository, oProcessWorkspace).WriteGeoTiff(oGeotiffProduct, sTargetDir, sLayerId);
 				oOutputFile = new File(sOutputFilePath);
 				s_oLogger.debug( "LauncherMain.PublishBandImage:  Geotiff File Created (EPSG=" + sEPSG + "): " + sOutputFilePath);
 			
@@ -888,30 +911,22 @@ public class LauncherMain {
 			
             updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 50);
             
-            s_oLogger.debug( "LauncherMain.PublishBandImage:  Moving Band Image...");
-
-            // Copy fie to GeoServer Data Dir
-            String sGeoServerDataDir = ConfigReader.getPropValue("GEOSERVER_DATADIR");
-            String sTargetDir = sGeoServerDataDir;
-
-            if (!(sTargetDir.endsWith("/")||sTargetDir.endsWith("\\"))) sTargetDir+="/";
-            sTargetDir+=sLayerId+"/";
-
-            String sTargetFile = sTargetDir + oOutputFile.getName();
-
-            File oTargetFile = new File(sTargetFile);
-
-            s_oLogger.debug("LauncherMain.PublishBandImage: InputFile: " + sOutputFilePath + " TargetFile: " + sTargetFile + " LayerId " + sLayerId);
-
-            FileUtils.copyFile(oOutputFile,oTargetFile);
-
             // Ok publish
             s_oLogger.debug("LauncherMain.PublishBandImage: call PublishImage");
             
             GeoServerManager manager = new GeoServerManager(ConfigReader.getPropValue("GEOSERVER_ADDRESS"),ConfigReader.getPropValue("GEOSERVER_USER"),ConfigReader.getPropValue("GEOSERVER_PASSWORD"));            
             
             Publisher oPublisher = new Publisher();
-            sLayerId = oPublisher.publishGeoTiff(sTargetFile, sLayerId, sEPSG, sStyle, manager);
+            
+            try {
+            	oPublisher.m_lMaxMbTiffPyramid = Long.parseLong(ConfigReader.getPropValue("MAX_GEOTIFF_DIMENSION_PYRAMID","50"));
+            }
+            catch (Exception e) {
+            	s_oLogger.debug("LauncherMain.PublishBandImage: wrong MAX_GEOTIFF_DIMENSION_PYRAMID, setting default to 50");
+            	oPublisher.m_lMaxMbTiffPyramid = 50L;
+			}
+            
+            sLayerId = oPublisher.publishGeoTiff(sOutputFilePath, sLayerId, sEPSG, sStyle, manager);
             
             updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 90);
             
