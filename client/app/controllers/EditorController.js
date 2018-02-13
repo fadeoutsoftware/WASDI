@@ -465,7 +465,7 @@ var EditorController = (function () {
 
             var oDialog = utilsVexDialogAlertTop('GURU MEDITATION<br>THERE WAS AN ERROR IN THE ' + sOperation + ' PROCESS'+ sErrorDescription);
             utilsVexCloseDialogAfterFewSeconds(10000, oDialog);
-            this.m_oProcessesLaunchedService.loadProcessesFromServer(this.m_oActiveWorkspace);
+            this.m_oProcessesLaunchedService.loadProcessesFromServer(this.m_oActiveWorkspace.workspaceId);
 
             if (oMessage.messageCode =="PUBLISHBAND") {
                 if (utilsIsObjectNullOrUndefined(oMessage.payload)==false) {
@@ -822,7 +822,7 @@ var EditorController = (function () {
                     }
                     else
                     {
-                        oController.m_oProcessesLaunchedService.loadProcessesFromServer(oController.m_oActiveWorkspace);
+                        oController.m_oProcessesLaunchedService.loadProcessesFromServer(oController.m_oActiveWorkspace.workspaceId);
                         // It is publishing: we will receive Rabbit Message
                         if (data.messageCode !== "WAITFORRABBIT") oController.setTreeNodeAsDeselected(oBand.productName+"_"+oBand.name);
                     }
@@ -1344,8 +1344,7 @@ var EditorController = (function () {
         }).then(function (modal) {
             modal.element.modal();
             modal.close.then(function (oResult) {
-                oController.m_oProcessesLaunchedService.loadProcessesFromServer(oController.m_oActiveWorkspace);
-
+                oController.m_oProcessesLaunchedService.loadProcessesFromServer(oController.m_oActiveWorkspace.workspaceId);
             });
         });
 
@@ -1410,7 +1409,7 @@ var EditorController = (function () {
                     oController.m_oSnapOperationService.ApplyOrbit(oResult[iIndexProduct].sourceFileName, oResult[iIndexProduct].destinationFileName,
                                                                     oController.m_oActiveWorkspace.workspaceId,oResult[iIndexProduct].options)
                         .success(function (data) {
-                            oController.m_oProcessesLaunchedService.loadProcessesFromServer(oController.m_oActiveWorkspace);
+                            oController.m_oProcessesLaunchedService.loadProcessesFromServer(oController.m_oActiveWorkspace.workspaceId);
                         }).error(function (error) {
                             utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR THE OPERATION APPLY ORBIT DOSEN'T WORK");
                     });
@@ -1457,7 +1456,7 @@ var EditorController = (function () {
                     oController.m_oSnapOperationService.Calibrate(oResult[iIndexProduct].sourceFileName, oResult[iIndexProduct].destinationFileName,
                                                                 oController.m_oActiveWorkspace.workspaceId, oResult[iIndexProduct].options)
                         .success(function (data) {
-                            oController.m_oProcessesLaunchedService.loadProcessesFromServer(oController.m_oActiveWorkspace);
+                            oController.m_oProcessesLaunchedService.loadProcessesFromServer(oController.m_oActiveWorkspace.workspaceId);
                         }).error(function (error) {
                         utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR THE OPERATION RADIOMETRIC CALIBRATION DOESN'T WORK");
                     });
@@ -1503,7 +1502,7 @@ var EditorController = (function () {
                     oController.m_oSnapOperationService.Multilooking(oResult[iIndexProduct].sourceFileName, oResult[iIndexProduct].destinationFileName,
                                             oController.m_oActiveWorkspace.workspaceId,oResult[[iIndexProduct]].options)
                         .success(function (data) {
-                            oController.m_oProcessesLaunchedService.loadProcessesFromServer(oController.m_oActiveWorkspace);
+                            oController.m_oProcessesLaunchedService.loadProcessesFromServer(oController.m_oActiveWorkspace.workspaceId);
                         }).error(function (error) {
                         utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR THE OPERATION MULTILOOKING DOSEN'T WORK");
                     });
@@ -1556,7 +1555,7 @@ var EditorController = (function () {
                 // oController.m_oScope.Result = oResult;
                 oController.m_oSnapOperationService.NDVI(oResult.sourceFileName, oResult.destinationFileName, oController.m_oActiveWorkspace.workspaceId,oResult.options)
                     .success(function (data) {
-                        oController.m_oProcessesLaunchedService.loadProcessesFromServer(oController.m_oActiveWorkspace);
+                        oController.m_oProcessesLaunchedService.loadProcessesFromServer(oController.m_oActiveWorkspace.workspaceId);
                     }).error(function (error) {
                     utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR THE OPERATION NDVI DOESN'T WORK");
                 });
@@ -1661,7 +1660,7 @@ var EditorController = (function () {
                     oController.m_oSnapOperationService.RangeDopplerTerrainCorrection(oResult[iIndexProduct].sourceFileName, oResult[iIndexProduct].destinationFileName,
                                                                                         oController.m_oActiveWorkspace.workspaceId, oResult[iIndexProduct].options)
                         .success(function (data) {
-                            oController.m_oProcessesLaunchedService.loadProcessesFromServer(oController.m_oActiveWorkspace);
+                            oController.m_oProcessesLaunchedService.loadProcessesFromServer(oController.m_oActiveWorkspace.workspaceId);
                         }).error(function (error) {
                         utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR THE OPERATION RANGE DOPPLER TERRATIN CORRECTION DOESN'T WORK");
                     });
