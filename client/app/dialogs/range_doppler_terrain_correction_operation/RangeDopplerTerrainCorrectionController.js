@@ -124,7 +124,31 @@ var RangeDopplerTerrainCorrectionController = (function() {
                     oRetValue.options.demName = oController.m_sDigitalElevationModelSelected;
                     oRetValue.options.demResamplingMethod = oController.m_sDEMResamplingMethodSelected;
                     oRetValue.options.imgResamplingMethod = oController.m_sImageResamplingMethodSelected;
-
+                    oRetValue.options.externalDEMFile =  oController.m_oReturnValue.options.externalDEMFile;
+                    oRetValue.options.externalDEMNoDataValue =  oController.m_oReturnValue.options.externalDEMNoDataValue;
+                    oRetValue.options.externalDEMApplyEGM =  oController.m_oReturnValue.options.externalDEMApplyEGM;
+                    oRetValue.options.pixelSpacingInMeter =  oController.m_oReturnValue.options.pixelSpacingInMeter;
+                    oRetValue.options.pixelSpacingInDegree =  oController.m_oReturnValue.options.pixelSpacingInDegree;
+                    oRetValue.options.mapProjection =  oController.m_oReturnValue.options.mapProjection;
+                    oRetValue.options.alignToStandardGrid =  oController.m_oReturnValue.options.alignToStandardGrid;
+                    oRetValue.options.standardGridOriginX =  oController.m_oReturnValue.options.standardGridOriginX;
+                    oRetValue.options.standardGridOriginY =  oController.m_oReturnValue.options.standardGridOriginY;
+                    oRetValue.options.nodataValueAtSea =  oController.m_oReturnValue.options.nodataValueAtSea;
+                    oRetValue.options.saveDEM =  oController.m_oReturnValue.options.saveDEM;
+                    oRetValue.options.saveLatLon =  oController.m_oReturnValue.options.saveLatLon;
+                    oRetValue.options.saveIncidenceAngleFromEllipsoid =  oController.m_oReturnValue.options.saveIncidenceAngleFromEllipsoid;
+                    oRetValue.options.saveLocalIncidenceAngle =  oController.m_oReturnValue.options.saveLocalIncidenceAngle;
+                    oRetValue.options.saveProjectedLocalIncidenceAngle =  oController.m_oReturnValue.options.saveProjectedLocalIncidenceAngle;
+                    oRetValue.options.saveSelectedSourceBand =  oController.m_oReturnValue.options.saveSelectedSourceBand;
+                    oRetValue.options.outputComplex =  oController.m_oReturnValue.options.outputComplex;
+                    oRetValue.options.applyRadiometricNormalization =  oController.m_oReturnValue.options.applyRadiometricNormalization;
+                    oRetValue.options.saveSigmaNought =  oController.m_oReturnValue.options.saveSigmaNought;
+                    oRetValue.options.saveGammaNought =  oController.m_oReturnValue.options.saveGammaNought;
+                    oRetValue.options.saveBetaNought =  oController.m_oReturnValue.options.saveBetaNought;
+                    oRetValue.options.incidenceAngleForSigma0 =  oController.m_oReturnValue.options.incidenceAngleForSigma0;
+                    oRetValue.options.incidenceAngleForGamma0 =  oController.m_oReturnValue.options.incidenceAngleForGamma0;
+                    oRetValue.options.auxFile =  oController.m_oReturnValue.options.auxFile;
+                    oRetValue.options.externalAuxFile =  oController.m_oReturnValue.options.externalAuxFile;
                 }
 
                 if (!utilsIsObjectNullOrUndefined(oRetValue)) {

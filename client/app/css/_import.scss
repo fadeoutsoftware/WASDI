@@ -175,13 +175,13 @@
     .panel-heading {
       border-bottom: 0;
 
-      .clear-button {
+      .header-button {
         cursor:pointer;
         display: inline;
         // top: 10%;
         //background: $wasdi-blue-logo-complementary-3;
         color:white;
-        padding:5px 5px;
+        padding:1px 5px;
 
         //margin-top: 15px;
         //margin-right: 15px;
@@ -195,7 +195,7 @@
 
       }
 
-      .clear-button:hover
+      .header-button:hover
       {
         background-color: $wasdi-green-logo;
       }

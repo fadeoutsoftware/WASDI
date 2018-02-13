@@ -79,6 +79,8 @@ var ApplyOrbitController = (function() {
                     oRetValue.sourceFileName = oProduct.fileName;
                     oRetValue.destinationFileName = oProduct.name + "_ApplyOrbit";
                     oRetValue.options.orbitType = oController.m_sSelectedOrbitStateVectors;
+                    oRetValue.options.continueOnFail = oController.m_oReturnValue.options.continueOnFail;
+                    oRetValue.options.polyDegree = oController.m_oReturnValue.options.polyDegree;
 
                 }
 
