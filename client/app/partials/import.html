@@ -524,8 +524,10 @@
                 <div class="container-table-row" ng-show="m_oController.m_bIsVisibleListOfLayers" id="div-container-table" >
 
                     <!-- TAB NAVIGATION -->
-                    <ul class="nav nav-tabs" role="tablist" ><!-- ng-hide="m_oController.m_bIsVisibleListOfLayers " && m_oController.isEmptyLayersList() == true-->
-                        <li ng-class="{active: m_oController.m_iActiveProvidersTab === $index}" ng-repeat="provider in m_oController.m_aListOfProvider | filter:{ selected: true }"  ng-click="m_oController.m_iActiveProvidersTab = $index">
+                    <ul class="nav nav-tabs" role="tablist" ><!-- ng-hide="m_oController.m_bIsVisibleListOfLayers " && m_oController.isEmptyProductsList() == true-->
+                        <li ng-class="{active: m_oController.m_iActiveProvidersTab === $index}"
+                            ng-repeat="provider in m_oController.m_aListOfProvider | filter:{ selected: true }"
+                            ng-click="m_oController.m_iActiveProvidersTab = $index; m_oController.updateLayerListForActiveTab($index)">
                             <a href="" role="tab" data-toggle="tab">
                                 {{provider.name }}
                                 <span class="badge pull-right">{{ m_oController.m_oPageService.getNumberOfProductByProvider(provider.name)}}</span>
@@ -539,7 +541,7 @@
                         <div ng-repeat="provider in m_oController.m_aListOfProvider | filter:{ selected: true }" class="missions" ng-show="m_oController.m_iActiveProvidersTab === $index">
 
                             <!--PAGING CONTROL-->
-                            <div class="pages" ng-hide="(m_oController.m_bIsVisibleListOfLayers && m_oController.m_bIsPaginatedList === false) || m_oController.isEmptyLayersList() == true">
+                            <div class="pages" ng-hide="(m_oController.m_bIsVisibleListOfLayers && m_oController.m_bIsPaginatedList === false) || m_oController.isEmptyProductsList() == true">
                                 <ul class="pager">
 
                                     <div class="form-group">
@@ -575,7 +577,7 @@
                                 <invader></invader>
                             </div>
 
-                            <table class="table table-hover layers " id="table_layers_list" ng-show="m_oController.m_bIsVisibleListOfLayers && m_oController.isEmptyLayersList() == false" >
+                            <table class="table table-hover layers " id="table_layers_list" ng-show="m_oController.m_bIsVisibleListOfLayers && m_oController.isEmptyProductsList() == false" >
 
                                 <tbody ng-repeat="layer in m_oController.m_aoProductsList | filter:{ provider: provider.name } "
                                        ng-mouseover="m_oController.changeStyleRectangleMouseOver(layer.rectangle)"

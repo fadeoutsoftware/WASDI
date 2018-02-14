@@ -521,7 +521,7 @@ var ImportController = (function() {
 
         oController.m_bClearFiltersEnabled = false;
         //delete layers and relatives rectangles in map
-        oController.deleteLayers(oProvider.name);
+        oController.deleteProducts(oProvider.name);
         //hide previous results
         oController.m_bIsVisibleListOfLayers = true;
         oController.m_bIsPaginatedList = true;
@@ -616,7 +616,7 @@ var ImportController = (function() {
 
         oController.m_bClearFiltersEnabled = false;
         //delete layers and relatives rectangles in map
-        oController.deleteLayers(oProvider.name);
+        oController.deleteProducts(oProvider.name);
         //hide previous results
         oController.m_bIsVisibleListOfLayers = true;
         oController.m_bIsPaginatedList = false;
@@ -962,8 +962,10 @@ var ImportController = (function() {
     };
 
 
-/*
-// P.Campanella 11/02/2018: tentativo NON finito di mostrare solo i footprint del provider selezionato
+    /**
+     * updateLayerListForActiveTab
+     * @param iActiveTab
+     */
     ImportController.prototype.updateLayerListForActiveTab = function(iActiveTab) {
         var oController = this;
 
@@ -973,20 +975,23 @@ var ImportController = (function() {
         var sProvider = oController.m_aListOfProvider[iActiveTab].name;
         var aaoAllBounds = [];
 
-        oController.deleteLayers(sProvider);
+        oController.deleteLayers();
 
         for(var iIndexData = 0; iIndexData < oController.m_aoProductsList.length; iIndexData++)
         {
             if (oController.m_aoProductsList[iIndexData].provider !== sProvider) continue;
 
-            oController.m_oMapService.addRectangleByBoundsArrayOnMap(oController.m_aoProductsList[iIndexData].bounds ,null,iIndexData);
-
+            var oRectangle = oController.m_oMapService.addRectangleByBoundsArrayOnMap(oController.m_aoProductsList[iIndexData].bounds ,null,iIndexData);
+            if(utilsIsObjectNullOrUndefined(oRectangle) === false)
+            {
+                oController.m_aoProductsList[iIndexData].rectangle = oRectangle
+            }
             aaoAllBounds.push(oController.m_aoProductsList[iIndexData].bounds);
         }
 
         oController.m_oMapService.zoomOnBounds(aaoAllBounds);
     };
-*/
+
     /*
     * Generate layers list
     * */
@@ -1008,16 +1013,17 @@ var ImportController = (function() {
 
             //get bounds
             var aoBounds = oController.polygonToBounds( aData[iIndexData].footprint);
-            var oRectangle = oController.m_oMapService.addRectangleByBoundsArrayOnMap(aoBounds ,null,iIndexData);
-            aData[iIndexData].rectangle = oRectangle;
+            // var oRectangle = oController.m_oMapService.addRectangleByBoundsArrayOnMap(aoBounds ,null,iIndexData);
+            // aData[iIndexData].rectangle = oRectangle;
+            aData[iIndexData].rectangle = null;
             aData[iIndexData].bounds = aoBounds;
             aData[iIndexData].checked = false;
             aaoAllBounds.push(aoBounds);
 
             oController.m_aoProductsList.push(aData[iIndexData]);
         }
-
-        oController.m_oMapService.zoomOnBounds(aaoAllBounds);
+        oController.updateLayerListForActiveTab(this.m_iActiveProvidersTab);
+        // oController.m_oMapService.zoomOnBounds(aaoAllBounds);
     };
 
     /*GetRelativeOrbit*/
@@ -1276,31 +1282,50 @@ var ImportController = (function() {
         }
     };
 
-    ImportController.prototype.isEmptyLayersList = function(){
+    ImportController.prototype.isEmptyProductsList = function(){
         if(utilsIsObjectNullOrUndefined(this.m_aoProductsList) ) return true;
         if( this.m_aoProductsList.length == 0) return true;
 
         return false;
     };
 
-    ImportController.prototype.deleteLayers = function(sProvider)
+
+    ImportController.prototype.deleteLayers = function()
+    {
+        if(this.isEmptyProductsList()) return false;
+        var iLengthProductsList = this.m_aoProductsList.length;
+        var oMap = this.m_oMapService.getMap();
+        for(var iIndexProductsList = 0; iIndexProductsList < iLengthProductsList; iIndexProductsList++)
+        {
+            var oRectangle = this.m_aoProductsList[iIndexProductsList].rectangle;
+            if(!utilsIsObjectNullOrUndefined(oRectangle))
+                oRectangle.removeFrom(oMap);
+        }
+    };
+
+    /**
+     * deleteProducts
+     * @param sProvider
+     * @returns {boolean}
+     */
+    ImportController.prototype.deleteProducts = function(sProvider)
     {
         //check if layers list is empty
-        if(this.isEmptyLayersList()) return false;
-        var iLengthLayersList = this.m_aoProductsList.length;
+        if(this.isEmptyProductsList()) return false;
+        var iLengthProductsList = this.m_aoProductsList.length;
         var oMap = this.m_oMapService.getMap();
         /* remove rectangle in map*/
-        for(var iIndexLayersList = 0; iIndexLayersList < iLengthLayersList; iIndexLayersList++)
+        for(var iIndexProductsList = 0; iIndexProductsList < iLengthProductsList; iIndexProductsList++)
         {
-            if( (utilsIsObjectNullOrUndefined(this.m_aoProductsList[iIndexLayersList].provider)=== false) && (this.m_aoProductsList[iIndexLayersList].provider === sProvider))
+            if( (utilsIsObjectNullOrUndefined(this.m_aoProductsList[iIndexProductsList].provider)=== false) && (this.m_aoProductsList[iIndexProductsList].provider === sProvider))
             {
-                var oRectangle = this.m_aoProductsList[iIndexLayersList].rectangle;
+                var oRectangle = this.m_aoProductsList[iIndexProductsList].rectangle;
                 if(!utilsIsObjectNullOrUndefined(oRectangle))
                     oRectangle.removeFrom(oMap);
-                if (iIndexLayersList > -1) {
-                    this.m_aoProductsList.splice(iIndexLayersList, 1);
-                    iLengthLayersList--;
-                    iIndexLayersList--;
+                if (iIndexProductsList > -1) {
+                    this.m_aoProductsList.splice(iIndexProductsList, 1);
+                    iLengthProductsList--;
+                    iIndexProductsList--;
                 }
             }
 

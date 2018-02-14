@@ -136,6 +136,12 @@
       .btn-group
       {
 
+        .selected-mode{
+          color: $wasdi-white;
+        }
+        .deselected-mode{
+          color: #777777;
+        }
         .btn-default
         {
           min-width: 46px;

@@ -367,8 +367,17 @@
                     <button type="button" class="btn btn-primary" ng-click="m_oController.switch2D3DMode()"
                             data-toggle="tooltip" data-placement="bottom" title="{{'EDITOR_TOOLTIP_SWITCH_3D_2D'|translate}}"
                             ng-hide=" m_oController.m_bIsActiveGeoraphicalMode == false">
-                        <i ng-show="m_oController.m_b2DMapModeOn == true" aria-hidden="true">2D</i>
-                        <i  ng-show="m_oController.m_b2DMapModeOn == false" aria-hidden="true">3D</i>
+                        <!--<i ng-show="m_oController.m_b2DMapModeOn == true" aria-hidden="true">2D</i>-->
+                        <!--<i  ng-show="m_oController.m_b2DMapModeOn == false" aria-hidden="true">3D</i>-->
+                        <div ng-show="m_oController.m_b2DMapModeOn === true">
+                            <span class="deselected-mode">3D</span> <i class="fa fa-toggle-on" aria-hidden="true"  ></i> <span class="selected-mode">2D</span>
+                        </div>
+
+                        <div ng-show="m_oController.m_b2DMapModeOn === false">
+                            <span class="selected-mode">3D</span> <i class="fa fa-toggle-on fa-rotate-180" aria-hidden="true"  ></i> <span class="deselected-mode">2D</span>
+                        </div>
+
+
                     </button>
 
 
