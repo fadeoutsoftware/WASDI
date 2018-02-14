@@ -24,6 +24,13 @@
         label{
           color: $wasdi-green-logo;
         }
+
+        .option-selected{
+          //color:$wasdi-green-logo;
+          background-color: $wasdi-green-logo;
+          color:$wasdi-white;
+        }
+
         .over-icon
         {
           cursor:pointer;

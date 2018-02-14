@@ -30,8 +30,9 @@
                                 <div ng-repeat="options in system.options track by $index"  class=" options">
                                     <h4>
                                         <div class="operation"  data-toggle="collapse"  data-target="#collapse{{ (system.name + $index) |lowercase | removeSpaces}}"
-                                             aria-expanded="false" aria-controls="collapsemapprojection" ng-click="m_oController.m_sSelectedFilter = options.name;
-                                                                                                                                m_oController.collapsePanels()" >
+                                             aria-expanded="false" aria-controls="collapsemapprojection"
+                                             ng-click="m_oController.m_sSelectedFilter = options.name;m_oController.collapsePanels()"
+                                             ng-class="{'option-selected':(m_oController.m_sSelectedFilter === options.name)}"   >
                                             {{options.name}}
                                         </div>
                                     </h4>
@@ -40,7 +41,7 @@
                                         <div class="col-xs-8 col-sm-8 col-md-8 col-lg-8">
                                             <div class="filter-properties">
                                                 <label>
-                                                    Name:&nbsp;{{m_oController.getSelectedOptionsObject(m_oController.m_sSelectedFilter).name}}
+                                                    Name:&nbsp;{{m_oController.getSelectedOptionsObject(m_oController.m_sSelectedFilter).name}}<!--by paolo-->
                                                 </label><br>
                                                 <label>
                                                     Shorthand:&nbsp;{{m_oController.getSelectedOptionsObject(m_oController.m_sSelectedFilter).shorthand}}
