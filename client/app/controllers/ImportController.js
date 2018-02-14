@@ -161,7 +161,7 @@ var ImportController = (function() {
         else
         {
             /*Load elements by Service if there was a previous search i load*/
-            this.m_oProcessesLaunchedService.loadProcessesFromServer(this.m_oActiveWorkspace.workspaceId);
+            if (!utilsIsObjectNullOrUndefined(this.m_oActiveWorkspace)) this.m_oProcessesLaunchedService.loadProcessesFromServer(this.m_oActiveWorkspace.workspaceId);
 
             var oWorkspaceByResultService = this.m_oResultsOfSearchService.getActiveWorkspace();
             //if the workspace id saved in ResultService but the id it's differet to actual workspace id clean ResultService
@@ -1343,7 +1343,7 @@ var ImportController = (function() {
             if (utilsIsStrNullOrEmpty(oMessage.messageCode) === false) sOperation = oMessage.messageCode;
             var oDialog = utilsVexDialogAlertTop('GURU MEDITATION<br>THERE WAS AN ERROR IN THE ' + sOperation + ' PROCESS');
             utilsVexCloseDialogAfterFewSeconds(3000, oDialog);
-            this.m_oProcessesLaunchedService.loadProcessesFromServer(this.m_oActiveWorkspace);
+            if (!utilsIsObjectNullOrUndefined(this.m_oActiveWorkspace)) this.m_oProcessesLaunchedService.loadProcessesFromServer(this.m_oActiveWorkspace.workspaceId);
             return;
         }
 
@@ -1352,7 +1352,7 @@ var ImportController = (function() {
             case "PUBLISH":
             case "PUBLISHBAND":
             case "UPDATEPROCESSES":
-                oController.m_oProcessesLaunchedService.loadProcessesFromServer(oController.m_oActiveWorkspace.workspaceId);
+                if (!utilsIsObjectNullOrUndefined(oController.m_oActiveWorkspace)) oController.m_oProcessesLaunchedService.loadProcessesFromServer(oController.m_oActiveWorkspace.workspaceId);
                 break;
             case "APPLYORBIT":
             case "CALIBRATE":
@@ -1398,7 +1398,7 @@ var ImportController = (function() {
                     /*Start Rabbit WebStomp*/
                     // oController.m_oRabbitStompService.initWebStomp("ImportController",oController);
                     oController.loadOpenSearchParamsByResultsOfSearchServices(oController);
-                    oController.m_oProcessesLaunchedService.loadProcessesFromServer(oController.m_oActiveWorkspace.workspaceId);
+                    if (!utilsIsObjectNullOrUndefined(oController.m_oActiveWorkspace)) oController.m_oProcessesLaunchedService.loadProcessesFromServer(oController.m_oActiveWorkspace.workspaceId);
                 }
             }
         }).error(function (data,status) {
