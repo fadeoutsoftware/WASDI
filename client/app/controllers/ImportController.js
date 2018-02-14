@@ -876,6 +876,7 @@ var ImportController = (function() {
                     utilsVexDialogAlertTop('GURU MEDITATION<br>THERE WAS AN ERROR IMPORTING THE IMAGE IN THE WORKSPACE');
                     aoProducts[iIndexProduct].isDisabledToDoDownload = false;
                 }
+
                 oThat.downloadProduct(url,oWorkSpace.workspaceId,aoProducts[iIndexProduct].bounds.toString(),aoProducts[iIndexProduct].provider,null,oError);
 
                 // oThat.m_oFileBufferService.download(url,oWorkSpace.workspaceId,aoProducts[iIndexProduct].bounds.toString(),
