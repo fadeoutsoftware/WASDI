@@ -2114,6 +2114,11 @@ var ImportController = (function() {
 
     };
 
+    ImportController.prototype.removeAllAdvanceSavedFilters = function()
+    {
+        this.m_oAdvanceFilter.savedData = [];
+    };
+
     ImportController.$inject = [
         '$scope',
         'ConstantsService',
