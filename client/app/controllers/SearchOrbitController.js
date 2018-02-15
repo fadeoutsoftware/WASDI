@@ -147,36 +147,29 @@ var SearchOrbitController = (function() {
 
     SearchOrbitController.prototype.searchOrbit = function()
     {
+
+        var sError = "";
+
+        if(utilsIsObjectNullOrUndefined(this.m_oGeoJSON)) sError += "PLEASE SELECT AREA OF INTEREST<br>LOOK AT THE TOP RIGHT CORNER OF THE MAP<br>";
+
+        //if there isn't a resolution throw an error
+        if(utilsIsObjectNullOrUndefined(this.m_oSelectedResolutionType) || this.m_oSelectedResolutionType.length == 0) sError += "PLEASE SELECT AT LEAST A RESOLUTION<br>";
+        //if there isn't a sensor type throw an error
+        if(utilsIsObjectNullOrUndefined(this.m_oSelectedSensorType) || this.m_oSelectedSensorType.length == 0) sError += "PLEASE SELECT AT LEAST A SENSOR TYPE<br>";
+        //if there isn't a satellite throw an error
+        if(utilsIsObjectNullOrUndefined(this.m_oSelectedSatellite) || this.m_oSelectedSatellite.length == 0) sError += "PLEASE SELECT AT LEAST A MISSION<br>";
+
+        if (!utilsIsStrNullOrEmpty(sError)) {
+            utilsVexDialogAlertDefault(sError,null);
+            return;
+        }
+
         var oController = this;
 
         //clear map and remove orbits and set check as false
         this.m_bMasterCheck = false;
         this.clearMapAndRemoveOrbits();
 
-        //if there isn't a selected area throw an error
-        if(utilsIsObjectNullOrUndefined(oController.m_oGeoJSON))
-        {
-            utilsVexDialogAlertTop("SELECT AREA");
-            return false;
-        }
-        //if there isn't a resolution throw an error
-        if(utilsIsObjectNullOrUndefined(oController.m_oSelectedResolutionType) || oController.m_oSelectedResolutionType.length == 0)
-        {
-            utilsVexDialogAlertTop("SELECT RESOLUTION");
-            return false;
-        }
-        //if there isn't a sensor type throw an error
-        if(utilsIsObjectNullOrUndefined(oController.m_oSelectedSensorType) || oController.m_oSelectedSensorType.length == 0)
-        {
-            utilsVexDialogAlertTop("SELECT SENSOR TYPE");
-            return false;
-        }
-        //if there isn't a satellite throw an error
-        if(utilsIsObjectNullOrUndefined(oController.m_oSelectedSatellite) || oController.m_oSelectedSatellite.length == 0)
-        {
-            utilsVexDialogAlertTop("YOU SHOULD SELECT A SATELLITE");
-            return false;
-        }
         var oOrbitSearch = new Object();
         oOrbitSearch.orbitFilters = new Array();
         this.m_oOrbitSearch.orbitFilters = new Array();
@@ -476,25 +469,8 @@ var SearchOrbitController = (function() {
         //
         //vex.dialog.alert(oOptions);
         return true;
-    }
-    SearchOrbitController.prototype.isClickableSearchButton = function()
-    {
-        var oController = this;
-        if(utilsIsObjectNullOrUndefined(oController.m_oGeoJSON))
-            return false;
-
-        //if there isn't a resolution throw an error
-        if(utilsIsObjectNullOrUndefined(oController.m_oSelectedResolutionType) || oController.m_oSelectedResolutionType.length == 0)
-            return false;
-        //if there isn't a sensor type throw an error
-        if(utilsIsObjectNullOrUndefined(oController.m_oSelectedSensorType) || oController.m_oSelectedSensorType.length == 0)
-            return false;
-        //if there isn't a satellite throw an error
-        if(utilsIsObjectNullOrUndefined(oController.m_oSelectedSatellite) || oController.m_oSelectedSatellite.length == 0)
-            return false;
-
-        return true;
     };
+
 
     /**
      * Rabbit Message Callback

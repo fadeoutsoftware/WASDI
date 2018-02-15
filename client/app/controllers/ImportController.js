@@ -581,7 +581,21 @@ var ImportController = (function() {
 
     ImportController.prototype.searchListAllSelectedProviders = function()
     {
-        if( (this.thereIsAtLeastOneProvider() === false) || (this.m_bIsVisibleListOfLayers || this.m_bisVisibleLocalStorageInputs)) return false;
+        if((this.m_bIsVisibleListOfLayers || this.m_bisVisibleLocalStorageInputs)) return false;
+
+        // Check input data
+        if(this.thereIsAtLeastOneProvider() === false) {
+            var sError= "SELECT AT LEAST ONE PROVIDER<br>NO PROVIDERS, NO IMAGES";
+            utilsVexDialogAlertDefault(sError,null);
+            return false;
+        }
+
+        if (utilsIsStrNullOrEmpty(this.m_oModel.geoselection)) {
+            var sError= "THE WORLD IS TOO BIG<br>PLEASE SELECT AN AREA OF INTEREST<br>LOOK AT THE TOP RIGHT CORNER OF THE MAP";
+            utilsVexDialogAlertDefault(sError,null);
+            return false;
+        }
+
         var iNumberOfProviders = this.m_aListOfProvider.length;
 
         for(var iIndexProvider = 0 ; iIndexProvider < iNumberOfProviders; iIndexProvider++)
@@ -611,8 +625,13 @@ var ImportController = (function() {
         }
 
         // Check input data
-        if(oController.thereIsAtLeastOneProvider() === false) return false;
-        if(utilsIsObjectNullOrUndefined(oProvider) === true) return false;
+        if(oController.thereIsAtLeastOneProvider() === false || utilsIsObjectNullOrUndefined(oProvider) === true) {
+            return false;
+        }
+
+        if (utilsIsStrNullOrEmpty(oController.m_oModel.geoselection)) {
+            return false;
+        }
 
         oController.m_bClearFiltersEnabled = false;
         //delete layers and relatives rectangles in map
