@@ -34,6 +34,7 @@ var ImportController = (function() {
 
         this.m_bShowsensingfilter = true;
 
+        this.m_sTypeOfFilterSelected = "Time period";
         this.m_oAdvanceFilter = {
             filterActive:"Seasons",//Seasons,Range,Months
             savedData:[],
@@ -1585,86 +1586,7 @@ var ImportController = (function() {
         }
         return bIsEmpty;
     };
-    // ImportController.prototype.seasonSpring = function(){
-    //
-    //     //sensingPeriodFrom; 21/03
-    //     //sensingPeriodTo; 20/06
-    //     var dateSensingPeriodFrom = new Date();
-    //     var dateSensingPeriodTo = new Date();
-    //     dateSensingPeriodFrom.setMonth(02);
-    //     dateSensingPeriodFrom.setDate(21);
-    //     dateSensingPeriodTo.setMonth(05)
-    //     dateSensingPeriodTo.setDate(20);
-    //     this.m_oResultsOfSearchService.setSensingPeriodFrom(dateSensingPeriodFrom);
-    //     this.m_oResultsOfSearchService.setSensingPeriodTo(dateSensingPeriodTo);
-    //     this.m_oModel.sensingPeriodFrom = this.m_oResultsOfSearchService.getSensingPeriodFrom();
-    //     this.m_oModel.sensingPeriodTo = this.m_oResultsOfSearchService.getSensingPeriodTo();
-    //     this.updateAdvancedSearch();
-    // };
-    // ImportController.prototype.seasonSummer = function(){
-    //     //sensingPeriodFrom; //21/06
-    //     //sensingPeriodTo; //22/09
-    //     var dateSensingPeriodFrom = new Date();
-    //     var dateSensingPeriodTo = new Date();
-    //     dateSensingPeriodFrom.setMonth(05);
-    //     dateSensingPeriodFrom.setDate(21);
-    //     dateSensingPeriodTo.setMonth(08)
-    //     dateSensingPeriodTo.setDate(22);
-    //     this.m_oResultsOfSearchService.setSensingPeriodFrom(dateSensingPeriodFrom);
-    //     this.m_oResultsOfSearchService.setSensingPeriodTo(dateSensingPeriodTo);
-    //     this.m_oModel.sensingPeriodFrom = this.m_oResultsOfSearchService.getSensingPeriodFrom();
-    //     this.m_oModel.sensingPeriodTo = this.m_oResultsOfSearchService.getSensingPeriodTo();
-    //     this.updateAdvancedSearch();
-    // };
-    // ImportController.prototype.seasonAutumn = function(){
-    //     //sensingPeriodFrom; //23/09
-    //     //sensingPeriodTo; //20/12
-    //     var dateSensingPeriodFrom = new Date();
-    //     var dateSensingPeriodTo = new Date();
-    //     dateSensingPeriodFrom.setMonth(08);
-    //     dateSensingPeriodFrom.setDate(23);
-    //     dateSensingPeriodTo.setMonth(11);
-    //     dateSensingPeriodTo.setDate(20);
-    //     this.m_oResultsOfSearchService.setSensingPeriodFrom(dateSensingPeriodFrom);
-    //     this.m_oResultsOfSearchService.setSensingPeriodTo(dateSensingPeriodTo);
-    //     this.m_oModel.sensingPeriodFrom = this.m_oResultsOfSearchService.getSensingPeriodFrom();
-    //     this.m_oModel.sensingPeriodTo = this.m_oResultsOfSearchService.getSensingPeriodTo();
-    //     this.updateAdvancedSearch();
-    //  };
-    // ImportController.prototype.seasonWinter = function(){
-    //     //sensingPeriodFrom; //21/12
-    //     //sensingPeriodTo; //20/03
-    //     var dateSensingPeriodFrom = new Date();
-    //     var dateSensingPeriodTo = new Date();
-    //     dateSensingPeriodFrom.setMonth(11);
-    //     dateSensingPeriodFrom.setDate(21);
-    //     dateSensingPeriodTo.setMonth(02)
-    //     dateSensingPeriodTo.setDate(20);
-    //     this.m_oResultsOfSearchService.setSensingPeriodFrom(dateSensingPeriodFrom);
-    //     this.m_oResultsOfSearchService.setSensingPeriodTo(dateSensingPeriodTo);
-    //     this.m_oModel.sensingPeriodFrom = this.m_oResultsOfSearchService.getSensingPeriodFrom();
-    //     this.m_oModel.sensingPeriodTo = this.m_oResultsOfSearchService.getSensingPeriodTo();
-    //     this.updateAdvancedSearch();
-    // };
-    //
-    // ImportController.prototype.changeSeason = function(sSeason)
-    // {
-    //     switch(sSeason) {
-    //         case "Spring":
-    //             this.seasonSpring();
-    //             break;
-    //         case "Summer":
-    //             this.seasonSummer();
-    //             break;
-    //         case "Autumn":
-    //             this.seasonAutumn();
-    //             break;
-    //         case "Winter":
-    //             this.seasonWinter();
-    //             break;
-    //     }
-    //
-    // };
+
 
     ImportController.prototype.getPeriod = function(iMonthFrom,iDayFrom,iMonthTo,iDayTo){
         if( (utilsIsObjectNullOrUndefined(iMonthFrom) === true) || (utilsIsObjectNullOrUndefined(iDayFrom) === true) ||
@@ -2136,6 +2058,30 @@ var ImportController = (function() {
     ImportController.prototype.removeAllAdvanceSavedFilters = function()
     {
         this.m_oAdvanceFilter.savedData = [];
+    };
+
+    ImportController.prototype.openAdvanceFiltersDialog = function(){
+        var oController = this;
+        this.m_oModalService.showModal({
+            templateUrl: "dialogs/import_advance_filters/ImportAdvanceFiltersView.html",
+            controller: "ImportAdvanceFiltersController",
+            inputs: {
+                extras: ""
+            }
+
+        }).then(function(modal){
+            modal.element.modal();
+            modal.close.then(function(result) {
+                if(utilsIsObjectNullOrUndefined(result) === true)
+                {
+                    return false;
+                }
+                oController.m_oAdvanceFilter.savedData = result;
+                return true;
+            })
+        });
+
+        return true;
     };
 
     ImportController.$inject = [
