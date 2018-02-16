@@ -25,67 +25,67 @@
             <div class="search-button" ng-class="{'search-button-disabled': (m_oController.m_bIsVisibleListOfLayers === false)}"
                                        ng-click="m_oController.downloadAllSelectedProducts()" >
                 <!--<i class="fa fa-search fa-lg" aria-hidden="true"></i>-->
-                Download all <i class="fa fa-download" aria-hidden="true"></i>
+                Download selected <i class="fa fa-download" aria-hidden="true"></i>
             </div>
 
         </div>
 
         <!--TIME-->
-        <div class="time-container" >
-            <!-- TO:-->
-            <div  class="my-input-text" ng-if="m_oController.m_bShowsensingfilter">
+        <!--<div class="time-container" >-->
+            <!--&lt;!&ndash; TO:&ndash;&gt;-->
+            <!--<div  class="my-input-text" ng-if="m_oController.m_bShowsensingfilter">-->
 
-                <div class=" advanced-calendar-input input-calendar-container " >
-                    <p class="input-group" >
-                        <input type="text" class="form-control advanced-calendar-date-input"
-                               uib-datepicker-popup="yyyy/MM/dd"
-                               ng-model="m_oController.m_oModel.sensingPeriodTo"
-                               is-open="m_oController.m_oStatus.openedSensingPeriodTo"
-                               date-disabled="m_oController.disabled(date, mode)" ng-required="true"
-                               min-date="m_oController.m_oModel.sensingPeriodFrom"
-                               ng-blur="m_oController.updateAdvancedSearch()" close-text="Close"
-                               readonly="true" data-container="body"/>
-                        <span class="input-group-btn">
-							<button type="button" class="btn btn-default advanced-calendar-button"
-                                    ng-click="m_oController.openSensingPeriodTo($event)"><i class="fa fa-calendar" aria-hidden="true"></i></button>
-						  </span>
-                    </p>
-                </div>
+                <!--<div class=" advanced-calendar-input input-calendar-container " >-->
+                    <!--<p class="input-group" >-->
+                        <!--<input type="text" class="form-control advanced-calendar-date-input"-->
+                               <!--uib-datepicker-popup="yyyy/MM/dd"-->
+                               <!--ng-model="m_oController.m_oModel.sensingPeriodTo"-->
+                               <!--is-open="m_oController.m_oStatus.openedSensingPeriodTo"-->
+                               <!--date-disabled="m_oController.disabled(date, mode)" ng-required="true"-->
+                               <!--min-date="m_oController.m_oModel.sensingPeriodFrom"-->
+                               <!--ng-blur="m_oController.updateAdvancedSearch()" close-text="Close"-->
+                               <!--readonly="true" data-container="body"/>-->
+                        <!--<span class="input-group-btn">-->
+							<!--<button type="button" class="btn btn-default advanced-calendar-button"-->
+                                    <!--ng-click="m_oController.openSensingPeriodTo($event)"><i class="fa fa-calendar" aria-hidden="true"></i></button>-->
+						  <!--</span>-->
+                    <!--</p>-->
+                <!--</div>-->
 
-                <div class="description-label" >
-                    To:
-                </div>
-                <!-- FROM: -->
-                <div class="input-calendar-container" >
+                <!--<div class="description-label" >-->
+                    <!--To:-->
+                <!--</div>-->
+                <!--&lt;!&ndash; FROM: &ndash;&gt;-->
+                <!--<div class="input-calendar-container" >-->
 
-                    <p class="input-group">
-                        <input type="text" class="form-control advanced-calendar-date-input"
-                               uib-datepicker-popup="yyyy/MM/dd"
-                               ng-model="m_oController.m_oModel.sensingPeriodFrom"
-                               is-open="m_oController.m_oStatus.openedSensingPeriodFrom"
-                               date-disabled="m_oController.disabled(date, mode)"
-                               max-date="m_oController.m_oModel.sensingPeriodTo" ng-required="true"
-                               ng-blur="m_oController.updateAdvancedSearch()" readonly="true"
-                               close-text="Close"/>
+                    <!--<p class="input-group">-->
+                        <!--<input type="text" class="form-control advanced-calendar-date-input"-->
+                               <!--uib-datepicker-popup="yyyy/MM/dd"-->
+                               <!--ng-model="m_oController.m_oModel.sensingPeriodFrom"-->
+                               <!--is-open="m_oController.m_oStatus.openedSensingPeriodFrom"-->
+                               <!--date-disabled="m_oController.disabled(date, mode)"-->
+                               <!--max-date="m_oController.m_oModel.sensingPeriodTo" ng-required="true"-->
+                               <!--ng-blur="m_oController.updateAdvancedSearch()" readonly="true"-->
+                               <!--close-text="Close"/>-->
 
-                        <span class="input-group-btn">
-        			        <button type="button" class="btn btn-default advanced-calendar-button"
-                                ng-click="m_oController.openSensingPeriodFrom($event)">
-                                <i class="fa fa-calendar" aria-hidden="true"></i>
-                            </button>
-                        </span>
+                        <!--<span class="input-group-btn">-->
+        			        <!--<button type="button" class="btn btn-default advanced-calendar-button"-->
+                                <!--ng-click="m_oController.openSensingPeriodFrom($event)">-->
+                                <!--<i class="fa fa-calendar" aria-hidden="true"></i>-->
+                            <!--</button>-->
+                        <!--</span>-->
 
-                    </p>
-                </div>
+                    <!--</p>-->
+                <!--</div>-->
 
-                <div class="description-label" >
-                    From:{{ this.m_oModel.sensingPeriodFrom}}
-                </div>
-                <div class="description-label" >
-                    Sensing period
-                </div>
-            </div>
-        </div>
+                <!--<div class="description-label" >-->
+                    <!--From:{{ this.m_oModel.sensingPeriodFrom}}-->
+                <!--</div>-->
+                <!--<div class="description-label" >-->
+                    <!--Sensing period-->
+                <!--</div>-->
+            <!--</div>-->
+        <!--</div>-->
     </div>
 
         <!-- SIDEBAR -->
@@ -119,364 +119,331 @@
             <div  class="panel-body"><!--id="mySidenav"-->
 
                 <!--------------------- SEARCH------------------------->
-                <div  class="advance-search" id="advanced-search-container" ng-hide="m_oController.m_bIsVisibleListOfLayers || m_oController.m_bisVisibleLocalStorageInputs">
-                    <div class="panel panel-default ">
-                        <div class="panel-heading">
-                            <h4 class="panel-title">
-                                <a href="javascript:;" data-toggle="collapse" data-parent="#accordion" data-target="#advanceFilter"
-                                   ng-model="chevronUp" ng-init="chevronUp=false" ng-click="chevronUp=!chevronUp">
-                                    {{"EDITOR_ADVANCE_FILTERS_TITLE"|translate}}
-                                    <i ng-hide="chevronUp" class="fa fa-chevron-down" aria-hidden="true"></i>
-                                    <i ng-show="chevronUp" class="fa fa-chevron-up" aria-hidden="true"></i>
-                                </a>
-                            </h4>
-                        </div>
-                        <div id="advanceFilter" class="panel-collapse collapse">
+                <!--<div  class="advance-search" id="advanced-search-container" ng-hide="m_oController.m_bIsVisibleListOfLayers || m_oController.m_bisVisibleLocalStorageInputs">-->
+                    <!--<div class="panel panel-default ">-->
+                        <!--<div class="panel-heading">-->
+                            <!--<h4 class="panel-title">-->
+                                <!--<a href="javascript:;" data-toggle="collapse" data-parent="#accordion" data-target="#advanceFilter"-->
+                                   <!--ng-model="chevronUp" ng-init="chevronUp=false" ng-click="chevronUp=!chevronUp">-->
+                                    <!--{{"EDITOR_ADVANCE_FILTERS_TITLE"|translate}}-->
+                                    <!--<i ng-hide="chevronUp" class="fa fa-chevron-down" aria-hidden="true"></i>-->
+                                    <!--<i ng-show="chevronUp" class="fa fa-chevron-up" aria-hidden="true"></i>-->
+                                <!--</a>-->
+                            <!--</h4>-->
+                        <!--</div>-->
+                        <!--<div id="advanceFilter" class="panel-collapse collapse">-->
 
-                            <div class="panel-body body-advance-filters">
-                                <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
-                                    <div class="row">
-                                        <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
-                                            <div class="dropdown">
-                                                <button class="my-button dropdown-toggle" type="button" id="dropdownMenuFitlers"
-                                                        data-toggle="dropdown">
-                                                    <span>{{m_oController.m_oAdvanceFilter.filterActive}}</span>
-                                                    <span class="caret"></span>
-                                                </button>
-                                                <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenuFitlers">
-                                                    <li role="presentation">
-                                                        <a role="menuitem"  href="" ng-click="m_oController.m_oAdvanceFilter.filterActive='Seasons'">Seasons</a>
-                                                    </li>
-                                                    <li role="presentation">
-                                                        <a role="menuitem"  href="" ng-click="m_oController.m_oAdvanceFilter.filterActive='Range'">Range</a>
-                                                    </li>
-                                                    <li role="presentation">
-                                                        <a role="menuitem" href="" ng-click="m_oController.m_oAdvanceFilter.filterActive='Months'">Months</a>
-                                                    </li>
-                                                </ul>
-                                            </div>
-
-                                        </div>
-                                        <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
-                                            <!--<button class="my-button" ng-click="m_oController.cleanAdvanceFilters()">-->
-                                                <!--Clean filters-->
-                                                <!--<i class="fa fa-trash-o" aria-hidden="true"></i>-->
-                                            <!--</button>-->
-                                        </div>
-                                    </div>
-
-                                    <div class="row well well-sm" ng-show="m_oController.m_oAdvanceFilter.filterActive === 'Seasons'">
-                                        <div class="col-xs-9 col-sm-9 col-md-9 col-lg-9">
-                                            <!--<div uib-datepicker ng-model="m_oController.m_oAdvanceFilter.selectedSeasonYear "  datepicker-options="m_oController.datePickerYears" ></div>-->
-                                            <multiselect options="m_oController.m_oAdvanceFilter.listOfYears" selected="m_oController.m_oAdvanceFilter.selectedSeasonYears"></multiselect>
-                                        </div>
-
-                                        <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
-                                            <div class="btn-group-vertical ">
-                                                <button type="button" class="btn btn-default" ng-click="m_oController.m_oAdvanceFilter.selectedSeason = 'spring'; m_oController.addSeason() ">
-                                                    <i class="fa fa-sun-o" aria-hidden="true"></i>
-                                                    {{"EDITOR_SEASONS_SPRING_BUTTON"|translate}}
-                                                </button>
-                                                <button type="button" class="btn btn-default" ng-click="m_oController.m_oAdvanceFilter.selectedSeason = 'summer'; m_oController.addSeason()">
-                                                    <i class="fa fa-thermometer-full" aria-hidden="true"></i>
-                                                    {{"EDITOR_SEASONS_SUMMER_BUTTON"|translate}}
-                                                </button>
-                                                <button type="button" class="btn btn-default" ng-click="m_oController.m_oAdvanceFilter.selectedSeason = 'autumn'; m_oController.addSeason()">
-                                                    <i class="fa fa-cloud" aria-hidden="true"></i>
-                                                    {{"EDITOR_SEASONS_AUTUMN_BUTTON"|translate}}
-                                                </button>
-                                                <button type="button" class="btn btn-default" ng-click="m_oController.m_oAdvanceFilter.selectedSeason = 'winter'; m_oController.addSeason()">
-                                                    <i class="fa fa-snowflake-o" aria-hidden="true"></i>
-                                                    {{"EDITOR_SEASONS_WINTER_BUTTON"|translate}}
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div class="row well well-sm"  ng-show="m_oController.m_oAdvanceFilter.filterActive === 'Range'">
-                                        <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
-                                            select years:
-                                            <multiselect options="m_oController.m_oAdvanceFilter.listOfYears" selected="m_oController.m_oAdvanceFilter.selectedYears"></multiselect>
-                                        </div>
-                                        <div class="col-xs-9 col-sm-9 col-md-9 col-lg-9">
-                                            FROM:
-                                            <div class="row  well well-sm">
-
-                                                <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
-                                                    <div class="DropdownMenu">
-                                                        <ul class="nav navbar-nav">
-                                                            <li class="dropdown mega-dropdown ">
-                                                                <a href="javascript:;" class="dropdown-toggle">
-                                                                    <i class="fa fa-"></i>
-                                                                    <span ng-show="m_oController.m_oAdvanceFilter.selectedMonthFrom === ''">Months</span>
-                                                                    <span ng-hide="utilsIsStrNullOrEmpty(m_oController.m_oAdvanceFilter.selectedMonthFrom)">{{m_oController.m_oAdvanceFilter.selectedMonthFrom }}</span>
-                                                                    <span class="fa fa-chevron-down pull-right"></span>
-                                                                </a>
-                                                                <ul class="dropdown-menu mega-dropdown-menu">
-                                                                    <li>
-                                                                        <div class="value-visualized" ng-class="{'value-selected': month === m_oController.m_oAdvanceFilter.selectedMonthFrom}"
-                                                                             ng-repeat="month in m_oController.m_oAdvanceFilter.listOfMonths"
-                                                                             ng-click = "m_oController.m_oAdvanceFilter.selectedMonthFrom = month">
-                                                                            {{month}}
-                                                                        </div>
-                                                                    </li>
-                                                                </ul>
-                                                            </li>
-                                                        </ul>
-                                                    </div>
-                                                </div>
-                                                <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
-                                                    <div class="DropdownMenu">
-                                                        <ul class="nav navbar-nav">
-                                                            <li class="dropdown mega-dropdown " ng-class="{'disabled': !m_oController.areSelectedMonthAndYearFrom()}">
-                                                                <a href="javascript:;" class="dropdown-toggle" ng-class="{'disabled': !m_oController.areSelectedMonthAndYearFrom()}">
-                                                                    <i class="fa fa-"></i>
-                                                                    <span ng-show="m_oController.m_oAdvanceFilter.selectedDayFrom === ''">Days</span>
-                                                                    <span ng-hide="utilsIsStrNullOrEmpty(m_oController.m_oAdvanceFilter.selectedDayFrom)">{{m_oController.m_oAdvanceFilter.selectedDayFrom }}</span>
-                                                                    <span class="fa fa-chevron-down pull-right"></span>
-                                                                </a>
-                                                                <ul class="dropdown-menu mega-dropdown-menu" ng-show="m_oController.areSelectedMonthAndYearFrom()">
-                                                                    <li>
-                                                                        <div class="value-visualized" ng-class="{'value-selected': day === m_oController.m_oAdvanceFilter.selectedDayFrom}"
-                                                                             ng-repeat="day in m_oController.getMonthDaysFrom()"
-                                                                             ng-click = "m_oController.m_oAdvanceFilter.selectedDayFrom = day"><!--m_oController.m_oAdvanceFilter.listOfDays-->
-                                                                            {{day}}
-                                                                        </div>
-                                                                    </li>
-                                                                </ul>
-                                                            </li>
-                                                        </ul>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            TO:
-                                            <div class="row  well well-sm">
-
-                                                <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
-                                                    <div class="DropdownMenu">
-                                                        <ul class="nav navbar-nav">
-                                                            <li class="dropdown mega-dropdown ">
-                                                                <a href="javascript:;" class="dropdown-toggle">
-                                                                    <i class="fa fa-"></i>
-                                                                    <span ng-show="m_oController.m_oAdvanceFilter.selectedMonthTo === ''">Months</span>
-                                                                    <span ng-hide="utilsIsStrNullOrEmpty(m_oController.m_oAdvanceFilter.selectedMonthTo)">{{m_oController.m_oAdvanceFilter.selectedMonthTo }}</span>
-                                                                    <span class="fa fa-chevron-down pull-right"></span>
-                                                                </a>
-                                                                <ul class="dropdown-menu mega-dropdown-menu">
-                                                                    <li>
-                                                                        <div class="value-visualized" ng-class="{'value-selected': month === m_oController.m_oAdvanceFilter.selectedMonthTo}"
-                                                                             ng-repeat="month in m_oController.m_oAdvanceFilter.listOfMonths"
-                                                                             ng-click = "m_oController.m_oAdvanceFilter.selectedMonthTo = month">
-                                                                            {{month}}
-                                                                        </div>
-                                                                    </li>
-                                                                </ul>
-                                                            </li>
-                                                        </ul>
-                                                    </div>
-                                                </div>
-
-                                                <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
-                                                    <div class="DropdownMenu" >
-                                                        <ul class="nav navbar-nav" >
-                                                            <li class="dropdown mega-dropdown "  ng-class="{'disabled': !m_oController.areSelectedMonthAndYearTo() }">
-                                                                <a href="" class="dropdown-toggle" ng-class="{'disabled': !m_oController.areSelectedMonthAndYearTo() }" >
-                                                                    <i class="fa fa-"></i>
-                                                                    <span ng-show="m_oController.m_oAdvanceFilter.selectedDayTo === ''">Days</span>
-                                                                    <span ng-hide="utilsIsStrNullOrEmpty(m_oController.m_oAdvanceFilter.selectedDayTo)">{{m_oController.m_oAdvanceFilter.selectedDayTo }}</span>
-                                                                    <span class="fa fa-chevron-down pull-right"></span>
-                                                                </a>
-                                                                <ul class="dropdown-menu mega-dropdown-menu" ng-show="m_oController.areSelectedMonthAndYearTo()">
-                                                                    <li >
-                                                                        <div class="value-visualized" ng-class="{'value-selected': day === m_oController.m_oAdvanceFilter.selectedDayTo}"
-                                                                             ng-repeat="day in m_oController.getMonthDaysTo()"
-                                                                             ng-click = "m_oController.m_oAdvanceFilter.selectedDayTo = day" ><!--m_oController.m_oAdvanceFilter.listOfDays-->
-                                                                            {{day}}
-
-                                                                        </div>
-                                                                    </li>
-                                                                </ul>
-                                                            </li>
-                                                        </ul>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-
-
-                                        </div>
-
-                                        <!--<div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">-->
-                                        <!--<multiselect options="m_oController.m_oAdvanceFilter.listOfMonths" selected="m_oController.m_oAdvanceFilter.selectedMonths"></multiselect>-->
-                                        <div class="row">
-                                            <div class=" col-xs-offset-8 col-sm-offset-8 col-md-offset-8 col-lg-offset-8 col-xs-4 col-sm-4 col-md-4 col-lg-4 ">
-                                                <button class="my-button add-filter-button" ng-click="m_oController.addFilterDataFromTo()">
-                                                    Add filter
-                                                </button>
-                                            </div>
-
-                                        </div>
-
+                            <!--<div class="panel-body body-advance-filters">-->
+                                <!--<div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">-->
+                                    <!--<div class="row">-->
+                                        <!--<div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">-->
+                                            <!--<div class="dropdown">-->
+                                                <!--<button class="my-button dropdown-toggle" type="button" id="dropdownMenuFitlers"-->
+                                                        <!--data-toggle="dropdown">-->
+                                                    <!--<span>{{m_oController.m_oAdvanceFilter.filterActive}}</span>-->
+                                                    <!--<span class="caret"></span>-->
+                                                <!--</button>-->
+                                                <!--<ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenuFitlers">-->
+                                                    <!--<li role="presentation">-->
+                                                        <!--<a role="menuitem"  href="" ng-click="m_oController.m_oAdvanceFilter.filterActive='Seasons'">Seasons</a>-->
+                                                    <!--</li>-->
+                                                    <!--<li role="presentation">-->
+                                                        <!--<a role="menuitem"  href="" ng-click="m_oController.m_oAdvanceFilter.filterActive='Range'">Range</a>-->
+                                                    <!--</li>-->
+                                                    <!--<li role="presentation">-->
+                                                        <!--<a role="menuitem" href="" ng-click="m_oController.m_oAdvanceFilter.filterActive='Months'">Months</a>-->
+                                                    <!--</li>-->
+                                                <!--</ul>-->
+                                            <!--</div>-->
 
                                         <!--</div>-->
-                                        <!--<multiselect options="m_oController.m_oAdvanceFilter.listOfDays" selected="m_oController.m_oAdvanceFilter.selectedDays"></multiselect>-->
-                                    </div>
-
-                                    <div class="row well well-sm" ng-show="m_oController.m_oAdvanceFilter.filterActive === 'Months'">
-                                        <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
-                                            <multiselect options="m_oController.m_oAdvanceFilter.listOfYears" selected="m_oController.m_oAdvanceFilter.selectedYearsSearchForMonths"></multiselect>
-                                        </div>
-                                        <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
-                                            <multiselect options="m_oController.m_oAdvanceFilter.listOfMonths" selected="m_oController.m_oAdvanceFilter.selectedMonthsSearchForMonths"></multiselect>
-                                        </div>
-                                        <div class="row">
-                                            <div class=" col-xs-offset-8 col-sm-offset-8 col-md-offset-8 col-lg-offset-8 col-xs-4 col-sm-4 col-md-4 col-lg-4 ">
-                                                <!--<div class="col-xs-10 col-sm-10 col-md-10 col-lg-10 col-xs-offset-2 col-sm-offset-2 col-md-offset-2 col-lg-offset-2 ">-->
-                                                <button class="my-button add-filter-button" ng-click="m_oController.addFilterMonths()">
-                                                    Add filter
-                                                </button>
-                                            </div>
-
-                                        </div>
-                                    </div>
-
-                                    <div class="row well well-sm" ng-show="m_oController.m_oAdvanceFilter.savedData !== []">
-                                        <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
-                                            <div class="chip" ng-repeat="data in m_oController.m_oAdvanceFilter.savedData">
-                                                {{data.name}}
-                                                <span class="closebtn" ng-click="m_oController.removeSaveDataChips(data) ">&times;</span> <!--this.parentElement.style.display='none';-->
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                            </div>
-
-                        </div>
-                    </div>
-                </div>
-
-                <!--<div class="row">-->
-                <!--TODO GRAPICH CANGE-->
-                    <!--<div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">-->
-                        <!--<div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">-->
-                            <!--<multiselect options="m_oController.m_oAdvanceFilter.listOfYears" selected="m_oController.m_oAdvanceFilter.selectedSeasonYears"></multiselect>-->
-                        <!--</div>-->
-                        <!--<div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">-->
-                            <!--<multiselect options="m_oController.m_oAdvanceFilter.listOfMonths" selected="m_oController.m_oAdvanceFilter.selectedMonthsSearchForMonths"></multiselect>-->
-                        <!--</div>-->
-                        <!--<div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">-->
-                            <!--<div >-->
-                                <!--FROM:-->
-                                <!--<div class="row  well well-sm">-->
-
-                                    <!--<div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">-->
-                                        <!--<div class="DropdownMenu">-->
-                                            <!--<ul class="nav navbar-nav">-->
-                                                <!--<li class="dropdown mega-dropdown ">-->
-                                                    <!--<a href="javascript:;" class="dropdown-toggle">-->
-                                                        <!--<i class="fa fa-"></i>-->
-                                                        <!--<span ng-show="m_oController.m_oAdvanceFilter.selectedMonthFrom === ''">Months</span>-->
-                                                        <!--<span ng-hide="utilsIsStrNullOrEmpty(m_oController.m_oAdvanceFilter.selectedMonthFrom)">{{m_oController.m_oAdvanceFilter.selectedMonthFrom }}</span>-->
-                                                        <!--<span class="fa fa-chevron-down pull-right"></span>-->
-                                                    <!--</a>-->
-                                                    <!--<ul class="dropdown-menu mega-dropdown-menu">-->
-                                                        <!--<li>-->
-                                                            <!--<div class="value-visualized" ng-class="{'value-selected': month === m_oController.m_oAdvanceFilter.selectedMonthFrom}"-->
-                                                                 <!--ng-repeat="month in m_oController.m_oAdvanceFilter.listOfMonths"-->
-                                                                 <!--ng-click = "m_oController.m_oAdvanceFilter.selectedMonthFrom = month">-->
-                                                                <!--{{month}}-->
-                                                            <!--</div>-->
-                                                        <!--</li>-->
-                                                    <!--</ul>-->
-                                                <!--</li>-->
-                                            <!--</ul>-->
+                                        <!--<div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">-->
+                                            <!--&lt;!&ndash;<button class="my-button" ng-click="m_oController.cleanAdvanceFilters()">&ndash;&gt;-->
+                                                <!--&lt;!&ndash;Clean filters&ndash;&gt;-->
+                                                <!--&lt;!&ndash;<i class="fa fa-trash-o" aria-hidden="true"></i>&ndash;&gt;-->
+                                            <!--&lt;!&ndash;</button>&ndash;&gt;-->
                                         <!--</div>-->
                                     <!--</div>-->
-                                    <!--<div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">-->
-                                        <!--<div class="DropdownMenu">-->
-                                            <!--<ul class="nav navbar-nav">-->
-                                                <!--<li class="dropdown mega-dropdown " ng-class="{'disabled': !m_oController.areSelectedMonthAndYearFrom()}">-->
-                                                    <!--<a href="javascript:;" class="dropdown-toggle" ng-class="{'disabled': !m_oController.areSelectedMonthAndYearFrom()}">-->
-                                                        <!--<i class="fa fa-"></i>-->
-                                                        <!--<span ng-show="m_oController.m_oAdvanceFilter.selectedDayFrom === ''">Days</span>-->
-                                                        <!--<span ng-hide="utilsIsStrNullOrEmpty(m_oController.m_oAdvanceFilter.selectedDayFrom)">{{m_oController.m_oAdvanceFilter.selectedDayFrom }}</span>-->
-                                                        <!--<span class="fa fa-chevron-down pull-right"></span>-->
-                                                    <!--</a>-->
-                                                    <!--<ul class="dropdown-menu mega-dropdown-menu" ng-show="m_oController.areSelectedMonthAndYearFrom()">-->
-                                                        <!--<li>-->
-                                                            <!--<div class="value-visualized" ng-class="{'value-selected': day === m_oController.m_oAdvanceFilter.selectedDayFrom}"-->
-                                                                 <!--ng-repeat="day in m_oController.getMonthDaysFrom()"-->
-                                                                 <!--ng-click = "m_oController.m_oAdvanceFilter.selectedDayFrom = day">&lt;!&ndash;m_oController.m_oAdvanceFilter.listOfDays&ndash;&gt;-->
-                                                                <!--{{day}}-->
-                                                            <!--</div>-->
-                                                        <!--</li>-->
-                                                    <!--</ul>-->
-                                                <!--</li>-->
-                                            <!--</ul>-->
+
+                                    <!--<div class="row well well-sm" ng-show="m_oController.m_oAdvanceFilter.filterActive === 'Seasons'">-->
+                                        <!--<div class="col-xs-9 col-sm-9 col-md-9 col-lg-9">-->
+                                            <!--&lt;!&ndash;<div uib-datepicker ng-model="m_oController.m_oAdvanceFilter.selectedSeasonYear "  datepicker-options="m_oController.datePickerYears" ></div>&ndash;&gt;-->
+                                            <!--<multiselect options="m_oController.m_oAdvanceFilter.listOfYears" selected="m_oController.m_oAdvanceFilter.selectedSeasonYears"></multiselect>-->
+                                        <!--</div>-->
+
+                                        <!--<div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">-->
+                                            <!--<div class="btn-group-vertical ">-->
+                                                <!--<button type="button" class="btn btn-default" ng-click="m_oController.m_oAdvanceFilter.selectedSeason = 'spring'; m_oController.addSeason() ">-->
+                                                    <!--<i class="fa fa-sun-o" aria-hidden="true"></i>-->
+                                                    <!--{{"EDITOR_SEASONS_SPRING_BUTTON"|translate}}-->
+                                                <!--</button>-->
+                                                <!--<button type="button" class="btn btn-default" ng-click="m_oController.m_oAdvanceFilter.selectedSeason = 'summer'; m_oController.addSeason()">-->
+                                                    <!--<i class="fa fa-thermometer-full" aria-hidden="true"></i>-->
+                                                    <!--{{"EDITOR_SEASONS_SUMMER_BUTTON"|translate}}-->
+                                                <!--</button>-->
+                                                <!--<button type="button" class="btn btn-default" ng-click="m_oController.m_oAdvanceFilter.selectedSeason = 'autumn'; m_oController.addSeason()">-->
+                                                    <!--<i class="fa fa-cloud" aria-hidden="true"></i>-->
+                                                    <!--{{"EDITOR_SEASONS_AUTUMN_BUTTON"|translate}}-->
+                                                <!--</button>-->
+                                                <!--<button type="button" class="btn btn-default" ng-click="m_oController.m_oAdvanceFilter.selectedSeason = 'winter'; m_oController.addSeason()">-->
+                                                    <!--<i class="fa fa-snowflake-o" aria-hidden="true"></i>-->
+                                                    <!--{{"EDITOR_SEASONS_WINTER_BUTTON"|translate}}-->
+                                                <!--</button>-->
+                                            <!--</div>-->
+                                        <!--</div>-->
+                                    <!--</div>-->
+
+                                    <!--<div class="row well well-sm"  ng-show="m_oController.m_oAdvanceFilter.filterActive === 'Range'">-->
+                                        <!--<div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">-->
+                                            <!--select years:-->
+                                            <!--<multiselect options="m_oController.m_oAdvanceFilter.listOfYears" selected="m_oController.m_oAdvanceFilter.selectedYears"></multiselect>-->
+                                        <!--</div>-->
+                                        <!--<div class="col-xs-9 col-sm-9 col-md-9 col-lg-9">-->
+                                            <!--FROM:-->
+                                            <!--<div class="row  well well-sm">-->
+
+                                                <!--<div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">-->
+                                                    <!--<div class="DropdownMenu">-->
+                                                        <!--<ul class="nav navbar-nav">-->
+                                                            <!--<li class="dropdown mega-dropdown ">-->
+                                                                <!--<a href="javascript:;" class="dropdown-toggle">-->
+                                                                    <!--<i class="fa fa-"></i>-->
+                                                                    <!--<span ng-show="m_oController.m_oAdvanceFilter.selectedMonthFrom === ''">Months</span>-->
+                                                                    <!--<span ng-hide="utilsIsStrNullOrEmpty(m_oController.m_oAdvanceFilter.selectedMonthFrom)">{{m_oController.m_oAdvanceFilter.selectedMonthFrom }}</span>-->
+                                                                    <!--<span class="fa fa-chevron-down pull-right"></span>-->
+                                                                <!--</a>-->
+                                                                <!--<ul class="dropdown-menu mega-dropdown-menu">-->
+                                                                    <!--<li>-->
+                                                                        <!--<div class="value-visualized" ng-class="{'value-selected': month === m_oController.m_oAdvanceFilter.selectedMonthFrom}"-->
+                                                                             <!--ng-repeat="month in m_oController.m_oAdvanceFilter.listOfMonths"-->
+                                                                             <!--ng-click = "m_oController.m_oAdvanceFilter.selectedMonthFrom = month">-->
+                                                                            <!--{{month}}-->
+                                                                        <!--</div>-->
+                                                                    <!--</li>-->
+                                                                <!--</ul>-->
+                                                            <!--</li>-->
+                                                        <!--</ul>-->
+                                                    <!--</div>-->
+                                                <!--</div>-->
+                                                <!--<div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">-->
+                                                    <!--<div class="DropdownMenu">-->
+                                                        <!--<ul class="nav navbar-nav">-->
+                                                            <!--<li class="dropdown mega-dropdown " ng-class="{'disabled': !m_oController.areSelectedMonthAndYearFrom()}">-->
+                                                                <!--<a href="javascript:;" class="dropdown-toggle" ng-class="{'disabled': !m_oController.areSelectedMonthAndYearFrom()}">-->
+                                                                    <!--<i class="fa fa-"></i>-->
+                                                                    <!--<span ng-show="m_oController.m_oAdvanceFilter.selectedDayFrom === ''">Days</span>-->
+                                                                    <!--<span ng-hide="utilsIsStrNullOrEmpty(m_oController.m_oAdvanceFilter.selectedDayFrom)">{{m_oController.m_oAdvanceFilter.selectedDayFrom }}</span>-->
+                                                                    <!--<span class="fa fa-chevron-down pull-right"></span>-->
+                                                                <!--</a>-->
+                                                                <!--<ul class="dropdown-menu mega-dropdown-menu" ng-show="m_oController.areSelectedMonthAndYearFrom()">-->
+                                                                    <!--<li>-->
+                                                                        <!--<div class="value-visualized" ng-class="{'value-selected': day === m_oController.m_oAdvanceFilter.selectedDayFrom}"-->
+                                                                             <!--ng-repeat="day in m_oController.getMonthDaysFrom()"-->
+                                                                             <!--ng-click = "m_oController.m_oAdvanceFilter.selectedDayFrom = day">&lt;!&ndash;m_oController.m_oAdvanceFilter.listOfDays&ndash;&gt;-->
+                                                                            <!--{{day}}-->
+                                                                        <!--</div>-->
+                                                                    <!--</li>-->
+                                                                <!--</ul>-->
+                                                            <!--</li>-->
+                                                        <!--</ul>-->
+                                                    <!--</div>-->
+                                                <!--</div>-->
+                                            <!--</div>-->
+                                            <!--TO:-->
+                                            <!--<div class="row  well well-sm">-->
+
+                                                <!--<div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">-->
+                                                    <!--<div class="DropdownMenu">-->
+                                                        <!--<ul class="nav navbar-nav">-->
+                                                            <!--<li class="dropdown mega-dropdown ">-->
+                                                                <!--<a href="javascript:;" class="dropdown-toggle">-->
+                                                                    <!--<i class="fa fa-"></i>-->
+                                                                    <!--<span ng-show="m_oController.m_oAdvanceFilter.selectedMonthTo === ''">Months</span>-->
+                                                                    <!--<span ng-hide="utilsIsStrNullOrEmpty(m_oController.m_oAdvanceFilter.selectedMonthTo)">{{m_oController.m_oAdvanceFilter.selectedMonthTo }}</span>-->
+                                                                    <!--<span class="fa fa-chevron-down pull-right"></span>-->
+                                                                <!--</a>-->
+                                                                <!--<ul class="dropdown-menu mega-dropdown-menu">-->
+                                                                    <!--<li>-->
+                                                                        <!--<div class="value-visualized" ng-class="{'value-selected': month === m_oController.m_oAdvanceFilter.selectedMonthTo}"-->
+                                                                             <!--ng-repeat="month in m_oController.m_oAdvanceFilter.listOfMonths"-->
+                                                                             <!--ng-click = "m_oController.m_oAdvanceFilter.selectedMonthTo = month">-->
+                                                                            <!--{{month}}-->
+                                                                        <!--</div>-->
+                                                                    <!--</li>-->
+                                                                <!--</ul>-->
+                                                            <!--</li>-->
+                                                        <!--</ul>-->
+                                                    <!--</div>-->
+                                                <!--</div>-->
+
+                                                <!--<div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">-->
+                                                    <!--<div class="DropdownMenu" >-->
+                                                        <!--<ul class="nav navbar-nav" >-->
+                                                            <!--<li class="dropdown mega-dropdown "  ng-class="{'disabled': !m_oController.areSelectedMonthAndYearTo() }">-->
+                                                                <!--<a href="" class="dropdown-toggle" ng-class="{'disabled': !m_oController.areSelectedMonthAndYearTo() }" >-->
+                                                                    <!--<i class="fa fa-"></i>-->
+                                                                    <!--<span ng-show="m_oController.m_oAdvanceFilter.selectedDayTo === ''">Days</span>-->
+                                                                    <!--<span ng-hide="utilsIsStrNullOrEmpty(m_oController.m_oAdvanceFilter.selectedDayTo)">{{m_oController.m_oAdvanceFilter.selectedDayTo }}</span>-->
+                                                                    <!--<span class="fa fa-chevron-down pull-right"></span>-->
+                                                                <!--</a>-->
+                                                                <!--<ul class="dropdown-menu mega-dropdown-menu" ng-show="m_oController.areSelectedMonthAndYearTo()">-->
+                                                                    <!--<li >-->
+                                                                        <!--<div class="value-visualized" ng-class="{'value-selected': day === m_oController.m_oAdvanceFilter.selectedDayTo}"-->
+                                                                             <!--ng-repeat="day in m_oController.getMonthDaysTo()"-->
+                                                                             <!--ng-click = "m_oController.m_oAdvanceFilter.selectedDayTo = day" >&lt;!&ndash;m_oController.m_oAdvanceFilter.listOfDays&ndash;&gt;-->
+                                                                            <!--{{day}}-->
+
+                                                                        <!--</div>-->
+                                                                    <!--</li>-->
+                                                                <!--</ul>-->
+                                                            <!--</li>-->
+                                                        <!--</ul>-->
+                                                    <!--</div>-->
+                                                <!--</div>-->
+                                            <!--</div>-->
+
+
+
+                                        <!--</div>-->
+
+                                        <!--&lt;!&ndash;<div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">&ndash;&gt;-->
+                                        <!--&lt;!&ndash;<multiselect options="m_oController.m_oAdvanceFilter.listOfMonths" selected="m_oController.m_oAdvanceFilter.selectedMonths"></multiselect>&ndash;&gt;-->
+                                        <!--<div class="row">-->
+                                            <!--<div class=" col-xs-offset-8 col-sm-offset-8 col-md-offset-8 col-lg-offset-8 col-xs-4 col-sm-4 col-md-4 col-lg-4 ">-->
+                                                <!--<button class="my-button add-filter-button" ng-click="m_oController.addFilterDataFromTo()">-->
+                                                    <!--Add filter-->
+                                                <!--</button>-->
+                                            <!--</div>-->
+
+                                        <!--</div>-->
+
+
+                                        <!--&lt;!&ndash;</div>&ndash;&gt;-->
+                                        <!--&lt;!&ndash;<multiselect options="m_oController.m_oAdvanceFilter.listOfDays" selected="m_oController.m_oAdvanceFilter.selectedDays"></multiselect>&ndash;&gt;-->
+                                    <!--</div>-->
+
+                                    <!--<div class="row well well-sm" ng-show="m_oController.m_oAdvanceFilter.filterActive === 'Months'">-->
+                                        <!--<div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">-->
+                                            <!--<multiselect options="m_oController.m_oAdvanceFilter.listOfYears" selected="m_oController.m_oAdvanceFilter.selectedYearsSearchForMonths"></multiselect>-->
+                                        <!--</div>-->
+                                        <!--<div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">-->
+                                            <!--<multiselect options="m_oController.m_oAdvanceFilter.listOfMonths" selected="m_oController.m_oAdvanceFilter.selectedMonthsSearchForMonths"></multiselect>-->
+                                        <!--</div>-->
+                                        <!--<div class="row">-->
+                                            <!--<div class=" col-xs-offset-8 col-sm-offset-8 col-md-offset-8 col-lg-offset-8 col-xs-4 col-sm-4 col-md-4 col-lg-4 ">-->
+                                                <!--&lt;!&ndash;<div class="col-xs-10 col-sm-10 col-md-10 col-lg-10 col-xs-offset-2 col-sm-offset-2 col-md-offset-2 col-lg-offset-2 ">&ndash;&gt;-->
+                                                <!--<button class="my-button add-filter-button" ng-click="m_oController.addFilterMonths()">-->
+                                                    <!--Add filter-->
+                                                <!--</button>-->
+                                            <!--</div>-->
+
+                                        <!--</div>-->
+                                    <!--</div>-->
+
+                                    <!--<div class="row well well-sm" ng-show="m_oController.m_oAdvanceFilter.savedData !== []">-->
+                                        <!--<div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">-->
+                                            <!--<div class="chip" ng-repeat="data in m_oController.m_oAdvanceFilter.savedData">-->
+                                                <!--{{data.name}}-->
+                                                <!--<span class="closebtn" ng-click="m_oController.removeSaveDataChips(data) ">&times;</span> &lt;!&ndash;this.parentElement.style.display='none';&ndash;&gt;-->
+                                            <!--</div>-->
                                         <!--</div>-->
                                     <!--</div>-->
                                 <!--</div>-->
-                                <!--TO:-->
-                                <!--<div class="row  well well-sm">-->
-
-                                    <!--<div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">-->
-                                        <!--<div class="DropdownMenu">-->
-                                            <!--<ul class="nav navbar-nav">-->
-                                                <!--<li class="dropdown mega-dropdown ">-->
-                                                    <!--<a href="javascript:;" class="dropdown-toggle">-->
-                                                        <!--<i class="fa fa-"></i>-->
-                                                        <!--<span ng-show="m_oController.m_oAdvanceFilter.selectedMonthTo === ''">Months</span>-->
-                                                        <!--<span ng-hide="utilsIsStrNullOrEmpty(m_oController.m_oAdvanceFilter.selectedMonthTo)">{{m_oController.m_oAdvanceFilter.selectedMonthTo }}</span>-->
-                                                        <!--<span class="fa fa-chevron-down pull-right"></span>-->
-                                                    <!--</a>-->
-                                                    <!--<ul class="dropdown-menu mega-dropdown-menu">-->
-                                                        <!--<li>-->
-                                                            <!--<div class="value-visualized" ng-class="{'value-selected': month === m_oController.m_oAdvanceFilter.selectedMonthTo}"-->
-                                                                 <!--ng-repeat="month in m_oController.m_oAdvanceFilter.listOfMonths"-->
-                                                                 <!--ng-click = "m_oController.m_oAdvanceFilter.selectedMonthTo = month">-->
-                                                                <!--{{month}}-->
-                                                            <!--</div>-->
-                                                        <!--</li>-->
-                                                    <!--</ul>-->
-                                                <!--</li>-->
-                                            <!--</ul>-->
-                                        <!--</div>-->
-                                    <!--</div>-->
-
-                                    <!--<div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">-->
-                                        <!--<div class="DropdownMenu" >-->
-                                            <!--<ul class="nav navbar-nav" >-->
-                                                <!--<li class="dropdown mega-dropdown "  ng-class="{'disabled': !m_oController.areSelectedMonthAndYearTo() }">-->
-                                                    <!--<a href="" class="dropdown-toggle" ng-class="{'disabled': !m_oController.areSelectedMonthAndYearTo() }" >-->
-                                                        <!--<i class="fa fa-"></i>-->
-                                                        <!--<span ng-show="m_oController.m_oAdvanceFilter.selectedDayTo === ''">Days</span>-->
-                                                        <!--<span ng-hide="utilsIsStrNullOrEmpty(m_oController.m_oAdvanceFilter.selectedDayTo)">{{m_oController.m_oAdvanceFilter.selectedDayTo }}</span>-->
-                                                        <!--<span class="fa fa-chevron-down pull-right"></span>-->
-                                                    <!--</a>-->
-                                                    <!--<ul class="dropdown-menu mega-dropdown-menu" ng-show="m_oController.areSelectedMonthAndYearTo()">-->
-                                                        <!--<li >-->
-                                                            <!--<div class="value-visualized" ng-class="{'value-selected': day === m_oController.m_oAdvanceFilter.selectedDayTo}"-->
-                                                                 <!--ng-repeat="day in m_oController.getMonthDaysTo()"-->
-                                                                 <!--ng-click = "m_oController.m_oAdvanceFilter.selectedDayTo = day" >&lt;!&ndash;m_oController.m_oAdvanceFilter.listOfDays&ndash;&gt;-->
-                                                                <!--{{day}}-->
-
-                                                            <!--</div>-->
-                                                        <!--</li>-->
-                                                    <!--</ul>-->
-                                                <!--</li>-->
-                                            <!--</ul>-->
-                                        <!--</div>-->
-                                    <!--</div>-->
-                                <!--</div>-->
-
-
 
                             <!--</div>-->
 
                         <!--</div>-->
                     <!--</div>-->
+
                 <!--</div>-->
+
+                    <div class="row">
+                        <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                            <div class="row">
+                                <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                                    <div class="radio">
+                                        <label>
+                                            <input type="radio" name="name" ng-model="m_oController.m_sTypeOfFilterSelected" value="Time period" checked="checked" >
+                                            Time period
+                                        </label>
+                                        <br>
+                                        <label>
+                                            <input type="radio" name="name" ng-model="m_oController.m_sTypeOfFilterSelected" value="Time series" checked="checked">
+                                            Time series
+                                        </label>
+                                    </div>
+                                </div>
+
+                            </div>
+                            <div class="row time-container" ng-show="m_oController.m_sTypeOfFilterSelected === 'Time period'">
+                                <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6" >
+                                    TO:
+                                    <div class=" advanced-calendar-input input-calendar-container " >
+                                        <p class="input-group" >
+
+                                            <input type="text" class="form-control advanced-calendar-date-input"
+                                                   uib-datepicker-popup="yyyy/MM/dd"
+                                                   ng-model="m_oController.m_oModel.sensingPeriodTo"
+                                                   is-open="m_oController.m_oStatus.openedSensingPeriodTo"
+                                                   date-disabled="m_oController.disabled(date, mode)" ng-required="true"
+                                                   min-date="m_oController.m_oModel.sensingPeriodFrom"
+                                                   ng-blur="m_oController.updateAdvancedSearch()" close-text="Close"
+                                                   readonly="true" data-container="body"/>
+
+                                            <span class="input-group-btn">
+							                    <button type="button" class="btn btn-default advanced-calendar-button"
+                                                    ng-click="m_oController.openSensingPeriodTo($event)"><i class="fa fa-calendar" aria-hidden="true"></i></button>
+						                    </span>
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+                                    FROM:
+                                    <div class="input-calendar-container" >
+
+                                        <p class="input-group">
+                                            <input type="text" class="form-control advanced-calendar-date-input"
+                                                   uib-datepicker-popup="yyyy/MM/dd"
+                                                   ng-model="m_oController.m_oModel.sensingPeriodFrom"
+                                                   is-open="m_oController.m_oStatus.openedSensingPeriodFrom"
+                                                   date-disabled="m_oController.disabled(date, mode)"
+                                                   max-date="m_oController.m_oModel.sensingPeriodTo" ng-required="true"
+                                                   ng-blur="m_oController.updateAdvancedSearch()" readonly="true"
+                                                   close-text="Close"/>
+
+                                            <span class="input-group-btn">
+        			                            <button type="button" class="btn btn-default advanced-calendar-button"
+                                                    ng-click="m_oController.openSensingPeriodFrom($event)">
+                                                <i class="fa fa-calendar" aria-hidden="true"></i>
+                                                </button>
+                                            </span>
+
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row" ng-show="m_oController.m_sTypeOfFilterSelected === 'Time series'">
+                                <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6" >
+                                    <button type="button" class="my-button" ng-click="m_oController.openAdvanceFiltersDialog()">Select Time Series</button>
+                                </div>
+                                <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+
+                                </div>
+                            </div>
+                            <div class="row well well-sm" ng-hide="m_oController.m_oAdvanceFilter.savedData.length === 0">
+                                <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                                    <div class="chip" ng-repeat="data in m_oController.m_oAdvanceFilter.savedData">
+                                        {{data.name}}
+                                        <span class="closebtn" ng-click="m_oController.removeSaveDataChips(data) ">&times;</span> <!--this.parentElement.style.display='none';-->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+
+
 
                     <div id="advanced-search-content"  ng-hide="m_oController.m_bIsVisibleListOfLayers || m_oController.m_bisVisibleLocalStorageInputs">
 
@@ -484,9 +451,17 @@
 
                             <!--SEARCH INPUT-->
                             <div class="search-input">
-                                <div class="my-label">Product Name</div>
-                                <input type="text" ng-model="m_oController.m_oModel.textQuery"
-                                       placeholder="Search..." ><!-- style="padding: 0px !important;"-->
+                                <div class="row">
+                                    <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
+                                        <div class="my-label">Product Name</div>
+
+                                    </div>
+                                    <div class="col-xs-9 col-sm-9 col-md-9 col-lg-9">
+                                        <input type="text" ng-model="m_oController.m_oModel.textQuery"
+                                               placeholder="Search..." ><!-- style="padding: 0px !important;"-->
+                                    </div>
+                                </div>
+
                             </div>
 
                             <!--*********************** MISSIONS LIST ********************************-->
@@ -683,6 +658,15 @@
                                     <!-- BUTTONS -->
                                     <td class="button-cell">
                                         <div class="btn-group-vertical" role="group" >
+                                            <!-- CHECK PRODUCT-->
+                                            <button type="button" class="btn btn btn-primary" ng-show="layer.checked" ng-click="layer.checked= !layer.checked"
+                                                    data-toggle="tooltip" data-placement="top" title="{{'IMPORT_TOOLTIP_CHECK'|translate}}">
+                                                <i class="fa fa-check-square-o" aria-hidden="true"></i>
+                                            </button>
+                                            <!-- UNCHECK PRODUCT-->
+                                            <button type="button" class="btn btn btn-primary" ng-hide="layer.checked" ng-click="layer.checked= !layer.checked "
+                                                    data-toggle="tooltip" data-placement="top" title="{{'IMPORT_TOOLTIP_UNCHECK'|translate}}">
+                                                <i class="fa fa-square-o" aria-hidden="true"></i>
                                             <button type="button" class="btn btn btn-primary" ng-click="m_oController.downloadProductInWorkspace(layer)"
                                                     ng-disabled="m_oController.isPossibleDoDownload(layer) || (layer.isDisabledToDoDownload != null && layer.isDisabledToDoDownload)"
                                                     data-toggle="tooltip" data-placement="top" title="{{'IMPORT_TOOLTIP_ADD_PRODUCT'|translate}}">
@@ -697,15 +681,7 @@
                                                 <i class="fa fa-info-circle" aria-hidden="true"></i>
                                             </button>
 
-                                            <!-- CHECK PRODUCT-->
-                                            <button type="button" class="btn btn btn-primary" ng-show="layer.checked" ng-click="layer.checked= !layer.checked"
-                                                    data-toggle="tooltip" data-placement="top" title="{{'IMPORT_TOOLTIP_CHECK'|translate}}">
-                                                <i class="fa fa-check-square-o" aria-hidden="true"></i>
-                                            </button>
-                                            <!-- UNCHECK PRODUCT-->
-                                            <button type="button" class="btn btn btn-primary" ng-hide="layer.checked" ng-click="layer.checked= !layer.checked "
-                                                    data-toggle="tooltip" data-placement="top" title="{{'IMPORT_TOOLTIP_UNCHECK'|translate}}">
-                                                <i class="fa fa-square-o" aria-hidden="true"></i>
+
                                             </button>
 
                                         </div>

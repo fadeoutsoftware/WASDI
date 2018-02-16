@@ -24,6 +24,7 @@
 @import "../css/_dialog";
 @import "../directives/multiradiobutton_dropdown_menu/multi_radiobutton_dropdown_menu";
 @import "../directives/image_preview/image_preview";
+@import "../directives/Toggle/toggle_switch";
 
 //DIALOGS
 @import "../dialogs/orbit_info/orbit_info";
@@ -47,7 +48,8 @@
 @import "../dialogs/downloadProductInWorkspace/downloadProductInWorkspace";
 @import "../dialogs/filter_band_operation/filter_band";
 @import "../dialogs/mask_manager/mask_manager";
-@import "../directives/Toggle/toggle_switch";
+@import "../dialogs/import_advance_filters/import_advance_filters";
+
 
 //COMPONENTS
 @import "components/range_slider";
