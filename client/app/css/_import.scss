@@ -248,7 +248,7 @@
 
       //css for simple search input time
       .time-container{
-        //margin-left: 20px;
+        margin-left: 5px;
         //float:left;
         input[type=text]{
           width: 100%;
@@ -257,6 +257,7 @@
         }
         .input-group{
           float:right;
+          width:100%;
           //width: 15%;
         }
         .description-label{
@@ -276,6 +277,11 @@
         button{
           border-color: $wasdi-blue-logo;
         }
+      }
+
+      .selected-time-series{
+        padding: 10px 20px;
+        margin: 4px 5px;
       }
 
       .add-filter-button{

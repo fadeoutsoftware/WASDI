@@ -2,14 +2,17 @@
 
     <!--Operation bar-->
     <div class="col-lg-11 col-md-10 col-sm-10 col-xs-10 col-lg-offset-1 col-md-offset-2 col-sm-offset-2 col-xs-offset-2 operations-bar my-input-text"  ><!--style="height: 80px;"-->
-        <!--PROVIDERS-->
-        <multiselectdropdownmenu options="m_oController.m_aListOfProvider"></multiselectdropdownmenu>
+        <!--&lt;!&ndash;PROVIDERS&ndash;&gt;-->
+        <!--<div style="">-->
+            <!--<multiselectdropdownmenu options="m_oController.m_aListOfProvider"></multiselectdropdownmenu>-->
+        <!--</div>-->
+
 
         <!--search button-->
         <div class="search-button-container" >
             <div class="search-button" ng-click="m_oController.searchAllSelectedProviders()" id="search-button"
                  ng-class="{'search-button-disabled': m_oController.thereIsAtLeastOneProvider() === false || (m_oController.m_bIsVisibleListOfLayers || m_oController.m_bisVisibleLocalStorageInputs),
-                            'search-button': m_oController.thereIsAtLeastOneProvider() === true }" >
+                            'search-button': m_oController.thereIsAtLeastOneProvider() === true }" ng-show="m_oController.m_sTypeOfFilterSelected === 'Time period'">
                 <!--<i class="fa fa-search fa-lg" aria-hidden="true"></i>-->
                 {{"IMPORT_SEARCH_BUTTON"|translate}} <i class="fa fa-search" aria-hidden="true"></i>
 
@@ -17,7 +20,7 @@
 
             <div class="search-button" ng-click="m_oController.searchListAllSelectedProviders()" id="search-button-list"
                  ng-class="{'search-button-disabled': m_oController.thereIsAtLeastOneProvider() === false || (m_oController.m_bIsVisibleListOfLayers || m_oController.m_bisVisibleLocalStorageInputs),
-                            'search-button': m_oController.thereIsAtLeastOneProvider() === true }" >
+                            'search-button': m_oController.thereIsAtLeastOneProvider() === true }" ng-show="m_oController.m_sTypeOfFilterSelected === 'Time series'">
                 <!--<i class="fa fa-search fa-lg" aria-hidden="true"></i>-->
                 {{"IMPORT_SEARCHLIST_BUTTON"|translate}} <i class="fa fa-search" aria-hidden="true"></i>
             </div>
@@ -357,10 +360,10 @@
 
                 <!--</div>-->
 
-                    <div class="row">
+                    <div class="row" ng-hide="m_oController.m_bIsVisibleListOfLayers || m_oController.m_bisVisibleLocalStorageInputs">
                         <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
                             <div class="row">
-                                <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                                <div class="col-xs-5 col-sm-5 col-md-5 col-lg-5 col-xs-offset-1 col-sm-offset-1 col-md-offset-1 col-lg-offset-1">
                                     <div class="radio">
                                         <label>
                                             <input type="radio" name="name" ng-model="m_oController.m_sTypeOfFilterSelected" value="Time period" checked="checked" >
@@ -373,9 +376,11 @@
                                         </label>
                                     </div>
                                 </div>
-
+                                <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+                                    <multiselectdropdownmenu options="m_oController.m_aListOfProvider"></multiselectdropdownmenu>
+                                </div>
                             </div>
-                            <div class="row time-container" ng-show="m_oController.m_sTypeOfFilterSelected === 'Time period'">
+                            <div class="row time-container" ng-show="m_oController.m_sTypeOfFilterSelected === 'Time period'"><!---->
                                 <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6" >
                                     TO:
                                     <div class=" advanced-calendar-input input-calendar-container " >
@@ -396,6 +401,7 @@
 						                    </span>
                                         </p>
                                     </div>
+                                    <!--<multiselectdropdownmenu options="m_oController.m_aListOfProvider"></multiselectdropdownmenu>-->
                                 </div>
                                 <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
                                     FROM:
@@ -420,14 +426,19 @@
 
                                         </p>
                                     </div>
+
+                                    <!--<button type="button" class="my-button selected-time-series" ng-click="m_oController.openAdvanceFiltersDialog()">Select Time Series</button>-->
                                 </div>
                             </div>
-                            <div class="row" ng-show="m_oController.m_sTypeOfFilterSelected === 'Time series'">
+                            <div class="row" ng-show="m_oController.m_sTypeOfFilterSelected === 'Time series'"><!---->
                                 <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6" >
-                                    <button type="button" class="my-button" ng-click="m_oController.openAdvanceFiltersDialog()">Select Time Series</button>
+                                    <!--PROVIDERS-->
+                                    <div style="">
+                                        <!--<multiselectdropdownmenu options="m_oController.m_aListOfProvider"></multiselectdropdownmenu>-->
+                                    </div>
                                 </div>
                                 <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
-
+                                    <button type="button" class="my-button selected-time-series" ng-click="m_oController.openAdvanceFiltersDialog()">Select Time Series</button>
                                 </div>
                             </div>
                             <div class="row well well-sm" ng-hide="m_oController.m_oAdvanceFilter.savedData.length === 0">
