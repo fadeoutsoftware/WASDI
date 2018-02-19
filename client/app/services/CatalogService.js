@@ -22,5 +22,8 @@ service('CatalogService', ['$http',  'ConstantsService', function ($http, oConst
           return this.m_oHttp.post(this.APIURL + "/catalog/downloadentry",oEntry,{responseType: 'arraybuffer'});
     };
 
+    this.ingestFile = function(sSelectedFile,sWorkspace){
+        return this.m_oHttp.put(this.APIURL + '/catalog/upload/ingest?file=' + sSelectedFile + '&workspace=' + sWorkspace);
+    };
 }]);
 

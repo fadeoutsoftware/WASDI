@@ -6,11 +6,12 @@
 
 var SftpUploadController = (function() {
 
-    function SftpUploadController($scope, oClose,oExtras,oAuthService,oConstantsService) {
+    function SftpUploadController($scope, oClose,oExtras,oAuthService,oConstantsService,oCatalogService) {
         this.m_oScope = $scope;
         this.m_oScope.m_oController = this;
         this.m_oOrbit = oExtras;
         this.m_oAuthService = oAuthService;
+        this.m_oCatalogService = oCatalogService;
         this.m_aoListOfFiles = [];
         this.m_bIsAccountCreated = null;
         this.m_sEmailNewPassword="";
@@ -164,7 +165,7 @@ var SftpUploadController = (function() {
     SftpUploadController.prototype.ingestFile = function(oSelectedFile){
         if(utilsIsObjectNullOrUndefined(oSelectedFile)=== true )
             return false;
-        this.m_oAuthService.ingestFile(oSelectedFile,this.m_oConstantsService.getActiveWorkspace().workspaceId).success(function (data, status) {
+        this.m_oCatalogService.ingestFile(oSelectedFile,this.m_oConstantsService.getActiveWorkspace().workspaceId).success(function (data, status) {
             if (data != null) {
                 if (data != undefined) {
 
@@ -185,7 +186,8 @@ var SftpUploadController = (function() {
         'close',
         'extras',
         'AuthService',
-        'ConstantsService'
+        'ConstantsService',
+        'CatalogService'
     ];
     return SftpUploadController;
 })();
