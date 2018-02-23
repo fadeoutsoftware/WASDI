@@ -247,6 +247,10 @@
                             ng-click="m_oController.setActiveTab(2)">
                             <a href="">Preview</a>
                         </li>
+                        <li role="presentation"  ng-class="{active: m_oController.m_iActiveMapPanelTab === 3}"
+                            ng-click="m_oController.setActiveTab(3)">
+                            <a href="">test</a>
+                        </li>
 
                         <!--<li role="presentation"><a href="#">Messages</a></li>-->
                     </ul>
@@ -324,9 +328,9 @@
                     <!----------------------------------------------- TAB 2  PREVIEW---------------------------------------------->
                     <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12" ng-show="m_oController.m_iActiveMapPanelTab === 2" style="margin-bottom: 50px;">
                         <div class="col-xs-10 col-sm-10 col-md-10 col-lg-10">
-                            <imagepreview is-loaded="m_oController.m_bIsLoadedPreviewBandImage" url-image="m_oController.m_sPreviewUrlSelectedBand"
-                                          body = "m_oController.m_oImagePreviewDirectivePayload">
-                            </imagepreview>
+                            <!--<imagepreview is-loaded="m_oController.m_bIsLoadedPreviewBandImage" url-image="m_oController.m_sPreviewUrlSelectedBand"-->
+                                          <!--body = "m_oController.m_oImagePreviewDirectivePayload">-->
+                            <!--</imagepreview>-->
 
                         </div>
 
@@ -335,6 +339,23 @@
                                     ng-disabled = " (m_oController.m_bIsLoadedPreviewBandImage === false) || (m_oController.m_bIsLoadedViewBandImage === false)">
                                 Apply
                             </button>
+                            <!-- on-click="m_oController.processingGetBandImage()"-->
+                        </div>
+                    </div>
+                    <!-------------------------------------------- TAB TEST -------------------------------------------->
+                    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12" ng-show="m_oController.m_iActiveMapPanelTab === 3" style="margin-bottom: 50px;">
+                        <div class="col-xs-10 col-sm-10 col-md-10 col-lg-10">
+                            <imageeditor is-loaded="m_oController.m_bIsLoadedPreviewBandImage" url-image="m_oController.m_sPreviewUrlSelectedBand"
+                                          body = "m_oController.m_oImagePreviewDirectivePayload">
+                            </imageeditor>
+
+                        </div>
+
+                        <div class="col-xs-2 col-sm-2 col-md-2 col-lg-2">
+                            <!--<button ng-click="m_oController.applyEditorPreviewImageUpdate()"-->
+                                    <!--ng-disabled = " (m_oController.m_bIsLoadedPreviewBandImage === false) || (m_oController.m_bIsLoadedViewBandImage === false)">-->
+                                <!--Apply-->
+                            <!--</button>-->
                             <!-- on-click="m_oController.processingGetBandImage()"-->
                         </div>
                     </div>
