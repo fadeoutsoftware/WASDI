@@ -3,17 +3,22 @@ package it.fadeout.rest.resources;
 import java.awt.Dimension;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
+import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -30,10 +35,12 @@ import javax.servlet.ServletConfig;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
+import javax.ws.rs.InternalServerErrorException;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -49,6 +56,7 @@ import org.esa.snap.core.gpf.annotations.Parameter;
 import org.esa.snap.rcp.imgfilter.FilteredBandAction;
 import org.esa.snap.rcp.imgfilter.model.Filter;
 import org.esa.snap.rcp.imgfilter.model.StandardFilters;
+import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 
 import com.bc.ceres.jai.operator.PaintDescriptor;
@@ -388,7 +396,7 @@ public class ProcessingResources {
 	 * @return
 	 * @throws Exception
 	 */
-	@POST
+	@GET
 	@Path("/graph_id")
 	public Response executeGraphFromWorkflowId(@HeaderParam("x-session-token") String sessionId, 
 			@QueryParam("workspace") String workspace, @QueryParam("source") String sourceProductName, @QueryParam("destination") String destinationProdutName, @QueryParam("workflowId") String workflowId) throws Exception {
@@ -498,7 +506,7 @@ public class ProcessingResources {
 				Wasdi.DebugLog("ProcessingResource.getBandImage: CANNOT APPLY FILTER TO BAND " + model.getBandName());
 	        	return Response.status(500).build();
 			}
-			raster = filteredBand.getSource();
+			raster = filteredBand;
 		} else {
 			raster = oSNAPProduct.getBand(model.getBandName());
 		}
@@ -515,7 +523,7 @@ public class ProcessingResources {
 		
 		BufferedImage img;
 		try {
-			img = manager.buildImage(raster, imgSize, vp);
+			img = manager.buildImage2(raster, imgSize, vp);
 		} catch (Exception e) {
 			e.printStackTrace();
 			return Response.status(500).build();
@@ -535,6 +543,191 @@ public class ProcessingResources {
 		return Response.ok(imageData).build();
 	}
 	
+	
+
+	@POST
+	@Path("/assimilation")
+	@Consumes(MediaType.MULTIPART_FORM_DATA)
+	@Produces(MediaType.APPLICATION_OCTET_STREAM)
+	public String Assimilation(
+			@FormDataParam("humidity") InputStream humidityFile,
+			@FormDataParam("humidity") FormDataContentDisposition humidityFileMetaData,
+			@HeaderParam("x-session-token") String sessionId,
+			@QueryParam("midapath") String midaPath) {
+		
+		Wasdi.DebugLog("ProcessingResource.Assimilation");
+
+		User user = Wasdi.GetUserFromSession(sessionId);
+		try {
+
+			//check authentication
+			if (user == null || Utils.isNullOrEmpty(user.getUserId())) {
+				return null;				
+			}
+			
+			//build and check paths
+			File assimilationWD = new File(m_oServletConfig.getInitParameter("AssimilationWDPath"));
+			if (!assimilationWD.isDirectory()) {				
+				System.out.println("ProcessingResource.Assimilation: ERROR: Invalid directory: " + assimilationWD.getAbsolutePath());
+				throw new InternalServerErrorException("invalid directory in assimilation settings");				
+			}						
+			File midaTifFile = new File(midaPath);
+			if (!midaTifFile.canRead()) {
+				System.out.println("ProcessingResource.Assimilation: ERROR: Invalid mida path: " + midaTifFile.getAbsolutePath());
+				throw new InternalServerErrorException("invalid path in assimilation settings");
+			}						
+			File humidityTifFile = new File(assimilationWD, UUID.randomUUID().toString() + ".tif");
+			File resultDir = new File(m_oServletConfig.getInitParameter("AssimilationResultPath"));
+			File resultTifFile = new File(resultDir, UUID.randomUUID().toString() + ".tif");
+			
+			
+			//save uploaded file			
+			int read = 0;
+			byte[] bytes = new byte[1024];
+			OutputStream out = new FileOutputStream(humidityTifFile);
+			while ((read = humidityFile.read(bytes)) != -1) {
+				out.write(bytes, 0, read);
+			}
+			out.flush();
+			out.close();
+
+			//execute assimilation
+			if (launchAssimilation(midaTifFile, humidityTifFile, resultTifFile)) {
+				String url = "wasdidownloads/" + resultTifFile.getName();
+				return url;				
+			}
+			
+			throw new InternalServerErrorException("unable to execute assimilation");
+			
+		} catch (Exception e) {
+			System.out.println("ProcessingResource.Assimilation: error launching assimilation " + e.getMessage());
+			e.printStackTrace();
+			throw new InternalServerErrorException("error launching assimilation: " + e.getMessage());
+		}
+
+	}
+
+	
+	@POST
+	@Path("/upload")
+	@Consumes(MediaType.MULTIPART_FORM_DATA)
+	public Response uploadModel(@FormDataParam("file") InputStream fileInputStream,
+			@FormDataParam("file") FormDataContentDisposition fileMetaData, @HeaderParam("x-session-token") String sSessionId, @QueryParam("sWorkspaceId") String sWorkspaceId) throws Exception
+	{ 
+		Wasdi.DebugLog("ProcessingResource.UploadModel");
+		
+		User oUser = Wasdi.GetUserFromSession(sSessionId);
+		if (oUser==null) return Response.status(Status.UNAUTHORIZED).build();
+		if (Utils.isNullOrEmpty(oUser.getUserId())) return Response.status(Status.UNAUTHORIZED).build();
+
+		String sDownloadRootPath = m_oServletConfig.getInitParameter("DownloadRootPath");
+		if (!sDownloadRootPath.endsWith("/"))
+			sDownloadRootPath += "/";
+
+		String sDownloadPath = sDownloadRootPath + oUser.getUserId()+ "/" + sWorkspaceId + "/" + "CONTINUUM";
+
+		if(!Files.exists(Paths.get(sDownloadPath)))
+		{
+			if (Files.createDirectories(Paths.get(sDownloadPath))== null)
+			{
+				System.out.println("ProcessingResource.uploadMapFile: Directory " + sDownloadPath + " not created");
+				return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+			}
+
+		}
+
+		try
+		{
+			int read = 0;
+			byte[] bytes = new byte[1024];
+
+			OutputStream out = new FileOutputStream(new File(sDownloadPath + "/" + fileMetaData.getFileName()));
+			while ((read = fileInputStream.read(bytes)) != -1) 
+			{
+				out.write(bytes, 0, read);
+			}
+			out.flush();
+			out.close();
+
+			/* TODO: Abilitare questa parte se si vuole far partire l'assimilazione dopo l'upload del file (E' ancora da testare) 
+			 * 
+			 * 
+			String sAssimilationContinuumPath =   m_oServletConfig.getInitParameter("AssimilationContinuumPath");
+			String sMulesmeEstimatePath =   m_oServletConfig.getInitParameter("MulesmeStimePath");
+			if (!sAssimilationContinuumPath.endsWith("/"))
+				sAssimilationContinuumPath += "/";
+			if (!sMulesmeEstimatePath.endsWith("/"))
+				sMulesmeEstimatePath += "/";
+
+
+			//Continuum format SoilMoistureItaly_20160801230000
+			//Get continuum date
+			SimpleDateFormat oDateFormat = new SimpleDateFormat("yyyyMMdd");
+			String sFileName = fileMetaData.getFileName();
+			String sDate = sFileName.split("_")[1].substring(0, 7);  
+			Calendar oContinuumDate = Calendar.getInstance();
+			Calendar oMulesmeDate = Calendar.getInstance();
+			oContinuumDate.setTime(oDateFormat.parse(sDate));
+			oMulesmeDate.setTime(oDateFormat.parse(sDate));
+			oMulesmeDate.add(Calendar.DATE, 1);  // number of days to add
+			String sMulesmeDate = oDateFormat.format(oMulesmeDate); 
+
+			//Search in catalog soil moisture map with date = continuum date + 1 day
+			CatalogRepository oRepo = new CatalogRepository();
+			Catalog oCatalog = oRepo.GetCatalogsByDate(sMulesmeDate);
+			if (oCatalog != null)
+			{
+				//Copy file into Mulesme Stime path
+				Files.move(Paths.get(oCatalog.getFilePath()), Paths.get(sMulesmeEstimatePath));
+				//Copy file from CONTINUUM to assimilation path
+				Files.move(Paths.get(sDownloadPath + "/" + fileMetaData.getFileName()), Paths.get(sAssimilationContinuumPath));
+				//launch assimilation
+				LaunchAssimilation();
+			}
+			 */
+
+
+
+		} catch (IOException e) 
+		{
+			throw new WebApplicationException("CatalogResources.uploadModel: Error while uploading file. Please try again !!");
+		}
+
+
+
+
+		return Response.ok().build();
+	}
+
+	private boolean launchAssimilation(File midaTifFile, File humidityTifFile, File resultTifFile) {
+
+		try {
+			
+			String cmd[] = new String[] {
+					m_oServletConfig.getInitParameter("AssimilationScript"),
+					midaTifFile.getAbsolutePath(),
+					humidityTifFile.getAbsolutePath(),
+					resultTifFile.getAbsolutePath()
+			};
+			
+			System.out.println("ProcessingResource.LaunchAssimilation: shell exec " + Arrays.toString(cmd));
+
+			Process proc = Runtime.getRuntime().exec(cmd);
+			BufferedReader input = new BufferedReader(new InputStreamReader(proc.getInputStream()));
+            String line;
+            while((line=input.readLine()) != null) {
+            	System.out.println("ProcessingResource.LaunchAssimilation: Assimilation stdout: " + line);
+            }
+			if (proc.waitFor() != 0) return false;
+		} catch (Exception oEx) {
+			System.out.println("ProcessingResource.LaunchAssimilation: error during assimilation process " + oEx.getMessage());
+			oEx.printStackTrace();
+			return false;
+		}
+
+		return true;
+	}
+
 	
 	private String AcceptedUserAndSession(String sSessionId) {
 		//Check user

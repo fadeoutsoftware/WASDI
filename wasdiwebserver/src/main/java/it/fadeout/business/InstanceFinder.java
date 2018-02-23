@@ -37,8 +37,9 @@ public class InstanceFinder {
 			"/org/nfs/orbits/sat/resource/cosmosky4.xml",
 			"/org/nfs/orbits/sat/resource/sentinel_1a.xml",
 			"/org/nfs/orbits/sat/resource/sentinel_1b.xml",
-			"/org/nfs/orbits/sat/resource/landsat8.xml"
-
+			"/org/nfs/orbits/sat/resource/landsat8.xml",
+		    "/org/nfs/orbits/sat/resource/sentinel_2a.xml",
+		    "/org/nfs/orbits/sat/resource/sentinel_2b.xml" 
 	};
 
 	public static final HashMap<String, String> s_sOrbitSatsMap = new HashMap<String, String>(){
@@ -50,6 +51,8 @@ public class InstanceFinder {
 			put("SENTINEL1A", "/org/nfs/orbits/sat/resource/sentinel_1a.xml");
 			put("SENTINEL1B", "/org/nfs/orbits/sat/resource/sentinel_1b.xml");
 			put("LANDSAT8", "/org/nfs/orbits/sat/resource/landsat8.xml");
+			put("SENTINEL2A", "/org/nfs/orbits/sat/resource/sentinel_2a.xml");
+			put("SENTINEL2B", "/org/nfs/orbits/sat/resource/sentinel_2b.xml");			
 		}
 	};
 
