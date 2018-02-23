@@ -537,3 +537,38 @@ function utilsVariableIsAnArray (variable)
 {
     return    variable.constructor === Array
 }
+
+
+function utilsGetMidPoint (iPointAX,iPointAY,iPointBX,iPointBY){
+    if( utilsIsANumber(iPointAX) === false || utilsIsANumber(iPointAY) === false || utilsIsANumber(iPointBX) === false || utilsIsANumber(iPointBY) === false )
+    {
+        return null;
+    }
+
+    var iMidPointX = (iPointAX + iPointBX)/2;
+    var iMidPointY = (iPointAY + iPointBY)/2;
+    return {
+        x:iMidPointX,
+        y:iMidPointY
+    }
+};
+function utilsCalcuMidPoint (iPointAX,iPointAY,iPointBX,iPointBY){
+    if( utilsIsANumber(iPointAX) === false || utilsIsANumber(iPointAY) === false || utilsIsANumber(iPointBX) === false || utilsIsANumber(iPointBY) === false )
+    {
+        return null;
+    }
+
+    var iMidPointX = (iPointAX + iPointBX)/2;
+    var iMidPointY = (iPointAY + iPointBY)/2;
+    return {
+        x:iMidPointX,
+        y:iMidPointY
+    }
+};
+
+function utilsCalculateDistanceBetweenTwoPoints(x1,y1,x2,y2){
+    var a = x1 - x2
+    var b = y1 - y2
+    var fDistance = Math.sqrt( a*a + b*b );
+    return fDistance;
+}
