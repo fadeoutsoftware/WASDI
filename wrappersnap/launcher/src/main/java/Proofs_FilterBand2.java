@@ -35,7 +35,7 @@ public class Proofs_FilterBand2 {
 		
 		System.out.println("-------------------------------------------------------------------------");
 		
-		createJpg(new Dimension(600, 600), new Rectangle(new Point(6000, 6000), new Dimension(2000, 2000)), "cut");
+		//createJpg(new Dimension(600, 600), new Rectangle(new Point(6000, 6000), new Dimension(2000, 2000)), "cut");
 		
 //		d = new Dimension(200, 200);
 //		img = manager.buildImage(product.getBand(bandName), d, new Rectangle(new Point(6000, 6000), new Dimension(2000, 2000)));
@@ -90,9 +90,11 @@ public class Proofs_FilterBand2 {
     }
 
 	private static void createJpg(Dimension d, Rectangle vp, String suffix) throws IOException, InterruptedException {
-		File file = new File("/home/doy/tmp/wasdi/tmp/S1B_IW_GRDH_1SDV_20170621T052711_20170621T052736_006144_00ACB6_75AA.zip");
+		//File file = new File("C:\\Temp\\wasdi\\data\\paolo\\2c1271a4-9e2b-4291-aabd-caf3074adb25\\S2A_MSIL1C_20180102T102421_N0206_R065_T32TMQ_20180102T123237.zip");
+		File file = new File("C:\\Temp\\wasdi\\data\\paolo\\2c1271a4-9e2b-4291-aabd-caf3074adb25\\S1A_IW_GRDH_1SDV_20180129T052722_20180129T052747_020365_022CA8_9D99.zip");
 		Product product = ProductIO.readProduct(file);
-		String bandName = "Amplitude_VH";
+		//String bandName = "B1";
+		String bandName = "AMPLITUDE_VH";
 		Filter filter = StandardFilters.SMOOTHING_FILTERS[0];
 		
 		Band band = product.getBand(bandName);
@@ -102,14 +104,15 @@ public class Proofs_FilterBand2 {
 		BandImageManager manager = new BandImageManager(product);		
 		FilterBand filteredBand = manager.getFilterBand(bandName, filter, 1);
 		RasterDataNode raster = filteredBand;//.getSource();
+		raster = band;
 		
 		System.out.println("filtered band created: " + (System.currentTimeMillis()-t) + " ms");
 		BufferedImage img;
 		
 //		d = new Dimension(600, 600);
 		if (vp==null) vp = new Rectangle(new Point(0, 0), raster.getRasterSize());
-		img = manager.buildImage(raster, d, vp);				
-		ImageIO.write(img, "jpg", new File("/home/doy/tmp/wasdi/tmp/" + filteredBand.getName() + "_" + suffix + ".jpg"));		
+		img = manager.buildImage2(raster, d, vp);				
+		ImageIO.write(img, "jpg", new File("C:\\Temp\\wasdi\\" + filteredBand.getName() + "_" + suffix + ".jpg"));		
 		
 	}
 	
