@@ -29,6 +29,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.InternalServerErrorException;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
@@ -48,16 +49,22 @@ import org.glassfish.jersey.server.internal.process.AsyncContext;
 import org.glassfish.jersey.server.internal.process.RespondingContext;
 
 import it.fadeout.Wasdi;
+import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.Catalog;
 import wasdi.shared.business.DownloadedFile;
 import wasdi.shared.business.DownloadedFileCategory;
+import wasdi.shared.business.ProcessStatus;
+import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.business.User;
 import wasdi.shared.business.Workspace;
 import wasdi.shared.data.CatalogRepository;
 import wasdi.shared.data.DownloadedFilesRepository;
 import wasdi.shared.data.MongoRepository;
+import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.data.ProductWorkspaceRepository;
 import wasdi.shared.data.WorkspaceRepository;
+import wasdi.shared.parameters.IngestFileParameter;
+import wasdi.shared.utils.SerializationUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.CatalogViewModel;
 import wasdi.shared.viewmodels.ProductViewModel;
@@ -188,97 +195,6 @@ public class CatalogResources {
 	}
 	
 
-	@POST
-	@Path("/assimilation")
-	@Consumes(MediaType.MULTIPART_FORM_DATA)
-	@Produces(MediaType.APPLICATION_OCTET_STREAM)
-	public String Assimilation(
-			@FormDataParam("humidity") InputStream humidityFile,
-			@FormDataParam("humidity") FormDataContentDisposition humidityFileMetaData,
-			@HeaderParam("x-session-token") String sessionId,
-			@QueryParam("midapath") String midaPath) {
-		
-		Wasdi.DebugLog("CatalogResources.Assimilation");
-
-		User user = Wasdi.GetUserFromSession(sessionId);
-		try {
-
-//			//check authentication
-//			if (user == null || Utils.isNullOrEmpty(user.getUserId())) {
-//				return Response.status(Status.UNAUTHORIZED).build();				
-//			}
-			
-			//build and check paths
-			File assimilationWD = new File(m_oServletConfig.getInitParameter("AssimilationWDPath"));
-			if (!assimilationWD.isDirectory()) {				
-				System.out.println("CatalogResources.Assimilation: ERROR: Invalid directory: " + assimilationWD.getAbsolutePath());
-				throw new InternalServerErrorException("invalid directory in assimilation settings");				
-			}						
-			File midaTifFile = new File(midaPath);
-			if (!midaTifFile.canRead()) {
-				System.out.println("CatalogResources.Assimilation: ERROR: Invalid mida path: " + midaTifFile.getAbsolutePath());
-				throw new InternalServerErrorException("invalid path in assimilation settings");
-			}						
-			File humidityTifFile = new File(assimilationWD, UUID.randomUUID().toString() + ".tif");
-			File resultDir = new File(m_oServletConfig.getInitParameter("AssimilationResultPath"));
-			File resultTifFile = new File(resultDir, UUID.randomUUID().toString() + ".tif");
-			
-			
-			//save uploaded file			
-			int read = 0;
-			byte[] bytes = new byte[1024];
-			OutputStream out = new FileOutputStream(humidityTifFile);
-			while ((read = humidityFile.read(bytes)) != -1) {
-				out.write(bytes, 0, read);
-			}
-			out.flush();
-			out.close();
-
-			//execute assimilation
-			if (launchAssimilation(midaTifFile, humidityTifFile, resultTifFile)) {
-				String url = "wasdidownloads/" + resultTifFile.getName();
-				return url;				
-			}
-			
-			throw new InternalServerErrorException("unable to execute assimilation");
-			
-		} catch (Exception e) {
-			System.out.println("CatalogResources.Assimilation: error launching assimilation " + e.getMessage());
-			e.printStackTrace();
-			throw new InternalServerErrorException("error launching assimilation: " + e.getMessage());
-		}
-
-	}
-
-	private boolean launchAssimilation(File midaTifFile, File humidityTifFile, File resultTifFile) {
-
-		try {
-			
-			String cmd[] = new String[] {
-					m_oServletConfig.getInitParameter("AssimilationScript"),
-					midaTifFile.getAbsolutePath(),
-					humidityTifFile.getAbsolutePath(),
-					resultTifFile.getAbsolutePath()
-			};
-			
-			System.out.println("CatalogResources.LaunchAssimilation: shell exec " + Arrays.toString(cmd));
-
-			Process proc = Runtime.getRuntime().exec(cmd);
-			BufferedReader input = new BufferedReader(new InputStreamReader(proc.getInputStream()));
-            String line;
-            while((line=input.readLine()) != null) {
-            	System.out.println("CatalogResources.LaunchAssimilation: Assimilation stdout: " + line);
-            }
-			if (proc.waitFor() != 0) return false;
-		} catch (Exception oEx) {
-			System.out.println("CatalogResources.LaunchAssimilation: error during assimilation process " + oEx.getMessage());
-			oEx.printStackTrace();
-			return false;
-		}
-
-		return true;
-	}
-
 	@GET
 	@Path("")
 	@Produces({"application/xml", "application/json", "text/xml"})
@@ -328,98 +244,76 @@ public class CatalogResources {
 		return aoCatalogList;
 	}
 	
+
 	
-	@POST
-	@Path("/upload")
-	@Consumes(MediaType.MULTIPART_FORM_DATA)
-	public Response uploadModel(@FormDataParam("file") InputStream fileInputStream,
-			@FormDataParam("file") FormDataContentDisposition fileMetaData, @HeaderParam("x-session-token") String sSessionId, @QueryParam("sWorkspaceId") String sWorkspaceId) throws Exception
-	{ 
-		Wasdi.DebugLog("CatalogResources.UploadModel");
+	@PUT
+	@Path("/upload/ingest")
+	@Produces({"application/json", "text/xml"})
+	public Response IngestFile(@HeaderParam("x-session-token") String sSessionId, @QueryParam("file") String sFile, @QueryParam("workspace") String sWorkspace) {
+		
+		Wasdi.DebugLog("CatalogResource.IngestFile");
 		
 		User oUser = Wasdi.GetUserFromSession(sSessionId);
-		if (oUser==null) return Response.status(Status.UNAUTHORIZED).build();
-		if (Utils.isNullOrEmpty(oUser.getUserId())) return Response.status(Status.UNAUTHORIZED).build();
-
-		String sDownloadRootPath = m_oServletConfig.getInitParameter("DownloadRootPath");
-		if (!sDownloadRootPath.endsWith("/"))
-			sDownloadRootPath += "/";
-
-		String sDownloadPath = sDownloadRootPath + oUser.getUserId()+ "/" + sWorkspaceId + "/" + "CONTINUUM";
-
-		if(!Files.exists(Paths.get(sDownloadPath)))
-		{
-			if (Files.createDirectories(Paths.get(sDownloadPath))== null)
-			{
-				System.out.println("CatalogResources.uploadMapFile: Directory " + sDownloadPath + " not created");
-				return Response.status(Status.INTERNAL_SERVER_ERROR).build();
-			}
-
+		if (oUser == null || Utils.isNullOrEmpty(oUser.getUserId())) return Response.status(Status.UNAUTHORIZED).build();		
+		String sAccount = oUser.getUserId();		
+		
+		String sUserBaseDir = m_oServletConfig.getInitParameter("sftpManagementUserDir");
+		File oUserBaseDir = new File(sUserBaseDir);
+		File oFilePath = new File(new File(new File(oUserBaseDir, sAccount), "uploads"), sFile);
+		if (!oFilePath.canRead()) {
+			System.out.println("AuthResource.IngestFile: ERROR: unable to access uploaded file " + oFilePath.getAbsolutePath());
+			return Response.serverError().build();
 		}
-
-		try
-		{
-			int read = 0;
-			byte[] bytes = new byte[1024];
-
-			OutputStream out = new FileOutputStream(new File(sDownloadPath + "/" + fileMetaData.getFileName()));
-			while ((read = fileInputStream.read(bytes)) != -1) 
+		try {
+			ProcessWorkspace oProcess = null;
+			ProcessWorkspaceRepository oRepository = new ProcessWorkspaceRepository();
+			IngestFileParameter oParameter = new IngestFileParameter();
+			oParameter.setWorkspace(sWorkspace);
+			oParameter.setUserId(sAccount);
+			oParameter.setExchange(sWorkspace);
+			oParameter.setFilePath(oFilePath.getAbsolutePath());
+			try
 			{
-				out.write(bytes, 0, read);
+				oProcess = new ProcessWorkspace();
+				oProcess.setOperationDate(Wasdi.GetFormatDate(new Date()));
+				oProcess.setOperationType(LauncherOperations.INGEST.name());
+				oProcess.setProductName(oFilePath.getName());
+				oProcess.setWorkspaceId(sWorkspace);
+				oProcess.setUserId(sAccount);
+				oProcess.setProcessObjId(Utils.GetRandomName());
+				oProcess.setStatus(ProcessStatus.CREATED.name());
+				oRepository.InsertProcessWorkspace(oProcess);
+				//set the process object Id to params
+				oParameter.setProcessObjId(oProcess.getProcessObjId());
 			}
-			out.flush();
-			out.close();
-
-			/* TODO: Abilitare questa parte se si vuole far partire l'assimilazione dopo l'upload del file (E' ancora da testare) 
-			 * 
-			 * 
-			String sAssimilationContinuumPath =   m_oServletConfig.getInitParameter("AssimilationContinuumPath");
-			String sMulesmeEstimatePath =   m_oServletConfig.getInitParameter("MulesmeStimePath");
-			if (!sAssimilationContinuumPath.endsWith("/"))
-				sAssimilationContinuumPath += "/";
-			if (!sMulesmeEstimatePath.endsWith("/"))
-				sMulesmeEstimatePath += "/";
-
-
-			//Continuum format SoilMoistureItaly_20160801230000
-			//Get continuum date
-			SimpleDateFormat oDateFormat = new SimpleDateFormat("yyyyMMdd");
-			String sFileName = fileMetaData.getFileName();
-			String sDate = sFileName.split("_")[1].substring(0, 7);  
-			Calendar oContinuumDate = Calendar.getInstance();
-			Calendar oMulesmeDate = Calendar.getInstance();
-			oContinuumDate.setTime(oDateFormat.parse(sDate));
-			oMulesmeDate.setTime(oDateFormat.parse(sDate));
-			oMulesmeDate.add(Calendar.DATE, 1);  // number of days to add
-			String sMulesmeDate = oDateFormat.format(oMulesmeDate); 
-
-			//Search in catalog soil moisture map with date = continuum date + 1 day
-			CatalogRepository oRepo = new CatalogRepository();
-			Catalog oCatalog = oRepo.GetCatalogsByDate(sMulesmeDate);
-			if (oCatalog != null)
-			{
-				//Copy file into Mulesme Stime path
-				Files.move(Paths.get(oCatalog.getFilePath()), Paths.get(sMulesmeEstimatePath));
-				//Copy file from CONTINUUM to assimilation path
-				Files.move(Paths.get(sDownloadPath + "/" + fileMetaData.getFileName()), Paths.get(sAssimilationContinuumPath));
-				//launch assimilation
-				LaunchAssimilation();
+			catch(Exception oEx){
+				System.out.println("DownloadResource.Download: Error updating process list " + oEx.getMessage());
+				oEx.printStackTrace();
+				return Response.serverError().build();
 			}
-			 */
-
-
-
-		} catch (IOException e) 
-		{
-			throw new WebApplicationException("CatalogResources.uploadModel: Error while uploading file. Please try again !!");
+	
+			String sPath = m_oServletConfig.getInitParameter("SerializationPath") + oProcess.getProcessObjId();
+			SerializationUtils.serializeObjectToXML(sPath, oParameter);
+	
+			String sLauncherPath = m_oServletConfig.getInitParameter("LauncherPath");
+			String sJavaExe = m_oServletConfig.getInitParameter("JavaExe");
+	
+			String sShellExString = sJavaExe + " -jar " + sLauncherPath +" -operation " + LauncherOperations.INGEST + " -parameter " + sPath;
+	
+			System.out.println("DownloadResource.Download: shell exec " + sShellExString);
+	
+			Process oProc = Runtime.getRuntime().exec(sShellExString);
+			
+			return Response.ok().build();
+			
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-
-
-
-
-		return Response.ok().build();
+		
+		return Response.serverError().build();
+		
 	}
-
+	
 	public static void main(String[] args) throws Exception {
 		
 		MongoRepository.SERVER_PORT = 27018;
