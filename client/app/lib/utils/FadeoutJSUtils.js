@@ -547,28 +547,43 @@ function utilsGetMidPoint (iPointAX,iPointAY,iPointBX,iPointBY){
 
     var iMidPointX = (iPointAX + iPointBX)/2;
     var iMidPointY = (iPointAY + iPointBY)/2;
-    return {
-        x:iMidPointX,
-        y:iMidPointY
-    }
-};
-function utilsCalcuMidPoint (iPointAX,iPointAY,iPointBX,iPointBY){
-    if( utilsIsANumber(iPointAX) === false || utilsIsANumber(iPointAY) === false || utilsIsANumber(iPointBX) === false || utilsIsANumber(iPointBY) === false )
-    {
-        return null;
-    }
 
-    var iMidPointX = (iPointAX + iPointBX)/2;
-    var iMidPointY = (iPointAY + iPointBY)/2;
     return {
         x:iMidPointX,
         y:iMidPointY
     }
 };
+// function utilsCalcuMidPoint (iPointAX,iPointAY,iPointBX,iPointBY){
+//     if( utilsIsANumber(iPointAX) === false || utilsIsANumber(iPointAY) === false || utilsIsANumber(iPointBX) === false || utilsIsANumber(iPointBY) === false )
+//     {
+//         return null;
+//     }
+//
+//     var iMidPointX = (iPointAX + iPointBX)/2;
+//     var iMidPointY = (iPointAY + iPointBY)/2;
+//     return {
+//         x:iMidPointX,
+//         y:iMidPointY
+//     }
+// };
 
 function utilsCalculateDistanceBetweenTwoPoints(x1,y1,x2,y2){
-    var a = x1 - x2
-    var b = y1 - y2
+    // var a = x1 - x2;
+    // var b = y1 - y2;
+
+    var a = x2 - x1;
+    var b = y2 - y1;
+    //
+    // console.log("---------------------- utilsCalculateDistanceBetweenTwoPoints ----------------------")
+    // console.log("x1:" + x1)
+    // console.log("y1:" + y1)
+    // console.log("x2:" + x2)
+    // console.log("y2:" + y2)
+    // console.log("y2:" + y2)
+    // console.log("a:" + a)
+    // console.log("b:" + b)
+
     var fDistance = Math.sqrt( a*a + b*b );
+    // console.log("fDistance:" + fDistance)
     return fDistance;
 }

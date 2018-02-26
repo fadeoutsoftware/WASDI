@@ -31,12 +31,7 @@ angular.module('wasdi.ImageEditorDirective', [])
                 // play with commenting this out to see the difference.
                 stage.mouseMoveOutside = true;
 
-                var iHeight = (iDefaultHeight *iDefaultValueZoom )/100;
-                var iWidth = (iDefaultWidth *iDefaultValueZoom )/100;
-
                 stage.addChild(oBitmap);
-
-
 
                 //create tick
                 createjs.Ticker.on("tick", tick);
@@ -44,7 +39,8 @@ angular.module('wasdi.ImageEditorDirective', [])
                 function tick(event) {
                     // Other stuff
                     stage.update(event);
-                }
+                };
+
                 var bItIsClicked = false;
                 var oMouseDownPoint ={
                     stageX:"",
@@ -61,56 +57,82 @@ angular.module('wasdi.ImageEditorDirective', [])
                     oMouseDownPoint.stageX = evt.stageX;
                     oMouseDownPoint.stageY = evt.stageY;
                     console.log("stagemousedown");
-                    // console.log("the canvas was clicked at "+evt.stageX+","+evt.stageY);
+                    // console.log("evt.stageX :" +evt.stageX);
+                    // console.log("evt.stageY :" +evt.stageY);
+
                 });
 
                 stage.on("stagemouseup", function(evt) {
                     bItIsClicked = false;
                     oMouseLastPoint.stageX = evt.stageX;
                     oMouseLastPoint.stageY = evt.stageY;
-                    //TODO Draw Rectangle(boh?)
                     console.log("stagemouseup");
-                    // console.log("the canvas was moved at "+evt.stageX+","+evt.stageY);
+                    // console.log("evt.stageX :" +evt.stageX);
+                    // console.log("evt.stageY :" +evt.stageY);
+                    //TODO Draw Rectangle(boh?)
+
                 });
 
-                stage.mouseMoveOutside = true;
                 stage.on("stagemousemove", function(evt) {
                     if( bItIsClicked === true )
                     {
                         //update actual position
                         oMouseLastPoint.stageX = evt.stageX;
                         oMouseLastPoint.stageY = evt.stageY;
+                        // console.log("evt.stageX :" +evt.stageX);
+                        // console.log("evt.stageY :" +evt.stageY);
 
+                        // console.log("------------- DEBUG stagemousemove-------------");
+                        // console.log("oMouseLastPoint.stageX" + oMouseLastPoint.stageX);
+                        // console.log("oMouseLastPoint.stageY" +  oMouseLastPoint.stageY);
+                        // console.log("oMouseDownPoint.stageX" + oMouseDownPoint.stageX);
+                        // console.log("oMouseDownPoint.stageY" + oMouseDownPoint.stageY);
                         var oSquarePoints = scope.calculateSquarePointsByMousePoints(oMouseDownPoint,oMouseLastPoint);
+
+                        // console.log("oSquarePoints.x "+ oSquarePoints.x);
+                        // console.log("oSquarePoints.y " + oSquarePoints.y);
+                        // console.log("oSquarePoints.width " + oSquarePoints.width);
+                        // console.log("oSquarePoints.height " + oSquarePoints.height);
 
                         if(utilsIsObjectNullOrUndefined(scope.Square) === true)
                         {
-                            var oSquare = scope.createSquare(oSquarePoints.x,oSquarePoints.y,oSquarePoints.width,oSquarePoints.height);
+
+                            //var oSquare = scope.createSquare(oSquarePoints.x,oSquarePoints.y,oSquarePoints.width,oSquarePoints.height);
+                            var oSquare = scope.createSquare(oMouseDownPoint.stageX,oMouseDownPoint.stageY,oMouseLastPoint.stageX-oMouseDownPoint.stageX,oMouseLastPoint.stageY-oMouseDownPoint.stageY);
 
                             if(utilsIsObjectNullOrUndefined(oSquare) === false)
                             {
                                 // add new square
                                 scope.Square = oSquare;
+                                stage.addChild(oSquare);
+                                // stage.setChildIndex( oSquare, stage.numChildren - 1);
                             }
 
                         }
                         else
                         {
-                            scope.updateSquare(scope.Square, oSquarePoints.x,oSquarePoints.y,oSquarePoints.width,oSquarePoints.height);
+                            // console.log("------------------ Update ------------------");
+                            // console.log("oSquarePoints.x "+ oSquarePoints.x);
+                            // console.log("oSquarePoints.y " + oSquarePoints.y);
+                            // console.log("oSquarePoints.width " + oSquarePoints.width);
+                            // console.log("oSquarePoints.height " + oSquarePoints.height);
+
+                            scope.updateSquare(scope.Square, oMouseDownPoint.stageX,oMouseDownPoint.stageY,oMouseLastPoint.stageX-oMouseDownPoint.stageX,oMouseLastPoint.stageY-oMouseDownPoint.stageY);
                         }
 
                         stage.update();
                         //TODO REMOVE OLD RECTANGLE (UPDATE IT ?)
+                        console.log("stagemousemove");
+
                     }
-                    console.log("stagemousemove");
-                //     console.log("stageX/Y: "+evt.stageX+","+evt.stageY); // always in bounds
-                //     console.log("rawX/Y: "+evt.rawX+","+evt.rawY); // could be < 0, or > width/height
+
                 });
 
 
 
                 stage.update();
 
+                // scope.Square = square;
                 scope.Square = null;
                 scope.Stage = stage;
                 scope.Bitmap = oBitmap;
@@ -152,16 +174,26 @@ angular.module('wasdi.ImageEditorDirective', [])
                     *   (x1,y2)                           (x2,y2)
                     *
                     * */
-                    var oPointA={
+                    var oPointA = {
                             x:oMouseLastPoint.stageX,
                             y:oMouseDownPoint.stageY
                     };
-                    var oPointB={
+                    var oPointB = {
                             x:oMouseDownPoint.stageX,
                             y:oMouseLastPoint.stageY
                     };
+                    // console.log("------------------------- Points -------------------------")
+                    // console.log("oPointA.X" + oPointA.x);
+                    // console.log("oPointA.Y" + oPointA.y);
+                    // console.log("oPointB.X" + oPointB.x);
+                    // console.log("oPointB.Y" + oPointB.y);
                     var fWidth = utilsCalculateDistanceBetweenTwoPoints (oMouseDownPoint.stageX,oMouseDownPoint.stageY,oPointA.x,oPointA.y);
                     var fHeight = utilsCalculateDistanceBetweenTwoPoints (oMouseDownPoint.stageX,oMouseDownPoint.stageY,oPointB.x,oPointB.y);
+                    // console.log("------------------ Return value ------------------");
+                    // console.log("oMidPoint.x "+ oMidPoint.x);
+                    // console.log("oMidPoint.y " + oMidPoint.y);
+                    // console.log("fWidth " + fWidth);
+                    // console.log("fHeight " + fHeight);
                     return {
                         x:oMidPoint.x,
                         y:oMidPoint.y,
@@ -170,7 +202,7 @@ angular.module('wasdi.ImageEditorDirective', [])
                     }
                     // var oSquare = scope.createSquare(oMidPoint.x,oMidPoint.y,fWidth,fHeight);
                     // return oSquare;
-                }
+                };
 
                 // scope.createDraggerContainer = function(){
                 //     var dragger = new createjs.Container();
