@@ -37,7 +37,8 @@ var EditorController = (function () {
         //Flag to know if the Band Image is loaded or not (2D - Editor Mode)
         this.m_bIsLoadedViewBandImage = true;
         //Url of the Preview Band Image (2D - Editor Mode)
-        this.m_sPreviewUrlSelectedBand = "";
+        // this.m_sPreviewUrlSelectedBand = "";
+        this.m_sPreviewUrlSelectedBand = "assets/img/test_image.jpg";
         //Url of the Band Image (2D - Editor Mode)
         this.m_sViewUrlSelectedBand = "";
 
