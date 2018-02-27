@@ -9,7 +9,7 @@ angular.module('wasdi.ImageEditorDirective', [])
                 // onClick: '&',
                 urlImage : '=',
                 body : '=',
-                isLoaded : '='
+                // isLoaded : '='
                 // * Text binding ('@' or '@?') *
                 // * One-way binding ('<' or '<?') *
                 // * Two-way binding ('=' or '=?') *
@@ -56,21 +56,13 @@ angular.module('wasdi.ImageEditorDirective', [])
                     bItIsClicked = true;
                     oMouseDownPoint.stageX = evt.stageX;
                     oMouseDownPoint.stageY = evt.stageY;
-                    console.log("stagemousedown");
-                    // console.log("evt.stageX :" +evt.stageX);
-                    // console.log("evt.stageY :" +evt.stageY);
-
                 });
 
                 stage.on("stagemouseup", function(evt) {
                     bItIsClicked = false;
                     oMouseLastPoint.stageX = evt.stageX;
                     oMouseLastPoint.stageY = evt.stageY;
-                    console.log("stagemouseup");
-                    // console.log("evt.stageX :" +evt.stageX);
-                    // console.log("evt.stageY :" +evt.stageY);
-                    //TODO Draw Rectangle(boh?)
-
+                    scope.zoom();
                 });
 
                 stage.on("stagemousemove", function(evt) {
@@ -79,20 +71,8 @@ angular.module('wasdi.ImageEditorDirective', [])
                         //update actual position
                         oMouseLastPoint.stageX = evt.stageX;
                         oMouseLastPoint.stageY = evt.stageY;
-                        // console.log("evt.stageX :" +evt.stageX);
-                        // console.log("evt.stageY :" +evt.stageY);
 
-                        // console.log("------------- DEBUG stagemousemove-------------");
-                        // console.log("oMouseLastPoint.stageX" + oMouseLastPoint.stageX);
-                        // console.log("oMouseLastPoint.stageY" +  oMouseLastPoint.stageY);
-                        // console.log("oMouseDownPoint.stageX" + oMouseDownPoint.stageX);
-                        // console.log("oMouseDownPoint.stageY" + oMouseDownPoint.stageY);
-                        var oSquarePoints = scope.calculateSquarePointsByMousePoints(oMouseDownPoint,oMouseLastPoint);
-
-                        // console.log("oSquarePoints.x "+ oSquarePoints.x);
-                        // console.log("oSquarePoints.y " + oSquarePoints.y);
-                        // console.log("oSquarePoints.width " + oSquarePoints.width);
-                        // console.log("oSquarePoints.height " + oSquarePoints.height);
+                        // var oSquarePoints = scope.calculateSquarePointsByMousePoints(oMouseDownPoint,oMouseLastPoint);
 
                         if(utilsIsObjectNullOrUndefined(scope.Square) === true)
                         {
@@ -105,24 +85,15 @@ angular.module('wasdi.ImageEditorDirective', [])
                                 // add new square
                                 scope.Square = oSquare;
                                 stage.addChild(oSquare);
-                                // stage.setChildIndex( oSquare, stage.numChildren - 1);
                             }
 
                         }
                         else
                         {
-                            // console.log("------------------ Update ------------------");
-                            // console.log("oSquarePoints.x "+ oSquarePoints.x);
-                            // console.log("oSquarePoints.y " + oSquarePoints.y);
-                            // console.log("oSquarePoints.width " + oSquarePoints.width);
-                            // console.log("oSquarePoints.height " + oSquarePoints.height);
-
                             scope.updateSquare(scope.Square, oMouseDownPoint.stageX,oMouseDownPoint.stageY,oMouseLastPoint.stageX-oMouseDownPoint.stageX,oMouseLastPoint.stageY-oMouseDownPoint.stageY);
                         }
 
                         stage.update();
-                        //TODO REMOVE OLD RECTANGLE (UPDATE IT ?)
-                        console.log("stagemousemove");
 
                     }
 
@@ -152,73 +123,93 @@ angular.module('wasdi.ImageEditorDirective', [])
                     return square;
                 }
 
-                scope.calculateSquarePointsByMousePoints = function(oMouseDownPoint,oMouseLastPoint){
-                    var oMidPoint = utilsGetMidPoint(oMouseDownPoint.stageX,oMouseDownPoint.stageY,oMouseLastPoint.stageX,oMouseLastPoint.stageY);
+                // scope.calculateSquarePointsByMousePoints = function(oMouseDownPoint,oMouseLastPoint){
+                //     var oMidPoint = utilsGetMidPoint(oMouseDownPoint.stageX,oMouseDownPoint.stageY,oMouseLastPoint.stageX,oMouseLastPoint.stageY);
+                //
+                //     if(utilsIsObjectNullOrUndefined(oMidPoint))
+                //     {
+                //         return false;
+                //     }
+                //
+                //     // oMouseDownPoint=(x1,y1)
+                //     // oMouseLastPoint=(x2,y2)
+                //     // oPointA=(x2,y1)?
+                //     // oPointB=(x1,y2)?
+                //     /*
+                //     // RECTANGLE EXAMPLE :
+                //     *   (x1,y1) ------------------------- (x2,y1)
+                //     *           -------------------------
+                //     *           -------------------------
+                //     *           -------------------------
+                //     *           -------------------------
+                //     *   (x1,y2)                           (x2,y2)
+                //     *
+                //     * */
+                //     var oPointA = {
+                //             x:oMouseLastPoint.stageX,
+                //             y:oMouseDownPoint.stageY
+                //     };
+                //     var oPointB = {
+                //             x:oMouseDownPoint.stageX,
+                //             y:oMouseLastPoint.stageY
+                //     };
+                //
+                //     var fWidth = utilsCalculateDistanceBetweenTwoPoints (oMouseDownPoint.stageX,oMouseDownPoint.stageY,oPointA.x,oPointA.y);
+                //     var fHeight = utilsCalculateDistanceBetweenTwoPoints (oMouseDownPoint.stageX,oMouseDownPoint.stageY,oPointB.x,oPointB.y);
+                //
+                //     return {
+                //         x:oMidPoint.x,
+                //         y:oMidPoint.y,
+                //         width:fWidth,
+                //         height:fHeight
+                //     }
+                //
+                // };
+                scope.zoom = function(){
+                    // Take the Preview Canvas Dimensions
+                    var element = angular.element(document.querySelector('#imageviewcanvas'));
+                    var iCanvasHeight = element[0].offsetHeight;
+                    var iCanvasWidth = element[0].offsetWidth;
 
-                    if(utilsIsObjectNullOrUndefined(oMidPoint))
+                    if(utilsIsObjectNullOrUndefined(scope.Square) === true)
                     {
                         return false;
                     }
+                    // Take position and dimensions of the over rectangle
+                    var iHeightSquare = scope.Square.graphics.command.h;
+                    var iWidthSquare = scope.Square.graphics.command.w;
+                    var iAx = scope.Square.graphics.command.x;
+                    var iAy = scope.Square.graphics.command.y;
+                    // var iAx = scope.Dragger.x;
+                    // var iAy = scope.Dragger.y;
 
-                    // oMouseDownPoint=(x1,y1)
-                    // oMouseLastPoint=(x2,y2)
-                    // oPointA=(x2,y1)?
-                    // oPointB=(x1,y2)?
-                    /*
-                    // RECTANGLE EXAMPLE :
-                    *   (x1,y1) ------------------------- (x2,y1)
-                    *           -------------------------
-                    *           -------------------------
-                    *           -------------------------
-                    *           -------------------------
-                    *   (x1,y2)                           (x2,y2)
-                    *
-                    * */
-                    var oPointA = {
-                            x:oMouseLastPoint.stageX,
-                            y:oMouseDownPoint.stageY
-                    };
-                    var oPointB = {
-                            x:oMouseDownPoint.stageX,
-                            y:oMouseLastPoint.stageY
-                    };
-                    // console.log("------------------------- Points -------------------------")
-                    // console.log("oPointA.X" + oPointA.x);
-                    // console.log("oPointA.Y" + oPointA.y);
-                    // console.log("oPointB.X" + oPointB.x);
-                    // console.log("oPointB.Y" + oPointB.y);
-                    var fWidth = utilsCalculateDistanceBetweenTwoPoints (oMouseDownPoint.stageX,oMouseDownPoint.stageY,oPointA.x,oPointA.y);
-                    var fHeight = utilsCalculateDistanceBetweenTwoPoints (oMouseDownPoint.stageX,oMouseDownPoint.stageY,oPointB.x,oPointB.y);
-                    // console.log("------------------ Return value ------------------");
-                    // console.log("oMidPoint.x "+ oMidPoint.x);
-                    // console.log("oMidPoint.y " + oMidPoint.y);
-                    // console.log("fWidth " + fWidth);
-                    // console.log("fHeight " + fHeight);
-                    return {
-                        x:oMidPoint.x,
-                        y:oMidPoint.y,
-                        width:fWidth,
-                        height:fHeight
-                    }
-                    // var oSquare = scope.createSquare(oMidPoint.x,oMidPoint.y,fWidth,fHeight);
-                    // return oSquare;
+                    // Data check
+                    if (iCanvasHeight == 0 || iCanvasWidth == 0) return;
+                    if (iAx<0) iAx = 0;
+                    if (iAy<0) iAy = 0;
+                    if (iHeightSquare <=0) iHeightSquare = 1;
+                    if (iWidthSquare <= 0) iWidthSquare = 1;
+
+                    // Calculate Percentage
+                    iHeightSquare = iHeightSquare/iCanvasHeight;
+                    iWidthSquare = iWidthSquare/iCanvasWidth;
+                    iAx = iAx/iCanvasWidth;
+                    iAy = iAy/iCanvasHeight;
+
+                    // Apply to the real band dimension
+                    scope.body.viewportX = Math.round(iAx * this.body.originalBandWidth);
+                    scope.body.viewportY = Math.round(iAy *  this.body.originalBandHeight);
+                    scope.body.viewportWidth = Math.round(iWidthSquare * this.body.originalBandWidth);
+                    scope.body.viewportHeight = Math.round(iHeightSquare * this.body.originalBandHeight);
                 };
 
-                // scope.createDraggerContainer = function(){
-                //     var dragger = new createjs.Container();
-                //     dragger.x = dragger.y = 0;
-                //
-                // }
-                // scope.CreateDraggableSquare = function(){
-                //     dragger.addChild(square); //, label
-                //     stage.addChild(dragger);
-                // }
                 scope.$watch('urlImage', function (newValue, oldValue, scope)
                 {
                     if(utilsIsObjectNullOrUndefined(newValue) === false && newValue !== "empty")
                     {
                         var oBitmap =  new createjs.Bitmap(newValue);
                         scope.Stage.addChild(oBitmap);
+                        scope.Stage.addChild(scope.Square);
 
                     }
                     else {

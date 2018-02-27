@@ -328,9 +328,9 @@
                     <!----------------------------------------------- TAB 2  PREVIEW---------------------------------------------->
                     <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12" ng-show="m_oController.m_iActiveMapPanelTab === 2" style="margin-bottom: 50px;">
                         <div class="col-xs-10 col-sm-10 col-md-10 col-lg-10">
-                            <!--<imagepreview is-loaded="m_oController.m_bIsLoadedPreviewBandImage" url-image="m_oController.m_sPreviewUrlSelectedBand"-->
-                                          <!--body = "m_oController.m_oImagePreviewDirectivePayload">-->
-                            <!--</imagepreview>-->
+                            <imagepreview is-loaded="m_oController.m_bIsLoadedPreviewBandImage" url-image="m_oController.m_sPreviewUrlSelectedBand"
+                                          body = "m_oController.m_oImagePreviewDirectivePayload">
+                            </imagepreview>
 
                         </div>
 
@@ -343,23 +343,23 @@
                         </div>
                     </div>
                     <!-------------------------------------------- TAB TEST -------------------------------------------->
-                    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12" ng-show="m_oController.m_iActiveMapPanelTab === 3" style="margin-bottom: 50px;">
-                        <div class="col-xs-10 col-sm-10 col-md-10 col-lg-10">
-                            <imageeditor is-loaded="m_oController.m_bIsLoadedPreviewBandImage"
-                                         url-image="m_oController.m_sPreviewUrlSelectedBand"
-                                         body = "m_oController.m_oImagePreviewDirectivePayload">
-                            </imageeditor> <!---->
+                    <!--<div class="col-xs-12 col-sm-12 col-md-12 col-lg-12" ng-show="m_oController.m_iActiveMapPanelTab === 3" style="margin-bottom: 50px;">-->
+                        <!--<div class="col-xs-10 col-sm-10 col-md-10 col-lg-10">-->
+                            <!--<imageeditor is-loaded="m_oController.m_bIsLoadedPreviewBandImage"-->
+                                         <!--url-image="m_oController.m_sPreviewUrlSelectedBand"-->
+                                         <!--body = "m_oController.m_oImagePreviewDirectivePayload">-->
+                            <!--</imageeditor> &lt;!&ndash;&ndash;&gt;-->
 
-                        </div>
+                        <!--</div>-->
 
-                        <div class="col-xs-2 col-sm-2 col-md-2 col-lg-2">
+                        <!--<div class="col-xs-2 col-sm-2 col-md-2 col-lg-2">-->
                             <!--<button ng-click="m_oController.applyEditorPreviewImageUpdate()"-->
                                     <!--ng-disabled = " (m_oController.m_bIsLoadedPreviewBandImage === false) || (m_oController.m_bIsLoadedViewBandImage === false)">-->
                                 <!--Apply-->
                             <!--</button>-->
-                            <!-- on-click="m_oController.processingGetBandImage()"-->
-                        </div>
-                    </div>
+                            <!--&lt;!&ndash; on-click="m_oController.processingGetBandImage()"&ndash;&gt;-->
+                        <!--</div>-->
+                    <!--</div>-->
 
                 </div>
                 <!--<div class="panel-body fixed-panel">-->
@@ -448,20 +448,24 @@
                     </button>
 
                     <button type="button" class="btn btn-default"  data-toggle="tooltip" data-placement="bottom"  title="{{'EDITOR_TOOLTIP_RESET_ZOOM'|translate}}"
-                            ng-hide="m_oController.m_bIsActiveGeoraphicalMode == true">
+                            ng-hide="m_oController.m_bIsActiveGeoraphicalMode == true" ng-click="m_oController.applyMapViewImageOriginalValues()">
                         <i class="fa fa-search-minus" aria-hidden="true"></i>
                     </button>
 
                 </div>
 
                 <!-- BAND 2d m_oController.m_b2DMapModeOn === true && -->
-                <img ng-src="{{m_oController.m_sViewUrlSelectedBand}}" ng-show="m_oController.m_bIsActiveGeoraphicalMode === false && m_oController.m_bIsLoadedViewBandImage">
+                <!--<img ng-src="{{m_oController.m_sViewUrlSelectedBand}}" ng-show="m_oController.m_bIsActiveGeoraphicalMode === false && m_oController.m_bIsLoadedViewBandImage">-->
+                <imageeditor url-image="m_oController.m_sViewUrlSelectedBand"
+                             body = "m_oController.m_oImagePreviewDirectivePayload"
+                             ng-show="m_oController.m_bIsActiveGeoraphicalMode === false && m_oController.m_bIsLoadedViewBandImage"><!--is-loaded="m_oController.m_bIsLoadedPreviewBandImage"-->
+                </imageeditor> <!---->
                 <div class="loadIcon" ng-hide="m_oController.m_bIsLoadedViewBandImage && (m_oController.m_bIsLoadedViewBandImage === true) ">
                     <invader></invader>
                 </div>
 
                 <!-- 2D map -->
-                <div class="map" id = "wasdiMap" ng-show="m_oController.m_b2DMapModeOn == true && m_oController.m_bIsActiveGeoraphicalMode === true"></div>
+                <div class="map" id = "wasdiMap" ng-show="m_oController.m_b2DMapModeOn == true && m_oController.m_bIsActiveGeoraphicalMode === true"></div><!---->
 
                 <!-- 3D map -->
                 <div id="cesiumContainer" class="map" ng-show="m_oController.m_b2DMapModeOn == false && m_oController.m_bIsActiveGeoraphicalMode === true"></div>

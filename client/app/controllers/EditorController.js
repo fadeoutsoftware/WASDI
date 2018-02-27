@@ -37,8 +37,8 @@ var EditorController = (function () {
         //Flag to know if the Band Image is loaded or not (2D - Editor Mode)
         this.m_bIsLoadedViewBandImage = true;
         //Url of the Preview Band Image (2D - Editor Mode)
-        // this.m_sPreviewUrlSelectedBand = "";
-        this.m_sPreviewUrlSelectedBand = "assets/img/test_image.jpg";
+        this.m_sPreviewUrlSelectedBand = "";
+        // this.m_sPreviewUrlSelectedBand = "assets/img/test_image.jpg";
         //Url of the Band Image (2D - Editor Mode)
         this.m_sViewUrlSelectedBand = "";
 
@@ -51,6 +51,7 @@ var EditorController = (function () {
             viewportWidth: 0,
             viewportHeight: 0
         };
+        // this.m_oImageMapDirectivePayload = {};
 
         // Reference to the actual active Band
         this.m_oActiveBand = null;
@@ -441,6 +442,27 @@ var EditorController = (function () {
         this.processingGetBandImage(oGetBandImageBody, this.m_oActiveWorkspace.workspaceId);
     };
 
+
+    EditorController.prototype.applyMapViewImageOriginalValues = function () {
+
+        if (utilsIsObjectNullOrUndefined(this.m_oActiveBand)) return;
+
+        var sFileName = this.m_aoProducts[this.m_oActiveBand.productIndex].fileName;
+
+        // Get Dimension of the Canvas
+        var elementMapContainer = angular.element(document.querySelector('#mapcontainer'));
+        var heightMapContainer = elementMapContainer[0].offsetHeight;
+        var widthMapContainer = elementMapContainer[0].offsetWidth;
+
+        var oGetBandImageBody = this.createBodyForProcessingBandImage(sFileName, this.m_oActiveBand.name,null,
+            0, 0,this.m_oImagePreviewDirectivePayload.originalBandWidth, this.m_oImagePreviewDirectivePayload.originalBandHeight,
+            widthMapContainer,heightMapContainer);
+
+        // Remove the image from visibile layers: it will be added later by processingGetBandImage
+        this.removeBandFromVisibleList(this.m_oActiveBand);
+        // Call the API and display the image
+        this.processingGetBandImage(oGetBandImageBody, this.m_oActiveWorkspace.workspaceId);
+    };
 
     /*********************************************************** MESSAGE HANDLING **********************************************************/
 
@@ -861,7 +883,7 @@ var EditorController = (function () {
 
             // Create body to get big image
             var oBodyMapContainer = this.createBodyForProcessingBandImage(sFileName,oBand.name, null, 0,0,oBand.width,oBand.height,widthMapContainer, heightMapContainer);
-
+            // this.m_oImageMapDirectivePayload = oBodyMapContainer;
             // Disable the not till the end of the API
             var sNode = this.m_aoProducts[oBand.productIndex].productName + "_" + oBand.bandName;
             this.setTreeNodeDisabled(sNode);

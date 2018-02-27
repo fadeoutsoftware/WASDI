@@ -40,7 +40,7 @@ angular.module('wasdi.ImagePreviewDirective', [])
                 square.alpha = 0.5;
 
                 var dragger = new createjs.Container();
-                dragger.x = dragger.y = 0;
+                 dragger.x = dragger.y = 0;
 
                 stage.addChild(oBitmap);
                 dragger.addChild(square); //, label
@@ -50,7 +50,7 @@ angular.module('wasdi.ImagePreviewDirective', [])
                     // keep a record on the offset between the mouse position and the container
                     // position. currentTarget will be the container that the event listener was added to:
                     evt.currentTarget.offset = {x: this.x - evt.stageX, y: this.y - evt.stageY};
-                    // scope.zoom();
+                    scope.zoom();
                 });
 
                 dragger.on("pressmove",function(evt) {
