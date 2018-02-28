@@ -180,3 +180,4 @@ wasdiApp.controller("DownloadProductInWorkspaceController",DownloadProductInWork
 wasdiApp.controller("FilterBandController",FilterBandController);
 wasdiApp.controller("MaskManagerController",MaskManagerController);
 wasdiApp.controller("ImportAdvanceFiltersController",ImportAdvanceFiltersController);
+wasdiApp.controller("WorkFlowManagerController",WorkFlowManagerController);

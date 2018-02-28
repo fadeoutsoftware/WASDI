@@ -207,6 +207,10 @@
   "DIALOG_WORKFLOW_DROP_OR_CLICK":"Drop workflow xml here or click to upload",
   "DIALOG_WORKFLOW_DRAG_DROP_NOT_SUPPORTED":"File Drag/Drop is not supported for this browser",
 
+  "DIALOG_WORKFLOW_MANAGER_TITLE":"Workflow",
+  "DIALOG_WORKFLOW_MANAGER_TABLE_NAME":"Name",
+  "DIALOG_WORKFLOW_MANAGER_TABLE_DESCRIPTION":"Description",
+
   "DIALOG_FILTER_BAND_TITLE":"Filter Band",
   "DIALOG_FILTER_BAND_TAB_NAME_SYSTEM":"System",
   "DIALOG_FILTER_BAND_TAB_NAME_USER":"User",

@@ -2,10 +2,11 @@
 
 'use strict';
 angular.module('wasdi.FilterService', ['wasdi.FilterService']).
-service('FilterService', ['$http',  'ConstantsService', function ($http, oConstantsService) {
+service('FilterService', ['$http',  'ConstantsService', function ($http, oConstantsService)
+{
     this.APIURL = oConstantsService.getAPIURL();
     this.m_oHttp = $http;
-
+    /* --------------------------------- TODO REMOVE  FILTERSERVICE AND PUT THE APIs IN SNAPOPERATIONSERVICE (a.corrado 27/02/18)---------------------------------  */
     this.getFilters = function()
     {
         return this.m_oHttp.get(this.APIURL + "/processing/standardfilters");

@@ -41,28 +41,38 @@ service('SnapOperationService', ['$http',  'ConstantsService', function ($http, 
         return this.m_oHttp.post(this.APIURL + '/processing/graph?workspace=' + sWorkspaceInput + '&source=' + sSourceInput + '&destination=' + sDestinationInput, oFileXmlInput);
     };
 
+    //Run a workflow that has been stored in WASDI.
+    this.executeGraphFromWorkflowId = function(sWorkspaceInput,sSourceInput,sDestinationInput,sWorkflowIdInput)
+    {
+        return this.m_oHttp.get(this.APIURL + '/processing/graph_id?workspace=' + sWorkspaceInput + '&source=' +
+                                sSourceInput + '&destination=' + sDestinationInput + "&workflowId" + sWorkflowIdInput);
+    };
+
+    this.uploadGraph = function(sWorkspaceInput,sName,sDescription,oBody)
+    {
+        var oOptions = {
+            transformRequest: angular.identity,
+            headers: {'Content-Type': undefined}
+        };
+        return this.m_oHttp.post(this.APIURL + '/processing/uploadgraph?workspace=' + sWorkspaceInput + "&name=" + sName +
+                                    "&description=" + sDescription ,oBody ,oOptions);
+    };
+
+    this.deleteWorkflow = function(sWorkflowId)
+    {
+        return this.m_oHttp.get(this.APIURL + '/processing/deletegraph?workflowId=' + sWorkflowId );
+    };
+
+    this.getWorkflowsByUser = function()
+    {
+        return this.m_oHttp.get(this.APIURL + '/processing/getgraphsbyusr');
+    };
+    /************************************ OTHERS **************************************************/
+
     this.Operation = function(sOperation, sSourceProductName, sDestinationProductName, sWorkspaceId, oOptionsInput)
     {
-        //DEBUG LOG
-        // console.log("OPERATION: " + sOperation);
-        // console.log("SOURCE PRODUCT NAME: " + sSourceProductName);
-        // console.log("DESTINATION PRODUCT NAME: " + sDestinationProductName);
-        // console.log("WORKSPACE ID: " + sWorkspaceId);
-        // console.log("OPTIONS: " + JSON.stringify(oOptionsInput));
-        // //'/snap/
         var sUrl = this.APIURL + '/processing/{sOperation}?sSourceProductName=' + sSourceProductName + '&sDestinationProductName=' + sDestinationProductName + '&sWorkspaceId=' + sWorkspaceId;
-        //sUrl = sUrl.replace("{sOperation}", sOperation);
-        // return this.m_oHttp.get(sUrl);
         var oConfig = {header:""};
-        /*var oData = {
-            settings:oOptionsInput,
-            sourceProductName:sSourceProductName,
-            destinationProductName:sDestinationProductName,
-            workspaceId:sWorkspaceId,
-            exchange: sWorkspaceId,
-            userId: oConstantsService.getUser().userId,
-        }*/
-        //var sUrl = this.APIURL + '/processing/{sOperation}';
         sUrl = sUrl.replace("{sOperation}", sOperation);
         return this.m_oHttp.post(sUrl,oOptionsInput,oConfig);
     }
