@@ -333,3 +333,18 @@ function utilsProjectGetBandsFromSelectedProducts(asSelectedProducts,aoProducts)
     // return ["test","secondo"];
 };
 
+
+function utilsProjectGetProductsName (aoProducts)
+{
+    if(utilsIsObjectNullOrUndefined(aoProducts) === true)
+    {
+        return []
+    }
+    var iNumberOfProducts = aoProducts.length;
+    var asReturnValue = [];
+    for( var iIndexProduct = 0 ; iIndexProduct < iNumberOfProducts; iIndexProduct ++ )
+    {
+        asReturnValue.push(aoProducts[iIndexProduct].name);
+    }
+    return asReturnValue;
+}

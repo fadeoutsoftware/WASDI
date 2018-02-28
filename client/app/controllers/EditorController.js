@@ -1378,6 +1378,32 @@ var EditorController = (function () {
      *
      * @returns {boolean}
      */
+    EditorController.prototype.openWorkflowManagerDialog = function(){
+        var oController = this;
+        this.m_oModalService.showModal({
+            templateUrl: "dialogs/workflow_manager/WorkFlowManagerView.html",
+            controller: "WorkFlowManagerController",
+            inputs: {
+                extras: {
+                    products:oController.m_aoProducts,
+                    workflowId:oController.m_oActiveWorkspace.workspaceId
+                }
+            }
+        }).then(function (modal) {
+            modal.element.modal();
+            modal.close.then(function (oResult) {
+
+                oController.m_oProcessesLaunchedService.loadProcessesFromServer(oController.m_oActiveWorkspace.workspaceId);
+            });
+        });
+
+        return true;
+    };
+
+    /**
+     *
+     * @returns {boolean}
+     */
     EditorController.prototype.openMaskManager = function(){
         var oController = this;
         this.m_oModalService.showModal({
@@ -2185,6 +2211,14 @@ var EditorController = (function () {
                                             if(utilsIsObjectNullOrUndefined(oFoundProduct) == false) oController.openWorkflowDialog();
                                         }
                                     },
+                                    "Workflow Manager":{
+                                        "label": "Workflow Manager",
+                                        "action": function (obj) {
+                                            var oFoundProduct = oController.m_aoProducts[$node.original.band.productIndex];
+
+                                            if(utilsIsObjectNullOrUndefined(oFoundProduct) == false) oController.openWorkflowManagerDialog();
+                                        }
+                                    },
                                     "Filter Band":{
                                         "label": "Filter Band",
                                         "action" : function(pbj){
@@ -2346,6 +2380,15 @@ var EditorController = (function () {
                                             var oFound = oController.findProductByFileName(sSourceFileName);
 
                                             if(utilsIsObjectNullOrUndefined(oFound) == false) oController.openWorkflowDialog();
+                                        }
+                                    },
+                                    "Workflow Manager":{
+                                        "label": "Workflow Manager",
+                                        "action": function (obj) {
+                                            var sSourceFileName = $node.original.fileName;
+                                            var oFound = oController.findProductByFileName(sSourceFileName);
+
+                                            if(utilsIsObjectNullOrUndefined(oFound) == false) oController.openWorkflowManagerDialog();
                                         }
                                     },
                                     "Filter Band":{

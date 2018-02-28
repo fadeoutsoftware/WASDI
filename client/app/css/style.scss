@@ -180,6 +180,26 @@ h4
   }
   tr,th{}
   tbody{}
+  .tr-over{
+    &:hover{
+      color:$wasdi-white;
+      background-color:$wasdi-green-logo;
+      cursor: pointer;
+      .td-button{
+        cursor: pointer;
+        i{
+          &:hover{
+            color:$wasdi-blue-logo;
+
+          }
+
+        }
+      }
+
+
+    }
+
+  }
 }
 // BUTTON
 .my-button {
