@@ -223,41 +223,54 @@ public class ProcessingResources {
 
 		Wasdi.DebugLog("ProcessingResources.uploadGraph");
 		
-		if (Utils.isNullOrEmpty(sSessionId)) return Response.status(401).build();
-		User oUser = Wasdi.GetUserFromSession(sSessionId);
+		try {
+			if (Utils.isNullOrEmpty(sSessionId)) return Response.status(401).build();
+			User oUser = Wasdi.GetUserFromSession(sSessionId);
 
-		if (oUser==null) return Response.status(401).build();
-		if (Utils.isNullOrEmpty(oUser.getUserId())) return Response.status(401).build();
+			if (oUser==null) return Response.status(401).build();
+			if (Utils.isNullOrEmpty(oUser.getUserId())) return Response.status(401).build();
 
-		String sUserId = oUser.getUserId();
-		
-		String sDownloadRootPath = m_oServletConfig.getInitParameter("DownloadRootPath");
-		if (!sDownloadRootPath.endsWith("/")) sDownloadRootPath = sDownloadRootPath + "/";
-		
-		String sWorkflowId =  UUID.randomUUID().toString();
-		File humidityTifFile = new File(sDownloadRootPath+sUserId+ "/workflows/" + sWorkflowId + ".xml");
-		
-		Wasdi.DebugLog("ProcessingResources.uploadGraph: workflow file Path: " + humidityTifFile.getPath());
-		
-		//save uploaded file
-		int read = 0;
-		byte[] bytes = new byte[1024];
-		OutputStream out = new FileOutputStream(humidityTifFile);
-		while ((read = fileInputStream.read(bytes)) != -1) {
-			out.write(bytes, 0, read);
+			String sUserId = oUser.getUserId();
+			
+			String sDownloadRootPath = m_oServletConfig.getInitParameter("DownloadRootPath");
+			if (!sDownloadRootPath.endsWith("/")) sDownloadRootPath = sDownloadRootPath + "/";
+			
+			File oUserWorkflowPath = new File(sDownloadRootPath+sUserId+ "/workflows/");
+			
+			if (!oUserWorkflowPath.exists()) {
+				oUserWorkflowPath.mkdirs();
+			}
+			
+			String sWorkflowId =  UUID.randomUUID().toString();
+			File humidityTifFile = new File(sDownloadRootPath+sUserId+ "/workflows/" + sWorkflowId + ".xml");
+			
+			Wasdi.DebugLog("ProcessingResources.uploadGraph: workflow file Path: " + humidityTifFile.getPath());
+			
+			//save uploaded file
+			int read = 0;
+			byte[] bytes = new byte[1024];
+			OutputStream out = new FileOutputStream(humidityTifFile);
+			while ((read = fileInputStream.read(bytes)) != -1) {
+				out.write(bytes, 0, read);
+			}
+			out.flush();
+			out.close();
+			
+			SnapWorkflow oWorkflow = new SnapWorkflow();
+			oWorkflow.setName(name);
+			oWorkflow.setDescription(description);
+			oWorkflow.setFilePath(humidityTifFile.getPath());
+			oWorkflow.setUserId(sUserId);
+			oWorkflow.setWorkflowId(sWorkflowId);
+			
+			SnapWorkflowRepository oSnapWorkflowRepository = new SnapWorkflowRepository();
+			oSnapWorkflowRepository.InsertSnapWorkflow(oWorkflow);			
 		}
-		out.flush();
-		out.close();
-		
-		SnapWorkflow oWorkflow = new SnapWorkflow();
-		oWorkflow.setName(name);
-		oWorkflow.setDescription(description);
-		oWorkflow.setFilePath(humidityTifFile.getPath());
-		oWorkflow.setUserId(sUserId);
-		oWorkflow.setWorkflowId(sWorkflowId);
-		
-		SnapWorkflowRepository oSnapWorkflowRepository = new SnapWorkflowRepository();
-		oSnapWorkflowRepository.InsertSnapWorkflow(oWorkflow);
+		catch (Exception oEx) {
+			oEx.printStackTrace();
+			return Response.serverError().build();
+		}
+
 				
 		return Response.ok().build();
 	}
@@ -454,7 +467,13 @@ public class ProcessingResources {
 			BandImageViewModel model) throws IOException {
 		
 		Wasdi.DebugLog("ProcessingResources.getBandImage");
+
+		// Check user session
+		String userId = AcceptedUserAndSession(sSessionId);
+		if (Utils.isNullOrEmpty(userId)) return Response.status(401).build();
+
 		
+		// Init the registry for JAI
 		OperationRegistry operationRegistry = JAI.getDefaultInstance().getOperationRegistry();
 		RegistryElementDescriptor oDescriptor = operationRegistry.getDescriptor("rendered", "Paint");
 		
@@ -472,10 +491,7 @@ public class ProcessingResources {
 		}
 		
 		
-
-		String userId = AcceptedUserAndSession(sSessionId);
-		if (Utils.isNullOrEmpty(userId)) return Response.status(401).build();
-		
+		// Get Download File Path
         String downloadPath = m_oServletConfig.getInitParameter("DownloadRootPath");
         File productFile = new File(new File(new File(downloadPath, userId), workspace), model.getProductFileName());
 		
