@@ -1377,7 +1377,116 @@ var ImportController = (function() {
 
         return true;
     };
+    /**
+     *
+     * @param oLayer
+     * @returns {boolean}
+     */
+    ImportController.prototype.openModalDownloadProductInSelectedWorkspaces = function(oLayer)
+    {
+        if(utilsIsObjectNullOrUndefined(oLayer) === true)
+        {
+            return false;
+        }
 
+        var oOptions = {
+            titleModal:"Add to workspaces",
+            buttonName:"Add to workspace"
+        };
+        var oThat = this;
+        var oCallback = function(result)
+        {
+            if(utilsIsObjectNullOrUndefined(result) === true)
+            {
+                return false;
+            }
+            var aoWorkSpaces = result;
+            var oController = this;
+            var iNumberOfWorkspaces = aoWorkSpaces.length;
+            if(utilsIsObjectNullOrUndefined(aoWorkSpaces) )
+            {
+                console.log("Error there aren't Workspaces");
+                return false;
+            }
+            // download product in all workspaces
+            for(var iIndexWorkspace = 0 ; iIndexWorkspace < iNumberOfWorkspaces; iIndexWorkspace++)
+            {
+                oLayer.isDisabledToDoDownload = true;
+                var sUrl = oLayer.link;
+                var oError = function (data,status) {
+                            utilsVexDialogAlertTop('GURU MEDITATION<br>THERE WAS AN ERROR IMPORTING THE IMAGE IN THE WORKSPACE');
+                            oLayer.isDisabledToDoDownload = false;
+                        }
+
+                oThat.downloadProduct(sUrl,aoWorkSpaces[iIndexWorkspace].workspaceId,oLayer.bounds.toString(),oLayer.provider,null,oError);
+
+            }
+
+            return true;
+        };
+
+        utilsProjectOpenGetListOfWorkspacesSelectedModal(oCallback,oOptions,this.m_oModalService);
+    };
+
+    ImportController.prototype.openModalDownloadSelectedProductsInSelectedWorkspaces = function()
+    {
+        var aoListOfSelectedProducts = this.getListOfSelectedProducts();
+
+        if(utilsIsObjectNullOrUndefined(aoListOfSelectedProducts) === true)
+        {
+            return false;
+        }
+
+        var oOptions = {
+            titleModal:"Add to workspaces",
+            buttonName:"Add to workspace"
+        };
+        var oThat = this;
+        var oCallback= function(result)
+        {
+            if(utilsIsObjectNullOrUndefined(result) === true)
+            {
+                return false;
+            }
+            var aoWorkSpaces = result;
+            var oController = this;
+            var iNumberOfWorkspaces = aoWorkSpaces.length;
+            var iNumberOfProducts = aoListOfSelectedProducts.length;
+            if(utilsIsObjectNullOrUndefined(aoWorkSpaces) )
+            {
+                console.log("Error there aren't Workspaces");
+                return false;
+            }
+
+            // download selected products in all workspaces
+            //fetch all workspaces
+            for(var iIndexWorkspace = 0 ; iIndexWorkspace < iNumberOfWorkspaces; iIndexWorkspace++)
+            {
+                //fetch all products
+                for(var iIndexProduct = 0 ; iIndexProduct < iNumberOfProducts; iIndexProduct++)
+                {
+                    aoListOfSelectedProducts[iIndexProduct].isDisabledToDoDownload = true;
+                    var url = aoListOfSelectedProducts[iIndexProduct].link;
+                    var oError = function (data,status) {
+                        utilsVexDialogAlertTop('GURU MEDITATION<br>THERE WAS AN ERROR IMPORTING THE IMAGE IN THE WORKSPACE');
+                        aoListOfSelectedProducts[iIndexProduct].isDisabledToDoDownload = false;
+                    }
+
+                    oThat.downloadProduct(url,aoWorkSpaces[iIndexWorkspace].workspaceId,aoListOfSelectedProducts[iIndexProduct].bounds.toString(),aoListOfSelectedProducts[iIndexProduct].provider,null,oError);
+
+                }
+            }
+
+            return true;
+        };
+
+        utilsProjectOpenGetListOfWorkspacesSelectedModal(oCallback,oOptions,this.m_oModalService);
+    }
+    /**
+     *
+     * @param oMessage
+     * @param oController
+     */
     ImportController.prototype.receivedRabbitMessage  = function (oMessage, oController) {
 
         if (oMessage == null) return;

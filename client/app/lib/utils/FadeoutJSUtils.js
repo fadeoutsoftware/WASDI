@@ -182,7 +182,7 @@ function utilsIsANumber(oValue)
 }
 
 //TODO TEST IT
-function utilsRemoveObjectInArray(iIndex,aArray)
+function utilsRemoveObjectInArrayByIndex(iIndex, aArray)
 {
     if (iIndex > -1) {
         aArray.splice(iIndex, 1);
@@ -192,6 +192,37 @@ function utilsRemoveObjectInArray(iIndex,aArray)
     }
 
 }
+//TODO TEST IT
+function utilsRemoveObjectInArray (aoArray,oObject)
+{
+    if( utilsIsObjectNullOrUndefined(aoArray) === true)
+        return false;
+    var iLengthArray =  aoArray.length;
+    for(var iIndexArray = 0 ; iIndexArray < iLengthArray; iIndexArray ++)
+    {
+        if( aoArray[iIndexArray] === oObject)
+        {
+            utilsRemoveObjectInArrayByIndex(iIndexArray,aoArray);
+            return true;
+        }
+    }
+
+    return false;
+}
+
+function utilsIsElementInArray (aoArray,oObject)
+{
+    if( utilsIsObjectNullOrUndefined(aoArray) === true)
+        return false;
+    var iLengthArray =  aoArray.length;
+    for( var iIndexArray = 0; iIndexArray < iLengthArray; iIndexArray++)
+    {
+        if(aoArray[iIndexArray] === oObject)
+            return true;
+    }
+    return false;
+}
+
 /*
 * return index of object in array
 * return -1 if there are some error or the object isn't inside array

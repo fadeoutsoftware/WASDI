@@ -17,8 +17,17 @@ var WorkFlowManagerController = (function() {
         this.m_asProductsName = utilsProjectGetProductsName(this.m_aoProducts);
         this.m_asSelectedProducts = [];
         this.m_aoWorkflows = [];
+        //TEST DATA
+        // this.m_aoWorkflows = [{
+        //      name:"Fermium ",
+        //      description:"energy "
+        //  },{
+        //      name:"Virundum  ",
+        //      description:"tubinga "
+        //  }];
         this.m_oSelectedWorkflow = null;
         this.m_oConstantsService = oConstantsService;
+        this.m_sSelectedWorkflowTab = 'WorkFlowTab1';
         // this.m_oActiveWorkspace =  this.m_oConstantsService.getActiveWorkspace();
         this.m_oHttp =  oHttp;
         //$scope.close = oClose;
@@ -157,7 +166,7 @@ var WorkFlowManagerController = (function() {
         }
         var oBody = new FormData();
         oBody.append('file', this.m_oFile[0]);
-        this.uploadGraph(this.m_sWorkspaceId, "TestFile","Description",oBody);
+        this.uploadGraph(this.m_sWorkspaceId, sFileName,"Description",oBody);
     };
 
     /**
@@ -204,8 +213,17 @@ var WorkFlowManagerController = (function() {
         });
 
         return true;
-    }
+    };
 
+    WorkFlowManagerController.prototype.isSelectedProduct = function(){
+        return (this.m_asSelectedProducts.length > 0);
+    };
+    WorkFlowManagerController.prototype.isSelectedWorkFlow = function(){
+        return !utilsIsObjectNullOrUndefined(this.m_oSelectedWorkflow);
+    }
+    WorkFlowManagerController.prototype.isUploadedNewWorkFlow = function (){
+        return !utilsIsObjectNullOrUndefined(this.m_oFile);
+    }
     WorkFlowManagerController.$inject = [
         '$scope',
         'close',

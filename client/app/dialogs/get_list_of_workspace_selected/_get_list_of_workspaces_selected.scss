@@ -1,4 +1,4 @@
-.workflow-manager-modal
+.get-list-of-worksapce
 {
   .modal-dialog
   {
@@ -18,22 +18,19 @@
 
       .modal-body
       {
-
-        .tab-content{
-          margin-top: 10px;
+        label{
+          color: $wasdi-green-logo;
         }
+        .over-icon
+        {
+          cursor:pointer;
+          i:hover {
 
-        table{
-          .selectedWorkflow{
+            //background-color:white;
+            color:$wasdi-over-icon;
 
-            color:$wasdi-white;
-            background-color: $wasdi-green-logo;
           }
-
         }
-
-
-
       }
 
       .modal-footer

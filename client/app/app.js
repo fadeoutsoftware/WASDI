@@ -181,3 +181,4 @@ wasdiApp.controller("FilterBandController",FilterBandController);
 wasdiApp.controller("MaskManagerController",MaskManagerController);
 wasdiApp.controller("ImportAdvanceFiltersController",ImportAdvanceFiltersController);
 wasdiApp.controller("WorkFlowManagerController",WorkFlowManagerController);
+wasdiApp.controller("GetListOfWorkspacesController",GetListOfWorkspacesController);
