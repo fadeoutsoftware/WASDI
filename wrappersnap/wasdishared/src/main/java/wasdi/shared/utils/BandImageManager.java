@@ -5,6 +5,8 @@ import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Rectangle;
+import java.awt.Shape;
+import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -262,27 +264,42 @@ public class BandImageManager {
 	        // Nelle sentinel 1 invece è come ci aspettiamo esattamente delle dimensioni del raster.
 	        	        
 	        if (oInputImageViewPortToRender!=null) {
-		        double dRasterWidth = (double) oInputBand.getRasterWidth();
-		        double dRasterHeight = (double) oInputBand.getRasterHeight();
+		        AffineTransform oImageToModel = oSnapImageLayer.getImageToModelTransform();
+		        
+		        double [] adInputRect = new double[4];
+		        double [] adOutputRect = new double[4];
+		        
+		        adInputRect[0] = oInputImageViewPortToRender.getMinX();
+		        adInputRect[1] = oInputImageViewPortToRender.getMinY();
+		        adInputRect[2] = oInputImageViewPortToRender.getMaxX();
+		        adInputRect[3] = oInputImageViewPortToRender.getMaxY();
+		        
+		        adOutputRect[0] = 0.0;
+		        adOutputRect[1] = 0.0;
+		        adOutputRect[2] = 0.0;
+		        adOutputRect[3] = 0.0;
+		        
+		        oImageToModel.transform(adInputRect, 0, adOutputRect, 0, 2);
+		        
+		        double dMinX = adOutputRect[0];
+		        double dMaxX = adOutputRect[2];
+		        if (dMinX>dMaxX) {
+		        	dMinX = adOutputRect[2];
+		        	dMaxX = adOutputRect[0];
+		        }
+		        
+		        double dMinY = adOutputRect[1];
+		        double dMaxY = adOutputRect[3];
+		        
+		        if (dMinY>dMaxY) {
+			        dMinY = adOutputRect[3];
+			        dMaxY = adOutputRect[1];		        	
+		        }
+		        
+		        Rectangle2D oModelViewPortToRender = new Rectangle2D.Double(dMinX, dMinY, dMaxX-dMinX, dMaxY-dMinY);
+		        
 
-		        Rectangle2D oModelBounds = oSnapImageLayer.getModelBounds();
-		        
-		        double dModelX = oModelBounds.getMinX();
-		        double dModelWidth = oModelBounds.getWidth();
-		        double dTransformedModelX = dModelX + ( (oInputImageViewPortToRender.getMinX()/dRasterWidth) * dModelWidth);
-
-		        double dModelY = oModelBounds.getMinY();
-		        double dModelHeigth = oModelBounds.getHeight();
-		        double dMul = 1.0;
-		        if (isModelYAxisDown(oSnapImageLayer)) dMul = -1.0;
-		        
-		        double dTransformedModelY = dModelY + dMul * ( (oInputImageViewPortToRender.getMinY()/dRasterHeight) * dModelHeigth);
-		        
-		        double dTransformedWidth = (oInputImageViewPortToRender.getWidth()/dRasterWidth) * oModelBounds.getWidth();
-		        double dTransformedHeight = (oInputImageViewPortToRender.getHeight()/dRasterHeight) * oModelBounds.getHeight();
-		        
-		        oInputImageViewPortToRender.setBounds((int) dTransformedModelX, (int) dTransformedModelY, (int) dTransformedWidth, (int) dTransformedHeight);
-	        	oImageRendering.getViewport().zoom(oInputImageViewPortToRender);
+	        	oImageRendering.getViewport().zoom(oModelViewPortToRender);
 	        }
 	        
 	        System.out.println("BandImageManager.buildImage: init render: " + (System.currentTimeMillis() - lStartTime) + " ms + (" + oSnapImageLayer.getClass().getName() + ")");
