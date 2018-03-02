@@ -6,7 +6,6 @@ angular.module('wasdi.ImagePreviewDirective', [])
             // template: "<canvas id='test' width='800' height='600'></canvas> ",
             templateUrl:"directives/image_preview/ImagePreviewView.html",
             scope :{
-                // onClick: '&',
                 urlImage : '=',
                 body : '=',
                 isLoaded : '='

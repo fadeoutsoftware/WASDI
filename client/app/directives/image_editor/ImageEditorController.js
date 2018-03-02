@@ -6,7 +6,6 @@ angular.module('wasdi.ImageEditorDirective', [])
             // template: "<canvas id='test' width='800' height='600'></canvas> ",
             templateUrl:"directives/image_editor/ImageEditorView.html",
             scope :{
-                // onClick: '&',
                 urlImage : '=',
                 body : '=',
                 // isLoaded : '='
@@ -201,6 +200,7 @@ angular.module('wasdi.ImageEditorDirective', [])
                     scope.body.viewportY = Math.round(iAy *  this.body.originalBandHeight);
                     scope.body.viewportWidth = Math.round(iWidthSquare * this.body.originalBandWidth);
                     scope.body.viewportHeight = Math.round(iHeightSquare * this.body.originalBandHeight);
+
                 };
 
                 scope.$watch('urlImage', function (newValue, oldValue, scope)
