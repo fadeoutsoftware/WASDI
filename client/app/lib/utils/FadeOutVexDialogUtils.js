@@ -62,6 +62,7 @@ function utilsVexDialogAlertDefault(oMessage,oCallback)
 
     var oVexInstance = vex.dialog.alert({unsafeMessage:oMessage,
                     callback:oCallback});
+
     return oVexInstance;
 }
 

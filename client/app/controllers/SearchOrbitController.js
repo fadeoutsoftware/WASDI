@@ -150,7 +150,7 @@ var SearchOrbitController = (function() {
 
         var sError = "";
 
-        if(utilsIsObjectNullOrUndefined(this.m_oGeoJSON)) sError += "PLEASE SELECT AREA OF INTEREST<br>LOOK AT THE TOP RIGHT CORNER OF THE MAP<br>";
+        if(utilsIsObjectNullOrUndefined(this.m_oGeoJSON)) sError += "PLEASE SELECT AREA OF INTEREST<br>TOP RIGHT CORNER OF THE MAP<br>";
 
         //if there isn't a resolution throw an error
         if(utilsIsObjectNullOrUndefined(this.m_oSelectedResolutionType) || this.m_oSelectedResolutionType.length == 0) sError += "PLEASE SELECT AT LEAST A RESOLUTION<br>";

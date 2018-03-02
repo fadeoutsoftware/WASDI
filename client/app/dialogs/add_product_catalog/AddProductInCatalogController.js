@@ -29,6 +29,7 @@ var AddProductInCatalogController = (function() {
         this.getWorkspaces();
         this.checkExtras();
     };
+
     AddProductInCatalogController.prototype.checkExtras = function()
     {
         var sFilename = this.m_aoProduct.fileName;
@@ -39,7 +40,8 @@ var AddProductInCatalogController = (function() {
         }else{
             this.m_sFileName = this.m_aoProduct.fileName;
         }
-    }
+    };
+
     AddProductInCatalogController.prototype.getWorkspaces = function()
     {
         var oController = this;

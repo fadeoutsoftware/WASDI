@@ -186,6 +186,9 @@ function utilsProjectShowRabbitMessageUserFeedBack(oMessage) {
 
     // Is there a feedback for the user?
     if (!utilsIsStrNullOrEmpty(sUserMessage)) {
+        var oAudio = new Audio('assets/audio/message.wav');
+        oAudio.play();
+
         // Give the short message
         var oDialog = utilsVexDialogAlertBottomRightCorner(sUserMessage);
         utilsVexCloseDialogAfterFewSeconds(4000,oDialog);
