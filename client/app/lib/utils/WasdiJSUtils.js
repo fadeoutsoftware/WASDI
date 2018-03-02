@@ -348,3 +348,57 @@ function utilsProjectGetProductsName (aoProducts)
     }
     return asReturnValue;
 }
+/****************************************************** MODALS ******************************************************/
+
+/**
+ *
+ * @param oCallback
+ * @param oOptions
+ * @param sTemplateUrl
+ * @param sControllerName
+ * @returns {boolean}
+ */
+function utilsProjectOpenDialog(oCallback,oOptions,sTemplateUrl,sControllerName,oModalService)
+{
+    /*
+    Example of options
+    {
+        products:oController.m_aoProducts,
+        selectedProduct:oSelectedProduct
+    }
+    * */
+    if(utilsIsStrNullOrEmpty(sTemplateUrl) === true || utilsIsStrNullOrEmpty(sControllerName) || utilsIsObjectNullOrUndefined(oModalService))
+    {
+        return false;
+    }
+
+    oModalService.showModal({
+        templateUrl: sTemplateUrl,
+        controller: sControllerName,
+        inputs: {
+            extras: oOptions
+        }
+    }).then(function(modal){
+        modal.element.modal();
+        modal.close.then(oCallback)
+    });
+    return true;
+}
+
+/**
+ *
+ * @param oCallback
+ * @param oOptions
+ * @returns {boolean}
+ */
+function utilsProjectOpenGetListOfWorkspacesSelectedModal (oCallback,oOptions,oModalService)
+{
+    if(utilsIsObjectNullOrUndefined(oCallback) === true || utilsIsObjectNullOrUndefined(oModalService))
+    {
+        return false;
+    }
+
+    utilsProjectOpenDialog(oCallback,oOptions,"dialogs/get_list_of_workspace_selected/GetListOfWorkspacesSelectedView.html","GetListOfWorkspacesController",oModalService)
+
+    return true;
+}

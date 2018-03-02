@@ -15,7 +15,6 @@
                             'search-button': m_oController.thereIsAtLeastOneProvider() === true }" ng-show="m_oController.m_sTypeOfFilterSelected === 'Time period'">
                 <!--<i class="fa fa-search fa-lg" aria-hidden="true"></i>-->
                 {{"IMPORT_SEARCH_BUTTON"|translate}} <i class="fa fa-search" aria-hidden="true"></i>
-
             </div>
 
             <div class="search-button" ng-click="m_oController.searchListAllSelectedProviders()" id="search-button-list"
@@ -26,7 +25,7 @@
             </div>
 
             <div class="search-button" ng-class="{'search-button-disabled': (m_oController.m_bIsVisibleListOfLayers === false)}"
-                                       ng-click="m_oController.downloadAllSelectedProducts()" >
+                                       ng-click="m_oController.openModalDownloadSelectedProductsInSelectedWorkspaces()" ><!--ng-click="m_oController.downloadAllSelectedProducts()"-->
                 <!--<i class="fa fa-search fa-lg" aria-hidden="true"></i>-->
                 Download selected <i class="fa fa-download" aria-hidden="true"></i>
             </div>
@@ -678,7 +677,7 @@
                                             <button type="button" class="btn btn btn-primary" ng-hide="layer.checked" ng-click="layer.checked= !layer.checked "
                                                     data-toggle="tooltip" data-placement="top" title="{{'IMPORT_TOOLTIP_UNCHECK'|translate}}">
                                                 <i class="fa fa-square-o" aria-hidden="true"></i>
-                                            <button type="button" class="btn btn btn-primary" ng-click="m_oController.downloadProductInWorkspace(layer)"
+                                            <button type="button" class="btn btn btn-primary" ng-click="m_oController.openModalDownloadProductInSelectedWorkspaces(layer)"
                                                     ng-disabled="m_oController.isPossibleDoDownload(layer) || (layer.isDisabledToDoDownload != null && layer.isDisabledToDoDownload)"
                                                     data-toggle="tooltip" data-placement="top" title="{{'IMPORT_TOOLTIP_ADD_PRODUCT'|translate}}">
                                                 <i class="fa fa-plus " aria-hidden="true"></i>

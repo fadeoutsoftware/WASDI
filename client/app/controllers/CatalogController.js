@@ -4,9 +4,9 @@
 
 var CatalogController = (function() {
 
-    function CatalogController($scope, oConstantsService, oAuthService,$state,oCatalogService,oMapService,oModalService )
+    function CatalogController($scope, oConstantsService, oAuthService,$state,oCatalogService,oMapService,oModalService,oProductService )
     {
-        // Service referenc
+        // Service reference
         this.m_oScope = $scope;
         this.m_oScope.m_oController = this;
         this.m_oConstantsService = oConstantsService;
@@ -15,7 +15,7 @@ var CatalogController = (function() {
         this.m_oMapService = oMapService;
         this.m_oCatalogService = oCatalogService;
         this.m_oModalService = oModalService;
-
+        this.m_oProductService = oProductService;
         // File Types
         this.m_asCategories = [];
         // Free text query
@@ -271,28 +271,97 @@ var CatalogController = (function() {
     };
 
     /**
-     * Add a product to a specific workspace
-     * @param oProduct
+     *
+     * @param oLayer
+     * @returns {boolean}
      */
-    CatalogController.prototype.addProductToWorkspace = function(oProduct)
+    CatalogController.prototype.openModalDownloadProductInSelectedWorkspaces = function(oLayer)
     {
-        var oController=this;
-        this.m_oModalService.showModal({
-            templateUrl: "dialogs/add_product_catalog/AddProductView.html",
-            controller: "AddProductInCatalogController",
-            inputs: {
-                extras: {
-                    product:oProduct
-                }
-            }
-        }).then(function (modal) {
-            modal.element.modal();
-            modal.close.then(function (result) {
-                oController.m_oScope.Result = result;
-            });
-        });
+        if(utilsIsObjectNullOrUndefined(oLayer) === true)
+        {
+            return false;
+        }
 
+        var oOptions = {
+            titleModal:"Add to workspaces",
+            buttonName:"Add to workspace"
+        };
+        var oThat = this;
+        var oCallback = function(result)
+        {
+            if(utilsIsObjectNullOrUndefined(result) === true)
+            {
+                return false;
+            }
+            var aoWorkSpaces = result;
+            var oController = this;
+            var iNumberOfWorkspaces = aoWorkSpaces.length;
+            if(utilsIsObjectNullOrUndefined(aoWorkSpaces) )
+            {
+                console.log("Error there aren't Workspaces");
+                return false;
+            }
+            // download product in all workspaces
+            for(var iIndexWorkspace = 0 ; iIndexWorkspace < iNumberOfWorkspaces; iIndexWorkspace++)
+            {
+                // oLayer.isDisabledToDoDownload = true;
+                // var sUrl = oLayer.link;
+                var oError = function (data,status) {
+                    utilsVexDialogAlertTop('GURU MEDITATION<br>THERE WAS AN ERROR TO IMPORTING THE IMAGE IN THE WORKSPACE');
+                    // oLayer.isDisabledToDoDownload = false;
+                }
+                oCallback =function(data,status){
+                }
+                var sProductFileName = oLayer.fileName
+                oThat.addProductInWorkspaces(aoWorkSpaces[iIndexWorkspace].workspaceId,sProductFileName,oError,oCallback);
+
+            }
+
+            return true;
+        };
+
+        utilsProjectOpenGetListOfWorkspacesSelectedModal(oCallback,oOptions,this.m_oModalService);
     };
+
+    CatalogController.prototype.addProductInWorkspaces = function(sWorkspaceId, sProductFileNameViewModel, oErrorCallback, oCallback)
+    {
+        if(utilsIsStrNullOrEmpty(sWorkspaceId) === true || utilsIsStrNullOrEmpty(sProductFileNameViewModel)=== true)
+        {
+            return false;
+        }
+        if(utilsIsObjectNullOrUndefined(oErrorCallback) === true || utilsIsObjectNullOrUndefined(oCallback) === true)
+        {
+            return false;
+        }
+
+        this.m_oProductService.addProductToWorkspace(sProductFileNameViewModel,sWorkspaceId).success(oCallback).error(oErrorCallback);
+
+        return true;
+    };
+    // /**
+    //  * Add a product to a specific workspace
+    //  * @param oProduct
+    //  */
+    // CatalogController.prototype.addProductToWorkspace = function(oProduct)
+    // {
+    //     var oController=this;
+    //     this.m_oModalService.showModal({
+    //         templateUrl: "dialogs/add_product_catalog/AddProductView.html",
+    //         controller: "AddProductInCatalogController",
+    //         inputs: {
+    //             extras: {
+    //                 product:oProduct
+    //             }
+    //         }
+    //     }).then(function (modal) {
+    //         modal.element.modal();
+    //         modal.close.then(function (result) {
+    //             oController.m_oScope.Result = result;
+    //         });
+    //     });
+    //
+    //
+    // };
 
     /**
      * Get info about a product
@@ -342,7 +411,8 @@ var CatalogController = (function() {
         '$state',
         'CatalogService',
         'MapService',
-        'ModalService'
+        'ModalService',
+        'ProductService'
     ];
 
     return CatalogController;
