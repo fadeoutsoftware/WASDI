@@ -405,3 +405,57 @@ function utilsProjectOpenGetListOfWorkspacesSelectedModal (oCallback,oOptions,oM
 
     return true;
 }
+
+
+//
+// /**
+//  *
+//  * @param min
+//  * @param p
+//  * @param max
+//  * @returns {boolean}
+//  */
+// function utilsIsBetween(min, p, max){
+//     var result = false;
+//
+//     if ( min < max ){
+//         if ( p > min && p < max ){
+//             result = true;
+//         }
+//     }
+//
+//     if ( min > max ){
+//         if ( p > max && p < min){
+//             result = true
+//         }
+//     }
+//
+//     if ( p == min || p == max ){
+//         result = true;
+//     }
+//
+//     return result;
+// }
+//
+// /**
+//  *
+//  * @param x
+//  * @param y
+//  * @param left
+//  * @param top
+//  * @param right
+//  * @param bottom
+//  * @returns {boolean}
+//  */
+// // left and right = x values
+// // top and bottom = y values
+//
+// function utilsIsPointInRectangle( x, y, left, top, right, bottom){
+//     var result = false;
+//
+//     if ( utilsIsBetween(left,x,right) && utilsIsBetween(top,y,bottom ) ){
+//         result = true;
+//     }
+//     return result;
+// }
+

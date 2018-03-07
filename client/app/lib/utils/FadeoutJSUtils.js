@@ -618,3 +618,17 @@ function utilsCalculateDistanceBetweenTwoPoints(x1,y1,x2,y2){
     // console.log("fDistance:" + fDistance)
     return fDistance;
 }
+
+function utilsIsPointInsideSquare(x, y, pointARectangleX, pointARectangleY, pointBRectangleX, pointBRectangleY) {
+    var x1 = Math.min(pointARectangleX, pointBRectangleX);
+    var x2 = Math.max(pointARectangleX, pointBRectangleX);
+    var y1 = Math.min(pointARectangleY, pointBRectangleY);
+    var y2 = Math.max(pointARectangleY, pointBRectangleY);
+    if ((x1 <= x ) && ( x <= x2) && (y1 <= y) && (y <= y2)) {
+        // console.log(x1 + "," + x + "," + x2);
+        // console.log(y1 + "," + y + "," + y2);
+        return true;
+    } else {
+        return false;
+    };
+};

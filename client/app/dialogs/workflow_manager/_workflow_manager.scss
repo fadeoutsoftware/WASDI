@@ -18,10 +18,12 @@
 
       .modal-body
       {
-
-        .tab-content{
-          margin-top: 10px;
-        }
+        //textarea {
+        //  resize: none;
+        //  background-color: $wasdi-white;
+        //  border-color:$wasdi-input-text-border-color ;
+        //
+        //}
 
         table{
           .selectedWorkflow{
@@ -31,6 +33,19 @@
           }
 
         }
+
+        .row{
+          margin-top: 20px;
+          .button-container{
+            float:right;
+          }
+        }
+
+        .tab-content{
+          margin-top: 10px;
+        }
+
+
 
 
 

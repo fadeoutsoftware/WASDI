@@ -17,18 +17,14 @@ var WorkFlowManagerController = (function() {
         this.m_asProductsName = utilsProjectGetProductsName(this.m_aoProducts);
         this.m_asSelectedProducts = [];
         this.m_aoWorkflows = [];
-        //TEST DATA
-        // this.m_aoWorkflows = [{
-        //      name:"Fermium ",
-        //      description:"energy "
-        //  },{
-        //      name:"Virundum  ",
-        //      description:"tubinga "
-        //  }];
         this.m_oSelectedWorkflow = null;
         this.m_oConstantsService = oConstantsService;
+        this.m_oWorkflowFileData = {
+            workflowName:"",
+            workflowDescription:""
+        };
+        this.isUploadingWorkflow = false;
         this.m_sSelectedWorkflowTab = 'WorkFlowTab1';
-        // this.m_oActiveWorkspace =  this.m_oConstantsService.getActiveWorkspace();
         this.m_oHttp =  oHttp;
         //$scope.close = oClose;
         var oController = this;
@@ -74,8 +70,14 @@ var WorkFlowManagerController = (function() {
         for(var iIndexSelectedProduct = 0 ; iIndexSelectedProduct < iNumberOfProducts; iIndexSelectedProduct++)
         {
             //TODO CHECK THIS CODE
-            var sDestinationProductName = this.m_asSelectedProducts.fileName + "_workflow";
-            this.executeGraphFromWorkflowId(this.m_sWorkspaceId,this.m_asSelectedProducts.fileName,sDestinationProductName,this.m_oSelectedWorkflow.id);
+            var oProduct = utilsProjectGetProductByName(this.m_asSelectedProducts[iIndexSelectedProduct],this.m_aoProducts);
+            if(utilsIsObjectNullOrUndefined(oProduct))
+            {
+                return false;
+            }
+
+            var sDestinationProductName = oProduct.name + "_workflow";
+            this.executeGraphFromWorkflowId(this.m_sWorkspaceId,oProduct.name,sDestinationProductName,this.m_oSelectedWorkflow.workflowId);
         }
         return true;
     };
@@ -106,11 +108,12 @@ var WorkFlowManagerController = (function() {
         {
             return false;
         }
-
+        var oController = this;
         this.m_oSnapOperationService.executeGraphFromWorkflowId(sWorkspaceId,sProductNameSelected,sDestinationProductName,sWorkflowId).success(function (data) {
             if(utilsIsObjectNullOrUndefined(data) == false)
             {
                 //TODO OK
+                oController.cleanAllExecuteWorkflowFields();
             }
             else
             {
@@ -119,6 +122,8 @@ var WorkFlowManagerController = (function() {
             }
         }).error(function (error) {
             utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN EXECUTE WORKFLOW");
+            oController.cleanAllExecuteWorkflowFields();
+
         });
 
         return true;
@@ -135,12 +140,12 @@ var WorkFlowManagerController = (function() {
         {
             return false;
         }
-
-        this.m_oSnapOperationService.deleteWorkflow(oWorkflow.id).success(function (data)
+        var oController = this;
+        this.m_oSnapOperationService.deleteWorkflow(oWorkflow.workflowId).success(function (data)
         {
             if(utilsIsObjectNullOrUndefined(data) == false)
             {
-                //TODO OK
+                oController.getWorkflowsByUser();
             }
             else
             {
@@ -157,16 +162,18 @@ var WorkFlowManagerController = (function() {
     /**
      * uploadUserGraphOnServer
      */
+
     WorkFlowManagerController.prototype.uploadUserGraphOnServer = function()
     {
-        var sFileName = this.m_oFile[0].name;
-        if(utilsIsStrNullOrEmpty(sFileName) === true)
+
+        if(utilsIsStrNullOrEmpty(this.m_oWorkflowFileData.workflowName) === true)
         {
-            sFileName = "workflow";
+            this.m_oWorkflowFileData.workflowName = "workflow";
         }
         var oBody = new FormData();
         oBody.append('file', this.m_oFile[0]);
-        this.uploadGraph(this.m_sWorkspaceId, sFileName,"Description",oBody);
+
+        this.uploadGraph(this.m_sWorkspaceId, this.m_oWorkflowFileData.workflowName,this.m_oWorkflowFileData.workflowDescription,oBody);
     };
 
     /**
@@ -187,7 +194,7 @@ var WorkFlowManagerController = (function() {
         {
             return false;
         }
-        if(utilsIsObjectNullOrUndefined(sDescription) === true || utilsIsStrNullOrEmpty(sDescription) === true)
+        if(utilsIsObjectNullOrUndefined(sDescription) === true )//|| utilsIsStrNullOrEmpty(sDescription) === true
         {
             return false;
         }
@@ -195,35 +202,70 @@ var WorkFlowManagerController = (function() {
         {
             return false;
         }
-
+        this.isUploadingWorkflow=true;
         var oController = this;
         this.m_oSnapOperationService.uploadGraph(this.m_sWorkspaceId,sName,sDescription,oBody).success(function (data) {
             if(utilsIsObjectNullOrUndefined(data) == false)
             {
                 //Reload list o workFlows
-                oController.getWorkflowsByUser()
+                oController.getWorkflowsByUser();
+                oController.cleanAllUploadWorkflowFields();
             }
             else
             {
                 //TODO ERROR
                 utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN UPLOAD WORKFLOW PROCESS");
             }
+            oController.isUploadingWorkflow = false;
         }).error(function (error) {
             utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN UPLOAD WORKFLOW PROCESS");
+            oController.cleanAllUploadWorkflowFields();
+            oController.isUploadingWorkflow = false;
         });
 
         return true;
     };
-
+    /**
+     *
+     * @returns {boolean}
+     */
     WorkFlowManagerController.prototype.isSelectedProduct = function(){
         return (this.m_asSelectedProducts.length > 0);
     };
+    /**
+     *
+     * @returns {boolean}
+     */
     WorkFlowManagerController.prototype.isSelectedWorkFlow = function(){
         return !utilsIsObjectNullOrUndefined(this.m_oSelectedWorkflow);
-    }
+    };
+    /**
+     *
+     * @returns {boolean}
+     */
     WorkFlowManagerController.prototype.isUploadedNewWorkFlow = function (){
         return !utilsIsObjectNullOrUndefined(this.m_oFile);
-    }
+    };
+
+    /**
+     *
+     */
+    WorkFlowManagerController.prototype.cleanAllUploadWorkflowFields = function (){
+        this.m_oWorkflowFileData = {
+            workflowName:"",
+            workflowDescription:""
+        };
+        this.m_oFile = null;
+    };
+
+    /**
+     *
+     */
+    WorkFlowManagerController.prototype.cleanAllExecuteWorkflowFields = function (){
+        this.m_asSelectedProducts = [];
+        this.m_oSelectedWorkflow = null;
+    };
+
     WorkFlowManagerController.$inject = [
         '$scope',
         'close',
