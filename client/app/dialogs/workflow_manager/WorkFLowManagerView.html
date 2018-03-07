@@ -26,9 +26,19 @@
                     <div class="tab-content">
                         <div class="tab-pane fade in" ng-class="{'active':m_oController.m_sSelectedWorkflowTab === 'WorkFlowTab1'}" id="WorkFlowTab1" >
 
-                            <!------------------------------ DRAG AND DROP WORKFLOWS ------------------------------>
+                            <!------------------------------ FILENAME ------------------------------>
+
+                            <div class="row my-input-text">
+                                <div class="col-xs-8 col-sm-8 col-md-8 col-lg-8 col-xs-offset-2 col-sm-offset-2 col-md-offset-2 col-lg-offset-2">
+                                    <input type="text" name="name"  class="my-input-text" value="" title="" required="required"
+                                           placeholder="Workflow name" ng-model="m_oController.m_oWorkflowFileData.workflowName">
+                                </div>
+
+                            </div>
+                            <!------------------------------ DRAG AND DROP WORKFLOWS + DESCRIPTION------------------------------>
                             <div class="row">
-                                <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+                                <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6 ">
+
                                     <div class="drag-and-drop ">
                                         {{"DIALOG_WORKFLOW_DROP_OR_CLICK"|translate}}
                                         <div ngf-drop ngf-select ng-model="m_oController.m_oFile" class="drop-box"
@@ -40,15 +50,24 @@
                                             <div ngf-no-file-drop>{{"DIALOG_WORKFLOW_DRAG_DROP_NOT_SUPPORTED"|translate}}</div>
                                         </div>
                                     </div>
-                                    <button class = "my-button" ng-click="m_oController.uploadUserGraphOnServer()"
-                                                                ng-show="m_oController.isUploadedNewWorkFlow()">Upload file</button>
+
                                 </div>
                                 <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
-                                    <!--TODO BIND WITH API -->
                                     <div class="form-group">
                                         <label for="comment">Description:</label>
-                                        <textarea class="form-control" rows="5" id="comment" ng-model=""></textarea>
+                                        <textarea class="form-control my-text-area" rows="5" id="comment"maxlength="50"
+                                                  ng-model="m_oController.m_oWorkflowFileData.workflowDescription"></textarea>
                                     </div>
+
+                                    <button class = "my-button my-align-right" ng-click="m_oController.uploadUserGraphOnServer()"
+                                            ng-show="m_oController.isUploadedNewWorkFlow()">Upload file</button>
+
+
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12" ng-show="m_oController.isUploadingWorkflow">
+                                    <invader></invader>
                                 </div>
                             </div>
                         </div>
@@ -91,11 +110,11 @@
                                     </div>
                                     <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
                                         <!-------------------------------- LIST OF PRODUCTS -------------------------------->
-                                        <multiselect options="m_oController.m_asProductsName" selected="m_oController.m_asSelectedProducts"
-                                                     ng-show="m_oController.isSelectedWorkFlow()">
+                                        <multiselect options="m_oController.m_asProductsName" selected="m_oController.m_asSelectedProducts">
+                                            <!--ng-show="m_oController.isSelectedWorkFlow()"-->
                                         </multiselect>
 
-                                        <button class="my-button" ng-click="m_oController.executeGraphFromWorkflowId"
+                                        <button class="my-button my-align-right" ng-click="m_oController.runWorkFlowPerProducts()"
                                                                   ng-show="m_oController.isSelectedWorkFlow() && m_oController.isSelectedProduct()">
                                             Execute workflow
                                         </button>

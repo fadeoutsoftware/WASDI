@@ -159,7 +159,13 @@ h4
 
 }
 
-
+.my-text-area{
+    resize: none;
+    background-color: $wasdi-white;
+    border-color:$wasdi-input-text-border-color ;
+    border-radius: 0px;
+    border-width: 2px;
+}
 
 .my-loading
 {
@@ -201,6 +207,15 @@ h4
 
   }
 }
+//MY ALIGN
+
+.my-align-left{
+    float: left;
+}
+.my-align-right{
+    float: right;
+}
+
 // BUTTON
 .my-button {
   background-color: $wasdi-button-default-color;
