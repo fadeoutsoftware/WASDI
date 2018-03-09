@@ -12,6 +12,7 @@ var ImportAdvanceFiltersController = (function() {
         this.m_oProductService = oProductService;
         this.m_sFileName = "";
 
+        //TODO REMOVE IT
         this.m_oAdvanceFilter = {
             filterActive:"Seasons",//Seasons,Range,Months
             savedData:[],
@@ -28,9 +29,26 @@ var ImportAdvanceFiltersController = (function() {
             selectedYearsSearchForMonths:[],
             selectedMonthsSearchForMonths:[]
         };
-
-        this.initDefaultYears();
-        this.initDefaultMonths();
+        this.test=[{
+            description:'miao',
+            selected:false,
+            link:''
+        }];
+        this.m_oAdvanceFilterOptions = {
+            listOfYears:this.getLastNYears(20),
+            listOfMonths:this.getListOfMonths(),
+            listOfDays:this.getListOfDays(31),
+            listOfSeasons:this.getSeasonsList(),
+            selectedYears:[],
+            selectedMonths:[],
+            selectedDays:[],
+            selectedSeasons:[],
+            savedData:[]
+        }
+        // this.getListOfYearsObjects(20);
+        // this.getListOfMonthsObject();
+        this.initDefaultYears();//TODO REMOVE IT
+        this.initDefaultMonths();//TODO REMOVE IT
 
         var oController = this;
         $scope.close = function(result) {
@@ -77,73 +95,73 @@ var ImportAdvanceFiltersController = (function() {
         return this.getPeriod(08,23,11,20)
     };
 
-    ImportAdvanceFiltersController.prototype.addSeason = function()
+    // ImportAdvanceFiltersController.prototype.addSeason = function()
+    // {
+    //     var sSeason = this.m_oAdvanceFilter.selectedSeason;
+    //
+    //     switch(sSeason) {
+    //         case "spring":
+    //             if(utilsIsObjectNullOrUndefined(this.m_oAdvanceFilter.selectedSeasonYears) === false)
+    //             {
+    //                 for(var iIndexYear = 0 ; iIndexYear < this.m_oAdvanceFilter.selectedSeasonYears.length; iIndexYear++ )
+    //                 {
+    //                     var oDataPeriod = this.getPeriodSpring();
+    //                     oDataPeriod.dateSensingPeriodFrom.setYear(this.m_oAdvanceFilter.selectedSeasonYears[iIndexYear]);
+    //                     oDataPeriod.dateSensingPeriodTo.setYear(this.m_oAdvanceFilter.selectedSeasonYears[iIndexYear]);
+    //                     var sName = this.m_oAdvanceFilter.selectedSeasonYears[iIndexYear] + " Spring";
+    //                     this.saveDataInAdvanceFilter(sName, oDataPeriod);
+    //                 }
+    //
+    //             }
+    //
+    //             break;
+    //         case "summer":
+    //
+    //             if(utilsIsObjectNullOrUndefined(this.m_oAdvanceFilter.selectedSeasonYears) === false)
+    //             {
+    //                 for(var iIndexYear = 0 ; iIndexYear < this.m_oAdvanceFilter.selectedSeasonYears.length; iIndexYear++ )
+    //                 {
+    //                     var oDataPeriod = this.getPeriodSummer();
+    //                     oDataPeriod.dateSensingPeriodFrom.setYear(this.m_oAdvanceFilter.selectedSeasonYears[iIndexYear]);
+    //                     oDataPeriod.dateSensingPeriodTo.setYear(this.m_oAdvanceFilter.selectedSeasonYears[iIndexYear]);
+    //                     var sName = this.m_oAdvanceFilter.selectedSeasonYears[iIndexYear] + " Summer";
+    //                     this.saveDataInAdvanceFilter(sName, oDataPeriod);
+    //                 }
+    //             }
+    //             break;
+    //         case "autumn":
+    //             if(utilsIsObjectNullOrUndefined(this.m_oAdvanceFilter.selectedSeasonYears) === false)
+    //             {
+    //                 for(var iIndexYear = 0 ; iIndexYear < this.m_oAdvanceFilter.selectedSeasonYears.length; iIndexYear++ )
+    //                 {
+    //                     var oDataPeriod = this.getPeriodAutumn();
+    //                     oDataPeriod.dateSensingPeriodFrom.setYear(this.m_oAdvanceFilter.selectedSeasonYears[iIndexYear]);
+    //                     oDataPeriod.dateSensingPeriodTo.setYear(this.m_oAdvanceFilter.selectedSeasonYears[iIndexYear]);
+    //                     var sName = this.m_oAdvanceFilter.selectedSeasonYears[iIndexYear] + " Autumn";
+    //                     this.saveDataInAdvanceFilter(sName, oDataPeriod);
+    //                 }
+    //             }
+    //             break;
+    //         case "winter":
+    //             if(utilsIsObjectNullOrUndefined(this.m_oAdvanceFilter.selectedSeasonYears) === false)
+    //             {
+    //                 for(var iIndexYear = 0 ; iIndexYear < this.m_oAdvanceFilter.selectedSeasonYears.length; iIndexYear++ )
+    //                 {
+    //                     var oDataPeriod = this.getPeriodWinter();
+    //                     // P.Campanella 10/02/2018: the winter start in yyyy and ends in yyyy+1. Or viceversa yyyy-1 to yyyyy
+    //                     oDataPeriod.dateSensingPeriodFrom.setYear(this.m_oAdvanceFilter.selectedSeasonYears[iIndexYear]-1);
+    //                     oDataPeriod.dateSensingPeriodTo.setYear(this.m_oAdvanceFilter.selectedSeasonYears[iIndexYear]);
+    //                     var sName = this.m_oAdvanceFilter.selectedSeasonYears[iIndexYear] + " Winter";
+    //                     this.saveDataInAdvanceFilter(sName, oDataPeriod);
+    //                 }
+    //             }
+    //             break;
+    //     }
+    // };
+
+    ImportAdvanceFiltersController.prototype.saveDataInAdvanceFilter = function(sName,oData,aoSaveData)
     {
-        var sSeason = this.m_oAdvanceFilter.selectedSeason;
-
-        switch(sSeason) {
-            case "spring":
-                if(utilsIsObjectNullOrUndefined(this.m_oAdvanceFilter.selectedSeasonYears) === false)
-                {
-                    for(var iIndexYear = 0 ; iIndexYear < this.m_oAdvanceFilter.selectedSeasonYears.length; iIndexYear++ )
-                    {
-                        var oDataPeriod = this.getPeriodSpring();
-                        oDataPeriod.dateSensingPeriodFrom.setYear(this.m_oAdvanceFilter.selectedSeasonYears[iIndexYear]);
-                        oDataPeriod.dateSensingPeriodTo.setYear(this.m_oAdvanceFilter.selectedSeasonYears[iIndexYear]);
-                        var sName = this.m_oAdvanceFilter.selectedSeasonYears[iIndexYear] + " Spring";
-                        this.saveDataInAdvanceFilter(sName, oDataPeriod);
-                    }
-
-                }
-
-                break;
-            case "summer":
-
-                if(utilsIsObjectNullOrUndefined(this.m_oAdvanceFilter.selectedSeasonYears) === false)
-                {
-                    for(var iIndexYear = 0 ; iIndexYear < this.m_oAdvanceFilter.selectedSeasonYears.length; iIndexYear++ )
-                    {
-                        var oDataPeriod = this.getPeriodSummer();
-                        oDataPeriod.dateSensingPeriodFrom.setYear(this.m_oAdvanceFilter.selectedSeasonYears[iIndexYear]);
-                        oDataPeriod.dateSensingPeriodTo.setYear(this.m_oAdvanceFilter.selectedSeasonYears[iIndexYear]);
-                        var sName = this.m_oAdvanceFilter.selectedSeasonYears[iIndexYear] + " Summer";
-                        this.saveDataInAdvanceFilter(sName, oDataPeriod);
-                    }
-                }
-                break;
-            case "autumn":
-                if(utilsIsObjectNullOrUndefined(this.m_oAdvanceFilter.selectedSeasonYears) === false)
-                {
-                    for(var iIndexYear = 0 ; iIndexYear < this.m_oAdvanceFilter.selectedSeasonYears.length; iIndexYear++ )
-                    {
-                        var oDataPeriod = this.getPeriodAutumn();
-                        oDataPeriod.dateSensingPeriodFrom.setYear(this.m_oAdvanceFilter.selectedSeasonYears[iIndexYear]);
-                        oDataPeriod.dateSensingPeriodTo.setYear(this.m_oAdvanceFilter.selectedSeasonYears[iIndexYear]);
-                        var sName = this.m_oAdvanceFilter.selectedSeasonYears[iIndexYear] + " Autumn";
-                        this.saveDataInAdvanceFilter(sName, oDataPeriod);
-                    }
-                }
-                break;
-            case "winter":
-                if(utilsIsObjectNullOrUndefined(this.m_oAdvanceFilter.selectedSeasonYears) === false)
-                {
-                    for(var iIndexYear = 0 ; iIndexYear < this.m_oAdvanceFilter.selectedSeasonYears.length; iIndexYear++ )
-                    {
-                        var oDataPeriod = this.getPeriodWinter();
-                        // P.Campanella 10/02/2018: the winter start in yyyy and ends in yyyy+1. Or viceversa yyyy-1 to yyyyy
-                        oDataPeriod.dateSensingPeriodFrom.setYear(this.m_oAdvanceFilter.selectedSeasonYears[iIndexYear]-1);
-                        oDataPeriod.dateSensingPeriodTo.setYear(this.m_oAdvanceFilter.selectedSeasonYears[iIndexYear]);
-                        var sName = this.m_oAdvanceFilter.selectedSeasonYears[iIndexYear] + " Winter";
-                        this.saveDataInAdvanceFilter(sName, oDataPeriod);
-                    }
-                }
-                break;
-        }
-    };
-
-    ImportAdvanceFiltersController.prototype.saveDataInAdvanceFilter = function(sName,oData)
-    {
-        if(utilsIsObjectNullOrUndefined(oData) === true || utilsIsStrNullOrEmpty(sName) === true)
+        if(utilsIsObjectNullOrUndefined(oData) === true || utilsIsStrNullOrEmpty(sName) === true || utilsIsObjectNullOrUndefined(aoSaveData))
             return false;
 
         var oSaveData = {
@@ -151,15 +169,15 @@ var ImportAdvanceFiltersController = (function() {
             data:oData
         };
 
-        var iNumberOfSaveData = this.m_oAdvanceFilter.savedData.length;
+        var iNumberOfSaveData = aoSaveData.length;
         for(var iIndexSaveData = 0; iIndexSaveData < iNumberOfSaveData; iIndexSaveData++)
         {
-            if(this.m_oAdvanceFilter.savedData[iIndexSaveData].name === oSaveData.name)
+            if(aoSaveData[iIndexSaveData].name === oSaveData.name)
             {
                 return false;
             }
         }
-        this.m_oAdvanceFilter.savedData.push(oSaveData);
+        aoSaveData.push(oSaveData);
 
         return true;
     };
@@ -186,15 +204,51 @@ var ImportAdvanceFiltersController = (function() {
 
     ImportAdvanceFiltersController.prototype.initDefaultYears = function()
     {
+        // var oActualDate = new Date();
+        // var iYears = oActualDate.getFullYear();
+        // for(var iIndex = 0 ; iIndex < 20; iIndex++)
+        // {
+        //     this.m_oAdvanceFilter.listOfYears.push(iYears.toString());
+        //     iYears--;
+        // }
+        this.m_oAdvanceFilter.listOfYears = this.getLastNYears(20);
+    };
+
+    ImportAdvanceFiltersController.prototype.getLastNYears = function(iN){
+        if(utilsIsInteger(iN) === false)
+        {
+            return null;
+        }
+        var aiReturnListOfYeras = [];
         var oActualDate = new Date();
         var iYears = oActualDate.getFullYear();
-        for(var iIndex = 0 ; iIndex < 20; iIndex++)
-        {
-            this.m_oAdvanceFilter.listOfYears.push(iYears.toString());
+        for( var iIndexYear = 0; iIndexYear < iN; iIndexYear++){
+            aiReturnListOfYeras.push(iYears.toString());
             iYears--;
         }
+        return aiReturnListOfYeras;
+    }
 
-    };
+    // ImportAdvanceFiltersController.prototype.getListOfYearsObjects = function(iN)
+    // {
+    //     if(utilsIsInteger(iN) === false)
+    //     {
+    //         return null;
+    //     }
+    //     var oActualDate = new Date();
+    //     var iYears = oActualDate.getFullYear();
+    //     for( var iIndexYear = 0; iIndexYear < iN; iIndexYear++){
+    //         var oYear = {
+    //             description:iYears.toString(),
+    //             selected:false,
+    //             link:""
+    //         };
+    //         //var oyear
+    //         this.m_oAdvanceFilterOptions.listOfYears.push(oYear);
+    //         iYears--;
+    //     }
+    //     // this
+    // }
     // ImportController.prototype.initDefaultDays = function()
     // {
     //
@@ -228,7 +282,65 @@ var ImportAdvanceFiltersController = (function() {
         }
 
     };
+    ImportAdvanceFiltersController.prototype.getListOfMonths = function()
+    {
+        /*
+            January - 31 days
+            February - 28 days in a common year and 29 days in leap years
+            March - 31 days
+            April - 30 days
+            May - 31 days
+            June - 30 days
+            July - 31 days
+            August - 31 days
+            September - 30 days
+            October - 31 days
+            November - 30 days
+            December - 31 days
+        * */
+        var asMonths = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+        var asReturnValue = [];
+        for(var iIndex = 0 ; iIndex < asMonths.length; iIndex++)
+        {
+            asReturnValue.push(asMonths[iIndex]);
+        }
+        return asReturnValue;
 
+    };
+    // ImportAdvanceFiltersController.prototype.getListOfMonthsObject = function()
+    // {
+    //     /*
+    //         January - 31 days
+    //         February - 28 days in a common year and 29 days in leap years
+    //         March - 31 days
+    //         April - 30 days
+    //         May - 31 days
+    //         June - 30 days
+    //         July - 31 days
+    //         August - 31 days
+    //         September - 30 days
+    //         October - 31 days
+    //         November - 30 days
+    //         December - 31 days
+    //     * */
+    //     var asMonths = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+    //     for(var iIndex = 0 ; iIndex < asMonths.length; iIndex++)
+    //     {
+    //         var oMonth = {
+    //             description:asMonths[iIndex],
+    //             selected:false,
+    //             link:""
+    //         }
+    //         this.m_oAdvanceFilterOptions.listOfMonths.push(oMonth);
+    //     }
+    //
+    // };
+    /**
+     *
+     * @param sMonth
+     * @param sYear
+     * @returns {number}
+     */
     ImportAdvanceFiltersController.prototype.getMonthDays = function(sMonth, sYear)
     {
         var sMonthLowerCase = sMonth.toLocaleLowerCase();
@@ -280,7 +392,30 @@ var ImportAdvanceFiltersController = (function() {
 
         }
     };
+    /**
+     *
+     * @param iNumberOfDayes
+     * @returns {Array}
+     */
+    ImportAdvanceFiltersController.prototype.getListOfDays = function(iNumberOfDayes){
+        if(utilsIsInteger(iNumberOfDayes) === false)
+        {
+            return [];
+        }
+        var asReturnValue = [];
+        for(var iIndex = 0 ; iIndex < iNumberOfDayes; iIndex++ )
+        {
+            asReturnValue.push((iIndex+1).toString());
+        }
+        return asReturnValue;
+    };
 
+    /**
+     *
+     * @param sMonth
+     * @param asYears
+     * @returns {*}
+     */
     ImportAdvanceFiltersController.prototype.getMonthDaysFromRangeOfMonths = function(sMonth, asYears)
     {
         if(utilsIsObjectNullOrUndefined(asYears) === true)
@@ -431,6 +566,250 @@ var ImportAdvanceFiltersController = (function() {
         }
         return true;
     };
+    /**
+     *
+     * @returns {[string,string,string,string]}
+     */
+    ImportAdvanceFiltersController.prototype.getSeasonsList = function()
+    {
+        return ["Spring","Summer","Autumn","Winter"];
+    };
+
+    ImportAdvanceFiltersController.prototype.addFiltersData = function()
+    {
+        var iNumberOfSelectedYears = this.m_oAdvanceFilterOptions.selectedYears.length;
+        for(var iIndexYear = 0 ; iIndexYear < iNumberOfSelectedYears ; iIndexYear++)
+        {
+            this.addSeason(this.m_oAdvanceFilterOptions.selectedSeasons,this.m_oAdvanceFilterOptions.selectedYears[iIndexYear],this.m_oAdvanceFilterOptions.savedData);
+            this.addMonths(this.m_oAdvanceFilterOptions.selectedMonths,this.m_oAdvanceFilterOptions.selectedYears[iIndexYear],this.m_oAdvanceFilterOptions.savedData);
+            this.addFilterPeriods(this.m_oAdvanceFilterOptions.selectedMonths,this.m_oAdvanceFilterOptions.selectedDays,this.m_oAdvanceFilterOptions.selectedYears[iIndexYear],this.m_oAdvanceFilterOptions.savedData)
+        }
+    };
+    /**
+     *
+     * @param asSelectedMonths
+     * @param iYear
+     * @param aoSaveData
+     * @returns {boolean}
+     */
+    ImportAdvanceFiltersController.prototype.addMonths = function(asSelectedMonths,iYear,aoSaveData)
+    {
+        if( utilsIsObjectNullOrUndefined(asSelectedMonths) || utilsIsObjectNullOrUndefined(iYear) || utilsIsObjectNullOrUndefined(aoSaveData) )
+        {
+            return false;
+        }
+
+        var iNumberOfSelectedMonths = asSelectedMonths.length;
+        for(var iIndexMonth = 0 ; iIndexMonth < iNumberOfSelectedMonths; iIndexMonth++)
+        {
+            var sName = iYear.toString() +" "+  asSelectedMonths[iIndexMonth];
+            var dateSensingPeriodFrom = new Date();
+            var dateSensingPeriodTo = new Date();
+            dateSensingPeriodFrom.setYear(iYear);
+            dateSensingPeriodFrom.setMonth(this.convertNameMonthInNumber(asSelectedMonths[iIndexMonth]));
+            dateSensingPeriodFrom.setDate(1);
+            dateSensingPeriodTo.setYear(asSelectedMonths[iIndexMonth]);
+            dateSensingPeriodTo.setMonth(this.convertNameMonthInNumber(asSelectedMonths[iIndexMonth]));
+            dateSensingPeriodTo.setDate(this.getMonthDays(asSelectedMonths[iIndexMonth],iYear));
+            var oData={
+                dateSensingPeriodFrom:dateSensingPeriodFrom,
+                dateSensingPeriodTo:dateSensingPeriodTo
+            };
+            this.saveDataInAdvanceFilter(sName,oData,aoSaveData);
+        }
+    };
+
+    ImportAdvanceFiltersController.prototype.addFilterPeriods = function(asSelectedMonths,asSelectedDays,iYear,aoSaveData)
+    {
+        if( utilsIsObjectNullOrUndefined(asSelectedMonths) || utilsIsObjectNullOrUndefined(asSelectedDays) ||
+            utilsIsObjectNullOrUndefined(iYear) || utilsIsObjectNullOrUndefined(aoSaveData))
+        {
+            return false
+        }
+        var iNumberOfSelectedMonths = asSelectedMonths.length;
+        var iNumberOfSelectedDays = asSelectedDays.length;
+        for(var iIndexSelectedMonth = 0; iIndexSelectedMonth < iNumberOfSelectedMonths; iIndexSelectedMonth++ )
+        {
+            var aiSelectedDays = this.convertArrayOfStringInArrayOfInteger(asSelectedDays);
+            var aaiPeriodsOfTimes = this.getPeriodsOfTimes(aiSelectedDays);
+            var iNumberOfPeriodsOfTimes = aaiPeriodsOfTimes.length;
+            //TODO END IT
+            for(var iIndexPeriodOfTimes = 0 ; iIndexPeriodOfTimes < iNumberOfPeriodsOfTimes; iIndexPeriodOfTimes++ )
+            {
+            }
+        }
+        // if(utilsIsObjectNullOrUndefined(this.m_oAdvanceFilter.selectedYears) === true ) return false;
+        // var iNumberOfSelectedYears = this.m_oAdvanceFilter.selectedYears.length;
+        // for(var iIndexYear = 0; iIndexYear < iNumberOfSelectedYears; iIndexYear++ )
+        // {
+        //     var sName="";
+        //     sName +=   this.m_oAdvanceFilter.selectedDayFrom.toString() + "/" + this.m_oAdvanceFilter.selectedMonthFrom.toString();
+        //     sName +=  " - " +this.m_oAdvanceFilter.selectedDayTo.toString() + "/" + this.m_oAdvanceFilter.selectedMonthTo.toString();
+        //     sName += " " + this.m_oAdvanceFilter.selectedYears[iIndexYear].toString();
+        //
+        //     var dateSensingPeriodFrom = new Date();
+        //     var dateSensingPeriodTo = new Date();
+        //     dateSensingPeriodFrom.setYear(this.m_oAdvanceFilter.selectedYears[iIndexYear]);
+        //     dateSensingPeriodFrom.setMonth(this.convertNameMonthInNumber(this.m_oAdvanceFilter.selectedMonthFrom));
+        //     // TODO CHECK LEAP YEAS (29 DAYS FEBRUARY)
+        //     dateSensingPeriodFrom.setDate( this.m_oAdvanceFilter.selectedDayFrom);
+        //     dateSensingPeriodTo.setYear(this.m_oAdvanceFilter.selectedYears[iIndexYear]);
+        //     dateSensingPeriodTo.setMonth(this.convertNameMonthInNumber(this.m_oAdvanceFilter.selectedMonthTo));
+        //     dateSensingPeriodTo.setDate(this.m_oAdvanceFilter.selectedDayTo);
+        //     var oData={
+        //         dateSensingPeriodFrom:dateSensingPeriodFrom,
+        //         dateSensingPeriodTo:dateSensingPeriodTo
+        //     };
+        //     this.saveDataInAdvanceFilter(sName,oData);
+        // }
+    };
+    ImportAdvanceFiltersController.prototype.savePeriodOfTime = function(aiPeriodOfTime,sMonth,iYear)
+    {
+        if(utilsIsObjectNullOrUndefined(aiPeriodOfTime))
+        {
+            return false;
+        }
+        var iNumberOfDays = aiPeriodOfTime.length;
+        var iSelectedDayFrom = aiPeriodOfTime[0];
+        var iSelectedDayTo = aiPeriodOfTime[iNumberOfDays];
+         var sName="";
+            sName +=  iSelectedDayFrom.toString() + " - "+ iSelectedDayTo +"/"+ this.convertNameMonthInNumber(sMonth) + "/" + iYear ;
+                // sName +=  " - " +this.m_oAdvanceFilter.selectedDayTo.toString() + "/" + this.m_oAdvanceFilter.selectedMonthTo.toString();
+                // sName += " " + this.m_oAdvanceFilter.selectedYears[iIndexYear].toString();
+
+                var dateSensingPeriodFrom = new Date();
+                var dateSensingPeriodTo = new Date();
+                dateSensingPeriodFrom.setYear(iYear);
+                dateSensingPeriodFrom.setMonth(this.convertNameMonthInNumber(sMonth));
+                // TODO CHECK LEAP YEAS (29 DAYS FEBRUARY)
+                dateSensingPeriodFrom.setDate( iSelectedDayFrom);
+                dateSensingPeriodTo.setYear(iYear);
+                dateSensingPeriodTo.setMonth(this.convertNameMonthInNumber(sMonth));
+                dateSensingPeriodTo.setDate(iSelectedDayTo);
+                var oData={
+                    dateSensingPeriodFrom:dateSensingPeriodFrom,
+                    dateSensingPeriodTo:dateSensingPeriodTo
+                };
+                this.saveDataInAdvanceFilter(sName,oData);
+
+    }
+    /**
+     *
+     * @param asArray
+     * @returns {*}
+     */
+    ImportAdvanceFiltersController.prototype.convertArrayOfStringInArrayOfInteger = function(asArray)
+    {
+        if(utilsIsObjectNullOrUndefined(asArray) === true)
+        {
+            return null;
+        }
+        var iNumberOfElement = asArray.length;
+        var aiReturnArray = [];
+        for(var iIndexArray = 0; iIndexArray < iNumberOfElement ; iIndexArray++ )
+        {
+            aiReturnArray.push( parseInt(asArray[iIndexArray]));
+        }
+        return aiReturnArray;
+    };
+
+    ImportAdvanceFiltersController.prototype.getPeriodsOfTimes = function(aiDays)
+    {
+        if(utilsIsObjectNullOrUndefined(aiDays))
+        {
+            return null;
+        }
+        var aaiReturnPeriodsOfTimes = [[]];
+        var iIndexReturnPeriodOfTime = 0;
+
+        aiDays.sort();
+        var iNumberOfDays = aiDays.length;
+        aaiReturnPeriodsOfTimes[iIndexReturnPeriodOfTime].push(aiDays[0]);
+        for(var iIndexDay = 1; iIndexDay < iNumberOfDays ; iIndexDay++)
+        {
+            /*
+            * example aiDays = [1,2,7,9]
+            * iIndexDay = 1;
+            * if( (aiDays[iIndexDay - 1 ] + 1 ) === aiDays[iIndexDay])
+            *
+            * aiDays[iIndexDay - 1 ] = 1
+            *
+            * (aiDays[iIndexDay - 1 ] + 1 ) = (1+1)
+            *
+            * aiDays[iIndexDay] = 2
+            *
+            * if( (1+1) === 2 ) aiDays[iIndexDay] and aiDays[iIndexDay-1] are a period of times because they are in sequence
+            *
+            * */
+            if( (aiDays[iIndexDay-1]+1) === aiDays[iIndexDay])
+            {
+                aaiReturnPeriodsOfTimes[iIndexReturnPeriodOfTime].push(aiDays[iIndexDay]);
+            }
+            else
+            {
+                //Push array
+                var aiNewPeriodOfTime = [ aiDays[iIndexDay] ];
+                aaiReturnPeriodsOfTimes.push( aiNewPeriodOfTime );
+                iIndexReturnPeriodOfTime++;
+            }
+        }
+        return aaiReturnPeriodsOfTimes;
+    };
+
+    /**
+     *
+     * @param asSeasonsSelected
+     * @param iYear
+     * @param aoSaveData
+     * @returns {boolean}
+     */
+    ImportAdvanceFiltersController.prototype.addSeason = function(asSeasonsSelected,iYear,aoSaveData)
+    {
+        if(utilsIsObjectNullOrUndefined(asSeasonsSelected) === true || utilsIsObjectNullOrUndefined(iYear) || utilsIsObjectNullOrUndefined(aoSaveData))
+        {
+            return false;
+        }
+        var iNumberOfSeasonsSelected = asSeasonsSelected.length;
+        for(var iIndexSeason = 0 ; iIndexSeason < iNumberOfSeasonsSelected ; iIndexSeason++)
+        {
+            var oDataPeriod = null;
+            switch(asSeasonsSelected[iIndexSeason].toLowerCase())
+            {
+                case "spring":
+                    oDataPeriod = this.getPeriodSpring();
+                    break;
+                case "summer":
+                    oDataPeriod = this.getPeriodSummer();
+                    break;
+                case "autumn":
+                    oDataPeriod = this.getPeriodAutumn();
+                    break;
+                case "winter":
+                    oDataPeriod = this.getPeriodWinter();
+                    break;
+            }
+
+            if(asSeasonsSelected[iIndexSeason] !== "winter")
+            {
+                oDataPeriod.dateSensingPeriodFrom.setYear(iYear);
+            }
+            else
+            {
+                // P.Campanella 10/02/2018: the winter start in yyyy and ends in yyyy+1. Or viceversa yyyy-1 to yyyyy
+                oDataPeriod.dateSensingPeriodFrom.setYear(iYear-1);
+            }
+            oDataPeriod.dateSensingPeriodTo.setYear(iYear);
+            var sName = iYear.toString() + asSeasonsSelected[iIndexSeason];
+            this.saveDataInAdvanceFilter(sName, oDataPeriod, aoSaveData);
+        };
+        // var sSeason = this.m_oAdvanceFilterOptions.selectedSeasons;
+        return true;
+
+    };
+
+    /**
+     *
+     */
     ImportAdvanceFiltersController.prototype.cleanAdvanceFilters = function()
     {
 
