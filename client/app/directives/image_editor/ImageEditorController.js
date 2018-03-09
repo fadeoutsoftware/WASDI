@@ -55,6 +55,7 @@ angular.module('wasdi.ImageEditorDirective', [])
 
                     if( scope.isNotPointInsideDraggerSquare(evt.stageX,evt.stageY) )
                     {
+                        console.log("stagemousedown")
                         scope.removeSquareAndDraggerContainer();
                         bItIsClicked = true;
                         oMouseDownPoint.stageX = evt.stageX;
@@ -68,6 +69,8 @@ angular.module('wasdi.ImageEditorDirective', [])
                     bItIsClicked = false;
                     if( scope.isNotPointInsideDraggerSquare(evt.stageX,evt.stageY) )
                     {
+                        console.log("stagemouseup")
+
                         // bItIsClicked = false;
                         oMouseLastPoint.stageX = evt.stageX;
                         oMouseLastPoint.stageY = evt.stageY;
@@ -80,49 +83,15 @@ angular.module('wasdi.ImageEditorDirective', [])
                 stage.on("stagemousemove", function(evt) {
                     if( (bItIsClicked === true)  )
                     {
-                        // var oPointASquare = null;
-                        // var oPointBSquare = null;
-                        // if(utilsIsObjectNullOrUndefined(scope.Dragger)=== false)
-                        // {
-                        //     var oDraggerBoundsRectangle = scope.Square.graphics.command;
-                        //     oPointASquare = {
-                        //         stageX:oDraggerBoundsRectangle.x,
-                        //         stageY:oDraggerBoundsRectangle.y,
-                        //     };
-                        //     oPointBSquare = {
-                        //         stageX:(oDraggerBoundsRectangle.x + oDraggerBoundsRectangle.w),
-                        //         stageY:(oDraggerBoundsRectangle.y + oDraggerBoundsRectangle.h),
-                        //     };
-                        //     //oMouseLastPoint.stageX,oMouseLastPoint.stageY
-                        //     // console.log("isInside: " + scope.isPointInsideSquare(evt.stageX,evt.stageY,oPointASquare.stageX,oPointASquare.stageY,oPointBSquare.stageX,oPointBSquare.stageY));
-                        // }
+                        console.log("stagemousemove")
 
-                        // if( (utilsIsObjectNullOrUndefined(oPointASquare) !== true) && (utilsIsObjectNullOrUndefined(oPointBSquare) !== true)
-                        //         && scope.isPointInsideSquare(evt.stageX,evt.stageY,oPointASquare.stageX,oPointASquare.stageY,oPointBSquare.stageX,oPointBSquare.stageY))
-                        // {
-                        //     console.log("isInside: " + scope.isPointInsideSquare(evt.stageX,evt.stageY,oPointASquare.stageX,oPointBSquare.stageX,oPointASquare.stageY,oPointBSquare.stageY));
-                        //     return false;
-                        // }
-
-                        // if( ( utilsIsObjectNullOrUndefined(scope.Dragger) === true ) || (scope.isPointInsideSquare(evt.stageX,evt.stageY,oPointASquare.stageX,oPointASquare.stageY,oPointBSquare.stageX,oPointBSquare.stageY) === false) )
-                        // {
                             //update actual position
                             oMouseLastPoint.stageX = evt.stageX;
                             oMouseLastPoint.stageY = evt.stageY;
 
-                            //
-                            // console.log("----------------- Positions -----------------------");
-                            // console.log("oMouseLastPoint.stageX" + oMouseLastPoint.stageX);
-                            // console.log("oMouseLastPoint.stageY "+ oMouseLastPoint.stageY);
-                            // console.log("oMouseDownPoint.stageX" + oMouseDownPoint.stageX);
-                            // console.log("oMouseDownPoint.stageY "+ oMouseDownPoint.stageY);
-                            // console.log("------------------ END -------------------------");
-                            // var oSquarePoints = scope.calculateSquarePointsByMousePoints(oMouseDownPoint,oMouseLastPoint);
-
                             if(utilsIsObjectNullOrUndefined(scope.Square) === true)
                             {
 
-                                //var oSquare = scope.createSquare(oSquarePoints.x,oSquarePoints.y,oSquarePoints.width,oSquarePoints.height);
                                 var oSquare = scope.createSquare(oMouseDownPoint.stageX,oMouseDownPoint.stageY,oMouseLastPoint.stageX-oMouseDownPoint.stageX,oMouseLastPoint.stageY-oMouseDownPoint.stageY);
 
 
@@ -130,6 +99,7 @@ angular.module('wasdi.ImageEditorDirective', [])
                                 {
                                     // add new draggable square
                                     var oDragger = new createjs.Container();
+                                    oDragger.x = oDragger.y = 0;
                                     oDragger.addChild(oSquare); //, label
                                     scope.Square = oSquare;
                                     scope.Dragger = oDragger;
@@ -137,6 +107,8 @@ angular.module('wasdi.ImageEditorDirective', [])
 
                                     oDragger.on("mousedown", scope.draggerMouseDownCallback);
                                     oDragger.on("pressmove",scope.draggerPressMoveCallback);
+                                    // oDragger.on("pressup",scope.draggerPressUpCallback);
+                                    // oDragger.mouseChildren = false;
                                 }
 
                             }
@@ -158,16 +130,39 @@ angular.module('wasdi.ImageEditorDirective', [])
                     if(utilsIsObjectNullOrUndefined(scope.Dragger)=== false)
                     {
                         var oDraggerBoundsRectangle = scope.Square.graphics.command;
+                        var iXSquare=0;
+                        var iYSquare=0;
+                        // if(utilsIsObjectNullOrUndefined(scope.Dragger.offset) === false)
+                        // {
+                        //     iXSquare = oDraggerBoundsRectangle.x + Math.abs(scope.Dragger.offset.x);
+                        //     iYSquare = oDraggerBoundsRectangle.y + Math.abs(scope.Dragger.offset.y);
+                        // }else{
+                        iXSquare= oDraggerBoundsRectangle.x;
+                            iYSquare= oDraggerBoundsRectangle.y;
+                        // }
+
+                        //SQUARE POINTS
                         oPointASquare = {
-                            stageX:oDraggerBoundsRectangle.x,
-                            stageY:oDraggerBoundsRectangle.y,
+                            stageX:iXSquare,
+                            stageY:iYSquare ,
                         };
+
                         oPointBSquare = {
-                            stageX:(oDraggerBoundsRectangle.x + oDraggerBoundsRectangle.w),
-                            stageY:(oDraggerBoundsRectangle.y + oDraggerBoundsRectangle.h),
+                            stageX:(iXSquare + oDraggerBoundsRectangle.w),
+                            stageY:(iYSquare + oDraggerBoundsRectangle.h),
                         };
-                        //oMouseLastPoint.stageX,oMouseLastPoint.stageY
-                        // console.log("isInside: " + scope.isPointInsideSquare(evt.stageX,evt.stageY,oPointASquare.stageX,oPointASquare.stageY,oPointBSquare.stageX,oPointBSquare.stageY));
+                        // oPointASquare = {
+                        //     stageX:scope.Dragger.x,
+                        //     stageY:scope.Dragger.y,
+                        // };
+                        //
+                        // oPointBSquare = {
+                        //     stageX:(scope.Dragger.x + oDraggerBoundsRectangle.w),
+                        //     stageY:(scope.Dragger.y + oDraggerBoundsRectangle.h),
+                        // };
+                        console.log("square x " + iXSquare);
+                        console.log("square y " + iYSquare);
+
                     }
                     return  ( utilsIsObjectNullOrUndefined(scope.Dragger) === true ) || (utilsIsPointInsideSquare(x, y, oPointASquare.stageX,oPointASquare.stageY,oPointBSquare.stageX,oPointBSquare.stageY) === false)
                 };
@@ -181,11 +176,19 @@ angular.module('wasdi.ImageEditorDirective', [])
                 scope.Bitmap = oBitmap;
                 scope.Dragger = null;
 
+                // scope.draggerPressUpCallback = function(evt){
+                //     // scope.Square.graphics.command.x =  scope.Square.graphics.command.x + evt.currentTarget.x;
+                //     // scope.Square.graphics.command.y =  scope.Square.graphics.command.y + evt.currentTarget.y;
+                //     stage.update();
+                // };
+
                 scope.draggerPressMoveCallback = function(evt) {
                     // Calculate the new X and Y based on the mouse new position plus the offset.
                     evt.currentTarget.x = evt.stageX + evt.currentTarget.offset.x;
                     evt.currentTarget.y = evt.stageY + evt.currentTarget.offset.y;
-                    // make sure to redraw the stage to show the change:
+                    // console.log("testX: " + evt.currentTarget.x);
+                    // console.log("testY: " + evt.currentTarget.y);
+                    console.log("draggerPressMoveCallback");
                     stage.update();
                     scope.zoom();
 
@@ -194,6 +197,8 @@ angular.module('wasdi.ImageEditorDirective', [])
                     // keep a record on the offset between the mouse position and the container
                     // position. currentTarget will be the container that the event listener was added to:
                     evt.currentTarget.offset = {x: this.x - evt.stageX, y: this.y - evt.stageY};
+                    console.log("draggerMouseDownCallback");
+
                     scope.zoom();
                 };
 

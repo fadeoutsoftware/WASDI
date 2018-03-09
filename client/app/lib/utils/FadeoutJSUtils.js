@@ -619,6 +619,16 @@ function utilsCalculateDistanceBetweenTwoPoints(x1,y1,x2,y2){
     return fDistance;
 }
 
+/**
+ *
+ * @param x
+ * @param y
+ * @param pointARectangleX
+ * @param pointARectangleY
+ * @param pointBRectangleX
+ * @param pointBRectangleY
+ * @returns {boolean}
+ */
 function utilsIsPointInsideSquare(x, y, pointARectangleX, pointARectangleY, pointBRectangleX, pointBRectangleY) {
     var x1 = Math.min(pointARectangleX, pointBRectangleX);
     var x2 = Math.max(pointARectangleX, pointBRectangleX);
@@ -632,3 +642,4 @@ function utilsIsPointInsideSquare(x, y, pointARectangleX, pointARectangleY, poin
         return false;
     };
 };
+
