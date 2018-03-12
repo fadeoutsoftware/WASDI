@@ -386,7 +386,7 @@ var ImportController = (function() {
         for(var i=0; i<this.m_aoMissions[parentIndex].filters.length; i++) {
             if(this.m_aoMissions[parentIndex].filters[i].indexvalue &&
                 this.m_aoMissions[parentIndex].filters[i].indexvalue.trim() != '') {
-                selected=true;
+                selected = true;
                 break;
             }
         }
@@ -2181,10 +2181,12 @@ var ImportController = (function() {
         }).then(function(modal){
             modal.element.modal();
             modal.close.then(function(result) {
-                if(utilsIsObjectNullOrUndefined(result) === true)
+                if(utilsIsObjectNullOrUndefined(result) === true || result.length === 0)
                 {
+                    oController.m_sTypeOfFilterSelected = 'Time period';
                     return false;
                 }
+
                 oController.m_oAdvanceFilter.savedData = result;
                 return true;
             })
