@@ -363,46 +363,29 @@
                         <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
                             <div class="row">
                                 <div class="col-xs-5 col-sm-5 col-md-5 col-lg-5 col-xs-offset-1 col-sm-offset-1 col-md-offset-1 col-lg-offset-1">
-                                    <div class="radio">
-                                        <label>
-                                            <input type="radio" name="name" ng-model="m_oController.m_sTypeOfFilterSelected" value="Time period" checked="checked" >
-                                            Time period
-                                        </label>
-                                        <br>
-                                        <label>
-                                            <input type="radio" name="name" ng-model="m_oController.m_sTypeOfFilterSelected" value="Time series" checked="checked">
-                                            Time series
-                                        </label>
-                                    </div>
+                                    <!--<div class="radio">-->
+                                        <!--<label>-->
+                                            <!--<input type="radio" name="name" ng-model="m_oController.m_sTypeOfFilterSelected" value="Time period" checked="checked" >-->
+                                            <!--Time period-->
+                                        <!--</label>-->
+                                        <!--<br>-->
+                                        <!--<label>-->
+                                            <!--<input type="radio" name="name" ng-model="m_oController.m_sTypeOfFilterSelected" value="Time series" checked="checked">-->
+                                            <!--Time series-->
+                                        <!--</label>-->
+                                    <button type="button" class="my-button selected-time-series"
+                                            ng-click="m_oController.openAdvanceFiltersDialog(); m_oController.m_sTypeOfFilterSelected = 'Time series'">Select Time Series</button>
+
+                                    <!--</div>-->
                                 </div>
                                 <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
                                     <multiselectdropdownmenu options="m_oController.m_aListOfProvider" name="Providers"></multiselectdropdownmenu>
 
                                 </div>
                             </div>
+
                             <div class="row time-container" ng-show="m_oController.m_sTypeOfFilterSelected === 'Time period'"><!---->
-                                <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6" >
-                                    TO:
-                                    <div class=" advanced-calendar-input input-calendar-container " >
-                                        <p class="input-group" >
 
-                                            <input type="text" class="form-control advanced-calendar-date-input"
-                                                   uib-datepicker-popup="yyyy/MM/dd"
-                                                   ng-model="m_oController.m_oModel.sensingPeriodTo"
-                                                   is-open="m_oController.m_oStatus.openedSensingPeriodTo"
-                                                   date-disabled="m_oController.disabled(date, mode)" ng-required="true"
-                                                   min-date="m_oController.m_oModel.sensingPeriodFrom"
-                                                   ng-blur="m_oController.updateAdvancedSearch()" close-text="Close"
-                                                   readonly="true" data-container="body"/>
-
-                                            <span class="input-group-btn">
-							                    <button type="button" class="btn btn-default advanced-calendar-button"
-                                                    ng-click="m_oController.openSensingPeriodTo($event)"><i class="fa fa-calendar" aria-hidden="true"></i></button>
-						                    </span>
-                                        </p>
-                                    </div>
-                                    <!--<multiselectdropdownmenu options="m_oController.m_aListOfProvider"></multiselectdropdownmenu>-->
-                                </div>
                                 <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
                                     FROM:
                                     <div class="input-calendar-container" >
@@ -429,6 +412,28 @@
 
                                     <!--<button type="button" class="my-button selected-time-series" ng-click="m_oController.openAdvanceFiltersDialog()">Select Time Series</button>-->
                                 </div>
+                                <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6" >
+                                    TO:
+                                    <div class=" advanced-calendar-input input-calendar-container " >
+                                        <p class="input-group" >
+
+                                            <input type="text" class="form-control advanced-calendar-date-input"
+                                                   uib-datepicker-popup="yyyy/MM/dd"
+                                                   ng-model="m_oController.m_oModel.sensingPeriodTo"
+                                                   is-open="m_oController.m_oStatus.openedSensingPeriodTo"
+                                                   date-disabled="m_oController.disabled(date, mode)" ng-required="true"
+                                                   min-date="m_oController.m_oModel.sensingPeriodFrom"
+                                                   ng-blur="m_oController.updateAdvancedSearch()" close-text="Close"
+                                                   readonly="true" data-container="body"/>
+
+                                            <span class="input-group-btn">
+							                    <button type="button" class="btn btn-default advanced-calendar-button"
+                                                        ng-click="m_oController.openSensingPeriodTo($event)"><i class="fa fa-calendar" aria-hidden="true"></i></button>
+						                    </span>
+                                        </p>
+                                    </div>
+                                    <!--<multiselectdropdownmenu options="m_oController.m_aListOfProvider"></multiselectdropdownmenu>-->
+                                </div>
                             </div>
                             <div class="row" ng-show="m_oController.m_sTypeOfFilterSelected === 'Time series'"><!---->
                                 <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6" >
@@ -438,7 +443,7 @@
                                     </div>
                                 </div>
                                 <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
-                                    <button type="button" class="my-button selected-time-series" ng-click="m_oController.openAdvanceFiltersDialog()">Select Time Series</button>
+                                    <!--<button type="button" class="my-button selected-time-series" ng-click="m_oController.openAdvanceFiltersDialog()">Select Time Series</button>-->
                                 </div>
                             </div>
                             <div class="row well well-sm" ng-hide="m_oController.m_oAdvanceFilter.savedData.length === 0">
