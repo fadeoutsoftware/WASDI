@@ -138,7 +138,7 @@ angular.module('wasdi.ImageEditorDirective', [])
                         //     iYSquare = oDraggerBoundsRectangle.y + Math.abs(scope.Dragger.offset.y);
                         // }else{
                         iXSquare= oDraggerBoundsRectangle.x;
-                            iYSquare= oDraggerBoundsRectangle.y;
+                        iYSquare= oDraggerBoundsRectangle.y;
                         // }
 
                         //SQUARE POINTS
@@ -186,8 +186,8 @@ angular.module('wasdi.ImageEditorDirective', [])
                     // Calculate the new X and Y based on the mouse new position plus the offset.
                     evt.currentTarget.x = evt.stageX + evt.currentTarget.offset.x;
                     evt.currentTarget.y = evt.stageY + evt.currentTarget.offset.y;
-                    // console.log("testX: " + evt.currentTarget.x);
-                    // console.log("testY: " + evt.currentTarget.y);
+                    console.log("offsetX: " + evt.currentTarget.x);
+                    console.log("offsetY: " + evt.currentTarget.y);
                     console.log("draggerPressMoveCallback");
                     stage.update();
                     scope.zoom();
