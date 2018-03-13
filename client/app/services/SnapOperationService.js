@@ -45,7 +45,7 @@ service('SnapOperationService', ['$http',  'ConstantsService', function ($http, 
     this.executeGraphFromWorkflowId = function(sWorkspaceInput,sSourceInput,sDestinationInput,sWorkflowIdInput)
     {
         return this.m_oHttp.get(this.APIURL + '/processing/graph_id?workspace=' + sWorkspaceInput + '&source=' +
-                                sSourceInput + '&destination=' + sDestinationInput + "&workflowId" + sWorkflowIdInput);
+                                sSourceInput + '&destination=' + sDestinationInput + "&workflowId=" + sWorkflowIdInput);
     };
 
     this.uploadGraph = function(sWorkspaceInput,sName,sDescription,oBody)
