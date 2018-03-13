@@ -337,13 +337,24 @@ angular.module('wasdi.ImageEditorDirective', [])
                     scope.Square = null;
                     return true;
                 };
-
+                /**
+                 *
+                 */
                 scope.clickOnGetImage = function()
                 {
                     scope.IsVisibleMouseCursorWait = true;
                     this.getZoomTemporaryImage();
                     this.applyEditorPreviewImage();
-                }
+                };
+
+                /**
+                 *
+                 */
+                scope.clickOnGetDefaultImage=function()
+                {
+                    scope.IsVisibleMouseCursorWait = true;
+                    scope.getDefaultImage();
+                };
                 /**
                  *
                  * @param oImage
@@ -368,7 +379,12 @@ angular.module('wasdi.ImageEditorDirective', [])
 
                     oImage.setTransform(null,null,fScaleValueX,fScaleValueY);
                 };
-
+                /**
+                 *
+                 * @param sUrlImage
+                 * @param oSquare
+                 * @returns {*}
+                 */
                 scope.cropImageBySquare = function(sUrlImage,oSquare){
                     if(utilsIsStrNullOrEmpty(sUrlImage) === true )
                     {
@@ -402,6 +418,9 @@ angular.module('wasdi.ImageEditorDirective', [])
                 //     // console.log("Point true/false:" + bReturnValue);
                 //     return bReturnValue;
                 // };
+                /**
+                 *
+                 */
                 scope.removeSquareAndDraggerContainer = function(){
                     scope.Stage.removeChild(scope.Square);
                     scope.Square = null;
@@ -409,6 +428,7 @@ angular.module('wasdi.ImageEditorDirective', [])
                     scope.Stage.removeChild(scope.Dragger);
                     scope.Dragger = null;
                 }
+
                 scope.$watch('urlImage', function (newValue, oldValue, scope)
                 {
                     scope.IsVisibleMouseCursorWait = false;
