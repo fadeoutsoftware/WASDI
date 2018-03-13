@@ -442,15 +442,15 @@
                         <!--<pre>{{m_oController.m_bIsModeOnPixelInfo|json}}</pre>-->
                     </button>
 
-                    <button type="button" class="btn btn-default"  data-toggle="tooltip" data-placement="bottom"  title="{{'EDITOR_TOOLTIP_ZOOM_ON'|translate}}"
-                            ng-hide="m_oController.m_bIsActiveGeoraphicalMode == true">
-                        <i class="fa fa-search-plus" aria-hidden="true"></i>
-                    </button>
+                    <!--<button type="button" class="btn btn-default"  data-toggle="tooltip" data-placement="bottom"  title="{{'EDITOR_TOOLTIP_ZOOM_ON'|translate}}"-->
+                            <!--ng-hide="m_oController.m_bIsActiveGeoraphicalMode == true">-->
+                        <!--<i class="fa fa-search-plus" aria-hidden="true"></i>-->
+                    <!--</button>-->
 
-                    <button type="button" class="btn btn-default"  data-toggle="tooltip" data-placement="bottom"  title="{{'EDITOR_TOOLTIP_RESET_ZOOM'|translate}}"
-                            ng-hide="m_oController.m_bIsActiveGeoraphicalMode == true" ng-click="m_oController.applyMapViewImageOriginalValues()">
-                        <i class="fa fa-search-minus" aria-hidden="true"></i>
-                    </button>
+                    <!--<button type="button" class="btn btn-default"  data-toggle="tooltip" data-placement="bottom"  title="{{'EDITOR_TOOLTIP_RESET_ZOOM'|translate}}"-->
+                            <!--ng-hide="m_oController.m_bIsActiveGeoraphicalMode == true" ng-click="m_oController.applyMapViewImageOriginalValues()">-->
+                        <!--<i class="fa fa-search-minus" aria-hidden="true"></i>-->
+                    <!--</button>-->
 
                 </div>
 
@@ -458,9 +458,11 @@
                 <!--<img ng-src="{{m_oController.m_sViewUrlSelectedBand}}" ng-show="m_oController.m_bIsActiveGeoraphicalMode === false && m_oController.m_bIsLoadedViewBandImage">-->
                 <imageeditor url-image="m_oController.m_sViewUrlSelectedBand"
                              body = "m_oController.m_oImagePreviewDirectivePayload"
-                             ng-show="m_oController.m_bIsActiveGeoraphicalMode === false && m_oController.m_bIsLoadedViewBandImage"><!--is-loaded="m_oController.m_bIsLoadedPreviewBandImage"-->
+                             get-default-image="m_oController.applyMapViewImageOriginalValues()"
+                             apply-editor-preview-image="m_oController.applyEditorPreviewImageUpdate()"
+                             ng-show="m_oController.m_bIsActiveGeoraphicalMode === false "><!--is-loaded="m_oController.m_bIsLoadedPreviewBandImage" ng-show&& m_oController.m_bIsLoadedViewBandImage-->
                 </imageeditor> <!---->
-                <div class="loadIcon" ng-hide="m_oController.m_bIsLoadedViewBandImage && (m_oController.m_bIsLoadedViewBandImage === true) ">
+                <div class="loadIcon" ng-hide="m_oController.m_bIsLoadedViewBandImage && (m_oController.m_bIsLoadedViewBandImage === true)" >
                     <invader></invader>
                 </div>
 

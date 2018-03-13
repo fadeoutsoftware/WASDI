@@ -1,9 +1,17 @@
-<div class="image-editor-container">
-
+<div class="image-editor-container" ng-class="{ 'wait-cursor-hover':IsVisibleMouseCursorWait === true }">
     <!--<div class="loadIcon" ng-hide="isLoaded">-->
         <!--<invader></invader>-->
     <!--</div>-->
-    <button class="my-button" ng-click="getZoomTemporaryImage()">test</button>
+    <div class="btn-group btn-group-right" role="group" >
+        <button type="button" class="btn btn-default" ng-click="clickOnGetImage()">
+            <i class="fa fa-search-plus" aria-hidden="true"></i>
+        </button>
+        <button type="button" class="btn btn-default"  title="{{'EDITOR_TOOLTIP_RESET_ZOOM'|translate}}"
+                 ng-click="getDefaultImage()">
+            <i class="fa fa-search-minus" aria-hidden="true"></i>
+        </button>
+    </div>
+
     <div> <!-- ng-show="isLoaded"-->
         <canvas id='imageviewcanvas'  width='1238px' height='707.797px' ></canvas><!-- width='800' height='600'-->
     </div>

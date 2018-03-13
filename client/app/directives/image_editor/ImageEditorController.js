@@ -8,6 +8,8 @@ angular.module('wasdi.ImageEditorDirective', [])
             scope :{
                 urlImage : '=',
                 body : '=',
+                getDefaultImage:'&',
+                applyEditorPreviewImage:'&'
                 // isLoaded : '='
                 // * Text binding ('@' or '@?') *
                 // * One-way binding ('<' or '<?') *
@@ -55,7 +57,7 @@ angular.module('wasdi.ImageEditorDirective', [])
 
                     if( scope.isNotPointInsideDraggerSquare(evt.stageX,evt.stageY) )
                     {
-                        console.log("stagemousedown")
+                        // console.log("stagemousedown")
                         scope.removeSquareAndDraggerContainer();
                         bItIsClicked = true;
                         oMouseDownPoint.stageX = evt.stageX;
@@ -69,7 +71,7 @@ angular.module('wasdi.ImageEditorDirective', [])
                     bItIsClicked = false;
                     if( scope.isNotPointInsideDraggerSquare(evt.stageX,evt.stageY) )
                     {
-                        console.log("stagemouseup")
+                        // console.log("stagemouseup")
 
                         // bItIsClicked = false;
                         oMouseLastPoint.stageX = evt.stageX;
@@ -83,7 +85,7 @@ angular.module('wasdi.ImageEditorDirective', [])
                 stage.on("stagemousemove", function(evt) {
                     if( (bItIsClicked === true)  )
                     {
-                        console.log("stagemousemove")
+                        // console.log("stagemousemove")
 
                             //update actual position
                             oMouseLastPoint.stageX = evt.stageX;
@@ -125,21 +127,28 @@ angular.module('wasdi.ImageEditorDirective', [])
                 });
 
                 scope.isNotPointInsideDraggerSquare = function(x, y) {
+                    if( utilsIsObjectNullOrUndefined(scope.Square ) === true || utilsIsObjectNullOrUndefined(scope.Dragger) === true   )
+                    {
+                        return true;
+                    }
                     var oPointASquare = null;
                     var oPointBSquare = null;
-                    if(utilsIsObjectNullOrUndefined(scope.Dragger)=== false)
-                    {
+
                         var oDraggerBoundsRectangle = scope.Square.graphics.command;
                         var iXSquare=0;
                         var iYSquare=0;
-                        // if(utilsIsObjectNullOrUndefined(scope.Dragger.offset) === false)
-                        // {
-                        //     iXSquare = oDraggerBoundsRectangle.x + Math.abs(scope.Dragger.offset.x);
-                        //     iYSquare = oDraggerBoundsRectangle.y + Math.abs(scope.Dragger.offset.y);
-                        // }else{
-                        iXSquare= oDraggerBoundsRectangle.x;
-                        iYSquare= oDraggerBoundsRectangle.y;
-                        // }
+                        if(utilsIsObjectNullOrUndefined(scope.Dragger.offset) === false)
+                        {
+                            iXSquare = oDraggerBoundsRectangle.x + Math.abs(scope.Dragger.x);
+                            iYSquare = oDraggerBoundsRectangle.y + Math.abs(scope.Dragger.y);
+                            // iXSquare = scope.Dragger.offset.x;
+                            // iYSquare = scope.Dragger.offset.y;
+                        }
+                        else
+                        {
+                            iXSquare= oDraggerBoundsRectangle.x;
+                            iYSquare= oDraggerBoundsRectangle.y;
+                        }
 
                         //SQUARE POINTS
                         oPointASquare = {
@@ -160,11 +169,14 @@ angular.module('wasdi.ImageEditorDirective', [])
                         //     stageX:(scope.Dragger.x + oDraggerBoundsRectangle.w),
                         //     stageY:(scope.Dragger.y + oDraggerBoundsRectangle.h),
                         // };
-                        console.log("square x " + iXSquare);
-                        console.log("square y " + iYSquare);
+                        // console.log("-------------- START isNotPointInsideDraggerSquare --------------")
+                        // console.log("square x " + iXSquare);
+                        // console.log("square y " + iYSquare);
+                        // console.log("-------------- END isNotPointInsideDraggerSquare --------------")
 
-                    }
-                    return  ( utilsIsObjectNullOrUndefined(scope.Dragger) === true ) || (utilsIsPointInsideSquare(x, y, oPointASquare.stageX,oPointASquare.stageY,oPointBSquare.stageX,oPointBSquare.stageY) === false)
+
+
+                    return (utilsIsPointInsideSquare(x, y, oPointASquare.stageX,oPointASquare.stageY,oPointBSquare.stageX,oPointBSquare.stageY) === false)
                 };
 
 
@@ -175,39 +187,62 @@ angular.module('wasdi.ImageEditorDirective', [])
                 scope.Stage = stage;
                 scope.Bitmap = oBitmap;
                 scope.Dragger = null;
-
+                scope.IsVisibleMouseCursorWait = false;
                 // scope.draggerPressUpCallback = function(evt){
                 //     // scope.Square.graphics.command.x =  scope.Square.graphics.command.x + evt.currentTarget.x;
                 //     // scope.Square.graphics.command.y =  scope.Square.graphics.command.y + evt.currentTarget.y;
                 //     stage.update();
                 // };
-
+                /**
+                 *
+                 * @param evt
+                 */
                 scope.draggerPressMoveCallback = function(evt) {
                     // Calculate the new X and Y based on the mouse new position plus the offset.
                     evt.currentTarget.x = evt.stageX + evt.currentTarget.offset.x;
                     evt.currentTarget.y = evt.stageY + evt.currentTarget.offset.y;
-                    console.log("offsetX: " + evt.currentTarget.x);
-                    console.log("offsetY: " + evt.currentTarget.y);
-                    console.log("draggerPressMoveCallback");
+                    // console.log("-------------- START draggerPressMoveCallback --------------");
+                    // console.log("offsetX: " + evt.currentTarget.x);
+                    // console.log("offsetY: " + evt.currentTarget.y);
+                    // console.log("-------------- END draggerPressMoveCallback --------------")
                     stage.update();
                     scope.zoom();
 
                 };
+                /**
+                 *
+                 * @param evt
+                 */
                 scope.draggerMouseDownCallback = function (evt) {
                     // keep a record on the offset between the mouse position and the container
                     // position. currentTarget will be the container that the event listener was added to:
                     evt.currentTarget.offset = {x: this.x - evt.stageX, y: this.y - evt.stageY};
-                    console.log("draggerMouseDownCallback");
+                    // console.log("draggerMouseDownCallback");
 
                     scope.zoom();
                 };
-
+                /**
+                 *
+                 * @param oSquare
+                 * @param iMidPointX
+                 * @param iMidPointY
+                 * @param iWidth
+                 * @param iHeight
+                 * @returns {*}
+                 */
                 scope.updateSquare = function(oSquare,iMidPointX,iMidPointY,iWidth,iHeight){
                     oSquare.graphics.clear().setStrokeStyle(2).beginStroke("#009036").beginFill("#43516A").drawRect(iMidPointX, iMidPointY, iWidth, iHeight);
                     oSquare.alpha = 0.5;
                     return oSquare;
                 }
-
+                /**
+                 *
+                 * @param iMidPointX
+                 * @param iMidPointY
+                 * @param iWidth
+                 * @param iHeight
+                 * @returns {createjs.Shape}
+                 */
                 scope.createSquare = function(iMidPointX,iMidPointY,iWidth,iHeight){
                     var square = new createjs.Shape();
                     square.graphics.setStrokeStyle(2).beginStroke("#009036").beginFill("#43516A").drawRect(iMidPointX, iMidPointY, iWidth, iHeight);
@@ -215,48 +250,10 @@ angular.module('wasdi.ImageEditorDirective', [])
                     return square;
                 }
 
-                // scope.calculateSquarePointsByMousePoints = function(oMouseDownPoint,oMouseLastPoint){
-                //     var oMidPoint = utilsGetMidPoint(oMouseDownPoint.stageX,oMouseDownPoint.stageY,oMouseLastPoint.stageX,oMouseLastPoint.stageY);
-                //
-                //     if(utilsIsObjectNullOrUndefined(oMidPoint))
-                //     {
-                //         return false;
-                //     }
-                //
-                //     // oMouseDownPoint=(x1,y1)
-                //     // oMouseLastPoint=(x2,y2)
-                //     // oPointA=(x2,y1)?
-                //     // oPointB=(x1,y2)?
-                //     /*
-                //     // RECTANGLE EXAMPLE :
-                //     *   (x1,y1) ------------------------- (x2,y1)
-                //     *           -------------------------
-                //     *           -------------------------
-                //     *           -------------------------
-                //     *           -------------------------
-                //     *   (x1,y2)                           (x2,y2)
-                //     *
-                //     * */
-                //     var oPointA = {
-                //             x:oMouseLastPoint.stageX,
-                //             y:oMouseDownPoint.stageY
-                //     };
-                //     var oPointB = {
-                //             x:oMouseDownPoint.stageX,
-                //             y:oMouseLastPoint.stageY
-                //     };
-                //
-                //     var fWidth = utilsCalculateDistanceBetweenTwoPoints (oMouseDownPoint.stageX,oMouseDownPoint.stageY,oPointA.x,oPointA.y);
-                //     var fHeight = utilsCalculateDistanceBetweenTwoPoints (oMouseDownPoint.stageX,oMouseDownPoint.stageY,oPointB.x,oPointB.y);
-                //
-                //     return {
-                //         x:oMidPoint.x,
-                //         y:oMidPoint.y,
-                //         width:fWidth,
-                //         height:fHeight
-                //     }
-                //
-                // };
+                /**
+                 *
+                 * @returns {boolean}
+                 */
                 scope.zoom = function(){
                     // Take the Preview Canvas Dimensions
                     var element = angular.element(document.querySelector('#imageviewcanvas'));
@@ -270,8 +267,14 @@ angular.module('wasdi.ImageEditorDirective', [])
                     // Take position and dimensions of the over rectangle
                     var iHeightSquare = scope.Square.graphics.command.h;
                     var iWidthSquare = scope.Square.graphics.command.w;
-                    var iAx = scope.Square.graphics.command.x;
-                    var iAy = scope.Square.graphics.command.y;
+                    // var iAx = scope.Square.graphics.command.x;
+                    // var iAy = scope.Square.graphics.command.y;
+                    // + Math.abs(scope.Dragger.x);
+                    // + Math.abs(scope.Dragger.y);
+                    var iAx = scope.Square.graphics.command.x + Math.abs(scope.Dragger.x);
+                    var iAy = scope.Square.graphics.command.y + Math.abs(scope.Dragger.y);
+                    // var iAx = scope.Square.graphics.command.x;
+                    // var iAy = scope.Square.graphics.command.y;
                     // var iAx = scope.Dragger.x;
                     // var iAy = scope.Dragger.y;
 
@@ -295,15 +298,27 @@ angular.module('wasdi.ImageEditorDirective', [])
                     scope.body.viewportHeight = Math.round(iHeightSquare * this.body.originalBandHeight);
 
                 };
-
+                /**
+                 *
+                 * @returns {boolean}
+                 */
                 scope.getZoomTemporaryImage = function(){
                     if(utilsIsObjectNullOrUndefined(scope.Square) === true)
                     {
                         return false;
                     }
+                    //update zoom for server request
+                    scope.zoom();
+
                     // https://codepen.io/fabiobiondi/pen/blHoy lik useful about crop images
+                    var iHeightSquare = scope.Square.graphics.command.h;
+                    var iWidthSquare = scope.Square.graphics.command.w;
+                    var iAx = scope.Square.graphics.command.x + Math.abs(scope.Dragger.x);
+                    var iAy = scope.Square.graphics.command.y + Math.abs(scope.Dragger.y);
+
                     //Crop bitmap
-                    var oSquare = new createjs.Rectangle(oMouseDownPoint.stageX,oMouseDownPoint.stageY,oMouseLastPoint.stageX-oMouseDownPoint.stageX,oMouseLastPoint.stageY-oMouseDownPoint.stageY);
+                    // var oSquare = new createjs.Rectangle(oMouseDownPoint.stageX,oMouseDownPoint.stageY,oMouseLastPoint.stageX-oMouseDownPoint.stageX,oMouseLastPoint.stageY-oMouseDownPoint.stageY);
+                    var oSquare = new createjs.Rectangle(iAx,iAy,iWidthSquare,iHeightSquare);
                     var oNewImage = scope.cropImageBySquare(scope.urlImage,oSquare);
 
                     //scale image 100% stage
@@ -313,12 +328,28 @@ angular.module('wasdi.ImageEditorDirective', [])
                     scope.Bitmap = null;
                     //add new bitmap
                     stage.addChild(oNewImage);
+
+                    // remove dragger
+                    scope.Stage.removeChild(scope.Dragger);
+                    scope.Dragger = null;
                     //Remove old Square
                     scope.Stage.removeChild(scope.Square);
                     scope.Square = null;
                     return true;
                 };
 
+                scope.clickOnGetImage = function()
+                {
+                    scope.IsVisibleMouseCursorWait = true;
+                    this.getZoomTemporaryImage();
+                    this.applyEditorPreviewImage();
+                }
+                /**
+                 *
+                 * @param oImage
+                 * @param oStage
+                 * @returns {boolean}
+                 */
                 scope.imageFillEntireStage = function(oImage,oStage)
                 {
                     if(utilsIsObjectNullOrUndefined(oImage) || utilsIsObjectNullOrUndefined(oStage))
@@ -380,6 +411,7 @@ angular.module('wasdi.ImageEditorDirective', [])
                 }
                 scope.$watch('urlImage', function (newValue, oldValue, scope)
                 {
+                    scope.IsVisibleMouseCursorWait = false;
                     if(utilsIsObjectNullOrUndefined(newValue) === false && newValue !== "empty")
                     {
                         var oBitmap =  new createjs.Bitmap(newValue);
@@ -397,6 +429,7 @@ angular.module('wasdi.ImageEditorDirective', [])
 
                     }
                     else {
+
                         scope.Stage.autoClear = true;
                         scope.Stage.removeAllChildren();
                         scope.Stage.update();

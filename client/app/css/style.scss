@@ -616,3 +616,52 @@ font-size: 2.5em !important;
     padding: 10px 10px;
   }
 }
+
+// BUTTON GROUP
+.btn-group {
+
+  .selected-mode {
+    color: $wasdi-white;
+  }
+  .deselected-mode {
+    color: #777777;
+  }
+  .btn-default {
+    min-width: 46px;
+    min-height: 34px;
+    background-color: $wasdi-blue-logo;
+    color: $wasdi-white;
+    opacity: 0.9;
+  }
+  .btn-default:hover {
+    color: $wasdi-green-logo;
+  }
+  .btn-default:disabled {
+    color: grey;
+  }
+}
+
+.btn-group-left
+{
+  z-index: 1001;
+  position: absolute;
+  top: 2px;
+  left: 20px;
+
+}
+.btn-group-right
+{
+  z-index: 1001;
+  position: absolute;
+  top: 2px;
+  right: 20px;
+
+}
+
+//CURSOR
+.wait-cursor-hover {
+  &:hover{
+    cursor: wait;
+
+  }
+}
