@@ -311,6 +311,14 @@ angular.module('wasdi.ImageEditorDirective', [])
                     scope.zoom();
 
                     // https://codepen.io/fabiobiondi/pen/blHoy lik useful about crop images
+                    console.log("------------------------- START: getZoomTemporaryImage -------------------------");
+                    console.log("scope.Square.graphics.command.h: " + scope.Square.graphics.command.h);
+                    console.log("scope.Square.graphics.command.w: " + scope.Square.graphics.command.w);
+                    console.log("scope.Square.graphics.command.x: " + scope.Square.graphics.command.x);
+                    console.log("scope.Square.graphics.command.y: " + scope.Square.graphics.command.y);
+                    console.log("scope.Dragger.x: " + scope.Dragger.x);
+                    console.log("scope.Dragger.y: " + scope.Dragger.y);
+                    console.log("------------------------- STOP: getZoomTemporaryImage -------------------------");
                     var iHeightSquare = scope.Square.graphics.command.h;
                     var iWidthSquare = scope.Square.graphics.command.w;
                     var iAx = scope.Square.graphics.command.x + Math.abs(scope.Dragger.x);
@@ -374,8 +382,8 @@ angular.module('wasdi.ImageEditorDirective', [])
                     {
                         return false;
                     }
-                    var fScaleValueX = oPositionStage.width / oPositionImageOnStage.width;
-                    var fScaleValueY = oPositionStage.height / oPositionImageOnStage.height;
+                    var fScaleValueX = Math.abs( oPositionStage.width / oPositionImageOnStage.width );
+                    var fScaleValueY = Math.abs( oPositionStage.height / oPositionImageOnStage.height );
 
                     oImage.setTransform(null,null,fScaleValueX,fScaleValueY);
                 };
