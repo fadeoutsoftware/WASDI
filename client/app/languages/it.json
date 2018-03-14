@@ -41,6 +41,7 @@
   "WORKSPACES_THEAD_OWNER":"Owner",
   "WORKSPACES_LABEL_NO_RESULTS":"No results",
   "WORKSPACES_TOOLTIP_DELETE":"Delete workspace",
+  "WORKSPACES_TOOLTIP_EDIT":"Open workspace",
   "WORKSPACES_ADD_NEW_WORKSPSACE":"You still don't have any Workspace: Create your first ",
 
   "EDITOR_TOOLTIP_SWITCH_3D_2D":"Switch 3D globe and 2D map",
