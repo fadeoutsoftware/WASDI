@@ -46,6 +46,9 @@ public class ProcessWorkspaceResource {
 			if (Utils.isNullOrEmpty(oUser.getUserId())) {
 				return aoProcessList;
 			}
+			if (Utils.isNullOrEmpty(sWorkspaceId)) {
+				return aoProcessList;
+			}
 
 			System.out.println("ProcessWorkspaceResource.GetProcessByWorkspace: process for ws " + sWorkspaceId);
 
@@ -65,6 +68,51 @@ public class ProcessWorkspaceResource {
 		}
 		catch (Exception oEx) {
 			System.out.println("ProcessWorkspaceResource.GetProcessByWorkspace: error retrieving process " + oEx.getMessage());
+			oEx.printStackTrace();
+		}
+
+		return aoProcessList;
+	}
+
+	
+	@GET
+	@Path("/byusr")
+	@Produces({"application/xml", "application/json", "text/xml"})
+	public ArrayList<ProcessWorkspaceViewModel> GetProcessByUser(@HeaderParam("x-session-token") String sSessionId) {
+		
+		Wasdi.DebugLog("ProcessWorkspaceResource.GetProcessByUser");
+
+		User oUser = Wasdi.GetUserFromSession(sSessionId);
+
+		ArrayList<ProcessWorkspaceViewModel> aoProcessList = new ArrayList<ProcessWorkspaceViewModel>();
+
+		try {
+			// Domain Check
+			if (oUser == null) {
+				return aoProcessList;
+			}
+			if (Utils.isNullOrEmpty(oUser.getUserId())) {
+				return aoProcessList;
+			}
+
+			System.out.println("ProcessWorkspaceResource.GetProcessByUser: process for User " + oUser.getUserId());
+
+			// Create repo
+			ProcessWorkspaceRepository oRepository = new ProcessWorkspaceRepository();
+
+			// Get Process List
+			List<ProcessWorkspace> aoProcess = oRepository.GetProcessByUser(oUser.getUserId());
+
+			// For each
+			for (int iProcess=0; iProcess<aoProcess.size(); iProcess++) {
+				// Create View Model
+				ProcessWorkspace oProcess = aoProcess.get(iProcess);
+				aoProcessList.add(buildProcessWorkspaceViewModel(oProcess));
+			}
+
+		}
+		catch (Exception oEx) {
+			System.out.println("ProcessWorkspaceResource.GetProcessByUser: error retrieving process " + oEx.getMessage());
 			oEx.printStackTrace();
 		}
 
@@ -107,6 +155,11 @@ public class ProcessWorkspaceResource {
 			if (Utils.isNullOrEmpty(oUser.getUserId())) {
 				return aoProcessList;
 			}
+			
+			if (Utils.isNullOrEmpty(sWorkspaceId)) {
+				return aoProcessList;
+			}
+
 
 			System.out.println("ProcessWorkspaceResource.GetProcessByWorkspace: process for ws " + sWorkspaceId);
 
@@ -126,6 +179,50 @@ public class ProcessWorkspaceResource {
 		}
 		catch (Exception oEx) {
 			System.out.println("ProcessWorkspaceResource.GetProcessByWorkspace: error retrieving process " + oEx.getMessage());
+			oEx.printStackTrace();
+		}
+
+		return aoProcessList;
+	}
+	
+	@GET
+	@Path("/lastbyusr")
+	@Produces({"application/xml", "application/json", "text/xml"})
+	public ArrayList<ProcessWorkspaceViewModel> GetLastProcessByUser(@HeaderParam("x-session-token") String sSessionId) {
+		
+		Wasdi.DebugLog("ProcessWorkspaceResource.GetLastProcessByUser");
+
+		User oUser = Wasdi.GetUserFromSession(sSessionId);
+
+		ArrayList<ProcessWorkspaceViewModel> aoProcessList = new ArrayList<ProcessWorkspaceViewModel>();
+
+		try {
+			// Domain Check
+			if (oUser == null) {
+				return aoProcessList;
+			}
+			if (Utils.isNullOrEmpty(oUser.getUserId())) {
+				return aoProcessList;
+			}
+
+			System.out.println("ProcessWorkspaceResource.GetLastProcessByUser: process for user " + oUser.getUserId());
+
+			// Create repo
+			ProcessWorkspaceRepository oRepository = new ProcessWorkspaceRepository();
+
+			// Get Process List
+			List<ProcessWorkspace> aoProcess = oRepository.GetLastProcessByUser(oUser.getUserId());
+
+			// For each
+			for (int iProcess=0; iProcess<aoProcess.size(); iProcess++) {
+				// Create View Model
+				ProcessWorkspace oProcess = aoProcess.get(iProcess);
+				aoProcessList.add(buildProcessWorkspaceViewModel(oProcess));
+			}
+
+		}
+		catch (Exception oEx) {
+			System.out.println("ProcessWorkspaceResource.GetLastProcessByUser: error retrieving process " + oEx.getMessage());
 			oEx.printStackTrace();
 		}
 
