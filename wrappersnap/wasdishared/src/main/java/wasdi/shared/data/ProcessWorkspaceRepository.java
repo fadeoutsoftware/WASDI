@@ -96,6 +96,22 @@ public class ProcessWorkspaceRepository extends MongoRepository {
         return aoReturnList;
     }
     
+    public List<ProcessWorkspace> GetProcessByUser(String sUserId) {
+
+        final ArrayList<ProcessWorkspace> aoReturnList = new ArrayList<ProcessWorkspace>();
+        try {
+
+            FindIterable<Document> oWSDocuments = getCollection("processworkpsace").find(new Document("userId", sUserId));
+            fillList(aoReturnList, oWSDocuments);
+
+        } catch (Exception oEx) {
+            oEx.printStackTrace();
+        }
+
+        return aoReturnList;
+    }
+
+    
     public List<ProcessWorkspace> GetQueuedProcess() {
 
         final ArrayList<ProcessWorkspace> aoReturnList = new ArrayList<ProcessWorkspace>();
@@ -174,6 +190,25 @@ public class ProcessWorkspaceRepository extends MongoRepository {
         return aoReturnList;
     }
 
+    public List<ProcessWorkspace> GetLastProcessByUser(String sUserId) {
+
+        final ArrayList<ProcessWorkspace> aoReturnList = new ArrayList<ProcessWorkspace>();
+        try {
+
+            FindIterable<Document> oWSDocuments = getCollection("processworkpsace").find(new Document("userId", sUserId)).sort(new Document("_id", -1)).limit(5);
+            fillList(aoReturnList, oWSDocuments);
+
+        } catch (Exception oEx) {
+            oEx.printStackTrace();
+        }
+        
+        // The client expects the most recent last
+        Collections.reverse(aoReturnList);
+
+        return aoReturnList;
+    }
+    
+    
     public ProcessWorkspace GetProcessByProductName(String sProductName) {
         ProcessWorkspace oProcessWorkspace = null;
         try {
