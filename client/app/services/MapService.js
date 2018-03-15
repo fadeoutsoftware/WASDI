@@ -616,6 +616,76 @@ service('MapService', ['$http','$rootScope', 'ConstantsService', function ($http
         catch (e) {
             console.log(e);
         }
-   };
+    };
 
+    this.isProductGeoreferenced = function(boundingBox, geoserverBoundindBox)
+    {
+        if( ( utilsIsObjectNullOrUndefined(boundingBox) === true ) || ( utilsIsObjectNullOrUndefined(geoserverBoundindBox) === true) )
+        {
+            return false;
+        }
+        var oGeoserverBoundingBox = this.parseGeoserverBoundingBox(geoserverBoundindBox);
+        var asBoundingBox = this.fromBboxToRectangleArray(boundingBox);
+        //it takes the center of the bounding box
+        var oMidPointGeoserverBoundingBox = utilsGetMidPoint(oGeoserverBoundingBox.maxx,oGeoserverBoundingBox.maxy,oGeoserverBoundingBox.minx,oGeoserverBoundingBox.miny);
+        var oMidPointBoundingBox = utilsGetMidPoint( parseInt(asBoundingBox[0]), parseInt(asBoundingBox[1]), parseInt(asBoundingBox[4]), parseInt(asBoundingBox[5]));
+        //
+        var isMidPointGeoserverBoundingBoxInBoundingBox = utilsIsPointInsideSquare(oMidPointGeoserverBoundingBox.x,oMidPointGeoserverBoundingBox.y,
+                                                                                    parseInt(asBoundingBox[0]),parseInt(asBoundingBox[1]),parseInt(asBoundingBox[4]), parseInt(asBoundingBox[5]) );
+        var isMidPointBoundingBoxGeoserverBoundingBox = utilsIsPointInsideSquare(oMidPointBoundingBox.x,oMidPointBoundingBox.y,oGeoserverBoundingBox.maxx,oGeoserverBoundingBox.maxy,oGeoserverBoundingBox.minx,oGeoserverBoundingBox.miny);
+        if( ( isMidPointBoundingBoxGeoserverBoundingBox === true ) && ( isMidPointGeoserverBoundingBoxInBoundingBox === true ) )
+        {
+            return true;
+        }
+        return false;
+    };
+
+    /**
+     *
+     * @param geoserverBoundingBox
+     * @returns {null}
+     */
+    this.parseGeoserverBoundingBox = function(geoserverBoundingBox){
+        // Check the input
+        if (utilsIsObjectNullOrUndefined(geoserverBoundingBox)) {
+            console.log("geoserverBoundingBox: geoserverBoundingBox is null");
+            return null;
+        }
+
+        // Parse the bounding box
+        geoserverBoundingBox = geoserverBoundingBox.replace(/\n/g,"");
+        var oBoundingBox = JSON.parse(geoserverBoundingBox);
+        if(utilsIsObjectNullOrUndefined(oBoundingBox)) {
+            console.log("GlobeService.zoomBandImageOnGeoserverBoundingBox: parsing bouning box is null");
+            return null;
+        }
+        return oBoundingBox;
+    };
+    /**
+     *
+     * @param bbox
+     * @returns {*}
+     */
+    this.fromBboxToRectangleArray = function (bbox) {
+
+        // skip if there isn't the product bounding box
+        if(utilsIsObjectNullOrUndefined(bbox) === true ) return null;
+
+        var aiInvertedArraySplit = [];
+        var  aoArraySplit;
+
+        // Split bbox string
+        aoArraySplit = bbox.split(",");
+
+        var iArraySplitLength = aoArraySplit.length;
+
+        if(iArraySplitLength !== 10) return null;
+
+        for(var iIndex = 0; iIndex < iArraySplitLength-1; iIndex = iIndex + 2){
+            aiInvertedArraySplit.push(aoArraySplit[iIndex+1]);
+            aiInvertedArraySplit.push(aoArraySplit[iIndex]);
+        }
+
+        return aiInvertedArraySplit;
+    };
 }]);
