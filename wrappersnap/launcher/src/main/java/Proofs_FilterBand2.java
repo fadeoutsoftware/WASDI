@@ -111,7 +111,7 @@ public class Proofs_FilterBand2 {
 		
 //		d = new Dimension(600, 600);
 		if (vp==null) vp = new Rectangle(new Point(0, 0), raster.getRasterSize());
-		img = manager.buildImage2(raster, d, vp);				
+		img = manager.buildImage(raster, d, vp);				
 		ImageIO.write(img, "jpg", new File("C:\\Temp\\wasdi\\" + filteredBand.getName() + "_" + suffix + ".jpg"));		
 		
 	}
