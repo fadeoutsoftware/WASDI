@@ -43,6 +43,10 @@ angular.module('wasdi.ImageEditorDirective', [])
                 };
 
                 var bItIsClicked = false;
+
+                // Flag to know if the user is using zoom functionality
+                scope.m_bIsActiveZoom = false;
+
                 var oMouseDownPoint ={
                     stageX:"",
                     stageY:""
@@ -54,6 +58,8 @@ angular.module('wasdi.ImageEditorDirective', [])
 
                 // var oController = this;
                 stage.on("stagemousedown", function(evt) {
+
+                    if (scope.m_bIsActiveZoom==false) return;
 
                     if( scope.isNotPointInsideDraggerSquare(evt.stageX,evt.stageY) )
                     {
@@ -68,6 +74,9 @@ angular.module('wasdi.ImageEditorDirective', [])
                 });
 
                 stage.on("stagemouseup", function(evt) {
+
+                    if (scope.m_bIsActiveZoom==false) return;
+
                     bItIsClicked = false;
                     if( scope.isNotPointInsideDraggerSquare(evt.stageX,evt.stageY) )
                     {
@@ -79,10 +88,16 @@ angular.module('wasdi.ImageEditorDirective', [])
                         scope.zoom();
                     }
 
+                    scope.m_bIsActiveZoom = false;
+                    scope.clickOnGetImage();
+
                 });
 
 
                 stage.on("stagemousemove", function(evt) {
+
+                    if (scope.m_bIsActiveZoom==false) return;
+
                     if( (bItIsClicked === true)  )
                     {
                         // console.log("stagemousemove")
@@ -126,6 +141,19 @@ angular.module('wasdi.ImageEditorDirective', [])
                     }
                 });
 
+                scope.clickOnZoom = function () {
+                    scope.m_bIsActiveZoom = true;
+                };
+
+                scope.clickOnResetZoom = function () {
+                    scope.body.viewportX = 0;
+                    scope.body.viewportY = 0;
+                    scope.body.viewportWidth = scope.body.originalBandWidth;
+                    scope.body.viewportHeight = scope.body.originalBandHeight;
+
+                    scope.clickOnGetDefaultImage();
+                };
+
                 scope.isNotPointInsideDraggerSquare = function(x, y) {
                     if( utilsIsObjectNullOrUndefined(scope.Square ) === true || utilsIsObjectNullOrUndefined(scope.Dragger) === true   )
                     {
@@ -153,12 +181,12 @@ angular.module('wasdi.ImageEditorDirective', [])
                         //SQUARE POINTS
                         oPointASquare = {
                             stageX:iXSquare,
-                            stageY:iYSquare ,
+                            stageY:iYSquare
                         };
 
                         oPointBSquare = {
                             stageX:(iXSquare + oDraggerBoundsRectangle.w),
-                            stageY:(iYSquare + oDraggerBoundsRectangle.h),
+                            stageY:(iYSquare + oDraggerBoundsRectangle.h)
                         };
                         // oPointASquare = {
                         //     stageX:scope.Dragger.x,
@@ -181,18 +209,15 @@ angular.module('wasdi.ImageEditorDirective', [])
 
 
                 stage.update();
+
                 //INIT SOME SCOPE VARIABLE
                 scope.Square = null;
                 scope.Dragger = null;
                 scope.Stage = stage;
                 scope.Bitmap = oBitmap;
                 scope.Dragger = null;
-                scope.IsVisibleMouseCursorWait = false;
-                // scope.draggerPressUpCallback = function(evt){
-                //     // scope.Square.graphics.command.x =  scope.Square.graphics.command.x + evt.currentTarget.x;
-                //     // scope.Square.graphics.command.y =  scope.Square.graphics.command.y + evt.currentTarget.y;
-                //     stage.update();
-                // };
+                scope.m_bIsVisibleMouseCursorWait = false;
+
                 /**
                  *
                  * @param evt
@@ -234,7 +259,7 @@ angular.module('wasdi.ImageEditorDirective', [])
                     oSquare.graphics.clear().setStrokeStyle(2).beginStroke("#009036").beginFill("#43516A").drawRect(iMidPointX, iMidPointY, iWidth, iHeight);
                     oSquare.alpha = 0.5;
                     return oSquare;
-                }
+                };
                 /**
                  *
                  * @param iMidPointX
@@ -248,7 +273,7 @@ angular.module('wasdi.ImageEditorDirective', [])
                     square.graphics.setStrokeStyle(2).beginStroke("#009036").beginFill("#43516A").drawRect(iMidPointX, iMidPointY, iWidth, iHeight);
                     square.alpha = 0.5;
                     return square;
-                }
+                };
 
                 /**
                  *
@@ -267,16 +292,22 @@ angular.module('wasdi.ImageEditorDirective', [])
                     // Take position and dimensions of the over rectangle
                     var iHeightSquare = scope.Square.graphics.command.h;
                     var iWidthSquare = scope.Square.graphics.command.w;
-                    // var iAx = scope.Square.graphics.command.x;
-                    // var iAy = scope.Square.graphics.command.y;
-                    // + Math.abs(scope.Dragger.x);
-                    // + Math.abs(scope.Dragger.y);
                     var iAx = scope.Square.graphics.command.x + Math.abs(scope.Dragger.x);
                     var iAy = scope.Square.graphics.command.y + Math.abs(scope.Dragger.y);
-                    // var iAx = scope.Square.graphics.command.x;
-                    // var iAy = scope.Square.graphics.command.y;
-                    // var iAx = scope.Dragger.x;
-                    // var iAy = scope.Dragger.y;
+
+                    // Consider always the ViewPort with origin point on top left and positive dimensions
+                    if (iHeightSquare<0) {
+                        iAy = iAy + iHeightSquare;
+                        iHeightSquare = Math.abs(iHeightSquare);
+                    }
+
+                    if (iWidthSquare<0) {
+                        iAx = iAx + iWidthSquare;
+                        iWidthSquare = Math.abs(iWidthSquare);
+                    }
+
+                    if (iAx-Math.trunc(iAx)>0) iWidthSquare = iWidthSquare+1;
+                    if (iAy-Math.trunc(iAy)>0) iHeightSquare = iHeightSquare+1;
 
                     // Data check
                     if (iCanvasHeight == 0 || iCanvasWidth == 0) return;
@@ -286,16 +317,36 @@ angular.module('wasdi.ImageEditorDirective', [])
                     if (iWidthSquare <= 0) iWidthSquare = 1;
 
                     // Calculate Percentage
-                    iHeightSquare = iHeightSquare/iCanvasHeight;
-                    iWidthSquare = iWidthSquare/iCanvasWidth;
-                    iAx = iAx/iCanvasWidth;
-                    iAy = iAy/iCanvasHeight;
+                    var iHeightPercentage = iHeightSquare/iCanvasHeight;
+                    var iWidthPercentage = iWidthSquare/iCanvasWidth;
+                    var iXPercentage = iAx/iCanvasWidth;
+                    var iYPercentage = iAy/iCanvasHeight;
 
                     // Apply to the real band dimension
-                    scope.body.viewportX = Math.round(iAx * this.body.originalBandWidth);
-                    scope.body.viewportY = Math.round(iAy *  this.body.originalBandHeight);
-                    scope.body.viewportWidth = Math.round(iWidthSquare * this.body.originalBandWidth);
-                    scope.body.viewportHeight = Math.round(iHeightSquare * this.body.originalBandHeight);
+                    scope.body.viewportX = scope.body.viewportX + Math.floor(iXPercentage * this.body.viewportWidth);
+                    scope.body.viewportY = scope.body.viewportY + Math.floor(iYPercentage *  this.body.viewportHeight);
+                    scope.body.viewportWidth = Math.ceil(iWidthPercentage * this.body.viewportWidth);
+                    scope.body.viewportHeight = Math.ceil(iHeightPercentage * this.body.viewportHeight);
+
+                    // Fix Image Ratio
+                    var dOriginalRatio = this.body.originalBandHeight / this.body.originalBandWidth;
+
+
+                    if ( (scope.body.viewportWidth*dOriginalRatio) > (scope.body.viewportHeight / dOriginalRatio) )  {
+                        scope.body.viewportHeight = Math.ceil(scope.body.viewportWidth * dOriginalRatio);
+                    }
+                    else {
+                        scope.body.viewportWidth = Math.ceil(scope.body.viewportHeight / dOriginalRatio);
+                    }
+
+                    console.log("------------------------- START: zoom -------------------------");
+                    console.log("this.body.originalBandHeight: " + this.body.originalBandHeight);
+                    console.log("this.body.originalBandWidth: " + this.body.originalBandWidth);
+                    console.log("scope.body.viewportX: " + scope.body.viewportX);
+                    console.log("scope.body.viewportY: " + scope.body.viewportY);
+                    console.log("scope.body.viewportWidth: " + scope.body.viewportWidth);
+                    console.log("scope.body.viewportHeight: " + scope.body.viewportHeight);
+                    console.log("------------------------- STOP: zoom -------------------------");
 
                 };
                 /**
@@ -324,6 +375,33 @@ angular.module('wasdi.ImageEditorDirective', [])
                     var iAx = scope.Square.graphics.command.x + Math.abs(scope.Dragger.x);
                     var iAy = scope.Square.graphics.command.y + Math.abs(scope.Dragger.y);
 
+                    // Consider always the ViewPort with origin point on top left and positive dimensions
+                    if (iHeightSquare<0) {
+                        iAy = iAy + iHeightSquare;
+                        iHeightSquare = Math.abs(iHeightSquare);
+                    }
+
+                    if (iWidthSquare<0) {
+                        iAx = iAx + iWidthSquare;
+                        iWidthSquare = Math.abs(iWidthSquare);
+                    }
+
+                    if (iAx-Math.trunc(iAx)>0) iWidthSquare = iWidthSquare+1;
+                    if (iAy-Math.trunc(iAy)>0) iHeightSquare = iHeightSquare+1;
+
+                    // More inclusive arrotondation
+                    iAx = Math.floor(iAx);
+                    iAy = Math.floor(iAy);
+
+                    // Fix Image Ratio
+                    var dOriginalRatio = this.body.originalBandHeight / this.body.originalBandWidth;
+                    if (iWidthSquare * dOriginalRatio > iHeightSquare / dOriginalRatio)  {
+                        iHeightSquare = Math.ceil(iWidthSquare * dOriginalRatio);
+                    }
+                    else {
+                        iWidthSquare = Math.ceil(iHeightSquare / dOriginalRatio);
+                    }
+
                     //Crop bitmap
                     // var oSquare = new createjs.Rectangle(oMouseDownPoint.stageX,oMouseDownPoint.stageY,oMouseLastPoint.stageX-oMouseDownPoint.stageX,oMouseLastPoint.stageY-oMouseDownPoint.stageY);
                     var oSquare = new createjs.Rectangle(iAx,iAy,iWidthSquare,iHeightSquare);
@@ -350,7 +428,7 @@ angular.module('wasdi.ImageEditorDirective', [])
                  */
                 scope.clickOnGetImage = function()
                 {
-                    scope.IsVisibleMouseCursorWait = true;
+                    scope.m_bIsVisibleMouseCursorWait = true;
                     this.getZoomTemporaryImage();
                     this.applyEditorPreviewImage();
                 };
@@ -360,7 +438,7 @@ angular.module('wasdi.ImageEditorDirective', [])
                  */
                 scope.clickOnGetDefaultImage=function()
                 {
-                    scope.IsVisibleMouseCursorWait = true;
+                    scope.m_bIsVisibleMouseCursorWait = true;
                     scope.getDefaultImage();
                 };
                 /**
@@ -410,22 +488,6 @@ angular.module('wasdi.ImageEditorDirective', [])
 
                 };
 
-                // scope.removeElementToStage = function(oElement,oStage){
-                //     if(utilsIsObjectNullOrUndefined(oElement) === true)
-                //     {
-                //         return false;
-                //     }
-                //     oStage.removeChild(oElement);
-                //     oElement = null;
-                //     return true;
-                // };
-
-                // scope.isPointInsideSquare = function(oPoint,oPointARectangle,oPointBRectangle)
-                // {
-                //     var bReturnValue = utilsIsPointInRectangle(oPoint.stageX,oPoint.stageY,oPointARectangle.stageX,oPointBRectangle.stageX,oPointARectangle.stageY,oPointBRectangle.stageY)
-                //     // console.log("Point true/false:" + bReturnValue);
-                //     return bReturnValue;
-                // };
                 /**
                  *
                  */
@@ -435,34 +497,23 @@ angular.module('wasdi.ImageEditorDirective', [])
 
                     scope.Stage.removeChild(scope.Dragger);
                     scope.Dragger = null;
-                }
+                };
 
                 scope.$watch('urlImage', function (newValue, oldValue, scope)
                 {
-                    scope.IsVisibleMouseCursorWait = false;
+                    scope.m_bIsVisibleMouseCursorWait = false;
+
+                    scope.Stage.removeAllChildren();
+
                     if(utilsIsObjectNullOrUndefined(newValue) === false && newValue !== "empty")
                     {
                         var oBitmap =  new createjs.Bitmap(newValue);
                         scope.Bitmap = oBitmap;
                         scope.Stage.addChild(oBitmap);
-
-                        // scope.removeElementToStage(scope.Square,scope.Stage);
                         scope.removeSquareAndDraggerContainer();
-                        // scope.Stage.removeChild(scope.Square);
-                        // scope.Square = null;
-                        //
-                        // scope.Stage.removeChild(scope.Dragger);
-                        // scope.Dragger = null;
-                        // scope.Stage.update();
-
-                    }
-                    else {
-
-                        scope.Stage.autoClear = true;
-                        scope.Stage.removeAllChildren();
-                        scope.Stage.update();
                     }
 
+                    scope.Stage.update();
                 });
             }
         };
