@@ -1,5 +1,7 @@
 package wasdi.shared.viewmodels;
 
+import java.util.List;
+
 public class BandImageViewModel {
 
 	private String productFileName;
@@ -8,6 +10,7 @@ public class BandImageViewModel {
 	private int filterIterationCount=1;
 	private int vp_x, vp_y, vp_w, vp_h;
 	private int img_w, img_h;
+	private List<ProductMaskViewModel> productMasks;
 	public String getProductFileName() {
 		return productFileName;
 	}
@@ -67,5 +70,11 @@ public class BandImageViewModel {
 	}
 	public void setImg_h(int img_h) {
 		this.img_h = img_h;
+	}
+	public List<ProductMaskViewModel> getProductMasks() {
+		return productMasks;
+	}
+	public void setProductMasks(List<ProductMaskViewModel> productMasks) {
+		this.productMasks = productMasks;
 	}
 }

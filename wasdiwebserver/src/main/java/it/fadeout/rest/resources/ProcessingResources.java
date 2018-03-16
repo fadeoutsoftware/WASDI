@@ -1,5 +1,6 @@
 package it.fadeout.rest.resources;
 
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
@@ -50,7 +51,9 @@ import org.apache.commons.io.IOUtils;
 import org.esa.snap.core.dataio.ProductIO;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.FilterBand;
+import org.esa.snap.core.datamodel.Mask;
 import org.esa.snap.core.datamodel.Product;
+import org.esa.snap.core.datamodel.ProductNodeGroup;
 import org.esa.snap.core.datamodel.RasterDataNode;
 import org.esa.snap.core.gpf.annotations.Parameter;
 import org.esa.snap.rcp.imgfilter.FilteredBandAction;
@@ -90,6 +93,7 @@ import wasdi.shared.utils.BandImageManager;
 import wasdi.shared.utils.SerializationUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.BandImageViewModel;
+import wasdi.shared.viewmodels.ProductMaskViewModel;
 import wasdi.shared.viewmodels.SnapOperatorParameterViewModel;
 import wasdi.shared.viewmodels.SnapWorkflowViewModel;
 
@@ -459,6 +463,38 @@ public class ProcessingResources {
 		return filtersMap;
 	}
 	
+	@GET
+	@Path("/productmasks")
+	@Produces({"application/json"})
+	public ArrayList<ProductMaskViewModel> getProductMasks(@HeaderParam("x-session-token") String sSessionId,
+			@QueryParam("file") String productFile, @QueryParam("band") String bandName) throws Exception {
+		
+		Wasdi.DebugLog("ProcessingResources.getProductMasks");
+		
+		ArrayList<ProductMaskViewModel> masks = new ArrayList<ProductMaskViewModel>();
+		
+		Product product = ProductIO.readProduct(productFile);
+		Band band = product.getBand(bandName);
+		
+		final ProductNodeGroup<Mask> maskGroup = product.getMaskGroup();
+		for (int i = 0; i < maskGroup.getNodeCount(); i++) {
+			final Mask mask = maskGroup.get(i);
+			if (mask.getRasterWidth() == band.getRasterWidth() &&
+				mask.getRasterHeight() == band.getRasterHeight()) {
+				ProductMaskViewModel vm = new ProductMaskViewModel();
+				vm.setName(mask.getName());
+				vm.setDescription(mask.getDescription());
+				vm.setMaskType(mask.getImageType().getName());
+				vm.setColorRed(mask.getImageColor().getRed());
+				vm.setColorGreen(mask.getImageColor().getGreen());
+				vm.setColorBlue(mask.getImageColor().getBlue());
+				masks.add(vm);
+			}
+		}
+
+		return masks;
+	}
+
 	@POST
 	@Path("/bandimage")
 	@Produces(MediaType.APPLICATION_OCTET_STREAM)
@@ -469,8 +505,8 @@ public class ProcessingResources {
 		Wasdi.DebugLog("ProcessingResources.getBandImage");
 
 		// Check user session
-		String userId = AcceptedUserAndSession(sSessionId);
-		if (Utils.isNullOrEmpty(userId)) return Response.status(401).build();
+//		String userId = AcceptedUserAndSession(sSessionId);
+//		if (Utils.isNullOrEmpty(userId)) return Response.status(401).build();
 
 		
 		// Init the registry for JAI
@@ -492,10 +528,10 @@ public class ProcessingResources {
 		
 		
 		// Get Download File Path
-        String downloadPath = m_oServletConfig.getInitParameter("DownloadRootPath");
-        File productFile = new File(new File(new File(downloadPath, userId), workspace), model.getProductFileName());
+//        String downloadPath = m_oServletConfig.getInitParameter("DownloadRootPath");
+//        File productFile = new File(new File(new File(downloadPath, userId), workspace), model.getProductFileName());
 		
-//		File productFile = new File("/home/doy/tmp/wasdi/tmp/S2B_MSIL1C_20180117T102339_N0206_R065_T32TMQ_20180117T122826.zip");
+		File productFile = new File("/home/doy/tmp/wasdi/tmp/S2B_MSIL1C_20180117T102339_N0206_R065_T32TMQ_20180117T122826.zip");
         
         if (!productFile.exists()) {
         	System.out.println("ProcessingResource.getBandImage: FILE NOT FOUND: " + productFile.getAbsolutePath());
@@ -537,9 +573,24 @@ public class ProcessingResources {
 		Rectangle vp = new Rectangle(model.getVp_x(), model.getVp_y(), model.getVp_w(), model.getVp_h());
 		Dimension imgSize = new Dimension(model.getImg_w(), model.getImg_h());
 		
+		List<ProductMaskViewModel> productMasksModels = model.getProductMasks();
+		if (productMasksModels!=null) {
+			for (ProductMaskViewModel maskModel : productMasksModels) {
+				Mask mask = oSNAPProduct.getMaskGroup().get(maskModel.getName());
+				if (mask == null) {
+					Wasdi.DebugLog("ProcessingResources.getBandImage: cannot find mask by name: " + maskModel.getName());
+				} else {
+					//set the user specified color
+					mask.setImageColor(new Color(maskModel.getColorRed(), maskModel.getColorGreen(), maskModel.getColorBlue()));
+					mask.setImageTransparency(maskModel.getTransparency());
+					raster.getOverlayMaskGroup().add(mask);
+				}
+			}
+		}
+		
 		BufferedImage img;
 		try {
-			img = manager.buildImage2(raster, imgSize, vp);
+			img = manager.buildImageWithMasks(raster, imgSize, vp);
 		} catch (Exception e) {
 			e.printStackTrace();
 			return Response.status(500).build();
