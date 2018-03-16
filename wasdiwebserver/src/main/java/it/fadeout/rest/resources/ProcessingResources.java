@@ -505,8 +505,8 @@ public class ProcessingResources {
 		Wasdi.DebugLog("ProcessingResources.getBandImage");
 
 		// Check user session
-//		String userId = AcceptedUserAndSession(sSessionId);
-//		if (Utils.isNullOrEmpty(userId)) return Response.status(401).build();
+		String userId = AcceptedUserAndSession(sSessionId);
+		if (Utils.isNullOrEmpty(userId)) return Response.status(401).build();
 
 		
 		// Init the registry for JAI
@@ -528,10 +528,10 @@ public class ProcessingResources {
 		
 		
 		// Get Download File Path
-//        String downloadPath = m_oServletConfig.getInitParameter("DownloadRootPath");
-//        File productFile = new File(new File(new File(downloadPath, userId), workspace), model.getProductFileName());
+        String downloadPath = m_oServletConfig.getInitParameter("DownloadRootPath");
+        File productFile = new File(new File(new File(downloadPath, userId), workspace), model.getProductFileName());
 		
-		File productFile = new File("/home/doy/tmp/wasdi/tmp/S2B_MSIL1C_20180117T102339_N0206_R065_T32TMQ_20180117T122826.zip");
+//		File productFile = new File("/home/doy/tmp/wasdi/tmp/S2B_MSIL1C_20180117T102339_N0206_R065_T32TMQ_20180117T122826.zip");
         
         if (!productFile.exists()) {
         	System.out.println("ProcessingResource.getBandImage: FILE NOT FOUND: " + productFile.getAbsolutePath());
