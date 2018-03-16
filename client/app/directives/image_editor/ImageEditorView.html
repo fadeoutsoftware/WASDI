@@ -1,13 +1,13 @@
-<div class="image-editor-container" ng-class="{ 'wait-cursor-hover':IsVisibleMouseCursorWait === true }">
+<div class="image-editor-container" ng-class="{ 'wait-cursor-hover':m_bIsVisibleMouseCursorWait === true, 'crosshair-cursor-hover':m_bIsActiveZoom === true }">
     <!--<div class="loadIcon" ng-hide="isLoaded">-->
         <!--<invader></invader>-->
     <!--</div>-->
     <div class="btn-group btn-group-right" role="group" >
-        <button type="button" class="btn btn-default" ng-click="clickOnGetImage()">
+        <button type="button" class="btn btn-default" ng-class="{'zoomButtonActive': m_bIsActiveZoom}" ng-click="clickOnZoom()">
             <i class="fa fa-search-plus" aria-hidden="true"></i>
         </button>
         <button type="button" class="btn btn-default"  title="{{'EDITOR_TOOLTIP_RESET_ZOOM'|translate}}"
-                 ng-click="clickOnGetDefaultImage()">
+                 ng-click="clickOnResetZoom()">
             <i class="fa fa-search-minus" aria-hidden="true"></i>
         </button>
     </div>

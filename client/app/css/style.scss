@@ -662,6 +662,11 @@ font-size: 2.5em !important;
 .wait-cursor-hover {
   &:hover{
     cursor: wait;
+  }
+}
 
+.crosshair-cursor-hover {
+  &:hover{
+    cursor: crosshair;
   }
 }

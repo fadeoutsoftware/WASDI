@@ -36,6 +36,8 @@ var EditorController = (function () {
         this.m_bIsLoadedPreviewBandImage = true;
         //Flag to know if the Band Image is loaded or not (2D - Editor Mode)
         this.m_bIsLoadedViewBandImage = true;
+        //Flag to know if the actual band Image is coming from a Zoom or if it is a new image
+        this.m_bIsEditorZoomingOnExistingImage = false;
         //Url of the Preview Band Image (2D - Editor Mode)
         this.m_sPreviewUrlSelectedBand = "";
         // this.m_sPreviewUrlSelectedBand = "assets/img/test_image.jpg";
@@ -435,6 +437,8 @@ var EditorController = (function () {
         var oGetBandImageBody = this.createBodyForProcessingBandImage(sFileName, this.m_oActiveBand.name,null,
             this.m_oImagePreviewDirectivePayload.viewportX, this.m_oImagePreviewDirectivePayload.viewportY,this.m_oImagePreviewDirectivePayload.viewportWidth,
             this.m_oImagePreviewDirectivePayload.viewportHeight,widthMapContainer,heightMapContainer);
+
+        this.m_bIsEditorZoomingOnExistingImage = true;
 
         // Remove the image from visibile layers: it will be added later by processingGetBandImage
         this.removeBandFromVisibleList(this.m_oActiveBand);
@@ -971,6 +975,12 @@ var EditorController = (function () {
         var oController = this;
         this.m_bIsLoadedViewBandImage = false;
         this.m_oFilterService.getProductBand(oBody,workspaceId).success(function (data, status) {
+
+            // Anyway this is not more a zoom.
+            oController.m_bIsEditorZoomingOnExistingImage = false;
+            // Stop the waiter
+            oController.m_bIsLoadedViewBandImage = true;
+
             if (data != null)
             {
                 if (data != undefined)
@@ -979,9 +989,6 @@ var EditorController = (function () {
                     var blob = new Blob([data], {type: "octet/stream"});
                     var objectUrl = URL.createObjectURL(blob);
                     oController.m_sViewUrlSelectedBand = objectUrl;
-
-                    // Stop the waiter
-                    oController.m_bIsLoadedViewBandImage = true;
 
                     // Set the node as selected
                     var sNodeID = oController.m_oActiveBand.productName + "_" + oController.m_oActiveBand.name;
@@ -1003,6 +1010,8 @@ var EditorController = (function () {
             // Clear the editor
             oController.clearImageEditor();
 
+            // Anyway this is not more a zoom.
+            oController.m_bIsEditorZoomingOnExistingImage = false;
             // Stop the waiter
             oController.m_bIsLoadedViewBandImage = true;
         });
