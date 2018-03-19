@@ -16,6 +16,7 @@ import wasdi.shared.data.DownloadedFilesRepository;
 import wasdi.shared.data.ProductWorkspaceRepository;
 import wasdi.shared.utils.SerializationUtils;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.viewmodels.BandViewModel;
 import wasdi.shared.viewmodels.MetadataViewModel;
 import wasdi.shared.viewmodels.ProductViewModel;
 import wasdi.snapopearations.ReadProduct;
@@ -45,7 +46,12 @@ public class UpdateBandViewModels {
         Engine.start(false);
         
         System.out.println("Create Repository");
+        
+        UpdateBandViewModels.UpdateBandViewModelsCycle();
 
+	}
+	
+	public static void UpdateBandViewModelsCycle() {
 		// Create repo
 		ProductWorkspaceRepository oProductWorkspaceRepository = new ProductWorkspaceRepository();
 		DownloadedFilesRepository oDownloadedFilesRepository = new DownloadedFilesRepository();
@@ -128,6 +134,14 @@ public class UpdateBandViewModels {
                 	System.out.println("Metadata Already Serialized");
                 }
                 
+                System.out.println("Check Band Dimensions. Bands count = " + oDownloadedFileEntity.getProductViewModel().getBandsGroups().getBands().size());
+                
+                for (int iBands = 0; iBands < oDownloadedFileEntity.getProductViewModel().getBandsGroups().getBands().size(); iBands++) {
+                	BandViewModel oBandVM = oDownloadedFileEntity.getProductViewModel().getBandsGroups().getBands().get(iBands);
+                	if (oBandVM.getWidth() == 0 || oBandVM.getHeight() == 0) {
+                		System.out.println("PRODUCT " +oDownloadedFileEntity.getProductViewModel().getName() + " BAND " + oBandVM.getName() + " DIMENSION PROBLEMS [W, H] = [" + oBandVM.getWidth() + ", " + oBandVM.getHeight()+ "]");
+                	}
+                }
                 
                 oDownloadedFileEntity.getProductViewModel().setMetadata(null);
                 oDownloadedFilesRepository.UpdateDownloadedFile(oDownloadedFileEntity);
