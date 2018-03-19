@@ -638,12 +638,25 @@ service('MapService', ['$http','$rootScope', 'ConstantsService', function ($http
 
         if ( utilsIsObjectNullOrUndefined(asBoundingBox)) return false;
 
+        var aoLatLngs = [];
+
+        for (var iPoints = 0; iPoints<asBoundingBox.length-2; iPoints+=2) {
+            var oLatLon = [parseFloat(asBoundingBox[iPoints+1]), parseFloat(asBoundingBox[iPoints])];
+            aoLatLngs.push(oLatLon);
+        }
+
+        var oBBPolygon = L.polygon(aoLatLngs, {color: 'red'});
+
+        var oBBCenter = oBBPolygon.getBounds().getCenter();
+
         //it takes the center of the bounding box
         var oMidPointGeoserverBoundingBox = utilsGetMidPoint(oGeoserverBoundingBox.maxx,oGeoserverBoundingBox.maxy,oGeoserverBoundingBox.minx,oGeoserverBoundingBox.miny);
-        var oMidPointBoundingBox = utilsGetMidPoint( parseInt(asBoundingBox[0]), parseInt(asBoundingBox[1]), parseInt(asBoundingBox[4]), parseInt(asBoundingBox[5]));
+        //var oMidPointBoundingBox = utilsGetMidPoint( parseFloat(asBoundingBox[0]), parseFloat(asBoundingBox[1]), parseFloat(asBoundingBox[4]), parseFloat(asBoundingBox[5]));
+        var oMidPointBoundingBox = {};
+        oMidPointBoundingBox.x = oBBCenter.lng;
+        oMidPointBoundingBox.y = oBBCenter.lat;
         //
-        var isMidPointGeoserverBoundingBoxInBoundingBox = utilsIsPointInsideSquare(oMidPointGeoserverBoundingBox.x,oMidPointGeoserverBoundingBox.y,
-                                                                                    parseInt(asBoundingBox[0]),parseInt(asBoundingBox[1]),parseInt(asBoundingBox[4]), parseInt(asBoundingBox[5]) );
+        var isMidPointGeoserverBoundingBoxInBoundingBox = utilsIsPointInsideSquare(oMidPointGeoserverBoundingBox.x,oMidPointGeoserverBoundingBox.y, oBBPolygon.getBounds().getEast(),oBBPolygon.getBounds().getNorth(),oBBPolygon.getBounds().getWest(), oBBPolygon.getBounds().getSouth());
         var isMidPointBoundingBoxGeoserverBoundingBox = utilsIsPointInsideSquare(oMidPointBoundingBox.x,oMidPointBoundingBox.y,oGeoserverBoundingBox.maxx,oGeoserverBoundingBox.maxy,oGeoserverBoundingBox.minx,oGeoserverBoundingBox.miny);
         if( ( isMidPointBoundingBoxGeoserverBoundingBox === true ) && ( isMidPointGeoserverBoundingBoxInBoundingBox === true ) )
         {
@@ -691,7 +704,7 @@ service('MapService', ['$http','$rootScope', 'ConstantsService', function ($http
 
         var iArraySplitLength = aoArraySplit.length;
 
-        if(iArraySplitLength !== 10) return null;
+        if(iArraySplitLength <= 10) return null;
 
         for(var iIndex = 0; iIndex < iArraySplitLength-1; iIndex = iIndex + 2){
             aiInvertedArraySplit.push(aoArraySplit[iIndex+1]);
