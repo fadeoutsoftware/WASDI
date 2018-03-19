@@ -34,183 +34,18 @@
                     <div class="row ">
                         <!--<div class= "col-xs-7 col-sm-7 col-md-7 col-lg-7 col-xs-offset-5 col-sm-offset-5 col-md-offset-5 col-lg-offset-5" >-->
                         <div class= "col-xs-6 col-sm-6 col-md-6 col-lg-6 col-xs-offset-6 col-sm-offset-6 col-md-offset-6 col-lg-offset-6" >
-                            <button class="my-button" ng-click="m_oController.addFiltersData()">
+                            <span class="my-button" ng-click="m_oController.addFiltersData()">
                                 <i class="fa fa-floppy-o" aria-hidden="true"></i>
-                                Save filters
-                            </button>
-                            <button class="my-button" ng-click="m_oController.removeSavedData()">
+                                Add Temporal Serie Filters
+                            </span>
+                            <span class="my-button" ng-click="m_oController.removeSavedData()">
                                 <i class="fa fa-trash" aria-hidden="true"></i>
-                                Remove filters
-                            </button>
+                                Clear added filters
+                            </span>
                         </div>
 
                     </div>
-                    <!--<div class="row well well-sm">-->
-                        <!--<div class="col-xs-9 col-sm-9 col-md-9 col-lg-9">-->
-                            <!--&lt;!&ndash;<div uib-datepicker ng-model="m_oController.m_oAdvanceFilter.selectedSeasonYear "  datepicker-options="m_oController.datePickerYears" ></div>&ndash;&gt;-->
-                            <!--<multiselect options="m_oController.m_oAdvanceFilter.listOfYears" selected="m_oController.m_oAdvanceFilter.selectedSeasonYears"></multiselect>-->
-                        <!--</div>-->
 
-                        <!--<div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">-->
-                            <!--<div class="btn-group-vertical ">-->
-                                <!--<button type="button" class="btn btn-default" ng-click="m_oController.m_oAdvanceFilter.selectedSeason = 'spring'; m_oController.addSeason() ">-->
-                                    <!--<i class="fa fa-sun-o" aria-hidden="true"></i>-->
-                                    <!--{{"EDITOR_SEASONS_SPRING_BUTTON"|translate}}-->
-                                <!--</button>-->
-                                <!--<button type="button" class="btn btn-default" ng-click="m_oController.m_oAdvanceFilter.selectedSeason = 'summer'; m_oController.addSeason()">-->
-                                    <!--<i class="fa fa-thermometer-full" aria-hidden="true"></i>-->
-                                    <!--{{"EDITOR_SEASONS_SUMMER_BUTTON"|translate}}-->
-                                <!--</button>-->
-                                <!--<button type="button" class="btn btn-default" ng-click="m_oController.m_oAdvanceFilter.selectedSeason = 'autumn'; m_oController.addSeason()">-->
-                                    <!--<i class="fa fa-cloud" aria-hidden="true"></i>-->
-                                    <!--{{"EDITOR_SEASONS_AUTUMN_BUTTON"|translate}}-->
-                                <!--</button>-->
-                                <!--<button type="button" class="btn btn-default" ng-click="m_oController.m_oAdvanceFilter.selectedSeason = 'winter'; m_oController.addSeason()">-->
-                                    <!--<i class="fa fa-snowflake-o" aria-hidden="true"></i>-->
-                                    <!--{{"EDITOR_SEASONS_WINTER_BUTTON"|translate}}-->
-                                <!--</button>-->
-                            <!--</div>-->
-                        <!--</div>-->
-                    <!--</div>-->
-
-                    <!--<div class="row well well-sm" >-->
-                        <!--<div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">-->
-                            <!--select years:-->
-                            <!--<multiselect options="m_oController.m_oAdvanceFilter.listOfYears" selected="m_oController.m_oAdvanceFilter.selectedYears"></multiselect>-->
-                        <!--</div>-->
-                        <!--<div class="col-xs-9 col-sm-9 col-md-9 col-lg-9">-->
-                            <!--FROM:-->
-                            <!--<div class="row">-->
-
-                                <!--<div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">-->
-                                    <!--<div class="dropdown">-->
-                                        <!--<button class="my-button dropdown-toggle" type="button" id="selectedMonthFrom"-->
-                                                <!--data-toggle="dropdown">-->
-                                            <!--<span ng-show="m_oController.m_oAdvanceFilter.selectedMonthFrom === ''">Months</span>-->
-                                            <!--<span ng-hide="utilsIsStrNullOrEmpty(m_oController.m_oAdvanceFilter.selectedMonthFrom)">{{m_oController.m_oAdvanceFilter.selectedMonthFrom }}</span>-->
-                                            <!--<span class="caret"></span>-->
-                                        <!--</button>-->
-                                        <!--<ul class="dropdown-menu" role="menu" aria-labelledby="selectedMonthFrom">-->
-                                            <!--<li role="presentation"  ng-repeat="month in m_oController.m_oAdvanceFilter.listOfMonths"-->
-                                                <!--ng-click = "m_oController.m_oAdvanceFilter.selectedMonthFrom = month">-->
-                                                <!--<a role="menuitem" tabindex="-1" href="">{{month}}</a>-->
-                                            <!--</li>-->
-
-                                        <!--</ul>-->
-                                    <!--</div>-->
-
-                                <!--</div>-->
-                                <!--<div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">-->
-                                    <!--<div class="dropdown">-->
-                                        <!--<button class="my-button dropdown-toggle" type="button" id="selectedDayFrom"-->
-                                                <!--data-toggle="dropdown" ng-disabled="!m_oController.areSelectedMonthAndYearFrom()">-->
-                                            <!--<span ng-show="m_oController.m_oAdvanceFilter.selectedDayFrom === ''">Days</span>-->
-                                            <!--<span ng-hide="utilsIsStrNullOrEmpty(m_oController.m_oAdvanceFilter.selectedDayFrom)">{{m_oController.m_oAdvanceFilter.selectedDayFrom }}</span>-->
-                                            <!--<span class="caret"></span>-->
-                                        <!--</button>-->
-                                        <!--<ul class="dropdown-menu" role="menu" aria-labelledby="selectedDayFrom">-->
-                                            <!--<li role="presentation" ng-repeat="day in m_oController.getMonthDaysFrom()"-->
-                                                <!--ng-click = "m_oController.m_oAdvanceFilter.selectedDayFrom = day">-->
-                                                <!--<a role="menuitem" tabindex="-1" href="">{{day}}</a>-->
-                                            <!--</li>-->
-                                        <!--</ul>-->
-                                    <!--</div>-->
-
-                                <!--</div>-->
-                            <!--</div>-->
-                            <!--TO:-->
-                            <!--<div class="row ">-->
-
-                                <!--<div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">-->
-                                    <!--<div class="dropdown">-->
-                                        <!--<button class="my-button dropdown-toggle" type="button" id="selectedMonthTo"-->
-                                                <!--data-toggle="dropdown">-->
-                                            <!--<span ng-show="m_oController.m_oAdvanceFilter.selectedMonthTo === ''">Months</span>-->
-                                            <!--<span ng-hide="utilsIsStrNullOrEmpty(m_oController.m_oAdvanceFilter.selectedMonthTo)">{{m_oController.m_oAdvanceFilter.selectedMonthTo }}</span>-->
-                                            <!--<span class="caret"></span>-->
-                                        <!--</button>-->
-                                        <!--<ul class="dropdown-menu" role="menu" aria-labelledby="selectedMonthTo">-->
-                                            <!--<li role="presentation"  ng-repeat="month in m_oController.m_oAdvanceFilter.listOfMonths"-->
-                                                <!--ng-click = "m_oController.m_oAdvanceFilter.selectedMonthTo = month">-->
-                                                <!--<a role="menuitem" tabindex="-1" href="">{{month}}</a>-->
-                                            <!--</li>-->
-
-                                        <!--</ul>-->
-                                    <!--</div>-->
-
-                                <!--</div>-->
-
-                                <!--<div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">-->
-                                    <!--<div class="dropdown">-->
-                                        <!--<button class="my-button dropdown-toggle" type="button" id="selectedDayTo"-->
-                                                <!--data-toggle="dropdown" ng-disabled="!m_oController.areSelectedMonthAndYearTo()">-->
-                                            <!--<span ng-show="m_oController.m_oAdvanceFilter.selectedDayTo === ''">Days</span>-->
-                                            <!--<span ng-hide="utilsIsStrNullOrEmpty(m_oController.m_oAdvanceFilter.selectedDayTo)">{{m_oController.m_oAdvanceFilter.selectedDayTo }}</span>-->
-                                            <!--<span class="caret"></span>-->
-                                        <!--</button>-->
-                                        <!--<ul class="dropdown-menu" role="menu" aria-labelledby="selectedDayTo">-->
-                                            <!--<li role="presentation"-->
-                                                <!--ng-repeat="day in m_oController.getMonthDaysTo()"-->
-                                                <!--ng-click = "m_oController.m_oAdvanceFilter.selectedDayTo = day">-->
-                                                <!--<a role="menuitem" tabindex="-1" href="">-->
-                                                    <!--{{day}}-->
-                                                <!--</a>-->
-                                            <!--</li>-->
-
-                                        <!--</ul>-->
-                                    <!--</div>-->
-
-
-                            <!--</div>-->
-
-
-
-                        <!--</div>-->
-
-                        <!--&lt;!&ndash;<div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">&ndash;&gt;-->
-                        <!--&lt;!&ndash;<multiselect options="m_oController.m_oAdvanceFilter.listOfMonths" selected="m_oController.m_oAdvanceFilter.selectedMonths"></multiselect>&ndash;&gt;-->
-                        <!--<div class="row">-->
-                            <!--<div class=" col-xs-offset-8 col-sm-offset-8 col-md-offset-8 col-lg-offset-8 col-xs-4 col-sm-4 col-md-4 col-lg-4 ">-->
-                                <!--<button class="my-button add-filter-button" ng-click="m_oController.addFilterDataFromTo()">-->
-                                    <!--Add filter-->
-                                <!--</button>-->
-                            <!--</div>-->
-
-                        <!--</div>-->
-
-
-                        <!--&lt;!&ndash;</div>&ndash;&gt;-->
-                        <!--&lt;!&ndash;<multiselect options="m_oController.m_oAdvanceFilter.listOfDays" selected="m_oController.m_oAdvanceFilter.selectedDays"></multiselect>&ndash;&gt;-->
-                    <!--</div>-->
-
-                    <!--</div>-->
-
-                    <!--<div class="row well well-sm" >-->
-                        <!--<div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">-->
-                            <!--<multiselect options="m_oController.m_oAdvanceFilter.listOfYears" selected="m_oController.m_oAdvanceFilter.selectedYearsSearchForMonths"></multiselect>-->
-                        <!--</div>-->
-                        <!--<div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">-->
-                            <!--<multiselect options="m_oController.m_oAdvanceFilter.listOfMonths" selected="m_oController.m_oAdvanceFilter.selectedMonthsSearchForMonths"></multiselect>-->
-                        <!--</div>-->
-                        <!--<div class="row">-->
-                            <!--<div class=" col-xs-offset-9 col-sm-offset-9 col-md-offset-9 col-lg-offset-9 col-xs-3 col-sm-3 col-md-3 col-lg-3 ">-->
-                                <!--&lt;!&ndash;<div class="col-xs-10 col-sm-10 col-md-10 col-lg-10 col-xs-offset-2 col-sm-offset-2 col-md-offset-2 col-lg-offset-2 ">&ndash;&gt;-->
-                                <!--<button class="my-button add-filter-button" ng-click="m_oController.addFilterMonths()">-->
-                                    <!--Add filter-->
-                                <!--</button>-->
-                            <!--</div>-->
-
-                        <!--</div>-->
-                    <!--</div>-->
-
-                    <!--<div class="row well well-sm" ng-show="m_oController.m_oAdvanceFilter.savedData !== []">-->
-                        <!--<div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">-->
-                            <!--<div class="chip" ng-repeat="data in m_oController.m_oAdvanceFilter.savedData">-->
-                                <!--{{data.name}}-->
-                                <!--<span class="closebtn" ng-click="m_oController.removeSaveDataChips(data) ">&times;</span> &lt;!&ndash;this.parentElement.style.display='none';&ndash;&gt;-->
-                            <!--</div>-->
-                        <!--</div>-->
-                    <!--</div>-->
                     <div class="row well well-sm" ng-show="m_oController.m_oAdvanceFilterOptions.savedData !== []">
                         <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
                             <div class="chip" ng-repeat="data in m_oController.m_oAdvanceFilterOptions.savedData">
@@ -227,10 +62,10 @@
             <!-- FOOTER -->
             <div class="modal-footer">
                 <button type="button" ng-click="close(null)" class="my-button" data-dismiss="modal">
-                    {{"DIALOG_CLOSE_BUTTON"|translate}}
+                   Cancel
                 </button>
                 <button type="button" ng-click="add(null)" class="my-button" data-dismiss="modal">
-                    Add
+                    Ok
                 </button>
             </div>
 
