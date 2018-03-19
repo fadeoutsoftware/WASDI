@@ -19,6 +19,7 @@ import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.business.User;
 import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.viewmodels.ProcessWorkspaceSummaryViewModel;
 import wasdi.shared.viewmodels.ProcessWorkspaceViewModel;
 
 @Path("/process")
@@ -227,6 +228,103 @@ public class ProcessWorkspaceResource {
 		}
 
 		return aoProcessList;
+	}
+	
+	@GET
+	@Path("/summary")
+	@Produces({"application/xml", "application/json", "text/xml"})
+	public ProcessWorkspaceSummaryViewModel GetSummary(@HeaderParam("x-session-token") String sSessionId) {
+		
+		Wasdi.DebugLog("ProcessWorkspaceResource.GetSummary");
+
+		User oUser = Wasdi.GetUserFromSession(sSessionId);
+
+		ProcessWorkspaceSummaryViewModel oSummaryViewModel = new ProcessWorkspaceSummaryViewModel();
+
+		try {
+			// Domain Check
+			if (oUser == null) {
+				return oSummaryViewModel;
+			}
+			if (Utils.isNullOrEmpty(oUser.getUserId())) {
+				return oSummaryViewModel;
+			}
+
+			System.out.println("ProcessWorkspaceResource.GetSummary: process for user " + oUser.getUserId());
+
+			// Create repo
+			ProcessWorkspaceRepository oRepository = new ProcessWorkspaceRepository();
+
+			// Get Download Waiting Process List
+			List<ProcessWorkspace> aoQueuedDownloads = oRepository.GetQueuedDownloads();
+
+			oSummaryViewModel.setAllDownloadWaiting(aoQueuedDownloads.size());
+			
+			int iUserDownloadWaiting = 0 ;
+			// Count the user's ones
+			for (int iProcess=0; iProcess<aoQueuedDownloads.size(); iProcess++) {
+				// Create View Model
+				ProcessWorkspace oProcess = aoQueuedDownloads.get(iProcess);
+				if (oProcess.getUserId().equals(oUser.getUserId())) iUserDownloadWaiting ++;
+			}
+			
+			oSummaryViewModel.setUserDownloadWaiting(iUserDownloadWaiting);
+			
+			
+			// Get Processing Waiting Process List
+			List<ProcessWorkspace> aoQueuedProcessing = oRepository.GetQueuedProcess();
+
+			oSummaryViewModel.setAllProcessWaiting(aoQueuedProcessing.size());
+			
+			int iUserProcessWaiting = 0 ;
+			// Count the user's ones
+			for (int iProcess=0; iProcess<aoQueuedProcessing.size(); iProcess++) {
+				// Create View Model
+				ProcessWorkspace oProcess = aoQueuedProcessing.get(iProcess);
+				if (oProcess.getUserId().equals(oUser.getUserId())) iUserProcessWaiting ++;
+			}
+			
+			oSummaryViewModel.setUserProcessWaiting(iUserProcessWaiting);
+			
+			
+			
+			// Get Processing Running  List
+			List<ProcessWorkspace> aoRunningProcessing = oRepository.GetRunningProcess();
+
+			oSummaryViewModel.setAllProcessRunning(aoRunningProcessing.size());
+			
+			int iUserProcessRunning= 0 ;
+			// Count the user's ones
+			for (int iProcess=0; iProcess<aoRunningProcessing.size(); iProcess++) {
+				// Create View Model
+				ProcessWorkspace oProcess = aoRunningProcessing.get(iProcess);
+				if (oProcess.getUserId().equals(oUser.getUserId())) iUserProcessRunning ++;
+			}
+			
+			oSummaryViewModel.setUserProcessRunning(iUserProcessRunning);
+			
+			// Get Download Running Process List
+			List<ProcessWorkspace> aoRunningDownload= oRepository.GetRunningDownloads();
+
+			oSummaryViewModel.setAllDownloadRunning(aoRunningDownload.size());
+			
+			int iUserDownloadRunning= 0 ;
+			// Count the user's ones
+			for (int iProcess=0; iProcess<aoRunningDownload.size(); iProcess++) {
+				// Create View Model
+				ProcessWorkspace oProcess = aoRunningDownload.get(iProcess);
+				if (oProcess.getUserId().equals(oUser.getUserId())) iUserDownloadRunning ++;
+			}
+			
+			oSummaryViewModel.setUserDownloadRunning(iUserDownloadRunning);
+
+		}
+		catch (Exception oEx) {
+			System.out.println("ProcessWorkspaceResource.GetSummary: error retrieving process " + oEx.getMessage());
+			oEx.printStackTrace();
+		}
+
+		return oSummaryViewModel;
 	}
 	
 	@GET
