@@ -8,6 +8,7 @@ import java.lang.reflect.Method;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Date;
+import java.util.List;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -65,6 +66,8 @@ import wasdi.shared.parameters.RangeDopplerGeocodingParameter;
 import wasdi.shared.parameters.RasterGeometricResampleParameter;
 import wasdi.shared.utils.SerializationUtils;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.viewmodels.BandViewModel;
+import wasdi.shared.viewmodels.MetadataViewModel;
 import wasdi.shared.viewmodels.ProductViewModel;
 import wasdi.shared.viewmodels.PublishBandResultViewModel;
 import wasdi.snapopearations.ApplyOrbit;
@@ -214,6 +217,12 @@ public class LauncherMain {
 
     	String sWorkspace = "";
     	String sExchange = "";
+    	
+    	if (sOperation.equals("MAGIC_UPDATE_BANDS")) {
+    		System.out.println("MAGIC UPDATE BANDS CYCLE");
+    		LauncherMain.UpdateBandViewModelsCycle();
+    		return;
+    	}
     	
     	try {
 			BaseParameter oBaseParameter = (BaseParameter) SerializationUtils.deserializeXMLToObject(sParameter);
@@ -1322,4 +1331,130 @@ public class LauncherMain {
 
         return iPid;
     }
+    
+	public static void UpdateBandViewModelsCycle() {
+		// Create repo
+		ProductWorkspaceRepository oProductWorkspaceRepository = new ProductWorkspaceRepository();
+		DownloadedFilesRepository oDownloadedFilesRepository = new DownloadedFilesRepository();
+		
+		List<DownloadedFile> aoDownloaded = oDownloadedFilesRepository.getList();
+		
+		// For all the downloaded files
+		for (int i=0; i<aoDownloaded.size(); i++) {
+			
+			DownloadedFile oDownloadedFileEntity = aoDownloaded.get(i);
+			
+			System.out.println("Product [" + i + "] - " + oDownloadedFileEntity.getFilePath());
+			
+			if (oDownloadedFileEntity.getFileName()!= null) {
+				if (oDownloadedFileEntity.getFileName().startsWith("SMCItaly")) {
+					System.out.println("MIDA Public Product, jump");
+					continue;
+				}
+			}
+			
+			
+			// Read The Product
+            ReadProduct oReadSNAPProduct = new ReadProduct();
+            File oProductFile = new File(oDownloadedFileEntity.getFilePath());
+            Product oProduct = oReadSNAPProduct.ReadProduct(oProductFile, null);
+            
+            if (Utils.isNullOrEmpty(oDownloadedFileEntity.getFileName())) {
+            	System.out.println("Fixing DownloadedFile - FileName");
+            	oDownloadedFileEntity.setFileName(oProductFile.getName());
+            	oDownloadedFilesRepository.UpdateDownloadedFile(oDownloadedFileEntity);
+            }
+            
+            // There was any problem?
+            if (oProduct == null) {
+            	
+            	// Product NULL
+            	
+            	// Check if the file exists
+            	if (oProductFile.exists()==false) {
+            		
+            		System.out.println("File does not Exists: delete it");
+            		oProductWorkspaceRepository.DeleteByProductName(oDownloadedFileEntity.getFileName());
+            		oDownloadedFilesRepository.DeleteByFilePath(oDownloadedFileEntity.getFilePath());
+            		System.out.println("File does not Exists: deleted");
+            	}
+            	else {            		
+            		
+            		// Clear Metadata anyway
+            		System.out.println("File Exists but could not be read");
+            		
+            		if (oDownloadedFileEntity.getProductViewModel() != null && oDownloadedFileEntity.getProductViewModel().getMetadata() != null) {
+            			oDownloadedFileEntity.getProductViewModel().setMetadata(null);
+                        oDownloadedFilesRepository.UpdateDownloadedFile(oDownloadedFileEntity);
+                        System.out.println("Cleared Metadata");
+            		}
+            		
+            	}
+            	continue;
+            }
+            
+            try {
+                ProductViewModel oVM = oReadSNAPProduct.getProductViewModel(oProduct, oProductFile);
+                
+                if (oVM == null) {
+                	System.out.println("WARNING - Product View Model NULL FOR " +  oDownloadedFileEntity.getFilePath());
+                	continue;
+                }
+                
+                //oVM.setMetadata(oReadSNAPProduct.getProductMetadataViewModel(oProductFile));
+                MetadataViewModel oMetadataViewModel = oReadSNAPProduct.getProductMetadataViewModel(oProductFile);
+                
+                if (oDownloadedFileEntity.getProductViewModel().getMetadataFileReference() == null || oDownloadedFileEntity.getProductViewModel().getMetadataFileReference().isEmpty()) {
+                    System.out.println("Serialize Metadata");
+                    String sMetadataFile = Utils.GetRandomName();
+                    SerializationUtils.serializeObjectToXML("/data/wasdi/metadata/"+sMetadataFile, oMetadataViewModel);
+                    oDownloadedFileEntity.getProductViewModel().setBandsGroups(oVM.getBandsGroups());
+                    oDownloadedFileEntity.getProductViewModel().setMetadataFileReference(sMetadataFile);                		                	
+                }
+                else {
+                	System.out.println("Metadata Already Serialized");
+                }
+                
+                System.out.println("Check Band Dimensions. Bands count = " + oDownloadedFileEntity.getProductViewModel().getBandsGroups().getBands().size());
+                
+                for (int iBands = 0; iBands < oDownloadedFileEntity.getProductViewModel().getBandsGroups().getBands().size(); iBands++) {
+                	BandViewModel oBandVM = oDownloadedFileEntity.getProductViewModel().getBandsGroups().getBands().get(iBands);
+                	if (oBandVM.getWidth() == 0 || oBandVM.getHeight() == 0) {
+                		System.out.println("PRODUCT " +oDownloadedFileEntity.getProductViewModel().getName() + " BAND " + oBandVM.getName() + " DIMENSION PROBLEMS [W, H] = [" + oBandVM.getWidth() + ", " + oBandVM.getHeight()+ "]");
+                	}
+                }
+                
+                oDownloadedFileEntity.getProductViewModel().setMetadata(null);
+                oDownloadedFilesRepository.UpdateDownloadedFile(oDownloadedFileEntity);
+                
+                //MetadataViewModel oReloaded = (MetadataViewModel) SerializationUtils.deserializeXMLToObject("C:\\Temp\\wasdi\\metadata\\"+oDownloadedFileEntity.getProductViewModel().getMetadataFileReference());
+            }
+            catch (Exception oEx) {
+            	System.out.println("Exception " + oEx);
+            }
+		}
+		
+		
+		System.out.println("Clearing Product Workspace Table..");
+		
+		List<ProductWorkspace> aoProductsWSs = oProductWorkspaceRepository.getList();
+		
+		for (int i=0; i<aoProductsWSs.size(); i++) {
+			ProductWorkspace oPW = aoProductsWSs.get(i);
+			
+			DownloadedFile oDF = oDownloadedFilesRepository.GetDownloadedFile(oPW.getProductName());
+			
+			if (oDF == null) {
+				System.out.println("\nINVALID Product : " + oPW.getProductName() + " WS : " + oPW.getWorkspaceId());
+				oProductWorkspaceRepository.DeleteByProductNameWorkspace(oPW.getProductName(), oPW.getWorkspaceId());
+				System.out.println("DELETED");
+			}
+			else {
+				System.out.print(".");
+			}
+		}
+
+
+		System.out.println("\nBye Bye");
+	}
 }

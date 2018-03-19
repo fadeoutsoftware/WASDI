@@ -35,63 +35,12 @@ public class Proofs_FilterBand2 {
 		
 		System.out.println("-------------------------------------------------------------------------");
 		
-		//createJpg(new Dimension(600, 600), new Rectangle(new Point(6000, 6000), new Dimension(2000, 2000)), "cut");
-		
-//		d = new Dimension(200, 200);
-//		img = manager.buildImage(product.getBand(bandName), d, new Rectangle(new Point(6000, 6000), new Dimension(2000, 2000)));
-//		System.out.println("cut image scaled created: " + (System.currentTimeMillis()-t) + " ms");		
-//		ImageIO.write(img, "jpg", new File("/home/doy/tmp/wasdi/tmp/" + bandName + "_cutted.jpg"));		
-//		System.out.println("cut image jpg created: " + (System.currentTimeMillis()-t) + " ms");
-
-//		System.out.println("create geotiff");
-//		manager.saveGeotiff(filteredBand, new File("/home/doy/tmp/wasdi/tmp/pippo.tif"), new ProgressMonitor() {
-//			
-//			@Override
-//			public void worked(int work) {
-//				System.out.println("worked: " + work);
-//			}
-//			
-//			@Override
-//			public void setTaskName(String taskName) {
-//				System.out.println("task name: " + taskName);				
-//			}
-//			
-//			@Override
-//			public void setSubTaskName(String subTaskName) {
-//				System.out.println("sub task name: " + subTaskName);
-//			}
-//			
-//			@Override
-//			public void setCanceled(boolean canceled) {
-//				System.out.println("cancelled: " + canceled);
-//			}
-//			
-//			@Override
-//			public boolean isCanceled() {
-//				return false;
-//			}
-//			
-//			@Override
-//			public void internalWorked(double work) {
-//				//System.out.println("internal worked: " + work);
-//			}
-//			
-//			@Override
-//			public void done() {
-//				System.out.println("done");
-//			}
-//			
-//			@Override
-//			public void beginTask(String taskName, int totalWork) {
-//				System.out.println("begin task " + taskName + ". work: " + totalWork);
-//			}
-//		});
-//		System.out.println("geotiff created: " + (System.currentTimeMillis()-t) + " ms");
     }
 
 	private static void createJpg(Dimension d, Rectangle vp, String suffix) throws IOException, InterruptedException {
-		//File file = new File("C:\\Temp\\wasdi\\data\\paolo\\2c1271a4-9e2b-4291-aabd-caf3074adb25\\S2A_MSIL1C_20180102T102421_N0206_R065_T32TMQ_20180102T123237.zip");
-		File file = new File("C:\\Temp\\wasdi\\data\\paolo\\2c1271a4-9e2b-4291-aabd-caf3074adb25\\S1A_IW_GRDH_1SDV_20180129T052722_20180129T052747_020365_022CA8_9D99.zip");
+		//File file = new File("C:\\Temp\\wasdi\\data\\paolo\\dcbb272f-c4c4-4ef7-8bc4-bd3e24dfe93a\\S2A_MSIL1C_20180207T104211_N0206_R008_T31TGN_20180207T142820.zip");
+		//File file = new File("C:\\Temp\\wasdi\\data\\paolo\\2c1271a4-9e2b-4291-aabd-caf3074adb25\\S1A_IW_GRDH_1SDV_20180129T052722_20180129T052747_020365_022CA8_9D99.zip");
+		File file = new File("C:\\Temp\\wasdi\\data\\paolo\\f205f454-7ab2-4285-b7ab-1b18b0d4b4eb\\S1B_IW_GRDH_1SDV_20170624T055025_20170624T055050_006188_00ADF2_0EB5.zip");
 		Product product = ProductIO.readProduct(file);
 		//String bandName = "B1";
 		String bandName = "AMPLITUDE_VH";
@@ -110,7 +59,10 @@ public class Proofs_FilterBand2 {
 		BufferedImage img;
 		
 //		d = new Dimension(600, 600);
-		if (vp==null) vp = new Rectangle(new Point(0, 0), raster.getRasterSize());
+		if (vp==null) {
+			vp = new Rectangle(new Point(0, 0), raster.getRasterSize());
+			//vp = new Rectangle(900,900,900,900);
+		}
 		img = manager.buildImage(raster, d, vp);				
 		ImageIO.write(img, "jpg", new File("C:\\Temp\\wasdi\\" + filteredBand.getName() + "_" + suffix + ".jpg"));		
 		
