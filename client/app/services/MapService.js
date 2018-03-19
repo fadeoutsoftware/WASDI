@@ -631,7 +631,13 @@ service('MapService', ['$http','$rootScope', 'ConstantsService', function ($http
             return false;
         }
         var oGeoserverBoundingBox = this.parseGeoserverBoundingBox(geoserverBoundindBox);
+
+        if ( utilsIsObjectNullOrUndefined(oGeoserverBoundingBox)) return false;
+
         var asBoundingBox = this.fromBboxToRectangleArray(boundingBox);
+
+        if ( utilsIsObjectNullOrUndefined(asBoundingBox)) return false;
+
         //it takes the center of the bounding box
         var oMidPointGeoserverBoundingBox = utilsGetMidPoint(oGeoserverBoundingBox.maxx,oGeoserverBoundingBox.maxy,oGeoserverBoundingBox.minx,oGeoserverBoundingBox.miny);
         var oMidPointBoundingBox = utilsGetMidPoint( parseInt(asBoundingBox[0]), parseInt(asBoundingBox[1]), parseInt(asBoundingBox[4]), parseInt(asBoundingBox[5]));
