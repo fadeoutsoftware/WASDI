@@ -241,6 +241,16 @@ var EditorController = (function () {
                 for (var iIndexLayers = 0; iIndexLayers < oController.m_aoVisibleBands.length; iIndexLayers++) {
                     // Check if it is a valid layer
                     if (!utilsIsObjectNullOrUndefined(oController.m_aoVisibleBands[iIndexLayers].layerId)) {
+
+                        var sColor="#f22323";
+                        var sGeoserverBBox = oController.m_aoVisibleBands[iIndexLayers].geoserverBoundingBox;
+                        if( oController.m_oMapService.isProductGeoreferenced( oController.m_aoVisibleBands[iIndexLayers].bbox, oController.m_aoVisibleBands[iIndexLayers].geoserverBoundingBox ) === false )
+                        {
+                            var oRectangleBoundingBox = oController.m_oMapService.addRectangleByGeoserverBoundingBox(sGeoserverBBox,sColor);
+                            //the options.layers property is used for remove the rectangle to the map
+                            oRectangleBoundingBox.options.layers = "wasdi:" + oController.m_aoVisibleBands[iIndexLayers].layerId;
+                        }
+
                         oController.addLayerMap2D(oController.m_aoVisibleBands[iIndexLayers].layerId);
                     }
 
@@ -290,6 +300,16 @@ var EditorController = (function () {
 
             //Check if there is a visible layer and if it is already published
             for (var iIndexLayer = 0; iIndexLayer < this.m_aoVisibleBands.length; iIndexLayer++) {
+                // var bIsProductGeoreferenced = false;
+                var sColor="#f22323";
+                var sGeoserverBBox = this.m_aoVisibleBands[iIndexLayer].geoserverBoundingBox;
+                if( this.m_oMapService.isProductGeoreferenced( this.m_aoVisibleBands[iIndexLayer].bbox, this.m_aoVisibleBands[iIndexLayer].geoserverBoundingBox ) === false )
+                {
+                    // bIsProductGeoreferenced = true;
+                    var oRectangleBoundingBox = this.m_oMapService.addRectangleByGeoserverBoundingBox(sGeoserverBBox,sColor);
+                    //the options.layers property is used for remove the rectangle to the map
+                    oRectangleBoundingBox.options.layers = "wasdi:" + this.m_aoVisibleBands[iIndexLayer].layerId;
+                }
 
                 //check if the layer has the layer Id
                 if (!utilsIsObjectNullOrUndefined(this.m_aoVisibleBands[iIndexLayer].layerId)) {
@@ -610,14 +630,26 @@ var EditorController = (function () {
         else {
             //add layer in list
 
+
             // check if the background is in Editor Mode or in Georeferenced Mode
             if (this.m_b2DMapModeOn == false) {
                 //if we are in 3D put the layer on the globe
                 this.addLayerMap3D(oBand.layerId);
             }
-            else {
+            else
+            {
+                var sColor="#f22323";
+                var sGeoserverBBox =oBand.geoserverBoundingBox;
+                if( this.m_oMapService.isProductGeoreferenced( oBand.bbox, oBand.geoserverBoundingBox ) === false )
+                {
+                    var oRectangleBoundingBox = this.m_oMapService.addRectangleByGeoserverBoundingBox(sGeoserverBBox,sColor);
+                    //the options.layers property is used for remove the rectangle to the map
+                    oRectangleBoundingBox.options.layers = "wasdi:" + oBand.layerId;
+                }
+
                 //if we are in 2D put it on the map
                 this.addLayerMap2D(oBand.layerId);
+
             }
 
             this.m_aoVisibleBands.push(oBand);
@@ -1161,11 +1193,12 @@ var EditorController = (function () {
             layers: 'wasdi:' + sLayerId,
             format: 'image/png',
             transparent: true,
-            noWrap: true
+            noWrap: true,
         });
 
         //it set the zindex of layer in map
         wmsLayer.setZIndex(1000);
+       // .leaflet-tile { border: solid black 5px; }
         wmsLayer.addTo(oMap);
 
     };

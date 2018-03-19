@@ -618,6 +618,12 @@ service('MapService', ['$http','$rootScope', 'ConstantsService', function ($http
         }
     };
 
+    /**
+     * This method works only for s1 products
+     * @param boundingBox
+     * @param geoserverBoundindBox
+     * @returns {boolean}
+     */
     this.isProductGeoreferenced = function(boundingBox, geoserverBoundindBox)
     {
         if( ( utilsIsObjectNullOrUndefined(boundingBox) === true ) || ( utilsIsObjectNullOrUndefined(geoserverBoundindBox) === true) )
@@ -688,4 +694,33 @@ service('MapService', ['$http','$rootScope', 'ConstantsService', function ($http
 
         return aiInvertedArraySplit;
     };
+
+    this.addRectangleByGeoserverBoundingBox = function(geoserverBoundingBox,sColor)
+    {
+        try {
+            if (utilsIsObjectNullOrUndefined(geoserverBoundingBox)) {
+                console.log("MapService.addRectangleByGeoserverBoundingBox: geoserverBoundingBox is null or empty ");
+                return;
+            }
+            if( (utilsIsObjectNullOrUndefined(sColor) === true) || (utilsIsStrNullOrEmpty(sColor) === true))
+            {
+                sColor = "#ff7800";
+            }
+            geoserverBoundingBox = geoserverBoundingBox.replace(/\n/g,"");
+            var oBounds = JSON.parse(geoserverBoundingBox);
+            //Zoom on layer
+            // var corner1 = L.latLng(oBounds.maxy, oBounds.maxx),
+            //     corner2 = L.latLng(oBounds.miny, oBounds.minx),
+            //     bounds = L.latLngBounds(corner1, corner2);
+            var bounds = [ [oBounds.maxy,oBounds.maxx],[oBounds.miny,oBounds.minx] ];
+            var oRectangle = L.rectangle(bounds, {color: sColor, weight: 2}).addTo(this.m_oWasdiMap);
+
+            return oRectangle
+        }
+        catch (e)
+        {
+            console.log(e);
+        }
+        return null;
+    }
 }]);
