@@ -25,6 +25,7 @@ import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductNodeGroup;
 import org.esa.snap.core.datamodel.RasterDataNode;
 import org.esa.snap.core.image.ColoredBandImageMultiLevelSource;
+import org.esa.snap.core.image.ImageManager;
 import org.esa.snap.core.layer.MaskCollectionLayerType;
 import org.esa.snap.core.layer.MaskLayerType;
 import org.esa.snap.core.util.ProductUtils;
@@ -152,8 +153,8 @@ public class BandImageManager {
 		}
 		
 		// NOTE: Codice che crea istogramma
-		//WasdiProgressMonitorStub oProgressMonitor = new WasdiProgressMonitorStub();
-		//ImageManager.getInstance().prepareImageInfos(new RasterDataNode[] {band}, oProgressMonitor);
+		WasdiProgressMonitorStub oProgressMonitor = new WasdiProgressMonitorStub();
+		ImageManager.getInstance().prepareImageInfos(new RasterDataNode[] {oInputBand}, oProgressMonitor);
 		
 		synchronized (cacheSyncObj) {
 			

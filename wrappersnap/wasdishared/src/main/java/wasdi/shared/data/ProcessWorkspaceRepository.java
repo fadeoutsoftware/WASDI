@@ -132,6 +132,28 @@ public class ProcessWorkspaceRepository extends MongoRepository {
 
         return aoReturnList;
     }
+    
+    
+    public List<ProcessWorkspace> GetRunningProcess() {
+
+        final ArrayList<ProcessWorkspace> aoReturnList = new ArrayList<ProcessWorkspace>();
+        try {
+
+            FindIterable<Document> oWSDocuments = getCollection("processworkpsace").find(
+            		Filters.and(
+            				Filters.eq("status", ProcessStatus.RUNNING.name()),
+            				Filters.not(Filters.eq("operationType", LauncherOperations.DOWNLOAD.name()))
+            				)
+            		)
+            		.sort(new Document("operationDate", -1));
+            fillList(aoReturnList, oWSDocuments);
+
+        } catch (Exception oEx) {
+            oEx.printStackTrace();
+        }
+
+        return aoReturnList;
+    }
 
 
     public List<ProcessWorkspace> GetQueuedDownloads() {
@@ -155,6 +177,26 @@ public class ProcessWorkspaceRepository extends MongoRepository {
         return aoReturnList;
     }
 
+    public List<ProcessWorkspace> GetRunningDownloads() {
+
+        final ArrayList<ProcessWorkspace> aoReturnList = new ArrayList<ProcessWorkspace>();
+        try {
+
+            FindIterable<Document> oWSDocuments = getCollection("processworkpsace").find(
+            		Filters.and(
+            				Filters.eq("status", ProcessStatus.RUNNING.name()),
+            				Filters.eq("operationType", LauncherOperations.DOWNLOAD.name())
+            				)
+            		)
+            		.sort(new Document("operationDate", -1));
+            fillList(aoReturnList, oWSDocuments);
+
+        } catch (Exception oEx) {
+            oEx.printStackTrace();
+        }
+
+        return aoReturnList;
+    }
     
 	private void fillList(final ArrayList<ProcessWorkspace> aoReturnList, FindIterable<Document> oWSDocuments) {
 		oWSDocuments.forEach(new Block<Document>() {
