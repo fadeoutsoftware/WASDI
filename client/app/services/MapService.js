@@ -704,7 +704,7 @@ service('MapService', ['$http','$rootScope', 'ConstantsService', function ($http
 
         var iArraySplitLength = aoArraySplit.length;
 
-        if(iArraySplitLength <= 10) return null;
+        if(iArraySplitLength < 10) return null;
 
         for(var iIndex = 0; iIndex < iArraySplitLength-1; iIndex = iIndex + 2){
             aiInvertedArraySplit.push(aoArraySplit[iIndex+1]);
