@@ -1453,7 +1453,7 @@ var EditorController = (function () {
             controller: "MaskManagerController",
             inputs: {
                 extras: {
-                    //products:oController.m_aoProducts,
+                    products:oController.m_aoProducts,
                 }
             }
         }).then(function (modal) {

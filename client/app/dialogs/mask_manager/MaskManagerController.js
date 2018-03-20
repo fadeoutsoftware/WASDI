@@ -5,15 +5,19 @@
 
 var MaskManagerController = (function() {
 
-    function MaskManagerController($scope, oClose, oExtras,$timeout) {
+    function MaskManagerController($scope, oClose, oExtras,$timeout,oSnapOperationService) {
         //MEMBERS
         this.m_oScope = $scope;
         this.m_oScope.m_oController = this;
         this.m_oExtras = oExtras;
+        this.m_aoProducts = oExtras.products;
+        this.m_oSnapOperationService = oSnapOperationService;
         this.m_oWindowsOpened = {
             rangeMask:false,
             logicalMask:false
         };
+
+        this.getProductMasks(this.m_aoProducts[0].fileName,this.m_aoProducts[0].bandsGroups.bands[0].name);
         this.m_aoMasks=[];
         this.m_sRangeMinValue = 0.0;
         this.m_sRangeMaxValue = 1.0;
@@ -397,6 +401,12 @@ var MaskManagerController = (function() {
             this.m_aoMasks.splice(iIndex,1);
         };
 
+        /**
+        *
+        * @param sText
+        * @param sIdTextArea
+        * @returns {boolean}
+        */
         MaskManagerController.prototype.addDataSourceLogicalMask = function(sText,sIdTextArea)
         {
             if(utilsIsStrNullOrEmpty(sIdTextArea))
@@ -409,11 +419,30 @@ var MaskManagerController = (function() {
             return true;
         };
 
+        MaskManagerController.prototype.getProductMasks = function(sFile,sBand)
+        {
+            if( (utilsIsStrNullOrEmpty(sFile) === true) || (utilsIsStrNullOrEmpty(sBand) === true) )
+            {
+                return false;
+            }
+
+            this.m_oSnapOperationService.getListOfProductMask(sFile,sBand).success(function (data) {
+                if(utilsIsStrNullOrEmpty(data) === false)
+                {
+
+                }
+            }).error(function (error) {
+                utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR THE OPERATION GET PRODUCT MASK DOESN'T WORK");
+            });
+
+            return true;
+        };
         MaskManagerController.$inject = [
             '$scope',
             'close',
             'extras',
-            '$timeout'
+            '$timeout',
+            'SnapOperationService'
             // 'GetParametersOperationService'
         ];
         return MaskManagerController;
