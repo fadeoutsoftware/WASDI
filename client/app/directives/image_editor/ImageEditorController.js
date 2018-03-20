@@ -338,15 +338,15 @@ angular.module('wasdi.ImageEditorDirective', [])
                     else {
                         scope.body.viewportWidth = Math.ceil(scope.body.viewportHeight / dOriginalRatio);
                     }
-
-                    console.log("------------------------- START: zoom -------------------------");
-                    console.log("this.body.originalBandHeight: " + this.body.originalBandHeight);
-                    console.log("this.body.originalBandWidth: " + this.body.originalBandWidth);
-                    console.log("scope.body.viewportX: " + scope.body.viewportX);
-                    console.log("scope.body.viewportY: " + scope.body.viewportY);
-                    console.log("scope.body.viewportWidth: " + scope.body.viewportWidth);
-                    console.log("scope.body.viewportHeight: " + scope.body.viewportHeight);
-                    console.log("------------------------- STOP: zoom -------------------------");
+                    //
+                    // console.log("------------------------- START: zoom -------------------------");
+                    // console.log("this.body.originalBandHeight: " + this.body.originalBandHeight);
+                    // console.log("this.body.originalBandWidth: " + this.body.originalBandWidth);
+                    // console.log("scope.body.viewportX: " + scope.body.viewportX);
+                    // console.log("scope.body.viewportY: " + scope.body.viewportY);
+                    // console.log("scope.body.viewportWidth: " + scope.body.viewportWidth);
+                    // console.log("scope.body.viewportHeight: " + scope.body.viewportHeight);
+                    // console.log("------------------------- STOP: zoom -------------------------");
 
                 };
                 /**
@@ -362,14 +362,14 @@ angular.module('wasdi.ImageEditorDirective', [])
                     scope.zoom();
 
                     // https://codepen.io/fabiobiondi/pen/blHoy lik useful about crop images
-                    console.log("------------------------- START: getZoomTemporaryImage -------------------------");
-                    console.log("scope.Square.graphics.command.h: " + scope.Square.graphics.command.h);
-                    console.log("scope.Square.graphics.command.w: " + scope.Square.graphics.command.w);
-                    console.log("scope.Square.graphics.command.x: " + scope.Square.graphics.command.x);
-                    console.log("scope.Square.graphics.command.y: " + scope.Square.graphics.command.y);
-                    console.log("scope.Dragger.x: " + scope.Dragger.x);
-                    console.log("scope.Dragger.y: " + scope.Dragger.y);
-                    console.log("------------------------- STOP: getZoomTemporaryImage -------------------------");
+                    // console.log("------------------------- START: getZoomTemporaryImage -------------------------");
+                    // console.log("scope.Square.graphics.command.h: " + scope.Square.graphics.command.h);
+                    // console.log("scope.Square.graphics.command.w: " + scope.Square.graphics.command.w);
+                    // console.log("scope.Square.graphics.command.x: " + scope.Square.graphics.command.x);
+                    // console.log("scope.Square.graphics.command.y: " + scope.Square.graphics.command.y);
+                    // console.log("scope.Dragger.x: " + scope.Dragger.x);
+                    // console.log("scope.Dragger.y: " + scope.Dragger.y);
+                    // console.log("------------------------- STOP: getZoomTemporaryImage -------------------------");
                     var iHeightSquare = scope.Square.graphics.command.h;
                     var iWidthSquare = scope.Square.graphics.command.w;
                     var iAx = scope.Square.graphics.command.x + Math.abs(scope.Dragger.x);
@@ -429,8 +429,25 @@ angular.module('wasdi.ImageEditorDirective', [])
                 scope.clickOnGetImage = function()
                 {
                     scope.m_bIsVisibleMouseCursorWait = true;
+                    // console.log("---------------------------- START BEFORE Body ----------------------------");
+                    // console.log("this.body.originalBandHeight: " + this.body.originalBandHeight );
+                    // console.log("this.body.originalBandWidth: " +  this.body.originalBandWidth );
+                    // console.log("this.body.viewportX: " + this.body.viewportX);
+                    // console.log("this.body.viewportY: " + this.body.viewportY);
+                    // console.log("this.body.viewportWidth: " + this.body.viewportWidth);
+                    // console.log("this.body.viewportHeight: " + this.body.viewportHeight);
+                    // console.log("---------------------------- END Body ----------------------------");
                     this.getZoomTemporaryImage();
                     this.applyEditorPreviewImage();
+                    // this.body = this.body;
+                    // console.log("---------------------------- START BEFORE AFTER Body ----------------------------");
+                    // console.log("this.body.originalBandHeight: " + this.body.originalBandHeight );
+                    // console.log("this.body.originalBandWidth: " +  this.body.originalBandWidth );
+                    // console.log("this.body.viewportX: " + this.body.viewportX);
+                    // console.log("this.body.viewportY: " + this.body.viewportY);
+                    // console.log("this.body.viewportWidth: " + this.body.viewportWidth);
+                    // console.log("this.body.viewportHeight: " + this.body.viewportHeight);
+                    // console.log("---------------------------- END AFTER Body ----------------------------");
                 };
 
                 /**
