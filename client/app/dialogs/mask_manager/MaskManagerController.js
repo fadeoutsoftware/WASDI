@@ -18,6 +18,8 @@ var MaskManagerController = (function() {
         };
 
         this.getProductMasks(this.m_aoProducts[0].fileName,this.m_aoProducts[0].bandsGroups.bands[0].name);
+        // this.getProductMasks(this.m_aoProducts[1].fileName,this.m_aoProducts[1].bandsGroups.bands[0].name);
+        // this.getProductMasks(this.m_aoProducts[2].fileName,this.m_aoProducts[2].bandsGroups.bands[0].name);
         this.m_aoMasks=[];
         this.m_sRangeMinValue = 0.0;
         this.m_sRangeMaxValue = 1.0;

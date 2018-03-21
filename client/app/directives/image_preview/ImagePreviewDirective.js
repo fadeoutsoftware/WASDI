@@ -130,23 +130,39 @@ angular.module('wasdi.ImagePreviewDirective', [])
                 //
                 //     return true;
                 // };
-
-                scope.$watchGroup(['body.viewportX','body.viewportY','body.viewportWidth','body.viewportHeight'], function (newValue, oldValue, scope)
+                scope.resizeRectangle = function(oBody)
                 {
-
                     var element = angular.element(document.querySelector('#imagepreviewcanvas'));
                     var iCanvasHeight = element[0].offsetHeight;
                     var iCanvasWidth = element[0].offsetWidth;
                     //originalBandWidth  originalBandHeight
-                    var fX = scope.body.viewportX / scope.body.originalBandWidth;
-                    var fY = scope.body.viewportY /scope. body.originalBandHeight;
-                    fX = fX * iCanvasWidth;
-                    fY = fY * iCanvasHeight;
-                    var fNewWidth = scope.body.viewportWidth / scope.body.originalBandWidth;
-                    var fNewHeight = scope.body.viewportHeight / scope.body.originalBandHeight;
+                    var fX = oBody.viewportX / oBody.originalBandWidth;
+                    var fY = oBody.viewportY /oBody.originalBandHeight;
+                    fX =  fX * iCanvasWidth;
+                    fY =  fY * iCanvasHeight;
+                    var fNewWidth = oBody.viewportWidth / oBody.originalBandWidth;
+                    var fNewHeight = oBody.viewportHeight / oBody.originalBandHeight;
                     fNewWidth = fNewWidth * iCanvasWidth;
                     fNewHeight = fNewHeight * iCanvasHeight;
                     scope.Square.graphics.clear().setStrokeStyle(2).beginStroke("#009036").beginFill("#43516A").drawRect(fX, fY, fNewWidth, fNewHeight);
+                };
+
+                scope.$watchGroup(['body.viewportX','body.viewportY','body.viewportWidth','body.viewportHeight'], function (newValue, oldValue, scope)
+                {
+                    scope.resizeRectangle(scope.body);
+                    // var element = angular.element(document.querySelector('#imagepreviewcanvas'));
+                    // var iCanvasHeight = element[0].offsetHeight;
+                    // var iCanvasWidth = element[0].offsetWidth;
+                    // //originalBandWidth  originalBandHeight
+                    // var fX = scope.body.viewportX / scope.body.originalBandWidth;
+                    // var fY = scope.body.viewportY /scope. body.originalBandHeight;
+                    // fX =  fX * iCanvasWidth;
+                    // fY =  fY * iCanvasHeight;
+                    // var fNewWidth = scope.body.viewportWidth / scope.body.originalBandWidth;
+                    // var fNewHeight = scope.body.viewportHeight / scope.body.originalBandHeight;
+                    // fNewWidth = fNewWidth * iCanvasWidth;
+                    // fNewHeight = fNewHeight * iCanvasHeight;
+                    // scope.Square.graphics.clear().setStrokeStyle(2).beginStroke("#009036").beginFill("#43516A").drawRect(fX, fY, fNewWidth, fNewHeight);
                 });
                 /**
                  *
@@ -164,8 +180,10 @@ angular.module('wasdi.ImagePreviewDirective', [])
                     else {
                         scope.Stage.autoClear = true;
                         scope.Stage.removeAllChildren();
-                        scope.Stage.update();
+                        // scope.Stage.update();
                     }
+                    scope.resizeRectangle(scope.body);
+                    scope.Stage.update();
 
                 });
 
