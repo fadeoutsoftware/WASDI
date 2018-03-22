@@ -67,6 +67,11 @@ service('SnapOperationService', ['$http',  'ConstantsService', function ($http, 
     {
         return this.m_oHttp.get(this.APIURL + '/processing/getgraphsbyusr');
     };
+    /************************************ Masks ************************************/
+    this.getListOfProductMask = function(sFile,sBand)
+    {
+        return this.m_oHttp.get(this.APIURL + '/processing/productmasks?file=' + sFile + "&band=" + sBand );
+    }
     /************************************ OTHERS **************************************************/
 
     this.Operation = function(sOperation, sSourceProductName, sDestinationProductName, sWorkspaceId, oOptionsInput)
