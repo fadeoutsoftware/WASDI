@@ -28,11 +28,6 @@ public class DownloadFileParameter extends BaseParameter{
      */
     private String queue;
 
-    /**
-     * Is ObjectId of MongoDb
-     */
-    private String processObjId;
-
     private String boundingBox;
 
     public String getUrl() { return url; }
@@ -47,14 +42,6 @@ public class DownloadFileParameter extends BaseParameter{
 
     public void setQueue(String sQueue) {
         this.queue = sQueue;
-    }
-
-    public String getProcessObjId() {
-        return processObjId;
-    }
-
-    public void setProcessObjId(String processObjId) {
-        this.processObjId = processObjId;
     }
 
     public String getBoundingBox() {
