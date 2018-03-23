@@ -237,8 +237,6 @@ public class ProductResource {
 				// Add View model to return list
 				if (oDownloaded != null) {
 					
-					System.out.println("ProductResource.GetListByWorkspace: Product [" + iProducts + "] = " + oDownloaded.getFileName());
-					
 					ProductViewModel pVM = oDownloaded.getProductViewModel();
 					
 					
@@ -274,8 +272,7 @@ public class ProductResource {
 
 						geoPVM.setMetadata(null);
 						aoProductList.add(geoPVM);
-						
-						System.out.println("ProductResource.GetListByWorkspace: added to return list");		
+								
 
 					} else {
 						System.out.println("ProductResource.GetListByWorkspace: ProductViewModel is Null: jump product");

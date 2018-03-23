@@ -467,32 +467,55 @@ public class ProcessingResources {
 	@Path("/productmasks")
 	@Produces({"application/json"})
 	public ArrayList<ProductMaskViewModel> getProductMasks(@HeaderParam("x-session-token") String sSessionId,
-			@QueryParam("file") String productFile, @QueryParam("band") String bandName) throws Exception {
+			@QueryParam("file") String sProductFile, @QueryParam("band") String sBandName, @QueryParam("workspaceId") String sWorkspaceId) throws Exception {
 		
 		Wasdi.DebugLog("ProcessingResources.getProductMasks");
 		
-		ArrayList<ProductMaskViewModel> masks = new ArrayList<ProductMaskViewModel>();
+		if (Utils.isNullOrEmpty(sSessionId)) return null;
+		User oUser = Wasdi.GetUserFromSession(sSessionId);
+
+		if (oUser==null) return null;
+		if (Utils.isNullOrEmpty(oUser.getUserId())) return null;
+
+		String sUserId = oUser.getUserId();
 		
-		Product product = ProductIO.readProduct(productFile);
-		Band band = product.getBand(bandName);
+		Wasdi.DebugLog("Params. File: " + sProductFile +" - Band: " + sBandName + " - Workspace: " + sWorkspaceId);
 		
-		final ProductNodeGroup<Mask> maskGroup = product.getMaskGroup();
-		for (int i = 0; i < maskGroup.getNodeCount(); i++) {
-			final Mask mask = maskGroup.get(i);
-			if (mask.getRasterWidth() == band.getRasterWidth() &&
-				mask.getRasterHeight() == band.getRasterHeight()) {
-				ProductMaskViewModel vm = new ProductMaskViewModel();
-				vm.setName(mask.getName());
-				vm.setDescription(mask.getDescription());
-				vm.setMaskType(mask.getImageType().getName());
-				vm.setColorRed(mask.getImageColor().getRed());
-				vm.setColorGreen(mask.getImageColor().getGreen());
-				vm.setColorBlue(mask.getImageColor().getBlue());
-				masks.add(vm);
-			}
+		String sDownloadRootPath = m_oServletConfig.getInitParameter("DownloadRootPath");
+		if (!sDownloadRootPath.endsWith("/")) sDownloadRootPath = sDownloadRootPath + "/";
+		
+		String sProductFileFullPath = sDownloadRootPath+sUserId+ "/" + sWorkspaceId + "/" + sProductFile;
+		
+		Wasdi.DebugLog("ProcessingResources.getProductMasks: file Path: " + sProductFileFullPath);
+
+		ArrayList<ProductMaskViewModel> asMasks = new ArrayList<ProductMaskViewModel>();
+		
+		try {
+			Product product = ProductIO.readProduct(sProductFileFullPath);
+			Band band = product.getBand(sBandName);
+			
+			final ProductNodeGroup<Mask> maskGroup = product.getMaskGroup();
+			for (int i = 0; i < maskGroup.getNodeCount(); i++) {
+				final Mask mask = maskGroup.get(i);
+				if (mask.getRasterWidth() == band.getRasterWidth() &&
+					mask.getRasterHeight() == band.getRasterHeight()) {
+					ProductMaskViewModel vm = new ProductMaskViewModel();
+					vm.setName(mask.getName());
+					vm.setDescription(mask.getDescription());
+					vm.setMaskType(mask.getImageType().getName());
+					vm.setColorRed(mask.getImageColor().getRed());
+					vm.setColorGreen(mask.getImageColor().getGreen());
+					vm.setColorBlue(mask.getImageColor().getBlue());
+					asMasks.add(vm);
+				}
+			}			
+		}
+		catch (Exception oEx) {
+			oEx.printStackTrace();
+			Wasdi.DebugLog(oEx.getMessage());
 		}
 
-		return masks;
+		return asMasks;
 	}
 
 	@POST
