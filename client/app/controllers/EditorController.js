@@ -1454,6 +1454,7 @@ var EditorController = (function () {
             inputs: {
                 extras: {
                     products:oController.m_aoProducts,
+                    workspaceId: oController.m_oActiveWorkspace.workspaceId
                 }
             }
         }).then(function (modal) {
