@@ -11,13 +11,14 @@ var MaskManagerController = (function() {
         this.m_oScope.m_oController = this;
         this.m_oExtras = oExtras;
         this.m_aoProducts = oExtras.products;
+        this.m_sWorkspaceId = oExtras.workspaceId;
         this.m_oSnapOperationService = oSnapOperationService;
         this.m_oWindowsOpened = {
             rangeMask:false,
             logicalMask:false
         };
 
-        this.getProductMasks(this.m_aoProducts[0].fileName,this.m_aoProducts[0].bandsGroups.bands[0].name);
+        this.getProductMasks(this.m_aoProducts[0].fileName,this.m_aoProducts[0].bandsGroups.bands[0].name, this.m_sWorkspaceId);
         // this.getProductMasks(this.m_aoProducts[1].fileName,this.m_aoProducts[1].bandsGroups.bands[0].name);
         // this.getProductMasks(this.m_aoProducts[2].fileName,this.m_aoProducts[2].bandsGroups.bands[0].name);
         this.m_aoMasks=[];
@@ -421,14 +422,14 @@ var MaskManagerController = (function() {
             return true;
         };
 
-        MaskManagerController.prototype.getProductMasks = function(sFile,sBand)
+        MaskManagerController.prototype.getProductMasks = function(sFile,sBand, sWorkspaceId)
         {
-            if( (utilsIsStrNullOrEmpty(sFile) === true) || (utilsIsStrNullOrEmpty(sBand) === true) )
+            if( (utilsIsStrNullOrEmpty(sFile) === true) || (utilsIsStrNullOrEmpty(sBand) === true) || (utilsIsStrNullOrEmpty(sWorkspaceId)))
             {
                 return false;
             }
 
-            this.m_oSnapOperationService.getListOfProductMask(sFile,sBand).success(function (data) {
+            this.m_oSnapOperationService.getListOfProductMask(sFile,sBand,sWorkspaceId).success(function (data) {
                 if(utilsIsStrNullOrEmpty(data) === false)
                 {
 
