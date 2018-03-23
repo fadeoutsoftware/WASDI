@@ -7,7 +7,6 @@ public class PublishParameters extends BaseParameter{
 
     private String fileName;
     private String queue;
-    private String processObjId;
 
     public String getFileName() {
         return fileName;
@@ -25,11 +24,4 @@ public class PublishParameters extends BaseParameter{
         this.queue = queue;
     }
 
-    public String getProcessObjId() {
-        return processObjId;
-    }
-
-    public void setProcessObjId(String processObjId) {
-        this.processObjId = processObjId;
-    }
 }

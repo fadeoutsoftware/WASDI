@@ -11,8 +11,6 @@ public class RasterGeometricResampleParameter extends BaseParameter{
 
     private String bandName;
 
-    private String processObjId;
-
     public String getBandName() {
         return bandName;
     }
@@ -35,13 +33,5 @@ public class RasterGeometricResampleParameter extends BaseParameter{
 
     public void setDestinationProductName(String destinationProductName) {
         this.destinationProductName = destinationProductName;
-    }
-
-    public String getProcessObjId() {
-        return processObjId;
-    }
-
-    public void setProcessObjId(String processObjId) {
-        this.processObjId = processObjId;
     }
 }

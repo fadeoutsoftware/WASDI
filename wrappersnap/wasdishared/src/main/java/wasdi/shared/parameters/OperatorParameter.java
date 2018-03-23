@@ -9,8 +9,6 @@ public class OperatorParameter extends BaseParameter{
 
     private String destinationProductName;
 
-    private String processObjId;
-
     private ISetting settings;
 
     public ISetting getSettings() {
@@ -35,13 +33,5 @@ public class OperatorParameter extends BaseParameter{
 
     public void setDestinationProductName(String destinationProductName) {
         this.destinationProductName = destinationProductName;
-    }
-
-    public String getProcessObjId() {
-        return processObjId;
-    }
-
-    public void setProcessObjId(String processObjId) {
-        this.processObjId = processObjId;
     }
 }
