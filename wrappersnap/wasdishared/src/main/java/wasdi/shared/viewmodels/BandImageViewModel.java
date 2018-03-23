@@ -11,6 +11,8 @@ public class BandImageViewModel {
 	private int vp_x, vp_y, vp_w, vp_h;
 	private int img_w, img_h;
 	private List<ProductMaskViewModel> productMasks;
+	private List<RangeMaskViewModel> rangeMasks;
+	private List<MathMaskViewModel> mathMasks;
 	public String getProductFileName() {
 		return productFileName;
 	}
@@ -76,5 +78,17 @@ public class BandImageViewModel {
 	}
 	public void setProductMasks(List<ProductMaskViewModel> productMasks) {
 		this.productMasks = productMasks;
+	}
+	public List<RangeMaskViewModel> getRangeMasks() {
+		return rangeMasks;
+	}
+	public void setRangeMasks(List<RangeMaskViewModel> rangeMasks) {
+		this.rangeMasks = rangeMasks;
+	}
+	public List<MathMaskViewModel> getMathMasks() {
+		return mathMasks;
+	}
+	public void setMathMasks(List<MathMaskViewModel> mathMasks) {
+		this.mathMasks = mathMasks;
 	}
 }

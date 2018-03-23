@@ -31,7 +31,6 @@ import javax.imageio.spi.IIORegistry;
 import javax.media.jai.JAI;
 import javax.media.jai.OperationRegistry;
 import javax.media.jai.RegistryElementDescriptor;
-import javax.media.jai.operator.FormatDescriptor;
 import javax.servlet.ServletConfig;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -56,17 +55,15 @@ import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductNodeGroup;
 import org.esa.snap.core.datamodel.RasterDataNode;
 import org.esa.snap.core.gpf.annotations.Parameter;
-import org.esa.snap.rcp.imgfilter.FilteredBandAction;
+import org.esa.snap.core.jexp.impl.Tokenizer;
 import org.esa.snap.rcp.imgfilter.model.Filter;
 import org.esa.snap.rcp.imgfilter.model.StandardFilters;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 
-import com.bc.ceres.jai.operator.PaintDescriptor;
+import com.bc.ceres.binding.PropertyContainer;
 
 import it.fadeout.Wasdi;
-import it.fadeout.business.DownloadsThread;
-import it.fadeout.business.ProcessingThread;
 import wasdi.shared.LauncherOperations;
 import wasdi.shared.SnapOperatorFactory;
 import wasdi.shared.business.ProcessStatus;
@@ -93,7 +90,10 @@ import wasdi.shared.utils.BandImageManager;
 import wasdi.shared.utils.SerializationUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.BandImageViewModel;
+import wasdi.shared.viewmodels.MaskViewModel;
+import wasdi.shared.viewmodels.MathMaskViewModel;
 import wasdi.shared.viewmodels.ProductMaskViewModel;
+import wasdi.shared.viewmodels.RangeMaskViewModel;
 import wasdi.shared.viewmodels.SnapOperatorParameterViewModel;
 import wasdi.shared.viewmodels.SnapWorkflowViewModel;
 
@@ -528,10 +528,10 @@ public class ProcessingResources {
 		
 		
 		// Get Download File Path
-        String downloadPath = m_oServletConfig.getInitParameter("DownloadRootPath");
-        File productFile = new File(new File(new File(downloadPath, userId), workspace), model.getProductFileName());
+//        String downloadPath = m_oServletConfig.getInitParameter("DownloadRootPath");
+//        File productFile = new File(new File(new File(downloadPath, userId), workspace), model.getProductFileName());
 		
-//		File productFile = new File("/home/doy/tmp/wasdi/tmp/S2B_MSIL1C_20180117T102339_N0206_R065_T32TMQ_20180117T122826.zip");
+		File productFile = new File("/home/doy/tmp/wasdi/tmp/S2B_MSIL1C_20180117T102339_N0206_R065_T32TMQ_20180117T122826.zip");
         
         if (!productFile.exists()) {
         	System.out.println("ProcessingResource.getBandImage: FILE NOT FOUND: " + productFile.getAbsolutePath());
@@ -573,6 +573,7 @@ public class ProcessingResources {
 		Rectangle vp = new Rectangle(model.getVp_x(), model.getVp_y(), model.getVp_w(), model.getVp_h());
 		Dimension imgSize = new Dimension(model.getImg_w(), model.getImg_h());
 		
+		//apply product masks
 		List<ProductMaskViewModel> productMasksModels = model.getProductMasks();
 		if (productMasksModels!=null) {
 			for (ProductMaskViewModel maskModel : productMasksModels) {
@@ -588,6 +589,38 @@ public class ProcessingResources {
 			}
 		}
 		
+		//applying range masks
+		List<RangeMaskViewModel> rangeMasksModels = model.getRangeMasks();
+		if (rangeMasksModels != null) {
+			for (RangeMaskViewModel maskModel : rangeMasksModels) {
+
+				Mask mask = createMask(oSNAPProduct, maskModel, Mask.RangeType.INSTANCE);
+				
+				String externalName = Tokenizer.createExternalName(model.getBandName());
+		        PropertyContainer imageConfig = mask.getImageConfig();
+		        imageConfig.setValue(Mask.RangeType.PROPERTY_NAME_MINIMUM, maskModel.getMin());
+		        imageConfig.setValue(Mask.RangeType.PROPERTY_NAME_MAXIMUM, maskModel.getMax());
+		        imageConfig.setValue(Mask.RangeType.PROPERTY_NAME_RASTER, externalName);
+		        oSNAPProduct.addMask(mask);
+				raster.getOverlayMaskGroup().add(mask);
+			}
+		}
+		
+		//applying math masks
+		List<MathMaskViewModel> mathMasksModels = model.getMathMasks();
+		if (mathMasksModels != null) {
+			for (MathMaskViewModel maskModel : mathMasksModels) {
+				
+				Mask mask = createMask(oSNAPProduct, maskModel, Mask.BandMathsType.INSTANCE);
+				
+				PropertyContainer imageConfig = mask.getImageConfig();
+		        imageConfig.setValue(Mask.BandMathsType.PROPERTY_NAME_EXPRESSION, maskModel.getExpression());
+		        oSNAPProduct.addMask(mask);
+				raster.getOverlayMaskGroup().add(mask);
+			}
+		}
+
+		//creating the image
 		BufferedImage img;
 		try {
 			img = manager.buildImageWithMasks(raster, imgSize, vp);
@@ -608,6 +641,15 @@ public class ProcessingResources {
 	    byte[] imageData = baos.toByteArray();
 		
 		return Response.ok(imageData).build();
+	}
+
+	private Mask createMask(Product oSNAPProduct, MaskViewModel maskModel, Mask.ImageType type) {
+		String maskName = UUID.randomUUID().toString();
+		Dimension maskSize = new Dimension(oSNAPProduct.getSceneRasterWidth(), oSNAPProduct.getSceneRasterHeight());
+		Mask mask = new Mask(maskName, maskSize.width, maskSize.height, type);
+		mask.setImageColor(new Color(maskModel.getColorRed(), maskModel.getColorGreen(), maskModel.getColorBlue()));
+		mask.setImageTransparency(maskModel.getTransparency());
+		return mask;
 	}
 	
 	
