@@ -914,16 +914,6 @@ public class ProcessingResources {
 			
 			SerializationUtils.serializeObjectToXML(sPath, oParameter);
 
-//			String sLauncherPath = m_oServletConfig.getInitParameter("LauncherPath");
-//			String sJavaExe = m_oServletConfig.getInitParameter("JavaExe");
-//
-//			String sShellExString = sJavaExe + " -jar " + sLauncherPath +" -operation " + operation + " -parameter " + sPath;
-//
-//			System.out.println("SnapOperations.ExecuteOperation: shell exec " + sShellExString);
-//
-//			Process oProc = Runtime.getRuntime().exec(sShellExString);
-
-
 		} catch (IOException e) {
 			e.printStackTrace();
 			return Response.serverError().build();
