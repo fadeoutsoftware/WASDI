@@ -437,7 +437,7 @@ var EditorController = (function () {
                     }
                 };
 
-                utilsVexDialogConfirm("GOING IN IMAGE-MODE WITH MORE THAN ONE LAYER OPENED:<br>ALL BUT THE LAST ONE WILL BE CLOSED<br>ARE YOU SURE?", oRemoveOtherLayersCallback);
+                utilsVexDialogConfirm("IN EDITOR MODE ONLY LAST IMAGE WILL BE SHOWN", oRemoveOtherLayersCallback);
             }
         }
     };
