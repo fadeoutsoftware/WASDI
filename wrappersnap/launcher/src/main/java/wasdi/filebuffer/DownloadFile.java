@@ -238,9 +238,11 @@ public class DownloadFile {
 	
 	        //send update process message
 
-			if (!LauncherMain.s_oSendToRabbit.SendUpdateProcessMessage(oProcessWorkspace)) {
-				logger.debug("LauncherMain.DownloadFile: Error sending rabbitmq message to update process list");
-			}
+	        if (LauncherMain.s_oSendToRabbit != null) {
+				if (!LauncherMain.s_oSendToRabbit.SendUpdateProcessMessage(oProcessWorkspace)) {
+					logger.debug("LauncherMain.DownloadFile: Error sending rabbitmq message to update process list");
+				}	        	
+	        }
 		} catch (Exception oEx) {
 			logger.error("LauncherMain.DownloadFile: Exception " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
 			oEx.printStackTrace();
