@@ -44,7 +44,7 @@ public class WasdiProgreeMonitor implements ProgressMonitor {
 	                }
 	                
 	                try {
-						LauncherMain.s_oSendToRabbit.SendUpdateProcessMessage(process);
+						if (LauncherMain.s_oSendToRabbit != null) LauncherMain.s_oSendToRabbit.SendUpdateProcessMessage(process);
 					} catch (JsonProcessingException e) {
 						e.printStackTrace();
 						LauncherMain.s_oLogger.error("WasdiProgreeMonitor: Error during SendUpdateProcessMessage: " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(e));

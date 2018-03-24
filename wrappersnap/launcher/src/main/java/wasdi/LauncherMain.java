@@ -134,12 +134,11 @@ public class LauncherMain {
 
         oOptions.addOption(oOptOperation);
         oOptions.addOption(oOptParameter);
-
+        
+        String sOperation = "";
+        String sParameter = "";
 
         try {
-            String sOperation = "";
-            String sParameter = "";
-
 
             // parse the command line arguments
             CommandLine oLine = parser.parse( oOptions, args );
@@ -164,15 +163,36 @@ public class LauncherMain {
             oLauncher.ExecuteOperation(sOperation,sParameter);
 
             s_oLogger.debug("Operation Done, bye");
-            LauncherMain.s_oSendToRabbit.Free();
-
         }
         catch( ParseException exp ) {
             s_oLogger.error("Launcher Main Exception " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(exp));
             // oops, something went wrong
             System.err.println( "Parsing failed.  Reason: " + exp.getMessage() );
+            
+            
+            try {
+            	BaseParameter oBaseParameter = (BaseParameter) SerializationUtils.deserializeXMLToObject(sParameter);
+                ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
+                ProcessWorkspace oProcessWorkspace = oProcessWorkspaceRepository.GetProcessByProcessObjId(oBaseParameter.getProcessObjId());
+                
+                if (oProcessWorkspace != null) {
+    				oProcessWorkspace.setProgressPerc(100);
+    				oProcessWorkspace.setOperationEndDate(Utils.GetFormatDate(new Date()));
+    				oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
+    		        if (!oProcessWorkspaceRepository.UpdateProcess(oProcessWorkspace)) {
+    		        	s_oLogger.debug("LauncherMain FINAL catch: Error during process update (terminated)");
+    		        }
+
+                }
+            }
+            catch (Exception e) {
+            	s_oLogger.error("Launcher Main FINAL Exception " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(e));
+			}
             System.exit(-1);
         }
+        finally {
+        	LauncherMain.s_oSendToRabbit.Free();
+		}
 
     }
 
