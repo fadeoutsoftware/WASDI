@@ -655,7 +655,7 @@ service('MapService', ['$http','$rootScope', 'ConstantsService', function ($http
         var oMidPointBoundingBox = {};
         oMidPointBoundingBox.x = oBBCenter.lng;
         oMidPointBoundingBox.y = oBBCenter.lat;
-        //
+        //TODO FIX IT
         var isMidPointGeoserverBoundingBoxInBoundingBox = utilsIsPointInsideSquare(oMidPointGeoserverBoundingBox.x,oMidPointGeoserverBoundingBox.y, oBBPolygon.getBounds().getEast(),oBBPolygon.getBounds().getNorth(),oBBPolygon.getBounds().getWest(), oBBPolygon.getBounds().getSouth());
         var isMidPointBoundingBoxGeoserverBoundingBox = utilsIsPointInsideSquare(oMidPointBoundingBox.x,oMidPointBoundingBox.y,oGeoserverBoundingBox.maxx,oGeoserverBoundingBox.maxy,oGeoserverBoundingBox.minx,oGeoserverBoundingBox.miny);
         if( ( isMidPointBoundingBoxGeoserverBoundingBox === true ) && ( isMidPointGeoserverBoundingBoxInBoundingBox === true ) )

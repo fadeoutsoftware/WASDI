@@ -25,6 +25,7 @@ var WorkFlowManagerController = (function() {
         };
         this.isUploadingWorkflow = false;
         this.m_sSelectedWorkflowTab = 'WorkFlowTab1';
+        this.m_bIsLoadingWorkflows = false;
         this.m_oHttp =  oHttp;
         //$scope.close = oClose;
         var oController = this;
@@ -41,19 +42,26 @@ var WorkFlowManagerController = (function() {
     WorkFlowManagerController.prototype.getWorkflowsByUser = function()
     {
         var oController = this;
+        this.m_bIsLoadingWorkflows = true;
         this.m_oSnapOperationService.getWorkflowsByUser().success(function (data) {
             if(utilsIsObjectNullOrUndefined(data) == false)
             {
-                //TODO CHECK IT !
                 oController.m_aoWorkflows = data;
             }
             else
             {
-                //TODO ERROR
                 utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN GET WORKFLOWS, THERE AREN'T DATA");
             }
+
+            //it changes the default tab, we can't visualize the 'WorkFlowTab1' because there aren't workflows
+            if( (utilsIsObjectNullOrUndefined(oController.m_aoWorkflows) === true) || (oController.m_aoWorkflows.length === 0) )
+            {
+                oController.m_sSelectedWorkflowTab = 'WorkFlowTab2';
+            }
+            oController.m_bIsLoadingWorkflows = false;
         }).error(function (error) {
             utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN GET WORKFLOWS");
+            oController.m_bIsLoadingWorkflows = false;
         });
     };
 
@@ -210,12 +218,14 @@ var WorkFlowManagerController = (function() {
                 //Reload list o workFlows
                 oController.getWorkflowsByUser();
                 oController.cleanAllUploadWorkflowFields();
+
             }
             else
             {
                 //TODO ERROR
                 utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN UPLOAD WORKFLOW PROCESS");
             }
+
             oController.isUploadingWorkflow = false;
         }).error(function (error) {
             utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN UPLOAD WORKFLOW PROCESS");
@@ -266,6 +276,17 @@ var WorkFlowManagerController = (function() {
         this.m_oSelectedWorkflow = null;
     };
 
+    WorkFlowManagerController.prototype.isPossibleDoUpload = function()
+    {
+        // this.m_oWorkflowFileData.workflowName,this.m_oWorkflowFileData.workflowDescription    this.m_oFile[0]
+        var bReturnValue = false;
+        if( (utilsIsStrNullOrEmpty( this.m_oWorkflowFileData.workflowName) === false) && (utilsIsStrNullOrEmpty(this.m_oWorkflowFileData.workflowDescription) === false)
+            && (utilsIsObjectNullOrUndefined(this.m_oFile[0]) === false))
+        {
+            bReturnValue = true;
+        }
+        return bReturnValue;
+    };
     WorkFlowManagerController.$inject = [
         '$scope',
         'close',

@@ -49,6 +49,8 @@
   "EDITOR_TOOLTIP_SYNCHRONIZE_MAP_3D":"Synchronize this globe to the 2D Navigation View",
   "EDITOR_TOOLTIP_SYNCHRONIZE_MAP_2D":"Synchronize this map to the 3D Navigation View",
   "EDITOR_TOOLTIP_HOME":"Home",
+  "EDITOR_TOOLTIP_UNDO_ZOOM":"Undo zoom",
+  "EDITOR_TOOLTIP_REDO_ZOOM":"Redo zoom",
   "EDITOR_TITLE_PANEL_PRODUCTS":"Products",
   "EDITOR_TOOLTIP_OPEN_BAND":"Expand published band",
   "EDITOR_TOOLTIP_TO_GEO":"Switch to Geographic View",

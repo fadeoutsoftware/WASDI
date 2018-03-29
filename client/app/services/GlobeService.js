@@ -156,6 +156,11 @@ service('GlobeService', ['$http',  'ConstantsService','SatelliteService', functi
     };
 
     /* ADD BOUNDING BOX */
+    /**
+     *
+     * @param bbox
+     * @returns {null}
+     */
     this.addRectangleOnGlobeBoundingBox = function (bbox)
     {
         // Get the array representing the bounding box
@@ -180,7 +185,44 @@ service('GlobeService', ['$http',  'ConstantsService','SatelliteService', functi
         return redRectangle;
     };
 
+    this.addRectangleOnGLobeByGeoserverBoundingBox = function(geoserverBoundingBox,oColor)
+    {
+        try {
+            if (utilsIsObjectNullOrUndefined(geoserverBoundingBox)) {
+                console.log("MapService.addRectangleByGeoserverBoundingBox: geoserverBoundingBox is null or empty");
+                return;
+            }
+            if( (utilsIsObjectNullOrUndefined(oColor) === true))
+            {
+                oColor = Cesium.Color.RED;
+            }
+            geoserverBoundingBox = geoserverBoundingBox.replace(/\n/g,"");
+            var oBoundingBox = JSON.parse(geoserverBoundingBox);
+            // var bounds = [oBounds.maxy,oBounds.maxx,oBounds.miny,oBounds.minx];
+            // var bounds = [oBounds.maxx,oBounds.maxy,oBounds.minx,oBounds.miny];
+            var oRectangle =  Cesium.Rectangle.fromDegrees( oBoundingBox.minx, oBoundingBox.miny , oBoundingBox.maxx,oBoundingBox.maxy);
 
+            // var oRectangle = this.addRectangleOnGlobeParamArray(bounds);
+
+            // var bounds = [ [oBounds.maxy,oBounds.maxx],[oBounds.miny,oBounds.minx] ];
+            // var oRectangle = L.rectangle(bounds, {color: sColor, weight: 2}).addTo(this.m_oWasdiMap);
+            var oReturnRectangle = this.m_oWasdiGlobe.entities.add({
+                name : 'Red translucent rectangle with outline',
+                rectangle : {
+                    coordinates : oRectangle,
+                    material : oColor.withAlpha(0.3),
+                    outline : true,
+                    outlineColor : oColor
+                }
+            });
+            return oReturnRectangle;
+        }
+        catch (e)
+        {
+            console.log(e);
+        }
+        return null;
+    };
     /**
      * ADD RECTANGLE (PARAM ARRAY OF POINTS )
      * @param aoArray

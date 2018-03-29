@@ -11,20 +11,23 @@
                 <h4>
                     <!-- TAB NAVIGATION -->
                     <ul class="nav nav-tabs" role="tablist">
-                        <li ng-class="{'active':m_oController.m_sSelectedWorkflowTab === 'WorkFlowTab1'}" ng-click="m_oController.m_sSelectedWorkflowTab = 'WorkFlowTab1'">
-                            <a href="" role="tab" data-toggle="tab">
-                                {{"DIALOG_WORKFLOW_MANAGER_TAB_UPLOAD_WORKFLOW" | translate}}
-                            </a>
-                        </li>
-                        <li ng-class="{'active':m_oController.m_sSelectedWorkflowTab === 'WorkFlowTab2'}" ng-click="m_oController.m_sSelectedWorkflowTab = 'WorkFlowTab2'">
+                        
+                        <li ng-class="{'active':m_oController.m_sSelectedWorkflowTab === 'WorkFlowTab1'}" ng-click="m_oController.m_sSelectedWorkflowTab = 'WorkFlowTab1'"
+                            ng-hide=" (m_oController.m_aoWorkflows.length === 0) && (m_oController.m_bIsLoadingWorkflows === false)">
                             <a href="" role="tab" data-toggle="tab">
                                 {{"DIALOG_WORKFLOW_MANAGER_TAB_EXECUTE_SAVED_WORKFLOW" | translate}}
+                            </a>
+                        </li>
+                        
+                        <li ng-class="{'active':m_oController.m_sSelectedWorkflowTab === 'WorkFlowTab2'}" ng-click="m_oController.m_sSelectedWorkflowTab = 'WorkFlowTab2'">
+                            <a href="" role="tab" data-toggle="tab">
+                                {{"DIALOG_WORKFLOW_MANAGER_TAB_UPLOAD_WORKFLOW" | translate}}
                             </a>
                         </li>
                     </ul>
                     <!-- TAB CONTENT -->
                     <div class="tab-content">
-                        <div class="tab-pane fade in" ng-class="{'active':m_oController.m_sSelectedWorkflowTab === 'WorkFlowTab1'}" id="WorkFlowTab1" >
+                        <div class="tab-pane fade in" ng-class="{'active':m_oController.m_sSelectedWorkflowTab === 'WorkFlowTab2'}" id="WorkFlowTab2" >
 
                             <!------------------------------ FILENAME ------------------------------>
 
@@ -51,6 +54,9 @@
                                         </div>
                                     </div>
 
+                                    <div class="loadIcon" ng-show="m_oController.isUploadingWorkflow">
+                                        <invader></invader>
+                                    </div>
                                 </div>
                                 <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
                                     <div class="form-group">
@@ -64,21 +70,31 @@
 
                                 </div>
                             </div>
-                            <div class="row">
-                                <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12" ng-show="m_oController.isUploadingWorkflow">
-                                    <invader></invader>
-                                </div>
-                            </div>
+                            <!--<div class="row">-->
+                                <!--<div class="col-xs-12 col-sm-12 col-md-12 col-lg-12" ng-show="m_oController.isUploadingWorkflow">-->
+                                    <!--<div class="loadIcon">-->
+                                        <!--<invader></invader>-->
+                                    <!--</div>-->
+                                <!--</div>-->
+                            <!--</div>-->
                         </div>
 
-                        <div class="tab-pane fade in" id="WorkFlowTab2" ng-class="{'active':m_oController.m_sSelectedWorkflowTab === 'WorkFlowTab2'}">
+                        <div class="tab-pane fade in" id="WorkFlowTab1" ng-class="{'active':m_oController.m_sSelectedWorkflowTab === 'WorkFlowTab1'}"
+                                            ng-hide=" (m_oController.m_aoWorkflows.length === 0) && (m_oController.m_bIsLoadingWorkflows === false)">
 
                             <!--------------------------------   TABLE WORKFLOWS + LIST OF PRODUCTS -------------------------------->
                             <div class="row">
-                                <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+
+                                <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12" ng-show=" (m_oController.m_aoWorkflows.length === 0) && (m_oController.m_bIsLoadingWorkflows === true)">
+                                    <div class="loadIcon">
+                                        <invader></invader>
+                                    </div>
+                                </div>
+
+                                <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12" ng-show="m_oController.m_aoWorkflows.length > 0">
                                     <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
                                         <!------------------------------------- WORKFLOWS TABLE ------------------------------------->
-                                        <table class="table table-hover my-table">
+                                        <table class="table table-hover my-table" >
                                             <thead>
                                             <tr>
                                                 <th>
@@ -106,6 +122,7 @@
                                             </tr>
                                             </tbody>
                                         </table>
+
                                     </div>
                                     <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
                                         <!-------------------------------- LIST OF PRODUCTS -------------------------------->
@@ -113,12 +130,16 @@
                                             <!--ng-show="m_oController.isSelectedWorkFlow()"-->
                                         </multiselect>
 
-                                        <button class="my-button my-align-right" ng-click="m_oController.runWorkFlowPerProducts()"
-                                                                  ng-show="m_oController.isSelectedWorkFlow() && m_oController.isSelectedProduct()">
+                                        <button class="my-button my-align-right" ng-click="m_oController.runWorkFlowPerProducts()" ng-class ="{ 'disabled' : m_oController.isPossibleDoUpload()}"
+                                                                  ng-show="m_oController.isSelectedWorkFlow() && m_oController.isSelectedProduct()" >
                                             Execute workflow
                                         </button>
                                     </div>
                                 </div>
+
+                                <!--<div class="col-xs-12 col-sm-12 col-md-12 col-lg-12" ng-show=" (m_oController.m_aoWorkflows.length === 0) && (m_oController.m_bIsLoadingWorkflows === false)">-->
+                                    <!---->
+                                <!--</div>-->
                             </div>
                         </div>
 

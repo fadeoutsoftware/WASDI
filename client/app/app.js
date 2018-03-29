@@ -52,6 +52,7 @@ var wasdiApp = angular.module('wasdi', [
     'moment-picker',//time picker
     'angularModalService',//modal
     'ngFileUpload',//upload
+    'colorpicker',
     // 'btorfs.multiselect'//multi select
 
 ]);
