@@ -672,3 +672,9 @@ font-size: 2.5em !important;
 }
 
 //.leaflet-tile { border: solid red 10px; }
+
+/* FIX COLOR PICKER NEED Z INDEX 1100 (modal / map)*/
+.color-picker {
+  z-index: 1100 !important;
+
+}

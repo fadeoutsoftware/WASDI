@@ -406,7 +406,22 @@ function utilsProjectOpenGetListOfWorkspacesSelectedModal (oCallback,oOptions,oM
     return true;
 }
 
+function utilsProjectCreateBodyForProcessingBandImage(sFileName, sBandName, sFilters, iRectangleX, iRectangleY, iRectangleWidth, iRectangleHeight, iOutputWidth, iOutputHeight){
 
+    var oBandImageBody = {
+        "productFileName": sFileName,
+        "bandName": sBandName,
+        "filterVM": sFilters,
+        "vp_x": iRectangleX,
+        "vp_y": iRectangleY,
+        "vp_w": iRectangleWidth,
+        "vp_h": iRectangleHeight,
+        "img_w": iOutputWidth,
+        "img_h": iOutputHeight
+    };
+
+    return oBandImageBody;
+};
 //
 // /**
 //  *

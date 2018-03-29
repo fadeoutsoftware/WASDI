@@ -52,20 +52,20 @@
                         </a>
                     </li>
 
-                    <li ng-click="m_oController.openMaskManager()" >
-                        <!--<a class="icon-eye" href=""><i  aria-hidden="true"></i></a>-->
-                        <a href="" class="icon-mask-manager">
-                            <div>
-                                <h4>
-                                    <i  aria-hidden="true"></i>
-                                    {{'EDITOR_OPERATION_TITLE_MASK_MANAGER'|translate}}
-                                </h4>
-                            </div>
+                    <!--<li ng-click="m_oController.openMaskManager()" >-->
+                        <!--&lt;!&ndash;<a class="icon-eye" href=""><i  aria-hidden="true"></i></a>&ndash;&gt;-->
+                        <!--<a href="" class="icon-mask-manager">-->
                             <!--<div>-->
-                            <!--<i  aria-hidden="true"></i> &lt;!&ndash;PROCESSOR ICON &ndash;&gt;-->
+                                <!--<h4>-->
+                                    <!--<i  aria-hidden="true"></i>-->
+                                    <!--{{'EDITOR_OPERATION_TITLE_MASK_MANAGER'|translate}}-->
+                                <!--</h4>-->
                             <!--</div>-->
-                        </a>
-                    </li>
+                            <!--&lt;!&ndash;<div>&ndash;&gt;-->
+                            <!--&lt;!&ndash;<i  aria-hidden="true"></i> &lt;!&ndash;PROCESSOR ICON &ndash;&gt;&ndash;&gt;-->
+                            <!--&lt;!&ndash;</div>&ndash;&gt;-->
+                        <!--</a>-->
+                    <!--</li>-->
 
                     <!--<li data-toggle="tooltip" data-placement="top" title="Coming soon" style="cursor:no-drop;">-->
                     <!--<a><i class="fa fa-grav fa-3x" aria-hidden="true"></i></a>-->
@@ -373,8 +373,30 @@
                         <div ng-show="m_oController.m_b2DMapModeOn === false">
                             <span class="selected-mode">3D</span> <i class="fa fa-toggle-on fa-rotate-180" aria-hidden="true"  ></i> <span class="deselected-mode">2D</span>
                         </div>
+                    </button>
 
+                    <button  type="button" class="btn btn-primary" ng-show = "m_oController.m_b2DMapModeOn === true
+                             && m_oController.m_bIsActiveGeoraphicalMode === true && m_oController.isActiveUndoMode()"
+                             title="{{'EDITOR_TOOLTIP_UNDO_ZOOM'|translate}}" ng-click="m_oController.clickOnUndoZoom2DMap()">
+                        <i class="fa fa-undo" aria-hidden="true"></i>
+                    </button>
 
+                    <button type="button" class="btn btn-primary" ng-show = "m_oController.m_b2DMapModeOn === false
+                            && m_oController.m_bIsActiveGeoraphicalMode === true && m_oController.isActiveUndoMode()"
+                            title="{{'EDITOR_TOOLTIP_UNDO_ZOOM'|translate}}" ng-click="m_oController.clickOnUndoZoom3DGLobe()">
+                        <i class="fa fa-undo" aria-hidden="true"></i>
+                    </button>
+
+                    <button  type="button" class="btn btn-primary" ng-show = "m_oController.m_b2DMapModeOn === true
+                             && m_oController.m_bIsActiveGeoraphicalMode === true && m_oController.isActiveRedoMode()"
+                             title="{{'EDITOR_TOOLTIP_REDO_ZOOM'|translate}}" ng-click="m_oController.clickOnRedoZoom2DMap()">
+                        <i class="fa fa-repeat" aria-hidden="true"></i>
+                    </button>
+
+                    <button type="button" class="btn btn-primary" ng-show = "m_oController.m_b2DMapModeOn === false
+                            && m_oController.m_bIsActiveGeoraphicalMode === true && m_oController.isActiveRedoMode()"
+                            title="{{'EDITOR_TOOLTIP_REDO_ZOOM'|translate}}" ng-click="m_oController.clickOnRedoZoom3DGlobe()">
+                        <i class="fa fa-repeat" aria-hidden="true"></i>
                     </button>
 
                     <!--<button type="button" class="btn btn-primary" ng-click=""-->

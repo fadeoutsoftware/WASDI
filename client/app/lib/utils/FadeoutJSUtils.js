@@ -643,3 +643,36 @@ function utilsIsPointInsideSquare(x, y, pointARectangleX, pointARectangleY, poin
     };
 };
 
+function utilsConvertRGBAInObjectColor (sRGBA)
+{
+    //rgba input value examples
+    // "rgb(255,255,255)" or "rgb(255,255,255,1)"
+    if( utilsIsStrNullOrEmpty(sRGBA) === true )
+        return null;
+
+    sRGBA = sRGBA.split("r");
+    sRGBA = sRGBA[1].split("g");
+    sRGBA = sRGBA[1].split("b");
+    sRGBA = sRGBA[1].split("(");
+    sRGBA = sRGBA[1].split(")");
+    sRGBA = sRGBA[0].split(",");
+
+    if( utilsIsObjectNullOrUndefined(sRGBA) === true)
+        return null;
+
+    var oReturnValue = {
+        red:sRGBA[0],
+        green:sRGBA[1],
+        blue:sRGBA[2]
+    };
+
+    if(oReturnValue.length === 4)
+    {
+        oReturnValue.transparency = sRGBA[3];
+    }
+    else
+    {
+        oReturnValue.transparency = 1;
+    }
+    return oReturnValue;
+};
