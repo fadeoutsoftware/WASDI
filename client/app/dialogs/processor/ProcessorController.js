@@ -22,41 +22,45 @@ var ProcessorController = (function() {
         this.m_oHttp =  oHttp;
         //file .zip
         this.m_oFile = null;
+        this.m_sName = "";
+        this.m_sDescription = "";
+        this.m_sVersion = "";
 
         var oController = this;
         $scope.close = function() {
             oClose(null, 300); // close, but give 500ms for bootstrap to animate
         };
         $scope.add = function() {
-            oController.postWorkFlow(oController, oController.m_oFile[0]);
+            oController.postProcessor(oController, oController.m_oFile[0]);
             oClose(null, 300); // close, but give 500ms for bootstrap to animate
         };
 
     };
 
 
-    ProcessorController.prototype.postWorkFlow = function (oController,oSelectedFile)
+    ProcessorController.prototype.postProcessor = function (oController,oSelectedFile)
     {
         if(utilsIsObjectNullOrUndefined(oSelectedFile) === true)
         {
             return false;
         }
 
+        //processors/uploadprocessor?name=paolo1&version=0.1&description=primo
         //TODO 19/02/2018 PUT IT INSIDE A SERVICE a.corrado
         var sUrl = oController.m_oConstantsService.getAPIURL();
-        sUrl += '/processing/graph?workspace=' + oController.m_oActiveWorkspace.workspaceId + '&source=' + oSelectedFile.fileName + '&destination=' + oController.changeProductName(oSelectedFile.productFriendlyName)//oController.m_sOutputFile;
+        sUrl += '/processors/uploadprocessor?workspace=' + oController.m_oActiveWorkspace.workspaceId + '&name=' + oController.m_sName+ '&version=' + oController.m_sVersion+'&description=' + encodeURI(oController.m_sDescription);
 
         var successCallback = function(data, status)
         {
             //utilsVexDialogAlertTop();
-            var oDialog = utilsVexDialogAlertBottomRightCorner("WORKFLOW UPLOADED<br>PROCESSING WILL START IN A WHILE");
+            var oDialog = utilsVexDialogAlertBottomRightCorner("PROCESSOR UPLOADED<br>IT WILL BE DEPLOYED IN A WHILE");
             utilsVexCloseDialogAfterFewSeconds(4000,oDialog);
 
         };
 
         var errorCallback = function (data, status)
         {
-            utilsVexDialogAlertTop("GURU MEDITATION<br>THERE WAS AN ERROR UPLOADING WORKFLOW DESCRIPTION FILE");
+            utilsVexDialogAlertTop("GURU MEDITATION<br>THERE WAS AN ERROR DEPLOYING THE PROCESSOR");
         };
 
 
