@@ -8,14 +8,17 @@
             <!-- BODY -->
             <div class="modal-body ">
                 <h4>
+                    <div class="input-group">
+                        <label for="procname">Processor Name</label> <input id="procname" type="text" class="form-control" placeholder="Name" ng-model="m_oController.m_sName"><br/>
+                        <label for="procver">Processor Version</label> <input id = "procver" type="text" class="form-control" placeholder="Version" ng-model="m_oController.m_sVersion"><br/>
+                        <label for="procdescr">Processor Description</label> <input id = "procdescr" type="text" class="form-control" placeholder="Description" ng-model="m_oController.m_sDescription"><br/>
+                    </div>
                     <div class="drag-and-drop ">
-                        upload file .zip
+                        Please Drag and Drop here the .zip file with your Python processor (MUST include myProcessor.py)
                         <div ngf-drop ngf-select ng-model="m_oController.m_oFile" class="drop-box"
                              ngf-drag-over-class="'dragover'" ngf-multiple="true" ngf-allow-dir="true"
-
-                             accept="text/xml"
-
-                             ngf-pattern="'text/xml'">
+                             accept="application/zip"
+                             ngf-pattern="'.zip'">
 
                             <!-- TODO PAOLO DEVI SOSTITUIRE QUESTA VOCE AL POSTO DI QUELLA VECCHIA accept="application/zip" -->
 
