@@ -17,6 +17,7 @@ public enum LauncherOperations {
     MULTILOOKING,
     FILTER,
     NDVI,
-    
-    GRAPH
+    GRAPH,
+    DEPLOYPROCESSOR,
+    RUNPROCESSOR
 }
