@@ -37,6 +37,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import sun.management.VMManagement;
 import wasdi.filebuffer.DownloadFile;
 import wasdi.geoserver.Publisher;
+import wasdi.processors.WasdiProcessorEngine;
 import wasdi.rabbit.Send;
 import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.DownloadedFile;
@@ -54,6 +55,7 @@ import wasdi.shared.geoserver.GeoServerManager;
 import wasdi.shared.parameters.ApplyOrbitParameter;
 import wasdi.shared.parameters.BaseParameter;
 import wasdi.shared.parameters.CalibratorParameter;
+import wasdi.shared.parameters.DeployProcessorParameter;
 import wasdi.shared.parameters.DownloadFileParameter;
 import wasdi.shared.parameters.FilterParameter;
 import wasdi.shared.parameters.GraphParameter;
@@ -325,6 +327,12 @@ public class LauncherMain {
                 	ExecuteGraph(oParameter);                	
                 }
                 break;
+                case DEPLOYPROCESSOR: {
+                	WasdiProcessorEngine oEngine = new WasdiProcessorEngine(ConfigReader.getPropValue("DOWNLOAD_ROOT_PATH"), ConfigReader.getPropValue("DOCKER_TEMPLATE_PATH"));
+                	DeployProcessorParameter oParameter = (DeployProcessorParameter) SerializationUtils.deserializeXMLToObject(sParameter);
+                	oEngine.DeployProcessor(oParameter);
+                }
+                break;
                 default:
                     s_oLogger.debug("Operation Not Recognized. Nothing to do");
                     break;
@@ -345,6 +353,12 @@ public class LauncherMain {
 		catch (Exception oEx) {
 			s_oLogger.error("ExecuteGraph Exception", oEx);
 			String sError = org.apache.commons.lang.exception.ExceptionUtils.getMessage(oEx);
+			
+			// P.Campanella 2018/03/30: handle exception and close the process
+			ProcessWorkspaceRepository oRepo = new ProcessWorkspaceRepository();
+			ProcessWorkspace oProcessWorkspace = oRepo.GetProcessByProcessObjId(params.getProcessObjId());
+			updateProcessStatus(oRepo, oProcessWorkspace, ProcessStatus.ERROR, 100);
+			
 			if (s_oSendToRabbit!=null) s_oSendToRabbit.SendRabbitMessage(false, LauncherOperations.GRAPH.name(), params.getWorkspace(),sError,params.getExchange());			
 		}
 	}
@@ -641,8 +655,16 @@ public class LauncherMain {
             
     }
 
-	private void updateProcessStatus(ProcessWorkspaceRepository oProcessWorkspaceRepository, ProcessWorkspace oProcessWorkspace, ProcessStatus status, int progressPerc) throws JsonProcessingException {
-		if (oProcessWorkspace == null) return;
+	public static void updateProcessStatus(ProcessWorkspaceRepository oProcessWorkspaceRepository, ProcessWorkspace oProcessWorkspace, ProcessStatus status, int progressPerc) throws JsonProcessingException {
+		
+		if (oProcessWorkspace == null) {
+			s_oLogger.error("LauncherMain.updateProcessStatus oProcessWorkspace is null");
+			return;
+		}
+		if (oProcessWorkspaceRepository == null) {
+			s_oLogger.error("LauncherMain.updateProcessStatus oProcessWorkspace is null");
+			return;
+		}
 		
 		oProcessWorkspace.setStatus(status.name());
 		oProcessWorkspace.setProgressPerc(progressPerc);
