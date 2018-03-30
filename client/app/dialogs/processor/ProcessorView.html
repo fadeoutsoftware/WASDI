@@ -1,0 +1,43 @@
+<div class="modal fade processor-dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <!-- HEADER -->
+            <div class=" modal-header">
+                Processor
+            </div>
+            <!-- BODY -->
+            <div class="modal-body ">
+                <h4>
+                    <div class="drag-and-drop ">
+                        upload file .zip
+                        <div ngf-drop ngf-select ng-model="m_oController.m_oFile" class="drop-box"
+                             ngf-drag-over-class="'dragover'" ngf-multiple="true" ngf-allow-dir="true"
+
+                             accept="text/xml"
+
+                             ngf-pattern="'text/xml'">
+
+                            <!-- TODO PAOLO DEVI SOSTITUIRE QUESTA VOCE AL POSTO DI QUELLA VECCHIA accept="application/zip" -->
+
+                            <div ng-show="m_oController.m_oFile">File: {{m_oController.m_oFile[0].name}}</div>
+                        </div>
+
+                        <div ngf-no-file-drop>{{"DIALOG_WORKFLOW_DRAG_DROP_NOT_SUPPORTED"|translate}}</div>
+                    </div>
+                </h4>
+
+            </div>
+
+            <!-- FOOTER -->
+            <div class="modal-footer">
+                <button type="button" ng-click="close(null)" class="my-button" data-dismiss="modal">
+                    {{"DIALOG_CLOSE_BUTTON"|translate}}
+                </button>
+                <button type="button" ng-click="add(null)" class="my-button" data-dismiss="modal">
+                    Add
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>

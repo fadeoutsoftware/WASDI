@@ -31,8 +31,8 @@ var MaskManagerController = (function() {
         this.m_aoMasks=[];
         this.m_sRangeMinValue = 0.0;
         this.m_sRangeMaxValue = 1.0;
-        this.m_sRangeSelectedRaster = "Defaultvalue";
-        this.m_sRangeListOfRasters=[""];
+        this.m_sRangeSelectedRaster = "";
+        this.m_sRangeListOfRasters=[];
         this.m_oTime = $timeout;
         this.m_sTextAreaLogicalMask = "";
         // this.m_asColors = [
@@ -204,7 +204,7 @@ var MaskManagerController = (function() {
     {
         this.m_sRangeMinValue = 0.0;
         this.m_sRangeMaxValue = 1.0;
-        this.m_sRangeSelectedRaster = "Defaultvalue";
+        this.m_sRangeSelectedRaster = this.m_sRangeListOfRasters[0];
         this.m_sMaskColor.rangeMaskColor =  "rgb(0,143,255)" ;
     };
 
@@ -514,7 +514,7 @@ var MaskManagerController = (function() {
     {
         var sFileName = this.m_oProduct.fileName;
         var sBandName = this.m_oBand.name;
-        var sFilters = null;
+        var sFilters = "";
         var iRectangleX = 0;
         var iRectangleY = 0;
         var iRectangleWidth = this.m_oBand.width;
@@ -591,7 +591,7 @@ var MaskManagerController = (function() {
      */
     MaskManagerController.prototype.getMathMask = function(iRedRGB,iGreenRGB,iBlueRGB,fTransparencyRGB,sExpression)
     {
-        var oBodyMask =   {
+        var oBodyMask = {
             "colorBlue": iBlueRGB,
             "colorGreen": iGreenRGB,
             "colorRed": iRedRGB,
@@ -599,7 +599,7 @@ var MaskManagerController = (function() {
             "expression": sExpression
         };
         return oBodyMask;
-    }
+    };
 
     MaskManagerController.prototype.initRangeListOfRasters = function()
     {
@@ -614,9 +614,9 @@ var MaskManagerController = (function() {
         {
             this.m_sRangeListOfRasters.push(this.m_asShow_Tie_pointGrids[iIndex]);
         }
+        this.m_sRangeSelectedRaster = this.m_sRangeListOfRasters[0];
 
-
-    }
+    };
 
     MaskManagerController.$inject = [
         '$scope',
