@@ -1665,6 +1665,30 @@ var EditorController = (function () {
      *
      * @returns {boolean}
      */
+    EditorController.prototype.openProcessorDialog = function(){
+        var oController = this;
+        this.m_oModalService.showModal({
+            templateUrl: "dialogs/processor/ProcessorView.html",
+            controller: "ProcessorController",
+            inputs: {
+                extras: {
+                    products:oController.m_aoProducts
+                }
+            }
+        }).then(function (modal) {
+            modal.element.modal();
+            modal.close.then(function (oResult) {
+                oController.m_oProcessesLaunchedService.loadProcessesFromServer(oController.m_oActiveWorkspace.workspaceId);
+            });
+        });
+
+        return true;
+    };
+
+    /**
+     *
+     * @returns {boolean}
+     */
     EditorController.prototype.openWorkflowManagerDialog = function(){
         var oController = this;
         this.m_oModalService.showModal({
@@ -1719,10 +1743,10 @@ var EditorController = (function () {
                 {
                     if (data != undefined)
                     {
-                        // // Create the link to the stream
-                        // var blob = new Blob([data], {type: "octet/stream"});
-                        // var objectUrl = URL.createObjectURL(blob);
-                        // oController.m_sViewUrlSelectedBand = objectUrl;
+                        // Create the link to the stream
+                        var blob = new Blob([data], {type: "octet/stream"});
+                        var objectUrl = URL.createObjectURL(blob);
+                        oController.m_sViewUrlSelectedBand = objectUrl;
                         //
                         // // Set the node as selected
                         // var sNodeID = oController.m_oActiveBand.productName + "_" + oController.m_oActiveBand.name;
@@ -1935,6 +1959,7 @@ var EditorController = (function () {
 
         return true;
     };
+
 
     /**
      *
