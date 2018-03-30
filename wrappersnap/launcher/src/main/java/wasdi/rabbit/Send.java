@@ -52,6 +52,8 @@ public class Send {
      */
     private boolean SendMsg(String sRoutingKey, String sMessageAttribute)
     {
+    	if (oChannel == null) return false;
+    	
         try {        	
             oChannel.basicPublish(sExchangeName, sRoutingKey, null, sMessageAttribute.getBytes());
         } catch (IOException e) {
