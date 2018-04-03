@@ -434,6 +434,7 @@
                                             <button type="button" class="btn btn btn-primary" ng-hide="layer.checked" ng-click="layer.checked= !layer.checked "
                                                     data-toggle="tooltip" data-placement="top" title="{{'IMPORT_TOOLTIP_UNCHECK'|translate}}">
                                                 <i class="fa fa-square-o" aria-hidden="true"></i>
+                                            </button>
                                             <button type="button" class="btn btn btn-primary" ng-click="m_oController.openModalDownloadProductInSelectedWorkspaces(layer)"
                                                     ng-disabled="m_oController.isPossibleDoDownload(layer) || (layer.isDisabledToDoDownload != null && layer.isDisabledToDoDownload)"
                                                     data-toggle="tooltip" data-placement="top" title="{{'IMPORT_TOOLTIP_ADD_PRODUCT'|translate}}">
@@ -448,8 +449,11 @@
                                                 <i class="fa fa-info-circle" aria-hidden="true"></i>
                                             </button>
 
-
+                                            <button type="button" class="btn btn btn-primary"  data-toggle="tooltip" data-placement="top"
+                                                    title="{{'IMPORT_TOOLTIP_DOWNLOAD'|translate}}"  ng-disabled="true">
+                                                <i class="fa fa-download" aria-hidden="true"></i>
                                             </button>
+
 
                                         </div>
                                     </td>
