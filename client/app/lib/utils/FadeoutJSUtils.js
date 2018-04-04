@@ -676,3 +676,12 @@ function utilsConvertRGBAInObjectColor (sRGBA)
     }
     return oReturnValue;
 };
+
+function utilsComponentToHex(c) {
+    var hex = c.toString(16);
+    return hex.length == 1 ? "0" + hex : hex;
+};
+
+function utilsRgbToHex(r, g, b) {
+    return "#" + utilsComponentToHex(r) + utilsComponentToHex(g) + utilsComponentToHex(b);
+};

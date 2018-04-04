@@ -524,11 +524,16 @@ var EditorController = (function () {
         var heightMapContainer = elementMapContainer[0].offsetHeight;
         var widthMapContainer = elementMapContainer[0].offsetWidth;
 
-        var oGetBandImageBody = this.createBodyForProcessingBandImage(sFileName, this.m_oActiveBand.name,null,
+        var oGetBandImageBody = this.createBodyForProcessingBandImage(sFileName, this.m_oActiveBand.name,this.m_oActiveBand.actualFilter,
             this.m_oImagePreviewDirectivePayload.viewportX, this.m_oImagePreviewDirectivePayload.viewportY,this.m_oImagePreviewDirectivePayload.viewportWidth,
             this.m_oImagePreviewDirectivePayload.viewportHeight,widthMapContainer,heightMapContainer);
 
         this.m_bIsEditorZoomingOnExistingImage = true;
+
+        // Add user selected masks, if available
+        oGetBandImageBody.productMasks = this.m_oActiveBand.productMasks;
+        oGetBandImageBody.rangeMasks = this.m_oActiveBand.rangeMasks;
+        oGetBandImageBody.mathMasks = this.m_oActiveBand.mathMasks;
 
         // Remove the image from visibile layers: it will be added later by processingGetBandImage
         this.removeBandFromVisibleList(this.m_oActiveBand);
@@ -548,9 +553,14 @@ var EditorController = (function () {
         var heightMapContainer = elementMapContainer[0].offsetHeight;
         var widthMapContainer = elementMapContainer[0].offsetWidth;
 
-        var oGetBandImageBody = this.createBodyForProcessingBandImage(sFileName, this.m_oActiveBand.name,null,
+        var oGetBandImageBody = this.createBodyForProcessingBandImage(sFileName, this.m_oActiveBand.name,this.m_oActiveBand.actualFilter,
             0, 0,this.m_oImagePreviewDirectivePayload.originalBandWidth, this.m_oImagePreviewDirectivePayload.originalBandHeight,
             widthMapContainer,heightMapContainer);
+
+        // Add user selected masks, if available
+        oGetBandImageBody.productMasks = this.m_oActiveBand.productMasks;
+        oGetBandImageBody.rangeMasks = this.m_oActiveBand.rangeMasks;
+        oGetBandImageBody.mathMasks = this.m_oActiveBand.mathMasks;
 
         // Remove the image from visibile layers: it will be added later by processingGetBandImage
         this.removeBandFromVisibleList(this.m_oActiveBand);
@@ -1146,11 +1156,16 @@ var EditorController = (function () {
             this.m_oImagePreviewDirectivePayload.viewportWidth = oBand.width;
 
             // Create body to get big image
-            var oBodyMapContainer = this.createBodyForProcessingBandImage(sFileName,oBand.name, null, 0,0,oBand.width,oBand.height,widthMapContainer, heightMapContainer);
+            var oBodyMapContainer = this.createBodyForProcessingBandImage(sFileName,oBand.name, oBand.actualFilter, 0,0,oBand.width,oBand.height,widthMapContainer, heightMapContainer);
             // this.m_oImageMapDirectivePayload = oBodyMapContainer;
             // Disable the not till the end of the API
             var sNode = this.m_aoProducts[oBand.productIndex].productName + "_" + oBand.bandName;
             this.setTreeNodeDisabled(sNode);
+
+            // Add user selected masks, if available
+            oBodyMapContainer.productMasks = oBand.productMasks;
+            oBodyMapContainer.rangeMasks = oBand.rangeMasks;
+            oBodyMapContainer.mathMasks = oBand.mathMasks;
 
             // Call the API and display the image
             oController.processingGetBandImage(oBodyMapContainer, oController.m_oActiveWorkspace.workspaceId);
@@ -1717,6 +1732,8 @@ var EditorController = (function () {
      */
     EditorController.prototype.openMaskManager = function(oBand,oProduct){
         var oController = this;
+        var oFinalBand = oBand;
+
         this.m_oModalService.showModal({
             templateUrl: "dialogs/mask_manager/MaskManagerView.html",
             controller: "MaskManagerController",
@@ -1729,40 +1746,35 @@ var EditorController = (function () {
                 }
             }
         }).then(function (modal) {
+
             modal.element.modal();
             modal.close.then(function (oResult) {
 
-            if(utilsIsObjectNullOrUndefined(oResult) === true)
-            {
-                return false;
-            }
+                if(utilsIsObjectNullOrUndefined(oResult) === true) return false;
 
-            oController.m_oFilterService.getProductBand(oResult,oController.m_oActiveWorkspace.workspaceId).success(function (data, status) {
+                // Set a filter, if it has been selected by the user
+                oResult.filterVM = oFinalBand.actualFilter;
+                // Save the masks, as user selected
+                oFinalBand.productMasks = oResult.productMasks;
+                oFinalBand.rangeMasks = oResult.rangeMasks;
+                oFinalBand.mathMasks = oResult.mathMasks;
 
-                if (data != null)
-                {
-                    if (data != undefined)
+                oController.m_oFilterService.getProductBand(oResult,oController.m_oActiveWorkspace.workspaceId).success(function (data, status) {
+
+                    if (data != null)
                     {
-                        // Create the link to the stream
-                        var blob = new Blob([data], {type: "octet/stream"});
-                        var objectUrl = URL.createObjectURL(blob);
-                        oController.m_sViewUrlSelectedBand = objectUrl;
-                        //
-                        // // Set the node as selected
-                        // var sNodeID = oController.m_oActiveBand.productName + "_" + oController.m_oActiveBand.name;
-                        // oController.setTreeNodeAsSelected(sNodeID);
-                        //
-                        // // And set the node in the visible list
-                        // oController.m_aoVisibleBands.push(oController.m_oActiveBand);
-                        //
-                        // // Zoom on the bounding box in the 3d globe
-                        // oController.m_oGlobeService.zoomBandImageOnBBOX(oController.m_aoProducts[oController.m_oActiveBand.productIndex].bbox);
+                        if (data != undefined)
+                        {
+                            // Create the link to the stream
+                            var blob = new Blob([data], {type: "octet/stream"});
+                            var objectUrl = URL.createObjectURL(blob);
+                            oController.m_sViewUrlSelectedBand = objectUrl;
+                        }
                     }
-                }
-            }).error(function (data, status) {
-                utilsVexDialogAlertTop('GURU MEDITATION<br>ERROR PROCESSING BAND IMAGE ');
+                }).error(function (data, status) {
+                    utilsVexDialogAlertTop('GURU MEDITATION<br>ERROR PROCESSING BAND IMAGE ');
 
-            });
+                });
 
             });
         });
@@ -2077,6 +2089,8 @@ var EditorController = (function () {
         if(utilsIsObjectNullOrUndefined(oSelectedBand) === true) return false;
 
         var oController = this;
+        var oFinalSelectedBand = oSelectedBand;
+
         this.m_oModalService.showModal({
             templateUrl: "dialogs/filter_band_operation/FilterBandDialog.html",
             controller: "FilterBandController",
@@ -2084,7 +2098,7 @@ var EditorController = (function () {
                 extras: {
                     workspaceId : this.m_oActiveWorkspace.workspaceId,
                     selectedBand: oSelectedBand
-                },
+                }
             }
         }).then(function (modal) {
             modal.element.modal();
@@ -2104,16 +2118,18 @@ var EditorController = (function () {
 
                 var oBodyMapContainer = oController.createBodyForProcessingBandImage(sFileName,oResult.band.name,oResult.filter,0,0,oResult.band.width, oResult.band.height,widthMapContainer, heightMapContainer);
 
-                var oBodyImagePreview = oController.createBodyForProcessingBandImage(sFileName,oResult.band.name,oResult.filter,0,0,oResult.band.width, oResult.band.height,widthImagePreview, heightImagePreview);
+                // Filters does not apply in the preview
+
+                // Save the filter for further operations
+                oFinalSelectedBand.actualFilter = oResult.filter;
+
+                // Add user selected masks, if available
+                oResult.productMasks = oFinalSelectedBand.productMasks;
+                oResult.rangeMasks = oFinalSelectedBand.rangeMasks;
+                oResult.mathMasks = oFinalSelectedBand.mathMasks;
 
                 oController.processingGetBandImage(oBodyMapContainer, oController.m_oActiveWorkspace.workspaceId);
-                if ( (widthImagePreview > 0) && (heightImagePreview > 0) )
-                {
-                    // Show Preview Only if it is visible
-                    oController.processingGetBandPreview(oBodyImagePreview,oController.m_oActiveWorkspace.workspaceId);
-                }
 
-                // oController.openBandImage(oResult.band,oResult.filter);
                 return true;
             });
         });

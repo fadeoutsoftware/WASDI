@@ -144,7 +144,8 @@ var MaskManagerController = (function() {
             "stdev()",
             "tan(@)",
             "tanh(@)"
-        ]
+        ];
+
         // this.m_oProduct = this.m_oExtras.product;
         // this.m_oProductChecked={};
         // // this.m_oSelectedProduct = this.m_oExtras.selectedProduct;
@@ -163,7 +164,7 @@ var MaskManagerController = (function() {
         this.m_oCheckboxs = {
             bands:false,
             masks:false,
-            tiePoint:false,
+            tiePoint:false
         };
 
         this.m_asDataSources = [];
@@ -175,8 +176,8 @@ var MaskManagerController = (function() {
             var result = oController.getBodyImage();
             oClose(result, 300); // close, but give 500ms for bootstrap to animate
         };
-
     };
+
     /**
      *
      * @param sButtonClicked
@@ -226,8 +227,8 @@ var MaskManagerController = (function() {
 
     MaskManagerController.prototype.saveRangeMaskAndClose = function()
     {
-        if( utilsIsObjectNullOrUndefined(this.m_aoMasks) )
-            return false;
+        if( utilsIsObjectNullOrUndefined(this.m_aoMasks) ) return false;
+
         var sDescription = this.m_sRangeMinValue + "<=" + this.m_sRangeSelectedRaster + "<=" + this.m_sRangeMaxValue ;
         var oReturnValue = {
             name:this.newUniqueNameGenerator(),
@@ -246,8 +247,7 @@ var MaskManagerController = (function() {
 
     MaskManagerController.prototype.addOperationOrConstantOrFunctionLogicalMask = function(sValue,sIdTextArea)
     {
-        if(utilsIsStrNullOrEmpty(sIdTextArea))
-            return false;
+        if(utilsIsStrNullOrEmpty(sIdTextArea)) return false;
 
         this.insertAtCaret(sIdTextArea,sValue);
 
@@ -300,7 +300,7 @@ var MaskManagerController = (function() {
         //     oController.m_oScope.$apply();
         // },100);
 
-    }
+    };
 
     MaskManagerController.prototype.saveLogicalMask = function(){
         if( utilsIsObjectNullOrUndefined(this.m_aoMasks) )
@@ -465,10 +465,26 @@ var MaskManagerController = (function() {
             return false;
         }
 
+        var oController = this;
+
         this.m_oSnapOperationService.getListOfProductMask(sFile,sBand,sWorkspaceId).success(function (data) {
             if(utilsIsObjectNullOrUndefined(data) === false)
             {
-                //TODO ADD TO m_aoMasks
+                var aoProductMasks = data;
+
+                if (utilsIsObjectNullOrUndefined(aoProductMasks)) return;
+
+                for (var i=0; i<aoProductMasks.length; i++) {
+                    var oWasdiMask = {};
+                    oWasdiMask.type = aoProductMasks[i].maskType;
+                    oWasdiMask.description = aoProductMasks[i].description;
+                    oWasdiMask.name = aoProductMasks[i].name;
+                    oWasdiMask.transparency = aoProductMasks[i].transparency;
+                    oWasdiMask.colour = "rgb("+aoProductMasks[i].colorRed+","+aoProductMasks[i].colorGreen+","+aoProductMasks[i].colorBlue+")";
+                    oWasdiMask.originalMaskObject = aoProductMasks[i];
+                    oWasdiMask.selected = false;
+                    oController.m_aoMasks.push(oWasdiMask);
+                }
             }
         }).error(function (error) {
             utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR THE OPERATION GET PRODUCT MASK DOESN'T WORK");
@@ -476,6 +492,7 @@ var MaskManagerController = (function() {
 
         return true;
     };
+
     /**
      *
      * @param oProduct
@@ -514,7 +531,7 @@ var MaskManagerController = (function() {
     {
         var sFileName = this.m_oProduct.fileName;
         var sBandName = this.m_oBand.name;
-        var sFilters = "";
+        var sFilters = null;
         var iRectangleX = 0;
         var iRectangleY = 0;
         var iRectangleWidth = this.m_oBand.width;
@@ -533,14 +550,16 @@ var MaskManagerController = (function() {
         // add masks operation into body
         for( var iIndexMask = 0 ; iIndexMask < iNumberOfMasks; iIndexMask++ )
         {
+            if (!this.m_aoMasks[iIndexMask].selected) continue;
 
             var oColor = utilsConvertRGBAInObjectColor(this.m_aoMasks[iIndexMask].colour);
-            if(utilsIsObjectNullOrUndefined(oColor) === true)
-                break;
+            if(utilsIsObjectNullOrUndefined(oColor) === true) break;
+
             var iRedRGB = oColor.red;
             var iGreenRGB = oColor.green;
             var iBlueRGB= oColor.blue;
-            var fTransparencyRGB= oColor.transparency;
+            var fTransparencyRGB= this.m_aoMasks[iIndexMask].transparency;
+
             if(this.m_aoMasks[iIndexMask].type === 'Range')
             {
                 var iMin = this.m_aoMasks[iIndexMask].min;
@@ -553,6 +572,13 @@ var MaskManagerController = (function() {
                 var sExpression = this.m_aoMasks[iIndexMask].description;
                 var oMathMask = this.getMathMask(iRedRGB,iGreenRGB,iBlueRGB,fTransparencyRGB,sExpression);
                 oBodyImage.mathMasks.push(oMathMask);
+            }
+            else
+            {
+                var sName = this.m_aoMasks[iIndexMask].name;
+                var oProductMask = this.getProductMask(iRedRGB,iGreenRGB,iBlueRGB,fTransparencyRGB,sName);
+
+                oBodyImage.productMasks.push(oProductMask);
             }
         }
         return oBodyImage;
@@ -601,6 +627,18 @@ var MaskManagerController = (function() {
         return oBodyMask;
     };
 
+    MaskManagerController.prototype.getProductMask = function(iRedRGB,iGreenRGB,iBlueRGB,fTransparencyRGB,sName)
+    {
+        var oBodyMask = {
+            "colorBlue": iBlueRGB,
+            "colorGreen": iGreenRGB,
+            "colorRed": iRedRGB,
+            "transparency": fTransparencyRGB,
+            "name": sName
+        };
+        return oBodyMask;
+    };
+
     MaskManagerController.prototype.initRangeListOfRasters = function()
     {
         // this.m_sRangeListOfRasters
@@ -623,7 +661,7 @@ var MaskManagerController = (function() {
         'close',
         'extras',
         '$timeout',
-        'SnapOperationService',
+        'SnapOperationService'
         // 'FilterService'
         // 'GetParametersOperationService'
     ];
