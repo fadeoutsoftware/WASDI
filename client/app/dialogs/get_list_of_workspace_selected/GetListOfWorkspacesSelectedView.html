@@ -12,44 +12,57 @@
                     </div>
                 </h3>
 
-                <h4>
-                    <table class="table table-hover">
-                        <thead>
-                        <tr>
-                            <!--<th><label>Id</label></th>-->
-                            <th><label>Workspace name</label></th>
-                            <th><label>Owner</label></th>
-                            <th>
-                            </th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <tr ng-repeat="workspace in m_oController.m_aoWorkspaceList" ng-hide="m_oController.m_aoWorkspaceList.length === 0">
-                            <!--<td>{{workspace.workspaceId}}</td>-->
-                            <td>{{workspace.workspaceName}}</td>
-                            <td>{{workspace.ownerUserId}}</td>
-                            <td class="over-icon" ng-click="m_oController.selectedWorkspace(workspace)" ng-hide="m_oController.isSelectedWorkspace(workspace)">
-                                <!--<button type="button" ng-click="close(workspace)" class="my-button" data-dismiss="modal">Download</button>-->
-                                <i class="fa fa-square-o" aria-hidden="true"></i>
-                            </td>
-                            <td class="over-icon" ng-click="m_oController.deselectWorkspace(workspace)" ng-show="m_oController.isSelectedWorkspace(workspace)">
-                                <i class="fa fa-check-square-o" aria-hidden="true"></i>
-                            </td>
-                        </tr>
-                        <!--<tr ng-show="m_oController.m_aoWorkspaceList.length === 0">-->
-                            <!--<td colspan="4" class="over-icon">-->
-                                <!--Create new workspace-->
-                                <!--<i class="fa fa-plus fa-lg" aria-hidden="true" ng-click="m_oController.createWorkspace()"></i>-->
-                            <!--</td>-->
-                        <!--</tr>-->
-                        </tbody>
-                    </table>
-                    <!--<div >-->
-                    <!--<label>Id:</label>}-->
-                    <!--<label>Workspace name:</label>-->
-                    <!--<label>Owner:</label>{{workspace.ownerUserId}}-->
-                    <!--</div>-->
-                </h4>
+                <div ng-show="(m_oController.m_bisLoadingWorkspacesList === false) && (m_oController.m_aoWorkspaceList.length === 0) ">
+                    <h4>
+                        {{"WORKSPACES_ADD_NEW_WORKSPSACE"|translate}}<a href="" ng-click="m_oController.createWorkspace()">{{"WORKSPACES_BUTTON_NEW_WORKSPACE"|translate}}</a>
+                    </h4>
+                </div>
+                <div ng-show="m_oController.m_aoWorkspaceList.length > 0">
+                    <h4>
+                        <table class="table table-hover">
+                            <thead>
+                            <tr>
+                                <!--<th><label>Id</label></th>-->
+                                <th><label>Workspace name</label></th>
+                                <th><label>Owner</label></th>
+                                <th class="over-icon" ng-hide = "m_oController.m_bSelectedAllWorkspaces"
+                                    ng-click = "m_oController.selectAllWorkspaces()">
+                                    <i class="fa fa-square-o" aria-hidden="true" ></i>
+                                </th>
+                                <th class="over-icon" ng-show = "m_oController.m_bSelectedAllWorkspaces"
+                                    ng-click = "m_oController.deselectAllWorkspaces()">
+                                    <i class="fa fa-check-square-o" aria-hidden="true"></i>
+                                </th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr ng-repeat="workspace in m_oController.m_aoWorkspaceList" ng-hide="m_oController.m_aoWorkspaceList.length === 0">
+                                <!--<td>{{workspace.workspaceId}}</td>-->
+                                <td>{{workspace.workspaceName}}</td>
+                                <td>{{workspace.ownerUserId}}</td>
+                                <td class="over-icon" ng-click="m_oController.selectedWorkspace(workspace)" ng-hide="m_oController.isSelectedWorkspace(workspace)">
+                                    <!--<button type="button" ng-click="close(workspace)" class="my-button" data-dismiss="modal">Download</button>-->
+                                    <i class="fa fa-square-o" aria-hidden="true"></i>
+                                </td>
+                                <td class="over-icon" ng-click="m_oController.deselectWorkspace(workspace)" ng-show="m_oController.isSelectedWorkspace(workspace)">
+                                    <i class="fa fa-check-square-o" aria-hidden="true"></i>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="4">
+                                    <h4>
+                                       <a href="" ng-click="m_oController.createWorkspace()">Add new workspace</a>
+                                    </h4>
+                                </td>
+                            </tr>
+
+                            </tbody>
+
+                        </table>
+
+                    </h4>
+                </div>
+
             </div>
             <div class="modal-footer">
                 <!--<button type="button" ng-click="close('download')" class="my-button" data-dismiss="modal">Download</button>-->
