@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns="http://www.w3.org/2000/svg" xml:space="preserve" width="1024px" height="1024px" shape-rendering="geometricPrecision" text-rendering="geometricPrecision" image-rendering="optimizeQuality" fill-rule="evenodd" clip-rule="evenodd" viewBox="0 0 10240 10240" xmlns:xlink="http://www.w3.org/1999/xlink">
+	<title>garbage_can icon</title>
+	<desc>garbage_can icon from the IconExperience.com O-Collection. Copyright by INCORS GmbH (www.incors.com).</desc>
+	<path id="curve2" fill="#FFFFFF" d="M2240 3520l5760 0 0 5504c0,317 -288,576 -640,576l-4480 0c-352,0 -640,-259 -640,-576l0 -5504zm5284 320c86,0 156,288 156,640l0 3840c0,352 -70,640 -156,640 -86,0 -156,-287 -156,-640l0 -3840c0,-353 70,-640 156,-640zm-2404 0c353,0 640,288 640,640l0 3840c0,352 -288,640 -640,640 -352,0 -640,-287 -640,-640l0 -3840c0,-353 288,-640 640,-640zm-1600 0c176,0 320,288 320,640l0 3840c0,352 -144,640 -320,640 -176,0 -320,-288 -320,-640l0 -3840c0,-353 144,-640 320,-640zm-804 0c86,0 156,288 156,640l0 3840c0,352 -70,640 -156,640 -86,0 -156,-287 -156,-640l0 -3840c0,-352 70,-640 156,-640zm4004 0c176,0 320,288 320,640l0 3840c0,352 -144,640 -320,640 -176,0 -320,-287 -320,-640l0 -3840c0,-353 144,-640 320,-640z"/>
+	<path id="curve1" fill="#FFFFFF" d="M4480 1930l-640 0 0 -330c0,-176 144,-320 320,-320l1920 0c176,0 320,144 320,320l0 330 -640 0 0 -330 -1280 0 0 330z"/>
+	<path id="curve0" fill="#FFFFFF" d="M2560 1920l5120 0c353,0 640,288 640,640l0 640 -6400 0 0 -640c0,-353 287,-640 640,-640z"/>
+</svg>

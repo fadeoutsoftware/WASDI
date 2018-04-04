@@ -11,6 +11,8 @@
 @import "search_orbit";
 @import "catalog";
 
+//utilities
+@import "utilities";
 
 //directive css
 @import "../directives/tree_directive/tree";
@@ -679,3 +681,48 @@ font-size: 2.5em !important;
   z-index: 1100 !important;
 
 }
+/********************** OVERRIDE LEAFLET ************************/
+
+//.leaflet-bar{
+//  a{
+//    background-color: $wasdi-blue-logo !important;
+//    color: $wasdi-white !important;
+//    &:hover{
+//      color: $wasdi-green-logo !important;
+//
+//
+//    }
+//  }
+//
+//}
+
+.leaflet-draw-toolbar{
+  $leaflet-icon-size:20px;
+  .leaflet-draw-draw-rectangle {
+    @include leaflet-toolbar-svg-icon("../assets/icons/mapBar/compasses_white.svg",$leaflet-icon-size,$wasdi-blue-logo);
+    &:hover{
+      @include leaflet-toolbar-svg-icon("../assets/icons/mapBar/compasses_green.svg",$leaflet-icon-size,$wasdi-blue-logo);
+    }
+  }
+
+
+  .leaflet-draw-edit-edit{
+    @include leaflet-toolbar-svg-icon("../assets/icons/mapBar/edit_white.svg",$leaflet-icon-size,$wasdi-blue-logo);
+    &:hover{
+      @include leaflet-toolbar-svg-icon("../assets/icons/mapBar/edit_green.svg",$leaflet-icon-size,$wasdi-blue-logo);
+    }
+  }
+
+  .leaflet-draw-edit-remove{
+    @include leaflet-toolbar-svg-icon("../assets/icons/mapBar/garbage_can_white.svg",$leaflet-icon-size,$wasdi-blue-logo);
+    &:hover{
+      @include leaflet-toolbar-svg-icon("../assets/icons/mapBar/garbage_can_green.svg",$leaflet-icon-size,$wasdi-blue-logo);
+    }
+  }
+
+
+}
+
+
+
+

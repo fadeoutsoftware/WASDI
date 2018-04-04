@@ -204,7 +204,7 @@ service('MapService', ['$http','$rootScope', 'ConstantsService', function ($http
                 marker:false,
                 polyline:false,
                 circle:false,
-                polygon:false
+                polygon:false,
             },
 
             edit: {
