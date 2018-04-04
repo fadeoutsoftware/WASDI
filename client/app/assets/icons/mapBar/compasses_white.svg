@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns="http://www.w3.org/2000/svg" xml:space="preserve" width="1024px" height="1024px" shape-rendering="geometricPrecision" text-rendering="geometricPrecision" image-rendering="optimizeQuality" fill-rule="evenodd" clip-rule="evenodd" viewBox="0 0 10240 10240" xmlns:xlink="http://www.w3.org/1999/xlink">
+	<title>compasses icon</title>
+	<desc>compasses icon from the IconExperience.com O-Collection. Copyright by INCORS GmbH (www.incors.com).</desc>
+	<path id="curve2" fill="#FFFFFF" d="M1920,6720 1920,6400 1920,6400 4275,6400 4800,6400 4817,5760 5423,5760 5440,6400 5965,6400 8320,6400 8320,6400 8320,6720 8320,7040 5440,7040 5440,7680 4800,7680 4800,7040 1920,7040z"/>
+	<path id="curve1" fill="#FFFFFF" d="M2113 8927c-249,-249 -416,-565 -243,-872l2108 -3733c225,229 519,391 848,452l-2907 5147 193 -993zm6013 0c249,-249 416,-565 243,-872l-2108 -3733c-225,229 -519,391 -848,452l2907 5147 -193 -993z"/>
+	<path id="curve0" fill="#FFFFFF" d="M4800 640l640 0 0 1320c552,142 960,643 960,1240 0,707 -573,1280 -1280,1280 -707,0 -1280,-573 -1280,-1280 0,-596 408,-1098 960,-1240l0 -1320zm320 1920c353,0 640,287 640,640 0,353 -287,640 -640,640 -353,0 -640,-287 -640,-640 0,-353 287,-640 640,-640z"/>
+</svg>

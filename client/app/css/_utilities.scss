@@ -1,0 +1,16 @@
+@mixin svg-icon($url,$size) {
+
+  background: url($url) ;
+  background-size: $size;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+@mixin leaflet-toolbar-svg-icon($url,$size,$color) {
+  background: url($url)!important;
+  background-color: $color !important;
+  background-size:$size !important;
+  background-repeat: no-repeat !important;
+  background-position: center !important;
+  cursor: pointer !important;
+}
