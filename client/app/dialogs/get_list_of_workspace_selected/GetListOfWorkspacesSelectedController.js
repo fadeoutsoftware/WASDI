@@ -11,10 +11,11 @@ var GetListOfWorkspacesController = (function() {
         this.m_oExtras = oExtras
         this.m_sButtonName = oExtras.buttonName;
         this.m_sTitleModal = oExtras.titleModal;
-
+        this.m_bSelectedAllWorkspaces = false;
         this.m_oWorkspaceService = oWorkspaceService;
         this.m_aoWorkspaceList = [];
         this.m_aoWorkspacesSelected = [];
+        this.m_bisLoadingWorkspacesList = true;
         this.m_oClose = oClose;
         //$scope.close = oClose;
         $scope.close = function(result) {
@@ -25,11 +26,36 @@ var GetListOfWorkspacesController = (function() {
     }
 
     /**
+     * selecteAllWorkspaces
+     */
+    GetListOfWorkspacesController.prototype.selectAllWorkspaces = function ()
+    {
+        this.m_bSelectedAllWorkspaces = true;
+        var iNumberOfWorkspaces = this.m_aoWorkspaceList.length;
+        for(var iIndexWorkspace = 0 ; iIndexWorkspace < iNumberOfWorkspaces ; iIndexWorkspace++)
+        {
+            this.selectedWorkspace(this.m_aoWorkspaceList[iIndexWorkspace]);
+        }
+    }
+    /**
+     * deselectAllWorkspaces
+     */
+    GetListOfWorkspacesController.prototype.deselectAllWorkspaces = function ()
+    {
+        this.m_bSelectedAllWorkspaces = false;
+        var iNumberOfWorkspaces = this.m_aoWorkspaceList.length;
+        for(var iIndexWorkspace = 0 ; iIndexWorkspace < iNumberOfWorkspaces ; iIndexWorkspace++)
+        {
+            this.deselectWorkspace(this.m_aoWorkspaceList[iIndexWorkspace]);
+        }
+    }
+    /**
      * getWorkspaces
      */
     GetListOfWorkspacesController.prototype.getWorkspaces = function()
     {
         var oController = this;
+        this.m_bisLoadingWorkspacesList = true;
         this.m_oWorkspaceService.getWorkspacesInfoListByUser().success(function (data, status) {
             if (data != null)
             {
@@ -38,8 +64,10 @@ var GetListOfWorkspacesController = (function() {
                     oController.m_aoWorkspaceList = data;
                 }
             }
+            oController.m_bisLoadingWorkspacesList = false;
         }).error(function (data,status) {
             //alert('error');
+            oController.m_bisLoadingWorkspacesList = false;
             utilsVexDialogAlertTop('GURU MEDITATION<br>ERROR IN WORKSPACESINFO');
         });
     };
@@ -94,6 +122,28 @@ var GetListOfWorkspacesController = (function() {
 
     };
 
+    /**
+     * createWorkspace
+     */
+    GetListOfWorkspacesController.prototype.createWorkspace = function () {
+
+        var oController = this;
+
+        this.m_oWorkspaceService.createWorkspace().success(function (data, status) {
+            if (data != null)
+            {
+                if (data != undefined)
+                {
+                    // var sWorkspaceId = data.stringValue;
+                    // oController.openWorkspace(sWorkspaceId);
+                    oController.getWorkspaces();
+                }
+            }
+        }).error(function (data,status) {
+            //alert('error');
+            utilsVexDialogAlertTop('GURU MEDITATION<br>ERROR IN CREATE WORKSPACE');
+        });
+    };
     GetListOfWorkspacesController.$inject = [
         '$scope',
         'close',
