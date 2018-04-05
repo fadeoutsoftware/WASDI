@@ -1142,19 +1142,6 @@ var EditorController = (function () {
             var heightMapContainer = elementMapContainer[0].offsetHeight;
             var widthMapContainer = elementMapContainer[0].offsetWidth;
 
-            // Get Preview Dimension
-            var elementImagePreview = angular.element(document.querySelector('#imagepreviewcanvas'));
-            var heightImagePreview = elementImagePreview[0].offsetHeight;
-            var widthImagePreview = elementImagePreview[0].offsetWidth;
-
-            // Initialize the info for the Image Preview Directive
-            this.m_oImagePreviewDirectivePayload.originalBandHeight = oBand.height;
-            this.m_oImagePreviewDirectivePayload.originalBandWidth = oBand.width;
-            this.m_oImagePreviewDirectivePayload.viewportX = 0;
-            this.m_oImagePreviewDirectivePayload.viewportY = 0;
-            this.m_oImagePreviewDirectivePayload.viewportHeight = oBand.height;
-            this.m_oImagePreviewDirectivePayload.viewportWidth = oBand.width;
-
             // Create body to get big image
             var oBodyMapContainer = this.createBodyForProcessingBandImage(sFileName,oBand.name, oBand.actualFilter, 0,0,oBand.width,oBand.height,widthMapContainer, heightMapContainer);
             // this.m_oImageMapDirectivePayload = oBodyMapContainer;
@@ -1170,15 +1157,6 @@ var EditorController = (function () {
             // Call the API and display the image
             oController.processingGetBandImage(oBodyMapContainer, oController.m_oActiveWorkspace.workspaceId);
 
-            // The preview is available?
-            if ( (widthImagePreview > 0) && (heightImagePreview > 0) )
-            {
-                // Yes call API also for preview
-                var oBodyImagePreview = this.createBodyForProcessingBandImage(sFileName,oBand.name, null, 0,0,oBand.width,oBand.height,widthImagePreview, heightImagePreview);
-                // Show it
-                oController.processingGetBandPreview(oBodyImagePreview,oController.m_oActiveWorkspace.workspaceId);
-            }
-
             // There was a band visualized before?
             if (utilsIsObjectNullOrUndefined(oLastActiveBand) == false) {
                 // Deselect the node
@@ -1188,6 +1166,31 @@ var EditorController = (function () {
                 // Remove it from Visible Layer List
                 oController.removeBandFromVisibleList(oLastActiveBand);
             }
+        }
+
+
+        // Anyway, show the preview
+
+        // Get Preview Dimension
+        var elementImagePreview = angular.element(document.querySelector('#imagepreviewcanvas'));
+        var heightImagePreview = elementImagePreview[0].offsetHeight;
+        var widthImagePreview = elementImagePreview[0].offsetWidth;
+
+        // Initialize the info for the Image Preview Directive
+        this.m_oImagePreviewDirectivePayload.originalBandHeight = oBand.height;
+        this.m_oImagePreviewDirectivePayload.originalBandWidth = oBand.width;
+        this.m_oImagePreviewDirectivePayload.viewportX = 0;
+        this.m_oImagePreviewDirectivePayload.viewportY = 0;
+        this.m_oImagePreviewDirectivePayload.viewportHeight = oBand.height;
+        this.m_oImagePreviewDirectivePayload.viewportWidth = oBand.width;
+
+        // The preview is available?
+        if ( (widthImagePreview > 0) && (heightImagePreview > 0) )
+        {
+            // Yes call API also for preview
+            var oBodyImagePreview = this.createBodyForProcessingBandImage(sFileName,oBand.name, null, 0,0,oBand.width,oBand.height,widthImagePreview, heightImagePreview);
+            // Show it
+            oController.processingGetBandPreview(oBodyImagePreview,oController.m_oActiveWorkspace.workspaceId);
         }
     };
 
@@ -1727,6 +1730,22 @@ var EditorController = (function () {
     };
 
     /**
+     * Handle click on "show mask" from image editor
+     */
+    EditorController.prototype.openMaskManagerFromImageEditor = function () {
+        if (utilsIsObjectNullOrUndefined(this.m_oActiveBand)) return;
+        var oFoundProduct = this.m_aoProducts[this.m_oActiveBand.productIndex];
+        this.openMaskManager(this.m_oActiveBand,oFoundProduct);
+    };
+
+    /**
+     * Handle click on "show filters" from image editor
+     */
+    EditorController.prototype.openFiltersFromImageEditor = function () {
+        if (utilsIsObjectNullOrUndefined(this.m_oActiveBand)) return;
+        this.filterBandDialog(this.m_oActiveBand);
+    };
+    /**
      *
      * @returns {boolean}
      */
@@ -2133,9 +2152,8 @@ var EditorController = (function () {
                 return true;
             });
         });
-
         return true;
-    }
+    };
 
 
     /*********************************************************** OPERATION MENU ***********************************************************/

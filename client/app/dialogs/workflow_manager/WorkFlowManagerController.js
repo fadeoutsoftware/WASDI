@@ -70,7 +70,7 @@ var WorkFlowManagerController = (function() {
      */
     WorkFlowManagerController.prototype.runWorkFlowPerProducts = function()
     {
-        var iNumberOfProducts = this.m_asSelectedProducts.length
+        var iNumberOfProducts = this.m_asSelectedProducts.length;
         if(utilsIsObjectNullOrUndefined(this.m_oSelectedWorkflow) === true)
         {
             return false;
@@ -85,7 +85,7 @@ var WorkFlowManagerController = (function() {
             }
 
             var sDestinationProductName = oProduct.name + "_workflow";
-            this.executeGraphFromWorkflowId(this.m_sWorkspaceId,oProduct.name,sDestinationProductName,this.m_oSelectedWorkflow.workflowId);
+            this.executeGraphFromWorkflowId(this.m_sWorkspaceId,oProduct.fileName,sDestinationProductName,this.m_oSelectedWorkflow.workflowId);
         }
         return true;
     };
