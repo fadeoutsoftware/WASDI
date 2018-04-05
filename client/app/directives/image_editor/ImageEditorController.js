@@ -88,7 +88,8 @@ angular.module('wasdi.ImageEditorDirective', [])
                         scope.zoom();
                     }
 
-                    scope.m_bIsActiveZoom = false;
+                    // scope.m_bIsActiveZoom = false;
+                    //scope.m_bIsActiveZoom = true;
                     scope.clickOnGetImage();
 
                 });

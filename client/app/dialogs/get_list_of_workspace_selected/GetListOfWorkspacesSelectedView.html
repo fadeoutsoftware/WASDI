@@ -51,7 +51,8 @@
                             <tr>
                                 <td colspan="4">
                                     <h4>
-                                       <a href="" ng-click="m_oController.createWorkspace()">Add new workspace</a>
+                                       <a href="" ng-click="m_oController.createWorkspace()" ng-hide="m_oController.m_bIsCreatingWorskapce">Add new workspace</a>
+                                       <invaderfixed ng-show="m_oController.m_bIsCreatingWorskapce"></invaderfixed>
                                     </h4>
                                 </td>
                             </tr>

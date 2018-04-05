@@ -31,7 +31,10 @@ angular.module('wasdi.TreeDirective', [])
                      *       'Children':[]
                      * }
                      * */
-
+                    if(utilsIsSubstring(oElement.name,"node.") === true)
+                    {
+                        this.replaceNodeNameWithOperationName(oElement);
+                    }
                     var oNode = new Object();
                     oNode.text = oElement.name;
                     oNode.attributes = oElement.attributes;
@@ -53,6 +56,25 @@ angular.module('wasdi.TreeDirective', [])
                 }
 
             };
+
+            this.replaceNodeNameWithOperationName = function(oElement)
+            {
+                if(utilsIsObjectNullOrUndefined(oElement) === true)
+                {
+                    return false;
+                }
+                var iNumberOfElementAttributes = oElement.attributes.length;
+                for(var iIndexElementAttributes = 0 ; iIndexElementAttributes < iNumberOfElementAttributes; iIndexElementAttributes++)
+                {
+                    if(oElement.attributes[iIndexElementAttributes].description === "operator")
+                    {
+                        oElement.name = oElement.attributes[iIndexElementAttributes].data;
+                        break;
+                    }
+                }
+                return true;
+            };
+
             this.myDisableNode = function(sIdInput)
             {
                 if(utilsIsObjectNullOrUndefined(sIdInput) === true)

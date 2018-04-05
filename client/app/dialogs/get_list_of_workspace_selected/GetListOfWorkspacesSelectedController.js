@@ -16,6 +16,7 @@ var GetListOfWorkspacesController = (function() {
         this.m_aoWorkspaceList = [];
         this.m_aoWorkspacesSelected = [];
         this.m_bisLoadingWorkspacesList = true;
+        this.m_bIsCreatingWorskapce = false;
         this.m_oClose = oClose;
         //$scope.close = oClose;
         $scope.close = function(result) {
@@ -128,7 +129,7 @@ var GetListOfWorkspacesController = (function() {
     GetListOfWorkspacesController.prototype.createWorkspace = function () {
 
         var oController = this;
-
+        this.m_bIsCreatingWorskapce = true;
         this.m_oWorkspaceService.createWorkspace().success(function (data, status) {
             if (data != null)
             {
@@ -139,9 +140,11 @@ var GetListOfWorkspacesController = (function() {
                     oController.getWorkspaces();
                 }
             }
+            oController.m_bIsCreatingWorskapce = false;
         }).error(function (data,status) {
             //alert('error');
             utilsVexDialogAlertTop('GURU MEDITATION<br>ERROR IN CREATE WORKSPACE');
+            oController.m_bIsCreatingWorskapce = false;
         });
     };
     GetListOfWorkspacesController.$inject = [
