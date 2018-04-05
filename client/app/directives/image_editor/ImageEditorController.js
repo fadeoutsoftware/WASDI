@@ -9,7 +9,9 @@ angular.module('wasdi.ImageEditorDirective', [])
                 urlImage : '=',
                 body : '=',
                 getDefaultImage:'&',
-                applyEditorPreviewImage:'&'
+                applyEditorPreviewImage:'&',
+                maskManager: '&',
+                filterManager: '&'
                 // isLoaded : '='
                 // * Text binding ('@' or '@?') *
                 // * One-way binding ('<' or '<?') *
@@ -143,7 +145,7 @@ angular.module('wasdi.ImageEditorDirective', [])
                 });
 
                 scope.clickOnZoom = function () {
-                    scope.m_bIsActiveZoom = true;
+                    scope.m_bIsActiveZoom = !scope.m_bIsActiveZoom;
                 };
 
                 scope.clickOnResetZoom = function () {
@@ -154,6 +156,14 @@ angular.module('wasdi.ImageEditorDirective', [])
 
                     scope.clickOnGetDefaultImage();
                 };
+
+                scope.clickOnMask = function () {
+                    scope.maskManager();
+                };
+
+                scope.clickOnFilter = function () {
+                    scope.filterManager();
+                }
 
                 scope.isNotPointInsideDraggerSquare = function(x, y) {
                     if( utilsIsObjectNullOrUndefined(scope.Square ) === true || utilsIsObjectNullOrUndefined(scope.Dragger) === true   )
