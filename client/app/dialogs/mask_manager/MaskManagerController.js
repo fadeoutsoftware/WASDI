@@ -24,7 +24,7 @@ var MaskManagerController = (function() {
             rangeMask:false,
             logicalMask:false
         };
-
+        this.m_bAreProductMasksLoading = false;
         this.getProductMasks(this.m_oProduct.fileName,this.m_oBand.name, this.m_sWorkspaceId);
         // this.getProductMasks(this.m_aoProducts[1].fileName,this.m_aoProducts[1].bandsGroups.bands[0].name);
         // this.getProductMasks(this.m_aoProducts[2].fileName,this.m_aoProducts[2].bandsGroups.bands[0].name);
@@ -466,8 +466,9 @@ var MaskManagerController = (function() {
         }
 
         var oController = this;
-
+        this.m_bAreProductMasksLoading = true;
         this.m_oSnapOperationService.getListOfProductMask(sFile,sBand,sWorkspaceId).success(function (data) {
+            oController.m_bAreProductMasksLoading = false;
             if(utilsIsObjectNullOrUndefined(data) === false)
             {
                 var aoProductMasks = data;
@@ -486,8 +487,10 @@ var MaskManagerController = (function() {
                     oController.m_aoMasks.push(oWasdiMask);
                 }
             }
+
         }).error(function (error) {
             utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR THE OPERATION GET PRODUCT MASK DOESN'T WORK");
+            oController.m_bAreProductMasksLoading = false;
         });
 
         return true;
