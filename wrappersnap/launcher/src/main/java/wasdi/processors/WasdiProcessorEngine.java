@@ -4,7 +4,12 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.zip.ZipEntry;
@@ -31,6 +36,7 @@ public class WasdiProcessorEngine {
 		m_sWorkingRootPath = sWorkingRootPath;
 		m_sDockerTemplatePath = sDockerTemplatePath;
 	}
+	
 	/**
 	 * Deploy a new Processor in WASDI
 	 * @param oParameter
@@ -117,7 +123,7 @@ public class WasdiProcessorEngine {
 			//docker run -it -p 8888:5000 fadeout/wasdi:0.6
 			asArgs.clear();
 			asArgs.add("run");
-			asArgs.add("-p"+iProcessorPort+":5000");
+			asArgs.add("-p127.0.0.1:"+iProcessorPort+":5000");
 			asArgs.add(sDockerName);
 			
 			shellExec(sCommand, asArgs, false);
@@ -261,8 +267,46 @@ public class WasdiProcessorEngine {
 			ProcessorRepository oProcessorRepository = new ProcessorRepository();
 			Processor oProcessor = oProcessorRepository.GetProcessor(sProcessorId);
 			
-			// TODO: Ricreare il JSON
-			// CHIAMARE API localhost:port
+			// Check processor
+			if (oProcessor == null) {
+				// Catch block will handle 
+				throw new Exception("Impossible to find processor " + sProcessorId);
+			}
+			
+			// Decode JSON
+			//String sEncodedJson = oParameter.getJSON();
+			//String sJson = java.net.URLDecoder.decode(sEncodedJson, "UTF-8");
+			String sJson = oParameter.getJson();
+			
+			LauncherMain.s_oLogger.debug("WasdiProcessorEngine.run: calling " + sProcessorName + " at port " + oProcessor.getPort());
+			
+			// Call localhost:port
+			String sUrl = "http://localhost:"+oProcessor.getPort()+"/run/"+sProcessorId;
+			URL oProcessorUrl = new URL(sUrl);
+			HttpURLConnection oConnection = (HttpURLConnection) oProcessorUrl.openConnection();
+			oConnection.setDoOutput(true);
+			oConnection.setRequestMethod("POST");
+			oConnection.setRequestProperty("Content-Type", "application/json");
+
+			OutputStream oOutputStream = oConnection.getOutputStream();
+			oOutputStream.write(sJson.getBytes());
+			oOutputStream.flush();
+
+			if (oConnection.getResponseCode() != HttpURLConnection.HTTP_CREATED) {
+				throw new RuntimeException("Failed : HTTP error code : " + oConnection.getResponseCode());
+			}
+
+			BufferedReader oBufferedReader = new BufferedReader(new InputStreamReader((oConnection.getInputStream())));
+
+			String sOutputResult;
+			LauncherMain.s_oLogger.debug("WasdiProcessorEngine.run: Output from Server .... \n");
+			while ((sOutputResult = oBufferedReader.readLine()) != null) {
+				LauncherMain.s_oLogger.debug("WasdiProcessorEngine.run: " + sOutputResult);
+			}
+
+			oConnection.disconnect();
+			
+			LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.DONE, 100);
 		}
 		catch (Exception oEx) {
 			//String sError = org.apache.commons.lang.exception.ExceptionUtils.getMessage(oEx);

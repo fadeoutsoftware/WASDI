@@ -333,6 +333,12 @@ public class LauncherMain {
                 	oEngine.DeployProcessor(oParameter);
                 }
                 break;
+                case RUNPROCESSOR: {
+                	WasdiProcessorEngine oEngine = new WasdiProcessorEngine(ConfigReader.getPropValue("DOWNLOAD_ROOT_PATH"), ConfigReader.getPropValue("DOCKER_TEMPLATE_PATH"));
+                	DeployProcessorParameter oParameter = (DeployProcessorParameter) SerializationUtils.deserializeXMLToObject(sParameter);
+                	oEngine.run(oParameter);
+                }
+                break;
                 default:
                     s_oLogger.debug("Operation Not Recognized. Nothing to do");
                     break;
@@ -377,6 +383,8 @@ public class LauncherMain {
         ProcessWorkspace oProcessWorkspace = oProcessWorkspaceRepository.GetProcessByProcessObjId(oParameter.getProcessObjId());
 
         try {
+        	updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 0);
+        	
             s_oLogger.debug("LauncherMain.Download: Download Start");
 
             oDownloadFile.setProviderUser(oParameter.getDownloadUser());
@@ -391,7 +399,7 @@ public class LauncherMain {
                 //get process pid
                 oProcessWorkspace.setPid(GetProcessId());
                 
-                updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 0);
+                updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 2);
                 
             } else {
             	s_oLogger.debug("LauncherMain.Download: process not found: " + oParameter.getProcessObjId());
