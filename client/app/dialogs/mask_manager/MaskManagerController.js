@@ -567,7 +567,7 @@ var MaskManagerController = (function() {
                 var oRangeMask = this.getRangeMaskBody(iRedRGB,iGreenRGB,iBlueRGB,fTransparencyRGB,iMin,iMax);
                 oBodyImage.rangeMasks.push(oRangeMask);
             }
-            if(this.m_aoMasks[iIndexMask].type === 'Maths')
+            else if(this.m_aoMasks[iIndexMask].type === 'Maths')
             {
                 var sExpression = this.m_aoMasks[iIndexMask].description;
                 var oMathMask = this.getMathMask(iRedRGB,iGreenRGB,iBlueRGB,fTransparencyRGB,sExpression);
