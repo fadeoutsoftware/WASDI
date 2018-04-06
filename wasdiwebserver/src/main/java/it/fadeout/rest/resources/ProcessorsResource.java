@@ -27,13 +27,10 @@ import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.business.Processor;
-import wasdi.shared.business.SnapWorkflow;
 import wasdi.shared.business.User;
 import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.data.ProcessorRepository;
-import wasdi.shared.data.SnapWorkflowRepository;
 import wasdi.shared.parameters.DeployProcessorParameter;
-import wasdi.shared.parameters.OperatorParameter;
 import wasdi.shared.utils.SerializationUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.DeployedProcessorViewModel;
@@ -237,7 +234,7 @@ public class ProcessorsResource {
 				oProcess.setUserId(sUserId);
 				oProcess.setProcessObjId(Utils.GetRandomName());
 				oProcess.setStatus(ProcessStatus.CREATED.name());
-				String sProcessId = oRepository.InsertProcessWorkspace(oProcess);
+				oRepository.InsertProcessWorkspace(oProcess);
 				
 				String sPath = m_oServletConfig.getInitParameter("SerializationPath");
 				if (! (sPath.endsWith("/")||sPath.endsWith("\\"))) sPath+="/";
@@ -250,6 +247,7 @@ public class ProcessorsResource {
 				oParameter.setUserId(sUserId);
 				oParameter.setExchange(sWorkspaceId);
 				oParameter.setProcessObjId(oProcess.getProcessObjId());
+				oParameter.setJson(sEncodedJson);
 				
 				SerializationUtils.serializeObjectToXML(sPath, oParameter);
 				
@@ -263,15 +261,87 @@ public class ProcessorsResource {
 			catch(Exception oEx){
 				System.out.println("ProcessorsResource.run: Error scheduling the deploy process " + oEx.getMessage());
 				oEx.printStackTrace();
-				oRunning.setStatus("ERROR");
+				oRunning.setStatus(ProcessStatus.ERROR.toString());
 				return oRunning;
 			}
 		}
 		catch (Exception oEx) {
 			oEx.printStackTrace();
-			oRunning.setStatus("ERROR");
+			oRunning.setStatus(ProcessStatus.ERROR.toString());
 			return oRunning;
-		}		
+		}
+		
+		return oRunning;
+	}
+	
+	@GET
+	@Path("/status")
+	public RunningProcessorViewModel status(@HeaderParam("x-session-token") String sSessionId, @QueryParam("processingId") String sProcessingId) throws Exception {
+
+		RunningProcessorViewModel oRunning = new RunningProcessorViewModel();
+		Wasdi.DebugLog("ProcessorsResource.status");
+		oRunning.setStatus(ProcessStatus.ERROR.toString());
+		
+		try {
+			// Check User 
+			if (Utils.isNullOrEmpty(sSessionId)) return oRunning;
+			User oUser = Wasdi.GetUserFromSession(sSessionId);
+
+			if (oUser==null) return oRunning;
+			if (Utils.isNullOrEmpty(oUser.getUserId())) return oRunning;
+			
+			String sUserId = oUser.getUserId();
+			//String sWorkspaceId = "";
+		
+			Wasdi.DebugLog("ProcessorsResource.status: get Running Processor " + sProcessingId);
+			
+			// Get Process-Workspace
+			ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
+			ProcessWorkspace oProcessWorkspace = oProcessWorkspaceRepository.GetProcessByProcessObjId(sProcessingId);
+			
+			// Check not null
+			if (oProcessWorkspace == null) {
+				Wasdi.DebugLog("ProcessorsResource.status: impossible to find " + sProcessingId);
+				return oRunning;
+			}
+			
+			// Check if it is the right user
+			if (oProcessWorkspace.getUserId().equals(sUserId) == false) {
+				Wasdi.DebugLog("ProcessorsResource.status: processing not of this user");
+				return oRunning;				
+			}
+			
+			// Check if it is a processor action
+			if (!(oProcessWorkspace.getOperationType().equals(LauncherOperations.DEPLOYPROCESSOR.toString()) || oProcessWorkspace.getOperationType().equals(LauncherOperations.RUNPROCESSOR.toString())) ) {
+				Wasdi.DebugLog("ProcessorsResource.status: not a running process ");
+				return oRunning;								
+			}
+			
+			// Get the processor from the db
+			ProcessorRepository oProcessorRepository = new ProcessorRepository();
+			Processor oProcessor = oProcessorRepository.GetProcessor(oProcessWorkspace.getProductName());
+			
+			// Set name, id, running id and status
+			oRunning.setName(oProcessor.getName());
+			oRunning.setProcessingIdentifier(sProcessingId);
+			oRunning.setProcessorId(oProcessor.getProcessorId());
+			oRunning.setStatus(oProcessWorkspace.getStatus());
+			
+			// Is this done?
+			if (oRunning.getStatus().equals(ProcessStatus.DONE.toString())) {
+				// Do we have a payload?
+				if (oProcessWorkspace.getPayload() != null) {
+					// Give result to the caller
+					oRunning.setJsonEncodedResult(oProcessWorkspace.getPayload());
+				}
+			}
+		}
+		catch (Exception oEx) {
+			System.out.println("ProcessorsResource.run: Error scheduling the deploy process " + oEx.getMessage());
+			oEx.printStackTrace();
+			oRunning.setStatus(ProcessStatus.ERROR.toString());
+		}
+		
 		return oRunning;
 	}
 }
