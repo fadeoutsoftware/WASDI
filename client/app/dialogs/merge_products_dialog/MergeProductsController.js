@@ -86,8 +86,8 @@ var MergeProductsController = (function() {
 
         var oController = this;
         var sUrl = oController.m_oConstantService.getAPIURL();
-        // sUrl += "/catalog/assimilation?midapath=" +"/data/wasdi/catalogue/mulesme/2017/09/19/SMCItaly_20170919.tif";
-        sUrl += "/catalog/assimilation?midapath=" + this.m_oSelectedEntry.filePath;
+        // sUrl += "/processing/assimilation?midapath=" +"/data/wasdi/catalogue/mulesme/2017/09/19/SMCItaly_20170919.tif";
+        sUrl += "/processing/assimilation?midapath=" + this.m_oSelectedEntry.filePath;
 
         var successCallback = function(data, status)
         {

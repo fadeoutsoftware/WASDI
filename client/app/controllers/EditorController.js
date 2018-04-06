@@ -2143,9 +2143,9 @@ var EditorController = (function () {
                 oFinalSelectedBand.actualFilter = oResult.filter;
 
                 // Add user selected masks, if available
-                oResult.productMasks = oFinalSelectedBand.productMasks;
-                oResult.rangeMasks = oFinalSelectedBand.rangeMasks;
-                oResult.mathMasks = oFinalSelectedBand.mathMasks;
+                oBodyMapContainer.productMasks = oFinalSelectedBand.productMasks;
+                oBodyMapContainer.rangeMasks = oFinalSelectedBand.rangeMasks;
+                oBodyMapContainer.mathMasks = oFinalSelectedBand.mathMasks;
 
                 oController.processingGetBandImage(oBodyMapContainer, oController.m_oActiveWorkspace.workspaceId);
 
