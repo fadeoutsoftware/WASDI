@@ -143,6 +143,13 @@ public class ProcessingThread extends Thread {
 							ProcessWorkspace process = queuedProcess.get(procIdx);
 							if (!launched.containsKey(process.getProcessObjId())) {
 								executedProcessId = executeProcess(process);
+								// Let the process start...
+								try {
+									//sleep before starting next iteraction
+									sleep(2000);
+								} catch (InterruptedException e) {
+									e.printStackTrace();
+								}
 							} else {
 								System.out.println(logPrefix + "process lauched before: " + process.getProcessObjId());
 							}
