@@ -16,8 +16,17 @@ public class ProcessWorkspace {
     private String status;
     private int progressPerc;
     private int pid;
+    private String payload;
 
-    public String getProductName() {
+    public String getPayload() {
+		return payload;
+	}
+
+	public void setPayload(String payload) {
+		this.payload = payload;
+	}
+
+	public String getProductName() {
         return productName;
     }
 

@@ -276,25 +276,25 @@ public abstract class QueryExecutor {
 
 		final String USER_AGENT = "Mozilla/5.0";
 
-		URL obj = new URL(sUrl);
-		HttpURLConnection con = (HttpURLConnection) obj.openConnection();
+		URL oURL = new URL(sUrl);
+		HttpURLConnection oConnection = (HttpURLConnection) oURL.openConnection();
 
 		// optional default is GET
-		con.setRequestMethod("GET");
+		oConnection.setRequestMethod("GET");
 
 		//add request header
-		con.setRequestProperty("User-Agent", USER_AGENT);
+		oConnection.setRequestProperty("User-Agent", USER_AGENT);
 		if (m_sUser!=null && m_sPassword!=null) {
 			String sUserCredentials = m_sUser + ":" + m_sPassword;
 			String sBasicAuth = "Basic " + Base64.getEncoder().encodeToString(sUserCredentials.getBytes("UTF-8"));
-			con.setRequestProperty ("Authorization", sBasicAuth);
+			oConnection.setRequestProperty ("Authorization", sBasicAuth);
 		}
 		
 		System.out.println("\nSending 'GET' request to URL : " + sUrl);
-		int responseCode = con.getResponseCode();
+		int responseCode = oConnection.getResponseCode();
 		System.out.println("Response Code : " + responseCode);
 
-		BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+		BufferedReader in = new BufferedReader(new InputStreamReader(oConnection.getInputStream()));
 		String inputLine;
 		StringBuffer response = new StringBuffer();
 
