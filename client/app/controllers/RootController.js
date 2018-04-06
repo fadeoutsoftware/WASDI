@@ -167,7 +167,15 @@ var RootController = (function() {
         $scope.$watch('m_oController.m_oConstantsService.m_oActiveWorkspace', function(newValue, oldValue, scope) {
             $scope.m_oController.m_aoProcessesRunning = [];
             $scope.m_oController.m_bIsEditModelWorkspaceNameActive = false;
+            if(utilsIsObjectNullOrUndefined(newValue) === false)
+            {
+                if(newValue.name === "Untitled Workspace")
+                {
+                    $scope.m_oController.editModelWorkspaceNameSetTrue();
+                }
+            }
         });
+
 
         /*COUNTDOWN METHOD*/
 
@@ -433,7 +441,7 @@ var RootController = (function() {
         };
         utilsVexPrompt("Insert Workspace Name:<br>", oController.m_oConstantsService.getActiveWorkspace().name, oCallback);
 
-        this.m_bIsEditModelWorkspaceNameActive =true;
+        this.m_bIsEditModelWorkspaceNameActive = true;
     };
 
 
