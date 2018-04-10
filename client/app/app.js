@@ -184,3 +184,4 @@ wasdiApp.controller("ImportAdvanceFiltersController",ImportAdvanceFiltersControl
 wasdiApp.controller("WorkFlowManagerController",WorkFlowManagerController);
 wasdiApp.controller("GetListOfWorkspacesController",GetListOfWorkspacesController);
 wasdiApp.controller("ProcessorController", ProcessorController);
+wasdiApp.controller("WpsController", WpsController);
