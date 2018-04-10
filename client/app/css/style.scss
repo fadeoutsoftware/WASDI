@@ -55,7 +55,7 @@
 @import "../dialogs/workflow_manager/workflow_manager";
 @import "../dialogs/get_list_of_workspace_selected/get_list_of_workspaces_selected";
 @import "../dialogs/processor/processor";
-
+@import "../dialogs/wps_dialog/wps";
 //COMPONENTS
 @import "components/range_slider";
 
@@ -620,6 +620,23 @@ font-size: 2.5em !important;
   }
 }
 
+.my-dropdown{
+
+  button{
+
+    border-style: solid;
+    border-color: #2D394F;
+    border-width: 2px;
+    background-color: $wasdi-white;
+    margin-top: 8px;
+    padding: 10px 10px;
+
+  }
+  .dropdown-menu{
+    max-height: 150px;
+    overflow-y: auto;
+  }
+}
 // BUTTON GROUP
 .btn-group {
 

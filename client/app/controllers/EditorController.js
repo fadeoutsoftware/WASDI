@@ -1704,6 +1704,32 @@ var EditorController = (function () {
     };
 
     /**
+     * openWPSDialog
+     * @returns {boolean}
+     */
+    EditorController.prototype.openWPSDialog = function()
+    {
+        var oController = this;
+        this.m_oModalService.showModal({
+            templateUrl: "dialogs/wps_dialog/WpsView.html",
+            controller: "WpsController",
+            inputs: {
+                extras: {
+                    // products:oController.m_aoProducts
+                }
+            }
+        }).then(function (modal) {
+            modal.element.modal();
+            modal.close.then(function (oResult) {
+
+                // oController.m_oProcessesLaunchedService.loadProcessesFromServer(oController.m_oActiveWorkspace.workspaceId);
+            });
+        });
+
+        return true;
+    };
+
+    /**
      *
      * @returns {boolean}
      */

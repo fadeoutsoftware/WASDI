@@ -34,6 +34,6 @@
     "stomp-websocket": "~2.3.4",
     "angular-bootstrap-multiselect":"https://github.com/bentorfs/angular-bootstrap-multiselect.git#~1.1.6",
     "plotly.js":"1.31.2",
-    "angular-colorpicker-directive":"~1.2.0"
+    "angular-colorpicker-directive":"~1.2.0",
   }
 }
