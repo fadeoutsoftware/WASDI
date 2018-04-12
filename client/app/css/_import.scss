@@ -219,7 +219,7 @@
       background-color:$wasdi-grey;
       //border-right: 20px solid $wasdi-blue-logo;
       //border: 1px solid $wasdi-blue-logo;
-      overflow: auto;
+      //overflow: auto;
       height: $wasdi-heigt-panel-import;
       max-height:$wasdi-heigt-panel-import;
       color:black;
@@ -422,7 +422,7 @@
     /*MISSIONS CSS */
     .missions
     {
-      margin-top: 30px;
+      margin-top: 5px;
       margin-bottom: 5px;
 
       //border-bottom: solid 1px ;
@@ -444,188 +444,201 @@
       margin-top: 50px;
 
     }
-    /************************TABLE**************************/
-    //Over tr
-    //  .table-hover tbody tr:hover td, .table-hover tbody tr:hover th {
-    //    //background-color: $wasdi;
-    //    color:$wasdi-green-logo;
-    //    border-top: 1px solid $wasdi-green-logo;
-    //    border-bottom: 1px solid $wasdi-green-logo;
-    //  }
-
-    .container-table-row
+    .tabs-container{
+      .badge{
+        margin-left: 5px;
+      }
+    }
+    /* Management Pages */
+    .pages
     {
-      overflow: auto;//ATTENTION CARE TO DELETE IT (USED FOR ANIMATION SCROLL)
-      //http://stackoverflow.com/questions/2905867/how-to-scroll-to-specific-item-using-jquery
 
-      /* Management Pages */
-      .pages
+      .pager
       {
-
-        .pager
+        margin: 0 !important;
+        .form-group
         {
-          .form-group
-          {
-            display: inline;
-            label{
-              font-weight: 400;
-            }
-            .form-control
-            {
-              display: inline;
-              width:15%;
-              border: 2px solid $wasdi-blue-logo;
-            }
+          display: inline;
+          label{
+            font-weight: 400;
           }
           .form-control
           {
             display: inline;
-            width: 10%;
+            width:15%;
             border: 2px solid $wasdi-blue-logo;
           }
-          form
+        }
+        .form-control
+        {
+          display: inline;
+          width: 10%;
+          border: 2px solid $wasdi-blue-logo;
+        }
+        form
+        {
+          display: inline;
+        }
+        li
+        {
+          a
           {
-            display: inline;
-          }
-          li
-          {
-            a
-            {
-              //color:$wasdi-blue-logo;
-              border: 2px solid $wasdi-blue-logo;
-              //border-color: $wasdi-blue-logo;
-              cursor:pointer;
+            //color:$wasdi-blue-logo;
+            border: 2px solid $wasdi-blue-logo;
+            //border-color: $wasdi-blue-logo;
+            cursor:pointer;
 
-            }
           }
         }
-
-      }
-      .badge{
-        margin-left: 5px;
-      }
-      /************* TABLE css*****************/
-      /*pls doesn't change it,  need it for on-mouse-click-rectangle event:
-      *  var container = $('#div-container-table'), scrollTo = $("#"+sId);
-      container.animate({
-      scrollTop: scrollTo.offset().top - container.offset().top + container.scrollTop()
-     });
-      */
-      height:100%;
-      //overflow: auto;
-      /***************************/
-      //Over TR
-      .table-hover tbody:hover{
-        //background-color: $wasdi;
-        //color:$wasdi-green-logo;
-        border-top: 2px solid $wasdi-green-logo;
-        border-bottom: 2px solid $wasdi-green-logo;
-
       }
 
-      .layers
+    }
+    /************************TABLE**************************/
+    //Over tr
+    //  .table-hover tbody tr:hover td, .table-hover tbody tr:hover th {
+    //    //background-color: $wasdi;
+    //    color:$wasdi-green-logo; xz
+
+    //    border-top: 1px solid $wasdi-green-logo;
+    //    border-bottom: 1px solid $wasdi-green-logo;
+    //  }
+    //.test{}
+      //overflow: scroll;
+      .container-table-row
       {
 
-        thead
-        {
-          background-color: $wasdi-import-table-head-background-color;
-          color:$wasdi-import-table-head-color;
+        overflow: auto;//ATTENTION CARE TO DELETE IT (USED FOR ANIMATION SCROLL)
+        //http://stackoverflow.com/questions/2905867/how-to-scroll-to-specific-item-using-jquery
+        height: 58vh;
+
+        /************* TABLE css*****************/
+        /*pls doesn't change it,  need it for on-mouse-click-rectangle event:
+        *  var container = $('#div-container-table'), scrollTo = $("#"+sId);
+        container.animate({
+        scrollTop: scrollTo.offset().top - container.offset().top + container.scrollTop()
+       });
+        */
+        //height:100%;
+        //overflow: auto;
+        /***************************/
+        //Over TR
+        .table-hover tbody:hover{
+          //background-color: #bfbfbf;
+          //color:$wasdi-green-logo;
+          border-top: 2px solid $wasdi-green-logo;
+          border-bottom: 2px solid $wasdi-green-logo;
+
         }
-
-        th
-        {
-          text-align:center;
-          vertical-align:middle;
-        }
-        tbody
-        {
-          border-top: 1px solid #ddd;//FIX TABLE
-          //border-top: 2px solid $wasdi-blue-logo;
-        }
-
-
-
-        .operation-button
-        {
+        .table-hover tbody tr:hover td, .table-hover tbody tr:hover th {
+          background-color: #bfbfbf;
           cursor:pointer;
 
         }
-        .operation-button:hover
+        .layers
         {
-          background-color: $wasdi-import-cell-background-color-over-button;
 
-          i{
-
-            color:$wasdi-import-cell-color-over-button;
+          thead
+          {
+            background-color: $wasdi-import-table-head-background-color;
+            color:$wasdi-import-table-head-color;
           }
 
-        }
-
-        .info-layer
-        {
-          //font-family:$wasdi-font-web-small-dimension !important;
-          //font-size:12px;
-          //line-height: 1.42857;
-          //font-weight: 500;
-          .button-cell
+          th
           {
-            vertical-align: middle;
-            .btn-group-vertical
+            text-align:center;
+            vertical-align:middle;
+          }
+          tbody
+          {
+            border-top: 1px solid #ddd;//FIX TABLE
+            //border-top: 2px solid $wasdi-blue-logo;
+          }
+
+
+
+          .operation-button
+          {
+            cursor:pointer;
+
+          }
+          .operation-button:hover
+          {
+            background-color: $wasdi-import-cell-background-color-over-button;
+
+            i{
+
+              color:$wasdi-import-cell-color-over-button;
+            }
+
+          }
+
+          .info-layer
+          {
+            //font-family:$wasdi-font-web-small-dimension !important;
+            //font-size:12px;
+            //line-height: 1.42857;
+            //font-weight: 500;
+            .button-cell
             {
-              .btn-primary
+              vertical-align: middle;
+              .btn-group-vertical
               {
-                background-color: $wasdi-blue-logo;
-                border-color: $wasdi-white;
-                //border-color: $wasdi-green-logo;
+                .btn-primary
+                {
+                  background-color: $wasdi-blue-logo;
+                  border-color: $wasdi-white;
+                  //border-color: $wasdi-green-logo;
+                }
+                .btn:hover
+                {
+                  background-color: $wasdi-green-logo;
+                  color: $wasdi-white;
+                }
               }
-              .btn:hover
+            }
+
+            .image-cell
+            {
+              vertical-align:middle;
+              text-align:center;
+              .label
+              {
+                padding: .1em .3em .1em;
+                font-size: 12px;
+                //font-size:90%;
+              }
+              //OVERRIDE BOOTSTRAP METHOD
+              .label-success
               {
                 background-color: $wasdi-green-logo;
-                color: $wasdi-white;
               }
-            }
-          }
-
-          .image-cell
-          {
-            vertical-align:middle;
-            text-align:center;
-            .label
-            {
-              padding: .1em .3em .1em;
-              font-size: 12px;
-              //font-size:90%;
-            }
-            //OVERRIDE BOOTSTRAP METHOD
-            .label-success
-            {
-              background-color: $wasdi-green-logo;
-            }
-            //PREVIEW IMAGE
-            .preview-layer-image
-            {
-              margin-top: 2px;
-              margin-bottom: 2px;
-              //margin-right: 0;
-              //max-height:$wasdi-import-preview-layer-on-table-dimension;
-              //max-width:$wasdi-import-preview-layer-on-table-dimension;
-              img
+              //PREVIEW IMAGE
+              .preview-layer-image
               {
-                height:$wasdi-import-preview-layer-on-table-dimension;
-                width:$wasdi-import-preview-layer-on-table-dimension;
+                margin-top: 2px;
+                margin-bottom: 2px;
+                //margin-right: 0;
+                //max-height:$wasdi-import-preview-layer-on-table-dimension;
+                //max-width:$wasdi-import-preview-layer-on-table-dimension;
+                img
+                {
+                  height:$wasdi-import-preview-layer-on-table-dimension;
+                  width:$wasdi-import-preview-layer-on-table-dimension;
+                }
               }
+            }
+
+            //DROPDOWN MENU
+            .operations-table-layers{
+              display: inline;
             }
           }
 
-          //DROPDOWN MENU
-          .operations-table-layers{
-            display: inline;
-          }
+
         }
-
-
       }
-    }
+
+
 
     /****************** INPUT FORM SEARCH CONTAINER********************/
     #advanced-search-container{

@@ -32,62 +32,6 @@
 
         </div>
 
-        <!--TIME-->
-        <!--<div class="time-container" >-->
-            <!--&lt;!&ndash; TO:&ndash;&gt;-->
-            <!--<div  class="my-input-text" ng-if="m_oController.m_bShowsensingfilter">-->
-
-                <!--<div class=" advanced-calendar-input input-calendar-container " >-->
-                    <!--<p class="input-group" >-->
-                        <!--<input type="text" class="form-control advanced-calendar-date-input"-->
-                               <!--uib-datepicker-popup="yyyy/MM/dd"-->
-                               <!--ng-model="m_oController.m_oModel.sensingPeriodTo"-->
-                               <!--is-open="m_oController.m_oStatus.openedSensingPeriodTo"-->
-                               <!--date-disabled="m_oController.disabled(date, mode)" ng-required="true"-->
-                               <!--min-date="m_oController.m_oModel.sensingPeriodFrom"-->
-                               <!--ng-blur="m_oController.updateAdvancedSearch()" close-text="Close"-->
-                               <!--readonly="true" data-container="body"/>-->
-                        <!--<span class="input-group-btn">-->
-							<!--<button type="button" class="btn btn-default advanced-calendar-button"-->
-                                    <!--ng-click="m_oController.openSensingPeriodTo($event)"><i class="fa fa-calendar" aria-hidden="true"></i></button>-->
-						  <!--</span>-->
-                    <!--</p>-->
-                <!--</div>-->
-
-                <!--<div class="description-label" >-->
-                    <!--To:-->
-                <!--</div>-->
-                <!--&lt;!&ndash; FROM: &ndash;&gt;-->
-                <!--<div class="input-calendar-container" >-->
-
-                    <!--<p class="input-group">-->
-                        <!--<input type="text" class="form-control advanced-calendar-date-input"-->
-                               <!--uib-datepicker-popup="yyyy/MM/dd"-->
-                               <!--ng-model="m_oController.m_oModel.sensingPeriodFrom"-->
-                               <!--is-open="m_oController.m_oStatus.openedSensingPeriodFrom"-->
-                               <!--date-disabled="m_oController.disabled(date, mode)"-->
-                               <!--max-date="m_oController.m_oModel.sensingPeriodTo" ng-required="true"-->
-                               <!--ng-blur="m_oController.updateAdvancedSearch()" readonly="true"-->
-                               <!--close-text="Close"/>-->
-
-                        <!--<span class="input-group-btn">-->
-        			        <!--<button type="button" class="btn btn-default advanced-calendar-button"-->
-                                <!--ng-click="m_oController.openSensingPeriodFrom($event)">-->
-                                <!--<i class="fa fa-calendar" aria-hidden="true"></i>-->
-                            <!--</button>-->
-                        <!--</span>-->
-
-                    <!--</p>-->
-                <!--</div>-->
-
-                <!--<div class="description-label" >-->
-                    <!--From:{{ this.m_oModel.sensingPeriodFrom}}-->
-                <!--</div>-->
-                <!--<div class="description-label" >-->
-                    <!--Sensing period-->
-                <!--</div>-->
-            <!--</div>-->
-        <!--</div>-->
     </div>
 
         <!-- SIDEBAR -->
@@ -355,12 +299,11 @@
                 </div>
 
                 <!--**************** PRODUCTS-LAYERS TABLE ----------------------->
-                <!--<div ng-include src="'partials/import_products_list.html'"></div>-->
 
-                 <!--the table become visible after the user Search a layer -->
-                <div class="container-table-row" ng-show="m_oController.m_bIsVisibleListOfLayers" id="div-container-table" >
 
+                <div class="tabs-container" ng-show="m_oController.m_bIsVisibleListOfLayers">
                     <!-- TAB NAVIGATION -->
+
                     <ul class="nav nav-tabs" role="tablist" ><!-- ng-hide="m_oController.m_bIsVisibleListOfLayers " && m_oController.isEmptyProductsList() == true-->
                         <li ng-class="{active: m_oController.m_iActiveProvidersTab === $index}"
                             ng-repeat="provider in m_oController.m_aListOfProvider | filter:{ selected: true }"
@@ -373,144 +316,176 @@
 
                         </li>
                     </ul>
-                    <!-- TAB CONTENT -->
-                    <div class="tab-content" >
-                        <div ng-repeat="provider in m_oController.m_aListOfProvider | filter:{ selected: true }" class="missions" ng-show="m_oController.m_iActiveProvidersTab === $index">
+                </div>
+                <div ng-repeat="provider in m_oController.m_aListOfProvider | filter:{ selected: true }" class="missions" ng-show="m_oController.m_iActiveProvidersTab === $index">
+                    <div class="pages" ng-hide="(m_oController.m_bIsVisibleListOfLayers && m_oController.m_bIsPaginatedList === false) || m_oController.isEmptyProductsList() == true">
+                        <ul class="pager">
 
-                            <!--PAGING CONTROL-->
-                            <div class="pages" ng-hide="(m_oController.m_bIsVisibleListOfLayers && m_oController.m_bIsPaginatedList === false) || m_oController.isEmptyProductsList() == true">
-                                <ul class="pager">
+                            <div class="form-group">
+                                <label for="selectPages">{{"IMPORT_PRODUCTS_PER_PAGE_LABEL"|translate}}</label>
+                                <select class="form-control" id="selectPages" ng-model="m_oController.m_oPageService.getProviderObject(provider.name).productsPerPageSelected"
+                                        ng-options="product for product in m_oController.m_oPageService.m_iProductsPerPage"
+                                        ng-change="m_oController.m_oPageService.changeNumberOfProductsPerPage(provider.name,m_oController)"><!--ng-change="m_oController.search(provider.name)">-->
+                                </select>
+                            </div><br>
+                            <li ng-click="m_oController.m_oPageService.firstPage(provider.name,m_oController)" ><a><i class="fa fa-angle-double-left" aria-hidden="true"></i></a></li>
+                            <li ng-click="m_oController.m_oPageService.minusOnePage(provider.name,m_oController)" ><a><i class="fa fa-angle-left" aria-hidden="true"></i></a></li>
+                            <form ng-submit="m_oController.m_oPageService.changePage(m_oController.m_oPageService.getProviderObject(provider.name).currentPage,provider.name,m_oController)">
+                                {{"IMPORT_PAGE_LABEL"|translate}}
+                                <input type="text" class="form-control" ng-model="m_oController.m_oPageService.getProviderObject(provider.name).currentPage">
+                                {{"IMPORT_OF_LABEL"|translate}} {{m_oController.m_oPageService.getProviderObject(provider.name).totalPages}}
+                            </form>
+                            <li ng-click="m_oController.m_oPageService.plusOnePage(provider.name, m_oController)" ><a><i class="fa fa-angle-right" aria-hidden="true"></i></a></li>
+                            <li ng-click="m_oController.m_oPageService.lastPage(provider.name,m_oController)" ><a><i class="fa fa-angle-double-right" aria-hidden="true"></i></a></li>
 
-                                    <div class="form-group">
-                                        <label for="selectPages">{{"IMPORT_PRODUCTS_PER_PAGE_LABEL"|translate}}</label>
-                                        <select class="form-control" id="selectPages" ng-model="m_oController.m_oPageService.getProviderObject(provider.name).productsPerPageSelected"
-                                                ng-options="product for product in m_oController.m_oPageService.m_iProductsPerPage"
-                                                ng-change="m_oController.m_oPageService.changeNumberOfProductsPerPage(provider.name,m_oController)"><!--ng-change="m_oController.search(provider.name)">-->
-                                        </select>
-                                    </div><br>
-                                    <li ng-click="m_oController.m_oPageService.firstPage(provider.name,m_oController)" ><a><i class="fa fa-angle-double-left" aria-hidden="true"></i></a></li>
-                                    <li ng-click="m_oController.m_oPageService.minusOnePage(provider.name,m_oController)" ><a><i class="fa fa-angle-left" aria-hidden="true"></i></a></li>
-                                    <form ng-submit="m_oController.m_oPageService.changePage(m_oController.m_oPageService.getProviderObject(provider.name).currentPage,provider.name,m_oController)">
-                                        {{"IMPORT_PAGE_LABEL"|translate}}
-                                        <input type="text" class="form-control" ng-model="m_oController.m_oPageService.getProviderObject(provider.name).currentPage">
-                                        {{"IMPORT_OF_LABEL"|translate}} {{m_oController.m_oPageService.getProviderObject(provider.name).totalPages}}
-                                    </form>
-                                    <li ng-click="m_oController.m_oPageService.plusOnePage(provider.name, m_oController)" ><a><i class="fa fa-angle-right" aria-hidden="true"></i></a></li>
-                                    <li ng-click="m_oController.m_oPageService.lastPage(provider.name,m_oController)" ><a><i class="fa fa-angle-double-right" aria-hidden="true"></i></a></li>
-
-                                </ul>
-
-                            </div>
-
-                            <!------------ IF THE LIST OF LAYERS IS EMPTY ------------>
-                            <div ng-show = "m_oController.isEmptyProviderLayerList(provider.name) && provider.isLoaded === true" style=" padding-left: 10px">
-                                <h3>
-                                    No results for {{provider.description}} provider
-                                    <i class="fa fa-exclamation" aria-hidden="true"></i>
-                                </h3>
-                            </div>
-                            <!----------------- LOADING LIST OF LAYERS ---------------------->
-                            <div ng-show = "m_oController.isEmptyProviderLayerList(provider.name) && m_oController.m_bIsVisibleListOfLayers === true &&  provider.isLoaded === false" class="loadIcon">
-                                <invader></invader>
-                            </div>
-
-                            <table class="table table-hover layers " id="table_layers_list" ng-show="m_oController.m_bIsVisibleListOfLayers && m_oController.isEmptyProductsList() == false" >
-
-                                <tbody ng-repeat="layer in m_oController.m_aoProductsList | filter:{ provider: provider.name } "
-                                       ng-mouseover="m_oController.changeStyleRectangleMouseOver(layer.rectangle)"
-                                       ng-mouseleave="m_oController.changeStyleRectangleMouseLeave(layer.rectangle)"
-                                       id='{{"layer"+layer.id}}'> <!--id='{{"layer:"+$index}}' layer.id-->
-                                <!------------------------------- SUMMARY ------------------------------->
-                                <tr class="info-layer" >
-                                    <!-- BUTTONS -->
-                                    <td class="button-cell">
-                                        <div class="btn-group-vertical" role="group" >
-                                            <!-- CHECK PRODUCT-->
-                                            <button type="button" class="btn btn btn-primary" ng-show="layer.checked" ng-click="layer.checked= !layer.checked"
-                                                    data-toggle="tooltip" data-placement="top" title="{{'IMPORT_TOOLTIP_CHECK'|translate}}">
-                                                <i class="fa fa-check-square-o" aria-hidden="true"></i>
-                                            </button>
-                                            <!-- UNCHECK PRODUCT-->
-                                            <button type="button" class="btn btn btn-primary" ng-hide="layer.checked" ng-click="layer.checked= !layer.checked "
-                                                    data-toggle="tooltip" data-placement="top" title="{{'IMPORT_TOOLTIP_UNCHECK'|translate}}">
-                                                <i class="fa fa-square-o" aria-hidden="true"></i>
-                                            </button>
-                                            <button type="button" class="btn btn btn-primary" ng-click="m_oController.openModalDownloadProductInSelectedWorkspaces(layer)"
-                                                    ng-disabled="m_oController.isPossibleDoDownload(layer) || (layer.isDisabledToDoDownload != null && layer.isDisabledToDoDownload)"
-                                                    data-toggle="tooltip" data-placement="top" title="{{'IMPORT_TOOLTIP_ADD_PRODUCT'|translate}}">
-                                                <i class="fa fa-plus " aria-hidden="true"></i>
-                                            </button>
-                                            <button type="button" class="btn btn btn-primary" ng-click="m_oController.zoomOnBounds(layer.rectangle)"
-                                                    data-toggle="tooltip" data-placement="top" title="{{'IMPORT_TOOLTIP_ZOOM_ON_PRODUCT'|translate}}">
-                                                <i class="fa fa-search-plus" aria-hidden="true"></i>
-                                            </button>
-                                            <button type="button" class="btn btn btn-primary" ng-click="m_oController.infoLayer(layer)"
-                                                    data-toggle="tooltip" data-placement="top" title="{{'IMPORT_TOOLTIP_INFO'|translate}}">
-                                                <i class="fa fa-info-circle" aria-hidden="true"></i>
-                                            </button>
-
-                                            <button type="button" class="btn btn btn-primary"  data-toggle="tooltip" data-placement="top"
-                                                    title="{{'IMPORT_TOOLTIP_DOWNLOAD'|translate}}"  ng-disabled="true">
-                                                <i class="fa fa-download" aria-hidden="true"></i>
-                                            </button>
-
-
-                                        </div>
-                                    </td>
-                                    <!-- IMAGE CELL -->
-                                    <td class="image-cell">
-                                        <span class="label label-success">{{layer.summary.Mode}}</span>&nbsp;<!--Mode-->
-                                        <span class="label label-success"> {{layer.summary.Instrument}}</span><!--Instrument-->
-                                        <div class="preview-layer-image" ><img src={{layer.preview}} alt="Image" style="height: 82px;width: 82px; "></div>
-                                        <span class="badge">{{layer.summary.Size}}</span><!--Size-->
-                                    </td>
-                                    <!-- INFO CELL -->
-                                    <td class="info-cell">
-
-                                        <div>{{layer.summary.Date|date:'medium'}}</div><!--Date-->
-                                        </br>
-
-                                        <div>
-                                            <span>Name: </span>
-                                            <span><b>{{layer.title}}</b></span>
-                                        </div>
-
-                                        <div>
-                                            <span>Polarisation: </span>
-                                            <span><b>{{layer.summary.Mode}}</b></span>
-                                        </div>
-
-                                        <div>
-                                            <span>Relative Orbit: </span>
-                                            <span><b>{{layer.properties.relativeorbitnumber}}</b></span>
-                                        </div>
-
-                                        <!--<div>{{"layer"+layer.id}}</div>-->
-                                        <div>
-                                            <span>Provider:</span>
-                                            <span><b>{{layer.provider}}</b></span>
-                                        </div>
-
-                                        <div>
-                                            <span>Platform name:</span>
-                                            <span><b>{{layer.properties.platformname}}</b></span>
-                                        </div>
-                                        <div>
-                                            <span>Sensor Operational mode:</span>
-                                            <span><b>{{layer.properties.sensoroperationalmode}}</b></span>
-                                        </div>
-                                    </td>
-
-                                </tr>
-                                </tbody>
-                            </table>
-                        </div>
+                        </ul>
 
                     </div>
+                    <!--<div class="test">-->
+
+                    <!--TODO IT-->
+                    <div class="container-table-row" ng-show="m_oController.m_bIsVisibleListOfLayers" id="div-container-table" >
+
+                    <!-- TAB CONTENT -->
+                    <!--<div>-->
+                    <!--<div ng-repeat="provider in m_oController.m_aListOfProvider | filter:{ selected: true }" class="missions" ng-show="m_oController.m_iActiveProvidersTab === $index">-->
+
+                    <!--PAGING CONTROL-->
+                    <!--<div class="pages" ng-hide="(m_oController.m_bIsVisibleListOfLayers && m_oController.m_bIsPaginatedList === false) || m_oController.isEmptyProductsList() == true">-->
+                    <!--<ul class="pager">-->
+
+                    <!--<div class="form-group">-->
+                    <!--<label for="selectPages">{{"IMPORT_PRODUCTS_PER_PAGE_LABEL"|translate}}</label>-->
+                    <!--<select class="form-control" id="selectPages" ng-model="m_oController.m_oPageService.getProviderObject(provider.name).productsPerPageSelected"-->
+                    <!--ng-options="product for product in m_oController.m_oPageService.m_iProductsPerPage"-->
+                    <!--ng-change="m_oController.m_oPageService.changeNumberOfProductsPerPage(provider.name,m_oController)">&lt;!&ndash;ng-change="m_oController.search(provider.name)">&ndash;&gt;-->
+                    <!--</select>-->
+                    <!--</div><br>-->
+                    <!--<li ng-click="m_oController.m_oPageService.firstPage(provider.name,m_oController)" ><a><i class="fa fa-angle-double-left" aria-hidden="true"></i></a></li>-->
+                    <!--<li ng-click="m_oController.m_oPageService.minusOnePage(provider.name,m_oController)" ><a><i class="fa fa-angle-left" aria-hidden="true"></i></a></li>-->
+                    <!--<form ng-submit="m_oController.m_oPageService.changePage(m_oController.m_oPageService.getProviderObject(provider.name).currentPage,provider.name,m_oController)">-->
+                    <!--{{"IMPORT_PAGE_LABEL"|translate}}-->
+                    <!--<input type="text" class="form-control" ng-model="m_oController.m_oPageService.getProviderObject(provider.name).currentPage">-->
+                    <!--{{"IMPORT_OF_LABEL"|translate}} {{m_oController.m_oPageService.getProviderObject(provider.name).totalPages}}-->
+                    <!--</form>-->
+                    <!--<li ng-click="m_oController.m_oPageService.plusOnePage(provider.name, m_oController)" ><a><i class="fa fa-angle-right" aria-hidden="true"></i></a></li>-->
+                    <!--<li ng-click="m_oController.m_oPageService.lastPage(provider.name,m_oController)" ><a><i class="fa fa-angle-double-right" aria-hidden="true"></i></a></li>-->
+
+                    <!--</ul>-->
+
+                    <!--</div>-->
+
+                    <!------------ IF THE LIST OF LAYERS IS EMPTY ------------>
+                    <div ng-show = "m_oController.isEmptyProviderLayerList(provider.name) && provider.isLoaded === true" style=" padding-left: 10px">
+                        <h3>
+                            No results for {{provider.description}} provider
+                            <i class="fa fa-exclamation" aria-hidden="true"></i>
+                        </h3>
+                    </div>
+                    <!----------------- LOADING LIST OF LAYERS ---------------------->
+                    <div ng-show = "m_oController.isEmptyProviderLayerList(provider.name) && m_oController.m_bIsVisibleListOfLayers === true &&  provider.isLoaded === false" class="loadIcon">
+                        <invader></invader>
+                    </div>
+
+                    <table class="table table-hover layers " id="table_layers_list" ng-show="m_oController.m_bIsVisibleListOfLayers && m_oController.isEmptyProductsList() == false" >
+
+                        <tbody ng-repeat="layer in m_oController.m_aoProductsList | filter:{ provider: provider.name } "
+                               ng-mouseover="m_oController.changeStyleRectangleMouseOver(layer.rectangle)"
+                               ng-mouseleave="m_oController.changeStyleRectangleMouseLeave(layer.rectangle)"
+                               id='{{"layer"+layer.id}}'> <!--id='{{"layer:"+$index}}' layer.id-->
+                        <!------------------------------- SUMMARY ------------------------------->
+                        <tr class="info-layer" >
+                            <!-- BUTTONS -->
+                            <td class="button-cell">
+                                <div class="btn-group-vertical" role="group" >
+                                    <!-- CHECK PRODUCT-->
+                                    <button type="button" class="btn btn btn-primary" ng-show="layer.checked" ng-click="layer.checked= !layer.checked"
+                                            data-toggle="tooltip" data-placement="top" title="{{'IMPORT_TOOLTIP_CHECK'|translate}}">
+                                        <i class="fa fa-check-square-o" aria-hidden="true"></i>
+                                    </button>
+                                    <!-- UNCHECK PRODUCT-->
+                                    <button type="button" class="btn btn btn-primary" ng-hide="layer.checked" ng-click="layer.checked= !layer.checked "
+                                            data-toggle="tooltip" data-placement="top" title="{{'IMPORT_TOOLTIP_UNCHECK'|translate}}">
+                                        <i class="fa fa-square-o" aria-hidden="true"></i>
+                                    </button>
+                                    <button type="button" class="btn btn btn-primary" ng-click="m_oController.openModalDownloadProductInSelectedWorkspaces(layer)"
+                                            ng-disabled="m_oController.isPossibleDoDownload(layer) || (layer.isDisabledToDoDownload != null && layer.isDisabledToDoDownload)"
+                                            data-toggle="tooltip" data-placement="top" title="{{'IMPORT_TOOLTIP_ADD_PRODUCT'|translate}}">
+                                        <i class="fa fa-plus " aria-hidden="true"></i>
+                                    </button>
+                                    <button type="button" class="btn btn btn-primary" ng-click="m_oController.zoomOnBounds(layer.rectangle)"
+                                            data-toggle="tooltip" data-placement="top" title="{{'IMPORT_TOOLTIP_ZOOM_ON_PRODUCT'|translate}}">
+                                        <i class="fa fa-search-plus" aria-hidden="true"></i>
+                                    </button>
+                                    <button type="button" class="btn btn btn-primary" ng-click="m_oController.infoLayer(layer)"
+                                            data-toggle="tooltip" data-placement="top" title="{{'IMPORT_TOOLTIP_INFO'|translate}}">
+                                        <i class="fa fa-info-circle" aria-hidden="true"></i>
+                                    </button>
+
+                                    <button type="button" class="btn btn btn-primary"  data-toggle="tooltip" data-placement="top"
+                                            title="{{'IMPORT_TOOLTIP_DOWNLOAD'|translate}}"  ng-disabled="true">
+                                        <i class="fa fa-download" aria-hidden="true"></i>
+                                    </button>
 
 
+                                </div>
+                            </td>
+                            <!-- IMAGE CELL -->
+                            <td class="image-cell">
+                                <span class="label label-success">{{layer.summary.Mode}}</span>&nbsp;<!--Mode-->
+                                <span class="label label-success"> {{layer.summary.Instrument}}</span><!--Instrument-->
+                                <div class="preview-layer-image" ><img src={{layer.preview}} alt="Image" style="height: 82px;width: 82px; "></div>
+                                <span class="badge">{{layer.summary.Size}}</span><!--Size-->
+                            </td>
+                            <!-- INFO CELL -->
+                            <td class="info-cell">
+
+                                <div>{{layer.summary.Date|date:'medium'}}</div><!--Date-->
+                                </br>
+
+                                <div>
+                                    <span>Name: </span>
+                                    <span><b>{{layer.title}}</b></span>
+                                </div>
+
+                                <div>
+                                    <span>Polarisation: </span>
+                                    <span><b>{{layer.summary.Mode}}</b></span>
+                                </div>
+
+                                <div>
+                                    <span>Relative Orbit: </span>
+                                    <span><b>{{layer.properties.relativeorbitnumber}}</b></span>
+                                </div>
+
+                                <!--<div>{{"layer"+layer.id}}</div>-->
+                                <div>
+                                    <span>Provider:</span>
+                                    <span><b>{{layer.provider}}</b></span>
+                                </div>
+
+                                <div>
+                                    <span>Platform name:</span>
+                                    <span><b>{{layer.properties.platformname}}</b></span>
+                                </div>
+                                <div>
+                                    <span>Sensor Operational mode:</span>
+                                    <span><b>{{layer.properties.sensoroperationalmode}}</b></span>
+                                </div>
+                            </td>
+
+                        </tr>
+                        </tbody>
+                    </table>
+                    <!--</div>-->
+
+                    <!--</div>-->
 
                 </div>
+                    <!--</div>-->
+                </div>
+                <!--the table become visible after the user Search a layer -->
+
             </div>
             </div>
         </div>
