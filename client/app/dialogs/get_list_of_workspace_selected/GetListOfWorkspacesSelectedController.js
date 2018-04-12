@@ -5,7 +5,7 @@
 
 var GetListOfWorkspacesController = (function() {
 
-    function GetListOfWorkspacesController($scope, oClose,oWorkspaceService,oExtras) {
+    function GetListOfWorkspacesController($scope, oClose,oWorkspaceService,oExtras,oConstantsService) {
         this.m_oScope = $scope;
         this.m_oScope.m_oController = this;
         this.m_oExtras = oExtras
@@ -17,6 +17,8 @@ var GetListOfWorkspacesController = (function() {
         this.m_aoWorkspacesSelected = [];
         this.m_bisLoadingWorkspacesList = true;
         this.m_bIsCreatingWorskapce = false;
+        this.m_oConstantsService = oConstantsService;
+        this.m_oActiveWorkspace = this.m_oConstantsService.getActiveWorkspace();
         this.m_oClose = oClose;
         //$scope.close = oClose;
         $scope.close = function(result) {
@@ -35,7 +37,7 @@ var GetListOfWorkspacesController = (function() {
         var iNumberOfWorkspaces = this.m_aoWorkspaceList.length;
         for(var iIndexWorkspace = 0 ; iIndexWorkspace < iNumberOfWorkspaces ; iIndexWorkspace++)
         {
-            this.selectedWorkspace(this.m_aoWorkspaceList[iIndexWorkspace]);
+            this.selectWorkspace(this.m_aoWorkspaceList[iIndexWorkspace]);
         }
     }
     /**
@@ -63,6 +65,11 @@ var GetListOfWorkspacesController = (function() {
                 if (data != undefined)
                 {
                     oController.m_aoWorkspaceList = data;
+                    var oDefaultWorkspace = oController.getDefaultWorkspace(oController.m_oActiveWorkspace,oController.m_aoWorkspaceList);
+                    if( utilsIsObjectNullOrUndefined(oDefaultWorkspace) === false)
+                    {
+                        oController.selectWorkspace(oDefaultWorkspace);
+                    }
                 }
             }
             oController.m_bisLoadingWorkspacesList = false;
@@ -73,12 +80,27 @@ var GetListOfWorkspacesController = (function() {
         });
     };
 
+    GetListOfWorkspacesController.prototype.getDefaultWorkspace = function(oActiveWorkspace,aoWorkspaceList){
+        if(utilsIsObjectNullOrUndefined(aoWorkspaceList) === true)
+        {
+            return null;
+        }
+        var iNumberOfWorkspaces = aoWorkspaceList.length;
+        for(var iIndexWorkspace = 0; iIndexWorkspace < iNumberOfWorkspaces; iIndexWorkspace++)
+        {
+            if(aoWorkspaceList[iIndexWorkspace].workspaceId === oActiveWorkspace.workspaceId)
+            {
+                return aoWorkspaceList[iIndexWorkspace];
+            }
+        }
+        return null;
+    };
     /**
      * selectedWorkspace
      * @param oWorkspace
      * @returns {boolean}
      */
-    GetListOfWorkspacesController.prototype.selectedWorkspace = function(oWorkspace){
+    GetListOfWorkspacesController.prototype.selectWorkspace = function(oWorkspace){
         if(utilsIsObjectNullOrUndefined(oWorkspace) === true)
             return false;
 
@@ -151,7 +173,8 @@ var GetListOfWorkspacesController = (function() {
         '$scope',
         'close',
         'WorkspaceService',
-        'extras'
+        'extras',
+        'ConstantsService'
     ];
     return GetListOfWorkspacesController;
 })();

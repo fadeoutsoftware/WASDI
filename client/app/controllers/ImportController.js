@@ -248,7 +248,7 @@ var ImportController = (function() {
                     {
                         var sId = "layer"+$scope.m_oController.m_aoProductsList[iIndex].id;
                         //change css of table
-                        jQuery("#"+sId).css({"border-top": "2px solid green", "border-bottom": "2px solid green"});
+                        jQuery("#"+sId).css({"border-top": "2px solid green", "border-bottom": "2px solid green","background-color": "#bfbfbf"});
 
 
                     }
@@ -275,7 +275,7 @@ var ImportController = (function() {
                     {
                         var sId = "layer"+$scope.m_oController.m_aoProductsList[iIndex].id;
                         //return default css of table
-                        jQuery("#"+sId).css({"border-top": "", "border-bottom": ""});
+                        jQuery("#"+sId).css({"border-top": "", "border-bottom": "", "background-color": "white"});
 
                     }
                 }
@@ -2179,7 +2179,10 @@ var ImportController = (function() {
             }
 
         }).then(function(modal){
-            modal.element.modal();
+            modal.element.modal({
+                backdrop: 'static',
+                keyboard: false
+            });
             modal.close.then(function(result) {
                 if(utilsIsObjectNullOrUndefined(result) === true || result.length === 0)
                 {

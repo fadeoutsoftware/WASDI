@@ -27,6 +27,15 @@
       height: $wasdi-heigth-globe-workspaces;//500px
       border: 2px solid black;
     }
+
+    @media screen and (max-width: 1600px) and (min-width: 1500px) {
+      .globe-style {
+        width: auto;//500px
+        height: 73vh;//500px
+        border: 2px solid black;
+      }
+    }
+
     .toolbar-right-bottom {
       display: block;
       position: absolute;
