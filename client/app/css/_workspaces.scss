@@ -28,13 +28,32 @@
       border: 2px solid black;
     }
 
-    @media screen and (max-width: 1600px) and (min-width: 1500px) {
-      .globe-style {
-        width: auto;//500px
-        height: 73vh;//500px
-        border: 2px solid black;
-      }
-    }
+    //@media screen and (max-width: 1600px) and (min-width: 1500px)
+    //{
+    //  .globe-style {
+    //    width: auto;//500px
+    //    height: 73vh;//500px
+    //    border: 2px solid black;
+    //  }
+    //}
+    //@media screen and (max-width: 1400px) and (min-width: 1300px)
+    //{
+    //  .globe-style {
+    //    width: auto;//500px
+    //    height: 71vh;//500px
+    //    border: 2px solid black;
+    //  }
+    //}
+    //@media screen and (max-width: 1300px) and (min-width: 1200px) and (max-height: 850px) and (min-height: 750px)
+    //{
+    //  .globe-style {
+    //    width: auto;//500px
+    //    height: 67vh;//500px
+    //    //border: 2px solid black;
+    //    border: 2px solid red;
+    //
+    //  }
+    //}
 
     .toolbar-right-bottom {
       display: block;
@@ -104,6 +123,19 @@
     //overflow-x: hidden;
     //height: $wasdi-max-height-workspaces;
     height: $wasdi-heigth-panel-workspaces-page;
+
+    //@media screen and (max-width: 1600px) and (min-width: 1500px) {
+    //  height: 34vh;
+    //}
+    //@media screen and (max-width: 1400px) and (min-width: 1300px)
+    //{
+    //  height: 30vh;
+    //}
+    //@media screen and (max-width: 1300px) and (min-width: 1200px)
+    //{
+    //  height: 40vh;
+    //}
+
     .list-files
     {
       height: $wasdi-heigth-workspace-list;

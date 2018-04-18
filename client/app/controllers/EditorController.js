@@ -55,6 +55,8 @@ var EditorController = (function () {
         };
         // this.m_oImageMapDirectivePayload = {};
 
+        this.m_iPanScalingValue = 1.5;
+
         // Reference to the actual active Band
         this.m_oActiveBand = null;
 
@@ -520,10 +522,12 @@ var EditorController = (function () {
         var sFileName = this.m_aoProducts[this.m_oActiveBand.productIndex].fileName;
 
         // Get Dimension of the Canvas
-        var elementMapContainer = angular.element(document.querySelector('#mapcontainer'));
-        var heightMapContainer = elementMapContainer[0].offsetHeight;
-        var widthMapContainer = elementMapContainer[0].offsetWidth;
+        var oMapContainerSize = this.getMapContainerSize(this.m_iPanScalingValue);
+        var heightMapContainer = oMapContainerSize.height;
+        var widthMapContainer = oMapContainerSize.width;
 
+        // heightMapContainer = heightMapContainer;
+        // widthMapContainer = widthMapContainer;
         var oGetBandImageBody = this.createBodyForProcessingBandImage(sFileName, this.m_oActiveBand.name,this.m_oActiveBand.actualFilter,
             this.m_oImagePreviewDirectivePayload.viewportX, this.m_oImagePreviewDirectivePayload.viewportY,this.m_oImagePreviewDirectivePayload.viewportWidth,
             this.m_oImagePreviewDirectivePayload.viewportHeight,widthMapContainer,heightMapContainer);
@@ -549,9 +553,9 @@ var EditorController = (function () {
         var sFileName = this.m_aoProducts[this.m_oActiveBand.productIndex].fileName;
 
         // Get Dimension of the Canvas
-        var elementMapContainer = angular.element(document.querySelector('#mapcontainer'));
-        var heightMapContainer = elementMapContainer[0].offsetHeight;
-        var widthMapContainer = elementMapContainer[0].offsetWidth;
+        var oMapContainerSize = this.getMapContainerSize(this.m_iPanScalingValue);
+        var heightMapContainer = oMapContainerSize.height;
+        var widthMapContainer = oMapContainerSize.width;
 
         var oGetBandImageBody = this.createBodyForProcessingBandImage(sFileName, this.m_oActiveBand.name,this.m_oActiveBand.actualFilter,
             0, 0,this.m_oImagePreviewDirectivePayload.originalBandWidth, this.m_oImagePreviewDirectivePayload.originalBandHeight,
@@ -1138,9 +1142,9 @@ var EditorController = (function () {
         else {
 
             // Get Dimension of the Canvas
-            var elementMapContainer = angular.element(document.querySelector('#mapcontainer'));
-            var heightMapContainer = elementMapContainer[0].offsetHeight;
-            var widthMapContainer = elementMapContainer[0].offsetWidth;
+            var oMapContainerSize = this.getMapContainerSize(this.m_iPanScalingValue);
+            var heightMapContainer = oMapContainerSize.height;
+            var widthMapContainer = oMapContainerSize.width;
 
             // Create body to get big image
             var oBodyMapContainer = this.createBodyForProcessingBandImage(sFileName,oBand.name, oBand.actualFilter, 0,0,oBand.width,oBand.height,widthMapContainer, heightMapContainer);
@@ -2151,9 +2155,10 @@ var EditorController = (function () {
                 if(utilsIsObjectNullOrUndefined(oResult) === true)  return false;
                 if(utilsIsObjectNullOrUndefined(oResult.filter) === true) return false;
 
-                var elementMapContainer = angular.element(document.querySelector('#mapcontainer'));
-                var heightMapContainer = elementMapContainer[0].offsetHeight;
-                var widthMapContainer = elementMapContainer[0].offsetWidth;
+                // var elementMapContainer = angular.element(document.querySelector('#mapcontainer'));
+                var oMapContainerSize = oController.getMapContainerSize(this.m_iPanScalingValue);
+                var heightMapContainer = oMapContainerSize.height;
+                var widthMapContainer = oMapContainerSize.width;
 
                 var elementImagePreview = angular.element(document.querySelector('#imagepreviewcanvas'));
                 var heightImagePreview = elementImagePreview[0].offsetHeight;
@@ -2181,7 +2186,17 @@ var EditorController = (function () {
         return true;
     };
 
+    EditorController.prototype.getMapContainerSize = function( iScalingValue){
+        var elementMapContainer = angular.element(document.querySelector('#mapcontainer'));
+        var heightMapContainer = elementMapContainer[0].offsetHeight * iScalingValue;
+        var widthMapContainer = elementMapContainer[0].offsetWidth * iScalingValue;
 
+        return {
+            height:heightMapContainer,
+            width:widthMapContainer
+        };
+
+    }
     /*********************************************************** OPERATION MENU ***********************************************************/
 
 
