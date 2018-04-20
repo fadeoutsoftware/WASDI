@@ -18,11 +18,12 @@
 
       .modal-body
       {
+        min-height: 450px;
         .dropdown-layers
         {
           .dropdown-menu
           {
-            max-height: 300px;
+            max-height: 250px;
             overflow: auto;
 
             li

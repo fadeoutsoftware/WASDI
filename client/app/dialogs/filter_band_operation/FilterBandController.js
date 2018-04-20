@@ -63,13 +63,27 @@ var FilterBandController = (function() {
 
         $scope.applyFilterOnClose = function(result) {
             // var oOption = oController.getSelectedOptionsObject('Arithmetic Mean 3x3');
-            var oOption = oController.getSelectedOptionsObject(oController.m_sSelectedFilter);
-            delete oOption.matrix;
-
-            var oReturnValue = {
-                band: oController.m_oSelectedBand,
-                filter: oOption
-            };
+            var oReturnValue,oOption;
+            if( (utilsIsObjectNullOrUndefined(oController.m_sSelectedFilter) === true) || (oController.m_sSelectedFilter === "") )
+            {
+                oReturnValue = null;
+            }
+            else
+            {
+                oOption = oController.getSelectedOptionsObject(oController.m_sSelectedFilter);
+                delete oOption.matrix;
+                oReturnValue = {
+                    band: oController.m_oSelectedBand,
+                    filter: oOption
+                };
+            }
+            // oOption = oController.getSelectedOptionsObject(oController.m_sSelectedFilter);
+            // delete oOption.matrix;
+            //
+            // oReturnValue = {
+            //     band: oController.m_oSelectedBand,
+            //     filter: oOption
+            // };
             oClose(oReturnValue, 200); // close, but give 500ms for bootstrap to animate
 
         };

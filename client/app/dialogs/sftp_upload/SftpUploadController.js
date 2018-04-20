@@ -31,7 +31,7 @@ var SftpUploadController = (function() {
     }
 
     SftpUploadController.prototype.deleteSftpAccount = function(){
-        //TODO chec if there is the user
+        //TODO check if there is the user
         if(utilsIsObjectNullOrUndefined(this.m_oUser)=== true ||utilsIsObjectNullOrUndefined(this.m_oUser.userId)=== true)
             return false;
         var oController = this;
