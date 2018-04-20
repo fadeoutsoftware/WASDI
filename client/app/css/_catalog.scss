@@ -149,12 +149,12 @@
     }
     .right-column
     {
-      .table-hover tbody:hover{
+      .table-hover tr:hover{
         //background-color: $wasdi;
         //color:$wasdi-green-logo;
         border-top: 2px solid $wasdi-green-logo;
         border-bottom: 2px solid $wasdi-green-logo;
-
+        cursor:pointer;
       }
       .table-products {
 

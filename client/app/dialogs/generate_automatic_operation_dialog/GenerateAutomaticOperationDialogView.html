@@ -1,0 +1,57 @@
+<div class="modal fade generate-automatic-operation-dialog-modal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" ng-click="close(false)" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title ">Metadata Attributes {{m_oController.m_sNameNode}}</h4>
+            </div>
+            <div class="modal-body">
+                <div class="attributes-metadata-table">
+                    <h4>
+                        <!-- PARAMETERS GENERATOR -->
+                        <div class="row" ng-repeat="parameter in m_oController.m_oParameters">
+                            <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                                <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
+                                    <label>{{parameter.label}}</label>
+                                </div>
+                                <div class="col-xs-9 col-sm-9 col-md-9 col-lg-9 my-input-text">
+                                    <!----------------- TEXT ----------------->
+                                    <input type="text" class="my-input-text" ng-if="m_oController.getTypeOfParameter(parameter) === 'text'"
+                                           ng-value="parameter.defaultValue">
+                                    <!----------------- CHECKBOX ----------------->
+                                    <div class="checkbox" ng-if="m_oController.getTypeOfParameter(parameter) === 'checkbox' ">
+                                        <label>
+                                            <input type="text"  class="my-input-text"  ng-value="parameter.defaultValue">
+                                        </label>
+                                    </div>
+                                    <!----------------- DROPDOWN ----------------->
+                                    <div class="my-dropdown" ng-if="m_oController.getTypeOfParameter(parameter) === 'dropdown' ">
+                                        <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1"
+                                                data-toggle="dropdown">
+                                            {{parameter.defaultValue}}
+                                            <span class="caret"></span>
+                                        </button>
+                                        <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1">
+                                            <li role="presentation" ng-repeat = "value in parameter.valueSet" >
+                                                <a role="menuitem" tabindex="-1" href="">
+                                                    {{value}}
+                                                </a>
+                                            </li>
+
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+
+
+                        </div>
+
+                    </h4>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" ng-click="close('ok')" class="my-button" data-dismiss="modal">Ok</button>
+            </div>
+        </div>
+    </div>
+</div>

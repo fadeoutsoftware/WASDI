@@ -4,7 +4,7 @@
 var EditorController = (function () {
     function EditorController($scope, $location, $interval, oConstantsService, oAuthService, oMapService, oFileBufferService,
                               oProductService, $state, oWorkspaceService, oGlobeService, oProcessesLaunchedService, oRabbitStompService,
-                              oSnapOperationService, oModalService, oFilterService) {
+                              oSnapOperationService, oModalService, oFilterService, oGetParametersOperationService) {
         // Reference to the needed Services
         this.m_oScope = $scope;
         this.m_oScope.m_oController = this;
@@ -23,6 +23,7 @@ var EditorController = (function () {
         this.m_oRabbitStompService = oRabbitStompService;
         this.m_oFilterService = oFilterService;
         this.m_oModalService = oModalService;
+        this.m_oGetParametersOperationService = oGetParametersOperationService;
 
         // Flag to know if in the big map is 2d (true) or 3d (false)
         this.m_b2DMapModeOn = true;
@@ -1759,6 +1760,33 @@ var EditorController = (function () {
         return true;
     };
 
+    EditorController.prototype.openGenerateOperationDialog = function(oOperation)
+    {
+        if(utilsIsObjectNullOrUndefined(oOperation) === true)
+        {
+            return false;
+        }
+        var oController = this;
+        this.m_oModalService.showModal({
+            templateUrl: "dialogs/generate_automatic_operation_dialog/GenerateAutomaticOperationDialogView.html",
+            controller: "GenerateAutomaticOperationDialogController",
+            inputs: {
+                extras: {
+                    getParameters:oOperation
+                //     products:oController.m_aoProducts,
+                //     workflowId:oController.m_oActiveWorkspace.workspaceId
+                }
+            }
+        }).then(function (modal) {
+            modal.element.modal();
+            modal.close.then(function (oResult) {
+
+                // oController.m_oProcessesLaunchedService.loadProcessesFromServer(oController.m_oActiveWorkspace.workspaceId);
+            });
+        });
+
+        return true;
+    }
     /**
      * Handle click on "show mask" from image editor
      */
@@ -2156,7 +2184,7 @@ var EditorController = (function () {
                 if(utilsIsObjectNullOrUndefined(oResult.filter) === true) return false;
 
                 // var elementMapContainer = angular.element(document.querySelector('#mapcontainer'));
-                var oMapContainerSize = oController.getMapContainerSize(this.m_iPanScalingValue);
+                var oMapContainerSize = oController.getMapContainerSize(oController.m_iPanScalingValue);
                 var heightMapContainer = oMapContainerSize.height;
                 var widthMapContainer = oMapContainerSize.width;
 
@@ -2988,7 +3016,8 @@ var EditorController = (function () {
         'RabbitStompService',
         'SnapOperationService',
         'ModalService',
-        'FilterService'
+        'FilterService',
+        'GetParametersOperationService'
 
     ];
 

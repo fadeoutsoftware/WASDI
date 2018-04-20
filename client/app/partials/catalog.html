@@ -138,12 +138,18 @@
                     <tr>
                         <th ng-click="m_oController.m_sOrderBy = 'fileName'; m_oController.m_bReverseOrder=!m_oController.m_bReverseOrder">
                             File Name
+                            <i class="fa fa-sort-desc" aria-hidden="true" ng-show="(m_oController.m_sOrderBy === 'fileName') && (m_oController.m_bReverseOrder === true)"></i>
+                            <i class="fa fa-sort-asc" aria-hidden="true" ng-show="(m_oController.m_sOrderBy === 'fileName') && (m_oController.m_bReverseOrder === false)"></i>
                         </th>
                         <th ng-click="m_oController.m_sOrderBy = 'refDate'; m_oController.m_bReverseOrder=!m_oController.m_bReverseOrder">
                             Date
+                            <i class="fa fa-sort-desc" aria-hidden="true" ng-show="(m_oController.m_sOrderBy === 'refDate') && (m_oController.m_bReverseOrder === true)"></i>
+                            <i class="fa fa-sort-asc" aria-hidden="true" ng-show="(m_oController.m_sOrderBy === 'refDate') && (m_oController.m_bReverseOrder === false)"></i>
                         </th>
                         <th ng-click="m_oController.m_sOrderBy = 'category'; m_oController.m_bReverseOrder=!m_oController.m_bReverseOrder">
                             Category
+                            <i class="fa fa-sort-desc" aria-hidden="true" ng-show="(m_oController.m_sOrderBy === 'category') && (m_oController.m_bReverseOrder === true)"></i>
+                            <i class="fa fa-sort-asc" aria-hidden="true" ng-show="(m_oController.m_sOrderBy === 'category') && (m_oController.m_bReverseOrder === false)"></i>
                         </th>
                         <th>
                             Info
