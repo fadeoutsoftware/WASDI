@@ -1760,9 +1760,10 @@ var EditorController = (function () {
         return true;
     };
 
-    EditorController.prototype.openGenerateOperationDialog = function(oOperation)
+    EditorController.prototype.openGenerateOperationDialog = function(oOperation,sName,oOperationServerRequest)
     {
-        if(utilsIsObjectNullOrUndefined(oOperation) === true)
+        if( (utilsIsObjectNullOrUndefined(oOperation) === true) || (utilsIsStrNullOrEmpty(sName) === true) ||
+            (utilsIsObjectNullOrUndefined(oOperationServerRequest) === true) )
         {
             return false;
         }
@@ -1772,7 +1773,9 @@ var EditorController = (function () {
             controller: "GenerateAutomaticOperationDialogController",
             inputs: {
                 extras: {
-                    getParameters:oOperation
+                    getParameters:oOperation,
+                    products:oController.m_aoProducts,
+                    nameDialog:sName
                 //     products:oController.m_aoProducts,
                 //     workflowId:oController.m_oActiveWorkspace.workspaceId
                 }
@@ -1780,7 +1783,28 @@ var EditorController = (function () {
         }).then(function (modal) {
             modal.element.modal();
             modal.close.then(function (oResult) {
+                if(utilsIsObjectNullOrUndefined(oResult) == true)
+                {
+                    utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR THE " + sName.toUpperCase() + " OPTIONS ARE WRONG OR EMPTY!");
+                    return false;
+                }
 
+                if(oResult == "close")
+                    return false;
+
+                var iNumberOfProduct = oResult.length;
+                for(var iIndexProduct = 0; iIndexProduct < iNumberOfProduct;iIndexProduct ++)
+                {
+                    // oController.m_oScope.Result = oResult;
+                    oOperationServerRequest(oResult[iIndexProduct].sourceFileName, oResult[iIndexProduct].destinationFileName,
+                        oController.m_oActiveWorkspace.workspaceId,oResult[iIndexProduct].options)
+                        .success(function (data) {
+                            oController.m_oProcessesLaunchedService.loadProcessesFromServer(oController.m_oActiveWorkspace.workspaceId);
+                        }).error(function (error) {
+                        utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR THE OPERATION " + sName.toUpperCase()  +" DOSEN'T WORK");
+                    });
+                }
+                return true;
                 // oController.m_oProcessesLaunchedService.loadProcessesFromServer(oController.m_oActiveWorkspace.workspaceId);
             });
         });

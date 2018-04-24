@@ -8,15 +8,43 @@ var GenerateAutomaticOperationDialogController = (function() {
         this.m_oScope.m_oController = this;
         this.m_oExtras = oExtras;
         this.m_oGetParameters = this.m_oExtras.getParameters;
+        this.m_sNameDialog = this.m_oExtras.nameDialog;
         this.m_oParameters=[];
-        /*metadataAttributes:node.original.attributes*/
-        //$scope.close = oClose;
-        $scope.close = function(result) {
-            oClose(result, 500); // close, but give 500ms for bootstrap to animate
+        this.m_asSelectedProducts = [];
+        this.m_aoProducts = this.m_oExtras.products;
+        if(utilsIsObjectNullOrUndefined(this.m_aoProducts) == true)
+        {
+            this.m_aoProducts = [];
+        }
+        //Dont't remove it!
+        this.m_asProductsName = this.getProductsName();
+        var oController = this;
+
+        $scope.close = function() {
+            oClose("close", 500); // close, but give 500ms for bootstrap to animate
+        };
+        $scope.run = function() {
+            var oResult = oController.getOperationArrayForSelectedProducts();
+            oClose(oResult, 500); // close, but give 500ms for bootstrap to animate
         };
         this.getParameters()
     }
 
+    /**
+     * getProductsName
+     * @returns {*}
+     */
+    GenerateAutomaticOperationDialogController.prototype.getProductsName = function(){
+        return utilsProjectGetProductsName(this.m_aoProducts);
+    }
+    /**
+     *
+     * @param sName
+     * @returns {*}
+     */
+    GenerateAutomaticOperationDialogController.prototype.getProductByName = function(sName){
+        return utilsProjectGetProductByName(sName,this.m_aoProducts);
+    };
     /**
      * getParameters
      */
@@ -40,7 +68,11 @@ var GenerateAutomaticOperationDialogController = (function() {
         });
 
     }
-
+    /**
+     * getTypeOfParameter
+     * @param oParameter
+     * @returns {*}
+     */
     GenerateAutomaticOperationDialogController.prototype.getTypeOfParameter = function(oParameter)
     {
         if(utilsIsObjectNullOrUndefined(oParameter) === true)
@@ -48,13 +80,13 @@ var GenerateAutomaticOperationDialogController = (function() {
             return null;
         }
         //ATTENTION don't change the order of if
-
-        if( (oParameter.defaultValue === true) || (oParameter.defaultValue === false))
+        //if boolean
+        if( (oParameter.defaultValue === true) || (oParameter.defaultValue === false) || (oParameter.defaultValue === "true") || (oParameter.defaultValue === "false") )
         {
             //checkbox case
             return "checkbox";
         }
-
+        //if there is a list of values
         if(oParameter.valueSet.length > 0)
         {
             // drop-down list case
@@ -67,7 +99,94 @@ var GenerateAutomaticOperationDialogController = (function() {
         }
 
         return null;
-    }
+    };
+
+    /**
+     * getParametersObject
+     * @returns {*}
+     * return all parameters selected by user
+     */
+    GenerateAutomaticOperationDialogController.prototype.getParametersObject = function()
+    {
+        if( utilsIsObjectNullOrUndefined( this.m_oParameters ) === true )
+        {
+            return null;
+        }
+        var iNumberOfParameters = this.m_oParameters.length;
+        var oOperationObject = {};
+        for(var iIndexParameter = 0; iIndexParameter < iNumberOfParameters; iIndexParameter++)
+        {
+            var sObjectProperty = this.m_oParameters[iIndexParameter].field;
+            if(utilsIsStrNullOrEmpty(sObjectProperty) === false)
+            {
+                var sValue = this.m_oParameters[iIndexParameter].defaultValue;
+                if(utilsIsObjectNullOrUndefined(sValue) === false)
+                {
+                    oOperationObject[sObjectProperty] = sValue;
+                }
+            }
+        }
+        return oOperationObject;
+
+    };
+    /**
+     * getOperationObject
+     * @param oProduct
+     * @returns {*}
+     * return sourceFileName, destinationFileName
+     */
+    GenerateAutomaticOperationDialogController.prototype.getProductObject = function(oProduct)
+    {
+        if(utilsIsObjectNullOrUndefined(oProduct) === true)
+        {
+            return null;
+        }
+        var sOperationName = "_OperationDefaultName";
+        //get operation name
+        if(utilsIsStrNullOrEmpty(this.m_sNameDialog) === true )
+        {
+            //remove spaces
+            sOperationName = "_" + this.m_sNameDialog.replace(/ /g,'');
+        }
+        var oOperationObject = {};
+        //product info
+        oOperationObject.sourceFileName = oProduct.fileName;
+        oOperationObject.destinationFileName = oProduct.name + "_ApplyOrbit";
+        oOperationObject.options = {};
+        return oOperationObject;
+    };
+    /**
+     * getOperationArrayForSelectedProducts
+     * @returns {*}
+     * return object, send it to the server
+     */
+    GenerateAutomaticOperationDialogController.prototype.getOperationArrayForSelectedProducts = function()
+    {
+        if(utilsIsObjectNullOrUndefined(this.m_asSelectedProducts))
+        {
+            return null;
+        }
+        var oParameters = this.getParametersObject();
+        if(utilsIsObjectNullOrUndefined(oParameters) === true)
+        {
+            return null;
+        }
+        var iNumberOfProducts = this.m_asSelectedProducts.length;
+        var aoArrayObject = [];
+        //generate array list with the objects created by product info + parameters
+        for(var iIndexProduct = 0; iIndexProduct < iNumberOfProducts; iIndexProduct++)
+        {
+            var oProduct = this.getProductByName(this.m_asSelectedProducts[iIndexProduct]);
+            var oOperationObject = this.getProductObject(oProduct);
+            if(utilsIsObjectNullOrUndefined(oOperationObject) === false)
+            {
+                // put parameters in product object
+                oOperationObject.options = oParameters;
+                aoArrayObject.push(oOperationObject);
+            }
+        }
+        return aoArrayObject;
+    };
 
     GenerateAutomaticOperationDialogController.$inject = [
         '$scope',

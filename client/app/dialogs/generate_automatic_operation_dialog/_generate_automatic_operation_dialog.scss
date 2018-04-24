@@ -18,7 +18,12 @@
 
       .modal-body
       {
-
+        height: 500px;
+        .my-dropdown{
+          .dropdown-menu{
+            max-height: 125px;
+          }
+        }
       }
 
       .modal-footer
