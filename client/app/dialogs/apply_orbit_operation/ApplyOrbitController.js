@@ -89,8 +89,6 @@ var ApplyOrbitController = (function() {
                 }
             }
 
-
-
             oClose(aoReturnValue, 500); // close, but give 500ms for bootstrap to animate
         };
 
