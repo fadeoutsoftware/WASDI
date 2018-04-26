@@ -90,6 +90,7 @@ import wasdi.shared.utils.BandImageManager;
 import wasdi.shared.utils.SerializationUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.BandImageViewModel;
+import wasdi.shared.viewmodels.ColorManipulationViewModel;
 import wasdi.shared.viewmodels.MaskViewModel;
 import wasdi.shared.viewmodels.MathMaskViewModel;
 import wasdi.shared.viewmodels.ProductMaskViewModel;
@@ -518,6 +519,41 @@ public class ProcessingResources {
 		return asMasks;
 	}
 
+	
+	@GET
+	@Path("/productcolormanipulation")
+	@Produces({"application/json"})
+	public ColorManipulationViewModel getColorManipulation(@HeaderParam("x-session-token") String sSessionId,
+			@QueryParam("file") String sProductFile, @QueryParam("band") String sBandName, 
+			@QueryParam("accurate") boolean accurate, @QueryParam("workspaceId") String sWorkspaceId) throws Exception {
+
+		Wasdi.DebugLog("ProcessingResources.getColorManipulation");
+		
+		if (Utils.isNullOrEmpty(sSessionId)) return null;
+		User oUser = Wasdi.GetUserFromSession(sSessionId);
+
+		if (oUser==null) return null;
+		if (Utils.isNullOrEmpty(oUser.getUserId())) return null;
+
+		String sUserId = oUser.getUserId();
+		
+		Wasdi.DebugLog("ProcessingResources.getColorManipulation. Params. File: " + sProductFile +" - Band: " + sBandName + " - Workspace: " + sWorkspaceId);
+		
+		String sDownloadRootPath = m_oServletConfig.getInitParameter("DownloadRootPath");
+		if (!sDownloadRootPath.endsWith("/")) sDownloadRootPath = sDownloadRootPath + "/";
+		
+		String sProductFileFullPath = sDownloadRootPath+sUserId+ "/" + sWorkspaceId + "/" + sProductFile;
+		
+//		String sProductFileFullPath = "/home/doy/tmp/wasdi/tmp/S2B_MSIL1C_20180117T102339_N0206_R065_T32TMQ_20180117T122826.zip";
+		
+		Wasdi.DebugLog("ProcessingResources.getColorManipulation: file Path: " + sProductFileFullPath);
+
+		Product product = ProductIO.readProduct(sProductFileFullPath);
+		BandImageManager manager = new BandImageManager(product);	
+		return manager.getColorManipulation(sBandName, accurate);
+		
+	}
+	
 	@POST
 	@Path("/bandimage")
 	@Produces(MediaType.APPLICATION_OCTET_STREAM)
@@ -643,10 +679,17 @@ public class ProcessingResources {
 			}
 		}
 
+		//applying color manipulation
+		
+		ColorManipulationViewModel colorManiputalion = model.getColorManiputalion();
+		if (colorManiputalion!=null) {
+			manager.applyColorManipulation(raster, colorManiputalion);
+		}
+		
 		//creating the image
 		BufferedImage img;
 		try {
-			img = manager.buildImageWithMasks(raster, imgSize, vp);
+			img = manager.buildImageWithMasks(raster, imgSize, vp, colorManiputalion==null);
 		} catch (Exception e) {
 			e.printStackTrace();
 			return Response.status(500).build();

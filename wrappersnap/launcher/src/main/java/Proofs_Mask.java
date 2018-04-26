@@ -81,7 +81,7 @@ public class Proofs_Mask {
 	        band.getOverlayMaskGroup().add(mask);
 			
 					
-			BufferedImage img = manager.buildImageWithMasks(band, new Dimension(600, 600), null);
+			BufferedImage img = manager.buildImageWithMasks(band, new Dimension(600, 600), null, true);
 			
 			ImageIO.write(img, "jpg", new File("/home/doy/tmp/wasdi/tmp/" + band.getName() + "_MASKED.jpg"));
 			manager.quit();

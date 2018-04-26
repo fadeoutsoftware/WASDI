@@ -13,6 +13,7 @@ public class BandImageViewModel {
 	private List<ProductMaskViewModel> productMasks;
 	private List<RangeMaskViewModel> rangeMasks;
 	private List<MathMaskViewModel> mathMasks;
+	private ColorManipulationViewModel colorManiputalion;
 	public String getProductFileName() {
 		return productFileName;
 	}
@@ -90,5 +91,11 @@ public class BandImageViewModel {
 	}
 	public void setMathMasks(List<MathMaskViewModel> mathMasks) {
 		this.mathMasks = mathMasks;
+	}
+	public ColorManipulationViewModel getColorManiputalion() {
+		return colorManiputalion;
+	}
+	public void setColorManiputalion(ColorManipulationViewModel colorManiputalion) {
+		this.colorManiputalion = colorManiputalion;
 	}
 }
