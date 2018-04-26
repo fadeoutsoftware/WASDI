@@ -16,14 +16,19 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.esa.snap.core.dataio.ProductIO;
 import org.esa.snap.core.datamodel.Band;
+import org.esa.snap.core.datamodel.ColorPaletteDef;
+import org.esa.snap.core.datamodel.ColorPaletteDef.Point;
 import org.esa.snap.core.datamodel.ConvolutionFilterBand;
 import org.esa.snap.core.datamodel.FilterBand;
 import org.esa.snap.core.datamodel.GeneralFilterBand;
+import org.esa.snap.core.datamodel.ImageInfo;
+import org.esa.snap.core.datamodel.ImageInfo.HistogramMatching;
 import org.esa.snap.core.datamodel.Kernel;
 import org.esa.snap.core.datamodel.Mask;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductNodeGroup;
 import org.esa.snap.core.datamodel.RasterDataNode;
+import org.esa.snap.core.datamodel.Stx;
 import org.esa.snap.core.image.ColoredBandImageMultiLevelSource;
 import org.esa.snap.core.image.ImageManager;
 import org.esa.snap.core.layer.MaskCollectionLayerType;
@@ -44,6 +49,10 @@ import com.bc.ceres.glevel.MultiLevelSource;
 import com.bc.ceres.grender.Viewport;
 import com.bc.ceres.grender.support.BufferedImageRendering;
 import com.bc.ceres.grender.support.DefaultViewport;
+
+import wasdi.shared.viewmodels.ColorManipulationViewModel;
+import wasdi.shared.viewmodels.ColorViewModel;
+import wasdi.shared.viewmodels.ColorWithValueViewModel;
 
 public class BandImageManager {
 
@@ -139,6 +148,78 @@ public class BandImageManager {
     }
 	
 	
+	public ColorManipulationViewModel getColorManipulation(String bandName, boolean bAccurateStats) {
+		RasterDataNode oInputBand = product.getRasterDataNode(bandName);
+		
+		WasdiProgressMonitorStub oProgressMonitor = new WasdiProgressMonitorStub();
+		ImageManager.getInstance().prepareImageInfos(new RasterDataNode[] {oInputBand}, oProgressMonitor);
+		
+		Stx oStats = oInputBand.getStx(bAccurateStats, oProgressMonitor);
+		ImageInfo oInfo = oInputBand.getImageInfo();
+
+		ColorManipulationViewModel oModel = new ColorManipulationViewModel();
+		
+		//get the point colors
+		Point[] oPoints = oInfo.getColorPaletteDef().getPoints();
+		ColorWithValueViewModel oColorsModel[] = new ColorWithValueViewModel[oPoints.length];
+		for (int i = 0; i < oColorsModel.length; i++) {
+			oColorsModel[i] = new ColorWithValueViewModel((float)oPoints[i].getSample(), oPoints[i].getColor());
+		}
+		oModel.setColors(oColorsModel);
+		
+		//get the histogram
+		oModel.setHistogramBins(oStats.getHistogramBins());
+		oModel.setHistogramWidth((float)oStats.getHistogramBinWidth());
+		oModel.setHistogramMin((float)oStats.getMinimum());
+		oModel.setHistogramMax((float)oStats.getMaximum());
+		
+		//get the no data color
+		oModel.setNoDataColor(new ColorViewModel(oInfo.getNoDataColor()));
+		
+		//get the histogram matching
+		oModel.setHistogramMatching(oInfo.getHistogramMatching());		
+		oModel.setHistogramMathcingValues(HistogramMatching.values());
+		
+		//get the discrete color option
+		oModel.setDiscreteColor(oInfo.getColorPaletteDef().isDiscrete());
+		
+		return oModel;
+	}
+	
+	
+	public void applyColorManipulation(RasterDataNode oInputBand, ColorManipulationViewModel oModel) {
+		WasdiProgressMonitorStub oProgressMonitor = new WasdiProgressMonitorStub();
+		ImageManager.getInstance().prepareImageInfos(new RasterDataNode[] {oInputBand}, oProgressMonitor);
+		
+		ImageInfo oInfo = oInputBand.getImageInfo();
+
+		//set the point colors
+		ColorPaletteDef oPaletteDef = oInfo.getColorPaletteDef();
+//		Point[] sourcePoints = oPaletteDef.getPoints(); 
+		Point[] oPoints = new Point[oModel.getColors().length];
+		for (int i = 0; i < oPoints.length; i++) {
+			float sample = oModel.getColors()[i].getValue();
+			oPoints[i] = new Point(sample, oModel.getColors()[i].asColor());
+			oPaletteDef.setAutoDistribute(false);
+//			if (sample != (float)sourcePoints[i].getSample()) {
+//				System.out.println("AUTODISTRIBUITE = FALSE");
+//				oPaletteDef.setAutoDistribute(false); 
+//			}
+		}
+		oPaletteDef.setPoints(oPoints);
+		
+		//set the no data color
+		oInfo.setNoDataColor(oModel.getNoDataColor().asColor());
+		
+		//set the histogram matching
+		oInfo.setHistogramMatching(oModel.getHistogramMatching());
+		
+		//set the discrete color option
+		oPaletteDef.setDiscrete(oModel.isDiscreteColor());
+		oInputBand.setImageInfo(oInfo);
+	}
+	
+	
 	public BufferedImage buildImage(RasterDataNode oInputBand, Dimension oOutputImageSize, Rectangle oInputImageViewPortToRender) {
 		
 		BufferedImage oOutputBufferedImage = null;
@@ -161,6 +242,9 @@ public class BandImageManager {
 			long lStartTime = System.currentTimeMillis();
 
 			//check if MultiLevelSource has already computed
+			
+			Band b = ((Band)oInputBand);
+			
 			String sProductKey = oInputBand.getProduct().getName() + "_" + oInputBand.getName();
 	        CachedSource oCachedObj = sourceCache.get(sProductKey); 
 	        if (oCachedObj == null) {
@@ -253,7 +337,7 @@ public class BandImageManager {
 	}
 
 	
-	public BufferedImage buildImageWithMasks(RasterDataNode oInputBand, Dimension oOutputImageSize, Rectangle oInputImageViewPortToRender) {
+	public BufferedImage buildImageWithMasks(RasterDataNode oInputBand, Dimension oOutputImageSize, Rectangle oInputImageViewPortToRender, boolean bUseCache) {
 		
 		BufferedImage oOutputBufferedImage = null;
 		
@@ -275,10 +359,13 @@ public class BandImageManager {
 			//check if MultiLevelSource has already computed
 			String sProductKey = oInputBand.getProduct().getName() + "_" + oInputBand.getName();
 	        CachedSource oCachedObj = sourceCache.get(sProductKey); 
-	        if (oCachedObj == null) {
+	        if (!bUseCache || oCachedObj == null) {
 	        	oCachedObj = new CachedSource(ColoredBandImageMultiLevelSource.create(oInputBand, ProgressMonitor.NULL));
 	        	System.out.println("BandImageManager.buildImage: multi level source not found in cache... created: " + (System.currentTimeMillis() - lStartTime) + " ms");
 	        	sourceCache.put(sProductKey, oCachedObj);
+	        }
+	        if (!bUseCache) {
+	        	sourceCache.remove(sProductKey);
 	        }
 	        
 	        // Get the Source
