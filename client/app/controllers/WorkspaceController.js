@@ -25,7 +25,6 @@ var WorkspaceController = (function() {
         this.m_oSelectedProduct = null;
         this.m_oWorkspaceSelected = null;
         this.m_oSatelliteService = oSatelliteService;
-
         this.m_aoSatellitePositions = [];
         this.m_aoSateliteInputTraks = [];
         this.m_oFakePosition = null;
@@ -60,6 +59,8 @@ var WorkspaceController = (function() {
                 $scope.m_oController.m_oUpdatePositionSatellite = undefined;
             }
         });
+
+
     }
 
     WorkspaceController.prototype.moveTo = function (sPath) {

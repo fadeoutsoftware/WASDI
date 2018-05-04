@@ -541,16 +541,21 @@ function utilsLeapYear(year)
     return ((year % 4 == 0) && (year % 100 != 0)) || (year % 400 == 0);
 }
 
-function utilsGenerateArrayWithFirstNIntValue (iValue)
+//from 1 to iValue
+function utilsGenerateArrayWithFirstNIntValue (iStartingValue,iEndValue)
 {
-    if(utilsIsObjectNullOrUndefined(iValue) === true || (utilsIsInteger(iValue) === false) )
+    if(utilsIsObjectNullOrUndefined(iEndValue) === true || (utilsIsInteger(iEndValue) === false) )
+    {
+        return null;
+    }
+    if(utilsIsObjectNullOrUndefined(iStartingValue) === true || (utilsIsInteger(iStartingValue) === false) )
     {
         return null;
     }
     var aiReturnArray = [];
-    for(var iIndexArray = 0; iIndexArray < iValue; iIndexArray++)
+    for(var iIndexArray = iStartingValue; iIndexArray < iEndValue; iIndexArray++)
     {
-        aiReturnArray[iIndexArray] = iIndexArray+1;
+        aiReturnArray[iIndexArray] = iIndexArray;
     }
     return aiReturnArray;
 }
