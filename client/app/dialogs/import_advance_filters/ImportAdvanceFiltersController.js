@@ -439,7 +439,7 @@ var ImportAdvanceFiltersController = (function() {
         {
             iReturnValue = this.getMonthDays(sMonth,asYears[0]);
         }
-        return utilsGenerateArrayWithFirstNIntValue(iReturnValue);
+        return utilsGenerateArrayWithFirstNIntValue(1,iReturnValue);
         //check leap year
     };
     // ImportAdvanceFiltersController.prototype.getMonthDaysFrom = function(){

@@ -24,6 +24,558 @@ var EditorController = (function () {
         this.m_oFilterService = oFilterService;
         this.m_oModalService = oModalService;
         this.m_oGetParametersOperationService = oGetParametersOperationService;
+        // this.m_oColorManipulation  = {
+        //     "colors": [
+        //         {
+        //             "colorBlue": 0,
+        //             "colorGreen": 0,
+        //             "colorRed": 0,
+        //             "value": 10.324219
+        //         },
+        //         {
+        //             "colorBlue": 128,
+        //             "colorGreen": 128,
+        //             "colorRed": 128,
+        //             "value": 98.9043
+        //         },
+        //         {
+        //             "colorBlue": 255,
+        //             "colorGreen": 255,
+        //             "colorRed": 255,
+        //             "value": 187.48438
+        //         }
+        //     ],
+        //     "discreteColor": false,
+        //     "histogramBins": [
+        //         249238935,
+        //         121606540,
+        //         64802852,
+        //         22513659,
+        //         8131026,
+        //         3232603,
+        //         1402951,
+        //         662921,
+        //         341415,
+        //         190371,
+        //         114538,
+        //         73686,
+        //         50697,
+        //         36111,
+        //         26528,
+        //         19938,
+        //         15782,
+        //         12339,
+        //         9827,
+        //         7805,
+        //         6559,
+        //         5274,
+        //         4507,
+        //         3874,
+        //         3287,
+        //         2712,
+        //         2434,
+        //         2097,
+        //         1852,
+        //         1559,
+        //         1405,
+        //         1178,
+        //         1166,
+        //         977,
+        //         809,
+        //         781,
+        //         703,
+        //         640,
+        //         513,
+        //         527,
+        //         488,
+        //         415,
+        //         371,
+        //         354,
+        //         343,
+        //         334,
+        //         284,
+        //         252,
+        //         234,
+        //         232,
+        //         214,
+        //         216,
+        //         194,
+        //         159,
+        //         148,
+        //         123,
+        //         148,
+        //         131,
+        //         129,
+        //         103,
+        //         109,
+        //         103,
+        //         102,
+        //         89,
+        //         81,
+        //         72,
+        //         83,
+        //         68,
+        //         58,
+        //         62,
+        //         73,
+        //         56,
+        //         48,
+        //         50,
+        //         51,
+        //         50,
+        //         35,
+        //         37,
+        //         41,
+        //         35,
+        //         39,
+        //         26,
+        //         35,
+        //         23,
+        //         27,
+        //         21,
+        //         22,
+        //         33,
+        //         19,
+        //         32,
+        //         28,
+        //         17,
+        //         18,
+        //         24,
+        //         22,
+        //         22,
+        //         18,
+        //         21,
+        //         18,
+        //         15,
+        //         13,
+        //         16,
+        //         19,
+        //         8,
+        //         18,
+        //         12,
+        //         14,
+        //         7,
+        //         10,
+        //         10,
+        //         12,
+        //         8,
+        //         9,
+        //         6,
+        //         5,
+        //         7,
+        //         10,
+        //         12,
+        //         9,
+        //         9,
+        //         5,
+        //         9,
+        //         5,
+        //         8,
+        //         8,
+        //         4,
+        //         7,
+        //         10,
+        //         7,
+        //         3,
+        //         6,
+        //         8,
+        //         5,
+        //         6,
+        //         6,
+        //         4,
+        //         7,
+        //         2,
+        //         3,
+        //         3,
+        //         10,
+        //         5,
+        //         5,
+        //         6,
+        //         3,
+        //         3,
+        //         6,
+        //         4,
+        //         2,
+        //         8,
+        //         3,
+        //         3,
+        //         1,
+        //         4,
+        //         1,
+        //         3,
+        //         3,
+        //         3,
+        //         1,
+        //         3,
+        //         4,
+        //         2,
+        //         0,
+        //         1,
+        //         2,
+        //         1,
+        //         2,
+        //         1,
+        //         3,
+        //         1,
+        //         0,
+        //         2,
+        //         4,
+        //         0,
+        //         2,
+        //         2,
+        //         5,
+        //         4,
+        //         2,
+        //         0,
+        //         2,
+        //         2,
+        //         2,
+        //         1,
+        //         1,
+        //         0,
+        //         1,
+        //         1,
+        //         0,
+        //         1,
+        //         2,
+        //         2,
+        //         2,
+        //         0,
+        //         4,
+        //         0,
+        //         3,
+        //         0,
+        //         3,
+        //         0,
+        //         1,
+        //         1,
+        //         1,
+        //         1,
+        //         0,
+        //         0,
+        //         2,
+        //         3,
+        //         1,
+        //         0,
+        //         1,
+        //         2,
+        //         1,
+        //         0,
+        //         0,
+        //         1,
+        //         2,
+        //         1,
+        //         0,
+        //         1,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         1,
+        //         2,
+        //         0,
+        //         0,
+        //         1,
+        //         0,
+        //         1,
+        //         0,
+        //         0,
+        //         1,
+        //         0,
+        //         0,
+        //         1,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         1,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         3,
+        //         1,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         1,
+        //         0,
+        //         0,
+        //         0,
+        //         2,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         1,
+        //         2,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         1,
+        //         0,
+        //         0,
+        //         0,
+        //         1,
+        //         1,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         1,
+        //         0,
+        //         0,
+        //         0,
+        //         1,
+        //         0,
+        //         0,
+        //         0,
+        //         1,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         1,
+        //         0,
+        //         0,
+        //         1,
+        //         1,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         1,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         1,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         1,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         1,
+        //         0,
+        //         0,
+        //         1,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         1,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         1,
+        //         1,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         1,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         1,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         1,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         1,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         0,
+        //         1
+        //     ],
+        //     "histogramMatching": "None",
+        //     "histogramMathcingValues": [
+        //         "None",
+        //         "Equalize",
+        //         "Normalize"
+        //     ],
+        //     "histogramMax": 25567,
+        //     "histogramMin": 1,
+        //     "histogramWidth": 49.933594,
+        //     "noDataColor": {
+        //         "colorBlue": 0,
+        //         "colorGreen": 0,
+        //         "colorRed": 0
+        //     }
+        // };
+        // TODO REMOVE IT, test case
 
         // Flag to know if in the big map is 2d (true) or 3d (false)
         this.m_b2DMapModeOn = true;
@@ -139,7 +691,7 @@ var EditorController = (function () {
         this.m_oRabbitStompService.setMessageCallback(this.receivedRabbitMessage);
         this.m_oRabbitStompService.setActiveController(this);
 
-        this.drawColourManipulationHistogram("colourManipulationDiv")
+        // this.drawColourManipulationHistogram("colourManipulationDiv",this.m_oColorManipulation.histogramBins);
     }
 
     /*********************************************************** VIEW METHODS**********************************************************/
@@ -176,7 +728,8 @@ var EditorController = (function () {
             if (heightImagePreview==0) heightImagePreview = 280;//default value canvas
             if (widthImagePreview==0) widthImagePreview = 560;//default value canvas
 
-            var oBodyImagePreview = this.createBodyForProcessingBandImage(sFileName,oBand.name,null,0,0,oBand.width,oBand.height,widthImagePreview,heightImagePreview);
+            var oBodyImagePreview = this.createBodyForProcessingBandImage(sFileName,oBand.name,null,0,0,oBand.width,oBand.height,
+                                    widthImagePreview,heightImagePreview,oBand.colorManipulation);
 
             this.processingGetBandPreview(oBodyImagePreview,this.m_oActiveWorkspace.workspaceId);
         }
@@ -531,7 +1084,7 @@ var EditorController = (function () {
         // widthMapContainer = widthMapContainer;
         var oGetBandImageBody = this.createBodyForProcessingBandImage(sFileName, this.m_oActiveBand.name,this.m_oActiveBand.actualFilter,
             this.m_oImagePreviewDirectivePayload.viewportX, this.m_oImagePreviewDirectivePayload.viewportY,this.m_oImagePreviewDirectivePayload.viewportWidth,
-            this.m_oImagePreviewDirectivePayload.viewportHeight,widthMapContainer,heightMapContainer);
+            this.m_oImagePreviewDirectivePayload.viewportHeight,widthMapContainer,heightMapContainer,this.m_oActiveBand.colorManipulation);
 
         this.m_bIsEditorZoomingOnExistingImage = true;
 
@@ -560,7 +1113,7 @@ var EditorController = (function () {
 
         var oGetBandImageBody = this.createBodyForProcessingBandImage(sFileName, this.m_oActiveBand.name,this.m_oActiveBand.actualFilter,
             0, 0,this.m_oImagePreviewDirectivePayload.originalBandWidth, this.m_oImagePreviewDirectivePayload.originalBandHeight,
-            widthMapContainer,heightMapContainer);
+            widthMapContainer,heightMapContainer,this.m_oActiveBand.colorManipulation);
 
         // Add user selected masks, if available
         oGetBandImageBody.productMasks = this.m_oActiveBand.productMasks;
@@ -1148,7 +1701,8 @@ var EditorController = (function () {
             var widthMapContainer = oMapContainerSize.width;
 
             // Create body to get big image
-            var oBodyMapContainer = this.createBodyForProcessingBandImage(sFileName,oBand.name, oBand.actualFilter, 0,0,oBand.width,oBand.height,widthMapContainer, heightMapContainer);
+            var oBodyMapContainer = this.createBodyForProcessingBandImage(sFileName,oBand.name, oBand.actualFilter, 0,0,
+                                        oBand.width,oBand.height,widthMapContainer, heightMapContainer,oBand.colorManipulation);
             // this.m_oImageMapDirectivePayload = oBodyMapContainer;
             // Disable the not till the end of the API
             var sNode = this.m_aoProducts[oBand.productIndex].productName + "_" + oBand.bandName;
@@ -1193,7 +1747,8 @@ var EditorController = (function () {
         if ( (widthImagePreview > 0) && (heightImagePreview > 0) )
         {
             // Yes call API also for preview
-            var oBodyImagePreview = this.createBodyForProcessingBandImage(sFileName,oBand.name, null, 0,0,oBand.width,oBand.height,widthImagePreview, heightImagePreview);
+            var oBodyImagePreview = this.createBodyForProcessingBandImage(sFileName,oBand.name, null, 0,0,oBand.width,oBand.height,
+                                    widthImagePreview, heightImagePreview,oBand.colorManipulation);
             // Show it
             oController.processingGetBandPreview(oBodyImagePreview,oController.m_oActiveWorkspace.workspaceId);
         }
@@ -1282,6 +1837,9 @@ var EditorController = (function () {
 
                     // Zoom on the bounding box in the 3d globe
                     oController.m_oGlobeService.zoomBandImageOnBBOX(oController.m_aoProducts[oController.m_oActiveBand.productIndex].bbox);
+
+                    // Get product colour manipulation
+                    oController.getProductColorManipulation(oBody.productFileName,oBody.bandName,true,workspaceId);
                 }
             }
         }).error(function (data, status) {
@@ -1315,7 +1873,8 @@ var EditorController = (function () {
      * @param iOutputHeight Height of the output image
      * @returns {{productFileName: *, bandName: *, filterVM: *, vp_x: *, vp_y: *, vp_w: *, vp_h: *, img_w: *, img_h: *}}
      */
-    EditorController.prototype.createBodyForProcessingBandImage = function(sFileName, sBandName, sFilters, iRectangleX, iRectangleY, iRectangleWidth, iRectangleHeight, iOutputWidth, iOutputHeight){
+    EditorController.prototype.createBodyForProcessingBandImage = function(sFileName, sBandName, sFilters, iRectangleX, iRectangleY,
+                                                                           iRectangleWidth, iRectangleHeight, iOutputWidth, iOutputHeight,oColorManipulation){
 
         var oBandImageBody = {
             "productFileName": sFileName,
@@ -1326,7 +1885,8 @@ var EditorController = (function () {
             "vp_w": iRectangleWidth,
             "vp_h": iRectangleHeight,
             "img_w": iOutputWidth,
-            "img_h": iOutputHeight
+            "img_h": iOutputHeight,
+            "colorManipulation":oColorManipulation
         };
 
         return oBandImageBody;
@@ -1767,6 +2327,7 @@ var EditorController = (function () {
         {
             return false;
         }
+        // oOperationServerRequest = this.m_oSnapOperationService.ApplyOrbit();
         var oController = this;
         this.m_oModalService.showModal({
             templateUrl: "dialogs/generate_automatic_operation_dialog/GenerateAutomaticOperationDialogView.html",
@@ -2218,7 +2779,8 @@ var EditorController = (function () {
 
                 var sFileName = oController.m_aoProducts[oResult.band.productIndex].fileName;
 
-                var oBodyMapContainer = oController.createBodyForProcessingBandImage(sFileName,oResult.band.name,oResult.filter,0,0,oResult.band.width, oResult.band.height,widthMapContainer, heightMapContainer);
+                var oBodyMapContainer = oController.createBodyForProcessingBandImage(sFileName,oResult.band.name,oResult.filter,0,0,
+                                    oResult.band.width, oResult.band.height,widthMapContainer, heightMapContainer,oResult.band.colorManipulation);
 
                 // Filters does not apply in the preview
 
@@ -2352,25 +2914,35 @@ var EditorController = (function () {
      * @param sNameDiv
      * @returns {boolean}
      */
-    EditorController.prototype.drawColourManipulationHistogram = function(sNameDiv)
+    EditorController.prototype.drawColourManipulationHistogram = function(sNameDiv,afValues)
     {
+
         if(utilsIsStrNullOrEmpty(sNameDiv) === true)
             return false;
-
-        var x = [];
-        for (var i = 0; i < 500; i ++) {
-            x[i] = Math.random();
+        if(utilsIsObjectNullOrUndefined(afValues) === true)
+            return false;
+        //todo test
+        var x = utilsGenerateArrayWithFirstNIntValue(0,afValues.length);
+        if(utilsIsObjectNullOrUndefined(x) === true)
+        {
+            return false;
         }
 
         var trace = {
-            x: x,
-            type: 'histogram'
+            x: x ,
+            y: afValues,
+            // type: 'histogram'
+            type: 'bar',
+            marker: {
+                color: '#C8A2C8',
+            }
         };
         var data = [trace];
         var layout = {
             //title: "Colour Manipolation",
             showlegend: false,
             height:200,
+            width:500,
             margin: {
                 l: 5,
                 r: 5,
@@ -2378,8 +2950,9 @@ var EditorController = (function () {
                 t: 5,
                 pad: 4
             },
+
         };
-        Plotly.newPlot(sNameDiv, data, layout,{staticPlot: true});
+        Plotly.newPlot(sNameDiv, data,layout,{staticPlot: true});//,layout,{staticPlot: true}
 
         return true;
     };
@@ -2420,6 +2993,64 @@ var EditorController = (function () {
         this.modifyColourManipulation(iMin,iMax,iAverage,sLayerId,oBand);
     };
 
+    EditorController.prototype.getProductColorManipulation = function(sFile,sBand,bAccurate,sWorkspaceId)
+    {
+        if( utilsIsStrNullOrEmpty(sFile) === true || utilsIsStrNullOrEmpty(sBand) === true || utilsIsStrNullOrEmpty(sWorkspaceId) === true || utilsIsObjectNullOrUndefined(bAccurate) === true )
+        {
+            return false;
+        }
+        var oController = this;
+        this.m_oSnapOperationService.getProductColorManipulation(sFile,sBand,bAccurate,sWorkspaceId).success(function (data, status) {
+            if (data != null)
+            {
+                if (data != undefined)
+                {
+                    // oController.m_oColorManipulation = data;
+                    if (utilsIsObjectNullOrUndefined(oController.m_oActiveBand) === false)
+                    {
+                        oController.m_oActiveBand.colorManipulation = data;
+                        oController.drawColourManipulationHistogram("colourManipulationDiv",data.histogramBins);
+
+                    }
+                }
+            }
+        }).error(function (data, status) {
+            utilsVexDialogAlertTop('GURU MEDITATION<br>PRODUCT COLOR MANIPULATION ');
+
+        });
+
+        return true;
+    };
+
+    /**
+     * processingProductColorManipulation
+     */
+    EditorController.prototype.processingProductColorManipulation = function()
+    {
+        if (utilsIsObjectNullOrUndefined(this.m_oActiveBand) === true) return;
+
+        var sWorkspaceId,oBand;
+        oBand = this.m_oActiveBand;
+        sWorkspaceId = this.m_oActiveWorkspace.workspaceId;
+
+        //get map size
+        var oMapContainerSize = this.getMapContainerSize(this.m_iPanScalingValue);
+        var heightMapContainer = oMapContainerSize.height;
+        var widthMapContainer = oMapContainerSize.width;
+
+        var sFileName = this.m_aoProducts[oBand.productIndex].fileName;
+        //get body
+        var oBodyMapContainer = this.createBodyForProcessingBandImage(sFileName,oBand.name,oBand.actualFilter,0,0,
+                                                oBand.width, oBand.height,widthMapContainer, heightMapContainer, oBand.colorManipulation);
+        //processing image with color manipulation
+        this.processingGetBandImage(oBodyMapContainer, sWorkspaceId);
+    }
+    EditorController.prototype.getDefaultProductColorManipulation = function()
+    {
+        //get default value of color manipolation
+        this.m_oActiveBand.colorManipulation = null;
+        this.processingProductColorManipulation()
+    }
     /********************************************************** TREE FUNCTIONS *********************************************************************/
 
     EditorController.prototype.isHideTree = function()

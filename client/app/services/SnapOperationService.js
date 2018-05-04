@@ -8,12 +8,18 @@ angular.module('wasdi.SnapOperationService', ['wasdi.SnapOperationService']).
 service('SnapOperationService', ['$http',  'ConstantsService', function ($http, oConstantsService) {
     this.APIURL = oConstantsService.getAPIURL();
     this.m_oHttp = $http;
-
+    this.m_oController = this;
     /************************************ RADAR OPERATIONS ************************************/
     this.ApplyOrbit = function (sSourceProductName, sDestinationProductName, sWorkspaceId,oOptionsInput) {
-
         return this.Operation("radar/applyOrbit", sSourceProductName, sDestinationProductName, sWorkspaceId, oOptionsInput);//orbit
     };
+    // this.ApplyOrbit = function (sSourceProductName, sDestinationProductName, sWorkspaceId,oOptionsInput) {
+    //     // return this.Operation("radar/applyOrbit", sSourceProductName, sDestinationProductName, sWorkspaceId, oOptionsInput);//orbit
+    //     var sUrl = this.APIURL + '/processing/radar/applyOrbit?sSourceProductName=' + sSourceProductName + '&sDestinationProductName=' + sDestinationProductName + '&sWorkspaceId=' + sWorkspaceId;
+    //     var oConfig = {header:""};
+    //     return this.m_oHttp.post(sUrl,oOptionsInput,oConfig);
+    // };
+
     this.Calibrate = function (sSourceProductName, sDestinationProductName, sWorkspaceId,oOptionsInput) {
 
         return this.Operation("radar/radiometricCalibration", sSourceProductName, sDestinationProductName, sWorkspaceId,oOptionsInput);//calibrate
@@ -72,6 +78,12 @@ service('SnapOperationService', ['$http',  'ConstantsService', function ($http, 
     {
         return this.m_oHttp.get(this.APIURL + '/processing/productmasks?file=' + sFile + "&band=" + sBand + "&workspaceId=" + sWorkspaceId);
     };
+
+    /***************************************** Histogram *****************************************/
+    this.getProductColorManipulation = function(sFile,sBand,bAccurate,sWorkspaceId)
+    {
+        return this.m_oHttp.get(this.APIURL + '/processing/productcolormanipulation?file=' + sFile + "&band=" + sBand + "&workspaceId=" + sWorkspaceId + "&accurate=" + bAccurate);
+    };
     /************************************ OTHERS **************************************************/
 
     this.Operation = function(sOperation, sSourceProductName, sDestinationProductName, sWorkspaceId, oOptionsInput)
@@ -80,7 +92,7 @@ service('SnapOperationService', ['$http',  'ConstantsService', function ($http, 
         var oConfig = {header:""};
         sUrl = sUrl.replace("{sOperation}", sOperation);
         return this.m_oHttp.post(sUrl,oOptionsInput,oConfig);
-    }
+    };
 
 }]);
 
