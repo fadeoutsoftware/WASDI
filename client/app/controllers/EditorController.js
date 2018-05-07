@@ -1886,7 +1886,7 @@ var EditorController = (function () {
             "vp_h": iRectangleHeight,
             "img_w": iOutputWidth,
             "img_h": iOutputHeight,
-            "colorManipulation":oColorManipulation
+            "colorManiputalion":oColorManipulation
         };
 
         return oBandImageBody;
@@ -2964,13 +2964,13 @@ var EditorController = (function () {
     {
         //TODO NEW BAND
     };
-    EditorController.prototype.resetColourManipulation = function()
-    {
-        //TODO REMOVE NEW BAND
-        this.removeBandImage(oBand)
-        //TODO ADD OLD BAND
-        this.addLayerMap2D(sLayerId);
-    };
+    // EditorController.prototype.resetColourManipulation = function()
+    // {
+    //     //TODO REMOVE NEW BAND
+    //     this.removeBandImage(oBand)
+    //     //TODO ADD OLD BAND
+    //     this.addLayerMap2D(sLayerId);
+    // };
     EditorController.prototype.modifyColourManipulation = function(iMin,iMax,iAverage,sLayerId,oBand)
     {
         //TODO REQUEST

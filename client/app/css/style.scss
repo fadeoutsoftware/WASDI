@@ -680,6 +680,20 @@ font-size: 2.5em !important;
 
 }
 
+.btn-group-vertical
+{
+  .btn-primary
+  {
+    background-color: $wasdi-blue-logo;
+    border-color: $wasdi-white;
+    //border-color: $wasdi-green-logo;
+  }
+  .btn:hover
+  {
+    background-color: $wasdi-green-logo;
+    color: $wasdi-white;
+  }
+}
 //CURSOR
 .wait-cursor-hover {
   &:hover{
