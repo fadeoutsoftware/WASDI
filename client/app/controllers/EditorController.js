@@ -1864,7 +1864,7 @@ var EditorController = (function () {
      * Generate the JSON Object to use for the POST API to get the image of a band
      * @param sFileName File Name
      * @param sBandName Band Name
-     * @param sFilters List of fitlers to apply, comma separated
+     * @param sFilters List of filters to apply, comma separated
      * @param iRectangleX X coordinate of the rectangle to render
      * @param iRectangleY Y coordinate of the rectangle to render
      * @param iRectangleWidth Width of the rectangle to render
@@ -2956,9 +2956,23 @@ var EditorController = (function () {
 
         return true;
     };
-    EditorController.prototype.adjust95percentageColourManipulation = function()
+    EditorController.prototype.adjust95percentageColourManipulation = function(oColorManipulation)
     {
-        //TODO NEW BAND
+        if(utilsIsObjectNullOrUndefined(oColorManipulation) === true)
+        {
+            return false;
+        }
+        //min value
+        oColorManipulation.colors[0].value = oColorManipulation.histogramMin;
+        //average value
+        oColorManipulation.colors[1].value = (oColorManipulation.histogramMax / 2 );
+        //max value
+        oColorManipulation.colors[2].value = oColorManipulation.histogramMax;
+
+        //processing product with the new color manipulation
+        this.processingProductColorManipulation();
+
+        return true;
     };
     EditorController.prototype.adjust100percentageColourManipulation = function()
     {
@@ -2971,26 +2985,74 @@ var EditorController = (function () {
     //     //TODO ADD OLD BAND
     //     this.addLayerMap2D(sLayerId);
     // };
-    EditorController.prototype.modifyColourManipulation = function(iMin,iMax,iAverage,sLayerId,oBand)
+    // EditorController.prototype.modifyColourManipulation = function(iMin,iMax,iAverage,sLayerId,oBand)
+    // {
+    //     //TODO REQUEST
+    //     //send iMin iMax iAverage to the server
+    //     //TODO REMOVE OLD BAND
+    //     this.removeBandImage(oBand)
+    //     //TODO ADD NEW BAND
+    //     this.addLayerMap2D(sLayerId);
+    // };
+    // EditorController.prototype.checkColorManipulationSliders = function(aoSlidersColors)
+    // {
+    //     this.minSliderColourManipulation(aoSlidersColors);
+    //     this.maxSliderColourManipulation(aoSlidersColors);
+    //     this.averageSliderColourManipulation(aoSlidersColors);
+    // };
+
+    EditorController.prototype.minSliderColourManipulation = function(aoSlidersColors)
     {
-        //TODO REQUEST
-        //send iMin iMax iAverage to the server
-        //TODO REMOVE OLD BAND
-        this.removeBandImage(oBand)
-        //TODO ADD NEW BAND
-        this.addLayerMap2D(sLayerId);
+        var iMaxValue = parseInt(aoSlidersColors[2].value);
+        var iMinValue = parseInt(aoSlidersColors[0].value);
+        var iAverageValue = parseInt(aoSlidersColors[1].value);
+        // the min value can't be bigger average
+        if(iMinValue >= iAverageValue)
+        {
+            aoSlidersColors[1].value = parseInt(aoSlidersColors[0].value);
+            if(iAverageValue >= iMaxValue)
+            {
+                //set max value with average
+                aoSlidersColors[2].value = parseInt(aoSlidersColors[1].value);
+            }
+        }
     };
-    EditorController.prototype.minSliderColourManipulation = function(iMin,iMax,iAverage)
+    EditorController.prototype.maxSliderColourManipulation = function(aoSlidersColors)
     {
-        this.modifyColourManipulation(iMin,iMax,iAverage,sLayerId,oBand);
+        var iMaxValue = parseInt(aoSlidersColors[2].value);
+        var iMinValue = parseInt(aoSlidersColors[0].value);
+        var iAverageValue = parseInt(aoSlidersColors[1].value);
+
+        // the max value can't be smaller average
+        if(iMaxValue <= iAverageValue)
+        {
+            //set average with max value
+            aoSlidersColors[1].value = parseInt(aoSlidersColors[2].value);
+            if(iAverageValue <= iMinValue)
+            {
+                //set min value with average
+                aoSlidersColors[0].value = parseInt(aoSlidersColors[1].value);
+            }
+
+        }
     };
-    EditorController.prototype.maxSliderColourManipulation = function(iMin,iMax,iAverage)
+    EditorController.prototype.averageSliderColourManipulation = function(aoSlidersColors)
     {
-        this.modifyColourManipulation(iMin,iMax,iAverage,sLayerId,oBand);
-    };
-    EditorController.prototype.averageSliderColourManipulation = function(iMin,iMax,iAverage)
-    {
-        this.modifyColourManipulation(iMin,iMax,iAverage,sLayerId,oBand);
+        var iMaxValue = parseInt(aoSlidersColors[2].value);
+        var iMinValue = parseInt(aoSlidersColors[0].value);
+        var iAverageValue = parseInt(aoSlidersColors[1].value);
+        // the average must be bigger than min value and smaller than max value
+        if( iAverageValue >= iMaxValue )
+        {
+            //set max value with average
+            aoSlidersColors[2].value = parseInt(aoSlidersColors[1].value);
+        }
+        if( iAverageValue <= iMinValue )
+        {
+            //set min value with average
+            aoSlidersColors[0].value = parseInt(aoSlidersColors[1].value);
+        }
+
     };
 
     EditorController.prototype.getProductColorManipulation = function(sFile,sBand,bAccurate,sWorkspaceId)
@@ -3047,10 +3109,24 @@ var EditorController = (function () {
     }
     EditorController.prototype.getDefaultProductColorManipulation = function()
     {
+        if(utilsIsObjectNullOrUndefined(this.m_oActiveBand.colorManipulation ) === false)
+        {
+            delete this.m_oActiveBand.colorManipulation;
+            //without the property body.colorManipulation the server return default colorManipulation
+        }
         //get default value of color manipolation
-        this.m_oActiveBand.colorManipulation = null;
         this.processingProductColorManipulation()
     }
+
+    EditorController.prototype.generateColor = function(oColors)
+    {
+        if( utilsIsObjectNullOrUndefined(oColors) === true )
+        {
+            return "";
+        }
+
+        return "rgb(" + oColors.colorBlue + "," + oColors.colorGreen + "," + oColors.colorRed +")";
+    };
     /********************************************************** TREE FUNCTIONS *********************************************************************/
 
     EditorController.prototype.isHideTree = function()

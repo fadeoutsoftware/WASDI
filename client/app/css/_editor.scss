@@ -29,6 +29,23 @@
           margin:10px 0px 10px 0px;
         }
       }
+
+      .ranges-container
+      {
+        .color-value
+        {
+          margin-left: 20px;
+          color: $wasdi-green-logo;
+          
+        }
+
+        input[type=range]
+        {
+          width: 80%;
+          float:left;
+
+        }
+      }
     }
     //override bootstrap
     .panel-heading {
