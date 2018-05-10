@@ -149,20 +149,22 @@
     }
     .right-column
     {
-      .table-hover tr:hover{
-        //background-color: $wasdi;
-        //color:$wasdi-green-logo;
-        border-top: 2px solid $wasdi-green-logo;
-        border-bottom: 2px solid $wasdi-green-logo;
-        cursor:pointer;
-      }
+      height: 75vh;
+      overflow-y: auto;
+      //.table-hover tr:hover{
+      //  //background-color: $wasdi;
+      //  //color:$wasdi-green-logo;
+      //  border-top: 2px solid $wasdi-green-logo;
+      //  border-bottom: 2px solid $wasdi-green-logo;
+      //  cursor:pointer;
+      //}
       .table-products {
-
         thead {
+          //display: block;
+          //overflow: auto;
           background-color: $wasdi-import-table-head-background-color;
           color: $wasdi-import-table-head-color;
         }
-
         th {
           text-align: center;
           vertical-align: middle;
@@ -180,6 +182,15 @@
         tbody {
           border-top: 1px solid #ddd; //FIX TABLE
           //border-top: 2px solid $wasdi-blue-logo;
+          height: 73vh;
+          overflow: auto;
+          tr{
+            &:hover{
+              border-top: 2px solid $wasdi-green-logo;
+              border-bottom: 2px solid $wasdi-green-logo;
+              cursor:pointer;
+            }
+          }
         }
 
         .operation-button {
