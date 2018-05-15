@@ -166,7 +166,8 @@
                 <tbody >
                     <tr ng-repeat="entry in m_oController.m_aoEntries | orderBy:m_oController.m_sOrderBy:m_oController.m_bReverseOrder | filter:search" id="{{'product'+$index}}"
                         ng-mouseover="m_oController.m_oMapService.changeStyleRectangleMouseOver(entry.rectangle)"
-                        ng-mouseleave="m_oController.m_oMapService.changeStyleRectangleMouseLeave(entry.rectangle)">
+                        ng-mouseleave="m_oController.m_oMapService.changeStyleRectangleMouseLeave(entry.rectangle)"
+                        ng-click="m_oController.m_oMapService.flyOnRectangle(entry.rectangle)">
                         <td>{{entry.fileName}}</td>
                         <td>{{entry.refDate}}</td>
                         <td>{{entry.category}}</td>

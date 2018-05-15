@@ -19,11 +19,10 @@ var HomeController = (function() {
         this.m_bVisualizeLink = false;
         if(this.m_oConstantsService.isUserLogged())
             this.m_oState.go("root.workspaces");// go workspaces
-
         if(this.m_bBrowserIsIE === true)
         {
             this.m_bVisualizeLink = false;
-            alert("Wasdi doesn't work on IE" + this.m_bVisualizeLink);
+            alert("Wasdi doesn't work on IE/EDGE");// + this.m_bVisualizeLink
         }
         else
         {

@@ -7,6 +7,15 @@
             <div  class='animate-hide'  ng-hide="m_oController.isHiddenOperationMainBar();">
                 <ul class="button-menu-with-icons">
 
+                    <li ng-click="m_oController.openSFTPDialog()" >
+                        <a href="" >
+                            <h4>
+                                <i class="fa fa-server" aria-hidden="true"></i>
+                                {{"EDITOR_OPERATION_TITLE_SFTP"|translate}}
+                            </h4>
+                        </a>
+                    </li>
+
                     <li   ng-click="m_oController.hideOperationMainBar(); m_oController.showOperationRadarBar();" ><!--data-toggle="tooltip" data-placement="top" title="{{'EDITOR_TOOLTIP_ICON_RADAR'|translate}}"-->
                         <!--<a class="icon-radar" href=""><i  aria-hidden="true"></i> </a>-->
                         <a href="" class="icon-radar ">
@@ -96,14 +105,14 @@
                     </li>
 
                     <!--sftp dialog-->
-                    <li ng-click="m_oController.openSFTPDialog()" >
-                        <a href="" >
-                            <h4>
-                                <i class="fa fa-server" aria-hidden="true"></i>
-                                {{"EDITOR_OPERATION_TITLE_SFTP"|translate}}
-                            </h4>
-                        </a>
-                    </li>
+                    <!--<li ng-click="m_oController.openSFTPDialog()" >-->
+                        <!--<a href="" >-->
+                            <!--<h4>-->
+                                <!--<i class="fa fa-server" aria-hidden="true"></i>-->
+                                <!--{{"EDITOR_OPERATION_TITLE_SFTP"|translate}}-->
+                            <!--</h4>-->
+                        <!--</a>-->
+                    <!--</li>-->
 
                     <!--workflow dialog-->
                     <!--<li ng-click="m_oController.openWorkflowDialog()" >-->
