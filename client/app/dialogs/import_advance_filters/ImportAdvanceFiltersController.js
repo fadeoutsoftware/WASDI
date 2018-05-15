@@ -844,7 +844,7 @@ var ImportAdvanceFiltersController = (function() {
                     break;
             }
 
-            if(asSeasonsSelected[iIndexSeason] !== "winter")
+            if(asSeasonsSelected[iIndexSeason].toLowerCase() !== "winter")
             {
                 oDataPeriod.dateSensingPeriodFrom.setYear(iYear);
             }

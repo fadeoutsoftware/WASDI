@@ -524,7 +524,24 @@ service('MapService', ['$http','$rootScope', 'ConstantsService', function ($http
             console.log(e);
         }
     };
-
+    /**
+     * flyOnRectangle
+     * @param oRectangle
+     * @returns {boolean}
+     */
+    this.flyOnRectangle = function(oRectangle)
+    {
+        if(utilsIsObjectNullOrUndefined(oRectangle) === true)
+        {
+            return false;
+        }
+        if(utilsIsObjectNullOrUndefined(this.m_oWasdiMap) === true)
+        {
+            return false;
+        }
+        this.m_oWasdiMap.fitBounds(oRectangle.getBounds());
+        return true;
+    }
     /**
      * Zoom on bounds
      * @param aBounds

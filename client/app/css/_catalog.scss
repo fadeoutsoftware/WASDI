@@ -164,6 +164,12 @@
           //overflow: auto;
           background-color: $wasdi-import-table-head-background-color;
           color: $wasdi-import-table-head-color;
+          th{
+            border-color: white;
+            border-style: solid;
+            border-width: 1px;
+            cursor: pointer;
+          }
         }
         th {
           text-align: center;
