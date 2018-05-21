@@ -378,7 +378,8 @@ public class LauncherMain {
     public String Download(DownloadFileParameter oParameter, String sDownloadPath) {
         String sFileName = "";
         // Download handler
-        DownloadFile oDownloadFile = new DownloadFile();
+        DownloadFile oDownloadFile = DownloadFile.getDownloadFile(oParameter.getProvider());
+        
         ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
         ProcessWorkspace oProcessWorkspace = oProcessWorkspaceRepository.GetProcessByProcessObjId(oParameter.getProcessObjId());
 

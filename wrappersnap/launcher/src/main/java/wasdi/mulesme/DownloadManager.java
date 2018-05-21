@@ -96,7 +96,7 @@ public class DownloadManager {
 				.replaceAll("__PRODUCTTYPE__", productType);
 		
 		QueryExecutor executor = QueryExecutor.newInstance(providerName, providerUser, providerPassword, "0", queryLimit, querySortedBy, queryOrder);
-		DownloadFile downloader = new DownloadFile();
+		DownloadFile downloader = DownloadFile.getDownloadFile("SENTINEL");
 		
 		System.out.println("searching products between " + from + " and " + to + " for " + footprints.size() + " regions ");
 		
