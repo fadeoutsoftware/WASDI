@@ -18,29 +18,29 @@ service('OpenSearchService', ['$http',  'ConstantsService', function ($http, oCo
     //-------------------------------------
 
     this.getApiProductsCount = function (query) {
-        return this.APIURL + this.API_GET_PRODUCTS_COUNT + query;
+        return this.APIURL + this.API_GET_PRODUCTS_COUNT + encodeURI(query);
     };
 
     this.getApiProducts = function (query) {
-        return this.APIURL + this.API_GET_PRODUCTS + query;
+        return this.APIURL + this.API_GET_PRODUCTS + encodeURI(query);
     };
 
     this.getApiProductsWithProviders = function (query) {
-        return this.APIURL + this.API_GET_SEARCH + query;
+        return this.APIURL + this.API_GET_SEARCH + encodeURI(query);
     };
 
     this.getApiProductsListWithProviders = function (query) {
-        return this.APIURL + this.API_GET_SEARCHLIST + query;
+        return this.APIURL + this.API_GET_SEARCHLIST + encodeURI(query);
     };
 
     this.getApiProductCountWithProviders = function(sQueryInput,sProvidersInput)
     {
-        return this.APIURL + '/search/query/count?sQuery=' + sQueryInput +"&providers="+sProvidersInput;
+        return this.APIURL + '/search/query/count?sQuery=' + encodeURI(sQueryInput) +"&providers="+encodeURI(sProvidersInput);
     };
 
     this.getApiProductListCountWithProviders = function(sQueryInput,sProvidersInput)
     {
-        return this.APIURL + '/search/query/countlist?sQuery=' + sQueryInput +"&providers="+sProvidersInput;
+        return this.APIURL + '/search/query/countlist?sQuery=' + encodeURI(sQueryInput) +"&providers="+encodeURI(sProvidersInput);
     };
 
     this.getListOfProvider = function()
