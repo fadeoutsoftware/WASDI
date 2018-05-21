@@ -211,7 +211,7 @@
             <groupId>org.esa.snap</groupId>
             <artifactId>snap-rcp</artifactId>
             <version>6.0.0</version>
-        </dependency>
+        </dependency>    
   </dependencies>
 	<build>
 		<finalName>wasdiwebserver</finalName>
