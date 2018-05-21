@@ -71,6 +71,8 @@ public class FileBufferResource {
 			oParameter.setBoundingBox(sBoundingBox);
 			oParameter.setDownloadUser(m_oServletConfig.getInitParameter(sProvider+".OSUser"));
 			oParameter.setDownloadPassword(m_oServletConfig.getInitParameter(sProvider+".OSPwd"));
+			oParameter.setProvider(sProvider);
+			
 			try
 			{
 				oProcess = new ProcessWorkspace();
