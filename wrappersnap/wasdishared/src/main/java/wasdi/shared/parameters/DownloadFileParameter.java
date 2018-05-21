@@ -29,8 +29,10 @@ public class DownloadFileParameter extends BaseParameter{
     private String queue;
 
     private String boundingBox;
+    
+    private String provider;
 
-    public String getUrl() { return url; }
+	public String getUrl() { return url; }
 
     public void setUrl(String sUrl) {
         this.url = sUrl;
@@ -68,4 +70,11 @@ public class DownloadFileParameter extends BaseParameter{
 		this.downloadPassword = downloadPassword;
 	}    
     
+    public String getProvider() {
+		return provider;
+	}
+
+	public void setProvider(String provider) {
+		this.provider = provider;
+	}
 }
