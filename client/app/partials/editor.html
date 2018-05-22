@@ -61,29 +61,30 @@
                         </a>
                     </li>
 
-                    <li ng-click="m_oController.openWPSDialog()">
-                        <a href="" >
-                            <div>
-                                <h4>
-                                    <i class="fa fa-server" aria-hidden="true"></i>
-                                    {{'EDITOR_OPERATION_TITLE_APPLY_WPS'|translate}}
-                                </h4>
-                            </div>
+                    <!--<li ng-click="m_oController.openWPSDialog()">-->
+                        <!--<a href="" >-->
+                            <!--<div>-->
+                                <!--<h4>-->
+                                    <!--<i class="fa fa-server" aria-hidden="true"></i>-->
+                                    <!--{{'EDITOR_OPERATION_TITLE_APPLY_WPS'|translate}}-->
+                                <!--</h4>-->
+                            <!--</div>-->
 
-                        </a>
-                    </li>
+                        <!--</a>-->
+                    <!--</li>-->
 
-                    <li ng-click="m_oController.openGenerateOperationDialog(m_oController.m_oGetParametersOperationService.getparametersApplyOrbit(),
-                                                                            'Apply orbit',m_oController.m_oSnapOperationService.ApplyOrbit)">
-                        <a href="" >
-                            <div>
-                                <h4>
-                                    test
-                                </h4>
-                            </div>
+                    <!--TODO REMOVE IT -->
+                    <!--<li ng-click="m_oController.openGenerateOperationDialog(m_oController.m_oGetParametersOperationService.getParametersNDVI(),-->
+                                                                            <!--'NDVI', m_oController.getNDVI)">-->
+                        <!--<a href="" >-->
+                            <!--<div>-->
+                                <!--<h4>-->
+                                    <!--test-->
+                                <!--</h4>-->
+                            <!--</div>-->
 
-                        </a>
-                    </li>
+                        <!--</a>-->
+                    <!--</li>-->
 
 
                 </ul>
@@ -292,7 +293,7 @@
                     <!---------------------- TAB 1 COLOURS------------------>
                     <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12" ng-show="(m_oController.m_iActiveMapPanelTab === 1) &&
                                                                                 (m_oController.m_oActiveBand !== null)">
-                        <div class="row">
+                        <div class="row histogram-container">
                             <div class="col-xs-10 col-sm-10 col-md-10 col-lg-10">
 
                                 <div class="loadIcon" ng-show="m_oController.m_oActiveBand.colorManipulation == null" >
@@ -301,58 +302,14 @@
                                 <div id="colourManipulationDiv" ng-hide="m_oController.m_oActiveBand.colorManipulation == null">
 
                                 </div>
-                                <!--<div class="ranges-container" ng-hide="m_oController.m_oActiveBand.colorManipulation == null">-->
-                                    <!--<div class="range-container">&lt;!&ndash; style="width: 100%;"&ndash;&gt;-->
-                                        <!--<span>-->
-                                    <!--Value:{{m_oController.m_oActiveBand.colorManipulation.colors[0].value}}-->
-                                <!--</span>-->
-                                        <!--<input type="range" min="{{m_oController.m_oActiveBand.colorManipulation.histogramMin}}"-->
-                                               <!--max="{{m_oController.m_oActiveBand.colorManipulation.histogramMax}}"-->
-                                               <!--ng-model="m_oController.m_oActiveBand.colorManipulation.colors[0].value" class="slider"-->
-                                               <!--ng-style="{'background-color': m_oController.generateColor(m_oController.m_oActiveBand.colorManipulation.colors[0])}"-->
-                                               <!--ng-change="m_oController.minSliderColourManipulation(m_oController.m_oActiveBand.colorManipulation.colors)">&lt;!&ndash;ng-change="m_oController.maxSliderColourManipulation()"&ndash;&gt;-->
 
-                                        <!--&lt;!&ndash;<p>&ndash;&gt;-->
-                                        <!--&lt;!&ndash;Value: <span id="demo"></span>&ndash;&gt;-->
-                                        <!--&lt;!&ndash;</p>&ndash;&gt;-->
-                                    <!--</div>-->
-                                    <!--<div class="range-container">&lt;!&ndash; style="width: 100%;"&ndash;&gt;-->
-                                        <!--<span>-->
-                                    <!--Value:{{m_oController.m_oActiveBand.colorManipulation.colors[1].value}}-->
-                                <!--</span>-->
-                                        <!--<input type="range" min="{{m_oController.m_oActiveBand.colorManipulation.histogramMin}}"-->
-                                               <!--max="{{m_oController.m_oActiveBand.colorManipulation.histogramMax}}"-->
-                                               <!--ng-model="m_oController.m_oActiveBand.colorManipulation.colors[1].value" class="slider"-->
-                                               <!--ng-style="{'background-color': m_oController.generateColor(m_oController.m_oActiveBand.colorManipulation.colors[1])}"-->
-                                               <!--ng-change="m_oController.averageSliderColourManipulation(m_oController.m_oActiveBand.colorManipulation.colors)">&lt;!&ndash; ng-change="m_oController.averageSliderColourManipulation()"&ndash;&gt;-->
-                                        <!--&lt;!&ndash;<p>&ndash;&gt;-->
-                                        <!--&lt;!&ndash;Value: <span id="demo"></span>&ndash;&gt;-->
-                                        <!--&lt;!&ndash;</p>&ndash;&gt;-->
-                                    <!--</div>-->
-                                    <!--<div class="range-container">&lt;!&ndash; style="width: 100%;"&ndash;&gt;-->
-                                        <!--<span>-->
-                                        <!--Value:{{m_oController.m_oActiveBand.colorManipulation.colors[2].value}}-->
-                                    <!--</span>-->
-                                        <!--<input type="range" min="{{m_oController.m_oActiveBand.colorManipulation.histogramMin}}"-->
-                                               <!--max="{{m_oController.m_oActiveBand.colorManipulation.histogramMax}}"-->
-                                               <!--ng-model="m_oController.m_oActiveBand.colorManipulation.colors[2].value" class="slider"-->
-                                               <!--ng-style="{'background-color': m_oController.generateColor(m_oController.m_oActiveBand.colorManipulation.colors[2])}"-->
-                                               <!--ng-change="m_oController.maxSliderColourManipulation(m_oController.m_oActiveBand.colorManipulation.colors)">&lt;!&ndash;ng-change="m_oController.minSliderColourManipulation()"&ndash;&gt;-->
-                                        <!--&lt;!&ndash;<p>&ndash;&gt;-->
-                                        <!--&lt;!&ndash;Value: <span id="demo"></span>&ndash;&gt;-->
-                                        <!--&lt;!&ndash;</p>&ndash;&gt;-->
-                                    <!--</div>-->
-                                <!--</div>-->
-                                <!--<div >-->
-                                <!--<invader></invader>-->
-                                <!--</div>-->
                             </div>
                             <div class="col-xs-2 col-sm-2 col-md-2 col-lg-2">
                                 <div class="btn-group-vertical" ng-hide="m_oController.m_oActiveBand.colorManipulation == null">
                                     <button type="button" class="btn btn-primary" ng-click="m_oController.adjust95percentageColourManipulation(m_oController.m_oActiveBand.colorManipulation)">
                                         95%
                                     </button>
-                                    <button type="button" class="btn btn-primary" ng-click="m_oController.adjust100percentageColourManipulation()">
+                                    <button type="button" class="btn btn-primary" ng-click="m_oController.adjust100percentageColourManipulation(m_oController.m_oActiveBand.colorManipulation)">
                                         100%
                                     </button>
                                     <button type="button" class="btn btn-primary" ng-click="m_oController.getDefaultProductColorManipulation()">

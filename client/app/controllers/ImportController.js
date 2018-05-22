@@ -2198,6 +2198,92 @@ var ImportController = (function() {
         return true;
     };
 
+    ImportController.prototype.isVisibleFilter = function(sCollection,sFilterName)
+    {
+        var bIsVisible = false;
+
+        //collection Filters
+        if(utilsIsStrNullOrEmpty(sFilterName) === false && utilsIsStrNullOrEmpty(sCollection) === false )
+        {
+            bIsVisible = this.probaVVisibleFilterProductIDForCollection(sCollection,sFilterName);
+        }
+    }
+
+    ImportController.prototype.probaVVisibleFilterProductIDForCollection = function(sCollection,sFilterName)
+    {
+
+        if( sFilterName !== "Product ID" )
+            return false;
+
+        switch(sCollection){
+            case "urn:ogc:def:EOP:VITO:PROBAV_S1-TOA_1KM_V001":
+            case "urn:ogc:def:EOP:VITO:PROBAV_S1-TOC_1KM_V001":
+            case "urn:ogc:def:EOP:VITO:PROBAV_S10-TOC_1KM_V001":
+            case "urn:ogc:def:EOP:VITO:PROBAV_S1-TOA_333M_V001":
+            case "urn:ogc:def:EOP:VITO:PROBAV_S1-TOC_333M_V001":
+            case "urn:ogc:def:EOP:VITO:PROBAV_S10-TOC_333M_V001":
+            case "urn:ogc:def:EOP:VITO:PROBAV_S10-TOC-NDVI_333M_V001":
+            case "urn:ogc:def:EOP:VITO:PROBAV_L2A_333M_V001":
+            case "urn:ogc:def:EOP:VITO:PROBAV_S1-TOA_100M_V001":
+            case "urn:ogc:def:EOP:VITO:PROBAV_S1-TOC_100M_V001":
+            case "urn:ogc:def:EOP:VITO:PROBAV_S1-TOC-NDVI_100M_V001":
+            case "urn:ogc:def:EOP:VITO:PROBAV_S5-TOA_100M_V001":
+            case "urn:ogc:def:EOP:VITO:PROBAV_S5-TOC_100M_V001":
+            case "urn:ogc:def:EOP:VITO:PROBAV_S5-TOC-NDVI_100M_V001":
+            case "urn:ogc:def:EOP:VITO:PROBAV_L2A_100M_V001":
+            case "urn:ogc:def:EOP:VITO:PROBAV_S10-TOC-NDVI_1KM_V001":
+            case "urn:ogc:def:EOP:VITO:PROBAV_P_V001":
+                return true;
+                break;
+            case "urn:ogc:def:EOP:VITO:PROBAV_L2A_1KM_V001":
+                return false;
+                break;
+
+            default: return false;
+            
+            return false;
+        }
+
+        // switch(sCollection){
+        //     case "urn:ogc:def:EOP:VITO:PROBAV_S1-TOA_1KM_V001":
+        //         break;
+        //     case "urn:ogc:def:EOP:VITO:PROBAV_S1-TOC_1KM_V001":
+        //         break;
+        //     case "urn:ogc:def:EOP:VITO:PROBAV_S10-TOC_1KM_V001":
+        //         break;
+        //     case "urn:ogc:def:EOP:VITO:PROBAV_S10-TOC-NDVI_1KM_V001":
+        //         break;
+        //     case "urn:ogc:def:EOP:VITO:PROBAV_L2A_1KM_V001":
+        //         break;
+        //     case "urn:ogc:def:EOP:VITO:PROBAV_P_V001":
+        //         break;
+        //     case "urn:ogc:def:EOP:VITO:PROBAV_S1-TOA_333M_V001":
+        //         break;
+        //     case "urn:ogc:def:EOP:VITO:PROBAV_S1-TOC_333M_V001":
+        //         break;
+        //     case "urn:ogc:def:EOP:VITO:PROBAV_S10-TOC_333M_V001":
+        //         break;
+        //     case "urn:ogc:def:EOP:VITO:PROBAV_S10-TOC-NDVI_333M_V001":
+        //         break;
+        //     case "urn:ogc:def:EOP:VITO:PROBAV_L2A_333M_V001":
+        //         break;
+        //     case "urn:ogc:def:EOP:VITO:PROBAV_S1-TOA_100M_V001":
+        //         break;
+        //     case "urn:ogc:def:EOP:VITO:PROBAV_S1-TOC_100M_V001":
+        //         break;
+        //     case "urn:ogc:def:EOP:VITO:PROBAV_S1-TOC-NDVI_100M_V001":
+        //         break;
+        //     case "urn:ogc:def:EOP:VITO:PROBAV_S5-TOA_100M_V001":
+        //         break;
+        //     case "urn:ogc:def:EOP:VITO:PROBAV_S5-TOC_100M_V001":
+        //         break;
+        //     case "urn:ogc:def:EOP:VITO:PROBAV_S5-TOC-NDVI_100M_V001":
+        //         break;
+        //     default:
+        // }
+
+    }
+
     ImportController.$inject = [
         '$scope',
         'ConstantsService',

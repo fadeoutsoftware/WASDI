@@ -26,9 +26,14 @@
                                                 <label>{{parameter.label}}</label>
                                             </div>
                                             <div class="col-xs-9 col-sm-9 col-md-9 col-lg-9 my-input-text">
+                                                <!----------------- SOURCE BANDS ----------------->
+                                                <div ng-if="m_oController.getTypeOfParameter(parameter) === 'sourceBands'">
+                                                    <multiselect options="m_oController.m_asSourceBands" selected="m_oController.m_asSourceBandsSelected"></multiselect>
+                                                </div>
+
                                                 <!----------------- TEXT ----------------->
                                                 <input type="text" class="my-input-text" ng-if="m_oController.getTypeOfParameter(parameter) === 'text'"
-                                                       ng-mdoel="parameter.defaultValue">
+                                                       ng-model="parameter.defaultValue">
                                                 <!----------------- CHECKBOX ----------------->
                                                 <div class="checkbox"  ng-if="m_oController.getTypeOfParameter(parameter) === 'checkbox' ">
                                                     <label>

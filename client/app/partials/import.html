@@ -62,7 +62,7 @@
 
             </div>
 
-            <div  class="panel-body"><!--id="mySidenav"-->
+            <div class="panel-body"><!--id="mySidenav"-->
 
                     <div class="row" ng-hide="m_oController.m_bIsVisibleListOfLayers || m_oController.m_bisVisibleLocalStorageInputs">
                         <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
@@ -199,6 +199,7 @@
                                 </div>
 
                                 <div class="row">
+                                    <!--{{mission.filters}}-->
                                     <div ng-repeat="filter in mission.filters">
                                         <!-- INPUT -->
                                         <div class="col-md-6" ng-if="!(filter.indexvalues && filter.indexvalues.split('|').length > 0)">
@@ -209,13 +210,14 @@
                                                     <input type="text" ng-model="filter.indexvalue"
                                                            ng-value="filter.indexvalue" class=" filter-input"
                                                            ng-blur="m_oController.updateFilter($parent.$parent.$index)"
-                                                           ng-pattern="filter.regex">
+                                                           ng-pattern="filter.regex" ><!--ng-show="m_oController.isVisibleFilter(null,filter.indexname)"-->
 
                                                     <span class="highlight filter-highlight"></span>
                                                     <span class="bar filter-bar"></span>
                                                 </div>
                                             </div>
                                         </div>
+
                                         <!-- INPUT NUMBER-->
                                         <!--TODO IT 659 su mantis-->
                                         <!--<div class="col-md-6" ng-if="(filter.indexmin && filter.indexmax && filter.indexvalues === '')">-->
@@ -243,14 +245,75 @@
                                                           class="browser-default" ng-model="filter.indexvalue">
                                                     <option selected></option>
                                                     <option ng-repeat="option in filter.indexvalues.split('|')"
-                                                            value="{{option}}">{{option}}
+                                                            value="{{option}}" ng-click="filter.valueselected = option">{{option}}
                                                     </option>
                                                 </datalist>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
+                                <!--{-->
+                                <!--"name": "Proba-V",-->
+                                <!--"indexname": "platformname",-->
+                                <!--"indexvalue": "Proba-V",-->
+                                <!--"filters": [-->
 
+                                <!--{-->
+                                <!--"indexname": "collection ",-->
+                                <!--"indexlabel": "Collection ",-->
+                                <!--"indexvalues":"S1 TOA - 1 km||S1 TOC - 1 km|S10 TOC - 1 km|S10 TOC NDVI - 1 km|L2A - 1km|Level 1C|S1 TOA - 300 m|S1 TOC - 300 m|S10 TOC - 300 m|S10 TOC NDVI - 300 m|L2A - 300m|S1 TOA 100 m|S1 TOC 100 m|S1 TOC NDVI 100 m|S5 TOA 100 m|S5 TOC 100 m|S5 TOC NDVI 100 m|VGT_P|VGT_S1",-->
+                                <!--"regex": ".*"-->
+                                <!--},-->
+                                <!--{-->
+                                <!--"indexname": "cloudcoverpercentage",-->
+                                <!--"indexlabel": "Cloud Coverage(%)(e.g.[0 TO 9.4])",-->
+                                <!--"indexvalues":"",-->
+                                <!--"indexmin":"0",-->
+                                <!--"indexmax":"100",-->
+                                <!--"regex": ".*"-->
+
+                                <!--},-->
+                                <!--{-->
+                                <!--"indexname": "snowcoverpercentage",-->
+                                <!--"indexlabel": "Snow Coverage(%)(e.g.[0 TO 9.4])",-->
+                                <!--"indexvalues":"",-->
+                                <!--"indexmin":"0",-->
+                                <!--"indexmax":"100",-->
+                                <!--"regex": ".*"-->
+
+                                <!--},{-->
+                                <!--"indexname": "productref",-->
+                                <!--"indexlabel": "productref",-->
+                                <!--"indexvalues":"",-->
+                                <!--"regex": ".*"-->
+
+                                <!--},{-->
+                                <!--"indexname": "cameraId",-->
+                                <!--"indexlabel": "cameraId",-->
+                                <!--"indexvalues":"",-->
+                                <!--"regex": ".*"-->
+
+                                <!--},{-->
+                                <!--"indexname": "Product ID",-->
+                                <!--"indexlabel": "Product ID",-->
+                                <!--"indexvalues":"",-->
+                                <!--"regex": ".*"-->
+
+                                <!--},{-->
+                                <!--"indexname": "Year",-->
+                                <!--"indexlabel": "Year",-->
+                                <!--"indexvalues":"",-->
+                                <!--"regex": ".*"-->
+
+                                <!--},{-->
+                                <!--"indexname": "Instrument",-->
+                                <!--"indexlabel": "Instrument",-->
+                                <!--"indexvalues":"VG1|VG2",-->
+                                <!--"regex": ".*"-->
+
+                                <!--}-->
+                                <!--]-->
+                                <!--}-->
 
                             </div>
 
