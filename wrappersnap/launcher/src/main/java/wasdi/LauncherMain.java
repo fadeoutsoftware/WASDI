@@ -9,6 +9,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Date;
 import java.util.List;
+import java.util.logging.Level;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -160,6 +161,8 @@ public class LauncherMain {
             LauncherMain oLauncher = new LauncherMain();
 
             s_oLogger.debug("Executing " + sOperation + " Parameter " + sParameter);
+            
+            SystemUtils.LOG.setLevel(Level.ALL);
 
             // And Run
             oLauncher.ExecuteOperation(sOperation,sParameter);
@@ -387,6 +390,8 @@ public class LauncherMain {
         	updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 0);
         	
             s_oLogger.debug("LauncherMain.Download: Download Start");
+            
+            if (oDownloadFile == null) throw new Exception("Donwload File is null. Check the provider name");
 
             oDownloadFile.setProviderUser(oParameter.getDownloadUser());
             oDownloadFile.setProviderPassword(oParameter.getDownloadPassword());

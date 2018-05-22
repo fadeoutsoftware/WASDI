@@ -5,6 +5,7 @@ import org.apache.log4j.Logger;
 import wasdi.LauncherMain;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.data.ProcessWorkspaceRepository;
+import wasdi.shared.utils.Utils;
 
 /**
  * Created by s.adamo on 06/10/2016.
@@ -65,7 +66,10 @@ public abstract class DownloadFile {
      * @param iProgress
      */
     public void UpdateProcessProgress(ProcessWorkspace oProcessWorkspace, int iProgress) {
-        try {    	
+    	
+    	if (oProcessWorkspace == null) return;
+    	
+        try {
 	    	ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
 	    	
 	        oProcessWorkspace.setProgressPerc(iProgress);
@@ -131,6 +135,9 @@ public abstract class DownloadFile {
 	 * @return Instance of the Provider Download File class
 	 */
 	public static DownloadFile getDownloadFile(String sProvider) {
+		
+		if (Utils.isNullOrEmpty(sProvider)) return null;
+		
 		if (sProvider.equals("SENTINEL")) {
 			return new DhUSDownloadFile();
 		}
