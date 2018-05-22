@@ -69,6 +69,11 @@
         <level value="debug" />
         <appender-ref ref="fileLauncher" />
     </logger>
+    
+    <logger name="org.esa.snap">
+        <level value="all" />
+        <appender-ref ref="fileLauncher" />
+    </logger>
 
     <logger name="wasdi.geoserver">
         <level value="debug" />

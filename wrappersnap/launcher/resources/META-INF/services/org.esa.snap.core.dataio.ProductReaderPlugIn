@@ -198,3 +198,6 @@ org.esa.s2tbx.dataio.gdal.reader.plugins.SGIDriverProductReaderPlugIn
 
 org.esa.s2tbx.dataio.deimos.DeimosProductReaderPlugin
 
+#VITO
+org.vito.probavbox.dataio.probav.ProbaVProductReaderPlugIn
+
