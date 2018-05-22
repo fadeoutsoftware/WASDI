@@ -519,6 +519,12 @@ service('GlobeService', ['$http',  'ConstantsService','SatelliteService', functi
                 icon : "assets/icons/sat_03.svg",
                 label : "LS8",
                 description : "NASA LANDSAT 8"
+            },
+            {
+                name : "PROBAV",
+                icon : "assets/icons/sat_03.svg",
+                label : "PROBA-V",
+                description : "PROBA VEGETATION"
             }
         ];
 

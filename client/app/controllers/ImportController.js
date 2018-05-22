@@ -1031,17 +1031,19 @@ var ImportController = (function() {
             if(utilsIsObjectNullOrUndefined( aData[iIndexData].preview) || utilsIsStrNullOrEmpty( aData[iIndexData].preview))
                 aData[iIndexData].preview = "assets/icons/ImageNotFound.svg";//default value ( set it if there isn't the image)
 
-            //get bounds
-            var aoBounds = oController.polygonToBounds( aData[iIndexData].footprint);
-            // var oRectangle = oController.m_oMapService.addRectangleByBoundsArrayOnMap(aoBounds ,null,iIndexData);
-            // aData[iIndexData].rectangle = oRectangle;
+            if (utilsIsObjectNullOrUndefined(aData[iIndexData].footprint)==false) {
+                //get bounds
+                var aoBounds = oController.polygonToBounds( aData[iIndexData].footprint);
+                aData[iIndexData].bounds = aoBounds;
+                aaoAllBounds.push(aoBounds);
+            }
+
             aData[iIndexData].rectangle = null;
-            aData[iIndexData].bounds = aoBounds;
             aData[iIndexData].checked = false;
-            aaoAllBounds.push(aoBounds);
 
             oController.m_aoProductsList.push(aData[iIndexData]);
         }
+
         oController.updateLayerListForActiveTab(this.m_iActiveProvidersTab);
         // oController.m_oMapService.zoomOnBounds(aaoAllBounds);
     };
@@ -1416,9 +1418,14 @@ var ImportController = (function() {
                 var oError = function (data,status) {
                             utilsVexDialogAlertTop('GURU MEDITATION<br>THERE WAS AN ERROR IMPORTING THE IMAGE IN THE WORKSPACE');
                             oLayer.isDisabledToDoDownload = false;
-                        }
+                        };
 
-                oThat.downloadProduct(sUrl,aoWorkSpaces[iIndexWorkspace].workspaceId,oLayer.bounds.toString(),oLayer.provider,null,oError);
+                var sBound = "";
+
+                if (utilsIsObjectNullOrUndefined(oLayer.bounds) == false) {
+                    sBound = oLayer.bounds.toString();
+                }
+                oThat.downloadProduct(sUrl,aoWorkSpaces[iIndexWorkspace].workspaceId,sBound,oLayer.provider,null,oError);
 
             }
 
