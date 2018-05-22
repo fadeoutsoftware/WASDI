@@ -155,6 +155,10 @@ public class QueryExecutorPROBAV extends QueryExecutor  {
 			sUrl+="&" + cloudCover;
 		if (snowCover != null)
 			sUrl+="&" + snowCover;
+		if (this.m_sOffset != null)
+			sUrl+="&startIndex=" + this.m_sOffset;
+		if (this.m_sLimit != null)
+			sUrl+="&count=" + this.m_sLimit;
 
 		//addUrlParams(oParamsMap);
 		return sUrl;
