@@ -1,6 +1,42 @@
 package wasdi.shared.opensearch;
 
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.StringReader;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Base64;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+
+import org.apache.abdera.Abdera;
 import org.apache.abdera.i18n.templates.Template;
+import org.apache.abdera.model.Document;
+import org.apache.abdera.model.Element;
+import org.apache.abdera.model.Entry;
+import org.apache.abdera.model.Feed;
+import org.apache.abdera.model.Link;
+import org.apache.abdera.parser.Parser;
+import org.apache.abdera.parser.ParserOptions;
+import org.apache.abdera.protocol.Response.ResponseType;
+import org.apache.abdera.protocol.client.AbderaClient;
+import org.apache.abdera.protocol.client.ClientResponse;
+import org.apache.abdera.protocol.client.RequestOptions;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
+
+import wasdi.shared.viewmodels.QueryResultViewModel;
 
 public class QueryExecutorPROBAV extends QueryExecutor  {
 
@@ -19,6 +55,271 @@ public class QueryExecutorPROBAV extends QueryExecutor  {
 	protected String getCountUrl(String sQuery) {
 		//http://www.vito-eodata.be/openSearch/findProducts?collection=urn:ogc:def:EOP:VITO:PROBAV_S1-TOC_1KM_V001&start=2016-05-05T00:00&end=2016-05-14T23:59&bbox=-180.00,0.00,180.00,90.00
 		return "http://www.vito-eodata.be/openSearch/count?filter=" + sQuery;
+	}
+
+	@Override
+	protected String buildUrl(String sQuery){
+		//Template oTemplate = getTemplate();
+		//Map<String,Object> oParamsMap = new HashMap<String, Object>();		
+		//oParamsMap.put("scheme", getUrlSchema());
+		//oParamsMap.put("path", getUrlPath());
+		//oParamsMap.put("start", m_sOffset);
+		//oParamsMap.put("rows", m_sLimit);
+		//oParamsMap.put("orderby", m_sSortedBy + " " + m_sOrder);
+		//oParamsMap.put("q", sQuery);
+		
+		String sUrl = "http://www.vito-eodata.be/openSearch/findProducts?";
+		String bbox = null;
+		String date = null;
+		String collection = null;
+		String cloudCover = null;
+		String snowCover = null;
+		String[] asFootprint = sQuery.split("AND");
+		if (asFootprint.length > 0)
+		{
+			for (String item : asFootprint) {
+				if (item.contains("POLYGON"))
+				{
+					String refString = item;
+					String[] asPolygon = refString.split("POLYGON\\(\\(");
+					if (asPolygon.length > 0)
+					{
+						String[] asCoordinates = asPolygon[1].split("\\)\\)")[0].split(",");
+						
+						double maxX;
+						double minX;
+						double maxY;
+						double minY;
+						//init
+						String[] asCordinate = asCoordinates[0].split(" ");
+						maxX = Double.parseDouble(asCordinate[0]);
+						minX = Double.parseDouble(asCordinate[0]);
+						maxY = Double.parseDouble(asCordinate[1]);
+						minY = Double.parseDouble(asCordinate[1]);
+						for (String sCoord : asCoordinates) {
+							asCordinate = sCoord.split(" ");
+							maxX = Math.max(maxX, Double.parseDouble(asCordinate[0]));
+							minX = Math.min(minX, Double.parseDouble(asCordinate[0]));
+							maxY = Math.max(maxY, Double.parseDouble(asCordinate[1]));
+							minY = Math.min(minY, Double.parseDouble(asCordinate[1]));
+						}
+						
+						bbox = String.format("bbox=%s,%s,%s,%s", String.valueOf(minX), String.valueOf(minY), String.valueOf(maxX), String.valueOf(maxY));
+					}
+				}
+				
+				if (item.contains("beginPosition"))
+				{
+					String refString = item;
+					String[] asDate = refString.split("\\[")[1].split("\\]")[0].split("TO");
+					String startdate = asDate[0].trim().substring(0, 16);
+					String enddate = asDate[1].trim().substring(0, 16);
+					
+					date = String.format("start=%s&end%s", startdate, enddate);
+				}
+				
+				if (item.contains("collection"))
+				{
+					String refString = item;
+					String[] asNameColletion = refString.split(":", 2)[1].split("\\)");
+					collection = String.format("collection=%s",asNameColletion[0]);
+				}
+				
+				/*
+				if (item.contains("cloudcoverpercentage"))
+				{
+					String refString = item;
+					String[] asNameColletion = refString.split(":", 2)[1].split("\\)");
+					cloudCover = String.format("cloudCover=[%s]",asNameColletion[0]);
+				}
+				
+				if (item.contains("snowcoverpercentage"))
+				{
+					String refString = item;
+					String[] asNameColletion = refString.split(":", 2)[1].split("\\)");
+					snowCover = String.format("snowCover=[%s]",asNameColletion[0]);
+				}
+				*/
+			}
+			
+		}
+		if (collection != null)
+			sUrl+=collection;
+		if (bbox != null)
+			sUrl+="&" + bbox;
+		if (date != null)
+			sUrl+="&" + date;
+		if (cloudCover != null)
+			sUrl+="&" + cloudCover;
+		if (snowCover != null)
+			sUrl+="&" + snowCover;
+
+		//addUrlParams(oParamsMap);
+		return sUrl;
+	}
+	
+	@Override
+	public int executeCount(String sQuery) throws IOException
+	{
+		String sUrl = buildUrl(sQuery);
+		
+		//create abdera client
+		Abdera oAbdera = new Abdera();
+		AbderaClient oClient = new AbderaClient(oAbdera);
+		oClient.setConnectionTimeout(15000);
+		oClient.setSocketTimeout(40000);
+		oClient.setConnectionManagerTimeout(20000);
+		oClient.setMaxConnectionsTotal(200);
+		oClient.setMaxConnectionsPerHost(50);
+		
+		// get default request option
+		RequestOptions oOptions = oClient.getDefaultRequestOptions();
+		
+		// build the parser
+		Parser oParser = oAbdera.getParser();
+		ParserOptions oParserOptions = oParser.getDefaultParserOptions();
+		oParserOptions.setCharset("UTF-8");
+		//options.setCompressionCodecs(CompressionCodec.GZIP);
+		oParserOptions.setFilterRestrictedCharacterReplacement('_');
+		oParserOptions.setFilterRestrictedCharacters(true);
+		oParserOptions.setMustPreserveWhitespace(false);
+		oParserOptions.setParseFilter(null);
+		// set authorization
+		if (m_sUser!=null && m_sPassword!=null) {
+			String sUserCredentials = m_sUser + ":" + m_sPassword;
+			String sBasicAuth = "Basic " + Base64.getEncoder().encodeToString(sUserCredentials.getBytes());
+			oOptions.setAuthorization(sBasicAuth);			
+		}
+		
+//		System.out.println("\nSending 'GET' request to URL : " + sUrl);
+		ClientResponse response = oClient.get(sUrl, oOptions);
+		
+		Document<Feed> oDocument = null;
+		
+		
+		if (response.getType() != ResponseType.SUCCESS) {
+			System.out.println("Response ERROR: " + response.getType());
+			return 0;
+		}
+
+		System.out.println("Response Success");		
+		
+		// Get The Result as a string
+		BufferedReader oBuffRead = new BufferedReader(response.getReader());
+		String sResponseLine = null;
+		StringBuilder oResponseStringBuilder = new StringBuilder();
+		while ((sResponseLine = oBuffRead.readLine()) != null) {
+		    oResponseStringBuilder.append(sResponseLine);
+		}
+		
+		String sResultAsString = oResponseStringBuilder.toString();
+		
+//		System.out.println(sResultAsString);
+
+		oDocument = oParser.parse(new StringReader(sResultAsString), oParserOptions);
+
+		if (oDocument == null) {
+			System.out.println("OpenSearchQuery.ExecuteQuery: Document response null");
+			return 0;
+		}
+		
+		Feed oFeed = (Feed) oDocument.getRoot();
+		
+		String sFeed = oFeed.toString();
+		
+		String sTotal = sFeed.substring(sFeed.lastIndexOf("<os:totalResults>") + 17 , sFeed.indexOf("</os:totalResults>"));
+		
+		return Integer.valueOf(sTotal);
+		
+	}
+	
+	@Override
+	protected ArrayList<QueryResultViewModel> buildResultLightViewModel(Document<Feed> oDocument, AbderaClient oClient, RequestOptions oOptions) {
+		
+		Feed oFeed = (Feed) oDocument.getRoot();
+		/*
+		ByteArrayOutputStream outStream = new ByteArrayOutputStream();
+		try {
+			oDocument.getRoot().writeTo(outStream);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		InputStream reader = new ByteArrayInputStream(outStream.toByteArray());
+		DocumentBuilderFactory f = 
+                DocumentBuilderFactory.newInstance();
+        DocumentBuilder b;
+		try {
+			b = f.newDocumentBuilder();
+			org.w3c.dom.Document doc = b.parse(reader);
+			doc.getDocumentElement().normalize();
+	        System.out.println ("Root element: " + 
+	                    doc.getDocumentElement().getNodeName());
+	        // loop through each item
+	        doc.getDocumentElement().toString();
+            NodeList items = doc.getDocumentElement().getElementsByTagName("atom:entry");
+            for (int i = 0; i < items.getLength(); i++)
+            {
+            	Node oFeature = items.item(i);
+            	Node oMultiExtended = oFeature.getFirstChild();
+            	Node oMultiSurface = oMultiExtended.getFirstChild();
+            	Node oSurfaceMember = oMultiSurface.getFirstChild();
+            	Node oSurfaceMember = oSurfaceMember.getFirstChild();
+            	for (int m = 0; i < oMultiExtended.getLength(); m++)
+                {
+            		NodeList oMultiExtended = oFeature.getChildNodes();
+                }
+            	
+            }
+	        
+		} catch (Exception e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+        */
+
+		ArrayList<QueryResultViewModel> aoResults = new ArrayList<QueryResultViewModel>();
+		
+		for (Entry oEntry : oFeed.getEntries()) {
+			
+			System.out.println(oEntry.toString());
+
+			QueryResultViewModel oResult = new QueryResultViewModel();
+			oResult.setProvider(m_sProvider);
+			
+			//retrive the title
+			oResult.setTitle(oEntry.getTitle());			
+			
+			//retrive the summary
+			oResult.setSummary(oEntry.getSummary());
+			
+			//retrieve the id
+			oResult.setId(oEntry.getId().toString());
+			
+			//retrieve the link
+			oResult.setLink(oEntry.getEnclosureLinkResolvedHref().toString());
+			
+			//retrieve the footprint and all others properties
+			List<Element> aoElements = oEntry.getElements();
+			for (Element element : aoElements) {
+				String sName = element.getAttributeValue("name");
+				if (sName != null) {
+					if (sName.equals("footprint")) {
+						oResult.setFootprint(element.getText());
+					} else {
+						oResult.getProperties().put(sName, element.getText());
+					}
+				}
+			}
+			
+			oResult.setPreview(null);
+			
+			aoResults.add(oResult);
+		} 
+
+		System.out.println("Search Done: found " + aoResults.size() + " results");
+
+		return aoResults;
 	}
 
 }

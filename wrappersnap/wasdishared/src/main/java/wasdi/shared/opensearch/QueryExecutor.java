@@ -108,7 +108,7 @@ public abstract class QueryExecutor {
 	}
 
 
-	private String buildUrl(String sQuery) {
+	protected String buildUrl(String sQuery) {
 		Template oTemplate = getTemplate();
 		Map<String,Object> oParamsMap = new HashMap<String, Object>();		
 		oParamsMap.put("scheme", getUrlSchema());
