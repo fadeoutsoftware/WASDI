@@ -325,10 +325,7 @@ public class OpenSearchResource {
 				Wasdi.DebugLog("OpenSearchResource.SearchList: [" + sProviders + "] Query["+iQueries+"] = " + asQueries.get(iQueries));
 				
 				Map<String, Integer> counterMap = getQueryCounters(sQuery, sProviders);			
-				
-				// TODO: TOGLIERE DOPO CHE FUNZIONA IL COUNT
-				counterMap.put("PROBAV", 10);
-				
+								
 				for (Entry<String, Integer> entry : counterMap.entrySet()) {
 
 					String sProvider = entry.getKey();				
