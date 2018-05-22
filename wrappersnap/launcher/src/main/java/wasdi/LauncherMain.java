@@ -9,6 +9,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Date;
 import java.util.List;
+import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;
 
 import org.apache.commons.cli.CommandLine;
@@ -162,7 +163,10 @@ public class LauncherMain {
 
             s_oLogger.debug("Executing " + sOperation + " Parameter " + sParameter);
             
+            ConsoleHandler handler = new ConsoleHandler();
+            handler.setLevel(Level.ALL);
             SystemUtils.LOG.setLevel(Level.ALL);
+            SystemUtils.LOG.addHandler(handler);
 
             // And Run
             oLauncher.ExecuteOperation(sOperation,sParameter);
