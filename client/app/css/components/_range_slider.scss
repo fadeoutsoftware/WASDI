@@ -5,7 +5,7 @@
 
 .range-container{
   width: 100%;
-  margin-top:10px;
+  //margin-top:10px;
 }
 .slider {
   -webkit-appearance: none;
@@ -15,6 +15,7 @@
   background: #d3d3d3;
   //background-color: red;
   //background: black;
+  border: solid 1px;
   outline: none;
   opacity: 0.7;
   -webkit-transition: .2s;

@@ -24,559 +24,6 @@ var EditorController = (function () {
         this.m_oFilterService = oFilterService;
         this.m_oModalService = oModalService;
         this.m_oGetParametersOperationService = oGetParametersOperationService;
-        // this.m_oColorManipulation  = {
-        //     "colors": [
-        //         {
-        //             "colorBlue": 0,
-        //             "colorGreen": 0,
-        //             "colorRed": 0,
-        //             "value": 10.324219
-        //         },
-        //         {
-        //             "colorBlue": 128,
-        //             "colorGreen": 128,
-        //             "colorRed": 128,
-        //             "value": 98.9043
-        //         },
-        //         {
-        //             "colorBlue": 255,
-        //             "colorGreen": 255,
-        //             "colorRed": 255,
-        //             "value": 187.48438
-        //         }
-        //     ],
-        //     "discreteColor": false,
-        //     "histogramBins": [
-        //         249238935,
-        //         121606540,
-        //         64802852,
-        //         22513659,
-        //         8131026,
-        //         3232603,
-        //         1402951,
-        //         662921,
-        //         341415,
-        //         190371,
-        //         114538,
-        //         73686,
-        //         50697,
-        //         36111,
-        //         26528,
-        //         19938,
-        //         15782,
-        //         12339,
-        //         9827,
-        //         7805,
-        //         6559,
-        //         5274,
-        //         4507,
-        //         3874,
-        //         3287,
-        //         2712,
-        //         2434,
-        //         2097,
-        //         1852,
-        //         1559,
-        //         1405,
-        //         1178,
-        //         1166,
-        //         977,
-        //         809,
-        //         781,
-        //         703,
-        //         640,
-        //         513,
-        //         527,
-        //         488,
-        //         415,
-        //         371,
-        //         354,
-        //         343,
-        //         334,
-        //         284,
-        //         252,
-        //         234,
-        //         232,
-        //         214,
-        //         216,
-        //         194,
-        //         159,
-        //         148,
-        //         123,
-        //         148,
-        //         131,
-        //         129,
-        //         103,
-        //         109,
-        //         103,
-        //         102,
-        //         89,
-        //         81,
-        //         72,
-        //         83,
-        //         68,
-        //         58,
-        //         62,
-        //         73,
-        //         56,
-        //         48,
-        //         50,
-        //         51,
-        //         50,
-        //         35,
-        //         37,
-        //         41,
-        //         35,
-        //         39,
-        //         26,
-        //         35,
-        //         23,
-        //         27,
-        //         21,
-        //         22,
-        //         33,
-        //         19,
-        //         32,
-        //         28,
-        //         17,
-        //         18,
-        //         24,
-        //         22,
-        //         22,
-        //         18,
-        //         21,
-        //         18,
-        //         15,
-        //         13,
-        //         16,
-        //         19,
-        //         8,
-        //         18,
-        //         12,
-        //         14,
-        //         7,
-        //         10,
-        //         10,
-        //         12,
-        //         8,
-        //         9,
-        //         6,
-        //         5,
-        //         7,
-        //         10,
-        //         12,
-        //         9,
-        //         9,
-        //         5,
-        //         9,
-        //         5,
-        //         8,
-        //         8,
-        //         4,
-        //         7,
-        //         10,
-        //         7,
-        //         3,
-        //         6,
-        //         8,
-        //         5,
-        //         6,
-        //         6,
-        //         4,
-        //         7,
-        //         2,
-        //         3,
-        //         3,
-        //         10,
-        //         5,
-        //         5,
-        //         6,
-        //         3,
-        //         3,
-        //         6,
-        //         4,
-        //         2,
-        //         8,
-        //         3,
-        //         3,
-        //         1,
-        //         4,
-        //         1,
-        //         3,
-        //         3,
-        //         3,
-        //         1,
-        //         3,
-        //         4,
-        //         2,
-        //         0,
-        //         1,
-        //         2,
-        //         1,
-        //         2,
-        //         1,
-        //         3,
-        //         1,
-        //         0,
-        //         2,
-        //         4,
-        //         0,
-        //         2,
-        //         2,
-        //         5,
-        //         4,
-        //         2,
-        //         0,
-        //         2,
-        //         2,
-        //         2,
-        //         1,
-        //         1,
-        //         0,
-        //         1,
-        //         1,
-        //         0,
-        //         1,
-        //         2,
-        //         2,
-        //         2,
-        //         0,
-        //         4,
-        //         0,
-        //         3,
-        //         0,
-        //         3,
-        //         0,
-        //         1,
-        //         1,
-        //         1,
-        //         1,
-        //         0,
-        //         0,
-        //         2,
-        //         3,
-        //         1,
-        //         0,
-        //         1,
-        //         2,
-        //         1,
-        //         0,
-        //         0,
-        //         1,
-        //         2,
-        //         1,
-        //         0,
-        //         1,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         1,
-        //         2,
-        //         0,
-        //         0,
-        //         1,
-        //         0,
-        //         1,
-        //         0,
-        //         0,
-        //         1,
-        //         0,
-        //         0,
-        //         1,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         1,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         3,
-        //         1,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         1,
-        //         0,
-        //         0,
-        //         0,
-        //         2,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         1,
-        //         2,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         1,
-        //         0,
-        //         0,
-        //         0,
-        //         1,
-        //         1,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         1,
-        //         0,
-        //         0,
-        //         0,
-        //         1,
-        //         0,
-        //         0,
-        //         0,
-        //         1,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         1,
-        //         0,
-        //         0,
-        //         1,
-        //         1,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         1,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         1,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         1,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         1,
-        //         0,
-        //         0,
-        //         1,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         1,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         1,
-        //         1,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         1,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         1,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         1,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         1,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         0,
-        //         1
-        //     ],
-        //     "histogramMatching": "None",
-        //     "histogramMathcingValues": [
-        //         "None",
-        //         "Equalize",
-        //         "Normalize"
-        //     ],
-        //     "histogramMax": 25567,
-        //     "histogramMin": 1,
-        //     "histogramWidth": 49.933594,
-        //     "noDataColor": {
-        //         "colorBlue": 0,
-        //         "colorGreen": 0,
-        //         "colorRed": 0
-        //     }
-        // };
-        // TODO REMOVE IT, test case
-
         // Flag to know if in the big map is 2d (true) or 3d (false)
         this.m_b2DMapModeOn = true;
         // Flag to know if the big map is the Geographical Mode (true) or in the Editor Mode (false)
@@ -691,7 +138,6 @@ var EditorController = (function () {
         this.m_oRabbitStompService.setMessageCallback(this.receivedRabbitMessage);
         this.m_oRabbitStompService.setActiveController(this);
 
-        // this.drawColourManipulationHistogram("colourManipulationDiv",this.m_oColorManipulation.histogramBins);
     }
 
     /*********************************************************** VIEW METHODS**********************************************************/
@@ -2320,6 +1766,75 @@ var EditorController = (function () {
         return true;
     };
 
+    /**
+     * getApplyOrbit
+     * @param oController
+     * @param sSourceFileName
+     * @param sDestinationFileName
+     * @param sWorkspaceId
+     * @param sOptions
+     * @param oFunctionSuccess
+     * @param oFunctionError
+     */
+    EditorController.prototype.getApplyOrbit = function(oController,sSourceFileName,sDestinationFileName,sWorkspaceId,sOptions,oFunctionSuccess,oFunctionError)
+    {
+        oController.m_oSnapOperationService.ApplyOrbit(sSourceFileName,sDestinationFileName,sWorkspaceId,sOptions).success(oFunctionSuccess).error(oFunctionError);
+    };
+    /**
+     * getMultilooking
+     * @param oController
+     * @param sSourceFileName
+     * @param sDestinationFileName
+     * @param sWorkspaceId
+     * @param sOptions
+     * @param oFunctionSuccess
+     * @param oFunctionError
+     */
+    EditorController.prototype.getMultilooking = function(oController,sSourceFileName,sDestinationFileName,sWorkspaceId,sOptions,oFunctionSuccess,oFunctionError)
+    {
+        oController.m_oSnapOperationService.Multilooking(sSourceFileName,sDestinationFileName,sWorkspaceId,sOptions).success(oFunctionSuccess).error(oFunctionError);
+    };
+    /**
+     * getRadiometricCalibration
+     * @param oController
+     * @param sSourceFileName
+     * @param sDestinationFileName
+     * @param sWorkspaceId
+     * @param sOptions
+     * @param oFunctionSuccess
+     * @param oFunctionError
+     */
+    EditorController.prototype.getRadiometricCalibration = function(oController,sSourceFileName,sDestinationFileName,sWorkspaceId,sOptions,oFunctionSuccess,oFunctionError)
+    {
+        oController.m_oSnapOperationService.Calibrate(sSourceFileName,sDestinationFileName,sWorkspaceId,sOptions).success(oFunctionSuccess).error(oFunctionError);
+    };
+    /**
+     * getRangeDopplerTerrainCorrection
+     * @param oController
+     * @param sSourceFileName
+     * @param sDestinationFileName
+     * @param sWorkspaceId
+     * @param sOptions
+     * @param oFunctionSuccess
+     * @param oFunctionError
+     */
+    EditorController.prototype.getRangeDopplerTerrainCorrection = function(oController,sSourceFileName,sDestinationFileName,sWorkspaceId,sOptions,oFunctionSuccess,oFunctionError)
+    {
+        oController.m_oSnapOperationService.RangeDopplerTerrainCorrection(sSourceFileName,sDestinationFileName,sWorkspaceId,sOptions).success(oFunctionSuccess).error(oFunctionError);
+    };
+
+    EditorController.prototype.getNDVI = function(oController,sSourceFileName,sDestinationFileName,sWorkspaceId,sOptions,oFunctionSuccess,oFunctionError)
+    {
+        oController.m_oSnapOperationService.NDVI(sSourceFileName,sDestinationFileName,sWorkspaceId,sOptions).success(oFunctionSuccess).error(oFunctionError);
+    };
+
+    /**
+     * openGenerateOperationDialog
+     * @param oOperation
+     * @param sName
+     * @param oOperationServerRequest
+     * @returns {boolean}
+     */
     EditorController.prototype.openGenerateOperationDialog = function(oOperation,sName,oOperationServerRequest)
     {
         if( (utilsIsObjectNullOrUndefined(oOperation) === true) || (utilsIsStrNullOrEmpty(sName) === true) ||
@@ -2356,17 +1871,16 @@ var EditorController = (function () {
                 var iNumberOfProduct = oResult.length;
                 for(var iIndexProduct = 0; iIndexProduct < iNumberOfProduct;iIndexProduct ++)
                 {
-                    // oController.m_oScope.Result = oResult;
-                    oOperationServerRequest(oResult[iIndexProduct].sourceFileName, oResult[iIndexProduct].destinationFileName,
-                        oController.m_oActiveWorkspace.workspaceId,oResult[iIndexProduct].options)
-                        .success(function (data) {
-                            oController.m_oProcessesLaunchedService.loadProcessesFromServer(oController.m_oActiveWorkspace.workspaceId);
-                        }).error(function (error) {
-                        utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR THE OPERATION " + sName.toUpperCase()  +" DOSEN'T WORK");
-                    });
+                    var oFunctionSuccess = function (data) {
+                        oController.m_oProcessesLaunchedService.loadProcessesFromServer(oController.m_oActiveWorkspace.workspaceId);
+                    };
+                    var oFunctionError = function (error) {
+                        utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR THE OPERATION " + sName.toUpperCase()  +" DOESN'T WORK");
+                    }
+                    oOperationServerRequest(oController,oResult[iIndexProduct].sourceFileName, oResult[iIndexProduct].destinationFileName,
+                        oController.m_oActiveWorkspace.workspaceId,oResult[iIndexProduct].options,oFunctionSuccess,oFunctionError);
                 }
                 return true;
-                // oController.m_oProcessesLaunchedService.loadProcessesFromServer(oController.m_oActiveWorkspace.workspaceId);
             });
         });
 
@@ -2934,15 +2448,20 @@ var EditorController = (function () {
             // type: 'histogram'
             type: 'bar',
             marker: {
-                color: '#C8A2C8',
+                color: '#43516A',
             }
         };
         var data = [trace];
         var layout = {
-            //title: "Colour Manipolation",
+            // title: "Colour Manipolation",
             showlegend: false,
             height:200,
             width:500,
+            xaxis: {
+                showgrid: true,
+                zeroline: true,
+            },
+            paper_bgcolor:"#000000",
             margin: {
                 l: 5,
                 r: 5,
@@ -2956,6 +2475,12 @@ var EditorController = (function () {
 
         return true;
     };
+
+    /**
+     *
+     * @param oColorManipulation
+     * @returns {boolean}
+     */
     EditorController.prototype.adjust95percentageColourManipulation = function(oColorManipulation)
     {
         if(utilsIsObjectNullOrUndefined(oColorManipulation) === true)
@@ -2969,14 +2494,53 @@ var EditorController = (function () {
         //max value
         oColorManipulation.colors[2].value = oColorManipulation.histogramMax;
 
-        //processing product with the new color manipulation
         this.processingProductColorManipulation();
 
         return true;
     };
-    EditorController.prototype.adjust100percentageColourManipulation = function()
+    EditorController.prototype.equalizeHistogram = function(src, dst) {
+        var srcLength = src.length;
+        if (!dst) { dst = src; }
+
+        // Compute histogram and histogram sum:
+        var hist = new Float32Array(512);
+        var sum = 0;
+        for (var i = 0; i < srcLength; ++i) {
+            ++hist[~~src[i]];
+            ++sum;
+        }
+
+        // Compute integral histogram:
+        var prev = hist[0];
+        for (var i = 1; i < 512; ++i) {
+            prev = hist[i] += prev;
+        }
+
+        // Equalize image:
+        var norm = 511 / sum;
+        for (var i = 0; i < srcLength; ++i) {
+            dst[i] = hist[~~src[i]] * norm;
+        }
+        return dst;
+    }
+
+    EditorController.prototype.adjust100percentageColourManipulation = function(oColorManipulation)
     {
-        //TODO NEW BAND
+        if(utilsIsObjectNullOrUndefined(oColorManipulation) === true)
+        {
+            return false;
+        }
+        //min value
+        oColorManipulation.colors[0].value = oColorManipulation.histogramMin;
+        //average value
+        oColorManipulation.colors[1].value = (oColorManipulation.histogramMax / 2 );
+        //max value
+        oColorManipulation.colors[2].value = oColorManipulation.histogramMax;
+
+        var test = [];
+        this.equalizeHistogram(oColorManipulation.histogramBins,test);
+
+        //processing product with the new color manipulation
     };
     // EditorController.prototype.resetColourManipulation = function()
     // {

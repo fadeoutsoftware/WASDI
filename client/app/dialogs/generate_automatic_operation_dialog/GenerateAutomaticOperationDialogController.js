@@ -11,6 +11,8 @@ var GenerateAutomaticOperationDialogController = (function() {
         this.m_sNameDialog = this.m_oExtras.nameDialog;
         this.m_oParameters=[];
         this.m_asSelectedProducts = [];
+        this.m_asSourceBands = [];
+        this.m_asSourceBandsSelected = [];
         this.m_aoProducts = this.m_oExtras.products;
         if(utilsIsObjectNullOrUndefined(this.m_aoProducts) == true)
         {
@@ -27,9 +29,23 @@ var GenerateAutomaticOperationDialogController = (function() {
             var oResult = oController.getOperationArrayForSelectedProducts();
             oClose(oResult, 500); // close, but give 500ms for bootstrap to animate
         };
-        this.getParameters()
+        this.getParameters();
+
+        /*************************************** WATCH ***************************************/
+        $scope.$watch('m_oController.m_asSelectedProducts', function (newValue, oldValue, scope)
+        {
+            $scope.m_oController.m_asSourceBands = $scope.m_oController.getBandsFromSelectedProducts();
+        },true);
     }
 
+    /**
+     *
+     * @returns {*}
+     */
+    GenerateAutomaticOperationDialogController.prototype.getBandsFromSelectedProducts = function()
+    {
+        return utilsProjectGetBandsFromSelectedProducts(this.m_asSelectedProducts,this.m_aoProducts);
+    };
     /**
      * getProductsName
      * @returns {*}
@@ -80,6 +96,11 @@ var GenerateAutomaticOperationDialogController = (function() {
             return null;
         }
         //ATTENTION don't change the order of if
+        //if source bands
+        if(oParameter.alias === "sourceBands")
+        {
+            return "sourceBands";
+        }
         //if boolean
         if( (oParameter.defaultValue === true) || (oParameter.defaultValue === false) || (oParameter.defaultValue === "true") || (oParameter.defaultValue === "false") )
         {
@@ -143,7 +164,7 @@ var GenerateAutomaticOperationDialogController = (function() {
         }
         var sOperationName = "_OperationDefaultName";
         //get operation name
-        if(utilsIsStrNullOrEmpty(this.m_sNameDialog) === true )
+        if(utilsIsStrNullOrEmpty(this.m_sNameDialog) === false )
         {
             //remove spaces
             sOperationName = "_" + this.m_sNameDialog.replace(/ /g,'');
@@ -151,7 +172,7 @@ var GenerateAutomaticOperationDialogController = (function() {
         var oOperationObject = {};
         //product info
         oOperationObject.sourceFileName = oProduct.fileName;
-        oOperationObject.destinationFileName = oProduct.name + "_ApplyOrbit";
+        oOperationObject.destinationFileName = oProduct.name + sOperationName;
         oOperationObject.options = {};
         return oOperationObject;
     };
@@ -182,12 +203,25 @@ var GenerateAutomaticOperationDialogController = (function() {
             {
                 // put parameters in product object
                 oOperationObject.options = oParameters;
+                //get selected band per products
+                oOperationObject.options.sourceBandNames = this.getSelectedBandsByProductName(oProduct.name, this.m_asSourceBandsSelected);
+
                 aoArrayObject.push(oOperationObject);
             }
         }
         return aoArrayObject;
     };
 
+    /**
+     * getSelectedBandsByProductName
+     * @param sProductName
+     * @param asSelectedBands
+     * @returns {*}
+     */
+    GenerateAutomaticOperationDialogController.prototype.getSelectedBandsByProductName = function(sProductName, asSelectedBands)
+    {
+        return utilsProjectGetSelectedBandsByProductName(sProductName, asSelectedBands);
+    };
     GenerateAutomaticOperationDialogController.$inject = [
         '$scope',
         'close',
