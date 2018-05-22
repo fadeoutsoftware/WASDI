@@ -1,5 +1,6 @@
 package wasdi.shared.opensearch;
 
+import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -15,6 +16,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.imageio.ImageIO;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -297,7 +299,8 @@ public class QueryExecutorPROBAV extends QueryExecutor  {
 			oResult.setId(oEntry.getId().toString());
 			
 			//retrieve the link
-			oResult.setLink(oEntry.getEnclosureLinkResolvedHref().toString());
+			Link oLink = oEntry.getEnclosureLink();
+			if (oLink != null)oResult.setLink(oLink.getHref().toString()); //TODO
 			
 			//retrieve the footprint and all others properties
 			List<Element> aoElements = oEntry.getElements();
@@ -313,6 +316,87 @@ public class QueryExecutorPROBAV extends QueryExecutor  {
 			}
 			
 			oResult.setPreview(null);
+			
+			aoResults.add(oResult);
+		} 
+
+		System.out.println("Search Done: found " + aoResults.size() + " results");
+
+		return aoResults;
+	}
+	
+	@Override
+	protected ArrayList<QueryResultViewModel> buildResultViewModel(Document<Feed> oDocument, AbderaClient oClient, RequestOptions oOptions) {
+		int iStreamSize = 1000000;
+		Feed oFeed = (Feed) oDocument.getRoot();
+
+		//set new connction timeout
+		oClient.setConnectionTimeout(2000);
+		//oClient.setSocketTimeout(2000);
+		oClient.setConnectionManagerTimeout(2000);
+
+		ArrayList<QueryResultViewModel> aoResults = new ArrayList<QueryResultViewModel>();
+		
+		for (Entry oEntry : oFeed.getEntries()) {
+
+			QueryResultViewModel oResult = new QueryResultViewModel();
+			oResult.setProvider(m_sProvider);
+//			System.out.println("Parsing new Entry");
+			
+			//retrive the title
+			oResult.setTitle(oEntry.getTitle());			
+			
+			//retrive the summary
+			oResult.setSummary(oEntry.getSummary());
+			
+			//retrieve the id
+			oResult.setId(oEntry.getId().toString());
+			
+			//retrieve the link
+//			List<Link> aoLinks = oEntry.getLinks();
+			Link oLink = oEntry.getEnclosureLink();
+			if (oLink != null)oResult.setLink(oLink.getHref().toString()); //TODO
+			
+			//retrieve the footprint and all others properties
+			List<Element> aoElements = oEntry.getElements();
+			for (Element element : aoElements) {
+				String sName = element.getAttributeValue("name");
+				if (sName != null) {
+					if (sName.equals("footprint")) {
+						oResult.setFootprint(element.getText());
+					} else {
+						oResult.getProperties().put(sName, element.getText());
+					}
+				}
+			}
+			
+			
+			//retrieve the icon
+			oLink = oEntry.getLink("icon");			
+			if (oLink != null) {
+//				System.out.println("Icon Link: " + oLink.getHref().toString());
+
+				try {
+					ClientResponse oImageResponse = oClient.get(oLink.getHref().toString(), oOptions);
+//					System.out.println("Response Got from the client");
+					if (oImageResponse.getType() == ResponseType.SUCCESS)
+					{
+//						System.out.println("Success: saving image preview");
+						InputStream oInputStreamImage = oImageResponse.getInputStream();
+						BufferedImage  oImage = ImageIO.read(oInputStreamImage);
+						ByteArrayOutputStream bas = new ByteArrayOutputStream();
+						ImageIO.write(oImage, "png", bas);
+						oResult.setPreview("data:image/png;base64," + Base64.getEncoder().encodeToString((bas.toByteArray())));
+//						System.out.println("Image Saved");
+					}				
+				}
+				catch (Exception e) {
+					System.out.println("Image Preview Cycle Exception " + e.toString());
+				}					
+			}
+			else {
+				System.out.println("Link Not Available" );
+			}
 			
 			aoResults.add(oResult);
 		} 
