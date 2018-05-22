@@ -74,14 +74,14 @@ var SearchOrbitController = (function() {
                 oController.m_oConfiguration = configuration;
                 if(!utilsIsObjectNullOrUndefined(oController.m_oConfiguration.orbitsearch) && !utilsIsObjectNullOrUndefined(oController.m_oConfiguration.orbitsearch.satelliteNames))
                 {
+                    /*
                     //check as selected all satellites
                     for(var iIndexSatellite = 0; iIndexSatellite < oController.m_oConfiguration.orbitsearch.satelliteNames.length ; iIndexSatellite++ )
                     {
                         var sOrbit = oController.m_oConfiguration.orbitsearch.satelliteNames[iIndexSatellite];
                         oController.m_oSelectedSatellite.push(sOrbit);
                     }
-
-
+                    */
                 }
                 if(!utilsIsObjectNullOrUndefined(oController.m_oConfiguration.orbitsearch) && !utilsIsObjectNullOrUndefined(oController.m_oConfiguration.orbitsearch.sensortypes))
                 {

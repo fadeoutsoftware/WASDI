@@ -296,7 +296,7 @@
         "sensortypes":["SAR","Optical"],
         "sensorresolutions":["High","Medium","Low"],
         "satelliteNames":["COSMOSKY1","COSMOSKY2","COSMOSKY3","COSMOSKY4", "SENTINEL1A", "SENTINEL1B", "LANDSAT8","SENTINEL2A",
-                            "SENTINEL2B"]
+                            "SENTINEL2B", "PROBAV"]
 
     }
 
