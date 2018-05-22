@@ -1,9 +1,7 @@
 package it.fadeout.business;
 
-import java.io.InputStream;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -16,12 +14,11 @@ import org.nfs.orbits.CoverageTool.Polygon;
 import org.nfs.orbits.CoverageTool.apoint;
 import org.nfs.orbits.sat.CoverageSwathResult;
 import org.nfs.orbits.sat.ISatellite;
+import org.nfs.orbits.sat.SatFactory;
 import org.nfs.orbits.sat.SatSensor;
 import org.nfs.orbits.sat.Satellite;
-import org.nfs.orbits.sat.SatFactory;
 import org.nfs.orbits.sat.SensorMode;
 import org.nfs.orbits.sat.SwathArea;
-import org.nfs.orbits.sat.test.TestSat;
 
 import satLib.astro.time.Time;
 
@@ -39,7 +36,9 @@ public class InstanceFinder {
 			"/org/nfs/orbits/sat/resource/sentinel_1b.xml",
 			"/org/nfs/orbits/sat/resource/landsat8.xml",
 		    "/org/nfs/orbits/sat/resource/sentinel_2a.xml",
-		    "/org/nfs/orbits/sat/resource/sentinel_2b.xml" 
+		    "/org/nfs/orbits/sat/resource/sentinel_2b.xml",
+		    "/org/nfs/orbits/sat/resource/probav.xml",
+		    "/org/nfs/orbits/sat/resource/quickbird2.xml"
 	};
 
 	public static final HashMap<String, String> s_sOrbitSatsMap = new HashMap<String, String>(){
@@ -53,6 +52,8 @@ public class InstanceFinder {
 			put("LANDSAT8", "/org/nfs/orbits/sat/resource/landsat8.xml");
 			put("SENTINEL2A", "/org/nfs/orbits/sat/resource/sentinel_2a.xml");
 			put("SENTINEL2B", "/org/nfs/orbits/sat/resource/sentinel_2b.xml");			
+			put("PROBAV", "/org/nfs/orbits/sat/resource/probav.xml");
+			put("QUICKBIRD2", "/org/nfs/orbits/sat/resource/quickbird2.xml");
 		}
 	};
 
