@@ -986,13 +986,18 @@ var ImportController = (function() {
      * updateLayerListForActiveTab
      * @param iActiveTab
      */
-    ImportController.prototype.updateLayerListForActiveTab = function(iActiveTab) {
+    ImportController.prototype.updateLayerListForActiveTab = function(sProvider) {
         var oController = this;
-
+/*
         if (utilsIsObjectNullOrUndefined(oController.m_aListOfProvider)) return;
         if (iActiveTab >= oController.m_aListOfProvider.length) return;
 
+        for (var iProviders = 0; iProviders< oController.m_aListOfProvider.length; iProviders++) {
+            if (oController.m_aListOfProvider[iProviders].selected == false) iActiveTab++;
+        }
+
         var sProvider = oController.m_aListOfProvider[iActiveTab].name;
+        */
         var aaoAllBounds = [];
 
         oController.deleteLayers();
@@ -1044,7 +1049,14 @@ var ImportController = (function() {
             oController.m_aoProductsList.push(aData[iIndexData]);
         }
 
-        oController.updateLayerListForActiveTab(this.m_iActiveProvidersTab);
+        var iActive = this.m_iActiveProvidersTab;
+
+        for (var i=0; i<oController.m_aListOfProvider.length; i++) {
+            if (oController.m_aListOfProvider[i].selected) break;
+            iActive++;
+        }
+        var sProvider = oController.m_aListOfProvider[iActive].name;
+        oController.updateLayerListForActiveTab(sProvider);
         // oController.m_oMapService.zoomOnBounds(aaoAllBounds);
     };
 
