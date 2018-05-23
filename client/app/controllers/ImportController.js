@@ -1173,9 +1173,11 @@ var ImportController = (function() {
 
     /* CONVERT POLYGON FORMAT TO BOUND FORMAT */
     ImportController.prototype.polygonToBounds=function (sContent) {
+
         sContent = sContent.replace("POLYGON ","");
         sContent = sContent.replace("((","");
         sContent = sContent.replace("))","");
+        // sContent= "-13.554 158.521,-13.936 158.45,-14.493 158.348,-14.394 157.898,-14.351 157.707,-14.085 156.505,-13.983 156.05,-13.95 155.906,-13.919 155.764,-13.887 155.626,-13.857 155.49,-13.768 155.101,-13.685 154.733,-13.657 154.615,-13.605 154.386,-13.529 154.057,-13.319 153.161,-13.212 152.713,-13.192 152.626,-13.111 152.293,-13.073 152.132,-13.053 152.053,-12.872 151.31,-12.706 150.638,-12.556 150.025,-12.017 150.145,-12.011 150.107,-11.992 150.0,-8.376 150.8,-8.263 150.824,-6.116 151.299,-6.003 151.323,-2.726 152.048,-2.612 152.074,-1.595 152.299,-1.729 152.964,-1.779 153.203,-1.833 153.451,-1.888 153.709,-1.946 153.976,-1.972 154.093,-1.876 154.114,-1.935 154.397,-2.027 154.847,-2.06 155.005,-2.092 155.166,-2.126 155.331,-2.306 156.228,-2.384 156.625,-2.426 156.834,-2.539 156.809,-2.577 156.998,-2.623 157.22,-2.669 157.451,-2.718 157.69,-2.82 158.198,-2.932 158.749,-2.991 159.043,-3.189 160.008,-3.263 160.362,-3.426 161.126,-3.76 161.055,-3.871 161.032,-4.093 160.984,-4.204 160.961,-4.315 160.937,-4.538 160.89,-4.76 160.844,-4.871 160.82,-6.427 160.498,-6.761 160.431,-6.983 160.385,-7.205 160.341,-7.539 160.273,-7.873 160.207,-7.984 160.184,-8.095 160.162,-9.207 159.942,-9.318 159.921,-9.541 159.877,-10.097 159.77,-10.43 159.705,-10.542 159.684,-10.653 159.662,-11.098 159.578,-11.209 159.556,-11.876 159.43,-11.987 159.41,-12.321 159.347,-12.432 159.327,-12.766 159.264,-12.877 159.244,-12.988 159.223,-13.1 159.203,-13.433 159.141,-13.545 159.121,-13.656 159.1,-13.584 158.694,-13.554 158.521";
         sContent = sContent.split(",");
         var aasNewContent = [];
         for (var iIndexBounds = 0; iIndexBounds < sContent.length; iIndexBounds++)
@@ -2205,21 +2207,55 @@ var ImportController = (function() {
         return true;
     };
 
-    ImportController.prototype.isVisibleFilter = function(sCollection,sFilterName)
-    {
-        var bIsVisible = false;
-
-        //collection Filters
-        if(utilsIsStrNullOrEmpty(sFilterName) === false && utilsIsStrNullOrEmpty(sCollection) === false )
+    ImportController.prototype.getSelectedValueInMission = function(aoMission,sIndexNameDropdownMenu){
+        if(utilsIsObjectNullOrUndefined(aoMission) === true || utilsIsStrNullOrEmpty(sIndexNameDropdownMenu) === true)
+            return "";
+        var aoFilters = aoMission.filters;
+        var iNumberOfFilters = aoFilters.length;
+        for(var iIndexFilter = 0 ; iIndexFilter < iNumberOfFilters; iIndexFilter++)
         {
-            bIsVisible = this.probaVVisibleFilterProductIDForCollection(sCollection,sFilterName);
-        }
-    }
+            if(aoFilters[iIndexFilter].indexname === sIndexNameDropdownMenu)
+            {
+                if(utilsIsObjectNullOrUndefined(aoFilters[iIndexFilter].indexvalue) === false)
+                {
+                    return aoFilters[iIndexFilter].indexvalue;
+                }
 
-    ImportController.prototype.probaVVisibleFilterProductIDForCollection = function(sCollection,sFilterName)
+            }
+        }
+        return "";
+    };
+
+    ImportController.prototype.isVisibleFilter = function(sCollection,sFilterName,sMissionName)
+    {
+        var bIsVisible = true;//all filters are visible as default
+
+        if(utilsIsStrNullOrEmpty(sFilterName) === false )
+        {
+            // Proba-V filters
+            if(sMissionName === "Mission:Proba-V" )
+            {
+                bIsVisible = false;
+                bIsVisible = bIsVisible || this.probaVVisibleFilterProductID(sCollection,sFilterName);
+                bIsVisible = bIsVisible || this.probaVVisibleFilterIsCollection(sFilterName);
+                bIsVisible = bIsVisible || this.probaVVisibleFilterCloudCoverage(sCollection,sFilterName);
+                bIsVisible = bIsVisible || this.probaVVisibleFilterSnowCoverage(sCollection,sFilterName);
+            }
+
+        }
+        return bIsVisible;
+    }
+    ImportController.prototype.probaVVisibleFilterIsCollection = function(sFilterName)
+    {
+        if( sFilterName === "collection" )
+            return true;
+
+        return false;
+    }
+    ImportController.prototype.probaVVisibleFilterProductID = function(sCollection,sFilterName)
     {
 
-        if( sFilterName !== "Product ID" )
+        if( sFilterName !== "ProductID" )
             return false;
 
         switch(sCollection){
@@ -2251,43 +2287,83 @@ var ImportController = (function() {
             return false;
         }
 
-        // switch(sCollection){
-        //     case "urn:ogc:def:EOP:VITO:PROBAV_S1-TOA_1KM_V001":
-        //         break;
-        //     case "urn:ogc:def:EOP:VITO:PROBAV_S1-TOC_1KM_V001":
-        //         break;
-        //     case "urn:ogc:def:EOP:VITO:PROBAV_S10-TOC_1KM_V001":
-        //         break;
-        //     case "urn:ogc:def:EOP:VITO:PROBAV_S10-TOC-NDVI_1KM_V001":
-        //         break;
-        //     case "urn:ogc:def:EOP:VITO:PROBAV_L2A_1KM_V001":
-        //         break;
-        //     case "urn:ogc:def:EOP:VITO:PROBAV_P_V001":
-        //         break;
-        //     case "urn:ogc:def:EOP:VITO:PROBAV_S1-TOA_333M_V001":
-        //         break;
-        //     case "urn:ogc:def:EOP:VITO:PROBAV_S1-TOC_333M_V001":
-        //         break;
-        //     case "urn:ogc:def:EOP:VITO:PROBAV_S10-TOC_333M_V001":
-        //         break;
-        //     case "urn:ogc:def:EOP:VITO:PROBAV_S10-TOC-NDVI_333M_V001":
-        //         break;
-        //     case "urn:ogc:def:EOP:VITO:PROBAV_L2A_333M_V001":
-        //         break;
-        //     case "urn:ogc:def:EOP:VITO:PROBAV_S1-TOA_100M_V001":
-        //         break;
-        //     case "urn:ogc:def:EOP:VITO:PROBAV_S1-TOC_100M_V001":
-        //         break;
-        //     case "urn:ogc:def:EOP:VITO:PROBAV_S1-TOC-NDVI_100M_V001":
-        //         break;
-        //     case "urn:ogc:def:EOP:VITO:PROBAV_S5-TOA_100M_V001":
-        //         break;
-        //     case "urn:ogc:def:EOP:VITO:PROBAV_S5-TOC_100M_V001":
-        //         break;
-        //     case "urn:ogc:def:EOP:VITO:PROBAV_S5-TOC-NDVI_100M_V001":
-        //         break;
-        //     default:
-        // }
+    };
+    ImportController.prototype.probaVVisibleFilterCloudCoverage = function(sCollection,sFilterName)
+    {
+
+        if( sFilterName !== "cloudcoverpercentage" )
+            return false;
+
+        switch(sCollection){
+            case "urn:ogc:def:EOP:VITO:PROBAV_S1-TOA_1KM_V001":
+            case "urn:ogc:def:EOP:VITO:PROBAV_S1-TOC_1KM_V001":
+            case "urn:ogc:def:EOP:VITO:PROBAV_S10-TOC_1KM_V001":
+            case "urn:ogc:def:EOP:VITO:PROBAV_S1-TOA_333M_V001":
+            case "urn:ogc:def:EOP:VITO:PROBAV_S1-TOC_333M_V001":
+            case "urn:ogc:def:EOP:VITO:PROBAV_S10-TOC_333M_V001":
+            case "urn:ogc:def:EOP:VITO:PROBAV_S10-TOC-NDVI_333M_V001":
+
+            case "urn:ogc:def:EOP:VITO:PROBAV_S1-TOA_100M_V001":
+            case "urn:ogc:def:EOP:VITO:PROBAV_S1-TOC_100M_V001":
+            case "urn:ogc:def:EOP:VITO:PROBAV_S1-TOC-NDVI_100M_V001":
+            case "urn:ogc:def:EOP:VITO:PROBAV_S5-TOA_100M_V001":
+            case "urn:ogc:def:EOP:VITO:PROBAV_S5-TOC_100M_V001":
+            case "urn:ogc:def:EOP:VITO:PROBAV_S5-TOC-NDVI_100M_V001":
+            case "urn:ogc:def:EOP:VITO:PROBAV_S10-TOC-NDVI_1KM_V001":
+
+                return true;
+                break;
+
+            case "urn:ogc:def:EOP:VITO:PROBAV_L2A_1KM_V001":
+            case "urn:ogc:def:EOP:VITO:PROBAV_P_V001":
+            case "urn:ogc:def:EOP:VITO:PROBAV_L2A_333M_V001":
+            case "urn:ogc:def:EOP:VITO:PROBAV_L2A_100M_V001":
+                return false;
+                break;
+
+            default: return false;
+
+            return false;
+        }
+
+    };
+    ImportController.prototype.probaVVisibleFilterSnowCoverage = function(sCollection,sFilterName)
+    {
+
+        if( sFilterName !== "snowcoverpercentage" )
+            return false;
+
+        switch(sCollection){
+            case "urn:ogc:def:EOP:VITO:PROBAV_S1-TOA_1KM_V001":
+            case "urn:ogc:def:EOP:VITO:PROBAV_S1-TOC_1KM_V001":
+            case "urn:ogc:def:EOP:VITO:PROBAV_S10-TOC_1KM_V001":
+            case "urn:ogc:def:EOP:VITO:PROBAV_S1-TOA_333M_V001":
+            case "urn:ogc:def:EOP:VITO:PROBAV_S1-TOC_333M_V001":
+            case "urn:ogc:def:EOP:VITO:PROBAV_S10-TOC_333M_V001":
+            case "urn:ogc:def:EOP:VITO:PROBAV_S10-TOC-NDVI_333M_V001":
+
+            case "urn:ogc:def:EOP:VITO:PROBAV_S1-TOA_100M_V001":
+            case "urn:ogc:def:EOP:VITO:PROBAV_S1-TOC_100M_V001":
+            case "urn:ogc:def:EOP:VITO:PROBAV_S1-TOC-NDVI_100M_V001":
+            case "urn:ogc:def:EOP:VITO:PROBAV_S5-TOA_100M_V001":
+            case "urn:ogc:def:EOP:VITO:PROBAV_S5-TOC_100M_V001":
+            case "urn:ogc:def:EOP:VITO:PROBAV_S5-TOC-NDVI_100M_V001":
+            case "urn:ogc:def:EOP:VITO:PROBAV_S10-TOC-NDVI_1KM_V001":
+
+                return true;
+                break;
+
+            case "urn:ogc:def:EOP:VITO:PROBAV_L2A_1KM_V001":
+            case "urn:ogc:def:EOP:VITO:PROBAV_P_V001":
+            case "urn:ogc:def:EOP:VITO:PROBAV_L2A_333M_V001":
+            case "urn:ogc:def:EOP:VITO:PROBAV_L2A_100M_V001":
+                return false;
+                break;
+
+            default: return false;
+
+            return false;
+        }
 
     }
 
