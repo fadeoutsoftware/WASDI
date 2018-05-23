@@ -427,7 +427,7 @@ public class QueryExecutorPROBAV extends QueryExecutor  {
 						{
 							String points = oPolygon.getChildNodes().item(0).getNodeValue();
 							String[] asPoints = points.split(" ");
-							for(int iPointCount = 0;iPointCount < asPoints.length;iPointCount++)
+							for(int iPointCount = 0;iPointCount < asPoints.length;iPointCount=iPointCount+2)
 							{
 								if (iPointCount + 1 < asPoints.length)
 								{
@@ -439,7 +439,7 @@ public class QueryExecutorPROBAV extends QueryExecutor  {
 								}
 							}
 							
-							sFootprint = String.format("POLYGON((%s))", sFootprint);
+							sFootprint = String.format("POLYGON ((%s))", sFootprint);
 							
 							
 						}
