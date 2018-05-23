@@ -71,7 +71,7 @@ public class QueryExecutorPROBAV extends QueryExecutor  {
 		//oParamsMap.put("q", sQuery);
 
 		String sUrl = "http://www.vito-eodata.be/openSearch/findProducts?";
-		String bbox = null;
+		String polygon = null;
 		String date = null;
 		String collection = null;
 		String cloudCover = null;
@@ -87,7 +87,16 @@ public class QueryExecutorPROBAV extends QueryExecutor  {
 					if (asPolygon.length > 0)
 					{
 						String[] asCoordinates = asPolygon[1].split("\\)\\)")[0].split(",");
-
+						String sPoints = "";
+						for (String sCoord : asCoordinates) {
+							if (!sPoints.equals(""))
+								sPoints+=",";
+							sPoints += sCoord.replace(" ", ",");
+							
+						}
+						polygon = String.format("geometry=polygon((%s))", sPoints);
+						
+						/*	
 						double maxX;
 						double minX;
 						double maxY;
@@ -105,8 +114,10 @@ public class QueryExecutorPROBAV extends QueryExecutor  {
 							maxY = Math.max(maxY, Double.parseDouble(asCordinate[1]));
 							minY = Math.min(minY, Double.parseDouble(asCordinate[1]));
 						}
-
-						bbox = String.format("bbox=%s,%s,%s,%s", String.valueOf(minX), String.valueOf(minY), String.valueOf(maxX), String.valueOf(maxY));
+					 	*/
+						//bbox = String.format("bbox=%s,%s,%s,%s", String.valueOf(minX), String.valueOf(minY), String.valueOf(maxX), String.valueOf(maxY));
+						//refString = asPolygon[1].split("\\)\\)")[0].replace(" ", ",");
+						
 					}
 				}
 
@@ -147,8 +158,8 @@ public class QueryExecutorPROBAV extends QueryExecutor  {
 		}
 		if (collection != null)
 			sUrl+=collection;
-		if (bbox != null)
-			sUrl+="&" + bbox;
+		if (polygon != null)
+			sUrl+="&" + polygon;
 		if (date != null)
 			sUrl+="&" + date;
 		if (cloudCover != null)
