@@ -167,8 +167,11 @@ public class QueryExecutorPROBAV extends QueryExecutor  {
 	@Override
 	public int executeCount(String sQuery) throws IOException
 	{
+		String sOldLimit = m_sLimit;
+		m_sLimit = "0";
 		String sUrl = buildUrl(sQuery);
-
+		m_sLimit = sOldLimit;
+		
 		//create abdera client
 		Abdera oAbdera = new Abdera();
 		AbderaClient oClient = new AbderaClient(oAbdera);
