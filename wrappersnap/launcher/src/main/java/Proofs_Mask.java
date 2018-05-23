@@ -25,21 +25,21 @@ public class Proofs_Mask {
 
 	public static void main(String[] args) throws Exception {
 		
-
-		File file = new File("/home/doy/tmp/wasdi/tmp/S2B_MSIL1C_20180117T102339_N0206_R065_T32TMQ_20180117T122826.zip");
+		String fileName = (args.length==3) ? args[0]: "/home/doy/tmp/wasdi/tmp/PROBAV_L2A_20180101_011405_2_100M_V101.HDF5";
+		String bandName = (args.length==3) ? args[1]: "SAA";
+		String maskName = (args.length==3) ? args[2]: "CLEAR";		
+		
+		File file = new File(fileName);
 		
 		Product product = ProductIO.readProduct(file);
 		BandImageManager manager = new BandImageManager(product);
 
 		try {
 		
-			String bandName = "B1";
 			Band band = product.getBand(bandName);
 			
-			String maskName = null;
-			Mask mask = null;
-
-//			maskName = "detector_footprint";//"detector_footprint-B01-02";
+			
+//			Mask mask = null;
 //			final ProductNodeGroup<Mask> maskGroup = product.getMaskGroup();
 //			for (int i = 0; i < maskGroup.getNodeCount(); i++) {
 //				mask = maskGroup.get(i);
@@ -52,6 +52,10 @@ public class Proofs_Mask {
 //				}
 //			}
 	
+
+			Mask mask = product.getMaskGroup().get(maskName);
+			band.getOverlayMaskGroup().add(mask);
+			
 			
 //			double minValue = 0.0;
 //			double maxValue = 0.2;			
@@ -68,23 +72,22 @@ public class Proofs_Mask {
 //	        product.addMask(mask);
 //	        band.getOverlayMaskGroup().add(mask);
 			
-			String code = "B1 > 0.3";
-	        maskName = UUID.randomUUID().toString();
-	        Dimension maskSize = new Dimension(product.getSceneRasterWidth(), product.getSceneRasterHeight());
-	        mask = new Mask(maskName, maskSize.width, maskSize.height, Mask.BandMathsType.INSTANCE);
-	        mask.setImageColor(Color.BLUE);
-	        mask.setImageTransparency(0.5);
-			String externalName = Tokenizer.createExternalName(bandName);
-	        PropertyContainer imageConfig = mask.getImageConfig();
-	        imageConfig.setValue(Mask.BandMathsType.PROPERTY_NAME_EXPRESSION, code);
-	        product.addMask(mask);
-	        band.getOverlayMaskGroup().add(mask);
+//			String code = "SAA > 0.3";
+//	        maskName = UUID.randomUUID().toString();
+//	        Dimension maskSize = new Dimension(product.getSceneRasterWidth(), product.getSceneRasterHeight());
+//	        mask = new Mask(maskName, maskSize.width, maskSize.height, Mask.BandMathsType.INSTANCE);
+//	        mask.setImageColor(Color.BLUE);
+//	        mask.setImageTransparency(0.5);
+//			String externalName = Tokenizer.createExternalName(bandName);
+//	        PropertyContainer imageConfig = mask.getImageConfig();
+//	        imageConfig.setValue(Mask.BandMathsType.PROPERTY_NAME_EXPRESSION, code);
+//	        product.addMask(mask);
+//	        band.getOverlayMaskGroup().add(mask);
 			
 					
 			BufferedImage img = manager.buildImageWithMasks(band, new Dimension(600, 600), null, true);
 			
-			ImageIO.write(img, "jpg", new File("/home/doy/tmp/wasdi/tmp/" + band.getName() + "_MASKED.jpg"));
-			manager.quit();
+			ImageIO.write(img, "jpg", new File(fileName + "_" + band.getName() + "_MASKED.jpg"));
 		} finally {
 			manager.quit();
 		}
