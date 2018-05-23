@@ -237,7 +237,8 @@ var MaskManagerController = (function() {
             transparency: 0.5,
             description:sDescription,
             min:this.m_sRangeMinValue,
-            max:this.m_sRangeMaxValue
+            max:this.m_sRangeMaxValue,
+            isUserGeneratedMask: true
         };
         utilsConvertRGBAInObjectColor(this.m_sMaskColor.rangeMaskColor);
         this.m_aoMasks.push(oReturnValue);
@@ -311,7 +312,8 @@ var MaskManagerController = (function() {
             type:"Maths",
             colour:this.m_sMaskColor.logicalMaskColor,
             transparency: 0.5,
-            description:sDescription
+            description:sDescription,
+            isUserGeneratedMask: true
         };
 
         this.m_aoMasks.push(oReturnValue);
@@ -563,14 +565,14 @@ var MaskManagerController = (function() {
             var iBlueRGB= oColor.blue;
             var fTransparencyRGB= this.m_aoMasks[iIndexMask].transparency;
 
-            if(this.m_aoMasks[iIndexMask].type === 'Range')
+            if(this.m_aoMasks[iIndexMask].type === 'Range' && !utilsIsObjectNullOrUndefined( this.m_aoMasks[iIndexMask].isUserGeneratedMask))
             {
                 var iMin = this.m_aoMasks[iIndexMask].min;
                 var iMax = this.m_aoMasks[iIndexMask].max;
                 var oRangeMask = this.getRangeMaskBody(iRedRGB,iGreenRGB,iBlueRGB,fTransparencyRGB,iMin,iMax);
                 oBodyImage.rangeMasks.push(oRangeMask);
             }
-            else if(this.m_aoMasks[iIndexMask].type === 'Maths')
+            else if(this.m_aoMasks[iIndexMask].type === 'Maths' && !utilsIsObjectNullOrUndefined( this.m_aoMasks[iIndexMask].isUserGeneratedMask))
             {
                 var sExpression = this.m_aoMasks[iIndexMask].description;
                 var oMathMask = this.getMathMask(iRedRGB,iGreenRGB,iBlueRGB,fTransparencyRGB,sExpression);
