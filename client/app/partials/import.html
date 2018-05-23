@@ -205,12 +205,16 @@
                                         <div class="col-md-6" ng-if="!(filter.indexvalues && filter.indexvalues.split('|').length > 0)">
                                             <div class="group">
                                                 <div class="my-input-text" >
-                                                    <label class="filter-label">{{filter.indexlabel}}</label>
+                                                    <label class="filter-label"
+                                                           ng-show="m_oController.isVisibleFilter(m_oController.getSelectedValueInMission(mission,'collection'),filter.indexname,mission.name)">
+                                                        {{filter.indexlabel}}
+                                                    </label>
                                                     <!--INPUT class="form controller"-->
                                                     <input type="text" ng-model="filter.indexvalue"
-                                                           ng-value="filter.indexvalue" class=" filter-input"
+                                                           ng-value="filter.indexvalue" class="filter-input"
                                                            ng-blur="m_oController.updateFilter($parent.$parent.$index)"
-                                                           ng-pattern="filter.regex" ><!--ng-show="m_oController.isVisibleFilter(null,filter.indexname)"-->
+                                                           ng-pattern="filter.regex"
+                                                           ng-show="m_oController.isVisibleFilter(m_oController.getSelectedValueInMission(mission,'collection'),filter.indexname,mission.name)">
 
                                                     <span class="highlight filter-highlight"></span>
                                                     <span class="bar filter-bar"></span>
@@ -232,20 +236,27 @@
                                         <!-- LIST OF OPTIONS-->
                                         <div id="adv-options" class="group col-md-6 my-input-text"
                                              ng-if="(filter.indexvalues && filter.indexvalues.split('|').length > 0)">
-                                            <label class="filter-label">{{filter.indexlabel}}</label>
+                                            <label class="filter-label"
+                                                   ng-show="m_oController.isVisibleFilter(m_oController.getSelectedValueInMission(mission,'collection'),filter.indexname,mission.name)">
+                                                {{filter.indexlabel}}
+                                            </label>
                                             <!--INPUT class="form controller"-->
                                             <input type="text" ng-model="filter.indexvalue" ng-value="filter.indexvalue"
                                                    class=" filter-input"
                                                    ng-blur="m_oController.updateFilter($parent.$parent.$index)"
                                                    ng-click="m_oController.clearInput($parent.$parent.$index, $parent.$index)"
                                                    ng-pattern="filter.regex"
-                                                   list="{{$parent.$parent.$index}}_{{$index}}_optlist">
-                                            <div class="adv-selectfield">
+                                                   list="{{$parent.$parent.$index}}_{{$index}}_optlist"
+                                                   ng-show="m_oController.isVisibleFilter(m_oController.getSelectedValueInMission(mission,'collection'),filter.indexname,mission.name)">
+                                            <div class="adv-selectfield"
+                                                 ng-show="m_oController.isVisibleFilter(m_oController.getSelectedValueInMission(mission,'collection'),filter.indexname,mission.name)">
                                                 <datalist id="{{$parent.$parent.$index}}_{{$index}}_optlist"
                                                           class="browser-default" ng-model="filter.indexvalue">
-                                                    <option selected></option>
+
+                                                    <option selected ng-hide="filter.required"></option>
+
                                                     <option ng-repeat="option in filter.indexvalues.split('|')"
-                                                            value="{{option}}" ng-click="filter.valueselected = option">{{option}}
+                                                            value="{{option}}" >{{option}}
                                                     </option>
                                                 </datalist>
                                             </div>
