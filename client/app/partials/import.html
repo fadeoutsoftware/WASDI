@@ -381,7 +381,7 @@
                     <ul class="nav nav-tabs" role="tablist" ><!-- ng-hide="m_oController.m_bIsVisibleListOfLayers " && m_oController.isEmptyProductsList() == true-->
                         <li ng-class="{active: m_oController.m_iActiveProvidersTab === $index}"
                             ng-repeat="provider in m_oController.m_aListOfProvider | filter:{ selected: true }"
-                            ng-click="m_oController.m_iActiveProvidersTab = $index; m_oController.updateLayerListForActiveTab($index)">
+                            ng-click="m_oController.m_iActiveProvidersTab = $index; m_oController.updateLayerListForActiveTab(provider.name)">
                             <a href="" role="tab" data-toggle="tab">
                                 {{provider.name }}
                                 <span class="badge pull-right">{{ m_oController.m_oPageService.getNumberOfProductByProvider(provider.name)}}</span>
