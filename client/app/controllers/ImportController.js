@@ -796,7 +796,7 @@ var ImportController = (function() {
                 utilsVexCloseDialogAfterFewSeconds("3000",oDialog);
             }
         }
-        if(utilsIsObjectNullOrUndefined(oCallback) === true)
+        if(utilsIsObjectNullOrUndefined(oError) === true)
         {
             oError = function (data,status) {
                 utilsVexDialogAlertTop('GURU MEDITATION<br>THERE WAS AN ERROR IMPORTING THE IMAGE IN THE WORKSPACE');

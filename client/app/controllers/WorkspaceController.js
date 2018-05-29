@@ -252,7 +252,7 @@ var WorkspaceController = (function() {
             aoTotalArray.push.apply(aoTotalArray,aArraySplit);
             iArraySplitLength = aArraySplit.length;
 
-            if(iArraySplitLength !== 10) continue;
+            if(iArraySplitLength < 10) continue;
 
             for(var iIndex = 0; iIndex < iArraySplitLength-1; iIndex = iIndex + 2){
                 iInvertedArraySplit.push(aArraySplit[iIndex+1]);
