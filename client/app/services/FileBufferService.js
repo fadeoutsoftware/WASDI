@@ -16,11 +16,16 @@ service('FileBufferService', ['$http',  'ConstantsService', function ($http, oCo
         //sUrl="https://scihub.copernicus.eu/dhus/odata/v1/Products('ed9c834d-0d8c-47d2-8337-3036bd14d0f3')/$value";
 
         var iCut = 4;
-        if (sUrl.startWith("https:")) iCut = 5;
-        
+        var sProtocol = 'http';
+
+        if (sUrl.startsWith("https:")) {
+            iCut = 5;
+            sProtocol = 'https';
+        }
+
         var sTest = sUrl.substring(iCut, sUrl.length);
         var sEncodedUri = encodeURIComponent(sTest);
-        sEncodedUri = 'https'+ sEncodedUri;
+        sEncodedUri = sProtocol + sEncodedUri;
 
         return this.m_oHttp.get(this.APIURL + '/filebuffer/download?sFileUrl='+sEncodedUri+"&sWorkspaceId="+sWorkspaceId+"&sBoundingBox="+sBounds+'&sProvider='+sProvider);
     }
