@@ -15,7 +15,10 @@ service('FileBufferService', ['$http',  'ConstantsService', function ($http, oCo
     this.download = function(sUrl, sWorkspaceId,sBounds,sProvider) {
         //sUrl="https://scihub.copernicus.eu/dhus/odata/v1/Products('ed9c834d-0d8c-47d2-8337-3036bd14d0f3')/$value";
 
-        var sTest = sUrl.substring(5,sUrl.length);
+        var iCut = 4;
+        if (sUrl.startWith("https:")) iCut = 5;
+        
+        var sTest = sUrl.substring(iCut, sUrl.length);
         var sEncodedUri = encodeURIComponent(sTest);
         sEncodedUri = 'https'+ sEncodedUri;
 
