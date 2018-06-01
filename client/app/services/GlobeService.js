@@ -516,15 +516,27 @@ service('GlobeService', ['$http',  'ConstantsService','SatelliteService', functi
             },
             {
                 name : "LANDSAT8",
-                icon : "assets/icons/sat_03.svg",
+                icon : "assets/icons/sat_04.svg",
                 label : "LS8",
                 description : "NASA LANDSAT 8"
             },
             {
                 name : "PROBAV",
-                icon : "assets/icons/sat_03.svg",
+                icon : "assets/icons/sat_05.svg",
                 label : "PROBA-V",
                 description : "PROBA VEGETATION"
+            },
+            {
+                name : "GEOEYE",
+                icon : "assets/icons/sat_06.svg",
+                label : "GEOEYE",
+                description : "GeoEye - Digital Globe"
+            },
+            {
+                name : "WORLDVIEW2",
+                icon : "assets/icons/sat_07.svg",
+                label : "WORLDVIEW2",
+                description : "WorldView - Digital Globe"
             }
         ];
 
