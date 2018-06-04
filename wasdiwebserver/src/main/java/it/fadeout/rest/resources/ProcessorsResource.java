@@ -259,7 +259,7 @@ public class ProcessorsResource {
 				Wasdi.DebugLog("ProcessorsResource.run: done"); 
 			}
 			catch(Exception oEx){
-				System.out.println("ProcessorsResource.run: Error scheduling the deploy process " + oEx.getMessage());
+				System.out.println("ProcessorsResource.run: Error scheduling the run process " + oEx.getMessage());
 				oEx.printStackTrace();
 				oRunning.setStatus(ProcessStatus.ERROR.toString());
 				return oRunning;
