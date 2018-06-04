@@ -274,11 +274,14 @@ public class WasdiProcessorEngine {
 			}
 			
 			// Decode JSON
-			//String sEncodedJson = oParameter.getJSON();
-			//String sJson = java.net.URLDecoder.decode(sEncodedJson, "UTF-8");
-			String sJson = oParameter.getJson();
+			String sEncodedJson = oParameter.getJson();
+			String sJson = java.net.URLDecoder.decode(sEncodedJson, "UTF-8");
+			//String sJson = oParameter.getJson();
 			
 			LauncherMain.s_oLogger.debug("WasdiProcessorEngine.run: calling " + sProcessorName + " at port " + oProcessor.getPort());
+			
+			LauncherMain.s_oLogger.debug("WasdiProcessorEngine.run: Encoded JSON Parameter " + sEncodedJson);
+			LauncherMain.s_oLogger.debug("WasdiProcessorEngine.run: Dencoded JSON Parameter " + sJson);
 			
 			// Call localhost:port
 			String sUrl = "http://localhost:"+oProcessor.getPort()+"/run/"+sProcessorId;
@@ -291,8 +294,8 @@ public class WasdiProcessorEngine {
 			OutputStream oOutputStream = oConnection.getOutputStream();
 			oOutputStream.write(sJson.getBytes());
 			oOutputStream.flush();
-
-			if (oConnection.getResponseCode() != HttpURLConnection.HTTP_CREATED) {
+			
+			if (! (oConnection.getResponseCode() == HttpURLConnection.HTTP_OK || oConnection.getResponseCode() == HttpURLConnection.HTTP_CREATED )) {
 				throw new RuntimeException("Failed : HTTP error code : " + oConnection.getResponseCode());
 			}
 

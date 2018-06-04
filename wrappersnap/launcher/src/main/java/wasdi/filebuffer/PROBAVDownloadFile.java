@@ -168,7 +168,7 @@ public class PROBAVDownloadFile extends DownloadFile {
                 // extracts file name from header field
                 int index = sDisposition.indexOf("filename=");
                 if (index > 0) {
-                    sFileName = sDisposition.substring(index + 10, sDisposition.length() - 1);
+                	sFileName = sDisposition.substring(index + 9,  sDisposition.length());
                 }
             } else {
                 // extracts file name from URL
@@ -346,11 +346,18 @@ public class PROBAVDownloadFile extends DownloadFile {
 				
 				logger.debug("PROBAVDownload.CopyLocalFile: Destination File" + sSaveDirOnServer);
 				
+				File oSourceFile = new File(sSourceFolder);
+				
+				if (oSourceFile.exists() == false) {
+					logger.warn("PROBAVDownload.CopyLocalFile: Source File not available. exit");
+					return "";					
+				}
+				
 				// Update user
 				UpdateProcessProgress(oProcessWorkspace,20);
 				
 				// Copy
-				FileUtils.copyFile(new File(sSourceFolder), new File(sSaveDirOnServer));
+				FileUtils.copyFile(oSourceFile, new File(sSaveDirOnServer));
 				
 				// Update user
 				UpdateProcessProgress(oProcessWorkspace, 100);

@@ -10,7 +10,9 @@ import java.nio.file.Paths;
 import java.util.Date;
 import java.util.List;
 import java.util.logging.ConsoleHandler;
+import java.util.logging.FileHandler;
 import java.util.logging.Level;
+import java.util.logging.SimpleFormatter;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -163,10 +165,13 @@ public class LauncherMain {
 
             s_oLogger.debug("Executing " + sOperation + " Parameter " + sParameter);
             
-            ConsoleHandler handler = new ConsoleHandler();
-            handler.setLevel(Level.ALL);
+            FileHandler oFileHandler = new FileHandler("/usr/lib/wasdi/launcher/logs/snap.log",true);
+            //ConsoleHandler handler = new ConsoleHandler();
+            oFileHandler.setLevel(Level.ALL);
+            SimpleFormatter oSimpleFormatter = new SimpleFormatter();
+            oFileHandler.setFormatter(oSimpleFormatter);
             SystemUtils.LOG.setLevel(Level.ALL);
-            SystemUtils.LOG.addHandler(handler);
+            SystemUtils.LOG.addHandler(oFileHandler);
 
             // And Run
             oLauncher.ExecuteOperation(sOperation,sParameter);
