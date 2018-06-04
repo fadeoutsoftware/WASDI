@@ -67,7 +67,6 @@ public class OpenSearchResource {
 			//return OpenSearchQuery.ExecuteQuerySentinel(sQuery, asParams.toArray(new String[asParams.size()]));
 			return OpenSearchQuery.ExecuteQuery(sQuery, asParameterMap);
 		} catch (URISyntaxException | IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
@@ -96,7 +95,6 @@ public class OpenSearchResource {
 					m_oServletConfig.getInitParameter("OSPwd"),
 					m_oServletConfig.getInitParameter("OSProvider"));
 		} catch (URISyntaxException | IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
