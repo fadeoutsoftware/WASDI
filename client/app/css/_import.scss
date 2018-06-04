@@ -498,22 +498,13 @@
 
     }
     /************************TABLE**************************/
-    //Over tr
-    //  .table-hover tbody tr:hover td, .table-hover tbody tr:hover th {
-    //    //background-color: $wasdi;
-    //    color:$wasdi-green-logo; xz
 
-    //    border-top: 1px solid $wasdi-green-logo;
-    //    border-bottom: 1px solid $wasdi-green-logo;
-    //  }
-    //.test{}
-      //overflow: scroll;
       .container-table-row
       {
 
         overflow: auto;//ATTENTION CARE TO DELETE IT (USED FOR ANIMATION SCROLL)
         //http://stackoverflow.com/questions/2905867/how-to-scroll-to-specific-item-using-jquery
-        height: 58vh;
+        height: 62vh;
 
         /************* TABLE css*****************/
         /*pls doesn't change it,  need it for on-mouse-click-rectangle event:
@@ -527,8 +518,6 @@
         /***************************/
         //Over TR
         .table-hover tbody:hover{
-          //background-color: #bfbfbf;
-          //color:$wasdi-green-logo;
           border-top: 2px solid $wasdi-green-logo;
           border-bottom: 2px solid $wasdi-green-logo;
 
@@ -555,7 +544,6 @@
           tbody
           {
             border-top: 1px solid #ddd;//FIX TABLE
-            //border-top: 2px solid $wasdi-blue-logo;
           }
 
 
@@ -641,7 +629,10 @@
 
         }
       }
-
+    .container-table-row-without-pagination
+    {
+      height: 71vh !important;
+    }
 
 
     /****************** INPUT FORM SEARCH CONTAINER********************/

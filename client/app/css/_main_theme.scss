@@ -116,19 +116,20 @@ $wasdi-searh-color:$wasdi-blue-logo;
 $wasdi-subtitle-color:$wasdi-green-logo;
 //ROOT
 $wasdi-brand-logo-root:$img-brand-logo-write-svg;
-$wasdi-brand-logo-root-size: 100px;
+$wasdi-brand-logo-root-size: 80px;
 
 //EDITOR SIDE-BAR
 $wasdi-sidebar-color-title-panel:$wasdi-blue-logo;
 $wasdi-title-color:$wasdi-white;
 $waddi-sidebar-color-border-panel:$wasdi-blue-logo;
 $wasdi-sidebar-background-color:$wasdi-grey;
-$wasdi-map-height:78vh;
+$wasdi-map-height:80vh;
+$wasdi-map-height-editor:81vh;
 $wasdi-map-height-max-width-1366-max-height-768:63vh;
-$wasdi-heigth-panel:34vh;
-$wasdi-heigth-panel-workspaces-page:39vh;
-$wasdi-heigth-workspace-list:30vh;
-$wasdi-heigth-globe-workspaces:79vh;
+$wasdi-heigth-panel:35.5vh;
+$wasdi-heigth-panel-workspaces-page:41vh;
+$wasdi-heigth-workspace-list:31vh;
+$wasdi-heigth-globe-workspaces:84vh;
 $wasdi-height-panel-max-width-1366-max-height-768:25vh;
 $wasdi-status-bar-heigth:50px;
 //WORKSPACES
@@ -142,9 +143,9 @@ $wasdi-import-table-head-color:$wasdi-white;//text color
 $wasdi-import-cell-background-color-over-button:$wasdi-green-logo;
 $wasdi-import-cell-color-over-button:$wasdi-white;
 $wasdi-import-preview-layer-on-table-dimension:82px;
-$wasdi-heigt-panel-import:73vh;
+$wasdi-heigt-panel-import:77vh;
 $wasdi-height-panel-import-max-width-1366-max-height-768:63vh;
-$wasdi-map-heigth-import:78vh;
+$wasdi-map-heigth-import:82vh;
 $wasdi-map-height-import-max-width-1366-max-height-768:70vh;
 
 //STATUS-BAR

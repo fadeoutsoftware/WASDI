@@ -44,6 +44,13 @@ angular.module('wasdi.ImageEditorDirective', [])
                     stage.update(event);
                 };
 
+                scope.$on(
+                    "$destroy",
+                    function( event ) {
+                        console.log('Destroy');
+                    }
+                );
+
                 var bItIsClicked = false;
 
                 // Flag to know if the user is using zoom functionality

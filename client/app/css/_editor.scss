@@ -133,7 +133,7 @@
     .map-container
     {
 
-      height: 78vh;
+      height: 82vh;
       border: 1px solid $wasdi-blue-logo;
 
       //BUTTONS ON MAP
@@ -243,7 +243,7 @@
       {
         //DIMENSIONS MAP
         width: auto;//500px
-        height: $wasdi-map-height;
+        height: $wasdi-map-height-editor;
 
         ///* (1366x768) WXGA Display */
         @media  screen and (max-width: 1366px)and (max-height: 768px) {
@@ -314,184 +314,377 @@
       text-decoration: none;
     }
 
-    li a:hover:not(.active) {
-      background-color: $wasdi-nav-bar-color-over;
-      color: white;
-    }
+
+    //li a:hover:not(.active) {
+    //  background-color: $wasdi-nav-bar-color-over;
+    //  color: white;
+    //}
 
     .active {
       background-color: $wasdi-nav-bar-color-selected;
     }
 
-    //.button-menu-with-icons{
-    //  li a {
-    //    padding: 0 5px 0 5px ;
-    //  }
-    //}
+    .button-menu-with-icons
+    {
+      .button-container
+      {
+        h4{
+          margin:0;
+          display: inline-block;
+        }
+        .dropdown-menu{
+          z-index: 1500 ;
+          li{
+            width: 100%;
+            &:hover{
+              color:white;
+              background-color: $wasdi-green-logo;
+              a{
+                color:white;
+                background-color: $wasdi-green-logo;
+              }
+            }
+          }
+        }
+        .my-button {
+          //background-color: $wasdi-button-default-color;
+          background-color: white;
+          color: $wasdi-blue-logo;
+          border: none;
+          //color: white;
+          padding: 5px 10px;
+          text-align: center;
+          text-decoration: none;
+          display: inline-block;
+          font-size: 16px;
+          margin: 4px 2px;
+          cursor: pointer;
+        }
+
+        .my-button:hover {
+          //background-color: $wasdi-button-over-color;
+          background-color:$wasdi-blue-logo ;
+          color: white;
+
+          //RADAR ICON
+          .icon-radar{
+            content: $wasdi-radar-icon-white-version;
+            width: $wasdi-size-icon;
+            height: auto;
+          }
+
+          //OPTICAL ICON
+          .icon-eye{
+            content: $wasdi-eye-icon-white-version;
+            width: $wasdi-size-icon;
+            height: auto;
+          }
+
+          //PROCESSOR ICON
+          .icon-document-gear
+          {
+            content: $wasdi-document-gear-icon-white-version;
+            width: $wasdi-size-icon;
+            height: auto;
+          }
+          //APPLY ORBIT
+          .icon-applyorbit-operations
+          {
+            content: $wasdi-orbit-icon-applyorbit-white-version;
+            width: $wasdi-size-icon;
+            height: auto;
+          }
+          //RADIOMETRIC CALIBRATE
+          .icon-radiometriccalibrate-operations
+          {
+            content: $wasdi-orbit-icon-calibrate-white-version;
+            width: $wasdi-size-icon;
+            height: auto;
+          }
+          //Multilooking
+          .icon-multilooking-operations
+          {
+            content: $wasdi-telescope-icon-multilooking-white-version;
+            width: $wasdi-size-icon;
+            height: auto;
+          }
+          //range-doppler-terrain-correction
+          .icon-range-doppler-terrain-correction-operations
+          {
+            content: $wasdi-earth-icon-range-doppler-terrain-correction-white-version;
+            width: $wasdi-size-icon;
+            height: auto;
+          }
+          //MIDA
+          .icon-mida-merge-operations
+          {
+            content: $wasdi-mida-merge-operations-white;
+            width: $wasdi-size-icon;
+            height: auto;
+          }
+          .icon-mask-manager
+          {
+            content: $wasdi-mask-manager-white;
+            width: $wasdi-size-icon;
+            height: auto;
+          }
+
+          i{
+            color:white;
+            background-color:$wasdi-blue-logo;
+          }
+        }
+        .my-button:disabled {
+          opacity: 0.65;
+          cursor: not-allowed;
+        }
+
+        //RADAR ICON
+        .icon-radar {
+          content: $wasdi-radar-icon;
+          width: $wasdi-size-icon;
+          height: auto;
+        }
+        //OPTICAL ICON
+        .icon-eye
+        {
+          content: $wasdi-eye-icon;
+          width: $wasdi-size-icon;
+          height: auto;
+        }
+        //PROCESSOR ICON
+        .icon-document-gear
+        {
+          content: $wasdi-document-gear-icon-version;
+          width: $wasdi-size-icon;
+          height: auto;
+        }
+        //APPLY ORBIT
+        .icon-applyorbit-operations
+        {
+          content: $wasdi-orbit-icon-applyorbit-blue-version;
+          width: $wasdi-size-icon;
+          height: auto;
+        }
+
+        //Radiometric Calibrate
+        .icon-radiometriccalibrate-operations
+        {
+          content: $wasdi-orbit-icon-calibrate-blue-version;
+          width: $wasdi-size-icon;
+          height: auto;
+        }
+        //MULTILOOKING ICON
+        .icon-multilooking-operations
+        {
+          content: $wasdi-telescope-icon-multilooking-blue-version;
+          width: $wasdi-size-icon;
+          height: auto;
+        }
+        //range doppler terrain correction
+        .icon-range-doppler-terrain-correction-operations
+        {
+          content: $wasdi-earth-icon-range-doppler-terrain-correction-blue-version;
+          width: $wasdi-size-icon;
+          height: auto;
+        }
+        // MIDA ICON
+        .icon-mida-merge-operations
+        {
+          content: $wasdi-mida-merge-operations-blue;
+          width: $wasdi-size-icon;
+          height: auto;
+        }
+        // ICON  MASK MENAGER
+        .icon-mask-manager
+        {
+          content: $wasdi-mask-manager-blue;
+          width: $wasdi-size-icon;
+          height: auto;
+        }
+
+
+      }
+    }
 
   }
 
   /********************************* ICONS *********************************/
 
   //RADAR ICON
-  .icon-radar {
-    i {
-      content: $wasdi-radar-icon;
-      width: $wasdi-size-icon;
-      height: auto;
+  //.icon-radar {
+  //  //i {
+  //    content: $wasdi-radar-icon;
+  //    width: $wasdi-size-icon;
+  //    height: auto;
+  //  &:hover{
+  //    content: $wasdi-radar-icon-white-version;
+  //    width: $wasdi-size-icon;
+  //    //margin-top: -20px;
+  //    height: auto;
+  //  }
+  //  //}
+  //}
+  //.icon-radar:hover {
+  //  //i {
+  //    content: $wasdi-radar-icon-white-version;
+  //    width: $wasdi-size-icon;
+  //    //margin-top: -20px;
+  //    height: auto;
+  //    //min-height: 50px;
+  //    //min-width: 50px;
+  //  //}
+  //}
+  ////OPTICAL ICON
+  //.icon-eye
+  //{
+  //  //i{
+  //    content: $wasdi-eye-icon;
+  //    width: $wasdi-size-icon;
+  //    height: auto;
+  //  &:hover{
+  //    content: $wasdi-eye-icon-white-version;
+  //    width: $wasdi-size-icon;
+  //    height: auto;
+  //  }
+  //  //}
+  //}
+  //.icon-eye:hover
+  //{
+  //  //i{
+  //    content: $wasdi-eye-icon-white-version;
+  //    width: $wasdi-size-icon;
+  //    height: auto;
+  //
+  //  //}
+  //}
 
-    }
-  }
-  .icon-radar:hover {
-    i {
-      content: $wasdi-radar-icon-white-version;
-      width: $wasdi-size-icon;
-      //margin-top: -20px;
-      height: auto;
-      //min-height: 50px;
-      //min-width: 50px;
-    }
-  }
-  //OPTICAL ICON
-  .icon-eye
-  {
-    i{
-      content: $wasdi-eye-icon;
-      width: $wasdi-size-icon;
-      height: auto;
-    }
-  }
-  .icon-eye:hover
-  {
-    i{
-      content: $wasdi-eye-icon-white-version;
-      width: $wasdi-size-icon;
-      height: auto;
+  ////PROCESSOR ICON
+  //.icon-document-gear
+  //{
+  //    content: $wasdi-document-gear-icon-version;
+  //    width: $wasdi-size-icon;
+  //    height: auto;
+  //    &:hover{
+  //      content: $wasdi-document-gear-icon-white-version;
+  //      width: $wasdi-size-icon;
+  //      height: auto;
+  //    }
+  //}
+  //.icon-document-gear:hover
+  //{
+  //  //i{
+  //    content: $wasdi-document-gear-icon-white-version;
+  //    width: $wasdi-size-icon;
+  //    height: auto;
+  //
+  //  //}
+  //}
 
-    }
-  }
-  //PROCESSOR ICON
-  .icon-document-gear
-  {
-    i{
-      content: $wasdi-document-gear-icon-version;
-      width: $wasdi-size-icon;
-      height: auto;
-
-    }
-  }
-  .icon-document-gear:hover
-  {
-    i{
-      content: $wasdi-document-gear-icon-white-version;
-      width: $wasdi-size-icon;
-      height: auto;
-
-    }
-  }
   //apply orbit
 
-  .icon-applyorbit-operations {
-    i{
-      content: $wasdi-orbit-icon-applyorbit-blue-version;
-      width: $wasdi-size-icon;
-      height: auto;
-    }
-  }
+  //.icon-applyorbit-operations {
+  //  i{
+  //    content: $wasdi-orbit-icon-applyorbit-blue-version;
+  //    width: $wasdi-size-icon;
+  //    height: auto;
+  //  }
+  //}
 
-  .icon-applyorbit-operations:hover {
-    i{
-      content: $wasdi-orbit-icon-applyorbit-white-version;
-      width: $wasdi-size-icon;
-      height: auto;
-    }
-  }
+  //.icon-applyorbit-operations:hover {
+  //  i{
+  //    content: $wasdi-orbit-icon-applyorbit-white-version;
+  //    width: $wasdi-size-icon;
+  //    height: auto;
+  //  }
+  //}
 
 
-  //Radiometric Calibrate
+  ////Radiometric Calibrate
+  //
+  //.icon-radiometriccalibrate-operations {
+  //  i{
+  //    content: $wasdi-orbit-icon-calibrate-blue-version;
+  //    width: $wasdi-size-icon;
+  //    height: auto;
+  //  }
+  //}
+  //
+  //.icon-radiometriccalibrate-operations:hover {
+  //  i{
+  //    content: $wasdi-orbit-icon-calibrate-white-version;
+  //    width: $wasdi-size-icon;
+  //    height: auto;
+  //  }
+  //}
 
-  .icon-radiometriccalibrate-operations {
-    i{
-      content: $wasdi-orbit-icon-calibrate-blue-version;
-      width: $wasdi-size-icon;
-      height: auto;
-    }
-  }
+  ////MULTILOOKING ICON
+  //.icon-multilooking-operations{
+  //  i{
+  //    content: $wasdi-telescope-icon-multilooking-blue-version;
+  //    width: $wasdi-size-icon;
+  //    height: auto;
+  //
+  //  }
+  //}
+  //.icon-multilooking-operations:hover{
+  //  i{
+  //    content: $wasdi-telescope-icon-multilooking-white-version;
+  //    width: $wasdi-size-icon;
+  //    height: auto;
+  //
+  //  }
+  //}
 
-  .icon-radiometriccalibrate-operations:hover {
-    i{
-      content: $wasdi-orbit-icon-calibrate-white-version;
-      width: $wasdi-size-icon;
-      height: auto;
-    }
-  }
+  ////EARTH ICON
+  //.icon-range-doppler-terrain-correction-operations{
+  //  i{
+  //    content: $wasdi-earth-icon-range-doppler-terrain-correction-blue-version;
+  //    width: $wasdi-size-icon;
+  //    height: auto;
+  //
+  //  }
+  //}
+  //.icon-range-doppler-terrain-correction-operations:hover{
+  //  i{
+  //    content: $wasdi-earth-icon-range-doppler-terrain-correction-white-version;
+  //    width: $wasdi-size-icon;
+  //    height: auto;
+  //
+  //  }
+  //}
+  //// MIDA ICON
+  //.icon-mida-merge-operations{
+  //  i{
+  //    content: $wasdi-mida-merge-operations-blue;
+  //    width: $wasdi-size-icon;
+  //    height: auto;
+  //
+  //  }
+  //}
+  //.icon-mida-merge-operations:hover{
+  //  i{
+  //    content: $wasdi-mida-merge-operations-white;
+  //    width: $wasdi-size-icon;
+  //    height: auto;
+  //  }
+  //}
 
-  //MULTILOOKING ICON
-  .icon-multilooking-operations{
-    i{
-      content: $wasdi-telescope-icon-multilooking-blue-version;
-      width: $wasdi-size-icon;
-      height: auto;
-
-    }
-  }
-  .icon-multilooking-operations:hover{
-    i{
-      content: $wasdi-telescope-icon-multilooking-white-version;
-      width: $wasdi-size-icon;
-      height: auto;
-
-    }
-  }
-  //EARTH ICON
-  .icon-range-doppler-terrain-correction-operations{
-    i{
-      content: $wasdi-earth-icon-range-doppler-terrain-correction-blue-version;
-      width: $wasdi-size-icon;
-      height: auto;
-
-    }
-  }
-  .icon-range-doppler-terrain-correction-operations:hover{
-    i{
-      content: $wasdi-earth-icon-range-doppler-terrain-correction-white-version;
-      width: $wasdi-size-icon;
-      height: auto;
-
-    }
-  }
-  // MIDA ICON
-  .icon-mida-merge-operations{
-    i{
-      content: $wasdi-mida-merge-operations-blue;
-      width: $wasdi-size-icon;
-      height: auto;
-
-    }
-  }
-  .icon-mida-merge-operations:hover{
-    i{
-      content: $wasdi-mida-merge-operations-white;
-      width: $wasdi-size-icon;
-      height: auto;
-    }
-  }
-
-  // ICON  MASK MENAGER
-  .icon-mask-manager{
-    i{
-      content: $wasdi-mask-manager-blue;
-      width: $wasdi-size-icon;
-      height: auto;
-    }
-  }
-  .icon-mask-manager:hover{
-    i{
-      content: $wasdi-mask-manager-white;
-      width: $wasdi-size-icon;
-      height: auto;
-    }
-  }
+  //// ICON  MASK MENAGER
+  //.icon-mask-manager{
+  //  i{
+  //    content: $wasdi-mask-manager-blue;
+  //    width: $wasdi-size-icon;
+  //    height: auto;
+  //  }
+  //}
+  //.icon-mask-manager:hover{
+  //  i{
+  //    content: $wasdi-mask-manager-white;
+  //    width: $wasdi-size-icon;
+  //    height: auto;
+  //  }
+  //}
   .band-published-label {
     color: #00A707;
   }

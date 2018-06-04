@@ -4,7 +4,7 @@
 var EditorController = (function () {
     function EditorController($scope, $location, $interval, oConstantsService, oAuthService, oMapService, oFileBufferService,
                               oProductService, $state, oWorkspaceService, oGlobeService, oProcessesLaunchedService, oRabbitStompService,
-                              oSnapOperationService, oModalService, oFilterService, oGetParametersOperationService) {
+                              oSnapOperationService, oModalService, oFilterService, oGetParametersOperationService, oTranslate) {
         // Reference to the needed Services
         this.m_oScope = $scope;
         this.m_oScope.m_oController = this;
@@ -24,6 +24,7 @@ var EditorController = (function () {
         this.m_oFilterService = oFilterService;
         this.m_oModalService = oModalService;
         this.m_oGetParametersOperationService = oGetParametersOperationService;
+        this.m_oTranslate = oTranslate;
         // Flag to know if in the big map is 2d (true) or 3d (false)
         this.m_b2DMapModeOn = true;
         // Flag to know if the big map is the Geographical Mode (true) or in the Editor Mode (false)
@@ -59,6 +60,8 @@ var EditorController = (function () {
 
         // Reference to the actual active Band
         this.m_oActiveBand = null;
+        //
+        this.m_aoNavBarMenu = [];
 
         this.m_oUndoRedoBoundigBoxesZoom = {
             actualLayerId:"",
@@ -138,7 +141,150 @@ var EditorController = (function () {
         this.m_oRabbitStompService.setMessageCallback(this.receivedRabbitMessage);
         this.m_oRabbitStompService.setActiveController(this);
 
+        //set default navbar menu
+        this.generateDefaultNavBarMenu();
+        this.navbarMenuTranslation();
+
     }
+    /********************************************************* TRANSLATE SERVICE ********************************************************/
+    EditorController.prototype.generateDefaultNavBarMenu = function(){
+        this.m_aoNavBarMenu = [
+            {
+                name:"",//sftp
+                subMenu:[],
+                onClick: this.openSFTPDialogInNavBar,
+                icon:"fa fa-server"
+            },
+            {
+                name:"",//radar
+                subMenu:[
+                    {
+                        name:"",//apply orbit
+                        subMenu:[],
+                        onClick: this.openApplyOrbitDialogInNavBar,
+                        icon:"icon-applyorbit-operations"
+                    },
+                    {
+                        name:"",//multilooking
+                        subMenu:[],
+                        onClick: this.openMultilookingDialogInNavBar,
+                        icon:"icon-multilooking-operations"
+                    },
+                    {
+                        name:"",// radiometric calibrate
+                        subMenu:[],
+                        onClick: this.openRadiometricCalibrationDialogInNavBar,
+                        icon:"icon-radiometriccalibrate-operations"
+                    },
+                    {
+                        name:"",//range doppler terrain correction
+                        subMenu:[],
+                        onClick: this.rangeDopplerTerrainCorrectionDialogInNavBar,
+                        icon:"icon-range-doppler-terrain-correction-operations"
+                    }
+                ],
+                onClick: "",
+                icon:"icon-radar"
+            },
+            {
+                name:"",//optical
+                subMenu:[
+                    {
+                        name:"",//range doppler terrain correction
+                        subMenu:[],
+                        onClick: this.openNDVIDialogInNavBar,
+                        icon:""
+                    }
+                ],
+                onClick: "",
+                icon:"icon-eye"
+            },
+            {
+                name:"",//Processor
+                subMenu:[
+                    {
+                        name:"",//mida
+                        subMenu:[],
+                        onClick: this.openMergeDialogInNavBar,
+                        icon:"icon-mida-merge-operations"
+                    },
+                    {
+                        name:"",//workflow
+                        subMenu:[],
+                        onClick: this.openWorkflowManagerDialog,
+                        icon:"fa fa-file-code-o"
+                    },
+                    {
+                        name:"",// New Processor
+                        subMenu:[],
+                        onClick: this.openProcessorDialog,
+                        icon:"fa fa-file-code-o"
+                    }
+                ],
+                onClick: "",
+                icon:"icon-document-gear"
+            },
+        ]
+    }
+    EditorController.prototype.navbarMenuTranslation = function()
+    {
+        var oController = this;
+
+        this.m_oTranslate('EDITOR_OPERATION_TITLE_SFTP').then(function(text)
+        {
+            oController.m_aoNavBarMenu[0].name  = text;
+        });
+        this.m_oTranslate('EDITOR_TOOLTIP_ICON_RADAR').then(function(text)
+        {
+            oController.m_aoNavBarMenu[1].name  = text;
+        });
+        this.m_oTranslate('EDITOR_TOOLTIP_ICON_EYE').then(function(text)
+        {
+            oController.m_aoNavBarMenu[2].name  = text;
+        });
+        this.m_oTranslate('EDITOR_OPERATION_TITLE_APPLY_RADIOMETRIC_PROCESSOR').then(function(text)
+        {
+            oController.m_aoNavBarMenu[3].name  = text;
+        });
+
+
+
+        //RADAR MENU
+        this.m_oTranslate('EDITOR_OPERATION_TITLE_APPLY_ORBIT').then(function(text)
+        {
+            oController.m_aoNavBarMenu[1].subMenu[0].name = text;
+        });
+        this.m_oTranslate('EDITOR_OPERATION_TITLE_APPLY_MULTILOOKING').then(function(text)
+        {
+            oController.m_aoNavBarMenu[1].subMenu[1].name = text;
+        });
+        this.m_oTranslate('EDITOR_OPERATION_TITLE_APPLY_RADIOMETRIC_CALIBRATE').then(function(text)
+        {
+            oController.m_aoNavBarMenu[1].subMenu[2].name = text;
+        });
+        this.m_oTranslate('EDITOR_OPERATION_TITLE_APPLY_RADIOMETRIC_RANGE_DOPPLER_TERRAIN_CORRECTION').then(function(text)
+        {
+            oController.m_aoNavBarMenu[1].subMenu[3].name = text;
+        });
+        //OPTICAL MENU
+        this.m_oTranslate('EDITOR_OPERATION_TITLE_APPLY_RADIOMETRIC_NDVI').then(function(text)
+        {
+            oController.m_aoNavBarMenu[2].subMenu[0].name  = text;
+        });
+        //PROCESSOR MENU
+        this.m_oTranslate('EDITOR_OPERATION_TITLE_MIDA').then(function(text)
+        {
+            oController.m_aoNavBarMenu[3].subMenu[0].name  = text;
+        });
+        this.m_oTranslate('EDITOR_OPERATION_TITLE_WORKFLOW').then(function(text)
+        {
+            oController.m_aoNavBarMenu[3].subMenu[1].name  = text;
+        });
+        this.m_oTranslate('EDITOR_OPERATION_TITLE_NEW_PROCESSOR').then(function(text)
+        {
+            oController.m_aoNavBarMenu[3].subMenu[2].name  = text;
+        });
+    };
 
     /*********************************************************** VIEW METHODS**********************************************************/
 
@@ -1642,10 +1788,17 @@ var EditorController = (function () {
      * @param oSelectedProduct
      * @returns {boolean}
      */
-    EditorController.prototype.openMergeDialog = function (oSelectedProduct) {
+    EditorController.prototype.openMergeDialog = function (oSelectedProduct,oWindow) {
 
-        var oController = this;
-
+        var oController;
+        if(utilsIsObjectNullOrUndefined(oWindow) === true)
+        {
+            oController = this;
+        }
+        else
+        {
+            oController = oWindow;
+        }
         this.m_oModalService.showModal({
             templateUrl: "dialogs/merge_products_dialog/MergeProductsDialog.html",
             controller: "MergeProductsController",
@@ -1664,6 +1817,25 @@ var EditorController = (function () {
         });
 
         return true;
+    };
+
+
+    /**
+     *
+     * @param oWindow
+     */
+    EditorController.prototype.openMergeDialogInNavBar = function(oWindow)
+    {
+        var oController;
+        if(utilsIsObjectNullOrUndefined(oWindow) === true)
+        {
+            oController = this;
+        }
+        else
+        {
+            oController = oWindow;
+        }
+        oWindow.openMergeDialog(null,oController);
     };
 
     /**
@@ -1694,9 +1866,18 @@ var EditorController = (function () {
      *
      * @returns {boolean}
      */
-    EditorController.prototype.openProcessorDialog = function(){
-        var oController = this;
-        this.m_oModalService.showModal({
+    EditorController.prototype.openProcessorDialog = function(oWindow){
+        var oController;
+        if(utilsIsObjectNullOrUndefined(oWindow) === true)
+        {
+            oController = this;
+        }
+        else
+        {
+            oController = oWindow;
+        }
+
+        oController.m_oModalService.showModal({
             templateUrl: "dialogs/processor/ProcessorView.html",
             controller: "ProcessorController",
             inputs: {
@@ -1744,9 +1925,18 @@ var EditorController = (function () {
      *
      * @returns {boolean}
      */
-    EditorController.prototype.openWorkflowManagerDialog = function(){
-        var oController = this;
-        this.m_oModalService.showModal({
+    EditorController.prototype.openWorkflowManagerDialog = function(oWindow){
+        var oController;
+        if(utilsIsObjectNullOrUndefined(oWindow) === true)
+        {
+            oController = this;
+        }
+        else
+        {
+            oController = oWindow;
+        }
+
+        oController.m_oModalService.showModal({
             templateUrl: "dialogs/workflow_manager/WorkFlowManagerView.html",
             controller: "WorkFlowManagerController",
             inputs: {
@@ -1963,8 +2153,17 @@ var EditorController = (function () {
      * @param oSelectedProduct
      * @returns {boolean}
      */
-    EditorController.prototype.openApplyOrbitDialog = function (oSelectedProduct) {
-        var oController = this;
+    EditorController.prototype.openApplyOrbitDialog = function (oSelectedProduct,oWindow) {
+
+        var oController;
+        if(utilsIsObjectNullOrUndefined(oWindow) === true)
+        {
+            oController = this;
+        }
+        else
+        {
+            oController = oWindow;
+        }
         this.m_oModalService.showModal({
             templateUrl: "dialogs/apply_orbit_operation/ApplyOrbitDialog.html",
             controller: "ApplyOrbitController",
@@ -2003,14 +2202,34 @@ var EditorController = (function () {
 
         return true;
     };
-
+    EditorController.prototype.openApplyOrbitDialogInNavBar = function(oWindow)
+    {
+        var oController;
+        if(utilsIsObjectNullOrUndefined(oWindow) === true)
+        {
+            oController = this;
+        }
+        else
+        {
+            oController = oWindow;
+        }
+        oWindow.openApplyOrbitDialog(null,oController);
+    }
     /**
      *
      * @param oSelectedProduct
      * @returns {boolean}
      */
-    EditorController.prototype.openRadiometricCalibrationDialog = function (oSelectedProduct) {
-        var oController = this;
+    EditorController.prototype.openRadiometricCalibrationDialog = function (oSelectedProduct,oWindow) {
+        var oController;
+        if(utilsIsObjectNullOrUndefined(oWindow) === true)
+        {
+            oController = this;
+        }
+        else
+        {
+            oController = oWindow;
+        }
         this.m_oModalService.showModal({
             templateUrl: "dialogs/radiometric_calibration_operation/RadiometricCalibrationDialog.html",
             controller: "RadiometricCalibrationController",
@@ -2049,14 +2268,38 @@ var EditorController = (function () {
 
         return true;
     };
-
+    /**
+     *
+     * @param oWindow
+     */
+    EditorController.prototype.openRadiometricCalibrationDialogInNavBar = function(oWindow)
+    {
+        var oController;
+        if(utilsIsObjectNullOrUndefined(oWindow) === true)
+        {
+            oController = this;
+        }
+        else
+        {
+            oController = oWindow;
+        }
+        oWindow.openRadiometricCalibrationDialog(null,oController);
+    }
     /**
      *
      * @param oSelectedProduct
      * @returns {boolean}
      */
-    EditorController.prototype.openMultilookingDialog = function (oSelectedProduct) {
-        var oController = this;
+    EditorController.prototype.openMultilookingDialog = function (oSelectedProduct,oWindow) {
+        var oController;
+        if(utilsIsObjectNullOrUndefined(oWindow) === true)
+        {
+            oController = this;
+        }
+        else
+        {
+            oController = oWindow;
+        }
         this.m_oModalService.showModal({
             templateUrl: "dialogs/multilooking_operation/MultilookingDialog.html",
             controller: "MultilookingController",
@@ -2105,15 +2348,39 @@ var EditorController = (function () {
 
         return true;
     };
-
+    /**
+     *
+     * @param oWindow
+     */
+    EditorController.prototype.openMultilookingDialogInNavBar = function(oWindow)
+    {
+        var oController;
+        if(utilsIsObjectNullOrUndefined(oWindow) === true)
+        {
+            oController = this;
+        }
+        else
+        {
+            oController = oWindow;
+        }
+        oWindow.openMultilookingDialog(null,oController);
+    }
     /**
      *
      * @param oSelectedProduct
      * @returns {boolean}
      */
-    EditorController.prototype.openNDVIDialog = function (oSelectedProduct) {
-        var oController = this;
-        this.m_oModalService.showModal({
+    EditorController.prototype.openNDVIDialog = function (oSelectedProduct,oWindow) {
+        var oController;
+        if(utilsIsObjectNullOrUndefined(oWindow) === true)
+        {
+            oController = this;
+        }
+        else
+        {
+            oController = oWindow;
+        }
+        oController.m_oModalService.showModal({
             templateUrl: "dialogs/NDVI_operation/NDVIDialog.html",
             controller: "NDVIController",
             inputs: {
@@ -2148,7 +2415,23 @@ var EditorController = (function () {
         return true;
     };
 
-
+    /**
+     *
+     * @param oWindow
+     */
+    EditorController.prototype.openNDVIDialogInNavBar = function(oWindow)
+    {
+        var oController;
+        if(utilsIsObjectNullOrUndefined(oWindow) === true)
+        {
+            oController = this;
+        }
+        else
+        {
+            oController = oWindow;
+        }
+        oWindow.openNDVIDialog(null,oController);
+    }
     /**
      *
      * @param oProductInput
@@ -2183,10 +2466,18 @@ var EditorController = (function () {
      * @param oProductInput
      * @returns {boolean}
      */
-    EditorController.prototype.openSFTPDialog = function (oProductInput)
+    EditorController.prototype.openSFTPDialog = function (oProductInput,oWindow)
     {
-        var oController = this;
-        this.m_oModalService.showModal({
+        var oController;
+        if(utilsIsObjectNullOrUndefined(oWindow) === true)
+        {
+            oController = this;
+        }
+        else
+        {
+            oController = oWindow;
+        }
+        oController.m_oModalService.showModal({
             templateUrl: "dialogs/sftp_upload/SftpUploadDialog.html",
             controller: "SftpUploadController",
             inputs: {
@@ -2209,12 +2500,38 @@ var EditorController = (function () {
 
     /**
      *
+     * @param oWindow
+     */
+    EditorController.prototype.openSFTPDialogInNavBar = function(oWindow)
+    {
+        var oController;
+        if(utilsIsObjectNullOrUndefined(oWindow) === true)
+        {
+            oController = this;
+        }
+        else
+        {
+            oController = oWindow;
+        }
+        oWindow.openSFTPDialog(null,oController);
+    };
+
+    /**
+     *
      * @param oSelectedProduct
      * @returns {boolean}
      */
-    EditorController.prototype.rangeDopplerTerrainCorrectionDialog = function (oSelectedProduct)
+    EditorController.prototype.rangeDopplerTerrainCorrectionDialog = function (oSelectedProduct,oWindow)
     {
-        var oController = this;
+        var oController;
+        if(utilsIsObjectNullOrUndefined(oWindow) === true)
+        {
+            oController = this;
+        }
+        else
+        {
+            oController = oWindow;
+        }
         this.m_oModalService.showModal({
             templateUrl: "dialogs/range_doppler_terrain_correction_operation/RangeDopplerTerrainCorrectionDialog.html",
             controller: "RangeDopplerTerrainCorrectionController",
@@ -2254,7 +2571,23 @@ var EditorController = (function () {
 
         return true;
     };
-
+    /**
+     *
+     * @param oWindow
+     */
+    EditorController.prototype.rangeDopplerTerrainCorrectionDialogInNavBar = function(oWindow)
+    {
+        var oController;
+        if(utilsIsObjectNullOrUndefined(oWindow) === true)
+        {
+            oController = this;
+        }
+        else
+        {
+            oController = oWindow;
+        }
+        oWindow.rangeDopplerTerrainCorrectionDialog(null,oController);
+    }
     /**
      *
      * @param oSelectedBand
@@ -3312,7 +3645,8 @@ var EditorController = (function () {
         'SnapOperationService',
         'ModalService',
         'FilterService',
-        'GetParametersOperationService'
+        'GetParametersOperationService',
+        '$translate'
 
     ];
 

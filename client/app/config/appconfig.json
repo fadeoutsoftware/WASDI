@@ -228,7 +228,7 @@
             ]
         },
         {
-            "name": "Mission:Proba-V",
+            "name": "Mission: Proba-V",
             "indexname": "platformname",
             "indexvalue": "Proba-V",
             "provider":"Proba-V",
