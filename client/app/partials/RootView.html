@@ -1,24 +1,24 @@
 <div class="root-view container-fluid">
 
-    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 logged-user"  >
-        <!-- HELP LOG-OUT-->
-        <ul class="link">
+    <!--<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 logged-user"  >-->
+        <!--&lt;!&ndash; HELP LOG-OUT&ndash;&gt;-->
+        <!--<ul class="link">-->
 
-            <li><a class="active" href="#news">{{"ROOT_VIEW_LINK_HELP"|translate}}</a></li>
-            <li><a  ng-click="m_oController.onClickLogOut()">{{"ROOT_VIEW_LINK_LOG_OUT"|translate}}</a></li>
+            <!--<li><a class="active" href="#news">{{"ROOT_VIEW_LINK_HELP"|translate}}</a></li>-->
+            <!--<li><a  ng-click="m_oController.onClickLogOut()">{{"ROOT_VIEW_LINK_LOG_OUT"|translate}}</a></li>-->
 
-        </ul>
-        <!-- USER ID-->
-        <span class="user-span">{{"ROOT_VIEW_LABEL_USER"|translate}} {{m_oController.m_oUser.name}}</span>
-        <!--SUBTITLE-->
-        <span class="subtitle-span" >
-            <h4>{{"ROOT_VIEW_SUBTITLE"|translate}}</h4>
+        <!--</ul>-->
+        <!--&lt;!&ndash; USER ID&ndash;&gt;-->
+        <!--<span class="user-span">{{"ROOT_VIEW_LABEL_USER"|translate}} {{m_oController.m_oUser.name}}</span>-->
+        <!--&lt;!&ndash;SUBTITLE&ndash;&gt;-->
+        <!--<span class="subtitle-span" >-->
+            <!--<h4>{{"ROOT_VIEW_SUBTITLE"|translate}}</h4>-->
 
-        </span>
-        <span style="color:green">
-            <h5>v0.65</h5>
-        </span>
-    </div>
+        <!--</span>-->
+        <!--<span style="color:green">-->
+            <!--<h5>v0.65</h5>-->
+        <!--</span>-->
+    <!--</div>-->
 
     <div class="col-lg-1 col-md-2 col-sm-2 col-xs-2 ">
         <a  href=""  ng-click="m_oController.openSnake()"><!--ui-sref="root.workspaces"-->
@@ -62,6 +62,39 @@
 
                         </div>
                     </div>
+                    <!------------------------------ USER ------------------------------>
+                    <div class="nav navbar-nav navbar-right user-container">
+                        <div class="dropdown">
+                            <button class="dropdown-toggle" type="button" id="dropdownMenuUser"
+                                    data-toggle="dropdown">
+                                <i class="fa fa-user-circle fa-2x" aria-hidden="true"></i>
+                                <!--<span class="caret"></span>-->
+                            </button>
+                            <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenuUser">
+                                <li role="presentation" class="dropdown-header" >
+                                    <!--<span class="user-span">-->
+                                    <i class="fa fa-user fa-lg" aria-hidden="true"></i>
+                                    <h4>{{"ROOT_VIEW_LABEL_USER"|translate}} {{m_oController.m_oUser.name}}</h4>
+                                    <!--</span>-->
+                                </li>
+                                <li role="presentation" class="divider"></li>
+
+                                <li role="presentation" class="disabled">
+                                    <a role="menuitem" tabindex="-1" href="" >
+                                        <i class="fa fa-info fa-lg" aria-hidden="true"></i>
+                                        <h4>{{"ROOT_VIEW_LINK_HELP"|translate}}</h4>
+                                    </a>
+                                </li>
+                                <li role="presentation">
+                                    <a role="menuitem" tabindex="-1" ng-click="m_oController.onClickLogOut()">
+                                        <i class="fa fa-sign-out fa-lg" aria-hidden="true"></i>
+                                        <h4>{{"ROOT_VIEW_LINK_LOG_OUT"|translate}}</h4>
+                                    </a>
+                                </li>
+
+                            </ul>
+                        </div>
+                    </div>
 
                     <ul class="nav navbar-nav navbar-right">
                         <!-- WORKSPACES BUTTON-->
@@ -98,20 +131,10 @@
                                 {{"ROOT_VIEW_NAV_BAR_LINK_CATALOG"|translate}}
                             </a>
                         </li>
-
-                        <!--TODO REMOVE JAVASCRIPT AT THE END OF FILE WHEN I LEAVE POPOVER-->
-                        <!--<li style="cursor:no-drop;" data-toggle="popover"  data-content="Coming Soon" data-placement="left"   href="">-->
-                            <!--<a>-->
-                                <!--<i class="fa fa-upload fa-lg" aria-hidden="true"></i>-->
-                                <!--{{"ROOT_VIEW_NAV_BAR_LINK_PUBLISH"|translate}}-->
-                            <!--</a>-->
-                        <!--</li>-->
-                        <!--<li style="cursor:no-drop;" data-toggle="popover"  data-content="Coming Soon" data-placement="left"   href="">-->
-                            <!--<a>-->
-                                <!--<i class="fa fa-share-alt fa-lg" aria-hidden="true"></i>-->
-                            <!--</a>-->
-                        <!--</li>-->
                     </ul>
+
+
+
                 </div>
 
 

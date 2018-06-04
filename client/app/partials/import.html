@@ -417,8 +417,10 @@
                     </div>
                     <!--<div class="test">-->
 
-                    <!--TODO IT-->
-                    <div class="container-table-row" ng-show="m_oController.m_bIsVisibleListOfLayers" id="div-container-table" >
+                    <div class="container-table-row" ng-class="{'container-table-row-without-pagination' :
+                                    (m_oController.m_bIsVisibleListOfLayers && m_oController.m_bIsPaginatedList === false)
+                                    || m_oController.isEmptyProductsList() == true}"
+                         ng-show="m_oController.m_bIsVisibleListOfLayers" id="div-container-table" >
 
                     <!-- TAB CONTENT -->
                     <!--<div>-->

@@ -2,6 +2,7 @@
 .root-view
 {
 
+  margin-top: 10px;
   .flex-container {
     display: flex;
     flex-direction: row;
@@ -78,7 +79,9 @@
   .brand-logo{
     content: $wasdi-brand-logo-root; // set 'src' attribute from CSS
     width: $wasdi-brand-logo-root-size;
-    margin-top: -20px;
+    //margin-top: -20px;
+    margin-top: -5px;
+    margin-left:35px;
     height: auto;
     min-height: 50px;
     min-width: 50px;
@@ -91,6 +94,69 @@
   .my-nav-bar
   {
     height: 60px;
+
+    .user-container{
+      margin-top: 10px;
+      color:white;
+      button
+      {
+        border:none;
+        background-color: transparent;
+      }
+      .dropdown-menu{
+        z-index: 1500 ;
+        li{
+          width: 100%;
+          &:hover{
+            color:white;
+            background-color: $wasdi-green-logo;
+            a{
+              color:white;
+              background-color: $wasdi-green-logo;
+            }
+          }
+          h4{
+            display: inline;
+          }
+          i{
+            padding-right: 3px;
+          }
+        }
+      }
+      //ul
+      //{
+      //  z-index: 1500;
+      //  li{
+      //    &:hover{
+      //      background-color: $wasdi-green-logo;
+      //    }
+      //  }
+      //  h4{
+      //    display: inline;
+      //  }
+      //  i{
+      //    padding-right: 3px;
+      //  }
+      //}
+      .dropdown-menu{
+        .dropdown-header{
+          cursor:default;
+        }
+      }
+      &:hover{
+        cursor:pointer;
+        button
+        {
+          i
+          {
+            background-color: $wasdi-nav-bar-color-active;
+            color:white;
+          }
+        }
+
+      }
+    }
+
     .navbar-default {
       background-color: $wasdi-nav-bar-color-background;
 

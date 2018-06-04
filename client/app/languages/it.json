@@ -72,6 +72,7 @@
   "EDITOR_OPERATION_TITLE_SFTP":"Import SFTP",
   "EDITOR_OPERATION_TITLE_WORKFLOW":"Workflow",
   "EDITOR_OPERATION_TITLE_MASK_MANAGER":"Mask manager",
+  "EDITOR_OPERATION_TITLE_NEW_PROCESSOR":"New Processor",
   "EDITOR_WIZARDS_TREE_SEARCH":"If you want search a new product:",
   "EDITOR_WIZARDS_TREE_SFTP":"If you want add a product by SFTP:",
   "EDITOR_ADVANCE_FILTERS_TITLE":"Advance filters",

@@ -136,6 +136,10 @@
       .panel-heading {
         border-bottom: 0;
         min-height: 40px;
+        h4{
+          margin-top: 0;
+          margin-bottom: 0;
+        }
       }
 
       //background-color: $wasdi-sidebar-background-color;
