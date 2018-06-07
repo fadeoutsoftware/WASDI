@@ -637,23 +637,18 @@
 
     /****************** INPUT FORM SEARCH CONTAINER********************/
     #advanced-search-container{
-
       padding: 8px;
-
     }
     #advanced-search-close-button{
       top:10px;
       right:10px;
     }
     #advanced-search-content{
-
       position: relative;
       height: 100%;
       width: 100%;
-      //background-color: white;
       overflow-y: auto;
       overflow-x: hidden;
-
 
       .advanced-calendar-input
       {

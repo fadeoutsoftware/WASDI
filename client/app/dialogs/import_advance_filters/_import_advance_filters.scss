@@ -16,7 +16,11 @@
 
         .advance-search
         {
-
+          .edit-filters-buttons{
+            .my-button {
+              padding: 5px 15px;
+            }
+          }
           .well {
             border: 1px solid $wasdi-green-logo;
           }
@@ -67,7 +71,11 @@
             }
           }
 
-
+          form{
+            fieldset{
+              border: 2px solid $wasdi-green-logo;
+            }
+          }
 
         }
 

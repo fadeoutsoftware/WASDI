@@ -5,7 +5,7 @@
 
 var GetListOfWorkspacesController = (function() {
 
-    function GetListOfWorkspacesController($scope, oClose,oWorkspaceService,oExtras,oConstantsService) {
+    function GetListOfWorkspacesController($scope, oClose,oWorkspaceService,oExtras,oConstantsService,oSnapOperationService,oModalService) {
         this.m_oScope = $scope;
         this.m_oScope.m_oController = this;
         this.m_oExtras = oExtras
@@ -19,13 +19,20 @@ var GetListOfWorkspacesController = (function() {
         this.m_bIsCreatingWorskapce = false;
         this.m_oConstantsService = oConstantsService;
         this.m_oActiveWorkspace = this.m_oConstantsService.getActiveWorkspace();
+        this.m_oSnapOperationService = oSnapOperationService;
+        this.m_oSelectedWorkflow = "";
+        this.m_oModalService = oModalService;
         this.m_oClose = oClose;
+        this.m_oActiveWorkspace = this.m_oConstantsService.getActiveWorkspace();
+        this.m_aoWorkflows = [];
+        this.m_bisLoadingWorkflows = false;
         //$scope.close = oClose;
         $scope.close = function(result) {
             oClose(result, 200); // close, but give 500ms for bootstrap to animate
         };
 
         this.getWorkspaces();
+        this.getWorkflowsByUser();
     }
 
     /**
@@ -169,12 +176,77 @@ var GetListOfWorkspacesController = (function() {
             oController.m_bIsCreatingWorskapce = false;
         });
     };
+    /**
+     *
+     */
+    GetListOfWorkspacesController.prototype.getWorkflowsByUser = function()
+    {
+        var oController = this;
+        // this.m_bIsLoadingWorkflows = true;
+        oController.m_bisLoadingWorkflows = true;
+
+        this.m_oSnapOperationService.getWorkflowsByUser().success(function (data) {
+            if(utilsIsObjectNullOrUndefined(data) == false)
+            {
+                oController.m_aoWorkflows = data;
+            }
+            else
+            {
+                utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN GET WORKFLOWS, THERE AREN'T DATA");
+            }
+            oController.m_bisLoadingWorkflows=false;
+
+            //it changes the default tab, we can't visualize the 'WorkFlowTab1' because there aren't workflows
+            // if( (utilsIsObjectNullOrUndefined(oController.m_aoWorkflows) === true) || (oController.m_aoWorkflows.length === 0) )
+            // {
+            //     oController.m_sSelectedWorkflowTab = 'WorkFlowTab2';
+            // }
+            // oController.m_bIsLoadingWorkflows = false;
+        }).error(function (error) {
+            utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN GET WORKFLOWS");
+            // oController.m_bIsLoadingWorkflows = false;
+            oController.m_bisLoadingWorkflows=false;
+
+        });
+    };
+
+    /**
+     *
+     * @returns {boolean}
+     */
+    GetListOfWorkspacesController.prototype.openWorkflowManagerDialog = function(){
+        var oController = this;
+        // if(utilsIsObjectNullOrUndefined(this.m_oActiveWorkspace) === true)
+        //     return false;
+
+        oController.m_oModalService.showModal({
+            templateUrl: "dialogs/workflow_manager/WorkFlowManagerView.html",
+            controller: "WorkFlowManagerController",
+            inputs: {
+                extras: {
+                    products:[],
+                    workflowId:oController.m_oActiveWorkspace.workspaceId
+                }
+            }
+        }).then(function (modal) {
+            modal.element.modal();
+            modal.close.then(function (oResult) {
+
+                oController.getWorkflowsByUser();
+                // oController.m_oProcessesLaunchedService.loadProcessesFromServer(oController.m_oActiveWorkspace.workspaceId);
+            });
+        });
+
+        return true;
+    };
     GetListOfWorkspacesController.$inject = [
         '$scope',
         'close',
         'WorkspaceService',
         'extras',
-        'ConstantsService'
+        'ConstantsService',
+        'SnapOperationService',
+        'ModalService'
     ];
     return GetListOfWorkspacesController;
 })();

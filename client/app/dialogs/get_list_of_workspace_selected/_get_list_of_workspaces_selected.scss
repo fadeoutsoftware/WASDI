@@ -18,6 +18,23 @@
 
       .modal-body
       {
+        max-height: 500px;
+        //override class
+        .my-table{
+          thead
+          {
+            th{
+              background-color: white;
+              color: $wasdi-green-logo;
+            }
+          }
+        }
+        table{
+          .selectedWorkflow{
+            color:$wasdi-white;
+            background-color: $wasdi-green-logo;
+          }
+        }
         label{
           color: $wasdi-green-logo;
         }

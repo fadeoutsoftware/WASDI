@@ -305,26 +305,26 @@ var EditorController = (function () {
 
         this.m_iActiveMapPanelTab = iTab;
 
-        if (iTab == 2 && this.m_oActiveBand != null) {
-            // Initialize Image Preview
-
-            var oBand = this.m_oActiveBand;
-            var sFileName = this.m_aoProducts[oBand.productIndex].fileName;
-
-            var elementImagePreview = angular.element(document.querySelector('#imagepreviewcanvas'));
-            var heightImagePreview = elementImagePreview[0].offsetHeight;
-            var widthImagePreview = elementImagePreview[0].offsetWidth;
-
-            // TODO: here the tab is not shown yet. So H and W are still 0.
-            // This code should run after the tab is shown
-            if (heightImagePreview==0) heightImagePreview = 280;//default value canvas
-            if (widthImagePreview==0) widthImagePreview = 560;//default value canvas
-
-            var oBodyImagePreview = this.createBodyForProcessingBandImage(sFileName,oBand.name,null,0,0,oBand.width,oBand.height,
-                                    widthImagePreview,heightImagePreview,oBand.colorManipulation);
-
-            this.processingGetBandPreview(oBodyImagePreview,this.m_oActiveWorkspace.workspaceId);
-        }
+        // if (iTab == 2 && this.m_oActiveBand != null) {
+        //     // Initialize Image Preview
+        //
+        //     var oBand = this.m_oActiveBand;
+        //     var sFileName = this.m_aoProducts[oBand.productIndex].fileName;
+        //
+        //     var elementImagePreview = angular.element(document.querySelector('#imagepreviewcanvas'));
+        //     var heightImagePreview = elementImagePreview[0].offsetHeight;
+        //     var widthImagePreview = elementImagePreview[0].offsetWidth;
+        //
+        //     // TODO: here the tab is not shown yet. So H and W are still 0.
+        //     // This code should run after the tab is shown
+        //     if (heightImagePreview==0) heightImagePreview = 280;//default value canvas
+        //     if (widthImagePreview==0) widthImagePreview = 560;//default value canvas
+        //
+        //     var oBodyImagePreview = this.createBodyForProcessingBandImage(sFileName,oBand.name,null,0,0,oBand.width,oBand.height,
+        //                             widthImagePreview,heightImagePreview,oBand.colorManipulation);
+        //
+        //      this.processingGetBandPreview(oBodyImagePreview,this.m_oActiveWorkspace.workspaceId);
+        // }
     };
 
 
@@ -1336,14 +1336,16 @@ var EditorController = (function () {
         this.m_oImagePreviewDirectivePayload.viewportWidth = oBand.width;
 
         // The preview is available?
-        if ( (widthImagePreview > 0) && (heightImagePreview > 0) )
-        {
+        // if ( (widthImagePreview > 0) && (heightImagePreview > 0) )
+        // {
+        if (heightImagePreview==0) heightImagePreview = 280;//default value canvas
+        if (widthImagePreview==0) widthImagePreview = 560;//default value canvas
             // Yes call API also for preview
             var oBodyImagePreview = this.createBodyForProcessingBandImage(sFileName,oBand.name, null, 0,0,oBand.width,oBand.height,
                                     widthImagePreview, heightImagePreview,oBand.colorManipulation);
             // Show it
             oController.processingGetBandPreview(oBodyImagePreview,oController.m_oActiveWorkspace.workspaceId);
-        }
+        // }
     };
 
     /**
@@ -3516,6 +3518,22 @@ var EditorController = (function () {
                                             }
                                         }
                                     },
+                                    "Download": {
+                                        "label": "Download",
+                                        "icon":"fa fa-download",
+                                        "action": function (obj) {
+                                            //$node.original.fileName;
+                                            if( (utilsIsObjectNullOrUndefined($node.original.fileName) == false) && (utilsIsStrNullOrEmpty($node.original.fileName) == false) )
+                                            {
+                                                var oProduct = oController.findProductByName($node.original.fileName);
+                                                var oEntry = {
+                                                    "fileName":oProduct.fileName,
+                                                    "filePath":oProduct.filePath
+                                                };
+                                                this.downloadEntry(oEntry);
+                                            }
+                                        }
+                                    },
 
                                     "DeleteProduct": {
                                         "label": "Delete Product",
@@ -3627,7 +3645,62 @@ var EditorController = (function () {
         return oTree;
     };
 
+    /**
+     * Download of a product
+     * @param oEntry
+     * @returns {boolean}
+     */
+    EditorController.prototype.downloadEntry = function(oEntry)
+    {
+        if(utilsIsObjectNullOrUndefined(oEntry)) return false;
+        // if(this.m_bIsDownloadingProduct === true)
+        //     return false;
 
+        var oJson = {
+            fileName: oEntry.fileName,
+            filePath: oEntry.filePath
+        };
+
+        var sFileName = oEntry.fileName;
+        // this.m_bIsDownloadingProduct = true;
+        var oController = this;
+        // this.m_sProductNameInDownloadingStatus = oEntry.fileName;
+        this.m_oCatalogService.downloadEntry(oJson).success(function (data, status, headers, config) {
+            if(utilsIsObjectNullOrUndefined(data) == false)
+            {
+                var blob = new Blob([data], {type: "application/octet-stream"});
+                saveAs(blob, sFileName);
+            }
+            // oController.m_bIsDownloadingProduct = false;
+            // oController.m_sProductNameInDownloadingStatus = "";
+        }).error(function (error) {
+            utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR DOWNLOADING FILE FROM THE CATALOGUE");
+            // oController.m_bIsDownloadingProduct = false;
+            // oController.m_sProductNameInDownloadingStatus = "";
+        });
+
+        return true;
+    };
+
+    EditorController.prototype.findProductByName = function(sFileName){
+        if(utilsIsStrNullOrEmpty(sFileName) === true)
+        {
+            return null;
+        }
+        var iNumberOfProducts = this.m_aoProducts.length;
+        var oSelectedProduct = null;
+        for(var iIndexProduct = 0; iIndexProduct < iNumberOfProducts ; iIndexProduct++)
+        {
+            if( this.m_aoProducts[iIndexProduct].fileName === sFileName)
+            {
+                oSelectedProduct = this.m_aoProducts[iIndexProduct];
+                break;
+            }
+
+        }
+        return oSelectedProduct;
+
+    };
     EditorController.$inject = [
         '$scope',
         '$location',
