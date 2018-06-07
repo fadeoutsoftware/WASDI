@@ -32,7 +32,8 @@ var CatalogController = (function() {
         this.m_sOrderBy = 'fileName';
         // Result grid order direction
         this.m_bReverseOrder = false;
-
+        this.m_bIsDownloadingProduct = false;
+        this.m_sProductNameInDownloadingStatus = "";
         this.m_oMapService.initMap('catalogMap');
         this.GetCategories();
         this.setDefaultData();
@@ -201,21 +202,41 @@ var CatalogController = (function() {
     CatalogController.prototype.downloadEntry = function(oEntry)
     {
         if(utilsIsObjectNullOrUndefined(oEntry)) return false;
+        if(this.m_bIsDownloadingProduct === true)
+            return false;
+
         var oJson = {
             fileName: oEntry.fileName,
             filePath: oEntry.filePath
         };
 
         var sFileName = oEntry.fileName;
+        this.m_bIsDownloadingProduct = true;
+        var oController = this;
+        this.m_sProductNameInDownloadingStatus = oEntry.fileName;
         this.m_oCatalogService.downloadEntry(oJson).success(function (data, status, headers, config) {
             if(utilsIsObjectNullOrUndefined(data) == false)
             {
                 //var FileSaver = require('file-saver');
                 var blob = new Blob([data], {type: "application/octet-stream"});
                 saveAs(blob, sFileName);
+                // var a = document.createElement("a"),
+                //     url = URL.createObjectURL(blob);
+                // a.href = url;
+                // a.download = sFileName;
+                // document.body.appendChild(a);
+                // a.click();
+                // setTimeout(function() {
+                //     document.body.removeChild(a);
+                //     window.URL.revokeObjectURL(url);
+                // }, 0);
             }
+            oController.m_bIsDownloadingProduct = false;
+            oController.m_sProductNameInDownloadingStatus = "";
         }).error(function (error) {
             utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR DOWNLOADING FILE FROM THE CATALOGUE");
+            oController.m_bIsDownloadingProduct = false;
+            oController.m_sProductNameInDownloadingStatus = "";
         });
 
         return true;

@@ -133,7 +133,7 @@
                 <invader></invader>
             </div>
 
-            <table class="table table-hover table-products"  ng-show="m_oController.m_bIsLoadedTable" >
+            <table class="table table-hover table-products" ng-show="m_oController.m_bIsLoadedTable" >
                 <thead>
 
                         <th ng-click="m_oController.m_sOrderBy = 'fileName'; m_oController.m_bReverseOrder=!m_oController.m_bReverseOrder">
@@ -167,7 +167,7 @@
                     <tr ng-repeat="entry in m_oController.m_aoEntries | orderBy:m_oController.m_sOrderBy:m_oController.m_bReverseOrder | filter:search" id="{{'product'+$index}}"
                         ng-mouseover="m_oController.m_oMapService.changeStyleRectangleMouseOver(entry.rectangle)"
                         ng-mouseleave="m_oController.m_oMapService.changeStyleRectangleMouseLeave(entry.rectangle)"
-                        ng-click="m_oController.m_oMapService.flyOnRectangle(entry.rectangle)">
+                        ng-click="m_oController.m_oMapService.flyOnRectangle(entry.rectangle)" ng-class="{'wait-cursor-hover':m_oController.m_bIsDownloadingProduct}" >
                         <td>{{entry.fileName}}</td>
                         <td>{{entry.refDate}}</td>
                         <td>{{entry.category}}</td>
@@ -180,9 +180,15 @@
                         <td ng-click="m_oController.openModalDownloadProductInSelectedWorkspaces(entry)">
                             <i class="fa fa-plus-circle fa-lg" aria-hidden="true"></i>
                         </td>
-                        <td ng-click="m_oController.downloadEntry(entry)">
+                        <td ng-click="m_oController.downloadEntry(entry)" ng-class="{'disabled':m_oController.m_bIsDownloadingProduct}"
+                            ng-disabled="m_oController.m_bIsDownloadingProduct" ng-hide="m_oController.m_sProductNameInDownloadingStatus === entry.fileName">
                             <i class="fa fa-download" aria-hidden="true"></i>
                         </td>
+                        <td ng-show="m_oController.m_sProductNameInDownloadingStatus === entry.fileName">
+                            <smallinvaderfixed></smallinvaderfixed>
+                        </td>
+
+
                     </tr>
                 </tbody>
             </table>

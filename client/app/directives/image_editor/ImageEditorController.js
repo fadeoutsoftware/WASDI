@@ -363,6 +363,7 @@ angular.module('wasdi.ImageEditorDirective', [])
                     {
                         return false;
                     }
+                    scope.m_bIsActiveZoom = false;
                     //update zoom for server request
                     scope.zoom();
 
@@ -568,6 +569,7 @@ angular.module('wasdi.ImageEditorDirective', [])
 
                     if(utilsIsObjectNullOrUndefined(newValue) === false && newValue !== "empty")
                     {
+                        scope.m_bIsActiveZoom = false;
                         var oBitmap =  new createjs.Bitmap(newValue);
                         //AFTER PAN
                         var oPan = new createjs.Container();

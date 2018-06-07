@@ -328,10 +328,12 @@
     {
       .button-container
       {
+        float:right;
         h4{
           margin:0;
           display: inline-block;
         }
+
         .dropdown-menu{
           z-index: 1500 ;
           li{
