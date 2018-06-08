@@ -69,6 +69,30 @@ var WappsController = (function() {
         return aoProcessorList;
     };
 
+    WappsController.prototype.testRun = function(sProcessor) {
+        console.log(sProcessor);
+
+        var oController = this;
+
+        var sJSON = '{"testParam":"prova run da WASDI"}';
+
+        this.m_oProcessorService.runProcessor(sProcessor, sJSON).success(function (data) {
+            if(utilsIsObjectNullOrUndefined(data) == false)
+            {
+                //oController.m_aoProcessorList = oController.setDefaultImages(data);
+                console.log('Run ' + data);
+            }
+            else
+            {
+                utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR RUNNING WAPP");
+            }
+        }).error(function (error) {
+            utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR RUNNING WAPP");
+            oController.cleanAllExecuteWorkflowFields();
+        });
+
+    };
+
     WappsController.$inject = [
         '$scope',
         'close',
