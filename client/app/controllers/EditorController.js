@@ -2834,6 +2834,7 @@ var EditorController = (function () {
                 zeroline: true,
             },
             paper_bgcolor:"#000000",
+            // paper_bgcolor:"#EF4343",
             margin: {
                 l: 5,
                 r: 5,

@@ -3,17 +3,21 @@
         <!--<invader></invader>-->
     <!--</div>-->
     <div class="btn-group btn-group-right" role="group" >
-        <button type="button" class="btn btn-default" ng-click="clickOnMask()">
+        <button type="button" class="btn btn-default" ng-click="clickOnMask()"  data-toggle="tooltip"
+                data-placement="bottom" title="{{'IMAGE_EDITOR_DIRECTIVE_TOOLTIP_MASK_MANAGER'|translate}}">
             <i class="fa fa-image" aria-hidden="true"></i>
         </button>
-        <button type="button" class="btn btn-default" ng-click="clickOnFilter()">
+        <button type="button" class="btn btn-default" ng-click="clickOnFilter()"  data-toggle="tooltip"
+                data-placement="bottom" title="{{'IMAGE_EDITOR_DIRECTIVE_TOOLTIP_FILTER_BAND'|translate}}">
             <i class="fa fa-filter" aria-hidden="true"></i>
         </button>
-        <button type="button" class="btn btn-default" ng-class="{'zoomButtonActive': m_bIsActiveZoom}" ng-click="clickOnZoom()">
+        <button type="button" class="btn btn-default" ng-class="{'zoomButtonActive': m_bIsActiveZoom}" ng-click="clickOnZoom()"  data-toggle="tooltip"
+                data-placement="bottom" title="{{'IMAGE_EDITOR_DIRECTIVE_TOOLTIP_ZOOM_ON'|translate}}">
             <i class="fa fa-search-plus" aria-hidden="true"></i>
         </button>
-        <button type="button" class="btn btn-default"  title="{{'EDITOR_TOOLTIP_RESET_ZOOM'|translate}}"
-                 ng-click="clickOnResetZoom()">
+        <button type="button" class="btn btn-default"   data-toggle="tooltip"
+                data-placement="bottom" title="{{'IMAGE_EDITOR_DIRECTIVE_TOOLTIP_RESET_ZOOM'|translate}}"
+                 ng-click="clickOnResetZoom()" title="test">
             <i class="fa fa-search-minus" aria-hidden="true"></i>
         </button>
     </div>
@@ -28,3 +32,11 @@
         <!--<input type="range" min="1" max="100" value="100" class="slider" ng-model="selectedValue" ng-change="changeZoomSquareSize(selectedValue)">&lt;!&ndash;ng-change="m_oController.maxSliderColourManipulation()"&ndash;&gt;-->
     <!--</div>-->
 </div>
+
+<script>
+    $(function () {
+        $('[data-toggle="tooltip"]').tooltip({
+            trigger : 'hover'
+        })
+    })
+</script>
