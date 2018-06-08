@@ -13,10 +13,19 @@
       //BODY
       .modal-body
       {
-
+        overflow-y: auto;
+        max-height: 500px;
         label{
           margin: 10px 0px 5px 0px;
           color:$wasdi-green-logo;
+        }
+        textarea{
+          resize: none;
+        }
+        .well{
+          border: 1px solid $wasdi-green-logo;
+          border-radius: 0;
+
         }
         .list-of-processor{
           .content-image{
@@ -25,6 +34,9 @@
               width: 82px;
             }
           }
+        }
+        .my-button{
+          padding: 10px 20px;
         }
       }
       //FOOTER

@@ -63,7 +63,7 @@ var WappsController = (function() {
         {
             if(utilsIsObjectNullOrUndefined(aoProcessorList.imgLink))
             {
-                this.m_aoProcessorList.imgLink = sDefaultImage;
+                aoProcessorList[iIndexProcessor].imgLink = sDefaultImage;
             }
         }
         return aoProcessorList;
