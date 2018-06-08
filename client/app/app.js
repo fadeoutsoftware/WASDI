@@ -29,6 +29,7 @@ var wasdiApp = angular.module('wasdi', [
     'wasdi.CatalogService',
     'wasdi.PagesService',
     'wasdi.FilterService',
+    'wasdi.ProcessorService',
 
     //DIRECTIVE
     'wasdi.SnakeDirective',
@@ -110,7 +111,7 @@ wasdiApp.config(['$stateProvider', '$urlRouterProvider', function($stateProvider
         url: '/workspaces',
         views:{
             'maincontent' : { templateUrl : 'partials/workspaces.html', controller  : 'WorkspaceController'}
-        },
+        }
     });
 
     //EDITOR
@@ -118,7 +119,7 @@ wasdiApp.config(['$stateProvider', '$urlRouterProvider', function($stateProvider
         url: '/{workSpace}/editor',
         views:{
             'maincontent' : { templateUrl : 'partials/editor.html', controller  : 'EditorController'}
-        },
+        }
     });
 
     //IMPORT
@@ -127,7 +128,7 @@ wasdiApp.config(['$stateProvider', '$urlRouterProvider', function($stateProvider
 
         views:{
             'maincontent' : { templateUrl : 'partials/import.html', controller  : 'ImportController'}
-        },
+        }
     });
 
     //SEARCH ORBIT
@@ -136,7 +137,7 @@ wasdiApp.config(['$stateProvider', '$urlRouterProvider', function($stateProvider
 
         views:{
             'maincontent' : { templateUrl : 'partials/searchorbit.html', controller  : 'SearchOrbitController'}
-        },
+        }
     });
     //CATALOG
     $stateProvider.state('root.catalog',{
@@ -144,7 +145,7 @@ wasdiApp.config(['$stateProvider', '$urlRouterProvider', function($stateProvider
 
         views:{
             'maincontent' : { templateUrl : 'partials/catalog.html', controller  : 'CatalogController'}
-        },
+        }
     });
 
 
