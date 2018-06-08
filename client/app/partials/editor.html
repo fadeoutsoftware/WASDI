@@ -309,7 +309,7 @@
                         </li>
                         <li role="presentation"  ng-class="{active: m_oController.m_iActiveMapPanelTab === 1}"
                             ng-click="m_oController.setActiveTab(1)" ng-show="(m_oController.m_oActiveBand !== null)">
-                            <a href="">Colour Manipulation</a>
+                            <a href="">{{"EDITOR_COLOUR_MANIPULATION_TITLE"|translate}}</a>
                         </li>
                         <li role="presentation"  ng-class="{active: m_oController.m_iActiveMapPanelTab === 2}"
                             ng-click="m_oController.setActiveTab(2)">
@@ -364,16 +364,16 @@
                             </div>
                             <div class="col-xs-2 col-sm-2 col-md-2 col-lg-2">
                                 <div class="btn-group-vertical" ng-hide="m_oController.m_oActiveBand.colorManipulation == null">
-                                    <button type="button" class="btn btn-primary" ng-click="m_oController.adjust95percentageColourManipulation(m_oController.m_oActiveBand.colorManipulation)">
+                                    <button type="button" class="btn btn-primary" ng-click="m_oController.adjust95percentageColourManipulation(m_oController.m_oActiveBand.colorManipulation)" title="test">
                                         95%
                                     </button>
-                                    <button type="button" class="btn btn-primary" ng-click="m_oController.adjust100percentageColourManipulation(m_oController.m_oActiveBand.colorManipulation)">
+                                    <button type="button" class="btn btn-primary" ng-click="m_oController.adjust100percentageColourManipulation(m_oController.m_oActiveBand.colorManipulation)" title="test">
                                         100%
                                     </button>
-                                    <button type="button" class="btn btn-primary" ng-click="m_oController.getDefaultProductColorManipulation()">
+                                    <button type="button" class="btn btn-primary" ng-click="m_oController.getDefaultProductColorManipulation()" title="test">
                                         <i class="fa fa-undo" aria-hidden="true"></i>
                                     </button>
-                                    <button type="button" class="btn btn-primary" ng-click="m_oController.processingProductColorManipulation()">
+                                    <button type="button" class="btn btn-primary" ng-click="m_oController.processingProductColorManipulation()" title="test">
                                         <i class="fa fa-paper-plane" aria-hidden="true"></i>
 
                                     </button>
@@ -510,29 +510,6 @@
                         <i class="fa fa-repeat" aria-hidden="true"></i>
                     </button>
 
-                    <!--<button type="button" class="btn btn-primary" ng-click=""-->
-                            <!--data-toggle="tooltip" data-placement="bottom" ng-hide=" m_oController.m_bIsActiveGeoraphicalMode == false">-->
-                        <!--&lt;!&ndash;<i ng-show="m_oController.m_b2DMapModeOn == true" aria-hidden="true">2D</i>&ndash;&gt;-->
-                        <!--&lt;!&ndash;<i  ng-show="m_oController.m_b2DMapModeOn == false" aria-hidden="true">3D</i>&ndash;&gt;-->
-                        <!--<div ng-show="m_oController.m_oMapService.isProductGeoreferenced( m_oController.m_aoVisibleBands[0].bbox, m_oController.m_aoVisibleBands[0].geoserverBoundingBox ) ">-->
-                            <!--<span class="deselected-mode">Not Georeferenced</span>-->
-                            <!--<i class="fa fa-toggle-on" aria-hidden="true"  ></i>-->
-                            <!--<span class="selected-mode">Georeferenced</span>-->
-                        <!--</div>-->
-
-                        <!--<div ng-hide="m_oController.m_oMapService.isProductGeoreferenced( m_oController.m_aoVisibleBands[0].bbox, m_oController.m_aoVisibleBands[0].geoserverBoundingBox ) ">-->
-                            <!--<span class="selected-mode">Not Georeferenced</span>-->
-                            <!--<i class="fa fa-toggle-on fa-rotate-180" aria-hidden="true"  ></i>-->
-                            <!--<span class="deselected-mode">Georeferenced</span>-->
-                        <!--</div>-->
-
-                    <!--</button>-->
-
-                    <!-- Switch Image Editor / Geographical Mode-->
-                    <!--<button type="button" class="btn btn-default " ng-class="m_oController.m_sClassBtnSwitchGeographic" ng-click="m_oController.switchEditorGeoReferencedMode();m_oController.changeClassBtnSwitchGeographic();" data-toggle="tooltip"-->
-                            <!--data-placement="bottom" title="{{m_oController.m_sToolTipBtnSwitchGeographic|translate}}"> &lt;!&ndash;ng-disabled="m_oController.m_b2DMapModeOn == false"&ndash;&gt;-->
-                    <!--</button>-->
-
                     <!-- 2D map Home button-->
                     <button type="button" class="btn btn-default" ng-click="m_oController.goWorkspaceHome();"  data-toggle="tooltip"
                             data-placement="bottom"  title="{{'EDITOR_TOOLTIP_HOME'|translate}}"
@@ -566,16 +543,6 @@
                         <i class="fa fa-info-circle" aria-hidden="true"></i>
                         <!--<pre>{{m_oController.m_bIsModeOnPixelInfo|json}}</pre>-->
                     </button>
-
-                    <!--<button type="button" class="btn btn-default"  data-toggle="tooltip" data-placement="bottom"  title="{{'EDITOR_TOOLTIP_ZOOM_ON'|translate}}"-->
-                            <!--ng-hide="m_oController.m_bIsActiveGeoraphicalMode == true">-->
-                        <!--<i class="fa fa-search-plus" aria-hidden="true"></i>-->
-                    <!--</button>-->
-
-                    <!--<button type="button" class="btn btn-default"  data-toggle="tooltip" data-placement="bottom"  title="{{'EDITOR_TOOLTIP_RESET_ZOOM'|translate}}"-->
-                            <!--ng-hide="m_oController.m_bIsActiveGeoraphicalMode == true" ng-click="m_oController.applyMapViewImageOriginalValues()">-->
-                        <!--<i class="fa fa-search-minus" aria-hidden="true"></i>-->
-                    <!--</button>-->
 
                 </div>
 
