@@ -17,7 +17,7 @@ var WappsController = (function() {
         this.m_aoSelectedWorkspaces = [];
         this.m_sFileName = "";
         this.m_oProcessorService = oProcessorService;
-
+        this.m_aoProcessorList = [];
         var oController = this;
         $scope.close = function(result) {
             oClose(result, 300); // close, but give 500ms for bootstrap to animate
@@ -26,21 +26,22 @@ var WappsController = (function() {
             oClose(result, 300); // close, but give 500ms for bootstrap to animate
         };
 
+        this.getProcessorsList();
     };
 
-
-    WappsController.prototype.test = function() {
+    /**
+     * getProcessorsList
+     */
+    WappsController.prototype.getProcessorsList = function() {
         var oController = this;
 
         this.m_oProcessorService.getProcessorsList().success(function (data) {
             if(utilsIsObjectNullOrUndefined(data) == false)
             {
-                //TODO OK
-                console.log(data);
+                oController.m_aoProcessorList = oController.setDefaultImages(data);
             }
             else
             {
-                //TODO ERROR
                 utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR GETTING WAPPS LIST");
             }
         }).error(function (error) {
@@ -48,6 +49,24 @@ var WappsController = (function() {
             oController.cleanAllExecuteWorkflowFields();
 
         });
+    };
+
+    WappsController.prototype.setDefaultImages = function(aoProcessorList)
+    {
+        if(utilsIsObjectNullOrUndefined(aoProcessorList) === true)
+        {
+            return aoProcessorList;
+        }
+        var sDefaultImage = "assets/icons/ImageNotFound.svg";
+        var iNumberOfProcessors = aoProcessorList.length;
+        for(var iIndexProcessor = 0; iIndexProcessor < iNumberOfProcessors; iIndexProcessor++)
+        {
+            if(utilsIsObjectNullOrUndefined(aoProcessorList.imgLink))
+            {
+                this.m_aoProcessorList.imgLink = sDefaultImage;
+            }
+        }
+        return aoProcessorList;
     };
 
     WappsController.$inject = [

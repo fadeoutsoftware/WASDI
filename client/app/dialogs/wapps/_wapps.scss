@@ -18,7 +18,14 @@
           margin: 10px 0px 5px 0px;
           color:$wasdi-green-logo;
         }
-
+        .list-of-processor{
+          .content-image{
+            img{
+              height: 82px;
+              width: 82px;
+            }
+          }
+        }
       }
       //FOOTER
       .modal-footer
