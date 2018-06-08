@@ -5,7 +5,7 @@
 
 var WappsController = (function() {
 
-    function WappsController($scope, oClose,oExtras,oWorkspaceService,oProductService) {
+    function WappsController($scope, oClose,oExtras,oWorkspaceService,oProductService, oProcessorService) {
         //MEMBERS
         this.m_oScope = $scope;
         this.m_oScope.m_oController = this;
@@ -16,6 +16,7 @@ var WappsController = (function() {
         this.m_aWorkspacesName = [];
         this.m_aoSelectedWorkspaces = [];
         this.m_sFileName = "";
+        this.m_oProcessorService = oProcessorService;
 
         var oController = this;
         $scope.close = function(result) {
@@ -27,12 +28,35 @@ var WappsController = (function() {
 
     };
 
+
+    WappsController.prototype.test = function() {
+        var oController = this;
+
+        this.m_oProcessorService.getProcessorsList().success(function (data) {
+            if(utilsIsObjectNullOrUndefined(data) == false)
+            {
+                //TODO OK
+                console.log(data);
+            }
+            else
+            {
+                //TODO ERROR
+                utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR GETTING WAPPS LIST");
+            }
+        }).error(function (error) {
+            utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR GETTING WAPPS LIST");
+            oController.cleanAllExecuteWorkflowFields();
+
+        });
+    };
+
     WappsController.$inject = [
         '$scope',
         'close',
         'extras',
         'WorkspaceService',
-        'ProductService'
+        'ProductService',
+        'ProcessorService'
 
     ];
     return WappsController;
