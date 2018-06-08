@@ -187,6 +187,9 @@ public class ProcessorsResource {
 				oVM.setProcessorId(oProcessor.getProcessorId());
 				oVM.setProcessorName(oProcessor.getName());
 				oVM.setProcessorVersion(oProcessor.getVersion());
+				oVM.setPublisher(oProcessor.getUserId());
+				
+				aoRet.add(oVM);
 			}
 		}
 		catch (Exception oEx) {

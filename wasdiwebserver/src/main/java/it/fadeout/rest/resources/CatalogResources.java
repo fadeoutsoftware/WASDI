@@ -67,6 +67,7 @@ import wasdi.shared.parameters.IngestFileParameter;
 import wasdi.shared.utils.SerializationUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.CatalogViewModel;
+import wasdi.shared.viewmodels.PrimitiveResult;
 import wasdi.shared.viewmodels.ProductViewModel;
 
 @Path("/catalog")
@@ -312,6 +313,93 @@ public class CatalogResources {
 		
 		return Response.serverError().build();
 		
+	}
+	
+	
+	@GET
+	@Path("/upload/ingestinws")
+	@Produces({"application/json", "text/xml"})
+	public PrimitiveResult IngestFileInWorkspace(@HeaderParam("x-session-token") String sSessionId, @QueryParam("file") String sFile, @QueryParam("workspace") String sWorkspace) {
+		
+		PrimitiveResult oResult = new PrimitiveResult();
+		
+		Wasdi.DebugLog("CatalogResource.IngestFileInWorkspace");
+		
+		User oUser = Wasdi.GetUserFromSession(sSessionId);
+		if (oUser == null || Utils.isNullOrEmpty(oUser.getUserId())) {
+			oResult.setBoolValue(false);
+			oResult.setIntValue(401);
+			return oResult;		
+		}
+		String sAccount = oUser.getUserId();		
+		
+		String sDownloadRootPath = m_oServletConfig.getInitParameter("DownloadRootPath");
+		if (!sDownloadRootPath.endsWith("/")) sDownloadRootPath = sDownloadRootPath + "/";
+		
+		File oUserBaseDir = new File(sDownloadRootPath+sAccount+ "/" +sWorkspace+"/");
+		
+		File oFilePath = new File(oUserBaseDir, sFile);
+		
+		if (!oFilePath.canRead()) {
+			oResult.setBoolValue(false);
+			oResult.setIntValue(500);
+			return oResult;		
+		}
+		try {
+			ProcessWorkspace oProcess = null;
+			ProcessWorkspaceRepository oRepository = new ProcessWorkspaceRepository();
+			IngestFileParameter oParameter = new IngestFileParameter();
+			oParameter.setWorkspace(sWorkspace);
+			oParameter.setUserId(sAccount);
+			oParameter.setExchange(sWorkspace);
+			oParameter.setFilePath(oFilePath.getAbsolutePath());
+			
+			try
+			{
+				oProcess = new ProcessWorkspace();
+				oProcess.setOperationDate(Wasdi.GetFormatDate(new Date()));
+				oProcess.setOperationType(LauncherOperations.INGEST.name());
+				oProcess.setProductName(oFilePath.getName());
+				oProcess.setWorkspaceId(sWorkspace);
+				oProcess.setUserId(sAccount);
+				oProcess.setProcessObjId(Utils.GetRandomName());
+				oProcess.setStatus(ProcessStatus.CREATED.name());
+				oRepository.InsertProcessWorkspace(oProcess);
+				//set the process object Id to params
+				oParameter.setProcessObjId(oProcess.getProcessObjId());
+			}
+			catch(Exception oEx){
+				System.out.println("CatalogueResource.IngestFileInWorkspace: Error updating process list " + oEx.getMessage());
+				oEx.printStackTrace();
+				oResult.setBoolValue(false);
+				oResult.setIntValue(500);
+				return oResult;		
+			}
+	
+			String sPath = m_oServletConfig.getInitParameter("SerializationPath") + oProcess.getProcessObjId();
+			SerializationUtils.serializeObjectToXML(sPath, oParameter);
+	
+			String sLauncherPath = m_oServletConfig.getInitParameter("LauncherPath");
+			String sJavaExe = m_oServletConfig.getInitParameter("JavaExe");
+	
+			String sShellExString = sJavaExe + " -jar " + sLauncherPath +" -operation " + LauncherOperations.INGEST + " -parameter " + sPath;
+	
+			System.out.println("CatalogueResource.IngestFileInWorkspace: shell exec " + sShellExString);
+	
+			Process oProc = Runtime.getRuntime().exec(sShellExString);
+			
+			oResult.setBoolValue(true);
+			oResult.setIntValue(200);
+			oResult.setStringValue(oProcess.getProcessObjId());
+			return oResult;		
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		oResult.setBoolValue(false);
+		oResult.setIntValue(500);
+		return oResult;
 	}
 	
 	public static void main(String[] args) throws Exception {

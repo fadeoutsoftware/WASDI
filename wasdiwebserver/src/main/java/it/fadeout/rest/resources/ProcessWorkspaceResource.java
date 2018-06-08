@@ -404,5 +404,88 @@ public class ProcessWorkspaceResource {
 
 	
 	
+	@GET
+	@Path("/byid")
+	@Produces({"application/xml", "application/json", "text/xml"})
+	public ProcessWorkspaceViewModel GetProcessById(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sProcessId") String sProcessWorkspaceId) {
+		
+		Wasdi.DebugLog("ProcessWorkspaceResource.GetProcessById");
+
+		User oUser = Wasdi.GetUserFromSession(sSessionId);
+
+		ProcessWorkspaceViewModel oProcess = new ProcessWorkspaceViewModel();
+
+		try {
+			// Domain Check
+			if (oUser == null) {
+				return oProcess;
+			}
+			if (Utils.isNullOrEmpty(oUser.getUserId())) {
+				return oProcess;
+			}
+
+			System.out.println("ProcessWorkspaceResource.GetProcessByUser: process id " + sProcessWorkspaceId);
+
+			// Create repo
+			ProcessWorkspaceRepository oRepository = new ProcessWorkspaceRepository();
+
+			// Get Process List
+			ProcessWorkspace oProcessWorkspace = oRepository.GetProcessByProcessObjId(sProcessWorkspaceId);
+			oProcess = buildProcessWorkspaceViewModel(oProcessWorkspace);
+
+		}
+		catch (Exception oEx) {
+			System.out.println("ProcessWorkspaceResource.GetProcessById: error retrieving process " + oEx.getMessage());
+			oEx.printStackTrace();
+		}
+
+		return oProcess;
+	}
+
+	
+	@GET
+	@Path("/updatebyid")
+	@Produces({"application/xml", "application/json", "text/xml"})
+	public ProcessWorkspaceViewModel UpdateProcessById(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sProcessId") String sProcessWorkspaceId, @QueryParam("status") String sStatus, @QueryParam("perc") int iPerc) {
+		
+		Wasdi.DebugLog("ProcessWorkspaceResource.GetProcessById");
+
+		User oUser = Wasdi.GetUserFromSession(sSessionId);
+
+		ProcessWorkspaceViewModel oProcess = new ProcessWorkspaceViewModel();
+
+		try {
+			// Domain Check
+			if (oUser == null) {
+				return oProcess;
+			}
+			if (Utils.isNullOrEmpty(oUser.getUserId())) {
+				return oProcess;
+			}
+
+			System.out.println("ProcessWorkspaceResource.GetProcessByUser: process id " + sProcessWorkspaceId);
+
+			// Create repo
+			ProcessWorkspaceRepository oRepository = new ProcessWorkspaceRepository();
+
+			// Get Process List
+			ProcessWorkspace oProcessWorkspace = oRepository.GetProcessByProcessObjId(sProcessWorkspaceId);
+			
+			oProcessWorkspace.setStatus(sStatus);
+			oProcessWorkspace.setProgressPerc(iPerc);
+
+			oRepository.UpdateProcess(oProcessWorkspace);
+			
+			oProcess = buildProcessWorkspaceViewModel(oProcessWorkspace);
+
+		}
+		catch (Exception oEx) {
+			System.out.println("ProcessWorkspaceResource.GetProcessById: error retrieving process " + oEx.getMessage());
+			oEx.printStackTrace();
+		}
+
+		return oProcess;
+	}
+
 
 }
