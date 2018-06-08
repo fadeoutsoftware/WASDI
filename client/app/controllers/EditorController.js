@@ -219,6 +219,12 @@ var EditorController = (function () {
                         subMenu:[],
                         onClick: this.openProcessorDialog,
                         icon:"fa fa-file-code-o"
+                    },
+                    {
+                        name:"",//WAPPS
+                        subMenu:[],
+                        onClick: this.openWappsDialog,
+                        icon:"fa fa-rocket"
                     }
                 ],
                 onClick: "",
@@ -283,6 +289,10 @@ var EditorController = (function () {
         this.m_oTranslate('EDITOR_OPERATION_TITLE_NEW_PROCESSOR').then(function(text)
         {
             oController.m_aoNavBarMenu[3].subMenu[2].name  = text;
+        });
+        this.m_oTranslate('EDITOR_OPERATION_TITLE_WAPPS').then(function(text)
+        {
+            oController.m_aoNavBarMenu[3].subMenu[3].name  = text;
         });
     };
 
@@ -2148,6 +2158,33 @@ var EditorController = (function () {
         });
 
         return true;
+    };
+
+    EditorController.prototype.openWappsDialog = function(oWindow)
+    {
+        var oController;
+        if(utilsIsObjectNullOrUndefined(oWindow) === true)
+        {
+            oController = this;
+        }
+        else
+        {
+            oController = oWindow;
+        }
+        oController.m_oModalService.showModal({
+            templateUrl: "dialogs/wapps/WappsViewDialog.html",
+            controller: "WappsController",
+            inputs: {
+                extras: {
+
+                }
+            }
+        }).then(function (modal) {
+            modal.element.modal();
+            modal.close.then(function(oResult){
+
+            });
+        });
     };
 
     /**

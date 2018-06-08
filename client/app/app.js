@@ -187,3 +187,4 @@ wasdiApp.controller("GetListOfWorkspacesController",GetListOfWorkspacesControlle
 wasdiApp.controller("ProcessorController", ProcessorController);
 wasdiApp.controller("WpsController", WpsController);
 wasdiApp.controller("GenerateAutomaticOperationDialogController", GenerateAutomaticOperationDialogController);
+wasdiApp.controller("WappsController", WappsController);
