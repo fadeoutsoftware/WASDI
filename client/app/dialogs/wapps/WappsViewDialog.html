@@ -3,9 +3,37 @@
         <div class="modal-content">
             <!-- HEADER -->
             <div class=" modal-header">
+                <div class="col-xs-11 col-sm-11 col-md-11 col-lg-11">
+                    <h4 class="modal-title ">
+                        {{"DIALOG_TITLE_WAPPS"|translate}}
+                    </h4>
+                </div>
+                <div class="col-xs-1 col-sm-1 col-md-1 col-lg-1">
+                    <button type="button" class="close" ng-click="close(null)" data-dismiss="modal" aria-hidden="true">&times;</button>
+                </div>
             </div>
             <!-- BODY -->
             <div class="modal-body ">
+                <h3>
+                    {{"DIALOG_TITLE_WAPPS"|translate}}
+                </h3>
+                <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 list-of-processor" ng-repeat="processor in m_oController.m_aoProcessorList">
+                    <div class="col-xs-2 col-sm-2 col-md-2 col-lg-2 content-image">
+                        <img src={{processor.preview}} alt="Image" >
+                    </div>
+                    <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+                        {{processor.processorName}}
+                        {{processor.processorDescription}}
+                    </div>
+                    <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
+                        <button type="button" ng-click="" class="my-button" >
+                            bottone1
+                        </button>
+                        <button type="button" ng-click="" class="my-button" >
+                            bottone2
+                        </button>
+                    </div>
+                </div>
                 <h4>
                     <button type="button" ng-click="m_oController.test()" class="my-button" >
                         bottone
