@@ -614,6 +614,10 @@ public class LauncherMain {
 			File oRootPath = new File(sDownloadPath);
 			File oDstDir = new File(new File(oRootPath, oParameter.getUserId()), oParameter.getWorkspace());
 			
+			if (!oDstDir.exists()) {
+	            oDstDir.mkdirs();
+			}
+			
 			if (!oDstDir.isDirectory() || !oDstDir.canWrite()) {
 				System.out.println("LauncherMain.Ingest: ERROR: unable to access destination directory " + oDstDir.getAbsolutePath());
 				throw new Exception("Unable to access destination directory for the Workspace");
@@ -631,7 +635,14 @@ public class LauncherMain {
 	        updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 50);	        
 	        
 			//copy file to workspace directory
-			FileUtils.copyFileToDirectory(oFilePath, oDstDir);
+	        if (!oFilePath.getParent().equals(oDstDir.getAbsolutePath())) {
+	        	s_oLogger.debug("File in another folder make a copy");
+	        	FileUtils.copyFileToDirectory(oFilePath, oDstDir);
+	        }
+	        else {
+	        	s_oLogger.debug("File already in place");
+	        }
+			
 			File oDstFile = new File(oDstDir, oFilePath.getName());
 			
 			updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 75);
