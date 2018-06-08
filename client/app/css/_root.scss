@@ -441,6 +441,16 @@
   //@media screen and (max-width: 1024px) {         margin-left:-10px;        }
 
 }
+
+#UserIcon {
+  background-image: url('../assets/icons/white-user-icon2.png');
+  width: 26px;
+}
+
+#UserIcon:hover {
+  background-image: url('../assets/icons/green-user-icon2.png');
+}
+
 @keyframes blink {
   from,
   to {
