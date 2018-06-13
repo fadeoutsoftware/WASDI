@@ -1,0 +1,72 @@
+//body {background:magenta;}
+
+$trasparent: rgba(0,0,0,0);
+$zero:0;
+$fontsize: 12px;
+$base:$fontsize - 1px;
+$size:100%;
+$caret_width: $fontsize;
+$caret_height:$caret_width * 2;
+
+#terminal {
+  margin: 8px;
+  cursor: text;
+  //height: 500px;
+}
+
+#getter {margin: 5px;}
+
+#setter {
+  width:$size;
+  border:$zero;
+  outline:none;
+  background:$trasparent;
+  caret-color:$trasparent;
+  position:absolute;
+  z-index:20;
+  top:$base;
+}
+
+textarea#setter,
+input#setter { /* explorer doesn't support [att=val] selector :( */
+  left: -1000px;
+  position: absolute;
+}
+
+#writer,
+#setter {
+  font-size: $fontsize;
+  padding:$zero;
+  line-height:1;
+  margin:$zero;
+  font-family:monospace;
+
+}
+
+.cursor {
+  background-color: green;
+  color: green;
+  position: relative;
+
+  animation: blink .8s ease-in-out infinite;
+  box-shadow: -1px 0px 5px green;
+
+}
+
+@-moz-keyframes blink {
+  0% {opacity: 0;}
+  100% {opacity: 1;}
+}
+@-webkit-keyframes blink {
+  0% {opacity: 0;}
+  100% {opacity: 1;}
+}
+@-o-keyframes blink {
+  0% {opacity: 0;}
+  100% {opacity: 1;}
+}
+@keyframes blink {
+  0% {opacity: 0;}
+  100% {opacity: 1;}
+}
+
