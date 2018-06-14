@@ -39,6 +39,7 @@ import com.bc.ceres.glevel.MultiLevelImage;
 import com.fasterxml.jackson.core.JsonProcessingException;
 
 import sun.management.VMManagement;
+import wasdi.asynch.SaveMetadataThread;
 import wasdi.filebuffer.DownloadFile;
 import wasdi.geoserver.Publisher;
 import wasdi.processors.WasdiProcessorEngine;
@@ -117,10 +118,11 @@ public class LauncherMain {
             //configure log
             DOMConfigurator.configure(oCurrentFile.getParentFile().getPath() + "/log4j.xml");
 
-        }catch(Exception exp)
+        }
+        catch(Exception exp)
         {
             //no log4j configuration
-            System.err.println( "Error loading log.  Reason: " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(exp) );
+            System.err.println( "Launcher Main - Error loading log.  Reason: " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(exp) );
             System.exit(-1);
         }
 
@@ -148,6 +150,7 @@ public class LauncherMain {
 
             // parse the command line arguments
             CommandLine oLine = parser.parse( oOptions, args );
+            
             if (oLine.hasOption("operation")) {
                 // Get the Operation Code
                 sOperation  = oLine.getOptionValue("operation");
@@ -164,14 +167,20 @@ public class LauncherMain {
             LauncherMain oLauncher = new LauncherMain();
 
             s_oLogger.debug("Executing " + sOperation + " Parameter " + sParameter);
+
+            String sSnapLogActive = ConfigReader.getPropValue("SNAPLOGACTIVE", "0");
             
-            FileHandler oFileHandler = new FileHandler("/usr/lib/wasdi/launcher/logs/snap.log",true);
-            //ConsoleHandler handler = new ConsoleHandler();
-            oFileHandler.setLevel(Level.ALL);
-            SimpleFormatter oSimpleFormatter = new SimpleFormatter();
-            oFileHandler.setFormatter(oSimpleFormatter);
-            SystemUtils.LOG.setLevel(Level.ALL);
-            SystemUtils.LOG.addHandler(oFileHandler);
+            if (sSnapLogActive.equals("1") || sSnapLogActive.equalsIgnoreCase("true")) {
+                String sSnapLogFolder = ConfigReader.getPropValue("SNAPLOGFOLDER", "/usr/lib/wasdi/launcher/logs/snap.log");
+
+                FileHandler oFileHandler = new FileHandler(sSnapLogFolder,true);
+                //ConsoleHandler handler = new ConsoleHandler();
+                oFileHandler.setLevel(Level.ALL);
+                SimpleFormatter oSimpleFormatter = new SimpleFormatter();
+                oFileHandler.setFormatter(oSimpleFormatter);
+                SystemUtils.LOG.setLevel(Level.ALL);
+                SystemUtils.LOG.addHandler(oFileHandler);            	
+            }
 
             // And Run
             oLauncher.ExecuteOperation(sOperation,sParameter);
@@ -185,6 +194,7 @@ public class LauncherMain {
             
             
             try {
+            	System.err.println("LauncherMain: try to put process in Safe ERROR state");
             	BaseParameter oBaseParameter = (BaseParameter) SerializationUtils.deserializeXMLToObject(sParameter);
                 ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
                 ProcessWorkspace oProcessWorkspace = oProcessWorkspaceRepository.GetProcessByProcessObjId(oBaseParameter.getProcessObjId());
@@ -230,9 +240,6 @@ public class LauncherMain {
             Config.instance("snap.auxdata").load(propFile);
             Config.instance().load();
 
-            //JAI.getDefaultInstance().getTileScheduler().setParallelism(Runtime.getRuntime().availableProcessors());
-            //MemUtils.configureJaiTileCache();
-            
             SystemUtils.init3rdPartyLibs(null);
             Engine.start(false);
 
@@ -340,14 +347,16 @@ public class LauncherMain {
                 }
                 break;
                 case DEPLOYPROCESSOR: {
-                	WasdiProcessorEngine oEngine = new WasdiProcessorEngine(ConfigReader.getPropValue("DOWNLOAD_ROOT_PATH"), ConfigReader.getPropValue("DOCKER_TEMPLATE_PATH"));
                 	DeployProcessorParameter oParameter = (DeployProcessorParameter) SerializationUtils.deserializeXMLToObject(sParameter);
+                	
+                	WasdiProcessorEngine oEngine = WasdiProcessorEngine.GetProcessorEngine(oParameter.getProcessorType(), ConfigReader.getPropValue("DOWNLOAD_ROOT_PATH"), ConfigReader.getPropValue("DOCKER_TEMPLATE_PATH"));
                 	oEngine.DeployProcessor(oParameter);
                 }
                 break;
                 case RUNPROCESSOR: {
-                	WasdiProcessorEngine oEngine = new WasdiProcessorEngine(ConfigReader.getPropValue("DOWNLOAD_ROOT_PATH"), ConfigReader.getPropValue("DOCKER_TEMPLATE_PATH"));
                 	DeployProcessorParameter oParameter = (DeployProcessorParameter) SerializationUtils.deserializeXMLToObject(sParameter);
+                	
+                	WasdiProcessorEngine oEngine = WasdiProcessorEngine.GetProcessorEngine(oParameter.getProcessorType(), ConfigReader.getPropValue("DOWNLOAD_ROOT_PATH"), ConfigReader.getPropValue("DOCKER_TEMPLATE_PATH"));
                 	oEngine.run(oParameter);
                 }
                 break;
@@ -480,7 +489,7 @@ public class LauncherMain {
                     Product oProduct = oReadProduct.ReadProduct(oProductFile, null);
                     oVM = oReadProduct.getProductViewModel(oProduct, oProductFile);
 	                // Save Metadata
-	                oVM.setMetadataFileReference(SaveMetadata(oReadProduct,oProductFile));
+	                oVM.setMetadataFileReference(AsynchSaveMetadata(oReadProduct,oProductFile));
 
 
                     // Save it in the register
@@ -582,6 +591,38 @@ public class LauncherMain {
         // There was an error...
         return "";
     }
+    
+    public String AsynchSaveMetadata(ReadProduct oReadProduct, File oProductFile) {
+		
+ 		// Write Metadata to file system
+        try {
+        	
+        	 
+            // Get Metadata Path a Random File Name
+            String sMetadataPath = ConfigReader.getPropValue("METADATA_PATH");
+            if (!sMetadataPath.endsWith("/")) sMetadataPath += "/";
+            String sMetadataFileName = Utils.GetRandomName();
+     		
+     		s_oLogger.debug("SaveMetadata: file = " + sMetadataFileName);
+     		
+     		SaveMetadataThread oThread = new SaveMetadataThread(sMetadataPath+sMetadataFileName, oReadProduct, oProductFile);
+     		oThread.start();
+     		 
+     		s_oLogger.debug("SaveMetadata: thread started");
+ 			
+ 			return sMetadataFileName;
+ 			
+ 		} catch (IOException e) {
+ 			s_oLogger.debug("SaveMetadata: Exception = " + e.toString());
+ 			e.printStackTrace();
+ 		} catch (Exception e) {
+ 			s_oLogger.debug("SaveMetadata: Exception = " + e.toString());
+ 			e.printStackTrace();
+ 		}
+         
+         // There was an error...
+         return "";
+     }
 
 
     
@@ -630,7 +671,7 @@ public class LauncherMain {
 	        updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 25);
 	        
             // Save Metadata
-            oVM.setMetadataFileReference(SaveMetadata(oReadProduct, oFilePath));
+            oVM.setMetadataFileReference(AsynchSaveMetadata(oReadProduct, oFilePath));
         
 	        updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 50);	        
 	        

@@ -4,11 +4,9 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -23,14 +21,31 @@ import wasdi.LauncherMain;
 import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.business.Processor;
+import wasdi.shared.business.ProcessorTypes;
 import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.data.ProcessorRepository;
 import wasdi.shared.parameters.DeployProcessorParameter;
+import wasdi.shared.utils.Utils;
 
-public class WasdiProcessorEngine {
+public abstract class WasdiProcessorEngine {
 	
-	String m_sWorkingRootPath = "";
-	String m_sDockerTemplatePath = "";
+	protected String m_sWorkingRootPath = "";
+	protected String m_sDockerTemplatePath = "";
+	
+	
+	public static WasdiProcessorEngine GetProcessorEngine(String sType,String sWorkingRootPath, String sDockerTemplatePath) {
+		
+		if (Utils.isNullOrEmpty(sType)) {
+			sType = ProcessorTypes.UBUNTU_PYTHON_SNAP;
+		}
+		
+		if (sType.equals(ProcessorTypes.UBUNTU_PYTHON_SNAP)) {
+			return new UbuntuPythonProcessorEngine(sWorkingRootPath,sDockerTemplatePath);
+		}
+		else {
+			return new UbuntuPythonProcessorEngine(sWorkingRootPath, sDockerTemplatePath);
+		}
+	}
 	
 	public WasdiProcessorEngine(String sWorkingRootPath, String sDockerTemplatePath) {
 		m_sWorkingRootPath = sWorkingRootPath;
@@ -96,13 +111,16 @@ public class WasdiProcessorEngine {
 			File oProcessorFolder = new File(sProcessorFolder);
 			
 			FileUtils.copyDirectory(oDockerTemplateFolder, oProcessorFolder);
-			
+
+			LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 25);
+
 			// Generate the image
 			LauncherMain.s_oLogger.debug("WasdiProcessorEngine.DeployProcessor: building image");
 			
+			handleUnzippedProcessor(sProcessorFolder);
+			
 			ProcessorRepository oProcessorRepository = new ProcessorRepository();
 			Processor oProcessor = oProcessorRepository.GetProcessor(sProcessorId);
-			
 			
 			String sDockerName = "wasdi/"+sProcessorName+":"+oProcessor.getVersion();
 			
@@ -112,6 +130,8 @@ public class WasdiProcessorEngine {
 			asArgs.add("build");
 			asArgs.add("-t"+sDockerName);
 			asArgs.add(sProcessorFolder);
+			
+			handleBuildCommand(sCommand, asArgs);
 			
 			shellExec(sCommand,asArgs);
 			
@@ -123,8 +143,13 @@ public class WasdiProcessorEngine {
 			//docker run -it -p 8888:5000 fadeout/wasdi:0.6
 			asArgs.clear();
 			asArgs.add("run");
+			// P.Campanella 11/06/2018: mounted volume
+			// NOTA: QUI INVECE SI CHE ABBIAMO PROBLEMI DI DIRITTI!!!!!!!!!!!!
+			asArgs.add("-v"+ m_sWorkingRootPath + ":/data/wasdi");
 			asArgs.add("-p127.0.0.1:"+iProcessorPort+":5000");
 			asArgs.add(sDockerName);
+			
+			handleRunCommand(sCommand, asArgs);
 			
 			shellExec(sCommand, asArgs, false);
 			LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 90);
@@ -153,6 +178,12 @@ public class WasdiProcessorEngine {
 		return true;
 	}
 	
+	protected abstract void handleRunCommand(String sCommand, ArrayList<String> asArgs);
+
+	protected abstract void handleBuildCommand(String sCommand, ArrayList<String> asArgs);
+
+	protected abstract void handleUnzippedProcessor(String sProcessorFolder);
+
 	public boolean UnzipProcessor(String sProcessorFolder, String sZipFileName) {
 		try {
 			// Create the file
@@ -284,7 +315,11 @@ public class WasdiProcessorEngine {
 			LauncherMain.s_oLogger.debug("WasdiProcessorEngine.run: Dencoded JSON Parameter " + sJson);
 			
 			// Call localhost:port
-			String sUrl = "http://localhost:"+oProcessor.getPort()+"/run/"+sProcessorId;
+			String sUrl = "http://localhost:"+oProcessor.getPort()+"/run/"+oParameter.getProcessObjId();
+			
+			LauncherMain.s_oLogger.debug("WasdiProcessorEngine.run: calling URL = " + sUrl);
+			
+			
 			URL oProcessorUrl = new URL(sUrl);
 			HttpURLConnection oConnection = (HttpURLConnection) oProcessorUrl.openConnection();
 			oConnection.setDoOutput(true);
@@ -326,4 +361,6 @@ public class WasdiProcessorEngine {
 		
 		return true;
 	}
+	
+	
 }
