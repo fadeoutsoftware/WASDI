@@ -221,7 +221,11 @@ var MaskManagerController = (function() {
 
     MaskManagerController.prototype.saveRangeMaskAndClose = function()
     {
-        if( utilsIsObjectNullOrUndefined(this.m_aoMasks) ) return false;
+        if( utilsIsObjectNullOrUndefined(this.m_aoMasks) )
+        {
+            this.closeAllWindows();
+            return false;
+        }
 
         var sDescription = this.m_sRangeMinValue + "<=" + this.m_sRangeSelectedRaster + "<=" + this.m_sRangeMaxValue ;
         var oReturnValue = {
@@ -301,7 +305,10 @@ var MaskManagerController = (function() {
 
     MaskManagerController.prototype.saveLogicalMask = function(){
         if( utilsIsObjectNullOrUndefined(this.m_aoMasks) )
+        {
+            this.closeAllWindows();
             return false;
+        }
         var sDescription = this.m_sTextAreaLogicalMask;
         var oReturnValue = {
             name:this.newUniqueNameGenerator(),
@@ -328,9 +335,10 @@ var MaskManagerController = (function() {
         {
             if( this.m_aoMasks[iIndexMask].name === sName )
             {
-                iIndexMask = 0;
+                iIndexMask = -1;
                 sName = "Mask" + iNameCounter;
-                iNameCounter = iNameCounter ++;
+                iNameCounter = iNameCounter + 1;
+                // continue;
             }
         }
         return sName;
@@ -692,7 +700,7 @@ var MaskManagerController = (function() {
         var iNumberOfSavedMasks = this.m_oMasksSaved.length;
         for(var iIndexSavedMask = 0; iIndexSavedMask < iNumberOfSavedMasks; iIndexSavedMask++)
         {
-            if( this.m_oMasksSaved[iIndexSavedMask].type === "Range" || this.m_oMasksSaved.type === "Math" )
+            if( this.m_oMasksSaved[iIndexSavedMask].type === "Range" || this.m_oMasksSaved.type === "Maths" )
             {
                 //if the saved mask is Range or Math
                 this.m_aoMasks.unshift(this.m_oMasksSaved[iIndexSavedMask]);
@@ -703,9 +711,10 @@ var MaskManagerController = (function() {
                 var iNumberOfMasks = this.m_aoMasks.length;
                 for(var iIndexMask = 0; iIndexMask < iNumberOfMasks; iIndexMask++)
                 {
+                    //find the mask saved previously in list of masks just loaded
                     if(this.m_aoMasks[iIndexMask].name === this.m_oMasksSaved[iIndexSavedMask].name)
                     {
-                        this.m_aoMasks[iIndexMask].selected = true;
+                        this.m_aoMasks[iIndexMask].selected = this.m_oMasksSaved[iIndexSavedMask].selected;
                     }
 
                 }
