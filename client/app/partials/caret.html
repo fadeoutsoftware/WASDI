@@ -8,7 +8,7 @@
     <title>Title Page</title>
 
     <!-- Bootstrap CSS -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+    <!--<link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.min.css">-->
 
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -17,7 +17,14 @@
     <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
     <![endif]-->
 
-    <link rel="stylesheet" href="css/style.css">
+    <!-- jQuery -->
+    <script src="http://code.jquery.com/jquery.js"></script>
+    <!-- Bootstrap JavaScript -->
+    <script src="bower_components/bootstrap/dist/js/bootstrap.js" ></script>
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+
+
+    <link rel="stylesheet" href="../css/style_caret_test.css">
 
 
 
@@ -26,18 +33,19 @@
 
 <script>
 
+
     function $(elid){
         return document.getElementById(elid);
     }
+    /*
+                var cursor;
+                window.onload = init;
 
-    var cursor;
-    window.onload = init;
-
-    function init(){
-        cursor = $("cursor");
-        cursor.style.left = "0px";
-    }
-
+                function init(){
+                    // cursor = $("cursor");
+                    // cursor.style.left = "0px";
+                }
+        */
     function nl2br(txt){
         return txt.replace(/\n/g, "<br />");
     }
@@ -67,26 +75,20 @@
 
 
 
+
 </script>
 <h1 class="text-center">Hello World</h1>
 
-
-
-
 <div id="terminal" onclick="$('setter').focus();">
-    <input type="text" class="setter" onkeydown="writeit(this, event);moveIt(this.value.length, event)" onkeyup="writeit(this, event)" onkeypress="writeit(this, event);"></input>
+    <!-- 		<textarea type="text" id="setter" onkeydown="writeit(this, event);moveIt(this.value.length, event)" onkeyup="writeit(this, event)" onkeypress="writeit(this, event);"></textarea> -->
+
+    <input type="text" id="setter" onkeydown="writeit(this, event);moveIt(this.value.length, event)" onkeyup="writeit(this, event)" onkeypress="writeit(this, event);">
     <div id="getter">
-        <span id="writer"></span>
-        <b class="cursor" id="cursor">B</b>
+        <span id="writer"></span><b class="cursor " id="cursor" style="left=0;">O</b>
     </div>
 </div>
 
 
-<!-- jQuery -->
-<script src="//code.jquery.com/jquery.js"></script>
-<!-- Bootstrap JavaScript -->
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
-<!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
 
 </body>
 </html>
