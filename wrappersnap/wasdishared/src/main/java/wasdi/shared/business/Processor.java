@@ -8,7 +8,14 @@ public class Processor {
 	private String version;
 	private String description;
 	private int port;
+	private String type;
 	
+	public String getType() {
+		return type;
+	}
+	public void setType(String type) {
+		this.type = type;
+	}
 	public String getProcessorId() {
 		return processorId;
 	}

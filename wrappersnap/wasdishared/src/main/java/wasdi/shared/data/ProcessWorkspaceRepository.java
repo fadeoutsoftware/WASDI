@@ -314,6 +314,26 @@ public class ProcessWorkspaceRepository extends MongoRepository {
 
         return false;
     }
+    
+    public boolean CleanQueue() {
+
+        try {
+        	
+        	System.out.println("Cleaning ProcessWorkspace Queue");
+        	String sJSON = "{\"status\":\"ERROR\"}";
+            Document oFilter = new Document("status", "CREATED");
+			Document oUpdate = new Document("$set", new Document(Document.parse(sJSON)));
+			getCollection("processworkpsace").updateMany(oFilter, oUpdate);
+
+            return true;
+
+        } catch (Exception oEx) {
+            oEx.printStackTrace();
+        }
+
+        return false;
+    }
+
 
     public boolean ExistsPidProcessWorkspace(Integer iPid) {
 
