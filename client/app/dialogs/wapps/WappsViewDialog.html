@@ -32,13 +32,9 @@
                                     <div class="form-group">
                                         Json:
                                         <textarea class="form-control" rows="5" id="" ng-model="value"></textarea>
-                                        <button type="button" ng-click="" class="my-button">
-                                            Send
-                                            <i class="fa fa-paper-plane" aria-hidden="true"></i>
-                                        </button>
-                                        <button type="button" ng-click="" class="my-button">
-                                            Delete
-                                            <i class="fa fa-eraser" aria-hidden="true"></i>
+                                        <button type="button" ng-click="m_oController.runProcessor(processor.processorName, value)" class="my-button">
+                                            Run
+                                            <i class="fa fa-play" aria-hidden="true"></i>
                                         </button>
                                     </div>
 
@@ -46,17 +42,17 @@
                             </div>
                             <div class="collapse" id="HelpProcessorPanel{{$index}}">
                                 <div class="well">
-                                    HO-HO-HO! PUNISHMENT OF FIGHT.
+                                    LOOK BEHIND YOU, A THREE-HEADED MONKEY!
                                 </div>
                             </div>
                         </div>
                         <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
                             <button type="button" ng-click="" class="my-button" data-toggle="collapse" href="#RunProcessorPanel{{$index}}"
                                     aria-expanded="false" aria-controls="RunProcessorPanel{{$index}}">
-                                Run
-                                <i class="fa fa-play" aria-hidden="true"></i>
+                                Execute
+                                <i class="fa fa-info-circle" aria-hidden="true"></i>
                             </button>
-                            <button type="button" ng-click="" class="my-button" data-toggle="collapse" href="#HelpProcessorPanel{{$index}}"
+                            <button type="button" ng-click="m_oController.getHelpFromProcessor(processor.processorName)" class="my-button" data-toggle="collapse" href="#HelpProcessorPanel{{$index}}"
                                     aria-expanded="false" aria-controls="HelpProcessorPanel{{$index}}">
                                 Help
                                 <i class="fa fa-question-circle" aria-hidden="true"></i>
