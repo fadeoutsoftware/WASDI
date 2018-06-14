@@ -1,9 +1,13 @@
 package it.fadeout.rest.resources;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -27,6 +31,7 @@ import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.business.Processor;
+import wasdi.shared.business.ProcessorTypes;
 import wasdi.shared.business.User;
 import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.data.ProcessorRepository;
@@ -34,6 +39,7 @@ import wasdi.shared.parameters.DeployProcessorParameter;
 import wasdi.shared.utils.SerializationUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.DeployedProcessorViewModel;
+import wasdi.shared.viewmodels.PrimitiveResult;
 import wasdi.shared.viewmodels.RunningProcessorViewModel;
 
 @Path("/processors")
@@ -56,7 +62,7 @@ public class ProcessorsResource {
 	@Path("/uploadprocessor")
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
 	public Response uploadProcessor(@FormDataParam("file") InputStream fileInputStream, @HeaderParam("x-session-token") String sSessionId, 
-			@QueryParam("workspace") String sWorkspaceId, @QueryParam("name") String sName, @QueryParam("version") String sVersion, @QueryParam("description") String sDescription) throws Exception {
+			@QueryParam("workspace") String sWorkspaceId, @QueryParam("name") String sName, @QueryParam("version") String sVersion, @QueryParam("description") String sDescription, @QueryParam("type") String sType) throws Exception {
 
 		Wasdi.DebugLog("ProcessorsResource.uploadProcessor");
 		
@@ -90,17 +96,22 @@ public class ProcessorsResource {
 			Wasdi.DebugLog("ProcessorsResource.uploadProcessor: Processor file Path: " + oProcessorFile.getPath());
 			
 			//save uploaded file
-			int read = 0;
-			byte[] bytes = new byte[1024];
-			OutputStream out = new FileOutputStream(oProcessorFile);
-			while ((read = fileInputStream.read(bytes)) != -1) {
-				out.write(bytes, 0, read);
+			int iRead = 0;
+			byte[] ayBytes = new byte[1024];
+			OutputStream oOutputStream = new FileOutputStream(oProcessorFile);
+			while ((iRead = fileInputStream.read(ayBytes)) != -1) {
+				oOutputStream.write(ayBytes, 0, iRead);
 			}
-			out.flush();
-			out.close();
+			oOutputStream.flush();
+			oOutputStream.close();
 			
 			// TODO: Controllare che sia uno zip file e che contenga almeno myProcessor.py
 			// Magari guardiamo anche se ha almeno una run
+			
+			
+			if (Utils.isNullOrEmpty(sType)) {
+				sType = ProcessorTypes.UBUNTU_PYTHON_SNAP;
+			}
 			
 			// Create processor entity
 			Processor oProcessor = new Processor();
@@ -110,40 +121,42 @@ public class ProcessorsResource {
 			oProcessor.setProcessorId(sProcessorId);
 			oProcessor.setVersion(sVersion);
 			oProcessor.setPort(-1);
+			oProcessor.setType(sType);
 			
 			// Store in the db
 			ProcessorRepository oProcessorRepository = new ProcessorRepository();
 			oProcessorRepository.InsertProcessor(oProcessor);
 			
-			// Schedule the process to deploy the processor
+			// Schedule the processworkspace to deploy the processor
 			String sProcessId = "";
 			ProcessWorkspaceRepository oRepository = new ProcessWorkspaceRepository();
-			ProcessWorkspace oProcess = new ProcessWorkspace();
+			ProcessWorkspace oProcessWorkspace = new ProcessWorkspace();
 			
 			try
 			{
-				oProcess.setOperationDate(Wasdi.GetFormatDate(new Date()));
-				oProcess.setOperationType(LauncherOperations.DEPLOYPROCESSOR.name());
-				oProcess.setProductName(sName);
-				oProcess.setWorkspaceId(sWorkspaceId);
-				oProcess.setUserId(sUserId);
-				oProcess.setProcessObjId(Utils.GetRandomName());
-				oProcess.setStatus(ProcessStatus.CREATED.name());
-				sProcessId = oRepository.InsertProcessWorkspace(oProcess);
+				oProcessWorkspace.setOperationDate(Wasdi.GetFormatDate(new Date()));
+				oProcessWorkspace.setOperationType(LauncherOperations.DEPLOYPROCESSOR.name());
+				oProcessWorkspace.setProductName(sName);
+				oProcessWorkspace.setWorkspaceId(sWorkspaceId);
+				oProcessWorkspace.setUserId(sUserId);
+				oProcessWorkspace.setProcessObjId(Utils.GetRandomName());
+				oProcessWorkspace.setStatus(ProcessStatus.CREATED.name());
+				sProcessId = oRepository.InsertProcessWorkspace(oProcessWorkspace);
 				
 				String sPath = m_oServletConfig.getInitParameter("SerializationPath");
 				if (! (sPath.endsWith("/")||sPath.endsWith("\\"))) sPath+="/";
-				sPath += oProcess.getProcessObjId();
+				sPath += oProcessWorkspace.getProcessObjId();
 
-				DeployProcessorParameter oParameter = new DeployProcessorParameter();
-				oParameter.setName(sName);
-				oParameter.setProcessorID(sProcessorId);
-				oParameter.setWorkspace(sWorkspaceId);
-				oParameter.setUserId(sUserId);
-				oParameter.setExchange(sWorkspaceId);
-				oParameter.setProcessObjId(oProcess.getProcessObjId());
+				DeployProcessorParameter oDeployProcessorParameter = new DeployProcessorParameter();
+				oDeployProcessorParameter.setName(sName);
+				oDeployProcessorParameter.setProcessorID(sProcessorId);
+				oDeployProcessorParameter.setWorkspace(sWorkspaceId);
+				oDeployProcessorParameter.setUserId(sUserId);
+				oDeployProcessorParameter.setExchange(sWorkspaceId);
+				oDeployProcessorParameter.setProcessObjId(oProcessWorkspace.getProcessObjId());
+				oDeployProcessorParameter.setProcessorType(sType);
 				
-				SerializationUtils.serializeObjectToXML(sPath, oParameter);
+				SerializationUtils.serializeObjectToXML(sPath, oDeployProcessorParameter);
 			}
 			catch(Exception oEx){
 				System.out.println("ProcessorsResource.uploadProcessor: Error scheduling the deploy process " + oEx.getMessage());
@@ -202,79 +215,147 @@ public class ProcessorsResource {
 	
 	@GET
 	@Path("/run")
-	public RunningProcessorViewModel run(@HeaderParam("x-session-token") String sSessionId, @QueryParam("name") String sName, @QueryParam("encodedJson") String sEncodedJson) throws Exception {
+	public RunningProcessorViewModel run(@HeaderParam("x-session-token") String sSessionId, @QueryParam("name") String sName, @QueryParam("encodedJson") String sEncodedJson, @QueryParam("workspace") String sWorkspaceId) throws Exception {
 
 
-		RunningProcessorViewModel oRunning = new RunningProcessorViewModel();
+		RunningProcessorViewModel oRunningProcessorViewModel = new RunningProcessorViewModel();
 		Wasdi.DebugLog("ProcessorsResource.run");
 		
 		try {
 			// Check User 
-			if (Utils.isNullOrEmpty(sSessionId)) return oRunning;
+			if (Utils.isNullOrEmpty(sSessionId)) return oRunningProcessorViewModel;
 			User oUser = Wasdi.GetUserFromSession(sSessionId);
 
-			if (oUser==null) return oRunning;
-			if (Utils.isNullOrEmpty(oUser.getUserId())) return oRunning;
+			if (oUser==null) return oRunningProcessorViewModel;
+			if (Utils.isNullOrEmpty(oUser.getUserId())) return oRunningProcessorViewModel;
 			
 			String sUserId = oUser.getUserId();
-			String sWorkspaceId = "";
 		
 			Wasdi.DebugLog("ProcessorsResource.run: get Processor");
 			ProcessorRepository oProcessorRepository = new ProcessorRepository();
 			Processor oProcessorToRun = oProcessorRepository.GetProcessorByName(sName);
 
 			// Schedule the process to run the processor
-			ProcessWorkspaceRepository oRepository = new ProcessWorkspaceRepository();
-			ProcessWorkspace oProcess = new ProcessWorkspace();
+			ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
+			ProcessWorkspace oProcessWorkspace = new ProcessWorkspace();
 			
 			try
 			{
 				Wasdi.DebugLog("ProcessorsResource.run: create task"); 
-				oProcess.setOperationDate(Wasdi.GetFormatDate(new Date()));
-				oProcess.setOperationType(LauncherOperations.RUNPROCESSOR.name());
-				oProcess.setProductName(sName);
-				oProcess.setWorkspaceId(sWorkspaceId);
-				oProcess.setUserId(sUserId);
-				oProcess.setProcessObjId(Utils.GetRandomName());
-				oProcess.setStatus(ProcessStatus.CREATED.name());
-				oRepository.InsertProcessWorkspace(oProcess);
+				oProcessWorkspace.setOperationDate(Wasdi.GetFormatDate(new Date()));
+				oProcessWorkspace.setOperationType(LauncherOperations.RUNPROCESSOR.name());
+				oProcessWorkspace.setProductName(sName);
+				oProcessWorkspace.setWorkspaceId(sWorkspaceId);
+				oProcessWorkspace.setUserId(sUserId);
+				oProcessWorkspace.setProcessObjId(Utils.GetRandomName());
+				oProcessWorkspace.setStatus(ProcessStatus.CREATED.name());
+				oProcessWorkspaceRepository.InsertProcessWorkspace(oProcessWorkspace);
 				
 				String sPath = m_oServletConfig.getInitParameter("SerializationPath");
 				if (! (sPath.endsWith("/")||sPath.endsWith("\\"))) sPath+="/";
-				sPath += oProcess.getProcessObjId();
+				sPath += oProcessWorkspace.getProcessObjId();
 
-				DeployProcessorParameter oParameter = new DeployProcessorParameter();
-				oParameter.setName(sName);
-				oParameter.setProcessorID(oProcessorToRun.getProcessorId());
-				oParameter.setWorkspace(sWorkspaceId);
-				oParameter.setUserId(sUserId);
-				oParameter.setExchange(sWorkspaceId);
-				oParameter.setProcessObjId(oProcess.getProcessObjId());
-				oParameter.setJson(sEncodedJson);
+				DeployProcessorParameter oDeployProcessorParameter = new DeployProcessorParameter();
+				oDeployProcessorParameter.setName(sName);
+				oDeployProcessorParameter.setProcessorID(oProcessorToRun.getProcessorId());
+				oDeployProcessorParameter.setWorkspace(sWorkspaceId);
+				oDeployProcessorParameter.setUserId(sUserId);
+				oDeployProcessorParameter.setExchange(sWorkspaceId);
+				oDeployProcessorParameter.setProcessObjId(oProcessWorkspace.getProcessObjId());
+				oDeployProcessorParameter.setJson(sEncodedJson);
+				oDeployProcessorParameter.setProcessorType(oProcessorToRun.getType());
 				
-				SerializationUtils.serializeObjectToXML(sPath, oParameter);
+				SerializationUtils.serializeObjectToXML(sPath, oDeployProcessorParameter);
 				
-				oRunning.setJsonEncodedResult("");
-				oRunning.setName(sName);
-				oRunning.setProcessingIdentifier(oProcess.getProcessObjId());
-				oRunning.setProcessorId(oProcessorToRun.getProcessorId());
-				oRunning.setStatus("CREATED");
+				oRunningProcessorViewModel.setJsonEncodedResult("");
+				oRunningProcessorViewModel.setName(sName);
+				oRunningProcessorViewModel.setProcessingIdentifier(oProcessWorkspace.getProcessObjId());
+				oRunningProcessorViewModel.setProcessorId(oProcessorToRun.getProcessorId());
+				oRunningProcessorViewModel.setStatus("CREATED");
 				Wasdi.DebugLog("ProcessorsResource.run: done"); 
 			}
 			catch(Exception oEx){
 				System.out.println("ProcessorsResource.run: Error scheduling the run process " + oEx.getMessage());
 				oEx.printStackTrace();
-				oRunning.setStatus(ProcessStatus.ERROR.toString());
-				return oRunning;
+				oRunningProcessorViewModel.setStatus(ProcessStatus.ERROR.toString());
+				return oRunningProcessorViewModel;
 			}
 		}
 		catch (Exception oEx) {
 			oEx.printStackTrace();
-			oRunning.setStatus(ProcessStatus.ERROR.toString());
-			return oRunning;
+			oRunningProcessorViewModel.setStatus(ProcessStatus.ERROR.toString());
+			return oRunningProcessorViewModel;
 		}
 		
-		return oRunning;
+		return oRunningProcessorViewModel;
+	}
+	
+	
+	@GET
+	@Path("/help")
+	public PrimitiveResult help(@HeaderParam("x-session-token") String sSessionId, @QueryParam("name") String sName) throws Exception {
+
+		PrimitiveResult oPrimitiveResult = new PrimitiveResult();
+		oPrimitiveResult.setBoolValue(false);
+		
+		Wasdi.DebugLog("ProcessorsResource.help");
+		
+		try {
+			// Check User 
+			if (Utils.isNullOrEmpty(sSessionId)) return oPrimitiveResult;
+			User oUser = Wasdi.GetUserFromSession(sSessionId);
+
+			if (oUser==null) return oPrimitiveResult;
+			if (Utils.isNullOrEmpty(oUser.getUserId())) return oPrimitiveResult;
+			
+			String sUserId = oUser.getUserId();
+		
+			Wasdi.DebugLog("ProcessorsResource.help: read Processor " +sName);
+			
+			ProcessorRepository oProcessorRepository = new ProcessorRepository();
+			Processor oProcessorToRun = oProcessorRepository.GetProcessorByName(sName);
+			
+			// Call localhost:port
+			String sUrl = "http://localhost:"+oProcessorToRun.getPort()+"/run/--help";
+			
+			Wasdi.DebugLog("ProcessorsResource.help: calling URL = " + sUrl);
+			
+			URL oProcessorUrl = new URL(sUrl);
+			HttpURLConnection oConnection = (HttpURLConnection) oProcessorUrl.openConnection();
+			oConnection.setDoOutput(true);
+			oConnection.setRequestMethod("POST");
+			oConnection.setRequestProperty("Content-Type", "application/json");
+
+			OutputStream oOutputStream = oConnection.getOutputStream();
+			oOutputStream.write("{}".getBytes());
+			oOutputStream.flush();
+			
+			if (! (oConnection.getResponseCode() == HttpURLConnection.HTTP_OK || oConnection.getResponseCode() == HttpURLConnection.HTTP_CREATED )) {
+				throw new RuntimeException("Failed : HTTP error code : " + oConnection.getResponseCode());
+			}
+
+			BufferedReader oBufferedReader = new BufferedReader(new InputStreamReader((oConnection.getInputStream())));
+
+			String sOutputResult;
+			String sOutputCumulativeResult = "";
+			Wasdi.DebugLog("ProcessorsResource.help: Output from Server .... \n");
+			while ((sOutputResult = oBufferedReader.readLine()) != null) {
+				Wasdi.DebugLog("ProcessorsResource.help: " + sOutputResult);
+				
+				if (!Utils.isNullOrEmpty(sOutputResult)) sOutputCumulativeResult += sOutputResult;
+			}
+
+			oConnection.disconnect();
+			
+			oPrimitiveResult.setBoolValue(true);
+			oPrimitiveResult.setStringValue(sOutputCumulativeResult);
+		}
+		catch (Exception oEx) {
+			oEx.printStackTrace();
+			return oPrimitiveResult;
+		}
+		
+		return oPrimitiveResult;
 	}
 	
 	@GET

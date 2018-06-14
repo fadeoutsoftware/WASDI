@@ -11,12 +11,12 @@ public class DownloadsThread extends ProcessingThread {
 
 	public DownloadsThread(ServletConfig servletConfig) throws Exception {
 		super(servletConfig, "ConcurrentDownloads");
-		logPrefix = "DownloadsThread: ";
+		m_sLogPrefix = "DownloadsThread: ";
 	}
 
 	@Override
 	protected List<ProcessWorkspace> getQueuedProcess() {
-		List<ProcessWorkspace> queuedProcess = repo.GetQueuedDownloads();
+		List<ProcessWorkspace> queuedProcess = m_oProcessWorkspaceRepository.GetQueuedDownloads();
 		
 //		System.out.println("DownloadsThread: read download queue. size: " + queuedProcess.size());
 //		for (ProcessWorkspace p : queuedProcess) {

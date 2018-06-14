@@ -19,6 +19,7 @@ import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.business.User;
 import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.viewmodels.PrimitiveResult;
 import wasdi.shared.viewmodels.ProcessWorkspaceSummaryViewModel;
 import wasdi.shared.viewmodels.ProcessWorkspaceViewModel;
 
@@ -448,7 +449,7 @@ public class ProcessWorkspaceResource {
 	@Produces({"application/xml", "application/json", "text/xml"})
 	public ProcessWorkspaceViewModel UpdateProcessById(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sProcessId") String sProcessWorkspaceId, @QueryParam("status") String sStatus, @QueryParam("perc") int iPerc) {
 		
-		Wasdi.DebugLog("ProcessWorkspaceResource.GetProcessById");
+		Wasdi.DebugLog("ProcessWorkspaceResource.UpdateProcessById");
 
 		User oUser = Wasdi.GetUserFromSession(sSessionId);
 
@@ -463,7 +464,7 @@ public class ProcessWorkspaceResource {
 				return oProcess;
 			}
 
-			System.out.println("ProcessWorkspaceResource.GetProcessByUser: process id " + sProcessWorkspaceId);
+			System.out.println("ProcessWorkspaceResource.UpdateProcessById: process id " + sProcessWorkspaceId);
 
 			// Create repo
 			ProcessWorkspaceRepository oRepository = new ProcessWorkspaceRepository();
@@ -480,12 +481,46 @@ public class ProcessWorkspaceResource {
 
 		}
 		catch (Exception oEx) {
-			System.out.println("ProcessWorkspaceResource.GetProcessById: error retrieving process " + oEx.getMessage());
+			System.out.println("ProcessWorkspaceResource.UpdateProcessById: error retrieving process " + oEx.getMessage());
 			oEx.printStackTrace();
 		}
 
 		return oProcess;
 	}
-
+	
+	@GET
+	@Path("/cleanqueue")
+	@Produces({"application/xml", "application/json", "text/xml"})
+	public PrimitiveResult CleanQueue(@HeaderParam("x-session-token") String sSessionId) {
+		
+		Wasdi.DebugLog("ProcessWorkspaceResource.CleanQueue");
+		
+		PrimitiveResult oResult = new PrimitiveResult();
+		oResult.setBoolValue(false);
+		
+		User oUser = Wasdi.GetUserFromSession(sSessionId);
+		
+		try {
+			// Domain Check
+			if (oUser == null) {
+				return oResult;
+			}
+			if (Utils.isNullOrEmpty(oUser.getUserId())) {
+				return oResult;
+			}
+			
+			// Create repo
+			ProcessWorkspaceRepository oRepository = new ProcessWorkspaceRepository();
+			oRepository.CleanQueue();
+			
+		}
+		catch (Exception oEx) {
+			System.out.println("ProcessWorkspaceResource.CleanQueue: error " + oEx.getMessage());
+			oEx.printStackTrace();
+			
+		}
+		
+		return oResult;
+	}
 
 }

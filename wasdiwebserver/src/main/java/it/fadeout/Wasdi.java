@@ -59,12 +59,12 @@ public class Wasdi extends Application {
 	/**
 	 * Process queue scheduler
 	 */
-	private static ProcessingThread processingThread = null;
+	private static ProcessingThread s_oProcessingThread = null;
 
 	/**
 	 * Downloads queue scheduler
 	 */
-	private static DownloadsThread downloadsThread = null;
+	private static DownloadsThread s_oDownloadsThread = null;
 
 	
 	@Override
@@ -88,19 +88,22 @@ public class Wasdi extends Application {
 	@PostConstruct
 	public void initWasdi() {		
 		
-		System.out.println("-----------init wasdi!!!!");
+		System.out.println("-----------welcome to WASDI - Web Advanced Space Developer Interface");
 
 		if (getInitParameter("DebugVersion", "false").equalsIgnoreCase("true")) {
 			s_bDebug = true;
+			System.out.println("-------Debug Version on");
 		}
 		
 		if (getInitParameter("DebugLog", "false").equalsIgnoreCase("true")) {
 			s_bDebugLog = true;
+			System.out.println("-------Debug Log on");
 		}
 
 
 		try {
 			Utils.m_iSessionValidityMinutes = Integer.parseInt(getInitParameter("SessionValidityMinutes", ""+Utils.m_iSessionValidityMinutes));
+			System.out.println("-------Session Validity [minutes]: " + Utils.m_iSessionValidityMinutes);
 		} catch (NumberFormatException e) {
 			e.printStackTrace();
 		}
@@ -110,41 +113,42 @@ public class Wasdi extends Application {
 		String Nfs = System.getProperty( "nfs.data.download" );
 		if (Nfs == null) System.setProperty( "nfs.data.download", userHome + "/nfs/download");
 
-		System.out.println("init wasdi: nfs dir " + System.getProperty( "nfs.data.download" ));
+		System.out.println("-------nfs dir " + System.getProperty( "nfs.data.download" ));
 
-		if (processingThread==null) {
+		if (s_oProcessingThread==null) {
 			try {
 				
-				System.out.println("init wasdi: starting processing and download threads...");
+				System.out.println("-------Starting Processing and Download Schedulers...");
 				
 				
 				if (getInitParameter("EnableProcessingScheduler", "true").toLowerCase().equals("true")) {
-					processingThread = new ProcessingThread(m_oServletConfig);
-					processingThread.start();
-					System.out.println("init wasdi: processing thread started");
+					s_oProcessingThread = new ProcessingThread(m_oServletConfig);
+					s_oProcessingThread.start();
+					System.out.println("-------processing thread STARTED");
 				}
 				else {
-					System.out.println("init wasdi: processing thread DISABLED");
+					System.out.println("-------processing thread DISABLED");
 				}
 				
 				
 				if (getInitParameter("EnableDownloadScheduler", "true").toLowerCase().equals("true")) {
-					downloadsThread = new DownloadsThread(m_oServletConfig);
-					downloadsThread.start();
-					System.out.println("init wasdi: downloads thread started");
+					s_oDownloadsThread = new DownloadsThread(m_oServletConfig);
+					s_oDownloadsThread.start();
+					System.out.println("-------downloads thread STARTED");
 				}
 				else {
-					System.out.println("init wasdi: downloads thread DISABLED");
+					System.out.println("-------downloads thread DISABLED");
 				}
 				
 				
 			} catch (Exception e) {
 				e.printStackTrace();
-				System.out.println("init wasdi: ERROR: CANNOT START PROCESSING THREAD!!!");
+				System.out.println("-------ERROR: CANNOT START PROCESSING THREAD!!!");
 			}
 		}
 		
-		System.out.println("initializing snap...");        
+		System.out.println("-------initializing snap...");
+		
 		try {
 			String snapAuxPropPath = getInitParameter("SNAP_AUX_PROPERTIES", null);
 			System.out.println("snap aux properties file: " + snapAuxPropPath);
@@ -152,9 +156,6 @@ public class Wasdi extends Application {
 			Config.instance("snap.auxdata").load(propFile);
 			Config.instance().load();
 
-			//JAI.getDefaultInstance().getTileScheduler().setParallelism(Runtime.getRuntime().availableProcessors());
-			//MemUtils.configureJaiTileCache();
-			
 			SystemUtils.init3rdPartyLibs(null);
 			SystemUtils.LOG.setLevel(Level.ALL);
 			
@@ -163,14 +164,23 @@ public class Wasdi extends Application {
 		} catch (Throwable e) {
 			e.printStackTrace();
 		}
+		
+		
+		System.out.println("------- WASDI Init done ");
+		System.out.println("-----------------------------------------");
+		System.out.println("------- 	 Welcome to space     -------");
+		System.out.println("-----------------------------------------");
 	}
 	
+	/**
+	 * Server Shut down procedure
+	 */
 	public static void shutDown() {
 		try {
-			Wasdi.DebugLog("Shutting Down Wasdi");
+			Wasdi.DebugLog("-------Shutting Down Wasdi");
 			
-			processingThread.stopThread();
-			downloadsThread.stopThread();
+			s_oProcessingThread.stopThread();
+			s_oDownloadsThread.stopThread();
 			MongoRepository.shutDownConnection();
 		}
 		catch (Exception e) {
@@ -179,15 +189,30 @@ public class Wasdi extends Application {
 		}
 	}
 
+	/**
+	 * Safe Read Init Parameter
+	 * @param sParmaneter
+	 * @param sDefault
+	 * @return
+	 */
 	private String getInitParameter(String sParmaneter, String sDefault) {		
 		String sParameterValue = m_oServletConfig.getInitParameter(sParmaneter);		
 		return sParameterValue==null ? sDefault : sParameterValue;
 	}
 	
+	/**
+	 * Get Safe Random file name
+	 * @return
+	 */
 	public static String GetSerializationFileName() {
 		return UUID.randomUUID().toString();
 	}
 	
+	/**
+	 * Get Common Date Time Format
+	 * @param oDate
+	 * @return
+	 */
 	public static String GetFormatDate(Date oDate) {
 		return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(oDate);
 	}
@@ -235,6 +260,11 @@ public class Wasdi extends Application {
 		}		
 	}
 	
+	/**
+	 * Get the OS PID of a process
+	 * @param oProc
+	 * @return
+	 */
 	public static Integer getPIDProcess(Process oProc) {
 		Integer oPID = null;
 		
@@ -253,9 +283,13 @@ public class Wasdi extends Application {
 		return oPID;
 	}
 	
-	public static void DebugLog(String s) {
+	/**
+	 * Debug Log
+	 * @param sMessage
+	 */
+	public static void DebugLog(String sMessage) {
 		if (s_bDebugLog) {
-			System.out.println(s);
+			System.out.println(sMessage);
 		}
 	}
 	
