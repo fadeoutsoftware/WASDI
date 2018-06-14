@@ -77,6 +77,10 @@
         //max-height: 200px;
         height: $wasdi-heigth-panel;
         overflow-y: auto;
+        .checkbox-satellite-container{
+          //display: inline;
+          //padding: 10px;
+        }
       }
       //override bootstrap
       .panel-heading {
@@ -160,7 +164,7 @@
     .map-container
     {
       border: 1px solid $wasdi-blue-logo;
-      height: 81vh;
+      height: $wasdi-map-height-editor;
 
       //margin-bottom: 35px;
       //leaflet
@@ -168,7 +172,9 @@
       {
         //DIMENSIONS MAP
         width: auto;//500px
-        height: 36.5vh;
+        //height: 36.5vh;
+        height: $wasdi-map-height;
+
 
         ///* (1366x768) WXGA Display */
         @media  screen and (max-width: 1366px)and (max-height: 768px) {

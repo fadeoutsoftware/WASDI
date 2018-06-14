@@ -216,29 +216,39 @@
                         </div>
 
                         <!----------------------------------- MASKS ----------------------------------->
+                        <input  class="my-input-text" type="text" placeholder="{{'DIALOG_MASK_MANAGER_FILTER_TABLE_INPUT'|translate}}" ng-model="m_oController.m_sFilterMaskTable">
+
                         <table class="table table-hover">
-                            <thead>
                             <tr>
-                                <th></th>
+                            <thead>
+                                <th ng-click="m_oController.m_bAreSelectedAllMasks = !m_oController.m_bAreSelectedAllMasks; m_oController.clickedSelectAllMasks()" class="over-icon">
+                                    <i class="fa fa-check-square-o" aria-hidden="true" ng-hide="m_oController.m_aoMasks.length === 0 || m_oController.m_bAreSelectedAllMasks === false"></i>
+                                    <i class="fa fa-square-o" aria-hidden="true" ng-hide="m_oController.m_aoMasks.length === 0 || m_oController.m_bAreSelectedAllMasks === true"></i>
+
+                                    <!--<input ng-hide="m_oController.m_aoMasks.length === 0" type="checkbox" ng-model="m_oController.m_bAreSelectedAllMasks" ng-click="m_oController.clickedSelectAllMasks()">-->
+                                </th>
                                 <th>Name</th>
                                 <th>Type</th>
                                 <th>Colour</th>
-                                <th>Transparency</th>
+                                <!--<th>Transparency</th>-->
                                 <th>Description</th>
                                 <th></th>
                             </tr>
                             </thead>
                             <tbody>
-                            <tr ng-repeat="mask in m_oController.m_aoMasks">
-                                <td>
-                                    <div class="checkbox">
-                                        <label>
-                                            <input type="checkbox" ng-model="mask.selected" id="">
-                                        </label>
-                                    </div>
+                            <tr ng-repeat="mask in m_oController.m_aoMasks  | filter:m_oController.m_sFilterMaskTable"><!-- | filter:m_oController.m_sFilterMaskTable-->
+                                <td class="over-icon" ng-click = "mask.selected = !mask.selected">
+                                    <i class="fa fa-check-square-o" aria-hidden="true" ng-show="mask.selected"></i>
+                                    <i class="fa fa-square-o" aria-hidden="true" ng-hide="mask.selected"></i>
+                                    <!--<div class="checkbox">-->
+                                        <!--<label>-->
+                                            <!--<input type="checkbox" ng-model="mask.selected" >-->
+                                        <!--</label>-->
+                                    <!--</div>-->
                                 </td>
                                 <td>
-                                    <input type="text" name="name"  class="my-input-text"  ng-model="mask.name">
+                                    <!--<input type="text" name="name"  class="my-input-text"  ng-model="mask.name">-->
+                                    {{mask.name}}
                                 </td>
                                 <td>
                                    {{mask.type}}
@@ -272,11 +282,12 @@
 
                                 </td>
 
+                                <!--<td>-->
+                                    <!--<input type="text" name="name"  class="my-input-text"  ng-model="mask.transparency">-->
+                                <!--</td>-->
                                 <td>
-                                    <input type="text" name="name"  class="my-input-text"  ng-model="mask.transparency">
-                                </td>
-                                <td>
-                                    <input type="text" name="name"  class="my-input-text"  ng-model="mask.description">
+                                    <!--<input type="text" name="name"  class="my-input-text"  ng-model="mask.description">-->
+                                    {{mask.description}}
                                 </td>
 
                                 <td class="over-icon" ng-click="m_oController.deleteMaskByIndex($index)">
@@ -291,10 +302,17 @@
                             </tbody>
                         </table>
                     </div>
+
                     <div class="col-xs-2 col-sm-2 col-md-2 col-lg-2">
                         <div class="btn-group-vertical">
-                            <button type="button" class="btn btn-default" ng-click="m_oController.changeWindowsOpened('rangeMask')">Range Mask</button>
-                            <button type="button" class="btn btn-default"  ng-click="m_oController.changeWindowsOpened('logicalMask')">Logical Mask</button>
+                            <button type="button" class="btn btn-default btn-primary" ng-click="m_oController.changeWindowsOpened('rangeMask')">
+                                <i class="fa fa-filter" aria-hidden="true"></i>
+                                Range Mask
+                            </button>
+                            <button type="button" class="btn btn-default btn-primary"  ng-click="m_oController.changeWindowsOpened('logicalMask')">
+                                <i class="fa fa-filter" aria-hidden="true"></i>
+                                Logical Mask
+                            </button>
                             <!--<button type="button" class="btn btn-default">Button</button>-->
                         </div>
 

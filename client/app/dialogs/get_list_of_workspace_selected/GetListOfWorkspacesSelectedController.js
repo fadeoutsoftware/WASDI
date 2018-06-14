@@ -26,6 +26,7 @@ var GetListOfWorkspacesController = (function() {
         this.m_oActiveWorkspace = this.m_oConstantsService.getActiveWorkspace();
         this.m_aoWorkflows = [];
         this.m_bisLoadingWorkflows = false;
+        this.m_bIsVisibleWorkFlowsOption = false;
         //$scope.close = oClose;
         $scope.close = function(result) {
             oClose(result, 200); // close, but give 500ms for bootstrap to animate
@@ -95,10 +96,14 @@ var GetListOfWorkspacesController = (function() {
         var iNumberOfWorkspaces = aoWorkspaceList.length;
         for(var iIndexWorkspace = 0; iIndexWorkspace < iNumberOfWorkspaces; iIndexWorkspace++)
         {
-            if(aoWorkspaceList[iIndexWorkspace].workspaceId === oActiveWorkspace.workspaceId)
+            if(utilsIsObjectNullOrUndefined(oActiveWorkspace) === false)
             {
-                return aoWorkspaceList[iIndexWorkspace];
+                if(aoWorkspaceList[iIndexWorkspace].workspaceId === oActiveWorkspace.workspaceId)
+                {
+                    return aoWorkspaceList[iIndexWorkspace];
+                }
             }
+
         }
         return null;
     };
@@ -214,18 +219,27 @@ var GetListOfWorkspacesController = (function() {
      *
      * @returns {boolean}
      */
-    GetListOfWorkspacesController.prototype.openWorkflowManagerDialog = function(){
+    GetListOfWorkspacesController.prototype.openWorkflowManagerDialog = function() {
         var oController = this;
         // if(utilsIsObjectNullOrUndefined(this.m_oActiveWorkspace) === true)
         //     return false;
-
+        var workspaceId;
+        if (utilsIsObjectNullOrUndefined(oController.m_oActiveWorkspace) === true)
+        {
+            workspaceId = null;
+        }
+        else
+        {
+            workspaceId = oController.m_oActiveWorkspace.workspaceId;
+        }
         oController.m_oModalService.showModal({
             templateUrl: "dialogs/workflow_manager/WorkFlowManagerView.html",
             controller: "WorkFlowManagerController",
             inputs: {
                 extras: {
                     products:[],
-                    workflowId:oController.m_oActiveWorkspace.workspaceId
+                    workflowId:workspaceId,
+                    defaultTab:'WorkFlowTab2'
                 }
             }
         }).then(function (modal) {

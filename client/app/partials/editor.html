@@ -319,7 +319,7 @@
                     </ul>
                 </div>
 
-                <div class="panel-body fixed-panel">
+                <div class="panel-body fixed-panel" id="panelBodyMapPreviewEditor">
                     <!--TODO: SLIDER-->
                     <!---------------------- TAB 0 NAVIGATION------------------>
                     <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12"  ng-show="m_oController.m_iActiveMapPanelTab === 0">
@@ -364,16 +364,19 @@
                             </div>
                             <div class="col-xs-2 col-sm-2 col-md-2 col-lg-2">
                                 <div class="btn-group-vertical" ng-hide="m_oController.m_oActiveBand.colorManipulation == null">
-                                    <button type="button" class="btn btn-primary" ng-click="m_oController.adjust95percentageColourManipulation(m_oController.m_oActiveBand.colorManipulation)" title="test">
+                                    <button type="button" class="btn btn-primary" ng-click="m_oController.adjust95percentageColourManipulation(m_oController.m_oActiveBand.colorManipulation)"
+                                            data-toggle="tooltip" data-placement="bottom" title="{{'EDITOR_COLOUR_MANIPULATION_TOOLTIP_95%'|translate}}">
                                         95%
                                     </button>
-                                    <button type="button" class="btn btn-primary" ng-click="m_oController.adjust100percentageColourManipulation(m_oController.m_oActiveBand.colorManipulation)" title="test">
-                                        100%
-                                    </button>
-                                    <button type="button" class="btn btn-primary" ng-click="m_oController.getDefaultProductColorManipulation()" title="test">
+                                    <!--<button type="button" class="btn btn-primary" ng-click="m_oController.adjust100percentageColourManipulation(m_oController.m_oActiveBand.colorManipulation)" title="test">-->
+                                        <!--100%-->
+                                    <!--</button>-->
+                                    <button type="button" class="btn btn-primary" ng-click="m_oController.getDefaultProductColorManipulation()"
+                                            data-toggle="tooltip" data-placement="bottom" title="{{'EDITOR_COLOUR_MANIPULATION_TOOLTIP_RESET_DEFAULTS'|translate}}">
                                         <i class="fa fa-undo" aria-hidden="true"></i>
                                     </button>
-                                    <button type="button" class="btn btn-primary" ng-click="m_oController.processingProductColorManipulation()" title="test">
+                                    <button type="button" class="btn btn-primary" ng-click="m_oController.processingProductColorManipulation()"
+                                            data-toggle="tooltip" data-placement="bottom" title="{{'EDITOR_COLOUR_MANIPULATION_TOOLTIP_APPLY_COLOR_MANIPULATION'|translate}}">
                                         <i class="fa fa-paper-plane" aria-hidden="true"></i>
 
                                     </button>
@@ -432,10 +435,12 @@
                     </div>
 
                     <!----------------------------------------------- TAB 2  PREVIEW---------------------------------------------->
-                    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12" ng-show="m_oController.m_iActiveMapPanelTab === 2" >
+                    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 preview-tab-container" ng-show="m_oController.m_iActiveMapPanelTab === 2" >
                         <div ><!--class="col-xs-12 col-sm-12 col-md-12 col-lg-12"-->
                             <imagepreview is-loaded="m_oController.m_bIsLoadedPreviewBandImage" url-image="m_oController.m_sPreviewUrlSelectedBand"
-                                          body = "m_oController.m_oImagePreviewDirectivePayload">
+                                          body = "m_oController.m_oImagePreviewDirectivePayload"
+                                          height-canvas="m_oController.m_oMapPreviewContainerSize.height"
+                                          width-canvas="m_oController.m_oMapPreviewContainerSize.width">
                             </imagepreview>
 
                         </div>
@@ -555,6 +560,8 @@
                              mask-manager="m_oController.openMaskManagerFromImageEditor()"
                              filter-manager="m_oController.openFiltersFromImageEditor()"
                              pan-scaling = "m_oController.m_iPanScalingValue"
+                             height-canvas = "m_oController.m_oMapContainerSize.height"
+                             width-canvas = "m_oController.m_oMapContainerSize.width"
                              ng-show="m_oController.m_bIsActiveGeoraphicalMode === false && (m_oController.m_bIsLoadedViewBandImage || m_oController.m_bIsEditorZoomingOnExistingImage)"><!--is-loaded="m_oController.m_bIsLoadedPreviewBandImage" ng-show&& m_oController.m_bIsLoadedViewBandImage-->
                 </imageeditor>
                 <div class="loadIcon" ng-hide="m_oController.m_bIsLoadedViewBandImage === true || m_oController.m_bIsEditorZoomingOnExistingImage" >

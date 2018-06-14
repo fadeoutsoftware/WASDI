@@ -109,8 +109,12 @@
         }
       }
       .panel-body{
-        overflow-y: auto;
+        //overflow-y: auto;
+        .preview-tab-container{
+          padding-left: 0;
+        }
       }
+
     }
     //override my button class in style.scss
     .my-button

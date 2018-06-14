@@ -696,7 +696,7 @@ function utilsConvertRGBAInObjectColor (sRGBA)
         blue:sRGBA[2]
     };
 
-    if(oReturnValue.length === 4)
+    if(sRGBA.length === 4)
     {
         oReturnValue.transparency = sRGBA[3];
     }

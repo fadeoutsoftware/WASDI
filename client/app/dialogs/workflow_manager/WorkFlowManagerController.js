@@ -24,7 +24,15 @@ var WorkFlowManagerController = (function() {
             workflowDescription:""
         };
         this.isUploadingWorkflow = false;
-        this.m_sSelectedWorkflowTab = 'WorkFlowTab1';
+        if( utilsIsObjectNullOrUndefined(this.m_oExtras.defaultTab) === true)
+        {
+            this.m_sSelectedWorkflowTab = 'WorkFlowTab1';
+        }
+        else
+        {
+            this.m_sSelectedWorkflowTab = this.m_oExtras.defaultTab;
+        }
+        // this.m_sSelectedWorkflowTab = 'WorkFlowTab1';
         this.m_bIsLoadingWorkflows = false;
         this.m_oHttp =  oHttp;
         //$scope.close = oClose;
