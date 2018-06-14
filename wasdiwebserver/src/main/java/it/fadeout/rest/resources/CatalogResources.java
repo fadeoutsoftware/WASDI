@@ -133,21 +133,62 @@ public class CatalogResources {
 			return Response.status(Status.UNAUTHORIZED).build();
 		}
 
-		File file = new File(entry.getFilePath());
-		ResponseBuilder resp = null;
-		if (!file.canRead()) {
+		File oFile = new File(entry.getFilePath());
+		
+		ResponseBuilder oResponseBuilder = null;
+		if (!oFile.canRead()) {
 			Wasdi.DebugLog("CatalogResources.DownloadEntry: file not readable");
-			resp = Response.serverError();
+			oResponseBuilder = Response.serverError();
 		} 
 		else {
 			Wasdi.DebugLog("CatalogResources.DownloadEntry: file ok return content");
-			resp = Response.ok(file);
-			resp.header("Content-Disposition", "attachment; filename="+ entry.getFileName());
+			oResponseBuilder = Response.ok(oFile);
+			oResponseBuilder.header("Content-Disposition", "attachment; filename="+ entry.getFileName());
 		}
 		
 		Wasdi.DebugLog("CatalogResources.DownloadEntry: done, return");
-		return resp.build();
+		return oResponseBuilder.build();
 	}
+	
+	@GET
+	@Path("downloadbyname")
+	@Produces(MediaType.APPLICATION_OCTET_STREAM)
+	public Response DownloadEntryByName(@HeaderParam("x-session-token") String sSessionId, @QueryParam("filename") String sFileName) {
+		
+		Wasdi.DebugLog("CatalogResources.DownloadEntryByName");
+		
+		User oUser = Wasdi.GetUserFromSession(sSessionId);
+		
+		if (oUser == null) {
+			Wasdi.DebugLog("CatalogResources.DownloadEntryByName: user not authorized");
+			return Response.status(Status.UNAUTHORIZED).build();
+		}
+		
+		DownloadedFilesRepository oRepo = new DownloadedFilesRepository();
+		DownloadedFile oDownloadedFile = oRepo.GetDownloadedFile(sFileName);
+		
+		if (oDownloadedFile == null) {
+			Wasdi.DebugLog("CatalogResources.DownloadEntryByName: file " + sFileName + " not found");
+			return Response.serverError().build();			
+		}
+
+		File oFile = new File(oDownloadedFile.getFilePath());
+		
+		ResponseBuilder oResponseBuilder = null;
+		if (!oFile.canRead()) {
+			Wasdi.DebugLog("CatalogResources.DownloadEntryByName: file not readable");
+			oResponseBuilder = Response.serverError();
+		} 
+		else {
+			Wasdi.DebugLog("CatalogResources.DownloadEntryByName: file ok return content");
+			oResponseBuilder = Response.ok(oFile);
+			oResponseBuilder.header("Content-Disposition", "attachment; filename="+ oDownloadedFile.getFileName());
+		}
+		
+		Wasdi.DebugLog("CatalogResources.DownloadEntryByName: done, return");
+		return oResponseBuilder.build();
+	}
+	
 	
 	private ArrayList<DownloadedFile> searchEntries(Date from, Date to, String freeText, String category, String userId) {
 		ArrayList<DownloadedFile> entries = new ArrayList<DownloadedFile>();
@@ -338,12 +379,37 @@ public class CatalogResources {
 		
 		File oUserBaseDir = new File(sDownloadRootPath+sAccount+ "/" +sWorkspace+"/");
 		
+		
+		
 		File oFilePath = new File(oUserBaseDir, sFile);
 		
 		if (!oFilePath.canRead()) {
-			oResult.setBoolValue(false);
-			oResult.setIntValue(500);
-			return oResult;		
+			Wasdi.DebugLog("CatalogResource.IngestFileInWorkspace: file not found. Check if it is an exension problem");
+			
+			String [] asSplittedFileName = sFile.split("\\.");
+			
+			if (asSplittedFileName.length == 1) {
+				
+				Wasdi.DebugLog("CatalogResource.IngestFileInWorkspace: file without exension, try .dim");
+				
+				sFile = sFile + ".dim";
+				oFilePath = new File(oUserBaseDir, sFile);
+				
+				if (!oFilePath.canRead()) {
+					Wasdi.DebugLog("CatalogResource.IngestFileInWorkspace: file not availalbe. Can be a developer process. Return 500 [file: " + sFile + "]");
+					oResult.setBoolValue(false);
+					oResult.setIntValue(500);
+					return oResult;							
+				}
+			}
+			else {
+				Wasdi.DebugLog("CatalogResource.IngestFileInWorkspace: file with exension but not available");
+				Wasdi.DebugLog("CatalogResource.IngestFileInWorkspace: file not availalbe. Can be a developer process. Return 500 [file: " + sFile + "]");
+				oResult.setBoolValue(false);
+				oResult.setIntValue(500);
+				return oResult;											
+			}
+			
 		}
 		try {
 			ProcessWorkspace oProcess = null;

@@ -8,12 +8,11 @@ public class WasdiLifeCycleListener implements ServletContextListener {
 
 	@Override
 	public void contextInitialized(ServletContextEvent sce) {
-		//System.out.println("-----------------------contextInitialized-----------------------------");
 	}
 
 	@Override
 	public void contextDestroyed(ServletContextEvent sce) {
-		System.out.println("-----------------------contextDestroyed-----------------------------");
+		System.out.println("Call Wasdi Shut Down. Bye");
 		Wasdi.shutDown();
 	}
 

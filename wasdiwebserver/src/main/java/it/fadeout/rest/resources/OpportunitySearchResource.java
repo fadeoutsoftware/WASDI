@@ -280,24 +280,23 @@ public class OpportunitySearchResource {
 	@Path("/updatetrack/{satellitesname}")
 	@Produces({ "application/xml", "application/json", "text/html" })
 	@Consumes(MediaType.APPLICATION_JSON)
-	public ArrayList<SatelliteOrbitResultViewModel> getUpdatedSatelliteTrack(
-			@HeaderParam("x-session-token") String sSessionId, @PathParam("satellitesname") String satname) {
+	public ArrayList<SatelliteOrbitResultViewModel> getUpdatedSatelliteTrack(@HeaderParam("x-session-token") String sSessionId, @PathParam("satellitesname") String sSatName) {
 
-		Wasdi.DebugLog("OpportunitySearchResource.getUpdatedSatelliteTrack");
+		//Wasdi.DebugLog("OpportunitySearchResource.getUpdatedSatelliteTrack");
 
 		// Check if we have codes
-		if (Utils.isNullOrEmpty(satname)) return null;
+		if (Utils.isNullOrEmpty(sSatName)) return null;
 
 		// Return array
 		ArrayList<SatelliteOrbitResultViewModel> aoRet = new ArrayList<SatelliteOrbitResultViewModel>();
 
 		// Clear the string
-		if (satname.endsWith("-")) {
-			satname = satname.substring(0, satname.length() - 1);
+		if (sSatName.endsWith("-")) {
+			sSatName = sSatName.substring(0, sSatName.length() - 1);
 		}
 
 		// Split the codes
-		String[] asSatellites = satname.split("-");
+		String[] asSatellites = sSatName.split("-");
 
 		// Get "now" in the right format
 		Time tconv = new Time();
