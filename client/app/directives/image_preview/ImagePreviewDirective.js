@@ -8,7 +8,9 @@ angular.module('wasdi.ImagePreviewDirective', [])
             scope :{
                 urlImage : '=',
                 body : '=',
-                isLoaded : '='
+                isLoaded : '=',
+                heightCanvas: '=',
+                widthCanvas: '='
                 // * Text binding ('@' or '@?') *
                 // * One-way binding ('<' or '<?') *
                 // * Two-way binding ('=' or '=?') *

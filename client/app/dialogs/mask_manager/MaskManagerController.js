@@ -14,6 +14,9 @@ var MaskManagerController = (function() {
         this.m_oBand = oExtras.band;
         this.m_oProduct = oExtras.product;
         this.m_sWorkspaceId = oExtras.workspaceId;
+        //mask selected
+        this.m_oMasksSaved = oExtras.masksSaved;
+
         // this.m_oBody = oExtras.body;
         this.m_sMaskColor = {
             rangeMaskColor:"rgb(0,143,255)",
@@ -24,10 +27,10 @@ var MaskManagerController = (function() {
             rangeMask:false,
             logicalMask:false
         };
+        this.m_sFilterMaskTable = "";
         this.m_bAreProductMasksLoading = false;
         this.getProductMasks(this.m_oProduct.fileName,this.m_oBand.name, this.m_sWorkspaceId);
-        // this.getProductMasks(this.m_aoProducts[1].fileName,this.m_aoProducts[1].bandsGroups.bands[0].name);
-        // this.getProductMasks(this.m_aoProducts[2].fileName,this.m_aoProducts[2].bandsGroups.bands[0].name);
+        //MASK LIST
         this.m_aoMasks=[];
         this.m_sRangeMinValue = 0.0;
         this.m_sRangeMaxValue = 1.0;
@@ -35,21 +38,7 @@ var MaskManagerController = (function() {
         this.m_sRangeListOfRasters=[];
         this.m_oTime = $timeout;
         this.m_sTextAreaLogicalMask = "";
-        // this.m_asColors = [
-        //     "rgb(0,0,0)",
-        //     "rgb(64,64,64)",
-        //     "rgb(128,128,128)",
-        //     "rgb(192,192,192)",
-        //     "rgb(255,255,255)",
-        //     "rgb(0,255,255)",
-        //     "rgb(0,0,255)",
-        //     "rgb(255,0,255)",
-        //     "rgb(255,255,0)",
-        //     "rgb(255,200,0)",
-        //     "rgb(255,0,0)",
-        //     "rgb(255,175,175)",
-        //     "rgb(0,255,0)",
-        // ];
+        this.m_bAreSelectedAllMasks = false;
         this.m_asContants = [
             "PI",
             "E",
@@ -173,7 +162,12 @@ var MaskManagerController = (function() {
             oClose(null, 300); // close, but give 500ms for bootstrap to animate
         };
         $scope.save = function() {
-            var result = oController.getBodyImage();
+            var result = {
+                body:oController.getBodyImage(),
+                listOfMasks:oController.m_aoMasks
+            }
+
+
             oClose(result, 300); // close, but give 500ms for bootstrap to animate
         };
     };
@@ -238,10 +232,12 @@ var MaskManagerController = (function() {
             description:sDescription,
             min:this.m_sRangeMinValue,
             max:this.m_sRangeMaxValue,
-            isUserGeneratedMask: true
+            isUserGeneratedMask: true,
+            selected:true
         };
         utilsConvertRGBAInObjectColor(this.m_sMaskColor.rangeMaskColor);
-        this.m_aoMasks.push(oReturnValue);
+        //add as firs element of array
+        this.m_aoMasks.unshift(oReturnValue);
         this.closeAllWindows();
         return true;
     };
@@ -313,10 +309,11 @@ var MaskManagerController = (function() {
             colour:this.m_sMaskColor.logicalMaskColor,
             transparency: 0.5,
             description:sDescription,
-            isUserGeneratedMask: true
+            isUserGeneratedMask: true,
+            selected:true
         };
-
-        this.m_aoMasks.push(oReturnValue);
+        //add as first element of array
+        this.m_aoMasks.unshift(oReturnValue);
         this.closeAllWindows();
         return true;
     };
@@ -489,6 +486,8 @@ var MaskManagerController = (function() {
                     oController.m_aoMasks.push(oWasdiMask);
                 }
             }
+            oController.maskSavedSelected();
+
 
         }).error(function (error) {
             utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR THE OPERATION GET PRODUCT MASK DOESN'T WORK");
@@ -563,7 +562,7 @@ var MaskManagerController = (function() {
             var iRedRGB = oColor.red;
             var iGreenRGB = oColor.green;
             var iBlueRGB= oColor.blue;
-            var fTransparencyRGB= this.m_aoMasks[iIndexMask].transparency;
+            var fTransparencyRGB= oColor.transparency;
 
             if(this.m_aoMasks[iIndexMask].type === 'Range' && !utilsIsObjectNullOrUndefined( this.m_aoMasks[iIndexMask].isUserGeneratedMask))
             {
@@ -660,7 +659,89 @@ var MaskManagerController = (function() {
         this.m_sRangeSelectedRaster = this.m_sRangeListOfRasters[0];
 
     };
+    MaskManagerController.prototype.clickedSelectAllMasks = function(){
+        var bNewStatusOfMask;
+        if(this.m_bAreSelectedAllMasks === true)
+        {
+            bNewStatusOfMask = true;
+        }
+        else
+        {
+            bNewStatusOfMask = false;
+        }
 
+        var iNumberOfMasks = this.m_aoMasks.length;
+        for(var iIndexOfMasks = 0; iIndexOfMasks < iNumberOfMasks ; iIndexOfMasks++)
+        {
+            this.m_aoMasks[iIndexOfMasks].selected = bNewStatusOfMask;
+        }
+    };
+
+    MaskManagerController.prototype.maskSavedSelected = function(){
+        if(utilsIsObjectNullOrUndefined(this.m_oMasksSaved) === true)
+        {
+            return false;
+        }
+        // this.findMaskAndSetSelected(this.m_oMasksSaved.mathMasks,this.m_aoMasks);
+        // this.findMaskAndSetSelected(this.m_oMasksSaved.productMasks,this.m_aoMasks);
+        // this.findMaskAndSetSelected(this.m_oMasksSaved.rangeMasks,this.m_aoMasks);
+
+        // this.m_aoMasks.unshift(this.m_oMasksSaved.mathMasks);
+        // this.m_aoMasks.unshift(this.m_oMasksSaved.mathMasks);
+
+        var iNumberOfSavedMasks = this.m_oMasksSaved.length;
+        for(var iIndexSavedMask = 0; iIndexSavedMask < iNumberOfSavedMasks; iIndexSavedMask++)
+        {
+            if( this.m_oMasksSaved[iIndexSavedMask].type === "Range" || this.m_oMasksSaved.type === "Math" )
+            {
+                //if the saved mask is Range or Math
+                this.m_aoMasks.unshift(this.m_oMasksSaved[iIndexSavedMask]);
+            }
+            else
+            {
+                //if the saved mask is a product mask
+                var iNumberOfMasks = this.m_aoMasks.length;
+                for(var iIndexMask = 0; iIndexMask < iNumberOfMasks; iIndexMask++)
+                {
+                    if(this.m_aoMasks[iIndexMask].name === this.m_oMasksSaved[iIndexSavedMask].name)
+                    {
+                        this.m_aoMasks[iIndexMask].selected = true;
+                    }
+
+                }
+            }
+        }
+
+
+    };
+
+    // MaskManagerController.prototype.unshiftArrayOfMasksOnMasksList = function()
+    // {
+    //     for()
+    // }
+
+    // MaskManagerController.prototype.findMaskAndSetSelected = function(aoListOfMasksSaved,aoListOfAllMask)
+    // {
+    //     if(utilsIsObjectNullOrUndefined(aoListOfMasksSaved) === true)
+    //     {
+    //         return false;
+    //     }
+    //
+    //     var iNumberOfSavedMasks = aoListOfMasksSaved.length;
+    //     for(var iIndexSavedMask = 0; iIndexSavedMask < iNumberOfSavedMasks; iIndexSavedMask++)
+    //     {
+    //         var iNumberOfMasks = aoListOfAllMask.length;
+    //         for(var iIndexMask = 0; iIndexMask < iNumberOfMasks; iIndexMask++)
+    //         {
+    //             if(aoListOfAllMask[iIndexMask].name === aoListOfMasksSaved[iIndexSavedMask].name)
+    //             {
+    //                 aoListOfAllMask[iIndexMask].selected = true;
+    //             }
+    //
+    //         }
+    //     }
+    //
+    // };
     MaskManagerController.$inject = [
         '$scope',
         'close',

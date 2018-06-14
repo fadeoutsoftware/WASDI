@@ -406,6 +406,19 @@ function utilsProjectOpenGetListOfWorkspacesSelectedModal (oCallback,oOptions,oM
     return true;
 }
 
+/**
+ *
+ * @param sFileName
+ * @param sBandName
+ * @param sFilters
+ * @param iRectangleX
+ * @param iRectangleY
+ * @param iRectangleWidth
+ * @param iRectangleHeight
+ * @param iOutputWidth
+ * @param iOutputHeight
+ * @returns {{productFileName: *, bandName: *, filterVM: *, vp_x: *, vp_y: *, vp_w: *, vp_h: *, img_w: *, img_h: *}}
+ */
 function utilsProjectCreateBodyForProcessingBandImage(sFileName, sBandName, sFilters, iRectangleX, iRectangleY, iRectangleWidth, iRectangleHeight, iOutputWidth, iOutputHeight){
 
     var oBandImageBody = {
@@ -422,55 +435,50 @@ function utilsProjectCreateBodyForProcessingBandImage(sFileName, sBandName, sFil
 
     return oBandImageBody;
 };
-//
-// /**
-//  *
-//  * @param min
-//  * @param p
-//  * @param max
-//  * @returns {boolean}
-//  */
-// function utilsIsBetween(min, p, max){
-//     var result = false;
-//
-//     if ( min < max ){
-//         if ( p > min && p < max ){
-//             result = true;
-//         }
-//     }
-//
-//     if ( min > max ){
-//         if ( p > max && p < min){
-//             result = true
-//         }
-//     }
-//
-//     if ( p == min || p == max ){
-//         result = true;
-//     }
-//
-//     return result;
-// }
-//
-// /**
-//  *
-//  * @param x
-//  * @param y
-//  * @param left
-//  * @param top
-//  * @param right
-//  * @param bottom
-//  * @returns {boolean}
-//  */
-// // left and right = x values
-// // top and bottom = y values
-//
-// function utilsIsPointInRectangle( x, y, left, top, right, bottom){
-//     var result = false;
-//
-//     if ( utilsIsBetween(left,x,right) && utilsIsBetween(top,y,bottom ) ){
-//         result = true;
-//     }
-//     return result;
-// }
 
+/**
+ * getMapContainerSize
+ * @returns {{height: number, width: number}}
+ */
+function utilsProjectGetMapContainerSize()
+{
+    // var elementMapContainer = angular.element(document.querySelector('#mapcontainer'));
+    // var heightMapContainer = elementMapContainer[0].offsetHeight;
+    // var widthMapContainer = elementMapContainer[0].offsetWidth;
+    //
+    // return {
+    //     height:heightMapContainer,
+    //     width:widthMapContainer
+    // };
+    return utilsProjectGetContainerSize(('#mapcontainer'));
+}
+
+/**
+ *
+ * @returns {{height, width}}
+ */
+function utilsProjectGetPreviewContainerSize()
+{
+
+    return utilsProjectGetContainerSize(('#panelBodyMapPreviewEditor'));
+}
+
+/**
+ * utilsProjectGetContainerSize
+ * @param sIdContainer
+ * @returns {*}
+ */
+function utilsProjectGetContainerSize(sIdContainer){
+    if(utilsIsStrNullOrEmpty(sIdContainer) === true)
+    {
+        return null;
+    }
+    var elementMapContainer = angular.element(document.querySelector(sIdContainer));
+    var heightMapContainer = elementMapContainer[0].offsetHeight;
+    var widthMapContainer = elementMapContainer[0].offsetWidth;
+
+    return {
+        height:heightMapContainer,
+        width:widthMapContainer
+    };
+}

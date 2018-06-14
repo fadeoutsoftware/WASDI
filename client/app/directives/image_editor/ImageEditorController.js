@@ -12,7 +12,9 @@ angular.module('wasdi.ImageEditorDirective', [])
                 applyEditorPreviewImage:'&',
                 maskManager: '&',
                 filterManager: '&',
-                panScaling: '='
+                panScaling: '=',
+                heightCanvas: '=',
+                widthCanvas: '='
                 // isLoaded : '='
                 // * Text binding ('@' or '@?') *
                 // * One-way binding ('<' or '<?') *
@@ -21,7 +23,11 @@ angular.module('wasdi.ImageEditorDirective', [])
             },
             link: function(scope, elem, attrs) {
                 var iDefaultValueZoom = 100;
+                // var dimension = utilsProjectGetMapContainerSize();
                 //default value canvas
+                // var m_iHeightCanvas = scope.heightCanvas;
+                // var m_iWidthCanvas = scope.widthCanvas;
+
                 //default value canvas
                 var stage = new createjs.Stage("imageviewcanvas");
                 var oBitmap = new createjs.Bitmap(scope.urlImage);

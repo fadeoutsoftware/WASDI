@@ -68,34 +68,36 @@
 
                         <!---------------------------------------- CHECK BOX ---------------------------------------------->
                         <!------------------------- Satellite ----------------------------->
-                        <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 ">
+                        <!--<div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 ">-->
+                        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 ">
+
                             <img src="assets/icons/Satellite.svg" alt="Satellite" height="30" width="30">{{"SEARCH_TITLE_CHECK_BOX_SATELLITE"|translate}}
                             <div class="well well-sm">
-                                <div ng-repeat="satellite in m_oController.m_oConfiguration.orbitsearch.satelliteNames">
+                                <div class="checkbox-satellite-container"ng-repeat="satellite in m_oController.m_oConfiguration.orbitsearch.satelliteNames">
                                     <input type="checkbox" checklist-model="m_oController.m_oSelectedSatellite"
                                            checklist-value="satellite"  />
                                     <span>{{satellite}}</span><!--ng-checked="true"-->
                                 </div>
                             </div>
                         </div>
-                        <!------------------------ Type ------------------>
-                        <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 container-checkbox" >
-                            {{"SEARCH_TITLE_CHECK_BOX_SENSOR_TYPE"|translate}}
-                            <div class="well well-sm">
-                                <div ng-repeat="sensortype in m_oController.m_oConfiguration.orbitsearch.sensortypes" >
-                                    <input type="checkbox" checklist-model="m_oController.m_oSelectedSensorType" checklist-value="sensortype"/> <span>{{sensortype}}</span>
-                                </div>
-                            </div>
-                        </div>
-                        <!-------------------------- Resolution --------------------->
-                        <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 " >
-                            {{"SEARCH_TITLE_CHECK_BOX_SENSOR_RESOLUTION"|translate}}
-                            <div class="well well-sm">
-                                <div ng-repeat="sensorresolution in m_oController.m_oConfiguration.orbitsearch.sensorresolutions" >
-                                    <input type="checkbox"  checklist-model="m_oController.m_oSelectedResolutionType" checklist-value="sensorresolution"/> <span>{{sensorresolution}}</span>
-                                </div>
-                            </div>
-                        </div>
+                        <!--&lt;!&ndash;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45; Type &#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&ndash;&gt;-->
+                        <!--<div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 container-checkbox" >-->
+                            <!--{{"SEARCH_TITLE_CHECK_BOX_SENSOR_TYPE"|translate}}-->
+                            <!--<div class="well well-sm">-->
+                                <!--<div ng-repeat="sensortype in m_oController.m_oConfiguration.orbitsearch.sensortypes" >-->
+                                    <!--<input type="checkbox" checklist-model="m_oController.m_oSelectedSensorType" checklist-value="sensortype"/> <span>{{sensortype}}</span>-->
+                                <!--</div>-->
+                            <!--</div>-->
+                        <!--</div>-->
+                        <!--&lt;!&ndash;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45; Resolution -&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&ndash;&gt;-->
+                        <!--<div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 " >-->
+                            <!--{{"SEARCH_TITLE_CHECK_BOX_SENSOR_RESOLUTION"|translate}}-->
+                            <!--<div class="well well-sm">-->
+                                <!--<div ng-repeat="sensorresolution in m_oController.m_oConfiguration.orbitsearch.sensorresolutions" >-->
+                                    <!--<input type="checkbox"  checklist-model="m_oController.m_oSelectedResolutionType" checklist-value="sensorresolution"/> <span>{{sensorresolution}}</span>-->
+                                <!--</div>-->
+                            <!--</div>-->
+                        <!--</div>-->
                         <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
                             Note: you should draw an area on the map before search orbits.
                         </div>

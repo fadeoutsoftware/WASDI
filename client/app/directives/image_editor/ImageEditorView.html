@@ -22,9 +22,11 @@
         </button>
     </div>
 
-    <div> <!-- ng-show="isLoaded"-->
-        <canvas id='imageviewcanvas'  width='1238px' height='707.797px' ></canvas><!-- width='800' height='600'-->
-    </div>
+    <!--<div> &lt;!&ndash; ng-show="isLoaded"&ndash;&gt;-->
+        <!--<canvas id='imageviewcanvas'  width='1238px' height='707.797px' ></canvas>&lt;!&ndash; width='800' height='600'&ndash;&gt;-->
+        <canvas id='imageviewcanvas'  width='{{widthCanvas}}' height='{{heightCanvas}}' ></canvas><!-- width='800' height='600'-->
+
+    <!--</div>-->
     <!--<button ng-click="changeZoomSquareSize()"> resize </button>-->
     <!--<button ng-click="onClick()"> Zoom </button>-->
 

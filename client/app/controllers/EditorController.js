@@ -44,7 +44,8 @@ var EditorController = (function () {
         // this.m_sPreviewUrlSelectedBand = "assets/img/test_image.jpg";
         //Url of the Band Image (2D - Editor Mode)
         this.m_sViewUrlSelectedBand = "";
-
+        this.m_oMapContainerSize = utilsProjectGetMapContainerSize();
+        this.m_oMapPreviewContainerSize = utilsProjectGetPreviewContainerSize();
         // Object used to exchange information with the image preview directive
         this.m_oImagePreviewDirectivePayload = {
             originalBandWidth: 0,
@@ -78,7 +79,8 @@ var EditorController = (function () {
             opticalBar:true,
             processorBar:true
         }
-
+        //we save the masks selected
+        this.m_oMasksSaved = null;
         // Index of the actual Active Tab
         this.m_iActiveMapPanelTab = 0;
         // Default globe zoom
@@ -1333,7 +1335,8 @@ var EditorController = (function () {
         // Anyway, show the preview
 
         // Get Preview Dimension
-        var elementImagePreview = angular.element(document.querySelector('#imagepreviewcanvas'));
+        // var elementImagePreview = angular.element(document.querySelector('#imagepreviewcanvas'));
+        var elementImagePreview = angular.element(document.querySelector('#panelBodyMapPreviewEditor'));
         var heightImagePreview = elementImagePreview[0].offsetHeight;
         var widthImagePreview = elementImagePreview[0].offsetWidth;
 
@@ -2119,8 +2122,8 @@ var EditorController = (function () {
                 extras: {
                     band:oBand,
                     product:oProduct,
-                    workspaceId: oController.m_oActiveWorkspace.workspaceId
-
+                    workspaceId: oController.m_oActiveWorkspace.workspaceId,
+                    masksSaved:oController.m_oMasksSaved
                 }
             }
         }).then(function (modal) {
@@ -2129,30 +2132,37 @@ var EditorController = (function () {
             modal.close.then(function (oResult) {
 
                 if(utilsIsObjectNullOrUndefined(oResult) === true) return false;
+                if(utilsIsObjectNullOrUndefined(oResult.body) === true) return false;
+
+                // oController.m_oMasksSaved = {};
+                // oController.m_oMasksSaved.productMasks = oResult.listOfMasks.productMasks;
+                // oController.m_oMasksSaved.rangeMasks = oResult.listOfMasks.rangeMasks;
+                // oController.m_oMasksSaved.mathMasks = oResult.listOfMasks.mathMasks;
+                oController.m_oMasksSaved = oResult.listOfMasks;
 
                 // Set a filter, if it has been selected by the user
                 oResult.filterVM = oFinalBand.actualFilter;
                 // Save the masks, as user selected
-                oFinalBand.productMasks = oResult.productMasks;
-                oFinalBand.rangeMasks = oResult.rangeMasks;
-                oFinalBand.mathMasks = oResult.mathMasks;
+                oFinalBand.productMasks = oResult.body.productMasks;
+                oFinalBand.rangeMasks = oResult.body.rangeMasks;
+                oFinalBand.mathMasks = oResult.body.mathMasks;
 
-                oController.m_oFilterService.getProductBand(oResult,oController.m_oActiveWorkspace.workspaceId).success(function (data, status) {
-
-                    if (data != null)
-                    {
-                        if (data != undefined)
-                        {
-                            // Create the link to the stream
-                            var blob = new Blob([data], {type: "octet/stream"});
-                            var objectUrl = URL.createObjectURL(blob);
-                            oController.m_sViewUrlSelectedBand = objectUrl;
-                        }
-                    }
-                }).error(function (data, status) {
-                    utilsVexDialogAlertTop('GURU MEDITATION<br>ERROR PROCESSING BAND IMAGE ');
-
-                });
+                // oController.m_oFilterService.getProductBand(oResult,oController.m_oActiveWorkspace.workspaceId).success(function (data, status) {
+                //
+                //     if (data != null)
+                //     {
+                //         if (data != undefined)
+                //         {
+                //             // Create the link to the stream
+                //             var blob = new Blob([data], {type: "octet/stream"});
+                //             var objectUrl = URL.createObjectURL(blob);
+                //             oController.m_sViewUrlSelectedBand = objectUrl;
+                //         }
+                //     }
+                // }).error(function (data, status) {
+                //     utilsVexDialogAlertTop('GURU MEDITATION<br>ERROR PROCESSING BAND IMAGE ');
+                //
+                // });
 
             });
         });
