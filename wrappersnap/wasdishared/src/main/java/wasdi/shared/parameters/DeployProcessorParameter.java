@@ -4,7 +4,14 @@ public class DeployProcessorParameter extends BaseParameter {
 	private String name;
 	private String processorID;
 	private String json;
+	private String processorType;
 	
+	public String getProcessorType() {
+		return processorType;
+	}
+	public void setProcessorType(String processorType) {
+		this.processorType = processorType;
+	}
 	public String getJson() {
 		return json;
 	}

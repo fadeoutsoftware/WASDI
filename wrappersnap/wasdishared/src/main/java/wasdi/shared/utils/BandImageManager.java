@@ -56,45 +56,62 @@ import wasdi.shared.viewmodels.ColorWithValueViewModel;
 
 public class BandImageManager {
 
-	Product product;
+	Product m_oProduct;
 	
 	private static class CachedSource {
-		public CachedSource(ColoredBandImageMultiLevelSource source) {
-			this.source = source;
-			this.ts = System.currentTimeMillis();
+		public CachedSource(ColoredBandImageMultiLevelSource oSource) {
+			this.m_oMultiLevelSource = oSource;
+			this.m_lTimestamp = System.currentTimeMillis();
 		}
-		MultiLevelSource source;
-		long ts;
+		MultiLevelSource m_oMultiLevelSource;
+		long m_lTimestamp;
 	}
 	
-	private static Map<String, CachedSource> sourceCache = new ConcurrentHashMap<String, CachedSource>();
-	private static Object cacheSyncObj = new Object();
+	private static Map<String, CachedSource> m_aoSourceCacheMap = new ConcurrentHashMap<String, CachedSource>();
+	private static Object m_oCacheSyncObj = new Object();
 	
-	private static Thread cacheThread = null;
+	private static Thread m_oCacheThread = null;
 	
 	static {
 		
 		System.out.println("BandImageManager.buildImage: laucnhing cached sources thread!");
 		
-		cacheThread  = new Thread(new Runnable() {
+		m_oCacheThread  = new Thread(new Runnable() {
 			
 			@Override
 			public void run() {
+				
+				int iCycleCount = 0;
+				
 				while (true) {
+					
 					try {
-						synchronized (cacheSyncObj) {
-							long ts = System.currentTimeMillis();
-							ArrayList<String> toRemove = new ArrayList<String>();
-							for (Entry<String, CachedSource> entry : sourceCache.entrySet()) {
-								if (ts - entry.getValue().ts > 600000L) { //not accessed by 10 minutes
-									toRemove.add(entry.getKey());
+						synchronized (m_oCacheSyncObj) {
+							
+							long lActualTimestamp = System.currentTimeMillis();
+							
+							ArrayList<String> asElementsToRemove = new ArrayList<String>();
+							
+							for (Entry<String, CachedSource> oCacheEntry : m_aoSourceCacheMap.entrySet()) {
+								
+								if (lActualTimestamp - oCacheEntry.getValue().m_lTimestamp > 600000L) { //not accessed by 10 minutes
+									asElementsToRemove.add(oCacheEntry.getKey());
 								}
 							}
-							for (String key : toRemove) {
-								CachedSource removed = sourceCache.remove(key);
-								removed.source = null;
+							
+							for (String key : asElementsToRemove) {
+								CachedSource removed = m_aoSourceCacheMap.remove(key);
+								removed.m_oMultiLevelSource = null;
+								
 								System.out.println("BandImageManager.buildImage: removed from cache: " + key);
 							}
+							
+							iCycleCount++;
+							
+							if ((iCycleCount%6)==0) {
+								System.out.println("------------ BandImageManager cache size: " + m_aoSourceCacheMap.entrySet().size());
+							}
+							
 						}						
 					} catch (Exception e) {
 						e.printStackTrace();
@@ -108,48 +125,51 @@ public class BandImageManager {
 			}
 		});
 		
-		cacheThread.start();
+		m_oCacheThread.start();
 	}
 	
 
-	public BandImageManager(Product product) {
-		this.product = product;
+	public BandImageManager(Product oProduct) {
+		this.m_oProduct = oProduct;
 	}
 	
-	public FilterBand getFilterBand(String bandName, Filter filter, int iterationCount) {
-        FilterBand targetBand;
-        String newBandName = bandName + "_" + filter.getShorthand();
-        RasterDataNode sourceRaster = product.getRasterDataNode(bandName); 
+	public FilterBand getFilterBand(String sBandName, Filter oFilter, int iIterationCount) {
+		
+        FilterBand oTargetBand;
         
-        if (filter.getOperation() == Filter.Operation.CONVOLVE) {
-            targetBand = new ConvolutionFilterBand(newBandName, sourceRaster, getKernel(filter), iterationCount);
-            if (sourceRaster instanceof Band) {
-                ProductUtils.copySpectralBandProperties((Band) sourceRaster, targetBand);
+        String sNewBandName = sBandName + "_" + oFilter.getShorthand();
+        RasterDataNode oSourceRasterDataNode = m_oProduct.getRasterDataNode(sBandName); 
+        
+        if (oFilter.getOperation() == Filter.Operation.CONVOLVE) {
+            oTargetBand = new ConvolutionFilterBand(sNewBandName, oSourceRasterDataNode, getKernel(oFilter), iIterationCount);
+            if (oSourceRasterDataNode instanceof Band) {
+                ProductUtils.copySpectralBandProperties((Band) oSourceRasterDataNode, oTargetBand);
             }
         } else {
-            GeneralFilterBand.OpType opType = getOpType(filter.getOperation());
-            targetBand = new GeneralFilterBand(newBandName, sourceRaster, opType, getKernel(filter), iterationCount);
-            if (sourceRaster instanceof Band) {
-                ProductUtils.copySpectralBandProperties((Band) sourceRaster, targetBand);
+            GeneralFilterBand.OpType opType = getOpType(oFilter.getOperation());
+            oTargetBand = new GeneralFilterBand(sNewBandName, oSourceRasterDataNode, opType, getKernel(oFilter), iIterationCount);
+            if (oSourceRasterDataNode instanceof Band) {
+                ProductUtils.copySpectralBandProperties((Band) oSourceRasterDataNode, oTargetBand);
             }
         }
 
-        targetBand.setDescription(String.format("Filter '%s' (=%s) applied to '%s'", filter.getName(), filter.getOperation(), sourceRaster.getName()));
-        if (sourceRaster instanceof Band) {
-            ProductUtils.copySpectralBandProperties((Band) sourceRaster, targetBand);
+        oTargetBand.setDescription(String.format("Filter '%s' (=%s) applied to '%s'", oFilter.getName(), oFilter.getOperation(), oSourceRasterDataNode.getName()));
+        if (oSourceRasterDataNode instanceof Band) {
+            ProductUtils.copySpectralBandProperties((Band) oSourceRasterDataNode, oTargetBand);
         }
         
-//        Band realBand = new Band(newBandName, targetBand.getDataType(), targetBand.getRasterWidth(), targetBand.getRasterHeight());
-//		realBand.setSourceImage(targetBand.getSourceImage());
-        ProductUtils.copyImageGeometry(sourceRaster, targetBand, false);
-        targetBand.fireProductNodeDataChanged();
-        product.addBand(targetBand);
-        return targetBand;
+        ProductUtils.copyImageGeometry(oSourceRasterDataNode, oTargetBand, false);
+        oTargetBand.fireProductNodeDataChanged();
+        
+        m_oProduct.addBand(oTargetBand);
+        
+        return oTargetBand;
     }
 	
 	
-	public ColorManipulationViewModel getColorManipulation(String bandName, boolean bAccurateStats) {
-		RasterDataNode oInputBand = product.getRasterDataNode(bandName);
+	public ColorManipulationViewModel getColorManipulation(String sBandName, boolean bAccurateStats) {
+		
+		RasterDataNode oInputBand = m_oProduct.getRasterDataNode(sBandName);
 		
 		WasdiProgressMonitorStub oProgressMonitor = new WasdiProgressMonitorStub();
 		ImageManager.getInstance().prepareImageInfos(new RasterDataNode[] {oInputBand}, oProgressMonitor);
@@ -162,6 +182,7 @@ public class BandImageManager {
 		//get the point colors
 		Point[] oPoints = oInfo.getColorPaletteDef().getPoints();
 		ColorWithValueViewModel oColorsModel[] = new ColorWithValueViewModel[oPoints.length];
+		
 		for (int i = 0; i < oColorsModel.length; i++) {
 			oColorsModel[i] = new ColorWithValueViewModel((float)oPoints[i].getSample(), oPoints[i].getColor());
 		}
@@ -188,6 +209,7 @@ public class BandImageManager {
 	
 	
 	public void applyColorManipulation(RasterDataNode oInputBand, ColorManipulationViewModel oModel) {
+		
 		WasdiProgressMonitorStub oProgressMonitor = new WasdiProgressMonitorStub();
 		ImageManager.getInstance().prepareImageInfos(new RasterDataNode[] {oInputBand}, oProgressMonitor);
 		
@@ -195,16 +217,15 @@ public class BandImageManager {
 
 		//set the point colors
 		ColorPaletteDef oPaletteDef = oInfo.getColorPaletteDef();
-//		Point[] sourcePoints = oPaletteDef.getPoints(); 
+
 		Point[] oPoints = new Point[oModel.getColors().length];
+		
 		for (int i = 0; i < oPoints.length; i++) {
-			float sample = oModel.getColors()[i].getValue();
-			oPoints[i] = new Point(sample, oModel.getColors()[i].asColor());
+			
+			float fSample = oModel.getColors()[i].getValue();
+			oPoints[i] = new Point(fSample, oModel.getColors()[i].asColor());
 			oPaletteDef.setAutoDistribute(false);
-//			if (sample != (float)sourcePoints[i].getSample()) {
-//				System.out.println("AUTODISTRIBUITE = FALSE");
-//				oPaletteDef.setAutoDistribute(false); 
-//			}
+			
 		}
 		oPaletteDef.setPoints(oPoints);
 		
@@ -237,33 +258,36 @@ public class BandImageManager {
 		WasdiProgressMonitorStub oProgressMonitor = new WasdiProgressMonitorStub();
 		ImageManager.getInstance().prepareImageInfos(new RasterDataNode[] {oInputBand}, oProgressMonitor);
 		
-		synchronized (cacheSyncObj) {
+		synchronized (m_oCacheSyncObj) {
 			
 			long lStartTime = System.currentTimeMillis();
 
 			//check if MultiLevelSource has already computed
 			
-			Band b = ((Band)oInputBand);
+			Band oBand = ((Band)oInputBand);
 			
 			String sProductKey = oInputBand.getProduct().getName() + "_" + oInputBand.getName();
-	        CachedSource oCachedObj = sourceCache.get(sProductKey); 
+			
+	        CachedSource oCachedObj = m_aoSourceCacheMap.get(sProductKey);
+	        
 	        if (oCachedObj == null) {
 	        	oCachedObj = new CachedSource(ColoredBandImageMultiLevelSource.create(oInputBand, ProgressMonitor.NULL));
 	        	System.out.println("BandImageManager.buildImage: multi level source not found in cache... created: " + (System.currentTimeMillis() - lStartTime) + " ms");
-	        	sourceCache.put(sProductKey, oCachedObj);
+	        	m_aoSourceCacheMap.put(sProductKey, oCachedObj);
 	        }
 	        
 	        // Get the Source
-	        MultiLevelSource oMultiLevelSource = oCachedObj.source;
+	        MultiLevelSource oMultiLevelSource = oCachedObj.m_oMultiLevelSource;
 	        
 	        // update cache timestamp
-	        oCachedObj.ts = System.currentTimeMillis();
+	        oCachedObj.m_lTimestamp = System.currentTimeMillis();
 	        System.out.println("BandImageManager.buildImage: multi level source obtained: " + (System.currentTimeMillis() - lStartTime) + " ms");
 
 	        // Create the Output buffered Image
 	        final int iOutputImageWidth = oOutputImageSize.width;
 	        final int iOutputImageHeight = oOutputImageSize.height;
 	        final int iOutputImageType = BufferedImage.TYPE_3BYTE_BGR;
+	        
 	        oOutputBufferedImage = new BufferedImage(iOutputImageWidth, iOutputImageHeight, iOutputImageType);
 	        
 	        // Create Image Layer
@@ -290,6 +314,7 @@ public class BandImageManager {
 	        // Nelle sentinel 1 invece � come ci aspettiamo esattamente delle dimensioni del raster.
 	        	        
 	        if (oInputImageViewPortToRender!=null) {
+	        	
 		        AffineTransform oImageToModel = oSnapImageLayer.getImageToModelTransform();
 		        
 		        double [] adInputRect = new double[4];
@@ -352,27 +377,27 @@ public class BandImageManager {
 
 		CollectionLayer rootLayer = new CollectionLayer();
 		
-		synchronized (cacheSyncObj) {
+		synchronized (m_oCacheSyncObj) {
 			
 			long lStartTime = System.currentTimeMillis();
 
 			//check if MultiLevelSource has already computed
 			String sProductKey = oInputBand.getProduct().getName() + "_" + oInputBand.getName();
-	        CachedSource oCachedObj = sourceCache.get(sProductKey); 
+	        CachedSource oCachedObj = m_aoSourceCacheMap.get(sProductKey); 
 	        if (!bUseCache || oCachedObj == null) {
 	        	oCachedObj = new CachedSource(ColoredBandImageMultiLevelSource.create(oInputBand, ProgressMonitor.NULL));
 	        	System.out.println("BandImageManager.buildImage: multi level source not found in cache... created: " + (System.currentTimeMillis() - lStartTime) + " ms");
-	        	sourceCache.put(sProductKey, oCachedObj);
+	        	m_aoSourceCacheMap.put(sProductKey, oCachedObj);
 	        }
 	        if (!bUseCache) {
-	        	sourceCache.remove(sProductKey);
+	        	m_aoSourceCacheMap.remove(sProductKey);
 	        }
 	        
 	        // Get the Source
-	        MultiLevelSource oMultiLevelSource = oCachedObj.source;
+	        MultiLevelSource oMultiLevelSource = oCachedObj.m_oMultiLevelSource;
 	        
 	        // update cache timestamp
-	        oCachedObj.ts = System.currentTimeMillis();
+	        oCachedObj.m_lTimestamp = System.currentTimeMillis();
 	        System.out.println("BandImageManager.buildImage: multi level source obtained: " + (System.currentTimeMillis() - lStartTime) + " ms");
 
 	        // Create the Output buffered Image
@@ -478,7 +503,7 @@ public class BandImageManager {
 	
 	public void saveGeotiff(Band band, File fileOut, ProgressMonitor pm) throws IOException {
 		Product outProduct = new Product("-", "GEOTIFF");
-		ProductUtils.copyGeoCoding(product, outProduct);
+		ProductUtils.copyGeoCoding(m_oProduct, outProduct);
         Band realBand = new Band("-", band.getDataType(), band.getRasterWidth(), band.getRasterHeight());
 		realBand.setSourceImage(band.getSourceImage());
         outProduct.addBand(realBand);
@@ -524,7 +549,7 @@ public class BandImageManager {
     }
 	
 	public static void quit() {
-		if (cacheThread!=null) cacheThread.interrupt();
+		if (m_oCacheThread!=null) m_oCacheThread.interrupt();
 	}
 	
 	private static class ImageLayerFilter implements LayerFilter {
