@@ -5,7 +5,7 @@
 
 var ProcessorController = (function() {
 
-    function ProcessorController($scope, oClose,oExtras,oWorkspaceService,oProductService,oConstantsService,oHttp) {
+    function ProcessorController($scope, oClose,oExtras,oWorkspaceService,oProductService,oConstantsService,oHttp, oProcessorService) {
         //MEMBERS
         this.m_oScope = $scope;
         this.m_oScope.m_oController = this;
@@ -25,6 +25,7 @@ var ProcessorController = (function() {
         this.m_sName = "";
         this.m_sDescription = "";
         this.m_sVersion = "";
+        this.m_oProcessorService = oProcessorService;
 
         var oController = this;
         $scope.close = function() {
@@ -45,32 +46,17 @@ var ProcessorController = (function() {
             return false;
         }
 
-        //processors/uploadprocessor?name=paolo1&version=0.1&description=primo
-        //TODO 19/02/2018 PUT IT INSIDE A SERVICE a.corrado
-        var sUrl = oController.m_oConstantsService.getAPIURL();
-        sUrl += '/processors/uploadprocessor?workspace=' + oController.m_oActiveWorkspace.workspaceId + '&name=' + oController.m_sName+ '&version=' + oController.m_sVersion+'&description=' + encodeURI(oController.m_sDescription);
+        var sType = "ubuntu_python_snap";
 
-        var successCallback = function(data, status)
-        {
-            //utilsVexDialogAlertTop();
+        var oBody = new FormData();
+        oBody.append('file', this.m_oFile[0]);
+
+        this.m_oProcessorService.uploadProcessor(oController.m_oActiveWorkspace.workspaceId,oController.m_sName,oController.m_sVersion, oController.m_sDescription, sType, oBody).success(function (data) {
             var oDialog = utilsVexDialogAlertBottomRightCorner("PROCESSOR UPLOADED<br>IT WILL BE DEPLOYED IN A WHILE");
             utilsVexCloseDialogAfterFewSeconds(4000,oDialog);
-
-        };
-
-        var errorCallback = function (data, status)
-        {
+        }).error(function (error) {
             utilsVexDialogAlertTop("GURU MEDITATION<br>THERE WAS AN ERROR DEPLOYING THE PROCESSOR");
-        };
-
-
-        var fd = new FormData();
-        fd.append('file', this.m_oFile[0]);
-
-        oController.m_oHttp.post(sUrl, fd, {
-            transformRequest: angular.identity,
-            headers: {'Content-Type': undefined}
-        }).then(successCallback, errorCallback);
+        });
 
         return true;
     };
@@ -94,7 +80,8 @@ var ProcessorController = (function() {
         'WorkspaceService',
         'ProductService',
         'ConstantsService',
-        '$http'
+        '$http',
+        'ProcessorService'
 
     ];
     return ProcessorController;
