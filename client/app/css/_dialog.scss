@@ -112,6 +112,7 @@ $color_alto_approx: #ddd;
 
 // start override vex css standard
 
+/*
 .vex-custom-field-wrapper,
 .vex-dialog-input {
   input {z-index: 2; position: absolute;}
@@ -164,10 +165,10 @@ $color_alto_approx: #ddd;
 
     }
   }
-  /* .vex-dialog-button-secondary {
+  !* .vex-dialog-button-secondary {
     border-color: $color_mountain_mist_approx!important;
     color: $wasdi-green-logo!important;
-  } */
+  } *!
 }
 
 .vex.vex-theme-bottom-right-corner .vex-content {margin-top: inherit!important;}
@@ -185,7 +186,7 @@ $color_alto_approx: #ddd;
 }
 
 .vex.vex-theme-top {
-  padding-top: 20%; /* override top position error VEX dialog*/
+  padding-top: 20%; !* override top position error VEX dialog*!
 }
 
 //End override
@@ -214,6 +215,7 @@ $color_alto_approx: #ddd;
     box-shadow:none!important;
   }
 }
+*/
 
 //End override
 
