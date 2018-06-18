@@ -47,6 +47,17 @@
 
   }
 
+  .space-invader-defender {
+    box-shadow:
+            0 0 0 .25em $wasdi-green-logo,
+            .625em 0 0 .25em $wasdi-green-logo,
+            -.625em 0 0 .25em $wasdi-green-logo,
+            1em .0625em 0 .1875em $wasdi-green-logo,
+            -1em .0625em 0 .1875em $wasdi-green-logo,
+            0 -.25em 0 .25em $wasdi-green-logo,
+            0 -.625em 0 0 $wasdi-green-logo;
+  }
+
   .space-invader-2 {
     box-shadow:
             0 0 0 .25em $wasdi-green-logo,
