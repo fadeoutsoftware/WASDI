@@ -2147,22 +2147,22 @@ var EditorController = (function () {
                 oFinalBand.rangeMasks = oResult.body.rangeMasks;
                 oFinalBand.mathMasks = oResult.body.mathMasks;
 
-                // oController.m_oFilterService.getProductBand(oResult,oController.m_oActiveWorkspace.workspaceId).success(function (data, status) {
-                //
-                //     if (data != null)
-                //     {
-                //         if (data != undefined)
-                //         {
-                //             // Create the link to the stream
-                //             var blob = new Blob([data], {type: "octet/stream"});
-                //             var objectUrl = URL.createObjectURL(blob);
-                //             oController.m_sViewUrlSelectedBand = objectUrl;
-                //         }
-                //     }
-                // }).error(function (data, status) {
-                //     utilsVexDialogAlertTop('GURU MEDITATION<br>ERROR PROCESSING BAND IMAGE ');
-                //
-                // });
+                oController.m_oFilterService.getProductBand(oResult.body,oController.m_oActiveWorkspace.workspaceId).success(function (data, status) {
+
+                    if (data != null)
+                    {
+                        if (data != undefined)
+                        {
+                            // Create the link to the stream
+                            var blob = new Blob([data], {type: "octet/stream"});
+                            var objectUrl = URL.createObjectURL(blob);
+                            oController.m_sViewUrlSelectedBand = objectUrl;
+                        }
+                    }
+                }).error(function (data, status) {
+                    utilsVexDialogAlertTop('GURU MEDITATION<br>ERROR PROCESSING BAND IMAGE ');
+
+                });
 
             });
         });
