@@ -487,8 +487,8 @@ var MaskManagerController = (function() {
                     oWasdiMask.type = aoProductMasks[i].maskType;
                     oWasdiMask.description = aoProductMasks[i].description;
                     oWasdiMask.name = aoProductMasks[i].name;
-                    oWasdiMask.transparency = aoProductMasks[i].transparency;
-                    oWasdiMask.colour = "rgb("+aoProductMasks[i].colorRed+","+aoProductMasks[i].colorGreen+","+aoProductMasks[i].colorBlue+")";
+                    oWasdiMask.transparency = 1.0-aoProductMasks[i].transparency;
+                    oWasdiMask.colour = "rgba("+aoProductMasks[i].colorRed+","+aoProductMasks[i].colorGreen+","+aoProductMasks[i].colorBlue+","+oWasdiMask.transparency+")";
                     oWasdiMask.originalMaskObject = aoProductMasks[i];
                     oWasdiMask.selected = false;
                     oController.m_aoMasks.push(oWasdiMask);
