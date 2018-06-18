@@ -165,7 +165,7 @@ var MaskManagerController = (function() {
             var result = {
                 body:oController.getBodyImage(),
                 listOfMasks:oController.m_aoMasks
-            }
+            };
 
 
             oClose(result, 300); // close, but give 500ms for bootstrap to animate

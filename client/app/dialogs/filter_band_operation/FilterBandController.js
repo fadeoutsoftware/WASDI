@@ -58,7 +58,7 @@ var FilterBandController = (function() {
         var oController = this;
         //$scope.close = oClose;
         $scope.close = function(result) {
-            oClose(result, 200); // close, but give 500ms for bootstrap to animate
+            oClose(result, 300); // close, but give 500ms for bootstrap to animate
         };
 
         $scope.applyFilterOnClose = function(result) {
@@ -84,7 +84,7 @@ var FilterBandController = (function() {
             //     band: oController.m_oSelectedBand,
             //     filter: oOption
             // };
-            oClose(oReturnValue, 200); // close, but give 500ms for bootstrap to animate
+            oClose(oReturnValue, 300); // close, but give 500ms for bootstrap to animate
 
         };
 
