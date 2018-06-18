@@ -7,6 +7,5 @@ angular.module('wasdi.SpaceInvaderDirective', [])
         return{
             restrict:"E",
             templateUrl:"directives/space_invaders/SpaceInvadersView.html"
-            // templateUrl:"directives/space_invaders/SpaceInvaders_defender.html"
         };
     });
