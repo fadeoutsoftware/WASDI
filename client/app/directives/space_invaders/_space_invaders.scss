@@ -1,7 +1,6 @@
 /* Variables */
 $bgColor: #000;
 $fgColor: $color_space;
-$timer:4s;
 
 
 
@@ -9,21 +8,36 @@ $timer:4s;
 //body {
 //  background-color: $bgColor;
 //}
-#invader {display: flex;}
+#invader {
+        //width:100%;
+        display: flex;}
 .invader {
   width: $dotsize;
   height: $dotsize;
+  // position: absolute;
   margin-top: 50px;
+  // left: 50%;
   margin:auto;
 }
 
+.invader {
+  //position:relative;
+  /*-webkit-animation-name: MOVE;
+  -webkit-animation-duration: 6s;
+  -webkit-animation-timing-function: step-end;
+  -webkit-animation-iteration-count: infinite;
+  -webkit-animation-direction: alternate;*/
+        //-webkit-animation-fill-mode:both;
 
+        //animation: SPRITE_A 1s step-start infinite alternate, MOVE 6s step-end infinite alternate;
+
+}
 .invader {position: relative;}
 .step1 {
-        animation: MOVE $timer step-end infinite alternate, STEP_A $timer step-end infinite;
+        animation: MOVE 6s step-end infinite alternate, STEP_A 6s step-end infinite;
 }
 .step2 {
-        animation: MOVE $timer step-end infinite alternate, STEP_B $timer step-end infinite;
+        animation: MOVE 6s step-end infinite alternate, STEP_B 6s step-end infinite;
 }
 
 @-webkit-keyframes STEP_A {
@@ -50,6 +64,7 @@ $timer:4s;
   60% {left:60%;}
   80% {left:80%;}
   100% {left:100%;}
+
 }
 
 
@@ -263,104 +278,3 @@ $timer:4s;
 
 
 
-//defender
-
-.invader-defender {
-        font-size: $dotsize;
-        position: absolute;
-        bottom: $dotsize*7;
-        // left: 50vh;
-        // width: $dotsize;
-        // height: $dotsize;
-        margin: 0 $dotsize*5;
-
-        .ship {
-                width:$dotsize;
-                height:$dotsize;
-                background: $fgColor;
-                box-shadow:
-                        0 0 $fgColor,
-                        0 $dotsize $fgColor,
-                        $dotsize $dotsize $fgColor,
-                        -$dotsize $dotsize $fgColor,
-                        $dotsize*2 $dotsize $fgColor,
-                        -$dotsize*2 $dotsize $fgColor,
-                        0 $dotsize*2 $fgColor,
-                        $dotsize $dotsize*2 $fgColor,
-                        -$dotsize $dotsize*2 $fgColor,
-                        $dotsize*2 $dotsize*2 $fgColor,
-                        -$dotsize*2 $dotsize*2 $fgColor,
-                        0 $dotsize*3 $fgColor,
-                        $dotsize $dotsize*3 $fgColor,
-                        -$dotsize $dotsize*3 $fgColor,
-                        $dotsize*2 $dotsize*3 $fgColor,
-                        -$dotsize*2 $dotsize*3 $fgColor,
-                        $dotsize*3 $dotsize*3 $fgColor,
-                        -$dotsize*3 $dotsize*3 $fgColor,
-                        $dotsize*4 $dotsize*3 $fgColor,
-                        -$dotsize*4 $dotsize*3 $fgColor,
-                        0 $dotsize*4 $fgColor,
-                        $dotsize $dotsize*4 $fgColor,
-                        -$dotsize $dotsize*4 $fgColor,
-                        $dotsize*2 $dotsize*4 $fgColor,
-                        -$dotsize*2 $dotsize*4 $fgColor,
-                        $dotsize*3 $dotsize*4 $fgColor,
-                        -$dotsize*3 $dotsize*4 $fgColor,
-                        $dotsize*4 $dotsize*4 $fgColor,
-                        -$dotsize*4 $dotsize*4 $fgColor,
-                        $dotsize*5 $dotsize*4 $fgColor,
-                        -$dotsize*5 $dotsize*4 $fgColor,
-                        $dotsize*6 $dotsize*4 $fgColor,
-                        -$dotsize*6 $dotsize*4 $fgColor,
-                        $dotsize*7 $dotsize*4 $fgColor,
-                        -$dotsize*7 $dotsize*4 $fgColor,
-                        0 $dotsize*5 $fgColor,
-                        $dotsize $dotsize*5 $fgColor,
-                        -$dotsize $dotsize*5 $fgColor,
-                        $dotsize*2 $dotsize*5 $fgColor,
-                        -$dotsize*2 $dotsize*5 $fgColor,
-                        $dotsize*3 $dotsize*5 $fgColor,
-                        -$dotsize*3 $dotsize*5 $fgColor,
-                        $dotsize*4 $dotsize*5 $fgColor,
-                        -$dotsize*4 $dotsize*5 $fgColor,
-                        $dotsize*5 $dotsize*5 $fgColor,
-                        -$dotsize*5 $dotsize*5 $fgColor,
-                        $dotsize*6 $dotsize*5 $fgColor,
-                        -$dotsize*6 $dotsize*5 $fgColor,
-                        $dotsize*7 $dotsize*5 $fgColor,
-                        -$dotsize*7 $dotsize*5 $fgColor,
-                        0 $dotsize*6 $fgColor,
-                        $dotsize $dotsize*6 $fgColor,
-                        -$dotsize $dotsize*6 $fgColor,
-                        $dotsize*2 $dotsize*6 $fgColor,
-                        -$dotsize*2 $dotsize*6 $fgColor,
-                        $dotsize*3 $dotsize*6 $fgColor,
-                        -$dotsize*3 $dotsize*6 $fgColor,
-                        $dotsize*4 $dotsize*6 $fgColor,
-                        -$dotsize*4 $dotsize*6 $fgColor,
-                        $dotsize*5 $dotsize*6 $fgColor,
-                        -$dotsize*5 $dotsize*6 $fgColor,
-                        $dotsize*6 $dotsize*6 $fgColor,
-                        -$dotsize*6 $dotsize*6 $fgColor,
-                        $dotsize*7 $dotsize*6 $fgColor,
-                        -$dotsize*7 $dotsize*6 $fgColor;
-
-
-//fire with animation
-                &--bullet {
-                        background-color: red;
-                        width: $dotsize/2;
-                        height: $dotsize*2;
-                        margin-left: $dotsize/4;
-                        position: absolute;
-                        animation: 2s linear fire;
-                        animation-iteration-count: infinite
-                }
-        }
-
-}
-//fire animation
-@keyframes fire {
-        from {bottom:$dotsize;}
-        to {bottom:$dotsize*100;}
-}

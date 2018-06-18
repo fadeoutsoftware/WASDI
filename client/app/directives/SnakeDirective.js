@@ -138,7 +138,7 @@ angular.module('wasdi.SnakeDirective', [])
                         var oText = new createjs.Text();
                         oText.x = 90;
                         oText.y = 0;
-                        oText.font = "70px decoder";
+                        oText.font = "68px astronaut";
                         oText.color = sFontColor;
                         oText.text = "Press Space to Play";
 
@@ -152,7 +152,7 @@ angular.module('wasdi.SnakeDirective', [])
                         oText.x = 260;
                         oText.y = 0;
 
-                        oText.font = "70px decoder";
+                        oText.font = "68px astronaut";
                         oText.color = sFontColor;
                         oText.text = "Game Over";
 
