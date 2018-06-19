@@ -18,7 +18,7 @@ var NDVIController = (function() {
         this.m_asProductsName = this.getProductsName();
         this.m_asSelectedProducts = [];
 
-        if(utilsIsObjectNullOrUndefined(this.m_oSelectedProduct) == true)
+        if(utilsIsObjectNullOrUndefined(this.m_oSelectedProduct) === true)
         {
             this.m_oSelectedProduct = null;
         }
@@ -31,8 +31,8 @@ var NDVIController = (function() {
         }
         // this.m_asOrbitStateVectors = ["Sentinel Precise(Auto Download)","Sentinel Restituted(Auto Download)","DORIS preliminary POR(ENVISAT)"
         //     ,"DORIS Precise Vor(ENVISAT)(Auto Download)","DELFT Precise(ENVISAT,ERS1&2)(Auto Download)","PRARE Precise(ERS1&2)(Auto Download)"];
-        this.m_sRedSourceBandSelected = "";
-        this.m_sNIRSourceBandSelected = "";
+        this.m_sRedSourceBandSelected = [];
+        this.m_sNIRSourceBandSelected = [];
 
         this.m_oReturnValue = {
             sourceFileName:"",
@@ -55,33 +55,66 @@ var NDVIController = (function() {
         $scope.run = function(oOptions) {
             //TODO CHECK OPTIONS
             var bAreOkOptions = true;
-
-            if( (utilsIsObjectNullOrUndefined(oController.m_oReturnValue.options.nirFactor) == true) && (utilsIsANumber(oController.m_oReturnValue.options.nirFactor) == false) )
-                bAreOkOptions = false;
-            if( (utilsIsObjectNullOrUndefined(oController.m_oReturnValue.options.redFactor) == true) && (utilsIsANumber(oController.m_oReturnValue.options.redFactor) == false) )
-                bAreOkOptions = false;
-
-            if( (utilsIsObjectNullOrUndefined(oController.m_oReturnValue.options.redSourceBand) == true)  )//&& (utilsIsStrNullOrEmpty(oController.m_oReturnValue.options.redSourceBand) == true)
-                bAreOkOptions = false;
-            if( (utilsIsObjectNullOrUndefined(oController.m_oReturnValue.options.nirSourceBand) == true)  )//&& (utilsIsStrNullOrEmpty(oController.m_oReturnValue.options.nirSourceBand) == true)
-                bAreOkOptions = false;
-            if(utilsIsObjectNullOrUndefined(oController.m_sRedSourceBandSelected) == true)
-                bAreOkOptions = false;
-            if(utilsIsObjectNullOrUndefined(oController.m_sNIRSourceBandSelected) == true)
-                bAreOkOptions = false;
-
-            if(bAreOkOptions != false)
+            var aoReturnValue = [];
+            var iNumberOfSelectedProducts = oController.m_asSelectedProducts.length;
+            for(var iIndexSelectedProduct = 0; iIndexSelectedProduct < iNumberOfSelectedProducts ; iIndexSelectedProduct++)
             {
-                oController.m_oReturnValue.sourceFileName = oController.m_oSelectedProduct.fileName;
-                oController.m_oReturnValue.destinationFileName = oController.m_sFileName_Operation;
-                oController.m_oReturnValue.options.redSourceBand = oController.m_sRedSourceBandSelected;
-                oController.m_oReturnValue.options.nirSourceBand = oController.m_sNIRSourceBandSelected;
+                var oProduct = oController.getProductByName(oController.m_asSelectedProducts[iIndexSelectedProduct]);
+                if( (utilsIsObjectNullOrUndefined(oProduct) == true) )
+                    bAreOkOptions = false;
+                if( (utilsIsObjectNullOrUndefined(oController.m_oReturnValue.options.nirFactor) == true) && (utilsIsANumber(oController.m_oReturnValue.options.nirFactor) == false) )
+                    bAreOkOptions = false;
+                if( (utilsIsObjectNullOrUndefined(oController.m_oReturnValue.options.redFactor) == true) && (utilsIsANumber(oController.m_oReturnValue.options.redFactor) == false) )
+                    bAreOkOptions = false;
+
+                if( (utilsIsObjectNullOrUndefined(oController.m_oReturnValue.options.redSourceBand) == true)  )//&& (utilsIsStrNullOrEmpty(oController.m_oReturnValue.options.redSourceBand) == true)
+                    bAreOkOptions = false;
+                if( (utilsIsObjectNullOrUndefined(oController.m_oReturnValue.options.nirSourceBand) == true)  )//&& (utilsIsStrNullOrEmpty(oController.m_oReturnValue.options.nirSourceBand) == true)
+                    bAreOkOptions = false;
+                if(utilsIsObjectNullOrUndefined(oController.m_sRedSourceBandSelected) == true)
+                    bAreOkOptions = false;
+                if(utilsIsObjectNullOrUndefined(oController.m_sNIRSourceBandSelected) == true)
+                    bAreOkOptions = false;
+
+                var oRetValue = null;
+                if(bAreOkOptions != false)
+                {
+                    oRetValue = {
+                        options:{}
+                    };
+                    oRetValue.sourceFileName = oProduct.fileName;
+                    oRetValue.destinationFileName = oProduct.name + "_NDVI";
+
+                    var redSourceBandList = oController.getSelectedBandsByProductName(oProduct.name, oController.m_sRedSourceBandSelected);
+                    var nirSourceBandList = oController.getSelectedBandsByProductName(oProduct.name, oController.m_sNIRSourceBandSelected);
+                    //the server need only a single band
+                    if(utilsIsObjectNullOrUndefined(redSourceBandList) === false && redSourceBandList.length > 0)
+                    {
+                        oRetValue.options.redSourceBand = redSourceBandList[0];
+                    }
+                    if(utilsIsObjectNullOrUndefined(nirSourceBandList) === false && nirSourceBandList.length > 0)
+                    {
+                        oRetValue.options.nirSourceBandList = nirSourceBandList[0];
+                    }
+                }
+
+                if (!utilsIsObjectNullOrUndefined(oRetValue)) {
+                    aoReturnValue.push(oRetValue);
+                }
             }
-            else
-            {
-                oOptions = null;
-            }
-            oClose(oOptions, 500); // close, but give 500ms for bootstrap to animate
+
+            // if(bAreOkOptions != false)
+            // {
+            //     oController.m_oReturnValue.sourceFileName = oController.m_oSelectedProduct.fileName;
+            //     oController.m_oReturnValue.destinationFileName = oController.m_sFileName_Operation;
+            //     oController.m_oReturnValue.options.redSourceBand = oController.m_sRedSourceBandSelected;
+            //     oController.m_oReturnValue.options.nirSourceBand = oController.m_sNIRSourceBandSelected;
+            // }
+            // else
+            // {
+            //     oOptions = null;
+            // }
+            oClose(aoReturnValue, 500); // close, but give 500ms for bootstrap to animate
         };
 
         this.m_oGetParametersOperationService.getParametersNDVI()
@@ -98,6 +131,23 @@ var NDVIController = (function() {
             }).error(function (error) {
             utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN GET PARAMETERS");
         });
+
+        //Watch if the user select a product
+        var oController = this;
+        $scope.$watch('m_oController.m_asSelectedProducts', function(newValue, oldValue, scope)
+        {
+            $scope.m_oController.m_asSourceBands = $scope.m_oController.getBandsFromSelectedProducts();
+
+            // if(utilsIsObjectNullOrUndefined(newValue) === false && newValue.length > 0)
+            // {
+            //     oController.loadBands();
+            // }
+            // else
+            // {
+            //     // oController.m_asSelectedProducts = [];
+            //     newValue = [];
+            // }
+        },true);
 
     }
 
@@ -141,17 +191,20 @@ var NDVIController = (function() {
         for(var iIndexBand = 0; iIndexBand < iNumberOfBands ;iIndexBand++)
         {
             if( utilsIsObjectNullOrUndefined(this.m_oSelectedProduct.bandsGroups.bands[iIndexBand]) == false )
+            {
                 this.m_asSourceBands.push(this.m_oSelectedProduct.bandsGroups.bands[iIndexBand].name);
+            }
+
         }
 
     };
 
-    NDVIController.prototype.selectedProductIsEmpty = function()
-    {
-        if(utilsIsObjectNullOrUndefined(this.m_oSelectedProduct) == true)
-            return true;
-        return false;
-    };
+    // NDVIController.prototype.selectedProductIsEmpty = function()
+    // {
+    //     if(utilsIsObjectNullOrUndefined(this.m_oSelectedProduct) == true)
+    //         return true;
+    //     return false;
+    // };
 
     /**
      *
@@ -178,7 +231,6 @@ var NDVIController = (function() {
         if(utilsIsStrNullOrEmpty(sName) === true)
             return null;
         var iNumberOfProducts = this.m_aoProducts.length;
-        ;
         for(var iIndexProduct = 0; iIndexProduct < iNumberOfProducts ; iIndexProduct++)
         {
             if( this.m_aoProducts[iIndexProduct].name === sName)
@@ -188,6 +240,27 @@ var NDVIController = (function() {
         }
         return null;
     }
+
+    /**
+     *
+     * @returns {*}
+     */
+    NDVIController.prototype.getBandsFromSelectedProducts = function()
+    {
+        return utilsProjectGetBandsFromSelectedProducts(this.m_asSelectedProducts,this.m_aoProducts);
+    };
+
+    /**
+     *
+     * @param sProductName
+     * @param asSelectedBands
+     * @returns {*}
+     */
+    NDVIController.prototype.getSelectedBandsByProductName = function(sProductName, asSelectedBands)
+    {
+        return utilsProjectGetSelectedBandsByProductName(sProductName, asSelectedBands);
+    };
+
     NDVIController.$inject = [
         '$scope',
         'close',

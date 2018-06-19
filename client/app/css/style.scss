@@ -58,6 +58,8 @@
 @import "../dialogs/wps_dialog/wps";
 @import "../dialogs/generate_automatic_operation_dialog/generate_automatic_operation_dialog";
 @import "../dialogs/wapps/wapps";
+@import "../dialogs/rasor/rasorwapp";
+@import "../dialogs/opera/operawapp";
 
 //COMPONENTS
 @import "components/range_slider";
@@ -756,6 +758,8 @@ font-size: 2.5em !important;
 
 
 }
+
+
 
 /* Add some of new Bootstrap 4 feature without needs to include it
  * due to some incompatibilities with old version

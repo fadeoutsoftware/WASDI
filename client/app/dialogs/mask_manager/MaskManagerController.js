@@ -700,7 +700,7 @@ var MaskManagerController = (function() {
         var iNumberOfSavedMasks = this.m_oMasksSaved.length;
         for(var iIndexSavedMask = 0; iIndexSavedMask < iNumberOfSavedMasks; iIndexSavedMask++)
         {
-            if( this.m_oMasksSaved[iIndexSavedMask].type === "Range" || this.m_oMasksSaved.type === "Maths" )
+            if( this.m_oMasksSaved[iIndexSavedMask].type === "Range" || this.m_oMasksSaved[iIndexSavedMask].type === "Maths" )
             {
                 //if the saved mask is Range or Math
                 this.m_aoMasks.unshift(this.m_oMasksSaved[iIndexSavedMask]);

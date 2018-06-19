@@ -47,15 +47,20 @@ angular.module('wasdi.ImageEditorDirective', [])
 
                 function tick(event) {
                     // Other stuff
-                    stage.update(event);
-                };
-
-                scope.$on(
-                    "$destroy",
-                    function( event ) {
-                        console.log('Destroy');
+                    if(utilsIsObjectNullOrUndefined(stage) === false && utilsIsObjectNullOrUndefined(event) === false)
+                    {
+                        stage.update(event);
                     }
-                );
+                };
+                //TODO DESTROY EVENT
+                // scope.$on(
+                //     "$destroy",
+                //     function( event ) {
+                //         console.log('Destroy Ticker');
+                //         oTicker = null;
+                //
+                //     }
+                // );
 
                 var bItIsClicked = false;
 

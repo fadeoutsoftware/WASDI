@@ -227,6 +227,18 @@ var EditorController = (function () {
                         subMenu:[],
                         onClick: this.openWappsDialog,
                         icon:"fa fa-rocket"
+                    },
+                    {
+                        name:"",//RASOR
+                        subMenu:[],
+                        onClick: this.openRasorDialog,
+                        icon:"fa fa-rocket"
+                    },
+                    {
+                        name:"",//OPERA
+                        subMenu:[],
+                        onClick: this.openWappDialog,
+                        icon:"fa fa-rocket"
                     }
                 ],
                 onClick: "",
@@ -295,6 +307,14 @@ var EditorController = (function () {
         this.m_oTranslate('EDITOR_OPERATION_TITLE_WAPPS').then(function(text)
         {
             oController.m_aoNavBarMenu[3].subMenu[3].name  = text;
+        });
+        this.m_oTranslate('EDITOR_OPERATION_TITLE_RASOR').then(function(text)
+        {
+            oController.m_aoNavBarMenu[3].subMenu[4].name  = text;
+        });
+        this.m_oTranslate('EDITOR_OPERATION_TITLE_OPERA').then(function(text)
+        {
+            oController.m_aoNavBarMenu[3].subMenu[5].name  = text;
         });
     };
 
@@ -2134,10 +2154,7 @@ var EditorController = (function () {
                 if(utilsIsObjectNullOrUndefined(oResult) === true) return false;
                 if(utilsIsObjectNullOrUndefined(oResult.body) === true) return false;
 
-                // oController.m_oMasksSaved = {};
-                // oController.m_oMasksSaved.productMasks = oResult.listOfMasks.productMasks;
-                // oController.m_oMasksSaved.rangeMasks = oResult.listOfMasks.rangeMasks;
-                // oController.m_oMasksSaved.mathMasks = oResult.listOfMasks.mathMasks;
+                //sav filter
                 oController.m_oMasksSaved = oResult.listOfMasks;
 
                 // Set a filter, if it has been selected by the user
@@ -2146,9 +2163,9 @@ var EditorController = (function () {
                 oFinalBand.productMasks = oResult.body.productMasks;
                 oFinalBand.rangeMasks = oResult.body.rangeMasks;
                 oFinalBand.mathMasks = oResult.body.mathMasks;
-
-                oController.m_oFilterService.getProductBand(oResult.body,oController.m_oActiveWorkspace.workspaceId).success(function (data, status) {
-
+                oController.m_bIsLoadedViewBandImage = false;
+                oController.m_oFilterService.getProductBand(oResult.body,oController.m_oActiveWorkspace.workspaceId).success(function (data, status)
+                {
                     if (data != null)
                     {
                         if (data != undefined)
@@ -2159,10 +2176,28 @@ var EditorController = (function () {
                             oController.m_sViewUrlSelectedBand = objectUrl;
                         }
                     }
+                    oController.m_bIsLoadedViewBandImage = true;
                 }).error(function (data, status) {
                     utilsVexDialogAlertTop('GURU MEDITATION<br>ERROR PROCESSING BAND IMAGE ');
-
+                    oController.m_bIsLoadedViewBandImage = true;
                 });
+
+                // oController.m_oFilterService.getProductBand(oResult.body,oController.m_oActiveWorkspace.workspaceId).success(function (data, status) {
+                //
+                //     if (data != null)
+                //     {
+                //         if (data != undefined)
+                //         {
+                //             // Create the link to the stream
+                //             var blob = new Blob([data], {type: "octet/stream"});
+                //             var objectUrl = URL.createObjectURL(blob);
+                //             oController.m_sViewUrlSelectedBand = objectUrl;
+                //         }
+                //     }
+                // }).error(function (data, status) {
+                //     utilsVexDialogAlertTop('GURU MEDITATION<br>ERROR PROCESSING BAND IMAGE ');
+                //
+                // });
 
             });
         });
@@ -2251,6 +2286,93 @@ var EditorController = (function () {
 
         return true;
     };
+
+    /**
+     *
+     * @param oSelectedProduct
+     * @returns {boolean}
+     */
+    EditorController.prototype.openRasorDialog = function (oWindow) {
+
+        var oController;
+        if(utilsIsObjectNullOrUndefined(oWindow) === true)
+        {
+            oController = this;
+        }
+        else
+        {
+            oController = oWindow;
+        }
+        oController.m_oModalService.showModal({
+            templateUrl: "dialogs/rasor/RasorWappDialog.html",
+            controller: "RasorWappController",
+            inputs: {
+                extras: {
+                    products:oController.m_aoProducts,
+
+                }
+            }
+        }).then(function (modal) {
+            modal.element.modal();
+            modal.close.then(function (oResult) {
+                if(utilsIsObjectNullOrUndefined(oResult) == true)
+                {
+                    // utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR THE APPLY ORBIT OPTIONS ARE WRONG OR EMPTY!");
+                    return false;
+                }
+
+                return true;
+            });
+        });
+
+        return true;
+    };
+
+    /**
+     *
+     * @param oSelectedProduct
+     * @returns {boolean}
+     */
+    EditorController.prototype.openWappDialog = function (oWindow) {
+
+        var oController;
+        if(utilsIsObjectNullOrUndefined(oWindow) === true)
+        {
+            oController = this;
+        }
+        else
+        {
+            oController = oWindow;
+        }
+        oController.m_oModalService.showModal({
+            templateUrl: "dialogs/opera/OperaWappDialog.html",
+            controller: "OperaWappController",
+            inputs: {
+                extras: {
+                    products:oController.m_aoProducts,
+
+                }
+            }
+        }).then(function (modal) {
+            modal.element.modal();
+            modal.close.then(function (oResult) {
+                if(utilsIsObjectNullOrUndefined(oResult) == true)
+                {
+                    // utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR THE APPLY ORBIT OPTIONS ARE WRONG OR EMPTY!");
+                    return false;
+                }
+
+                return true;
+            });
+        });
+
+        return true;
+    };
+
+    /**
+     *
+     * @param oWindow
+     */
     EditorController.prototype.openApplyOrbitDialogInNavBar = function(oWindow)
     {
         var oController;
@@ -2449,14 +2571,24 @@ var EditorController = (function () {
                 }
                 if(oResult == "close")
                     return false;
-
+                var iNumberOfSelectedProducts = oResult.length;
+                for(var iIndexSelectedProduct = 0; iIndexSelectedProduct < iNumberOfSelectedProducts ; iIndexSelectedProduct++)
+                {
+                    var oProduct = oResult[iIndexSelectedProduct];
+                    oController.m_oSnapOperationService.NDVI(oProduct.sourceFileName, oProduct.destinationFileName, oController.m_oActiveWorkspace.workspaceId,oProduct.options)
+                        .success(function (data) {
+                            oController.m_oProcessesLaunchedService.loadProcessesFromServer(oController.m_oActiveWorkspace.workspaceId);
+                        }).error(function (error) {
+                        utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR THE OPERATION NDVI DOESN'T WORK");
+                    });
+                }
                 // oController.m_oScope.Result = oResult;
-                oController.m_oSnapOperationService.NDVI(oResult.sourceFileName, oResult.destinationFileName, oController.m_oActiveWorkspace.workspaceId,oResult.options)
-                    .success(function (data) {
-                        oController.m_oProcessesLaunchedService.loadProcessesFromServer(oController.m_oActiveWorkspace.workspaceId);
-                    }).error(function (error) {
-                    utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR THE OPERATION NDVI DOESN'T WORK");
-                });
+                // oController.m_oSnapOperationService.NDVI(oResult.sourceFileName, oResult.destinationFileName, oController.m_oActiveWorkspace.workspaceId,oResult.options)
+                //     .success(function (data) {
+                //         oController.m_oProcessesLaunchedService.loadProcessesFromServer(oController.m_oActiveWorkspace.workspaceId);
+                //     }).error(function (error) {
+                //     utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR THE OPERATION NDVI DOESN'T WORK");
+                // });
                 return true;
             });
         });

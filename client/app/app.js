@@ -188,3 +188,5 @@ wasdiApp.controller("ProcessorController", ProcessorController);
 wasdiApp.controller("WpsController", WpsController);
 wasdiApp.controller("GenerateAutomaticOperationDialogController", GenerateAutomaticOperationDialogController);
 wasdiApp.controller("WappsController", WappsController);
+wasdiApp.controller("RasorWappController", RasorWappController);
+wasdiApp.controller("OperaWappController", OperaWappController);

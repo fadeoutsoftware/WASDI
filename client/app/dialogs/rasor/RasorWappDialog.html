@@ -1,0 +1,57 @@
+<div class="modal fade rasor-wapp-modal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" ng-click="close(false)" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title ">{{"EDITOR_OPERATION_TITLE_RASOR"|translate}}</h4>
+            </div>
+            <div class="modal-body">
+                <h4>
+                    <div class="row">
+                        <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 rasor-logo-container">
+                            <img class="rasor-logo" src="assets/rasor/rasor_logo.png" ng-click="m_oController.redirectToRasorWebSite()">
+                        </div>
+                    </div>
+
+                    <div class="row rasor-wapp-container">
+                        <div class="col-xs-9 col-sm-9 col-md-9 col-lg-9 ">
+                            <div class="dropdown my-dropdown">
+                                <button class="btn btn-default dropdown-toggle" type="button" id="dropdownProductRasor"
+                                        data-toggle="dropdown">
+                                    {{m_oController.m_oSelectedProduct.name}}
+                                    <span class="caret"></span>
+                                </button>
+                                <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownProductRasor">
+                                    <li role="presentation" ng-repeat="product in m_oController.m_aoProducts" >
+                                        <a role="menuitem" tabindex="-1" href="" ng-click="m_oController.m_oSelectedProduct = product">
+                                            {{product.name}}
+                                        </a>
+                                    </li>
+
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
+                            <button class="my-button">Run</button>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 result-container">
+                            <div>
+                                <label>
+                                    Stima della popolazione coinvolta:
+                                </label>
+                            </div>
+                            <div class="well-sm">{{m_oController.m_sResultFromServer}}</div>
+
+                        </div>
+
+                    </div>
+                </h4>
+            </div>
+            <div class="modal-footer">
+                <button type="button" ng-click="close('ok')" class="my-button" data-dismiss="modal">{{"DIALOG_SFTP_UPLOAD_CLOSE_BUTTON"|translate}}</button>
+            </div>
+        </div>
+    </div>
+</div>

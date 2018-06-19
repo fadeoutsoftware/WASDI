@@ -1,5 +1,6 @@
 .NDVD-modal
 {
+  //overflow: visible;
   .modal-dialog
   {
 
@@ -16,6 +17,9 @@
 
       .modal-body
       {
+        //overflow-y: visible;
+        max-height: 500px;
+
         h4
         {
           form
@@ -28,6 +32,10 @@
                   width: 100%;
                 }
                 ul{
+                  max-height: 200px;
+                  max-width: 400px;
+                  overflow-y: auto;
+                  overflow-x: auto;
                   li{
                     min-height: 26px;
                     a{
