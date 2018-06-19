@@ -18,23 +18,26 @@
 
       .modal-body
       {
-        //FORM FOR NEW USER
-        form{
-          fieldset{
-            .column-email{
-              label{
-                margin-top: 10px;
-              }
-            }
+        min-height: 400px;
+        max-height: 500px;
+        .opera-wapp-container{
+          margin-top: 20px;
+        }
+        .result-container{
+          margin-top: 20px;
+          label{
+            color:$wasdi-green-logo;
           }
         }
 
-        .my-button{
-          margin:0;
-          margin-top: 5px;
-          padding: 10px 10px;
+        .opera-logo-container{
+          .opera-logo{
+            width: 250px;
+            cursor: pointer;
+          }
 
         }
+
       }
 
       .modal-footer
