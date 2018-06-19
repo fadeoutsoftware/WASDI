@@ -97,19 +97,30 @@ var WappsController = (function() {
         var oController = this;
 
         this.m_oProcessorService.getHelpFromProcessor(sProcessor).success(function (data) {
-            if(utilsIsObjectNullOrUndefined(data) == false)
+            if(utilsIsObjectNullOrUndefined(data) === false)
             {
                 var sHelpMessage = data.stringValue;
-                try {
-
-                    sHelpMessage = data.stringValue.replace("\\n", "<br>");
-                    sHelpMessage = sHelpMessage.replace("\\t","&nbsp&nbsp");
-                    oHelp = JSON.parse(sHelpMessage);
-                    sHelpMessage = oHelp.help
+                if(utilsIsObjectNullOrUndefined(sHelpMessage) === false )
+                {
+                    try {
+                        sHelpMessage = data.stringValue.replace("\\n", "<br>");
+                        sHelpMessage = sHelpMessage.replace("\\t","&nbsp&nbsp");
+                        oHelp = JSON.parse(sHelpMessage);
+                        sHelpMessage = oHelp.help;
+                    }
+                    catch(err) {
+                        sHelpMessage = data.stringValue;
+                    }
 
                 }
-                catch(err) {
-                    sHelpMessage = data.stringValue;
+                else
+                {
+                    sHelpMessage = "";
+                }
+                //If the message is empty from the server or is null
+                if(sHelpMessage === "")
+                {
+                    sHelpMessage = "There isn't any help message."
                 }
                 utilsVexDialogAlertTop(sHelpMessage);
             }
