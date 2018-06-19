@@ -1,0 +1,56 @@
+.rasor-wapp-modal
+{
+  .modal-dialog
+  {
+    width:50%;
+    .modal-content
+    {
+      .modal-header
+      {
+        color:$wasdi-white;
+        background-color: $wasdi-blue-logo;
+        .close
+        {
+          color: $wasdi-white;
+          opacity: 1;
+        }
+      }
+
+      .modal-body
+      {
+        //FORM FOR NEW USER
+        min-height: 400px;
+        max-height: 500px;
+        .rasor-wapp-container{
+          margin-top: 20px;
+        }
+        .result-container{
+          margin-top: 20px;
+          label{
+            color:$wasdi-green-logo;
+          }
+        }
+
+        .rasor-logo-container{
+          .rasor-logo{
+            width: 250px;
+            cursor: pointer;
+          }
+          //img{
+          //  cursor: pointer;
+          //}
+        }
+
+      }
+
+      .modal-footer
+      {
+        border-top:1px solid $wasdi-blue-logo;
+        .my-button
+        {
+          padding: 10px 21px;
+        }
+      }
+    }
+  }
+}

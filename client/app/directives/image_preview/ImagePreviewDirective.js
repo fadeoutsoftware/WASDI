@@ -69,8 +69,19 @@ angular.module('wasdi.ImagePreviewDirective', [])
 
                 function tick(event) {
                     // Other stuff
-                    stage.update(event);
+                    if(utilsIsObjectNullOrUndefined(stage) === false && utilsIsObjectNullOrUndefined(event) === false)
+                    {
+                        stage.update(event);
+                    }
                 }
+                // scope.$on(
+                //     "$destroy",
+                //     function( event ) {
+                //         console.log('Destroy Ticker');
+                //         oTicker = null;
+                //
+                //     }
+                // );
 
                 stage.update();
 
