@@ -15,8 +15,17 @@ public class ProcessWorkspaceViewModel {
     private int progressPerc;
     private String processObjId;
     private int pid;
+    private String payload;
 
-    public String getProductName() {
+    public String getPayload() {
+		return payload;
+	}
+
+	public void setPayload(String payload) {
+		this.payload = payload;
+	}
+
+	public String getProductName() {
         return productName;
     }
 
