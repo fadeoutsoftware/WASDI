@@ -211,6 +211,18 @@ var EditorController = (function () {
                         icon:"icon-mida-merge-operations"
                     },
                     {
+                        name:"",//OPERA
+                        subMenu:[],
+                        onClick: this.openWappDialog,
+                        icon:"fa fa-tint"
+                    },
+                    {
+                        name:"",//RASOR
+                        subMenu:[],
+                        onClick: this.openRasorDialog,
+                        icon:"fa fa-users"
+                    },
+                    {
                         name:"",//workflow
                         subMenu:[],
                         onClick: this.openWorkflowManagerDialog,
@@ -227,25 +239,14 @@ var EditorController = (function () {
                         subMenu:[],
                         onClick: this.openWappsDialog,
                         icon:"fa fa-rocket"
-                    },
-                    {
-                        name:"",//RASOR
-                        subMenu:[],
-                        onClick: this.openRasorDialog,
-                        icon:"fa fa-rocket"
-                    },
-                    {
-                        name:"",//OPERA
-                        subMenu:[],
-                        onClick: this.openWappDialog,
-                        icon:"fa fa-rocket"
                     }
                 ],
                 onClick: "",
                 icon:"icon-document-gear"
             },
         ]
-    }
+    };
+
     EditorController.prototype.navbarMenuTranslation = function()
     {
         var oController = this;
@@ -296,23 +297,23 @@ var EditorController = (function () {
         {
             oController.m_aoNavBarMenu[3].subMenu[0].name  = text;
         });
-        this.m_oTranslate('EDITOR_OPERATION_TITLE_WORKFLOW').then(function(text)
+        this.m_oTranslate('EDITOR_OPERATION_TITLE_OPERA').then(function(text)
         {
             oController.m_aoNavBarMenu[3].subMenu[1].name  = text;
         });
-        this.m_oTranslate('EDITOR_OPERATION_TITLE_NEW_PROCESSOR').then(function(text)
+        this.m_oTranslate('EDITOR_OPERATION_TITLE_RASOR').then(function(text)
         {
             oController.m_aoNavBarMenu[3].subMenu[2].name  = text;
         });
-        this.m_oTranslate('EDITOR_OPERATION_TITLE_WAPPS').then(function(text)
+        this.m_oTranslate('EDITOR_OPERATION_TITLE_WORKFLOW').then(function(text)
         {
             oController.m_aoNavBarMenu[3].subMenu[3].name  = text;
         });
-        this.m_oTranslate('EDITOR_OPERATION_TITLE_RASOR').then(function(text)
+        this.m_oTranslate('EDITOR_OPERATION_TITLE_NEW_PROCESSOR').then(function(text)
         {
             oController.m_aoNavBarMenu[3].subMenu[4].name  = text;
         });
-        this.m_oTranslate('EDITOR_OPERATION_TITLE_OPERA').then(function(text)
+        this.m_oTranslate('EDITOR_OPERATION_TITLE_WAPPS').then(function(text)
         {
             oController.m_aoNavBarMenu[3].subMenu[5].name  = text;
         });
