@@ -93,6 +93,11 @@ service('SnapOperationService', ['$http',  'ConstantsService', function ($http, 
         sUrl = sUrl.replace("{sOperation}", sOperation);
         return this.m_oHttp.post(sUrl,oOptionsInput,oConfig);
     };
+    
+    
+    this.runSaba = function (sFile, sWorkspaceId) {
+        return this.m_oHttp.get(this.APIURL + '/processing/saba?file=' + sFile + "&workspaceId=" + sWorkspaceId);
+    }
 
 }]);
 

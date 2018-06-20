@@ -44,7 +44,7 @@ service('ProcessesLaunchedService', ['ConstantsService','$rootScope','$http', fu
             {
                 utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN LOAD PROCESSES");
             });
-    }
+    };
 
     this.loadAllProcessesFromServer = function(sWorkSpaceId)
     {
@@ -69,12 +69,12 @@ service('ProcessesLaunchedService', ['ConstantsService','$rootScope','$http', fu
             {
                 utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN LOAD PROCESSES");
             });
-    }
+    };
 
     this.getAllProcessesFromServer = function(sWorkSpaceId)
     {
         return this.m_oHttp.get(this.APIURL + '/process/byws?sWorkspaceId='+sWorkSpaceId);
-    }
+    };
 
     this.removeProcessInServer = function(sPidInput,sWorkSpaceId,oProcess)
     {
@@ -94,19 +94,19 @@ service('ProcessesLaunchedService', ['ConstantsService','$rootScope','$http', fu
                 utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR WHILE KILLING THE PROCESS");
             });
         return true;
-    }
+    };
 
     this.getProcesses = function()
     {
         return this.m_aoProcessesRunning;
-    }
+    };
 
 
     this.updateProcessesBar = function()
     {
         //send a message to RootController for update the bar of processes
         $rootScope.$broadcast('m_aoProcessesRunning:updated',true);
-    }
+    };
 
 
     this.thereAreSomePublishBandProcess = function()
@@ -121,7 +121,7 @@ service('ProcessesLaunchedService', ['ConstantsService','$rootScope','$http', fu
             return false;
         }
         return false;
-    }
+    };
 
     this.thereIsPublishBandProcessOfTheProduct = function(sProductId)
     {
@@ -148,7 +148,7 @@ service('ProcessesLaunchedService', ['ConstantsService','$rootScope','$http', fu
             return false;
         }
         return false;
-    }
+    };
 
     this.checkIfFileIsDownloading = function(oLayer,sTypeOfProcess)
     {
@@ -179,17 +179,17 @@ service('ProcessesLaunchedService', ['ConstantsService','$rootScope','$http', fu
         }
         return false;
 
-    }
+    };
 
     this.getTypeOfProcessProductDownload = function()
     {
         return this.TYPE_OF_PROCESS[0];
-    }
+    };
 
     this.getTypeOfProcessPublishingBand = function()
     {
         return this.TYPE_OF_PROCESS[1];
-    }
+    };
 
     this.checkIfProcessWasStopped = function(oProcessInput)
     {
@@ -207,6 +207,17 @@ service('ProcessesLaunchedService', ['ConstantsService','$rootScope','$http', fu
 
         }
         return false;
+    };
+
+    /**
+     * Get a single process workspace object
+     * @param sProcessId
+     * @returns {*}
+     */
+    this.getProcessWorkspaceById = function(sProcessId)
+    {
+        var oService = this;
+        return this.m_oHttp.get(this.APIURL + '/process/byid?sProcessId=' + sProcessId);
     }
 
 }]);
