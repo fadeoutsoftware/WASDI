@@ -20,6 +20,7 @@ var RasorWappController = (function() {
         this.m_oProcessorService = oProcessorService;
         this.m_oInterval = $interval;
         this.m_oProcessesLaunchedService = oProcessesLaunchedService;
+        this.m_bIsRunning = false;
 
         if(utilsIsObjectNullOrUndefined(this.m_aoProducts) === false)
         {
@@ -46,6 +47,8 @@ var RasorWappController = (function() {
             {
                 if (data.status == 'DONE') {
                     console.log('---------------------------------Run Rasor - DONE = ' + data.payload);
+                    oLinkToController.m_bIsRunning = false;
+
                     var oResult = JSON.parse(data.payload);
                     oLinkToController.m_sResultFromServer = "" + parseInt(oResult.pop) + " Persone";
 
@@ -55,10 +58,12 @@ var RasorWappController = (function() {
                 else if (data.status == 'STOPPED') {
                     console.log('---------------------------------Run Rasor - STOPPED');
                     oLinkToController.m_sResultFromServer = "RASOR has been Stopped by the User";
+                    oLinkToController.m_bIsRunning = false;
                 }
                 else if (data.status == 'ERROR') {
                     console.log('---------------------------------Run Rasor - ERROR');
                     oLinkToController.m_sResultFromServer = "There was an Error running RASOR";
+                    oLinkToController.m_bIsRunning = false;
                 }
                 else if (data.status == 'WAITING') {
                     console.log('---------------------------------Run Rasor - WAITING');
@@ -103,6 +108,7 @@ var RasorWappController = (function() {
         var sJSON = '{"file":"'+ sFile+'","workspace":"'+sWorkspaceId + '"}';
 
         this.m_sResultFromServer = "RASOR App is waiting to start";
+        this.m_bIsRunning = true;
 
         this.m_oProcessorService.runProcessor('rasor2', sJSON).success(function (data) {
             if(utilsIsObjectNullOrUndefined(data) == false)
@@ -119,6 +125,7 @@ var RasorWappController = (function() {
             utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR RUNNING WAPP");
             oController.cleanAllExecuteWorkflowFields();
             //oController.m_sResultFromServer = "RASOR App is waiting to start";
+            oController.m_bIsRunning = false;
         });
 
     };

@@ -18,6 +18,7 @@ var OperaWappController = (function() {
         this.m_sResultFromServer = "";
         this.m_oSelectedProduct = null;
         this.m_oSnapOperationService = oSnapOperationService;
+        this.m_bIsRunning = false;
 
         if(utilsIsObjectNullOrUndefined(this.m_aoProducts) === false)
         {
@@ -38,10 +39,15 @@ var OperaWappController = (function() {
         var sFile = this.m_oSelectedProduct.fileName;
         var sWorkspaceId = this.m_oConstantsService.getActiveWorkspace().workspaceId;
 
+        var oController = this;
+        this.m_bIsRunning = true;
+
         this.m_oSnapOperationService.runSaba(sFile,sWorkspaceId).success(function (data) {
+            oController.m_bIsRunning = false;
             var oDialog = utilsVexDialogAlertBottomRightCorner("OPERA FLOOD DETECTION<br>DONE");
             utilsVexCloseDialogAfterFewSeconds(4000,oDialog);
         }).error(function (error) {
+            oController.m_bIsRunning = false;
             utilsVexDialogAlertTop("GURU MEDITATION<br>THERE WAS AN ERROR RUNNING OPERA");
         });
 
