@@ -19,6 +19,8 @@ var OperaWappController = (function() {
         this.m_oSelectedProduct = null;
         this.m_oSnapOperationService = oSnapOperationService;
         this.m_bIsRunning = false;
+        this.m_sLastGeneratedFile = "";
+        this.m_bHasResult = false;
 
         if(utilsIsObjectNullOrUndefined(this.m_aoProducts) === false)
         {
@@ -35,15 +37,26 @@ var OperaWappController = (function() {
     };
 
     OperaWappController.prototype.runSaba = function() {
-        console.log('eccomi');
+
+        this.m_bHasResult = false;
+
         var sFile = this.m_oSelectedProduct.fileName;
         var sWorkspaceId = this.m_oConstantsService.getActiveWorkspace().workspaceId;
+
+        this.m_sResultFromServer = "Opera Automatic Flooded Area Detection Running";
 
         var oController = this;
         this.m_bIsRunning = true;
 
         this.m_oSnapOperationService.runSaba(sFile,sWorkspaceId).success(function (data) {
             oController.m_bIsRunning = false;
+
+            if (data.intValue == 200) {
+                var sFile = data.stringValue;
+                oController.m_sResultFromServer = "Flooded Area Map Created. File Added to Workspace " + sFile;
+                oController.m_sLastGeneratedFile = sFile;
+                oController.m_bHasResult = true;
+            }
             var oDialog = utilsVexDialogAlertBottomRightCorner("OPERA FLOOD DETECTION<br>DONE");
             utilsVexCloseDialogAfterFewSeconds(4000,oDialog);
         }).error(function (error) {
@@ -52,6 +65,10 @@ var OperaWappController = (function() {
         });
 
     };
+
+    OperaWappController.prototype.publish = function() {
+        console.log('OPERA OUTPUT FILE ' + this.m_sLastGeneratedFile);
+    }
 
 
     OperaWappController.$inject = [
