@@ -122,14 +122,15 @@
                         <!-- EDITOR BUTTON-->
                         <li ng-class="{active:m_oController.activePageCss('root.editor')}" ng-disabled="m_oController.disableEditorButton()" >
                             <a ng-click="m_oController.onClickProcess();m_oController.openEditorPage()" href="" ng-style="{cursor:m_oController.cursorCss()}"  >
-                                <i class="fa fa-cogs fa-lg" aria-hidden="true"></i><!-- ui-sref="root.editor"-->
+                                <!--i class="fa fa-cogs fa-lg" aria-hidden="true"></i>-->
+                                <i class="fa fa-rocket fa-lg" aria-hidden="true"></i>
                                 {{"ROOT_VIEW_NAV_BAR_LINK_PROCESS"|translate}}
                             </a>
                         </li>
                         <!-- CATALOGUE BUTTON-->
                         <li ng-class="{active:m_oController.activePageCss('root.catalog')}"  >
                             <a ng-click="m_oController.openCatalogPage()" href=""  >
-                                <i class="fa fa-archive fa-lg" aria-hidden="true"></i>
+                                <i class="fa fa-database fa-lg" aria-hidden="true"></i>
                                 {{"ROOT_VIEW_NAV_BAR_LINK_CATALOG"|translate}}
                             </a>
                         </li>
