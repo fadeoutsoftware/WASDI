@@ -20,6 +20,9 @@
       {
         min-height: 400px;
         max-height: 500px;
+        .loadIcon #invader, .loading-files #invader {
+          margin-top: 50px;
+        }
         .rasor-wapp-container{
           margin-top: 20px;
         }

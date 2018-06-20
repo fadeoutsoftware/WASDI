@@ -18,8 +18,11 @@
 
       .modal-body
       {
-        min-height: 400px;
-        max-height: 500px;
+        min-height: 500px;
+        max-height: 600px;
+        .loadIcon #invader, .loading-files #invader {
+          margin-top: 50px;
+        }
         .opera-wapp-container{
           margin-top: 20px;
         }

@@ -578,7 +578,7 @@ angular.module('wasdi.ImageEditorDirective', [])
                     scope.m_bIsVisibleMouseCursorWait = false;
                     scope.Stage.removeAllChildren();
 
-                    if(utilsIsObjectNullOrUndefined(newValue) === false && newValue !== "empty")
+                    if(utilsIsObjectNullOrUndefined(newValue) === false && newValue !== "//:0")
                     {
                         scope.m_bIsActiveZoom = false;
                         var oBitmap =  new createjs.Bitmap(newValue);
