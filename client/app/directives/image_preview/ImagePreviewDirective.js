@@ -162,7 +162,11 @@ angular.module('wasdi.ImagePreviewDirective', [])
 
                 scope.$watchGroup(['body.viewportX','body.viewportY','body.viewportWidth','body.viewportHeight'], function (newValue, oldValue, scope)
                 {
-                    scope.resizeRectangle(scope.body);
+                    // if(utilsIsObjectNullOrUndefined(scope.body) === false)
+                    // {
+                        scope.resizeRectangle(scope.body);
+                    // }
+
                     // var element = angular.element(document.querySelector('#imagepreviewcanvas'));
                     // var iCanvasHeight = element[0].offsetHeight;
                     // var iCanvasWidth = element[0].offsetWidth;
@@ -177,6 +181,7 @@ angular.module('wasdi.ImagePreviewDirective', [])
                     // fNewHeight = fNewHeight * iCanvasHeight;
                     // scope.Square.graphics.clear().setStrokeStyle(2).beginStroke("#009036").beginFill("#43516A").drawRect(fX, fY, fNewWidth, fNewHeight);
                 });
+
                 /**
                  *
                  */
@@ -189,10 +194,14 @@ angular.module('wasdi.ImagePreviewDirective', [])
                         scope.Stage.addChild(scope.Square);
                         // scope.Stage.addChild(scope.Dragger);
                         // scope.zoom();
+                        // scope.resizeRectangle(scope.body);
+                        // scope.Stage.update();
                     }
                     else {
                         scope.Stage.autoClear = true;
                         scope.Stage.removeAllChildren();
+                        // scope.Stage.update();
+                        // scope.resizeRectangle(scope.body);
                         // scope.Stage.update();
                     }
                     scope.resizeRectangle(scope.body);

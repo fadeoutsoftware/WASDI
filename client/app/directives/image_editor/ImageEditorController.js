@@ -599,6 +599,8 @@ angular.module('wasdi.ImageEditorDirective', [])
 
 
                         scope.removeSquareAndDraggerContainer();
+                        // scope.Stage.update();
+
                     }
 
                     scope.Stage.update();
