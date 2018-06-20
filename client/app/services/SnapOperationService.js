@@ -99,5 +99,8 @@ service('SnapOperationService', ['$http',  'ConstantsService', function ($http, 
         return this.m_oHttp.get(this.APIURL + '/processing/saba?file=' + sFile + "&workspaceId=" + sWorkspaceId);
     }
 
+    this.publishSabaResult = function (sFile, sWorkspaceId) {
+        return this.m_oHttp.get(this.APIURL + '/processing/ddspublishsaba?file=' + sFile + "&workspaceId=" + sWorkspaceId);
+    }
 }]);
 
