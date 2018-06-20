@@ -68,7 +68,30 @@ var OperaWappController = (function() {
 
     OperaWappController.prototype.publish = function() {
         console.log('OPERA OUTPUT FILE ' + this.m_sLastGeneratedFile);
-    }
+
+        var sFile = this.m_sLastGeneratedFile;
+        var sWorkspaceId = this.m_oConstantsService.getActiveWorkspace().workspaceId;
+
+        this.m_sResultFromServer = "Publishing OPERA Result in Dewetra";
+        var oController = this;
+
+        this.m_oSnapOperationService.publishSabaResult(sFile,sWorkspaceId).success(function (data) {
+            oController.m_bIsRunning = false;
+
+            if (data.intValue == 200) {
+                var sFile = data.stringValue;
+                oController.m_sResultFromServer = "File available in Dewetra " + sFile;
+                oController.m_sLastGeneratedFile = sFile;
+                oController.m_bHasResult = false;
+            }
+            var oDialog = utilsVexDialogAlertBottomRightCorner("FLOODED AREA<br>PUBLISHED");
+            utilsVexCloseDialogAfterFewSeconds(4000,oDialog);
+        }).error(function (error) {
+            oController.m_bIsRunning = false;
+            utilsVexDialogAlertTop("GURU MEDITATION<br>THERE WAS AN ERROR PUBLISHING OPERA");
+        });
+
+    };
 
 
     OperaWappController.$inject = [
