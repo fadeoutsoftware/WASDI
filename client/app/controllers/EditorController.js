@@ -155,7 +155,7 @@ var EditorController = (function () {
                 name:"",//sftp
                 subMenu:[],
                 onClick: this.openSFTPDialogInNavBar,
-                icon:"fa fa-server"
+                icon:"fa fa-upload"
             },
             {
                 name:"",//radar
