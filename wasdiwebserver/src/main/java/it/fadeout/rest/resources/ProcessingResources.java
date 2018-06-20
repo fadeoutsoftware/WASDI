@@ -5,10 +5,12 @@ import java.awt.Dimension;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -46,6 +48,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.esa.snap.core.dataio.ProductIO;
 import org.esa.snap.core.datamodel.Band;
@@ -832,6 +835,147 @@ public class ProcessingResources {
 		}
 
 	}
+	
+	
+	
+	@GET
+	@Path("/saba")
+	@Produces({"application/json"})
+	public PrimitiveResult Saba(@HeaderParam("x-session-token") String sSessionId, @QueryParam("file") String sFileName, @QueryParam("workspaceId") String sWorkspaceId) {
+		
+		PrimitiveResult oResult = new PrimitiveResult();
+		
+		Wasdi.DebugLog("ProcessingResource.Saba");
+
+		User oUser = Wasdi.GetUserFromSession(sSessionId);
+		try {
+
+			//check authentication
+			if (oUser == null || Utils.isNullOrEmpty(oUser.getUserId())) {
+				oResult.setBoolValue(false);
+				oResult.setIntValue(404);
+				return oResult;				
+			}
+			
+			Wasdi.DebugLog("ProcessingResource.Saba: INPUT FILE " + sFileName);
+			
+			Wasdi.DebugLog("ProcessingResource.Saba: launching ENVI SABA Processor");
+			
+			//execute assimilation
+			if (launchSaba(sFileName, sWorkspaceId)) {
+				Wasdi.DebugLog("ProcessingResource.Saba: ok return");
+				String sOutputFile = "";
+				
+				if (sFileName.startsWith("CSK")) {
+					sOutputFile = "Mappa_" + sFileName.substring(0, 41) +".tif";
+				}
+				else if (sFileName.startsWith("S1A")) {
+					sOutputFile = "Mappa_" + sFileName.substring(0, 32) +".tif";
+				}
+				
+				oResult.setStringValue(sOutputFile);
+				
+				oResult.setBoolValue(true);
+				oResult.setIntValue(200);				
+			}
+			else {
+				Wasdi.DebugLog("ProcessingResource.Saba: error, return");
+				oResult.setBoolValue(false);
+				oResult.setIntValue(500);				
+			}
+		} catch (Exception e) {
+			System.out.println("ProcessingResource.Saba: error launching Saba " + e.getMessage());
+			e.printStackTrace();
+			oResult.setBoolValue(false);
+			oResult.setIntValue(500);				
+			return oResult;
+		}
+		
+		return oResult;
+	}
+	
+	@GET
+	@Path("/ddspublishsaba")
+	@Produces({"application/json"})
+	public PrimitiveResult DDSPublishSaba(@HeaderParam("x-session-token") String sSessionId, @QueryParam("file") String sFileName, @QueryParam("workspaceId") String sWorkspaceId) {
+		
+		PrimitiveResult oResult = new PrimitiveResult();
+		
+		Wasdi.DebugLog("ProcessingResource.DDSPublishSaba");
+
+		User oUser = Wasdi.GetUserFromSession(sSessionId);
+		try {
+
+			//check authentication
+			if (oUser == null || Utils.isNullOrEmpty(oUser.getUserId())) {
+				oResult.setBoolValue(false);
+				oResult.setIntValue(404);
+				return null;				
+			}
+			
+			Wasdi.DebugLog("ProcessingResource.DDSPublishSaba: INPUT FILE " + sFileName);
+			
+			String sAccount = oUser.getUserId();		
+			
+			String sDownloadRootPath = m_oServletConfig.getInitParameter("DownloadRootPath");
+			if (!sDownloadRootPath.endsWith("/")) sDownloadRootPath = sDownloadRootPath + "/";
+			File oUserBaseDir = new File(sDownloadRootPath+sAccount+ "/" +sWorkspaceId+"/");
+			File oFilePath = new File(oUserBaseDir, sFileName);
+			
+			Wasdi.DebugLog("ProcessingResource.DDSPublishSaba: Full Path " + oFilePath.getPath());
+			
+			String sDestinationFile = m_oServletConfig.getInitParameter("DDSPath");
+			String [] asFileNameSplitted = sFileName.split("_");
+			
+			if (asFileNameSplitted==null) {
+				oResult.setBoolValue(false);
+				oResult.setIntValue(500);
+				oResult.setStringValue("Impossible split file _");
+				return oResult;					
+			}
+			
+			if (asFileNameSplitted.length<1) {
+				oResult.setBoolValue(false);
+				oResult.setIntValue(500);
+				oResult.setStringValue("Impossible split file _");
+				return oResult;						
+			}
+			
+			String sDate = asFileNameSplitted[asFileNameSplitted.length-1];
+			
+			String sDDSFileFolder = sDestinationFile+sDate.substring(0, 4) + "/" + sDate.substring(4,6)+ "/" + sDate.substring(6,8)+"/";
+			
+			
+			Wasdi.DebugLog("ProcessingResource.DDSPublishSaba: Output File Path " + sDDSFileFolder);
+			
+			File oOutputFile = new File(sDDSFileFolder);
+			
+			oOutputFile.mkdirs();
+			
+			String sOutputFileOnlyName = "FLOOD_" + sDate.replace("T", "") + "f";
+			
+			Wasdi.DebugLog("ProcessingResource.DDSPublishSaba: Output File Name " + sOutputFileOnlyName);
+			
+			oOutputFile = new File(sDDSFileFolder+sOutputFileOnlyName);
+			
+			FileUtils.copyFile(oFilePath, oOutputFile);
+			
+			Wasdi.DebugLog("ProcessingResource.DDSPublishSaba: Copy Done");
+				
+			oResult.setStringValue(sDDSFileFolder);
+			oResult.setBoolValue(true);
+			oResult.setIntValue(200);	
+			
+		} catch (Exception e) {
+			System.out.println("ProcessingResource.DDSPublishSaba: error publishing Saba Output " + e.getMessage());
+			e.printStackTrace();
+			oResult.setBoolValue(false);
+			oResult.setIntValue(500);				
+			return oResult;
+		}
+		
+		return oResult;		
+	}
 
 	
 	@POST
@@ -954,6 +1098,60 @@ public class ProcessingResources {
 		return true;
 	}
 
+	/**
+	 * Launch Saba ENVI process
+	 * @param sInputFile
+	 * @param sWorkspaceId
+	 * @return
+	 */
+	private boolean launchSaba(String sInputFile, String sWorkspaceId) {
+
+		try {
+			
+			String cmd[] = new String[] {
+					m_oServletConfig.getInitParameter("SabaScript")
+			};
+			
+			String sParamFile = m_oServletConfig.getInitParameter("SabaParam");
+			
+			Wasdi.DebugLog("ProcessingResource.launchSaba ParamFile " + sParamFile);
+			
+			System.out.println("ProcessingResource.launchSaba: shell exec " + Arrays.toString(cmd));
+			File oFile = new File(sParamFile);
+			
+			if (!oFile.exists()) {				
+				oFile.mkdirs();
+			}
+			
+			BufferedWriter oWriter = new BufferedWriter(new FileWriter(oFile));
+			oWriter.write("USER,dpc");
+			oWriter.newLine();
+			oWriter.write("PASSWORD,badeno");
+			oWriter.newLine();
+			oWriter.write("FILE,"+sInputFile);
+			oWriter.newLine();
+			oWriter.write("WORKSPACE,"+sWorkspaceId);
+			oWriter.newLine();
+			oWriter.flush();		
+			oWriter.close();
+			
+			
+
+			Process proc = Runtime.getRuntime().exec(cmd);
+			BufferedReader input = new BufferedReader(new InputStreamReader(proc.getInputStream()));
+            String line;
+            while((line=input.readLine()) != null) {
+            	System.out.println("ProcessingResource.launchSaba: envi stdout: " + line);
+            }
+			if (proc.waitFor() != 0) return false;
+		} catch (Exception oEx) {
+			System.out.println("ProcessingResource.launchSaba: error during saba process " + oEx.getMessage());
+			oEx.printStackTrace();
+			return false;
+		}
+
+		return true;
+	}
 	
 	private String AcceptedUserAndSession(String sSessionId) {
 		//Check user

@@ -134,6 +134,7 @@ public class ProcessWorkspaceResource {
 		oViewModel.setStatus(oProcess.getStatus());
 		oViewModel.setProgressPerc(oProcess.getProgressPerc());
 		oViewModel.setProcessObjId(oProcess.getProcessObjId());
+		oViewModel.setPayload(oProcess.getPayload());
 		return oViewModel;
 	}
 	
@@ -482,6 +483,51 @@ public class ProcessWorkspaceResource {
 		}
 		catch (Exception oEx) {
 			System.out.println("ProcessWorkspaceResource.UpdateProcessById: error retrieving process " + oEx.getMessage());
+			oEx.printStackTrace();
+		}
+
+		return oProcess;
+	}
+	
+	
+	@GET
+	@Path("/setpayload")
+	@Produces({"application/xml", "application/json", "text/xml"})
+	public ProcessWorkspaceViewModel SetProcessPayload(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sProcessId") String sProcessWorkspaceId, @QueryParam("payload") String sPayload) {
+		
+		Wasdi.DebugLog("ProcessWorkspaceResource.SetProcessPayload");
+
+		User oUser = Wasdi.GetUserFromSession(sSessionId);
+
+		ProcessWorkspaceViewModel oProcess = new ProcessWorkspaceViewModel();
+
+		try {
+			// Domain Check
+			if (oUser == null) {
+				return oProcess;
+			}
+			if (Utils.isNullOrEmpty(oUser.getUserId())) {
+				return oProcess;
+			}
+
+			System.out.println("ProcessWorkspaceResource.SetProcessPayload: process id " + sProcessWorkspaceId);
+			System.out.println("ProcessWorkspaceResource.SetProcessPayload: PAYLOAD " + sPayload);
+
+			// Create repo
+			ProcessWorkspaceRepository oRepository = new ProcessWorkspaceRepository();
+
+			// Get Process List
+			ProcessWorkspace oProcessWorkspace = oRepository.GetProcessByProcessObjId(sProcessWorkspaceId);
+			
+			oProcessWorkspace.setPayload(sPayload);
+
+			oRepository.UpdateProcess(oProcessWorkspace);
+			
+			oProcess = buildProcessWorkspaceViewModel(oProcessWorkspace);
+
+		}
+		catch (Exception oEx) {
+			System.out.println("ProcessWorkspaceResource.SetProcessPayload: error retrieving process " + oEx.getMessage());
 			oEx.printStackTrace();
 		}
 
