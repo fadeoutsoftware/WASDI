@@ -224,7 +224,7 @@ public abstract class WasdiProcessorEngine {
 		    oZipInputStream.close();
 		    
 		    if (!bMyProcessorExists) {
-		    	LauncherMain.s_oLogger.error("WasdiProcessorEngine.UnzipProcessor myProcess.py not present in processor " + sZipFileName);
+		    	LauncherMain.s_oLogger.error("WasdiProcessorEngine.UnzipProcessor myProcessor.py not present in processor " + sZipFileName);
 		    	return false;
 		    }
 		    
@@ -343,6 +343,9 @@ public abstract class WasdiProcessorEngine {
 			}
 
 			oConnection.disconnect();
+			
+			// Read Again Process Workspace: the user may have changed it!
+			oProcessWorkspace = oProcessWorkspaceRepository.GetProcessByProcessObjId(oProcessWorkspace.getProcessObjId());
 			
 			LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.DONE, 100);
 		}

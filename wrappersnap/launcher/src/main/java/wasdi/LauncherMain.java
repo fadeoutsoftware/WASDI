@@ -688,6 +688,9 @@ public class LauncherMain {
 			
 			updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 75);
 			
+			if (oVM.getName().equals("geotiff")) {
+				oVM.setName(oVM.getFileName());
+			}
             // Save it in the register
 			DownloadedFilesRepository oDownloadedRepo = new DownloadedFilesRepository();
 			DownloadedFile oAlreadyDownloaded = new DownloadedFile();
