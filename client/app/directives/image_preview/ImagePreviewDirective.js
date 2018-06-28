@@ -145,9 +145,11 @@ angular.module('wasdi.ImagePreviewDirective', [])
                 // };
                 scope.resizeRectangle = function(oBody)
                 {
-                    var element = angular.element(document.querySelector('#imagepreviewcanvas'));
-                    var iCanvasHeight = element[0].offsetHeight;
-                    var iCanvasWidth = element[0].offsetWidth;
+                    // var element = angular.element(document.querySelector('#imagepreviewcanvas'));
+                    // var iCanvasHeight = element[0].offsetHeight;
+                    // var iCanvasWidth = element[0].offsetWidth;
+                    var iCanvasHeight = scope.heightCanvas;
+                    var iCanvasWidth =  scope.widthCanvas;
                     //originalBandWidth  originalBandHeight
                     var fX = oBody.viewportX / oBody.originalBandWidth;
                     var fY = oBody.viewportY /oBody.originalBandHeight;

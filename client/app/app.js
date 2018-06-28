@@ -6,7 +6,7 @@ var wasdiApp = angular.module('wasdi', [
     'ngAnimate',
     'ui.router',//library alternative for router
     'pascalprecht.translate',
-
+    'JSONedit',
 
     //US SERVICE
     'wasdi.ConstantsService',

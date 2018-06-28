@@ -15,6 +15,22 @@
       {
         overflow-y: auto;
         max-height: 500px;
+        //.vex.vex-theme-top .vex-content {
+        //  -moz-border-radius: 0 0 5px 5px;
+        //  -webkit-border-radius: 0 0 5px 5px;
+        //  border-radius: 0 0 5px 5px;
+        //  font-family: "Helvetica Neue", sans-serif;
+        //  background: #f0f0f0;
+        //  color: #444;
+        //  padding: 1em;
+        //  position: relative;
+        //  margin: 0 auto;
+        //  max-width: 80%;
+        //  width: 80%;
+        //  font-size: 1.1em;
+        //  line-height: 1.5em;
+        //}
+
         label{
           margin: 10px 0px 5px 0px;
           color:$wasdi-green-logo;
@@ -38,6 +54,21 @@
             cursor:pointer;
             background-color:#BFBEBE;
 
+          }
+          .jsonView {
+            padding: 30px 0 0 15px;
+            //.block {
+            //  border-style: solid;
+            //  border-width: 1px;
+            //  /* padding: 5px; */
+            //   margin: 1px;
+            //   padding: 2px;
+            //  //background-color: $wasdi-green-logo;
+            //  border-color: $wasdi-blue-logo;
+            //}
+          }
+          .jsonContainer{
+            margin: 20px 0;
           }
         }
         .my-button{

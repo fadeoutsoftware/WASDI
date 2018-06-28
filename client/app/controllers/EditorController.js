@@ -29,7 +29,8 @@ var EditorController = (function () {
         this.m_b2DMapModeOn = true;
         // Flag to know if the big map is the Geographical Mode (true) or in the Editor Mode (false)
         this.m_bIsActiveGeoraphicalMode = false;
-
+            
+        this.m_bIsLoadingColourManipulation = false;
         this.m_bIsLoadingTree = true;
         this.m_sToolTipBtnSwitchGeographic = "EDITOR_TOOLTIP_TO_GEO";
         this.m_sClassBtnSwitchGeographic = "btn-switch-not-geographic";
@@ -333,31 +334,44 @@ var EditorController = (function () {
      * Set the active tab between Navigation, Colour manipulation, Preview
      * @param iTab
      */
-    EditorController.prototype.setActiveTab = function (iTab) {
-        if (this.m_iActiveMapPanelTab == iTab) return;
+    EditorController.prototype.setActiveTab = function (iTab)
+    {
+        if (this.m_iActiveMapPanelTab === iTab) return;
 
         this.m_iActiveMapPanelTab = iTab;
+        // if was clicked the tab color manipulation && the active band isn't null && there isn't any saved colour manipulation, get colour manipulation
+        if( (iTab === 1) && (utilsIsObjectNullOrUndefined(this.m_oActiveBand) === false) && (utilsIsObjectNullOrUndefined(this.m_oActiveBand.colorManipulation) === true) &&
+            (this.m_bIsLoadingColourManipulation === false) )
+        {
+            var oBand = this.m_oActiveBand;
+            var sFileName = this.m_aoProducts[oBand.productIndex].fileName
+            this.getProductColorManipulation(sFileName,oBand.name,true,this.m_oActiveWorkspace.workspaceId);
 
-        // if (iTab == 2 && this.m_oActiveBand != null) {
-        //     // Initialize Image Preview
-        //
-        //     var oBand = this.m_oActiveBand;
-        //     var sFileName = this.m_aoProducts[oBand.productIndex].fileName;
-        //
-        //     var elementImagePreview = angular.element(document.querySelector('#imagepreviewcanvas'));
-        //     var heightImagePreview = elementImagePreview[0].offsetHeight;
-        //     var widthImagePreview = elementImagePreview[0].offsetWidth;
-        //
-        //     // TODO: here the tab is not shown yet. So H and W are still 0.
-        //     // This code should run after the tab is shown
-        //     if (heightImagePreview==0) heightImagePreview = 280;//default value canvas
-        //     if (widthImagePreview==0) widthImagePreview = 560;//default value canvas
-        //
-        //     var oBodyImagePreview = this.createBodyForProcessingBandImage(sFileName,oBand.name,null,0,0,oBand.width,oBand.height,
-        //                             widthImagePreview,heightImagePreview,oBand.colorManipulation);
-        //
-        //      this.processingGetBandPreview(oBodyImagePreview,this.m_oActiveWorkspace.workspaceId);
-        // }
+        }
+        //if was clicked the tab preview && the active band isn't null && there isn't any saved preview image, preview image
+        if ( (iTab === 2) && (this.m_oActiveBand !== null) && ( utilsIsStrNullOrEmpty(this.m_sPreviewUrlSelectedBand) === true || this.m_sPreviewUrlSelectedBand === "empty") &&
+            (this.m_bIsLoadedPreviewBandImage === true))
+        {
+            // Initialize Image Preview
+
+            var oBand = this.m_oActiveBand;
+            var sFileName = this.m_aoProducts[oBand.productIndex].fileName;
+
+            // var elementImagePreview = angular.element(document.querySelector('#imagepreviewcanvas'));
+            var elementImagePreview = angular.element(document.querySelector('#panelBodyMapPreviewEditor'));
+            var heightImagePreview = elementImagePreview[0].offsetHeight;
+            var widthImagePreview = elementImagePreview[0].offsetWidth;
+
+            // TODO: here the tab is not shown yet. So H and W are still 0.
+            // This code should run after the tab is shown
+            if (heightImagePreview==0) heightImagePreview = 280;//default value canvas
+            if (widthImagePreview==0) widthImagePreview = 560;//default value canvas
+
+            var oBodyImagePreview = this.createBodyForProcessingBandImage(sFileName,oBand.name,null,0,0,oBand.width,oBand.height,
+                                    widthImagePreview,heightImagePreview,oBand.colorManipulation);
+
+             this.processingGetBandPreview(oBodyImagePreview,this.m_oActiveWorkspace.workspaceId);
+        }
     };
 
 
@@ -1280,6 +1294,10 @@ var EditorController = (function () {
         var oLastActiveBand = this.m_oActiveBand;
 
         this.m_oActiveBand = oBand;
+        //set navigation tab
+        this.m_iActiveMapPanelTab = 0;
+        //set default value for preview image
+        this.m_sPreviewUrlSelectedBand="empty";
 
         // CHECK THE ACTUAL MODE
         if (this.m_bIsActiveGeoraphicalMode) {
@@ -1372,13 +1390,13 @@ var EditorController = (function () {
         // The preview is available?
         // if ( (widthImagePreview > 0) && (heightImagePreview > 0) )
         // {
-        if (heightImagePreview==0) heightImagePreview = 280;//default value canvas
-        if (widthImagePreview==0) widthImagePreview = 560;//default value canvas
-            // Yes call API also for preview
-            var oBodyImagePreview = this.createBodyForProcessingBandImage(sFileName,oBand.name, null, 0,0,oBand.width,oBand.height,
-                                    widthImagePreview, heightImagePreview,oBand.colorManipulation);
-            // Show it
-            oController.processingGetBandPreview(oBodyImagePreview,oController.m_oActiveWorkspace.workspaceId);
+        // if (heightImagePreview==0) heightImagePreview = 280;//default value canvas
+        // if (widthImagePreview==0) widthImagePreview = 560;//default value canvas
+        //     // Yes call API also for preview
+        //     var oBodyImagePreview = this.createBodyForProcessingBandImage(sFileName,oBand.name, null, 0,0,oBand.width,oBand.height,
+        //                             widthImagePreview, heightImagePreview,oBand.colorManipulation);
+            // // Show it
+            // oController.processingGetBandPreview(oBodyImagePreview,oController.m_oActiveWorkspace.workspaceId);
         // }
     };
 
@@ -1467,7 +1485,7 @@ var EditorController = (function () {
                     oController.m_oGlobeService.zoomBandImageOnBBOX(oController.m_aoProducts[oController.m_oActiveBand.productIndex].bbox);
 
                     // Get product colour manipulation
-                    oController.getProductColorManipulation(oBody.productFileName,oBody.bandName,true,workspaceId);
+                    // oController.getProductColorManipulation(oBody.productFileName,oBody.bandName,true,workspaceId);
                 }
             }
         }).error(function (data, status) {
@@ -1533,11 +1551,16 @@ var EditorController = (function () {
             return false;
         }
 
+        //delete color manipulation in jstree (the colour manipulation is passed with reference)
+         delete this.m_oActiveBand.colorManipulation;
         // Clear the active Band
         this.m_oActiveBand = null;
         // Get the layer Id
         var sLayerId = "wasdi:" + oBand.layerId;
-
+        //set navigation tab
+        this.m_iActiveMapPanelTab = 0;
+        //remove preview band image
+        this.m_sPreviewUrlSelectedBand = "empty";
         // Check the actual Mode
         if (this.m_b2DMapModeOn) {
             // We are in 2d mode
@@ -3142,6 +3165,7 @@ var EditorController = (function () {
             return false;
         }
         var oController = this;
+        this.m_bIsLoadingColourManipulation = true;
         this.m_oSnapOperationService.getProductColorManipulation(sFile,sBand,bAccurate,sWorkspaceId).success(function (data, status) {
             if (data != null)
             {
@@ -3156,9 +3180,10 @@ var EditorController = (function () {
                     }
                 }
             }
+            oController.m_bIsLoadingColourManipulation = false;
         }).error(function (data, status) {
             utilsVexDialogAlertTop('GURU MEDITATION<br>PRODUCT COLOR MANIPULATION ');
-
+            oController.m_bIsLoadingColourManipulation = false;
         });
 
         return true;

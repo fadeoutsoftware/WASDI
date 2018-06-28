@@ -18,6 +18,7 @@ var WappsController = (function() {
         this.m_sFileName = "";
         this.m_oProcessorService = oProcessorService;
         this.m_aoProcessorList = [];
+        this.myJson = {};
         var oController = this;
         $scope.close = function(result) {
             oClose(result, 300); // close, but give 500ms for bootstrap to animate
@@ -122,7 +123,8 @@ var WappsController = (function() {
                 {
                     sHelpMessage = "There isn't any help message."
                 }
-                utilsVexDialogAlertTop(sHelpMessage);
+                // utilsVexDialogAlertTop(sHelpMessage);
+                utilsVexDialogBigAlertTop(sHelpMessage);
             }
             else
             {
@@ -135,6 +137,11 @@ var WappsController = (function() {
 
     };
 
+
+    WappsController.prototype.collapsePanels = function()
+    {
+        utilsCollapseBootstrapPanels();
+    };
     WappsController.$inject = [
         '$scope',
         'close',

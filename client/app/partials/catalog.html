@@ -21,9 +21,10 @@
                            ng-model-options="{ updateOn: 'blur' }">
 
                     <span class="input-group-addon">
-                                <i class="fa fa-calendar"></i>
-                            </span>
+                        <i class="fa fa-calendar"></i>
+                    </span>
                 </div>
+
             </div>
 
             <div class="description">
@@ -95,13 +96,23 @@
                         <i class="fa fa-filter" aria-hidden="true"></i>
                         Filters:
                         <div class="well well-sm">
-                            <div class="radio" ng-repeat="category in m_oController.m_asCategories ">
-                                <label >
-                                    <input type="radio" name="pageNumber" ng-value="category.isSelected"
-                                           ng-click="m_oController.radioButtonOnCLick(category)" ng-checked="category.isSelected"><!-- ng-model="category.isSelected"-->
-                                    {{category.name}}
+                            <!--<div class="radio" ng-repeat="category in m_oController.m_asCategories ">-->
+                                <!--<label >-->
+                                    <!--<input type="radio" name="pageNumber" ng-value="category.isSelected"-->
+                                           <!--ng-click="m_oController.radioButtonOnCLick(category)" ng-checked="category.isSelected">&lt;!&ndash; ng-model="category.isSelected"&ndash;&gt;-->
+                                    <!--{{m_oController.getFriendlyOperationName(category.name)}}-->
+                                <!--</label>-->
+                            <!--</div>-->
+
+                            <div class="checkbox" ng-repeat="category in m_oController.m_asCategories ">
+                                <label>
+                                    <input type="checkbox" name="pageNumber" ng-value="category.isSelected"
+                                           ng-click="category.isSelected = !category.isSelected"
+                                           ng-checked="category.isSelected"><!-- ng-model="category.isSelected"-->
+                                    {{category.friendlyName}}
                                 </label>
                             </div>
+
                         </div>
                     </div>
 

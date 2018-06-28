@@ -140,6 +140,10 @@ function utilsFindBootstrapEnvironment()
         }
     }
 }
+
+function utilsCollapseBootstrapPanels (){
+    jQuery('.collapse').collapse('hide');
+}
 /**
  *
  * @param sSource
