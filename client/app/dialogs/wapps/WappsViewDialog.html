@@ -13,16 +13,22 @@
                 </div>
             </div>
             <!-- BODY -->
-            <div class="modal-body ">
+            <div class="modal-body "  >
                 <h4>
-                    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 list-of-processor" ng-repeat="processor in m_oController.m_aoProcessorList">
+                    <!--TODO IT -->
+                    <!--<div class="jsonView">-->
+                        <!--<json child="m_oController.myJson" default-collapsed="false" type="object"></json>-->
+                    <!--</div>-->
+                    <!--{{m_oController.myJson}}-->
+
+                    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 list-of-processor" ng-repeat="processor in m_oController.m_aoProcessorList" >
                         <!--data-toggle="collapse" href="#RunProcessorPanel{{$index}}"-->
                         <!--aria-expanded="false" aria-controls="RunProcessorPanel{{$index}}"-->
                         <div class="col-xs-2 col-sm-2 col-md-2 col-lg-2 content-image" data-toggle="collapse" href="#RunProcessorPanel{{$index}}"
-                             aria-expanded="false" aria-controls="RunProcessorPanel{{$index}}">
+                             aria-expanded="false" aria-controls="RunProcessorPanel{{$index}}" ng-click="m_oController.myJson={}; m_oController.collapsePanels()">
                             <img src={{processor.imgLink}} alt="Image" >
                         </div>
-                        <div class="col-xs-10 col-sm-10 col-md-10 col-lg-10" data-toggle="collapse" href="#RunProcessorPanel{{$index}}"
+                        <div class="col-xs-10 col-sm-10 col-md-10 col-lg-10" data-toggle="collapse" href="#RunProcessorPanel{{$index}}" ng-click="m_oController.myJson={}; m_oController.collapsePanels()"
                              aria-expanded="false" aria-controls="RunProcessorPanel{{$index}}">
                             <label>
                                 {{processor.processorName}}
@@ -63,8 +69,13 @@
 
                                     <div class="form-group">
                                         Json:
-                                        <textarea class="form-control" rows="5" id="" ng-model="value"></textarea>
-                                        <button type="button" ng-click="m_oController.runProcessor(processor.processorName, value)" class="my-button">
+                                        <div class="jsonView">
+                                            <json child="m_oController.myJson" default-collapsed="false" type="object"></json>
+                                        </div>
+                                        <div class="jsonContainer">{{m_oController.myJson}}</div>
+                                        <!--Json:-->
+                                        <!--<textarea class="form-control" rows="5" id="" ng-model="value"></textarea>-->
+                                        <button type="button" ng-click="m_oController.runProcessor(processor.processorName, m_oController.myJson)" class="my-button">
                                             Run
                                             <i class="fa fa-play" aria-hidden="true"></i>
                                         </button>

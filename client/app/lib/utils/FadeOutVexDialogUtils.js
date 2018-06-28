@@ -108,6 +108,26 @@ function utilsVexDialogAlertTop(oMessage,oCallback)
     });
     return oVexInstance;
 }
+
+function utilsVexDialogBigAlertTop(oMessage,oCallback)
+{
+    if(utilsIsStrNullOrEmpty(oMessage))
+        oMessage = "Are you absolutely sure you want to destroy the alien planet?";//Default message
+
+    if(utilsIsObjectNullOrUndefined(oCallback))
+    {
+        /*Default CallBack*/
+        oCallback = function (value){return "ok"; }
+    }
+
+    oMessage += "<br>";
+    var oVexInstance = vex.dialog.alert({
+        unsafeMessage:oMessage,
+        className:'vex-theme-top big-vex',// Overwrites defaultOptions
+        callback:oCallback,
+    });
+    return oVexInstance;
+}
 //@params: 1000 millisecond = 1
 function utilsVexCloseDialogAfterFewSeconds(iSecond,oVexInstance)
 {

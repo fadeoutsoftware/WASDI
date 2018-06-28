@@ -4,7 +4,7 @@
 
 var CatalogController = (function() {
 
-    function CatalogController($scope, oConstantsService, oAuthService,$state,oCatalogService,oMapService,oModalService,oProductService )
+    function CatalogController($scope, oConstantsService, oAuthService,$state,oCatalogService,oMapService,oModalService,oProductService,oTranslate )
     {
         // Service reference
         this.m_oScope = $scope;
@@ -16,6 +16,16 @@ var CatalogController = (function() {
         this.m_oCatalogService = oCatalogService;
         this.m_oModalService = oModalService;
         this.m_oProductService = oProductService;
+        this.m_oTranslate = oTranslate;
+
+        //OPERATIONS FRIENDLY NAME
+        this.m_sDonwloadFriendlyName = "";
+        this.m_sComputedFriendlyName = "";
+        this.m_sPublicFriendlyName = "";
+        this.m_sIngestionFriendlyName = "";
+        this.m_sSharedFriendlyName  = "";
+        this.getTranslatedOperation();
+
         // File Types
         this.m_asCategories = [];
         // Free text query
@@ -28,6 +38,7 @@ var CatalogController = (function() {
         this.m_aoEntries = [];
         // Flag to know if the table was loaded
         this.m_bIsLoadedTable = true;
+        this.m_iNumberOfEntryRequest = 0;
         // Result grid order column
         this.m_sOrderBy = 'fileName';
         // Result grid order direction
@@ -150,7 +161,8 @@ var CatalogController = (function() {
                         if(iIndexCategory === 0) isSelected = true;
                         var oCategory = {
                             name:data[iIndexCategory],
-                            isSelected:isSelected
+                            isSelected:isSelected,
+                            friendlyName:oController.getFriendlyOperationName(data[iIndexCategory])
                         };
                         oController.m_asCategories.push(oCategory);
                     }
@@ -167,6 +179,35 @@ var CatalogController = (function() {
     /**
      * Make the real query
      */
+    // CatalogController.prototype.searchEntries = function()
+    // {
+    //     var sFrom="";
+    //     var sTo="";
+    //     if(utilsIsStrNullOrEmpty(this.m_oDataFrom) === false) sFrom = this.m_oDataFrom.replace(/-/g,'');
+    //     if(utilsIsStrNullOrEmpty(this.m_oDataTo) === false) sTo =  this.m_oDataTo.replace(/-/g,'');
+    //
+    //     var sFreeText = this.m_sInputQuery;
+    //     var sCategory = this.getSelectedCategoriesAsString() ;
+    //     var oController = this;
+    //     this.m_bIsLoadedTable = false;
+    //     sFrom += "00";
+    //     sTo += "00";
+    //
+    //     this.m_oCatalogService.getEntries(sFrom,sTo,sFreeText,sCategory).success(function (data) {
+    //         if(utilsIsObjectNullOrUndefined(data) == false)
+    //         {
+    //             oController.m_aoEntries = data;
+    //             oController.drawEntriesBoundariesInMap();
+    //         }
+    //         oController.m_bIsLoadedTable = true;
+    //     }).error(function (error) {
+    //         utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR SEARCHING THE CATALOGUE");
+    //         oController.m_bIsLoadedTable = true;
+    //     });
+    // };
+    /**
+     *
+     */
     CatalogController.prototype.searchEntries = function()
     {
         var sFrom="";
@@ -175,25 +216,77 @@ var CatalogController = (function() {
         if(utilsIsStrNullOrEmpty(this.m_oDataTo) === false) sTo =  this.m_oDataTo.replace(/-/g,'');
 
         var sFreeText = this.m_sInputQuery;
-        var sCategory = this.getSelectedCategoriesAsString() ;
         var oController = this;
-        this.m_bIsLoadedTable = false;
+        var iNumberOfCategories = this.m_asCategories.length;
+        this.m_iNumberOfEntryRequest = 0;
         sFrom += "00";
         sTo += "00";
+        this.m_aoEntries = [];
 
+        //How many request to server ?
+        for(var iIndexCategory = 0 ; iIndexCategory < iNumberOfCategories; iIndexCategory++)
+        {
+            if(this.m_asCategories[iIndexCategory].isSelected === true)
+            {
+                this.m_iNumberOfEntryRequest++;
+            }
+        }
+        //send request to server (get entries)
+        for(var iIndexCategory = 0 ; iIndexCategory < iNumberOfCategories; iIndexCategory++)
+        {
+            var sCategory = this.m_asCategories[iIndexCategory].name;
+            if(this.m_asCategories[iIndexCategory].isSelected === true)
+            {
+                this.m_bIsLoadedTable = false;
+                // this.m_iNumberOfEntryRequest++;
+                this.getEntries(sFrom,sTo,sFreeText,sCategory);
+            }
+        }
+
+    };
+    /**
+     *
+     * @param sFrom
+     * @param sTo
+     * @param sFreeText
+     * @param sCategory
+     * @returns {boolean}
+     */
+    /**
+     * Make the real query
+     */
+    CatalogController.prototype.getEntries = function(sFrom,sTo,sFreeText,sCategory){
+        if(utilsIsStrNullOrEmpty(sFrom) === true || utilsIsStrNullOrEmpty(sTo) === true || utilsIsStrNullOrEmpty(sCategory) === true  )
+        {
+            return false;
+        }
+        var oController = this;
+        //get entries
         this.m_oCatalogService.getEntries(sFrom,sTo,sFreeText,sCategory).success(function (data) {
             if(utilsIsObjectNullOrUndefined(data) == false)
             {
-                oController.m_aoEntries = data;
+                oController.m_aoEntries = oController.m_aoEntries.concat(data);
                 oController.drawEntriesBoundariesInMap();
             }
-            oController.m_bIsLoadedTable = true;
+
+            oController.m_iNumberOfEntryRequest--;
+            if(oController.m_iNumberOfEntryRequest === 0)
+            {
+                oController.m_bIsLoadedTable = true;
+            }
+            // oController.m_bIsLoadedTable = true;
         }).error(function (error) {
             utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR SEARCHING THE CATALOGUE");
-            oController.m_bIsLoadedTable = true;
+            oController.m_iNumberOfEntryRequest--;
+            if(oController.m_iNumberOfEntryRequest === 0)
+            {
+                oController.m_bIsLoadedTable = true;
+            }
+            // oController.m_bIsLoadedTable = true;
         });
-    };
 
+        return true;
+    };
     /**
      * Download of a product
      * @param oEntry
@@ -424,7 +517,73 @@ var CatalogController = (function() {
             }
         }
     };
+    /**
+     *
+     * @param sOperationName
+     * @returns {string}
+     */
+    CatalogController.prototype.getFriendlyOperationName = function(sOperationName)
+    {
+        if(utilsIsStrNullOrEmpty(sOperationName) === true)
+        {
+            return "";
+        }
+        sOperationName = sOperationName.toLowerCase();
+        var sReturnValue = "";
+        switch(sOperationName) {
+            case "download":
+                sReturnValue = this.m_sDonwloadFriendlyName;
+                // return "Downloaded products";
+                break;
+            case "computed":
+                sReturnValue = this.m_sComputedFriendlyName;
+                // return "Computed products";
+                break;
+            case "public":
+                sReturnValue = this.m_sPublicFriendlyName;
+                // return "Products saved in Wasdi";
+                break;
+            case "ingestion":
+                sReturnValue = this.m_sIngestionFriendlyName;
+                // return "Ingestion products";
+                break;
+            case "shared":
+                sReturnValue = this.m_sSharedFriendlyName;
+                // return "Shared products by users";
+                break;
+        }
+        return sReturnValue;
+    };
 
+    CatalogController.prototype.getTranslatedOperation = function()
+    {
+        var oController = this;
+        //DOWNLOAD
+        this.m_oTranslate('CATALOG_OPERATION_DOWNLOAD').then(function(text)
+        {
+            oController.m_sDonwloadFriendlyName = text;
+        });
+        //COMPUTED
+        this.m_oTranslate('CATALOG_OPERATION_COMPUTED').then(function(text)
+        {
+            oController.m_sComputedFriendlyName = text;
+        });
+        //PUBLIC
+        this.m_oTranslate('CATALOG_OPERATION_PUBLIC').then(function(text)
+        {
+            oController.m_sPublicFriendlyName = text;
+        });
+        //INGESTION
+        this.m_oTranslate('CATALOG_OPERATION_INGESTION').then(function(text)
+        {
+            oController.m_sIngestionFriendlyName = text;
+        });
+        //SHARED
+        this.m_oTranslate('CATALOG_OPERATION_SHARED').then(function(text)
+        {
+            oController.m_sSharedFriendlyName  = text;
+        });
+    };
     CatalogController.$inject = [
         '$scope',
         'ConstantsService',
@@ -433,7 +592,8 @@ var CatalogController = (function() {
         'CatalogService',
         'MapService',
         'ModalService',
-        'ProductService'
+        'ProductService',
+        '$translate'
     ];
 
     return CatalogController;

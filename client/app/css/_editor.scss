@@ -23,6 +23,25 @@
       @media  screen and (max-width: 1366px)and (max-height: 768px) {
         height: $wasdi-height-panel-max-width-1366-max-height-768;
       }
+      //Navigation tab globe or map
+      .navigation-tab{
+        padding: 0;
+        .globe-container-panel{
+          padding: 0;
+        }
+        .map-container-panel{
+          padding: 0;
+          .btn-group, .btn-group-vertical{
+            position: absolute;
+            left: 2px;
+            top: 2px;
+            z-index: 1000;
+          }
+
+        }
+
+      }
+
       .wizards{
         margin:5px 5px 5px 10px;
         div{

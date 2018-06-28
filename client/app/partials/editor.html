@@ -322,13 +322,15 @@
                 <div class="panel-body fixed-panel" id="panelBodyMapPreviewEditor">
                     <!--TODO: SLIDER-->
                     <!---------------------- TAB 0 NAVIGATION------------------>
-                    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12"  ng-show="m_oController.m_iActiveMapPanelTab === 0">
-                        <div class="col-xs-11 col-sm-11 col-md-11 col-lg-11">
-                            <div class="map" id = "wasdiMap2" ng-show="m_oController.m_b2DMapModeOn == false"></div>
+                    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 navigation-tab"  ng-show="m_oController.m_iActiveMapPanelTab === 0">
+                        <!-- 3D MAP  -->
+                        <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 globe-container-panel"  ng-show="m_oController.m_b2DMapModeOn == true">
                             <div class="map" id="cesiumContainer2"  ng-show="m_oController.m_b2DMapModeOn == true"  ></div>
                         </div>
-                        <div class="col-xs-1 col-sm-1 col-md-1 col-lg-1">
-                            <div class="btn-group-vertical">
+                        <!-- 2D MAP-->
+                        <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 map-container-panel" ng-show="m_oController.m_b2DMapModeOn == false">
+                            <div class="map" id = "wasdiMap2" ng-show="m_oController.m_b2DMapModeOn == false"></div>
+                            <div class="btn-group-vertical ">
                                 <!--button type="button" class="btn btn-primary" ng-click="m_oController.switch2D3DMode()"
                                         data-toggle="tooltip" data-placement="top" title="{{'EDITOR_TOOLTIP_SWITCH_3D_2D'|translate}}"
                                         ng-show=" m_oController.m_bIsActiveGeoraphicalMode == true">
@@ -346,7 +348,28 @@
                                     <i class="fa fa-location-arrow" aria-hidden="true"></i>
                                 </button>
                             </div>
+                            <!--<div class="map" id="cesiumContainer2"  ng-show="m_oController.m_b2DMapModeOn == true"  ></div>-->
                         </div>
+                        <!--<div class="col-xs-1 col-sm-1 col-md-1 col-lg-1 buttons-container" ng-show="m_oController.m_b2DMapModeOn == false">-->
+                            <!--<div class="btn-group-vertical">-->
+                                <!--&lt;!&ndash;button type="button" class="btn btn-primary" ng-click="m_oController.switch2D3DMode()"-->
+                                        <!--data-toggle="tooltip" data-placement="top" title="{{'EDITOR_TOOLTIP_SWITCH_3D_2D'|translate}}"-->
+                                        <!--ng-show=" m_oController.m_bIsActiveGeoraphicalMode == true">-->
+                                    <!--<i ng-show="m_oController.m_b2DMapModeOn == true" class="fa fa-map-o" aria-hidden="true"></i>-->
+                                    <!--<i  ng-show="m_oController.m_b2DMapModeOn == false" class="fa fa-globe " aria-hidden="true"></i>-->
+                                <!--</button&ndash;&gt;-->
+                                <!--<button type="button" class="btn btn-primary" ng-click="m_oController.synchronize2DMap()"-->
+                                        <!--data-toggle="tooltip" data-placement="top" title="{{'EDITOR_TOOLTIP_SYNCHRONIZE_MAP_2D'|translate}}"-->
+                                        <!--ng-show="m_oController.m_b2DMapModeOn == false && m_oController.m_bIsActiveGeoraphicalMode == true ">-->
+                                    <!--<i class="fa fa-location-arrow" aria-hidden="true"></i>-->
+                                <!--</button>-->
+                                <!--<button type="button" class="btn btn-primary" ng-click="m_oController.synchronize3DMap()"-->
+                                        <!--data-toggle="tooltip" data-placement="top" title="{{'EDITOR_TOOLTIP_SYNCHRONIZE_MAP_3D'|translate}}"-->
+                                        <!--ng-show="m_oController.m_b2DMapModeOn == true && m_oController.m_bIsActiveGeoraphicalMode == true">-->
+                                    <!--<i class="fa fa-location-arrow" aria-hidden="true"></i>-->
+                                <!--</button>-->
+                            <!--</div>-->
+                        <!--</div>-->
                     </div>
                     <!---------------------- TAB 1 COLOURS------------------>
                     <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12" ng-show="(m_oController.m_iActiveMapPanelTab === 1) &&
@@ -354,7 +377,10 @@
                         <div class="row histogram-container">
                             <div class="col-xs-10 col-sm-10 col-md-10 col-lg-10">
 
-                                <div class="loadIcon" ng-show="m_oController.m_oActiveBand.colorManipulation == null" >
+                                <!--<div class="loadIcon" ng-show="m_oController.m_oActiveBand.colorManipulation == null" >-->
+                                    <!--<invader></invader>-->
+                                <!--</div>          -->
+                                <div class="loadIcon" ng-show="m_oController.m_bIsLoadingColourManipulation === true" >
                                     <invader></invader>
                                 </div>
                                 <div id="colourManipulationDiv" ng-hide="m_oController.m_oActiveBand.colorManipulation == null">

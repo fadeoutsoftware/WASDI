@@ -108,6 +108,12 @@
   "IMPORT_SEASON_WINTER_RADIO_BUTTON":"Winter",
   "IMPORT_SEASON_AUTUMN_RADIO_BUTTON":"Autumn",
 
+  "CATALOG_OPERATION_DOWNLOAD":"Downloaded products",
+  "CATALOG_OPERATION_COMPUTED":"Computed products",
+  "CATALOG_OPERATION_PUBLIC":"Products saved in Wasdi",
+  "CATALOG_OPERATION_INGESTION":"Ingestion products",
+  "CATALOG_OPERATION_SHARED":"Shared products by users",
+
   "SEARCH_TITLE_CHECK_BOX_SENSOR_TYPE":"Sensor Type :",
   "SEARCH_TITLE_CHECK_BOX_SENSOR_RESOLUTION":"Sensor Resolution :",
   "SEARCH_TITLE_CHECK_BOX_SATELLITE":"Satellite :",
