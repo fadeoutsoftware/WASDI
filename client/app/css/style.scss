@@ -710,6 +710,12 @@ font-size: 2.5em !important;
   }
 }
 
+.disabled-cursor-hover{
+  &:hover{
+    cursor: no-drop;
+  }
+}
+
 //.leaflet-tile { border: solid red 10px; }
 
 /* FIX COLOR PICKER NEED Z INDEX 1100 (modal / map)*/

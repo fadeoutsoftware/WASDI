@@ -7,54 +7,54 @@
                 <button class="my-button" ng-click="m_oController.searchOrbit()">Search</button>
             </div>
 
-            <!---------------------- TIME PICKER END -------------------->
-            <div class=" time-picker-container">
-                <div class="input-group my-input-text"
-                     moment-picker="m_oController.m_oOrbitSearch.acquisitionEndTime"
-                     format="YYYY-MM-DD HH"
-                     today="true">
+            <!--&lt;!&ndash;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45; TIME PICKER END &#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&ndash;&gt;-->
+            <!--<div class=" time-picker-container">-->
+            <!--<div class="input-group my-input-text"-->
+            <!--moment-picker="m_oController.m_oOrbitSearch.acquisitionEndTime"-->
+            <!--format="YYYY-MM-DD HH"-->
+            <!--today="true">-->
 
-                    <input class="form-control"
-                           placeholder="Select acquisition end time"
-                           ng-model="m_oController.m_oOrbitSearch.acquisitionEndTime"
-                           ng-model-options="{ updateOn: 'blur' }">
+            <!--<input class="form-control"-->
+            <!--placeholder="Select acquisition end time"-->
+            <!--ng-model="m_oController.m_oOrbitSearch.acquisitionEndTime"-->
+            <!--ng-model-options="{ updateOn: 'blur' }">-->
 
-                    <span class="input-group-addon">
-                        <i class="fa fa-calendar"></i>
-                    </span>
-                </div>
-            </div>
-            <!--format="YYYY-MM-DD HH:mm:ss"-->
+            <!--<span class="input-group-addon">-->
+            <!--<i class="fa fa-calendar"></i>-->
+            <!--</span>-->
+            <!--</div>-->
+            <!--</div>-->
+            <!--&lt;!&ndash;format="YYYY-MM-DD HH:mm:ss"&ndash;&gt;-->
 
-            <div class="description">
-                <i class="fa fa-calendar" aria-hidden="true"></i>
-                Acquisition End Time:
-            </div>
+            <!--<div class="description">-->
+            <!--<i class="fa fa-calendar" aria-hidden="true"></i>-->
+            <!--Acquisition End Time:-->
+            <!--</div>-->
 
-            <!------------------------- TIME PICKER START -------------------->
-            <div class=" time-picker-container ">
+            <!--&lt;!&ndash;-&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45; TIME PICKER START &#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&ndash;&gt;-->
+            <!--<div class=" time-picker-container ">-->
 
 
-                <div class="input-group my-input-text"
-                     moment-picker="m_oController.m_oOrbitSearch.acquisitionStartTime"
-                     format="YYYY-MM-DD HH"
-                     today="true">
+            <!--<div class="input-group my-input-text"-->
+            <!--moment-picker="m_oController.m_oOrbitSearch.acquisitionStartTime"-->
+            <!--format="YYYY-MM-DD HH"-->
+            <!--today="true">-->
 
-                    <input class="form-control"
-                           placeholder="Select acquisition start time"
-                           ng-model="m_oController.m_oOrbitSearch.acquisitionStartTime"
-                           ng-model-options="{ updateOn: 'blur' }">
+            <!--<input class="form-control"-->
+            <!--placeholder="Select acquisition start time"-->
+            <!--ng-model="m_oController.m_oOrbitSearch.acquisitionStartTime"-->
+            <!--ng-model-options="{ updateOn: 'blur' }">-->
 
-                    <span class="input-group-addon">
-                        <i class="fa fa-calendar"></i>
-                    </span>
-                </div>
-            </div>
+            <!--<span class="input-group-addon">-->
+            <!--<i class="fa fa-calendar"></i>-->
+            <!--</span>-->
+            <!--</div>-->
+            <!--</div>-->
 
-            <div class="description">
-                <i class="fa fa-calendar" aria-hidden="true"></i>
-                Acquisition Start Time:
-            </div>
+            <!--<div class="description">-->
+            <!--<i class="fa fa-calendar" aria-hidden="true"></i>-->
+            <!--Acquisition Start Time:-->
+            <!--</div>-->
         </div>
 
         <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12 left-side-bar">
@@ -62,6 +62,10 @@
                 <div class="panel panel-default">
                     <div class="panel-heading">
                         {{"SEARCH_TITLE_PANEL_HEADING_FILTERS"|translate}}
+
+                        <i class="fa fa-arrow-left fa-lg backbtn" aria-hidden="true" ng-click="m_oController.clearOrbitsTable()"
+                           ng-show = "m_oController.thereAreOrbits() && (m_oController.m_bIsVisibleLoadingIcon === false)"></i>
+
                     </div>
 
                     <div class="panel-body">
@@ -69,83 +73,178 @@
                         <!---------------------------------------- CHECK BOX ---------------------------------------------->
                         <!------------------------- Satellite ----------------------------->
                         <!--<div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 ">-->
-                        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 ">
+                        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 " ng-hide = "m_oController.thereAreOrbits() || (m_oController.m_bIsVisibleLoadingIcon === true)">
+
+                            <div class="row time-container">
+                                <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+                                    <!---------------------- TIME PICKER END -------------------->
+                                    FROM:
+                                    <div class=" time-picker-container">
+                                        <div class="input-group my-input-text"
+                                             moment-picker="m_oController.m_oOrbitSearch.acquisitionEndTime"
+                                             format="YYYY-MM-DD HH"
+                                             today="true">
+
+                                            <input class="form-control"
+                                                   placeholder="Select acquisition end time"
+                                                   ng-model="m_oController.m_oOrbitSearch.acquisitionEndTime"
+                                                   ng-model-options="{ updateOn: 'blur' }">
+
+                                            <span class="input-group-addon">
+                                                <i class="fa fa-calendar"></i>
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <!--format="YYYY-MM-DD HH:mm:ss"-->
+
+                                    <!--<div class="description">-->
+                                        <!--<i class="fa fa-calendar" aria-hidden="true"></i>-->
+                                        <!--Acquisition End Time:-->
+                                    <!--</div>-->
+                                </div>
+                                <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+                                    <!------------------------- TIME PICKER START -------------------->
+                                    TO:
+                                    <div class=" time-picker-container ">
+                                        <div class="input-group my-input-text"
+                                             moment-picker="m_oController.m_oOrbitSearch.acquisitionStartTime"
+                                             format="YYYY-MM-DD HH"
+                                             today="true">
+
+                                            <input class="form-control"
+                                                   placeholder="Select acquisition start time"
+                                                   ng-model="m_oController.m_oOrbitSearch.acquisitionStartTime"
+                                                   ng-model-options="{ updateOn: 'blur' }">
+
+                                            <span class="input-group-addon">
+                                                <i class="fa fa-calendar"></i>
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <!--<div class="description">-->
+                                        <!--<i class="fa fa-calendar" aria-hidden="true"></i>-->
+                                        <!--Acquisition Start Time:-->
+                                    <!--</div>-->
+                                </div>
+                            </div>
 
                             <img src="assets/icons/Satellite.svg" alt="Satellite" height="30" width="30">{{"SEARCH_TITLE_CHECK_BOX_SATELLITE"|translate}}
                             <div class="well well-sm">
+                                <!--<div class="checkbox-satellite-container"ng-repeat="satellite in m_oController.m_oConfiguration.orbitsearch.satelliteNames">-->
+                                <!--<input type="checkbox" checklist-model="m_oController.m_oSelectedSatellite"-->
+                                <!--checklist-value="satellite"  />-->
+                                <!--<span>{{satellite}}</span>&lt;!&ndash;ng-checked="true"&ndash;&gt;-->
+                                <!--</div>-->
                                 <div class="checkbox-satellite-container"ng-repeat="satellite in m_oController.m_oConfiguration.orbitsearch.satelliteNames">
-                                    <input type="checkbox" checklist-model="m_oController.m_oSelectedSatellite"
-                                           checklist-value="satellite"  />
-                                    <span>{{satellite}}</span><!--ng-checked="true"-->
+                                    <i class="fa fa-square-o" aria-hidden="true" ng-click="m_oController.checkedSatellite(satellite)" ng-hide="m_oController.isSatelliteSelected(satellite)"></i>
+                                    <i class="fa fa-check-square-o" aria-hidden="true"  ng-click="m_oController.uncheckedSatellite(satellite)" ng-show="m_oController.isSatelliteSelected(satellite)"></i>
+                                    <span>{{satellite}}</span>
                                 </div>
+
                             </div>
                         </div>
                         <!--&lt;!&ndash;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45; Type &#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&ndash;&gt;-->
                         <!--<div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 container-checkbox" >-->
-                            <!--{{"SEARCH_TITLE_CHECK_BOX_SENSOR_TYPE"|translate}}-->
-                            <!--<div class="well well-sm">-->
-                                <!--<div ng-repeat="sensortype in m_oController.m_oConfiguration.orbitsearch.sensortypes" >-->
-                                    <!--<input type="checkbox" checklist-model="m_oController.m_oSelectedSensorType" checklist-value="sensortype"/> <span>{{sensortype}}</span>-->
-                                <!--</div>-->
-                            <!--</div>-->
+                        <!--{{"SEARCH_TITLE_CHECK_BOX_SENSOR_TYPE"|translate}}-->
+                        <!--<div class="well well-sm">-->
+                        <!--<div ng-repeat="sensortype in m_oController.m_oConfiguration.orbitsearch.sensortypes" >-->
+                        <!--<input type="checkbox" checklist-model="m_oController.m_oSelectedSensorType" checklist-value="sensortype"/> <span>{{sensortype}}</span>-->
+                        <!--</div>-->
+                        <!--</div>-->
                         <!--</div>-->
                         <!--&lt;!&ndash;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45; Resolution -&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&ndash;&gt;-->
                         <!--<div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 " >-->
-                            <!--{{"SEARCH_TITLE_CHECK_BOX_SENSOR_RESOLUTION"|translate}}-->
-                            <!--<div class="well well-sm">-->
-                                <!--<div ng-repeat="sensorresolution in m_oController.m_oConfiguration.orbitsearch.sensorresolutions" >-->
-                                    <!--<input type="checkbox"  checklist-model="m_oController.m_oSelectedResolutionType" checklist-value="sensorresolution"/> <span>{{sensorresolution}}</span>-->
-                                <!--</div>-->
-                            <!--</div>-->
+                        <!--{{"SEARCH_TITLE_CHECK_BOX_SENSOR_RESOLUTION"|translate}}-->
+                        <!--<div class="well well-sm">-->
+                        <!--<div ng-repeat="sensorresolution in m_oController.m_oConfiguration.orbitsearch.sensorresolutions" >-->
+                        <!--<input type="checkbox"  checklist-model="m_oController.m_oSelectedResolutionType" checklist-value="sensorresolution"/> <span>{{sensorresolution}}</span>-->
                         <!--</div>-->
-                        <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
-                            Note: you should draw an area on the map before search orbits.
+                        <!--</div>-->
+                        <!--</div>-->
+
+                        <!--<div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">-->
+                        <!--Note: you should draw an area on the map before search orbits.-->
+                        <!--</div>-->
+                        <div class="loadIcon" ng-show="m_oController.m_bIsVisibleLoadingIcon">
+                            <invader></invader>
                         </div>
+                        <!----------------------------------- RESULTS --------------------------------------->
+                        <div class="row col-lg-12 col-md-12 col-sm-12 col-xs-12 table-container" ng-show = "m_oController.thereAreOrbits() && (m_oController.m_bIsVisibleLoadingIcon === false)">
+                            <table class="table table-hover table-search-orbit my-table">
+                                <thead>
+                                <tr>
+                                    <th><!--class="loadIcon" ng-class="{'disabled-cursor-hover':m_oController.m_bisLoadingAllOrbitInMap }"-->
+                                        <input class="my-checkbox" type="checkbox" ng-model="m_oController.m_bMasterCheck" ng-click="m_oController.showAllSwath(m_oController.m_bMasterCheck)">
+
+                                        <!--<i class="fa fa-square-o" aria-hidden="true"-->
+                                           <!--ng-click="m_oController.m_bMasterCheck = !m_oController.m_bMasterCheck;m_oController.showAllSwath(m_oController.m_bMasterCheck)"-->
+                                           <!--ng-checked="m_oController.m_bMasterCheck" ng-hide="m_oController.m_bMasterCheck || (m_oController.m_bisLoadingAllOrbitInMap === true)"></i>-->
+                                        <!--<i class="fa fa-check-square-o" aria-hidden="true"-->
+                                           <!--ng-click="m_oController.m_bMasterCheck = !m_oController.m_bMasterCheck;m_oController.showAllSwath(m_oController.m_bMasterCheck)"-->
+                                           <!--ng-checked="m_oController.m_bMasterCheck" ng-show="m_oController.m_bMasterCheck && (m_oController.m_bisLoadingAllOrbitInMap === false)"></i>-->
+
+                                        <!--TODO REMOVE IT -->
+                                        <!--<div class="loadIcon" ng-show="m_oController.m_bisLoadingAllOrbitInMap">-->
+                                        <!---->
+                                        <!--</div>-->
+                                        <!--TODO IT -->
+                                        <!--<div class="loadIcon">-->
+                                        <!--<smallinvaderfixed ></smallinvaderfixed>-->
+                                        <!--</div>-->
+
+                                    </th>
+                                    <th>
+                                        {{"SEARCH_TITLE_HEAD_ORBIT_TABLE_SATELLITE"|translate}}
+                                    </th>
+                                    <th>
+                                        {{"SEARCH_TITLE_HEAD_ORBIT_TABLE_ACQUISITION_START"|translate}}
+                                    </th>
+                                    <th>
+                                        {{"SEARCH_TITLE_HEAD_ORBIT_TABLE_ACQUISITION_END"|translate}}
+                                    </th>
+                                    <th>
+                                        <!--Buttons-->
+                                    </th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr ng-repeat="orbit in m_oController.getOrbits()" ><!--ng-mouseover="m_oController.mouseOverOrbitInTable(orbit)"
+                            ng-mouseleave="m_oController.mouseLeaveOrbitInTable(orbit)" ng-click="m_oController.showSwath(orbit)"-->
+                                    <td >
+                                        <input type="checkbox" ng-checked="m_oController.m_bMasterCheck" ng-click="m_oController.showSwath(orbit)">
+                                        <!--TODO REMOVE IT -->
+                                        <!--<i class="fa fa-square-o" aria-hidden="true" ng-click="orbit.isSelected = !orbit.isSelected;m_oController.showSwath(orbit)"-->
+                                           <!--ng-checked="orbit.isSelected" ng-hide="orbit.isSelected || (m_oController.m_bisLoadingAllOrbitInMap === true)"></i>-->
+                                        <!--<i class="fa fa-check-square-o" aria-hidden="true" ng-click="orbit.isSelected = !orbit.isSelected;m_oController.showSwath(orbit)"-->
+                                           <!--ng-checked="orbit.isSelected" ng-show="orbit.isSelected && (m_oController.m_bisLoadingAllOrbitInMap === false)"></i>-->
+
+                                        <smallinvaderfixed ng-show="m_oController.m_bisLoadingAllOrbitInMap"></smallinvaderfixed>
+
+                                    </td>
+                                    <td><span >{{orbit.SatelliteName}}</span></td>
+                                    <td><span >{{m_oController.getDateFromTimestamp(orbit.AcquisitionStartTime)}}</span></td>
+                                    <td><span >{{m_oController.getDateFromTimestamp(orbit.AcquisitionEndTime)}}</span></td>
+                                    <td class="info-satellite" ng-click="m_oController.openOrbitInfo(orbit)">
+                                        <div class="button-info">
+                                            <i class="fa fa-info-circle fa-lg" aria-hidden="true"></i>
+                                        </div>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+
+
+
+                        </div>
+
                     </div>
 
                 </div>
+
             </div>
             <!------------------------------- TABLE ORBIT --------------------------------------->
-            <div class="row col-lg-12 col-md-12 col-sm-12 col-xs-12 table-container">
-                <table class="table table-hover table-search-orbit my-table">
-                    <thead>
-                    <tr>
-                        <th><input type="checkbox" ng-model="m_oController.m_bMasterCheck" ng-click="m_oController.showAllSwath(m_oController.m_bMasterCheck)"></th>
-                        <th>
-                            {{"SEARCH_TITLE_HEAD_ORBIT_TABLE_SATELLITE"|translate}}
-                        </th>
-                        <th>
-                            {{"SEARCH_TITLE_HEAD_ORBIT_TABLE_ACQUISITION_START"|translate}}
-                        </th>
-                        <th>
-                            {{"SEARCH_TITLE_HEAD_ORBIT_TABLE_ACQUISITION_END"|translate}}
-                        </th>
-                        <th>
-                            <!--Buttons-->
-                        </th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <tr ng-repeat="orbit in m_oController.getOrbits()" ><!--ng-mouseover="m_oController.mouseOverOrbitInTable(orbit)"
-                            ng-mouseleave="m_oController.mouseLeaveOrbitInTable(orbit)" ng-click="m_oController.showSwath(orbit)"-->
-                        <td> <input type="checkbox" ng-checked="m_oController.m_bMasterCheck" ng-click="m_oController.showSwath(orbit)"></td>
-                        <td><span >{{orbit.SatelliteName}}</span></td>
-                        <td><span >{{m_oController.getDateFromTimestamp(orbit.AcquisitionStartTime)}}</span></td>
-                        <td><span >{{m_oController.getDateFromTimestamp(orbit.AcquisitionEndTime)}}</span></td>
-                        <td class="info-satellite" ng-click="m_oController.openOrbitInfo(orbit)">
-                            <div class="button-info">
-                                <i class="fa fa-info-circle fa-lg" aria-hidden="true"></i>
-                            </div>
-                        </td>
-                    </tr>
-                    </tbody>
-                </table>
 
-                <div class="loadIcon" ng-show="m_oController.m_bIsVisibleLoadingIcon">
-                    <invader></invader>
-                </div>
-
-            </div>
 
 
         </div>
