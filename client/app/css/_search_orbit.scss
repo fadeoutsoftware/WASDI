@@ -11,39 +11,39 @@
       width: 13%;
       margin:15px 5px 5px 0;
     }
-    //data
-    .time-picker-container
-    {
-      float: right;
-      margin-top: 10px;
-      margin-bottom: 10px;
-      width:12%;
-
-      .my-input-text {
-        width: 100%;
-        //input{
-        //  width:20%;
-        //}
-        .form-control {
-          border-radius: 0;
-          border: 2px solid $wasdi-input-text-border-color;
-        }
-        .input-group-addon
-        {
-          background-color: $wasdi-blue-logo;
-          border-color: $wasdi-blue-logo;
-          color:white;
-        }
-        .input-group-addon:hover
-        {
-          background-color: $wasdi-green-logo;
-        }
-      }
-
-      .moment-picker .moment-picker-container {
-        z-index: 1005;
-      }
-    }
+    ////data
+    //.time-picker-container
+    //{
+    //  float: right;
+    //  margin-top: 10px;
+    //  margin-bottom: 10px;
+    //  width:12%;
+    //
+    //  .my-input-text {
+    //    width: 100%;
+    //    //input{
+    //    //  width:20%;
+    //    //}
+    //    .form-control {
+    //      border-radius: 0;
+    //      border: 2px solid $wasdi-input-text-border-color;
+    //    }
+    //    .input-group-addon
+    //    {
+    //      background-color: $wasdi-blue-logo;
+    //      border-color: $wasdi-blue-logo;
+    //      color:white;
+    //    }
+    //    .input-group-addon:hover
+    //    {
+    //      background-color: $wasdi-green-logo;
+    //    }
+    //  }
+    //
+    //  .moment-picker .moment-picker-container {
+    //    z-index: 1005;
+    //  }
+    //}
     //search button
     .buttom-collumn
     {
@@ -69,17 +69,77 @@
     /*PANEL WITH FILTERS*/
     .my-panel
     {
-
+      .panel-heading
+      {
+        .backbtn
+        {
+          color: $wasdi-white;
+          cursor:pointer;
+        }
+        .backbtn:hover
+        {
+          color: $wasdi-button-over-color;
+          background-color:transparent;
+        }
+      }
       //OVERRIDING
       .panel-body
       {
         padding: 0;
         //max-height: 200px;
-        height: $wasdi-heigth-panel;
+        height: $wasdi-height-log-panel;
         overflow-y: auto;
+
+        .time-container{
+          margin-left: 5px;
+          margin-top: 15px;
+          .time-picker-container
+          {
+            float: right;
+            margin-top: 10px;
+            margin-bottom: 10px;
+            width:100%;
+
+            .my-input-text {
+              width: 100%;
+              //input{
+              //  width:20%;
+              //}
+              .form-control {
+                border-radius: 0;
+                border: 2px solid $wasdi-input-text-border-color;
+              }
+              .input-group-addon
+              {
+                background-color: $wasdi-blue-logo;
+                border-color: $wasdi-blue-logo;
+                color:white;
+              }
+              .input-group-addon:hover
+              {
+                background-color: $wasdi-green-logo;
+              }
+            }
+
+            .moment-picker .moment-picker-container {
+              z-index: 1005;
+            }
+          }
+        }
+
         .checkbox-satellite-container{
           //display: inline;
           //padding: 10px;
+        }
+
+        .my-table{
+          thead{
+            th{
+              background-color: white !important;
+              color: black !important;
+            }
+          }
+
         }
       }
       //override bootstrap
@@ -117,9 +177,11 @@
     /*TABLE SEARCH ORBIT */
     .table-container
     {
-      max-height: 350px;       /* Just for the demo          */
+      //max-height: 350px;       /* Just for the demo          */
+      max-height: $wasdi-height-log-panel;
       overflow-y: auto;    /* Trigger vertical scroll    */
       overflow-x: hidden;  /* Hide the horizontal scroll */
+      margin-left: 1px;
       .table-search-orbit
       {
         .info-satellite

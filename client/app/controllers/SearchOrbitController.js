@@ -30,7 +30,7 @@ var SearchOrbitController = (function() {
         this.m_oModalService = oModalService;
         this.m_oProductService = oProductService;
         this.m_bMasterCheck = false;
-
+        this.m_bisLoadingAllOrbitInMap = false;
         this.m_oActiveWorkspace = this.m_oConstantsService.getActiveWorkspace();
         this.m_oUser = this.m_oConstantsService.getUser();
         this.m_bIsVisibleLoadingIcon = false;
@@ -246,13 +246,15 @@ var SearchOrbitController = (function() {
                 if(!utilsIsObjectNullOrUndefined(data))
                 {
                     oController.m_aoOrbits = data;
-                    oController.m_bIsVisibleLoadingIcon = false;
+                    oController.setOrbitAsUnchecked()
                 }
                 else
                 {
                     utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR: SEARCH ORBITS FAILS.");
                 }
-        })
+                oController.m_bIsVisibleLoadingIcon = false;
+
+            })
             .error(function (data, status, header, config) {
                 utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR: SEARCH ORBITS FAILS.");
                 oController.m_aoOrbits = null;
@@ -261,10 +263,35 @@ var SearchOrbitController = (function() {
 
     };
 
+    SearchOrbitController.prototype.setOrbitAsUnchecked = function(){
+        if( utilsIsObjectNullOrUndefined(this.m_aoOrbits) === true )
+        {
+            return false;
+        }
+        var iNumberOfOrbits = this.m_aoOrbits.length;
+        for(var iOrbitIndex = 0; iOrbitIndex < iNumberOfOrbits; iOrbitIndex++)
+        {
+            this.m_aoOrbits[iOrbitIndex].isSelected = false;
+        }
+        return true;
+    };
+    /**
+     *
+     * @returns {null|Array|*}
+     */
     SearchOrbitController.prototype.getOrbits = function(){
         return this.m_aoOrbits;
     };
 
+    SearchOrbitController.prototype.thereAreOrbits = function(){
+        return ( ( utilsIsObjectNullOrUndefined(this.m_aoOrbits) === false ) && (this.m_aoOrbits.length > 0 ) )
+    };
+
+    /**
+     *
+     * @param oOrbit
+     * @returns {boolean}
+     */
     SearchOrbitController.prototype.showSwath = function(oOrbit){
 
 
@@ -326,8 +353,13 @@ var SearchOrbitController = (function() {
         }
         return true;
 
-    }
+    };
 
+
+    /**
+     * openWorkspace
+     * @param sWorkspaceId
+     */
     SearchOrbitController.prototype.openWorkspace = function (sWorkspaceId) {
 
         var oController = this;
@@ -356,7 +388,7 @@ var SearchOrbitController = (function() {
             return false;
 
         var iNumberOfOrbits = this.m_aoOrbits.length;
-
+        this.m_bisLoadingAllOrbitInMap = true;
         if(oCheckValue)
         {
             //TRUE
@@ -411,10 +443,36 @@ var SearchOrbitController = (function() {
                 oOrbit.FootPrintRectangle = null;
             }
         }
+        this.m_bisLoadingAllOrbitInMap = false;
+        this.selectDeselectAllOrbits(this.m_bMasterCheck);
 
-
+        // this.m_oScope.$apply();
     };
 
+    /**
+     * selectDeselectAllOrbits
+     * @returns {boolean}
+     */
+    SearchOrbitController.prototype.selectDeselectAllOrbits = function(bValue)
+    {
+        if(utilsIsObjectNullOrUndefined(this.m_aoOrbits) === true)
+        {
+            return false;
+        }
+        var iNumberOfOrbits = this.m_aoOrbits.length;
+
+        for(var iIndexOrbit = 0 ; iIndexOrbit < iNumberOfOrbits; iIndexOrbit++ )
+        {
+            this.m_aoOrbits[iIndexOrbit].isSelected = bValue;
+        }
+        return true;
+    };
+
+    /**
+     * mouseOverOrbitInTable
+     * @param oOrbit
+     * @returns {boolean}
+     */
     SearchOrbitController.prototype.mouseOverOrbitInTable = function(oOrbit)
     {
         if(utilsIsObjectNullOrUndefined(oOrbit))
@@ -514,7 +572,11 @@ var SearchOrbitController = (function() {
         utilsProjectShowRabbitMessageUserFeedBack(oMessage);
 
     }
-
+    /**
+     *
+     * @param oMessage
+     * @param oController
+     */
     SearchOrbitController.prototype.receivedNewProductMessage = function (oMessage, oController) {
         var sMessage = 'PRODUCT ADDED TO THE WORKSPACE<br>READY';
 
@@ -526,8 +588,51 @@ var SearchOrbitController = (function() {
 
         var oDialog = utilsVexDialogAlertBottomRightCorner(sMessage);
         utilsVexCloseDialogAfterFewSeconds(4000, oDialog);
+    };
+
+    SearchOrbitController.prototype.checkedSatellite = function(sSatellite)
+    {
+        if(utilsIsStrNullOrEmpty(sSatellite) === false)
+        {
+            this.m_oSelectedSatellite.push(sSatellite);
+        }
+    };
+    SearchOrbitController.prototype.uncheckedSatellite = function(sSatellite)
+    {
+        if(utilsIsStrNullOrEmpty(sSatellite) === false)
+        {
+            // var iNumberOfSelectedSatellite = this.m_oSelectedSatellite.length;
+            utilsRemoveObjectInArray(this.m_oSelectedSatellite,sSatellite);
+        }
+    };
+    /**
+     *
+     * @param sSatellite
+     * @returns {*}
+     */
+    SearchOrbitController.prototype.isSatelliteSelected = function(sSatellite)
+    {
+        if(utilsIsStrNullOrEmpty(sSatellite) === true)
+        {
+            return false;
+        }
+        return utilsIsElementInArray(this.m_oSelectedSatellite,sSatellite);
     }
 
+    SearchOrbitController.prototype.clearOrbitsTable = function(){
+        if(utilsIsObjectNullOrUndefined(this.m_aoOrbits) === true)
+            return false;
+        var iNumberOfOrbits = this.m_aoOrbits.length;
+
+        for(var iIndexOrbit = 0; iIndexOrbit < iNumberOfOrbits; iIndexOrbit++)
+        {
+            var oOrbit = this.m_aoOrbits[iIndexOrbit];
+            this.m_oMapService.removeLayerFromMap(oOrbit.FootPrintRectangle);//remove orbit rectangle from map
+            oOrbit.FootPrintRectangle = null;
+        }
+        this.m_aoOrbits = [];
+        return true;
+    };
 
     SearchOrbitController.$inject = [
         '$scope',

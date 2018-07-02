@@ -3,6 +3,7 @@
   .modal-dialog
   {
     width:50%;
+    max-height: 500px;
     .modal-content
     {
       .modal-header
@@ -21,8 +22,8 @@
         .orbit-info-table
         {
           display: inline-block;
-          overflow-y: scroll;
-          max-height:400px;
+          //overflow-y: scroll;
+          //max-height:400px;
           table {
             text-align: center;
             margin: auto;
