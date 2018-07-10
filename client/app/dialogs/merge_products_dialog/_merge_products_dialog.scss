@@ -18,6 +18,8 @@
 
       .modal-body
       {
+
+        height: 350px;
         .drag-and-drop
         {
           .button {
@@ -33,7 +35,8 @@
             background: #F8F8F8;
             border: 5px dashed $wasdi-blue-logo;
             width: 90%;
-            height: 100px;
+            height: 150px;
+
             text-align: center;
             padding-top: 25px;
             margin: 10px;
@@ -60,7 +63,7 @@
 
           .dropdown-menu
           {
-            max-height: 300px;
+            max-height: 200px;
             overflow: auto;
 
             li
