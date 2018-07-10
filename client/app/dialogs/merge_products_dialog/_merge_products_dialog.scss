@@ -19,7 +19,7 @@
       .modal-body
       {
 
-        height: 350px;
+        height: 450px;
         .drag-and-drop
         {
           .button {
@@ -55,6 +55,17 @@
           }
 
 
+
+        }
+
+        .mida-logos-container{
+
+          .logo-container{
+            width: auto;
+            height: 100px;
+            cursor: pointer;
+            background-color: rgba(16, 32, 48, 0.75);
+          }
 
         }
 

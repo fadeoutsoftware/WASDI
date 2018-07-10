@@ -3,7 +3,7 @@
  */
 var MergeProductsController = (function() {
 
-    function MergeProductsController($scope, oClose,oExtras,Upload,oConstantService,$http,oCatalogService) {
+    function MergeProductsController($scope, oClose,oExtras,Upload,oConstantService,$http,oCatalogService,$window) {
         this.m_oScope = $scope;
         this.m_oScope.m_oController = this;
         this.m_sLog = '';
@@ -16,6 +16,7 @@ var MergeProductsController = (function() {
         this.m_oCatalogService = oCatalogService;
         this.m_aoEntries = [];
         this.m_oSelectedEntry = null;
+        this.m_oWindow=$window;
         this.m_oClose = oClose;       //$scope.close = oClose;
         this.searchEntries();
 
@@ -186,6 +187,9 @@ var MergeProductsController = (function() {
         this.m_oScope.close(sResult, 500); // close, but give 500ms for bootstrap to animate
     };
 
+    MergeProductsController.prototype.redirectToMidaWebSite = function(){
+        this.m_oWindow.open('http://www.mydewetra.org', '_blank');
+    };
     MergeProductsController.$inject = [
         '$scope',
         'close',
@@ -193,7 +197,8 @@ var MergeProductsController = (function() {
         'Upload',
         'ConstantsService',
         '$http',
-        'CatalogService'
+        'CatalogService',
+        '$window'
     ];
     return MergeProductsController;
 })();
