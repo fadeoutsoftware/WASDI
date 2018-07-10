@@ -33,9 +33,11 @@
           }
         }
 
-        .opera-logo-container{
-          .opera-logo{
-            width: 150px;
+        .opera-logos-container{
+
+          .logo-container{
+            width: auto;
+            height: 100px;
             cursor: pointer;
             background-color: rgba(16, 32, 48, 0.75);
           }
