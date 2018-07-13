@@ -365,6 +365,7 @@ angular.module('wasdi.ImageEditorDirective', [])
                     oBody.viewportHeight = oBody.viewportHeight * iScaleValue;
 
                 };
+
                 /**
                  *
                  * @returns {boolean}
@@ -427,18 +428,20 @@ angular.module('wasdi.ImageEditorDirective', [])
 
                     //scale image 100% stage
                     scope.imageFillEntireStage(oNewImage,scope.Stage);
-                    //Remove old Bitmap
-                    scope.Stage.removeChild(scope.Bitmap);
-                    scope.Bitmap = null;
+
+                    // //Remove old Bitmap
+                    // scope.Stage.removeChild(scope.Bitmap);
+                    // scope.Bitmap = null;
+                    scope.Stage.removeAllChildren();
+
                     //add new bitmap
                     stage.addChild(oNewImage);
-
-                    // remove dragger
-                    scope.Stage.removeChild(scope.Dragger);
-                    scope.Dragger = null;
-                    //Remove old Square
-                    scope.Stage.removeChild(scope.Square);
-                    scope.Square = null;
+                    // // remove dragger
+                    // scope.Stage.removeChild(scope.Dragger);
+                    // scope.Dragger = null;
+                    // //Remove old Square
+                    // scope.Stage.removeChild(scope.Square);
+                    // scope.Square = null;
                     return true;
                 };
 

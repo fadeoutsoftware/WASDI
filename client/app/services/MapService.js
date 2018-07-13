@@ -539,9 +539,9 @@ service('MapService', ['$http','$rootScope', 'ConstantsService', function ($http
         {
             return false;
         }
-        this.m_oWasdiMap.fitBounds(oRectangle.getBounds());
+        this.m_oWasdiMap.flyToBounds(oRectangle.getBounds());
         return true;
-    }
+    };
     /**
      * Zoom on bounds
      * @param aBounds
