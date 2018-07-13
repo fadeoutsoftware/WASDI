@@ -245,6 +245,12 @@ var EditorController = (function () {
                 onClick: "",
                 icon:"icon-document-gear"
             },
+            {
+                name:"WPS", //WPS
+                subMenu:[],
+                onClick: this.openWPSDialog,
+                icon:"fa fa-tasks"
+            }
         ]
     };
 
@@ -1958,10 +1964,19 @@ var EditorController = (function () {
      * openWPSDialog
      * @returns {boolean}
      */
-    EditorController.prototype.openWPSDialog = function()
+    EditorController.prototype.openWPSDialog = function(oWindow)
     {
-        var oController = this;
-        this.m_oModalService.showModal({
+        var oController;
+        if(utilsIsObjectNullOrUndefined(oWindow) === true)
+        {
+            oController = this;
+        }
+        else
+        {
+            oController = oWindow;
+        }
+
+        oController.m_oModalService.showModal({
             templateUrl: "dialogs/wps_dialog/WpsView.html",
             controller: "WpsController",
             inputs: {
@@ -2182,7 +2197,7 @@ var EditorController = (function () {
                 oController.m_oMasksSaved = oResult.listOfMasks;
 
                 // Set a filter, if it has been selected by the user
-                oResult.filterVM = oFinalBand.actualFilter;
+                oResult.body.filterVM = oFinalBand.actualFilter;
                 // Save the masks, as user selected
                 oFinalBand.productMasks = oResult.body.productMasks;
                 oFinalBand.rangeMasks = oResult.body.rangeMasks;
