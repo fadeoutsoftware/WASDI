@@ -435,7 +435,7 @@ var RootController = (function() {
             oWorkspace.name = value;
 
             oController.m_oWorkspaceService.UpdateWorkspace(oWorkspace).success(function (data) {
-                oWorkspace.name = data.name;
+                oWorkspace.name = data.name
                 oController.m_bIsEditModelWorkspaceNameActive = false;
             });
         };
