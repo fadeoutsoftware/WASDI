@@ -172,7 +172,6 @@ var WpsController = (function() {
     {
         // var sel = document.getElementById("wps");
         // getCapabilities(sel.options[sel.selectedIndex].text);
-        console.log("miao");
         getCapabilities(this.m_sSelectedWps);
         this.clickOnShowCapabilities();
     };

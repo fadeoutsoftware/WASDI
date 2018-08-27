@@ -505,7 +505,6 @@ angular.module('wasdi.ImageEditorDirective', [])
                     }
                     var fScaleValueX = Math.abs( oPositionStage.width / oPositionImageOnStage.width );
                     var fScaleValueY = Math.abs( oPositionStage.height / oPositionImageOnStage.height );
-
                     oImage.setTransform(null,null,fScaleValueX,fScaleValueY);
                 };
                 /**

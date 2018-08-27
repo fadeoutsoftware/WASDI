@@ -11,16 +11,19 @@
                         <h1>wps-js example</h1>
                         <p>wps-js is an <a href="https://github.com/52North/wps-js/" title="wps-js on GitHub">open source client library</a> for connecting Javascript client to <a href="http://www.opengeospatial.org/standards/wps" title="WPS @ Open Geospatial Consortium">OGC Web Processing</a> services. This page demonstrates how you can use it. More documentation is available in the <a href="https://wiki.52north.org/bin/view/Geoprocessing/Wps-js" title="wps-js wiki page">52&deg;North Wiki</a> and on <a href="https://github.com/52North/wps-js/blob/master/README.md" title="wps-js readme">GitHub</a>.</p>
                     </div>-->
+                    <h3>
+                        Wps list
+                    </h3>
 
-                        <div>
-                            <select id="wps" ng-model="m_oController.m_sSelectedWps" ng-change="m_oController.onChangeWPS()"><!--ng-change="m_oController.onChangeWPS()"-->
-                                <!--<option>Select a WPS</option>-->
-                                <!--<option>http://geoprocessing.demo.52north.org:8080/latest-wps/WebProcessingService</option>-->
-                                <option>http://www.wasdi.net/geoserver/wps</option>
-                            </select>
-                            <!--{{m_oController.m_sSelectedWps}}-->
-                        </div>
-                    <div class="row">
+                    <div>
+                        <select id="wps" ng-model="m_oController.m_sSelectedWps" ng-change="m_oController.onChangeWPS()"><!--ng-change="m_oController.onChangeWPS()"-->
+                            <!--<option>Select a WPS</option>-->
+                            <!--<option>http://geoprocessing.demo.52north.org:8080/latest-wps/WebProcessingService</option>-->
+                            <option>http://www.wasdi.net/geoserver/wps</option>
+                        </select>
+                        <!--{{m_oController.m_sSelectedWps}}-->
+                    </div>
+                    <div class="row" ng-hide="m_oController.m_sSelectedWps === '' ">
                         <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
                             <div>
                                 <h3>
@@ -50,7 +53,7 @@
                         </div>
                     </div>
 
-                    <div class="row">
+                    <div class="row" ng-hide="m_oController.m_sSelectedWps === '' ">
                         <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
                             <h3>
                                 Execute results
@@ -61,6 +64,7 @@
                         </div>
 
                     </div>
+
                 </div>
 
                 <!--TODO MOVE SCRIPTS-->

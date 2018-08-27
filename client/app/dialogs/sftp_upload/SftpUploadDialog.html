@@ -8,7 +8,9 @@
             <div class="modal-body">
                 <h4>
                     <!-- ICON -->
-                    <invader ng-show="m_oController.isVisibleLoadIcon()"></invader>
+                    <div class="loadIcon">
+                        <invader ng-show="m_oController.isVisibleLoadIcon()"></invader><!--ng-show="m_oController.isVisibleLoadIcon()"-->
+                    </div>
                     <!-- NEW USER -->
                     <form ng-hide="m_oController.isVisibleLoadIcon() || m_oController.isAccountCreated()">
                         <fieldset class="my-input-text">

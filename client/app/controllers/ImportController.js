@@ -1207,8 +1207,14 @@ var ImportController = (function() {
 
             var oLatLonArray = [];
 
-            oLatLonArray[0] = JSON.parse(aNewBounds[1]); //Lat
-            oLatLonArray[1] = JSON.parse(aNewBounds[0]); //Lon
+            try{
+                oLatLonArray[0] = JSON.parse(aNewBounds[1]); //Lat
+                oLatLonArray[1] = JSON.parse(aNewBounds[0]); //Lon
+            }catch(err){
+                console.log("Function polygonToBounds: Error in parse operation");
+                return [];
+            }
+
 
 
             //var aoOutputPoint = proj4(sSourceProjection,sDestinationProjection,aNewBounds);

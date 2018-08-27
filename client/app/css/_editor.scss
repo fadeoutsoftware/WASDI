@@ -356,7 +356,9 @@
           margin:0;
           display: inline-block;
         }
-
+        i{
+          width: 20px;
+        }
         .dropdown-menu{
           z-index: 1500 ;
           li{

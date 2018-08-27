@@ -209,6 +209,8 @@ service('MapService', ['$http','$rootScope', 'ConstantsService', function ($http
 
             edit: {
                 featureGroup: drawnItems,//draw items are the "voice" of menu
+                edit: false,// hide edit button
+                remove: false// hide remove button
             }
         };
 
@@ -256,6 +258,10 @@ service('MapService', ['$http','$rootScope', 'ConstantsService', function ($http
      */
     this.initGeoSearchPluginForOpenStreetMap = function()
     {
+        /*
+            https://github.com/perliedman/leaflet-control-geocoder
+            TODO CHANGE GEOCODER
+        */
         var geocoder = L.Control.Geocoder.mapzen('search-DopSHJw');
         var control = L.Control.geocoder({
             geocoder: geocoder,
