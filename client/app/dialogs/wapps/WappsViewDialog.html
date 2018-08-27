@@ -14,6 +14,7 @@
             </div>
             <!-- BODY -->
             <div class="modal-body "  >
+
                 <h4>
                     <!--TODO IT -->
                     <!--<div class="jsonView">-->
@@ -21,11 +22,11 @@
                     <!--</div>-->
                     <!--{{m_oController.myJson}}-->
 
-                    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 list-of-processor" ng-repeat="processor in m_oController.m_aoProcessorList" >
+                    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 list-of-processor" ng-repeat="processor in m_oController.m_aoProcessorList">
                         <!--data-toggle="collapse" href="#RunProcessorPanel{{$index}}"-->
                         <!--aria-expanded="false" aria-controls="RunProcessorPanel{{$index}}"-->
                         <div class="col-xs-2 col-sm-2 col-md-2 col-lg-2 content-image" data-toggle="collapse" href="#RunProcessorPanel{{$index}}"
-                             aria-expanded="false" aria-controls="RunProcessorPanel{{$index}}" ng-click="m_oController.myJson={}; m_oController.collapsePanels()">
+                             aria-expanded="false" aria-controls="RunProcessorPanel{{$index}}" ng-click="m_oController.collapsePanels()">
                             <img src={{processor.imgLink}} alt="Image" >
                         </div>
                         <div class="col-xs-10 col-sm-10 col-md-10 col-lg-10" data-toggle="collapse" href="#RunProcessorPanel{{$index}}" ng-click="m_oController.myJson={}; m_oController.collapsePanels()"
@@ -68,14 +69,43 @@
                                 <div class="well">
 
                                     <div class="form-group">
-                                        Json:
-                                        <div class="jsonView">
+
+                                        <div class="row">
+                                            <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
+                                                JSON Editor mode:<span ng-show="m_oController.m_bIsJsonEditModeActive"> On </span> <span ng-hide="m_oController.m_bIsJsonEditModeActive"> Off </span>
+                                            </div>
+                                            <div class="col-xs-8 col-sm-8 col-md-8 col-lg-8">
+                                                <div class="btn-switch-square" ng-class="{'btn-switch--on':m_oController.m_bIsJsonEditModeActive}" ng-model="m_oController.m_bIsJsonEditModeActive"
+                                                     ng-click="m_oController.m_bIsJsonEditModeActive = !m_oController.m_bIsJsonEditModeActive">
+                                                    <div class="square" ng-class="{'btn-switch-circle--on':m_oController.m_bIsJsonEditModeActive}" ng-model="m_oController.m_bIsJsonEditModeActive"
+                                                         ng-click="m_oController.m_bIsJsonEditModeActive = m_oController.m_bIsJsonEditModeActive"></div>
+                                                </div>
+                                            </div>
+
+                                        </div>
+
+
+                                        <label>
+                                            Json:
+                                        </label>
+                                        <!--Editor json-->
+                                        <div class="jsonView" ng-show="m_oController.m_bIsJsonEditModeActive">
                                             <json child="m_oController.myJson" default-collapsed="false" type="object"></json>
                                         </div>
-                                        <div class="jsonContainer">{{m_oController.myJson}}</div>
-                                        <!--Json:-->
-                                        <!--<textarea class="form-control" rows="5" id="" ng-model="value"></textarea>-->
-                                        <button type="button" ng-click="m_oController.runProcessor(processor.processorName, m_oController.myJson)" class="my-button">
+                                        <div class="jsonContainer" ng-show="m_oController.m_bIsJsonEditModeActive">
+                                            {{m_oController.myJson}}
+                                        </div>
+
+                                        <textarea class="form-control" rows="5" id="" ng-model="m_oController.m_sMyJsonString" ng-hide="m_oController.m_bIsJsonEditModeActive"></textarea>
+
+                                        <button type="button" ng-click="m_oController.runProcessor(processor.processorName, m_oController.myJson)"
+                                                class="my-button"  ng-show="m_oController.m_bIsJsonEditModeActive">
+                                            Run
+                                            <i class="fa fa-play" aria-hidden="true"></i>
+                                        </button>
+
+                                        <button type="button" ng-click="m_oController.runProcessor(processor.processorName, m_oController.m_sMyJsonString)"
+                                                class="my-button"  ng-hide="m_oController.m_bIsJsonEditModeActive">
                                             Run
                                             <i class="fa fa-play" aria-hidden="true"></i>
                                         </button>

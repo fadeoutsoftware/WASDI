@@ -1,5 +1,5 @@
 <div class="modal fade NDVD-modal">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-dialog-extra-large">
         <div class="modal-content">
             <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 modal-header">
 
@@ -50,45 +50,61 @@
 
                             <!--DROPDOWN MENUS-->
                             <div class="row">
-                                <div class=" col-lg-6 col-md-6 col-sm-6 col-xs-6">
-                                    <label>{{"DIALOG_NDVI_RED_SOURCE_BAND"|translate}}</label>
-                                    <!--<div class="dropdown dropup">-->
-                                        <!--<button class="btn btn-default dropdown-toggle" type="button" id="NDVIDropdownMenuRedSourceBand"-->
-                                                <!--data-toggle="dropdown">-->
-                                            <!--{{m_oController.m_sRedSourceBandSelected}}-->
-                                            <!--<span class="caret"></span>-->
-                                        <!--</button>-->
-
-                                        <!--<ul class="dropdown-menu" role="menu" aria-labelledby="NDVIDropdownMenuRedSourceBand">-->
-                                            <!--<li role="presentation" ng-repeat="RedSourceBand in m_oController.m_asSourceBands">&lt;!&ndash;m_oController.m_asSourceBands&ndash;&gt;-->
-                                                <!--<a role="menuitem" tabindex="-1" href="" ng-click="m_oController.m_sRedSourceBandSelected = RedSourceBand">{{RedSourceBand}}</a>-->
-                                            <!--</li>-->
-                                        <!--</ul>-->
-
-                                    <!--</div>-->
+                                <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                                    <label>
+                                        {{"DIALOG_NDVI_RED_SOURCE_BAND"|translate}}
+                                    </label>
                                     <multiselect options="m_oController.m_asSourceBands" selected="m_oController.m_sRedSourceBandSelected"></multiselect>
                                 </div>
+                                <!--<div class=" col-lg-6 col-md-6 col-sm-6 col-xs-6">-->
+                                    <!--<label>{{"DIALOG_NDVI_RED_SOURCE_BAND"|translate}}</label>-->
+                                    <!--&lt;!&ndash;<div class="dropdown dropup">&ndash;&gt;-->
+                                        <!--&lt;!&ndash;<button class="btn btn-default dropdown-toggle" type="button" id="NDVIDropdownMenuRedSourceBand"&ndash;&gt;-->
+                                                <!--&lt;!&ndash;data-toggle="dropdown">&ndash;&gt;-->
+                                            <!--&lt;!&ndash;{{m_oController.m_sRedSourceBandSelected}}&ndash;&gt;-->
+                                            <!--&lt;!&ndash;<span class="caret"></span>&ndash;&gt;-->
+                                        <!--&lt;!&ndash;</button>&ndash;&gt;-->
 
-                                <div class=" col-lg-6 col-md-6 col-sm-6 col-xs-6">
-                                    <label>{{"DIALOG_NDVI_NIR_SOURCE_BAND"|translate}}</label>
-                                    <!--<div class="dropdown dropup">-->
-                                        <!--<button class="btn btn-default dropdown-toggle" type="button" id="NDVIDropdownMenuNIRSourceBand"-->
-                                                <!--data-toggle="dropdown">-->
-                                            <!--{{m_oController.m_sNIRSourceBandSelected}}-->
-                                            <!--<span class="caret"></span>-->
-                                        <!--</button>-->
+                                        <!--&lt;!&ndash;<ul class="dropdown-menu" role="menu" aria-labelledby="NDVIDropdownMenuRedSourceBand">&ndash;&gt;-->
+                                            <!--&lt;!&ndash;<li role="presentation" ng-repeat="RedSourceBand in m_oController.m_asSourceBands">&lt;!&ndash;m_oController.m_asSourceBands&ndash;&gt;&ndash;&gt;-->
+                                                <!--&lt;!&ndash;<a role="menuitem" tabindex="-1" href="" ng-click="m_oController.m_sRedSourceBandSelected = RedSourceBand">{{RedSourceBand}}</a>&ndash;&gt;-->
+                                            <!--&lt;!&ndash;</li>&ndash;&gt;-->
+                                        <!--&lt;!&ndash;</ul>&ndash;&gt;-->
 
-                                        <!--<ul class="dropdown-menu" role="menu" aria-labelledby="NDVIDropdownMenuNIRSourceBand">-->
-                                            <!--<li role="presentation" ng-repeat="NIRSourceBand in m_oController.m_asSourceBands">&lt;!&ndash;m_oController.m_asSourceBands&ndash;&gt;-->
-                                                <!--<a role="menuitem" tabindex="-1" href="" ng-click="m_oController.m_sNIRSourceBandSelected = NIRSourceBand">{{NIRSourceBand}}</a>-->
-                                            <!--</li>-->
-                                        <!--</ul>-->
+                                    <!--&lt;!&ndash;</div>&ndash;&gt;-->
+                                    <!--<multiselect options="m_oController.m_asSourceBands" selected="m_oController.m_sRedSourceBandSelected"></multiselect>-->
+                                <!--</div>-->
 
-                                    <!--</div>-->
+
+                                <!--<div class=" col-lg-6 col-md-6 col-sm-6 col-xs-6">-->
+                                    <!--<label>{{"DIALOG_NDVI_NIR_SOURCE_BAND"|translate}}</label>-->
+                                    <!--&lt;!&ndash;<div class="dropdown dropup">&ndash;&gt;-->
+                                        <!--&lt;!&ndash;<button class="btn btn-default dropdown-toggle" type="button" id="NDVIDropdownMenuNIRSourceBand"&ndash;&gt;-->
+                                                <!--&lt;!&ndash;data-toggle="dropdown">&ndash;&gt;-->
+                                            <!--&lt;!&ndash;{{m_oController.m_sNIRSourceBandSelected}}&ndash;&gt;-->
+                                            <!--&lt;!&ndash;<span class="caret"></span>&ndash;&gt;-->
+                                        <!--&lt;!&ndash;</button>&ndash;&gt;-->
+
+                                        <!--&lt;!&ndash;<ul class="dropdown-menu" role="menu" aria-labelledby="NDVIDropdownMenuNIRSourceBand">&ndash;&gt;-->
+                                            <!--&lt;!&ndash;<li role="presentation" ng-repeat="NIRSourceBand in m_oController.m_asSourceBands">&lt;!&ndash;m_oController.m_asSourceBands&ndash;&gt;&ndash;&gt;-->
+                                                <!--&lt;!&ndash;<a role="menuitem" tabindex="-1" href="" ng-click="m_oController.m_sNIRSourceBandSelected = NIRSourceBand">{{NIRSourceBand}}</a>&ndash;&gt;-->
+                                            <!--&lt;!&ndash;</li>&ndash;&gt;-->
+                                        <!--&lt;!&ndash;</ul>&ndash;&gt;-->
+
+                                    <!--&lt;!&ndash;</div>&ndash;&gt;-->
+                                    <!--<multiselect options="m_oController.m_asSourceBands" selected="m_oController.m_sNIRSourceBandSelected"></multiselect>-->
+
+                                <!--</div>-->
+                            </div>
+                            <div class="row">
+                                <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                                    <label>
+                                        {{"DIALOG_NDVI_NIR_SOURCE_BAND"|translate}}
+                                    </label>
                                     <multiselect options="m_oController.m_asSourceBands" selected="m_oController.m_sNIRSourceBandSelected"></multiselect>
-
                                 </div>
                             </div>
+
                         </fieldset>
                     </form>
                     <!--</div>-->

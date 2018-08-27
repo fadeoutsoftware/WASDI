@@ -44,7 +44,7 @@ ul.wps-execute-response-list li, ul.wps-capabilities-list li {
 label.wps-item-label {
 	font-variant:small-caps;
 	margin-right: 0.5em;
-	padding: 0.1em;
+	padding: 0.3em;
 	background-color: #43516A;
 	/*#66C5E4 original color*/
 	width: 100px;
@@ -59,7 +59,7 @@ label.wps-item-label {
 label.wps-input-item-label {
 	font-variant:small-caps;
 	margin-right: 0.5em;
-	padding: 0.1em;
+	padding: 0.4em;
 	/*background-color: #66C5E4;*/
 	background-color: #43516A;
 	display: inline-block;
@@ -104,7 +104,7 @@ span.wps-item-error-message-value {
 
 textarea.wps-complex-input-textarea {
 	width: 377px;
-	height: 17px;
+	height: 20px;
 	resize: none;
 }
 

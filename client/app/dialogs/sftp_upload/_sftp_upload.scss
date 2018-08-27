@@ -9,6 +9,7 @@
       {
         color:$wasdi-white;
         background-color: $wasdi-blue-logo;
+
         .close
         {
           color: $wasdi-white;
@@ -18,6 +19,9 @@
 
       .modal-body
       {
+        .loadIcon #invader, .loading-files #invader {
+          margin-top: 35px;
+        }
         //FORM FOR NEW USER
         form{
           fieldset{

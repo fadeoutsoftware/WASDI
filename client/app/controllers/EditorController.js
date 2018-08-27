@@ -215,31 +215,31 @@ var EditorController = (function () {
                         name:"",//OPERA
                         subMenu:[],
                         onClick: this.openWappDialog,
-                        icon:"fa fa-tint"
+                        icon:"fa fa-lg fa-tint"
                     },
                     {
                         name:"",//RASOR
                         subMenu:[],
                         onClick: this.openRasorDialog,
-                        icon:"fa fa-users"
+                        icon:"fa fa-lg fa-users"
                     },
                     {
                         name:"",//workflow
                         subMenu:[],
                         onClick: this.openWorkflowManagerDialog,
-                        icon:"fa fa-file-code-o"
+                        icon:"fa fa-lg fa-file-code-o"
                     },
                     {
                         name:"",// New Processor
                         subMenu:[],
                         onClick: this.openProcessorDialog,
-                        icon:"fa fa-file-code-o"
+                        icon:"fa fa-lg fa-file-code-o"
                     },
                     {
                         name:"",//WAPPS
                         subMenu:[],
                         onClick: this.openWappsDialog,
-                        icon:"fa fa-rocket"
+                        icon:"fa fa-lg fa-rocket"
                     }
                 ],
                 onClick: "",

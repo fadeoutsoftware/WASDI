@@ -24,9 +24,11 @@ var NDVIController = (function() {
         }
         else
         {
-            if( (utilsIsObjectNullOrUndefined(this.m_oSelectedProduct.productFriendlyName)== false) && (utilsIsStrNullOrEmpty(this.m_oSelectedProduct.productFriendlyName)== false))
-                this.m_sFileName_Operation = this.m_oSelectedProduct.name + "_NDVI";
-            this.m_asSourceBands = [""];
+            // if( (utilsIsObjectNullOrUndefined(this.m_oSelectedProduct.productFriendlyName)== false) && (utilsIsStrNullOrEmpty(this.m_oSelectedProduct.productFriendlyName)== false))
+            //     this.m_sFileName_Operation = this.m_oSelectedProduct.name + "_NDVI";
+            // this.m_asSourceBands = [""];
+            this.m_asSelectedProducts.push(this.m_oSelectedProduct.name);
+
             this.loadBands();
         }
         // this.m_asOrbitStateVectors = ["Sentinel Precise(Auto Download)","Sentinel Restituted(Auto Download)","DORIS preliminary POR(ENVISAT)"

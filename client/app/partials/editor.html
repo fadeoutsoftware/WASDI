@@ -508,7 +508,8 @@
                 <div class="btn-group btn-group-left" role="group" >
                     <button type="button" class="btn btn-default " ng-class="m_oController.m_sClassBtnSwitchGeographic"
                         ng-click="m_oController.switchEditorGeoReferencedMode();m_oController.changeClassBtnSwitchGeographic();" data-toggle="tooltip"
-                        data-placement="bottom" title="{{m_oController.m_sToolTipBtnSwitchGeographic|translate}}"> <!--ng-disabled="m_oController.m_b2DMapModeOn == false"-->
+                        data-placement="bottom" title="{{m_oController.m_sToolTipBtnSwitchGeographic|translate}}"
+                        ng-disabled="!(m_oController.m_bIsLoadedViewBandImage === true || m_oController.m_bIsEditorZoomingOnExistingImage)"> <!--ng-disabled="m_oController.m_b2DMapModeOn == false"-->
                     </button>
 
                     <!--<button class="btn-group btn-group-left" role="group"-->

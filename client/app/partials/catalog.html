@@ -7,7 +7,6 @@
                 <button class="my-button" ng-click="m_oController.searchEntries()" ng-disabled="!m_oController.m_bIsLoadedTable">Search</button>
 
             </div>
-
             <div class="time-picker-container">
 
                 <div class="input-group my-input-text"
@@ -146,7 +145,6 @@
 
             <table class="table table-hover table-products" ng-show="m_oController.m_bIsLoadedTable" >
                 <thead>
-
                         <th ng-click="m_oController.m_sOrderBy = 'fileName'; m_oController.m_bReverseOrder=!m_oController.m_bReverseOrder">
                             File Name
                             <i class="fa fa-sort-desc" aria-hidden="true" ng-show="(m_oController.m_sOrderBy === 'fileName') && (m_oController.m_bReverseOrder === true)"></i>

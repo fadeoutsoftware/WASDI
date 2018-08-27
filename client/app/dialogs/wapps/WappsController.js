@@ -18,7 +18,9 @@ var WappsController = (function() {
         this.m_sFileName = "";
         this.m_oProcessorService = oProcessorService;
         this.m_aoProcessorList = [];
+        this.m_bIsJsonEditModeActive = true;
         this.myJson = {};
+        this.m_sMyJsonString = "";
         var oController = this;
         $scope.close = function(result) {
             oClose(result, 300); // close, but give 500ms for bootstrap to animate
@@ -74,7 +76,19 @@ var WappsController = (function() {
         console.log("RUN - " + sProcessor);
 
         var oController = this;
+        //TODO CHECK IF STRING CONVERT AS OBJECT
 
+        if(utilsIsString(sJSON) === true)
+        {
+            try {
+                sJSON = JSON.parse(sJSON);
+            }
+            catch(err) {
+                utilsVexDialogAlertTop("Invalid JSON");
+                return;
+            }
+
+        }
         this.m_oProcessorService.runProcessor(sProcessor, sJSON).success(function (data) {
             if(utilsIsObjectNullOrUndefined(data) == false)
             {
@@ -140,6 +154,8 @@ var WappsController = (function() {
 
     WappsController.prototype.collapsePanels = function()
     {
+        this.myJson = {};
+        this.m_sMyJsonString = "";
         utilsCollapseBootstrapPanels();
     };
     WappsController.$inject = [

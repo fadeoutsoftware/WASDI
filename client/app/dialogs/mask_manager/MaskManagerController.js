@@ -29,9 +29,19 @@ var MaskManagerController = (function() {
         };
         this.m_sFilterMaskTable = "";
         this.m_bAreProductMasksLoading = false;
-        this.getProductMasks(this.m_oProduct.fileName,this.m_oBand.name, this.m_sWorkspaceId);
         //MASK LIST
         this.m_aoMasks=[];
+        //IF THERE AREN'T DIFFERENT
+        if(utilsIsObjectNullOrUndefined(this.m_oMasksSaved ) === true)
+        {
+            this.getProductMasks(this.m_oProduct.fileName,this.m_oBand.name, this.m_sWorkspaceId);
+        }
+        else
+        {
+            this.m_aoMasks = this.m_oMasksSaved;
+        }
+
+
         this.m_sRangeMinValue = 0.0;
         this.m_sRangeMaxValue = 1.0;
         this.m_sRangeSelectedRaster = "";
@@ -487,14 +497,16 @@ var MaskManagerController = (function() {
                     oWasdiMask.type = aoProductMasks[i].maskType;
                     oWasdiMask.description = aoProductMasks[i].description;
                     oWasdiMask.name = aoProductMasks[i].name;
-                    oWasdiMask.transparency = 1.0-aoProductMasks[i].transparency;
-                    oWasdiMask.colour = "rgba("+aoProductMasks[i].colorRed+","+aoProductMasks[i].colorGreen+","+aoProductMasks[i].colorBlue+","+oWasdiMask.transparency+")";
+                    // oWasdiMask.transparency = 1.0-aoProductMasks[i].transparency;
+                    // oWasdiMask.transparency = aoProductMasks[i].transparency;
+                    // oWasdiMask.colour = "rgba("+aoProductMasks[i].colorRed+","+aoProductMasks[i].colorGreen+","+aoProductMasks[i].colorBlue+","+oWasdiMask.transparency+")";
+                    oWasdiMask.colour = "rgba("+aoProductMasks[i].colorRed+","+aoProductMasks[i].colorGreen+","+aoProductMasks[i].colorBlue+","+aoProductMasks[i].transparency+")";
                     oWasdiMask.originalMaskObject = aoProductMasks[i];
                     oWasdiMask.selected = false;
                     oController.m_aoMasks.push(oWasdiMask);
                 }
             }
-            oController.maskSavedSelected();
+            // oController.maskSavedSelected();
 
 
         }).error(function (error) {
@@ -570,7 +582,7 @@ var MaskManagerController = (function() {
             var iRedRGB = oColor.red;
             var iGreenRGB = oColor.green;
             var iBlueRGB= oColor.blue;
-            var fTransparencyRGB= oColor.transparency;
+            var fTransparencyRGB= 1.0-oColor.transparency;
 
             if(this.m_aoMasks[iIndexMask].type === 'Range' && !utilsIsObjectNullOrUndefined( this.m_aoMasks[iIndexMask].isUserGeneratedMask))
             {

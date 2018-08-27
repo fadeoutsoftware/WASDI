@@ -1,0 +1,69 @@
+//.container {
+//  width: 50px;
+//  margin: 50px auto;
+//}
+
+/* EXAMPLE
+app.controller('mainController', function($scope) {
+
+  $scope.toggle = {};
+  $scope.toggle.switch = false;
+
+});
+
+<div class="btn-switch" ng-class="{'btn-switch--on':toggle.switch}" ng-model="toggle.switch" ng-click="toggle.switch = !toggle.switch">
+  <div class="btn-switch-circle" ng-class="{'btn-switch-circle--on':toggle.switch}" ng-model="toggle.switch" ng-click="!toggle.switch = toggle.switch"></div>
+</div>
+    */
+.btn-switch-circle {
+  position: relative;
+  display: block;
+  width: 50px;
+  height: 25px;
+  cursor: pointer;
+  background-color: $wasdi-blue-logo;
+  border: 2px solid $wasdi-blue-logo;
+  border-radius: 40px;
+
+  .circle {
+    position: absolute;
+    top: 0;
+    left: 0;
+    display: block;
+    height: 21px;
+    width: 21px;
+    background-color: #fff;
+     border-radius: 40px;
+  }
+}
+.btn-switch-square {
+  position: relative;
+  display: block;
+  width: 50px;
+  height: 25px;
+  cursor: pointer;
+  background-color: $wasdi-blue-logo;
+  border: 2px solid $wasdi-blue-logo;
+  // border-radius: 40px;
+
+  .square {
+    position: absolute;
+    top: 0;
+    left: 0;
+    display: block;
+    height: 21px;
+    width: 21px;
+    background-color: #fff;
+    // border-radius: 40px;
+  }
+}
+
+.btn-switch--on {
+  background-color: $wasdi-green-logo;
+  border: 2px solid $wasdi-green-logo;
+
+  .btn-switch-circle--on {
+    left: auto;
+    right: 0;
+  }
+}

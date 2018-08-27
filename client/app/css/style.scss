@@ -28,6 +28,8 @@
 @import "../directives/image_preview/image_preview";
 @import "../directives/Toggle/toggle_switch";
 @import "../directives/image_editor/image_editor_directive";
+@import "../directives/DropDownMenu/dropdown_menu";
+@import "../directives/to_do_list/to_do_list";
 
 //DIALOGS
 @import "../dialogs/orbit_info/orbit_info";
@@ -63,7 +65,7 @@
 
 //COMPONENTS
 @import "components/range_slider";
-
+@import "components/toggle_switch";
 body
 {
   font-family: $wasdi-font-web;
@@ -326,108 +328,116 @@ h4
 //modal css default (bootstrap)
 .modal-dialog
 {
-  width:50%;
-  .modal-content
-  {
-    .modal-header
-    {
-      color:$wasdi-white;
-      background-color: $wasdi-blue-logo;
-      .close
-      {
-        color: $wasdi-white;
-        opacity: 1;
-      }
-    }
 
-    .modal-body
-    {
-      /*css used in operation dialog*/
-      //overflow-y: auto;
-      //max-height:$wasdi-max-heigth-body;
-      overflow-x: auto;
-
-      //FIX FIREFOX
-      input[type=text]
-      {
-        padding: 6px 12px;
-      }
-
-      form
-      {
-        fieldset
-        {
-          border:2px solid $wasdi-blue-logo;
-          padding: 20px 20px;
-
-
-
-          legend
-          {
-            width: auto;
-            border-bottom: 0;
-          }
-          .my-input-text
-          {
-            input[type=text]
-            {
-              background-color: $wasdi-grey;
-            }
-            .input-group
-            {
-              .input-group-btn
-              {
-                .btn-default {
-                  color: $wasdi-blue-logo;
-                  background-color: $wasdi-grey;
-                  border-color: $wasdi-blue-logo;
-                  width:100%
-                }
-                .productsDropDown
-                {
-                  width:100%
-                }
-              }
-            }
-          }
-          .inline
-          {
-            float: left;
-          }
-          .inline-right
-          {
-            float: right;
-          }
-
-          .btn-block {
-            display: block;
-            width: 50%;
-
-          }
-          .btn-default {
-            color: #333;
-            background-color: #fff;
-            border-color: $wasdi-blue-logo;
-          }
-          .dropdown
-          {
-            margin-left:10px;
-          }
-        }
-      }
-    }
-
-    .modal-footer
-    {
-      border-top:1px solid $wasdi-blue-logo;
-      .my-button
-      {
-        padding: 10px 21px;
-      }
-    }
-  }
+  @include utilities-modal-style(50%);
+  //width:50%;
+  //.modal-content
+  //{
+  //  .modal-header
+  //  {
+  //    color:$wasdi-white;
+  //    background-color: $wasdi-blue-logo;
+  //    .close
+  //    {
+  //      color: $wasdi-white;
+  //      opacity: 1;
+  //    }
+  //  }
+  //
+  //  .modal-body
+  //  {
+  //    /*css used in operation dialog*/
+  //    //overflow-y: auto;
+  //    //max-height:$wasdi-max-heigth-body;
+  //    overflow-x: auto;
+  //
+  //    //FIX FIREFOX
+  //    input[type=text]
+  //    {
+  //      padding: 6px 12px;
+  //    }
+  //
+  //    form
+  //    {
+  //      fieldset
+  //      {
+  //        border:2px solid $wasdi-blue-logo;
+  //        padding: 20px 20px;
+  //
+  //
+  //
+  //        legend
+  //        {
+  //          width: auto;
+  //          border-bottom: 0;
+  //        }
+  //        .my-input-text
+  //        {
+  //          input[type=text]
+  //          {
+  //            background-color: $wasdi-grey;
+  //          }
+  //          .input-group
+  //          {
+  //            .input-group-btn
+  //            {
+  //              .btn-default {
+  //                color: $wasdi-blue-logo;
+  //                background-color: $wasdi-grey;
+  //                border-color: $wasdi-blue-logo;
+  //                width:100%
+  //              }
+  //              .productsDropDown
+  //              {
+  //                width:100%
+  //              }
+  //            }
+  //          }
+  //        }
+  //        .inline
+  //        {
+  //          float: left;
+  //        }
+  //        .inline-right
+  //        {
+  //          float: right;
+  //        }
+  //
+  //        .btn-block {
+  //          display: block;
+  //          width: 50%;
+  //
+  //        }
+  //        .btn-default {
+  //          color: #333;
+  //          background-color: #fff;
+  //          border-color: $wasdi-blue-logo;
+  //        }
+  //        .dropdown
+  //        {
+  //          margin-left:10px;
+  //        }
+  //      }
+  //    }
+  //  }
+  //
+  //  .modal-footer
+  //  {
+  //    border-top:1px solid $wasdi-blue-logo;
+  //    .my-button
+  //    {
+  //      padding: 10px 21px;
+  //    }
+  //  }
+  //}
 }
 
+.modal-dialog-large{
+  @include utilities-modal-style(75%);
+}
+.modal-dialog-extra-large{
+  @include utilities-modal-style(90%);
+}
 
 //ANIMATE HIDE
 .animate-hide {
