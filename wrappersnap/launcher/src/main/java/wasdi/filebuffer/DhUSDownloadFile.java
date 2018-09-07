@@ -15,6 +15,11 @@ import wasdi.ConfigReader;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.utils.Utils;
 
+/**
+ * Donwload File Utility Class for DhUS
+ * @author p.campanella
+ *
+ */
 public class DhUSDownloadFile extends DownloadFile {
 	
     public DhUSDownloadFile() {

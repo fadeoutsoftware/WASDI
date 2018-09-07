@@ -8,6 +8,7 @@ import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.utils.Utils;
 
 /**
+ * Base Download Utility Class 
  * Created by s.adamo on 06/10/2016.
  */
 public abstract class DownloadFile {

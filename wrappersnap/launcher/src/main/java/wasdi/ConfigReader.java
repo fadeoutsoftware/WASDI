@@ -7,6 +7,11 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Properties;
 
+/**
+ * Launcher Configuration Reader
+ * @author p.campanella
+ *
+ */
 public class ConfigReader {
 
     static HashMap<String,String> m_aoProperties;
@@ -20,12 +25,10 @@ public class ConfigReader {
 
             //inputStream = new ConfigReader().getClass().getClassLoader().getResourceAsStream(propFileName);
             File oCurrentFile = new File(LauncherMain.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath());
-            inputStream = new FileInputStream(oCurrentFile.getParentFile().getPath() + "/config.properties");
+            inputStream = new FileInputStream(oCurrentFile.getParentFile().getPath() + "/" + propFileName);
 
             if (inputStream != null) {
                 prop.load(inputStream);
-            } else {
-                throw new FileNotFoundException("property file '" + propFileName + "' not found in the classpath");
             }
 
             Enumeration<String> aoProperties =  (Enumeration<String>) prop.propertyNames();

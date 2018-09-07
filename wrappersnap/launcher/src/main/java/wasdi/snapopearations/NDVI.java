@@ -8,6 +8,7 @@ import wasdi.shared.parameters.NDVISetting;
 import wasdi.shared.parameters.RangeDopplerGeocodingSetting;
 
 /**
+ * NDVI Snap Operation Parameter Wrapper
  * Created by s.adamo on 17/03/2017.
  */
 public class NDVI extends BaseOperation{

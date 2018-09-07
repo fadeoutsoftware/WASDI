@@ -364,6 +364,10 @@ public class PROBAVDownloadFile extends DownloadFile {
 				
 				return sSaveDirOnServer;
 			}
+			else {
+				// Copy all the folder
+				FileUtils.copyDirectory(new File(sSourceFolder), new File(sSaveDirOnServer));
+			}
 			
 			return "";
 		}

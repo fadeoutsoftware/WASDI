@@ -41,6 +41,11 @@ import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.ProductViewModel;
 
 
+/**
+ * Wasdi SNAP Workflow Graph Wrapper and Exectur
+ * @author p.campanella
+ *
+ */
 public class WasdiGraph {
 	private File inputFile, outputFile;
 	private Graph graph;
@@ -51,6 +56,12 @@ public class WasdiGraph {
 	private GraphParameter params;
 	
 	
+	/**
+	 * Construct the Graph object
+	 * @param params
+	 * @param rabbitSender
+	 * @throws Exception
+	 */
 	public WasdiGraph(GraphParameter params, Send rabbitSender) throws Exception {
 		//set the pgraph parameters
 		this.params = params;
@@ -77,6 +88,10 @@ public class WasdiGraph {
 	}
 
 
+	/**
+	 * Run the graph
+	 * @throws Exception
+	 */
 	public void execute() throws Exception {
 		
 		try {
@@ -134,7 +149,10 @@ public class WasdiGraph {
 			
 	}
 
-
+	/**
+	 * Initialize the WASDI process
+	 * @throws Exception
+	 */
 	private void initProcess() throws Exception {
 		if (process != null) {
 			//set source file size in the process
@@ -185,7 +203,12 @@ public class WasdiGraph {
 		}
 	}
 
-	
+	/**
+	 * Adds Output product to WASDI DB
+	 * @param product
+	 * @param sBBox
+	 * @throws Exception
+	 */
     private void addProductToDb(Product product, String sBBox) throws Exception {
         ReadProduct readProduct = new ReadProduct();
         File productFile = new File(outputFile.getAbsolutePath()+".dim");
@@ -247,6 +270,10 @@ public class WasdiGraph {
     }
 	
 	
+    /**
+     * Add product to the workspace
+     * @throws Exception
+     */
     private void addProductToWorkspace() throws Exception {
     	
 		// Create Repository
@@ -273,7 +300,11 @@ public class WasdiGraph {
 		}
     }
 
-	
+	/**
+	 * Get Process Id
+	 * @return
+	 * @throws Exception
+	 */
 	private int GetProcessId() throws Exception {
         RuntimeMXBean runtimeMXBean = ManagementFactory.getRuntimeMXBean();
         Field jvmField = runtimeMXBean.getClass().getDeclaredField("jvm");
@@ -284,6 +315,13 @@ public class WasdiGraph {
         return (int)getProcessIdMethod.invoke(vmManagement);
     }
 	
+	/**
+	 * Set the value of a node of the XML chart
+	 * @param node
+	 * @param childName
+	 * @param value
+	 * @return
+	 */
 	public static boolean setNodeValue(Node node, String childName, String value) {
 		DomElement el = node.getConfiguration();
 		DomElement[] children = el.getChildren(childName);

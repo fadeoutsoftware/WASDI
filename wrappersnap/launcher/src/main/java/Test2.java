@@ -3,6 +3,7 @@
  */
 
 //import publish.Publisher;
+import wasdi.ConfigReader;
 import wasdi.filebuffer.DownloadFile;
 import wasdi.filebuffer.LocalFileDescriptor;
 import wasdi.shared.utils.SerializationUtils;
@@ -92,8 +93,12 @@ public class Test2 {
     	String sLink = "https://www.vito-eodata.be/PDF/dataaccess?service=DSEO&request=GetProduct&version=1.0.0&collectionID=1000060&productID=271466625&ProductURI=urn:ogc:def:EOP:VITO:PROBAV_L2A_1KM_V001:PROBAV_CENTER_L2A_20180521_225405_1KM:V101&";
     	//String sLink = "https://www.vito-eodata.be/PDF/dataaccess?service=DSEO&request=GetProduct&version=1.0.0&collectionID=1000060&productID=200462849&ProductURI=urn:ogc:def:EOP:VITO:PROBAV_L2A_1KM_V001:PROBAV_CENTER_L2A_20160505_010431_1KM:V101&";
     	
-    	oDownloadFile.setProviderPassword("***REMOVED***");
-    	oDownloadFile.setProviderUser("pcampanella");
+    	// CHECK USR AND PW ON THE config.properties file!!!!
+    	String sUser = ConfigReader.getPropValue("DHUS_USER");
+    	String sPassword = ConfigReader.getPropValue("DHUS_PASSWORD");
+    	
+    	oDownloadFile.setProviderPassword(sPassword);
+    	oDownloadFile.setProviderUser(sUser);
     	
     	String sFileName = oDownloadFile.GetFileName(sLink);
     	
@@ -103,7 +108,7 @@ public class Test2 {
     	
     	System.out.println("File Size: " + lSize);
     	
-    	oDownloadFile.ExecuteDownloadFile(sLink, "paolo", "***REMOVED***", "C:/temp/wasdi/paolo", null);
+    	oDownloadFile.ExecuteDownloadFile(sLink, sUser, sPassword, "C:/temp/wasdi/paolo", null);
 
 /*
         final JFileChooser fc = new JFileChooser();

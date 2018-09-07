@@ -12,6 +12,7 @@ import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.data.ProcessWorkspaceRepository;
 
 /**
+ * SNAP Product Write Utility
  * Created by s.adamo on 24/05/2016.
  */
 public class WriteProduct  {

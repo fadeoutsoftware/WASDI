@@ -9,6 +9,7 @@ import wasdi.shared.utils.Utils;
 import java.io.File;
 
 /**
+ * Calibration Snap Operation Parameter Wrapper
  * Created by s.adamo on 24/05/2016.
  */
 public class Calibration extends BaseOperation{
