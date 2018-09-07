@@ -1,19 +1,20 @@
 package wasdi.snapopearations;
 
+import java.io.File;
+
 import org.esa.s1tbx.sar.gpf.geometric.RangeDopplerGeocodingOp;
-import org.esa.s1tbx.sar.gpf.ui.geometric.MapProjectionHandler;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.gpf.Operator;
 import org.esa.snap.dem.dataio.DEMFactory;
 import org.geotools.referencing.wkt.UnformattableObjectException;
-import org.opengis.referencing.crs.CoordinateReferenceSystem;
+
 import wasdi.LauncherMain;
 import wasdi.shared.parameters.ISetting;
 import wasdi.shared.parameters.RangeDopplerGeocodingSetting;
 import wasdi.shared.utils.Utils;
 
-import java.io.File;
 /**
+ * Terrain Correction Snap Operation Parameter Wrapper
  * Created by s.adamo on 24/05/2016.
  */
 public class TerrainCorrection extends BaseOperation{

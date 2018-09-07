@@ -18,6 +18,11 @@ import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.data.MongoRepository;
 import wasdi.shared.viewmodels.RabbitMessageViewModel;
 
+/**
+ * Utility class to send Rabbit Messages
+ * @author p.campanella
+ *
+ */
 public class Send {
 	
 	Connection oConnection = null;
@@ -44,7 +49,7 @@ public class Send {
 	}
 	
     /**
-     *
+     * Send a Rabbit Message
      * @param sRoutingKey (Is the workspace Id)
      * @param sMessageAttribute
      * @return true if the message is sent, false otherwise
@@ -65,6 +70,12 @@ public class Send {
 
     }
 
+    /**
+     * Sends Update Process Rabbit Message
+     * @param oProcess
+     * @return
+     * @throws JsonProcessingException
+     */
     public boolean SendUpdateProcessMessage(ProcessWorkspace oProcess) throws JsonProcessingException {  
     	
     	if (oProcess==null) return false;
@@ -80,7 +91,16 @@ public class Send {
         return SendMsg(oProcess.getWorkspaceId(), sJSON);
     }
 
-    public boolean SendRabbitMessage(boolean bOk, String sMessageCode, String sWorkSpaceId, Object oPayload, String sWorkspaceId) {
+    /**
+     * Send a Generic WASDI Rabbit Message
+     * @param bOk Flag ok or not
+     * @param sMessageCode Message Code
+     * @param sWorkSpaceId Reference Workspace
+     * @param oPayload Message Payload
+     * @param sExchangeId Exchange Routing Key
+     * @return
+     */
+    public boolean SendRabbitMessage(boolean bOk, String sMessageCode, String sWorkSpaceId, Object oPayload, String sExchangeId) {
 
         try {
             RabbitMessageViewModel oRabbitVM = new RabbitMessageViewModel();
@@ -93,7 +113,7 @@ public class Send {
 
             String sJSON = MongoRepository.s_oMapper.writeValueAsString(oRabbitVM);
 
-            return SendMsg(sWorkspaceId, sJSON);
+            return SendMsg(sExchangeId, sJSON);
         }
         catch (Exception oEx) {
             LauncherMain.s_oLogger.log(Level.ERROR, "Send.SendRabbitMessage: ERROR", oEx);

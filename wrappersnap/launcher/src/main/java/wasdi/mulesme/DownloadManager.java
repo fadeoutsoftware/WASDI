@@ -18,6 +18,7 @@ import org.opengis.feature.simple.SimpleFeature;
 import com.vividsolutions.jts.geom.MultiPolygon;
 import com.vividsolutions.jts.geom.Polygon;
 
+import wasdi.ConfigReader;
 import wasdi.filebuffer.DownloadFile;
 import wasdi.shared.opensearch.QueryExecutor;
 import wasdi.shared.viewmodels.QueryResultViewModel;
@@ -46,8 +47,8 @@ public class DownloadManager {
     private String querySortedBy = "ingestiondate";
     private String queryOrder = "desc";	
     private String providerName = "SENTINEL";
-    private String providerUser = "sadamo";
-    private String providerPassword = "***REMOVED***";
+    private String providerUser = "";
+    private String providerPassword = "";
     
     /**
      * constructor with the fottprints shape file and the download destination folder 
@@ -198,6 +199,10 @@ public class DownloadManager {
 		Date to = ARGS_DATE_FORMAT.parse(args[3]);
 		
 		DownloadManager manager = new DownloadManager(new File(args[0]), new File(args[1]));
+		// 2018-09-07: SET USER AND PW from config.properties
+		// TODO: Never Tested
+		manager.setProviderUser(ConfigReader.getPropValue("DHUS_USER"));
+		manager.setProviderUser(ConfigReader.getPropValue("DHUS_PASSWORD"));
 		
 		if (args.length > 4) manager.setQueryLimit(args[4]);
 		manager.download(from, to);

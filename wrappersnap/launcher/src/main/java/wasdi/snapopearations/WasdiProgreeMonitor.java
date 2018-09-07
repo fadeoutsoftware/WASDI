@@ -7,6 +7,11 @@ import wasdi.LauncherMain;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.data.ProcessWorkspaceRepository;
 
+/**
+ * Wasdi Progres Monitor Listener
+ * @author p.campanella
+ *
+ */
 public class WasdiProgreeMonitor implements ProgressMonitor {
 	
 	private ProcessWorkspaceRepository processRepository = null;

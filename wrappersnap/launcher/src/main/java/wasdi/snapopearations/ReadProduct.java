@@ -35,10 +35,14 @@ import wasdi.shared.viewmodels.NodeGroupViewModel;
 import wasdi.shared.viewmodels.ProductViewModel;
 
 /**
+ * Read SNAP Product utility class
  * Created by s.adamo on 18/05/2016.
  */
 public class ReadProduct {
 
+	/**
+	 * Static Cache implemented as a Hash Map Name, Product Object
+	 */
     public  static HashMap<String, Product> m_oCacheProducts = new HashMap<String, Product>();
 
     /**
@@ -76,7 +80,7 @@ public class ReadProduct {
     }
 
     /**
-     * discover the format of the tproduct contained in oFile
+     * discover the format of the product contained in oFile
      * @param oFile
      * @return the format name if the reader plugin manage one and only one format. null otherwise
      */
@@ -151,6 +155,11 @@ public class ReadProduct {
 		return oViewModel;
 	}
 
+	/**
+	 * Get Product Bounding Box from File
+	 * @param oProductFile
+	 * @return "%f,%f,%f,%f,%f,%f,%f,%f,%f,%f", minY, minX, minY, maxX, maxY, maxX, maxY, minX, minY, minX
+	 */
 	public String getProductBoundingBox(File oProductFile) {
 		
 		try {
@@ -246,6 +255,11 @@ public class ReadProduct {
         return  oSourceViewModel;
     }
 
+    /**
+     * Fills Band View Models
+     * @param oProductViewModel
+     * @param oProduct
+     */
     private void FillBandsViewModel(ProductViewModel oProductViewModel, Product oProduct)
     {
         if (oProductViewModel == null) {

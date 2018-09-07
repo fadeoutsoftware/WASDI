@@ -9,6 +9,7 @@ import wasdi.shared.parameters.ISetting;
 import wasdi.shared.parameters.MultilookingSetting;
 
 /**
+ * Multilooking Snap Operation Parameter Wrapper
  * Created by s.adamo on 24/05/2016.
  */
 public class Multilooking extends BaseOperation{

@@ -6,6 +6,7 @@ import wasdi.shared.parameters.ApplyOrbitSetting;
 import wasdi.shared.parameters.ISetting;
 
 /**
+ * Apply Orbit Snap Operation Parameter Wrapper
  * Created by s.adamo on 16/03/2017.
  */
 public class ApplyOrbit extends BaseOperation{

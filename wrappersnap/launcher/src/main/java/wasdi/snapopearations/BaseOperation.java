@@ -8,6 +8,8 @@ import wasdi.shared.parameters.ISetting;
 
 
 /**
+ * Base SNAP Operation class.
+ * Include a SNAP Operator and binds Settings to it
  * Created by s.adamo on 17/03/2017.
  */
 public abstract class BaseOperation {

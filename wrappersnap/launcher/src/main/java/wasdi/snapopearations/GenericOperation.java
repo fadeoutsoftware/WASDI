@@ -7,6 +7,7 @@ import wasdi.shared.parameters.ApplyOrbitSetting;
 import wasdi.shared.parameters.ISetting;
 
 /**
+ * Generic SPI Snap Operation Parameter Wrapper
  * Created by s.adamo on 16/03/2017.
  */
 public class GenericOperation extends BaseOperation{

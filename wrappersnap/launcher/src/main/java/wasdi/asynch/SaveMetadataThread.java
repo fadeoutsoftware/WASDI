@@ -7,6 +7,11 @@ import wasdi.LauncherMain;
 import wasdi.shared.utils.SerializationUtils;
 import wasdi.snapopearations.ReadProduct;
 
+/**
+ * Save Metadata file Thread
+ * @author p.campanella
+ *
+ */
 public class SaveMetadataThread extends Thread {
 	String m_sMetadataFilePath;
 	ReadProduct m_oReadProduct;
