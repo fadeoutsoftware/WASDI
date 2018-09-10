@@ -1,15 +1,8 @@
 package it.fadeout.rest.resources;
 
-import it.fadeout.Wasdi;
-import it.fadeout.business.InstanceFinder;
-import it.fadeout.viewmodels.SatelliteOrbitResultViewModel;
-
-import java.util.ArrayList;
-
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
-import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -18,8 +11,10 @@ import javax.ws.rs.core.MediaType;
 import org.nfs.orbits.sat.SatFactory;
 import org.nfs.orbits.sat.Satellite;
 
+import it.fadeout.Wasdi;
+import it.fadeout.business.InstanceFinder;
+import it.fadeout.viewmodels.SatelliteOrbitResultViewModel;
 import satLib.astro.time.Time;
-import wasdi.shared.utils.Utils;
 
 
 @Path("/satellite")

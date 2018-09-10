@@ -1124,9 +1124,9 @@ public class ProcessingResources {
 			}
 			
 			BufferedWriter oWriter = new BufferedWriter(new FileWriter(oFile));
-			oWriter.write("USER,dpc");
+			oWriter.write("USER,"+m_oServletConfig.getInitParameter("SabaUser"));
 			oWriter.newLine();
-			oWriter.write("PASSWORD,badeno");
+			oWriter.write("PASSWORD,"+m_oServletConfig.getInitParameter("SabaPassword"));
 			oWriter.newLine();
 			oWriter.write("FILE,"+sInputFile);
 			oWriter.newLine();

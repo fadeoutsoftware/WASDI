@@ -1,7 +1,6 @@
 package it.fadeout.viewmodels;
 
 import java.util.ArrayList;
-import java.util.Date;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
