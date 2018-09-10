@@ -1,7 +1,7 @@
 package wasdi.shared.business;
 
 /**
- * Created by s.adamo on 02/03/2017.
+ * Catalog Entity
  */
 public class Catalog {
 

@@ -1,6 +1,8 @@
 package wasdi.shared.business;
 
 /**
+ * Product Workspace entity
+ * Represents an association between a product and a workspace
  * Created by p.campanella on 18/11/2016.
  */
 public class ProductWorkspace {

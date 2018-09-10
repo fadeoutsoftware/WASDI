@@ -1,10 +1,31 @@
 package wasdi.shared.business;
 
+/**
+ * Snap Workflow Entity
+ * Represent a snap xml workflow imported in WASDI
+ * @author p.campanella
+ *
+ */
 public class SnapWorkflow {
+	/**
+	 * Workflow Identifier
+	 */
 	private String workflowId;
+	/**
+	 * Name
+	 */
 	private String name;
+	/**
+	 * Description 
+	 */
 	private String description;
+	/**
+	 * User Owner
+	 */
 	private String userId;
+	/**
+	 * Full xml file path
+	 */
 	private String filePath;
 	
 	public String getName() {

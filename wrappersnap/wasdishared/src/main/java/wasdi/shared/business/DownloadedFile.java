@@ -8,16 +8,37 @@ import java.util.TimeZone;
 import wasdi.shared.viewmodels.ProductViewModel;
 
 /**
+ * Downloaded File Entity
+ * Represents a EO File ingested in WASDI
  * Created by p.campanella on 11/11/2016.
  */
 public class DownloadedFile {
+	
+	/**
+	 * File Name
+	 */
     private String fileName;
+    /**
+     * Full File Path
+     */
     private String filePath;
+    /**
+     * Boundig Box of the file
+     */
     private String boundingBox;
+    /**
+     * Reference Date
+     */
     private String refDate;
+    /**
+     * File Category
+     */
     private String category = DownloadedFileCategory.PUBLIC.name();
     
-    // NOTE: Usually do not use View Models in entities. But this is more an entity that not a view model...
+    /**
+     * Product View Model
+     * NOTE: Usually do not use View Models in entities. But this is more an entity that not a view model...
+     */
     private ProductViewModel productViewModel;
 
     public String getFileName() {

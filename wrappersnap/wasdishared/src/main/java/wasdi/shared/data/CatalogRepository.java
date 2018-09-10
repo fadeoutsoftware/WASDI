@@ -12,10 +12,16 @@ import com.mongodb.client.FindIterable;
 import wasdi.shared.business.Catalog;
 
 /**
+ * Catalog Repo
  * Created by s.adamo on 02/03/2017.
  */
 public class CatalogRepository extends MongoRepository{
 
+	/**
+	 * Insert new Catalog
+	 * @param oCatalog
+	 * @return
+	 */
     public boolean InsertCatalogEntry(Catalog oCatalog) {
         try {
             String sJSON = s_oMapper.writeValueAsString(oCatalog);
@@ -30,6 +36,10 @@ public class CatalogRepository extends MongoRepository{
         return false;
     }
 
+    /**
+     * Get All catalogues
+     * @return
+     */
     public List<Catalog> GetCatalogs() {
 
         final ArrayList<Catalog> aoReturnList = new ArrayList<Catalog>();
@@ -58,6 +68,11 @@ public class CatalogRepository extends MongoRepository{
         return aoReturnList;
     }
 
+    /**
+     * Get by date
+     * @param sDate
+     * @return
+     */
     public Catalog GetCatalogsByDate(String sDate) {
 
         Catalog oCatalog = null;

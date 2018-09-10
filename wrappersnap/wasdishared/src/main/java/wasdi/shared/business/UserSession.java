@@ -1,12 +1,30 @@
 package wasdi.shared.business;
 
 /**
+ * User Session Entity
+ * Represent an active WASDI Session
  * Created by p.campanella on 21/10/2016.
  */
 public class UserSession {
+	
+	/**
+	 * User ID
+	 */
     private String userId;
+    
+    /**
+     * Login Date
+     */
     private Double loginDate;
+    
+    /**
+     * Last activity timestamp
+     */
     private Double lastTouch;
+    
+    /**
+     * Unique session ID
+     */
     private String sessionId;
 
     public String getUserId() {

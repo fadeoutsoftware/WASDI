@@ -1,21 +1,59 @@
 package wasdi.shared.business;
 
 /**
+ * Process Workspace Entity
+ * Represent any "job" ongoing on the WASDI server
  * Created by s.adamo on 31/01/2017.
  */
 public class ProcessWorkspace {
 
+	/**
+	 * Involved product
+	 */
     private String productName;
+    /**
+     * Active Workspace 
+     */
     private String workspaceId;
+    /**
+     * User owner of the job
+     */
     private String userId;
+    /**
+     * Type of the operation
+     */
     private String operationType;
+    /**
+     * Start date of the operation
+     */
     private String operationDate;
+    /**
+     * End date of the operation
+     */
     private String operationEndDate;
+    /**
+     * Unique identifier of the job
+     */
     private String processObjId;
+    /**
+     * Size of the involved file
+     */
     private String fileSize;
+    /**
+     * Status of the process
+     */
     private String status;
+    /**
+     * Percentuage of the job done
+     */
     private int progressPerc;
+    /**
+     * System pid
+     */
     private int pid;
+    /**
+     * Process Payload
+     */
     private String payload;
 
     public String getPayload() {

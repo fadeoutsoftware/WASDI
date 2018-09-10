@@ -1,7 +1,5 @@
 package wasdi.shared.viewmodels;
 
-import javax.xml.bind.annotation.XmlRootElement;
-
 /**
  * Created by p.campanella on 14/10/2016.
  */

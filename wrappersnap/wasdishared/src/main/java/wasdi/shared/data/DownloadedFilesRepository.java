@@ -23,10 +23,16 @@ import wasdi.shared.viewmodels.AttributeViewModel;
 import wasdi.shared.viewmodels.MetadataViewModel;
 
 /**
+ * Downloaded File Repo
  * Created by p.campanella on 11/11/2016.
  */
 public class DownloadedFilesRepository extends MongoRepository {
 
+	/**
+	 * Insert new Downloaded File
+	 * @param oFile
+	 * @return
+	 */
     public boolean InsertDownloadedFile(DownloadedFile oFile) {
         try {
             String sJSON = s_oMapper.writeValueAsString(oFile);
@@ -41,6 +47,11 @@ public class DownloadedFilesRepository extends MongoRepository {
         return false;
     }
 
+    /**
+     * Update Entity
+     * @param oFile
+     * @return
+     */
     public boolean UpdateDownloadedFile(DownloadedFile oFile) {
         try {
             String sJSON = s_oMapper.writeValueAsString(oFile);
@@ -60,6 +71,11 @@ public class DownloadedFilesRepository extends MongoRepository {
         return  false;
     }
 
+    /**
+     * Get Downloaded file by name
+     * @param sFileName
+     * @return
+     */
     public DownloadedFile GetDownloadedFile(String sFileName) {
         try {
             Document oSessionDocument = getCollection("downloadedfiles").find(new Document("fileName", sFileName)).first();
@@ -78,6 +94,14 @@ public class DownloadedFilesRepository extends MongoRepository {
         return  null;
     }
 
+    /**
+     * Search files
+     * @param from start date
+     * @param to end date
+     * @param freeText free text to search in name
+     * @param category category
+     * @return
+     */
     public List<DownloadedFile> Search(Date from, Date to, String freeText, String category) {
     	final List<DownloadedFile> files = new ArrayList<DownloadedFile>();    	
     	List<Bson> filters = new ArrayList<Bson>();
@@ -121,7 +145,11 @@ public class DownloadedFilesRepository extends MongoRepository {
 		return files ;
     }
     
-    
+    /**
+     * Delete by file path
+     * @param sFilePath
+     * @return
+     */
     public int DeleteByFilePath(String sFilePath) {
 
         try {
@@ -140,6 +168,10 @@ public class DownloadedFilesRepository extends MongoRepository {
         return 0;
     }
     
+    /**
+     * Get full list
+     * @return
+     */
     public List<DownloadedFile> getList() {
         final ArrayList<DownloadedFile> aoReturnList = new ArrayList<DownloadedFile>();
         try {

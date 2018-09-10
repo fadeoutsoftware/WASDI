@@ -1,13 +1,40 @@
 package wasdi.shared.business;
 
+/**
+ * Processor Entity
+ * Represents a User Processor uploaded to WASDI 
+ * @author p.campanella
+ *
+ */
 public class Processor {
 	
+	/**
+	 * Identifier of the processor
+	 */
 	private String processorId;
+	/**
+	 * User owner of the processor
+	 */
 	private String userId;
+	/**
+	 * Processor Name
+	 */
 	private String name;
+	/**
+	 * Processor Version
+	 */
 	private String version;
+	/**
+	 * Processor Description
+	 */
 	private String description;
+	/**
+	 * http port assigned to the processor
+	 */
 	private int port;
+	/**
+	 * Processor type
+	 */
 	private String type;
 	
 	public String getType() {

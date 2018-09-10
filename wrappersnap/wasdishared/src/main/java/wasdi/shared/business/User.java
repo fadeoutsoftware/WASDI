@@ -1,13 +1,30 @@
 package wasdi.shared.business;
 
 /**
+ * WASDI User
  * Created by p.campanella on 21/10/2016.
  */
 public class User {
+	
+	/**
+	 * Unique int id
+	 */
     private int id;
+    /**
+     * User ID
+     */
     private String userId;
+    /**
+     * Name
+     */
     private String name;
+    /**
+     * Surname
+     */
     private String surname;
+    /**
+     * Password
+     */
     private String password;
 
     public int getId() {
