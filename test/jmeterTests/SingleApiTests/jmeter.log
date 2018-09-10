@@ -1,0 +1,68 @@
+2018-03-22 19:08:31,773 INFO o.a.j.u.JMeterUtils: Setting Locale to en_US
+2018-03-22 19:08:31,906 INFO o.a.j.JMeter: Loading user properties from: /usr/local/src/jmeterWasdiTester/src/test/jmeter/apache-jmeter-3.3/bin/user.properties
+2018-03-22 19:08:31,917 INFO o.a.j.JMeter: Loading system properties from: /usr/local/src/jmeterWasdiTester/src/test/jmeter/apache-jmeter-3.3/bin/system.properties
+2018-03-22 19:08:31,957 INFO o.a.j.JMeter: Copyright (c) 1998-2017 The Apache Software Foundation
+2018-03-22 19:08:31,958 INFO o.a.j.JMeter: Version 3.3 r1808647
+2018-03-22 19:08:31,958 INFO o.a.j.JMeter: java.version=1.8.0_162
+2018-03-22 19:08:31,958 INFO o.a.j.JMeter: java.vm.name=OpenJDK 64-Bit Server VM
+2018-03-22 19:08:31,958 INFO o.a.j.JMeter: os.name=Linux
+2018-03-22 19:08:31,958 INFO o.a.j.JMeter: os.arch=amd64
+2018-03-22 19:08:31,958 INFO o.a.j.JMeter: os.version=4.15.0-1-amd64
+2018-03-22 19:08:31,959 INFO o.a.j.JMeter: file.encoding=UTF-8
+2018-03-22 19:08:31,960 INFO o.a.j.JMeter: Max memory     =2147483648
+2018-03-22 19:08:31,960 INFO o.a.j.JMeter: Available Processors =4
+2018-03-22 19:08:31,975 INFO o.a.j.JMeter: Default Locale=English (United States)
+2018-03-22 19:08:31,982 INFO o.a.j.JMeter: JMeter  Locale=English (United States)
+2018-03-22 19:08:31,983 INFO o.a.j.JMeter: JMeterHome=/usr/local/src/jmeterWasdiTester/src/test/jmeter/apache-jmeter-3.3
+2018-03-22 19:08:31,983 INFO o.a.j.JMeter: user.dir  =/usr/local/src/jmeterWasdiTester/src/test/jmeter/SingleAPITets
+2018-03-22 19:08:31,983 INFO o.a.j.JMeter: PWD       =/usr/local/src/jmeterWasdiTester/src/test/jmeter/SingleAPITets
+2018-03-22 19:08:31,984 INFO o.a.j.JMeter: IP: 127.0.1.1 Name: Worderland FullName: Worderland
+2018-03-22 19:08:34,195 INFO o.a.j.g.a.LookAndFeelCommand: Using look and feel: javax.swing.plaf.metal.MetalLookAndFeel [Metal, CrossPlatform, System]
+2018-03-22 19:08:34,229 INFO o.a.j.JMeter: Loaded icon properties from org/apache/jmeter/images/icon.properties
+2018-03-22 19:08:37,929 INFO o.a.j.e.u.CompoundVariable: Note: Function class names must contain the string: '.functions.'
+2018-03-22 19:08:37,935 INFO o.a.j.e.u.CompoundVariable: Note: Function class names must not contain the string: '.gui.'
+2018-03-22 19:08:46,132 INFO o.a.j.g.u.MenuFactory: Skipping org.apache.jmeter.assertions.BSFAssertion
+2018-03-22 19:08:46,306 INFO o.a.j.JMeter: Loading file: ProductResource/wasdiDeleteProduct.jmx
+2018-03-22 19:08:46,309 INFO o.a.j.s.FileServer: Default base='/usr/local/src/jmeterWasdiTester/src/test/jmeter/SingleAPITets'
+2018-03-22 19:08:46,310 INFO o.a.j.s.FileServer: Set new base='/usr/local/src/jmeterWasdiTester/src/test/jmeter/SingleAPITets/ProductResource'
+2018-03-22 19:08:47,992 INFO o.a.j.s.SaveService: Testplan (JMX) version: 2.2. Testlog (JTL) version: 2.2
+2018-03-22 19:08:48,141 INFO o.a.j.s.SaveService: Using SaveService properties file encoding UTF-8
+2018-03-22 19:08:48,155 INFO o.a.j.s.SaveService: Using SaveService properties version 3.2
+2018-03-22 19:08:48,196 INFO o.a.j.s.SaveService: Loading file: ProductResource/wasdiDeleteProduct.jmx
+2018-03-22 19:08:48,504 INFO o.a.j.p.h.s.HTTPSamplerBase: Parser for text/html is org.apache.jmeter.protocol.http.parser.LagartoBasedHtmlParser
+2018-03-22 19:08:48,504 INFO o.a.j.p.h.s.HTTPSamplerBase: Parser for application/xhtml+xml is org.apache.jmeter.protocol.http.parser.LagartoBasedHtmlParser
+2018-03-22 19:08:48,508 INFO o.a.j.p.h.s.HTTPSamplerBase: Parser for application/xml is org.apache.jmeter.protocol.http.parser.LagartoBasedHtmlParser
+2018-03-22 19:08:48,509 INFO o.a.j.p.h.s.HTTPSamplerBase: Parser for text/xml is org.apache.jmeter.protocol.http.parser.LagartoBasedHtmlParser
+2018-03-22 19:08:48,509 INFO o.a.j.p.h.s.HTTPSamplerBase: Parser for text/vnd.wap.wml is org.apache.jmeter.protocol.http.parser.RegexpHTMLParser
+2018-03-22 19:08:48,509 INFO o.a.j.p.h.s.HTTPSamplerBase: Parser for text/css is org.apache.jmeter.protocol.http.parser.CssParser
+2018-03-22 19:08:48,724 INFO o.a.j.s.FileServer: Set new base='/usr/local/src/jmeterWasdiTester/src/test/jmeter/SingleAPITets/ProductResource'
+2018-03-22 19:08:49,987 INFO o.a.j.s.SampleResult: Note: Sample TimeStamps are START times
+2018-03-22 19:08:50,005 INFO o.a.j.s.SampleResult: sampleresult.default.encoding is set to ISO-8859-1
+2018-03-22 19:08:50,006 INFO o.a.j.s.SampleResult: sampleresult.useNanoTime=true
+2018-03-22 19:08:50,007 INFO o.a.j.s.SampleResult: sampleresult.nanoThreadSleep=5000
+2018-03-22 19:08:50,818 INFO o.a.j.g.u.MenuFactory: Skipping org.apache.jmeter.extractor.BSFPostProcessor
+2018-03-22 19:08:51,176 INFO o.a.j.g.u.MenuFactory: Skipping org.apache.jmeter.modifiers.BSFPreProcessor
+2018-03-22 19:08:55,449 INFO o.a.j.e.KeyToolUtils: keytool found at 'keytool'
+2018-03-22 19:08:55,452 INFO o.a.j.p.h.p.ProxyControl: HTTP(S) Test Script Recorder SSL Proxy will use keys that support embedded 3rd party resources in file /usr/local/src/jmeterWasdiTester/src/test/jmeter/apache-jmeter-3.3/bin/proxyserver.jks
+2018-03-22 19:08:56,515 INFO o.a.j.g.u.MenuFactory: Skipping org.apache.jmeter.protocol.java.sampler.BSFSampler
+2018-03-22 19:08:57,425 INFO o.a.j.g.u.MenuFactory: Skipping org.apache.jmeter.protocol.mongodb.config.MongoSourceElement
+2018-03-22 19:08:57,426 INFO o.a.j.g.u.MenuFactory: Skipping org.apache.jmeter.protocol.mongodb.sampler.MongoScriptSampler
+2018-03-22 19:08:58,354 INFO o.a.j.g.u.MenuFactory: Skipping org.apache.jmeter.timers.BSFTimer
+2018-03-22 19:08:58,589 INFO o.a.j.g.u.MenuFactory: Skipping org.apache.jmeter.visualizers.BSFListener
+2018-03-22 19:10:03,584 INFO o.a.j.e.StandardJMeterEngine: Running the test!
+2018-03-22 19:10:03,587 INFO o.a.j.s.SampleEvent: List of sample_variables: []
+2018-03-22 19:10:03,587 INFO o.a.j.s.SampleEvent: List of sample_variables: []
+2018-03-22 19:10:03,644 INFO o.a.j.g.u.JMeterMenuBar: setRunning(true, *local*)
+2018-03-22 19:10:04,850 INFO o.a.j.e.StandardJMeterEngine: Starting ThreadGroup: 1 : Wasdi Test API 
+2018-03-22 19:10:04,851 INFO o.a.j.e.StandardJMeterEngine: Starting 1 threads for group Wasdi Test API .
+2018-03-22 19:10:04,851 INFO o.a.j.e.StandardJMeterEngine: Thread will continue on error
+2018-03-22 19:10:04,852 INFO o.a.j.t.ThreadGroup: Starting thread group... number=1 threads=1 ramp-up=1 perThread=1000.0 delayedStart=false
+2018-03-22 19:10:04,892 INFO o.a.j.t.ThreadGroup: Started thread group number 1
+2018-03-22 19:10:04,893 INFO o.a.j.e.StandardJMeterEngine: All thread groups have been started
+2018-03-22 19:10:04,940 INFO o.a.j.t.JMeterThread: Thread started: Wasdi Test API  1-1
+2018-03-22 19:10:05,121 INFO o.a.j.p.h.s.HTTPHCAbstractImpl: Local host = Worderland
+2018-03-22 19:10:05,208 INFO o.a.j.p.h.s.HTTPHC4Impl: HTTP request retry count = 0
+2018-03-22 19:10:06,564 INFO o.a.j.t.JMeterThread: Thread is done: Wasdi Test API  1-1
+2018-03-22 19:10:06,565 INFO o.a.j.t.JMeterThread: Thread finished: Wasdi Test API  1-1
+2018-03-22 19:10:06,568 INFO o.a.j.e.StandardJMeterEngine: Notifying test listeners of end of test
+2018-03-22 19:10:06,569 INFO o.a.j.g.u.JMeterMenuBar: setRunning(false, *local*)
