@@ -1,0 +1,347 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+	xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd"
+	id="WebApp_ID" version="3.1">
+ 
+ 	<display-name>Wasdi</display-name>
+ 	
+ 	<listener>  
+    	<listener-class>
+        	it.fadeout.WasdiLifeCycleListener
+    	</listener-class>
+	</listener>
+	  
+ 	<welcome-file-list>
+		<welcome-file>index.html</welcome-file>
+		<welcome-file>index.htm</welcome-file>
+		<welcome-file>index.jsp</welcome-file>
+		<welcome-file>default.html</welcome-file>
+		<welcome-file>default.htm</welcome-file>
+		<welcome-file>default.jsp</welcome-file>
+	</welcome-file-list>
+
+	<servlet>
+		<servlet-name>wasdiwebserver</servlet-name>
+		<servlet-class>org.glassfish.jersey.servlet.ServletContainer</servlet-class>
+		<init-param>
+			<param-name>jersey.config.server.provider.packages</param-name>
+			<param-value>it.fadeout.rest</param-value>
+		</init-param>
+		<init-param>
+	        	<param-name>jersey.config.server.provider.classnames</param-name>
+	        	<param-value>org.glassfish.jersey.media.multipart.MultiPartFeature</param-value>
+   		</init-param>
+		<init-param>
+			<param-name>javax.ws.rs.Application</param-name>
+			<param-value>it.fadeout.Wasdi</param-value>
+		</init-param>	
+		<init-param>
+			<param-name>jersey.config.server.provider.packages</param-name>
+			<param-value>it.fadeout.business</param-value>
+		</init-param>
+		<init-param>
+			<param-name>jersey.config.server.provider.packages</param-name>
+			<param-value>it.fadeout.viewmodels</param-value>
+		</init-param>
+		
+         <!-- SNAP INITIALIZATION -->
+
+       	<init-param>
+           	<param-name>SNAP_AUX_PROPERTIES</param-name>
+           	<param-value>/usr/lib/wasdi/launcher/snap.auxdata.properties</param-value>
+       	</init-param>
+		
+		
+        <!-- SEARCH PROVIDERS -->
+		
+		<init-param>
+			<param-name>SearchProviders</param-name>
+			<param-value>SENTINEL;MATERA;PROBAV</param-value>
+		</init-param>
+		
+		<init-param>
+			<param-name>SENTINEL.OSUser</param-name>
+			<param-value>user</param-value>
+		</init-param>
+		<init-param>
+			<param-name>SENTINEL.OSPwd</param-name>
+			<param-value>password</param-value>
+		</init-param>
+		<init-param>
+			<param-name>SENTINEL.Description</param-name>
+			<param-value>Copernicus Open Access Hub</param-value>
+		</init-param>
+		<init-param>
+			<param-name>SENTINEL.Link</param-name>
+			<param-value>https://scihub.copernicus.eu/dhus/#/home</param-value>
+		</init-param>
+		<init-param>
+			<param-name>MATERA.OSUser</param-name>
+			<param-value>user</param-value>
+		</init-param>
+		<init-param>
+			<param-name>MATERA.OSPwd</param-name>
+			<param-value>password</param-value>
+		</init-param>		
+		<init-param>
+			<param-name>MATERA.Description</param-name>
+			<param-value>Italian Sentinel Collaborative Data Hub</param-value>
+		</init-param>
+		<init-param>
+			<param-name>MATERA.Link</param-name>
+			<param-value>http://collaborative.mt.asi.it</param-value>
+		</init-param>				
+		
+		<init-param>
+			<param-name>PROBAV.OSUser</param-name>
+			<param-value>user</param-value>
+		</init-param>
+		<init-param>
+			<param-name>PROBAV.OSPwd</param-name>
+			<param-value>password</param-value>
+		</init-param>		
+		<init-param>
+			<param-name>PROBAV.Description</param-name>
+			<param-value>PROBA-V MEP</param-value>
+		</init-param>
+		<init-param>
+			<param-name>PROBAV.Link</param-name>
+			<param-value>https://www.vito-eodata.be/PDF/portal/Application.html#Home</param-value>
+		</init-param>	
+				
+		<init-param>
+			<param-name>SERCO.OSUser</param-name>
+			<param-value>user</param-value>
+		</init-param>
+		<init-param>
+			<param-name>SERCO.OSPwd</param-name>
+			<param-value>password</param-value>
+		</init-param>
+		<init-param>
+			<param-name>SERCO.Description</param-name>
+			<param-value>SERCO DIAS</param-value>
+		</init-param>
+		<init-param>
+			<param-name>SERCO.Link</param-name>
+			<param-value>http://early.onda-dias.eu/catalogue/</param-value>
+		</init-param>
+
+
+
+		<!-- GEOSERVER CONNECTION -->
+
+		<init-param>
+				<param-name>GS_URL</param-name>
+				<param-value>http://217.182.93.57/geoserver</param-value>
+		</init-param>
+		<init-param>
+				<param-name>GS_USER</param-name>
+				<param-value>admin</param-value>
+		</init-param>
+		<init-param>
+				<param-name>GS_PASSWORD</param-name>
+				<param-value>geoserver</param-value>
+		</init-param>
+		<init-param>
+				<param-name>GS_WORKSPACE</param-name>
+				<param-value>wasdi</param-value>
+		</init-param>
+
+
+
+		<!-- UPLOAD ACCOUNT MANAGEMENT -->
+		<init-param>
+				<param-name>sftpManagementWSServiceAddress</param-name>
+				<param-value>ws://localhost:6703</param-value>
+		</init-param>
+		<init-param>
+				<param-name>sftpManagementMailSenser</param-name>
+				<param-value>admin@wasdi.eu</param-value>
+		</init-param>
+
+		<init-param>
+				<param-name>mercuriusAPIAddress</param-name>
+				<param-value>http://127.0.0.1:8080/it.fadeout.mercurius.webapi</param-value>
+		</init-param>
+		<init-param>
+				<param-name>sftpMailTitle</param-name>
+				<param-value>Wasdi sftp account</param-value>
+		</init-param>
+		<init-param>
+				<param-name>sftpMailText</param-name>
+				<param-value>Wasdi has created for you an sftp account that you can use to add your Satellite images to your Wasdi workspace. You can connect to sftp at the address 217.182.93.57 using this credentials:</param-value>
+		</init-param>
+		<init-param>
+				<param-name>sftpManagementUserDir</param-name>
+				<param-value>/data/sftpuser/</param-value>
+		</init-param>
+
+
+		<!-- Default DhUS User -->
+
+		<init-param>
+				<param-name>OSUser</param-name>
+				<param-value>user</param-value>
+		</init-param>
+		<init-param>
+				<param-name>OSPwd</param-name>
+				<param-value>password</param-value>
+		</init-param>
+		<init-param>
+				<param-name>OSProvider</param-name>
+				<param-value>SENTINEL</param-value>
+		</init-param>
+
+
+
+		<init-param>
+				<param-name>SerializationPath</param-name>
+				<param-value>/usr/lib/wasdi/params/</param-value>
+		</init-param>
+		<init-param>
+				<param-name>LauncherPath</param-name>
+				<param-value>/usr/lib/wasdi/launcher/launcher.jar</param-value>
+		</init-param>
+		<init-param>
+				<param-name>ConcurrentProcess</param-name>
+				<param-value>1</param-value>
+		</init-param>
+		<init-param>
+				<param-name>ConcurrentDownloads</param-name>
+				<param-value>1</param-value>
+		</init-param>
+		<init-param>
+				<param-name>ProcessingThreadSleepingTimeMS</param-name>
+				<param-value>3000</param-value>
+		</init-param>
+
+		<!-- SABA PARAMETERS -->
+		<init-param>
+				<param-name>SabaScript</param-name>
+				<param-value>/data/wasdi/processors/saba/run_saba.sh</param-value>
+		</init-param>
+		<init-param>
+				<param-name>SabaParam</param-name>
+				<param-value>/data/wasdi/processors/saba/saba.txt</param-value>
+		</init-param>
+		<init-param>
+				<param-name>DDSPath</param-name>
+				<param-value>/data/wasdi/dds/opera/</param-value>
+		</init-param>
+		<init-param>
+				<param-name>SabaUser</param-name>
+				<param-value>user</param-value>
+		</init-param>
+		<init-param>
+				<param-name>SabaPassword</param-name>
+				<param-value>password</param-value>
+		</init-param>
+
+
+		<!-- ASSIMILATION PARAMETERS -->
+		<init-param>
+				<param-name>AssimilationScript</param-name>
+				<param-value>/data/mulesme/run_assimilation.sh</param-value>
+		</init-param>
+		<init-param>
+				<param-name>AssimilationWDPath</param-name>
+				<param-value>/data/mulesme/Assimilation/webdata</param-value>
+		</init-param>
+		<init-param>
+				<param-name>AssimilationResultPath</param-name>
+				<param-value>/data/webdownloads/wasdidownloads</param-value>
+		</init-param>
+
+		<init-param>
+				<param-name>MulesmeStimePath</param-name>
+				<param-value>/usr/lib/wasdi/mulesme/Stime/</param-value>
+		</init-param>
+		<init-param>
+				<param-name>DownloadRootPath</param-name>
+				<param-value>/data/wasdi</param-value>
+		</init-param>
+		<init-param>
+				<param-name>JavaExe</param-name>
+				<param-value>java -Xmx11264m -Xms1024m -XX:+AggressiveOpts -Xverify:none -Dsun.awt.nopixfmt=true -Dsun.java2d.dpiaware=false  -Dsnap.parallelism=8 -Djava.library.path=/usr/lib/wasdi/jni</param-value>
+				<!--param-value>java </param-value-->
+		</init-param>
+		<init-param>
+				<param-name>JavaExendMemoryParam</param-name>
+				<param-value>-Xmx8g -Xms256m</param-value>
+		</init-param>
+		<init-param>
+				<param-name>KillCommand</param-name>
+				<param-value>kill -9 </param-value>
+		</init-param>
+
+		<init-param>
+				<param-name>MetadataPath</param-name>
+				<param-value>/data/wasdi/metadata</param-value>
+		</init-param>
+		<init-param>
+				<param-name>DebugVersion</param-name>
+				<param-value>false</param-value>
+		</init-param>		
+		<init-param>
+				<param-name>DebugUser</param-name>
+				<param-value>user</param-value>
+		</init-param>		
+		<init-param>
+				<param-name>DebugPassword</param-name>
+				<param-value>password</param-value>
+		</init-param>				
+		<init-param>
+				<param-name>DebugLog</param-name>
+				<param-value>true</param-value>
+		</init-param>
+		<init-param>
+				<param-name>ServerVersion</param-name>
+				<param-value>0.8</param-value>
+		</init-param>
+		<init-param>
+				<param-name>EnableProcessingScheduler</param-name>
+				<param-value>true</param-value>
+		</init-param>
+		<init-param>
+			<param-name>EnableDownloadScheduler</param-name>
+				<param-value>true</param-value>
+		</init-param>                
+		<!-- Mongo Parameters -->
+		<init-param>
+			<param-name>MONGO_ADDRESS</param-name>
+				<param-value>127.0.0.1</param-value>
+		</init-param>                
+		<init-param>
+			<param-name>MONGO_PORT</param-name>
+				<param-value>27017</param-value>
+		</init-param>                
+		<init-param>
+			<param-name>MONGO_DBNAME</param-name>
+				<param-value>wasdi</param-value>
+		</init-param>                
+		<init-param>
+			<param-name>MONGO_DBUSER</param-name>
+				<param-value>user</param-value>
+		</init-param>                
+		<init-param>
+			<param-name>MONGO_DBPWD</param-name>
+				<param-value>password</param-value>
+		</init-param>                
+		<load-on-startup>1</load-on-startup>
+	</servlet>
+
+	<servlet-mapping>
+		<servlet-name>wasdiwebserver</servlet-name>
+		<url-pattern>/rest/*</url-pattern>
+	</servlet-mapping>
+	
+	<filter>
+		<filter-name>WasdiFilter</filter-name>
+		<filter-class>it.fadeout.rest.resources.CORSFilter</filter-class>
+	</filter>
+	<filter-mapping>
+		<filter-name>WasdiFilter</filter-name>
+		<url-pattern>/*</url-pattern>
+	</filter-mapping>	
+</web-app>
