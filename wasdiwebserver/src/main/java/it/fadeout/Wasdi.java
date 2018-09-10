@@ -65,6 +65,16 @@ public class Wasdi extends Application {
 	 * Downloads queue scheduler
 	 */
 	private static DownloadsThread s_oDownloadsThread = null;
+	
+	/**
+	 * User for debug mode auto login
+	 */
+	public static String s_sDebugUser = "user";
+	
+	/**
+	 * Password for debug mode auto login
+	 */
+	public static String s_sDebugPassword = "password";
 
 	
 	@Override
@@ -93,6 +103,8 @@ public class Wasdi extends Application {
 		if (getInitParameter("DebugVersion", "false").equalsIgnoreCase("true")) {
 			s_bDebug = true;
 			System.out.println("-------Debug Version on");
+			s_sDebugUser = getInitParameter("DebugUser", "user");
+			s_sDebugPassword = getInitParameter("DebugPassword", "password");
 		}
 		
 		if (getInitParameter("DebugLog", "false").equalsIgnoreCase("true")) {
@@ -150,6 +162,13 @@ public class Wasdi extends Application {
 		System.out.println("-------initializing snap...");
 		
 		try {
+			
+            MongoRepository.SERVER_ADDRESS = getInitParameter("MONGO_ADDRESS", "127.0.0.1");
+            MongoRepository.SERVER_PORT = Integer.parseInt(getInitParameter("MONGO_PORT", "27017"));
+            MongoRepository.DB_NAME = getInitParameter("MONGO_DBNAME","wasdi");
+            MongoRepository.DB_USER = getInitParameter("MONGO_DBUSER","mongo");
+            MongoRepository.DB_PWD = getInitParameter("MONGO_DBPWD","mongo");
+			
 			String snapAuxPropPath = getInitParameter("SNAP_AUX_PROPERTIES", null);
 			System.out.println("snap aux properties file: " + snapAuxPropPath);
 			Path propFile = Paths.get(snapAuxPropPath);
@@ -228,10 +247,10 @@ public class Wasdi extends Application {
 		if (s_bDebug) {
 			User oUser = new User();
 			oUser.setId(1);
-			oUser.setUserId("paolo");
-			oUser.setName("Paolo");
-			oUser.setSurname("Campanella");
-			oUser.setPassword("password");
+			oUser.setUserId(s_sDebugUser);
+			oUser.setName("Name");
+			oUser.setSurname("Surname");
+			oUser.setPassword(s_sDebugPassword);
 			return oUser;
 		}
 		else {
