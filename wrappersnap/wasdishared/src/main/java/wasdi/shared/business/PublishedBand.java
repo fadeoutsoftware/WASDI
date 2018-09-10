@@ -1,15 +1,38 @@
 package wasdi.shared.business;
 
 /**
+ * Published Band Entity
+ * Represent a single band published on geoserver (WMS)
  * Created by p.campanella on 17/11/2016.
  */
 public class PublishedBand {
+	/**
+	 * Parent Product Name
+	 */
     private String productName;
+    /**
+     * Band Name
+     */
     private String bandName;
+    /**
+     * Layer Identifier
+     */
     private String layerId;
+    /**
+     * User owner
+     */
     private String userId;
+    /**
+     * Workspace used
+     */
     private String workspaceId;
+    /**
+     * Boundig box
+     */
     private String boundingBox;
+    /**
+     * Boundig box in geoserver format
+     */
     private String geoserverBoundingBox;
 
     public String getProductName() {

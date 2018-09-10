@@ -383,9 +383,7 @@ public abstract class QueryExecutor {
 	
 
 	public static void main(String[] args) {
-//		QueryExecutor oExecutor = QueryExecutor.newInstance("SENTINEL", "sadamo", "***REMOVED***", "0", "10", "ingestiondate", "asc"); 
-		QueryExecutor oExecutor = QueryExecutor.newInstance("MATERA", "p.campanella", "***REMOVED***", "0", "10", "ingestiondate", "asc");
-//		QueryExecutor oExecutor = QueryExecutor.newInstance("FEDEO", null, null, "0", "10", "ingestiondate", "asc");
+		QueryExecutor oExecutor = QueryExecutor.newInstance("MATERA", "user", "password", "0", "10", "ingestiondate", "asc");
 		
 		try {
 			String sQuery = "( beginPosition:[2017-05-15T00:00:00.000Z TO 2017-05-15T23:59:59.999Z] AND endPosition:[2017-05-15T00:00:00.000Z TO 2017-05-15T23:59:59.999Z] ) AND   (platformname:Sentinel-1 AND filename:S1A_* AND producttype:GRD)";

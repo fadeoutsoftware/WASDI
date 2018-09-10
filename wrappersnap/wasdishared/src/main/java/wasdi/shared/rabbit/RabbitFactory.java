@@ -9,8 +9,8 @@ import java.io.IOException;
  */
 public class RabbitFactory {
 
-    public static String s_sRABBIT_QUEUE_USER = "fadeout";
-    public static String s_sRABBIT_QUEUE_PWD = "fadeout";
+    public static String s_sRABBIT_QUEUE_USER = "user";
+    public static String s_sRABBIT_QUEUE_PWD = "password";
     public static String s_sRABBIT_HOST = "127.0.0.1";
     public static String s_sRABBIT_QUEUE_PORT = "5672";
 
