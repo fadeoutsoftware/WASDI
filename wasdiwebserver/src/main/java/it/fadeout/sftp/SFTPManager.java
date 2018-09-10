@@ -88,7 +88,7 @@ public class SFTPManager {
 //		oManager.removeAccount(sAccount);
 //		if (!oManager.createAccount(sAccount, sPassword)) System.out.println("NOOOO");
 //		//send email with new password
-//		MercuriusAPI oAPI = new MercuriusAPI("http://***REMOVED***/it.fadeout.mercurius.webapi");			
+//		MercuriusAPI oAPI = new MercuriusAPI("http://130.251.104.84:8080/it.fadeout.mercurius.webapi");			
 //		Message oMessage = new Message();
 //		oMessage.setTilte("Wasdi sftp account");
 //		oMessage.setSender("adminwasdi@acrotec.it");
