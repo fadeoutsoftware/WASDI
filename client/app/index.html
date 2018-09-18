@@ -6,11 +6,13 @@
 <head>
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
   <title>Wasdi</title>
   <meta name="description" content="">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
-
+  <!---------------- GOOGLE LOGIN ---------------->
+  <!--<meta name="google-signin-client_id" content="882119222530-2ur18or5tht7oln8tlvv0bvnpu6lnhrk.apps.googleusercontent.com">-->
 
   <!-- Fonts -->
   <link rel="stylesheet" href="fonts/astronaut/stylesheet.css">
@@ -105,6 +107,7 @@
   <script src="services/ConstantsService.js"></script>
   <script src="services/SessionInjector.js"></script>
   <script src="services/AuthService.js"></script>
+  <script src="services/AuthServiceFacebook.js"></script>
   <script src="services/MapService.js"></script>
   <script src="services/GlobeService.js"></script>
   <script src="services/WorkspaceService.js"></script>
@@ -123,6 +126,7 @@
   <script src="services/PagesService.js"></script>
   <script src="services/FilterService.js"></script>
   <script src="services/ProcessorService.js"></script>
+  <script src="services/AuthServiceGoogle.js"></script>
 
   <!-- Wasdi Directives -->
   <script src="directives/SnakeDirective.js"></script>
@@ -302,6 +306,7 @@
   <!--<script src="bower_components/json-edit/bower_components/angular/angular.min.js"></script>-->
   <script src="bower_components/json-edit/bower_components/angular-ui-sortable/sortable.min.js"></script>
   <!--<link  href="bower_components/json-edit/bower_components/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" type="text/css" />-->
+  <script src="bower_components/angular-directive.g-signin/google-plus-signin.js"></script>
 
   <!-- WPS -->
   <!--<script src="lib/wps-js/js/jquery/jquery-ui.1.8.3.min.js"></script>-->
@@ -309,6 +314,33 @@
   <script src="lib/wps-js/js/openlayers/OpenLayers-closure.js"></script>
   <script src="lib/wps-js/js/wps-js/wps-js.0.1.1.js"></script>
   <link type="text/css" rel="stylesheet" href="lib/wps-js/css/wps-js.css">
+
+  <!-- FACEBOOK LOGIN -->
+   <!--<script src="http://connect.facebook.net/it_IT/sdk.js"></script>-->
+  <script>
+    //FACEBOOK LOGIN LOAD API
+      window.fbAsyncInit = function() {
+          FB.init({
+              appId      : '935479099995075',
+              xfbml      : true,
+              version    : 'v3.1'
+          });
+          FB.AppEvents.logPageView();
+      };
+
+      (function(d, s, id){
+          var js, fjs = d.getElementsByTagName(s)[0];
+          if (d.getElementById(id)) {return;}
+          js = d.createElement(s); js.id = id;
+          js.src = "http://connect.facebook.net/en_US/sdk.js";
+          fjs.parentNode.insertBefore(js, fjs);
+
+      }(document, 'script', 'facebook-jssdk'));
+
+  </script>
+
+  <!---------------- GOOGLE LOGIN ---------------->
+  <!--<script src="https://apis.google.com/js/platform.js" async defer></script>-->
 
 </body>
 </html>

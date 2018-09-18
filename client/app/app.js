@@ -7,11 +7,13 @@ var wasdiApp = angular.module('wasdi', [
     'ui.router',//library alternative for router
     'pascalprecht.translate',
     'JSONedit',
+    'directive.g+signin',
 
     //US SERVICE
     'wasdi.ConstantsService',
     'wasdi.sessionInjector',
     'wasdi.AuthService',
+    'wasdi.AuthServiceFacebook',
     'wasdi.MapService',
     'wasdi.GlobeService',
     'wasdi.WorkspaceService',
@@ -30,6 +32,7 @@ var wasdiApp = angular.module('wasdi', [
     'wasdi.PagesService',
     'wasdi.FilterService',
     'wasdi.ProcessorService',
+    'wasdi.AuthServiceGoogle',
 
     //DIRECTIVE
     'wasdi.SnakeDirective',
@@ -61,6 +64,7 @@ var wasdiApp = angular.module('wasdi', [
 
 ]);
 
+
 wasdiApp.config(['$httpProvider', '$translateProvider', function($httpProvider, $translateProvider) {
     $httpProvider.interceptors.push('sessionInjector');
 
@@ -69,7 +73,6 @@ wasdiApp.config(['$httpProvider', '$translateProvider', function($httpProvider, 
         prefix: 'languages/',
         suffix: '.json'
     });
-
 
     $translateProvider.preferredLanguage('it');
     $translateProvider.useSanitizeValueStrategy('escaped');
