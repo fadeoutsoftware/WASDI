@@ -1,5 +1,6 @@
 package it.fadeout.rest.resources;
 
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -27,9 +28,17 @@ import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.LoginInfo;
 import wasdi.shared.viewmodels.PrimitiveResult;
 import wasdi.shared.viewmodels.UserViewModel;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken.Payload;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
+import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
+import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.api.client.json.jackson2.JacksonFactory;
+
 
 @Path("/auth")
 public class AuthResource {
+
 	
 	@Context
 	ServletConfig m_oServletConfig;
@@ -257,7 +266,129 @@ public class AuthResource {
 
 		return Response.ok().build();
 	}
+	
+	//CHECK USER ID TOKEN BY GOOGLE 
+	@POST
+	@Path("/logingoogleuser")
+	@Produces({"application/xml", "application/json", "text/xml"})
+	public UserViewModel LoginGoogleUser(LoginInfo oLoginInfo) {
+		Wasdi.DebugLog("AuthResource.CheckGoogleUserId");
+		UserViewModel oUserVM = new UserViewModel();
+		oUserVM.setUserId("");
+		
+		try 
+		{
+			if (oLoginInfo == null) {
+				return oUserVM;
+			}
+			if (Utils.isNullOrEmpty(oLoginInfo.getUserId())) {
+				return oUserVM;
+			}
+			if (Utils.isNullOrEmpty(oLoginInfo.getGoogleIdToken())) {
+				return oUserVM;
+			}
+			
+			final NetHttpTransport transport = GoogleNetHttpTransport.newTrustedTransport();
+			final JacksonFactory jsonFactory = JacksonFactory.getDefaultInstance();
+			GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(transport, jsonFactory)
+				    // Specify the CLIENT_ID of the app that accesses the backend:
+				    .setAudience(Collections.singletonList(oLoginInfo.getUserId()))
+				    // Or, if multiple clients access the backend:
+				    //.setAudience(Arrays.asList(CLIENT_ID_1, CLIENT_ID_2, CLIENT_ID_3))
+				    .build();
+			
+			// (Receive idTokenString by HTTPS POST)
+			GoogleIdToken oIdToken = verifier.verify(oLoginInfo.getGoogleIdToken());
+			
+			//check id token
+			if (oIdToken != null) 
+			{
+			  Payload oPayload = oIdToken.getPayload();
 
+			  // Print user identifier
+			  String userId = oPayload.getSubject();
+			 
+			  // Get profile information from payload
+			  String sEmail = oPayload.getEmail();
+			 /* boolean bEmailVerified = Boolean.valueOf(oPayload.getEmailVerified());
+			  String sName = (String) oPayload.get("name");
+			  String sPictureUrl = (String) oPayload.get("picture");
+			  String sLocale = (String) oPayload.get("locale");
+			  String sGivenName = (String) oPayload.get("given_name");
+			  String sFamilyName = (String) oPayload.get("family_name");*/
+			  
+			  // store profile information and create session
+			  System.out.println("AuthResource.LoginGoogleUser: requested access from " + userId);
+			
+
+			  UserRepository oUserRepository = new UserRepository();
+			  String sAuthProvider = "google";
+			  User oWasdiUser = oUserRepository.GoogleLogin(userId , sEmail, sAuthProvider);
+			  //save new user 
+			  if(oWasdiUser == null)
+			  {
+				  User oUser = new User();
+				  oUser.setAuthServiceProvider(sAuthProvider);
+				  oUser.setUserId(userId);
+				  oUser.setEmail(sEmail);
+				  
+				  if(oUserRepository.InsertUser(oUser) == true)
+				  {
+					  //the user is stored in DB
+					  //get user from database (i do it only for consistency)
+					  oWasdiUser = oUserRepository.GoogleLogin(userId , sEmail, sAuthProvider);
+				  }
+			  }
+			  
+			  if (oWasdiUser != null) 
+			  {
+
+				  //get all expired sessions
+				  SessionRepository oSessionRepository = new SessionRepository();
+				  List<UserSession> aoEspiredSessions = oSessionRepository.GetAllExpiredSessions(oWasdiUser.getUserId());
+				  for (UserSession oUserSession : aoEspiredSessions) {
+					  //delete data base session
+					  if (!oSessionRepository.DeleteSession(oUserSession)) {
+						  System.out.println("AuthService.LoginGoogleUser: Error deleting session.");
+					  }
+				  }
+
+				  oUserVM.setName(oWasdiUser.getName());
+				  oUserVM.setSurname(oWasdiUser.getSurname());
+				  oUserVM.setUserId(oWasdiUser.getUserId());
+				  oUserVM.setEmail(oWasdiUser.getEmail());
+				  
+				  UserSession oSession = new UserSession();
+				  oSession.setUserId(oWasdiUser.getUserId());
+				  String sSessionId = UUID.randomUUID().toString();
+				  oSession.setSessionId(sSessionId);
+				  oSession.setLoginDate((double) new Date().getTime());
+				  oSession.setLastTouch((double) new Date().getTime());
+
+				  Boolean bRet = oSessionRepository.InsertSession(oSession);
+				  if (!bRet)
+					  return oUserVM;
+
+				  oUserVM.setSessionId(sSessionId);
+				  System.out.println("AuthService.LoginGoogleUser: access succeeded");
+			  }
+			  else {
+				  System.out.println("AuthService.LoginGoogleUser: access failed");
+			  }
+
+			} 
+			else 
+			{
+			  System.out.println("Invalid ID token.");
+			}
+			
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
+		return oUserVM;
+
+	}
+	
 	private void sendPasswordEmail(String sEmail, String sAccount, String sPassword) {
 		//send email with new password
 		String sMercuriusAPIAddress = m_oServletConfig.getInitParameter("mercuriusAPIAddress");

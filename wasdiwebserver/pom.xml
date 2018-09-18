@@ -28,6 +28,11 @@
 			<version>3.8.1</version>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+  			<groupId>com.google.api-client</groupId>
+  			<artifactId>google-api-client</artifactId>
+  			<version>1.24.1</version>
+		</dependency>
 		<!-- dependency>
 			<groupId>com.sun.jersey</groupId>
 			<artifactId>jersey-server</artifactId>
@@ -390,6 +395,7 @@
 					<failOnMissingWebXml>false</failOnMissingWebXml>
 				</configuration>
 			</plugin>
+			 
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>3.3</version>
@@ -398,6 +404,7 @@
 					<target>1.8</target>
 				</configuration>
 			</plugin>
+			 
 		</plugins>
 	</build>
 </project>
