@@ -26,7 +26,9 @@ public class User {
      * Password
      */
     private String password;
-
+    private String authServiceProvider;
+    private String email;
+    
     public int getId() {
         return id;
     }
@@ -66,4 +68,20 @@ public class User {
     public void setPassword(String password) {
         this.password = password;
     }
+
+	public String getAuthServiceProvider() {
+		return authServiceProvider;
+	}
+
+	public void setAuthServiceProvider(String authServiceProvider) {
+		this.authServiceProvider = authServiceProvider;
+	}
+
+	public String getEmail() {
+		return email;
+	}
+
+	public void setEmail(String email) {
+		this.email = email;
+	}
 }
