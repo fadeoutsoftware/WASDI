@@ -3,13 +3,17 @@
  */
 
 var HomeController = (function() {
-    function HomeController($scope, $location, oConstantsService, oAuthService, oRabbitStompService,oState) {
+    function HomeController($scope, $location, oConstantsService, oAuthService, oRabbitStompService,oState,oAuthServiceFacebook,
+                            oAuthServiceGoogle) {
         this.m_oScope = $scope;
         this.m_oLocation  = $location;
         this.m_oConstantsService = oConstantsService;
         this.m_oAuthService = oAuthService;
         this.m_oRabbitStompService = oRabbitStompService;
-        this.m_oState=oState;
+        this.m_oState = oState;
+        this.m_oAuthServiceFacebook = oAuthServiceFacebook;
+        this.m_oAuthServiceGoogle = oAuthServiceGoogle;
+
         this.m_oScope.m_oController=this;
         this.m_bLoginIsVisible = false;//Login in visible after click on logo
         this.m_sUserName = "";
@@ -17,6 +21,7 @@ var HomeController = (function() {
         this.m_bRegisterIsVisible = false;
         this.m_bBrowserIsIE = utilsUserUseIEBrowser();
         this.m_bVisualizeLink = false;
+
         if(this.m_oConstantsService.isUserLogged())
             this.m_oState.go("root.workspaces");// go workspaces
         if(this.m_bBrowserIsIE === true)
@@ -28,7 +33,36 @@ var HomeController = (function() {
         {
             this.m_bVisualizeLink = true;
         }
+        var oController = this;
+        $scope.$on('event:google-plus-signin-success', function (event,authResult) {
 
+            // Send login to server
+            if(utilsIsObjectNullOrUndefined(authResult) === false)
+            {
+                var oIdToken = {
+                    userId: authResult.client_id,
+                    googleIdToken : authResult.id_token
+                }
+                if(utilsIsStrNullOrEmpty(oIdToken.googleIdToken) === false && utilsIsStrNullOrEmpty(oIdToken.userId) === false )
+                {
+                    oController.m_oAuthServiceGoogle.loginGoogleUser(oIdToken).success(
+                        function (data,status)
+                        {
+                            oController.callbackLogin(data, status,oController)
+                        }).error(function (data,status) {
+                        //alert('error');
+                        utilsVexDialogAlertTop("GURU MEDITATION<br>LOGIN ERROR");
+
+                    });
+                }
+
+            }
+
+        });
+        $scope.$on('event:google-plus-signin-failure', function (event,authResult) {
+            // Auth failure or signout detected
+            console.log("event:google-plus-signin-failure");
+        });
     }
 
     HomeController.prototype.changeVisibilityLoginRegister = function(sStatus){
@@ -58,35 +92,41 @@ var HomeController = (function() {
         oLoginInfo.userId = oController.m_sUserName;
         oLoginInfo.userPassword = oController.m_sUserPassword;
 
-        var oConstantsService = oController.m_oConstantsService;
+        // var oConstantsService = oController.m_oConstantsService;
         this.m_oConstantsService.setUser(null);
-        this.m_oAuthService.login(oLoginInfo).success(function (data, status) {
-            if (data != null)
-            {
-                if (data != undefined)
-                {
-                    if (data.userId != null && data.userId != "")
-                    {
-                        //LOGIN OK
-                        if(!utilsIsObjectNullOrUndefined(data.sessionId)|| !utilsIsStrNullOrEmpty(data.sessionId))
-                        {
-                            oConstantsService.setUser(data);//set user
-                            oController.m_oState.go("root.workspaces");// go workspaces
-                        }
-                    }
-                    else
-                    {
-                        //LOGIN FAIL
-                        utilsVexDialogAlertTop( "GURU MEDITATION<br>WRONG CREDENTIALS, TRY AGAIN");
-
-                    }
-                }
-            }
-        }).error(function (data,status) {
+        this.m_oAuthService.login(oLoginInfo).success(
+            function (data,status) {
+                oController.callbackLogin(data, status,oController)
+            }).error(function (data,status) {
             //alert('error');
             utilsVexDialogAlertTop("GURU MEDITATION<br>LOGIN ERROR");
 
         });
+    }
+
+    HomeController.prototype.callbackLogin = function(data, status,oController)
+    {
+        if (data != null)
+        {
+            if (data != undefined)
+            {
+                if (data.userId != null && data.userId != "")
+                {
+                    //LOGIN OK
+                    if(!utilsIsObjectNullOrUndefined(data.sessionId)|| !utilsIsStrNullOrEmpty(data.sessionId))
+                    {
+                        oController.m_oConstantsService.setUser(data);//set user
+                        oController.m_oState.go("root.workspaces");// go workspaces
+                    }
+                }
+                else
+                {
+                    //LOGIN FAIL
+                    utilsVexDialogAlertTop( "GURU MEDITATION<br>WRONG CREDENTIALS, TRY AGAIN");
+
+                }
+            }
+        }
     }
 
     HomeController.prototype.getUserName = function () {
@@ -117,7 +157,16 @@ var HomeController = (function() {
 
     HomeController.prototype.isUserLogged = function () {
         return this.m_oConstantsService.isUserLogged();
-    }
+    };
+
+    // HomeController.prototype.onSignIn = function (googleUser) {
+    //     var profile = googleUser.getBasicProfile();
+    //     console.log('ID: ' + profile.getId()); // Do not send to your backend! Use an ID token instead.
+    //     console.log('Name: ' + profile.getName());
+    //     console.log('Image URL: ' + profile.getImageUrl());
+    //     console.log('Email: ' + profile.getEmail()); // This is null if the 'email' scope is not present.
+    // };
+
 
     HomeController.$inject = [
         '$scope',
@@ -125,7 +174,9 @@ var HomeController = (function() {
         'ConstantsService',
         'AuthService',
         'RabbitStompService',
-        '$state'
+        '$state',
+        'AuthServiceFacebook',
+        'AuthServiceGoogle'
     ];
 
     return HomeController;
