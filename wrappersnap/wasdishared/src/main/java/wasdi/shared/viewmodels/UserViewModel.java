@@ -9,7 +9,8 @@ public class UserViewModel {
     private String name;
     private String surname;
     private String sessionId;
-
+    private String email;
+    
     public String getUserId() {
         return userId;
     }
@@ -41,4 +42,12 @@ public class UserViewModel {
     public void setSessionId(String sessionId) {
         this.sessionId = sessionId;
     }
+
+	public String getEmail() {
+		return email;
+	}
+
+	public void setEmail(String email) {
+		this.email = email;
+	}
 }

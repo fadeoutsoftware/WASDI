@@ -26,11 +26,15 @@ public class UserRepository extends  MongoRepository{
         return false;
     }
 
+
     public User GetUser(String sUserId) {
 
         try {
             Document oUserDocument = getCollection("users").find(new Document("userId", sUserId)).first();
-
+            if(oUserDocument == null)
+            {
+            	return null;
+            }
             String sJSON = oUserDocument.toJson();
 
             User oUser = s_oMapper.readValue(sJSON,User.class);
@@ -65,7 +69,29 @@ public class UserRepository extends  MongoRepository{
 
         return  null;
     }
+    
+    public User GoogleLogin(String sUserId, String sEmail, String sAuthProvider) {
+        try {
+            User oUser = GetUser(sUserId);
 
+            if (oUser != null)
+            {
+            	 if (oUser.getEmail() != null  && oUser.getAuthServiceProvider() != null)
+                 {
+                     if ( oUser.getEmail().equals(sEmail) && oUser.getAuthServiceProvider().equals(sAuthProvider) )
+                     {
+                         return oUser;
+                     }
+                 }
+            }
+
+            return null;
+        } catch (Exception oEx) {
+            oEx.printStackTrace();
+        }
+
+        return  null;
+    }
     public boolean DeleteUser(String sUserId) {
 
         try {

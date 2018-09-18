@@ -9,7 +9,8 @@ import javax.xml.bind.annotation.XmlRootElement;
 public class LoginInfo {
     private String userId;
     private String userPassword;
-
+    private String googleIdToken;
+    
     public LoginInfo() {
 
     }
@@ -29,4 +30,14 @@ public class LoginInfo {
     public void setUserPassword(String userPassword) {
         this.userPassword = userPassword;
     }
+
+	public String getGoogleIdToken() {
+		return googleIdToken;
+	}
+
+	public void setGoogleIdToken(String googleIdToken) {
+		this.googleIdToken = googleIdToken;
+	}
+
+
 }

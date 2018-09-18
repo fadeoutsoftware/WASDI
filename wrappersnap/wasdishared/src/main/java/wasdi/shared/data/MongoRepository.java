@@ -60,13 +60,20 @@ public class MongoRepository {
      * @return
      */
     public static MongoDatabase getMongoDatabase() {
-        if (s_oMongoClient == null) {
+    	try 
+    	{
+    		if (s_oMongoClient == null) {
 
-            MongoCredential oCredential = MongoCredential.createCredential(DB_USER, DB_NAME, DB_PWD.toCharArray());
-            s_oMongoClient = new MongoClient(new ServerAddress(SERVER_ADDRESS, SERVER_PORT), Arrays.asList(oCredential));
-            s_oMongoDatabase = s_oMongoClient.getDatabase(DB_NAME);
-        }
-
+            	MongoCredential oCredential = MongoCredential.createCredential(DB_USER, DB_NAME, DB_PWD.toCharArray());
+            	s_oMongoClient = new MongoClient(new ServerAddress(SERVER_ADDRESS, SERVER_PORT), Arrays.asList(oCredential));
+            	s_oMongoDatabase = s_oMongoClient.getDatabase(DB_NAME);
+        	}
+    	}
+    	catch (Exception e) 
+    	{
+    		System.out.println("MongoRepository.getMongoDatabase: exception " + e.getMessage());
+			e.printStackTrace();
+    	}
         return s_oMongoDatabase;
     }
 
