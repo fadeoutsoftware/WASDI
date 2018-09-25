@@ -13,9 +13,20 @@ service('AuthService', ['$http',  'ConstantsService', function ($http, oConstant
         //return this.m_oHttp.post('http://localhost:8080/wasdiwebserver/rest//auth/login',oCredentials);
     }
 
+    /**
+     * logout
+     */
     this.logout = function() {
         //CLEAN COOKIE
         return this.m_oHttp.get(this.APIURL + '/auth/logout');
+    }
+
+    /**
+     * signingUser
+     * @param oUser
+     */
+    this.signingUser = function(oUser){
+        return this.m_oHttp.post(this.APIURL + '/auth/signin',oUser);
     }
 
     this.checkSession = function(sSession)
