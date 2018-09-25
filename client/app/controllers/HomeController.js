@@ -18,6 +18,16 @@ var HomeController = (function() {
         this.m_bLoginIsVisible = false;//Login in visible after click on logo
         this.m_sUserName = "";
         this.m_sUserPassword = "";
+        this.m_bSuccess = false;
+        this.m_bError = false;
+        this.m_oRegistrationUser={
+            name:"",
+            surname:"",
+            password:"",
+            repeatPassword:"",
+            email:"",
+            userId:""//userId == email
+        }
         this.m_bRegisterIsVisible = false;
         this.m_bBrowserIsIE = utilsUserUseIEBrowser();
         this.m_bVisualizeLink = false;
@@ -71,6 +81,8 @@ var HomeController = (function() {
         {
             this.m_bLoginIsVisible = true;
             this.m_bRegisterIsVisible = false;
+            this.cleanSignInForm();
+
         }
 
         if(sStatus === "Register")
@@ -155,10 +167,106 @@ var HomeController = (function() {
         return "";
     }
 
+    /**
+     * signingUser
+     * @returns {boolean}
+     */
+    HomeController.prototype.signingUser = function(myForm)
+    {
+
+        var oUser = {};
+        var oController = this;
+
+        if( (utilsIsObjectNullOrUndefined(oController.m_oRegistrationUser) === true) || (this.isValidSigningUser(oController.m_oRegistrationUser) === false) )
+        {
+            return false;
+        }
+        oUser.userId = oController.m_oRegistrationUser.userId;
+        oUser.password = oController.m_oRegistrationUser.password;
+        oUser.name = oController.m_oRegistrationUser.name;
+        oUser.surname = oController.m_oRegistrationUser.surname;
+
+        this.m_bSuccess = false;
+        this.m_bError = false;
+        this.m_oAuthService.signingUser(oUser).success(
+            function (data,status) {
+                // oController.callbackLogin(data, status,oController);
+                if(utilsIsObjectNullOrUndefined(data) !== true)
+                {
+                    if(data.boolValue === true)
+                    {
+                        oController.m_bSuccess = true;
+                    }
+                    else
+                    {
+                        oController.m_bError = true;
+                    }
+                }
+                else
+                {
+                    utilsVexDialogAlertTop("GURU MEDITATION<br>SIGNIN ERROR");
+                }
+            }).error(function (data,status) {
+            //alert('error');
+            utilsVexDialogAlertTop("GURU MEDITATION<br>SIGNIN ERROR");
+
+        });
+
+        return true;
+    }
+
+    HomeController.prototype.isValidSigningUser = function(oRegistrationUser)
+    {
+        if(utilsIsObjectNullOrUndefined(oRegistrationUser) === true )
+        {
+            return false;
+        }
+
+        if( (utilsIsStrNullOrEmpty(oRegistrationUser.userId) === true) || (utilsIsEmail(oRegistrationUser.userId) === false) ) //
+        {
+            return false;
+        }
+
+        if( (utilsIsStrNullOrEmpty(oRegistrationUser.password) === true) || (oRegistrationUser.password.length < 8) ||
+            (utilsIsStrNullOrEmpty(oRegistrationUser.repeatPassword) === true) || (oRegistrationUser.password !== oRegistrationUser.repeatPassword) )
+        {
+            return false;
+        }
+
+        if( utilsIsStrNullOrEmpty(oRegistrationUser.name) === true )
+        {
+            return false;
+        }
+
+        if( utilsIsStrNullOrEmpty(oRegistrationUser.surname) === true )
+        {
+            return false;
+        }
+
+
+        return true;
+    }
+    /**
+     * isUserLogged
+     */
     HomeController.prototype.isUserLogged = function () {
         return this.m_oConstantsService.isUserLogged();
     };
 
+    HomeController.prototype.cleanSignInForm = function()
+    {
+        this.m_bSuccess = false;
+        this.m_bError = false;
+        this.m_oScope.signinForm.$setPristine();
+        this.m_oRegistrationUser={
+            name:"",
+            surname:"",
+            password:"",
+            repeatPassword:"",
+            email:"",
+            userId:""//userId == email
+        }
+    }
     // HomeController.prototype.onSignIn = function (googleUser) {
     //     var profile = googleUser.getBasicProfile();
     //     console.log('ID: ' + profile.getId()); // Do not send to your backend! Use an ID token instead.

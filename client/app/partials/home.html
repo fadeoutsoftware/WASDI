@@ -28,7 +28,7 @@
             </div>
 
 
-            <!-- LOGIN FORM -->
+            <!------------------------ LOGIN FORM ------------------------>
             <div class="login-content" ng-show="m_oController.m_bLoginIsVisible" >
                 <form class="form-signin" ng-submit="m_oController.login()" >
                     <div class="form-group">
@@ -53,9 +53,78 @@
                 <google-plus-signin clientid="882119222530-0e4bq80lvftjh3iqehb7mcit5mgh1bu7.apps.googleusercontent.com" language="it"></google-plus-signin>
 
             </div>
+            <!------------------------ REGISTRATION FORM ------------------------>
+            <div class="signin-content" ng-show="m_oController.m_bRegisterIsVisible" >
+                <!--Work in progress... If you want a test account contact us: wasdi@fadeout.it-->
+                <form class="form-signin" name="signinForm" ng-submit="m_oController.signingUser()" >
+                    <div class="form-group">
+                        <input type="email" name="useremail" placeholder="{{'SIGN_IN_PLACEHOLDER_EMAIL'|translate}}" class="form-control"
+                               ng-model="m_oController.m_oRegistrationUser.userId" required>
+                        <h6 class="error-message" ng-if="(signinForm.useremail.$dirty === true) &&
+                                                         (!signinForm.useremail.$valid)">
+                            Invalid email
+                        </h6>
+                    </div>
 
-            <div class="login-content" ng-show="m_oController.m_bRegisterIsVisible" >
-                Work in progress... If you want a test account contact us: wasdi@fadeout.it
+                    <div class="form-group">
+                        <input type="password" name="userpassword"  ng-model="m_oController.m_oRegistrationUser.password"
+                               placeholder="{{'SIGN_IN_PLACEHOLDER_PASSWORD'|translate}}" class="form-control"
+                                ng-minlength="8" required><!-- ng-model="m_oController.m_oRegistrationUser.password"-->
+                        <h6 class="error-message" ng-if="(m_oController.m_oRegistrationUser.password.length !== 0) &&
+                                                         (!signinForm.userpassword.$valid)">
+                            The value is too short
+                        </h6>
+                    </div>
+
+                    <!--<input name="myInput" ng-model="myInput" ng-maxlength="5">-->
+
+
+                    <div class="form-group">
+                        <input type="password" name="userrepeatpassword" placeholder="{{'SIGN_IN_PLACEHOLDER_REPEAT_PASSWORD'|translate}}" class="form-control"
+                               ng-model="m_oController.m_oRegistrationUser.repeatPassword" ng-minlength="8" required>
+                        <h6 class="error-message" ng-if="(signinForm.userrepeatpassword.$dirty === true) &&
+                                                        (signinForm.userpassword.$viewValue !== signinForm.userrepeatpassword.$viewValue)">
+                            The passwords are different
+                        </h6>
+                    </div>
+
+                    <div class ="form-group" >
+                        <input type="text" name="username" placeholder="{{'SIGN_IN_PLACEHOLDER_NAME'|translate}}" class="form-control"
+                               ng-model="m_oController.m_oRegistrationUser.name" required>
+                        <h6 class="error-message" ng-if="(signinForm.username.$dirty === true) &&
+                                                         (!signinForm.username.$valid)">
+                            Insert Name
+                        </h6>
+                    </div>
+                    <div class="form-group">
+                        <input type="text" name="usersurname" placeholder="{{'SIGN_IN_PLACEHOLDER_SURNAME'|translate}}" class="form-control"
+                               ng-model="m_oController.m_oRegistrationUser.surname" required>
+                        <h6 class="error-message" ng-if="(signinForm.usersurname.$dirty === true) &&
+                                                         (!signinForm.usersurname.$valid)">
+                            Insert Surname
+                        </h6>
+                    </div>
+
+                    <button class="btn btn-md btn-primary btn-block btn-signin" ng-class="{disabled: signinForm.$invalid === true }"
+                            type="submit">
+                        {{"SIGN_IN_BUTTON"|translate}}
+                    </button>
+
+                    <div class="alert alert-success" role="alert" ng-show ="m_oController.m_bSuccess === true">
+                        Success sign in!
+                    </div>
+                    <div class="alert alert-danger" role="alert" ng-show ="m_oController.m_bError === true">
+                        Error from server, was impossible sign in user.
+                    </div>
+                    <!--<div class="form-group">-->
+                        <!--<input type="password" placeholder="{{'LOGIN_PLACEHOLDER_PASSWORD'|translate}}" class="form-control" id="userPassword" ng-model="m_oController.m_sUserPassword">-->
+                    <!--</div>-->
+                    <!--<label>-->
+                        <!--<input type="checkbox" value="remember-me"> {{"LOGIN_CHECK_BOX_LABEL"|translate}}-->
+                    <!--</label>-->
+                    <!--<button class="btn btn-md btn-primary btn-block btn-signin" type="submit">{{"LOGIN_BUTTON_SIGN_IN"|translate}}</button>-->
+                </form>
+
             </div>
 
             <!--snake></snake-->
