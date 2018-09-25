@@ -1,5 +1,6 @@
 package it.fadeout.rest.resources;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -17,6 +18,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import it.fadeout.Wasdi;
+import it.fadeout.business.PasswordAuthentication;
 import it.fadeout.mercurius.business.Message;
 import it.fadeout.mercurius.client.MercuriusAPI;
 import it.fadeout.sftp.SFTPManager;
@@ -38,7 +40,7 @@ import com.google.api.client.json.jackson2.JacksonFactory;
 
 @Path("/auth")
 public class AuthResource {
-
+	PasswordAuthentication oPasswordAuthentication = new PasswordAuthentication();
 	
 	@Context
 	ServletConfig m_oServletConfig;
@@ -48,7 +50,7 @@ public class AuthResource {
 	@Produces({"application/xml", "application/json", "text/xml"})
 	public UserViewModel Login(LoginInfo oLoginInfo) {
 		Wasdi.DebugLog("AuthResource.Login");
-			
+		
 		UserViewModel oUserVM = new UserViewModel();
 		oUserVM.setUserId("");
 		
@@ -66,10 +68,14 @@ public class AuthResource {
 			System.out.println("AuthResource.Login: requested access from " + oLoginInfo.getUserId());
 			
 			UserRepository oUserRepository = new UserRepository();
+
 			
-			User oWasdiUser = oUserRepository.Login(oLoginInfo.getUserId(), oLoginInfo.getUserPassword());
-			
-			if (oWasdiUser != null) {
+			//User oWasdiUser = oUserRepository.Login(oLoginInfo.getUserId(), oLoginInfo.getUserPassword());
+			User oWasdiUser = oUserRepository.GetUser(oLoginInfo.getUserId());
+
+			String sToken = oWasdiUser.getPassword();
+			Boolean bIsLogged = oPasswordAuthentication.authenticate(oLoginInfo.getUserPassword().toCharArray(), sToken);
+			if (bIsLogged == true) {
 				
 				//get all expired sessions
 				SessionRepository oSessionRepository = new SessionRepository();
@@ -99,12 +105,15 @@ public class AuthResource {
 				oUserVM.setSessionId(sSessionId);
 				System.out.println("AuthService.Login: access succeeded");
 			}
-			else {
+			else 
+			{
 				System.out.println("AuthService.Login: access failed");
 			}		
 		}
 		catch (Exception oEx) {
-			oEx.toString();
+			System.out.println("AuthService.Login: Error");
+			oEx.printStackTrace();
+			
 		}
 		
 
@@ -159,6 +168,7 @@ public class AuthResource {
 	}	
 
 	
+	
 	@POST
 	@Path("/upload/createaccount")
 	@Produces({"application/json", "text/xml"})
@@ -184,7 +194,6 @@ public class AuthResource {
 	    
 		return Response.ok().build();
 	}
-	
 	
 	@GET
 	@Path("/upload/existsaccount")
@@ -387,6 +396,94 @@ public class AuthResource {
 		}
 		return oUserVM;
 
+	}
+	
+	@POST
+	@Path("/signin")
+	@Produces({"application/json", "text/xml"})
+	/******************REGISTRATION USER*******************/
+	public PrimitiveResult RegistrationUser(User oUser) 
+	{	
+		Wasdi.DebugLog("AuthService.RegistrationUser"  );
+		PrimitiveResult oResult = new PrimitiveResult();
+		oResult.setBoolValue(false);
+		if(oUser != null)
+		{
+			try
+			{
+				//Check User properties
+				if(Utils.isNullOrEmpty(oUser.getUserId()))
+				{
+					return oResult;
+				}
+				if(Utils.isNullOrEmpty(oUser.getName()))
+				{
+					return oResult;
+				}
+				if(Utils.isNullOrEmpty(oUser.getSurname()))
+				{
+					return oResult;
+				}
+				if(Utils.isNullOrEmpty(oUser.getPassword()))
+				{
+					return oResult;
+				}
+				
+				UserRepository oUserRepository = new UserRepository();
+				User oWasdiUser = oUserRepository.GetUser(oUser.getUserId());
+				
+				//if oWasdiUser is a new user -> oWasdiUser == null
+				if(oWasdiUser == null)
+				{
+					//save new user 
+					String sAuthProvider = "wasdi";
+					User oNewUser = new User();
+					oNewUser.setAuthServiceProvider(sAuthProvider);
+					oNewUser.setUserId(oUser.getUserId());
+					oNewUser.setEmail(oUser.getUserId());
+					oNewUser.setName(oUser.getName());
+					oNewUser.setSurname(oUser.getSurname());
+					oNewUser.setPassword(oPasswordAuthentication.hash(oUser.getPassword().toCharArray()));
+					if(oUserRepository.InsertUser(oNewUser) == true)
+					{
+						//the user is stored in DB
+						oResult.setBoolValue(true);
+					}
+				}
+			}
+			catch(Exception e)
+			{
+				e.printStackTrace();
+				oResult.setBoolValue(false);
+			}
+			
+
+
+		}
+		
+		return oResult;
+	}
+	
+	private void updatePasswordInDB(UserRepository oUserRepository)
+	{
+		//update password
+		ArrayList<User> aoUsers = oUserRepository.getAllUsers();
+		aoUsers = UpdateHashUsersPassword(aoUsers);
+		oUserRepository.UpdateAllUsers(aoUsers);
+	}
+	
+	private ArrayList<User> UpdateHashUsersPassword(ArrayList<User> aoUsers)
+	{
+		for (int i = 0; i < aoUsers.size(); i++) 
+		{
+			User oUser = aoUsers.get(i);
+			if( oUser.getAuthServiceProvider() == null || oUser.getAuthServiceProvider().contains("google") == false)
+			{
+				oUser.setPassword(oPasswordAuthentication.hash(oUser.getPassword().toCharArray()));
+			}
+			
+		}
+		return aoUsers;
 	}
 	
 	private void sendPasswordEmail(String sEmail, String sAccount, String sPassword) {
