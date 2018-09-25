@@ -21,6 +21,7 @@ import org.esa.snap.runtime.Config;
 import org.esa.snap.runtime.Engine;
 
 import it.fadeout.business.DownloadsThread;
+import it.fadeout.business.PasswordAuthentication;
 import it.fadeout.business.ProcessingThread;
 import it.fadeout.rest.resources.AuthResource;
 import it.fadeout.rest.resources.CatalogResources;
@@ -180,6 +181,9 @@ public class Wasdi extends Application {
 			
 			Engine.start(false);
 			
+			//init HASH
+			//initPasswordAuthenticationParameters();
+			
 		} catch (Throwable e) {
 			e.printStackTrace();
 		}
@@ -207,7 +211,7 @@ public class Wasdi extends Application {
 			e.printStackTrace();
 		}
 	}
-
+	
 	/**
 	 * Safe Read Init Parameter
 	 * @param sParmaneter
@@ -219,6 +223,13 @@ public class Wasdi extends Application {
 		return sParameterValue==null ? sDefault : sParameterValue;
 	}
 	
+	/*
+	 * 
+	 */
+	/*private void initPasswordAuthenticationParameters()
+	{	
+		PasswordAuthentication.setAlgorithm(getInitParameter("PWD_AUTHENTICATION","PBKDF2WithHmacSHA1"));
+	}*/
 	/**
 	 * Get Safe Random file name
 	 * @return
