@@ -6,9 +6,9 @@
 ----
 
 
-# Prerequisites installation, and setup for WASDI
+# Prerequisites installation, and setup for WASDI(#l1-prerequisites)
 
-## Java
+## Java(#l2-java)
 
 Java JDK (not RE) version 1.8. To check the installed version:
 
@@ -19,12 +19,14 @@ Note for **Windows** users: make sure the install path does not contain spaces. 
 **TODO**
 *check whether the no-space-issue is a real issue and how to overcome it (maybe w/ a shortcut? a softlink from the git bash?)*
 
-## Native [Java Advanced Imaging API (JAI)](http://www.oracle.com/technetwork/java/javase/tech/jai-142803.html)
+### Native [Java Advanced Imaging API (JAI)](http://www.oracle.com/technetwork/java/javase/tech/jai-142803.html)(#l3-JAI)
 
 It's important to install the official Oracle JDK with [native JAI](https://geoserver.geo-solutions.it/edu/en/install_run/jai_io_install.html)
 
 **TODO**
 *Verify whether ImageIO is optional/useful/mandatory*
+
+[back to Java](#l2-java)
 
 ## MongoDB
 
