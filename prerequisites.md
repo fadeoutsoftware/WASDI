@@ -24,18 +24,21 @@ Download and install [NGINX](https://nginx.org/en/). Here are the instructions f
 
 - Download and Install [Tomcat](http://tomcat.apache.org/) **[version 8.5](https://tomcat.apache.org/download-80.cgi)**
 
+**TODO**
+*native HDF5*
+
+## Websocket
+
+Install [Websocketd](http://websocketd.com/) to use [websockets](https://www.html5rocks.com/en/tutorials/websockets/basics/)
+
+
 ## Wget (optional under Windows)
 
 - Download and install [wget](https://www.gnu.org/software/wget/)
 
-## Maven
+**TODO**
+*sftpmanager*
 
-- [Download](https://maven.apache.org/download.html) and [install](http://maven.apache.org/install.html) Maven
-  - *Optional* (yet suggested): [get familiar with Maven (in 5 minutes)](https://maven.apache.org/guides/getting-started/maven-in-five-minutes.html)
-
-## Git
-
-[Download](https://git-scm.com/downloads) and install [git](https://git-scm.com/)
 
 ## MongoDB
 
@@ -53,6 +56,15 @@ Download and install [NGINX](https://nginx.org/en/). Here are the instructions f
 
 - Download and install [GeoServer](http://geoserver.org/)
 
+## Git
+
+[Download](https://git-scm.com/downloads) and install [git](https://git-scm.com/)
+
+## Maven
+
+- [Download](https://maven.apache.org/download.html) and [install](http://maven.apache.org/install.html) Maven
+  - *Optional* (yet suggested): [get familiar with Maven (in 5 minutes)](https://maven.apache.org/guides/getting-started/maven-in-five-minutes.html)
+
 ## Eclipse
 
 - Setup Eclipse for Maven using the [M2Eclipse plugin](http://www.eclipse.org/m2e/). Here's an [unofficial guide](http://www.vogella.com/tutorials/EclipseMaven/article.html)
@@ -62,4 +74,4 @@ Download and install [NGINX](https://nginx.org/en/). Here are the instructions f
 ----
 
 You're done!
-Proceed to [install snap software packages](./snap.md) or go back to [readme.md](./readme.md)
+Proceed to [install snap software packages](./snap.md) or go back to [readme.md](./readme.md) for the process summary.
