@@ -24,6 +24,8 @@ Download and install [NGINX](https://nginx.org/en/). Here are the instructions f
 
 - Download and Install [Tomcat](http://tomcat.apache.org/) **[version 8.5](https://tomcat.apache.org/download-80.cgi)**
 
+## HDF5
+
 **TODO**
 *native HDF5*
 
@@ -35,6 +37,8 @@ Install [Websocketd](http://websocketd.com/) to use [websockets](https://www.htm
 ## Wget (optional under Windows)
 
 - Download and install [wget](https://www.gnu.org/software/wget/)
+
+## sftpmanager
 
 **TODO**
 *sftpmanager*
@@ -52,7 +56,7 @@ Install [Websocketd](http://websocketd.com/) to use [websockets](https://www.htm
 - [install](https://www.erlang.org/downloads) the [Erlang](https://www.erlang.org/) programming language. Make sure to install it using an administrator account
 - [download](https://www.rabbitmq.com/download.html) and [install](https://www.rabbitmq.com/download.html#installation-guides) [Rabbit MQ](https://www.rabbitmq.com/)
 
-##Geoserver
+## Geoserver
 
 - Download and install [GeoServer](http://geoserver.org/)
 
@@ -67,6 +71,7 @@ Install [Websocketd](http://websocketd.com/) to use [websockets](https://www.htm
 
 ## Eclipse
 
+- [Download](https://www.eclipse.org/downloads/) and install [Eclipse](https://www.eclipse.org/)
 - Setup Eclipse for Maven using the [M2Eclipse plugin](http://www.eclipse.org/m2e/). Here's an [unofficial guide](http://www.vogella.com/tutorials/EclipseMaven/article.html)
 - Install the [Eclipse Web Tools Platform SDK](https://www.eclipse.org/webtools/). Later, you will be able to configure Eclipse for working with Tomcat: here's a [unofficial (yet useful) guide](https://www.mulesoft.com/tcat/tomcat-eclipse) with an example
 - *optional* Setup Eclipse for git using [egit](https://www.eclipse.org/egit/). [Unofficial guide](http://www.vogella.com/tutorials/EclipseGit/article.html)
