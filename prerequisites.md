@@ -99,11 +99,17 @@ db.createUser(
 )
 ```
 
-## NGINX (optional under Windows)
+[back to MongoDB](#mongoDB)
+
+## NGINX
+
+**TODO** *check: optional under Windows?*
 
 Download and install [NGINX](https://nginx.org/en/). Here are the instructions for [installing NGINX on Ubuntu](https://www.digitalocean.com/community/tutorials/how-to-install-nginx-on-ubuntu-16-04)
 
 Configure nginx in `/etc/nginx/sites-available/default`
+
+[back to NGINX](#NGINX)
 
 ## Tomcat
 
@@ -170,6 +176,8 @@ Launcher configuration: `config.properties`
 
 User's home must be tomcat'home. On Ubuntu:  `/user/share/tomcat`
 
+[back to Tomcat](#tomcat)
+
 ## HDF5
 
 Install the native HDF5 libraries
@@ -183,6 +191,8 @@ https://portal.hdfgroup.org/display/support
 
 include the library into `catalina.sh`
 
+[back to HDF5](#HDF5)
+
 ## Wget, SFTPmanager and Websocket
 
 **TODO** *check under Windows*
@@ -195,7 +205,7 @@ $ cd /usr/lib/wasdi/sftpmanager
 $ screen ./websocketd --port=6703 ./service.sh
 ```
 
-
+[back to](#wget,-SFTPmanager-and-Websocket)
    
 ## Rabbit MQ
 
@@ -230,6 +240,7 @@ Access [rabbit management](https://www.rabbitmq.com/management.html)
 Delete user `guest`
 Enable user `rabbitUser rabbitUser'
 
+[back to Rabbit MQ](#rabbit-MQ)
 
 ## Geoserver
 
@@ -249,21 +260,27 @@ Setup logging in production
 
 (Checked with version 2.10.1)
 
-## Git
+[back to GeoServer](#geoserver)
+
+##Development tools
+
+### Git
 
 [Download](https://git-scm.com/downloads) and install [git](https://git-scm.com/)
 
-## Maven
+### Maven
 
 - [Download](https://maven.apache.org/download.html) and [install](http://maven.apache.org/install.html) Maven
   - *Optional* (yet suggested): [get familiar with Maven (in 5 minutes)](https://maven.apache.org/guides/getting-started/maven-in-five-minutes.html)
 
-## Eclipse
+### Eclipse
 
 - [Download](https://www.eclipse.org/downloads/) and install [Eclipse](https://www.eclipse.org/)
 - Setup Eclipse for Maven using the [M2Eclipse plugin](http://www.eclipse.org/m2e/). Here's an [unofficial guide](http://www.vogella.com/tutorials/EclipseMaven/article.html)
 - Install the [Eclipse Web Tools Platform SDK](https://www.eclipse.org/webtools/). Later, you will be able to configure Eclipse for working with Tomcat: here's a [unofficial (yet useful) guide](https://www.mulesoft.com/tcat/tomcat-eclipse) with an example
 - *optional* Setup Eclipse for git using [egit](https://www.eclipse.org/egit/). [Unofficial guide](http://www.vogella.com/tutorials/EclipseGit/article.html)
+
+[back to Development tools](#development-tools)
 
 ----
 
