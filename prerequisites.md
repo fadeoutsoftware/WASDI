@@ -205,7 +205,7 @@ $ cd /usr/lib/wasdi/sftpmanager
 $ screen ./websocketd --port=6703 ./service.sh
 ```
 
-[back to](#wget,-sftpmanager-and-websocket)
+[back to Wget, SFTPmanager and Websocket](#wget-sftpmanager-and-websocket)
    
 ## Rabbit MQ
 
@@ -262,7 +262,7 @@ Setup logging in production
 
 [back to GeoServer](#geoserver)
 
-##Development tools
+## Development tools
 
 ### Git
 

@@ -12,8 +12,9 @@ aPath/ $ mkdir snap
 aPath/ $ cd snap
 ```
 
+## Snap core packages
 
-## Snap engine
+### Snap engine
 
 ```
 aPath/snap/ $ git clone https://github.com/senbox-org/snap-engine
@@ -21,13 +22,16 @@ aPath/snap/ $ cd snap-engine
 aPath/snap/snap-engine/ $ mvn clean install
 ```
 
-## Snap desktop
+### Snap desktop
 
 ```
 aPath/snap/ $ git clone https://github.com/senbox-org/snap-desktop
 aPath/snap/ $ cd snap-desktop
 aPath/snap/snap-desktop/ $ mvn clean install
 ```
+
+[back to Snap core packages](#snap-core-packages)
+
 
 ## Sentinel toolboxes
 
@@ -56,6 +60,7 @@ aPath/snap/s#tbx/ $ mvn clean install -DskipTests=true
 
 to skip the tests (the latter worked smoothly in our tests): you're just going to use the toolboxes, not contributing to them. Also, please report the incident on the appropriate ESA's forum: [s1tbx](https://forum.step.esa.int/c/s1tbx/problem-reports), [s2tbx](https://forum.step.esa.int/c/s2tbx/problem-reports) and [s3tbx](https://forum.step.esa.int/c/s3tbx/problem-reports)
 
+[back to Sentinel toolboxes](#sentinel-toolboxes)
 
 ## PROBA-V toolbox
 
@@ -66,6 +71,10 @@ aPath/snap/ $ git clone https://github.com/senbox-org/probavbox.git
 aPath/snap/ $ cd probavox
 aPath/snap/probavox/ $ mvn clean install
 ```
+
+[back to PROBA-V toolbox](#proba-v-toolbox)
+
+----
 
 You're done!
 Proceed to [install and configure WASDI](./setupWasdi.md) or [go back](./README.md) for the process summary.
