@@ -1,3 +1,4 @@
+
 Make sure to fulfill the [prerequisites](./prerequisites.md) before continuing.
 
 # SNAP
@@ -67,4 +68,4 @@ aPath/snap/probavox/ $ mvn clean install
 ```
 
 You're done!
-Proceed to [install and configure WASDI](./setupWasdi.md) or go back to [readme.md](./readme.md) for the process summary.
+Proceed to [install and configure WASDI](./setupWasdi.md) or [go back](./README.md) for the process summary.
