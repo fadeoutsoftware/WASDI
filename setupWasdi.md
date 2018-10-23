@@ -1,7 +1,7 @@
 # WASDI installation
 
 
-## download WASDI
+## Download WASDI
 
 clone the code from github:
 
@@ -13,12 +13,24 @@ clone the code from github:
 
 ## Configure MongoDB
 
-Create a user table:
+Create database `wasdi`
 
 ```
 $ mongo wasdi
+```
+
+From within mongo, create a user table:
+
+```
 db.createCollection("users")
-db.users.insert({ "userId" : "myUserID", "name" : "myName", "password" : "myPassword", "surname" : "mySurname"})
+db.users.insert(
+  {
+    "userId" : "myUserID",
+	"name" : "myName",
+	"password" : "myPassword",
+	"surname" : "mySurname"
+  }
+)
 ```
 
 Create Mongo admin account
@@ -27,19 +39,20 @@ Create Mongo admin account
 $ mongo
 use admin
 db.createUser(
-{
-  user: "UserAdministrator",
-  pwd: "myUserPassword",
-  roles: [ { role: "userAdminAnyDatabase", db: "admin" } ]
+  {
+    user: "UserAdministrator",
+    pwd: "myUserPassword",
+    roles: [ { role: "userAdminAnyDatabase", db: "admin" } ]
   }
 )
 ```
 
-Re-start the mongod instance with the --auth command line option: edit /etc/mongodb.conf with a text editor (e.g. `$ nano /etc/mongodb.conf`) and change the corresponding line to:
+Stop the service and [enable authentication](https://docs.mongodb.com/manual/tutorial/enable-authentication/). You can either:
 
-```
-Set auth=true
-```
+- use the [configuration file](https://docs.mongodb.com/manual/administration/configuration/):
+  - on linux: you will need root privileges. The file is usually `/etc/mongodb.conf` (**TODO** *check this one*) and set `security.authorization: enabled` (or auth=true if you don't use the YAML format - that depends on your installation).
+  - on Windows: you will need administration privileges. [Edit `mongod.cfg`](https://docs.mongodb.com/manual/reference/configuration-options/#security.authorization) (usually in `C:\Program Files\MongoDB\Server\4.0\bin\` and add `security.authorization: enabled`. 
+- pass the --auth command line option when launched
 
 Create wasdi collection user
 
@@ -47,9 +60,17 @@ Create wasdi collection user
 $ mongo
 db.auth("UserAdministrator", "myUserPassword")
 use wasdi
-db.createUser({ user:"***REMOVED***" ,   pwd: "myWasdiMongoPassword", roles: [{
-role: "readWrite", db: "wasdi" }]})
+db.createUser(
+  {
+    user:"***REMOVED***" ,
+	pwd: "myWasdiMongoPassword",
+	roles: [ { role: "readWrite", db: "wasdi" } ]
+	]
+  }
+)
 ```
+
+----
 
 # Setup
 
