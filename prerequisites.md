@@ -9,6 +9,9 @@ $ java -version
 
 Note for **Windows** users: make sure the install path does not contain spaces. This is required in order to avoid issues when [using Maven](https://maven.apache.org/guides/getting-started/windows-prerequisites.html). Example of an appropriate path for a Windows installation: `C:\path\to\Java\`
 
+**TODO**
+*check whether the no-space-issue is really an issue* / how to overcome it
+
 ## Native [Java Advanced Imaging API (JAI)](http://www.oracle.com/technetwork/java/javase/tech/jai-142803.html)
 
 It's important to install the official Oracle JDK with [native JAI](https://geoserver.geo-solutions.it/edu/en/install_run/jai_io_install.html)
@@ -46,10 +49,14 @@ Install [Websocketd](http://websocketd.com/) to use [websockets](https://www.htm
 
 ## MongoDB
 
-- [install](https://docs.mongodb.com/manual/administration/install-community/) [MongoDB](https://www.mongodb.com/)
-- install a MongoDB client, suggested: [robomongo](https://robomongo.org/)
-   - [robo 3T](https://robomongo.org/download) (lighter)
-   - [Studio 3T](https://studio3t.com/knowledge-base/articles/installation/) (complete mongoDB IDE, requires License)
+- [Download](https://www.mongodb.com/download-center/community) and [install](https://docs.mongodb.com/manual/administration/install-community/) [MongoDB](https://www.mongodb.com/) (make sure to head for the download, not for a Database-as-a-Service solution)
+- install a MongoDB client:
+  - free:
+    - (**suggested**) [robomongo](https://robomongo.org/) [robo 3T](https://robomongo.org/download) (lighter)
+	- [MongoDB Compass](https://www.mongodb.com/download-center/compass), the official MongoDB administration GUI. *Note to **Windows** users: officially, it comes together with MongoDB (uncheck the flag during the installation process if you don't want it), however, at the time of writing, we could not [find it](https://stackoverflow.com/questions/47696519/windows-mongodb-installed-compass-but-cant-find-compass-within-system) after the installation and had to download and install it separately.*
+  - paid:
+    - [Studio 3T](https://studio3t.com/knowledge-base/articles/installation/) (complete mongoDB IDE, requires License)
+    - [Navicat](https://www.navicat.com/en/products/navicat-for-mongodb)
    
 ## Rabbit MQ
 
