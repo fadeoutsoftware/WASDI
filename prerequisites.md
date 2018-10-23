@@ -109,7 +109,7 @@ Download and install [NGINX](https://nginx.org/en/). Here are the instructions f
 
 Configure nginx in `/etc/nginx/sites-available/default`
 
-[back to NGINX](#NGINX)
+[back to NGINX](#nginx)
 
 ## Tomcat
 
@@ -191,7 +191,7 @@ https://portal.hdfgroup.org/display/support
 
 include the library into `catalina.sh`
 
-[back to HDF5](#HDF5)
+[back to HDF5](#hdf5)
 
 ## Wget, SFTPmanager and Websocket
 
@@ -205,7 +205,7 @@ $ cd /usr/lib/wasdi/sftpmanager
 $ screen ./websocketd --port=6703 ./service.sh
 ```
 
-[back to](#wget,-SFTPmanager-and-Websocket)
+[back to](#wget,-sftpmanager-and-websocket)
    
 ## Rabbit MQ
 
@@ -240,7 +240,7 @@ Access [rabbit management](https://www.rabbitmq.com/management.html)
 Delete user `guest`
 Enable user `rabbitUser rabbitUser'
 
-[back to Rabbit MQ](#rabbit-MQ)
+[back to Rabbit MQ](#rabbit-mq)
 
 ## Geoserver
 
