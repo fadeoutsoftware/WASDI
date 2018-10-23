@@ -11,7 +11,7 @@ clone the code from github:
 
 **TODO**
 
-## configure MongoDB
+## Configure MongoDB
 
 Create a user table:
 
@@ -54,7 +54,7 @@ role: "readWrite", db: "wasdi" }]})
 # Setup
 
 
-## prerequisites setup
+## Prerequisites setup
 
 ** TODO: **
 
@@ -66,7 +66,7 @@ role: "readWrite", db: "wasdi" }]})
 - configure file r/w permissions
 
 
-## build
+## Build
 
 
 ** TODO: **
@@ -74,3 +74,7 @@ role: "readWrite", db: "wasdi" }]})
 - eclipse maven project setup
 - how to build
 - how to setup users and passwords
+
+## Deploy
+
+** TODO **

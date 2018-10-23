@@ -1,6 +1,6 @@
 Make sure to fulfill the [prerequisites](./prerequisites.md) before continuing.
 
-# Snap
+# SNAP
 
 Instructions to download [SNAP](https://senbox.atlassian.net/wiki/spaces/SNAP/pages/10879039/How+to+build+SNAP+from+sources) and sentinel toolboxes 1-3 in a directory (assume it is called `snap`), and build them. In details:
 
@@ -12,7 +12,7 @@ aPath/ $ cd snap
 ```
 
 
-## SNAP engine
+## Snap engine
 
 ```
 aPath/snap/ $ git clone https://github.com/senbox-org/snap-engine
@@ -20,7 +20,7 @@ aPath/snap/ $ cd snap-engine
 aPath/snap/snap-engine/ $ mvn clean install
 ```
 
-## SNAP desktop
+## Snap desktop
 
 ```
 aPath/snap/ $ git clone https://github.com/senbox-org/snap-desktop

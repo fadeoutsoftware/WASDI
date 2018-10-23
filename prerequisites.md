@@ -9,7 +9,7 @@ $ java -version
 
 Note for **Windows** users: make sure the install path does not contain spaces. This is required in order to avoid issues when [using Maven](https://maven.apache.org/guides/getting-started/windows-prerequisites.html). Example of an appropriate path for a Windows installation: `C:\path\to\Java\`
 
-##Native [Java Advanced Imaging API (JAI)](http://www.oracle.com/technetwork/java/javase/tech/jai-142803.html)
+## Native [Java Advanced Imaging API (JAI)](http://www.oracle.com/technetwork/java/javase/tech/jai-142803.html)
 
 It's important to install the official Oracle JDK with [native JAI](https://geoserver.geo-solutions.it/edu/en/install_run/jai_io_install.html)
 
@@ -38,7 +38,7 @@ Install [Websocketd](http://websocketd.com/) to use [websockets](https://www.htm
 
 - Download and install [wget](https://www.gnu.org/software/wget/)
 
-## sftpmanager
+## SFTPmanager
 
 **TODO**
 *sftpmanager*
