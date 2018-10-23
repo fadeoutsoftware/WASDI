@@ -26,7 +26,7 @@ It's important to install the official Oracle JDK with [native JAI](https://geos
 **TODO**
 *Verify whether ImageIO is optional/useful/mandatory*
 
-[back to Java](##-java)
+[back to Java](##Java)
 
 ## MongoDB
 
