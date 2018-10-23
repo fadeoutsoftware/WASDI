@@ -1,5 +1,5 @@
-# WASDI installation
 
+# WASDI installation
 
 ## Download WASDI
 
@@ -201,19 +201,6 @@ User's home must be tomcat'home. On Ubuntu:  `/user/share/tomcat`
 
 ----
 
-# Setup
-
-
-## Prerequisites setup
-
-** TODO: **
-
-- webserver/tomcat setup
-- SFTP setup
-- GeoServer setup
-- configure r/w permissions on files and folders
-
-
 ## Build
 
 
@@ -231,4 +218,4 @@ User's home must be tomcat'home. On Ubuntu:  `/user/share/tomcat`
 
 You're done!
 
-[./README.md]
+back to [README.md](./README.md)

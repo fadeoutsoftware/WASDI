@@ -86,4 +86,4 @@ Install [Websocketd](http://websocketd.com/) to use [websockets](https://www.htm
 ----
 
 You're done!
-Proceed to [install snap software packages](./snap.md) or go back to [readme.md](./readme.md) for the process summary.
+Proceed to [install snap software packages](./snap.md) or [go back](./README.md) for the process summary.
