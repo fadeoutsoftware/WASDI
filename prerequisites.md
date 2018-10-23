@@ -1,5 +1,12 @@
 ﻿
-# Prerequisites
+> **Caveat:** still pretty raw, and oriented mostly to a linux server
+
+**TODO** *refine for windows*
+
+----
+
+
+# Prerequisites installation, and setup for WASDI
 
 ## Java
 
@@ -10,7 +17,7 @@ $ java -version
 Note for **Windows** users: make sure the install path does not contain spaces. This is required in order to avoid issues when [using Maven](https://maven.apache.org/guides/getting-started/windows-prerequisites.html). Example of an appropriate path for a Windows installation: `C:\path\to\Java\`
 
 **TODO**
-*check whether the no-space-issue is really an issue* / how to overcome it
+*check whether the no-space-issue is a real issue and how to overcome it (maybe w/ a shortcut? a softlink from the git bash?)*
 
 ## Native [Java Advanced Imaging API (JAI)](http://www.oracle.com/technetwork/java/javase/tech/jai-142803.html)
 
@@ -18,34 +25,6 @@ It's important to install the official Oracle JDK with [native JAI](https://geos
 
 **TODO**
 *Verify whether ImageIO is optional/useful/mandatory*
-
-## NGINX (optional under Windows)
-
-Download and install [NGINX](https://nginx.org/en/). Here are the instructions for [installing NGINX on Ubuntu](https://www.digitalocean.com/community/tutorials/how-to-install-nginx-on-ubuntu-16-04)
-
-## Tomcat
-
-- Download and Install [Tomcat](http://tomcat.apache.org/) **[version 8.5](https://tomcat.apache.org/download-80.cgi)**
-
-## HDF5
-
-**TODO**
-*native HDF5*
-
-## Websocket
-
-Install [Websocketd](http://websocketd.com/) to use [websockets](https://www.html5rocks.com/en/tutorials/websockets/basics/)
-
-
-## Wget (optional under Windows)
-
-- Download and install [wget](https://www.gnu.org/software/wget/)
-
-## SFTPmanager
-
-**TODO**
-*sftpmanager*
-
 
 ## MongoDB
 
@@ -57,15 +36,216 @@ Install [Websocketd](http://websocketd.com/) to use [websockets](https://www.htm
   - paid:
     - [Studio 3T](https://studio3t.com/knowledge-base/articles/installation/) (complete mongoDB IDE, requires License)
     - [Navicat](https://www.navicat.com/en/products/navicat-for-mongodb)
+	
+### Configure MongoDB
+
+**TODO** *check again and refine*
+
+Create database `wasdi`
+
+```
+$ mongo wasdi
+```
+
+From the mongo prompt, create a user table:
+
+```
+db.createCollection("users")
+db.users.insert(
+  {
+    "userId" : "myUserID",
+	"name" : "myName",
+	"password" : "myPassword",
+	"surname" : "mySurname"
+  }
+)
+```
+
+Then, create Mongo admin account
+
+```
+use admin
+db.createUser(
+  {
+    user: "UserAdministrator",
+    pwd: "myUserPassword",
+    roles: [ { role: "userAdminAnyDatabase", db: "admin" } ]
+  }
+)
+```
+
+Stop the service and [enable authentication](https://docs.mongodb.com/manual/tutorial/enable-authentication/). You can either:
+
+- use the [configuration file](https://docs.mongodb.com/manual/administration/configuration/) (strongly suggested option): uncomment `security:` and add `authorization: enabled`, then restart the service. OS dependent details:
+  - on linux: you will need root privileges. The file is usually `/etc/mongodb.conf` (**TODO** *check this one*)  (or auth=true if you don't use the YAML format - that depends on your installation).
+  - on Windows: you will need administration privileges. [Edit `mongod.cfg`](https://docs.mongodb.com/manual/reference/configuration-options/#security.authorization) (usually in `C:\Program Files\MongoDB\Server\4.0\bin\`)
+- pass the --auth command line option when launched
+
+Create wasdi collection user
+
+```
+$ mongo
+db.auth("UserAdministrator", "myUserPassword")
+use wasdi
+db.createUser(
+  {
+    user:"wasdimongo" ,
+	pwd: "myWasdiMongoPassword",
+	roles: [ { role: "readWrite", db: "wasdi" } ]
+	]
+  }
+)
+```
+
+## NGINX (optional under Windows)
+
+Download and install [NGINX](https://nginx.org/en/). Here are the instructions for [installing NGINX on Ubuntu](https://www.digitalocean.com/community/tutorials/how-to-install-nginx-on-ubuntu-16-04)
+
+Configure nginx in `/etc/nginx/sites-available/default`
+
+## Tomcat
+
+- Download and Install [Tomcat](http://tomcat.apache.org/) **[version 8.5](https://tomcat.apache.org/download-80.cgi)**
+
+### Configure Tomcat
+
+**TODO** *check and refine*
+
+#### Tomcat folders and permissions
+
+Create the following Tomcat folders:
+
+```
+/usr/lib/wasdi/launcher
+/usr/lib/wasdi/params
+/usr/lib/wasdi/sftpmanager
+/data/wasdi
+/data/wasdi/metadata
+/data/wasdi/wps
+/data/wasdi/catalogue
+/data/wasdi/dockertemplate
+/data/wasdi/processors
+```
+
+verify that the user can write in tomcat folders
+
+create folders:
+
+```
+.snap
+/nfs/download
+```
+
+https://stackoverflow.com/questions/10076754/how-does-tomcat-locate-the-webapps-directory
+
+#### Tomcat configuration
+
+```
+$ locate catalina.sh
+$ touch setenv.sh
+$ nano setenv.sh
+$ export CATALINA_OPTS="$CATALINA_OPTS -Xms4G"
+$ export CATALINA_OPTS="$CATALINA_OPTS -Xmx16G"
+```
+
+Then restart it.
+
+#### Tomcat RAM and parameters
+
+```
+$ cd /etc/default
+Nano tomcat8
+JAVA_OPTS="-Djava.awt.headless=true -Xmx10g -XX:+UseConcMarkSweepGC -XX:+AggressiveOpts -Xverify:none -Dsun.java2d.noddraw=true -Dsun.awt.nopixfmt=true -Dsun.java2d.dpiaware=false -Dsnap.jai.tileCacheSize=4096 -Djava.library-path=/opt/gdal"
+```
+
+Note: check Java command line for the Launcher
+Note: check RAM available to catalina
+
+http://tomcat.apache.org/tomcat-5.5-doc/config/realm.html
+http://tomcat.apache.org/tomcat-8.0-doc/realm-howto.html
+
+Launcher configuration: `config.properties`
+
+User's home must be tomcat'home. On Ubuntu:  `/user/share/tomcat`
+
+## HDF5
+
+Install the native HDF5 libraries
+https://wiki-bsse.ethz.ch/display/JHDF5/Download+Page
+https://wiki-bsse.ethz.ch/display/JHDF5/Documentation+page
+
+more info:
+
+https://stackoverflow.com/questions/9227099/hdf5-in-java-what-are-the-difference-between-the-availabe-apis
+https://portal.hdfgroup.org/display/support
+
+include the library into `catalina.sh`
+
+## Wget, SFTPmanager and Websocket
+
+**TODO** *check under Windows*
+
+- install [wget](https://www.gnu.org/software/wget/) 
+- install [Websocketd](http://websocketd.com/) to use [websockets](https://www.html5rocks.com/en/tutorials/websockets/basics/)
+
+```
+$ cd /usr/lib/wasdi/sftpmanager
+$ screen ./websocketd --port=6703 ./service.sh
+```
+
+
    
 ## Rabbit MQ
 
 - [install](https://www.erlang.org/downloads) the [Erlang](https://www.erlang.org/) programming language. Make sure to install it using an administrator account
 - [download](https://www.rabbitmq.com/download.html) and [install](https://www.rabbitmq.com/download.html#installation-guides) [Rabbit MQ](https://www.rabbitmq.com/)
 
+### Configure Rabbit
+
+**TODO** *check and refine*
+
+[install the web STOMP plugin:](https://www.rabbitmq.com/web-stomp.html)
+
+```
+rabbitmq-plugins enable rabbitmq_web_stomp
+```
+
+Create rabbit user
+
+```
+rabbitmqctl add_user rabbitUser rabbitUser
+rabbitmq-plugins enable rabbitmq_management
+```
+
+Create rabbit user admin
+
+```
+rabbitmqctl add_user admin password
+rabbitmqctl set_user_tags admin administrator
+```
+
+Access [rabbit management](https://www.rabbitmq.com/management.html)
+Delete user `guest`
+Enable user `rabbitUser rabbitUser'
+
+
 ## Geoserver
 
 - Download and install [GeoServer](http://geoserver.org/)
+
+### Configure GeoServer
+
+Unpack geoserver
+move the .war file into tomcat
+
+Change geoserver password: enter with admin geoserver and set the new password
+Will be used in launcher config
+Log into geoserver
+Change admin passsword
+Setup logging in production
+[Activate wps](http://docs.geoserver.org/latest/en/user/services/wps/install.html#configuring-wps)
+
+(Checked with version 2.10.1)
 
 ## Git
 
