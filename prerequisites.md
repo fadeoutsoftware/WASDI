@@ -99,7 +99,7 @@ db.createUser(
 )
 ```
 
-[back to MongoDB](#mongoDB)
+[back to MongoDB](#mongodb)
 
 ## NGINX
 
