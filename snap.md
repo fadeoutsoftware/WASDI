@@ -47,17 +47,18 @@ aPath/snap/s#tbx/ $ mvn clean install
 ```
 Just make sure to replace the character `#` above with the appropriate digit, i.e, `1`, `2`, or `3`
 
-According to the developers, builds may fail because of unit tests failing (that happened consistently in our tests). If that is case, replace the build above command with
+Note: according to the developers, builds may fail because of unit tests failing (in fact, that happened consistently in our tests). If that is case, just replace the build above command with
 
 ```
 aPath/snap/s#tbx/ $ mvn clean install -DskipTests=true
 ```
 
-to skip the tests (the latter worked smoothly in our tests). Also, please report the incident on the appropriate ESA's forum: [s1tbx](https://forum.step.esa.int/c/s1tbx/problem-reports), [s2tbx](https://forum.step.esa.int/c/s2tbx/problem-reports) and [s3tbx](https://forum.step.esa.int/c/s3tbx/problem-reports)
+to skip the tests (the latter worked smoothly in our tests): you're just going to use the toolboxes, not contributing to them. Also, please report the incident on the appropriate ESA's forum: [s1tbx](https://forum.step.esa.int/c/s1tbx/problem-reports), [s2tbx](https://forum.step.esa.int/c/s2tbx/problem-reports) and [s3tbx](https://forum.step.esa.int/c/s3tbx/problem-reports)
 
 
 ## PROBA-V toolbox
 
+Finally, install the PROBA-V toolbox:
 
 ```
 aPath/snap/ $ git clone https://github.com/senbox-org/probavbox.git
@@ -66,4 +67,4 @@ aPath/snap/probavox/ $ mvn clean install
 ```
 
 You're done!
-Proceed to [install and configure WASDI](./wasdi.md) or go back to [readme.md](./readme.md) for the process summary.
+Proceed to [install and configure WASDI](./setupWasdi.md) or go back to [readme.md](./readme.md) for the process summary.
