@@ -1,3 +1,5 @@
+Make sure to fulfill the [prerequisites](./prerequisites.md) before continuing.
+
 #Snap
 
 Instructions to download [SNAP](https://senbox.atlassian.net/wiki/spaces/SNAP/pages/10879039/How+to+build+SNAP+from+sources) and sentinel toolboxes 1-3 in a directory (assume it is called `snap`), and build them. In details:
@@ -63,3 +65,4 @@ aPath/snap/probavox/ $ mvn clean install
 ```
 
 You're done!
+Proceed to [install and configure WASDI](./wasdi.md) or go back to [readme.md](./readme.md) for the process summary.
