@@ -7,7 +7,26 @@ Java JDK (not RE) version 1.8. To check the installed version:
 
 $ java -version
 
-Note for windows users: make sure the install path does not contain spaces. This is required in order to avoid issues when [using Maven](https://maven.apache.org/guides/getting-started/windows-prerequisites.html). Example of an appropriate path for a windows installation
+Note for **Windows** users: make sure the install path does not contain spaces. This is required in order to avoid issues when [using Maven](https://maven.apache.org/guides/getting-started/windows-prerequisites.html). Example of an appropriate path for a Windows installation: `C:\path\to\Java\`
+
+##Native [Java Advanced Imaging API (JAI)](http://www.oracle.com/technetwork/java/javase/tech/jai-142803.html)
+
+It's important to install the official Oracle JDK with [native JAI](https://geoserver.geo-solutions.it/edu/en/install_run/jai_io_install.html)
+
+**TODO**
+*Verify whether ImageIO is optional/useful/mandatory*
+
+## NGINX (optional under Windows)
+
+Download and install [NGINX](https://nginx.org/en/). Here are the instructions for [installing NGINX on Ubuntu](https://www.digitalocean.com/community/tutorials/how-to-install-nginx-on-ubuntu-16-04)
+
+## Tomcat
+
+- Download and Install [Tomcat](http://tomcat.apache.org/) **[version 8.5](https://tomcat.apache.org/download-80.cgi)**
+
+## Wget (optional under Windows)
+
+- Download and install [wget](https://www.gnu.org/software/wget/)
 
 ## Maven
 
@@ -18,17 +37,13 @@ Note for windows users: make sure the install path does not contain spaces. This
 
 [Download](https://git-scm.com/downloads) and install [git](https://git-scm.com/)
 
-## Tomcat
-
-- Download and Install [Tomcat](http://tomcat.apache.org/) **[version 8.5](https://tomcat.apache.org/download-80.cgi)**
-
 ## MongoDB
 
 - [install](https://docs.mongodb.com/manual/administration/install-community/) [MongoDB](https://www.mongodb.com/)
 - install a MongoDB client, suggested: [robomongo](https://robomongo.org/)
    - [robo 3T](https://robomongo.org/download) (lighter)
    - [Studio 3T](https://studio3t.com/knowledge-base/articles/installation/) (complete mongoDB IDE, requires License)
-
+   
 ## Rabbit MQ
 
 - [install](https://www.erlang.org/downloads) the [Erlang](https://www.erlang.org/) programming language. Make sure to install it using an administrator account
@@ -46,4 +61,5 @@ Note for windows users: make sure the install path does not contain spaces. This
 
 ----
 
-You're done! See setup.md to continue
+You're done!
+Proceed to [install snap software packages](./snap.md) or go back to [readme.md](./readme.md)
