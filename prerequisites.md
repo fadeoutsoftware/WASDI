@@ -1,6 +1,7 @@
 ﻿
-> **Caveat:** still pretty raw, and oriented mostly to a linux server
+> **Caveat:** still pretty raw, and oriented mostly to a linux server running Ubuntu 16.04 LTS
 
+**TODO** *check with newer versions of Ubuntu*
 **TODO** *refine for windows*
 
 ----
@@ -10,11 +11,20 @@
 
 ## Java
 
-Java JDK (not RE) version 1.8. To check the installed version:
+**TODO** *check with newer versions, i.e., 1.11*
 
+[Install](https://openjdk.java.net/install/index.html) [Java](https://openjdk.java.net/) JDK (not just RE) **version 1.8**
+
+- linux: openjdk-8-jdk
+  - apt based: `# apt install openjdk-8-jdk`
+- Windows: [Oracle Java](https://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html). (pick the version with the odd number, [called CPU, e.g. 8u191, not 8u192](https://www.oracle.com/technetwork/java/javase/cpu-psu-explained-2331472.html))
+To check the installed version:
+
+```
 $ java -version
+```
 
-Note for **Windows** users: make sure the install path does not contain spaces. This is required in order to avoid issues when [using Maven](https://maven.apache.org/guides/getting-started/windows-prerequisites.html). Example of an appropriate path for a Windows installation: `C:\path\to\Java\`
+Note for **Windows** users: make sure the JDK install path does not contain spaces. This is required in order to avoid issues when [using Maven](https://maven.apache.org/guides/getting-started/windows-prerequisites.html). Example of an appropriate path for a Windows installation: `C:\path\to\Java\someVersion`
 
 **TODO**
 *check whether the no-space-issue is a real issue and how to overcome it (maybe w/ a shortcut? a softlink from the git bash?)*
