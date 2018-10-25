@@ -36,6 +36,7 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.jackson2.JacksonFactory;
+import com.sun.javafx.webkit.UtilitiesImpl;
 
 
 @Path("/auth")
@@ -411,8 +412,9 @@ public class AuthResource {
 		{
 			try
 			{
+				oUser.setPassword("a");
 				//Check User properties
-				if(Utils.isNullOrEmpty(oUser.getUserId()))
+				if(Utils.isNullOrEmpty(oUser.getUserId()) || Utils.isValidEmail(oUser.getUserId()) == false )
 				{
 					return oResult;
 				}
@@ -424,7 +426,7 @@ public class AuthResource {
 				{
 					return oResult;
 				}
-				if(Utils.isNullOrEmpty(oUser.getPassword()))
+				if(Utils.isNullOrEmpty(oUser.getPassword()) || oUser.getPassword().length() < 8)
 				{
 					return oResult;
 				}

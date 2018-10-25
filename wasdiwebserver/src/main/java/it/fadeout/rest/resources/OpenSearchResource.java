@@ -132,10 +132,32 @@ public class OpenSearchResource {
 		for (String sProvider : asProviders) {
 			String sUser = m_oServletConfig.getInitParameter(sProvider+".OSUser");
 			String sPassword = m_oServletConfig.getInitParameter(sProvider+".OSPwd");
+			
+			String sOffset = null;
+			String sLimit = null;
+			String sSortedBy = null;
+			String sOrder = null;
+			if(sProvider.equals("SENTINEL") )
+			{
+				sOffset="0";
+				sLimit = "1";
+				sSortedBy = "ingestiondate";
+				sOrder = "asc";
+			}
 
-			QueryExecutor oExecutor = QueryExecutor.newInstance(sProvider, sUser, sPassword, null, null, null, null);
+			//QueryExecutor oExecutor = QueryExecutor.newInstance(sProvider, sUser, sPassword, null, null, null, null);
+			QueryExecutor oExecutor = QueryExecutor.newInstance(sProvider, sUser, sPassword,sOffset, sLimit, sSortedBy, sOrder);
 			try {
-				pMap.put(sProvider, oExecutor.executeCount(sQuery));
+				Integer iTotalResults = 0;
+				if(sProvider.equals("SENTINEL") )
+				{
+					iTotalResults = oExecutor.executeCountSentinel(sQuery);
+				}
+				else
+				{
+					iTotalResults = oExecutor.executeCount(sQuery);
+				}
+				pMap.put(sProvider, iTotalResults);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -165,7 +187,17 @@ public class OpenSearchResource {
 			if (sSortedBy == null) sSortedBy = "ingestiondate";
 			if (sOrder == null) sOrder = "asc";
 			
-			Map<String, Integer> counterMap = getQueryCounters(sQuery, sProviders);			
+			Map<String, Integer> counterMap = null;
+			try{
+				counterMap = getQueryCounters(sQuery, sProviders);	
+				//TEST
+				//counterMap = new HashMap();
+				//counterMap.put("SENTINEL", 10);
+			}catch(Exception e)
+			{
+				e.printStackTrace();
+			}
+				
 			
 			ArrayList<QueryResultViewModel> aoResults = new ArrayList<QueryResultViewModel>();
 			
