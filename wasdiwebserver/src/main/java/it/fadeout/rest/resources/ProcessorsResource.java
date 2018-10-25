@@ -31,7 +31,7 @@ import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.business.Processor;
-//import wasdi.shared.business.ProcessorTypes;
+import wasdi.shared.business.ProcessorTypes;
 import wasdi.shared.business.User;
 import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.data.ProcessorRepository;
