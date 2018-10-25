@@ -43,7 +43,10 @@ public class QueryExecutorSENTINEL extends QueryExecutor {
 
 	@Override
 	protected String getCountUrl(String sQuery) {
-		return "https://scihub.copernicus.eu/dhus/api/stub/products/count?filter=" + sQuery;
+		//return "https://scihub.copernicus.eu/dhus/api/stub/products/count?filter=" + sQuery;
+		//return "https://scihub.copernicus.eu/dhus/odata/v1/Products/$count?$filter=" + sQuery;
+		return "https://scihub.copernicus.eu/dhus/search?q=" + sQuery; 
+		//return "https://scihub.copernicus.eu/dhus/odata/v1/Products/$count?$filter=startswith(Name,'S2')"; 
 	}
 	
 }
