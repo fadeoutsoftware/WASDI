@@ -11,6 +11,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Stream;
 import static org.apache.commons.lang.SystemUtils.IS_OS_UNIX;
+import org.apache.commons.validator.routines.EmailValidator;
 
 /**
  * Created by p.campanella on 14/10/2016.
@@ -117,6 +118,14 @@ public class Utils {
                 e.printStackTrace();
             }
         }
+    }
+    
+    public static boolean isValidEmail(String sEmail)
+    {
+    	
+    	boolean bIsValid = EmailValidator.getInstance().isValid(sEmail);
+		return bIsValid;
+    	
     }
     
 	public static String GetFormatDate(Date oDate){
