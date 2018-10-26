@@ -2,6 +2,10 @@
 
 Web Advanced Space Developer Interface
 
+>**TODO** *instructions for developers (how to setup)*
+>**TODO** *instructions for sysadmi (how to deploy)*
+
+
 ## Getting started
 
 1. install [prerequisites](./prerequisites.md)
