@@ -73,7 +73,9 @@ public class AuthResource {
 			
 			//User oWasdiUser = oUserRepository.Login(oLoginInfo.getUserId(), oLoginInfo.getUserPassword());
 			User oWasdiUser = oUserRepository.GetUser(oLoginInfo.getUserId());
-
+			if( oWasdiUser == null ) {
+				return oUserVM;
+			}
 			String sToken = oWasdiUser.getPassword();
 			Boolean bIsLogged = m_oPasswordAuthentication.authenticate(oLoginInfo.getUserPassword().toCharArray(), sToken);
 			if (bIsLogged == true) {
@@ -412,7 +414,6 @@ public class AuthResource {
 		{
 			try
 			{
-				oUser.setPassword("a");
 				//Check User properties
 				if(Utils.isNullOrEmpty(oUser.getUserId()) || Utils.isValidEmail(oUser.getUserId()) == false )
 				{
