@@ -19,6 +19,8 @@ aPath/ $ cd snap
 ```
 aPath/snap/ $ git clone https://github.com/senbox-org/snap-engine
 aPath/snap/ $ cd snap-engine
+aPath/snap/ $ git fetch --all
+aPath/snap/ $ git checkout tags/6.0.0
 aPath/snap/snap-engine/ $ mvn clean install
 ```
 
@@ -27,6 +29,8 @@ aPath/snap/snap-engine/ $ mvn clean install
 ```
 aPath/snap/ $ git clone https://github.com/senbox-org/snap-desktop
 aPath/snap/ $ cd snap-desktop
+aPath/snap/ $ git fetch --all
+aPath/snap/ $ git checkout tags/6.0.0
 aPath/snap/snap-desktop/ $ mvn clean install
 ```
 
@@ -47,6 +51,8 @@ Then build the projects in the same order. The general procedure is:
 
 ```
 aPath/snap/ $ cd s#tbx
+aPath/snap/ $ git fetch --all
+aPath/snap/ $ git checkout tags/6.0.0
 aPath/snap/s#tbx/ $ mvn clean install
 
 ```
@@ -69,10 +75,17 @@ Finally, install the PROBA-V toolbox:
 ```
 aPath/snap/ $ git clone https://github.com/senbox-org/probavbox.git
 aPath/snap/ $ cd probavox
+aPath/snap/ $ git fetch --all
+aPath/snap/ $ git checkout tags/2.0.0
 aPath/snap/probavox/ $ mvn clean install
 ```
 
 [back to PROBA-V toolbox](#proba-v-toolbox)
+
+## Snap desktop tool
+
+Download and install the [SNAP desktop tool](http://step.esa.int/main/download/)
+
 
 ----
 
