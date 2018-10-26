@@ -29,6 +29,7 @@ import wasdi.shared.data.UserRepository;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.LoginInfo;
 import wasdi.shared.viewmodels.PrimitiveResult;
+import wasdi.shared.viewmodels.RegistrationInfoViewModel;
 import wasdi.shared.viewmodels.UserViewModel;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken.Payload;
@@ -405,7 +406,7 @@ public class AuthResource {
 	@Path("/signin")
 	@Produces({"application/json", "text/xml"})
 	/******************REGISTRATION USER*******************/
-	public PrimitiveResult RegistrationUser(User oUser) 
+	public PrimitiveResult RegistrationUser(RegistrationInfoViewModel oUser) 
 	{	
 		Wasdi.DebugLog("AuthService.RegistrationUser"  );
 		PrimitiveResult oResult = new PrimitiveResult();
