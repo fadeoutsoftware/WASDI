@@ -1,4 +1,12 @@
-﻿
+﻿----
+
+** warning - work in progress **
+
+*the following instructions are not reliable yet, use them at your own risk*
+
+----
+
+
 > **Caveat:** still pretty raw, and oriented mostly to a linux server running Ubuntu 16.04 LTS
 
 **TODO** *check with newer versions of Ubuntu*

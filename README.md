@@ -2,6 +2,15 @@
 
 Web Advanced Space Developer Interface
 
+----
+
+** warning - work in progress **
+
+*the following instructions are not reliable yet, use them at your own risk*
+
+----
+
+
 >**TODO** *instructions for developers (how to setup)*
 >**TODO** *instructions for sysadmi (how to deploy)*
 

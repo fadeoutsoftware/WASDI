@@ -1,3 +1,11 @@
+----
+
+** warning - work in progress **
+
+*the following instructions are not reliable, use them at your own risk*
+
+----
+
 
 Make sure to fulfill the [prerequisites](./prerequisites.md) before continuing.
 
