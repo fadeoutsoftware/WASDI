@@ -1204,7 +1204,12 @@ public class ProcessingResources {
 				return oResult;
 			}
 
-			String sPath = m_oServletConfig.getInitParameter("SerializationPath") + oProcess.getProcessObjId();
+			String sPath = m_oServletConfig.getInitParameter("SerializationPath");
+			
+			if (!(sPath.endsWith("\\") || sPath.endsWith("/"))){
+				sPath += "/";
+			}
+			sPath = sPath + oProcess.getProcessObjId();
 
 			
 			OperatorParameter oParameter = GetParameter(operation); 

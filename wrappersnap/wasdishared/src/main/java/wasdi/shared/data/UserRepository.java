@@ -1,9 +1,19 @@
 package wasdi.shared.data;
 
+import java.io.IOException;
+import java.util.ArrayList;
+
 import org.bson.Document;
+import org.bson.conversions.Bson;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.mongodb.Block;
+import com.mongodb.client.FindIterable;
+import com.mongodb.client.MongoCollection;
 import com.mongodb.client.result.DeleteResult;
+import com.mongodb.client.result.UpdateResult;
 
+import wasdi.shared.business.Catalog;
 import wasdi.shared.business.User;
 
 /**
@@ -46,7 +56,7 @@ public class UserRepository extends  MongoRepository{
 
         return  null;
     }
-
+    
     public User Login(String sUserId, String sPassword) {
         try {
             User oUser = GetUser(sUserId);
@@ -92,6 +102,7 @@ public class UserRepository extends  MongoRepository{
 
         return  null;
     }
+    
     public boolean DeleteUser(String sUserId) {
 
         try {
@@ -112,4 +123,68 @@ public class UserRepository extends  MongoRepository{
 
         return  false;
     }
+   
+    public boolean UpdateUser (User oUser)
+    {
+    	String sJSON;
+		try 
+		{
+			sJSON = s_oMapper.writeValueAsString(oUser);
+			Bson oFilter = new Document("userId", oUser.getUserId());
+		    Bson oUpdateOperationDocument = new Document("$set", new Document(Document.parse(sJSON)));
+            UpdateResult oResult = getCollection("users").updateOne(oFilter, oUpdateOperationDocument);
+            if (oResult.getModifiedCount()==1) return  true;
+
+		} 
+		catch (JsonProcessingException e) 
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		 return  false;
+    }
+    
+    
+    public ArrayList<User> getAllUsers ()
+    {
+    	FindIterable<Document> oDocuments = getCollection("users").find();
+        final ArrayList<User> aoReturnList = new ArrayList<User>();
+
+    	oDocuments.forEach(new Block<Document>() 
+    	{
+    		public void apply(Document document) 
+    		{
+    			String sJSON = document.toJson();
+    			User oUser = null;
+    			try {
+    				oUser = s_oMapper.readValue(sJSON,User.class);
+    				aoReturnList.add(oUser);
+    			} catch (IOException e) {
+    				e.printStackTrace();
+    			}
+
+    		}
+          });
+    	
+    	return aoReturnList;
+    }
+    
+    public void UpdateAllUsers (ArrayList<User> aoUsers)
+    {
+    	try
+    	{
+    		for (int i = 0; i < aoUsers.size(); i++) 
+    		{
+    			User oUser = aoUsers.get(i);	
+    			UpdateUser(oUser);
+    		}
+    	}
+    	catch(Exception oEx)
+    	{
+    		oEx.printStackTrace();
+    	}
+ 	
+    }
+    
+
 }
