@@ -41,7 +41,7 @@ import com.sun.javafx.webkit.UtilitiesImpl;
 
 @Path("/auth")
 public class AuthResource {
-	PasswordAuthentication oPasswordAuthentication = new PasswordAuthentication();
+	PasswordAuthentication m_oPasswordAuthentication = new PasswordAuthentication();
 	
 	@Context
 	ServletConfig m_oServletConfig;
@@ -75,7 +75,7 @@ public class AuthResource {
 			User oWasdiUser = oUserRepository.GetUser(oLoginInfo.getUserId());
 
 			String sToken = oWasdiUser.getPassword();
-			Boolean bIsLogged = oPasswordAuthentication.authenticate(oLoginInfo.getUserPassword().toCharArray(), sToken);
+			Boolean bIsLogged = m_oPasswordAuthentication.authenticate(oLoginInfo.getUserPassword().toCharArray(), sToken);
 			if (bIsLogged == true) {
 				
 				//get all expired sessions
@@ -445,7 +445,7 @@ public class AuthResource {
 					oNewUser.setEmail(oUser.getUserId());
 					oNewUser.setName(oUser.getName());
 					oNewUser.setSurname(oUser.getSurname());
-					oNewUser.setPassword(oPasswordAuthentication.hash(oUser.getPassword().toCharArray()));
+					oNewUser.setPassword(m_oPasswordAuthentication.hash(oUser.getPassword().toCharArray()));
 					if(oUserRepository.InsertUser(oNewUser) == true)
 					{
 						//the user is stored in DB
@@ -481,7 +481,7 @@ public class AuthResource {
 			User oUser = aoUsers.get(i);
 			if( oUser.getAuthServiceProvider() == null || oUser.getAuthServiceProvider().contains("google") == false)
 			{
-				oUser.setPassword(oPasswordAuthentication.hash(oUser.getPassword().toCharArray()));
+				oUser.setPassword(m_oPasswordAuthentication.hash(oUser.getPassword().toCharArray()));
 			}
 			
 		}
