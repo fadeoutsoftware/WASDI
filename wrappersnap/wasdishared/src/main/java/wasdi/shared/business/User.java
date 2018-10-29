@@ -26,7 +26,7 @@ public class User {
      * Password
      */
     private String password;
-    private Boolean firstAccessValidated;
+    private Boolean validAfterFirstAccess;
     private String firstAccessUUID;
     private String authServiceProvider;
     private String email;
@@ -71,12 +71,12 @@ public class User {
         this.password = password;
     }
 
-	public Boolean getFirstAccessValidated() {
-		return firstAccessValidated;
+	public Boolean getValidAfterFirstAccess() {
+		return validAfterFirstAccess;
 	}
 
-	public void setFirstAccessValidated(Boolean firstAccessValidated) {
-		this.firstAccessValidated = firstAccessValidated;
+	public void setValidAfterFirstAccess(Boolean validAfterFirstAccess) {
+		this.validAfterFirstAccess = validAfterFirstAccess;
 	}
 
 	public String getFirstAccessUUID() {

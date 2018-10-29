@@ -105,6 +105,12 @@ public final class PasswordAuthentication
 	      zero |= hash[salt.length + idx] ^ check[idx];
 	    return zero == 0;
 	  }
+	  
+	  public boolean authenticate(String sPassword, String token) {
+		  return authenticate(sPassword.toCharArray(), token);
+	  }
+	  
+	  
 
 	  private static byte[] pbkdf2(char[] password, byte[] salt, int iterations)
 	  {
