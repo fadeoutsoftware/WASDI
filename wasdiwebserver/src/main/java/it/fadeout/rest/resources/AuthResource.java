@@ -27,6 +27,7 @@ import wasdi.shared.business.UserSession;
 import wasdi.shared.data.SessionRepository;
 import wasdi.shared.data.UserRepository;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.viewmodels.ChangeUserPasswordViewModel;
 import wasdi.shared.viewmodels.LoginInfo;
 import wasdi.shared.viewmodels.PrimitiveResult;
 import wasdi.shared.viewmodels.RegistrationInfoViewModel;
@@ -42,6 +43,9 @@ import com.sun.javafx.webkit.UtilitiesImpl;
 
 @Path("/auth")
 public class AuthResource {
+	
+	private static int MINPASSWORDLENGTH = 8;
+	
 	PasswordAuthentication m_oPasswordAuthentication = new PasswordAuthentication();
 	
 	@Context
@@ -406,35 +410,35 @@ public class AuthResource {
 	@Path("/signin")
 	@Produces({"application/json", "text/xml"})
 	/******************REGISTRATION USER*******************/
-	public PrimitiveResult RegistrationUser(RegistrationInfoViewModel oUser) 
+	public PrimitiveResult RegistrationUser(RegistrationInfoViewModel oUserViewModel) 
 	{	
 		Wasdi.DebugLog("AuthService.RegistrationUser"  );
 		PrimitiveResult oResult = new PrimitiveResult();
 		oResult.setBoolValue(false);
-		if(oUser != null)
+		if(oUserViewModel != null)
 		{
 			try
 			{
 				//Check User properties
-				if(Utils.isNullOrEmpty(oUser.getUserId()) || Utils.isValidEmail(oUser.getUserId()) == false )
+				if(Utils.isNullOrEmpty(oUserViewModel.getUserId()) || Utils.isValidEmail(oUserViewModel.getUserId()) == false )
 				{
 					return oResult;
 				}
-				if(Utils.isNullOrEmpty(oUser.getName()))
+				if(Utils.isNullOrEmpty(oUserViewModel.getName()))
 				{
 					return oResult;
 				}
-				if(Utils.isNullOrEmpty(oUser.getSurname()))
+				if(Utils.isNullOrEmpty(oUserViewModel.getSurname()))
 				{
 					return oResult;
 				}
-				if(Utils.isNullOrEmpty(oUser.getPassword()) || oUser.getPassword().length() < 8)
+				if(Utils.isNullOrEmpty(oUserViewModel.getPassword()) || oUserViewModel.getPassword().length() < MINPASSWORDLENGTH)
 				{
 					return oResult;
 				}
 				
 				UserRepository oUserRepository = new UserRepository();
-				User oWasdiUser = oUserRepository.GetUser(oUser.getUserId());
+				User oWasdiUser = oUserRepository.GetUser(oUserViewModel.getUserId());
 				
 				//if oWasdiUser is a new user -> oWasdiUser == null
 				if(oWasdiUser == null)
@@ -443,11 +447,11 @@ public class AuthResource {
 					String sAuthProvider = "wasdi";
 					User oNewUser = new User();
 					oNewUser.setAuthServiceProvider(sAuthProvider);
-					oNewUser.setUserId(oUser.getUserId());
-					oNewUser.setEmail(oUser.getUserId());
-					oNewUser.setName(oUser.getName());
-					oNewUser.setSurname(oUser.getSurname());
-					oNewUser.setPassword(m_oPasswordAuthentication.hash(oUser.getPassword().toCharArray()));
+					oNewUser.setUserId(oUserViewModel.getUserId());
+					oNewUser.setEmail(oUserViewModel.getUserId());
+					oNewUser.setName(oUserViewModel.getName());
+					oNewUser.setSurname(oUserViewModel.getSurname());
+					oNewUser.setPassword(m_oPasswordAuthentication.hash(oUserViewModel.getPassword().toCharArray()));
 					if(oUserRepository.InsertUser(oNewUser) == true)
 					{
 						//the user is stored in DB
@@ -467,6 +471,76 @@ public class AuthResource {
 		
 		return oResult;
 	}
+	
+/*
+
+@POST
+	@Path("/signin")
+	@Produces({"application/json", "text/xml"})
+	public PrimitiveResult RegistrationUser(RegistrationInfoViewModel oUser) 
+	public PrimitiveResult ChangeUserName(@HeaderParam("x-session-token") String sSessionId, ChangeUserPasswordViewModel oChPasswViewModel) {
+*/	
+	
+	
+	@POST
+	@Path("/changePassword")
+	@Produces({"application/json", "text/xml"})
+	public PrimitiveResult ChangeUserPassword(@HeaderParam("x-session-token") String sSessionId,
+			ChangeUserPasswordViewModel oChPasswViewModel) {
+		
+		Wasdi.DebugLog("AuthService.ChangeUserPassword"  );
+		PrimitiveResult oResult = new PrimitiveResult();
+		oResult.setBoolValue(false);
+		
+		//input validation
+		//(just oChPasswViewModel, sSessionId validity is automatically checked later on)
+		if(null == oChPasswViewModel) {
+			System.err.println("AuthService.ChangeUserPassword: null ChangeUserPasswordViewModel");
+			return oResult;
+		}
+		if(null == oChPasswViewModel.getNewPassword() ) {
+			System.err.println("AuthService.ChangeUserPassword: null new password!");
+			return oResult;
+		}
+		if(null == oChPasswViewModel.getCurrentPassword() ) {
+			System.err.println("AuthService.ChangeUserPassword: null current password!");
+			return oResult;
+		}
+		if( oChPasswViewModel.getNewPassword().length() < MINPASSWORDLENGTH ) {
+			System.err.println("AuthService.ChangeUserPassword: password is too short");
+			return oResult;
+		}
+		
+		
+		try {
+			//validity is automatically checked		
+			User oUserId = Wasdi.GetUserFromSession(sSessionId);
+			if(null == oUserId) {
+				//Maybe the user didn't exist, or failed for some other reasons
+				System.err.print("Null user from session id (does the user exist?)");
+				return oResult;
+			}
+	
+			String sOldPassword = oUserId.getPassword();
+			Boolean bPasswordCorrect = m_oPasswordAuthentication.authenticate(oChPasswViewModel.getCurrentPassword().toCharArray(), sOldPassword);
+			
+			if( !bPasswordCorrect ) {
+				System.err.println("Wrong current password for user " + oUserId);
+				return oResult;
+			} else {
+				oUserId.setPassword(m_oPasswordAuthentication.hash(oChPasswViewModel.getNewPassword().toCharArray()));
+				UserRepository oUR = new UserRepository();
+				oUR.UpdateUser(oUserId);
+				oResult.setBoolValue(true);
+			}
+		} catch(Exception e) {
+			System.err.println("AuthService.ChangeUserPassword: Exception");
+			e.printStackTrace();
+		}
+		
+		return oResult;
+		
+	} 
 	
 	private void updatePasswordInDB(UserRepository oUserRepository)
 	{
