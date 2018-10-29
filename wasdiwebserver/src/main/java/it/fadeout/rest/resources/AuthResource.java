@@ -34,15 +34,12 @@ import wasdi.shared.viewmodels.LoginInfo;
 import wasdi.shared.viewmodels.PrimitiveResult;
 import wasdi.shared.viewmodels.RegistrationInfoViewModel;
 import wasdi.shared.viewmodels.UserViewModel;
-import wasdi.shared.utils.DButils;
-
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken.Payload;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.jackson2.JacksonFactory;
-import com.sun.javafx.webkit.UtilitiesImpl;
 
 
 @Path("/auth")
@@ -417,7 +414,6 @@ public class AuthResource {
 	@POST
 	@Path("/signin")
 	@Produces({"application/json", "text/xml"})
-	/******************USER REGISTRATION*******************/
 	public PrimitiveResult userRegistration(RegistrationInfoViewModel oUserViewModel) 
 	{	
 		Wasdi.DebugLog("AuthService.RegistrationUser"  );
