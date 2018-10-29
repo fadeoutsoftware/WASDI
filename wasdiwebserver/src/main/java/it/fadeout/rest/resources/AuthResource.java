@@ -13,6 +13,7 @@ import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
@@ -46,8 +47,6 @@ import com.sun.javafx.webkit.UtilitiesImpl;
 
 @Path("/auth")
 public class AuthResource {
-	
-	private static int MINPASSWORDLENGTH = 8;
 	
 	PasswordAuthentication m_oPasswordAuthentication = new PasswordAuthentication();
 	
@@ -441,8 +440,7 @@ public class AuthResource {
 				{
 					return oResult;
 				}
-				if(Utils.isNullOrEmpty(oUserViewModel.getPassword()) || oUserViewModel.getPassword().length() < MINPASSWORDLENGTH)
-				{
+				if(Utils.validateUserPassword(oUserViewModel.getPassword())){
 					return oResult;
 				}
 				
@@ -560,7 +558,7 @@ public class AuthResource {
 			System.err.println(oResult.getStringValue());
 			return oResult;
 		}
-		if( oChPasswViewModel.getNewPassword().length() < MINPASSWORDLENGTH ) {
+		if( Utils.validateUserPassword(oChPasswViewModel.getNewPassword())) {
 			oResult.setStringValue("AuthService.ChangeUserPassword: password is too short");
 			System.err.println(oResult.getStringValue());
 			return oResult;
@@ -646,7 +644,7 @@ public class AuthResource {
 		oMessage.setMessage(sMessage);
 		oAPI.sendMailDirect(oUser.getUserId(), oMessage);
 	}
-	
+
 	private String buildRegistrationLink(User oUser) {
 		String sResult = "";
 		
@@ -657,14 +655,32 @@ public class AuthResource {
 		String appPrefix = "/wasdiwebserver";
 		String restPrefix = "/rest";
 		String apiPath = "/auth";
-		String apiName = "/validateRegistrationToken?";
+		String apiName = "/validateNewUser?";
 		String userId = "user=" + oUser.getUserId();
-		String token = "token=" +oUser.getFirstAccessUUID();
+		String token = "validationCode=" +oUser.getFirstAccessUUID();
 		
 		sResult = protocol + domain + appPrefix + restPrefix + apiPath + apiName + userId + "&" + token;
 		
 		return sResult;
 	}
+	
+	@GET
+	@Path("/validateNewUser")
+	@Produces({"application/xml", "application/json", "text/xml"})
+	public PrimitiveResult validateNewUser(@QueryParam("email") String sUserId, @QueryParam("validationCode") String sToken  ) {
+		
+		PrimitiveResult oResult = new PrimitiveResult();
+		oResult.setBoolValue(false);
+		
+		UserRepository oUserRepo = new UserRepository();
+		
+		if( oUserRepo.validateFirstAccess(sUserId, sToken) ) {
+			oResult.setBoolValue(true);
+		}
+		return oResult;
+	}
+	
+
 
 	private void sendPasswordEmail(String sRecipientEmail, String sAccount, String sPassword) {
 		//send email with new password

@@ -140,4 +140,30 @@ public class Utils {
 		 String pre = ("KMGTPE").charAt(exp-1) + "";
 		 return String.format("%.1f %sB", bytes / Math.pow(unit, exp), pre);
 	}
+	
+	
+	public static Boolean validateUserId(String sUserId) {
+		Boolean res = true;
+		if(null == sUserId) {
+			System.err.println("wasdi.shared.Utils.validateUserId: sUserId is null");
+			res = false;
+		} else if(sUserId.length() < 1) {
+			System.err.println("wasdi.shared.Utils.validateUserId: sUserId is too short (has length: "+sUserId.length() +")");
+			res = false;
+		}
+		return res;
+	}
+	
+	private static int MINPASSWORDLENGTH = 8;
+	public static Boolean validateUserPassword(String sPassword) {
+		Boolean res = true;
+		if(null == sPassword) {
+			System.err.println("wasdi.shared.Utils.validateUserId: sPassword is null");
+			res = false;
+		} else if(sPassword.length() < MINPASSWORDLENGTH) {
+			System.err.println("wasdi.shared.Utils.validateUserId: sPassWord is too short (has length: "+ sPassword.length()+")");
+			res = false;
+		}
+		return res;
+	}
 }
