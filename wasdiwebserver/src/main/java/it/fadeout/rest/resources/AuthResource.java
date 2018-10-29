@@ -66,7 +66,7 @@ public class AuthResource {
 			if (oLoginInfo == null) {
 				return oUserVM;
 			}
-			if (Utils.isNullOrEmpty(oLoginInfo.getUserId())) {
+			if(!Utils.validateUserId(oLoginInfo.getUserId())){
 				return oUserVM;
 			}
 			if (Utils.isNullOrEmpty(oLoginInfo.getUserPassword())) {
@@ -84,8 +84,8 @@ public class AuthResource {
 				return oUserVM;
 			}
 			
-			if(null != oWasdiUser.getFirstAccessValidated()) {
-				if(oWasdiUser.getFirstAccessValidated() ) {
+			if(null != oWasdiUser.getValidAfterFirstAccess()) {
+				if(oWasdiUser.getValidAfterFirstAccess() ) {
 					String sToken = oWasdiUser.getPassword();
 					Boolean bIsLogged = m_oPasswordAuthentication.authenticate(oLoginInfo.getUserPassword().toCharArray(), sToken);
 					if (bIsLogged == true) {
@@ -459,7 +459,7 @@ public class AuthResource {
 					oNewUser.setName(oUserViewModel.getName());
 					oNewUser.setSurname(oUserViewModel.getSurname());
 					oNewUser.setPassword(m_oPasswordAuthentication.hash(oUserViewModel.getPassword().toCharArray()));
-					oNewUser.setFirstAccessValidated(false);
+					oNewUser.setValidAfterFirstAccess(false);
 					oNewUser.setFirstAccessUUID(UUID.randomUUID().toString());
 					if(oUserRepository.InsertUser(oNewUser) == true)
 					{
@@ -483,8 +483,46 @@ public class AuthResource {
 		return oResult;
 	}
 	
-
-	//TODO get api after 
+	
+	@GET
+	@Path("/validateNewUser")
+	@Produces({"application/xml", "application/json", "text/xml"})
+	public PrimitiveResult validateNewUser(@QueryParam("email") String sUserId, @QueryParam("validationCode") String sToken  ) {
+		
+		PrimitiveResult oResult = new PrimitiveResult();
+		oResult.setBoolValue(false);
+		
+		if(!Utils.validateUserId(sUserId)) {
+			return oResult;
+		}
+		if(!Utils.isNullOrEmpty(sToken)) {
+			return oResult;
+		}
+		
+		UserRepository oUserRepo = new UserRepository();
+		User oUser = oUserRepo.GetUser(sUserId);
+		if( null == oUser.getValidAfterFirstAccess()) {
+			System.err.println("AuthResources.validateNewUser: unexpected null first access validation flag");
+			return oResult;
+		} else if(true == oUser.getValidAfterFirstAccess() ) {
+			System.err.println("AuthResources.validateNewUser: unexpected true first access validation flag");
+			return oResult;
+		} else if( false == oUser.getValidAfterFirstAccess() ) {
+			sToken = oUser.getFirstAccessUUID();
+			if(!Utils.isNullOrEmpty(sToken)) {
+				if(sToken.equals(sToken)) {
+					oUser.setValidAfterFirstAccess(true);
+					oUserRepo.UpdateUser(oUser);
+					oResult.setBoolValue(true);
+				} else {
+					System.err.println("AuthResources.validateNewUser: registration token mismatch");
+					return oResult;
+				}
+			}
+		}
+		
+		return oResult;
+	}
 	
 
 @POST
@@ -644,42 +682,20 @@ public class AuthResource {
 		oMessage.setMessage(sMessage);
 		oAPI.sendMailDirect(oUser.getUserId(), oMessage);
 	}
+	
+	
 
 	private String buildRegistrationLink(User oUser) {
 		String sResult = "";
 		
-		//TODO retrieve these strings automatically from the configuration
-		String protocol = "http://";
-		//String protocol = "https://";
-		String domain = "www.wasdi.net";
-		String appPrefix = "/wasdiwebserver";
-		String restPrefix = "/rest";
-		String apiPath = "/auth";
-		String apiName = "/validateNewUser?";
-		String userId = "user=" + oUser.getUserId();
-		String token = "validationCode=" +oUser.getFirstAccessUUID();
+		String sAPIUrl =  m_oServletConfig.getInitParameter("REGISTRATION_API_URL");
+		String sUserId = "user=" + oUser.getUserId();
+		String sToken = "validationCode=" + oUser.getFirstAccessUUID();
 		
-		sResult = protocol + domain + appPrefix + restPrefix + apiPath + apiName + userId + "&" + token;
+		sResult = sAPIUrl + sUserId + "&" + sToken;
 		
 		return sResult;
 	}
-	
-	@GET
-	@Path("/validateNewUser")
-	@Produces({"application/xml", "application/json", "text/xml"})
-	public PrimitiveResult validateNewUser(@QueryParam("email") String sUserId, @QueryParam("validationCode") String sToken  ) {
-		
-		PrimitiveResult oResult = new PrimitiveResult();
-		oResult.setBoolValue(false);
-		
-		UserRepository oUserRepo = new UserRepository();
-		
-		if( oUserRepo.validateFirstAccess(sUserId, sToken) ) {
-			oResult.setBoolValue(true);
-		}
-		return oResult;
-	}
-	
 
 
 	private void sendPasswordEmail(String sRecipientEmail, String sAccount, String sPassword) {

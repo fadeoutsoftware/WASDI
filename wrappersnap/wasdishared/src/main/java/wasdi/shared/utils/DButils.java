@@ -15,13 +15,13 @@ public class DButils {
 	//used for updating users so that the validation flag for the registration is enabled
 	public static void addRegistrationValidationFlag() {
 		UserRepository oUrepo = new UserRepository();
-		ArrayList<User> oExistingUsers = oUrepo.getAllUsers();
-		for (User oUser : oExistingUsers) {
+		ArrayList<User> aoExistingUsers = oUrepo.getAllUsers();
+		for (User oUser : aoExistingUsers) {
 			if( null == oUser.getFirstAccessValidated() ) {
 				oUser.setFirstAccessValidated(true);
 			}
 		}
-		oUrepo.UpdateAllUsers(oExistingUsers);
+		oUrepo.UpdateAllUsers(aoExistingUsers);
 	}
 	
 }
