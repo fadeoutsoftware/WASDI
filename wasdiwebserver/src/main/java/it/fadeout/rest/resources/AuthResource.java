@@ -22,6 +22,7 @@ import it.fadeout.business.PasswordAuthentication;
 import it.fadeout.mercurius.business.Message;
 import it.fadeout.mercurius.client.MercuriusAPI;
 import it.fadeout.sftp.SFTPManager;
+
 import wasdi.shared.business.User;
 import wasdi.shared.business.UserSession;
 import wasdi.shared.data.SessionRepository;
@@ -32,6 +33,8 @@ import wasdi.shared.viewmodels.LoginInfo;
 import wasdi.shared.viewmodels.PrimitiveResult;
 import wasdi.shared.viewmodels.RegistrationInfoViewModel;
 import wasdi.shared.viewmodels.UserViewModel;
+import wasdi.shared.utils.DButils;
+
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken.Payload;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
@@ -101,6 +104,7 @@ public class AuthResource {
 				
 				UserSession oSession = new UserSession();
 				oSession.setUserId(oWasdiUser.getUserId());
+				//TODO check: can two users have the same sessionid?
 				String sSessionId = UUID.randomUUID().toString();
 				oSession.setSessionId(sSessionId);
 				oSession.setLoginDate((double) new Date().getTime());
@@ -112,6 +116,7 @@ public class AuthResource {
 				
 				oUserVM.setSessionId(sSessionId);
 				System.out.println("AuthService.Login: access succeeded");
+				
 			}
 			else 
 			{
@@ -452,7 +457,10 @@ public class AuthResource {
 					oNewUser.setName(oUserViewModel.getName());
 					oNewUser.setSurname(oUserViewModel.getSurname());
 					oNewUser.setPassword(m_oPasswordAuthentication.hash(oUserViewModel.getPassword().toCharArray()));
-					//TODO set signup first validation token
+					//set signup first validation token
+					//TODO generate unique GUID
+					UUID uuid = UUID.randomUUID();
+					oNewUser.setFirstAccessUUID(uuid.toString());
 					//TODO send link via email to the user
 					if(oUserRepository.InsertUser(oNewUser) == true)
 					{
