@@ -632,14 +632,7 @@ public class AuthResource {
 		return oResult;
 		
 	} 
-	
-	private void updatePasswordInDB(UserRepository oUserRepository)
-	{
-		//update password
-		ArrayList<User> aoUsers = oUserRepository.getAllUsers();
-		aoUsers = UpdateHashUsersPassword(aoUsers);
-		oUserRepository.UpdateAllUsers(aoUsers);
-	}
+
 	
 	private ArrayList<User> UpdateHashUsersPassword(ArrayList<User> aoUsers)
 	{
