@@ -84,52 +84,56 @@ public class AuthResource {
 			if( oWasdiUser == null ) {
 				return oUserVM;
 			}
-			String sToken = oWasdiUser.getPassword();
-			Boolean bIsLogged = m_oPasswordAuthentication.authenticate(oLoginInfo.getUserPassword().toCharArray(), sToken);
-			if (bIsLogged == true) {
-				
-				//get all expired sessions
-				SessionRepository oSessionRepository = new SessionRepository();
-				List<UserSession> aoEspiredSessions = oSessionRepository.GetAllExpiredSessions(oWasdiUser.getUserId());
-				for (UserSession oUserSession : aoEspiredSessions) {
-					//delete data base session
-					if (!oSessionRepository.DeleteSession(oUserSession)) {
-						System.out.println("AuthService.Login: Error deleting session.");
-					}
+			
+			if(null != oWasdiUser.getFirstAccessValidated()) {
+				if(oWasdiUser.getFirstAccessValidated() ) {
+					String sToken = oWasdiUser.getPassword();
+					Boolean bIsLogged = m_oPasswordAuthentication.authenticate(oLoginInfo.getUserPassword().toCharArray(), sToken);
+					if (bIsLogged == true) {
+						
+						//get all expired sessions
+						SessionRepository oSessionRepository = new SessionRepository();
+						List<UserSession> aoEspiredSessions = oSessionRepository.GetAllExpiredSessions(oWasdiUser.getUserId());
+						for (UserSession oUserSession : aoEspiredSessions) {
+							//delete data base session
+							if (!oSessionRepository.DeleteSession(oUserSession)) {
+								System.out.println("AuthService.Login: Error deleting session.");
+							}
+						}
+						
+						oUserVM.setName(oWasdiUser.getName());
+						oUserVM.setSurname(oWasdiUser.getSurname());
+						oUserVM.setUserId(oWasdiUser.getUserId());
+						
+						UserSession oSession = new UserSession();
+						oSession.setUserId(oWasdiUser.getUserId());
+						//TODO check: can two users have the same sessionid?
+						String sSessionId = UUID.randomUUID().toString();
+						oSession.setSessionId(sSessionId);
+						oSession.setLoginDate((double) new Date().getTime());
+						oSession.setLastTouch((double) new Date().getTime());
+						
+						Boolean bRet = oSessionRepository.InsertSession(oSession);
+						if (!bRet)
+							return oUserVM;
+						
+						oUserVM.setSessionId(sSessionId);
+						System.out.println("AuthService.Login: access succeeded");
+					} else {
+						System.out.println("AuthService.Login: access failed");
+					}	
+				} else {
+					System.err.println("AuthService.Login: registration not validated yet");
 				}
-				
-				oUserVM.setName(oWasdiUser.getName());
-				oUserVM.setSurname(oWasdiUser.getSurname());
-				oUserVM.setUserId(oWasdiUser.getUserId());
-				
-				UserSession oSession = new UserSession();
-				oSession.setUserId(oWasdiUser.getUserId());
-				//TODO check: can two users have the same sessionid?
-				String sSessionId = UUID.randomUUID().toString();
-				oSession.setSessionId(sSessionId);
-				oSession.setLoginDate((double) new Date().getTime());
-				oSession.setLastTouch((double) new Date().getTime());
-				
-				Boolean bRet = oSessionRepository.InsertSession(oSession);
-				if (!bRet)
-					return oUserVM;
-				
-				oUserVM.setSessionId(sSessionId);
-				System.out.println("AuthService.Login: access succeeded");
-				
+				System.err.println("AuthService.Login: registration flag is null");
 			}
-			else 
-			{
-				System.out.println("AuthService.Login: access failed");
-			}		
+				
 		}
 		catch (Exception oEx) {
 			System.out.println("AuthService.Login: Error");
 			oEx.printStackTrace();
 			
 		}
-		
-
 		
 		return oUserVM;
 	}
