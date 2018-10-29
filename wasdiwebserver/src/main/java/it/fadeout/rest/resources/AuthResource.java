@@ -472,14 +472,50 @@ public class AuthResource {
 		return oResult;
 	}
 	
-/*
+
 
 @POST
 	@Path("/signin")
 	@Produces({"application/json", "text/xml"})
-	public PrimitiveResult RegistrationUser(RegistrationInfoViewModel oUser) 
-	public PrimitiveResult ChangeUserName(@HeaderParam("x-session-token") String sSessionId, ChangeUserPasswordViewModel oChPasswViewModel) {
-*/	
+	public PrimitiveResult ChangeUserName(@HeaderParam("x-session-token") String sSessionId, String sNewName) {
+		Wasdi.DebugLog("AuthService.ChangeUserPassword"  );
+		PrimitiveResult oResult = new PrimitiveResult();
+		oResult.setBoolValue(false);
+		//note: sSessionId validity is automatically checked later
+		//MAYBE: refactor: method for validating user name
+		if(null == sNewName ) {
+			oResult.setStringValue("new name is null");
+			System.err.println(oResult.getStringValue());
+			return oResult;
+		}
+		if(sNewName.length() < 1) {
+			oResult.setStringValue("new name is too short");
+			System.err.println(oResult.getStringValue());
+			return oResult;
+		}
+		
+		try {
+			//validity is automatically checked		
+			User oUserId = Wasdi.GetUserFromSession(sSessionId);
+			if(null == oUserId) {
+				//Maybe the user didn't exist, or failed for some other reasons
+				System.err.print("Null user from session id (does the user exist?)");
+				return oResult;
+			}
+	
+			oUserId.setName(sNewName);
+			UserRepository oUR = new UserRepository();
+			oUR.UpdateUser(oUserId);
+			oResult.setBoolValue(true);
+			
+		} catch(Exception e) {
+			System.err.println("AuthService.ChangeUserPassword: Exception");
+			e.printStackTrace();
+		}
+		
+		return oResult;
+	}
+
 	
 	
 	@POST
@@ -495,19 +531,23 @@ public class AuthResource {
 		//input validation
 		//(just oChPasswViewModel, sSessionId validity is automatically checked later on)
 		if(null == oChPasswViewModel) {
-			System.err.println("AuthService.ChangeUserPassword: null ChangeUserPasswordViewModel");
+			oResult.setStringValue("AuthService.ChangeUserPassword: null ChangeUserPasswordViewModel");
+			System.err.println(oResult.getStringValue());
 			return oResult;
 		}
 		if(null == oChPasswViewModel.getNewPassword() ) {
-			System.err.println("AuthService.ChangeUserPassword: null new password!");
+			oResult.setStringValue("AuthService.ChangeUserPassword: null new password!");
+			System.err.println(oResult.getStringValue());
 			return oResult;
 		}
 		if(null == oChPasswViewModel.getCurrentPassword() ) {
-			System.err.println("AuthService.ChangeUserPassword: null current password!");
+			oResult.setStringValue("AuthService.ChangeUserPassword: null current password!");
+			System.err.println(oResult.getStringValue());
 			return oResult;
 		}
 		if( oChPasswViewModel.getNewPassword().length() < MINPASSWORDLENGTH ) {
-			System.err.println("AuthService.ChangeUserPassword: password is too short");
+			oResult.setStringValue("AuthService.ChangeUserPassword: password is too short");
+			System.err.println(oResult.getStringValue());
 			return oResult;
 		}
 		
