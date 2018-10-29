@@ -461,16 +461,15 @@ public class AuthResource {
 					oNewUser.setName(oUserViewModel.getName());
 					oNewUser.setSurname(oUserViewModel.getSurname());
 					oNewUser.setPassword(m_oPasswordAuthentication.hash(oUserViewModel.getPassword().toCharArray()));
-					//set signup first validation token
-					//TODO generate unique GUID
-					UUID uuid = UUID.randomUUID();
-					oNewUser.setFirstAccessUUID(uuid.toString());
-					//TODO send link via email to the user
+					oNewUser.setFirstAccessValidated(false);
+					oNewUser.setFirstAccessUUID(UUID.randomUUID().toString());
 					if(oUserRepository.InsertUser(oNewUser) == true)
 					{
 						//the user is stored in DB
 						oResult.setBoolValue(true);
 					}
+					//send email confirmation link via email to the user
+					sendRegistrationEmail(oNewUser);
 				}
 			}
 			catch(Exception e)
@@ -620,7 +619,54 @@ public class AuthResource {
 		return aoUsers;
 	}
 	
-	private void sendPasswordEmail(String sEmail, String sAccount, String sPassword) {
+		
+	private void sendRegistrationEmail(User oUser) {
+		String sMercuriusAPIAddress = m_oServletConfig.getInitParameter("mercuriusAPIAddress");
+		MercuriusAPI oAPI = new MercuriusAPI(sMercuriusAPIAddress);			
+		Message oMessage = new Message();
+		
+		//TODO let the servlet config handle the message subject title
+		//e.g.
+		//String sTitle = m_oServletConfig.getInitParameter("sftpMailTitle");
+		String sTitle = "Welcome to WASDI";
+		oMessage.setTilte(sTitle);
+		
+		//TODO use the appropriate sender config
+		String sSender = m_oServletConfig.getInitParameter("sftpManagementMailSenser");
+		if (sSender==null) {
+			sSender = "adminwasdi@wasdi.org";
+		}
+		oMessage.setSender(sSender);
+		
+		//String sMessage = m_oServletConfig.getInitParameter("sftpMailText");
+		//TODO let the servlet config handle the message body
+		String sMessage = "Dear " + oUser.getName() + " " + oUser.getSurname() + ",\n welcome to WASDI.\n\n"+
+				"Please click on the link below to activate your account:\n\n" + 
+				buildRegistrationLink(oUser);
+		oMessage.setMessage(sMessage);
+		oAPI.sendMailDirect(oUser.getUserId(), oMessage);
+	}
+	
+	private String buildRegistrationLink(User oUser) {
+		String sResult = "";
+		
+		//TODO retrieve these strings automatically from the configuration
+		String protocol = "http://";
+		//String protocol = "https://";
+		String domain = "www.wasdi.net";
+		String appPrefix = "/wasdiwebserver";
+		String restPrefix = "/rest";
+		String apiPath = "/auth";
+		String apiName = "/validateRegistrationToken?";
+		String userId = "user=" + oUser.getUserId();
+		String token = "token=" +oUser.getFirstAccessUUID();
+		
+		sResult = protocol + domain + appPrefix + restPrefix + apiPath + apiName + userId + "&" + token;
+		
+		return sResult;
+	}
+
+	private void sendPasswordEmail(String sRecipientEmail, String sAccount, String sPassword) {
 		//send email with new password
 		String sMercuriusAPIAddress = m_oServletConfig.getInitParameter("mercuriusAPIAddress");
 		MercuriusAPI oAPI = new MercuriusAPI(sMercuriusAPIAddress);			
@@ -634,7 +680,7 @@ public class AuthResource {
 		String sMessage = m_oServletConfig.getInitParameter("sftpMailText");
 		sMessage += "\n\nUSER: " + sAccount + " - PASSWORD: " + sPassword;
 		oMessage.setMessage(sMessage);
-		oAPI.sendMailDirect(sEmail, oMessage);
+		oAPI.sendMailDirect(sRecipientEmail, oMessage);
 	}
 
 }
