@@ -103,7 +103,11 @@ public class AuthResource {
 						
 						UserSession oSession = new UserSession();
 						oSession.setUserId(oWasdiUser.getUserId());
-						//TODO check: can two users have the same sessionid?
+						
+						//TODOcheck: two users cannot have the same sessionId
+						//can it really happen? Should we check for this possibility?
+						//Actual risk of collision is very low (~10^-10 over a year)
+						//https://stackoverflow.com/questions/20999792/does-randomuuid-give-a-unique-id
 						String sSessionId = UUID.randomUUID().toString();
 						oSession.setSessionId(sSessionId);
 						oSession.setLoginDate((double) new Date().getTime());
@@ -412,11 +416,11 @@ public class AuthResource {
 	}
 		
 	@POST
-	@Path("/signin")
+	@Path("/register")
 	@Produces({"application/json", "text/xml"})
 	public PrimitiveResult userRegistration(RegistrationInfoViewModel oUserViewModel) 
 	{	
-		Wasdi.DebugLog("AuthService.RegistrationUser"  );
+		Wasdi.DebugLog("AuthService.UserRegistration"  );
 		PrimitiveResult oResult = new PrimitiveResult();
 		oResult.setBoolValue(false);
 		if(oUserViewModel != null)
@@ -436,7 +440,7 @@ public class AuthResource {
 				{
 					return oResult;
 				}
-				if(Utils.validateUserPassword(oUserViewModel.getPassword())){
+				if(!Utils.validateUserPassword(oUserViewModel.getPassword())){
 					return oResult;
 				}
 				
@@ -491,7 +495,7 @@ public class AuthResource {
 		if(!Utils.validateUserId(sUserId)) {
 			return oResult;
 		}
-		if(!Utils.isNullOrEmpty(sToken)) {
+		if(Utils.isNullOrEmpty(sToken)) {
 			return oResult;
 		}
 		
@@ -504,9 +508,9 @@ public class AuthResource {
 			System.err.println("AuthResources.validateNewUser: unexpected true first access validation flag");
 			return oResult;
 		} else if( false == oUser.getValidAfterFirstAccess() ) {
-			sToken = oUser.getFirstAccessUUID();
+			String sDBToken = oUser.getFirstAccessUUID();
 			if(!Utils.isNullOrEmpty(sToken)) {
-				if(sToken.equals(sToken)) {
+				if(sDBToken.equals(sToken)) {
 					oUser.setValidAfterFirstAccess(true);
 					oUserRepo.UpdateUser(oUser);
 					oResult.setBoolValue(true);
@@ -525,7 +529,7 @@ public class AuthResource {
 	@Path("/signin")
 	@Produces({"application/json", "text/xml"})
 	public PrimitiveResult ChangeUserName(@HeaderParam("x-session-token") String sSessionId, String sNewName) {
-		Wasdi.DebugLog("AuthService.ChangeUserPassword"  );
+		Wasdi.DebugLog("AuthService.signin"  );
 		PrimitiveResult oResult = new PrimitiveResult();
 		oResult.setBoolValue(false);
 		//note: sSessionId validity is automatically checked later
@@ -653,30 +657,43 @@ public class AuthResource {
 	
 		
 	private void sendRegistrationEmail(User oUser) {
-		String sMercuriusAPIAddress = m_oServletConfig.getInitParameter("mercuriusAPIAddress");
-		MercuriusAPI oAPI = new MercuriusAPI(sMercuriusAPIAddress);			
-		Message oMessage = new Message();
-		
-		//TODO let the servlet config handle the message subject title
-		//e.g.
-		//String sTitle = m_oServletConfig.getInitParameter("sftpMailTitle");
-		String sTitle = "Welcome to WASDI";
-		oMessage.setTilte(sTitle);
-		
-		//TODO use the appropriate sender config
-		String sSender = m_oServletConfig.getInitParameter("sftpManagementMailSenser");
-		if (sSender==null) {
-			sSender = "adminwasdi@wasdi.org";
+		try {
+			String sLink = buildRegistrationLink(oUser);
+			System.out.println(sLink);
+			
+			//FIXME: add the following parameter to the configuration file
+			String sMercuriusAPIAddress = m_oServletConfig.getInitParameter("mercuriusAPIAddress");
+			if(Utils.isNullOrEmpty(sMercuriusAPIAddress)) {
+				System.err.println("AuthResource.sendRegistrationEmail: sMercuriusAPIAddress is null");
+				return;
+			}
+			MercuriusAPI oAPI = new MercuriusAPI(sMercuriusAPIAddress);			
+			Message oMessage = new Message();
+			
+			//TODO let the servlet config handle the message subject title
+			//e.g.
+			//String sTitle = m_oServletConfig.getInitParameter("sftpMailTitle");
+			String sTitle = "Welcome to WASDI";
+			oMessage.setTilte(sTitle);
+			
+			//TODO use the appropriate sender config
+			String sSender = m_oServletConfig.getInitParameter("sftpManagementMailSenser");
+			if (sSender==null) {
+				sSender = "adminwasdi@wasdi.org";
+			}
+			oMessage.setSender(sSender);
+			
+			//String sMessage = m_oServletConfig.getInitParameter("sftpMailText");
+			//TODO let the servlet config handle the message body
+			String sMessage = "Dear " + oUser.getName() + " " + oUser.getSurname() + ",\n welcome to WASDI.\n\n"+
+					"Please click on the link below to activate your account:\n\n" + 
+					sLink;
+			oMessage.setMessage(sMessage);
+			oAPI.sendMailDirect(oUser.getUserId(), oMessage);
+		} catch(Exception e) {
+			System.err.println(e.getMessage() );
+			return;
 		}
-		oMessage.setSender(sSender);
-		
-		//String sMessage = m_oServletConfig.getInitParameter("sftpMailText");
-		//TODO let the servlet config handle the message body
-		String sMessage = "Dear " + oUser.getName() + " " + oUser.getSurname() + ",\n welcome to WASDI.\n\n"+
-				"Please click on the link below to activate your account:\n\n" + 
-				buildRegistrationLink(oUser);
-		oMessage.setMessage(sMessage);
-		oAPI.sendMailDirect(oUser.getUserId(), oMessage);
 	}
 	
 	
@@ -685,7 +702,7 @@ public class AuthResource {
 		String sResult = "";
 		
 		String sAPIUrl =  m_oServletConfig.getInitParameter("REGISTRATION_API_URL");
-		String sUserId = "user=" + oUser.getUserId();
+		String sUserId = "email=" + oUser.getUserId();
 		String sToken = "validationCode=" + oUser.getFirstAccessUUID();
 		
 		sResult = sAPIUrl + sUserId + "&" + sToken;
