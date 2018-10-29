@@ -405,12 +405,12 @@ public class AuthResource {
 		return oUserVM;
 
 	}
-	
+		
 	@POST
 	@Path("/signin")
 	@Produces({"application/json", "text/xml"})
-	/******************REGISTRATION USER*******************/
-	public PrimitiveResult RegistrationUser(RegistrationInfoViewModel oUserViewModel) 
+	/******************USER REGISTRATION*******************/
+	public PrimitiveResult userRegistration(RegistrationInfoViewModel oUserViewModel) 
 	{	
 		Wasdi.DebugLog("AuthService.RegistrationUser"  );
 		PrimitiveResult oResult = new PrimitiveResult();
@@ -452,6 +452,8 @@ public class AuthResource {
 					oNewUser.setName(oUserViewModel.getName());
 					oNewUser.setSurname(oUserViewModel.getSurname());
 					oNewUser.setPassword(m_oPasswordAuthentication.hash(oUserViewModel.getPassword().toCharArray()));
+					//TODO set signup first validation token
+					//TODO send link via email to the user
 					if(oUserRepository.InsertUser(oNewUser) == true)
 					{
 						//the user is stored in DB
@@ -473,6 +475,8 @@ public class AuthResource {
 	}
 	
 
+	//TODO get api after 
+	
 
 @POST
 	@Path("/signin")
