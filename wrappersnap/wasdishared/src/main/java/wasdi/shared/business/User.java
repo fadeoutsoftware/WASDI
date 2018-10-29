@@ -26,6 +26,7 @@ public class User {
      * Password
      */
     private String password;
+    private Boolean firstAccessValidated;
     private String authServiceProvider;
     private String email;
     
@@ -68,6 +69,14 @@ public class User {
     public void setPassword(String password) {
         this.password = password;
     }
+
+	public Boolean getFirstAccessValidated() {
+		return firstAccessValidated;
+	}
+
+	public void setFirstAccessValidated(Boolean firstAccessValidated) {
+		this.firstAccessValidated = firstAccessValidated;
+	}
 
 	public String getAuthServiceProvider() {
 		return authServiceProvider;
