@@ -186,5 +186,16 @@ public class UserRepository extends  MongoRepository{
  	
     }
     
+    public Boolean validateFirstAccess(String sUserId, String sToken) {
+    	Boolean bRes = false;
+    	
+    	User oUser = GetUser(sUserId);
+    	if(oUser.getFirstAccessUUID().equals(sToken)) {
+    		oUser.setFirstAccessValidated(true);
+    		bRes = true;
+    	}
+    	
+    	return bRes;
+    }
 
 }
