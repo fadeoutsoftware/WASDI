@@ -41,7 +41,7 @@ public class Utils {
     public static  boolean isValidSession(UserSession oSession) {
 
         if (oSession == null) return false;
-        if (isNullOrEmpty(oSession.getUserId()) ) return  false;
+        if (isNullOrEmpty(oSession.getUserId()) ) return false;
 
         Date oLastTouch = getDate(oSession.getLastTouch());
 
@@ -122,8 +122,10 @@ public class Utils {
     
     public static boolean isValidEmail(String sEmail)
     {
-    	
-    	boolean bIsValid = EmailValidator.getInstance().isValid(sEmail);
+    	boolean bIsValid = false;
+    	if(!isNullOrEmpty(sEmail)) {
+    		bIsValid = EmailValidator.getInstance().isValid(sEmail);
+    	}
 		return bIsValid;
     	
     }
@@ -142,12 +144,13 @@ public class Utils {
 	}
 	
 	
-	public static Boolean validateUserId(String sUserId) {
+	private static int MINUSERIDLENGTH = 4;
+	public static Boolean userIdIsGoodEnough(String sUserId) {
 		Boolean res = true;
 		if(null == sUserId) {
 			System.err.println("wasdi.shared.Utils.validateUserId: sUserId is null");
 			res = false;
-		} else if(sUserId.length() < 1) {
+		} else if(sUserId.length() < MINUSERIDLENGTH ) {
 			System.err.println("wasdi.shared.Utils.validateUserId: sUserId is too short (has length: "+sUserId.length() +")");
 			res = false;
 		}
@@ -155,7 +158,7 @@ public class Utils {
 	}
 	
 	private static int MINPASSWORDLENGTH = 8;
-	public static Boolean validateUserPassword(String sPassword) {
+	public static Boolean passwordIsGoodEnough(String sPassword) {
 		Boolean res = true;
 		if(null == sPassword) {
 			System.err.println("wasdi.shared.Utils.validateUserId: sPassword is null");
@@ -168,7 +171,7 @@ public class Utils {
 	}
 	
 	public static int MINSESSIONLENGTH = 8;
-	public static Boolean validateSessionId(String sSessionId ) {
+	public static Boolean sessionIdIsGoodEnough(String sSessionId ) {
 		Boolean res = true;
 		if(null == sSessionId ) {
 			System.err.println("wasdi.shared.Utils.validateSessionId: sSessionId is null");

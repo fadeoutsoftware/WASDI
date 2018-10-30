@@ -57,6 +57,8 @@ public class UserRepository extends  MongoRepository{
         return  null;
     }
     
+    //TODO check: remove?
+    //method never used
     public User Login(String sUserId, String sPassword) {
         try {
             User oUser = GetUser(sUserId);
@@ -80,15 +82,16 @@ public class UserRepository extends  MongoRepository{
         return  null;
     }
     
+    //TODO check: can we get rid of sEmail?
     public User GoogleLogin(String sUserId, String sEmail, String sAuthProvider) {
         try {
             User oUser = GetUser(sUserId);
 
             if (oUser != null)
             {
-            	 if (oUser.getEmail() != null  && oUser.getAuthServiceProvider() != null)
+            	 if (oUser.getUserId() != null  && oUser.getAuthServiceProvider() != null)
                  {
-                     if ( oUser.getEmail().equals(sEmail) && oUser.getAuthServiceProvider().equals(sAuthProvider) )
+                     if ( oUser.getUserId().equals(sEmail) && oUser.getAuthServiceProvider().equals(sAuthProvider) )
                      {
                          return oUser;
                      }

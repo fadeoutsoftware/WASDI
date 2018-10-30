@@ -29,7 +29,6 @@ public class User {
     private Boolean validAfterFirstAccess;
     private String firstAccessUUID;
     private String authServiceProvider;
-    private String email;
     
     public int getId() {
         return id;
@@ -95,11 +94,4 @@ public class User {
 		this.authServiceProvider = authServiceProvider;
 	}
 
-	public String getEmail() {
-		return email;
-	}
-
-	public void setEmail(String email) {
-		this.email = email;
-	}
 }
