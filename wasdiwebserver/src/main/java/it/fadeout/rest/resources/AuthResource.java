@@ -1,6 +1,5 @@
 package it.fadeout.rest.resources;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -655,24 +654,9 @@ public class AuthResource {
 		
 		return oResult;
 		
-	} 
-
+	} 	
 	
-	private ArrayList<User> UpdateHashUsersPassword(ArrayList<User> aoUsers)
-	{
-		for (int i = 0; i < aoUsers.size(); i++) 
-		{
-			User oUser = aoUsers.get(i);
-			if( oUser.getAuthServiceProvider() == null || oUser.getAuthServiceProvider().contains("google") == false)
-			{
-				oUser.setPassword(m_oPasswordAuthentication.hash(oUser.getPassword().toCharArray()));
-			}
-			
-		}
-		return aoUsers;
-	}
-	
-		
+	//FIXME email provider not working as expected
 	private void sendRegistrationEmail(User oUser, String sLink) {
 		try {
 			
