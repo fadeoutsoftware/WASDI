@@ -544,27 +544,24 @@ public class AuthResource {
 @POST
 	@Path("/editUserDetails")
 	@Produces({"application/json", "text/xml"})
-	public PrimitiveResult editUserDetails(@HeaderParam("x-session-token") String sSessionId, UserViewModel oUserVM ) {
+	public UserViewModel editUserDetails(@HeaderParam("x-session-token") String sSessionId, UserViewModel oUserVM ) {
 		Wasdi.DebugLog("AuthService.signin"  );
-		PrimitiveResult oResult = new PrimitiveResult();
-		oResult.setBoolValue(false);
 		//note: sSessionId validity is automatically checked later
 		//note: only name and surname can be changed, so far. Other fields are ignored
 
 		//check name
 		if(Utils.isNullOrEmpty(oUserVM.getName())) {
-			oResult.setStringValue("AuthResource.EditUserDetails: oUserVM.getName() null or empty");
-			System.err.println(oResult.getStringValue());
-			return oResult;
+			System.err.println("AuthResource.EditUserDetails: oUserVM.getName() null or empty");
+			return null;
 		}
 		
 		//check surname
 		if(Utils.isNullOrEmpty(oUserVM.getSurname())) {
-			oResult.setStringValue("AuthResource.EditUserDetails: oUserVM.getSurname() null or empty");
-			System.err.println(oResult.getStringValue());
-			return oResult;
+			System.err.println("AuthResource.EditUserDetails: oUserVM.getSurname() null or empty");
+			return null;
 		}
 		
+		UserViewModel oUVMResult = null;
 		
 		try {
 			//note: session validity is automatically checked		
@@ -572,22 +569,26 @@ public class AuthResource {
 			if(null == oUserId) {
 				//Maybe the user didn't exist, or failed for some other reasons
 				System.err.print("Null user from session id (does the user exist?)");
-				return oResult;
+				return null;
 			}
 	
 			oUserId.setName(oUserVM.getName());
 			oUserId.setSurname(oUserVM.getSurname());
 			
+			oUVMResult.setUserId(oUserVM.getUserId());
+			oUVMResult.setName(oUserVM.getName());
+			oUVMResult.setSurname(oUserVM.getSurname());
+			oUVMResult.setSessionId(sSessionId);
+			
 
 			UserRepository oUR = new UserRepository();
 			oUR.UpdateUser(oUserId);
-			oResult.setBoolValue(true);
 			
 		} catch(Exception e) {
 			System.err.println("AuthService.ChangeUserPassword: Exception");
 			e.printStackTrace();
 		}		
-		return oResult;
+		return oUVMResult;
 	}
 
 	
