@@ -1445,7 +1445,11 @@ var BaseRequest = Class.extend({
 		} else {
 			targetUrl = this.settings.url;
 		}
-		jQuery.ajax(targetUrl, combinedRequestSettings);
+
+         // var sUrl = 'https://cors-anywhere.herokuapp.com/http://gpod.eo.esa.int/wps/?Request=GetCapabilities&service=WPS&AcceptVersions=1.0.0';
+         var sUrl = 'https://crossorigin.me/http://gpod.eo.esa.int/wps/?Request=GetCapabilities&service=WPS&AcceptVersions=1.0.0';
+        // var sUrl = 'https://cors-anywhere.herokuapp.com/' + targetUrl;
+		jQuery.ajax(sUrl, combinedRequestSettings);
 	}
 });
 
@@ -1465,7 +1469,7 @@ var GetRequest = BaseRequest.extend({
 		}
 		
 		return {
-			type : "GET"
+			type : "GET",
 		};
 	},
 	

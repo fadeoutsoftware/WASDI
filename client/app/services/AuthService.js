@@ -26,7 +26,7 @@ service('AuthService', ['$http',  'ConstantsService', function ($http, oConstant
      * @param oUser
      */
     this.signingUser = function(oUser){
-        return this.m_oHttp.post(this.APIURL + '/auth/signin',oUser);
+        return this.m_oHttp.post(this.APIURL + '/auth/register',oUser);
     }
 
     this.checkSession = function(sSession)
@@ -67,6 +67,16 @@ service('AuthService', ['$http',  'ConstantsService', function ($http, oConstant
     this.getListFilesUpload = function()
     {
         return this.m_oHttp.get(this.APIURL + '/auth/upload/list');
+    };
+
+    this.changePassword = function(oPasswords)
+    {
+        return this.m_oHttp.post(this.APIURL + '/auth/changePassword',oPasswords);
+    };
+
+    this.changeUserInfo = function(oUserInfo)
+    {
+        return this.m_oHttp.post(this.APIURL + '/auth/editUserDetails',oUserInfo);
     };
     //
     // this.ingestFile = function(sSelectedFile,sWorkspace){
