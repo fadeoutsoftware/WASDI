@@ -41,7 +41,7 @@ public class Utils {
     public static  boolean isValidSession(UserSession oSession) {
 
         if (oSession == null) return false;
-        if (isNullOrEmpty(oSession.getUserId()) ) return  false;
+        if (isNullOrEmpty(oSession.getUserId()) ) return false;
 
         Date oLastTouch = getDate(oSession.getLastTouch());
 

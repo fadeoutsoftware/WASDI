@@ -428,16 +428,13 @@ public class AuthResource {
 			try
 			{
 				//Check User properties
-				if(Utils.isNullOrEmpty(oUserViewModel.getUserId()) || Utils.isValidEmail(oUserViewModel.getUserId()) == false )
-				{
+				if(Utils.isNullOrEmpty(oUserViewModel.getUserId()) || !Utils.isValidEmail(oUserViewModel.getUserId()) ) {
 					return oResult;
 				}
-				if(Utils.isNullOrEmpty(oUserViewModel.getName()))
-				{
+				if(Utils.isNullOrEmpty(oUserViewModel.getName())) {
 					return oResult;
 				}
-				if(Utils.isNullOrEmpty(oUserViewModel.getSurname()))
-				{
+				if(Utils.isNullOrEmpty(oUserViewModel.getSurname())) {
 					return oResult;
 				}
 				if(!Utils.validateUserPassword(oUserViewModel.getPassword())){
@@ -448,8 +445,7 @@ public class AuthResource {
 				User oWasdiUser = oUserRepository.GetUser(oUserViewModel.getUserId());
 				
 				//if oWasdiUser is a new user -> oWasdiUser == null
-				if(oWasdiUser == null)
-				{
+				if(oWasdiUser == null) {
 					//save new user 
 					String sAuthProvider = "wasdi";
 					User oNewUser = new User();
@@ -461,8 +457,8 @@ public class AuthResource {
 					oNewUser.setPassword(m_oPasswordAuthentication.hash(oUserViewModel.getPassword().toCharArray()));
 					oNewUser.setValidAfterFirstAccess(false);
 					oNewUser.setFirstAccessUUID(UUID.randomUUID().toString());
-					if(oUserRepository.InsertUser(oNewUser) == true)
-					{
+					
+					if(oUserRepository.InsertUser(oNewUser) == true) {
 						//the user is stored in DB
 						oResult.setBoolValue(true);
 					}
@@ -475,8 +471,6 @@ public class AuthResource {
 				e.printStackTrace();
 				oResult.setBoolValue(false);
 			}
-			
-
 
 		}
 		

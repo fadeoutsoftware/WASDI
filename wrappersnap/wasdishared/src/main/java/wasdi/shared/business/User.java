@@ -29,6 +29,7 @@ public class User {
     private Boolean validAfterFirstAccess;
     private String firstAccessUUID;
     private String authServiceProvider;
+    //TODO remove email
     private String email;
     
     public int getId() {
