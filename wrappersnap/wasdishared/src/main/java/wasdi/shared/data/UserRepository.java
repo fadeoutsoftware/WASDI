@@ -57,6 +57,8 @@ public class UserRepository extends  MongoRepository{
         return  null;
     }
     
+    //TODO check: remove?
+    //method never used
     public User Login(String sUserId, String sPassword) {
         try {
             User oUser = GetUser(sUserId);
