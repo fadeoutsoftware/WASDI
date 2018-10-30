@@ -122,8 +122,10 @@ public class Utils {
     
     public static boolean isValidEmail(String sEmail)
     {
-    	
-    	boolean bIsValid = EmailValidator.getInstance().isValid(sEmail);
+    	boolean bIsValid = false;
+    	if(!isNullOrEmpty(sEmail)) {
+    		bIsValid = EmailValidator.getInstance().isValid(sEmail);
+    	}
 		return bIsValid;
     	
     }
