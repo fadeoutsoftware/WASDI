@@ -149,8 +149,12 @@ public class AuthResource {
 	public UserViewModel CheckSession(@HeaderParam("x-session-token") String sSessionId) {
 		UserViewModel oUserVM = new UserViewModel();
 		User oUser = Wasdi.GetUserFromSession(sSessionId);
-		if (oUser == null) return null;
-		if (Utils.isNullOrEmpty(oUser.getUserId())) return null;
+		if (oUser == null) {
+			return null;
+		}
+		if (!Utils.validateUserId(oUser.getUserId())){
+			return null;
+		}
 		
 		oUserVM.setName(oUser.getName());
 		oUserVM.setSurname(oUser.getSurname());
@@ -315,7 +319,7 @@ public class AuthResource {
 			if (oLoginInfo == null) {
 				return oUserVM;
 			}
-			if (Utils.isNullOrEmpty(oLoginInfo.getUserId())) {
+			if ( !Utils.isValidEmail(oLoginInfo.getUserId()) ){
 				return oUserVM;
 			}
 			if (Utils.isNullOrEmpty(oLoginInfo.getGoogleIdToken())) {
