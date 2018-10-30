@@ -63,7 +63,7 @@ public class AuthResource {
 			if (oLoginInfo == null) {
 				return oUserVM;
 			}
-			if(!Utils.validateUserId(oLoginInfo.getUserId())){
+			if(!Utils.userIdIsGoodEnough(oLoginInfo.getUserId())){
 				return oUserVM;
 			}
 			if (Utils.isNullOrEmpty(oLoginInfo.getUserPassword())) {
@@ -152,7 +152,7 @@ public class AuthResource {
 		if (oUser == null) {
 			return null;
 		}
-		if (!Utils.validateUserId(oUser.getUserId())){
+		if (!Utils.userIdIsGoodEnough(oUser.getUserId())){
 			return null;
 		}
 		
@@ -174,7 +174,7 @@ public class AuthResource {
 		PrimitiveResult oResult = new PrimitiveResult();
 		oResult.setBoolValue(false);
 		
-		if(!Utils.validateSessionId(sSessionId)) {
+		if(!Utils.sessionIdIsGoodEnough(sSessionId)) {
 			return oResult;
 		}
 		
@@ -449,7 +449,7 @@ public class AuthResource {
 				if(Utils.isNullOrEmpty(oUserViewModel.getSurname())) {
 					return oResult;
 				}
-				if(!Utils.validateUserPassword(oUserViewModel.getPassword())){
+				if(!Utils.passwordIsGoodEnough(oUserViewModel.getPassword())){
 					return oResult;
 				}
 				
@@ -509,7 +509,7 @@ public class AuthResource {
 		PrimitiveResult oResult = new PrimitiveResult();
 		oResult.setBoolValue(false);
 		
-		if(!Utils.validateUserId(sUserId)) {
+		if(!Utils.userIdIsGoodEnough(sUserId)) {
 			return oResult;
 		}
 		if(Utils.isNullOrEmpty(sToken)) {
@@ -620,7 +620,7 @@ public class AuthResource {
 			System.err.println(oResult.getStringValue());
 			return oResult;
 		}
-		if( Utils.validateUserPassword(oChPasswViewModel.getNewPassword())) {
+		if( Utils.passwordIsGoodEnough(oChPasswViewModel.getNewPassword())) {
 			oResult.setStringValue("AuthService.ChangeUserPassword: password is too short");
 			System.err.println(oResult.getStringValue());
 			return oResult;
