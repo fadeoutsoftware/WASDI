@@ -542,7 +542,7 @@ public class AuthResource {
 	
 
 @POST
-	@Path("/signin")
+	@Path("/editUserDetails")
 	@Produces({"application/json", "text/xml"})
 	public PrimitiveResult editUserDetails(@HeaderParam("x-session-token") String sSessionId, UserViewModel oUserVM ) {
 		Wasdi.DebugLog("AuthService.signin"  );
