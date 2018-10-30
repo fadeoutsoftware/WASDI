@@ -255,6 +255,11 @@ public class Wasdi extends Application {
 	 */
 	public static User GetUserFromSession(String sSessionId){
 		
+		//validate sSessionId
+    	if(!Utils.validateSessionId(sSessionId)) {
+    		return null;
+    	}
+		
 		if (s_bDebug) {
 			User oUser = new User();
 			oUser.setId(1);
