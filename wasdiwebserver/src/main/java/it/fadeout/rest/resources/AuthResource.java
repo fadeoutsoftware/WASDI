@@ -462,8 +462,15 @@ public class AuthResource {
 						//the user is stored in DB
 						oResult.setBoolValue(true);
 					}
-					//send email confirmation link via email to the user
-					sendRegistrationEmail(oNewUser);
+					//build confirmation link
+					String sLink = buildRegistrationLink(oNewUser);
+					System.out.println(sLink);
+					//send it via email to the user
+					sendRegistrationEmail(oNewUser, sLink);
+					
+					//TODO remove once working
+					//only for debugging the mail sender
+					//sendPasswordEmail(oUserViewModel.getUserId(), oUserViewModel.getName(), oUserViewModel.getPassword());
 				}
 			}
 			catch(Exception e)
@@ -650,12 +657,9 @@ public class AuthResource {
 	}
 	
 		
-	private void sendRegistrationEmail(User oUser) {
+	private void sendRegistrationEmail(User oUser, String sLink) {
 		try {
-			String sLink = buildRegistrationLink(oUser);
-			System.out.println(sLink);
 			
-			//FIXME: add the following parameter to the configuration file
 			String sMercuriusAPIAddress = m_oServletConfig.getInitParameter("mercuriusAPIAddress");
 			if(Utils.isNullOrEmpty(sMercuriusAPIAddress)) {
 				System.err.println("AuthResource.sendRegistrationEmail: sMercuriusAPIAddress is null");
