@@ -544,24 +544,24 @@ public class AuthResource {
 @POST
 	@Path("/editUserDetails")
 	@Produces({"application/json", "text/xml"})
-	public UserViewModel editUserDetails(@HeaderParam("x-session-token") String sSessionId, UserViewModel oUserVM ) {
+	public UserViewModel editUserDetails(@HeaderParam("x-session-token") String sSessionId, UserViewModel oInputUserVM ) {
 		Wasdi.DebugLog("AuthService.signin"  );
 		//note: sSessionId validity is automatically checked later
 		//note: only name and surname can be changed, so far. Other fields are ignored
 
 		//check name
-		if(Utils.isNullOrEmpty(oUserVM.getName())) {
+		if(Utils.isNullOrEmpty(oInputUserVM.getName())) {
 			System.err.println("AuthResource.EditUserDetails: oUserVM.getName() null or empty");
 			return null;
 		}
 		
 		//check surname
-		if(Utils.isNullOrEmpty(oUserVM.getSurname())) {
+		if(Utils.isNullOrEmpty(oInputUserVM.getSurname())) {
 			System.err.println("AuthResource.EditUserDetails: oUserVM.getSurname() null or empty");
 			return null;
 		}
 		
-		UserViewModel oUVMResult = null;
+		UserViewModel oOutputUserVM = null;
 		
 		try {
 			//note: session validity is automatically checked		
@@ -572,13 +572,14 @@ public class AuthResource {
 				return null;
 			}
 	
-			oUserId.setName(oUserVM.getName());
-			oUserId.setSurname(oUserVM.getSurname());
+			oUserId.setName(oInputUserVM.getName());
+			oUserId.setSurname(oInputUserVM.getSurname());
 			
-			oUVMResult.setUserId(oUserVM.getUserId());
-			oUVMResult.setName(oUserVM.getName());
-			oUVMResult.setSurname(oUserVM.getSurname());
-			oUVMResult.setSessionId(sSessionId);
+			oOutputUserVM = new UserViewModel();
+			oOutputUserVM.setUserId(oInputUserVM.getUserId());
+			oOutputUserVM.setName(oInputUserVM.getName());
+			oOutputUserVM.setSurname(oInputUserVM.getSurname());
+			oOutputUserVM.setSessionId(sSessionId);
 			
 
 			UserRepository oUR = new UserRepository();
@@ -588,7 +589,7 @@ public class AuthResource {
 			System.err.println("AuthService.ChangeUserPassword: Exception");
 			e.printStackTrace();
 		}		
-		return oUVMResult;
+		return oOutputUserVM;
 	}
 
 	
