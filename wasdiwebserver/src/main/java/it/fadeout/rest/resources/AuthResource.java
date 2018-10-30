@@ -74,8 +74,6 @@ public class AuthResource {
 			
 			UserRepository oUserRepository = new UserRepository();
 
-			
-			//User oWasdiUser = oUserRepository.Login(oLoginInfo.getUserId(), oLoginInfo.getUserPassword());
 			User oWasdiUser = oUserRepository.GetUser(oLoginInfo.getUserId());
 			if( oWasdiUser == null ) {
 				return oUserVM;
@@ -83,19 +81,13 @@ public class AuthResource {
 			
 			if(null != oWasdiUser.getValidAfterFirstAccess()) {
 				if(oWasdiUser.getValidAfterFirstAccess() ) {
-					String sToken = oWasdiUser.getPassword();
-					Boolean bIsLogged = m_oPasswordAuthentication.authenticate(oLoginInfo.getUserPassword().toCharArray(), sToken);
-					if (bIsLogged == true) {
-						
+					Boolean bLoginSuccess = m_oPasswordAuthentication.authenticate(
+											oLoginInfo.getUserPassword().toCharArray(),
+											oWasdiUser.getPassword()
+										);
+					if ( bLoginSuccess ) {
 						//get all expired sessions
-						SessionRepository oSessionRepository = new SessionRepository();
-						List<UserSession> aoEspiredSessions = oSessionRepository.GetAllExpiredSessions(oWasdiUser.getUserId());
-						for (UserSession oUserSession : aoEspiredSessions) {
-							//delete data base session
-							if (!oSessionRepository.DeleteSession(oUserSession)) {
-								System.out.println("AuthService.Login: Error deleting session.");
-							}
-						}
+						clearUserExpiredSessions(oWasdiUser);
 						
 						oUserVM.setName(oWasdiUser.getName());
 						oUserVM.setSurname(oWasdiUser.getSurname());
@@ -113,10 +105,11 @@ public class AuthResource {
 						oSession.setLoginDate((double) new Date().getTime());
 						oSession.setLastTouch((double) new Date().getTime());
 						
-						Boolean bRet = oSessionRepository.InsertSession(oSession);
-						if (!bRet)
+						SessionRepository oSessionRepo = new SessionRepository();
+						Boolean bRet = oSessionRepo.InsertSession(oSession);
+						if (!bRet) {
 							return oUserVM;
-						
+						}
 						oUserVM.setSessionId(sSessionId);
 						System.out.println("AuthService.Login: access succeeded");
 					} else {
@@ -125,6 +118,7 @@ public class AuthResource {
 				} else {
 					System.err.println("AuthService.Login: registration not validated yet");
 				}
+			} else {
 				System.err.println("AuthService.Login: registration flag is null");
 			}
 				
@@ -136,6 +130,17 @@ public class AuthResource {
 		}
 		
 		return oUserVM;
+	}
+
+	private void clearUserExpiredSessions(User oWasdiUser) {
+		SessionRepository oSessionRepository = new SessionRepository();
+		List<UserSession> aoEspiredSessions = oSessionRepository.GetAllExpiredSessions(oWasdiUser.getUserId());
+		for (UserSession oUserSession : aoEspiredSessions) {
+			//delete data base session
+			if (!oSessionRepository.DeleteSession(oUserSession)) {
+				System.err.println("AuthService.Login: Error deleting session.");
+			}
+		}
 	}
 	
 	@GET
@@ -165,8 +170,10 @@ public class AuthResource {
 		PrimitiveResult oResult = new PrimitiveResult();
 		oResult.setBoolValue(false);
 		
-		if (sSessionId == null) return oResult;
-		if (sSessionId.isEmpty()) return oResult;
+		if(!Utils.validateSessionId(sSessionId)) {
+			return oResult;
+		}
+		
 		
 		SessionRepository oSessionRepository = new SessionRepository();
 		UserSession oSession = oSessionRepository.GetSession(sSessionId);
