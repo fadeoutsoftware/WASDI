@@ -7,15 +7,7 @@ import wasdi.shared.data.UserRepository;
 
 public class ZZZTemplateMain {
 
-	/*
-	private void updatePasswordInDB(UserRepository oUserRepository)
-	{
-		//update password
-		ArrayList<User> aoUsers = oUserRepository.getAllUsers();
-		aoUsers = UpdateHashUsersPassword(aoUsers);
-		oUserRepository.UpdateAllUsers(aoUsers);
-	}
-	*/
+
 	public static void sampleMethod() {
 		System.out.println("sample method running");
 	}

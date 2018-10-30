@@ -1,6 +1,5 @@
 package it.fadeout.rest.resources;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -55,7 +54,7 @@ public class AuthResource {
 	@Produces({"application/xml", "application/json", "text/xml"})
 	public UserViewModel Login(LoginInfo oLoginInfo) {
 		Wasdi.DebugLog("AuthResource.Login");
-		
+		//TODO captcha
 		UserViewModel oUserVM = new UserViewModel();
 		oUserVM.setUserId("");
 		
@@ -63,7 +62,7 @@ public class AuthResource {
 			if (oLoginInfo == null) {
 				return oUserVM;
 			}
-			if(!Utils.validateUserId(oLoginInfo.getUserId())){
+			if(!Utils.userIdIsGoodEnough(oLoginInfo.getUserId())){
 				return oUserVM;
 			}
 			if (Utils.isNullOrEmpty(oLoginInfo.getUserPassword())) {
@@ -74,8 +73,6 @@ public class AuthResource {
 			
 			UserRepository oUserRepository = new UserRepository();
 
-			
-			//User oWasdiUser = oUserRepository.Login(oLoginInfo.getUserId(), oLoginInfo.getUserPassword());
 			User oWasdiUser = oUserRepository.GetUser(oLoginInfo.getUserId());
 			if( oWasdiUser == null ) {
 				return oUserVM;
@@ -83,19 +80,13 @@ public class AuthResource {
 			
 			if(null != oWasdiUser.getValidAfterFirstAccess()) {
 				if(oWasdiUser.getValidAfterFirstAccess() ) {
-					String sToken = oWasdiUser.getPassword();
-					Boolean bIsLogged = m_oPasswordAuthentication.authenticate(oLoginInfo.getUserPassword().toCharArray(), sToken);
-					if (bIsLogged == true) {
-						
+					Boolean bLoginSuccess = m_oPasswordAuthentication.authenticate(
+											oLoginInfo.getUserPassword().toCharArray(),
+											oWasdiUser.getPassword()
+										);
+					if ( bLoginSuccess ) {
 						//get all expired sessions
-						SessionRepository oSessionRepository = new SessionRepository();
-						List<UserSession> aoEspiredSessions = oSessionRepository.GetAllExpiredSessions(oWasdiUser.getUserId());
-						for (UserSession oUserSession : aoEspiredSessions) {
-							//delete data base session
-							if (!oSessionRepository.DeleteSession(oUserSession)) {
-								System.out.println("AuthService.Login: Error deleting session.");
-							}
-						}
+						clearUserExpiredSessions(oWasdiUser);
 						
 						oUserVM.setName(oWasdiUser.getName());
 						oUserVM.setSurname(oWasdiUser.getSurname());
@@ -113,10 +104,11 @@ public class AuthResource {
 						oSession.setLoginDate((double) new Date().getTime());
 						oSession.setLastTouch((double) new Date().getTime());
 						
-						Boolean bRet = oSessionRepository.InsertSession(oSession);
-						if (!bRet)
+						SessionRepository oSessionRepo = new SessionRepository();
+						Boolean bRet = oSessionRepo.InsertSession(oSession);
+						if (!bRet) {
 							return oUserVM;
-						
+						}
 						oUserVM.setSessionId(sSessionId);
 						System.out.println("AuthService.Login: access succeeded");
 					} else {
@@ -125,6 +117,7 @@ public class AuthResource {
 				} else {
 					System.err.println("AuthService.Login: registration not validated yet");
 				}
+			} else {
 				System.err.println("AuthService.Login: registration flag is null");
 			}
 				
@@ -137,6 +130,17 @@ public class AuthResource {
 		
 		return oUserVM;
 	}
+
+	private void clearUserExpiredSessions(User oWasdiUser) {
+		SessionRepository oSessionRepository = new SessionRepository();
+		List<UserSession> aoEspiredSessions = oSessionRepository.GetAllExpiredSessions(oWasdiUser.getUserId());
+		for (UserSession oUserSession : aoEspiredSessions) {
+			//delete data base session
+			if (!oSessionRepository.DeleteSession(oUserSession)) {
+				System.err.println("AuthService.Login: Error deleting session.");
+			}
+		}
+	}
 	
 	@GET
 	@Path("/checksession")
@@ -144,8 +148,12 @@ public class AuthResource {
 	public UserViewModel CheckSession(@HeaderParam("x-session-token") String sSessionId) {
 		UserViewModel oUserVM = new UserViewModel();
 		User oUser = Wasdi.GetUserFromSession(sSessionId);
-		if (oUser == null) return null;
-		if (Utils.isNullOrEmpty(oUser.getUserId())) return null;
+		if (oUser == null) {
+			return null;
+		}
+		if (!Utils.userIdIsGoodEnough(oUser.getUserId())){
+			return null;
+		}
 		
 		oUserVM.setName(oUser.getName());
 		oUserVM.setSurname(oUser.getSurname());
@@ -165,8 +173,10 @@ public class AuthResource {
 		PrimitiveResult oResult = new PrimitiveResult();
 		oResult.setBoolValue(false);
 		
-		if (sSessionId == null) return oResult;
-		if (sSessionId.isEmpty()) return oResult;
+		if(!Utils.sessionIdIsGoodEnough(sSessionId)) {
+			return oResult;
+		}
+		
 		
 		SessionRepository oSessionRepository = new SessionRepository();
 		UserSession oSession = oSessionRepository.GetSession(sSessionId);
@@ -299,6 +309,7 @@ public class AuthResource {
 	@Produces({"application/xml", "application/json", "text/xml"})
 	public UserViewModel LoginGoogleUser(LoginInfo oLoginInfo) {
 		Wasdi.DebugLog("AuthResource.CheckGoogleUserId");
+		//TODO captcha
 		UserViewModel oUserVM = new UserViewModel();
 		oUserVM.setUserId("");
 		
@@ -307,7 +318,7 @@ public class AuthResource {
 			if (oLoginInfo == null) {
 				return oUserVM;
 			}
-			if (Utils.isNullOrEmpty(oLoginInfo.getUserId())) {
+			if ( !Utils.isValidEmail(oLoginInfo.getUserId()) ){
 				return oUserVM;
 			}
 			if (Utils.isNullOrEmpty(oLoginInfo.getGoogleIdToken())) {
@@ -356,7 +367,6 @@ public class AuthResource {
 				  User oUser = new User();
 				  oUser.setAuthServiceProvider(sAuthProvider);
 				  oUser.setUserId(userId);
-				  oUser.setEmail(sEmail);
 				  
 				  if(oUserRepository.InsertUser(oUser) == true)
 				  {
@@ -382,7 +392,6 @@ public class AuthResource {
 				  oUserVM.setName(oWasdiUser.getName());
 				  oUserVM.setSurname(oWasdiUser.getSurname());
 				  oUserVM.setUserId(oWasdiUser.getUserId());
-				  oUserVM.setEmail(oWasdiUser.getEmail());
 				  
 				  UserSession oSession = new UserSession();
 				  oSession.setUserId(oWasdiUser.getUserId());
@@ -423,24 +432,23 @@ public class AuthResource {
 		Wasdi.DebugLog("AuthService.UserRegistration"  );
 		PrimitiveResult oResult = new PrimitiveResult();
 		oResult.setBoolValue(false);
+		
+		//TODO captcha
 		if(oUserViewModel != null)
 		{
 			try
 			{
 				//Check User properties
-				if(Utils.isNullOrEmpty(oUserViewModel.getUserId()) || Utils.isValidEmail(oUserViewModel.getUserId()) == false )
-				{
+				if(Utils.isNullOrEmpty(oUserViewModel.getUserId()) || !Utils.isValidEmail(oUserViewModel.getUserId()) ) {
 					return oResult;
 				}
-				if(Utils.isNullOrEmpty(oUserViewModel.getName()))
-				{
+				if(Utils.isNullOrEmpty(oUserViewModel.getName())) {
 					return oResult;
 				}
-				if(Utils.isNullOrEmpty(oUserViewModel.getSurname()))
-				{
+				if(Utils.isNullOrEmpty(oUserViewModel.getSurname())) {
 					return oResult;
 				}
-				if(!Utils.validateUserPassword(oUserViewModel.getPassword())){
+				if(!Utils.passwordIsGoodEnough(oUserViewModel.getPassword())){
 					return oResult;
 				}
 				
@@ -448,26 +456,36 @@ public class AuthResource {
 				User oWasdiUser = oUserRepository.GetUser(oUserViewModel.getUserId());
 				
 				//if oWasdiUser is a new user -> oWasdiUser == null
-				if(oWasdiUser == null)
-				{
+				if(oWasdiUser == null) {
 					//save new user 
 					String sAuthProvider = "wasdi";
 					User oNewUser = new User();
 					oNewUser.setAuthServiceProvider(sAuthProvider);
 					oNewUser.setUserId(oUserViewModel.getUserId());
-					oNewUser.setEmail(oUserViewModel.getUserId());
 					oNewUser.setName(oUserViewModel.getName());
 					oNewUser.setSurname(oUserViewModel.getSurname());
 					oNewUser.setPassword(m_oPasswordAuthentication.hash(oUserViewModel.getPassword().toCharArray()));
 					oNewUser.setValidAfterFirstAccess(false);
-					oNewUser.setFirstAccessUUID(UUID.randomUUID().toString());
-					if(oUserRepository.InsertUser(oNewUser) == true)
-					{
+					String sToken = UUID.randomUUID().toString();
+					oNewUser.setFirstAccessUUID(sToken);
+					
+					if(oUserRepository.InsertUser(oNewUser) == true) {
 						//the user is stored in DB
 						oResult.setBoolValue(true);
 					}
-					//send email confirmation link via email to the user
-					sendRegistrationEmail(oNewUser);
+					//build confirmation link
+					String sLink = buildRegistrationLink(oNewUser);
+					System.out.println(sLink);
+					//send it via email to the user
+					//disabled temporary, email sending provider does work properly
+					//sendRegistrationEmail(oNewUser, sLink);
+					
+					//TODO remove once email sending works
+					oResult = validateNewUser(oUserViewModel.getUserId(), sToken);
+					
+					//TODO remove once working
+					//only for debugging the mail sender
+					//sendPasswordEmail(oUserViewModel.getUserId(), oUserViewModel.getName(), oUserViewModel.getPassword());
 				}
 			}
 			catch(Exception e)
@@ -475,8 +493,6 @@ public class AuthResource {
 				e.printStackTrace();
 				oResult.setBoolValue(false);
 			}
-			
-
 
 		}
 		
@@ -492,7 +508,7 @@ public class AuthResource {
 		PrimitiveResult oResult = new PrimitiveResult();
 		oResult.setBoolValue(false);
 		
-		if(!Utils.validateUserId(sUserId)) {
+		if(!Utils.userIdIsGoodEnough(sUserId)) {
 			return oResult;
 		}
 		if(Utils.isNullOrEmpty(sToken)) {
@@ -526,7 +542,7 @@ public class AuthResource {
 	
 
 @POST
-	@Path("/signin")
+	@Path("/editUserDetails")
 	@Produces({"application/json", "text/xml"})
 	public PrimitiveResult editUserDetails(@HeaderParam("x-session-token") String sSessionId, UserViewModel oUserVM ) {
 		Wasdi.DebugLog("AuthService.signin"  );
@@ -603,7 +619,7 @@ public class AuthResource {
 			System.err.println(oResult.getStringValue());
 			return oResult;
 		}
-		if( Utils.validateUserPassword(oChPasswViewModel.getNewPassword())) {
+		if( Utils.passwordIsGoodEnough(oChPasswViewModel.getNewPassword())) {
 			oResult.setStringValue("AuthService.ChangeUserPassword: password is too short");
 			System.err.println(oResult.getStringValue());
 			return oResult;
@@ -638,30 +654,12 @@ public class AuthResource {
 		
 		return oResult;
 		
-	} 
-
+	} 	
 	
-	private ArrayList<User> UpdateHashUsersPassword(ArrayList<User> aoUsers)
-	{
-		for (int i = 0; i < aoUsers.size(); i++) 
-		{
-			User oUser = aoUsers.get(i);
-			if( oUser.getAuthServiceProvider() == null || oUser.getAuthServiceProvider().contains("google") == false)
-			{
-				oUser.setPassword(m_oPasswordAuthentication.hash(oUser.getPassword().toCharArray()));
-			}
-			
-		}
-		return aoUsers;
-	}
-	
-		
-	private void sendRegistrationEmail(User oUser) {
+	//FIXME email provider not working as expected
+	private void sendRegistrationEmail(User oUser, String sLink) {
 		try {
-			String sLink = buildRegistrationLink(oUser);
-			System.out.println(sLink);
 			
-			//FIXME: add the following parameter to the configuration file
 			String sMercuriusAPIAddress = m_oServletConfig.getInitParameter("mercuriusAPIAddress");
 			if(Utils.isNullOrEmpty(sMercuriusAPIAddress)) {
 				System.err.println("AuthResource.sendRegistrationEmail: sMercuriusAPIAddress is null");
