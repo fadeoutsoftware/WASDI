@@ -55,7 +55,7 @@ public class AuthResource {
 	@Produces({"application/xml", "application/json", "text/xml"})
 	public UserViewModel Login(LoginInfo oLoginInfo) {
 		Wasdi.DebugLog("AuthResource.Login");
-		
+		//TODO captcha
 		UserViewModel oUserVM = new UserViewModel();
 		oUserVM.setUserId("");
 		
@@ -306,6 +306,7 @@ public class AuthResource {
 	@Produces({"application/xml", "application/json", "text/xml"})
 	public UserViewModel LoginGoogleUser(LoginInfo oLoginInfo) {
 		Wasdi.DebugLog("AuthResource.CheckGoogleUserId");
+		//TODO captcha
 		UserViewModel oUserVM = new UserViewModel();
 		oUserVM.setUserId("");
 		
@@ -428,6 +429,8 @@ public class AuthResource {
 		Wasdi.DebugLog("AuthService.UserRegistration"  );
 		PrimitiveResult oResult = new PrimitiveResult();
 		oResult.setBoolValue(false);
+		
+		//TODO captcha
 		if(oUserViewModel != null)
 		{
 			try
@@ -460,7 +463,8 @@ public class AuthResource {
 					oNewUser.setSurname(oUserViewModel.getSurname());
 					oNewUser.setPassword(m_oPasswordAuthentication.hash(oUserViewModel.getPassword().toCharArray()));
 					oNewUser.setValidAfterFirstAccess(false);
-					oNewUser.setFirstAccessUUID(UUID.randomUUID().toString());
+					String sToken = UUID.randomUUID().toString();
+					oNewUser.setFirstAccessUUID(sToken);
 					
 					if(oUserRepository.InsertUser(oNewUser) == true) {
 						//the user is stored in DB
@@ -470,7 +474,11 @@ public class AuthResource {
 					String sLink = buildRegistrationLink(oNewUser);
 					System.out.println(sLink);
 					//send it via email to the user
-					sendRegistrationEmail(oNewUser, sLink);
+					//disabled temporary, email sending provider does work properly
+					//sendRegistrationEmail(oNewUser, sLink);
+					
+					//TODO remove once email sending works
+					oResult = validateNewUser(oUserViewModel.getUserId(), sToken);
 					
 					//TODO remove once working
 					//only for debugging the mail sender
