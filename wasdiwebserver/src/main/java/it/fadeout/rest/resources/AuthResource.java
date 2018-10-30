@@ -363,7 +363,6 @@ public class AuthResource {
 				  User oUser = new User();
 				  oUser.setAuthServiceProvider(sAuthProvider);
 				  oUser.setUserId(userId);
-				  oUser.setEmail(sEmail);
 				  
 				  if(oUserRepository.InsertUser(oUser) == true)
 				  {
@@ -389,7 +388,6 @@ public class AuthResource {
 				  oUserVM.setName(oWasdiUser.getName());
 				  oUserVM.setSurname(oWasdiUser.getSurname());
 				  oUserVM.setUserId(oWasdiUser.getUserId());
-				  oUserVM.setEmail(oWasdiUser.getEmail());
 				  
 				  UserSession oSession = new UserSession();
 				  oSession.setUserId(oWasdiUser.getUserId());
@@ -458,7 +456,6 @@ public class AuthResource {
 					User oNewUser = new User();
 					oNewUser.setAuthServiceProvider(sAuthProvider);
 					oNewUser.setUserId(oUserViewModel.getUserId());
-					oNewUser.setEmail(oUserViewModel.getUserId());
 					oNewUser.setName(oUserViewModel.getName());
 					oNewUser.setSurname(oUserViewModel.getSurname());
 					oNewUser.setPassword(m_oPasswordAuthentication.hash(oUserViewModel.getPassword().toCharArray()));
