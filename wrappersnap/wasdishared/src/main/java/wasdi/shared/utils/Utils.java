@@ -166,4 +166,16 @@ public class Utils {
 		}
 		return res;
 	}
+	
+	public static int MINSESSIONLENGTH = 8;
+	public static Boolean validateSessionId(String sSessionId ) {
+		Boolean res = true;
+		if(null == sSessionId ) {
+			System.err.println("wasdi.shared.Utils.validateSessionId: sSessionId is null");
+			res = false;
+		} else if(sSessionId.length() < MINSESSIONLENGTH ) {
+			System.err.println("wasdi.shared.Utils.validateSessionId: sSessionId is too short");
+		}
+		return res;
+	}
 }

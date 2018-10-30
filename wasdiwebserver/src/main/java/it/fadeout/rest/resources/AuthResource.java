@@ -528,25 +528,30 @@ public class AuthResource {
 @POST
 	@Path("/signin")
 	@Produces({"application/json", "text/xml"})
-	public PrimitiveResult ChangeUserName(@HeaderParam("x-session-token") String sSessionId, String sNewName) {
+	public PrimitiveResult editUserDetails(@HeaderParam("x-session-token") String sSessionId, UserViewModel oUserVM ) {
 		Wasdi.DebugLog("AuthService.signin"  );
 		PrimitiveResult oResult = new PrimitiveResult();
 		oResult.setBoolValue(false);
 		//note: sSessionId validity is automatically checked later
-		//MAYBE: refactor: method for validating user name
-		if(null == sNewName ) {
-			oResult.setStringValue("new name is null");
-			System.err.println(oResult.getStringValue());
-			return oResult;
-		}
-		if(sNewName.length() < 1) {
-			oResult.setStringValue("new name is too short");
+		//note: only name and surname can be changed, so far. Other fields are ignored
+
+		//check name
+		if(Utils.isNullOrEmpty(oUserVM.getName())) {
+			oResult.setStringValue("AuthResource.EditUserDetails: oUserVM.getName() null or empty");
 			System.err.println(oResult.getStringValue());
 			return oResult;
 		}
 		
+		//check surname
+		if(Utils.isNullOrEmpty(oUserVM.getSurname())) {
+			oResult.setStringValue("AuthResource.EditUserDetails: oUserVM.getSurname() null or empty");
+			System.err.println(oResult.getStringValue());
+			return oResult;
+		}
+		
+		
 		try {
-			//validity is automatically checked		
+			//note: session validity is automatically checked		
 			User oUserId = Wasdi.GetUserFromSession(sSessionId);
 			if(null == oUserId) {
 				//Maybe the user didn't exist, or failed for some other reasons
@@ -554,7 +559,10 @@ public class AuthResource {
 				return oResult;
 			}
 	
-			oUserId.setName(sNewName);
+			oUserId.setName(oUserVM.getName());
+			oUserId.setSurname(oUserVM.getSurname());
+			
+
 			UserRepository oUR = new UserRepository();
 			oUR.UpdateUser(oUserId);
 			oResult.setBoolValue(true);
@@ -562,8 +570,7 @@ public class AuthResource {
 		} catch(Exception e) {
 			System.err.println("AuthService.ChangeUserPassword: Exception");
 			e.printStackTrace();
-		}
-		
+		}		
 		return oResult;
 	}
 
