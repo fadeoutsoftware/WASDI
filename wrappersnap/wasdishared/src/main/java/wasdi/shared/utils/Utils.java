@@ -100,6 +100,7 @@ public class Utils {
                 setExecutablePermissions(path);
             }
         });
+        files.close();
     }
 
     private static void setExecutablePermissions(Path executablePathName) {
