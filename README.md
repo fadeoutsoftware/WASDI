@@ -39,7 +39,9 @@ mvn clean install
 ```
 
 **TODO** *import into eclipse*
+
 **TODO** *build wrappersnap\launcher*
+
 **TODO** *build wasdiwebserver*
 
 
