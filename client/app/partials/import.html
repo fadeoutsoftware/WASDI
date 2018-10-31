@@ -189,14 +189,14 @@
                             </ul>
 
                             <div ng-repeat="mission in m_oController.getMissions()" class="missions" ng-show="m_oController.m_activeMissionTab === $index">
-                                <div>
+                                <!--<div>-->
                                     <div class="col-md-1 col-xs-4 col-sd-4">
                                         <div class="glyphicon mission-checkbox"
                                              ng-class="{'glyphicon-unchecked': !mission.selected, 'glyphicon-check': mission.selected }"
                                              ng-click="mission.selected = !mission.selected; m_oController.updateMissionSelection($index);"></div>
                                     </div>
                                     <div class="col-md-11 col-xs-8 col-sd-8">{{mission.name}}</div>
-                                </div>
+                                <!--</div>-->
 
                                 <div class="row">
                                     <!--{{mission.filters}}-->
