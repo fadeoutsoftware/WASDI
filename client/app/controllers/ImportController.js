@@ -382,15 +382,17 @@ var ImportController = (function() {
     ImportController.prototype.updateFilter = function(parentIndex){
 
         //console.log("parentIndex",parentIndex);
-        var selected = false;
+        // var selected = false;
         for(var i=0; i<this.m_aoMissions[parentIndex].filters.length; i++) {
             if(this.m_aoMissions[parentIndex].filters[i].indexvalue &&
                 this.m_aoMissions[parentIndex].filters[i].indexvalue.trim() != '') {
-                selected = true;
+                // selected = true;
+                this.m_aoMissions[parentIndex].selected = true
+
                 break;
             }
         }
-        this.m_aoMissions[parentIndex].selected=selected;
+        // this.m_aoMissions[parentIndex].selected=selected;
         this.setFilter();
         //console.log("filter",AdvancedFilterService.getAdvancedFilter());
 
