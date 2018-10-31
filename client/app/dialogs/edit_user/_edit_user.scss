@@ -1,0 +1,127 @@
+.edit-user-dialog-catalog
+{
+  .modal-dialog
+  {
+
+    .modal-content
+    {
+      //HEADER
+      .modal-header
+      {
+
+      }
+      //BODY
+      .modal-body
+      {
+
+        .edit-content
+        {
+          //@extend %form-css;
+          border: solid 1px black;
+          padding: 20px 40px 40px 20px;
+          background-color: $wasdi-login-color-background-content;
+          margin: 0px 30px;
+          .loadIcon
+          {
+            margin-top: -30px;
+            margin-bottom: 50px;
+          }
+          .error-message
+          {
+            color:red;
+          }
+          .my-input-text{
+            input[type=password]{
+              width: 100%;
+              padding: 12px 20px;
+              margin: 8px 0;
+              box-sizing: border-box;
+
+
+              background-color: $wasdi-white;
+              border-color:$wasdi-input-text-border-color ;
+
+            }
+            // FIX COLOR INSIDE PLACEHOLDER
+            ::-webkit-input-placeholder {
+              color: $wasdi-input-text-color;
+            }
+
+            :-moz-placeholder { /* Firefox 18- */
+              color: $wasdi-input-text-color
+            }
+
+            ::-moz-placeholder {  /* Firefox 19+ */
+              color: $wasdi-input-text-color;
+            }
+
+            :-ms-input-placeholder {
+              color: $wasdi-input-text-color;
+            }
+
+          }
+
+        }
+        //%form-css{
+        //  //CENTER VERTICALLY and HORIZONTALLY
+        //  position: absolute;
+        //  top: 70%;//50%;
+        //  left: 50%;
+        //  transform: translate(-50%, -50%);
+        //  border: solid 1px black;
+        //  z-index: 1;
+        //  //CONTENT
+        //  width: 350px;
+        //  max-width: 350px;
+        //  padding: 40px 40px;
+        //  background-color: $wasdi-login-color-background-content;
+        //
+        //  input[type=email][type=password]
+        //  {
+        //    width: 100%;
+        //
+        //    display: block;
+        //    margin-bottom: 10px;
+        //    z-index: 1;
+        //    position: relative;
+        //    -moz-box-sizing: border-box;
+        //    -webkit-box-sizing: border-box;
+        //    box-sizing: border-box;
+        //  }
+        //
+        //  //OVERRIDE BOOTSTRAP
+        //  //change input[email,password]
+        //  .form-control
+        //  {
+        //    height:45px ;
+        //  }
+        //
+        //  //OVERRIDE BOOTSTRAP
+        //  //change over color button
+        //  .btn-primary:hover, .btn-primary:focus, .btn-primary:active, .btn-primary.active, .open>.dropdown-toggle.btn-primary {
+        //    color: #fff;//default
+        //    background-color: $wasdi-login-color-background;
+        //    border-color: #285e8e; //default
+        //  }
+        //  .form-signin
+        //  {
+        //    .error-message
+        //    {
+        //      color:red;
+        //    }
+        //  }
+        //  .alert {
+        //    margin-bottom: 0px;
+        //    margin-top: 5px;
+        //  }
+        //}
+
+      }
+      //FOOTER
+      .modal-footer
+      {
+
+      }
+    }
+  }
+}

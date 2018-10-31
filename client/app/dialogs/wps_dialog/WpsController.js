@@ -172,6 +172,7 @@ var WpsController = (function() {
     {
         // var sel = document.getElementById("wps");
         // getCapabilities(sel.options[sel.selectedIndex].text);
+        // getCapabilities(this.m_oConstantService.getWPSPROXY() + this.m_sSelectedWps);
         getCapabilities(this.m_sSelectedWps);
         this.clickOnShowCapabilities();
     };
