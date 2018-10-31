@@ -62,6 +62,8 @@
 @import "../dialogs/wapps/wapps";
 @import "../dialogs/rasor/rasorwapp";
 @import "../dialogs/opera/operawapp";
+@import "../dialogs/edit_user/edit_user";
+
 
 //COMPONENTS
 @import "components/range_slider";
@@ -140,11 +142,12 @@ h4
 
 //INPUT TEXT
 .my-input-text{
-  input[type=text] {
+  input[type=text]{
     width: 100%;
     padding: 12px 20px;
     margin: 8px 0;
     box-sizing: border-box;
+
 
     background-color: $wasdi-white;
     border-color:$wasdi-input-text-border-color ;
@@ -247,6 +250,7 @@ h4
 .my-button:disabled {
   opacity: 0.65;
   cursor: not-allowed;
+  color: red;
 }
 
 // ICON OVER
@@ -328,108 +332,7 @@ h4
 //modal css default (bootstrap)
 .modal-dialog
 {
-
   @include utilities-modal-style(50%);
-  //width:50%;
-  //.modal-content
-  //{
-  //  .modal-header
-  //  {
-  //    color:$wasdi-white;
-  //    background-color: $wasdi-blue-logo;
-  //    .close
-  //    {
-  //      color: $wasdi-white;
-  //      opacity: 1;
-  //    }
-  //  }
-  //
-  //  .modal-body
-  //  {
-  //    /*css used in operation dialog*/
-  //    //overflow-y: auto;
-  //    //max-height:$wasdi-max-heigth-body;
-  //    overflow-x: auto;
-  //
-  //    //FIX FIREFOX
-  //    input[type=text]
-  //    {
-  //      padding: 6px 12px;
-  //    }
-  //
-  //    form
-  //    {
-  //      fieldset
-  //      {
-  //        border:2px solid $wasdi-blue-logo;
-  //        padding: 20px 20px;
-  //
-  //
-  //
-  //        legend
-  //        {
-  //          width: auto;
-  //          border-bottom: 0;
-  //        }
-  //        .my-input-text
-  //        {
-  //          input[type=text]
-  //          {
-  //            background-color: $wasdi-grey;
-  //          }
-  //          .input-group
-  //          {
-  //            .input-group-btn
-  //            {
-  //              .btn-default {
-  //                color: $wasdi-blue-logo;
-  //                background-color: $wasdi-grey;
-  //                border-color: $wasdi-blue-logo;
-  //                width:100%
-  //              }
-  //              .productsDropDown
-  //              {
-  //                width:100%
-  //              }
-  //            }
-  //          }
-  //        }
-  //        .inline
-  //        {
-  //          float: left;
-  //        }
-  //        .inline-right
-  //        {
-  //          float: right;
-  //        }
-  //
-  //        .btn-block {
-  //          display: block;
-  //          width: 50%;
-  //
-  //        }
-  //        .btn-default {
-  //          color: #333;
-  //          background-color: #fff;
-  //          border-color: $wasdi-blue-logo;
-  //        }
-  //        .dropdown
-  //        {
-  //          margin-left:10px;
-  //        }
-  //      }
-  //    }
-  //  }
-  //
-  //  .modal-footer
-  //  {
-  //    border-top:1px solid $wasdi-blue-logo;
-  //    .my-button
-  //    {
-  //      padding: 10px 21px;
-  //    }
-  //  }
-  //}
 }
 
 .modal-dialog-large{
@@ -804,6 +707,63 @@ font-size: 2.5em !important;
     padding-left: 15px;
   }
 }
+
+%form-css
+{
+  //CENTER VERTICALLY and HORIZONTALLY
+  position: absolute;
+  top: 70%;//50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  border: solid 1px black;
+  z-index: 1;
+  //CONTENT
+  width: 350px;
+  max-width: 350px;
+  padding: 40px 40px;
+  background-color: $wasdi-login-color-background-content;
+
+  input[type=email][type=password]
+  {
+    width: 100%;
+
+    display: block;
+    margin-bottom: 10px;
+    z-index: 1;
+    position: relative;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    box-sizing: border-box;
+  }
+
+  //OVERRIDE BOOTSTRAP
+  //change input[email,password]
+  .form-control
+  {
+    height:45px ;
+  }
+
+  //OVERRIDE BOOTSTRAP
+  //change over color button
+  .btn-primary:hover, .btn-primary:focus, .btn-primary:active, .btn-primary.active, .open>.dropdown-toggle.btn-primary {
+    color: #fff;//default
+    background-color: $wasdi-login-color-background;
+    border-color: #285e8e; //default
+  }
+  .form-signin
+  {
+    .error-message
+    {
+      color:red;
+    }
+  }
+  .alert {
+    margin-bottom: 0px;
+    margin-top: 5px;
+  }
+}
+
+
 
 //vex override
 //.big-vex {

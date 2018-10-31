@@ -1,0 +1,164 @@
+<div class="modal fade edit-user-dialog-catalog">
+    <div class="modal-dialog ">
+        <div class="modal-content">
+            <!-- HEADER -->
+            <div class=" modal-header">
+
+                <div class="col-xs-11 col-sm-11 col-md-11 col-lg-11">
+                    {{ "DIALOG_EDIT_USER" | translate }}
+                </div>
+                <div class="col-xs-1 col-sm-1 col-md-1 col-lg-1">
+                    <button type="button" class="close" ng-click="close(null)" data-dismiss="modal" aria-hidden="true">&times;</button>
+                </div>
+
+            </div>
+            <!-- BODY -->
+            <div class="modal-body ">
+                <h4>
+
+                    <div class="edit-content" >
+                        <form name="changeUserInfoForm" ng-submit="m_oController.changeUserInfo()">
+                            <legend>{{"DIALOG_EDIT_USER_INFO"|translate}}</legend>
+
+                            <div class="loadIcon" ng-show="m_oController.m_bEditingUserInfo" ><!--ng-show="m_oController.m_bEditingPassword" -->
+                                <invader></invader>
+                            </div>
+                            <!--<div class="loadIcon" >&lt;!&ndash;ng-show="m_oController.m_bEditingPassword" &ndash;&gt;-->
+                                <!--<invader></invader>-->
+                            <!--</div>-->
+
+                            <div ng-hide="m_oController.m_bEditingUserInfo">
+                                <div class="row">
+                                    <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
+                                        {{'DIALOG_EDIT_USER_INFO_NAME'|translate}}
+                                    </div>
+
+                                    <div class="col-xs-8 col-sm-8 col-md-8 col-lg-8">
+                                        <div class="my-input-text">
+                                            <input type="text" name="name"  ng-model="m_oController.m_oEditUser.name"
+                                                   class=""  required><!--  placeholder="{{'DIALOG_EDIT_USER_PASSWORD'|translate}}"-->
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
+                                        {{'DIALOG_EDIT_USER_INFO_SURNAME'|translate}}
+                                    </div>
+
+                                    <div class="col-xs-8 col-sm-8 col-md-8 col-lg-8">
+
+                                        <div class="my-input-text">
+                                            <input type="text" name="surname"  class=""
+                                                   ng-model="m_oController.m_oEditUser.surname" required><!--placeholder="{{'DIALOG_EDIT_USER_REPEAT_PASSWORD'|translate}}"-->
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4 col-xs-offset-8 col-sm-offset-8 col-md-offset-8 col-lg-offset-8">
+                                        <button type="submit"  class="my-button" ng-disabled="changeUserInfoForm.$invalid === true ">
+                                            {{"DIALOG_EDIT_USER_EDIT_USER_INFO"|translate}}
+                                        </button>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </form>
+
+
+
+                        <form name="changePasswordForm" ng-submit="m_oController.changePassword()" >
+
+                            <legend>{{"DIALOG_EDIT_USER_CHANGE_PASSWORD"|translate}}</legend>
+
+                            <div class="loadIcon" ng-show="m_oController.m_bEditingPassword" ><!--ng-show="m_oController.m_bEditingPassword" -->
+                                <invader></invader>
+                            </div>
+
+                            <div ng-hide="m_oController.m_bEditingPassword">
+                                <!--OLD PASSWORD-->
+                                <div class="row">
+                                    <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
+                                        {{'DIALOG_EDIT_USER_OLD_PASSWORD'|translate}}
+                                    </div>
+
+                                    <div class="col-xs-8 col-sm-8 col-md-8 col-lg-8">
+                                        <div class="my-input-text">
+                                            <input type="password" name="usercurrentpassword"  ng-model="m_oController.m_oEditUser.currentPassword"
+                                                   class="" required><!--  placeholder="{{'DIALOG_EDIT_USER_PASSWORD'|translate}}"-->
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- NEW PASSWORD-->
+                                <div class="row">
+                                    <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
+                                        {{'DIALOG_EDIT_USER_NEW_PASSWORD'|translate}}
+                                    </div>
+
+                                    <div class="col-xs-8 col-sm-8 col-md-8 col-lg-8">
+                                        <div class="my-input-text">
+                                            <input type="password" name="usernewpassword"  ng-model="m_oController.m_oEditUser.newPassword"
+                                                   class="" ng-minlength="8" required><!--  placeholder="{{'DIALOG_EDIT_USER_PASSWORD'|translate}}"-->
+                                        </div>
+                                        <h5 class="error-message" ng-if="(m_oController.m_oEditUser.newPassword.length !== 0) &&
+                                                         (!changePasswordForm.usernewpassword.$valid)">
+                                            The value is too short
+                                        </h5>
+                                    </div>
+
+                                </div>
+                                <!--REPEAT NEW PASSWORD-->
+                                <div class="row">
+                                    <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
+                                        {{'DIALOG_EDIT_USER_REPEAT_NEW_PASSWORD'|translate}}
+                                    </div>
+
+                                    <div class="col-xs-8 col-sm-8 col-md-8 col-lg-8">
+
+                                        <div class="my-input-text">
+                                            <input type="password" name="userrepeatpassword"  class=""
+                                                   ng-model="m_oController.m_oEditUser.repeatNewPassword" ng-minlength="8" required><!--placeholder="{{'DIALOG_EDIT_USER_REPEAT_PASSWORD'|translate}}"-->
+                                        </div>
+                                        <h5 class="error-message" ng-if="(changePasswordForm.userrepeatpassword.$dirty === true) &&
+                                                        (changePasswordForm.usernewpassword.$viewValue !== changePasswordForm.userrepeatpassword.$viewValue)">
+                                            The passwords are different
+                                        </h5>
+                                    </div>
+
+                                </div>
+
+                                <!--BUTTON-->
+                                <div class="row">
+                                    <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4 col-xs-offset-8 col-sm-offset-8 col-md-offset-8 col-lg-offset-8">
+                                        <button type="submit" class="my-button" ng-disabled="changePasswordForm.$invalid === true"><!--ng-class="{disabled: changePasswordForm.$invalid === true }"-->
+                                            {{"DIALOG_EDIT_USER_CHANGE_PASSWORD"|translate}}
+                                        </button>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </form>
+
+                    </div>
+
+                </h4>
+            </div>
+
+            <!-- FOOTER -->
+            <div class="modal-footer">
+                <button type="button" ng-click="close(null)" class="my-button" data-dismiss="modal">
+                    {{"DIALOG_CLOSE_BUTTON"|translate}}
+                </button>
+                <!--<button type="button" ng-click="add(null)" class="my-button" data-dismiss="modal">-->
+                    <!--Add-->
+                <!--</button>-->
+            </div>
+
+        </div>
+    </div>
+</div>

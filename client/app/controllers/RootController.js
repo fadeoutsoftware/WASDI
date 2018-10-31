@@ -444,6 +444,31 @@ var RootController = (function() {
         this.m_bIsEditModelWorkspaceNameActive = true;
     };
 
+    RootController.prototype.editUserInfo = function(oProcessInput)
+    {
+        var oController = this;
+        var oWorkspace = this.m_oConstantsService.getActiveWorkspace();
+        this.m_oModalService.showModal({
+            templateUrl: "dialogs/edit_user/EditUserDialog.html",
+            controller: "EditUserController",
+            inputs: {
+                extras: {
+                    user:oController.m_oUser
+                }
+            }
+        }).then(function(modal) {
+            modal.element.modal();
+            modal.close.then(function(result) {
+                oController.m_oScope.Result = result ;
+                oController.m_oUser = oController.m_oConstantsService.getUser();
+                // if(result === 'delete')
+                //     oController.m_oProcessesLaunchedService.removeProcessInServer(oProcessInput.processObjId,oWorkspace.workspaceId,oProcessInput)
+            });
+        });
+
+        return true;
+    };
+
 
     /*********************************************************************/
     RootController.$inject = [
