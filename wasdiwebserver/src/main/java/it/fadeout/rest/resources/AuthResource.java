@@ -347,6 +347,7 @@ public class AuthResource {
 			 
 			  // Get profile information from payload
 			  String sEmail = oPayload.getEmail();
+			  
 			 /* boolean bEmailVerified = Boolean.valueOf(oPayload.getEmailVerified());
 			  String sName = (String) oPayload.get("name");
 			  String sPictureUrl = (String) oPayload.get("picture");
@@ -576,9 +577,9 @@ public class AuthResource {
 			oUserId.setSurname(oInputUserVM.getSurname());
 			
 			oOutputUserVM = new UserViewModel();
-			oOutputUserVM.setUserId(oInputUserVM.getUserId());
-			oOutputUserVM.setName(oInputUserVM.getName());
-			oOutputUserVM.setSurname(oInputUserVM.getSurname());
+			oOutputUserVM.setUserId(oUserId.getUserId());
+			oOutputUserVM.setName(oUserId.getName());
+			oOutputUserVM.setSurname(oUserId.getSurname());
 			oOutputUserVM.setSessionId(sSessionId);
 			
 
@@ -621,7 +622,7 @@ public class AuthResource {
 			System.err.println(oResult.getStringValue());
 			return oResult;
 		}
-		if( Utils.passwordIsGoodEnough(oChPasswViewModel.getNewPassword())) {
+		if( Utils.passwordIsGoodEnough(oChPasswViewModel.getNewPassword()) == false) {
 			oResult.setStringValue("AuthService.ChangeUserPassword: password is too short");
 			System.err.println(oResult.getStringValue());
 			return oResult;
