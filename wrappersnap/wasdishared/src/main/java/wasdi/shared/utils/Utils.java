@@ -171,14 +171,15 @@ public class Utils {
 		return res;
 	}
 	
-	public static int MINSESSIONLENGTH = 8;
-	public static Boolean sessionIdIsGoodEnough(String sSessionId ) {
+	//UUID are 36 characters long (32 alphanumeric + 4 hyphens "-" )
+	public static int MINGUIDLENGTH = 31;
+	public static Boolean guidIsGoodEnough(String sTokenId ) {
 		Boolean res = true;
-		if(null == sSessionId ) {
-			System.err.println("wasdi.shared.Utils.validateSessionId: sSessionId is null");
+		if(null == sTokenId ) {
+			System.err.println("wasdi.shared.Utils.validateSessionId: sTokenId is null");
 			res = false;
-		} else if(sSessionId.length() < MINSESSIONLENGTH ) {
-			System.err.println("wasdi.shared.Utils.validateSessionId: sSessionId is too short");
+		} else if(sTokenId.length() < MINGUIDLENGTH ) {
+			System.err.println("wasdi.shared.Utils.validateSessionId: sTokenId is too short");
 		}
 		return res;
 	}
