@@ -42,7 +42,7 @@ var EditUserController = (function() {
                     }
                     else
                     {
-                        utilsVexDialogAlertBottomRightCorner("CHANGED PASSWORD");
+                        var oVexWindow = utilsVexDialogAlertBottomRightCorner("CHANGED PASSWORD");
                         utilsVexCloseDialogAfterFewSeconds(3000,oVexWindow);
 
                     }

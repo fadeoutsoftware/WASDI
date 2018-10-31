@@ -21,6 +21,11 @@
           padding: 20px 40px 40px 20px;
           background-color: $wasdi-login-color-background-content;
           margin: 0px 30px;
+          .loadIcon
+          {
+            margin-top: -30px;
+            margin-bottom: 50px;
+          }
           .error-message
           {
             color:red;

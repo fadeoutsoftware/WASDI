@@ -23,6 +23,9 @@
                             <div class="loadIcon" ng-show="m_oController.m_bEditingUserInfo" ><!--ng-show="m_oController.m_bEditingPassword" -->
                                 <invader></invader>
                             </div>
+                            <!--<div class="loadIcon" >&lt;!&ndash;ng-show="m_oController.m_bEditingPassword" &ndash;&gt;-->
+                                <!--<invader></invader>-->
+                            <!--</div>-->
 
                             <div ng-hide="m_oController.m_bEditingUserInfo">
                                 <div class="row">
@@ -54,7 +57,7 @@
 
                                 <div class="row">
                                     <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4 col-xs-offset-8 col-sm-offset-8 col-md-offset-8 col-lg-offset-8">
-                                        <button type="submit"  class="my-button" >
+                                        <button type="submit"  class="my-button" ng-disabled="changeUserInfoForm.$invalid === true ">
                                             {{"DIALOG_EDIT_USER_EDIT_USER_INFO"|translate}}
                                         </button>
 
@@ -132,7 +135,7 @@
                                 <!--BUTTON-->
                                 <div class="row">
                                     <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4 col-xs-offset-8 col-sm-offset-8 col-md-offset-8 col-lg-offset-8">
-                                        <button type="submit" class="my-button" ng-class="{disabled: signinForm.$invalid === true }">
+                                        <button type="submit" class="my-button" ng-disabled="changePasswordForm.$invalid === true"><!--ng-class="{disabled: changePasswordForm.$invalid === true }"-->
                                             {{"DIALOG_EDIT_USER_CHANGE_PASSWORD"|translate}}
                                         </button>
                                     </div>
