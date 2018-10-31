@@ -436,7 +436,12 @@ public class AuthResource {
 	{	
 		Wasdi.DebugLog("AuthService.UserRegistration"  );
 		PrimitiveResult oResult = new PrimitiveResult();
+		//TODO refactor w/ null object
 		oResult.setBoolValue(false);
+		
+		if(null == oUserViewModel) {
+			return oResult;
+		}
 		
 		//TODO captcha
 		if(oUserViewModel != null)
