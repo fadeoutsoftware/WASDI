@@ -256,7 +256,7 @@ public class Wasdi extends Application {
 	public static User GetUserFromSession(String sSessionId){
 		
 		//validate sSessionId
-    	if(!Utils.sessionIdIsGoodEnough(sSessionId)) {
+    	if(!Utils.guidIsGoodEnough(sSessionId)) {
     		return null;
     	}
 		

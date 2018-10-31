@@ -27,12 +27,15 @@ import wasdi.shared.business.User;
 import wasdi.shared.business.UserSession;
 import wasdi.shared.data.SessionRepository;
 import wasdi.shared.data.UserRepository;
+import wasdi.shared.utils.CredentialPolicy;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.ChangeUserPasswordViewModel;
 import wasdi.shared.viewmodels.LoginInfo;
 import wasdi.shared.viewmodels.PrimitiveResult;
 import wasdi.shared.viewmodels.RegistrationInfoViewModel;
 import wasdi.shared.viewmodels.UserViewModel;
+
+import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken.Payload;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
@@ -45,6 +48,7 @@ import com.google.api.client.json.jackson2.JacksonFactory;
 public class AuthResource {
 	
 	PasswordAuthentication m_oPasswordAuthentication = new PasswordAuthentication();
+	CredentialPolicy m_oCredentialPolicy = new CredentialPolicy();
 	
 	@Context
 	ServletConfig m_oServletConfig;
@@ -55,18 +59,18 @@ public class AuthResource {
 	public UserViewModel Login(LoginInfo oLoginInfo) {
 		Wasdi.DebugLog("AuthResource.Login");
 		//TODO captcha
-		UserViewModel oUserVM = new UserViewModel();
-		oUserVM.setUserId("");
-		
+
+		UserViewModel oUserVM = UserViewModel.getInvalid();
 		try {
 			if (oLoginInfo == null) {
-				return oUserVM;
+				return UserViewModel.getInvalid();
 			}
+			//TODO refactor: replace using CredentialPolicy
 			if(!Utils.userIdIsGoodEnough(oLoginInfo.getUserId())){
-				return oUserVM;
+				return UserViewModel.getInvalid();
 			}
 			if (Utils.isNullOrEmpty(oLoginInfo.getUserPassword())) {
-				return oUserVM;
+				return UserViewModel.getInvalid();
 			}
 			
 			System.out.println("AuthResource.Login: requested access from " + oLoginInfo.getUserId());
@@ -75,7 +79,7 @@ public class AuthResource {
 
 			User oWasdiUser = oUserRepository.GetUser(oLoginInfo.getUserId());
 			if( oWasdiUser == null ) {
-				return oUserVM;
+				return UserViewModel.getInvalid();
 			}
 			
 			if(null != oWasdiUser.getValidAfterFirstAccess()) {
@@ -87,7 +91,7 @@ public class AuthResource {
 					if ( bLoginSuccess ) {
 						//get all expired sessions
 						clearUserExpiredSessions(oWasdiUser);
-						
+						oUserVM = new UserViewModel();
 						oUserVM.setName(oWasdiUser.getName());
 						oUserVM.setSurname(oWasdiUser.getSurname());
 						oUserVM.setUserId(oWasdiUser.getUserId());
@@ -173,7 +177,7 @@ public class AuthResource {
 		PrimitiveResult oResult = new PrimitiveResult();
 		oResult.setBoolValue(false);
 		
-		if(!Utils.sessionIdIsGoodEnough(sSessionId)) {
+		if(!Utils.guidIsGoodEnough(sSessionId)) {
 			return oResult;
 		}
 		
@@ -478,11 +482,12 @@ public class AuthResource {
 					String sLink = buildRegistrationLink(oNewUser);
 					System.out.println(sLink);
 					//send it via email to the user
+					//TODO uncomment to enable as soon as the email provider works
 					//disabled temporary, email sending provider does work properly
-					//sendRegistrationEmail(oNewUser, sLink);
+					sendRegistrationEmail(oNewUser, sLink);
 					
 					//TODO remove once email sending works
-					oResult = validateNewUser(oUserViewModel.getUserId(), sToken);
+					//oResult = validateNewUser(oUserViewModel.getUserId(), sToken);
 					
 					//TODO remove once working
 					//only for debugging the mail sender
@@ -521,12 +526,12 @@ public class AuthResource {
 		if( null == oUser.getValidAfterFirstAccess()) {
 			System.err.println("AuthResources.validateNewUser: unexpected null first access validation flag");
 			return oResult;
-		} else if(true == oUser.getValidAfterFirstAccess() ) {
+		} else if( oUser.getValidAfterFirstAccess() ) {
 			System.err.println("AuthResources.validateNewUser: unexpected true first access validation flag");
 			return oResult;
-		} else if( false == oUser.getValidAfterFirstAccess() ) {
+		} else if( !oUser.getValidAfterFirstAccess() ) {
 			String sDBToken = oUser.getFirstAccessUUID();
-			if(!Utils.isNullOrEmpty(sToken)) {
+			if(Utils.guidIsGoodEnough(sToken) ){
 				if(sDBToken.equals(sToken)) {
 					oUser.setValidAfterFirstAccess(true);
 					oUserRepo.UpdateUser(oUser);
@@ -698,7 +703,7 @@ public class AuthResource {
 	}
 	
 	
-
+	//TODO link to a client's page
 	private String buildRegistrationLink(User oUser) {
 		String sResult = "";
 		

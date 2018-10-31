@@ -1,1 +1,7 @@
-test/jmeterTests/SingleApiTests/AuthResource/login.json
+# test/jmeterTests/SingleApiTests/AuthResource/login.json
+
+# (recursively) ignore file with the following names, whatever the containing directory
+.classpath
+.project
+.settings
+*.class
