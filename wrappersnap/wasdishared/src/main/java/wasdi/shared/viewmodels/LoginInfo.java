@@ -15,7 +15,6 @@ public class LoginInfo {
     
     //singleton pattern
     private static LoginInfo s_oInvalid;
-    private static LoginInfo s_oValid;
     
     static {
     	LoginInfo oLoginInfo = new LoginInfo();
@@ -29,17 +28,6 @@ public class LoginInfo {
     	return s_oInvalid;
     }
     
-    static {
-    	LoginInfo oLoginInfo = new LoginInfo();
-    	oLoginInfo.userId = "anAcceptableName";
-    	oLoginInfo.userPassword = "anAcceptablePassword_1234";
-    	oLoginInfo.googleIdToken = UUID.randomUUID().toString();
-    	s_oValid = oLoginInfo;
-    }
-    
-    public static LoginInfo getValid() {
-    	return s_oValid;
-    }
     
     @Override
     public boolean equals(Object oOther) {

@@ -14,7 +14,6 @@ public class UserViewModel {
 	
 	//singleton pattern
 	private static UserViewModel s_oInvalid;
-	private static UserViewModel s_oValid;
 	
     static {
     	UserViewModel oViewModel = new UserViewModel();
@@ -28,20 +27,7 @@ public class UserViewModel {
     public static UserViewModel getInvalid() {    	
     	return s_oInvalid;
     }
-    
-    static {
-    	UserViewModel oViewModel = new UserViewModel();
-    	oViewModel.userId = "email@domain.com";
-    	oViewModel.name = "an acceptable name";
-    	oViewModel.surname = "an acceptable surname";
-    	oViewModel.sessionId = UUID.randomUUID().toString();
-    	s_oValid = oViewModel;
-    }
-    
-    public static UserViewModel getValid() {
-    	return s_oValid;
-    }
-    
+        
     @Override
     public boolean equals(Object oOther) {
     	if (oOther == null) return false;
