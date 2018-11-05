@@ -29,6 +29,7 @@ public class User {
     private Boolean validAfterFirstAccess;
     private String firstAccessUUID;
     private String authServiceProvider;
+    private String googleIdToken;
     
     //singleton pattern
     private static User s_oInvalid;
@@ -111,6 +112,14 @@ public class User {
 
 	public void setAuthServiceProvider(String authServiceProvider) {
 		this.authServiceProvider = authServiceProvider;
+	}
+
+	public String getGoogleIdToken() {
+		return googleIdToken;
+	}
+
+	public void setGoogleIdToken(String googleIdToken) {
+		this.googleIdToken = googleIdToken;
 	}
 
 }
