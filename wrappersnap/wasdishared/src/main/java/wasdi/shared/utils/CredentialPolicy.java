@@ -143,6 +143,7 @@ public class CredentialPolicy {
 	}
 	
 	public boolean satisfies(User oUser) {
+		//TODO implement (just a stub)
 		if(null==oUser) {
 			throw new NullArgumentException();
 		}
