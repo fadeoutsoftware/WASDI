@@ -82,7 +82,7 @@ public class UserRepository extends  MongoRepository{
         return  null;
     }
     
-    //TODO check: can we get rid of sEmail?
+    //TODO check: can we get rid of sEmail? @sergin13 @kr1zz
     public User GoogleLogin(String sUserId, String sEmail, String sAuthProvider) {
         try {
             User oUser = GetUser(sUserId);

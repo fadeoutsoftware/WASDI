@@ -30,6 +30,25 @@ public class User {
     private String firstAccessUUID;
     private String authServiceProvider;
     
+    //singleton pattern
+    private static User s_oInvalid;
+    
+    static {
+    	s_oInvalid = new User();
+    	s_oInvalid.id = -1;
+    	s_oInvalid.userId = null;
+    	s_oInvalid.name = null;
+    	s_oInvalid.surname = null;
+    	s_oInvalid.password = null;
+    	s_oInvalid.validAfterFirstAccess = null;
+    	s_oInvalid.firstAccessUUID = null;
+    	s_oInvalid.authServiceProvider = null;
+    }
+
+    public static User getInvalid() {
+		return s_oInvalid;
+	}
+    
     public int getId() {
         return id;
     }

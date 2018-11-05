@@ -358,6 +358,7 @@ public class AuthResource {
 		Wasdi.DebugLog("AuthResource.CheckGoogleUserId");
 		//TODO captcha
 		//TODO refactor to use null object @sergin13 + @kr1zz
+		//TODO check policy in order to be coherent
 		UserViewModel oUserVM = new UserViewModel();
 		oUserVM.setUserId("");
 		
@@ -469,6 +470,7 @@ public class AuthResource {
 			
 		} catch (Exception e) {
 			// TODO: handle exception
+			e.printStackTrace();
 		}
 		return oUserVM;
 
@@ -535,16 +537,10 @@ public class AuthResource {
 					//TODO log instead
 					System.out.println(sLink);
 					//send it via email to the user
-					//TODO uncomment to enable as soon as the email provider works
-					//disabled temporary, email sending provider does work properly
 					sendRegistrationEmail(oNewUser, sLink);
 					
-					//TODO remove once email sending works
+					//uncomment only if email sending service does not work
 					//oResult = validateNewUser(oUserViewModel.getUserId(), sToken);
-					
-					//TODO remove once working
-					//only for debugging the mail sender
-					//sendPasswordEmail(oUserViewModel.getUserId(), oUserViewModel.getName(), oUserViewModel.getPassword());
 				}
 			}
 			catch(Exception e)
@@ -782,6 +778,7 @@ public class AuthResource {
 	
 	//TODO link to a client's page
 	private String buildRegistrationLink(User oUser) {
+		//MAYBE check w/ CredentialPolicy 
 		String sResult = "";
 		
 		String sAPIUrl =  m_oServletConfig.getInitParameter("REGISTRATION_API_URL");
@@ -796,7 +793,7 @@ public class AuthResource {
 
 	private void sendPasswordEmail(String sRecipientEmail, String sAccount, String sPassword) {
 		//TODO log
-		//TODO refactor to use null object @sergin13 + @kr1zz (?)
+		//MAYBE refactor (?) to use null object @sergin13 + @kr1zz (?)
 		//TODO check w/ CredentialPolicy
 		//send email with new password
 		String sMercuriusAPIAddress = m_oServletConfig.getInitParameter("mercuriusAPIAddress");
