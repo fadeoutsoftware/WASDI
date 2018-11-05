@@ -83,15 +83,15 @@ public class UserRepository extends  MongoRepository{
     }
     
     //TODO check: can we get rid of sEmail? @sergin13 @kr1zz
-    public User GoogleLogin(String sUserId, String sEmail, String sAuthProvider) {
+    public User GoogleLogin(String sGoogleIdToken, String sEmail, String sAuthProvider) {
         try {
-            User oUser = GetUser(sUserId);
+            User oUser = GetUser(sEmail);
 
             if (oUser != null)
             {
             	 if (oUser.getUserId() != null  && oUser.getAuthServiceProvider() != null)
                  {
-                     if ( oUser.getUserId().equals(sEmail) && oUser.getAuthServiceProvider().equals(sAuthProvider) )
+                     if ( oUser.getGoogleIdToken().equals(sGoogleIdToken) && oUser.getAuthServiceProvider().equals(sAuthProvider)   )
                      {
                          return oUser;
                      }

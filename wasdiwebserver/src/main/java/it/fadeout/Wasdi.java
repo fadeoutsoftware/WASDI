@@ -79,7 +79,11 @@ public class Wasdi extends Application {
 	public static String s_sDebugPassword = "password";
 
 	//XXX replace with dependency injection
-	private static CredentialPolicy m_oCredentialPolicy = new CredentialPolicy();
+	private static CredentialPolicy m_oCredentialPolicy;
+	
+	static{
+		m_oCredentialPolicy = new CredentialPolicy();
+	}
 	
 	@Override
 	public Set<Class<?>> getClasses() {
