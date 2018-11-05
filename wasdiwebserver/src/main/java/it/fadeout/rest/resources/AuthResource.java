@@ -46,9 +46,9 @@ import com.google.api.client.json.jackson2.JacksonFactory;
 @Path("/auth")
 public class AuthResource {
 	
+	//TODO use dependency injection
 	PasswordAuthentication m_oPasswordAuthentication = new PasswordAuthentication();
-	
-	//TODO use dependency injection 
+	//TODO use dependency injection
 	CredentialPolicy m_oCredentialPolicy = new CredentialPolicy();
 	
 	@Context
@@ -796,7 +796,7 @@ public class AuthResource {
 
 	private void sendPasswordEmail(String sRecipientEmail, String sAccount, String sPassword) {
 		//TODO log
-		//TODO refactor to use null object @sergin13 + @kr1zz
+		//TODO refactor to use null object @sergin13 + @kr1zz (?)
 		//TODO check w/ CredentialPolicy
 		//send email with new password
 		String sMercuriusAPIAddress = m_oServletConfig.getInitParameter("mercuriusAPIAddress");
