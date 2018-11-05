@@ -173,8 +173,10 @@ public class FileBufferResource {
 	@GET
 	@Path("publishband")
 	@Produces({"application/xml", "application/json", "text/xml"})
-	public RabbitMessageViewModel PublishBand(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sFileUrl") String sFileUrl, @QueryParam("sWorkspaceId") String sWorkspaceId, @QueryParam("sBand") String sBand) throws IOException
-	{
+	public RabbitMessageViewModel PublishBand(	@HeaderParam("x-session-token") String sSessionId,
+												@QueryParam("sFileUrl") String sFileUrl,
+												@QueryParam("sWorkspaceId") String sWorkspaceId,
+												@QueryParam("sBand") String sBand) throws IOException {
 		RabbitMessageViewModel oReturnValue = null;
 		try {
 			
