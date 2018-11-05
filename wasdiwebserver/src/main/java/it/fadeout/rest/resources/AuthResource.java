@@ -46,9 +46,9 @@ import com.google.api.client.json.jackson2.JacksonFactory;
 @Path("/auth")
 public class AuthResource {
 	
-	//TODO use dependency injection
+	//MAYBE replace with dependency injection
 	PasswordAuthentication m_oPasswordAuthentication = new PasswordAuthentication();
-	//TODO use dependency injection
+	//MAYBE replace with dependency injection
 	CredentialPolicy m_oCredentialPolicy = new CredentialPolicy();
 	
 	@Context
@@ -60,15 +60,16 @@ public class AuthResource {
 	public UserViewModel Login(LoginInfo oLoginInfo) {
 		Wasdi.DebugLog("AuthResource.Login");
 		//TODO captcha
+		
+		if (oLoginInfo == null) {
+			return UserViewModel.getInvalid();
+		}
+		if(!m_oCredentialPolicy.satisfies(oLoginInfo)) {
+			return UserViewModel.getInvalid();
+		}
 
 		UserViewModel oUserVM = UserViewModel.getInvalid();
 		try {
-			if (oLoginInfo == null) {
-				return UserViewModel.getInvalid();
-			}
-			if(!m_oCredentialPolicy.satisfies(oLoginInfo)) {
-				return UserViewModel.getInvalid();
-			}
 			
 			//TODO log instead
 			System.out.println("AuthResource.Login: requested access from " + oLoginInfo.getUserId());
@@ -77,6 +78,9 @@ public class AuthResource {
 
 			User oWasdiUser = oUserRepository.GetUser(oLoginInfo.getUserId());
 			if( oWasdiUser == null ) {
+				return UserViewModel.getInvalid();
+			}
+			if(!m_oCredentialPolicy.satisfies(oWasdiUser)) {
 				return UserViewModel.getInvalid();
 			}
 			
@@ -97,7 +101,7 @@ public class AuthResource {
 						UserSession oSession = new UserSession();
 						oSession.setUserId(oWasdiUser.getUserId());
 						
-						//TODO check: two users must not have the same sessionId (to avoid ambiguity when getting user from sessionId)
+						//XXX check: two users must not have the same sessionId (to avoid ambiguity when getting user from sessionId)
 						//can it really happen? Should we really read from DB to check for this possibility?
 						//Actual risk of collision is very low (~10^-10 over a year)
 						//https://stackoverflow.com/questions/20999792/does-randomuuid-give-a-unique-id
@@ -139,7 +143,7 @@ public class AuthResource {
 	}
 
 	private void clearUserExpiredSessions(User oUser) {
-		//TODO allow checking for User policy satisfaction 
+		//MAYBE check for User policy satisfaction 
 		SessionRepository oSessionRepository = new SessionRepository();
 		List<UserSession> aoEspiredSessions = oSessionRepository.GetAllExpiredSessions(oUser.getUserId());
 		for (UserSession oUserSession : aoEspiredSessions) {
@@ -156,6 +160,13 @@ public class AuthResource {
 	@Produces({"application/xml", "application/json", "text/xml"})
 	public UserViewModel CheckSession(@HeaderParam("x-session-token") String sSessionId) {
 		Wasdi.DebugLog("AuthResource.CheckSession");
+		
+		if(null == sSessionId) {
+			Wasdi.DebugLog("AuthResource.CheckSession: null sSessionId");
+			//TODO switch to the version below: @sergin13 + @kr1zz
+			return null;
+			//return UserViewModel.getInvalid();
+		}
 
 		User oUser = Wasdi.GetUserFromSession(sSessionId);
 		if (oUser == null) {
@@ -163,10 +174,7 @@ public class AuthResource {
 			return null;
 			//return UserViewModel.getInvalid();
 			
-		}
-		//TODO implement code to use version below
-		if(!m_oCredentialPolicy.validUserId(oUser.getUserId())) {
-		//if(!m_oCredentialPolicy.satisfies(oUser)) {
+		} else if(!m_oCredentialPolicy.satisfies(oUser)) {
 			//TODO switch to the version below
 			return null;
 			//return UserViewModel.getInvalid();
@@ -184,11 +192,19 @@ public class AuthResource {
 	@GET
 	@Path("/logout")
 	@Produces({"application/xml", "application/json", "text/xml"})
+	//MAYBE change return type @sergin13 @kr1zz
 	public PrimitiveResult Logout(@HeaderParam("x-session-token") String sSessionId) {
 		Wasdi.DebugLog("AuthResource.Logout");
 		
+		if(null == sSessionId) {
+			Wasdi.DebugLog("AuthResource.CheckSession: null sSessionId");
+			//XXX switch to the version below: @sergin13 + @kr1zz
+			return null;
+			//return UserViewModel.getInvalid();
+		}
+		
 		PrimitiveResult oResult = new PrimitiveResult();
-		//TODO refactor oRsult in order to use null object @sergin13 + @kr1zz
+		//XXX refactor oResult in order to use null object @sergin13 + @kr1zz
 		oResult.setBoolValue(false);
 		
 		
@@ -226,7 +242,6 @@ public class AuthResource {
 			return Response.status(Status.BAD_REQUEST).build();
 		}
 		
-		
 		User oUser = Wasdi.GetUserFromSession(sSessionId);
 		//TODO implement code to use version below
 		if (oUser == null || m_oCredentialPolicy.validUserId(oUser.getUserId())) {
@@ -257,7 +272,7 @@ public class AuthResource {
 	@Path("/upload/existsaccount")
 	@Produces({"application/json", "text/xml"})
 	public boolean ExixtsSftpAccount(@HeaderParam("x-session-token") String sSessionId) {
-		//TODO check input: what shall we return if sSessionId is null/invalid? false? @sergin13 + @kr1zz
+		//TODO check input: what shall we return if sSessionId is null/invalid? false? @sergin13 + @kr1zz maybe change return type?
 		Wasdi.DebugLog("AuthService.ExistsSftpAccount");
 		
 		User oUser = Wasdi.GetUserFromSession(sSessionId);
@@ -303,7 +318,7 @@ public class AuthResource {
 	@Path("/upload/removeaccount")
 	@Produces({"application/json", "text/xml"})
 	public Response RemoveSftpAccount(@HeaderParam("x-session-token") String sSessionId) {
-		//TODO check input: what shall we return if sSessionId is null/invalid? @sergin13 + @kr1zz
+		//TODO check input: what shall we return if sSessionId is null/invalid? BAD REQUEST? @sergin13 + @kr1zz
 		Wasdi.DebugLog("AuthService.RemoveSftpAccount");
 		
 		User oUser = Wasdi.GetUserFromSession(sSessionId);
@@ -324,13 +339,18 @@ public class AuthResource {
 	@Path("/upload/updatepassword")
 	@Produces({"application/json", "text/xml"})
 	public Response UpdateSftpPassword(@HeaderParam("x-session-token") String sSessionId, String sEmail) {
-		
 		Wasdi.DebugLog("AuthService.UpdateSftpPassword");
+		if(!m_oCredentialPolicy.validSessionId(sSessionId) || !m_oCredentialPolicy.validEmail(sEmail)) {
+			return Response.status(Status.BAD_REQUEST).build();
+		}
 		
 		User oUser = Wasdi.GetUserFromSession(sSessionId);
 		//TODO implement to use below version
-		if (oUser == null || Utils.isNullOrEmpty(oUser.getUserId())) return Response.status(Status.UNAUTHORIZED).build();
-		//if(!m_oCredentialPolicy.satisfies(oUser)) {return Response.status(Status.UNAUTHORIZED).build();}
+		if(null == oUser) {
+			return Response.status(Status.UNAUTHORIZED).build();
+		} else if( !m_oCredentialPolicy.satisfies(oUser)) {
+			return Response.status(Status.UNAUTHORIZED).build(); 
+		}
 		
 		String sAccount = oUser.getUserId();
 		
@@ -357,19 +377,20 @@ public class AuthResource {
 	public UserViewModel LoginGoogleUser(LoginInfo oLoginInfo) {
 		Wasdi.DebugLog("AuthResource.CheckGoogleUserId");
 		//TODO captcha
-		//TODO refactor to use null object @sergin13 + @kr1zz
-		//TODO check policy in order to be coherent
+		//XXX refactor to use null object @sergin13 + @kr1zz
+		
 		UserViewModel oUserVM = new UserViewModel();
 		oUserVM.setUserId("");
+		if (oLoginInfo == null) {
+			return oUserVM;
+		}
+		if(!m_oCredentialPolicy.satisfies(oLoginInfo)) {
+			return oUserVM;
+		}
 		
 		try 
-		{
-			if (oLoginInfo == null) {
-				return oUserVM;
-			}
-			if(!m_oCredentialPolicy.satisfies(oLoginInfo)) {
-				return oUserVM;
-			}
+		{	
+			
 			
 			final NetHttpTransport transport = GoogleNetHttpTransport.newTrustedTransport();
 			final JacksonFactory jsonFactory = JacksonFactory.getDefaultInstance();
@@ -479,7 +500,7 @@ public class AuthResource {
 	@POST
 	@Path("/register")
 	@Produces({"application/json", "text/xml"})
-	public PrimitiveResult userRegistration(RegistrationInfoViewModel oUserViewModel) 
+	public PrimitiveResult userRegistration(RegistrationInfoViewModel oRegistrationInfoViewModel) 
 	{	
 		Wasdi.DebugLog("AuthService.UserRegistration"  );
 		//TODO captcha
@@ -488,31 +509,20 @@ public class AuthResource {
 		//TODO refactor w/ null object
 		oResult.setBoolValue(false);
 		
-		if(null == oUserViewModel) {
+		if(null == oRegistrationInfoViewModel) {
 			return oResult;
 		}
 		
-		if(oUserViewModel != null)
+		if(oRegistrationInfoViewModel != null)
 		{
 			try
 			{
-				//TODO credentialPolicy for RegistrationInfoViewModel
-				//Check User properties
-				if(Utils.isNullOrEmpty(oUserViewModel.getUserId()) || !Utils.isValidEmail(oUserViewModel.getUserId()) ) {
-					return oResult;
-				}
-				if(Utils.isNullOrEmpty(oUserViewModel.getName())) {
-					return oResult;
-				}
-				if(Utils.isNullOrEmpty(oUserViewModel.getSurname())) {
-					return oResult;
-				}
-				if(!Utils.passwordIsGoodEnough(oUserViewModel.getPassword())){
+				if(!m_oCredentialPolicy.satisfies(oRegistrationInfoViewModel)) {
 					return oResult;
 				}
 				
 				UserRepository oUserRepository = new UserRepository();
-				User oWasdiUser = oUserRepository.GetUser(oUserViewModel.getUserId());
+				User oWasdiUser = oUserRepository.GetUser(oRegistrationInfoViewModel.getUserId());
 				
 				//if oWasdiUser is a new user -> oWasdiUser == null
 				if(oWasdiUser == null) {
@@ -520,10 +530,10 @@ public class AuthResource {
 					String sAuthProvider = "wasdi";
 					User oNewUser = new User();
 					oNewUser.setAuthServiceProvider(sAuthProvider);
-					oNewUser.setUserId(oUserViewModel.getUserId());
-					oNewUser.setName(oUserViewModel.getName());
-					oNewUser.setSurname(oUserViewModel.getSurname());
-					oNewUser.setPassword(m_oPasswordAuthentication.hash(oUserViewModel.getPassword().toCharArray()));
+					oNewUser.setUserId(oRegistrationInfoViewModel.getUserId());
+					oNewUser.setName(oRegistrationInfoViewModel.getName());
+					oNewUser.setSurname(oRegistrationInfoViewModel.getSurname());
+					oNewUser.setPassword(m_oPasswordAuthentication.hash(oRegistrationInfoViewModel.getPassword().toCharArray()));
 					oNewUser.setValidAfterFirstAccess(false);
 					String sToken = UUID.randomUUID().toString();
 					oNewUser.setFirstAccessUUID(sToken);
@@ -558,18 +568,18 @@ public class AuthResource {
 	@GET
 	@Path("/validateNewUser")
 	@Produces({"application/xml", "application/json", "text/xml"})
+	//XXX change return type
 	public PrimitiveResult validateNewUser(@QueryParam("email") String sUserId, @QueryParam("validationCode") String sToken  ) {
 		//TODO log
 		
-		//TODO refactor to use null object @sergin13 @kr1zz
+		//TODO refactor to use null object
 		PrimitiveResult oResult = new PrimitiveResult();
 		oResult.setBoolValue(false);
 		
-		//TODO check input w/ CredentialPolicy
-		if(!Utils.userIdIsGoodEnough(sUserId)) {
+		if(!m_oCredentialPolicy.validUserId(sUserId)) {
 			return oResult;
 		}
-		if(Utils.isNullOrEmpty(sToken)) {
+		if(!m_oCredentialPolicy.validFirstAccessUUID(sToken)) {
 			return oResult;
 		}
 		
@@ -585,7 +595,7 @@ public class AuthResource {
 			return oResult;
 		} else if( !oUser.getValidAfterFirstAccess() ) {
 			String sDBToken = oUser.getFirstAccessUUID();
-			if(Utils.guidIsGoodEnough(sToken) ){
+			if(m_oCredentialPolicy.validFirstAccessUUID(sToken)) {
 				if(sDBToken.equals(sToken)) {
 					oUser.setValidAfterFirstAccess(true);
 					oUserRepo.UpdateUser(oUser);
@@ -602,7 +612,7 @@ public class AuthResource {
 	}
 	
 
-@POST
+	@POST
 	@Path("/editUserDetails")
 	@Produces({"application/json", "text/xml"})
 	public UserViewModel editUserDetails(@HeaderParam("x-session-token") String sSessionId, UserViewModel oInputUserVM ) {
@@ -610,19 +620,13 @@ public class AuthResource {
 		//note: sSessionId validity is automatically checked later
 		//note: only name and surname can be changed, so far. Other fields are ignored
 
-		//TODO refactor to use null object @sergin13 + @kr1zz
-		//TODO check w/ CredentialPolicy
-		//check name
-		if(Utils.isNullOrEmpty(oInputUserVM.getName())) {
-			//TODO log instead
-			System.err.println("AuthResource.EditUserDetails: oUserVM.getName() null or empty");
+		//XXX refactor to use null object @sergin13 + @kr1zz
+		
+		if(!m_oCredentialPolicy.validSessionId(sSessionId) || null == oInputUserVM ) {
 			return null;
 		}
 		
-		//check surname
-		if(Utils.isNullOrEmpty(oInputUserVM.getSurname())) {
-			//TODO log instead
-			System.err.println("AuthResource.EditUserDetails: oUserVM.getSurname() null or empty");
+		if(!m_oCredentialPolicy.satisfies(oInputUserVM)) {
 			return null;
 		}
 		
@@ -668,38 +672,24 @@ public class AuthResource {
 		
 		Wasdi.DebugLog("AuthService.ChangeUserPassword"  );
 		
-		//TODO refactor to use null object @sergin13 + @kr1zz
-		//TODO check w/ CredentialPolicy
+		//XXX refactor to use null object @sergin13 + @kr1zz
 		PrimitiveResult oResult = new PrimitiveResult();
 		oResult.setBoolValue(false);
 		
 		//input validation
-		//(just oChPasswViewModel, sSessionId validity is automatically checked later on)
-		if(null == oChPasswViewModel) {
-			oResult.setStringValue("AuthService.ChangeUserPassword: null ChangeUserPasswordViewModel");
-			//TODO log instead
-			System.err.println(oResult.getStringValue());
-			return oResult;
-		}
-		if(null == oChPasswViewModel.getNewPassword() ) {
-			oResult.setStringValue("AuthService.ChangeUserPassword: null new password!");
-			//TODO log instead
-			System.err.println(oResult.getStringValue());
-			return oResult;
-		}
-		if(null == oChPasswViewModel.getCurrentPassword() ) {
-			oResult.setStringValue("AuthService.ChangeUserPassword: null current password!");
-			//TODO log instead
-			System.err.println(oResult.getStringValue());
-			return oResult;
-		}
-		if( Utils.passwordIsGoodEnough(oChPasswViewModel.getNewPassword()) == false) {
-			oResult.setStringValue("AuthService.ChangeUserPassword: password is too short");
+		if(null == oChPasswViewModel || !m_oCredentialPolicy.validSessionId(sSessionId)) {
+			oResult.setStringValue("AuthService.ChangeUserPassword: invalid input");
 			//TODO log instead
 			System.err.println(oResult.getStringValue());
 			return oResult;
 		}
 		
+		if(!m_oCredentialPolicy.satisfies(oChPasswViewModel)) {
+			oResult.setStringValue("AuthService.ChangeUserPassword: invalid input");
+			//TODO log instead
+			System.err.println(oResult.getStringValue());
+			return oResult;
+		}
 		
 		try {
 			//validity is automatically checked		
@@ -736,7 +726,8 @@ public class AuthResource {
 	
 	private void sendRegistrationEmail(User oUser, String sLink) {
 		//TODO log
-		//TODO check w/ CredentialPolicy
+		//MAYBE validate input
+		//MAYBE check w/ CredentialPolicy
 		try {
 			
 			String sMercuriusAPIAddress = m_oServletConfig.getInitParameter("mercuriusAPIAddress");
@@ -776,11 +767,11 @@ public class AuthResource {
 	}
 	
 	
-	//TODO link to a client's page
 	private String buildRegistrationLink(User oUser) {
-		//MAYBE check w/ CredentialPolicy 
+		//TODO log
 		String sResult = "";
-		
+		//MAYBE validate input	
+		//TODO link to a client's page
 		String sAPIUrl =  m_oServletConfig.getInitParameter("REGISTRATION_API_URL");
 		String sUserId = "email=" + oUser.getUserId();
 		String sToken = "validationCode=" + oUser.getFirstAccessUUID();
@@ -793,8 +784,13 @@ public class AuthResource {
 
 	private void sendPasswordEmail(String sRecipientEmail, String sAccount, String sPassword) {
 		//TODO log
-		//MAYBE refactor (?) to use null object @sergin13 + @kr1zz (?)
-		//TODO check w/ CredentialPolicy
+		if(null == sRecipientEmail || null == sPassword ) {
+			//TODO log instead
+			System.err.println("AuthResource.sendPasswordEmail: null input, not enough information to send email");
+			return;
+		}
+		//XXX refactor (?) to use null object @sergin13 + @kr1zz (?)
+		//maybe check w/ CredentialPolicy
 		//send email with new password
 		String sMercuriusAPIAddress = m_oServletConfig.getInitParameter("mercuriusAPIAddress");
 		MercuriusAPI oAPI = new MercuriusAPI(sMercuriusAPIAddress);			

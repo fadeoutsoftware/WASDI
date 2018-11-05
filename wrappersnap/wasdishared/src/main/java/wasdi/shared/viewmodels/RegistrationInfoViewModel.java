@@ -11,7 +11,21 @@ public class RegistrationInfoViewModel {
     private String password;
     private String googleIdToken;
    
+    //singleton pattern
+    private static  RegistrationInfoViewModel s_oInvalid;
     
+    static {
+    	s_oInvalid = new RegistrationInfoViewModel();
+    	s_oInvalid.userId = null;
+    	s_oInvalid.name = null;
+    	s_oInvalid.surname = null;
+    	s_oInvalid.password = null;
+    	s_oInvalid.googleIdToken = null;
+    }
+    
+    public static RegistrationInfoViewModel getInvalid() {
+		return s_oInvalid;
+	}
     
 	public String getUserId() {
 		return userId;
@@ -43,4 +57,5 @@ public class RegistrationInfoViewModel {
 	public void setGoogleIdToken(String googleIdToken) {
 		this.googleIdToken = googleIdToken;
 	}
+	
 }

@@ -121,6 +121,7 @@ public class Utils {
         }
     }
     
+    //XXX remove if not used
     public static boolean isValidEmail(String sEmail)
     {
     	boolean bIsValid = false;
@@ -144,43 +145,4 @@ public class Utils {
 		 return String.format("%.1f %sB", bytes / Math.pow(unit, exp), pre);
 	}
 	
-	
-	private static int MINUSERIDLENGTH = 4;
-	public static Boolean userIdIsGoodEnough(String sUserId) {
-		Boolean res = true;
-		if(null == sUserId) {
-			System.err.println("wasdi.shared.Utils.validateUserId: sUserId is null");
-			res = false;
-		} else if(sUserId.length() < MINUSERIDLENGTH ) {
-			System.err.println("wasdi.shared.Utils.validateUserId: sUserId is too short (has length: "+sUserId.length() +")");
-			res = false;
-		}
-		return res;
-	}
-	
-	private static int MINPASSWORDLENGTH = 8;
-	public static Boolean passwordIsGoodEnough(String sPassword) {
-		Boolean res = true;
-		if(null == sPassword) {
-			System.err.println("wasdi.shared.Utils.validateUserId: sPassword is null");
-			res = false;
-		} else if(sPassword.length() < MINPASSWORDLENGTH) {
-			System.err.println("wasdi.shared.Utils.validateUserId: sPassWord is too short (has length: "+ sPassword.length()+")");
-			res = false;
-		}
-		return res;
-	}
-	
-	//UUID are 36 characters long (32 alphanumeric + 4 hyphens "-" )
-	public static int MINGUIDLENGTH = 31;
-	public static Boolean guidIsGoodEnough(String sTokenId ) {
-		Boolean res = true;
-		if(null == sTokenId ) {
-			System.err.println("wasdi.shared.Utils.validateSessionId: sTokenId is null");
-			res = false;
-		} else if(sTokenId.length() < MINGUIDLENGTH ) {
-			System.err.println("wasdi.shared.Utils.validateSessionId: sTokenId is too short");
-		}
-		return res;
-	}
 }
