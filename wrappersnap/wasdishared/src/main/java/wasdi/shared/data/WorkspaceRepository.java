@@ -5,6 +5,7 @@ import com.mongodb.client.FindIterable;
 import com.mongodb.client.result.DeleteResult;
 import org.bson.Document;
 import wasdi.shared.business.Workspace;
+import wasdi.shared.viewmodels.WorkspaceListInfoViewModel;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -131,4 +132,32 @@ public class WorkspaceRepository extends  MongoRepository{
 
         return 0;
     }
+
+	public ArrayList<Workspace> getWorkspaceListByProductName(String sProductName) {
+		
+		final ArrayList<Workspace> aoReturnList = new ArrayList<Workspace>();
+        try {
+
+            FindIterable<Document> oWSDocuments = getCollection("workspaces").find(new Document("productName", sProductName));
+
+            oWSDocuments.forEach(new Block<Document>() {
+                public void apply(Document document) {
+                    String sJSON = document.toJson();
+                    Workspace oWorkspace = null;
+                    try {
+                        oWorkspace = s_oMapper.readValue(sJSON,Workspace.class);
+                        aoReturnList.add(oWorkspace);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+
+                }
+            });
+
+        } catch (Exception oEx) {
+            oEx.printStackTrace();
+        }
+
+        return aoReturnList;
+	}
 }
