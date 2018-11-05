@@ -8,6 +8,18 @@ public class ChangeUserPasswordViewModel {
     private String currentPassword;
     private String newPassword;
     
+    private static ChangeUserPasswordViewModel s_oInvalid;
+    
+    static {
+    	s_oInvalid = new ChangeUserPasswordViewModel();
+    	s_oInvalid.currentPassword = null;
+    	s_oInvalid.newPassword = null;
+    }
+    
+    public static ChangeUserPasswordViewModel getInvalid() {
+		return s_oInvalid;
+	}
+    
 	public String getCurrentPassword() {
 		return currentPassword;
 	}

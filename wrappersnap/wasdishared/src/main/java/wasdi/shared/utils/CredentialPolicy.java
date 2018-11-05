@@ -4,7 +4,9 @@ import org.apache.commons.math3.exception.NullArgumentException;
 import org.apache.commons.validator.routines.EmailValidator;
 
 import wasdi.shared.business.User;
+import wasdi.shared.viewmodels.ChangeUserPasswordViewModel;
 import wasdi.shared.viewmodels.LoginInfo;
+import wasdi.shared.viewmodels.RegistrationInfoViewModel;
 import wasdi.shared.viewmodels.UserViewModel;
 
 public class CredentialPolicy {
@@ -35,7 +37,7 @@ public class CredentialPolicy {
         return  false;
     }
 	
-	private Boolean validPassword(String sPassword ) {
+	public Boolean validPassword(String sPassword ) {
 		if(isNullOrEmpty(sPassword)) {
 			return false;
 		}
@@ -107,13 +109,47 @@ public class CredentialPolicy {
 		}
 	}
 	
+	private boolean validAuthServiceProvider(String sAuthServiceProvider) {
+		if(isNullOrEmpty(sAuthServiceProvider)) {
+			return false;
+		} else {//TODO check how to validate if provider is google @sergin13 @kr1zz
+			 String sGoogle = new String("google");
+			 if(sAuthServiceProvider.toLowerCase().equals(sGoogle.toLowerCase())) {
+				 return true;
+			 } else {
+				 return false;
+			 }
+		}
+	}
+	
+	private Boolean validValidAfterFirstAccess(Boolean bValid ) {
+		if (null == bValid) {
+			return false;
+		} else {
+			//the flag is valid whether it is both true or false
+			return true;
+		}
+	}
+	
+	public Boolean validFirstAccessUUID(String sUUID) {
+		if(isNullOrEmpty(sUUID)) {
+			return false;
+		} else if(sUUID.length() < MINGUIDLENGTH ) {
+			return false;
+		} else {
+			return true;
+		}
+	}
+	
+	
+// begin satisfaction checks 
+	
 	
 	public Boolean satisfies( LoginInfo oLoginInfo ) {
-		//TODO check after refactoring: due to googleId modifications these conditions may change
 		if(null == oLoginInfo) {
 			throw new NullArgumentException();
 		}
-		
+		//TODO check after refactoring: due to googleId modifications these conditions may change		
 		if( validGoogleIdToken(oLoginInfo.getGoogleIdToken()) ) {
 			return true;
 		} else if( !validUserId(oLoginInfo.getUserId() )) {
@@ -143,15 +179,58 @@ public class CredentialPolicy {
 	}
 	
 	public boolean satisfies(User oUser) {
-		//TODO implement (just a stub)
 		if(null==oUser) {
 			throw new NullArgumentException();
 		}
-		if(null==oUser.getUserId()) {
+		//TODO check after refactoring: due to googleId modifications these conditions may change
+		if(validAuthServiceProvider(oUser.getAuthServiceProvider())) {
+			return true;
+		} else if(!validUserId( oUser.getUserId() )) {
+			return false;
+		} else if( !validName(oUser.getName())) {
+			return false;
+		} else if( !validSurname(oUser.getSurname())) {
+			return false;
+		} else if( !validPassword(oUser.getPassword())) {
+			return false;
+		} else if( !validValidAfterFirstAccess(oUser.getValidAfterFirstAccess())) {
+			return false;
+		} else if( !validFirstAccessUUID(oUser.getFirstAccessUUID())) {
+			return false;
+		} else {
+			return true;
+		}
+	}
+
+	public Boolean satisfies(RegistrationInfoViewModel oRInfo) {
+		if(null == oRInfo) {
+			throw new NullArgumentException();
+		}
+		//TODO check after refactoring: due to googleId modifications these conditions may change
+		if(validGoogleIdToken(oRInfo.getGoogleIdToken())) {
+			return true;
+		} else if(!validUserId(oRInfo.getUserId())) {
+			return false;
+		} else if(!validName(oRInfo.getName())) {
+			return false;
+		} else if(!validSurname(oRInfo.getSurname())) {
+			return false;
+		} else if(!validPassword(oRInfo.getPassword())) {
+			return false;
+		} else {
+			return true;
+		}
+	}
+
+	public Boolean satisfies(ChangeUserPasswordViewModel oChangeUserPassword) {
+		if(null == oChangeUserPassword) {
+			throw new NullArgumentException();
+		}
+		if(validPassword(oChangeUserPassword.getCurrentPassword()) && validPassword(oChangeUserPassword.getNewPassword())) {
+			return true;
+		} else {
 			return false;
 		}
-		return false;
 	}
-	
-	//TODO implement for RegistrationInfoViewModel
+
 }

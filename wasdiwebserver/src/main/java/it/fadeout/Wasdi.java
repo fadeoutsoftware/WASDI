@@ -38,6 +38,7 @@ import wasdi.shared.business.UserSession;
 import wasdi.shared.data.MongoRepository;
 import wasdi.shared.data.SessionRepository;
 import wasdi.shared.data.UserRepository;
+import wasdi.shared.utils.CredentialPolicy;
 import wasdi.shared.utils.Utils;
 
 public class Wasdi extends Application {
@@ -77,6 +78,8 @@ public class Wasdi extends Application {
 	 */
 	public static String s_sDebugPassword = "password";
 
+	//XXX replace with dependency injection
+	private static CredentialPolicy m_oCredentialPolicy = new CredentialPolicy();
 	
 	@Override
 	public Set<Class<?>> getClasses() {
@@ -254,9 +257,10 @@ public class Wasdi extends Application {
 	 * @return
 	 */
 	public static User GetUserFromSession(String sSessionId){
+
 		
 		//validate sSessionId
-    	if(!Utils.guidIsGoodEnough(sSessionId)) {
+    	if(!m_oCredentialPolicy.validSessionId(sSessionId)) {
     		return null;
     	}
 		
