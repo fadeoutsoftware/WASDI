@@ -391,7 +391,6 @@ public class AuthResource {
 		try 
 		{	
 			
-			
 			final NetHttpTransport transport = GoogleNetHttpTransport.newTrustedTransport();
 			final JacksonFactory jsonFactory = JacksonFactory.getDefaultInstance();
 			GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(transport, jsonFactory)
@@ -410,38 +409,38 @@ public class AuthResource {
 			  Payload oPayload = oIdToken.getPayload();
 
 			  // Print user identifier
-			  String userId = oPayload.getSubject();
+			  String sGoogleIdToken = oPayload.getSubject();
 			 
 			  // Get profile information from payload
 			  String sEmail = oPayload.getEmail();
 			  
-			 /* boolean bEmailVerified = Boolean.valueOf(oPayload.getEmailVerified());
-			  String sName = (String) oPayload.get("name");
-			  String sPictureUrl = (String) oPayload.get("picture");
-			  String sLocale = (String) oPayload.get("locale");
-			  String sGivenName = (String) oPayload.get("given_name");
-			  String sFamilyName = (String) oPayload.get("family_name");*/
+			 // boolean bEmailVerified = Boolean.valueOf(oPayload.getEmailVerified());
+			 // String sName = (String) oPayload.get("name");
+			 // String sPictureUrl = (String) oPayload.get("picture");
+			 // String sLocale = (String) oPayload.get("locale");
+			 // String sGivenName = (String) oPayload.get("given_name");
+			 // String sFamilyName = (String) oPayload.get("family_name");
 			  
 			  // store profile information and create session
 			  //TODO log instead
-			  System.out.println("AuthResource.LoginGoogleUser: requested access from " + userId);
+			  System.out.println("AuthResource.LoginGoogleUser: requested access from " + sGoogleIdToken);
 			
 
 			  UserRepository oUserRepository = new UserRepository();
 			  String sAuthProvider = "google";
-			  User oWasdiUser = oUserRepository.GoogleLogin(userId , sEmail, sAuthProvider);
+			  User oWasdiUser = oUserRepository.GoogleLogin(sGoogleIdToken , sEmail, sAuthProvider);
 			  //save new user 
 			  if(oWasdiUser == null)
 			  {
 				  User oUser = new User();
 				  oUser.setAuthServiceProvider(sAuthProvider);
-				  oUser.setUserId(userId);
-				  
+				  oUser.setUserId(sEmail);
+				  oUser.setGoogleIdToken(sGoogleIdToken);
 				  if(oUserRepository.InsertUser(oUser) == true)
 				  {
 					  //the user is stored in DB
 					  //get user from database (i do it only for consistency)
-					  oWasdiUser = oUserRepository.GoogleLogin(userId , sEmail, sAuthProvider);
+					  oWasdiUser = oUserRepository.GoogleLogin(sGoogleIdToken , sEmail, sAuthProvider);
 				  }
 			  }
 			  
