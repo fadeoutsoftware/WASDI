@@ -23,15 +23,19 @@ import wasdi.shared.business.DownloadedFile;
 import wasdi.shared.business.ProductWorkspace;
 import wasdi.shared.business.PublishedBand;
 import wasdi.shared.business.User;
+import wasdi.shared.business.UserSession;
 import wasdi.shared.business.Workspace;
 import wasdi.shared.business.WorkspaceSharing;
 import wasdi.shared.data.DownloadedFilesRepository;
 import wasdi.shared.data.ProductWorkspaceRepository;
 import wasdi.shared.data.PublishedBandsRepository;
+import wasdi.shared.data.SessionRepository;
 import wasdi.shared.data.WorkspaceRepository;
 import wasdi.shared.data.WorkspaceSharingRepository;
 import wasdi.shared.geoserver.GeoServerManager;
+import wasdi.shared.utils.CredentialPolicy;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.WorkspacePolicy;
 import wasdi.shared.viewmodels.PrimitiveResult;
 import wasdi.shared.viewmodels.WorkspaceEditorViewModel;
 import wasdi.shared.viewmodels.WorkspaceListInfoViewModel;
@@ -39,9 +43,62 @@ import wasdi.shared.viewmodels.WorkspaceListInfoViewModel;
 @Path("/ws")
 public class WorkspaceResource {
 
+	private CredentialPolicy m_oCredentialPolicy = new CredentialPolicy();
+	private WorkspacePolicy m_oWorkspacePolicy = new WorkspacePolicy();
+	
 	@Context
 	ServletConfig m_oServletConfig;
 
+	@GET
+	@Path("/workspacelistbyproductname")
+	@Produces({"application/xml", "application/json", "text/xml"})
+	public ArrayList<WorkspaceListInfoViewModel> getWorkspaceListByProductName(
+			@HeaderParam("x-session-token") String sSessionId,
+			@QueryParam("workspace") String sProductName) {
+		Wasdi.DebugLog("WorkspaceResource.getWorkspaceListByProductName");
+		
+		//input validation
+		if(null == sSessionId || null == sProductName) {
+			Wasdi.DebugLog("WorkspaceResource.getWorkspaceListByProductName: invalid input");
+			return null;
+		} else if( !m_oCredentialPolicy.validSessionId(sSessionId)) {
+			Wasdi.DebugLog("WorkspaceResource.getWorkspaceListByProductName: invalid sSessionId");
+			return null;
+		} else if(m_oWorkspacePolicy.validProductName(sProductName)) {
+			Wasdi.DebugLog("WorkspaceResource.getWorkspaceListByProductName: invalid sProductName");
+			return null;
+		}
+		
+		//session validation
+		SessionRepository oSessionRepo = new SessionRepository();
+		UserSession oUserSession = oSessionRepo.GetSession(sSessionId);
+		if(null == oUserSession) {
+			Wasdi.DebugLog("WorkspaceResource.getWorkspaceListByProductName: invalid sSessionId");
+			return null;
+		}
+		
+		//retrieve workspace list and check it's not null
+		WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
+		ArrayList<Workspace> aoWSList = oWorkspaceRepository.getWorkspaceListByProductName(sProductName);
+		if(null == aoWSList) {
+			return null;
+		}
+		
+		//create and populate result 
+		ArrayList<WorkspaceListInfoViewModel> aoResult = new ArrayList<WorkspaceListInfoViewModel>(); 
+		for (Workspace oWorkspace : aoWSList) {
+			if(null != oWorkspace) {
+				WorkspaceListInfoViewModel oTemp = new WorkspaceListInfoViewModel();
+				oTemp.setWorkspaceId(oWorkspace.getWorkspaceId());
+				oTemp.setWorkspaceName(oWorkspace.getName());
+				oTemp.setOwnerUserId(oWorkspace.getUserId());
+			} else {
+				Wasdi.DebugLog("WorkspaceResource.getWorkspaceListByProductName: found null workspace from DB");
+			}
+		}
+
+		return aoResult;
+	}
 
 	@GET
 	@Path("/byuser")
