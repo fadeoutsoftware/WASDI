@@ -11,7 +11,7 @@ public class UserViewModel {
     private String name;
     private String surname;
     private String sessionId;
-	
+	private String authProvider;
 	//singleton pattern
 	private static UserViewModel s_oInvalid;
 	
@@ -21,6 +21,7 @@ public class UserViewModel {
     	oViewModel.name = null;
     	oViewModel.surname = null;
     	oViewModel.sessionId = null;
+    	oViewModel.authProvider = null;
     	s_oInvalid = oViewModel;
     }
     
@@ -37,7 +38,8 @@ public class UserViewModel {
         if( this.userId.equals( oUserViewModel.userId ) &&
         	this.name.equals( oUserViewModel.name ) &&
         	this.surname.equals( oUserViewModel.surname ) &&
-        	this.sessionId.equals( oUserViewModel.sessionId ) ) {
+        	this.sessionId.equals( oUserViewModel.sessionId ) &&
+        	this.authProvider.equals(oUserViewModel.authProvider) ) {
         	return true;
         } else
         	return false;
@@ -74,4 +76,12 @@ public class UserViewModel {
     public void setSessionId(String sessionId) {
         this.sessionId = sessionId;
     }
+
+	public String getAuthProvider() {
+		return authProvider;
+	}
+
+	public void setAuthProvider(String authProvider) {
+		this.authProvider = authProvider;
+	}
 }
