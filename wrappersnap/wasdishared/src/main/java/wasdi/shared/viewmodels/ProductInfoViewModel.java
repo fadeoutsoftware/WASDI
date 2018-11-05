@@ -5,7 +5,11 @@ import java.util.Date;
 public class ProductInfoViewModel {
 	
 	Date date;
-	String originalname, name, polarization, relOrbit, provider;
+	String 	originalname,
+			name,
+			polarization,
+			relOrbit,
+			provider;
 	
 	public Date getDate() {
 		return date;

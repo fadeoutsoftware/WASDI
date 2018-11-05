@@ -616,7 +616,7 @@ public class AuthResource {
 	@Path("/editUserDetails")
 	@Produces({"application/json", "text/xml"})
 	public UserViewModel editUserDetails(@HeaderParam("x-session-token") String sSessionId, UserViewModel oInputUserVM ) {
-		Wasdi.DebugLog("AuthService.signin"  );
+		Wasdi.DebugLog("AuthService.editUserDetails");
 		//note: sSessionId validity is automatically checked later
 		//note: only name and surname can be changed, so far. Other fields are ignored
 
@@ -725,7 +725,7 @@ public class AuthResource {
 	} 	
 	
 	private void sendRegistrationEmail(User oUser, String sLink) {
-		//TODO log
+		Wasdi.DebugLog("AuthResource.sendRegistrationEmail");
 		//MAYBE validate input
 		//MAYBE check w/ CredentialPolicy
 		try {
@@ -761,7 +761,7 @@ public class AuthResource {
 			oAPI.sendMailDirect(oUser.getUserId(), oMessage);
 		} catch(Exception e) {
 			//TODO log instead
-			System.err.println(e.getMessage() );
+			System.err.println("\n\n"+e.getMessage()+"\n\n" );
 			return;
 		}
 	}
