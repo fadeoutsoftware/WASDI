@@ -9,6 +9,21 @@ public class PrimitiveResult {
     private String StringValue;
     private Double DoubleValue;
     private Boolean BoolValue;
+    
+    //singleton pattern
+    private static PrimitiveResult s_oInvalid;
+    
+    static {
+    	s_oInvalid = new PrimitiveResult();
+    	s_oInvalid.IntValue = null;
+    	s_oInvalid.StringValue = null;
+    	s_oInvalid.DoubleValue = null;
+    	s_oInvalid.BoolValue = false;
+    }
+    
+    public static PrimitiveResult getInvalid() {
+    	return s_oInvalid;
+    }
 
     public Integer getIntValue() {
         return IntValue;
