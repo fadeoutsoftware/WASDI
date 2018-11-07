@@ -776,6 +776,7 @@ public class AuthResource {
 	
 			Integer iMailReturned = 0;
 			iMailReturned = oAPI.sendMailDirect(oUser.getUserId(), oMessage);
+			System.out.println("AuthResource.sendRegistrationEmail: "+iMailReturned.toString());
 			//TODO inspect return message with true and fraudolent email addresses
 			//TODO take action depending on the return message
 		} catch(Exception e) {
