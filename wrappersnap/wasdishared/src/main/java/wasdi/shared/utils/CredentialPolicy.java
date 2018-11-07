@@ -76,7 +76,7 @@ public class CredentialPolicy {
 		}
 	}
 	
-	private Boolean validName(String sName) {
+	public Boolean validName(String sName) {
 		if(isNullOrEmpty(sName)) {
 			return false;
 		}
@@ -87,7 +87,7 @@ public class CredentialPolicy {
 		}
 	}
 	
-	private Boolean validSurname(String sSurname) {
+	public Boolean validSurname(String sSurname) {
 		if(isNullOrEmpty(sSurname)) {
 			return false;
 		}
