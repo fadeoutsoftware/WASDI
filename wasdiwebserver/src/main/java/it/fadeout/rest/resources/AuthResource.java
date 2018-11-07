@@ -198,35 +198,41 @@ public class AuthResource {
 		
 		if(null == sSessionId) {
 			Wasdi.DebugLog("AuthResource.CheckSession: null sSessionId");
-			//XXX switch to the version below: @sergin13 + @kr1zz
+			//XXX change frontend to switch to the version below: @sergin13 + @kr1zz
 			return null;
 			//return UserViewModel.getInvalid();
 		}
 		
-		PrimitiveResult oResult = new PrimitiveResult();
-		//XXX refactor oResult in order to use null object @sergin13 + @kr1zz
-		oResult.setBoolValue(false);
-		
 		
 		if(!m_oCredentialPolicy.validSessionId(sSessionId)) {
-			return oResult;
+			return null;
+			//XXX change frontend to switch to the version below: @sergin13 + @kr1zz 
+			//return oResult;
 		}
-		
+		PrimitiveResult oResult = PrimitiveResult.getInvalid();
 		SessionRepository oSessionRepository = new SessionRepository();
 		UserSession oSession = oSessionRepository.GetSession(sSessionId);
 		if(oSession != null) {
+			oResult = new PrimitiveResult();
+			oResult.setStringValue(sSessionId);
 			if(oSessionRepository.DeleteSession(oSession)) {
 				//TODO log instead
 				System.out.println("AuthService.Logout: Session data base deleted.");
 				oResult.setBoolValue(true);
-			}
-			else {
+			} else {
 				//TODO log instead
 				System.out.println("AuthService.Logout: Error deleting session data base.");
+				//TODO newly added, check the frontend can handle this: @sergin13 + @kr1zz
+				oResult.setBoolValue(false);
 			}
 			
+		} else {
+			//TODO newly added, check the frontend can handle this: @sergin13 + @kr1zz
+			//XXX change frontend to switch to the version below: @sergin13 + @kr1zz
+			return null;
+			//return UserViewModel.getInvalid();
 		}
-		
+		//TODO check the frontend can handle this: @sergin13 + @kr1zz
 		return oResult;
 	}	
 
@@ -243,11 +249,12 @@ public class AuthResource {
 		}
 		
 		User oUser = Wasdi.GetUserFromSession(sSessionId);
-		//TODO implement code to use version below
-		if (oUser == null || m_oCredentialPolicy.validUserId(oUser.getUserId())) {
+		if (oUser == null  ) {
+			return Response.status(Status.UNAUTHORIZED).build();
+		} else if(!m_oCredentialPolicy.satisfies(oUser)) {
 			return Response.status(Status.UNAUTHORIZED).build();
 		}
-		//if(!m_oCredentialPolicy.satisfies(oUser)) {return Response.status(Status.UNAUTHORIZED).build();}
+		
 		String sAccount = oUser.getUserId();
 		//TODO read from servlet config file
 		String wsAddress = m_oServletConfig.getInitParameter("sftpManagementWSServiceAddress");
@@ -276,9 +283,13 @@ public class AuthResource {
 		Wasdi.DebugLog("AuthService.ExistsSftpAccount");
 		
 		User oUser = Wasdi.GetUserFromSession(sSessionId);
-		//TODO implement code to use version below
-		if (oUser == null || m_oCredentialPolicy.validUserId(oUser.getUserId())) { return false; }
-		//if(!m_oCredentialPolicy.satisfies(oUser)) {return false;}
+		if (oUser == null) {
+			//TODO same comment at the beginning: is this the appropriate semantics? @sergin13 + @kr1zz maybe change return type?
+			return false;
+		} else if(!m_oCredentialPolicy.satisfies(oUser)) {
+			//TODO same comment at the beginning: is this the appropriate semantics? @sergin13 + @kr1zz maybe change return type?
+			return false;
+		}
 		String sAccount = oUser.getUserId();		
 		
 		//TODO read param from servlet config file
@@ -300,9 +311,11 @@ public class AuthResource {
 		}
 		
 		User oUser = Wasdi.GetUserFromSession(sSessionId);
-		//TODO implement to use version below
-		if (oUser == null || m_oCredentialPolicy.validUserId(oUser.getUserId())) { return null; }
-		//if(!m_oCredentialPolicy.satisfies(oUser)) {return null;}	
+		if (oUser == null) {
+			return null;
+		} else if(!m_oCredentialPolicy.satisfies(oUser)) {
+			return null;
+		}	
 		String sAccount = oUser.getUserId();		
 		
 		//TODO read param from servlet config file
@@ -318,13 +331,21 @@ public class AuthResource {
 	@Path("/upload/removeaccount")
 	@Produces({"application/json", "text/xml"})
 	public Response RemoveSftpAccount(@HeaderParam("x-session-token") String sSessionId) {
-		//TODO check input: what shall we return if sSessionId is null/invalid? BAD REQUEST? @sergin13 + @kr1zz
 		Wasdi.DebugLog("AuthService.RemoveSftpAccount");
+
+		//TODO newly added: check if the frontend can handle these 2 @sergin13 @kr1zz
+		if( null==sSessionId ) {
+			return Response.status(Status.BAD_REQUEST).build();
+		} else if( !m_oCredentialPolicy.validSessionId(sSessionId)) {
+			return Response.status(Status.BAD_REQUEST).build();
+		}
 		
 		User oUser = Wasdi.GetUserFromSession(sSessionId);
-		//TODO implement to use below version
-		if (oUser == null || m_oCredentialPolicy.validUserId(oUser.getUserId())) return Response.status(Status.UNAUTHORIZED).build();
-		//if(!m_oCredentialPolicy.satisfies(oUser)) {return Response.status(Status.UNAUTHORIZED).build();}
+		if (oUser == null) {
+			return Response.status(Status.UNAUTHORIZED).build();
+		} else if(!m_oCredentialPolicy.satisfies(oUser)) {
+			return Response.status(Status.UNAUTHORIZED).build();
+		}
 		String sAccount = oUser.getUserId();
 		
 		String wsAddress = m_oServletConfig.getInitParameter("sftpManagementWSServiceAddress");
@@ -345,7 +366,6 @@ public class AuthResource {
 		}
 		
 		User oUser = Wasdi.GetUserFromSession(sSessionId);
-		//TODO implement to use below version
 		if(null == oUser) {
 			return Response.status(Status.UNAUTHORIZED).build();
 		} else if( !m_oCredentialPolicy.satisfies(oUser)) {
@@ -377,10 +397,8 @@ public class AuthResource {
 	public UserViewModel LoginGoogleUser(LoginInfo oLoginInfo) {
 		Wasdi.DebugLog("AuthResource.CheckGoogleUserId");
 		//TODO captcha
-		//XXX refactor to use null object @sergin13 + @kr1zz
 		
-		UserViewModel oUserVM = new UserViewModel();
-		oUserVM.setUserId("");
+		UserViewModel oUserVM = UserViewModel.getInvalid();
 		if (oLoginInfo == null) {
 			return oUserVM;
 		}
@@ -458,6 +476,7 @@ public class AuthResource {
 					  }
 				  }
 
+				  oUserVM = new UserViewModel();
 				  oUserVM.setName(oWasdiUser.getName());
 				  oUserVM.setSurname(oWasdiUser.getSurname());
 				  oUserVM.setUserId(oWasdiUser.getUserId());
@@ -501,12 +520,10 @@ public class AuthResource {
 	@Produces({"application/json", "text/xml"})
 	public PrimitiveResult userRegistration(RegistrationInfoViewModel oRegistrationInfoViewModel) 
 	{	
-		Wasdi.DebugLog("AuthService.UserRegistration"  );
+		Wasdi.DebugLog("AuthService.UserRegistration");
 		//TODO captcha
 		
-		PrimitiveResult oResult = new PrimitiveResult();
-		//TODO refactor w/ null object
-		oResult.setBoolValue(false);
+		PrimitiveResult oResult = PrimitiveResult.getInvalid();
 		
 		if(null == oRegistrationInfoViewModel) {
 			return oResult;
@@ -539,7 +556,9 @@ public class AuthResource {
 					
 					if(oUserRepository.InsertUser(oNewUser) == true) {
 						//the user is stored in DB
+						oResult = new PrimitiveResult();
 						oResult.setBoolValue(true);
+						oResult.setStringValue(oNewUser.getUserId());
 					}
 					//build confirmation link
 					String sLink = buildRegistrationLink(oNewUser);
@@ -555,7 +574,6 @@ public class AuthResource {
 			catch(Exception e)
 			{
 				e.printStackTrace();
-				oResult.setBoolValue(false);
 			}
 
 		}
@@ -569,11 +587,9 @@ public class AuthResource {
 	@Produces({"application/xml", "application/json", "text/xml"})
 	//XXX change return type
 	public PrimitiveResult validateNewUser(@QueryParam("email") String sUserId, @QueryParam("validationCode") String sToken  ) {
-		//TODO log
-		
-		//TODO refactor to use null object
-		PrimitiveResult oResult = new PrimitiveResult();
-		oResult.setBoolValue(false);
+		Wasdi.DebugLog("AuthService.validateNewUser");
+	
+		PrimitiveResult oResult = PrimitiveResult.getInvalid();
 		
 		if(!m_oCredentialPolicy.validUserId(sUserId)) {
 			return oResult;
@@ -598,7 +614,9 @@ public class AuthResource {
 				if(sDBToken.equals(sToken)) {
 					oUser.setValidAfterFirstAccess(true);
 					oUserRepo.UpdateUser(oUser);
+					oResult = new PrimitiveResult();
 					oResult.setBoolValue(true);
+					oResult.setStringValue(oUser.getUserId());
 				} else {
 					//TODO log instead
 					System.err.println("AuthResources.validateNewUser: registration token mismatch");
@@ -671,25 +689,20 @@ public class AuthResource {
 		
 		Wasdi.DebugLog("AuthService.ChangeUserPassword"  );
 		
-		//XXX refactor to use null object @sergin13 + @kr1zz
-		PrimitiveResult oResult = new PrimitiveResult();
-		oResult.setBoolValue(false);
-		
 		//input validation
 		if(null == oChPasswViewModel || !m_oCredentialPolicy.validSessionId(sSessionId)) {
-			oResult.setStringValue("AuthService.ChangeUserPassword: invalid input");
 			//TODO log instead
-			System.err.println(oResult.getStringValue());
-			return oResult;
+			System.err.println("AuthService.ChangeUserPassword: invalid input");
+			return PrimitiveResult.getInvalid();
 		}
 		
 		if(!m_oCredentialPolicy.satisfies(oChPasswViewModel)) {
-			oResult.setStringValue("AuthService.ChangeUserPassword: invalid input");
 			//TODO log instead
-			System.err.println(oResult.getStringValue());
-			return oResult;
+			System.err.println("AuthService.ChangeUserPassword: invalid input\n");
+			return PrimitiveResult.getInvalid();
 		}
 		
+		PrimitiveResult oResult = PrimitiveResult.getInvalid();
 		try {
 			//validity is automatically checked		
 			User oUserId = Wasdi.GetUserFromSession(sSessionId);
@@ -711,6 +724,7 @@ public class AuthResource {
 				oUserId.setPassword(m_oPasswordAuthentication.hash(oChPasswViewModel.getNewPassword().toCharArray()));
 				UserRepository oUR = new UserRepository();
 				oUR.UpdateUser(oUserId);
+				oResult = new PrimitiveResult();
 				oResult.setBoolValue(true);
 			}
 		} catch(Exception e) {
@@ -738,13 +752,13 @@ public class AuthResource {
 			MercuriusAPI oAPI = new MercuriusAPI(sMercuriusAPIAddress);			
 			Message oMessage = new Message();
 			
-			//TODO let the servlet config handle the message subject title
+			//TODO read the message subject title from servlet config file
 			//e.g.
 			//String sTitle = m_oServletConfig.getInitParameter("sftpMailTitle");
 			String sTitle = "Welcome to WASDI";
 			oMessage.setTilte(sTitle);
 			
-			//TODO use the appropriate sender config
+			//TODO read the sender from the servlet config file
 			String sSender = m_oServletConfig.getInitParameter("sftpManagementMailSenser");
 			if (sSender==null) {
 				sSender = "adminwasdi@wasdi.org";
@@ -752,7 +766,7 @@ public class AuthResource {
 			oMessage.setSender(sSender);
 			
 			//String sMessage = m_oServletConfig.getInitParameter("sftpMailText");
-			//TODO let the servlet config handle the message body
+			//TODO read the message from the servlet config file
 			String sMessage = "Dear " + oUser.getName() + " " + oUser.getSurname() + ",\n welcome to WASDI.\n\n"+
 					"Please click on the link below to activate your account:\n\n" + 
 					sLink;
@@ -767,7 +781,7 @@ public class AuthResource {
 	
 	
 	private String buildRegistrationLink(User oUser) {
-		//TODO log
+		Wasdi.DebugLog("AuthResource.buildRegistrationLink");
 		String sResult = "";
 		//MAYBE validate input	
 		//TODO link to a client's page
@@ -782,7 +796,7 @@ public class AuthResource {
 
 
 	private void sendPasswordEmail(String sRecipientEmail, String sAccount, String sPassword) {
-		//TODO log
+		Wasdi.DebugLog("AuthResource.sendPasswordEmail");
 		if(null == sRecipientEmail || null == sPassword ) {
 			//TODO log instead
 			System.err.println("AuthResource.sendPasswordEmail: null input, not enough information to send email");
