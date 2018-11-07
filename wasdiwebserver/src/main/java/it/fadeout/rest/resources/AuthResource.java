@@ -163,21 +163,15 @@ public class AuthResource {
 		
 		if(null == sSessionId) {
 			Wasdi.DebugLog("AuthResource.CheckSession: null sSessionId");
-			//TODO switch to the version below: @sergin13 + @kr1zz
-			return null;
-			//return UserViewModel.getInvalid();
+			return UserViewModel.getInvalid();
 		}
 
 		User oUser = Wasdi.GetUserFromSession(sSessionId);
 		if (oUser == null) {
-			//TODO switch to the version below: @sergin13 + @kr1zz
-			return null;
-			//return UserViewModel.getInvalid();
+			return UserViewModel.getInvalid();
 			
 		} else if(!m_oCredentialPolicy.satisfies(oUser)) {
-			//TODO switch to the version below
-			return null;
-			//return UserViewModel.getInvalid();
+			return UserViewModel.getInvalid();
 		}
 		
 		UserViewModel oUserVM = new UserViewModel();
@@ -192,22 +186,18 @@ public class AuthResource {
 	@GET
 	@Path("/logout")
 	@Produces({"application/xml", "application/json", "text/xml"})
-	//MAYBE change return type @sergin13 @kr1zz
+	//MAYBEchange return type to http response @sergin13 @kr1zz 
 	public PrimitiveResult Logout(@HeaderParam("x-session-token") String sSessionId) {
 		Wasdi.DebugLog("AuthResource.Logout");
 		
 		if(null == sSessionId) {
 			Wasdi.DebugLog("AuthResource.CheckSession: null sSessionId");
-			//XXX change frontend to switch to the version below: @sergin13 + @kr1zz
-			return null;
-			//return UserViewModel.getInvalid();
+			return PrimitiveResult.getInvalid();
 		}
 		
 		
 		if(!m_oCredentialPolicy.validSessionId(sSessionId)) {
-			return null;
-			//XXX change frontend to switch to the version below: @sergin13 + @kr1zz 
-			//return oResult;
+			return PrimitiveResult.getInvalid();
 		}
 		PrimitiveResult oResult = PrimitiveResult.getInvalid();
 		SessionRepository oSessionRepository = new SessionRepository();
@@ -222,17 +212,12 @@ public class AuthResource {
 			} else {
 				//TODO log instead
 				System.out.println("AuthService.Logout: Error deleting session data base.");
-				//TODO newly added, check the frontend can handle this: @sergin13 + @kr1zz
 				oResult.setBoolValue(false);
 			}
 			
 		} else {
-			//TODO newly added, check the frontend can handle this: @sergin13 + @kr1zz
-			//XXX change frontend to switch to the version below: @sergin13 + @kr1zz
-			return null;
-			//return UserViewModel.getInvalid();
+			return PrimitiveResult.getInvalid();
 		}
-		//TODO check the frontend can handle this: @sergin13 + @kr1zz
 		return oResult;
 	}	
 
@@ -244,7 +229,7 @@ public class AuthResource {
 	public Response CreateSftpAccount(@HeaderParam("x-session-token") String sSessionId, String sEmail) {
 		Wasdi.DebugLog("AuthService.CreateSftpAccount: Called for Mail " + sEmail);
 		
-		if(! m_oCredentialPolicy.validSessionId(sSessionId) || m_oCredentialPolicy.validEmail(sEmail)) {
+		if(! m_oCredentialPolicy.validSessionId(sSessionId) || !m_oCredentialPolicy.validEmail(sEmail)) {
 			return Response.status(Status.BAD_REQUEST).build();
 		}
 		
@@ -278,17 +263,14 @@ public class AuthResource {
 	@GET
 	@Path("/upload/existsaccount")
 	@Produces({"application/json", "text/xml"})
-	public boolean ExixtsSftpAccount(@HeaderParam("x-session-token") String sSessionId) {
-		//TODO check input: what shall we return if sSessionId is null/invalid? false? @sergin13 + @kr1zz maybe change return type?
+	public Boolean ExixtsSftpAccount(@HeaderParam("x-session-token") String sSessionId) {
 		Wasdi.DebugLog("AuthService.ExistsSftpAccount");
 		
 		User oUser = Wasdi.GetUserFromSession(sSessionId);
 		if (oUser == null) {
-			//TODO same comment at the beginning: is this the appropriate semantics? @sergin13 + @kr1zz maybe change return type?
-			return false;
+			return null;
 		} else if(!m_oCredentialPolicy.satisfies(oUser)) {
-			//TODO same comment at the beginning: is this the appropriate semantics? @sergin13 + @kr1zz maybe change return type?
-			return false;
+			return null;
 		}
 		String sAccount = oUser.getUserId();		
 		
@@ -297,7 +279,13 @@ public class AuthResource {
 		if (wsAddress==null) wsAddress = "ws://localhost:6703"; 
 		SFTPManager oManager = new SFTPManager(wsAddress);
 
-		return oManager.checkUser(sAccount);
+		Boolean bRes = false;
+		try{
+			bRes = oManager.checkUser(sAccount);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return bRes;
 	}
 
 
@@ -332,8 +320,6 @@ public class AuthResource {
 	@Produces({"application/json", "text/xml"})
 	public Response RemoveSftpAccount(@HeaderParam("x-session-token") String sSessionId) {
 		Wasdi.DebugLog("AuthService.RemoveSftpAccount");
-
-		//TODO newly added: check if the frontend can handle these 2 @sergin13 @kr1zz
 		if( null==sSessionId ) {
 			return Response.status(Status.BAD_REQUEST).build();
 		} else if( !m_oCredentialPolicy.validSessionId(sSessionId)) {
@@ -585,12 +571,12 @@ public class AuthResource {
 	@GET
 	@Path("/validateNewUser")
 	@Produces({"application/xml", "application/json", "text/xml"})
-	//XXX change return type
 	public PrimitiveResult validateNewUser(@QueryParam("email") String sUserId, @QueryParam("validationCode") String sToken  ) {
 		Wasdi.DebugLog("AuthService.validateNewUser");
 	
 		PrimitiveResult oResult = PrimitiveResult.getInvalid();
 		
+		//TODO controlla che sia una mail plausibile 
 		if(!m_oCredentialPolicy.validUserId(sUserId)) {
 			return oResult;
 		}
@@ -636,15 +622,13 @@ public class AuthResource {
 		Wasdi.DebugLog("AuthService.editUserDetails");
 		//note: sSessionId validity is automatically checked later
 		//note: only name and surname can be changed, so far. Other fields are ignored
-
-		//XXX refactor to use null object @sergin13 + @kr1zz
 		
 		if(!m_oCredentialPolicy.validSessionId(sSessionId) || null == oInputUserVM ) {
-			return null;
+			return UserViewModel.getInvalid();
 		}
-		
+		//TODO change: only name and surname must be valid, the others will typically be null, including userId
 		if(!m_oCredentialPolicy.satisfies(oInputUserVM)) {
-			return null;
+			return UserViewModel.getInvalid();
 		}
 		
 		UserViewModel oOutputUserVM = null;
@@ -737,6 +721,7 @@ public class AuthResource {
 		
 	} 	
 	
+	//TODO change type to account for errors
 	private void sendRegistrationEmail(User oUser, String sLink) {
 		Wasdi.DebugLog("AuthResource.sendRegistrationEmail");
 		//MAYBE validate input
