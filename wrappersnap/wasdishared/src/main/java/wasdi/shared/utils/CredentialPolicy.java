@@ -152,9 +152,11 @@ public class CredentialPolicy {
 		//TODO check after refactoring: due to googleId modifications these conditions may change		
 		if( validGoogleIdToken(oLoginInfo.getGoogleIdToken()) ) {
 			return true;
-		} else if( !validUserId(oLoginInfo.getUserId() )) {
+		} else 
+			if( oLoginInfo.getUserId().isEmpty() == true ) {//TODO original !validUserId(oLoginInfo.getUserId(), in test database there aren't email
 			return false;
-		} else if(!validPassword(oLoginInfo.getUserPassword())) {
+		} else 
+		if(!validPassword(oLoginInfo.getUserPassword())) {
 			return false;
 		} else {
 			return true;
@@ -185,7 +187,7 @@ public class CredentialPolicy {
 		//TODO check after refactoring: due to googleId modifications these conditions may change
 		if(validAuthServiceProvider(oUser.getAuthServiceProvider())) {
 			return true;
-		} else if(!validUserId( oUser.getUserId() )) {
+		} else if( oUser.getUserId().isEmpty() == true ) {//TODO original !validUserId( oUser.getUserId(), in test database there aren't email
 			return false;
 		} else if( !validName(oUser.getName())) {
 			return false;
