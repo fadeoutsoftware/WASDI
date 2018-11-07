@@ -17,6 +17,8 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import org.openide.util.io.OperationException;
+
 import it.fadeout.Wasdi;
 import it.fadeout.business.PasswordAuthentication;
 import it.fadeout.mercurius.business.Message;
@@ -35,12 +37,14 @@ import wasdi.shared.viewmodels.PrimitiveResult;
 import wasdi.shared.viewmodels.RegistrationInfoViewModel;
 import wasdi.shared.viewmodels.UserViewModel;
 
+import com.bc.ceres.binio.DataAccessException;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken.Payload;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.jackson2.JacksonFactory;
+import com.sleepycat.je.OperationFailureException;
 
 
 @Path("/auth")
@@ -71,7 +75,7 @@ public class AuthResource {
 		UserViewModel oUserVM = UserViewModel.getInvalid();
 		try {
 			
-			//TODO log instead
+			//XXX log instead
 			System.out.println("AuthResource.Login: requested access from " + oLoginInfo.getUserId());
 			
 			UserRepository oUserRepository = new UserRepository();
@@ -116,24 +120,24 @@ public class AuthResource {
 							return oUserVM;
 						}
 						oUserVM.setSessionId(sSessionId);
-						//TODO log instead
+						//XXX log instead
 						System.out.println("AuthService.Login: access succeeded");
 					} else {
-						//TODO log instead
+						//XXX log instead
 						System.out.println("AuthService.Login: access failed");
 					}	
 				} else {
-					//TODO log instead
+					//XXX log instead
 					System.err.println("AuthService.Login: registration not validated yet");
 				}
 			} else {
-				//TODO log instead
+				//XXX log instead
 				System.err.println("AuthService.Login: registration flag is null");
 			}
 				
 		}
 		catch (Exception oEx) {
-			//TODO log instead
+			//XXX log instead
 			System.out.println("AuthService.Login: Error");
 			oEx.printStackTrace();
 			
@@ -149,7 +153,7 @@ public class AuthResource {
 		for (UserSession oUserSession : aoEspiredSessions) {
 			//delete data base session
 			if (!oSessionRepository.DeleteSession(oUserSession)) {
-				//TODO log instead
+				//XXX log instead
 				System.err.println("AuthService.Login: Error deleting session.");
 			}
 		}
@@ -206,11 +210,11 @@ public class AuthResource {
 			oResult = new PrimitiveResult();
 			oResult.setStringValue(sSessionId);
 			if(oSessionRepository.DeleteSession(oSession)) {
-				//TODO log instead
+				//XXX log instead
 				System.out.println("AuthService.Logout: Session data base deleted.");
 				oResult.setBoolValue(true);
 			} else {
-				//TODO log instead
+				//XXX log instead
 				System.out.println("AuthService.Logout: Error deleting session data base.");
 				oResult.setBoolValue(false);
 			}
@@ -250,7 +254,7 @@ public class AuthResource {
 		String sPassword = UUID.randomUUID().toString().split("-")[0];
 		
 		if (!oManager.createAccount(sAccount, sPassword)) {
-			//TODO log instead
+			//XXX log instead
 			System.out.println("AuthService.CreateSftpAccount: error creating sftp account");
 			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
 		}
@@ -279,7 +283,7 @@ public class AuthResource {
 		if (wsAddress==null) wsAddress = "ws://localhost:6703"; 
 		SFTPManager oManager = new SFTPManager(wsAddress);
 
-		Boolean bRes = false;
+		Boolean bRes = null;
 		try{
 			bRes = oManager.checkUser(sAccount);
 		} catch (Exception e) {
@@ -426,7 +430,7 @@ public class AuthResource {
 			 // String sFamilyName = (String) oPayload.get("family_name");
 			  
 			  // store profile information and create session
-			  //TODO log instead
+			  //XXX log instead
 			  System.out.println("AuthResource.LoginGoogleUser: requested access from " + sGoogleIdToken);
 			
 
@@ -457,7 +461,7 @@ public class AuthResource {
 				  for (UserSession oUserSession : aoEspiredSessions) {
 					  //delete data base session
 					  if (!oSessionRepository.DeleteSession(oUserSession)) {
-						  //TODO log instead
+						  //XXX log instead
 						  System.out.println("AuthService.LoginGoogleUser: Error deleting session.");
 					  }
 				  }
@@ -479,22 +483,21 @@ public class AuthResource {
 					  return oUserVM;
 
 				  oUserVM.setSessionId(sSessionId);
-				  //TODO log instead
+				  //XXX log instead
 				  System.out.println("AuthService.LoginGoogleUser: access succeeded");
 			  }
 			  else {
-				  //TODO log instead
+				  //XXX log instead
 				  System.out.println("AuthService.LoginGoogleUser: access failed");
 			  }
 
 			} 
 			else {
-				//TODO log instead
+				//XXX log instead
 				System.out.println("Invalid ID token.");
 			}
 			
 		} catch (Exception e) {
-			// TODO: handle exception
 			e.printStackTrace();
 		}
 		return oUserVM;
@@ -508,19 +511,15 @@ public class AuthResource {
 	{	
 		Wasdi.DebugLog("AuthService.UserRegistration");
 		//TODO captcha
-		
-		PrimitiveResult oResult = PrimitiveResult.getInvalid();
+		 
 		
 		if(null == oRegistrationInfoViewModel) {
-			return oResult;
-		}
-		
-		if(oRegistrationInfoViewModel != null)
-		{
+			return PrimitiveResult.getInvalid();
+		} else {
 			try
 			{
 				if(!m_oCredentialPolicy.satisfies(oRegistrationInfoViewModel)) {
-					return oResult;
+					return PrimitiveResult.getInvalid();
 				}
 				
 				UserRepository oUserRepository = new UserRepository();
@@ -540,18 +539,39 @@ public class AuthResource {
 					String sToken = UUID.randomUUID().toString();
 					oNewUser.setFirstAccessUUID(sToken);
 					
+					PrimitiveResult oResult = PrimitiveResult.getInvalid();
 					if(oUserRepository.InsertUser(oNewUser) == true) {
 						//the user is stored in DB
 						oResult = new PrimitiveResult();
 						oResult.setBoolValue(true);
 						oResult.setStringValue(oNewUser.getUserId());
+					} else {
+						//XXX log instead
+						System.err.println("AuthResource.userRegistration: insert new user in DB failed");
+						return PrimitiveResult.getInvalid();
 					}
 					//build confirmation link
 					String sLink = buildRegistrationLink(oNewUser);
-					//TODO log instead
+					//XXX log instead
 					System.out.println(sLink);
 					//send it via email to the user
-					sendRegistrationEmail(oNewUser, sLink);
+					Boolean bMailSuccess = sendRegistrationEmail(oNewUser, sLink);
+					
+					if(bMailSuccess){
+						return oResult;
+					} else {
+						//problem sending the email: either the given address is invalid
+						//or the mail server failed for some reason
+						//in both cases the user must be removed from DB
+						if( !oUserRepository.DeleteUser(oNewUser.getUserId()) ) {
+							throw new Exception("failed removal of newly created user");
+						}
+						//and the client should be informed
+						oResult = new PrimitiveResult();
+						oResult.setBoolValue(false);
+						oResult.setStringValue("cannot send email");
+						return oResult;
+					} 
 					
 					//uncomment only if email sending service does not work
 					//oResult = validateNewUser(oUserViewModel.getUserId(), sToken);
@@ -561,10 +581,8 @@ public class AuthResource {
 			{
 				e.printStackTrace();
 			}
-
 		}
-		
-		return oResult;
+		return PrimitiveResult.getInvalid();
 	}
 	
 	
@@ -576,7 +594,6 @@ public class AuthResource {
 	
 		PrimitiveResult oResult = PrimitiveResult.getInvalid();
 		
-		//TODO controlla che sia una mail plausibile 
 		if(!m_oCredentialPolicy.validUserId(sUserId)) {
 			return oResult;
 		}
@@ -587,11 +604,11 @@ public class AuthResource {
 		UserRepository oUserRepo = new UserRepository();
 		User oUser = oUserRepo.GetUser(sUserId);
 		if( null == oUser.getValidAfterFirstAccess()) {
-			//TODO log instead
+			//XXX log instead
 			System.err.println("AuthResources.validateNewUser: unexpected null first access validation flag");
 			return oResult;
 		} else if( oUser.getValidAfterFirstAccess() ) {
-			//TODO log instead
+			//XXX log instead
 			System.err.println("AuthResources.validateNewUser: unexpected true first access validation flag");
 			return oResult;
 		} else if( !oUser.getValidAfterFirstAccess() ) {
@@ -604,7 +621,7 @@ public class AuthResource {
 					oResult.setBoolValue(true);
 					oResult.setStringValue(oUser.getUserId());
 				} else {
-					//TODO log instead
+					//XXX log instead
 					System.err.println("AuthResources.validateNewUser: registration token mismatch");
 					return oResult;
 				}
@@ -626,12 +643,11 @@ public class AuthResource {
 		if(!m_oCredentialPolicy.validSessionId(sSessionId) || null == oInputUserVM ) {
 			return UserViewModel.getInvalid();
 		}
-		//TODO change: only name and surname must be valid, the others will typically be null, including userId
-		if(!m_oCredentialPolicy.satisfies(oInputUserVM)) {
+		//check only name and surname: they are the only fields that must be valid,
+		//the others will typically be null, including userId
+		if(!m_oCredentialPolicy.validName(oInputUserVM.getName()) || !m_oCredentialPolicy.validSurname(oInputUserVM.getSurname())) {
 			return UserViewModel.getInvalid();
 		}
-		
-		UserViewModel oOutputUserVM = null;
 		
 		try {
 			//note: session validity is automatically checked		
@@ -639,28 +655,30 @@ public class AuthResource {
 			if(null == oUserId) {
 				//Maybe the user didn't exist, or failed for some other reasons
 				System.err.print("Null user from session id (does the user exist?)");
-				return null;
+				return UserViewModel.getInvalid();
 			}
 	
+			//update
 			oUserId.setName(oInputUserVM.getName());
 			oUserId.setSurname(oInputUserVM.getSurname());
+			UserRepository oUR = new UserRepository();
+			oUR.UpdateUser(oUserId);
 			
-			oOutputUserVM = new UserViewModel();
+			//respond
+			UserViewModel oOutputUserVM = new UserViewModel();
 			oOutputUserVM.setUserId(oUserId.getUserId());
 			oOutputUserVM.setName(oUserId.getName());
 			oOutputUserVM.setSurname(oUserId.getSurname());
 			oOutputUserVM.setSessionId(sSessionId);
-			
-
-			UserRepository oUR = new UserRepository();
-			oUR.UpdateUser(oUserId);
+			return oOutputUserVM;
 			
 		} catch(Exception e) {
-			//TODO log instead
+			//XXX log instead
 			System.err.println("AuthService.ChangeUserPassword: Exception");
 			e.printStackTrace();
-		}		
-		return oOutputUserVM;
+		}
+		//should not get here
+		return UserViewModel.getInvalid();
 	}
 
 	
@@ -675,13 +693,13 @@ public class AuthResource {
 		
 		//input validation
 		if(null == oChPasswViewModel || !m_oCredentialPolicy.validSessionId(sSessionId)) {
-			//TODO log instead
+			//XXX log instead
 			System.err.println("AuthService.ChangeUserPassword: invalid input");
 			return PrimitiveResult.getInvalid();
 		}
 		
 		if(!m_oCredentialPolicy.satisfies(oChPasswViewModel)) {
-			//TODO log instead
+			//XXX log instead
 			System.err.println("AuthService.ChangeUserPassword: invalid input\n");
 			return PrimitiveResult.getInvalid();
 		}
@@ -692,7 +710,7 @@ public class AuthResource {
 			User oUserId = Wasdi.GetUserFromSession(sSessionId);
 			if(null == oUserId) {
 				//Maybe the user didn't exist, or failed for some other reasons
-				//TODO log instead
+				//XXX log instead
 				System.err.print("Null user from session id (does the user exist?)");
 				return oResult;
 			}
@@ -701,7 +719,7 @@ public class AuthResource {
 			Boolean bPasswordCorrect = m_oPasswordAuthentication.authenticate(oChPasswViewModel.getCurrentPassword().toCharArray(), sOldPassword);
 			
 			if( !bPasswordCorrect ) {
-				//TODO log instead
+				//XXX log instead
 				System.err.println("Wrong current password for user " + oUserId);
 				return oResult;
 			} else {
@@ -712,7 +730,7 @@ public class AuthResource {
 				oResult.setBoolValue(true);
 			}
 		} catch(Exception e) {
-			//TODO log instead
+			//XXX log instead
 			System.err.println("AuthService.ChangeUserPassword: Exception");
 			e.printStackTrace();
 		}
@@ -721,8 +739,7 @@ public class AuthResource {
 		
 	} 	
 	
-	//TODO change type to account for errors
-	private void sendRegistrationEmail(User oUser, String sLink) {
+	private Boolean sendRegistrationEmail(User oUser, String sLink) {
 		Wasdi.DebugLog("AuthResource.sendRegistrationEmail");
 		//MAYBE validate input
 		//MAYBE check w/ CredentialPolicy
@@ -730,9 +747,9 @@ public class AuthResource {
 			
 			String sMercuriusAPIAddress = m_oServletConfig.getInitParameter("mercuriusAPIAddress");
 			if(Utils.isNullOrEmpty(sMercuriusAPIAddress)) {
-				//TODO log instead
+				//XXX log instead
 				System.err.println("AuthResource.sendRegistrationEmail: sMercuriusAPIAddress is null");
-				return;
+				return false;
 			}
 			MercuriusAPI oAPI = new MercuriusAPI(sMercuriusAPIAddress);			
 			Message oMessage = new Message();
@@ -756,12 +773,18 @@ public class AuthResource {
 					"Please click on the link below to activate your account:\n\n" + 
 					sLink;
 			oMessage.setMessage(sMessage);
-			oAPI.sendMailDirect(oUser.getUserId(), oMessage);
+	
+			Integer iMailReturned = 0;
+			iMailReturned = oAPI.sendMailDirect(oUser.getUserId(), oMessage);
+			System.out.println("AuthResource.sendRegistrationEmail: "+iMailReturned.toString());
+			//TODO inspect return message with true and fraudolent email addresses
+			//TODO take action depending on the return message
 		} catch(Exception e) {
-			//TODO log instead
+			//XXX log instead
 			System.err.println("\n\n"+e.getMessage()+"\n\n" );
-			return;
+			return false;
 		}
+		return true;
 	}
 	
 	
@@ -769,7 +792,7 @@ public class AuthResource {
 		Wasdi.DebugLog("AuthResource.buildRegistrationLink");
 		String sResult = "";
 		//MAYBE validate input	
-		//TODO link to a client's page
+		//TODO link to a client's page @sergin13 @kr1zz
 		String sAPIUrl =  m_oServletConfig.getInitParameter("REGISTRATION_API_URL");
 		String sUserId = "email=" + oUser.getUserId();
 		String sToken = "validationCode=" + oUser.getFirstAccessUUID();
@@ -783,7 +806,7 @@ public class AuthResource {
 	private void sendPasswordEmail(String sRecipientEmail, String sAccount, String sPassword) {
 		Wasdi.DebugLog("AuthResource.sendPasswordEmail");
 		if(null == sRecipientEmail || null == sPassword ) {
-			//TODO log instead
+			//XXX log instead
 			System.err.println("AuthResource.sendPasswordEmail: null input, not enough information to send email");
 			return;
 		}
