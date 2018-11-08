@@ -17,8 +17,6 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
-import org.openide.util.io.OperationException;
-
 import it.fadeout.Wasdi;
 import it.fadeout.business.PasswordAuthentication;
 import it.fadeout.mercurius.business.Message;
@@ -37,14 +35,12 @@ import wasdi.shared.viewmodels.PrimitiveResult;
 import wasdi.shared.viewmodels.RegistrationInfoViewModel;
 import wasdi.shared.viewmodels.UserViewModel;
 
-import com.bc.ceres.binio.DataAccessException;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken.Payload;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.jackson2.JacksonFactory;
-import com.sleepycat.je.OperationFailureException;
 
 
 @Path("/auth")
