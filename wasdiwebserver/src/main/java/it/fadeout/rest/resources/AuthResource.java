@@ -384,17 +384,14 @@ public class AuthResource {
 		Wasdi.DebugLog("AuthResource.CheckGoogleUserId");
 		//TODO captcha
 		
-		UserViewModel oUserVM = UserViewModel.getInvalid();
 		if (oLoginInfo == null) {
-			return oUserVM;
+			return UserViewModel.getInvalid();
 		}
 		if(!m_oCredentialPolicy.satisfies(oLoginInfo)) {
-			return oUserVM;
+			return UserViewModel.getInvalid();
 		}
 		
-		try 
-		{	
-			
+		try {	
 			final NetHttpTransport transport = GoogleNetHttpTransport.newTrustedTransport();
 			final JacksonFactory jsonFactory = JacksonFactory.getDefaultInstance();
 			GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(transport, jsonFactory)
@@ -408,8 +405,7 @@ public class AuthResource {
 			GoogleIdToken oIdToken = verifier.verify(oLoginInfo.getGoogleIdToken());
 			
 			//check id token
-			if (oIdToken != null) 
-			{
+			if (oIdToken != null) {
 			  Payload oPayload = oIdToken.getPayload();
 
 			  // Print user identifier
@@ -432,25 +428,21 @@ public class AuthResource {
 
 			  UserRepository oUserRepository = new UserRepository();
 			  String sAuthProvider = "google";
-			  User oWasdiUser = oUserRepository.GoogleLogin(sGoogleIdToken , sEmail, sAuthProvider);
+			  User oWasdiUser = oUserRepository.GetUser(sEmail);
 			  //save new user 
-			  if(oWasdiUser == null)
-			  {
+			  if(oWasdiUser == null) {
 				  User oUser = new User();
 				  oUser.setAuthServiceProvider(sAuthProvider);
 				  oUser.setUserId(sEmail);
 				  oUser.setGoogleIdToken(sGoogleIdToken);
-				  if(oUserRepository.InsertUser(oUser) == true)
-				  {
+				  if(oUserRepository.InsertUser(oUser) == true) {
 					  //the user is stored in DB
 					  //get user from database (i do it only for consistency)
 					  oWasdiUser = oUserRepository.GoogleLogin(sGoogleIdToken , sEmail, sAuthProvider);
 				  }
 			  }
 			  
-			  if (oWasdiUser != null && oWasdiUser.getAuthServiceProvider().equalsIgnoreCase("google") == true) 
-			  {
-
+			  if (oWasdiUser != null && oWasdiUser.getAuthServiceProvider().equalsIgnoreCase("google") == true) {
 				  //get all expired sessions
 				  SessionRepository oSessionRepository = new SessionRepository();
 				  List<UserSession> aoEspiredSessions = oSessionRepository.GetAllExpiredSessions(oWasdiUser.getUserId());
@@ -462,7 +454,7 @@ public class AuthResource {
 					  }
 				  }
 
-				  oUserVM = new UserViewModel();
+				  UserViewModel oUserVM = new UserViewModel();
 				  oUserVM.setName(oWasdiUser.getName());
 				  oUserVM.setSurname(oWasdiUser.getSurname());
 				  oUserVM.setUserId(oWasdiUser.getUserId());
@@ -475,29 +467,28 @@ public class AuthResource {
 				  oSession.setLastTouch((double) new Date().getTime());
 
 				  Boolean bRet = oSessionRepository.InsertSession(oSession);
-				  if (!bRet)
-					  return oUserVM;
-
+				  if (!bRet) {
+					  return UserViewModel.getInvalid();
+				  }
 				  oUserVM.setSessionId(sSessionId);
 				  //XXX log instead
 				  System.out.println("AuthService.LoginGoogleUser: access succeeded");
-			  }
-			  else {
+				  return oUserVM;
+			  } else {
 				  //XXX log instead
 				  System.out.println("AuthService.LoginGoogleUser: access failed");
 			  }
 
-			} 
-			else {
+			} else {
 				//XXX log instead
 				System.out.println("Invalid ID token.");
+				UserViewModel.getInvalid();
 			}
 			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		return oUserVM;
-
+		return UserViewModel.getInvalid();
 	}
 		
 	@POST
