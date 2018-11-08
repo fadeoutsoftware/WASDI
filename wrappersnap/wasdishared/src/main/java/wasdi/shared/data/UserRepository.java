@@ -87,17 +87,17 @@ public class UserRepository extends  MongoRepository{
         try {
             User oUser = GetUser(sEmail);
 
-            if (oUser != null)
-            {
-            	 if (oUser.getUserId() != null  && oUser.getAuthServiceProvider() != null)
-                 {
-                     if ( oUser.getGoogleIdToken().equals(sGoogleIdToken) && oUser.getAuthServiceProvider().equals(sAuthProvider)   )
-                     {
-                         return oUser;
-                     }
-                 }
+            if (oUser != null){
+            	if ( oUser.getUserId() != null &&
+            			oUser.getAuthServiceProvider() != null &&
+            			null != oUser.getGoogleIdToken() ) {
+            		if(oUser.getGoogleIdToken().equals(sGoogleIdToken)) {
+            			if ( oUser.getAuthServiceProvider().equals(sAuthProvider)   ) {
+            				return oUser;
+            			}
+            		}
+            	}
             }
-
             return null;
         } catch (Exception oEx) {
             oEx.printStackTrace();
