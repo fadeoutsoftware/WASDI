@@ -25,7 +25,6 @@ public class CredentialPolicy {
 	private static int MINNAMELENGTH = 1;
 	private static int MINSURNAMELENGTH = 1;
 
-	//TODO check other private methods, from utils
 
 	private boolean isNullOrEmpty(String sString) {
 		if (sString == null) {
@@ -246,5 +245,4 @@ public class CredentialPolicy {
 			return false;
 		}
 	}
-
 }
