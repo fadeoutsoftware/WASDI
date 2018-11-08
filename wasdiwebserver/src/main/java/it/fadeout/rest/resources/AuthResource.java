@@ -588,13 +588,12 @@ public class AuthResource {
 	public PrimitiveResult validateNewUser(@QueryParam("email") String sUserId, @QueryParam("validationCode") String sToken  ) {
 		Wasdi.DebugLog("AuthService.validateNewUser");
 	
-		PrimitiveResult oResult = PrimitiveResult.getInvalid();
 		
-		if(!m_oCredentialPolicy.validUserId(sUserId)) {
-			return oResult;
+		if(! (m_oCredentialPolicy.validUserId(sUserId) && m_oCredentialPolicy.validEmail(sUserId)) ) {
+			return PrimitiveResult.getInvalid();
 		}
 		if(!m_oCredentialPolicy.validFirstAccessUUID(sToken)) {
-			return oResult;
+			return PrimitiveResult.getInvalid();
 		}
 		
 		UserRepository oUserRepo = new UserRepository();
@@ -602,29 +601,29 @@ public class AuthResource {
 		if( null == oUser.getValidAfterFirstAccess()) {
 			//XXX log instead
 			System.err.println("AuthResources.validateNewUser: unexpected null first access validation flag");
-			return oResult;
+			return PrimitiveResult.getInvalid();
 		} else if( oUser.getValidAfterFirstAccess() ) {
 			//XXX log instead
 			System.err.println("AuthResources.validateNewUser: unexpected true first access validation flag");
-			return oResult;
+			return PrimitiveResult.getInvalid();
 		} else if( !oUser.getValidAfterFirstAccess() ) {
 			String sDBToken = oUser.getFirstAccessUUID();
 			if(m_oCredentialPolicy.validFirstAccessUUID(sToken)) {
 				if(sDBToken.equals(sToken)) {
 					oUser.setValidAfterFirstAccess(true);
 					oUserRepo.UpdateUser(oUser);
-					oResult = new PrimitiveResult();
+					PrimitiveResult oResult = new PrimitiveResult();
 					oResult.setBoolValue(true);
 					oResult.setStringValue(oUser.getUserId());
+					return oResult;
 				} else {
 					//XXX log instead
 					System.err.println("AuthResources.validateNewUser: registration token mismatch");
-					return oResult;
+					PrimitiveResult.getInvalid();
 				}
 			}
 		}
-		
-		return oResult;
+		return PrimitiveResult.getInvalid();
 	}
 	
 
