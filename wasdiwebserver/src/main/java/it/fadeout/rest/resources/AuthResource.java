@@ -448,7 +448,7 @@ public class AuthResource {
 				  }
 			  }
 			  
-			  if (oWasdiUser != null) 
+			  if (oWasdiUser != null && oWasdiUser.getAuthServiceProvider().equalsIgnoreCase("google") == true) 
 			  {
 
 				  //get all expired sessions
