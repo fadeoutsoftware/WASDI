@@ -769,11 +769,13 @@ public class AuthResource {
 					sLink;
 			oMessage.setMessage(sMessage);
 	
-			Integer iMailReturned = 0;
-			iMailReturned = oAPI.sendMailDirect(oUser.getUserId(), oMessage);
-			System.out.println("AuthResource.sendRegistrationEmail: "+iMailReturned.toString());
-			//TODO inspect return message with true and fraudolent email addresses
-			//TODO take action depending on the return message
+			Integer iPositiveSucceded = 0;
+			iPositiveSucceded = oAPI.sendMailDirect(oUser.getUserId(), oMessage);
+			System.out.println("AuthResource.sendRegistrationEmail: "+iPositiveSucceded.toString());
+			if(iPositiveSucceded < 0 ) {
+				//negative result means email couldn't be sent
+				return false;
+			}
 		} catch(Exception e) {
 			//XXX log instead
 			System.err.println("\n\n"+e.getMessage()+"\n\n" );
