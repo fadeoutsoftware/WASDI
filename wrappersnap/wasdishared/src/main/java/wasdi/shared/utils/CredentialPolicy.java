@@ -10,33 +10,32 @@ import wasdi.shared.viewmodels.RegistrationInfoViewModel;
 import wasdi.shared.viewmodels.UserViewModel;
 
 public class CredentialPolicy {
-	
+
 	//TODO read constants from config file
 	//UUID are 36 characters long (32 alphanumeric + 4 hyphens "-" )
-	
-	private static int MINUSERIDLENGTH = 4;
+
+	private static int MINUSERIDLENGTH =2;
 	private static int MINPASSWORDLENGTH = 8;
 	private static int MINGUIDLENGTH = 31;
 	private static int MINGOOGLEIDLENGTH = MINGUIDLENGTH;
 	private static int MINSESSIONIDLENGTH = MINGUIDLENGTH;
-	
-	
+
+
 	//probably we may raise these values to 2 but no more: some (sur)names can be very short (e.g. "Li")
 	private static int MINNAMELENGTH = 1;
 	private static int MINSURNAMELENGTH = 1;
-	
-	//TODO private methods, from utils
-	
+
+
 	private boolean isNullOrEmpty(String sString) {
-        if (sString == null) {
-        	return true;
-        }
-        if (sString.isEmpty()) {
-        	return  true;
-        }
-        return  false;
-    }
-	
+		if (sString == null) {
+			return true;
+		}
+		if (sString.isEmpty()) {
+			return  true;
+		}
+		return  false;
+	}
+
 	public Boolean validPassword(String sPassword ) {
 		if(isNullOrEmpty(sPassword)) {
 			return false;
@@ -47,7 +46,7 @@ public class CredentialPolicy {
 			return true;
 		}
 	}
-	
+
 	private Boolean validGoogleIdToken(String sGoogleId) {
 		if(isNullOrEmpty(sGoogleId)) {
 			return false;
@@ -58,24 +57,33 @@ public class CredentialPolicy {
 			return true;
 		}
 	}
-	
+
 	public Boolean validEmail(String sEmail ) {
-		return validUserId(sEmail);
+		if(isNullOrEmpty(sEmail)) {
+			return false;
+		} else if(!EmailValidator.getInstance().isValid(sEmail) ){
+			return false;
+		} else {
+			return true;
+		}
 	}
-	
+
+	//TODO check it is not used as an email validator
 	public Boolean validUserId(String sUserId) {
 		if(isNullOrEmpty(sUserId)) {
 			return false;
 		}
 		if(sUserId.length() < MINUSERIDLENGTH) {
 			return false;
-		} else if(!EmailValidator.getInstance().isValid(sUserId) ){
+		} /*
+		//commented out because previously inserted users didn't have a valid email address as userId
+		else if(!EmailValidator.getInstance().isValid(sUserId) ){
 			return false;
-		} else {
+		} */else {
 			return true;
 		}
 	}
-	
+
 	public Boolean validName(String sName) {
 		if(isNullOrEmpty(sName)) {
 			return false;
@@ -86,7 +94,7 @@ public class CredentialPolicy {
 			return true;
 		}
 	}
-	
+
 	public Boolean validSurname(String sSurname) {
 		if(isNullOrEmpty(sSurname)) {
 			return false;
@@ -97,7 +105,7 @@ public class CredentialPolicy {
 			return true;
 		}
 	}
-	
+
 	public Boolean validSessionId(String sSessionId) {
 		if(isNullOrEmpty(sSessionId)) {
 			return false;
@@ -108,20 +116,25 @@ public class CredentialPolicy {
 			return true;
 		}
 	}
-	
+
 	private boolean validAuthServiceProvider(String sAuthServiceProvider) {
 		if(isNullOrEmpty(sAuthServiceProvider)) {
 			return false;
-		} else {//TODO check how to validate if provider is google @sergin13 @kr1zz
-			 String sGoogle = new String("google");
-			 if(sAuthServiceProvider.toLowerCase().equals(sGoogle.toLowerCase())) {
-				 return true;
-			 } else {
-				 return false;
-			 }
+		} else {
+			String sGoogle = new String("google");
+			if(sAuthServiceProvider.toLowerCase().equals(sGoogle.toLowerCase())) {
+				return true;
+			} else {
+				String sWasdi = new String("wasdi");
+				if(sAuthServiceProvider.toLowerCase().equals(sWasdi.toLowerCase())) {
+					return true;
+				} else {
+					return false;
+				}
+			}
 		}
 	}
-	
+
 	private Boolean validValidAfterFirstAccess(Boolean bValid ) {
 		if (null == bValid) {
 			return false;
@@ -130,7 +143,7 @@ public class CredentialPolicy {
 			return true;
 		}
 	}
-	
+
 	public Boolean validFirstAccessUUID(String sUUID) {
 		if(isNullOrEmpty(sUUID)) {
 			return false;
@@ -140,11 +153,11 @@ public class CredentialPolicy {
 			return true;
 		}
 	}
-	
-	
-// begin satisfaction checks 
-	
-	
+
+
+	// begin satisfaction checks 
+
+
 	public Boolean satisfies( LoginInfo oLoginInfo ) {
 		if(null == oLoginInfo) {
 			throw new NullArgumentException();
@@ -152,17 +165,15 @@ public class CredentialPolicy {
 		//TODO check after refactoring: due to googleId modifications these conditions may change		
 		if( validGoogleIdToken(oLoginInfo.getGoogleIdToken()) ) {
 			return true;
-		} else 
-			if( oLoginInfo.getUserId().isEmpty() == true ) {//TODO original !validUserId(oLoginInfo.getUserId(), in test database there aren't email
+		} else if(!validUserId(oLoginInfo.getUserId())) {
 			return false;
-		} else 
-		if(!validPassword(oLoginInfo.getUserPassword())) {
+		} else if(!validPassword(oLoginInfo.getUserPassword())) {
 			return false;
 		} else {
 			return true;
 		}
 	}
-	
+
 	public Boolean satisfies( UserViewModel oUserVM ) {
 		if( null == oUserVM) {
 			throw new NullArgumentException();
@@ -179,7 +190,7 @@ public class CredentialPolicy {
 			return true;
 		}
 	}
-	
+
 	public boolean satisfies(User oUser) {
 		if(null==oUser) {
 			throw new NullArgumentException();
@@ -187,7 +198,7 @@ public class CredentialPolicy {
 		//TODO check after refactoring: due to googleId modifications these conditions may change
 		if(validAuthServiceProvider(oUser.getAuthServiceProvider())) {
 			return true;
-		} else if( oUser.getUserId().isEmpty() == true ) {//TODO original !validUserId( oUser.getUserId(), in test database there aren't email
+		} else if(!validUserId(oUser.getUserId())) {
 			return false;
 		} else if( !validName(oUser.getName())) {
 			return false;
@@ -234,5 +245,4 @@ public class CredentialPolicy {
 			return false;
 		}
 	}
-
 }

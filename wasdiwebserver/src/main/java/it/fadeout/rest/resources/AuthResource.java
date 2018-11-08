@@ -17,8 +17,6 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
-import org.openide.util.io.OperationException;
-
 import it.fadeout.Wasdi;
 import it.fadeout.business.PasswordAuthentication;
 import it.fadeout.mercurius.business.Message;
@@ -37,14 +35,12 @@ import wasdi.shared.viewmodels.PrimitiveResult;
 import wasdi.shared.viewmodels.RegistrationInfoViewModel;
 import wasdi.shared.viewmodels.UserViewModel;
 
-import com.bc.ceres.binio.DataAccessException;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken.Payload;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.jackson2.JacksonFactory;
-import com.sleepycat.je.OperationFailureException;
 
 
 @Path("/auth")
@@ -592,13 +588,12 @@ public class AuthResource {
 	public PrimitiveResult validateNewUser(@QueryParam("email") String sUserId, @QueryParam("validationCode") String sToken  ) {
 		Wasdi.DebugLog("AuthService.validateNewUser");
 	
-		PrimitiveResult oResult = PrimitiveResult.getInvalid();
 		
-		if(!m_oCredentialPolicy.validUserId(sUserId)) {
-			return oResult;
+		if(! (m_oCredentialPolicy.validUserId(sUserId) && m_oCredentialPolicy.validEmail(sUserId)) ) {
+			return PrimitiveResult.getInvalid();
 		}
 		if(!m_oCredentialPolicy.validFirstAccessUUID(sToken)) {
-			return oResult;
+			return PrimitiveResult.getInvalid();
 		}
 		
 		UserRepository oUserRepo = new UserRepository();
@@ -606,29 +601,29 @@ public class AuthResource {
 		if( null == oUser.getValidAfterFirstAccess()) {
 			//XXX log instead
 			System.err.println("AuthResources.validateNewUser: unexpected null first access validation flag");
-			return oResult;
+			return PrimitiveResult.getInvalid();
 		} else if( oUser.getValidAfterFirstAccess() ) {
 			//XXX log instead
 			System.err.println("AuthResources.validateNewUser: unexpected true first access validation flag");
-			return oResult;
+			return PrimitiveResult.getInvalid();
 		} else if( !oUser.getValidAfterFirstAccess() ) {
 			String sDBToken = oUser.getFirstAccessUUID();
 			if(m_oCredentialPolicy.validFirstAccessUUID(sToken)) {
 				if(sDBToken.equals(sToken)) {
 					oUser.setValidAfterFirstAccess(true);
 					oUserRepo.UpdateUser(oUser);
-					oResult = new PrimitiveResult();
+					PrimitiveResult oResult = new PrimitiveResult();
 					oResult.setBoolValue(true);
 					oResult.setStringValue(oUser.getUserId());
+					return oResult;
 				} else {
 					//XXX log instead
 					System.err.println("AuthResources.validateNewUser: registration token mismatch");
-					return oResult;
+					PrimitiveResult.getInvalid();
 				}
 			}
 		}
-		
-		return oResult;
+		return PrimitiveResult.getInvalid();
 	}
 	
 
@@ -774,11 +769,13 @@ public class AuthResource {
 					sLink;
 			oMessage.setMessage(sMessage);
 	
-			Integer iMailReturned = 0;
-			iMailReturned = oAPI.sendMailDirect(oUser.getUserId(), oMessage);
-			System.out.println("AuthResource.sendRegistrationEmail: "+iMailReturned.toString());
-			//TODO inspect return message with true and fraudolent email addresses
-			//TODO take action depending on the return message
+			Integer iPositiveSucceded = 0;
+			iPositiveSucceded = oAPI.sendMailDirect(oUser.getUserId(), oMessage);
+			System.out.println("AuthResource.sendRegistrationEmail: "+iPositiveSucceded.toString());
+			if(iPositiveSucceded < 0 ) {
+				//negative result means email couldn't be sent
+				return false;
+			}
 		} catch(Exception e) {
 			//XXX log instead
 			System.err.println("\n\n"+e.getMessage()+"\n\n" );
