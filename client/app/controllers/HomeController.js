@@ -61,7 +61,7 @@ var HomeController = (function() {
                             oController.callbackLogin(data, status,oController)
                         }).error(function (data,status) {
                         //alert('error');
-                        utilsVexDialogAlertTop("GURU MEDITATION<br>LOGIN ERROR");
+                        utilsVexDialogAlertTop("GURU MEDITATION<br>GOOGLE LOGIN ERROR");
 
                     });
                 }

@@ -78,6 +78,11 @@ service('AuthService', ['$http',  'ConstantsService', function ($http, oConstant
     {
         return this.m_oHttp.post(this.APIURL + '/auth/editUserDetails',oUserInfo);
     };
+
+    this.validateUser = function(sEmail,sValidationCode)
+    {
+        return this.m_oHttp.get(this.APIURL + '/auth/validateNewUser?email=' + sEmail + '&validationCode=' + sValidationCode);
+    }
     //
     // this.ingestFile = function(sSelectedFile,sWorkspace){
     //     return this.m_oHttp.put(this.APIURL + '/auth/upload/ingest?file=' + sSelectedFile + '&workspace=' + sWorkspace);

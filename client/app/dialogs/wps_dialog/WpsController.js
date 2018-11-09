@@ -18,6 +18,7 @@ var WpsController = (function() {
             oClose(result, 500); // close, but give 500ms for bootstrap to animate
         };
 
+        this.setUpProxy()
         // this.wpsInitialization();
     }
     WpsController.prototype.wpsInitialization = function(){
@@ -155,45 +156,35 @@ var WpsController = (function() {
         });
     };
 
-    // /**
-    //  *
-    //  */
-    // WpsController.prototype.onChangeProcesses = function()
-    // {
-    //     var sel = document.getElementById("processes");
-    //     describeProcess(sel.options[sel.selectedIndex].text);
-    //     // console.log("bau");
-    //     // describeProcess(this.m_sSelectedProcess);
-    // };
-    // /**
-    //  *
-    //  */
+    /**
+     * onChangeWPS
+     */
+
     WpsController.prototype.onChangeWPS = function()
     {
         // var sel = document.getElementById("wps");
         // getCapabilities(sel.options[sel.selectedIndex].text);
+
+        this.m_sSelectedWps = this.m_sSelectedWps.replace("http://","");
         // getCapabilities(this.m_oConstantService.getWPSPROXY() + this.m_sSelectedWps);
         getCapabilities(this.m_sSelectedWps);
         this.clickOnShowCapabilities();
     };
 
-    // WpsController.prototype.executeCallback = function(response) {
-    //
-    //     var doc = response.getRawResponseDocument();
-    //     try {
-    //         $("textarea#xmlExecute").val((new XMLSerializer()).serializeToString(doc));
-    //     } catch (e){
-    //         $("textarea#xmlExecute").val(doc);
-    //     }
-    //
-    // };
-    // WpsController.prototype.testExecuteRequest_wps_1_0 = function()
-    // {
-    //     var inputGenerator = new InputGenerator();
-    //     var inputs,outputs;
-    //     this.m_oWPSService.execute(this.executeCallback(), "JTS:area", "document", "async", false, inputs, outputs);
-    //
-    // };
+    /**
+     * setUpProxy
+     */
+    WpsController.prototype.setUpProxy = function()
+    {
+        var oSetupProxy= {
+            proxy : {
+                url : 'http://178.22.66.96/corsproxy/',
+                type: 'parameter',
+            }
+        }
+        jQuery.wpsSetup(oSetupProxy);
+    }
+
 
     WpsController.$inject = [
         '$scope',

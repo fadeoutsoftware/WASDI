@@ -1436,7 +1436,8 @@ var BaseRequest = Class.extend({
 		var targetUrl;
 		if (USE_PROXY) {
 			if (PROXY_TYPE == "parameter") {
-				targetUrl = PROXY_URL + encodeURIComponent(this.settings.url);
+				// targetUrl = PROXY_URL + encodeURIComponent(this.settings.url);
+				targetUrl = PROXY_URL + this.settings.url;
 			}
 			else {
 				//TODO split URL into host-base + query and create new
@@ -1445,11 +1446,14 @@ var BaseRequest = Class.extend({
 		} else {
 			targetUrl = this.settings.url;
 		}
-
-         // var sUrl = 'https://cors-anywhere.herokuapp.com/http://gpod.eo.esa.int/wps/?Request=GetCapabilities&service=WPS&AcceptVersions=1.0.0';
-         var sUrl = 'https://crossorigin.me/http://gpod.eo.esa.int/wps/?Request=GetCapabilities&service=WPS&AcceptVersions=1.0.0';
+       //var sUrl = 'http://178.22.66.96/corsproxy/http://gpod.eo.esa.int/wps/?Request=GetCapabilities&service=WPS&AcceptVersions=1.0.0';
+		// 	var sUrl = 'http://178.22.66.96/corsproxy/gpod.eo.esa.int/wps/?Request=GetCapabilities&service=WPS&AcceptVersions=1.0.0';
+		// var sUrl = 'https://cors-anywhere.herokuapp.com/http://gpod.eo.esa.int/wps/?Request=GetCapabilities&service=WPS&AcceptVersions=1.0.0';
+        // var sUrl = 'https://crossorigin.me/http://gpod.eo.esa.int/wps/?Request=GetCapabilities&service=WPS&AcceptVersions=1.0.0';
         // var sUrl = 'https://cors-anywhere.herokuapp.com/' + targetUrl;
-		jQuery.ajax(sUrl, combinedRequestSettings);
+        // var sUrl = 'http://178.22.66.96/corsproxy/' + targetUrl;
+        // jQuery.ajax(sUrl, combinedRequestSettings);
+        jQuery.ajax(targetUrl, combinedRequestSettings);
 	}
 });
 
