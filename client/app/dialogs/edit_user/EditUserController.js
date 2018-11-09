@@ -34,9 +34,9 @@ var EditUserController = (function() {
         this.m_bEditingPassword = true;
         this.m_oAuthService.changePassword(oJsonToSend)
             .success(function (data) {
-                if(utilsIsObjectNullOrUndefined(data) == false)
+                if(utilsIsObjectNullOrUndefined(data) === false)
                 {
-                    if(data.boolValue===  false)
+                    if(data.boolValue ===  false)
                     {
                         utilsVexDialogAlertTop("GURU MEDITATION<br>WAS IMPOSSIBLE CHANGE THE PASSWORD");
                     }
@@ -73,9 +73,9 @@ var EditUserController = (function() {
         this.m_bEditingUserInfo = true;
         this.m_oAuthService.changeUserInfo(oJsonToSend)
             .success(function (data) {
-                if(utilsIsObjectNullOrUndefined(data) == false)
+                if(utilsIsObjectNullOrUndefined(data) === false ||  data.userId !== "" )
                 {
-                    if(data.boolValue===  false)
+                    if(data.boolValue ===  false)
                     {
                         utilsVexDialogAlertTop("GURU MEDITATION<br>WAS IMPOSSIBLE CHANGE THE USER INFO");
                     }
