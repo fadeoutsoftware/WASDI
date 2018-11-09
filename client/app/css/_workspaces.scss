@@ -101,14 +101,20 @@
         cursor:pointer;
       }
       // COLOR OVER A TD
-      .over-color:hover
+      .over-color
       {
-        cursor:pointer;
-        i:hover {
+        background-color: $wasdi-white;
+        color: $wasdi-blue-logo;
 
-          //background-color:white;
-          color:$wasdi-over-icon;
+        &:hover{
+          cursor:pointer;
+          i:hover {
+
+            //background-color:white;
+            color:$wasdi-over-icon;
+          }
         }
+
       }
       .selected-row
       {
