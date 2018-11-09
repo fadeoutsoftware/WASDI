@@ -1426,10 +1426,10 @@ var BaseRequest = Class.extend({
 					self.changeElementContent(htmlContent);	
 				}
 			},
-			error: function() {
+			error: function(data) {
 				self.changeElementContent('<div class="wps-error"><div class="wps-generic-error"></div>'+
-						'<div>An error occured while connecting to '+
-						self.settings.url +'</div></div>');
+						'<div>An error occured in the request to '+
+						self.settings.url +'</div></div>' + data.responseText);
 			}
 		}, requestSettings);
 		
