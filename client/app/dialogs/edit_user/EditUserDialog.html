@@ -5,7 +5,10 @@
             <div class=" modal-header">
 
                 <div class="col-xs-11 col-sm-11 col-md-11 col-lg-11">
-                    {{ "DIALOG_EDIT_USER" | translate }}
+                    <h4>
+                        <img src="assets/icons/white-user-icon2.png" style="width: 26px" />
+                        {{ "DIALOG_EDIT_USER" | translate }}
+                    </h4>
                 </div>
                 <div class="col-xs-1 col-sm-1 col-md-1 col-lg-1">
                     <button type="button" class="close" ng-click="close(null)" data-dismiss="modal" aria-hidden="true">&times;</button>
@@ -57,10 +60,9 @@
 
                                 <div class="row">
                                     <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4 col-xs-offset-8 col-sm-offset-8 col-md-offset-8 col-lg-offset-8">
-                                        <button type="submit"  class="my-button" ng-disabled="changeUserInfoForm.$invalid === true ">
+                                        <button type="submit"  class="my-button" ng-disabled="changeUserInfoForm.$invalid === true || changeUserInfoForm.$dirty === false ">
                                             {{"DIALOG_EDIT_USER_EDIT_USER_INFO"|translate}}
                                         </button>
-
                                     </div>
 
                                 </div>
@@ -71,7 +73,7 @@
 
 
 
-                        <form name="changePasswordForm" ng-submit="m_oController.changePassword()" >
+                        <form name="changePasswordForm" ng-submit="m_oController.changePassword()" ng-hide="m_oController.getUserAuthProvider() === 'google' " >
 
                             <legend>{{"DIALOG_EDIT_USER_CHANGE_PASSWORD"|translate}}</legend>
 

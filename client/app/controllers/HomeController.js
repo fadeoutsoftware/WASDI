@@ -16,10 +16,12 @@ var HomeController = (function() {
 
         this.m_oScope.m_oController=this;
         this.m_bLoginIsVisible = false;//Login in visible after click on logo
+        this.m_bIsVisibleRecoveryPassword = false;
         this.m_sUserName = "";
         this.m_sUserPassword = "";
         this.m_bSuccess = false;
         this.m_bError = false;
+        this.m_sMessageError = "";
         this.m_oRegistrationUser={
             name:"",
             surname:"",
@@ -135,7 +137,6 @@ var HomeController = (function() {
                 {
                     //LOGIN FAIL
                     utilsVexDialogAlertTop( "GURU MEDITATION<br>WRONG CREDENTIALS, TRY AGAIN");
-
                 }
             }
         }
@@ -182,6 +183,7 @@ var HomeController = (function() {
             return false;
         }
         oUser.userId = oController.m_oRegistrationUser.userId;
+        oUser.userId = "ss";
         oUser.password = oController.m_oRegistrationUser.password;
         oUser.name = oController.m_oRegistrationUser.name;
         oUser.surname = oController.m_oRegistrationUser.surname;
@@ -199,6 +201,10 @@ var HomeController = (function() {
                     }
                     else
                     {
+                        if(utilsIsStrNullOrEmpty(data.stringValue) === false)
+                        {
+                            oController.m_sMessageError = data.stringValue;
+                        }
                         oController.m_bError = true;
                     }
                 }
