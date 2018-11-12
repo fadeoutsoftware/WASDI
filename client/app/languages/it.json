@@ -7,6 +7,10 @@
   "LOGIN_WRITE":"Web Advanced Space Developer Interface",
   "LOGIN_LINK_FORM":"Login",
   "LOGIN_LINK_REGISTER":"Register",
+
+  "RECOVERY_EMAIL_BUTTON":"Send request",
+  "RECOVERY_EMAIL_TITLE":"Insert your email if you want to recover yor password",
+
   "SIGN_IN_PLACEHOLDER_EMAIL":"Email Address",
   "SIGN_IN_PLACEHOLDER_PASSWORD":"Password",
   "SIGN_IN_PLACEHOLDER_REPEAT_PASSWORD":"Repeat Password",
@@ -292,6 +296,12 @@
   "DIALOG_EDIT_USER_EDIT_USER_INFO":"Edit user info",
 
   "DIALOG_CATALOG_INFO_PRODUCT_PRODUCT_BANDS_LABEL":"Bands",
-  "DIALOG_CATALOG_INFO_PRODUCT_PRODUCT_INFO_LABEL":"Info"
+  "DIALOG_CATALOG_INFO_PRODUCT_PRODUCT_INFO_LABEL":"Info",
+
+  "DIALOG_WPS_TITLE":"Execute WPS",
+  "DIALOG_WPS_TITLE_WPS_LIST":"WPS list",
+  "DIALOG_WPS_TITLE_SHOW_CAPABILITIES":"Show Capabilities",
+  "DIALOG_WPS_TITLE_SELECT_PROCESS":"Select a process",
+  "DIALOG_WPS_TITLE_EXECUTE_RESULTS":"Execute results"
 
 }

@@ -16,6 +16,7 @@ var HomeController = (function() {
 
         this.m_oScope.m_oController=this;
         this.m_bLoginIsVisible = false;//Login in visible after click on logo
+        this.m_bIsVisibleRecoveryPassword = false;
         this.m_sUserName = "";
         this.m_sUserPassword = "";
         this.m_bSuccess = false;
