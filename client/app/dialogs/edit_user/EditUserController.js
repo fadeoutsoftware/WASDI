@@ -25,6 +25,11 @@ var EditUserController = (function() {
 
     };
 
+    EditUserController.prototype.getUserAuthProvider = function()
+    {
+        return this.m_oUser.authProvider;
+    };
+
     EditUserController.prototype.changePassword = function()
     {
 

@@ -62,17 +62,17 @@
                                ng-model="m_oController.m_oRegistrationUser.userId" required>
                         <h6 class="error-message" ng-if="(signinForm.useremail.$dirty === true) &&
                                                          (!signinForm.useremail.$valid)">
-                            Invalid email
+                            {{"SIGN_IN_ERROR_INVALID_TOO_SHORT"|translate}}
                         </h6>
                     </div>
 
-                    <div class="">
+                    <div class="form-group">
                         <input type="password" name="userpassword"  ng-model="m_oController.m_oRegistrationUser.password"
                                placeholder="{{'SIGN_IN_PLACEHOLDER_PASSWORD'|translate}}" class="form-control"
                                 ng-minlength="8" required><!-- ng-model="m_oController.m_oRegistrationUser.password"-->
                         <h6 class="error-message" ng-if="(m_oController.m_oRegistrationUser.password.length !== 0) &&
                                                          (!signinForm.userpassword.$valid)">
-                            The value is too short
+                            {{"SIGN_IN_ERROR_INVALID_TOO_SHORT"|translate}}
                         </h6>
                     </div>
 
@@ -84,7 +84,7 @@
                                ng-model="m_oController.m_oRegistrationUser.repeatPassword" ng-minlength="8" required>
                         <h6 class="error-message" ng-if="(signinForm.userrepeatpassword.$dirty === true) &&
                                                         (signinForm.userpassword.$viewValue !== signinForm.userrepeatpassword.$viewValue)">
-                            The passwords are different
+                            {{"SIGN_IN_ERROR_INVALID_DIFFERENT_PASSWORDS"|translate}}
                         </h6>
                     </div>
 
@@ -93,7 +93,7 @@
                                ng-model="m_oController.m_oRegistrationUser.name" required>
                         <h6 class="error-message" ng-if="(signinForm.username.$dirty === true) &&
                                                          (!signinForm.username.$valid)">
-                            Insert Name
+                            {{"SIGN_IN_ERROR_INVALID_INSERT_NAME"|translate}}
                         </h6>
                     </div>
                     <div class="form-group">
@@ -101,7 +101,7 @@
                                ng-model="m_oController.m_oRegistrationUser.surname" required>
                         <h6 class="error-message" ng-if="(signinForm.usersurname.$dirty === true) &&
                                                          (!signinForm.usersurname.$valid)">
-                            Insert Surname
+                            {{"SIGN_IN_ERROR_INVALID_INSERT_SURNAME"|translate}}
                         </h6>
                     </div>
 
@@ -111,10 +111,15 @@
                     </button>
 
                     <div class="alert alert-success" role="alert" ng-show ="m_oController.m_bSuccess === true">
-                        Success sign in!
+                        {{"SIGN_IN_ERROR_SUCCESS_REGISTRATION"|translate}}
                     </div>
-                    <div class="alert alert-danger" role="alert" ng-show ="m_oController.m_bError === true">
-                        Error from server, was impossible sign in user.
+                    <div class="alert alert-danger" role="alert"
+                                ng-hide = "m_oController.m_bError === false || m_oController.m_sMessageError || m_oController.m_sMessageError.length > 0">
+                        {{"SIGN_IN_ERROR_GENERAL_ERROR"|translate}}
+                    </div>
+                    <div class="alert alert-danger" role="alert" ng-show ="m_oController.m_bError === true"
+                                ng-show = "!m_oController.m_sMessageError || m_oController.m_sMessageError.length  === 0">
+                        {{m_oController.m_sMessageError}}
                     </div>
                     <!--<div class="form-group">-->
                         <!--<input type="password" placeholder="{{'LOGIN_PLACEHOLDER_PASSWORD'|translate}}" class="form-control" id="userPassword" ng-model="m_oController.m_sUserPassword">-->
