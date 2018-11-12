@@ -48,7 +48,9 @@ public class AuthResource {
 	//MAYBE replace with dependency injection
 	PasswordAuthentication m_oPasswordAuthentication = new PasswordAuthentication();
 	//MAYBE replace with dependency injection
+	//MAYBE two different policy: one for google one for username/password
 	CredentialPolicy m_oCredentialPolicy = new CredentialPolicy();
+	//MAYBE separate
 	
 	@Context
 	ServletConfig m_oServletConfig;
@@ -261,7 +263,7 @@ public class AuthResource {
 			wsAddress = "ws://localhost:6703";
 		}
 		SFTPManager oManager = new SFTPManager(wsAddress);
-		String sPassword = UUID.randomUUID().toString().split("-")[0];
+		String sPassword = Utils.generateRandomPassword();
 		
 		if (!oManager.createAccount(sAccount, sPassword)) {
 			
@@ -379,7 +381,7 @@ public class AuthResource {
 		if (wsAddress==null) wsAddress = "ws://localhost:6703"; 
 		SFTPManager oManager = new SFTPManager(wsAddress);
 		
-		String sPassword = UUID.randomUUID().toString().split("-")[0];
+		String sPassword = Utils.generateRandomPassword();
 		
 		if (!oManager.updatePassword(sAccount, sPassword)) {
 			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
@@ -715,6 +717,7 @@ public class AuthResource {
 			} else {
 				oUserId.setPassword(m_oPasswordAuthentication.hash(oChPasswViewModel.getNewPassword().toCharArray()));
 				UserRepository oUR = new UserRepository();
+				//TODO check return value
 				oUR.UpdateUser(oUserId);
 				oResult = new PrimitiveResult();
 				oResult.setBoolValue(true);
@@ -727,6 +730,43 @@ public class AuthResource {
 		return oResult;
 		
 	} 	
+	
+	
+	@GET
+	@Path("/lostPassword")
+	@Produces({"application/xml", "application/json", "text/xml"})
+	public PrimitiveResult lostPassword(@QueryParam("userId") String sUserId ) {
+		Wasdi.DebugLog("AuthService.lostPassword");
+		if(null == sUserId ) {
+			return PrimitiveResult.getInvalid();
+		}
+		if(!m_oCredentialPolicy.validUserId(sUserId)) {
+			return PrimitiveResult.getInvalid();
+		}
+		UserRepository oUserRepository = new UserRepository();
+		User oUser = oUserRepository.GetUser(sUserId);
+		if(null == oUser) {
+			return PrimitiveResult.getInvalid();
+		} else {
+			if(m_oCredentialPolicy.validEmail(oUser.getUserId())) {
+				String sPassword = Utils.generateRandomPassword();
+				String sHashedPassword = m_oPasswordAuthentication.hash(sPassword.toCharArray()); 
+				oUser.setPassword(sHashedPassword);
+				if(oUserRepository.UpdateUser(oUser)) {
+					sendPasswordEmail(sUserId, sUserId, sPassword);
+					PrimitiveResult oResult = new PrimitiveResult();
+					oResult.setBoolValue(true);
+					oResult.setIntValue(0);
+					return oResult;
+				} else {
+					return PrimitiveResult.getInvalid();
+				}
+			} else {
+				//older users did not necessarily specified an email
+				return PrimitiveResult.getInvalid();
+			}
+		}
+	}
 	
 	private Boolean sendRegistrationEmail(User oUser, String sLink) {
 		Wasdi.DebugLog("AuthResource.sendRegistrationEmail");
@@ -781,7 +821,7 @@ public class AuthResource {
 		Wasdi.DebugLog("AuthResource.buildRegistrationLink");
 		String sResult = "";
 		//MAYBE validate input	
-		//TODO link to a client's page @sergin13 @kr1zz
+		//TODO link to a client's page @sergin13 @kr1zz (web.xml... can be temporary hardcoded, otherwise)
 		String sAPIUrl =  m_oServletConfig.getInitParameter("REGISTRATION_API_URL");
 		String sUserId = "email=" + oUser.getUserId();
 		String sToken = "validationCode=" + oUser.getFirstAccessUUID();
@@ -813,6 +853,7 @@ public class AuthResource {
 		String sMessage = m_oServletConfig.getInitParameter("sftpMailText");
 		sMessage += "\n\nUSER: " + sAccount + " - PASSWORD: " + sPassword;
 		oMessage.setMessage(sMessage);
+		//TODO check return type
 		oAPI.sendMailDirect(sRecipientEmail, oMessage);
 	}
 
