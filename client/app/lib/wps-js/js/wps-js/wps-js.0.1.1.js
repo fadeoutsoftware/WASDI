@@ -2792,10 +2792,13 @@ function describeProcess(processIdentifier, wpsUrl, targetContainer) {
             formBuilder.buildExecuteForm(jQuery('#'+targetContainer), process, execute);
             
             // create a link to the full process description
-            var processDescriptionLink = jQuery('<a title="Full process description" target="_blank">Show Description</a>');
-            processDescriptionLink.attr("href", describeProcess.settings.url);
-            jQuery('#'+targetContainer).prepend(jQuery('<div class="wps-description-link">').append(processDescriptionLink));
-            
+            // var processDescriptionLink = jQuery('<a title="Full process description" target="_blank">Show Description</a>');
+            // processDescriptionLink.attr("href", describeProcess.settings.url);
+            // jQuery('#'+targetContainer).prepend(jQuery('<div class="wps-description-link">').append(processDescriptionLink));
+
+        	var processDescriptionLink = jQuery('<a title="Full process description" target="_blank" href = http://' + describeProcess.settings.url + '>Show Description</a>');
+	        jQuery('#'+targetContainer).prepend(jQuery('<div class="wps-description-link">').append(processDescriptionLink));
+
             // create links to the metadata elements
             var metadata = jQuery(response.getElementsByTagNameNS(OWS_11_NAMESPACE, "Metadata"));
             if(metadata.length > 0) {

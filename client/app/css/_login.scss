@@ -127,9 +127,13 @@
     .login-content
     {
       @extend %form-css;
-
-
+      .google-button-container
+      {
+        //margin-top: 10px;
+      }
     }
+
+
     /***************** signin-content *****************/
     .signin-content
     {

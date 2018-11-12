@@ -128,9 +128,12 @@
           background-color: $wasdi-white !important;
           color: $wasdi-blue-logo !important;
           border-top: none;
+
           &:hover{
+
             background-color: $wasdi-grey !important;
             cursor:pointer;
+            //color:$wasdi-over-icon !important;
             i:hover {
 
               //background-color:white;
