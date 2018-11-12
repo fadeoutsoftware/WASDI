@@ -144,5 +144,19 @@ public class Utils {
 		 String pre = ("KMGTPE").charAt(exp-1) + "";
 		 return String.format("%.1f %sB", bytes / Math.pow(unit, exp), pre);
 	}
+
+	private static char randomChar() {
+		Random r = new Random();
+		char c = (char)(r.nextInt(26) + 'a');
+		return c;
+	}
 	
+	
+	public static String generateRandomPassword() {
+		//String sPassword = UUID.randomUUID().toString().split("-")[0];
+		String sPassword = new String(UUID.randomUUID().toString());
+		sPassword = sPassword.replace('-', randomChar());
+		//XXX shuffle string before returning
+		return sPassword;
+	}
 }
