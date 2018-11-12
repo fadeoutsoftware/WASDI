@@ -183,7 +183,7 @@ var WpsController = (function() {
             }
         }
         jQuery.wpsSetup(oSetupProxy);
-    }
+    };
 
 
     WpsController.$inject = [
