@@ -5,7 +5,6 @@ import org.esa.s2tbx.radiometry.TndviOp;
 import org.esa.snap.core.gpf.Operator;
 import wasdi.shared.parameters.ISetting;
 import wasdi.shared.parameters.NDVISetting;
-import wasdi.shared.parameters.RangeDopplerGeocodingSetting;
 
 /**
  * NDVI Snap Operation Parameter Wrapper

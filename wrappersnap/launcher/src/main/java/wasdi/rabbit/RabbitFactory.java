@@ -2,13 +2,7 @@ package wasdi.rabbit;
 
 import com.rabbitmq.client.ConnectionFactory;
 import wasdi.ConfigReader;
-import wasdi.LauncherMain;
-import wasdi.shared.LauncherOperations;
-import wasdi.shared.data.MongoRepository;
-import wasdi.shared.viewmodels.RabbitMessageViewModel;
-
 import java.io.IOException;
-import java.io.StringReader;
 
 /**
  * Created by s.adamo on 02/02/2017.

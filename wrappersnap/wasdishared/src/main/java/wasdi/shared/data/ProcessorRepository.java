@@ -12,9 +12,7 @@ import com.mongodb.client.FindIterable;
 import com.mongodb.client.result.DeleteResult;
 import com.mongodb.client.result.UpdateResult;
 
-import wasdi.shared.business.DownloadedFile;
 import wasdi.shared.business.Processor;
-import wasdi.shared.business.SnapWorkflow;
 
 public class ProcessorRepository extends  MongoRepository {
 	

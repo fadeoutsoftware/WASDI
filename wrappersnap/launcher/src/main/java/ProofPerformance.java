@@ -1,15 +1,12 @@
 import java.io.File;
-import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
 
-import org.esa.snap.core.dataio.ProductIO;
 import org.esa.snap.core.dataio.dimap.DimapProductWriterPlugIn;
 import org.esa.snap.core.datamodel.Product;
-import org.esa.snap.core.gpf.GPF;
 import org.esa.snap.core.gpf.common.WriteOp;
 import org.esa.snap.core.gpf.internal.OperatorExecutor;
 import org.esa.snap.core.util.SystemUtils;
@@ -17,15 +14,11 @@ import org.esa.snap.runtime.Config;
 import org.esa.snap.runtime.Engine;
 
 import com.bc.ceres.core.ProgressMonitor;
-import com.bc.ceres.core.SubProgressMonitor;
-
 import wasdi.ConfigReader;
 import wasdi.shared.parameters.ApplyOrbitParameter;
 import wasdi.shared.parameters.ApplyOrbitSetting;
-import wasdi.shared.parameters.ISetting;
 import wasdi.snapopearations.ApplyOrbit;
 import wasdi.snapopearations.ReadProduct;
-import wasdi.snapopearations.WriteProduct;
 
 public class ProofPerformance {
 

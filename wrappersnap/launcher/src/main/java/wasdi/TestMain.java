@@ -22,7 +22,6 @@ import org.json.JSONObject;
 import com.bc.ceres.glevel.MultiLevelImage;
 
 import wasdi.filebuffer.DownloadFile;
-import wasdi.rabbit.Send;
 import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.DownloadedFile;
 import wasdi.shared.business.ProcessWorkspace;
@@ -229,8 +228,8 @@ public class TestMain {
 
         String sJSON = MongoRepository.s_oMapper.writeValueAsString(oVM);
         LauncherMain.s_oLogger.debug(sJSON);
-        int i=0;
-        i++;
+//        int i=0;
+//        i++;
     }
 
     public void GenerateBandTiff() throws Exception {
@@ -247,9 +246,9 @@ public class TestMain {
         GeoTIFFMetadata oMetadata = GeoCoding2GeoTIFFMetadata.createGeoTIFFMetadata(oGeoCoding, oBandImage.getWidth(),oBandImage.getHeight());
 
         GeoTIFF.writeImage(oBandImage, new File("C:\\temp\\wasdi\\paolo\\6de8a7af-c383-4d34-8423-3c229e610d39\\band1.tif"), oMetadata);
-
-        int i=0;
-        i++;
+//
+//        int i=0;
+//        i++;
 
         //String sTiffFile = oReadProduct.writeBigTiff("C:\\temp\\wasdi\\paolo\\6de8a7af-c383-4d34-8423-3c229e610d39\\S1A_IW_GRDH_1SDV_20161030T052733_20161030T052758_013715_016011_EBDC.zip", "C:\\temp\\wasdi\\paolo\\6de8a7af-c383-4d34-8423-3c229e610d39", "6de8a7af-c383-4d34-8423-3c229e610d39");
     }

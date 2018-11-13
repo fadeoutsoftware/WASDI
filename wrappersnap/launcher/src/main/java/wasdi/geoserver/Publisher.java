@@ -9,7 +9,6 @@ import java.nio.file.Paths;
 import org.apache.log4j.Logger;
 import org.apache.log4j.xml.DOMConfigurator;
 
-import it.geosolutions.geoserver.rest.encoder.coverage.GSCoverageEncoder;
 import wasdi.shared.geoserver.GeoServerManager;
 import wasdi.shared.utils.Utils;
 
