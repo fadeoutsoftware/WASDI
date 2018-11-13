@@ -1,4 +1,3 @@
-import java.io.IOException;
 import java.util.ArrayList;
 
 //import it.fadeout.business.PasswordAuthentication;
@@ -7,7 +6,6 @@ import wasdi.shared.business.PasswordAuthentication;
 import wasdi.shared.business.User;
 import wasdi.shared.data.MongoRepository;
 import wasdi.shared.data.UserRepository;
-import java.util.ArrayList;
 
 public class DButils {
 

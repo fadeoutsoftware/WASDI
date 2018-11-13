@@ -1,7 +1,5 @@
 package wasdi.shared.viewmodels;
 
-import java.util.UUID;
-
 import javax.xml.bind.annotation.XmlRootElement;
 
 /**
