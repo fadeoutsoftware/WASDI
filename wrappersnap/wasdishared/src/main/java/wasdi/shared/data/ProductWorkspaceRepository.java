@@ -11,7 +11,6 @@ import com.mongodb.client.FindIterable;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.result.DeleteResult;
 
-import wasdi.shared.business.DownloadedFile;
 import wasdi.shared.business.ProductWorkspace;
 
 /**

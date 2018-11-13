@@ -5,8 +5,6 @@ import com.mongodb.client.FindIterable;
 import com.mongodb.client.result.DeleteResult;
 import org.bson.Document;
 import wasdi.shared.business.Workspace;
-import wasdi.shared.viewmodels.WorkspaceListInfoViewModel;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
