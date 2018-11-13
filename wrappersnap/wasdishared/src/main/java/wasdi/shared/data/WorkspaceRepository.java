@@ -131,7 +131,7 @@ public class WorkspaceRepository extends  MongoRepository{
         return 0;
     }
 
-	public ArrayList<Workspace> getWorkspaceListByProductName(String sProductName) {
+	/*public ArrayList<Workspace> getWorkspaceListByProductName(String sProductName) {
 		
 		final ArrayList<Workspace> aoReturnList = new ArrayList<Workspace>();
         try {
@@ -157,5 +157,5 @@ public class WorkspaceRepository extends  MongoRepository{
         }
 
         return aoReturnList;
-	}
+	}*/
 }
