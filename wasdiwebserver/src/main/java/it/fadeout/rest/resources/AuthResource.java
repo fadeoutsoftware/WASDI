@@ -751,23 +751,31 @@ public class AuthResource {
 		if(null == oUser) {
 			return PrimitiveResult.getInvalid();
 		} else {
-			if(m_oCredentialPolicy.validEmail(oUser.getUserId())) {
-				String sPassword = Utils.generateRandomPassword();
-				String sHashedPassword = m_oPasswordAuthentication.hash(sPassword.toCharArray()); 
-				oUser.setPassword(sHashedPassword);
-				if(oUserRepository.UpdateUser(oUser)) {
-					if(! sendPasswordEmail(sUserId, sUserId, sPassword) ) {
-						return PrimitiveResult.getInvalid(); 
+			if(null != oUser.getAuthServiceProvider()){
+				if( m_oCredentialPolicy.authenticatedByWasdi(oUser.getAuthServiceProvider()) ){
+					if(m_oCredentialPolicy.validEmail(oUser.getUserId()) ) {
+						String sPassword = Utils.generateRandomPassword();
+						String sHashedPassword = m_oPasswordAuthentication.hash( sPassword.toCharArray() ); 
+						oUser.setPassword(sHashedPassword);
+						if(oUserRepository.UpdateUser(oUser)) {
+							if(! sendPasswordEmail(sUserId, sUserId, sPassword) ) {
+								return PrimitiveResult.getInvalid(); 
+							}
+							PrimitiveResult oResult = new PrimitiveResult();
+							oResult.setBoolValue(true);
+							oResult.setIntValue(0);
+							return oResult;
+						} else {
+							return PrimitiveResult.getInvalid();
+						}
+					} else {
+						//older users did not necessarily specified an email
+						return PrimitiveResult.getInvalid();
 					}
-					PrimitiveResult oResult = new PrimitiveResult();
-					oResult.setBoolValue(true);
-					oResult.setIntValue(0);
-					return oResult;
 				} else {
 					return PrimitiveResult.getInvalid();
 				}
 			} else {
-				//older users did not necessarily specified an email
 				return PrimitiveResult.getInvalid();
 			}
 		}
