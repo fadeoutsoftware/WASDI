@@ -24,16 +24,12 @@ public class CredentialPolicy {
 	//probably we may raise these values to 2 but no more: some (sur)names can be very short (e.g. "Li")
 	private static int MINNAMELENGTH = 1;
 	private static int MINSURNAMELENGTH = 1;
+	
+	private static String WASDIAUTHPROVIDER="wasdi";
 
 
 	private boolean isNullOrEmpty(String sString) {
-		if (sString == null) {
-			return true;
-		}
-		if (sString.isEmpty()) {
-			return  true;
-		}
-		return  false;
+		return Utils.isNullOrEmpty(sString);
 	}
 
 	public Boolean validPassword(String sPassword ) {
@@ -154,8 +150,19 @@ public class CredentialPolicy {
 		}
 	}
 
-
-	// begin satisfaction checks 
+	public Boolean authenticatedByWasdi(String sAuthProvider) {
+		if(isNullOrEmpty(sAuthProvider)) {
+			return false;
+		} else if(sAuthProvider.equalsIgnoreCase(WASDIAUTHPROVIDER)) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+	
+	//---------------------------------------------------------------------------
+	// begin satisfaction checks
+	//---------------------------------------------------------------------------
 
 
 	public Boolean satisfies( LoginInfo oLoginInfo ) {
