@@ -1,0 +1,17 @@
+.validate-new-user-view{
+  padding: 0;
+  .top-background
+  {
+    @extend %login-top-background;
+
+    .content
+    {
+      @extend %form-css;
+    }
+  }
+
+  .bottom-background
+  {
+    @extend %login-bottom-background;
+  }
+}

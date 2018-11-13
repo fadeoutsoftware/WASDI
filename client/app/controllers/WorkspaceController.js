@@ -334,25 +334,50 @@ var WorkspaceController = (function() {
         if(utilsIsObjectNullOrUndefined(this.m_aoProducts) || this.m_aoProducts.length == 0) return true;
         return false;
     };
+    /**
+     *
+     * @param oWorkspace
+     * @returns {*}
+     */
+    // WorkspaceController.prototype.isSelectedRowInWorkspaceTableCSS = function(oWorkspace)
+    // {
+    //     if(utilsIsObjectNullOrUndefined(oWorkspace))
+    //         return '';
+    //     if(utilsIsStrNullOrEmpty(oWorkspace.workspaceId))
+    //         return '';
+    //
+    //     if(utilsIsObjectNullOrUndefined(this.m_oWorkspaceSelected))
+    //         return '';
+    //     if(utilsIsStrNullOrEmpty(this.m_oWorkspaceSelected.workspaceId))
+    //         return '';
+    //
+    //     if(oWorkspace.workspaceId != this.m_oWorkspaceSelected.workspaceId)
+    //         return '';
+    //
+    //     return 'selected-row';
+    // };
 
-    WorkspaceController.prototype.isSelectedRowInWorkspaceTable = function(oWorkspace)
-    {
+    WorkspaceController.prototype.isSelectedRowInWorkspaceTable = function(oWorkspace){
         if(utilsIsObjectNullOrUndefined(oWorkspace))
-            return '';
+            return false;
         if(utilsIsStrNullOrEmpty(oWorkspace.workspaceId))
-            return '';
+            return false;
 
         if(utilsIsObjectNullOrUndefined(this.m_oWorkspaceSelected))
-            return '';
+            return false;
         if(utilsIsStrNullOrEmpty(this.m_oWorkspaceSelected.workspaceId))
-            return '';
+            return false;
 
         if(oWorkspace.workspaceId != this.m_oWorkspaceSelected.workspaceId)
-            return '';
+            return false;
 
-        return 'selected-row';
-    };
-
+        return true;
+    }
+    /**
+     *
+     * @param sWorkspaceId
+     * @constructor
+     */
 	WorkspaceController.prototype.DeleteWorkspace = function (sWorkspaceId) {
 
         var oController = this;

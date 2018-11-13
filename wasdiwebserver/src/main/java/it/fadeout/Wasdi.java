@@ -21,7 +21,7 @@ import org.esa.snap.runtime.Config;
 import org.esa.snap.runtime.Engine;
 
 import it.fadeout.business.DownloadsThread;
-import it.fadeout.business.PasswordAuthentication;
+//import it.fadeout.business.PasswordAuthentication;
 import it.fadeout.business.ProcessingThread;
 import it.fadeout.rest.resources.AuthResource;
 import it.fadeout.rest.resources.CatalogResources;
@@ -129,11 +129,27 @@ public class Wasdi extends Application {
 		}
 		
 		//set nfs properties download
-		String userHome = System.getProperty( "user.home");
-		String Nfs = System.getProperty( "nfs.data.download" );
-		if (Nfs == null) System.setProperty( "nfs.data.download", userHome + "/nfs/download");
+		String sUserHome = System.getProperty( "user.home");
+		String sNfsFolder = System.getProperty( "nfs.data.download" );
+		if (sNfsFolder == null) System.setProperty( "nfs.data.download", sUserHome + "/nfs/download");
 
 		System.out.println("-------nfs dir " + System.getProperty( "nfs.data.download" ));
+		
+		
+		try {
+			
+            MongoRepository.SERVER_ADDRESS = getInitParameter("MONGO_ADDRESS", "127.0.0.1");
+            MongoRepository.SERVER_PORT = Integer.parseInt(getInitParameter("MONGO_PORT", "27017"));
+            MongoRepository.DB_NAME = getInitParameter("MONGO_DBNAME","wasdi");
+            MongoRepository.DB_USER = getInitParameter("MONGO_DBUSER","mongo");
+            MongoRepository.DB_PWD = getInitParameter("MONGO_DBPWD","mongo");
+            
+            System.out.println("-------Mongo db User " + MongoRepository.DB_USER);
+			
+		} catch (Throwable e) {
+			e.printStackTrace();
+		}
+		
 
 		if (s_oProcessingThread==null) {
 			try {
@@ -169,14 +185,7 @@ public class Wasdi extends Application {
 		
 		System.out.println("-------initializing snap...");
 		
-		try {
-			
-            MongoRepository.SERVER_ADDRESS = getInitParameter("MONGO_ADDRESS", "127.0.0.1");
-            MongoRepository.SERVER_PORT = Integer.parseInt(getInitParameter("MONGO_PORT", "27017"));
-            MongoRepository.DB_NAME = getInitParameter("MONGO_DBNAME","wasdi");
-            MongoRepository.DB_USER = getInitParameter("MONGO_DBUSER","mongo");
-            MongoRepository.DB_PWD = getInitParameter("MONGO_DBPWD","mongo");
-			
+		try {		
 			String snapAuxPropPath = getInitParameter("SNAP_AUX_PROPERTIES", null);
 			System.out.println("snap aux properties file: " + snapAuxPropPath);
 			Path propFile = Paths.get(snapAuxPropPath);
@@ -197,9 +206,9 @@ public class Wasdi extends Application {
 		
 		
 		System.out.println("------- WASDI Init done ");
-		System.out.println("-----------------------------------------");
+		System.out.println("---------------------------------------------");
 		System.out.println("------- 	 Welcome to space     -------");
-		System.out.println("-----------------------------------------");
+		System.out.println("---------------------------------------------");
 	}
 	
 	/**

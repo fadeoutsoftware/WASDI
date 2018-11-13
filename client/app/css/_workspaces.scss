@@ -101,19 +101,47 @@
         cursor:pointer;
       }
       // COLOR OVER A TD
-      .over-color:hover
-      {
-        cursor:pointer;
-        i:hover {
-
-          //background-color:white;
-          color:$wasdi-over-icon;
-        }
-      }
+      //.over-color
+      //{
+      //  background-color: $wasdi-white;
+      //  color: $wasdi-blue-logo;
+      //
+      //  &:hover{
+      //    cursor:pointer;
+      //    i:hover {
+      //
+      //      //background-color:white;
+      //      color:$wasdi-over-icon;
+      //    }
+      //  }
+      //
+      //}
       .selected-row
       {
+
         background-color: #44536C;
         color: white;
+
+        // COLOR OVER A TD
+        .over-color
+        {
+          background-color: $wasdi-white !important;
+          color: $wasdi-blue-logo !important;
+          border-top: none;
+
+          &:hover{
+
+            background-color: $wasdi-grey !important;
+            cursor:pointer;
+            //color:$wasdi-over-icon !important;
+            i:hover {
+
+              //background-color:white;
+              color:$wasdi-over-icon;
+            }
+          }
+
+        }
       }
     }
   }

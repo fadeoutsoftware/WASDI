@@ -3,7 +3,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" ng-click="close(false)" data-dismiss="modal" aria-hidden="true">&times;</button>
-                <h4 class="modal-title ">Metadata Attributes {{m_oController.m_sNameNode}}</h4>
+                <h4 class="modal-title ">{{"DIALOG_WPS_TITLE"|translate}}</h4>
             </div>
             <div class="modal-body">
                 <div id="wrapper">
@@ -12,18 +12,14 @@
                         <p>wps-js is an <a href="https://github.com/52North/wps-js/" title="wps-js on GitHub">open source client library</a> for connecting Javascript client to <a href="http://www.opengeospatial.org/standards/wps" title="WPS @ Open Geospatial Consortium">OGC Web Processing</a> services. This page demonstrates how you can use it. More documentation is available in the <a href="https://wiki.52north.org/bin/view/Geoprocessing/Wps-js" title="wps-js wiki page">52&deg;North Wiki</a> and on <a href="https://github.com/52North/wps-js/blob/master/README.md" title="wps-js readme">GitHub</a>.</p>
                     </div>-->
                     <h3>
-                        Wps list
+                        {{"DIALOG_WPS_TITLE_WPS_LIST"|translate}}
                     </h3>
 
                     <div>
                         <select id="wps" ng-model="m_oController.m_sSelectedWps" ng-change="m_oController.onChangeWPS()"><!--ng-change="m_oController.onChangeWPS()"-->
                             <!--<option>Select a WPS</option>-->
-                            <!--<option>http://geoprocessing.demo.52north.org:8080/latest-wps/WebProcessingService</option>-->
-                            <!--<option>http://www.wasdi.net/geoserver/wps</option>-->
-                            <!--<option>http://127.0.0.1/geoserver/wps</option>-->
                             <option>http://178.22.66.96/geoserver/wps</option>
                             <option>http://gpod.eo.esa.int/wps</option>
-
                         </select>
                         <!--{{m_oController.m_sSelectedWps}}-->
                     </div>
@@ -31,11 +27,9 @@
                         <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
                             <div>
                                 <h3>
-                                    Capabilities Show Capabilities<!--<a href="" id="wpscaller" ng-click="m_oController.clickOnShowCapabilities()"></a>--><!--ng-click="m_oController.clickOnShowCapabilities()"-->
+                                    {{"DIALOG_WPS_TITLE_SHOW_CAPABILITIES"|translate}}
                                 </h3>
-                                <!--<div class="wps-container">-->
                                     <div id="capabilitiesByClick"></div>
-                                <!--</div>-->
                             </div>
                         </div>
                         <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
@@ -44,7 +38,7 @@
                                 <!--<div class="wps-container">-->
                                     <select id="processes" ><!--ng-model="m_oController.m_sSelectedProcess" ng-change="m_oController.onChangeProcesses()"-->
                                         <option>
-                                            Select a process
+                                            {{"DIALOG_WPS_TITLE_SELECT_PROCESS"|translate}}
                                         </option>
                                         {{m_oController.m_sSelectedProcess}}
                                     </select>
@@ -60,7 +54,7 @@
                     <div class="row" ng-hide="m_oController.m_sSelectedWps === '' ">
                         <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
                             <h3>
-                                Execute results
+                                {{"DIALOG_WPS_TITLE_EXECUTE_RESULTS"|translate}}
                             </h3>
                             <!--<div class="wps-container">-->
                                 <div id="executeProcess"></div>
@@ -71,19 +65,10 @@
 
                 </div>
 
-                <!--TODO MOVE SCRIPTS-->
                 <script type="text/javascript">
-                    var capabilities, // the capabilities, read by Format.WPSCapabilities::read
-                        process; // the process description from Format.WPSDescribeProcess::read
-//
-//                    $('#wpscaller').click(function() {
-//                        var sel = document.getElementById("wps");
-//
-//                        $('#capabilitiesByClick').wpsCall({
-//                            url : sel.options[sel.selectedIndex].text,
-//                            requestType : GET_CAPABILITIES_TYPE
-//                        });
-//                    });
+//                    var capabilities, // the capabilities, read by Format.WPSCapabilities::read
+//                        process; // the process description from Format.WPSDescribeProcess::read
+
 
                     $(document).ready(function() {
                         $.wpsSetup({
@@ -103,103 +88,9 @@
 
                         describeProcess(sel.options[sel.selectedIndex].text);
                     };
-//                    document.getElementById("wps").onchange = function() {
-//                        var sel = document.getElementById("wps");
-//
-//                        getCapabilities(sel.options[sel.selectedIndex].text);
-//                    };
 
                 </script>
 
-                <!--TODO REMOVE IT-->
-               <!--<h4 >-->
-                   <!--<div class="row">-->
-                       <!--<div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">-->
-                           <!--<div class="wps-container">-->
-
-                               <!--<div class="dropdown">-->
-                                   <!--<button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenuWpsProcess"-->
-                                           <!--data-toggle="dropdown">-->
-                                       <!--Select a Process-->
-                                       <!--<span class="caret"></span>-->
-                                   <!--</button>-->
-                                   <!--<ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenuWpsProcess">-->
-                                       <!--<li role="presentation"  ng-repeat="process in m_oController.m_aoProcesses" ng-click="m_oController.getDescriptionSelectedProcess(process.identifier)">-->
-                                           <!--<a role="menuitem" tabindex="-1" href="">-->
-                                               <!--{{process.identifier}}-->
-                                           <!--</a>-->
-                                       <!--</li>-->
-
-                                   <!--</ul>-->
-                               <!--</div>-->
-                               <!--&lt;!&ndash;<select id="processes" ng-change="m_oController.getDescriptionSelectedProcess(process.identifier)">&ndash;&gt;-->
-                                   <!--&lt;!&ndash;<option>Select a Process</option>&ndash;&gt;-->
-                                   <!--&lt;!&ndash;<option ng-repeat="process in m_oController.m_aoProcesses">&ndash;&gt;-->
-                                       <!--&lt;!&ndash;{{process.identifier}}&ndash;&gt;-->
-                                   <!--&lt;!&ndash;</option>&ndash;&gt;-->
-                               <!--&lt;!&ndash;</select>&ndash;&gt;-->
-                           <!--</div>-->
-
-                           <!--&lt;!&ndash;<button ng-click="m_oController.getDescriptionSelectedProcess()">test get desciption process</button>&ndash;&gt;-->
-                       <!--</div>-->
-                   <!--</div>-->
-                   <!--<div class="row">-->
-                       <!--<div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">-->
-                           <!--capabilitiesText-->
-                           <!--<textarea rows="20" cols="100" id="capabilitiesText">empty</textarea>-->
-                       <!--</div>-->
-                   <!--</div>-->
-                   <!--&lt;!&ndash;<div class="row">&ndash;&gt;-->
-                       <!--&lt;!&ndash;<div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">&ndash;&gt;-->
-
-                           <!--&lt;!&ndash;<div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">&ndash;&gt;-->
-                               <!--&lt;!&ndash;<div class="dropdown my-dropdown" >&ndash;&gt;-->
-
-                                   <!--&lt;!&ndash;<button class="" type="button" id="wpsprocesses"&ndash;&gt;-->
-                                           <!--&lt;!&ndash;data-toggle="dropdown">&ndash;&gt;-->
-                                       <!--&lt;!&ndash;Processes&ndash;&gt;-->
-                                       <!--&lt;!&ndash;<span class="caret"></span>&ndash;&gt;-->
-                                   <!--&lt;!&ndash;</button>&ndash;&gt;-->
-
-                                   <!--&lt;!&ndash;<ul class="dropdown-menu" role="menu" aria-labelledby="wpsprocesses">&ndash;&gt;-->
-                                       <!--&lt;!&ndash;<li role="presentation" ng-repeat="process in m_oController.m_aoProcesses"&ndash;&gt;-->
-                                           <!--&lt;!&ndash;ng-click="m_oController.getDescriptionSelectedProcess(process.identifier)">&ndash;&gt;-->
-
-                                           <!--&lt;!&ndash;<a role="menuitem" tabindex="-1" href="">&ndash;&gt;-->
-                                               <!--&lt;!&ndash;{{process.title}}&ndash;&gt;-->
-                                           <!--&lt;!&ndash;</a>&ndash;&gt;-->
-                                       <!--&lt;!&ndash;</li>&ndash;&gt;-->
-                                   <!--&lt;!&ndash;</ul>&ndash;&gt;-->
-
-                               <!--&lt;!&ndash;</div>&ndash;&gt;-->
-                           <!--&lt;!&ndash;</div>&ndash;&gt;-->
-                           <!--&lt;!&ndash;<div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">&ndash;&gt;-->
-                               <!--&lt;!&ndash;<div>&ndash;&gt;-->
-                                   <!--&lt;!&ndash;capabilitiesText&ndash;&gt;-->
-                                   <!--&lt;!&ndash;<textarea rows="20" cols="100" id="capabilitiesText">empty</textarea>&ndash;&gt;-->
-                               <!--&lt;!&ndash;</div>&ndash;&gt;-->
-                           <!--&lt;!&ndash;</div>&ndash;&gt;-->
-                           <!--&lt;!&ndash;<div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">&ndash;&gt;-->
-                               <!--&lt;!&ndash;<div>&ndash;&gt;-->
-                                   <!--&lt;!&ndash;processDescriptionText&ndash;&gt;-->
-                                   <!--&lt;!&ndash;<textarea rows="20" cols="100" id="processDescriptionText">empty</textarea>&ndash;&gt;-->
-                               <!--&lt;!&ndash;</div>&ndash;&gt;-->
-                           <!--&lt;!&ndash;</div>&ndash;&gt;-->
-
-                       <!--&lt;!&ndash;</div>&ndash;&gt;-->
-
-                   <!--&lt;!&ndash;</div>&ndash;&gt;-->
-                   <!--&lt;!&ndash;<div class="row">&ndash;&gt;-->
-                       <!--&lt;!&ndash;<div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">&ndash;&gt;-->
-                           <!--&lt;!&ndash;<div>&ndash;&gt;-->
-                               <!--&lt;!&ndash;xmlExecute&ndash;&gt;-->
-                               <!--&lt;!&ndash;<textarea rows="20" cols="100" id="xmlExecute">&ndash;&gt;-->
-                                   <!--&lt;!&ndash;empty&ndash;&gt;-->
-                               <!--&lt;!&ndash;</textarea>&ndash;&gt;-->
-                           <!--&lt;!&ndash;</div>&ndash;&gt;-->
-                       <!--&lt;!&ndash;</div>&ndash;&gt;-->
-                   <!--&lt;!&ndash;</div>&ndash;&gt;-->
-               <!--</h4>-->
 
             </div>
             <div class="modal-footer">

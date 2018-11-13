@@ -1,28 +1,124 @@
 <div class="modal fade get-info-dialog-catalog">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-dialog-large">
         <div class="modal-content">
             <!-- HEADER -->
             <div class=" modal-header">
-                {{m_oController.m_oProductChecked.filePath}}
+
+                <button type="button" class="close" ng-click="close(false)" data-dismiss="modal" aria-hidden="true">&times;</button>
+
+                <h4 class="modal-title ">
+                    {{m_oController.getFileName()}}
+                </h4>
             </div>
             <!-- BODY -->
             <div class="modal-body ">
                 <h4>
-                    <div>
-                       <label>File Name:</label>
-                        {{m_oController.m_oProductChecked.fileName}}
+                    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                        <div class="row">
+                            <div class="panel panel-default">
+                                <div class="panel-heading" data-toggle="collapse" href="#productinfo">
+                                    <h4 class="panel-title">
+                                        {{"DIALOG_CATALOG_INFO_PRODUCT_PRODUCT_INFO_LABEL"|translate}}
+                                    </h4>
+                                </div>
+                                <div id="productinfo" class="panel-collapse collapse">
+                                    <!--{{collapse}}-->
+                                    <div class="panel-body">
+                                        <div class="row">
+                                            <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
+                                                <label>File Name:</label>
+                                            </div>
+
+                                            <div class="col-xs-9 col-sm-9 col-md-9 col-lg-9">
+                                                {{m_oController.m_oProduct.fileName}}
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
+                                                <label>Category:</label>
+                                            </div>
+                                            <div class="col-xs-9 col-sm-9 col-md-9 col-lg-9">
+                                                {{m_oController.m_oProduct.category}}
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
+                                                <label>Bounding box:</label>
+                                            </div>
+                                            <div class="col-xs-9 col-sm-9 col-md-9 col-lg-9">
+                                                {{m_oController.m_oProduct.boundingBox}}
+                                            </div>
+
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!--<div class="row">-->
+                            <!--<div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">-->
+                                <!--<label>File Name:</label>-->
+                            <!--</div>-->
+
+                            <!--<div class="col-xs-9 col-sm-9 col-md-9 col-lg-9">-->
+                                <!--{{m_oController.m_oProductChecked.fileName}}-->
+                            <!--</div>-->
+                        <!--</div>-->
+
                     </div>
-                    <div>
-                        <label>Category:</label>
-                        {{m_oController.m_oProductChecked.category}}
-                    </div>
-                    <div>
-                        <label>Bounding box:</label>
-                        {{m_oController.m_oProductChecked.boundingBox}}
+
+                    <!--<div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">-->
+                        <!--<div class="row">-->
+                            <!--<div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">-->
+                                <!--<label>Category:</label>-->
+                            <!--</div>-->
+                            <!--<div class="col-xs-9 col-sm-9 col-md-9 col-lg-9">-->
+                                <!--{{m_oController.m_oProductChecked.category}}-->
+                            <!--</div>-->
+                        <!--</div>-->
+                    <!--</div>-->
+
+                    <!--<div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">-->
+                        <!--<div class="row">-->
+                            <!--<div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">-->
+                                <!--<label>Bounding box:</label>-->
+                            <!--</div>-->
+                            <!--<div class="col-xs-9 col-sm-9 col-md-9 col-lg-9">-->
+                                <!--{{m_oController.m_oProductChecked.boundingBox}}-->
+                            <!--</div>-->
+
+                        <!--</div>-->
+                    <!--</div>-->
+
+                    <!--<div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">-->
+                        <!--<div ng-repeat="band in m_oController.getProductBands()">-->
+                            <!--{{band.name}}-->
+                        <!--</div>-->
+                    <!--</div>-->
+
+                    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                        <div class="row">
+                            <div class="panel panel-default">
+                                <div class="panel-heading" data-toggle="collapse" href="#productbands">
+                                    <h4 class="panel-title">
+                                        <!--<i data-toggle="collapse" href="#productbands">-->
+                                        {{"DIALOG_CATALOG_INFO_PRODUCT_PRODUCT_BANDS_LABEL"|translate}}
+                                        <!--</i>-->
+                                    </h4>
+                                </div>
+                                <div id="productbands" class="panel-collapse collapse">
+                                    <!--{{collapse}}-->
+                                    <div class="panel-body">
+                                        <div ng-repeat="band in m_oController.getProductBands()">
+                                            {{band.name}}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                 </h4>
-
 
             </div>
 

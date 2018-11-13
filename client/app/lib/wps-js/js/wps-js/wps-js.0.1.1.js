@@ -1426,17 +1426,18 @@ var BaseRequest = Class.extend({
 					self.changeElementContent(htmlContent);	
 				}
 			},
-			error: function() {
+			error: function(data) {
 				self.changeElementContent('<div class="wps-error"><div class="wps-generic-error"></div>'+
-						'<div>An error occured while connecting to '+
-						self.settings.url +'</div></div>');
+						'<div>An error occured in the request to '+
+						self.settings.url +'</div></div>' + data.responseText);
 			}
 		}, requestSettings);
 		
 		var targetUrl;
 		if (USE_PROXY) {
 			if (PROXY_TYPE == "parameter") {
-				targetUrl = PROXY_URL + encodeURIComponent(this.settings.url);
+				// targetUrl = PROXY_URL + encodeURIComponent(this.settings.url);
+				targetUrl = PROXY_URL + this.settings.url;
 			}
 			else {
 				//TODO split URL into host-base + query and create new
@@ -1445,11 +1446,14 @@ var BaseRequest = Class.extend({
 		} else {
 			targetUrl = this.settings.url;
 		}
-
-         // var sUrl = 'https://cors-anywhere.herokuapp.com/http://gpod.eo.esa.int/wps/?Request=GetCapabilities&service=WPS&AcceptVersions=1.0.0';
-         var sUrl = 'https://crossorigin.me/http://gpod.eo.esa.int/wps/?Request=GetCapabilities&service=WPS&AcceptVersions=1.0.0';
+       //var sUrl = 'http://178.22.66.96/corsproxy/http://gpod.eo.esa.int/wps/?Request=GetCapabilities&service=WPS&AcceptVersions=1.0.0';
+		// 	var sUrl = 'http://178.22.66.96/corsproxy/gpod.eo.esa.int/wps/?Request=GetCapabilities&service=WPS&AcceptVersions=1.0.0';
+		// var sUrl = 'https://cors-anywhere.herokuapp.com/http://gpod.eo.esa.int/wps/?Request=GetCapabilities&service=WPS&AcceptVersions=1.0.0';
+        // var sUrl = 'https://crossorigin.me/http://gpod.eo.esa.int/wps/?Request=GetCapabilities&service=WPS&AcceptVersions=1.0.0';
         // var sUrl = 'https://cors-anywhere.herokuapp.com/' + targetUrl;
-		jQuery.ajax(sUrl, combinedRequestSettings);
+        // var sUrl = 'http://178.22.66.96/corsproxy/' + targetUrl;
+        // jQuery.ajax(sUrl, combinedRequestSettings);
+        jQuery.ajax(targetUrl, combinedRequestSettings);
 	}
 });
 
@@ -2788,10 +2792,13 @@ function describeProcess(processIdentifier, wpsUrl, targetContainer) {
             formBuilder.buildExecuteForm(jQuery('#'+targetContainer), process, execute);
             
             // create a link to the full process description
-            var processDescriptionLink = jQuery('<a title="Full process description" target="_blank">Show Description</a>');
-            processDescriptionLink.attr("href", describeProcess.settings.url);
-            jQuery('#'+targetContainer).prepend(jQuery('<div class="wps-description-link">').append(processDescriptionLink));
-            
+            // var processDescriptionLink = jQuery('<a title="Full process description" target="_blank">Show Description</a>');
+            // processDescriptionLink.attr("href", describeProcess.settings.url);
+            // jQuery('#'+targetContainer).prepend(jQuery('<div class="wps-description-link">').append(processDescriptionLink));
+
+        	var processDescriptionLink = jQuery('<a title="Full process description" target="_blank" href = http://' + describeProcess.settings.url + '>Show Description</a>');
+	        jQuery('#'+targetContainer).prepend(jQuery('<div class="wps-description-link">').append(processDescriptionLink));
+
             // create links to the metadata elements
             var metadata = jQuery(response.getElementsByTagNameNS(OWS_11_NAMESPACE, "Metadata"));
             if(metadata.length > 0) {

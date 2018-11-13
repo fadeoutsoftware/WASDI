@@ -3,15 +3,16 @@
 {
   .login-top
   {
+    @extend %login-top-background;
 
-    font-family: Arial;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    height: 50vh;
-    width: 100vw;
-
-    background-color: $wasdi-login-color-background;
-    position: relative;//for center login content element
+    //font-family: Arial;
+    //-webkit-font-smoothing: antialiased;
+    //-moz-osx-font-smoothing: grayscale;
+    //height: 50vh;
+    //width: 100vw;
+    //
+    //background-color: $wasdi-login-color-background;
+    //position: relative;//for center login content element
 
 
     //WRITE(IMAGE) CSS
@@ -69,66 +70,70 @@
       color:$wasdi-green-logo;
     }
 
-    %form-css{
-      //CENTER VERTICALLY and HORIZONTALLY
-      position: absolute;
-      top: 70%;//50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      border: solid 1px black;
-      z-index: 1;
-      //CONTENT
-      width: 350px;
-      max-width: 350px;
-      padding: 40px 40px;
-      background-color: $wasdi-login-color-background-content;
-
-      input[type=email][type=password]
-      {
-        width: 100%;
-
-        display: block;
-        margin-bottom: 10px;
-        z-index: 1;
-        position: relative;
-        -moz-box-sizing: border-box;
-        -webkit-box-sizing: border-box;
-        box-sizing: border-box;
-      }
-
-      //OVERRIDE BOOTSTRAP
-      //change input[email,password]
-      .form-control
-      {
-        height:45px ;
-      }
-
-      //OVERRIDE BOOTSTRAP
-      //change over color button
-      .btn-primary:hover, .btn-primary:focus, .btn-primary:active, .btn-primary.active, .open>.dropdown-toggle.btn-primary {
-        color: #fff;//default
-        background-color: $wasdi-login-color-background;
-        border-color: #285e8e; //default
-      }
-      .form-signin
-      {
-        .error-message
-        {
-          color:red;
-        }
-      }
-      .alert {
-        margin-bottom: 0px;
-        margin-top: 5px;
-      }
-    }
+    //%form-css{
+    //  //CENTER VERTICALLY and HORIZONTALLY
+    //  position: absolute;
+    //  top: 70%;//50%;
+    //  left: 50%;
+    //  transform: translate(-50%, -50%);
+    //  border: solid 1px black;
+    //  z-index: 1;
+    //  //CONTENT
+    //  width: 350px;
+    //  max-width: 350px;
+    //  padding: 40px 40px;
+    //  background-color: $wasdi-login-color-background-content;
+    //
+    //  input[type=email][type=password]
+    //  {
+    //    width: 100%;
+    //
+    //    display: block;
+    //    margin-bottom: 10px;
+    //    z-index: 1;
+    //    position: relative;
+    //    -moz-box-sizing: border-box;
+    //    -webkit-box-sizing: border-box;
+    //    box-sizing: border-box;
+    //  }
+    //
+    //  //OVERRIDE BOOTSTRAP
+    //  //change input[email,password]
+    //  .form-control
+    //  {
+    //    height:45px ;
+    //  }
+    //
+    //  //OVERRIDE BOOTSTRAP
+    //  //change over color button
+    //  .btn-primary:hover, .btn-primary:focus, .btn-primary:active, .btn-primary.active, .open>.dropdown-toggle.btn-primary {
+    //    color: #fff;//default
+    //    background-color: $wasdi-login-color-background;
+    //    border-color: #285e8e; //default
+    //  }
+    //  .form-signin
+    //  {
+    //    .error-message
+    //    {
+    //      color:red;
+    //    }
+    //  }
+    //  .alert {
+    //    margin-bottom: 0px;
+    //    margin-top: 5px;
+    //  }
+    //}
 
     .login-content
     {
       @extend %form-css;
-
-
+      .google-button-container
+      {
+        //margin-top: 10px;
+      }
     }
+
+
     /***************** signin-content *****************/
     .signin-content
     {
@@ -147,13 +152,15 @@
   }
   .login-bottom
   {
-    font-family: Arial;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    height: 50vh;
-    width: 100vw;
-    background-color: $wasdi-white;
-    position: relative;//for center login content element
+    @extend %login-bottom-background;
+
+    //font-family: Arial;
+    //-webkit-font-smoothing: antialiased;
+    //-moz-osx-font-smoothing: grayscale;
+    //height: 50vh;
+    //width: 100vw;
+    //background-color: $wasdi-white;
+    //position: relative;//for center login content element
 
     //Logo
     .logo
