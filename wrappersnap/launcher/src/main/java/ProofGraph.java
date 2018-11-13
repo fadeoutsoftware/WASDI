@@ -20,8 +20,6 @@ import org.esa.snap.runtime.Engine;
 import com.bc.ceres.binding.dom.DomElement;
 import com.bc.ceres.core.ProgressMonitor;
 
-import wasdi.ConfigReader;
-
 public class ProofGraph {
 	
 	private static class MyGraphObserver implements GraphProcessingObserver {

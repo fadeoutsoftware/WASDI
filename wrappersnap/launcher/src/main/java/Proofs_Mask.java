@@ -1,24 +1,12 @@
-import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.util.UUID;
-import java.util.prefs.Preferences;
-
 import javax.imageio.ImageIO;
 
 import org.esa.snap.core.dataio.ProductIO;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Mask;
 import org.esa.snap.core.datamodel.Product;
-import org.esa.snap.core.datamodel.ProductNodeGroup;
-import org.esa.snap.core.jexp.impl.Tokenizer;
-import org.esa.snap.core.util.ProductUtils;
-import org.esa.snap.core.util.StringUtils;
-import org.esa.snap.rcp.SnapApp;
-
-import com.bc.ceres.binding.PropertyContainer;
-
 import wasdi.shared.utils.BandImageManager;
 
 public class Proofs_Mask {
