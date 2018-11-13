@@ -4,25 +4,11 @@ import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-
 import javax.imageio.ImageIO;
-import javax.media.jai.JAI;
-import javax.media.jai.OperationRegistry;
-import javax.media.jai.RegistryElementDescriptor;
-
 import org.esa.snap.core.dataio.ProductIO;
 import org.esa.snap.core.datamodel.Band;
-import org.esa.snap.core.datamodel.FilterBand;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.RasterDataNode;
-import org.esa.snap.core.util.SystemUtils;
-import org.esa.snap.rcp.imgfilter.model.Filter;
-import org.esa.snap.rcp.imgfilter.model.StandardFilters;
-import org.esa.snap.runtime.Config;
-import org.esa.snap.runtime.Engine;
-
 import wasdi.shared.utils.BandImageManager;
 
 public class Proofs_BandImage {

@@ -21,7 +21,6 @@ import org.esa.snap.core.datamodel.Kernel;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.RasterDataNode;
 import org.esa.snap.core.image.ColoredBandImageMultiLevelSource;
-import org.esa.snap.core.util.Debug;
 import org.esa.snap.core.util.ProductUtils;
 import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.rcp.imgfilter.model.Filter;
@@ -29,9 +28,7 @@ import org.esa.snap.rcp.imgfilter.model.StandardFilters;
 import org.esa.snap.runtime.Config;
 import org.esa.snap.runtime.Engine;
 
-import com.bc.ceres.core.Assert;
 import com.bc.ceres.core.ProgressMonitor;
-import com.bc.ceres.core.SubProgressMonitor;
 import com.bc.ceres.glayer.support.ImageLayer;
 import com.bc.ceres.glevel.MultiLevelSource;
 import com.bc.ceres.grender.Viewport;

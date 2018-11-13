@@ -5,21 +5,6 @@
 //import publish.Publisher;
 import wasdi.ConfigReader;
 import wasdi.filebuffer.DownloadFile;
-import wasdi.filebuffer.LocalFileDescriptor;
-import wasdi.shared.utils.SerializationUtils;
-import wasdi.snapopearations.Calibration;
-import wasdi.snapopearations.Filter;
-import wasdi.snapopearations.Multilooking;
-import wasdi.snapopearations.TerrainCorrection;
-
-import org.esa.snap.core.dataio.ProductIO;
-import org.esa.snap.core.datamodel.Product;
-import org.esa.snap.dataio.bigtiff.BigGeoTiffProductReaderPlugIn;
-
-import javax.swing.*;
-import java.io.File;
-import java.io.IOException;
-import java.util.HashMap;
 
 public class Test2 {
     public static void main(String[] args) throws Exception

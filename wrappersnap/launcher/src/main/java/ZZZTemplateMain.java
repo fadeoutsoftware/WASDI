@@ -1,9 +1,5 @@
-import java.util.ArrayList;
-
 import wasdi.ConfigReader;
-import wasdi.shared.business.User;
 import wasdi.shared.data.MongoRepository;
-import wasdi.shared.data.UserRepository;
 
 public class ZZZTemplateMain {
 
