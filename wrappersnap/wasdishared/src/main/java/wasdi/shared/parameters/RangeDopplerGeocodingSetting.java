@@ -2,8 +2,6 @@ package wasdi.shared.parameters;
 
 import wasdi.shared.utils.Constants;
 
-import java.io.File;
-
 /**
  * Created by s.adamo on 08/02/2017.
  */

@@ -9,11 +9,9 @@ import org.bson.conversions.Bson;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.mongodb.Block;
 import com.mongodb.client.FindIterable;
-import com.mongodb.client.MongoCollection;
 import com.mongodb.client.result.DeleteResult;
 import com.mongodb.client.result.UpdateResult;
 
-import wasdi.shared.business.Catalog;
 import wasdi.shared.business.User;
 
 /**

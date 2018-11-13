@@ -1,5 +1,4 @@
 import java.awt.Dimension;
-import java.awt.print.Printable;
 import java.io.File;
 
 import org.esa.snap.core.dataio.ProductIO;

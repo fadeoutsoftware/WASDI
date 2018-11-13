@@ -18,7 +18,6 @@ import com.mongodb.client.result.DeleteResult;
 import com.mongodb.client.result.UpdateResult;
 
 import wasdi.shared.business.DownloadedFile;
-import wasdi.shared.business.Workspace;
 import wasdi.shared.viewmodels.AttributeViewModel;
 import wasdi.shared.viewmodels.MetadataViewModel;
 

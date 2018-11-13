@@ -1,21 +1,13 @@
 
 //import publish.Publisher;
 import java.io.File;
-import java.io.FileInputStream;
-import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import org.apache.commons.io.IOUtils;
 import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.runtime.Config;
 import org.esa.snap.runtime.Engine;
 
-import wasdi.LauncherMain;
-import wasdi.shared.LauncherOperations;
-import wasdi.shared.parameters.GraphParameter;
-import wasdi.shared.parameters.GraphSetting;
-import wasdi.shared.utils.SerializationUtils;
 import wasdi.snapopearations.ReadProduct;
 
 /**
