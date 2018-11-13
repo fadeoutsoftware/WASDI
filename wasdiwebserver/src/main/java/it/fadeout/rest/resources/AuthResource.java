@@ -270,8 +270,9 @@ public class AuthResource {
 			Wasdi.DebugLog("AuthService.CreateSftpAccount: error creating sftp account");
 			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
 		}
-		
-		sendPasswordEmail(sEmail, sAccount, sPassword);
+		if(!sendPasswordEmail(sEmail, sAccount, sPassword)) {
+			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+		}
 	    
 		return Response.ok().build();
 	}
@@ -387,7 +388,9 @@ public class AuthResource {
 			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
 		}
 		
-		sendPasswordEmail(sEmail, sAccount, sPassword);
+		if(!sendPasswordEmail(sEmail, sAccount, sPassword)) {
+			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+		}
 
 		return Response.ok().build();
 	}
@@ -753,7 +756,9 @@ public class AuthResource {
 				String sHashedPassword = m_oPasswordAuthentication.hash(sPassword.toCharArray()); 
 				oUser.setPassword(sHashedPassword);
 				if(oUserRepository.UpdateUser(oUser)) {
-					sendPasswordEmail(sUserId, sUserId, sPassword);
+					if(! sendPasswordEmail(sUserId, sUserId, sPassword) ) {
+						return PrimitiveResult.getInvalid(); 
+					}
 					PrimitiveResult oResult = new PrimitiveResult();
 					oResult.setBoolValue(true);
 					oResult.setIntValue(0);
@@ -832,11 +837,11 @@ public class AuthResource {
 	}
 
 
-	private void sendPasswordEmail(String sRecipientEmail, String sAccount, String sPassword) {
+	private Boolean sendPasswordEmail(String sRecipientEmail, String sAccount, String sPassword) {
 		Wasdi.DebugLog("AuthResource.sendPasswordEmail");
 		if(null == sRecipientEmail || null == sPassword ) {
 			Wasdi.DebugLog("AuthResource.sendPasswordEmail: null input, not enough information to send email");
-			return;
+			return false;
 		}
 		//XXX refactor (?) to use null object @sergin13 + @kr1zz (?)
 		//maybe check w/ CredentialPolicy
@@ -853,8 +858,11 @@ public class AuthResource {
 		String sMessage = m_oServletConfig.getInitParameter("sftpMailText");
 		sMessage += "\n\nUSER: " + sAccount + " - PASSWORD: " + sPassword;
 		oMessage.setMessage(sMessage);
-		//TODO check return type
-		oAPI.sendMailDirect(sRecipientEmail, oMessage);
+		
+		if(oAPI.sendMailDirect(sRecipientEmail, oMessage) >= 0) {
+			return true;
+		}
+		return false;
 	}
 
 }
