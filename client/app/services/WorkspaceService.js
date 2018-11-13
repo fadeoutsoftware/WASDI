@@ -29,7 +29,7 @@ service('WorkspaceService', ['$http',  'ConstantsService', function ($http, oCon
     };
 
     this.getWorkspaceListByProductName = function(sProductName){
-        return this.m_oHttp.get(this.APIURL + '/ws/byuser?productname=' + sProductName);
+        return this.m_oHttp.get(this.APIURL + '/ws/workspacelistbyproductname?productname=' + sProductName);
     };
 
 }]);

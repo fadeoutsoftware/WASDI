@@ -18,6 +18,18 @@
           color: $wasdi-green-logo;
         }
 
+        .panel-default > .panel-heading{
+          background-color: $wasdi-blue-logo;
+          color:$wasdi-white;
+        }
+
+        .band-row-container
+        {
+          .band-row
+          {
+            padding: 10px;
+          }
+        }
       }
       //FOOTER
       .modal-footer
