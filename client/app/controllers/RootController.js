@@ -27,8 +27,9 @@ var RootController = (function() {
          * Check user session
          */
         this.m_oAuthService.checkSession().success(function (data, status) {
-            if (data == null || data == undefined || data == '')
+            if (data === null || data === undefined || data === '' || data.userId === ''  )
             {
+
                 oController.m_oConstantsService.logOut();
                 oController.m_oState.go("home");
             }
@@ -214,8 +215,14 @@ var RootController = (function() {
         var oController=this;
 
         this.m_oAuthService.logout().success(function (data, status) {
+            if(utilsIsObjectNullOrUndefined(data) === true || data.BoolValue === false)
+            {
+                utilsVexDialogAlertTop("SERVER ERROR ON LOGOUT");
+                console.log("SERVER ERROR ON LOGOUT");
+            }
             oController.m_oConstantsService.logOut();
             oController.m_oState.go("home");
+
         }).error(function (data,status) {
             utilsVexDialogAlertTop("ERROR IN LOGOUT");
             // oController.m_oState.go("home");

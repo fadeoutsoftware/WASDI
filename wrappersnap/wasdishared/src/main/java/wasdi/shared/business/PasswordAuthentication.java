@@ -1,4 +1,4 @@
-package it.fadeout.business;
+package wasdi.shared.business;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;

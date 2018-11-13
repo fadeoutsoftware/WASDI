@@ -73,13 +73,18 @@
                                 <!--<span class="caret"></span>-->
                             </button>
                             <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenuUser">
-                                <li role="presentation" class="dropdown-header"  ng-click="m_oController.editUserInfo()">
-                                    <!--<span class="user-span">-->
-                                    <i class="fa fa-user fa-lg" aria-hidden="true"></i>
-                                    <h4 ng-hide="m_oController.m_oUser.name === null">{{"ROOT_VIEW_LABEL_USER"|translate}} {{m_oController.m_oUser.name}}</h4>
-                                    <h4 ng-show=" m_oController.m_oUser.name === null && m_oController.m_oUser.email !== null">{{"ROOT_VIEW_LABEL_USER"|translate}} {{m_oController.m_oUser.email}}</h4>
-                                    <!--</span>-->
-                                </li>
+                                    <li role="presentation" class=""  ng-click="m_oController.editUserInfo()"><!--dropdown-header-->
+                                        <a role="menuitem" tabindex="-1">
+
+                                            <!--<span class="user-span">-->
+                                            <i class="fa fa-user fa-lg" aria-hidden="true"></i>
+                                            <h4 ng-hide="m_oController.m_oUser.name === null">{{"ROOT_VIEW_LABEL_USER"|translate}} {{m_oController.m_oUser.name}}</h4>
+                                            <h4 ng-show=" m_oController.m_oUser.name === null && m_oController.m_oUser.email !== null">{{"ROOT_VIEW_LABEL_USER"|translate}} {{m_oController.m_oUser.email}}</h4>
+                                            <!--</span>-->
+                                        </a>
+
+                                    </li>
+
                                 <li role="presentation" class="divider"></li>
 
                                 <li role="presentation" class="disabled">

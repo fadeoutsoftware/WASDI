@@ -7,12 +7,23 @@
     "LOGIN_WRITE":"Web Advanced Space Developer Interface",
     "LOGIN_LINK_FORM":"Login",
     "LOGIN_LINK_REGISTER":"Register",
+
+    "RECOVERY_EMAIL_BUTTON":"Send request",
+    "RECOVERY_EMAIL_TITLE":"Insert your email if you want to recover yor password",
+
     "SIGN_IN_PLACEHOLDER_EMAIL":"Email Address",
     "SIGN_IN_PLACEHOLDER_PASSWORD":"Password",
     "SIGN_IN_PLACEHOLDER_REPEAT_PASSWORD":"Repeat Password",
     "SIGN_IN_PLACEHOLDER_NAME":"Name",
     "SIGN_IN_PLACEHOLDER_SURNAME":"Surname",
     "SIGN_IN_BUTTON":"Sign in",
+    "SIGN_IN_ERROR_INVALID_EMAIL":"Invalid email",
+    "SIGN_IN_ERROR_INVALID_TOO_SHORT":"The value is too short",
+    "SIGN_IN_ERROR_INVALID_DIFFERENT_PASSWORDS":"The passwords are different",
+    "SIGN_IN_ERROR_INVALID_INSERT_NAME":"Insert Name",
+    "SIGN_IN_ERROR_INVALID_INSERT_SURNAME":"Insert Surname",
+    "SIGN_IN_ERROR_GENERAL_ERROR":"Error from server, was impossible sign in user.",
+    "SIGN_IN_ERROR_SUCCESS_REGISTRATION":"Thank you for your WASDI registration. A validation e-mail have been sent to the specified address. Please click on the validation link to immediately activate your account",
 
 
     "ROOT_VIEW_NAV_BAR_LINK_IMPORT":"Search",
@@ -273,7 +284,7 @@
 
     "DIALOG_TITLE_WAPPS":"Wapps",
 
-    "DIALOG_EDIT_USER":"Edit user info",
+    "DIALOG_EDIT_USER":"Update user info",
     "DIALOG_EDIT_USER_OLD_PASSWORD":"Old password",
     "DIALOG_EDIT_USER_NEW_PASSWORD":"New password",
     "DIALOG_EDIT_USER_REPEAT_NEW_PASSWORD":"Repeat new password",
@@ -282,6 +293,15 @@
     "DIALOG_EDIT_USER_INFO_NAME":"Name",
     "DIALOG_EDIT_USER_INFO_SURNAME":"Surname",
     "DIALOG_EDIT_USER_CHANGE_PASSWORD":"Change password",
-    "DIALOG_EDIT_USER_EDIT_USER_INFO":"Edit user info"
+    "DIALOG_EDIT_USER_EDIT_USER_INFO":"Edit user info",
+
+    "DIALOG_CATALOG_INFO_PRODUCT_PRODUCT_BANDS_LABEL":"Bands",
+    "DIALOG_CATALOG_INFO_PRODUCT_PRODUCT_INFO_LABEL":"Info",
+
+    "DIALOG_WPS_TITLE":"Execute WPS",
+    "DIALOG_WPS_TITLE_WPS_LIST":"WPS list",
+    "DIALOG_WPS_TITLE_SHOW_CAPABILITIES":"Show Capabilities",
+    "DIALOG_WPS_TITLE_SELECT_PROCESS":"Select a process",
+    "DIALOG_WPS_TITLE_EXECUTE_RESULTS":"Execute results"
 
 }

@@ -78,15 +78,18 @@ var SftpUploadController = (function() {
         // var sTestEmail = "a.corrado@fadeout.it";
         this.m_bIsVisibleLoadIcon = true;
         this.m_oAuthService.createAccountUpload(this.m_sEmailNewUser).success(function (data, status) {
-            if (data != null) {
-                if (data != undefined) {
+            if (data !== null || status === 200) {
+                if (data !== undefined) {
                     oController.isCreatedAccountUpload();
-
                 }
+            }
+            else
+            {
+                utilsVexDialogAlertTop("ERROR SERVER WAS IMPOSSIBLE CREATE ACCOUNT");
             }
             oController.m_bIsVisibleLoadIcon = false;
         }).error(function (data, status) {
-            if(data) console.log("SftpUploadController error during creation");
+            utilsVexDialogAlertTop("ERROR SERVER");
             oController.m_bIsVisibleLoadIcon = false;
         });
     };

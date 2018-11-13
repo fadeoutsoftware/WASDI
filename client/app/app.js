@@ -103,6 +103,13 @@ wasdiApp.config(['$stateProvider', '$urlRouterProvider', function($stateProvider
         controller: 'HomeController'
     });
 
+    //VALIDATE REGISTRATION
+    $stateProvider.state('validatenewuser', {
+        url: '/validatenewuser',
+        templateUrl: 'partials/validatenewuser.html',
+        controller: 'ValidateUserController'
+    });
+
     //ROOT abstract class
     $stateProvider.state('root', {
         url: '',
@@ -163,6 +170,7 @@ wasdiApp.controller("EditorController", EditorController);
 wasdiApp.controller("RootController",RootController);
 wasdiApp.controller("ImportController",ImportController);
 wasdiApp.controller("SearchOrbitController",SearchOrbitController);
+wasdiApp.controller("ValidateUserController",ValidateUserController);
 
 //dialogs
 wasdiApp.controller("OrbitInfoController",OrbitInfoController);

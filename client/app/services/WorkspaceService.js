@@ -10,22 +10,26 @@ service('WorkspaceService', ['$http',  'ConstantsService', function ($http, oCon
 
     this.getWorkspacesInfoListByUser = function() {
         return this.m_oHttp.get(this.APIURL + '/ws/byuser');
-    }
+    };
 
     this.getWorkspaceEditorViewModel = function (sWorkspaceId) {
         return this.m_oHttp.get(this.APIURL + '/ws?sWorkspaceId='+sWorkspaceId);
-    }
+    };
 
     this.createWorkspace = function () {
         return this.m_oHttp.get(this.APIURL + '/ws/create');
-    }
+    };
 
     this.UpdateWorkspace = function (oWorkspace) {
         return this.m_oHttp.post(this.APIURL + '/ws/update', oWorkspace);
-    }
+    };
 
     this.DeleteWorkspace = function (sWorkspaceId, bDeleteFile, bDeleteLayer) {
         return this.m_oHttp.delete(this.APIURL + '/ws/delete?sWorkspaceId=' + sWorkspaceId + '&bDeleteFile=' + bDeleteFile + '&bDeleteLayer=' + bDeleteLayer);
-    }
+    };
+
+    this.getWorkspaceListByProductName = function(sProductName){
+        return this.m_oHttp.get(this.APIURL + '/ws/byuser?productname=' + sProductName);
+    };
 
 }]);
