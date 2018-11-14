@@ -580,6 +580,12 @@ public class AuthResource {
 					//uncomment only if email sending service does not work
 					//oResult = validateNewUser(oUserViewModel.getUserId(), sToken);
 				}
+				else
+				{
+					PrimitiveResult oResult = PrimitiveResult.getInvalid();
+					oResult.setStringValue("mail already in use, impossible to register the new user");
+					return oResult;
+				}
 			}
 			catch(Exception e)
 			{
