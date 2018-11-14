@@ -54,7 +54,7 @@ public class WorkspaceResource {
 	@Produces({"application/xml", "application/json", "text/xml"})
 	public ArrayList<WorkspaceListInfoViewModel> getWorkspaceListByProductName(
 			@HeaderParam("x-session-token") String sSessionId,
-			@QueryParam("workspace") String sProductName) {
+			@QueryParam("productname") String sProductName) {
 		Wasdi.DebugLog("WorkspaceResource.getWorkspaceListByProductName");
 		
 		//input validation
@@ -64,7 +64,7 @@ public class WorkspaceResource {
 		} else if( !m_oCredentialPolicy.validSessionId(sSessionId)) {
 			Wasdi.DebugLog("WorkspaceResource.getWorkspaceListByProductName: invalid sSessionId");
 			return null;
-		} else if(m_oWorkspacePolicy.validProductName(sProductName)) {
+		} else if(!m_oWorkspacePolicy.validProductName(sProductName)) {
 			Wasdi.DebugLog("WorkspaceResource.getWorkspaceListByProductName: invalid sProductName");
 			return null;
 		}
@@ -77,16 +77,41 @@ public class WorkspaceResource {
 			return null;
 		}
 		
-		//retrieve workspace list and check it's not null
-		WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
-		ArrayList<Workspace> aoWSList = oWorkspaceRepository.getWorkspaceListByProductName(sProductName);
-		if(null == aoWSList) {
+		//get list of workspaces ID by productname
+		ProductWorkspaceRepository oProductWorkspaceRepository = new ProductWorkspaceRepository();
+		List<String> asWorkspaces = oProductWorkspaceRepository.getWorkspaces(sProductName);
+		if(asWorkspaces == null) {
+			Wasdi.DebugLog("WorkspaceResource.getWorkspaceListByProductName: Workspaces list is null");
 			return null;
 		}
 		
-		//create and populate result 
+		
+		WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
 		ArrayList<WorkspaceListInfoViewModel> aoResult = new ArrayList<WorkspaceListInfoViewModel>(); 
-		for (Workspace oWorkspace : aoWSList) {
+		
+		//get workspace info  for each workspace ID 
+		for (String sWorkspaceID : asWorkspaces) 
+		{
+			Workspace oWorkspace = oWorkspaceRepository.GetWorkspace(sWorkspaceID);
+			if(null != oWorkspace) 
+			{
+				WorkspaceListInfoViewModel oTemp = new WorkspaceListInfoViewModel();
+				oTemp.setWorkspaceId(oWorkspace.getWorkspaceId());
+				oTemp.setWorkspaceName(oWorkspace.getName());
+				oTemp.setOwnerUserId(oWorkspace.getUserId());
+				aoResult.add(oTemp);
+			}
+		}
+		//retrieve workspace list and check it's not null
+		/*WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
+		ArrayList<Workspace> aoWSList = oWorkspaceRepository.getWorkspaceListByProductName(sProductName);
+		if(null == aoWSList) {
+			return null;
+		}*/
+		
+		//create and populate result 
+		//ArrayList<WorkspaceListInfoViewModel> aoResult = new ArrayList<WorkspaceListInfoViewModel>(); 
+		/*for (Workspace oWorkspace : aoWSList) {
 			if(null != oWorkspace) {
 				WorkspaceListInfoViewModel oTemp = new WorkspaceListInfoViewModel();
 				oTemp.setWorkspaceId(oWorkspace.getWorkspaceId());
@@ -95,7 +120,7 @@ public class WorkspaceResource {
 			} else {
 				Wasdi.DebugLog("WorkspaceResource.getWorkspaceListByProductName: found null workspace from DB");
 			}
-		}
+		}*/
 
 		return aoResult;
 	}
