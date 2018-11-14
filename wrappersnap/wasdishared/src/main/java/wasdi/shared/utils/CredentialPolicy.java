@@ -231,6 +231,8 @@ public class CredentialPolicy {
 			return true;
 		} else if(!validUserId(oRInfo.getUserId())) {
 			return false;
+		} else if(!validEmail(oRInfo.getUserId())) {
+			return false;
 		} else if(!validName(oRInfo.getName())) {
 			return false;
 		} else if(!validSurname(oRInfo.getSurname())) {
