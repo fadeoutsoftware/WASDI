@@ -76,7 +76,6 @@ public class FtpClient {
     }
 
 	public String pwd() throws IOException {
-		int iResponse = m_oFtp.pwd();
-		return null;
+		return m_oFtp.printWorkingDirectory();
 	}
 }
