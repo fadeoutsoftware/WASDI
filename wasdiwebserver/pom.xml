@@ -32,7 +32,7 @@
 		<!-- ESA -->
 
 		<!-- ESA: snap -->
-		<dependency>
+		<!-- dependency>
 			<groupId>org.esa.snap</groupId>
 			<artifactId>snap-core</artifactId>
 			<version>6.0.5</version>
@@ -56,10 +56,10 @@
 			<groupId>org.esa.snap</groupId>
 			<artifactId>snap-rcp</artifactId>
 			<version>6.0.5</version>
-		</dependency>
+		</dependency -->
 
 		<!-- ESA: s1tbx -->
-		<dependency>
+		<!-- dependency>
 			<groupId>org.esa.s1tbx</groupId>
 			<artifactId>s1tbx-op-sar-processing</artifactId>
 			<version>6.0.5</version>
@@ -78,10 +78,10 @@
 			<groupId>org.esa.s1tbx</groupId>
 			<artifactId>s1tbx-op-sentinel1-ui</artifactId>
 			<version>6.0.5</version>
-		</dependency>
+		</dependency -->
 
 		<!-- ESA: s2tbx -->
-		<dependency>
+		<!-- dependency>
 			<groupId>org.esa.s2tbx</groupId>
 			<artifactId>s2tbx-spot-reader</artifactId>
 			<version>6.0.2</version>
@@ -130,10 +130,10 @@
 			<groupId>org.esa.s2tbx</groupId>
 			<artifactId>lib-gdal</artifactId>
 			<version>6.0.2</version>
-		</dependency>
+		</dependency -->
 
 		<!-- ESA: s3tbx -->
-		<dependency>
+		<!-- dependency>
 			<groupId>org.esa.s3tbx</groupId>
 			<artifactId>s3tbx-aatsr-sst</artifactId>
 			<version>6.0.4</version>     
@@ -287,10 +287,10 @@
 			<groupId>org.esa.s3tbx</groupId>
 			<artifactId>s3tbx-spot-vgt-reader</artifactId>
 			<version>6.0.4</version>     
-		</dependency>
+		</dependency -->
 
 		<!-- ESA: probav -->
-		<dependency>
+		<!-- dependency>
 			<groupId>org.vito.probavbox</groupId>
 			<artifactId>probavbox-kit</artifactId>
 			<version>2.0.0</version>
@@ -299,14 +299,14 @@
 			<groupId>org.vito.probavbox</groupId>
 			<artifactId>probavbox-reader</artifactId>
 			<version>2.0.0</version>
-		</dependency>
+		</dependency -->
 
 		<!-- nfs.orbits -->
-		<dependency>
+		<!-- dependency>
 			<groupId>org.nfs.orbits</groupId>
 			<artifactId>orbit</artifactId>
 			<version>1.0.0</version>     
-		</dependency>        
+		</dependency -->        
 
 		<!-- other more common libraries -->
 
