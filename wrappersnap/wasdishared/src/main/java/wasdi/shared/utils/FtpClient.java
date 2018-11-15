@@ -22,6 +22,7 @@ import org.apache.commons.net.ftp.FTPReply;
 import java.io.*;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.function.BooleanSupplier;
 import java.util.stream.Collectors;
 
 public class FtpClient {
@@ -77,5 +78,17 @@ public class FtpClient {
 
 	public String pwd() throws IOException {
 		return m_oFtp.printWorkingDirectory();
+
+	}
+
+	public Boolean FileIsNowOnServer(String sPath, String sFilename) throws IOException {
+		Collection<String> aoFiles = listFiles(sPath);
+		for (String sFile : aoFiles) {
+			if(sFile.equals(sFilename)) {
+				return true;
+			}
+		}
+		
+		return false;
 	}
 }
