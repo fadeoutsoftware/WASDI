@@ -38,12 +38,52 @@
 
     <dependencies>
 
+	<!-- ESA -->
+		
+		<!-- ESA: snap -->
+        <dependency>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>snap-rcp</artifactId>
+            <version>6.0.0</version>
+        </dependency>
+		
+		<!-- ESA: s1tbx -->
+        <dependency>
+            <groupId>org.esa.s1tbx</groupId>
+            <artifactId>s1tbx-op-sar-processing</artifactId>
+            <version>6.0.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.s1tbx</groupId>
+            <artifactId>s1tbx-op-calibration</artifactId>
+            <version>6.0.0</version>
+        </dependency>
+        
+		<!-- ESA: s2tbx -->
+		<dependency>
+            <groupId>org.esa.s2tbx</groupId>
+            <artifactId>s2tbx-radiometric-indices</artifactId>
+            <version>6.0.0</version>
+        </dependency>
+        
+		<!-- ESA: provav -->
+        <dependency>
+            <groupId>org.vito.probavbox</groupId>
+            <artifactId>probavbox-kit</artifactId>
+            <version>2.0.0</version>
+        </dependency>            
+        <dependency>
+            <groupId>org.vito.probavbox</groupId>
+            <artifactId>probavbox-reader</artifactId>
+            <version>2.0.0</version>
+        </dependency>  
         <!-- https://mvnrepository.com/artifact/org.mongodb/mongo-java-driver -->
         <dependency>
             <groupId>org.mongodb</groupId>
             <artifactId>mongo-java-driver</artifactId>
             <version>3.3.0</version>
         </dependency>
+		
         <!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-databind -->
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
@@ -60,61 +100,33 @@
             <artifactId>amqp-client</artifactId>
             <version>3.6.5</version>
         </dependency>
-        <dependency>
-            <groupId>commons-lang</groupId>
-            <artifactId>commons-lang</artifactId>
-            <version>2.6</version>
-        </dependency>
-        
-        <dependency>
-            <groupId>org.esa.s1tbx</groupId>
-            <artifactId>s1tbx-op-sar-processing</artifactId>
-            <version>6.0.0</version>
-        </dependency>
-        <dependency>
-            <groupId>org.esa.s1tbx</groupId>
-            <artifactId>s1tbx-op-calibration</artifactId>
-            <version>6.0.0</version>
-        </dependency>
-        <dependency>
-            <groupId>org.esa.s2tbx</groupId>
-            <artifactId>s2tbx-radiometric-indices</artifactId>
-            <version>6.0.0</version>
-        </dependency>
-        
+        		
+		<!-- geoserver -->
         <dependency>
             <groupId>it.geosolutions</groupId>
             <artifactId>geoserver-manager</artifactId>
             <version>1.7.0</version>
         </dependency>
-        
+
+		<!-- https://mvnrepository.com/artifact/org.json/json -->        
 		<dependency>
 		    <groupId>org.json</groupId>
 		    <artifactId>json</artifactId>
 		    <version>20160810</version>
 		</dependency>
-        <dependency>
-            <groupId>org.esa.snap</groupId>
-            <artifactId>snap-rcp</artifactId>
-            <version>6.0.0</version>
-        </dependency>
-        
-        <dependency>
-            <groupId>org.vito.probavbox</groupId>
-            <artifactId>probavbox-kit</artifactId>
-            <version>2.0.0</version>
-        </dependency>            
-        <dependency>
-            <groupId>org.vito.probavbox</groupId>
-            <artifactId>probavbox-reader</artifactId>
-            <version>2.0.0</version>
-        </dependency>            
+		
+		<!-- Apache Commons -->
         <dependency>
     		<groupId>commons-validator</groupId>
     		<artifactId>commons-validator</artifactId>
     		<version>1.4.1</version>
 		</dependency>
-        <!-- https://mvnrepository.com/artifact/org.json/json -->
+		<dependency>
+            <groupId>commons-lang</groupId>
+            <artifactId>commons-lang</artifactId>
+            <version>2.6</version>
+        </dependency>     
+		
     </dependencies>
     
     <repositories>
