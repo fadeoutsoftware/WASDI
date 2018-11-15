@@ -22,7 +22,6 @@ import org.apache.commons.net.ftp.FTPReply;
 import java.io.*;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.function.BooleanSupplier;
 import java.util.stream.Collectors;
 
 public class FtpClient {
@@ -40,7 +39,7 @@ public class FtpClient {
         this.m_sPassword = sPassword;
     }
 
-    public void open() throws IOException {
+    public Boolean open() throws IOException {
         m_oFtp = new FTPClient();
 
         m_oFtp.addProtocolCommandListener(new PrintCommandListener(new PrintWriter(System.out)));
@@ -52,7 +51,7 @@ public class FtpClient {
             throw new IOException("Exception in connecting to FTP Server");
         }
 
-        m_oFtp.login(m_sUser, m_sPassword);
+        return m_oFtp.login(m_sUser, m_sPassword);
     }
 
     public void close() throws IOException {
@@ -67,8 +66,16 @@ public class FtpClient {
                 .collect(Collectors.toList());
     }
 
-    public void putFileToPath(File oFile, String sPath) throws IOException {
-        m_oFtp.storeFile(sPath, new FileInputStream(oFile));
+    public Boolean putFileToPath(File oFile, String sAbsolutePath) throws IOException {
+    	String sPathName = new String(sAbsolutePath);
+    	if(!sPathName.endsWith(oFile.getName()) ) {
+    		if(!sPathName.endsWith("/")) {
+    			sPathName+="/";
+    		}
+    		sPathName+=oFile.getName();
+    	}
+        Boolean bRes = m_oFtp.storeFile(sPathName, new FileInputStream(oFile) );
+        return bRes;
     }
 
     public void downloadFile(String sSource, String sDestination) throws IOException {
@@ -78,7 +85,6 @@ public class FtpClient {
 
 	public String pwd() throws IOException {
 		return m_oFtp.printWorkingDirectory();
-
 	}
 
 	public Boolean FileIsNowOnServer(String sPath, String sFilename) throws IOException {
@@ -90,5 +96,10 @@ public class FtpClient {
 		}
 		
 		return false;
+	}
+
+	public Boolean cd(String sPath) throws IOException {
+		return m_oFtp.changeWorkingDirectory(sPath);
+		
 	}
 }
