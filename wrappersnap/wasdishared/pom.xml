@@ -2,126 +2,373 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
+	<modelVersion>4.0.0</modelVersion>
 
-    <groupId>wasdi.shared</groupId>
-    <artifactId>wasdishared</artifactId>
-    <version>1.0-SNAPSHOT</version>
-    <properties>
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
-    </properties>
-    
-    
-    
-    <build>
-        <plugins>
+	<groupId>wasdi.shared</groupId>
+	<artifactId>wasdishared</artifactId>
+	<version>1.0-SNAPSHOT</version>
+	<properties>
+		<maven.compiler.source>1.8</maven.compiler.source>
+		<maven.compiler.target>1.8</maven.compiler.target>
+	</properties>
+
+
+
+	<build>
+		<plugins>
 			<plugin>
-		        <artifactId>maven-assembly-plugin</artifactId>
-		        <executions>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<executions>
 					<execution>
 						<phase>package</phase>
-				  		<goals>
-				    		<goal>single</goal>
-				  		</goals>
+						<goals>
+							<goal>single</goal>
+						</goals>
 					</execution>
-		        </executions>
-		        <configuration>
-	        		<descriptorRefs>
-		            	<descriptorRef>jar-with-dependencies</descriptorRef>
-		          	</descriptorRefs>
-		        </configuration>
-	      </plugin>        
-            
-        </plugins>
-    </build>
+				</executions>
+				<configuration>
+					<descriptorRefs>
+						<descriptorRef>jar-with-dependencies</descriptorRef>
+					</descriptorRefs>
+				</configuration>
+			</plugin>        
 
-    <dependencies>
+		</plugins>
+	</build>
 
-        <!-- https://mvnrepository.com/artifact/org.mongodb/mongo-java-driver -->
-        <dependency>
-            <groupId>org.mongodb</groupId>
-            <artifactId>mongo-java-driver</artifactId>
-            <version>3.3.0</version>
-        </dependency>
-        <!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-databind -->
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-databind</artifactId>
-            <version>2.8.4</version>
-        </dependency>
-        <dependency>
-            <groupId>log4j</groupId>
-            <artifactId>log4j</artifactId>
-            <version>1.2.17</version>
-        </dependency>
-        <dependency>
-            <groupId>com.rabbitmq</groupId>
-            <artifactId>amqp-client</artifactId>
-            <version>3.6.5</version>
-        </dependency>
-        <dependency>
-            <groupId>commons-lang</groupId>
-            <artifactId>commons-lang</artifactId>
-            <version>2.6</version>
-        </dependency>
-        
-        <dependency>
-            <groupId>org.esa.s1tbx</groupId>
-            <artifactId>s1tbx-op-sar-processing</artifactId>
-            <version>6.0.0</version>
-        </dependency>
-        <dependency>
-            <groupId>org.esa.s1tbx</groupId>
-            <artifactId>s1tbx-op-calibration</artifactId>
-            <version>6.0.0</version>
-        </dependency>
-        <dependency>
-            <groupId>org.esa.s2tbx</groupId>
-            <artifactId>s2tbx-radiometric-indices</artifactId>
-            <version>6.0.0</version>
-        </dependency>
-        
-        <dependency>
-            <groupId>it.geosolutions</groupId>
-            <artifactId>geoserver-manager</artifactId>
-            <version>1.7.0</version>
-        </dependency>
-        
+	<dependencies>
+
+		<!-- ESA -->
+
+		<!-- ESA: snap -->
 		<dependency>
-		    <groupId>org.json</groupId>
-		    <artifactId>json</artifactId>
-		    <version>20160810</version>
+			<groupId>org.esa.snap</groupId>
+			<artifactId>snap-raster</artifactId>
+			<version>6.0.5</version>
 		</dependency>
-        <dependency>
-            <groupId>org.esa.snap</groupId>
-            <artifactId>snap-rcp</artifactId>
-            <version>6.0.0</version>
-        </dependency>
-        
-        <dependency>
-            <groupId>org.vito.probavbox</groupId>
-            <artifactId>probavbox-kit</artifactId>
-            <version>2.0.0</version>
-        </dependency>            
-        <dependency>
-            <groupId>org.vito.probavbox</groupId>
-            <artifactId>probavbox-reader</artifactId>
-            <version>2.0.0</version>
-        </dependency>            
-        <dependency>
-    		<groupId>commons-validator</groupId>
-    		<artifactId>commons-validator</artifactId>
-    		<version>1.4.1</version>
+		<dependency>
+			<groupId>org.esa.snap</groupId>
+			<artifactId>snap-bigtiff</artifactId>
+			<version>6.0.5</version>
 		</dependency>
-        <!-- https://mvnrepository.com/artifact/org.json/json -->
-    </dependencies>
-    
-    <repositories>
-        <repository>
-            <id>GeoSolutions</id>
-            <url>http://maven.geo-solutions.it/</url>
-        </repository>
-    </repositories>
-    
+		<dependency>
+			<groupId>org.esa.snap</groupId>
+			<artifactId>snap-core</artifactId>
+			<version>6.0.5</version>
+		</dependency>
+		<dependency>
+			<groupId>org.esa.snap</groupId>
+			<artifactId>snap-rcp</artifactId>
+			<version>6.0.5</version>
+		</dependency>
+		<!-- dependency>
+			<groupId>org.esa.snap</groupId>
+			<artifactId>snap-engine-utilities</artifactId>
+			<version>6.0.5</version>
+		</dependency-->
+		
+
+		<!-- ESA: s1tbx -->
+		<dependency>
+			<groupId>org.esa.s1tbx</groupId>
+			<artifactId>s1tbx-op-sar-processing</artifactId>
+			<version>6.0.5</version>
+		</dependency>
+		<!-- dependency>
+			<groupId>org.esa.s1tbx</groupId>
+			<artifactId>s1tbx-op-calibration</artifactId>
+			<version>6.0.5</version>
+		</dependency>
+		<dependency>
+			<groupId>org.esa.s1tbx</groupId>
+			<artifactId>s1tbx-op-sentinel1-ui</artifactId>
+			<version>6.0.5</version>
+		</dependency>   
+		<dependency>
+			<groupId>org.esa.s1tbx</groupId>
+			<artifactId>s1tbx-op-sar-processing-ui</artifactId>
+			<version>6.0.5</version>
+		</dependency -->
+
+		<!-- ESA: s2tbx -->
+		<dependency>
+			<groupId>org.esa.s2tbx</groupId>
+			<artifactId>s2tbx-radiometric-indices</artifactId>
+			<version>6.0.2</version>
+		</dependency>
+		<!-- dependency>
+			<groupId>org.esa.s2tbx</groupId>
+			<artifactId>s2tbx-spot-reader</artifactId>
+			<version>6.0.2</version>
+		</dependency>
+		<dependency>
+			<groupId>org.esa.s2tbx</groupId>
+			<artifactId>s2tbx-spot6-reader</artifactId>
+			<version>6.0.2</version>
+		</dependency>
+		<dependency>
+			<groupId>org.esa.s2tbx</groupId>
+			<artifactId>s2tbx-s2msi-reader</artifactId>
+			<version>6.0.2</version>
+		</dependency>
+		<dependency>
+			<groupId>org.esa.s2tbx</groupId>
+			<artifactId>s2tbx-rapideye-reader</artifactId>
+			<version>6.0.2</version>
+		</dependency>
+		<dependency>
+			<groupId>org.esa.s2tbx</groupId>
+			<artifactId>s2tbx-jp2-reader</artifactId>
+			<version>6.0.2</version>
+		</dependency>
+		<dependency>
+			<groupId>org.esa.s2tbx</groupId>
+			<artifactId>s2tbx-gdal-reader</artifactId>
+			<version>6.0.2</version>
+		</dependency>
+		<dependency>
+			<groupId>org.esa.s2tbx</groupId>
+			<artifactId>s2tbx-cache</artifactId>
+			<version>6.0.2</version>
+		</dependency>
+		<dependency>
+			<groupId>org.esa.s2tbx</groupId>
+			<artifactId>s2tbx-biophysical</artifactId>
+			<version>6.0.2</version>
+		</dependency>
+		<dependency>
+			<groupId>org.esa.s2tbx</groupId>
+			<artifactId>lib-gdal</artifactId>
+			<version>6.0.2</version>
+		</dependency -->
+		
+		<!-- ESA: s3tbx -->
+		<!-- dependency>
+			<groupId>org.esa.s3tbx</groupId>
+			<artifactId>s3tbx-aatsr-sst</artifactId>
+			<version>6.0.4</version>     
+		</dependency>
+		<dependency>
+			<groupId>org.esa.s3tbx</groupId>
+			<artifactId>s3tbx-aerosol-retrieval</artifactId>
+			<version>6.0.4</version>     
+		</dependency>
+		<dependency>
+			<groupId>org.esa.s3tbx</groupId>
+			<artifactId>s3tbx-alos-reader</artifactId>
+			<version>6.0.4</version>     
+		</dependency>
+		<dependency>
+			<groupId>org.esa.s3tbx</groupId>
+			<artifactId>s3tbx-arc</artifactId>
+			<version>6.0.4</version>     
+		</dependency>
+		<dependency>
+			<groupId>org.esa.s3tbx</groupId>
+			<artifactId>s3tbx-atsr-reader</artifactId>
+			<version>6.0.4</version>     
+		</dependency>
+		<dependency>
+			<groupId>org.esa.s3tbx</groupId>
+			<artifactId>s3tbx-avhrr-reader</artifactId>
+			<version>6.0.4</version>     
+		</dependency>
+		<dependency>
+			<groupId>org.esa.s3tbx</groupId>
+			<artifactId>s3tbx-c2rcc</artifactId>
+			<version>6.0.4</version>     
+		</dependency>
+		<dependency>
+			<groupId>org.esa.s3tbx</groupId>
+			<artifactId>s3tbx-chris-reader</artifactId>
+			<version>6.0.4</version>     
+		</dependency>
+		<dependency>
+			<groupId>org.esa.s3tbx</groupId>
+			<artifactId>s3tbx-flhmci</artifactId>
+			<version>6.0.4</version>     
+		</dependency>
+		<dependency>
+			<groupId>org.esa.s3tbx</groupId>
+			<artifactId>s3tbx-fub-wew</artifactId>
+			<version>6.0.4</version>     
+		</dependency>
+		<dependency>
+			<groupId>org.esa.s3tbx</groupId>
+			<artifactId>s3tbx-fu-operator</artifactId>
+			<version>6.0.4</version>     
+		</dependency>
+		<dependency>
+			<groupId>org.esa.s3tbx</groupId>
+			<artifactId>s3tbx-idepix</artifactId>
+			<version>6.0.4</version>     
+		</dependency>
+		<dependency>
+			<groupId>org.esa.s3tbx</groupId>
+			<artifactId>s3tbx-kit</artifactId>
+			<version>6.0.4</version>     
+		</dependency>
+		<dependency>
+			<groupId>org.esa.s3tbx</groupId>
+			<artifactId>s3tbx-landsat-reader</artifactId>
+			<version>6.0.4</version>     
+		</dependency>
+		<dependency>
+			<groupId>org.esa.s3tbx</groupId>
+			<artifactId>s3tbx-meris-cloud</artifactId>
+			<version>6.0.4</version>     
+		</dependency>
+		<dependency>
+			<groupId>org.esa.s3tbx</groupId>
+			<artifactId>s3tbx-meris-brr</artifactId>
+			<version>6.0.4</version>     
+		</dependency>
+		<dependency>
+			<groupId>org.esa.s3tbx</groupId>
+			<artifactId>s3tbx-meris-sdr</artifactId>
+			<version>6.0.4</version>     
+		</dependency>
+		<dependency>
+			<groupId>org.esa.s3tbx</groupId>
+			<artifactId>s3tbx-meris-l2auxdata</artifactId>
+			<version>6.0.4</version>     
+		</dependency>
+		<dependency>
+			<groupId>org.esa.s3tbx</groupId>
+			<artifactId>s3tbx-meris-radiometry</artifactId>
+			<version>6.0.4</version>     
+		</dependency>
+		<dependency>
+			<groupId>org.esa.s3tbx</groupId>
+			<artifactId>s3tbx-meris-smac</artifactId>
+			<version>6.0.4</version>     
+		</dependency>
+		<dependency>
+			<groupId>org.esa.s3tbx</groupId>
+			<artifactId>s3tbx-meris-ops</artifactId>
+			<version>6.0.4</version>     
+		</dependency>
+		<dependency>
+			<groupId>org.esa.s3tbx</groupId>
+			<artifactId>s3tbx-merisl3-reader</artifactId>
+			<version>6.0.4</version>     
+		</dependency>
+		<dependency>
+			<groupId>org.esa.s3tbx</groupId>
+			<artifactId>s3tbx-modis-reader</artifactId>
+			<version>6.0.4</version>     
+		</dependency>
+		<dependency>
+			<groupId>org.esa.s3tbx</groupId>
+			<artifactId>s3tbx-mphchl</artifactId>
+			<version>6.0.4</version>     
+		</dependency>
+		<dependency>
+			<groupId>org.esa.s3tbx</groupId>
+			<artifactId>s3tbx-rad2refl</artifactId>
+			<version>6.0.4</version>     
+		</dependency>
+		<dependency>
+			<groupId>org.esa.s3tbx</groupId>
+			<artifactId>s3tbx-olci-radiometry</artifactId>
+			<version>6.0.4</version>     
+		</dependency>
+		<dependency>
+			<groupId>org.esa.s3tbx</groupId>
+			<artifactId>s3tbx-owt-classification</artifactId>
+			<version>6.0.4</version>     
+		</dependency>
+		<dependency>
+			<groupId>org.esa.s3tbx</groupId>
+			<artifactId>s3tbx-sentinel3-reader</artifactId>
+			<version>6.0.4</version>     
+		</dependency>
+		<dependency>
+			<groupId>org.esa.s3tbx</groupId>
+			<artifactId>s3tbx-slstr-pdu-stitching</artifactId>
+			<version>6.0.4</version>     
+		</dependency>
+		<dependency>
+			<groupId>org.esa.s3tbx</groupId>
+			<artifactId>s3tbx-slstr-regrid</artifactId>
+			<version>6.0.4</version>     
+		</dependency>
+		<dependency>
+			<groupId>org.esa.s3tbx</groupId>
+			<artifactId>s3tbx-spot-vgt-reader</artifactId>
+			<version>6.0.4</version>     
+		</dependency-->
+
+		<!-- ESA: provav -->
+		<!-- dependency>
+			<groupId>org.vito.probavbox</groupId>
+			<artifactId>probavbox-kit</artifactId>
+			<version>2.0.0</version>
+		</dependency>            
+		<dependency>
+			<groupId>org.vito.probavbox</groupId>
+			<artifactId>probavbox-reader</artifactId>
+			<version>2.0.0</version>
+		</dependency-->  
+		
+		
+		<!-- https://mvnrepository.com/artifact/org.mongodb/mongo-java-driver -->
+		<dependency>
+			<groupId>org.mongodb</groupId>
+			<artifactId>mongo-java-driver</artifactId>
+			<version>3.3.0</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-databind -->
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
+			<version>2.8.4</version>
+		</dependency>
+		<dependency>
+			<groupId>log4j</groupId>
+			<artifactId>log4j</artifactId>
+			<version>1.2.17</version>
+		</dependency>
+		<dependency>
+			<groupId>com.rabbitmq</groupId>
+			<artifactId>amqp-client</artifactId>
+			<version>3.6.5</version>
+		</dependency>
+
+		<!-- geoserver -->
+		<dependency>
+			<groupId>it.geosolutions</groupId>
+			<artifactId>geoserver-manager</artifactId>
+			<version>1.7.0</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.json/json -->        
+		<dependency>
+			<groupId>org.json</groupId>
+			<artifactId>json</artifactId>
+			<version>20160810</version>
+		</dependency>
+
+		<!-- Apache Commons -->
+		<dependency>
+			<groupId>commons-validator</groupId>
+			<artifactId>commons-validator</artifactId>
+			<version>1.4.1</version>
+		</dependency>
+		<dependency>
+			<groupId>commons-lang</groupId>
+			<artifactId>commons-lang</artifactId>
+			<version>2.6</version>
+		</dependency>     
+
+	</dependencies>
+
+	<repositories>
+		<repository>
+			<id>GeoSolutions</id>
+			<url>http://maven.geo-solutions.it/</url>
+		</repository>
+	</repositories>
+
 </project>
