@@ -156,6 +156,7 @@ public class ProcessorsResource {
 				oDeployProcessorParameter.setProcessObjId(oProcessWorkspace.getProcessObjId());
 				oDeployProcessorParameter.setProcessorType(sType);
 				
+				//TODO move it before inserting the new process into DB
 				SerializationUtils.serializeObjectToXML(sPath, oDeployProcessorParameter);
 			}
 			catch(Exception oEx){
@@ -265,6 +266,7 @@ public class ProcessorsResource {
 				oDeployProcessorParameter.setJson(sEncodedJson);
 				oDeployProcessorParameter.setProcessorType(oProcessorToRun.getType());
 				
+				//TODO move it before inserting the new process into DB
 				SerializationUtils.serializeObjectToXML(sPath, oDeployProcessorParameter);
 				
 				oRunningProcessorViewModel.setJsonEncodedResult("");
