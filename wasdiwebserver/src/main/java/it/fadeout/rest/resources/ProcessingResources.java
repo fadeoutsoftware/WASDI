@@ -1249,7 +1249,7 @@ public class ProcessingResources {
 			oParameter.setExchange(sWorkspaceId);
 			oParameter.setProcessObjId(oProcess.getProcessObjId());
 			if (oSetting != null) oParameter.setSettings(oSetting);	
-			
+			//TODO move it before inserting the new process into DB
 			SerializationUtils.serializeObjectToXML(sPath, oParameter);
 
 		} catch (IOException e) {

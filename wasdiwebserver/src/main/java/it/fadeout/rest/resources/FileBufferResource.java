@@ -95,6 +95,7 @@ public class FileBufferResource {
 			}
 			
 			String sPath = m_oServletConfig.getInitParameter("SerializationPath") + oProcess.getProcessObjId();
+			//TODO move it before inserting the new process into DB
 			SerializationUtils.serializeObjectToXML(sPath, oParameter);
 			
 		} catch (IOException e) {
@@ -159,6 +160,7 @@ public class FileBufferResource {
 			oParameter.setExchange(sWorkspaceId);
 			oParameter.setProcessObjId(oProcess.getProcessObjId());
 
+			//TODO move it before inserting the new process into DB
 			SerializationUtils.serializeObjectToXML(sPath, oParameter);
 
 		} catch (IOException e) {
@@ -249,6 +251,7 @@ public class FileBufferResource {
 			oParameter.setExchange(sWorkspaceId);
 			oParameter.setProcessObjId(oProcess.getProcessObjId());
 
+			//TODO move it before inserting the new process into DB
 			SerializationUtils.serializeObjectToXML(sPath, oParameter);
 
 		}catch (IOException e) {

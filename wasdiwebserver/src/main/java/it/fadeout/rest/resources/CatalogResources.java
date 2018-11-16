@@ -311,6 +311,7 @@ public class CatalogResources {
 			}
 	
 			String sPath = m_oServletConfig.getInitParameter("SerializationPath") + oProcess.getProcessObjId();
+			//TODO move it before inserting the new process into DB
 			SerializationUtils.serializeObjectToXML(sPath, oParameter);
 	
 			String sLauncherPath = m_oServletConfig.getInitParameter("LauncherPath");
@@ -419,6 +420,7 @@ public class CatalogResources {
 			}
 	
 			String sPath = m_oServletConfig.getInitParameter("SerializationPath") + oProcess.getProcessObjId();
+			//TODO move it before inserting the new process into DB
 			SerializationUtils.serializeObjectToXML(sPath, oParameter);
 	
 			String sLauncherPath = m_oServletConfig.getInitParameter("LauncherPath");
