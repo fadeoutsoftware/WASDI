@@ -183,7 +183,6 @@ var HomeController = (function() {
             return false;
         }
         oUser.userId = oController.m_oRegistrationUser.userId;
-        oUser.userId = "ss";
         oUser.password = oController.m_oRegistrationUser.password;
         oUser.name = oController.m_oRegistrationUser.name;
         oUser.surname = oController.m_oRegistrationUser.surname;
