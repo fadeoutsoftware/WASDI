@@ -276,6 +276,10 @@ public class LauncherMain {
 		}
     	
         try {
+        	//XXX refactor this switch
+        	//suggestions:
+        	// https://www.developer.com/java/data/seven-ways-to-refactor-java-switch-statements.html
+        	// https://www.google.it/search?q=java+get+rid+of+switch
         	LauncherOperations op = LauncherOperations.valueOf(sOperation);
             switch (op)
             {
@@ -292,6 +296,9 @@ public class LauncherMain {
                     Download(oDownloadFileParameter, ConfigReader.getPropValue("DOWNLOAD_ROOT_PATH"));
                 }
                 break;
+                case UPLOADVIAFTP: {
+                	//TODO implement call to 
+                }
                 case PUBLISHBAND: {
                     // Deserialize Parameters
                     PublishBandParameter oPublishBandParameter = (PublishBandParameter) SerializationUtils.deserializeXMLToObject(sParameter);
