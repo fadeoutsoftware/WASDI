@@ -1,9 +1,10 @@
 var WpsController = (function() {
 
-    function WpsController($scope, oClose,oExtras,oConstantsService) {
+    function WpsController($scope, oClose,oExtras,oConstantsService,oSnapOperationService) {
         this.m_oScope = $scope;
         this.m_oScope.m_oController = this;
         this.m_oExtras = oExtras;
+        this.m_oSnapOperationService = oSnapOperationService;
         // this.m_aoAttributes = this.m_oExtras.metadataAttributes;
         this.m_sNameNode = this.m_oExtras.nameNode;
         this.m_oConstantService = oConstantsService;
@@ -11,6 +12,7 @@ var WpsController = (function() {
         this.m_aoProcesses = [];
         this.m_oWPSService = null;
         this.m_sSelectedWps = "";
+        this.m_asWPSListURL = [];
         // this.m_sSelectedProcess = "";
         /*metadataAttributes:node.original.attributes*/
         //$scope.close = oClose;
@@ -18,7 +20,8 @@ var WpsController = (function() {
             oClose(result, 500); // close, but give 500ms for bootstrap to animate
         };
 
-        this.setUpProxy()
+        this.setUpProxy();
+        this.getWPSList();
         // this.wpsInitialization();
     }
     WpsController.prototype.wpsInitialization = function(){
@@ -164,7 +167,7 @@ var WpsController = (function() {
     {
         // var sel = document.getElementById("wps");
         // getCapabilities(sel.options[sel.selectedIndex].text);
-
+        this.m_sSelectedWps = this.m_sSelectedWps.trim();
         this.m_sSelectedWps = this.m_sSelectedWps.replace("http://","");
         // getCapabilities(this.m_oConstantService.getWPSPROXY() + this.m_sSelectedWps);
         getCapabilities(this.m_sSelectedWps);
@@ -185,12 +188,54 @@ var WpsController = (function() {
         jQuery.wpsSetup(oSetupProxy);
     };
 
+    WpsController.prototype.getWPSList = function()
+    {
+        var oController = this;
+        this.m_oSnapOperationService.getWPSList()
+            .success(function(data,status)
+            {
+                oController.callbackWPSList(oController,data,status)
+                // if( (utilsIsObjectNullOrUndefined(data) === false) && (status === 200))
+                // {
+                //     oController.m_asWPSListURL = data;
+                // }
+                // else
+                // {
+                //     utilsVexDialogAlertTop("GURU MEDITATION<br>WAS IMPOSSIBLE GET WPS LIST.");
+                //
+                // }
+            })
+            .error(function(data,status)
+            {
+                utilsVexDialogAlertTop("GURU MEDITATION<br>WAS IMPOSSIBLE GET WPS LIST.");
+            });
+    };
+
+    WpsController.prototype.callbackWPSList = function(oController,data,status)
+    {
+        if( (utilsIsObjectNullOrUndefined(data) === false) && (status === 200))
+        {
+            var iNumberOfWPSUrl = data.length;
+            for(var iIndexWPSUrl = 0 ; iIndexWPSUrl < iNumberOfWPSUrl; iIndexWPSUrl++)
+            {
+                oController.m_asWPSListURL.push(data[iIndexWPSUrl].address)
+            }
+            // oController.m_asWPSListURL = data;
+        }
+        else
+        {
+            utilsVexDialogAlertTop("GURU MEDITATION<br>WAS IMPOSSIBLE GET WPS LIST.");
+
+        }
+    }
 
     WpsController.$inject = [
         '$scope',
         'close',
         'extras',
-        'ConstantsService'
+        'ConstantsService',
+        'SnapOperationService',
+
     ];
     return WpsController;
 })();

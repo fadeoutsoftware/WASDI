@@ -13,12 +13,20 @@
             <!-- BODY -->
             <div class="modal-body ">
                 <h4>
+                    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                        <div class="row">
+                            <div class="map-container">
+                                <div id="getInfoProductCatalogMap" class="map" ></div>
+                            </div>
+                        </div>
+                    </div>
+
                     <!------------------------------ INFO ------------------------------>
                     <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
                         <div class="row">
                             <div class="panel panel-default ">
                                 <div class="panel-heading pointer-cursor-hover" data-toggle="collapse" href="#productinfo"
-                                     ng-model="arrowIconInfo" ng-init="arrowIconInfo = false" ng-click="arrowIconInfo = !arrowIconInfo">
+                                     ng-model="arrowIconInfo" ng-init="arrowIconInfo = false" ng-click="arrowIconInfo = !arrowIconInfo;">
                                     <!--ng-model="arrowIconBands" ng-init="arrowIconBands = false" ng-click="arrowIconBands = !arrowIconBands">-->
                                     <!--<i class="fa fa-angle-double-down" aria-hidden="true" ng-hide="arrowIconBands"></i>-->
                                     <!--<i class="fa fa-angle-double-up" aria-hidden="true" ng-show="arrowIconBands"></i>-->
@@ -45,18 +53,24 @@
                                                 <label>Category:</label>
                                             </div>
                                             <div class="col-xs-9 col-sm-9 col-md-9 col-lg-9">
-                                                {{m_oController.m_oProduct.category}}
+                                                <!--{{m_oController.m_oProduct.category}}-->
+                                                {{m_oController.getFriendlyOperationName(m_oController.m_oProduct.category)}}
                                             </div>
                                         </div>
-                                        <div class="row">
-                                            <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
-                                                <label>Bounding box:</label>
-                                            </div>
-                                            <div class="col-xs-9 col-sm-9 col-md-9 col-lg-9">
-                                                {{m_oController.m_oProduct.boundingBox}}
-                                            </div>
+                                        <!--<div class="row">-->
+                                            <!--<div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">-->
+                                                <!--<label>Bounding box:</label>-->
+                                            <!--</div>-->
+                                            <!--<div class="col-xs-9 col-sm-9 col-md-9 col-lg-9">-->
+                                                <!--&lt;!&ndash;{{m_oController.m_oProduct.boundingBox}}&ndash;&gt;-->
+                                                <!--&lt;!&ndash;<div id="getInfoProductCatalogMap" class="map" ></div>&ndash;&gt;-->
+                                                <!--&lt;!&ndash;<div id="test" class="map" ></div>&ndash;&gt;-->
+                                                <!--<div class="test">-->
+                                                    <!--<div id="getInfoProductCatalogMap" class="map" ></div>-->
+                                                <!--</div>-->
+                                            <!--</div>-->
 
-                                        </div>
+                                        <!--</div>-->
 
                                     </div>
                                 </div>
@@ -65,7 +79,8 @@
 
                     </div>
 
-                   <!------------------------------ BANDS ------------------------------>
+
+                    <!------------------------------ BANDS ------------------------------>
                     <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
                         <div class="row">
                             <div class="panel panel-default">
@@ -96,9 +111,9 @@
                                         <div class="table-container">
                                             <table class="table table-hover">
                                                 <thead>
-                                                <th>Name</th>
-                                                <th>Published</th>
-                                                <th>Workspace</th>
+                                                <th>{{"DIALOG_CATALOG_INFO_PRODUCT_TABLE_HEADER_NAME"|translate}}</th>
+                                                <th>{{"DIALOG_CATALOG_INFO_PRODUCT_TABLE_HEADER_PUBLISHED"|translate}}</th>
+                                                <th>{{"DIALOG_CATALOG_INFO_PRODUCT_TABLE_HEADER_WORKSPACE"|translate}}</th>
                                                 </thead>
                                                 <tbody>
                                                 <tr ng-repeat="band in m_oController.getProductBands()">
@@ -146,7 +161,7 @@
                                                     <td>
                                                         <a href="" ng-click="m_oController.publicAllSelectedBands()">
                                                             <i class="fa fa-paper-plane" aria-hidden="true"></i>
-                                                            Public all bands
+                                                            {{"DIALOG_CATALOG_INFO_PRODUCT_TABLE_FOOT_PUBLIC_BAND"|translate}}
                                                         </a>
                                                     </td>
                                                 </tr>
@@ -156,40 +171,7 @@
 
                                         </div>
 
-                                        <!--<div class="band-row-container" ng-repeat="band in m_oController.getProductBands()">-->
-                                            <!--<div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 band-row">-->
-                                                <!--<div class="col-xs-4 col-sm-4 col-md-4 col-lg-4" >-->
-                                                    <!--{{band.name}}-->
-                                                <!--</div>-->
-                                                <!--<div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">-->
-                                                    <!--<div class="dropdown">-->
-                                                        <!--<button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenuWorkspaceList"-->
-                                                                <!--data-toggle="dropdown">-->
-                                                            <!--{{band.selectedWorkspace.workspaceName || "Public band in workspace" }}-->
 
-                                                            <!--<span class="caret"></span>-->
-                                                        <!--</button>-->
-
-                                                        <!--<ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenuWorkspaceList">-->
-                                                            <!--<li role="presentation" ng-repeat="oWorkspace in m_oController.m_aoListOfProductWorkspaces">-->
-                                                                <!--<a role="menuitem" tabindex="-1" href="" ng-click="band.selectedWorkspace = oWorkspace">-->
-                                                                    <!--<i class="fa fa-folder-open" aria-hidden="true"></i>-->
-                                                                    <!--{{oWorkspace.workspaceName}} - -->
-                                                                    <!--<i class="fa fa-user" aria-hidden="true"></i>-->
-                                                                    <!--{{oWorkspace.ownerUserId}}-->
-                                                                <!--</a>-->
-                                                            <!--</li>-->
-
-                                                        <!--</ul>-->
-                                                    <!--</div>-->
-                                                <!--</div>-->
-
-                                                <!--&lt;!&ndash;<button class="my-button" ng-click="m_oController.publicAllSelectedBands()"> TEST </button>&ndash;&gt;-->
-
-                                            <!--</div>-->
-
-
-                                        <!--</div>-->
 
 
 
@@ -199,7 +181,11 @@
                         </div>
                     </div>
 
-
+                    <!--<div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">-->
+                        <!--<div class="row">-->
+                            <!--<div id="imagestest"></div>-->
+                        <!--</div>-->
+                    <!--</div>-->
 
                 </h4>
 

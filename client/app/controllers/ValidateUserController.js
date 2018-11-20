@@ -25,7 +25,6 @@ var ValidateUserController  = (function() {
     ValidateUserController.prototype.timeoutRedirect = function(){
         var oController = this;
         this.m_oTimeout( function(){
-            console.log("test");
             oController.m_oState.go("home");// go workspaces
         }, 5000 );
     }
