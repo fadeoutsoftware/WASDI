@@ -48,7 +48,8 @@ public class FileBufferResource {
 			
 			Wasdi.DebugLog("FileBufferResource.Download");
 
-			if (Utils.isNullOrEmpty(sSessionId)) return Response.status(401).build();
+			Boolean bSessionIsValid = !Utils.isNullOrEmpty(sSessionId); 
+			if (bSessionIsValid) return Response.status(401).build();
 
 			User oUser = Wasdi.GetUserFromSession(sSessionId);
 
@@ -94,6 +95,7 @@ public class FileBufferResource {
 			}
 			
 			String sPath = m_oServletConfig.getInitParameter("SerializationPath") + oProcess.getProcessObjId();
+			//TODO move it before inserting the new process into DB
 			SerializationUtils.serializeObjectToXML(sPath, oParameter);
 			
 		} catch (IOException e) {
@@ -158,6 +160,7 @@ public class FileBufferResource {
 			oParameter.setExchange(sWorkspaceId);
 			oParameter.setProcessObjId(oProcess.getProcessObjId());
 
+			//TODO move it before inserting the new process into DB
 			SerializationUtils.serializeObjectToXML(sPath, oParameter);
 
 		} catch (IOException e) {
@@ -248,6 +251,7 @@ public class FileBufferResource {
 			oParameter.setExchange(sWorkspaceId);
 			oParameter.setProcessObjId(oProcess.getProcessObjId());
 
+			//TODO move it before inserting the new process into DB
 			SerializationUtils.serializeObjectToXML(sPath, oParameter);
 
 		}catch (IOException e) {

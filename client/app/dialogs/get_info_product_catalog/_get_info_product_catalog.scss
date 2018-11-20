@@ -30,6 +30,10 @@
             padding: 10px;
           }
         }
+
+        .table-container{
+          @extend %table-container-css;
+        }
       }
       //FOOTER
       .modal-footer

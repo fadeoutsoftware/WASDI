@@ -113,17 +113,17 @@ public class ProcessingThread extends Thread {
 				long lNow = System.currentTimeMillis();
 				
 				// List of array to clear
-				ArrayList<String> aoToClear = new ArrayList<String>();
+				ArrayList<String> asToClear = new ArrayList<String>();
 				
 				// For each running entry
 				for (Entry<String, Date> entry : m_aoLaunchedProcesses.entrySet()) {
 					
 					// If if is so old, kill it
-					if (lNow - entry.getValue().getTime() > 3600000L) aoToClear.add(entry.getKey());
+					if (lNow - entry.getValue().getTime() > 3600000L) asToClear.add(entry.getKey());
 				}
 				
 				// Clear every killed process
-				for (String key : aoToClear) {
+				for (String key : asToClear) {
 					m_aoLaunchedProcesses.remove(key);
 					System.out.println(m_sLogPrefix + "removing " + key + " from launched");
 				}

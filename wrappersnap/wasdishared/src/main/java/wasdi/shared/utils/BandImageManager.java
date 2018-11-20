@@ -2,17 +2,25 @@ package wasdi.shared.utils;
 
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
+import java.awt.image.RenderedImage;
+import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
+
+import javax.media.jai.JAI;
 
 import org.esa.snap.core.dataio.ProductIO;
 import org.esa.snap.core.datamodel.Band;
@@ -28,23 +36,34 @@ import org.esa.snap.core.datamodel.Mask;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductNodeGroup;
 import org.esa.snap.core.datamodel.RasterDataNode;
+import org.esa.snap.core.datamodel.SceneTransformProvider;
 import org.esa.snap.core.datamodel.Stx;
+import org.esa.snap.core.datamodel.VectorDataNode;
 import org.esa.snap.core.image.ColoredBandImageMultiLevelSource;
 import org.esa.snap.core.image.ImageManager;
 import org.esa.snap.core.layer.MaskCollectionLayerType;
 import org.esa.snap.core.layer.MaskLayerType;
+import org.esa.snap.core.layer.RgbImageLayerType;
+import org.esa.snap.core.util.DefaultPropertyMap;
 import org.esa.snap.core.util.ProductUtils;
+import org.esa.snap.core.util.PropertyMap;
 import org.esa.snap.rcp.imgfilter.model.Filter;
+import org.esa.snap.ui.product.ProductSceneImage;
+import org.esa.snap.ui.product.VectorDataCollectionLayerType;
+import org.esa.snap.ui.product.VectorDataLayer;
+import org.esa.snap.ui.product.VectorDataLayerType;
 
 import com.bc.ceres.binding.PropertySet;
 import com.bc.ceres.core.ProgressMonitor;
 import com.bc.ceres.glayer.CollectionLayer;
 import com.bc.ceres.glayer.Layer;
+import com.bc.ceres.glayer.LayerContext;
 import com.bc.ceres.glayer.LayerFilter;
 import com.bc.ceres.glayer.LayerType;
 import com.bc.ceres.glayer.LayerTypeRegistry;
 import com.bc.ceres.glayer.support.ImageLayer;
 import com.bc.ceres.glayer.support.LayerUtils;
+import com.bc.ceres.glevel.MultiLevelModel;
 import com.bc.ceres.glevel.MultiLevelSource;
 import com.bc.ceres.grender.Viewport;
 import com.bc.ceres.grender.support.BufferedImageRendering;
@@ -480,6 +499,212 @@ public class BandImageManager {
 		
         return oOutputBufferedImage;
 	}
+	
+	
+	
+	
+	
+	public BufferedImage buildRGBImage(RasterDataNode oRedBand, RasterDataNode oGreenBand, RasterDataNode oBlueBand, Dimension oOutputImageSize, boolean bUseCache) throws IOException {
+		
+		BufferedImage oOutputBufferedImage = null;
+		
+		if (oRedBand==null || oBlueBand == null || oGreenBand == null) {
+			System.out.println("BandImageManager.buildImage: band null");
+			return null;
+		}
+		if (oRedBand.getProduct()==null || oBlueBand.getProduct() == null || oGreenBand.getProduct() == null) {
+			System.out.println("BandImageManager.buildImage: band product null");
+			return null;
+		}
+		
+		synchronized (m_oCacheSyncObj) {
+			
+			long lStartTime = System.currentTimeMillis();
+			
+			ProductSceneImage oProductSceneImage = new ProductSceneImage("RGB", oRedBand, oGreenBand, oBlueBand, new DefaultPropertyMap(), ProgressMonitor.NULL);
+			
+
+	        RasterDataNode aoRasters [] = { oRedBand, oGreenBand, oBlueBand };
+	        
+	        
+	        ColoredBandImageMultiLevelSource oColoredBandImageMultiLevelSource = ColoredBandImageMultiLevelSource.create(aoRasters, ProgressMonitor.NULL);
+	        
+	        System.out.println("BandImageManager.buildImage: multi level source obtained: " + (System.currentTimeMillis() - lStartTime) + " ms");
+	        
+	        CollectionLayer oRootLayer = new CollectionLayer();
+
+	        // Create Image Layer
+	        
+	        final RgbImageLayerType oRgbLayerType = LayerTypeRegistry.getLayerType(RgbImageLayerType.class);
+	        final Layer oLayer = oRgbLayerType.createLayer(aoRasters, oColoredBandImageMultiLevelSource);
+	        System.out.println("BandImageManager.buildImage: RGB imageLayer created: " + (System.currentTimeMillis() - lStartTime) + " ms");
+	        oLayer.setName("RGB");
+	        oLayer.setVisible(true);
+	        oLayer.setId("org.esa.snap.layers.baseImage");
+	        
+	        oRootLayer.getChildren().add(oLayer);
+	        	        
+	        System.out.println("BandImageManager.buildImage: init render: " + (System.currentTimeMillis() - lStartTime) + " ms ");
+	        
+	        // Create the Output buffered Image
+	        final int iOutputImageWidth = oOutputImageSize.width;
+	        final int iOutputImageHeight = oOutputImageSize.height;
+	        final int iOutputImageType = BufferedImage.TYPE_3BYTE_BGR;
+	        oOutputBufferedImage = new BufferedImage(iOutputImageWidth, iOutputImageHeight, iOutputImageType);
+	        
+	        final BufferedImageRendering oImageRendering = new BufferedImageRendering(oOutputBufferedImage);
+
+	        // Clear the background
+	        final Graphics2D graphics = oImageRendering.getGraphics();
+	        graphics.setColor(Color.BLACK);
+	        graphics.fillRect(0, 0, iOutputImageWidth, iOutputImageHeight);
+	        
+	        oRootLayer.render(oImageRendering);
+	        System.out.println("BandImageManager.buildImage: render done: " + (System.currentTimeMillis() - lStartTime) + " ms");			
+		}
+		
+        return oOutputBufferedImage;
+	}
+	
+	public RenderedImage buildRGBImage2(RasterDataNode oRedBand, RasterDataNode oGreenBand, RasterDataNode oBlueBand, Dimension oOutputImageSize, boolean bUseCache) throws IOException {
+		
+		RenderedImage oOutputImage = null;
+		
+		if (oRedBand==null || oBlueBand == null || oGreenBand == null) {
+			System.out.println("BandImageManager.buildImage: band null");
+			return null;
+		}
+		if (oRedBand.getProduct()==null || oBlueBand.getProduct() == null || oGreenBand.getProduct() == null) {
+			System.out.println("BandImageManager.buildImage: band product null");
+			return null;
+		}
+
+		synchronized (m_oCacheSyncObj) {
+			
+			long lStartTime = System.currentTimeMillis();
+
+	        RasterDataNode aoRasters [] = { oRedBand, oGreenBand, oBlueBand };
+	        
+	        ImageInfo oInfo = ProductUtils.createImageInfo(aoRasters, true, ProgressMonitor.NULL);
+	        oOutputImage = ImageManager.getInstance().createColoredBandImage(aoRasters, oInfo, 0);
+	        
+	        System.out.println("BandImageManager.buildImage: render done: " + (System.currentTimeMillis() - lStartTime) + " ms");			
+		}
+		
+        return oOutputImage;
+	}
+	
+	
+	
+	
+	public BufferedImage buildRGBImage3(RasterDataNode oRedBand, RasterDataNode oGreenBand, RasterDataNode oBlueBand, Dimension oOutputImageSize, boolean bUseCache) throws IOException {
+		
+		BufferedImage oOutputBufferedImage = null;
+		
+		if (oRedBand==null || oBlueBand == null || oGreenBand == null) {
+			System.out.println("BandImageManager.buildImage: band null");
+			return null;
+		}
+		if (oRedBand.getProduct()==null || oBlueBand.getProduct() == null || oGreenBand.getProduct() == null) {
+			System.out.println("BandImageManager.buildImage: band product null");
+			return null;
+		}
+		
+		synchronized (m_oCacheSyncObj) {
+			
+			long lStartTime = System.currentTimeMillis();
+			
+			ProductSceneImage oProductSceneImage = new ProductSceneImage("RGB", oRedBand, oGreenBand, oBlueBand, new DefaultPropertyMap(), ProgressMonitor.NULL);
+			
+			DefaultViewport oViewport = new DefaultViewport(isModelYAxisDown((ImageLayer)oProductSceneImage.getRootLayer().getChildren().get(0)));
+			
+	        // Create the Output buffered Image
+	        final int iOutputImageWidth = oOutputImageSize.width;
+	        final int iOutputImageHeight = oOutputImageSize.height;
+	        final int iOutputImageType = BufferedImage.TYPE_3BYTE_BGR;
+	        oOutputBufferedImage = new BufferedImage(iOutputImageWidth, iOutputImageHeight, iOutputImageType);
+	        
+	        final BufferedImageRendering oImageRendering = new BufferedImageRendering(oOutputBufferedImage);
+
+	        // Clear the background
+	        final Graphics2D graphics = oImageRendering.getGraphics();
+	        graphics.setColor(Color.BLACK);
+	        graphics.fillRect(0, 0, iOutputImageWidth, iOutputImageHeight);
+	        
+	        oProductSceneImage.getRootLayer().render(oImageRendering);
+	        System.out.println("BandImageManager.buildImage: render done: " + (System.currentTimeMillis() - lStartTime) + " ms");			
+		}
+		
+        return oOutputBufferedImage;
+	}
+
+	
+	public RenderedImage buildRGBImage4(RasterDataNode oRedBand, RasterDataNode oGreenBand, RasterDataNode oBlueBand, Dimension oOutputImageSize, boolean bUseCache) throws IOException {
+		
+		RenderedImage oRenderedImage = null;
+		
+		if (oRedBand==null || oBlueBand == null || oGreenBand == null) {
+			System.out.println("BandImageManager.buildImage: band null");
+			return null;
+		}
+		if (oRedBand.getProduct()==null || oBlueBand.getProduct() == null || oGreenBand.getProduct() == null) {
+			System.out.println("BandImageManager.buildImage: band product null");
+			return null;
+		}
+
+		synchronized (m_oCacheSyncObj) {
+			
+			long lStartTime = System.currentTimeMillis();
+
+	        RasterDataNode aoRasters [] = { oRedBand, oGreenBand, oBlueBand };
+	        
+	        ImageInfo oInfo = ProductUtils.createImageInfo(aoRasters, true, ProgressMonitor.NULL);
+	        oRenderedImage = ImageManager.getInstance().createColoredBandImage(aoRasters, oInfo, 0);
+	        
+	        MultiLevelModel oMultiLevelModel = oRedBand.getMultiLevelModel();
+	        
+	        // RGB
+	        ImageLayer RGBLayer = new ImageLayer(oRenderedImage, oRedBand.getImageToModelTransform(), 1);
+
+	        BufferedImage buffered = new BufferedImage(oRenderedImage.getWidth(), oRenderedImage.getHeight(), BufferedImage.TYPE_INT_ARGB);
+	        // TODO: questo ha creato solo un ritaglio dell'immagine non tutta
+	        //BufferedImage buffered = new BufferedImage( (int) oOutputImageSize.getWidth(),(int) oOutputImageSize.getHeight(), BufferedImage.TYPE_INT_ARGB);
+	        BufferedImageRendering rendering = createRendering(buffered, oMultiLevelModel);
+	        RGBLayer.render(rendering);
+
+	        JAI.create("filestore", rendering.getImage(), "C:\\temp\\ORAVEDIAMO2.JPG", "JPEG");
+	        
+	        System.out.println("BandImageManager.buildImage: render done: " + (System.currentTimeMillis() - lStartTime) + " ms");			
+		}
+		
+        return oRenderedImage;
+	}
+	
+	
+
+    private static BufferedImageRendering createRendering(BufferedImage bufferedImage, MultiLevelModel multiLevelModel) {
+        AffineTransform m2iTransform = multiLevelModel.getModelToImageTransform(0);
+        final Viewport vp2 = new DefaultViewport(new Rectangle(bufferedImage.getWidth(), bufferedImage.getHeight()),
+                                                 m2iTransform.getDeterminant() > 0.0);
+        vp2.zoom(multiLevelModel.getModelBounds());
+
+        final BufferedImageRendering imageRendering = new BufferedImageRendering(bufferedImage, vp2);
+        // because image to model transform is stored with the exported image we have to invert
+        // image to view transformation
+        final AffineTransform v2mTransform = vp2.getViewToModelTransform();
+        v2mTransform.preConcatenate(m2iTransform);
+        final AffineTransform v2iTransform = new AffineTransform(v2mTransform);
+
+        final Graphics2D graphics2D = imageRendering.getGraphics();
+        v2iTransform.concatenate(graphics2D.getTransform());
+        graphics2D.setTransform(v2iTransform);
+        return imageRendering;
+    }
+
+    
+    private static boolean isModelYAxisDown(ImageLayer baseImageLayer) {
+        return baseImageLayer.getImageToModelTransform().getDeterminant() > 0.0;
+    }
 
 	
 	int getFirstImageLayerIndex(Layer rootLayer) {
@@ -510,11 +735,7 @@ public class BandImageManager {
 		if (pm==null) pm = ProgressMonitor.NULL;
 		ProductIO.writeProduct(outProduct, fileOut, "GEOTIFF", true, pm);
 	}
-	
-	private boolean isModelYAxisDown(ImageLayer baseImageLayer) {
-        return baseImageLayer.getImageToModelTransform().getDeterminant() > 0.0;
-    }
-	
+
 	private Kernel getKernel(Filter filter) {
         return new Kernel(filter.getKernelWidth(),
                 filter.getKernelHeight(),
@@ -557,6 +778,27 @@ public class BandImageManager {
         @Override
         public boolean accept(Layer layer) {
             return layer instanceof ImageLayer;
+        }
+    }
+	
+    private static class MyLayerContext implements LayerContext {
+
+        private final Product product;
+        private final Layer rootLayer;
+
+        public MyLayerContext(Product product, Layer rootLayer) {
+            this.product = product;
+            this.rootLayer = rootLayer;
+        }
+
+        @Override
+        public Object getCoordinateReferenceSystem() {
+            return product.getSceneGeoCoding().getMapCRS();
+        }
+
+        @Override
+        public Layer getRootLayer() {
+            return rootLayer;
         }
     }
 }
