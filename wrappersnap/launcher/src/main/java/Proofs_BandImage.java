@@ -64,8 +64,9 @@ public class Proofs_BandImage {
 		
 		RenderedImage oOutImg;
 		
-		oOutImg = oManager.buildRGBImage2(oRedBand , oGreenBand, oBlueBand, oOutputDimension, true);	
-		JAI.create("filestore", oOutImg, sOutPath, "PNG");
+		oOutImg = oManager.buildRGBImage2(oRedBand , oGreenBand, oBlueBand, oOutputDimension, true);
+		//FIXME JAI could not be resolved
+		//JAI.create("filestore", oOutImg, sOutPath, "PNG");
 		//ImageIO.write(img, "jpg", new File(sOutPath));
 		
 		oManager.quit();
