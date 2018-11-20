@@ -21,6 +21,7 @@ import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.math3.exception.NullArgumentException;
 import org.apache.log4j.Logger;
 import org.apache.log4j.xml.DOMConfigurator;
 import org.esa.snap.core.datamodel.Band;
@@ -573,18 +574,34 @@ public class LauncherMain {
     }
     
     
-	private void ftpTransfer(FtpTransferParameters oFtpTransferParameters) throws IOException {
-		//TODO setup local file first
-		
-		FtpClient oFtpClient = new FtpClient(oFtpTransferParameters.getM_sFtpServer(),
-				oFtpTransferParameters.getM_iPort(),
-				oFtpTransferParameters.getM_sUsername(),
-				oFtpTransferParameters.getM_sPassword() );
-		if(oFtpClient.open() ) {
-			//TODO connect, transfer and check
+	public Boolean ftpTransfer(FtpTransferParameters oFtpTransferParameters) throws IOException {
+		if(null == oFtpTransferParameters) {
+			throw new IllegalArgumentException();
+		} else if(Utils.isFilePathPlausible(oFtpTransferParameters.getFullLocalPath())) {
+			String fullLocalPath = oFtpTransferParameters.getFullLocalPath();
+			File oFile = new File(fullLocalPath);
+			if(oFile.exists()) {
+				if(	Utils.isServerNamePlausible( oFtpTransferParameters.getM_sFtpServer()) &&
+					Utils.isPortNumberPlausible(oFtpTransferParameters.getM_iPort()) &&
+					!Utils.isNullOrEmpty(oFtpTransferParameters.getM_sUsername()) &&
+					!Utils.isNullOrEmpty(oFtpTransferParameters.getM_sPassword()) ) {
+					FtpClient oFtpClient = new FtpClient(oFtpTransferParameters.getM_sFtpServer(),
+							oFtpTransferParameters.getM_iPort(),
+							oFtpTransferParameters.getM_sUsername(),
+							oFtpTransferParameters.getM_sPassword() );
+					if(oFtpClient.open() ) {
+						if(oFtpClient.putFileToPath(oFile, oFtpTransferParameters.getM_sRemotePath() ) ) {
+							//String sRemotePath = oFtpTransferParameters.getM_sRemotePath();
+							String sRemotePath = ".";
+							if(oFtpClient.FileIsNowOnServer(sRemotePath, oFile.getName())) {
+								return true;
+							}
+						}
+					}
+				}
+			}
 		}
-		//TODO change type and return something meaningful
-		
+		return false;
 	}
     
     public String SaveMetadata(ReadProduct oReadProduct, File oProductFile) {
