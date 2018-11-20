@@ -158,8 +158,7 @@
 		</dependency>
 		<!-- https://mvnrepository.com/artifact/org.json/json -->
 
-		<!-- FTP server + tests -->
-
+		<!-- FTP mock server + tests -->
 		<dependency>
 			<groupId>commons-net</groupId>
 			<artifactId>commons-net</artifactId>

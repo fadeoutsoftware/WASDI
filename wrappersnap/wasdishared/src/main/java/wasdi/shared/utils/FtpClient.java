@@ -14,6 +14,7 @@
 //FTPS is supported by apache commons
 package wasdi.shared.utils;
 
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.net.PrintCommandListener;
 import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPFile;
@@ -59,6 +60,7 @@ public class FtpClient {
     }
 
     public Collection<String> listFiles(String sPath) throws IOException {
+    	String sWD = pwd();
         FTPFile[] aoFiles = m_oFtp.listFiles(sPath);
 
         return Arrays.stream(aoFiles)
@@ -66,15 +68,30 @@ public class FtpClient {
                 .collect(Collectors.toList());
     }
 
-    public Boolean putFileToPath(File oFile, String sAbsolutePath) throws IOException {
-    	String sPathName = new String(sAbsolutePath);
-    	if(!sPathName.endsWith(oFile.getName()) ) {
-    		if(!sPathName.endsWith("/")) {
-    			sPathName+="/";
-    		}
-    		sPathName+=oFile.getName();
+    public Boolean putFileToPath(File oFile, String sRemoteRelativePath) throws IOException {
+    	if(null == oFile || null == sRemoteRelativePath) {
+    		throw new IllegalArgumentException();
     	}
-        Boolean bRes = m_oFtp.storeFile(sPathName, new FileInputStream(oFile) );
+    	String sPathName = new String(FilenameUtils.normalize(sRemoteRelativePath, true));
+    	/*
+		if(!sPathName.endsWith("/")) {
+			sPathName+="/";
+		}
+    	//strip leading "/"s
+    	while(sPathName.startsWith("/")) {
+    		sPathName = sPathName.substring(1);
+    	}*/
+
+    	Boolean bRes = new Boolean(true);
+    	String wd = new String(pwd());
+    	if(!wd.equals(sPathName)) {
+    		bRes = cd(sPathName);
+    		wd = new String(pwd());
+    	}
+        if(bRes) {
+        	sPathName = oFile.getName();
+        	bRes = m_oFtp.storeFile(sPathName, new FileInputStream(oFile) );
+        }
         return bRes;
     }
 
@@ -84,22 +101,36 @@ public class FtpClient {
     }
 
 	public String pwd() throws IOException {
-		return m_oFtp.printWorkingDirectory();
+		String wd = null;
+		wd = new String(m_oFtp.printWorkingDirectory());
+		return wd;
 	}
 
 	public Boolean FileIsNowOnServer(String sPath, String sFilename) throws IOException {
-		Collection<String> aoFiles = listFiles(sPath);
+		if(null == sPath || null == sFilename) {
+			throw new IllegalArgumentException();
+		}
+		String sWD = pwd();
+		String sDir = FilenameUtils.normalize(sPath, true); 
+		Collection<String> aoFiles = listFiles(sDir);
 		for (String sFile : aoFiles) {
 			if(sFile.equals(sFilename)) {
 				return true;
 			}
 		}
-		
 		return false;
 	}
 
 	public Boolean cd(String sPath) throws IOException {
-		return m_oFtp.changeWorkingDirectory(sPath);
+		if(null == sPath) {
+			throw new IllegalArgumentException();
+		}
+		String sDir = new String(FilenameUtils.normalize(sPath, true));
+		while(sDir.startsWith("/")) {
+			sDir = sDir.substring(1);
+		}
+		Boolean bRes = m_oFtp.changeWorkingDirectory(sDir); 
+		return bRes;
 		
 	}
 }
