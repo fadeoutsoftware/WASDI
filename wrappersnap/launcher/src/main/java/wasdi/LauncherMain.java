@@ -62,6 +62,7 @@ import wasdi.shared.parameters.CalibratorParameter;
 import wasdi.shared.parameters.DeployProcessorParameter;
 import wasdi.shared.parameters.DownloadFileParameter;
 import wasdi.shared.parameters.FilterParameter;
+import wasdi.shared.parameters.FtpTransferParameters;
 import wasdi.shared.parameters.GraphParameter;
 import wasdi.shared.parameters.IngestFileParameter;
 import wasdi.shared.parameters.MultilookingParameter;
@@ -70,6 +71,7 @@ import wasdi.shared.parameters.OperatorParameter;
 import wasdi.shared.parameters.PublishBandParameter;
 import wasdi.shared.parameters.RangeDopplerGeocodingParameter;
 import wasdi.shared.parameters.RasterGeometricResampleParameter;
+import wasdi.shared.utils.FtpClient;
 import wasdi.shared.utils.SerializationUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.BandViewModel;
@@ -297,7 +299,8 @@ public class LauncherMain {
                 }
                 break;
                 case UPLOADVIAFTP: {
-                	//TODO implement call to 
+                	FtpTransferParameters oFtpTransferParameters = (FtpTransferParameters) SerializationUtils.deserializeXMLToObject(sParameter);
+                	ftpTransfer(oFtpTransferParameters);
                 }
                 case PUBLISHBAND: {
                     // Deserialize Parameters
@@ -377,6 +380,7 @@ public class LauncherMain {
         	s_oLogger.error("ExecuteOperation Exception", oEx);
         }
     }
+
 
 	public void ExecuteGraph(GraphParameter params) throws Exception {
 		try {
@@ -568,6 +572,20 @@ public class LauncherMain {
         return  sFileName;
     }
     
+    
+	private void ftpTransfer(FtpTransferParameters oFtpTransferParameters) throws IOException {
+		//TODO setup local file first
+		
+		FtpClient oFtpClient = new FtpClient(oFtpTransferParameters.getM_sFtpServer(),
+				oFtpTransferParameters.getM_iPort(),
+				oFtpTransferParameters.getM_sUsername(),
+				oFtpTransferParameters.getM_sPassword() );
+		if(oFtpClient.open() ) {
+			//TODO connect, transfer and check
+		}
+		//TODO change type and return something meaningful
+		
+	}
     
     public String SaveMetadata(ReadProduct oReadProduct, File oProductFile) {
     			
