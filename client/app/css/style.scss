@@ -629,6 +629,12 @@ font-size: 2.5em !important;
   }
 }
 
+.pointer-cursor-hover {
+  &:hover {
+    cursor: pointer;
+  }
+}
+
 //.leaflet-tile { border: solid red 10px; }
 
 /* FIX COLOR PICKER NEED Z INDEX 1100 (modal / map)*/
@@ -838,5 +844,20 @@ font-size: 2.5em !important;
   .alert {
     margin-bottom: 0px;
     margin-top: 5px;
+  }
+}
+
+%table-container-css
+{
+  table
+  {
+    thead
+    {
+      th
+      {
+        background-color: #44536C;
+        color: white;
+      }
+    }
   }
 }

@@ -13,11 +13,18 @@
             <!-- BODY -->
             <div class="modal-body ">
                 <h4>
+                    <!------------------------------ INFO ------------------------------>
                     <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
                         <div class="row">
-                            <div class="panel panel-default">
-                                <div class="panel-heading" data-toggle="collapse" href="#productinfo">
+                            <div class="panel panel-default ">
+                                <div class="panel-heading pointer-cursor-hover" data-toggle="collapse" href="#productinfo"
+                                     ng-model="arrowIconInfo" ng-init="arrowIconInfo = false" ng-click="arrowIconInfo = !arrowIconInfo">
+                                    <!--ng-model="arrowIconBands" ng-init="arrowIconBands = false" ng-click="arrowIconBands = !arrowIconBands">-->
+                                    <!--<i class="fa fa-angle-double-down" aria-hidden="true" ng-hide="arrowIconBands"></i>-->
+                                    <!--<i class="fa fa-angle-double-up" aria-hidden="true" ng-show="arrowIconBands"></i>-->
                                     <h4 class="panel-title">
+                                        <i class="fa fa-angle-double-down" aria-hidden="true" ng-hide="arrowIconInfo"></i>
+                                        <i class="fa fa-angle-double-up" aria-hidden="true" ng-show="arrowIconInfo"></i>
                                         {{"DIALOG_CATALOG_INFO_PRODUCT_PRODUCT_INFO_LABEL"|translate}}
                                     </h4>
                                 </div>
@@ -55,98 +62,134 @@
                                 </div>
                             </div>
                         </div>
-                        <!--<div class="row">-->
-                            <!--<div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">-->
-                                <!--<label>File Name:</label>-->
-                            <!--</div>-->
-
-                            <!--<div class="col-xs-9 col-sm-9 col-md-9 col-lg-9">-->
-                                <!--{{m_oController.m_oProductChecked.fileName}}-->
-                            <!--</div>-->
-                        <!--</div>-->
-
 
                     </div>
 
-                    <!--<div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">-->
-                        <!--<div class="row">-->
-                            <!--<div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">-->
-                                <!--<label>Category:</label>-->
-                            <!--</div>-->
-                            <!--<div class="col-xs-9 col-sm-9 col-md-9 col-lg-9">-->
-                                <!--{{m_oController.m_oProductChecked.category}}-->
-                            <!--</div>-->
-                        <!--</div>-->
-                    <!--</div>-->
-
-                    <!--<div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">-->
-                        <!--<div class="row">-->
-                            <!--<div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">-->
-                                <!--<label>Bounding box:</label>-->
-                            <!--</div>-->
-                            <!--<div class="col-xs-9 col-sm-9 col-md-9 col-lg-9">-->
-                                <!--{{m_oController.m_oProductChecked.boundingBox}}-->
-                            <!--</div>-->
-
-                        <!--</div>-->
-                    <!--</div>-->
-
-                    <!--<div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">-->
-                        <!--<div ng-repeat="band in m_oController.getProductBands()">-->
-                            <!--{{band.name}}-->
-                        <!--</div>-->
-                    <!--</div>-->
-
+                   <!------------------------------ BANDS ------------------------------>
                     <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
                         <div class="row">
                             <div class="panel panel-default">
-                                <div class="panel-heading">
+                                <div class="panel-heading pointer-cursor-hover">
                                     <h4 class="panel-title" >
                                         <div class="row">
-                                            <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12" data-toggle="collapse" href="#productbands">
-                                                    {{"DIALOG_CATALOG_INFO_PRODUCT_PRODUCT_BANDS_LABEL"|translate}}
-                                            </div>
+                                            <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12" data-toggle="collapse" href="#productbands"
+                                                 ng-model="arrowIconBands" ng-init="arrowIconBands = false" ng-click="arrowIconBands = !arrowIconBands">
 
+                                                <i class="fa fa-angle-double-down" aria-hidden="true" ng-hide="arrowIconBands"></i>
+                                                <i class="fa fa-angle-double-up" aria-hidden="true" ng-show="arrowIconBands"></i>
+                                                {{"DIALOG_CATALOG_INFO_PRODUCT_PRODUCT_BANDS_LABEL"|translate}}
+                                            </div>
+                                            <!--<div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">-->
+                                                <!--<a href="" ng-click="m_oController.publicAllSelectedBands()">-->
+                                                    <!--<i class="fa fa-paper-plane" aria-hidden="true"></i>-->
+                                                    <!--Public all bands-->
+                                                <!--</a>-->
+                                            <!--</div>-->
                                         </div>
                                     </h4>
 
                                 </div>
+
                                 <div id="productbands" class="panel-collapse collapse">
                                     <!--{{collapse}}-->
-                                    <div class="panel-body">
+                                    <div class="panel-body" >
+                                        <div class="table-container">
+                                            <table class="table table-hover">
+                                                <thead>
+                                                <th>Name</th>
+                                                <th>Published</th>
+                                                <th>Workspace</th>
+                                                </thead>
+                                                <tbody>
+                                                <tr ng-repeat="band in m_oController.getProductBands()">
+                                                    <td>
+                                                        {{band.name}}
+                                                    </td>
 
-                                        <div class="band-row-container" ng-repeat="band in m_oController.getProductBands()">
-                                            <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 band-row">
-                                                <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
-                                                    {{band.name}}
-                                                </div>
-                                                <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
-                                                    <div class="dropdown">
-                                                        <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenuWorkspaceList"
-                                                                data-toggle="dropdown">
-                                                            {{band.selectedWorkspace.workspaceName || "Public band in workspace" }}
+                                                    <td>
+                                                        {{band.published}}
+                                                    </td>
 
-                                                            <span class="caret"></span>
-                                                        </button>
+                                                    <td>
+                                                        <div class="dropdown">
+                                                            <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenuWorkspaceList"
+                                                                    data-toggle="dropdown">
+                                                                {{band.selectedWorkspace.workspaceName || "Public band in workspace" }}
 
-                                                        <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenuWorkspaceList">
-                                                            <li role="presentation" ng-repeat="oWorkspace in m_oController.m_aoListOfProductWorkspaces">
-                                                                <a role="menuitem" tabindex="-1" href="" ng-click="band.selectedWorkspace = oWorkspace">
-                                                                    <i class="fa fa-folder-open" aria-hidden="true"></i>
-                                                                    {{oWorkspace.workspaceName}} -
-                                                                    <i class="fa fa-user" aria-hidden="true"></i>
-                                                                    {{oWorkspace.ownerUserId}}
-                                                                </a>
-                                                            </li>
+                                                                <span class="caret"></span>
+                                                            </button>
 
-                                                        </ul>
-                                                    </div>
-                                                </div>
+                                                            <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenuWorkspaceList">
+                                                                <li class="dropdown-header"  ng-click="band.selectedWorkspace = null">
+                                                                    <a role="menuitem" tabindex="-1" href="">
+                                                                        Public band in workspace
+                                                                    </a>
+                                                                </li>
+                                                                <li role="presentation" ng-repeat="oWorkspace in m_oController.m_aoListOfProductWorkspaces">
+                                                                    <a role="menuitem" tabindex="-1" href="" ng-click="band.selectedWorkspace = oWorkspace">
+                                                                        <i class="fa fa-folder-open" aria-hidden="true"></i>
+                                                                        {{oWorkspace.workspaceName}} -
+                                                                        <i class="fa fa-user" aria-hidden="true"></i>
+                                                                        {{oWorkspace.ownerUserId}}
+                                                                    </a>
+                                                                </li>
 
-                                            </div>
+                                                            </ul>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                                </tbody>
+                                                <tfoot>
+                                                <tr>
+                                                    <td></td>
+                                                    <td></td>
+                                                    <td>
+                                                        <a href="" ng-click="m_oController.publicAllSelectedBands()">
+                                                            <i class="fa fa-paper-plane" aria-hidden="true"></i>
+                                                            Public all bands
+                                                        </a>
+                                                    </td>
+                                                </tr>
 
+                                                </tfoot>
+                                            </table>
 
                                         </div>
+
+                                        <!--<div class="band-row-container" ng-repeat="band in m_oController.getProductBands()">-->
+                                            <!--<div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 band-row">-->
+                                                <!--<div class="col-xs-4 col-sm-4 col-md-4 col-lg-4" >-->
+                                                    <!--{{band.name}}-->
+                                                <!--</div>-->
+                                                <!--<div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">-->
+                                                    <!--<div class="dropdown">-->
+                                                        <!--<button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenuWorkspaceList"-->
+                                                                <!--data-toggle="dropdown">-->
+                                                            <!--{{band.selectedWorkspace.workspaceName || "Public band in workspace" }}-->
+
+                                                            <!--<span class="caret"></span>-->
+                                                        <!--</button>-->
+
+                                                        <!--<ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenuWorkspaceList">-->
+                                                            <!--<li role="presentation" ng-repeat="oWorkspace in m_oController.m_aoListOfProductWorkspaces">-->
+                                                                <!--<a role="menuitem" tabindex="-1" href="" ng-click="band.selectedWorkspace = oWorkspace">-->
+                                                                    <!--<i class="fa fa-folder-open" aria-hidden="true"></i>-->
+                                                                    <!--{{oWorkspace.workspaceName}} - -->
+                                                                    <!--<i class="fa fa-user" aria-hidden="true"></i>-->
+                                                                    <!--{{oWorkspace.ownerUserId}}-->
+                                                                <!--</a>-->
+                                                            <!--</li>-->
+
+                                                        <!--</ul>-->
+                                                    <!--</div>-->
+                                                <!--</div>-->
+
+                                                <!--&lt;!&ndash;<button class="my-button" ng-click="m_oController.publicAllSelectedBands()"> TEST </button>&ndash;&gt;-->
+
+                                            <!--</div>-->
+
+
+                                        <!--</div>-->
 
 
 

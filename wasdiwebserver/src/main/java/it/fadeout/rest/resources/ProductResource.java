@@ -170,7 +170,7 @@ public class ProductResource {
 	@GET
 	@Path("info")
 	@Produces({"application/xml", "application/json", "text/xml"})
-	ProductInfoViewModel GetInfo(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sProductName") String sProductName) {
+	public ProductInfoViewModel GetInfo(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sProductName") String sProductName) {
 		
 		Wasdi.DebugLog("ProductResource.GetInfo");
 

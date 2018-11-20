@@ -73,8 +73,10 @@ import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.business.SnapWorkflow;
 import wasdi.shared.business.User;
+import wasdi.shared.business.WpsProvider;
 import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.data.SnapWorkflowRepository;
+import wasdi.shared.data.WpsProvidersRepository;
 import wasdi.shared.parameters.ApplyOrbitParameter;
 import wasdi.shared.parameters.ApplyOrbitSetting;
 import wasdi.shared.parameters.CalibratorParameter;
@@ -90,6 +92,7 @@ import wasdi.shared.parameters.OperatorParameter;
 import wasdi.shared.parameters.RangeDopplerGeocodingParameter;
 import wasdi.shared.parameters.RangeDopplerGeocodingSetting;
 import wasdi.shared.utils.BandImageManager;
+import wasdi.shared.utils.CredentialPolicy;
 import wasdi.shared.utils.SerializationUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.BandImageViewModel;
@@ -101,12 +104,16 @@ import wasdi.shared.viewmodels.ProductMaskViewModel;
 import wasdi.shared.viewmodels.RangeMaskViewModel;
 import wasdi.shared.viewmodels.SnapOperatorParameterViewModel;
 import wasdi.shared.viewmodels.SnapWorkflowViewModel;
+import wasdi.shared.viewmodels.WpsViewModel;
 
 @Path("/processing")
 public class ProcessingResources {
 	
 	@Context
 	ServletConfig m_oServletConfig;
+	
+	//XXX replace by dependency injection
+	CredentialPolicy m_oCredentialPolicy = new CredentialPolicy();
 		
 //	@GET
 //	@Path("test")
@@ -1068,6 +1075,28 @@ public class ProcessingResources {
 
 		return Response.ok().build();
 	}
+	
+	@GET
+	@Path("/WPSlist")
+	@Produces({"application/xml", "application/json", "text/xml"})
+	public ArrayList<WpsViewModel> getWpsList( @HeaderParam("x-session-token") String sSessionId ){
+		Wasdi.DebugLog("ProcessingResource.getWpsList");
+		//TODO validate input
+		WpsProvidersRepository oWPSrepo = new WpsProvidersRepository();
+		ArrayList<WpsProvider> aoWPSProviders = oWPSrepo.getWpsList();
+		if(null!=aoWPSProviders) {
+			ArrayList<WpsViewModel> aoResult = new ArrayList<WpsViewModel>();
+			for (WpsProvider oWpsProvider : aoWPSProviders) {
+				if(null!=oWpsProvider) {
+					WpsViewModel oWpsViewModel = new WpsViewModel();
+					oWpsViewModel.setAddress(oWpsProvider.getAddress());
+					aoResult.add(oWpsViewModel);
+				}
+			}
+			return aoResult;
+		}
+		return null;
+	}
 
 	private boolean launchAssimilation(File midaTifFile, File humidityTifFile, File resultTifFile) {
 
@@ -1220,7 +1249,7 @@ public class ProcessingResources {
 			oParameter.setExchange(sWorkspaceId);
 			oParameter.setProcessObjId(oProcess.getProcessObjId());
 			if (oSetting != null) oParameter.setSettings(oSetting);	
-			
+			//TODO move it before inserting the new process into DB
 			SerializationUtils.serializeObjectToXML(sPath, oParameter);
 
 		} catch (IOException e) {
