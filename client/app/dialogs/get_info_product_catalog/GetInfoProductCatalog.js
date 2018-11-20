@@ -5,7 +5,7 @@
 
 var GetInfoProductCatalogController = (function() {
 
-    function GetInfoProductCatalogController($scope, oClose, oExtras,oWorkspaceService,oFileBufferService) {
+    function GetInfoProductCatalogController($scope, oClose, oExtras,oWorkspaceService,oFileBufferService,oTranslate,oMapService,oTimeout) {
         //MEMBERS
         this.m_oScope = $scope;
         this.m_oScope.m_oController = this;
@@ -15,11 +15,27 @@ var GetInfoProductCatalogController = (function() {
         this.m_oProduct = this.m_oExtras.product;
         this.m_oSelectedProduct = this.m_oExtras.selectedProduct;
         this.m_aoListOfProductWorkspaces = [];
+        this.m_sDonwloadFriendlyName = "";
+        this.m_sComputedFriendlyName = "";
+        this.m_sPublicFriendlyName = "";
+        this.m_sIngestionFriendlyName = "";
+        this.m_sSharedFriendlyName  = "";
+        this.m_oTranslate = oTranslate;
+        this.m_oMapService = oMapService;
+        this.m_oTimeout = oTimeout;
+        this.m_oMap = null;
+
+        var oController = this;
         $scope.close = function(result) {
+            oController.clearMap
             oClose(result, 300); // close, but give 500ms for bootstrap to animate
         };
+
+        // this.m_oMapService.initMap('getInfoProductCatalogMap');
+        // this.m_oMapService.initMap('test');
+        this.initMapWithDelay();
+        this.getTranslatedOperation();
         this.getWorkspaceListByProduct();
-        // this.checkProductInfo();
     };
 
     // GetInfoProductCatalogController.prototype.checkProductInfo = function()
@@ -156,12 +172,134 @@ var GetInfoProductCatalogController = (function() {
         return true;
     };
 
+
+    /**
+     *
+     * @param sOperationName
+     * @returns {string}
+     */
+    GetInfoProductCatalogController.prototype.getFriendlyOperationName = function(sOperationName)
+    {
+        if(utilsIsStrNullOrEmpty(sOperationName) === true)
+        {
+            return "";
+        }
+        sOperationName = sOperationName.toLowerCase();
+        var sReturnValue = "";
+        switch(sOperationName) {
+            case "download":
+                sReturnValue = this.m_sDonwloadFriendlyName;
+                // return "Downloaded products";
+                break;
+            case "computed":
+                sReturnValue = this.m_sComputedFriendlyName;
+                // return "Computed products";
+                break;
+            case "public":
+                sReturnValue = this.m_sPublicFriendlyName;
+                // return "Products saved in Wasdi";
+                break;
+            case "ingestion":
+                sReturnValue = this.m_sIngestionFriendlyName;
+                // return "Ingestion products";
+                break;
+            case "shared":
+                sReturnValue = this.m_sSharedFriendlyName;
+                // return "Shared products by users";
+                break;
+        }
+        return sReturnValue;
+    };
+
+    GetInfoProductCatalogController.prototype.getTranslatedOperation = function()
+    {
+        var oController = this;
+        //DOWNLOAD
+        this.m_oTranslate('CATALOG_OPERATION_DOWNLOAD').then(function(text)
+        {
+            oController.m_sDonwloadFriendlyName = text;
+        });
+        //COMPUTED
+        this.m_oTranslate('CATALOG_OPERATION_COMPUTED').then(function(text)
+        {
+            oController.m_sComputedFriendlyName = text;
+        });
+        //PUBLIC
+        this.m_oTranslate('CATALOG_OPERATION_PUBLIC').then(function(text)
+        {
+            oController.m_sPublicFriendlyName = text;
+        });
+        //INGESTION
+        this.m_oTranslate('CATALOG_OPERATION_INGESTION').then(function(text)
+        {
+            oController.m_sIngestionFriendlyName = text;
+        });
+        //SHARED
+        this.m_oTranslate('CATALOG_OPERATION_SHARED').then(function(text)
+        {
+            oController.m_sSharedFriendlyName  = text;
+        });
+    };
+
+
+    GetInfoProductCatalogController.prototype.initMapWithDelay = function(){
+        /*
+        * We init the map after the dialog is loaded
+        * */
+        var oController = this;
+        this.m_oTimeout( function(){
+            oController.m_oMapService.initTileLayer();
+            oController.m_oMap = oController.m_oMapService.initMap('getInfoProductCatalogMap');
+            oController.addRectangleInMap(oController.m_oMap);
+        }, 500 );
+    };
+
+    GetInfoProductCatalogController.prototype.addRectangleInMap = function(oMap)
+    {
+        var sBbox = this.m_oProduct.boundingBox;
+        var sColor = "#ff7800";
+        // var sReferenceName = "product_"+this.m_oProduct.fileName;
+
+        if(utilsIsObjectNullOrUndefined(oMap) === true)
+        {
+            return false;
+        }
+
+        if( (utilsIsObjectNullOrUndefined(sBbox) === false)&&(utilsIsStrNullOrEmpty(sBbox) === false) )
+        {
+
+            var aoBounds = this.m_oMapService.convertBboxInBoundariesArray(sBbox);
+            for(var iIndex = 0; iIndex < aoBounds.length; iIndex++ )
+            {
+                if(utilsIsObjectNullOrUndefined(aoBounds[iIndex])) return false;
+            }
+
+            //default color
+            if(utilsIsStrNullOrEmpty(sColor)) sColor="#ff7800";
+
+            // create an colored rectangle
+            // weight = line thickness
+            var oRectangle = L.polygon(aoBounds, {color: sColor, weight: 1}).addTo(oMap);
+
+            //Fly to BBox
+            oMap.flyToBounds(oRectangle.getBounds());;
+        }
+        else
+        {
+                return false;
+        }
+        return true;
+    };
+
     GetInfoProductCatalogController.$inject = [
         '$scope',
         'close',
         'extras',
         'WorkspaceService',
-        'FileBufferService'
+        'FileBufferService',
+        '$translate',
+        'MapService',
+        '$timeout'
         // 'GetParametersOperationService'
     ];
     return GetInfoProductCatalogController;

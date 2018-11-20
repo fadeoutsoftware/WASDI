@@ -31,9 +31,39 @@
           }
         }
 
-        .table-container{
-          @extend %table-container-css;
+        .panel
+        {
+          //.map
+          //{
+          //  width: auto;
+          //  height: 600px;
+          //}
+          .table-container
+          {
+            //@extend %table-container-css;
+            //table
+            //{
+            //  thead
+            //  {
+            //    th
+            //    {
+            //      background-color: #44536C;
+            //      color: white;
+            //    }
+            //  }
+            //}
+          }
+
         }
+        .map-container
+        {
+          .map
+          {
+            width: auto;
+            height: 300px;
+          }
+        }
+
       }
       //FOOTER
       .modal-footer

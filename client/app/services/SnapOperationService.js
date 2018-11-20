@@ -102,5 +102,9 @@ service('SnapOperationService', ['$http',  'ConstantsService', function ($http, 
     this.publishSabaResult = function (sFile, sWorkspaceId) {
         return this.m_oHttp.get(this.APIURL + '/processing/ddspublishsaba?file=' + sFile + "&workspaceId=" + sWorkspaceId);
     }
+
+    this.getWPSList = function () {
+        return this.m_oHttp.get(this.APIURL + '/processing/WPSlist');
+    }
 }]);
 

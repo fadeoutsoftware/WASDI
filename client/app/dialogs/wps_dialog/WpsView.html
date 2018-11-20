@@ -18,8 +18,11 @@
                     <div>
                         <select id="wps" ng-model="m_oController.m_sSelectedWps" ng-change="m_oController.onChangeWPS()"><!--ng-change="m_oController.onChangeWPS()"-->
                             <!--<option>Select a WPS</option>-->
-                            <option>http://178.22.66.96/geoserver/wps</option>
-                            <option>http://gpod.eo.esa.int/wps</option>
+                            <!--<option>http://178.22.66.96/geoserver/wps</option>-->
+                            <!--<option>http://gpod.eo.esa.int/wps</option>-->
+                            <option ng-repeat="wpsUrl in m_oController.m_asWPSListURL">
+                                {{wpsUrl}}
+                            </option>
                         </select>
                         <!--{{m_oController.m_sSelectedWps}}-->
                     </div>
