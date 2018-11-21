@@ -45,7 +45,7 @@ var CatalogController = (function() {
         this.m_bReverseOrder = false;
         this.m_bIsDownloadingProduct = false;
         this.m_sProductNameInDownloadingStatus = "";
-        this.m_oMapService.initMap('catalogMap');
+        this.m_oMapService.initWasdiMap('catalogMap');
         this.GetCategories();
         this.setDefaultData();
 
