@@ -32,23 +32,33 @@ import wasdi.shared.business.DownloadedFileCategory;
 import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.business.User;
+import wasdi.shared.business.UserSession;
 import wasdi.shared.business.Workspace;
 import wasdi.shared.data.CatalogRepository;
 import wasdi.shared.data.DownloadedFilesRepository;
 import wasdi.shared.data.MongoRepository;
 import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.data.ProductWorkspaceRepository;
+import wasdi.shared.data.SessionRepository;
 import wasdi.shared.data.WorkspaceRepository;
+import wasdi.shared.parameters.FtpTransferParameters;
+import wasdi.shared.parameters.FtpTransferParameters.FtpDirection;
 import wasdi.shared.parameters.IngestFileParameter;
+import wasdi.shared.utils.CredentialPolicy;
 import wasdi.shared.utils.SerializationUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.CatalogViewModel;
+import wasdi.shared.viewmodels.FtpTransferViewModel;
 import wasdi.shared.viewmodels.PrimitiveResult;
 import wasdi.shared.viewmodels.ProductViewModel;
 
 @Path("/catalog")
 public class CatalogResources {
 
+	//XXX replace with dependency injection
+	//MAYBE two different policy: one for google one for username/password
+	CredentialPolicy m_oCredentialPolicy = new CredentialPolicy();
+	
 	@Context
 	ServletConfig m_oServletConfig;
 
@@ -333,7 +343,6 @@ public class CatalogResources {
 		
 	}
 	
-	
 	@GET
 	@Path("/upload/ingestinws")
 	@Produces({"application/json", "text/xml"})
@@ -443,6 +452,90 @@ public class CatalogResources {
 		
 		oResult.setBoolValue(false);
 		oResult.setIntValue(500);
+		return oResult;
+	}
+	
+	@PUT
+	@Path("/upload/ftp")
+	@Produces({"application/json", "text/xml"})
+	//TODO change return type
+	public PrimitiveResult ftpTransferFile(@HeaderParam("x-session-token") String sSessionId, FtpTransferViewModel oFtpTransferVM) {
+		Wasdi.DebugLog("CatalogResource.ftpTransferFile");
+
+		//input validation
+		if(null == sSessionId || null == oFtpTransferVM) {
+			//TODO check appropriateness
+			PrimitiveResult oResult = PrimitiveResult.getInvalidInstance();
+			oResult.setStringValue("Null arguments");
+			return oResult;
+		}
+		if(!m_oCredentialPolicy.validSessionId(sSessionId)) {
+			PrimitiveResult oResult = PrimitiveResult.getInvalidInstance();
+			oResult.setStringValue("sSessionId badly formatted");
+			return oResult;
+		}
+		SessionRepository oSessionRep = new SessionRepository();
+		UserSession oSession = oSessionRep.GetSession(sSessionId);
+		if(null==oSession) {
+			PrimitiveResult oResult = PrimitiveResult.getInvalidInstance();
+			oResult.setStringValue("Invalid Session");
+			return oResult;
+		}
+		String sUserId = oSession.getUserId();
+		if(null==sUserId) {
+			PrimitiveResult oResult = PrimitiveResult.getInvalidInstance();
+			oResult.setStringValue("Null User");
+			return oResult;
+		}
+		
+		
+		try {
+			Wasdi.DebugLog("CatalogResource.ftpTransferFile: prepare parameters");
+			FtpTransferParameters oParams = new FtpTransferParameters();
+			oParams.setM_eDirection(FtpDirection.UPLOAD);
+			oParams.setM_sFtpServer(oFtpTransferVM.getServer());
+			oParams.setM_iPort(oFtpTransferVM.getPort());
+			oParams.setM_sUsername(oFtpTransferVM.getUser());
+			oParams.setM_sPassword(oFtpTransferVM.getPassword());
+			oParams.setM_sRemotePath(oFtpTransferVM.getDestinationAbsolutePath());
+			oParams.setM_sRemoteFileName(oFtpTransferVM.getFileName());
+			oParams.setM_sLocalFileName(oFtpTransferVM.getFileName());
+			DownloadedFilesRepository oRepo = new DownloadedFilesRepository();
+			oParams.setM_sLocalPath(oRepo.GetDownloadedFile(oParams.getM_sLocalFileName()).getFilePath());
+	
+			Wasdi.DebugLog("CatalogResource.ftpTransferFile: prepare process");
+			
+			
+			ProcessWorkspace oProcess = new ProcessWorkspace();
+			oProcess.setOperationDate(Wasdi.GetFormatDate(new Date()));
+			oProcess.setOperationType(LauncherOperations.UPLOADVIAFTP.name());
+			//oProcess.setProductName(sFileUrl);
+			//oProcess.setWorkspaceId(sWorkspaceId);
+			oProcess.setUserId(sUserId);
+			oProcess.setProcessObjId(Utils.GetRandomName());
+			oProcess.setStatus(ProcessStatus.CREATED.name());
+			oParams.setProcessObjId(oProcess.getProcessObjId());
+			
+			String sPath = m_oServletConfig.getInitParameter("SerializationPath") + oProcess.getProcessObjId();
+			SerializationUtils.serializeObjectToXML(sPath, oParams);
+			
+			ProcessWorkspaceRepository oRepository = new ProcessWorkspaceRepository();
+			
+			
+			//TODO get file size (length) and other properties by reading from DB
+		} catch (Exception e) {
+			e.printStackTrace();
+			PrimitiveResult oRes = PrimitiveResult.getInvalidInstance();
+			oRes.setStringValue(e.getMessage());
+			return oRes;
+		}
+		
+		
+		
+
+		
+		PrimitiveResult oResult = new PrimitiveResult();
+		oResult.setBoolValue(true);
 		return oResult;
 	}
 	
