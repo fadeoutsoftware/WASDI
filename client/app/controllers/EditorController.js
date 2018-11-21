@@ -397,7 +397,7 @@ var EditorController = (function () {
             this.m_oMapService.clearMap();
             this.m_oGlobeService.clearGlobe();
             this.m_oGlobeService.initGlobe('cesiumContainer');
-            this.m_oMapService.initMap('wasdiMap2');
+            this.m_oMapService.initWasdiMap('wasdiMap2');
 
             // Due to the problems of Leaflet initialization, let's do the subsequent steps a little bit later
             setTimeout(function () {
@@ -455,7 +455,7 @@ var EditorController = (function () {
             //We are going in 2D MAP
             this.m_oMapService.clearMap();
             this.m_oGlobeService.clearGlobe();
-            this.m_oMapService.initMap('wasdiMap');
+            this.m_oMapService.initWasdiMap('wasdiMap');
             this.m_oGlobeService.initGlobe('cesiumContainer2');
 
             // Due to the problems of Leaflet initialization, let's do the subsequent steps a little bit later

@@ -114,6 +114,14 @@ service('MapService', ['$http','$rootScope', 'ConstantsService', function ($http
      */
     this.m_oActiveBaseLayer = this.m_oOSMBasic;
 
+    this.initWasdiMap = function(sMapDiv)
+    {
+        if(this.m_oWasdiMap != null)
+        {
+            this.initTileLayer();
+        }
+        this.m_oWasdiMap = this.initMap(sMapDiv);
+    };
     /**
      * Init the Map
      * @param sMapDiv
@@ -121,10 +129,10 @@ service('MapService', ['$http','$rootScope', 'ConstantsService', function ($http
     this.initMap = function(sMapDiv) {
 
         //the map
-        if(this.m_oWasdiMap != null)
-        {
-            this.initTileLayer();
-        }
+        // if(this.m_oWasdiMap != null)
+        // {
+        //     this.initTileLayer();
+        // }
 
         /*  it need disabled keyboard, there'is a bug :
         *   https://github.com/Leaflet/Leaflet/issues/1228
@@ -134,7 +142,7 @@ service('MapService', ['$http','$rootScope', 'ConstantsService', function ($http
         *   return L.DomEvent.off(this._container, "mousedown", this.keyboard._onMouseDown);
         *   });
         */
-        this.m_oWasdiMap = L.map(sMapDiv, {
+        var oMap = L.map(sMapDiv, {
             zoomControl: false,
             layers: [this.m_oOSMBasic],
             keyboard: false
@@ -142,33 +150,35 @@ service('MapService', ['$http','$rootScope', 'ConstantsService', function ($http
         });
 
         // coordinates in map find this plugin in lib folder
-        L.control.mousePosition().addTo(this.m_oWasdiMap);
+        L.control.mousePosition().addTo(oMap);
 
         //scale control
         L.control.scale({
             position: "bottomright",
             imperial: false
-        }).addTo(this.m_oWasdiMap);
+        }).addTo(oMap);
 
         //layers control
-        this.m_oLayersControl.addTo(this.m_oWasdiMap);
+        this.m_oLayersControl.addTo(oMap);
 
         // center map
         var southWest = L.latLng(0, 0),
             northEast = L.latLng(0, 0),
             oBoundaries = L.latLngBounds(southWest, northEast);
 
-        this.m_oWasdiMap.fitBounds(oBoundaries);
-        this.m_oWasdiMap.setZoom(3);
+        oMap.fitBounds(oBoundaries);
+        oMap.setZoom(3);
 
         var oActiveBaseLayer = this.m_oActiveBaseLayer;
 
         //add event on base change
-        this.m_oWasdiMap.on('baselayerchange', function(e){
+        oMap.on('baselayerchange', function(e){
             // console.log(e);
             e.layer.bringToBack();
             oActiveBaseLayer = e;
         });
+
+        return oMap;
 
     };
 
@@ -190,7 +200,7 @@ service('MapService', ['$http','$rootScope', 'ConstantsService', function ($http
         var oController=this;
 
         //Init standard map
-        this.initMap(sMapDiv);
+        this.initWasdiMap(sMapDiv);
 
         //LEAFLET.DRAW LIB
         //add draw.search (opensearch)
@@ -248,7 +258,7 @@ service('MapService', ['$http','$rootScope', 'ConstantsService', function ($http
     this.initMapEditor = function(sMapDiv)
     {
         if(utilsIsObjectNullOrUndefined(sMapDiv)) return false;
-        this.initMap(sMapDiv);
+        this.initWasdiMap(sMapDiv);
 
         return true;
     };
