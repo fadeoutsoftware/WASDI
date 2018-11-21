@@ -59,7 +59,7 @@ public class FtpClient {
         m_oFtp.disconnect();
     }
     
-    //TODO return directory tree with permissions
+    //XXX return directory tree with permissions
     
     
     public Collection<String> listDirs() throws IOException {

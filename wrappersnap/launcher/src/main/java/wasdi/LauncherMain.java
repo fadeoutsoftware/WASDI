@@ -581,6 +581,7 @@ public class LauncherMain {
 			String fullLocalPath = oFtpTransferParameters.getFullLocalPath();
 			File oFile = new File(fullLocalPath);
 			if(oFile.exists()) {
+				//TODO setFileSizeToProcess
 				if(	Utils.isServerNamePlausible( oFtpTransferParameters.getM_sFtpServer()) &&
 					Utils.isPortNumberPlausible(oFtpTransferParameters.getM_iPort()) &&
 					!Utils.isNullOrEmpty(oFtpTransferParameters.getM_sUsername()) &&
@@ -590,6 +591,8 @@ public class LauncherMain {
 							oFtpTransferParameters.getM_sUsername(),
 							oFtpTransferParameters.getM_sPassword() );
 					if(oFtpClient.open() ) {
+						//TODO treat the remote password as absolute, not relative.
+						//i.e. extract the relative path and pass it to the FTP client
 						if(oFtpClient.putFileToPath(oFile, oFtpTransferParameters.getM_sRemotePath() ) ) {
 							//String sRemotePath = oFtpTransferParameters.getM_sRemotePath();
 							String sRemotePath = ".";

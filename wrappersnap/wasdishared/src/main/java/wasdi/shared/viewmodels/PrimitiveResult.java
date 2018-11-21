@@ -21,7 +21,21 @@ public class PrimitiveResult {
     	s_oInvalid.BoolValue = false;
     }
     
-    public static PrimitiveResult getInvalid() {
+    public PrimitiveResult(PrimitiveResult oPres) {
+    	this.IntValue = oPres.IntValue;
+    	this.StringValue = oPres.StringValue;
+    	this.DoubleValue = oPres.DoubleValue;
+    	this.BoolValue = oPres.BoolValue;
+    }
+    
+    public static PrimitiveResult getInvalidInstance() {
+    	return new PrimitiveResult(getInvalid());
+    }
+    
+    public PrimitiveResult() {
+	}
+
+	public static PrimitiveResult getInvalid() {
     	return s_oInvalid;
     }
 

@@ -15,7 +15,8 @@ import wasdi.shared.utils.Utils;
  *
  */
 public class FtpTransferParameters extends BaseParameter {
-	public static enum FtpDirection{Upload, Download};
+	//XXX two different classes for the two directions
+	public static enum FtpDirection{UPLOAD, DOWNLOAD};
 	FtpDirection m_eDirection;
 	
 	//FTP server-side info

@@ -45,9 +45,9 @@ import com.google.api.client.json.jackson2.JacksonFactory;
 @Path("/auth")
 public class AuthResource {
 	
-	//MAYBE replace with dependency injection
+	//XXX replace with dependency injection
 	PasswordAuthentication m_oPasswordAuthentication = new PasswordAuthentication();
-	//MAYBE replace with dependency injection
+	//XXX replace with dependency injection
 	//MAYBE two different policy: one for google one for username/password
 	CredentialPolicy m_oCredentialPolicy = new CredentialPolicy();
 	//MAYBE separate
