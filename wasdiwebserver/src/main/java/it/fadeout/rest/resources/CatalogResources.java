@@ -500,12 +500,11 @@ public class CatalogResources {
 			oParams.setM_sRemotePath(oFtpTransferVM.getDestinationAbsolutePath());
 			oParams.setM_sRemoteFileName(oFtpTransferVM.getFileName());
 			oParams.setM_sLocalFileName(oFtpTransferVM.getFileName());
-			DownloadedFilesRepository oRepo = new DownloadedFilesRepository();
-			oParams.setM_sLocalPath(oRepo.GetDownloadedFile(oParams.getM_sLocalFileName()).getFilePath());
+			//TODO replace with new kind of repository: FtpUploadRepository, see TODO below...
+			DownloadedFilesRepository oDownRepo = new DownloadedFilesRepository();
+			oParams.setM_sLocalPath(oDownRepo.GetDownloadedFile(oParams.getM_sLocalFileName()).getFilePath());
 	
 			Wasdi.DebugLog("CatalogResource.ftpTransferFile: prepare process");
-			
-			
 			ProcessWorkspace oProcess = new ProcessWorkspace();
 			oProcess.setOperationDate(Wasdi.GetFormatDate(new Date()));
 			oProcess.setOperationType(LauncherOperations.UPLOADVIAFTP.name());
@@ -516,10 +515,13 @@ public class CatalogResources {
 			oProcess.setStatus(ProcessStatus.CREATED.name());
 			oParams.setProcessObjId(oProcess.getProcessObjId());
 			
+			Wasdi.DebugLog("CatalogResource.ftpTransferFile: serialize parameters");
 			String sPath = m_oServletConfig.getInitParameter("SerializationPath") + oProcess.getProcessObjId();
 			SerializationUtils.serializeObjectToXML(sPath, oParams);
 			
+			//TODO replace with new kind of repository: FtpUploadRepository
 			ProcessWorkspaceRepository oRepository = new ProcessWorkspaceRepository();
+			oRepository.InsertProcessWorkspace(oProcess);
 			
 			
 			//TODO get file size (length) and other properties by reading from DB
