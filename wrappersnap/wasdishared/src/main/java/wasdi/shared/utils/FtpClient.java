@@ -58,16 +58,38 @@ public class FtpClient {
     public void close() throws IOException {
         m_oFtp.disconnect();
     }
+    
+    //TODO return directory tree with permissions
+    
+    
+    public Collection<String> listDirs() throws IOException {
+		return listDirs(pwd());
+	}
+    
+    public Collection<String> listDirs(String sPath) throws IOException {
+    	FTPFile[] aoFiles = m_oFtp.listDirectories(sPath);
+
+        return Arrays.stream(aoFiles)
+                .map(FTPFile::getName)
+                .collect(Collectors.toList());
+	}
+
+	public Collection<String> listFiles() throws IOException {
+		return listFiles(pwd());
+	}
 
     public Collection<String> listFiles(String sPath) throws IOException {
-    	String sWD = pwd();
         FTPFile[] aoFiles = m_oFtp.listFiles(sPath);
 
         return Arrays.stream(aoFiles)
                 .map(FTPFile::getName)
                 .collect(Collectors.toList());
     }
-
+    
+    public Boolean putFileOnServer(File oFile) throws IOException {
+		return putFileToPath(oFile, pwd() );
+	}
+    
     public Boolean putFileToPath(File oFile, String sRemoteRelativePath) throws IOException {
     	if(null == oFile || null == sRemoteRelativePath) {
     		throw new IllegalArgumentException();
@@ -90,6 +112,7 @@ public class FtpClient {
     	}
         if(bRes) {
         	sPathName = oFile.getName();
+        	//m_oFtp.storeFile
         	bRes = m_oFtp.storeFile(sPathName, new FileInputStream(oFile) );
         }
         return bRes;
