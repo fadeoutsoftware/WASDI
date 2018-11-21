@@ -205,3 +205,4 @@ wasdiApp.controller("WappsController", WappsController);
 wasdiApp.controller("RasorWappController", RasorWappController);
 wasdiApp.controller("OperaWappController", OperaWappController);
 wasdiApp.controller("EditUserController", EditUserController);
+wasdiApp.controller("FTPController", FTPController);

@@ -64,7 +64,7 @@
 @import "../dialogs/rasor/rasorwapp";
 @import "../dialogs/opera/operawapp";
 @import "../dialogs/edit_user/edit_user";
-
+@import "../dialogs/ftp_service/ftp_service";
 
 //COMPONENTS
 @import "components/range_slider";
@@ -143,7 +143,7 @@ h4
 
 //INPUT TEXT
 .my-input-text{
-  input[type=text]{
+  input[type=text],[type=password]{
     width: 100%;
     padding: 12px 20px;
     margin: 8px 0;

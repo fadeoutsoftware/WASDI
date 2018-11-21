@@ -502,6 +502,30 @@ var CatalogController = (function() {
     };
 
     /**
+     * Get info about a product
+     * @param oProduct
+     */
+    CatalogController.prototype.openFTPService = function(oProduct)
+    {
+        var oController=this;
+        this.m_oModalService.showModal({
+            templateUrl: "dialogs/ftp_service/FTPView.html",
+            controller: "FTPController",
+            inputs: {
+                extras: {
+                    product:oProduct
+                }
+            }
+        }).then(function (modal) {
+            modal.element.modal();
+            modal.close.then(function (result) {
+                oController.m_oScope.Result = result;
+            });
+        });
+
+    };
+
+    /**
      * Handle change category event
      * @param oCategory
      */
