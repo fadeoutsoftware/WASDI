@@ -12,7 +12,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   <!---------------- GOOGLE LOGIN ---------------->
-  <!--<meta name="google-signin-client_id" content="882119222530-2ur18or5tht7oln8tlvv0bvnpu6lnhrk.apps.googleusercontent.com">-->
+  <meta name="google-signin-client_id" content="882119222530-0e4bq80lvftjh3iqehb7mcit5mgh1bu7.apps.googleusercontent.com">
 
   <!-- Fonts -->
   <link rel="stylesheet" href="fonts/astronaut/stylesheet.css">
@@ -77,7 +77,26 @@
 
     <div ui-view>  </div>
 
-
+  <!--<div id="my-signin2"></div>-->
+  <!--<script>-->
+      <!--function onSuccess(googleUser) {-->
+          <!--console.log('Logged in as: ' + googleUser.getBasicProfile().getName());-->
+      <!--}-->
+      <!--function onFailure(error) {-->
+          <!--console.log(error);-->
+      <!--}-->
+      <!--function renderButton() {-->
+          <!--gapi.signin2.render('my-signin2', {-->
+              <!--'scope': 'profile email',-->
+              <!--'width': 240,-->
+              <!--'height': 50,-->
+              <!--'longtitle': true,-->
+              <!--'theme': 'dark',-->
+              <!--'onsuccess': onSuccess,-->
+              <!--'onfailure': onFailure-->
+          <!--});-->
+      <!--}-->
+  <!--</script>-->
 
   <!-- In production use:
   <script src="//ajax.googleapis.com/ajax/libs/angularjs/x.x.x/angular.min.js"></script>
@@ -319,6 +338,9 @@
   <script src="lib/wps-js/js/wps-js/wps-js.0.1.1.js"></script>
   <link type="text/css" rel="stylesheet" href="lib/wps-js/css/wps-js.css">
 
+  <!---------------- GOOGLE LOGIN ---------------->
+  <!--<script src="https://apis.google.com/js/platform.js?onload=renderButton" async defer></script>-->
+
   <!-- FACEBOOK LOGIN -->
    <!--<script src="http://connect.facebook.net/it_IT/sdk.js"></script>-->
   <!--<script>-->
@@ -343,8 +365,6 @@
 
   <!--</script>-->
 
-  <!---------------- GOOGLE LOGIN ---------------->
-  <!--<script src="https://apis.google.com/js/platform.js" async defer></script>-->
 
 </body>
 </html>

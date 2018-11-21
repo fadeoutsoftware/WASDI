@@ -4,7 +4,7 @@
 
 var HomeController = (function() {
     function HomeController($scope, $location, oConstantsService, oAuthService, oRabbitStompService,oState,oAuthServiceFacebook,
-                            oAuthServiceGoogle) {
+                            oAuthServiceGoogle,oWindow) {
         this.m_oScope = $scope;
         this.m_oLocation  = $location;
         this.m_oConstantsService = oConstantsService;
@@ -45,15 +45,50 @@ var HomeController = (function() {
         {
             this.m_bVisualizeLink = true;
         }
-        var oController = this;
-        $scope.$on('event:google-plus-signin-success', function (event,authResult) {
 
-            // Send login to server
-            if(utilsIsObjectNullOrUndefined(authResult) === false)
+        // var oController = this;
+        // $scope.$on('event:google-plus-signin-success', function (event,authResult) {
+        //
+        //     // Send login to server
+        //     if(utilsIsObjectNullOrUndefined(authResult) === false)
+        //     {
+        //         var oIdToken = {
+        //             userId: authResult.client_id,
+        //             googleIdToken : authResult.id_token
+        //         }
+        //         if(utilsIsStrNullOrEmpty(oIdToken.googleIdToken) === false && utilsIsStrNullOrEmpty(oIdToken.userId) === false )
+        //         {
+        //             oController.m_oAuthServiceGoogle.loginGoogleUser(oIdToken).success(
+        //                 function (data,status)
+        //                 {
+        //                     oController.callbackLogin(data, status,oController)
+        //                 }).error(function (data,status) {
+        //                 //alert('error');
+        //                 utilsVexDialogAlertTop("GURU MEDITATION<br>GOOGLE LOGIN ERROR");
+        //
+        //             });
+        //         }
+        //
+        //     }
+        //
+        // });
+        // $scope.$on('event:google-plus-signin-failure', function (event,authResult) {
+        //     // Auth failure or signout detected
+        //     console.log("event:google-plus-signin-failure");
+        // });
+
+        var oController = this;
+        // on success google login event
+        this.onSuccess = function (googleUser) {
+            //882119222530-0e4bq80lvftjh3iqehb7mcit5mgh1bu7.apps.googleusercontent.com
+
+            // console.log('Logged in as: ' + googleUser.getBasicProfile().getName());
+
+            if(utilsIsObjectNullOrUndefined(googleUser) === false)
             {
                 var oIdToken = {
-                    userId: authResult.client_id,
-                    googleIdToken : authResult.id_token
+                    userId: oController.m_oConstantsService.getClientIdGoogle(),
+                    googleIdToken : googleUser.Zi.id_token
                 }
                 if(utilsIsStrNullOrEmpty(oIdToken.googleIdToken) === false && utilsIsStrNullOrEmpty(oIdToken.userId) === false )
                 {
@@ -69,13 +104,26 @@ var HomeController = (function() {
                 }
 
             }
+        };
+        // on failure google login event
+        this.onFailure = function (error) {
+            console.log("Login failure");
+        };
 
-        });
-        $scope.$on('event:google-plus-signin-failure', function (event,authResult) {
-            // Auth failure or signout detected
-            console.log("event:google-plus-signin-failure");
-        });
+        //Render google login button after the google api are loaded
+        oWindow.renderButton = function () {
+            gapi.signin2.render('my-signin2', {
+                'scope': 'profile email',
+                'width': 267,
+                'height': 40,
+                'longtitle': true,
+                'theme': 'dark',
+                'onsuccess': oController.onSuccess,
+                'onfailure': oController.onFailure
+            });
+        };
     }
+
 
     HomeController.prototype.changeVisibilityLoginRegister = function(sStatus){
 
@@ -289,7 +337,8 @@ var HomeController = (function() {
         'RabbitStompService',
         '$state',
         'AuthServiceFacebook',
-        'AuthServiceGoogle'
+        'AuthServiceGoogle',
+        '$window'
     ];
 
     return HomeController;
