@@ -77,8 +77,33 @@
 
                             <div class="row time-container">
                                 <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
-                                    <!---------------------- TIME PICKER END -------------------->
+                                    <!------------------------- TIME PICKER START -------------------->
                                     FROM:
+                                    <div class=" time-picker-container ">
+                                        <div class="input-group my-input-text"
+                                             moment-picker="m_oController.m_oOrbitSearch.acquisitionStartTime"
+                                             format="YYYY-MM-DD HH"
+                                             today="true">
+
+                                            <input class="form-control"
+                                                   placeholder="Select acquisition start time"
+                                                   ng-model="m_oController.m_oOrbitSearch.acquisitionStartTime"
+                                                   ng-model-options="{ updateOn: 'blur' }">
+
+                                            <span class="input-group-addon">
+                                                <i class="fa fa-calendar"></i>
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <!--<div class="description">-->
+                                    <!--<i class="fa fa-calendar" aria-hidden="true"></i>-->
+                                    <!--Acquisition Start Time:-->
+                                    <!--</div>-->
+                                </div>
+                                <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+                                    <!---------------------- TIME PICKER END -------------------->
+                                    TO:
                                     <div class=" time-picker-container">
                                         <div class="input-group my-input-text"
                                              moment-picker="m_oController.m_oOrbitSearch.acquisitionEndTime"
@@ -102,31 +127,7 @@
                                         <!--Acquisition End Time:-->
                                     <!--</div>-->
                                 </div>
-                                <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
-                                    <!------------------------- TIME PICKER START -------------------->
-                                    TO:
-                                    <div class=" time-picker-container ">
-                                        <div class="input-group my-input-text"
-                                             moment-picker="m_oController.m_oOrbitSearch.acquisitionStartTime"
-                                             format="YYYY-MM-DD HH"
-                                             today="true">
 
-                                            <input class="form-control"
-                                                   placeholder="Select acquisition start time"
-                                                   ng-model="m_oController.m_oOrbitSearch.acquisitionStartTime"
-                                                   ng-model-options="{ updateOn: 'blur' }">
-
-                                            <span class="input-group-addon">
-                                                <i class="fa fa-calendar"></i>
-                                            </span>
-                                        </div>
-                                    </div>
-
-                                    <!--<div class="description">-->
-                                        <!--<i class="fa fa-calendar" aria-hidden="true"></i>-->
-                                        <!--Acquisition Start Time:-->
-                                    <!--</div>-->
-                                </div>
                             </div>
 
                             <img src="assets/icons/Satellite.svg" alt="Satellite" height="30" width="30">{{"SEARCH_TITLE_CHECK_BOX_SATELLITE"|translate}}
