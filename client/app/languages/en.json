@@ -62,6 +62,7 @@
     "WORKSPACES_ADD_NEW_WORKSPSACE":"You still don't have any Workspace: Create your first ",
     "WORKSPACES_LIST_OF_WORKFLOWS_TITLE":"List of Workflows",
 
+
     "EDITOR_TOOLTIP_SWITCH_3D_2D":"Switch 3D globe and 2D map",
     "EDITOR_TOOLTIP_HOME_2D":"Center of map",
     "EDITOR_TOOLTIP_SYNCHRONIZE_MAP_3D":"Synchronize this globe to the 2D Navigation View",
@@ -137,6 +138,11 @@
     "CATALOG_TABLE_TH_FILE_ADD":"Add",
     "CATALOG_TABLE_TH_FILE_DOWNLOAD":"Download",
     "CATALOG_TABLE_TH_FILE_FTP":"Ftp",
+
+    "SEARCH_ORBIT_FILTER_PLACEHOLDER":"Filter",
+    "SEARCH_ORBIT_TITLE_HEAD_ORBIT_TABLE_SATELLITE": "Satellite",
+    "SEARCH_TITLE_HEAD_ORBIT_TABLE_ACQUISITION_START": "Acquisition Start",
+    "SEARCH_TITLE_HEAD_ORBIT_TABLE_ACQUISITION_END": "Acquisition End",
 
     "SEARCH_TITLE_CHECK_BOX_SENSOR_TYPE":"Sensor Type :",
     "SEARCH_TITLE_CHECK_BOX_SENSOR_RESOLUTION":"Sensor Resolution :",
