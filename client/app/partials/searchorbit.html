@@ -169,6 +169,15 @@
                         <div class="loadIcon" ng-show="m_oController.m_bIsVisibleLoadingIcon">
                             <invader></invader>
                         </div>
+
+                        <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12" ng-show = "m_oController.thereAreOrbits() && (m_oController.m_bIsVisibleLoadingIcon === false)" ><!--ng-show="m_oController.m_bIsLoadedTable"-->
+                            <div class="row">
+                                <div class="my-input-text">
+                                    <input type="text" ng-model="sFilterTable" placeholder="{{'SEARCH_ORBIT_FILTER_PLACEHOLDER'|translate}}" >
+                                </div>
+                            </div>
+                        </div>
+
                         <!----------------------------------- RESULTS --------------------------------------->
                         <div class="row col-lg-12 col-md-12 col-sm-12 col-xs-12 table-container" ng-show = "m_oController.thereAreOrbits() && (m_oController.m_bIsVisibleLoadingIcon === false)">
                             <table class="table table-hover table-search-orbit my-table">
@@ -176,32 +185,21 @@
                                 <tr>
                                     <th><!--class="loadIcon" ng-class="{'disabled-cursor-hover':m_oController.m_bisLoadingAllOrbitInMap }"-->
                                         <input class="my-checkbox" type="checkbox" ng-model="m_oController.m_bMasterCheck" ng-click="m_oController.showAllSwath(m_oController.m_bMasterCheck)">
-
-                                        <!--<i class="fa fa-square-o" aria-hidden="true"-->
-                                           <!--ng-click="m_oController.m_bMasterCheck = !m_oController.m_bMasterCheck;m_oController.showAllSwath(m_oController.m_bMasterCheck)"-->
-                                           <!--ng-checked="m_oController.m_bMasterCheck" ng-hide="m_oController.m_bMasterCheck || (m_oController.m_bisLoadingAllOrbitInMap === true)"></i>-->
-                                        <!--<i class="fa fa-check-square-o" aria-hidden="true"-->
-                                           <!--ng-click="m_oController.m_bMasterCheck = !m_oController.m_bMasterCheck;m_oController.showAllSwath(m_oController.m_bMasterCheck)"-->
-                                           <!--ng-checked="m_oController.m_bMasterCheck" ng-show="m_oController.m_bMasterCheck && (m_oController.m_bisLoadingAllOrbitInMap === false)"></i>-->
-
-                                        <!--TODO REMOVE IT -->
-                                        <!--<div class="loadIcon" ng-show="m_oController.m_bisLoadingAllOrbitInMap">-->
-                                        <!---->
-                                        <!--</div>-->
-                                        <!--TODO IT -->
-                                        <!--<div class="loadIcon">-->
-                                        <!--<smallinvaderfixed ></smallinvaderfixed>-->
-                                        <!--</div>-->
-
                                     </th>
-                                    <th>
-                                        {{"SEARCH_TITLE_HEAD_ORBIT_TABLE_SATELLITE"|translate}}
+                                    <th ng-click="m_oController.m_sOrderBy = 'Satellite'; m_oController.m_bReverseOrder=!m_oController.m_bReverseOrder">
+                                        {{"SEARCH_ORBIT_TITLE_HEAD_ORBIT_TABLE_SATELLITE"|translate}}
+                                        <i class="fa fa-sort-desc" aria-hidden="true" ng-show="(m_oController.m_sOrderBy === 'Satellite') && (m_oController.m_bReverseOrder === true)"></i>
+                                        <i class="fa fa-sort-asc" aria-hidden="true" ng-show="(m_oController.m_sOrderBy === 'Satellite') && (m_oController.m_bReverseOrder === false)"></i>
                                     </th>
-                                    <th>
+                                    <th ng-click="m_oController.m_sOrderBy = 'AcqStart'; m_oController.m_bReverseOrder=!m_oController.m_bReverseOrder">
                                         {{"SEARCH_TITLE_HEAD_ORBIT_TABLE_ACQUISITION_START"|translate}}
+                                        <i class="fa fa-sort-desc" aria-hidden="true" ng-show="(m_oController.m_sOrderBy === 'AcqStart') && (m_oController.m_bReverseOrder === true)"></i>
+                                        <i class="fa fa-sort-asc" aria-hidden="true" ng-show="(m_oController.m_sOrderBy === 'AcqStart') && (m_oController.m_bReverseOrder === false)"></i>
                                     </th>
-                                    <th>
+                                    <th ng-click="m_oController.m_sOrderBy = 'AcqEnd'; m_oController.m_bReverseOrder=!m_oController.m_bReverseOrder">
                                         {{"SEARCH_TITLE_HEAD_ORBIT_TABLE_ACQUISITION_END"|translate}}
+                                        <i class="fa fa-sort-desc" aria-hidden="true" ng-show="(m_oController.m_sOrderBy === 'AcqEnd') && (m_oController.m_bReverseOrder === true)"></i>
+                                        <i class="fa fa-sort-asc" aria-hidden="true" ng-show="(m_oController.m_sOrderBy === 'AcqEnd') && (m_oController.m_bReverseOrder === false)"></i>
                                     </th>
                                     <th>
                                         <!--Buttons-->
@@ -209,10 +207,11 @@
                                 </tr>
                                 </thead>
                                 <tbody>
-                                <tr ng-repeat="orbit in m_oController.getOrbits()" ><!--ng-mouseover="m_oController.mouseOverOrbitInTable(orbit)"
+                                <tr ng-repeat="orbit in m_oController.getOrbits() | orderBy:m_oController.m_sOrderBy:m_oController.m_bReverseOrder | filter:sFilterTable" ><!--ng-mouseover="m_oController.mouseOverOrbitInTable(orbit)"
                             ng-mouseleave="m_oController.mouseLeaveOrbitInTable(orbit)" ng-click="m_oController.showSwath(orbit)"-->
                                     <td >
-                                        <input type="checkbox" ng-checked="m_oController.m_bMasterCheck" ng-click="m_oController.showSwath(orbit)">
+                                        <input type="checkbox" ng-checked="m_oController.m_bMasterCheck" ng-click="m_oController.showSwath(orbit)"
+                                                placeholder="{{'SEARCH_ORBIT_FILTER_PLACEHOLDER'|translate}}">
                                         <!--TODO REMOVE IT -->
                                         <!--<i class="fa fa-square-o" aria-hidden="true" ng-click="orbit.isSelected = !orbit.isSelected;m_oController.showSwath(orbit)"-->
                                            <!--ng-checked="orbit.isSelected" ng-hide="orbit.isSelected || (m_oController.m_bisLoadingAllOrbitInMap === true)"></i>-->

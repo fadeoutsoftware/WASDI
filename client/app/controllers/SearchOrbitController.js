@@ -35,8 +35,10 @@ var SearchOrbitController = (function() {
         this.m_oUser = this.m_oConstantsService.getUser();
         this.m_bIsVisibleLoadingIcon = false;
 
-        //this.m_oProcessesLaunchedService.updateProcessesBar();
-        //if there isn't workspace
+        //order the table
+        this.m_sOrderBy = "Satellite";
+        this.m_bReverseOrder = false;
+
         if(utilsIsObjectNullOrUndefined( this.m_oActiveWorkspace) && utilsIsStrNullOrEmpty( this.m_oActiveWorkspace))
         {
             //if this.m_oState.params.workSpace in empty null or undefined create new workspace

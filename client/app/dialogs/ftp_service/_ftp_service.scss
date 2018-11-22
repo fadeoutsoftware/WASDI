@@ -1,0 +1,40 @@
+.ftp-modal
+{
+  .modal-dialog
+  {
+    width:50%;
+    .modal-content
+    {
+      .modal-header
+      {
+        color:$wasdi-white;
+        background-color: $wasdi-blue-logo;
+        .close
+        {
+          color: $wasdi-white;
+          opacity: 1;
+        }
+      }
+
+      .modal-body
+      {
+        .form-signin{
+          .my-input-text{
+            input[type=text],[type=password]{
+              padding: 12px 20px;
+           }
+          }
+        }
+      }
+
+      .modal-footer
+      {
+        border-top:1px solid $wasdi-blue-logo;
+        .my-button
+        {
+          padding: 10px 21px;
+        }
+      }
+    }
+  }
+}
