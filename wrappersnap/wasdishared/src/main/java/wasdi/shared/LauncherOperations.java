@@ -6,6 +6,7 @@ package wasdi.shared;
 public enum LauncherOperations {
 	INGEST,
     DOWNLOAD,
+    UPLOADVIAFTP,
     PUBLISH,
     DOWNLOADANDPUBLISH,
     PUBLISHBAND,

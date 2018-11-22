@@ -217,10 +217,9 @@ public class ProcessorsResource {
 	@GET
 	@Path("/run")
 	public RunningProcessorViewModel run(@HeaderParam("x-session-token") String sSessionId, @QueryParam("name") String sName, @QueryParam("encodedJson") String sEncodedJson, @QueryParam("workspace") String sWorkspaceId) throws Exception {
-
+		Wasdi.DebugLog("ProcessorsResource.run");
 
 		RunningProcessorViewModel oRunningProcessorViewModel = new RunningProcessorViewModel();
-		Wasdi.DebugLog("ProcessorsResource.run");
 		
 		try {
 			// Check User 
@@ -232,7 +231,7 @@ public class ProcessorsResource {
 			
 			String sUserId = oUser.getUserId();
 		
-			Wasdi.DebugLog("ProcessorsResource.run: get Processor");
+			Wasdi.DebugLog("ProcessorsResource.run: get Processor");	
 			ProcessorRepository oProcessorRepository = new ProcessorRepository();
 			Processor oProcessorToRun = oProcessorRepository.GetProcessorByName(sName);
 
@@ -240,8 +239,7 @@ public class ProcessorsResource {
 			ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
 			ProcessWorkspace oProcessWorkspace = new ProcessWorkspace();
 			
-			try
-			{
+			try{
 				Wasdi.DebugLog("ProcessorsResource.run: create task"); 
 				oProcessWorkspace.setOperationDate(Wasdi.GetFormatDate(new Date()));
 				oProcessWorkspace.setOperationType(LauncherOperations.RUNPROCESSOR.name());
