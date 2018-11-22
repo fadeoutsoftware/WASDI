@@ -454,11 +454,10 @@ public class CatalogResources {
 		oResult.setIntValue(500);
 		return oResult;
 	}
-	
-	@PUT
+		
+	@POST
 	@Path("/upload/ftp")
 	@Produces({"application/json", "text/xml"})
-	//TODO change return type
 	public PrimitiveResult ftpTransferFile(@HeaderParam("x-session-token") String sSessionId, FtpTransferViewModel oFtpTransferVM) {
 		Wasdi.DebugLog("CatalogResource.ftpTransferFile");
 
@@ -498,12 +497,26 @@ public class CatalogResources {
 			oParams.setM_sUsername(oFtpTransferVM.getUser());
 			oParams.setM_sPassword(oFtpTransferVM.getPassword());
 			oParams.setM_sRemotePath(oFtpTransferVM.getDestinationAbsolutePath());
-			oParams.setM_sRemoteFileName(oFtpTransferVM.getFileName());
-			oParams.setM_sLocalFileName(oFtpTransferVM.getFileName());
+			String sFileName = oFtpTransferVM.getFileName();
+			oParams.setM_sRemoteFileName(sFileName);
+			oParams.setM_sLocalFileName(sFileName);
 			//TODO replace with new kind of repository: FtpUploadRepository, see TODO below...
 			DownloadedFilesRepository oDownRepo = new DownloadedFilesRepository();
-			oParams.setM_sLocalPath(oDownRepo.GetDownloadedFile(oParams.getM_sLocalFileName()).getFilePath());
-	
+			String sFullLocalPath = oDownRepo.GetDownloadedFile(sFileName).getFilePath();
+			
+			//The DB stores the full path, i.e., dirs + filename. Therefore it has to be removed
+			//there should be no ending slashes, but just in case...
+			while(sFullLocalPath.endsWith("/")) {
+				sFullLocalPath = sFullLocalPath.substring(0, sFullLocalPath.length()-1);
+			}
+			//here we are: remove the filename suffix and keep just the directories
+			//note: this makes sense just as long as the path format in the DB is with the file name at the end
+			if(sFullLocalPath.endsWith(sFileName) ) {
+				Integer iLen = sFullLocalPath.length() - sFileName.length();
+				sFullLocalPath = sFullLocalPath.substring(0, iLen);
+			}
+			oParams.setM_sLocalPath(sFullLocalPath);
+					
 			Wasdi.DebugLog("CatalogResource.ftpTransferFile: prepare process");
 			ProcessWorkspace oProcess = new ProcessWorkspace();
 			oProcess.setOperationDate(Wasdi.GetFormatDate(new Date()));
