@@ -226,7 +226,9 @@ public class ProcessingThread extends Thread {
 		
 		File oParameterFilePath = new File(m_oParametersFilesFolder, oProcessWorkspace.getProcessObjId());
 
-		String sShellExString = m_sJavaExePath + " -jar " + m_sLauncherPath +" -operation " + oProcessWorkspace.getOperationType() + " -parameter " + oParameterFilePath.getAbsolutePath();
+		String sShellExString = m_sJavaExePath + " -jar " + m_sLauncherPath +
+				" -operation " + oProcessWorkspace.getOperationType() +
+				" -parameter " + oParameterFilePath.getAbsolutePath();
 
 		System.out.println(m_sLogPrefix + "executing command for process " + oProcessWorkspace.getProcessObjId() + ": " + sShellExString);
 

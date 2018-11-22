@@ -21,6 +21,7 @@ import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.math3.exception.NullArgumentException;
 import org.apache.log4j.Logger;
 import org.apache.log4j.xml.DOMConfigurator;
 import org.esa.snap.core.datamodel.Band;
@@ -62,6 +63,7 @@ import wasdi.shared.parameters.CalibratorParameter;
 import wasdi.shared.parameters.DeployProcessorParameter;
 import wasdi.shared.parameters.DownloadFileParameter;
 import wasdi.shared.parameters.FilterParameter;
+import wasdi.shared.parameters.FtpTransferParameters;
 import wasdi.shared.parameters.GraphParameter;
 import wasdi.shared.parameters.IngestFileParameter;
 import wasdi.shared.parameters.MultilookingParameter;
@@ -70,6 +72,7 @@ import wasdi.shared.parameters.OperatorParameter;
 import wasdi.shared.parameters.PublishBandParameter;
 import wasdi.shared.parameters.RangeDopplerGeocodingParameter;
 import wasdi.shared.parameters.RasterGeometricResampleParameter;
+import wasdi.shared.utils.FtpClient;
 import wasdi.shared.utils.SerializationUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.BandViewModel;
@@ -276,6 +279,10 @@ public class LauncherMain {
 		}
     	
         try {
+        	//XXX refactor this switch
+        	//suggestions:
+        	// https://www.developer.com/java/data/seven-ways-to-refactor-java-switch-statements.html
+        	// https://www.google.it/search?q=java+get+rid+of+switch
         	LauncherOperations op = LauncherOperations.valueOf(sOperation);
             switch (op)
             {
@@ -292,6 +299,10 @@ public class LauncherMain {
                     Download(oDownloadFileParameter, ConfigReader.getPropValue("DOWNLOAD_ROOT_PATH"));
                 }
                 break;
+                case UPLOADVIAFTP: {
+                	FtpTransferParameters oFtpTransferParameters = (FtpTransferParameters) SerializationUtils.deserializeXMLToObject(sParameter);
+                	ftpTransfer(oFtpTransferParameters);
+                }
                 case PUBLISHBAND: {
                     // Deserialize Parameters
                     PublishBandParameter oPublishBandParameter = (PublishBandParameter) SerializationUtils.deserializeXMLToObject(sParameter);
@@ -370,6 +381,7 @@ public class LauncherMain {
         	s_oLogger.error("ExecuteOperation Exception", oEx);
         }
     }
+
 
 	public void ExecuteGraph(GraphParameter params) throws Exception {
 		try {
@@ -561,6 +573,43 @@ public class LauncherMain {
         return  sFileName;
     }
     
+    
+    //TODO change process status at the end
+    //XXX notify client via rabbit of the transfer status
+	public Boolean ftpTransfer(FtpTransferParameters oFtpTransferParameters) throws IOException {
+		if(null == oFtpTransferParameters) {
+			throw new IllegalArgumentException();
+		} else if(Utils.isFilePathPlausible(oFtpTransferParameters.getFullLocalPath())) {
+			String fullLocalPath = oFtpTransferParameters.getFullLocalPath();
+			File oFile = new File(fullLocalPath);
+			if(oFile.exists()) {
+				//TODO setFileSizeToProcess
+				if(	Utils.isServerNamePlausible( oFtpTransferParameters.getM_sFtpServer()) &&
+					Utils.isPortNumberPlausible(oFtpTransferParameters.getM_iPort()) &&
+					!Utils.isNullOrEmpty(oFtpTransferParameters.getM_sUsername()) &&
+					!Utils.isNullOrEmpty(oFtpTransferParameters.getM_sPassword()) ) {
+					FtpClient oFtpClient = new FtpClient(oFtpTransferParameters.getM_sFtpServer(),
+							oFtpTransferParameters.getM_iPort(),
+							oFtpTransferParameters.getM_sUsername(),
+							oFtpTransferParameters.getM_sPassword() );
+					if(oFtpClient.open() ) {
+						//TODO treat the remote password as absolute, not relative.
+						//i.e. extract the relative path and pass it to the FTP client
+						if(oFtpClient.putFileToPath(oFile, oFtpTransferParameters.getM_sRemotePath() ) ) {
+							//String sRemotePath = oFtpTransferParameters.getM_sRemotePath();
+							String sRemotePath = ".";
+							if(oFtpClient.FileIsNowOnServer(sRemotePath, oFile.getName())) {
+								oFtpClient.close();
+								return true;
+							}
+						}
+						oFtpClient.close();
+					}
+				}
+			}
+		}
+		return false;
+	}
     
     public String SaveMetadata(ReadProduct oReadProduct, File oProductFile) {
     			

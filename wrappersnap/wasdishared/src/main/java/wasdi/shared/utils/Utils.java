@@ -11,7 +11,8 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Stream;
 import static org.apache.commons.lang.SystemUtils.IS_OS_UNIX;
-import org.apache.commons.validator.routines.EmailValidator;
+// email, IP addresses (v4 and v6), domains and URL validators:
+import org.apache.commons.validator.routines.*;
 
 /**
  * Created by p.campanella on 14/10/2016.
@@ -158,5 +159,48 @@ public class Utils {
 		sPassword = sPassword.replace('-', randomChar());
 		//XXX shuffle string before returning
 		return sPassword;
+	}
+	
+	public static Boolean isFilePathPlausible(String sFullPath) {
+		if(isNullOrEmpty(sFullPath)) {
+			return false;
+		}
+		
+		return true;
+	}
+	
+	
+	public static Boolean isServerNamePlausible(String sServer) {
+		if(isNullOrEmpty(sServer)) {
+			return false;
+		}
+		//Ok, let's inspect the server...
+		Boolean bRes = false;
+		bRes = InetAddressValidator.getInstance().isValid(sServer);
+		if(!bRes) {
+			//then maybe it's a domain
+			bRes = DomainValidator.getInstance().isValid(sServer);
+			if(!bRes) {
+				//then maybe it's an URL
+				bRes = UrlValidator.getInstance().isValid(sServer);
+			}
+			if(!bRes) {
+				//then maybe it's localhost
+				if(sServer.equals("localhost")) {
+					bRes = true;
+				}
+			}
+		}
+		return bRes;
+	}
+	
+	public static Boolean isPortNumberPlausible(Integer iPort) {
+		if(null == iPort) {
+			return false;
+		}
+		if( 0 <= iPort && iPort <= 65535 ){
+			return true;
+		}
+		return false;
 	}
 }
