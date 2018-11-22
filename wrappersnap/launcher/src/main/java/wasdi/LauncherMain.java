@@ -574,6 +574,8 @@ public class LauncherMain {
     }
     
     
+    //TODO change process status at the end
+    //XXX notify client via rabbit of the transfer status
 	public Boolean ftpTransfer(FtpTransferParameters oFtpTransferParameters) throws IOException {
 		if(null == oFtpTransferParameters) {
 			throw new IllegalArgumentException();
@@ -597,9 +599,11 @@ public class LauncherMain {
 							//String sRemotePath = oFtpTransferParameters.getM_sRemotePath();
 							String sRemotePath = ".";
 							if(oFtpClient.FileIsNowOnServer(sRemotePath, oFile.getName())) {
+								oFtpClient.close();
 								return true;
 							}
 						}
+						oFtpClient.close();
 					}
 				}
 			}

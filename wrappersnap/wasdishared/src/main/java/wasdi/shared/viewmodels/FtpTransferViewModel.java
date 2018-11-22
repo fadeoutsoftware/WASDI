@@ -19,8 +19,8 @@ public class FtpTransferViewModel {
 	private String password;
 	
 	//file to upload
-	private String sfileName;
-	private String sDestinationAbsolutePath;
+	private String fileName;
+	private String destinationAbsolutePath;
 	
 
 	public String getServer() {
@@ -56,18 +56,18 @@ public class FtpTransferViewModel {
 	}
 
 	public String getFileName() {
-		return sfileName;
+		return fileName;
 	}
 
 	public void setFileName(String sfileName) {
-		this.sfileName = sfileName;
+		this.fileName = sfileName;
 	}
 
 	public String getDestinationAbsolutePath() {
-		return sDestinationAbsolutePath;
+		return destinationAbsolutePath;
 	}
 
 	public void setDestinationAbsolutePath(String sDestinationAbsolutePath) {
-		this.sDestinationAbsolutePath = sDestinationAbsolutePath;
+		this.destinationAbsolutePath = sDestinationAbsolutePath;
 	}
 }
