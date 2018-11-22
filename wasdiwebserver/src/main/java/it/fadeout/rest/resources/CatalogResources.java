@@ -455,7 +455,7 @@ public class CatalogResources {
 		return oResult;
 	}
 		
-	@POST
+	@PUT
 	@Path("/upload/ftp")
 	@Produces({"application/json", "text/xml"})
 	public PrimitiveResult ftpTransferFile(@HeaderParam("x-session-token") String sSessionId, FtpTransferViewModel oFtpTransferVM) {
