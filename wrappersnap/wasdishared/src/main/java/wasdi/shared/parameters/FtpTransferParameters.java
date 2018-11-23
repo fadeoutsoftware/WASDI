@@ -94,7 +94,7 @@ public class FtpTransferParameters extends BaseParameter {
 		return m_sRemotePath;
 	}
 	public void setM_sRemotePath(String sPath) {
-		//TODO validate input
+		//null or "" means root
 		this.m_sRemotePath = sPath;
 	}
 	public String getM_sLocalFileName() {
