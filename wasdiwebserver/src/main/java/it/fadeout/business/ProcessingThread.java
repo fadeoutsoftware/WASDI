@@ -230,14 +230,17 @@ public class ProcessingThread extends Thread {
 				" -operation " + oProcessWorkspace.getOperationType() +
 				" -parameter " + oParameterFilePath.getAbsolutePath();
 
-		System.out.println(m_sLogPrefix + "executing command for process " + oProcessWorkspace.getProcessObjId() + ": " + sShellExString);
+		System.out.println(m_sLogPrefix + "executing command for process " + oProcessWorkspace.getProcessObjId() + ": ");
+		System.out.println(sShellExString);
 
 		try {
 			
 			Process oSystemProc = Runtime.getRuntime().exec(sShellExString);
+			System.out.println(oSystemProc.isAlive());
 			System.out.println(m_sLogPrefix + "executed!!!");
 			
 			m_aoLaunchedProcesses.put(oProcessWorkspace.getProcessObjId(), new Date());
+			System.out.println(oSystemProc.isAlive());
 			
 		} catch (IOException e) {
 			
