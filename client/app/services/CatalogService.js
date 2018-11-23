@@ -25,5 +25,9 @@ service('CatalogService', ['$http',  'ConstantsService', function ($http, oConst
     this.ingestFile = function(sSelectedFile,sWorkspace){
         return this.m_oHttp.put(this.APIURL + '/catalog/upload/ingest?file=' + sSelectedFile + '&workspace=' + sWorkspace);
     };
+    this.uploadFTPFile = function(oFtpTransferFile){
+
+        return this.m_oHttp.put(this.APIURL + '/catalog/upload/ftp',oFtpTransferFile);
+    };
 }]);
 
