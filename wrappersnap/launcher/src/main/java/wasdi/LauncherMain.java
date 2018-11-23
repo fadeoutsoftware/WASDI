@@ -576,39 +576,75 @@ public class LauncherMain {
     
     //TODO change process status at the end
     //XXX notify client via rabbit of the transfer status
-	public Boolean ftpTransfer(FtpTransferParameters oFtpTransferParameters) throws IOException {
-		if(null == oFtpTransferParameters) {
+	public Boolean ftpTransfer(FtpTransferParameters oParam) throws IOException {
+		if(null == oParam) {
 			throw new IllegalArgumentException();
-		} else if(Utils.isFilePathPlausible(oFtpTransferParameters.getFullLocalPath())) {
-			String fullLocalPath = oFtpTransferParameters.getFullLocalPath();
-			File oFile = new File(fullLocalPath);
-			if(oFile.exists()) {
-				//TODO setFileSizeToProcess
-				if(	Utils.isServerNamePlausible( oFtpTransferParameters.getM_sFtpServer()) &&
-					Utils.isPortNumberPlausible(oFtpTransferParameters.getM_iPort()) &&
-					!Utils.isNullOrEmpty(oFtpTransferParameters.getM_sUsername()) &&
-					!Utils.isNullOrEmpty(oFtpTransferParameters.getM_sPassword()) ) {
-					FtpClient oFtpClient = new FtpClient(oFtpTransferParameters.getM_sFtpServer(),
-							oFtpTransferParameters.getM_iPort(),
-							oFtpTransferParameters.getM_sUsername(),
-							oFtpTransferParameters.getM_sPassword() );
-					if(oFtpClient.open() ) {
-						//TODO treat the remote password as absolute, not relative.
-						//i.e. extract the relative path and pass it to the FTP client
-						if(oFtpClient.putFileToPath(oFile, oFtpTransferParameters.getM_sRemotePath() ) ) {
-							//String sRemotePath = oFtpTransferParameters.getM_sRemotePath();
-							String sRemotePath = ".";
-							if(oFtpClient.FileIsNowOnServer(sRemotePath, oFile.getName())) {
-								oFtpClient.close();
-								return true;
-							}
-						}
-						oFtpClient.close();
-					}
-				}
-			}
 		}
-		return false;
+		if(null == oParam.getProcessObjId()) {
+			throw new NullPointerException();
+		}
+		ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
+		ProcessWorkspace oProcessWorkspace = oProcessWorkspaceRepository.GetProcessByProcessObjId(oParam.getProcessObjId());
+
+        if(null == oProcessWorkspace ) {
+        	throw new NullPointerException();
+        }
+        updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 0);
+		if(!Utils.isFilePathPlausible(oParam.getFullLocalPath())) {
+			oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
+			return false;
+		}
+		updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 1);
+			
+		String fullLocalPath = oParam.getFullLocalPath();
+		File oFile = new File(fullLocalPath);
+		if(!oFile.exists()) {
+			oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
+			return false;
+		}
+		updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 2);
+		//TODO setFileSizeToProcess and use to update status
+		if(!(	Utils.isServerNamePlausible( oParam.getM_sFtpServer()) &&
+				Utils.isPortNumberPlausible(oParam.getM_iPort()) &&
+				!Utils.isNullOrEmpty(oParam.getM_sUsername()) &&
+				//actually password might be empty
+				(null != oParam.getM_sPassword())
+				)){
+			oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
+			return false;
+		}
+		updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 3);
+
+		FtpClient oFtpClient = new FtpClient(oParam.getM_sFtpServer(),
+				oParam.getM_iPort(),
+				oParam.getM_sUsername(),
+				oParam.getM_sPassword() );
+		
+		if(!oFtpClient.open() ) {
+			oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
+			return false;
+		}
+		updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 4);
+		//TODO treat the remote password as absolute, not relative.
+		//i.e. extract the relative path and pass it to the FTP client
+		Boolean bPut = oFtpClient.putFileToPath(oFile, oParam.getM_sRemotePath() );
+		if(!bPut) {
+			oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
+			return false;
+		}
+		updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 95);
+		//String sRemotePath = oFtpTransferParameters.getM_sRemotePath();
+		String sRemotePath = ".";
+		Boolean bCheck = oFtpClient.FileIsNowOnServer(sRemotePath, oFile.getName()); 
+		if(bCheck) {
+			oFtpClient.close();
+			updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 100);
+			oProcessWorkspace.setStatus(ProcessStatus.DONE.name());
+			oFtpClient.close();
+			return true;
+		}
+		oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
+		return false;	
 	}
     
     public String SaveMetadata(ReadProduct oReadProduct, File oProductFile) {
@@ -781,7 +817,11 @@ public class LauncherMain {
             
     }
 
-	public static void updateProcessStatus(ProcessWorkspaceRepository oProcessWorkspaceRepository, ProcessWorkspace oProcessWorkspace, ProcessStatus status, int progressPerc) throws JsonProcessingException {
+	public static void updateProcessStatus(ProcessWorkspaceRepository oProcessWorkspaceRepository,
+			ProcessWorkspace oProcessWorkspace,
+			ProcessStatus status,
+			int progressPerc
+			) throws JsonProcessingException {
 		
 		if (oProcessWorkspace == null) {
 			s_oLogger.error("LauncherMain.updateProcessStatus oProcessWorkspace is null");
