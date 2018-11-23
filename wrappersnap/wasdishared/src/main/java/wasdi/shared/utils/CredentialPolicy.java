@@ -1,6 +1,6 @@
 package wasdi.shared.utils;
 
-import org.apache.commons.math3.exception.NullArgumentException;
+//import org.apache.commons.math3.exception.NullArgumentException;
 import org.apache.commons.validator.routines.EmailValidator;
 
 import wasdi.shared.business.User;
@@ -167,7 +167,7 @@ public class CredentialPolicy {
 
 	public Boolean satisfies( LoginInfo oLoginInfo ) {
 		if(null == oLoginInfo) {
-			throw new NullArgumentException();
+			throw new NullPointerException();
 		}
 		//TODO check after refactoring: due to googleId modifications these conditions may change		
 		if( validGoogleIdToken(oLoginInfo.getGoogleIdToken()) ) {
@@ -183,7 +183,7 @@ public class CredentialPolicy {
 
 	public Boolean satisfies( UserViewModel oUserVM ) {
 		if( null == oUserVM) {
-			throw new NullArgumentException();
+			throw new NullPointerException();
 		}
 		if(!validUserId(oUserVM.getUserId())) {
 			return false;
@@ -200,7 +200,7 @@ public class CredentialPolicy {
 
 	public boolean satisfies(User oUser) {
 		if(null==oUser) {
-			throw new NullArgumentException();
+			throw new NullPointerException();
 		}
 		//TODO check after refactoring: due to googleId modifications these conditions may change
 		if(validAuthServiceProvider(oUser.getAuthServiceProvider())) {
@@ -224,7 +224,7 @@ public class CredentialPolicy {
 
 	public Boolean satisfies(RegistrationInfoViewModel oRInfo) {
 		if(null == oRInfo) {
-			throw new NullArgumentException();
+			throw new NullPointerException();
 		}
 		//TODO check after refactoring: due to googleId modifications these conditions may change
 		if(validGoogleIdToken(oRInfo.getGoogleIdToken())) {
@@ -246,7 +246,7 @@ public class CredentialPolicy {
 
 	public Boolean satisfies(ChangeUserPasswordViewModel oChangeUserPassword) {
 		if(null == oChangeUserPassword) {
-			throw new NullArgumentException();
+			throw new NullPointerException();
 		}
 		if(validPassword(oChangeUserPassword.getCurrentPassword()) && validPassword(oChangeUserPassword.getNewPassword())) {
 			return true;
