@@ -300,8 +300,11 @@ public class LauncherMain {
                 }
                 break;
                 case UPLOADVIAFTP: {
+                	s_oLogger.debug("ExecuteOperation: UPLOADVIAFT case: load parameters");
                 	FtpTransferParameters oFtpTransferParameters = (FtpTransferParameters) SerializationUtils.deserializeXMLToObject(sParameter);
+                	s_oLogger.debug("ExecuteOperation: UPLOADVIAFT case: try ftp transfer");
                 	ftpTransfer(oFtpTransferParameters);
+                	s_oLogger.debug("ExecuteOperation: UPLOADVIAFT case: done");
                 }
                 case PUBLISHBAND: {
                     // Deserialize Parameters
@@ -577,21 +580,27 @@ public class LauncherMain {
     //TODO change process status at the end
     //XXX notify client via rabbit of the transfer status
 	public Boolean ftpTransfer(FtpTransferParameters oParam) throws IOException {
+		s_oLogger.debug("ftpTransfer begin");
 		if(null == oParam) {
-			throw new IllegalArgumentException();
+			s_oLogger.debug("ftpTransfer: null input");
+			return false;
 		}
 		if(null == oParam.getProcessObjId()) {
-			throw new NullPointerException();
+			s_oLogger.debug("ftpTransfer: null ProcessObjId");
+			return false;
 		}
 		ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
 		ProcessWorkspace oProcessWorkspace = oProcessWorkspaceRepository.GetProcessByProcessObjId(oParam.getProcessObjId());
 
         if(null == oProcessWorkspace ) {
-        	throw new NullPointerException();
+        	s_oLogger.debug("ftpTransfer: null Process Workspace");
+        	return false;
         }
         updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 0);
 		if(!Utils.isFilePathPlausible(oParam.getFullLocalPath())) {
+			s_oLogger.debug("ftpTransfer: null local path");
 			oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
+			CloseProcessWorkspace(oProcessWorkspaceRepository, oProcessWorkspace);
 			return false;
 		}
 		updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 1);
@@ -599,7 +608,9 @@ public class LauncherMain {
 		String fullLocalPath = oParam.getFullLocalPath();
 		File oFile = new File(fullLocalPath);
 		if(!oFile.exists()) {
+			s_oLogger.debug("ftpTransfer: local file does not exist");
 			oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
+			CloseProcessWorkspace(oProcessWorkspaceRepository, oProcessWorkspace);
 			return false;
 		}
 		updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 2);
@@ -610,7 +621,9 @@ public class LauncherMain {
 				//actually password might be empty
 				(null != oParam.getM_sPassword())
 				)){
+			s_oLogger.debug("ftpTransfer: invalid FTP parameters");
 			oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
+			CloseProcessWorkspace(oProcessWorkspaceRepository, oProcessWorkspace);
 			return false;
 		}
 		updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 3);
@@ -621,7 +634,13 @@ public class LauncherMain {
 				oParam.getM_sPassword() );
 		
 		if(!oFtpClient.open() ) {
+			s_oLogger.debug("ftpTransfer: could not connect to FTP server with these credentials:");
+			s_oLogger.debug("server: "+oParam.getM_sFtpServer());
+			s_oLogger.debug("por: "+oParam.getM_iPort());
+			s_oLogger.debug("username: "+oParam.getM_sUsername());
+			s_oLogger.debug("password: " + oParam.getM_sPassword());
 			oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
+			CloseProcessWorkspace(oProcessWorkspaceRepository, oProcessWorkspace);
 			return false;
 		}
 		updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 4);
@@ -629,22 +648,27 @@ public class LauncherMain {
 		//i.e. extract the relative path and pass it to the FTP client
 		Boolean bPut = oFtpClient.putFileToPath(oFile, oParam.getM_sRemotePath() );
 		if(!bPut) {
+			s_oLogger.debug("ftpTransfer: put failed");
 			oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
+			CloseProcessWorkspace(oProcessWorkspaceRepository, oProcessWorkspace);
 			return false;
 		}
 		updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 95);
 		//String sRemotePath = oFtpTransferParameters.getM_sRemotePath();
 		String sRemotePath = ".";
 		Boolean bCheck = oFtpClient.FileIsNowOnServer(sRemotePath, oFile.getName()); 
-		if(bCheck) {
-			oFtpClient.close();
-			updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 100);
-			oProcessWorkspace.setStatus(ProcessStatus.DONE.name());
-			oFtpClient.close();
-			return true;
+		if(!bCheck) {
+			s_oLogger.debug("ftpTransfer: could not find file on server");
+			oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
+			CloseProcessWorkspace(oProcessWorkspaceRepository, oProcessWorkspace);
+			return false;
 		}
-		oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
-		return false;	
+		oFtpClient.close();
+		updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 100);
+		oProcessWorkspace.setStatus(ProcessStatus.DONE.name());
+		oFtpClient.close();
+		s_oLogger.debug("ftpTransfer completed successfully");
+		return true;
 	}
     
     public String SaveMetadata(ReadProduct oReadProduct, File oProductFile) {
