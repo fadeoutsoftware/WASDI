@@ -27,14 +27,14 @@ public class Send {
 	
 	Connection oConnection = null;
 	Channel oChannel= null;
-	String sExchangeName = "amq.topic";
+	String m_sExchangeName = "amq.topic";
 	
 	public Send() {
 		//create connection to the server
         try {
             oConnection = RabbitFactory.getConnectionFactory().newConnection();
             if (oConnection!=null) oChannel = oConnection.createChannel();
-            sExchangeName = ConfigReader.getPropValue("RABBIT_EXCHANGE", "amq.topic");
+            m_sExchangeName = ConfigReader.getPropValue("RABBIT_EXCHANGE", "amq.topic");
         } catch (Exception e) {
             LauncherMain.s_oLogger.log(Level.ERROR, "Send.Init: Error connecting to rabbit", e);
         }
@@ -60,7 +60,7 @@ public class Send {
     	if (oChannel == null) return false;
     	
         try {        	
-            oChannel.basicPublish(sExchangeName, sRoutingKey, null, sMessageAttribute.getBytes());
+            oChannel.basicPublish(m_sExchangeName, sRoutingKey, null, sMessageAttribute.getBytes());
         } catch (IOException e) {
             LauncherMain.s_oLogger.log(Level.ERROR, "Send.SendMgs: Error publishing message " + sMessageAttribute + " to " + sRoutingKey, e);
             return false;
