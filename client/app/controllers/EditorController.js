@@ -330,6 +330,11 @@ var EditorController = (function () {
         {
             oController.m_aoNavBarMenu[3].subMenu[5].name  = text;
         });
+
+        this.m_oTranslate('EDITOR_OPERATION_TITLE_LIST_FLOOD_AREA_DETECTION').then(function(text)
+        {
+            oController.m_aoNavBarMenu[3].subMenu[6].name  = text;
+        });
     };
 
     /*********************************************************** VIEW METHODS**********************************************************/
@@ -2298,7 +2303,7 @@ var EditorController = (function () {
             controller: "ListFloodAreaDetectionController",
             inputs: {
                 extras: {
-
+                    products:oController.m_aoProducts,
                 }
             }
         }).then(function (modal) {
