@@ -133,7 +133,7 @@ public class AuthResource {
 						}
 						oUserVM.setSessionId(sSessionId);
 						
-						Wasdi.DebugLog("AuthService.Login: access succeeded");
+						Wasdi.DebugLog("AuthService.Login: access succeeded, sSessionId: "+sSessionId);
 					} else {
 						
 						Wasdi.DebugLog("AuthService.Login: access failed");

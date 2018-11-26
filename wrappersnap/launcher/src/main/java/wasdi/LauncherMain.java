@@ -118,7 +118,8 @@ public class LauncherMain {
             //get jar directory
             File oCurrentFile = new File(LauncherMain.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath());
             //configure log
-            DOMConfigurator.configure(oCurrentFile.getParentFile().getPath() + "/log4j.xml");
+            String sThisFilePath = oCurrentFile.getParentFile().getPath();
+            DOMConfigurator.configure(sThisFilePath + "/log4j.xml");
 
         }
         catch(Exception exp)
@@ -306,6 +307,7 @@ public class LauncherMain {
                 	ftpTransfer(oFtpTransferParameters);
                 	s_oLogger.debug("ExecuteOperation: UPLOADVIAFT case: done");
                 }
+                break;
                 case PUBLISHBAND: {
                     // Deserialize Parameters
                     PublishBandParameter oPublishBandParameter = (PublishBandParameter) SerializationUtils.deserializeXMLToObject(sParameter);
