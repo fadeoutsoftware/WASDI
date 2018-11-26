@@ -53,7 +53,7 @@ var FTPController = (function() {
 
         this.m_oCatalogService.uploadFTPFile(oFtpTransferFile)
             .success(function(data,status){
-                if(utilsIsObjectNullOrUndefined(data) === false && data.BoolValue === true)
+                if(utilsIsObjectNullOrUndefined(data) === false && data.boolValue === true)
                 {
                     console.log("done");
                 }
