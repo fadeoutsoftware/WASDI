@@ -666,9 +666,8 @@ public class LauncherMain {
 			return false;
 		}
 		oFtpClient.close();
-		updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 100);
-		oProcessWorkspace.setStatus(ProcessStatus.DONE.name());
-		oFtpClient.close();
+		updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.DONE, 100);
+		CloseProcessWorkspace(oProcessWorkspaceRepository, oProcessWorkspace);
 		s_oLogger.debug("ftpTransfer completed successfully");
 		return true;
 	}
@@ -865,6 +864,9 @@ public class LauncherMain {
 			s_oLogger.debug("Error during process update");
 		}	                
 		//send update process message
+		if(null == s_oSendToRabbit) {
+			 s_oSendToRabbit = new Send();
+		}
 		if (!s_oSendToRabbit.SendUpdateProcessMessage(oProcessWorkspace)) {
 		    s_oLogger.debug("Error sending rabbitmq message to update process list");
 		}
