@@ -240,6 +240,12 @@ var EditorController = (function () {
                         subMenu:[],
                         onClick: this.openWappsDialog,
                         icon:"fa fa-lg fa-rocket"
+                    },
+                    {
+                        name:"",//LIST FLOOD AREA DETECTION
+                        subMenu:[],
+                        onClick: this.openListtFloodAreaDetectionDialog,
+                        icon:"fa fa-lg fa-file-code-o"
                     }
                 ],
                 onClick: "",
@@ -2258,6 +2264,38 @@ var EditorController = (function () {
         oController.m_oModalService.showModal({
             templateUrl: "dialogs/wapps/WappsViewDialog.html",
             controller: "WappsController",
+            inputs: {
+                extras: {
+
+                }
+            }
+        }).then(function (modal) {
+            modal.element.modal();
+            modal.close.then(function(oResult){
+
+            });
+        });
+    };
+
+    /**
+     * openListtFloodAreaDetectionDialog
+     * @param oWindow
+     */
+    EditorController.prototype.openListtFloodAreaDetectionDialog = function(oWindow)
+    {
+        var oController;
+        if(utilsIsObjectNullOrUndefined(oWindow) === true)
+        {
+            oController = this;
+        }
+        else
+        {
+            oController = oWindow;
+        }
+
+        oController.m_oModalService.showModal({
+            templateUrl: "dialogs/list_flood_area_detection/ListFloodAreaDetectionView.html",
+            controller: "ListFloodAreaDetectionController",
             inputs: {
                 extras: {
 
