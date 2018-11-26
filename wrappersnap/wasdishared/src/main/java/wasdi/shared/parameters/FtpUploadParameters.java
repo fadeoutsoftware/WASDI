@@ -14,13 +14,10 @@ import wasdi.shared.utils.Utils;
  * @author c.nattero
  *
  */
-public class FtpTransferParameters extends BaseParameter {
-	//XXX two different classes for the two directions
-	public static enum FtpDirection{UPLOAD, DOWNLOAD};
-	FtpDirection m_eDirection;
+public class FtpUploadParameters extends BaseParameter {
 	
 	//FTP server-side info
-	String m_sFtpServer;
+	String ftpServer;
 	Integer m_iPort;
 	String m_sUsername;
 	String m_sPassword;
@@ -36,33 +33,26 @@ public class FtpTransferParameters extends BaseParameter {
 	String m_sLocalFileName;
 	String m_sLocalPath;
 	
-	public FtpDirection getM_eDirection() {
-		return m_eDirection;
+	public String getFtpServer() {
+		return ftpServer;
 	}
-	public void setM_eDirection(FtpDirection eDirection) {
-		//TODO validate input
-		this.m_eDirection = eDirection;
-	}
-	public String getM_sFtpServer() {
-		return m_sFtpServer;
-	}
-	public void setM_sFtpServer(String sFtpServer) {
+	public void setFtpServer(String sFtpServer) {
 		if(null == sFtpServer) {
 			throw new IllegalArgumentException();
 		} else if( sFtpServer.toLowerCase().startsWith("http") ){
 			throw new IllegalArgumentException();
 		}
-		this.m_sFtpServer = sFtpServer;
-		if(m_sFtpServer.toLowerCase().startsWith("ftp://")) {
+		this.ftpServer = sFtpServer;
+		if(ftpServer.toLowerCase().startsWith("ftp://")) {
 			//strip prefix
-			m_sFtpServer = m_sFtpServer.substring(6,m_sFtpServer.length());
+			ftpServer = ftpServer.substring(6,ftpServer.length());
 		}
-		while(m_sFtpServer.endsWith("/")) {
-			m_sFtpServer = m_sFtpServer.substring(0,m_sFtpServer.length()-1);
+		while(ftpServer.endsWith("/")) {
+			ftpServer = ftpServer.substring(0,ftpServer.length()-1);
 		}
 		//test if server name is correct after trimming trailing slashes
-		if(!Utils.isServerNamePlausible(m_sFtpServer)) {
-			m_sFtpServer = null;
+		if(!Utils.isServerNamePlausible(ftpServer)) {
+			ftpServer = null;
 			throw new IllegalArgumentException();
 		}
 	}

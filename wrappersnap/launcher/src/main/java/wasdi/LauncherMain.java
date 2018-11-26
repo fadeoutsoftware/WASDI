@@ -63,7 +63,7 @@ import wasdi.shared.parameters.CalibratorParameter;
 import wasdi.shared.parameters.DeployProcessorParameter;
 import wasdi.shared.parameters.DownloadFileParameter;
 import wasdi.shared.parameters.FilterParameter;
-import wasdi.shared.parameters.FtpTransferParameters;
+import wasdi.shared.parameters.FtpUploadParameters;
 import wasdi.shared.parameters.GraphParameter;
 import wasdi.shared.parameters.IngestFileParameter;
 import wasdi.shared.parameters.MultilookingParameter;
@@ -300,9 +300,9 @@ public class LauncherMain {
                     Download(oDownloadFileParameter, ConfigReader.getPropValue("DOWNLOAD_ROOT_PATH"));
                 }
                 break;
-                case UPLOADVIAFTP: {
+                case FTPUPLOAD: {
                 	s_oLogger.debug("ExecuteOperation: UPLOADVIAFT case: load parameters");
-                	FtpTransferParameters oFtpTransferParameters = (FtpTransferParameters) SerializationUtils.deserializeXMLToObject(sParameter);
+                	FtpUploadParameters oFtpTransferParameters = (FtpUploadParameters) SerializationUtils.deserializeXMLToObject(sParameter);
                 	s_oLogger.debug("ExecuteOperation: UPLOADVIAFT case: try ftp transfer");
                 	ftpTransfer(oFtpTransferParameters);
                 	s_oLogger.debug("ExecuteOperation: UPLOADVIAFT case: done");
@@ -581,7 +581,7 @@ public class LauncherMain {
     
     //TODO change process status at the end
     //XXX notify client via rabbit of the transfer status
-	public Boolean ftpTransfer(FtpTransferParameters oParam) throws IOException {
+	public Boolean ftpTransfer(FtpUploadParameters oParam) throws IOException {
 		s_oLogger.debug("ftpTransfer begin");
 		if(null == oParam) {
 			s_oLogger.debug("ftpTransfer: null input");
@@ -619,8 +619,9 @@ public class LauncherMain {
 			return false;
 		}
 		updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 2);
-		//TODO setFileSizeToProcess and use to update status
-		if(!(	Utils.isServerNamePlausible( oParam.getM_sFtpServer()) &&
+		String sFtpServer = oParam.getFtpServer();
+		//TODO move here checks on server name
+		if(!(	Utils.isServerNamePlausible( sFtpServer ) &&
 				Utils.isPortNumberPlausible(oParam.getM_iPort()) &&
 				!Utils.isNullOrEmpty(oParam.getM_sUsername()) &&
 				//actually password might be empty
@@ -633,14 +634,14 @@ public class LauncherMain {
 		}
 		updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 3);
 
-		FtpClient oFtpClient = new FtpClient(oParam.getM_sFtpServer(),
+		FtpClient oFtpClient = new FtpClient(oParam.getFtpServer(),
 				oParam.getM_iPort(),
 				oParam.getM_sUsername(),
 				oParam.getM_sPassword() );
 		
 		if(!oFtpClient.open() ) {
 			s_oLogger.debug("ftpTransfer: could not connect to FTP server with these credentials:");
-			s_oLogger.debug("server: "+oParam.getM_sFtpServer());
+			s_oLogger.debug("server: "+oParam.getFtpServer());
 			s_oLogger.debug("por: "+oParam.getM_iPort());
 			s_oLogger.debug("username: "+oParam.getM_sUsername());
 			s_oLogger.debug("password: " + oParam.getM_sPassword());
@@ -649,8 +650,7 @@ public class LauncherMain {
 			return false;
 		}
 		updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 4);
-		//TODO treat the remote password as absolute, not relative.
-		//i.e. extract the relative path and pass it to the FTP client
+		//XXX see how to modify FTP client to update status
 		Boolean bPut = oFtpClient.putFileToPath(oFile, oParam.getM_sRemotePath() );
 		if(!bPut) {
 			s_oLogger.debug("ftpTransfer: put failed");

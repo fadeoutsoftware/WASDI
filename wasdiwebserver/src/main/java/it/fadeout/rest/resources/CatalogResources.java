@@ -41,8 +41,7 @@ import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.data.ProductWorkspaceRepository;
 import wasdi.shared.data.SessionRepository;
 import wasdi.shared.data.WorkspaceRepository;
-import wasdi.shared.parameters.FtpTransferParameters;
-import wasdi.shared.parameters.FtpTransferParameters.FtpDirection;
+import wasdi.shared.parameters.FtpUploadParameters;
 import wasdi.shared.parameters.IngestFileParameter;
 import wasdi.shared.utils.CredentialPolicy;
 import wasdi.shared.utils.SerializationUtils;
@@ -496,9 +495,9 @@ public class CatalogResources {
 		
 		try {
 			Wasdi.DebugLog("CatalogResource.ftpTransferFile: prepare parameters");
-			FtpTransferParameters oParams = new FtpTransferParameters();
-			oParams.setM_eDirection(FtpDirection.UPLOAD);
-			oParams.setM_sFtpServer(oFtpTransferVM.getServer());
+			FtpUploadParameters oParams = new FtpUploadParameters();
+			oParams.setFtpServer(oFtpTransferVM.getServer());
+			//TODO move here checks on server name from the viewModel
 			oParams.setM_iPort(oFtpTransferVM.getPort());
 			oParams.setM_sUsername(oFtpTransferVM.getUser());
 			oParams.setM_sPassword(oFtpTransferVM.getPassword());
@@ -532,7 +531,7 @@ public class CatalogResources {
 			Wasdi.DebugLog("CatalogResource.ftpTransferFile: prepare process");
 			ProcessWorkspace oProcess = new ProcessWorkspace();
 			oProcess.setOperationDate(Wasdi.GetFormatDate(new Date()));
-			oProcess.setOperationType(LauncherOperations.UPLOADVIAFTP.name());
+			oProcess.setOperationType(LauncherOperations.FTPUPLOAD.name());
 			//oProcess.setProductName(sFileUrl);
 			oProcess.setWorkspaceId(sWorkspace);
 			oProcess.setUserId(sUserId);
