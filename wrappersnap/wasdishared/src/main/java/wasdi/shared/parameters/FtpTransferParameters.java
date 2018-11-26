@@ -27,6 +27,10 @@ public class FtpTransferParameters extends BaseParameter {
 	String m_sRemoteFileName;
 	String m_sRemotePath;
 	
+	//TODO remove logic
+	//TODO rename without m?
+	//TODO use just localFileName
+	
 	//local file info
 	//MAYBE read from config?
 	String m_sLocalFileName;
@@ -115,12 +119,14 @@ public class FtpTransferParameters extends BaseParameter {
 			throw new IllegalArgumentException();
 		}
 		this.m_sLocalPath=new String( FilenameUtils.normalizeNoEndSeparator(sLocalPath, true) );
+		/*
 		if(!m_sLocalPath.endsWith("/")) {
 			m_sLocalPath+="/";
 		}
 		while(m_sLocalPath.startsWith("/")) {
 			m_sLocalPath = m_sLocalPath.substring(1);
 		}
+		*/
 	}
 	
 	public String getFullLocalPath() {

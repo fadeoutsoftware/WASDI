@@ -458,7 +458,7 @@ public class CatalogResources {
 	@PUT
 	@Path("/upload/ftp")
 	@Produces({"application/json", "text/xml"})
-	public PrimitiveResult ftpTransferFile(@HeaderParam("x-session-token") String sSessionId, FtpTransferViewModel oFtpTransferVM) {
+	public PrimitiveResult ftpTransferFile(@HeaderParam("x-session-token") String sSessionId,  @QueryParam("workspace") String sWorkspace, FtpTransferViewModel oFtpTransferVM) {
 		Wasdi.DebugLog("CatalogResource.ftpTransferFile");
 
 		//input validation
@@ -487,6 +487,12 @@ public class CatalogResources {
 			return oResult;
 		}
 		
+		if (sWorkspace==null)  {
+			PrimitiveResult oResult = PrimitiveResult.getInvalidInstance();
+			oResult.setStringValue("Null Workspace");
+			return oResult;			
+		}
+		
 		
 		try {
 			Wasdi.DebugLog("CatalogResource.ftpTransferFile: prepare parameters");
@@ -500,10 +506,14 @@ public class CatalogResources {
 			String sFileName = oFtpTransferVM.getFileName();
 			oParams.setM_sRemoteFileName(sFileName);
 			oParams.setM_sLocalFileName(sFileName);
+			oParams.setExchange(sWorkspace);
+			oParams.setWorkspace(sWorkspace);
+			
 			//TODO replace with new kind of repository: FtpUploadRepository, see TODO below...
 			DownloadedFilesRepository oDownRepo = new DownloadedFilesRepository();
 			String sFullLocalPath = oDownRepo.GetDownloadedFile(sFileName).getFilePath();
 			
+			/*
 			//The DB stores the full path, i.e., dirs + filename. Therefore it has to be removed
 			//there should be no ending slashes, but just in case...
 			while(sFullLocalPath.endsWith("/")) {
@@ -515,6 +525,8 @@ public class CatalogResources {
 				Integer iLen = sFullLocalPath.length() - sFileName.length();
 				sFullLocalPath = sFullLocalPath.substring(0, iLen);
 			}
+			*/
+			
 			oParams.setM_sLocalPath(sFullLocalPath);
 					
 			Wasdi.DebugLog("CatalogResource.ftpTransferFile: prepare process");
@@ -522,7 +534,7 @@ public class CatalogResources {
 			oProcess.setOperationDate(Wasdi.GetFormatDate(new Date()));
 			oProcess.setOperationType(LauncherOperations.UPLOADVIAFTP.name());
 			//oProcess.setProductName(sFileUrl);
-			//oProcess.setWorkspaceId(sWorkspaceId);
+			oProcess.setWorkspaceId(sWorkspace);
 			oProcess.setUserId(sUserId);
 			oProcess.setProcessObjId(Utils.GetRandomName());
 			oProcess.setStatus(ProcessStatus.CREATED.name());

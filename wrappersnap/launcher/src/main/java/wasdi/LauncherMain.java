@@ -607,8 +607,11 @@ public class LauncherMain {
 		}
 		updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 1);
 			
-		String fullLocalPath = oParam.getFullLocalPath();
-		File oFile = new File(fullLocalPath);
+		DownloadedFilesRepository oDownRepo = new DownloadedFilesRepository();
+		String sFullLocalPath = oDownRepo.GetDownloadedFile(oParam.getM_sLocalFileName()).getFilePath();
+
+		//String fullLocalPath = oParam.getM_sLocalPath();
+		File oFile = new File(sFullLocalPath);
 		if(!oFile.exists()) {
 			s_oLogger.debug("ftpTransfer: local file does not exist");
 			oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
