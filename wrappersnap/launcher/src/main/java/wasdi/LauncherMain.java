@@ -579,7 +579,7 @@ public class LauncherMain {
     }
     
     
-    //TODO change process status at the end
+    //XXX sprout class
     //XXX notify client via rabbit of the transfer status
 	public Boolean ftpTransfer(FtpUploadParameters oParam) throws IOException {
 		s_oLogger.debug("ftpTransfer begin");
