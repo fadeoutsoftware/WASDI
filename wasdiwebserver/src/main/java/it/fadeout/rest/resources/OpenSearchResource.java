@@ -137,6 +137,7 @@ public class OpenSearchResource {
 			String sLimit = null;
 			String sSortedBy = null;
 			String sOrder = null;
+			//XXX move this into SENTINEL query executor
 			if(sProvider.equals("SENTINEL") )
 			{
 				sOffset="0";
@@ -151,6 +152,7 @@ public class OpenSearchResource {
 				Integer iTotalResults = 0;
 				if(sProvider.equals("SENTINEL") )
 				{
+					//XXX move this into SENTINEL query executor
 					iTotalResults = oExecutor.executeCountSentinel(sQuery);
 				}
 				else
