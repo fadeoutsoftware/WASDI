@@ -118,9 +118,12 @@ public class OpenSearchResource {
 		
 		if (sProviders!=null) {
 			Map<String, Integer> pMap = getQueryCounters(sQuery, sProviders);
+			return pMap.size();
+			/*
 			for (Integer count : pMap.values()) {
 				iCounter += count;
 			}
+			*/
 		}
 		
 		return iCounter;
