@@ -5,3 +5,5 @@
 .project
 .settings
 *.class
+.idea
+.idea/
