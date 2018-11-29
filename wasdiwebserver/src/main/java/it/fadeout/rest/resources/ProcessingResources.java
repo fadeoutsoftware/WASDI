@@ -1293,6 +1293,118 @@ public class ProcessingResources {
 			
 		}
 	}
+
+	
+	@GET
+	@Path("/alglist")
+	@Produces({"application/json"})
+	public PrimitiveResult algList(
+			@HeaderParam("x-session-token") String sSessionId,
+			@QueryParam("file") String sFileName,
+			@QueryParam("workspaceId") String sWorkspaceId) {
+		
+		Wasdi.DebugLog("ProcessingResource.algList");
+		PrimitiveResult oResult = new PrimitiveResult();
+		User oUser = Wasdi.GetUserFromSession(sSessionId);
+		try {
+			//check authentication
+			if (oUser == null || Utils.isNullOrEmpty(oUser.getUserId())) {
+				oResult.setBoolValue(false);
+				oResult.setIntValue(404);
+				return oResult;				
+			}
+			Wasdi.DebugLog("ProcessingResource.algList: INPUT FILE " + sFileName);
+			Wasdi.DebugLog("ProcessingResource.list: launching ENVI LIST Processor");
+			
+			//execute assimilation
+			if (launchList(sFileName, sWorkspaceId)) {
+				Wasdi.DebugLog("ProcessingResource.algList: ok return");
+				String sOutputFile = "";
+				
+				if (sFileName.startsWith("CSK")) {
+					sOutputFile = "Mappa_" + sFileName.substring(0, 41) +".tif";
+				}
+				else if (sFileName.startsWith("S1A")) {
+					sOutputFile = "Mappa_" + sFileName.substring(0, 32) +".tif";
+				}
+				
+				oResult.setStringValue(sOutputFile);
+				
+				oResult.setBoolValue(true);
+				oResult.setIntValue(200);				
+			}
+			else {
+				Wasdi.DebugLog("ProcessingResource.algList: error, return");
+				oResult.setBoolValue(false);
+				oResult.setIntValue(500);				
+			}
+		} catch (Exception e) {
+			System.out.println("ProcessingResource.algList: error launching list " + e.getMessage());
+			e.printStackTrace();
+			oResult.setBoolValue(false);
+			oResult.setIntValue(500);				
+			return oResult;
+		}
+		
+		return oResult;
+	}
+	
+	/**
+	 * Launch LIST ENVI process
+	 * @param sInputFile
+	 * @param sWorkspaceId
+	 * @return
+	 */
+	private boolean launchList(String sInputFile, String sWorkspaceId) {
+
+		try {
+			String cmd[] = new String[] {
+					m_oServletConfig.getInitParameter("ListScript")
+			};
+			
+			String sParamFile = m_oServletConfig.getInitParameter("ListParam");
+			
+			Wasdi.DebugLog("ProcessingResource.launchList ParamFile " + sParamFile);
+			
+			System.out.println("ProcessingResource.launchList: shell exec " + Arrays.toString(cmd));
+			File oFile = new File(sParamFile);
+			
+			if (!oFile.exists()) {				
+				Wasdi.DebugLog("ProcessingResource.launchList: " + sParamFile + " doesn't exist, ending");
+				//TODO check: why create a dir?
+				//oFile.mkdirs();
+				return false;
+			}
+			
+			BufferedWriter oWriter = new BufferedWriter(new FileWriter(oFile));
+			oWriter.write("USER,"+m_oServletConfig.getInitParameter("ListUser"));
+			oWriter.newLine();
+			oWriter.write("PASSWORD,"+m_oServletConfig.getInitParameter("ListPassword"));
+			oWriter.newLine();
+			oWriter.write("FILE,"+sInputFile);
+			oWriter.newLine();
+			oWriter.write("WORKSPACE,"+sWorkspaceId);
+			oWriter.newLine();
+			oWriter.flush();		
+			oWriter.close();
+			
+
+			Process proc = Runtime.getRuntime().exec(cmd);
+			BufferedReader input = new BufferedReader(new InputStreamReader(proc.getInputStream()));
+            String line;
+            while((line=input.readLine()) != null) {
+            	System.out.println("ProcessingResource.launchList: envi stdout: " + line);
+            }
+			if (proc.waitFor() != 0) return false;
+		} catch (Exception oEx) {
+			System.out.println("ProcessingResource.launchList: error during list process " + oEx.getMessage());
+			oEx.printStackTrace();
+			return false;
+		}
+
+		return true;
+	}
+	
 	
 	
 }
