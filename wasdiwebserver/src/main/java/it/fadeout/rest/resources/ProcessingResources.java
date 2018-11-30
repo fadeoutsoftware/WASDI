@@ -75,6 +75,7 @@ import wasdi.shared.business.SnapWorkflow;
 import wasdi.shared.business.User;
 import wasdi.shared.business.WpsProvider;
 import wasdi.shared.data.ProcessWorkspaceRepository;
+import wasdi.shared.data.SessionRepository;
 import wasdi.shared.data.SnapWorkflowRepository;
 import wasdi.shared.data.WpsProvidersRepository;
 import wasdi.shared.parameters.ApplyOrbitParameter;
@@ -1293,12 +1294,79 @@ public class ProcessingResources {
 			
 		}
 	}
-
 	
 	@GET
-	@Path("/alglist")
+	@Path("/idlDemo") 
 	@Produces({"application/json"})
-	public PrimitiveResult algList(
+	public PrimitiveResult idlDemo(
+			@HeaderParam("x-session-token") String sSessionId) {
+		Wasdi.DebugLog("ProcessingResource.idlDemo");
+	
+		User oUser = Wasdi.GetUserFromSession(sSessionId);
+		//check session validity
+		if (oUser == null || Utils.isNullOrEmpty(oUser.getUserId())) {
+			PrimitiveResult oResult = new PrimitiveResult();
+			oResult.setBoolValue(false);
+			oResult.setIntValue(404);
+			return oResult;				
+		}
+		Wasdi.DebugLog("ProcessingResource.idlDemo: ok valid session, let's go");
+
+		try {
+			String cmd[] = new String[] {
+					m_oServletConfig.getInitParameter("IdlDemoScript")
+			};
+			
+			Wasdi.DebugLog("ProcessingResource.idlDemo " + cmd[0] );
+			
+			System.out.println("ProcessingResource.idlDemo: shell exec " + Arrays.toString(cmd));
+			Process proc = Runtime.getRuntime().exec(cmd);
+			BufferedReader input = new BufferedReader(new InputStreamReader(proc.getInputStream()));
+            String line = null;
+            while((line=input.readLine()) != null) {
+            	System.out.println("ProcessingResource.idlDemo: envi stdout: " + line);
+            }
+			if (proc.waitFor() != 0) {
+				return PrimitiveResult.getInvalidInstance();
+			}
+		} catch (Exception oEx) {
+			System.out.println("ProcessingResource.idlDemo: error happened" + oEx.getMessage());
+			oEx.printStackTrace();
+			return PrimitiveResult.getInvalidInstance();
+		}
+
+		System.out.println("ProcessingResource.idlDemo: about to respond and close");
+		PrimitiveResult oResult = new PrimitiveResult();
+		oResult.setBoolValue(true);
+		oResult.setIntValue(200);
+		oResult.setStringValue("IDL code executed");
+		return oResult;
+	}
+	
+
+	@GET
+	@Path("/listFloodDemo")
+	@Produces({"application/json"})
+	public PrimitiveResult listFloodDemo(
+			@HeaderParam("x-session-token") String sSessionId) {
+		Wasdi.DebugLog("ProcessingResource.listFloodDemo");
+		try {
+			String sFileName = m_oServletConfig.getInitParameter("ListFloodDemo.fileName");
+			String sWorkspaceId = m_oServletConfig.getInitParameter("ListFloodDemo.workspaceId");
+			return listflood(sSessionId, sFileName, sWorkspaceId);
+		} catch (Exception e) {
+			e.printStackTrace();
+			PrimitiveResult oRes = PrimitiveResult.getInvalidInstance();
+			oRes.setIntValue(500);
+			return oRes;
+		}
+		
+	}
+	
+	@GET
+	@Path("/listflood")
+	@Produces({"application/json"})
+	public PrimitiveResult listflood(
 			@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("file") String sFileName,
 			@QueryParam("workspaceId") String sWorkspaceId) {
@@ -1316,9 +1384,10 @@ public class ProcessingResources {
 			Wasdi.DebugLog("ProcessingResource.algList: INPUT FILE " + sFileName);
 			Wasdi.DebugLog("ProcessingResource.list: launching ENVI LIST Processor");
 			
-			//execute assimilation
+			//try execute algorithm
 			if (launchList(sFileName, sWorkspaceId)) {
 				Wasdi.DebugLog("ProcessingResource.algList: ok return");
+				//TODO read value somewhere (input argument? config file?)
 				String sOutputFile = "";
 				
 				if (sFileName.startsWith("CSK")) {
@@ -1362,11 +1431,12 @@ public class ProcessingResources {
 					m_oServletConfig.getInitParameter("ListScript")
 			};
 			
+			Wasdi.DebugLog("ProcessingResource.launchList " + cmd[0] );
+			
 			String sParamFile = m_oServletConfig.getInitParameter("ListParam");
 			
 			Wasdi.DebugLog("ProcessingResource.launchList ParamFile " + sParamFile);
 			
-			System.out.println("ProcessingResource.launchList: shell exec " + Arrays.toString(cmd));
 			File oFile = new File(sParamFile);
 			
 			if (!oFile.exists()) {				
@@ -1374,21 +1444,26 @@ public class ProcessingResources {
 				//TODO check: why create a dir?
 				//oFile.mkdirs();
 				return false;
+			} else {
+				Wasdi.DebugLog("ProcessingResource.launchList: " + sParamFile + " exists, ok");
 			}
 			
 			BufferedWriter oWriter = new BufferedWriter(new FileWriter(oFile));
-			oWriter.write("USER,"+m_oServletConfig.getInitParameter("ListUser"));
-			oWriter.newLine();
-			oWriter.write("PASSWORD,"+m_oServletConfig.getInitParameter("ListPassword"));
-			oWriter.newLine();
-			oWriter.write("FILE,"+sInputFile);
-			oWriter.newLine();
-			oWriter.write("WORKSPACE,"+sWorkspaceId);
-			oWriter.newLine();
-			oWriter.flush();		
-			oWriter.close();
+			if(null!= oWriter) {
+				Wasdi.DebugLog("ProcessingResource.launchList: BufferedWriter created");
+				oWriter.write("USER,"+m_oServletConfig.getInitParameter("ListUser"));
+				oWriter.newLine();
+				oWriter.write("PASSWORD,"+m_oServletConfig.getInitParameter("ListPassword"));
+				oWriter.newLine();
+				oWriter.write("FILE,"+sInputFile);
+				oWriter.newLine();
+				oWriter.write("WORKSPACE,"+sWorkspaceId);
+				oWriter.newLine();
+				oWriter.flush();		
+				oWriter.close();
+			}
 			
-
+			System.out.println("ProcessingResource.launchList: shell exec " + Arrays.toString(cmd));
 			Process proc = Runtime.getRuntime().exec(cmd);
 			BufferedReader input = new BufferedReader(new InputStreamReader(proc.getInputStream()));
             String line;
