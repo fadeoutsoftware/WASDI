@@ -155,7 +155,7 @@
             "indexvalue": "Sentinel-2",
             "filters": [
                 {
-                    "indexname": "satelliteplatform",
+                    "indexname": "filename",
                     "indexlabel": "Satellite Platform",
                     "indexvalues":"S2A_*|S2B_*",
                     "regex": ".*"
@@ -249,7 +249,6 @@
                     "indexmin":"0",
                     "indexmax":"100",
                     "regex": ".*"
-
                 },
                 {
                     "indexname": "snowcoverpercentage",
@@ -289,6 +288,50 @@
                     "indexvalues":"VG1|VG2",
                     "regex": ".*"
 
+                }
+            ]
+        },
+        {
+            "name": "Mission: ENVISAT",
+            "indexname": "platformname",
+            "indexvalue": "Envisat",
+            "provider":"Envisat",
+            "filters": [
+                {
+                    "indexname": "name",
+                    "indexlabel": "Type",
+                    "indexvalues":"ASA_IM__0P|ASA_WS__0P",
+                    "regex": ".*"
+
+                },{
+                    "indexname": "orbitDirection",
+                    "indexlabel": "orbitDirection",
+                    "indexvalues":"ASCENDING|DESCENDING",
+                    "regex": ".*"
+
+                }
+            ]
+        },
+        {
+            "name": "Mission: LANDSAT",
+            "indexname": "platformname",
+            "indexvalue": "Landsat-*",
+            "provider":"Landsat-*",
+            "filters": [
+                {
+                    "indexname": "name",
+                    "indexlabel": "Type",
+                    "indexvalues":"L1T|L1G|L1GT|L1GS|L1TP",
+                    "regex": ".*"
+
+                },
+                {
+                    "indexname": "cloudCoverPercentage",
+                    "indexlabel": "Cloud Coverage(%)(e.g.[0 TO 9.4])",
+                    "indexvalues":"",
+                    "indexmin":"0",
+                    "indexmax":"100",
+                    "regex": ".*"
                 }
             ]
         }
