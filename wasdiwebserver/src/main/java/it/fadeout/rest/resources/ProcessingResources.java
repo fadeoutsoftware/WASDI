@@ -50,6 +50,7 @@ import javax.ws.rs.core.Response.Status;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.http.protocol.HTTP;
 import org.esa.snap.core.dataio.ProductIO;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.FilterBand;
@@ -75,6 +76,7 @@ import wasdi.shared.business.SnapWorkflow;
 import wasdi.shared.business.User;
 import wasdi.shared.business.WpsProvider;
 import wasdi.shared.data.ProcessWorkspaceRepository;
+import wasdi.shared.data.SessionRepository;
 import wasdi.shared.data.SnapWorkflowRepository;
 import wasdi.shared.data.WpsProvidersRepository;
 import wasdi.shared.parameters.ApplyOrbitParameter;
@@ -1293,6 +1295,226 @@ public class ProcessingResources {
 			
 		}
 	}
+	
+	/**
+	 * Runs a dummy IDL script. Used to test the setup and as a stub to implement the launch of new IDL scripts 
+	 * @param sSessionId a valid session identifier
+	 * @return BAD_REQUEST if null request, UNAUTHORIZED if session is not valid, OK after execution of the script
+	 */
+	@GET
+	@Path("/idlDemo") 
+	@Produces({"application/json"})
+	public PrimitiveResult idlDemo(
+			@HeaderParam("x-session-token") String sSessionId) {
+		Wasdi.DebugLog("ProcessingResource.idlDemo");
+	
+		
+		if(null != sSessionId ) {
+			PrimitiveResult oResult = new PrimitiveResult();
+			oResult.setBoolValue(false);
+			oResult.setIntValue(Integer.parseInt(Response.Status.BAD_REQUEST.toString()));
+			return oResult;
+		}
+		User oUser = Wasdi.GetUserFromSession(sSessionId);
+		//check session validity
+		if (oUser == null || Utils.isNullOrEmpty(oUser.getUserId())) {
+			PrimitiveResult oResult = new PrimitiveResult();
+			oResult.setBoolValue(false);
+			oResult.setIntValue(Integer.parseInt(Response.Status.UNAUTHORIZED.toString()));
+			return oResult;				
+		}
+		Wasdi.DebugLog("ProcessingResource.idlDemo: ok valid session, let's go");
+
+		try {
+			String cmd[] = new String[] {
+					m_oServletConfig.getInitParameter("IdlDemoScript")
+			};
+			
+			Wasdi.DebugLog("ProcessingResource.idlDemo " + cmd[0] );
+			
+			System.out.println("ProcessingResource.idlDemo: shell exec " + Arrays.toString(cmd));
+			Process proc = Runtime.getRuntime().exec(cmd);
+			BufferedReader input = new BufferedReader(new InputStreamReader(proc.getInputStream()));
+            String line = null;
+            while((line=input.readLine()) != null) {
+            	System.out.println("ProcessingResource.idlDemo: envi stdout: " + line);
+            }
+			if (proc.waitFor() != 0) {
+				return PrimitiveResult.getInvalidInstance();
+			}
+		} catch (Exception oEx) {
+			System.out.println("ProcessingResource.idlDemo: error happened" + oEx.getMessage());
+			oEx.printStackTrace();
+			return PrimitiveResult.getInvalidInstance();
+		}
+
+		System.out.println("ProcessingResource.idlDemo: about to respond and close");
+		PrimitiveResult oResult = new PrimitiveResult();
+		oResult.setBoolValue(true);
+		oResult.setIntValue(Integer.parseInt(Response.Status.OK.toString()));
+		oResult.setStringValue("IDL code executed");
+		return oResult;
+	}
+	
+	/**
+	 * Runs a the IDL script implementation of the LIST flood algorithm with sample input files
+	 * Shows a practical usage of WASDL 
+	 * @param sSessionId a valid session identifier
+	 * @return BAD_REQUEST if null request, UNAUTHORIZED if session is not valid, OK after execution of the script
+	 */
+	@GET
+	@Path("/listFloodDemo")
+	@Produces({"application/json"})
+	public PrimitiveResult listFloodDemo(
+			@HeaderParam("x-session-token") String sSessionId) {
+		Wasdi.DebugLog("ProcessingResource.listFloodDemo");
+		try {
+			//get standard demo files and parameters
+			String sFileName = m_oServletConfig.getInitParameter("ListFloodDemo.fileName");
+			String sWorkspaceId = m_oServletConfig.getInitParameter("ListFloodDemo.workspaceId");
+			return listflood(sSessionId, sFileName, sWorkspaceId);
+		} catch (Exception e) {
+			e.printStackTrace();
+			PrimitiveResult oResult = PrimitiveResult.getInvalidInstance();
+			oResult.setIntValue(Integer.parseInt(Response.Status.INTERNAL_SERVER_ERROR.toString()));
+			return oResult;
+		}
+		
+	}
+	
+	/**
+	 * Runs a the IDL script implementation of the LIST flood algorithm on specified files
+	 * @param sSessionId a valid session identifier
+	 * @param sFileName input file
+	 * @param a workspase identifier
+	 * @return BAD_REQUEST if null request, UNAUTHORIZED if session is not valid, OK after execution of the script
+	 */
+	@GET
+	@Path("/listflood")
+	@Produces({"application/json"})
+	public PrimitiveResult listflood(
+			@HeaderParam("x-session-token") String sSessionId,
+			@QueryParam("file") String sFileName,
+			@QueryParam("workspaceId") String sWorkspaceId) {
+		
+		Wasdi.DebugLog("ProcessingResource.algList");
+		if(null != sSessionId ) {
+			PrimitiveResult oResult = new PrimitiveResult();
+			oResult.setBoolValue(false);
+			oResult.setIntValue(Integer.parseInt(Response.Status.BAD_REQUEST.toString()));
+			return oResult;
+		}
+		
+		User oUser = Wasdi.GetUserFromSession(sSessionId);
+		try {
+			//check authentication
+			if (oUser == null || Utils.isNullOrEmpty(oUser.getUserId())) {
+				PrimitiveResult oResult = PrimitiveResult.getInvalidInstance();
+				oResult.setIntValue(Integer.parseInt(Response.Status.UNAUTHORIZED.toString()));
+				return oResult;				
+			}
+			Wasdi.DebugLog("ProcessingResource.algList: PARAM FILE " + sFileName);
+			Wasdi.DebugLog("ProcessingResource.list: launching ENVI LIST Processor");
+			
+			//try execute algorithm
+			if (launchList(sFileName, sWorkspaceId)) {
+				Wasdi.DebugLog("ProcessingResource.algList: ok return");
+				//TODO read value somewhere (input argument? config file?)
+				String sOutputFile = "";
+				
+				if (sFileName.startsWith("CSK")) {
+					sOutputFile = "Mappa_" + sFileName.substring(0, 41) +".tif";
+				}
+				else if (sFileName.startsWith("S1A")) {
+					sOutputFile = "Mappa_" + sFileName.substring(0, 32) +".tif";
+				}
+				
+				PrimitiveResult oResult = new PrimitiveResult();
+				oResult.setStringValue(sOutputFile);
+				oResult.setBoolValue(true);
+				oResult.setIntValue(Integer.parseInt(Response.Status.OK.toString()));
+				return oResult;
+			}
+			else {
+				Wasdi.DebugLog("ProcessingResource.algList: error, return");
+				PrimitiveResult oResult = PrimitiveResult.getInvalidInstance();
+				oResult.setBoolValue(false);
+				oResult.setIntValue(Integer.parseInt(Response.Status.INTERNAL_SERVER_ERROR.toString()));
+				return oResult;
+			}
+		} catch (Exception e) {
+			System.out.println("ProcessingResource.algList: error launching list " + e.getMessage());
+			e.printStackTrace();
+			PrimitiveResult oResult = PrimitiveResult.getInvalidInstance();
+			oResult.setBoolValue(false);
+			oResult.setIntValue(Integer.parseInt(Response.Status.INTERNAL_SERVER_ERROR.toString()));				
+			return oResult;
+		}
+	
+	}
+	
+	/**
+	 * Launch LIST ENVI process
+	 * @param sInputFile 
+	 * @param sWorkspaceId
+	 * @return
+	 */
+	private boolean launchList(String sInputFile, String sWorkspaceId) {
+
+		try {
+			String cmd[] = new String[] {
+					m_oServletConfig.getInitParameter("ListScript")
+			};
+			
+			Wasdi.DebugLog("ProcessingResource.launchList " + cmd[0] );
+			
+			String sParamFile = m_oServletConfig.getInitParameter("ListParam");
+			
+			Wasdi.DebugLog("ProcessingResource.launchList ParamFile " + sParamFile);
+			
+			File oFile = new File(sParamFile);
+			
+			if (!oFile.exists()) {				
+				Wasdi.DebugLog("ProcessingResource.launchList: " + sParamFile + " doesn't exist, ending");
+				//TODO check: why create a dir?
+				//oFile.mkdirs();
+				return false;
+			} else {
+				Wasdi.DebugLog("ProcessingResource.launchList: " + sParamFile + " exists, ok");
+			}
+			
+			BufferedWriter oWriter = new BufferedWriter(new FileWriter(oFile));
+			if(null!= oWriter) {
+				Wasdi.DebugLog("ProcessingResource.launchList: BufferedWriter created");
+				oWriter.write("USER,"+m_oServletConfig.getInitParameter("ListUser"));
+				oWriter.newLine();
+				oWriter.write("PASSWORD,"+m_oServletConfig.getInitParameter("ListPassword"));
+				oWriter.newLine();
+				oWriter.write("FILE,"+sInputFile);
+				oWriter.newLine();
+				oWriter.write("WORKSPACE,"+sWorkspaceId);
+				oWriter.newLine();
+				oWriter.flush();		
+				oWriter.close();
+			}
+			
+			System.out.println("ProcessingResource.launchList: shell exec " + Arrays.toString(cmd));
+			Process proc = Runtime.getRuntime().exec(cmd);
+			BufferedReader input = new BufferedReader(new InputStreamReader(proc.getInputStream()));
+            String line;
+            while((line=input.readLine()) != null) {
+            	System.out.println("ProcessingResource.launchList: envi stdout: " + line);
+            }
+			if (proc.waitFor() != 0) return false;
+		} catch (Exception oEx) {
+			System.out.println("ProcessingResource.launchList: error during list process " + oEx.getMessage());
+			oEx.printStackTrace();
+			return false;
+		}
+
+		return true;
+	}
+	
 	
 	
 }
