@@ -99,6 +99,7 @@ import wasdi.shared.utils.SerializationUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.BandImageViewModel;
 import wasdi.shared.viewmodels.ColorManipulationViewModel;
+import wasdi.shared.viewmodels.ListFloodViewModel;
 import wasdi.shared.viewmodels.MaskViewModel;
 import wasdi.shared.viewmodels.MathMaskViewModel;
 import wasdi.shared.viewmodels.PrimitiveResult;
@@ -1362,6 +1363,8 @@ public class ProcessingResources {
 	 * @param sSessionId a valid session identifier
 	 * @return BAD_REQUEST if null request, UNAUTHORIZED if session is not valid, OK after execution of the script
 	 */
+	
+	/*
 	@GET
 	@Path("/listFloodDemo")
 	@Produces({"application/json"})
@@ -1381,7 +1384,7 @@ public class ProcessingResources {
 		}
 		
 	}
-	
+	*/
 	/**
 	 * Runs a the IDL script implementation of the LIST flood algorithm on specified files
 	 * @param sSessionId a valid session identifier
@@ -1389,15 +1392,16 @@ public class ProcessingResources {
 	 * @param a workspase identifier
 	 * @return BAD_REQUEST if null request, UNAUTHORIZED if session is not valid, OK after execution of the script
 	 */
-	@GET
+	@POST
 	@Path("/listflood")
 	@Produces({"application/json"})
 	public PrimitiveResult listflood(
 			@HeaderParam("x-session-token") String sSessionId,
-			@QueryParam("file") String sFileName,
-			@QueryParam("workspaceId") String sWorkspaceId) {
+			@QueryParam("workspaceId") String sWorkspaceId,
+			ListFloodViewModel oListFloodViewModel) {
 		
 		Wasdi.DebugLog("ProcessingResource.algList");
+		
 		if(null != sSessionId ) {
 			PrimitiveResult oResult = new PrimitiveResult();
 			oResult.setBoolValue(false);
@@ -1406,6 +1410,7 @@ public class ProcessingResources {
 		}
 		
 		User oUser = Wasdi.GetUserFromSession(sSessionId);
+		
 		try {
 			//check authentication
 			if (oUser == null || Utils.isNullOrEmpty(oUser.getUserId())) {
@@ -1413,24 +1418,17 @@ public class ProcessingResources {
 				oResult.setIntValue(Integer.parseInt(Response.Status.UNAUTHORIZED.toString()));
 				return oResult;				
 			}
-			Wasdi.DebugLog("ProcessingResource.algList: PARAM FILE " + sFileName);
-			Wasdi.DebugLog("ProcessingResource.list: launching ENVI LIST Processor");
 			
+			Wasdi.DebugLog("ProcessingResource.algList: REF FILE " + oListFloodViewModel.getReferenceFile());
+			Wasdi.DebugLog("ProcessingResource.algList: POST EVENT FILE " + oListFloodViewModel.getPostEventFile());
+			Wasdi.DebugLog("ProcessingResource.list: launching ENVI LIST Processor");
+						
 			//try execute algorithm
-			if (launchList(sFileName, sWorkspaceId)) {
+			if (launchList(oListFloodViewModel, sWorkspaceId)) {
 				Wasdi.DebugLog("ProcessingResource.algList: ok return");
 				//TODO read value somewhere (input argument? config file?)
-				String sOutputFile = "";
-				
-				if (sFileName.startsWith("CSK")) {
-					sOutputFile = "Mappa_" + sFileName.substring(0, 41) +".tif";
-				}
-				else if (sFileName.startsWith("S1A")) {
-					sOutputFile = "Mappa_" + sFileName.substring(0, 32) +".tif";
-				}
-				
+
 				PrimitiveResult oResult = new PrimitiveResult();
-				oResult.setStringValue(sOutputFile);
 				oResult.setBoolValue(true);
 				oResult.setIntValue(Integer.parseInt(Response.Status.OK.toString()));
 				return oResult;
@@ -1455,11 +1453,11 @@ public class ProcessingResources {
 	
 	/**
 	 * Launch LIST ENVI process
-	 * @param sInputFile 
+	 * @param sReferenceFile 
 	 * @param sWorkspaceId
 	 * @return
 	 */
-	private boolean launchList(String sInputFile, String sWorkspaceId) {
+	private boolean launchList(ListFloodViewModel oListFloodViewModel, String sWorkspaceId) {
 
 		try {
 			String cmd[] = new String[] {
@@ -1474,38 +1472,44 @@ public class ProcessingResources {
 			
 			File oFile = new File(sParamFile);
 			
-			if (!oFile.exists()) {				
-				Wasdi.DebugLog("ProcessingResource.launchList: " + sParamFile + " doesn't exist, ending");
-				//TODO check: why create a dir?
-				//oFile.mkdirs();
-				return false;
-			} else {
-				Wasdi.DebugLog("ProcessingResource.launchList: " + sParamFile + " exists, ok");
-			}
-			
 			BufferedWriter oWriter = new BufferedWriter(new FileWriter(oFile));
 			if(null!= oWriter) {
 				Wasdi.DebugLog("ProcessingResource.launchList: BufferedWriter created");
-				oWriter.write("USER,"+m_oServletConfig.getInitParameter("ListUser"));
+				//oWriter.write("USER,"+m_oServletConfig.getInitParameter("ListUser"));
+				//oWriter.newLine();
+				//oWriter.write("PASSWORD,"+m_oServletConfig.getInitParameter("ListPassword"));
+				//oWriter.newLine();
+				oWriter.write(oListFloodViewModel.getPostEventFile());
 				oWriter.newLine();
-				oWriter.write("PASSWORD,"+m_oServletConfig.getInitParameter("ListPassword"));
+				oWriter.write(oListFloodViewModel.getReferenceFile());
 				oWriter.newLine();
-				oWriter.write("FILE,"+sInputFile);
 				oWriter.newLine();
-				oWriter.write("WORKSPACE,"+sWorkspaceId);
+				oWriter.newLine();
+				oWriter.write("S1A_IW_GRDH_1SDV_20180904T174542_20180904T174607_023552_0290A2_A262_HSBA_MASK.tif");
+				oWriter.newLine();
+				oWriter.write("S1A_IW_GRDH_1SDV_20180904T174542_20180904T174607_023552_0290A2_A262_flood_map.tif");
+				oWriter.newLine();
+				oWriter.write("4");
+				oWriter.newLine();
+				oWriter.write("2.4");
+				oWriter.newLine();
+				oWriter.write("1000");
+				oWriter.newLine();
+				oWriter.write("10");
 				oWriter.newLine();
 				oWriter.flush();		
 				oWriter.close();
 			}
 			
 			System.out.println("ProcessingResource.launchList: shell exec " + Arrays.toString(cmd));
-			Process proc = Runtime.getRuntime().exec(cmd);
-			BufferedReader input = new BufferedReader(new InputStreamReader(proc.getInputStream()));
-            String line;
-            while((line=input.readLine()) != null) {
-            	System.out.println("ProcessingResource.launchList: envi stdout: " + line);
+			Process oProc = Runtime.getRuntime().exec(cmd);
+			BufferedReader oInput = new BufferedReader(new InputStreamReader(oProc.getInputStream()));
+			
+            String sLine;
+            while((sLine=oInput.readLine()) != null) {
+            	System.out.println("ProcessingResource.launchList: envi stdout: " + sLine);
             }
-			if (proc.waitFor() != 0) return false;
+			if (oProc.waitFor() != 0) return false;
 		} catch (Exception oEx) {
 			System.out.println("ProcessingResource.launchList: error during list process " + oEx.getMessage());
 			oEx.printStackTrace();
