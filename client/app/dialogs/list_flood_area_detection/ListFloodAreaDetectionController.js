@@ -44,8 +44,8 @@ var ListFloodAreaDetectionController = (function() {
             return false;
         }
         var oListFlood = {
-           referenceFile:this.m_oSelectedReferenceProduct.name,
-           postEventFile:this.m_oSelectedPostEventImageProduct.name,
+           referenceFile:this.m_oSelectedReferenceProduct.fileName,
+           postEventFile:this.m_oSelectedPostEventImageProduct.fileName,
            outputMaskFile:"",
            outputFloodMapFile:"",
         };
@@ -65,12 +65,12 @@ var ListFloodAreaDetectionController = (function() {
                 }
                 else
                 {
-                    utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR: SEARCH ORBITS FAILS.");
+                    utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR: LIST FLOOD FAILS.");
                 }
 
             })
             .error(function(){
-                utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR: SEARCH ORBITS FAILS.");
+                utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR: LIST FLOOD FAILS.");
             });
     };
 
