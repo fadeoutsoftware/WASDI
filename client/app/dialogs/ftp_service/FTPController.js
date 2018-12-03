@@ -3,11 +3,12 @@
  */
 var FTPController = (function() {
 
-    function FTPController($scope, oClose,oExtras,oCatalogService) {
+    function FTPController($scope, oClose,oExtras,oCatalogService,oConstantsService) {
         this.m_oScope = $scope;
         this.m_oScope.m_oController = this;
         this.m_oExtras = oExtras;
         this.m_oCatalogService = oCatalogService ;
+        this.m_oConstantsService = oConstantsService;
         this.m_oProduct = this.m_oExtras.product;
 
         this.m_oFtpRequest = {
@@ -34,24 +35,33 @@ var FTPController = (function() {
             fileName:"",
             destinationAbsolutePath:""
         };
+
         var oController = this;
-        if(this.isDataFtpRequestValid() === false)
+        var oActiveWorkspace = this.m_oConstantsService.getActiveWorkspace()
+
+        if(this.isDataFtpRequestValid() === false  )
         {
+            utilsVexDialogAlertTop("GURU MEDITATION<br>INVALID DATA FTP");
             return false;
         }
-
+        if(oActiveWorkspace === null)
+        {
+            utilsVexDialogAlertTop("GURU MEDITATION<br>YOU SHOULD SELECT AN ACTIVE WORKSPACE");
+            return false;
+        }
         var oFtpTransferFile = {
             server:this.m_oFtpRequest.serverIp,
             port:this.m_oFtpRequest.port,
             user:this.m_oFtpRequest.user,
             password:this.m_oFtpRequest.password,
             fileName:this.m_oProduct.fileName,
-            destinationAbsolutePath:""
+            destinationAbsolutePath:"",
+            // workspace:oActiveWorkspace.workspaceId
         };
 
         oFtpTransferFile.server = this.m_oFtpRequest.serverIp;
 
-        this.m_oCatalogService.uploadFTPFile(oFtpTransferFile)
+        this.m_oCatalogService.uploadFTPFile(oFtpTransferFile,oActiveWorkspace.workspaceId)
             .success(function(data,status){
                 if(utilsIsObjectNullOrUndefined(data) === false && data.boolValue === true)
                 {
@@ -60,8 +70,10 @@ var FTPController = (function() {
                 else
                 {
                     utilsVexDialogAlertTop("GURU MEDITATION<br>UPLOAD FTP FILE ERROR");
+                    // oController.cleanFormInputData();
+
                 }
-                oController.cleanFormInputData();
+                // oController.cleanFormInputData();
 
             })
             .error(function(data,status){
@@ -110,7 +122,8 @@ var FTPController = (function() {
         '$scope',
         'close',
         'extras',
-        'CatalogService'
+        'CatalogService',
+        'ConstantsService'
     ];
     return FTPController;
 })();

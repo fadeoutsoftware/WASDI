@@ -105,6 +105,10 @@ service('SnapOperationService', ['$http',  'ConstantsService', function ($http, 
 
     this.getWPSList = function () {
         return this.m_oHttp.get(this.APIURL + '/processing/WPSlist');
-    }
+    };
+
+    this.runListFlood = function (oListFlood,sWorkspaceId) {
+        return this.m_oHttp.post(this.APIURL + '/processing/listflood?workspaceId='+sWorkspaceId ,oListFlood);
+    };
 }]);
 
