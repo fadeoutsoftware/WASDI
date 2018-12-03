@@ -683,6 +683,7 @@ public class BandImageManager {
 	
 
     private static BufferedImageRendering createRendering(BufferedImage bufferedImage, MultiLevelModel multiLevelModel) {
+    	
         AffineTransform m2iTransform = multiLevelModel.getModelToImageTransform(0);
         final Viewport vp2 = new DefaultViewport(new Rectangle(bufferedImage.getWidth(), bufferedImage.getHeight()),
                                                  m2iTransform.getDeterminant() > 0.0);
