@@ -176,7 +176,7 @@ var SearchOrbitController = (function() {
         oOrbitSearch.orbitFilters = new Array();
         this.m_oOrbitSearch.orbitFilters = new Array();
         this.m_oOrbitSearch.satelliteNames = new Array();
-        var oOrbitFilter = new Object();
+       // var oOrbitFilter = new Object();
 
         if(utilsIsObjectNullOrUndefined(this.m_oSelectedSensorType))
             var iLengthSelectedSensorType = 0;
@@ -248,7 +248,7 @@ var SearchOrbitController = (function() {
                 if(!utilsIsObjectNullOrUndefined(data))
                 {
                     oController.m_aoOrbits = data;
-                    oController.setOrbitAsUnchecked()
+                    oController.setOrbitAsUnchecked();
                 }
                 else
                 {

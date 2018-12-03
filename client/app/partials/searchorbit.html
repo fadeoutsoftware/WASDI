@@ -132,11 +132,7 @@
 
                             <img src="assets/icons/Satellite.svg" alt="Satellite" height="30" width="30">{{"SEARCH_TITLE_CHECK_BOX_SATELLITE"|translate}}
                             <div class="well well-sm">
-                                <!--<div class="checkbox-satellite-container"ng-repeat="satellite in m_oController.m_oConfiguration.orbitsearch.satelliteNames">-->
-                                <!--<input type="checkbox" checklist-model="m_oController.m_oSelectedSatellite"-->
-                                <!--checklist-value="satellite"  />-->
-                                <!--<span>{{satellite}}</span>&lt;!&ndash;ng-checked="true"&ndash;&gt;-->
-                                <!--</div>-->
+
                                 <div class="checkbox-satellite-container"ng-repeat="satellite in m_oController.m_oConfiguration.orbitsearch.satelliteNames">
                                     <i class="fa fa-square-o" aria-hidden="true" ng-click="m_oController.checkedSatellite(satellite)" ng-hide="m_oController.isSatelliteSelected(satellite)"></i>
                                     <i class="fa fa-check-square-o" aria-hidden="true"  ng-click="m_oController.uncheckedSatellite(satellite)" ng-show="m_oController.isSatelliteSelected(satellite)"></i>
@@ -144,27 +140,60 @@
                                 </div>
 
                             </div>
-                        </div>
-                        <!--&lt;!&ndash;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45; Type &#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&ndash;&gt;-->
-                        <!--<div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 container-checkbox" >-->
-                        <!--{{"SEARCH_TITLE_CHECK_BOX_SENSOR_TYPE"|translate}}-->
-                        <!--<div class="well well-sm">-->
-                        <!--<div ng-repeat="sensortype in m_oController.m_oConfiguration.orbitsearch.sensortypes" >-->
-                        <!--<input type="checkbox" checklist-model="m_oController.m_oSelectedSensorType" checklist-value="sensortype"/> <span>{{sensortype}}</span>-->
-                        <!--</div>-->
-                        <!--</div>-->
-                        <!--</div>-->
-                        <!--&lt;!&ndash;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45; Resolution -&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&ndash;&gt;-->
-                        <!--<div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 " >-->
-                        <!--{{"SEARCH_TITLE_CHECK_BOX_SENSOR_RESOLUTION"|translate}}-->
-                        <!--<div class="well well-sm">-->
-                        <!--<div ng-repeat="sensorresolution in m_oController.m_oConfiguration.orbitsearch.sensorresolutions" >-->
-                        <!--<input type="checkbox"  checklist-model="m_oController.m_oSelectedResolutionType" checklist-value="sensorresolution"/> <span>{{sensorresolution}}</span>-->
-                        <!--</div>-->
-                        <!--</div>-->
-                        <!--</div>-->
 
-                        <!--<div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">-->
+                            <div class="well well-sm">
+                                looking type
+                                <div class="radio">
+                                    <label>
+                                        <input type="radio" name="name" id="lookingTypeLeft" value="" checked="checked">
+                                        {{"SEARCH_TITLE_LOOKING_TYPE_LEFT_LABEL"|translate}}
+                                    </label>
+                                    <label>
+                                        <input type="radio" name="name" id="lookingTypeRight" value="" checked="checked">
+                                        {{"SEARCH_TITLE_LOOKING_TYPE_RIGHT_LABEL"|translate}}
+                                    </label>
+                                    <label>
+                                        <input type="radio" name="name" id="lookingTypeNone" value="" checked="checked">
+                                        {{"SEARCH_TITLE_LOOKING_TYPE_NONE_LABEL"|translate}}
+                                    </label>
+                                </div>
+
+                            </div>
+                            <!--<div class="well well-sm">-->
+                                <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 well well-sm">
+                                    <div class="row">
+                                        <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
+                                            {{"SEARCH_TITLE_LOOKING_TYPE_VIEW_ANGLE_LABEL"|translate}}
+                                        </div>
+                                        <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
+                                            <input type="text" name="name" value="" checked="checked"  placeholder="{{'SEARCH_TITLE_LOOKING_TYPE_VIEW_NEAR_ANGLE_LABEL'|translate}}" >
+
+                                        </div>
+                                        <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
+                                            <input type="text" name="name" value="" checked="checked"  placeholder="{{'SEARCH_TITLE_LOOKING_TYPE_VIEW_FAR_ANGLE_LABEL'|translate}}" >
+
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
+                                            {{"SEARCH_TITLE_LOOKING_TYPE_SWATH_SIZE_LABEL"|translate}}
+                                        </div>
+                                        <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
+                                            <input type="text" name="name" value="" checked="checked"  placeholder="{{'SEARCH_TITLE_LOOKING_TYPE_SWATH_SIZE_LENGTH_LABEL'|translate}}" >
+
+                                        </div>
+                                        <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
+                                            <input type="text" name="name" value="" checked="checked"  placeholder="{{'SEARCH_TITLE_LOOKING_TYPE_SWATH_SIZE_WIDTH_LABEL'|translate}}" >
+
+                                        </div>
+                                    </div>
+                                </div>
+
+                            <!--</div>-->
+
+
+                        </div>
+
                         <!--Note: you should draw an area on the map before search orbits.-->
                         <!--</div>-->
                         <div class="loadIcon" ng-show="m_oController.m_bIsVisibleLoadingIcon">
