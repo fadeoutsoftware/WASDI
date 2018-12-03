@@ -1313,7 +1313,7 @@ public class ProcessingResources {
 		if(null != sSessionId ) {
 			PrimitiveResult oResult = new PrimitiveResult();
 			oResult.setBoolValue(false);
-			oResult.setIntValue(Integer.parseInt(Response.Status.BAD_REQUEST.toString()));
+			oResult.setIntValue(400);
 			return oResult;
 		}
 		User oUser = Wasdi.GetUserFromSession(sSessionId);
@@ -1321,7 +1321,7 @@ public class ProcessingResources {
 		if (oUser == null || Utils.isNullOrEmpty(oUser.getUserId())) {
 			PrimitiveResult oResult = new PrimitiveResult();
 			oResult.setBoolValue(false);
-			oResult.setIntValue(Integer.parseInt(Response.Status.UNAUTHORIZED.toString()));
+			oResult.setIntValue(401);
 			return oResult;				
 		}
 		Wasdi.DebugLog("ProcessingResource.idlDemo: ok valid session, let's go");
@@ -1352,7 +1352,7 @@ public class ProcessingResources {
 		System.out.println("ProcessingResource.idlDemo: about to respond and close");
 		PrimitiveResult oResult = new PrimitiveResult();
 		oResult.setBoolValue(true);
-		oResult.setIntValue(Integer.parseInt(Response.Status.OK.toString()));
+		oResult.setIntValue(200);
 		oResult.setStringValue("IDL code executed");
 		return oResult;
 	}
@@ -1402,10 +1402,10 @@ public class ProcessingResources {
 		
 		Wasdi.DebugLog("ProcessingResource.algList");
 		
-		if(null != sSessionId ) {
+		if(null == sSessionId ) {
 			PrimitiveResult oResult = new PrimitiveResult();
 			oResult.setBoolValue(false);
-			oResult.setIntValue(Integer.parseInt(Response.Status.BAD_REQUEST.toString()));
+			oResult.setIntValue(400);
 			return oResult;
 		}
 		
@@ -1415,7 +1415,7 @@ public class ProcessingResources {
 			//check authentication
 			if (oUser == null || Utils.isNullOrEmpty(oUser.getUserId())) {
 				PrimitiveResult oResult = PrimitiveResult.getInvalidInstance();
-				oResult.setIntValue(Integer.parseInt(Response.Status.UNAUTHORIZED.toString()));
+				oResult.setIntValue(401);
 				return oResult;				
 			}
 			
@@ -1430,14 +1430,14 @@ public class ProcessingResources {
 
 				PrimitiveResult oResult = new PrimitiveResult();
 				oResult.setBoolValue(true);
-				oResult.setIntValue(Integer.parseInt(Response.Status.OK.toString()));
+				oResult.setIntValue(200);
 				return oResult;
 			}
 			else {
 				Wasdi.DebugLog("ProcessingResource.algList: error, return");
 				PrimitiveResult oResult = PrimitiveResult.getInvalidInstance();
 				oResult.setBoolValue(false);
-				oResult.setIntValue(Integer.parseInt(Response.Status.INTERNAL_SERVER_ERROR.toString()));
+				oResult.setIntValue(500);
 				return oResult;
 			}
 		} catch (Exception e) {
@@ -1445,7 +1445,7 @@ public class ProcessingResources {
 			e.printStackTrace();
 			PrimitiveResult oResult = PrimitiveResult.getInvalidInstance();
 			oResult.setBoolValue(false);
-			oResult.setIntValue(Integer.parseInt(Response.Status.INTERNAL_SERVER_ERROR.toString()));				
+			oResult.setIntValue(500);				
 			return oResult;
 		}
 	
