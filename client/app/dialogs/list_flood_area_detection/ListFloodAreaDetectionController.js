@@ -60,7 +60,8 @@ var ListFloodAreaDetectionController = (function() {
             .success(function(data,status){
                 if( (utilsIsObjectNullOrUndefined(data) === false) && (status === 200))
                 {
-                    utilsVexDialogAlertBottomRightCorner("GURU MEDITATION<br>LIST FLOOD IS RUNNING.");
+                    var oDialog =  utilsVexDialogAlertBottomRightCorner("GURU MEDITATION<br>LIST FLOOD IS RUNNING.");
+                    utilsVexCloseDialogAfterFewSeconds(4000, oDialog);
                 }
                 else
                 {
