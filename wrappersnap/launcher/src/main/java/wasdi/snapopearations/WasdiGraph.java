@@ -105,8 +105,9 @@ public class WasdiGraph {
 				throw new Exception("Reader node and Writer node are mandatory");
 			}		
 			if (!setNodeValue(nodeReader, "file", inputFile.getAbsolutePath()) || 
-					!setNodeValue(nodeWriter, "file", outputFile.getAbsolutePath()) ||
-					!setNodeValue(nodeWriter, "formatName", DimapProductWriterPlugIn.DIMAP_FORMAT_NAME) ) {
+					!setNodeValue(nodeWriter, "file", outputFile.getAbsolutePath()) 
+					//|| !setNodeValue(nodeWriter, "formatName", DimapProductWriterPlugIn.DIMAP_FORMAT_NAME) 
+					) {
 				throw new Exception("Error setting input/output file");
 			}
 			
