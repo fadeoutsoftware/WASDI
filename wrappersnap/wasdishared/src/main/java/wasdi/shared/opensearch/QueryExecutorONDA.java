@@ -36,10 +36,21 @@ import wasdi.shared.viewmodels.QueryResultViewModel;
  */
 public class QueryExecutorONDA extends QueryExecutor {
 
-	String m_sLocale = "UTF-8";
-	String m_sEnconding = m_sLocale;
-	String m_sDecoding = m_sLocale;
+	DiasQueryTranslator m_oQTrans;
 	
+	public QueryExecutorONDA() {
+		m_oQTrans = new OpenSearch2OdataTranslator();
+	}
+	
+	
+	public DiasQueryTranslator getM_oQTrans() {
+		return m_oQTrans;
+	}
+
+	public void setM_oQTrans(DiasQueryTranslator m_oQTrans) {
+		this.m_oQTrans = m_oQTrans;
+	}
+
 	/* (non-Javadoc)
 	 * @see wasdi.shared.opensearch.QueryExecutor#getUrlPath()
 	 */
@@ -64,7 +75,7 @@ public class QueryExecutorONDA extends QueryExecutor {
 	@Override
 	protected String getCountUrl(String sQuery) {
 		String sUrl = "https://catalogue.onda-dias.eu/dias-catalogue/Products/$count?$search=%22";
-		sUrl+=openSearch2ODATA(sQuery);
+		sUrl+=m_oQTrans.translateAndEncode(sQuery);
 		sUrl+="%22";
 		return sUrl;
 	}
@@ -75,68 +86,69 @@ public class QueryExecutorONDA extends QueryExecutor {
 	protected String buildUrl(String sQuery){
 		
 		String sUrl = "https://catalogue.onda-dias.eu/dias-catalogue/Products?$search=%22";
-		sUrl+=openSearch2ODATA(sQuery);
+		sUrl+=m_oQTrans.translateAndEncode(sQuery);
 		sUrl+="%22&$top=10";
 		return sUrl;
 	}
 
-	protected String openSearch2ODATA(String sQuery) {
-		String sResult = sQuery;
-//		try {
-//			sResult = java.net.URLDecoder.decode(sQuery, m_sDecoding );
-//		} catch (UnsupportedEncodingException e) {
-//			e.printStackTrace();
-//		}
 
-		
-		//expected elements
-		//
-		//polygon (optional):
-		  //footprint:"intersects(POLYGON((
-		    //9.434509277343752 36.82027895130877,
-		    //9.434509277343752 44.912304304581525,
-		    //24.72747802734375 44.912304304581525,
-		    //24.72747802734375 36.82027895130877,
-		    //9.434509277343752 36.82027895130877
-		    //)))"
-		//
-		//time interval:
-		  //beginPosition:[2018-11-20T00:00:00.000Z TO 2018-11-27T23:59:59.999Z]
-		  // AND 
-		  //endPosition:[2018-11-20T00:00:00.000Z TO 2018-11-27T23:59:59.999Z] 
-		//
-		//
-		
-		//SENTINEL 1
-		sResult = sResult.replaceAll("platformname:Sentinel-1", "name:S1*");
-		//SENTINEL 2
-		sResult = sResult.replaceAll("platformname:Sentinel-2", "name:S2*");
-		//SENTINEL 3
-		sResult = sResult.replaceAll("platformname:Sentinel-3", "name:S3*");
-
-
-		//SENTINEL 1 - 2 - 3
-		sResult = sResult.replaceAll("filename:", "name:");
-		sResult = sResult.replaceAll("producttype:", "name:");
-		//polarisationmode:HH not supported by ONDA? 
-		//sensoroperationalmode:SM same name in ONDA 
-		//swathidentifier:b not supported by ONDA?
-		//cloudcoverpercentage:a same name in ONDA
-		sResult = sResult.replaceAll("timeliness:Near Real Time", "timeliness:NRT");
-		sResult = sResult.replaceAll("timeliness:Short Time Critical", "timeliness:STC");
-		sResult = sResult.replaceAll("timeliness:Non Time Critical", "timeliness:NTC");
-		//OS: just for sentinel1, ONDA: just for sentinel3
-		sResult = sResult.replaceAll("relativeorbitstart:", "relativeOrbitNumber:");
-		//cloudCoverPercentage should be the same
-		
-		/*while(sResult.contains("  ")) {
-			sResult = sResult.replaceAll("  ", " ");
-		}*/
-		//sResult = java.net.URLEncoder.encode(sResult, m_sEnconding);
-		sResult = sResult.replaceAll(" ", "%20");
-		
-		return sResult;
-	}
+//	protected String openSearch2ODATA(String sQuery) {
+//		String sResult = sQuery;
+////		try {
+////			sResult = java.net.URLDecoder.decode(sQuery, m_sDecoding );
+////		} catch (UnsupportedEncodingException e) {
+////			e.printStackTrace();
+////		}
+//
+//		
+//		//expected elements
+//		//
+//		//polygon (optional):
+//		  //footprint:"intersects(POLYGON((
+//		    //9.434509277343752 36.82027895130877,
+//		    //9.434509277343752 44.912304304581525,
+//		    //24.72747802734375 44.912304304581525,
+//		    //24.72747802734375 36.82027895130877,
+//		    //9.434509277343752 36.82027895130877
+//		    //)))"
+//		//
+//		//time interval:
+//		  //beginPosition:[2018-11-20T00:00:00.000Z TO 2018-11-27T23:59:59.999Z]
+//		  // AND 
+//		  //endPosition:[2018-11-20T00:00:00.000Z TO 2018-11-27T23:59:59.999Z] 
+//		//
+//		//
+//		
+//		//SENTINEL 1
+//		sResult = sResult.replaceAll("platformname:Sentinel-1", "name:S1*");
+//		//SENTINEL 2
+//		sResult = sResult.replaceAll("platformname:Sentinel-2", "name:S2*");
+//		//SENTINEL 3
+//		sResult = sResult.replaceAll("platformname:Sentinel-3", "name:S3*");
+//
+//
+//		//SENTINEL 1 - 2 - 3
+//		sResult = sResult.replaceAll("filename:", "name:");
+//		sResult = sResult.replaceAll("producttype:", "name:");
+//		//polarisationmode:HH not supported by ONDA? 
+//		//sensoroperationalmode:SM same name in ONDA 
+//		//swathidentifier:b not supported by ONDA?
+//		//cloudcoverpercentage:a same name in ONDA
+//		sResult = sResult.replaceAll("timeliness:Near Real Time", "timeliness:NRT");
+//		sResult = sResult.replaceAll("timeliness:Short Time Critical", "timeliness:STC");
+//		sResult = sResult.replaceAll("timeliness:Non Time Critical", "timeliness:NTC");
+//		//OS: just for sentinel1, ONDA: just for sentinel3
+//		sResult = sResult.replaceAll("relativeorbitstart:", "relativeOrbitNumber:");
+//		//cloudCoverPercentage should be the same
+//		
+//		/*while(sResult.contains("  ")) {
+//			sResult = sResult.replaceAll("  ", " ");
+//		}*/
+//		//sResult = java.net.URLEncoder.encode(sResult, m_sEnconding);
+//		sResult = sResult.replaceAll(" ", "%20");
+//		
+//		return sResult;
+//	}
 
 	
 	@Override
