@@ -29,8 +29,12 @@ public class OpenSearch2OdataTranslator extends DiasQueryTranslator {
 
 		//SENTINEL 1 - 2 - 3
 		sResult = sResult.replaceAll("filename:", "name:");
+		
+		//specific product types that need asterisks
+		sResult = sResult.replaceAll("producttype:SLC","producttype:\\*SLC\\*");
+		sResult = sResult.replaceAll("producttype:S2MSI1C", "producttype:\\*S2MSI1C\\*");
 		sResult = sResult.replaceAll("producttype:", "name:");
-		sResult = sResult.replaceAll(":SLC",":\\*SLC\\*");
+		
 		//polarisationmode:HH not supported by ONDA? 
 		//sensoroperationalmode:SM same name in ONDA 
 		//swathidentifier:b not supported by ONDA?
@@ -42,12 +46,14 @@ public class OpenSearch2OdataTranslator extends DiasQueryTranslator {
 		sResult = sResult.replaceAll("relativeorbitstart:", "relativeOrbitNumber:");
 		
 		sResult = sResult.replaceAll("sensoroperationalmode:", "sensorOperationalMode:");
+		sResult = sResult.replaceAll("cloudcoverpercentage", "cloudCoverPercentage");
 		
 		//cloudCoverPercentage should be the same
 
 		
 		//remove double spaces
-		trimDoubles(sResult, ' ');
+		//trimDoubles(sResult, ' ');
+		sResult = sResult.trim().replaceAll(" +", " ");
 		
 		return sResult;
 	}
