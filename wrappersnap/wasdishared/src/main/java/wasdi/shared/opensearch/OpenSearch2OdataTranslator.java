@@ -45,7 +45,10 @@ public class OpenSearch2OdataTranslator extends DiasQueryTranslator {
 		
 		//cloudCoverPercentage should be the same
 
-	
+		
+		//remove double spaces
+		trimDoubles(sResult, ' ');
+		
 		return sResult;
 	}
 

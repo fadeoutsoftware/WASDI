@@ -134,6 +134,8 @@ public class OpenSearchResource {
 	}
 
 	private Map<String, Integer> getQueryCounters(String sQuery, String sProviders) {
+		Wasdi.DebugLog("OpenSearchResource.getQueryCounters");
+		
 		Map<String, Integer> pMap = new HashMap<String, Integer>();
 		String asProviders[] = sProviders.split(",|;");
 		for (String sProvider : asProviders) {
