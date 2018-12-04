@@ -32,13 +32,15 @@ public abstract class DiasQueryTranslator {
 	}
 	
 	public String trimDoubles(String sQuery, char c) {
+		/*
 		String sSingle = new String("");
 		sSingle = sSingle + c;
 		String sDouble = new String(sSingle);
-		sDouble = sDouble + c;
+		sDouble = sDouble + sDouble;
 		while( sQuery.contains(sDouble) ) {
-			sQuery.replaceAll(sDouble, sSingle);
+			sQuery = sQuery.replaceAll(sDouble, sSingle);
 		}
+		*/
 		
 		return sQuery;
 	}
