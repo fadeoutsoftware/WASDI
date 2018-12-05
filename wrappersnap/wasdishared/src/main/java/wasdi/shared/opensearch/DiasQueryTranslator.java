@@ -31,18 +31,4 @@ public abstract class DiasQueryTranslator {
 		return encode(translate(sQuery));
 	}
 	
-	public String trimDoubles(String sQuery, char c) {
-		/*
-		String sSingle = new String("");
-		sSingle = sSingle + c;
-		String sDouble = new String(sSingle);
-		sDouble = sDouble + sDouble;
-		while( sQuery.contains(sDouble) ) {
-			sQuery = sQuery.replaceAll(sDouble, sSingle);
-		}
-		*/
-		
-		return sQuery;
-	}
-
 }

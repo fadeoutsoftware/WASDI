@@ -9,25 +9,10 @@ package wasdi.shared.opensearch;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.StringReader;
-import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.net.URLEncoder;
 import java.util.ArrayList;
-import java.util.Base64;
-
-import org.apache.abdera.Abdera;
 import org.apache.abdera.i18n.templates.Template;
-import org.apache.abdera.model.Document;
-import org.apache.abdera.model.Feed;
-import org.apache.abdera.parser.Parser;
-import org.apache.abdera.parser.ParserOptions;
-import org.apache.abdera.protocol.Response.ResponseType;
-import org.apache.abdera.protocol.client.AbderaClient;
-import org.apache.abdera.protocol.client.ClientResponse;
-import org.apache.abdera.protocol.client.RequestOptions;
-
 import wasdi.shared.viewmodels.QueryResultViewModel;
 
 /**
@@ -84,11 +69,14 @@ public class QueryExecutorONDA extends QueryExecutor {
 	// /Products/$count?$search="name:S2*"
 	@Override
 	protected String buildUrl(String sQuery){
-		
+		return getCountUrl(sQuery);
+		//TODO implement
+		/*
 		String sUrl = "https://catalogue.onda-dias.eu/dias-catalogue/Products?$search=%22";
 		sUrl+=m_oQTrans.translateAndEncode(sQuery);
 		sUrl+="%22&$top=10";
 		return sUrl;
+		*/
 	}
 
 
@@ -156,7 +144,7 @@ public class QueryExecutorONDA extends QueryExecutor {
 
 		//String sUrl = "https://catalogue.onda-dias.eu/dias-catalogue/Products/$count?$search=%22S2A_MSIL1C_20160719T094032_N0204_R036_T33TYH_20160719T094201%20AND%20(%20name:S1*%20AND%20name:S1A_*%20AND%20name:*%20AND%20name:*%20AND%20name:*%20)%22";
 		//String sUrl = URLEncoder.encode(getCountUrl(sQuery), m_sEnconding);
-		String sUrl = getCountUrl(sQuery);
+		String sUrl = buildUrl(sQuery);
 		
 		
 		URL oURL = new URL(sUrl);
@@ -165,7 +153,7 @@ public class QueryExecutorONDA extends QueryExecutor {
 
 		// optional default is GET
 		oConnection.setRequestMethod("GET");
-
+		oConnection.setRequestProperty("Accept", "*/*");
 
 		//XXX add user and password
 
