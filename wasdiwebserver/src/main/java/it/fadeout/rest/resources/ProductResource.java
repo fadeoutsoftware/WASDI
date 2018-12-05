@@ -186,7 +186,8 @@ public class ProductResource {
 		if (oDownloadedFile != null) {
 			if (oDownloadedFile.getProductViewModel() != null) {
 				// Ok read
-				MetadataViewModel metadata = oDownloadedFile.getProductViewModel().getMetadata();
+				//TODO this is useless, return something
+				//MetadataViewModel metadata = oDownloadedFile.getProductViewModel().getMetadata();
 			}
 		}		
 		// There was a problem

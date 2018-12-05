@@ -85,6 +85,7 @@ public class FileBufferResource {
 				oProcess.setProcessObjId(Utils.GetRandomName());
 				oProcess.setStatus(ProcessStatus.CREATED.name());
 				sProcessId = oRepository.InsertProcessWorkspace(oProcess);
+				System.out.println("DownloadResource.Download: process ID: "+sProcessId);
 				//set the process object Id to params
 				oParameter.setProcessObjId(oProcess.getProcessObjId());
 			}
@@ -143,6 +144,7 @@ public class FileBufferResource {
 				oProcess.setProcessObjId(Utils.GetRandomName());
 				oProcess.setStatus(ProcessStatus.CREATED.name());
 				sProcessId = oRepository.InsertProcessWorkspace(oProcess);
+				System.out.println("DownloadResource.Publish: process ID: "+sProcessId);
 			}
 			catch(Exception oEx){
 				System.out.println("DownloadResource.Publish: Error updating process list " + oEx.getMessage());
@@ -217,7 +219,6 @@ public class FileBufferResource {
 			}
 
 			//Update process list
-			String sProcessId = "";
 			ProcessWorkspaceRepository oRepository = new ProcessWorkspaceRepository();
 			ProcessWorkspace oProcess = null;
 			try
@@ -230,7 +231,8 @@ public class FileBufferResource {
 				oProcess.setUserId(oUser.getUserId());
 				oProcess.setProcessObjId(Utils.GetRandomName());
 				oProcess.setStatus(ProcessStatus.CREATED.name());
-				sProcessId = oRepository.InsertProcessWorkspace(oProcess);
+				String sProcessId = oRepository.InsertProcessWorkspace(oProcess);
+				System.out.println("DownloadResource.PublishBand: process ID: "+sProcessId);
 			}
 			catch(Exception oEx){
 				System.out.println("DownloadResource.PublishBand: Error updating process list " + oEx.getMessage());

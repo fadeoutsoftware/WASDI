@@ -133,7 +133,6 @@ public class FtpClient {
 		if(null == sPath || null == sFilename) {
 			throw new IllegalArgumentException();
 		}
-		String sWD = pwd();
 		String sDir = FilenameUtils.normalize(sPath, true); 
 		Collection<String> aoFiles = listFiles(sDir);
 		for (String sFile : aoFiles) {
