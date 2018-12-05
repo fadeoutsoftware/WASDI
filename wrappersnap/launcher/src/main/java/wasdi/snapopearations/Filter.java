@@ -26,8 +26,8 @@ public class Filter extends BaseOperation{
         if (!(oSetting instanceof FilterSetting))
             return;
 
-        FilterSetting oFilterSetting = (FilterSetting) oSetting;
-        //TODO: Da implementare
+        //FilterSetting oFilterSetting = (FilterSetting) oSetting;
+        //TODO implement
 
     }
 }

@@ -1198,7 +1198,6 @@ public class ProcessingResources {
 	private PrimitiveResult ExecuteOperation(String sSessionId, String sSourceProductName, String sDestinationProductName, String sWorkspaceId, ISetting oSetting, LauncherOperations operation) {
 		
 		PrimitiveResult oResult = new PrimitiveResult();
-		String sProcessId = "";
 		String sProcessObjId = "";
 		
 		String sUserId = AcceptedUserAndSession(sSessionId);
@@ -1226,7 +1225,8 @@ public class ProcessingResources {
 				sProcessObjId = Utils.GetRandomName();
 				oProcess.setProcessObjId(sProcessObjId);
 				oProcess.setStatus(ProcessStatus.CREATED.name());
-				sProcessId = oRepository.InsertProcessWorkspace(oProcess);
+				String sProcessId = oRepository.InsertProcessWorkspace(oProcess);
+				System.out.println("SnapOperations.ExecuteOperation: process ID: "+sProcessId);
 			}
 			catch(Exception oEx){
 				System.out.println("SnapOperations.ExecuteOperation: Error updating process list " + oEx.getMessage());

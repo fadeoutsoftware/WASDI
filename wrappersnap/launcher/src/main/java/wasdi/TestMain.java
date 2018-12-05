@@ -179,14 +179,16 @@ public class TestMain {
 		oLauncherMain.ExecuteOperator(oParameter, new wasdi.snapopearations.NDVI(), LauncherOperations.TERRAIN);
     }
 
-    public void GetDownloadFile(){
+    @SuppressWarnings("unused")
+	public void GetDownloadFile(){
         LauncherMain oLauncherMain = new LauncherMain();
         DownloadedFilesRepository oRepo = new DownloadedFilesRepository();
         DownloadedFile oFile = oRepo.GetDownloadedFile("");
 
     }
 
-    public  void InsertProcess() {
+    @SuppressWarnings("unused")
+	public  void InsertProcess() {
         LauncherMain oLauncherMain = new LauncherMain();
         ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
         ProcessWorkspace oProcessWorkspace = new ProcessWorkspace();
@@ -197,7 +199,8 @@ public class TestMain {
         oProcessWorkspaceRepository.DeleteProcessWorkspace(sId);
     }
 
-    public  void GetProcess() {
+    @SuppressWarnings("unused")
+	public  void GetProcess() {
         ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
         ProcessWorkspace oProcessWorkspace = new ProcessWorkspace();
         oProcessWorkspace.setOperationType(LauncherOperations.DOWNLOAD.name());
@@ -213,7 +216,8 @@ public class TestMain {
         	System.out.println("Found " + oList.size() + " recent processes");
         }
     }
-    public  void DeleteProcess() {
+    @SuppressWarnings("unused")
+	public  void DeleteProcess() {
         ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
         ProcessWorkspace oProcessWorkspace = new ProcessWorkspace();
         oProcessWorkspace.setOperationType(LauncherOperations.DOWNLOAD.name());
@@ -265,13 +269,13 @@ public class TestMain {
     }
 
     public  void TestPublish() {
-        LauncherMain oLauncherMain = new LauncherMain();
+        //LauncherMain oLauncherMain = new LauncherMain();
         PublishParameters oParam = new PublishParameters();
         oParam.setUserId("Dati Sentinel");
         oParam.setWorkspace("6de8a7af-c383-4d34-8423-3c229e610d39");
         oParam.setFileName("S1A_IW_GRDH_1SDV_20170102T045542_20170102T045607_014648_017D27_A1B4.zip");
         oParam.setQueue("6de8a7af-c383-4d34-8423-3c229e610d39");
-        String[] asBands = new String[]{"Amplitude_VH"};
+        //String[] asBands = new String[]{"Amplitude_VH"};
         //oLauncherMain.Publish(oParam);
     }
 
@@ -351,7 +355,8 @@ public class TestMain {
     }
 
     public void ProductWorkspaceRepositoryTest() {
-        LauncherMain oLauncherMain = new LauncherMain();
+        @SuppressWarnings("unused")
+		LauncherMain oLauncherMain = new LauncherMain();
         ProductWorkspace oPW = new ProductWorkspace();
         oPW.setProductName("S1A_IW_GRDH_1SDV_20161030T052733_20161030T052758_013715_016011_EBDC.zip");
         oPW.setWorkspaceId("6de8a7af-c383-4d34-8423-3c229e610d39");
@@ -394,7 +399,8 @@ public class TestMain {
 //
 //    }
 
-    public void DeleteSession(){
+    @SuppressWarnings("unused")
+	public void DeleteSession(){
 
         LauncherMain oLauncherMain = new LauncherMain();
         SessionRepository oRepo = new SessionRepository();
@@ -404,7 +410,8 @@ public class TestMain {
 
     }
 
-    public void GetFileSize() {
+    @SuppressWarnings("unused")
+	public void GetFileSize() {
 
         DownloadFile oDownloadFile = DownloadFile.getDownloadFile("SENTINEL");
         LauncherMain oLauncherMain = new LauncherMain();

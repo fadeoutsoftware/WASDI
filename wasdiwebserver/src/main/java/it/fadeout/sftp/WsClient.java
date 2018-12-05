@@ -18,7 +18,7 @@ public class WsClient extends Semaphore {
 	String m_sMessage;
 	boolean ok;
 	String data;
-	private Session m_sUserSession;
+	//private Session m_sUserSession;
 
 	public WsClient(String sWsAddress, String sMessage) throws InterruptedException {
 		super(0, true);
@@ -36,7 +36,7 @@ public class WsClient extends Semaphore {
    @OnOpen
     public void onOpen(Session userSession) {
         System.out.println("opening websocket...");
-        m_sUserSession = userSession;
+        //m_sUserSession = userSession;
         userSession.getAsyncRemote().sendText(m_sMessage);	        
    }
    
