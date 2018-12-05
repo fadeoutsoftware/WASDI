@@ -6,6 +6,9 @@
  */
 package wasdi.shared.opensearch;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 /**
  * @author c.nattero
  *
@@ -19,15 +22,14 @@ public class OpenSearch2OdataTranslator extends DiasQueryTranslator {
 	@Override
 	public String translate(String sQuery) {
 		String sResult = sQuery;
-		//SENTINEL 1
+		sResult = sResult.trim().replaceAll(" +", " ");
+		
+		//SENTINEL 1 2 3 platform
 		sResult = sResult.replaceAll("platformname:Sentinel-1", "name:S1*");
-		//SENTINEL 2
 		sResult = sResult.replaceAll("platformname:Sentinel-2", "name:S2*");
-		//SENTINEL 3
 		sResult = sResult.replaceAll("platformname:Sentinel-3", "name:S3*");
 
-
-		//SENTINEL 1 - 2 - 3
+		//SENTINEL 1 2 3 filename
 		sResult = sResult.replaceAll("filename:", "name:");
 		
 		//specific product types that need asterisks
@@ -46,16 +48,15 @@ public class OpenSearch2OdataTranslator extends DiasQueryTranslator {
 		sResult = sResult.replaceAll("timeliness:Non Time Critical", "timeliness:NTC");
 		//OS: just for sentinel1, ONDA: just for sentinel3
 		sResult = sResult.replaceAll("relativeorbitstart:", "relativeOrbitNumber:");
+		sResult = sResult.replaceAll("relativeorbitnumber:", "relativeOrbitNumber:");
+		//if there's a dot "." remove it and the decimals that follow 
+		sResult = sResult.replaceAll("(?<=relativeOrbitNumber:\\d{1,50})\\.\\d*(?=\\s$|\\s{0,1}|\\)|[a-z]|[A-Z])", "");
+
 		
 		sResult = sResult.replaceAll("sensoroperationalmode:", "sensorOperationalMode:");
 		sResult = sResult.replaceAll("cloudcoverpercentage", "cloudCoverPercentage");
 		
 		//cloudCoverPercentage should be the same
-
-		
-		//remove double spaces
-		//trimDoubles(sResult, ' ');
-		sResult = sResult.trim().replaceAll(" +", " ");
 		
 		return sResult;
 	}
