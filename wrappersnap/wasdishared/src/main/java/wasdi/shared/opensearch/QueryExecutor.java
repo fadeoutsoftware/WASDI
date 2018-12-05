@@ -142,7 +142,7 @@ public abstract class QueryExecutor {
 	protected abstract String getCountUrl(String sQuery);	
 	
 	protected ArrayList<QueryResultViewModel> buildResultViewModel(Document<Feed> oDocument, AbderaClient oClient, RequestOptions oOptions) {
-		int iStreamSize = 1000000;
+		//int iStreamSize = 1000000;
 		Feed oFeed = (Feed) oDocument.getRoot();
 		
 		//set new connction timeout

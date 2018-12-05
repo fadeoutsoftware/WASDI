@@ -31,8 +31,10 @@ public class OpenSearch2OdataTranslator extends DiasQueryTranslator {
 		sResult = sResult.replaceAll("filename:", "name:");
 		
 		//specific product types that need asterisks
-		sResult = sResult.replaceAll("producttype:SLC","producttype:\\*SLC\\*");
-		sResult = sResult.replaceAll("producttype:S2MSI1C", "producttype:\\*S2MSI1C\\*");
+		sResult = sResult.replaceAll("producttype:SLC","name:\\*SLC\\*");
+		sResult = sResult.replaceAll("producttype:GRD","name:\\*GRD\\*");
+		sResult = sResult.replaceAll("producttype:OCN","name:\\*OCN\\*");
+		sResult = sResult.replaceAll("producttype:S2MSI1C", "name:\\*S2MSI1C\\*");
 		sResult = sResult.replaceAll("producttype:", "name:");
 		
 		//polarisationmode:HH not supported by ONDA? 
@@ -63,8 +65,7 @@ public class OpenSearch2OdataTranslator extends DiasQueryTranslator {
 	 */
 	@Override
 	public String encode(String sDecoded) {
-		String sResult = new String(sDecoded); 
-		sDecoded.replaceAll(" ", "%20");
+		String sResult = new String( sDecoded.replaceAll(" ", "%20") );
 		//sResult = java.net.URLEncoder.encode(sDecoded, m_sEnconding);
 		return sResult;
 	}

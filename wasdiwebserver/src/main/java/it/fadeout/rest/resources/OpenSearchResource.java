@@ -51,7 +51,7 @@ public class OpenSearchResource {
 
 		try {
 			HashMap<String, String> asParameterMap = new HashMap<>();
-			ArrayList<String> asParams = new ArrayList<>();
+			//ArrayList<String> asParams = new ArrayList<>();
 			if (sOffset != null)
 				asParameterMap.put("offset", sOffset);
 			if (sLimit != null)
