@@ -14,11 +14,14 @@ import org.nfs.orbits.CoverageTool.Polygon;
 import org.nfs.orbits.CoverageTool.apoint;
 import org.nfs.orbits.sat.CoverageSwathResult;
 import org.nfs.orbits.sat.ISatellite;
+import org.nfs.orbits.sat.LookingType;
 import org.nfs.orbits.sat.SatFactory;
 import org.nfs.orbits.sat.SatSensor;
 import org.nfs.orbits.sat.Satellite;
 import org.nfs.orbits.sat.SensorMode;
 import org.nfs.orbits.sat.SwathArea;
+import org.nfs.orbits.sat.ViewAngle;
+import org.nfs.orbits.sat.swathSize;
 
 import satLib.astro.time.Time;
 
@@ -374,7 +377,7 @@ public class InstanceFinder {
 		return oResults;
 	}
 
-
+	
 	/**
 	 * 
 	 * @param sArea
@@ -387,7 +390,7 @@ public class InstanceFinder {
 	public static ArrayList<CoverageSwathResult> findSwatsByFilters(String sArea, 
 			String sAquisitionStartTime, String sAquisitionEndTime,
 			ArrayList<String> asSatelliteNames,
-			String sSensorResolution, String sSensorType) throws ParseException {
+			String sSensorResolution, String sSensorType,String sLookingType,String sViewAngle,String sSwathSize) throws ParseException {
 
 
 		System.out.println("findSwats: CREO I SATELLITI");
@@ -423,7 +426,9 @@ public class InstanceFinder {
 		}
 
 		ArrayList<ISatellite> aoSatellites = new ArrayList<ISatellite>();
-
+		LookingType oLookingType = convertLookingTypeString(sLookingType);
+		ViewAngle oViewAngle = convertViewAngleString(sViewAngle);
+		swathSize oSwathSize = convertSwathSizeString(sSwathSize);
 		for (ISatellite oSatellite : m_aoSatellites) {
 
 			if (oSatellite.getType().toString().toUpperCase().equals(sSensorType.toUpperCase()) == false) continue;
@@ -453,6 +458,19 @@ public class InstanceFinder {
 				for (SensorMode oSensorMode : oSensorModes) {
 					//System.out.println("\tMODE: " + oSensorMode.getName());
 					oSensorMode.setEnabled(bEnabled);
+				}
+				
+				if(oLookingType != null)
+				{
+					oSensor.setLooking(oLookingType);
+				}
+				if(oViewAngle != null)
+				{
+					oSensor.setViewAngle(oViewAngle);
+				}
+				if(oSwathSize != null)
+				{
+					oSensor.setswathSize(oSwathSize);
 				}
 			}
 
@@ -520,7 +538,7 @@ public class InstanceFinder {
 		// imposto le date di inizio e fine osservazione
 		coverageRequest.setFirstDate(oDateTimeStart);
 		coverageRequest.setSecondDate(oDateTimeEnd);
-
+		//String sLookingType,String sViewAngle,String sSwathSize
 		System.out.println("findSwats CHIAMO SOLVE REQUEST");
 		// Eseguo la ricerca
 		// se a solveRequest passo false ottengo soltanto la potenziale
@@ -534,8 +552,59 @@ public class InstanceFinder {
 		return oResults;
 	}
 
-
-
+	private static LookingType convertLookingTypeString(String sLookingType)
+	{
+		sLookingType = sLookingType.trim();
+		sLookingType = sLookingType.toUpperCase();
+		switch (sLookingType) {
+		case "NONE":
+			return LookingType.NONE ;
+		case "LEFT":
+			return LookingType.LEFT ;
+		case "RIGHT":
+			return LookingType.RIGHT ;
+		default:
+			break;
+		}
+		return null;
+	}
+	
+	private static ViewAngle convertViewAngleString(String sViewAngle)
+	{
+		sViewAngle = sViewAngle.trim();
+		if(sViewAngle.isEmpty())
+		{
+			return null;
+		}
+		String [] asViewAngleSplitted = sViewAngle.split(",");
+		asViewAngleSplitted[0] = asViewAngleSplitted[0].replace("(nearAngle:", "");
+		asViewAngleSplitted[1] = asViewAngleSplitted[1].replace("farAngle:", "");
+		asViewAngleSplitted[1] = asViewAngleSplitted[1].replace(")", "");
+		if(asViewAngleSplitted[0].isEmpty() || asViewAngleSplitted[1].isEmpty())
+		{
+			return null;
+		}
+		ViewAngle oViewAngleReturnValue = new ViewAngle(Double.parseDouble(asViewAngleSplitted[0]), Double.parseDouble(asViewAngleSplitted[1]));
+		return oViewAngleReturnValue;
+	}
+	private static swathSize convertSwathSizeString(String sSwathSize)
+	{
+		sSwathSize = sSwathSize.trim();
+		if(sSwathSize.isEmpty())
+		{
+			return null;
+		}
+		String [] asSwathSizeSplitted = sSwathSize.split(",");
+		asSwathSizeSplitted[0] = asSwathSizeSplitted[0].replace("(length:", "");
+		asSwathSizeSplitted[1] = asSwathSizeSplitted[1].replace("width:", "");
+		asSwathSizeSplitted[1] = asSwathSizeSplitted[1].replace(")", "");
+		if(asSwathSizeSplitted[0].isEmpty() || asSwathSizeSplitted[1].isEmpty())
+		{
+			return null;
+		}
+		swathSize oSwathSize = new swathSize(Double.parseDouble(asSwathSizeSplitted[0]), Double.parseDouble(asSwathSizeSplitted[1]));
+		return oSwathSize;
+	}
 	public static void test() {
 		// inizializzo i satelliti
 		ArrayList<ISatellite> satelliti = new ArrayList<ISatellite>();

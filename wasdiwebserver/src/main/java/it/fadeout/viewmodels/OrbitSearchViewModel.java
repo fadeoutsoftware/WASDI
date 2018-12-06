@@ -4,6 +4,10 @@ import java.util.ArrayList;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
+import org.nfs.orbits.sat.LookingType;
+import org.nfs.orbits.sat.ViewAngle;
+import org.nfs.orbits.sat.swathSize;
+
 @XmlRootElement
 public class OrbitSearchViewModel {
 
@@ -12,7 +16,48 @@ public class OrbitSearchViewModel {
 	private String acquisitionStartTime;
 	private String acquisitionEndTime;
 	private ArrayList<String> satelliteNames;
+	//private LookingType lookingType;
+	private String lookingType;
+	//private ViewAngle viewAngle;
+	//private swathSize swathSize;
+	private String viewAngle;
+	private String swathSize;	
 	
+	/*public LookingType getLookingType() {
+		return lookingType;
+	}
+
+
+
+	public void setLookingType(LookingType lookingType) {
+		this.lookingType = lookingType;
+	}
+
+
+
+	public ViewAngle getViewAngle() {
+		return viewAngle;
+	}
+
+
+
+	public void setViewAngle(ViewAngle viewAngle) {
+		this.viewAngle = viewAngle;
+	}
+
+
+
+	public org.nfs.orbits.sat.swathSize getSwathSize() {
+		return swathSize;
+	}
+
+
+
+	public void setSwathSize(org.nfs.orbits.sat.swathSize swathSize) {
+		this.swathSize = swathSize;
+	}
+
+*/
 	public OrbitSearchViewModel()
 	{}
 	
@@ -71,6 +116,42 @@ public class OrbitSearchViewModel {
 
 	public void setSatelliteNames(ArrayList<String> satelliteNames) {
 		this.satelliteNames = satelliteNames;
+	}
+
+
+
+	public String getLookingType() {
+		return lookingType;
+	}
+
+
+
+	public void setLookingType(String lookingType) {
+		this.lookingType = lookingType;
+	}
+
+
+
+	public String getSwathSize() {
+		return swathSize;
+	}
+
+
+
+	public void setSwathSize(String swathSize) {
+		this.swathSize = swathSize;
+	}
+
+
+
+	public String getViewAngle() {
+		return viewAngle;
+	}
+
+
+
+	public void setViewAngle(String viewAngle) {
+		this.viewAngle = viewAngle;
 	}
 	
 	
