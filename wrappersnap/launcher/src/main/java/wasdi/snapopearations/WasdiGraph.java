@@ -8,6 +8,7 @@ import java.lang.management.RuntimeMXBean;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.Date;
 
 import org.apache.log4j.Logger;
@@ -47,44 +48,60 @@ import wasdi.shared.viewmodels.ProductViewModel;
  *
  */
 public class WasdiGraph {
-	private File inputFile, outputFile;
-	private Graph graph;
-	private Logger logger = LauncherMain.s_oLogger;
-	private ProcessWorkspaceRepository processRepository;
-	private ProcessWorkspace process;
-	private Send rabbitSender;
-	private GraphParameter params;
+	
+	private File m_oInputFile;
+	private File m_oOutputFile;
+	private Graph m_oGraph;
+	private Logger m_oLogger = LauncherMain.s_oLogger;
+	private ProcessWorkspaceRepository m_oProcessRepository;
+	private ProcessWorkspace m_oProcess;
+	private Send m_oRabbitSender;
+	private GraphParameter m_oParams;
+	
+	private ArrayList<String> asInputNodes = new ArrayList<>();
+	private ArrayList<String> asOutputNodes = new ArrayList<>();
 	
 	
 	/**
 	 * Construct the Graph object
-	 * @param params
-	 * @param rabbitSender
+	 * @param oParams
+	 * @param oRabbitSender
 	 * @throws Exception
 	 */
-	public WasdiGraph(GraphParameter params, Send rabbitSender) throws Exception {
+	public WasdiGraph(GraphParameter oParams, Send oRabbitSender) throws Exception {
 		//set the pgraph parameters
-		this.params = params;
+		this.m_oParams = oParams;
 		
 		//set the rabbit sender
-		this.rabbitSender = rabbitSender;
+		this.m_oRabbitSender = oRabbitSender;
 		
 		//build snap graph object
-		graph = GraphIO.read(new StringReader(((GraphSetting)(params.getSettings())).getGraphXml()));
+		m_oGraph = GraphIO.read(new StringReader(((GraphSetting)(oParams.getSettings())).getGraphXml()));
 		
 		//retrieve wasdi process
-        processRepository = new ProcessWorkspaceRepository();
-        process = processRepository.GetProcessByProcessObjId(params.getProcessObjId());
-        
-        //check input file
-        File baseDir = new File(ConfigReader.getPropValue("DOWNLOAD_ROOT_PATH"));
-        File userDir = new File(baseDir, params.getUserId());
-        File workspaceDir = new File(userDir, params.getWorkspace());
-        inputFile = new File(workspaceDir, params.getSourceProductName());
-        if (!inputFile.canRead()) throw new Exception("WasdiGraph: cannot access input file: " + inputFile.getAbsolutePath());
-        
-        //build output file path
-        outputFile = new File(workspaceDir, params.getDestinationProductName());
+        m_oProcessRepository = new ProcessWorkspaceRepository();
+        m_oProcess = m_oProcessRepository.GetProcessByProcessObjId(oParams.getProcessObjId());        
+	}
+	
+	/**
+	 * Find the Read and Write Nodes in this 
+	 */
+	public void findIONodes() {
+		
+		Node [] aoNodes = m_oGraph.getNodes();
+		
+		if (aoNodes == null) return;
+		if (aoNodes.length == 0) return;
+		
+		for (int iNodes=0; iNodes<aoNodes.length;iNodes++) {
+			Node oNode = aoNodes[iNodes];
+			if (oNode.getOperatorName()=="Read") {
+				asInputNodes.add(oNode.getId());
+			}
+			else if (oNode.getOperatorName() == "Write") {
+				asOutputNodes.add(oNode.getId());
+			}
+		}
 	}
 
 
@@ -95,55 +112,100 @@ public class WasdiGraph {
 	public void execute() throws Exception {
 		
 		try {
-		
-			//set the input and output files to the graph snap object
-			Node nodeReader = graph.getNode("Read");
-			Node nodeWriter = graph.getNode("Write");
+
+	        //check input file
+	        File oBaseDir = new File(ConfigReader.getPropValue("DOWNLOAD_ROOT_PATH"));
+	        File oUserDir = new File(oBaseDir, m_oParams.getUserId());
+	        File oWorkspaceDir = new File(oUserDir, m_oParams.getWorkspace());
+
+			GraphSetting oGraphSettings = (GraphSetting) m_oParams.getSettings();
 			
-			if (nodeReader==null || nodeWriter==null) {
-				logger.error("WasdiGraph.execute: Reader node and Writer node are mandatory!!");
-				throw new Exception("Reader node and Writer node are mandatory");
-			}		
-			if (!setNodeValue(nodeReader, "file", inputFile.getAbsolutePath()) || 
-					!setNodeValue(nodeWriter, "file", outputFile.getAbsolutePath()) 
-					//|| !setNodeValue(nodeWriter, "formatName", DimapProductWriterPlugIn.DIMAP_FORMAT_NAME) 
-					) {
-				throw new Exception("Error setting input/output file");
+			for (int iNode = 0; iNode<oGraphSettings.getInputNodeNames().size(); iNode++) {
+				
+				String sInputNode = oGraphSettings.getInputNodeNames().get(iNode);
+				
+				//set the input and output files to the graph snap object
+				Node oNodeReader = m_oGraph.getNode(sInputNode);
+				
+				if (oNodeReader==null ) {
+					m_oLogger.error("WasdiGraph.execute: Reader node and Writer node are mandatory!!");
+					throw new Exception("Reader node and Writer node are mandatory");
+				}
+				
+		        File oInputFile = new File(oWorkspaceDir, oGraphSettings.getInputFileNames().get(iNode));
+		        if (!oInputFile.canRead()) throw new Exception("WasdiGraph: cannot access input file: " + oInputFile.getAbsolutePath());
+		        
+		        if (m_oInputFile == null) {
+		        	m_oInputFile= oInputFile;
+		        }
+				
+				if (!setNodeValue(oNodeReader, "file", oInputFile.getAbsolutePath()))
+				{
+					throw new Exception("Error setting input file");
+				}
+			}
+			
+			for (int iNode = 0; iNode<oGraphSettings.getOutputNodeNames().size(); iNode++) {
+				
+				String sOutputNode = oGraphSettings.getOutputNodeNames().get(iNode);
+				
+				//set the input and output files to the graph snap object
+				Node oNodeWriter = m_oGraph.getNode(sOutputNode);
+				
+				if (oNodeWriter==null ) {
+					m_oLogger.error("WasdiGraph.execute: Reader node and Writer node are mandatory!!");
+					throw new Exception("Reader node and Writer node are mandatory");
+				}
+				
+				//TODO: output file name
+		        File oOutputFile = new File(oWorkspaceDir, oGraphSettings.getInputFileNames().get(iNode)+"workflow");
+		        
+		        if (m_oOutputFile == null) {
+		        	m_oOutputFile = oOutputFile;
+		        }
+				
+				if (!setNodeValue(oNodeWriter, "file", oOutputFile.getAbsolutePath())) 
+						//|| !setNodeValue(nodeWriter, "formatName", DimapProductWriterPlugIn.DIMAP_FORMAT_NAME) 
+				{
+					throw new Exception("Error setting output file");
+				}
 			}
 			
 			// P.Campanella 16/06/2017: should add real file size to the Process Log
             //set file size     
-            LauncherMain.SetFileSizeToProcess(inputFile, process);
+            LauncherMain.SetFileSizeToProcess(m_oInputFile, m_oProcess);
 			
 			//build the snap graph context and processor
-			GraphContext context = new GraphContext(graph);		
-			GraphProcessor processor = new GraphProcessor();
+			GraphContext oContext = new GraphContext(m_oGraph);		
+			GraphProcessor oProcessor = new GraphProcessor();
 			
 			//update the wasdi process 
 			initProcess();
 			
-			processor.executeGraph(context, new WasdiProgreeMonitor(processRepository, process));
+			oProcessor.executeGraph(oContext, new WasdiProgreeMonitor(m_oProcessRepository, m_oProcess));
 			
-			Product[] outputs = context.getOutputProducts();
-			if (outputs==null || outputs.length==0) throw new Exception("No output created");
+			Product[] aoOutputs = oContext.getOutputProducts();
+			if (aoOutputs==null || aoOutputs.length==0) throw new Exception("No output created");
 			
-			if (outputs.length>1) logger.warn("More than 1 output created... keep only the first");
+			//if (aoOutputs.length>1) m_oLogger.warn("More than 1 output created... keep only the first");
 			
-			Product product = outputs[0];
-	
-			logger.debug("WasdiGraph.execute: managing output product: " + product.getName());
+			for (int iOutputs = 0; iOutputs<aoOutputs.length; iOutputs++) {
+				Product oProduct = aoOutputs[iOutputs];
+				
+				m_oLogger.debug("WasdiGraph.execute: managing output product ["+ iOutputs+"]: " + oProduct.getName());
+				
+	            // Get the original Bounding Box
+	            DownloadedFilesRepository oDownloadedRepo = new DownloadedFilesRepository();
+	            DownloadedFile oDownloadedFile = oDownloadedRepo.GetDownloadedFile(m_oInputFile.getName()) ;
+	            
+	            String sBbox = "";            
+	            if (oDownloadedFile != null) {
+	            	sBbox = oDownloadedFile.getBoundingBox();
+	            }
+	            
+	            addProductToDb(oProduct, sBbox);				
+			}
 			
-            // Get the original Bounding Box
-            DownloadedFilesRepository downloadedRepo = new DownloadedFilesRepository();
-            DownloadedFile downloadedFile = downloadedRepo.GetDownloadedFile(inputFile.getName()) ;
-            String bbox = "";            
-            if (downloadedFile != null) {
-            	bbox = downloadedFile.getBoundingBox();
-            }
-            
-            addProductToDb(product, bbox);
-			
-        
 		} finally {
             closeProcess();
 		}
@@ -155,26 +217,26 @@ public class WasdiGraph {
 	 * @throws Exception
 	 */
 	private void initProcess() throws Exception {
-		if (process != null) {
+		if (m_oProcess != null) {
 			//set source file size in the process
-			long inputFileSize = inputFile.length();
-		    double inputFileSizeGiga = ( (double) inputFileSize )/ (1024.0 * 1024.0 * 1024.0);
-		    DecimalFormat format = new DecimalFormat("#.00"); 	        
-		    logger.debug("WasdiGraph.execute: File size [Gb] = " + format.format(inputFileSizeGiga));
-		    process.setFileSize(format.format(inputFileSizeGiga));
+			long lInputFileSize = m_oInputFile.length();
+		    double dInputFileSizeGiga = ( (double) lInputFileSize )/ (1024.0 * 1024.0 * 1024.0);
+		    DecimalFormat oFormat = new DecimalFormat("#.00"); 	        
+		    m_oLogger.debug("WasdiGraph.execute: File size [Gb] = " + oFormat.format(dInputFileSizeGiga));
+		    m_oProcess.setFileSize(oFormat.format(dInputFileSizeGiga));
 		    //set process pid, status and progress
-			process.setPid(GetProcessId());
-			process.setStatus(ProcessStatus.RUNNING.name());
-			process.setProgressPerc(0);
+			m_oProcess.setPid(GetProcessId());
+			m_oProcess.setStatus(ProcessStatus.RUNNING.name());
+			m_oProcess.setProgressPerc(0);
 			//update the process
-		    if (!processRepository.UpdateProcess(process)) {
-		    	logger.error("WasdiGraph.execute: Error during process update (pip + starting)");
+		    if (!m_oProcessRepository.UpdateProcess(m_oProcess)) {
+		    	m_oLogger.error("WasdiGraph.execute: Error during process update (pip + starting)");
 		    } else {
-		    	logger.debug("WasdiGraph.execute: Updated process  " + process.getProcessObjId());
+		    	m_oLogger.debug("WasdiGraph.execute: Updated process  " + m_oProcess.getProcessObjId());
 		    }
 	        //send update process message
-		    if (rabbitSender!=null && !rabbitSender.SendUpdateProcessMessage(process)) {
-				logger.error("WasdiGraph.execute: Error sending rabbitmq message to update process list");
+		    if (m_oRabbitSender!=null && !m_oRabbitSender.SendUpdateProcessMessage(m_oProcess)) {
+				m_oLogger.error("WasdiGraph.execute: Error sending rabbitmq message to update process list");
 			}
 		}
 		
@@ -186,21 +248,21 @@ public class WasdiGraph {
      */
 	private void closeProcess() {
 		try{
-			if (process != null) {
+			if (m_oProcess != null) {
 		        //update the process
-				process.setProgressPerc(100);
-				process.setStatus(ProcessStatus.DONE.name());
-				process.setOperationEndDate(Utils.GetFormatDate(new Date()));
-		        if (!processRepository.UpdateProcess(process)) {
-		        	logger.error("WasdiGraph: Error during process update (terminated)");
+				m_oProcess.setProgressPerc(100);
+				m_oProcess.setStatus(ProcessStatus.DONE.name());
+				m_oProcess.setOperationEndDate(Utils.GetFormatDate(new Date()));
+		        if (!m_oProcessRepository.UpdateProcess(m_oProcess)) {
+		        	m_oLogger.error("WasdiGraph: Error during process update (terminated)");
 		        }
 		        //send update process message
-				if (rabbitSender!=null && !rabbitSender.SendUpdateProcessMessage(process)) {
-				    logger.debug("WasdiGraph: Error sending rabbitmq message to update process list");
+				if (m_oRabbitSender!=null && !m_oRabbitSender.SendUpdateProcessMessage(m_oProcess)) {
+				    m_oLogger.debug("WasdiGraph: Error sending rabbitmq message to update process list");
 				}
 			}
 		} catch (Exception e) {
-		    logger.error("WasdiGraph: Exception closing process", e);
+		    m_oLogger.error("WasdiGraph: Exception closing process", e);
 		}
 	}
 
@@ -211,22 +273,22 @@ public class WasdiGraph {
 	 * @throws Exception
 	 */
     private void addProductToDb(Product product, String sBBox) throws Exception {
-        ReadProduct readProduct = new ReadProduct();
-        File productFile = new File(outputFile.getAbsolutePath()+".dim");
-		ProductViewModel oVM = readProduct.getProductViewModel(product, productFile);
+        ReadProduct oReadProduct = new ReadProduct();
+        File oProductFile = new File(m_oOutputFile.getAbsolutePath()+".dim");
+		ProductViewModel oVM = oReadProduct.getProductViewModel(product, oProductFile);
         
         // P.Campanella 12/05/2017: it looks it is done before. Let leave here a check
         DownloadedFilesRepository oDownloadedRepo = new DownloadedFilesRepository();
         DownloadedFile oCheck = oDownloadedRepo.GetDownloadedFile(oVM.getFileName());
         boolean bAddProductToWS = true;
         if (oCheck == null) {
-        	logger.debug("Insert in db");
+        	m_oLogger.debug("Insert in db");
         	
             // Save it in the register
             DownloadedFile oOutputProduct = new DownloadedFile();
             
-            oOutputProduct.setFileName(productFile.getName());
-            oOutputProduct.setFilePath(productFile.getAbsolutePath());
+            oOutputProduct.setFileName(oProductFile.getName());
+            oOutputProduct.setFilePath(oProductFile.getAbsolutePath());
             oOutputProduct.setProductViewModel(oVM);
             oOutputProduct.setBoundingBox(sBBox);
             
@@ -237,7 +299,7 @@ public class WasdiGraph {
         		if (!sMetadataPath.endsWith("/")) sMetadataPath += "/";
         		String sMetadataFileName = Utils.GetRandomName();
 
-    			SerializationUtils.serializeObjectToXML(sMetadataPath+sMetadataFileName, readProduct.getProductMetadataViewModel(productFile));
+    			SerializationUtils.serializeObjectToXML(sMetadataPath+sMetadataFileName, oReadProduct.getProductMetadataViewModel(oProductFile));
     			
     			oOutputProduct.getProductViewModel().setMetadataFileReference(sMetadataFileName);
     			
@@ -248,10 +310,10 @@ public class WasdiGraph {
     		}            
             
             if (!oDownloadedRepo.InsertDownloadedFile(oOutputProduct)) {
-            	logger.error("Impossible to Insert the new Product " + outputFile.getName() + " in the database.");            	
+            	m_oLogger.error("Impossible to Insert the new Product " + m_oOutputFile.getName() + " in the database.");            	
             }
             else {
-            	logger.error("Product Inserted " + outputFile.getName());
+            	m_oLogger.error("Product Inserted " + m_oOutputFile.getName());
             }
         }
         
@@ -259,15 +321,15 @@ public class WasdiGraph {
         	addProductToWorkspace();
         }
         else {
-        	logger.error("Product NOT added to the Workspace");
+        	m_oLogger.error("Product NOT added to the Workspace");
         }
         
-        logger.debug("OK DONE");
+        m_oLogger.debug("OK DONE");
         
         //P.Campanella 12/05/2017: Metadata are saved in the DB but sent back to the client with a dedicated API. So here metadata are nulled
         //oVM.setMetadata(null);
 
-        if (rabbitSender!=null) rabbitSender.SendRabbitMessage(true, LauncherOperations.GRAPH.name(), params.getWorkspace(), oVM, params.getExchange());
+        if (m_oRabbitSender!=null) m_oRabbitSender.SendRabbitMessage(true, LauncherOperations.GRAPH.name(), m_oParams.getWorkspace(), oVM, m_oParams.getExchange());
     }
 	
 	
@@ -278,26 +340,26 @@ public class WasdiGraph {
     private void addProductToWorkspace() throws Exception {
     	
 		// Create Repository
-		ProductWorkspaceRepository productRepository = new ProductWorkspaceRepository();
+		ProductWorkspaceRepository oProductRepository = new ProductWorkspaceRepository();
 		
 		// Check if product is already in the Workspace
-		if (!productRepository.ExistsProductWorkspace(params.getDestinationProductName(), params.getWorkspace())) {
+		if (!oProductRepository.ExistsProductWorkspace(m_oParams.getDestinationProductName(), m_oParams.getWorkspace())) {
 			
     		// Create the entity
-    		ProductWorkspace productEntity = new ProductWorkspace();
-    		productEntity.setProductName(params.getDestinationProductName() + ".dim");
-    		productEntity.setWorkspaceId(params.getWorkspace());
+    		ProductWorkspace oProductEntity = new ProductWorkspace();
+    		oProductEntity.setProductName(m_oParams.getDestinationProductName() + ".dim");
+    		oProductEntity.setWorkspaceId(m_oParams.getWorkspace());
     		
     		// Try to insert
-    		if (!productRepository.InsertProductWorkspace(productEntity)) {        			
-    			logger.debug("WasdiGraph.addProductToWorkspace:  Error adding " + params.getDestinationProductName() + " in WS " + params.getWorkspace());
+    		if (!oProductRepository.InsertProductWorkspace(oProductEntity)) {        			
+    			m_oLogger.debug("WasdiGraph.addProductToWorkspace:  Error adding " + m_oParams.getDestinationProductName() + " in WS " + m_oParams.getWorkspace());
     			throw new Exception("unable to insert product in workspace");
     		}
     		
-    		logger.debug("WasdiGraph.addProductToWorkspace:  Inserted " + params.getDestinationProductName() + " in WS " + params.getWorkspace());
+    		m_oLogger.debug("WasdiGraph.addProductToWorkspace:  Inserted " + m_oParams.getDestinationProductName() + " in WS " + m_oParams.getWorkspace());
 		}
 		else {
-			logger.debug("WasdiGraph.addProductToWorkspace: Product " + params.getDestinationProductName() + " Already exists in WS " + params.getWorkspace());
+			m_oLogger.debug("WasdiGraph.addProductToWorkspace: Product " + m_oParams.getDestinationProductName() + " Already exists in WS " + m_oParams.getWorkspace());
 		}
     }
 
@@ -307,13 +369,13 @@ public class WasdiGraph {
 	 * @throws Exception
 	 */
 	private int GetProcessId() throws Exception {
-        RuntimeMXBean runtimeMXBean = ManagementFactory.getRuntimeMXBean();
-        Field jvmField = runtimeMXBean.getClass().getDeclaredField("jvm");
-        jvmField.setAccessible(true);
-        VMManagement vmManagement = (VMManagement) jvmField.get(runtimeMXBean);
-        Method getProcessIdMethod = vmManagement.getClass().getDeclaredMethod("getProcessId");
-        getProcessIdMethod.setAccessible(true);
-        return (int)getProcessIdMethod.invoke(vmManagement);
+        RuntimeMXBean oRuntimeMXBean = ManagementFactory.getRuntimeMXBean();
+        Field oJvmField = oRuntimeMXBean.getClass().getDeclaredField("jvm");
+        oJvmField.setAccessible(true);
+        VMManagement oVmManagement = (VMManagement) oJvmField.get(oRuntimeMXBean);
+        Method oGetProcessIdMethod = oVmManagement.getClass().getDeclaredMethod("getProcessId");
+        oGetProcessIdMethod.setAccessible(true);
+        return (int)oGetProcessIdMethod.invoke(oVmManagement);
     }
 	
 	/**
@@ -324,21 +386,20 @@ public class WasdiGraph {
 	 * @return
 	 */
 	public static boolean setNodeValue(Node node, String childName, String value) {
-		DomElement el = node.getConfiguration();
-		DomElement[] children = el.getChildren(childName);
-		if (children==null || children.length!=1) {
+		DomElement oDomElement = node.getConfiguration();
+		DomElement[] aoChildren = oDomElement.getChildren(childName);
+		if (aoChildren==null || aoChildren.length!=1) {
 			
 			XppDomElement oFileElement = new XppDomElement("file");
 			oFileElement.setValue(value);
-			el.addChild(oFileElement);
+			oDomElement.addChild(oFileElement);
 			
 			return true;
 		}
 		else {
-			children[0].setValue(value);
+			aoChildren[0].setValue(value);
 		}
-		
-		
+
 		return true;
 	}
 	

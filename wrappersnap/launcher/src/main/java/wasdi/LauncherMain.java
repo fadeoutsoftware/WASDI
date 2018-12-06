@@ -133,7 +133,7 @@ public class LauncherMain {
 
 
         // create the parser
-        CommandLineParser parser = new DefaultParser();
+        CommandLineParser oParser = new DefaultParser();
 
         // create Options object
         Options oOptions = new Options();
@@ -152,7 +152,7 @@ public class LauncherMain {
         try {
 
             // parse the command line arguments
-            CommandLine oLine = parser.parse( oOptions, args );
+            CommandLine oLine = oParser.parse( oOptions, args );
             
             if (oLine.hasOption("operation")) {
                 // Get the Operation Code
@@ -239,8 +239,8 @@ public class LauncherMain {
 
             System.setProperty("user.home", ConfigReader.getPropValue("USER_HOME"));
 
-            Path propFile = Paths.get(ConfigReader.getPropValue("SNAP_AUX_PROPERTIES"));
-            Config.instance("snap.auxdata").load(propFile);
+            Path oPropFile = Paths.get(ConfigReader.getPropValue("SNAP_AUX_PROPERTIES"));
+            Config.instance("snap.auxdata").load(oPropFile);
             Config.instance().load();
 
             SystemUtils.init3rdPartyLibs(null);
