@@ -1,10 +1,13 @@
 import java.awt.Rectangle;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import org.apache.commons.io.IOUtils;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.gpf.graph.Graph;
 import org.esa.snap.core.gpf.graph.GraphContext;
@@ -19,6 +22,11 @@ import org.esa.snap.runtime.Engine;
 
 import com.bc.ceres.binding.dom.DomElement;
 import com.bc.ceres.core.ProgressMonitor;
+
+import wasdi.rabbit.Send;
+import wasdi.shared.parameters.GraphParameter;
+import wasdi.shared.parameters.GraphSetting;
+import wasdi.snapopearations.WasdiGraph;
 
 public class ProofGraph {
 	
@@ -99,12 +107,12 @@ public class ProofGraph {
 	
 	public static void main(String[] args) throws FileNotFoundException, GraphException {
 		
-		File graphXmlFile = new File("/home/doy/tmp/wasdi/graph/myGraph.xml");
-		File inputFile = new File("/home/doy/tmp/wasdi/graph/S1A_IW_GRDH_1SDV_20160802T051857_20160802T051922_012417_013615_C75B.zip");
-		File outputFile = new File("/home/doy/tmp/wasdi/graph/output_product");
+		File graphXmlFile = new File("c:/temp/wasdi/MultiGraph.xml");
+		File inputFile = new File("C:\\Temp\\wasdi\\data\\paolo\\2c1271a4-9e2b-4291-aabd-caf3074adb25\\S1A_IW_GRDH_1SDV_20180129T052722_20180129T052747_020365_022CA8_9D99.zip");
+		File outputFile = new File("C:\\Temp\\wasdi\\testchartout.dim");
 
-		System.setProperty("user.home", "/home/doy");
-        Path propFile = Paths.get("/home/doy/workspaces/wasdi/server/launcher/target/config.properties");
+		System.setProperty("user.home", "C:\\Users\\p.campanella.FADEOUT");
+        Path propFile = Paths.get("C:\\Codice\\Progetti\\WASDI\\server\\launcher\\target\\config.properties");
         Config.instance("snap.auxdata").load(propFile);
         Config.instance().load();
 
@@ -113,7 +121,29 @@ public class ProofGraph {
         
         SystemUtils.init3rdPartyLibs(null);
         Engine.start(false);
+        
+        try {
+            GraphParameter oParam = new GraphParameter();
+            oParam.setDestinationProductName("testchartout.dim");
+            oParam.setProcessObjId("123");
+            oParam.setSourceProductName("S1A_IW_GRDH_1SDV_20180129T052722_20180129T052747_020365_022CA8_9D99.zip");
+            oParam.setUserId("paolo");
+            oParam.setWorkspace("2c1271a4-9e2b-4291-aabd-caf3074adb25");
+            oParam.setExchange("2c1271a4-9e2b-4291-aabd-caf3074adb25");
+            
+            GraphSetting oSettings = new GraphSetting();
+            
+    		FileInputStream fileInputStream = new FileInputStream("c:/temp/wasdi/MultiGraph.xml");
+    		String sGraphXml = IOUtils.toString(fileInputStream, Charset.defaultCharset().name());
+            oSettings.setGraphXml(sGraphXml);
+            
+            oParam.setSettings(oSettings);
 
+			WasdiGraph oWasdiGraph = new WasdiGraph(oParam, new Send());
+			oWasdiGraph.execute();
+		} catch (Exception e) {
+			System.out.println(e.toString());
+		}
 		
 		Graph graph = GraphIO.read(new FileReader(graphXmlFile));
 		
