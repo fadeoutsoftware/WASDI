@@ -22,7 +22,47 @@ public class OpenSearch2OdataTranslator extends DiasQueryTranslator {
 	@Override
 	public String translate(String sQuery) {
 		String sResult = sQuery;
+		//Safe to assume:
+			//no leading/ending whitespaces
+			//no double whitespaces
 		sResult = sResult.trim().replaceAll(" +", " ");
+		
+		//What is supported by ONDA?
+		//checked on 2018.12.06
+		//https://catalogue.onda-dias.eu/catalogue/ supports:
+		//(by mission)
+		
+		
+		//Sentinel-1
+			//YES
+				//Platform:[S1A_*|S1B_*] (optional)
+				//type:[SLC|GRD|OCN] (optional)
+				//relativeOrbitNumber:[integer in [1-175]] (optional)
+				//Sensor Mode:[SM|IW|EW|WV] (optional)
+			//NO
+		//Sentinel-2
+			//YES
+				//Platform:[S2A_*|S2B-*] (optional)
+				//Type:[MSI1C|MSI2A|MSI2Ap] (optional)
+				//Cloud Cover %:interval [a,b] between float [0,100] (optional)
+			//NO
+		//Sentinel-3
+			//YES
+				//Type:[SR_1_SRA__|SR_1_SRA_A_|SR_1_SRA_BS|SR_2_LAN__] (optional)
+				//Timeliness:[Near Real time|Short Time Critical|Non Time Critical]
+			//NO
+		//ENVISAT
+			//YES
+				//type: [ASA_IM__0P|ASA_WS__0P] (optional)
+				//Orbit Position:[ASCENDING|DESCENDING]
+			//NO
+		//LANDSAT
+			//YES
+				//Type:[L1T|L1G|L1GT|L1GS|L1TP] (optional)
+				//Cloud Cover %:interval [a,b] between float [0,100] (optional)
+			//NO
+		
+		//begin translation
 		
 		//SENTINEL 1 2 3 platform
 		sResult = sResult.replaceAll("platformname:Sentinel-1", "name:S1*");
@@ -49,8 +89,11 @@ public class OpenSearch2OdataTranslator extends DiasQueryTranslator {
 		//OS: just for sentinel1, ONDA: just for sentinel3
 		sResult = sResult.replaceAll("relativeorbitstart:", "relativeOrbitNumber:");
 		sResult = sResult.replaceAll("relativeorbitnumber:", "relativeOrbitNumber:");
-		//if there's a dot "." remove it and the decimals that follow 
-		sResult = sResult.replaceAll("(?<=relativeOrbitNumber:\\d{1,50})\\.\\d*(?=\\s$|\\s{0,1}|\\)|[a-z]|[A-Z])", "");
+		//if there's a dot "." remove it and the decimals that follow
+		String sPattern = "(?<=relativeOrbitNumber:\\d{1,50})"+
+				"\\.\\d*"+
+				"(?=\\s{0,1}|\\)|[a-z]|[A-Z])";
+		sResult = sResult.replaceAll(sPattern, "");
 
 		
 		sResult = sResult.replaceAll("sensoroperationalmode:", "sensorOperationalMode:");
