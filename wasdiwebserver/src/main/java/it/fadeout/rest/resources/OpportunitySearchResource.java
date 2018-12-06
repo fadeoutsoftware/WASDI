@@ -80,7 +80,7 @@ public class OpportunitySearchResource {
 					aoCoverageSwathResult = InstanceFinder.findSwatsByFilters(sArea,
 							OrbitSearch.getAcquisitionStartTime(), OrbitSearch.getAcquisitionEndTime(),
 							OrbitSearch.getSatelliteNames(), oOrbitFilter.getSensorResolution(),
-							oOrbitFilter.getSensorType());
+							oOrbitFilter.getSensorType(),OrbitSearch.getLookingType(),OrbitSearch.getViewAngle(),OrbitSearch.getSwathSize());
 				} 
 				catch (ParseException e) {
 					e.printStackTrace();
