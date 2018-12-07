@@ -8,6 +8,7 @@ var WorkFlowManagerController = (function() {
 
     function WorkFlowManagerController($scope, oClose,oExtras,oSnapOperationService,oConstantsService, oHttp) {
         this.m_oScope = $scope;
+        this.m_oClose = oClose;
         this.m_oScope.m_oController = this;
         this.m_oExtras = oExtras;
         this.m_oSnapOperationService = oSnapOperationService;
@@ -18,6 +19,8 @@ var WorkFlowManagerController = (function() {
         this.m_asSelectedProducts = [];
         this.m_aoWorkflows = [];
         this.m_oSelectedWorkflow = null;
+        this.m_oSelectedMultiInputWorkflow = null;
+
         this.m_oConstantsService = oConstantsService;
         this.m_oWorkflowFileData = {
             workflowName:"",
@@ -45,6 +48,8 @@ var WorkFlowManagerController = (function() {
 
         //Load workflows
         this.getWorkflowsByUser();
+
+
     }
 
     WorkFlowManagerController.prototype.getWorkflowsByUser = function()
@@ -55,6 +60,16 @@ var WorkFlowManagerController = (function() {
             if(utilsIsObjectNullOrUndefined(data) == false)
             {
                 oController.m_aoWorkflows = data;
+                //TODO REMOVE IT
+                oController.m_aoWorkflows.push({
+                    "description": "",
+                    "inputFileNames": [],
+                    "inputNodeNames": ["read1","read2","read3","read4"],
+                    "name": "workflow",
+                    "outputFileNames": [],
+                    "outputNodeNames": [],
+                    "workflowId": "04b0fd8e-92e6-4ba1-83ff-56858795f5d2"
+                })
             }
             else
             {
@@ -85,19 +100,82 @@ var WorkFlowManagerController = (function() {
         }
         for(var iIndexSelectedProduct = 0 ; iIndexSelectedProduct < iNumberOfProducts; iIndexSelectedProduct++)
         {
-            //TODO CHECK THIS CODE
             var oProduct = utilsProjectGetProductByName(this.m_asSelectedProducts[iIndexSelectedProduct],this.m_aoProducts);
             if(utilsIsObjectNullOrUndefined(oProduct))
             {
                 return false;
             }
-
+            //TODO REMOVE IT
             var sDestinationProductName = oProduct.name + "_workflow";
-            this.executeGraphFromWorkflowId(this.m_sWorkspaceId,oProduct.fileName,sDestinationProductName,this.m_oSelectedWorkflow.workflowId);
+            //TODO ADD DESCRIPTION
+            var oSnapWorkflowViewModel = this.getObjectExecuteGraph(this.m_oSelectedWorkflow.workflowId,oProduct.fileName,"",
+                this.m_oSelectedWorkflow.inputNodeNames, this.m_oSelectedWorkflow.inputFileNames,this.m_oSelectedWorkflow.outputNodeNames,
+                this.m_oSelectedWorkflow.outputFileNames);
+
+            this.executeGraphFromWorkflowId(this.m_sWorkspaceId,oSnapWorkflowViewModel);
         }
         return true;
     };
 
+    WorkFlowManagerController.prototype.runMultiInputWorkFlow=function()
+    {
+        //TODO ADD DESCRIPTION
+        var oSnapWorkflowViewModel = this.getObjectExecuteGraph(this.m_oSelectedWorkflow.workflowId,oProduct.fileName,"",
+            this.m_oSelectedWorkflow.inputNodeNames, this.m_oSelectedWorkflow.inputFileNames,this.m_oSelectedWorkflow.outputNodeNames,
+            this.m_oSelectedWorkflow.outputFileNames);
+
+        this.executeGraphFromWorkflowId(this.m_sWorkspaceId,oSnapWorkflowViewModel);
+
+    };
+
+    WorkFlowManagerController.prototype.getObjectExecuteGraph = function(sWorkflowId,sName,sDescription,asInputNodeNames,
+                                                                         asInputFileNames,asOutputNodeNames,asOutputFileNames)
+    {
+        if(this.areOkDataExecuteGraph(sWorkflowId,sName,asInputNodeNames, asInputFileNames) === true)
+        {
+            return null;
+        }
+        var oExecuteGraph = this.getEmptyObjectExecuteGraph();
+        oExecuteGraph.workflowId = sWorkflowId;
+        oExecuteGraph.name = sName;
+        oExecuteGraph.description = sDescription;
+        oExecuteGraph.inputNodeNames = asInputNodeNames;
+        oExecuteGraph.asInputFileNames = asInputFileNames;
+        oExecuteGraph.asOutputNodeNames = asOutputNodeNames;
+        oExecuteGraph.asOutputFileNames = asOutputFileNames;
+
+        return oExecuteGraph;
+    };
+
+    WorkFlowManagerController.prototype.areOkDataExecuteGraph = function(sWorkflowId,sName,asInputNodeNames,
+                                                                         asInputFileNames)
+    {
+        var bReturnValue = true;
+        if(utilsIsStrNullOrEmpty(sWorkflowId) || utilsIsStrNullOrEmpty(sName) || utilsIsObjectNullOrUndefined(asInputNodeNames) ||
+            utilsIsObjectNullOrUndefined(asInputFileNames) )
+        {
+            bReturnValue = false;
+        }
+        if(asInputNodeNames.length !== asInputFileNames.length)
+        {
+            bReturnValue = false;
+        }
+
+        return bReturnValue;
+    };
+
+    WorkFlowManagerController.prototype.getEmptyObjectExecuteGraph = function()
+    {
+        return {
+            workflowId:"",
+            name:"",
+            description:"",
+            inputNodeNames:[],
+            inputFileNames:[],
+            outputNodeNames:[],
+            outputFileNames:[]
+        }
+    };
     /**
      * executeGraphFromWorkflowId
      * @param sWorkspaceId
@@ -106,45 +184,40 @@ var WorkFlowManagerController = (function() {
      * @param sWorkflowId
      * @returns {boolean}
      */
-    WorkFlowManagerController.prototype.executeGraphFromWorkflowId = function(sWorkspaceId,sProductNameSelected,sDestinationProductName,sWorkflowId)
+    WorkFlowManagerController.prototype.executeGraphFromWorkflowId = function(sWorkspaceId,oObjectWorkFlow)
     {
         if(utilsIsObjectNullOrUndefined(sWorkspaceId) === true)
         {
             return false;
         }
-        if(utilsIsObjectNullOrUndefined(sWorkflowId) === true)
-        {
-            return false;
-        }
-        if(utilsIsObjectNullOrUndefined(sProductNameSelected) === true || utilsIsStrNullOrEmpty(sProductNameSelected) === true)
-        {
-            return false;
-        }
-        if(utilsIsObjectNullOrUndefined(sDestinationProductName) === true || utilsIsStrNullOrEmpty(sDestinationProductName) === true)
+        if(utilsIsObjectNullOrUndefined(oObjectWorkFlow) === true)
         {
             return false;
         }
         var oController = this;
-        this.m_oSnapOperationService.executeGraphFromWorkflowId(sWorkspaceId,sProductNameSelected,sDestinationProductName,sWorkflowId).success(function (data) {
-            if(utilsIsObjectNullOrUndefined(data) == false)
+        this.m_oSnapOperationService.executeGraphFromWorkflowId(sWorkspaceId,oObjectWorkFlow).success(function (data) {
+            if(utilsIsObjectNullOrUndefined(data) === false && data.boolValue === true )
             {
-                //TODO OK
                 oController.cleanAllExecuteWorkflowFields();
             }
             else
             {
-                //TODO ERROR
                 utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN EXECUTE WORKFLOW,");
             }
-        }).error(function (error) {
-            utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN EXECUTE WORKFLOW");
-            oController.cleanAllExecuteWorkflowFields();
+            oController.closeDialogWithDelay("",500);
 
+        }).error(function (error) {
+
+            oController.cleanAllExecuteWorkflowFields();
+            utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN EXECUTE WORKFLOW");
         });
 
         return true;
     };
+    WorkFlowManagerController.prototype.closeDialogWithDelay = function(result,iDelay) {
 
+        this.m_oClose(result, 700); // close, but give 500ms for bootstrap to animate
+    };
     /**
      * deleteWorkflow
      * @param oWorkflow
@@ -226,7 +299,8 @@ var WorkFlowManagerController = (function() {
                 //Reload list o workFlows
                 oController.getWorkflowsByUser();
                 oController.cleanAllUploadWorkflowFields();
-
+                var oDialog = utilsVexDialogAlertBottomRightCorner("SUCCESSFUL UPLOAD");
+                utilsVexCloseDialogAfterFewSeconds(4000,oDialog);
             }
             else
             {
@@ -295,6 +369,54 @@ var WorkFlowManagerController = (function() {
         }
         return bReturnValue;
     };
+
+    WorkFlowManagerController.prototype.getSingleInputWorkflow = function()
+    {
+        var iNumberOfWorkflows = this.m_aoWorkflows.length;
+        var aoReturnArray = [];
+        for(var iIndexWorkflow = 0 ; iIndexWorkflow < iNumberOfWorkflows ; iIndexWorkflow++)
+        {
+            if(this.m_aoWorkflows[iIndexWorkflow].inputNodeNames.length < 2 )
+            {
+                aoReturnArray.push(this.m_aoWorkflows[iIndexWorkflow]);
+            }
+        }
+        return aoReturnArray;
+    };
+    WorkFlowManagerController.prototype.getMultipleInputWorkflow = function()
+    {
+        var iNumberOfWorkflows = this.m_aoWorkflows.length;
+        var aoReturnArray = [];
+        for(var iIndexWorkflow = 0 ; iIndexWorkflow < iNumberOfWorkflows ; iIndexWorkflow++)
+        {
+            if(this.m_aoWorkflows[iIndexWorkflow].inputNodeNames.length >= 2 )
+            {
+                aoReturnArray.push(this.m_aoWorkflows[iIndexWorkflow]);
+            }
+        }
+        return aoReturnArray;
+    };
+
+    WorkFlowManagerController.prototype.addProductInputInNode = function(sNode,sProduct)
+    {
+        if(utilsIsStrNullOrEmpty(sNode) || utilsIsStrNullOrEmpty(sProduct) )
+        {
+            return false;
+        }
+
+        var iIndexOfElement = utilsFindObjectInArray(this.m_oSelectedMultiInputWorkflow.inputNodeNames,sNode)
+
+        if(iIndexOfElement === -1)
+        {
+            return false;
+        }
+
+        this.m_oSelectedMultiInputWorkflow.inputFileNames[iIndexOfElement] =  sProduct;
+
+
+        return true;
+    };
+
     WorkFlowManagerController.$inject = [
         '$scope',
         'close',

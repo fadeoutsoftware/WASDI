@@ -549,7 +549,7 @@ font-size: 2.5em !important;
     background-color: $wasdi-white;
     margin-top: 8px;
     padding: 10px 10px;
-
+    border-radius: 0px
   }
   .dropdown-menu{
     max-height: 150px;
@@ -861,4 +861,11 @@ font-size: 2.5em !important;
       }
     }
   }
+}
+
+.my-line{
+  width: 112px;
+  height: 47px;
+  border-bottom: 1px solid black;
+  position: absolute;
 }

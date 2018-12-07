@@ -66,6 +66,15 @@ var SearchOrbitController = (function() {
             this.m_oOrbitSearch = new Object();
             this.m_oOrbitSearch.acquisitionStartTime = moment();
             this.m_oOrbitSearch.acquisitionEndTime = moment().add(7, 'd');
+            this.m_oOrbitSearch.lookingType = "LEFT";
+            this.m_oOrbitSearch.viewAngle = {
+                nearAngle:"",
+                farAngle:""
+            };
+            this.m_oOrbitSearch.swathSize = {
+                length:"",
+                width:""
+            };
         };
 
         var oController = this;
@@ -242,6 +251,8 @@ var SearchOrbitController = (function() {
         this.m_aoOrbits = null;
         oController.m_oOrbitSearch.acquisitionStartTime += ":00:00";
         oController.m_oOrbitSearch.acquisitionEndTime += ":00:00";
+        oController.m_oOrbitSearch.viewAngle = oController.convertViewAngleToString();
+        oController.m_oOrbitSearch.swathSize = oController.convertSwathSizeToString();
         //call search
         this.m_oSearchOrbitService.searchOrbit(oController.m_oOrbitSearch)
             .success(function (data, status, headers, config) {
@@ -249,22 +260,57 @@ var SearchOrbitController = (function() {
                 {
                     oController.m_aoOrbits = data;
                     oController.setOrbitAsUnchecked();
+                    if(data.length === 0)
+                    {
+                        utilsVexDialogAlertTop("GURU MEDITATION<br>NO RESULTS FOR YOUR FILTERS");
+                    }
                 }
                 else
                 {
                     utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR: SEARCH ORBITS FAILS.");
                 }
+                oController.initOrbitSearch();
                 oController.m_bIsVisibleLoadingIcon = false;
 
             })
             .error(function (data, status, header, config) {
                 utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR: SEARCH ORBITS FAILS.");
+                oController.initOrbitSearch();
                 oController.m_aoOrbits = null;
                 oController.m_bIsVisibleLoadingIcon = false;
             });
 
     };
 
+
+    SearchOrbitController.prototype.convertViewAngleToString = function()
+    {
+        if( (utilsIsObjectNullOrUndefined(this.m_oOrbitSearch) === true)
+            || (utilsIsObjectNullOrUndefined(this.m_oOrbitSearch.viewAngle) === true)
+            || (utilsIsObjectNullOrUndefined(this.m_oOrbitSearch.viewAngle.nearAngle) === true)
+            || (utilsIsObjectNullOrUndefined(this.m_oOrbitSearch.viewAngle.farAngle) === true) )
+        {
+            return "";
+        }
+        return "(nearAngle:" + this.m_oOrbitSearch.viewAngle.nearAngle + ",farAngle:" + this.m_oOrbitSearch.viewAngle.farAngle +")";
+    };
+
+    SearchOrbitController.prototype.convertSwathSizeToString = function()
+    {
+        if( (utilsIsObjectNullOrUndefined(this.m_oOrbitSearch) === true)
+            || (utilsIsObjectNullOrUndefined(this.m_oOrbitSearch.swathSize) === true)
+            || (utilsIsObjectNullOrUndefined(this.m_oOrbitSearch.swathSize.length) === true)
+            || (utilsIsObjectNullOrUndefined(this.m_oOrbitSearch.swathSize.width) === true) )
+        {
+            return "";
+        }
+        return "(length:" + this.m_oOrbitSearch.swathSize.length + ",width:" + this.m_oOrbitSearch.swathSize.width +")";
+    };
+
+    /**
+     *
+     * @returns {boolean}
+     */
     SearchOrbitController.prototype.setOrbitAsUnchecked = function(){
         if( utilsIsObjectNullOrUndefined(this.m_aoOrbits) === true )
         {

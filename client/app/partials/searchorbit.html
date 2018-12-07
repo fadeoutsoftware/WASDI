@@ -145,15 +145,18 @@
                                 looking type
                                 <div class="radio">
                                     <label>
-                                        <input type="radio" name="name" id="lookingTypeLeft" value="" checked="checked">
+                                        <input type="radio" name="name" id="lookingTypeLeft" value="" checked="checked"
+                                               ng-click="m_oController.m_oOrbitSearch.lookingType='LEFT'">
                                         {{"SEARCH_TITLE_LOOKING_TYPE_LEFT_LABEL"|translate}}
                                     </label>
                                     <label>
-                                        <input type="radio" name="name" id="lookingTypeRight" value="" checked="checked">
+                                        <input type="radio" name="name" id="lookingTypeRight" value=""
+                                               ng-click="m_oController.m_oOrbitSearch.lookingType='RIGHT'">
                                         {{"SEARCH_TITLE_LOOKING_TYPE_RIGHT_LABEL"|translate}}
                                     </label>
                                     <label>
-                                        <input type="radio" name="name" id="lookingTypeNone" value="" checked="checked">
+                                        <input type="radio" name="name" id="lookingTypeNone" value=""
+                                               ng-click="m_oController.m_oOrbitSearch.lookingType='NONE'">
                                         {{"SEARCH_TITLE_LOOKING_TYPE_NONE_LABEL"|translate}}
                                     </label>
                                 </div>
@@ -166,11 +169,13 @@
                                             {{"SEARCH_TITLE_LOOKING_TYPE_VIEW_ANGLE_LABEL"|translate}}
                                         </div>
                                         <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
-                                            <input type="text" name="name" value="" checked="checked"  placeholder="{{'SEARCH_TITLE_LOOKING_TYPE_VIEW_NEAR_ANGLE_LABEL'|translate}}" >
+                                            <input type="number" name="name" value="" checked="checked"  placeholder="{{'SEARCH_TITLE_LOOKING_TYPE_VIEW_NEAR_ANGLE_LABEL'|translate}}"
+                                                   ng-model="m_oController.m_oOrbitSearch.viewAngle.nearAngle">
 
                                         </div>
                                         <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
-                                            <input type="text" name="name" value="" checked="checked"  placeholder="{{'SEARCH_TITLE_LOOKING_TYPE_VIEW_FAR_ANGLE_LABEL'|translate}}" >
+                                            <input type="number" name="name" value="" checked="checked"  placeholder="{{'SEARCH_TITLE_LOOKING_TYPE_VIEW_FAR_ANGLE_LABEL'|translate}}"
+                                                   ng-model="m_oController.m_oOrbitSearch.viewAngle.farAngle">
 
                                         </div>
                                     </div>
@@ -179,11 +184,13 @@
                                             {{"SEARCH_TITLE_LOOKING_TYPE_SWATH_SIZE_LABEL"|translate}}
                                         </div>
                                         <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
-                                            <input type="text" name="name" value="" checked="checked"  placeholder="{{'SEARCH_TITLE_LOOKING_TYPE_SWATH_SIZE_LENGTH_LABEL'|translate}}" >
+                                            <input type="number" name="name" value="" checked="checked"  placeholder="{{'SEARCH_TITLE_LOOKING_TYPE_SWATH_SIZE_LENGTH_LABEL'|translate}}"
+                                                   ng-model="m_oController.m_oOrbitSearch.swathSize.length">
 
                                         </div>
                                         <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
-                                            <input type="text" name="name" value="" checked="checked"  placeholder="{{'SEARCH_TITLE_LOOKING_TYPE_SWATH_SIZE_WIDTH_LABEL'|translate}}" >
+                                            <input type="number" name="name" value="" checked="checked"  placeholder="{{'SEARCH_TITLE_LOOKING_TYPE_SWATH_SIZE_WIDTH_LABEL'|translate}}"
+                                                   ng-model="m_oController.m_oOrbitSearch.swathSize.width">
 
                                         </div>
                                     </div>
