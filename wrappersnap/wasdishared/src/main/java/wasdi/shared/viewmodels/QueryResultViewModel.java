@@ -1,9 +1,12 @@
 package wasdi.shared.viewmodels;
 
+import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
 
 import javax.xml.bind.annotation.XmlRootElement;
+
+import org.json.JSONObject;
 
 @XmlRootElement
 public class QueryResultViewModel {
@@ -16,6 +19,13 @@ public class QueryResultViewModel {
 	String footprint;
 	String provider;
 	Map<String, String> properties = new HashMap<String, String>();
+	
+	//this field must be populated ad hoc in each subclass
+	Map<String, String> asProviderToWasdiKeyMap;
+	
+	public QueryResultViewModel() {
+		asProviderToWasdiKeyMap = new HashMap<String, String>();
+	}
 	
 	public String getPreview() {
 		return preview;
@@ -64,5 +74,45 @@ public class QueryResultViewModel {
 	}
 	public void setProvider(String provider) {
 		this.provider = provider;
+	}
+	
+	public void populate(JSONObject oJson) {
+		String[] asKeys = JSONObject.getNames(oJson);
+		for (String sKey: asKeys) {
+			String sValue = oJson.getString(sKey);
+			addField(sKey, sValue);
+		}
+		buildSummary();
+	}
+	
+	public void addField(String sProviderKey, String sValue){
+		String sMappedKey = asProviderToWasdiKeyMap.get(sProviderKey);
+		if(null == sMappedKey) {
+			return;
+		}
+		try {
+			//try with a field first
+			Field aoField = this.getClass().getDeclaredField(sMappedKey);
+			aoField.set(this,sValue);
+			
+		} catch (NoSuchFieldException e) {
+			//if not add it as a property
+			addProperty(sMappedKey, sValue);
+			
+		} catch (IllegalArgumentException e) {
+			// should not happen as it's checked against
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			//Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	protected void addProperty(String sKey, String sValue) {
+		properties.put(sKey, sValue);
+	}
+	
+	protected void buildSummary() {
+		//override in derived classes
 	}
 }
