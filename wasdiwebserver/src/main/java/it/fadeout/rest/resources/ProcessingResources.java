@@ -296,10 +296,10 @@ public class ProcessingResources {
 			for (int iNodes=0; iNodes<aoNodes.length;iNodes++) {
 				Node oNode = aoNodes[iNodes];
 				// Search Read and Write nodes
-				if (oNode.getOperatorName()=="Read") {
+				if (oNode.getOperatorName().equals("Read")) {
 					oWorkflow.getInputNodeNames().add(oNode.getId());
 				}
-				else if (oNode.getOperatorName() == "Write") {
+				else if (oNode.getOperatorName().equals("Write")) {
 					oWorkflow.getOutputNodeNames().add(oNode.getId());
 				}
 			}
