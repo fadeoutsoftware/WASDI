@@ -56,21 +56,24 @@ var ListFloodAreaDetectionController = (function() {
             return false;
         }
 
+        var oDialog =  utilsVexDialogAlertBottomRightCorner("GURU MEDITATION<br>LIST FLOOD IS RUNNING.");
+        utilsVexCloseDialogAfterFewSeconds(4000, oDialog);
+
         this.m_SnapOperationService.runListFlood(oListFlood,oActiveWorkspace.workspaceId)
             .success(function(data,status){
                 if( (utilsIsObjectNullOrUndefined(data) === false) && (status === 200))
                 {
-                    var oDialog =  utilsVexDialogAlertBottomRightCorner("GURU MEDITATION<br>LIST FLOOD IS RUNNING.");
+                    var oDialog =  utilsVexDialogAlertBottomRightCorner("PROCESS DONE<br>FLOODED AREA MAP ADDED TO THE WORKSPACE.");
                     utilsVexCloseDialogAfterFewSeconds(4000, oDialog);
                 }
                 else
                 {
-                    utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR: LIST FLOOD FAILS.");
+                    utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR: LIST FLOOD FAILED.");
                 }
 
             })
             .error(function(){
-                utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR: LIST FLOOD FAILS.");
+                utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR: LIST FLOOD FAILED.");
             });
     };
 
