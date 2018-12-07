@@ -3,11 +3,13 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import org.apache.commons.io.IOUtils;
+import org.esa.snap.core.dataio.ProductIO;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.gpf.graph.Graph;
 import org.esa.snap.core.gpf.graph.GraphContext;
@@ -23,7 +25,9 @@ import org.esa.snap.runtime.Engine;
 import com.bc.ceres.binding.dom.DomElement;
 import com.bc.ceres.core.ProgressMonitor;
 
+import wasdi.ConfigReader;
 import wasdi.rabbit.Send;
+import wasdi.shared.data.MongoRepository;
 import wasdi.shared.parameters.GraphParameter;
 import wasdi.shared.parameters.GraphSetting;
 import wasdi.snapopearations.WasdiGraph;
@@ -105,16 +109,25 @@ public class ProofGraph {
 		
 	}
 	
-	public static void main(String[] args) throws FileNotFoundException, GraphException {
-		
+	public static void main(String[] args) throws GraphException, NumberFormatException, IOException {
+		/*
 		File graphXmlFile = new File("c:/temp/wasdi/MultiGraph.xml");
 		File inputFile = new File("C:\\Temp\\wasdi\\data\\paolo\\2c1271a4-9e2b-4291-aabd-caf3074adb25\\S1A_IW_GRDH_1SDV_20180129T052722_20180129T052747_020365_022CA8_9D99.zip");
 		File outputFile = new File("C:\\Temp\\wasdi\\testchartout.dim");
-
+		 */
+		
+//		Product oTest = ProductIO.readProduct("C:\\Temp\\wasdi\\data\\paolo\\2c1271a4-9e2b-4291-aabd-caf3074adb25\\S1A_IW_GRDH_1SDV_20180129T052722_20180129T052747_020365_022CA8_9D99.zip");	
 		System.setProperty("user.home", "C:\\Users\\p.campanella.FADEOUT");
         Path propFile = Paths.get("C:\\Codice\\Progetti\\WASDI\\server\\launcher\\target\\config.properties");
         Config.instance("snap.auxdata").load(propFile);
         Config.instance().load();
+        
+		MongoRepository.SERVER_ADDRESS = ConfigReader.getPropValue("MONGO_ADDRESS");
+        MongoRepository.SERVER_PORT = Integer.parseInt(ConfigReader.getPropValue("MONGO_PORT"));
+        MongoRepository.DB_NAME = ConfigReader.getPropValue("MONGO_DBNAME");
+        MongoRepository.DB_USER = ConfigReader.getPropValue("MONGO_DBUSER");
+        MongoRepository.DB_PWD = ConfigReader.getPropValue("MONGO_DBPWD");
+
 
         //JAI.getDefaultInstance().getTileScheduler().setParallelism(Runtime.getRuntime().availableProcessors());
         //MemUtils.configureJaiTileCache();
@@ -133,18 +146,26 @@ public class ProofGraph {
             
             GraphSetting oSettings = new GraphSetting();
             
-    		FileInputStream fileInputStream = new FileInputStream("c:/temp/wasdi/MultiGraph.xml");
+    		FileInputStream fileInputStream = new FileInputStream("c:/temp/wasdi/MultiGraph2.xml");
     		String sGraphXml = IOUtils.toString(fileInputStream, Charset.defaultCharset().name());
             oSettings.setGraphXml(sGraphXml);
             
             oParam.setSettings(oSettings);
 
 			WasdiGraph oWasdiGraph = new WasdiGraph(oParam, new Send());
+			oSettings.setInputNodeNames(oWasdiGraph.getInputNodes());
+			oSettings.setOutputNodeNames(oWasdiGraph.getOutputNodes());
+			oSettings.getInputFileNames().add("S1A_IW_GRDH_1SDV_20180129T052722_20180129T052747_020365_022CA8_9D99.zip");
+			oSettings.getInputFileNames().add("S2A_MSIL1C_20180102T102421_N0206_R065_T32TMQ_20180102T123237.zip");
+			//oSettings.getOutputFileNames().add("");
+			//oSettings.getOutputFileNames().add("");
+			
 			oWasdiGraph.execute();
 		} catch (Exception e) {
 			System.out.println(e.toString());
 		}
 		
+        /*
 		Graph graph = GraphIO.read(new FileReader(graphXmlFile));
 		
 		
@@ -173,7 +194,7 @@ public class ProofGraph {
 			File f = product.getFileLocation();
 			System.out.println(f);
 		}
-		
+		*/
 	}
 
 	private static boolean setNodeFileValue(Node node, File file) {

@@ -9,9 +9,13 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
+import java.util.Iterator;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
+import org.esa.snap.core.dataio.ProductIO;
 import org.esa.snap.core.dataio.dimap.DimapProductWriterPlugIn;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.gpf.graph.Graph;
@@ -49,17 +53,46 @@ import wasdi.shared.viewmodels.ProductViewModel;
  */
 public class WasdiGraph {
 	
+	/**
+	 * First input file
+	 */
 	private File m_oInputFile;
+	/**
+	 * First output file
+	 */
 	private File m_oOutputFile;
+	/**
+	 * Snap Graph
+	 */
 	private Graph m_oGraph;
+	/**
+	 * Logger
+	 */
 	private Logger m_oLogger = LauncherMain.s_oLogger;
+	/**
+	 * ProcessWorkspaceRepository 
+	 */
 	private ProcessWorkspaceRepository m_oProcessRepository;
+	/**
+	 * Process Workspace Entity
+	 */
 	private ProcessWorkspace m_oProcess;
+	/**
+	 * Rabbit reference
+	 */
 	private Send m_oRabbitSender;
+	/**
+	 * Workflow Parameters
+	 */
 	private GraphParameter m_oParams;
-	
-	private ArrayList<String> asInputNodes = new ArrayList<>();
-	private ArrayList<String> asOutputNodes = new ArrayList<>();
+	/**
+	 * List of input nodes
+	 */
+	private ArrayList<String> m_asInputNodes = new ArrayList<>();
+	/**
+	 * List of output nodes
+	 */
+	private ArrayList<String> m_asOutputNodes = new ArrayList<>();
 	
 	
 	/**
@@ -80,11 +113,14 @@ public class WasdiGraph {
 		
 		//retrieve wasdi process
         m_oProcessRepository = new ProcessWorkspaceRepository();
-        m_oProcess = m_oProcessRepository.GetProcessByProcessObjId(oParams.getProcessObjId());        
+        m_oProcess = m_oProcessRepository.GetProcessByProcessObjId(oParams.getProcessObjId());
+        
+        findIONodes();
 	}
 	
 	/**
-	 * Find the Read and Write Nodes in this 
+	 * Find the Read and Write Nodes in this Workflow. 
+	 * NOTE: The execute function uses the list received in the parameters and not these 
 	 */
 	public void findIONodes() {
 		
@@ -95,11 +131,11 @@ public class WasdiGraph {
 		
 		for (int iNodes=0; iNodes<aoNodes.length;iNodes++) {
 			Node oNode = aoNodes[iNodes];
-			if (oNode.getOperatorName()=="Read") {
-				asInputNodes.add(oNode.getId());
+			if (oNode.getOperatorName().equals("Read")) {
+				m_asInputNodes.add(oNode.getId());
 			}
-			else if (oNode.getOperatorName() == "Write") {
-				asOutputNodes.add(oNode.getId());
+			else if (oNode.getOperatorName().equals("Write")) {
+				m_asOutputNodes.add(oNode.getId());
 			}
 		}
 	}
@@ -107,6 +143,7 @@ public class WasdiGraph {
 
 	/**
 	 * Run the graph
+	 * NOTE: uses the list of I/O in the parameter object and not the self member took from the XML of the workflow
 	 * @throws Exception
 	 */
 	public void execute() throws Exception {
@@ -117,6 +154,8 @@ public class WasdiGraph {
 	        File oBaseDir = new File(ConfigReader.getPropValue("DOWNLOAD_ROOT_PATH"));
 	        File oUserDir = new File(oBaseDir, m_oParams.getUserId());
 	        File oWorkspaceDir = new File(oUserDir, m_oParams.getWorkspace());
+	        
+	        ArrayList<File> aoOutputFiles = new ArrayList<>(); 
 
 			GraphSetting oGraphSettings = (GraphSetting) m_oParams.getSettings();
 			
@@ -158,11 +197,15 @@ public class WasdiGraph {
 				}
 				
 				//TODO: output file name
-		        File oOutputFile = new File(oWorkspaceDir, oGraphSettings.getInputFileNames().get(iNode)+"workflow");
+				String sOutputName = Utils.GetFileNameWithoutExtension(oGraphSettings.getInputFileNames().get(iNode));
+				
+		        File oOutputFile = new File(oWorkspaceDir, sOutputName+"_workflow");
 		        
 		        if (m_oOutputFile == null) {
 		        	m_oOutputFile = oOutputFile;
 		        }
+		        
+		        aoOutputFiles.add(oOutputFile);
 				
 				if (!setNodeValue(oNodeWriter, "file", oOutputFile.getAbsolutePath())) 
 						//|| !setNodeValue(nodeWriter, "formatName", DimapProductWriterPlugIn.DIMAP_FORMAT_NAME) 
@@ -203,7 +246,7 @@ public class WasdiGraph {
 	            	sBbox = oDownloadedFile.getBoundingBox();
 	            }
 	            
-	            addProductToDb(oProduct, sBbox);				
+	            addProductToDb(oProduct, sBbox, aoOutputFiles.get(iOutputs));				
 			}
 			
 		} finally {
@@ -268,19 +311,63 @@ public class WasdiGraph {
 
 	/**
 	 * Adds Output product to WASDI DB
-	 * @param product
+	 * @param oProduct
 	 * @param sBBox
 	 * @throws Exception
 	 */
-    private void addProductToDb(Product product, String sBBox) throws Exception {
+    private void addProductToDb(Product oProduct, String sBBox, File oOutputFile) throws Exception {
+    	
+    	// Need to find the file of this output product
+        
+        // Get the partent folder
+        File oFolder = new File(oOutputFile.getParent());
+        // And the product Name
+        String sName = oProduct.getName();
+        
+        File oProductFile = null;
+        
+        try {
+        	// List the file in the folder
+            Collection<File> aoFiles = FileUtils.listFiles(oFolder, null, false);
+
+            // For each
+            for (Iterator<File> oIterator = aoFiles.iterator(); oIterator.hasNext();) {
+                File oFileInFolder = (File) oIterator.next();
+                
+                // Find the one starting with the exact name
+                if (oFileInFolder.getName().startsWith(sName)) {
+                	// Check that is not o folder
+                	if (oFileInFolder.isFile()) {
+                		// Should be the entry point
+                		oProductFile = oFileInFolder;
+                		break;
+                	}
+                }
+                    
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        
+        // This is an error: here I should have found the file
+        if (oProductFile == null) {
+        	
+        	m_oLogger.error("Product " + oOutputFile.getName() + " FILE NOT FOUND. TRY with .dim");
+        	
+        	// Try with the standard but probably will fail
+        	oProductFile = new File(oOutputFile.getAbsolutePath()+".dim");
+        }
+        
+        // Read the View Model
         ReadProduct oReadProduct = new ReadProduct();
-        File oProductFile = new File(m_oOutputFile.getAbsolutePath()+".dim");
-		ProductViewModel oVM = oReadProduct.getProductViewModel(product, oProductFile);
+		ProductViewModel oVM = oReadProduct.getProductViewModel(oProduct, oProductFile);
         
         // P.Campanella 12/05/2017: it looks it is done before. Let leave here a check
         DownloadedFilesRepository oDownloadedRepo = new DownloadedFilesRepository();
         DownloadedFile oCheck = oDownloadedRepo.GetDownloadedFile(oVM.getFileName());
+        
         boolean bAddProductToWS = true;
+        
         if (oCheck == null) {
         	m_oLogger.debug("Insert in db");
         	
@@ -313,7 +400,7 @@ public class WasdiGraph {
             	m_oLogger.error("Impossible to Insert the new Product " + m_oOutputFile.getName() + " in the database.");            	
             }
             else {
-            	m_oLogger.error("Product Inserted " + m_oOutputFile.getName());
+            	m_oLogger.error("Product Inserted " + oOutputFile.getName());
             }
         }
         
@@ -380,28 +467,77 @@ public class WasdiGraph {
 	
 	/**
 	 * Set the value of a node of the XML chart
-	 * @param node
-	 * @param childName
-	 * @param value
+	 * @param oNode
+	 * @param sChildName
+	 * @param sValue
 	 * @return
 	 */
-	public static boolean setNodeValue(Node node, String childName, String value) {
-		DomElement oDomElement = node.getConfiguration();
-		DomElement[] aoChildren = oDomElement.getChildren(childName);
+	public static boolean setNodeValue(Node oNode, String sChildName, String sValue) {
+		DomElement oDomElement = oNode.getConfiguration();
+		DomElement[] aoChildren = oDomElement.getChildren(sChildName);
 		if (aoChildren==null || aoChildren.length!=1) {
 			
 			XppDomElement oFileElement = new XppDomElement("file");
-			oFileElement.setValue(value);
+			oFileElement.setValue(sValue);
 			oDomElement.addChild(oFileElement);
 			
 			return true;
 		}
 		else {
-			aoChildren[0].setValue(value);
+			aoChildren[0].setValue(sValue);
 		}
 
 		return true;
 	}
-	
+
+
+	/**
+	 * Get list of input nodes
+	 * @return
+	 */
+	public ArrayList<String> getInputNodes() {
+		return m_asInputNodes;
+	}
+
+	/**
+	 * Set list of input nodes
+	 * @param asInputNodes
+	 */
+	public void setInputNodes(ArrayList<String> asInputNodes) {
+		this.m_asInputNodes = asInputNodes;
+	}
+
+	/**
+	 * Get list of Output nodes
+	 * @return
+	 */
+	public ArrayList<String> getOutputNodes() {
+		return m_asOutputNodes;
+	}
+
+	/**
+	 * Set List of Output nodes
+	 * @param asOutputNodes
+	 */
+	public void setOutputNodes(ArrayList<String> asOutputNodes) {
+		this.m_asOutputNodes = asOutputNodes;
+	}
+
+	/**
+	 * Get Parameters
+	 * @return
+	 */
+	public GraphParameter getParams() {
+		return m_oParams;
+	}
+
+	/**
+	 * Set Parameters
+	 * @param oParams
+	 */
+	public void setParams(GraphParameter oParams) {
+		this.m_oParams = oParams;
+	}
+
 	
 }
