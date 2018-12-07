@@ -123,9 +123,9 @@ public class OpenSearchResource {
 
 		int iCounter = 0;
 		if (sProviders != null) {
-			Map<String, Integer> aiMap = getQueryCounters(sQuery, sProviders);
+			Map<String, Integer> aiQueryCountResultsPerProvider = getQueryCountResultsPerProvider(sQuery, sProviders);
 
-			for (Integer count : aiMap.values()) {
+			for (Integer count : aiQueryCountResultsPerProvider.values()) {
 				iCounter += count;
 			}
 		}
@@ -133,10 +133,10 @@ public class OpenSearchResource {
 		return iCounter;
 	}
 
-	private Map<String, Integer> getQueryCounters(String sQuery, String sProviders) {
+	private Map<String, Integer> getQueryCountResultsPerProvider(String sQuery, String sProviders) {
 		Wasdi.DebugLog("OpenSearchResource.getQueryCounters");
 		
-		Map<String, Integer> pMap = new HashMap<String, Integer>();
+		Map<String, Integer> aiQueryCountResultsPerProvider = new HashMap<String, Integer>();
 		String asProviders[] = sProviders.split(",|;");
 		for (String sProvider : asProviders) {
 			String sUser = m_oServletConfig.getInitParameter(sProvider + ".OSUser");
@@ -159,20 +159,20 @@ public class OpenSearchResource {
 			QueryExecutor oExecutor = QueryExecutor.newInstance(sProvider, sUser, sPassword, sOffset, sLimit, sSortedBy,
 					sOrder);
 			try {
-				Integer iTotalResults = 0;
+				Integer iProviderCountResults = 0;
 				if (sProvider.equals("SENTINEL")) {
 					// XXX move this into SENTINEL query executor
-					iTotalResults = oExecutor.executeCountSentinel(sQuery);
+					iProviderCountResults = oExecutor.executeCountSentinel(sQuery);
 				} else {
-					iTotalResults = oExecutor.executeCount(sQuery);
+					iProviderCountResults = oExecutor.executeCount(sQuery);
 				}
-				pMap.put(sProvider, iTotalResults);
+				aiQueryCountResultsPerProvider.put(sProvider, iProviderCountResults);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
 
 		}
-		return pMap;
+		return aiQueryCountResultsPerProvider;
 	}
 
 	@GET
@@ -204,7 +204,7 @@ public class OpenSearchResource {
 
 			Map<String, Integer> aiCounterMap = null;
 			try {
-				aiCounterMap = getQueryCounters(sQuery, sProviders);
+				aiCounterMap = getQueryCountResultsPerProvider(sQuery, sProviders);
 				// TEST
 				// counterMap = new HashMap();
 				// counterMap.put("SENTINEL", 10);
@@ -332,7 +332,7 @@ public class OpenSearchResource {
 		for (int iQueries = 0; iQueries < asQueries.size(); iQueries++) {
 			sQuery = asQueries.get(iQueries);
 			if (sProviders != null) {
-				Map<String, Integer> pMap = getQueryCounters(sQuery, sProviders);
+				Map<String, Integer> pMap = getQueryCountResultsPerProvider(sQuery, sProviders);
 				for (Integer count : pMap.values()) {
 					iCounter += count;
 				}
@@ -373,10 +373,9 @@ public class OpenSearchResource {
 
 				sQuery = asQueries.get(iQueries);
 
-				Wasdi.DebugLog("OpenSearchResource.SearchList: [" + sProviders + "] Query[" + iQueries + "] = "
-						+ asQueries.get(iQueries));
+				Wasdi.DebugLog("OpenSearchResource.SearchList: [" + sProviders + "] Query[" + iQueries + "] = " + asQueries.get(iQueries));
 
-				Map<String, Integer> counterMap = getQueryCounters(sQuery, sProviders);
+				Map<String, Integer> counterMap = getQueryCountResultsPerProvider(sQuery, sProviders);
 
 				for (Entry<String, Integer> entry : counterMap.entrySet()) {
 
@@ -407,8 +406,9 @@ public class OpenSearchResource {
 							if (aoTmp != null && !aoTmp.isEmpty()) {
 								iObtainedResults += aoTmp.size();
 								aoResults.addAll(aoTmp);
-								System.out.println("Found " + aoTmp.size() + " results for Query#" + iQueries + " for "
-										+ sProvider);
+								System.out.println("Found " + aoTmp.size() +
+										" results for Query#" + iQueries +
+										" for " + sProvider);
 							} else {
 								System.out.println("No results found for " + sProvider);
 							}
