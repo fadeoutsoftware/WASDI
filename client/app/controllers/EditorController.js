@@ -3794,7 +3794,7 @@ var EditorController = (function () {
                                                     "fileName":oProduct.fileName,
                                                     "filePath":oProduct.filePath
                                                 };
-                                                this.downloadEntry(oEntry);
+                                                oController.downloadEntry(oEntry);
                                             }
                                         }
                                     },

@@ -2,7 +2,7 @@
 {
   .modal-dialog
   {
-    width:50%;
+    //width:50%;
     .modal-content
     {
       .modal-header
@@ -13,6 +13,9 @@
         {
           color: $wasdi-white;
           opacity: 1;
+        }
+        .snap-logo{
+          width: 50px;
         }
       }
 
@@ -49,7 +52,14 @@
 
 
 
-
+      .multi-input-workflows{
+        margin-bottom: 100px;
+        .my-dropdown{
+          li{
+            max-height: 100px;
+          }
+        }
+      }
 
       }
 
