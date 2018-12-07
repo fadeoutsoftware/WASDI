@@ -6,9 +6,6 @@
  */
 package wasdi.shared.opensearch;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 /**
  * @author c.nattero
  *
@@ -40,17 +37,21 @@ public class OpenSearch2OdataTranslator extends DiasQueryTranslator {
 				//relativeOrbitNumber:[integer in [1-175]] (optional)
 				//Sensor Mode:[SM|IW|EW|WV] (optional)
 			//NO
+				//Polarisation
+				//Swath
 		//Sentinel-2
 			//YES
 				//Platform:[S2A_*|S2B-*] (optional)
 				//Type:[MSI1C|MSI2A|MSI2Ap] (optional)
 				//Cloud Cover %:interval [a,b] between float [0,100] (optional)
-			//NO
 		//Sentinel-3
 			//YES
 				//Type:[SR_1_SRA__|SR_1_SRA_A_|SR_1_SRA_BS|SR_2_LAN__] (optional)
 				//Timeliness:[Near Real time|Short Time Critical|Non Time Critical]
 			//NO
+				//instrument
+				//product level
+				//CRelative Orbit Start
 		//ENVISAT
 			//YES
 				//type: [ASA_IM__0P|ASA_WS__0P] (optional)
@@ -61,6 +62,8 @@ public class OpenSearch2OdataTranslator extends DiasQueryTranslator {
 				//Type:[L1T|L1G|L1GT|L1GS|L1TP] (optional)
 				//Cloud Cover %:interval [a,b] between float [0,100] (optional)
 			//NO
+		//PROBAV
+			//not supported
 		
 		//begin translation
 		

@@ -350,12 +350,14 @@ public abstract class QueryExecutor {
 		oParserOptions.setFilterRestrictedCharacters(true);
 		oParserOptions.setMustPreserveWhitespace(false);
 		oParserOptions.setParseFilter(null);
+		
 		// set authorization
 		if (m_sUser!=null && m_sPassword!=null) {
 			String sUserCredentials = m_sUser + ":" + m_sPassword;
 			String sBasicAuth = "Basic " + Base64.getEncoder().encodeToString(sUserCredentials.getBytes());
 			oOptions.setAuthorization(sBasicAuth);			
 		}
+		
 		
 //		System.out.println("\nSending 'GET' request to URL : " + sUrl);
 		ClientResponse response = oClient.get(sUrl, oOptions);
@@ -422,18 +424,23 @@ public abstract class QueryExecutor {
 		// build the parser
 		Parser oParser = oAbdera.getParser();
 		ParserOptions oParserOptions = oParser.getDefaultParserOptions();
+		
 		oParserOptions.setCharset("UTF-8");
+		
 		//options.setCompressionCodecs(CompressionCodec.GZIP);
 		oParserOptions.setFilterRestrictedCharacterReplacement('_');
 		oParserOptions.setFilterRestrictedCharacters(true);
 		oParserOptions.setMustPreserveWhitespace(false);
 		oParserOptions.setParseFilter(null);
+		
+		
 		// set authorization
 		if (m_sUser!=null && m_sPassword!=null) {
 			String sUserCredentials = m_sUser + ":" + m_sPassword;
 			String sBasicAuth = "Basic " + Base64.getEncoder().encodeToString(sUserCredentials.getBytes());
 			oOptions.setAuthorization(sBasicAuth);			
 		}
+		
 		
 //		System.out.println("\nSending 'GET' request to URL : " + sUrl);
 		ClientResponse response = oClient.get(sUrl, oOptions);
