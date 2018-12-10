@@ -48,10 +48,9 @@ service('SnapOperationService', ['$http',  'ConstantsService', function ($http, 
     };
 
     //Run a workflow that has been stored in WASDI.
-    this.executeGraphFromWorkflowId = function(sWorkspaceInput,sSourceInput,sDestinationInput,sWorkflowIdInput)
+    this.executeGraphFromWorkflowId = function(sWorkspaceInput,oSnapWorkflowViewModel)
     {
-        return this.m_oHttp.get(this.APIURL + '/processing/graph_id?workspace=' + sWorkspaceInput + '&source=' +
-                                sSourceInput + '&destination=' + sDestinationInput + "&workflowId=" + sWorkflowIdInput);
+        return this.m_oHttp.post(this.APIURL + '/processing/graph_id?workspace=' + sWorkspaceInput,oSnapWorkflowViewModel);
     };
 
     this.uploadGraph = function(sWorkspaceInput,sName,sDescription,oBody)
