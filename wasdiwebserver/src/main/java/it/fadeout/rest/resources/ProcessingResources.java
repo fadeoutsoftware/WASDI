@@ -10,11 +10,13 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.StringReader;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.nio.charset.Charset;
@@ -59,6 +61,9 @@ import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductNodeGroup;
 import org.esa.snap.core.datamodel.RasterDataNode;
 import org.esa.snap.core.gpf.annotations.Parameter;
+import org.esa.snap.core.gpf.graph.Graph;
+import org.esa.snap.core.gpf.graph.GraphIO;
+import org.esa.snap.core.gpf.graph.Node;
 import org.esa.snap.core.jexp.impl.Tokenizer;
 import org.esa.snap.rcp.imgfilter.model.Filter;
 import org.esa.snap.rcp.imgfilter.model.StandardFilters;
@@ -261,26 +266,43 @@ public class ProcessingResources {
 			}
 			
 			String sWorkflowId =  UUID.randomUUID().toString();
-			File humidityTifFile = new File(sDownloadRootPath+sUserId+ "/workflows/" + sWorkflowId + ".xml");
+			File oWorkflowXmlFile = new File(sDownloadRootPath+sUserId+ "/workflows/" + sWorkflowId + ".xml");
 			
-			Wasdi.DebugLog("ProcessingResources.uploadGraph: workflow file Path: " + humidityTifFile.getPath());
+			Wasdi.DebugLog("ProcessingResources.uploadGraph: workflow file Path: " + oWorkflowXmlFile.getPath());
 			
 			//save uploaded file
-			int read = 0;
-			byte[] bytes = new byte[1024];
-			OutputStream out = new FileOutputStream(humidityTifFile);
-			while ((read = fileInputStream.read(bytes)) != -1) {
-				out.write(bytes, 0, read);
+			int iRead = 0;
+			byte[] ayBytes = new byte[1024];
+			OutputStream oOutStream = new FileOutputStream(oWorkflowXmlFile);
+			while ((iRead = fileInputStream.read(ayBytes)) != -1) {
+				oOutStream.write(ayBytes, 0, iRead);
 			}
-			out.flush();
-			out.close();
-			
+			oOutStream.flush();
+			oOutStream.close();
+						
 			SnapWorkflow oWorkflow = new SnapWorkflow();
 			oWorkflow.setName(name);
 			oWorkflow.setDescription(description);
-			oWorkflow.setFilePath(humidityTifFile.getPath());
+			oWorkflow.setFilePath(oWorkflowXmlFile.getPath());
 			oWorkflow.setUserId(sUserId);
 			oWorkflow.setWorkflowId(sWorkflowId);
+			
+			// Read the graph
+			Graph oGraph = GraphIO.read(new FileReader(oWorkflowXmlFile));
+
+			// Take the nodes
+			Node [] aoNodes = oGraph.getNodes();
+			
+			for (int iNodes=0; iNodes<aoNodes.length;iNodes++) {
+				Node oNode = aoNodes[iNodes];
+				// Search Read and Write nodes
+				if (oNode.getOperatorName().equals("Read")) {
+					oWorkflow.getInputNodeNames().add(oNode.getId());
+				}
+				else if (oNode.getOperatorName().equals("Write")) {
+					oWorkflow.getOutputNodeNames().add(oNode.getId());
+				}
+			}
 			
 			SnapWorkflowRepository oSnapWorkflowRepository = new SnapWorkflowRepository();
 			oSnapWorkflowRepository.InsertSnapWorkflow(oWorkflow);			
@@ -322,6 +344,8 @@ public class ProcessingResources {
 			oVM.setName(aoDbWorkflows.get(i).getName());
 			oVM.setDescription(aoDbWorkflows.get(i).getDescription());
 			oVM.setWorkflowId(aoDbWorkflows.get(i).getWorkflowId());
+			oVM.setOutputNodeNames(aoDbWorkflows.get(i).getInputNodeNames());
+			oVM.setInputNodeNames(aoDbWorkflows.get(i).getInputNodeNames());
 			
 			aoRetWorkflows.add(oVM);
 		}
@@ -399,12 +423,12 @@ public class ProcessingResources {
 			return oResult;
 		}
 
-		GraphSetting settings = new GraphSetting();
-		String graphXml;
-		graphXml = IOUtils.toString(fileInputStream, Charset.defaultCharset().name());
-		settings.setGraphXml(graphXml);
+		GraphSetting oSettings = new GraphSetting();
+		String sGraphXml;
+		sGraphXml = IOUtils.toString(fileInputStream, Charset.defaultCharset().name());
+		oSettings.setGraphXml(sGraphXml);
 		
-		return ExecuteOperation(sessionId, sourceProductName, destinationProdutName, workspace, settings, LauncherOperations.GRAPH);
+		return ExecuteOperation(sessionId, sourceProductName, destinationProdutName, workspace, oSettings, LauncherOperations.GRAPH);
 		
 	}
 	
@@ -435,15 +459,15 @@ public class ProcessingResources {
 			return oResult;
 		}
 		
-		GraphSetting settings = new GraphSetting();		
-		String graphXml;
+		GraphSetting oSettings = new GraphSetting();		
+		String sGraphXml;
 		
 		FileInputStream fileInputStream = new FileInputStream("/usr/lib/wasdi/S1_GRD_preprocessing.xml");
 		
-		graphXml = IOUtils.toString(fileInputStream, Charset.defaultCharset().name());
-		settings.setGraphXml(graphXml);
+		sGraphXml = IOUtils.toString(fileInputStream, Charset.defaultCharset().name());
+		oSettings.setGraphXml(sGraphXml);
 		
-		return ExecuteOperation(sessionId, sourceProductName, destinationProdutName, workspace, settings, LauncherOperations.GRAPH);
+		return ExecuteOperation(sessionId, sourceProductName, destinationProdutName, workspace, oSettings, LauncherOperations.GRAPH);
 	}
 	
 	/**
@@ -456,10 +480,10 @@ public class ProcessingResources {
 	 * @return
 	 * @throws Exception
 	 */
-	@GET
+	@POST
 	@Path("/graph_id")
 	public PrimitiveResult executeGraphFromWorkflowId(@HeaderParam("x-session-token") String sessionId, 
-			@QueryParam("workspace") String workspace, @QueryParam("source") String sourceProductName, @QueryParam("destination") String destinationProdutName, @QueryParam("workflowId") String workflowId) throws Exception {
+			@QueryParam("workspace") String workspace, SnapWorkflowViewModel oSnapWorkflow) throws Exception {
 
 		PrimitiveResult oResult = new PrimitiveResult();
 		Wasdi.DebugLog("ProcessingResources.executeGraphFromWorkflowId");
@@ -489,7 +513,7 @@ public class ProcessingResources {
 		String sGraphXml;
 		
 		SnapWorkflowRepository oSnapWorkflowRepository = new SnapWorkflowRepository();
-		SnapWorkflow oWF = oSnapWorkflowRepository.GetSnapWorkflow(workflowId);
+		SnapWorkflow oWF = oSnapWorkflowRepository.GetSnapWorkflow(oSnapWorkflow.getWorkflowId());
 		
 		if (oWF == null) {
 			oResult.setBoolValue(false);
@@ -507,7 +531,21 @@ public class ProcessingResources {
 		sGraphXml = IOUtils.toString(fileInputStream, Charset.defaultCharset().name());
 		oGraphSettings.setGraphXml(sGraphXml);
 		
-		return ExecuteOperation(sessionId, sourceProductName, destinationProdutName, workspace, oGraphSettings, LauncherOperations.GRAPH);
+		oGraphSettings.setInputFileNames(oSnapWorkflow.getInputFileNames());
+		oGraphSettings.setInputNodeNames(oSnapWorkflow.getInputNodeNames());
+		oGraphSettings.setOutputFileNames(oSnapWorkflow.getOutputFileNames());
+		oGraphSettings.setOutputNodeNames(oSnapWorkflow.getOutputNodeNames());
+		
+		String sSourceProductName = "";
+		String sDestinationProdutName = "";
+		
+		if (oSnapWorkflow.getInputFileNames().size()>0) {
+			sSourceProductName = oSnapWorkflow.getInputFileNames().get(0);
+			// TODO: Output file name
+			sDestinationProdutName = sSourceProductName + oSnapWorkflow.getName();
+		}
+		
+		return ExecuteOperation(sessionId, sSourceProductName, sDestinationProdutName, workspace, oGraphSettings, LauncherOperations.GRAPH);
 	}
 
 	@GET
@@ -1448,7 +1486,6 @@ public class ProcessingResources {
 			oResult.setIntValue(500);				
 			return oResult;
 		}
-	
 	}
 	
 	/**

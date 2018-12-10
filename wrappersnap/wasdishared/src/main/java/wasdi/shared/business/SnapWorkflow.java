@@ -1,5 +1,7 @@
 package wasdi.shared.business;
 
+import java.util.ArrayList;
+
 /**
  * Snap Workflow Entity
  * Represent a snap xml workflow imported in WASDI
@@ -27,6 +29,17 @@ public class SnapWorkflow {
 	 * Full xml file path
 	 */
 	private String filePath;
+	
+	/**
+	 * List of the name of the input nodes
+	 */
+	private ArrayList<String> inputNodeNames = new ArrayList<>();
+	
+	/**
+	 * List of the name of the output nodes
+	 */
+	private ArrayList<String> outputNodeNames = new ArrayList<>();
+
 	
 	public String getName() {
 		return name;
@@ -57,5 +70,17 @@ public class SnapWorkflow {
 	}
 	public void setWorkflowId(String workflowId) {
 		this.workflowId = workflowId;
+	}
+	public ArrayList<String> getInputNodeNames() {
+		return inputNodeNames;
+	}
+	public void setInputNodeNames(ArrayList<String> inputNodeNames) {
+		this.inputNodeNames = inputNodeNames;
+	}
+	public ArrayList<String> getOutputNodeNames() {
+		return outputNodeNames;
+	}
+	public void setOutputNodeNames(ArrayList<String> outputNodeNames) {
+		this.outputNodeNames = outputNodeNames;
 	}
 }
