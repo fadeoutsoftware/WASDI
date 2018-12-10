@@ -22,7 +22,7 @@ public class QueryResultViewModelONDA extends QueryResultViewModel {
 	}
 
 	@Override
-	protected void buildSummary() {
+	public void buildSummary() {
 		//example:
 		//summary : "Date: 2018-11-01T17:22:56.428Z, Instrument: SAR-C SAR, Mode: VH VV, Satellite: Sentinel-1, Size: 1.6 GB"
 		summary = new String ("");

@@ -81,7 +81,22 @@ public class QueryExecutorONDA extends QueryExecutor {
 	
 	@Override
 	public int executeCount(String sQuery) throws IOException {
-
+		//TODO filter results according to those parameters specified by WASDI and not supported by ONDA:
+		//polarisation
+		//relative orbit
+		//Swath
+		//
+		//Naming conventions:
+		// https://sentinel.esa.int/web/sentinel/user-guides
+		//sentinel 1:
+			// https://sentinel.esa.int/web/sentinel/user-guides/sentinel-1-sar/naming-conventions
+			// https://sentinel.esa.int/web/sentinel/user-guides/sentinel-2-msi/naming-convention
+		//sentinel 2:
+			// https://sentinel.esa.int/web/sentinel/user-guides/sentinel-2-msi/naming-convention
+		//sentinel 3:
+			//...
+		
+		
 		//String sUrl = "https://catalogue.onda-dias.eu/dias-catalogue/Products/$count?$search=%22S2A_MSIL1C_20160719T094032_N0204_R036_T33TYH_20160719T094201%20AND%20(%20name:S1*%20AND%20name:S1A_*%20AND%20name:*%20AND%20name:*%20AND%20name:*%20)%22";
 		//String sUrl = URLEncoder.encode(getCountUrl(sQuery), m_sEnconding);
 		String sUrl = getCountUrl(sQuery);
