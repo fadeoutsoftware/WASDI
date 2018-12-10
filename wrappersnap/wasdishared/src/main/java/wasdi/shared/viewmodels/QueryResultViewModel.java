@@ -79,10 +79,10 @@ public class QueryResultViewModel {
 	public void populate(JSONObject oJson) {
 		String[] asKeys = JSONObject.getNames(oJson);
 		for (String sKey: asKeys) {
-			String sValue = oJson.getString(sKey);
+			String sValue = oJson.optString(sKey);
 			addField(sKey, sValue);
+			//FIXME manage boolean and other types
 		}
-		buildSummary();
 	}
 	
 	public void addField(String sProviderKey, String sValue){
@@ -98,8 +98,8 @@ public class QueryResultViewModel {
 		} catch (NoSuchFieldException e) {
 			//if not add it as a property
 			addProperty(sMappedKey, sValue);
-			
-		} catch (IllegalArgumentException e) {
+		} //catch (NullPointerException e ) {}
+		catch (IllegalArgumentException e) {
 			// should not happen as it's checked against
 			e.printStackTrace();
 		} catch (IllegalAccessException e) {
@@ -112,7 +112,7 @@ public class QueryResultViewModel {
 		properties.put(sKey, sValue);
 	}
 	
-	protected void buildSummary() {
+	public void buildSummary() {
 		//override in derived classes
 	}
 }
