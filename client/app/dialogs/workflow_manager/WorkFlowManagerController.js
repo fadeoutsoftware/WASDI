@@ -49,7 +49,6 @@ var WorkFlowManagerController = (function() {
         //Load workflows
         this.getWorkflowsByUser();
 
-
     }
 
     WorkFlowManagerController.prototype.getWorkflowsByUser = function()
@@ -60,16 +59,16 @@ var WorkFlowManagerController = (function() {
             if(utilsIsObjectNullOrUndefined(data) == false)
             {
                 oController.m_aoWorkflows = data;
-                //TODO REMOVE IT
-                oController.m_aoWorkflows.push({
-                    "description": "",
-                    "inputFileNames": [],
-                    "inputNodeNames": ["read1","read2","read3","read4"],
-                    "name": "workflow",
-                    "outputFileNames": [],
-                    "outputNodeNames": [],
-                    "workflowId": "04b0fd8e-92e6-4ba1-83ff-56858795f5d2"
-                })
+                // //TODO REMOVE IT
+                // oController.m_aoWorkflows.push({
+                //     "description": "",
+                //     "inputFileNames": [],
+                //     "inputNodeNames": ["read1","read2","read3","read4"],
+                //     "name": "workflow",
+                //     "outputFileNames": [],
+                //     "outputNodeNames": [],
+                //     "workflowId": "04b0fd8e-92e6-4ba1-83ff-56858795f5d2"
+                // })
             }
             else
             {
@@ -106,32 +105,43 @@ var WorkFlowManagerController = (function() {
                 return false;
             }
             //TODO REMOVE IT
-            var sDestinationProductName = oProduct.name + "_workflow";
-            //TODO ADD DESCRIPTION
-            var oSnapWorkflowViewModel = this.getObjectExecuteGraph(this.m_oSelectedWorkflow.workflowId,oProduct.fileName,"",
+            // var sDestinationProductName = oProduct.name + "_workflow";
+            this.m_oSelectedWorkflow.inputFileNames.push(oProduct.fileName);
+            var oSnapWorkflowViewModel = this.getObjectExecuteGraph(this.m_oSelectedWorkflow.workflowId,this.m_oSelectedWorkflow.name,this.m_oSelectedWorkflow.description,
                 this.m_oSelectedWorkflow.inputNodeNames, this.m_oSelectedWorkflow.inputFileNames,this.m_oSelectedWorkflow.outputNodeNames,
                 this.m_oSelectedWorkflow.outputFileNames);
-
-            this.executeGraphFromWorkflowId(this.m_sWorkspaceId,oSnapWorkflowViewModel);
+            if(utilsIsObjectNullOrUndefined(oSnapWorkflowViewModel) === false)
+            {
+                this.executeGraphFromWorkflowId(this.m_sWorkspaceId,oSnapWorkflowViewModel);
+            }
+            else
+            {
+                utilsVexDialogAlertTop("GURU MEDITATION<br>YOU HAVE TO INSERT A PRODUCT FOR EACH INPUT NODE.");
+            }
         }
         return true;
     };
 
     WorkFlowManagerController.prototype.runMultiInputWorkFlow=function()
     {
-        //TODO ADD DESCRIPTION
-        var oSnapWorkflowViewModel = this.getObjectExecuteGraph(this.m_oSelectedWorkflow.workflowId,oProduct.fileName,"",
-            this.m_oSelectedWorkflow.inputNodeNames, this.m_oSelectedWorkflow.inputFileNames,this.m_oSelectedWorkflow.outputNodeNames,
-            this.m_oSelectedWorkflow.outputFileNames);
-
-        this.executeGraphFromWorkflowId(this.m_sWorkspaceId,oSnapWorkflowViewModel);
+        var oSnapWorkflowViewModel = this.getObjectExecuteGraph(this.m_oSelectedMultiInputWorkflow.workflowId,this.m_oSelectedMultiInputWorkflow.name,this.m_oSelectedMultiInputWorkflow.description,
+            this.m_oSelectedMultiInputWorkflow.inputNodeNames, this.m_oSelectedMultiInputWorkflow.inputFileNames,this.m_oSelectedMultiInputWorkflow.outputNodeNames,
+            this.m_oSelectedMultiInputWorkflow.outputFileNames);
+        if(utilsIsObjectNullOrUndefined(oSnapWorkflowViewModel) === false)
+        {
+            this.executeGraphFromWorkflowId(this.m_sWorkspaceId,oSnapWorkflowViewModel);
+        }
+        else
+        {
+            utilsVexDialogAlertTop("GURU MEDITATION<br>YOU HAVE TO INSERT A PRODUCT FOR EACH INPUT NODE.");
+        }
 
     };
 
     WorkFlowManagerController.prototype.getObjectExecuteGraph = function(sWorkflowId,sName,sDescription,asInputNodeNames,
                                                                          asInputFileNames,asOutputNodeNames,asOutputFileNames)
     {
-        if(this.areOkDataExecuteGraph(sWorkflowId,sName,asInputNodeNames, asInputFileNames) === true)
+        if(this.areOkDataExecuteGraph(sWorkflowId,sName,asInputNodeNames, asInputFileNames) === false)
         {
             return null;
         }
@@ -140,9 +150,9 @@ var WorkFlowManagerController = (function() {
         oExecuteGraph.name = sName;
         oExecuteGraph.description = sDescription;
         oExecuteGraph.inputNodeNames = asInputNodeNames;
-        oExecuteGraph.asInputFileNames = asInputFileNames;
-        oExecuteGraph.asOutputNodeNames = asOutputNodeNames;
-        oExecuteGraph.asOutputFileNames = asOutputFileNames;
+        oExecuteGraph.inputFileNames = asInputFileNames;
+        oExecuteGraph.outputNodeNames = asOutputNodeNames;
+        oExecuteGraph.outputFileNames = asOutputFileNames;
 
         return oExecuteGraph;
     };
