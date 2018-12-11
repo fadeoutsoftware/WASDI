@@ -12,17 +12,9 @@ package wasdi.shared.opensearch;
  */
 public abstract class DiasQueryTranslator {
 	
-	String m_sLocale;
-	String m_sEnconding;
-	String m_sDecoding;
-
-	DiasQueryTranslator(){
-		//MAYBE overload the constructor if more cases are needed
-		m_sLocale = "UTF-8";
-		m_sEnconding = m_sLocale;
-		m_sDecoding = m_sLocale;
-	}
+	//MAYBE specify locale, encoding and decoding formats
 	
+	//translates from WASDI query (OpenSearch) to <derived class> format
 	public abstract String translate(String sQuery);
 	public abstract String encode( String sDecoded );
 	public abstract String decode(String sEncoded );

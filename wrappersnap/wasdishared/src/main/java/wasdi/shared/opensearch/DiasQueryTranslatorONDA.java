@@ -10,11 +10,16 @@ package wasdi.shared.opensearch;
  * @author c.nattero
  *
  */
-public class OpenSearch2OdataTranslator extends DiasQueryTranslator {
+public class DiasQueryTranslatorONDA extends DiasQueryTranslator {
 
 	
 	/* (non-Javadoc)
 	 * @see wasdi.shared.opensearch.DiasQueryTranslator#translate(java.lang.String)
+	 * 
+	 * translates from WASDI query (OpenSearch) to OpenData format used by ONDA DIAS
+	 * 
+	 * https://github.com/fadeoutsoftware/WASDI/issues/18
+	 * 
 	 */
 	@Override
 	public String translate(String sQuery) {
@@ -23,6 +28,7 @@ public class OpenSearch2OdataTranslator extends DiasQueryTranslator {
 			//no leading/ending whitespaces
 			//no double whitespaces
 		sResult = sResult.trim().replaceAll(" +", " ");
+		
 		
 		//What is supported by ONDA?
 		//checked on 2018.12.06
