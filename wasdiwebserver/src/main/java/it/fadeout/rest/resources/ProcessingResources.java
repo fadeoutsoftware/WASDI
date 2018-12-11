@@ -344,7 +344,7 @@ public class ProcessingResources {
 			oVM.setName(aoDbWorkflows.get(i).getName());
 			oVM.setDescription(aoDbWorkflows.get(i).getDescription());
 			oVM.setWorkflowId(aoDbWorkflows.get(i).getWorkflowId());
-			oVM.setOutputNodeNames(aoDbWorkflows.get(i).getInputNodeNames());
+			oVM.setOutputNodeNames(aoDbWorkflows.get(i).getOutputNodeNames());
 			oVM.setInputNodeNames(aoDbWorkflows.get(i).getInputNodeNames());
 			
 			aoRetWorkflows.add(oVM);
