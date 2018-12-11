@@ -11,17 +11,18 @@ import org.json.JSONObject;
 @XmlRootElement
 public class QueryResultViewModel {
 	
-	String preview;
-	String title;
-	String summary;
-	String id;
-	String link;
-	String footprint;
-	String provider;
-	Map<String, String> properties = new HashMap<String, String>();
+	protected String preview;
+	protected String title;
+	protected String summary;
+	protected String id;
+	protected String link;
+	protected String footprint;
+	protected String provider;
+	
+	protected Map<String, String> properties = new HashMap<String, String>();
 	
 	//this field must be populated ad hoc in each subclass
-	Map<String, String> asProviderToWasdiKeyMap;
+	protected Map<String, String> asProviderToWasdiKeyMap;
 	
 	public QueryResultViewModel() {
 		asProviderToWasdiKeyMap = new HashMap<String, String>();
@@ -87,19 +88,20 @@ public class QueryResultViewModel {
 	
 	public void addField(String sProviderKey, String sValue){
 		String sMappedKey = asProviderToWasdiKeyMap.get(sProviderKey);
-		if(null == sMappedKey) {
-			return;
-		}
 		try {
-			//try with a field first
-			Field aoField = this.getClass().getDeclaredField(sMappedKey);
+			//check only base class
+			Class oCls = QueryResultViewModel.class;
+			Field aoField = oCls.getDeclaredField(sMappedKey);
+			aoField.setAccessible(true);
 			aoField.set(this,sValue);
 			
 		} catch (NoSuchFieldException e) {
-			//if not add it as a property
+			//if not add it as a property using its mapped name
 			addProperty(sMappedKey, sValue);
-		} //catch (NullPointerException e ) {}
-		catch (IllegalArgumentException e) {
+		} catch (NullPointerException e ) {
+			//it does not have a corresponding key, then add it as a property using its original name
+			addProperty(sProviderKey, sValue);
+		} catch (IllegalArgumentException e) {
 			// should not happen as it's checked against
 			e.printStackTrace();
 		} catch (IllegalAccessException e) {

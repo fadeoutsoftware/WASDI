@@ -81,11 +81,13 @@ public class QueryExecutorONDA extends QueryExecutor {
 	
 	@Override
 	public int executeCount(String sQuery) throws IOException {
-		//TODO filter results according to those parameters specified by WASDI and not supported by ONDA:
+		//note: the following parameters specified by WASDI are not supported by ONDA:
 		//polarisation
 		//relative orbit
 		//Swath
 		//
+		//XXX is it possible to filter results accordingly using info from the query?
+		
 		//Naming conventions:
 		// https://sentinel.esa.int/web/sentinel/user-guides
 		//sentinel 1:
@@ -97,10 +99,9 @@ public class QueryExecutorONDA extends QueryExecutor {
 			//...
 		
 		
-		//String sUrl = "https://catalogue.onda-dias.eu/dias-catalogue/Products/$count?$search=%22S2A_MSIL1C_20160719T094032_N0204_R036_T33TYH_20160719T094201%20AND%20(%20name:S1*%20AND%20name:S1A_*%20AND%20name:*%20AND%20name:*%20AND%20name:*%20)%22";
-		//String sUrl = URLEncoder.encode(getCountUrl(sQuery), m_sEnconding);
 		String sUrl = getCountUrl(sQuery);
-		
+		//use this to test with just 3 results
+		//sUrl = "https://catalogue.onda-dias.eu/dias-catalogue/Products/$count?$search=%22(%20(%20name:S1*%20AND%20name:S1A_*%20AND%20name:*SLC*%20AND%20name:*%20AND%20sensorOperationalMode:SM%20)%20)%20AND%20(%20(%20beginPosition:[2018-12-02T00:00:00.000Z%20TO%202018-12-02T23:59:59.999Z]%20AND%20endPosition:[2018-12-02T00:00:00.000Z%20TO%202018-12-02T23:59:59.999Z]%20)%20)%22";
 		
 		URL oURL = new URL(sUrl);
 		HttpURLConnection oConnection = (HttpURLConnection) oURL.openConnection();
@@ -140,17 +141,14 @@ public class QueryExecutorONDA extends QueryExecutor {
 	}
 
 	
-//	//the following request returns 2 results
-//	//http://127.0.0.1:8080/wasdiwebserver/rest/search/query?sQuery=(%20beginPosition:%5B2018-11-30T09:53:56.000Z%20TO%202018-12-01T00:00:00.000Z%5D%20AND%20endPosition:%5B2018-11-30T00:00:00.000Z%20TO%202018-12-01T00:00:00.000Z%5D%20)%20AND%20%20%20(platformname:Sentinel-1%20AND%20relativeorbitnumber:68.8)&providers=ONDA
-	//https://catalogue.onda-dias.eu/dias-catalogue/Products?$search=%22(%20beginPosition:[2018-11-30T09:53:56.000Z%20TO%202018-12-01T00:00:00.000Z]%20AND%20endPosition:[2018-11-30T00:00:00.000Z%20TO%202018-12-01T00:00:00.000Z]%20)%20AND%20(name:S1*%20AND%20relativeOrbitNumber:68)%22&$top=10&$format=atom
 	@Override
 	public ArrayList<QueryResultViewModel> execute(String sQuery) throws IOException {
 
-		//String sUrl = "https://catalogue.onda-dias.eu/dias-catalogue/Products/$count?$search=%22S2A_MSIL1C_20160719T094032_N0204_R036_T33TYH_20160719T094201%20AND%20(%20name:S1*%20AND%20name:S1A_*%20AND%20name:*%20AND%20name:*%20AND%20name:*%20)%22";
-		//String sUrl = URLEncoder.encode(getCountUrl(sQuery), m_sEnconding);
+
 		String sUrl = buildUrl(sQuery);
-		//TODO remove after implementation is completed
-		sUrl = "https://catalogue.onda-dias.eu/dias-catalogue/Products?$search=%22(%20(%20name:S1*%20AND%20name:*%20AND%20name:*%20AND%20name:*%20AND%20name:*%20)%20)%20AND%20(%20(%20beginPosition:[2018-11-01T00:00:00.000Z%20TO%202018-11-01T23:59:59.999Z]%20AND%20endPosition:[2018-11-01T00:00:00.000Z%20TO%202018-11-01T23:59:59.999Z]%20)%20)%20AND%20footprint:%22Intersects(POLYGON((8.437671661376955%2047.29099010963179,8.437671661376955%2047.4249516177179,8.811206817626955%2047.4249516177179,8.811206817626955%2047.29099010963179,8.437671661376955%2047.29099010963179)))%22%22&$top=10&$format=json&$skip=0&$orderby=creationDate";
+
+		//use this to test with just 3 results
+		//sUrl = "https://catalogue.onda-dias.eu/dias-catalogue/Products?$search=%22(%20(%20name:S1*%20AND%20name:S1A_*%20AND%20name:*SLC*%20AND%20name:*%20AND%20sensorOperationalMode:SM%20)%20)%20AND%20(%20(%20beginPosition:[2018-12-02T00:00:00.000Z%20TO%202018-12-02T23:59:59.999Z]%20AND%20endPosition:[2018-12-02T00:00:00.000Z%20TO%202018-12-02T23:59:59.999Z]%20)%20)%22&$orderby=creationDate%20desc&$top=15&$skip=0&$format=json";
 		
 		
 		URL oURL = new URL(sUrl);
@@ -182,7 +180,9 @@ public class QueryExecutorONDA extends QueryExecutor {
 			//print result
 			System.out.println("Count Done: Response " + oResponse.toString());
 	
-			return buildResultLightViewModel(oResponse.toString());
+			ArrayList<QueryResultViewModel> aoResult = buildResultLightViewModel(oResponse.toString());
+			//MAYBE filter aoResult using info from the query
+			return aoResult;
 		} else {
 			String sMessage = oConnection.getResponseMessage();
 			System.out.println(sMessage);
@@ -205,6 +205,7 @@ public class QueryExecutorONDA extends QueryExecutor {
 					JSONObject oOndaEntry = (JSONObject)(oObject);
 					QueryResultViewModelONDA oRes = new QueryResultViewModelONDA();
 					oRes.populate(oOndaEntry);
+					oRes.buildSummary();
 					aoResult.add(oRes);
 				}
 			}
