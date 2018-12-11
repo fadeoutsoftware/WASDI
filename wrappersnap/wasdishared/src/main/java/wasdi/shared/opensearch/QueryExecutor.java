@@ -36,6 +36,9 @@ import org.apache.abdera.protocol.client.RequestOptions;
 import wasdi.shared.viewmodels.QueryResultViewModel;
 
 public abstract class QueryExecutor {
+	
+	protected DiasQueryTranslator m_oQueryTranslator;
+	protected DiasResponseTranslator m_oResponseTranslator;
 
 	public static QueryExecutor newInstance(String sProvider, String sUser, String sPassword, String sOffset, String sLimit, String sSortedBy, String sOrder) {
 		
@@ -52,6 +55,11 @@ public abstract class QueryExecutor {
 				oExecutor.setLimit(sLimit);
 				oExecutor.setSortedBy(sSortedBy);
 				oExecutor.setOrder(sOrder);
+				//TODO get rid of this if! 
+				if(sProvider == "ONDA") {
+					oExecutor.m_oQueryTranslator = new DiasQueryTranslatorONDA();
+					oExecutor.m_oResponseTranslator = new DiasResponseTranslatorONDA();
+				}
 				return oExecutor;
 			}
 		} catch (InstantiationException e) {

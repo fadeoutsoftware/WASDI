@@ -17,28 +17,12 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import wasdi.shared.viewmodels.QueryResultViewModel;
-import wasdi.shared.viewmodels.QueryResultViewModelONDA;
 
 /**
  * @author c.nattero
  *
  */
 public class QueryExecutorONDA extends QueryExecutor {
-
-	DiasQueryTranslator m_oQTrans;
-	
-	public QueryExecutorONDA() {
-		m_oQTrans = new OpenSearch2OdataTranslator();
-	}
-	
-	
-	public DiasQueryTranslator getM_oQTrans() {
-		return m_oQTrans;
-	}
-
-	public void setM_oQTrans(DiasQueryTranslator m_oQTrans) {
-		this.m_oQTrans = m_oQTrans;
-	}
 
 	/* (non-Javadoc)
 	 * @see wasdi.shared.opensearch.QueryExecutor#getUrlPath()
@@ -64,7 +48,7 @@ public class QueryExecutorONDA extends QueryExecutor {
 	@Override
 	protected String getCountUrl(String sQuery) {
 		String sUrl = "https://catalogue.onda-dias.eu/dias-catalogue/Products/$count?$search=%22";
-		sUrl+=m_oQTrans.translateAndEncode(sQuery);
+		sUrl+=m_oQueryTranslator.translateAndEncode(sQuery);
 		sUrl+="%22";
 		return sUrl;
 	}
@@ -74,7 +58,8 @@ public class QueryExecutorONDA extends QueryExecutor {
 	@Override
 	protected String buildUrl(String sQuery){
 		String sUrl = "https://catalogue.onda-dias.eu/dias-catalogue/Products?$search=%22";
-		sUrl+=m_oQTrans.translateAndEncode(sQuery);
+		sUrl+=m_oQueryTranslator.translateAndEncode(sQuery);
+		//TODO get rid of the $top=10 and introduce pagination
 		sUrl+="%22&$top=10&$format=json&$skip=0&$orderby=creationDate";
 		return sUrl;
 	}
@@ -196,24 +181,23 @@ public class QueryExecutorONDA extends QueryExecutor {
 			System.out.println("QueryExecutor.buildResultLightViewModel: passed a null string");
 			return null;
 		}
-		JSONObject oJson = new JSONObject(sJson);
-		if(oJson.has("value")) {
+		try {
+			JSONObject oJsonOndaResponse = new JSONObject(sJson);
 			ArrayList<QueryResultViewModel> aoResult = new ArrayList<QueryResultViewModel>();
-			JSONArray oJsonArray = oJson.getJSONArray("value");
-			for (Object oObject : oJsonArray) {
+			JSONArray aoJsonArray = oJsonOndaResponse.getJSONArray("value");
+			for (Object oObject : aoJsonArray) {
 				if(null!=oObject) {
 					JSONObject oOndaEntry = (JSONObject)(oObject);
-					QueryResultViewModelONDA oRes = new QueryResultViewModelONDA();
-					oRes.populate(oOndaEntry);
-					oRes.buildSummary();
+					QueryResultViewModel oRes = m_oResponseTranslator.translate(oOndaEntry);
 					aoResult.add(oRes);
 				}
 			}
 			return aoResult;
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 		return null;
 	}
 	
-
 }
 
