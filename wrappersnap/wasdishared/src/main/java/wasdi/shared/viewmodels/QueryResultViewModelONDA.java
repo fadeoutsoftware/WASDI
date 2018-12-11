@@ -14,10 +14,15 @@ public class QueryResultViewModelONDA extends QueryResultViewModel {
 
 	public QueryResultViewModelONDA() {
 		//ONDA key, WASDI key
+		
+		//members:
 		asProviderToWasdiKeyMap.put("id", "id");
 		asProviderToWasdiKeyMap.put("footprint","footprint");
-		asProviderToWasdiKeyMap.put("preview","quicklook");
-		asProviderToWasdiKeyMap.put("name","title");
+		asProviderToWasdiKeyMap.put("quicklook", "preview");
+		
+		//properties
+		asProviderToWasdiKeyMap.put("name","filename");
+		asProviderToWasdiKeyMap.put("@odata.mediaContentType", "format");
 		provider = "ONDA";
 	}
 
@@ -35,4 +40,6 @@ public class QueryResultViewModelONDA extends QueryResultViewModel {
 		//String sInstrument = "Instrument: ";
 		
 	}
+	
+	//MAYBE override addField if this derived class introduces new members 
 }
