@@ -113,6 +113,7 @@ public class AuthResource {
 						oUserVM.setName(oWasdiUser.getName());
 						oUserVM.setSurname(oWasdiUser.getSurname());
 						oUserVM.setUserId(oWasdiUser.getUserId());
+						oUserVM.setAuthProvider(oWasdiUser.getAuthServiceProvider());
 						
 						UserSession oSession = new UserSession();
 						oSession.setUserId(oWasdiUser.getUserId());
@@ -476,6 +477,7 @@ public class AuthResource {
 				  oUserVM.setName(oWasdiUser.getName());
 				  oUserVM.setSurname(oWasdiUser.getSurname());
 				  oUserVM.setUserId(oWasdiUser.getUserId());
+				  oUserVM.setAuthProvider(oWasdiUser.getAuthServiceProvider());
 				  
 				  UserSession oSession = new UserSession();
 				  oSession.setUserId(oWasdiUser.getUserId());
