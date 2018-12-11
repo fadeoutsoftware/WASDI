@@ -59,16 +59,6 @@ var WorkFlowManagerController = (function() {
             if(utilsIsObjectNullOrUndefined(data) == false)
             {
                 oController.m_aoWorkflows = data;
-                // //TODO REMOVE IT
-                // oController.m_aoWorkflows.push({
-                //     "description": "",
-                //     "inputFileNames": [],
-                //     "inputNodeNames": ["read1","read2","read3","read4"],
-                //     "name": "workflow",
-                //     "outputFileNames": [],
-                //     "outputNodeNames": [],
-                //     "workflowId": "04b0fd8e-92e6-4ba1-83ff-56858795f5d2"
-                // })
             }
             else
             {
@@ -399,10 +389,7 @@ var WorkFlowManagerController = (function() {
         var aoReturnArray = [];
         for(var iIndexWorkflow = 0 ; iIndexWorkflow < iNumberOfWorkflows ; iIndexWorkflow++)
         {
-            if(this.m_aoWorkflows[iIndexWorkflow].inputNodeNames.length >= 2 )
-            {
-                aoReturnArray.push(this.m_aoWorkflows[iIndexWorkflow]);
-            }
+            aoReturnArray.push(this.m_aoWorkflows[iIndexWorkflow]);
         }
         return aoReturnArray;
     };
@@ -414,14 +401,22 @@ var WorkFlowManagerController = (function() {
             return false;
         }
 
-        var iIndexOfElement = utilsFindObjectInArray(this.m_oSelectedMultiInputWorkflow.inputNodeNames,sNode)
+        var iIndexOfElement = utilsFindObjectInArray(this.m_oSelectedMultiInputWorkflow.inputNodeNames,sNode);
 
         if(iIndexOfElement === -1)
         {
             return false;
         }
 
-        this.m_oSelectedMultiInputWorkflow.inputFileNames[iIndexOfElement] =  sProduct;
+        // TODO: Refactoring del ciclo
+        for(var iProducts = 0; iProducts<this.m_aoProducts.length; iProducts++ ) {
+            if (this.m_aoProducts[iProducts].name === sProduct) {
+                this.m_oSelectedMultiInputWorkflow.inputFileNames[iIndexOfElement] =  this.m_aoProducts[iProducts].fileName;
+                break;
+            }
+        }
+
+
 
 
         return true;
