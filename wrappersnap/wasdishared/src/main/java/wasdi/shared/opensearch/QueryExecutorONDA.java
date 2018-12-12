@@ -60,7 +60,7 @@ public class QueryExecutorONDA extends QueryExecutor {
 		String sUrl = "https://catalogue.onda-dias.eu/dias-catalogue/Products?$search=%22";
 		sUrl+=m_oQueryTranslator.translateAndEncode(sQuery);
 		//TODO get rid of the $top=10 and introduce pagination
-		sUrl+="%22&$top=10&$format=json&$skip=0&$orderby=creationDate";
+		sUrl+="%22&$top=" + m_sLimit + "&$skip="+ m_sOffset +"&$format=json"+ "&$orderby=creationDate";
 		return sUrl;
 	}
 	

@@ -268,7 +268,6 @@ public class OpenSearchResource {
 					e.printStackTrace();
 				}
 				iSkipped += iCount;
-
 			}
 
 			return aoResults.toArray(new QueryResultViewModel[aoResults.size()]);
