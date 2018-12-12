@@ -128,6 +128,7 @@ public class ProcessorsResource {
 			oProcessorRepository.InsertProcessor(oProcessor);
 			
 			// Schedule the processworkspace to deploy the processor
+			//String sProcessId = "";
 			ProcessWorkspaceRepository oRepository = new ProcessWorkspaceRepository();
 			ProcessWorkspace oProcessWorkspace = new ProcessWorkspace();
 			
@@ -307,6 +308,8 @@ public class ProcessorsResource {
 
 			if (oUser==null) return oPrimitiveResult;
 			if (Utils.isNullOrEmpty(oUser.getUserId())) return oPrimitiveResult;
+			
+			//String sUserId = oUser.getUserId();
 			
 			Wasdi.DebugLog("ProcessorsResource.help: read Processor " +sName);
 			

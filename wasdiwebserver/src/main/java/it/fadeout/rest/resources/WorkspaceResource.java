@@ -393,7 +393,8 @@ public class WorkspaceResource {
 					
 					GeoServerManager gsManager = new GeoServerManager(m_oServletConfig.getInitParameter("GS_URL"), m_oServletConfig.getInitParameter("GS_USER"), 
 							m_oServletConfig.getInitParameter("GS_PASSWORD"));
-					//String gsWorkspace = m_oServletConfig.getInitParameter("GS_WORKSPACE");
+					String gsWorkspace = m_oServletConfig.getInitParameter("GS_WORKSPACE");
+					System.out.println("WorkspaceResource.DeleteWorkspace: gsWorkspace = " + gsWorkspace);
 					
 					for (ProductWorkspace oProductWorkspace : aoProducts) {
 						List<PublishedBand> aoPublishedBands = oPublishRepository.GetPublishedBandsByProductName(oProductWorkspace.getProductName());

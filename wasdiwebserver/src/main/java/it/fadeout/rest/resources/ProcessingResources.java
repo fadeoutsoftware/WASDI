@@ -1237,6 +1237,7 @@ public class ProcessingResources {
 		
 		PrimitiveResult oResult = new PrimitiveResult();
 		String sProcessObjId = "";
+		//String sProcessObjId = "";
 		
 		String sUserId = AcceptedUserAndSession(sSessionId);
 		
