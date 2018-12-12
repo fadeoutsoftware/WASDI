@@ -56,7 +56,7 @@ public abstract class QueryExecutor {
 				oExecutor.setSortedBy(sSortedBy);
 				oExecutor.setOrder(sOrder);
 				//TODO get rid of this if! 
-				if(sProvider == "ONDA") {
+				if(sProvider.equals("ONDA")) {
 					oExecutor.m_oQueryTranslator = new DiasQueryTranslatorONDA();
 					oExecutor.m_oResponseTranslator = new DiasResponseTranslatorONDA();
 				}
@@ -419,7 +419,6 @@ public abstract class QueryExecutor {
 		//XXX log instead
 		System.out.println("QueryExecutor.execute");
 		String sUrl = buildUrl(sQuery);
-		sUrl = "https://catalogue.onda-dias.eu/dias-catalogue/Products?$search=%22(%20(%20name:S1*%20AND%20name:*%20AND%20name:*%20AND%20name:*%20AND%20name:*%20)%20)%20AND%20(%20(%20beginPosition:[2018-11-01T00:00:00.000Z%20TO%202018-11-01T23:59:59.999Z]%20AND%20endPosition:[2018-11-01T00:00:00.000Z%20TO%202018-11-01T23:59:59.999Z]%20)%20)%20AND%20footprint:%22Intersects(POLYGON((8.437671661376955%2047.29099010963179,8.437671661376955%2047.4249516177179,8.811206817626955%2047.4249516177179,8.811206817626955%2047.29099010963179,8.437671661376955%2047.29099010963179)))%22%22&$top=10&$format=atom&$skip=0&$orderby=creationDate";
 		
 		//create abdera client
 		Abdera oAbdera = new Abdera();

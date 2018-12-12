@@ -11,6 +11,7 @@ import java.util.Map;
 
 import org.json.JSONObject;
 
+import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.QueryResultViewModel;
 
 /**
@@ -47,7 +48,13 @@ public class DiasResponseTranslatorONDA implements DiasResponseTranslator {
 			oResult.setProvider("ONDA");
 			oResult.setFootprint( oJsonOndaResult.getString("footprint") );
 			oResult.setId(oJsonOndaResult.getString("id"));
-			oResult.setPreview("quicklook");
+			String sPreview = oJsonOndaResult.optString("quicklook");
+			//is there a preview?
+			if( !Utils.isNullOrEmpty(sPreview) ) {
+				oResult.setPreview("data:image/png;base64,"+ sPreview);
+			} else {
+				oResult.setPreview(null);
+			}
 						
 			//XXX infer product type from file name
 			//XXX infer polarisation from file name
@@ -62,9 +69,9 @@ public class DiasResponseTranslatorONDA implements DiasResponseTranslator {
 			asProperties.put("size", String.valueOf(dSize) + " GB");
 			//ONDA
 			asProperties.put("creationDate", oJsonOndaResult.getString("creationDate"));
-			asProperties.put("offline", oJsonOndaResult.getString("offline"));
+			asProperties.put("offline", oJsonOndaResult.optString("offline"));
 			asProperties.put("pseudopath", oJsonOndaResult.getString("pseudopath"));
-			asProperties.put("downloadable", oJsonOndaResult.getString("downloadable"));
+			asProperties.put("downloadable", oJsonOndaResult.optString("downloadable"));
 			
 			oResult.setProperties(asProperties);
 			
