@@ -66,7 +66,7 @@ public class OpportunitySearchResource {
 
 			System.out.println("nfs dir " + System.getProperty("nfs.data.download"));
 
-			//Date dtDate = new Date();
+			Date dtDate = new Date();
 			String sArea = OrbitSearch.getPolygon();
 			int iIdCoverageCounter = 1;
 

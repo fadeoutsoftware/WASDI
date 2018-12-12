@@ -167,6 +167,7 @@ public class ProductResource {
 	}
 	
 	
+	//XXX Remove legacy method: it's not used by anyone and it does not return anything but null
 	@GET
 	@Path("info")
 	@Produces({"application/xml", "application/json", "text/xml"})
