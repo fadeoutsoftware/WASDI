@@ -46,7 +46,7 @@ public class DiasResponseTranslatorONDA implements DiasResponseTranslator {
 			//TODO translate from JSON to QueryResultViewModel
 			QueryResultViewModel oResult = new QueryResultViewModel();
 			oResult.setProvider("ONDA");
-			oResult.setFootprint( oJsonOndaResult.getString("footprint") );
+			oResult.setFootprint( oJsonOndaResult.optString("footprint") );
 			oResult.setId(oJsonOndaResult.getString("id"));
 			String sPreview = oJsonOndaResult.optString("quicklook");
 			//is there a preview?
