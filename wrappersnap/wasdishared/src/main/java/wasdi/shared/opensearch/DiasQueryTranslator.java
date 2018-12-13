@@ -6,18 +6,23 @@
  */
 package wasdi.shared.opensearch;
 
+import java.util.HashMap;
+
 /**
  * @author c.nattero
  *
  */
 public abstract class DiasQueryTranslator {
 	
-	//MAYBE specify locale, encoding and decoding formats
+	protected HashMap<String, String> keyMapping;
+	protected HashMap<String, String> valueMapping;
+
+	//TODO add appropriate structure to store intermediate query components
+	
 	
 	//translates from WASDI query (OpenSearch) to <derived class> format
 	public abstract String translate(String sQuery);
 	public abstract String encode( String sDecoded );
-	public abstract String decode(String sEncoded );
 	
 	public String translateAndEncode(String sQuery) {
 		return encode(translate(sQuery));
