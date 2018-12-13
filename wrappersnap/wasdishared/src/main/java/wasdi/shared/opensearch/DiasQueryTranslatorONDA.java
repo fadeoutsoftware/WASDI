@@ -116,6 +116,9 @@ public class DiasQueryTranslatorONDA extends DiasQueryTranslator {
 		
 		//Envisat
 		sResult = sResult.replaceAll("platformname:Envisat", "platformName:Envisat");
+		
+		//Landsat
+		sResult = sResult.replaceAll("platformname:Landsat-*","platformName:Landsat-*");
 
 		//SENTINEL 1 2 3 filename
 		sResult = sResult.replaceAll("filename:", "name:");
@@ -127,6 +130,15 @@ public class DiasQueryTranslatorONDA extends DiasQueryTranslator {
 		sResult = sResult.replaceAll("producttype:S2MSI1C", "name:\\*S2MSI1C\\*");
 		sResult = sResult.replaceAll("producttype:", "name:");
 		
+		sResult = sResult.replaceAll("name:ASA_IM__0P","name:*ASA_IM__0P*");
+		sResult = sResult.replaceAll("name:ASA_WS__0P","name:*ASA_WS__0P*");
+		
+		sResult = sResult.replaceAll("name:L1T","name:*L1T*");
+		sResult = sResult.replaceAll("name:L1G","name:*L1G*");
+		sResult = sResult.replaceAll("name:L1GT","name:*L1GT*");
+		sResult = sResult.replaceAll("name:L1GS","name:*L1GS*");
+		sResult = sResult.replaceAll("name:L1TP","name:*L1TP*");
+				
 		//polarisationmode:HH not supported by ONDA? 
 		//sensoroperationalmode:SM same name in ONDA 
 		//swathidentifier:b not supported by ONDA?
