@@ -494,7 +494,6 @@ public class ProcessingResources {
 			return oResult;
 		}
 		User oUser = Wasdi.GetUserFromSession(sessionId);
-
 		if (oUser==null) {
 			oResult.setBoolValue(false);
 			oResult.setIntValue(401);
