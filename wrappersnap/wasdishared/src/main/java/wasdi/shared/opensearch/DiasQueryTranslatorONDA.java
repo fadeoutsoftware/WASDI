@@ -11,8 +11,40 @@ package wasdi.shared.opensearch;
  *
  */
 public class DiasQueryTranslatorONDA extends DiasQueryTranslator {
-
 	
+	//TODO make a JSON file with query configuration
+	//TODO write the path of the JSON file in the configuration file (web.xml, filename read and passed from the server?)
+	
+	public DiasQueryTranslatorONDA() {
+		/*
+		keyMapping.put("platformname", "name");
+		valueMapping.put("Sentinel-1", "S1*");
+		valueMapping.put("Sentinel-2", "S2*");
+		valueMapping.put("Sentinel-3", "S3*");
+		
+		keyMapping.put("filename", "name");
+		keyMapping.put("producttype", "name");
+		
+		valueMapping.put("SLC", "*SLC*");
+		valueMapping.put("GRD", "*GRD*");
+		valueMapping.put("GRD", "*GRD*");
+		valueMapping.put("S2MSI1C", "*S2MSI1C*");
+		
+		keyMapping.put("timeliness", "timeliness");
+		valueMapping.put("Near Real Time", "NRT");
+		valueMapping.put("Short Time Critical", "STC");
+		valueMapping.put("Non Time Critical", "NTC");
+		
+		//these can have only integer values
+		keyMapping.put("relativeorbitstart", "relativeOrbitNumber");
+		keyMapping.put("relativeorbitnumber", "relativeOrbitNumber");
+		
+		keyMapping.put("sensoroperationalmode", "sensorOperationalMode");
+		keyMapping.put("cloudcoverpercentage", "cloudCoverPercentage");
+		*/
+		
+	}
+
 	/* (non-Javadoc)
 	 * @see wasdi.shared.opensearch.DiasQueryTranslator#translate(java.lang.String)
 	 * 
@@ -73,10 +105,17 @@ public class DiasQueryTranslatorONDA extends DiasQueryTranslator {
 		
 		//begin translation
 		
+		//polygon
+		sResult = sResult.replaceAll("intersects", "Intersects");
+		
+		
 		//SENTINEL 1 2 3 platform
 		sResult = sResult.replaceAll("platformname:Sentinel-1", "name:S1*");
 		sResult = sResult.replaceAll("platformname:Sentinel-2", "name:S2*");
 		sResult = sResult.replaceAll("platformname:Sentinel-3", "name:S3*");
+		
+		//Envisat
+		sResult = sResult.replaceAll("platformname:Envisat", "platformName:Envisat");
 
 		//SENTINEL 1 2 3 filename
 		sResult = sResult.replaceAll("filename:", "name:");
@@ -118,18 +157,12 @@ public class DiasQueryTranslatorONDA extends DiasQueryTranslator {
 	 */
 	@Override
 	public String encode(String sDecoded) {
-		String sResult = new String( sDecoded.replaceAll(" ", "%20") );
+		String sResult = new String(sDecoded); 
+		sResult = sResult.replaceAll(" ", "%20");
+		sResult = sResult.replaceAll("\"", "%22");
 		//sResult = java.net.URLEncoder.encode(sDecoded, m_sEnconding);
 		return sResult;
 	}
 
-	/* (non-Javadoc)
-	 * @see wasdi.shared.opensearch.DiasQueryTranslator#decode(java.lang.String)
-	 */
-	@Override
-	public String decode(String sEncoded) {
-		// TODO Auto-generated method stub
-		return null;
-	}
 
 }
