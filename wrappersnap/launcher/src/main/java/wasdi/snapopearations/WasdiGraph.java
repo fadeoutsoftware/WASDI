@@ -405,7 +405,7 @@ public class WasdiGraph {
         }
         
         if (bAddProductToWS) {
-        	addProductToWorkspace();
+        	addProductToWorkspace(oProductFile.getName());
         }
         else {
         	m_oLogger.error("Product NOT added to the Workspace");
@@ -424,29 +424,29 @@ public class WasdiGraph {
      * Add product to the workspace
      * @throws Exception
      */
-    private void addProductToWorkspace() throws Exception {
+    private void addProductToWorkspace(String sProductName) throws Exception {
     	
 		// Create Repository
 		ProductWorkspaceRepository oProductRepository = new ProductWorkspaceRepository();
 		
 		// Check if product is already in the Workspace
-		if (!oProductRepository.ExistsProductWorkspace(m_oParams.getDestinationProductName(), m_oParams.getWorkspace())) {
+		if (!oProductRepository.ExistsProductWorkspace(sProductName, m_oParams.getWorkspace())) {
 			
     		// Create the entity
     		ProductWorkspace oProductEntity = new ProductWorkspace();
-    		oProductEntity.setProductName(m_oParams.getDestinationProductName() + ".dim");
+    		oProductEntity.setProductName(sProductName);
     		oProductEntity.setWorkspaceId(m_oParams.getWorkspace());
     		
     		// Try to insert
     		if (!oProductRepository.InsertProductWorkspace(oProductEntity)) {        			
-    			m_oLogger.debug("WasdiGraph.addProductToWorkspace:  Error adding " + m_oParams.getDestinationProductName() + " in WS " + m_oParams.getWorkspace());
+    			m_oLogger.debug("WasdiGraph.addProductToWorkspace:  Error adding " + sProductName + " in WS " + m_oParams.getWorkspace());
     			throw new Exception("unable to insert product in workspace");
     		}
     		
-    		m_oLogger.debug("WasdiGraph.addProductToWorkspace:  Inserted " + m_oParams.getDestinationProductName() + " in WS " + m_oParams.getWorkspace());
+    		m_oLogger.debug("WasdiGraph.addProductToWorkspace:  Inserted " + sProductName + " in WS " + m_oParams.getWorkspace());
 		}
 		else {
-			m_oLogger.debug("WasdiGraph.addProductToWorkspace: Product " + m_oParams.getDestinationProductName() + " Already exists in WS " + m_oParams.getWorkspace());
+			m_oLogger.debug("WasdiGraph.addProductToWorkspace: Product " + sProductName + " Already exists in WS " + m_oParams.getWorkspace());
 		}
     }
 
