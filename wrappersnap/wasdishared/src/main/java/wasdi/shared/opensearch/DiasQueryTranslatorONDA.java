@@ -6,6 +6,8 @@
  */
 package wasdi.shared.opensearch;
 
+import wasdi.shared.utils.Utils;
+
 /**
  * @author c.nattero
  *
@@ -43,6 +45,70 @@ public class DiasQueryTranslatorONDA extends DiasQueryTranslator {
 		keyMapping.put("cloudcoverpercentage", "cloudCoverPercentage");
 		*/
 		
+	}
+	
+	protected String cleanerTranslate(String sQuery) {
+		String sResult = new String("");
+		String sSentinel1 = "";
+		if(sQuery.contains("Sentinel-1")) {
+			sSentinel1 = "(";
+			//TODO parse for Sentinel-1 parameters
+			sSentinel1 +=")";
+			if(!Utils.isNullOrEmpty(sSentinel1)) {
+				sResult = sSentinel1;
+			}
+		}
+		if(sQuery.contains("Sentinel-2")) {
+			String sSentinel2 = "";
+			//TODO parse for Sentinel-2 parameters
+			if(!Utils.isNullOrEmpty(sSentinel2)) {
+				if(!Utils.isNullOrEmpty(sResult)){
+					sResult = sResult + " AND ";
+				}
+				sResult = sResult + sSentinel2;
+			}
+		}
+		if(sQuery.contains("Sentinel-3")) {
+			String sSentinel3 = "";
+			//TODO parse for Sentinel-3 parameters
+			if(!Utils.isNullOrEmpty(sSentinel3)) {
+				if(!Utils.isNullOrEmpty(sResult)){
+					sResult = sResult + " AND ";
+				}
+				sResult = sResult + sSentinel3;
+			}
+		}
+		//Proba-V
+		if(sQuery.contains("Proba-V")) {
+			//ignore this case
+			System.out.println("DiasQueryTranslatorONDA.CleanerTranslate: ignoring Proba-V as not supported by ONDA");
+		}
+		//TODO Envisat
+		if(sQuery.contains("Envisat")) {
+			String sEnvisat = "";
+			//TODO parse for Envisat parameters
+			if(!Utils.isNullOrEmpty(sEnvisat)) {
+				if(!Utils.isNullOrEmpty(sResult)){
+					sResult = sResult + " AND ";
+				}
+				sResult = sResult + sEnvisat;
+			}
+		}
+		//Landsat
+		if(sQuery.contains("Landsat")) {
+			String sLandsat = "";
+			//TODO parse for Landsat parameters
+			if(!Utils.isNullOrEmpty(sLandsat)) {
+				if(!Utils.isNullOrEmpty(sResult)){
+					sResult = sResult + " AND ";
+				}
+				sResult = sResult + sLandsat;
+			}
+		}
+		//TODO time frame
+		//TODO footprint
+		
+		return sResult;
 	}
 
 	/* (non-Javadoc)

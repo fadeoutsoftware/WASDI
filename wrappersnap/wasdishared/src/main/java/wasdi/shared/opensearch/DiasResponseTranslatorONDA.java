@@ -43,11 +43,10 @@ public class DiasResponseTranslatorONDA implements DiasResponseTranslator {
 	
 	public QueryResultViewModel translate(JSONObject oJsonOndaResult) {
 		try {
-			//TODO translate from JSON to QueryResultViewModel
 			QueryResultViewModel oResult = new QueryResultViewModel();
 			oResult.setProvider("ONDA");
 			oResult.setFootprint( oJsonOndaResult.optString("footprint") );
-			oResult.setId(oJsonOndaResult.getString("id"));
+			oResult.setId(oJsonOndaResult.optString("id"));
 			String sPreview = oJsonOndaResult.optString("quicklook");
 			//is there a preview?
 			if( !Utils.isNullOrEmpty(sPreview) ) {
@@ -62,21 +61,26 @@ public class DiasResponseTranslatorONDA implements DiasResponseTranslator {
 			
 			Map<String, String> asProperties = new HashMap<String, String>();
 			//mapped
-			asProperties.put("format", oJsonOndaResult.getString("@odata.mediaContentType"));
-			asProperties.put("filename", oJsonOndaResult.getString("name"));
+			asProperties.put("format", oJsonOndaResult.optString("@odata.mediaContentType"));
+			asProperties.put("filename", oJsonOndaResult.optString("name"));
 			double dSize = oJsonOndaResult.getInt("size");
 			dSize = dSize / (1024 * 1024); 
 			asProperties.put("size", String.valueOf(dSize) + " GB");
 			//ONDA
-			asProperties.put("creationDate", oJsonOndaResult.getString("creationDate"));
+			asProperties.put("creationDate", oJsonOndaResult.optString("creationDate"));
 			asProperties.put("offline", oJsonOndaResult.optString("offline"));
-			asProperties.put("pseudopath", oJsonOndaResult.getString("pseudopath"));
+			asProperties.put("pseudopath", oJsonOndaResult.optString("pseudopath"));
 			asProperties.put("downloadable", oJsonOndaResult.optString("downloadable"));
 			
 			oResult.setProperties(asProperties);
 			
 			//oResult.setLink(link);
-			String sTitle = oJsonOndaResult.getString("name").split("\\.")[0];
+			String sTitle = oJsonOndaResult.optString("name");
+			if( !Utils.isNullOrEmpty(sTitle) ) {
+				if(sTitle.contains(".")) {
+					sTitle = sTitle.split("\\.")[0];
+				}
+			}
 			oResult.setTitle(sTitle);
 			
 			//build summary
