@@ -20,7 +20,12 @@
                 <h4>
 
                     <div class="edit-content" >
-                        <form name="changeUserInfoForm" ng-submit="m_oController.changeUserInfo()">
+                        <form ng-show = "m_oController.isUserLoggedWithGoogle()">
+                            <legend>{{"DIALOG_EDIT_USER_INFO_GOOGLE_ACCOUNT"|translate}}</legend>
+                            User email: {{m_oController.m_oUser.userId}}
+                        </form>
+
+                        <form name="changeUserInfoForm" ng-submit="m_oController.changeUserInfo()" ng-hide = "m_oController.isUserLoggedWithGoogle()">
                             <legend>{{"DIALOG_EDIT_USER_INFO"|translate}}</legend>
 
                             <div class="loadIcon" ng-show="m_oController.m_bEditingUserInfo" ><!--ng-show="m_oController.m_bEditingPassword" -->
@@ -73,7 +78,7 @@
 
 
 
-                        <form name="changePasswordForm" ng-submit="m_oController.changePassword()" ng-hide="m_oController.getUserAuthProvider() === 'google' " >
+                        <form name="changePasswordForm" ng-submit="m_oController.changePassword()" ng-hide="m_oController.isUserLoggedWithGoogle()" >
 
                             <legend>{{"DIALOG_EDIT_USER_CHANGE_PASSWORD"|translate}}</legend>
 
