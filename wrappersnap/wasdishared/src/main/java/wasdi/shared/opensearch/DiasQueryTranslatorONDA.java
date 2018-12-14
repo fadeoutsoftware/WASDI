@@ -6,6 +6,9 @@
  */
 package wasdi.shared.opensearch;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import wasdi.shared.utils.Utils;
 
 /**
@@ -47,61 +50,37 @@ public class DiasQueryTranslatorONDA extends DiasQueryTranslator {
 		
 	}
 	
-	protected String cleanerTranslate(String sQuery) {
-		String sResult = new String("\"( ");
-		
-		if(sQuery.contains("Sentinel-1")) {		
-			String sSentinel1 = "(name:S1*";
-			sSentinel1 += " AND ";
-			//Platform:[S1A_*|S1B_*] (optional)
-			if(sQuery.contains("S1A")) {
-				sSentinel1 += "name:S1A_*";
-			} else if(sQuery.contains("S1B")) {
-				sSentinel1 += "name:S1B_*";
-			} else {
-				sSentinel1 += "name:*";
-			}
-			
-			//type:[SLC|GRD|OCN] (optional)
-			if(sQuery.contains("SLC")) {
-				sSentinel1+=" AND ";
-				sSentinel1+= "name:*SLC*";
-			} else if( sQuery.contains("GRD") ) {
-				sSentinel1+="name:*GRD*";
-			} else if( sQuery.contains("OCN") ) {
-				sSentinel1+="name:*OCN*";
-			} else {
-				sSentinel1+="name:*";
-			}
-			
-			if
-			sSentinel1+=" AND ";
-			//TODO relativeOrbitNumber:[integer in [1-175]] (optional)
-			
-			//Sensor Mode:[SM|IW|EW|WV] (optional)
-			sSentinel1+=" AND ";
-			sSentinel1 +=")";
-			sResult += sSentinel1;
+	protected String cleanerTranslate(String sInput) {
+		if(Utils.isNullOrEmpty(sInput)) {
+			return new String("");
 		}
+			
+		String sQuery = new String(sInput);
+		//insert space before and after round brackets
+		sQuery = sQuery.replaceAll("\\(", " \\( ");
+		sQuery = sQuery.replaceAll("\\)", " \\) ");
+		//remove space before and after square brackets 
+		sQuery = sQuery.replaceAll(" \\[", "\\[");
+		sQuery = sQuery.replaceAll("\\[ ", "\\[");
+		sQuery = sQuery.replaceAll(" \\]", "\\]");
+		sQuery = sQuery.replaceAll("\\] ", "\\]");
 		
-		if(sQuery.contains("Sentinel-2")) {
-			String sSentinel2 = "( ";
-			//TODO parse for Sentinel-2 parameters
-			sSentinel2 += " )";
-			if(!Utils.isNullOrEmpty(sResult)){
-				sResult = sResult + " AND ";
-			}
-			sResult += sSentinel2;
-		}
+		sQuery = sQuery.replaceAll("AND", " AND ");
+		sQuery = sQuery.trim().replaceAll(" +", " ");
+		
+		String sResult = new String("");
+		
+		sResult += parseSentinel1(sQuery); 
+		
+		sResult += parseSentinel2(sQuery);
 		
 		if(sQuery.contains("Sentinel-3")) {
 			String sSentinel3 = "( ";
 			//TODO parse for Sentinel-2 parameters
+			
 			sSentinel3 += " )";
-			if(!Utils.isNullOrEmpty(sResult)){
-				sResult = sResult + " AND ";
-			}
 			sResult += sSentinel3;
+		//end Sentinel2
 		}
 		
 		//Proba-V
@@ -113,31 +92,146 @@ public class DiasQueryTranslatorONDA extends DiasQueryTranslator {
 		//TODO Envisat
 		if(sQuery.contains("Envisat")) {
 			String sEnvisat = "( ";
-			//TODO parse for Sentinel-2 parameters
+			//TODO parse for Envisat parameters
+			
 			sEnvisat += " )";
-			if(!Utils.isNullOrEmpty(sResult)){
-				sResult = sResult + " AND ";
-			}
 			sResult += sEnvisat;
 		}
 		
 		//Landsat
 		if(sQuery.contains("Landsat")) {
 			String sLandsat = "( ";
-			//TODO parse for Sentinel-2 parameters
+			//TODO parse for Landsat parameters
+			
 			sLandsat += " )";
-			if(!Utils.isNullOrEmpty(sResult)){
-				sResult = sResult + " AND ";
-			}
 			sResult += sLandsat;
 		}
 		
 		//TODO time frame
+		//WASDI OpenSearch format
+		//( ( endPosition:[1900-01-01T00:00:000Z TO 2018-01-01T23:59:59.999Z] ) )
+		//ONDA format
+		//( ( endPosition:[1900-01-01T00:00:000Z TO 2018-01-01T23:59:59.999Z] ) )
 		
 		//TODO footprint
-		
-		sResult+=" )\"";
+		//WASDI OpenSearch format
+		//( footprint:"intersects(POLYGON((-2.1670532226562504 26.83632531613058,-2.1670532226562504 46.869580496513265,22.618103027343754 46.869580496513265,22.618103027343754 26.83632531613058,-2.1670532226562504 26.83632531613058)))" )
+		//ONDA format
+		//footprint:"Intersects(POLYGON((-1.9335937500000002 42.16340342422403,-1.9335937500000002 50.28933925329178,47.63671875000001 50.28933925329178,47.63671875000001 42.16340342422403,-1.9335937500000002 42.16340342422403)))"
 		return sResult;
+	}
+
+	public String parseSentinel2(String sQuery) {
+		String sSentinel2 = "";
+		if(sQuery.contains("platformname:Sentinel-2")) {
+			sSentinel2 = "( ( name:S2* AND ";
+			if(sQuery.contains("filename:S2A_*")){
+				sSentinel2+="name:S2A_* AND ";
+			} else if(sQuery.contains("filename:S2B_*")){
+				sSentinel2+="name:S2B_* AND ";
+			} else {
+				sSentinel2+="name:* AND ";
+			}
+
+			if(sQuery.contains("producttype:S2MSI1C")) {
+				sSentinel2+="name:*MSI1C*";
+			} else if(sQuery.contains("producttype:S2MSIAp")) {
+				sSentinel2+="name:*MSIAp*";
+			} else {
+				sSentinel2+="name:*";
+			}
+			sSentinel2+=" )";
+
+			//cloudCoverPercentage make sure to read the query for s2 and not for landsat
+			int iFrom = sQuery.indexOf("platformname:Sentinel-2");
+			int iTo = sQuery.length();
+			int iLand = sQuery.indexOf("platformname:Landsat");
+			if(iLand > 0 ) {
+				iTo = Math.min(iTo, iLand);
+			}
+			String sSearchSubString = sQuery.substring(iFrom, iTo);
+			String sCloud = "cloudcoverpercentage";
+			if(sSearchSubString.contains(sCloud)) {
+				iFrom = sSearchSubString.indexOf(sCloud) + sCloud.length()+2;
+				iTo = sSearchSubString.indexOf("]");
+				sSearchSubString = sSearchSubString.substring(iFrom, iTo);
+				String[] sInterval = sSearchSubString.split(" TO ");
+				String sLow = sInterval[0];
+				String sHi = sInterval[1];
+				sSentinel2 +=" AND cloudCoverPercentage:[ " + sLow + " TO " + sHi + " ]";
+
+			}
+			sSentinel2 += " )";
+		}
+		
+		return sSentinel2;
+	}
+
+	public String parseSentinel1(String sQuery) {
+		String sSentinel1 = "";
+		if(sQuery.contains("platformname:Sentinel-1")) {
+			sSentinel1 = "( ( name:S1* AND ";
+			
+			//filename:[S1A_*|S1B_*] (optional)
+			if(sQuery.matches(".*filename\\s*\\:\\s*S1A.*")){
+				sSentinel1 += "name:S1A_*";
+			} else if(sQuery.matches(".*filename\\s*\\:\\s*S1B.*")) {
+				sSentinel1 += "name:S1B_*";
+			} else {
+				sSentinel1 += "name:*";
+			}
+			sSentinel1+=" AND ";
+			
+			//producttype:[SLC|GRD|OCN] (optional)
+			if(sQuery.matches(".*producttype\\s*\\:\\s*SLC.*")) {
+				sSentinel1+= "name:*SLC*";
+			} else if( sQuery.matches(".*producttype\\s*\\:\\s*GRD.*") ) {
+				sSentinel1+="name:*GRD*";
+			} else if( sQuery.matches(".*producttype\\s*\\:\\s*OCN.*") ) {
+				sSentinel1+="name:*OCN*";
+			} else {
+				sSentinel1+="name:*";
+			}
+			sSentinel1+=" AND ";
+			//the next token w/ wildcard is always added by ONDA
+			sSentinel1+="name:*";
+			
+			//relativeorbitnumber/relativeOrbitNumber:[integer in [1-175]] (optional)
+			if(sQuery.contains("relativeorbitnumber")) {
+				String sPattern = "(?<= relativeorbitnumber\\:)(\\d*.\\d*)(?= )";
+				Pattern oPattern = Pattern.compile(sPattern);
+				Matcher oMatcher = oPattern.matcher(sQuery);
+				String sIntRelativeOrbit = "";
+				if(oMatcher.find()) {
+					//its a number with decimal digits
+					sIntRelativeOrbit = oMatcher.group(1);
+					sIntRelativeOrbit = sIntRelativeOrbit.split("\\.")[0];
+					sSentinel1+=" AND relativeorbitnumber:" + sIntRelativeOrbit;
+				} else {
+					//it's an integer
+					sPattern = "(?<= relativeorbitnumber\\:)(\\d*)(?= )";
+					oPattern = Pattern.compile(sPattern);
+					oMatcher = oPattern.matcher(sQuery);
+					if(oMatcher.find()) {
+						sIntRelativeOrbit = oMatcher.group(1);
+						sSentinel1+=" AND relativeOrbitNumber:" + sIntRelativeOrbit;
+					} //don't add the query otherwise
+				} 
+			}
+			//Sensor Mode:[SM|IW|EW|WV] (optional)
+			if(sQuery.matches(".*sensoroperationalmode\\s*\\:\\s*SM.*")) {
+				sSentinel1+=" AND sensorOperationalMode:SM";
+			} else if(sQuery.matches(".*sensoroperationalmode\\s*\\:\\s*IW.*")) {
+				sSentinel1+=" AND sensorOperationalMode:IW";
+			} else if(sQuery.matches(".*sensoroperationalmode\\s*\\:\\s*EW.*")) {
+				sSentinel1+=" AND sensorOperationalMode:EW";
+			} else if(sQuery.matches(".*sensoroperationalmode\\s*\\:\\s*WV.*")) {
+				sSentinel1+=" AND sensorOperationalMode:WV";
+			}
+			sSentinel1 +=" ) )";
+		}
+		
+		return sSentinel1;
 	}
 
 	/* (non-Javadoc)
@@ -154,7 +248,7 @@ public class DiasQueryTranslatorONDA extends DiasQueryTranslator {
 		//Safe to assume:
 			//no leading/ending whitespaces
 			//no double whitespaces
-		sResult = sResult.trim().replaceAll(" +", " ");
+		sResult = sResult.trim().replaceAll(" +", " "); 
 		
 		
 		//What is supported by ONDA?
@@ -248,7 +342,8 @@ public class DiasQueryTranslatorONDA extends DiasQueryTranslator {
 		
 		//cloudCoverPercentage should be the same
 		
-		return sResult;
+		//return sResult;
+		return cleanerTranslate(sQuery);
 	}
 
 	/* (non-Javadoc)
