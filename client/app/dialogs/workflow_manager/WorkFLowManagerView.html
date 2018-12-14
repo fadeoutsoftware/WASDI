@@ -23,24 +23,32 @@
 
                             </a>
                         </li>
-                        
+
+                        <li ng-class="{'active':m_oController.m_sSelectedWorkflowTab === 'WorkFlowTab3'}" ng-click="m_oController.m_sSelectedWorkflowTab = 'WorkFlowTab3'"
+                            ng-hide=" (m_oController.m_aoWorkflows.length === 0) && (m_oController.m_bIsLoadingWorkflows === false)">
+                            <a href="" role="tab" data-toggle="tab">
+                                {{"DIALOG_WORKFLOW_MANAGER_TAB_EXECUTE_SAVED_WORKFLOW" | translate}}
+                            </a>
+                        </li>
+
                         <li ng-class="{'active':m_oController.m_sSelectedWorkflowTab === 'WorkFlowTab2'}" ng-click="m_oController.m_sSelectedWorkflowTab = 'WorkFlowTab2'">
                             <a href="" role="tab" data-toggle="tab">
                                 {{"DIALOG_WORKFLOW_MANAGER_TAB_UPLOAD_WORKFLOW" | translate}}
                             </a>
                         </li>
 
-                        <li ng-class="{'active':m_oController.m_sSelectedWorkflowTab === 'WorkFlowTab3'}" ng-click="m_oController.m_sSelectedWorkflowTab = 'WorkFlowTab3'">
-                            <a href="" role="tab" data-toggle="tab">
-                                {{"DIALOG_WORKFLOW_MANAGER_TAB_EXECUTE_SAVED_WORKFLOW" | translate}}
-                            </a>
-                        </li>
+
                     </ul>
                     <!-- TAB CONTENT -->
                     <div class="tab-content">
                         <div class="tab-pane fade in" ng-class="{'active':m_oController.m_sSelectedWorkflowTab === 'WorkFlowTab2'}" id="WorkFlowTab2" >
 
                             <!------------------------------ FILENAME ------------------------------>
+                            <div class="row">
+                                <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                                    Upload workflow
+                                </div>
+                            </div>
 
                             <div class="row my-input-text">
                                 <div class="col-xs-8 col-sm-8 col-md-8 col-lg-8 col-xs-offset-2 col-sm-offset-2 col-md-offset-2 col-lg-offset-2">
@@ -95,6 +103,13 @@
 
                             <!--------------------------------   TABLE WORKFLOWS + LIST OF PRODUCTS -------------------------------->
                             <div class="row">
+                                <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                                    Execute workflow
+                                </div>
+                            </div>
+
+
+                            <div class="row">
 
                                 <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12" ng-show=" (m_oController.m_aoWorkflows.length === 0) && (m_oController.m_bIsLoadingWorkflows === true)">
                                     <div class="loadIcon">
@@ -143,7 +158,7 @@
 
                                         <button class="my-button my-align-right" ng-click="m_oController.runWorkFlowPerProducts();" ng-class ="{ 'disabled' : m_oController.isPossibleDoUpload()}"
                                                                   ng-show="m_oController.isSelectedWorkFlow() && m_oController.isSelectedProduct()" data-dismiss="modal" >
-                                            Execute workflow
+                                            {{"DIALOG_WORKFLOW_MANAGER_EXECUTE_WORKFLOW_BUTTON"|translate}}
                                         </button>
                                     </div>
                                 </div>
@@ -158,7 +173,13 @@
                     <!----------------------------------------- MULTI WORKFLOW INPUT ----------------------------------------->
                     <div class="tab-pane fade in" id="WorkFlowTab3" ng-class="{'active':m_oController.m_sSelectedWorkflowTab === 'WorkFlowTab3'}"
                             ng-show="m_oController.m_sSelectedWorkflowTab === 'WorkFlowTab3'">
-                        <!-- ng-hide=" (m_oController.m_aoWorkflows.length === 0) && (m_oController.m_bIsLoadingWorkflows === false)"-->
+
+                        <div class="row">
+                            <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                                Execute workflow
+                            </div>
+                        </div>
+
                         <div class="row">
 
                             <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12" ng-show=" (m_oController.m_aoWorkflows.length === 0) && (m_oController.m_bIsLoadingWorkflows === true)">
@@ -243,37 +264,11 @@
                                             </tr>
                                         </tbody>
                                     </table>
-                                    <button class="my-button" ng-click="m_oController.runMultiInputWorkFlow()" data-dismiss="modal">Run</button>
-                                    <!--<div ng-repeat="node in m_oController.m_oSelectedMultiInputWorkflow.inputNodeNames" >-->
-                                        <!--<div class="row">-->
-                                            <!--<div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">-->
-                                                <!--<label>{{node}}</label>-->
-                                            <!--</div>-->
+                                    <button class="my-button my-align-right" ng-click="m_oController.runMultiInputWorkFlow()"
+                                            data-dismiss="modal" ng-hide="m_oController.m_oSelectedMultiInputWorkflow === null">
+                                        {{"DIALOG_WORKFLOW_MANAGER_EXECUTE_WORKFLOW_BUTTON"|translate}}
+                                    </button>
 
-                                            <!--<div class="col-xs-9 col-sm-9 col-md-9 col-lg-9">-->
-                                                <!--<div class="dropdown my-dropdown ">-->
-                                                    <!--<button class="btn btn-default dropdown-toggle" type="button"-->
-                                                            <!--id="dropdownMenuProductListMultiselectWorkflow" data-toggle="dropdown">-->
-                                                        <!--Products-->
-                                                        <!--<span class="caret"></span>-->
-                                                    <!--</button>-->
-                                                    <!--<ul class="dropdown-menu" role="menu"-->
-                                                        <!--aria-labelledby="dropdownMenuProductListMultiselectWorkflow">-->
-
-                                                        <!--<li role="presentation">-->
-                                                            <!--<a role="menuitem" tabindex="-1" href=""-->
-                                                               <!--ng-repeat="product in m_oController.m_asProductsName"-->
-                                                                <!--ng-click="m_oController.addProductInputInNode(node,product)">-->
-                                                                <!--{{product}}-->
-                                                            <!--</a >-->
-                                                        <!--</li>-->
-
-                                                    <!--</ul>-->
-                                                <!--</div>-->
-                                            <!--</div>-->
-                                        <!--</div>-->
-
-                                    <!--</div>-->
 
                                 </div>
                             </div>

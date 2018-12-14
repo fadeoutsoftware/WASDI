@@ -35,6 +35,20 @@ service('PagesService', ['$http',  'ConstantsService','OpenSearchService', funct
 
     });
 
+    this.setDefaultPaginationValuesForProvider = function()
+    {
+
+        var iNumberOfListProvider = this.m_aListOfProvider.length;
+        for(var iIndexProviders = 0; iIndexProviders < iNumberOfListProvider ; iIndexProviders++)
+        {
+            this.m_aListOfProvider[iIndexProviders].totalOfProducts = 0;
+            this.m_aListOfProvider[iIndexProviders].totalPages = 1;
+            this.m_aListOfProvider[iIndexProviders].currentPage = 1;
+            this.m_aListOfProvider[iIndexProviders].productsPerPageSelected = 10;
+            this.m_aListOfProvider[iIndexProviders].isLoaded = false;
+        }
+    };
+
     this.getProviders = function(){
         return this.m_aListOfProvider;
     };

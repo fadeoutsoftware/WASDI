@@ -225,7 +225,8 @@ var RootController = (function() {
 
         }).error(function (data,status) {
             utilsVexDialogAlertTop("ERROR IN LOGOUT");
-            // oController.m_oState.go("home");
+            oController.m_oConstantsService.logOut();
+            oController.m_oState.go("home");
         });
 
 
@@ -372,7 +373,7 @@ var RootController = (function() {
     RootController.prototype.openSnake = function()
     {
         var oController = this;
-        console.log("miao");
+        // console.log("miao");
         this.m_oModalService.showModal({
             // templateUrl: "dialogs/snake_dialog/SnakeDialog.html",
             templateUrl: "dialogs/snake_dialog/SnakeDialogV2.html",
