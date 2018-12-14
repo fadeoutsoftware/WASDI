@@ -48,66 +48,95 @@ public class DiasQueryTranslatorONDA extends DiasQueryTranslator {
 	}
 	
 	protected String cleanerTranslate(String sQuery) {
-		String sResult = new String("");
-		String sSentinel1 = "";
-		if(sQuery.contains("Sentinel-1")) {
-			sSentinel1 = "(";
-			//TODO parse for Sentinel-1 parameters
+		String sResult = new String("\"( ");
+		
+		if(sQuery.contains("Sentinel-1")) {		
+			String sSentinel1 = "(name:S1*";
+			sSentinel1 += " AND ";
+			//Platform:[S1A_*|S1B_*] (optional)
+			if(sQuery.contains("S1A")) {
+				sSentinel1 += "name:S1A_*";
+			} else if(sQuery.contains("S1B")) {
+				sSentinel1 += "name:S1B_*";
+			} else {
+				sSentinel1 += "name:*";
+			}
+			
+			//type:[SLC|GRD|OCN] (optional)
+			if(sQuery.contains("SLC")) {
+				sSentinel1+=" AND ";
+				sSentinel1+= "name:*SLC*";
+			} else if( sQuery.contains("GRD") ) {
+				sSentinel1+="name:*GRD*";
+			} else if( sQuery.contains("OCN") ) {
+				sSentinel1+="name:*OCN*";
+			} else {
+				sSentinel1+="name:*";
+			}
+			
+			if
+			sSentinel1+=" AND ";
+			//TODO relativeOrbitNumber:[integer in [1-175]] (optional)
+			
+			//Sensor Mode:[SM|IW|EW|WV] (optional)
+			sSentinel1+=" AND ";
 			sSentinel1 +=")";
-			if(!Utils.isNullOrEmpty(sSentinel1)) {
-				sResult = sSentinel1;
-			}
+			sResult += sSentinel1;
 		}
+		
 		if(sQuery.contains("Sentinel-2")) {
-			String sSentinel2 = "";
+			String sSentinel2 = "( ";
 			//TODO parse for Sentinel-2 parameters
-			if(!Utils.isNullOrEmpty(sSentinel2)) {
-				if(!Utils.isNullOrEmpty(sResult)){
-					sResult = sResult + " AND ";
-				}
-				sResult = sResult + sSentinel2;
+			sSentinel2 += " )";
+			if(!Utils.isNullOrEmpty(sResult)){
+				sResult = sResult + " AND ";
 			}
+			sResult += sSentinel2;
 		}
+		
 		if(sQuery.contains("Sentinel-3")) {
-			String sSentinel3 = "";
-			//TODO parse for Sentinel-3 parameters
-			if(!Utils.isNullOrEmpty(sSentinel3)) {
-				if(!Utils.isNullOrEmpty(sResult)){
-					sResult = sResult + " AND ";
-				}
-				sResult = sResult + sSentinel3;
+			String sSentinel3 = "( ";
+			//TODO parse for Sentinel-2 parameters
+			sSentinel3 += " )";
+			if(!Utils.isNullOrEmpty(sResult)){
+				sResult = sResult + " AND ";
 			}
+			sResult += sSentinel3;
 		}
+		
 		//Proba-V
 		if(sQuery.contains("Proba-V")) {
 			//ignore this case
 			System.out.println("DiasQueryTranslatorONDA.CleanerTranslate: ignoring Proba-V as not supported by ONDA");
 		}
+		
 		//TODO Envisat
 		if(sQuery.contains("Envisat")) {
-			String sEnvisat = "";
-			//TODO parse for Envisat parameters
-			if(!Utils.isNullOrEmpty(sEnvisat)) {
-				if(!Utils.isNullOrEmpty(sResult)){
-					sResult = sResult + " AND ";
-				}
-				sResult = sResult + sEnvisat;
+			String sEnvisat = "( ";
+			//TODO parse for Sentinel-2 parameters
+			sEnvisat += " )";
+			if(!Utils.isNullOrEmpty(sResult)){
+				sResult = sResult + " AND ";
 			}
+			sResult += sEnvisat;
 		}
+		
 		//Landsat
 		if(sQuery.contains("Landsat")) {
-			String sLandsat = "";
-			//TODO parse for Landsat parameters
-			if(!Utils.isNullOrEmpty(sLandsat)) {
-				if(!Utils.isNullOrEmpty(sResult)){
-					sResult = sResult + " AND ";
-				}
-				sResult = sResult + sLandsat;
+			String sLandsat = "( ";
+			//TODO parse for Sentinel-2 parameters
+			sLandsat += " )";
+			if(!Utils.isNullOrEmpty(sResult)){
+				sResult = sResult + " AND ";
 			}
+			sResult += sLandsat;
 		}
+		
 		//TODO time frame
+		
 		//TODO footprint
 		
+		sResult+=" )\"";
 		return sResult;
 	}
 
@@ -134,15 +163,7 @@ public class DiasQueryTranslatorONDA extends DiasQueryTranslator {
 		//(by mission)
 		
 		
-		//Sentinel-1
-			//YES
-				//Platform:[S1A_*|S1B_*] (optional)
-				//type:[SLC|GRD|OCN] (optional)
-				//relativeOrbitNumber:[integer in [1-175]] (optional)
-				//Sensor Mode:[SM|IW|EW|WV] (optional)
-			//NO
-				//Polarisation
-				//Swath
+		
 		//Sentinel-2
 			//YES
 				//Platform:[S2A_*|S2B-*] (optional)
