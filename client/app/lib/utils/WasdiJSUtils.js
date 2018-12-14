@@ -482,3 +482,18 @@ function utilsProjectGetContainerSize(sIdContainer){
         width:widthMapContainer
     };
 }
+
+function utilsProjectGetPolygonArray(sPolygonString){
+    if(utilsIsStrNullOrEmpty(sPolygonString) === true)
+    {
+        return null;
+    }
+
+    var sTemp = sPolygonString;
+    sTemp = sTemp.replace("POLYGON","");
+    sTemp = sTemp.replace("((","");
+    sTemp = sTemp.replace("))","");
+    sTemp = sTemp.split(",");
+
+    return sTemp;
+}

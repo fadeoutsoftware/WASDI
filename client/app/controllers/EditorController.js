@@ -4,7 +4,7 @@
 var EditorController = (function () {
     function EditorController($scope, $location, $interval, oConstantsService, oAuthService, oMapService, oFileBufferService,
                               oProductService, $state, oWorkspaceService, oGlobeService, oProcessesLaunchedService, oRabbitStompService,
-                              oSnapOperationService, oModalService, oFilterService, oGetParametersOperationService, oTranslate) {
+                              oSnapOperationService, oModalService, oFilterService, oGetParametersOperationService, oTranslate, oCatalogService) {
         // Reference to the needed Services
         this.m_oScope = $scope;
         this.m_oScope.m_oController = this;
@@ -25,6 +25,7 @@ var EditorController = (function () {
         this.m_oModalService = oModalService;
         this.m_oGetParametersOperationService = oGetParametersOperationService;
         this.m_oTranslate = oTranslate;
+        this.m_oCatalogService = oCatalogService;
         // Flag to know if in the big map is 2d (true) or 3d (false)
         this.m_b2DMapModeOn = true;
         // Flag to know if the big map is the Geographical Mode (true) or in the Editor Mode (false)
@@ -1267,6 +1268,8 @@ var EditorController = (function () {
         }).error(function (data, status) {
             utilsVexDialogAlertTop('GURU MEDITATION<br>ERROR IMPOSSIBLE GET WORKSPACE IN EDITOR')
         });
+
+        return true;
     };
 
 
@@ -2986,20 +2989,17 @@ var EditorController = (function () {
             this.m_sClassBtnSwitchGeographic = "btn-switch-geographic";
             this.m_sToolTipBtnSwitchGeographic = "EDITOR_TOOLTIP_TO_EDITOR";
         }
-
         else
         {
             this.m_sClassBtnSwitchGeographic = "btn-switch-not-geographic";
             this.m_sToolTipBtnSwitchGeographic = "EDITOR_TOOLTIP_TO_GEO";
-
         }
-    }
+    };
 
 
     EditorController.prototype.changeModeOnOffPixelInfo = function()
     {
         this.m_bIsModeOnPixelInfo = !this.m_bIsModeOnPixelInfo;
-
     };
 
     EditorController.prototype.getClassPixelInfo = function()
@@ -3794,7 +3794,8 @@ var EditorController = (function () {
                                                     "fileName":oProduct.fileName,
                                                     "filePath":oProduct.filePath
                                                 };
-                                                oController.downloadEntry(oEntry);
+                                                // oController.downloadEntry(oEntry);
+                                                 oController.downloadProductByName($node.original.fileName);
                                             }
                                         }
                                     },
@@ -3938,14 +3939,40 @@ var EditorController = (function () {
             // oController.m_bIsDownloadingProduct = false;
             // oController.m_sProductNameInDownloadingStatus = "";
         }).error(function (error) {
-            utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR DOWNLOADING FILE FROM THE CATALOGUE");
+            utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR DOWNLOADING FILE");
             // oController.m_bIsDownloadingProduct = false;
             // oController.m_sProductNameInDownloadingStatus = "";
         });
 
         return true;
     };
+    EditorController.prototype.downloadProductByName = function(sFileName)
+    {
+        if(utilsIsStrNullOrEmpty(sFileName) === true )
+        {
+            return false;
+        }
 
+        this.m_oCatalogService.downloadByName(sFileName)
+            .success(function(data,status){
+                if(utilsIsObjectNullOrUndefined(data) == false)
+                {
+                    var blob = new Blob([data], {type: "application/octet-stream"});
+                    saveAs(blob, sFileName);
+                }
+            })
+            .error(function(data,status){
+                utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR DOWNLOADING FILE");
+
+            });
+        return true;
+    };
+
+    /**
+     * findProductByName
+     * @param sFileName
+     * @returns {*}
+     */
     EditorController.prototype.findProductByName = function(sFileName){
         if(utilsIsStrNullOrEmpty(sFileName) === true)
         {
@@ -3983,7 +4010,8 @@ var EditorController = (function () {
         'ModalService',
         'FilterService',
         'GetParametersOperationService',
-        '$translate'
+        '$translate',
+        'CatalogService'
 
     ];
 

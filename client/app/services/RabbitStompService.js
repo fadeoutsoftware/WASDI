@@ -12,6 +12,7 @@ service('RabbitStompService', ['$http',  'ConstantsService','$interval','Process
     // Scope
     this.m_oScope = $scope;
 
+    this.m_oWebSocket = null;
     this.m_oReconnectTimerPromise = null;
     this.m_oRabbitReconnect = null;
 
@@ -50,6 +51,9 @@ service('RabbitStompService', ['$http',  'ConstantsService','$interval','Process
         return !utilsIsStrNullOrEmpty(this.m_sWorkspaceId);
     }
 
+    this.isReadyState = function(){
+        return (( (utilsIsObjectNullOrUndefined(this.m_oWebSocket ) === false) && (this.m_oWebSocket.readyState === WebSocket.OPEN) )? true : false  );
+    }
 
     this.subscribe = function (workspaceId) {
         this.unsubscribe();
@@ -189,7 +193,7 @@ service('RabbitStompService', ['$http',  'ConstantsService','$interval','Process
         // Keep local reference to the callbacks to use it in the reconnection callback
         this.m_oOn_Connect = on_connect;
         this.m_oOn_Error = on_error;
-
+        this.m_oWebSocket = oWebSocket;
         // Call back for rabbit reconnection
         var rabbit_reconnect = function () {
 

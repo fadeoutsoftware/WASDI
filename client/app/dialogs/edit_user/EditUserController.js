@@ -24,12 +24,21 @@ var EditUserController = (function() {
         };
 
     };
-
+    /*
+        getUserAuthProvider
+     */
     EditUserController.prototype.getUserAuthProvider = function()
     {
         return this.m_oUser.authProvider;
     };
+    EditUserController.prototype.isUserLoggedWithGoogle = function()
+    {
+        return ((this.m_oUser.authProvider === "google") ? true: false);
+    };
 
+    /*
+        changePassword
+     */
     EditUserController.prototype.changePassword = function()
     {
 

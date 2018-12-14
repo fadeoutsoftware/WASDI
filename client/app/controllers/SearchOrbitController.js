@@ -8,7 +8,7 @@
 var SearchOrbitController = (function() {
     function SearchOrbitController($scope, $location, oConstantsService, oAuthService,oState, oConfigurationService,
                                    oMapService, oSearchOrbitService,oProcessesLaunchedService,oWorkspaceService,
-                                   oRabbitStompService,oModalService, oProductService) {
+                                   oRabbitStompService,oModalService, oProductService,$filter) {
         this.m_oScope = $scope;
         this.m_oLocation = $location;
         this.m_oConstantsService = oConstantsService;
@@ -34,7 +34,8 @@ var SearchOrbitController = (function() {
         this.m_oActiveWorkspace = this.m_oConstantsService.getActiveWorkspace();
         this.m_oUser = this.m_oConstantsService.getUser();
         this.m_bIsVisibleLoadingIcon = false;
-
+        this.m_oFilter = $filter;
+        this.m_sFilterTable = "";
         //order the table
         this.m_sOrderBy = "Satellite";
         this.m_bReverseOrder = false;
@@ -340,6 +341,7 @@ var SearchOrbitController = (function() {
      * @param oOrbit
      * @returns {boolean}
      */
+    //TODO REMOVE IT ?
     SearchOrbitController.prototype.showSwath = function(oOrbit){
 
 
@@ -372,16 +374,17 @@ var SearchOrbitController = (function() {
             //create oRectangle
             var sSwath = oOrbit.SwathFootPrint;
             var aasNewContent = [];
-
-            sSwath = sSwath.replace("POLYGON","");
-            sSwath = sSwath.replace("((","");
-            sSwath = sSwath.replace("))","");
-            sSwath = sSwath.split(",");
+            //
+            // sSwath = sSwath.replace("POLYGON","");
+            // sSwath = sSwath.replace("((","");
+            // sSwath = sSwath.replace("))","");
+            // sSwath = sSwath.split(",");
+            sSwath = utilsProjectGetPolygonArray(sSwath);
 
             for (var iIndexBounds = 0; iIndexBounds < sSwath.length; iIndexBounds++)
             {
                 var aBounds = sSwath[iIndexBounds];
-                console.log(aBounds);
+                // console.log(aBounds);
                 var aNewBounds = aBounds.split(" ");
 
                 var oLatLonArray = [];
@@ -403,7 +406,74 @@ var SearchOrbitController = (function() {
 
     };
 
+    /**
+     *
+     * @param oOrbit
+     * @returns {boolean}
+     */
+    SearchOrbitController.prototype.showFrame = function(oOrbit){
 
+
+        if (utilsIsObjectNullOrUndefined(oOrbit))
+            return false;
+
+        if (!oOrbit.hasOwnProperty('FrameFootPrint'))
+            return false;
+
+        /* find orbit in orbit list*/
+        if(utilsIsObjectNullOrUndefined(this.m_aoOrbits))
+        {
+            return false;
+        }
+
+        //Find orbit in Orbits list return index
+        var iIndexOrbitInOrbitsList = utilsFindObjectInArray(this.m_aoOrbits,oOrbit)
+        if(iIndexOrbitInOrbitsList == -1)
+            return false;
+
+        //if there is FootPrintRectangle set it null, otherwise create FootPrintRectangle
+        // it correspond ----> FootPrintRectangle == null == uncheck ||  FootPrintRectangle != null == check
+        if(!utilsIsObjectNullOrUndefined(this.m_aoOrbits[iIndexOrbitInOrbitsList].FootPrintRectangle))
+        {
+            this.m_oMapService.removeLayerFromMap(this.m_aoOrbits[iIndexOrbitInOrbitsList].FootPrintRectangle);//remove orbit rectangle from map
+            this.m_aoOrbits[iIndexOrbitInOrbitsList].FootPrintRectangle = null;
+        }
+        else
+        {
+            //create oRectangle
+            var sFrame = oOrbit.FrameFootPrint;
+            var aasNewContent = [];
+
+            // sFrame = sFrame.replace("POLYGON","");
+            // sFrame = sFrame.replace("((","");
+            // sFrame = sFrame.replace("))","");
+            // sFrame = sFrame.split(",");
+            sFrame = utilsProjectGetPolygonArray(sFrame);
+
+            for (var iIndexBounds = 0; iIndexBounds < sFrame.length; iIndexBounds++)
+            {
+                var aBounds = sFrame[iIndexBounds];
+                // console.log(aBounds);
+                var aNewBounds = aBounds.split(" ");
+
+                var oLatLonArray = [];
+
+                oLatLonArray[0] = JSON.parse(aNewBounds[1]); //Lat
+                oLatLonArray[1] = JSON.parse(aNewBounds[0]); //Lon
+
+                aasNewContent.push(oLatLonArray);
+            }
+            var oRectangle = this.m_oMapService.addRectangleByBoundsArrayOnMap(aasNewContent, null, 0);
+            if(utilsIsObjectNullOrUndefined(oRectangle))
+            {
+                utilsVexDialogAlertTop("IMPOSSIBLE TO VISUALIZE ORBIT");
+                return false;
+            }
+            this.m_aoOrbits[iIndexOrbitInOrbitsList].FootPrintRectangle = oRectangle;
+        }
+        return true;
+
+    };
     /**
      * openWorkspace
      * @param sWorkspaceId
@@ -429,12 +499,57 @@ var SearchOrbitController = (function() {
             //alert('error');
             utilsVexDialogAlertTop('GURU MEDITATION<br>ERROR IMPOSSIBLE GET WORKSPACE')
         });
-    }
+    };
 
+    SearchOrbitController.prototype.showAllFrameFootPrint = function(oCheckValue)
+    {
+        if(utilsIsObjectNullOrUndefined(this.m_aoOrbits))
+        {
+            return false;
+        }
+
+        var aoFilteredOrbits = this.m_oFilter('filter')(this.m_aoOrbits,this.m_sFilterTable);
+
+        var iNumberOfOrbits = aoFilteredOrbits.length;
+        this.m_bisLoadingAllOrbitInMap = true;
+        if(oCheckValue)
+        {
+            //TRUE
+            /*add all rectangles in map*/
+            for(var iIndexOrbit = 0; iIndexOrbit < iNumberOfOrbits; iIndexOrbit++)
+            {
+                var oOrbit = aoFilteredOrbits[iIndexOrbit];
+                //if there is saved in orbit the FootPrintRectangle we don't need to create it
+                if(!utilsIsObjectNullOrUndefined(oOrbit.FootPrintRectangle))
+                {
+                    continue;
+                }
+                this.showFrame(oOrbit);
+            }
+        }
+        else
+        {
+            //FALSE
+            // /*remove all rectangles in map*/
+            // for(var iIndexOrbit = 0; iIndexOrbit < iNumberOfOrbits; iIndexOrbit++)
+            // {
+            //     var oOrbit = this.m_aoOrbits[iIndexOrbit];
+            //     this.m_oMapService.removeLayerFromMap(oOrbit.FootPrintRectangle);//remove orbit rectangle from map
+            //     oOrbit.FootPrintRectangle = null;
+            // }
+            this.removeAllRectangle(aoFilteredOrbits);
+
+        }
+        this.m_bisLoadingAllOrbitInMap = false;
+        this.selectDeselectAllOrbits(this.m_bMasterCheck,aoFilteredOrbits);
+    };
+
+    // TODO REMOVE IT?
     SearchOrbitController.prototype.showAllSwath = function(oCheckValue){
         if(utilsIsObjectNullOrUndefined(this.m_aoOrbits))
             return false;
-
+        //TODO ADD THIS  -->  var aoFilteredOrbits = this.m_oFilter('filter')(this.m_aoOrbits,this.m_sFilterTable);
+        //TODO CHANGE m_aoOrbits with  aoFilteredOrbits
         var iNumberOfOrbits = this.m_aoOrbits.length;
         this.m_bisLoadingAllOrbitInMap = true;
         if(oCheckValue)
@@ -449,6 +564,7 @@ var SearchOrbitController = (function() {
                 {
                    continue;
                 }
+                //TODO SUBSTITUTE THIS PART OF CODE WITH showSwath FUNCTION
                 var sSwath = oOrbit.SwathFootPrint;
                 var aasNewContent = [];
 
@@ -484,34 +600,51 @@ var SearchOrbitController = (function() {
         {
             //FALSE
             /*remove all rectangles in map*/
-            for(var iIndexOrbit = 0; iIndexOrbit < iNumberOfOrbits; iIndexOrbit++)
-            {
-                var oOrbit = this.m_aoOrbits[iIndexOrbit];
-                this.m_oMapService.removeLayerFromMap(oOrbit.FootPrintRectangle);//remove orbit rectangle from map
-                oOrbit.FootPrintRectangle = null;
-            }
+            //TODO CHANGE this.m_aoOrbits with aoFiltered orbits
+            this.removeAllRectangle(this.m_aoOrbits);
         }
         this.m_bisLoadingAllOrbitInMap = false;
-        this.selectDeselectAllOrbits(this.m_bMasterCheck);
+        //TODO CHANGE this.m_aoOrbits with aoFiltered orbits
+        this.selectDeselectAllOrbits(this.m_bMasterCheck,this.m_aoOrbits);
 
         // this.m_oScope.$apply();
     };
 
+    SearchOrbitController.prototype.removeAllRectangle = function(aoOrbits)
+    {
+        if(utilsIsObjectNullOrUndefined(aoOrbits) === true)
+        {
+            return false;
+        }
+        var iNumberOfOrbits = aoOrbits.length;
+
+        for(var iIndexOrbit = 0; iIndexOrbit < iNumberOfOrbits; iIndexOrbit++)
+        {
+            var oOrbit = aoOrbits[iIndexOrbit];
+
+            if(utilsIsObjectNullOrUndefined(oOrbit.FootPrintRectangle) === false)
+            {
+                this.m_oMapService.removeLayerFromMap(oOrbit.FootPrintRectangle);//remove orbit rectangle from map
+                oOrbit.FootPrintRectangle = null;
+            }
+        }
+        return true;
+    }
     /**
      * selectDeselectAllOrbits
      * @returns {boolean}
      */
-    SearchOrbitController.prototype.selectDeselectAllOrbits = function(bValue)
+    SearchOrbitController.prototype.selectDeselectAllOrbits = function(bValue,aoOrbits)
     {
-        if(utilsIsObjectNullOrUndefined(this.m_aoOrbits) === true)
+        if(utilsIsObjectNullOrUndefined(aoOrbits) === true)
         {
             return false;
         }
-        var iNumberOfOrbits = this.m_aoOrbits.length;
+        var iNumberOfOrbits = aoOrbits.length;
 
         for(var iIndexOrbit = 0 ; iIndexOrbit < iNumberOfOrbits; iIndexOrbit++ )
         {
-            this.m_aoOrbits[iIndexOrbit].isSelected = bValue;
+            aoOrbits[iIndexOrbit].isSelected = bValue;
         }
         return true;
     };
@@ -695,7 +828,8 @@ var SearchOrbitController = (function() {
         'WorkspaceService',
         'RabbitStompService',
         'ModalService',
-        'ProductService'
+        'ProductService',
+        '$filter'
     ];
 
     return SearchOrbitController;
