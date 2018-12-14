@@ -90,6 +90,10 @@ var WorkspaceController = (function() {
 
 
     WorkspaceController.prototype.openWorkspace = function (sWorkspaceId) {
+        if(this.m_oRabbitStompService.isReadyState() === false)
+        {
+            return false;
+        }
         // Stop loading new workspaces.. we are leaving!
         this.m_bOpeningWorkspace = true;
         var oController = this;
