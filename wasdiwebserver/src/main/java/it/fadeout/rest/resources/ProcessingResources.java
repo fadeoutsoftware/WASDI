@@ -529,6 +529,7 @@ public class ProcessingResources {
 		
 		sGraphXml = IOUtils.toString(fileInputStream, Charset.defaultCharset().name());
 		oGraphSettings.setGraphXml(sGraphXml);
+		oGraphSettings.setWorkflowName(oWF.getName().trim());
 		
 		oGraphSettings.setInputFileNames(oSnapWorkflow.getInputFileNames());
 		oGraphSettings.setInputNodeNames(oSnapWorkflow.getInputNodeNames());
@@ -1525,15 +1526,15 @@ public class ProcessingResources {
 				oWriter.newLine();
 				oWriter.write("S1A_IW_GRDH_1SDV_20180904T174542_20180904T174607_023552_0290A2_A262_flood_map.tif");
 				oWriter.newLine();
-				oWriter.write("4");
+				oWriter.write("" + oListFloodViewModel.getHsbaStartDepth());
 				oWriter.newLine();
-				oWriter.write("2.4");
+				oWriter.write("" + oListFloodViewModel.getBimodalityCoeff());
 				oWriter.newLine();
-				oWriter.write("1000");
+				oWriter.write(""+oListFloodViewModel.getMinTileDimension());
 				oWriter.newLine();
-				oWriter.write("10");
+				oWriter.write("" + oListFloodViewModel.getMinBlobRemoval());
 				oWriter.newLine();
-				oWriter.flush();		
+				oWriter.flush();
 				oWriter.close();
 			}
 			
