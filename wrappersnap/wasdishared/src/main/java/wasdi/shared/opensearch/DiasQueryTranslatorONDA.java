@@ -295,6 +295,7 @@ public class DiasQueryTranslatorONDA extends DiasQueryTranslator {
 			
 			//relativeorbitnumber/relativeOrbitNumber:[integer in [1-175]] (optional)
 			if(sQuery.contains("relativeorbitnumber")) {
+				sSentinel1+=" AND relativeOrbitNumber:";
 				String sPattern = "(?<= relativeorbitnumber\\:)(\\d*.\\d*)(?= )";
 				Pattern oPattern = Pattern.compile(sPattern);
 				Matcher oMatcher = oPattern.matcher(sQuery);
@@ -303,7 +304,7 @@ public class DiasQueryTranslatorONDA extends DiasQueryTranslator {
 					//its a number with decimal digits
 					sIntRelativeOrbit = oMatcher.group(1);
 					sIntRelativeOrbit = sIntRelativeOrbit.split("\\.")[0];
-					sSentinel1+=" AND relativeorbitnumber:" + sIntRelativeOrbit;
+					sSentinel1+= sIntRelativeOrbit;
 				} else {
 					//it's an integer
 					sPattern = "(?<= relativeorbitnumber\\:)(\\d*)(?= )";
@@ -311,7 +312,7 @@ public class DiasQueryTranslatorONDA extends DiasQueryTranslator {
 					oMatcher = oPattern.matcher(sQuery);
 					if(oMatcher.find()) {
 						sIntRelativeOrbit = oMatcher.group(1);
-						sSentinel1+=" AND relativeOrbitNumber:" + sIntRelativeOrbit;
+						sSentinel1+= sIntRelativeOrbit;
 					} //don't add the query otherwise
 				} 
 			}

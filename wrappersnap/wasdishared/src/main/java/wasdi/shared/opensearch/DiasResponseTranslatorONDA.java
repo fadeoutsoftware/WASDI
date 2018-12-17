@@ -43,16 +43,27 @@ public class DiasResponseTranslatorONDA implements DiasResponseTranslator {
 	
 	public QueryResultViewModel translate(JSONObject oJsonOndaResult) {
 		try {
+			//TODO check every get/opt against null value
+			
 			QueryResultViewModel oResult = new QueryResultViewModel();
 			oResult.setProvider("ONDA");
-			oResult.setFootprint( oJsonOndaResult.optString("footprint") );
-			oResult.setId(oJsonOndaResult.optString("id"));
+			String sFootprint = oJsonOndaResult.optString("footprint");
+			if(null!=sFootprint) {
+				oResult.setFootprint( sFootprint );
+			} else {
+				oResult.setFootprint("");
+			}
+			String sId = oJsonOndaResult.optString("id");
+			if(null!=sFootprint) {
+				oResult.setId(sId);
+			} else {
+				oResult.setId("");
+			}
 			String sPreview = oJsonOndaResult.optString("quicklook");
-			//is there a preview?
 			if( !Utils.isNullOrEmpty(sPreview) ) {
 				oResult.setPreview("data:image/png;base64,"+ sPreview);
 			} else {
-				oResult.setPreview(null);
+				oResult.setPreview(""); 
 			}
 						
 			//XXX infer product type from file name
@@ -61,21 +72,52 @@ public class DiasResponseTranslatorONDA implements DiasResponseTranslator {
 			
 			Map<String, String> asProperties = new HashMap<String, String>();
 			//mapped
-			asProperties.put("format", oJsonOndaResult.optString("@odata.mediaContentType"));
-			asProperties.put("filename", oJsonOndaResult.optString("name"));
-			double dSize = oJsonOndaResult.getInt("size");
-			dSize = dSize / (1024 * 1024); 
-			asProperties.put("size", String.valueOf(dSize) + " GB");
-			//ONDA
-			asProperties.put("creationDate", oJsonOndaResult.optString("creationDate"));
-			asProperties.put("offline", oJsonOndaResult.optString("offline"));
-			asProperties.put("pseudopath", oJsonOndaResult.optString("pseudopath"));
-			asProperties.put("downloadable", oJsonOndaResult.optString("downloadable"));
+			String sFormat = oJsonOndaResult.optString("@odata.mediaContentType");
+			if(null!=sFormat) {
+				asProperties.put("format", sFormat );
+			}
+			String sName = oJsonOndaResult.optString("name");
+			if(null!=sName) {
+				asProperties.put("filename", sName);
+			}
+			Integer iSize = oJsonOndaResult.optInt("size");
+			Double dSize = -1.0;
+			String sChosenUnit = "ZZ";
+			if(null != iSize) {
+				dSize = (double)iSize;
+				//check against null size
+				String[] sUnits = {"B", "kB", "MB", "GB"};
+				int iUnitIndex = 0;
+				int iLim = sUnits.length -1;
+				while(iUnitIndex < iLim && dSize >= 1024) {
+					dSize = dSize / 1024;
+					iUnitIndex++;
+				}
+				sChosenUnit = sUnits[iUnitIndex];
+				asProperties.put("size", String.valueOf(dSize) + " " + sChosenUnit);
+			}
 			
+			//ONDA
+			String sCreationDate = oJsonOndaResult.optString("creationDate");
+			if(null!= sCreationDate) {
+				asProperties.put("creationDate", sCreationDate);
+			}
+			String sOffline = oJsonOndaResult.optString("offline");
+			if(sOffline != null) {
+				asProperties.put("offline", sOffline);
+			}
+			String sPseudopath = oJsonOndaResult.optString("pseudopath");
+			if(null!=sPseudopath) {
+				asProperties.put("pseudopath", sPseudopath);
+			}
+			String sDownloadable = oJsonOndaResult.optString("downloadable");
+			if(null!=sDownloadable) {
+				asProperties.put("downloadable", sDownloadable);
+			}
 			oResult.setProperties(asProperties);
 			
 			//oResult.setLink(link);
-			String sTitle = oJsonOndaResult.optString("name");
+			String sTitle = sName;
 			if( !Utils.isNullOrEmpty(sTitle) ) {
 				if(sTitle.contains(".")) {
 					sTitle = sTitle.split("\\.")[0];
@@ -93,7 +135,7 @@ public class DiasResponseTranslatorONDA implements DiasResponseTranslator {
 			sSummary = sSummary + "Mode: " + ", ";
 			//TODO infer Satellite from filename
 			sSummary = sSummary + "Satellite: " + ", ";
-			sSummary = sSummary + "Size: " +dSize + " GB";
+			sSummary = sSummary + "Size: " +dSize + " " + sChosenUnit;
 			
 			oResult.setSummary(sSummary);
 		
