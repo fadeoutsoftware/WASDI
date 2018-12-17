@@ -15,6 +15,10 @@ var ListFloodAreaDetectionController = (function() {
         this.m_aoProducts = this.m_oExtras.products;
         this.m_oSelectedReferenceProduct = null;
         this.m_oSelectedPostEventImageProduct = null;
+        this.m_iHSBAStartDepth = 4;
+        this.m_dBimodalityCoefficent = 2.4;
+        this.m_iMinimumTileDimension = 1000;
+        this.m_iMinimalBlobRemoval = 10;
         if(utilsIsObjectNullOrUndefined(this.m_aoProducts) === false)
         {
             this.m_oSelectedReferenceProduct = this.m_aoProducts[0];
@@ -33,21 +37,22 @@ var ListFloodAreaDetectionController = (function() {
     ListFloodAreaDetectionController.prototype.runListFloodAreaDetection = function(){
         var oActiveWorkspace = this.m_oConstantsService.getActiveWorkspace();
 
-        if(utilsIsObjectNullOrUndefined(this.m_oSelectedReferenceProduct) === true )
+        if(this.checkListFloodAreaDetectionObject(this.m_oSelectedReferenceProduct,this.m_oSelectedPostEventImageProduct,
+                                               this.m_iHSBAStartDepth,this.m_dBimodalityCoefficent,this.m_iMinimumTileDimension,
+                                               this.m_iMinimalBlobRemoval ) === false)
         {
-            utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR: INVALID REFERENCE PRODUCT ");
             return false;
         }
-        if(utilsIsObjectNullOrUndefined(this.m_oSelectedPostEventImageProduct) === true )
-        {
-            utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR: INVALID POST EVENT IMAGE PRODUCT ");
-            return false;
-        }
+
         var oListFlood = {
            referenceFile:this.m_oSelectedReferenceProduct.fileName,
            postEventFile:this.m_oSelectedPostEventImageProduct.fileName,
            outputMaskFile:"",
            outputFloodMapFile:"",
+           hsbaStartDepth: this.m_iHSBAStartDepth,
+           bimodalityCoeff: this.m_dBimodalityCoefficent,
+           minTileDimension: this.m_iMinimumTileDimension,
+           minBlobRemoval: this.m_iMinimalBlobRemoval
         };
 
         if(utilsIsObjectNullOrUndefined(oActiveWorkspace) === true)
@@ -77,6 +82,24 @@ var ListFloodAreaDetectionController = (function() {
             });
     };
 
+    ListFloodAreaDetectionController .prototype.checkListFloodAreaDetectionObject = function(oReferenceProduct,oPostEventImageProduct,
+                                                                                             iHsbaStartDepth,dBimodalityCoeff,
+                                                                                             iMinTileDimension,iMinBlobRemoval)
+    {
+        var bReturnValue = true;
+        if(utilsIsObjectNullOrUndefined(oReferenceProduct) === true )
+        {
+            utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR: INVALID REFERENCE PRODUCT ");
+            bReturnValue = false;
+        }
+        if(utilsIsObjectNullOrUndefined(oPostEventImageProduct) === true )
+        {
+            utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR: INVALID POST EVENT IMAGE PRODUCT ");
+            bReturnValue = false;
+        }
+        //TODO CHECK DATA  iHsbaStartDepth,dBimodalityCoeff, iMinTileDimension,iMinBlobRemoval
+        return bReturnValue;
+    }
 
     ListFloodAreaDetectionController.$inject = [
         '$scope',

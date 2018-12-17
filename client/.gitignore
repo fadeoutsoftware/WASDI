@@ -1,7 +1,29 @@
 logs/*
 !.gitkeep
-node_modules/
-bower_components/
-tmp
+
+#node_modules/
+#bower_components/
+#tmp
+#.DS_Store
+#.idea
+
+# dependencies
+/node_modules
+/app/bower_components
+
+# IDEs and editors
+/.idea
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+
+# System Files
 .DS_Store
-.idea
+Thumbs.db
+
+*.css
+*.css.map
+**/ConstantsService.js
