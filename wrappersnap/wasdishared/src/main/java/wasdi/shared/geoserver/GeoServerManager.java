@@ -22,56 +22,63 @@ import it.geosolutions.geoserver.rest.encoder.coverage.GSImageMosaicEncoder;
 public class GeoServerManager {
 	
 	
-	private final String workspace = "wasdi";
+	private final String m_sWorkspace = "wasdi";
 
-    String restUrl  = "http://localhost:8080/geoserver";
-    String restUser = "admin";
-    String restPassword   = "geoserver";
-    GeoServerRESTPublisher gsPublisher;
-    GeoServerRESTReader gsReader;
+    String m_sRestUrl  = "http://localhost:8080/geoserver";
+    String m_sRestUser = "admin";
+    String m_sRestPassword   = "geoserver";
+    GeoServerRESTPublisher m_oGsPublisher;
+    GeoServerRESTReader m_oGsReader;
 
     public GeoServerManager(String sRestUrl, String sUser, String sPassword) throws MalformedURLException {
-        restUrl = sRestUrl;
-        restUser = sUser;
-        restPassword = sPassword;
-        gsReader = new GeoServerRESTReader(restUrl, restUser, restPassword);
-        gsPublisher = new GeoServerRESTPublisher(restUrl, restUser, restPassword);
+        m_sRestUrl = sRestUrl;
+        m_sRestUser = sUser;
+        m_sRestPassword = sPassword;
+        m_oGsReader = new GeoServerRESTReader(m_sRestUrl, m_sRestUser, m_sRestPassword);
+        m_oGsPublisher = new GeoServerRESTPublisher(m_sRestUrl, m_sRestUser, m_sRestPassword);
 
-    	if (!gsReader.existsWorkspace(workspace)) {
-    		gsPublisher.createWorkspace(workspace);
+    	if (!m_oGsReader.existsWorkspace(m_sWorkspace)) {
+    		m_oGsPublisher.createWorkspace(m_sWorkspace);
     	}
     }
     
-    public String getLayerBBox(String layerId) {
+    public String getLayerBBox(String sLayerId) {
     	
-    	RESTLayer layer = gsReader.getLayer(workspace, layerId);
-    	RESTResource res = gsReader.getResource(layer);
-    	RESTBoundingBox bbox = res.getLatLonBoundingBox();
-    	
-    	String ret = String.format("{\"miny\":%f,\"minx\":%f,\"crs\":\"%s\",\"maxy\":%f,\"maxx\":%f}", 
-    			bbox.getMinY(), bbox.getMinX(), bbox.getCRS().replace("\"", "\\\\\\\""), bbox.getMaxY(), bbox.getMaxX());
-    	
-    	return ret;
+    	try {
+        	RESTLayer oLayer = m_oGsReader.getLayer(m_sWorkspace, sLayerId);
+        	RESTResource oRes = m_oGsReader.getResource(oLayer);
+        	RESTBoundingBox oBbox = oRes.getLatLonBoundingBox();
+        	
+        	String sRet = String.format("{\"miny\":%f,\"minx\":%f,\"crs\":\"%s\",\"maxy\":%f,\"maxx\":%f}", 
+        			oBbox.getMinY(), oBbox.getMinX(), oBbox.getCRS().replace("\"", "\\\\\\\""), oBbox.getMaxY(), oBbox.getMaxX());
+        	
+        	return sRet;    		
+    	}
+    	catch (Exception oEx) {
+    		String sError = org.apache.commons.lang.exception.ExceptionUtils.getMessage(oEx);
+    		System.out.println("GeoServerManager.getLayerBBox: ERROR " + sError);
+    		return "";
+		}
     	
     }
 
-    public boolean removeLayer(String layerId) {
+    public boolean removeLayer(String sLayerId) {
 
-    	RESTLayer layer = gsReader.getLayer(workspace, layerId);
-    	Type layerType = layer.getType();    	
-    	RESTResource res = gsReader.getResource(layer);
+    	RESTLayer oLayer = m_oGsReader.getLayer(m_sWorkspace, sLayerId);
+    	Type oLayerType = oLayer.getType();    	
+    	RESTResource oRes = m_oGsReader.getResource(oLayer);
     	
-    	String storeName = res.getStoreName();
-    	String[] toks = storeName.split(":");
-    	if (toks.length>1) storeName = toks[1];
+    	String sStoreName = oRes.getStoreName();
+    	String[] asToks = sStoreName.split(":");
+    	if (asToks.length>1) sStoreName = asToks[1];
     	
-		switch (layerType) {
+		switch (oLayerType) {
 		case VECTOR:
-			return gsPublisher.removeDatastore(workspace, storeName, true, Purge.ALL);			
+			return m_oGsPublisher.removeDatastore(m_sWorkspace, sStoreName, true, Purge.ALL);			
 		case RASTER:
-			return gsPublisher.removeCoverageStore(workspace, storeName, true, Purge.ALL);
+			return m_oGsPublisher.removeCoverageStore(m_sWorkspace, sStoreName, true, Purge.ALL);
 		default:
-			System.out.println("GeoServerManager.removeLayer: unknown layer type for " + layerId);
+			System.out.println("GeoServerManager.removeLayer: unknown layer type for " + sLayerId);
 			break;
 		}
 
@@ -79,58 +86,58 @@ public class GeoServerManager {
     }
     
 
-    public boolean publishImagePyramid(String storeName, String style, String epsg, File baseDir)
+    public boolean publishImagePyramid(String sStoreName, String sStyle, String sEpsg, File oBaseDir)
             throws FileNotFoundException {
     	
-    	RESTLayer layer = gsReader.getLayer(workspace, storeName);
-    	if (layer != null) removeLayer(storeName);
+    	RESTLayer oLayer = m_oGsReader.getLayer(m_sWorkspace, sStoreName);
+    	if (oLayer != null) removeLayer(sStoreName);
     	
     	//layer encoder
-    	final GSLayerEncoder layerEnc = new GSLayerEncoder();
-    	if (style==null || style.isEmpty()) style="raster";
-    	layerEnc.setDefaultStyle(style);
+    	final GSLayerEncoder oLayerEnc = new GSLayerEncoder();
+    	if (sStyle==null || sStyle.isEmpty()) sStyle="raster";
+    	oLayerEnc.setDefaultStyle(sStyle);
     	
     	//coverage encoder
-    	final GSImageMosaicEncoder coverageEnc=new GSImageMosaicEncoder();
-    	coverageEnc.setName(storeName);
-    	coverageEnc.setTitle(storeName);
-    	if (epsg!=null) coverageEnc.setSRS(epsg);
-    	coverageEnc.setMaxAllowedTiles(Integer.MAX_VALUE); 
+    	final GSImageMosaicEncoder oCoverageEnc=new GSImageMosaicEncoder();
+    	oCoverageEnc.setName(sStoreName);
+    	oCoverageEnc.setTitle(sStoreName);
+    	if (sEpsg!=null) oCoverageEnc.setSRS(sEpsg);
+    	oCoverageEnc.setMaxAllowedTiles(Integer.MAX_VALUE); 
     	
     	//publish
-    	boolean res = gsPublisher.publishExternalMosaic(workspace, storeName, baseDir, coverageEnc, layerEnc);
+    	boolean bRes = m_oGsPublisher.publishExternalMosaic(m_sWorkspace, sStoreName, oBaseDir, oCoverageEnc, oLayerEnc);
     	
     	//configure coverage
-        if (res && gsReader.existsCoveragestore(workspace, storeName) && gsReader.existsCoverage(workspace, storeName, storeName)) {
-        	GSCoverageEncoder ce = new GSCoverageEncoder();
-            ce.setEnabled(true); //abilito il coverage
-            ce.setSRS(epsg);
-        	gsPublisher.configureCoverage(ce, workspace, storeName);
+        if (bRes && m_oGsReader.existsCoveragestore(m_sWorkspace, sStoreName) && m_oGsReader.existsCoverage(m_sWorkspace, sStoreName, sStoreName)) {
+        	GSCoverageEncoder oCe = new GSCoverageEncoder();
+            oCe.setEnabled(true); //abilito il coverage
+            oCe.setSRS(sEpsg);
+        	m_oGsPublisher.configureCoverage(oCe, m_sWorkspace, sStoreName);
         }
 
     	
-		return res;
+		return bRes;
     	
     }
 
 
-    public boolean publishStandardGeoTiff(String storeName, File geotiffFile, String epsg, String style)
+    public boolean publishStandardGeoTiff(String sStoreName, File oGeotiffFile, String sEpsg, String sStyle)
             throws FileNotFoundException {
 
-    	RESTLayer layer = gsReader.getLayer(workspace, storeName);
-    	if (layer != null) removeLayer(storeName);
+    	RESTLayer oLayer = m_oGsReader.getLayer(m_sWorkspace, sStoreName);
+    	if (oLayer != null) removeLayer(sStoreName);
 
-    	if (style == null || style.isEmpty()) style = "raster";
+    	if (sStyle == null || sStyle.isEmpty()) sStyle = "raster";
         
-        boolean res = gsPublisher.publishExternalGeoTIFF(workspace,storeName,geotiffFile, storeName, epsg, GSResourceEncoder.ProjectionPolicy.FORCE_DECLARED,style);
+        boolean bRes = m_oGsPublisher.publishExternalGeoTIFF(m_sWorkspace,sStoreName,oGeotiffFile, sStoreName, sEpsg, GSResourceEncoder.ProjectionPolicy.FORCE_DECLARED,sStyle);
         
-        if (res && gsReader.existsCoveragestore(workspace, storeName) && gsReader.existsCoverage(workspace, storeName, storeName)) {
-        	GSCoverageEncoder ce = new GSCoverageEncoder();
-            ce.setEnabled(true); //abilito il coverage
-            ce.setSRS(epsg);
-        	gsPublisher.configureCoverage(ce, workspace, storeName);
+        if (bRes && m_oGsReader.existsCoveragestore(m_sWorkspace, sStoreName) && m_oGsReader.existsCoverage(m_sWorkspace, sStoreName, sStoreName)) {
+        	GSCoverageEncoder oCe = new GSCoverageEncoder();
+            oCe.setEnabled(true); //abilito il coverage
+            oCe.setSRS(sEpsg);
+        	m_oGsPublisher.configureCoverage(oCe, m_sWorkspace, sStoreName);
         }
         
-		return res;
+		return bRes;
     }
 }
