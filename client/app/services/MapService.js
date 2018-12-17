@@ -201,16 +201,18 @@ service('MapService', ['$http','$rootScope', 'ConstantsService', function ($http
 
         //Init standard map
         this.initWasdiMap(sMapDiv);
-
         //LEAFLET.DRAW LIB
+
         //add draw.search (opensearch)
         var drawnItems = new L.FeatureGroup();
         this.m_oDrawItems = drawnItems;//save draw items (used in delete shape)
         this.m_oWasdiMap.addLayer(drawnItems);
 
+
+
         var oOptions={
             position:'topright',//position of menu
-            draw:{// what kind of shape is disable/enable
+            draw:{// what kind of shapes are disable/enable
                 marker:false,
                 polyline:false,
                 circle:false,
@@ -220,15 +222,15 @@ service('MapService', ['$http','$rootScope', 'ConstantsService', function ($http
             edit: {
                 featureGroup: drawnItems,//draw items are the "voice" of menu
                 edit: false,// hide edit button
-                remove: false// hide remove button
+                remove: true// hide remove button
             }
         };
 
         var oDrawControl = new L.Control.Draw(oOptions);
 
         this.m_oWasdiMap.addControl(oDrawControl);
-
         //Without this.m_oWasdiMap.on() the shape isn't saved on map
+
         this.m_oWasdiMap.on(L.Draw.Event.CREATED, function (event)
         {
             var layer = event.layer;
@@ -244,12 +246,25 @@ service('MapService', ['$http','$rootScope', 'ConstantsService', function ($http
         });
 
         //TODO event EDITED
-        //this.m_oWasdiMap.on(L.Draw.Event.EDITED, function (event) {
-        //    var layer = event.layers;
-        //});
+        this.m_oWasdiMap.on(L.Draw.Event.DELETESTOP, function (event) {
+           var layer = event.layers;
+        });
 
     };
+    this.mapDrawEventDeletePolygon = function(oFunction,oMap)
+    {
+        if(utilsIsObjectNullOrUndefined(oFunction) || utilsIsObjectNullOrUndefined(oMap))
+        {
+            return false;
+        }
+        oMap.on(L.Draw.Event.DELETED, oFunction);
+        // oMap.on(L.Draw.Event.EDITED , oFunction);
+        // oMap.on(L.Draw.Event.DELETESTOP, oFunction);
+        // oMap.on(L.Draw.Event.DELETESTART, oFunction);
+        // oMap.on(L.Draw.Event.CREATED, oFunction);
 
+        return true;
+    }
     /**
      * Init map editor
      * @param sMapDiv
