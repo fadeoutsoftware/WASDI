@@ -55,73 +55,171 @@ public class DiasQueryTranslatorONDA extends DiasQueryTranslator {
 			return new String("");
 		}
 			
-		String sQuery = new String(sInput);
-		//insert space before and after round brackets
-		sQuery = sQuery.replaceAll("\\(", " \\( ");
-		sQuery = sQuery.replaceAll("\\)", " \\) ");
-		//remove space before and after square brackets 
-		sQuery = sQuery.replaceAll(" \\[", "\\[");
-		sQuery = sQuery.replaceAll("\\[ ", "\\[");
-		sQuery = sQuery.replaceAll(" \\]", "\\]");
-		sQuery = sQuery.replaceAll("\\] ", "\\]");
-		
-		sQuery = sQuery.replaceAll("AND", " AND ");
-		sQuery = sQuery.trim().replaceAll(" +", " ");
+		String sQuery = prepareQuery(sInput);
 		
 		String sResult = new String("");
+		String sTmp = "";
 		
-		sResult += parseSentinel1(sQuery); 
+		sTmp += parseSentinel1(sQuery);
+		if(!Utils.isNullOrEmpty(sTmp)) {
+			sResult += sTmp;
+		}
 		
-		sResult += parseSentinel2(sQuery);
+		sTmp = parseSentinel2(sQuery);
+		if(!Utils.isNullOrEmpty(sTmp)) {
+			if(!Utils.isNullOrEmpty(sResult)) {
+				sResult += " AND ";
+			}
+			sResult += sTmp;
+		}
 		
-		if(sQuery.contains("Sentinel-3")) {
-			String sSentinel3 = "( ";
-			//TODO parse for Sentinel-2 parameters
-			
-			sSentinel3 += " )";
-			sResult += sSentinel3;
-		//end Sentinel2
+		sTmp = parseSentinel3(sQuery);
+		if(!Utils.isNullOrEmpty(sTmp)) {
+			if(!Utils.isNullOrEmpty(sResult)) {
+				sResult += " AND ";
+			}
+			sResult += sTmp;
 		}
 		
 		//Proba-V
 		if(sQuery.contains("Proba-V")) {
 			//ignore this case
 			System.out.println("DiasQueryTranslatorONDA.CleanerTranslate: ignoring Proba-V as not supported by ONDA");
+			if(!Utils.isNullOrEmpty(sResult)) {
+				sResult += " AND ";
+			}
+			sResult += "( platformName:ErrorProba-VNotSupported )";
 		}
 		
-		//TODO Envisat
-		if(sQuery.contains("Envisat")) {
-			String sEnvisat = "( ";
-			//TODO parse for Envisat parameters
-			
-			sEnvisat += " )";
-			sResult += sEnvisat;
+		sTmp = parseEnvisat(sQuery);
+		if(!Utils.isNullOrEmpty(sTmp)) {
+			if(!Utils.isNullOrEmpty(sResult)) {
+				sResult += " AND ";
+			}
+			sResult += sTmp;
 		}
 		
-		//Landsat
-		if(sQuery.contains("Landsat")) {
-			String sLandsat = "( ";
-			//TODO parse for Landsat parameters
-			
-			sLandsat += " )";
-			sResult += sLandsat;
+	
+		sTmp = parseLandsat(sQuery);
+		if(!Utils.isNullOrEmpty(sTmp)) {
+			if(!Utils.isNullOrEmpty(sResult)) {
+				sResult += " AND ";
+			}
+			sResult += sTmp;
 		}
 		
-		//TODO time frame
-		//WASDI OpenSearch format
-		//( ( endPosition:[1900-01-01T00:00:000Z TO 2018-01-01T23:59:59.999Z] ) )
-		//ONDA format
-		//( ( endPosition:[1900-01-01T00:00:000Z TO 2018-01-01T23:59:59.999Z] ) )
 		
-		//TODO footprint
-		//WASDI OpenSearch format
-		//( footprint:"intersects(POLYGON((-2.1670532226562504 26.83632531613058,-2.1670532226562504 46.869580496513265,22.618103027343754 46.869580496513265,22.618103027343754 26.83632531613058,-2.1670532226562504 26.83632531613058)))" )
-		//ONDA format
-		//footprint:"Intersects(POLYGON((-1.9335937500000002 42.16340342422403,-1.9335937500000002 50.28933925329178,47.63671875000001 50.28933925329178,47.63671875000001 42.16340342422403,-1.9335937500000002 42.16340342422403)))"
+		sTmp = parseTimeFrame(sQuery);
+		if(!Utils.isNullOrEmpty(sTmp)) {
+			if(!Utils.isNullOrEmpty(sResult)) {
+				sResult = sResult + " AND ( ( " + sTmp + " ) )";
+			} else {
+				sResult += sTmp;
+			}
+		}
+		
+		sTmp = parseFootPrint(sQuery);
+		if(!Utils.isNullOrEmpty(sTmp)) {
+			if(!Utils.isNullOrEmpty(sResult)) {
+				sResult += " AND ";
+			}
+			sResult += sTmp;
+		}
 		return sResult;
 	}
 
-	public String parseSentinel2(String sQuery) {
+	protected String parseLandsat(String sQuery) {
+		String sResult = "";
+		if(sQuery.contains("Landsat")) {
+			sResult += "( ( platformName:Landsat-* AND name:*";
+			int iStart = sQuery.indexOf("Landsat");
+			if(sQuery.substring(iStart).contains("L1T")) {
+				sResult+="L1T*";
+			} else if(sQuery.substring(iStart).contains("L1G")) {
+				sResult+="L1G*";
+			} else if(sQuery.substring(iStart).contains("L1GT")) {
+				sResult+="L1GT*";
+			} else if(sQuery.substring(iStart).contains("L1GS")) {
+				sResult+="L1GS*";
+			} else if(sQuery.substring(iStart).contains("L1TP")) {
+				sResult+="L1TP*";
+			}
+			sResult += " )";
+			
+			if(sQuery.substring(iStart).contains("cloudCoverPercentage")) {
+				//cloudCoverPercentage:[16.33 TO 95.6]
+				iStart = sQuery.indexOf("cloudCoverPercentage:");
+				iStart = sQuery.indexOf("[", iStart);
+				int iStop = sQuery.indexOf("]", iStart);
+				sResult += " AND cloudCoverPercentage:";
+				sResult+=sQuery.substring(iStart, iStop+1);
+				
+			}
+			sResult += ")";
+		}
+		return sResult;
+	}
+
+	protected String parseEnvisat(String sQuery) {
+		String sResult = "";
+		if(sQuery.contains("Envisat")) {
+			sResult +="( ( platformName:Envisat AND name:*";
+			int iStart = sQuery.indexOf("Envisat");
+			if(sQuery.substring(iStart).contains("ASA_IM__0P")) {
+				sResult+="ASA_IM__0P*";
+			} else if(sQuery.substring(iStart).contains("ASA_WS__0P")) {
+				sResult+="ASA_WS__0P*";
+			}
+			
+			if(sQuery.substring(iStart).contains("orbitDirection:")) {
+				sResult+=" AND orbitDirection:";
+				iStart = sQuery.indexOf("orbitDirection:");
+				if(sQuery.substring(iStart).contains("ASCENDING")) {
+					sResult += "ASCENDING";
+				} else {
+					sResult += "DESCENDING";
+				}
+			}
+			
+			sResult +=" ) )";
+		}
+		return sResult;
+	}
+
+	protected String parseSentinel3(String sQuery) {
+		String sResult = "";
+		if(sQuery.contains("Sentinel-3")) {
+			sResult += "( ( name:S3* AND name:*";
+			
+			int iStart = sQuery.indexOf("Sentinel-3");
+			if(sQuery.substring(iStart).contains("SR_1_SRA___")) {
+				sResult += "SR_1_SRA___*";
+			} else if(sQuery.substring(iStart).contains("SR_1_SRA_A_")) {
+				sResult += "SR_1_SRA_A_*";
+			} else if(sQuery.substring(iStart).contains("SR_1_SRA_BS")) {
+				sResult += "SR_1_SRA_BS*";
+			} else if(sQuery.substring(iStart).contains("SR_2_LAN___")) {
+				sResult += "SR_2_LAN___*";
+			}
+			
+			if(sQuery.substring(iStart).contains("timeliness")) {
+				sResult += " AND timeliness:";
+				iStart = sQuery.substring(iStart).indexOf("timeliness");
+				if(sQuery.substring(iStart).contains("Near Real Time") ){
+					sResult += "NRT";
+				} else if(sQuery.substring(iStart).contains("Short Time Critical")) {
+					sResult += "STC";
+				} else if(sQuery.substring(iStart).contains("Non Time Critical") ) {
+					sResult += "NTC";
+				}
+			}
+			sResult += " ) )";
+		}
+		return sResult;
+	}
+
+
+	protected String parseSentinel2(String sQuery) {
 		String sSentinel2 = "";
 		if(sQuery.contains("platformname:Sentinel-2")) {
 			sSentinel2 = "( ( name:S2* AND ";
@@ -135,8 +233,8 @@ public class DiasQueryTranslatorONDA extends DiasQueryTranslator {
 
 			if(sQuery.contains("producttype:S2MSI1C")) {
 				sSentinel2+="name:*MSI1C*";
-			} else if(sQuery.contains("producttype:S2MSIAp")) {
-				sSentinel2+="name:*MSIAp*";
+			} else if(sQuery.contains("producttype:S2MSI2Ap")) {
+				sSentinel2+="name:*MSIL2Ap*";
 			} else {
 				sSentinel2+="name:*";
 			}
@@ -167,7 +265,7 @@ public class DiasQueryTranslatorONDA extends DiasQueryTranslator {
 		return sSentinel2;
 	}
 
-	public String parseSentinel1(String sQuery) {
+	protected String parseSentinel1(String sQuery) {
 		String sSentinel1 = "";
 		if(sQuery.contains("platformname:Sentinel-1")) {
 			sSentinel1 = "( ( name:S1* AND ";
@@ -181,7 +279,6 @@ public class DiasQueryTranslatorONDA extends DiasQueryTranslator {
 				sSentinel1 += "name:*";
 			}
 			sSentinel1+=" AND ";
-			
 			//producttype:[SLC|GRD|OCN] (optional)
 			if(sQuery.matches(".*producttype\\s*\\:\\s*SLC.*")) {
 				sSentinel1+= "name:*SLC*";
@@ -356,6 +453,101 @@ public class DiasQueryTranslatorONDA extends DiasQueryTranslator {
 		sResult = sResult.replaceAll("\"", "%22");
 		//sResult = java.net.URLEncoder.encode(sDecoded, m_sEnconding);
 		return sResult;
+	}
+
+	String getNextDateTime(String sSubQuery) {
+		String sDateTime = "";
+		String sDateTimePattern = "(\\d\\d\\d\\d-\\d\\d-\\d\\dT\\d\\d\\:\\d\\d:\\d\\d\\.\\d\\d\\dZ)"; 
+		Pattern oDateTimePattern = Pattern.compile(sDateTimePattern);
+		Matcher oMatcher = oDateTimePattern.matcher(sSubQuery);
+		if(oMatcher.find()) {
+			sDateTime = oMatcher.group(1);
+		}
+		return sDateTime;
+	}
+	
+	//time frame
+	//WASDI OpenSearch format
+	//( beginPosition:[2018-12-10T00:00:00.000Z TO 2018-12-17T23:59:59.999Z] AND endPosition:[2018-12-10T00:00:00.000Z TO 2018-12-17T23:59:59.999Z] )
+	//ONDA format
+	//( ( beginPosition:[2018-01-01T00:00:00.000Z TO 2018-12-01T23:59:59.999Z] AND endPosition:[2018-01-01T00:00:00.000Z TO 2018-12-01T23:59:59.999Z] ) )
+	protected String parseTimeFrame(String sQuery) {
+		String sResult = "";
+		int iStart = 0;
+		if(sQuery.contains("beginPosition") ) {
+			sResult += "beginPosition:[";
+			//start
+			iStart = sQuery.indexOf("beginPosition");
+			String sDateTime = getNextDateTime(sQuery.substring(iStart));	
+			sResult += sDateTime;
+			sResult += " TO ";
+			//end
+			iStart = sQuery.indexOf(" TO ", iStart);
+			sDateTime = getNextDateTime(sQuery.substring(iStart));	
+			sResult += sDateTime;
+			sResult += "]";
+		}	
+		if( sQuery.contains("endPosition")) {
+			if(!Utils.isNullOrEmpty(sResult)) {
+				sResult += " AND ";
+			}
+			//start
+			sResult += "endPosition:[";
+			iStart = sQuery.indexOf("endPosition", iStart);
+			String sDateTime = getNextDateTime(sQuery.substring(iStart));	
+			sResult += sDateTime;
+			sResult += " TO ";
+			//end
+			iStart = sQuery.indexOf(" TO ", iStart);
+			sDateTime = getNextDateTime(sQuery.substring(iStart));	
+			sResult += sDateTime;
+			sResult += "]";
+		}
+		return sResult;
+	}
+
+	//footprint
+	//WASDI OpenSearch format
+	//footprint:"intersects(POLYGON((-13.535156250000002 18.97902595325528,-13.535156250000002 60.23981116999893,62.92968750000001 60.23981116999893,62.92968750000001 18.97902595325528,-13.535156250000002 18.97902595325528)))"
+	//ONDA format
+	//footprint:"Intersects(POLYGON((-13.535156250000002 18.97902595325528,-13.535156250000002 60.23981116999893,62.92968750000001 60.23981116999893,62.92968750000001 18.97902595325528,-13.535156250000002 18.97902595325528)))"
+	protected String  parseFootPrint(String sQuery) {
+		String sFootprint = "";
+		if(sQuery.contains("footprint")) {
+			sFootprint += "footprint:\"Intersects(POLYGON(("; //no leading spaces
+			//parse polygon
+			String sPolygonLabel = "POLYGON (";
+			int iStart = sQuery.indexOf(sPolygonLabel) + sPolygonLabel.length() + 1;
+			Character cCurrent = sQuery.charAt(iStart);
+			while(cCurrent.equals('(') || cCurrent.equals(' ')) {
+				iStart++;
+				cCurrent = sQuery.charAt(iStart);
+			}
+			int iEnd = sQuery.indexOf(" )", iStart);
+			String sPolygonCoordinates = sQuery.substring(iStart, iEnd);
+			sFootprint += sPolygonCoordinates;
+			sFootprint+=")))\""; //no trailing spaces
+		}
+		return sFootprint;
+	}
+	
+	protected String prepareQuery(String sInput) {
+		String sQuery = new String(sInput);
+		//insert space before and after round brackets
+		sQuery = sQuery.replaceAll("\\(", " \\( ");
+		sQuery = sQuery.replaceAll("\\)", " \\) ");
+		//remove space before and after square brackets 
+		sQuery = sQuery.replaceAll(" \\[", "\\[");
+		sQuery = sQuery.replaceAll("\\[ ", "\\[");
+		sQuery = sQuery.replaceAll(" \\]", "\\]");
+		sQuery = sQuery.replaceAll("\\] ", "\\]");
+		sQuery = sQuery.replaceAll("POLYGON", "POLYGON ");
+		sQuery = sQuery.replaceAll("\\: ", "\\:");
+		sQuery = sQuery.replaceAll(" \\: ", "\\:");
+		
+		sQuery = sQuery.replaceAll("AND", " AND ");
+		sQuery = sQuery.trim().replaceAll(" +", " ");
+		return sQuery;
 	}
 
 
