@@ -116,6 +116,15 @@ public class WasdiGraph {
         m_oProcess = m_oProcessRepository.GetProcessByProcessObjId(oParams.getProcessObjId());
         
         findIONodes();
+        
+        if (((GraphSetting) m_oParams.getSettings()).getInputNodeNames().size() == 0) {
+        	((GraphSetting) m_oParams.getSettings()).setInputNodeNames(m_asInputNodes);
+        }
+        
+        if (((GraphSetting) m_oParams.getSettings()).getOutputNodeNames().size() == 0) {
+        	((GraphSetting) m_oParams.getSettings()).setOutputNodeNames(m_asOutputNodes);
+        }
+        
 	}
 	
 	/**
@@ -196,10 +205,28 @@ public class WasdiGraph {
 					throw new Exception("Reader node and Writer node are mandatory");
 				}
 				
-				//TODO: output file name
-				String sOutputName = Utils.GetFileNameWithoutExtension(oGraphSettings.getInputFileNames().get(iNode));
+				// Output file name: prepare default
 				
-		        File oOutputFile = new File(oWorkspaceDir, sOutputName+"_workflow");
+				String sOutputName = "Output_" + oGraphSettings.getWorkflowName() + "_" + iNode;
+				
+				// First Try: corresponding input plus workflowname
+				if (oGraphSettings.getInputFileNames() != null) {
+					if (oGraphSettings.getInputFileNames().size()>iNode) {
+						sOutputName = Utils.GetFileNameWithoutExtension(oGraphSettings.getInputFileNames().get(iNode));
+						sOutputName = sOutputName + "_" + oGraphSettings.getWorkflowName();						
+					}
+				}
+				
+				// Second try (Best choice): did the user supplied an output?
+				if (oGraphSettings.getOutputFileNames() != null) {
+					if (oGraphSettings.getOutputFileNames().size()>iNode) {
+						sOutputName = oGraphSettings.getOutputFileNames().get(iNode);
+					}
+				}
+				
+				m_oLogger.info("Output File ["+iNode+"]: " + sOutputName);
+				
+		        File oOutputFile = new File(oWorkspaceDir, sOutputName);
 		        
 		        if (m_oOutputFile == null) {
 		        	m_oOutputFile = oOutputFile;

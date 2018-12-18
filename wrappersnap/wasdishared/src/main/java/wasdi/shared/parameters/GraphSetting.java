@@ -7,6 +7,8 @@ import java.util.ArrayList;
  */
 public class GraphSetting implements ISetting{
 
+	String workflowName;
+	
 	String graphXml;
 
 	private ArrayList<String> inputNodeNames = new ArrayList<>();
@@ -53,6 +55,14 @@ public class GraphSetting implements ISetting{
 
 	public void setGraphXml(String graphXml) {
 		this.graphXml = graphXml;
+	}
+
+	public String getWorkflowName() {
+		return workflowName;
+	}
+
+	public void setWorkflowName(String workflowName) {
+		this.workflowName = workflowName;
 	}
 	
 	

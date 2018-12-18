@@ -7,3 +7,6 @@
 *.class
 .idea
 .idea/
+/node_modules
+**/.metadata	
+/Servers/
