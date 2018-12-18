@@ -9,24 +9,12 @@ package wasdi.shared.opensearch;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.StringReader;
-import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.net.URLEncoder;
 import java.util.ArrayList;
-import java.util.Base64;
-
-import org.apache.abdera.Abdera;
 import org.apache.abdera.i18n.templates.Template;
-import org.apache.abdera.model.Document;
-import org.apache.abdera.model.Feed;
-import org.apache.abdera.parser.Parser;
-import org.apache.abdera.parser.ParserOptions;
-import org.apache.abdera.protocol.Response.ResponseType;
-import org.apache.abdera.protocol.client.AbderaClient;
-import org.apache.abdera.protocol.client.ClientResponse;
-import org.apache.abdera.protocol.client.RequestOptions;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import wasdi.shared.viewmodels.QueryResultViewModel;
 
@@ -36,10 +24,6 @@ import wasdi.shared.viewmodels.QueryResultViewModel;
  */
 public class QueryExecutorONDA extends QueryExecutor {
 
-	String m_sLocale = "UTF-8";
-	String m_sEnconding = m_sLocale;
-	String m_sDecoding = m_sLocale;
-	
 	/* (non-Javadoc)
 	 * @see wasdi.shared.opensearch.QueryExecutor#getUrlPath()
 	 */
@@ -64,7 +48,7 @@ public class QueryExecutorONDA extends QueryExecutor {
 	@Override
 	protected String getCountUrl(String sQuery) {
 		String sUrl = "https://catalogue.onda-dias.eu/dias-catalogue/Products/$count?$search=%22";
-		sUrl+=openSearch2ODATA(sQuery);
+		sUrl+=m_oQueryTranslator.translateAndEncode(sQuery);
 		sUrl+="%22";
 		return sUrl;
 	}
@@ -73,79 +57,36 @@ public class QueryExecutorONDA extends QueryExecutor {
 	// /Products/$count?$search="name:S2*"
 	@Override
 	protected String buildUrl(String sQuery){
-		
 		String sUrl = "https://catalogue.onda-dias.eu/dias-catalogue/Products?$search=%22";
-		sUrl+=openSearch2ODATA(sQuery);
-		sUrl+="%22&$top=10";
+		sUrl+=m_oQueryTranslator.translateAndEncode(sQuery);
+		//TODO get rid of the $top=10 and introduce pagination
+		sUrl+="%22&$top=" + m_sLimit + "&$skip="+ m_sOffset +"&$format=json"+ "&$orderby=creationDate";
 		return sUrl;
 	}
-
-	protected String openSearch2ODATA(String sQuery) {
-		String sResult = sQuery;
-//		try {
-//			sResult = java.net.URLDecoder.decode(sQuery, m_sDecoding );
-//		} catch (UnsupportedEncodingException e) {
-//			e.printStackTrace();
-//		}
-
-		
-		//expected elements
-		//
-		//polygon (optional):
-		  //footprint:"intersects(POLYGON((
-		    //9.434509277343752 36.82027895130877,
-		    //9.434509277343752 44.912304304581525,
-		    //24.72747802734375 44.912304304581525,
-		    //24.72747802734375 36.82027895130877,
-		    //9.434509277343752 36.82027895130877
-		    //)))"
-		//
-		//time interval:
-		  //beginPosition:[2018-11-20T00:00:00.000Z TO 2018-11-27T23:59:59.999Z]
-		  // AND 
-		  //endPosition:[2018-11-20T00:00:00.000Z TO 2018-11-27T23:59:59.999Z] 
-		//
-		//
-		
-		//SENTINEL 1
-		sResult = sResult.replaceAll("platformname:Sentinel-1", "name:S1*");
-		//SENTINEL 2
-		sResult = sResult.replaceAll("platformname:Sentinel-2", "name:S2*");
-		//SENTINEL 3
-		sResult = sResult.replaceAll("platformname:Sentinel-3", "name:S3*");
-
-
-		//SENTINEL 1 - 2 - 3
-		sResult = sResult.replaceAll("filename:", "name:");
-		sResult = sResult.replaceAll("producttype:", "name:");
-		//polarisationmode:HH not supported by ONDA? 
-		//sensoroperationalmode:SM same name in ONDA 
-		//swathidentifier:b not supported by ONDA?
-		//cloudcoverpercentage:a same name in ONDA
-		sResult = sResult.replaceAll("timeliness:Near Real Time", "timeliness:NRT");
-		sResult = sResult.replaceAll("timeliness:Short Time Critical", "timeliness:STC");
-		sResult = sResult.replaceAll("timeliness:Non Time Critical", "timeliness:NTC");
-		//OS: just for sentinel1, ONDA: just for sentinel3
-		sResult = sResult.replaceAll("relativeorbitstart:", "relativeOrbitNumber:");
-		//cloudCoverPercentage should be the same
-		
-		/*while(sResult.contains("  ")) {
-			sResult = sResult.replaceAll("  ", " ");
-		}*/
-		//sResult = java.net.URLEncoder.encode(sResult, m_sEnconding);
-		sResult = sResult.replaceAll(" ", "%20");
-		
-		return sResult;
-	}
-
 	
 	@Override
 	public int executeCount(String sQuery) throws IOException {
-
-		//String sUrl = "https://catalogue.onda-dias.eu/dias-catalogue/Products/$count?$search=%22S2A_MSIL1C_20160719T094032_N0204_R036_T33TYH_20160719T094201%20AND%20(%20name:S1*%20AND%20name:S1A_*%20AND%20name:*%20AND%20name:*%20AND%20name:*%20)%22";
-		//String sUrl = URLEncoder.encode(getCountUrl(sQuery), m_sEnconding);
-		String sUrl = getCountUrl(sQuery);
+		//note: the following parameters specified by WASDI are not supported by ONDA:
+		//polarisation
+		//relative orbit
+		//Swath
+		//
+		//XXX is it possible to filter results accordingly using info from the query?
 		
+		//Naming conventions:
+		// https://sentinel.esa.int/web/sentinel/user-guides
+		//sentinel 1:
+			// https://sentinel.esa.int/web/sentinel/user-guides/sentinel-1-sar/naming-conventions
+			// https://sentinel.esa.int/web/sentinel/user-guides/sentinel-2-msi/naming-convention
+		//sentinel 2:
+			// https://sentinel.esa.int/web/sentinel/user-guides/sentinel-2-msi/naming-convention
+		//sentinel 3:
+			//...
+		
+		
+		String sUrl = getCountUrl(sQuery);
+		//use this to test with just 3 results
+		//sUrl = "https://catalogue.onda-dias.eu/dias-catalogue/Products/$count?$search=%22(%20(%20name:S1*%20AND%20name:S1A_*%20AND%20name:*SLC*%20AND%20name:*%20AND%20sensorOperationalMode:SM%20)%20)%20AND%20(%20(%20beginPosition:[2018-12-02T00:00:00.000Z%20TO%202018-12-02T23:59:59.999Z]%20AND%20endPosition:[2018-12-02T00:00:00.000Z%20TO%202018-12-02T23:59:59.999Z]%20)%20)%22";
 		
 		URL oURL = new URL(sUrl);
 		HttpURLConnection oConnection = (HttpURLConnection) oURL.openConnection();
@@ -153,7 +94,7 @@ public class QueryExecutorONDA extends QueryExecutor {
 
 		// optional default is GET
 		oConnection.setRequestMethod("GET");
-
+		oConnection.setRequestProperty("Accept", "*/*");
 
 		//XXX add user and password
 
@@ -165,149 +106,98 @@ public class QueryExecutorONDA extends QueryExecutor {
 		if(200 == responseCode) {
 			BufferedReader in = new BufferedReader(new InputStreamReader(oConnection.getInputStream()));
 			String inputLine;
-			StringBuffer response = new StringBuffer();
+			StringBuffer sResponse = new StringBuffer();
 	
 			while ((inputLine = in.readLine()) != null) {
-				response.append(inputLine);
+				sResponse.append(inputLine);
 			}
 			in.close();
 		
 
 			//print result
-			System.out.println("Count Done: Response " + response.toString());
+			System.out.println("Count Done: Response " + sResponse.toString());
 	
-			return Integer.parseInt(response.toString());
+			return Integer.parseInt(sResponse.toString());
 		} else {
+			String sMessage = oConnection.getResponseMessage();
+			System.out.println(sMessage);
 			return -1;
 		}
 	}
 
+	
 	@Override
-	public ArrayList<QueryResultViewModel> execute(String sQuery, boolean bFullViewModel) throws IOException {
+	public ArrayList<QueryResultViewModel> execute(String sQuery) throws IOException {
+
+
 		String sUrl = buildUrl(sQuery);
+
+		//use this to test with just 3 results
+		//sUrl = "https://catalogue.onda-dias.eu/dias-catalogue/Products?$search=%22(%20(%20name:S1*%20AND%20name:S1A_*%20AND%20name:*SLC*%20AND%20name:*%20AND%20sensorOperationalMode:SM%20)%20)%20AND%20(%20(%20beginPosition:[2018-12-02T00:00:00.000Z%20TO%202018-12-02T23:59:59.999Z]%20AND%20endPosition:[2018-12-02T00:00:00.000Z%20TO%202018-12-02T23:59:59.999Z]%20)%20)%22&$orderby=creationDate%20desc&$top=15&$skip=0&$format=json";
 		
 		
 		URL oURL = new URL(sUrl);
 		HttpURLConnection oConnection = (HttpURLConnection) oURL.openConnection();
 
+
 		// optional default is GET
 		oConnection.setRequestMethod("GET");
-
-		//oConnection.setRequestProperty("Accept", "application/json, text/plain, */*");
 		oConnection.setRequestProperty("Accept", "*/*");
-		//oConnection.setRequestProperty("Content-type", "application/json, text/plain");
 
 		//XXX add user and password
 
 		System.out.println("\nSending 'GET' request to URL : " + sUrl);
-		
-		
+
 		int responseCode =  oConnection.getResponseCode();
 		System.out.println("Response Code : " + responseCode);
 
 		if(200 == responseCode) {
 			BufferedReader in = new BufferedReader(new InputStreamReader(oConnection.getInputStream()));
 			String inputLine;
-			StringBuffer response = new StringBuffer();
+			StringBuffer oResponse = new StringBuffer();
 	
 			while ((inputLine = in.readLine()) != null) {
-				response.append(inputLine);
+				oResponse.append(inputLine);
 			}
 			in.close();
 		
 
 			//print result
-			System.out.println("Count Done: Response " + response.toString());
+			System.out.println("Count Done: Response " + oResponse.toString());
 	
-			// Get The Result as a string
-//			BufferedReader oBuffRead = new BufferedReader(response.getReader());
-//			String sResponseLine = null;
-//			StringBuilder oResponseStringBuilder = new StringBuilder();
-//			while ((sResponseLine = oBuffRead.readLine()) != null) {
-//			    oResponseStringBuilder.append(sResponseLine);
-//			}
-			
-			//TODO parse
-			//TODO return something meaningful
-			return null;
+			ArrayList<QueryResultViewModel> aoResult = buildResultLightViewModel(oResponse.toString());
+			//MAYBE filter aoResult using info from the query
+			return aoResult;
 		} else {
-			BufferedReader in = new BufferedReader(new InputStreamReader(oConnection.getErrorStream()));
-			String inputLine;
-			StringBuffer response = new StringBuffer();
-	
-			while ((inputLine = in.readLine()) != null) {
-				response.append(inputLine);
-			}
-			in.close();
+			String sMessage = oConnection.getResponseMessage();
+			System.out.println(sMessage);
 			return null;
 		}
-		
-		/*
-		//create abdera client
-		Abdera oAbdera = new Abdera();
-		AbderaClient oClient = new AbderaClient(oAbdera);
-		oClient.setConnectionTimeout(15000);
-		oClient.setSocketTimeout(40000);
-		oClient.setConnectionManagerTimeout(20000);
-		oClient.setMaxConnectionsTotal(200);
-		oClient.setMaxConnectionsPerHost(50);
-		
-		// get default request option
-		RequestOptions oOptions = oClient.getDefaultRequestOptions();
-		
-		// build the parser
-		Parser oParser = oAbdera.getParser();
-		ParserOptions oParserOptions = oParser.getDefaultParserOptions();
-		oParserOptions.setCharset("UTF-8");
-		//options.setCompressionCodecs(CompressionCodec.GZIP);
-		oParserOptions.setFilterRestrictedCharacterReplacement('_');
-		oParserOptions.setFilterRestrictedCharacters(true);
-		oParserOptions.setMustPreserveWhitespace(false);
-		oParserOptions.setParseFilter(null);
-		// set authorization
-		if (m_sUser!=null && m_sPassword!=null) {
-			String sUserCredentials = m_sUser + ":" + m_sPassword;
-			String sBasicAuth = "Basic " + Base64.getEncoder().encodeToString(sUserCredentials.getBytes());
-			oOptions.setAuthorization(sBasicAuth);			
-		}
-		
-//		System.out.println("\nSending 'GET' request to URL : " + sUrl);
-		ClientResponse response = oClient.get(sUrl, oOptions);
-		
-		Document<Feed> oDocument = null;
-		
-		
-		if (response.getType() != ResponseType.SUCCESS) {
-			System.out.println("Response ERROR: " + response.getType());
-			return null;
-		}
-
-		System.out.println("Response Success");		
-		
-		// Get The Result as a string
-		BufferedReader oBuffRead = new BufferedReader(response.getReader());
-		String sResponseLine = null;
-		StringBuilder oResponseStringBuilder = new StringBuilder();
-		while ((sResponseLine = oBuffRead.readLine()) != null) {
-		    oResponseStringBuilder.append(sResponseLine);
-		}
-		
-		String sResultAsString = oResponseStringBuilder.toString();
-		
-//		System.out.println(sResultAsString);
-
-		oDocument = oParser.parse(new StringReader(sResultAsString), oParserOptions);
-
-		if (oDocument == null) {
-			System.out.println("OpenSearchQuery.ExecuteQuery: Document response null");
-			return null;
-		}
-		
-		if (bFullViewModel) return buildResultViewModel(oDocument, oClient, oOptions);
-		else return buildResultLightViewModel(oDocument, oClient, oOptions);
-		*/
 	}
-
-
+	
+	protected ArrayList<QueryResultViewModel> buildResultLightViewModel(String sJson){
+		System.out.println("QueryExecutor.buildResultLightViewModel");
+		if(null==sJson ) {
+			System.out.println("QueryExecutor.buildResultLightViewModel: passed a null string");
+			return null;
+		}
+		try {
+			JSONObject oJsonOndaResponse = new JSONObject(sJson);
+			ArrayList<QueryResultViewModel> aoResult = new ArrayList<QueryResultViewModel>();
+			JSONArray aoJsonArray = oJsonOndaResponse.getJSONArray("value");
+			for (Object oObject : aoJsonArray) {
+				if(null!=oObject) {
+					JSONObject oOndaEntry = (JSONObject)(oObject);
+					QueryResultViewModel oRes = m_oResponseTranslator.translate(oOndaEntry);
+					aoResult.add(oRes);
+				}
+			}
+			return aoResult;
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
 }
 

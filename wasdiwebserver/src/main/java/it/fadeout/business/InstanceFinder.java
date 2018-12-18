@@ -159,7 +159,7 @@ public class InstanceFinder {
 			}
 		}
 
-		double k = Math.PI / 180.0d;
+		//double k = Math.PI / 180.0d;
 		// setto i punti dell'area di interesse
 		oPoligon.setVertex(aoPoints);
 		oAreaOfInterest.setArea(oPoligon);
@@ -322,7 +322,7 @@ public class InstanceFinder {
 			}
 		}
 
-		double k = Math.PI / 180.0d;
+		//double k = Math.PI / 180.0d;
 		// setto i punti dell'area di interesse
 		oPoligon.setVertex(aoPoints);
 		oAreaOfInterest.setArea(oPoligon);
@@ -509,7 +509,7 @@ public class InstanceFinder {
 			}
 		}
 
-		double k = Math.PI / 180.0d;
+		//double k = Math.PI / 180.0d;
 		// setto i punti dell'area di interesse
 		oPoligon.setVertex(aoPoints);
 		oAreaOfInterest.setArea(oPoligon);

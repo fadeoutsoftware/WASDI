@@ -301,7 +301,7 @@ public class QueryExecutorPROBAV extends QueryExecutor  {
 
 	@Override
 	protected ArrayList<QueryResultViewModel> buildResultViewModel(Document<Feed> oDocument, AbderaClient oClient, RequestOptions oOptions) {
-		int iStreamSize = 1000000;
+		//int iStreamSize = 1000000;
 		Feed oFeed = (Feed) oDocument.getRoot();
 
 		Map<String, String> oMap = getFootprint(oDocument);

@@ -167,6 +167,7 @@ public class ProductResource {
 	}
 	
 	
+	//XXX Remove legacy method: it's not used by anyone and it does not return anything but null
 	@GET
 	@Path("info")
 	@Produces({"application/xml", "application/json", "text/xml"})
@@ -186,7 +187,8 @@ public class ProductResource {
 		if (oDownloadedFile != null) {
 			if (oDownloadedFile.getProductViewModel() != null) {
 				// Ok read
-				MetadataViewModel metadata = oDownloadedFile.getProductViewModel().getMetadata();
+				//TODO this is useless, return something
+				//MetadataViewModel metadata = oDownloadedFile.getProductViewModel().getMetadata();
 			}
 		}		
 		// There was a problem

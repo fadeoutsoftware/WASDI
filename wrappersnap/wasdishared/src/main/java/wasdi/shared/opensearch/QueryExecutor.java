@@ -20,6 +20,7 @@ import javax.imageio.ImageIO;
 
 import org.apache.abdera.Abdera;
 import org.apache.abdera.i18n.templates.Template;
+import org.apache.abdera.i18n.text.io.CompressionUtil.CompressionCodec;
 import org.apache.abdera.model.Document;
 import org.apache.abdera.model.Element;
 import org.apache.abdera.model.Entry;
@@ -35,6 +36,9 @@ import org.apache.abdera.protocol.client.RequestOptions;
 import wasdi.shared.viewmodels.QueryResultViewModel;
 
 public abstract class QueryExecutor {
+	
+	protected DiasQueryTranslator m_oQueryTranslator;
+	protected DiasResponseTranslator m_oResponseTranslator;
 
 	public static QueryExecutor newInstance(String sProvider, String sUser, String sPassword, String sOffset, String sLimit, String sSortedBy, String sOrder) {
 		
@@ -51,6 +55,11 @@ public abstract class QueryExecutor {
 				oExecutor.setLimit(sLimit);
 				oExecutor.setSortedBy(sSortedBy);
 				oExecutor.setOrder(sOrder);
+				//TODO get rid of this if! 
+				if(sProvider.equals("ONDA")) {
+					oExecutor.m_oQueryTranslator = new DiasQueryTranslatorONDA();
+					oExecutor.m_oResponseTranslator = new DiasResponseTranslatorONDA();
+				}
 				return oExecutor;
 			}
 		} catch (InstantiationException e) {
@@ -142,7 +151,7 @@ public abstract class QueryExecutor {
 	protected abstract String getCountUrl(String sQuery);	
 	
 	protected ArrayList<QueryResultViewModel> buildResultViewModel(Document<Feed> oDocument, AbderaClient oClient, RequestOptions oOptions) {
-		int iStreamSize = 1000000;
+		//int iStreamSize = 1000000;
 		Feed oFeed = (Feed) oDocument.getRoot();
 		
 		//set new connction timeout
@@ -350,12 +359,14 @@ public abstract class QueryExecutor {
 		oParserOptions.setFilterRestrictedCharacters(true);
 		oParserOptions.setMustPreserveWhitespace(false);
 		oParserOptions.setParseFilter(null);
+		
 		// set authorization
 		if (m_sUser!=null && m_sPassword!=null) {
 			String sUserCredentials = m_sUser + ":" + m_sPassword;
 			String sBasicAuth = "Basic " + Base64.getEncoder().encodeToString(sUserCredentials.getBytes());
 			oOptions.setAuthorization(sBasicAuth);			
 		}
+		
 		
 //		System.out.println("\nSending 'GET' request to URL : " + sUrl);
 		ClientResponse response = oClient.get(sUrl, oOptions);
@@ -405,6 +416,8 @@ public abstract class QueryExecutor {
 	}
 
 	public ArrayList<QueryResultViewModel> execute(String sQuery, boolean bFullViewModel) throws IOException {
+		//XXX log instead
+		System.out.println("QueryExecutor.execute");
 		String sUrl = buildUrl(sQuery);
 		
 		//create abdera client
@@ -419,27 +432,16 @@ public abstract class QueryExecutor {
 		// get default request option
 		RequestOptions oOptions = oClient.getDefaultRequestOptions();
 		
-		// build the parser
-		Parser oParser = oAbdera.getParser();
-		ParserOptions oParserOptions = oParser.getDefaultParserOptions();
-		oParserOptions.setCharset("UTF-8");
-		//options.setCompressionCodecs(CompressionCodec.GZIP);
-		oParserOptions.setFilterRestrictedCharacterReplacement('_');
-		oParserOptions.setFilterRestrictedCharacters(true);
-		oParserOptions.setMustPreserveWhitespace(false);
-		oParserOptions.setParseFilter(null);
 		// set authorization
 		if (m_sUser!=null && m_sPassword!=null) {
 			String sUserCredentials = m_sUser + ":" + m_sPassword;
 			String sBasicAuth = "Basic " + Base64.getEncoder().encodeToString(sUserCredentials.getBytes());
 			oOptions.setAuthorization(sBasicAuth);			
 		}
-		
-//		System.out.println("\nSending 'GET' request to URL : " + sUrl);
+
+		System.out.println("\nSending 'GET' request to URL : " + sUrl);
 		ClientResponse response = oClient.get(sUrl, oOptions);
-		
-		Document<Feed> oDocument = null;
-		
+				
 		
 		if (response.getType() != ResponseType.SUCCESS) {
 			System.out.println("Response ERROR: " + response.getType());
@@ -460,8 +462,17 @@ public abstract class QueryExecutor {
 		
 //		System.out.println(sResultAsString);
 
-		oDocument = oParser.parse(new StringReader(sResultAsString), oParserOptions);
-
+		// build the parser
+		Parser oParser = oAbdera.getParser();
+		ParserOptions oParserOptions = oParser.getDefaultParserOptions();
+		oParserOptions.setCharset("UTF-8");
+		oParserOptions.setCompressionCodecs(CompressionCodec.GZIP);
+		oParserOptions.setFilterRestrictedCharacterReplacement('_');
+		oParserOptions.setFilterRestrictedCharacters(true);
+		oParserOptions.setMustPreserveWhitespace(false);
+		oParserOptions.setParseFilter(null);
+		
+		Document<Feed> oDocument = oParser.parse(new StringReader(sResultAsString), oParserOptions);
 		if (oDocument == null) {
 			System.out.println("OpenSearchQuery.ExecuteQuery: Document response null");
 			return null;

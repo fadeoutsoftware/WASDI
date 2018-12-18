@@ -20,7 +20,8 @@ import org.esa.snap.dataio.bigtiff.BigGeoTiffProductReaderPlugIn;
  * Created by s.adamo on 18/05/2016.
  */
 public class Test3 {
-    public static void main(String[] args) throws Exception {
+    @SuppressWarnings("unused")
+	public static void main(String[] args) throws Exception {
 
         /*---Test-------------------------------*/
 
@@ -74,7 +75,7 @@ public class Test3 {
                 SpeckleFilterOp opFilter = (SpeckleFilterOp) spiFilter.createOperator();
                 opFilter.setSourceProduct(exportProduct);//calibrateProduct
                 opFilter.SetFilter("Refined Lee");
-                Product filterProduct = opFilter.getTargetProduct();
+                //Product filterProduct = opFilter.getTargetProduct();
 
                 File filterFile = new File("C:\\Users\\s.adamo\\Documents\\test_filter.tif");
                 //File filterFile = new File("C:\\Users\\a.corrado\\Documents\\test_filter.tif");
@@ -127,11 +128,15 @@ public class Test3 {
 
 
 
-    private static int within(final int val, final int max) {
+
+    @SuppressWarnings("unused")
+	private static int within(final int val, final int max) {
         return Math.max(0, Math.min(val, max));
     }
 
-    private static String createNewProductName(String sourceProductName, int productIndex) {
+
+    @SuppressWarnings("unused")
+	private static String createNewProductName(String sourceProductName, int productIndex) {
         String newNameBase = "";
         if (sourceProductName != null && sourceProductName.length() > 0) {
             newNameBase = FileUtils.exchangeExtension(sourceProductName, "");
@@ -146,8 +151,12 @@ public class Test3 {
         return newProductName;
     }
 
-    private static void updateSubsetDefRegion(ProductSubsetDef productSubsetDef, int x1, int y1, int x2, int y2, int sx, int sy) {
+
+  
+    @SuppressWarnings("unused")
+	private static void updateSubsetDefRegion(ProductSubsetDef productSubsetDef, int x1, int y1, int x2, int y2, int sx, int sy) {
         productSubsetDef.setRegion(x1, y1, x2 - x1 + 1, y2 - y1 + 1);
         productSubsetDef.setSubSampling(sx, sy);
     }
+    
 }

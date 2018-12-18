@@ -26,6 +26,7 @@ public class Proofs_BandImage {
 		System.out.println("TEST DONE");
     }
 
+	@SuppressWarnings("unused")
 	private static void createJpg(Dimension d, Rectangle vp, String filePath, String bandName, String outPath) throws IOException, InterruptedException {
 		File file = new File(filePath);
 		
@@ -33,7 +34,7 @@ public class Proofs_BandImage {
 		
 		Band band = product.getBand(bandName);
 		
-		long t = System.currentTimeMillis();
+		//long t = System.currentTimeMillis();
 		
 		BandImageManager manager = new BandImageManager(product);
 		
@@ -49,6 +50,7 @@ public class Proofs_BandImage {
 		manager.quit();
 	}
 	
+	@SuppressWarnings("unused")
 	private static void createRGB(Dimension oOutputDimension , String sFilePath, String sRedBandName, String sGreenBandName, String sBlueBandName, String sOutPath) throws IOException, InterruptedException {
 		File file = new File(sFilePath);
 		

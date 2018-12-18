@@ -330,7 +330,8 @@ public class CatalogResources {
 	
 			System.out.println("DownloadResource.Download: shell exec " + sShellExString);
 	
-			Process oProc = Runtime.getRuntime().exec(sShellExString);
+			//Process oProc = Runtime.getRuntime().exec(sShellExString);
+			Runtime.getRuntime().exec(sShellExString);
 			
 			return Response.ok().build();
 			
@@ -438,7 +439,8 @@ public class CatalogResources {
 	
 			System.out.println("CatalogueResource.IngestFileInWorkspace: shell exec " + sShellExString);
 	
-			Process oProc = Runtime.getRuntime().exec(sShellExString);
+			//Process oProc = Runtime.getRuntime().exec(sShellExString);
+			Runtime.getRuntime().exec(sShellExString);
 			
 			oResult.setBoolValue(true);
 			oResult.setIntValue(200);

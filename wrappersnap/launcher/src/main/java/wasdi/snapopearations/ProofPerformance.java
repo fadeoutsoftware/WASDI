@@ -73,7 +73,8 @@ public class ProofPerformance {
 		long t = System.currentTimeMillis();
 		ApplyOrbitParameter parameters = new ApplyOrbitParameter();		
 		ApplyOrbit operation = new ApplyOrbit();
-        WriteProduct writer = new WriteProduct();
+		//note: check the next, commented out because unused
+        //WriteProduct writer = new WriteProduct();
         ReadProduct reader = new ReadProduct();
         Product inProduct = reader.ReadProduct(inFile, null);
                 
@@ -81,7 +82,10 @@ public class ProofPerformance {
         t = System.currentTimeMillis();
 
         ISetting settings = parameters.getSettings();
-		Product outProduct = operation.getOperation(inProduct, settings);
+
+        //note: check the next, commented out because unused
+        //Product outProduct = operation.getOperation(inProduct, settings);
+		operation.getOperation(inProduct, settings);
 
         System.out.println("output product built: " + (System.currentTimeMillis()-t));
         t = System.currentTimeMillis();
