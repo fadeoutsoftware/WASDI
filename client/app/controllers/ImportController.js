@@ -87,6 +87,7 @@ var ImportController = (function() {
         this.m_bIsPaginatedList = true;
 
         this.m_oMapService.initMapWithDrawSearch('wasdiMapImport');
+        this.m_oMapService.mapDrawEventDeletePolygon(this.eventInMapDrawPolygonDeleted,this.m_oMapService.getMap());
         this.m_oMapService.initGeoSearchPluginForOpenStreetMap();
 
         // layers list == products list
@@ -236,10 +237,11 @@ var ImportController = (function() {
             var oRectangle = args.rectangle;
             if(!utilsIsObjectNullOrUndefined(oRectangle))
             {
+                var iLengthLayersList;
                 if(utilsIsObjectNullOrUndefined($scope.m_oController.m_aoProductsList.length))
-                    var iLengthLayersList = 0;
+                    iLengthLayersList = 0;
                 else
-                    var iLengthLayersList = $scope.m_oController.m_aoProductsList.length;
+                    iLengthLayersList = $scope.m_oController.m_aoProductsList.length;
 
                 for(var iIndex = 0; iIndex < iLengthLayersList; iIndex++)
                 {
@@ -263,10 +265,11 @@ var ImportController = (function() {
             var oRectangle = args.rectangle;
             if(!utilsIsObjectNullOrUndefined(oRectangle))
             {
+                var iLengthLayersList;
                 if(utilsIsObjectNullOrUndefined($scope.m_oController.m_aoProductsList.length))
-                    var iLengthLayersList = 0;
+                    iLengthLayersList = 0;
                 else
-                    var iLengthLayersList = $scope.m_oController.m_aoProductsList.length;
+                    iLengthLayersList = $scope.m_oController.m_aoProductsList.length;
 
                 for(var iIndex = 0; iIndex < iLengthLayersList; iIndex++)
                 {
@@ -803,7 +806,7 @@ var ImportController = (function() {
             oError = function (data,status) {
                 utilsVexDialogAlertTop('GURU MEDITATION<br>THERE WAS AN ERROR IMPORTING THE IMAGE IN THE WORKSPACE');
                 // oProduct.isDisabledToDoDownload = false;
-            }
+            };
         }
         this.m_oFileBufferService.download(sUrl,sWorkspaceId,sBounds,oProvider).success(oCallback).error(oError);
     };
@@ -815,7 +818,7 @@ var ImportController = (function() {
             controller: "DownloadProductInWorkspaceController",
         }).then(function(modal){
             modal.element.modal();
-            modal.close.then(oCallback)
+            modal.close.then(oCallback);
         });
 
         return true;
@@ -1126,7 +1129,7 @@ var ImportController = (function() {
 
     ImportController.prototype.getBoundsByLayerFootPrint=function(oLayer)
     {
-        var sKeyWord = "footprint" //inside name property, if there is write footprint there are the BOUNDS
+        var sKeyWord = "footprint"; //inside name property, if there is write footprint there are the BOUNDS
         if(utilsIsObjectNullOrUndefined(oLayer))
             return null;
         var aoStr = oLayer.str;
@@ -1145,10 +1148,11 @@ var ImportController = (function() {
         {
             if(aoStr[iIndexStr].name == sKeyWord)//we find bounds
             {
+                var sContent;
                 if(this.m_oConstantsService.testMode() == true)
-                    var sContent = aoStr[iIndexStr].text;/*.content TODO */
+                    sContent = aoStr[iIndexStr].text;/*.content TODO */
                 else
-                    var sContent = aoStr[iIndexStr].content;
+                    sContent = aoStr[iIndexStr].content;
 
                 if(utilsIsObjectNullOrUndefined(sContent))
                     return null;
@@ -1634,17 +1638,20 @@ var ImportController = (function() {
     ImportController.prototype.setPaginationVariables = function()
     {
         this.m_bClearFiltersEnabled = true;
-        this.m_iTotalOfProducts = 0;
-        this.m_iCurrentPage = 1;
-        this.m_iProductsPerPageSelected = 10;
-        this.m_iTotalPages = 1;
+        // this.m_iTotalOfProducts = 0;
+        // this.m_iCurrentPage = 1;
+        // this.m_iProductsPerPageSelected = 10;
+        // this.m_iTotalPages = 1;
         this.m_bIsVisibleListOfLayers = false;
+        // this.m_oModel.geoselection = "";
+        //set default pages
+        this.m_oPageService.setDefaultPaginationValuesForProvider();
 
         this.m_oResultsOfSearchService.setIsVisibleListOfProducts(false);
-        this.m_oResultsOfSearchService.setTotalPages(1);
-        this.m_oResultsOfSearchService.setProductsPerPageSelected(10);
-        this.m_oResultsOfSearchService.setCurrentPage(1);
-        this.m_oResultsOfSearchService.setTotalOfProducts(0);
+        // this.m_oResultsOfSearchService.setTotalPages(1);
+        // this.m_oResultsOfSearchService.setProductsPerPageSelected(10);
+        // this.m_oResultsOfSearchService.setCurrentPage(1);
+        // this.m_oResultsOfSearchService.setTotalOfProducts(0);
     };
 
     ImportController.prototype.isPossibleDoDownload = function(oLayer)
@@ -1923,12 +1930,11 @@ var ImportController = (function() {
         switch(sMonthLowerCase) {
             case "january":
                 return 31;
-                break;
             case "february":
 
                 if(utilsLeapYear(sYear))
                 {
-                    return 29
+                    return 29;
                 }
                 else
                 {
@@ -1937,31 +1943,22 @@ var ImportController = (function() {
                 break;
             case "march":
                 return 31;
-                break;
             case "april":
                 return 30;
-                break;
             case "may":
                 return 31;
-                break;
             case "june":
                 return 30;
-                break;
             case "july":
                 return 31;
-                break;
             case "august":
                 return 31;
-                break;
             case "september":
                 return 30;
-                break;
             case "october":
                 return 31;
-                break;
             case "november":
                 return 30;
-                break;
             case "december":
                 return 31;
                 break;
@@ -1996,10 +1993,10 @@ var ImportController = (function() {
         //check leap year
     };
     ImportController.prototype.getMonthDaysFrom = function(){
-        return this.getMonthDaysFromRangeOfMonths(this.m_oAdvanceFilter.selectedMonthFrom, this.m_oAdvanceFilter.selectedYears)
+        return this.getMonthDaysFromRangeOfMonths(this.m_oAdvanceFilter.selectedMonthFrom, this.m_oAdvanceFilter.selectedYears);
     };
     ImportController.prototype.getMonthDaysTo = function(){
-        return this.getMonthDaysFromRangeOfMonths(this.m_oAdvanceFilter.selectedMonthTo, this.m_oAdvanceFilter.selectedYears)
+        return this.getMonthDaysFromRangeOfMonths(this.m_oAdvanceFilter.selectedMonthTo, this.m_oAdvanceFilter.selectedYears);
     };
 
     ImportController.prototype.areSelectedMonthAndYearFrom = function(){
@@ -2469,7 +2466,12 @@ var ImportController = (function() {
         }
 
     }
+    ImportController.prototype.eventInMapDrawPolygonDeleted=function (event)
+    {
 
+        this.m_oModel.geoselection = "";
+        console.log("TEST");
+    }
     ImportController.$inject = [
         '$scope',
         'ConstantsService',

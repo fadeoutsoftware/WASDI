@@ -1169,11 +1169,14 @@ public class LauncherMain {
             	oPublisher.m_lMaxMbTiffPyramid = Long.parseLong(ConfigReader.getPropValue("MAX_GEOTIFF_DIMENSION_PYRAMID","50"));
             }
             catch (Exception e) {
-            	s_oLogger.debug("LauncherMain.PublishBandImage: wrong MAX_GEOTIFF_DIMENSION_PYRAMID, setting default to 50");
+            	s_oLogger.error("LauncherMain.PublishBandImage: wrong MAX_GEOTIFF_DIMENSION_PYRAMID, setting default to 50");
             	oPublisher.m_lMaxMbTiffPyramid = 50L;
 			}
             
+            s_oLogger.debug("Call publish geotiff sOutputFilePath = " + sOutputFilePath + " , sLayerId = " + sLayerId);
             sLayerId = oPublisher.publishGeoTiff(sOutputFilePath, sLayerId, sEPSG, sStyle, manager);
+            
+            s_oLogger.debug("Obtained sLayerId = " + sLayerId);
             
             updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 90);
             

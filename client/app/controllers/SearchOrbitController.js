@@ -5,6 +5,8 @@
  * Created by p.campanella on 21/10/2016.
  */
 
+'use strict';
+
 var SearchOrbitController = (function() {
     function SearchOrbitController($scope, $location, oConstantsService, oAuthService,oState, oConfigurationService,
                                    oMapService, oSearchOrbitService,oProcessesLaunchedService,oWorkspaceService,
