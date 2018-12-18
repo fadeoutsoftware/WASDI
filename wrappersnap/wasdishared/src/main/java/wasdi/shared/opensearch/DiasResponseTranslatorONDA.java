@@ -47,24 +47,14 @@ public class DiasResponseTranslatorONDA implements DiasResponseTranslator {
 			
 			QueryResultViewModel oResult = new QueryResultViewModel();
 			oResult.setProvider("ONDA");
-			String sFootprint = oJsonOndaResult.optString("footprint");
-			if(null!=sFootprint) {
-				oResult.setFootprint( sFootprint );
-			} else {
-				oResult.setFootprint("");
-			}
-			String sId = oJsonOndaResult.optString("id");
-			if(null!=sFootprint) {
-				oResult.setId(sId);
-			} else {
-				oResult.setId("");
-			}
-			String sPreview = oJsonOndaResult.optString("quicklook");
-			if( !Utils.isNullOrEmpty(sPreview) ) {
-				oResult.setPreview("data:image/png;base64,"+ sPreview);
-			} else {
-				oResult.setPreview(""); 
-			}
+			String sFootprint = oJsonOndaResult.optString("footprint","");
+			oResult.setFootprint( sFootprint );
+			String sId = oJsonOndaResult.optString("id","");
+			oResult.setId(sId);
+			
+			String sPreview = oJsonOndaResult.optString("quicklook","");
+			oResult.setPreview("data:image/png;base64,"+ sPreview);
+			
 						
 			//XXX infer product type from file name
 			//XXX infer polarisation from file name
@@ -80,11 +70,11 @@ public class DiasResponseTranslatorONDA implements DiasResponseTranslator {
 			if(null!=sName) {
 				asProperties.put("filename", sName);
 			}
-			Integer iSize = oJsonOndaResult.optInt("size");
+			Long lSize = oJsonOndaResult.optLong("size");
 			Double dSize = -1.0;
 			String sChosenUnit = "ZZ";
-			if(null != iSize) {
-				dSize = (double)iSize;
+			if(null != lSize) {
+				dSize = (double)lSize;
 				//check against null size
 				String[] sUnits = {"B", "kB", "MB", "GB"};
 				int iUnitIndex = 0;
@@ -93,6 +83,8 @@ public class DiasResponseTranslatorONDA implements DiasResponseTranslator {
 					dSize = dSize / 1024;
 					iUnitIndex++;
 				}
+				//now, round it to two decimal digits
+				dSize = Math.round(dSize*100)/100.0; 
 				sChosenUnit = sUnits[iUnitIndex];
 				asProperties.put("size", String.valueOf(dSize) + " " + sChosenUnit);
 			}
