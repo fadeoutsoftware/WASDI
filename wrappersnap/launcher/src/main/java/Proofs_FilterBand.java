@@ -57,7 +57,7 @@ public class Proofs_FilterBand {
 		Filter filter = StandardFilters.SMOOTHING_FILTERS[0];
 	
 		String newBandName = bandName + "_" + filter.getShorthand();
-		File fileOut = new File("/home/doy/tmp/wasdi/tmp/" + newBandName + ".tif");
+		//File fileOut = new File("/home/doy/tmp/wasdi/tmp/" + newBandName + ".tif");
 		
 		Product outProduct = new Product(newBandName, "GEOTIFF");
 		ProductUtils.copyGeoCoding(product, outProduct);

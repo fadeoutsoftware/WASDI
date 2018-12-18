@@ -1,21 +1,25 @@
 package wasdi.shared.viewmodels;
 
+import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
+import org.json.JSONObject;
+
 @XmlRootElement
 public class QueryResultViewModel {
 	
-	String preview;
-	String title;
-	String summary;
-	String id;
-	String link;
-	String footprint;
-	String provider;
-	Map<String, String> properties = new HashMap<String, String>();
+	protected String preview;
+	protected String title;
+	protected String summary;
+	protected String id;
+	protected String link;
+	protected String footprint;
+	protected String provider;
+	
+	protected Map<String, String> properties = new HashMap<String, String>();
 	
 	public String getPreview() {
 		return preview;
@@ -64,5 +68,5 @@ public class QueryResultViewModel {
 	}
 	public void setProvider(String provider) {
 		this.provider = provider;
-	}
+	}	
 }

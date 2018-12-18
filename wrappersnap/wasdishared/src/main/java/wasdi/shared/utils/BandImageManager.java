@@ -2,21 +2,16 @@ package wasdi.shared.utils;
 
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.RenderedImage;
-import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -36,9 +31,7 @@ import org.esa.snap.core.datamodel.Mask;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductNodeGroup;
 import org.esa.snap.core.datamodel.RasterDataNode;
-import org.esa.snap.core.datamodel.SceneTransformProvider;
 import org.esa.snap.core.datamodel.Stx;
-import org.esa.snap.core.datamodel.VectorDataNode;
 import org.esa.snap.core.image.ColoredBandImageMultiLevelSource;
 import org.esa.snap.core.image.ImageManager;
 import org.esa.snap.core.layer.MaskCollectionLayerType;
@@ -46,13 +39,8 @@ import org.esa.snap.core.layer.MaskLayerType;
 import org.esa.snap.core.layer.RgbImageLayerType;
 import org.esa.snap.core.util.DefaultPropertyMap;
 import org.esa.snap.core.util.ProductUtils;
-import org.esa.snap.core.util.PropertyMap;
 import org.esa.snap.rcp.imgfilter.model.Filter;
 import org.esa.snap.ui.product.ProductSceneImage;
-import org.esa.snap.ui.product.VectorDataCollectionLayerType;
-import org.esa.snap.ui.product.VectorDataLayer;
-import org.esa.snap.ui.product.VectorDataLayerType;
-
 import com.bc.ceres.binding.PropertySet;
 import com.bc.ceres.core.ProgressMonitor;
 import com.bc.ceres.glayer.CollectionLayer;
@@ -283,7 +271,7 @@ public class BandImageManager {
 
 			//check if MultiLevelSource has already computed
 			
-			Band oBand = ((Band)oInputBand);
+			//Band oBand = ((Band)oInputBand);
 			
 			String sProductKey = oInputBand.getProduct().getName() + "_" + oInputBand.getName();
 			
@@ -521,7 +509,7 @@ public class BandImageManager {
 			
 			long lStartTime = System.currentTimeMillis();
 			
-			ProductSceneImage oProductSceneImage = new ProductSceneImage("RGB", oRedBand, oGreenBand, oBlueBand, new DefaultPropertyMap(), ProgressMonitor.NULL);
+			//ProductSceneImage oProductSceneImage = new ProductSceneImage("RGB", oRedBand, oGreenBand, oBlueBand, new DefaultPropertyMap(), ProgressMonitor.NULL);
 			
 
 	        RasterDataNode aoRasters [] = { oRedBand, oGreenBand, oBlueBand };
@@ -616,7 +604,7 @@ public class BandImageManager {
 			
 			ProductSceneImage oProductSceneImage = new ProductSceneImage("RGB", oRedBand, oGreenBand, oBlueBand, new DefaultPropertyMap(), ProgressMonitor.NULL);
 			
-			DefaultViewport oViewport = new DefaultViewport(isModelYAxisDown((ImageLayer)oProductSceneImage.getRootLayer().getChildren().get(0)));
+			//DefaultViewport oViewport = new DefaultViewport(isModelYAxisDown((ImageLayer)oProductSceneImage.getRootLayer().getChildren().get(0)));
 			
 	        // Create the Output buffered Image
 	        final int iOutputImageWidth = oOutputImageSize.width;
@@ -782,6 +770,7 @@ public class BandImageManager {
         }
     }
 	
+	/*
     private static class MyLayerContext implements LayerContext {
 
         private final Product product;
@@ -801,5 +790,7 @@ public class BandImageManager {
         public Layer getRootLayer() {
             return rootLayer;
         }
+
     }
+    */
 }

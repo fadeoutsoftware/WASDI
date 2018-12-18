@@ -37,6 +37,7 @@ public class WsClient extends Semaphore {
     public void onOpen(Session userSession) {
         System.out.println("opening websocket...");
         m_sUserSession = userSession;
+        System.out.println("WsClient.onOpen: userSession = " + userSession.getId() );
         userSession.getAsyncRemote().sendText(m_sMessage);	        
    }
    
