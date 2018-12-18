@@ -71,7 +71,7 @@ public class DiasQueryTranslatorONDA extends DiasQueryTranslator {
 		
 		sTmp += parseSentinel1(sQuery);
 		if(!Utils.isNullOrEmpty(sTmp)) {
-			sResult += "( " + sTmp +" )";
+			sResult += sTmp;
 		}
 		
 		sTmp = parseSentinel2(sQuery);
@@ -79,7 +79,7 @@ public class DiasQueryTranslatorONDA extends DiasQueryTranslator {
 			if(!Utils.isNullOrEmpty(sResult)) {
 				sResult += " OR ";
 			}
-			sResult += "( " + sTmp +" )";
+			sResult += sTmp;
 		}
 		
 		sTmp = parseSentinel3(sQuery);
@@ -87,7 +87,7 @@ public class DiasQueryTranslatorONDA extends DiasQueryTranslator {
 			if(!Utils.isNullOrEmpty(sResult)) {
 				sResult += " OR ";
 			}
-			sResult += "( " + sTmp +" )";
+			sResult += sTmp;
 		}
 				
 		sTmp = parseEnvisat(sQuery);
@@ -95,7 +95,7 @@ public class DiasQueryTranslatorONDA extends DiasQueryTranslator {
 			if(!Utils.isNullOrEmpty(sResult)) {
 				sResult += " OR ";
 			}
-			sResult += "( " + sTmp +" )";
+			sResult += sTmp;
 		}
 		
 	
@@ -104,17 +104,27 @@ public class DiasQueryTranslatorONDA extends DiasQueryTranslator {
 			if(!Utils.isNullOrEmpty(sResult)) {
 				sResult += " OR ";
 			}
-			sResult += "( " + sTmp +" )";
+			sResult += sTmp;
 		}
 		
-		
-		sTmp = parseTimeFrame(sQuery);
-		if(!Utils.isNullOrEmpty(sTmp)) {
+		String sAdditional = parseAdditionalQuery(sQuery);
+		if(!Utils.isNullOrEmpty(sAdditional)) {
 			if(!Utils.isNullOrEmpty(sResult)) {
-				sResult = sResult + " AND ( ( " + sTmp + " ) )";
-			} else {
-				sResult += "( ( " + sTmp +" ) )";
+				sResult += " OR ";
 			}
+			sResult += sAdditional;
+		}
+		
+		if(!Utils.isNullOrEmpty(sResult)) {
+			sResult = "( " + sResult + " )";
+		}
+		
+		String sTimeFrame = parseTimeFrame(sQuery);
+		if(!Utils.isNullOrEmpty(sTimeFrame)) {
+			if(!Utils.isNullOrEmpty(sResult)) {
+				sResult += " AND ";
+			}
+			sResult += "( ( " + sTimeFrame +" ) )";
 		}
 		
 		sTmp = parseFootPrint(sQuery);
@@ -129,11 +139,36 @@ public class DiasQueryTranslatorONDA extends DiasQueryTranslator {
 		if(sQuery.contains("Proba-V")) {
 			//ignore this case
 			if(Utils.isNullOrEmpty(sResult)) {
-				sResult += "( platformName:ErrorProba-VNotSupported )";
+				sResult += "( Proba-V are Not Supported by ONDA, then invalidate query with this text to return zero results )";
 			}
 			System.out.println("DiasQueryTranslatorONDA.translate: ignoring Proba-V as not supported by ONDA");			
 		}
+	
 		
+		return sResult;
+	}
+
+	protected String parseAdditionalQuery(String sQuery) {
+		String sResult = "";
+		int iStop = Math.min( Math.max(sQuery.indexOf(" AND "),0), sQuery.length() );
+		String sSubQuery = sQuery.substring(0, iStop);
+		if(
+				!sSubQuery.contains("Sentinel") &&
+				!sSubQuery.contains("Landsat") &&
+				!sSubQuery.contains("Envisat") &&
+				!sSubQuery.contains("Proba") &&
+				!sSubQuery.contains("footprint") &&
+				!sSubQuery.contains("beginPosition") &&
+				!sSubQuery.contains("endPosition")
+		) {
+			sResult += sSubQuery.trim();
+			
+			if(!Utils.isNullOrEmpty(sResult)) {
+				if( !( sResult.startsWith("(") && sResult.endsWith(")") ) ){
+					sResult = "( " + sResult + " )";
+				}
+			}
+		}
 		return sResult;
 	}
 
