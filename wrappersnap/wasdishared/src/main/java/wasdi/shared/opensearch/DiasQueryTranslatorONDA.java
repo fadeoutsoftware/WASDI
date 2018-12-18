@@ -71,50 +71,40 @@ public class DiasQueryTranslatorONDA extends DiasQueryTranslator {
 		
 		sTmp += parseSentinel1(sQuery);
 		if(!Utils.isNullOrEmpty(sTmp)) {
-			sResult += sTmp;
+			sResult += "( " + sTmp +" )";
 		}
 		
 		sTmp = parseSentinel2(sQuery);
 		if(!Utils.isNullOrEmpty(sTmp)) {
 			if(!Utils.isNullOrEmpty(sResult)) {
-				sResult += " AND ";
+				sResult += " OR ";
 			}
-			sResult += sTmp;
+			sResult += "( " + sTmp +" )";
 		}
 		
 		sTmp = parseSentinel3(sQuery);
 		if(!Utils.isNullOrEmpty(sTmp)) {
 			if(!Utils.isNullOrEmpty(sResult)) {
-				sResult += " AND ";
+				sResult += " OR ";
 			}
-			sResult += sTmp;
+			sResult += "( " + sTmp +" )";
 		}
-		
-		//Proba-V
-		if(sQuery.contains("Proba-V")) {
-			//ignore this case
-			System.out.println("DiasQueryTranslatorONDA.CleanerTranslate: ignoring Proba-V as not supported by ONDA");
-			if(!Utils.isNullOrEmpty(sResult)) {
-				sResult += " AND ";
-			}
-			sResult += "( platformName:ErrorProba-VNotSupported )";
-		}
-		
+				
 		sTmp = parseEnvisat(sQuery);
 		if(!Utils.isNullOrEmpty(sTmp)) {
 			if(!Utils.isNullOrEmpty(sResult)) {
-				sResult += " AND ";
+				sResult += " OR ";
 			}
-			sResult += sTmp;
+			sResult += "( " + sTmp +" )";
 		}
 		
 	
 		sTmp = parseLandsat(sQuery);
 		if(!Utils.isNullOrEmpty(sTmp)) {
 			if(!Utils.isNullOrEmpty(sResult)) {
-				sResult += " AND ";
+				sResult += " OR ";
 			}
-			sResult += sTmp;
+			sResult += "( " + sTmp +" )";
 		}
 		
 		
@@ -123,7 +113,7 @@ public class DiasQueryTranslatorONDA extends DiasQueryTranslator {
 			if(!Utils.isNullOrEmpty(sResult)) {
 				sResult = sResult + " AND ( ( " + sTmp + " ) )";
 			} else {
-				sResult += sTmp;
+				sResult += "( ( " + sTmp +" ) )";
 			}
 		}
 		
@@ -134,13 +124,23 @@ public class DiasQueryTranslatorONDA extends DiasQueryTranslator {
 			}
 			sResult += sTmp;
 		}
+		
+		//Proba-V
+		if(sQuery.contains("Proba-V")) {
+			//ignore this case
+			if(Utils.isNullOrEmpty(sResult)) {
+				sResult += "( platformName:ErrorProba-VNotSupported )";
+			}
+			System.out.println("DiasQueryTranslatorONDA.translate: ignoring Proba-V as not supported by ONDA");			
+		}
+		
 		return sResult;
 	}
 
 	protected String parseLandsat(String sQuery) {
 		String sResult = "";
 		if(sQuery.contains("Landsat")) {
-			sResult += "( ( platformName:Landsat-* AND name:*";
+			sResult += "( platformName:Landsat-* AND name:*";
 			int iStart = sQuery.indexOf("Landsat");
 			if(sQuery.substring(iStart).contains("L1T")) {
 				sResult+="L1T*";
@@ -164,7 +164,6 @@ public class DiasQueryTranslatorONDA extends DiasQueryTranslator {
 				sResult+=sQuery.substring(iStart, iStop+1);
 				
 			}
-			sResult += ")";
 		}
 		return sResult;
 	}
@@ -172,7 +171,7 @@ public class DiasQueryTranslatorONDA extends DiasQueryTranslator {
 	protected String parseEnvisat(String sQuery) {
 		String sResult = "";
 		if(sQuery.contains("Envisat")) {
-			sResult +="( ( platformName:Envisat AND name:*";
+			sResult +="( platformName:Envisat AND name:*";
 			int iStart = sQuery.indexOf("Envisat");
 			if(sQuery.substring(iStart).contains("ASA_IM__0P")) {
 				sResult+="ASA_IM__0P*";
@@ -190,7 +189,7 @@ public class DiasQueryTranslatorONDA extends DiasQueryTranslator {
 				}
 			}
 			
-			sResult +=" ) )";
+			sResult +=" )";
 		}
 		return sResult;
 	}
@@ -198,7 +197,7 @@ public class DiasQueryTranslatorONDA extends DiasQueryTranslator {
 	protected String parseSentinel3(String sQuery) {
 		String sResult = "";
 		if(sQuery.contains("Sentinel-3")) {
-			sResult += "( ( name:S3* AND name:*";
+			sResult += "( name:S3* AND name:*";
 			
 			int iStart = sQuery.indexOf("Sentinel-3");
 			if(sQuery.substring(iStart).contains("SR_1_SRA___")) {
@@ -222,7 +221,7 @@ public class DiasQueryTranslatorONDA extends DiasQueryTranslator {
 					sResult += "NTC";
 				}
 			}
-			sResult += " ) )";
+			sResult += " )";
 		}
 		return sResult;
 	}
@@ -231,7 +230,7 @@ public class DiasQueryTranslatorONDA extends DiasQueryTranslator {
 	protected String parseSentinel2(String sQuery) {
 		String sSentinel2 = "";
 		if(sQuery.contains("platformname:Sentinel-2")) {
-			sSentinel2 = "( ( name:S2* AND ";
+			sSentinel2 = "( name:S2* AND ";
 			if(sQuery.contains("filename:S2A_*")){
 				sSentinel2+="name:S2A_* AND ";
 			} else if(sQuery.contains("filename:S2B_*")){
@@ -268,7 +267,6 @@ public class DiasQueryTranslatorONDA extends DiasQueryTranslator {
 				sSentinel2 +=" AND cloudCoverPercentage:[ " + sLow + " TO " + sHi + " ]";
 
 			}
-			sSentinel2 += " )";
 		}
 		
 		return sSentinel2;
@@ -277,7 +275,7 @@ public class DiasQueryTranslatorONDA extends DiasQueryTranslator {
 	protected String parseSentinel1(String sQuery) {
 		String sSentinel1 = "";
 		if(sQuery.contains("platformname:Sentinel-1")) {
-			sSentinel1 = "( ( name:S1* AND ";
+			sSentinel1 = "( name:S1* AND ";
 			
 			//filename:[S1A_*|S1B_*] (optional)
 			if(sQuery.matches(".*filename\\s*\\:\\s*S1A.*")){
@@ -335,7 +333,7 @@ public class DiasQueryTranslatorONDA extends DiasQueryTranslator {
 			} else if(sQuery.matches(".*sensoroperationalmode\\s*\\:\\s*WV.*")) {
 				sSentinel1+=" AND sensorOperationalMode:WV";
 			}
-			sSentinel1 +=" ) )";
+			sSentinel1 +=" )";
 		}
 		
 		return sSentinel1;
