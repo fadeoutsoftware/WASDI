@@ -129,30 +129,5 @@ public abstract class DownloadFile {
 	public void setProviderPassword(String m_sProviderPassword) {
 		this.m_sProviderPassword = m_sProviderPassword;
 	}
-	
-	/**
-	 * Donwload File class Factory
-	 * @param sProvider	Name of the provider
-	 * @return Instance of the Provider Download File class
-	 */
-	public static DownloadFile getDownloadFile(String sProvider) {
-		
-		if (Utils.isNullOrEmpty(sProvider)) return null;
-		
-		if (sProvider.equals("SENTINEL")) {
-			return new DhUSDownloadFile();
-		}
-		else if (sProvider.equals("MATERA")) {
-			return new DhUSDownloadFile();
-		}
-		else if (sProvider.equals("FEDEO")) {
-			return new DhUSDownloadFile();
-		}
-		else if (sProvider.equals("PROBAV")) {
-			return new PROBAVDownloadFile();
-		}
-		else {
-			return new DhUSDownloadFile();
-		}
-	}
+
 }
