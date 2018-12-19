@@ -49,7 +49,9 @@ public class FileBufferResource {
 			Wasdi.DebugLog("FileBufferResource.Download");
 
 			Boolean bSessionIsValid = !Utils.isNullOrEmpty(sSessionId); 
-			if (bSessionIsValid) return Response.status(401).build();
+			if (!bSessionIsValid) {
+				return Response.status(401).build();
+			};
 
 			User oUser = Wasdi.GetUserFromSession(sSessionId);
 
