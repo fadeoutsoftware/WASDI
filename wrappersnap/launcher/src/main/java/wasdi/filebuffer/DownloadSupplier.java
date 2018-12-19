@@ -11,33 +11,37 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
 
+import wasdi.shared.utils.Utils;
+
 /**
  * @author c.nattero
  *
  */
 public class DownloadSupplier {
 
-	private static final Map<String, Supplier<DownloadFile>> aoDownloadSupplier;
+	private static final Map<String, Supplier<DownloadFile>> s_aoDownloadSupplier;
 
- static {
-    final Map<String, Supplier<DownloadFile>> aoDownloaders = new HashMap<>();
-    aoDownloaders.put("SENTINEL", DhUSDownloadFile::new);
-    aoDownloaders.put("MATERA", DhUSDownloadFile::new);
-    aoDownloaders.put("FEDEO", DhUSDownloadFile::new);
-    aoDownloaders.put("PROBAV", PROBAVDownloadFile::new);
-    aoDownloaders.put("ONDA", ONDADownloadFile::new);
+	static {
+		final Map<String, Supplier<DownloadFile>> aoDownloaders = new HashMap<>();
+		aoDownloaders.put("SENTINEL", DhUSDownloadFile::new);
+		aoDownloaders.put("MATERA", DhUSDownloadFile::new);
+		aoDownloaders.put("FEDEO", DhUSDownloadFile::new);
+		aoDownloaders.put("PROBAV", PROBAVDownloadFile::new);
+		aoDownloaders.put("ONDA", ONDADownloadFile::new);
 
-    aoDownloadSupplier = Collections.unmodifiableMap(aoDownloaders);
- }
+		s_aoDownloadSupplier = Collections.unmodifiableMap(aoDownloaders);
+	}
 
- public DownloadFile supplyDownloader(String sDownloadFileType) {
-    Supplier<DownloadFile> oDownloadFile = aoDownloadSupplier.get(sDownloadFileType);
+	public DownloadFile supplyDownloader(String sDownloadFileType) {
+		DownloadFile oResult = null;
+		if(!Utils.isNullOrEmpty(sDownloadFileType)) {
+			Supplier<DownloadFile> oDownloadFile = s_aoDownloadSupplier.get(sDownloadFileType);
+			if(oDownloadFile != null ) {
+				oResult = oDownloadFile.get();
+			}
+		}
 
-    if (oDownloadFile == null) {
-       throw new IllegalArgumentException("Invalid player type: "
-          + sDownloadFileType);
-    }
-    return oDownloadFile.get();
- }
+		return oResult;
+	}
 
 }
