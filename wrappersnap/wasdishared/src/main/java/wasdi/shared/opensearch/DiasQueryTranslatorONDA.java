@@ -69,6 +69,8 @@ public class DiasQueryTranslatorONDA extends DiasQueryTranslator {
 		String sResult = new String("");
 		String sTmp = "";
 		
+		//TODO refactor n objects with the method parse
+		
 		sTmp += parseSentinel1(sQuery);
 		if(!Utils.isNullOrEmpty(sTmp)) {
 			sResult += sTmp;
