@@ -129,26 +129,5 @@ public abstract class DownloadFile {
 	public void setProviderPassword(String m_sProviderPassword) {
 		this.m_sProviderPassword = m_sProviderPassword;
 	}
-	
-	/**
-	 * Donwload File class Factory
-	 * @param sProvider	Name of the provider
-	 * @return Instance of the Provider Download File class
-	 */
-	public static DownloadFile getDownloadFile(String sProvider) {
 
-		switch (sProvider) {
-		case "SENTINEL":
-		case "MATERA":
-		case "FEDEO":
-			return new DhUSDownloadFile();
-		case "PROBAV":
-			return new PROBAVDownloadFile();
-		case "ONDA":
-			return new ONDADownloadFile();
-		case "":
-		default:
-			return null;
-		}
-	}
 }
