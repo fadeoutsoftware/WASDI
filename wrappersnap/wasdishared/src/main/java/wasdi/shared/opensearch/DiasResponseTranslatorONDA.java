@@ -67,8 +67,17 @@ public class DiasResponseTranslatorONDA implements DiasResponseTranslator {
 				asProperties.put("format", sFormat );
 			}
 			String sName = oJsonOndaResult.optString("name");
-			if(null!=sName) {
+			if(!Utils.isNullOrEmpty(sName)) {
 				asProperties.put("filename", sName);
+				String sPseudopath = oJsonOndaResult.optString("pseudopath");
+				if(null!=sPseudopath) {
+					asProperties.put("pseudopath", sPseudopath);
+					String sPath = "file:/mnt/";
+					String[] sIntermediate = sPseudopath.split(", ");
+					sPath += sIntermediate[0]; 
+					sPath += "/" + sName + ".value";
+					oResult.setLink("file:"+sPath);
+				}
 			}
 			Long lSize = oJsonOndaResult.optLong("size");
 			Double dSize = -1.0;
@@ -98,17 +107,12 @@ public class DiasResponseTranslatorONDA implements DiasResponseTranslator {
 			if(sOffline != null) {
 				asProperties.put("offline", sOffline);
 			}
-			String sPseudopath = oJsonOndaResult.optString("pseudopath");
-			if(null!=sPseudopath) {
-				asProperties.put("pseudopath", sPseudopath);
-			}
 			String sDownloadable = oJsonOndaResult.optString("downloadable");
 			if(null!=sDownloadable) {
 				asProperties.put("downloadable", sDownloadable);
 			}
 			oResult.setProperties(asProperties);
 			
-			//oResult.setLink(link);
 			String sTitle = sName;
 			if( !Utils.isNullOrEmpty(sTitle) ) {
 				if(sTitle.contains(".")) {
