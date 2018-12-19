@@ -5,6 +5,7 @@
 //import publish.Publisher;
 import wasdi.ConfigReader;
 import wasdi.filebuffer.DownloadFile;
+import wasdi.filebuffer.DownloadSupplier;
 
 public class Test2 {
     public static void main(String[] args) throws Exception
@@ -73,7 +74,8 @@ public class Test2 {
     	
     	//HashMap<String, LocalFileDescriptor> m_asCollectionsFolders = (HashMap<String, LocalFileDescriptor>) SerializationUtils.deserializeXMLToObject("C:/temp/wasdi/probavcollections.xml");
     	
-    	DownloadFile oDownloadFile = DownloadFile.getDownloadFile("PROBAV");
+    	//DownloadFile oDownloadFile = DownloadFile.getDownloadFile("PROBAV");
+    	DownloadFile oDownloadFile = new DownloadSupplier().supplyDownloader("PROBAV");
     	
     	String sLink = "https://www.vito-eodata.be/PDF/dataaccess?service=DSEO&request=GetProduct&version=1.0.0&collectionID=1000060&productID=271466625&ProductURI=urn:ogc:def:EOP:VITO:PROBAV_L2A_1KM_V001:PROBAV_CENTER_L2A_20180521_225405_1KM:V101&";
     	//String sLink = "https://www.vito-eodata.be/PDF/dataaccess?service=DSEO&request=GetProduct&version=1.0.0&collectionID=1000060&productID=200462849&ProductURI=urn:ogc:def:EOP:VITO:PROBAV_L2A_1KM_V001:PROBAV_CENTER_L2A_20160505_010431_1KM:V101&";
