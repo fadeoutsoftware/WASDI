@@ -39,7 +39,11 @@ public class SnapWorkflow {
 	 * List of the name of the output nodes
 	 */
 	private ArrayList<String> outputNodeNames = new ArrayList<>();
-
+	
+	/**
+	 * Flag to know if the workflow is public or not
+	 */
+	private boolean isPublic;
 	
 	public String getName() {
 		return name;
@@ -82,5 +86,11 @@ public class SnapWorkflow {
 	}
 	public void setOutputNodeNames(ArrayList<String> outputNodeNames) {
 		this.outputNodeNames = outputNodeNames;
+	}
+	public boolean getIsPublic() {
+		return isPublic;
+	}
+	public void setIsPublic(boolean isPublic) {
+		this.isPublic = isPublic;
 	}
 }

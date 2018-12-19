@@ -6,6 +6,7 @@ public class SnapWorkflowViewModel {
 	private String workflowId;
 	private String name;
 	private String description;
+	private boolean isPublic;
 	
 	private ArrayList<String> inputNodeNames = new ArrayList<>();
 	private ArrayList<String> inputFileNames = new ArrayList<>();
@@ -55,6 +56,12 @@ public class SnapWorkflowViewModel {
 	}
 	public void setOutputFileNames(ArrayList<String> outputFileNames) {
 		this.outputFileNames = outputFileNames;
+	}
+	public boolean isPublic() {
+		return isPublic;
+	}
+	public void setPublic(boolean isPublic) {
+		this.isPublic = isPublic;
 	}
 
 }
