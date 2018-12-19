@@ -51,7 +51,7 @@ public class FileBufferResource {
 			Boolean bSessionIsValid = !Utils.isNullOrEmpty(sSessionId); 
 			if (!bSessionIsValid) {
 				return Response.status(401).build();
-			};
+			}
 
 			User oUser = Wasdi.GetUserFromSession(sSessionId);
 
