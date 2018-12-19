@@ -136,23 +136,17 @@ public abstract class DownloadFile {
 	 * @return Instance of the Provider Download File class
 	 */
 	public static DownloadFile getDownloadFile(String sProvider) {
-		
-		if (Utils.isNullOrEmpty(sProvider)) return null;
-		
-		if (sProvider.equals("SENTINEL")) {
+
+		switch (sProvider) {
+		case "SENTINEL":
+		case "MATERA":
+		case "FEDEO":
 			return new DhUSDownloadFile();
-		}
-		else if (sProvider.equals("MATERA")) {
-			return new DhUSDownloadFile();
-		}
-		else if (sProvider.equals("FEDEO")) {
-			return new DhUSDownloadFile();
-		}
-		else if (sProvider.equals("PROBAV")) {
+		case "PROBAV":
 			return new PROBAVDownloadFile();
-		}
-		else {
-			return new DhUSDownloadFile();
+		case "":
+		default:
+			return null;
 		}
 	}
 }
