@@ -92,15 +92,15 @@ var HomeController = (function() {
                 }
                 if(utilsIsStrNullOrEmpty(oIdToken.googleIdToken) === false && utilsIsStrNullOrEmpty(oIdToken.userId) === false )
                 {
-                    oController.m_oAuthServiceGoogle.loginGoogleUser(oIdToken).success(
-                        function (data,status)
+                    oController.m_oAuthServiceGoogle.loginGoogleUser(oIdToken)
+                        .success(function (data,status)
                         {
                             oController.callbackLogin(data, status,oController)
-                        }).error(function (data,status) {
-                        //alert('error');
-                        utilsVexDialogAlertTop("GURU MEDITATION<br>GOOGLE LOGIN ERROR");
-
-                    });
+                        })
+                        .error(function (data,status)
+                        {
+                            utilsVexDialogAlertTop("GURU MEDITATION<br>GOOGLE LOGIN ERROR");
+                        });
                 }
 
             }

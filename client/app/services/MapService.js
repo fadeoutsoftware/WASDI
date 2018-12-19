@@ -251,17 +251,25 @@ service('MapService', ['$http','$rootScope', 'ConstantsService', function ($http
         });
 
     };
-    this.mapDrawEventDeletePolygon = function(oFunction,oMap)
+    this.mapDrawEventDeletePolygon = function(oMap,oFunction,oController)
     {
-        if(utilsIsObjectNullOrUndefined(oFunction) || utilsIsObjectNullOrUndefined(oMap))
+        if(utilsIsObjectNullOrUndefined(oFunction) === true || utilsIsObjectNullOrUndefined(oMap) === true || utilsIsObjectNullOrUndefined(oController) === true)
         {
             return false;
         }
-        oMap.on(L.Draw.Event.DELETED, oFunction);
-        // oMap.on(L.Draw.Event.EDITED , oFunction);
-        // oMap.on(L.Draw.Event.DELETESTOP, oFunction);
-        // oMap.on(L.Draw.Event.DELETESTART, oFunction);
-        // oMap.on(L.Draw.Event.CREATED, oFunction);
+
+       // var oController = this;
+        oMap.on(L.Draw.Event.DELETED,  function (event)
+        {
+            oFunction(oController);
+            // if(oController.m_oDrawItems && oController.m_oDrawItems.getLayers().length!==0){
+            //     oController.deleteDrawShapeEditToolbar();
+            //     oFunction();
+            //
+            // }
+
+        });
+
 
         return true;
     }
