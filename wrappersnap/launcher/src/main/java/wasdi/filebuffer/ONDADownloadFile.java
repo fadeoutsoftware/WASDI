@@ -20,11 +20,13 @@ import wasdi.shared.utils.Utils;
  */
 public class ONDADownloadFile extends DownloadFile {
 
+	String m_sPrefix = "http:file:";
+	
 	/**
 	 * 
 	 */
 	public ONDADownloadFile() {
-		//Auto-generated constructor stub
+		
 	}
 
 	/**
@@ -32,7 +34,6 @@ public class ONDADownloadFile extends DownloadFile {
 	 */
 	public ONDADownloadFile(Logger logger) {
 		super(logger);
-		//Auto-generated constructor stub
 	}
 
 	/* (non-Javadoc)
@@ -43,7 +44,22 @@ public class ONDADownloadFile extends DownloadFile {
 		//TODO get rid of the "http:" part
 		//http:file:/mnt/OPTICAL/LEVEL-1C/2018/12/12/S2B_MSIL1C_20181212T010259_N0207_R045_T54PZA_20181212T021706.zip.value
 		long lLenght = 0L;
-		//TODO read file length from file system
+		
+		if(sFileURL.startsWith(m_sPrefix)) {
+			
+			// Remove the prefix
+			int iStart = sFileURL.indexOf(m_sPrefix) +m_sPrefix.length();
+			String sSourceFilePath = sFileURL.substring(iStart);
+			
+			// remove the .value
+			sSourceFilePath = sSourceFilePath.substring(0, sSourceFilePath.lastIndexOf('.'));
+			
+			// This is the folder: we need the .value file
+			sSourceFilePath += "/.value";
+			File oSourceFile = new File(sSourceFilePath);
+			lLenght = oSourceFile.length();
+		}
+		
 		return lLenght;
 	}
 
@@ -69,15 +85,29 @@ public class ONDADownloadFile extends DownloadFile {
 		
 		//TODO check string format
 		
-		//TODO check if the file exists somewhere else on the local file system, i.e., in some other workspaces 
-		if(sFileURL.startsWith("http:file:")) {
-			String sPrefix = "http:file:";
-			//TODO get the product from file system
-			int iStart = sFileURL.indexOf(sPrefix) +sPrefix.length();
+		//@Cristiano: No, lo fa prima la downlaod. Cancelliamo il commento :) : check if the file exists somewhere else on the local file system, i.e., in some other workspaces 
+		if(sFileURL.startsWith(m_sPrefix)) {
+			
+			// Remove the prefix
+			int iStart = sFileURL.indexOf(m_sPrefix) +m_sPrefix.length();
 			String sSourceFilePath = sFileURL.substring(iStart);
+			
+			// remove the .value
+			sSourceFilePath = sSourceFilePath.substring(0, sSourceFilePath.lastIndexOf('.'));
+			
+			// This is the folder: we need the .value file
+			sSourceFilePath += "/.value";
 			File oSourceFile = new File(sSourceFilePath);
-			FileUtils.copyFile(oSourceFile, new File(sSaveDirOnServer));
-			return "";
+			
+			// Destination file name: start from the simple name
+			String sDestinationFileName = GetFileName(sFileURL);
+			// set the destination folder
+			if (sSaveDirOnServer.endsWith("/") == false) sSaveDirOnServer += "/";
+			sDestinationFileName = sSaveDirOnServer + sDestinationFileName;
+			
+			// copy the product from file system
+			FileUtils.copyFile(oSourceFile, new File(sDestinationFileName));
+			return sDestinationFileName;
 		} else if(sFileURL.startsWith("http:")) {
 			//TODO download the file
 			return "";
@@ -90,7 +120,22 @@ public class ONDADownloadFile extends DownloadFile {
 	 */
 	@Override
 	public String GetFileName(String sFileURL) throws Exception {
-		// TODO Auto-generated method stub
+		
+		// Format check
+		if(sFileURL.startsWith("http:file:")) {
+			
+			// Remove prefix
+			int iStart = sFileURL.indexOf(m_sPrefix) +m_sPrefix.length();
+			String sSourceFilePath = sFileURL.substring(iStart);
+			
+			// Create a file to have the name
+			File oInputFile = new File(sSourceFilePath);
+			String sOnlyName = oInputFile.getName(); 
+			
+			// Remove the ONDA .value extension
+			return sOnlyName.substring(0, sOnlyName.lastIndexOf('.'));
+		}
+		
 		return null;
 	}
 
