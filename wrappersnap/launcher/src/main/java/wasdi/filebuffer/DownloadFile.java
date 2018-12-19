@@ -144,6 +144,8 @@ public abstract class DownloadFile {
 			return new DhUSDownloadFile();
 		case "PROBAV":
 			return new PROBAVDownloadFile();
+		case "ONDA":
+			return new ONDADownloadFile();
 		case "":
 		default:
 			return null;
