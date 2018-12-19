@@ -128,7 +128,7 @@ public class ProcessorsResource {
 			oProcessorRepository.InsertProcessor(oProcessor);
 			
 			// Schedule the processworkspace to deploy the processor
-			String sProcessId = "";
+			//String sProcessId = "";
 			ProcessWorkspaceRepository oRepository = new ProcessWorkspaceRepository();
 			ProcessWorkspace oProcessWorkspace = new ProcessWorkspace();
 			
@@ -141,7 +141,8 @@ public class ProcessorsResource {
 				oProcessWorkspace.setUserId(sUserId);
 				oProcessWorkspace.setProcessObjId(Utils.GetRandomName());
 				oProcessWorkspace.setStatus(ProcessStatus.CREATED.name());
-				sProcessId = oRepository.InsertProcessWorkspace(oProcessWorkspace);
+				String sProcessId = oRepository.InsertProcessWorkspace(oProcessWorkspace);
+				System.out.println("SnapOperations.ExecuteOperation: process ID: "+sProcessId);
 				
 				String sPath = m_oServletConfig.getInitParameter("SerializationPath");
 				if (! (sPath.endsWith("/")||sPath.endsWith("\\"))) sPath+="/";
@@ -308,8 +309,8 @@ public class ProcessorsResource {
 			if (oUser==null) return oPrimitiveResult;
 			if (Utils.isNullOrEmpty(oUser.getUserId())) return oPrimitiveResult;
 			
-			String sUserId = oUser.getUserId();
-		
+			//String sUserId = oUser.getUserId();
+			
 			Wasdi.DebugLog("ProcessorsResource.help: read Processor " +sName);
 			
 			ProcessorRepository oProcessorRepository = new ProcessorRepository();

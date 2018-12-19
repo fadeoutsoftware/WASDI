@@ -41,11 +41,11 @@ public class Proofs_FilterBand2 {
 		Product product = ProductIO.readProduct(file);
 		String bandName = "B1";
 //		String bandName = "AMPLITUDE_VH";
-		Filter filter = StandardFilters.SMOOTHING_FILTERS[0];
+		//Filter filter = StandardFilters.SMOOTHING_FILTERS[0];
 		
 		Band band = product.getBand(bandName);
 		
-		long t = System.currentTimeMillis();
+		//long t = System.currentTimeMillis();
 		
 		BandImageManager manager = new BandImageManager(product);
 		

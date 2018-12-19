@@ -5,7 +5,7 @@ package wasdi.shared.parameters;
  */
 public class FilterSetting implements ISetting {
 
-    private String[] sourceBandNames;
+    //private String[] sourceBandNames;
 
 
     public FilterSetting(){

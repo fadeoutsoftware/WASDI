@@ -7,6 +7,12 @@ public class ListFloodViewModel {
 	private String outputMaskFile;
 	private String outputFloodMapFile;
 	
+	private int hsbaStartDepth;
+	private double bimodalityCoeff;
+	private int minTileDimension;
+	private int minBlobRemoval;
+	
+	
 	
 	public String getReferenceFile() {
 		return referenceFile;
@@ -31,6 +37,30 @@ public class ListFloodViewModel {
 	}
 	public void setOutputFloodMapFile(String outputFloodMapFile) {
 		this.outputFloodMapFile = outputFloodMapFile;
+	}
+	public int getHsbaStartDepth() {
+		return hsbaStartDepth;
+	}
+	public void setHsbaStartDepth(int hsbaStartDepth) {
+		this.hsbaStartDepth = hsbaStartDepth;
+	}
+	public double getBimodalityCoeff() {
+		return bimodalityCoeff;
+	}
+	public void setBimodalityCoeff(double bimodalityCoeff) {
+		this.bimodalityCoeff = bimodalityCoeff;
+	}
+	public int getMinTileDimension() {
+		return minTileDimension;
+	}
+	public void setMinTileDimension(int minTileDimension) {
+		this.minTileDimension = minTileDimension;
+	}
+	public int getMinBlobRemoval() {
+		return minBlobRemoval;
+	}
+	public void setMinBlobRemoval(int minBlobRemoval) {
+		this.minBlobRemoval = minBlobRemoval;
 	}
 
 }
