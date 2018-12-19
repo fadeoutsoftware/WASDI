@@ -97,6 +97,20 @@ angular.module('wasdi.TreeDirective', [])
                 return true;
             };
 
+            this.openCloseNode = function(sId)
+            {
+                //open node
+                var isOpen = $("#jstree").jstree("is_open", sId);
+                if(!isOpen)
+                {
+                    $("#jstree").jstree("open_node", sId);
+                }
+                else
+                {
+                    $("#jstree").jstree("close_node", sId);
+                }
+            };
+
             var oController = this;
             /*
             *  NOTE: $SCOPE = EDITOR SCOPE
@@ -133,6 +147,8 @@ angular.module('wasdi.TreeDirective', [])
 
                             if(!utilsIsObjectNullOrUndefined(data.node) && data.event.type !="contextmenu")
                             {
+                                oController.openCloseNode(data.node.id);
+
                                 //$scope.m_oController.m_oProcessesLaunchedService.thereIsPublishBandProcessOfTheProduct(data.node.id) == false &&
                                 if( data.node.children.length == 0 && !utilsIsObjectNullOrUndefined(data.node.original.band))
                                 {

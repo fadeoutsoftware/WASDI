@@ -87,7 +87,7 @@ var ImportController = (function() {
         this.m_bIsPaginatedList = true;
 
         this.m_oMapService.initMapWithDrawSearch('wasdiMapImport');
-        this.m_oMapService.mapDrawEventDeletePolygon(this.eventInMapDrawPolygonDeleted,this.m_oMapService.getMap());
+        this.m_oMapService.mapDrawEventDeletePolygon(this.m_oMapService.getMap(),this.clearModelGeoselection,this);
         this.m_oMapService.initGeoSearchPluginForOpenStreetMap();
 
         // layers list == products list
@@ -2466,12 +2466,11 @@ var ImportController = (function() {
         }
 
     }
-    ImportController.prototype.eventInMapDrawPolygonDeleted=function (event)
+    ImportController.prototype.clearModelGeoselection = function(oController)
     {
-
-        this.m_oModel.geoselection = "";
-        console.log("TEST");
+        oController.m_oModel.geoselection = "";
     }
+
     ImportController.$inject = [
         '$scope',
         'ConstantsService',
