@@ -16,6 +16,7 @@ import com.vividsolutions.jts.geom.Polygon;
 
 import wasdi.ConfigReader;
 import wasdi.filebuffer.DownloadFile;
+import wasdi.filebuffer.DownloadSupplier;
 import wasdi.shared.opensearch.QueryExecutor;
 import wasdi.shared.viewmodels.QueryResultViewModel;
 
@@ -93,7 +94,9 @@ public class DownloadManager {
 				.replaceAll("__PRODUCTTYPE__", productType);
 		
 		QueryExecutor executor = QueryExecutor.newInstance(providerName, providerUser, providerPassword, "0", queryLimit, querySortedBy, queryOrder);
-		DownloadFile downloader = DownloadFile.getDownloadFile("SENTINEL");
+		//replaced by the next one
+		//DownloadFile oDownloadFile = DownloadFile.getDownloadFile("SENTINEL");
+		DownloadFile oDownloadFile = new DownloadSupplier().supplyDownloader("SENTINEL");
 		
 		System.out.println("searching products between " + from + " and " + to + " for " + footprints.size() + " regions ");
 		
@@ -114,7 +117,7 @@ public class DownloadManager {
 					
 					System.out.println("\tdownloading " + result.getSummary() + " --> " + result.getLink());
 					
-					downloader.ExecuteDownloadFile(result.getLink(), providerUser, providerPassword, destinationDir.getAbsolutePath(), null);
+					oDownloadFile.ExecuteDownloadFile(result.getLink(), providerUser, providerPassword, destinationDir.getAbsolutePath(), null);
 					
 					System.out.println("\t\tdone");
 				}					

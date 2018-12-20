@@ -1,10 +1,13 @@
 import java.util.ArrayList;
+import java.util.List;
 
 //import it.fadeout.business.PasswordAuthentication;
 import wasdi.ConfigReader;
 import wasdi.shared.business.PasswordAuthentication;
+import wasdi.shared.business.SnapWorkflow;
 import wasdi.shared.business.User;
 import wasdi.shared.data.MongoRepository;
+import wasdi.shared.data.SnapWorkflowRepository;
 import wasdi.shared.data.UserRepository;
 
 public class DButils {
@@ -55,7 +58,12 @@ public class DButils {
 			// Commento per sicurezza
 			//DButils oDbUtils = new DButils();
 			//oDbUtils.updatePasswordInDB(new UserRepository());
-
+			
+			SnapWorkflowRepository oRepo = new SnapWorkflowRepository();
+			List<SnapWorkflow> aoRet = oRepo.GetSnapWorkflowPublicAndByUser("paolo");
+			
+			System.out.println("tot " + aoRet.size());
+ 
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

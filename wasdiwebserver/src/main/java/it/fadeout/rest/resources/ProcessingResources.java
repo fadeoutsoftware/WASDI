@@ -234,8 +234,8 @@ public class ProcessingResources {
 	 * @param fileInputStream
 	 * @param sSessionId
 	 * @param workspace
-	 * @param name
-	 * @param description
+	 * @param sName
+	 * @param sDescription
 	 * @return
 	 * @throws Exception
 	 */
@@ -243,7 +243,7 @@ public class ProcessingResources {
 	@Path("/uploadgraph")
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
 	public Response uploadGraph(@FormDataParam("file") InputStream fileInputStream, @HeaderParam("x-session-token") String sSessionId, 
-			@QueryParam("workspace") String workspace, @QueryParam("name") String name, @QueryParam("description") String description) throws Exception {
+			@QueryParam("workspace") String workspace, @QueryParam("name") String sName, @QueryParam("description") String sDescription, @QueryParam("public") Boolean bPublic) throws Exception {
 
 		Wasdi.DebugLog("ProcessingResources.uploadGraph");
 		
@@ -281,11 +281,13 @@ public class ProcessingResources {
 			oOutStream.close();
 						
 			SnapWorkflow oWorkflow = new SnapWorkflow();
-			oWorkflow.setName(name);
-			oWorkflow.setDescription(description);
+			oWorkflow.setName(sName);
+			oWorkflow.setDescription(sDescription);
 			oWorkflow.setFilePath(oWorkflowXmlFile.getPath());
 			oWorkflow.setUserId(sUserId);
 			oWorkflow.setWorkflowId(sWorkflowId);
+			if (bPublic == null ) oWorkflow.setIsPublic(false);
+			else oWorkflow.setIsPublic(bPublic.booleanValue());
 			
 			// Read the graph
 			Graph oGraph = GraphIO.read(new FileReader(oWorkflowXmlFile));
@@ -337,7 +339,7 @@ public class ProcessingResources {
 		SnapWorkflowRepository oSnapWorkflowRepository = new SnapWorkflowRepository();
 		ArrayList<SnapWorkflowViewModel> aoRetWorkflows = new ArrayList<>();
 		
-		List<SnapWorkflow> aoDbWorkflows = oSnapWorkflowRepository.GetSnapWorkflowByUser(sUserId);
+		List<SnapWorkflow> aoDbWorkflows = oSnapWorkflowRepository.GetSnapWorkflowPublicAndByUser(sUserId);
 		
 		for (int i=0; i<aoDbWorkflows.size(); i++) {
 			SnapWorkflowViewModel oVM = new SnapWorkflowViewModel();
@@ -346,6 +348,7 @@ public class ProcessingResources {
 			oVM.setWorkflowId(aoDbWorkflows.get(i).getWorkflowId());
 			oVM.setOutputNodeNames(aoDbWorkflows.get(i).getOutputNodeNames());
 			oVM.setInputNodeNames(aoDbWorkflows.get(i).getInputNodeNames());
+			oVM.setPublic(aoDbWorkflows.get(i).getIsPublic());
 			
 			aoRetWorkflows.add(oVM);
 		}
@@ -483,7 +486,7 @@ public class ProcessingResources {
 	@POST
 	@Path("/graph_id")
 	public PrimitiveResult executeGraphFromWorkflowId(@HeaderParam("x-session-token") String sessionId, 
-			@QueryParam("workspace") String workspace, SnapWorkflowViewModel oSnapWorkflow) throws Exception {
+			@QueryParam("workspace") String workspace, SnapWorkflowViewModel oSnapWorkflowViewModel) throws Exception {
 
 		PrimitiveResult oResult = new PrimitiveResult();
 		Wasdi.DebugLog("ProcessingResources.executeGraphFromWorkflowId");
@@ -512,14 +515,14 @@ public class ProcessingResources {
 		String sGraphXml;
 		
 		SnapWorkflowRepository oSnapWorkflowRepository = new SnapWorkflowRepository();
-		SnapWorkflow oWF = oSnapWorkflowRepository.GetSnapWorkflow(oSnapWorkflow.getWorkflowId());
+		SnapWorkflow oWF = oSnapWorkflowRepository.GetSnapWorkflow(oSnapWorkflowViewModel.getWorkflowId());
 		
 		if (oWF == null) {
 			oResult.setBoolValue(false);
 			oResult.setIntValue(500);
 			return oResult;
 		}
-		if (oWF.getUserId().equals(sUserId)==false) {
+		if (oWF.getUserId().equals(sUserId)==false && oWF.getIsPublic() == false) {
 			oResult.setBoolValue(false);
 			oResult.setIntValue(401);
 			return oResult;
@@ -527,22 +530,24 @@ public class ProcessingResources {
 		
 		FileInputStream fileInputStream = new FileInputStream(oWF.getFilePath());
 		
+		String sWorkFlowName = oWF.getName().replace(' ', '_');
+		
 		sGraphXml = IOUtils.toString(fileInputStream, Charset.defaultCharset().name());
 		oGraphSettings.setGraphXml(sGraphXml);
-		oGraphSettings.setWorkflowName(oWF.getName().trim());
+		oGraphSettings.setWorkflowName(sWorkFlowName);
 		
-		oGraphSettings.setInputFileNames(oSnapWorkflow.getInputFileNames());
-		oGraphSettings.setInputNodeNames(oSnapWorkflow.getInputNodeNames());
-		oGraphSettings.setOutputFileNames(oSnapWorkflow.getOutputFileNames());
-		oGraphSettings.setOutputNodeNames(oSnapWorkflow.getOutputNodeNames());
+		oGraphSettings.setInputFileNames(oSnapWorkflowViewModel.getInputFileNames());
+		oGraphSettings.setInputNodeNames(oSnapWorkflowViewModel.getInputNodeNames());
+		oGraphSettings.setOutputFileNames(oSnapWorkflowViewModel.getOutputFileNames());
+		oGraphSettings.setOutputNodeNames(oSnapWorkflowViewModel.getOutputNodeNames());
 		
 		String sSourceProductName = "";
 		String sDestinationProdutName = "";
 		
-		if (oSnapWorkflow.getInputFileNames().size()>0) {
-			sSourceProductName = oSnapWorkflow.getInputFileNames().get(0);
+		if (oSnapWorkflowViewModel.getInputFileNames().size()>0) {
+			sSourceProductName = oSnapWorkflowViewModel.getInputFileNames().get(0);
 			// TODO: Output file name
-			sDestinationProdutName = sSourceProductName + oSnapWorkflow.getName();
+			sDestinationProdutName = sSourceProductName + "_" + sWorkFlowName;
 		}
 		
 		return ExecuteOperation(sessionId, sSourceProductName, sDestinationProdutName, workspace, oGraphSettings, LauncherOperations.GRAPH);
@@ -1463,7 +1468,7 @@ public class ProcessingResources {
 			Wasdi.DebugLog("ProcessingResource.list: launching ENVI LIST Processor");
 						
 			//try execute algorithm
-			if (launchList(oListFloodViewModel, sWorkspaceId)) {
+			if (launchList(oListFloodViewModel, oUser, sWorkspaceId)) {
 				Wasdi.DebugLog("ProcessingResource.algList: ok return");
 				//TODO read value somewhere (input argument? config file?)
 
@@ -1495,7 +1500,7 @@ public class ProcessingResources {
 	 * @param sWorkspaceId
 	 * @return
 	 */
-	private boolean launchList(ListFloodViewModel oListFloodViewModel, String sWorkspaceId) {
+	private boolean launchList(ListFloodViewModel oListFloodViewModel, User oUser, String sWorkspaceId) {
 
 		try {
 			String cmd[] = new String[] {
@@ -1513,19 +1518,35 @@ public class ProcessingResources {
 			BufferedWriter oWriter = new BufferedWriter(new FileWriter(oFile));
 			if(null!= oWriter) {
 				Wasdi.DebugLog("ProcessingResource.launchList: BufferedWriter created");
-				//oWriter.write("USER,"+m_oServletConfig.getInitParameter("ListUser"));
-				//oWriter.newLine();
-				//oWriter.write("PASSWORD,"+m_oServletConfig.getInitParameter("ListPassword"));
-				//oWriter.newLine();
+
+				oWriter.write(m_oServletConfig.getInitParameter("DownloadRootPath"));
+				oWriter.newLine();
+				oWriter.write(oUser.getUserId());
+				oWriter.newLine();
+				oWriter.write(oUser.getPassword());
+				oWriter.newLine();
+				oWriter.write(sWorkspaceId);
+				oWriter.newLine();				
+
 				oWriter.write(oListFloodViewModel.getPostEventFile());
 				oWriter.newLine();
 				oWriter.write(oListFloodViewModel.getReferenceFile());
 				oWriter.newLine();
 				oWriter.newLine();
 				oWriter.newLine();
-				oWriter.write("S1A_IW_GRDH_1SDV_20180904T174542_20180904T174607_023552_0290A2_A262_HSBA_MASK.tif");
+				
+				String sMaskFile = oListFloodViewModel.getPostEventFile();
+				sMaskFile = Utils.GetFileNameWithoutExtension(sMaskFile);
+				sMaskFile += "_HSBA_MASK.tif";
+				
+				oWriter.write(sMaskFile);
 				oWriter.newLine();
-				oWriter.write("S1A_IW_GRDH_1SDV_20180904T174542_20180904T174607_023552_0290A2_A262_flood_map.tif");
+				
+				String sFloodMapFile = oListFloodViewModel.getPostEventFile();
+				sFloodMapFile = Utils.GetFileNameWithoutExtension(sFloodMapFile);
+				sFloodMapFile += "_flood_map.tif";				
+				
+				oWriter.write(sFloodMapFile);
 				oWriter.newLine();
 				oWriter.write("" + oListFloodViewModel.getHsbaStartDepth());
 				oWriter.newLine();

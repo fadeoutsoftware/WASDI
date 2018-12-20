@@ -115,14 +115,31 @@ public class WasdiGraph {
         m_oProcessRepository = new ProcessWorkspaceRepository();
         m_oProcess = m_oProcessRepository.GetProcessByProcessObjId(oParams.getProcessObjId());
         
+        m_oLogger.info("WasdiGraph: call find IO Nodes");
         findIONodes();
         
-        if (((GraphSetting) m_oParams.getSettings()).getInputNodeNames().size() == 0) {
-        	((GraphSetting) m_oParams.getSettings()).setInputNodeNames(m_asInputNodes);
-        }
-        
-        if (((GraphSetting) m_oParams.getSettings()).getOutputNodeNames().size() == 0) {
-        	((GraphSetting) m_oParams.getSettings()).setOutputNodeNames(m_asOutputNodes);
+        if (m_oParams.getSettings() != null) {
+        	GraphSetting oGraphSetting = (GraphSetting) m_oParams.getSettings();
+        	if (oGraphSetting != null) {
+        		if (oGraphSetting.getInputNodeNames() == null) {
+        			 m_oLogger.info("WasdiGraph: input node names null: set m_asInputNodes");
+        			oGraphSetting.setInputNodeNames(m_asInputNodes);
+        		}
+        		else if (oGraphSetting.getInputNodeNames().size() == 0) {
+        			m_oLogger.info("WasdiGraph: input node names size 0: set m_asInputNodes");
+        			oGraphSetting.setInputNodeNames(m_asInputNodes);
+        		}
+        		
+        		if (oGraphSetting.getOutputNodeNames() == null) {
+        			m_oLogger.info("WasdiGraph: output node names null: set m_asOutputNodes");
+        			oGraphSetting.setOutputNodeNames(m_asOutputNodes);
+        		}
+        		else if (oGraphSetting.getOutputNodeNames().size() == 0) {
+        			m_oLogger.info("WasdiGraph: output node names size 0: set m_asOutputNodes [size] " + m_asOutputNodes.size());
+        			oGraphSetting.setOutputNodeNames(m_asOutputNodes);
+        		}
+
+        	}
         }
         
 	}
@@ -141,9 +158,11 @@ public class WasdiGraph {
 		for (int iNodes=0; iNodes<aoNodes.length;iNodes++) {
 			Node oNode = aoNodes[iNodes];
 			if (oNode.getOperatorName().equals("Read")) {
+				m_oLogger.info("WasdiGraph.findIONodes: input node found " + oNode.getId());
 				m_asInputNodes.add(oNode.getId());
 			}
 			else if (oNode.getOperatorName().equals("Write")) {
+				m_oLogger.info("WasdiGraph.findIONodes: output node found " + oNode.getId());
 				m_asOutputNodes.add(oNode.getId());
 			}
 		}
@@ -158,7 +177,8 @@ public class WasdiGraph {
 	public void execute() throws Exception {
 		
 		try {
-
+			m_oLogger.info("WasdiGraph.execute: start");
+			
 	        //check input file
 	        File oBaseDir = new File(ConfigReader.getPropValue("DOWNLOAD_ROOT_PATH"));
 	        File oUserDir = new File(oBaseDir, m_oParams.getUserId());
@@ -167,6 +187,8 @@ public class WasdiGraph {
 	        ArrayList<File> aoOutputFiles = new ArrayList<>(); 
 
 			GraphSetting oGraphSettings = (GraphSetting) m_oParams.getSettings();
+			
+			m_oLogger.info("WasdiGraph.execute: setting input files");
 			
 			for (int iNode = 0; iNode<oGraphSettings.getInputNodeNames().size(); iNode++) {
 				
@@ -191,7 +213,11 @@ public class WasdiGraph {
 				{
 					throw new Exception("Error setting input file");
 				}
+				
+				m_oLogger.info("WasdiGraph.execute: input file set " + oInputFile.getAbsolutePath());
 			}
+			
+			m_oLogger.info("WasdiGraph.execute: setting output files");
 			
 			for (int iNode = 0; iNode<oGraphSettings.getOutputNodeNames().size(); iNode++) {
 				
@@ -206,8 +232,13 @@ public class WasdiGraph {
 				}
 				
 				// Output file name: prepare default
+				String sWorkflowAppend = "Workflow";
 				
-				String sOutputName = "Output_" + oGraphSettings.getWorkflowName() + "_" + iNode;
+				if (!Utils.isNullOrEmpty(oGraphSettings.getWorkflowName())) {
+					sWorkflowAppend = oGraphSettings.getWorkflowName();
+				}
+				
+				String sOutputName = "Output_" + sWorkflowAppend + "_" + iNode;
 				
 				// First Try: corresponding input plus workflowname
 				if (oGraphSettings.getInputFileNames() != null) {
@@ -239,7 +270,11 @@ public class WasdiGraph {
 				{
 					throw new Exception("Error setting output file");
 				}
+				
+				m_oLogger.info("WasdiGraph.execute: output file set " + oOutputFile.getAbsolutePath());
 			}
+			
+			m_oLogger.info("WasdiGraph.execute: call SetFileSizeToProcess");
 			
 			// P.Campanella 16/06/2017: should add real file size to the Process Log
             //set file size     
@@ -249,8 +284,12 @@ public class WasdiGraph {
 			GraphContext oContext = new GraphContext(m_oGraph);		
 			GraphProcessor oProcessor = new GraphProcessor();
 			
+			m_oLogger.info("WasdiGraph.execute: call init process");
+			
 			//update the wasdi process 
 			initProcess();
+			
+			m_oLogger.info("WasdiGraph.execute: start graph");
 			
 			oProcessor.executeGraph(oContext, new WasdiProgreeMonitor(m_oProcessRepository, m_oProcess));
 			
@@ -258,7 +297,7 @@ public class WasdiGraph {
 			if (aoOutputs==null || aoOutputs.length==0) throw new Exception("No output created");
 			
 			//if (aoOutputs.length>1) m_oLogger.warn("More than 1 output created... keep only the first");
-			
+					
 			for (int iOutputs = 0; iOutputs<aoOutputs.length; iOutputs++) {
 				Product oProduct = aoOutputs[iOutputs];
 				

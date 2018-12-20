@@ -95,45 +95,45 @@ public class DownloadedFilesRepository extends MongoRepository {
 
     /**
      * Search files
-     * @param from start date
-     * @param to end date
-     * @param freeText free text to search in name
-     * @param category category
+     * @param oDateFrom start date
+     * @param oDateTo end date
+     * @param sFreeText free text to search in name
+     * @param sCategory category
      * @return
      */
-    public List<DownloadedFile> Search(Date from, Date to, String freeText, String category) {
-    	final List<DownloadedFile> files = new ArrayList<DownloadedFile>();    	
-    	List<Bson> filters = new ArrayList<Bson>();
+    public List<DownloadedFile> Search(Date oDateFrom, Date oDateTo, String sFreeText, String sCategory) {
+    	final List<DownloadedFile> aoFiles = new ArrayList<DownloadedFile>();    	
+    	List<Bson> aoFilters = new ArrayList<Bson>();
     	
-    	if (from!=null && to!=null) {
+    	if (oDateFrom!=null && oDateTo!=null) {
     		
-    		DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm'Z'");
+    		DateFormat oDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm'Z'");
     		
-    		filters.add(Filters.and(Filters.gte("refDate", df.format(from)), Filters.lte("refDate", df.format(to))));
+    		aoFilters.add(Filters.and(Filters.gte("refDate", oDateFormat.format(oDateFrom)), Filters.lte("refDate", oDateFormat.format(oDateTo))));
     	}
     	
-    	if (freeText!=null && !freeText.isEmpty()) {
-    		Document regQuery = new Document();
-    		regQuery.append("$regex", Pattern.quote(freeText));
-    		regQuery.append("$options", "i");
-    		Document findQuery = new Document();
-    		findQuery.append("fileName", regQuery);
-    		filters.add(findQuery);
+    	if (sFreeText!=null && !sFreeText.isEmpty()) {
+    		Document oRegQuery = new Document();
+    		oRegQuery.append("$regex", Pattern.quote(sFreeText));
+    		oRegQuery.append("$options", "i");
+    		Document oFindQuery = new Document();
+    		oFindQuery.append("fileName", oRegQuery);
+    		aoFilters.add(oFindQuery);
     	}
     	
-    	if (category!=null && !category.isEmpty()) {
-    		filters.add(Filters.eq("category", category));
+    	if (sCategory!=null && !sCategory.isEmpty()) {
+    		aoFilters.add(Filters.eq("category", sCategory));
     	}
     	
-    	Bson filter = Filters.and(filters);
-    	FindIterable<Document> docs = filters.isEmpty() ? getCollection("downloadedfiles").find() : getCollection("downloadedfiles").find(filter);
+    	Bson filter = Filters.and(aoFilters);
+    	FindIterable<Document> aoDocs = aoFilters.isEmpty() ? getCollection("downloadedfiles").find() : getCollection("downloadedfiles").find(filter);
     	
-    	docs.forEach(new Block<Document>() {
-            public void apply(Document document) {
-                String json = document.toJson();
+    	aoDocs.forEach(new Block<Document>() {
+            public void apply(Document oDocument) {
+                String sJson = oDocument.toJson();
                 try {
-                    DownloadedFile df = s_oMapper.readValue(json, DownloadedFile.class);
-                    files.add(df);
+                    DownloadedFile oDownloadedFile = s_oMapper.readValue(sJson, DownloadedFile.class);
+                    aoFiles.add(oDownloadedFile);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -141,7 +141,7 @@ public class DownloadedFilesRepository extends MongoRepository {
             }
         });
     	
-		return files ;
+		return aoFiles ;
     }
     
     /**
