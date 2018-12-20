@@ -92,8 +92,9 @@ public class DownloadManager {
 				.replaceAll("__TO__", QUERY_DATE_FORMAT.format(to))
 				.replaceAll("__PLATFORM__", platformName)
 				.replaceAll("__PRODUCTTYPE__", productType);
-		
-		QueryExecutor executor = QueryExecutor.newInstance(providerName, providerUser, providerPassword, "0", queryLimit, querySortedBy, queryOrder);
+		//TODO read from config file
+		String sDownloadProtocol = "";
+		QueryExecutor executor = QueryExecutor.newInstance(providerName, providerUser, providerPassword, "0", queryLimit, querySortedBy, queryOrder, sDownloadProtocol);
 		//replaced by the next one
 		//DownloadFile oDownloadFile = DownloadFile.getDownloadFile("SENTINEL");
 		DownloadFile oDownloadFile = new DownloadSupplier().supplyDownloader("SENTINEL");

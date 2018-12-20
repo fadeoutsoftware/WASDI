@@ -93,6 +93,7 @@ public class DhUSDownloadFile extends DownloadFile {
         return lLenght;
     }
 
+    //TODO move this method into superclass
     @Override
     public String ExecuteDownloadFile(String sFileURL, String sDownloadUser, String sDownloadPassword, String sSaveDirOnServer, ProcessWorkspace oProcessWorkspace) throws IOException {
 
