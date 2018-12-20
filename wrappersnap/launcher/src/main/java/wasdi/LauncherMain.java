@@ -40,6 +40,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import sun.management.VMManagement;
 import wasdi.asynch.SaveMetadataThread;
 import wasdi.filebuffer.DownloadFile;
+import wasdi.filebuffer.DownloadSupplier;
 import wasdi.geoserver.Publisher;
 import wasdi.processors.WasdiProcessorEngine;
 import wasdi.rabbit.Send;
@@ -414,7 +415,9 @@ public class LauncherMain {
     public String Download(DownloadFileParameter oParameter, String sDownloadPath) {
         String sFileName = "";
         // Download handler
-        DownloadFile oDownloadFile = DownloadFile.getDownloadFile(oParameter.getProvider());
+        //replaced by the next one
+        //DownloadFile oDownloadFile = DownloadFile.getDownloadFile(oParameter.getProvider());
+        DownloadFile oDownloadFile = new DownloadSupplier().supplyDownloader(oParameter.getProvider());
         
         ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
         ProcessWorkspace oProcessWorkspace = oProcessWorkspaceRepository.GetProcessByProcessObjId(oParameter.getProcessObjId());
