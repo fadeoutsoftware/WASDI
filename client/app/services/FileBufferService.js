@@ -22,6 +22,10 @@ service('FileBufferService', ['$http',  'ConstantsService', function ($http, oCo
             iCut = 5;
             sProtocol = 'https';
         }
+        if (sUrl.startsWith("file")) {
+            iCut = 4;
+            sProtocol = 'file';
+        }
 
         var sTest = sUrl.substring(iCut, sUrl.length);
         var sEncodedUri = encodeURIComponent(sTest);

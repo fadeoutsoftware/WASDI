@@ -102,7 +102,7 @@
     },
     "missions": [
         {
-            "name": "Mission: Sentinel-1",
+            "name": "S1",
             "indexname": "platformname",
             "indexvalue": "Sentinel-1",
             "filters": [
@@ -150,7 +150,7 @@
             ]
         },
         {
-            "name": "Mission: Sentinel-2",
+            "name": "S2",
             "indexname": "platformname",
             "indexvalue": "Sentinel-2",
             "filters": [
@@ -181,7 +181,7 @@
             ]
         } ,
         {
-            "name": "Mission: Sentinel-3",
+            "name": "S3",
             "indexname": "platformname",
             "indexvalue": "Sentinel-3",
             "filters": [
@@ -228,7 +228,7 @@
             ]
         },
         {
-            "name": "Mission: Proba-V",
+            "name": "PROBAV",
             "indexname": "platformname",
             "indexvalue": "Proba-V",
             "provider":"Proba-V",
@@ -292,7 +292,7 @@
             ]
         },
         {
-            "name": "Mission: ENVISAT",
+            "name": "ENVISAT",
             "indexname": "platformname",
             "indexvalue": "Envisat",
             "provider":"Envisat",
@@ -313,7 +313,7 @@
             ]
         },
         {
-            "name": "Mission: LANDSAT",
+            "name": "L8",
             "indexname": "platformname",
             "indexvalue": "Landsat-*",
             "provider":"Landsat-*",
