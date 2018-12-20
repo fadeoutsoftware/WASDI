@@ -188,7 +188,7 @@ public class QueryExecutorONDA extends QueryExecutor {
 			for (Object oObject : aoJsonArray) {
 				if(null!=oObject) {
 					JSONObject oOndaEntry = (JSONObject)(oObject);
-					QueryResultViewModel oRes = m_oResponseTranslator.translate(oOndaEntry);
+					QueryResultViewModel oRes = m_oResponseTranslator.translate(oOndaEntry, m_sDownloadProtocol);
 					aoResult.add(oRes);
 				}
 			}

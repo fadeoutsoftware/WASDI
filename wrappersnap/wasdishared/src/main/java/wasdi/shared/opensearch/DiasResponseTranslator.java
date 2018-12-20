@@ -14,5 +14,5 @@ import wasdi.shared.viewmodels.QueryResultViewModel;
  */
 public interface DiasResponseTranslator {
 	
-	public QueryResultViewModel translate( Object oResponseViewModel );
+	public QueryResultViewModel translate( Object oResponseViewModel, String sProtocol );
 }

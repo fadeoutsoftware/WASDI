@@ -39,8 +39,11 @@ public abstract class QueryExecutor {
 	
 	protected DiasQueryTranslator m_oQueryTranslator;
 	protected DiasResponseTranslator m_oResponseTranslator;
+	protected String m_sDownloadProtocol;
 
-	public static QueryExecutor newInstance(String sProvider, String sUser, String sPassword, String sOffset, String sLimit, String sSortedBy, String sOrder) {
+	//TODO refactor w/ a factory
+	//TODO refactor: pass a dictionary instead
+	public static QueryExecutor newInstance(String sProvider, String sUser, String sPassword, String sOffset, String sLimit, String sSortedBy, String sOrder, String sDownloadProtocol) {
 		
 		String sClassName = QueryExecutor.class.getName() + sProvider;
 		
@@ -60,6 +63,7 @@ public abstract class QueryExecutor {
 					oExecutor.m_oQueryTranslator = new DiasQueryTranslatorONDA();
 					oExecutor.m_oResponseTranslator = new DiasResponseTranslatorONDA();
 				}
+				oExecutor.m_sDownloadProtocol = sDownloadProtocol;
 				return oExecutor;
 			}
 		} catch (InstantiationException e) {
@@ -489,7 +493,7 @@ public abstract class QueryExecutor {
 	
 
 	public static void main(String[] args) {
-		QueryExecutor oExecutor = QueryExecutor.newInstance("MATERA", "user", "password", "0", "10", "ingestiondate", "asc");
+		QueryExecutor oExecutor = QueryExecutor.newInstance("MATERA", "user", "password", "0", "10", "ingestiondate", "asc", "");
 		
 		try {
 			String sQuery = "( beginPosition:[2017-05-15T00:00:00.000Z TO 2017-05-15T23:59:59.999Z] AND endPosition:[2017-05-15T00:00:00.000Z TO 2017-05-15T23:59:59.999Z] ) AND   (platformname:Sentinel-1 AND filename:S1A_* AND producttype:GRD)";
