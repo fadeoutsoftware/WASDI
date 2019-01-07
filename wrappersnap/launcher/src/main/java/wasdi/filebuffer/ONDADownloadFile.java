@@ -12,12 +12,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.Authenticator;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.PasswordAuthentication;
 import java.net.URL;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 
+import wasdi.ConfigReader;
 import wasdi.shared.business.DownloadedFile;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.data.DownloadedFilesRepository;
@@ -51,7 +53,7 @@ public class ONDADownloadFile extends DownloadFile {
 	 */
 	@Override
 	public long GetDownloadFileSize(String sFileURL) throws Exception {
-		//http:file:/mnt/OPTICAL/LEVEL-1C/2018/12/12/S2B_MSIL1C_20181212T010259_N0207_R045_T54PZA_20181212T021706.zip.value
+		//file:/mnt/OPTICAL/LEVEL-1C/2018/12/12/S2B_MSIL1C_20181212T010259_N0207_R045_T54PZA_20181212T021706.zip.value
 		long lLenght = 0L;
 
 		if(sFileURL.startsWith("file:")) {
@@ -74,11 +76,64 @@ public class ONDADownloadFile extends DownloadFile {
 		return lLenght;
 	}
 
-	
 
-	protected long getSizeViaHttp(String sFileURL) {
+
+	protected long getSizeViaHttp(String sFileURL) throws IOException {
 		long lLength = 0L;
-		//TODO implement
+
+		// Domain check
+		if (Utils.isNullOrEmpty(sFileURL)) {
+			logger.debug("DownloadFile.GetDownloadSize: sFileURL is null");
+			return lLength;
+		}
+		String sUser = "";
+		String sPassword = "";
+		try {
+			sUser = ConfigReader.getPropValue("ONDA_USER");
+			sPassword = ConfigReader.getPropValue("ONDA_PASSWORD");
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		//TODO can we get read of these lines and abort execution instead? Do these members ever really get updated?
+		if (!Utils.isNullOrEmpty(m_sProviderUser)) sUser = m_sProviderUser;
+		if (!Utils.isNullOrEmpty(m_sProviderPassword)) sPassword = m_sProviderPassword;
+
+		final String sFinalUser = sUser;
+		final String sFinalPassword = sPassword;
+
+		// dhus authentication
+		Authenticator.setDefault(new Authenticator() {
+			protected PasswordAuthentication getPasswordAuthentication() {
+				try{
+					return new PasswordAuthentication(sFinalUser, sFinalPassword.toCharArray());
+				}
+				catch (Exception oEx){
+					logger.error("DownloadFile.GetDownloadSize: exception setting auth " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
+				}
+				return null;
+			}
+		});
+
+		logger.debug("DownloadFile.GetDownloadSize: FileUrl = " + sFileURL);
+
+		URL oUrl = new URL(sFileURL);
+		HttpURLConnection oConnection = (HttpURLConnection) oUrl.openConnection();
+		oConnection.setRequestMethod("GET");
+		oConnection.setRequestProperty("Accept", "*/*");
+		int responseCode = oConnection.getResponseCode();
+
+		// always check HTTP response code first
+		if (responseCode == HttpURLConnection.HTTP_OK) {
+			lLength = oConnection.getHeaderFieldLong("Content-Length", 0L);
+			logger.debug("DownloadFile.GetDownloadSize: File size = " + lLength);
+			return lLength;
+		} else {
+			logger.debug("DownloadFile.GetDownloadSize: No file to download. Server replied HTTP code: " + responseCode);
+			m_iLastError = responseCode;
+		}
+		oConnection.disconnect();
+
 		return lLength;
 	}
 
@@ -138,8 +193,8 @@ public class ONDADownloadFile extends DownloadFile {
 		//TODO move this code into superclass, see DhUSDownloadFile
 		String sReturnFilePath = "";
 
-        // TODO: Here we are assuming dhus authentication. But we have to find a general solution
-        logger.debug("DownloadFile.ExecuteDownloadFile: sDownloadUser = " + sDownloadUser);
+		// TODO: Here we are assuming dhus authentication. But we have to find a general solution
+		logger.debug("DownloadFile.ExecuteDownloadFile: sDownloadUser = " + sDownloadUser);
 		if (sDownloadUser!=null) {
 			Authenticator.setDefault(new Authenticator() {
 				protected PasswordAuthentication getPasswordAuthentication() {
@@ -159,9 +214,9 @@ public class ONDADownloadFile extends DownloadFile {
 		HttpURLConnection oConnection = (HttpURLConnection) oUrl.openConnection();
 		oConnection.setRequestMethod("GET");
 		oConnection.setRequestProperty("Accept", "*/*");
-		
+
 		int responseCode = oConnection.getResponseCode();
-		
+
 		// always check HTTP response code first
 		if (responseCode == HttpURLConnection.HTTP_OK) {
 
