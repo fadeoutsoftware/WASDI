@@ -79,10 +79,12 @@ import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.business.SnapWorkflow;
 import wasdi.shared.business.User;
+import wasdi.shared.business.Workspace;
 import wasdi.shared.business.WpsProvider;
 import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.data.SessionRepository;
 import wasdi.shared.data.SnapWorkflowRepository;
+import wasdi.shared.data.WorkspaceRepository;
 import wasdi.shared.data.WpsProvidersRepository;
 import wasdi.shared.parameters.ApplyOrbitParameter;
 import wasdi.shared.parameters.ApplyOrbitSetting;
@@ -1513,6 +1515,9 @@ public class ProcessingResources {
 			
 			Wasdi.DebugLog("ProcessingResource.launchList ParamFile " + sParamFile);
 			
+			WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
+			Workspace oWorkspace = oWorkspaceRepository.GetWorkspace(sWorkspaceId);
+			
 			File oFile = new File(sParamFile);
 			
 			BufferedWriter oWriter = new BufferedWriter(new FileWriter(oFile));
@@ -1525,8 +1530,8 @@ public class ProcessingResources {
 				oWriter.newLine();
 				oWriter.write(oUser.getPassword());
 				oWriter.newLine();
-				oWriter.write(sWorkspaceId);
-				oWriter.newLine();				
+				oWriter.write(oWorkspace.getName());
+				oWriter.newLine();
 
 				oWriter.write(oListFloodViewModel.getPostEventFile());
 				oWriter.newLine();

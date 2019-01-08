@@ -97,7 +97,9 @@ public class FileBufferResource {
 				return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
 			}
 			
-			String sPath = m_oServletConfig.getInitParameter("SerializationPath") + oProcess.getProcessObjId();
+			String sPath = m_oServletConfig.getInitParameter("SerializationPath");
+			if (! (sPath.endsWith("\\") || sPath.endsWith("/")) ) sPath += "/";
+			sPath += oProcess.getProcessObjId();
 			//TODO move it before inserting the new process into DB
 			SerializationUtils.serializeObjectToXML(sPath, oParameter);
 			
