@@ -37,7 +37,7 @@ public class DhUSDownloadFile extends DownloadFile {
 
         // Domain check
         if (Utils.isNullOrEmpty(sFileURL)) {
-            logger.debug("DownloadFile.GetDownloadSize: sFileURL is null");
+            m_oLogger.debug("DownloadFile.GetDownloadSize: sFileURL is null");
             return lLenght;
         }
         
@@ -63,13 +63,13 @@ public class DhUSDownloadFile extends DownloadFile {
                     return new PasswordAuthentication(sFinalUser, sFinalPassword.toCharArray());
                 }
                 catch (Exception oEx){
-                    logger.error("DownloadFile.GetDownloadSize: exception setting auth " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
+                    m_oLogger.error("DownloadFile.GetDownloadSize: exception setting auth " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
                 }
                 return null;
             }
         });
 
-        logger.debug("DownloadFile.GetDownloadSize: FileUrl = " + sFileURL);
+        m_oLogger.debug("DownloadFile.GetDownloadSize: FileUrl = " + sFileURL);
 
         URL url = new URL(sFileURL);
         HttpURLConnection httpConn = (HttpURLConnection) url.openConnection();
@@ -80,12 +80,12 @@ public class DhUSDownloadFile extends DownloadFile {
 
             lLenght = httpConn.getHeaderFieldLong("Content-Length", 0L);
 
-            logger.debug("DownloadFile.GetDownloadSize: File size = " + lLenght);
+            m_oLogger.debug("DownloadFile.GetDownloadSize: File size = " + lLenght);
 
             return lLenght;
 
         } else {
-            logger.debug("DownloadFile.GetDownloadSize: No file to download. Server replied HTTP code: " + responseCode);
+            m_oLogger.debug("DownloadFile.GetDownloadSize: No file to download. Server replied HTTP code: " + responseCode);
             m_iLastError = responseCode;
         }
         httpConn.disconnect();
@@ -99,18 +99,18 @@ public class DhUSDownloadFile extends DownloadFile {
 
         // Domain check
         if (Utils.isNullOrEmpty(sFileURL)) {
-            logger.debug("DownloadFile.ExecuteDownloadFile: sFileURL is null");
+            m_oLogger.debug("DownloadFile.ExecuteDownloadFile: sFileURL is null");
             return "";
         }
         if (Utils.isNullOrEmpty(sSaveDirOnServer)) {
-            logger.debug("DownloadFile.ExecuteDownloadFile: sSaveDirOnServer is null");
+            m_oLogger.debug("DownloadFile.ExecuteDownloadFile: sSaveDirOnServer is null");
             return "";
         }
 
         String sReturnFilePath = "";
 
         // TODO: Here we are assuming dhus authentication. But we have to find a general solution
-        logger.debug("DownloadFile.ExecuteDownloadFile: sDownloadUser = " + sDownloadUser);
+        m_oLogger.debug("DownloadFile.ExecuteDownloadFile: sDownloadUser = " + sDownloadUser);
         
         if (sDownloadUser!=null) {
             Authenticator.setDefault(new Authenticator() {
@@ -119,14 +119,14 @@ public class DhUSDownloadFile extends DownloadFile {
                     	return new PasswordAuthentication(sDownloadUser, sDownloadPassword.toCharArray());
                     }
                     catch (Exception oEx){
-                        logger.error("DownloadFile.ExecuteDownloadFile: exception setting auth " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
+                        m_oLogger.error("DownloadFile.ExecuteDownloadFile: exception setting auth " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
                     }
                     return null;
                 }
             });        	
         }
 
-        logger.debug("DownloadFile.ExecuteDownloadFile: FileUrl = " + sFileURL);
+        m_oLogger.debug("DownloadFile.ExecuteDownloadFile: FileUrl = " + sFileURL);
 
         URL url = new URL(sFileURL);
         HttpURLConnection httpConn = (HttpURLConnection) url.openConnection();
@@ -135,14 +135,14 @@ public class DhUSDownloadFile extends DownloadFile {
         // always check HTTP response code first
         if (responseCode == HttpURLConnection.HTTP_OK) {
 
-            logger.debug("DownloadFile.ExecuteDownloadFile: Connected");
+            m_oLogger.debug("DownloadFile.ExecuteDownloadFile: Connected");
 
             String sFileName = "";
             String sDisposition = httpConn.getHeaderField("Content-Disposition");
             String sContentType = httpConn.getContentType();
             int iContentLength = httpConn.getContentLength();
             
-            logger.debug("ExecuteDownloadFile. ContentLenght: " + iContentLength);
+            m_oLogger.debug("ExecuteDownloadFile. ContentLenght: " + iContentLength);
 
             if (sDisposition != null) {
                 // extracts file name from header field
@@ -155,16 +155,16 @@ public class DhUSDownloadFile extends DownloadFile {
                 sFileName = sFileURL.substring(sFileURL.lastIndexOf("/") + 1,sFileURL.length());
             }
 
-            logger.debug("Content-Type = " + sContentType);
-            logger.debug("Content-Disposition = " + sDisposition);
-            logger.debug("Content-Length = " + iContentLength);
-            logger.debug("fileName = " + sFileName);
+            m_oLogger.debug("Content-Type = " + sContentType);
+            m_oLogger.debug("Content-Disposition = " + sDisposition);
+            m_oLogger.debug("Content-Length = " + iContentLength);
+            m_oLogger.debug("fileName = " + sFileName);
 
             // opens input stream from the HTTP connection
             InputStream oInputStream = httpConn.getInputStream();
             String saveFilePath= sSaveDirOnServer + "/" + sFileName;
 
-            logger.debug("DownloadFile.ExecuteDownloadFile: Create Save File Path = " + saveFilePath);
+            m_oLogger.debug("DownloadFile.ExecuteDownloadFile: Create Save File Path = " + saveFilePath);
 
             File oTargetFile = new File(saveFilePath);
             File oTargetDir = oTargetFile.getParentFile();
@@ -186,7 +186,7 @@ public class DhUSDownloadFile extends DownloadFile {
             while ((iBytesRead = oInputStream.read(abBuffer)) != -1) {
             	
             	if (iBytesRead <= 0) {
-            		logger.debug("ExecuteDownloadFile. Read 0 bytes from stream. Counter: " + nZeroes);
+            		m_oLogger.debug("ExecuteDownloadFile. Read 0 bytes from stream. Counter: " + nZeroes);
             		nZeroes--;
             	} else {
             		nZeroes = MAX_NUM_ZEORES_DURING_READ;
@@ -217,9 +217,9 @@ public class DhUSDownloadFile extends DownloadFile {
 
             sReturnFilePath = saveFilePath;
 
-            logger.debug("File downloaded " + sReturnFilePath);
+            m_oLogger.debug("File downloaded " + sReturnFilePath);
         } else {
-            logger.debug("No file to download. Server replied HTTP code: " + responseCode);
+            m_oLogger.debug("No file to download. Server replied HTTP code: " + responseCode);
             m_iLastError = responseCode;
         }
         httpConn.disconnect();
@@ -233,7 +233,7 @@ public class DhUSDownloadFile extends DownloadFile {
         try {
             // Domain check
             if (Utils.isNullOrEmpty(sFileURL)) {
-                logger.debug("DownloadFile.GetFileName: sFileURL is null or Empty");
+                m_oLogger.debug("DownloadFile.GetFileName: sFileURL is null or Empty");
                 return "";
             }
 
@@ -255,13 +255,13 @@ public class DhUSDownloadFile extends DownloadFile {
                         return new PasswordAuthentication(sFinalUser, sFinalPassword.toCharArray());
                     }
                     catch (Exception oEx){
-                        logger.error("DownloadFile.GetFileName: exception setting auth " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
+                        m_oLogger.error("DownloadFile.GetFileName: exception setting auth " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
                     }
                     return null;
                 }
             });
 
-            logger.debug("DownloadFile.GetFileName: FileUrl = " + sFileURL);
+            m_oLogger.debug("DownloadFile.GetFileName: FileUrl = " + sFileURL);
 
             String sConnectionTimeout = ConfigReader.getPropValue("CONNECTION_TIMEOUT");
             String sReadTimeOut = ConfigReader.getPropValue("READ_TIMEOUT");
@@ -273,27 +273,27 @@ public class DhUSDownloadFile extends DownloadFile {
                 iConnectionTimeOut = Integer.parseInt(sConnectionTimeout);
             }
             catch (Exception oEx) {
-                logger.error(org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
+                m_oLogger.error(org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
             }
             try {
                 iReadTimeOut = Integer.parseInt(sReadTimeOut);
             }
             catch (Exception oEx) {
-                logger.error(org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
+                m_oLogger.error(org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
             }
 
             URL url = new URL(sFileURL);
             HttpURLConnection httpConn = (HttpURLConnection) url.openConnection();
-            logger.debug("DownloadFile.GetFileName: Connection Created");
+            m_oLogger.debug("DownloadFile.GetFileName: Connection Created");
             httpConn.setConnectTimeout(iConnectionTimeOut);
             httpConn.setReadTimeout(iReadTimeOut);
-            logger.debug("DownloadFile.GetFileName: Timeout Setted: waiting response");
+            m_oLogger.debug("DownloadFile.GetFileName: Timeout Setted: waiting response");
             int responseCode = httpConn.getResponseCode();
 
             // always check HTTP response code first
             if (responseCode == HttpURLConnection.HTTP_OK) {
 
-                logger.debug("DownloadFile.GetFileName: Connected");
+                m_oLogger.debug("DownloadFile.GetFileName: Connected");
 
                 String fileName = "";
                 String disposition = httpConn.getHeaderField("Content-Disposition");
@@ -313,12 +313,12 @@ public class DhUSDownloadFile extends DownloadFile {
 
                 sReturnFilePath = fileName;
 
-                logger.debug("Content-Type = " + contentType);
-                logger.debug("Content-Disposition = " + disposition);
-                logger.debug("Content-Length = " + contentLength);
-                logger.debug("fileName = " + fileName);
+                m_oLogger.debug("Content-Type = " + contentType);
+                m_oLogger.debug("Content-Disposition = " + disposition);
+                m_oLogger.debug("Content-Length = " + contentLength);
+                m_oLogger.debug("fileName = " + fileName);
             } else {
-                logger.debug("No file to download. Server replied HTTP code: " + responseCode);
+                m_oLogger.debug("No file to download. Server replied HTTP code: " + responseCode);
                 m_iLastError = responseCode;
             }
             httpConn.disconnect();
@@ -326,7 +326,7 @@ public class DhUSDownloadFile extends DownloadFile {
             return  sReturnFilePath;
         }
         catch (Exception oEx) {
-            logger.error(org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
+            m_oLogger.error(org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
         }
 
         return  "";
