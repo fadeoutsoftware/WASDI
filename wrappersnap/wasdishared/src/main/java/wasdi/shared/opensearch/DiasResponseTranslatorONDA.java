@@ -82,7 +82,7 @@ public class DiasResponseTranslatorONDA implements DiasResponseTranslator {
 					} else {
 						return null;
 					}
-				} else if(sProtocol.equals("https:")) {
+				} else if(sProtocol.startsWith("https:")) {
 					if(!Utils.isNullOrEmpty(sId)) {
 						//tentative download
 						sPath += sProtocol;
