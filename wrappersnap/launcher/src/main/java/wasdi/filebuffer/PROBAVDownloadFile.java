@@ -49,7 +49,7 @@ public class PROBAVDownloadFile extends DownloadFile {
 
 	        // Domain check
 	        if (Utils.isNullOrEmpty(sFileURL)) {
-	            logger.debug("PROBAVDownloadFile.GetDownloadSize: sFileURL is null");
+	            m_oLogger.debug("PROBAVDownloadFile.GetDownloadSize: sFileURL is null");
 	            return lLenght;
 	        }
 	        
@@ -75,13 +75,13 @@ public class PROBAVDownloadFile extends DownloadFile {
 	                    return new PasswordAuthentication(sFinalUser, sFinalPassword.toCharArray());
 	                }
 	                catch (Exception oEx){
-	                    logger.error("PROBAVDownloadFile.GetDownloadSize: exception setting auth " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
+	                    m_oLogger.error("PROBAVDownloadFile.GetDownloadSize: exception setting auth " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
 	                }
 	                return null;
 	            }
 	        });
 
-	        logger.debug("PROBAVDownloadFile.GetDownloadSize: FileUrl = " + sFileURL);
+	        m_oLogger.debug("PROBAVDownloadFile.GetDownloadSize: FileUrl = " + sFileURL);
 
 	        URL url = new URL(sFileURL);
 	        HttpURLConnection httpConn = (HttpURLConnection) url.openConnection();
@@ -92,12 +92,12 @@ public class PROBAVDownloadFile extends DownloadFile {
 
 	            lLenght = httpConn.getHeaderFieldLong("Content-Length", 0L);
 
-	            logger.debug("PROBAVDownloadFile.GetDownloadSize: File size = " + lLenght);
+	            m_oLogger.debug("PROBAVDownloadFile.GetDownloadSize: File size = " + lLenght);
 
 	            return lLenght;
 
 	        } else {
-	            logger.debug("PROBAVDownloadFile.GetDownloadSize: No file to download. Server replied HTTP code: " + responseCode);
+	            m_oLogger.debug("PROBAVDownloadFile.GetDownloadSize: No file to download. Server replied HTTP code: " + responseCode);
 	            m_iLastError = responseCode;
 	        }
 	        httpConn.disconnect();
@@ -109,11 +109,11 @@ public class PROBAVDownloadFile extends DownloadFile {
 	public String ExecuteDownloadFile(String sFileURL, String sDownloadUser, String sDownloadPassword, String sSaveDirOnServer, ProcessWorkspace oProcessWorkspace) throws Exception {
         // Domain check
         if (Utils.isNullOrEmpty(sFileURL)) {
-            logger.debug("PROBAVDownloadFile.ExecuteDownloadFile: sFileURL is null");
+            m_oLogger.debug("PROBAVDownloadFile.ExecuteDownloadFile: sFileURL is null");
             return "";
         }
         if (Utils.isNullOrEmpty(sSaveDirOnServer)) {
-            logger.debug("PROBAVDownloadFile.ExecuteDownloadFile: sSaveDirOnServer is null");
+            m_oLogger.debug("PROBAVDownloadFile.ExecuteDownloadFile: sSaveDirOnServer is null");
             return "";
         }
         
@@ -121,16 +121,16 @@ public class PROBAVDownloadFile extends DownloadFile {
         String sReturnFilePath = CopyLocalFile(sFileURL, sDownloadUser, sDownloadPassword, sSaveDirOnServer, oProcessWorkspace);
         
         if (!Utils.isNullOrEmpty(sReturnFilePath)) {
-        	logger.debug("PROBAVDownloadFile.ExecuteDownloadFile: File found in local repo. Return");
+        	m_oLogger.debug("PROBAVDownloadFile.ExecuteDownloadFile: File found in local repo. Return");
         	
         	return sReturnFilePath;
         }
         else {
-        	logger.debug("PROBAVDownloadFile.ExecuteDownloadFile: File NOT found in local repo, try to donwload from provider");
+        	m_oLogger.debug("PROBAVDownloadFile.ExecuteDownloadFile: File NOT found in local repo, try to donwload from provider");
         }
 
         // authentication
-        logger.debug("PROBAVDownloadFile.ExecuteDownloadFile: sDownloadUser = " + sDownloadUser);
+        m_oLogger.debug("PROBAVDownloadFile.ExecuteDownloadFile: sDownloadUser = " + sDownloadUser);
         
         if (sDownloadUser!=null) {
             Authenticator.setDefault(new Authenticator() {
@@ -139,14 +139,14 @@ public class PROBAVDownloadFile extends DownloadFile {
                     	return new PasswordAuthentication(sDownloadUser, sDownloadPassword.toCharArray());
                     }
                     catch (Exception oEx){
-                        logger.error("PROBAVDownloadFile.ExecuteDownloadFile: exception setting auth " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
+                        m_oLogger.error("PROBAVDownloadFile.ExecuteDownloadFile: exception setting auth " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
                     }
                     return null;
                 }
             });        	
         }
 
-        logger.debug("PROBAVDownloadFile.ExecuteDownloadFile: FileUrl = " + sFileURL);
+        m_oLogger.debug("PROBAVDownloadFile.ExecuteDownloadFile: FileUrl = " + sFileURL);
 
         URL url = new URL(sFileURL);
         HttpURLConnection httpConn = (HttpURLConnection) url.openConnection();
@@ -155,14 +155,14 @@ public class PROBAVDownloadFile extends DownloadFile {
         // always check HTTP response code first
         if (responseCode == HttpURLConnection.HTTP_OK) {
 
-            logger.debug("PROBAVDownloadFile.ExecuteDownloadFile: Connected");
+            m_oLogger.debug("PROBAVDownloadFile.ExecuteDownloadFile: Connected");
 
             String sFileName = "";
             String sDisposition = httpConn.getHeaderField("Content-Disposition");
             String sContentType = httpConn.getContentType();
             int iContentLength = httpConn.getContentLength();
             
-            logger.debug("PROBAVDownloadFile.ExecuteDownloadFile. ContentLenght: " + iContentLength);
+            m_oLogger.debug("PROBAVDownloadFile.ExecuteDownloadFile. ContentLenght: " + iContentLength);
 
             if (sDisposition != null) {
                 // extracts file name from header field
@@ -175,16 +175,16 @@ public class PROBAVDownloadFile extends DownloadFile {
                 sFileName = sFileURL.substring(sFileURL.lastIndexOf("/") + 1,sFileURL.length());
             }
 
-            logger.debug("Content-Type = " + sContentType);
-            logger.debug("Content-Disposition = " + sDisposition);
-            logger.debug("Content-Length = " + iContentLength);
-            logger.debug("fileName = " + sFileName);
+            m_oLogger.debug("Content-Type = " + sContentType);
+            m_oLogger.debug("Content-Disposition = " + sDisposition);
+            m_oLogger.debug("Content-Length = " + iContentLength);
+            m_oLogger.debug("fileName = " + sFileName);
 
             // opens input stream from the HTTP connection
             InputStream oInputStream = httpConn.getInputStream();
             String saveFilePath= sSaveDirOnServer + "/" + sFileName;
 
-            logger.debug("PROBAVDownloadFile.ExecuteDownloadFile: Create Save File Path = " + saveFilePath);
+            m_oLogger.debug("PROBAVDownloadFile.ExecuteDownloadFile: Create Save File Path = " + saveFilePath);
 
             File oTargetFile = new File(saveFilePath);
             File oTargetDir = oTargetFile.getParentFile();
@@ -206,7 +206,7 @@ public class PROBAVDownloadFile extends DownloadFile {
             while ((iBytesRead = oInputStream.read(abBuffer)) != -1) {
             	
             	if (iBytesRead <= 0) {
-            		logger.debug("PROBAVDownloadFile.ExecuteDownloadFile. Read 0 bytes from stream. Counter: " + nZeroes);
+            		m_oLogger.debug("PROBAVDownloadFile.ExecuteDownloadFile. Read 0 bytes from stream. Counter: " + nZeroes);
             		nZeroes--;
             	} else {
             		nZeroes = MAX_NUM_ZEORES_DURING_READ;
@@ -237,9 +237,9 @@ public class PROBAVDownloadFile extends DownloadFile {
 
             sReturnFilePath = saveFilePath;
 
-            logger.debug("PROBAVDownloadFile File downloaded " + sReturnFilePath);
+            m_oLogger.debug("PROBAVDownloadFile File downloaded " + sReturnFilePath);
         } else {
-            logger.debug("PROBAVDownloadFile No file to download. Server replied HTTP code: " + responseCode);
+            m_oLogger.debug("PROBAVDownloadFile No file to download. Server replied HTTP code: " + responseCode);
             m_iLastError = responseCode;
         }
         httpConn.disconnect();
@@ -289,15 +289,15 @@ public class PROBAVDownloadFile extends DownloadFile {
 				
 				// Safe check
 				if (asSplittedFileName == null) {
-					logger.error("PROBAVDownload.CopyLocalFile: splitted file name is null");
+					m_oLogger.error("PROBAVDownload.CopyLocalFile: splitted file name is null");
 					return "";
 				}
 				if (asSplittedFileName.length == 0) {
-					logger.error("PROBAVDownload.CopyLocalFile: splitted file name is empyt");
+					m_oLogger.error("PROBAVDownload.CopyLocalFile: splitted file name is empyt");
 					return "";					
 				}
 				if (asSplittedFileName.length < 3) {
-					logger.error("PROBAVDownload.CopyLocalFile: splitted file name length < 3");
+					m_oLogger.error("PROBAVDownload.CopyLocalFile: splitted file name length < 3");
 					return "";					
 				}
 				
@@ -305,7 +305,7 @@ public class PROBAVDownloadFile extends DownloadFile {
 				String sDateString = asSplittedFileName[2];
 				
 				if (sDateString.length()<8) {
-					logger.error("PROBAVDownload.CopyLocalFile: Date String lenght < 8");
+					m_oLogger.error("PROBAVDownload.CopyLocalFile: Date String lenght < 8");
 					return "";					
 				}
 				
@@ -320,15 +320,15 @@ public class PROBAVDownloadFile extends DownloadFile {
 				
 				// Safe check
 				if (asSplittedFileName == null) {
-					logger.error("PROBAVDownload.CopyLocalFile: splitted file name 2 is null");
+					m_oLogger.error("PROBAVDownload.CopyLocalFile: splitted file name 2 is null");
 					return "";
 				}
 				if (asSplittedFileName.length == 0) {
-					logger.error("PROBAVDownload.CopyLocalFile: splitted file name 2 is empyt");
+					m_oLogger.error("PROBAVDownload.CopyLocalFile: splitted file name 2 is empyt");
 					return "";					
 				}
 				if (asSplittedFileName.length < 2) {
-					logger.error("PROBAVDownload.CopyLocalFile: splitted file name 2 length < 2");
+					m_oLogger.error("PROBAVDownload.CopyLocalFile: splitted file name 2 length < 2");
 					return "";					
 				}
 				
@@ -338,18 +338,18 @@ public class PROBAVDownloadFile extends DownloadFile {
 				// Final Source: base + year + month + name + fulldate + filefolder + file
 				sSourceFolder = sSourceFolder + "/" + sYear + "/" + sMonth + "/" + sDateString + "/" + sFileFolder + "/" + sFileName;
 				
-				logger.debug("PROBAVDownload.CopyLocalFile: Source File" + sSourceFolder);
+				m_oLogger.debug("PROBAVDownload.CopyLocalFile: Source File" + sSourceFolder);
 				
 				// Final destination: base + file
 				if (!sSaveDirOnServer.endsWith("/")) sSaveDirOnServer +="/";
 				sSaveDirOnServer += sFileName;
 				
-				logger.debug("PROBAVDownload.CopyLocalFile: Destination File" + sSaveDirOnServer);
+				m_oLogger.debug("PROBAVDownload.CopyLocalFile: Destination File" + sSaveDirOnServer);
 				
 				File oSourceFile = new File(sSourceFolder);
 				
 				if (oSourceFile.exists() == false) {
-					logger.warn("PROBAVDownload.CopyLocalFile: Source File not available. exit");
+					m_oLogger.warn("PROBAVDownload.CopyLocalFile: Source File not available. exit");
 					return "";					
 				}
 				
@@ -382,7 +382,7 @@ public class PROBAVDownloadFile extends DownloadFile {
         try {
             // Domain check
             if (Utils.isNullOrEmpty(sFileURL)) {
-                logger.debug("DownloadFile.GetFileName: sFileURL is null or Empty");
+                m_oLogger.debug("DownloadFile.GetFileName: sFileURL is null or Empty");
                 return "";
             }
 
@@ -404,13 +404,13 @@ public class PROBAVDownloadFile extends DownloadFile {
                         return new PasswordAuthentication(sFinalUser, sFinalPassword.toCharArray());
                     }
                     catch (Exception oEx){
-                        logger.error("DownloadFile.GetFileName: exception setting auth " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
+                        m_oLogger.error("DownloadFile.GetFileName: exception setting auth " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
                     }
                     return null;
                 }
             });
 
-            logger.debug("DownloadFile.GetFileName: FileUrl = " + sFileURL);
+            m_oLogger.debug("DownloadFile.GetFileName: FileUrl = " + sFileURL);
 
             String sConnectionTimeout = ConfigReader.getPropValue("CONNECTION_TIMEOUT");
             String sReadTimeOut = ConfigReader.getPropValue("READ_TIMEOUT");
@@ -422,27 +422,27 @@ public class PROBAVDownloadFile extends DownloadFile {
                 iConnectionTimeOut = Integer.parseInt(sConnectionTimeout);
             }
             catch (Exception oEx) {
-                logger.error(org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
+                m_oLogger.error(org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
             }
             try {
                 iReadTimeOut = Integer.parseInt(sReadTimeOut);
             }
             catch (Exception oEx) {
-                logger.error(org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
+                m_oLogger.error(org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
             }
 
             URL url = new URL(sFileURL);
             HttpURLConnection httpConn = (HttpURLConnection) url.openConnection();
-            logger.debug("PROBAVDownloadFile.GetFileName: Connection Created");
+            m_oLogger.debug("PROBAVDownloadFile.GetFileName: Connection Created");
             httpConn.setConnectTimeout(iConnectionTimeOut);
             httpConn.setReadTimeout(iReadTimeOut);
-            logger.debug("PROBAVDownloadFile.GetFileName: Timeout Setted: waiting response");
+            m_oLogger.debug("PROBAVDownloadFile.GetFileName: Timeout Setted: waiting response");
             int responseCode = httpConn.getResponseCode();
 
             // always check HTTP response code first
             if (responseCode == HttpURLConnection.HTTP_OK) {
 
-                logger.debug("PROBAVDownloadFile.GetFileName: Connected");
+                m_oLogger.debug("PROBAVDownloadFile.GetFileName: Connected");
 
                 String fileName = "";
                 String disposition = httpConn.getHeaderField("Content-Disposition");
@@ -462,12 +462,12 @@ public class PROBAVDownloadFile extends DownloadFile {
 
                 sReturnFilePath = fileName;
 
-                logger.debug("PROBAVDownloadFile.GetFileName: Content-Type = " + contentType);
-                logger.debug("PROBAVDownloadFile.GetFileName: Content-Disposition = " + disposition);
-                logger.debug("PROBAVDownloadFile.GetFileName: Content-Length = " + contentLength);
-                logger.debug("PROBAVDownloadFile.GetFileName: fileName = " + fileName);
+                m_oLogger.debug("PROBAVDownloadFile.GetFileName: Content-Type = " + contentType);
+                m_oLogger.debug("PROBAVDownloadFile.GetFileName: Content-Disposition = " + disposition);
+                m_oLogger.debug("PROBAVDownloadFile.GetFileName: Content-Length = " + contentLength);
+                m_oLogger.debug("PROBAVDownloadFile.GetFileName: fileName = " + fileName);
             } else {
-                logger.debug("PROBAVDownloadFile.GetFileName: No file to download. Server replied HTTP code: " + responseCode);
+                m_oLogger.debug("PROBAVDownloadFile.GetFileName: No file to download. Server replied HTTP code: " + responseCode);
                 m_iLastError = responseCode;
             }
             httpConn.disconnect();
@@ -475,7 +475,7 @@ public class PROBAVDownloadFile extends DownloadFile {
             return  sReturnFilePath;
         }
         catch (Exception oEx) {
-            logger.error(org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
+            m_oLogger.error(org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
         }
 
         return  "";		
