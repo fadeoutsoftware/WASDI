@@ -69,25 +69,38 @@ public class OpportunitySearchResource {
 			Date dtDate = new Date();
 			String sArea = OrbitSearch.getPolygon();
 			int iIdCoverageCounter = 1;
+			
+			System.out.println("Create data e poligono");
 
 			// Foreach filter combination found
 			List<OrbitFilterViewModel> oOrbitFilters = OrbitSearch.getOrbitFilters();
 			for (OrbitFilterViewModel oOrbitFilter : oOrbitFilters) {
+				
+				System.out.println("Ciclo filtri");
 
 				// Find the opportunities
 				ArrayList<CoverageSwathResult> aoCoverageSwathResult = new ArrayList<>();
 				try {
+					System.out.println("PRE FIND");
 					aoCoverageSwathResult = InstanceFinder.findSwatsByFilters(sArea,
 							OrbitSearch.getAcquisitionStartTime(), OrbitSearch.getAcquisitionEndTime(),
 							OrbitSearch.getSatelliteNames(), oOrbitFilter.getSensorResolution(),
 							oOrbitFilter.getSensorType(),OrbitSearch.getLookingType(),OrbitSearch.getViewAngle(),OrbitSearch.getSwathSize());
+					System.out.println("POST FIND");
 				} 
-				catch (ParseException e) {
+				catch (Throwable e) {
+					System.out.println("ECCEZIONE " + e.toString());
 					e.printStackTrace();
 				}
 
-				if (aoCoverageSwathResult == null)
+				System.out.println("uscito dal ciclo");
+				
+				if (aoCoverageSwathResult == null) {
+					System.out.println("TORNATO NULL");
 					return null;
+				}
+				
+				System.out.println("Risultati ok " + aoCoverageSwathResult.size());
 
 				// For each Swat Result
 				for (CoverageSwathResult oSwatResul : aoCoverageSwathResult) {
@@ -101,6 +114,8 @@ public class OpportunitySearchResource {
 				}
 
 			}
+			
+			System.out.println("TORNO");
 
 			return aoCoverageSwathResultViewModels;
 		} catch (Exception oEx) {

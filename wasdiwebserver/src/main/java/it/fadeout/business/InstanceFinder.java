@@ -429,6 +429,7 @@ public class InstanceFinder {
 		LookingType oLookingType = convertLookingTypeString(sLookingType);
 		ViewAngle oViewAngle = convertViewAngleString(sViewAngle);
 		swathSize oSwathSize = convertSwathSizeString(sSwathSize);
+		
 		for (ISatellite oSatellite : m_aoSatellites) {
 
 			if (oSatellite.getType().toString().toUpperCase().equals(sSensorType.toUpperCase()) == false) continue;
