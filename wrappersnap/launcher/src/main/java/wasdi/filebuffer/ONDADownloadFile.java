@@ -54,15 +54,15 @@ public class ONDADownloadFile extends DownloadFile {
 	@Override
 	public long GetDownloadFileSize(String sFileURL) throws Exception {
 		//file:/mnt/OPTICAL/LEVEL-1C/2018/12/12/S2B_MSIL1C_20181212T010259_N0207_R045_T54PZA_20181212T021706.zip/.value
-		
+
 		m_oLogger.debug("ONDADownloadFile.GetDownloadSize: start " + sFileURL);
-		
+
 		long lLenght = 0L;
 
 		if(sFileURL.startsWith("file:")) {
 
 			m_sPrefix = "file:";
-			m_sSuffix = ".value";
+			m_sSuffix = "/.value";
 			// Remove the prefix
 			int iStart = sFileURL.indexOf(m_sPrefix) +m_sPrefix.length();
 			String sPath = sFileURL.substring(iStart);
@@ -71,7 +71,7 @@ public class ONDADownloadFile extends DownloadFile {
 			sPath = sPath.substring(0, sPath.lastIndexOf(m_sSuffix));
 
 			// This is the folder: we need the .value file
-			String sSourceFilePath = sPath + "/" + m_sSuffix;
+			String sSourceFilePath = sPath + m_sSuffix;
 
 			m_oLogger.debug("ONDADownloadFile.GetDownloadSize: full path " + sSourceFilePath);
 			File oSourceFile = new File(sSourceFilePath);
@@ -127,14 +127,14 @@ public class ONDADownloadFile extends DownloadFile {
 		});
 
 		m_oLogger.debug("ONDADownloadFile.GetDownloadSize: FileUrl = " + sFileURL);
-		
+
 		try {
 			URL oUrl = new URL(sFileURL);
 			HttpURLConnection oConnection = (HttpURLConnection) oUrl.openConnection();
 			oConnection.setRequestMethod("GET");
 			oConnection.setRequestProperty("Accept", "*/*");
-			oConnection.setConnectTimeout(10000);
-			oConnection.setReadTimeout(10000);
+			oConnection.setConnectTimeout(100000);
+			oConnection.setReadTimeout(100000);
 			m_oLogger.debug("ONDADownloadFile.GetDownloadSize: Call get response");
 			int responseCode = oConnection.getResponseCode();
 			m_oLogger.debug("ONDADownloadFile.GetDownloadSize: Response got");
@@ -177,9 +177,9 @@ public class ONDADownloadFile extends DownloadFile {
 
 
 		if(sFileURL.startsWith("file:")) {
-			//file:/mnt/OPTICAL/LEVEL-1C/2018/12/12/S2B_MSIL1C_20181212T010259_N0207_R045_T54PZA_20181212T021706.zip.value
+			//file:/mnt/OPTICAL/LEVEL-1C/2018/12/12/S2B_MSIL1C_20181212T010259_N0207_R045_T54PZA_20181212T021706.zip/.value
 			m_sPrefix = "file:";
-			m_sSuffix = ".value";
+			m_sSuffix = "/.value";
 			// Remove the prefix
 			int iStart = sFileURL.indexOf(m_sPrefix) +m_sPrefix.length();
 			String sPath = sFileURL.substring(iStart);
@@ -188,7 +188,7 @@ public class ONDADownloadFile extends DownloadFile {
 			sPath = sPath.substring(0, sPath.lastIndexOf(m_sSuffix));
 
 			// This is the folder: we need the .value file
-			String sSourceFilePath = sPath + "/" + m_sSuffix;
+			String sSourceFilePath = sPath + m_sSuffix;
 			File oSourceFile = new File(sSourceFilePath);
 
 			// Destination file name: start from the simple name
@@ -200,6 +200,7 @@ public class ONDADownloadFile extends DownloadFile {
 			sDestinationFileName = sSaveDirOnServer + sDestinationFileName;
 
 			// copy the product from file system
+			//TODO read file as a stream and notify every 10%
 			FileUtils.copyFile(oSourceFile, new File(sDestinationFileName));
 			return sDestinationFileName;
 		} else if(sFileURL.startsWith("https://")) {
@@ -246,9 +247,9 @@ public class ONDADownloadFile extends DownloadFile {
 			String sFileName = "";
 			String sDisposition = oConnection.getHeaderField("Content-Disposition");
 			String sContentType = oConnection.getContentType();
-			int iContentLength = oConnection.getContentLength();
+			long  lContentLength = oConnection.getContentLength();
 
-			m_oLogger.debug("ExecuteDownloadFile. ContentLenght: " + iContentLength);
+			m_oLogger.debug("ExecuteDownloadFile. ContentLenght: " + lContentLength);
 
 			if (sDisposition != null) {
 				// extracts file name from header field
@@ -263,7 +264,7 @@ public class ONDADownloadFile extends DownloadFile {
 
 			m_oLogger.debug("Content-Type = " + sContentType);
 			m_oLogger.debug("Content-Disposition = " + sDisposition);
-			m_oLogger.debug("Content-Length = " + iContentLength);
+			m_oLogger.debug("Content-Length = " + lContentLength);
 			m_oLogger.debug("fileName = " + sFileName);
 
 			// opens input stream from the HTTP connection
@@ -282,7 +283,7 @@ public class ONDADownloadFile extends DownloadFile {
 			// Cumulative Byte Count
 			int iTotalBytes = 0;
 			// Byte that represent 10% of the file
-			int iTenPercent = iContentLength/10;
+			long lTenPercent = lContentLength/10;
 			// Percent of the completed download
 			int iFilePercent = 0 ;
 
@@ -299,7 +300,7 @@ public class ONDADownloadFile extends DownloadFile {
 				}
 				if (nZeroes <=0 ) break;
 
-				//            	logger.debug("ExecuteDownloadFile. Read " + iBytesRead +  " bytes from stream");
+				//logger.debug("ExecuteDownloadFile. Read " + iBytesRead +  " bytes from stream");
 
 				oOutputStream.write(abBuffer, 0, iBytesRead);
 
@@ -307,7 +308,7 @@ public class ONDADownloadFile extends DownloadFile {
 				iTotalBytes += iBytesRead;
 
 				// Overcome a 10% limit?
-				if(oProcessWorkspace!=null && iContentLength>BUFFER_SIZE && iTotalBytes>=iTenPercent && iFilePercent<=100) {
+				if(oProcessWorkspace!=null && lContentLength>BUFFER_SIZE && iTotalBytes>=lTenPercent && iFilePercent<=100) {
 					// Increase the file
 					iFilePercent += 10;
 					if (iFilePercent>100) iFilePercent = 100;
@@ -337,6 +338,112 @@ public class ONDADownloadFile extends DownloadFile {
 	 */
 	@Override
 	public String GetFileName(String sFileURL) throws Exception {
+		try {
+			// Domain check
+			if (Utils.isNullOrEmpty(sFileURL)) {
+				m_oLogger.debug("DownloadFile.GetFileName: sFileURL is null or Empty");
+				return "";
+			}
+
+			String sReturnFilePath = "";
+
+			String sUser = ConfigReader.getPropValue("ONDA_USER");
+			String sPassword = ConfigReader.getPropValue("ONDA_PASSWORD");
+
+			if (!Utils.isNullOrEmpty(m_sProviderUser)) sUser = m_sProviderUser;
+			if (!Utils.isNullOrEmpty(m_sProviderPassword)) sPassword = m_sProviderPassword;
+
+			final String sFinalUser = sUser;
+			final String sFinalPassword = sPassword;
+
+			// dhus authentication
+			Authenticator.setDefault(new Authenticator() {
+				protected PasswordAuthentication getPasswordAuthentication() {
+					try{
+						return new PasswordAuthentication(sFinalUser, sFinalPassword.toCharArray());
+					}
+					catch (Exception oEx){
+						m_oLogger.error("DownloadFile.GetFileName: exception setting auth " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
+					}
+					return null;
+				}
+			});
+
+			m_oLogger.debug("DownloadFile.GetFileName: FileUrl = " + sFileURL);
+
+			String sConnectionTimeout = ConfigReader.getPropValue("CONNECTION_TIMEOUT");
+			String sReadTimeOut = ConfigReader.getPropValue("READ_TIMEOUT");
+
+			int iConnectionTimeOut = 10000;
+			int iReadTimeOut = 10000;
+
+			try {
+				iConnectionTimeOut = Integer.parseInt(sConnectionTimeout);
+			}
+			catch (Exception oEx) {
+				m_oLogger.error(org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
+			}
+			try {
+				iReadTimeOut = Integer.parseInt(sReadTimeOut);
+			}
+			catch (Exception oEx) {
+				m_oLogger.error(org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
+			}
+
+			URL url = new URL(sFileURL);
+			HttpURLConnection oConnection = (HttpURLConnection) url.openConnection();
+			oConnection.setRequestMethod("GET");
+			oConnection.setRequestProperty("Accept", "*/*");
+			m_oLogger.debug("DownloadFile.GetFileName: Connection Created");
+			oConnection.setConnectTimeout(iConnectionTimeOut);
+			oConnection.setReadTimeout(iReadTimeOut);
+			m_oLogger.debug("DownloadFile.GetFileName: Timeout Setted: waiting response");
+			int responseCode = oConnection.getResponseCode();
+
+			// always check HTTP response code first
+			if (responseCode == HttpURLConnection.HTTP_OK) {
+
+				m_oLogger.debug("DownloadFile.GetFileName: Connected");
+
+				String fileName = "";
+				String disposition = oConnection.getHeaderField("Content-Disposition");
+				String contentType = oConnection.getContentType();
+				int contentLength = oConnection.getContentLength();
+
+				if (disposition != null) {
+					// extracts file name from header field
+					int index = disposition.indexOf("filename=");
+					if (index > 0) {
+						fileName = disposition.substring(index + 10,  disposition.length() - 1);
+					}
+				} else {
+					// extracts file name from URL
+					fileName = sFileURL.substring(sFileURL.lastIndexOf("/") + 1, sFileURL.length());
+				}
+
+				sReturnFilePath = fileName;
+
+				m_oLogger.debug("Content-Type = " + contentType);
+				m_oLogger.debug("Content-Disposition = " + disposition);
+				m_oLogger.debug("Content-Length = " + contentLength);
+				m_oLogger.debug("fileName = " + fileName);
+			} else {
+				m_oLogger.debug("No file to download. Server replied HTTP code: " + responseCode);
+				m_iLastError = responseCode;
+			}
+			oConnection.disconnect();
+
+			return  sReturnFilePath;
+		}
+		catch (Exception oEx) {
+			m_oLogger.error(org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
+		}
+
+		return  "";
+	}
+}
+/*
+
 		//check whether the file has already been downloaded, else return null
 
 		if (Utils.isNullOrEmpty(sFileURL)) {
@@ -356,16 +463,12 @@ public class ONDADownloadFile extends DownloadFile {
 			sOnlyName = sOnlyName.substring(0, sOnlyName.lastIndexOf(m_sSuffix)); 
 			return sOnlyName;
 
-		} else if(sFileURL.startsWith("https://")) {
-			
-			// TODO: Qui deve ottenere il nome del file e non usare l'ultima parte. 
-			
+		} else if(sFileURL.startsWith("https://")) {			
+			//https://catalogue.onda-dias.eu/dias-catalogue/Products(357ae76d-f1c4-4f25-b535-e278c3f937af)/$value
 			m_sPrefix = "https://";
 			int iStart = sFileURL.lastIndexOf("/") + 1;
 			String sFileName = sFileURL.substring(iStart);
 			return sFileName;
 		} 
 		return null;	
-	}
-
-}
+ */

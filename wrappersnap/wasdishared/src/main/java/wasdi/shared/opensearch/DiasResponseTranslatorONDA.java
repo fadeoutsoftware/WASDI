@@ -78,7 +78,7 @@ public class DiasResponseTranslatorONDA implements DiasResponseTranslator {
 						sPath = "file:/mnt/";
 						String[] sIntermediate = sPseudopath.split(", ");
 						sPath += sIntermediate[0]; 
-						sPath += "/" + sName + ".value";
+						sPath += "/" + sName + "/.value";
 					} else {
 						return null;
 					}
@@ -86,7 +86,10 @@ public class DiasResponseTranslatorONDA implements DiasResponseTranslator {
 					if(!Utils.isNullOrEmpty(sId)) {
 						//tentative download
 						sPath += sProtocol;
-						sPath += "//catalogue.onda-dias.eu/dias-catalogue/Products";
+						if(!sProtocol.endsWith("//")) {
+							sPath += "//";
+						}
+						sPath += "catalogue.onda-dias.eu/dias-catalogue/Products";
 						sPath += "(";
 						sPath += sId;
 						sPath += ")";
