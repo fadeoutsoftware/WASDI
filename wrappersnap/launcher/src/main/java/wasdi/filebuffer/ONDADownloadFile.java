@@ -7,22 +7,20 @@
 package wasdi.filebuffer;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.Authenticator;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.PasswordAuthentication;
 import java.net.URL;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 
 import wasdi.ConfigReader;
-import wasdi.shared.business.DownloadedFile;
 import wasdi.shared.business.ProcessWorkspace;
-import wasdi.shared.data.DownloadedFilesRepository;
 import wasdi.shared.utils.Utils;
 
 /**
@@ -201,7 +199,19 @@ public class ONDADownloadFile extends DownloadFile {
 
 			// copy the product from file system
 			//TODO read file as a stream and notify every 10%
-			FileUtils.copyFile(oSourceFile, new File(sDestinationFileName));
+			//FileUtils.copyFile(oSourceFile, new File(sDestinationFileName));
+			try {
+				File oDestionationFile = new File(sDestinationFileName);
+				//oDestionationFile.createNewFile();
+				InputStream oInputStream = new FileInputStream(oSourceFile);
+				OutputStream oOutputStream = new FileOutputStream(oDestionationFile);
+				copyStream(oProcessWorkspace, oSourceFile.length(), oInputStream, oOutputStream);
+
+
+			} catch (Exception e) {
+				e.printStackTrace();
+				m_oLogger.debug( e.toString() );
+			}
 			return sDestinationFileName;
 		} else if(sFileURL.startsWith("https://")) {
 			return downloadViaHttp(sFileURL, sDownloadUser, sDownloadPassword, sSaveDirOnServer, oProcessWorkspace);
@@ -280,47 +290,7 @@ public class ONDADownloadFile extends DownloadFile {
 			// opens an output stream to save into file
 			FileOutputStream oOutputStream = new FileOutputStream(saveFilePath);
 
-			// Cumulative Byte Count
-			int iTotalBytes = 0;
-			// Byte that represent 10% of the file
-			long lTenPercent = lContentLength/10;
-			// Percent of the completed download
-			int iFilePercent = 0 ;
-
-			int iBytesRead = -1;
-			byte[] abBuffer = new byte[BUFFER_SIZE];
-			int nZeroes = MAX_NUM_ZEORES_DURING_READ;
-			while ((iBytesRead = oInputStream.read(abBuffer)) != -1) {
-
-				if (iBytesRead <= 0) {
-					m_oLogger.debug("ExecuteDownloadFile. Read 0 bytes from stream. Counter: " + nZeroes);
-					nZeroes--;
-				} else {
-					nZeroes = MAX_NUM_ZEORES_DURING_READ;
-				}
-				if (nZeroes <=0 ) break;
-
-				//logger.debug("ExecuteDownloadFile. Read " + iBytesRead +  " bytes from stream");
-
-				oOutputStream.write(abBuffer, 0, iBytesRead);
-
-				// Sum bytes
-				iTotalBytes += iBytesRead;
-
-				// Overcome a 10% limit?
-				if(oProcessWorkspace!=null && lContentLength>BUFFER_SIZE && iTotalBytes>=lTenPercent && iFilePercent<=100) {
-					// Increase the file
-					iFilePercent += 10;
-					if (iFilePercent>100) iFilePercent = 100;
-					// Reset the count
-					iTotalBytes = 0;
-					// Update the progress
-					if (nZeroes == MAX_NUM_ZEORES_DURING_READ) UpdateProcessProgress(oProcessWorkspace, iFilePercent);
-				}
-			}
-
-			oOutputStream.close();
-			oInputStream.close();
+			copyStream(oProcessWorkspace, lContentLength, oInputStream, oOutputStream);
 
 			sReturnFilePath = saveFilePath;
 
@@ -333,11 +303,89 @@ public class ONDADownloadFile extends DownloadFile {
 		return  sReturnFilePath;
 	}
 
+	protected void copyStream(ProcessWorkspace oProcessWorkspace, long lContentLength, InputStream oInputStream,
+			OutputStream oOutputStream) throws IOException {
+
+		// Cumulative Byte Count
+		int iTotalBytes = 0;
+		// Byte that represent 10% of the file
+		long lTenPercent = lContentLength/10;
+		// Percent of the completed download
+		int iFilePercent = 0 ;
+
+		int iBytesRead = -1;
+		byte[] abBuffer = new byte[BUFFER_SIZE];
+		int nZeroes = MAX_NUM_ZEORES_DURING_READ;
+		while ((iBytesRead = oInputStream.read(abBuffer)) != -1) {
+
+			if (iBytesRead <= 0) {
+				m_oLogger.debug("ExecuteDownloadFile. Read 0 bytes from stream. Counter: " + nZeroes);
+				nZeroes--;
+			} else {
+				nZeroes = MAX_NUM_ZEORES_DURING_READ;
+			}
+			if (nZeroes <=0 ) break;
+
+			//logger.debug("ExecuteDownloadFile. Read " + iBytesRead +  " bytes from stream");
+
+			oOutputStream.write(abBuffer, 0, iBytesRead);
+
+			// Sum bytes
+			iTotalBytes += iBytesRead;
+
+			// Overcome a 10% limit?
+			if(oProcessWorkspace!=null && lContentLength>BUFFER_SIZE && iTotalBytes>=lTenPercent && iFilePercent<=100) {
+				// Increase the file
+				iFilePercent += 10;
+				if (iFilePercent>100) iFilePercent = 100;
+				// Reset the count
+				iTotalBytes = 0;
+				// Update the progress
+				if (nZeroes == MAX_NUM_ZEORES_DURING_READ) UpdateProcessProgress(oProcessWorkspace, iFilePercent);
+			}
+		}
+
+		oOutputStream.close();
+		oInputStream.close();
+	}
+
 	/* (non-Javadoc)
 	 * @see wasdi.filebuffer.DownloadFile#GetFileName(java.lang.String)
 	 */
 	@Override
 	public String GetFileName(String sFileURL) throws Exception {
+		//check whether the file has already been downloaded, else return null
+
+		if (Utils.isNullOrEmpty(sFileURL)) {
+			m_oLogger.debug("DownloadFile.GetFileName: sFileURL is null or Empty");
+			m_oLogger.fatal("DownloadFile.GetFileName: sFileURL is null or Empty");
+			return "";
+		}
+
+		if(sFileURL.startsWith("file:")) {
+
+			m_sPrefix = "file:";
+			m_sSuffix = "/.value";
+			// Remove the prefix
+			int iStart = sFileURL.indexOf(m_sPrefix) +m_sPrefix.length();
+			String sPath = sFileURL.substring(iStart);
+
+			// remove the ".value" suffix
+			sPath = sPath.substring(0, sPath.lastIndexOf(m_sSuffix));
+
+			// Destination file name: start from the simple name
+			//commented out as it returns null if the file is not in WASDI, use the next one instead
+			//String sDestinationFileName = GetFileName(sFileURL);
+			String sDestinationFileName = sPath.substring( sPath.lastIndexOf("/") + 1);
+			return sDestinationFileName;
+
+		} else if(sFileURL.startsWith("https://")) {
+			return getFileNameViaHttp(sFileURL);
+		} 
+		return null;	
+	}
+
+	protected String getFileNameViaHttp(String sFileURL) throws Exception {
 		try {
 			// Domain check
 			if (Utils.isNullOrEmpty(sFileURL)) {

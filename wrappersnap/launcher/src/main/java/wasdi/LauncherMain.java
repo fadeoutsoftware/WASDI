@@ -497,7 +497,7 @@ public class LauncherMain {
                     if (Utils.isNullOrEmpty(sFileName)) {
                     	int iLastError = oDownloadFile.getLastServerError();
                     	String sError = "There was an error contacting the provider";
-                    	if (iLastError>0) sError+=": query obtained HTTP Erro Code " + iLastError;
+                    	if (iLastError>0) sError+=": query obtained HTTP Error Code " + iLastError;
                     	throw new Exception(sError);
                     }
 
