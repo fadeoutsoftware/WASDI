@@ -207,7 +207,6 @@ public class ONDADownloadFile extends DownloadFile {
 				OutputStream oOutputStream = new FileOutputStream(oDestionationFile);
 				copyStream(oProcessWorkspace, oSourceFile.length(), oInputStream, oOutputStream);
 
-
 			} catch (Exception e) {
 				e.printStackTrace();
 				m_oLogger.debug( e.toString() );
@@ -309,7 +308,7 @@ public class ONDADownloadFile extends DownloadFile {
 		// Cumulative Byte Count
 		int iTotalBytes = 0;
 		// Byte that represent 10% of the file
-		long lTenPercent = lContentLength/10;
+		long lOnePercent = lContentLength/100;
 		// Percent of the completed download
 		int iFilePercent = 0 ;
 
@@ -333,10 +332,10 @@ public class ONDADownloadFile extends DownloadFile {
 			// Sum bytes
 			iTotalBytes += iBytesRead;
 
-			// Overcome a 10% limit?
-			if(oProcessWorkspace!=null && lContentLength>BUFFER_SIZE && iTotalBytes>=lTenPercent && iFilePercent<=100) {
+			// Overcome a 1% limit?
+			if(oProcessWorkspace!=null && lContentLength>BUFFER_SIZE && iTotalBytes>=lOnePercent && iFilePercent<=100) {
 				// Increase the file
-				iFilePercent += 10;
+				iFilePercent += 1;
 				if (iFilePercent>100) iFilePercent = 100;
 				// Reset the count
 				iTotalBytes = 0;

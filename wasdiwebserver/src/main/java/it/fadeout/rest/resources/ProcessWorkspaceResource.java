@@ -3,6 +3,7 @@ package it.fadeout.rest.resources;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 
 import javax.servlet.ServletConfig;
 import javax.ws.rs.GET;
@@ -124,8 +125,8 @@ public class ProcessWorkspaceResource {
 
 	private ProcessWorkspaceViewModel buildProcessWorkspaceViewModel(ProcessWorkspace oProcess) {
 		ProcessWorkspaceViewModel oViewModel = new ProcessWorkspaceViewModel();
-		oViewModel.setOperationDate(oProcess.getOperationDate());
-		oViewModel.setOperationEndDate(oProcess.getOperationEndDate());
+		oViewModel.setOperationDate(oProcess.getOperationDate() + " " + TimeZone.getDefault().getDisplayName(false, TimeZone.SHORT));
+		oViewModel.setOperationEndDate(oProcess.getOperationEndDate() + " " + TimeZone.getDefault().getDisplayName(false, TimeZone.SHORT));
 		oViewModel.setOperationType(oProcess.getOperationType());
 		oViewModel.setProductName(oProcess.getProductName());
 		oViewModel.setUserId(oProcess.getUserId());

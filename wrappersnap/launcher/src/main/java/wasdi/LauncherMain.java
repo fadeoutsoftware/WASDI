@@ -385,6 +385,8 @@ public class LauncherMain {
 			if (s_oSendToRabbit!=null) s_oSendToRabbit.SendRabbitMessage(false, sOperation, sWorkspace,sError,sExchange);			
         	s_oLogger.error("ExecuteOperation Exception", oEx);
         }
+        
+        s_oLogger.debug("Launcher did his job. Bye bye, see you soon.");
     }
 
 
@@ -441,7 +443,7 @@ public class LauncherMain {
                 //get process pid
                 oProcessWorkspace.setPid(GetProcessId());
                 
-                updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 2);
+                //updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 2);
                 
             } else {
             	s_oLogger.debug("LauncherMain.Download: process not found: " + oParameter.getProcessObjId());
@@ -463,7 +465,7 @@ public class LauncherMain {
 
                 // Get the file name
                 String sFileNameWithoutPath = oDownloadFile.GetFileName(oParameter.getUrl());
-                s_oLogger.debug("LauncherMain.Download: File not already downloaded. File Name: " + sFileNameWithoutPath);
+                s_oLogger.debug("LauncherMain.Download: File to download: " + sFileNameWithoutPath);
                 DownloadedFile oAlreadyDownloaded = null;
                 DownloadedFilesRepository oDownloadedRepo = new DownloadedFilesRepository();
                 if (!Utils.isNullOrEmpty(sFileNameWithoutPath)) {
@@ -471,7 +473,7 @@ public class LauncherMain {
                     oAlreadyDownloaded = oDownloadedRepo.GetDownloadedFile(sFileNameWithoutPath);
                 }
 
-                updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 10);
+                //updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 10);
                 
                 if (oAlreadyDownloaded == null) {
                     s_oLogger.debug("LauncherMain.Download: File not already downloaded. Download it");
@@ -543,7 +545,7 @@ public class LauncherMain {
 
                 }
                 
-                updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 80);
+                //updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 80);
             }
             else {
                 s_oLogger.debug("LauncherMain.Download: Debug Option Active: file not really downloaded, using configured one");
@@ -560,7 +562,18 @@ public class LauncherMain {
                 if (oProcessWorkspace != null) oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
             } else {
                 AddProductToDbAndSendToRabbit(oVM, sFileName, oParameter.getWorkspace(), oParameter.getExchange(), LauncherOperations.DOWNLOAD.name(), oParameter.getBoundingBox());
-                if (oProcessWorkspace != null) oProcessWorkspace.setStatus(ProcessStatus.DONE.name());                
+                
+                s_oLogger.debug("LauncherMain.Download: Add Product to Db and Send to Rabbit Done");
+                
+                if (oProcessWorkspace != null) {
+                	s_oLogger.debug("LauncherMain.Download: Set process workspace state as done");
+                	
+                	oProcessWorkspace.setStatus(ProcessStatus.DONE.name());
+                	
+                	s_oLogger.debug("LauncherMain.Download: Set process workspace passed");
+                } else {
+                	s_oLogger.error("LauncherMain.Download: unexpected null oProcessWorkspace");
+                }
             }
         }
         catch (Exception oEx) {
@@ -573,10 +586,15 @@ public class LauncherMain {
             if (s_oSendToRabbit!=null) s_oSendToRabbit.SendRabbitMessage(false,LauncherOperations.DOWNLOAD.name(),oParameter.getWorkspace(),sError,oParameter.getExchange());
         }
         finally{
+        	s_oLogger.debug("LauncherMain.Download: finally call CloseProcessWorkspace ");
             //update process status and send rabbit updateProcess message
             CloseProcessWorkspace(oProcessWorkspaceRepository, oProcessWorkspace);
+            
+            s_oLogger.debug("LauncherMain.Download: CloseProcessWorkspace done");
         }
 
+        s_oLogger.debug("LauncherMain.Download: return file name " + sFileName);
+        
         return  sFileName;
     }
     
@@ -1400,20 +1418,21 @@ public class LauncherMain {
      */
 	private void CloseProcessWorkspace(ProcessWorkspaceRepository oProcessWorkspaceRepository, ProcessWorkspace oProcessWorkspace) {
 		try{
+			s_oLogger.debug("LauncherMain.CloseProcessWorkspace");
 			if (oProcessWorkspace != null) {
 		        //update the process
 				oProcessWorkspace.setProgressPerc(100);
 				oProcessWorkspace.setOperationEndDate(Utils.GetFormatDate(new Date()));
 		        if (!oProcessWorkspaceRepository.UpdateProcess(oProcessWorkspace)) {
-		        	s_oLogger.debug("LauncherMain: Error during process update (terminated)");
+		        	s_oLogger.debug("LauncherMain.CloseProcessWorkspace: Error during process update (terminated)");
 		        }
 		        //send update process message
 				if (s_oSendToRabbit!=null && !s_oSendToRabbit.SendUpdateProcessMessage(oProcessWorkspace)) {
-				    s_oLogger.debug("LauncherMain: Error sending rabbitmq message to update process list");
+				    s_oLogger.debug("LauncherMain.CloseProcessWorkspace: Error sending rabbitmq message to update process list");
 				}
 			}
 		} catch (Exception oEx) {
-		    s_oLogger.debug("LauncherMain: Exception deleting process " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
+		    s_oLogger.debug("LauncherMain.CloseProcessWorkspace: Exception deleting process " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
 		}
 	}
 	
@@ -1546,8 +1565,6 @@ public class LauncherMain {
         	s_oLogger.error("Product NOT added to the Workspace");
         }
         
-        s_oLogger.debug("OK DONE");
-
         s_oLogger.debug("LauncherMain.AddProductToDbAndSendToRabbit: Image added. Send Rabbit Message Exchange = " + sExchange);
 
         if (s_oSendToRabbit!=null) s_oSendToRabbit.SendRabbitMessage(true,sOperation,sWorkspace,oVM,sExchange);
