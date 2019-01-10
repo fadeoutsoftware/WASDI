@@ -509,7 +509,7 @@ public class LauncherMain {
                     Product oProduct = oReadProduct.ReadProduct(oProductFile, null);
                     oVM = oReadProduct.getProductViewModel(oProduct, oProductFile);
 	                // Save Metadata
-	                oVM.setMetadataFileReference(AsynchSaveMetadata(oReadProduct,oProductFile));
+	                oVM.setMetadataFileReference(AsynchSaveMetadata(sFileName));
 
 
                     // Save it in the register
@@ -724,12 +724,11 @@ public class LauncherMain {
         return "";
     }
     
-    public String AsynchSaveMetadata(ReadProduct oReadProduct, File oProductFile) {
+    public String AsynchSaveMetadata(String sProductFile) {
 		
  		// Write Metadata to file system
         try {
         	
-        	 
             // Get Metadata Path a Random File Name
             String sMetadataPath = ConfigReader.getPropValue("METADATA_PATH");
             if (!sMetadataPath.endsWith("/")) sMetadataPath += "/";
@@ -737,7 +736,7 @@ public class LauncherMain {
      		
      		s_oLogger.debug("SaveMetadata: file = " + sMetadataFileName);
      		
-     		SaveMetadataThread oThread = new SaveMetadataThread(sMetadataPath+sMetadataFileName, oReadProduct, oProductFile);
+     		SaveMetadataThread oThread = new SaveMetadataThread(sMetadataPath+sMetadataFileName, sProductFile);
      		oThread.start();
      		 
      		s_oLogger.debug("SaveMetadata: thread started");
@@ -803,7 +802,7 @@ public class LauncherMain {
 	        updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 25);
 	        
             // Save Metadata
-            oVM.setMetadataFileReference(AsynchSaveMetadata(oReadProduct, oFilePath));
+            oVM.setMetadataFileReference(AsynchSaveMetadata(oParameter.getFilePath()));
         
 	        updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 50);	        
 	        
@@ -1568,6 +1567,8 @@ public class LauncherMain {
         s_oLogger.debug("LauncherMain.AddProductToDbAndSendToRabbit: Image added. Send Rabbit Message Exchange = " + sExchange);
 
         if (s_oSendToRabbit!=null) s_oSendToRabbit.SendRabbitMessage(true,sOperation,sWorkspace,oVM,sExchange);
+        
+        s_oLogger.debug("LauncherMain.AddProductToDbAndSendToRabbit: Method finished");
     }
     
     /**
