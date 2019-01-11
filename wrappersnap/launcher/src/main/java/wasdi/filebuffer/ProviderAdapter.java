@@ -23,7 +23,7 @@ import wasdi.shared.business.ProcessWorkspace;
  * Base Download Utility Class 
  * Created by s.adamo on 06/10/2016.
  */
-public abstract class FileDownloader implements ProcessWorkspaceUpdateNotifier {
+public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier {
 
 	protected final int BUFFER_SIZE = 4096;
     protected final int MAX_NUM_ZEORES_DURING_READ = 20;
@@ -38,7 +38,7 @@ public abstract class FileDownloader implements ProcessWorkspaceUpdateNotifier {
     /**
      * Constructor: uses LauncerMain logger
      */
-    public FileDownloader() {
+    public ProviderAdapter() {
 		this(LauncherMain.s_oLogger);	
 	}
     
@@ -46,7 +46,7 @@ public abstract class FileDownloader implements ProcessWorkspaceUpdateNotifier {
      * Constructor with user defined logger
      * @param logger
      */
-    public FileDownloader(Logger logger) {
+    public ProviderAdapter(Logger logger) {
 		this.m_oLogger = logger;
 		m_aoSubscribers = new ArrayList<ProcessWorkspaceUpdateSubscriber>();
 	}
