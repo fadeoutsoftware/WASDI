@@ -420,6 +420,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 		//replaced by the next one
 		//DownloadFile oDownloadFile = DownloadFile.getDownloadFile(oParameter.getProvider());
 		DownloadFile oDownloadFile = new DownloadSupplier().supplyDownloader(oParameter.getProvider());
+		oDownloadFile.subscribe(this);
 
 		ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
 		ProcessWorkspace oProcessWorkspace = oProcessWorkspaceRepository.GetProcessByProcessObjId(oParameter.getProcessObjId());
