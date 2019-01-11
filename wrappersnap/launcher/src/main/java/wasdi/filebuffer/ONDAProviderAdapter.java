@@ -53,7 +53,7 @@ public class ONDAProviderAdapter extends ProviderAdapter {
 	public long GetDownloadFileSize(String sFileURL) throws Exception {
 		//file:/mnt/OPTICAL/LEVEL-1C/2018/12/12/S2B_MSIL1C_20181212T010259_N0207_R045_T54PZA_20181212T021706.zip/.value
 
-		m_oLogger.debug("ONDADownloadFile.GetDownloadSize: start " + sFileURL);
+		m_oLogger.debug("ONDAProviderAdapter.GetDownloadSize: start " + sFileURL);
 
 		long lLenght = 0L;
 
@@ -71,13 +71,13 @@ public class ONDAProviderAdapter extends ProviderAdapter {
 			// This is the folder: we need the .value file
 			String sSourceFilePath = sPath + m_sSuffix;
 
-			m_oLogger.debug("ONDADownloadFile.GetDownloadSize: full path " + sSourceFilePath);
+			m_oLogger.debug("ONDAProviderAdapter.GetDownloadSize: full path " + sSourceFilePath);
 			File oSourceFile = new File(sSourceFilePath);
 			lLenght = oSourceFile.length();
 			if (!oSourceFile.exists()) {
-				m_oLogger.debug("ONDADownloadFile.GetDownloadSize: FILE DOES NOT EXISTS");
+				m_oLogger.debug("ONDAProviderAdapter.GetDownloadSize: FILE DOES NOT EXISTS");
 			}
-			m_oLogger.debug("ONDADownloadFile.GetDownloadSize: Found length " + lLenght);
+			m_oLogger.debug("ONDAProviderAdapter.GetDownloadSize: Found length " + lLenght);
 		} else if(sFileURL.startsWith("https:")) {
 			lLenght = getSizeViaHttp(sFileURL);
 		}
@@ -92,7 +92,7 @@ public class ONDAProviderAdapter extends ProviderAdapter {
 
 		// Domain check
 		if (Utils.isNullOrEmpty(sFileURL)) {
-			m_oLogger.debug("ONDADownloadFile.getSizeViaHttp: sFileURL is null");
+			m_oLogger.debug("ONDAProviderAdapter.getSizeViaHttp: sFileURL is null");
 			return lLength;
 		}
 		String sUser = "";
@@ -118,13 +118,13 @@ public class ONDAProviderAdapter extends ProviderAdapter {
 					return new PasswordAuthentication(sFinalUser, sFinalPassword.toCharArray());
 				}
 				catch (Exception oEx){
-					m_oLogger.error("ONDADownloadFile.GetDownloadSize: exception setting auth " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
+					m_oLogger.error("ONDAProviderAdapter.GetDownloadSize: exception setting auth " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
 				}
 				return null;
 			}
 		});
 
-		m_oLogger.debug("ONDADownloadFile.GetDownloadSize: FileUrl = " + sFileURL);
+		m_oLogger.debug("ONDAProviderAdapter.GetDownloadSize: FileUrl = " + sFileURL);
 
 		try {
 			URL oUrl = new URL(sFileURL);
@@ -133,23 +133,23 @@ public class ONDAProviderAdapter extends ProviderAdapter {
 			oConnection.setRequestProperty("Accept", "*/*");
 			oConnection.setConnectTimeout(100000);
 			oConnection.setReadTimeout(100000);
-			m_oLogger.debug("ONDADownloadFile.GetDownloadSize: Call get response");
+			m_oLogger.debug("ONDAProviderAdapter.GetDownloadSize: Call get response");
 			int responseCode = oConnection.getResponseCode();
-			m_oLogger.debug("ONDADownloadFile.GetDownloadSize: Response got");
+			m_oLogger.debug("ONDAProviderAdapter.GetDownloadSize: Response got");
 
 			// always check HTTP response code first
 			if (responseCode == HttpURLConnection.HTTP_OK) {
 				lLength = oConnection.getHeaderFieldLong("Content-Length", 0L);
-				m_oLogger.debug("ONDADownloadFile.GetDownloadSize: File size = " + lLength);
+				m_oLogger.debug("ONDAProviderAdapter.GetDownloadSize: File size = " + lLength);
 				return lLength;
 			} else {
-				m_oLogger.debug("ONDADownloadFile.GetDownloadSize: No file to download. Server replied HTTP code: " + responseCode);
+				m_oLogger.debug("ONDAProviderAdapter.GetDownloadSize: No file to download. Server replied HTTP code: " + responseCode);
 				m_iLastError = responseCode;
 			}
 			oConnection.disconnect();			
 		}
 		catch (Exception oEx) {
-			m_oLogger.debug("ONDADownloadFile.GetDownloadSize: Exception " + oEx.toString());
+			m_oLogger.debug("ONDAProviderAdapter.GetDownloadSize: Exception " + oEx.toString());
 		}
 
 
@@ -164,19 +164,18 @@ public class ONDAProviderAdapter extends ProviderAdapter {
 			String sSaveDirOnServer, ProcessWorkspace oProcessWorkspace) throws Exception {
 		// Domain check
 		if (Utils.isNullOrEmpty(sFileURL)) {
-			m_oLogger.debug("ONDAVDownloadFile.ExecuteDownloadFile: sFileURL is null");
+			m_oLogger.debug("ONDAProviderAdapter.ExecuteDownloadFile: sFileURL is null");
 			return "";
 		}
 		if (Utils.isNullOrEmpty(sSaveDirOnServer)) {
-			m_oLogger.debug("ONDADownloadFile.ExecuteDownloadFile: sSaveDirOnServer is null");
+			m_oLogger.debug("ONDAProviderAdapter.ExecuteDownloadFile: sSaveDirOnServer is null");
 			return "";
 		}
 		setProcessWorkspace(oProcessWorkspace);
 
-
-
 		if(sFileURL.startsWith("file:")) {
 			//file:/mnt/OPTICAL/LEVEL-1C/2018/12/12/S2B_MSIL1C_20181212T010259_N0207_R045_T54PZA_20181212T021706.zip/.value
+			
 			m_sPrefix = "file:";
 			m_sSuffix = "/.value";
 			// Remove the prefix
@@ -191,16 +190,14 @@ public class ONDAProviderAdapter extends ProviderAdapter {
 			File oSourceFile = new File(sSourceFilePath);
 
 			// Destination file name: start from the simple name
-			//commented out as it returns null if the file is not in WASDI, use the next one instead
-			//String sDestinationFileName = GetFileName(sFileURL);
+			// Do not call GetFileName: here in ONDA the real file is called .value, for WASDI getFileName returns the original Satellite file name
 			String sDestinationFileName = sPath.substring( sPath.lastIndexOf("/") + 1);
+			
 			// set the destination folder
 			if (sSaveDirOnServer.endsWith("/") == false) sSaveDirOnServer += "/";
 			sDestinationFileName = sSaveDirOnServer + sDestinationFileName;
 
 			// copy the product from file system
-			//TODO read file as a stream and notify every 10%
-			//FileUtils.copyFile(oSourceFile, new File(sDestinationFileName));
 			try {
 				File oDestionationFile = new File(sDestinationFileName);
 				//oDestionationFile.createNewFile();
@@ -228,13 +225,14 @@ public class ONDAProviderAdapter extends ProviderAdapter {
 		//check whether the file has already been downloaded, else return null
 
 		if (Utils.isNullOrEmpty(sFileURL)) {
-			m_oLogger.debug("DownloadFile.GetFileName: sFileURL is null or Empty");
-			m_oLogger.fatal("DownloadFile.GetFileName: sFileURL is null or Empty");
+			m_oLogger.debug("ONDAProviderAdapter.GetFileName: sFileURL is null or Empty");
+			m_oLogger.fatal("ONDAProviderAdapter.GetFileName: sFileURL is null or Empty");
 			return "";
 		}
 
 		if(sFileURL.startsWith("file:")) {
-
+			
+			// In Onda, the real file is .value but here we need the name of Satellite image that, in ONDA is the parent folder name
 			m_sPrefix = "file:";
 			m_sSuffix = "/.value";
 			// Remove the prefix
@@ -245,8 +243,6 @@ public class ONDAProviderAdapter extends ProviderAdapter {
 			sPath = sPath.substring(0, sPath.lastIndexOf(m_sSuffix));
 
 			// Destination file name: start from the simple name
-			//commented out as it returns null if the file is not in WASDI, use the next one instead
-			//String sDestinationFileName = GetFileName(sFileURL);
 			String sDestinationFileName = sPath.substring( sPath.lastIndexOf("/") + 1);
 			return sDestinationFileName;
 
@@ -255,139 +251,5 @@ public class ONDAProviderAdapter extends ProviderAdapter {
 		} 
 		return null;	
 	}
-
-	protected String getFileNameViaHttp(String sFileURL) throws Exception {
-		try {
-			// Domain check
-			if (Utils.isNullOrEmpty(sFileURL)) {
-				m_oLogger.debug("DownloadFile.GetFileName: sFileURL is null or Empty");
-				return "";
-			}
-
-			String sReturnFilePath = "";
-
-			String sUser = ConfigReader.getPropValue("ONDA_USER");
-			String sPassword = ConfigReader.getPropValue("ONDA_PASSWORD");
-
-			if (!Utils.isNullOrEmpty(m_sProviderUser)) sUser = m_sProviderUser;
-			if (!Utils.isNullOrEmpty(m_sProviderPassword)) sPassword = m_sProviderPassword;
-
-			final String sFinalUser = sUser;
-			final String sFinalPassword = sPassword;
-
-			// dhus authentication
-			Authenticator.setDefault(new Authenticator() {
-				protected PasswordAuthentication getPasswordAuthentication() {
-					try{
-						return new PasswordAuthentication(sFinalUser, sFinalPassword.toCharArray());
-					}
-					catch (Exception oEx){
-						m_oLogger.error("DownloadFile.GetFileName: exception setting auth " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
-					}
-					return null;
-				}
-			});
-
-			m_oLogger.debug("DownloadFile.GetFileName: FileUrl = " + sFileURL);
-
-			String sConnectionTimeout = ConfigReader.getPropValue("CONNECTION_TIMEOUT");
-			String sReadTimeOut = ConfigReader.getPropValue("READ_TIMEOUT");
-
-			int iConnectionTimeOut = 10000;
-			int iReadTimeOut = 10000;
-
-			try {
-				iConnectionTimeOut = Integer.parseInt(sConnectionTimeout);
-			}
-			catch (Exception oEx) {
-				m_oLogger.error(org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
-			}
-			try {
-				iReadTimeOut = Integer.parseInt(sReadTimeOut);
-			}
-			catch (Exception oEx) {
-				m_oLogger.error(org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
-			}
-
-			URL url = new URL(sFileURL);
-			HttpURLConnection oConnection = (HttpURLConnection) url.openConnection();
-			oConnection.setRequestMethod("GET");
-			oConnection.setRequestProperty("Accept", "*/*");
-			m_oLogger.debug("DownloadFile.GetFileName: Connection Created");
-			oConnection.setConnectTimeout(iConnectionTimeOut);
-			oConnection.setReadTimeout(iReadTimeOut);
-			m_oLogger.debug("DownloadFile.GetFileName: Timeout Setted: waiting response");
-			int responseCode = oConnection.getResponseCode();
-
-			// always check HTTP response code first
-			if (responseCode == HttpURLConnection.HTTP_OK) {
-
-				m_oLogger.debug("DownloadFile.GetFileName: Connected");
-
-				String fileName = "";
-				String disposition = oConnection.getHeaderField("Content-Disposition");
-				String contentType = oConnection.getContentType();
-				int contentLength = oConnection.getContentLength();
-
-				if (disposition != null) {
-					// extracts file name from header field
-					int index = disposition.indexOf("filename=");
-					if (index > 0) {
-						fileName = disposition.substring(index + 10,  disposition.length() - 1);
-					}
-				} else {
-					// extracts file name from URL
-					fileName = sFileURL.substring(sFileURL.lastIndexOf("/") + 1, sFileURL.length());
-				}
-
-				sReturnFilePath = fileName;
-
-				m_oLogger.debug("Content-Type = " + contentType);
-				m_oLogger.debug("Content-Disposition = " + disposition);
-				m_oLogger.debug("Content-Length = " + contentLength);
-				m_oLogger.debug("fileName = " + fileName);
-			} else {
-				m_oLogger.debug("No file to download. Server replied HTTP code: " + responseCode);
-				m_iLastError = responseCode;
-			}
-			oConnection.disconnect();
-
-			return  sReturnFilePath;
-		}
-		catch (Exception oEx) {
-			m_oLogger.error(org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
-		}
-
-		return  "";
-	}
+	
 }
-/*
-
-		//check whether the file has already been downloaded, else return null
-
-		if (Utils.isNullOrEmpty(sFileURL)) {
-			m_oLogger.debug("DownloadFile.GetFileName: sFileURL is null or Empty");
-			m_oLogger.fatal("DownloadFile.GetFileName: sFileURL is null or Empty");
-			return "";
-		}
-
-		if(sFileURL.startsWith("file:")) {
-			String sSourceFilePath = "";
-			m_sPrefix = "file:";
-			m_sSuffix = ".value";
-			int iStart = sFileURL.indexOf(m_sPrefix) + m_sPrefix.length();
-			sSourceFilePath += sFileURL.substring(iStart);
-			File oInputFile = new File(sSourceFilePath);
-			String sOnlyName = oInputFile.getName(); 
-			sOnlyName = sOnlyName.substring(0, sOnlyName.lastIndexOf(m_sSuffix)); 
-			return sOnlyName;
-
-		} else if(sFileURL.startsWith("https://")) {			
-			//https://catalogue.onda-dias.eu/dias-catalogue/Products(357ae76d-f1c4-4f25-b535-e278c3f937af)/$value
-			m_sPrefix = "https://";
-			int iStart = sFileURL.lastIndexOf("/") + 1;
-			String sFileName = sFileURL.substring(iStart);
-			return sFileName;
-		} 
-		return null;	
- */
