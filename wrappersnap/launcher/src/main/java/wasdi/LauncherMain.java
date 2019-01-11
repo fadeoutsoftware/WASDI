@@ -419,8 +419,8 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 		// Download handler
 		//replaced by the next one
 		//DownloadFile oDownloadFile = DownloadFile.getDownloadFile(oParameter.getProvider());
-		DownloadFile oDownloadFile = new DownloadSupplier().supplyDownloader(oParameter.getProvider());
-		oDownloadFile.subscribe(this);
+		DownloadFile oFileDownloader = new DownloadSupplier().supplyDownloader(oParameter.getProvider());
+		oFileDownloader.subscribe(this);
 
 		ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
 		ProcessWorkspace oProcessWorkspace = oProcessWorkspaceRepository.GetProcessByProcessObjId(oParameter.getProcessObjId());
@@ -430,14 +430,14 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 
 			s_oLogger.debug("LauncherMain.Download: Download Start");
 
-			if (oDownloadFile == null) throw new Exception("Donwload File is null. Check the provider name");
+			if (oFileDownloader == null) throw new Exception("Donwload File is null. Check the provider name");
 
-			oDownloadFile.setProviderUser(oParameter.getDownloadUser());
-			oDownloadFile.setProviderPassword(oParameter.getDownloadPassword());
+			oFileDownloader.setProviderUser(oParameter.getDownloadUser());
+			oFileDownloader.setProviderPassword(oParameter.getDownloadPassword());
 
 			if (oProcessWorkspace != null) {
 				//get file size
-				long lFileSizeByte = oDownloadFile.GetDownloadFileSize(oParameter.getUrl());
+				long lFileSizeByte = oFileDownloader.GetDownloadFileSize(oParameter.getUrl());
 				//set file size
 				SetFileSizeToProcess(lFileSizeByte, oProcessWorkspace);
 
@@ -465,7 +465,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			if (ConfigReader.getPropValue("DOWNLOAD_ACTIVE").equals("true")) {
 
 				// Get the file name
-				String sFileNameWithoutPath = oDownloadFile.GetFileName(oParameter.getUrl());
+				String sFileNameWithoutPath = oFileDownloader.GetFileName(oParameter.getUrl());
 				s_oLogger.debug("LauncherMain.Download: File to download: " + sFileNameWithoutPath);
 				DownloadedFile oAlreadyDownloaded = null;
 				DownloadedFilesRepository oDownloadedRepo = new DownloadedFilesRepository();
@@ -495,14 +495,15 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 
 
 					// No: it isn't: download it
-					sFileName = oDownloadFile.ExecuteDownloadFile(oParameter.getUrl(), oParameter.getDownloadUser(), oParameter.getDownloadPassword(), sDownloadPath, oProcessWorkspace);
+					sFileName = oFileDownloader.ExecuteDownloadFile(oParameter.getUrl(), oParameter.getDownloadUser(), oParameter.getDownloadPassword(), sDownloadPath, oProcessWorkspace);
 
 					if (Utils.isNullOrEmpty(sFileName)) {
-						int iLastError = oDownloadFile.getLastServerError();
+						int iLastError = oFileDownloader.getLastServerError();
 						String sError = "There was an error contacting the provider";
 						if (iLastError>0) sError+=": query obtained HTTP Error Code " + iLastError;
 						throw new Exception(sError);
 					}
+					oFileDownloader.unsubscribe(this);
 
 					// Get The product view Model
 					ReadProduct oReadProduct = new ReadProduct();
@@ -594,7 +595,6 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			s_oLogger.debug("LauncherMain.Download: CloseProcessWorkspace done");
 		}
 
-		oDownloadFile.unsubscribe(this);
 		s_oLogger.debug("LauncherMain.Download: return file name " + sFileName);
 
 		return  sFileName;
