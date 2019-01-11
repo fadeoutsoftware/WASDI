@@ -27,7 +27,7 @@ import wasdi.shared.utils.Utils;
  * @author c.nattero
  *
  */
-public class ONDADownloadFile extends DownloadFile {
+public class ONDAFileDownloader extends FileDownloader {
 
 	String m_sPrefix = "";
 	String m_sSuffix = "";
@@ -35,14 +35,14 @@ public class ONDADownloadFile extends DownloadFile {
 	/**
 	 * 
 	 */
-	public ONDADownloadFile() {
+	public ONDAFileDownloader() {
 
 	}
 
 	/**
 	 * @param logger
 	 */
-	public ONDADownloadFile(Logger logger) {
+	public ONDAFileDownloader(Logger logger) {
 		super(logger);
 	}
 
