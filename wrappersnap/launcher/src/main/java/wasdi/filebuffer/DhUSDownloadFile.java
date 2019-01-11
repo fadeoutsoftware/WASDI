@@ -96,7 +96,8 @@ public class DhUSDownloadFile extends DownloadFile {
     //TODO move this method into superclass
     @Override
     public String ExecuteDownloadFile(String sFileURL, String sDownloadUser, String sDownloadPassword, String sSaveDirOnServer, ProcessWorkspace oProcessWorkspace) throws IOException {
-
+    	return downloadViaHttp(sFileURL, sDownloadUser, sDownloadPassword, sSaveDirOnServer, oProcessWorkspace);
+    	/*
         // Domain check
         if (Utils.isNullOrEmpty(sFileURL)) {
             m_oLogger.debug("DownloadFile.ExecuteDownloadFile: sFileURL is null");
@@ -225,6 +226,7 @@ public class DhUSDownloadFile extends DownloadFile {
         httpConn.disconnect();
 
         return  sReturnFilePath;
+        */
     }
 
     @Override
