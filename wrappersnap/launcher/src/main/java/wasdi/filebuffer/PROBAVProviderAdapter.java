@@ -18,11 +18,11 @@ import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.utils.SerializationUtils;
 import wasdi.shared.utils.Utils;
 
-public class PROBAVFileDownloader extends FileDownloader {
+public class PROBAVProviderAdapter extends ProviderAdapter {
 
 	HashMap<String, LocalFileDescriptor> m_asCollectionsFolders = new HashMap<>();
 	
-    public PROBAVFileDownloader() {
+    public PROBAVProviderAdapter() {
 		super();
 
 		try {
@@ -38,7 +38,7 @@ public class PROBAVFileDownloader extends FileDownloader {
 		
 	}
     
-    public PROBAVFileDownloader(Logger logger) {
+    public PROBAVProviderAdapter(Logger logger) {
 		super(logger);
 	}
     

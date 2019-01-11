@@ -39,8 +39,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 
 import sun.management.VMManagement;
 import wasdi.asynch.SaveMetadataThread;
-import wasdi.filebuffer.FileDownloader;
-import wasdi.filebuffer.FileDownloaderSupplier;
+import wasdi.filebuffer.ProviderAdapter;
+import wasdi.filebuffer.ProviderAdapterSupplier;
 import wasdi.geoserver.Publisher;
 import wasdi.processors.WasdiProcessorEngine;
 import wasdi.rabbit.Send;
@@ -417,8 +417,8 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 	public String Download(DownloadFileParameter oParameter, String sDownloadPath) {
 		String sFileName = "";
 
-		FileDownloader oFileDownloader = new FileDownloaderSupplier().supplyFileDownloader(oParameter.getProvider());
-		oFileDownloader.subscribe(this);
+		ProviderAdapter oProviderAdapter = new ProviderAdapterSupplier().supplyProviderAdapter(oParameter.getProvider());
+		oProviderAdapter.subscribe(this);
 
 		ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
 		ProcessWorkspace oProcessWorkspace = oProcessWorkspaceRepository.GetProcessByProcessObjId(oParameter.getProcessObjId());
@@ -428,14 +428,14 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 
 			s_oLogger.debug("LauncherMain.Download: Download Start");
 
-			if (oFileDownloader == null) throw new Exception("Donwload File is null. Check the provider name");
+			if (oProviderAdapter == null) throw new Exception("Donwload File is null. Check the provider name");
 
-			oFileDownloader.setProviderUser(oParameter.getDownloadUser());
-			oFileDownloader.setProviderPassword(oParameter.getDownloadPassword());
+			oProviderAdapter.setProviderUser(oParameter.getDownloadUser());
+			oProviderAdapter.setProviderPassword(oParameter.getDownloadPassword());
 
 			if (oProcessWorkspace != null) {
 				//get file size
-				long lFileSizeByte = oFileDownloader.GetDownloadFileSize(oParameter.getUrl());
+				long lFileSizeByte = oProviderAdapter.GetDownloadFileSize(oParameter.getUrl());
 				//set file size
 				SetFileSizeToProcess(lFileSizeByte, oProcessWorkspace);
 
@@ -463,7 +463,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			if (ConfigReader.getPropValue("DOWNLOAD_ACTIVE").equals("true")) {
 
 				// Get the file name
-				String sFileNameWithoutPath = oFileDownloader.GetFileName(oParameter.getUrl());
+				String sFileNameWithoutPath = oProviderAdapter.GetFileName(oParameter.getUrl());
 				s_oLogger.debug("LauncherMain.Download: File to download: " + sFileNameWithoutPath);
 				DownloadedFile oAlreadyDownloaded = null;
 				DownloadedFilesRepository oDownloadedRepo = new DownloadedFilesRepository();
@@ -493,15 +493,15 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 
 
 					// No: it isn't: download it
-					sFileName = oFileDownloader.ExecuteDownloadFile(oParameter.getUrl(), oParameter.getDownloadUser(), oParameter.getDownloadPassword(), sDownloadPath, oProcessWorkspace);
+					sFileName = oProviderAdapter.ExecuteDownloadFile(oParameter.getUrl(), oParameter.getDownloadUser(), oParameter.getDownloadPassword(), sDownloadPath, oProcessWorkspace);
 
 					if (Utils.isNullOrEmpty(sFileName)) {
-						int iLastError = oFileDownloader.getLastServerError();
+						int iLastError = oProviderAdapter.getLastServerError();
 						String sError = "There was an error contacting the provider";
 						if (iLastError>0) sError+=": query obtained HTTP Error Code " + iLastError;
 						throw new Exception(sError);
 					}
-					oFileDownloader.unsubscribe(this);
+					oProviderAdapter.unsubscribe(this);
 
 					// Get The product view Model
 					ReadProduct oReadProduct = new ReadProduct();
