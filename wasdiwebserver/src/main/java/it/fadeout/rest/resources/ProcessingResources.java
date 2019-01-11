@@ -1470,7 +1470,7 @@ public class ProcessingResources {
 			Wasdi.DebugLog("ProcessingResource.list: launching ENVI LIST Processor");
 						
 			//try execute algorithm
-			if (launchList(oListFloodViewModel, oUser, sWorkspaceId)) {
+			if (launchList(sSessionId, oListFloodViewModel, oUser, sWorkspaceId)) {
 				Wasdi.DebugLog("ProcessingResource.algList: ok return");
 				//TODO read value somewhere (input argument? config file?)
 
@@ -1502,7 +1502,7 @@ public class ProcessingResources {
 	 * @param sWorkspaceId
 	 * @return
 	 */
-	private boolean launchList(ListFloodViewModel oListFloodViewModel, User oUser, String sWorkspaceId) {
+	private boolean launchList(String sSessionId, ListFloodViewModel oListFloodViewModel, User oUser, String sWorkspaceId) {
 
 		try {
 			String cmd[] = new String[] {
@@ -1526,11 +1526,16 @@ public class ProcessingResources {
 
 				oWriter.write(m_oServletConfig.getInitParameter("DownloadRootPath"));
 				oWriter.newLine();
-				oWriter.write(oUser.getUserId());
+				if (Utils.isNullOrEmpty(sSessionId)) oWriter.write(oUser.getUserId());
+				else oWriter.write("");
 				oWriter.newLine();
-				oWriter.write(oUser.getPassword());
+				if (Utils.isNullOrEmpty(sSessionId)) oWriter.write(oUser.getPassword());
+				else oWriter.write("");
 				oWriter.newLine();
 				oWriter.write(oWorkspace.getName());
+				oWriter.newLine();
+				oWriter.write(sSessionId);
+				
 				oWriter.newLine();
 
 				oWriter.write(oListFloodViewModel.getPostEventFile());
