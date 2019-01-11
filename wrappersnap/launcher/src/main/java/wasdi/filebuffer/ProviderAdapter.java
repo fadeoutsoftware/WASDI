@@ -14,10 +14,12 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 
+import wasdi.ConfigReader;
 import wasdi.LauncherMain;
 import wasdi.ProcessWorkspaceUpdateNotifier;
 import wasdi.ProcessWorkspaceUpdateSubscriber;
 import wasdi.shared.business.ProcessWorkspace;
+import wasdi.shared.utils.Utils;
 
 /**
  * Base Download Utility Class 
@@ -83,63 +85,16 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
     	if(null != oSubscriber) {
     		m_aoSubscribers.add(oSubscriber);
     	} else {
-    		m_oLogger.warn("DownloadFile.subscribe: null subscriber");
+    		m_oLogger.warn("ProviderAdapter.subscribe: null subscriber");
     	}
 	}
 
 	@Override
 	public void unsubscribe(ProcessWorkspaceUpdateSubscriber oSubscriber) {
 		if(!m_aoSubscribers.remove(oSubscriber)) {
-			m_oLogger.warn("DownloadFile.subscribe: subscriber not found");
+			m_oLogger.warn("ProviderAdapter.subscribe: subscriber not found");
 		}
 		
-	}
-    
-   
-    protected void copyStream(ProcessWorkspace oProcessWorkspace, long lContentLength, InputStream oInputStream,
-			OutputStream oOutputStream) throws IOException {
-
-		// Cumulative Byte Count
-		int iTotalBytes = 0;
-		// Byte that represent 10% of the file
-		long lOnePercent = lContentLength/100;
-		// Percent of the completed download
-		int iFilePercent = 0 ;
-
-		int iBytesRead = -1;
-		byte[] abBuffer = new byte[BUFFER_SIZE];
-		int nZeroes = MAX_NUM_ZEORES_DURING_READ;
-		while ((iBytesRead = oInputStream.read(abBuffer)) != -1) {
-
-			if (iBytesRead <= 0) {
-				m_oLogger.debug("ExecuteDownloadFile. Read 0 bytes from stream. Counter: " + nZeroes);
-				nZeroes--;
-			} else {
-				nZeroes = MAX_NUM_ZEORES_DURING_READ;
-			}
-			if (nZeroes <=0 ) break;
-
-			//logger.debug("ExecuteDownloadFile. Read " + iBytesRead +  " bytes from stream");
-
-			oOutputStream.write(abBuffer, 0, iBytesRead);
-
-			// Sum bytes
-			iTotalBytes += iBytesRead;
-
-			// Overcome a 1% limit?
-			if(oProcessWorkspace!=null && lContentLength>BUFFER_SIZE && iTotalBytes>=lOnePercent && iFilePercent<=100) {
-				// Increase the file
-				iFilePercent += 1;
-				if (iFilePercent>100) iFilePercent = 100;
-				// Reset the count
-				iTotalBytes = 0;
-				// Update the progress
-				if (nZeroes == MAX_NUM_ZEORES_DURING_READ) UpdateProcessProgress(iFilePercent);
-			}
-		}
-
-		oOutputStream.close();
-		oInputStream.close();
 	}
      
     /**
@@ -206,87 +161,332 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 	public void setProviderPassword(String m_sProviderPassword) {
 		this.m_sProviderPassword = m_sProviderPassword;
 	}
+	
+	/**
+	 * Download a file via Http using Basic HTTP authentication is sDownloadUser is not null
+	 */
+	protected String downloadViaHttp(String sFileURL, String sDownloadUser, String sDownloadPassword, String sSaveDirOnServer) throws IOException {
+		String sReturnFilePath = "";
 
-	protected String downloadViaHttp(String sFileURL, String sDownloadUser, String sDownloadPassword, String sSaveDirOnServer)
-			throws IOException {
-				//TODO move this code into superclass, see DhUSDownloadFile
-				String sReturnFilePath = "";
-			
-				// TODO: Here we are assuming dhus authentication. But we have to find a general solution
-				m_oLogger.debug("DownloadFile.ExecuteDownloadFile: sDownloadUser = " + sDownloadUser);
-				if (sDownloadUser!=null) {
-					Authenticator.setDefault(new Authenticator() {
-						protected PasswordAuthentication getPasswordAuthentication() {
-							try{
-								return new PasswordAuthentication(sDownloadUser, sDownloadPassword.toCharArray());
-							} catch (Exception oEx){
-								m_oLogger.error("DownloadFile.ExecuteDownloadFile: exception setting auth " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
-							}
-							return null;
-						}
-					});        	
-				}
-			
-				m_oLogger.debug("DownloadFile.ExecuteDownloadFile: FileUrl = " + sFileURL);
-			
-				URL oUrl = new URL(sFileURL);
-				HttpURLConnection oConnection = (HttpURLConnection) oUrl.openConnection();
-				oConnection.setRequestMethod("GET");
-				oConnection.setRequestProperty("Accept", "*/*");
-			
-				int responseCode = oConnection.getResponseCode();
-			
-				// always check HTTP response code first
-				if (responseCode == HttpURLConnection.HTTP_OK) {
-			
-					m_oLogger.debug("DownloadFile.ExecuteDownloadFile: Connected");
-			
-					String sFileName = "";
-					String sDisposition = oConnection.getHeaderField("Content-Disposition");
-					String sContentType = oConnection.getContentType();
-					long  lContentLength = oConnection.getContentLength();
-			
-					m_oLogger.debug("ExecuteDownloadFile. ContentLenght: " + lContentLength);
-			
-					if (sDisposition != null) {
-						// extracts file name from header field
-						int index = sDisposition.indexOf("filename=");
-						if (index > 0) {
-							sFileName = sDisposition.substring(index + 10, sDisposition.length() - 1);
-						}
-					} else {
-						// extracts file name from URL
-						sFileName = sFileURL.substring(sFileURL.lastIndexOf("/") + 1,sFileURL.length());
+		// Basic HTTP Authentication
+		m_oLogger.debug("ProviderAdapter.downloadViaHttp: sDownloadUser = " + sDownloadUser);
+
+		if (sDownloadUser != null) {
+			Authenticator.setDefault(new Authenticator() {
+				protected PasswordAuthentication getPasswordAuthentication() {
+					try {
+						return new PasswordAuthentication(sDownloadUser, sDownloadPassword.toCharArray());
+					} catch (Exception oEx) {
+						m_oLogger.error("ProviderAdapter.downloadViaHttp: exception setting auth "
+								+ org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
 					}
-			
-					m_oLogger.debug("Content-Type = " + sContentType);
-					m_oLogger.debug("Content-Disposition = " + sDisposition);
-					m_oLogger.debug("Content-Length = " + lContentLength);
-					m_oLogger.debug("fileName = " + sFileName);
-			
-					// opens input stream from the HTTP connection
-					InputStream oInputStream = oConnection.getInputStream();
-					String saveFilePath= sSaveDirOnServer + "/" + sFileName;
-			
-					m_oLogger.debug("DownloadFile.ExecuteDownloadFile: Create Save File Path = " + saveFilePath);
-			
-					File oTargetFile = new File(saveFilePath);
-					File oTargetDir = oTargetFile.getParentFile();
-					oTargetDir.mkdirs();
-			
-					// opens an output stream to save into file
-					FileOutputStream oOutputStream = new FileOutputStream(saveFilePath);
-			
-					copyStream(m_oProcessWorkspace, lContentLength, oInputStream, oOutputStream);
-			
-					sReturnFilePath = saveFilePath;
-			
-					m_oLogger.debug("File downloaded " + sReturnFilePath);
-				} else {
-					m_oLogger.debug("No file to download. Server replied HTTP code: " + responseCode);
-					m_iLastError = responseCode;
+					return null;
 				}
-				oConnection.disconnect();
-				return  sReturnFilePath;
+			});
+		}
+
+		m_oLogger.debug("ProviderAdapter.downloadViaHttp: FileUrl = " + sFileURL);
+
+		URL oUrl = new URL(sFileURL);
+		HttpURLConnection oConnection = (HttpURLConnection) oUrl.openConnection();
+		oConnection.setRequestMethod("GET");
+		oConnection.setRequestProperty("Accept", "*/*");
+
+		int responseCode = oConnection.getResponseCode();
+
+		// always check HTTP response code first
+		if (responseCode == HttpURLConnection.HTTP_OK) {
+
+			m_oLogger.debug("ProviderAdapter.downloadViaHttp: Connected");
+
+			String sFileName = "";
+			String sDisposition = oConnection.getHeaderField("Content-Disposition");
+			String sContentType = oConnection.getContentType();
+			long lContentLength = oConnection.getContentLength();
+
+			m_oLogger.debug("ProviderAdapter.downloadViaHttp. ContentLenght: " + lContentLength);
+
+			if (sDisposition != null) {
+				// extracts file name from header field
+				int index = sDisposition.indexOf("filename=");
+				if (index > 0) {
+					sFileName = sDisposition.substring(index + 10, sDisposition.length() - 1);
+				}
+			} else {
+				// extracts file name from URL
+				sFileName = sFileURL.substring(sFileURL.lastIndexOf("/") + 1, sFileURL.length());
 			}
+
+			m_oLogger.debug("Content-Type = " + sContentType);
+			m_oLogger.debug("Content-Disposition = " + sDisposition);
+			m_oLogger.debug("Content-Length = " + lContentLength);
+			m_oLogger.debug("fileName = " + sFileName);
+
+			// opens input stream from the HTTP connection
+			InputStream oInputStream = oConnection.getInputStream();
+			String saveFilePath = sSaveDirOnServer + "/" + sFileName;
+
+			m_oLogger.debug("ProviderAdapter.downloadViaHttp: Create Save File Path = " + saveFilePath);
+
+			File oTargetFile = new File(saveFilePath);
+			File oTargetDir = oTargetFile.getParentFile();
+			oTargetDir.mkdirs();
+
+			// opens an output stream to save into file
+			FileOutputStream oOutputStream = new FileOutputStream(saveFilePath);
+
+			copyStream(m_oProcessWorkspace, lContentLength, oInputStream, oOutputStream);
+
+			sReturnFilePath = saveFilePath;
+
+			m_oLogger.debug("ProviderAdapter.downloadViaHttp File downloaded " + sReturnFilePath);
+		} else {
+			m_oLogger.debug(
+					"ProviderAdapter.downloadViaHttp No file to download. Server replied HTTP code: " + responseCode);
+			m_iLastError = responseCode;
+		}
+		oConnection.disconnect();
+		return sReturnFilePath;
+	}
+
+	/**
+	 * Copy a source stream to a output stream notifying the progress
+	 * @param oProcessWorkspace
+	 * @param lContentLength
+	 * @param oInputStream
+	 * @param oOutputStream
+	 * @throws IOException
+	 */
+	protected void copyStream(ProcessWorkspace oProcessWorkspace, long lContentLength, InputStream oInputStream, OutputStream oOutputStream) throws IOException {
+
+		// Cumulative Byte Count
+		int iTotalBytes = 0;
+		// Byte that represent 10% of the file
+		long lOnePercent = lContentLength / 100;
+		// Percent of the completed download
+		int iFilePercent = 0;
+
+		int iBytesRead = -1;
+		byte[] abBuffer = new byte[BUFFER_SIZE];
+		int nZeroes = MAX_NUM_ZEORES_DURING_READ;
+		while ((iBytesRead = oInputStream.read(abBuffer)) != -1) {
+
+			if (iBytesRead <= 0) {
+				m_oLogger.debug("ProviderAdapter.copyStream: Read 0 bytes from stream. Counter: " + nZeroes);
+				nZeroes--;
+			} else {
+				nZeroes = MAX_NUM_ZEORES_DURING_READ;
+			}
+			if (nZeroes <= 0)
+				break;
+
+			// logger.debug("ExecuteDownloadFile. Read " + iBytesRead + " bytes from
+			// stream");
+
+			oOutputStream.write(abBuffer, 0, iBytesRead);
+
+			// Sum bytes
+			iTotalBytes += iBytesRead;
+
+			// Overcome a 1% limit?
+			if (oProcessWorkspace != null && lContentLength > BUFFER_SIZE && iTotalBytes >= lOnePercent
+					&& iFilePercent <= 100) {
+				// Increase the file
+				iFilePercent += 1;
+				if (iFilePercent > 100)
+					iFilePercent = 100;
+				// Reset the count
+				iTotalBytes = 0;
+				// Update the progress
+				if (nZeroes == MAX_NUM_ZEORES_DURING_READ)
+					UpdateProcessProgress(iFilePercent);
+			}
+		}
+
+		oOutputStream.close();
+		oInputStream.close();
+	}
+	
+	
+	
+	protected long getDownloadFileSizeViaHttp(String sFileURL)  throws Exception  {
+
+        long lLenght = 0L;
+
+        // Domain check
+        if (Utils.isNullOrEmpty(sFileURL)) {
+            m_oLogger.debug("ProviderAdapter.getDownloadFileSizeViaHttp: sFileURL is null");
+            return lLenght;
+        }
+        
+        String sUser = "";
+        String sPassword = "";
+		try {
+			sUser = ConfigReader.getPropValue("DHUS_USER");
+			sPassword = ConfigReader.getPropValue("DHUS_PASSWORD");
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+        
+        if (!Utils.isNullOrEmpty(m_sProviderUser)) sUser = m_sProviderUser;
+        if (!Utils.isNullOrEmpty(m_sProviderPassword)) sPassword = m_sProviderPassword;
+
+        final String sFinalUser = sUser;
+        final String sFinalPassword = sPassword;
+        
+        // dhus authentication
+        Authenticator.setDefault(new Authenticator() {
+            protected PasswordAuthentication getPasswordAuthentication() {
+                try{
+                    return new PasswordAuthentication(sFinalUser, sFinalPassword.toCharArray());
+                }
+                catch (Exception oEx){
+                    m_oLogger.error("ProviderAdapter.getDownloadFileSizeViaHttp: exception setting auth " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
+                }
+                return null;
+            }
+        });
+
+        m_oLogger.debug("ProviderAdapter.getDownloadFileSizeViaHttp: FileUrl = " + sFileURL);
+
+        URL url = new URL(sFileURL);
+        HttpURLConnection httpConn = (HttpURLConnection) url.openConnection();
+        int responseCode = httpConn.getResponseCode();
+
+        // always check HTTP response code first
+        if (responseCode == HttpURLConnection.HTTP_OK) {
+
+            lLenght = httpConn.getHeaderFieldLong("Content-Length", 0L);
+
+            m_oLogger.debug("ProviderAdapter.getDownloadFileSizeViaHttp: File size = " + lLenght);
+
+            return lLenght;
+
+        } else {
+            m_oLogger.debug("ProviderAdapter.getDownloadFileSizeViaHttp: No file to download. Server replied HTTP code: " + responseCode);
+            m_iLastError = responseCode;
+        }
+        httpConn.disconnect();
+
+        return lLenght;
+    }
+	
+	
+	/**
+	 * Get File Name via http
+	 * @param sFileURL
+	 * @return
+	 * @throws IOException
+	 */
+	public String getFileNameViaHttp(String sFileURL) throws IOException {
+
+		try {
+			// Domain check
+			if (Utils.isNullOrEmpty(sFileURL)) {
+				m_oLogger.debug("ProviderAdapter.getFileNameViaHttp: sFileURL is null or Empty");
+				return "";
+			}
+
+			String sReturnFilePath = "";
+
+			String sUser = ConfigReader.getPropValue("DHUS_USER");
+			String sPassword = ConfigReader.getPropValue("DHUS_PASSWORD");
+
+			if (!Utils.isNullOrEmpty(m_sProviderUser)) sUser = m_sProviderUser;
+			if (!Utils.isNullOrEmpty(m_sProviderPassword)) sPassword = m_sProviderPassword;
+
+			final String sFinalUser = sUser;
+			final String sFinalPassword = sPassword;
+
+			// dhus authentication
+			Authenticator.setDefault(new Authenticator() {
+				protected PasswordAuthentication getPasswordAuthentication() {
+					try {
+						return new PasswordAuthentication(sFinalUser, sFinalPassword.toCharArray());
+					} catch (Exception oEx) {
+						m_oLogger.error("ProviderAdapter.getFileNameViaHttp: exception setting auth "
+								+ org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
+					}
+					return null;
+				}
+			});
+
+			m_oLogger.debug("ProviderAdapter.getFileNameViaHttp: FileUrl = " + sFileURL);
+
+			String sConnectionTimeout = ConfigReader.getPropValue("CONNECTION_TIMEOUT");
+			String sReadTimeOut = ConfigReader.getPropValue("READ_TIMEOUT");
+
+			int iConnectionTimeOut = 10000;
+			int iReadTimeOut = 10000;
+
+			try {
+				iConnectionTimeOut = Integer.parseInt(sConnectionTimeout);
+			} catch (Exception oEx) {
+				m_oLogger.error(org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
+			}
+			try {
+				iReadTimeOut = Integer.parseInt(sReadTimeOut);
+			} catch (Exception oEx) {
+				m_oLogger.error(org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
+			}
+
+			URL oUrl = new URL(sFileURL);
+			HttpURLConnection oHttpConn = (HttpURLConnection) oUrl.openConnection();
+			m_oLogger.debug("ProviderAdapter.getFileNameViaHttp: Connection Created");
+			
+			//NOTE: the DhUS version did not set GET and Accept. ONDA did. TEST 
+			oHttpConn.setRequestMethod("GET");
+			oHttpConn.setRequestProperty("Accept", "*/*");
+			oHttpConn.setConnectTimeout(iConnectionTimeOut);
+			oHttpConn.setReadTimeout(iReadTimeOut);
+			m_oLogger.debug("ProviderAdapter.getFileNameViaHttp: Timeout Setted: waiting response");
+			int responseCode = oHttpConn.getResponseCode();
+
+			// always check HTTP response code first
+			if (responseCode == HttpURLConnection.HTTP_OK) {
+
+				m_oLogger.debug("ProviderAdapter.getFileNameViaHttp: Connected");
+
+				String sFileName = "";
+				String sDisposition = oHttpConn.getHeaderField("Content-Disposition");
+				String sContentType = oHttpConn.getContentType();
+				int sContentLength = oHttpConn.getContentLength();
+
+				if (sDisposition != null) {
+					// extracts file name from header field
+					int iIndex = sDisposition.indexOf("filename=");
+					if (iIndex > 0) {
+						if (sDisposition.endsWith("\"")) {
+							sFileName = sDisposition.substring(iIndex + 10, sDisposition.length() - 1);
+						}
+						else {
+							sFileName = sDisposition.substring(iIndex + 9, sDisposition.length());
+						}
+						
+					}
+				} else {
+					// extracts file name from URL
+					sFileName = sFileURL.substring(sFileURL.lastIndexOf("/") + 1, sFileURL.length());
+				}
+
+				sReturnFilePath = sFileName;
+
+				m_oLogger.debug("Content-Type = " + sContentType);
+				m_oLogger.debug("Content-Disposition = " + sDisposition);
+				m_oLogger.debug("Content-Length = " + sContentLength);
+				m_oLogger.debug("fileName = " + sFileName);
+			} else {
+				m_oLogger.debug("ProviderAdapter.getFileNameViaHttp No file to download. Server replied HTTP code: " + responseCode);
+				m_iLastError = responseCode;
+			}
+			oHttpConn.disconnect();
+
+			return sReturnFilePath;
+			
+		} catch (Exception oEx) {
+			m_oLogger.error(org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
+		}
+
+		return "";
+	}
 }

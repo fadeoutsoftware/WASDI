@@ -442,8 +442,6 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 				//get process pid
 				oProcessWorkspace.setPid(GetProcessId());
 
-				//updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 2);
-
 			} else {
 				s_oLogger.debug("LauncherMain.Download: process not found: " + oParameter.getProcessObjId());
 			}
@@ -472,15 +470,11 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 					oAlreadyDownloaded = oDownloadedRepo.GetDownloadedFile(sFileNameWithoutPath);
 				}
 
-				//updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 10);
-
 				if (oAlreadyDownloaded == null) {
 					s_oLogger.debug("LauncherMain.Download: File not already downloaded. Download it");
 
-					String sProcessFileName = sFileNameWithoutPath;
-
-					if (!Utils.isNullOrEmpty(sProcessFileName)) {
-						oProcessWorkspace.setProductName(sProcessFileName);
+					if (!Utils.isNullOrEmpty(sFileNameWithoutPath)) {
+						oProcessWorkspace.setProductName(sFileNameWithoutPath);
 						//update the process
 						if (!oProcessWorkspaceRepository.UpdateProcess(oProcessWorkspace))
 							s_oLogger.debug("LauncherMain.Download: Error during process update with file name");
@@ -490,7 +484,6 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 							s_oLogger.debug("LauncherMain.Download: Error sending rabbitmq message to update process list");
 						}
 					}
-
 
 					// No: it isn't: download it
 					sFileName = oProviderAdapter.ExecuteDownloadFile(oParameter.getUrl(), oParameter.getDownloadUser(), oParameter.getDownloadPassword(), sDownloadPath, oProcessWorkspace);
