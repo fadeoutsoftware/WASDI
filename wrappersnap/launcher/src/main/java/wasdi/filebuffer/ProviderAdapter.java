@@ -33,6 +33,8 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
     protected String m_sProviderUser;
     protected String m_sProviderPassword;
     
+    ProcessWorkspace m_oProcessWorkspace;
+    
     private List<ProcessWorkspaceUpdateSubscriber> m_aoSubscribers;
 
     /**
@@ -132,29 +134,38 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 				// Reset the count
 				iTotalBytes = 0;
 				// Update the progress
-				if (nZeroes == MAX_NUM_ZEORES_DURING_READ) UpdateProcessProgress(oProcessWorkspace, iFilePercent);
+				if (nZeroes == MAX_NUM_ZEORES_DURING_READ) UpdateProcessProgress(iFilePercent);
 			}
 		}
 
 		oOutputStream.close();
 		oInputStream.close();
 	}
-    
+     
     /**
      * 
      * @param oProcessWorkspace
      * @param iProgress
      */
-    protected void UpdateProcessProgress(ProcessWorkspace oProcessWorkspace, int iProgress) {
+    protected void UpdateProcessProgress(int iProgress) {
     	
-    	if (oProcessWorkspace == null) return;
-    	oProcessWorkspace.setProgressPerc(iProgress);
+    	if (m_oProcessWorkspace == null) return;
+    	m_oProcessWorkspace.setProgressPerc(iProgress);
     	//notify all subscribers
     	for (ProcessWorkspaceUpdateSubscriber oSubscriber : m_aoSubscribers) {
-			oSubscriber.notify(oProcessWorkspace);
+			oSubscriber.notify(m_oProcessWorkspace);
 		}
     	
     }
+    
+	public void setProcessWorkspace(ProcessWorkspace oProcessWorkspace) {
+		if(null!=oProcessWorkspace) {
+			m_oProcessWorkspace = oProcessWorkspace;
+		} else {
+			m_oLogger.error("ProviderAdapter.setProcessWorkspace: oProcessWorkspace is null");
+			throw new NullPointerException();
+		}
+	}
     
     /**
      * Get the last server error
@@ -196,7 +207,7 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 		this.m_sProviderPassword = m_sProviderPassword;
 	}
 
-	protected String downloadViaHttp(String sFileURL, String sDownloadUser, String sDownloadPassword, String sSaveDirOnServer, ProcessWorkspace oProcessWorkspace)
+	protected String downloadViaHttp(String sFileURL, String sDownloadUser, String sDownloadPassword, String sSaveDirOnServer)
 			throws IOException {
 				//TODO move this code into superclass, see DhUSDownloadFile
 				String sReturnFilePath = "";
@@ -266,7 +277,7 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 					// opens an output stream to save into file
 					FileOutputStream oOutputStream = new FileOutputStream(saveFilePath);
 			
-					copyStream(oProcessWorkspace, lContentLength, oInputStream, oOutputStream);
+					copyStream(m_oProcessWorkspace, lContentLength, oInputStream, oOutputStream);
 			
 					sReturnFilePath = saveFilePath;
 			
@@ -278,5 +289,4 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 				oConnection.disconnect();
 				return  sReturnFilePath;
 			}
-
 }

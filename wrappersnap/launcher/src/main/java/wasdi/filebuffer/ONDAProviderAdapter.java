@@ -171,6 +171,7 @@ public class ONDAProviderAdapter extends ProviderAdapter {
 			m_oLogger.debug("ONDADownloadFile.ExecuteDownloadFile: sSaveDirOnServer is null");
 			return "";
 		}
+		setProcessWorkspace(oProcessWorkspace);
 
 
 
@@ -213,7 +214,7 @@ public class ONDAProviderAdapter extends ProviderAdapter {
 			}
 			return sDestinationFileName;
 		} else if(sFileURL.startsWith("https://")) {
-			return downloadViaHttp(sFileURL, sDownloadUser, sDownloadPassword, sSaveDirOnServer, oProcessWorkspace);
+			return downloadViaHttp(sFileURL, sDownloadUser, sDownloadPassword, sSaveDirOnServer);
 
 		}
 		return "";

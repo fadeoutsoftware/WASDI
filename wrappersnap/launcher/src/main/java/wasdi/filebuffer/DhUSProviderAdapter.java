@@ -96,7 +96,8 @@ public class DhUSProviderAdapter extends ProviderAdapter {
     //TODO move this method into superclass
     @Override
     public String ExecuteDownloadFile(String sFileURL, String sDownloadUser, String sDownloadPassword, String sSaveDirOnServer, ProcessWorkspace oProcessWorkspace) throws IOException {
-    	return downloadViaHttp(sFileURL, sDownloadUser, sDownloadPassword, sSaveDirOnServer, oProcessWorkspace);
+    	setProcessWorkspace(oProcessWorkspace);
+    	return downloadViaHttp(sFileURL, sDownloadUser, sDownloadPassword, sSaveDirOnServer);
     	/*
         // Domain check
         if (Utils.isNullOrEmpty(sFileURL)) {

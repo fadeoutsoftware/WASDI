@@ -116,6 +116,7 @@ public class PROBAVProviderAdapter extends ProviderAdapter {
             m_oLogger.debug("PROBAVDownloadFile.ExecuteDownloadFile: sSaveDirOnServer is null");
             return "";
         }
+        setProcessWorkspace(oProcessWorkspace);
         
 
         String sReturnFilePath = CopyLocalFile(sFileURL, sDownloadUser, sDownloadPassword, sSaveDirOnServer, oProcessWorkspace);
@@ -228,7 +229,7 @@ public class PROBAVProviderAdapter extends ProviderAdapter {
                 	// Reset the count
                 	iTotalBytes = 0;
                 	// Update the progress
-                	if (nZeroes == MAX_NUM_ZEORES_DURING_READ) UpdateProcessProgress(oProcessWorkspace, iFilePercent);
+                	if (nZeroes == MAX_NUM_ZEORES_DURING_READ) UpdateProcessProgress(iFilePercent);
                 }
             }
 
@@ -354,13 +355,13 @@ public class PROBAVProviderAdapter extends ProviderAdapter {
 				}
 				
 				// Update user
-				UpdateProcessProgress(oProcessWorkspace,20);
+				UpdateProcessProgress(20);
 				
 				// Copy
 				FileUtils.copyFile(oSourceFile, new File(sSaveDirOnServer));
 				
 				// Update user
-				UpdateProcessProgress(oProcessWorkspace, 100);
+				UpdateProcessProgress(100);
 				
 				return sSaveDirOnServer;
 			}
