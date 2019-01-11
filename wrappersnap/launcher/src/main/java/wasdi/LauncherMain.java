@@ -594,6 +594,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			s_oLogger.debug("LauncherMain.Download: CloseProcessWorkspace done");
 		}
 
+		oDownloadFile.unsubscribe(this);
 		s_oLogger.debug("LauncherMain.Download: return file name " + sFileName);
 
 		return  sFileName;
