@@ -497,3 +497,4 @@ function utilsProjectGetPolygonArray(sPolygonString){
 
     return sTemp;
 }
+

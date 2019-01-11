@@ -69,7 +69,8 @@ var ProcessesLogsController = (function() {
     ProcessesLogsController.prototype.generateFile = function(sText)
     {
         var textFile = null;
-        textFile = utilsMakeFile(sText,textFile);
+        var sType = 'text/plain';
+        textFile = utilsMakeFile(sText,textFile,sType);
         return textFile;
     };
 

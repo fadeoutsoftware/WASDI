@@ -494,9 +494,9 @@ function utilsAddTextInCursorPosition(areaId, text) {
 
     }
 
-function utilsMakeFile(sText,textFile){
+function utilsMakeFile(sText,textFile,sType){
 
-    var data = new Blob([sText], {type: 'text/plain'});
+    var data = new Blob([sText], {type: sType});
 
     // If we are replacing a previously generated file we need to
     // manually revoke the object URL to avoid memory leaks.
@@ -719,3 +719,26 @@ function utilsComponentToHex(c) {
 function utilsRgbToHex(r, g, b) {
     return "#" + utilsComponentToHex(r) + utilsComponentToHex(g) + utilsComponentToHex(b);
 };
+
+
+function utilsSearchTree(element, matchingTitle,sPropertyIdNodeName,sChildrenNodeName){
+    if( utilsIsStrNullOrEmpty(sPropertyIdNodeName) === true)
+    {
+        throw "utilsSearchTree function sPropertyIdNodeName is null or undefined";
+    }
+    if( utilsIsStrNullOrEmpty(sChildrenNodeName) === true)
+    {
+        throw "utilsSearchTree function sChildrenNodeName is null or undefined";
+    }
+    if(element[sPropertyIdNodeName] == matchingTitle){
+        return element;
+    }else if (element[sChildrenNodeName] != null){
+        var i;
+        var result = null;
+        for(i=0; result == null && i < element[sChildrenNodeName].length; i++){
+            result = utilsSearchTree(element[sChildrenNodeName][i], matchingTitle,sPropertyIdNodeName,sChildrenNodeName);
+        }
+        return result;
+    }
+    return null;
+}

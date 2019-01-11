@@ -412,7 +412,12 @@ h4
   width: $wasdi-size-icon-context-menu-jstree ;
   height: auto ;
 }
-
+.satelite-icon-context-menu-jstree
+{
+  content: $wasdi-satelite-icon-black-version;
+  width: $wasdi-size-icon-context-menu-jstree ;
+  height: auto ;
+}
 //CONTEXT MENU JS TREE (override)
 .vakata-context li>a>i:empty{
   width: 1.8em !important;

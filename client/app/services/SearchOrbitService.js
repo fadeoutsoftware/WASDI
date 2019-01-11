@@ -21,6 +21,10 @@ service('SearchOrbitService', ['$http',  'ConstantsService', function ($http, oC
         return this.m_oHttp.post(this.APIURL + '/searchorbit/search', oData, {
             headers: { 'Content-Type': 'application/json;charset=utf-8'}
         });
+    };
+
+    this.getKML = function (oData) {
+        return this.m_oHttp.get(this.APIURL + '/searchorbit/getkmlsearchresults');
     }
 
 }]);
