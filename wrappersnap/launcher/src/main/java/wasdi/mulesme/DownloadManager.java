@@ -117,8 +117,10 @@ public class DownloadManager {
 //					if (result.getTitle().contains("S1B")) continue;
 					
 					System.out.println("\tdownloading " + result.getSummary() + " --> " + result.getLink());
-					
+					//TODO implement subscriber interface
+					//TODO subscribe
 					oProviderAdapter.ExecuteDownloadFile(result.getLink(), providerUser, providerPassword, destinationDir.getAbsolutePath(), null);
+					//TODO unsubscribe
 					
 					System.out.println("\t\tdone");
 				}					
