@@ -20,13 +20,13 @@ import wasdi.shared.utils.Utils;
  * @author p.campanella
  *
  */
-public class DhUSDownloadFile extends DownloadFile {
+public class DhUSFileDownloader extends FileDownloader {
 	
-    public DhUSDownloadFile() {
+    public DhUSFileDownloader() {
 		super();
 	}
     
-    public DhUSDownloadFile(Logger logger) {
+    public DhUSFileDownloader(Logger logger) {
 		super(logger);
 	}
 

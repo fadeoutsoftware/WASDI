@@ -39,8 +39,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 
 import sun.management.VMManagement;
 import wasdi.asynch.SaveMetadataThread;
-import wasdi.filebuffer.DownloadFile;
-import wasdi.filebuffer.DownloadSupplier;
+import wasdi.filebuffer.FileDownloader;
+import wasdi.filebuffer.FileDownloaderSupplier;
 import wasdi.geoserver.Publisher;
 import wasdi.processors.WasdiProcessorEngine;
 import wasdi.rabbit.Send;
@@ -416,10 +416,8 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 	 */
 	public String Download(DownloadFileParameter oParameter, String sDownloadPath) {
 		String sFileName = "";
-		// Download handler
-		//replaced by the next one
-		//DownloadFile oDownloadFile = DownloadFile.getDownloadFile(oParameter.getProvider());
-		DownloadFile oFileDownloader = new DownloadSupplier().supplyDownloader(oParameter.getProvider());
+
+		FileDownloader oFileDownloader = new FileDownloaderSupplier().supplyFileDownloader(oParameter.getProvider());
 		oFileDownloader.subscribe(this);
 
 		ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();

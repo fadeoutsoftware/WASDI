@@ -18,11 +18,11 @@ import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.utils.SerializationUtils;
 import wasdi.shared.utils.Utils;
 
-public class PROBAVDownloadFile extends DownloadFile {
+public class PROBAVFileDownloader extends FileDownloader {
 
 	HashMap<String, LocalFileDescriptor> m_asCollectionsFolders = new HashMap<>();
 	
-    public PROBAVDownloadFile() {
+    public PROBAVFileDownloader() {
 		super();
 
 		try {
@@ -38,7 +38,7 @@ public class PROBAVDownloadFile extends DownloadFile {
 		
 	}
     
-    public PROBAVDownloadFile(Logger logger) {
+    public PROBAVFileDownloader(Logger logger) {
 		super(logger);
 	}
     
@@ -274,10 +274,10 @@ public class PROBAVDownloadFile extends DownloadFile {
 		if (oDescriptor != null) {
 			
 			// Get Source Folder
-			String sSourceFolder = oDescriptor.Folder;
+			String sSourceFolder = oDescriptor.m_sFolder;
 			
 			// Is it a single file?
-			if (oDescriptor.SingleFile) {
+			if (oDescriptor.m_bSingleFile) {
 				
 				// Yes single file
 				
