@@ -10,7 +10,7 @@
 var SearchOrbitController = (function() {
     function SearchOrbitController($scope, $location, oConstantsService, oAuthService,oState, oConfigurationService,
                                    oMapService, oSearchOrbitService,oProcessesLaunchedService,oWorkspaceService,
-                                   oRabbitStompService,oModalService, oProductService,$filter) {
+                                   oRabbitStompService,oModalService, oProductService,$filter ,oTreeService) {
         this.m_oScope = $scope;
         this.m_oLocation = $location;
         this.m_oConstantsService = oConstantsService;
@@ -38,9 +38,16 @@ var SearchOrbitController = (function() {
         this.m_bIsVisibleLoadingIcon = false;
         this.m_oFilter = $filter;
         this.m_sFilterTable = "";
+        this.m_oTreeService = oTreeService;
+        this.m_sIdDiv = "#orbitsTree";
+        //TODO TEST
+        // this.m_oTreeService.createNewInstanceTree("#orbitsTree",this.getTreeJsonDefault());
+
         //order the table
         this.m_sOrderBy = "Satellite";
         this.m_bReverseOrder = false;
+        this.m_sHrefLogFile = "";
+        this.downloadKML();//TODO REMOVE IT
 
         if(utilsIsObjectNullOrUndefined( this.m_oActiveWorkspace) && utilsIsStrNullOrEmpty( this.m_oActiveWorkspace))
         {
@@ -261,6 +268,11 @@ var SearchOrbitController = (function() {
             .success(function (data, status, headers, config) {
                 if(!utilsIsObjectNullOrUndefined(data))
                 {
+                    //TODO NEW FEATURE
+                    //var oDataTree = oController.generateDataTree(data);
+                    // oController.m_oTreeService.createNewInstanceTree("#orbitsTree",oController.generateDataTree(data));
+                    oController.m_oTreeService.createNewInstanceTree(oController.m_sIdDiv,oController.getResultOpportunitiesTreeJson(data));
+
                     oController.m_aoOrbits = data;
                     oController.setOrbitAsUnchecked();
                     if(data.length === 0)
@@ -817,6 +829,223 @@ var SearchOrbitController = (function() {
         return true;
     };
 
+
+    SearchOrbitController.prototype.downloadKML = function()
+    {
+        var oController = this;
+        this.m_oSearchOrbitService.getKML()
+            .success(function(data,state){
+                if( utilsIsObjectNullOrUndefined(data) === false )
+                {
+                    var textFile = null;
+                    var sType = 'application/xml';
+                    // var sType = 'application/vnd.google-earth.kml+xml';
+                    //var sType = 'application/vnd.google-earth.kmz';
+                    oController.m_sHrefLogFile = utilsMakeFile(data,textFile,sType);
+                }
+                else
+                {
+                    utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN DOWNLOAD KML");
+                }
+            })
+            .error(function(data,state){
+                utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN  DOWNLOAD KML");
+            });
+    };
+
+    SearchOrbitController.prototype.getResultOpportunitiesTreeJson = function(oDataInput)
+    {
+
+        var oData1 = this.generateDataTree(oDataInput);
+
+        var oJsonData = {
+            core: {
+                data: oData1,
+                    check_callback: false
+            },
+            checkbox: {
+                three_state : true, // to avoid that fact that checking a node also check others
+                    whole_node : false,  // to avoid checking the box just clicking the node
+                    tie_selection : false // for checking without selecting and selecting without checking
+            },
+            plugins: ['checkbox']
+        }
+
+        return oJsonData;
+    };
+
+    SearchOrbitController.prototype.generateDataTree = function(aoData)
+    {
+        if( utilsIsObjectNullOrUndefined(aoData) )
+        {
+            return null;
+        }
+
+        var iNumberOfOpportunities = aoData.length;
+        var oReturnValue = [{
+            "id": "results",
+            "text": "Results",
+            "state": { "opened": true },
+            "children": []
+        }];
+
+        var sIdDiv = this.m_sIdDiv;
+        var oCheckFunction = this.onCheckEventTreeFunction;
+        var oUncheckFunction = this.onUncheckEventTreeFunction;
+        var sCheckEvent = this.m_oTreeService.getCheckNodeNameEvent();
+        var sUncheckEvent = this.m_oTreeService.getUncheckNodeNameEvent();
+        var oController = this;
+
+        for(var iIndexOpportunity = 0 ; iIndexOpportunity < iNumberOfOpportunities; iIndexOpportunity++ )
+        {
+            var oData = new Date(aoData[iIndexOpportunity].AcquisitionStartTime);
+            var sMonth = oData.getUTCMonth() + 1; //months from 1-12
+            var sDay = oData.getUTCDate();
+            var sYear = oData.getUTCFullYear();
+            var sNewDate = sYear + "/" + sMonth + "/" + sDay;
+            var sHours = oData.getHours();
+            var sMinutes = oData.getMinutes();
+            var sSeconds = oData.getSeconds();
+            var sTimes = sHours + ":" + sMinutes + ":" + sSeconds;
+            var sSensorMode = aoData[iIndexOpportunity].SensorMode;
+            var sSensorLookDirection = aoData[iIndexOpportunity].SensorLookDirection;
+            var sSwathName = aoData[iIndexOpportunity].SwathName;
+            var asSplittedSwathName = sSwathName.split("__");
+            var sFrameName = asSplittedSwathName[0] + "-" + asSplittedSwathName[1] + "-" + sSensorMode + "- H" + sTimes ;
+
+            //add data node
+            var oResultSearchTreeData = this.generateNode(oReturnValue[0],sNewDate);
+            //add sensor look direction node
+            var oResultSearchTreeSensorLookDirection = this.generateNode(oResultSearchTreeData,sSensorLookDirection);
+            //add swath node
+            var oResultSearchTreeSwathName = this.generateNode(oResultSearchTreeSensorLookDirection,sSwathName);
+            //add frame node
+            var oFrameNode = this.generateNode(oResultSearchTreeSwathName,sFrameName);
+
+            oFrameNode.isFrame = true;
+            oFrameNode.FrameFootPrint = aoData[iIndexOpportunity].FrameFootPrint;
+
+            //check event on tree
+            this.m_oTreeService.onTreeEvent(sCheckEvent,sIdDiv,oCheckFunction,oController);
+            //uncheck event on tree
+            this.m_oTreeService.onTreeEvent(sUncheckEvent,sIdDiv,oUncheckFunction,oController);
+
+
+        }
+        return oReturnValue;
+
+    };
+
+    SearchOrbitController.prototype.onCheckEventTreeFunction = function(oController,e,data)
+    {
+        if(utilsIsObjectNullOrUndefined(data) === true )
+        {
+            return false;
+        }
+        var oNode = data.node;
+        if(utilsIsObjectNullOrUndefined(oNode) === true )
+        {
+            return false;
+        }
+
+        if(oNode.original.isFrame)
+        {
+            if( utilsIsObjectNullOrUndefined(oNode.original.rectangle) === true)
+            {
+                var oRectangle = oController.drawRectangleInMap(oNode.original);
+                oNode.original.rectangle = oRectangle;
+            }
+        }
+        return true;
+    };
+
+    SearchOrbitController.prototype.onUncheckEventTreeFunction = function(oController,e,data)
+    {
+        if(utilsIsObjectNullOrUndefined(data) === true )
+        {
+            return false;
+        }
+        var oNode = data.node;
+        if(utilsIsObjectNullOrUndefined(oNode) === true )
+        {
+            return false;
+        }
+
+        if(oNode.original.isFrame)
+        {
+            if(utilsIsObjectNullOrUndefined(oNode.original.rectangle) === false)
+            {
+                oController.m_oMapService.removeLayerFromMap(oNode.original.rectangle);
+                oNode.original.rectangle = null;
+            }
+        }
+        return true;
+    };
+
+    SearchOrbitController.prototype.generateNode = function(oTree,sNewNode)
+    {
+        var sPropertyIdNodeName = "text";
+        var sPropertyChilderNodeName = "children";
+        var oResultSearch = utilsSearchTree(oTree,sNewNode,sPropertyIdNodeName,sPropertyChilderNodeName);
+        if (utilsIsObjectNullOrUndefined(oResultSearch))
+        {
+            //new data
+            var oNewDataNode={
+                // "id": sNewNode,
+                "text": sNewNode,
+                "children": []
+            }
+
+            //add a new data result
+            oTree.children.push(oNewDataNode);
+            oResultSearch = utilsSearchTree(oTree,sNewNode,sPropertyIdNodeName,sPropertyChilderNodeName);
+        }
+        return oResultSearch;
+    };
+
+    SearchOrbitController.prototype.drawRectangleInMap = function(oOrbit)
+    {
+        if (utilsIsObjectNullOrUndefined(oOrbit))
+        {
+            return null;
+        }
+
+        if (!oOrbit.hasOwnProperty('FrameFootPrint'))
+        {
+            return null;
+        }
+
+        //create oRectangle
+        var sFrame = oOrbit.FrameFootPrint;
+        var aasNewContent = [];
+
+        // sFrame = sFrame.replace("POLYGON","");
+        // sFrame = sFrame.replace("((","");
+        // sFrame = sFrame.replace("))","");
+        // sFrame = sFrame.split(",");
+        sFrame = utilsProjectGetPolygonArray(sFrame);
+
+        for (var iIndexBounds = 0; iIndexBounds < sFrame.length; iIndexBounds++)
+        {
+            var aBounds = sFrame[iIndexBounds];
+            // console.log(aBounds);
+            var aNewBounds = aBounds.split(" ");
+
+            var oLatLonArray = [];
+
+            oLatLonArray[0] = JSON.parse(aNewBounds[1]); //Lat
+            oLatLonArray[1] = JSON.parse(aNewBounds[0]); //Lon
+
+            aasNewContent.push(oLatLonArray);
+        }
+        var oRectangle = this.m_oMapService.addRectangleByBoundsArrayOnMap(aasNewContent, null, 0);
+        if(utilsIsObjectNullOrUndefined(oRectangle))
+        {
+            utilsVexDialogAlertTop("THERE ARE PROBLEMS IN ORBIT VISUALIZATION");
+            return null;
+        }
+        return oRectangle;
+    }
     SearchOrbitController.$inject = [
         '$scope',
         '$location',
@@ -831,7 +1060,8 @@ var SearchOrbitController = (function() {
         'RabbitStompService',
         'ModalService',
         'ProductService',
-        '$filter'
+        '$filter',
+        'TreeService'
     ];
 
     return SearchOrbitController;

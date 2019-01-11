@@ -33,6 +33,7 @@ var wasdiApp = angular.module('wasdi', [
     'wasdi.FilterService',
     'wasdi.ProcessorService',
     'wasdi.AuthServiceGoogle',
+    'wasdi.TreeService',
 
     //DIRECTIVE
     'wasdi.SnakeDirective',
