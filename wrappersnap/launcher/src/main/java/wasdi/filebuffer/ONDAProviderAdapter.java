@@ -162,6 +162,8 @@ public class ONDAProviderAdapter extends ProviderAdapter {
 	@Override
 	public String ExecuteDownloadFile(String sFileURL, String sDownloadUser, String sDownloadPassword,
 			String sSaveDirOnServer, ProcessWorkspace oProcessWorkspace) throws Exception {
+		
+		
 		// Domain check
 		if (Utils.isNullOrEmpty(sFileURL)) {
 			m_oLogger.debug("ONDAProviderAdapter.ExecuteDownloadFile: sFileURL is null");
@@ -171,9 +173,15 @@ public class ONDAProviderAdapter extends ProviderAdapter {
 			m_oLogger.debug("ONDAProviderAdapter.ExecuteDownloadFile: sSaveDirOnServer is null");
 			return "";
 		}
+		
+		m_oLogger.debug("ONDAProviderAdapter.ExecuteDownloadFile: start");
+		
 		setProcessWorkspace(oProcessWorkspace);
 
 		if(sFileURL.startsWith("file:")) {
+			
+			m_oLogger.debug("ONDAProviderAdapter.ExecuteDownloadFile: this is a file:// protocol, get file name");
+			
 			//file:/mnt/OPTICAL/LEVEL-1C/2018/12/12/S2B_MSIL1C_20181212T010259_N0207_R045_T54PZA_20181212T021706.zip/.value
 			
 			m_sPrefix = "file:";
@@ -188,6 +196,8 @@ public class ONDAProviderAdapter extends ProviderAdapter {
 			// This is the folder: we need the .value file
 			String sSourceFilePath = sPath + m_sSuffix;
 			File oSourceFile = new File(sSourceFilePath);
+			
+			m_oLogger.debug("ONDAProviderAdapter.ExecuteDownloadFile: source file: " + sSourceFilePath);
 
 			// Destination file name: start from the simple name
 			// Do not call GetFileName: here in ONDA the real file is called .value, for WASDI getFileName returns the original Satellite file name
@@ -196,18 +206,29 @@ public class ONDAProviderAdapter extends ProviderAdapter {
 			// set the destination folder
 			if (sSaveDirOnServer.endsWith("/") == false) sSaveDirOnServer += "/";
 			sDestinationFileName = sSaveDirOnServer + sDestinationFileName;
+			
+			m_oLogger.debug("ONDAProviderAdapter.ExecuteDownloadFile: destination file: " + sDestinationFileName);
 
 			// copy the product from file system
 			try {
 				File oDestionationFile = new File(sDestinationFileName);
+				
+				if (oDestionationFile.getParentFile() != null) { 
+					if (oDestionationFile.getParentFile().exists() == false) {
+						oDestionationFile.getParentFile().mkdirs();
+					}
+				}
+				
 				//oDestionationFile.createNewFile();
 				InputStream oInputStream = new FileInputStream(oSourceFile);
 				OutputStream oOutputStream = new FileOutputStream(oDestionationFile);
+				
+				m_oLogger.debug("ONDAProviderAdapter.ExecuteDownloadFile: start copy stream");
+				
 				copyStream(oProcessWorkspace, oSourceFile.length(), oInputStream, oOutputStream);
 
 			} catch (Exception e) {
-				e.printStackTrace();
-				m_oLogger.debug( e.toString() );
+				m_oLogger.debug( "ONDAProviderAdapter.Exception: " + e.toString());
 			}
 			return sDestinationFileName;
 		} else if(sFileURL.startsWith("https://")) {

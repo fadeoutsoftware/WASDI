@@ -265,6 +265,8 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 		long lOnePercent = lContentLength / 100;
 		// Percent of the completed download
 		int iFilePercent = 0;
+		
+		m_oLogger.debug("ProviderAdapter.copyStream: start copy");
 
 		int iBytesRead = -1;
 		byte[] abBuffer = new byte[BUFFER_SIZE];
@@ -305,6 +307,8 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 
 		oOutputStream.close();
 		oInputStream.close();
+		
+		m_oLogger.debug("ProviderAdapter.copyStream: copy done");
 	}
 	
 	
