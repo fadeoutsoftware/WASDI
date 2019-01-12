@@ -7,6 +7,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.logging.FileHandler;
@@ -188,7 +189,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			// And Run
 			oLauncher.ExecuteOperation(sOperation,sParameter);
 
-			s_oLogger.debug("Operation Done, bye");
+			s_oLogger.debug(getBye());
 		}
 		catch( ParseException exp ) {
 			s_oLogger.error("Launcher Main Exception " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(exp));
@@ -221,6 +222,22 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			LauncherMain.s_oSendToRabbit.Free();
 		}
 
+	}
+	
+	private static String getBye() {
+		ArrayList<String> m_asByes = new ArrayList<>();
+		m_asByes.add("----WASDI:Operation Done----");
+		m_asByes.add("----WASDI:Look behind you, a Three-Headed Monster!----");
+		m_asByes.add("----WASDI:Mission Completed----");
+		m_asByes.add("----WASDI:So you want to be a pirate, eh? You look more like a flooring inspector----");
+		m_asByes.add("----WASDI:Use the force Luke----");
+		m_asByes.add("----WASDI:one small step for man, one giant leap for mankind----");
+		m_asByes.add("----WASDI:I love it when a plan comes together----");
+		m_asByes.add("----WASDI:Follow the white Rabbit----");
+		m_asByes.add("----WASDI:Don't panic----");
+		//m_asByes.add("----WASDI: ----");
+		
+		return m_asByes.get(((int)(Math.random()*100000))%m_asByes.size());
 	}
 
 	/**
