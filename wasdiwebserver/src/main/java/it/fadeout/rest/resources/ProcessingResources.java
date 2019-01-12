@@ -1526,8 +1526,7 @@ public class ProcessingResources {
 
 				oWriter.write(m_oServletConfig.getInitParameter("DownloadRootPath"));
 				oWriter.newLine();
-				if (Utils.isNullOrEmpty(sSessionId)) oWriter.write(oUser.getUserId());
-				else oWriter.write("");
+				oWriter.write(oUser.getUserId());
 				oWriter.newLine();
 				if (Utils.isNullOrEmpty(sSessionId)) oWriter.write(oUser.getPassword());
 				else oWriter.write("");
