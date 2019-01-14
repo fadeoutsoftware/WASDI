@@ -29,9 +29,6 @@ import wasdi.shared.utils.Utils;
  */
 public class ONDAProviderAdapter extends ProviderAdapter {
 
-	String m_sPrefix = "";
-	String m_sSuffix = "";
-
 	/**
 	 * 
 	 */
@@ -59,20 +56,13 @@ public class ONDAProviderAdapter extends ProviderAdapter {
 
 		if(sFileURL.startsWith("file:")) {
 
-			m_sPrefix = "file:";
-			m_sSuffix = "/.value";
+			String sPrefix = "file:";
 			// Remove the prefix
-			int iStart = sFileURL.indexOf(m_sPrefix) +m_sPrefix.length();
+			int iStart = sFileURL.indexOf(sPrefix) +sPrefix.length();
 			String sPath = sFileURL.substring(iStart);
 
-			// remove the ".value" suffix
-			sPath = sPath.substring(0, sPath.lastIndexOf(m_sSuffix));
-
-			// This is the folder: we need the .value file
-			String sSourceFilePath = sPath + m_sSuffix;
-
-			m_oLogger.debug("ONDAProviderAdapter.GetDownloadSize: full path " + sSourceFilePath);
-			File oSourceFile = new File(sSourceFilePath);
+			m_oLogger.debug("ONDAProviderAdapter.GetDownloadSize: full path " + sPath);
+			File oSourceFile = new File(sPath);
 			lLenght = oSourceFile.length();
 			if (!oSourceFile.exists()) {
 				m_oLogger.debug("ONDAProviderAdapter.GetDownloadSize: FILE DOES NOT EXISTS");
@@ -103,11 +93,8 @@ public class ONDAProviderAdapter extends ProviderAdapter {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-
-		//TODO can we get read of these lines and abort execution instead? Do these members ever really get updated?
 		if (!Utils.isNullOrEmpty(m_sProviderUser)) sUser = m_sProviderUser;
 		if (!Utils.isNullOrEmpty(m_sProviderPassword)) sPassword = m_sProviderPassword;
-
 		final String sFinalUser = sUser;
 		final String sFinalPassword = sPassword;
 
@@ -180,29 +167,20 @@ public class ONDAProviderAdapter extends ProviderAdapter {
 
 		if(sFileURL.startsWith("file:")) {
 			
-			m_oLogger.debug("ONDAProviderAdapter.ExecuteDownloadFile: this is a file:// protocol, get file name");
+			m_oLogger.debug("ONDAProviderAdapter.ExecuteDownloadFile: this is a \"file:\" protocol, get file name");
 			
 			//file:/mnt/OPTICAL/LEVEL-1C/2018/12/12/S2B_MSIL1C_20181212T010259_N0207_R045_T54PZA_20181212T021706.zip/.value
 			
-			m_sPrefix = "file:";
-			m_sSuffix = "/.value";
+			String sPrefix = "file:";
 			// Remove the prefix
-			int iStart = sFileURL.indexOf(m_sPrefix) +m_sPrefix.length();
+			int iStart = sFileURL.indexOf(sPrefix) +sPrefix.length();
 			String sPath = sFileURL.substring(iStart);
 
-			// remove the ".value" suffix
-			sPath = sPath.substring(0, sPath.lastIndexOf(m_sSuffix));
-
-			// This is the folder: we need the .value file
-			String sSourceFilePath = sPath + m_sSuffix;
-			File oSourceFile = new File(sSourceFilePath);
+			m_oLogger.debug("ONDAProviderAdapter.ExecuteDownloadFile: source file: " + sPath);
+			File oSourceFile = new File(sPath);
 			
-			m_oLogger.debug("ONDAProviderAdapter.ExecuteDownloadFile: source file: " + sSourceFilePath);
-
 			// Destination file name: start from the simple name
-			// Do not call GetFileName: here in ONDA the real file is called .value, for WASDI getFileName returns the original Satellite file name
-			String sDestinationFileName = sPath.substring( sPath.lastIndexOf("/") + 1);
-			
+			String sDestinationFileName = GetFileName(sFileURL);
 			// set the destination folder
 			if (sSaveDirOnServer.endsWith("/") == false) sSaveDirOnServer += "/";
 			sDestinationFileName = sSaveDirOnServer + sDestinationFileName;
@@ -219,7 +197,6 @@ public class ONDAProviderAdapter extends ProviderAdapter {
 					}
 				}
 				
-				//oDestionationFile.createNewFile();
 				InputStream oInputStream = new FileInputStream(oSourceFile);
 				OutputStream oOutputStream = new FileOutputStream(oDestionationFile);
 				
@@ -254,16 +231,16 @@ public class ONDAProviderAdapter extends ProviderAdapter {
 		if(sFileURL.startsWith("file:")) {
 			
 			// In Onda, the real file is .value but here we need the name of Satellite image that, in ONDA is the parent folder name
-			m_sPrefix = "file:";
-			m_sSuffix = "/.value";
+			String sPrefix = "file:";
+			String sSuffix = "/.value";
 			// Remove the prefix
-			int iStart = sFileURL.indexOf(m_sPrefix) +m_sPrefix.length();
+			int iStart = sFileURL.indexOf(sPrefix) +sPrefix.length();
 			String sPath = sFileURL.substring(iStart);
 
 			// remove the ".value" suffix
-			sPath = sPath.substring(0, sPath.lastIndexOf(m_sSuffix));
+			sPath = sPath.substring(0, sPath.lastIndexOf(sSuffix));
 
-			// Destination file name: start from the simple name
+			// Destination file name: start from the simple name, i.e., exclude the containing dir, slash included:
 			String sDestinationFileName = sPath.substring( sPath.lastIndexOf("/") + 1);
 			return sDestinationFileName;
 
