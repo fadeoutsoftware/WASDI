@@ -94,7 +94,6 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 		if(!m_aoSubscribers.remove(oSubscriber)) {
 			m_oLogger.warn("ProviderAdapter.subscribe: subscriber not found");
 		}
-		
 	}
      
     /**
