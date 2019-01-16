@@ -77,7 +77,8 @@ mvn clean install
 
 **TODO** *how to configure* - attach images of the config
 
-
+make sure Elicpse uses the jre within the jdk and not another one installed separately: Windows -> Preferences -> Java -> installed JREs
+ 
 ----
 
 ## Deploy
