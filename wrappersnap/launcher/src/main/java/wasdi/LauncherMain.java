@@ -434,19 +434,19 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 	public String Download(DownloadFileParameter oParameter, String sDownloadPath) {
 		String sFileName = "";
 
-		ProviderAdapter oProviderAdapter = new ProviderAdapterSupplier().supplyProviderAdapter(oParameter.getProvider());
-		oProviderAdapter.subscribe(this);
-
 		ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
 		ProcessWorkspace oProcessWorkspace = oProcessWorkspaceRepository.GetProcessByProcessObjId(oParameter.getProcessObjId());
 
 		try {
 			updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 0);
-
 			s_oLogger.debug("LauncherMain.Download: Download Start");
-
-			if (oProviderAdapter == null) throw new Exception("Donwload File is null. Check the provider name");
-
+			
+			ProviderAdapter oProviderAdapter = new ProviderAdapterSupplier().supplyProviderAdapter(oParameter.getProvider());
+			if (oProviderAdapter != null) {
+				oProviderAdapter.subscribe(this);
+			} else {
+				throw new Exception("Donwload File is null. Check the provider name");
+			}
 			oProviderAdapter.setProviderUser(oParameter.getDownloadUser());
 			oProviderAdapter.setProviderPassword(oParameter.getDownloadPassword());
 
@@ -461,6 +461,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 
 			} else {
 				s_oLogger.debug("LauncherMain.Download: process not found: " + oParameter.getProcessObjId());
+				//FIXME what happens if oProcessWorkspace is null? Shall we let the download proceed anyway?
 			}
 
 
@@ -585,8 +586,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 					s_oLogger.error("LauncherMain.Download: unexpected null oProcessWorkspace");
 				}
 			}
-		}
-		catch (Exception oEx) {
+		} catch (Exception oEx) {
 			oEx.printStackTrace();
 			s_oLogger.error("LauncherMain.Download: Exception " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
 
@@ -594,8 +594,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 
 			if (oProcessWorkspace != null) oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
 			if (s_oSendToRabbit!=null) s_oSendToRabbit.SendRabbitMessage(false,LauncherOperations.DOWNLOAD.name(),oParameter.getWorkspace(),sError,oParameter.getExchange());
-		}
-		finally{
+		} finally {
 			s_oLogger.debug("LauncherMain.Download: finally call CloseProcessWorkspace ");
 			//update process status and send rabbit updateProcess message
 			CloseProcessWorkspace(oProcessWorkspaceRepository, oProcessWorkspace);
