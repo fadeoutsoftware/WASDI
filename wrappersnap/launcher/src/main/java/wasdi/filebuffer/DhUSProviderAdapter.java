@@ -1,19 +1,10 @@
 package wasdi.filebuffer;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.Authenticator;
-import java.net.HttpURLConnection;
-import java.net.PasswordAuthentication;
-import java.net.URL;
 
 import org.apache.log4j.Logger;
 
-import wasdi.ConfigReader;
 import wasdi.shared.business.ProcessWorkspace;
-import wasdi.shared.utils.Utils;
 
 /**
  * Donwload File Utility Class for DhUS
