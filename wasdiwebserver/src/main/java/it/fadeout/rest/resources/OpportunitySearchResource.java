@@ -1,11 +1,14 @@
 package it.fadeout.rest.resources;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
 
+import javax.servlet.ServletConfig;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
@@ -13,27 +16,38 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 
 import org.nfs.orbits.CoverageTool.Polygon;
 import org.nfs.orbits.CoverageTool.apoint;
 import org.nfs.orbits.sat.CoverageSwathResult;
 import org.nfs.orbits.sat.SatFactory;
+import org.nfs.orbits.sat.SatSensor;
 import org.nfs.orbits.sat.Satellite;
 import org.nfs.orbits.sat.SwathArea;
 
+import de.micromata.opengis.kml.v_2_2_0.Kml;
 import it.fadeout.Wasdi;
 import it.fadeout.business.InstanceFinder;
 import it.fadeout.viewmodels.CoverageSwathResultViewModel;
 import it.fadeout.viewmodels.OrbitFilterViewModel;
 import it.fadeout.viewmodels.OrbitSearchViewModel;
 import it.fadeout.viewmodels.SatelliteOrbitResultViewModel;
+import it.fadeout.viewmodels.SatelliteResourceViewModel;
 import satLib.astro.time.Time;
 import wasdi.shared.business.User;
+import wasdi.shared.utils.CredentialPolicy;
 import wasdi.shared.utils.Utils;
 
 @Path("/searchorbit")
 public class OpportunitySearchResource {
+	@Context
+	ServletConfig m_oServletConfig;
+	
+	CredentialPolicy m_oCredentialPolicy = new CredentialPolicy();
 
 	@POST
 	@Path("/search")
@@ -275,7 +289,27 @@ public class OpportunitySearchResource {
 		}
 		return ret;
 	}
-
+	@GET
+	@Path("/getkmlsearchresults")
+	@Produces({ "application/xml"})//, "application/json", "text/html" 
+	//@Consumes(MediaType.APP)
+	@Consumes(MediaType.APPLICATION_XML)
+	public Kml getKmlSearchResults ()
+	{
+		final Kml kml = new Kml();
+		kml.createAndSetPlacemark()
+		   .withName("London, UK").withOpen(Boolean.TRUE)
+		   .createAndSetPoint().addToCoordinates(-0.126236, 51.500152);
+		
+		/*try {
+			kml.marshal(new File("C:\\temp\\wasdi\\HelloKml.kml"));
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return null;
+		}*/
+		return kml;
+	}
 	@GET
 	@Path("/updatetrack/{satellitesname}")
 	@Produces({ "application/xml", "application/json", "text/html" })
@@ -338,4 +372,49 @@ public class OpportunitySearchResource {
 
 		return aoRet;
 	}
+	
+	
+	@GET
+	@Path("/getsatellitesresource")
+	@Produces({ "application/xml", "application/json", "text/html"}) 
+	//@Consumes(MediaType.APP)
+	@Consumes(MediaType.APPLICATION_JSON)
+	public ArrayList <SatelliteResourceViewModel> getSatellitesResources (@HeaderParam("x-session-token") String sSessionId)
+	{
+//		if(! m_oCredentialPolicy.validSessionId(sSessionId)) {
+//			//todo retur error
+//			//Satellite oSatellite = new
+//		}
+		String[] asSatellites = null;
+		
+//		String satres = InstanceFinder.s_sOrbitSatsMap.get("COSMOSKY1");
+		String sSatellites = m_oServletConfig.getInitParameter("LIST_OF_SATELLITES");
+		if (sSatellites != null && sSatellites.length() > 0) 
+		{
+			asSatellites = sSatellites.split(",|;");
+		}
+		
+		ArrayList <SatelliteResourceViewModel> aaoReturnValue = new ArrayList <SatelliteResourceViewModel>();
+		for(Integer iIndexSarellite = 0; iIndexSarellite < asSatellites.length ; iIndexSarellite ++)
+		{
+			try {
+				String satres = InstanceFinder.s_sOrbitSatsMap.get(asSatellites[iIndexSarellite]);
+				Satellite oSatellite = SatFactory.buildSat(satres);
+				ArrayList<SatSensor> aoSatelliteSensors = oSatellite.getSensors();
+				
+				SatelliteResourceViewModel oSatelliteResource = new SatelliteResourceViewModel();
+				oSatelliteResource.setSatelliteName(asSatellites[iIndexSarellite]);
+				oSatelliteResource.setSatelliteSensors(aoSatelliteSensors);
+				aaoReturnValue.add(oSatelliteResource);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				return null;
+			}			
+		}
+		
+		return aaoReturnValue;
+
+	}
+
 }

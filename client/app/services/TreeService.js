@@ -55,7 +55,8 @@ service('TreeService', ['$http',  'ConstantsService', function ($http, oConstant
     //click event
     this.getChangedNodeNameEvent = function(){
         return "changed.jstree";
-    }
+    };
+
 
     this.onTreeEvent = function(sEvent,sIdDiv,oFunction,oController){
         if(utilsIsStrNullOrEmpty(sIdDiv) || utilsIsStrNullOrEmpty(sEvent) || utilsIsObjectNullOrUndefined(oFunction) || utilsIsObjectNullOrUndefined(oController))
@@ -66,6 +67,29 @@ service('TreeService', ['$http',  'ConstantsService', function ($http, oConstant
         $(sIdDiv).on(sEvent, function(e, data) {
             oFunction(oController,e,data);
         });
+
+        return true;
+    }
+
+    this.getNodeById = function(sNodeId,sDivId){
+        if( utilsIsStrNullOrEmpty(sNodeId) === true || utilsIsStrNullOrEmpty(sDivId) === true )
+        {
+            return null;
+        }
+
+        // var oNode = $(sDivId).jstree(true).find(sNodeId);
+        var oNode = $(sDivId).jstree(true).get_node(sNodeId);
+        return oNode;
+    }
+
+    this.loadNewTree = function(sIdDiv, oNewTree) {
+        if (utilsIsStrNullOrEmpty(sIdDiv) === true || utilsIsObjectNullOrUndefined(oNewTree) === true)
+        {
+            return false;
+        }
+        $(sIdDiv).jstree(true).settings.core = oNewTree.core;
+        $(sIdDiv).jstree(true).refresh(true);
+        // $(sIdDiv).jstree(true).redraw(true);
 
         return true;
     }
