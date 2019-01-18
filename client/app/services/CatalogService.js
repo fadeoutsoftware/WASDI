@@ -23,7 +23,29 @@ service('CatalogService', ['$http',  'ConstantsService', function ($http, oConst
     };
     this.downloadByName = function(sFileName)
     {
-          return this.m_oHttp.get(this.APIURL + "/catalog/downloadbyname?filename=" + sFileName);
+        var urlParams = "?" + "token=" + oConstantsService.getSessionId();
+        urlParams = urlParams + "&" + "filename=" + sFileName;
+
+        var _this = this;
+
+        var config = {
+            timeout : 1000 * 120
+        }
+
+
+        return this.m_oHttp.get(this.APIURL + "/catalog/checkdownloadavaialibitybyname" + urlParams, config)
+            .then(function(data){
+                if(data.data.boolValue == true)
+                {
+                    //window.open(_this.APIURL + "/catalog/downloadbyname" + urlParams);
+                    window.location.href = _this.APIURL + "/catalog/downloadbyname" + urlParams;
+                }
+            })
+            .catch(function(reason){
+                throw "File not found";
+            })
+
+
     };
 
     this.ingestFile = function(sSelectedFile,sWorkspace){

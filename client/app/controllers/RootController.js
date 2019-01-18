@@ -200,9 +200,19 @@ var RootController = (function() {
         };
 
         var mytimeout = $timeout($scope.onTimeout,1000);
+
     }
 
     /*********************************** METHODS **************************************/
+
+    RootController.prototype.openLogoutModal = function()
+    {
+        $('#logoutModal').modal('show');
+    }
+    RootController.prototype.closeLogoutModal = function()
+    {
+        $('#logoutModal').modal('hide');
+    }
 
     RootController.prototype.onClickProcess = function()
     {
@@ -212,22 +222,35 @@ var RootController = (function() {
 
     RootController.prototype.onClickLogOut = function()
     {
-        var oController=this;
+        var _this = this;
 
-        this.m_oAuthService.logout().success(function (data, status) {
-            if(utilsIsObjectNullOrUndefined(data) === true || data.BoolValue === false)
-            {
-                utilsVexDialogAlertTop("SERVER ERROR ON LOGOUT");
-                console.log("SERVER ERROR ON LOGOUT");
-            }
-            oController.m_oConstantsService.logOut();
-            oController.m_oState.go("home");
+        //this.openLogoutModal();
+        this.m_oAuthService.logout()
+            .success(function (data, status) {
+                if(utilsIsObjectNullOrUndefined(data) === true || data.BoolValue === false)
+                {
+                    utilsVexDialogAlertTop("SERVER ERROR ON LOGOUT");
+                    console.log("SERVER ERROR ON LOGOUT");
+                }
 
-        }).error(function (data,status) {
-            utilsVexDialogAlertTop("ERROR IN LOGOUT");
-            oController.m_oConstantsService.logOut();
-            oController.m_oState.go("home");
-        });
+                try
+                {
+                    _this.m_oConstantsService.setActiveWorkspace(null);
+                    _this.m_oConstantsService.logOut();
+                }catch(e)
+                {
+
+                }
+
+                //_this.closeLogoutModal();
+                _this.m_oState.go("home");
+            })
+            .error(function (data,status) {
+                utilsVexDialogAlertTop("ERROR IN LOGOUT");
+                _this.m_oConstantsService.logOut();
+                //_this.closeLogoutModal();
+                _this.m_oState.go("home");
+            });
 
 
     };

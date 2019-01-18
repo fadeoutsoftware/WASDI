@@ -3,7 +3,9 @@
  */
 'use strict';
 angular.module('wasdi.RabbitStompService', ['wasdi.RabbitStompService']).
-service('RabbitStompService', ['$http',  'ConstantsService','$interval','ProcessesLaunchedService', function ($http, oConstantsService,$interval,oProcessesLaunchedService,$scope) {
+service('RabbitStompService',
+    ['$http',  'ConstantsService','$interval','ProcessesLaunchedService', '$q',
+    function ($http, oConstantsService,$interval,oProcessesLaunchedService, $q, $scope) {
 
     // Reconnection promise to stop the timer if the reconnection succeed or if the user change page
     this.m_oInterval = $interval;
@@ -38,6 +40,18 @@ service('RabbitStompService', ['$http',  'ConstantsService','$interval','Process
     this.m_oActiveController = null;
 
     this.m_sWorkspaceId = "";
+
+    // Use defer/promise to keep trace when service is ready to
+    // perform any operation
+    this.m_oServiceReadyDeferred = null;
+    this.m_oServiceReadyPromise = null;
+    this.waitServiceIsReady = function ()
+    {
+        if( this.m_oServiceReadyPromise == null){
+            this.m_oServiceReadyPromise = this.m_oServiceReadyDeferred.promise;
+        }
+        return this.m_oServiceReadyPromise;
+    }
 
     this.setMessageCallback = function (fCallback) {
         this.m_fMessageCallBack = fCallback;
@@ -136,10 +150,13 @@ service('RabbitStompService', ['$http',  'ConstantsService','$interval','Process
     * */
     this.initWebStomp = function()
     {
+        var _this = this;
+
+        this.m_oServiceReadyDeferred = $q.defer();
+
         // Web Socket to receive workspace messages
         //var oWebSocket = new WebSocket(this.m_oConstantsService.getStompUrl());
         var oWebSocket = new SockJS(this.m_oConstantsService.getStompUrl());
-        var oThisService = this;
         this.m_oClient = Stomp.over(oWebSocket);
         this.m_oClient.heartbeat.outgoing = 0;
         this.m_oClient.heartbeat.incoming = 0;
@@ -152,22 +169,24 @@ service('RabbitStompService', ['$http',  'ConstantsService','$interval','Process
             console.log('RabbitStompService: Web Stomp connected');
 
             //CHECK IF the session is valid
-            var oSessionId = oThisService.m_oConstantsService.getSessionId();
+            var oSessionId = _this.m_oConstantsService.getSessionId();
             if(utilsIsObjectNullOrUndefined(oSessionId))
             {
                 console.log("RabbitStompService: Error session id Null in on_connect");
                 return false;
             }
 
+            _this.m_oServiceReadyDeferred.resolve(true);
+
             // Is this a re-connection?
-            if (oThisService.m_oReconnectTimerPromise != null) {
+            if (_this.m_oReconnectTimerPromise != null) {
 
                 // Yes it is: clear the timer
-                oThisService.m_oInterval.cancel(oThisService.m_oReconnectTimerPromise);
-                oThisService.m_oReconnectTimerPromise = null;
+                _this.m_oInterval.cancel(_this.m_oReconnectTimerPromise);
+                _this.m_oReconnectTimerPromise = null;
 
-                if (oThisService.m_sWorkspaceId !== "") {
-                    oThisService.subscribe(oThisService.m_sWorkspaceId);
+                if (_this.m_sWorkspaceId !== "") {
+                    _this.subscribe(_this.m_sWorkspaceId);
                 }
             }
         };
@@ -183,9 +202,9 @@ service('RabbitStompService', ['$http',  'ConstantsService','$interval','Process
             if (sMessage == "LOST_CONNECTION" || sMessage == "Whoops! Lost connection to undefined") {
                 console.log('RabbitStompService: Web Socket Connection Lost');
 
-                if (oThisService.m_oReconnectTimerPromise == null) {
+                if (_this.m_oReconnectTimerPromise == null) {
                     // Try to Reconnect
-                    oThisService.m_oReconnectTimerPromise = oThisService.m_oInterval(oThisService.m_oRabbitReconnect, 5000);
+                    _this.m_oReconnectTimerPromise = _this.m_oInterval(_this.m_oRabbitReconnect, 5000);
                 }
             }
         };
@@ -201,19 +220,19 @@ service('RabbitStompService', ['$http',  'ConstantsService','$interval','Process
 
             // Connect again
             //oThisService.oWebSocket = new WebSocket(oThisService.m_oConstantsService.getStompUrl());
-            oThisService.oWebSocket = new SockJS(oThisService.m_oConstantsService.getStompUrl());
-            oThisService.m_oClient = Stomp.over(oThisService.oWebSocket);
-            oThisService.m_oClient.heartbeat.outgoing = 0;
-            oThisService.m_oClient.heartbeat.incoming = 0;
-            oThisService.m_oClient.debug = null;
+            _this.oWebSocket = new SockJS(_this.m_oConstantsService.getStompUrl());
+            _this.m_oClient = Stomp.over(_this.oWebSocket);
+            _this.m_oClient.heartbeat.outgoing = 0;
+            _this.m_oClient.heartbeat.incoming = 0;
+            _this.m_oClient.debug = null;
 
-            oThisService.m_oClient.connect(oThisService.m_oConstantsService.getRabbitUser(), oThisService.m_oConstantsService.getRabbitPassword(), oThisService.m_oOn_Connect, oThisService.m_oOn_Error, '/');
+            _this.m_oClient.connect(_this.m_oConstantsService.getRabbitUser(), _this.m_oConstantsService.getRabbitPassword(), _this.m_oOn_Connect, _this.m_oOn_Error, '/');
         };
 
 
         this.m_oRabbitReconnect = rabbit_reconnect;
         //connect to the queue
-        this.m_oClient.connect(oThisService.m_oConstantsService.getRabbitUser(), oThisService.m_oConstantsService.getRabbitPassword(), on_connect, on_error, '/');
+        this.m_oClient.connect(_this.m_oConstantsService.getRabbitUser(), _this.m_oConstantsService.getRabbitPassword(), on_connect, on_error, '/');
 
 
         return true;

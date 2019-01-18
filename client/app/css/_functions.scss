@@ -1,0 +1,18 @@
+/// Remove the unit of a length
+/// @param {Number} $number - Number to remove unit from
+/// @return {Number} - Unitless number
+@function strip-unit($number) {
+    @if type-of($number) == 'number' and not unitless($number) {
+        @return $number / ($number * 0 + 1);
+    }
+
+    @return $number;
+}
+
+// Calculate size in px based on 'rem' size and a base website font size
+// (Usefull to Bootstrap 4 migration)
+@function calculatePxFromRemAndBasePx($sizeRem, $baseSizePx)
+{
+    // use '+ 0px' or '* 1px' to convert unit to px
+    @return (strip-unit($sizeRem) * $baseSizePx) + 0px;
+}
