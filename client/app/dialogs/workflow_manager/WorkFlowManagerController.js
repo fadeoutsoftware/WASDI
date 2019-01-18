@@ -416,9 +416,6 @@ var WorkFlowManagerController = (function() {
             }
         }
 
-
-
-
         return true;
     };
 

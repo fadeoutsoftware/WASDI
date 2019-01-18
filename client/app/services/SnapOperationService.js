@@ -107,7 +107,7 @@ service('SnapOperationService', ['$http',  'ConstantsService', function ($http, 
     };
 
     this.runListFlood = function (oListFlood,sWorkspaceId) {
-        return this.m_oHttp.post(this.APIURL + '/processing/listflood?workspaceId='+sWorkspaceId ,oListFlood);
+        return this.m_oHttp.post(this.APIURL + '/processing/asynchlistflood?workspaceId='+sWorkspaceId ,oListFlood);
     };
 }]);
 

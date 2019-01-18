@@ -33,6 +33,8 @@ service('CatalogService', ['$http',  'ConstantsService', function ($http, oConst
         }
 
 
+        window.location.href = this.APIURL + "/catalog/downloadbyname" + urlParams;
+        /*
         return this.m_oHttp.get(this.APIURL + "/catalog/checkdownloadavaialibitybyname" + urlParams, config)
             .then(function(data){
                 if(data.data.boolValue == true)
@@ -44,7 +46,7 @@ service('CatalogService', ['$http',  'ConstantsService', function ($http, oConst
             .catch(function(reason){
                 throw "File not found";
             })
-
+*/
 
     };
 

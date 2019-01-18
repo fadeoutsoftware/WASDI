@@ -3977,10 +3977,12 @@ var EditorController = (function () {
         //         utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR DOWNLOADING FILE");
         //
         //     });
+        /*
             .catch(function(data,status){
                 utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR DOWNLOADING FILE");
 
             });
+        */
         return true;
     };
 
