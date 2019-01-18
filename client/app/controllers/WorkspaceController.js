@@ -145,6 +145,22 @@ var WorkspaceController = (function() {
 
     };
 
+    WorkspaceController.prototype.deselectWorskpace = function() //oWorkspace)
+    {
+        for (var i =0; i<this.m_aoProducts.length; i++)
+        {
+            this.m_oGlobeService.removeEntity(this.m_aoProducts[i].oRectangle)
+        }
+
+        this.m_oWorkspaceSelected = null;
+        this.m_bIsVisibleFiles = false;
+        this.m_bLoadingWSFiles = false;
+        this.m_bIsOpenInfo = false;
+
+        this.m_oGlobeService.flyHome();
+        this.m_oGlobeService.startRotationGlobe(3);
+    }
+
     WorkspaceController.prototype.loadProductList = function(oWorkspace)
     {
         // View is leaving...
@@ -161,19 +177,7 @@ var WorkspaceController = (function() {
 
             if (this.m_oWorkspaceSelected.workspaceId == oWorkspace.workspaceId) {
 
-                //DESELECT:
-                for (var i =0; i<this.m_aoProducts.length; i++) {
-                    this.m_oGlobeService.removeEntity(this.m_aoProducts[i].oRectangle)
-                }
-
-
-                this.m_oWorkspaceSelected = null;
-                this.m_bIsVisibleFiles = false;
-                this.m_bLoadingWSFiles = false;
-                this.m_bIsOpenInfo = false;
-
-                this.m_oGlobeService.flyHome();
-                this.m_oGlobeService.startRotationGlobe(3);
+                this.deselectWorskpace();
 
                 return;
             }
@@ -395,12 +399,14 @@ var WorkspaceController = (function() {
                 if (value.geoserver == 'on')
                     bDeleteLayer = true;
 
-                oController.m_oWorkspaceService.DeleteWorkspace(sWorkspaceId, bDeleteFile, bDeleteLayer).success(function (data, status) {
-                    oController.fetchWorkspaceInfoList();
+                oController.m_oWorkspaceService.DeleteWorkspace(sWorkspaceId, bDeleteFile, bDeleteLayer)
+                    .success(function (data, status) {
+                        oController.deselectWorskpace();
+                        oController.fetchWorkspaceInfoList();
+                    })
+                    .error(function (data, status) {
 
-                }).error(function (data, status) {
-
-                });
+                    });
             }
         });
     };
