@@ -187,11 +187,11 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 		m_oLogger.debug("ProviderAdapter.downloadViaHttp: FileUrl = " + sFileURL);
 
 		URL oUrl = new URL(sFileURL);
-		HttpURLConnection oConnection = (HttpURLConnection) oUrl.openConnection();
-		oConnection.setRequestMethod("GET");
-		oConnection.setRequestProperty("Accept", "*/*");
-
-		int responseCode = oConnection.getResponseCode();
+		HttpURLConnection oHttpConn = (HttpURLConnection) oUrl.openConnection();
+		oHttpConn.setRequestMethod("GET");
+		oHttpConn.setRequestProperty("Accept", "*/*");
+		oHttpConn.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:57.0) Gecko/20100101 Firefox/57.0");
+		int responseCode = oHttpConn.getResponseCode();
 
 		// always check HTTP response code first
 		if (responseCode == HttpURLConnection.HTTP_OK) {
@@ -199,9 +199,9 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 			m_oLogger.debug("ProviderAdapter.downloadViaHttp: Connected");
 
 			String sFileName = "";
-			String sDisposition = oConnection.getHeaderField("Content-Disposition");
-			String sContentType = oConnection.getContentType();
-			long lContentLength = oConnection.getContentLength();
+			String sDisposition = oHttpConn.getHeaderField("Content-Disposition");
+			String sContentType = oHttpConn.getContentType();
+			long lContentLength = oHttpConn.getContentLength();
 
 			m_oLogger.debug("ProviderAdapter.downloadViaHttp. ContentLenght: " + lContentLength);
 
@@ -222,21 +222,21 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 			m_oLogger.debug("fileName = " + sFileName);
 
 			// opens input stream from the HTTP connection
-			InputStream oInputStream = oConnection.getInputStream();
-			String saveFilePath = sSaveDirOnServer + "/" + sFileName;
+			InputStream oInputStream = oHttpConn.getInputStream();
+			String sSaveFilePath = sSaveDirOnServer + "/" + sFileName;
 
-			m_oLogger.debug("ProviderAdapter.downloadViaHttp: Create Save File Path = " + saveFilePath);
+			m_oLogger.debug("ProviderAdapter.downloadViaHttp: Create Save File Path = " + sSaveFilePath);
 
-			File oTargetFile = new File(saveFilePath);
+			File oTargetFile = new File(sSaveFilePath);
 			File oTargetDir = oTargetFile.getParentFile();
 			oTargetDir.mkdirs();
 
 			// opens an output stream to save into file
-			FileOutputStream oOutputStream = new FileOutputStream(saveFilePath);
+			FileOutputStream oOutputStream = new FileOutputStream(sSaveFilePath);
 
 			copyStream(m_oProcessWorkspace, lContentLength, oInputStream, oOutputStream);
 
-			sReturnFilePath = saveFilePath;
+			sReturnFilePath = sSaveFilePath;
 
 			m_oLogger.debug("ProviderAdapter.downloadViaHttp File downloaded " + sReturnFilePath);
 		} else {
@@ -244,7 +244,7 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 					"ProviderAdapter.downloadViaHttp No file to download. Server replied HTTP code: " + responseCode);
 			m_iLastError = responseCode;
 		}
-		oConnection.disconnect();
+		oHttpConn.disconnect();
 		return sReturnFilePath;
 	}
 
@@ -352,14 +352,17 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 
         m_oLogger.debug("ProviderAdapter.getDownloadFileSizeViaHttp: FileUrl = " + sFileURL);
 
-        URL url = new URL(sFileURL);
-        HttpURLConnection httpConn = (HttpURLConnection) url.openConnection();
-        int responseCode = httpConn.getResponseCode();
+        URL oUrl = new URL(sFileURL);
+        HttpURLConnection oHttpConn = (HttpURLConnection) oUrl.openConnection();
+        oHttpConn.setRequestMethod("GET");
+		oHttpConn.setRequestProperty("Accept", "*/*");
+        oHttpConn.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:57.0) Gecko/20100101 Firefox/57.0");
+        int responseCode = oHttpConn.getResponseCode();
 
         // always check HTTP response code first
         if (responseCode == HttpURLConnection.HTTP_OK) {
 
-            lLenght = httpConn.getHeaderFieldLong("Content-Length", 0L);
+            lLenght = oHttpConn.getHeaderFieldLong("Content-Length", 0L);
 
             m_oLogger.debug("ProviderAdapter.getDownloadFileSizeViaHttp: File size = " + lLenght);
 
@@ -369,7 +372,7 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
             m_oLogger.debug("ProviderAdapter.getDownloadFileSizeViaHttp: No file to download. Server replied HTTP code: " + responseCode);
             m_iLastError = responseCode;
         }
-        httpConn.disconnect();
+        oHttpConn.disconnect();
 
         return lLenght;
     }
@@ -440,6 +443,7 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 			//NOTE: the DhUS version did not set GET and Accept. ONDA did. TEST 
 			oHttpConn.setRequestMethod("GET");
 			oHttpConn.setRequestProperty("Accept", "*/*");
+			oHttpConn.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:57.0) Gecko/20100101 Firefox/57.0");
 			oHttpConn.setConnectTimeout(iConnectionTimeOut);
 			oHttpConn.setReadTimeout(iReadTimeOut);
 			m_oLogger.debug("ProviderAdapter.getFileNameViaHttp: Timeout Setted: waiting response");
