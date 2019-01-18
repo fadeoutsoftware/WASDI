@@ -4,10 +4,6 @@ import java.util.ArrayList;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
-import org.nfs.orbits.sat.LookingType;
-import org.nfs.orbits.sat.ViewAngle;
-import org.nfs.orbits.sat.swathSize;
-
 @XmlRootElement
 public class OrbitSearchViewModel {
 
