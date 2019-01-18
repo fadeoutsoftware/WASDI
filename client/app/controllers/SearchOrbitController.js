@@ -40,14 +40,18 @@ var SearchOrbitController = (function() {
         this.m_sFilterTable = "";
         this.m_oTreeService = oTreeService;
         this.m_sIdDiv = "#orbitsTree";
-        //TODO TEST
-        // this.m_oTreeService.createNewInstanceTree("#orbitsTree",this.getTreeJsonDefault());
+        this.m_sIdDivSatelliteResourceTree = "#satelliteResourceTree";
+        this.m_oOpportunitiesTree = null;
+        // this.m_aoSatelliteResources = [];
+        this.m_aoSatelliteResourcesTree = null;
+
 
         //order the table
         this.m_sOrderBy = "Satellite";
         this.m_bReverseOrder = false;
         this.m_sHrefLogFile = "";
         this.downloadKML();//TODO REMOVE IT
+        this.getSatellitesResources();
 
         if(utilsIsObjectNullOrUndefined( this.m_oActiveWorkspace) && utilsIsStrNullOrEmpty( this.m_oActiveWorkspace))
         {
@@ -271,7 +275,16 @@ var SearchOrbitController = (function() {
                     //TODO NEW FEATURE
                     //var oDataTree = oController.generateDataTree(data);
                     // oController.m_oTreeService.createNewInstanceTree("#orbitsTree",oController.generateDataTree(data));
-                    oController.m_oTreeService.createNewInstanceTree(oController.m_sIdDiv,oController.getResultOpportunitiesTreeJson(data));
+                    if(utilsIsObjectNullOrUndefined(oController.m_oOpportunitiesTree) === true)
+                    {
+                        oController.m_oOpportunitiesTree = oController.getResultOpportunitiesTreeJson(data);
+                        oController.m_oTreeService.createNewInstanceTree(oController.m_sIdDiv,oController.m_oOpportunitiesTree);
+                    }
+                    else
+                    {
+                        oController.m_oOpportunitiesTree = oController.getResultOpportunitiesTreeJson(data);
+                        oController.m_oTreeService.loadNewTree(oController.m_sIdDiv,oController.m_oOpportunitiesTree);
+                    }
 
                     oController.m_aoOrbits = data;
                     oController.setOrbitAsUnchecked();
@@ -874,6 +887,7 @@ var SearchOrbitController = (function() {
         return oJsonData;
     };
 
+
     SearchOrbitController.prototype.generateDataTree = function(aoData)
     {
         if( utilsIsObjectNullOrUndefined(aoData) )
@@ -907,11 +921,11 @@ var SearchOrbitController = (function() {
             var sMinutes = oData.getMinutes();
             var sSeconds = oData.getSeconds();
             var sTimes = sHours + ":" + sMinutes + ":" + sSeconds;
-            var sSensorMode = aoData[iIndexOpportunity].SensorMode;
+            var sSensorMode = ( utilsIsObjectNullOrUndefined(aoData[iIndexOpportunity].SensorMode) ? "" : aoData[iIndexOpportunity].SensorMode );
             var sSensorLookDirection = aoData[iIndexOpportunity].SensorLookDirection;
             var sSwathName = aoData[iIndexOpportunity].SwathName;
             var asSplittedSwathName = sSwathName.split("__");
-            var sFrameName = asSplittedSwathName[0] + "-" + asSplittedSwathName[1] + "-" + sSensorMode + "- H" + sTimes ;
+            var sFrameName = asSplittedSwathName[0] + "-" + asSplittedSwathName[1] + "-" + sSensorMode + "-H" + sTimes ;
 
             //add data node
             var oResultSearchTreeData = this.generateNode(oReturnValue[0],sNewDate);
@@ -929,7 +943,7 @@ var SearchOrbitController = (function() {
             this.m_oTreeService.onTreeEvent(sCheckEvent,sIdDiv,oCheckFunction,oController);
             //uncheck event on tree
             this.m_oTreeService.onTreeEvent(sUncheckEvent,sIdDiv,oUncheckFunction,oController);
-
+            // this.m_oTreeService.onTreeEvent
 
         }
         return oReturnValue;
@@ -948,16 +962,28 @@ var SearchOrbitController = (function() {
             return false;
         }
 
-        if(oNode.original.isFrame)
+        //no children
+        if(oNode.children.length === 0)
         {
-            if( utilsIsObjectNullOrUndefined(oNode.original.rectangle) === true)
+            if(oNode.original.isFrame)
             {
-                var oRectangle = oController.drawRectangleInMap(oNode.original);
-                oNode.original.rectangle = oRectangle;
+                if( utilsIsObjectNullOrUndefined(oNode.original.rectangle) === true)
+                {
+                    var oRectangle = oController.drawRectangleInMap(oNode.original);
+                    oNode.original.rectangle = oRectangle;
+                }
             }
         }
+        else
+        {
+            var aoFrames = oController.getAllFramesInBranch(oNode.children);
+            oController.drawAllFrames(aoFrames);
+        }
+
         return true;
     };
+
+
 
     SearchOrbitController.prototype.onUncheckEventTreeFunction = function(oController,e,data)
     {
@@ -971,15 +997,78 @@ var SearchOrbitController = (function() {
             return false;
         }
 
-        if(oNode.original.isFrame)
+        if(oNode.children.length === 0)
         {
-            if(utilsIsObjectNullOrUndefined(oNode.original.rectangle) === false)
+            if(oNode.original.isFrame)
             {
-                oController.m_oMapService.removeLayerFromMap(oNode.original.rectangle);
-                oNode.original.rectangle = null;
+                if(utilsIsObjectNullOrUndefined(oNode.original.rectangle) === false)
+                {
+                    oController.m_oMapService.removeLayerFromMap(oNode.original.rectangle);
+                    oNode.original.rectangle = null;
+                }
             }
         }
+        else
+        {
+            var aoFrames = oController.getAllFramesInBranch(oNode.children);
+            oController.removeAllFrames(aoFrames);
+        }
+
+
         return true;
+    };
+
+    SearchOrbitController.prototype.drawAllFrames = function(aoFrames)
+    {
+        if(utilsIsObjectNullOrUndefined(aoFrames) === false)
+        {
+
+            var iNumberOfFrames = aoFrames.length;
+
+            for(var iIndexFrame = 0; iIndexFrame < iNumberOfFrames; iIndexFrame++ )
+            {
+                if( utilsIsObjectNullOrUndefined(aoFrames[iIndexFrame].original.rectangle) === true)
+                {
+                    // var sFrameFootPrint = aoFrames[iIndex].original.FrameFootPrint;
+                    var oRectangle = this.drawRectangleInMap(aoFrames[iIndexFrame].original);
+                    aoFrames[iIndexFrame].original.rectangle = oRectangle;
+                }
+
+            }
+        }
+    };
+
+    SearchOrbitController.prototype.removeAllFrames = function(aoFrames)
+    {
+        if(utilsIsObjectNullOrUndefined(aoFrames) === false)
+        {
+
+            var iNumberOfFrames = aoFrames.length;
+
+            for(var iIndexFrame = 0; iIndexFrame < iNumberOfFrames; iIndexFrame++ )
+            {
+
+                if(utilsIsObjectNullOrUndefined(aoFrames[iIndexFrame].original.rectangle) === false)
+                {
+                    this.m_oMapService.removeLayerFromMap(aoFrames[iIndexFrame].original.rectangle);
+                    aoFrames[iIndexFrame].original.rectangle = null;
+                }
+            }
+        }
+    };
+
+    SearchOrbitController.prototype.getAllFramesInBranch = function(asNodes,oResult = [])
+    {
+        for(var i = 0, length = asNodes.length; i < length; i++){
+            var oNode = this.m_oTreeService.getNodeById(asNodes[i],this.m_sIdDiv);
+            if(!oNode.children || oNode.children.length === 0){
+                oResult.push(oNode);
+            }else{
+                // var oChildren = this.m_oMapService.getNodeById(oNode.children);
+                oResult = this.getAllFramesInBranch(oNode.children, oResult);
+            }
+        }
+        return oResult;
     };
 
     SearchOrbitController.prototype.generateNode = function(oTree,sNewNode)
@@ -1045,7 +1134,117 @@ var SearchOrbitController = (function() {
             return null;
         }
         return oRectangle;
+    };
+
+    SearchOrbitController.prototype.getSatellitesResources = function()
+    {
+        var oController = this;
+        this.m_oSearchOrbitService.getSatellitesResources()
+            .success(function(data,status){
+                if(utilsIsObjectNullOrUndefined(data) === false || status !== 200)
+                {
+                    // oController.m_aoSatelliteResources = data;
+                    // var oTree = oController.getSatellitesResourcesTreeJson(oController.m_aoSatelliteResources);
+
+                    if(utilsIsObjectNullOrUndefined(oController.m_aoSatelliteResourcesTree) === true)
+                    {
+                        oController.m_aoSatelliteResourcesTree = oController.getSatellitesResourcesTreeJson(data);
+                        oController.m_oTreeService.createNewInstanceTree(oController.m_sIdDivSatelliteResourceTree,oController.m_aoSatelliteResourcesTree);
+                    }
+                    else
+                    {
+                        oController.m_aoSatelliteResourcesTree = oController.getSatellitesResourcesTreeJson(data);
+                        oController.m_oTreeService.loadNewTree(oController.m_sIdDivSatelliteResourceTree,oController.m_aoSatelliteResourcesTree);
+                    }
+
+                }
+                else
+                {
+                    utilsVexDialogAlertTop("THERE ARE PROBLEMS IN SATELLITE RESOURCES");
+                }
+            })
+            .error(function(data,status){
+                utilsVexDialogAlertTop("THERE ARE PROBLEMS IN SATELLITE RESOURCES");
+            })
+    };
+
+    SearchOrbitController.prototype.getSatellitesResourcesTreeJson = function(oDataInput)
+    {
+
+        var oData1 = this.generateSatellitesResourcesTree(oDataInput);
+
+        var oJsonData = {
+            core: {
+                data: oData1,
+                check_callback: false
+            },
+            checkbox: {
+                three_state : true, // to avoid that fact that checking a node also check others
+                whole_node : false,  // to avoid checking the box just clicking the node
+                tie_selection : false // for checking without selecting and selecting without checking
+            },
+            plugins: ['checkbox']
+        }
+
+        return oJsonData;
+    };
+
+    SearchOrbitController.prototype.generateSatellitesResourcesTree = function(oDataInput)
+    {
+        if( utilsIsObjectNullOrUndefined(oDataInput) )
+        {
+            return null;
+        }
+
+        var iNumberOfSatellites = oDataInput.length;
+        var aoSatellites = oDataInput;
+        var oReturnValue = [{
+            "id": "results",
+            "text": "Satellites",
+            "state": { "opened": true },
+            "children": []
+        }];
+
+        // var sIdDiv = this.m_sIdDivSatelliteResourceTree;
+        // var oController = this;
+
+        //for each satellite
+        for(var iSatellite = 0 ; iSatellite < iNumberOfSatellites; iSatellite++)
+        {
+            var sSatelliteName = aoSatellites[iSatellite].satelliteName;
+
+            //add satellite
+            var oSatelliteTree = this.generateNode(oReturnValue[0],sSatelliteName);
+
+            var oSatellite = aoSatellites[iSatellite];
+            var iNumberOfSatelliteSensors = oSatellite.satelliteSensors.length;
+
+            //for each sensor
+            for(var iSensor = 0; iSensor < iNumberOfSatelliteSensors; iSensor++)
+            {
+                var sDescription = oSatellite.satelliteSensors[iSensor].description;
+
+                //add sensor
+                var oSatelliteSensorTree = this.generateNode(oSatelliteTree,sDescription);
+
+                var oSensor = oSatellite.satelliteSensors[iSensor];
+                var iNumberOfSensorModes = oSensor.sensorModes.length;
+                //for each sensor mode
+                for(var iSensorMode = 0; iSensorMode <  iNumberOfSensorModes; iSensorMode++)
+                {
+                    var sName = oSensor.sensorModes[iSensorMode].name;
+                    this.generateNode(oSatelliteSensorTree,sName);
+                }
+
+            }
+
+            // var oSatelliteTree = this.generateNode(oSatelliteTree,sSatelliteName);
+
+        }
+
+        return oReturnValue;
     }
+
     SearchOrbitController.$inject = [
         '$scope',
         '$location',

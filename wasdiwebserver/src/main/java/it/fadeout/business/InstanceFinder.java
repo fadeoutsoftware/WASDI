@@ -551,7 +551,14 @@ public class InstanceFinder {
 
 		return oResults;
 	}
-
+	
+	
+	private static  ArrayList<CoverageSwathResult> findSwatsByFiltersTEST(String sArea)
+	{
+		return null;
+	}
+	
+	
 	private static LookingType convertLookingTypeString(String sLookingType)
 	{
 		sLookingType = sLookingType.trim();

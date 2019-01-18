@@ -150,7 +150,7 @@ public class Wasdi extends Application {
 			e.printStackTrace();
 		}
 		
-
+		
 		if (s_oProcessingThread==null) {
 			try {
 				
