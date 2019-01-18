@@ -89,6 +89,7 @@ import wasdi.shared.parameters.CalibratorParameter;
 import wasdi.shared.parameters.CalibratorSetting;
 import wasdi.shared.parameters.GraphParameter;
 import wasdi.shared.parameters.GraphSetting;
+import wasdi.shared.parameters.IDLProcParameter;
 import wasdi.shared.parameters.ISetting;
 import wasdi.shared.parameters.MultilookingParameter;
 import wasdi.shared.parameters.MultilookingSetting;
@@ -1462,10 +1463,10 @@ public class ProcessingResources {
 				return oResult;				
 			}
 			
-			Wasdi.DebugLog("ProcessingResource.algList: REF FILE " + oListFloodViewModel.getReferenceFile());
-			Wasdi.DebugLog("ProcessingResource.algList: POST EVENT FILE " + oListFloodViewModel.getPostEventFile());
-			Wasdi.DebugLog("ProcessingResource.list: launching ENVI LIST Processor");
-						
+			Wasdi.DebugLog("ProcessingResource.listflood: REF FILE " + oListFloodViewModel.getReferenceFile());
+			Wasdi.DebugLog("ProcessingResource.listflood: POST EVENT FILE " + oListFloodViewModel.getPostEventFile());
+			Wasdi.DebugLog("ProcessingResource.listflood: launching ENVI LIST Processor");
+			
 			//try execute algorithm
 			if (launchList(sSessionId, oListFloodViewModel, oUser, sWorkspaceId)) {
 				Wasdi.DebugLog("ProcessingResource.algList: ok return");
@@ -1494,6 +1495,56 @@ public class ProcessingResources {
 	}
 	
 	/**
+	 * Runs a the IDL script implementation of the LIST flood algorithm on specified files
+	 * @param sSessionId a valid session identifier
+	 * @param sFileName input file
+	 * @param a workspase identifier
+	 * @return BAD_REQUEST if null request, UNAUTHORIZED if session is not valid, OK after execution of the script
+	 */
+	@POST
+	@Path("/asynchlistflood")
+	@Produces({"application/json"})
+	public PrimitiveResult asynchListFlood(
+			@HeaderParam("x-session-token") String sSessionId,
+			@QueryParam("workspaceId") String sWorkspaceId,
+			ListFloodViewModel oListFloodViewModel) {
+		
+		Wasdi.DebugLog("ProcessingResource.algList");
+		
+		if(null == sSessionId ) {
+			PrimitiveResult oResult = new PrimitiveResult();
+			oResult.setBoolValue(false);
+			oResult.setIntValue(400);
+			return oResult;
+		}
+		
+		User oUser = Wasdi.GetUserFromSession(sSessionId);
+		
+		try {
+			//check authentication
+			if (oUser == null || Utils.isNullOrEmpty(oUser.getUserId())) {
+				PrimitiveResult oResult = PrimitiveResult.getInvalidInstance();
+				oResult.setIntValue(401);
+				return oResult;				
+			}
+			
+			Wasdi.DebugLog("ProcessingResource.asynchListFlood: REF FILE " + oListFloodViewModel.getReferenceFile());
+			Wasdi.DebugLog("ProcessingResource.asynchListFlood: POST EVENT FILE " + oListFloodViewModel.getPostEventFile());
+			Wasdi.DebugLog("ProcessingResource.asynchListFlood: launching ENVI LIST Processor");
+						
+			return 	asynchLaunchList(sSessionId, oListFloodViewModel, oUser, sWorkspaceId);
+						
+		} catch (Exception e) {
+			System.out.println("ProcessingResource.algList: error launching list " + e.getMessage());
+			e.printStackTrace();
+			PrimitiveResult oResult = PrimitiveResult.getInvalidInstance();
+			oResult.setBoolValue(false);
+			oResult.setIntValue(500);				
+			return oResult;
+		}
+	}
+	
+	/**
 	 * Launch LIST ENVI process
 	 * @param sReferenceFile 
 	 * @param sWorkspaceId
@@ -1502,11 +1553,11 @@ public class ProcessingResources {
 	private boolean launchList(String sSessionId, ListFloodViewModel oListFloodViewModel, User oUser, String sWorkspaceId) {
 
 		try {
-			String cmd[] = new String[] {
+			String asCmd[] = new String[] {
 					m_oServletConfig.getInitParameter("ListScript")
 			};
 			
-			Wasdi.DebugLog("ProcessingResource.launchList " + cmd[0] );
+			Wasdi.DebugLog("ProcessingResource.launchList " + asCmd[0] );
 			
 			String sParamFile = m_oServletConfig.getInitParameter("ListParam");
 			
@@ -1566,8 +1617,8 @@ public class ProcessingResources {
 				oWriter.close();
 			}
 			
-			System.out.println("ProcessingResource.launchList: shell exec " + Arrays.toString(cmd));
-			Process oProc = Runtime.getRuntime().exec(cmd);
+			System.out.println("ProcessingResource.launchList: shell exec " + Arrays.toString(asCmd));
+			Process oProc = Runtime.getRuntime().exec(asCmd);
 			BufferedReader oInput = new BufferedReader(new InputStreamReader(oProc.getInputStream()));
 			
             String sLine;
@@ -1584,6 +1635,147 @@ public class ProcessingResources {
 		return true;
 	}
 	
+	
+	
+	
+	
+	
+	/**
+	 * Launch LIST ENVI process
+	 * @param sReferenceFile 
+	 * @param sWorkspaceId
+	 * @return
+	 */
+	private PrimitiveResult asynchLaunchList(String sSessionId, ListFloodViewModel oListFloodViewModel, User oUser, String sWorkspaceId) {
+
+		PrimitiveResult oResult = new PrimitiveResult();
+		String sProcessObjId = Utils.GetRandomName();
+		String sUserId = Wasdi.GetUserFromSession(sSessionId).getUserId();
+		String sFloodMapFile = "";
+		
+		oResult.setBoolValue(false);
+		oResult.setIntValue(500);
+		
+		try {			
+			String sParamFile = m_oServletConfig.getInitParameter("ListParamAsynch");
+			
+			Wasdi.DebugLog("ProcessingResource.launchList ParamFile " + sParamFile);
+			
+			String sParamFullPath = m_oServletConfig.getInitParameter("DownloadRootPath") + "/processors/listflood/" + sParamFile;
+			
+			WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
+			Workspace oWorkspace = oWorkspaceRepository.GetWorkspace(sWorkspaceId);
+			
+			File oFile = new File(sParamFullPath);
+			
+			BufferedWriter oWriter = new BufferedWriter(new FileWriter(oFile));
+			if(null!= oWriter) {
+				Wasdi.DebugLog("ProcessingResource.launchList: BufferedWriter created");
+
+				oWriter.write(m_oServletConfig.getInitParameter("DownloadRootPath"));
+				oWriter.newLine();
+				oWriter.write(oUser.getUserId());
+				oWriter.newLine();
+				if (Utils.isNullOrEmpty(sSessionId)) oWriter.write(oUser.getPassword());
+				else oWriter.write("");
+				oWriter.newLine();
+				oWriter.write(oWorkspace.getName());
+				oWriter.newLine();
+				oWriter.write(sSessionId);
+				oWriter.newLine();
+				oWriter.write(sProcessObjId);
+				oWriter.newLine();
+
+				oWriter.write(oListFloodViewModel.getPostEventFile());
+				oWriter.newLine();
+				oWriter.write(oListFloodViewModel.getReferenceFile());
+				oWriter.newLine();
+				oWriter.newLine();
+				oWriter.newLine();
+				
+				String sMaskFile = oListFloodViewModel.getPostEventFile();
+				sMaskFile = Utils.GetFileNameWithoutExtension(sMaskFile);
+				sMaskFile += "_HSBA_MASK.tif";
+				
+				oWriter.write(sMaskFile);
+				oWriter.newLine();
+				
+				sFloodMapFile = oListFloodViewModel.getPostEventFile();
+				sFloodMapFile = Utils.GetFileNameWithoutExtension(sFloodMapFile);
+				sFloodMapFile += "_flood_map.tif";				
+				
+				oWriter.write(sFloodMapFile);
+				oWriter.newLine();
+				oWriter.write("" + oListFloodViewModel.getHsbaStartDepth());
+				oWriter.newLine();
+				oWriter.write("" + oListFloodViewModel.getBimodalityCoeff());
+				oWriter.newLine();
+				oWriter.write(""+oListFloodViewModel.getMinTileDimension());
+				oWriter.newLine();
+				oWriter.write("" + oListFloodViewModel.getMinBlobRemoval());
+				oWriter.newLine();
+				oWriter.flush();
+				oWriter.close();
+			}
+			
+			//Update process list
+			
+			ProcessWorkspaceRepository oRepository = new ProcessWorkspaceRepository();
+			ProcessWorkspace oProcess = new ProcessWorkspace();
+			
+			try
+			{
+				oProcess.setOperationDate(Wasdi.GetFormatDate(new Date()));
+				oProcess.setOperationType(LauncherOperations.RUNIDL.toString());
+				oProcess.setProductName(oListFloodViewModel.getReferenceFile());
+				oProcess.setWorkspaceId(sWorkspaceId);
+				oProcess.setUserId(sUserId);
+				oProcess.setProcessObjId(sProcessObjId);
+				oProcess.setStatus(ProcessStatus.CREATED.name());
+				String sProcessId = oRepository.InsertProcessWorkspace(oProcess);
+				System.out.println("ProcessingResource.asynchLaunchList: process ID: "+sProcessId);
+			}
+			catch(Exception oEx){
+				System.out.println("ProcessingResource.asynchLaunchList: Error updating process list " + oEx.getMessage());
+				oEx.printStackTrace();
+				oResult.setBoolValue( false);
+				oResult.setIntValue(500);
+				return oResult;
+			}
+
+			String sPath = m_oServletConfig.getInitParameter("SerializationPath");
+			
+			if (!(sPath.endsWith("\\") || sPath.endsWith("/"))){
+				sPath += "/";
+			}
+			sPath = sPath + oProcess.getProcessObjId();
+
+			
+			IDLProcParameter oParameter = new IDLProcParameter();
+			oParameter.setWorkspace(sWorkspaceId);
+			oParameter.setUserId(sUserId);
+			oParameter.setExchange(sWorkspaceId);
+			oParameter.setProcessObjId(oProcess.getProcessObjId());
+			oParameter.setParameterFile(sParamFile);
+			oParameter.setProcessorName("listflood");
+	
+			//TODO move it before inserting the new process into DB
+			SerializationUtils.serializeObjectToXML(sPath, oParameter);
+
+			oResult.setBoolValue(true);
+			oResult.setIntValue(200);
+			oResult.setStringValue(oProcess.getProcessObjId());
+			
+		} catch (Exception oEx) {
+			System.out.println("ProcessingResource.launchList: error during list process " + oEx.getMessage());
+			oEx.printStackTrace();
+			oResult.setBoolValue(false);
+			oResult.setIntValue(500);
+			return oResult;
+		}
+				
+		return oResult;
+	}
 	
 	
 }
