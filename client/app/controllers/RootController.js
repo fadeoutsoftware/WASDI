@@ -21,7 +21,19 @@ var RootController = (function() {
         this.m_oModalService = oModalService;
         this.m_oRabbitStompService = oRabbitStompService;
         this.m_bIsEditModelWorkspaceNameActive = false;
+        this.m_isRabbitConnected = true;
         var oController = this;
+
+
+
+        $scope.$on('rabbitConnectionStateChanged', function(event, args) {
+            if( args.connectionState == 1) { oController.m_isRabbitConnected = true; }
+            else if( args.connectionState == 2) { oController.m_isRabbitConnected = false; }
+            else{
+                oController.m_isRabbitConnected = false
+            }
+        })
+
 
         /**
          * Check user session
@@ -212,6 +224,11 @@ var RootController = (function() {
     RootController.prototype.closeLogoutModal = function()
     {
         $('#logoutModal').modal('hide');
+    }
+
+    RootController.prototype.isRabbitConnected = function()
+    {
+        return this.m_isRabbitConnected;
     }
 
     RootController.prototype.onClickProcess = function()

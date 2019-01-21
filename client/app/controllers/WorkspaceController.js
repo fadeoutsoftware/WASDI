@@ -59,6 +59,20 @@ var WorkspaceController = (function() {
                 $scope.m_oController.m_oUpdatePositionSatellite = undefined;
             }
         });
+        $scope.$on('rabbitConnectionStateChanged', function(event, args) {
+
+            console.debug('rabbitConnectionStateChanged', args);
+            //if( args.connectionState == ConnectionState.Lost)
+            if( args.connectionState == 2)
+            {
+                //console.debug("Reconnect attempt #" + oRabbitStompService.m_oRabbitReconnectAttemptCount);
+                if(oRabbitStompService.m_oRabbitReconnectAttemptCount == 0)
+                {
+                    var dialog = utilsVexDialogAlertBottomRightCorner("Async server connection lost");
+                    utilsVexCloseDialogAfter(3000, dialog);
+                }
+            }
+        });
 
 
     }

@@ -818,7 +818,7 @@ var EditorController = (function () {
             if (utilsIsStrNullOrEmpty(sErrorDescription) === false) sErrorDescription = "<br>"+sErrorDescription;
 
             var oDialog = utilsVexDialogAlertTop('GURU MEDITATION<br>THERE WAS AN ERROR IN THE ' + sOperation + ' PROCESS'+ sErrorDescription);
-            utilsVexCloseDialogAfterFewSeconds(10000, oDialog);
+            utilsVexCloseDialogAfter(10000, oDialog);
             this.m_oProcessesLaunchedService.loadProcessesFromServer(this.m_oActiveWorkspace.workspaceId);
 
             if (oMessage.messageCode =="PUBLISHBAND") {
@@ -868,7 +868,7 @@ var EditorController = (function () {
 
         // Alert the user
         var oDialog = utilsVexDialogAlertBottomRightCorner('PRODUCT ADDED TO THE WS<br>READY');
-        utilsVexCloseDialogAfterFewSeconds(4000, oDialog);
+        utilsVexCloseDialogAfter(4000, oDialog);
 
         // Update product list
         this.getProductListByWorkspace();
@@ -1339,7 +1339,7 @@ var EditorController = (function () {
 
                 if (!bAlreadyPublished) {
                     var oDialog = utilsVexDialogAlertBottomRightCorner('PUBLISHING BAND ' + oBand.name);
-                    utilsVexCloseDialogAfterFewSeconds(4000, oDialog);
+                    utilsVexCloseDialogAfter(4000, oDialog);
                 }
 
                 if (!utilsIsObjectNullOrUndefined(data) && data.messageResult != "KO" && utilsIsObjectNullOrUndefined(data.messageResult)) {
