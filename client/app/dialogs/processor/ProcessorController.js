@@ -53,7 +53,7 @@ var ProcessorController = (function() {
 
         this.m_oProcessorService.uploadProcessor(oController.m_oActiveWorkspace.workspaceId,oController.m_sName,oController.m_sVersion, oController.m_sDescription, sType, oBody).success(function (data) {
             var oDialog = utilsVexDialogAlertBottomRightCorner("PROCESSOR UPLOADED<br>IT WILL BE DEPLOYED IN A WHILE");
-            utilsVexCloseDialogAfterFewSeconds(4000,oDialog);
+            utilsVexCloseDialogAfter(4000,oDialog);
         }).error(function (error) {
             utilsVexDialogAlertTop("GURU MEDITATION<br>THERE WAS AN ERROR DEPLOYING THE PROCESSOR");
         });

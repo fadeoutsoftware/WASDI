@@ -779,7 +779,7 @@ var ImportController = (function() {
     //             oThat.m_oFileBufferService.download(url,oWorkSpace.workspaceId,oLayer.bounds.toString(),oLayer.provider).success(function (data, status) {
     //                 //TODO CHECK DATA-STATUS
     //                 var oDialog = utilsVexDialogAlertBottomRightCorner("IMPORTING IMAGE IN WASDI...");
-    //                 utilsVexCloseDialogAfterFewSeconds("3000",oDialog);
+    //                 utilsVexCloseDialogAfter("3000",oDialog);
     //
     //
     //             }).error(function (data,status) {
@@ -798,7 +798,7 @@ var ImportController = (function() {
         {
             oCallback = function (data, status) {
                 var oDialog = utilsVexDialogAlertBottomRightCorner("IMPORTING IMAGE IN WASDI...");
-                utilsVexCloseDialogAfterFewSeconds("3000",oDialog);
+                utilsVexCloseDialogAfter("3000",oDialog);
             }
         }
         if(utilsIsObjectNullOrUndefined(oError) === true)
@@ -861,7 +861,7 @@ var ImportController = (function() {
             oThat.downloadProduct(url,oWorkSpace.workspaceId,oProduct.bounds.toString(),oProduct.provider,null,oError);
             // oThat.m_oFileBufferService.download(url,oWorkSpace.workspaceId,oProduct.bounds.toString(),oProduct.provider).success(function (data, status) {
             //     var oDialog = utilsVexDialogAlertBottomRightCorner("IMPORTING IMAGE IN WASDI...");
-            //     utilsVexCloseDialogAfterFewSeconds("3000",oDialog);
+            //     utilsVexCloseDialogAfter("3000",oDialog);
             //
             //
             // }).error(function (data,status) {
@@ -909,7 +909,7 @@ var ImportController = (function() {
                 // {
                 //     //TODO CHECK DATA-STATUS
                 //     var oDialog = utilsVexDialogAlertBottomRightCorner("IMPORTING IMAGE IN WASDI...");
-                //     utilsVexCloseDialogAfterFewSeconds("3000",oDialog);
+                //     utilsVexCloseDialogAfter("3000",oDialog);
                 //
                 // }).error(function (data,status) {
                 //     utilsVexDialogAlertTop('GURU MEDITATION<br>THERE WAS AN ERROR IMPORTING THE IMAGE IN THE WORKSPACE');
@@ -1541,7 +1541,7 @@ var ImportController = (function() {
             var sOperation = "null";
             if (utilsIsStrNullOrEmpty(oMessage.messageCode) === false) sOperation = oMessage.messageCode;
             var oDialog = utilsVexDialogAlertTop('GURU MEDITATION<br>THERE WAS AN ERROR IN THE ' + sOperation + ' PROCESS');
-            utilsVexCloseDialogAfterFewSeconds(3000, oDialog);
+            utilsVexCloseDialogAfter(3000, oDialog);
             if (!utilsIsObjectNullOrUndefined(this.m_oActiveWorkspace)) this.m_oProcessesLaunchedService.loadProcessesFromServer(this.m_oActiveWorkspace.workspaceId);
             return;
         }
@@ -1577,7 +1577,7 @@ var ImportController = (function() {
         //     oController.m_oState.go("root.editor", { workSpace : sWorkSpace.workspaceId });
         // }
         var oDialog = utilsVexDialogAlertBottomRightCorner('PRODUCT ADDED TO THE WORKSPACE<br>READY');
-        utilsVexCloseDialogAfterFewSeconds(3000, oDialog);
+        utilsVexCloseDialogAfter(3000, oDialog);
 
         //this.m_oProcessesLaunchedService.loadProcessesFromServer(this.m_oActiveWorkspace.workspaceId);
     };

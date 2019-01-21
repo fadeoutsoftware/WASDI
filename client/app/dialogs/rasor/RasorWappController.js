@@ -53,7 +53,7 @@ var RasorWappController = (function() {
                     oLinkToController.m_sResultFromServer = "" + parseInt(oResult.pop) + " Persone";
 
                     var oDialog = utilsVexDialogAlertBottomRightCorner("RASOR HUMAN IMPACT<br>CALCULATION DONE ["+ parseInt(oResult.pop)+"]");
-                    utilsVexCloseDialogAfterFewSeconds(4000,oDialog);
+                    utilsVexCloseDialogAfter(4000,oDialog);
                 }
                 else if (data.status == 'STOPPED') {
                     console.log('---------------------------------Run Rasor - STOPPED');

@@ -5,9 +5,9 @@
 $screen-lg: map-get($grid-breakpoints, "lg");
 
 @import "functions";
+@import "main_theme";
 
 @import "login";
-@import "main_theme";
 @import "root";
 @import "editor";
 @import "workspaces";
