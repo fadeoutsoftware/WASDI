@@ -50,6 +50,7 @@ angular.module('wasdi.RabbitStompService', ['wasdi.RabbitStompService']).service
             this.m_oActiveController = null;
 
             this.m_sWorkspaceId = "";
+            this.m_iConnectionState = ConnectionState.Init;
 
             // Use defer/promise to keep trace when service is ready to
             // perform any operation
@@ -77,8 +78,9 @@ angular.module('wasdi.RabbitStompService', ['wasdi.RabbitStompService']).service
 
             this.notifyConnectionStateChange = function(connectionState)
             {
+                this.m_iConnectionState = connectionState;
                 var params = {
-                    connectionState : connectionState
+                    connectionState : this.m_iConnectionState
                 }
                 $rootScope.$broadcast('rabbitConnectionStateChanged', params);
             }
@@ -165,6 +167,11 @@ angular.module('wasdi.RabbitStompService', ['wasdi.RabbitStompService']).service
                     this.m_sWorkspaceId = "";
                     this.m_oSubscription.unsubscribe();
                 }
+            }
+
+            this.getConnectionState = function()
+            {
+                return this.m_iConnectionState;
             }
 
             /*@Params: WorkspaceID, Name of controller, Controller
