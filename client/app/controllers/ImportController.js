@@ -34,7 +34,8 @@ var ImportController = (function() {
 
         this.m_bShowsensingfilter = true;
 
-        this.m_sTypeOfFilterSelected = "Time period";
+        //this.m_sTypeOfFilterSelected = "Time period";
+        this.setFilterTypeAsTimePeriod();
         this.m_oAdvanceFilter = {
             filterActive:"Seasons",//Seasons,Range,Months
             savedData:[],
@@ -340,6 +341,17 @@ var ImportController = (function() {
     }
 
     /***************** METHODS ***************/
+
+
+    ImportController.prototype.setFilterTypeAsTimePeriod = function(){ this.m_sTypeOfFilterSelected = "Time period"; }
+    ImportController.prototype.setFilterTypeAsTimeSeries = function(){ this.m_sTypeOfFilterSelected = "Time series"; }
+    ImportController.prototype.updateAdvancedSavedFiltersUi = function()
+    {
+        if(this.m_oAdvanceFilter.savedData.length == 0)
+        {
+            this.setFilterTypeAsTimePeriod();
+        }
+    }
 
 
     /**
@@ -1879,6 +1891,9 @@ var ImportController = (function() {
             if(this.m_oAdvanceFilter.savedData[iIndexNumberOfSaveData] === oData)
             {
                 this.m_oAdvanceFilter.savedData.splice(iIndexNumberOfSaveData, 1);
+
+                this.updateAdvancedSavedFiltersUi();
+
                 break;
             }
         }
@@ -2199,12 +2214,12 @@ var ImportController = (function() {
         this.m_oAdvanceFilter.selectedMonthTo = "";
         this.m_oAdvanceFilter.selectedYearsSearchForMonths = [];
         this.m_oAdvanceFilter.selectedMonthsSearchForMonths = [];
-
     };
 
     ImportController.prototype.removeAllAdvanceSavedFilters = function()
     {
         this.m_oAdvanceFilter.savedData = [];
+        this.updateAdvancedSavedFiltersUi();
     };
 
     ImportController.prototype.openAdvanceFiltersDialog = function(){
@@ -2224,7 +2239,8 @@ var ImportController = (function() {
             modal.close.then(function(result) {
                 if(utilsIsObjectNullOrUndefined(result) === true || result.length === 0)
                 {
-                    oController.m_sTypeOfFilterSelected = 'Time period';
+                    //oController.m_sTypeOfFilterSelected = 'Time period';
+                    oController.setFilterTypeAsTimePeriod();
                     return false;
                 }
 
