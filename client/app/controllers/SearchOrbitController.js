@@ -44,7 +44,7 @@ var SearchOrbitController = (function() {
         this.m_oOpportunitiesTree = null;
         // this.m_aoSatelliteResources = [];
         this.m_aoSatelliteResourcesTree = null;
-
+        this.m_aoSatelliteResources = [];
 
         //order the table
         this.m_sOrderBy = "Satellite";
@@ -910,17 +910,21 @@ var SearchOrbitController = (function() {
         var sUncheckEvent = this.m_oTreeService.getUncheckNodeNameEvent();
         var oController = this;
 
+        //Opportunities = search results = orbits
         for(var iIndexOpportunity = 0 ; iIndexOpportunity < iNumberOfOpportunities; iIndexOpportunity++ )
         {
             var oData = new Date(aoData[iIndexOpportunity].AcquisitionStartTime);
+
             var sMonth = oData.getUTCMonth() + 1; //months from 1-12
             var sDay = oData.getUTCDate();
             var sYear = oData.getUTCFullYear();
             var sNewDate = sYear + "/" + sMonth + "/" + sDay;
+
             var sHours = oData.getHours();
             var sMinutes = oData.getMinutes();
             var sSeconds = oData.getSeconds();
             var sTimes = sHours + ":" + sMinutes + ":" + sSeconds;
+
             var sSensorMode = ( utilsIsObjectNullOrUndefined(aoData[iIndexOpportunity].SensorMode) ? "" : aoData[iIndexOpportunity].SensorMode );
             var sSensorLookDirection = aoData[iIndexOpportunity].SensorLookDirection;
             var sSwathName = aoData[iIndexOpportunity].SwathName;
@@ -1145,9 +1149,11 @@ var SearchOrbitController = (function() {
                 {
                     // oController.m_aoSatelliteResources = data;
                     // var oTree = oController.getSatellitesResourcesTreeJson(oController.m_aoSatelliteResources);
-
+                    data = oController.setAllSatelliteSensorsDisable(data);
+                    oController.m_aoSatelliteResources = data;
                     if(utilsIsObjectNullOrUndefined(oController.m_aoSatelliteResourcesTree) === true)
                     {
+                        oController.m_aoSatelliteResources = data;
                         oController.m_aoSatelliteResourcesTree = oController.getSatellitesResourcesTreeJson(data);
                         oController.m_oTreeService.createNewInstanceTree(oController.m_sIdDivSatelliteResourceTree,oController.m_aoSatelliteResourcesTree);
                     }
@@ -1156,6 +1162,7 @@ var SearchOrbitController = (function() {
                         oController.m_aoSatelliteResourcesTree = oController.getSatellitesResourcesTreeJson(data);
                         oController.m_oTreeService.loadNewTree(oController.m_sIdDivSatelliteResourceTree,oController.m_aoSatelliteResourcesTree);
                     }
+
 
                 }
                 else
@@ -1166,6 +1173,22 @@ var SearchOrbitController = (function() {
             .error(function(data,status){
                 utilsVexDialogAlertTop("THERE ARE PROBLEMS IN SATELLITE RESOURCES");
             })
+    };
+
+    SearchOrbitController.prototype.setAllSatelliteSensorsDisable = function(aoSatelliteResources)
+    {
+        var iNumberOfSatelliteResources = aoSatelliteResources.length;
+
+        for(var iIndexSatelliteResource = 0 ; iIndexSatelliteResource < iNumberOfSatelliteResources; iIndexSatelliteResource++)
+        {
+            var oSatelliteResource = aoSatelliteResources[iIndexSatelliteResource]
+            var iNumberOfSensors = oSatelliteResource.satelliteSensors.length;
+            for(var iSensor = 0; iSensor < iNumberOfSensors;iSensor++)
+            {
+                oSatelliteResource.satelliteSensors[iSensor].enabled = false;
+            }
+        }
+        return aoSatelliteResources;
     };
 
     SearchOrbitController.prototype.getSatellitesResourcesTreeJson = function(oDataInput)
@@ -1179,7 +1202,7 @@ var SearchOrbitController = (function() {
                 check_callback: false
             },
             checkbox: {
-                three_state : true, // to avoid that fact that checking a node also check others
+                three_state : false, // to avoid that fact that checking a node also check others
                 whole_node : false,  // to avoid checking the box just clicking the node
                 tie_selection : false // for checking without selecting and selecting without checking
             },
@@ -1243,8 +1266,152 @@ var SearchOrbitController = (function() {
         }
 
         return oReturnValue;
+    };
+
+    SearchOrbitController.prototype.searchOrbitTEST = function()
+    {
+        var aoNodes = this.getAllSelectedNode();
+        var oJSON = this.generateArrayJSONSearchOrbit(aoNodes,this.m_aoSatelliteResources);
+    };
+
+    SearchOrbitController.prototype.getAllSelectedNode = function()
+    {
+        //todo remove point 1 bookmark call ale cottino
+        var asAllCheckedIdNode = this.m_oTreeService.getAllCheckedIDNode(this.m_sIdDivSatelliteResourceTree);
+        var iNumberOfCheckedNodes = asAllCheckedIdNode.length;
+        var aoNodes = [];
+
+        for(var iCheckedNode = 0 ; iCheckedNode < iNumberOfCheckedNodes; iCheckedNode++)
+        {
+            var oNode = this.m_oTreeService.getNodeById(asAllCheckedIdNode[iCheckedNode],this.m_sIdDivSatelliteResourceTree );
+            aoNodes.push(oNode);
+        }
+        return aoNodes;
+
     }
 
+    SearchOrbitController.prototype.generateArrayJSONSearchOrbit = function(aoNodes,aoSatelliteResources)
+    {
+        if(utilsIsObjectNullOrUndefined(aoNodes) === true || utilsIsObjectNullOrUndefined(aoSatelliteResources) === true)
+        {
+            return null;
+        }
+
+        var iNumberOfNodes = aoNodes.length;
+        var aoSelectedFilters = [];
+
+        for(var iIndexNode = 0; iIndexNode < iNumberOfNodes; iIndexNode ++)
+        {
+            var oJsonNode = this.searchNodeInSatelliteResources(aoNodes[iIndexNode]);
+            aoSelectedFilters.push(oJsonNode);
+        }
+
+        var iNumberOfSelectedFilters = aoSelectedFilters.length;
+
+        for(var iIndexSelectedFilter = 0; iIndexSelectedFilter < iNumberOfSelectedFilters; iIndexSelectedFilter ++)
+        {
+            var sSatellite = aoSelectedFilters[iIndexSelectedFilter].text;
+            var sSatelliteSensorDescription = "";
+            var sSatelliteSensorMode = "";
+            if(aoSelectedFilters[iIndexSelectedFilter].children[0].length !== 0)
+            {
+                sSatelliteSensorDescription = aoSelectedFilters[iIndexSelectedFilter].children[0];
+                if(aoSelectedFilters[iIndexSelectedFilter].children[0].children[0].length !== 0)
+                {
+                    sSatelliteSensorMode = aoSelectedFilters[iIndexSelectedFilter].children[0].children[0];
+                }
+            }
+            for()
+        }
+        // this.setEnableAllSelectedCheckFilters(aoSelectedFilters,aoSatelliteResources);
+        // aoSatelliteResources;
+        var aoJSONReturnValue;
+        return aoJSONReturnValue;
+    }
+
+    SearchOrbitController.prototype.setEnableAllSelectedCheckFilters = function(aoSelectedFilters,aoSatelliteResources)
+    {
+        var aoAllEnableSatellites = this.getAllSatellitesEnable(aoSelectedFilters,aoSatelliteResources);
+
+    };
+
+    SearchOrbitController.prototype.setEnableAllSensorsModes = function(aoSelectedFilters,aoAllEnableSatellites)
+    {
+        var iNumberOfSatelliteResources  = aoAllEnableSatellites.length;
+        var iNumberOfSelectedFilters = aoSelectedFilters.length;
+        var aoReturnValue = [];
+        for(var iIndexSatellite = 0 ; iIndexSatellite < iNumberOfSatelliteResources ; iIndexSatellite++)
+        {
+            var oSatelliteResource = aoAllEnableSatellites[iIndexSatellite];
+
+            for(var iSelectedFilter = 0 ; iSelectedFilter < iNumberOfSelectedFilters; iSelectedFilter++)
+            {
+                var oSelectedFilter = aoSelectedFilters[iSelectedFilter];
+                if( oSatelliteResource.satelliteName === oSelectedFilter.text)
+                {
+
+                }
+            }
+
+        }
+    }
+
+    SearchOrbitController.prototype.getAllSatellitesEnable = function(aoSelectedFilters,aoSatelliteResources)
+    {
+        var iNumberOfSatelliteResources  = aoSatelliteResources.length;
+        var iNumberOfSelectedFilters = aoSelectedFilters.length;
+        var aoReturnValue = [];
+        for(var iIndexSatellite = 0 ; iIndexSatellite < iNumberOfSatelliteResources ; iIndexSatellite++)
+        {
+            var oSatelliteResource = aoSatelliteResources[iIndexSatellite];
+
+            for(var iSelectedFilter = 0 ; iSelectedFilter < iNumberOfSelectedFilters; iSelectedFilter++)
+            {
+                var oSelectedFilter = aoSelectedFilters[iSelectedFilter];
+                if( oSatelliteResource.satelliteName === oSelectedFilter.text)
+                {
+                    aoReturnValue.push(oSatelliteResource);
+                }
+            }
+
+        }
+        return aoReturnValue;
+    };
+
+
+    SearchOrbitController.prototype.searchNodeInSatelliteResources = function(oNode){
+        if(utilsIsObjectNullOrUndefined(oNode))
+        {
+            return null;
+        }
+        if(oNode.parent === "results")
+        {
+            return {
+                text : oNode.text,
+                enable : true,
+                children:[]
+            };
+        }
+
+        var oTempNode = oNode;
+        var oReturnValue = null;
+        var oOldNode = [];
+
+        while(oTempNode.text !== "Satellites")
+        {
+            oReturnValue = {
+                text : oTempNode.text,
+                enable : true,
+                children:oOldNode,
+            };
+            oOldNode = oReturnValue;
+            oTempNode = this.m_oTreeService.getNodeById(oTempNode.parent,this.m_sIdDivSatelliteResourceTree);
+        }
+
+
+        return oReturnValue;
+
+    }
     SearchOrbitController.$inject = [
         '$scope',
         '$location',
