@@ -28,7 +28,7 @@ service('ConstantsService', [function () {
 
         // SERCO
         this.URL = 'http://217.182.93.57//wasdiwebserver/';
-        this.WEBSTOMPURL = 'http://217.182.93.57//rabbit/stomp/bad';
+        this.WEBSTOMPURL = 'http://217.182.93.57//rabbit/stomp';
         this.WMSURL = "http://217.182.93.57//geoserver/ows?";
         this.WASDIGEOSERVERWPS = "http://217.182.93.57//geoserver/wps";
 
