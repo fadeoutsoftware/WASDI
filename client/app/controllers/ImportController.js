@@ -1573,7 +1573,8 @@ var ImportController = (function() {
             case "DOWNLOAD":
             case "GRAPH":
             case "INGEST":
-                oController.receivedNewProductMessage(oMessage,oController);
+                //oController.receivedNewProductMessage(oMessage,oController);
+                // TODO: check the correctnes of this step. It seems a dialog will be shonw here then again in the method below 'utilsProjectShowRabbitMessageUserFeedBack', but is it wrong or right?
                 break;
             default:
                 console.log("RABBIT ERROR: got empty message ");
