@@ -22,12 +22,17 @@ service('TreeService', ['$http',  'ConstantsService', function ($http, oConstant
     this.closeNode = function(sIdDiv,sIdNode)
     {
         return this.nodeOperation(sIdDiv,sIdNode,"close_node");
-    }
+    };
 
     this.isOpenNode = function(sIdDiv,sIdNode){
         return this.nodeOperation(sIdDiv,sIdNode,"is_open");
-    }
+    };
 
+    this.getAllCheckedIDNode = function(sIdDiv){
+        var asNodes = [];
+        asNodes = $(sIdDiv).jstree(true).get_checked();
+        return asNodes;
+    };
     this.nodeOperation = function(sIdDiv,sIdNode, sOperation)
     {
         if( ( utilsIsStrNullOrEmpty(sIdDiv) === true ) || ( utilsIsStrNullOrEmpty(sIdNode) === true )
