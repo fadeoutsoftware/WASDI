@@ -151,12 +151,10 @@
   /*************************************************/
   //map container leaflet
   .map-column{
-    padding-left: 0;
-    padding-right: 0;
     .map-container
     {
 
-      height: 82vh;
+      height: 100%;
       border: 1px solid $wasdi-blue-logo;
 
       //BUTTONS ON MAP

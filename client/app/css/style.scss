@@ -136,13 +136,13 @@ h4 {
 // Base layout settings
 .content-wrapper{
 
-    height: calc(100vh - #{$size-header-height-total});
+    height: calc(100vh - #{$size-header-height-total + 10px});
     &.has-processes-bar{
         height: calc(100vh - #{$size-header-height-total + $size-status-bar-height-closed});
     }
 
     overflow: hidden;
-    padding-bottom: $size-content-wrapper-padding-top-bottom;
+    padding-bottom: $size-content-wrapper-padding-bottom;
     position: relative;
 
     // Temp fix untill all 'content-wrapper' direct child '.container-fluid' classes has been removed
@@ -174,7 +174,6 @@ h4 {
             //padding: 0px;
             margin: 0px !important;
             height: 100%;
-            width: 400px;
         }
 
         .btn-wasdi{
@@ -198,9 +197,75 @@ h4 {
 
         & > div{
             height: 100%;
+            position: relative;
             margin-top: 0px !important; // force to 0 margin and padding (TODO: remove the 10px margin from other SCSS)
         }
     }
+}
+
+.map-column{
+    padding-left: 0;
+    padding-right: 0;
+
+    .map-container{
+        height: 100%;
+    }
+}
+//----------------------------------------------------
+
+
+//----------------------------------------------------
+// Buttons
+.btn{
+    &.btn-wasdi {
+        border-radius: 0px;
+
+        &.btn-primary {
+            background-color: $color-btn-primary-bg;
+            color: $color-btn-primary-text;
+
+            &:hover{
+                &:not([disabled]) {
+                    background-color: $color-btn-primary-bg-hover;
+                }
+            }
+        }
+
+        &.btn-secondary {
+            background-color: $color-btn-secondary-bg;
+            color: $color-btn-secondary-text;
+
+            &:hover{
+                &:not([disabled]) {
+                    background-color: $color-btn-secondary-bg-hover;
+                }
+            }
+        }
+
+        &:disabled, &.disabled{
+            opacity: .65;
+        }
+    }
+}
+
+.btn-group{
+    $parent : &;
+
+    &.use-divider{
+        .btn{
+            &:not([last-of-type])
+            {
+                &.btn-secondary{ border-right: 1px solid  #aaa; }
+            }
+        }
+    }
+
+    &#{$parent}-sm{
+        .btn {
+            font-size: 14px;
+        }
+    }
+
 }
 //----------------------------------------------------
 

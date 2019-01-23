@@ -123,8 +123,8 @@ $wasdi-sidebar-color-title-panel:$wasdi-blue-logo;
 $wasdi-title-color:$wasdi-white;
 $waddi-sidebar-color-border-panel:$wasdi-blue-logo;
 $wasdi-sidebar-background-color:$wasdi-grey;
-$wasdi-map-height:80vh;
-$wasdi-map-height-editor:81vh;
+$wasdi-map-height: 100%;
+$wasdi-map-height-editor: 100%;
 $wasdi-map-height-max-width-1366-max-height-768:63vh;
 $wasdi-heigth-panel:35.5vh;
 $wasdi-height-log-panel:77vh;
@@ -146,7 +146,7 @@ $wasdi-import-cell-color-over-button:$wasdi-white;
 $wasdi-import-preview-layer-on-table-dimension:82px;
 $wasdi-heigt-panel-import:77vh;
 $wasdi-height-panel-import-max-width-1366-max-height-768:63vh;
-$wasdi-map-heigth-import:82vh;
+$wasdi-map-heigth-import: 100%;
 $wasdi-map-height-import-max-width-1366-max-height-768:70vh;
 
 //STATUS-BAR
@@ -154,6 +154,16 @@ $wasdi-status-bar-color:#C0C0C0;
 
 //MODAL
 $wasdi-max-heigth-body:600px;
+
+
+// Buttons
+$color-btn-primary-bg: $wasdi-blue-logo;
+$color-btn-primary-bg-hover: $wasdi-green-logo;
+$color-btn-primary-text: white;
+
+$color-btn-secondary-bg: $wasdi-blue-logo-complementary-1;
+$color-btn-secondary-bg-hover: $wasdi-green-logo;
+$color-btn-secondary-text: white;
 
 
 $color-connection-status-connected: #7cad56;

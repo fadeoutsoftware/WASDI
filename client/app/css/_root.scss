@@ -220,31 +220,7 @@
     }
 }
 
-.rabbit-connection-status-wrapper {
-    padding: 0px !important;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
 
-    .icon{
-        $size-connection-icon: 20px;
-        color: whitesmoke;
-        justify-content: center;
-        border-radius: 50%;
-        background-color: $color-connection-status-connected;
-        width: $size-connection-icon;
-        height: $size-connection-icon;
-        text-align: center;
-        line-height: $size-connection-icon + 2;
-        font-size: 12px
-    }
-
-    &.disconnected{
-        .icon{
-            background-color: $color-connection-status-lost;
-        }
-    }
-}
 
 .table > tbody > tr > td {
 
