@@ -1,7 +1,7 @@
 <div class="workspaces-view">
 
     <div class="row-v4 justify-content-end toolbar">
-        <div class="col-v4-auto ml-auto">
+        <div class="col-v4-auto mr-auto filter-search-wrapper">
             <input type="text" class="my-input-text" placeholder="{{'WORKSPACES_PLACEHOLDER_SEARCH'|translate}}" ng-model="searchWorkSpace" >
         </div>
         <div class="col-v4-auto">
@@ -9,16 +9,15 @@
                 <!--<i class="fa fa-pencil fa-lg" aria-hidden="true"></i>-->
             <!--</td>-->
 
-            <button class="btn-wasdi" ng-click="m_oController.openWorkspace(m_oController.m_oWorkspaceSelected.workspaceId)"
+            <button class="btn btn-primary btn-wasdi" ng-click="m_oController.createWorkspace()">
+                {{"WORKSPACES_BUTTON_NEW_WORKSPACE"|translate}}
+            </button>
+            <button class="btn btn-primary btn-wasdi" ng-click="m_oController.openWorkspace(m_oController.m_oWorkspaceSelected.workspaceId)"
                     ng-disabled="(m_oController.m_oWorkspaceSelected === null) || (m_oController.m_oRabbitStompService.isReadyState() === false) ">
                 Edit Workspace
             </button>
-            <button class="btn-wasdi" ng-click="m_oController.createWorkspace()">
-                {{"WORKSPACES_BUTTON_NEW_WORKSPACE"|translate}}
-            </button>
         </div>
     </div>
-
     <div class="spacer"></div>
 
     <div class="row-v4 full-width-content">

@@ -243,14 +243,6 @@ var RootController = (function() {
             return this.m_bIsOpenStatusBar;
         };
 
-        this.getAdditionalClasses = function()
-        {
-            if(this.isProcessesBarVisible() == true){
-                return "has-processes-bar";
-            }
-            return "booooo";
-        }
-
         var mytimeout = $timeout($scope.onTimeout,1000);
 
     }
@@ -350,17 +342,22 @@ var RootController = (function() {
     };
 
     /***************************** IS VISIBLE HTML ELEMENT ******************************/
+
     RootController.prototype.isProcessesBarVisible = function ()
     {
-        var sState=this.m_oState.current.name;
-        console.debug(">>>>>>>>>>>>>>", sState);
-        switch(sState) {
-            case "root.workspaces":
-                return false;
-                break;
-            default: return true;
+        var sState = this.m_oState.current.name;
+
+        // NOTE: a bug is reported using 'ng-class' in combination with 'ui-view'
+        // (https://github.com/angular-ui/ui-router/issues/866)
+        // Try to solve with jQuery workaround
+
+        if( sState == "root.workspaces" )
+        {
+            $("#main").removeClass("has-processes-bar");
+            return false;
         }
 
+        $("#main").addClass("has-processes-bar");
         return true;
     };
 
@@ -436,6 +433,12 @@ var RootController = (function() {
         if(oPage == this.m_oState.current.name ) return true;
         else return false;
     };
+
+    RootController.prototype.toggleProcessesBar = function()
+    {
+        this.m_bIsOpenStatusBar = !this.m_bIsOpenStatusBar;
+        this.m_bIsOpenNav = !this.m_bIsOpenNav;
+    }
 
     RootController.prototype.openNav = function() {
         //document.getElementById("status-bar").style.height = "500px";

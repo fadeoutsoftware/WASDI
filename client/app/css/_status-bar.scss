@@ -12,11 +12,72 @@
     transition: 0.5s;
     color: $wasdi-white;
     padding: 2px;
+    padding-top: 0px;
     height: $size-status-bar-height-closed;
 
     &.open{
         height: $size-status-bar-height-opened;
     }
+
+
+    .always-visible-part{
+        height: $size-status-bar-height-closed;
+        .toggle-btn{
+            width: 24px;
+        }
+        .rabbit-connection-status-wrapper {
+            $size-connection-icon: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+
+            .icon-bg {
+                width: $size-connection-icon;
+                padding: 0px !important;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+            }
+
+            .icon{
+                color: whitesmoke;
+                justify-content: center;
+                border-radius: 50%;
+                background-color: $color-connection-status-connected;
+                width: $size-connection-icon;
+                height: $size-connection-icon;
+                text-align: center;
+                line-height: $size-connection-icon + 2;
+                font-size: 12px
+            }
+
+            &.disconnected{
+                .icon{
+                    background-color: $color-connection-status-lost;
+                }
+            }
+        }
+        .processes-info-wrapper{
+            width: 90px;
+
+            .badge{
+                position: relative;
+                top: -1px;
+            }
+        }
+
+        .btn-wasdi-proc-bar{
+            background-color: transparent;
+            border-color: transparent;
+            color: $color-btn-primary-text;
+            &:hover{
+                color: $color-btn-primary-text;
+                background-color: $color-btn-primary-bg-hover;
+            }
+        }
+    }
+
+
 
     .row {
         margin-right: 5px;
