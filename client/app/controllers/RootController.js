@@ -238,6 +238,19 @@ var RootController = (function() {
             mytimeout = $timeout($scope.onTimeout,1000);
         };
 
+        this.isProcesssBarOpened = function()
+        {
+            return this.m_bIsOpenStatusBar;
+        };
+
+        this.getAdditionalClasses = function()
+        {
+            if(this.isProcessesBarVisible() == true){
+                return "has-processes-bar";
+            }
+            return "booooo";
+        }
+
         var mytimeout = $timeout($scope.onTimeout,1000);
 
     }
@@ -337,9 +350,10 @@ var RootController = (function() {
     };
 
     /***************************** IS VISIBLE HTML ELEMENT ******************************/
-    RootController.prototype.isVisibleProcessesBar = function ()
+    RootController.prototype.isProcessesBarVisible = function ()
     {
         var sState=this.m_oState.current.name;
+        console.debug(">>>>>>>>>>>>>>", sState);
         switch(sState) {
             case "root.workspaces":
                 return false;
@@ -424,14 +438,14 @@ var RootController = (function() {
     };
 
     RootController.prototype.openNav = function() {
-        document.getElementById("status-bar").style.height = "500px";
+        //document.getElementById("status-bar").style.height = "500px";
         this.m_bIsOpenStatusBar = !this.m_bIsOpenStatusBar;
         this.m_bIsOpenNav = true;
 
     };
 
     RootController.prototype.closeNav = function() {
-        document.getElementById("status-bar").style.height = "4.5%";
+        //document.getElementById("status-bar").style.height = "4.5%";
         this.m_bIsOpenStatusBar = !this.m_bIsOpenStatusBar;
         this.m_bIsOpenNav = false;
 

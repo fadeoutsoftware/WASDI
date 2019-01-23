@@ -1,7 +1,5 @@
 
 .root-view {
-
-    margin-top: 10px;
     .flex-container {
         display: flex;
         flex-direction: row;
@@ -71,18 +69,7 @@
         }
     }
 
-    //LOGO
-    .brand-logo {
-        content: $wasdi-brand-logo-root; // set 'src' attribute from CSS
-        width: $wasdi-brand-logo-root-size;
-        //margin-top: -20px;
-        margin-top: -5px;
-        margin-left: 35px;
-        height: auto;
-        min-height: 50px;
-        min-width: 50px;
 
-    }
 
     //NAVBAR OVERIDE
     .my-nav-bar {
@@ -147,28 +134,28 @@
             }
         }
 
-        .navbar-default {
-            background-color: $wasdi-nav-bar-color-background;
-
-        }
-        .navbar-default .navbar-nav > li > a {
-            color: white;
-
-        }
-        .navbar-default .navbar-nav > .active {
-            color: white;
-            background: $wasdi-nav-bar-color-active;
-        }
-        //ACTIVE
-        .navbar-default .navbar-nav > .active > a,
-        .navbar-default .navbar-nav > .active > a:hover,
-        .navbar-default .navbar-nav > .active > a:focus {
-            color: white;
-            background: $wasdi-nav-bar-color-active;
-        }
-        .navbar-default .navbar-toggle .icon-bar {
-            background-color: $wasdi-white;
-        }
+        //.navbar-default {
+        //    background-color: $wasdi-nav-bar-color-background;
+        //
+        //}
+        //.navbar-default .navbar-nav > li > a {
+        //    color: white;
+        //
+        //}
+        //.navbar-default .navbar-nav > .active {
+        //    color: white;
+        //    background: $wasdi-nav-bar-color-active;
+        //}
+        ////ACTIVE
+        //.navbar-default .navbar-nav > .active > a,
+        //.navbar-default .navbar-nav > .active > a:hover,
+        //.navbar-default .navbar-nav > .active > a:focus {
+        //    color: white;
+        //    background: $wasdi-nav-bar-color-active;
+        //}
+        //.navbar-default .navbar-toggle .icon-bar {
+        //    background-color: $wasdi-white;
+        //}
         // OVER
         .navbar-default .navbar-nav > li > a:hover, .navbar-default .navbar-nav > li > a:focus {
             background-color: $wasdi-nav-bar-color-active;
@@ -231,98 +218,6 @@
             }
         }
     }
-
-    /*STATUS BAR */
-    .status-bar {
-        //height: 4.5%;
-        height: 45px;
-        //min-height: 4.5%;
-        width: 100%;
-        position: fixed;
-        z-index: 1000;
-        bottom: 0;
-        left: 0;
-        background-color: $wasdi-nav-bar-color-background;
-        overflow-x: hidden;
-        overflow-y: hidden;
-        transition: 0.5s;
-        color: $wasdi-white;
-        padding: 2px;
-
-        .row {
-            margin-right: 5px;
-        }
-        .number-processes {
-            margin-top: 10px;
-            //position: absolute;
-            right: 0;
-        }
-        .processes-list {
-            //margin-top:10px;
-            //overflow-y: auto;
-            //height: 400px;
-            //min-height: 40px;
-
-            .table-striped > tbody > tr:nth-of-type(odd) {
-                background-color: $wasdi-blue-logo;
-            }
-
-            //If the name it's too long cut it!
-            .table td.text {
-                max-width: 350px;
-                span {
-                    white-space: nowrap;
-                    overflow: hidden;
-                    text-overflow: ellipsis;
-                    display: inline-block;
-                    max-width: 100%;
-                }
-            }
-            .single-process {
-                display: inline-grid;
-            }
-            .progress-single-process {
-                //  float: right;
-                //  width:10%;
-                //  background-color:$wasdi-white ;
-                //  .progress-bar{}
-                width: 15%;
-                padding: 0 0 0 0;
-                background: $wasdi-white;
-
-            }
-        }
-        .my-button {
-            color: white;
-            color: white;
-            padding: 0;
-            margin: 0;
-            //padding: 3px;
-            line-height: 0;
-
-        }
-        .my-button:hover {
-            color: $wasdi-button-over-color;
-            background-color: transparent;
-        }
-
-        .openbtn {
-            margin-top: 10px;
-            //position: absolute;
-            //top: 0;
-            //right: 20px;
-            //position: absolute;
-            //left:50%;
-            ////bottom:70%;
-            //top:-10px;
-            //background-color: black;
-            //z-index: 5000;
-            //font-size: 20px;
-            //margin-left: 50px;
-            //color: $wasdi-white;
-        }
-    }
-
 }
 
 .rabbit-connection-status-wrapper {
