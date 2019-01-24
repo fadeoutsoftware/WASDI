@@ -11,8 +11,7 @@
     overflow-y: hidden;
     transition: 0.5s;
     color: $wasdi-white;
-    padding: 2px;
-    padding-top: 0px;
+    padding: 0px;
     height: $size-status-bar-height-closed;
 
     &.open{
@@ -74,6 +73,37 @@
                 color: $color-btn-primary-text;
                 background-color: $color-btn-primary-bg-hover;
             }
+        }
+
+        .last-process{
+            & > div{
+                margin-top: 2px;
+            }
+            .label{
+                line-height: 15px;
+                padding: 1px 10px !important;
+                letter-spacing: 0.2px;
+                background-color: transparent;
+                border: 1px solid #aaa;
+            }
+            .single-process{
+                font-size: calculatePxFromRemAndBasePx(0.8rem, 16px);
+            }
+        }
+
+        .loadIcon{
+            position: relative;
+            top: 6px;
+        }
+    }
+
+
+    .processes-list-wrapper{
+        height: 0px;
+    }
+    &.open {
+        .processes-list-wrapper {
+            height: $size-status-bar-height-opened - $size-status-bar-height-closed;
         }
     }
 

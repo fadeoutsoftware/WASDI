@@ -1720,6 +1720,17 @@ var ImportController = (function() {
         return false;
     };
 
+
+    ImportController.prototype.isSearchBtnEnabled = function()
+    {
+        // Disabled if
+        // m_oController.thereIsAtLeastOneProvider() === false || (m_oController.m_bIsVisibleListOfLayers || m_oController.m_bisVisibleLocalStorageInputs)
+        if( this.thereIsAtLeastOneProvider() === false ){ return false; }
+        if( this.m_bIsVisibleListOfLayers || this.m_bisVisibleLocalStorageInputs){ return false}
+        return true
+    }
+
+
     /**
      * setDefaultData
      */

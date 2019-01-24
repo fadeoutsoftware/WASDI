@@ -4,17 +4,15 @@
         <div class="col-v4-auto mr-auto filter-search-wrapper">
             <input type="text" class="my-input-text" placeholder="{{'WORKSPACES_PLACEHOLDER_SEARCH'|translate}}" ng-model="searchWorkSpace" >
         </div>
-        <div class="col-v4-auto">
-            <!--<td class="over-color cell-edit-button" ng-click="m_oController.openWorkspace(oWSListItem.workspaceId)"  data-toggle="tooltip" data-placement="top" title="{{'WORKSPACES_TOOLTIP_EDITOR'|translate}}">-->
-                <!--<i class="fa fa-pencil fa-lg" aria-hidden="true"></i>-->
-            <!--</td>-->
-
+        <div class="col-v4-auto pr-2">
             <button class="btn btn-primary btn-wasdi" ng-click="m_oController.createWorkspace()">
-                {{"WORKSPACES_BUTTON_NEW_WORKSPACE"|translate}}
+                <i class="fa fa-plus" aria-hidden="true"></i>{{"WORKSPACES_BUTTON_NEW_WORKSPACE"|translate}}
             </button>
+        </div>
+        <div class="col-v4-auto pl-2">
             <button class="btn btn-primary btn-wasdi" ng-click="m_oController.openWorkspace(m_oController.m_oWorkspaceSelected.workspaceId)"
                     ng-disabled="(m_oController.m_oWorkspaceSelected === null) || (m_oController.m_oRabbitStompService.isReadyState() === false) ">
-                Edit Workspace
+                <i class="fa fa-pencil" aria-hidden="true"></i>Edit Workspace
             </button>
         </div>
     </div>

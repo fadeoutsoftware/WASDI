@@ -132,6 +132,10 @@ h4 {
 }
 
 
+// Remove outline 'border' from buttons, inputs, etc
+@include removeOutlineFor("*");
+
+
 //----------------------------------------------------
 // Base layout settings
 .content-wrapper{
@@ -163,11 +167,13 @@ h4 {
         position: relative;
         //background-color: #0a6aa1; //debug
 
-        & > div{
+        & > div {
             $size-margin-top: 6px;
             margin-top: $size-margin-top;
             height: calc(100% - #{$size-margin-top});
-            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
         }
 
         input[type=text]{
@@ -220,23 +226,33 @@ h4 {
     &.btn-wasdi {
         border-radius: 0px;
 
+
+        @if ( fontFamilyContains($wasdi-font-web, "Hero-Light")) {
+            font-weight: 600;
+            letter-spacing: 0.4px;
+        }
+
         &.btn-primary {
+            border-color: $color-btn-primary-bg;
             background-color: $color-btn-primary-bg;
             color: $color-btn-primary-text;
 
             &:hover{
                 &:not([disabled]) {
+                    border-color: $color-btn-primary-bg-hover;
                     background-color: $color-btn-primary-bg-hover;
                 }
             }
         }
 
         &.btn-secondary {
+            border-color: $color-btn-secondary-bg;
             background-color: $color-btn-secondary-bg;
             color: $color-btn-secondary-text;
 
             &:hover{
                 &:not([disabled]) {
+                    border-color: $color-btn-secondary-bg-hover;
                     background-color: $color-btn-secondary-bg-hover;
                 }
             }
@@ -244,6 +260,10 @@ h4 {
 
         &:disabled, &.disabled{
             opacity: .65;
+        }
+
+        .fa{
+            margin-right: 8px;
         }
     }
 }
@@ -381,7 +401,7 @@ h4 {
 }
 
 // BUTTON
-.my-button, .btn-wasdi {
+.my-button {
     background-color: $wasdi-button-default-color;
     border: none;
     color: white;
