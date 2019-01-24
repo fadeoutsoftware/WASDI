@@ -74,9 +74,7 @@
                         <!------------------------- Satellite ----------------------------->
                         <!--<div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 ">-->
                         <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 " ng-hide = "m_oController.thereAreOrbits() || (m_oController.m_bIsVisibleLoadingIcon === true)">
-                            <!-- TREE -->
-                            <div id="satelliteResourceTree"></div>
-                            <button ng-click="m_oController.searchOrbitTEST()">test</button>
+
 
                             <div class="row time-container">
                                 <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
@@ -133,71 +131,77 @@
 
                             </div>
 
-                            <img src="assets/icons/Satellite.svg" alt="Satellite" height="30" width="30">{{"SEARCH_TITLE_CHECK_BOX_SATELLITE"|translate}}
-                            <div class="well well-sm">
 
-                                <div class="checkbox-satellite-container"ng-repeat="satellite in m_oController.m_oConfiguration.orbitsearch.satelliteNames">
-                                    <i class="fa fa-square-o" aria-hidden="true" ng-click="m_oController.checkedSatellite(satellite)" ng-hide="m_oController.isSatelliteSelected(satellite)"></i>
-                                    <i class="fa fa-check-square-o" aria-hidden="true"  ng-click="m_oController.uncheckedSatellite(satellite)" ng-show="m_oController.isSatelliteSelected(satellite)"></i>
-                                    <span>{{satellite}}</span>
-                                </div>
+                            <!-- TREE -->
+                            <div id="satelliteResourceTree"></div>
+                            <!--<button ng-click="m_oController.searchOrbitTEST()">test</button>-->
 
-                            </div>
 
-                            <div class="well well-sm">
-                                looking type
-                                <div class="radio">
-                                    <label>
-                                        <input type="radio" name="name" id="lookingTypeLeft" value="" checked="checked"
-                                               ng-click="m_oController.m_oOrbitSearch.lookingType='LEFT'">
-                                        {{"SEARCH_TITLE_LOOKING_TYPE_LEFT_LABEL"|translate}}
-                                    </label>
-                                    <label>
-                                        <input type="radio" name="name" id="lookingTypeRight" value=""
-                                               ng-click="m_oController.m_oOrbitSearch.lookingType='RIGHT'">
-                                        {{"SEARCH_TITLE_LOOKING_TYPE_RIGHT_LABEL"|translate}}
-                                    </label>
-                                    <label>
-                                        <input type="radio" name="name" id="lookingTypeNone" value=""
-                                               ng-click="m_oController.m_oOrbitSearch.lookingType='NONE'">
-                                        {{"SEARCH_TITLE_LOOKING_TYPE_NONE_LABEL"|translate}}
-                                    </label>
-                                </div>
-
-                            </div>
+                            <!--<img src="assets/icons/Satellite.svg" alt="Satellite" height="30" width="30">{{"SEARCH_TITLE_CHECK_BOX_SATELLITE"|translate}}-->
                             <!--<div class="well well-sm">-->
-                                <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 well well-sm">
-                                    <div class="row">
-                                        <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
-                                            {{"SEARCH_TITLE_LOOKING_TYPE_VIEW_ANGLE_LABEL"|translate}}
-                                        </div>
-                                        <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
-                                            <input type="number" name="name" value="" checked="checked"  placeholder="{{'SEARCH_TITLE_LOOKING_TYPE_VIEW_NEAR_ANGLE_LABEL'|translate}}"
-                                                   ng-model="m_oController.m_oOrbitSearch.viewAngle.nearAngle">
 
-                                        </div>
-                                        <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
-                                            <input type="number" name="name" value="" checked="checked"  placeholder="{{'SEARCH_TITLE_LOOKING_TYPE_VIEW_FAR_ANGLE_LABEL'|translate}}"
-                                                   ng-model="m_oController.m_oOrbitSearch.viewAngle.farAngle">
+                                <!--<div class="checkbox-satellite-container"ng-repeat="satellite in m_oController.m_oConfiguration.orbitsearch.satelliteNames">-->
+                                    <!--<i class="fa fa-square-o" aria-hidden="true" ng-click="m_oController.checkedSatellite(satellite)" ng-hide="m_oController.isSatelliteSelected(satellite)"></i>-->
+                                    <!--<i class="fa fa-check-square-o" aria-hidden="true"  ng-click="m_oController.uncheckedSatellite(satellite)" ng-show="m_oController.isSatelliteSelected(satellite)"></i>-->
+                                    <!--<span>{{satellite}}</span>-->
+                                <!--</div>-->
 
-                                        </div>
-                                    </div>
-                                    <div class="row">
-                                        <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
-                                            {{"SEARCH_TITLE_LOOKING_TYPE_SWATH_SIZE_LABEL"|translate}}
-                                        </div>
-                                        <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
-                                            <input type="number" name="name" value="" checked="checked"  placeholder="{{'SEARCH_TITLE_LOOKING_TYPE_SWATH_SIZE_LENGTH_LABEL'|translate}}"
-                                                   ng-model="m_oController.m_oOrbitSearch.swathSize.length">
+                            <!--</div>-->
 
-                                        </div>
-                                        <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
-                                            <input type="number" name="name" value="" checked="checked"  placeholder="{{'SEARCH_TITLE_LOOKING_TYPE_SWATH_SIZE_WIDTH_LABEL'|translate}}"
-                                                   ng-model="m_oController.m_oOrbitSearch.swathSize.width">
+                            <!--<div class="well well-sm">-->
+                                <!--looking type-->
+                                <!--<div class="radio">-->
+                                    <!--<label>-->
+                                        <!--<input type="radio" name="name" id="lookingTypeLeft" value="" checked="checked"-->
+                                               <!--ng-click="m_oController.m_oOrbitSearch.lookingType='LEFT'">-->
+                                        <!--{{"SEARCH_TITLE_LOOKING_TYPE_LEFT_LABEL"|translate}}-->
+                                    <!--</label>-->
+                                    <!--<label>-->
+                                        <!--<input type="radio" name="name" id="lookingTypeRight" value=""-->
+                                               <!--ng-click="m_oController.m_oOrbitSearch.lookingType='RIGHT'">-->
+                                        <!--{{"SEARCH_TITLE_LOOKING_TYPE_RIGHT_LABEL"|translate}}-->
+                                    <!--</label>-->
+                                    <!--<label>-->
+                                        <!--<input type="radio" name="name" id="lookingTypeNone" value=""-->
+                                               <!--ng-click="m_oController.m_oOrbitSearch.lookingType='NONE'">-->
+                                        <!--{{"SEARCH_TITLE_LOOKING_TYPE_NONE_LABEL"|translate}}-->
+                                    <!--</label>-->
+                                <!--</div>-->
 
-                                        </div>
-                                    </div>
-                                </div>
+                            <!--</div>-->
+                            <!--&lt;!&ndash;<div class="well well-sm">&ndash;&gt;-->
+                                <!--<div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 well well-sm">-->
+                                    <!--<div class="row">-->
+                                        <!--<div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">-->
+                                            <!--{{"SEARCH_TITLE_LOOKING_TYPE_VIEW_ANGLE_LABEL"|translate}}-->
+                                        <!--</div>-->
+                                        <!--<div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">-->
+                                            <!--<input type="number" name="name" value="" checked="checked"  placeholder="{{'SEARCH_TITLE_LOOKING_TYPE_VIEW_NEAR_ANGLE_LABEL'|translate}}"-->
+                                                   <!--ng-model="m_oController.m_oOrbitSearch.viewAngle.nearAngle">-->
+
+                                        <!--</div>-->
+                                        <!--<div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">-->
+                                            <!--<input type="number" name="name" value="" checked="checked"  placeholder="{{'SEARCH_TITLE_LOOKING_TYPE_VIEW_FAR_ANGLE_LABEL'|translate}}"-->
+                                                   <!--ng-model="m_oController.m_oOrbitSearch.viewAngle.farAngle">-->
+
+                                        <!--</div>-->
+                                    <!--</div>-->
+                                    <!--<div class="row">-->
+                                        <!--<div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">-->
+                                            <!--{{"SEARCH_TITLE_LOOKING_TYPE_SWATH_SIZE_LABEL"|translate}}-->
+                                        <!--</div>-->
+                                        <!--<div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">-->
+                                            <!--<input type="number" name="name" value="" checked="checked"  placeholder="{{'SEARCH_TITLE_LOOKING_TYPE_SWATH_SIZE_LENGTH_LABEL'|translate}}"-->
+                                                   <!--ng-model="m_oController.m_oOrbitSearch.swathSize.length">-->
+
+                                        <!--</div>-->
+                                        <!--<div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">-->
+                                            <!--<input type="number" name="name" value="" checked="checked"  placeholder="{{'SEARCH_TITLE_LOOKING_TYPE_SWATH_SIZE_WIDTH_LABEL'|translate}}"-->
+                                                   <!--ng-model="m_oController.m_oOrbitSearch.swathSize.width">-->
+
+                                        <!--</div>-->
+                                    <!--</div>-->
+                                <!--</div>-->
 
                             <!--</div>-->
 
@@ -210,13 +214,13 @@
                             <invader></invader>
                         </div>
 
-                        <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12" ng-show = "m_oController.thereAreOrbits() && (m_oController.m_bIsVisibleLoadingIcon === false)" ><!--ng-show="m_oController.m_bIsLoadedTable"-->
-                            <div class="row">
-                                <div class="my-input-text">
-                                    <input type="text" ng-model="m_oController.m_sFilterTable" placeholder="{{'SEARCH_ORBIT_FILTER_PLACEHOLDER'|translate}}" >
-                                </div>
-                            </div>
-                        </div>
+                        <!--<div class="col-xs-12 col-sm-12 col-md-12 col-lg-12" ng-show = "m_oController.thereAreOrbits() && (m_oController.m_bIsVisibleLoadingIcon === false)" >&lt;!&ndash;ng-show="m_oController.m_bIsLoadedTable"&ndash;&gt;-->
+                            <!--<div class="row">-->
+                                <!--<div class="my-input-text">-->
+                                    <!--<input type="text" ng-model="m_oController.m_sFilterTable" placeholder="{{'SEARCH_ORBIT_FILTER_PLACEHOLDER'|translate}}" >-->
+                                <!--</div>-->
+                            <!--</div>-->
+                        <!--</div>-->
 
                         <!----------------------------------- RESULTS --------------------------------------->
                         <div class="row col-lg-12 col-md-12 col-sm-12 col-xs-12 table-container" ng-show = "m_oController.thereAreOrbits() && (m_oController.m_bIsVisibleLoadingIcon === false)">
@@ -225,58 +229,58 @@
                             <!--TREE -->
                             <div id="orbitsTree"></div>
 
-                            <table class="table table-hover table-search-orbit my-table">
-                                <thead>
-                                <tr>
-                                    <th><!--class="loadIcon" ng-class="{'disabled-cursor-hover':m_oController.m_bisLoadingAllOrbitInMap }"-->
-                                        <input class="my-checkbox" type="checkbox" ng-model="m_oController.m_bMasterCheck" ng-click="m_oController.showAllFrameFootPrint(m_oController.m_bMasterCheck)">
-                                    </th>
-                                    <th ng-click="m_oController.m_sOrderBy = 'Satellite'; m_oController.m_bReverseOrder=!m_oController.m_bReverseOrder">
-                                        {{"SEARCH_ORBIT_TITLE_HEAD_ORBIT_TABLE_SATELLITE"|translate}}
-                                        <i class="fa fa-sort-desc" aria-hidden="true" ng-show="(m_oController.m_sOrderBy === 'Satellite') && (m_oController.m_bReverseOrder === true)"></i>
-                                        <i class="fa fa-sort-asc" aria-hidden="true" ng-show="(m_oController.m_sOrderBy === 'Satellite') && (m_oController.m_bReverseOrder === false)"></i>
-                                    </th>
-                                    <th ng-click="m_oController.m_sOrderBy = 'AcqStart'; m_oController.m_bReverseOrder=!m_oController.m_bReverseOrder">
-                                        {{"SEARCH_TITLE_HEAD_ORBIT_TABLE_ACQUISITION_START"|translate}}
-                                        <i class="fa fa-sort-desc" aria-hidden="true" ng-show="(m_oController.m_sOrderBy === 'AcqStart') && (m_oController.m_bReverseOrder === true)"></i>
-                                        <i class="fa fa-sort-asc" aria-hidden="true" ng-show="(m_oController.m_sOrderBy === 'AcqStart') && (m_oController.m_bReverseOrder === false)"></i>
-                                    </th>
-                                    <th ng-click="m_oController.m_sOrderBy = 'AcqEnd'; m_oController.m_bReverseOrder=!m_oController.m_bReverseOrder">
-                                        {{"SEARCH_TITLE_HEAD_ORBIT_TABLE_ACQUISITION_END"|translate}}
-                                        <i class="fa fa-sort-desc" aria-hidden="true" ng-show="(m_oController.m_sOrderBy === 'AcqEnd') && (m_oController.m_bReverseOrder === true)"></i>
-                                        <i class="fa fa-sort-asc" aria-hidden="true" ng-show="(m_oController.m_sOrderBy === 'AcqEnd') && (m_oController.m_bReverseOrder === false)"></i>
-                                    </th>
-                                    <th>
-                                        <!--Buttons-->
-                                    </th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                <tr ng-repeat="orbit in m_oController.getOrbits() | orderBy:m_oController.m_sOrderBy:m_oController.m_bReverseOrder | filter:{SatelliteName:m_oController.m_sFilterTable} " ><!--ng-mouseover="m_oController.mouseOverOrbitInTable(orbit)"
-                            ng-mouseleave="m_oController.mouseLeaveOrbitInTable(orbit)" ng-click="m_oController.showSwath(orbit)"-->
-                                    <td >
-                                        <input type="checkbox" ng-checked="orbit.isSelected" ng-click="m_oController.showFrame(orbit)"
-                                                placeholder="{{'SEARCH_ORBIT_FILTER_PLACEHOLDER'|translate}}">
-                                        <!--TODO REMOVE IT -->
-                                        <!--<i class="fa fa-square-o" aria-hidden="true" ng-click=" orbit.isSelected= !orbit.isSelected;m_oController.showSwath(orbit)"-->
-                                           <!--ng-checked="orbit.isSelected" ng-hide="orbit.isSelected || (m_oController.m_bisLoadingAllOrbitInMap === true)"></i>-->
-                                        <!--<i class="fa fa-check-square-o" aria-hidden="true" ng-click="orbit.isSelected = !orbit.isSelected;m_oController.showSwath(orbit)"-->
-                                           <!--ng-checked="orbit.isSelected" ng-show="orbit.isSelected && (m_oController.m_bisLoadingAllOrbitInMap === false)"></i>-->
+                            <!--<table class="table table-hover table-search-orbit my-table">-->
+                                <!--<thead>-->
+                                <!--<tr>-->
+                                    <!--<th>&lt;!&ndash;class="loadIcon" ng-class="{'disabled-cursor-hover':m_oController.m_bisLoadingAllOrbitInMap }"&ndash;&gt;-->
+                                        <!--<input class="my-checkbox" type="checkbox" ng-model="m_oController.m_bMasterCheck" ng-click="m_oController.showAllFrameFootPrint(m_oController.m_bMasterCheck)">-->
+                                    <!--</th>-->
+                                    <!--<th ng-click="m_oController.m_sOrderBy = 'Satellite'; m_oController.m_bReverseOrder=!m_oController.m_bReverseOrder">-->
+                                        <!--{{"SEARCH_ORBIT_TITLE_HEAD_ORBIT_TABLE_SATELLITE"|translate}}-->
+                                        <!--<i class="fa fa-sort-desc" aria-hidden="true" ng-show="(m_oController.m_sOrderBy === 'Satellite') && (m_oController.m_bReverseOrder === true)"></i>-->
+                                        <!--<i class="fa fa-sort-asc" aria-hidden="true" ng-show="(m_oController.m_sOrderBy === 'Satellite') && (m_oController.m_bReverseOrder === false)"></i>-->
+                                    <!--</th>-->
+                                    <!--<th ng-click="m_oController.m_sOrderBy = 'AcqStart'; m_oController.m_bReverseOrder=!m_oController.m_bReverseOrder">-->
+                                        <!--{{"SEARCH_TITLE_HEAD_ORBIT_TABLE_ACQUISITION_START"|translate}}-->
+                                        <!--<i class="fa fa-sort-desc" aria-hidden="true" ng-show="(m_oController.m_sOrderBy === 'AcqStart') && (m_oController.m_bReverseOrder === true)"></i>-->
+                                        <!--<i class="fa fa-sort-asc" aria-hidden="true" ng-show="(m_oController.m_sOrderBy === 'AcqStart') && (m_oController.m_bReverseOrder === false)"></i>-->
+                                    <!--</th>-->
+                                    <!--<th ng-click="m_oController.m_sOrderBy = 'AcqEnd'; m_oController.m_bReverseOrder=!m_oController.m_bReverseOrder">-->
+                                        <!--{{"SEARCH_TITLE_HEAD_ORBIT_TABLE_ACQUISITION_END"|translate}}-->
+                                        <!--<i class="fa fa-sort-desc" aria-hidden="true" ng-show="(m_oController.m_sOrderBy === 'AcqEnd') && (m_oController.m_bReverseOrder === true)"></i>-->
+                                        <!--<i class="fa fa-sort-asc" aria-hidden="true" ng-show="(m_oController.m_sOrderBy === 'AcqEnd') && (m_oController.m_bReverseOrder === false)"></i>-->
+                                    <!--</th>-->
+                                    <!--<th>-->
+                                        <!--&lt;!&ndash;Buttons&ndash;&gt;-->
+                                    <!--</th>-->
+                                <!--</tr>-->
+                                <!--</thead>-->
+                                <!--<tbody>-->
+                                <!--<tr ng-repeat="orbit in m_oController.getOrbits() | orderBy:m_oController.m_sOrderBy:m_oController.m_bReverseOrder | filter:{SatelliteName:m_oController.m_sFilterTable} " >&lt;!&ndash;ng-mouseover="m_oController.mouseOverOrbitInTable(orbit)"-->
+                            <!--ng-mouseleave="m_oController.mouseLeaveOrbitInTable(orbit)" ng-click="m_oController.showSwath(orbit)"&ndash;&gt;-->
+                                    <!--<td >-->
+                                        <!--<input type="checkbox" ng-checked="orbit.isSelected" ng-click="m_oController.showFrame(orbit)"-->
+                                                <!--placeholder="{{'SEARCH_ORBIT_FILTER_PLACEHOLDER'|translate}}">-->
+                                        <!--&lt;!&ndash;TODO REMOVE IT &ndash;&gt;-->
+                                        <!--&lt;!&ndash;<i class="fa fa-square-o" aria-hidden="true" ng-click=" orbit.isSelected= !orbit.isSelected;m_oController.showSwath(orbit)"&ndash;&gt;-->
+                                           <!--&lt;!&ndash;ng-checked="orbit.isSelected" ng-hide="orbit.isSelected || (m_oController.m_bisLoadingAllOrbitInMap === true)"></i>&ndash;&gt;-->
+                                        <!--&lt;!&ndash;<i class="fa fa-check-square-o" aria-hidden="true" ng-click="orbit.isSelected = !orbit.isSelected;m_oController.showSwath(orbit)"&ndash;&gt;-->
+                                           <!--&lt;!&ndash;ng-checked="orbit.isSelected" ng-show="orbit.isSelected && (m_oController.m_bisLoadingAllOrbitInMap === false)"></i>&ndash;&gt;-->
 
-                                        <smallinvaderfixed ng-show="m_oController.m_bisLoadingAllOrbitInMap"></smallinvaderfixed>
+                                        <!--<smallinvaderfixed ng-show="m_oController.m_bisLoadingAllOrbitInMap"></smallinvaderfixed>-->
 
-                                    </td>
-                                    <td><span >{{orbit.SatelliteName}}</span></td>
-                                    <td><span >{{m_oController.getDateFromTimestamp(orbit.AcquisitionStartTime)}}</span></td>
-                                    <td><span >{{m_oController.getDateFromTimestamp(orbit.AcquisitionEndTime)}}</span></td>
-                                    <td class="info-satellite" ng-click="m_oController.openOrbitInfo(orbit)">
-                                        <div class="button-info">
-                                            <i class="fa fa-info-circle fa-lg" aria-hidden="true"></i>
-                                        </div>
-                                    </td>
-                                </tr>
-                                </tbody>
-                            </table>
+                                    <!--</td>-->
+                                    <!--<td><span >{{orbit.SatelliteName}}</span></td>-->
+                                    <!--<td><span >{{m_oController.getDateFromTimestamp(orbit.AcquisitionStartTime)}}</span></td>-->
+                                    <!--<td><span >{{m_oController.getDateFromTimestamp(orbit.AcquisitionEndTime)}}</span></td>-->
+                                    <!--<td class="info-satellite" ng-click="m_oController.openOrbitInfo(orbit)">-->
+                                        <!--<div class="button-info">-->
+                                            <!--<i class="fa fa-info-circle fa-lg" aria-hidden="true"></i>-->
+                                        <!--</div>-->
+                                    <!--</td>-->
+                                <!--</tr>-->
+                                <!--</tbody>-->
+                            <!--</table>-->
 
                         </div>
 

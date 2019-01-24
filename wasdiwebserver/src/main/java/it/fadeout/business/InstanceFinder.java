@@ -23,6 +23,10 @@ import org.nfs.orbits.sat.SwathArea;
 import org.nfs.orbits.sat.ViewAngle;
 import org.nfs.orbits.sat.swathSize;
 
+import it.fadeout.viewmodels.OpportunitiesSearchViewModel;
+import it.fadeout.viewmodels.SatelliteFilterViewModel;
+import it.fadeout.viewmodels.SensorModeViewModel;
+import it.fadeout.viewmodels.SensorViewModel;
 import satLib.astro.time.Time;
 
 public class InstanceFinder {
@@ -59,6 +63,19 @@ public class InstanceFinder {
 			put("PROBAV", "/org/nfs/orbits/sat/resource/probav.xml");
 			put("GEOEYE", "/org/nfs/orbits/sat/resource/geoeye.xml");
 			put("WORLDVIEW2", "/org/nfs/orbits/sat/resource/worldview2.xml");
+			
+			put("COSMO-SKYMED 1", "/org/nfs/orbits/sat/resource/cosmosky1.xml");
+			put("COSMO-SKYMED 2", "/org/nfs/orbits/sat/resource/cosmosky2.xml");
+			put("COSMO-SKYMED 3", "/org/nfs/orbits/sat/resource/cosmosky3.xml");
+			put("COSMO-SKYMED 4", "/org/nfs/orbits/sat/resource/cosmosky4.xml");
+			put("SENTINEL-1A", "/org/nfs/orbits/sat/resource/sentinel_1a.xml");
+			put("SENTINEL-1B", "/org/nfs/orbits/sat/resource/sentinel_1b.xml");
+			put("LANDSAT 8", "/org/nfs/orbits/sat/resource/landsat8.xml");
+			put("SENTINEL-2A", "/org/nfs/orbits/sat/resource/sentinel_2a.xml");
+			put("SENTINEL-2B", "/org/nfs/orbits/sat/resource/sentinel_2b.xml");			
+			put("PROBA-V", "/org/nfs/orbits/sat/resource/probav.xml");
+			put("GEOEYE 1", "/org/nfs/orbits/sat/resource/geoeye.xml");
+			put("WORLDVIEW-2 (WV-2)", "/org/nfs/orbits/sat/resource/worldview2.xml");
 		}
 	};
 
@@ -378,39 +395,203 @@ public class InstanceFinder {
 	}
 
 	
-	/**
-	 * 
-	 * @param sArea
-	 * @param dtDate
-	 * @param sSensorResolution
-	 * @param sSensorType
-	 * @return
-	 * @throws ParseException 
-	 */
-	public static ArrayList<CoverageSwathResult> findSwatsByFilters(String sArea, 
-			String sAquisitionStartTime, String sAquisitionEndTime,
-			ArrayList<String> asSatelliteNames,
-			String sSensorResolution, String sSensorType,String sLookingType,String sViewAngle,String sSwathSize) throws ParseException {
-
-
+//	/**
+//	 * 
+//	 * @param sArea
+//	 * @param dtDate
+//	 * @param sSensorResolution
+//	 * @param sSensorType
+//	 * @return
+//	 * @throws ParseException 
+//	 */
+//	public static ArrayList<CoverageSwathResult> findSwatsByFilters(String sArea, 
+//			String sAquisitionStartTime, String sAquisitionEndTime,
+//			ArrayList<String> asSatelliteNames,
+//			String sSensorResolution, String sSensorType,String sLookingType,String sViewAngle,String sSwathSize) throws ParseException {
+//
+//
+//		System.out.println("findSwats: CREO I SATELLITI");
+//
+//		m_aoSatellites = new ArrayList<ISatellite>();
+//
+//		// use all cosmo skymed satellites
+//		for (int i = 0; i < asSatelliteNames.size(); i++) {
+//
+//			System.out.println("InstanceFinder::findSwatsByFilters: cerco satellite: " + asSatelliteNames.get(i));
+//			//InputStream oInputStream = TestSat.class.getResourceAsStream(s_sOrbitSatsMap.get(asSatelliteNames.get(i)));
+//
+//			Satellite oSatellite;
+//			try {
+//				//oSatellite = new Satellite(oInputStream);
+//				oSatellite=SatFactory.buildSat(s_sOrbitSatsMap.get(asSatelliteNames.get(i)));
+//				System.out.println("costruito");
+//			} catch (Throwable oEx) {
+//				oEx.printStackTrace();
+//				System.out.println("InstanceFinder::findSwatsByFilters: unable to instantiate satellite " + s_sOrbitSats[i] + " - " + oEx);
+//				return null;
+//			}
+//
+//			// add the current satellite to the find list
+//			m_aoSatellites.add(oSatellite);
+//		}
+//
+//		if (m_aoSatellites != null) {
+//			System.out.println("InstanceFinder::findSwatsByFilters: Satelliti Disponibili " + m_aoSatellites.size());
+//		}
+//		else {
+//			System.out.println("InstanceFinder::findSwatsByFilters: m_aoSatellites NULL ");
+//		}
+//
+//		ArrayList<ISatellite> aoSatellites = new ArrayList<ISatellite>();
+//		LookingType oLookingType = convertLookingTypeString(sLookingType);
+//		ViewAngle oViewAngle = convertViewAngleString(sViewAngle);
+//		swathSize oSwathSize = convertSwathSizeString(sSwathSize);
+//		for (ISatellite oSatellite : m_aoSatellites) {
+//
+//			if (oSatellite.getType().toString().toUpperCase().equals(sSensorType.toUpperCase()) == false) continue;
+//
+//			// di ogni satellite devo specificare quali sensori attivare e quali
+//			// angoli considerare
+//			// (di Default nessun sensore è abilitato)
+//
+//			// ottengo l'elenco dei sensori disponibili sul satellite
+//			ArrayList<SatSensor> oSatSensors = oSatellite.getSensors();
+//
+//			for (SatSensor oSensor : oSatSensors) {
+//
+//				boolean bEnabled = false;
+//				if (oSensor.getResolution().toString().toUpperCase().substring(0, 1).equals(sSensorResolution.toUpperCase().substring(0, 1) )==true) {
+//					bEnabled = true;
+//				}
+//
+//				//System.out.println("SENSORE ORBIT: " + oSensor.getSName());
+//
+//				// activate all sensors
+//				oSensor.setEnabled(bEnabled);
+//				// ottengo l'elenco di tutti i fasci (angoli) di
+//				// acquisizione disponibili per questo sensore
+//				ArrayList<SensorMode> oSensorModes = oSensor.getSensorModes();
+//				// per questo sensore attivo tutti i possibili fasci
+//				for (SensorMode oSensorMode : oSensorModes) {
+//					//System.out.println("\tMODE: " + oSensorMode.getName());
+//					oSensorMode.setEnabled(bEnabled);
+//				}
+//				
+//				if(oLookingType != null)
+//				{
+//					oSensor.setLooking(oLookingType);
+//				}
+//				if(oViewAngle != null)
+//				{
+//					oSensor.setViewAngle(oViewAngle);
+//				}
+//				if(oSwathSize != null)
+//				{
+//					oSensor.setswathSize(oSwathSize);
+//				}
+//			}
+//
+//			aoSatellites.add(oSatellite);	
+//		}
+//
+//		// preparo l'area di interesse
+//		InterestArea oAreaOfInterest = new InterestArea("required area");
+//
+//		Polygon oPoligon = new Polygon();
+//		String sCleanedArea = sArea.replaceAll("[POLYGN()]", "");
+//		String[] asAreaPoints = sCleanedArea.split(",");
+//		int iPointsCount = asAreaPoints.length;
+//		apoint[] aoPoints = new apoint[iPointsCount];
+//
+//		// process each polygon point
+//		if (asAreaPoints != null) {
+//			for (int iCount = 0; iCount < iPointsCount; iCount++) {
+//				String[] asPoint = asAreaPoints[iCount].split(" ");
+//				double dX;
+//				try {
+//					dX = Double.valueOf(asPoint[0]);
+//				} catch (Exception oEx) {
+//					System.out.println("InstanceFinder.findSwats: eccezione nella conversione stringa double del punto x dell'area ");
+//					dX = 0;
+//				}
+//				double dY;
+//				try {
+//					dY = Double.valueOf(asPoint[1]);
+//				} catch (Exception oEx) {
+//					System.out.println("InstanceFinder.findSwats: eccezione nella conversione stringa double del punto y dell'area ");
+//					dY = 0;
+//				}
+//				aoPoints[iCount] = new apoint(dX * s_dConversionFactor, dY * s_dConversionFactor, 0);
+//
+//			}
+//		}
+//
+//		//double k = Math.PI / 180.0d;
+//		// setto i punti dell'area di interesse
+//		oPoligon.setVertex(aoPoints);
+//		oAreaOfInterest.setArea(oPoligon);
+//
+//		SimpleDateFormat oFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+//		Date dtAquisitionStartTime = oFormat.parse(sAquisitionStartTime);
+//		Date dtAquisitionEndTime = oFormat.parse(sAquisitionEndTime);
+//
+//		SimpleDateFormat oFormat2 = new SimpleDateFormat("yyyyMMddHHmmss");
+//		sAquisitionStartTime = oFormat2.format(dtAquisitionStartTime);
+//		sAquisitionEndTime = oFormat2.format(dtAquisitionEndTime);
+//
+//		// scelgo il periodo di osservazione
+//		Time oDateTimeStart = new Time(sAquisitionStartTime);
+//		Time oDateTimeEnd = new Time(sAquisitionEndTime);
+//
+//		// preparo la richiesta di copertura
+//		CoverageRequest coverageRequest = new CoverageRequest();
+//
+//		// aggiungo l'area di interesse (posso aggiungerne anche più di una)
+//		coverageRequest.addInterestArea(oAreaOfInterest);
+//
+//		// imposto la lista di satelliti da utilizzare per la ricerca
+//		coverageRequest.setISatellite(aoSatellites);
+//
+//		// imposto le date di inizio e fine osservazione
+//		coverageRequest.setFirstDate(oDateTimeStart);
+//		coverageRequest.setSecondDate(oDateTimeEnd);
+//		//String sLookingType,String sViewAngle,String sSwathSize
+//		System.out.println("findSwats CHIAMO SOLVE REQUEST");
+//		// Eseguo la ricerca
+//		// se a solveRequest passo false ottengo soltanto la potenziale
+//		// copertura, i fasci non vengono considerati.
+//		// se passo true per ogni potenziale copertura viene calcolata anche la copertura dei fasci attivati precedentemente
+//		ArrayList<CoverageSwathResult> oResults = coverageRequest.solveRequest(true);
+//
+//		System.out.println("findSwats TORNO");
+//		// ris contiente l'elenco di tutte le potenziali coperture
+//
+//		return oResults;
+//	}
+	
+	
+	public static  ArrayList<CoverageSwathResult> findSwatsByFilters(OpportunitiesSearchViewModel oOpportunitiesSearch)
+	{
 		System.out.println("findSwats: CREO I SATELLITI");
 
 		m_aoSatellites = new ArrayList<ISatellite>();
-
+		ArrayList<SatelliteFilterViewModel> aoSatelliteFilters;
+		aoSatelliteFilters = oOpportunitiesSearch.getSatelliteFilters();
+		
 		// use all cosmo skymed satellites
-		for (int i = 0; i < asSatelliteNames.size(); i++) {
-
-			System.out.println("InstanceFinder::findSwatsByFilters: cerco satellite: " + asSatelliteNames.get(i));
+		for (int iIndexSatelliteFitler = 0; iIndexSatelliteFitler < aoSatelliteFilters.size() ; iIndexSatelliteFitler++) {
+			String sSatelliteName = aoSatelliteFilters.get(iIndexSatelliteFitler).getSatelliteName();
+			System.out.println("InstanceFinder::findSwatsByFilters: cerco satellite: " + sSatelliteName);
 			//InputStream oInputStream = TestSat.class.getResourceAsStream(s_sOrbitSatsMap.get(asSatelliteNames.get(i)));
 
 			Satellite oSatellite;
 			try {
 				//oSatellite = new Satellite(oInputStream);
-				oSatellite=SatFactory.buildSat(s_sOrbitSatsMap.get(asSatelliteNames.get(i)));
+				oSatellite=SatFactory.buildSat(s_sOrbitSatsMap.get(sSatelliteName));
 				System.out.println("costruito");
 			} catch (Throwable oEx) {
 				oEx.printStackTrace();
-				System.out.println("InstanceFinder::findSwatsByFilters: unable to instantiate satellite " + s_sOrbitSats[i] + " - " + oEx);
+				System.out.println("InstanceFinder::findSwatsByFilters: unable to instantiate satellite " + s_sOrbitSats[iIndexSatelliteFitler] + " - " + oEx);
 				return null;
 			}
 
@@ -424,62 +605,100 @@ public class InstanceFinder {
 		else {
 			System.out.println("InstanceFinder::findSwatsByFilters: m_aoSatellites NULL ");
 		}
-
-		ArrayList<ISatellite> aoSatellites = new ArrayList<ISatellite>();
-		LookingType oLookingType = convertLookingTypeString(sLookingType);
-		ViewAngle oViewAngle = convertViewAngleString(sViewAngle);
-		swathSize oSwathSize = convertSwathSizeString(sSwathSize);
-		for (ISatellite oSatellite : m_aoSatellites) {
-
-			if (oSatellite.getType().toString().toUpperCase().equals(sSensorType.toUpperCase()) == false) continue;
-
-			// di ogni satellite devo specificare quali sensori attivare e quali
-			// angoli considerare
-			// (di Default nessun sensore è abilitato)
-
-			// ottengo l'elenco dei sensori disponibili sul satellite
-			ArrayList<SatSensor> oSatSensors = oSatellite.getSensors();
-
-			for (SatSensor oSensor : oSatSensors) {
-
-				boolean bEnabled = false;
-				if (oSensor.getResolution().toString().toUpperCase().substring(0, 1).equals(sSensorResolution.toUpperCase().substring(0, 1) )==true) {
-					bEnabled = true;
-				}
-
-				//System.out.println("SENSORE ORBIT: " + oSensor.getSName());
-
-				// activate all sensors
-				oSensor.setEnabled(bEnabled);
-				// ottengo l'elenco di tutti i fasci (angoli) di
-				// acquisizione disponibili per questo sensore
-				ArrayList<SensorMode> oSensorModes = oSensor.getSensorModes();
-				// per questo sensore attivo tutti i possibili fasci
-				for (SensorMode oSensorMode : oSensorModes) {
-					//System.out.println("\tMODE: " + oSensorMode.getName());
-					oSensorMode.setEnabled(bEnabled);
+		
+		for (int iIndexSatelliteFitler = 0; iIndexSatelliteFitler < aoSatelliteFilters.size() ; iIndexSatelliteFitler++) 
+		{
+			aoSatelliteFilters.get(iIndexSatelliteFitler);
+		}
+//		ArrayList<ISatellite> aoSatellites = new ArrayList<ISatellite>();
+		
+		//vedo quali sensori sono stati selezionati 
+		for (ISatellite oSatellite : m_aoSatellites) 
+		{
+			for(int iIndexSatelliteFilter = 0; iIndexSatelliteFilter < aoSatelliteFilters.size() ; iIndexSatelliteFilter++)
+			{
+				String sSatelliteName =  aoSatelliteFilters.get(iIndexSatelliteFilter).getSatelliteName();
+				if(oSatellite.getName().equals(sSatelliteName))
+				{
+					ArrayList<SensorViewModel> aoSatelliteSensorsEnabled = aoSatelliteFilters.get(iIndexSatelliteFilter).getSatelliteSensors();
+					ArrayList<SatSensor> aoSatSensors = oSatellite.getSensors();
+					setEnableSensorsAndSensorModes(aoSatSensors,aoSatelliteSensorsEnabled);
+					
 				}
 				
-				if(oLookingType != null)
-				{
-					oSensor.setLooking(oLookingType);
-				}
-				if(oViewAngle != null)
-				{
-					oSensor.setViewAngle(oViewAngle);
-				}
-				if(oSwathSize != null)
-				{
-					oSensor.setswathSize(oSwathSize);
-				}
 			}
-
-			aoSatellites.add(oSatellite);	
 		}
-
+		
 		// preparo l'area di interesse
 		InterestArea oAreaOfInterest = new InterestArea("required area");
+		String sArea = oOpportunitiesSearch.getPolygon();
+		Polygon oPoligon = prepareAreaOfInterest(sArea);
+		oAreaOfInterest.setArea(oPoligon);
+		
+		//preparo le date
+		String sAquisitionStartTime = oOpportunitiesSearch.getAcquisitionStartTime();
+		String sAquisitionEndTime = oOpportunitiesSearch.getAcquisitionEndTime();
+		sAquisitionStartTime = dateFormat(sAquisitionStartTime);
+		sAquisitionEndTime = dateFormat(sAquisitionEndTime);
+		
+		// scelgo il periodo di osservazione
+		Time oDateTimeStart = new Time(sAquisitionStartTime);
+		Time oDateTimeEnd = new Time(sAquisitionEndTime);
+		
+		// preparo la richiesta di copertura
+		CoverageRequest coverageRequest = new CoverageRequest();
 
+		coverageRequest = getCoverageRequest(oAreaOfInterest,m_aoSatellites,oDateTimeStart,oDateTimeEnd);
+		//String sLookingType,String sViewAngle,String sSwathSize
+		System.out.println("findSwats CHIAMO SOLVE REQUEST");
+		// Eseguo la ricerca
+		// se a solveRequest passo false ottengo soltanto la potenziale
+		// copertura, i fasci non vengono considerati.
+		// se passo true per ogni potenziale copertura viene calcolata anche la copertura dei fasci attivati precedentemente
+		ArrayList<CoverageSwathResult> oResults = coverageRequest.solveRequest(true);
+
+		System.out.println("findSwats TORNO");
+		// ris contiente l'elenco di tutte le potenziali coperture
+		
+		return oResults;
+	}
+	
+	private static CoverageRequest getCoverageRequest(InterestArea oAreaOfInterest,ArrayList<ISatellite> aoSatellites,Time oDateTimeStart,Time oDateTimeEnd)
+	{
+		CoverageRequest oCoverageRequest = new CoverageRequest();
+
+		// aggiungo l'area di interesse (posso aggiungerne anche più di una)
+		oCoverageRequest.addInterestArea(oAreaOfInterest);
+
+		// imposto la lista di satelliti da utilizzare per la ricerca
+		oCoverageRequest.setISatellite(aoSatellites);
+
+		// imposto le date di inizio e fine osservazione
+		oCoverageRequest.setFirstDate(oDateTimeStart);
+		oCoverageRequest.setSecondDate(oDateTimeEnd);
+		
+		return oCoverageRequest;
+	}
+	
+	private static String dateFormat(String sTime)
+	{
+		SimpleDateFormat oFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		Date dtTime;
+		try {
+			dtTime = oFormat.parse(sTime);
+			SimpleDateFormat oFormat2 = new SimpleDateFormat("yyyyMMddHHmmss");
+			sTime = oFormat2.format(dtTime);
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		return sTime;
+	}
+	
+	private static Polygon prepareAreaOfInterest(String sArea){
+//		String sArea = oOpportunitiesSearch.getPolygon();
+		
 		Polygon oPoligon = new Polygon();
 		String sCleanedArea = sArea.replaceAll("[POLYGN()]", "");
 		String[] asAreaPoints = sCleanedArea.split(",");
@@ -508,56 +727,67 @@ public class InstanceFinder {
 
 			}
 		}
-
-		//double k = Math.PI / 180.0d;
-		// setto i punti dell'area di interesse
 		oPoligon.setVertex(aoPoints);
-		oAreaOfInterest.setArea(oPoligon);
-
-		SimpleDateFormat oFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-		Date dtAquisitionStartTime = oFormat.parse(sAquisitionStartTime);
-		Date dtAquisitionEndTime = oFormat.parse(sAquisitionEndTime);
-
-		SimpleDateFormat oFormat2 = new SimpleDateFormat("yyyyMMddHHmmss");
-		sAquisitionStartTime = oFormat2.format(dtAquisitionStartTime);
-		sAquisitionEndTime = oFormat2.format(dtAquisitionEndTime);
-
-		// scelgo il periodo di osservazione
-		Time oDateTimeStart = new Time(sAquisitionStartTime);
-		Time oDateTimeEnd = new Time(sAquisitionEndTime);
-
-		// preparo la richiesta di copertura
-		CoverageRequest coverageRequest = new CoverageRequest();
-
-		// aggiungo l'area di interesse (posso aggiungerne anche più di una)
-		coverageRequest.addInterestArea(oAreaOfInterest);
-
-		// imposto la lista di satelliti da utilizzare per la ricerca
-		coverageRequest.setISatellite(aoSatellites);
-
-		// imposto le date di inizio e fine osservazione
-		coverageRequest.setFirstDate(oDateTimeStart);
-		coverageRequest.setSecondDate(oDateTimeEnd);
-		//String sLookingType,String sViewAngle,String sSwathSize
-		System.out.println("findSwats CHIAMO SOLVE REQUEST");
-		// Eseguo la ricerca
-		// se a solveRequest passo false ottengo soltanto la potenziale
-		// copertura, i fasci non vengono considerati.
-		// se passo true per ogni potenziale copertura viene calcolata anche la copertura dei fasci attivati precedentemente
-		ArrayList<CoverageSwathResult> oResults = coverageRequest.solveRequest(true);
-
-		System.out.println("findSwats TORNO");
-		// ris contiente l'elenco di tutte le potenziali coperture
-
-		return oResults;
+		
+		return oPoligon;
 	}
-	
-	
-	private static  ArrayList<CoverageSwathResult> findSwatsByFiltersTEST(String sArea)
+	private static void setEnableSensorsAndSensorModes(ArrayList<SatSensor> aoSatSensors, ArrayList<SensorViewModel> aoSatelliteSensorsEnabled)
 	{
-		return null;
+		
+//		ArrayList<SatSensor> aoSatSensors = oSatellite.getSensors();
+		for (SatSensor oSensor : aoSatSensors) 
+		{
+			for(SensorViewModel oSensorEnabled : aoSatelliteSensorsEnabled)
+			{
+				if(oSensor.getDescription().equals(oSensorEnabled.getDescription()))
+				{
+					oSensor.setEnabled(true);
+					
+					ArrayList<SensorMode> oSensorModes = oSensor.getSensorModes();
+					ArrayList<SensorModeViewModel> oSensorModesEnabled = oSensorEnabled.getSensorModes();
+					setEnableSensorModes(oSensorModes,oSensorModesEnabled);
+//					for (SensorMode oSensorMode : oSensorModes) {
+//						for(SensorModeViewModel oSensorModeEnabled:oSensorModesEnabled)
+//						{
+//							if(oSensorMode.getName().equals(oSensorModeEnabled.getName()))
+//							{
+//								oSensorMode.setEnabled(true);
+//							}
+//							else
+//							{
+//								oSensorMode.setEnabled(false);
+//							}
+//
+//						}
+//					}
+				}
+				else
+				{
+					oSensor.setEnabled(false);
+				}
+			}
+		}
+		
+		
 	}
 	
+	private static void setEnableSensorModes(ArrayList<SensorMode> oSensorModes, ArrayList<SensorModeViewModel> oSensorModesEnabled)
+	{
+		for (SensorMode oSensorMode : oSensorModes) {
+			for(SensorModeViewModel oSensorModeEnabled:oSensorModesEnabled)
+			{
+				if(oSensorMode.getName().equals(oSensorModeEnabled.getName()))
+				{
+					oSensorMode.setEnabled(true);
+				}
+				else
+				{
+					oSensorMode.setEnabled(false);
+				}
+
+			}
+		}
+	}
 	
 	private static LookingType convertLookingTypeString(String sLookingType)
 	{
