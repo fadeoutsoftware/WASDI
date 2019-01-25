@@ -28,6 +28,7 @@ service('TreeService', ['$http',  'ConstantsService', function ($http, oConstant
         return this.nodeOperation(sIdDiv,sIdNode,"is_open");
     };
 
+
     this.getAllCheckedIDNode = function(sIdDiv){
         var asNodes = [];
         asNodes = $(sIdDiv).jstree(true).get_checked();
@@ -41,6 +42,35 @@ service('TreeService', ['$http',  'ConstantsService', function ($http, oConstant
             return false;
         }
         $(sIdDiv).jstree(sOperation, sIdNode);
+
+        return true;
+    };
+
+    this.closeAllNodes = function(sIdDiv){
+        if(utilsIsStrNullOrEmpty(sIdDiv))
+        {
+            return false;
+        }
+        $(sIdDiv).jstree('close_all');
+        return true;
+    };
+
+    this.openAllNodes = function(sIdDiv){
+        if(utilsIsStrNullOrEmpty(sIdDiv))
+        {
+            return false;
+        }
+        $(sIdDiv).jstree('open_all');
+        return true;
+    };
+
+    this.uncheckAllNodes = function(sIdDiv){
+        if(utilsIsStrNullOrEmpty(sIdDiv))
+        {
+            return false;
+        }
+        $(sIdDiv).jstree("uncheck_all");
+        // $(sIdDiv).jstree().deselect_all(true);
 
         return true;
     };
@@ -98,5 +128,45 @@ service('TreeService', ['$http',  'ConstantsService', function ($http, oConstant
 
         return true;
     }
+
+    this.openAllCheckedNodes = function(sIdDiv)
+    {
+        var treeInst = $(sIdDiv).jstree(true);
+        var aoNodes = treeInst._model.data;
+
+        for (var iIndex in aoNodes)
+        {
+            if ( (utilsIsObjectNullOrUndefined(aoNodes[iIndex]) === false) &&
+                 (utilsIsObjectNullOrUndefined(aoNodes[iIndex].state.checked) === false) &&
+                 (aoNodes[iIndex].state.checked === true) )
+            {
+                $(sIdDiv).jstree("_open_to", aoNodes[iIndex].id);
+            }
+        }
+    };
+
+    this.numberOfCheckedNodes = function(sIdDiv)
+    {
+        var treeInst = $(sIdDiv).jstree(true);
+        var iNumberOfCheckedNodes = 0;
+        if(utilsIsObjectNullOrUndefined(treeInst._model) === true)
+        {
+            return iNumberOfCheckedNodes;
+        }
+        var aoNodes = treeInst._model.data;
+
+
+        for (var iIndex in aoNodes)
+        {
+            if ( (utilsIsObjectNullOrUndefined(aoNodes[iIndex]) === false) &&
+                 (utilsIsObjectNullOrUndefined(aoNodes[iIndex].state.checked) === false) &&
+                 (aoNodes[iIndex].state.checked === true) )
+            {
+                iNumberOfCheckedNodes ++;
+            }
+        }
+        return iNumberOfCheckedNodes;
+    };
+
 
 }]);

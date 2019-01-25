@@ -132,10 +132,43 @@
                             </div>
 
 
-                            <!-- TREE -->
-                            <div id="satelliteResourceTree"></div>
-                            <!--<button ng-click="m_oController.searchOrbitTEST()">test</button>-->
 
+
+                            <!-- TREE -->
+                            <div class="tree-container">
+                                <div class="btn-group" role="group" aria-label="...">
+                                    <button type="button" class="btn btn-default"
+                                            ng-click="m_oController.m_oTreeService.openAllCheckedNodes(m_oController.m_sIdDivSatelliteResourceTree)">
+                                        checked nodes
+                                    </button>
+                                    <button type="button" class="btn btn-default"
+                                            ng-click="m_oController.m_oTreeService.closeAllNodes(m_oController.m_sIdDivSatelliteResourceTree)">
+                                        close nodes
+                                    </button>
+                                    <button type="button" class="btn btn-default"
+                                            ng-click="m_oController.m_oTreeService.openAllNodes(m_oController.m_sIdDivSatelliteResourceTree)">
+                                        open nodes
+                                    </button>
+                                    <button type="button" class="btn btn-default"
+                                            ng-click="m_oController.m_oTreeService.uncheckAllNodes(m_oController.m_sIdDivSatelliteResourceTree)">
+                                        deselect nodes
+                                    </button>
+
+                                </div>
+
+                                <div id="satelliteResourceTree"></div>
+
+                                selected nodes: <span class="badge">{{m_oController.m_oTreeService.numberOfCheckedNodes(m_oController.m_sIdDivSatelliteResourceTree)}}</span>
+
+                            </div>
+
+
+                            <!--<button ng-click="m_oController.searchOrbitTEST()">test</button>-->
+                            <!--<button ng-click="m_oController.m_oTreeService.openAllCheckedNodes(m_oController.m_sIdDivSatelliteResourceTree)">checked node</button>-->
+                            <!--<button ng-click="m_oController.m_oTreeService.closeAllNodes(m_oController.m_sIdDivSatelliteResourceTree)">close node</button>-->
+                            <!--<button ng-click="m_oController.m_oTreeService.openAllNodes(m_oController.m_sIdDivSatelliteResourceTree)">open node</button>-->
+                            <!--<button ng-click="m_oController.m_oTreeService.uncheckAllNodes(m_oController.m_sIdDivSatelliteResourceTree)">deselect all nodes</button>-->
+                            <!--number of selected nodes: <span class="badge">{{m_oController.m_oTreeService.numberOfCheckedNodes(m_oController.m_sIdDivSatelliteResourceTree)}}</span>-->
 
                             <!--<img src="assets/icons/Satellite.svg" alt="Satellite" height="30" width="30">{{"SEARCH_TITLE_CHECK_BOX_SATELLITE"|translate}}-->
                             <!--<div class="well well-sm">-->
@@ -227,7 +260,33 @@
                             <!--<a ng-href="{{m_oController.m_sHrefLogFile}}" download ="download">Download KML</a>-->
 
                             <!--TREE -->
-                            <div id="orbitsTree"></div>
+                            <div class="tree-container-results">
+
+                                <div class="btn-group" role="group" aria-label="...">
+                                    <button type="button" class="btn btn-default"
+                                            ng-click="m_oController.m_oTreeService.openAllCheckedNodes(m_oController.m_sIdDiv)">
+                                        checked nodes
+                                    </button>
+                                    <button type="button" class="btn btn-default"
+                                            ng-click="m_oController.m_oTreeService.closeAllNodes(m_oController.m_sIdDiv)">
+                                        close nodes
+                                    </button>
+                                    <button type="button" class="btn btn-default"
+                                            ng-click="m_oController.m_oTreeService.openAllNodes(m_oController.m_sIdDiv)">
+                                        open nodes
+                                    </button>
+                                    <!--<button type="button" class="btn btn-default"-->
+                                            <!--ng-click="m_oController.m_oTreeService.uncheckAllNodes(m_oController.m_sIdDiv)">-->
+                                        <!--deselect nodes-->
+                                    <!--</button>-->
+
+                                </div>
+
+                                <div id="orbitsTree"></div>
+
+                                selected nodes: <span class="badge">{{m_oController.m_oTreeService.numberOfCheckedNodes(m_oController.m_sIdDiv)}}</span>
+
+                            </div>
 
                             <!--<table class="table table-hover table-search-orbit my-table">-->
                                 <!--<thead>-->

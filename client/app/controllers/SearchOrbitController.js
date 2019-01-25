@@ -900,6 +900,7 @@ var SearchOrbitController = (function() {
         var oReturnValue = [{
             "id": "results",
             "text": "Results",
+            "icon":"folder-icon-menu-jstree",
             "state": { "opened": true },
             "children": []
         }];
@@ -934,12 +935,18 @@ var SearchOrbitController = (function() {
 
             //add data node
             var oResultSearchTreeData = this.generateNode(oReturnValue[0],sNewDate);
+            oResultSearchTreeData.icon = "calendar1-square-icon-menu-jstree";
+
             //add sensor look direction node
             var oResultSearchTreeSensorLookDirection = this.generateNode(oResultSearchTreeData,sSensorLookDirection);
+            oResultSearchTreeSensorLookDirection.icon = "arrow-mix-icon-menu-jstree";
             //add swath node
             var oResultSearchTreeSwathName = this.generateNode(oResultSearchTreeSensorLookDirection,sSwathName);
+            oResultSearchTreeSwathName.icon = "vector-square-icon-menu-jstree";
+
             //add frame node
             var oFrameNode = this.generateNode(oResultSearchTreeSwathName,sFrameName);
+            oFrameNode.icon = "selection-icon-menu-jstree";
 
             oFrameNode.isFrame = true;
             oFrameNode.FrameFootPrint = aoData[iIndexOpportunity].FrameFootPrint;
@@ -1225,6 +1232,7 @@ var SearchOrbitController = (function() {
         var oReturnValue = [{
             "id": "results",
             "text": "Satellites",
+            "icon":"folder-icon-menu-jstree",
             "state": { "opened": true },
             "children": []
         }];
@@ -1239,6 +1247,7 @@ var SearchOrbitController = (function() {
 
             //add satellite
             var oSatelliteTree = this.generateNode(oReturnValue[0],sSatelliteName);
+            oSatelliteTree.icon = "satelite-icon-context-menu-jstree";
 
             var oSatellite = aoSatellites[iSatellite];
             var iNumberOfSatelliteSensors = oSatellite.satelliteSensors.length;
@@ -1250,6 +1259,8 @@ var SearchOrbitController = (function() {
 
                 //add sensor
                 var oSatelliteSensorTree = this.generateNode(oSatelliteTree,sDescription);
+                oSatelliteSensorTree.icon = "folder-icon-menu-jstree";
+
 
                 var oSensor = oSatellite.satelliteSensors[iSensor];
                 var iNumberOfSensorModes = oSensor.sensorModes.length;
@@ -1257,7 +1268,8 @@ var SearchOrbitController = (function() {
                 for(var iSensorMode = 0; iSensorMode <  iNumberOfSensorModes; iSensorMode++)
                 {
                     var sName = oSensor.sensorModes[iSensorMode].name;
-                    this.generateNode(oSatelliteSensorTree,sName);
+                    var oSensorModeNode = this.generateNode(oSatelliteSensorTree,sName);
+                    oSensorModeNode.icon = "touch-icon-menu-jstree";
                 }
 
             }
