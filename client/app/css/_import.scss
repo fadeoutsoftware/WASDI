@@ -103,13 +103,34 @@
 
     }
 
-    .filters-wrapper {
-        .MultiselectDropdownMenuDirective{
-            margin-top: 2px;
+    .side-panel{
+        .panel{
+            height: 100%;
+            overflow: hidden;
+        }
+
+        label{
+            font-weight: normal;
         }
     }
 
-    .product-search-wrapper{
+    .filters-wrapper {
+        .MultiselectDropdownMenuDirective{
+            margin-top: 2px;
+            ul{
+                &, li{
+                    width: 100%;
+                }
+            }
+        }
+
+        .MultiselectDropdownMenuDirective, .btn-wasdi{
+            width: 130px;
+        }
+    }
+
+    .product-search-wrapper {
+
         input[type=text] {
             width: 100%;
             padding: 12px 20px;
@@ -117,6 +138,64 @@
             box-sizing: border-box;
             background-color: white;
             border-color: #2D394F;
+            margin: 0px;
+        }
+    }
+
+    .mission-tabs-wrapper{
+        ul{
+            li{
+                &:hover{
+                    cursor: pointer;
+                }
+
+                & > div{
+                    padding-bottom: 8px;
+                    padding-top: 8px;
+                }
+
+                &.selected{
+                    & > div{
+                        //color: $color-link;
+                        color: $wasdi-green-logo;
+                    }
+                }
+
+                .fa{
+                    font-size: 16px;
+                    width: 14px;
+
+                    &:hover{
+                        cursor: pointer;
+                    }
+
+                }
+                span{
+                    font-size: calculatePxFromRemAndBasePx(0.7rem, 16px);
+                    position: relative;
+                    top: -2px;
+                }
+            }
+        }
+
+        a{
+            padding-left: 2px;
+            padding-right: 2px;
+            span{
+                font-size: calculatePxFromRemAndBasePx(0.9rem, 16px);
+            }
+        }
+    }
+
+    .mission-details-wrapper{
+
+        background-color: #fff;
+
+        overflow-y: auto;
+        overflow-x: hidden;
+
+        input[type=text]{
+            width: 100%;
         }
     }
 
@@ -216,14 +295,7 @@
             //border-right: 20px solid $wasdi-blue-logo;
             //border: 1px solid $wasdi-blue-logo;
             //overflow: auto;
-            height: $wasdi-heigt-panel-import;
-            max-height: $wasdi-heigt-panel-import;
             color: black;
-            ///* (1366x768) WXGA Display */
-            @media screen and (max-width: 1366px) and (max-height: 768px) {
-                height: $wasdi-height-panel-import-max-width-1366-max-height-768;
-                max-height: $wasdi-height-panel-import-max-width-1366-max-height-768;
-            }
 
             .loading-div {
                 width: 50px;

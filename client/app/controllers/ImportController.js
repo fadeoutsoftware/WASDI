@@ -31,6 +31,7 @@ var ImportController = (function() {
 
         // Self link for the scope
         this.m_oScope.m_oController = this;
+        this.m_oScope.$ctrl = this;
 
         this.m_bShowsensingfilter = true;
 
@@ -353,6 +354,24 @@ var ImportController = (function() {
         }
     }
 
+
+    ImportController.prototype.toggleMissionSelection= function(mission, index, event)
+    {
+        mission.selected = !mission.selected;
+        this.updateMissionSelection(index);
+
+        // prevent tab selection when user click on the checkbox
+        event.stopPropagation();
+    }
+
+    ImportController.prototype.selectTabMission= function(mission, index, event)
+    {
+        this.m_activeMissionTab = index;
+    }
+    ImportController.prototype.isMissionTabOpen= function(index)
+    {
+        return this.m_activeMissionTab === index;
+    }
 
     /**
      * Get the list of available missions
@@ -835,6 +854,18 @@ var ImportController = (function() {
 
         return true;
     };
+
+
+    ImportController.prototype.getFilterPlaceholder = function(filter)
+    {
+        if(filter["indexhint"] != undefined){
+            return filter["indexhint"];
+        }    
+        return "";
+        
+    }
+    
+    
 
     /**
      * downloadProduct

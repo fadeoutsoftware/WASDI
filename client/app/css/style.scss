@@ -217,6 +217,12 @@ h4 {
         height: 100%;
     }
 }
+
+.panel-body{
+    &.auto-parent-height{
+        height: $size-panel-body-height-with-single-row-heading;
+    }
+}
 //----------------------------------------------------
 
 
@@ -289,6 +295,17 @@ h4 {
 }
 //----------------------------------------------------
 
+//----------------------------------------------------
+// Inputs
+.wasdi-input{
+    border-color: $wasdi-blue-logo;
+    //border-color: $wasdi-blue-logo-complementary-3;
+    padding: 12px 20px;
+    box-sizing: border-box;
+    background-color: white;
+    margin: 0px;
+}
+//----------------------------------------------------
 
 
 
