@@ -97,7 +97,28 @@
             }
           }
         }
-
+        .tree-container
+        {
+          height: 60vh;
+          .jstree
+          {
+            //display: block;
+            //overflow-x: auto;
+            //overflow-y: auto;
+            //min-height: 30%;
+            max-height: 60vh;
+            height: 100%;
+          }
+        }
+        .tree-container-results
+        {
+          height: 75vh;
+          .jstree
+          {
+            max-height: 69vh;
+            height: 100%;
+          }
+        }
         .checkbox-satellite-container{
           //display: inline;
           //padding: 10px;
@@ -150,7 +171,8 @@
     .table-container
     {
       //max-height: 350px;       /* Just for the demo          */
-      max-height: 69vh;
+      //max-height: 69vh;
+      max-height: 100%;
       overflow-y: auto;    /* Trigger vertical scroll    */
       overflow-x: hidden;  /* Hide the horizontal scroll */
       margin-left: 1px;

@@ -7,7 +7,7 @@
             <div class="button-menu-with-icons" ng-hide="m_oController.isHiddenOperationMainBar();"><!--class='animate-hide'-->
 
                 <div class="button-container" ng-repeat="button in m_oController.m_aoNavBarMenu"><!--style="float: left" -->
-                    <button class="my-button" ng-if = " button.onClick !== '' "  ng-click="button.onClick(m_oController)">
+                    <button class="my-button" ng-if = "button.onClick !== '' "  ng-click="button.onClick(m_oController)">
                         <i ng-class="button.icon"></i>
                         <h4>{{button.name}}</h4>
                     </button>
