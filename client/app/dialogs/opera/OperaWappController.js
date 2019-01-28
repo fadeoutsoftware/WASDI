@@ -58,7 +58,7 @@ var OperaWappController = (function() {
                 oController.m_bHasResult = true;
             }
             var oDialog = utilsVexDialogAlertBottomRightCorner("OPERA FLOOD DETECTION<br>DONE");
-            utilsVexCloseDialogAfterFewSeconds(4000,oDialog);
+            utilsVexCloseDialogAfter(4000,oDialog);
         }).error(function (error) {
             oController.m_bIsRunning = false;
             utilsVexDialogAlertTop("GURU MEDITATION<br>THERE WAS AN ERROR RUNNING OPERA");
@@ -85,7 +85,7 @@ var OperaWappController = (function() {
                 oController.m_bHasResult = false;
             }
             var oDialog = utilsVexDialogAlertBottomRightCorner("FLOODED AREA<br>PUBLISHED");
-            utilsVexCloseDialogAfterFewSeconds(4000,oDialog);
+            utilsVexCloseDialogAfter(4000,oDialog);
         }).error(function (error) {
             oController.m_bIsRunning = false;
             utilsVexDialogAlertTop("GURU MEDITATION<br>THERE WAS AN ERROR PUBLISHING OPERA");

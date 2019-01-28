@@ -191,7 +191,7 @@ function utilsProjectShowRabbitMessageUserFeedBack(oMessage) {
 
         // Give the short message
         var oDialog = utilsVexDialogAlertBottomRightCorner(sUserMessage);
-        utilsVexCloseDialogAfterFewSeconds(4000,oDialog);
+        utilsVexCloseDialogAfter(4000,oDialog);
     }
 
 }
@@ -497,3 +497,4 @@ function utilsProjectGetPolygonArray(sPolygonString){
 
     return sTemp;
 }
+

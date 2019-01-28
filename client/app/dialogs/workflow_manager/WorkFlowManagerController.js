@@ -300,7 +300,7 @@ var WorkFlowManagerController = (function() {
                 oController.getWorkflowsByUser();
                 oController.cleanAllUploadWorkflowFields();
                 var oDialog = utilsVexDialogAlertBottomRightCorner("SUCCESSFUL UPLOAD");
-                utilsVexCloseDialogAfterFewSeconds(4000,oDialog);
+                utilsVexCloseDialogAfter(4000,oDialog);
             }
             else
             {

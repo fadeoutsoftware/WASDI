@@ -1,493 +1,529 @@
 
-.root-view
-{
+.root-view {
 
-  margin-top: 10px;
-  .flex-container {
-    display: flex;
-    flex-direction: row;
-    white-space: nowrap;
-    justify-content: flex-start;
-  }
-  .flex-container div {padding:0 4em 0 1em;}
-  .column {flex-direction: column;}
-  .end {justify-content: flex-end;}
-
-
-  // LOGGED USER
-  .logged-user
-  {
-    //position: absolute;
-    //top: 1px;
-
-    .link
-    {
-      margin-top: 7px;
-      i
-      {
-        float: left;
-        color: $wasdi-subtitle-color;
-      }
-      a
-      {
-        cursor:pointer;
-
-      }
-
+    margin-top: 10px;
+    .flex-container {
+        display: flex;
+        flex-direction: row;
+        white-space: nowrap;
+        justify-content: flex-start;
     }
-    //SPAN USER ID
-    .user-span
-    {
-      margin-top: 7px;
-      float: right;
+    .flex-container div {
+        padding: 0 4em 0 1em;
     }
-    //SPAN SUBTITLE
-    .subtitle-span
-    {
-
-      @media only screen and (min-width: 320px)
-      {
-        display: none;
-      }
-
-      @media only screen and (min-width: 961px)
-      {
-        display:inherit;
-        float:left;
-        margin-left:10%;
-        color:$wasdi-subtitle-color;
-      }
+    .column {
+        flex-direction: column;
+    }
+    .end {
+        justify-content: flex-end;
     }
 
-    ul {
-      float:right;
-      list-style-type: none;
-      li {
-        //color: $wasdi-logged-user-link;
-        float: left;
-      }
-      li a {
-        color: $wasdi-logged-user-link;
-        text-align: center;
-        padding: 14px 16px;
-        text-decoration: none;
-      }
-    }
-  }
+    // LOGGED USER
+    .logged-user {
+        //position: absolute;
+        //top: 1px;
 
-  //LOGO
-  .brand-logo{
-    content: $wasdi-brand-logo-root; // set 'src' attribute from CSS
-    width: $wasdi-brand-logo-root-size;
-    //margin-top: -20px;
-    margin-top: -5px;
-    margin-left:35px;
-    height: auto;
-    min-height: 50px;
-    min-width: 50px;
-
-  }
-
-
-
-  //NAVBAR OVERIDE
-  .my-nav-bar
-  {
-    height: 60px;
-
-    .user-container{
-      margin-top: 10px;
-      color:white;
-      button
-      {
-        border:none;
-        background-color: transparent;
-      }
-      .dropdown-menu{
-        z-index: 1500 ;
-        li{
-          width: 100%;
-          &:hover{
-            color:white;
-            background-color: $wasdi-green-logo;
-            a{
-              color:white;
-              background-color: $wasdi-green-logo;
+        .link {
+            margin-top: 7px;
+            i {
+                float: left;
+                color: $wasdi-subtitle-color;
             }
-          }
-          h4{
-            display: inline;
-          }
-          i{
-            padding-right: 3px;
-          }
+            a {
+                cursor: pointer;
+
+            }
+
         }
-      }
-      //ul
-      //{
-      //  z-index: 1500;
-      //  li{
-      //    &:hover{
-      //      background-color: $wasdi-green-logo;
-      //    }
-      //  }
-      //  h4{
-      //    display: inline;
-      //  }
-      //  i{
-      //    padding-right: 3px;
-      //  }
-      //}
-      .dropdown-menu{
-        .dropdown-header{
-          cursor:default;
+        //SPAN USER ID
+        .user-span {
+            margin-top: 7px;
+            float: right;
         }
-      }
-      &:hover{
-        cursor:pointer;
-        button
-        {
-          i
-          {
+        //SPAN SUBTITLE
+        .subtitle-span {
+
+            @media only screen and (min-width: 320px) {
+                display: none;
+            }
+
+            @media only screen and (min-width: 961px) {
+                display: inherit;
+                float: left;
+                margin-left: 10%;
+                color: $wasdi-subtitle-color;
+            }
+        }
+
+        ul {
+            float: right;
+            list-style-type: none;
+            li {
+                //color: $wasdi-logged-user-link;
+                float: left;
+            }
+            li a {
+                color: $wasdi-logged-user-link;
+                text-align: center;
+                padding: 14px 16px;
+                text-decoration: none;
+            }
+        }
+    }
+
+    //LOGO
+    .brand-logo {
+        content: $wasdi-brand-logo-root; // set 'src' attribute from CSS
+        width: $wasdi-brand-logo-root-size;
+        //margin-top: -20px;
+        margin-top: -5px;
+        margin-left: 35px;
+        height: auto;
+        min-height: 50px;
+        min-width: 50px;
+
+    }
+
+    //NAVBAR OVERIDE
+    .my-nav-bar {
+        height: 60px;
+
+        .user-container {
+            margin-top: 10px;
+            color: white;
+            button {
+                border: none;
+                background-color: transparent;
+            }
+            .dropdown-menu {
+                z-index: 1500;
+                li {
+                    width: 100%;
+                    &:hover {
+                        color: white;
+                        background-color: $wasdi-green-logo;
+                        a {
+                            color: white;
+                            background-color: $wasdi-green-logo;
+                        }
+                    }
+                    h4 {
+                        display: inline;
+                    }
+                    i {
+                        padding-right: 3px;
+                    }
+                }
+            }
+            //ul
+            //{
+            //  z-index: 1500;
+            //  li{
+            //    &:hover{
+            //      background-color: $wasdi-green-logo;
+            //    }
+            //  }
+            //  h4{
+            //    display: inline;
+            //  }
+            //  i{
+            //    padding-right: 3px;
+            //  }
+            //}
+            .dropdown-menu {
+                .dropdown-header {
+                    cursor: default;
+                }
+            }
+            &:hover {
+                cursor: pointer;
+                button {
+                    i {
+                        background-color: $wasdi-nav-bar-color-active;
+                        color: white;
+                    }
+                }
+
+            }
+        }
+
+        .navbar-default {
+            background-color: $wasdi-nav-bar-color-background;
+
+        }
+        .navbar-default .navbar-nav > li > a {
+            color: white;
+
+        }
+        .navbar-default .navbar-nav > .active {
+            color: white;
+            background: $wasdi-nav-bar-color-active;
+        }
+        //ACTIVE
+        .navbar-default .navbar-nav > .active > a,
+        .navbar-default .navbar-nav > .active > a:hover,
+        .navbar-default .navbar-nav > .active > a:focus {
+            color: white;
+            background: $wasdi-nav-bar-color-active;
+        }
+        .navbar-default .navbar-toggle .icon-bar {
+            background-color: $wasdi-white;
+        }
+        // OVER
+        .navbar-default .navbar-nav > li > a:hover, .navbar-default .navbar-nav > li > a:focus {
             background-color: $wasdi-nav-bar-color-active;
-            color:white;
-          }
+            color: $wasdi-white;
+        }
+        //Change input class for name
+        .name-workspace {
+            margin-top: 5px;
+            .form-group {
+                margin-bottom: 5px;
+
+                input {
+                    border: inherit;
+                    outline: 0;
+                    width: 400px;
+                    background: transparent;
+                    //responsive
+                    @media screen and (max-width: $screen-lg) {
+                        width: 200px;
+                    }
+                    @media screen and (max-width: 1024px) {
+                        width: 100px;
+                    }
+                }
+
+                .input-mydisable {
+
+                    //color: white;
+                    //color:rgba(255,255,255, 0.5);
+                    //border-bottom: 2px solid  rgba(255,255,255, 0.5);//$wasdi-green-logo;
+
+                    //background: url("../assets/icons/pencil_24x24.png")no-repeat scroll;
+                    //background-position: 370px 0;
+                    //background: url("../assets/icons/Satellite.svg")no-repeat scroll 7px 7px;
+                    //background-repeat: no-repeat;
+                }
+                .input-myenable {
+                    //color:$wasdi-green-logo;
+                    //border-bottom: 2px solid  $wasdi-green-logo;
+                }
+
+                .btn-edit {
+                    border: hidden;
+                    background-color: transparent;
+
+                    .btn-edit-mode-on {
+                        color: $wasdi-green-logo;
+                    }
+                    .btn-edit-mode-off {
+                        color: white;
+                    }
+                }
+                //.btn-edit:hover{
+                //  //border: hidden;
+                //  //color: white;
+                //  //background-color: $wasdi-green-logo;
+                //  color: $wasdi-green-logo;
+                //}
+
+            }
+        }
+    }
+
+    /*STATUS BAR */
+    .status-bar {
+        //height: 4.5%;
+        height: 45px;
+        //min-height: 4.5%;
+        width: 100%;
+        position: fixed;
+        z-index: 1000;
+        bottom: 0;
+        left: 0;
+        background-color: $wasdi-nav-bar-color-background;
+        overflow-x: hidden;
+        overflow-y: hidden;
+        transition: 0.5s;
+        color: $wasdi-white;
+        padding: 2px;
+
+        .row {
+            margin-right: 5px;
+        }
+        .number-processes {
+            margin-top: 10px;
+            //position: absolute;
+            right: 0;
+        }
+        .processes-list {
+            //margin-top:10px;
+            //overflow-y: auto;
+            //height: 400px;
+            //min-height: 40px;
+
+            .table-striped > tbody > tr:nth-of-type(odd) {
+                background-color: $wasdi-blue-logo;
+            }
+
+            //If the name it's too long cut it!
+            .table td.text {
+                max-width: 350px;
+                span {
+                    white-space: nowrap;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    display: inline-block;
+                    max-width: 100%;
+                }
+            }
+            .single-process {
+                display: inline-grid;
+            }
+            .progress-single-process {
+                //  float: right;
+                //  width:10%;
+                //  background-color:$wasdi-white ;
+                //  .progress-bar{}
+                width: 15%;
+                padding: 0 0 0 0;
+                background: $wasdi-white;
+
+            }
+        }
+        .my-button {
+            color: white;
+            color: white;
+            padding: 0;
+            margin: 0;
+            //padding: 3px;
+            line-height: 0;
+
+        }
+        .my-button:hover {
+            color: $wasdi-button-over-color;
+            background-color: transparent;
         }
 
-      }
-    }
-
-    .navbar-default {
-      background-color: $wasdi-nav-bar-color-background;
-
-    }
-    .navbar-default .navbar-nav > li > a {
-      color: white;
-
-    }
-    .navbar-default .navbar-nav > .active{
-      color: white;
-      background: $wasdi-nav-bar-color-active;
-    }
-    //ACTIVE
-    .navbar-default .navbar-nav > .active > a,
-    .navbar-default .navbar-nav > .active > a:hover,
-    .navbar-default .navbar-nav > .active > a:focus {
-      color: white;
-      background: $wasdi-nav-bar-color-active;
-    }
-    .navbar-default .navbar-toggle .icon-bar {
-      background-color: $wasdi-white;
-    }
-    // OVER
-    .navbar-default .navbar-nav > li > a:hover, .navbar-default .navbar-nav > li > a:focus {
-      background-color: $wasdi-nav-bar-color-active;
-      color: $wasdi-white;
-    }
-    //Change input class for name
-    .name-workspace
-    {
-      margin-top: 5px;
-      .form-group{
-        margin-bottom: 5px;
-
-        input{
-          border: inherit;
-          outline: 0;
-          width: 400px;
-          background: transparent;
-          //responsive
-          @media screen and (max-width: $screen-lg) {         width:200px;        }
-          @media screen and (max-width: 1024px) {         width:100px;        }
+        .openbtn {
+            margin-top: 10px;
+            //position: absolute;
+            //top: 0;
+            //right: 20px;
+            //position: absolute;
+            //left:50%;
+            ////bottom:70%;
+            //top:-10px;
+            //background-color: black;
+            //z-index: 5000;
+            //font-size: 20px;
+            //margin-left: 50px;
+            //color: $wasdi-white;
         }
-
-
-        .input-mydisable{
-
-          //color: white;
-          //color:rgba(255,255,255, 0.5);
-          //border-bottom: 2px solid  rgba(255,255,255, 0.5);//$wasdi-green-logo;
-
-          //background: url("../assets/icons/pencil_24x24.png")no-repeat scroll;
-          //background-position: 370px 0;
-          //background: url("../assets/icons/Satellite.svg")no-repeat scroll 7px 7px;
-          //background-repeat: no-repeat;
-        }
-        .input-myenable
-        {
-          //color:$wasdi-green-logo;
-          //border-bottom: 2px solid  $wasdi-green-logo;
-        }
-
-
-
-
-        .btn-edit{
-          border: hidden;
-          background-color: transparent;
-
-          .btn-edit-mode-on{
-            color: $wasdi-green-logo;
-          }
-          .btn-edit-mode-off{
-            color:white;
-          }
-        }
-        //.btn-edit:hover{
-        //  //border: hidden;
-        //  //color: white;
-        //  //background-color: $wasdi-green-logo;
-        //  color: $wasdi-green-logo;
-        //}
-
-      }
     }
-  }
-
-  /*STATUS BAR */
-  .status-bar
-  {
-    //height: 4.5%;
-    height:45px;
-    //min-height: 4.5%;
-    width: 100%;
-    position: fixed;
-    z-index: 1000;
-    bottom: 0;
-    left: 0;
-    background-color: $wasdi-nav-bar-color-background;
-    overflow-x: hidden;
-    overflow-y: hidden;
-    transition: 0.5s;
-    color: $wasdi-white;
-    padding: 2px;
-
-    .row{
-      margin-right: 5px;
-    }
-    .number-processes
-    {
-      margin-top: 10px;
-      //position: absolute;
-      right:0;
-    }
-    .processes-list
-    {
-      //margin-top:10px;
-      //overflow-y: auto;
-      //height: 400px;
-      //min-height: 40px;
-
-      .table-striped>tbody>tr:nth-of-type(odd)
-      {
-        background-color: $wasdi-blue-logo;
-      }
-
-      //If the name it's too long cut it!
-      .table td.text {
-        max-width: 350px;
-        span {
-          white-space: nowrap;
-          overflow: hidden;
-          text-overflow: ellipsis;
-          display: inline-block;
-          max-width: 100%;
-        }
-      }
-      .single-process
-      {
-        display: inline-grid;
-      }
-      .progress-single-process
-      {
-      //  float: right;
-      //  width:10%;
-      //  background-color:$wasdi-white ;
-      //  .progress-bar{}
-        width: 15%;
-        padding: 0 0 0 0;
-        background: $wasdi-white;
-
-      }
-    }
-    .my-button
-    {
-      color:white;
-      color:white;
-      padding: 0;
-      margin: 0;
-      //padding: 3px;
-      line-height: 0;
-
-
-    }
-    .my-button:hover{
-      color: $wasdi-button-over-color;
-      background-color:transparent;
-    }
-
-    .openbtn {
-      margin-top: 10px;
-      //position: absolute;
-      //top: 0;
-      //right: 20px;
-      //position: absolute;
-      //left:50%;
-      ////bottom:70%;
-      //top:-10px;
-      //background-color: black;
-      //z-index: 5000;
-      //font-size: 20px;
-      //margin-left: 50px;
-      //color: $wasdi-white;
-    }
-  }
 
 }
 
+.rabbit-connection-status-wrapper {
+    padding: 0px !important;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
 
-.table > tbody > tr > td{
+    .icon{
+        $size-connection-icon: 20px;
+        color: whitesmoke;
+        justify-content: center;
+        border-radius: 50%;
+        background-color: $color-connection-status-connected;
+        width: $size-connection-icon;
+        height: $size-connection-icon;
+        text-align: center;
+        line-height: $size-connection-icon + 2;
+        font-size: 12px
+    }
 
-  vertical-align:middle;
+    &.disconnected{
+        .icon{
+            background-color: $color-connection-status-lost;
+        }
+    }
+}
+
+.table > tbody > tr > td {
+
+    vertical-align: middle;
 }
 
 #tableProcesses.table > tbody > tr > td {
-  padding:10px;
+    padding: 10px;
 
 }
+
 //.panel,
 .loadIcon,
-.loading-files  {
-  width:90%;
-  padding:0 15px;
-  margin-top : -5px;
-  $color_space: $wasdi-blue-logo;
-  $dotsize: 8px;
-  @import "../directives/space_invaders/space_invaders";
-  #invader {
-    margin-top: calc(100% / 3);
-  }
+.loading-files {
+    width: 90%;
+    padding: 0 15px;
+    margin-top: -5px;
+    $color_space: $wasdi-blue-logo;
+    $dotsize: 8px;
+    @import "../directives/space_invaders/space_invaders";
+    #invader {
+        margin-top: calc(100% / 3);
+    }
 }
+
 .table,
 .processes-list {
-  $color_space: $wasdi-green-logo;
-  $dotsize: 4px;
-  @import "../directives/space_invaders/space_invaders";
-  &.ng-hide {
-    //.space {min-height: 100vh;}
-  }
-  #invader {
-    width:calc(100% - 32px);
-  }
+    $color_space: $wasdi-green-logo;
+    $dotsize: 4px;
+    @import "../directives/space_invaders/space_invaders";
+    &.ng-hide {
+        //.space {min-height: 100vh;}
+    }
+    #invader {
+        width: calc(100% - 32px);
+    }
 
 }
+
 //.processes-list #invader {margin-top:20px;}
 //#tableProcesses #invader {margin-top:-20px; }
 
 #tableProcesses.table > tbody > tr > td:first-child {
-  min-width:80px;
+    min-width: 80px;
 }
-
-
 
 //.name-workspace effect + cursor
 
 //.name-workspace {opacity: 1;}
 
 .name-workspace:hover {
-  //opacity:0.9;
-  transform:scale(1.05);
-  input {border-bottom-width:3px;}
+    //opacity:0.9;
+    transform: scale(1.05);
+    input {
+        border-bottom-width: 3px;
+    }
 }
-.name-workspace input ,
+
+.name-workspace input,
 .root-view .my-nav-bar .name-workspace .form-group input {
 
-  border-style:solid;
-  border-bottom-width: 2px;
+    border-style: solid;
+    border-bottom-width: 2px;
 }
+
 .name-workspace .form-group {
-  input.input-mydisable {
-    color:$wasdi-white;
-    border-color: $wasdi-white;
-  }
-  input.input-myenable {
-    color:$wasdi-white;
-    border-color: $wasdi-white;
-  }
+    input.input-mydisable {
+        color: $wasdi-white;
+        border-color: $wasdi-white;
+    }
+    input.input-myenable {
+        color: $wasdi-white;
+        border-color: $wasdi-white;
+    }
 }
-.name-workspace:hover .input-myenable ~ .cursor {  display: none;}
+
+.name-workspace:hover .input-myenable ~ .cursor {
+    display: none;
+}
 
 .name-workspace:hover,
-.name-workspace {  transition: all 0.2s ease;}
+.name-workspace {
+    transition: all 0.2s ease;
+}
 
-.name-workspace .form-group {display:flex;}
-.name-workspace .cursor {display:none;}
-.name-workspace:hover .cursor {display:block;}
+.name-workspace .form-group {
+    display: flex;
+}
 
+.name-workspace .cursor {
+    display: none;
+}
 
+.name-workspace:hover .cursor {
+    display: block;
+}
 
 .cursor {
-  font-size:1em;
-  margin:4px;
-  width:20px;
-  color: transparent;
-  animation: 1s blink step-end infinite;
-  position: relative;
-  //margin-left:-300px;
-  /*   height:30px; */
-  margin-left: -60px;
-  width:15px;;
-  //@media screen and (max-width: $screen-lg) {         margin-left:-100px;        }
-  //@media screen and (max-width: 1024px) {         margin-left:-10px;        }
+    font-size: 1em;
+    margin: 4px;
+    width: 20px;
+    color: transparent;
+    animation: 1s blink step-end infinite;
+    position: relative;
+    //margin-left:-300px;
+    /*   height:30px; */
+    margin-left: -60px;
+    width: 15px;;
+    //@media screen and (max-width: $screen-lg) {         margin-left:-100px;        }
+    //@media screen and (max-width: 1024px) {         margin-left:-10px;        }
 
 }
 
 #UserIcon {
-  background-image: url('../assets/icons/white-user-icon2.png');
-  width: 26px;
+    background-image: url('../assets/icons/white-user-icon2.png');
+    width: 26px;
 }
 
 #UserIcon:hover {
-  background-image: url('../assets/icons/green-user-icon2.png');
+    background-image: url('../assets/icons/green-user-icon2.png');
 }
 
 @keyframes blink {
-  from,
-  to {
-    background-color: rgba(0, 0, 0, .0);
-    background-color: transparent;
-  }
-  50% {
-    background-color: $wasdi-white;
-  }
+    from,
+    to {
+        background-color: rgba(0, 0, 0, .0);
+        background-color: transparent;
+    }
+    50% {
+        background-color: $wasdi-white;
+    }
 }
-
 
 @-webkit-keyframes cursor {
-  from { opacity: 1.0;  }
-  to {    opacity: 0.0;  }
+    from {
+        opacity: 1.0;
+    }
+    to {
+        opacity: 0.0;
+    }
 }
-
 
 @-moz-keyframes cursor {
-  from { opacity: 1.0;  }
-  to {    opacity: 0.0;  }
+    from {
+        opacity: 1.0;
+    }
+    to {
+        opacity: 0.0;
+    }
 }
-
 
 @-ms-keyframes cursor {
-  from { opacity: 1.0;  }
-  to {    opacity: 0.0;  }
+    from {
+        opacity: 1.0;
+    }
+    to {
+        opacity: 0.0;
+    }
 }
-
 
 @-o-keyframes cursor {
-  from { opacity: 1.0;  }
-  to {    opacity: 0.0;  }
+    from {
+        opacity: 1.0;
+    }
+    to {
+        opacity: 0.0;
+    }
 }
 
-
 @keyframes cursor {
-  from { opacity: 1.0;  }
-  to {    opacity: 0.0;  }
+    from {
+        opacity: 1.0;
+    }
+    to {
+        opacity: 0.0;
+    }
 }

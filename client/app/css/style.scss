@@ -5,9 +5,9 @@
 $screen-lg: map-get($grid-breakpoints, "lg");
 
 @import "functions";
+@import "main_theme";
 
 @import "login";
-@import "main_theme";
 @import "root";
 @import "editor";
 @import "workspaces";
@@ -412,6 +412,53 @@ h4 {
     content: $wasdi-info-icon-black-version;
     width: $wasdi-size-icon-context-menu-jstree;
     height: auto;
+}
+.satelite-icon-context-menu-jstree
+{
+  content: $wasdi-satelite-icon-black-version;
+  width: $wasdi-size-icon-context-menu-jstree ;
+  height: auto ;
+}
+
+.touch-icon-menu-jstree
+{
+  content: $wasdi-touch-icon-black-version;
+  width: $wasdi-size-icon-context-menu-jstree ;
+  height: auto ;
+}
+.vector-square-icon-menu-jstree
+{
+  content: $wasdi-vector-square-icon-black-version;
+  width: $wasdi-size-icon-context-menu-jstree ;
+  height: auto ;
+}
+
+.calendar1-square-icon-menu-jstree
+{
+  content: $wasdi-calendar1-icon-black-version;
+  width: $wasdi-size-icon-context-menu-jstree ;
+  height: auto ;
+}
+
+.folder-icon-menu-jstree
+{
+  content: $wasdi-folder-icon-orange-version;
+  width: $wasdi-size-icon-context-menu-jstree ;
+  height: auto ;
+}
+
+.arrow-mix-icon-menu-jstree
+{
+  content: $wasdi-arrow-mix-icon-black-version;
+  width: $wasdi-size-icon-context-menu-jstree ;
+  height: auto ;
+}
+
+.selection-icon-menu-jstree
+{
+  content: $wasdi-selection-icon-black-version;
+  width: $wasdi-size-icon-context-menu-jstree ;
+  height: auto ;
 }
 
 //CONTEXT MENU JS TREE (override)
