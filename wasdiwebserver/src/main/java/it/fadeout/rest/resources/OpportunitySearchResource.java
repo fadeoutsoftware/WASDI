@@ -1,8 +1,5 @@
 package it.fadeout.rest.resources;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -18,8 +15,6 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
 
 import org.nfs.orbits.CoverageTool.Polygon;
 import org.nfs.orbits.CoverageTool.apoint;
@@ -34,8 +29,6 @@ import it.fadeout.Wasdi;
 import it.fadeout.business.InstanceFinder;
 import it.fadeout.viewmodels.CoverageSwathResultViewModel;
 import it.fadeout.viewmodels.OpportunitiesSearchViewModel;
-import it.fadeout.viewmodels.OrbitFilterViewModel;
-import it.fadeout.viewmodels.OrbitSearchViewModel;
 import it.fadeout.viewmodels.SatelliteFilterViewModel;
 import it.fadeout.viewmodels.SatelliteOrbitResultViewModel;
 import it.fadeout.viewmodels.SatelliteResourceViewModel;
@@ -392,6 +385,7 @@ public class OpportunitySearchResource {
 		}
 		return ret;
 	}
+	
 	@GET
 	@Path("/getkmlsearchresults")
 	@Produces({ "application/xml"})//, "application/json", "text/html" 
@@ -413,6 +407,7 @@ public class OpportunitySearchResource {
 		}*/
 		return kml;
 	}
+	
 	@GET
 	@Path("/updatetrack/{satellitesname}")
 	@Produces({ "application/xml", "application/json", "text/html" })
