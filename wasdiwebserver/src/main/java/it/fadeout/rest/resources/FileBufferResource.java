@@ -61,9 +61,10 @@ public class FileBufferResource {
 			String sUserId = oUser.getUserId();
 
 			//Update process list
-			String sProcessId = "";
 			ProcessWorkspace oProcess = null;
 			ProcessWorkspaceRepository oRepository = new ProcessWorkspaceRepository();
+			
+			String sProcessObjId = Utils.GetRandomName();
 			
 			DownloadFileParameter oParameter = new DownloadFileParameter();
 			oParameter.setQueue(sSessionId);
@@ -75,7 +76,14 @@ public class FileBufferResource {
 			oParameter.setDownloadUser(m_oServletConfig.getInitParameter(sProvider+".OSUser"));
 			oParameter.setDownloadPassword(m_oServletConfig.getInitParameter(sProvider+".OSPwd"));
 			oParameter.setProvider(sProvider);
+			//set the process object Id to params
+			oParameter.setProcessObjId(sProcessObjId);
 			
+			String sPath = m_oServletConfig.getInitParameter("SerializationPath");
+			if (! (sPath.endsWith("\\") || sPath.endsWith("/")) ) sPath += "/";
+			sPath += sProcessObjId;
+			SerializationUtils.serializeObjectToXML(sPath, oParameter);
+
 			try
 			{
 				oProcess = new ProcessWorkspace();
@@ -84,25 +92,17 @@ public class FileBufferResource {
 				oProcess.setProductName(sFileUrl);
 				oProcess.setWorkspaceId(sWorkspaceId);
 				oProcess.setUserId(sUserId);
-				oProcess.setProcessObjId(Utils.GetRandomName());
+				oProcess.setProcessObjId(sProcessObjId);
 				oProcess.setStatus(ProcessStatus.CREATED.name());
-				sProcessId = oRepository.InsertProcessWorkspace(oProcess);
-				System.out.println("DownloadResource.Download: process ID: "+sProcessId);
-				//set the process object Id to params
-				oParameter.setProcessObjId(oProcess.getProcessObjId());
+				oRepository.InsertProcessWorkspace(oProcess);
+				Wasdi.DebugLog("FileBufferResource.Download: Process Scheduled for Launcher");
 			}
 			catch(Exception oEx){
 				System.out.println("DownloadResource.Download: Error updating process list " + oEx.getMessage());
 				oEx.printStackTrace();
 				return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
 			}
-			
-			String sPath = m_oServletConfig.getInitParameter("SerializationPath");
-			if (! (sPath.endsWith("\\") || sPath.endsWith("/")) ) sPath += "/";
-			sPath += oProcess.getProcessObjId();
-			//TODO move it before inserting the new process into DB
-			SerializationUtils.serializeObjectToXML(sPath, oParameter);
-			
+						
 		} catch (IOException e) {
 			e.printStackTrace();
 		} catch (Exception e) {
@@ -131,9 +131,22 @@ public class FileBufferResource {
 			if (Utils.isNullOrEmpty(oUser.getUserId())) return Response.status(401).build();
 
 			String sUserId = oUser.getUserId();
+			
+			String sProcessObjId = Utils.GetRandomName();
+			
+			PublishParameters oParameter = new PublishParameters();
+			oParameter.setQueue(sSessionId);
+			oParameter.setFileName(sFileUrl);
+			oParameter.setWorkspace(sWorkspaceId);
+			oParameter.setUserId(sUserId);
+			oParameter.setExchange(sWorkspaceId);
+			oParameter.setProcessObjId(sProcessObjId);
+
+			String sPath = m_oServletConfig.getInitParameter("SerializationPath") + sProcessObjId;
+			SerializationUtils.serializeObjectToXML(sPath, oParameter);
+			
 
 			//Update process list
-			String sProcessId = "";
 			ProcessWorkspaceRepository oRepository = new ProcessWorkspaceRepository();
 			ProcessWorkspace oProcess = null;
 			try
@@ -145,29 +158,16 @@ public class FileBufferResource {
 				oProcess.setProductName(sFileUrl);
 				oProcess.setWorkspaceId(sWorkspaceId);
 				oProcess.setUserId(sUserId);
-				oProcess.setProcessObjId(Utils.GetRandomName());
+				oProcess.setProcessObjId(sProcessObjId);
 				oProcess.setStatus(ProcessStatus.CREATED.name());
-				sProcessId = oRepository.InsertProcessWorkspace(oProcess);
-				System.out.println("DownloadResource.Publish: process ID: "+sProcessId);
+				oRepository.InsertProcessWorkspace(oProcess);
+				Wasdi.DebugLog("FileBufferResource.Publish: Process Scheduled for Launcher");
 			}
 			catch(Exception oEx){
 				System.out.println("DownloadResource.Publish: Error updating process list " + oEx.getMessage());
 				oEx.printStackTrace();
 				return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
 			}
-
-			String sPath = m_oServletConfig.getInitParameter("SerializationPath") + oProcess.getProcessObjId();
-
-			PublishParameters oParameter = new PublishParameters();
-			oParameter.setQueue(sSessionId);
-			oParameter.setFileName(sFileUrl);
-			oParameter.setWorkspace(sWorkspaceId);
-			oParameter.setUserId(sUserId);
-			oParameter.setExchange(sWorkspaceId);
-			oParameter.setProcessObjId(oProcess.getProcessObjId());
-
-			//TODO move it before inserting the new process into DB
-			SerializationUtils.serializeObjectToXML(sPath, oParameter);
 
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -221,6 +221,24 @@ public class FileBufferResource {
 				System.out.println("FileBufferResource.PublishBand: return published band" );
 				return oReturnValue;
 			}
+			
+			
+			String sProcessObjId = Utils.GetRandomName();
+
+			String sUserId = oUser.getUserId();
+
+			PublishBandParameter oParameter = new PublishBandParameter();
+			oParameter.setQueue(sSessionId);
+			oParameter.setFileName(sFileUrl);
+			oParameter.setWorkspace(sWorkspaceId);
+			oParameter.setUserId(sUserId);
+			oParameter.setBandName(sBand);
+			oParameter.setExchange(sWorkspaceId);
+			oParameter.setProcessObjId(sProcessObjId);
+
+			String sPath = m_oServletConfig.getInitParameter("SerializationPath") + sProcessObjId;
+			
+			SerializationUtils.serializeObjectToXML(sPath, oParameter);
 
 			//Update process list
 			ProcessWorkspaceRepository oRepository = new ProcessWorkspaceRepository();
@@ -233,32 +251,16 @@ public class FileBufferResource {
 				oProcess.setProductName(sFileUrl);
 				oProcess.setWorkspaceId(sWorkspaceId);
 				oProcess.setUserId(oUser.getUserId());
-				oProcess.setProcessObjId(Utils.GetRandomName());
+				oProcess.setProcessObjId(sProcessObjId);
 				oProcess.setStatus(ProcessStatus.CREATED.name());
-				String sProcessId = oRepository.InsertProcessWorkspace(oProcess);
-				System.out.println("DownloadResource.PublishBand: process ID: "+sProcessId);
+				oRepository.InsertProcessWorkspace(oProcess);
+				Wasdi.DebugLog("FileBufferResource.PublishBand: Process Scheduled for Launcher");
 			}
 			catch(Exception oEx){
 				System.out.println("DownloadResource.PublishBand: Error updating process list " + oEx.getMessage());
 				oEx.printStackTrace();
 				return oReturnValue;
 			}
-
-			String sUserId = oUser.getUserId();
-
-			String sPath = m_oServletConfig.getInitParameter("SerializationPath") + oProcess.getProcessObjId();
-
-			PublishBandParameter oParameter = new PublishBandParameter();
-			oParameter.setQueue(sSessionId);
-			oParameter.setFileName(sFileUrl);
-			oParameter.setWorkspace(sWorkspaceId);
-			oParameter.setUserId(sUserId);
-			oParameter.setBandName(sBand);
-			oParameter.setExchange(sWorkspaceId);
-			oParameter.setProcessObjId(oProcess.getProcessObjId());
-
-			//TODO move it before inserting the new process into DB
-			SerializationUtils.serializeObjectToXML(sPath, oParameter);
 
 		}catch (IOException e) {
 			e.printStackTrace();
