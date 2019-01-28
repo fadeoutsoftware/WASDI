@@ -65,17 +65,17 @@ var ListFloodAreaDetectionController = (function() {
             .success(function(data,status){
                 if( (utilsIsObjectNullOrUndefined(data) === false) && (status === 200))
                 {
-                    var oDialog =  utilsVexDialogAlertBottomRightCorner("PROCESS DONE<br>FLOODED AREA MAP ADDED TO THE WORKSPACE.");
+                    var oDialog =  utilsVexDialogAlertBottomRightCorner("eDRIF FLOODED AREA DETECTION<br>THE PROCESS HAS BEEN SCHEDULED");
                     utilsVexCloseDialogAfter(4000, oDialog);
                 }
                 else
                 {
-                    utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR: LIST FLOOD FAILED.");
+                    utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR: LIST FLOOD FAILED");
                 }
 
             })
             .error(function(){
-                utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR: LIST FLOOD FAILED.");
+                utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR: LIST FLOOD FAILED");
             });
     };
 
