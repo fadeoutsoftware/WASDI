@@ -25,12 +25,12 @@ service('ConstantsService', [function () {
         // this.WASDIGEOSERVERWPS = "http://wasdi.vgt.vito.be/geoserver/wps";
 
 
-
-        // SERCO
-        this.URL = 'http://217.182.93.57//wasdiwebserver/';
-        this.WEBSTOMPURL = 'http://217.182.93.57//rabbit/stomp/bad';
-        this.WMSURL = "http://217.182.93.57//geoserver/ows?";
-        this.WASDIGEOSERVERWPS = "http://217.182.93.57//geoserver/wps";
+        //
+        // // SERCO
+        // this.URL = 'http://217.182.93.57//wasdiwebserver/';
+        // this.WEBSTOMPURL = 'http://217.182.93.57//rabbit/stomp/bad';
+        // this.WMSURL = "http://217.182.93.57//geoserver/ows?";
+        // this.WASDIGEOSERVERWPS = "http://217.182.93.57//geoserver/wps";
 
 
     // PAOLO
@@ -44,9 +44,9 @@ service('ConstantsService', [function () {
     // this.WMSURL = "http://10.0.0.15:8080/geoserver/ows?";//wasdi/wms? OLD VERSION
 
     // LOCALHOST
-    // this.URL= 'http://127.0.0.1:8080/wasdiwebserver/';//
-    // this.WEBSTOMPURL = 'http://178.22.66.96/rabbit/stomp';
-    // this.WMSURL = "http://127.0.0.1:8080/geoserver/ows?";//wasdi/wms? OLD VERSION
+    this.URL= 'http://127.0.0.1:8080/wasdiwebserver/';//
+    this.WEBSTOMPURL = 'http://178.22.66.96/rabbit/stomp';
+    this.WMSURL = "http://127.0.0.1:8080/geoserver/ows?";//wasdi/wms? OLD VERSION
     
 
     this.WPSPROXY =  'https://cors-anywhere.herokuapp.com/';
