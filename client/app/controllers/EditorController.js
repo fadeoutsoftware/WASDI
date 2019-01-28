@@ -133,9 +133,21 @@ var EditorController = (function () {
         this.getProductListByWorkspace();
 
         // Subscribe Rabbit
-        if (this.m_oRabbitStompService.isSubscrbed() == false && !utilsIsObjectNullOrUndefined(this.m_oActiveWorkspace)) {
-            this.m_oRabbitStompService.subscribe(this.m_oActiveWorkspace.workspaceId);
+        this._subscribeToRabbit = function()
+        {
+            if (this.m_oRabbitStompService.isSubscrbed() == false && !utilsIsObjectNullOrUndefined(this.m_oActiveWorkspace))
+            {
+                var _this = this;
+                this.m_oRabbitStompService.waitServiceIsReady()
+                    .then(function(){
+                        console.log('EditorController: Web Stomp is ready --> subscribe');
+                        _this.m_oRabbitStompService.subscribe(_this.m_oActiveWorkspace.workspaceId);
+                    })
+
+            }
         }
+
+        this._subscribeToRabbit();
 
         //Set default value tree
         //IMPORTANT NOTE: there's a 'WATCH' for this.m_oTree in TREE DIRECTIVE
@@ -806,7 +818,7 @@ var EditorController = (function () {
             if (utilsIsStrNullOrEmpty(sErrorDescription) === false) sErrorDescription = "<br>"+sErrorDescription;
 
             var oDialog = utilsVexDialogAlertTop('GURU MEDITATION<br>THERE WAS AN ERROR IN THE ' + sOperation + ' PROCESS'+ sErrorDescription);
-            utilsVexCloseDialogAfterFewSeconds(10000, oDialog);
+            utilsVexCloseDialogAfter(10000, oDialog);
             this.m_oProcessesLaunchedService.loadProcessesFromServer(this.m_oActiveWorkspace.workspaceId);
 
             if (oMessage.messageCode =="PUBLISHBAND") {
@@ -856,7 +868,7 @@ var EditorController = (function () {
 
         // Alert the user
         var oDialog = utilsVexDialogAlertBottomRightCorner('PRODUCT ADDED TO THE WS<br>READY');
-        utilsVexCloseDialogAfterFewSeconds(4000, oDialog);
+        utilsVexCloseDialogAfter(4000, oDialog);
 
         // Update product list
         this.getProductListByWorkspace();
@@ -1260,9 +1272,9 @@ var EditorController = (function () {
                     oController.m_oProcessesLaunchedService.loadProcessesFromServer(oController.m_oActiveWorkspace.workspaceId);
 
                     if (oController.m_oRabbitStompService.isSubscrbed() == false) {
-                        oController.m_oRabbitStompService.subscribe(oController.m_oActiveWorkspace.workspaceId);
+                        //oController.m_oRabbitStompService.subscribe(oController.m_oActiveWorkspace.workspaceId);
+                        oController._subscribeToRabbit();
                     }
-
                 }
             }
         }).error(function (data, status) {
@@ -1327,7 +1339,7 @@ var EditorController = (function () {
 
                 if (!bAlreadyPublished) {
                     var oDialog = utilsVexDialogAlertBottomRightCorner('PUBLISHING BAND ' + oBand.name);
-                    utilsVexCloseDialogAfterFewSeconds(4000, oDialog);
+                    utilsVexCloseDialogAfter(4000, oDialog);
                 }
 
                 if (!utilsIsObjectNullOrUndefined(data) && data.messageResult != "KO" && utilsIsObjectNullOrUndefined(data.messageResult)) {
@@ -3954,14 +3966,18 @@ var EditorController = (function () {
         }
 
         this.m_oCatalogService.downloadByName(sFileName)
-            .success(function(data,status){
-                if(utilsIsObjectNullOrUndefined(data) == false)
-                {
-                    var blob = new Blob([data], {type: "application/octet-stream"});
-                    saveAs(blob, sFileName);
-                }
-            })
-            .error(function(data,status){
+        //     .success(function(data,status){
+        //         if(utilsIsObjectNullOrUndefined(data) == false)
+        //         {
+        //             var blob = new Blob([data], {type: "application/octet-stream"});
+        //             saveAs(blob, sFileName);
+        //         }
+        //     })
+        //     .error(function(data,status){
+        //         utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR DOWNLOADING FILE");
+        //
+        //     });
+            .catch(function(data,status){
                 utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR DOWNLOADING FILE");
 
             });

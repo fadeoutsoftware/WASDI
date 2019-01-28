@@ -15,8 +15,8 @@ import com.vividsolutions.jts.geom.MultiPolygon;
 import com.vividsolutions.jts.geom.Polygon;
 
 import wasdi.ConfigReader;
-import wasdi.filebuffer.DownloadFile;
-import wasdi.filebuffer.DownloadSupplier;
+import wasdi.filebuffer.ProviderAdapter;
+import wasdi.filebuffer.ProviderAdapterSupplier;
 import wasdi.shared.opensearch.QueryExecutor;
 import wasdi.shared.viewmodels.QueryResultViewModel;
 
@@ -97,7 +97,7 @@ public class DownloadManager {
 		QueryExecutor executor = QueryExecutor.newInstance(providerName, providerUser, providerPassword, "0", queryLimit, querySortedBy, queryOrder, sDownloadProtocol);
 		//replaced by the next one
 		//DownloadFile oDownloadFile = DownloadFile.getDownloadFile("SENTINEL");
-		DownloadFile oDownloadFile = new DownloadSupplier().supplyDownloader("SENTINEL");
+		ProviderAdapter oProviderAdapter = new ProviderAdapterSupplier().supplyProviderAdapter("SENTINEL");
 		
 		System.out.println("searching products between " + from + " and " + to + " for " + footprints.size() + " regions ");
 		
@@ -117,8 +117,10 @@ public class DownloadManager {
 //					if (result.getTitle().contains("S1B")) continue;
 					
 					System.out.println("\tdownloading " + result.getSummary() + " --> " + result.getLink());
-					
-					oDownloadFile.ExecuteDownloadFile(result.getLink(), providerUser, providerPassword, destinationDir.getAbsolutePath(), null);
+					//TODO implement subscriber interface
+					//TODO subscribe
+					oProviderAdapter.ExecuteDownloadFile(result.getLink(), providerUser, providerPassword, destinationDir.getAbsolutePath(), null);
+					//TODO unsubscribe
 					
 					System.out.println("\t\tdone");
 				}					

@@ -57,7 +57,7 @@ var EditUserController = (function() {
                     else
                     {
                         var oVexWindow = utilsVexDialogAlertBottomRightCorner("CHANGED PASSWORD");
-                        utilsVexCloseDialogAfterFewSeconds(3000,oVexWindow);
+                        utilsVexCloseDialogAfter(3000,oVexWindow);
 
                     }
 
@@ -96,7 +96,7 @@ var EditUserController = (function() {
                     else
                     {
                         var oVexWindow = utilsVexDialogAlertBottomRightCorner("CHANGED USER INFO");
-                        utilsVexCloseDialogAfterFewSeconds(3000,oVexWindow);
+                        utilsVexCloseDialogAfter(3000,oVexWindow);
                         oController.m_oUser = data;
                         oController.m_oConstantsService.setUser(data);//save in coockie
                     }

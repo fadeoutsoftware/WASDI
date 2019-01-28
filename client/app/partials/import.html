@@ -19,7 +19,8 @@
 
             <div class="search-button" ng-click="m_oController.searchListAllSelectedProviders()" id="search-button-list"
                  ng-class="{'search-button-disabled': m_oController.thereIsAtLeastOneProvider() === false || (m_oController.m_bIsVisibleListOfLayers || m_oController.m_bisVisibleLocalStorageInputs),
-                            'search-button': m_oController.thereIsAtLeastOneProvider() === true }" ng-show="m_oController.m_sTypeOfFilterSelected === 'Time series'">
+                            'search-button': m_oController.thereIsAtLeastOneProvider() === true }"
+                 ng-show="m_oController.m_sTypeOfFilterSelected === 'Time series'">
                 <!--<i class="fa fa-search fa-lg" aria-hidden="true"></i>-->
                 {{"IMPORT_SEARCHLIST_BUTTON"|translate}} <i class="fa fa-search" aria-hidden="true"></i>
             </div>

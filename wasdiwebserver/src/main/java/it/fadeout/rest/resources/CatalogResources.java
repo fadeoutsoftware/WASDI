@@ -1,6 +1,11 @@
 package it.fadeout.rest.resources;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -119,6 +124,7 @@ public class CatalogResources {
 		}
 
 		File oFile = new File(entry.getFilePath());
+		//File oFile = new File("C:\\temp\\wasdi\\test_file.txt");
 		
 		ResponseBuilder oResponseBuilder = null;
 		if (!oFile.canRead()) {
@@ -135,12 +141,77 @@ public class CatalogResources {
 		return oResponseBuilder.build();
 	}
 	
+	
+	/**
+	 * Get the entry file to download
+	 * @param sFileName
+	 * @return A File object if the file can be download, NULL if the file does not exist or is undreadable
+	 */
+	private File getEntryFile(String sFileName)
+	{
+		DownloadedFilesRepository oRepo = new DownloadedFilesRepository();
+		DownloadedFile oDownloadedFile = oRepo.GetDownloadedFile(sFileName);
+		
+		if (oDownloadedFile == null) 
+		{
+			Wasdi.DebugLog("CatalogResources.getEntryFile: file " + sFileName + " not found");
+			return null;
+		}
+
+		File oFile = new File(oDownloadedFile.getFilePath());
+		//File oFile = new File("C:\\temp\\wasdi\\S1A_IW_GRDH_1SDV_20180605T051925_20180605T051950_022217_026754_8ADD.zip");
+		
+		if( oFile.canRead() == true)
+		{
+			return oFile;
+		}
+		else {
+			return null; 
+		}
+	}
+	
+	
 	@GET
 	@Path("downloadbyname")
 	@Produces(MediaType.APPLICATION_OCTET_STREAM)
-	public Response DownloadEntryByName(@HeaderParam("x-session-token") String sSessionId, @QueryParam("filename") String sFileName) {
-		
+	//public Response DownloadEntryByName(@HeaderParam("x-session-token") String sSessionId, @QueryParam("filename") String sFileName)
+	public Response DownloadEntryByName(@HeaderParam("x-session-token") String sSessionId, @QueryParam("token") String sTokenSessionId, @QueryParam("filename") String sFileName)
+	{			
 		Wasdi.DebugLog("CatalogResources.DownloadEntryByName");
+		
+		if( Utils.isNullOrEmpty(sSessionId) == false) {
+			sTokenSessionId = sSessionId;
+		}
+		
+		User oUser = Wasdi.GetUserFromSession(sTokenSessionId);
+		
+		if (oUser == null) {
+			Wasdi.DebugLog("CatalogResources.DownloadEntryByName: user not authorized");
+			return Response.status(Status.UNAUTHORIZED).build();
+		}
+		
+		ResponseBuilder oResponseBuilder = null;
+		File oFile = this.getEntryFile(sFileName);
+		if(oFile == null) {
+			Wasdi.DebugLog("CatalogResources.DownloadEntryByName: file not readable");
+			oResponseBuilder = Response.serverError();	
+		}
+		else {
+			Wasdi.DebugLog("CatalogResources.DownloadEntryByName: file ok return content");
+			oResponseBuilder = Response.ok(oFile);
+			oResponseBuilder.header("Content-Disposition", "attachment; filename="+ oFile.getName());
+		}
+		
+		Wasdi.DebugLog("CatalogResources.DownloadEntryByName: done, return");
+		return oResponseBuilder.build();
+	}
+	
+	@GET
+	@Path("checkdownloadavaialibitybyname")
+	@Produces({"application/xml", "application/json", "text/xml"})
+	public Response checkDownloadEntryAvailabilityByName(@QueryParam("token") String sSessionId, @QueryParam("filename") String sFileName)
+	{			
+		Wasdi.DebugLog("CatalogResources.CheckDownloadEntryAvailabilityByName");
 		
 		User oUser = Wasdi.GetUserFromSession(sSessionId);
 		
@@ -149,30 +220,17 @@ public class CatalogResources {
 			return Response.status(Status.UNAUTHORIZED).build();
 		}
 		
-		DownloadedFilesRepository oRepo = new DownloadedFilesRepository();
-		DownloadedFile oDownloadedFile = oRepo.GetDownloadedFile(sFileName);
-		
-		if (oDownloadedFile == null) {
-			Wasdi.DebugLog("CatalogResources.DownloadEntryByName: file " + sFileName + " not found");
-			return Response.serverError().build();			
-		}
-
-		File oFile = new File(oDownloadedFile.getFilePath());
-		
-		ResponseBuilder oResponseBuilder = null;
-		if (!oFile.canRead()) {
-			Wasdi.DebugLog("CatalogResources.DownloadEntryByName: file not readable");
-			oResponseBuilder = Response.serverError();
-		} 
-		else {
-			Wasdi.DebugLog("CatalogResources.DownloadEntryByName: file ok return content");
-			oResponseBuilder = Response.ok(oFile);
-			oResponseBuilder.header("Content-Disposition", "attachment; filename="+ oDownloadedFile.getFileName());
+		File oFile = this.getEntryFile(sFileName);
+		if(oFile == null) {
+			return Response.serverError().build();	
 		}
 		
-		Wasdi.DebugLog("CatalogResources.DownloadEntryByName: done, return");
-		return oResponseBuilder.build();
+		PrimitiveResult oResult = new PrimitiveResult();
+		oResult.setBoolValue(oFile != null);
+		return Response.ok(oResult).build();		
 	}
+	
+	
 	
 	
 	private ArrayList<DownloadedFile> searchEntries(Date from, Date to, String freeText, String category, String userId) {

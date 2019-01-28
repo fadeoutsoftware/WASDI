@@ -116,8 +116,13 @@ wasdiApp.config(['$stateProvider', '$urlRouterProvider', function($stateProvider
         url: '',
         abstract: true,
         templateUrl: 'partials/RootView.html',
-        controller : 'RootController'
-        //resolve: { authenticated: checkAuthentication }
+        controller : 'RootController',
+        // resolve: { authenticated: function () {
+        //         //decheckAuthentication
+        //         debugger;
+        //
+        //         return AuthService.checkSession();
+        //     } }
     });
 
     //WORKSPACES
@@ -208,3 +213,25 @@ wasdiApp.controller("OperaWappController", OperaWappController);
 wasdiApp.controller("EditUserController", EditUserController);
 wasdiApp.controller("FTPController", FTPController);
 wasdiApp.controller("ListFloodAreaDetectionController", ListFloodAreaDetectionController);
+
+
+wasdiApp.run(["$rootScope", "$state", "AuthService", function($rootScope, $state, AuthService){
+
+    $rootScope.$on('$stateChangeStart', function(event, toState, toParams, fromState, fromParams, options){
+        // if(toState.name.indexOf("root") >= 0)
+        // {
+        //     AuthService.checkSession()
+        //         .then(function(response){
+        //             debugger;
+        //         })
+        //     event.preventDefault();
+        // }
+
+    })
+
+    // $rootScope.$on('$stateChangeSuccess', function(event, toState, toParams, fromState, fromParams) {
+    //     // if (!Authorization.authorized && _.has(toState, 'data.authorization') && _.has(toState, 'data.redirectTo')) {
+    //     //     $state.go(toState.data.redirectTo);
+    //     // }
+    // });
+}])

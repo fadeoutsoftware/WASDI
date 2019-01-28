@@ -21,7 +21,46 @@ var RootController = (function() {
         this.m_oModalService = oModalService;
         this.m_oRabbitStompService = oRabbitStompService;
         this.m_bIsEditModelWorkspaceNameActive = false;
+        this.m_isRabbitConnected = true;
         var oController = this;
+
+
+
+        this.updateRabbitConnectionState = function(forceNotification)
+        {
+            if( forceNotification == null || forceNotification === undefined){
+                forceNotification = false;
+            }
+            var connectionState = oRabbitStompService.getConnectionState();
+            if( connectionState === 1) {
+                oController.m_isRabbitConnected = true;
+            }
+            else if( connectionState === 2) {
+                oController.m_isRabbitConnected = false;
+                if(oRabbitStompService.m_oRabbitReconnectAttemptCount === 0 || forceNotification === true)
+                {
+                    this.signalRabbitConnectionLost();
+                }
+            }
+        }
+
+
+        this.signalRabbitConnectionLost = function()
+        {
+            var dialog = utilsVexDialogAlertBottomRightCorner("Async server connection lost");
+            utilsVexCloseDialogAfter(5000, dialog);
+        }
+
+
+
+        // Subscribe to 'rabbit service connection changes'
+        var _this = this;
+        $scope.$on('rabbitConnectionStateChanged', function(event, args) {
+            _this.updateRabbitConnectionState();
+        });
+        // then immediatly check rabbit connection state
+        this.updateRabbitConnectionState(true);
+
 
         /**
          * Check user session
@@ -200,9 +239,25 @@ var RootController = (function() {
         };
 
         var mytimeout = $timeout($scope.onTimeout,1000);
+
     }
 
     /*********************************** METHODS **************************************/
+
+
+    RootController.prototype.openLogoutModal = function()
+    {
+        $('#logoutModal').modal('show');
+    }
+    RootController.prototype.closeLogoutModal = function()
+    {
+        $('#logoutModal').modal('hide');
+    }
+
+    RootController.prototype.isRabbitConnected = function()
+    {
+        return this.m_isRabbitConnected;
+    }
 
     RootController.prototype.onClickProcess = function()
     {
@@ -212,22 +267,35 @@ var RootController = (function() {
 
     RootController.prototype.onClickLogOut = function()
     {
-        var oController=this;
+        var _this = this;
 
-        this.m_oAuthService.logout().success(function (data, status) {
-            if(utilsIsObjectNullOrUndefined(data) === true || data.BoolValue === false)
-            {
-                utilsVexDialogAlertTop("SERVER ERROR ON LOGOUT");
-                console.log("SERVER ERROR ON LOGOUT");
-            }
-            oController.m_oConstantsService.logOut();
-            oController.m_oState.go("home");
+        //this.openLogoutModal();
+        this.m_oAuthService.logout()
+            .success(function (data, status) {
+                if(utilsIsObjectNullOrUndefined(data) === true || data.BoolValue === false)
+                {
+                    utilsVexDialogAlertTop("SERVER ERROR ON LOGOUT");
+                    console.log("SERVER ERROR ON LOGOUT");
+                }
 
-        }).error(function (data,status) {
-            utilsVexDialogAlertTop("ERROR IN LOGOUT");
-            oController.m_oConstantsService.logOut();
-            oController.m_oState.go("home");
-        });
+                try
+                {
+                    _this.m_oConstantsService.setActiveWorkspace(null);
+                    _this.m_oConstantsService.logOut();
+                }catch(e)
+                {
+
+                }
+
+                //_this.closeLogoutModal();
+                _this.m_oState.go("home");
+            })
+            .error(function (data,status) {
+                utilsVexDialogAlertTop("ERROR IN LOGOUT");
+                _this.m_oConstantsService.logOut();
+                //_this.closeLogoutModal();
+                _this.m_oState.go("home");
+            });
 
 
     };

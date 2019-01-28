@@ -1,12 +1,9 @@
 package wasdi.shared.viewmodels;
 
-import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
 
 import javax.xml.bind.annotation.XmlRootElement;
-
-import org.json.JSONObject;
 
 @XmlRootElement
 public class QueryResultViewModel {
