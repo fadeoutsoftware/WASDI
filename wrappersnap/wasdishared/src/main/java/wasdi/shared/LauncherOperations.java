@@ -20,5 +20,6 @@ public enum LauncherOperations {
     NDVI,
     GRAPH,
     DEPLOYPROCESSOR,
-    RUNPROCESSOR
+    RUNPROCESSOR,
+    RUNIDL
 }

@@ -1,6 +1,8 @@
 package wasdi;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.lang.management.ManagementFactory;
 import java.lang.management.RuntimeMXBean;
 import java.lang.reflect.Field;
@@ -8,6 +10,7 @@ import java.lang.reflect.Method;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.logging.FileHandler;
@@ -66,6 +69,7 @@ import wasdi.shared.parameters.DownloadFileParameter;
 import wasdi.shared.parameters.FilterParameter;
 import wasdi.shared.parameters.FtpUploadParameters;
 import wasdi.shared.parameters.GraphParameter;
+import wasdi.shared.parameters.IDLProcParameter;
 import wasdi.shared.parameters.IngestFileParameter;
 import wasdi.shared.parameters.MultilookingParameter;
 import wasdi.shared.parameters.NDVIParameter;
@@ -391,6 +395,11 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 				WasdiProcessorEngine oEngine = WasdiProcessorEngine.GetProcessorEngine(oParameter.getProcessorType(), ConfigReader.getPropValue("DOWNLOAD_ROOT_PATH"), ConfigReader.getPropValue("DOCKER_TEMPLATE_PATH"));
 				oEngine.run(oParameter);
 			}
+			case RUNIDL: {
+				IDLProcParameter oParameter = (IDLProcParameter) SerializationUtils.deserializeXMLToObject(sParameter);
+				
+				RunIDLProcessor(oParameter);
+			}
 			break;
 			default:
 				s_oLogger.debug("Operation Not Recognized. Nothing to do");
@@ -405,7 +414,6 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 
 		s_oLogger.debug("Launcher did his job. Bye bye, see you soon.");
 	}
-
 
 	public void ExecuteGraph(GraphParameter params) throws Exception {
 		try {
@@ -1373,6 +1381,77 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			CloseProcessWorkspace(oProcessWorkspaceRepository, oProcessWorkspace);
 		}
 	}
+	
+	
+	public void RunIDLProcessor(IDLProcParameter oParameter) {
+		s_oLogger.debug("LauncherMain.RunIDLProcessor: Start");
+		ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
+		ProcessWorkspace oProcessWorkspace = oProcessWorkspaceRepository.GetProcessByProcessObjId(oParameter.getProcessObjId());
+
+		try {
+
+			if (oProcessWorkspace != null) {
+				//get process pid
+				oProcessWorkspace.setPid(GetProcessId());
+				oProcessWorkspace.setStatus(ProcessStatus.RUNNING.name());
+				oProcessWorkspace.setProgressPerc(0);
+				//update the process
+				oProcessWorkspaceRepository.UpdateProcess(oProcessWorkspace);
+				//send update process message
+				if (s_oSendToRabbit!=null && !s_oSendToRabbit.SendUpdateProcessMessage(oProcessWorkspace)) {
+					s_oLogger.debug("LauncherMain.RunIDLProcessor: Error sending rabbitmq message to update process list");
+				}
+			}
+			
+			String sBasePath = ConfigReader.getPropValue("DOWNLOAD_ROOT_PATH");
+			if (!sBasePath.endsWith("/")) sBasePath+="/";
+			
+			String sRunPath = sBasePath+"processors/"+oParameter.getProcessorName()+"/run_" + oParameter.getProcessorName() + ".sh";
+			
+			String asCmd[] = new String[] {
+					sRunPath
+			};
+			
+			s_oLogger.debug("ProcessingResource.launchList: shell exec " + Arrays.toString(asCmd));
+			Process oProc = Runtime.getRuntime().exec(asCmd);
+			/*
+			BufferedReader oInput = new BufferedReader(new InputStreamReader(oProc.getInputStream()));
+			
+            String sLine;
+            while((sLine=oInput.readLine()) != null) {
+            	s_oLogger.debug("ProcessingResource.launchList: envi stdout: " + sLine);
+            }
+            */
+            
+			s_oLogger.debug("ProcessingResource.launchList: waiting for the process to exit");
+			
+			if (oProc.waitFor() == 0) {
+				// ok
+				s_oLogger.debug("ProcessingResource.launchList: process done with code 0");
+				if (oProcessWorkspace != null) oProcessWorkspace.setStatus(ProcessStatus.DONE.name());
+			}
+			else {
+				// errore
+				s_oLogger.debug("ProcessingResource.launchList: process done with code != 0");
+				if (oProcessWorkspace != null) oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
+				
+			}
+
+		}
+		catch (Exception oEx) {
+			s_oLogger.error("LauncherMain.RunIDLProcessor: exception " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
+			if (oProcessWorkspace != null) oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
+
+			String sError = org.apache.commons.lang.exception.ExceptionUtils.getMessage(oEx);
+			if (s_oSendToRabbit!=null) s_oSendToRabbit.SendRabbitMessage(false,LauncherOperations.RUNIDL.name(),oParameter.getWorkspace(),sError,oParameter.getExchange());
+
+		}
+		finally {			
+			s_oLogger.debug("LauncherMain.RunIDLProcessor: End");
+			CloseProcessWorkspace(oProcessWorkspaceRepository, oProcessWorkspace);
+		}
+	}
+
 
 	/**
 	 * Adds a product to a Workspace. If it is alredy added it will not be duplicated.
