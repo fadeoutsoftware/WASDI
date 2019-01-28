@@ -47,7 +47,6 @@ import wasdi.filebuffer.ProviderAdapter;
 import wasdi.filebuffer.ProviderAdapterSupplier;
 import wasdi.geoserver.Publisher;
 import wasdi.processors.WasdiProcessorEngine;
-import wasdi.rabbit.Send;
 import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.DownloadedFile;
 import wasdi.shared.business.DownloadedFileCategory;
@@ -77,6 +76,8 @@ import wasdi.shared.parameters.OperatorParameter;
 import wasdi.shared.parameters.PublishBandParameter;
 import wasdi.shared.parameters.RangeDopplerGeocodingParameter;
 import wasdi.shared.parameters.RasterGeometricResampleParameter;
+import wasdi.shared.rabbit.RabbitFactory;
+import wasdi.shared.rabbit.Send;
 import wasdi.shared.utils.FtpClient;
 import wasdi.shared.utils.SerializationUtils;
 import wasdi.shared.utils.Utils;
@@ -169,9 +170,16 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 				// Get the Parameter File
 				sParameter = oLine.getOptionValue("parameter");
 			}
+			
+			
+			// Set Rabbit Factory Params
+            RabbitFactory.s_sRABBIT_QUEUE_USER = ConfigReader.getPropValue("RABBIT_QUEUE_USER");
+            RabbitFactory.s_sRABBIT_QUEUE_PWD = ConfigReader.getPropValue("RABBIT_QUEUE_PWD");
+            RabbitFactory.s_sRABBIT_HOST = ConfigReader.getPropValue("RABBIT_HOST");
+            RabbitFactory.s_sRABBIT_QUEUE_PORT = ConfigReader.getPropValue("RABBIT_QUEUE_PORT");
 
 			// Create Launcher Instance
-			LauncherMain.s_oSendToRabbit = new Send();
+			LauncherMain.s_oSendToRabbit = new Send(ConfigReader.getPropValue("RABBIT_EXCHANGE", "amq.topic"));
 			LauncherMain oLauncher = new LauncherMain();
 
 			s_oLogger.debug("Executing " + sOperation + " Parameter " + sParameter);
@@ -904,7 +912,11 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 		}	                
 		//send update process message
 		if(null == s_oSendToRabbit) {
-			s_oSendToRabbit = new Send();
+			try {
+				s_oSendToRabbit = new Send(ConfigReader.getPropValue("RABBIT_EXCHANGE", "amq.topic"));
+			} catch (IOException e) {
+				s_oLogger.debug("Error creating Rabbit Send " + e.toString());
+			}
 		}
 		if (!s_oSendToRabbit.SendUpdateProcessMessage(oProcessWorkspace)) {
 			s_oLogger.debug("Error sending rabbitmq message to update process list");
@@ -1412,27 +1424,28 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 					sRunPath
 			};
 			
-			s_oLogger.debug("ProcessingResource.launchList: shell exec " + Arrays.toString(asCmd));
-			Process oProc = Runtime.getRuntime().exec(asCmd);
-			/*
+			s_oLogger.debug("LauncherMain.RunIDLProcessor: shell exec " + Arrays.toString(asCmd));
+			ProcessBuilder oProcBuilder = new ProcessBuilder(asCmd);
+			Process oProc = oProcBuilder.start();
+			
 			BufferedReader oInput = new BufferedReader(new InputStreamReader(oProc.getInputStream()));
 			
             String sLine;
             while((sLine=oInput.readLine()) != null) {
-            	s_oLogger.debug("ProcessingResource.launchList: envi stdout: " + sLine);
+            	s_oLogger.debug("LauncherMain.RunIDLProcessor: envi stdout: " + sLine);
             }
-            */
             
-			s_oLogger.debug("ProcessingResource.launchList: waiting for the process to exit");
+            
+			s_oLogger.debug("LauncherMain.RunIDLProcessor: waiting for the process to exit");
 			
 			if (oProc.waitFor() == 0) {
 				// ok
-				s_oLogger.debug("ProcessingResource.launchList: process done with code 0");
+				s_oLogger.debug("LauncherMain.RunIDLProcessor: process done with code 0");
 				if (oProcessWorkspace != null) oProcessWorkspace.setStatus(ProcessStatus.DONE.name());
 			}
 			else {
 				// errore
-				s_oLogger.debug("ProcessingResource.launchList: process done with code != 0");
+				s_oLogger.debug("LauncherMain.RunIDLProcessor: process done with code != 0");
 				if (oProcessWorkspace != null) oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
 				
 			}

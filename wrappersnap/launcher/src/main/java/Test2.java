@@ -3,13 +3,46 @@
  */
 
 //import publish.Publisher;
+import java.util.ArrayList;
+
 import wasdi.ConfigReader;
-import wasdi.filebuffer.DownloadFile;
-import wasdi.filebuffer.DownloadSupplier;
 
 public class Test2 {
+	
+	private static String getBye() {
+		ArrayList<String> m_asByes = new ArrayList<>();
+		m_asByes.add("----WASDI:Operation Done----");
+		m_asByes.add("----WASDI:Operation Done---");
+		m_asByes.add("----WASDI:Operation Done--");
+		m_asByes.add("----WASDI:Operation Done-");
+		m_asByes.add("----WASDI:Operation Done");
+		m_asByes.add("----WASDI:Operation Don");
+		m_asByes.add("----WASDI:Operation Do");
+		m_asByes.add("----WASDI:Operation D");
+		m_asByes.add("----WASDI:Operation");
+		m_asByes.add("----WASDI:Operatio");
+		m_asByes.add("----WASDI:Operat");
+		m_asByes.add("1");
+		m_asByes.add("2");
+		m_asByes.add("3");
+		m_asByes.add("4");
+		m_asByes.add("5");
+		m_asByes.add("6");
+		m_asByes.add("7");
+		m_asByes.add("8");
+		m_asByes.add("9");
+		
+		
+		return m_asByes.get(((int)(Math.random()*100000))%m_asByes.size());
+	}
+
+	
     public static void main(String[] args) throws Exception
     {
+    	
+    	for (int i=0; i<10; i++) {
+    		System.out.println(getBye());
+    	}
     	
     	/*
     	HashMap<String, LocalFileDescriptor> m_asCollectionsFolders = new HashMap<>();
@@ -75,11 +108,11 @@ public class Test2 {
     	//HashMap<String, LocalFileDescriptor> m_asCollectionsFolders = (HashMap<String, LocalFileDescriptor>) SerializationUtils.deserializeXMLToObject("C:/temp/wasdi/probavcollections.xml");
     	
     	//DownloadFile oDownloadFile = DownloadFile.getDownloadFile("PROBAV");
-    	DownloadFile oDownloadFile = new DownloadSupplier().supplyDownloader("PROBAV");
+    	//DownloadFile oDownloadFile = new DownloadSupplier().supplyDownloader("PROBAV");
     	
     	String sLink = "https://www.vito-eodata.be/PDF/dataaccess?service=DSEO&request=GetProduct&version=1.0.0&collectionID=1000060&productID=271466625&ProductURI=urn:ogc:def:EOP:VITO:PROBAV_L2A_1KM_V001:PROBAV_CENTER_L2A_20180521_225405_1KM:V101&";
     	//String sLink = "https://www.vito-eodata.be/PDF/dataaccess?service=DSEO&request=GetProduct&version=1.0.0&collectionID=1000060&productID=200462849&ProductURI=urn:ogc:def:EOP:VITO:PROBAV_L2A_1KM_V001:PROBAV_CENTER_L2A_20160505_010431_1KM:V101&";
-    	
+    	/*
     	// CHECK USR AND PW ON THE config.properties file!!!!
     	String sUser = ConfigReader.getPropValue("DHUS_USER");
     	String sPassword = ConfigReader.getPropValue("DHUS_PASSWORD");
@@ -97,7 +130,7 @@ public class Test2 {
     	
     	oDownloadFile.ExecuteDownloadFile(sLink, sUser, sPassword, "C:/temp/wasdi/paolo", null);
 
-/*
+
         final JFileChooser fc = new JFileChooser();
 
         //In response to a button click:

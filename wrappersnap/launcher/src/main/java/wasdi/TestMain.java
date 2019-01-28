@@ -21,8 +21,6 @@ import org.json.JSONObject;
 
 import com.bc.ceres.glevel.MultiLevelImage;
 
-import wasdi.filebuffer.DownloadFile;
-import wasdi.filebuffer.DownloadSupplier;
 import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.DownloadedFile;
 import wasdi.shared.business.ProcessWorkspace;
@@ -414,6 +412,7 @@ public class TestMain {
     @SuppressWarnings("unused")
 	public void GetFileSize() {
 
+    	/*
     	//replaced by the next one
         //DownloadFile oDownloadFile = DownloadFile.getDownloadFile("SENTINEL");
         DownloadFile oDownloadFile = new DownloadSupplier().supplyDownloader("SENTINEL");
@@ -430,6 +429,7 @@ public class TestMain {
         } catch (Exception e) {
             e.printStackTrace();
         }
+        */
     }
 
     public void RasterGeometricResampling() {

@@ -19,6 +19,7 @@ import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.business.User;
 import wasdi.shared.data.ProcessWorkspaceRepository;
+import wasdi.shared.rabbit.Send;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.PrimitiveResult;
 import wasdi.shared.viewmodels.ProcessWorkspaceSummaryViewModel;
@@ -449,7 +450,7 @@ public class ProcessWorkspaceResource {
 	@GET
 	@Path("/updatebyid")
 	@Produces({"application/xml", "application/json", "text/xml"})
-	public ProcessWorkspaceViewModel UpdateProcessById(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sProcessId") String sProcessWorkspaceId, @QueryParam("status") String sStatus, @QueryParam("perc") int iPerc) {
+	public ProcessWorkspaceViewModel UpdateProcessById(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sProcessId") String sProcessWorkspaceId, @QueryParam("status") String sStatus, @QueryParam("perc") int iPerc, @QueryParam("sendrabbit") String sSendToRabbit) {
 		
 		Wasdi.DebugLog("ProcessWorkspaceResource.UpdateProcessById");
 
@@ -481,6 +482,24 @@ public class ProcessWorkspaceResource {
 			
 			oProcess = buildProcessWorkspaceViewModel(oProcessWorkspace);
 
+			// Check if we need to send the asynch rabbit message
+			if (Utils.isNullOrEmpty(sSendToRabbit) == false) {
+				// The param exists
+				if (sSendToRabbit.equals("1") || sSendToRabbit.equals("true")) {
+					
+					// Search for exchange name
+					String sExchange = m_oServletConfig.getInitParameter("RABBIT_EXCHANGE");
+					
+					// Set default if is empty
+					if (Utils.isNullOrEmpty(sExchange)) {
+						sExchange = "amq.topic";
+					}
+					
+					// Send the Asynch Message to the clients
+					Send oSendToRabbit = new Send(sExchange);
+					oSendToRabbit.SendUpdateProcessMessage(oProcessWorkspace);
+				}
+			}
 		}
 		catch (Exception oEx) {
 			System.out.println("ProcessWorkspaceResource.UpdateProcessById: error retrieving process " + oEx.getMessage());
