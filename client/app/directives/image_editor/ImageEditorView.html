@@ -1,4 +1,4 @@
-<div class="image-editor-container" ng-class="{ 'wait-cursor-hover':m_bIsVisibleMouseCursorWait === true, 'crosshair-cursor-hover':m_bIsActiveZoom === true }">
+<div class="image-editor-container w-100 h-100" ng-class="{ 'wait-cursor-hover':m_bIsVisibleMouseCursorWait === true, 'crosshair-cursor-hover':m_bIsActiveZoom === true }">
     <!--<div class="loadIcon" ng-hide="isLoaded">-->
         <!--<invader></invader>-->
     <!--</div>-->
@@ -28,7 +28,8 @@
 
     <!--<div> &lt;!&ndash; ng-show="isLoaded"&ndash;&gt;-->
         <!--<canvas id='imageviewcanvas'  width='1238px' height='707.797px' ></canvas>&lt;!&ndash; width='800' height='600'&ndash;&gt;-->
-        <canvas id='imageviewcanvas'  width='{{widthCanvas}}' height='{{heightCanvas}}' ></canvas><!-- width='800' height='600'-->
+
+    <canvas id='imageviewcanvas'  width='{{widthCanvas}}' height='{{heightCanvas}}' ></canvas><!-- width='800' height='600'-->
 
     <!--</div>-->
     <!--<button ng-click="changeZoomSquareSize()"> resize </button>-->

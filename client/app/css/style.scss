@@ -75,6 +75,8 @@
 @import "../dialogs/ftp_service/ftp_service";
 @import "../dialogs/list_flood_area_detection/list_flood_area_detection";
 
+@import "buttons";
+
 //COMPONENTS
 @import "components/range_slider";
 @import "components/toggle_switch";
@@ -165,6 +167,7 @@ h4 {
     .toolbar{
         height: $size-toolbar-height-total;
         position: relative;
+        z-index: $z-index-top-toolbar;
         //background-color: #0a6aa1; //debug
 
         & > div {
@@ -220,80 +223,11 @@ h4 {
 
 .panel-body{
     &.auto-parent-height{
-        height: $size-panel-body-height-with-single-row-heading;
+        height: $size-panel-body-height-with-single-row-heading !important;
     }
 }
 //----------------------------------------------------
 
-
-//----------------------------------------------------
-// Buttons
-.btn{
-    &.btn-wasdi {
-        border-radius: 0px;
-
-
-        @if ( fontFamilyContains($wasdi-font-web, "Hero-Light")) {
-            font-weight: 600;
-            letter-spacing: 0.4px;
-        }
-
-        &.btn-primary {
-            border-color: $color-btn-primary-bg;
-            background-color: $color-btn-primary-bg;
-            color: $color-btn-primary-text;
-
-            &:hover{
-                &:not([disabled]) {
-                    border-color: $color-btn-primary-bg-hover;
-                    background-color: $color-btn-primary-bg-hover;
-                }
-            }
-        }
-
-        &.btn-secondary {
-            border-color: $color-btn-secondary-bg;
-            background-color: $color-btn-secondary-bg;
-            color: $color-btn-secondary-text;
-
-            &:hover{
-                &:not([disabled]) {
-                    border-color: $color-btn-secondary-bg-hover;
-                    background-color: $color-btn-secondary-bg-hover;
-                }
-            }
-        }
-
-        &:disabled, &.disabled{
-            opacity: .65;
-        }
-
-        .fa{
-            margin-right: 8px;
-        }
-    }
-}
-
-.btn-group{
-    $parent : &;
-
-    &.use-divider{
-        .btn{
-            &:not([last-of-type])
-            {
-                &.btn-secondary{ border-right: 1px solid  #aaa; }
-            }
-        }
-    }
-
-    &#{$parent}-sm{
-        .btn {
-            font-size: 14px;
-        }
-    }
-
-}
-//----------------------------------------------------
 
 //----------------------------------------------------
 // Inputs
