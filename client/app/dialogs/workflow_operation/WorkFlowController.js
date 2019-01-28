@@ -51,7 +51,7 @@ var WorkFlowController = (function() {
     //     {
     //         //utilsVexDialogAlertTop();
     //         var oDialog = utilsVexDialogAlertBottomRightCorner("WORKFLOW UPLOADED<br>PROCESSING WILL START IN A WHILE");
-    //         utilsVexCloseDialogAfterFewSeconds(4000,oDialog);
+    //         utilsVexCloseDialogAfter(4000,oDialog);
     //
     //     };
     //
@@ -92,7 +92,7 @@ var WorkFlowController = (function() {
         {
             //utilsVexDialogAlertTop();
             var oDialog = utilsVexDialogAlertBottomRightCorner("WORKFLOW UPLOADED<br>PROCESSING WILL START IN A WHILE");
-            utilsVexCloseDialogAfterFewSeconds(4000,oDialog);
+            utilsVexCloseDialogAfter(4000,oDialog);
 
         };
 

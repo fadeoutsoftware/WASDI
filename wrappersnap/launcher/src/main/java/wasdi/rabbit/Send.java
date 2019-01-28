@@ -65,7 +65,7 @@ public class Send {
             LauncherMain.s_oLogger.log(Level.ERROR, "Send.SendMgs: Error publishing message " + sMessageAttribute + " to " + sRoutingKey, e);
             return false;
         }
-        LauncherMain.s_oLogger.debug(" [x] Sent '" + sMessageAttribute + "' to " + sRoutingKey);
+        //LauncherMain.s_oLogger.debug(" [x] Sent '" + sMessageAttribute + "' to " + sRoutingKey);
         return true;
 
     }

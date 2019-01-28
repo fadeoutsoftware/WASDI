@@ -1,18 +1,18 @@
 package wasdi.filebuffer;
 
 public class LocalFileDescriptor {
-	public String Code;
-	public String Folder;
-	public boolean SingleFile;
+	public String m_sCode;
+	public String m_sFolder;
+	public boolean m_bSingleFile;
 	
 	public LocalFileDescriptor() {
 		
 	}
 	
 	public LocalFileDescriptor(String sCode, String sFolder, boolean bSingleFile) {
-		Code = sCode;
-		Folder = sFolder;
-		SingleFile = bSingleFile;
+		m_sCode = sCode;
+		m_sFolder = sFolder;
+		m_bSingleFile = bSingleFile;
 	}
 	
 }

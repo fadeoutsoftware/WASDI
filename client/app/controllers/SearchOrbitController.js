@@ -754,7 +754,7 @@ var SearchOrbitController = (function() {
             if (utilsIsStrNullOrEmpty(oMessage.messageCode) === false  )
                 sOperation = oMessage.messageCode;
             var oDialog = utilsVexDialogAlertTop('GURU MEDITATION<br>THERE WAS AN ERROR IN THE ' + sOperation + ' PROCESS');
-            utilsVexCloseDialogAfterFewSeconds(4000, oDialog);
+            utilsVexCloseDialogAfter(4000, oDialog);
             this.m_oProcessesLaunchedService.loadProcessesFromServer(this.m_oActiveWorkspace.workspaceId);
             return;
         }
@@ -796,7 +796,7 @@ var SearchOrbitController = (function() {
         //     sMessage += " <a href='' ng-click='this.test()'> Link </a>"
 
         var oDialog = utilsVexDialogAlertBottomRightCorner(sMessage);
-        utilsVexCloseDialogAfterFewSeconds(4000, oDialog);
+        utilsVexCloseDialogAfter(4000, oDialog);
     };
 
     // SearchOrbitController.prototype.checkedSatellite = function(sSatellite)

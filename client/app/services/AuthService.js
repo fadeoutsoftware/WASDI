@@ -4,7 +4,7 @@
 
 'use strict';
 angular.module('wasdi.AuthService', ['wasdi.ConstantsService']).
-service('AuthService', ['$http',  'ConstantsService', function ($http, oConstantsService) {
+service('AuthService', ['$http',  '$state', 'ConstantsService', function ($http, $state, oConstantsService) {
     this.APIURL = oConstantsService.getAPIURL();
     this.m_oHttp = $http;
 
@@ -16,9 +16,10 @@ service('AuthService', ['$http',  'ConstantsService', function ($http, oConstant
     /**
      * logout
      */
+    var _this = this;
     this.logout = function() {
         //CLEAN COOKIE
-        return this.m_oHttp.get(this.APIURL + '/auth/logout');
+        return this.m_oHttp.get(this.APIURL + '/auth/logout')
     }
 
     /**

@@ -16,7 +16,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.io.StringReader;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.nio.charset.Charset;
@@ -52,7 +51,6 @@ import javax.ws.rs.core.Response.Status;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.http.protocol.HTTP;
 import org.esa.snap.core.dataio.ProductIO;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.FilterBand;
@@ -79,10 +77,11 @@ import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.business.SnapWorkflow;
 import wasdi.shared.business.User;
+import wasdi.shared.business.Workspace;
 import wasdi.shared.business.WpsProvider;
 import wasdi.shared.data.ProcessWorkspaceRepository;
-import wasdi.shared.data.SessionRepository;
 import wasdi.shared.data.SnapWorkflowRepository;
+import wasdi.shared.data.WorkspaceRepository;
 import wasdi.shared.data.WpsProvidersRepository;
 import wasdi.shared.parameters.ApplyOrbitParameter;
 import wasdi.shared.parameters.ApplyOrbitSetting;
@@ -1468,7 +1467,7 @@ public class ProcessingResources {
 			Wasdi.DebugLog("ProcessingResource.list: launching ENVI LIST Processor");
 						
 			//try execute algorithm
-			if (launchList(oListFloodViewModel, oUser, sWorkspaceId)) {
+			if (launchList(sSessionId, oListFloodViewModel, oUser, sWorkspaceId)) {
 				Wasdi.DebugLog("ProcessingResource.algList: ok return");
 				//TODO read value somewhere (input argument? config file?)
 
@@ -1500,7 +1499,7 @@ public class ProcessingResources {
 	 * @param sWorkspaceId
 	 * @return
 	 */
-	private boolean launchList(ListFloodViewModel oListFloodViewModel, User oUser, String sWorkspaceId) {
+	private boolean launchList(String sSessionId, ListFloodViewModel oListFloodViewModel, User oUser, String sWorkspaceId) {
 
 		try {
 			String cmd[] = new String[] {
@@ -1513,6 +1512,9 @@ public class ProcessingResources {
 			
 			Wasdi.DebugLog("ProcessingResource.launchList ParamFile " + sParamFile);
 			
+			WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
+			Workspace oWorkspace = oWorkspaceRepository.GetWorkspace(sWorkspaceId);
+			
 			File oFile = new File(sParamFile);
 			
 			BufferedWriter oWriter = new BufferedWriter(new FileWriter(oFile));
@@ -1523,10 +1525,14 @@ public class ProcessingResources {
 				oWriter.newLine();
 				oWriter.write(oUser.getUserId());
 				oWriter.newLine();
-				oWriter.write(oUser.getPassword());
+				if (Utils.isNullOrEmpty(sSessionId)) oWriter.write(oUser.getPassword());
+				else oWriter.write("");
 				oWriter.newLine();
-				oWriter.write(sWorkspaceId);
-				oWriter.newLine();				
+				oWriter.write(oWorkspace.getName());
+				oWriter.newLine();
+				oWriter.write(sSessionId);
+				
+				oWriter.newLine();
 
 				oWriter.write(oListFloodViewModel.getPostEventFile());
 				oWriter.newLine();
