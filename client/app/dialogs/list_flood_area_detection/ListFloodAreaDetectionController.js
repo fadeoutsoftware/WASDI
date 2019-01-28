@@ -61,9 +61,6 @@ var ListFloodAreaDetectionController = (function() {
             return false;
         }
 
-        var oDialog =  utilsVexDialogAlertBottomRightCorner("GURU MEDITATION<br>LIST FLOOD IS RUNNING.");
-        utilsVexCloseDialogAfter(4000, oDialog);
-
         this.m_SnapOperationService.runListFlood(oListFlood,oActiveWorkspace.workspaceId)
             .success(function(data,status){
                 if( (utilsIsObjectNullOrUndefined(data) === false) && (status === 200))
@@ -97,7 +94,6 @@ var ListFloodAreaDetectionController = (function() {
             utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR: INVALID POST EVENT IMAGE PRODUCT ");
             bReturnValue = false;
         }
-        //TODO CHECK DATA  iHsbaStartDepth,dBimodalityCoeff, iMinTileDimension,iMinBlobRemoval
         return bReturnValue;
     }
 
