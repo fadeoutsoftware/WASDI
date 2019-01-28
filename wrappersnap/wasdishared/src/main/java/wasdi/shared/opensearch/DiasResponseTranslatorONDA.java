@@ -31,17 +31,17 @@ public class DiasResponseTranslatorONDA implements DiasResponseTranslator {
 	 * @see wasdi.shared.opensearch.DiasResponseTranslator#translate(java.lang.Object)
 	 */
 	@Override
-	public QueryResultViewModel translate(Object oObject) {
+	public QueryResultViewModel translate(Object oObject, String sProtocol) {
 		try {
 			JSONObject oJson = (JSONObject)oObject;
-			return translate(oJson);
+			return translate(oJson, sProtocol);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		return null;
 	}
 	
-	public QueryResultViewModel translate(JSONObject oJsonOndaResult) {
+	public QueryResultViewModel translate(JSONObject oJsonOndaResult, String sProtocol) {
 		try {
 			//TODO check every get/opt against null value
 			
@@ -69,15 +69,33 @@ public class DiasResponseTranslatorONDA implements DiasResponseTranslator {
 			String sName = oJsonOndaResult.optString("name");
 			if(!Utils.isNullOrEmpty(sName)) {
 				asProperties.put("filename", sName);
+				String sPath = "";
 				String sPseudopath = oJsonOndaResult.optString("pseudopath");
-				if(null!=sPseudopath) {
-					asProperties.put("pseudopath", sPseudopath);
-					String sPath = "file:/mnt/";
-					String[] sIntermediate = sPseudopath.split(", ");
-					sPath += sIntermediate[0]; 
-					sPath += "/" + sName + ".value";
-					oResult.setLink("file:"+sPath);
+				
+				if(sProtocol.equals("file:")) {
+					if(!Utils.isNullOrEmpty(sPseudopath) && !Utils.isNullOrEmpty(sName)) {
+						asProperties.put("pseudopath", sPseudopath);
+						sPath = "file:/mnt/";
+						String[] sIntermediate = sPseudopath.split(", ");
+						sPath += sIntermediate[0]; 
+						sPath += "/" + sName + ".value";
+					} else {
+						return null;
+					}
+				} else if(sProtocol.equals("https:")) {
+					if(!Utils.isNullOrEmpty(sId)) {
+						//tentative download
+						sPath += sProtocol;
+						sPath += "//catalogue.onda-dias.eu/dias-catalogue/Products";
+						sPath += "(";
+						sPath += sId;
+						sPath += ")";
+						sPath += "/$value";
+					} else {
+						return null;
+					}
 				}
+				oResult.setLink(sPath);
 			}
 			Long lSize = oJsonOndaResult.optLong("size");
 			Double dSize = -1.0;

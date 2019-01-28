@@ -141,6 +141,7 @@ public class OpenSearchResource {
 		for (String sProvider : asProviders) {
 			String sUser = m_oServletConfig.getInitParameter(sProvider + ".OSUser");
 			String sPassword = m_oServletConfig.getInitParameter(sProvider + ".OSPwd");
+			String sDownloadProtocol = m_oServletConfig.getInitParameter(sProvider+".downloadProtocol");
 
 			String sOffset = null;
 			String sLimit = null;
@@ -157,7 +158,7 @@ public class OpenSearchResource {
 			// QueryExecutor oExecutor = QueryExecutor.newInstance(sProvider, sUser,
 			// sPassword, null, null, null, null);
 			QueryExecutor oExecutor = QueryExecutor.newInstance(sProvider, sUser, sPassword, sOffset, sLimit, sSortedBy,
-					sOrder);
+					sOrder, sDownloadProtocol);
 			try {
 				Integer iProviderCountResults = 0;
 				if (sProvider.equals("SENTINEL")) {
@@ -250,12 +251,13 @@ public class OpenSearchResource {
 
 				String sUser = m_oServletConfig.getInitParameter(sProvider + ".OSUser");
 				String sPassword = m_oServletConfig.getInitParameter(sProvider + ".OSPwd");
+				String sDownloadProtocol = m_oServletConfig.getInitParameter(sProvider+".downloadProtocol");
 
 				System.out.println(
 						"Executing query for " + sProvider + ": offset=" + sActualOffset + ": limit=" + sActualLimit);
 
 				QueryExecutor oExecutor = QueryExecutor.newInstance(sProvider, sUser, sPassword, sActualOffset,
-						sActualLimit, sSortedBy, sOrder);
+						sActualLimit, sSortedBy, sOrder, sDownloadProtocol);
 				try {
 					ArrayList<QueryResultViewModel> aoTmp = oExecutor.execute(sQuery);
 					if (aoTmp != null && !aoTmp.isEmpty()) {
@@ -396,9 +398,10 @@ public class OpenSearchResource {
 
 						String sUser = m_oServletConfig.getInitParameter(sProvider + ".OSUser");
 						String sPassword = m_oServletConfig.getInitParameter(sProvider + ".OSPwd");
+						String sDownloadProtocol = m_oServletConfig.getInitParameter(sProvider+".downloadProtocol");
 
 						QueryExecutor oExecutor = QueryExecutor.newInstance(sProvider, sUser, sPassword, sActualOffset,
-								sActualLimit, sSortedBy, sOrder);
+								sActualLimit, sSortedBy, sOrder, sDownloadProtocol);
 						try {
 							ArrayList<QueryResultViewModel> aoTmp = oExecutor.execute(sQuery, false);
 
