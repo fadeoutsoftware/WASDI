@@ -389,11 +389,6 @@
 			<version>1.0.0</version>     
 		</dependency>
 
-		<dependency>
-			<groupId>it.fadeout</groupId>
-			<artifactId>mercurius</artifactId>
-			<version>1.0</version>
-		</dependency>
 	</dependencies>
 	<build>
 		<finalName>wasdiwebserver</finalName>

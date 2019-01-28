@@ -1256,6 +1256,22 @@ public class ProcessingResources {
 		try {
 			//Update process list
 			
+			OperatorParameter oParameter = GetParameter(operation); 
+			oParameter.setSourceProductName(sSourceProductName);
+			oParameter.setDestinationProductName(sDestinationProductName);
+			oParameter.setWorkspace(sWorkspaceId);
+			oParameter.setUserId(sUserId);
+			oParameter.setExchange(sWorkspaceId);
+			oParameter.setProcessObjId(sProcessObjId);
+			if (oSetting != null) oParameter.setSettings(oSetting);	
+			
+			String sPath = m_oServletConfig.getInitParameter("SerializationPath");
+			
+			if (!(sPath.endsWith("\\") || sPath.endsWith("/"))) sPath += "/";
+			sPath = sPath + sProcessObjId;
+
+			SerializationUtils.serializeObjectToXML(sPath, oParameter);
+
 			ProcessWorkspaceRepository oRepository = new ProcessWorkspaceRepository();
 			ProcessWorkspace oProcess = new ProcessWorkspace();
 			
@@ -1269,8 +1285,8 @@ public class ProcessingResources {
 				sProcessObjId = Utils.GetRandomName();
 				oProcess.setProcessObjId(sProcessObjId);
 				oProcess.setStatus(ProcessStatus.CREATED.name());
-				String sProcessId = oRepository.InsertProcessWorkspace(oProcess);
-				System.out.println("SnapOperations.ExecuteOperation: process ID: "+sProcessId);
+				oRepository.InsertProcessWorkspace(oProcess);
+				Wasdi.DebugLog("ProcessingResource.ExecuteOperation: Process Scheduled for Launcher");
 			}
 			catch(Exception oEx){
 				System.out.println("SnapOperations.ExecuteOperation: Error updating process list " + oEx.getMessage());
@@ -1279,25 +1295,6 @@ public class ProcessingResources {
 				oResult.setIntValue(500);
 				return oResult;
 			}
-
-			String sPath = m_oServletConfig.getInitParameter("SerializationPath");
-			
-			if (!(sPath.endsWith("\\") || sPath.endsWith("/"))){
-				sPath += "/";
-			}
-			sPath = sPath + oProcess.getProcessObjId();
-
-			
-			OperatorParameter oParameter = GetParameter(operation); 
-			oParameter.setSourceProductName(sSourceProductName);
-			oParameter.setDestinationProductName(sDestinationProductName);
-			oParameter.setWorkspace(sWorkspaceId);
-			oParameter.setUserId(sUserId);
-			oParameter.setExchange(sWorkspaceId);
-			oParameter.setProcessObjId(oProcess.getProcessObjId());
-			if (oSetting != null) oParameter.setSettings(oSetting);	
-			//TODO move it before inserting the new process into DB
-			SerializationUtils.serializeObjectToXML(sPath, oParameter);
 
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -1720,6 +1717,21 @@ public class ProcessingResources {
 			
 			//Update process list
 			
+			IDLProcParameter oParameter = new IDLProcParameter();
+			oParameter.setWorkspace(sWorkspaceId);
+			oParameter.setUserId(sUserId);
+			oParameter.setExchange(sWorkspaceId);
+			oParameter.setProcessObjId(sProcessObjId);
+			oParameter.setParameterFile(sParamFile);
+			oParameter.setProcessorName("listflood");
+	
+			String sPath = m_oServletConfig.getInitParameter("SerializationPath");			
+			if (!(sPath.endsWith("\\") || sPath.endsWith("/"))) sPath += "/";
+			sPath = sPath + sProcessObjId;
+			
+			SerializationUtils.serializeObjectToXML(sPath, oParameter);
+
+			
 			ProcessWorkspaceRepository oRepository = new ProcessWorkspaceRepository();
 			ProcessWorkspace oProcess = new ProcessWorkspace();
 			
@@ -1732,8 +1744,8 @@ public class ProcessingResources {
 				oProcess.setUserId(sUserId);
 				oProcess.setProcessObjId(sProcessObjId);
 				oProcess.setStatus(ProcessStatus.CREATED.name());
-				String sProcessId = oRepository.InsertProcessWorkspace(oProcess);
-				System.out.println("ProcessingResource.asynchLaunchList: process ID: "+sProcessId);
+				oRepository.InsertProcessWorkspace(oProcess);
+				Wasdi.DebugLog("ProcessingResource.asynchLaunch: Process Scheduled for Launcher");
 			}
 			catch(Exception oEx){
 				System.out.println("ProcessingResource.asynchLaunchList: Error updating process list " + oEx.getMessage());
@@ -1742,25 +1754,6 @@ public class ProcessingResources {
 				oResult.setIntValue(500);
 				return oResult;
 			}
-
-			String sPath = m_oServletConfig.getInitParameter("SerializationPath");
-			
-			if (!(sPath.endsWith("\\") || sPath.endsWith("/"))){
-				sPath += "/";
-			}
-			sPath = sPath + oProcess.getProcessObjId();
-
-			
-			IDLProcParameter oParameter = new IDLProcParameter();
-			oParameter.setWorkspace(sWorkspaceId);
-			oParameter.setUserId(sUserId);
-			oParameter.setExchange(sWorkspaceId);
-			oParameter.setProcessObjId(oProcess.getProcessObjId());
-			oParameter.setParameterFile(sParamFile);
-			oParameter.setProcessorName("listflood");
-	
-			//TODO move it before inserting the new process into DB
-			SerializationUtils.serializeObjectToXML(sPath, oParameter);
 
 			oResult.setBoolValue(true);
 			oResult.setIntValue(200);

@@ -1,11 +1,6 @@
 package it.fadeout.rest.resources;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -85,23 +80,22 @@ public class CatalogResources {
 	@Path("entries")
 	@Produces({"application/json"})
 	public ArrayList<DownloadedFile> GetEntries(@HeaderParam("x-session-token") String sSessionId, 
-			@QueryParam("from") String from, 
-			@QueryParam("to") String to,
-			@QueryParam("freetext") String freeText,
-			@QueryParam("category") String category
+			@QueryParam("from") String sFrom, 
+			@QueryParam("to") String sTo,
+			@QueryParam("freetext") String sFreeText,
+			@QueryParam("category") String sCategory
 			) {
 		
 		Wasdi.DebugLog("CatalogResources.GetEntries");
 		
-		User me = Wasdi.GetUserFromSession(sSessionId);
-		String userId = me.getUserId();
-//		String userId = "paolo";
+		User oUser = Wasdi.GetUserFromSession(sSessionId);
+		String sUserId = oUser.getUserId();
 
-		SimpleDateFormat format = new SimpleDateFormat("yyyyMMddHHmm");
+		SimpleDateFormat oDateFormat = new SimpleDateFormat("yyyyMMddHHmm");
 		try {
-			Date dtFrom = (from==null || from.isEmpty())?null:format.parse(from);
-			Date dtTo = (to==null || to.isEmpty())?null:format.parse(to);
-			return searchEntries(dtFrom, dtTo, freeText, category, userId);
+			Date dtFrom = (sFrom==null || sFrom.isEmpty())?null:oDateFormat.parse(sFrom);
+			Date dtTo = (sTo==null || sTo.isEmpty())?null:oDateFormat.parse(sTo);
+			return searchEntries(dtFrom, dtTo, sFreeText, sCategory, sUserId);
 		} catch (ParseException e) {
 			e.printStackTrace();
 			throw new InternalServerErrorException("invalid date: " + e.getMessage());
@@ -112,7 +106,7 @@ public class CatalogResources {
 	@POST
 	@Path("downloadentry")
 	@Produces(MediaType.APPLICATION_OCTET_STREAM)
-	public Response DownloadEntry(@HeaderParam("x-session-token") String sSessionId, DownloadedFile entry) {
+	public Response DownloadEntry(@HeaderParam("x-session-token") String sSessionId, DownloadedFile oEntry) {
 		
 		Wasdi.DebugLog("CatalogResources.DownloadEntry");
 		
@@ -123,8 +117,7 @@ public class CatalogResources {
 			return Response.status(Status.UNAUTHORIZED).build();
 		}
 
-		File oFile = new File(entry.getFilePath());
-		//File oFile = new File("C:\\temp\\wasdi\\test_file.txt");
+		File oFile = new File(oEntry.getFilePath());
 		
 		ResponseBuilder oResponseBuilder = null;
 		if (!oFile.canRead()) {
@@ -134,7 +127,7 @@ public class CatalogResources {
 		else {
 			Wasdi.DebugLog("CatalogResources.DownloadEntry: file ok return content");
 			oResponseBuilder = Response.ok(oFile);
-			oResponseBuilder.header("Content-Disposition", "attachment; filename="+ entry.getFileName());
+			oResponseBuilder.header("Content-Disposition", "attachment; filename="+ oEntry.getFileName());
 		}
 		
 		Wasdi.DebugLog("CatalogResources.DownloadEntry: done, return");
@@ -174,7 +167,6 @@ public class CatalogResources {
 	@GET
 	@Path("downloadbyname")
 	@Produces(MediaType.APPLICATION_OCTET_STREAM)
-	//public Response DownloadEntryByName(@HeaderParam("x-session-token") String sSessionId, @QueryParam("filename") String sFileName)
 	public Response DownloadEntryByName(@HeaderParam("x-session-token") String sSessionId, @QueryParam("token") String sTokenSessionId, @QueryParam("filename") String sFileName)
 	{			
 		Wasdi.DebugLog("CatalogResources.DownloadEntryByName");
@@ -230,53 +222,58 @@ public class CatalogResources {
 		return Response.ok(oResult).build();		
 	}
 	
-	
-	
-	
-	private ArrayList<DownloadedFile> searchEntries(Date from, Date to, String freeText, String category, String userId) {
-		ArrayList<DownloadedFile> entries = new ArrayList<DownloadedFile>();
+	/**
+	 * Search entries in the internal WASDI Catalogue
+	 * @param oFrom Date From
+	 * @param oTo Date To
+	 * @param sFreeText Free Text query
+	 * @param sCategory Category
+	 * @param sUserId User calling
+	 * @return
+	 */
+	private ArrayList<DownloadedFile> searchEntries(Date oFrom, Date oTo, String sFreeText, String sCategory, String sUserId) {
+		ArrayList<DownloadedFile> aoEntries = new ArrayList<DownloadedFile>();
 		
-		WorkspaceRepository wksRepo = new WorkspaceRepository();
-		ProductWorkspaceRepository prodWksRepo = new ProductWorkspaceRepository();
-		DownloadedFilesRepository downFilesRepo = new DownloadedFilesRepository();
+		WorkspaceRepository oWorkspaceRepo = new WorkspaceRepository();
+		ProductWorkspaceRepository oProductWorkspaceRepo = new ProductWorkspaceRepository();
+		DownloadedFilesRepository oDownloadedFilesRepo = new DownloadedFilesRepository();
 
 		//get all my workspaces
-		List<Workspace> myWorkspacesList = wksRepo.GetWorkspaceByUser(userId);
-		Map<String, Workspace> myWorkspaces = new HashMap<String, Workspace>();
-		for (Workspace wks : myWorkspacesList) {
-			myWorkspaces.put(wks.getWorkspaceId(), wks);
+		List<Workspace> aoWorkspacesList = oWorkspaceRepo.GetWorkspaceByUser(sUserId);
+		Map<String, Workspace> aoWorkspaces = new HashMap<String, Workspace>();
+		for (Workspace wks : aoWorkspacesList) {
+			aoWorkspaces.put(wks.getWorkspaceId(), wks);
 		}
 		
 		//retrieve all compatible files
-		List<DownloadedFile> files = downFilesRepo.Search(from, to, freeText, category);
+		List<DownloadedFile> aoDownloadedFiles = oDownloadedFilesRepo.Search(oFrom, oTo, sFreeText, sCategory);
 		
-		for (DownloadedFile df : files) {
+		for (DownloadedFile oDownloadedFile : aoDownloadedFiles) {
 			
 			//check if the product is in my workspace
-			ProductViewModel pvm = df.getProductViewModel();
-			//boolean isPublic = category.equals(DownloadedFileCategory.PUBLIC)fileWorkspaces.isEmpty();
-			boolean isMine = category.equals(DownloadedFileCategory.PUBLIC.name());
-			if (!isMine) {
-				if (pvm != null) {
-					pvm.setMetadata(null);
-					List<String> fileWorkspaces = prodWksRepo.getWorkspaces(pvm.getFileName()); //TODO check if productName should be used					
-					for (String wks : fileWorkspaces) {
-						if (myWorkspaces.containsKey(wks)) {
-							isMine = true;
+			ProductViewModel oProductViewModel = oDownloadedFile.getProductViewModel();
+
+			boolean bIsOwnedByUser = sCategory.equals(DownloadedFileCategory.PUBLIC.name());
+			if (!bIsOwnedByUser) {
+				if (oProductViewModel != null) {
+					oProductViewModel.setMetadata(null);
+					List<String> aoProductWorkspaces = oProductWorkspaceRepo.getWorkspaces(oProductViewModel.getFileName()); //TODO check if productName should be used					
+					for (String sProductWorkspace : aoProductWorkspaces) {
+						if (aoWorkspaces.containsKey(sProductWorkspace)) {
+							bIsOwnedByUser = true;
 							break;
 						}
 					}
 				}
 			}
 			
-//			if (isMine || isPublic) {
-			if (isMine) {
-				
-				entries.add(df);
+			if (bIsOwnedByUser) {	
+				aoEntries.add(oDownloadedFile);
 			}
 			
 		}
-		return entries;
+		
+		return aoEntries;
 	}
 	
 
@@ -343,20 +340,31 @@ public class CatalogResources {
 		String sAccount = oUser.getUserId();		
 		
 		String sUserBaseDir = m_oServletConfig.getInitParameter("sftpManagementUserDir");
+		
 		File oUserBaseDir = new File(sUserBaseDir);
 		File oFilePath = new File(new File(new File(oUserBaseDir, sAccount), "uploads"), sFile);
+		
 		if (!oFilePath.canRead()) {
-			System.out.println("AuthResource.IngestFile: ERROR: unable to access uploaded file " + oFilePath.getAbsolutePath());
+			System.out.println("CatalogResource.IngestFile: ERROR: unable to access uploaded file " + oFilePath.getAbsolutePath());
 			return Response.serverError().build();
 		}
 		try {
 			ProcessWorkspace oProcess = null;
 			ProcessWorkspaceRepository oRepository = new ProcessWorkspaceRepository();
+			
+			String sProcessObjId = Utils.GetRandomName();
+			
 			IngestFileParameter oParameter = new IngestFileParameter();
 			oParameter.setWorkspace(sWorkspace);
 			oParameter.setUserId(sAccount);
 			oParameter.setExchange(sWorkspace);
 			oParameter.setFilePath(oFilePath.getAbsolutePath());
+			//set the process object Id to params
+			oParameter.setProcessObjId(sProcessObjId);
+			
+			String sPath = m_oServletConfig.getInitParameter("SerializationPath") + sProcessObjId;
+			SerializationUtils.serializeObjectToXML(sPath, oParameter);
+		
 			try
 			{
 				oProcess = new ProcessWorkspace();
@@ -365,32 +373,17 @@ public class CatalogResources {
 				oProcess.setProductName(oFilePath.getName());
 				oProcess.setWorkspaceId(sWorkspace);
 				oProcess.setUserId(sAccount);
-				oProcess.setProcessObjId(Utils.GetRandomName());
+				oProcess.setProcessObjId(sProcessObjId);
 				oProcess.setStatus(ProcessStatus.CREATED.name());
 				oRepository.InsertProcessWorkspace(oProcess);
-				//set the process object Id to params
-				oParameter.setProcessObjId(oProcess.getProcessObjId());
+				Wasdi.DebugLog("CatalogueResource.IngestFile: Process Scheduled for Launcher");
 			}
 			catch(Exception oEx){
 				System.out.println("DownloadResource.Download: Error updating process list " + oEx.getMessage());
 				oEx.printStackTrace();
 				return Response.serverError().build();
 			}
-	
-			String sPath = m_oServletConfig.getInitParameter("SerializationPath") + oProcess.getProcessObjId();
-			//TODO move it before inserting the new process into DB
-			SerializationUtils.serializeObjectToXML(sPath, oParameter);
-	
-			String sLauncherPath = m_oServletConfig.getInitParameter("LauncherPath");
-			String sJavaExe = m_oServletConfig.getInitParameter("JavaExe");
-	
-			String sShellExString = sJavaExe + " -jar " + sLauncherPath +" -operation " + LauncherOperations.INGEST + " -parameter " + sPath;
-	
-			System.out.println("DownloadResource.Download: shell exec " + sShellExString);
-	
-			//Process oProc = Runtime.getRuntime().exec(sShellExString);
-			Runtime.getRuntime().exec(sShellExString);
-			
+				
 			return Response.ok().build();
 			
 		} catch (Exception e) {
@@ -422,8 +415,6 @@ public class CatalogResources {
 		if (!sDownloadRootPath.endsWith("/")) sDownloadRootPath = sDownloadRootPath + "/";
 		
 		File oUserBaseDir = new File(sDownloadRootPath+sAccount+ "/" +sWorkspace+"/");
-		
-		
 		
 		File oFilePath = new File(oUserBaseDir, sFile);
 		
@@ -458,12 +449,20 @@ public class CatalogResources {
 		try {
 			ProcessWorkspace oProcess = null;
 			ProcessWorkspaceRepository oRepository = new ProcessWorkspaceRepository();
+			
+			String sProcessObjId = Utils.GetRandomName();
+			
 			IngestFileParameter oParameter = new IngestFileParameter();
 			oParameter.setWorkspace(sWorkspace);
 			oParameter.setUserId(sAccount);
 			oParameter.setExchange(sWorkspace);
 			oParameter.setFilePath(oFilePath.getAbsolutePath());
-			
+			//set the process object Id to params
+			oParameter.setProcessObjId(sProcessObjId);
+
+			String sPath = m_oServletConfig.getInitParameter("SerializationPath") + sProcessObjId;
+			SerializationUtils.serializeObjectToXML(sPath, oParameter);
+		
 			try
 			{
 				oProcess = new ProcessWorkspace();
@@ -472,11 +471,10 @@ public class CatalogResources {
 				oProcess.setProductName(oFilePath.getName());
 				oProcess.setWorkspaceId(sWorkspace);
 				oProcess.setUserId(sAccount);
-				oProcess.setProcessObjId(Utils.GetRandomName());
+				oProcess.setProcessObjId(sProcessObjId);
 				oProcess.setStatus(ProcessStatus.CREATED.name());
 				oRepository.InsertProcessWorkspace(oProcess);
-				//set the process object Id to params
-				oParameter.setProcessObjId(oProcess.getProcessObjId());
+				Wasdi.DebugLog("CatalogueResource.IngestFileInWorkspace: Process Scheduled for Launcher");
 			}
 			catch(Exception oEx){
 				System.out.println("CatalogueResource.IngestFileInWorkspace: Error updating process list " + oEx.getMessage());
@@ -485,21 +483,7 @@ public class CatalogResources {
 				oResult.setIntValue(500);
 				return oResult;		
 			}
-	
-			String sPath = m_oServletConfig.getInitParameter("SerializationPath") + oProcess.getProcessObjId();
-			//TODO move it before inserting the new process into DB
-			SerializationUtils.serializeObjectToXML(sPath, oParameter);
-	
-			String sLauncherPath = m_oServletConfig.getInitParameter("LauncherPath");
-			String sJavaExe = m_oServletConfig.getInitParameter("JavaExe");
-	
-			String sShellExString = sJavaExe + " -jar " + sLauncherPath +" -operation " + LauncherOperations.INGEST + " -parameter " + sPath;
-	
-			System.out.println("CatalogueResource.IngestFileInWorkspace: shell exec " + sShellExString);
-	
-			//Process oProc = Runtime.getRuntime().exec(sShellExString);
-			Runtime.getRuntime().exec(sShellExString);
-			
+				
 			oResult.setBoolValue(true);
 			oResult.setIntValue(200);
 			oResult.setStringValue(oProcess.getProcessObjId());
@@ -522,7 +506,7 @@ public class CatalogResources {
 
 		//input validation
 		if(null == sSessionId || null == oFtpTransferVM) {
-			//TODO check appropriateness
+			// check appropriateness
 			PrimitiveResult oResult = PrimitiveResult.getInvalidInstance();
 			oResult.setStringValue("Null arguments");
 			return oResult;
@@ -534,6 +518,7 @@ public class CatalogResources {
 		}
 		SessionRepository oSessionRep = new SessionRepository();
 		UserSession oSession = oSessionRep.GetSession(sSessionId);
+		
 		if(null==oSession) {
 			PrimitiveResult oResult = PrimitiveResult.getInvalidInstance();
 			oResult.setStringValue("Invalid Session");
@@ -557,6 +542,7 @@ public class CatalogResources {
 			Wasdi.DebugLog("CatalogResource.ftpTransferFile: prepare parameters");
 			FtpUploadParameters oParams = new FtpUploadParameters();
 			oParams.setFtpServer(oFtpTransferVM.getServer());
+			
 			//TODO move here checks on server name from the viewModel
 			oParams.setM_iPort(oFtpTransferVM.getPort());
 			oParams.setM_sUsername(oFtpTransferVM.getUser());
@@ -603,12 +589,10 @@ public class CatalogResources {
 			String sPath = m_oServletConfig.getInitParameter("SerializationPath") + oProcess.getProcessObjId();
 			SerializationUtils.serializeObjectToXML(sPath, oParams);
 			
-			//TODO replace with new kind of repository: FtpUploadRepository
 			ProcessWorkspaceRepository oRepository = new ProcessWorkspaceRepository();
 			oRepository.InsertProcessWorkspace(oProcess);
+			Wasdi.DebugLog("CatalogueResource.ftpTransferFile: Process Scheduled for Launcher");
 			
-			
-			//TODO get file size (length) and other properties by reading from DB
 		} catch (Exception e) {
 			e.printStackTrace();
 			PrimitiveResult oRes = PrimitiveResult.getInvalidInstance();
@@ -616,34 +600,9 @@ public class CatalogResources {
 			return oRes;
 		}
 		
-		
-		
-
-		
 		PrimitiveResult oResult = new PrimitiveResult();
 		oResult.setBoolValue(true);
 		return oResult;
-	}
-	
-	public static void main(String[] args) throws Exception {
-		
-		MongoRepository.SERVER_PORT = 27018;
-		
-		String userId = "paolo";
-		String from = "";//"201709200000";
-		String to = "";//"201709222200";
-		String freeText = "";
-		String category = "PUBLIC";
-
-		SimpleDateFormat format = new SimpleDateFormat("yyyyMMddHHmm");
-		Date dtFrom = (from==null || from.isEmpty())?null:format.parse(from);
-		Date dtTo = (to==null || to.isEmpty())?null:format.parse(to);
-		ArrayList<DownloadedFile> entries = new CatalogResources().searchEntries(dtFrom, dtTo, freeText, category, userId);
-		
-		for (DownloadedFile df : entries) {
-			System.out.println(df.getRefDate() + " --> " + df.getFilePath());
-		}
-		
 	}
 	
 }

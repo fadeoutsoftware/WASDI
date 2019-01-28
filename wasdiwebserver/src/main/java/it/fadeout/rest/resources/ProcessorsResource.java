@@ -128,7 +128,24 @@ public class ProcessorsResource {
 			oProcessorRepository.InsertProcessor(oProcessor);
 			
 			// Schedule the processworkspace to deploy the processor
-			//String sProcessId = "";
+			
+			String sProcessObjId = Utils.GetRandomName();
+			
+			DeployProcessorParameter oDeployProcessorParameter = new DeployProcessorParameter();
+			oDeployProcessorParameter.setName(sName);
+			oDeployProcessorParameter.setProcessorID(sProcessorId);
+			oDeployProcessorParameter.setWorkspace(sWorkspaceId);
+			oDeployProcessorParameter.setUserId(sUserId);
+			oDeployProcessorParameter.setExchange(sWorkspaceId);
+			oDeployProcessorParameter.setProcessObjId(sProcessObjId);
+			oDeployProcessorParameter.setProcessorType(sType);
+			
+			String sPath = m_oServletConfig.getInitParameter("SerializationPath");
+			if (! (sPath.endsWith("/")||sPath.endsWith("\\"))) sPath+="/";
+			sPath += sProcessObjId;
+
+			SerializationUtils.serializeObjectToXML(sPath, oDeployProcessorParameter);
+
 			ProcessWorkspaceRepository oRepository = new ProcessWorkspaceRepository();
 			ProcessWorkspace oProcessWorkspace = new ProcessWorkspace();
 			
@@ -139,26 +156,11 @@ public class ProcessorsResource {
 				oProcessWorkspace.setProductName(sName);
 				oProcessWorkspace.setWorkspaceId(sWorkspaceId);
 				oProcessWorkspace.setUserId(sUserId);
-				oProcessWorkspace.setProcessObjId(Utils.GetRandomName());
+				oProcessWorkspace.setProcessObjId(sProcessObjId);
 				oProcessWorkspace.setStatus(ProcessStatus.CREATED.name());
-				String sProcessId = oRepository.InsertProcessWorkspace(oProcessWorkspace);
-				System.out.println("SnapOperations.ExecuteOperation: process ID: "+sProcessId);
+				oRepository.InsertProcessWorkspace(oProcessWorkspace);
 				
-				String sPath = m_oServletConfig.getInitParameter("SerializationPath");
-				if (! (sPath.endsWith("/")||sPath.endsWith("\\"))) sPath+="/";
-				sPath += oProcessWorkspace.getProcessObjId();
-
-				DeployProcessorParameter oDeployProcessorParameter = new DeployProcessorParameter();
-				oDeployProcessorParameter.setName(sName);
-				oDeployProcessorParameter.setProcessorID(sProcessorId);
-				oDeployProcessorParameter.setWorkspace(sWorkspaceId);
-				oDeployProcessorParameter.setUserId(sUserId);
-				oDeployProcessorParameter.setExchange(sWorkspaceId);
-				oDeployProcessorParameter.setProcessObjId(oProcessWorkspace.getProcessObjId());
-				oDeployProcessorParameter.setProcessorType(sType);
-				
-				//TODO move it before inserting the new process into DB
-				SerializationUtils.serializeObjectToXML(sPath, oDeployProcessorParameter);
+				Wasdi.DebugLog("ProcessorResource.uploadProcessor: Process Scheduled for Launcher");
 			}
 			catch(Exception oEx){
 				System.out.println("ProcessorsResource.uploadProcessor: Error scheduling the deploy process " + oEx.getMessage());
@@ -237,6 +239,27 @@ public class ProcessorsResource {
 			Processor oProcessorToRun = oProcessorRepository.GetProcessorByName(sName);
 
 			// Schedule the process to run the processor
+			
+			String sProcessObjId = Utils.GetRandomName();
+			
+			String sPath = m_oServletConfig.getInitParameter("SerializationPath");
+			if (! (sPath.endsWith("/")||sPath.endsWith("\\"))) sPath+="/";
+			sPath += sProcessObjId;
+
+			DeployProcessorParameter oDeployProcessorParameter = new DeployProcessorParameter();
+			oDeployProcessorParameter.setName(sName);
+			oDeployProcessorParameter.setProcessorID(oProcessorToRun.getProcessorId());
+			oDeployProcessorParameter.setWorkspace(sWorkspaceId);
+			oDeployProcessorParameter.setUserId(sUserId);
+			oDeployProcessorParameter.setExchange(sWorkspaceId);
+			oDeployProcessorParameter.setProcessObjId(sProcessObjId);
+			oDeployProcessorParameter.setJson(sEncodedJson);
+			oDeployProcessorParameter.setProcessorType(oProcessorToRun.getType());
+			
+			//TODO move it before inserting the new process into DB
+			SerializationUtils.serializeObjectToXML(sPath, oDeployProcessorParameter);
+
+			
 			ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
 			ProcessWorkspace oProcessWorkspace = new ProcessWorkspace();
 			
@@ -247,27 +270,12 @@ public class ProcessorsResource {
 				oProcessWorkspace.setProductName(sName);
 				oProcessWorkspace.setWorkspaceId(sWorkspaceId);
 				oProcessWorkspace.setUserId(sUserId);
-				oProcessWorkspace.setProcessObjId(Utils.GetRandomName());
+				oProcessWorkspace.setProcessObjId(sProcessObjId);
 				oProcessWorkspace.setStatus(ProcessStatus.CREATED.name());
 				oProcessWorkspaceRepository.InsertProcessWorkspace(oProcessWorkspace);
 				
-				String sPath = m_oServletConfig.getInitParameter("SerializationPath");
-				if (! (sPath.endsWith("/")||sPath.endsWith("\\"))) sPath+="/";
-				sPath += oProcessWorkspace.getProcessObjId();
-
-				DeployProcessorParameter oDeployProcessorParameter = new DeployProcessorParameter();
-				oDeployProcessorParameter.setName(sName);
-				oDeployProcessorParameter.setProcessorID(oProcessorToRun.getProcessorId());
-				oDeployProcessorParameter.setWorkspace(sWorkspaceId);
-				oDeployProcessorParameter.setUserId(sUserId);
-				oDeployProcessorParameter.setExchange(sWorkspaceId);
-				oDeployProcessorParameter.setProcessObjId(oProcessWorkspace.getProcessObjId());
-				oDeployProcessorParameter.setJson(sEncodedJson);
-				oDeployProcessorParameter.setProcessorType(oProcessorToRun.getType());
-				
-				//TODO move it before inserting the new process into DB
-				SerializationUtils.serializeObjectToXML(sPath, oDeployProcessorParameter);
-				
+				Wasdi.DebugLog("ProcessorResource.run: Process Scheduled for Launcher");
+								
 				oRunningProcessorViewModel.setJsonEncodedResult("");
 				oRunningProcessorViewModel.setName(sName);
 				oRunningProcessorViewModel.setProcessingIdentifier(oProcessWorkspace.getProcessObjId());

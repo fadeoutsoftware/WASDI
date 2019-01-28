@@ -38,6 +38,7 @@ import wasdi.shared.business.UserSession;
 import wasdi.shared.data.MongoRepository;
 import wasdi.shared.data.SessionRepository;
 import wasdi.shared.data.UserRepository;
+import wasdi.shared.rabbit.RabbitFactory;
 import wasdi.shared.utils.CredentialPolicy;
 import wasdi.shared.utils.Utils;
 
@@ -150,6 +151,18 @@ public class Wasdi extends Application {
 			e.printStackTrace();
 		}
 		
+		try {
+			
+    		RabbitFactory.s_sRABBIT_QUEUE_USER = getInitParameter("RABBIT_QUEUE_USER", "guest");
+            RabbitFactory.s_sRABBIT_QUEUE_PWD = getInitParameter("RABBIT_QUEUE_PWD", "guest");
+            RabbitFactory.s_sRABBIT_HOST = getInitParameter("RABBIT_HOST", "127.0.0.1");
+            RabbitFactory.s_sRABBIT_QUEUE_PORT = getInitParameter("RABBIT_QUEUE_PORT","5672");
+            
+            System.out.println("-------Mongo db User " + MongoRepository.DB_USER);
+			
+		} catch (Throwable e) {
+			e.printStackTrace();
+		}		
 
 		if (s_oProcessingThread==null) {
 			try {
