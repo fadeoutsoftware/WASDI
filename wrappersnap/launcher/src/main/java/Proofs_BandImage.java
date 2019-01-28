@@ -6,6 +6,8 @@ import java.awt.image.RenderedImage;
 import java.io.File;
 import java.io.IOException;
 import javax.imageio.ImageIO;
+import javax.media.jai.JAI;
+
 import org.esa.snap.core.dataio.ProductIO;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
@@ -21,8 +23,10 @@ public class Proofs_BandImage {
 		String sRedBandName = "B4";
 		String sGreenBandName = "B3";
 		String sBlueBandName = "B2";
-		String sOutPath = "C:\\Temp\\wasdi\\data\\paolo\\2c1271a4-9e2b-4291-aabd-caf3074adb25\\RGB.png";
-		createRGB(new Dimension(1219, 1063), sFilePath, sRedBandName, sGreenBandName, sBlueBandName, sOutPath);
+		String sOutPath = "C:\\Temp\\wasdi\\data\\paolo\\2c1271a4-9e2b-4291-aabd-caf3074adb25\\RGB_v2.png";
+		//createRGB(new Dimension(1219, 1063), sFilePath, sRedBandName, sGreenBandName, sBlueBandName, sOutPath);
+		//createRGB(new Dimension(600, 600), sFilePath, sRedBandName, sGreenBandName, sBlueBandName, sOutPath);
+		createRGB(null, sFilePath, sRedBandName, sGreenBandName, sBlueBandName, sOutPath);
 		System.out.println("TEST DONE");
     }
 
@@ -60,16 +64,22 @@ public class Proofs_BandImage {
 		Band oGreenBand = product.getBand(sGreenBandName);
 		Band oBlueBand = product.getBand(sBlueBandName);
 		
-		long t = System.currentTimeMillis();
-		
 		BandImageManager oManager = new BandImageManager(product);
 		
 		RenderedImage oOutImg;
 		
-		oOutImg = oManager.buildRGBImage2(oRedBand , oGreenBand, oBlueBand, oOutputDimension, true);
-		//FIXME JAI could not be resolved
-		//JAI.create("filestore", oOutImg, sOutPath, "PNG");
-		//ImageIO.write(img, "jpg", new File(sOutPath));
+		System.out.println("createRGB: start buildRGBImage");
+		
+		//oOutImg = oManager.buildRGBImage(oRedBand , oGreenBand, oBlueBand, oOutputDimension);
+		oOutImg = oManager.buildRGBImage4(oRedBand , oGreenBand, oBlueBand, oOutputDimension,true);
+		
+		long lStartTime = System.currentTimeMillis();
+		
+		//JAI.create("filestore", oOutImg, sOutPath, "JPEG");
+		ImageIO.setUseCache(false);
+		ImageIO.write(oOutImg, "PNG", new File(sOutPath));
+		
+		System.out.println("createRGB: Saved in " + (System.currentTimeMillis() - lStartTime) + " ms");
 		
 		oManager.quit();
 	}

@@ -1,22 +1,15 @@
 import java.awt.Rectangle;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import org.apache.commons.io.IOUtils;
-import org.esa.snap.core.dataio.ProductIO;
-import org.esa.snap.core.datamodel.Product;
-import org.esa.snap.core.gpf.graph.Graph;
 import org.esa.snap.core.gpf.graph.GraphContext;
 import org.esa.snap.core.gpf.graph.GraphException;
-import org.esa.snap.core.gpf.graph.GraphIO;
 import org.esa.snap.core.gpf.graph.GraphProcessingObserver;
-import org.esa.snap.core.gpf.graph.GraphProcessor;
 import org.esa.snap.core.gpf.graph.Node;
 import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.runtime.Config;
@@ -26,10 +19,10 @@ import com.bc.ceres.binding.dom.DomElement;
 import com.bc.ceres.core.ProgressMonitor;
 
 import wasdi.ConfigReader;
-import wasdi.rabbit.Send;
 import wasdi.shared.data.MongoRepository;
 import wasdi.shared.parameters.GraphParameter;
 import wasdi.shared.parameters.GraphSetting;
+import wasdi.shared.rabbit.Send;
 import wasdi.snapopearations.WasdiGraph;
 
 public class ProofGraph {
@@ -152,7 +145,7 @@ public class ProofGraph {
             
             oParam.setSettings(oSettings);
 
-			WasdiGraph oWasdiGraph = new WasdiGraph(oParam, new Send());
+			WasdiGraph oWasdiGraph = new WasdiGraph(oParam, new Send("amq.topic"));
 			oSettings.setInputNodeNames(oWasdiGraph.getInputNodes());
 			oSettings.setOutputNodeNames(oWasdiGraph.getOutputNodes());
 			oSettings.getInputFileNames().add("S1A_IW_GRDH_1SDV_20180129T052722_20180129T052747_020365_022CA8_9D99.zip");
