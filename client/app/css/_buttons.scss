@@ -1,0 +1,232 @@
+.btn{
+    &.btn-wasdi {
+        border-radius: 0px;
+
+
+        @if ( fontFamilyContains($wasdi-font-web, "Hero-Light")) {
+            font-weight: 600;
+            letter-spacing: 0.4px;
+        }
+
+        &.btn-primary {
+            border-color: $color-btn-primary-bg;
+            background-color: $color-btn-primary-bg;
+            color: $color-btn-primary-text;
+
+            &:hover{
+                &:not([disabled]) {
+                    border-color: $color-btn-primary-bg-hover;
+                    background-color: $color-btn-primary-bg-hover;
+                }
+            }
+        }
+        &.btn-outline-primary{
+            border-color: $color-btn-primary-bg;
+            background: transparent;
+            color: $color-btn-primary-bg;
+
+            &.no-border{
+                border-color: transparent;
+                font-size: 16px;
+                letter-spacing: 0px;
+            }
+
+            &:hover{
+                &:not([disabled]) {
+                    border-color: $color-btn-primary-bg;
+                    background-color: $color-btn-primary-bg;
+                    color: $color-btn-primary-text;
+                }
+            }
+        }
+
+        &.btn-secondary {
+            border-color: $color-btn-secondary-bg;
+            background-color: $color-btn-secondary-bg;
+            color: $color-btn-secondary-text;
+
+            &:hover{
+                &:not([disabled]) {
+                    border-color: $color-btn-secondary-bg-hover;
+                    background-color: $color-btn-secondary-bg-hover;
+                }
+            }
+        }
+
+        &:disabled, &.disabled{
+            opacity: .65;
+        }
+
+        .fa{
+            margin-right: 8px;
+        }
+
+
+        //-----------------------------------------------------------
+        // Custom icons
+        .custom-icon{
+            &:not(.fa) {
+                margin-right: 8px;
+                position: relative;
+                top: 4px;
+            }
+        }
+        //RADAR ICON
+        .icon-radar {
+            content: $wasdi-radar-icon;
+            width: $wasdi-size-icon;
+            height: auto;
+        }
+        //OPTICAL ICON
+        .icon-eye {
+            content: $wasdi-eye-icon;
+            width: $wasdi-size-icon;
+            height: auto;
+        }
+        //PROCESSOR ICON
+        .icon-document-gear {
+            content: $wasdi-document-gear-icon-version;
+            width: $wasdi-size-icon;
+            height: auto;
+        }
+        //APPLY ORBIT
+        .icon-applyorbit-operations {
+            content: $wasdi-orbit-icon-applyorbit-blue-version;
+            width: $wasdi-size-icon;
+            height: auto;
+        }
+
+        //Radiometric Calibrate
+        .icon-radiometriccalibrate-operations {
+            content: $wasdi-orbit-icon-calibrate-blue-version;
+            width: $wasdi-size-icon;
+            height: auto;
+        }
+        //MULTILOOKING ICON
+        .icon-multilooking-operations {
+            content: $wasdi-telescope-icon-multilooking-blue-version;
+            width: $wasdi-size-icon;
+            height: auto;
+        }
+        //range doppler terrain correction
+        .icon-range-doppler-terrain-correction-operations {
+            content: $wasdi-earth-icon-range-doppler-terrain-correction-blue-version;
+            width: $wasdi-size-icon;
+            height: auto;
+        }
+        // MIDA ICON
+        .icon-mida-merge-operations {
+            content: $wasdi-mida-merge-operations-blue;
+            width: $wasdi-size-icon;
+            height: auto;
+        }
+        // ICON  MASK MENAGER
+        .icon-mask-manager {
+            content: $wasdi-mask-manager-blue;
+            width: $wasdi-size-icon;
+            height: auto;
+        }
+
+        &:hover {
+            //background-color: $wasdi-button-over-color;
+            background-color: $wasdi-blue-logo;
+            color: white;
+
+            //RADAR ICON
+            .icon-radar {
+                content: $wasdi-radar-icon-white-version;
+                width: $wasdi-size-icon;
+                height: auto;
+            }
+
+            //OPTICAL ICON
+            .icon-eye {
+                content: $wasdi-eye-icon-white-version;
+                width: $wasdi-size-icon;
+                height: auto;
+            }
+
+            //PROCESSOR ICON
+            .icon-document-gear {
+                content: $wasdi-document-gear-icon-white-version;
+                width: $wasdi-size-icon;
+                height: auto;
+            }
+            //APPLY ORBIT
+            .icon-applyorbit-operations {
+                content: $wasdi-orbit-icon-applyorbit-white-version;
+                width: $wasdi-size-icon;
+                height: auto;
+            }
+            //RADIOMETRIC CALIBRATE
+            .icon-radiometriccalibrate-operations {
+                content: $wasdi-orbit-icon-calibrate-white-version;
+                width: $wasdi-size-icon;
+                height: auto;
+            }
+            //Multilooking
+            .icon-multilooking-operations {
+                content: $wasdi-telescope-icon-multilooking-white-version;
+                width: $wasdi-size-icon;
+                height: auto;
+            }
+            //range-doppler-terrain-correction
+            .icon-range-doppler-terrain-correction-operations {
+                content: $wasdi-earth-icon-range-doppler-terrain-correction-white-version;
+                width: $wasdi-size-icon;
+                height: auto;
+            }
+            //MIDA
+            .icon-mida-merge-operations {
+                content: $wasdi-mida-merge-operations-white;
+                width: $wasdi-size-icon;
+                height: auto;
+            }
+            .icon-mask-manager {
+                content: $wasdi-mask-manager-white;
+                width: $wasdi-size-icon;
+                height: auto;
+            }
+
+            i {
+                color: white;
+                background-color: $wasdi-blue-logo;
+            }
+        }
+        //-----------------------------------------------------------
+
+    }
+}
+
+.btn-group{
+    $parent : &;
+
+    &.use-divider{
+        .btn{
+            &:not([last-of-type])
+            {
+                &.btn-secondary{ border-right: 1px solid  #aaa; }
+            }
+        }
+    }
+
+    &#{$parent}-sm{
+        .btn {
+            font-size: 14px;
+        }
+    }
+
+}
+
+.dropdown{
+    .dropdown-item{
+        a{
+            padding-top: 6px;
+            padding-bottom: 6px;
+            &:hover {
+                background-color: $wasdi-green-logo;
+                color: whitesmoke;
+            }
+        }
+    }
+}

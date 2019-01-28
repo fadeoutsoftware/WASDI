@@ -24,3 +24,9 @@ $size-status-bar-height-opened: 500px;
 
 $size-panel-heading-height-single-row-total: 40px; // 39px real
 $size-panel-body-height-with-single-row-heading: calc(100% - #{$size-panel-heading-height-single-row-total});
+
+
+
+
+$z-index-map-btn: 1001;
+$z-index-top-toolbar: $z-index-map-btn + 1;
