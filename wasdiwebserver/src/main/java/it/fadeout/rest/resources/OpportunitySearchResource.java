@@ -196,6 +196,13 @@ public class OpportunitySearchResource {
 						iIdCoverageCounter++;
 						aoCoverageSwathResultViewModels.add(oCoverageSwathResultViewModel);
 					}
+					
+					CoverageSwathResultViewModel oSwathResultViewModel = getCoverageSwathResultViewModelFromCoverageSwathResult(oSwatResul);
+					oSwathResultViewModel.FrameFootPrint = "";
+					oSwathResultViewModel.IdCoverageSwathResultViewModel = iIdCoverageCounter;
+					iIdCoverageCounter++;
+					
+					aoCoverageSwathResultViewModels.add(oSwathResultViewModel);
 				}
 //
 //			}
@@ -209,10 +216,10 @@ public class OpportunitySearchResource {
 		return aoCoverageSwathResultViewModels;
 	}
 	
-	
-	private ArrayList<CoverageSwathResultViewModel> getSwatViewModelFromResult(CoverageSwathResult oSwath) {
-		ArrayList<CoverageSwathResultViewModel> aoResults = new ArrayList<CoverageSwathResultViewModel>();
+	public CoverageSwathResultViewModel getCoverageSwathResultViewModelFromCoverageSwathResult(CoverageSwathResult oSwath) {
+		
 		CoverageSwathResultViewModel oVM = new CoverageSwathResultViewModel();
+		
 		if (oSwath != null) {
 
 			oVM.SwathName = oSwath.getSwathName();
@@ -271,58 +278,69 @@ public class OpportunitySearchResource {
 					oVM.SwathFootPrint += "))";
 				}
 			}
+		}
+		
+		return oVM;
+	}
+	
+	private ArrayList<CoverageSwathResultViewModel> getSwatViewModelFromResult(CoverageSwathResult oSwath) {
+		
+		ArrayList<CoverageSwathResultViewModel> aoResults = new ArrayList<CoverageSwathResultViewModel>();
+		
+		if (oSwath == null) return aoResults;
+		
+		CoverageSwathResultViewModel oVM = getCoverageSwathResultViewModelFromCoverageSwathResult(oSwath);
 
-			List<SwathArea> aoAreas = oSwath.getChilds();
+		List<SwathArea> aoAreas = oSwath.getChilds();
 
-			for (SwathArea oArea : aoAreas) {
+		for (SwathArea oArea : aoAreas) {
 
-				CoverageSwathResultViewModel oSwathResult = new CoverageSwathResultViewModel(oVM);
+			CoverageSwathResultViewModel oSwathResult = new CoverageSwathResultViewModel(oVM);
 
-				if (oArea.getMode() != null) {
-					oSwathResult.SensorMode = oArea.getMode().getName();
-					if (oArea.getMode().getViewAngle() != null)
-						oSwathResult.Angle = oArea.getMode().getViewAngle().toString();
-				}
-
-				if (oArea.getswathSize() != null) {
-					oSwathResult.CoverageLength = oArea.getswathSize().getLength();
-					oSwathResult.CoverageWidth = oArea.getswathSize().getWidth();
-				}
-
-				oSwathResult.Coverage = oArea.getCoverage() * 100;
-
-				if (oArea.getswathSize() != null) {
-					oSwathResult.CoverageWidth = oArea.getswathSize().getWidth();
-					oSwathResult.CoverageLength = oArea.getswathSize().getLength();
-				}
-
-				if (oArea.getFootprint() != null) {
-					Polygon oPolygon = oArea.getFootprint();
-					apoint[] aoPoints = oPolygon.getVertex();
-
-					if (aoPoints != null) {
-
-						oSwathResult.FrameFootPrint = "POLYGON((";
-
-						for (int iPoints = 0; iPoints < aoPoints.length; iPoints++) {
-							apoint oPoint = aoPoints[iPoints];
-							oSwathResult.FrameFootPrint += "" + (oPoint.x * 180.0 / Math.PI);
-							oSwathResult.FrameFootPrint += " ";
-							oSwathResult.FrameFootPrint += "" + (oPoint.y * 180.0 / Math.PI);
-							oSwathResult.FrameFootPrint += ",";
-						}
-
-						oSwathResult.FrameFootPrint = oSwathResult.FrameFootPrint.substring(0,
-								oSwathResult.FrameFootPrint.length() - 2);
-
-						oSwathResult.FrameFootPrint += "))";
-					}
-				}
-
-				aoResults.add(oSwathResult);
+			if (oArea.getMode() != null) {
+				oSwathResult.SensorMode = oArea.getMode().getName();
+				if (oArea.getMode().getViewAngle() != null)
+					oSwathResult.Angle = oArea.getMode().getViewAngle().toString();
 			}
 
+			if (oArea.getswathSize() != null) {
+				oSwathResult.CoverageLength = oArea.getswathSize().getLength();
+				oSwathResult.CoverageWidth = oArea.getswathSize().getWidth();
+			}
+
+			oSwathResult.Coverage = oArea.getCoverage() * 100;
+
+			if (oArea.getswathSize() != null) {
+				oSwathResult.CoverageWidth = oArea.getswathSize().getWidth();
+				oSwathResult.CoverageLength = oArea.getswathSize().getLength();
+			}
+
+			if (oArea.getFootprint() != null) {
+				Polygon oPolygon = oArea.getFootprint();
+				apoint[] aoPoints = oPolygon.getVertex();
+
+				if (aoPoints != null) {
+
+					oSwathResult.FrameFootPrint = "POLYGON((";
+
+					for (int iPoints = 0; iPoints < aoPoints.length; iPoints++) {
+						apoint oPoint = aoPoints[iPoints];
+						oSwathResult.FrameFootPrint += "" + (oPoint.x * 180.0 / Math.PI);
+						oSwathResult.FrameFootPrint += " ";
+						oSwathResult.FrameFootPrint += "" + (oPoint.y * 180.0 / Math.PI);
+						oSwathResult.FrameFootPrint += ",";
+					}
+
+					oSwathResult.FrameFootPrint = oSwathResult.FrameFootPrint.substring(0,
+							oSwathResult.FrameFootPrint.length() - 2);
+
+					oSwathResult.FrameFootPrint += "))";
+				}
+			}
+
+			aoResults.add(oSwathResult);
 		}
+
 		return aoResults;
 	}
 
