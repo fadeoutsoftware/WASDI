@@ -829,16 +829,18 @@ var SearchOrbitController = (function() {
     // }
 
     SearchOrbitController.prototype.clearOrbitsTable = function(){
-        if(utilsIsObjectNullOrUndefined(this.m_aoOrbits) === true)
-            return false;
-        var iNumberOfOrbits = this.m_aoOrbits.length;
-
-        for(var iIndexOrbit = 0; iIndexOrbit < iNumberOfOrbits; iIndexOrbit++)
-        {
-            var oOrbit = this.m_aoOrbits[iIndexOrbit];
-            this.m_oMapService.removeLayerFromMap(oOrbit.FootPrintRectangle);//remove orbit rectangle from map
-            oOrbit.FootPrintRectangle = null;
-        }
+        // this.m_oMapService.removeLayersFromMap();
+        // if(utilsIsObjectNullOrUndefined(this.m_aoOrbits) === true)
+        //     return false;
+        //
+        // var iNumberOfOrbits = this.m_aoOrbits.length;
+        //
+        // for(var iIndexOrbit = 0; iIndexOrbit < iNumberOfOrbits; iIndexOrbit++)
+        // {
+        //     var oOrbit = this.m_aoOrbits[iIndexOrbit];
+        //     this.m_oMapService.removeLayerFromMap(oOrbit.FootPrintRectangle);//remove orbit rectangle from map
+        //     oOrbit.FootPrintRectangle = null;
+        // }
         this.m_aoOrbits = [];
         return true;
     };
@@ -878,7 +880,7 @@ var SearchOrbitController = (function() {
                     check_callback: false
             },
             checkbox: {
-                three_state : true, // to avoid that fact that checking a node also check others
+                three_state : false, // to avoid that fact that checking a node also check others
                     whole_node : false,  // to avoid checking the box just clicking the node
                     tie_selection : false // for checking without selecting and selecting without checking
             },
@@ -943,21 +945,31 @@ var SearchOrbitController = (function() {
             //add swath node
             var oResultSearchTreeSwathName = this.generateNode(oResultSearchTreeSensorLookDirection,sSwathName);
             oResultSearchTreeSwathName.icon = "vector-square-icon-menu-jstree";
+            oResultSearchTreeSwathName.isSwath = true;
+            if( (utilsIsStrNullOrEmpty(aoData[iIndexOpportunity].FrameFootPrint) === true) && (utilsIsStrNullOrEmpty(aoData[iIndexOpportunity].SwathFootPrint) === false) )
+            {
+                oResultSearchTreeSwathName.FrameFootPrint = aoData[iIndexOpportunity].SwathFootPrint;
+                continue;
+            }
 
             //add frame node
             var oFrameNode = this.generateNode(oResultSearchTreeSwathName,sFrameName);
             oFrameNode.icon = "selection-icon-menu-jstree";
-
             oFrameNode.isFrame = true;
-            oFrameNode.FrameFootPrint = aoData[iIndexOpportunity].FrameFootPrint;
 
-            //check event on tree
-            this.m_oTreeService.onTreeEvent(sCheckEvent,sIdDiv,oCheckFunction,oController);
-            //uncheck event on tree
-            this.m_oTreeService.onTreeEvent(sUncheckEvent,sIdDiv,oUncheckFunction,oController);
-            // this.m_oTreeService.onTreeEvent
+            if( (utilsIsStrNullOrEmpty(aoData[iIndexOpportunity].FrameFootPrint) === false) )
+            {
+                oFrameNode.FrameFootPrint = aoData[iIndexOpportunity].FrameFootPrint;
+
+            }
 
         }
+
+        //check event on tree
+        this.m_oTreeService.onTreeEvent(sCheckEvent,sIdDiv,oCheckFunction,oController);
+        //uncheck event on tree
+        this.m_oTreeService.onTreeEvent(sUncheckEvent,sIdDiv,oUncheckFunction,oController);
+
         return oReturnValue;
 
     };
@@ -974,22 +986,17 @@ var SearchOrbitController = (function() {
             return false;
         }
 
-        //no children
-        if(oNode.children.length === 0)
+
+        if(oNode.original.isFrame || oNode.original.isSwath)
         {
-            if(oNode.original.isFrame)
+            if( utilsIsObjectNullOrUndefined(oNode.original.rectangle) === true)
             {
-                if( utilsIsObjectNullOrUndefined(oNode.original.rectangle) === true)
-                {
-                    var oRectangle = oController.drawRectangleInMap(oNode.original);
-                    oNode.original.rectangle = oRectangle;
-                }
+                var sColor = "orange";
+                if (oNode.original.isSwath) sColor = "yellow";
+
+                var oRectangle = oController.drawRectangleInMap(oNode.original,sColor);
+                oNode.original.rectangle = oRectangle;
             }
-        }
-        else
-        {
-            var aoFrames = oController.getAllFramesInBranch(oNode.children);
-            oController.drawAllFrames(aoFrames);
         }
 
         return true;
@@ -1009,23 +1016,14 @@ var SearchOrbitController = (function() {
             return false;
         }
 
-        if(oNode.children.length === 0)
+        if(oNode.original.isFrame || oNode.original.isSwath)
         {
-            if(oNode.original.isFrame)
+            if(utilsIsObjectNullOrUndefined(oNode.original.rectangle) === false)
             {
-                if(utilsIsObjectNullOrUndefined(oNode.original.rectangle) === false)
-                {
-                    oController.m_oMapService.removeLayerFromMap(oNode.original.rectangle);
-                    oNode.original.rectangle = null;
-                }
+                oController.m_oMapService.removeLayerFromMap(oNode.original.rectangle);
+                oNode.original.rectangle = null;
             }
         }
-        else
-        {
-            var aoFrames = oController.getAllFramesInBranch(oNode.children);
-            oController.removeAllFrames(aoFrames);
-        }
-
 
         return true;
     };
@@ -1104,8 +1102,13 @@ var SearchOrbitController = (function() {
         return oResultSearch;
     };
 
-    SearchOrbitController.prototype.drawRectangleInMap = function(oOrbit)
+    SearchOrbitController.prototype.drawRectangleInMap = function(oOrbit,sColor)
     {
+        if(utilsIsStrNullOrEmpty(sColor) === true)
+        {
+            sColor = null;
+        }
+
         if (utilsIsObjectNullOrUndefined(oOrbit))
         {
             return null;
@@ -1139,7 +1142,7 @@ var SearchOrbitController = (function() {
 
             aasNewContent.push(oLatLonArray);
         }
-        var oRectangle = this.m_oMapService.addRectangleByBoundsArrayOnMap(aasNewContent, null, 0);
+        var oRectangle = this.m_oMapService.addRectangleByBoundsArrayOnMap(aasNewContent, sColor, 0);
         if(utilsIsObjectNullOrUndefined(oRectangle))
         {
             utilsVexDialogAlertTop("THERE ARE PROBLEMS IN ORBIT VISUALIZATION");
@@ -1193,7 +1196,7 @@ var SearchOrbitController = (function() {
             var iNumberOfSensors = oSatelliteResource.satelliteSensors.length;
             for(var iSensor = 0; iSensor < iNumberOfSensors;iSensor++)
             {
-                oSatelliteResource.satelliteSensors[iSensor].enabled = false;
+                oSatelliteResource.satelliteSensors[iSensor].enable = false;
             }
         }
         return aoSatelliteResources;
@@ -1318,6 +1321,7 @@ var SearchOrbitController = (function() {
                     //var oDataTree = oController.generateDataTree(data);
                     // oController.m_oTreeService.createNewInstanceTree("#orbitsTree",oController.generateDataTree(data));
                     oController.m_aoOrbits = data;
+
                     if(utilsIsObjectNullOrUndefined(oController.m_oOpportunitiesTree) === true)
                     {
                         oController.m_oOpportunitiesTree = oController.getResultOpportunitiesTreeJson(data);
@@ -1359,17 +1363,20 @@ var SearchOrbitController = (function() {
         for(var iIndexSatellite = 0; iIndexSatellite < iNumberOfSatellites; iIndexSatellite++)
         {
             var oSatellite = aoSatelliteResources[iIndexSatellite];
-            oSatellite.enabled = false;
+            oSatellite.enable = false;
+            // oSatellite.enabled = false;
             var iNumberOfSatelliteSensors = oSatellite.satelliteSensors.length;
             for(var iIndexSensors = 0; iIndexSensors < iNumberOfSatelliteSensors;iIndexSensors++)
             {
                 var aoSatelliteSensors = oSatellite.satelliteSensors[iIndexSensors];
-                aoSatelliteSensors.enabled = false;
+                aoSatelliteSensors.enable = false;
+                // aoSatelliteSensors.enabled = false;
                 var iNumberOfSensorModes = aoSatelliteSensors.sensorModes.length;
                 for(var iIndexSensorMode = 0 ; iIndexSensorMode < iNumberOfSensorModes ; iIndexSensorMode++ )
                 {
                     var oSensorMode = aoSatelliteSensors.sensorModes[iIndexSensorMode];
-                    oSensorMode.enabled = false;
+                    oSensorMode.enable = false;
+                    // oSensorMode.enabled = false;
                 }
             }
         }
@@ -1388,21 +1395,21 @@ var SearchOrbitController = (function() {
             for(var iIndexSensor = 0;iIndexSensor < iNumberOfSensors ; iIndexSensor++)
             {
                 var oSensor = oSatellite.satelliteSensors[iIndexSensor];
-                if(oSensor.enabled)
+                if(oSensor.enable)
                 {
                     var oTempSensor = {};
                     oTempSensor.description = oSensor.description;
-                    oTempSensor.enabled = oSensor.enabled;
+                    oTempSensor.enable = oSensor.enable;
                     oTempSensor.sensorModes = [];
                     var iNumberOfSensorModes = oSensor.sensorModes.length;
                     for(var iIndexSensorMode = 0; iIndexSensorMode < iNumberOfSensorModes; iIndexSensorMode++)
                     {
                         var oSensorMode = oSensor.sensorModes[iIndexSensorMode];
-                        if(oSensorMode.enabled)
+                        if(oSensorMode.enable)
                         {
                             var oTempSensorMode = {};
                             oTempSensorMode.name = oSensorMode.name;
-                            oTempSensorMode.enabled = oSensorMode.enabled;
+                            oTempSensorMode.enable = oSensorMode.enable;
                             oTempSensor.sensorModes.push(oTempSensorMode);
                         }
 
@@ -1509,7 +1516,7 @@ var SearchOrbitController = (function() {
             var oSatelliteSensor=oSatellite.satelliteSensors[iIndexSatelliteSensor];
             if(sSatelliteSensorDescription === oSatelliteSensor.description)
             {
-                oSatelliteSensor.enabled = true;
+                oSatelliteSensor.enable = true;
             }
             if(utilsIsStrNullOrEmpty(sSatelliteSensorMode) === false)
             {
@@ -1518,7 +1525,7 @@ var SearchOrbitController = (function() {
                 {
                     if( oSatelliteSensor.sensorModes[iSensorMode].name === sSatelliteSensorMode)
                     {
-                        oSatelliteSensor.sensorModes[iSensorMode].enabled = true;
+                        oSatelliteSensor.sensorModes[iSensorMode].enable = true;
                     }
 
                 }
