@@ -128,11 +128,16 @@ function utilsVexDialogBigAlertTop(oMessage,oCallback)
     });
     return oVexInstance;
 }
-//@params: 1000 millisecond = 1
-function utilsVexCloseDialogAfterFewSeconds(iSecond,oVexInstance)
+
+/**
+ * Close a Vex dialog after a given time interval
+ * @param iDelayMs The time interval in millis
+ * @param oVexInstance The instance of Vex dialog to close
+ */
+function utilsVexCloseDialogAfter(iDelayMs,oVexInstance)
 {
-    if(!utilsIsObjectNullOrUndefined (iSecond) && !utilsIsObjectNullOrUndefined (oVexInstance))
-        setTimeout(function(){vex.close(oVexInstance) }, iSecond);
+    if(!utilsIsObjectNullOrUndefined (iDelayMs) && !utilsIsObjectNullOrUndefined (oVexInstance))
+        setTimeout(function(){vex.close(oVexInstance) }, iDelayMs);
 }
 
 function utilsVexDialogConfirmWithCheckBox(oMessage,oCallback)

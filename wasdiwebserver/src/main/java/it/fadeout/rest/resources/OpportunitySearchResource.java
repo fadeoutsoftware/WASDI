@@ -1,10 +1,14 @@
 package it.fadeout.rest.resources;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
 
+import javax.servlet.ServletConfig;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
@@ -12,40 +16,128 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 
 import org.nfs.orbits.CoverageTool.Polygon;
 import org.nfs.orbits.CoverageTool.apoint;
 import org.nfs.orbits.sat.CoverageSwathResult;
 import org.nfs.orbits.sat.SatFactory;
+import org.nfs.orbits.sat.SatSensor;
 import org.nfs.orbits.sat.Satellite;
 import org.nfs.orbits.sat.SwathArea;
 
+import de.micromata.opengis.kml.v_2_2_0.Kml;
 import it.fadeout.Wasdi;
 import it.fadeout.business.InstanceFinder;
 import it.fadeout.viewmodels.CoverageSwathResultViewModel;
+import it.fadeout.viewmodels.OpportunitiesSearchViewModel;
 import it.fadeout.viewmodels.OrbitFilterViewModel;
 import it.fadeout.viewmodels.OrbitSearchViewModel;
+import it.fadeout.viewmodels.SatelliteFilterViewModel;
 import it.fadeout.viewmodels.SatelliteOrbitResultViewModel;
+import it.fadeout.viewmodels.SatelliteResourceViewModel;
 import satLib.astro.time.Time;
 import wasdi.shared.business.User;
+import wasdi.shared.utils.CredentialPolicy;
 import wasdi.shared.utils.Utils;
 
 @Path("/searchorbit")
 public class OpportunitySearchResource {
+	@Context
+	ServletConfig m_oServletConfig;
+	
+	CredentialPolicy m_oCredentialPolicy = new CredentialPolicy();
 
+//	@POST
+//	@Path("/search")
+//	@Produces({ "application/xml", "application/json", "text/html" })
+//	@Consumes(MediaType.APPLICATION_JSON)
+//	public ArrayList<CoverageSwathResultViewModel> Search(@HeaderParam("x-session-token") String sSessionId,
+//			OrbitSearchViewModel OrbitSearch) {
+//		Wasdi.DebugLog("OpportunitySearchResource.Search");
+//
+//		User oUser = Wasdi.GetUserFromSession(sSessionId);
+//
+//		ArrayList<CoverageSwathResultViewModel> aoCoverageSwathResultViewModels = new ArrayList<CoverageSwathResultViewModel>();
+//
+//		try {
+//			if (oUser == null) {
+//				return aoCoverageSwathResultViewModels;
+//			}
+//			if (Utils.isNullOrEmpty(oUser.getUserId())) {
+//				return aoCoverageSwathResultViewModels;
+//			}
+//
+//			if (OrbitSearch == null)
+//				return null;
+//
+//			// set nfs properties download
+//			String userHome = System.getProperty("user.home");
+//			String Nfs = System.getProperty("nfs.data.download");
+//			if (Nfs == null)
+//				System.setProperty("nfs.data.download", userHome + "/nfs/download");
+//
+//			System.out.println("nfs dir " + System.getProperty("nfs.data.download"));
+//
+//			Date dtDate = new Date();
+//			String sArea = OrbitSearch.getPolygon();
+//			int iIdCoverageCounter = 1;
+//
+//			// Foreach filter combination found
+//			List<OrbitFilterViewModel> oOrbitFilters = OrbitSearch.getOrbitFilters();
+//			for (OrbitFilterViewModel oOrbitFilter : oOrbitFilters) {
+//
+//				// Find the opportunities
+//				ArrayList<CoverageSwathResult> aoCoverageSwathResult = new ArrayList<>();
+//				try {
+//					aoCoverageSwathResult = InstanceFinder.findSwatsByFilters(sArea,
+//							OrbitSearch.getAcquisitionStartTime(), OrbitSearch.getAcquisitionEndTime(),
+//							OrbitSearch.getSatelliteNames(), oOrbitFilter.getSensorResolution(),
+//							oOrbitFilter.getSensorType(),OrbitSearch.getLookingType(),OrbitSearch.getViewAngle(),OrbitSearch.getSwathSize());
+//				} 
+//				catch (ParseException e) {
+//					e.printStackTrace();
+//				}
+//
+//				if (aoCoverageSwathResult == null)
+//					return null;
+//
+//				// For each Swat Result
+//				for (CoverageSwathResult oSwatResul : aoCoverageSwathResult) {
+//					// Get View Model and Childs
+//					ArrayList<CoverageSwathResultViewModel> aoModels = getSwatViewModelFromResult(oSwatResul);
+//					for (CoverageSwathResultViewModel oCoverageSwathResultViewModel : aoModels) {
+//						oCoverageSwathResultViewModel.IdCoverageSwathResultViewModel = iIdCoverageCounter;
+//						iIdCoverageCounter++;
+//						aoCoverageSwathResultViewModels.add(oCoverageSwathResultViewModel);
+//					}
+//				}
+//
+//			}
+//
+//			return aoCoverageSwathResultViewModels;
+//		} catch (Exception oEx) {
+//			System.out.println("OpportunitySearchResource.Search: Error searching opportunity " + oEx.getMessage());
+//			oEx.printStackTrace();
+//		}
+//
+//		return aoCoverageSwathResultViewModels;
+//	}
+	
 	@POST
 	@Path("/search")
 	@Produces({ "application/xml", "application/json", "text/html" })
 	@Consumes(MediaType.APPLICATION_JSON)
-	public ArrayList<CoverageSwathResultViewModel> Search(@HeaderParam("x-session-token") String sSessionId,
-			OrbitSearchViewModel OrbitSearch) {
+	public ArrayList<CoverageSwathResultViewModel> Search(@HeaderParam("x-session-token") String sSessionId,OpportunitiesSearchViewModel OpportunitiesSearch) {
 		Wasdi.DebugLog("OpportunitySearchResource.Search");
 
 		User oUser = Wasdi.GetUserFromSession(sSessionId);
 
 		ArrayList<CoverageSwathResultViewModel> aoCoverageSwathResultViewModels = new ArrayList<CoverageSwathResultViewModel>();
-
+		
 		try {
 			if (oUser == null) {
 				return aoCoverageSwathResultViewModels;
@@ -53,54 +145,48 @@ public class OpportunitySearchResource {
 			if (Utils.isNullOrEmpty(oUser.getUserId())) {
 				return aoCoverageSwathResultViewModels;
 			}
-
-			if (OrbitSearch == null)
-				return null;
-
+//
+//			if (OrbitSearch == null)
+//				return null;
+//
 			// set nfs properties download
 			String userHome = System.getProperty("user.home");
 			String Nfs = System.getProperty("nfs.data.download");
 			if (Nfs == null)
 				System.setProperty("nfs.data.download", userHome + "/nfs/download");
-
+//
 			System.out.println("nfs dir " + System.getProperty("nfs.data.download"));
 
 			Date dtDate = new Date();
-			String sArea = OrbitSearch.getPolygon();
+//			String sArea = OpportunitiesSearch.getPolygon();
 			int iIdCoverageCounter = 1;
 			
-			System.out.println("Create data e poligono");
-
-			// Foreach filter combination found
-			List<OrbitFilterViewModel> oOrbitFilters = OrbitSearch.getOrbitFilters();
-			for (OrbitFilterViewModel oOrbitFilter : oOrbitFilters) {
-				
-				System.out.println("Ciclo filtri");
-
-				// Find the opportunities
+			ArrayList<SatelliteFilterViewModel> aoSatelliteFilters = OpportunitiesSearch.getSatelliteFilters();
+//			for(SatelliteFilterViewModel oSatelliteFilter : aoSatelliteFilters )
+//			{
 				ArrayList<CoverageSwathResult> aoCoverageSwathResult = new ArrayList<>();
-				try {
-					System.out.println("PRE FIND");
-					aoCoverageSwathResult = InstanceFinder.findSwatsByFilters(sArea,
-							OrbitSearch.getAcquisitionStartTime(), OrbitSearch.getAcquisitionEndTime(),
-							OrbitSearch.getSatelliteNames(), oOrbitFilter.getSensorResolution(),
-							oOrbitFilter.getSensorType(),OrbitSearch.getLookingType(),OrbitSearch.getViewAngle(),OrbitSearch.getSwathSize());
-					System.out.println("POST FIND");
-				} 
-				catch (Throwable e) {
-					System.out.println("ECCEZIONE " + e.toString());
-					e.printStackTrace();
-				}
-
-				System.out.println("uscito dal ciclo");
+				aoCoverageSwathResult = InstanceFinder.findSwatsByFilters(OpportunitiesSearch);
 				
-				if (aoCoverageSwathResult == null) {
-					System.out.println("TORNATO NULL");
+//			}
+//			// Foreach filter combination found
+//			List<OrbitFilterViewModel> oOrbitFilters = OrbitSearch.getOrbitFilters();
+//			for (OrbitFilterViewModel oOrbitFilter : oOrbitFilters) {
+//
+//				// Find the opportunities
+//				ArrayList<CoverageSwathResult> aoCoverageSwathResult = new ArrayList<>();
+//				try {
+//					aoCoverageSwathResult = InstanceFinder.findSwatsByFilters(sArea,
+//							OrbitSearch.getAcquisitionStartTime(), OrbitSearch.getAcquisitionEndTime(),
+//							OrbitSearch.getSatelliteNames(), oOrbitFilter.getSensorResolution(),
+//							oOrbitFilter.getSensorType(),OrbitSearch.getLookingType(),OrbitSearch.getViewAngle(),OrbitSearch.getSwathSize());
+//				} 
+//				catch (ParseException e) {
+//					e.printStackTrace();
+//				}
+//
+				if (aoCoverageSwathResult == null)
 					return null;
-				}
-				
-				System.out.println("Risultati ok " + aoCoverageSwathResult.size());
-
+//
 				// For each Swat Result
 				for (CoverageSwathResult oSwatResul : aoCoverageSwathResult) {
 					// Get View Model and Childs
@@ -110,13 +196,18 @@ public class OpportunitySearchResource {
 						iIdCoverageCounter++;
 						aoCoverageSwathResultViewModels.add(oCoverageSwathResultViewModel);
 					}
+					
+					CoverageSwathResultViewModel oSwathResultViewModel = getCoverageSwathResultViewModelFromCoverageSwathResult(oSwatResul);
+					oSwathResultViewModel.FrameFootPrint = "";
+					oSwathResultViewModel.IdCoverageSwathResultViewModel = iIdCoverageCounter;
+					iIdCoverageCounter++;
+					
+					aoCoverageSwathResultViewModels.add(oSwathResultViewModel);
 				}
-
-			}
-			
-			System.out.println("TORNO");
-
-			return aoCoverageSwathResultViewModels;
+//
+//			}
+//
+//			return aoCoverageSwathResultViewModels;
 		} catch (Exception oEx) {
 			System.out.println("OpportunitySearchResource.Search: Error searching opportunity " + oEx.getMessage());
 			oEx.printStackTrace();
@@ -124,10 +215,11 @@ public class OpportunitySearchResource {
 
 		return aoCoverageSwathResultViewModels;
 	}
-
-	private ArrayList<CoverageSwathResultViewModel> getSwatViewModelFromResult(CoverageSwathResult oSwath) {
-		ArrayList<CoverageSwathResultViewModel> aoResults = new ArrayList<CoverageSwathResultViewModel>();
+	
+	public CoverageSwathResultViewModel getCoverageSwathResultViewModelFromCoverageSwathResult(CoverageSwathResult oSwath) {
+		
 		CoverageSwathResultViewModel oVM = new CoverageSwathResultViewModel();
+		
 		if (oSwath != null) {
 
 			oVM.SwathName = oSwath.getSwathName();
@@ -186,58 +278,69 @@ public class OpportunitySearchResource {
 					oVM.SwathFootPrint += "))";
 				}
 			}
+		}
+		
+		return oVM;
+	}
+	
+	private ArrayList<CoverageSwathResultViewModel> getSwatViewModelFromResult(CoverageSwathResult oSwath) {
+		
+		ArrayList<CoverageSwathResultViewModel> aoResults = new ArrayList<CoverageSwathResultViewModel>();
+		
+		if (oSwath == null) return aoResults;
+		
+		CoverageSwathResultViewModel oVM = getCoverageSwathResultViewModelFromCoverageSwathResult(oSwath);
 
-			List<SwathArea> aoAreas = oSwath.getChilds();
+		List<SwathArea> aoAreas = oSwath.getChilds();
 
-			for (SwathArea oArea : aoAreas) {
+		for (SwathArea oArea : aoAreas) {
 
-				CoverageSwathResultViewModel oSwathResult = new CoverageSwathResultViewModel(oVM);
+			CoverageSwathResultViewModel oSwathResult = new CoverageSwathResultViewModel(oVM);
 
-				if (oArea.getMode() != null) {
-					oSwathResult.SensorMode = oArea.getMode().getName();
-					if (oArea.getMode().getViewAngle() != null)
-						oSwathResult.Angle = oArea.getMode().getViewAngle().toString();
-				}
-
-				if (oArea.getswathSize() != null) {
-					oSwathResult.CoverageLength = oArea.getswathSize().getLength();
-					oSwathResult.CoverageWidth = oArea.getswathSize().getWidth();
-				}
-
-				oSwathResult.Coverage = oArea.getCoverage() * 100;
-
-				if (oArea.getswathSize() != null) {
-					oSwathResult.CoverageWidth = oArea.getswathSize().getWidth();
-					oSwathResult.CoverageLength = oArea.getswathSize().getLength();
-				}
-
-				if (oArea.getFootprint() != null) {
-					Polygon oPolygon = oArea.getFootprint();
-					apoint[] aoPoints = oPolygon.getVertex();
-
-					if (aoPoints != null) {
-
-						oSwathResult.FrameFootPrint = "POLYGON((";
-
-						for (int iPoints = 0; iPoints < aoPoints.length; iPoints++) {
-							apoint oPoint = aoPoints[iPoints];
-							oSwathResult.FrameFootPrint += "" + (oPoint.x * 180.0 / Math.PI);
-							oSwathResult.FrameFootPrint += " ";
-							oSwathResult.FrameFootPrint += "" + (oPoint.y * 180.0 / Math.PI);
-							oSwathResult.FrameFootPrint += ",";
-						}
-
-						oSwathResult.FrameFootPrint = oSwathResult.FrameFootPrint.substring(0,
-								oSwathResult.FrameFootPrint.length() - 2);
-
-						oSwathResult.FrameFootPrint += "))";
-					}
-				}
-
-				aoResults.add(oSwathResult);
+			if (oArea.getMode() != null) {
+				oSwathResult.SensorMode = oArea.getMode().getName();
+				if (oArea.getMode().getViewAngle() != null)
+					oSwathResult.Angle = oArea.getMode().getViewAngle().toString();
 			}
 
+			if (oArea.getswathSize() != null) {
+				oSwathResult.CoverageLength = oArea.getswathSize().getLength();
+				oSwathResult.CoverageWidth = oArea.getswathSize().getWidth();
+			}
+
+			oSwathResult.Coverage = oArea.getCoverage() * 100;
+
+			if (oArea.getswathSize() != null) {
+				oSwathResult.CoverageWidth = oArea.getswathSize().getWidth();
+				oSwathResult.CoverageLength = oArea.getswathSize().getLength();
+			}
+
+			if (oArea.getFootprint() != null) {
+				Polygon oPolygon = oArea.getFootprint();
+				apoint[] aoPoints = oPolygon.getVertex();
+
+				if (aoPoints != null) {
+
+					oSwathResult.FrameFootPrint = "POLYGON((";
+
+					for (int iPoints = 0; iPoints < aoPoints.length; iPoints++) {
+						apoint oPoint = aoPoints[iPoints];
+						oSwathResult.FrameFootPrint += "" + (oPoint.x * 180.0 / Math.PI);
+						oSwathResult.FrameFootPrint += " ";
+						oSwathResult.FrameFootPrint += "" + (oPoint.y * 180.0 / Math.PI);
+						oSwathResult.FrameFootPrint += ",";
+					}
+
+					oSwathResult.FrameFootPrint = oSwathResult.FrameFootPrint.substring(0,
+							oSwathResult.FrameFootPrint.length() - 2);
+
+					oSwathResult.FrameFootPrint += "))";
+				}
+			}
+
+			aoResults.add(oSwathResult);
 		}
+
 		return aoResults;
 	}
 
@@ -289,7 +392,27 @@ public class OpportunitySearchResource {
 		}
 		return ret;
 	}
-
+	@GET
+	@Path("/getkmlsearchresults")
+	@Produces({ "application/xml"})//, "application/json", "text/html" 
+	//@Consumes(MediaType.APP)
+	@Consumes(MediaType.APPLICATION_XML)
+	public Kml getKmlSearchResults ()
+	{
+		final Kml kml = new Kml();
+		kml.createAndSetPlacemark()
+		   .withName("London, UK").withOpen(Boolean.TRUE)
+		   .createAndSetPoint().addToCoordinates(-0.126236, 51.500152);
+		
+		/*try {
+			kml.marshal(new File("C:\\temp\\wasdi\\HelloKml.kml"));
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return null;
+		}*/
+		return kml;
+	}
 	@GET
 	@Path("/updatetrack/{satellitesname}")
 	@Produces({ "application/xml", "application/json", "text/html" })
@@ -352,4 +475,49 @@ public class OpportunitySearchResource {
 
 		return aoRet;
 	}
+	
+	
+	@GET
+	@Path("/getsatellitesresource")
+	@Produces({ "application/xml", "application/json", "text/html"}) 
+	//@Consumes(MediaType.APP)
+	@Consumes(MediaType.APPLICATION_JSON)
+	public ArrayList <SatelliteResourceViewModel> getSatellitesResources (@HeaderParam("x-session-token") String sSessionId)
+	{
+//		if(! m_oCredentialPolicy.validSessionId(sSessionId)) {
+//			//todo retur error
+//			//Satellite oSatellite = new
+//		}
+		String[] asSatellites = null;
+		
+//		String satres = InstanceFinder.s_sOrbitSatsMap.get("COSMOSKY1");
+		String sSatellites = m_oServletConfig.getInitParameter("LIST_OF_SATELLITES");
+		if (sSatellites != null && sSatellites.length() > 0) 
+		{
+			asSatellites = sSatellites.split(",|;");
+		}
+		
+		ArrayList <SatelliteResourceViewModel> aaoReturnValue = new ArrayList <SatelliteResourceViewModel>();
+		for(Integer iIndexSarellite = 0; iIndexSarellite < asSatellites.length ; iIndexSarellite ++)
+		{
+			try {
+				String satres = InstanceFinder.s_sOrbitSatsMap.get(asSatellites[iIndexSarellite]);
+				Satellite oSatellite = SatFactory.buildSat(satres);
+				ArrayList<SatSensor> aoSatelliteSensors = oSatellite.getSensors();
+				
+				SatelliteResourceViewModel oSatelliteResource = new SatelliteResourceViewModel();
+				oSatelliteResource.setSatelliteName(oSatellite.getName());
+				oSatelliteResource.setSatelliteSensors(aoSatelliteSensors);
+				aaoReturnValue.add(oSatelliteResource);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				return null;
+			}			
+		}
+		
+		return aaoReturnValue;
+
+	}
+
 }
