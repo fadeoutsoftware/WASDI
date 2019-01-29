@@ -199,6 +199,22 @@
         }
     }
 
+    .missions-result-container{
+        .tabs-container{
+            .nav-item{
+                font-size: 12px;
+                .badge{
+                    font-size: 12px;
+                    letter-spacing: .5px;
+                    font-family: monospace;
+                    margin-top: -3px;
+                    font-weight: 500;
+                    padding: 4px 8px;
+                }
+            }
+        }
+    }
+
     // MAP CONTAINER
     .map-column {
         padding-left: 0;
@@ -260,6 +276,7 @@
                 //background: $wasdi-blue-logo-complementary-3;
                 color: white;
                 padding: 1px 5px;
+                margin: 0px;
 
                 //margin-top: 15px;
                 //margin-right: 15px;
@@ -479,8 +496,6 @@
         }
         /*MISSIONS CSS */
         .missions {
-            margin-top: 5px;
-            margin-bottom: 5px;
 
             //border-bottom: solid 1px ;
             input[type=text] {

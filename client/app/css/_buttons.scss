@@ -25,12 +25,6 @@
             background: transparent;
             color: $color-btn-primary-bg;
 
-            &.no-border{
-                border-color: transparent;
-                font-size: 16px;
-                letter-spacing: 0px;
-            }
-
             &:hover{
                 &:not([disabled]) {
                     border-color: $color-btn-primary-bg;
@@ -53,12 +47,35 @@
             }
         }
 
+
+        &.btn-outline-light {
+            border-color: whitesmoke;
+            background-color: transparent;
+            color: $color-btn-primary-text;
+
+            &:hover{
+                &:not([disabled]) {
+                    border-color: $color-btn-primary-bg-hover;
+                    background-color: $color-btn-primary-bg-hover;
+                }
+            }
+        }
+
+
+
         &:disabled, &.disabled{
             opacity: .65;
         }
 
+        &.no-border{
+            border-color: transparent;
+            font-size: 16px;
+            letter-spacing: 0px;
+        }
+
         .fa{
             margin-right: 8px;
+            background-color: transparent !important;
         }
 
 

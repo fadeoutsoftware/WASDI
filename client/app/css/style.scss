@@ -226,6 +226,17 @@ h4 {
         height: $size-panel-body-height-with-single-row-heading !important;
     }
 }
+
+
+.card{
+    border-color: $wasdi-blue-logo;
+
+    .card-header{
+        background-color: $wasdi-blue-logo;
+        color: whitesmoke;
+    }
+}
+
 //----------------------------------------------------
 
 
