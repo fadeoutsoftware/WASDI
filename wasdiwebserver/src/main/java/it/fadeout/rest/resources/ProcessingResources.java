@@ -328,11 +328,21 @@ public class ProcessingResources {
 	public ArrayList<SnapWorkflowViewModel> getWorkflowsByUser(@HeaderParam("x-session-token") String sSessionId) {
 		Wasdi.DebugLog("ProcessingResources.getWorkflowsByUser");
 		
-		if (Utils.isNullOrEmpty(sSessionId)) return null;
+		if (Utils.isNullOrEmpty(sSessionId)) {
+			Wasdi.DebugLog("ProcessingResources.getWorkflowsByUser: session null");
+			return null;
+		}
 		User oUser = Wasdi.GetUserFromSession(sSessionId);
 
-		if (oUser==null) return null;
-		if (Utils.isNullOrEmpty(oUser.getUserId())) return null;
+		if (oUser==null) {
+			Wasdi.DebugLog("ProcessingResources.getWorkflowsByUser: user null");
+			return null;
+		}
+		
+		if (Utils.isNullOrEmpty(oUser.getUserId())) {
+			Wasdi.DebugLog("ProcessingResources.getWorkflowsByUser: user id null");
+			return null;
+		}
 
 		String sUserId = oUser.getUserId();
 		
@@ -352,6 +362,8 @@ public class ProcessingResources {
 			
 			aoRetWorkflows.add(oVM);
 		}
+		
+		Wasdi.DebugLog("ProcessingResources.getWorkflowsByUser: return " + aoRetWorkflows.size() + " workflows");
 		
 		return aoRetWorkflows;
 	}
@@ -1256,6 +1268,8 @@ public class ProcessingResources {
 		try {
 			//Update process list
 			
+			sProcessObjId = Utils.GetRandomName();
+			
 			OperatorParameter oParameter = GetParameter(operation); 
 			oParameter.setSourceProductName(sSourceProductName);
 			oParameter.setDestinationProductName(sDestinationProductName);
@@ -1282,7 +1296,6 @@ public class ProcessingResources {
 				oProcess.setProductName(sSourceProductName);
 				oProcess.setWorkspaceId(sWorkspaceId);
 				oProcess.setUserId(sUserId);
-				sProcessObjId = Utils.GetRandomName();
 				oProcess.setProcessObjId(sProcessObjId);
 				oProcess.setStatus(ProcessStatus.CREATED.name());
 				oRepository.InsertProcessWorkspace(oProcess);
