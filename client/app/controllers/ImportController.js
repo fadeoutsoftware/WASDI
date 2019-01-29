@@ -156,10 +156,10 @@ var ImportController = (function() {
                 this.openWorkspace(this.m_oState.params.workSpace);
                 this.m_oActiveWorkspace = this.m_oConstantsService.getActiveWorkspace();
             }
-            else
-            {
-                //TODO CREATE NEW WORKSPACE OR GO HOME
-            }
+            // else
+            // {
+            //
+            // }
         }
         else
         {
@@ -543,7 +543,10 @@ var ImportController = (function() {
         //hide previous results
         oController.m_bIsVisibleListOfLayers = true;
         oController.m_bIsPaginatedList = true;
-        oController.m_oSearchService.setTextQuery(oController.m_oModel.textQuery);
+        //TODO
+        // "*" + oController.m_oModel.textQuery + "*" fix
+        oController.m_oSearchService.setTextQuery("*" + oController.m_oModel.textQuery + "*");
+        // oController.m_oSearchService.setTextQuery(oController.m_oModel.textQuery);
         oController.m_oSearchService.setGeoselection(oController.m_oModel.geoselection);
         var aoProviders = [];
         aoProviders.push(oProvider);
@@ -588,8 +591,9 @@ var ImportController = (function() {
                 }
             }, function errorCallback(response) {
                 utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN OPEN SEARCH REQUEST...");
-                oController.m_bIsVisibleListOfLayers = false;//visualize filter list
-                oController.m_oResultsOfSearchService.setIsVisibleListOfProducts(oController.m_bIsVisibleListOfLayers );
+                oProvider.isLoaded = true;
+                // oController.m_bIsVisibleListOfLayers = false;//visualize filter list
+                // oController.m_oResultsOfSearchService.setIsVisibleListOfProducts(oController.m_bIsVisibleListOfLayers );
             });
 
 
@@ -774,7 +778,6 @@ var ImportController = (function() {
     //             var oController = this;
     //             if(utilsIsObjectNullOrUndefined(oWorkSpace) || utilsIsObjectNullOrUndefined(oLayer))
     //             {
-    //                 //TODO CHEK THIS POSSIBLE CASE
     //                 //utilsVexDialogAlertTop("Error there isn't workspaceID or layer")
     //                 console.log("Error there isn't workspaceID or layer");
     //                 return false;
@@ -782,14 +785,12 @@ var ImportController = (function() {
     //             var url = oLayer.link;
     //             if(utilsIsObjectNullOrUndefined(url))
     //             {
-    //                 //TODO CHECK THIS POSSIBLE CASE
     //                 //utilsVexDialogAlertTop("Error there isn't workspaceID or layer")
     //                 console.log("Error there isn't workspaceID or layer")
     //                 return false;
     //             }
     //
     //             oThat.m_oFileBufferService.download(url,oWorkSpace.workspaceId,oLayer.bounds.toString(),oLayer.provider).success(function (data, status) {
-    //                 //TODO CHECK DATA-STATUS
     //                 var oDialog = utilsVexDialogAlertBottomRightCorner("IMPORTING IMAGE IN WASDI...");
     //                 utilsVexCloseDialogAfter("3000",oDialog);
     //
@@ -919,7 +920,6 @@ var ImportController = (function() {
                 // oThat.m_oFileBufferService.download(url,oWorkSpace.workspaceId,aoProducts[iIndexProduct].bounds.toString(),
                 //     aoProducts[iIndexProduct].provider).success(function (data, status)
                 // {
-                //     //TODO CHECK DATA-STATUS
                 //     var oDialog = utilsVexDialogAlertBottomRightCorner("IMPORTING IMAGE IN WASDI...");
                 //     utilsVexCloseDialogAfter("3000",oDialog);
                 //
@@ -1162,7 +1162,7 @@ var ImportController = (function() {
             {
                 var sContent;
                 if(this.m_oConstantsService.testMode() == true)
-                    sContent = aoStr[iIndexStr].text;/*.content TODO */
+                    sContent = aoStr[iIndexStr].text;
                 else
                     sContent = aoStr[iIndexStr].content;
 
