@@ -142,7 +142,8 @@
                                                 ng-click="m_oController.m_oSelectedWorkflow = workflow">
                                                 <td >{{workflow.name}}</td>
                                                 <td>{{workflow.description}}</td>
-                                                <td class="td-button" ng-click="m_oController.deleteWorkflow(workflow)">
+                                                <!--<td class="td-button" ng-click="m_oController.deleteWorkflow(workflow)">-->
+                                                <td class="td-button" ng-click="m_oController.openDeleteWorkflowDialog(workflow)">
                                                     <i class="fa fa-trash" aria-hidden="true"></i>
                                                 </td>
                                             </tr>

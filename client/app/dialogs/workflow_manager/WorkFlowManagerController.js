@@ -419,6 +419,23 @@ var WorkFlowManagerController = (function() {
         return true;
     };
 
+    WorkFlowManagerController.prototype.openDeleteWorkflowDialog = function(oWorkflow){
+        if(utilsIsObjectNullOrUndefined(oWorkflow) === true)
+        {
+            return false;
+        }
+        var oController = this;
+        var oReturnFunctionValue = function(oValue){
+            if (oValue === true)
+            {
+                oController.deleteWorkflow(oWorkflow);
+            }
+
+        }
+        utilsVexDialogConfirm("Do you want to delete workflow: " + oWorkflow.name + " ?",oReturnFunctionValue);
+        return true;
+    };
+
     WorkFlowManagerController.$inject = [
         '$scope',
         'close',
