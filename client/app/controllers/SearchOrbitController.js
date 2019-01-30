@@ -1217,10 +1217,27 @@ var SearchOrbitController = (function() {
                 whole_node : false,  // to avoid checking the box just clicking the node
                 tie_selection : false // for checking without selecting and selecting without checking
             },
-            plugins: ['checkbox']
+            plugins: ['checkbox','contextmenu'],
+            contextmenu: { // my right click menu
+                items:this.functionContextMenu,
+            }
         }
 
         return oJsonData;
+    };
+
+    SearchOrbitController.prototype.functionContextMenu = function($node)
+    {
+        console.log("test");
+        var oReturnValue = {
+                "Radar": {
+                "label": "Radar",
+                "action": false,
+                "icon":"radar-icon-context-menu-jstree",
+            }
+        }
+
+        return oReturnValue;
     };
 
     SearchOrbitController.prototype.generateSatellitesResourcesTree = function(oDataInput)
