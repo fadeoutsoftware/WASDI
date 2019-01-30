@@ -7,19 +7,32 @@ var ProcessesLogsController = (function() {
     function ProcessesLogsController($scope, oClose, oProcessesLaunchedService,oConstantsService) {//,oExtras
         this.m_oScope = $scope;
         this.m_oScope.m_oController = this;
+
+        this.hasError = false;
         this.m_oProcessesLaunchedService = oProcessesLaunchedService;
         this.m_aoProcessesLogs = [];
         this.filterTable = "";this.m_bAreProcessesLoaded = false;
         // this.m_oExtrs= oExtras;
         //$scope.close = oClose;
         this.m_oConstantsService = oConstantsService;
-        this.m_sActiveWorkspaceId = this.m_oConstantsService.getActiveWorkspace().workspaceId,
-        $scope.close = function(result) {
-            oClose(result, 500); // close, but give 500ms for bootstrap to animate
-        };
 
-        this.getAllProcessesLogs();
-        this.m_sHrefLogFile = "";
+        if(_.isNil(this.m_oConstantsService.getActiveWorkspace()) == false)
+        {
+            this.m_sActiveWorkspaceId = this.m_oConstantsService.getActiveWorkspace().workspaceId;
+
+            $scope.close = function(result) {
+                oClose(result, 500); // close, but give 500ms for bootstrap to animate
+            };
+
+            this.getAllProcessesLogs();
+            this.m_sHrefLogFile = "";
+        }
+        else{
+            this.hasError = true;
+            this.m_sActiveWorkspaceId = null;
+        }
+
+
 ;    }
 
     /**

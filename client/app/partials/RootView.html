@@ -89,14 +89,10 @@
                         <!------------------------------ USER ------------------------------>
                         <div class="nav navbar-nav navbar-right user-container">
                             <div class="dropdown">
-                                <button class="dropdown-toggle" type="button" id="dropdownMenuUser"
-                                        data-toggle="dropdown ml-3">
-                                    <!--i class="fa fa-user-circle fa-2x" aria-hidden="true"></i-->
+                                <div class="dropdown-toggle ml-4" type="button" id="dropdownMenuUser" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
                                     <img src="assets/icons/white-user-icon2.png" style="width: 26px" onmouseover="this.src='assets/icons/green-user-icon2.png';" onmouseout="this.src='assets/icons/white-user-icon2.png';" />
-                                    <!--div id="UserIcon"></div-->
-                                    <!--<span class="caret"></span>-->
-                                </button>
-                                <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenuUser">
+                                </div>
+                                <ul class="dropdown-menu mt-3" aria-labelledby="dropdownMenuUser">
                                     <li role="presentation" class=""  ng-click="m_oController.editUserInfo()" ><!--dropdown-header-->
                                         <a role="menuitem" tabindex="-1">
 
@@ -123,8 +119,6 @@
                                             <h4>{{"ROOT_VIEW_LINK_LOG_OUT"|translate}}</h4>
                                         </a>
                                     </li>
-
-
                                 </ul>
                             </div>
                         </div>
