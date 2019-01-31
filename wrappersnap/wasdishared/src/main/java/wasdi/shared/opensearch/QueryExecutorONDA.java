@@ -16,6 +16,8 @@ import org.apache.abdera.i18n.templates.Template;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import com.google.gson.JsonObject;
+
 import wasdi.shared.viewmodels.QueryResultViewModel;
 
 /**
@@ -85,44 +87,56 @@ public class QueryExecutorONDA extends QueryExecutor {
 		
 		
 		String sUrl = getCountUrl(sQuery);
-		//use this to test with just 3 results
-		//sUrl = "https://catalogue.onda-dias.eu/dias-catalogue/Products/$count?$search=%22(%20(%20name:S1*%20AND%20name:S1A_*%20AND%20name:*SLC*%20AND%20name:*%20AND%20sensorOperationalMode:SM%20)%20)%20AND%20(%20(%20beginPosition:[2018-12-02T00:00:00.000Z%20TO%202018-12-02T23:59:59.999Z]%20AND%20endPosition:[2018-12-02T00:00:00.000Z%20TO%202018-12-02T23:59:59.999Z]%20)%20)%22";
+		////use this to test with just 3 results
+		////sUrl = "https://catalogue.onda-dias.eu/dias-catalogue/Products/$count?$search=%22(%20(%20name:S1*%20AND%20name:S1A_*%20AND%20name:*SLC*%20AND%20name:*%20AND%20sensorOperationalMode:SM%20)%20)%20AND%20(%20(%20beginPosition:[2018-12-02T00:00:00.000Z%20TO%202018-12-02T23:59:59.999Z]%20AND%20endPosition:[2018-12-02T00:00:00.000Z%20TO%202018-12-02T23:59:59.999Z]%20)%20)%22";
 		
-		URL oURL = new URL(sUrl);
-		HttpURLConnection oConnection = (HttpURLConnection) oURL.openConnection();
-
-
-		// optional default is GET
-		oConnection.setRequestMethod("GET");
-		oConnection.setRequestProperty("Accept", "*/*");
-
-		//XXX add user and password
-
-		System.out.println("\nSending 'GET' request to URL : " + sUrl);
-
-		int responseCode =  oConnection.getResponseCode();
-		System.out.println("Response Code : " + responseCode);
-
-		if(200 == responseCode) {
-			BufferedReader in = new BufferedReader(new InputStreamReader(oConnection.getInputStream()));
-			String inputLine;
-			StringBuffer sResponse = new StringBuffer();
-	
-			while ((inputLine = in.readLine()) != null) {
-				sResponse.append(inputLine);
+		int iResult = -1;
+		String sResult = httpGetResults(sUrl);
+		if(null!=sResult) {
+			try {
+				iResult = Integer.parseInt(sResult);
+			} catch (Exception e) {
+				e.printStackTrace();
 			}
-			in.close();
-		
-
-			//print result
-			System.out.println("Count Done: Response " + sResponse.toString());
-	
-			return Integer.parseInt(sResponse.toString());
-		} else {
-			String sMessage = oConnection.getResponseMessage();
-			System.out.println(sMessage);
-			return -1;
 		}
+		return iResult;
+		
+		
+//		URL oURL = new URL(sUrl);
+//		HttpURLConnection oConnection = (HttpURLConnection) oURL.openConnection();
+//
+//
+//		// optional default is GET
+//		oConnection.setRequestMethod("GET");
+//		oConnection.setRequestProperty("Accept", "*/*");
+//
+//		//XXX add user and password
+//
+//		System.out.println("\nSending 'GET' request to URL : " + sUrl);
+//
+//		int responseCode =  oConnection.getResponseCode();
+//		System.out.println("Response Code : " + responseCode);
+//
+//		if(200 == responseCode) {
+//			BufferedReader in = new BufferedReader(new InputStreamReader(oConnection.getInputStream()));
+//			String inputLine;
+//			StringBuffer sResponse = new StringBuffer();
+//	
+//			while ((inputLine = in.readLine()) != null) {
+//				sResponse.append(inputLine);
+//			}
+//			in.close();
+//		
+//
+//			//print result
+//			System.out.println("Count Done: Response " + sResponse.toString());
+//	
+//			return Integer.parseInt(sResponse.toString());
+//		} else {
+//			String sMessage = oConnection.getResponseMessage();
+//			System.out.println(sMessage);
+//			return -1;
+//		}
 	}
 
 	
@@ -131,48 +145,57 @@ public class QueryExecutorONDA extends QueryExecutor {
 
 
 		String sUrl = buildUrl(sQuery);
-
-		//use this to test with just 3 results
-		//sUrl = "https://catalogue.onda-dias.eu/dias-catalogue/Products?$search=%22(%20(%20name:S1*%20AND%20name:S1A_*%20AND%20name:*SLC*%20AND%20name:*%20AND%20sensorOperationalMode:SM%20)%20)%20AND%20(%20(%20beginPosition:[2018-12-02T00:00:00.000Z%20TO%202018-12-02T23:59:59.999Z]%20AND%20endPosition:[2018-12-02T00:00:00.000Z%20TO%202018-12-02T23:59:59.999Z]%20)%20)%22&$orderby=creationDate%20desc&$top=15&$skip=0&$format=json";
 		
+		String sResult = httpGetResults(sUrl);
 		
-		URL oURL = new URL(sUrl);
-		HttpURLConnection oConnection = (HttpURLConnection) oURL.openConnection();
-
-
-		// optional default is GET
-		oConnection.setRequestMethod("GET");
-		oConnection.setRequestProperty("Accept", "*/*");
-
-		//XXX add user and password
-
-		System.out.println("\nSending 'GET' request to URL : " + sUrl);
-
-		int responseCode =  oConnection.getResponseCode();
-		System.out.println("Response Code : " + responseCode);
-
-		if(200 == responseCode) {
-			BufferedReader in = new BufferedReader(new InputStreamReader(oConnection.getInputStream()));
-			String inputLine;
-			StringBuffer oResponse = new StringBuffer();
-	
-			while ((inputLine = in.readLine()) != null) {
-				oResponse.append(inputLine);
-			}
-			in.close();
-		
-
-			//print result
-			System.out.println("Count Done: Response " + oResponse.toString());
-	
-			ArrayList<QueryResultViewModel> aoResult = buildResultLightViewModel(oResponse.toString());
-			//MAYBE filter aoResult using info from the query
-			return aoResult;
-		} else {
-			String sMessage = oConnection.getResponseMessage();
-			System.out.println(sMessage);
-			return null;
+		ArrayList<QueryResultViewModel> aoResult = null;
+		if(sResult!= null) {
+			aoResult = buildResultLightViewModel(sResult);
 		}
+		return aoResult;
+
+		
+		////use this to test with just 3 results
+		////sUrl = "https://catalogue.onda-dias.eu/dias-catalogue/Products?$search=%22(%20(%20name:S1*%20AND%20name:S1A_*%20AND%20name:*SLC*%20AND%20name:*%20AND%20sensorOperationalMode:SM%20)%20)%20AND%20(%20(%20beginPosition:[2018-12-02T00:00:00.000Z%20TO%202018-12-02T23:59:59.999Z]%20AND%20endPosition:[2018-12-02T00:00:00.000Z%20TO%202018-12-02T23:59:59.999Z]%20)%20)%22&$orderby=creationDate%20desc&$top=15&$skip=0&$format=json";
+		
+		
+//		URL oURL = new URL(sUrl);
+//		HttpURLConnection oConnection = (HttpURLConnection) oURL.openConnection();
+//
+//
+//		// optional default is GET
+//		oConnection.setRequestMethod("GET");
+//		oConnection.setRequestProperty("Accept", "*/*");
+//
+//		//XXX add user and password
+//
+//		System.out.println("\nSending 'GET' request to URL : " + sUrl);
+//
+//		int responseCode =  oConnection.getResponseCode();
+//		System.out.println("Response Code : " + responseCode);
+//
+//		if(200 == responseCode) {
+//			BufferedReader in = new BufferedReader(new InputStreamReader(oConnection.getInputStream()));
+//			String inputLine;
+//			StringBuffer oResponse = new StringBuffer();
+//	
+//			while ((inputLine = in.readLine()) != null) {
+//				oResponse.append(inputLine);
+//			}
+//			in.close();
+//		
+//
+//			//print result
+//			System.out.println("Count Done: Response " + oResponse.toString());
+//	
+//			ArrayList<QueryResultViewModel> aoResult = buildResultLightViewModel(oResponse.toString());
+//			//MAYBE filter aoResult using info from the query
+//			return aoResult;
+//		} else {
+//			String sMessage = oConnection.getResponseMessage();
+//			System.out.println(sMessage);
+//			return null;
+//		}
 	}
 	
 	protected ArrayList<QueryResultViewModel> buildResultLightViewModel(String sJson){
@@ -184,12 +207,40 @@ public class QueryExecutorONDA extends QueryExecutor {
 		try {
 			JSONObject oJsonOndaResponse = new JSONObject(sJson);
 			ArrayList<QueryResultViewModel> aoResult = new ArrayList<QueryResultViewModel>();
-			JSONArray aoJsonArray = oJsonOndaResponse.getJSONArray("value");
-			for (Object oObject : aoJsonArray) {
-				if(null!=oObject) {
-					JSONObject oOndaEntry = (JSONObject)(oObject);
-					QueryResultViewModel oRes = m_oResponseTranslator.translate(oOndaEntry, m_sDownloadProtocol);
-					aoResult.add(oRes);
+			JSONArray aoJsonArray = oJsonOndaResponse.optJSONArray("value");
+			if(null!=aoJsonArray) {
+				for (Object oObject : aoJsonArray) {
+					if(null!=oObject) {
+						JSONObject oOndaFullEntry = new JSONObject("{}");
+						String sEntryKey = "entry";
+						JSONObject oOndaEntry = (JSONObject)(oObject);
+						oOndaFullEntry.put(sEntryKey, oOndaEntry);
+
+						String sId = oOndaEntry.optString("id");
+						if(null!=sId) {
+							String sBaseUrl = "https://catalogue.onda-dias.eu/dias-catalogue/Products(";
+							sBaseUrl += sId;
+							sBaseUrl += ")";
+							String sFormat = "?$format=json";
+							String sProductInfoUrl =  sBaseUrl + sFormat;
+							String sMetadataUrl = sBaseUrl + "/Metadata" + sFormat;
+
+							//not necessary
+//							String sProductInfoJson = httpGetResults(sProductInfoUrl);
+//							if(null!=sProductInfoJson) {
+//								JSONObject oProductInfo = new JSONObject(sProductInfoJson); 
+//								oOndaFullEntry.put("productInfo", oProductInfo);
+//							}
+							//XXX is it possible to query metadata for all products at once, instead of performing a call each time?
+							String sMetadataJson = httpGetResults(sMetadataUrl);
+							if(null!=sMetadataJson) {
+								JSONObject oMetadata = new JSONObject(sMetadataJson);
+								oOndaFullEntry.put("metadata", oMetadata);
+							}
+						}
+						QueryResultViewModel oRes = m_oResponseTranslator.translate(oOndaFullEntry, m_sDownloadProtocol);
+						aoResult.add(oRes);
+					}
 				}
 			}
 			return aoResult;
@@ -197,6 +248,46 @@ public class QueryExecutorONDA extends QueryExecutor {
 			e.printStackTrace();
 		}
 		return null;
+	}
+
+	private String httpGetResults(String sUrl) {
+		String sResult = null;
+		try {
+			URL oURL = new URL(sUrl);
+			HttpURLConnection oConnection = (HttpURLConnection) oURL.openConnection();
+	
+			// optional default is GET
+			oConnection.setRequestMethod("GET");
+			oConnection.setRequestProperty("Accept", "*/*");
+	
+			System.out.println("\nSending 'GET' request to URL : " + sUrl);
+	
+			int responseCode =  oConnection.getResponseCode();
+			System.out.println("Response Code : " + responseCode);
+	
+			if(200 == responseCode) {
+				BufferedReader in = new BufferedReader(new InputStreamReader(oConnection.getInputStream()));
+				String inputLine;
+				StringBuffer oResponse = new StringBuffer();
+		
+				while ((inputLine = in.readLine()) != null) {
+					oResponse.append(inputLine);
+				}
+				in.close();
+			
+	
+				//print result
+				System.out.println("Count Done: Response " + oResponse.toString());
+		
+				sResult = oResponse.toString();
+			} else {
+				String sMessage = oConnection.getResponseMessage();
+				System.out.println(sMessage);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return sResult;
 	}
 	
 }
