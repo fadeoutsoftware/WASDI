@@ -862,12 +862,6 @@ var SearchOrbitController = (function() {
                 {
                     var textFile = null;
                     var sType = 'application/xml';
-                    // var sType = 'application/kml';
-                    // var sType = 'kml';
-                    // var sType = 'application/vnd.google-earth.kml+xml';
-                    //var sType = 'application/vnd.google-earth.kmz';
-
-                    // oController.m_sHrefLogFile = utilsMakeFile(data,textFile,sType);
                     var sUrl = utilsMakeFile(data,textFile,sType);
                     utilsSaveFile(sUrl,sText+".kml");
 
