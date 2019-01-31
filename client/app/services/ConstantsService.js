@@ -2,7 +2,7 @@
  * Created by p.campanella on 21/10/2016.
  */
 
-'use strict';
+//'use strict';
 angular.module('wasdi.ConstantsService', []).
 service('ConstantsService', [function () {
 
