@@ -24,8 +24,8 @@ service('SearchOrbitService', ['$http',  'ConstantsService', function ($http, oC
 
     };
 
-    this.getKML = function (oData) {
-        return this.m_oHttp.get(this.APIURL + '/searchorbit/getkmlsearchresults');
+    this.getKML = function (sText,sFootPrint) {
+        return this.m_oHttp.get(this.APIURL + '/searchorbit/getkmlsearchresults?text=' + sText + "&footPrint=" + sFootPrint);
     }
 
     this.getSatellitesResources = function (oData) {
