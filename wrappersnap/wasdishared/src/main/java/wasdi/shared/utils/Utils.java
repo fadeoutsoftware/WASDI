@@ -13,6 +13,11 @@ import java.util.stream.Stream;
 import static org.apache.commons.lang.SystemUtils.IS_OS_UNIX;
 // email, IP addresses (v4 and v6), domains and URL validators:
 import org.apache.commons.validator.routines.*;
+import org.opengis.geometry.coordinate.Polygon;
+
+import java.util.Arrays;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Created by p.campanella on 14/10/2016.
@@ -202,5 +207,16 @@ public class Utils {
 			return true;
 		}
 		return false;
+	}
+	
+	public static String[] convertPolygonToArray(String sArea){
+		if(sArea.isEmpty()== true)
+		{
+			return null;
+		}
+		String sCleanedArea = sArea.replaceAll("[POLYGN()]", "");
+		String[] asAreaPoints = sCleanedArea.split(",");
+		return asAreaPoints;
+
 	}
 }

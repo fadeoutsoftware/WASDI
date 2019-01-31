@@ -846,18 +846,31 @@ var SearchOrbitController = (function() {
     };
 
 
-    SearchOrbitController.prototype.downloadKML = function()
+    SearchOrbitController.prototype.downloadKML = function(oNode)
     {
+        if(utilsIsObjectNullOrUndefined(oNode) === true)
+        {
+            return false;
+        }
         var oController = this;
-        this.m_oSearchOrbitService.getKML()
+        var sText = oNode.text;
+        var sFootPrint = oNode.original.FrameFootPrint;
+        console.log(sFootPrint);
+        this.m_oSearchOrbitService.getKML(sText,sFootPrint)
             .success(function(data,state){
                 if( utilsIsObjectNullOrUndefined(data) === false )
                 {
                     var textFile = null;
                     var sType = 'application/xml';
+                    // var sType = 'application/kml';
+                    // var sType = 'kml';
                     // var sType = 'application/vnd.google-earth.kml+xml';
                     //var sType = 'application/vnd.google-earth.kmz';
-                    oController.m_sHrefLogFile = utilsMakeFile(data,textFile,sType);
+
+                    // oController.m_sHrefLogFile = utilsMakeFile(data,textFile,sType);
+                    var sUrl = utilsMakeFile(data,textFile,sType);
+                    utilsSaveFile(sUrl,sText+".kml");
+
                 }
                 else
                 {
@@ -867,13 +880,15 @@ var SearchOrbitController = (function() {
             .error(function(data,state){
                 utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN  DOWNLOAD KML");
             });
+
+        return true;
     };
 
     SearchOrbitController.prototype.getResultOpportunitiesTreeJson = function(oDataInput)
     {
 
         var oData1 = this.generateDataTree(oDataInput);
-
+        var oController = this;
         var oJsonData = {
             core: {
                 data: oData1,
@@ -884,7 +899,28 @@ var SearchOrbitController = (function() {
                     whole_node : false,  // to avoid checking the box just clicking the node
                     tie_selection : false // for checking without selecting and selecting without checking
             },
-            plugins: ['checkbox']
+            plugins: ['checkbox','contextmenu'],
+            "contextmenu": { // my right click menu
+                "items":function($node){
+                    // var oController = this;
+                    var bIsEmptyNodeFootPrint = oController.isEmptyNodeFootPrint($node);
+
+                    var oReturnValue = {
+                        "KML": {
+                            "label": "Download KML",
+
+                            "action": function (obj) {
+                                oController.downloadKML($node);
+
+                            },
+                            "_disabled":bIsEmptyNodeFootPrint
+                        }
+                    }
+
+                    return oReturnValue;
+                }
+
+            }
         }
 
         return oJsonData;
@@ -1217,27 +1253,58 @@ var SearchOrbitController = (function() {
                 whole_node : false,  // to avoid checking the box just clicking the node
                 tie_selection : false // for checking without selecting and selecting without checking
             },
-            plugins: ['checkbox','contextmenu'],
-            contextmenu: { // my right click menu
-                items:this.functionContextMenu,
-            }
+            plugins: ['checkbox'],
+
         }
 
         return oJsonData;
     };
 
-    SearchOrbitController.prototype.functionContextMenu = function($node)
+    // SearchOrbitController.prototype.functionContextMenu = function($node,oController)
+    // {
+    //     // var oController = this;
+    //     var bIsEmptyNodeFootPrint = oController.isEmptyNodeFootPrint($node);
+    //
+    //     var oReturnValue = {
+    //             "KML": {
+    //             "label": "Download KML",
+    //
+    //             "action": function (obj) {
+    //                 // console.log("KML");
+    //                 oController.downloadKML($node);
+    //                 // $node.original
+    //                 // if($node.original.isFrame || $node.original.isSwath)
+    //                 // {
+    //                 //     if( utilsIsObjectNullOrUndefined(oNode.original.rectangle) === true)
+    //                 //     {
+    //                 //         var sColor = "orange";
+    //                 //         if (oNode.original.isSwath) sColor = "yellow";
+    //                 //
+    //                 //         var oRectangle = oController.drawRectangleInMap(oNode.original,sColor);
+    //                 //         oNode.original.rectangle = oRectangle;
+    //                 //     }
+    //                 // }
+    //
+    //             },
+    //             "_disabled":bIsEmptyNodeFootPrint
+    //
+    //             // "icon":"radar-icon-context-menu-jstree",
+    //         }
+    //     }
+    //
+    //     return oReturnValue;
+    // };
+
+    SearchOrbitController.prototype.isEmptyNodeFootPrint = function(oNode)
     {
-        console.log("test");
-        var oReturnValue = {
-                "Radar": {
-                "label": "Radar",
-                "action": false,
-                "icon":"radar-icon-context-menu-jstree",
-            }
+        if( (oNode.original.isFrame === false) || (oNode.original.isSwath===false) ||
+            (oNode.original.hasOwnProperty('FrameFootPrint') === false) ||
+            (utilsIsStrNullOrEmpty(oNode.original.FrameFootPrint) === true) )
+        {
+            return true;
         }
 
-        return oReturnValue;
+        return false;
     };
 
     SearchOrbitController.prototype.generateSatellitesResourcesTree = function(oDataInput)
