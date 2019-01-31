@@ -55,9 +55,13 @@ var RootController = (function() {
 
         // Subscribe to 'rabbit service connection changes'
         var _this = this;
-        $scope.$on('rabbitConnectionStateChanged', function(event, args) {
+        // $scope.$on('rabbitConnectionStateChanged', function(event, args) {
+        //     _this.updateRabbitConnectionState();
+        // });
+        var msgHlp = MessageHelper.getInstanceWithAnyScope($scope);
+        msgHlp.subscribeToRabbitConnectionStateChange(function(event, args) {
             _this.updateRabbitConnectionState();
-        });
+        })
         // then immediatly check rabbit connection state
         this.updateRabbitConnectionState(true);
 
