@@ -208,10 +208,17 @@ public class DiasResponseTranslatorONDA implements DiasResponseTranslator {
 					oResult.getProperties().put(sKey, sOdataContext);
 				}
 				JSONArray aoMetadata = oMetadata.optJSONArray("value");
+				Map<String,String> asOndaToSentinel = new HashMap<>();
+				asOndaToSentinel.put("beginPosition", "properties.beginPosition");
+				//TODO populate the map
 				if(null!=aoMetadata) {
 					for (Object oObject : aoMetadata) {
 						if(null!=oObject) {
-							//TODO parse each field
+							JSONObject oMetadataEntry = (JSONObject)oObject;
+							//TODO get id and use it as a key
+							//if the corresponding value is not null then use it as a key
+							//to save the metadata "value" field into oResult
+							//else if it is null use the metadata "id" value as a key and save it
 						}
 					}
 				}
