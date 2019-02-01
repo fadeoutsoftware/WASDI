@@ -471,7 +471,9 @@ h4 {
     width: 1.8em !important;
     height: 2.4em;
 }
-
+.vakata-context, .vakata-context ul {
+    z-index: 1000;
+}
 /*JSTREE WAIT ICON */
 //.jstree-default a.jstree-loading .jstree-icon {
 //  background:url("image") center center no-repeat !important;
