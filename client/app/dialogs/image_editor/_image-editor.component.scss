@@ -1,76 +1,32 @@
-.workflow-manager-modal
-{
-  .modal-dialog
-  {
-    //width:50%;
-    .modal-content
-    {
-      .modal-header
-      {
-        color:$wasdi-white;
-        background-color: $wasdi-blue-logo;
-        .close
-        {
-          color: $wasdi-white;
-          opacity: 1;
+.image-editor-modal {
+    .modal-dialog {
+        width: 90% !important;
+        height: 90% !important;
+
+        .modal-content {
+            .modal-header {
+                color: $wasdi-white;
+                background-color: $wasdi-blue-logo;
+                .close {
+                    color: $wasdi-white;
+                    opacity: 1;
+                }
+                .snap-logo {
+                    width: 50px;
+                }
+            }
+
+            .modal-body {
+                max-height: none !important;
+
+            }
+
+            .modal-footer {
+                border-top: 1px solid $wasdi-blue-logo;
+                .my-button {
+                    padding: 10px 21px;
+                }
+            }
         }
-        .snap-logo{
-          width: 50px;
-        }
-      }
-
-      .modal-body
-      {
-        //textarea {
-        //  resize: none;
-        //  background-color: $wasdi-white;
-        //  border-color:$wasdi-input-text-border-color ;
-        //
-        //}
-        .loadIcon {
-          margin-bottom: 20px;
-        }
-        table{
-          .selectedWorkflow{
-
-            color:$wasdi-white;
-            background-color: $wasdi-green-logo;
-          }
-
-        }
-
-        .row{
-          margin-top: 20px;
-          .button-container{
-            float:right;
-          }
-        }
-
-        .tab-content{
-          margin-top: 10px;
-        }
-
-
-
-      .multi-input-workflows{
-        margin-bottom: 100px;
-        .my-dropdown{
-          li{
-            max-height: 100px;
-          }
-        }
-      }
-
-      }
-
-      .modal-footer
-      {
-        border-top:1px solid $wasdi-blue-logo;
-        .my-button
-        {
-          padding: 10px 21px;
-        }
-      }
     }
-  }
 }

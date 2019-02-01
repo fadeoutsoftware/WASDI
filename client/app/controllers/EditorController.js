@@ -162,7 +162,7 @@ var EditorController = (function () {
         this.navbarMenuTranslation();
 
         // Launch image editor modal to debug it
-        this.openImageEditorDialog();
+        //this.openImageEditorDialog();
 
 
     }
@@ -355,6 +355,10 @@ var EditorController = (function () {
     };
 
     /*********************************************************** VIEW METHODS**********************************************************/
+
+    EditorController.prototype.onEditBtnClick = function(){
+        this.openImageEditorDialog();
+    }
 
     EditorController.prototype.openImageEditorDialog = function(){
         var oController = this;

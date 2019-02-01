@@ -12,6 +12,7 @@ angular.module('wasdi.ImageEditorDirective', [])
                 applyEditorPreviewImage:'&',
                 maskManager: '&',
                 filterManager: '&',
+                //onEditBtnClick : '&onEditClick',
                 panScaling: '=',
                 heightCanvas: '=',
                 widthCanvas: '='
@@ -179,6 +180,10 @@ angular.module('wasdi.ImageEditorDirective', [])
 
                     scope.clickOnGetDefaultImage();
                 };
+
+                scope.clickOnEdit = function(){
+                    scope.onEditBtnClick();
+                }
 
                 scope.clickOnMask = function () {
                     scope.maskManager();
