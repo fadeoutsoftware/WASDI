@@ -108,7 +108,7 @@
 //
 // Hide tabbable panes to start, show them when `.active`
 
-.tab-content {
+.tab#{$versionSelector}-content {
   > .tab-pane {
     display: none;
   }

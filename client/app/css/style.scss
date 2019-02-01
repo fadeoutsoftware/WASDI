@@ -1,5 +1,4 @@
 //bootstrap
-//@import "bootstrap-4/customized_bootstrap_v4";
 @import "../bower_components/bootstrap-sass/assets/stylesheets/bootstrap";
 
 //$screen-lg: map-get($grid-breakpoints, "lg");
@@ -74,12 +73,18 @@
 @import "../dialogs/edit_user/edit_user";
 @import "../dialogs/ftp_service/ftp_service";
 @import "../dialogs/list_flood_area_detection/list_flood_area_detection";
+@import "../dialogs/image_editor/image-editor.component";
 
 @import "buttons";
 
 //COMPONENTS
 @import "components/range_slider";
 @import "components/toggle_switch";
+
+
+@import "bootstrap_v4_fix";
+
+
 body {
     font-family: $wasdi-font-web;
     font-size: $wasdi-font-size;
@@ -253,9 +258,21 @@ h4 {
 //----------------------------------------------------
 
 
+// In tabs with icons and text set fixed space between icon and text
+.nav-v4-tabs {
+    .nav-v4-link {
+        .fa{
+            margin-right: 8px;
+        }
+    }
+}
+
+
 .vakata-context{
     z-index: $z-index-context-menu-right-click;
 }
+
+
 
 
 

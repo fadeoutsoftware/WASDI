@@ -12,6 +12,11 @@ var ImageEditorController = (function() {
         this.m_oScope = $scope;
         this.m_oClose = oClose;
         this.m_oScope.m_oController = this;
+        this.m_oScope.$ctrl = this;
+
+        this._selectedTab = TabType.ImageEditorMask;
+
+        
         this.m_oExtras = oExtras;
         this.m_oSnapOperationService = oSnapOperationService;
         this.m_oFile = null;
@@ -52,6 +57,18 @@ var ImageEditorController = (function() {
         this.getWorkflowsByUser();
 
     }
+
+
+    ImageEditorController.prototype.selectedTabMask = function() { this._selectedTab = TabType.ImageEditorMask; }
+    ImageEditorController.prototype.selectedTabFilterBand = function() { this._selectedTab = TabType.ImageEditorFilterBand; }
+    ImageEditorController.prototype.selectedTabColorManipulation = function() { this._selectedTab = TabType.ImageEditorColorManipulation; }
+
+    ImageEditorController.prototype.isSelectedTabMask = function() { return this._selectedTab == TabType.ImageEditorMask; }
+    ImageEditorController.prototype.isSelectedTabFilterBand = function() { return this._selectedTab == TabType.ImageEditorFilterBand; }
+    ImageEditorController.prototype.isSelectedTabColorManipulation = function() { return this._selectedTab == TabType.ImageEditorColorManipulation; }
+
+
+
 
     ImageEditorController.prototype.getWorkflowsByUser = function()
     {

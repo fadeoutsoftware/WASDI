@@ -1,284 +1,51 @@
-<div class="modal fade workflow-manager-modal ">
-    <div class="modal-dialog modal-dialog-extra-large">
-        <div class="modal-content ">
+<div class="modal fade image-editor-modal ">
+    <div class="modal-dialog mt-4">
+        <div class="modal-content h-100 d-flex flex-column">
 
             <div class="modal-header">
                 <button type="button" class="close" ng-click="close()" data-dismiss="modal" aria-hidden="true">&times;</button>
                 <h4 class="modal-title ">
-                    <img class="snap-logo" src="assets/wasdi/SnapLogo.jpg" >
-                    <a href="http://step.esa.int/main/toolboxes/snap/" target="_blank" style="color: white">{{"DIALOG_WORKFLOW_MANAGER_TITLE"|translate}}</a>
+                    Image editor
                 </h4>
 
             </div>
 
-            <div class="modal-body">
-                <h4>
-                    <!-- TAB NAVIGATION -->
-                    <ul class="nav nav-tabs" role="tablist">
-                        
-                        <li ng-class="{'active':m_oController.m_sSelectedWorkflowTab === 'WorkFlowTab1'}" ng-click="m_oController.m_sSelectedWorkflowTab = 'WorkFlowTab1'"
-                            ng-hide=" (m_oController.m_aoWorkflows.length === 0) && (m_oController.m_bIsLoadingWorkflows === false)">
-                            <a href="" role="tab" data-toggle="tab">
-                                {{"DIALOG_WORKFLOW_MANAGER_TAB_BATCH_WORKFLOW" | translate}}
-
-                            </a>
-                        </li>
-
-                        <li ng-class="{'active':m_oController.m_sSelectedWorkflowTab === 'WorkFlowTab3'}" ng-click="m_oController.m_sSelectedWorkflowTab = 'WorkFlowTab3'"
-                            ng-hide=" (m_oController.m_aoWorkflows.length === 0) && (m_oController.m_bIsLoadingWorkflows === false)">
-                            <a href="" role="tab" data-toggle="tab">
-                                {{"DIALOG_WORKFLOW_MANAGER_TAB_EXECUTE_SAVED_WORKFLOW" | translate}}
-                            </a>
-                        </li>
-
-                        <li ng-class="{'active':m_oController.m_sSelectedWorkflowTab === 'WorkFlowTab2'}" ng-click="m_oController.m_sSelectedWorkflowTab = 'WorkFlowTab2'">
-                            <a href="" role="tab" data-toggle="tab">
-                                {{"DIALOG_WORKFLOW_MANAGER_TAB_UPLOAD_WORKFLOW" | translate}}
-                            </a>
-                        </li>
-
-
-                    </ul>
-                    <!-- TAB CONTENT -->
-                    <div class="tab-content">
-                        <div class="tab-pane fade in" ng-class="{'active':m_oController.m_sSelectedWorkflowTab === 'WorkFlowTab2'}" id="WorkFlowTab2" >
-
-                            <!------------------------------ FILENAME ------------------------------>
-                            <div class="row">
-                                <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
-                                    Upload workflow
+            <div class="modal-body d-flex flex-column flex-fill">
+                <div class="row-v4 d-flex flex-column flex-fill">
+                    <div class="col-v4-12 d-flex flex-column d-flex flex-column flex-fill">
+                        <!-- TAB NAVIGATION -->
+                        <ul class="nav-v4 nav-v4-tabs" id="myTab" role="tablist">
+                            <li class="nav-v4-item active" ng-click="$ctrl.selectedTabMask()">
+                                <div class="nav-v4-link" ng-class="{'active' : $ctrl.isSelectedTabMask()}" id="home-tab" data-toggle="tab" data-target="#home" role="tab" aria-controls="home" aria-selected="true">
+                                    <i class="fa fa-image" aria-hidden="true"></i>Mask manager
                                 </div>
+                            </li>
+                            <li class="nav-v4-item" ng-click="$ctrl.selectedTabFilterBand()">
+                                <div class="nav-v4-link" ng-class="{'active' : $ctrl.isSelectedTabFilterBand()}" id="profile-tab" data-toggle="tab" data-target="#profile" role="tab" aria-controls="profile" aria-selected="false">
+                                    <i class="fa fa-filter" aria-hidden="true"></i>Filter band
+                                </div>
+                            </li>
+                            <li class="nav-v4-item" ng-click="$ctrl.selectedTabColorManipulation()">
+                                <div class="nav-v4-link" ng-class="{'active' : $ctrl.isSelectedTabColorManipulation()}" id="contact-tab" data-toggle="tab" data-target="#contact" role="tab" aria-controls="contact" aria-selected="false">
+                                    <i class="fa fa-sliders" aria-hidden="true"></i>Color manipulation
+                                </div>
+                            </li>
+                        </ul>
+                        <!-- TAB CONTENT -->
+                        <div class="tab-v4-content d-flex flex-column flex-fill" id="myTabContent">
+                            <div class="tab-pane flex-fill fade active in" id="home" role="tabpanel" aria-labelledby="home-tab">
+                                <ng-include src="'dialogs/image_editor/mask-manager.html'"></ng-include>
                             </div>
-
-                            <div class="row my-input-text">
-                                <div class="col-xs-8 col-sm-8 col-md-8 col-lg-8 col-xs-offset-2 col-sm-offset-2 col-md-offset-2 col-lg-offset-2">
-                                    <input type="text" name="name"  class="my-input-text" value="" title="" required="required"
-                                           placeholder="Workflow name" ng-model="m_oController.m_oWorkflowFileData.workflowName">
-                                </div>
-
+                            <div class="tab-pane flex-fill fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">
+                                <ng-include src="'dialogs/image_editor/filter-band.html'"></ng-include>
                             </div>
-                            <!------------------------------ DRAG AND DROP WORKFLOWS + DESCRIPTION------------------------------>
-                            <div class="row">
-                                <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6 ">
-
-                                    <div class="drag-and-drop ">
-                                        {{"DIALOG_WORKFLOW_DROP_OR_CLICK"|translate}}
-                                        <div ngf-drop ngf-select ng-model="m_oController.m_oFile" class="drop-box"
-                                             ngf-drag-over-class="'dragover'" ngf-multiple="true" ngf-allow-dir="true"
-                                             accept="text/xml"
-                                             ngf-pattern="'text/xml'">
-                                            <!---->
-                                            <div ng-show="m_oController.m_oFile">File: {{m_oController.m_oFile[0].name}}</div>
-                                            <div ngf-no-file-drop>{{"DIALOG_WORKFLOW_DRAG_DROP_NOT_SUPPORTED"|translate}}</div>
-                                        </div>
-                                    </div>
-
-                                    <div class="loadIcon" ng-show="m_oController.isUploadingWorkflow">
-                                        <invader></invader>
-                                    </div>
-                                </div>
-                                <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
-                                    <div class="form-group">
-                                        <label for="comment">Description:</label>
-                                        <textarea class="form-control my-text-area" rows="5" id="comment"maxlength="50"
-                                                  ng-model="m_oController.m_oWorkflowFileData.workflowDescription"></textarea>
-                                    </div>
-
-                                    <button class = "my-button my-align-right" ng-click="m_oController.uploadUserGraphOnServer()"
-                                            ng-show="m_oController.isUploadedNewWorkFlow()">Upload file</button>
-
-                                </div>
+                            <div class="tab-pane flex-fill fade" id="contact" role="tabpanel" aria-labelledby="contact-tab">
+                                <ng-include src="'dialogs/image_editor/color-manipulation.html'"></ng-include>
                             </div>
-                            <!--<div class="row">-->
-                                <!--<div class="col-xs-12 col-sm-12 col-md-12 col-lg-12" ng-show="m_oController.isUploadingWorkflow">-->
-                                    <!--<div class="loadIcon">-->
-                                        <!--<invader></invader>-->
-                                    <!--</div>-->
-                                <!--</div>-->
-                            <!--</div>-->
-                        </div>
-
-                        <div class="tab-pane fade in" id="WorkFlowTab1" ng-class="{'active':m_oController.m_sSelectedWorkflowTab === 'WorkFlowTab1'}"
-                                            ng-hide=" (m_oController.m_aoWorkflows.length === 0) && (m_oController.m_bIsLoadingWorkflows === false)">
-
-                            <!--------------------------------   TABLE WORKFLOWS + LIST OF PRODUCTS -------------------------------->
-                            <div class="row">
-                                <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
-                                    Execute workflow
-                                </div>
-                            </div>
-
-
-                            <div class="row">
-
-                                <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12" ng-show=" (m_oController.m_aoWorkflows.length === 0) && (m_oController.m_bIsLoadingWorkflows === true)">
-                                    <div class="loadIcon">
-                                        <invader></invader>
-                                    </div>
-                                </div>
-
-                                <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12" ng-show="m_oController.m_aoWorkflows.length > 0">
-                                    <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
-                                        <!------------------------------------- WORKFLOWS TABLE ------------------------------------->
-                                        <table class="table table-hover my-table" >
-                                            <thead>
-                                            <tr>
-                                                <th>
-                                                    {{"DIALOG_WORKFLOW_MANAGER_TABLE_NAME"|translate}}
-                                                </th>
-                                                <th>
-                                                    {{"DIALOG_WORKFLOW_MANAGER_TABLE_DESCRIPTION"|translate}}
-                                                </th>
-                                                <th>
-
-                                                </th>
-                                            </tr>
-
-                                            </thead>
-                                            <tbody>
-
-                                            <tr class="tr-over" ng-repeat="workflow in m_oController.getSingleInputWorkflow() "
-                                                ng-class="{'selectedWorkflow': m_oController.m_oSelectedWorkflow  === workflow}"
-                                                ng-click="m_oController.m_oSelectedWorkflow = workflow">
-                                                <td >{{workflow.name}}</td>
-                                                <td>{{workflow.description}}</td>
-                                                <td class="td-button" ng-click="m_oController.deleteWorkflow(workflow)">
-                                                    <i class="fa fa-trash" aria-hidden="true"></i>
-                                                </td>
-                                            </tr>
-                                            </tbody>
-                                        </table>
-
-                                    </div>
-                                    <div class="col-xs-8 col-sm-8 col-md-8 col-lg-8">
-                                        <!-------------------------------- LIST OF PRODUCTS -------------------------------->
-                                        <multiselect options="m_oController.m_asProductsName" selected="m_oController.m_asSelectedProducts">
-                                            <!--ng-show="m_oController.isSelectedWorkFlow()"-->
-                                        </multiselect>
-
-                                        <button class="my-button my-align-right" ng-click="m_oController.runWorkFlowPerProducts();" ng-class ="{ 'disabled' : m_oController.isPossibleDoUpload()}"
-                                                                  ng-show="m_oController.isSelectedWorkFlow() && m_oController.isSelectedProduct()" data-dismiss="modal" >
-                                            {{"DIALOG_WORKFLOW_MANAGER_EXECUTE_WORKFLOW_BUTTON"|translate}}
-                                        </button>
-                                    </div>
-                                </div>
-
-                                <!--<div class="col-xs-12 col-sm-12 col-md-12 col-lg-12" ng-show=" (m_oController.m_aoWorkflows.length === 0) && (m_oController.m_bIsLoadingWorkflows === false)">-->
-                                    <!---->
-                                <!--</div>-->
-                            </div>
-                        </div>
-
-                    </div>
-                    <!----------------------------------------- MULTI WORKFLOW INPUT ----------------------------------------->
-                    <div class="tab-pane fade in" id="WorkFlowTab3" ng-class="{'active':m_oController.m_sSelectedWorkflowTab === 'WorkFlowTab3'}"
-                            ng-show="m_oController.m_sSelectedWorkflowTab === 'WorkFlowTab3'">
-
-                        <div class="row">
-                            <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
-                                Execute workflow
-                            </div>
-                        </div>
-
-                        <div class="row">
-
-                            <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12" ng-show=" (m_oController.m_aoWorkflows.length === 0) && (m_oController.m_bIsLoadingWorkflows === true)">
-                                <div class="loadIcon">
-                                    <invader></invader>
-                                </div>
-                            </div>
-
-                            <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 multi-input-workflows" ng-show="m_oController.m_aoWorkflows.length > 0" >
-                                <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
-                                    <!------------------------------------- WORKFLOWS TABLE ------------------------------------->
-                                    <table class="table table-hover my-table" >
-                                        <thead>
-                                        <tr>
-                                            <th>
-                                                {{"DIALOG_WORKFLOW_MANAGER_TABLE_NAME"|translate}}
-                                            </th>
-                                            <th>
-                                                {{"DIALOG_WORKFLOW_MANAGER_TABLE_DESCRIPTION"|translate}}
-                                            </th>
-                                            <th>
-
-                                            </th>
-                                        </tr>
-
-                                        </thead>
-                                        <tbody>
-
-                                        <tr class="tr-over" ng-repeat="workflow in m_oController.getMultipleInputWorkflow()"
-                                            ng-class="{'selectedWorkflow': m_oController.m_oSelectedMultiInputWorkflow  === workflow}"
-                                            ng-click="m_oController.m_oSelectedMultiInputWorkflow = workflow">
-                                            <td>{{workflow.name}}</td>
-                                            <td>{{workflow.description}}</td>
-                                            <td class="td-button" ng-click="m_oController.deleteWorkflow(workflow)">
-                                                <i class="fa fa-trash" aria-hidden="true"></i>
-                                            </td>
-                                        </tr>
-                                        </tbody>
-                                    </table>
-
-                                </div>
-                                <div class="col-xs-8 col-sm-8 col-md-8 col-lg-8">
-
-                                    <table class="table my-table" >
-                                        <thead>
-                                        <tr>
-                                            <th>{{"DIALOG_WORKFLOW_MANAGER_MULTI_INPUT_WORKFLOW_HEADER_TABLE_NODE_NAME"|translate}}</th>
-                                            <th>{{"DIALOG_WORKFLOW_MANAGER_MULTI_INPUT_WORKFLOW_HEADER_TABLE_PRODUCTS_LIST"|translate}}</th>
-                                            <th>{{"DIALOG_WORKFLOW_MANAGER_MULTI_INPUT_WORKFLOW_HEADER_TABLE_SELECTED_PRODUCT"|translate}}</th>
-                                        </tr>
-
-                                        </thead>
-                                        <tbody>
-                                            <tr ng-repeat="node in m_oController.m_oSelectedMultiInputWorkflow.inputNodeNames ">
-                                                <td>
-                                                    {{node}}
-                                                </td>
-                                                <td>
-                                                    <div class="dropdown my-dropdown">
-                                                        <button class="btn btn-default dropdown-toggle" type="button"
-                                                                id="dropdownMenuProductListMultiselectWorkflow" data-toggle="dropdown">
-                                                            Products
-                                                            <span class="caret"></span>
-                                                        </button>
-                                                        <ul class="dropdown-menu" role="menu"
-                                                            aria-labelledby="dropdownMenuProductListMultiselectWorkflow">
-
-                                                            <li role="presentation">
-                                                                <a role="menuitem" tabindex="-1" href=""
-                                                                   ng-repeat="product in m_oController.m_asProductsName"
-                                                                   ng-click="m_oController.addProductInputInNode(node,product)">
-                                                                    {{product}}
-                                                                </a >
-                                                            </li>
-
-                                                        </ul>
-                                                    </div>
-                                                </td>
-                                                <td>
-                                                    {{m_oController.m_oSelectedMultiInputWorkflow.inputFileNames[$index]}}
-                                                </td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                    <button class="my-button my-align-right" ng-click="m_oController.runMultiInputWorkFlow()"
-                                            data-dismiss="modal" ng-hide="m_oController.m_oSelectedMultiInputWorkflow === null">
-                                        {{"DIALOG_WORKFLOW_MANAGER_EXECUTE_WORKFLOW_BUTTON"|translate}}
-                                    </button>
-
-
-                                </div>
-                            </div>
-
-                            <!--<div class="col-xs-12 col-sm-12 col-md-12 col-lg-12" ng-show=" (m_oController.m_aoWorkflows.length === 0) && (m_oController.m_bIsLoadingWorkflows === false)">-->
-                            <!---->
-                            <!--</div>-->
                         </div>
                     </div>
-                </h4>
+                </div>
+
             </div>
 
             <div class="modal-footer">
