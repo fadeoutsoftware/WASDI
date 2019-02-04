@@ -224,7 +224,7 @@ service('MapService', ['$http','$rootScope', 'ConstantsService', function ($http
             drawnItems.addLayer(layer);
         });
 
-        //TODO event EDITED
+        //REMOVE IT ?
         this.m_oWasdiMap.on(L.Draw.Event.DELETESTOP, function (event) {
            var layer = event.layers;
         });
@@ -272,7 +272,6 @@ service('MapService', ['$http','$rootScope', 'ConstantsService', function ($http
     {
         /*
             https://github.com/perliedman/leaflet-control-geocoder
-            TODO CHANGE GEOCODER
         */
         // var geocoder = L.Control.Geocoder.mapzen('search-DopSHJw');
         // var MapGeoCoderProvider = L.Control.Geocoder.google('<you API key>', { ... other options ... });
@@ -451,7 +450,7 @@ service('MapService', ['$http','$rootScope', 'ConstantsService', function ($http
         //mouse over event change rectangle style
         oRectangle.on("mouseover", function (event) {//SEND MESSAGE TO IMPORT CONTROLLER
             oRectangle.setStyle({weight:3,fillOpacity:0.7});
-            $rootScope.$broadcast('on-mouse-over-rectangle',{rectangle:oRectangle});// TODO SEND MASSAGE FOR CHANGE CSS in LAYER LIST TABLE
+            $rootScope.$broadcast('on-mouse-over-rectangle',{rectangle:oRectangle});
             var temp = oRectangle.getBounds()
 
 
@@ -459,7 +458,7 @@ service('MapService', ['$http','$rootScope', 'ConstantsService', function ($http
         //mouse out event set default value of style
         oRectangle.on("mouseout", function (event) {//SEND MESSAGE TO IMPORT CONTROLLER
             oRectangle.setStyle({weight:1,fillOpacity:0.2});
-            $rootScope.$broadcast('on-mouse-leave-rectangle',{rectangle:oRectangle});// TODO SEND MASSAGE FOR CHANGE CSS in LAYER LIST TABLE
+            $rootScope.$broadcast('on-mouse-leave-rectangle',{rectangle:oRectangle});
         });
 
         return oRectangle;
@@ -500,14 +499,14 @@ service('MapService', ['$http','$rootScope', 'ConstantsService', function ($http
         //mouse over event change rectangle style
         oRectangle.on("mouseover", function (event) {
             oRectangle.setStyle({weight:3,fillOpacity:0.7});
-            $rootScope.$broadcast('on-mouse-over-rectangle',{rectangle:oRectangle});// TODO SEND MASSAGE FOR CHANGE CSS in LAYER LIST TABLE
+            $rootScope.$broadcast('on-mouse-over-rectangle',{rectangle:oRectangle});
             var temp = oRectangle.getBounds()
         });
 
         //mouse out event set default value of style
         oRectangle.on("mouseout", function (event) {
             oRectangle.setStyle({weight:1,fillOpacity:0.2});
-            $rootScope.$broadcast('on-mouse-leave-rectangle',{rectangle:oRectangle});// TODO SEND MASSAGE FOR CHANGE CSS in LAYER LIST TABLE
+            $rootScope.$broadcast('on-mouse-leave-rectangle',{rectangle:oRectangle});
         });
 
         return oRectangle;
