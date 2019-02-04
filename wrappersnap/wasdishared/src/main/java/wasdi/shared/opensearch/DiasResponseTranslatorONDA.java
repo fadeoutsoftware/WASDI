@@ -61,14 +61,13 @@ public class DiasResponseTranslatorONDA implements DiasResponseTranslator {
 		asTempMap.put("orbitDirection", m_sPropertyPrefix + "orbitdirection");
 		asTempMap.put("status", m_sPropertyPrefix + "status");
 		asTempMap.put("cycleNumber", m_sPropertyPrefix + "cycleNumber");
-		
+
 		//warning: the following are remapped by a seems-to-be-appropriate guess
 		asTempMap.put("dataTakeIdentifier", m_sPropertyPrefix + "missiondatatakeid");
 		asTempMap.put("platformNssdcid", m_sPropertyPrefix + "platformidentifier");
 		asTempMap.put("polarisationChannels", m_sPropertyPrefix + "polarisationmode");
-		asTempMap.put("creationDate", m_sPropertyPrefix + "ingestiondate");
-		 
-		 
+
+
 
 		m_asOndaToSentinel = Collections.unmodifiableMap(asTempMap);
 
@@ -126,64 +125,68 @@ public class DiasResponseTranslatorONDA implements DiasResponseTranslator {
 				oResult.setProvider("ONDA");
 				String sFootprint = oJsonOndaResult.optString("footprint","");
 				oResult.setFootprint( sFootprint );
-				String sId = oJsonOndaResult.optString("id","");
-				oResult.setId(sId);
+				String sProductId = oJsonOndaResult.optString("id","");
+				String sLink = "";
+				if(!Utils.isNullOrEmpty(sProductId)) {
+					oResult.setId(sProductId);
+					//TODO use m_sLinkPrefix and m_sLinkSuffix instead
+					//tentative download
+					sLink += sProtocol;
+					if(!sProtocol.endsWith("//")) {
+						sLink += "//";
+					}
+					sLink += "catalogue.onda-dias.eu/dias-catalogue/Products";
+					sLink += "(";
+					sLink += sProductId;
+					sLink += ")";
+					sLink += "/$value";
+					oResult.getProperties().put("link", sLink);
+				} else {
+					//NOTE this should not happen. Is it possible to take countermeasures?
+					System.out.println("DiasResponseTranslatorONDA.translate: WARNING: sProductId is null");
+				}
 
 				String sPreview = oJsonOndaResult.optString("quicklook","");
-				oResult.setPreview("data:image/png;base64,"+ sPreview);
-
-				//mapped
-				String sFormat = oJsonOndaResult.optString("@odata.mediaContentType");
-				if(null!=sFormat) {
-					oResult.getProperties().put("format", sFormat );
+				if(null!= sPreview ) {
+					oResult.setPreview("data:image/png;base64,"+ sPreview);
 				}
-				String sName = oJsonOndaResult.optString("name");
-				if(!Utils.isNullOrEmpty(sName)) {
-					oResult.getProperties().put("filename", sName);
+
+				String sProductFileFormat = oJsonOndaResult.optString("@odata.mediaContentType");
+				if(null!=sProductFileFormat) {
+					oResult.getProperties().put("format", sProductFileFormat );
+				}
+
+				String sProductFileName = oJsonOndaResult.optString("name");
+				if(!Utils.isNullOrEmpty(sProductFileName)) {
+					oResult.getProperties().put("filename", sProductFileName);
+
 					String sPath = "";
 					String sPseudopath = oJsonOndaResult.optString("pseudopath");
-
-					//do this anyway, an appropriate (or empty) pseudopath can always be reconstructed
-					if(!Utils.isNullOrEmpty(sPseudopath) && !Utils.isNullOrEmpty(sName)) {
+					if(!Utils.isNullOrEmpty(sPseudopath) ) {
 						oResult.getProperties().put("pseudopath", sPseudopath);
-						//TODO change the Launcher so that all pseudopaths can be passed (maybe iterate through them...)
 						sPath = "file:/mnt/";
 						String[] sIntermediate = sPseudopath.split(", ");
+						//MAYBE change the Launcher so that all pseudopaths can be passed (maybe iterate through them...)
 						sPath += sIntermediate[0]; 
-						sPath += "/" + sName + "/.value";
+						sPath += "/" + sProductFileName + "/.value";
 					} else {
-						//FIXME this should not happen. Is it possible to take countermeasures?
-						return null;
+						//NOTE this should not happen. Is it possible to take countermeasures?
+						System.out.println("DiasResponseTranslatorONDA.translate: WARNING: sPseudopath is null");
 					}
-					//do this anyway, an appropriate link can always be reconstructed
-					String sLink = "";
-					if(!Utils.isNullOrEmpty(sId)) {
-						//TODO use m_sLinkPrefix and m_sLinkSuffix instead
-						//tentative download
-						sLink += sProtocol;
-						if(!sProtocol.endsWith("//")) {
-							sLink += "//";
-						}
-						sLink += "catalogue.onda-dias.eu/dias-catalogue/Products";
-						sLink += "(";
-						sLink += sId;
-						sLink += ")";
-						sLink += "/$value";
-						oResult.getProperties().put("link", sLink);
-						} else {
-							//FIXME this should not happen. Is it possible to take countermeasures?
-							return null;
-						}
-					//TODO change this choice so that both alternatives are passed to the launcher
+
+					//TODO change how the launcher works so that alternatives can be used
 					if(sProtocol.startsWith("file")){
 						oResult.setLink(sPath);
 					} else if(sProtocol.startsWith("http")){
 						oResult.setLink(sLink);
 					}
+				} else {
+					//NOTE this should not happen. Is it possible to take countermeasures?
+					System.out.println("DiasResponseTranslatorONDA.translate: WARNING: sProductFileName is null");
 				}
 
 				Long lSize = oJsonOndaResult.optLong("size");
-				setsize(oResult, lSize);
+				setSize(oResult, lSize);
 
 				//ONDA
 				String sCreationDate = oJsonOndaResult.optString("creationDate");
@@ -213,57 +216,6 @@ public class DiasResponseTranslatorONDA implements DiasResponseTranslator {
 		return oResult;
 	}
 
-
-	protected void setsize(QueryResultViewModel oResult, Long lSize) {
-		Double dSize = -1.0;
-		String sChosenUnit = "ZZ";
-		if(null != lSize) {
-			dSize = (double)lSize;
-			//check against null size
-			String[] sUnits = {"B", "kB", "MB", "GB"};
-			int iUnitIndex = 0;
-			int iLim = sUnits.length -1;
-			while(iUnitIndex < iLim && dSize >= 1024) {
-				dSize = dSize / 1024;
-				iUnitIndex++;
-			}
-			//now, round it to two decimal digits
-			dSize = Math.round(dSize*100)/100.0; 
-			sChosenUnit = sUnits[iUnitIndex];
-			String sSize = String.valueOf(dSize) + " " + sChosenUnit;
-			oResult.getProperties().put("size", sSize);
-		}
-	}
-
-
-	private void finalizeViewModel(QueryResultViewModel oResult) {
-		//TODO review view model fields: is it all correct? Is there anything missing that can be reconstructed from properties?
-		//TODO review m_asOndaToSentinel entries: is it all correct? Is there anything missing that can be reconstructed from properties?
-		setTitle(oResult);
-		buildSummary(oResult);
-		
-	}
-
-
-	protected void setTitle(QueryResultViewModel oResult) {
-		
-		String sTitle = oResult.getProperties().get("filename");
-		if(null == sTitle) {
-			sTitle = oResult.getProperties().get("name");
-		}
-		if(null!=sTitle) {
-			sTitle = pruneFileExtension(sTitle);
-			
-			if( !Utils.isNullOrEmpty(sTitle) ) {
-				if(sTitle.contains(".")) {
-					sTitle = sTitle.split("\\.")[0];
-				}
-			}
-			oResult.setTitle(sTitle);
-		}
-	}
-
-
 	//XXX move this method to some shared class
 	private String pruneFileExtension(String sFileName) {
 		String sResult = sFileName.substring(0, sFileName.lastIndexOf(".")); //eliminate the file extension .ZIP, .SAFE...
@@ -274,9 +226,61 @@ public class DiasResponseTranslatorONDA implements DiasResponseTranslator {
 		return sResult;
 	}
 
+	//XXX move this method to some shared class
+	protected String getNormalizedSize(Long lSize) {
+		Double dSize = -1.0;
+		String sChosenUnit = "ZZ";
+		String sSize = null;
+		if(null != lSize) {
+			dSize = (double)lSize;
+			//check against null size
+			String[] sUnits = {"B", "kB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB", "BB"}; //...yeah, ready for the decades to come :-O 
+			int iUnitIndex = 0;
+			int iLim = sUnits.length -1;
+			while(iUnitIndex < iLim && dSize >= 1024) {
+				dSize = dSize / 1024;
+				iUnitIndex++;
+			}
+			//now, round it to two decimal digits
+			dSize = Math.round(dSize*100)/100.0; 
+			sChosenUnit = sUnits[iUnitIndex];
+			sSize = String.valueOf(dSize) + " " + sChosenUnit;
+		}
+		return sSize;
+	}
 
-	protected void parseMetadata(QueryResultViewModel oResult, JSONObject oMetadata) {
-		if(null==oMetadata) {
+	//XXX move this method to some shared class
+	protected void setSize(QueryResultViewModel oResult, Long lSize) {
+		if(null!=oResult) {
+			String sSize = getNormalizedSize(lSize);
+			oResult.getProperties().put("size", sSize);
+		}
+	}
+
+
+	private void finalizeViewModel(QueryResultViewModel oResult) {
+		setTitle(oResult);
+		buildSummary(oResult);
+
+	}
+
+
+	protected void setTitle(QueryResultViewModel oResult) {
+
+		String sTitle = oResult.getProperties().get("filename");
+		if(null == sTitle) {
+			sTitle = oResult.getProperties().get("name");
+		}
+		if(null!=sTitle) {
+			sTitle = pruneFileExtension(sTitle);
+			oResult.setTitle(sTitle);
+		}
+	}
+
+
+
+	protected void parseMetadata(QueryResultViewModel oResult, JSONObject oEntireMetadata) {
+		if(null==oEntireMetadata) {
 			System.out.println("DiasResponseTranslator.parseMetadata: oMetadata is null");
 			return;
 		}
@@ -285,51 +289,76 @@ public class DiasResponseTranslatorONDA implements DiasResponseTranslator {
 			//XXX should we throw an exception instead?
 			return;
 		}
-		if(null!=oMetadata) {
-			String sContextKey = "@odata.context";
-			String sOdataContext = oMetadata.optString(sContextKey);
-			if(null!=sOdataContext) {
-				oResult.getProperties().put(sContextKey, sOdataContext);
-			}
-			JSONArray aoMetadata = oMetadata.optJSONArray("value");
 
-			for (Object oObject : aoMetadata) {
-				if(null!=oObject) {
-					JSONObject oMetadataEntry = (JSONObject)oObject;
-					String sMetaKey = oMetadataEntry.optString("id");
-					if(null!= sMetaKey) {
-						String sMetaValue = null;
-						sMetaValue = oMetadata.optString("value");
-						if(null != sMetaValue) {
-							String sKey = null;
-							sKey = m_asOndaToSentinel.get(sMetaKey);
-							if(null == sKey) {
-								oResult.getProperties().put(sMetaKey, sMetaValue);
-							} else if( sKey.startsWith(m_sPropertyPrefix) ) {
-								sKey = sKey.substring(m_sPropertyPrefix.length());
-								oResult.getProperties().put(sKey, sMetaValue);
-							} else {
-								//then it must be a field:
-								
+		String sContextKey = "@odata.context";
+		String sOdataContext = oEntireMetadata.optString(sContextKey);
+		if(null!=sOdataContext) {
+			oResult.getProperties().put(sContextKey, sOdataContext);
+		}
+		JSONArray aoMetadataArray = oEntireMetadata.optJSONArray("value");
+
+		for (Object oObject : aoMetadataArray) {
+			if(null!=oObject) {
+				JSONObject oMetadataSingleEntry = (JSONObject)oObject;
+				String sMetaKey = oMetadataSingleEntry.optString("id");
+				if(null!= sMetaKey) {
+					String sMetaValue = null;
+					sMetaValue = oMetadataSingleEntry.optString("value");
+					if(null != sMetaValue) {
+						String sKey = null;
+						sKey = m_asOndaToSentinel.get(sMetaKey);
+						if(null == sKey) {
+							oResult.getProperties().put(sMetaKey, sMetaValue);
+						} else if( sKey.startsWith(m_sPropertyPrefix) ) {
+							sKey = sKey.substring(m_sPropertyPrefix.length());
+							oResult.getProperties().put(sKey, sMetaValue);
+						} else {
+							System.out.println("DiasResponseTranslatorONDA.parseMetadata: hit a viewmodel field: " + sKey + " = " + sMetaValue);
+							switch(sKey) {
+							case "preview":
+								oResult.setPreview(sMetaValue);
+								break;
+							case "title":
+								oResult.setTitle(sMetaValue);
+								break;
+							case "summary":
+								oResult.setSummary(sMetaValue);
+								break;
+							case "id":
+								oResult.setId(sMetaValue);
+								break;
+							case "link":
+								oResult.setLink(sMetaValue);
+								break;
+							case "footprint":
+								oResult.setLink(sMetaValue);
+								break;
+							case "provider":
+								oResult.setProvider(sMetaValue);
+								break;
+							default:
+								System.out.println("DiasResponseTranslatorONDA.parseMetadata: unknown viewmodel field");
 							}
 						}
 					}
 				}
 			}
 		}
+
 	}
 
 	private void buildSummary(QueryResultViewModel oResult) {
-		//TODO parse oResult to get the required values instead
-		HashMap<String, String> asSummary = new HashMap<>();
-		//MAYBE Class FileNameParser + one derived class for each mission, passed by outside (depending on the query) 
-		String sSummary = "Date: " + asSummary.get("Date") + ", ";
-		sSummary = sSummary + "Instrument: " + asSummary.get("Instrument") + ", ";
-		//TODO infer Mode from filename
-		sSummary = sSummary + "Mode: " + asSummary.get("Mode") + ", ";
+		String sDate = oResult.getProperties().get("creationDate");
+		String sSummary = "Date: " + sDate + ", ";
+		String sInstrument = oResult.getProperties().get("instrumentname");
+		sSummary = sSummary + "Instrument: " + sInstrument + ", ";
+		String sMode = oResult.getProperties().get("sensoroperationalmode");
+		sSummary = sSummary + "Mode: " + sMode + ", ";
 		//TODO infer Satellite from filename
-		sSummary = sSummary + "Satellite: " + asSummary.get("Satellite") + ", ";
-		sSummary = sSummary + "Size: " + asSummary.get("Size");// + " " + sChosenUnit;
+		String sSatellite = oResult.getProperties().get("platformname");
+		sSummary = sSummary + "Satellite: " + sSatellite + ", ";
+		String sSize = oResult.getProperties().get("size");
+		sSummary = sSummary + "Size: " + sSize;// + " " + sChosenUnit;
 		oResult.setSummary(sSummary);
 	}
 
