@@ -274,7 +274,10 @@ service('MapService', ['$http','$rootScope', 'ConstantsService', function ($http
             https://github.com/perliedman/leaflet-control-geocoder
             TODO CHANGE GEOCODER
         */
-        var geocoder = L.Control.Geocoder.mapzen('search-DopSHJw');
+        // var geocoder = L.Control.Geocoder.mapzen('search-DopSHJw');
+        // var MapGeoCoderProvider = L.Control.Geocoder.google('<you API key>', { ... other options ... });
+        var geocoder = L.Control.Geocoder.nominatim();
+
         var control = L.Control.geocoder({
             geocoder: geocoder,
             position:'topleft'
