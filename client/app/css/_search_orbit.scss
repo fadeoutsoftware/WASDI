@@ -1,96 +1,104 @@
-.search-orbit-view
-{
-  //operation bar
-  .operations-bar
-  {
-    text-align: right;
-    margin-top: -45px;
-    //data description
-    .description{
-      float:right;
-      width: 13%;
-      margin:15px 5px 5px 0;
+.search-orbit-view {
+    .filter-datetime-picker-wrapper{
+        label{
+            font-weight: normal;
+        }
     }
+        ////operation bar
+        //.operations-bar
+        //{
+        //  text-align: right;
+        //  margin-top: -45px;
+        //  //data description
+        //  .description{
+        //    float:right;
+        //    width: 13%;
+        //    margin:15px 5px 5px 0;
+        //  }
+        //
+        //  //search button
+        //  .buttom-collumn
+        //  {
+        //    text-align: right;
+        //    float:right;
+        //    margin-left: 10px;
+        //    .my-button{
+        //      padding:10px 10px;
+        //      margin-top: 5px;
+        //    }
+        //
+        //  }
+        //
+        //}
+    .left-side-bar {
+        font-family: sans-serif;
+        font-weight: 400;
+        font-size: 14px;
+        line-height: 1.42857;
+        font-weight: 400;
+        /*PANEL WITH FILTERS*/
+        .my-panel {
 
-    //search button
-    .buttom-collumn
-    {
-      text-align: right;
-      float:right;
-      margin-left: 10px;
-      .my-button{
-        padding:10px 10px;
-        margin-top: 5px;
-      }
+            //background-color: $wasdi-sidebar-background-color;
+            &.panel-default {
+                border-color: $waddi-sidebar-color-border-panel;
+                margin-bottom: 5px;
 
-    }
-
-  }
-
-  .left-side-bar
-  {
-    font-family: sans-serif;
-    font-weight: 400;
-    font-size: 14px;
-    line-height: 1.42857;
-    font-weight: 400;
-    /*PANEL WITH FILTERS*/
-    .my-panel
-    {
-      .panel-heading
-      {
-        .backbtn
-        {
-          color: $wasdi-white;
-          cursor:pointer;
-        }
-        .backbtn:hover
-        {
-          color: $wasdi-button-over-color;
-          background-color:transparent;
-        }
-      }
-      //OVERRIDING
-      .panel-body
-      {
-        padding: 0;
-        //max-height: 200px;
-        height: $wasdi-height-log-panel;
-        overflow-y: auto;
-        .row{
-           margin-left: 0px;
-           margin-right: 0px;
-        }
-        .time-container{
-          margin-left: 5px;
-          margin-top: 15px;
-          .time-picker-container
-          {
-            float: right;
-            margin-top: 10px;
-            margin-bottom: 10px;
-            width:100%;
-
-            .my-input-text {
-              width: 100%;
-              //input{
-              //  width:20%;
-              //}
-              .form-control {
-                border-radius: 0;
-                border: 2px solid $wasdi-input-text-border-color;
-              }
-              .input-group-addon
-              {
-                background-color: $wasdi-blue-logo;
-                border-color: $wasdi-blue-logo;
-                color:white;
-              }
-              .input-group-addon:hover
-              {
-                background-color: $wasdi-green-logo;
-              }
+                & > .panel-heading {
+                    background-color: $wasdi-sidebar-color-title-panel;
+                    color: $wasdi-title-color;
+                }
             }
+
+            //override bootstrap
+            .panel-heading {
+                border-bottom: 0;
+                .backbtn {
+                    color: $wasdi-white;
+                    cursor: pointer;
+                }
+                .backbtn:hover {
+                    color: $wasdi-button-over-color;
+                    background-color: transparent;
+                }
+            }
+            //OVERRIDING
+            .panel-body {
+                padding: 0;
+                //max-height: 200px;
+                height: $size-panel-body-height-with-single-row-heading;
+                overflow-y: auto;
+                .row {
+                    margin-left: 0px;
+                    margin-right: 0px;
+                }
+                .time-container {
+                    margin-left: 5px;
+                    margin-top: 15px;
+                    .time-picker-container {
+                        float: right;
+                        margin-top: 10px;
+                        margin-bottom: 10px;
+                        width: 100%;
+
+                        .my-input-text {
+                            width: 100%;
+                            //input{
+                            //  width:20%;
+                            //}
+                            .form-control {
+                                border-radius: 0;
+                                border: 2px solid $wasdi-input-text-border-color;
+                            }
+                            .input-group-addon {
+                                background-color: $wasdi-blue-logo;
+                                border-color: $wasdi-blue-logo;
+                                color: white;
+                            }
+                            .input-group-addon:hover {
+                                background-color: $wasdi-green-logo;
+                            }
+                        }
 
             .moment-picker .moment-picker-container {
               z-index: 1005;
@@ -124,123 +132,91 @@
           //padding: 10px;
         }
 
-        .my-table{
-          thead{
-            th{
-              background-color: white !important;
-              color: black !important;
-              cursor:pointer;
+                .my-table {
+                    thead {
+                        th {
+                            background-color: white !important;
+                            color: black !important;
+                            cursor: pointer;
+                        }
+                    }
+
+                }
             }
-          }
+
+            .my-button {
+                padding: 10px 20px;
+                //position: absolute;
+                //bottom: 70px;
+                //right: 20px;
+            }
+            .well {
+                border: 1px solid $wasdi-blue-logo;
+            }
 
         }
-      }
-      //override bootstrap
-      .panel-heading {
-        border-bottom: 0;
-      }
 
-      //background-color: $wasdi-sidebar-background-color;
-      .panel-default {
-        border-color: $waddi-sidebar-color-border-panel;
-        margin-bottom: 5px;
-      }
-      .panel-default > .panel-heading
-      {
-        background-color:$wasdi-sidebar-color-title-panel ;
-        color:$wasdi-title-color;
-      }
+        /*TABLE SEARCH ORBIT */
+        .table-container {
+            //max-height: 350px;       /* Just for the demo          */
+            max-height: 69vh;
+            overflow-y: auto; /* Trigger vertical scroll    */
+            overflow-x: hidden; /* Hide the horizontal scroll */
+            margin-left: 1px;
+            .table-search-orbit {
+                .info-satellite {
+                    cursor: pointer;
+                    .button-info {
+                        color: $wasdi-blue-logo;
+                    }
+                    .button-info:hover {
 
+                        color: $wasdi-green-logo;
+                    }
+                }
+                .info-satellite:hover {
+                    color: $wasdi-green-logo;
+                }
 
-      .my-button
-      {
-        padding: 10px 20px;
-        //position: absolute;
-        //bottom: 70px;
-        //right: 20px;
-      }
-      .well
-      {
-        border: 1px solid $wasdi-blue-logo;
-      }
-
+            }
+            .loading-orbits {
+                width: 50%;
+                margin: 0 auto;
+                text-align: center;
+            }
+            .loadIcon, .loading-files {
+                width: 90%;
+                padding: 35px 15px;
+            }
+        }
 
     }
+    //.map-container
+    //{
+    //
+    //}
+    .map-column {
+        .map-container {
+            border: 1px solid $wasdi-blue-logo;
+            height: $wasdi-map-height-editor;
 
-    /*TABLE SEARCH ORBIT */
-    .table-container
-    {
-      //max-height: 350px;       /* Just for the demo          */
-      //max-height: 69vh;
-      max-height: 100%;
-      overflow-y: auto;    /* Trigger vertical scroll    */
-      overflow-x: hidden;  /* Hide the horizontal scroll */
-      margin-left: 1px;
-      .table-search-orbit
-      {
-        .info-satellite
-        {
-          cursor: pointer;
-          .button-info
-          {
-            color: $wasdi-blue-logo;
-          }
-          .button-info:hover
-          {
+            //margin-bottom: 35px;
+            //leaflet
+            .map {
+                //DIMENSIONS MAP
+                width: auto; //500px
+                //height: 36.5vh;
+                height: $wasdi-map-height;
 
-            color: $wasdi-green-logo;
-          }
+                ///* (1366x768) WXGA Display */
+                @media screen and (max-width: 1366px) and (max-height: 768px) {
+                    width: auto;
+                    height: $wasdi-map-height-max-width-1366-max-height-768;
+                }
+
+                //height: auto;
+            }
+
         }
-        .info-satellite:hover
-        {
-          color: $wasdi-green-logo;
-        }
-
-      }
-      .loading-orbits
-      {
-        width: 50%;
-        margin: 0 auto;
-        text-align: center;
-      }
-      .loadIcon, .loading-files {
-        width: 90%;
-        padding: 35px 15px;
-      }
     }
-
-  }
-  //.map-container
-  //{
-  //
-  //}
-  .map-column{
-    padding-left: 0;
-    padding-right: 0;
-    .map-container
-    {
-      border: 1px solid $wasdi-blue-logo;
-      height: $wasdi-map-height-editor;
-
-      //margin-bottom: 35px;
-      //leaflet
-      .map
-      {
-        //DIMENSIONS MAP
-        width: auto;//500px
-        //height: 36.5vh;
-        height: $wasdi-map-height;
-
-
-        ///* (1366x768) WXGA Display */
-        @media  screen and (max-width: 1366px)and (max-height: 768px) {
-          width:auto;
-          height: $wasdi-map-height-max-width-1366-max-height-768;
-        }
-
-        //height: auto;
-      }
-
-    }
-  }
 }

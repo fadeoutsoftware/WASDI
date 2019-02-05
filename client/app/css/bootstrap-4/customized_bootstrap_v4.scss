@@ -5,26 +5,28 @@
  * Licensed under MIT (https://github.com/twbs/bootstrap/blob/master/LICENSE)
  */
 
+$versionSelector: "-v4";
+
 @import "functions";
 @import "variables";
 @import "mixins";
-//@import "root";
+@import "root";
 //@import "reboot";
 //@import "type";
 //@import "images";
 //@import "code";
-//@import "grid";
+@import "grid";
 //@import "tables";
 //@import "forms";
 //@import "buttons";
 //@import "transitions";
-//@import "dropdown";
+@import "dropdown";
 //@import "button-group";
 //@import "input-group";
 //@import "custom-forms";
-//@import "nav";
-//@import "navbar";
-//@import "card";
+@import "nav";
+@import "navbar";
+@import "card";
 //@import "breadcrumb";
 //@import "pagination";
 //@import "badge";
