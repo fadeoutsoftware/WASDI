@@ -240,19 +240,31 @@ service('ConstantsService', [function () {
 
     this.logOutGoogle = function ()
     {
-        var oController = this;
-        if(utilsIsObjectNullOrUndefined(gapi.auth2) === true)
+        try
         {
-            gapi.load('auth2', function() {
-                gapi.auth2.init();
-                oController.googleSignOutAPI();
-            });
-        }
-        else
+            if (_.isNil(gapi) == false)
+            {
+                var oController = this;
+                if (_.isNil(gapi.auth2) === true)
+                {
+                    gapi.load('auth2', function () {
+                        gapi.auth2.init();
+                        oController.googleSignOutAPI();
+                    });
+                }
+                else
+                {
+                    this.googleSignOutAPI();
+                }
+            }
+            else
+            {
+                throw "Google API null or undefined, cannot perform logout";
+            }
+        }catch (e)
         {
-            this.googleSignOutAPI();
+            console.error("logOutGoogle(): ", e);
         }
-
     }
 
     this.googleSignOutAPI = function()
