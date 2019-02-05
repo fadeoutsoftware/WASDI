@@ -161,12 +161,7 @@ public class OpenSearchResource {
 					sOrder, sDownloadProtocol);
 			try {
 				Integer iProviderCountResults = 0;
-				if (sProvider.equals("SENTINEL")) {
-					// XXX move this into SENTINEL query executor
-					iProviderCountResults = oExecutor.executeCountSentinel(sQuery);
-				} else {
-					iProviderCountResults = oExecutor.executeCount(sQuery);
-				}
+				iProviderCountResults = oExecutor.executeCount(sQuery);
 				aiQueryCountResultsPerProvider.put(sProvider, iProviderCountResults);
 			} catch (IOException e) {
 				e.printStackTrace();
