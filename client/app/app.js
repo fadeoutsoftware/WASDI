@@ -213,6 +213,7 @@ wasdiApp.controller("OperaWappController", OperaWappController);
 wasdiApp.controller("EditUserController", EditUserController);
 wasdiApp.controller("FTPController", FTPController);
 wasdiApp.controller("ListFloodAreaDetectionController", ListFloodAreaDetectionController);
+wasdiApp.controller("JRCProcessorController", JRCProcessorController);
 
 
 wasdiApp.run(["$rootScope", "$state", "AuthService", function($rootScope, $state, AuthService){
