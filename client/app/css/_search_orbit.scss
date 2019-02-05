@@ -4,38 +4,35 @@
             font-weight: normal;
         }
     }
-        ////operation bar
-        //.operations-bar
-        //{
-        //  text-align: right;
-        //  margin-top: -45px;
-        //  //data description
-        //  .description{
-        //    float:right;
-        //    width: 13%;
-        //    margin:15px 5px 5px 0;
-        //  }
-        //
-        //  //search button
-        //  .buttom-collumn
-        //  {
-        //    text-align: right;
-        //    float:right;
-        //    margin-left: 10px;
-        //    .my-button{
-        //      padding:10px 10px;
-        //      margin-top: 5px;
-        //    }
-        //
-        //  }
-        //
-        //}
+
+    .jstree{
+        // TODO: temp fix, investigate how to avoid the auto-streching of tree container height
+        max-height: 52vh;
+
+        @include heighLowerEqualsThan(800px){
+            max-height: 55vh;
+        }
+        @include heighLowerEqualsThan(700px){
+            max-height: 50vh;
+        }
+        @include heighLowerEqualsThan(670px){
+            max-height: 40vh
+        }
+    }
+
     .left-side-bar {
         font-family: sans-serif;
         font-weight: 400;
         font-size: 14px;
         line-height: 1.42857;
         font-weight: 400;
+
+
+        .btn-wasdi{
+            font-weight: 500 !important;
+        }
+
+
         /*PANEL WITH FILTERS*/
         .my-panel {
 
@@ -107,14 +104,14 @@
         }
         .tree-container
         {
-          height: 60vh;
+          //height: 60vh;
           .jstree
           {
             //display: block;
             //overflow-x: auto;
             //overflow-y: auto;
             //min-height: 30%;
-            max-height: 60vh;
+            //max-height: 60vh;
             height: 100%;
           }
         }

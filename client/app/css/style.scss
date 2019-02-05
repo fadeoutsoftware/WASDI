@@ -7,6 +7,8 @@
 @import "functions";
 @import "main_theme";
 
+//utilities
+@import "utilities";
 
 @import "header";
 @import "login";
@@ -19,8 +21,7 @@
 @import "validatenewuser";
 @import "status-bar";
 
-//utilities
-@import "utilities";
+
 
 //directive css
 @import "../directives/tree_directive/tree";
@@ -218,8 +219,8 @@ h4 {
 }
 
 .map-column{
-    padding-left: 0;
-    padding-right: 0;
+    //padding-left: 0;
+    //padding-right: 0;
 
     .map-container{
         height: 100%;
