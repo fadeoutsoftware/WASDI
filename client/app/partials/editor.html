@@ -55,11 +55,20 @@
 
                     <tree class="flex-fill d-flex flex-column" ngModelTree="prova" ng-hide="m_oController.isHideTree() || (m_oController.m_bIsLoadingTree === true)" ></tree>
                     <!--|| (m_oController.m_oTree === null)||(m_oController.m_oTree.core.data.length === 0)-->
-                    <div class = "wizards" ng-show="m_oController.isHideTree() && (m_oController.m_bIsLoadingTree === false)">
-                        <h4>
-                            <div>{{"EDITOR_WIZARDS_TREE_SEARCH"|translate}} <a ng-click="m_oController.goSearch()" href="">Search</a></div>
-                            <div>{{"EDITOR_WIZARDS_TREE_SFTP"|translate}} <a ng-click="m_oController.openSFTPDialog()" href="">SFTP</a></div>
-                        </h4>
+                    <div class = "wizards p-4" ng-show="m_oController.isHideTree() && (m_oController.m_bIsLoadingTree === false)">
+                        <h4 class="mt-0">{{"EDITOR_WIZARDS_HOW_TO_ADD_NEW_PRODUCT"|translate}} :</h4>
+                        <div class="row-v4 mt-4 justify-content-center">
+                            <div class="col-v4-5">
+                                <button class="btn btn-wasdi btn-primary w-100" ng-click="m_oController.goSearch()"><i class="fa fa-search"></i>{{"BTN_SEARCH"|translate}}</button>
+                            </div>
+                            <div class="col-v4-5">
+                                <button class="btn btn-wasdi btn-primary w-100" ng-click="m_oController.openSFTPDialog()"><i class="fa fa-plus"></i>{{"BTN_IMPORT"|translate}}</button>
+                            </div>
+                        </div>
+                        <!--<h4>-->
+                            <!--<div>{{"EDITOR_WIZARDS_TREE_SEARCH"|translate}} <a ng-click="m_oController.goSearch()" href="">Search</a></div>-->
+                            <!--<div>{{"EDITOR_WIZARDS_TREE_SFTP"|translate}} <a ng-click="m_oController.openSFTPDialog()" href="">SFTP</a></div>-->
+                        <!--</h4>-->
                     </div>
                 </div>
             </div>
