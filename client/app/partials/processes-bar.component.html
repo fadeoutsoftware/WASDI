@@ -36,7 +36,8 @@
             </div>
         </div>
         <div class="col-v4-auto ml-auto rabbit-connection-status-wrapper">
-            <div class="icon-bg" ng-class="{'disconnected' : m_oController.isRabbitConnected() == false}">
+            <div class="icon-bg" ng-class="{'disconnected' : m_oController.isRabbitConnected() == false}"
+                 data-toggle="tooltip" data-placement="top" title="Asynchronous Notifications {{m_oController.getConnectionStatusForTooltip()}}">
                 <!--<div class="loadIcon"><smallinvaderfixed></smallinvaderfixed></div>-->
                 <i class="icon fa fa-plug" aria-hidden="true"></i>
             </div>
