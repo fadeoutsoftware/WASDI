@@ -2750,7 +2750,8 @@ var EditorController = (function () {
         oWindow.openNDVIDialog(null,oController);
     }
     /**
-     *
+     * When user right click on a product and choose 'Properties' a dialog
+     * will be opened to show product properties
      * @param oProductInput
      * @returns {boolean}
      */
