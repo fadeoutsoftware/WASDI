@@ -155,10 +155,11 @@ public class OpenSearchResource {
 				sOrder = "asc";
 			}
 
-			// QueryExecutor oExecutor = QueryExecutor.newInstance(sProvider, sUser,
-			// sPassword, null, null, null, null);
-			QueryExecutor oExecutor = QueryExecutor.newInstance(sProvider, sUser, sPassword, sOffset, sLimit, sSortedBy,
-					sOrder, sDownloadProtocol);
+			String sGetMetadata = m_oServletConfig.getInitParameter("getProductMetadata");
+			QueryExecutor oExecutor =
+					QueryExecutor.newInstance(sProvider, sUser,
+							sPassword, sOffset, sLimit,
+							sSortedBy, sOrder, sDownloadProtocol, sGetMetadata);
 			try {
 				Integer iProviderCountResults = 0;
 				iProviderCountResults = oExecutor.executeCount(sQuery);
@@ -251,8 +252,9 @@ public class OpenSearchResource {
 				System.out.println(
 						"Executing query for " + sProvider + ": offset=" + sActualOffset + ": limit=" + sActualLimit);
 
+				String sGetMetadata = m_oServletConfig.getInitParameter("getProductMetadata");
 				QueryExecutor oExecutor = QueryExecutor.newInstance(sProvider, sUser, sPassword, sActualOffset,
-						sActualLimit, sSortedBy, sOrder, sDownloadProtocol);
+						sActualLimit, sSortedBy, sOrder, sDownloadProtocol, sGetMetadata);
 				try {
 					ArrayList<QueryResultViewModel> aoTmp = oExecutor.execute(sQuery);
 					if (aoTmp != null && !aoTmp.isEmpty()) {
@@ -394,9 +396,10 @@ public class OpenSearchResource {
 						String sUser = m_oServletConfig.getInitParameter(sProvider + ".OSUser");
 						String sPassword = m_oServletConfig.getInitParameter(sProvider + ".OSPwd");
 						String sDownloadProtocol = m_oServletConfig.getInitParameter(sProvider+".downloadProtocol");
-
+						String sGetMetadata = m_oServletConfig.getInitParameter("getProductMetadata");
+						
 						QueryExecutor oExecutor = QueryExecutor.newInstance(sProvider, sUser, sPassword, sActualOffset,
-								sActualLimit, sSortedBy, sOrder, sDownloadProtocol);
+								sActualLimit, sSortedBy, sOrder, sDownloadProtocol, sGetMetadata);
 						try {
 							ArrayList<QueryResultViewModel> aoTmp = oExecutor.execute(sQuery, false);
 

@@ -232,7 +232,7 @@ public class QueryExecutorONDA extends QueryExecutor {
 //								oOndaFullEntry.put("productInfo", oProductInfo);
 //							}
 							//XXX is it possible to query metadata for all products at once, instead of performing a call each time?
-							if(m_bGetMetadata) {
+							if(m_bMustCollectMetadata) {
 								String sMetadataJson = httpGetResults(sMetadataUrl);
 								if(null!=sMetadataJson) {
 									JSONObject oMetadata = new JSONObject(sMetadataJson);

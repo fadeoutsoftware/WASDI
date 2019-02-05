@@ -40,11 +40,13 @@ public abstract class QueryExecutor {
 	protected DiasQueryTranslator m_oQueryTranslator;
 	protected DiasResponseTranslator m_oResponseTranslator;
 	protected String m_sDownloadProtocol;
-	protected boolean m_bGetMetadata;
+	protected boolean m_bMustCollectMetadata;
 
 	//TODO refactor w/ a factory
 	//TODO refactor: pass a dictionary instead
-	public static QueryExecutor newInstance(String sProvider, String sUser, String sPassword, String sOffset, String sLimit, String sSortedBy, String sOrder, String sDownloadProtocol) {
+	public static QueryExecutor newInstance(
+			String sProvider, String sUser, String sPassword, String sOffset,
+			String sLimit, String sSortedBy, String sOrder, String sDownloadProtocol, String sGetMetadata) {
 		
 		String sClassName = QueryExecutor.class.getName() + sProvider;
 		
@@ -59,6 +61,7 @@ public abstract class QueryExecutor {
 				oExecutor.setLimit(sLimit);
 				oExecutor.setSortedBy(sSortedBy);
 				oExecutor.setOrder(sOrder);
+				oExecutor.setMustCollectMetadata(shallRetrieveMetadata(sGetMetadata));
 				//TODO get rid of this if! 
 				if(sProvider.equals("ONDA")) {
 					oExecutor.m_oQueryTranslator = new DiasQueryTranslatorONDA();
@@ -78,6 +81,19 @@ public abstract class QueryExecutor {
 		return null;
 	}
 	
+	private static boolean shallRetrieveMetadata(String sGetMetadata) {
+		if(null == sGetMetadata) {
+			return true;
+		} else if (sGetMetadata.equalsIgnoreCase("true") || sGetMetadata.equalsIgnoreCase("1")) {
+			return true;
+		} else return true;
+	}
+
+	private void setMustCollectMetadata(boolean bGetMetadata) {
+		m_bMustCollectMetadata = bGetMetadata;
+		
+	}
+
 	protected String m_sProvider; 
 	protected String m_sUser; 
 	protected String m_sPassword; 
@@ -415,7 +431,7 @@ public abstract class QueryExecutor {
 	
 
 	public static void main(String[] args) {
-		QueryExecutor oExecutor = QueryExecutor.newInstance("MATERA", "user", "password", "0", "10", "ingestiondate", "asc", "");
+		QueryExecutor oExecutor = QueryExecutor.newInstance("MATERA", "user", "password", "0", "10", "ingestiondate", "asc", "", "true");
 		
 		try {
 			String sQuery = "( beginPosition:[2017-05-15T00:00:00.000Z TO 2017-05-15T23:59:59.999Z] AND endPosition:[2017-05-15T00:00:00.000Z TO 2017-05-15T23:59:59.999Z] ) AND   (platformname:Sentinel-1 AND filename:S1A_* AND producttype:GRD)";
