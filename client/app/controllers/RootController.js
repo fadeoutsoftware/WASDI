@@ -253,10 +253,35 @@ var RootController = (function() {
 
         var mytimeout = $timeout($scope.onTimeout,1000);
 
+
+
+        this.initTooltips();
     }
 
     /*********************************** METHODS **************************************/
 
+    RootController.prototype.getConnectionStatusForTooltip = function()
+    {
+        //return Math.random() * 1000;
+        if( this.isRabbitConnected() == true){ return "Connected"}
+        return "Disconnected";
+    }
+
+    RootController.prototype.initTooltips = function()
+    {
+        var _this = this;
+        var tooltipsList = $('[data-toggle="tooltip"]');
+        if(tooltipsList.length == 0)
+        {
+            setTimeout(function () {
+                _this.initTooltips();
+            }, 100);
+            return;
+        }
+
+        tooltipsList.tooltip();
+    }
+    
 
     RootController.prototype.openLogoutModal = function()
     {
