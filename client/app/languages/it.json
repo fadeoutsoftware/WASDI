@@ -96,6 +96,7 @@
   "EDITOR_OPERATION_TITLE_LIST_FLOOD_AREA_DETECTION":"List flood area detection",
   "EDITOR_OPERATION_TITLE_RASOR":"Rasor",
   "EDITOR_OPERATION_TITLE_OPERA":"Opera",
+  "EDITOR_WIZARDS_HOW_TO_ADD_NEW_PRODUCT":"Choose how to add a product",
   "EDITOR_WIZARDS_TREE_SEARCH":"If you want search a new product:",
   "EDITOR_WIZARDS_TREE_SFTP":"If you want add a product by SFTP:",
   "EDITOR_ADVANCE_FILTERS_TITLE":"Advance filters",
@@ -107,6 +108,9 @@
   "EDITOR_COLOUR_MANIPULATION_TOOLTIP_95%":"Auto-adjust to 95% of all pixels",
   "EDITOR_COLOUR_MANIPULATION_TOOLTIP_RESET_DEFAULTS":"Reset to defaults",
   "EDITOR_COLOUR_MANIPULATION_TOOLTIP_APPLY_COLOR_MANIPULATION":"Apply color manipulation",
+
+  "BTN_SEARCH" : "Search",
+  "BTN_IMPORT" : "Import",
 
   "IMPORT_ADVANCE_SEARCH_LABEL":"Advance search",
   "IMPORT_PRODUCTS_PER_PAGE_LABEL":"Products per page:",
