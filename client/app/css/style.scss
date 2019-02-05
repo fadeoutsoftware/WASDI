@@ -70,6 +70,7 @@ $screen-lg: map-get($grid-breakpoints, "lg");
 @import "../dialogs/edit_user/edit_user";
 @import "../dialogs/ftp_service/ftp_service";
 @import "../dialogs/list_flood_area_detection/list_flood_area_detection";
+@import "../dialogs/JRC_processor/jrc_processor";
 
 //COMPONENTS
 @import "components/range_slider";
@@ -899,4 +900,11 @@ h4 {
     height: 47px;
     border-bottom: 1px solid black;
     position: absolute;
+}
+
+.logo-container-partner{
+    width: auto;
+    height: 100px;
+    cursor: pointer;
+    background-color: rgba(16, 32, 48, 0.75);
 }

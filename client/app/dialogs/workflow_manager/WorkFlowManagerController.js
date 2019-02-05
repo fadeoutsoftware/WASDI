@@ -436,6 +436,22 @@ var WorkFlowManagerController = (function() {
         return true;
     };
 
+    WorkFlowManagerController.prototype.isTheOwnerOfWorkflow = function(oWorkflow)
+    {
+        var oUser = this.m_oConstantsService.getUser();
+        if( (utilsIsObjectNullOrUndefined(oWorkflow) === true) || (utilsIsObjectNullOrUndefined(oUser) === true) )
+        {
+            return false;
+        }
+        var sUserIdOwner = oWorkflow.userId;
+
+        if( sUserIdOwner === oUser.userId)
+        {
+            return true;
+        }
+        return false;
+    }
+
     WorkFlowManagerController.$inject = [
         '$scope',
         'close',
