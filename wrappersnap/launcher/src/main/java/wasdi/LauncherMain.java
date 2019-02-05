@@ -1508,6 +1508,8 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			
 			s_oLogger.debug("LauncherMain.executeMATLABProcessor: shell exec " + Arrays.toString(asCmd));
 			ProcessBuilder oProcBuilder = new ProcessBuilder(asCmd);
+			
+			oProcBuilder.directory(new File (sBasePath+"processors/"+oParameter.getProcessorName()));
 			Process oProc = oProcBuilder.start();
 			
 			BufferedReader oInput = new BufferedReader(new InputStreamReader(oProc.getInputStream()));
