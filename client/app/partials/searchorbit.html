@@ -1,74 +1,27 @@
-<div class="container-fluid">
-    <div class="editor-view col-lg-12 col-md-12 col-sm-12 col-xs-12 search-orbit-view">
+<div class="editor-view search-orbit-view">
 
-        <div class="col-lg-11 col-md-10 col-sm-10 col-xs-10 col-lg-offset-1 col-md-offset-2 col-sm-offset-2 col-xs-offset-2 operations-bar "  >
-            <!--SEARCH BUTTON -->
-            <div class="buttom-collumn">
-                <button class="my-button" ng-click="m_oController.searchOrbit()">Search</button>
-            </div>
-
-            <!--&lt;!&ndash;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45; TIME PICKER END &#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&ndash;&gt;-->
-            <!--<div class=" time-picker-container">-->
-            <!--<div class="input-group my-input-text"-->
-            <!--moment-picker="m_oController.m_oOrbitSearch.acquisitionEndTime"-->
-            <!--format="YYYY-MM-DD HH"-->
-            <!--today="true">-->
-
-            <!--<input class="form-control"-->
-            <!--placeholder="Select acquisition end time"-->
-            <!--ng-model="m_oController.m_oOrbitSearch.acquisitionEndTime"-->
-            <!--ng-model-options="{ updateOn: 'blur' }">-->
-
-            <!--<span class="input-group-addon">-->
-            <!--<i class="fa fa-calendar"></i>-->
-            <!--</span>-->
-            <!--</div>-->
-            <!--</div>-->
-            <!--&lt;!&ndash;format="YYYY-MM-DD HH:mm:ss"&ndash;&gt;-->
-
-            <!--<div class="description">-->
-            <!--<i class="fa fa-calendar" aria-hidden="true"></i>-->
-            <!--Acquisition End Time:-->
-            <!--</div>-->
-
-            <!--&lt;!&ndash;-&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45; TIME PICKER START &#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&ndash;&gt;-->
-            <!--<div class=" time-picker-container ">-->
-
-
-            <!--<div class="input-group my-input-text"-->
-            <!--moment-picker="m_oController.m_oOrbitSearch.acquisitionStartTime"-->
-            <!--format="YYYY-MM-DD HH"-->
-            <!--today="true">-->
-
-            <!--<input class="form-control"-->
-            <!--placeholder="Select acquisition start time"-->
-            <!--ng-model="m_oController.m_oOrbitSearch.acquisitionStartTime"-->
-            <!--ng-model-options="{ updateOn: 'blur' }">-->
-
-            <!--<span class="input-group-addon">-->
-            <!--<i class="fa fa-calendar"></i>-->
-            <!--</span>-->
-            <!--</div>-->
-            <!--</div>-->
-
-            <!--<div class="description">-->
-            <!--<i class="fa fa-calendar" aria-hidden="true"></i>-->
-            <!--Acquisition Start Time:-->
-            <!--</div>-->
+    <!-- TOP TOOLBAR/OPERATION BAR -->
+    <div class="row-v4 justify-content-end toolbar">
+        <div class="col-v4-auto ml-auto">
+            <button class="btn btn-primary btn-wasdi" ng-click="m_oController.searchOrbit()"><i class="fa fa-search" aria-hidden="true"></i>Search</button>
         </div>
+    </div>
 
-        <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12 left-side-bar">
-            <div class="my-panel">
-                <div class="panel panel-default">
-                    <div class="panel-heading">
-                        {{"SEARCH_TITLE_PANEL_HEADING_FILTERS"|translate}}
+    <div class="spacer"></div>
 
-                        <i class="fa fa-arrow-left fa-lg backbtn" aria-hidden="true" ng-click="m_oController.clearOrbitsTable()"
-                           ng-show = "m_oController.thereAreOrbits() && (m_oController.m_bIsVisibleLoadingIcon === false)"></i>
+    <div class="row-v4 full-width-content">
 
-                    </div>
+        <div class="col-v4-lg-4 col-v4-md-4 col-v4-sm-4 col-xs-12 left-side-bar">
+            <div class="panel panel-default h-100 my-panel">
+                <div class="panel-heading">
+                    {{"SEARCH_TITLE_PANEL_HEADING_FILTERS"|translate}}
 
-                    <div class="panel-body">
+                    <i class="fa fa-arrow-left fa-lg backbtn" aria-hidden="true" ng-click="m_oController.clearOrbitsTable()"
+                       ng-show = "m_oController.thereAreOrbits() && (m_oController.m_bIsVisibleLoadingIcon === false)"></i>
+
+                </div>
+
+                <div class="panel-body">
 
                         <!---------------------------------------- CHECK BOX ---------------------------------------------->
                         <!------------------------- Satellite ----------------------------->
@@ -355,7 +308,7 @@
         </div>
 
         <!--------------- MAP CONTAINER --------------->
-        <div class="col-lg-8 col-md-8 col-sm-8 col-xs-12 map-column">
+        <div class="col-v4-lg-8 col-v4-md-8 col-v4-sm-8 col-v4-xs-12 map-column">
             <div class="map-container">
                 <div class="map" id="orbitMap"></div>
             </div>

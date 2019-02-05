@@ -1,723 +1,696 @@
-.editor-view
-{
-  margin-top:5px;
-  padding-left: 0;
-  padding-right: 0;
+.editor-view {
 
-  //SIDEBAR
-  .sidebar
-  {
-    background-color: #f5f5f5;//black;
-    border-right: 1px solid #eee;
-    position: relative;
-    bottom: 0;
-    left:0;
-    padding-right: 5px;
-    padding-left: 5px;
-    //override bootstrap
-    /* panel globe and tree */
-    .panel-body
-    {
-      padding: 0;
-      height: $wasdi-heigth-panel;
-      @media  screen and (max-width: 1366px)and (max-height: 768px) {
-        height: $wasdi-height-panel-max-width-1366-max-height-768;
-      }
-      //Navigation tab globe or map
-      .navigation-tab{
-        padding: 0;
-        .globe-container-panel{
-          padding: 0;
-        }
-        .map-container-panel{
-          padding: 0;
-          .btn-group, .btn-group-vertical{
-            position: absolute;
-            left: 2px;
-            top: 2px;
-            z-index: 1000;
-          }
-
-        }
-
-      }
-
-      .wizards{
-        margin:5px 5px 5px 10px;
-        div{
-          margin:10px 0px 10px 0px;
-        }
-      }
-      .histogram-container{
-        margin-top: 5px;
-      }
-      .ranges-container
-      {
-        margin-top: 10px;
-
-        .color-value
-        {
-          margin-left: 20px;
-          color: $wasdi-green-logo;
-          
-        }
-
-        input[type=range]
-        {
-          width: 80%;
-          float:left;
-
-        }
-      }
-    }
-    //override bootstrap
-    .panel-heading {
-      border-bottom: 0;
-      min-height: 40px;
-      .active{
-        color:black;
-      }
-
-      .nav-tabs{
-        li{
-          //color:white;
-          a{
-            padding-top: 3px;
-            padding-bottom: 3px;
-            color:white;
-            &:hover{
-              color:black;
+    .toolbar{
+        .button-menu-with-icons{
+            &:not(:last-of-type){
+                padding-right: 0px;
             }
-          }
-
+            .dropdown{
+                .dropdown-item{
+                    i{
+                        width: 20px;
+                        text-align: center;
+                    }
+                    span{
+                        font-size: 18px;
+                    }
+                }
+            }
         }
-        .active a{
-          color: black !important;
-        }
-
-      }
-    }
-
-    //background-color: $wasdi-sidebar-background-color;
-    .panel-default {
-      border-color: $waddi-sidebar-color-border-panel;
-      margin-bottom: 5px;
-
-
-    }
-    .panel-default > .panel-heading
-    {
-      background-color:$wasdi-sidebar-color-title-panel ;
-      color:$wasdi-title-color;
-    }
-    //panel tree
-
-    //panel globe
-    .small-map-container
-    {
-      .map
-      {
-        width: auto;//500px
-        height: $wasdi-heigth-panel;//500px
-
-        margin-bottom: 50px;
-
-        @media  screen and (max-width: 1366px)and (max-height: 768px) {
-          width: auto;
-          height:$wasdi-height-panel-max-width-1366-max-height-768;
-        }
-      }
-      .panel-body{
-        //overflow-y: auto;
-        .preview-tab-container{
-          padding-left: 0;
-        }
-      }
-
-    }
-    //override my button class in style.scss
-    .my-button
-    {
-      color:white;
-      padding: 0;
-      margin: 0;
-      padding-left: 10px;
-    }
-    .my-button:hover{
-      color: $wasdi-button-over-color;
-      background-color:transparent;
-    }
-  }
-  /*************************************************/
-  //map container leaflet
-  .map-column{
-    padding-left: 0;
-    padding-right: 0;
-    .map-container
-    {
-
-      height: 82vh;
-      border: 1px solid $wasdi-blue-logo;
-
-      //BUTTONS ON MAP
-      .btn-group-left
-      {
-        z-index: 1001;
-        position: absolute;
-        top: 2px;
-        left: 20px;
-
-      }
-      .btn-group-right
-      {
-        z-index: 1001;
-        position: absolute;
-        top: 2px;
-        right: 20px;
-
-      }
-
-      .btn-group
-      {
-
-        .selected-mode{
-          color: $wasdi-white;
-        }
-        .deselected-mode{
-          color: #777777;
-        }
-        .btn-default
-        {
-          min-width: 46px;
-          min-height: 34px;
-          background-color: $wasdi-blue-logo;
-          color: $wasdi-white;
-          opacity: 0.9;
-        }
-        .btn-default:hover
-        {
-          color: $wasdi-green-logo;
-        }
-        .btn-default:disabled
-        {
-          color:grey;
-        }
-
-        .btn-switch-geographic
-        {
-          background-color: $wasdi-blue-logo;
-          background-image: url("../assets/icons/mapBar/globe_white.svg");
-          background-size: 20px;
-          background-repeat: no-repeat;
-          background-position: center;
-
-          &:hover,&:active{
-            background-color: $wasdi-blue-logo;
-            //background-image: url("../assets/icons/mapBar/map_route_green(NoGeoReference).svg");
-            background-image: url("../assets/icons/mapBar/pictureModeGreen.svg");
-            background-size: 20px;
-            background-repeat: no-repeat;
-            background-position: center;
-
-          }
-        }
-
-
-
-        .btn-switch-not-geographic
-        {
-          background-color: $wasdi-blue-logo;
-          //background-image: url("../assets/icons/mapBar/map_route_white(NoGeoReference).svg");
-          background-image: url("../assets/icons/mapBar/pictureModeWhite.svg");
-          background-size: 20px;
-          background-repeat: no-repeat;
-          background-position: center;
-          //background: url("../assets/icons/mapBar/globe_white.svg")left center no-repeat;;
-          &:hover,&:active {
-            background-color: $wasdi-blue-logo;
-            //background-image: url("../assets/icons/mapBar/map_route_green(NoGeoReference).svg");
-            background-image: url("../assets/icons/mapBar/globe_green.svg");
-            background-size: 20px;
-            background-repeat: no-repeat;
-            background-position: center;
-          }
-        }
-
-      }
-
-      //layers list
-      .layers-list{
-        z-index: 1001;
-        position: absolute;
-        bottom: 2px;
-        left: 20px;
-        background-color: white;
-        overflow-y: auto;
-        overflow-x: hidden;
-        height: 100px;
-        width: 300px;
-        border:2px solid $wasdi-blue-logo;
-        .checkbox{
-          margin: 10px;
-        }
-      }
-      //leaflet
-      .map
-      {
-        //DIMENSIONS MAP
-        width: auto;//500px
-        height: $wasdi-map-height-editor;
-
-        ///* (1366x768) WXGA Display */
-        @media  screen and (max-width: 1366px)and (max-height: 768px) {
-          width:auto;
-          height: $wasdi-map-height-max-width-1366-max-height-768;
-        }
-
-
-        .leaflet-popup-pane
-        {
-          visibility:hidden;
-        }
-      }
-
-    }
-  }
-
-  //map container leaflet in sidebar
-
-
-  //OPERATION BAR
-  .operations-bar
-  {
-
-    text-align: right;
-    margin-top: -45px;
-    li a,
-    li,
-    h4 {
-      display: flex;
-      align-items: center;
-      i {
-        margin-right:5px;
-      }
 
     }
 
+    //SIDEBAR
+    .sidebar {
+        //background-color: #f5f5f5;//black;
+        //border-right: 1px solid #eee;
+        //position: relative;
+        //bottom: 0;
+        //left:0;
+        //padding-right: 5px;
+        //padding-left: 5px;
+        //override bootstrap
+        /* panel globe and tree */
+        .panel-body {
+            padding: 0;
+            //height: $wasdi-heigth-panel;
+            @media screen and (max-width: 1366px) and (max-height: 768px) {
+                height: $wasdi-height-panel-max-width-1366-max-height-768;
+            }
+            //Navigation tab globe or map
+            .navigation-tab {
+                padding: 0;
+                .globe-container-panel {
+                    padding: 0;
+                }
+                .map-container-panel {
+                    padding: 0;
+                    .btn-group, .btn-group-vertical {
+                        position: absolute;
+                        left: 2px;
+                        top: 2px;
+                        z-index: 1000;
+                    }
 
-    ul {
-      list-style-type: none;
-      padding: 0;
-      overflow: hidden;
+                }
 
+            }
 
+            .wizards {
+                margin: 5px 5px 5px 10px;
+                div {
+                    margin: 10px 0px 10px 0px;
+                }
+            }
+            .histogram-container {
+                margin-top: 5px;
+            }
+            .ranges-container {
+                margin-top: 10px;
 
-    }
+                .color-value {
+                    margin-left: 20px;
+                    color: $wasdi-green-logo;
 
-    li {
-      height:40px ;
-      float: right;
-      .icon
-      {
-        img
-        {
-          height: 42px;
+                }
+
+                input[type=range] {
+                    width: 80%;
+                    float: left;
+
+                }
+            }
         }
-      }
+        //override bootstrap
+        .panel-heading {
+            border-bottom: 0;
+            min-height: 40px;
+            .active {
+                color: black;
+            }
+
+            .nav-tabs {
+                li {
+                    //color:white;
+                    a {
+                        padding-top: 3px;
+                        padding-bottom: 3px;
+                        color: white;
+                        &:hover {
+                            color: black;
+                        }
+                    }
+
+                }
+                .active a {
+                    color: black !important;
+                }
+
+            }
+        }
+
+        //background-color: $wasdi-sidebar-background-color;
+        .panel-default {
+            border-color: $waddi-sidebar-color-border-panel;
+            margin-bottom: 5px;
+
+        }
+        .panel-default > .panel-heading {
+            background-color: $wasdi-sidebar-color-title-panel;
+            color: $wasdi-title-color;
+        }
+        //panel tree
+
+        //panel globe
+        .small-map-container {
+            .map {
+                width: auto; //500px
+                height: $wasdi-heigth-panel; //500px
+
+                margin-bottom: 50px;
+
+                @media screen and (max-width: 1366px) and (max-height: 768px) {
+                    width: auto;
+                    height: $wasdi-height-panel-max-width-1366-max-height-768;
+                }
+            }
+            .panel-body {
+                //overflow-y: auto;
+                .preview-tab-container {
+                    padding-left: 0;
+                }
+            }
+
+        }
+        //override my button class in style.scss
+        .my-button {
+            color: white;
+            padding: 0;
+            margin: 0;
+            padding-left: 10px;
+        }
+        .my-button:hover {
+            color: $wasdi-button-over-color;
+            background-color: transparent;
+        }
+    }
+    /*************************************************/
+
+
+    .panel-tree{
+        height: 40%;
+    }
+    .small-map-container{
+        height: 56%;
     }
 
-    li a {
-      //margin-top: 5px;
-      display: block;
-      color: $wasdi-operation-bar-color-icon;
-      text-align: center;
-      //padding: 14px 16px;
-      //padding:2px 16px 14px 16px;
-      padding: 3px 5px 5px 5px ;
-      text-decoration: none;
+
+    //map container leaflet
+    .map-column {
+        .map-container {
+
+            height: 100%;
+            border: 1px solid $wasdi-blue-logo;
+
+            //BUTTONS ON MAP
+            .btn-group-left {
+                z-index: 1001;
+                position: absolute;
+                top: 2px;
+                left: 20px;
+
+            }
+            .btn-group-right {
+                z-index: 1001;
+                position: absolute;
+                top: 2px;
+                right: 20px;
+
+            }
+
+            .btn-group {
+
+                .selected-mode {
+                    color: $wasdi-white;
+                }
+                .deselected-mode {
+                    color: #777777;
+                }
+                .btn-default {
+                    min-width: 46px;
+                    min-height: 34px;
+                    background-color: $wasdi-blue-logo;
+                    color: $wasdi-white;
+                    opacity: 0.9;
+                }
+                .btn-default:hover {
+                    color: $wasdi-green-logo;
+                }
+                .btn-default:disabled {
+                    color: grey;
+                }
+
+                .btn-switch-geographic {
+                    background-color: $wasdi-blue-logo;
+                    background-image: url("../assets/icons/mapBar/globe_white.svg");
+                    background-size: 20px;
+                    background-repeat: no-repeat;
+                    background-position: center;
+
+                    &:hover, &:active {
+                        background-color: $wasdi-blue-logo;
+                        //background-image: url("../assets/icons/mapBar/map_route_green(NoGeoReference).svg");
+                        background-image: url("../assets/icons/mapBar/pictureModeGreen.svg");
+                        background-size: 20px;
+                        background-repeat: no-repeat;
+                        background-position: center;
+
+                    }
+                }
+
+                .btn-switch-not-geographic {
+                    background-color: $wasdi-blue-logo;
+                    //background-image: url("../assets/icons/mapBar/map_route_white(NoGeoReference).svg");
+                    background-image: url("../assets/icons/mapBar/pictureModeWhite.svg");
+                    background-size: 20px;
+                    background-repeat: no-repeat;
+                    background-position: center;
+                    //background: url("../assets/icons/mapBar/globe_white.svg")left center no-repeat;;
+                    &:hover, &:active {
+                        background-color: $wasdi-blue-logo;
+                        //background-image: url("../assets/icons/mapBar/map_route_green(NoGeoReference).svg");
+                        background-image: url("../assets/icons/mapBar/globe_green.svg");
+                        background-size: 20px;
+                        background-repeat: no-repeat;
+                        background-position: center;
+                    }
+                }
+
+            }
+
+            //layers list
+            .layers-list {
+                z-index: 1001;
+                position: absolute;
+                bottom: 2px;
+                left: 20px;
+                background-color: white;
+                overflow-y: auto;
+                overflow-x: hidden;
+                height: 100px;
+                width: 300px;
+                border: 2px solid $wasdi-blue-logo;
+                .checkbox {
+                    margin: 10px;
+                }
+            }
+            //leaflet
+            .map {
+                //DIMENSIONS MAP
+                width: auto; //500px
+                height: $wasdi-map-height-editor;
+
+                ///* (1366x768) WXGA Display */
+                @media screen and (max-width: 1366px) and (max-height: 768px) {
+                    width: auto;
+                    height: $wasdi-map-height-max-width-1366-max-height-768;
+                }
+
+                .leaflet-popup-pane {
+                    visibility: hidden;
+                }
+            }
+
+        }
     }
 
+    //map container leaflet in sidebar
 
-    //li a:hover:not(.active) {
-    //  background-color: $wasdi-nav-bar-color-over;
-    //  color: white;
+    //OPERATION BAR
+    .operations-bar {
+
+        text-align: right;
+        margin-top: -45px;
+        li a,
+        li,
+        h4 {
+            display: flex;
+            align-items: center;
+            i {
+                margin-right: 5px;
+            }
+
+        }
+
+        ul {
+            list-style-type: none;
+            padding: 0;
+            overflow: hidden;
+
+        }
+
+        li {
+            height: 40px;
+            float: right;
+            .icon {
+                img {
+                    height: 42px;
+                }
+            }
+        }
+
+        li a {
+            //margin-top: 5px;
+            display: block;
+            color: $wasdi-operation-bar-color-icon;
+            text-align: center;
+            //padding: 14px 16px;
+            //padding:2px 16px 14px 16px;
+            padding: 3px 5px 5px 5px;
+            text-decoration: none;
+        }
+
+        //li a:hover:not(.active) {
+        //  background-color: $wasdi-nav-bar-color-over;
+        //  color: white;
+        //}
+
+        .active {
+            background-color: $wasdi-nav-bar-color-selected;
+        }
+
+        .button-menu-with-icons {
+            .button-container {
+                //float: right;
+                h4 {
+                    margin: 0;
+                    display: inline-block;
+                }
+                i {
+                    width: 20px;
+                }
+                .dropdown-menu {
+                    z-index: 1500;
+                    li {
+                        width: 100%;
+                        &:hover {
+                            color: white;
+                            background-color: $wasdi-green-logo;
+                            a {
+                                color: white;
+                                background-color: $wasdi-green-logo;
+                            }
+                        }
+                    }
+                }
+                .my-button {
+                    //background-color: $wasdi-button-default-color;
+                    background-color: white;
+                    color: $wasdi-blue-logo;
+                    border: none;
+                    //color: white;
+                    padding: 5px 10px;
+                    text-align: center;
+                    text-decoration: none;
+                    display: inline-block;
+                    font-size: 16px;
+                    margin: 4px 2px;
+                    cursor: pointer;
+                }
+
+                .my-button:hover {
+                    //background-color: $wasdi-button-over-color;
+                    background-color: $wasdi-blue-logo;
+                    color: white;
+
+                    //RADAR ICON
+                    .icon-radar {
+                        content: $wasdi-radar-icon-white-version;
+                        width: $wasdi-size-icon;
+                        height: auto;
+                    }
+
+                    //OPTICAL ICON
+                    .icon-eye {
+                        content: $wasdi-eye-icon-white-version;
+                        width: $wasdi-size-icon;
+                        height: auto;
+                    }
+
+                    //PROCESSOR ICON
+                    .icon-document-gear {
+                        content: $wasdi-document-gear-icon-white-version;
+                        width: $wasdi-size-icon;
+                        height: auto;
+                    }
+                    //APPLY ORBIT
+                    .icon-applyorbit-operations {
+                        content: $wasdi-orbit-icon-applyorbit-white-version;
+                        width: $wasdi-size-icon;
+                        height: auto;
+                    }
+                    //RADIOMETRIC CALIBRATE
+                    .icon-radiometriccalibrate-operations {
+                        content: $wasdi-orbit-icon-calibrate-white-version;
+                        width: $wasdi-size-icon;
+                        height: auto;
+                    }
+                    //Multilooking
+                    .icon-multilooking-operations {
+                        content: $wasdi-telescope-icon-multilooking-white-version;
+                        width: $wasdi-size-icon;
+                        height: auto;
+                    }
+                    //range-doppler-terrain-correction
+                    .icon-range-doppler-terrain-correction-operations {
+                        content: $wasdi-earth-icon-range-doppler-terrain-correction-white-version;
+                        width: $wasdi-size-icon;
+                        height: auto;
+                    }
+                    //MIDA
+                    .icon-mida-merge-operations {
+                        content: $wasdi-mida-merge-operations-white;
+                        width: $wasdi-size-icon;
+                        height: auto;
+                    }
+                    .icon-mask-manager {
+                        content: $wasdi-mask-manager-white;
+                        width: $wasdi-size-icon;
+                        height: auto;
+                    }
+
+                    i {
+                        color: white;
+                        background-color: $wasdi-blue-logo;
+                    }
+                }
+                .my-button:disabled {
+                    opacity: 0.65;
+                    cursor: not-allowed;
+                }
+
+                ////RADAR ICON
+                //.icon-radar {
+                //    content: $wasdi-radar-icon;
+                //    width: $wasdi-size-icon;
+                //    height: auto;
+                //}
+                ////OPTICAL ICON
+                //.icon-eye {
+                //    content: $wasdi-eye-icon;
+                //    width: $wasdi-size-icon;
+                //    height: auto;
+                //}
+                ////PROCESSOR ICON
+                //.icon-document-gear {
+                //    content: $wasdi-document-gear-icon-version;
+                //    width: $wasdi-size-icon;
+                //    height: auto;
+                //}
+                ////APPLY ORBIT
+                //.icon-applyorbit-operations {
+                //    content: $wasdi-orbit-icon-applyorbit-blue-version;
+                //    width: $wasdi-size-icon;
+                //    height: auto;
+                //}
+                //
+                ////Radiometric Calibrate
+                //.icon-radiometriccalibrate-operations {
+                //    content: $wasdi-orbit-icon-calibrate-blue-version;
+                //    width: $wasdi-size-icon;
+                //    height: auto;
+                //}
+                ////MULTILOOKING ICON
+                //.icon-multilooking-operations {
+                //    content: $wasdi-telescope-icon-multilooking-blue-version;
+                //    width: $wasdi-size-icon;
+                //    height: auto;
+                //}
+                ////range doppler terrain correction
+                //.icon-range-doppler-terrain-correction-operations {
+                //    content: $wasdi-earth-icon-range-doppler-terrain-correction-blue-version;
+                //    width: $wasdi-size-icon;
+                //    height: auto;
+                //}
+                //// MIDA ICON
+                //.icon-mida-merge-operations {
+                //    content: $wasdi-mida-merge-operations-blue;
+                //    width: $wasdi-size-icon;
+                //    height: auto;
+                //}
+                //// ICON  MASK MENAGER
+                //.icon-mask-manager {
+                //    content: $wasdi-mask-manager-blue;
+                //    width: $wasdi-size-icon;
+                //    height: auto;
+                //}
+
+            }
+        }
+
+    }
+
+    /********************************* ICONS *********************************/
+
+    //RADAR ICON
+    //.icon-radar {
+    //  //i {
+    //    content: $wasdi-radar-icon;
+    //    width: $wasdi-size-icon;
+    //    height: auto;
+    //  &:hover{
+    //    content: $wasdi-radar-icon-white-version;
+    //    width: $wasdi-size-icon;
+    //    //margin-top: -20px;
+    //    height: auto;
+    //  }
+    //  //}
+    //}
+    //.icon-radar:hover {
+    //  //i {
+    //    content: $wasdi-radar-icon-white-version;
+    //    width: $wasdi-size-icon;
+    //    //margin-top: -20px;
+    //    height: auto;
+    //    //min-height: 50px;
+    //    //min-width: 50px;
+    //  //}
+    //}
+    ////OPTICAL ICON
+    //.icon-eye
+    //{
+    //  //i{
+    //    content: $wasdi-eye-icon;
+    //    width: $wasdi-size-icon;
+    //    height: auto;
+    //  &:hover{
+    //    content: $wasdi-eye-icon-white-version;
+    //    width: $wasdi-size-icon;
+    //    height: auto;
+    //  }
+    //  //}
+    //}
+    //.icon-eye:hover
+    //{
+    //  //i{
+    //    content: $wasdi-eye-icon-white-version;
+    //    width: $wasdi-size-icon;
+    //    height: auto;
+    //
+    //  //}
     //}
 
-    .active {
-      background-color: $wasdi-nav-bar-color-selected;
+    ////PROCESSOR ICON
+    //.icon-document-gear
+    //{
+    //    content: $wasdi-document-gear-icon-version;
+    //    width: $wasdi-size-icon;
+    //    height: auto;
+    //    &:hover{
+    //      content: $wasdi-document-gear-icon-white-version;
+    //      width: $wasdi-size-icon;
+    //      height: auto;
+    //    }
+    //}
+    //.icon-document-gear:hover
+    //{
+    //  //i{
+    //    content: $wasdi-document-gear-icon-white-version;
+    //    width: $wasdi-size-icon;
+    //    height: auto;
+    //
+    //  //}
+    //}
+
+    //apply orbit
+
+    //.icon-applyorbit-operations {
+    //  i{
+    //    content: $wasdi-orbit-icon-applyorbit-blue-version;
+    //    width: $wasdi-size-icon;
+    //    height: auto;
+    //  }
+    //}
+
+    //.icon-applyorbit-operations:hover {
+    //  i{
+    //    content: $wasdi-orbit-icon-applyorbit-white-version;
+    //    width: $wasdi-size-icon;
+    //    height: auto;
+    //  }
+    //}
+
+    ////Radiometric Calibrate
+    //
+    //.icon-radiometriccalibrate-operations {
+    //  i{
+    //    content: $wasdi-orbit-icon-calibrate-blue-version;
+    //    width: $wasdi-size-icon;
+    //    height: auto;
+    //  }
+    //}
+    //
+    //.icon-radiometriccalibrate-operations:hover {
+    //  i{
+    //    content: $wasdi-orbit-icon-calibrate-white-version;
+    //    width: $wasdi-size-icon;
+    //    height: auto;
+    //  }
+    //}
+
+    ////MULTILOOKING ICON
+    //.icon-multilooking-operations{
+    //  i{
+    //    content: $wasdi-telescope-icon-multilooking-blue-version;
+    //    width: $wasdi-size-icon;
+    //    height: auto;
+    //
+    //  }
+    //}
+    //.icon-multilooking-operations:hover{
+    //  i{
+    //    content: $wasdi-telescope-icon-multilooking-white-version;
+    //    width: $wasdi-size-icon;
+    //    height: auto;
+    //
+    //  }
+    //}
+
+    ////EARTH ICON
+    //.icon-range-doppler-terrain-correction-operations{
+    //  i{
+    //    content: $wasdi-earth-icon-range-doppler-terrain-correction-blue-version;
+    //    width: $wasdi-size-icon;
+    //    height: auto;
+    //
+    //  }
+    //}
+    //.icon-range-doppler-terrain-correction-operations:hover{
+    //  i{
+    //    content: $wasdi-earth-icon-range-doppler-terrain-correction-white-version;
+    //    width: $wasdi-size-icon;
+    //    height: auto;
+    //
+    //  }
+    //}
+    //// MIDA ICON
+    //.icon-mida-merge-operations{
+    //  i{
+    //    content: $wasdi-mida-merge-operations-blue;
+    //    width: $wasdi-size-icon;
+    //    height: auto;
+    //
+    //  }
+    //}
+    //.icon-mida-merge-operations:hover{
+    //  i{
+    //    content: $wasdi-mida-merge-operations-white;
+    //    width: $wasdi-size-icon;
+    //    height: auto;
+    //  }
+    //}
+
+    //// ICON  MASK MENAGER
+    //.icon-mask-manager{
+    //  i{
+    //    content: $wasdi-mask-manager-blue;
+    //    width: $wasdi-size-icon;
+    //    height: auto;
+    //  }
+    //}
+    //.icon-mask-manager:hover{
+    //  i{
+    //    content: $wasdi-mask-manager-white;
+    //    width: $wasdi-size-icon;
+    //    height: auto;
+    //  }
+    //}
+    .band-published-label {
+        color: #00A707;
     }
 
-    .button-menu-with-icons
-    {
-      .button-container
-      {
-        float:right;
-        h4{
-          margin:0;
-          display: inline-block;
-        }
-        i{
-          width: 20px;
-        }
-        .dropdown-menu{
-          z-index: 1500 ;
-          li{
-            width: 100%;
-            &:hover{
-              color:white;
-              background-color: $wasdi-green-logo;
-              a{
-                color:white;
-                background-color: $wasdi-green-logo;
-              }
-            }
-          }
-        }
-        .my-button {
-          //background-color: $wasdi-button-default-color;
-          background-color: white;
-          color: $wasdi-blue-logo;
-          border: none;
-          //color: white;
-          padding: 5px 10px;
-          text-align: center;
-          text-decoration: none;
-          display: inline-block;
-          font-size: 16px;
-          margin: 4px 2px;
-          cursor: pointer;
-        }
-
-        .my-button:hover {
-          //background-color: $wasdi-button-over-color;
-          background-color:$wasdi-blue-logo ;
-          color: white;
-
-          //RADAR ICON
-          .icon-radar{
-            content: $wasdi-radar-icon-white-version;
-            width: $wasdi-size-icon;
-            height: auto;
-          }
-
-          //OPTICAL ICON
-          .icon-eye{
-            content: $wasdi-eye-icon-white-version;
-            width: $wasdi-size-icon;
-            height: auto;
-          }
-
-          //PROCESSOR ICON
-          .icon-document-gear
-          {
-            content: $wasdi-document-gear-icon-white-version;
-            width: $wasdi-size-icon;
-            height: auto;
-          }
-          //APPLY ORBIT
-          .icon-applyorbit-operations
-          {
-            content: $wasdi-orbit-icon-applyorbit-white-version;
-            width: $wasdi-size-icon;
-            height: auto;
-          }
-          //RADIOMETRIC CALIBRATE
-          .icon-radiometriccalibrate-operations
-          {
-            content: $wasdi-orbit-icon-calibrate-white-version;
-            width: $wasdi-size-icon;
-            height: auto;
-          }
-          //Multilooking
-          .icon-multilooking-operations
-          {
-            content: $wasdi-telescope-icon-multilooking-white-version;
-            width: $wasdi-size-icon;
-            height: auto;
-          }
-          //range-doppler-terrain-correction
-          .icon-range-doppler-terrain-correction-operations
-          {
-            content: $wasdi-earth-icon-range-doppler-terrain-correction-white-version;
-            width: $wasdi-size-icon;
-            height: auto;
-          }
-          //MIDA
-          .icon-mida-merge-operations
-          {
-            content: $wasdi-mida-merge-operations-white;
-            width: $wasdi-size-icon;
-            height: auto;
-          }
-          .icon-mask-manager
-          {
-            content: $wasdi-mask-manager-white;
-            width: $wasdi-size-icon;
-            height: auto;
-          }
-
-          i{
-            color:white;
-            background-color:$wasdi-blue-logo;
-          }
-        }
-        .my-button:disabled {
-          opacity: 0.65;
-          cursor: not-allowed;
-        }
-
-        //RADAR ICON
-        .icon-radar {
-          content: $wasdi-radar-icon;
-          width: $wasdi-size-icon;
-          height: auto;
-        }
-        //OPTICAL ICON
-        .icon-eye
-        {
-          content: $wasdi-eye-icon;
-          width: $wasdi-size-icon;
-          height: auto;
-        }
-        //PROCESSOR ICON
-        .icon-document-gear
-        {
-          content: $wasdi-document-gear-icon-version;
-          width: $wasdi-size-icon;
-          height: auto;
-        }
-        //APPLY ORBIT
-        .icon-applyorbit-operations
-        {
-          content: $wasdi-orbit-icon-applyorbit-blue-version;
-          width: $wasdi-size-icon;
-          height: auto;
-        }
-
-        //Radiometric Calibrate
-        .icon-radiometriccalibrate-operations
-        {
-          content: $wasdi-orbit-icon-calibrate-blue-version;
-          width: $wasdi-size-icon;
-          height: auto;
-        }
-        //MULTILOOKING ICON
-        .icon-multilooking-operations
-        {
-          content: $wasdi-telescope-icon-multilooking-blue-version;
-          width: $wasdi-size-icon;
-          height: auto;
-        }
-        //range doppler terrain correction
-        .icon-range-doppler-terrain-correction-operations
-        {
-          content: $wasdi-earth-icon-range-doppler-terrain-correction-blue-version;
-          width: $wasdi-size-icon;
-          height: auto;
-        }
-        // MIDA ICON
-        .icon-mida-merge-operations
-        {
-          content: $wasdi-mida-merge-operations-blue;
-          width: $wasdi-size-icon;
-          height: auto;
-        }
-        // ICON  MASK MENAGER
-        .icon-mask-manager
-        {
-          content: $wasdi-mask-manager-blue;
-          width: $wasdi-size-icon;
-          height: auto;
-        }
-
-
-      }
+    .band-not-published-label {
+        color: #0a6aa1;
+        font-style: italic;
     }
-
-  }
-
-  /********************************* ICONS *********************************/
-
-  //RADAR ICON
-  //.icon-radar {
-  //  //i {
-  //    content: $wasdi-radar-icon;
-  //    width: $wasdi-size-icon;
-  //    height: auto;
-  //  &:hover{
-  //    content: $wasdi-radar-icon-white-version;
-  //    width: $wasdi-size-icon;
-  //    //margin-top: -20px;
-  //    height: auto;
-  //  }
-  //  //}
-  //}
-  //.icon-radar:hover {
-  //  //i {
-  //    content: $wasdi-radar-icon-white-version;
-  //    width: $wasdi-size-icon;
-  //    //margin-top: -20px;
-  //    height: auto;
-  //    //min-height: 50px;
-  //    //min-width: 50px;
-  //  //}
-  //}
-  ////OPTICAL ICON
-  //.icon-eye
-  //{
-  //  //i{
-  //    content: $wasdi-eye-icon;
-  //    width: $wasdi-size-icon;
-  //    height: auto;
-  //  &:hover{
-  //    content: $wasdi-eye-icon-white-version;
-  //    width: $wasdi-size-icon;
-  //    height: auto;
-  //  }
-  //  //}
-  //}
-  //.icon-eye:hover
-  //{
-  //  //i{
-  //    content: $wasdi-eye-icon-white-version;
-  //    width: $wasdi-size-icon;
-  //    height: auto;
-  //
-  //  //}
-  //}
-
-  ////PROCESSOR ICON
-  //.icon-document-gear
-  //{
-  //    content: $wasdi-document-gear-icon-version;
-  //    width: $wasdi-size-icon;
-  //    height: auto;
-  //    &:hover{
-  //      content: $wasdi-document-gear-icon-white-version;
-  //      width: $wasdi-size-icon;
-  //      height: auto;
-  //    }
-  //}
-  //.icon-document-gear:hover
-  //{
-  //  //i{
-  //    content: $wasdi-document-gear-icon-white-version;
-  //    width: $wasdi-size-icon;
-  //    height: auto;
-  //
-  //  //}
-  //}
-
-  //apply orbit
-
-  //.icon-applyorbit-operations {
-  //  i{
-  //    content: $wasdi-orbit-icon-applyorbit-blue-version;
-  //    width: $wasdi-size-icon;
-  //    height: auto;
-  //  }
-  //}
-
-  //.icon-applyorbit-operations:hover {
-  //  i{
-  //    content: $wasdi-orbit-icon-applyorbit-white-version;
-  //    width: $wasdi-size-icon;
-  //    height: auto;
-  //  }
-  //}
-
-
-  ////Radiometric Calibrate
-  //
-  //.icon-radiometriccalibrate-operations {
-  //  i{
-  //    content: $wasdi-orbit-icon-calibrate-blue-version;
-  //    width: $wasdi-size-icon;
-  //    height: auto;
-  //  }
-  //}
-  //
-  //.icon-radiometriccalibrate-operations:hover {
-  //  i{
-  //    content: $wasdi-orbit-icon-calibrate-white-version;
-  //    width: $wasdi-size-icon;
-  //    height: auto;
-  //  }
-  //}
-
-  ////MULTILOOKING ICON
-  //.icon-multilooking-operations{
-  //  i{
-  //    content: $wasdi-telescope-icon-multilooking-blue-version;
-  //    width: $wasdi-size-icon;
-  //    height: auto;
-  //
-  //  }
-  //}
-  //.icon-multilooking-operations:hover{
-  //  i{
-  //    content: $wasdi-telescope-icon-multilooking-white-version;
-  //    width: $wasdi-size-icon;
-  //    height: auto;
-  //
-  //  }
-  //}
-
-  ////EARTH ICON
-  //.icon-range-doppler-terrain-correction-operations{
-  //  i{
-  //    content: $wasdi-earth-icon-range-doppler-terrain-correction-blue-version;
-  //    width: $wasdi-size-icon;
-  //    height: auto;
-  //
-  //  }
-  //}
-  //.icon-range-doppler-terrain-correction-operations:hover{
-  //  i{
-  //    content: $wasdi-earth-icon-range-doppler-terrain-correction-white-version;
-  //    width: $wasdi-size-icon;
-  //    height: auto;
-  //
-  //  }
-  //}
-  //// MIDA ICON
-  //.icon-mida-merge-operations{
-  //  i{
-  //    content: $wasdi-mida-merge-operations-blue;
-  //    width: $wasdi-size-icon;
-  //    height: auto;
-  //
-  //  }
-  //}
-  //.icon-mida-merge-operations:hover{
-  //  i{
-  //    content: $wasdi-mida-merge-operations-white;
-  //    width: $wasdi-size-icon;
-  //    height: auto;
-  //  }
-  //}
-
-  //// ICON  MASK MENAGER
-  //.icon-mask-manager{
-  //  i{
-  //    content: $wasdi-mask-manager-blue;
-  //    width: $wasdi-size-icon;
-  //    height: auto;
-  //  }
-  //}
-  //.icon-mask-manager:hover{
-  //  i{
-  //    content: $wasdi-mask-manager-white;
-  //    width: $wasdi-size-icon;
-  //    height: auto;
-  //  }
-  //}
-  .band-published-label {
-    color: #00A707;
-  }
-
-  .band-not-published-label {
-    color: #0a6aa1;
-    font-style: italic;
-  }
 }

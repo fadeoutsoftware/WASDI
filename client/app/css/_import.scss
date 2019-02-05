@@ -1,1097 +1,1110 @@
-.import-view
-{
+.import-view {
 
-  //OPERATION BAR
-  .operations-bar
-  {
-    text-align: right;
-    margin-top: -45px;
-    .multiRadioButtonDropdownMenu{
-      float: left;
-      border-style: solid;
-      border-color: #2D394F;
-      border-width: 2px;
-      margin-top: 8px;
-      background-color: $wasdi-white;
-    }
-    .MultiRadioButtonDropdownDirective{
-      float: left;
-      margin-left: 5px;
-
-    }
-    .providers-container{
-      margin-top: 10px;
-      float: left;
-    }
-    .my-input-text{
-      input[type=text]{
-        width: 20%;
-        float:left;
-        margin-left: 10px;
-        padding: 10px 10px;
-
-      }
-    }
-
-    //.time-container{
-    //  margin-left: 20px;
-    //  //float:left;
-    //  input[type=text]{
-    //    width: 100%;
-    //    border: 2px solid $wasdi-blue-logo;
-    //
-    //  }
-    //  .input-group{
-    //    float:right;
-    //    width: 15%;
-    //  }
-    //  .description-label{
-    //    float:right;
-    //    margin:13px 5px 0px 5px ;
-    //
-    //  }
-    //  .advanced-calendar-button {
-    //    color: $wasdi-white;
-    //    background-color: $wasdi-blue-logo;
-    //    border-color: $wasdi-blue-logo;
-    //  }
-    //  .advanced-calendar-button:hover
-    //  {
-    //    background-color: $wasdi-green-logo;
-    //  }
-    //  button{
-    //    border-color: $wasdi-blue-logo;
-    //  }
-    //}
-    .search-button-container
-    {
-      text-align: right;
-      margin-top: 15px;
-      margin-left: 10px;
-      float: right;
-      .search-button {
-        cursor:pointer;
-        display: inline;
-        // top: 10%;
-        background: $wasdi-import-left-side-navbar-color-background;
-        color:white;
-        padding:10px 10px;
-
-        //margin-top: 15px;
-        //border: 1px solid white;
-        //z-index: 1000;
-        opacity: 1;
-        i
-        {
-          color: white;
+    //OPERATION BAR
+    .operations-bar {
+        text-align: right;
+        margin-top: -45px;
+        .multiRadioButtonDropdownMenu {
+            float: left;
+            border-style: solid;
+            border-color: #2D394F;
+            border-width: 2px;
+            margin-top: 8px;
+            background-color: $wasdi-white;
         }
-
-      }
-
-      .search-button:hover
-      {
-        background-color: $wasdi-green-logo;
-      }
-      .search-button-disabled
-      {
-        background-color: $wasdi-blue-logo-complementary-1;
-        cursor:not-allowed;
-        display: inline;
-        color:white;
-        padding:10px 10px;
-        margin-top: 15px;
-        opacity: 1;
-        i
-        {
-          color: white;
-        }
-      }
-    }
-
-
-  }
-
-  margin-top: 5px;
-  padding: 0;
-  // MAP CONTAINER
-  .map-column{
-    padding-left: 0;
-    padding-right: 0;
-    .map-container
-    {
-      //padding-left: 0;
-      //padding-right: 0px;
-      border: 1px solid $wasdi-blue-logo;
-      .map
-      {
-        //DIMENSIONS MAP
-        width: auto;//500px
-        height: $wasdi-map-heigth-import;//500px
-        ///* (1366x768) WXGA Display */
-        @media  screen and (max-width: 1366px)and (max-height: 768px) {
-          width:auto;
-          height: $wasdi-map-height-import-max-width-1366-max-height-768;
-        }
-
-      }
-    }
-  }
-
-
-   //SIDEBAR
-  .side-panel{
-
-    //change font family
-    font-family: $wasdi-font-web-normal;
-    font-weight:$wasdi-font-weight-normal;
-
-    font-size:14px;
-    line-height: 1.42857;
-    font-weight: 400;
-
-
-    h1
-    {
-      font-family: $wasdi-font-web-normal;
-      font-weight:$wasdi-font-weight-normal;
-    }
-    h2
-    {
-      font-family: $wasdi-font-web-normal;
-      font-weight:$wasdi-font-weight-normal;
-    }
-    h3
-    {
-      font-family: $wasdi-font-web-normal;
-      font-weight:$wasdi-font-weight-normal;
-    }
-    h4
-    {
-      font-family: $wasdi-font-web-normal;
-      font-weight:$wasdi-font-weight-normal;
-    }
-
-    //override bootstrap
-    .panel-heading {
-      border-bottom: 0;
-
-      .header-button {
-        cursor:pointer;
-        display: inline;
-        // top: 10%;
-        //background: $wasdi-blue-logo-complementary-3;
-        color:white;
-        padding:1px 5px;
-
-        //margin-top: 15px;
-        //margin-right: 15px;
-        //border: 1px solid white;
-        //z-index: 1000;
-        opacity: 1;
-        i
-        {
-          color: white;
-        }
-
-      }
-
-      .header-button:hover
-      {
-        background-color: $wasdi-green-logo;
-      }
-    }
-
-    //background-color: $wasdi-sidebar-background-color;
-    .panel-default {
-      border-color: $waddi-sidebar-color-border-panel;
-      margin-bottom: 5px;
-      margin-bottom: 7%;
-
-    }
-    .panel-default > .panel-heading
-    {
-      background-color:$wasdi-sidebar-color-title-panel;
-      color:$wasdi-title-color;
-    }
-    .panel-body {
-
-      padding: 0;
-      background-color:$wasdi-grey;
-      //border-right: 20px solid $wasdi-blue-logo;
-      //border: 1px solid $wasdi-blue-logo;
-      //overflow: auto;
-      height: $wasdi-heigt-panel-import;
-      max-height:$wasdi-heigt-panel-import;
-      color:black;
-      ///* (1366x768) WXGA Display */
-      @media  screen and (max-width: 1366px)and (max-height: 768px) {
-        height: $wasdi-height-panel-import-max-width-1366-max-height-768;
-        max-height:$wasdi-height-panel-import-max-width-1366-max-height-768;
-      }
-
-      .loading-div{
-        width:50px;
-      }
-
-      .DropdownMenu
-      {
-        //width: 120px;
-        width: 100%;
-
-        ul
-        {
-          width:100%;
-          .mega-dropdown
-          {
-            width:100%;
-
-          }
-        }
-
-      }
-
-      //css for simple search input time
-      .time-container{
-        margin-left: 5px;
-        margin-top: 15px;
-        //float:left;
-        input[type=text]{
-          width: 100%;
-          border: 2px solid $wasdi-blue-logo;
+        .MultiRadioButtonDropdownDirective {
+            float: left;
+            margin-left: 5px;
 
         }
-        .input-group{
-          float:right;
-          width:100%;
-          //width: 15%;
+        .providers-container {
+            margin-top: 10px;
+            float: left;
         }
-        .description-label{
-          float:right;
-          margin:13px 5px 0px 5px ;
+        .my-input-text {
+            input[type=text] {
+                width: 20%;
+                float: left;
+                margin-left: 10px;
+                padding: 10px 10px;
 
+            }
         }
-        .advanced-calendar-button {
-          color: $wasdi-white;
-          background-color: $wasdi-blue-logo;
-          border-color: $wasdi-blue-logo;
-        }
-        .advanced-calendar-button:hover
-        {
-          background-color: $wasdi-green-logo;
-        }
-        button{
-          border-color: $wasdi-blue-logo;
-        }
-      }
 
-      .selected-time-series{
-        padding: 10px 20px;
-        margin: 4px 5px;
-      }
-
-      .add-filter-button{
-        padding: 10px 20px;
-      }
-
-      .btn-group-vertical{
-        .btn-default{
-          color:white;
-          background-color: $wasdi-blue-logo;
-          &:hover{
-            color:$wasdi-green-logo;
-          }
-        }
-      }
-      .well{
-        border-color: $wasdi-green-logo;
-        margin: 10px;
-      }
-      .my-input-text
-      {
-        .form-control
-        {
-          border-radius: 0;
-          border:2px solid $wasdi-input-text-border-color;
-        }
-        input[type=text] {
-
-          border-color: $wasdi-blue-logo;
-          margin:0;
-        }
-        input[type=number] {
-
-          border-color: $wasdi-blue-logo;
-          margin:0;
-          padding: 12px 20px;
-        }
-        //.advance-search{
+        //.time-container{
+        //  margin-left: 20px;
+        //  //float:left;
+        //  input[type=text]{
+        //    width: 100%;
+        //    border: 2px solid $wasdi-blue-logo;
         //
-        //  .ingestion-time{
-        //    .description-label{
-        //      margin-top: 7px;
-        //    }
         //  }
+        //  .input-group{
+        //    float:right;
+        //    width: 15%;
+        //  }
+        //  .description-label{
+        //    float:right;
+        //    margin:13px 5px 0px 5px ;
         //
+        //  }
         //  .advanced-calendar-button {
         //    color: $wasdi-white;
         //    background-color: $wasdi-blue-logo;
         //    border-color: $wasdi-blue-logo;
-        //    //border-radius: 0;
-        //    //border:1px solid $wasdi-input-text-border-color;
         //  }
         //  .advanced-calendar-button:hover
         //  {
         //    background-color: $wasdi-green-logo;
         //  }
-        //  .ingestion-time{
-        //    input[type=text]{
-        //      width: 20%;
-        //    }
+        //  button{
+        //    border-color: $wasdi-blue-logo;
         //  }
-        //
-        //
-        //
         //}
-        .search-input{
-          margin-bottom: 15px;
-          .my-label{
-            margin-bottom: 8px;
-          }
+        .search-button-container {
+            text-align: right;
+            margin-top: 15px;
+            margin-left: 10px;
+            float: right;
+            .search-button {
+                cursor: pointer;
+                display: inline;
+                // top: 10%;
+                background: $wasdi-import-left-side-navbar-color-background;
+                color: white;
+                padding: 10px 10px;
 
-        }
+                //margin-top: 15px;
+                //border: 1px solid white;
+                //z-index: 1000;
+                opacity: 1;
+                i {
+                    color: white;
+                }
 
-      }
-      .merge-search
-      {
-        margin-top: 20px;
-      }
-
-      form {
-        fieldset {
-          border: 2px solid $wasdi-blue-logo;
-          padding: 20px 20px;
-
-          legend {
-            width: auto;
-            border-bottom: 0;
-          }
-        }
-      }
-
-    }
-    .body-advance-filters{
-      height: 100%;
-      .row{
-        margin-right: 0px;
-        margin-left: 0px;
-        .my-button{
-          padding: 10px 20px;
-        }
-      }
-    }
-    //SEARCH BUTTON
-
-
-
-
-    .localStoragebtn
-    {
-      margin-left: 10px;
-      color: $wasdi-white;
-      cursor:pointer;
-    }
-    .localStoragebtn:hover
-    {
-      color: $wasdi-button-over-color;
-      background-color:transparent;
-    }
-
-    .backbtn {
-
-      //position: absolute;
-      //top: 0;
-      //left: 10px;
-      //font-size: 25px;
-      //margin-right: 50px;
-
-      color: $wasdi-white;
-      cursor:pointer;
-
-
-    }
-    .backbtn:hover{
-      color: $wasdi-button-over-color;
-      background-color:transparent;
-    }
-    /*MISSIONS CSS */
-    .missions
-    {
-      margin-top: 5px;
-      margin-bottom: 5px;
-
-      //border-bottom: solid 1px ;
-      input[type=text] {
-        margin: 4px 0;
-      }
-
-      .filter-label
-      {
-        margin: 8px 0;
-        font-weight:400;
-      }
-    }
-    .loadIcon
-    {
-      color:$wasdi-blue-logo;
-      display: table;
-      margin: 0 auto;
-      margin-top: 50px;
-
-    }
-    .tabs-container{
-      .badge{
-        margin-left: 5px;
-      }
-    }
-    /* Management Pages */
-    .pages
-    {
-
-      .pager
-      {
-        margin: 0 !important;
-        .form-group
-        {
-          display: inline;
-          label{
-            font-weight: 400;
-          }
-          .form-control
-          {
-            display: inline;
-            width:15%;
-            border: 2px solid $wasdi-blue-logo;
-          }
-        }
-        .form-control
-        {
-          display: inline;
-          width: 10%;
-          border: 2px solid $wasdi-blue-logo;
-        }
-        form
-        {
-          display: inline;
-        }
-        li
-        {
-          a
-          {
-            //color:$wasdi-blue-logo;
-            border: 2px solid $wasdi-blue-logo;
-            //border-color: $wasdi-blue-logo;
-            cursor:pointer;
-
-          }
-        }
-      }
-
-    }
-    /************************TABLE**************************/
-
-      .container-table-row
-      {
-
-        overflow: auto;//ATTENTION CARE TO DELETE IT (USED FOR ANIMATION SCROLL)
-        //http://stackoverflow.com/questions/2905867/how-to-scroll-to-specific-item-using-jquery
-        height: 62vh;
-
-        /************* TABLE css*****************/
-        /*pls doesn't change it,  need it for on-mouse-click-rectangle event:
-        *  var container = $('#div-container-table'), scrollTo = $("#"+sId);
-        container.animate({
-        scrollTop: scrollTo.offset().top - container.offset().top + container.scrollTop()
-       });
-        */
-        //height:100%;
-        //overflow: auto;
-        /***************************/
-        //Over TR
-        .table-hover tbody:hover{
-          border-top: 2px solid $wasdi-green-logo;
-          border-bottom: 2px solid $wasdi-green-logo;
-
-        }
-        .table-hover tbody tr:hover td, .table-hover tbody tr:hover th {
-          background-color: #bfbfbf;
-          cursor:pointer;
-
-        }
-        .layers
-        {
-
-          thead
-          {
-            background-color: $wasdi-import-table-head-background-color;
-            color:$wasdi-import-table-head-color;
-          }
-
-          th
-          {
-            text-align:center;
-            vertical-align:middle;
-          }
-          tbody
-          {
-            border-top: 1px solid #ddd;//FIX TABLE
-          }
-
-
-
-          .operation-button
-          {
-            cursor:pointer;
-
-          }
-          .operation-button:hover
-          {
-            background-color: $wasdi-import-cell-background-color-over-button;
-
-            i{
-
-              color:$wasdi-import-cell-color-over-button;
             }
 
-          }
-
-          .info-layer
-          {
-            //font-family:$wasdi-font-web-small-dimension !important;
-            //font-size:12px;
-            //line-height: 1.42857;
-            //font-weight: 500;
-            .button-cell
-            {
-              vertical-align: middle;
-              .btn-group-vertical
-              {
-                .btn-primary
-                {
-                  background-color: $wasdi-blue-logo;
-                  border-color: $wasdi-white;
-                  //border-color: $wasdi-green-logo;
-                }
-                .btn:hover
-                {
-                  background-color: $wasdi-green-logo;
-                  color: $wasdi-white;
-                }
-              }
-            }
-
-            .image-cell
-            {
-              vertical-align:middle;
-              text-align:center;
-              .label
-              {
-                padding: .1em .3em .1em;
-                font-size: 12px;
-                //font-size:90%;
-              }
-              //OVERRIDE BOOTSTRAP METHOD
-              .label-success
-              {
+            .search-button:hover {
                 background-color: $wasdi-green-logo;
-              }
-              //PREVIEW IMAGE
-              .preview-layer-image
-              {
-                margin-top: 2px;
-                margin-bottom: 2px;
-                //margin-right: 0;
-                //max-height:$wasdi-import-preview-layer-on-table-dimension;
-                //max-width:$wasdi-import-preview-layer-on-table-dimension;
-                img
-                {
-                  height:$wasdi-import-preview-layer-on-table-dimension;
-                  width:$wasdi-import-preview-layer-on-table-dimension;
+            }
+            .search-button-disabled {
+                background-color: $wasdi-blue-logo-complementary-1;
+                cursor: not-allowed;
+                display: inline;
+                color: white;
+                padding: 10px 10px;
+                margin-top: 15px;
+                opacity: 1;
+                i {
+                    color: white;
                 }
-              }
             }
+        }
 
-            //DROPDOWN MENU
-            .operations-table-layers{
-              display: inline;
+    }
+
+    .side-panel{
+        .panel{
+            height: 100%;
+            overflow: hidden;
+        }
+
+        label{
+            font-weight: normal;
+        }
+    }
+
+    .filters-wrapper {
+        .MultiselectDropdownMenuDirective{
+            margin-top: 2px;
+            ul{
+                &, li{
+                    width: 100%;
+                }
             }
-          }
-
-
         }
-      }
-    .container-table-row-without-pagination
-    {
-      height: 71vh !important;
+
+        .MultiselectDropdownMenuDirective, .btn-wasdi{
+            width: 130px;
+        }
     }
 
+    .product-search-wrapper {
 
-    /****************** INPUT FORM SEARCH CONTAINER********************/
-    #advanced-search-container{
-      padding: 8px;
-    }
-    #advanced-search-close-button{
-      top:10px;
-      right:10px;
-    }
-    #advanced-search-content{
-      position: relative;
-      height: 100%;
-      width: 100%;
-      overflow-y: auto;
-      overflow-x: hidden;
-
-      .advanced-calendar-input
-      {
-        margin-left: 0;
-        padding-left: 0;
-      }
-
-      // css calendar
-      .input-calendar-container
-      {
-        table
-        {
-          tr,th
-          {
-            color:$wasdi-blue-logo;
-          }
-
-          thead
-          {
-            color:$wasdi-blue-logo;
-          }
-
-          strong
-          {
-            color:$wasdi-blue-logo;
-          }
-
-          i
-          {
-            color:$wasdi-blue-logo;
-          }
-
-          .btn-default {
-            border-color: $wasdi-blue-logo;
-          }
-        }
-
-        .btn-info
-        {
-          background-color: $wasdi-blue-logo;
-          border-color: $wasdi-blue-logo;
-          opacity: 0.9;
-        }
-        .btn-info:hover
-        {
-          background-color: $wasdi-blue-logo;
-          border-color: $wasdi-blue-logo;
-          opacity: 1;
-        }
-        .btn-success {
-          background-color: $wasdi-green-logo;
-          border-color: $wasdi-green-logo;
-          opacity: 0.9;
-        }
-        .btn-success:hover {
-          background-color: $wasdi-green-logo;
-          border-color: $wasdi-green-logo;
-          opacity: 1;
-
-        }
-        .btn-info
-        {
-          .text-info
-          {
-            color:white;
-          }
-        }
-
-      }
-
-      .my-input-text
-      {
-
-        .form-control
-        {
-          border-radius: 0;
-          border:2px solid $wasdi-input-text-border-color;
-        }
         input[type=text] {
-          margin:0px;
+            width: 100%;
+            padding: 12px 20px;
+            margin: 8px 0;
+            box-sizing: border-box;
+            background-color: white;
+            border-color: #2D394F;
+            margin: 0px;
+        }
+    }
+
+    .mission-tabs-wrapper{
+        ul{
+            li{
+                &:hover{
+                    cursor: pointer;
+                }
+
+                & > div{
+                    padding-bottom: 8px;
+                    padding-top: 8px;
+                }
+
+                &.selected{
+                    & > div{
+                        //color: $color-link;
+                        color: $wasdi-green-logo;
+                    }
+                }
+
+                .fa{
+                    font-size: 16px;
+                    width: 14px;
+
+                    &:hover{
+                        cursor: pointer;
+                    }
+
+                }
+                span{
+                    font-size: calculatePxFromRemAndBasePx(0.7rem, 16px);
+                    position: relative;
+                    top: -2px;
+                }
+            }
         }
 
-        .advanced-calendar-button {
-          color: $wasdi-white;
-          background-color: $wasdi-blue-logo;
-          border-color: $wasdi-blue-logo;
-          //border-radius: 0;
-          //border:1px solid $wasdi-input-text-border-color;
+        a{
+            padding-left: 2px;
+            padding-right: 2px;
+            span{
+                font-size: calculatePxFromRemAndBasePx(0.9rem, 16px);
+            }
         }
-        .advanced-calendar-button:hover
-        {
-          background-color: $wasdi-green-logo;
+    }
+
+    .mission-details-wrapper{
+
+        background-color: #fff;
+
+        overflow-y: auto;
+        overflow-x: hidden;
+
+        input[type=text]{
+            width: 100%;
         }
-      }
-
-
-    }
-    .advanced-search-collapse-title {
-      margin-left: 5px;
-      font-size: 14px;
-    }
-    .advanced-search-clear {
-      margin-right: 10px;
-      font-size: 14px;
-      float: right;
-      font-weight: normal !important;
     }
 
-    .advanced-search-clear:hover {
-      text-decoration: underline;
+    .missions-result-container{
+        .tabs-container{
+            .nav-item{
+                font-size: 12px;
+                .badge{
+                    font-size: 12px;
+                    letter-spacing: .5px;
+                    font-family: monospace;
+                    margin-top: -3px;
+                    font-weight: 500;
+                    padding: 4px 8px;
+                }
+            }
+        }
     }
 
-    .advanced-search-heading {
-      padding: 5px 10px !important;
+    // MAP CONTAINER
+    .map-column {
+        padding-left: 0;
+        padding-right: 0;
+        .map-container {
+            //padding-left: 0;
+            //padding-right: 0px;
+            border: 1px solid $wasdi-blue-logo;
+            .map {
+                //DIMENSIONS MAP
+                width: auto; //500px
+                height: $wasdi-map-heigth-import; //500px
+                ///* (1366x768) WXGA Display */
+                @media screen and (max-width: 1366px) and (max-height: 768px) {
+                    width: auto;
+                    height: $wasdi-map-height-import-max-width-1366-max-height-768;
+                }
+
+            }
+        }
     }
-    .advanced-search-panel-title {
-      margin-top: -5px !important;
-      cursor: default !important;
+
+    //SIDEBAR
+    .side-panel {
+
+        //change font family
+        font-family: $wasdi-font-web-normal;
+        font-weight: $wasdi-font-weight-normal;
+
+        font-size: 14px;
+        line-height: 1.42857;
+        font-weight: 400;
+
+        h1 {
+            font-family: $wasdi-font-web-normal;
+            font-weight: $wasdi-font-weight-normal;
+        }
+        h2 {
+            font-family: $wasdi-font-web-normal;
+            font-weight: $wasdi-font-weight-normal;
+        }
+        h3 {
+            font-family: $wasdi-font-web-normal;
+            font-weight: $wasdi-font-weight-normal;
+        }
+        h4 {
+            font-family: $wasdi-font-web-normal;
+            font-weight: $wasdi-font-weight-normal;
+        }
+
+        //override bootstrap
+        .panel-heading {
+            border-bottom: 0;
+
+            .header-button {
+                cursor: pointer;
+                display: inline;
+                // top: 10%;
+                //background: $wasdi-blue-logo-complementary-3;
+                color: white;
+                padding: 1px 5px;
+                margin: 0px;
+
+                //margin-top: 15px;
+                //margin-right: 15px;
+                //border: 1px solid white;
+                //z-index: 1000;
+                opacity: 1;
+                i {
+                    color: white;
+                }
+
+            }
+
+            .header-button:hover {
+                background-color: $wasdi-green-logo;
+            }
+        }
+
+        //background-color: $wasdi-sidebar-background-color;
+        .panel-default {
+            border-color: $waddi-sidebar-color-border-panel;
+            margin-bottom: 5px;
+            margin-bottom: 7%;
+
+        }
+        .panel-default > .panel-heading {
+            background-color: $wasdi-sidebar-color-title-panel;
+            color: $wasdi-title-color;
+        }
+        .panel-body {
+
+            padding: 0;
+            background-color: $wasdi-grey;
+            //border-right: 20px solid $wasdi-blue-logo;
+            //border: 1px solid $wasdi-blue-logo;
+            //overflow: auto;
+            color: black;
+
+            .loading-div {
+                width: 50px;
+            }
+
+            .DropdownMenu {
+                //width: 120px;
+                width: 100%;
+
+                ul {
+                    width: 100%;
+                    .mega-dropdown {
+                        width: 100%;
+
+                    }
+                }
+
+            }
+
+            //css for simple search input time
+            .time-container {
+
+                //float:left;
+                input[type=text] {
+                    width: 100%;
+                    border: 2px solid $wasdi-blue-logo;
+                    height: 33px; // TODO: temp fix to align bottom border of datetime picker. The control must be replaced with the same used in 'catalog'
+                }
+                .input-group {
+                    float: right;
+                    width: 100%;
+                    //width: 15%;
+                }
+                .description-label {
+                    float: right;
+                    margin: 13px 5px 0px 5px;
+
+                }
+                .advanced-calendar-button {
+                    color: $wasdi-white;
+                    background-color: $wasdi-blue-logo;
+                    border-color: $wasdi-blue-logo;
+                }
+                .advanced-calendar-button:hover {
+                    background-color: $wasdi-green-logo;
+                }
+                button {
+                    border-color: $wasdi-blue-logo;
+                }
+            }
+
+            .selected-time-series {
+                padding: 10px 20px;
+                margin: 4px 5px;
+            }
+
+            .add-filter-button {
+                padding: 10px 20px;
+            }
+
+            .btn-group-vertical {
+                .btn-default {
+                    color: white;
+                    background-color: $wasdi-blue-logo;
+                    &:hover {
+                        color: $wasdi-green-logo;
+                    }
+                }
+            }
+            .well {
+                border-color: $wasdi-green-logo;
+                margin: 10px;
+            }
+            .my-input-text {
+                .form-control {
+                    border-radius: 0;
+                    border: 2px solid $wasdi-input-text-border-color;
+                }
+                input[type=text] {
+
+                    border-color: $wasdi-blue-logo;
+                    margin: 0;
+                }
+                input[type=number] {
+
+                    border-color: $wasdi-blue-logo;
+                    margin: 0;
+                    padding: 12px 20px;
+                }
+                //.advance-search{
+                //
+                //  .ingestion-time{
+                //    .description-label{
+                //      margin-top: 7px;
+                //    }
+                //  }
+                //
+                //  .advanced-calendar-button {
+                //    color: $wasdi-white;
+                //    background-color: $wasdi-blue-logo;
+                //    border-color: $wasdi-blue-logo;
+                //    //border-radius: 0;
+                //    //border:1px solid $wasdi-input-text-border-color;
+                //  }
+                //  .advanced-calendar-button:hover
+                //  {
+                //    background-color: $wasdi-green-logo;
+                //  }
+                //  .ingestion-time{
+                //    input[type=text]{
+                //      width: 20%;
+                //    }
+                //  }
+                //
+                //
+                //
+                //}
+                .search-input {
+                    margin-bottom: 15px;
+                    .my-label {
+                        margin-bottom: 8px;
+                    }
+
+                }
+
+            }
+            .merge-search {
+                margin-top: 20px;
+            }
+
+            form {
+                fieldset {
+                    border: 2px solid $wasdi-blue-logo;
+                    padding: 20px 20px;
+
+                    legend {
+                        width: auto;
+                        border-bottom: 0;
+                    }
+                }
+            }
+
+        }
+        .body-advance-filters {
+            height: 100%;
+            .row {
+                margin-right: 0px;
+                margin-left: 0px;
+                .my-button {
+                    padding: 10px 20px;
+                }
+            }
+        }
+        //SEARCH BUTTON
+
+        .localStoragebtn {
+            margin-left: 10px;
+            color: $wasdi-white;
+            cursor: pointer;
+        }
+        .localStoragebtn:hover {
+            color: $wasdi-button-over-color;
+            background-color: transparent;
+        }
+
+        .backbtn {
+
+            //position: absolute;
+            //top: 0;
+            //left: 10px;
+            //font-size: 25px;
+            //margin-right: 50px;
+
+            color: $wasdi-white;
+            cursor: pointer;
+
+        }
+        .backbtn:hover {
+            color: $wasdi-button-over-color;
+            background-color: transparent;
+        }
+        /*MISSIONS CSS */
+        .missions {
+
+            //border-bottom: solid 1px ;
+            input[type=text] {
+                margin: 4px 0;
+            }
+
+            .filter-label {
+                margin: 8px 0;
+                font-weight: 400;
+            }
+        }
+        .loadIcon {
+            color: $wasdi-blue-logo;
+            display: table;
+            margin: 0 auto;
+            margin-top: 50px;
+
+        }
+        .tabs-container {
+            .badge {
+                margin-left: 5px;
+            }
+        }
+        /* Management Pages */
+        .pages {
+
+            .pager {
+                margin: 0 !important;
+                .form-group {
+                    display: inline;
+                    label {
+                        font-weight: 400;
+                    }
+                    .form-control {
+                        display: inline;
+                        width: 15%;
+                        border: 2px solid $wasdi-blue-logo;
+                    }
+                }
+                .form-control {
+                    display: inline;
+                    width: 10%;
+                    border: 2px solid $wasdi-blue-logo;
+                }
+                form {
+                    display: inline;
+                }
+                li {
+                    a {
+                        //color:$wasdi-blue-logo;
+                        border: 2px solid $wasdi-blue-logo;
+                        //border-color: $wasdi-blue-logo;
+                        cursor: pointer;
+
+                    }
+                }
+            }
+
+        }
+        /************************TABLE**************************/
+
+        .container-table-row {
+
+            overflow: auto; //ATTENTION CARE TO DELETE IT (USED FOR ANIMATION SCROLL)
+            //http://stackoverflow.com/questions/2905867/how-to-scroll-to-specific-item-using-jquery
+            height: 62vh;
+
+            /************* TABLE css*****************/
+            /*pls doesn't change it,  need it for on-mouse-click-rectangle event:
+            *  var container = $('#div-container-table'), scrollTo = $("#"+sId);
+            container.animate({
+            scrollTop: scrollTo.offset().top - container.offset().top + container.scrollTop()
+           });
+            */
+            //height:100%;
+            //overflow: auto;
+            /***************************/
+            //Over TR
+            .table-hover tbody:hover {
+                border-top: 2px solid $wasdi-green-logo;
+                border-bottom: 2px solid $wasdi-green-logo;
+
+            }
+            .table-hover tbody tr:hover td, .table-hover tbody tr:hover th {
+                background-color: #bfbfbf;
+                cursor: pointer;
+
+            }
+            .layers {
+
+                thead {
+                    background-color: $wasdi-import-table-head-background-color;
+                    color: $wasdi-import-table-head-color;
+                }
+
+                th {
+                    text-align: center;
+                    vertical-align: middle;
+                }
+                tbody {
+                    border-top: 1px solid #ddd; //FIX TABLE
+                }
+
+                .operation-button {
+                    cursor: pointer;
+
+                }
+                .operation-button:hover {
+                    background-color: $wasdi-import-cell-background-color-over-button;
+
+                    i {
+
+                        color: $wasdi-import-cell-color-over-button;
+                    }
+
+                }
+
+                .info-layer {
+                    //font-family:$wasdi-font-web-small-dimension !important;
+                    //font-size:12px;
+                    //line-height: 1.42857;
+                    //font-weight: 500;
+                    .button-cell {
+                        vertical-align: middle;
+                        .btn-group-vertical {
+                            .btn-primary {
+                                background-color: $wasdi-blue-logo;
+                                border-color: $wasdi-white;
+                                //border-color: $wasdi-green-logo;
+                            }
+                            .btn:hover {
+                                background-color: $wasdi-green-logo;
+                                color: $wasdi-white;
+                            }
+                        }
+                    }
+
+                    .image-cell {
+                        vertical-align: middle;
+                        text-align: center;
+                        .label {
+                            padding: .1em .3em .1em;
+                            font-size: 12px;
+                            //font-size:90%;
+                        }
+                        //OVERRIDE BOOTSTRAP METHOD
+                        .label-success {
+                            background-color: $wasdi-green-logo;
+                        }
+                        //PREVIEW IMAGE
+                        .preview-layer-image {
+                            margin-top: 2px;
+                            margin-bottom: 2px;
+                            //margin-right: 0;
+                            //max-height:$wasdi-import-preview-layer-on-table-dimension;
+                            //max-width:$wasdi-import-preview-layer-on-table-dimension;
+                            img {
+                                height: $wasdi-import-preview-layer-on-table-dimension;
+                                width: $wasdi-import-preview-layer-on-table-dimension;
+                            }
+                        }
+                    }
+
+                    //DROPDOWN MENU
+                    .operations-table-layers {
+                        display: inline;
+                    }
+                }
+
+            }
+        }
+        .container-table-row-without-pagination {
+            height: 71vh !important;
+        }
+
+        /****************** INPUT FORM SEARCH CONTAINER********************/
+        #advanced-search-container {
+            padding: 8px;
+        }
+        #advanced-search-close-button {
+            top: 10px;
+            right: 10px;
+        }
+        #advanced-search-content {
+            position: relative;
+            height: 100%;
+            width: 100%;
+            overflow-y: auto;
+            overflow-x: hidden;
+
+            .advanced-calendar-input {
+                margin-left: 0;
+                padding-left: 0;
+            }
+
+            // css calendar
+            .input-calendar-container {
+                table {
+                    tr, th {
+                        color: $wasdi-blue-logo;
+                    }
+
+                    thead {
+                        color: $wasdi-blue-logo;
+                    }
+
+                    strong {
+                        color: $wasdi-blue-logo;
+                    }
+
+                    i {
+                        color: $wasdi-blue-logo;
+                    }
+
+                    .btn-default {
+                        border-color: $wasdi-blue-logo;
+                    }
+                }
+
+                .btn-info {
+                    background-color: $wasdi-blue-logo;
+                    border-color: $wasdi-blue-logo;
+                    opacity: 0.9;
+                }
+                .btn-info:hover {
+                    background-color: $wasdi-blue-logo;
+                    border-color: $wasdi-blue-logo;
+                    opacity: 1;
+                }
+                .btn-success {
+                    background-color: $wasdi-green-logo;
+                    border-color: $wasdi-green-logo;
+                    opacity: 0.9;
+                }
+                .btn-success:hover {
+                    background-color: $wasdi-green-logo;
+                    border-color: $wasdi-green-logo;
+                    opacity: 1;
+
+                }
+                .btn-info {
+                    .text-info {
+                        color: white;
+                    }
+                }
+
+            }
+
+            .my-input-text {
+
+                .form-control {
+                    border-radius: 0;
+                    border: 2px solid $wasdi-input-text-border-color;
+                }
+                input[type=text] {
+                    margin: 0px;
+                }
+
+                .advanced-calendar-button {
+                    color: $wasdi-white;
+                    background-color: $wasdi-blue-logo;
+                    border-color: $wasdi-blue-logo;
+                    //border-radius: 0;
+                    //border:1px solid $wasdi-input-text-border-color;
+                }
+                .advanced-calendar-button:hover {
+                    background-color: $wasdi-green-logo;
+                }
+            }
+
+        }
+        .advanced-search-collapse-title {
+            margin-left: 5px;
+            font-size: 14px;
+        }
+        .advanced-search-clear {
+            margin-right: 10px;
+            font-size: 14px;
+            float: right;
+            font-weight: normal !important;
+        }
+
+        .advanced-search-clear:hover {
+            text-decoration: underline;
+        }
+
+        .advanced-search-heading {
+            padding: 5px 10px !important;
+        }
+        .advanced-search-panel-title {
+            margin-top: -5px !important;
+            cursor: default !important;
+        }
+
+        .coll-product-header {
+
+            margin: 5px;
+            padding: 10px;
+            .my-input-text {
+                width: 100%;
+                display: inline-flex;
+            }
+
+        }
+
+        /* input text override my class in style*/
+
     }
+    /********************************************************/
 
-    .coll-product-header
-    {
+    //#advanced-search-container{
+    //  position: fixed;
+    //  background-color: white;
+    //  width: 728px;
+    //  height: 700px;
+    //  z-index: 999;
+    //  top: 150px;
+    //  left: calc(-728px - 20px);
+    //  box-shadow: 3px 5px 19px 0 rgba(49,50,50,.62);
+    //  padding: 8px;
+    //}
 
-      margin: 5px;
-      padding: 10px;
-      .my-input-text
-      {
-        width:100%;
-        display:inline-flex;
-      }
+    //#advanced-search-close-button{
+    //  position: absolute;
+    //  top:10px;
+    //  right:10px;
+    //}
 
-    }
+    //#advanced-search-content{
+    //
+    //  position: relative;
+    //  height: 100%;
+    //  width: 100%;
+    //  background-color: white;
+    //  overflow-y: auto;
+    //  overflow-x: hidden;
+    //}
 
-    /* input text override my class in style*/
+    //.advanced-search-collapse-title {
+    //  margin-left: 5px;
+    //  font-size: 14px;
+    //}
+    //
+    //.advanced-search-clear {
+    //  margin-right: 10px;
+    //  font-size: 14px;
+    //  float: right;
+    //  font-weight: normal !important;
+    //}
+    //
+    //.advanced-search-clear:hover {
+    //  text-decoration: underline;
+    //}
+    //
+    //.advanced-search-heading {
+    //  padding: 5px 10px !important;
+    //}
+    //.advanced-search-panel-title {
+    //  margin-top: -5px !important;
+    //  cursor: default !important;
+    //}
 
-
-
-  }
-  /********************************************************/
-
-
-
-
-      //#advanced-search-container{
-      //  position: fixed;
-      //  background-color: white;
-      //  width: 728px;
-      //  height: 700px;
-      //  z-index: 999;
-      //  top: 150px;
-      //  left: calc(-728px - 20px);
-      //  box-shadow: 3px 5px 19px 0 rgba(49,50,50,.62);
-      //  padding: 8px;
-      //}
-
-      //#advanced-search-close-button{
-      //  position: absolute;
-      //  top:10px;
-      //  right:10px;
-      //}
-
-      //#advanced-search-content{
-      //
-      //  position: relative;
-      //  height: 100%;
-      //  width: 100%;
-      //  background-color: white;
-      //  overflow-y: auto;
-      //  overflow-x: hidden;
-      //}
-
-      //.advanced-search-collapse-title {
-      //  margin-left: 5px;
-      //  font-size: 14px;
-      //}
-      //
-      //.advanced-search-clear {
-      //  margin-right: 10px;
-      //  font-size: 14px;
-      //  float: right;
-      //  font-weight: normal !important;
-      //}
-      //
-      //.advanced-search-clear:hover {
-      //  text-decoration: underline;
-      //}
-      //
-      //.advanced-search-heading {
-      //  padding: 5px 10px !important;
-      //}
-      //.advanced-search-panel-title {
-      //  margin-top: -5px !important;
-      //  cursor: default !important;
-      //}
-
-      /******************* da mettere in ordine *******************************/
-      //.panel-heading .accordion-toggle:before {
-      //  font-family: 'Glyphicons Halflings';
-      //  content: '\e113';
-      //  float: left;
-      //  color: grey;
-      //}
-      //.panel-heading .accordion-toggle.collapsed:before {
-      //  content: "\e114";
-      //}
-      //.avanced-search-subtitle{
-      //  margin-top:10px;
-      //}
-      //
-      //.collapse {
-      //  position: inherit;
-      //}
-      //#section_0 {
-      //  overflow-y: hidden !important;
-      //}
-      //
-      //#advanced-search-content  .dropdown-menu{
-      //  position: fixed !important;
-      //  visibility: hidden;
-      //}
-      //.advanced-panel {
-      //  margin-bottom: 8px !important;
-      //}
-      //.advanced-calendar-button {
-      //  border:none;
-      //  top: 5px;
-      //}
-      //.advanced-calendar-label {
-      //  top: 10px;
-      //}
-      //
-      //.advanced-calendar-date-input {
-      //  padding: 0px;
-      //  text-align: center;
-      //}
-      //.advanced-calendar-date-input{
-      //  font-size: 11px;
-      //}
-      //
-      //.coll-product-container{
-      //  background-color: white;
-      //  /*min-width: 40%;*/
-      //  width: 100%;
-      //  height: 400px;
-      //
-      //}
-      //
-      //.coll-product-footer {
-      //  font-size: 14px;
-      //}
-      //
-      //@media screen and (min-width: 993px) and (max-width: 1200px) {
-      //  /*.list-container {
-      //    min-width: 50%  !important;
-      //  }*/
-      //  .coll-product-footer {
-      //    font-size: 14px;
-      //  }
-      //}
-      //
-      //@media screen and (min-width: 769px) and(max-width: 992px) {
-      //  /*.list-container {
-      //    min-width: 100% !important;
-      //  }*/
-      //  .coll-product-footer {
-      //    font-size: 13px;
-      //  }
-      //}
-      //
-      //@media screen and (max-width: 768px) {
-      //  /*.list-container {
-      //    min-width: 100% !important;
-      //  }*/
-      //  .coll-product-footer {
-      //    font-size: 13px;
-      //  }
-      //}
-      //
-      //.coll-product-list-container{
-      //  padding: 0px 0px 0px 0px;
-      //  position: relative;
-      //  height: 100%;
-      //  width: 100%;
-      //}
-      //
-      //.coll-product-list{
-      //  position: relative;
-      //  height: calc(100% - 85px);
-      //  width: 100%;
-      //  background-color: white;
-      //  overflow-y: auto;
-      //  overflow-x: auto;
-      //}
-      //
-      //.coll-product-toolbar{
-      //  position: relative;
-      //  width: 100%;
-      //  background-color: white;
-      //  padding: 10px;
-      //  background-color: #FAFAFA;
-      //  height: 50px;
-      //}
-      //
-      //.coll-product-header{
-      //  position: relative;
-      //  height: 35px;
-      //  background-color: white;
-      //  top: 0px;
-      //  background-color: #FAFAFA;
-      //}
-      //
-      //.disabled-button{
-      //  opacity:0.4;
-      //  cursor: default;
-      //}
-      //
-      //.select-page-button{
-      //  cursor: pointer;
-      //}
-      //
-      //.page-selector-input{
-      //  width: 40px !important;
-      //  cursor: pointer;
-      //  margin: 0px;
-      //  padding: 7px;
-      //  height: 30px;
-      //  border: 1px solid #9A9A9A !important;
-      //  display: inline;
-      //}
-      //
-      //.pagination-button{
-      //  margin-right: 2.5px;
-      //  margin-left: 2.5px;
-      //  display:inline;
-      //}
-      //
-      //.coll-product-list-checkbox {
-      //  width: 30px;
-      //}
-      //
-      //.coll-product{
-      //  display: inline-flex;
-      //  font-size: 12px;
-      //  font-family: Roboto;
-      //  height: 25px;
-      //  line-height: 20px;
-      //}
-      //
-      //.coll-product:hover{
-      //  background: #dedede;
-      //}
-      //
-      //.coll-products-left {
-      //  float: left;
-      //  display: inline-flex;
-      //  padding-left: 0px;
-      //}
-      //
-      //.coll-products-right {
-      //  float: right;
-      //  display: inline-flex;
-      //}
-      //
-      //.filter-label {
-      //  font-weight: normal !important;
-      //}
-      //.filter-highlight {
-      //  top: 50% !important;
-      //}
-      //.filter-checkbox-label {
-      //  font-weight: bold !important;
-      //}
-      //.filter-bar:before,.filter-bar:after {
-      //  height: 1px !important;
-      //  color: rgba(0,0,0,1) !important;
-      //  background: rgba(0,0,0,1) !important;
-      //}
-      //.filter-checkbox {
-      //  margin-bottom: 25px !important;
-      //}
-      //.filter-input:invalid {
-      //  color: red;
-      //}
-      //
-      //input::-webkit-calendar-picker-indicator {
-      //  display: none;
-      //}
-      //
-      //#adv-options label                {
-      //
-      //  font-weight: normal;
-      //
-      //  pointer-events: none;
-      //
-      //  transition: 0.2s ease all;
-      //  -moz-transition: 0.2s ease all;
-      //  -webkit-transition: 0.2s ease all;
-      //}
-      //.adv-selectfield label {display: none;}
-      //
-      //.adv-selectfield {
-      //  font-family: 'Roboto','Helvetica','Arial',sans-serif;
-      //  position: relative;
-      //}
-      //
-      //.adv-selectfield::after {
-      //  position: absolute;
-      //  top: -1em;
-      //  right: 0.5em;
-      //  /* Styling the down arrow */
-      //  width: 0;
-      //  height: 0;
-      //  padding: 0;
-      //  content: '';
-      //  border-left: .25em solid transparent;
-      //  border-right: .25em solid transparent;
-      //  border-top: .375em solid rgba(0,0,0, 1);
-      //  pointer-events: none;
-      //  color: black;
-      //
-      //}
-      //
-      //.adv-selectfield datalist {
-      //  -webkit-appearance: none;
-      //  -moz-appearance: none;
-      //  background-color: transparent;
-      //  width:	100%;
-      //}
-      //
-      //
-      //.adv-selectfield datalist::-ms-expand {display: none;}
-      //
-      //.adv-select-label {
-      //  top: -20px;
-      //  color: rgb(55, 59, 80);
-      //  font-size: 13px;
-      //}
-      //
-      //#adv-options .group            {
-      //  position:relative;
-      //  margin-bottom:15px;
-      //}
-
+    /******************* da mettere in ordine *******************************/
+    //.panel-heading .accordion-toggle:before {
+    //  font-family: 'Glyphicons Halflings';
+    //  content: '\e113';
+    //  float: left;
+    //  color: grey;
+    //}
+    //.panel-heading .accordion-toggle.collapsed:before {
+    //  content: "\e114";
+    //}
+    //.avanced-search-subtitle{
+    //  margin-top:10px;
+    //}
+    //
+    //.collapse {
+    //  position: inherit;
+    //}
+    //#section_0 {
+    //  overflow-y: hidden !important;
+    //}
+    //
+    //#advanced-search-content  .dropdown-menu{
+    //  position: fixed !important;
+    //  visibility: hidden;
+    //}
+    //.advanced-panel {
+    //  margin-bottom: 8px !important;
+    //}
+    //.advanced-calendar-button {
+    //  border:none;
+    //  top: 5px;
+    //}
+    //.advanced-calendar-label {
+    //  top: 10px;
+    //}
+    //
+    //.advanced-calendar-date-input {
+    //  padding: 0px;
+    //  text-align: center;
+    //}
+    //.advanced-calendar-date-input{
+    //  font-size: 11px;
+    //}
+    //
+    //.coll-product-container{
+    //  background-color: white;
+    //  /*min-width: 40%;*/
+    //  width: 100%;
+    //  height: 400px;
+    //
+    //}
+    //
+    //.coll-product-footer {
+    //  font-size: 14px;
+    //}
+    //
+    //@media screen and (min-width: 993px) and (max-width: 1200px) {
+    //  /*.list-container {
+    //    min-width: 50%  !important;
+    //  }*/
+    //  .coll-product-footer {
+    //    font-size: 14px;
+    //  }
+    //}
+    //
+    //@media screen and (min-width: 769px) and(max-width: 992px) {
+    //  /*.list-container {
+    //    min-width: 100% !important;
+    //  }*/
+    //  .coll-product-footer {
+    //    font-size: 13px;
+    //  }
+    //}
+    //
+    //@media screen and (max-width: 768px) {
+    //  /*.list-container {
+    //    min-width: 100% !important;
+    //  }*/
+    //  .coll-product-footer {
+    //    font-size: 13px;
+    //  }
+    //}
+    //
+    //.coll-product-list-container{
+    //  padding: 0px 0px 0px 0px;
+    //  position: relative;
+    //  height: 100%;
+    //  width: 100%;
+    //}
+    //
+    //.coll-product-list{
+    //  position: relative;
+    //  height: calc(100% - 85px);
+    //  width: 100%;
+    //  background-color: white;
+    //  overflow-y: auto;
+    //  overflow-x: auto;
+    //}
+    //
+    //.coll-product-toolbar{
+    //  position: relative;
+    //  width: 100%;
+    //  background-color: white;
+    //  padding: 10px;
+    //  background-color: #FAFAFA;
+    //  height: 50px;
+    //}
+    //
+    //.coll-product-header{
+    //  position: relative;
+    //  height: 35px;
+    //  background-color: white;
+    //  top: 0px;
+    //  background-color: #FAFAFA;
+    //}
+    //
+    //.disabled-button{
+    //  opacity:0.4;
+    //  cursor: default;
+    //}
+    //
+    //.select-page-button{
+    //  cursor: pointer;
+    //}
+    //
+    //.page-selector-input{
+    //  width: 40px !important;
+    //  cursor: pointer;
+    //  margin: 0px;
+    //  padding: 7px;
+    //  height: 30px;
+    //  border: 1px solid #9A9A9A !important;
+    //  display: inline;
+    //}
+    //
+    //.pagination-button{
+    //  margin-right: 2.5px;
+    //  margin-left: 2.5px;
+    //  display:inline;
+    //}
+    //
+    //.coll-product-list-checkbox {
+    //  width: 30px;
+    //}
+    //
+    //.coll-product{
+    //  display: inline-flex;
+    //  font-size: 12px;
+    //  font-family: Roboto;
+    //  height: 25px;
+    //  line-height: 20px;
+    //}
+    //
+    //.coll-product:hover{
+    //  background: #dedede;
+    //}
+    //
+    //.coll-products-left {
+    //  float: left;
+    //  display: inline-flex;
+    //  padding-left: 0px;
+    //}
+    //
+    //.coll-products-right {
+    //  float: right;
+    //  display: inline-flex;
+    //}
+    //
+    //.filter-label {
+    //  font-weight: normal !important;
+    //}
+    //.filter-highlight {
+    //  top: 50% !important;
+    //}
+    //.filter-checkbox-label {
+    //  font-weight: bold !important;
+    //}
+    //.filter-bar:before,.filter-bar:after {
+    //  height: 1px !important;
+    //  color: rgba(0,0,0,1) !important;
+    //  background: rgba(0,0,0,1) !important;
+    //}
+    //.filter-checkbox {
+    //  margin-bottom: 25px !important;
+    //}
+    //.filter-input:invalid {
+    //  color: red;
+    //}
+    //
+    //input::-webkit-calendar-picker-indicator {
+    //  display: none;
+    //}
+    //
+    //#adv-options label                {
+    //
+    //  font-weight: normal;
+    //
+    //  pointer-events: none;
+    //
+    //  transition: 0.2s ease all;
+    //  -moz-transition: 0.2s ease all;
+    //  -webkit-transition: 0.2s ease all;
+    //}
+    //.adv-selectfield label {display: none;}
+    //
+    //.adv-selectfield {
+    //  font-family: 'Roboto','Helvetica','Arial',sans-serif;
+    //  position: relative;
+    //}
+    //
+    //.adv-selectfield::after {
+    //  position: absolute;
+    //  top: -1em;
+    //  right: 0.5em;
+    //  /* Styling the down arrow */
+    //  width: 0;
+    //  height: 0;
+    //  padding: 0;
+    //  content: '';
+    //  border-left: .25em solid transparent;
+    //  border-right: .25em solid transparent;
+    //  border-top: .375em solid rgba(0,0,0, 1);
+    //  pointer-events: none;
+    //  color: black;
+    //
+    //}
+    //
+    //.adv-selectfield datalist {
+    //  -webkit-appearance: none;
+    //  -moz-appearance: none;
+    //  background-color: transparent;
+    //  width:	100%;
+    //}
+    //
+    //
+    //.adv-selectfield datalist::-ms-expand {display: none;}
+    //
+    //.adv-select-label {
+    //  top: -20px;
+    //  color: rgb(55, 59, 80);
+    //  font-size: 13px;
+    //}
+    //
+    //#adv-options .group            {
+    //  position:relative;
+    //  margin-bottom:15px;
+    //}
 
     //.sidenav a {
     //  padding: 8px 8px 8px 32px;
@@ -1120,37 +1133,34 @@
     //
     //}
 
-
-
     @media screen and (max-height: 450px) {
-      .sidenav {padding-top: 15px;}
-      .sidenav a {font-size: 18px;}
+        .sidenav {
+            padding-top: 15px;
+        }
+        .sidenav a {
+            font-size: 18px;
+        }
     }
 
-
-
-
-  //FIXED OPEN MENU BUTTON
-  .fixed {
-    cursor:pointer;
-    position: fixed;
-   // top: 10%;
-    left: 5px;
-    background: $wasdi-import-left-side-navbar-color-background;
-    color:white;
-    padding:10px 20px;
-    margin-top: 5px;
-    //border: 1px solid white;
-    z-index: 1000;
-    opacity: 0.9;
-    i
-    {
-      color: white;
+    //FIXED OPEN MENU BUTTON
+    .fixed {
+        cursor: pointer;
+        position: fixed;
+        // top: 10%;
+        left: 5px;
+        background: $wasdi-import-left-side-navbar-color-background;
+        color: white;
+        padding: 10px 20px;
+        margin-top: 5px;
+        //border: 1px solid white;
+        z-index: 1000;
+        opacity: 0.9;
+        i {
+            color: white;
+        }
     }
-  }
-  .fixed:hover
-  {
-    background-color: $wasdi-green-logo;
-  }
-  //END SIDEBAR
+    .fixed:hover {
+        background-color: $wasdi-green-logo;
+    }
+    //END SIDEBAR
 }

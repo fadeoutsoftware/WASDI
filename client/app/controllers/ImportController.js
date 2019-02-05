@@ -31,6 +31,7 @@ var ImportController = (function() {
 
         // Self link for the scope
         this.m_oScope.m_oController = this;
+        this.m_oScope.$ctrl = this;
 
         this.m_bShowsensingfilter = true;
 
@@ -353,6 +354,24 @@ var ImportController = (function() {
         }
     }
 
+
+    ImportController.prototype.toggleMissionSelection= function(mission, index, event)
+    {
+        mission.selected = !mission.selected;
+        this.updateMissionSelection(index);
+
+        // prevent tab selection when user click on the checkbox
+        event.stopPropagation();
+    }
+
+    ImportController.prototype.selectTabMission= function(mission, index, event)
+    {
+        this.m_activeMissionTab = index;
+    }
+    ImportController.prototype.isMissionTabOpen= function(index)
+    {
+        return this.m_activeMissionTab === index;
+    }
 
     /**
      * Get the list of available missions
@@ -836,6 +855,18 @@ var ImportController = (function() {
 
         return true;
     };
+
+
+    ImportController.prototype.getFilterPlaceholder = function(filter)
+    {
+        if(filter["indexhint"] != undefined){
+            return filter["indexhint"];
+        }    
+        return "";
+        
+    }
+    
+    
 
     /**
      * downloadProduct
@@ -1573,7 +1604,8 @@ var ImportController = (function() {
             case "DOWNLOAD":
             case "GRAPH":
             case "INGEST":
-                oController.receivedNewProductMessage(oMessage,oController);
+                //oController.receivedNewProductMessage(oMessage,oController);
+                // TODO: check the correctnes of this step. It seems a dialog will be shonw here then again in the method below 'utilsProjectShowRabbitMessageUserFeedBack', but is it wrong or right?
                 break;
             default:
                 console.log("RABBIT ERROR: got empty message ");
@@ -1718,6 +1750,17 @@ var ImportController = (function() {
         }
         return false;
     };
+
+
+    ImportController.prototype.isSearchBtnEnabled = function()
+    {
+        // Disabled if
+        // m_oController.thereIsAtLeastOneProvider() === false || (m_oController.m_bIsVisibleListOfLayers || m_oController.m_bisVisibleLocalStorageInputs)
+        if( this.thereIsAtLeastOneProvider() === false ){ return false; }
+        if( this.m_bIsVisibleListOfLayers || this.m_bisVisibleLocalStorageInputs){ return false}
+        return true
+    }
+
 
     /**
      * setDefaultData
