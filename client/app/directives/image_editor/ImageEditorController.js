@@ -12,7 +12,7 @@ angular.module('wasdi.ImageEditorDirective', [])
                 applyEditorPreviewImage:'&',
                 maskManager: '&',
                 filterManager: '&',
-                //onEditBtnClick : '&onEditClick',
+                onEditBtnClick : '&onEditClick',
                 panScaling: '=',
                 heightCanvas: '=',
                 widthCanvas: '='
