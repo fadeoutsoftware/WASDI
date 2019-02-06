@@ -80,8 +80,9 @@
                                                    is-open="$ctrl.m_oStatus.openedSensingPeriodFrom"
                                                    date-disabled="$ctrl.disabled(date, mode)"
                                                    max-date="$ctrl.m_oModel.sensingPeriodTo" ng-required="true"
-                                                   ng-blur="$ctrl.updateAdvancedSearch()" readonly="true"
-                                                   close-text="Close"/>
+                                                   ng-blur="$ctrl.updateAdvancedSearch()"
+                                                   ng-change="$ctrl.updateAdvancedSearch()"
+                                                   close-text="Close"/><!--readonly="true"-->
 
                                             <span class="input-group-btn">
                                                 <button type="button" class="btn btn-default advanced-calendar-button"
@@ -105,7 +106,8 @@
                                                    date-disabled="$ctrl.disabled(date, mode)" ng-required="true"
                                                    min-date="$ctrl.m_oModel.sensingPeriodFrom"
                                                    ng-blur="$ctrl.updateAdvancedSearch()" close-text="Close"
-                                                   readonly="true" data-container="body"/>
+                                                   ng-change="$ctrl.updateAdvancedSearch()"
+                                                   data-container="body"/><!--readonly="true"-->
 
                                             <span class="input-group-btn">
                                                 <button type="button" class="btn btn-default advanced-calendar-button"
