@@ -276,10 +276,9 @@ public class QueryExecutorONDA extends QueryExecutor {
 					oResponse.append(inputLine);
 				}
 				in.close();
-			
 	
 				//print result
-				System.out.println("Count Done: Response " + oResponse.toString());
+				System.out.println("Count Done: Response " + oResponse.toString().substring(0, 256) + "...");
 		
 				sResult = oResponse.toString();
 			} else {
