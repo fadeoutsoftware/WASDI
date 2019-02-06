@@ -52,6 +52,7 @@ public abstract class QueryExecutor {
 		
 		try {
 			Object o = Class.forName(sClassName).newInstance();
+			
 			if (o instanceof QueryExecutor) {
 				QueryExecutor oExecutor = (QueryExecutor) o;
 				oExecutor.setProvider(sProvider);
@@ -64,8 +65,8 @@ public abstract class QueryExecutor {
 				oExecutor.setMustCollectMetadata(shallRetrieveMetadata(sGetMetadata));
 				//TODO get rid of this if! 
 				if(sProvider.equals("ONDA")) {
-					oExecutor.m_oQueryTranslator = new DiasQueryTranslatorONDA();
-					oExecutor.m_oResponseTranslator = new DiasResponseTranslatorONDA();
+					oExecutor.setQueryTranslator(new DiasQueryTranslatorONDA());
+					oExecutor.setResponseTranslator(new DiasResponseTranslatorONDA());
 				}
 				oExecutor.m_sDownloadProtocol = sDownloadProtocol;
 				return oExecutor;
@@ -81,6 +82,15 @@ public abstract class QueryExecutor {
 		return null;
 	}
 	
+	private void setQueryTranslator(DiasQueryTranslator oQueryTranslator) {
+		m_oQueryTranslator = oQueryTranslator;
+		
+	}
+
+	public void setResponseTranslator(DiasResponseTranslator oResponseTranslator) {
+		this.m_oResponseTranslator = oResponseTranslator;
+	}
+
 	private static boolean shallRetrieveMetadata(String sGetMetadata) {
 		if(null == sGetMetadata) {
 			return true;
