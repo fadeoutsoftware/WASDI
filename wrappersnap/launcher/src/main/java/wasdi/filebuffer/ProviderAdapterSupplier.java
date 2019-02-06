@@ -19,7 +19,7 @@ import wasdi.shared.utils.Utils;
  */
 public class ProviderAdapterSupplier {
 
-	private static final Map<String, Supplier<ProviderAdapter>> s_aoDownloadSupplier;
+	private static final Map<String, Supplier<ProviderAdapter>> s_aoDownloaderSuppliers;
 
 	static {
 		final Map<String, Supplier<ProviderAdapter>> aoDownloaders = new HashMap<>();
@@ -29,15 +29,15 @@ public class ProviderAdapterSupplier {
 		aoDownloaders.put("PROBAV", PROBAVProviderAdapter::new);
 		aoDownloaders.put("ONDA", ONDAProviderAdapter::new);
 
-		s_aoDownloadSupplier = Collections.unmodifiableMap(aoDownloaders);
+		s_aoDownloaderSuppliers = Collections.unmodifiableMap(aoDownloaders);
 	}
 
 	public ProviderAdapter supplyProviderAdapter(String sProviderAdapterType) {
 		ProviderAdapter oResult = null;
 		if(!Utils.isNullOrEmpty(sProviderAdapterType)) {
-			Supplier<ProviderAdapter> oDownloadFile = s_aoDownloadSupplier.get(sProviderAdapterType);
-			if(oDownloadFile != null ) {
-				oResult = oDownloadFile.get();
+			Supplier<ProviderAdapter> oSupplier = s_aoDownloaderSuppliers.get(sProviderAdapterType);
+			if(oSupplier != null ) {
+				oResult = oSupplier.get();
 			}
 		}
 
