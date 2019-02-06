@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+<beans>
+	<bean id="WASDIHello" class="org.geoserver.wpasdi.WASDIHello"/>
+	<bean id="WASDIImport" class="org.geoserver.wpasdi.WASDIImportEOImage"/>
+	<bean id="WASDIProcessStatus" class="org.geoserver.wpasdi.WASDIProcessStatus"/>
+	<bean id="WASDIGetAvailableProcessors" class="org.geoserver.wpasdi.WASDIGetAvailableProcessors"/>
+	<bean id="WASDIExecuteProcessor" class="org.geoserver.wpasdi.WASDIExecuteProcessor"/>
+</beans>
