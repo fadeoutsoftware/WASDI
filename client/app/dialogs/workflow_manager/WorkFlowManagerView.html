@@ -50,13 +50,13 @@
                                 </div>
                             </div>
 
-                            <div class="row my-input-text">
+                            <div class="row">
                                 <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
                                     <input type="text" name="name"  class="my-input-text" value="" title="" required="required"
                                                         placeholder="Workflow name" ng-model="m_oController.m_oWorkflowFileData.workflowName">
                                 </div>
 
-                                <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+                                <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6 is-public-content">
                                     <i class="fa fa-square-o " aria-hidden="true"
                                        ng-hide = "m_oController.m_oWorkflowFileData.isPublic === true"
                                        ng-click = "m_oController.m_oWorkflowFileData.isPublic = !m_oController.m_oWorkflowFileData.isPublic"></i>
@@ -65,7 +65,9 @@
                                        ng-click = "m_oController.m_oWorkflowFileData.isPublic = !m_oController.m_oWorkflowFileData.isPublic"></i>
                                     is public
                                 </div>
+
                             </div>
+
                             <!------------------------------ DRAG AND DROP WORKFLOWS + DESCRIPTION------------------------------>
                             <div class="row">
                                 <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6 ">

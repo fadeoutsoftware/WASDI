@@ -1,0 +1,24 @@
+//modal css default (bootstrap)
+@import "../utilities";
+
+.modal-dialog {
+  $baseClass: &;
+  @include utilities-modal-style(50%);
+  //&:not(.modal-sm) {
+  //  @include utilities-modal-style(50%);
+  //  &#{$baseClass}-large { @include utilities-modal-style(75%); }
+  //  &#{$baseClass}-extra-large{ @include utilities-modal-style(90%);}
+  //
+  //}
+
+
+  &.logout{
+    margin-top: 25vh;
+    .text{
+      font-size: calculatePxFromRemAndBasePx(1.2rem, 16);
+    }
+  }
+}
+
+.modal-dialog-large { @include utilities-modal-style(75%); }
+.modal-dialog-extra-large{ @include utilities-modal-style(90%);}
