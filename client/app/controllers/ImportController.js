@@ -564,8 +564,8 @@ var ImportController = (function() {
         oController.m_bIsPaginatedList = true;
         //TODO
         // "*" + oController.m_oModel.textQuery + "*" fix
-        oController.m_oSearchService.setTextQuery("*" + oController.m_oModel.textQuery + "*");
-        // oController.m_oSearchService.setTextQuery(oController.m_oModel.textQuery);
+        // oController.m_oSearchService.setTextQuery("*" + oController.m_oModel.textQuery + "*");
+        oController.m_oSearchService.setTextQuery(oController.m_oModel.textQuery);
         oController.m_oSearchService.setGeoselection(oController.m_oModel.geoselection);
         var aoProviders = [];
         aoProviders.push(oProvider);

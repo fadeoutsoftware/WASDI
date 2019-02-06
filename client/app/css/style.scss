@@ -6,6 +6,7 @@
 @import "variables";
 @import "functions";
 @import "main_theme";
+@import "layout/modal";
 
 //utilities
 @import "utilities";
@@ -74,6 +75,7 @@
 @import "../dialogs/edit_user/edit_user";
 @import "../dialogs/ftp_service/ftp_service";
 @import "../dialogs/list_flood_area_detection/list_flood_area_detection";
+@import "../dialogs/JRC_processor/jrc_processor";
 @import "../dialogs/image_editor/image-editor.component";
 
 @import "buttons";
@@ -479,23 +481,23 @@ h4 {
 }
 
 
-//modal css default (bootstrap)
-.modal-dialog {
-    $baseClass: &;
-    &:not(.modal-sm) {
-        @include utilities-modal-style(50%);
-
-        #{$baseClass}-large { @include utilities-modal-style(75%); }
-        #{$baseClass}-extra-large{ @include utilities-modal-style(90%);}
-    }
-
-    &.logout{
-        margin-top: 25vh;
-        .text{
-            font-size: calculatePxFromRemAndBasePx(1.2rem, 16);
-        }
-    }
-}
+////modal css default (bootstrap)
+//.modal-dialog {
+//    $baseClass: &;
+//    &:not(.modal-sm) {
+//        @include utilities-modal-style(50%);
+//
+//        #{$baseClass}-large { @include utilities-modal-style(75%); }
+//        #{$baseClass}-extra-large{ @include utilities-modal-style(90%);}
+//    }
+//
+//    &.logout{
+//        margin-top: 25vh;
+//        .text{
+//            font-size: calculatePxFromRemAndBasePx(1.2rem, 16);
+//        }
+//    }
+//}
 
 
 //ANIMATE HIDE
@@ -1051,4 +1053,11 @@ h4 {
     height: 47px;
     border-bottom: 1px solid black;
     position: absolute;
+}
+
+.logo-container-partner{
+    width: auto;
+    height: 100px;
+    cursor: pointer;
+    background-color: rgba(16, 32, 48, 0.75);
 }

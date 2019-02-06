@@ -91,6 +91,7 @@ import wasdi.shared.parameters.GraphParameter;
 import wasdi.shared.parameters.GraphSetting;
 import wasdi.shared.parameters.IDLProcParameter;
 import wasdi.shared.parameters.ISetting;
+import wasdi.shared.parameters.MATLABProcParameters;
 import wasdi.shared.parameters.MultilookingParameter;
 import wasdi.shared.parameters.MultilookingSetting;
 import wasdi.shared.parameters.NDVIParameter;
@@ -104,6 +105,7 @@ import wasdi.shared.utils.SerializationUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.BandImageViewModel;
 import wasdi.shared.viewmodels.ColorManipulationViewModel;
+import wasdi.shared.viewmodels.JRCTestViewModel;
 import wasdi.shared.viewmodels.ListFloodViewModel;
 import wasdi.shared.viewmodels.MaskViewModel;
 import wasdi.shared.viewmodels.MathMaskViewModel;
@@ -328,11 +330,21 @@ public class ProcessingResources {
 	public ArrayList<SnapWorkflowViewModel> getWorkflowsByUser(@HeaderParam("x-session-token") String sSessionId) {
 		Wasdi.DebugLog("ProcessingResources.getWorkflowsByUser");
 		
-		if (Utils.isNullOrEmpty(sSessionId)) return null;
+		if (Utils.isNullOrEmpty(sSessionId)) {
+			Wasdi.DebugLog("ProcessingResources.getWorkflowsByUser: session null");
+			return null;
+		}
 		User oUser = Wasdi.GetUserFromSession(sSessionId);
 
-		if (oUser==null) return null;
-		if (Utils.isNullOrEmpty(oUser.getUserId())) return null;
+		if (oUser==null) {
+			Wasdi.DebugLog("ProcessingResources.getWorkflowsByUser: user null");
+			return null;
+		}
+		
+		if (Utils.isNullOrEmpty(oUser.getUserId())) {
+			Wasdi.DebugLog("ProcessingResources.getWorkflowsByUser: user id null");
+			return null;
+		}
 
 		String sUserId = oUser.getUserId();
 		
@@ -349,9 +361,11 @@ public class ProcessingResources {
 			oVM.setOutputNodeNames(aoDbWorkflows.get(i).getOutputNodeNames());
 			oVM.setInputNodeNames(aoDbWorkflows.get(i).getInputNodeNames());
 			oVM.setPublic(aoDbWorkflows.get(i).getIsPublic());
-			
+			oVM.setUserId(aoDbWorkflows.get(i).getUserId());
 			aoRetWorkflows.add(oVM);
 		}
+		
+		Wasdi.DebugLog("ProcessingResources.getWorkflowsByUser: return " + aoRetWorkflows.size() + " workflows");
 		
 		return aoRetWorkflows;
 	}
@@ -1256,6 +1270,8 @@ public class ProcessingResources {
 		try {
 			//Update process list
 			
+			sProcessObjId = Utils.GetRandomName();
+			
 			OperatorParameter oParameter = GetParameter(operation); 
 			oParameter.setSourceProductName(sSourceProductName);
 			oParameter.setDestinationProductName(sDestinationProductName);
@@ -1282,7 +1298,6 @@ public class ProcessingResources {
 				oProcess.setProductName(sSourceProductName);
 				oProcess.setWorkspaceId(sWorkspaceId);
 				oProcess.setUserId(sUserId);
-				sProcessObjId = Utils.GetRandomName();
 				oProcess.setProcessObjId(sProcessObjId);
 				oProcess.setStatus(ProcessStatus.CREATED.name());
 				oRepository.InsertProcessWorkspace(oProcess);
@@ -1659,29 +1674,42 @@ public class ProcessingResources {
 			Wasdi.DebugLog("ProcessingResource.launchList ParamFile " + sParamFile);
 			
 			String sParamFullPath = m_oServletConfig.getInitParameter("DownloadRootPath") + "/processors/listflood/" + sParamFile;
+			String sConfigFullPath = m_oServletConfig.getInitParameter("DownloadRootPath") + "/processors/listflood/config.properties"; 
 			
 			WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
 			Workspace oWorkspace = oWorkspaceRepository.GetWorkspace(sWorkspaceId);
 			
 			File oFile = new File(sParamFullPath);
+			String sFolder = oFile.getParent();
+			File oConfigFile = new File (sConfigFullPath);
 			
-			BufferedWriter oWriter = new BufferedWriter(new FileWriter(oFile));
+			BufferedWriter oWriter = new BufferedWriter(new FileWriter(oConfigFile));
+			
 			if(null!= oWriter) {
-				Wasdi.DebugLog("ProcessingResource.launchList: BufferedWriter created");
+				Wasdi.DebugLog("ProcessingResource.launchList: Creating config.properties file");
 
-				oWriter.write(m_oServletConfig.getInitParameter("DownloadRootPath"));
+				oWriter.write("BASEPATH=" + m_oServletConfig.getInitParameter("DownloadRootPath"));
 				oWriter.newLine();
-				oWriter.write(oUser.getUserId());
+				oWriter.write("USER=" + oUser.getUserId());
 				oWriter.newLine();
-				if (Utils.isNullOrEmpty(sSessionId)) oWriter.write(oUser.getPassword());
-				else oWriter.write("");
+				oWriter.write("WORKSPACE=" + oWorkspace.getName());
 				oWriter.newLine();
-				oWriter.write(oWorkspace.getName());
+				oWriter.write("SESSIONID="+sSessionId);
 				oWriter.newLine();
-				oWriter.write(sSessionId);
+				oWriter.write("ISONSERVER=1");
 				oWriter.newLine();
-				oWriter.write(sProcessObjId);
-				oWriter.newLine();
+				oWriter.write("DOWNLOADACTIVE=0");
+				oWriter.newLine();				
+				oWriter.write("MYPROCID="+sProcessObjId);
+				oWriter.newLine();				
+				oWriter.flush();
+				oWriter.close();
+			}			
+			
+			
+			oWriter = new BufferedWriter(new FileWriter(oFile));
+			if(null!= oWriter) {
+				Wasdi.DebugLog("ProcessingResource.launchList: Creating parameters file");
 
 				oWriter.write(oListFloodViewModel.getPostEventFile());
 				oWriter.newLine();
@@ -1771,4 +1799,184 @@ public class ProcessingResources {
 	}
 	
 	
+	
+	
+	
+	/**
+	 * Runs a the IDL script implementation of the LIST flood algorithm on specified files
+	 * @param sSessionId a valid session identifier
+	 * @param sFileName input file
+	 * @param a workspase identifier
+	 * @return BAD_REQUEST if null request, UNAUTHORIZED if session is not valid, OK after execution of the script
+	 */
+	@POST
+	@Path("/asynchjrctest")
+	@Produces({"application/json"})
+	public PrimitiveResult asynchJRCTest(
+			@HeaderParam("x-session-token") String sSessionId,
+			@QueryParam("workspaceId") String sWorkspaceId,
+			JRCTestViewModel oJRCViewModel) {
+		
+		Wasdi.DebugLog("ProcessingResource.asynchJRCTest");
+		
+		if(null == sSessionId ) {
+			PrimitiveResult oResult = new PrimitiveResult();
+			oResult.setBoolValue(false);
+			oResult.setIntValue(400);
+			return oResult;
+		}
+		
+		User oUser = Wasdi.GetUserFromSession(sSessionId);
+		
+		try {
+			//check authentication
+			if (oUser == null || Utils.isNullOrEmpty(oUser.getUserId())) {
+				PrimitiveResult oResult = PrimitiveResult.getInvalidInstance();
+				oResult.setIntValue(401);
+				return oResult;				
+			}
+			
+			Wasdi.DebugLog("ProcessingResource.asynchJRCTest: INPUT FILE " + oJRCViewModel.getInputFileName());
+			Wasdi.DebugLog("ProcessingResource.asynchJRCTest: OUTPUT FILE " + oJRCViewModel.getOutputFileName());
+			Wasdi.DebugLog("ProcessingResource.asynchJRCTest: EPSG " + oJRCViewModel.getEpsg());
+			
+			Wasdi.DebugLog("ProcessingResource.asynchJRCTest: launching MATLAB JRC Processor");
+						
+			return 	asynchLaunchJRC(sSessionId, oJRCViewModel, oUser, sWorkspaceId);
+						
+		} catch (Exception e) {
+			System.out.println("ProcessingResource.asynchJRCTest: error launching list " + e.getMessage());
+			e.printStackTrace();
+			PrimitiveResult oResult = PrimitiveResult.getInvalidInstance();
+			oResult.setBoolValue(false);
+			oResult.setIntValue(500);				
+			return oResult;
+		}
+	}
+	
+	
+	/**
+	 * Launch LIST ENVI process
+	 * @param sReferenceFile 
+	 * @param sWorkspaceId
+	 * @return
+	 */
+	private PrimitiveResult asynchLaunchJRC(String sSessionId, JRCTestViewModel oJRCViewModel, User oUser, String sWorkspaceId) {
+
+		PrimitiveResult oResult = new PrimitiveResult();
+		String sProcessObjId = Utils.GetRandomName();
+		String sUserId = Wasdi.GetUserFromSession(sSessionId).getUserId();
+		String sFloodMapFile = "";
+		
+		oResult.setBoolValue(false);
+		oResult.setIntValue(500);
+		
+		try {			
+			String sParamFile = "param.txt";
+			
+			String sParamFullPath = m_oServletConfig.getInitParameter("DownloadRootPath") + "/processors/wasdi_matlab_test_01/" + sParamFile;
+			String sConfigFullPath = m_oServletConfig.getInitParameter("DownloadRootPath") + "/processors/wasdi_matlab_test_01/config.properties"; 
+			
+			WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
+			Workspace oWorkspace = oWorkspaceRepository.GetWorkspace(sWorkspaceId);
+			
+			File oFile = new File(sParamFullPath);
+			String sFolder = oFile.getParent();
+			File oConfigFile = new File (sConfigFullPath);
+			
+			BufferedWriter oWriter = new BufferedWriter(new FileWriter(oConfigFile));
+			
+			if(null!= oWriter) {
+				Wasdi.DebugLog("ProcessingResource.asynchLaunchJRC: Creating config.properties file");
+
+				oWriter.write("BASEPATH=" + m_oServletConfig.getInitParameter("DownloadRootPath"));
+				oWriter.newLine();
+				oWriter.write("USER=" + oUser.getUserId());
+				oWriter.newLine();
+				oWriter.write("WORKSPACE=" + oWorkspace.getName());
+				oWriter.newLine();
+				oWriter.write("SESSIONID="+sSessionId);
+				oWriter.newLine();
+				oWriter.write("ISONSERVER=1");
+				oWriter.newLine();
+				oWriter.write("DOWNLOADACTIVE=0");
+				oWriter.newLine();				
+				oWriter.write("MYPROCID="+sProcessObjId);
+				oWriter.newLine();				
+				oWriter.write("PARAMFILEPATH="+sParamFullPath);
+				oWriter.newLine();
+				oWriter.flush();
+				oWriter.close();
+			}			
+			
+			
+			oWriter = new BufferedWriter(new FileWriter(oFile));
+			if(null!= oWriter) {
+				Wasdi.DebugLog("ProcessingResource.asynchLaunchJRC: Creating parameters file");
+
+				oWriter.write("INPUT=" + oJRCViewModel.getInputFileName());
+				oWriter.newLine();
+				oWriter.write("EPSG" + oJRCViewModel.getEpsg());
+				oWriter.newLine();
+				oWriter.write("OUTPUT" + oJRCViewModel.getOutputFileName());
+				oWriter.newLine();
+				oWriter.flush();
+				oWriter.close();
+			}
+			
+			//Update process list
+			
+			MATLABProcParameters oParameter = new MATLABProcParameters();
+			oParameter.setWorkspace(sWorkspaceId);
+			oParameter.setUserId(sUserId);
+			oParameter.setExchange(sWorkspaceId);
+			oParameter.setProcessObjId(sProcessObjId);
+			oParameter.setConfigFilePath(sConfigFullPath);
+			oParameter.setParamFilePath(sParamFullPath);
+			oParameter.setProcessorName("wasdi_matlab_test_01");
+	
+			String sPath = m_oServletConfig.getInitParameter("SerializationPath");			
+			if (!(sPath.endsWith("\\") || sPath.endsWith("/"))) sPath += "/";
+			sPath = sPath + sProcessObjId;
+			
+			SerializationUtils.serializeObjectToXML(sPath, oParameter);
+
+			
+			ProcessWorkspaceRepository oRepository = new ProcessWorkspaceRepository();
+			ProcessWorkspace oProcess = new ProcessWorkspace();
+			
+			try
+			{
+				oProcess.setOperationDate(Wasdi.GetFormatDate(new Date()));
+				oProcess.setOperationType(LauncherOperations.RUNIDL.toString());
+				oProcess.setProductName(oJRCViewModel.getInputFileName());
+				oProcess.setWorkspaceId(sWorkspaceId);
+				oProcess.setUserId(sUserId);
+				oProcess.setProcessObjId(sProcessObjId);
+				oProcess.setStatus(ProcessStatus.CREATED.name());
+				oRepository.InsertProcessWorkspace(oProcess);
+				Wasdi.DebugLog("ProcessingResource.asynchLaunch: Process Scheduled for Launcher");
+			}
+			catch(Exception oEx){
+				System.out.println("ProcessingResource.asynchLaunchList: Error updating process list " + oEx.getMessage());
+				oEx.printStackTrace();
+				oResult.setBoolValue( false);
+				oResult.setIntValue(500);
+				return oResult;
+			}
+
+			oResult.setBoolValue(true);
+			oResult.setIntValue(200);
+			oResult.setStringValue(oProcess.getProcessObjId());
+			
+		} catch (Exception oEx) {
+			System.out.println("ProcessingResource.launchList: error during list process " + oEx.getMessage());
+			oEx.printStackTrace();
+			oResult.setBoolValue(false);
+			oResult.setIntValue(500);
+			return oResult;
+		}
+				
+		return oResult;
+	}
 }
