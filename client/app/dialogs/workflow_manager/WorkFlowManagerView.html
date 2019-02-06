@@ -139,6 +139,9 @@
                                                     {{"DIALOG_WORKFLOW_MANAGER_TABLE_DESCRIPTION"|translate}}
                                                 </th>
                                                 <th>
+                                                    {{"DIALOG_WORKFLOW_MANAGER_TABLE_OWNER"|translate}}
+                                                </th>
+                                                <th>
 
                                                 </th>
                                             </tr>
@@ -151,6 +154,7 @@
                                                 ng-click="m_oController.m_oSelectedWorkflow = workflow">
                                                 <td >{{workflow.name}}</td>
                                                 <td>{{workflow.description}}</td>
+                                                <td>{{workflow.userId}}</td>
                                                 <!--<td class="td-button" ng-click="m_oController.deleteWorkflow(workflow)">-->
                                                 <td class="td-button" ng-click="m_oController.openDeleteWorkflowDialog(workflow)"
                                                                       ng-hide="m_oController.userIsOwnerOfWorkflow(workflow)===false">
@@ -224,6 +228,8 @@
                                             ng-click="m_oController.m_oSelectedMultiInputWorkflow = workflow">
                                             <td>{{workflow.name}}</td>
                                             <td>{{workflow.description}}</td>
+                                            <td>{{workflow.userId}}</td>
+
                                             <td class="td-button" ng-click="m_oController.deleteWorkflow(workflow)"
                                                                 ng-hide="m_oController.userIsOwnerOfWorkflow(workflow)===false">
                                                 <i class="fa fa-trash" aria-hidden="true" ></i>
