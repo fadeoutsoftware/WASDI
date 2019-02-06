@@ -281,7 +281,7 @@ var RootController = (function() {
 
         tooltipsList.tooltip();
     }
-    
+
 
     RootController.prototype.openLogoutModal = function()
     {
