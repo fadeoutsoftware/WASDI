@@ -55,9 +55,13 @@ var RootController = (function() {
 
         // Subscribe to 'rabbit service connection changes'
         var _this = this;
-        $scope.$on('rabbitConnectionStateChanged', function(event, args) {
+        // $scope.$on('rabbitConnectionStateChanged', function(event, args) {
+        //     _this.updateRabbitConnectionState();
+        // });
+        var msgHlp = MessageHelper.getInstanceWithAnyScope($scope);
+        msgHlp.subscribeToRabbitConnectionStateChange(function(event, args) {
             _this.updateRabbitConnectionState();
-        });
+        })
         // then immediatly check rabbit connection state
         this.updateRabbitConnectionState(true);
 
@@ -113,7 +117,6 @@ var RootController = (function() {
             // you could inspect the data to see
             if(data == true)
             {
-
                 var aoProcessesRunning = $scope.m_oController.m_oProcessesLaunchedService.getProcesses();
 
                 if(utilsIsObjectNullOrUndefined(aoProcessesRunning) == true) return;
@@ -196,6 +199,11 @@ var RootController = (function() {
                 }
 
                 $scope.m_oController.m_aoProcessesRunning = aoProcessesRunning;
+
+                // Debug processes bar (+)
+                var testProcess = {"fileSize":"420.5 MB","operationDate":"2019-01-24 08:54:41 GMT","operationEndDate":"null GMT","operationType":"DOWNLOAD","payload":null,"pid":1066,"processObjId":"fde1b926-c524-4c5c-ad77-9ed2cfbb12be","productName":"S2A_MSIL2A_20190117T102351_N0211_R065_T32TPQ_20190117T130032.zip","progressPerc":0,"status":"RUNNING","userId":"paolo"};
+                this.m_oLastProcesses = testProcess;
+                // Debug processes bar (-)
             }
 
         });
@@ -238,12 +246,42 @@ var RootController = (function() {
             mytimeout = $timeout($scope.onTimeout,1000);
         };
 
+        this.isProcesssBarOpened = function()
+        {
+            return this.m_bIsOpenStatusBar;
+        };
+
         var mytimeout = $timeout($scope.onTimeout,1000);
 
+
+
+        this.initTooltips();
     }
 
     /*********************************** METHODS **************************************/
 
+    RootController.prototype.getConnectionStatusForTooltip = function()
+    {
+        //return Math.random() * 1000;
+        if( this.isRabbitConnected() == true){ return "Connected"}
+        return "Disconnected";
+    }
+
+    RootController.prototype.initTooltips = function()
+    {
+        var _this = this;
+        var tooltipsList = $('[data-toggle="tooltip"]');
+        if(tooltipsList.length == 0)
+        {
+            setTimeout(function () {
+                _this.initTooltips();
+            }, 100);
+            return;
+        }
+
+        tooltipsList.tooltip();
+    }
+    
 
     RootController.prototype.openLogoutModal = function()
     {
@@ -337,16 +375,22 @@ var RootController = (function() {
     };
 
     /***************************** IS VISIBLE HTML ELEMENT ******************************/
-    RootController.prototype.isVisibleProcessesBar = function ()
+
+    RootController.prototype.isProcessesBarVisible = function ()
     {
-        var sState=this.m_oState.current.name;
-        switch(sState) {
-            case "root.workspaces":
-                return false;
-                break;
-            default: return true;
+        var sState = this.m_oState.current.name;
+
+        // NOTE: a bug is reported using 'ng-class' in combination with 'ui-view'
+        // (https://github.com/angular-ui/ui-router/issues/866)
+        // Try to solve with jQuery workaround
+
+        if( sState == "root.workspaces" )
+        {
+            $("#main").removeClass("has-processes-bar");
+            return false;
         }
 
+        $("#main").addClass("has-processes-bar");
         return true;
     };
 
@@ -423,15 +467,21 @@ var RootController = (function() {
         else return false;
     };
 
+    RootController.prototype.toggleProcessesBar = function()
+    {
+        this.m_bIsOpenStatusBar = !this.m_bIsOpenStatusBar;
+        this.m_bIsOpenNav = !this.m_bIsOpenNav;
+    }
+
     RootController.prototype.openNav = function() {
-        document.getElementById("status-bar").style.height = "500px";
+        //document.getElementById("status-bar").style.height = "500px";
         this.m_bIsOpenStatusBar = !this.m_bIsOpenStatusBar;
         this.m_bIsOpenNav = true;
 
     };
 
     RootController.prototype.closeNav = function() {
-        document.getElementById("status-bar").style.height = "4.5%";
+        //document.getElementById("status-bar").style.height = "4.5%";
         this.m_bIsOpenStatusBar = !this.m_bIsOpenStatusBar;
         this.m_bIsOpenNav = false;
 

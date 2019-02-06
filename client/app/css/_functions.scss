@@ -14,5 +14,11 @@
 @function calculatePxFromRemAndBasePx($sizeRem, $baseSizePx)
 {
     // use '+ 0px' or '* 1px' to convert unit to px
-    @return (strip-unit($sizeRem) * $baseSizePx) + 0px;
+    @return (strip-unit($sizeRem) * strip-unit($baseSizePx)) + 0px;
+}
+
+@function fontFamilyContains($fontFamilyVar, $fontToSearch)
+{
+    @if( index($fontFamilyVar, $fontToSearch) ){ @return true; }
+    @else{ @return false; }
 }

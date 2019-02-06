@@ -1,0 +1,33 @@
+// Due to custom layout, the UI is structured this way
+// The header has an height an a virtual height. The firstone is the real height, and is equal to the height of
+// the navbar + some space on top. The virtual height is calculated to include the logo height too.
+// The 'content-wrapper' is just after the 'header' (so its distance from top is
+// equal to '$size-header-height-total'. It has a tool bar (which is just below the navbar) the a spacer to simulate
+// the full width contents are below the 'header + toolbar' block.
+
+$size-header-height: 50px;
+$size-header-virtual-height: 100px;
+$size-header-padding-top: 10px;
+$size-header-height-total: $size-header-height + $size-header-padding-top;
+//$size-header-virtual-height-total: $size-header-virtual-height + $size-header-padding-top;
+
+
+$size-content-wrapper-padding-bottom: 10px;
+
+$size-toolbar-height-total: $size-header-virtual-height - $size-header-height;
+
+$size-content-spacer: ($size-header-virtual-height - $size-header-height) - $size-toolbar-height-total + 16px;
+$size-full-width-content-height: calc(100% - #{$size-content-spacer + $size-toolbar-height-total});
+
+$size-status-bar-height-closed: 48px;
+$size-status-bar-height-opened: 500px;
+
+$size-panel-heading-height-single-row-total: 40px; // 39px real
+$size-panel-body-height-with-single-row-heading: calc(100% - #{$size-panel-heading-height-single-row-total});
+
+
+
+
+$z-index-context-menu-right-click: 1001;
+$z-index-map-btn: 1001;
+$z-index-top-toolbar: $z-index-map-btn + 1;

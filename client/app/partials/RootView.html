@@ -1,4 +1,4 @@
-<div class="root-view container-fluid">
+<div class="root-view container-fluid-v4">
 
     <!--<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 logged-user"  >-->
         <!--&lt;!&ndash; HELP LOG-OUT&ndash;&gt;-->
@@ -41,302 +41,142 @@
     </div>
 
 
-    <div class="col-lg-1 col-md-2 col-sm-2 col-xs-2 ">
-        <a  href=""  ng-click="m_oController.openSnake()"><!--ui-sref="root.workspaces"-->
-            <!--<img class="navbar-brand-logo">-->
-            <img class="brand-logo" id="brand-logo" >
-            <script>
-                // Script fix an error with Firefox which does not
-                // show image correctly if the 'SRC' is set from CSS
-                // via 'content' field
-                $(document).ready(function () {
-                    var oImage = $("#brand-logo");
-                    var imageSrc = oImage.css("content");
-                    imageSrc = imageSrc.replace("url(\"","");
-                    imageSrc = imageSrc.replace("\")","");
-                    oImage.attr("src",imageSrc);
-                })
-            </script>
-        </a>
-    </div>
-    <!--------------------------- NAVBAR -------------------------------->
-    <div class="col-lg-11 col-md-10 col-sm-10 col-xs-10 my-nav-bar">
-        <nav class="navbar navbar-default" ><!--ng-show="m_oController.isVisibleNavBar()"-->
-            <div class="container-fluid">
-                <div class="navbar-header">
-                    <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
-                        <span class="sr-only">Toggle navigation</span>
-                        <span class="icon-bar"></span>
-                        <span class="icon-bar"></span>
-                        <span class="icon-bar"></span>
-                    </button>
-                </div>
-
-                <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-                    <!-- EDIT NAME -->
-                    <div class="nav navbar-nav navbar-left name-workspace" ng-hide="m_oController.hideWorkspaceName()">
-                        <div class="form-group">
-                            <input type="text" readonly ng-model="m_oController.m_oConstantsService.getActiveWorkspace().name" placeholder="..."
-                                   ng-class="{'input-mydisable': !m_oController.m_bIsEditModelWorkspaceNameActive,'input-myenable': m_oController.m_bIsEditModelWorkspaceNameActive}"
-                                   ng-click="m_oController.editModelWorkspaceNameSetTrue()" style="height: 36px">
-                            <b class="cursor" ></b>
-
-                        </div>
-                    </div>
-                    <!------------------------------ USER ------------------------------>
-                    <div class="nav navbar-nav navbar-right user-container">
-                        <div class="dropdown">
-                            <button class="dropdown-toggle" type="button" id="dropdownMenuUser"
-                                    data-toggle="dropdown">
-                                <!--i class="fa fa-user-circle fa-2x" aria-hidden="true"></i-->
-                                <img src="assets/icons/white-user-icon2.png" style="width: 26px" onmouseover="this.src='assets/icons/green-user-icon2.png';" onmouseout="this.src='assets/icons/white-user-icon2.png';" />
-                                <!--div id="UserIcon"></div-->
-                                <!--<span class="caret"></span>-->
-                            </button>
-                            <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenuUser">
-                                <li role="presentation" class=""  ng-click="m_oController.editUserInfo()" ><!--dropdown-header-->
-                                    <a role="menuitem" tabindex="-1">
-
-                                        <!--<span class="user-span">-->
-                                        <i class="fa fa-user fa-lg" aria-hidden="true"></i>
-                                        <h4 ng-hide="m_oController.m_oUser.name === null">{{"ROOT_VIEW_LABEL_USER"|translate}} {{m_oController.m_oUser.name}}</h4>
-                                        <h4 ng-show=" m_oController.m_oUser.name === null && m_oController.m_oUser.email !== null">{{"ROOT_VIEW_LABEL_USER"|translate}} {{m_oController.m_oUser.userId}}</h4>
-                                        <!--</span>-->
-                                    </a>
-
-                                </li>
-
-                                <li role="presentation" class="divider"></li>
-
-                                <li role="presentation" class="disabled">
-                                    <a role="menuitem" tabindex="-1" href="" >
-                                        <i class="fa fa-info fa-lg" aria-hidden="true"></i>
-                                        <h4>{{"ROOT_VIEW_LINK_HELP"|translate}}</h4>
-                                    </a>
-                                </li>
-                                <li role="presentation">
-                                    <a role="menuitem" tabindex="-1" ng-click="m_oController.onClickLogOut()">
-                                        <i class="fa fa-sign-out fa-lg" aria-hidden="true"></i>
-                                        <h4>{{"ROOT_VIEW_LINK_LOG_OUT"|translate}}</h4>
-                                    </a>
-                                </li>
+    <!-------------------- HEADER (LOGO & NAVBAR) -------------------------------->
+    <div class="row-v4 header-wrapper">
+        <div class="col-v4-auto">
+            <a  href=""  ng-click="m_oController.openSnake()"><!--ui-sref="root.workspaces"-->
+                <!--<img class="navbar-brand-logo">-->
+                <img class="brand-logo" id="brand-logo" >
+                <script>
+                    // Script fix an error with Firefox which does not
+                    // show image correctly if the 'SRC' is set from CSS
+                    // via 'content' field
+                    $(document).ready(function () {
+                        var oImage = $("#brand-logo");
+                        var imageSrc = oImage.css("content");
+                        imageSrc = imageSrc.replace("url(\"","");
+                        imageSrc = imageSrc.replace("\")","");
+                        oImage.attr("src",imageSrc);
+                    })
+                </script>
+            </a>
+        </div>
 
 
-                            </ul>
-                        </div>
+        <div class="col-v4 my-nav-bar pl-0">
+            <nav class="navbar navbar-default navbar-wasdi" ><!--ng-show="m_oController.isVisibleNavBar()"-->
+                <div class="container-fluid-v4">
+                    <div class="navbar-header">
+                        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+                            <span class="sr-only">Toggle navigation</span>
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                        </button>
                     </div>
 
-                    <ul class="nav navbar-nav navbar-right">
-                        <!-- WORKSPACES BUTTON-->
-                        <li ng-class="{active:m_oController.activePageCss('root.workspaces')}">
-                            <a ui-sref="root.workspaces" ><i class="fa fa-list-ul" aria-hidden="true"></i>
-                                {{"ROOT_VIEW_NAV_BAR_LINK_WORKSPACES"|translate}}
-                            </a>
-                        </li>
-                        <!-- PLAN BUTTON-->
-                        <li ng-class="{active:m_oController.activePageCss('root.searchorbit')}"  > <!-- -->
-                          <a ng-click="m_oController.openSearchorbit()"  href="" > <!---->
-                              <i class="fa fa-calendar-o fa-lg" aria-hidden="true" ></i>
-                                {{"ROOT_VIEW_NAV_BAR_LINK_SEARCH"|translate}}
-                            </a>
-                        </li>
-                        <!-- SEARCH BUTTON-->
-                        <li   ng-class="{active:m_oController.activePageCss('root.import')}"    >
-                            <a ng-click="m_oController.openImportPage()" href=""   >
-                                <i class="fa fa-search fa-lg" aria-hidden="true"></i><!--ui-sref="root.import"-->
-                                {{"ROOT_VIEW_NAV_BAR_LINK_IMPORT"|translate}}
-                            </a>
-                        </li>
-                        <!-- EDITOR BUTTON-->
-                        <li ng-class="{active:m_oController.activePageCss('root.editor')}" ng-disabled="m_oController.disableEditorButton()" >
-                            <a ng-click="m_oController.onClickProcess();m_oController.openEditorPage()" href="" ng-style="{cursor:m_oController.cursorCss()}"  >
-                                <!--i class="fa fa-cogs fa-lg" aria-hidden="true"></i>-->
-                                <i class="fa fa-rocket fa-lg" aria-hidden="true"></i>
-                                {{"ROOT_VIEW_NAV_BAR_LINK_PROCESS"|translate}}
-                            </a>
-                        </li>
-                        <!-- CATALOGUE BUTTON-->
-                        <li ng-class="{active:m_oController.activePageCss('root.catalog')}"  >
-                            <a ng-click="m_oController.openCatalogPage()" href=""  >
-                                <i class="fa fa-database fa-lg" aria-hidden="true"></i>
-                                {{"ROOT_VIEW_NAV_BAR_LINK_CATALOG"|translate}}
-                            </a>
-                        </li>
-                    </ul>
+                    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                        <!-- EDIT NAME -->
+                        <div class="nav navbar-nav navbar-left name-workspace" ng-hide="m_oController.hideWorkspaceName()">
+                            <div class="form-group">
+                                <input type="text" readonly ng-model="m_oController.m_oConstantsService.getActiveWorkspace().name" placeholder="..."
+                                       ng-class="{'input-mydisable': !m_oController.m_bIsEditModelWorkspaceNameActive,'input-myenable': m_oController.m_bIsEditModelWorkspaceNameActive}"
+                                       ng-click="m_oController.editModelWorkspaceNameSetTrue()" style="height: 36px">
+                                <b class="cursor" ></b>
 
+                            </div>
+                        </div>
+                        <!------------------------------ USER ------------------------------>
+                        <div class="nav navbar-nav navbar-right user-container">
+                            <div class="dropdown">
+                                <div class="dropdown-toggle ml-4" type="button" id="dropdownMenuUser" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                                    <img src="assets/icons/white-user-icon2.png" style="width: 26px" onmouseover="this.src='assets/icons/green-user-icon2.png';" onmouseout="this.src='assets/icons/white-user-icon2.png';" />
+                                </div>
+                                <ul class="dropdown-menu mt-3" aria-labelledby="dropdownMenuUser">
+                                    <li role="presentation" class=""  ng-click="m_oController.editUserInfo()" ><!--dropdown-header-->
+                                        <a role="menuitem" tabindex="-1">
+
+                                            <!--<span class="user-span">-->
+                                            <i class="fa fa-user fa-lg" aria-hidden="true"></i>
+                                            <h4 ng-hide="m_oController.m_oUser.name === null">{{"ROOT_VIEW_LABEL_USER"|translate}} {{m_oController.m_oUser.name}}</h4>
+                                            <h4 ng-show=" m_oController.m_oUser.name === null && m_oController.m_oUser.email !== null">{{"ROOT_VIEW_LABEL_USER"|translate}} {{m_oController.m_oUser.userId}}</h4>
+                                            <!--</span>-->
+                                        </a>
+
+                                    </li>
+
+                                    <li role="presentation" class="divider"></li>
+
+                                    <li role="presentation" class="disabled">
+                                        <a role="menuitem" tabindex="-1" href="" >
+                                            <i class="fa fa-info fa-lg" aria-hidden="true"></i>
+                                            <h4>{{"ROOT_VIEW_LINK_HELP"|translate}}</h4>
+                                        </a>
+                                    </li>
+                                    <li role="presentation">
+                                        <a role="menuitem" tabindex="-1" ng-click="m_oController.onClickLogOut()">
+                                            <i class="fa fa-sign-out fa-lg" aria-hidden="true"></i>
+                                            <h4>{{"ROOT_VIEW_LINK_LOG_OUT"|translate}}</h4>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <ul class="nav navbar-nav navbar-right">
+                            <!-- WORKSPACES BUTTON-->
+                            <li ng-class="{active:m_oController.activePageCss('root.workspaces')}">
+                                <a ui-sref="root.workspaces" ><i class="fa fa-list-ul" aria-hidden="true"></i>
+                                    {{"ROOT_VIEW_NAV_BAR_LINK_WORKSPACES"|translate}}
+                                </a>
+                            </li>
+                            <!-- PLAN BUTTON-->
+                            <li ng-class="{active:m_oController.activePageCss('root.searchorbit')}"  > <!-- -->
+                              <a ng-click="m_oController.openSearchorbit()"  href="" > <!---->
+                                  <i class="fa fa-calendar-o fa-lg" aria-hidden="true" ></i>
+                                    {{"ROOT_VIEW_NAV_BAR_LINK_SEARCH"|translate}}
+                                </a>
+                            </li>
+                            <!-- SEARCH BUTTON-->
+                            <li   ng-class="{active:m_oController.activePageCss('root.import')}"    >
+                                <a ng-click="m_oController.openImportPage()" href=""   >
+                                    <i class="fa fa-search fa-lg" aria-hidden="true"></i><!--ui-sref="root.import"-->
+                                    {{"ROOT_VIEW_NAV_BAR_LINK_IMPORT"|translate}}
+                                </a>
+                            </li>
+                            <!-- EDITOR BUTTON-->
+                            <li ng-class="{active:m_oController.activePageCss('root.editor')}" ng-disabled="m_oController.disableEditorButton()" >
+                                <a ng-click="m_oController.onClickProcess();m_oController.openEditorPage()" href="" ng-style="{cursor:m_oController.cursorCss()}"  >
+                                    <!--i class="fa fa-cogs fa-lg" aria-hidden="true"></i>-->
+                                    <i class="fa fa-rocket fa-lg" aria-hidden="true"></i>
+                                    {{"ROOT_VIEW_NAV_BAR_LINK_PROCESS"|translate}}
+                                </a>
+                            </li>
+                            <!-- CATALOGUE BUTTON-->
+                            <li ng-class="{active:m_oController.activePageCss('root.catalog')}"  >
+                                <a ng-click="m_oController.openCatalogPage()" href=""  >
+                                    <i class="fa fa-database fa-lg" aria-hidden="true"></i>
+                                    {{"ROOT_VIEW_NAV_BAR_LINK_CATALOG"|translate}}
+                                </a>
+                            </li>
+                        </ul>
+
+
+
+                    </div>
 
 
                 </div>
-
-
-            </div>
-        </nav>
+            </nav>
+        </div>
     </div>
 
 
-    <div ui-view="maincontent" id="main"></div>
+    <div ui-view="maincontent" id="main" class="content-wrapper" ng-class="{'has-processes-bar' : m_oController.isProcessesBarVisible() == true}"></div>
 
     <!------------------ PROCESSES BAR ------------------->
-    <div class=" status-bar " id="status-bar" ng-show="m_oController.isVisibleProcessesBar() == true" >
-        <div class="row"  >
-                <div class="col-xs-1 col-sm-1 col-md-1 col-lg-1 processes-list" ><!--style="margin:0; padding:0;" -->
-                    <div class="loadIcon" ng-show="m_oController.m_oLastProcesses != null && !m_oController.m_bIsOpenNav"><!---->
-                        <smallinvaderfixed></smallinvaderfixed>
-                        <!--<invader></invader>-->
-                    </div>
-                </div>
+    <ng-include src="'partials/processes-bar.component.html'"></ng-include>
 
-                <div class="col-lg-8 col-md-8 col-sm-8 col-xs-8 processes-list" >
-                    <div ng-show="m_oController.m_oLastProcesses != null && !m_oController.m_bIsOpenNav"><!--ng-show="m_oController.m_oLastProcesses != null && !m_oController.m_bIsOpenNav"-->
-                        <div class="flex-container column">
-                            <div class="flex-container">
-                                <span class="label label-default">{{"ROOT_LABEL_OPERATION_DATA"|translate}}</span>
-                                <div class="single-process" >{{m_oController.m_oLastProcesses.operationDate}}</div>
-                                <span class="label label-default">{{"ROOT_LABEL_TYPE_OF_OPERATION"|translate}}</span>
-                                <div class="single-process">{{m_oController.m_oLastProcesses.operationType}}</div>
-
-
-                                <div class="progress-single-process" >
-                                    <div class="progress-bar progress-bar-success" role="progressbar"  aria-valuemin="0" aria-valuemax="100" ng-style="{width:m_oController.m_oLastProcesses.progressPerc+'%' }">
-                                        <span class="">{{m_oController.m_oLastProcesses.progressPerc}} %</span>
-                                        <!-- class="sr-only " for hide {{oProcess.progressPerc}} % Complete (success) -->
-                                    </div>
-                                    <!--<div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="40" aria-valuemin="0" aria-valuemax="100" ng-style="{width:oProcess.progressPerc+'%' }" style="width: 100%;">-->
-                                        <!--<span class="ng-binding">100 %</span>&lt;!&ndash; class="sr-only " for hide {{oProcess.progressPerc}} % Complete (success) &ndash;&gt;-->
-                                    <!--</div>-->
-                                </div>
-
-                            </div>
-
-                            <div class="flex-container">
-                                <span class="label label-default">{{"ROOT_LABEL_NAME"|translate}}</span>
-                                <div class="single-process">{{m_oController.m_oLastProcesses.productName}}</div>
-                            </div>
-                            <!--{{oProcess.progressPerc}} %-->
-                        </div>
-                    </div>
-                </div>
-
-
-                <div class="col-lg-3 col-md-3 col-sm-3 col-xs-3 ">
-                    <!--<div class="number-processes">-->
-                    <div class="flex-container end">
-                        <div class="rabbit-connection-status-wrapper mr-5" ng-class="{'disconnected' : m_oController.isRabbitConnected() == false}">
-                            <!--<div class="loadIcon"><smallinvaderfixed></smallinvaderfixed></div>-->
-                            <i class="icon fa fa-plug" aria-hidden="true"></i>
-                        </div>
-                        <p class="number-processes">{{"ROOT_LABEL_NUMBER_OF_WAITING_PROCESSES"|translate}}
-                            <span class="badge">{{m_oController.m_iWaitingProcesses}}</span>
-                        </p>&nbsp;&nbsp;
-                        <p class="number-processes">{{"ROOT_LABEL_NUMBER_OF_RUNNING_PROCESSES"|translate}}
-                            <span class="badge">{{m_oController.m_iNumberOfProcesses}}</span>
-                        </p>
-                        <div  class="my-button openbtn" ng-click="m_oController.openNav()" ng-hide="m_oController.m_bIsOpenStatusBar">
-                            <i class="fa fa-arrow-up" aria-hidden="true"></i>
-                        </div>
-                        <div  class="my-button openbtn" ng-click="m_oController.closeNav()" ng-show="m_oController.m_bIsOpenStatusBar">
-                            <i class="fa fa-arrow-down" aria-hidden="true"></i>
-                        </div>
-
-
-                    </div>
-
-                    <!--</div>-->
-
-                </div>
-                <!--<div class="col-xs-1 col-sm-1 col-md-1 col-lg-1">
-
-                </div>-->
-        </div>
-        <!--</div>-->
-
-        <br/>
-        <div class="container-fluid">
-
-            <!--<div class="row">-->
-                <div class="processes-list" ng-show="m_oController.m_bIsOpenNav" style="height: 350px"  ><!--style="height: 80px"-->
-
-                    <table class="table table-responsive table-striped " id="tableProcesses" >
-                        <thead>
-                        <tr>
-                            <th></th>
-                            <th>{{"ROOT_TABLE_HEAD_OPERATION_DATA"|translate}}</th>
-                            <th>{{"ROOT_TABLE_HEAD_TYPE_OF_OPERATION"|translate}}</th>
-                            <th>{{"ROOT_TABLE_HEAD_NAME"|translate}}</th>
-                            <th>{{"ROOT_TABLE_HEAD_ID_USER"|translate}}</th>
-                            <th>Real size</th>
-                            <th>Progress</th>
-                            <th>{{"ROOT_TABLE_HEAD_TIME"|translate}} </th>
-                            <th></th>
-                        </tr>
-                        </thead>
-                        <tbody>
-
-                        <tr ng-repeat="oProcess in m_oController.m_aoProcessesRunning  | orderBy:'-' track by $index ">
-                            <td>
-                                <!--<invaderfixed ng-show="oProcess.status === 'RUNNING' || oProcess.status === 'CREATED'"></invaderfixed>-->
-                                <smallinvaderfixed ng-show="oProcess.status === 'RUNNING'"></smallinvaderfixed>
-                                <span class="label label-info" ng-show="oProcess.status === 'CREATED'">Waiting</span>
-                                <span class="label label-warning" ng-show="oProcess.status === 'DONE'">Log</span>
-                                <span class="label label-danger" ng-show="oProcess.status === 'STOPPED'">Stopped</span>
-                                <span class="label label-danger" ng-show="oProcess.status === 'ERROR'" >Error</span>
-                            </td>
-                            <td>
-                                {{oProcess.operationDate}}
-                            </td>
-                            <td>
-                                {{oProcess.operationType}}
-                            </td>
-                            <td class="text"  title="{{oProcess.productName}}"  ><!--data-toggle="tooltip" data-placement="bottom"-->
-                                <span>{{oProcess.productName}}</span>
-                            </td>
-                            <td>
-                                {{oProcess.userId}}
-                            </td>
-                            <td>
-                                {{oProcess.fileSize}}
-                            </td>
-                            <td>
-                                <!--{{oProcess.progressPerc}} %-->
-                                <div class="progress">
-                                    <div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="40" aria-valuemin="0" aria-valuemax="100" ng-style="{width:oProcess.progressPerc+'%' }">
-                                        <span class="">{{oProcess.progressPerc}} %</span><!-- class="sr-only " for hide {{oProcess.progressPerc}} % Complete (success) -->
-                                    </div>
-                                </div>
-                            </td>
-                            <td>
-                                {{oProcess.timeRunning | date:'HH:mm:ss'}}
-                            </td>
-                            <td >
-                                <div class="my-button" ng-click="m_oController.deleteProcess(oProcess)" ng-show="oProcess.status === 'RUNNING'">
-                                    <i class="fa fa-times-circle" aria-hidden="true" data-toggle="tooltip" title="Stop processes"  data-placement="bottom"></i>
-                                </div>
-                            </td>
-                        </tr>
-
-                        </tbody>
-                    </table>
-                </div>
-                <div class="pull-right">
-                    <button class="btn my-button" ng-click="m_oController.openProcessLogsDialog()">
-                        <i class="fa fa-refresh" aria-hidden="true"></i>
-                        <h5>Load more...</h5>
-                    </button>
-                </div>
-
-                <!--<div class="col-xs-2 col-sm-2 col-md-2 col-lg-2 ">
-                    <button class="btn my-button" ng-click="m_oController.openProcessLogsDialog()">
-                        <i class="fa fa-refresh" aria-hidden="true"></i>
-                        <h5>Load more...</h5>
-                    </button>
-                </div>-->
-
-            <!--</div>-->
-        </div>
-
-
-
-    </div>
 
 </div>
 

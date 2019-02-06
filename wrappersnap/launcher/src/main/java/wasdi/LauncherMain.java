@@ -70,6 +70,7 @@ import wasdi.shared.parameters.FtpUploadParameters;
 import wasdi.shared.parameters.GraphParameter;
 import wasdi.shared.parameters.IDLProcParameter;
 import wasdi.shared.parameters.IngestFileParameter;
+import wasdi.shared.parameters.MATLABProcParameters;
 import wasdi.shared.parameters.MultilookingParameter;
 import wasdi.shared.parameters.NDVIParameter;
 import wasdi.shared.parameters.OperatorParameter;
@@ -403,10 +404,15 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 				WasdiProcessorEngine oEngine = WasdiProcessorEngine.GetProcessorEngine(oParameter.getProcessorType(), ConfigReader.getPropValue("DOWNLOAD_ROOT_PATH"), ConfigReader.getPropValue("DOCKER_TEMPLATE_PATH"));
 				oEngine.run(oParameter);
 			}
+			break;
 			case RUNIDL: {
 				IDLProcParameter oParameter = (IDLProcParameter) SerializationUtils.deserializeXMLToObject(sParameter);
-				
-				RunIDLProcessor(oParameter);
+				executeIDLProcessor(oParameter);
+			}
+			break;
+			case RUNMATLAB: {
+				MATLABProcParameters oParameter = (MATLABProcParameters) SerializationUtils.deserializeXMLToObject(sParameter);
+				executeMATLABProcessor(oParameter);
 			}
 			break;
 			default:
@@ -1395,7 +1401,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 	}
 	
 	
-	public void RunIDLProcessor(IDLProcParameter oParameter) {
+	public void executeIDLProcessor(IDLProcParameter oParameter) {
 		s_oLogger.debug("LauncherMain.RunIDLProcessor: Start");
 		ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
 		ProcessWorkspace oProcessWorkspace = oProcessWorkspaceRepository.GetProcessByProcessObjId(oParameter.getProcessObjId());
@@ -1461,6 +1467,82 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 		}
 		finally {			
 			s_oLogger.debug("LauncherMain.RunIDLProcessor: End");
+			CloseProcessWorkspace(oProcessWorkspaceRepository, oProcessWorkspace);
+		}
+	}
+
+	
+	public void executeMATLABProcessor(MATLABProcParameters oParameter) {
+		s_oLogger.debug("LauncherMain.executeMATLABProcessor: Start");
+		ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
+		ProcessWorkspace oProcessWorkspace = oProcessWorkspaceRepository.GetProcessByProcessObjId(oParameter.getProcessObjId());
+
+		try {
+
+			if (oProcessWorkspace != null) {
+				//get process pid
+				oProcessWorkspace.setPid(GetProcessId());
+				oProcessWorkspace.setStatus(ProcessStatus.RUNNING.name());
+				oProcessWorkspace.setProgressPerc(0);
+				//update the process
+				oProcessWorkspaceRepository.UpdateProcess(oProcessWorkspace);
+				//send update process message
+				if (s_oSendToRabbit!=null && !s_oSendToRabbit.SendUpdateProcessMessage(oProcessWorkspace)) {
+					s_oLogger.debug("LauncherMain.executeMATLABProcessor: Error sending rabbitmq message to update process list");
+				}
+			}
+			
+			String sBasePath = ConfigReader.getPropValue("DOWNLOAD_ROOT_PATH");
+			if (!sBasePath.endsWith("/")) sBasePath+="/";
+			
+			String sRunPath = sBasePath+"processors/"+oParameter.getProcessorName()+"/run_" + oParameter.getProcessorName() + ".sh";
+			
+			String sMatlabRunTimePath = ConfigReader.getPropValue("MATLAB_RUNTIME_PATH", "/usr/local/MATLAB/MATLAB_Runtime/v95");
+			String sConfigFilePath = sBasePath+"processors/"+oParameter.getProcessorName()+"/config.properties";
+			
+			String asCmd[] = new String[] {
+					sRunPath,
+					sMatlabRunTimePath,
+					sConfigFilePath
+			};
+			
+			s_oLogger.debug("LauncherMain.executeMATLABProcessor: shell exec " + Arrays.toString(asCmd));
+			ProcessBuilder oProcBuilder = new ProcessBuilder(asCmd);
+			Process oProc = oProcBuilder.start();
+			
+			BufferedReader oInput = new BufferedReader(new InputStreamReader(oProc.getInputStream()));
+			
+            String sLine;
+            while((sLine=oInput.readLine()) != null) {
+            	s_oLogger.debug("LauncherMain.executeMATLABProcessor: script stdout: " + sLine);
+            }
+            
+            
+			s_oLogger.debug("LauncherMain.executeMATLABProcessor: waiting for the process to exit");
+			
+			if (oProc.waitFor() == 0) {
+				// ok
+				s_oLogger.debug("LauncherMain.executeMATLABProcessor: process done with code 0");
+				if (oProcessWorkspace != null) oProcessWorkspace.setStatus(ProcessStatus.DONE.name());
+			}
+			else {
+				// errore
+				s_oLogger.debug("LauncherMain.executeMATLABProcessor: process done with code != 0");
+				if (oProcessWorkspace != null) oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
+				
+			}
+
+		}
+		catch (Exception oEx) {
+			s_oLogger.error("LauncherMain.executeMATLABProcessor: exception " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
+			if (oProcessWorkspace != null) oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
+
+			String sError = org.apache.commons.lang.exception.ExceptionUtils.getMessage(oEx);
+			if (s_oSendToRabbit!=null) s_oSendToRabbit.SendRabbitMessage(false,LauncherOperations.RUNIDL.name(),oParameter.getWorkspace(),sError,oParameter.getExchange());
+
+		}
+		finally {			
+			s_oLogger.debug("LauncherMain.executeMATLABProcessor: End");
 			CloseProcessWorkspace(oProcessWorkspaceRepository, oProcessWorkspace);
 		}
 	}

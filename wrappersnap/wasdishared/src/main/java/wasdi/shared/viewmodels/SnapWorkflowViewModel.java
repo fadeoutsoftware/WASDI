@@ -64,11 +64,11 @@ public class SnapWorkflowViewModel {
 	public void setPublic(boolean isPublic) {
 		this.isPublic = isPublic;
 	}
+
 	public String getUserId() {
 		return userId;
 	}
 	public void setUserId(String userId) {
 		this.userId = userId;
 	}
-
 }

@@ -12,6 +12,7 @@ angular.module('wasdi.ImageEditorDirective', [])
                 applyEditorPreviewImage:'&',
                 maskManager: '&',
                 filterManager: '&',
+                onEditBtnClick : '&onEditClick',
                 panScaling: '=',
                 heightCanvas: '=',
                 widthCanvas: '='
@@ -22,6 +23,17 @@ angular.module('wasdi.ImageEditorDirective', [])
                 // * Function binding ('&' or '&?') *
             },
             link: function(scope, elem, attrs) {
+
+                // var e = elem;
+                // var _this = this;
+                // elem.ready(function () {
+                //     debugger;
+                //     console.debug(e);
+                //     console.debug(_this);
+                //     console.debug(scope);
+                //     heie[0].parentElement.clientWidth
+                // })
+
                 var iDefaultValueZoom = 100;
                 // var dimension = utilsProjectGetMapContainerSize();
                 //default value canvas
@@ -168,6 +180,10 @@ angular.module('wasdi.ImageEditorDirective', [])
 
                     scope.clickOnGetDefaultImage();
                 };
+
+                scope.clickOnEdit = function(){
+                    scope.onEditBtnClick();
+                }
 
                 scope.clickOnMask = function () {
                     scope.maskManager();

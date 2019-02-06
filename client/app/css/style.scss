@@ -1,12 +1,16 @@
 //bootstrap
-@import "bootstrap-4/customized_bootstrap_v4";
-//@import "../bower_components/bootstrap-sass/assets/stylesheets/bootstrap";
+@import "../bower_components/bootstrap-sass/assets/stylesheets/bootstrap";
 
-$screen-lg: map-get($grid-breakpoints, "lg");
+//$screen-lg: map-get($grid-breakpoints, "lg");
 
+@import "variables";
 @import "functions";
 @import "main_theme";
 
+//utilities
+@import "utilities";
+
+@import "header";
 @import "login";
 @import "root";
 @import "editor";
@@ -15,9 +19,9 @@ $screen-lg: map-get($grid-breakpoints, "lg");
 @import "search_orbit";
 @import "catalog";
 @import "validatenewuser";
+@import "status-bar";
 
-//utilities
-@import "utilities";
+
 
 //directive css
 @import "../directives/tree_directive/tree";
@@ -70,10 +74,19 @@ $screen-lg: map-get($grid-breakpoints, "lg");
 @import "../dialogs/edit_user/edit_user";
 @import "../dialogs/ftp_service/ftp_service";
 @import "../dialogs/list_flood_area_detection/list_flood_area_detection";
+@import "../dialogs/JRC_processor/jrc_processor";
+@import "../dialogs/image_editor/image-editor.component";
+
+@import "buttons";
 
 //COMPONENTS
 @import "components/range_slider";
 @import "components/toggle_switch";
+
+
+@import "bootstrap_v4_fix";
+
+
 body {
     font-family: $wasdi-font-web;
     font-size: $wasdi-font-size;
@@ -127,6 +140,144 @@ h4 {
     font-weight: $wasdi-font-weight;
 }
 
+
+// Remove outline 'border' from buttons, inputs, etc
+@include removeOutlineFor("*");
+
+
+//----------------------------------------------------
+// Base layout settings
+.content-wrapper{
+
+    height: calc(100vh - #{$size-header-height-total + 10px});
+    &.has-processes-bar{
+        height: calc(100vh - #{$size-header-height-total + $size-status-bar-height-closed});
+    }
+
+    overflow: hidden;
+    padding-bottom: $size-content-wrapper-padding-bottom;
+    position: relative;
+
+    // Temp fix untill all 'content-wrapper' direct child '.container-fluid' classes has been removed
+    & > .container-fluid{
+        &:before{
+            content: "Remove '.container-fluid' class";
+        }
+        background-color: red;
+    }
+
+    & > div{
+        height: 100%;
+        position: relative;
+    }
+
+    .toolbar{
+        height: $size-toolbar-height-total;
+        position: relative;
+        z-index: $z-index-top-toolbar;
+        //background-color: #0a6aa1; //debug
+
+        & > div {
+            $size-margin-top: 6px;
+            margin-top: $size-margin-top;
+            height: calc(100% - #{$size-margin-top});
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        input[type=text]{
+            //padding: 0px;
+            margin: 0px !important;
+            height: 100%;
+        }
+
+        .btn-wasdi{
+            padding-top: 10px;
+            padding-bottom: 10px;
+            margin: 0px;
+        }
+    }
+
+    .spacer{
+        height: $size-content-spacer;
+        //background-color: red;  //debug
+    }
+
+    .full-width-content{
+        position: relative;
+        height: $size-full-width-content-height;
+        overflow-y: auto;
+        overflow-x: hidden;
+        //background-color: lightseagreen;  //debug
+
+        & > div{
+            height: 100%;
+            position: relative;
+            margin-top: 0px !important; // force to 0 margin and padding (TODO: remove the 10px margin from other SCSS)
+        }
+    }
+}
+
+.map-column{
+    //padding-left: 0;
+    //padding-right: 0;
+
+    .map-container{
+        height: 100%;
+    }
+}
+
+.panel-body{
+    &.auto-parent-height{
+        height: $size-panel-body-height-with-single-row-heading !important;
+    }
+}
+
+
+.card{
+    border-color: $wasdi-blue-logo;
+
+    .card-header{
+        background-color: $wasdi-blue-logo;
+        color: whitesmoke;
+    }
+}
+
+//----------------------------------------------------
+
+
+//----------------------------------------------------
+// Inputs
+.wasdi-input{
+    border-color: $wasdi-blue-logo;
+    //border-color: $wasdi-blue-logo-complementary-3;
+    padding: 12px 20px;
+    box-sizing: border-box;
+    background-color: white;
+    margin: 0px;
+}
+//----------------------------------------------------
+
+
+// In tabs with icons and text set fixed space between icon and text
+.nav-v4-tabs {
+    .nav-v4-link {
+        .fa{
+            margin-right: 8px;
+        }
+    }
+}
+
+
+.vakata-context{
+    z-index: $z-index-context-menu-right-click;
+}
+
+
+
+
+
 //HEADLINE - TITLE
 .my-title {
     //font-family: times, Times New Roman, times-roman, georgia, serif;
@@ -146,7 +297,7 @@ h4 {
 
 //INPUT TEXT
 .my-input-text {
-    input[type=text], [type=password] {
+    &, input[type=text], [type=password] {
         width: 100%;
         padding: 12px 20px;
         margin: 8px 0;
@@ -245,16 +396,18 @@ h4 {
     font-size: 16px;
     margin: 4px 2px;
     cursor: pointer;
-}
 
-.my-button:hover {
-    background-color: $wasdi-button-over-color;
-    color: white;
-}
+    &:hover {
+        &:not([disabled]) {
+            background-color: $wasdi-button-over-color;
+            color: white;
+        }
+    }
 
-.my-button:disabled {
-    opacity: 0.65;
-    cursor: not-allowed;
+    &:disabled {
+        opacity: 0.65 !important;
+        cursor: not-allowed !important;
+    }
 }
 
 // ICON OVER
@@ -732,33 +885,33 @@ h4 {
 
 }
 
-/* Add some of new Bootstrap 4 feature without needs to include it
- * due to some incompatibilities with old version
- */
-
-.row-v4 {
-    display: -webkit-box;
-    display: -ms-flexbox;
-    display: flex;
-    -ms-flex-wrap: wrap;
-    flex-wrap: wrap;
-    margin-right: -15px;
-    margin-left: -15px;
-
-    .col {
-        -ms-flex-preferred-size: 0;
-        flex-basis: 0;
-        -webkit-box-flex: 1;
-        -ms-flex-positive: 1;
-        flex-grow: 1;
-        max-width: 100%;
-        position: relative;
-        width: 100%;
-        min-height: 1px;
-        padding-right: 15px;
-        padding-left: 15px;
-    }
-}
+///* Add some of new Bootstrap 4 feature without needs to include it
+// * due to some incompatibilities with old version
+// */
+//
+//.row-v4 {
+//    display: -webkit-box;
+//    display: -ms-flexbox;
+//    display: flex;
+//    -ms-flex-wrap: wrap;
+//    flex-wrap: wrap;
+//    margin-right: -15px;
+//    margin-left: -15px;
+//
+//    .col {
+//        -ms-flex-preferred-size: 0;
+//        flex-basis: 0;
+//        -webkit-box-flex: 1;
+//        -ms-flex-positive: 1;
+//        flex-grow: 1;
+//        max-width: 100%;
+//        position: relative;
+//        width: 100%;
+//        min-height: 1px;
+//        padding-right: 15px;
+//        padding-left: 15px;
+//    }
+//}
 
 %form-css {
     //CENTER VERTICALLY and HORIZONTALLY
@@ -899,4 +1052,11 @@ h4 {
     height: 47px;
     border-bottom: 1px solid black;
     position: absolute;
+}
+
+.logo-container-partner{
+    width: auto;
+    height: 100px;
+    cursor: pointer;
+    background-color: rgba(16, 32, 48, 0.75);
 }

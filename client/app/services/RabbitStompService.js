@@ -1,14 +1,15 @@
 /**
  * Created by a.corrado on 23/01/2017.
  */
-'use strict';
 
-var ConnectionState;
-(function (ConnectionState) {
-    ConnectionState[ConnectionState["Init"] = 0] = "Init";
-    ConnectionState[ConnectionState["Connected"] = 1] = "Connected";
-    ConnectionState[ConnectionState["Lost"] = 2] = "Lost";
-})(ConnectionState || (ConnectionState = {}));
+
+//'use strict';
+// var ConnectionState;
+// (function (ConnectionState) {
+//     ConnectionState[ConnectionState["Init"] = 0] = "Init";
+//     ConnectionState[ConnectionState["Connected"] = 1] = "Connected";
+//     ConnectionState[ConnectionState["Lost"] = 2] = "Lost";
+// })(ConnectionState || (ConnectionState = {}));
 
 angular.module('wasdi.RabbitStompService', ['wasdi.RabbitStompService']).service('RabbitStompService',
     ['$http', 'ConstantsService', '$interval', 'ProcessesLaunchedService', '$q', '$rootScope',
@@ -50,7 +51,7 @@ angular.module('wasdi.RabbitStompService', ['wasdi.RabbitStompService']).service
             this.m_oActiveController = null;
 
             this.m_sWorkspaceId = "";
-            this.m_iConnectionState = ConnectionState.Init;
+            this.m_iConnectionState = RabbitConnectionState.Init;
 
             // Use defer/promise to keep trace when service is ready to
             // perform any operation
@@ -78,11 +79,9 @@ angular.module('wasdi.RabbitStompService', ['wasdi.RabbitStompService']).service
 
             this.notifyConnectionStateChange = function(connectionState)
             {
-                this.m_iConnectionState = connectionState;
-                var params = {
-                    connectionState : this.m_iConnectionState
-                }
-                $rootScope.$broadcast('rabbitConnectionStateChanged', params);
+                 this.m_iConnectionState = connectionState;
+                var msgHlp = MessageHelper.getInstance($rootScope);
+                msgHlp.notifyRabbitConnectionStateChange(connectionState);
             }
 
             this.isReadyState = function () {
@@ -197,7 +196,7 @@ angular.module('wasdi.RabbitStompService', ['wasdi.RabbitStompService']).service
                 var on_connect = function () {
                     console.log('RabbitStompService: Web Stomp connected');
 
-                    _this.notifyConnectionStateChange(ConnectionState.Connected);
+                    _this.notifyConnectionStateChange(RabbitConnectionState.Connected);
                     _this.m_oRabbitReconnectAttemptCount = 0;
 
                     //CHECK IF the session is valid
@@ -237,7 +236,7 @@ angular.module('wasdi.RabbitStompService', ['wasdi.RabbitStompService']).service
                     {
                         console.log('RabbitStompService: Web Socket Connection Lost');
 
-                        _this.notifyConnectionStateChange(ConnectionState.Lost);
+                        _this.notifyConnectionStateChange(RabbitConnectionState.Lost);
 
                         if (_this.m_oReconnectTimerPromise == null)
                         {
