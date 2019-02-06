@@ -153,7 +153,8 @@ function utilsProjectShowRabbitMessageUserFeedBack(oMessage) {
     switch(sMessageCode)
     {
         case "DOWNLOAD":
-            sUserMessage = "FILE NOW AVAILABLE ON WASDI SERVER<br>READY";
+            //sUserMessage = "FILE NOW AVAILABLE ON WASDI SERVER<br>READY";
+            sUserMessage = "PRODUCT ADDED TO THE WORKSPACE<br>READY";
             break;
         case "PUBLISH":
             sUserMessage = "PUBLISH DONE<br>READY";

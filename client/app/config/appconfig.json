@@ -136,7 +136,8 @@
                 },
                 {
                     "indexname": "relativeorbitnumber",
-                    "indexlabel": "Relative Orbit Number (from 1 to 175)",
+                    "indexlabel": "Relative Orbit Number",
+                    "indexhint" : "(from 1 to 175)",
                     "indexvalues": "",
                     "regex": "[1-9]|[1-9][0-9]|[1-9][0-7][0-5]"
 
@@ -170,7 +171,8 @@
                 },
                 {
                     "indexname": "cloudcoverpercentage",
-                    "indexlabel": "Cloud Coverage(%)(e.g.[0 TO 9.4])",
+                    "indexlabel": "Cloud Coverage (%)",
+                    "indexhint" : "e.g. [0 TO 9.4]",
                     "indexvalues":"",
                     "indexmin":"0",
                     "indexmax":"100",
@@ -216,7 +218,8 @@
                 },
                 {
                     "indexname": "relativeorbitstart ",
-                    "indexlabel": "CRelative Orbit Start [1-385]",
+                    "indexlabel": "CRelative Orbit Start",
+                        "indexhint" : "e.g. [1-385]",
                     "indexvalues":"",
                     "indexmin":"1",
                     "indexmax":"385",
@@ -244,7 +247,8 @@
                 },
                 {
                     "indexname": "cloudcoverpercentage",
-                    "indexlabel": "Cloud Coverage(%)(e.g.[0 TO 9.4])",
+                    "indexlabel": "Cloud Coverage (%)",
+                    "indexhint" : "e.g. [0 TO 9.4]",
                     "indexvalues":"",
                     "indexmin":"0",
                     "indexmax":"100",
@@ -252,7 +256,8 @@
                 },
                 {
                     "indexname": "snowcoverpercentage",
-                    "indexlabel": "Snow Coverage(%)(e.g.[0 TO 9.4])",
+                    "indexlabel": "Snow Coverage (%)",
+                    "indexhint" : "e.g. [0 TO 9.4]",
                     "indexvalues":"",
                     "indexmin":"0",
                     "indexmax":"100",
@@ -327,7 +332,8 @@
                 },
                 {
                     "indexname": "cloudCoverPercentage",
-                    "indexlabel": "Cloud Coverage(%)(e.g.[0 TO 9.4])",
+                    "indexlabel": "Cloud Coverage (%)",
+                    "indexhint" : "e.g. [0 TO 9.4]",
                     "indexvalues":"",
                     "indexmin":"0",
                     "indexmax":"100",

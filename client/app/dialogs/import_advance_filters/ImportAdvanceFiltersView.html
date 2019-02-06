@@ -13,40 +13,41 @@
                 <!--<h4>-->
 
                 <!--</h4>-->
-                <div class="advance-search col-xs-12 col-sm-12 col-md-12 col-lg-12">
-                    <div class="row">
-                        <form >
-                            <fieldset>
-                                <legend>{{"DIALOG_CRONOTAB_CRONOTAB_BOX"|translate}}</legend>
+                <div class="advance-search">
+                    <div class="row-v4">
+                        <div class="col-v4-12">
+                            <form >
+                                <fieldset>
+                                    <legend>{{"DIALOG_CRONOTAB_CRONOTAB_BOX"|translate}}</legend>
 
-                                <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
-                                    <multiselect options="m_oController.m_oAdvanceFilterOptions.listOfYears"  selected="m_oController.m_oAdvanceFilterOptions.selectedYears"></multiselect>
-                                </div>
-                                <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
-                                    <multiselect options="m_oController.m_oAdvanceFilterOptions.listOfSeasons"  selected="m_oController.m_oAdvanceFilterOptions.selectedSeasons"></multiselect>
-                                </div>
+                                    <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
+                                        <multiselect options="m_oController.m_oAdvanceFilterOptions.listOfYears"  selected="m_oController.m_oAdvanceFilterOptions.selectedYears"></multiselect>
+                                    </div>
+                                    <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
+                                        <multiselect options="m_oController.m_oAdvanceFilterOptions.listOfSeasons"  selected="m_oController.m_oAdvanceFilterOptions.selectedSeasons"></multiselect>
+                                    </div>
 
-                                <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
-                                    <multiselect options="m_oController.m_oAdvanceFilterOptions.listOfMonths" selected="m_oController.m_oAdvanceFilterOptions.selectedMonths"></multiselect>
-                                </div>
-                                <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
-                                    <multiselect options="m_oController.m_oAdvanceFilterOptions.listOfDays"  selected="m_oController.m_oAdvanceFilterOptions.selectedDays"></multiselect>
-                                </div>
+                                    <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
+                                        <multiselect options="m_oController.m_oAdvanceFilterOptions.listOfMonths" selected="m_oController.m_oAdvanceFilterOptions.selectedMonths"></multiselect>
+                                    </div>
+                                    <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
+                                        <multiselect options="m_oController.m_oAdvanceFilterOptions.listOfDays"  selected="m_oController.m_oAdvanceFilterOptions.selectedDays"></multiselect>
+                                    </div>
 
-                            </fieldset>
-                        </form>
-
-
+                                </fieldset>
+                            </form>
+                        </div>
                     </div>
 
-                    <div class="row edit-filters-buttons">
+
+                    <div class="row-v4 mt-3 edit-filters-buttons">
                         <!--<div class= "col-xs-7 col-sm-7 col-md-7 col-lg-7 col-xs-offset-5 col-sm-offset-5 col-md-offset-5 col-lg-offset-5" >-->
-                        <div class= "col-xs-3 col-sm-3 col-md-3 col-lg-3 col-xs-offset-9 col-sm-offset-9 col-md-offset-9 col-lg-offset-9" >
-                            <span class="my-button" ng-click="m_oController.addFiltersData()">
+                        <div class= "col-v4-auto ml-auto">
+                            <span class="btn btn-primary btn-wasdi" ng-click="m_oController.addFiltersData()">
                                 <i class="fa fa-floppy-o" aria-hidden="true"></i>
                                 {{"DIALOG_CRONOTAB_ADD_BUTTON"|translate}}
                             </span>
-                            <span class="my-button" ng-click="m_oController.removeSavedData()">
+                            <span class="btn btn-primary btn-wasdi" ng-click="m_oController.removeSavedData()">
                                 <i class="fa fa-trash" aria-hidden="true"></i>
                                 {{"DIALOG_CRONOTAB_CLEAR_BUTTON"|translate}}
                             </span>
@@ -54,20 +55,20 @@
 
                     </div>
 
-                    <div  class="row" ng-show="m_oController.m_oAdvanceFilterOptions.savedData.length > 0"><!--class="row well well-sm"-->
-                        <form >
-                            <fieldset>
-                                <legend>{{"DIALOG_CRONOTAB_FILTERS_BOX"|translate}}</legend>
-                                <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
-                                    <div class="chip" ng-repeat="data in m_oController.m_oAdvanceFilterOptions.savedData">
-                                        {{data.name}}
-                                        <span class="closebtn" ng-click="m_oController.removeSaveDataChips(data) ">&times;</span> <!--this.parentElement.style.display='none';-->
+                    <div  class="row-v4" ng-show="m_oController.m_oAdvanceFilterOptions.savedData.length > 0"><!--class="row well well-sm"-->
+                        <div class="col-v4-12">
+                            <form >
+                                <fieldset>
+                                    <legend>{{"DIALOG_CRONOTAB_FILTERS_BOX"|translate}}</legend>
+                                    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                                        <div class="chip" ng-repeat="data in m_oController.m_oAdvanceFilterOptions.savedData">
+                                            {{data.name}}
+                                            <span class="closebtn" ng-click="m_oController.removeSaveDataChips(data) ">&times;</span> <!--this.parentElement.style.display='none';-->
+                                        </div>
                                     </div>
-                                </div>
-                            </fieldset>
-                        </form>
-
-
+                                </fieldset>
+                            </form>
+                        </div>
                     </div>
 
                 </div>
