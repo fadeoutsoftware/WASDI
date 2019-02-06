@@ -12,8 +12,9 @@ var JRCProcessorController = (function() {
         this.m_aoProduct = this.m_oExtras.products;
         this.m_sFileName = "";
         this.m_oSelectedReferenceProduct = this.m_aoProduct[0];
-        this.m_sEPSG="";
-        this.m_sOutputFile="";
+        this.m_sEPSG="3857";
+        this.m_sOutputFile="test_output";
+        this.m_sPreprocess="SentinelToGeoTiff";
         // this.m_asSelectedProducts = [];
         // this.m_asProductsName = utilsProjectGetProductsName(this.m_aoProduct);
 
@@ -29,16 +30,18 @@ var JRCProcessorController = (function() {
     };
 
     JRCProcessorController.prototype.redirectToWebSite = function(){
-        this.m_oWindow.open('http://www.mydewetra.org', '_blank');
+        this.m_oWindow.open('https://ec.europa.eu/jrc/en', '_blank');
     };
 
     JRCProcessorController.prototype.runJrcProcessor = function()
     {
         var oJRCJson = {
-            inputFile: this.m_oSelectedReferenceProduct.fileName,
+            inputFileName: this.m_oSelectedReferenceProduct.fileName,
             epsg:this.m_sEPSG,
-            outputFile:this.m_sOutputFile,
+            outputFileName:this.m_sOutputFile,
+            preprocess:this.m_sPreprocess
         };
+
         var oActiveWorkspace = this.m_oConstantsService.getActiveWorkspace();
 
         this.m_oSnapOperationService.runJRCProcessor(oJRCJson,oActiveWorkspace.workspaceId)
