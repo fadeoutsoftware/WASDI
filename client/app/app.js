@@ -215,6 +215,8 @@ wasdiApp.controller("FTPController", FTPController);
 wasdiApp.controller("ListFloodAreaDetectionController", ListFloodAreaDetectionController);
 wasdiApp.controller("JRCProcessorController", JRCProcessorController);
 
+wasdiApp.controller(ImageEditorController.REG_NAME, ImageEditorController);
+
 
 wasdiApp.run(["$rootScope", "$state", "AuthService", function($rootScope, $state, AuthService){
 
