@@ -18,32 +18,37 @@
   <link rel="stylesheet" href="fonts/astronaut/stylesheet.css">
   <link rel="stylesheet" href="fonts/starlight/stylesheet.css">
 
-  <!--Bootstrap css-->
-  <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.min.css">
-  <!--<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.3/css/bootstrap.min.css" />-->
+
+
+
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="bower_components/fontawesome/css/font-awesome.min.css">
+    <!-- jQuery -->
+    <script src="//code.jquery.com/jquery-1.11.0.min.js"></script>
+    <script src="//code.jquery.com/ui/1.11.4/jquery-ui.min.js"></script>
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.11.1/themes/start/jquery-ui.css">
+    <!-- js tree css-->
+    <link rel="stylesheet" href="bower_components/jstree/dist/themes/default/style.min.css">
+    <!--Cesium css-->
+    <link rel="stylesheet" href="lib/Cesium/Widgets/widgets.css">
+    <!--Geocoder-->
+    <link rel="stylesheet" href="bower_components/leaflet-control-geocoder/Control.Geocoder.css">
+    <!-- Color picker-->
+    <link rel="stylesheet" type="text/css" href="bower_components/angular-colorpicker-directive/css/color-picker.min.css" />
+    <!-- wps-js-dev -->
+    <!--link rel="shortcut icon" href="lib/wps-js-dev/dist/favicon.ico"/-->
+
+    <!--Bootstrap-->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.0/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.0/css/bootstrap.min.css" />
+    <!--<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.2.1/js/bootstrap.min.js"></script>-->
+    <!--<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.2.1/css/bootstrap.min.css" />-->
 
   <!-- CSS -->
+  <link rel="stylesheet" href="css/bootstrap-4/customized_bootstrap_v4.css">
   <link rel="stylesheet" href="css/style.css">
-  <!-- FontAwesome -->
-  <link rel="stylesheet" href="bower_components/fontawesome/css/font-awesome.min.css">
-  <!-- jQuery -->
-  <link rel="stylesheet" href="//code.jquery.com/ui/1.11.1/themes/start/jquery-ui.css">
-  <!-- js tree css-->
-  <link rel="stylesheet" href="bower_components/jstree/dist/themes/default/style.min.css">
-  <!--Cesium css-->
-  <link rel="stylesheet" href="lib/Cesium/Widgets/widgets.css">
-  <!--Geocoder-->
-  <link rel="stylesheet" href="bower_components/leaflet-control-geocoder/Control.Geocoder.css">
-  <!-- Color picker-->
-  <link rel="stylesheet" type="text/css" href="bower_components/angular-colorpicker-directive/css/color-picker.min.css" />
-  <!-- wps-js-dev -->
-  <!--link rel="shortcut icon" href="lib/wps-js-dev/dist/favicon.ico"/-->
 
 
-
-
-  <!--script src="lib/jquery/jquery-1.10.2.js"></script-->
-  <script src="//code.jquery.com/jquery-1.11.0.min.js"></script>
 
   <!-- Google Maps Scripts -->
   <script src="http://maps.google.com/maps/api/js?v=3&amp;sensor=false"></script>
@@ -51,9 +56,12 @@
   <!--ASK GOOGLE API KEY -->
   <!--<script src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY" async defer></script>-->
 
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.0.1/dist/leaflet.css" />
-  <script src="https://unpkg.com/leaflet@1.0.1/dist/leaflet.js"></script>
-  <script src="https://unpkg.com/leaflet@1.0.1/dist/leaflet.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.11/lodash.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.0.1/leaflet.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.0.1/leaflet.css" />
+  <!--<link rel="stylesheet" href="https://unpkg.com/leaflet@1.0.1/dist/leaflet.css" />-->
+  <!--<script src="https://unpkg.com/leaflet@1.0.1/dist/leaflet.js"></script>-->
   <script src='https://unpkg.com/leaflet.gridlayer.googlemutant@latest/Leaflet.GoogleMutant.js'></script>
 
   <script src="http://code.createjs.com/createjs-2014.12.12.min.js"></script>
@@ -101,11 +109,23 @@
   <script src="//ajax.googleapis.com/ajax/libs/angularjs/x.x.x/angular.min.js"></script>
   -->
 
-  <script src="bower_components/angular/angular.js"></script>
-  <script src="bower_components/angular-route/angular-route.js"></script>
+  <!-- Test new angular -->
+  <!--<script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.6.2/angular.js"></script>-->
+  <!--<script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.6.2/angular-route.min.js"></script>-->
+  <!--<script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.6.2/angular-animate.min.js"></script>-->
+  <!--<script src="https://cdnjs.cloudflare.com/ajax/libs/angular-ui-router/0.4.2/angular-ui-router.min.js"></script>-->
+
+  <!-- Original angular -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.5.11/angular.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.5.11/angular-route.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.5.11/angular-animate.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/angular-ui-router/0.2.8/angular-ui-router.min.js"></script>
+  <!--<script src="bower_components/angular/angular.js"></script>-->
+  <!--<script src="bower_components/angular-route/angular-route.js"></script>-->
   <script src="bower_components/angular-translate/angular-translate.min.js"></script>
   <script src="bower_components/angular-translate-loader-static-files/angular-translate-loader-static-files.min.js"></script>
-  <script src="bower_components/angular-ui-router/release/angular-ui-router.min.js"></script>
+  <!--<script src="bower_components/angular-ui-router/release/angular-ui-router.min.js"></script>-->
+
   <script src="bower_components/angular-bootstrap/ui-bootstrap-tpls.js"></script>
   <script src="bower_components/moment/moment.js"></script>
   <!--<script src="bower_components/leaflet.wms/dist/leaflet.wms.js"></script>  &lt;!&ndash; LEAFLET.WMS&ndash;&gt;-->
@@ -117,7 +137,7 @@
   <!-- angular-bootstrap-multiselect -->
   <!--<script src="bower_components/angular-bootstrap-multiselect/dist/angular-bootstrap-multiselect.min.js"></script>-->
   <!--<script src="bower_components/angular-bootstrap-multiselect/dist/angular-bootstrap-multiselect-templates.js"></script>-->
-  <script src="bower_components/angular-animate/angular-animate.min.js"></script>
+  <!--<script src="bower_components/angular-animate/angular-animate.min.js"></script>-->
   <script src="bower_components/angular-colorpicker-directive/js/color-picker.min.js"></script>
 
   <!--Datetime picker-->
@@ -127,6 +147,11 @@
 
   <!-- Wasdi secret -->
   <script src="secrets.js"></script>
+
+  <!-- Wasdi models/classes -->
+  <script src="models/RabbitConnectionState.js"></script>
+  <script src="models/TabType.js"></script>
+  <script src="models/MessageHelper.js"></script>
 
   <!-- Wasdi Services -->
   <script src="services/ConstantsService.js"></script>
@@ -218,6 +243,8 @@
   <script src="dialogs/edit_user/EditUserController.js"></script>
   <script src="dialogs/ftp_service/FTPController.js"></script>
   <script src="dialogs/list_flood_area_detection/ListFloodAreaDetectionController.js"></script>
+  <script src="dialogs/image_editor/image-editor.component.js"></script>
+  <script src="dialogs/JRC_processor/JRCProcessorController.js"></script>
   <!--APP JS-->
   <script src="app.js"></script>
 
@@ -245,9 +272,6 @@
   <script src="bower_components/jstree/src/jstree.contextmenu.js"></script>
   <!-- cesium -->
   <script src="lib/Cesium/Cesium.js"></script>
-  <!--  bootstrap js-->
-  <!--<script src="bower_components/bootstrap-sass/assets/javascripts/bootstrap.min.js"></script>-->
-  <script src="bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
 
 
   <!--VEX DIALOG-->
@@ -343,7 +367,7 @@
 
   <!-- WPS -->
   <!--<script src="lib/wps-js/js/jquery/jquery-ui.1.8.3.min.js"></script>-->
-  <script src="//code.jquery.com/ui/1.11.4/jquery-ui.min.js"></script>
+  <!--<script src="//code.jquery.com/ui/1.11.4/jquery-ui.min.js"></script>-->
   <script src="lib/wps-js/js/openlayers/OpenLayers-closure.js"></script>
   <script src="lib/wps-js/js/wps-js/wps-js.0.1.1.js"></script>
   <link type="text/css" rel="stylesheet" href="lib/wps-js/css/wps-js.css">

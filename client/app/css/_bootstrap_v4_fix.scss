@@ -1,0 +1,13 @@
+// Fix boostrap 4 tabs header padding due to v4 use 16px as default text size instead of 14px
+.nav-v4-tabs{
+    .nav-v4-link{
+        font-size: 16px;
+        padding: 8px 16px;
+    }
+}
+
+.nav-v4-link{
+    &:hover{
+        cursor: pointer;
+    }
+}

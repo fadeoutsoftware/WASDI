@@ -657,14 +657,16 @@ service('MapService', ['$http','$rootScope', 'ConstantsService', function ($http
 
     /**
      * This method works only for s1 products
-     * @param boundingBox
-     * @param geoserverBoundindBox
+     * @param boundingBox The bounding box declared by product
+     * @param geoserverBoundindBox The bounding box declared by the Geo Server when a band has been published
      * @returns {boolean}
      */
     this.isProductGeoreferenced = function(boundingBox, geoserverBoundindBox)
     {
         if( ( utilsIsObjectNullOrUndefined(boundingBox) === true ) || ( utilsIsObjectNullOrUndefined(geoserverBoundindBox) === true) )
         {
+            if(utilsIsObjectNullOrUndefined(boundingBox) === true){ console.debug("Product bounding box is null"); }
+            else if(utilsIsObjectNullOrUndefined(geoserverBoundindBox) === true){ console.debug("Geoserver bounding box is null"); }
             return false;
         }
         var oGeoserverBoundingBox = this.parseGeoserverBoundingBox(geoserverBoundindBox);
