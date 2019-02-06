@@ -54,6 +54,9 @@ public class Utils {
         return  true;
     }
 
+    //FIXME it does not work as expected in the following case:
+    //the filename contains one or more dots ('.'):
+    //  /home/username/my.lovely.file.name.zip
     public static String GetFileNameWithoutExtension(String sInputFile) {
         String sReturn = "";
         File oFile = new File(sInputFile);
