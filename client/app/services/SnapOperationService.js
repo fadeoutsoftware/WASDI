@@ -53,14 +53,14 @@ service('SnapOperationService', ['$http',  'ConstantsService', function ($http, 
         return this.m_oHttp.post(this.APIURL + '/processing/graph_id?workspace=' + sWorkspaceInput,oSnapWorkflowViewModel);
     };
 
-    this.uploadGraph = function(sWorkspaceInput,sName,sDescription,oBody)
+    this.uploadGraph = function(sWorkspaceInput,sName,sDescription,oBody,bIsPublic)
     {
         var oOptions = {
             transformRequest: angular.identity,
             headers: {'Content-Type': undefined}
         };
         return this.m_oHttp.post(this.APIURL + '/processing/uploadgraph?workspace=' + sWorkspaceInput + "&name=" + sName +
-                                    "&description=" + sDescription ,oBody ,oOptions);
+                                    "&description=" + sDescription + "&public=" + bIsPublic,oBody ,oOptions);
     };
 
     this.deleteWorkflow = function(sWorkflowId)
@@ -109,5 +109,11 @@ service('SnapOperationService', ['$http',  'ConstantsService', function ($http, 
     this.runListFlood = function (oListFlood,sWorkspaceId) {
         return this.m_oHttp.post(this.APIURL + '/processing/asynchlistflood?workspaceId='+sWorkspaceId ,oListFlood);
     };
+
+    this.runJRCProcessor = function (oJRC,sWorkspaceId) {
+        return this.m_oHttp.post(this.APIURL + '/processing/asynchjrctest?workspaceId='+sWorkspaceId ,oJRC);
+    };
+
+
 }]);
 

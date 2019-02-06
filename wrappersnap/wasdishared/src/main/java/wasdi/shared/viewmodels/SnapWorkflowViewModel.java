@@ -7,7 +7,8 @@ public class SnapWorkflowViewModel {
 	private String name;
 	private String description;
 	private boolean isPublic;
-	
+	private String userId;
+
 	private ArrayList<String> inputNodeNames = new ArrayList<>();
 	private ArrayList<String> inputFileNames = new ArrayList<>();
 	
@@ -64,4 +65,10 @@ public class SnapWorkflowViewModel {
 		this.isPublic = isPublic;
 	}
 
+	public String getUserId() {
+		return userId;
+	}
+	public void setUserId(String userId) {
+		this.userId = userId;
+	}
 }
