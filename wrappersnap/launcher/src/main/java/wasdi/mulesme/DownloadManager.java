@@ -94,7 +94,7 @@ public class DownloadManager {
 				.replaceAll("__PRODUCTTYPE__", productType);
 		//TODO read from config file
 		String sDownloadProtocol = "";
-		QueryExecutor executor = QueryExecutor.newInstance(providerName, providerUser, providerPassword, "0", queryLimit, querySortedBy, queryOrder, sDownloadProtocol, true);
+		QueryExecutor executor = QueryExecutor.newInstance(providerName, providerUser, providerPassword, "0", queryLimit, querySortedBy, queryOrder, sDownloadProtocol, "true");
 		//replaced by the next one
 		//DownloadFile oDownloadFile = DownloadFile.getDownloadFile("SENTINEL");
 		ProviderAdapter oProviderAdapter = new ProviderAdapterSupplier().supplyProviderAdapter("SENTINEL");
