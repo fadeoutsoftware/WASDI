@@ -509,6 +509,27 @@ function utilsMakeFile(sText,textFile,sType){
     return textFile;
 };
 
+function utilsSaveFile(sUrl,sFilename)
+{
+    if(utilsIsObjectNullOrUndefined(sUrl) === true )
+    {
+        return false;
+    }
+    if( (utilsIsObjectNullOrUndefined(sFilename) === true) || (utilsIsStrNullOrEmpty(sFilename) === true))
+    {
+        sFilename = "default"
+    }
+    var a = document.createElement("a");
+    document.body.appendChild(a);
+    a.style = "display: none";
+    a.href = sUrl;
+    a.download = sFilename;
+    a.click();
+    window.URL.revokeObjectURL(sUrl);
+
+    return true;
+};
+
 function utilsUserUseIEBrowser()
 {
     var ua = window.navigator.userAgent;

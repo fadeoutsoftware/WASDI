@@ -28,60 +28,41 @@ service('MapService', ['$http','$rootScope', 'ConstantsService', function ($http
             // this option disables loading tiles outside of the world bounds.
             noWrap: true
         });
-        this.m_oOSMMapquest = L.tileLayer('http://otile{s}.mqcdn.com/tiles/1.0.0/osm/{z}/{x}/{y}.png', {
-            subdomains: "12",
-            attribution:
-                '&copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors. Tiles courtesy of <a href="http://www.mapquest.com/" target="_blank">MapQuest</a> <img src="https://developer.mapquest.com/content/osm/mq_logo.png">',
-            maxZoom: 18,
-            // this map option disables world wrapping. by default, it is false.
-            continuousWorld: false,
-            // this option disables loading tiles outside of the world bounds.
-            noWrap: true
-        });
-        this.m_oOSMHumanitarian = L.tileLayer('http://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', {
-            attribution:
-                '&copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors. Tiles courtesy of <a href="http://hot.openstreetmap.org/" target="_blank">Humanitarian OpenStreetMap Team</a>',
-            maxZoom: 18,
-            // this map option disables world wrapping. by default, it is false.
-            continuousWorld: false,
-            // this option disables loading tiles outside of the world bounds.
-            noWrap: true
-        });
-        this.m_oOCMCycle = L.tileLayer('http://{s}.tile.opencyclemap.org/cycle/{z}/{x}/{y}.png', {
-            attribution:
-                '&copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors. Tiles courtesy of <a href="http://www.thunderforest.com/" target="_blank">Andy Allan</a>',
-            maxZoom: 18,
-            // this map option disables world wrapping. by default, it is false.
-            continuousWorld: false,
-            // this option disables loading tiles outside of the world bounds.
-            noWrap: true
-        });
-        this.m_oOCMTransport = L.tileLayer('http://{s}.tile2.opencyclemap.org/transport/{z}/{x}/{y}.png', {
-            attribution:
-                '&copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors. Tiles courtesy of <a href="http://www.thunderforest.com/" target="_blank">Andy Allan</a>',
-            maxZoom: 18,
-            // this map option disables world wrapping. by default, it is false.
-            continuousWorld: false,
-            // this option disables loading tiles outside of the world bounds.
-            noWrap: true
+
+        this.m_oOpenTopoMap = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
+            maxZoom: 17,
+            attribution: 'Map data: &copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>, <a href="http://viewfinderpanoramas.org">SRTM</a> | Map style: &copy; <a href="https://opentopomap.org">OpenTopoMap</a> (<a href="https://creativecommons.org/licenses/by-sa/3.0/">CC-BY-SA</a>)'
         });
 
-        this.m_oGoogleSatelite = L.tileLayer('http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}',{
-            maxZoom: 18,
-            subdomains:['mt0','mt1','mt2','mt3'],
-            // this map option disables world wrapping. by default, it is false.
-            continuousWorld: false,
-            // this option disables loading tiles outside of the world bounds.
-            noWrap: true
+        // this.m_oThunderforestSpinalMap =  L.tileLayer('https://{s}.tile.thunderforest.com/spinal-map/{z}/{x}/{y}.png?apikey={apikey}', {
+        //     attribution: '&copy; <a href="http://www.thunderforest.com/">Thunderforest</a>, &copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+        //     apikey: '<your apikey>',
+        //     maxZoom: 22
+        // });
+        this.m_oEsriWorldStreetMap = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
+            attribution: 'Tiles &copy; Esri &mdash; Source: Esri, DeLorme, NAVTEQ, USGS, Intermap, iPC, NRCAN, Esri Japan, METI, Esri China (Hong Kong), Esri (Thailand), TomTom, 2012'
+        });
+
+        this.m_oEsriWorldImagery = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+            attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
+        });
+        this.m_oNASAGIBSViirsEarthAtNight2012 = L.tileLayer('https://map1.vis.earthdata.nasa.gov/wmts-webmerc/VIIRS_CityLights_2012/default/{time}/{tilematrixset}{maxZoom}/{z}/{y}/{x}.{format}', {
+            attribution: 'Imagery provided by services from the Global Imagery Browse Services (GIBS), operated by the NASA/GSFC/Earth Science Data and Information System (<a href="https://earthdata.nasa.gov">ESDIS</a>) with funding provided by NASA/HQ.',
+            bounds: [[-85.0511287776, -179.999999975], [85.0511287776, 179.999999975]],
+            minZoom: 1,
+            maxZoom: 8,
+            format: 'jpg',
+            time: '',
+            tilematrixset: 'GoogleMapsCompatible_Level'
         });
     };
 
     //init tile layer
     this.initTileLayer();
 
-    this.m_oGoogleHybrid = new L.gridLayer.googleMutant('hybrid');
-    this.m_oGoogleMap = new L.gridLayer.googleMutant('roadmap');
-    this.m_oGoogleTerrain = new L.gridLayer.googleMutant('terrain');
+    // this.m_oGoogleHybrid = new L.gridLayer.googleMutant('hybrid');
+    // this.m_oGoogleMap = new L.gridLayer.googleMutant('roadmap');
+    // this.m_oGoogleTerrain = new L.gridLayer.googleMutant('terrain');
 
     /**
      * layers control
@@ -89,13 +70,11 @@ service('MapService', ['$http','$rootScope', 'ConstantsService', function ($http
     this.m_oLayersControl = L.control.layers(
         {
             "Standard": this.m_oOSMBasic,
-            "Cycle Map": this.m_oOCMCycle,
-            "Transport Map": this.m_oOCMTransport,
-            "Humanitarian": this.m_oOSMHumanitarian,
-            "Google Hybrid": this.m_oGoogleHybrid,
-            "Google Map": this.m_oGoogleMap,
-            "Google Satellite": this.m_oGoogleSatelite,
-            "Google Terrain": this.m_oGoogleTerrain
+            "OpenTopoMap":this.m_oOpenTopoMap,
+            // "ThunderforestSpinalMap":this.m_oThunderforestSpinalMap,
+            "EsriWorldStreetMap":this.m_oEsriWorldStreetMap,
+            "EsriWorldImagery":this.m_oEsriWorldImagery,
+            "NASAGIBSViirsEarthAtNight2012":this.m_oNASAGIBSViirsEarthAtNight2012
         },
         {},
         {
@@ -245,7 +224,7 @@ service('MapService', ['$http','$rootScope', 'ConstantsService', function ($http
             drawnItems.addLayer(layer);
         });
 
-        //TODO event EDITED
+        //REMOVE IT ?
         this.m_oWasdiMap.on(L.Draw.Event.DELETESTOP, function (event) {
            var layer = event.layers;
         });
@@ -293,9 +272,11 @@ service('MapService', ['$http','$rootScope', 'ConstantsService', function ($http
     {
         /*
             https://github.com/perliedman/leaflet-control-geocoder
-            TODO CHANGE GEOCODER
         */
-        var geocoder = L.Control.Geocoder.mapzen('search-DopSHJw');
+        // var geocoder = L.Control.Geocoder.mapzen('search-DopSHJw');
+        // var MapGeoCoderProvider = L.Control.Geocoder.google('<you API key>', { ... other options ... });
+        var geocoder = L.Control.Geocoder.nominatim();
+
         var control = L.Control.geocoder({
             geocoder: geocoder,
             position:'topleft'
@@ -469,7 +450,7 @@ service('MapService', ['$http','$rootScope', 'ConstantsService', function ($http
         //mouse over event change rectangle style
         oRectangle.on("mouseover", function (event) {//SEND MESSAGE TO IMPORT CONTROLLER
             oRectangle.setStyle({weight:3,fillOpacity:0.7});
-            $rootScope.$broadcast('on-mouse-over-rectangle',{rectangle:oRectangle});// TODO SEND MASSAGE FOR CHANGE CSS in LAYER LIST TABLE
+            $rootScope.$broadcast('on-mouse-over-rectangle',{rectangle:oRectangle});
             var temp = oRectangle.getBounds()
 
 
@@ -477,7 +458,7 @@ service('MapService', ['$http','$rootScope', 'ConstantsService', function ($http
         //mouse out event set default value of style
         oRectangle.on("mouseout", function (event) {//SEND MESSAGE TO IMPORT CONTROLLER
             oRectangle.setStyle({weight:1,fillOpacity:0.2});
-            $rootScope.$broadcast('on-mouse-leave-rectangle',{rectangle:oRectangle});// TODO SEND MASSAGE FOR CHANGE CSS in LAYER LIST TABLE
+            $rootScope.$broadcast('on-mouse-leave-rectangle',{rectangle:oRectangle});
         });
 
         return oRectangle;
@@ -518,14 +499,14 @@ service('MapService', ['$http','$rootScope', 'ConstantsService', function ($http
         //mouse over event change rectangle style
         oRectangle.on("mouseover", function (event) {
             oRectangle.setStyle({weight:3,fillOpacity:0.7});
-            $rootScope.$broadcast('on-mouse-over-rectangle',{rectangle:oRectangle});// TODO SEND MASSAGE FOR CHANGE CSS in LAYER LIST TABLE
+            $rootScope.$broadcast('on-mouse-over-rectangle',{rectangle:oRectangle});
             var temp = oRectangle.getBounds()
         });
 
         //mouse out event set default value of style
         oRectangle.on("mouseout", function (event) {
             oRectangle.setStyle({weight:1,fillOpacity:0.2});
-            $rootScope.$broadcast('on-mouse-leave-rectangle',{rectangle:oRectangle});// TODO SEND MASSAGE FOR CHANGE CSS in LAYER LIST TABLE
+            $rootScope.$broadcast('on-mouse-leave-rectangle',{rectangle:oRectangle});
         });
 
         return oRectangle;

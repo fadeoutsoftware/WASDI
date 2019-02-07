@@ -419,6 +419,39 @@ var WorkFlowManagerController = (function() {
         return true;
     };
 
+    WorkFlowManagerController.prototype.openDeleteWorkflowDialog = function(oWorkflow){
+        if(utilsIsObjectNullOrUndefined(oWorkflow) === true)
+        {
+            return false;
+        }
+        var oController = this;
+        var oReturnFunctionValue = function(oValue){
+            if (oValue === true)
+            {
+                oController.deleteWorkflow(oWorkflow);
+            }
+
+        }
+        utilsVexDialogConfirm("Do you want to delete workflow: " + oWorkflow.name + " ?",oReturnFunctionValue);
+        return true;
+    };
+
+    WorkFlowManagerController.prototype.isTheOwnerOfWorkflow = function(oWorkflow)
+    {
+        var oUser = this.m_oConstantsService.getUser();
+        if( (utilsIsObjectNullOrUndefined(oWorkflow) === true) || (utilsIsObjectNullOrUndefined(oUser) === true) )
+        {
+            return false;
+        }
+        var sUserIdOwner = oWorkflow.userId;
+
+        if( sUserIdOwner === oUser.userId)
+        {
+            return true;
+        }
+        return false;
+    }
+
     WorkFlowManagerController.$inject = [
         '$scope',
         'close',
