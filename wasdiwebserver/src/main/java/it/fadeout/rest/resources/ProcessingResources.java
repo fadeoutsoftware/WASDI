@@ -1903,7 +1903,7 @@ public class ProcessingResources {
 				oWriter.newLine();				
 				oWriter.write("MYPROCID="+sProcessObjId);
 				oWriter.newLine();				
-				oWriter.write("PARAMFILEPATH="+sParamFullPath);
+				oWriter.write("PARAMETERSFILEPATH="+sParamFullPath);
 				oWriter.newLine();
 				oWriter.flush();
 				oWriter.close();
@@ -1916,9 +1916,11 @@ public class ProcessingResources {
 
 				oWriter.write("INPUT=" + oJRCViewModel.getInputFileName());
 				oWriter.newLine();
-				oWriter.write("EPSG" + oJRCViewModel.getEpsg());
+				oWriter.write("EPSG=" + oJRCViewModel.getEpsg());
 				oWriter.newLine();
-				oWriter.write("OUTPUT" + oJRCViewModel.getOutputFileName());
+				oWriter.write("OUTPUT=" + oJRCViewModel.getOutputFileName());
+				oWriter.newLine();
+				oWriter.write("PREPROCESS=" + oJRCViewModel.getPreprocess());
 				oWriter.newLine();
 				oWriter.flush();
 				oWriter.close();
@@ -1948,7 +1950,7 @@ public class ProcessingResources {
 			try
 			{
 				oProcess.setOperationDate(Wasdi.GetFormatDate(new Date()));
-				oProcess.setOperationType(LauncherOperations.RUNIDL.toString());
+				oProcess.setOperationType(LauncherOperations.RUNMATLAB.toString());
 				oProcess.setProductName(oJRCViewModel.getInputFileName());
 				oProcess.setWorkspaceId(sWorkspaceId);
 				oProcess.setUserId(sUserId);
