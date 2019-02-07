@@ -1,84 +1,64 @@
-.get-capabilities-info-modal
-{
-  .modal-dialog
-  {
-    width:50%;
-    .modal-content
-    {
-      .modal-header
-      {
-        color:$wasdi-white;
-        background-color: $wasdi-blue-logo;
-        .close
-        {
-          color: $wasdi-white;
-          opacity: 1;
-        }
-      }
-
-      .modal-body
-      {
-        min-height: 450px;
-        .dropdown-layers
-        {
-          .dropdown-menu
-          {
-            max-height: 250px;
-            overflow: auto;
-
-            li
-            {
-              cursor:pointer;
-              padding:0 5px;
+.get-capabilities-info-modal {
+    .modal-dialog {
+        width: 50%;
+        .modal-content {
+            .modal-header {
+                color: $wasdi-white;
+                background-color: $wasdi-blue-logo;
+                .close {
+                    color: $wasdi-white;
+                    opacity: 1;
+                }
             }
-            li:hover
-            {
-              background-color: $wasdi-blue-logo;
-              color:white;
+
+            .modal-body {
+                min-height: 450px;
+                .dropdown-layers {
+                    .dropdown-menu {
+                        max-height: 250px;
+                        overflow: auto;
+
+                        li {
+                            cursor: pointer;
+                            padding: 0 5px;
+                        }
+                        li:hover {
+                            background-color: $wasdi-blue-logo;
+                            color: white;
+                        }
+                    }
+
+                    .btn {
+                        color: $wasdi-blue-logo;
+                        border: 1px solid $wasdi-blue-logo;
+                        width: 80%;
+                        margin: 15px;
+                        font-size: 14px;
+                        line-height: 1.42857;
+                        font-weight: 600;
+                    }
+
+                }
+
+                .my-input-text {
+                    margin: 0px;
+                    padding: 0px;
+
+                    input[type=text] {
+                        margin: 0px;
+                        padding: 18px 12px;
+                    }
+
+                }
+
             }
-          }
 
-          .btn
-          {
-            color: $wasdi-blue-logo;
-            border:1px solid $wasdi-blue-logo;
-            width: 80%;
-            margin: 15px;
-            font-size: 14px;
-            line-height: 1.42857;
-            font-weight: 600;
-          }
-
+            .modal-footer {
+                border-top: 1px solid $wasdi-blue-logo;
+                .my-button {
+                    padding: 10px 21px;
+                }
+            }
         }
-        .my-button
-        {
-          margin-top: 16px;
-          padding: 8px 16px;
-
-        }
-        .my-input-text
-        {
-          float: left;
-          width: 80%;
-          margin:8px 15px;
-          input[type=text] {
-
-            padding: 20px 20px;
-
-          }
-
-        }
-
-      }
-
-      .modal-footer
-      {
-        border-top:1px solid $wasdi-blue-logo;
-        .my-button
-        {
-          padding: 10px 21px;
-        }
-      }
     }
-  }
 }

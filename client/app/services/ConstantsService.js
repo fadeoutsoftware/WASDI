@@ -2,19 +2,19 @@
  * Created by p.campanella on 21/10/2016.
  */
 
-'use strict';
+//'use strict';
 angular.module('wasdi.ConstantsService', []).
 service('ConstantsService', [function () {
 
     this.COOKIE_EXPIRE_TIME_DAYS = 1;//days
 
     // WASDI SERVER
-    // /**/   this.URL = 'http://178.22.66.96/wasdiwebserver/';
-    // this.WEBSTOMPURL = 'http://178.22.66.96/rabbit/stomp';
-    // this.WMSURL = "http://178.22.66.96/geoserver/ows?";
-    // //this.WASDIGEOSERVERWPS = "http://178.22.66.96/geoserver/wps";
-    // this.WASDIGEOSERVERWPS = "http://www.wasdi.net/geoserver/wps";
-
+    /**/
+        // this.URL = 'http://178.22.66.96/wasdiwebserver/';
+        // this.WEBSTOMPURL = 'http://178.22.66.96/rabbit/stomp';
+        // this.WMSURL = "http://178.22.66.96/geoserver/ows?";
+        // //this.WASDIGEOSERVERWPS = "http://178.22.66.96/geoserver/wps";
+        //  this.WASDIGEOSERVERWPS = "http://www.wasdi.net/geoserver/wps";
     //
 
     /**/
@@ -25,10 +25,10 @@ service('ConstantsService', [function () {
         // this.WASDIGEOSERVERWPS = "http://wasdi.vgt.vito.be/geoserver/wps";
 
 
-        //
-        // // SERCO
+
+        // SERCO
         // this.URL = 'http://217.182.93.57//wasdiwebserver/';
-        // this.WEBSTOMPURL = 'http://217.182.93.57//rabbit/stomp/bad';
+        // this.WEBSTOMPURL = 'http://217.182.93.57//rabbit/stomp';
         // this.WMSURL = "http://217.182.93.57//geoserver/ows?";
         // this.WASDIGEOSERVERWPS = "http://217.182.93.57//geoserver/wps";
 
@@ -47,7 +47,7 @@ service('ConstantsService', [function () {
     this.URL= 'http://127.0.0.1:8080/wasdiwebserver/';//
     this.WEBSTOMPURL = 'http://178.22.66.96/rabbit/stomp';
     this.WMSURL = "http://127.0.0.1:8080/geoserver/ows?";//wasdi/wms? OLD VERSION
-
+    
 
     this.WPSPROXY =  'https://cors-anywhere.herokuapp.com/';
 
@@ -240,19 +240,31 @@ service('ConstantsService', [function () {
 
     this.logOutGoogle = function ()
     {
-        var oController = this;
-        if(utilsIsObjectNullOrUndefined(gapi.auth2) === true)
+        try
         {
-            gapi.load('auth2', function() {
-                gapi.auth2.init();
-                oController.googleSignOutAPI();
-            });
-        }
-        else
+            if (_.isNil(gapi) == false)
+            {
+                var oController = this;
+                if (_.isNil(gapi.auth2) === true)
+                {
+                    gapi.load('auth2', function () {
+                        gapi.auth2.init();
+                        oController.googleSignOutAPI();
+                    });
+                }
+                else
+                {
+                    this.googleSignOutAPI();
+                }
+            }
+            else
+            {
+                throw "Google API null or undefined, cannot perform logout";
+            }
+        }catch (e)
         {
-            this.googleSignOutAPI();
+            console.error("logOutGoogle(): ", e);
         }
-
     }
 
     this.googleSignOutAPI = function()

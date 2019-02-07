@@ -24,7 +24,8 @@ var WorkFlowManagerController = (function() {
         this.m_oConstantsService = oConstantsService;
         this.m_oWorkflowFileData = {
             workflowName:"",
-            workflowDescription:""
+            workflowDescription:"",
+            isPublic:false
         };
         this.isUploadingWorkflow = false;
         if( utilsIsObjectNullOrUndefined(this.m_oExtras.defaultTab) === true)
@@ -262,7 +263,8 @@ var WorkFlowManagerController = (function() {
         var oBody = new FormData();
         oBody.append('file', this.m_oFile[0]);
 
-        this.uploadGraph(this.m_sWorkspaceId, this.m_oWorkflowFileData.workflowName,this.m_oWorkflowFileData.workflowDescription,oBody);
+        this.uploadGraph(this.m_sWorkspaceId, this.m_oWorkflowFileData.workflowName,this.m_oWorkflowFileData.workflowDescription,
+            this.m_oWorkflowFileData.isPublic,oBody);
     };
 
     /**
@@ -273,7 +275,7 @@ var WorkFlowManagerController = (function() {
      * @param oBody
      * @returns {boolean}
      */
-    WorkFlowManagerController.prototype.uploadGraph = function(sWorkspaceId,sName,sDescription,oBody)
+    WorkFlowManagerController.prototype.uploadGraph = function(sWorkspaceId,sName,sDescription,bIsPublic,oBody)
     {
         if(utilsIsObjectNullOrUndefined(sWorkspaceId) === true)
         {
@@ -293,7 +295,7 @@ var WorkFlowManagerController = (function() {
         }
         this.isUploadingWorkflow=true;
         var oController = this;
-        this.m_oSnapOperationService.uploadGraph(this.m_sWorkspaceId,sName,sDescription,oBody).success(function (data) {
+        this.m_oSnapOperationService.uploadGraph(this.m_sWorkspaceId,sName,sDescription,oBody,bIsPublic).success(function (data) {
             if(utilsIsObjectNullOrUndefined(data) == false)
             {
                 //Reload list o workFlows
@@ -345,7 +347,8 @@ var WorkFlowManagerController = (function() {
     WorkFlowManagerController.prototype.cleanAllUploadWorkflowFields = function (){
         this.m_oWorkflowFileData = {
             workflowName:"",
-            workflowDescription:""
+            workflowDescription:"",
+            isPublic:false
         };
         this.m_oFile = null;
     };
