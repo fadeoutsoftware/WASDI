@@ -2391,7 +2391,7 @@ var EditorController = (function () {
         }
 
         oController.m_oModalService.showModal({
-            templateUrl: "dialogs/JRC_Processor/JRCProcessorView.html",
+            templateUrl: "dialogs/JRC_processor/JRCProcessorView.html",
             controller: "JRCProcessorController",
             inputs: {
                 extras: {
