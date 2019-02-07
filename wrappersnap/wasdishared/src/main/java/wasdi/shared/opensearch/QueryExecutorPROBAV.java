@@ -39,23 +39,27 @@ public class QueryExecutorPROBAV extends QueryExecutor  {
 	
 	@Override
 	protected String[] getUrlPath() {
+		System.out.println("QueryExecutorPROBAV.getUrlPath");
 		return new String[] {"openSearch/findProducts"};
 	}
 
 	@Override
 	protected Template getTemplate() {
+		System.out.println("QueryExecutorPROBAV.getTemplate");
 		//http://www.vito-eodata.be/openSearch/findProducts?collection=urn:ogc:def:EOP:VITO:PROBAV_S1-TOC_1KM_V001&start=2016-05-05T00:00&end=2016-05-14T23:59&bbox=-180.00,0.00,180.00,90.00
 		return new Template("{scheme}://{-append|.|host}www.vito-eodata.be{-opt|/|path}{-listjoin|/|path}{-prefix|/|page}{-opt|?|q}{-join|&|q,start,rows,orderby}");
 	}
 
 	@Override
 	protected String getCountUrl(String sQuery) {
+		System.out.println("QueryExecutorPROBAV.getCountUrl");
 		//http://www.vito-eodata.be/openSearch/findProducts?collection=urn:ogc:def:EOP:VITO:PROBAV_S1-TOC_1KM_V001&start=2016-05-05T00:00&end=2016-05-14T23:59&bbox=-180.00,0.00,180.00,90.00
 		return "http://www.vito-eodata.be/openSearch/count?filter=" + sQuery;
 	}
 
 	@Override
 	protected String buildUrl(PaginatedQuery oQuery){
+		System.out.println("QueryExecutorPROBAV.buildUrl");
 
 		String sUrl = "http://www.vito-eodata.be/openSearch/findProducts?";
 		String sPolygon = null;
@@ -142,6 +146,7 @@ public class QueryExecutorPROBAV extends QueryExecutor  {
 	@Override
 	public int executeCount(String sQuery) throws IOException
 	{
+		System.out.println("QueryExecutorPROBAV.executeCount");
 		PaginatedQuery oQuery = new PaginatedQuery(sQuery, null, null, null, null);
 		String sUrl = buildUrl(oQuery);
 		
@@ -218,6 +223,7 @@ public class QueryExecutorPROBAV extends QueryExecutor  {
 	@Override
 	protected ArrayList<QueryResultViewModel> buildResultLightViewModel(Document<Feed> oDocument, AbderaClient oClient, RequestOptions oOptions) {
 
+		System.out.println("QueryExecutorPROBAV.buildResultLightViewModel");
 		Feed oFeed = (Feed) oDocument.getRoot();
 
 		Map<String, String> oMap = getFootprint(oDocument);
@@ -272,6 +278,8 @@ public class QueryExecutorPROBAV extends QueryExecutor  {
 
 	@Override
 	protected ArrayList<QueryResultViewModel> buildResultViewModel(Document<Feed> oDocument, AbderaClient oClient, RequestOptions oOptions) {
+		
+		System.out.println("QueryExecutorPROBAV.buildResultViewModel");
 		//int iStreamSize = 1000000;
 		Feed oFeed = (Feed) oDocument.getRoot();
 
@@ -356,8 +364,8 @@ public class QueryExecutorPROBAV extends QueryExecutor  {
 		return aoResults;
 	}
 	
-	private Map<String, String> getFootprint(Document<Feed> oDocument)
-	{
+	private Map<String, String> getFootprint(Document<Feed> oDocument){
+		System.out.println("QueryExecutorPROBAV.getFootprint");
 		Map<String, String> oMap = new HashMap<String, String>();
 		
 		ByteArrayOutputStream outStream = new ByteArrayOutputStream();
@@ -413,8 +421,6 @@ public class QueryExecutorPROBAV extends QueryExecutor  {
 							}
 							
 							sFootprint = String.format("POLYGON ((%s))", sFootprint);
-							
-							
 						}
 					}
 					
