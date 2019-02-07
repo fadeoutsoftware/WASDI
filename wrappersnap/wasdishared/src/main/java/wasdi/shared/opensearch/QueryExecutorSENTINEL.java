@@ -48,8 +48,7 @@ public class QueryExecutorSENTINEL extends QueryExecutor {
 
 	//public int executeCountSentinel(String sQuery) throws IOException {
 	public int executeCount(String sQuery) throws IOException {	
-		
-		PaginatedQuery oQuery = new PaginatedQuery(sQuery, null, null, null, null);
+		PaginatedQuery oQuery = new PaginatedQuery(sQuery, "0", "1", "ingestiondate", "asc");
 		String sUrl = buildUrl(oQuery);
 		//create abdera client
 		Abdera oAbdera = new Abdera();

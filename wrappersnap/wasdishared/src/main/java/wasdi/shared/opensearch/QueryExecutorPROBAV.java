@@ -56,29 +56,21 @@ public class QueryExecutorPROBAV extends QueryExecutor  {
 
 	@Override
 	protected String buildUrl(PaginatedQuery oQuery){
-		//Template oTemplate = getTemplate();
-		//Map<String,Object> oParamsMap = new HashMap<String, Object>();		
-		//oParamsMap.put("scheme", getUrlSchema());
-		//oParamsMap.put("path", getUrlPath());
-		//oParamsMap.put("start", m_sOffset);
-		//oParamsMap.put("rows", m_sLimit);
-		//oParamsMap.put("orderby", m_sSortedBy + " " + m_sOrder);
-		//oParamsMap.put("q", sQuery);
 
 		String sUrl = "http://www.vito-eodata.be/openSearch/findProducts?";
-		String polygon = null;
-		String date = null;
-		String collection = null;
-		String cloudCover = null;
-		String snowCover = null;
+		String sPolygon = null;
+		String sDate = null;
+		String sCollection = null;
+		String sCloudCover = null;
+		String sSnowCover = null;
 		String[] asFootprint = oQuery.getQuery().split("AND");
 		if (asFootprint.length > 0)
 		{
-			for (String item : asFootprint) {
-				if (item.contains("POLYGON"))
+			for (String sItem : asFootprint) {
+				if (sItem.contains("POLYGON"))
 				{
-					String refString = item;
-					String[] asPolygon = refString.split("POLYGON\\(\\(");
+					String sRefString = sItem;
+					String[] asPolygon = sRefString.split("POLYGON\\(\\(");
 					if (asPolygon.length > 0)
 					{
 						String[] asCoordinates = asPolygon[1].split("\\)\\)")[0].split(",");
@@ -89,78 +81,55 @@ public class QueryExecutorPROBAV extends QueryExecutor  {
 							sPoints += sCoord.replace(" ", ",");
 							
 						}
-						polygon = String.format("geometry=polygon((%s))", sPoints);
-						
-						/*	
-						double maxX;
-						double minX;
-						double maxY;
-						double minY;
-						//init
-						String[] asCordinate = asCoordinates[0].split(" ");
-						maxX = Double.parseDouble(asCordinate[0]);
-						minX = Double.parseDouble(asCordinate[0]);
-						maxY = Double.parseDouble(asCordinate[1]);
-						minY = Double.parseDouble(asCordinate[1]);
-						for (String sCoord : asCoordinates) {
-							asCordinate = sCoord.split(" ");
-							maxX = Math.max(maxX, Double.parseDouble(asCordinate[0]));
-							minX = Math.min(minX, Double.parseDouble(asCordinate[0]));
-							maxY = Math.max(maxY, Double.parseDouble(asCordinate[1]));
-							minY = Math.min(minY, Double.parseDouble(asCordinate[1]));
-						}
-					 	*/
-						//bbox = String.format("bbox=%s,%s,%s,%s", String.valueOf(minX), String.valueOf(minY), String.valueOf(maxX), String.valueOf(maxY));
-						//refString = asPolygon[1].split("\\)\\)")[0].replace(" ", ",");
-						
+						sPolygon = String.format("geometry=polygon((%s))", sPoints);						
 					}
 				}
 
-				if (item.contains("beginPosition"))
+				if (sItem.contains("beginPosition"))
 				{
-					String refString = item;
-					String[] asDate = refString.split("\\[")[1].split("\\]")[0].split("TO");
-					String startdate = asDate[0].trim().substring(0, 16);
-					String enddate = asDate[1].trim().substring(0, 16);
+					String sRefString = sItem;
+					String[] asDate = sRefString.split("\\[")[1].split("\\]")[0].split("TO");
+					String sStartdate = asDate[0].trim().substring(0, 16);
+					String sEnddate = asDate[1].trim().substring(0, 16);
 
-					date = String.format("start=%s&end%s", startdate, enddate);
+					sDate = String.format("start=%s&end%s", sStartdate, sEnddate);
 				}
 
-				if (item.contains("collection"))
+				if (sItem.contains("collection"))
 				{
-					String refString = item;
-					String[] asNameColletion = refString.split(":", 2)[1].split("\\)");
-					collection = String.format("collection=%s",asNameColletion[0]);
+					String sRefString = sItem;
+					String[] asNameColletion = sRefString.split(":", 2)[1].split("\\)");
+					sCollection = String.format("collection=%s",asNameColletion[0]);
 				}
 
 				
-				if (item.contains("cloudcoverpercentage"))
+				if (sItem.contains("cloudcoverpercentage"))
 				{
-					String refString = item;
-					String[] asNameColletion = refString.split(":", 2)[1].split("\\)");
-					cloudCover = String.format("cloudCover=[0,%s]",asNameColletion[0]);
+					String sRefString = sItem;
+					String[] asNameColletion = sRefString.split(":", 2)[1].split("\\)");
+					sCloudCover = String.format("cloudCover=[0,%s]",asNameColletion[0]);
 				}
 
-				if (item.contains("snowcoverpercentage"))
+				if (sItem.contains("snowcoverpercentage"))
 				{
-					String refString = item;
-					String[] asNameColletion = refString.split(":", 2)[1].split("\\)");
-					snowCover = String.format("snowCover=[0,%s]",asNameColletion[0]);
+					String sRefString = sItem;
+					String[] asNameColletion = sRefString.split(":", 2)[1].split("\\)");
+					sSnowCover = String.format("snowCover=[0,%s]",asNameColletion[0]);
 				}
 				
 			}
 
 		}
-		if (collection != null)
-			sUrl+=collection;
-		if (polygon != null)
-			sUrl+="&" + polygon;
-		if (date != null)
-			sUrl+="&" + date;
-		if (cloudCover != null)
-			sUrl+="&" + cloudCover;
-		if (snowCover != null)
-			sUrl+="&" + snowCover;
+		if (sCollection != null)
+			sUrl+=sCollection;
+		if (sPolygon != null)
+			sUrl+="&" + sPolygon;
+		if (sDate != null)
+			sUrl+="&" + sDate;
+		if (sCloudCover != null)
+			sUrl+="&" + sCloudCover;
+		if (sSnowCover != null)
+			sUrl+="&" + sSnowCover;
 		if (oQuery.getOffset() != null)
 			sUrl+="&startIndex=" + oQuery.getOffset();
 		if (oQuery.getLimit() != null)
