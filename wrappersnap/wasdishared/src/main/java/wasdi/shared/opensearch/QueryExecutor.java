@@ -375,11 +375,10 @@ public abstract class QueryExecutor {
 	}
 
 	public void setDownloadProtocol(String sDownloadProtocol) {
-		if(null == sDownloadProtocol) {
-			throw new NullPointerException("QueryExecutor.setDownloadProtocol: sDownloadProtocol is null");
-		}
 		m_sDownloadProtocol = sDownloadProtocol;
-		
+		if(null==m_sDownloadProtocol) {
+			m_sDownloadProtocol = "https:";
+		}
 	}
 
 	public void setCredentials(AuthenticationCredentials oCredentials) {

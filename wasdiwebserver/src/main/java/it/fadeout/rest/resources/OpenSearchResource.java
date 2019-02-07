@@ -158,16 +158,6 @@ public class OpenSearchResource {
 			String sLimit = null;
 			String sSortedBy = null;
 			String sOrder = null;
-			// XXX can we get rid of this code?
-			/*
-			if (sProvider.equals("SENTINEL")) {
-				sOffset = "0";
-				sLimit = "1";
-				sSortedBy = "ingestiondate";
-				sOrder = "asc";
-			}
-			*/
-
 			
 			QueryExecutor oExecutor = getExecutor(sProviders, sOffset, sLimit, sSortedBy, sOrder);
 
@@ -455,8 +445,8 @@ public class OpenSearchResource {
 	private AuthenticationCredentials getCredentials(String sProvider) {
 		AuthenticationCredentials oCredentials = m_aoCredentials.get(sProvider);
 		if(null == oCredentials) {
-			String sUser = m_oServletConfig.getInitParameter("OSUser");
-			String sPassword = m_oServletConfig.getInitParameter("OSPwd");
+			String sUser = m_oServletConfig.getInitParameter(sProvider+".OSUser");
+			String sPassword = m_oServletConfig.getInitParameter(sProvider+".OSPwd");
 			oCredentials = new AuthenticationCredentials(sUser, sPassword);
 			m_aoCredentials.put(sProvider, oCredentials);
 		}
