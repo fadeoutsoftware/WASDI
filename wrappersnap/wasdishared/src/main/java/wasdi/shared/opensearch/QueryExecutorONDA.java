@@ -62,6 +62,7 @@ public class QueryExecutorONDA extends QueryExecutor {
 		String sUrl = "https://catalogue.onda-dias.eu/dias-catalogue/Products?$search=%22";
 		sUrl+=m_oQueryTranslator.translateAndEncode(sQuery);
 		//TODO get rid of the $top=10 and introduce pagination
+		//TODO don't use hardcoded values
 		sUrl+="%22&$top=" + m_sLimit + "&$skip="+ m_sOffset +"&$format=json"+ "&$orderby=creationDate";
 		return sUrl;
 	}
@@ -278,7 +279,7 @@ public class QueryExecutorONDA extends QueryExecutor {
 				in.close();
 	
 				//print result
-				System.out.println("Count Done: Response " + oResponse.toString().substring(0, 256) + "...");
+				System.out.println("Count Done: Response " + oResponse.toString().substring(0, Math.min(256, oResponse.length())) + "...");
 		
 				sResult = oResponse.toString();
 			} else {

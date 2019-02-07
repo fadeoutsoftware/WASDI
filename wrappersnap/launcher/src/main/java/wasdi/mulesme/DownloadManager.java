@@ -18,6 +18,8 @@ import wasdi.ConfigReader;
 import wasdi.filebuffer.ProviderAdapter;
 import wasdi.filebuffer.ProviderAdapterSupplier;
 import wasdi.shared.opensearch.QueryExecutor;
+import wasdi.shared.opensearch.QueryExecutorFactory;
+import wasdi.shared.opensearch.QueryExecutorFactorySupplier;
 import wasdi.shared.viewmodels.QueryResultViewModel;
 
 
@@ -25,60 +27,60 @@ public class DownloadManager {
 	
 //	public static Logger logger = Logger.getLogger(DownloadManager.class);
 
-    private static String QUERY_TEMPLATE = "( footprint:\"intersects(__FOOTPRINT__)\" ) AND ( beginPosition:[__FROM__ TO __TO__] AND endPosition:[__FROM__ TO __TO__] ) AND (platformname:__PLATFORM__ AND producttype:__PRODUCTTYPE__)";
-    private static SimpleDateFormat QUERY_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-    private static SimpleDateFormat ARGS_DATE_FORMAT = new SimpleDateFormat("yyyyMMddHHmm");
+    private static String s_sQUERY_TEMPLATE = "( footprint:\"intersects(__FOOTPRINT__)\" ) AND ( beginPosition:[__FROM__ TO __TO__] AND endPosition:[__FROM__ TO __TO__] ) AND (platformname:__PLATFORM__ AND producttype:__PRODUCTTYPE__)";
+    private static SimpleDateFormat s_oQUERY_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+    private static SimpleDateFormat s_oARGS_DATE_FORMAT = new SimpleDateFormat("yyyyMMddHHmm");
     
     /**
      * footprints used to filter products
      */
-	private ArrayList<String> footprints = new ArrayList<>();
+	private ArrayList<String> m_asfootprints = new ArrayList<>();
 	/**
 	 * download destination folder
 	 */
-	private File destinationDir = null;
+	private File m_odestinationDir = null;
 	
-	private String platformName = "Sentinel-1";
-	private String productType = "GRD";
-    private String queryLimit = "2";
-    private String querySortedBy = "ingestiondate";
-    private String queryOrder = "desc";	
-    private String providerName = "SENTINEL";
-    private String providerUser = "";
-    private String providerPassword = "";
+	private String m_splatformName = "Sentinel-1";
+	private String m_sproductType = "GRD";
+    private String m_squeryLimit = "2";
+    private String m_squerySortedBy = "ingestiondate";
+    private String m_squeryOrder = "desc";	
+    private String m_sproviderName = "SENTINEL";
+    private String m_sproviderUser = "";
+    private String m_sproviderPassword = "";
     
     /**
-     * constructor with the fottprints shape file and the download destination folder 
-     * @param footprintShp
-     * @param destinationDir
+     * constructor with the footprints shape file and the download destination folder 
+     * @param oFootprintShp
+     * @param oDestinationDir
      * @throws Exception
      */
-	public DownloadManager(File footprintShp, File destinationDir) throws Exception{
+	public DownloadManager(File oFootprintShp, File oDestinationDir) throws Exception{
 		
-		this.destinationDir = destinationDir;
+		this.m_odestinationDir = oDestinationDir;
 		
-		ShapefileDataStore ds = new ShapefileDataStore(footprintShp.toURI().toURL());
-		SimpleFeatureSource fs = ds.getFeatureSource();
-		SimpleFeatureCollection fc = fs.getFeatures();
-		FeatureIterator<SimpleFeature> fit = fc.features();		
-		while (fit.hasNext()) {
-			SimpleFeature f = fit.next();
-			Object o = f.getDefaultGeometry();
-			String wkt = null;
-			if (o instanceof MultiPolygon) {
-				MultiPolygon mp = (MultiPolygon) o;
-				Polygon p = (Polygon)mp.getGeometryN(0);
-				wkt = p.toText();				
+		ShapefileDataStore oDataStore = new ShapefileDataStore(oFootprintShp.toURI().toURL());
+		SimpleFeatureSource oFeatureSource = oDataStore.getFeatureSource();
+		SimpleFeatureCollection oFeatureCollection = oFeatureSource.getFeatures();
+		FeatureIterator<SimpleFeature> oFeatureIterator = oFeatureCollection.features();		
+		while (oFeatureIterator.hasNext()) {
+			SimpleFeature oFeature = oFeatureIterator.next();
+			Object oDefaultGeom = oFeature.getDefaultGeometry();
+			String oWkt = null;
+			if (oDefaultGeom instanceof MultiPolygon) {
+				MultiPolygon oMultiPolygon = (MultiPolygon) oDefaultGeom;
+				Polygon oPolygon = (Polygon)oMultiPolygon.getGeometryN(0);
+				oWkt = oPolygon.toText();				
 			}
-			if (o instanceof Polygon) {
-				Polygon p = (Polygon) o;
-				wkt = p.toText();
+			if (oDefaultGeom instanceof Polygon) {
+				Polygon oPolygon = (Polygon) oDefaultGeom;
+				oWkt = oPolygon.toText();
 			}
 //			System.out.println(wkt);				
-			if (wkt!=null) footprints.add(wkt);
+			if (oWkt!=null) m_asfootprints.add(oWkt);
 		}
-		fit.close();
-		ds.dispose();
+		oFeatureIterator.close();
+		oDataStore.dispose();
 	}
 	
 	/**
@@ -87,39 +89,42 @@ public class DownloadManager {
 	 * @param to
 	 */
 	public void download(Date from, Date to) {
-		String query = QUERY_TEMPLATE
-				.replaceAll("__FROM__", QUERY_DATE_FORMAT.format(from))
-				.replaceAll("__TO__", QUERY_DATE_FORMAT.format(to))
-				.replaceAll("__PLATFORM__", platformName)
-				.replaceAll("__PRODUCTTYPE__", productType);
+		String query = s_sQUERY_TEMPLATE
+				.replaceAll("__FROM__", s_oQUERY_DATE_FORMAT.format(from))
+				.replaceAll("__TO__", s_oQUERY_DATE_FORMAT.format(to))
+				.replaceAll("__PLATFORM__", m_splatformName)
+				.replaceAll("__PRODUCTTYPE__", m_sproductType);
 		//TODO read from config file
 		String sDownloadProtocol = "";
-		QueryExecutor executor = QueryExecutor.newInstance(providerName, providerUser, providerPassword, "0", queryLimit, querySortedBy, queryOrder, sDownloadProtocol, "true");
+		QueryExecutorFactorySupplier oSupplier = new QueryExecutorFactorySupplier();
+		QueryExecutorFactory oFactory = oSupplier.supply(m_sproviderName);
+		QueryExecutor oExecutor = oFactory.newInstance(m_sproviderUser, m_sproviderPassword, "0", m_squeryLimit, m_squerySortedBy, m_squeryOrder, sDownloadProtocol, "true");
+		
 		//replaced by the next one
 		//DownloadFile oDownloadFile = DownloadFile.getDownloadFile("SENTINEL");
 		ProviderAdapter oProviderAdapter = new ProviderAdapterSupplier().supplyProviderAdapter("SENTINEL");
 		
-		System.out.println("searching products between " + from + " and " + to + " for " + footprints.size() + " regions ");
+		System.out.println("searching products between " + from + " and " + to + " for " + m_asfootprints.size() + " regions ");
 		
-		for (String footprint : footprints) {
-			String footprintQuery = query.replaceAll("__FOOTPRINT__", footprint);
+		for (String sFootprint : m_asfootprints) {
+			String sFootprintQuery = query.replaceAll("__FOOTPRINT__", sFootprint);
 			
 //			System.out.println("managing footprint " + footprint);
 			
 			try {
-				ArrayList<QueryResultViewModel> results = executor.execute(footprintQuery);
-				if (results == null) {
+				ArrayList<QueryResultViewModel> aoResults = oExecutor.execute(sFootprintQuery);
+				if (aoResults == null) {
 					System.out.println("\tno results found");
 					continue;
 				}
-				for (QueryResultViewModel result : results) {
+				for (QueryResultViewModel oResult : aoResults) {
 					
 //					if (result.getTitle().contains("S1B")) continue;
 					
-					System.out.println("\tdownloading " + result.getSummary() + " --> " + result.getLink());
+					System.out.println("\tdownloading " + oResult.getSummary() + " --> " + oResult.getLink());
 					//TODO implement subscriber interface
 					//TODO subscribe
-					oProviderAdapter.ExecuteDownloadFile(result.getLink(), providerUser, providerPassword, destinationDir.getAbsolutePath(), null);
+					oProviderAdapter.ExecuteDownloadFile(oResult.getLink(), m_sproviderUser, m_sproviderPassword, m_odestinationDir.getAbsolutePath(), null);
 					//TODO unsubscribe
 					
 					System.out.println("\t\tdone");
@@ -133,72 +138,72 @@ public class DownloadManager {
 	}
 	
 	public String getPlatformName() {
-		return platformName;
+		return m_splatformName;
 	}
 
 	public void setPlatformName(String platformName) {
-		this.platformName = platformName;
+		this.m_splatformName = platformName;
 	}
 
 	public String getProductType() {
-		return productType;
+		return m_sproductType;
 	}
 
 	public void setProductType(String productType) {
-		this.productType = productType;
+		this.m_sproductType = productType;
 	}
 
 	public String getQueryLimit() {
-		return queryLimit;
+		return m_squeryLimit;
 	}
 
 	public void setQueryLimit(String queryLimit) {
-		this.queryLimit = queryLimit;
+		this.m_squeryLimit = queryLimit;
 	}
 
 	public String getQuerySortedBy() {
-		return querySortedBy;
+		return m_squerySortedBy;
 	}
 
 	public void setQuerySortedBy(String querySortedBy) {
-		this.querySortedBy = querySortedBy;
+		this.m_squerySortedBy = querySortedBy;
 	}
 
 	public String getQueryOrder() {
-		return queryOrder;
+		return m_squeryOrder;
 	}
 
 	public void setQueryOrder(String queryOrder) {
-		this.queryOrder = queryOrder;
+		this.m_squeryOrder = queryOrder;
 	}
 
 	public String getProviderName() {
-		return providerName;
+		return m_sproviderName;
 	}
 
 	public void setProviderName(String providerName) {
-		this.providerName = providerName;
+		this.m_sproviderName = providerName;
 	}
 
 	public String getProviderUser() {
-		return providerUser;
+		return m_sproviderUser;
 	}
 
 	public void setProviderUser(String providerUser) {
-		this.providerUser = providerUser;
+		this.m_sproviderUser = providerUser;
 	}
 
 	public String getProviderPassword() {
-		return providerPassword;
+		return m_sproviderPassword;
 	}
 
 	public void setProviderPassword(String providerPassword) {
-		this.providerPassword = providerPassword;
+		this.m_sproviderPassword = providerPassword;
 	}
 
 	public static void main(String[] args) throws Exception {		
-		Date from = ARGS_DATE_FORMAT.parse(args[2]);
-		Date to = ARGS_DATE_FORMAT.parse(args[3]);
+		Date from = s_oARGS_DATE_FORMAT.parse(args[2]);
+		Date to = s_oARGS_DATE_FORMAT.parse(args[3]);
 		
 		DownloadManager manager = new DownloadManager(new File(args[0]), new File(args[1]));
 		// 2018-09-07: SET USER AND PW from config.properties

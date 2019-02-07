@@ -220,6 +220,17 @@ public class Utils {
 		String sCleanedArea = sArea.replaceAll("[POLYGN()]", "");
 		String[] asAreaPoints = sCleanedArea.split(",");
 		return asAreaPoints;
+	}
 
+	public static boolean doesThisStringMeansTrue(String sString) {
+		//default value is arbitrary!
+		if(isNullOrEmpty(sString)) {
+			return true;
+		} else if(sString.equalsIgnoreCase("true")) {
+			return true;
+		} else if(sString.equalsIgnoreCase("1")) {
+			return true;
+		}
+		return false;
 	}
 }
