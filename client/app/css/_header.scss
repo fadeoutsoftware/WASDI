@@ -1,0 +1,53 @@
+.header-wrapper{
+    padding-top: $size-header-padding-top;
+    height: $size-header-height-total;
+
+
+    //LOGO
+    .brand-logo {
+        content: $wasdi-brand-logo-root; // set 'src' attribute from CSS
+        width: $wasdi-brand-logo-root-size;
+        height: auto;
+        min-height: 50px;
+        min-width: 50px;
+    }
+
+    .navbar{
+        &.navbar-wasdi {
+            background-color: $wasdi-nav-bar-color-background;
+            height: 48px;
+            padding-bottom: 0px;
+            margin-bottom: 0px;
+
+            ul.navbar-nav{
+                li {
+                    a {
+                        color: white;
+                    }
+
+                    .fa{
+                        margin-right: 0.5rem;
+                    }
+                }
+
+                .active{
+                    color: white;
+                    background: $wasdi-nav-bar-color-active;
+
+                    a{
+                        &, &:hover, &:focus{
+                            color: white;
+                            background: $wasdi-nav-bar-color-active;
+                        }
+                    }
+                }
+            }
+
+            .navbar-toggle{
+                .icon-bar {
+                    background-color: $wasdi-white;
+                }
+            }
+        }
+    }
+}

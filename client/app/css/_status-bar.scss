@@ -1,0 +1,184 @@
+.status-bar {
+    //height: 4.5%;
+    //min-height: 4.5%;
+    width: 100%;
+    position: fixed;
+    z-index: 1000;
+    bottom: 0;
+    left: 0;
+    background-color: $wasdi-nav-bar-color-background;
+    overflow-x: hidden;
+    overflow-y: hidden;
+    transition: 0.5s;
+    color: $wasdi-white;
+    padding: 0px;
+    height: $size-status-bar-height-closed;
+
+    &.open{
+        height: $size-status-bar-height-opened;
+    }
+
+
+    .always-visible-part{
+        height: $size-status-bar-height-closed;
+        .toggle-btn{
+            width: 24px;
+        }
+        .rabbit-connection-status-wrapper {
+            $size-connection-icon: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+
+            .icon-bg {
+                width: $size-connection-icon;
+                padding: 0px !important;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+            }
+
+            .icon{
+                color: whitesmoke;
+                justify-content: center;
+                border-radius: 50%;
+                background-color: $color-connection-status-connected;
+                width: $size-connection-icon;
+                height: $size-connection-icon;
+                text-align: center;
+                line-height: $size-connection-icon + 2;
+                font-size: 12px
+            }
+
+            &.disconnected{
+                .icon{
+                    background-color: $color-connection-status-lost;
+                }
+            }
+        }
+        .processes-info-wrapper{
+            width: 90px;
+
+            .badge{
+                position: relative;
+                top: -1px;
+            }
+        }
+
+        .btn-wasdi-proc-bar{
+            background-color: transparent;
+            border-color: transparent;
+            color: $color-btn-primary-text;
+            &:hover{
+                color: $color-btn-primary-text;
+                background-color: $color-btn-primary-bg-hover;
+            }
+        }
+
+        .last-process{
+            & > div{
+                margin-top: 2px;
+            }
+            .label{
+                line-height: 15px;
+                padding: 1px 10px !important;
+                letter-spacing: 0.2px;
+                background-color: transparent;
+                border: 1px solid #aaa;
+            }
+            .single-process{
+                font-size: calculatePxFromRemAndBasePx(0.8rem, 16px);
+            }
+        }
+
+        .loadIcon{
+            position: relative;
+            top: 6px;
+        }
+    }
+
+
+    .processes-list-wrapper{
+        height: 0px;
+    }
+    &.open {
+        .processes-list-wrapper {
+            height: $size-status-bar-height-opened - $size-status-bar-height-closed;
+        }
+    }
+
+
+
+    .row {
+        margin-right: 5px;
+    }
+    .number-processes {
+        margin-top: 10px;
+        //position: absolute;
+        right: 0;
+    }
+    .processes-list {
+        //margin-top:10px;
+        //overflow-y: auto;
+        //height: 400px;
+        //min-height: 40px;
+
+        .table-striped > tbody > tr:nth-of-type(odd) {
+            background-color: $wasdi-blue-logo;
+        }
+
+        //If the name it's too long cut it!
+        .table td.text {
+            max-width: 350px;
+            span {
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                display: inline-block;
+                max-width: 100%;
+            }
+        }
+        .single-process {
+            display: inline-grid;
+        }
+        .progress-single-process {
+            //  float: right;
+            //  width:10%;
+            //  background-color:$wasdi-white ;
+            //  .progress-bar{}
+            width: 15%;
+            padding: 0 0 0 0;
+            background: $wasdi-white;
+
+        }
+    }
+    .my-button {
+        color: white;
+        color: white;
+        padding: 0;
+        margin: 0;
+        //padding: 3px;
+        line-height: 0;
+
+    }
+    .my-button:hover {
+        color: $wasdi-button-over-color;
+        background-color: transparent;
+    }
+
+    .openbtn {
+        margin-top: 10px;
+        //position: absolute;
+        //top: 0;
+        //right: 20px;
+        //position: absolute;
+        //left:50%;
+        ////bottom:70%;
+        //top:-10px;
+        //background-color: black;
+        //z-index: 5000;
+        //font-size: 20px;
+        //margin-left: 50px;
+        //color: $wasdi-white;
+    }
+}

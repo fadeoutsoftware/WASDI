@@ -161,6 +161,10 @@ var EditorController = (function () {
         this.generateDefaultNavBarMenu();
         this.navbarMenuTranslation();
 
+        // Launch image editor modal to debug it
+        //this.openImageEditorDialog();
+
+
     }
     /********************************************************* TRANSLATE SERVICE ********************************************************/
     EditorController.prototype.generateDefaultNavBarMenu = function(){
@@ -361,6 +365,41 @@ var EditorController = (function () {
     };
 
     /*********************************************************** VIEW METHODS**********************************************************/
+
+    EditorController.prototype.onEditBtnClick = function(){
+        this.openImageEditorDialog();
+    }
+
+    EditorController.prototype.openImageEditorDialog = function(){
+        var oController = this;
+        this.m_oModalService.showModal({
+            templateUrl: "dialogs/image_editor/image-editor.component.html",
+            controller: ImageEditorController.REG_NAME,
+            inputs: {
+                extras: ""
+            }
+
+        }).then(function(modal){
+            modal.element.modal({
+                backdrop: 'static',
+                keyboard: false
+            });
+            modal.close.then(function(result) {
+                // if(utilsIsObjectNullOrUndefined(result) === true || result.length === 0)
+                // {
+                //     //oController.m_sTypeOfFilterSelected = 'Time period';
+                //     oController.setFilterTypeAsTimePeriod();
+                //     return false;
+                // }
+                //
+                // oController.m_oAdvanceFilter.savedData = result;
+                // return true;
+            })
+        });
+
+        return true;
+    };
+
 
     /**
      * Change location to path
@@ -2749,7 +2788,8 @@ var EditorController = (function () {
         oWindow.openNDVIDialog(null,oController);
     }
     /**
-     *
+     * When user right click on a product and choose 'Properties' a dialog
+     * will be opened to show product properties
      * @param oProductInput
      * @returns {boolean}
      */

@@ -1,255 +1,236 @@
-<div class="import-view col-lg-12 col-md-12 col-sm-12 col-xs-12">
+<div class="import-view">
 
     <!--Operation bar-->
-    <div class="col-lg-11 col-md-10 col-sm-10 col-xs-10 col-lg-offset-1 col-md-offset-2 col-sm-offset-2 col-xs-offset-2 operations-bar my-input-text"  ><!--style="height: 80px;"-->
-        <!--&lt;!&ndash;PROVIDERS&ndash;&gt;-->
-        <!--<div style="">-->
-            <!--<multiselectdropdownmenu options="m_oController.m_aListOfProvider"></multiselectdropdownmenu>-->
-        <!--</div>-->
-
-
-        <!--search button-->
-        <div class="search-button-container" >
-            <div class="search-button" ng-click="m_oController.searchAllSelectedProviders()" id="search-button"
-                 ng-class="{'search-button-disabled': m_oController.thereIsAtLeastOneProvider() === false || (m_oController.m_bIsVisibleListOfLayers || m_oController.m_bisVisibleLocalStorageInputs),
-                            'search-button': m_oController.thereIsAtLeastOneProvider() === true }" ng-show="m_oController.m_sTypeOfFilterSelected === 'Time period'">
-                <!--<i class="fa fa-search fa-lg" aria-hidden="true"></i>-->
-                {{"IMPORT_SEARCH_BUTTON"|translate}} <i class="fa fa-search" aria-hidden="true"></i>
+    <div class="row-v4 justify-content-end toolbar">
+        <div class="col-v4-auto ml-auto">
+            <div class="btn-group btn-group-sm use-divider" role="group" aria-label="Basic example">
+                <button type="button" id="search-button" class="btn btn-primary btn-wasdi search-button"
+                        ng-click="$ctrl.searchAllSelectedProviders()"
+                        ng-class="{'disabled': $ctrl.isSearchBtnEnabled() == false, 'search-button': $ctrl.thereIsAtLeastOneProvider() === true }"
+                        ng-show="$ctrl.m_sTypeOfFilterSelected === 'Time period'">
+                    <i class="fa fa-search" aria-hidden="true"></i>{{"IMPORT_SEARCH_BUTTON"|translate}}</i>
+                </button>
+                <button type="button" id="search-button-list" class="btn btn-primary btn-wasdi search-button"
+                        ng-click="$ctrl.searchListAllSelectedProviders()"
+                        ng-class="{'disabled': $ctrl.isSearchBtnEnabled() == false, 'search-button': $ctrl.thereIsAtLeastOneProvider() === true }"
+                        ng-show="$ctrl.m_sTypeOfFilterSelected === 'Time series'">
+                    <i class="fa fa-search" aria-hidden="true"></i>{{"IMPORT_SEARCHLIST_BUTTON"|translate}}</button>
+                <button type="button" class="btn btn-secondary btn-wasdi search-button" ng-class="{'disabled': ($ctrl.m_bIsVisibleListOfLayers === false)}"
+                        ng-click="$ctrl.openModalDownloadSelectedProductsInSelectedWorkspaces()" >
+                    <i class="fa fa-download" aria-hidden="true"></i>Download selected</button>
             </div>
-
-            <div class="search-button" ng-click="m_oController.searchListAllSelectedProviders()" id="search-button-list"
-                 ng-class="{'search-button-disabled': m_oController.thereIsAtLeastOneProvider() === false || (m_oController.m_bIsVisibleListOfLayers || m_oController.m_bisVisibleLocalStorageInputs),
-                            'search-button': m_oController.thereIsAtLeastOneProvider() === true }"
-                 ng-show="m_oController.m_sTypeOfFilterSelected === 'Time series'">
-                <!--<i class="fa fa-search fa-lg" aria-hidden="true"></i>-->
-                {{"IMPORT_SEARCHLIST_BUTTON"|translate}} <i class="fa fa-search" aria-hidden="true"></i>
-            </div>
-
-            <div class="search-button" ng-class="{'search-button-disabled': (m_oController.m_bIsVisibleListOfLayers === false)}"
-                                       ng-click="m_oController.openModalDownloadSelectedProductsInSelectedWorkspaces()" ><!--ng-click="m_oController.downloadAllSelectedProducts()"-->
-                <!--<i class="fa fa-search fa-lg" aria-hidden="true"></i>-->
-                Download selected <i class="fa fa-download" aria-hidden="true"></i>
-            </div>
-
         </div>
-
     </div>
+    <div class="spacer"></div>
 
-        <!-- SIDEBAR -->
-    <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12 side-panel">
 
-        <div class="panel panel-default">
 
-            <div class="panel-heading">
-                <!-- BACK -->
-                <i class="fa fa-arrow-left fa-lg backbtn" aria-hidden="true" ng-click=" m_oController.setPaginationVariables()" ng-show="m_oController.m_bIsVisibleListOfLayers"></i>
+    <div class="row-v4 full-width-content">
+        <!----------------------------------- SIDEBAR ------------------------------------------->
+        <div class="col-v4-lg-4 col-v4-md-4 col-v4-sm-4 col-v4-xs-12 side-panel">
 
-                <span ng-hide="m_oController.m_bIsVisibleListOfLayers">{{"IMPORT_PANEL_HEAD_TITLE_FILTERS"|translate}}</span>
-                <div class="my-button header-button" ng-click="m_oController.clearFilter();m_oController.cleanAdvanceFilters();m_oController.removeAllAdvanceSavedFilters()"
-                     title="Clear Search Filter" ng-show="m_oController.m_bClearFiltersEnabled">
-                    <!--<i class="fa fa-search fa-lg" aria-hidden="true"></i>-->
-                    <!--{{"IMPORT_CLEAR_BUTTON"|translate}}-->
-                    <i class="fa fa-bath" aria-hidden="true" ></i>
+            <div class="card h-100">
+                <div class="card-header">
+                    <!-- BACK -->
+                    <i class="fa fa-arrow-left backbtn" aria-hidden="true" ng-click=" $ctrl.setPaginationVariables()" ng-show="$ctrl.m_bIsVisibleListOfLayers"></i>
 
+                    <span ng-hide="$ctrl.m_bIsVisibleListOfLayers">{{"IMPORT_PANEL_HEAD_TITLE_FILTERS"|translate}}</span>
+                    <div class="btn btn-wasdi btn-outline-light no-border btn-sm" ng-click="$ctrl.clearFilter();$ctrl.cleanAdvanceFilters();$ctrl.removeAllAdvanceSavedFilters()"
+                         title="Clear Search Filter" ng-show="$ctrl.m_bClearFiltersEnabled">
+                        <!--<i class="fa fa-search fa-lg" aria-hidden="true"></i>-->
+                        <!--{{"IMPORT_CLEAR_BUTTON"|translate}}-->
+                        <i class="fa fa-bath mr-0" aria-hidden="true" ></i>
+                    </div>
+                    <button class="btn btn-wasdi btn-outline-light no-border btn-sm" ng-show="$ctrl.m_bIsVisibleListOfLayers"
+                            ng-click="$ctrl.deselectAllProducts()">
+                        <i class="fa fa-square-o mr-0" aria-hidden="true"></i>
+                    </button>
+                    <button class="btn btn-wasdi btn-outline-light no-border btn-sm" ng-show="$ctrl.m_bIsVisibleListOfLayers"
+                            ng-click="$ctrl.selectAllProducts()">
+                        <i class="fa fa-check-square-o mr-0" aria-hidden="true"></i>
+                    </button>
                 </div>
-                <button class="my-button header-button " ng-show="m_oController.m_bIsVisibleListOfLayers"
-                        ng-click="m_oController.deselectAllProducts()">
-                    <i class="fa fa-square-o" aria-hidden="true"></i>
-                </button>
-                <button class="my-button header-button " ng-show="m_oController.m_bIsVisibleListOfLayers"
-                        ng-click="m_oController.selectAllProducts()">
-                    <i class="fa fa-check-square-o" aria-hidden="true"></i>
-                </button>
+                <div class="card-body p-0 d-flex flex-column">
+                    <div class="search-filters-container mt-2" ng-hide="$ctrl.m_bIsVisibleListOfLayers || $ctrl.m_bisVisibleLocalStorageInputs">
+                        <div class="container-fluid-v4 filters-wrapper" >
 
-            </div>
-
-            <div class="panel-body"><!--id="mySidenav"-->
-
-                    <div class="row" ng-hide="m_oController.m_bIsVisibleListOfLayers || m_oController.m_bisVisibleLocalStorageInputs">
-                        <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
-                            <div class="row">
-                                <div class="col-xs-5 col-sm-5 col-md-5 col-lg-5 col-xs-offset-1 col-sm-offset-1 col-md-offset-1 col-lg-offset-1">
-                                    <button type="button" class="my-button selected-time-series"
-                                            ng-click="m_oController.openAdvanceFiltersDialog(); m_oController.m_sTypeOfFilterSelected = 'Time series'"><i class="fa fa-calendar"></i><span class="myButton"> &nbsp;&nbsp;CronTab</span></button>
-
-                                    <!--</div>-->
+                            <!-- CronTab / Providers buttons -->
+                            <div class="row-v4 justify-content-around mt-2">
+                                <div class="col-v4-auto">
+                                    <button type="button" class="btn btn-primary btn-wasdi selected-time-series h-100"
+                                            ng-click="$ctrl.openAdvanceFiltersDialog(); $ctrl.m_sTypeOfFilterSelected = 'Time series'">
+                                        <i class="fa fa-calendar"></i>CronTab
+                                    </button>
                                 </div>
-                                <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
-                                    <multiselectdropdownmenu options="m_oController.m_aListOfProvider" name="Providers"></multiselectdropdownmenu>
-
+                                <div class="col-v4-auto">
+                                    <multiselectdropdownmenu options="$ctrl.m_aListOfProvider" name="Providers"></multiselectdropdownmenu>
                                 </div>
                             </div>
 
-                            <div class="row time-container" ng-show="m_oController.m_sTypeOfFilterSelected === 'Time period'"><!---->
-
-                                <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
-                                    FROM:
+                            <!-- From / To date pickers -->
+                            <div class="row-v4 mt-2 time-container" ng-hide="$ctrl.m_sTypeOfFilterSelected != 'Time period'">
+                                <div class="col-v4">
+                                    From:
                                     <div class="input-calendar-container" >
 
                                         <p class="input-group">
                                             <input type="text" class="form-control advanced-calendar-date-input"
                                                    uib-datepicker-popup="yyyy/MM/dd"
-                                                   ng-model="m_oController.m_oModel.sensingPeriodFrom"
-                                                   is-open="m_oController.m_oStatus.openedSensingPeriodFrom"
-                                                   date-disabled="m_oController.disabled(date, mode)"
-                                                   max-date="m_oController.m_oModel.sensingPeriodTo" ng-required="true"
-                                                   ng-blur="m_oController.updateAdvancedSearch()" readonly="true"
-                                                   close-text="Close"/>
+                                                   ng-model="$ctrl.m_oModel.sensingPeriodFrom"
+                                                   is-open="$ctrl.m_oStatus.openedSensingPeriodFrom"
+                                                   date-disabled="$ctrl.disabled(date, mode)"
+                                                   max-date="$ctrl.m_oModel.sensingPeriodTo" ng-required="true"
+                                                   ng-blur="$ctrl.updateAdvancedSearch()"
+                                                   ng-change="$ctrl.updateAdvancedSearch()"
+                                                   close-text="Close"/><!--readonly="true"-->
 
                                             <span class="input-group-btn">
-        			                            <button type="button" class="btn btn-default advanced-calendar-button"
-                                                    ng-click="m_oController.openSensingPeriodFrom($event)">
+                                                <button type="button" class="btn btn-default advanced-calendar-button"
+                                                        ng-click="$ctrl.openSensingPeriodFrom($event)">
                                                 <i class="fa fa-calendar" aria-hidden="true"></i>
                                                 </button>
                                             </span>
 
                                         </p>
                                     </div>
-
-                                    <!--<button type="button" class="my-button selected-time-series" ng-click="m_oController.openAdvanceFiltersDialog()">Select Time Series</button>-->
                                 </div>
-                                <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6" >
-                                    TO:
+                                <div class="col-v4">
+                                    To:
                                     <div class=" advanced-calendar-input input-calendar-container " >
                                         <p class="input-group" >
 
                                             <input type="text" class="form-control advanced-calendar-date-input"
                                                    uib-datepicker-popup="yyyy/MM/dd"
-                                                   ng-model="m_oController.m_oModel.sensingPeriodTo"
-                                                   is-open="m_oController.m_oStatus.openedSensingPeriodTo"
-                                                   date-disabled="m_oController.disabled(date, mode)" ng-required="true"
-                                                   min-date="m_oController.m_oModel.sensingPeriodFrom"
-                                                   ng-blur="m_oController.updateAdvancedSearch()" close-text="Close"
-                                                   readonly="true" data-container="body"/>
+                                                   ng-model="$ctrl.m_oModel.sensingPeriodTo"
+                                                   is-open="$ctrl.m_oStatus.openedSensingPeriodTo"
+                                                   date-disabled="$ctrl.disabled(date, mode)" ng-required="true"
+                                                   min-date="$ctrl.m_oModel.sensingPeriodFrom"
+                                                   ng-blur="$ctrl.updateAdvancedSearch()" close-text="Close"
+                                                   ng-change="$ctrl.updateAdvancedSearch()"
+                                                   data-container="body"/><!--readonly="true"-->
 
                                             <span class="input-group-btn">
-							                    <button type="button" class="btn btn-default advanced-calendar-button"
-                                                        ng-click="m_oController.openSensingPeriodTo($event)"><i class="fa fa-calendar" aria-hidden="true"></i></button>
-						                    </span>
+                                                <button type="button" class="btn btn-default advanced-calendar-button"
+                                                        ng-click="$ctrl.openSensingPeriodTo($event)"><i class="fa fa-calendar" aria-hidden="true"></i></button>
+                                            </span>
                                         </p>
                                     </div>
-                                    <!--<multiselectdropdownmenu options="m_oController.m_aListOfProvider"></multiselectdropdownmenu>-->
                                 </div>
                             </div>
-                            <div class="row" ng-show="m_oController.m_sTypeOfFilterSelected === 'Time series'"><!---->
+
+                            <!-- Time-series filters summary -->
+                            <div class="row-v4 mt-2" ng-hide="$ctrl.m_sTypeOfFilterSelected != 'Time series'">
                                 <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6" >
                                     <!--PROVIDERS-->
                                     <div style="">
-                                        <!--<multiselectdropdownmenu options="m_oController.m_aListOfProvider"></multiselectdropdownmenu>-->
+                                        <!--<multiselectdropdownmenu options="$ctrl.m_aListOfProvider"></multiselectdropdownmenu>-->
                                     </div>
                                 </div>
                                 <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
-                                    <!--<button type="button" class="my-button selected-time-series" ng-click="m_oController.openAdvanceFiltersDialog()">Select Time Series</button>-->
+                                    <!--<button type="button" class="my-button selected-time-series" ng-click="$ctrl.openAdvanceFiltersDialog()">Select Time Series</button>-->
                                 </div>
                             </div>
-                            <div class="row well well-sm" ng-hide="m_oController.m_oAdvanceFilter.savedData.length === 0">
-                                <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
-                                    <div class="chip" ng-repeat="data in m_oController.m_oAdvanceFilter.savedData">
-                                        {{data.name}}
-                                        <span class="closebtn" ng-click="m_oController.removeSaveDataChips(data) ">&times;</span> <!--this.parentElement.style.display='none';-->
+                            <div class="row-v4 mt-2" ng-hide="$ctrl.m_oAdvanceFilter.savedData.length === 0">
+                                <div class="col-v4-12">
+                                    <div class="well well-sm">
+                                        <div class="chip" ng-repeat="data in $ctrl.m_oAdvanceFilter.savedData">
+                                            {{data.name}}
+                                            <span class="closebtn" ng-click="$ctrl.removeSaveDataChips(data) ">&times;</span> <!--this.parentElement.style.display='none';-->
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
-                    </div>
-
-
-
-
-                    <div id="advanced-search-content"  ng-hide="m_oController.m_bIsVisibleListOfLayers || m_oController.m_bisVisibleLocalStorageInputs">
-
-                        <div style="overflow:visible;padding:15px 5px;" class="my-input-text"><!--id="section_2" class="panel-collapse collapse" role="tabpanel" aria-labelledby="section_2"-->
-
-                            <!--SEARCH INPUT-->
-                            <div class="search-input">
-                                <div class="row">
-                                    <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
-                                        <div class="my-label">Product Name</div>
-
+                        <!-- Missions selector and advanced filters -->
+                        <div id="advanced-search-content" class="flex-grow-1 mt-4 d-flex flex-column">
+                            <!-- Product name search -->
+                            <div class="container-fluid-v4">
+                                <div class="row-v4 product-search-wrapper">
+                                    <div class="col-v4-auto d-flex flex-column justify-content-center">
+                                        <div>Product<br>Name</div>
                                     </div>
-                                    <div class="col-xs-9 col-sm-9 col-md-9 col-lg-9">
-                                        <input type="text" ng-model="m_oController.m_oModel.textQuery"
-                                               placeholder="Search..." ><!-- style="padding: 0px !important;"-->
+                                    <div class="col-v4">
+                                        <input type="text" ng-model="$ctrl.m_oModel.textQuery" placeholder="Search..." >
                                     </div>
                                 </div>
-
                             </div>
 
-                            <!--*********************** MISSIONS LIST ********************************-->
-                            <ul class="nav nav-tabs nav-justified">
-                                <!--<li class="active"><a href="#">{{mission.name}}</a></li>-->
-                                <li ng-class="{active: m_oController.m_activeMissionTab === $index}" ng-repeat="mission in m_oController.getMissions()" ng-click="m_oController.m_activeMissionTab = $index">
-                                    <a href="">
-                                        <i class="fa fa-check-circle" aria-hidden="true" ng-show="mission.selected"></i>
-                                        <i class="fa fa-times-circle" aria-hidden="true" ng-hide="mission.selected"></i>
-                                        {{mission.name}}
-                                    </a>
-                                </li>
+                            <!-- Missions tabs -->
+                            <div class="row-v4 mission-tabs-wrapper mt-3">
+                                <div class="col-v4-12">
+                                    <div class="container-fluid-v4"><label>Select missions</label></div>
+                                    <ul class="nav-v4 nav-v4-tabs nav-v4-fill">
+                                        <!--<li ng-class="{active: $ctrl.m_activeMissionTab === $index}" ng-repeat="mission in $ctrl.getMissions()" ng-click="$ctrl.m_activeMissionTab = $index">-->
+                                        <!--<a href="">-->
+                                        <!--<i class="fa fa-check-circle" aria-hidden="true" ng-show="mission.selected"></i>-->
+                                        <!--<i class="fa fa-times-circle" aria-hidden="true" ng-hide="mission.selected"></i>-->
+                                        <!--{{mission.name}}-->
+                                        <!--</a>-->
+                                        <!--</li>-->
+                                        <li class="nav-v4-item" ng-repeat="mission in $ctrl.getMissions()"
+                                            ng-class="{'selected' : mission.selected == true}" ng-click="$ctrl.selectTabMission(mission, $index, $event)">
+                                            <div class="nav-v4-link" ng-class="{active: $ctrl.m_activeMissionTab === $index}">
+                                                <i class="mr-2 fa" aria-hidden="true" ng-class="{'fa-square-o' : mission.selected != true, 'fa-check-square' : mission.selected == true}" ng-click="$ctrl.toggleMissionSelection(mission, $index, $event)"></i>
+                                                <span>{{mission.name}}</span>
+                                            </div>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
 
-                            </ul>
+                            <!-- Mission details -->
+                            <div class="mission-details-wrapper container-fluid flex-grow-1">
+                                <div class="row-v4" ng-repeat="mission in $ctrl.getMissions()" ng-show="$ctrl.isMissionTabOpen($index)">
 
-                            <div ng-repeat="mission in m_oController.getMissions()" class="missions" ng-show="m_oController.m_activeMissionTab === $index">
-                                <!--<div>-->
-                                    <div class="col-md-1 col-xs-4 col-sd-4">
-                                        <div class="glyphicon mission-checkbox"
-                                             ng-class="{'glyphicon-unchecked': !mission.selected, 'glyphicon-check': mission.selected }"
-                                             ng-click="mission.selected = !mission.selected; m_oController.updateMissionSelection($index);"></div>
-                                    </div>
-                                    <div class="col-md-11 col-xs-8 col-sd-8">{{mission.name}}</div>
-                                <!--</div>-->
-
-                                <div class="row">
-                                    <!--{{mission.filters}}-->
-                                    <div ng-repeat="filter in mission.filters">
+                                    <div class="col-v4-6 mt-2" ng-repeat="filter in mission.filters">
                                         <!-- INPUT -->
-                                        <div class="col-md-6" ng-if="!(filter.indexvalues && filter.indexvalues.split('|').length > 0)">
+                                        <div ng-if="!(filter.indexvalues && filter.indexvalues.split('|').length > 0)">
                                             <div class="group">
-                                                <div class="my-input-text" >
-                                                    <label class="filter-label"
-                                                           ng-show="m_oController.isVisibleFilter(m_oController.getSelectedValueInMission(mission,'collection'),filter.indexname,mission.name)">
-                                                        {{filter.indexlabel}}
-                                                    </label>
-                                                    <!--INPUT class="form controller"-->
-                                                    <input type="text" ng-model="filter.indexvalue"
-                                                           ng-value="filter.indexvalue" class="filter-input"
-                                                           ng-blur="m_oController.updateFilter($parent.$parent.$index)"
-                                                           ng-pattern="filter.regex"
-                                                           ng-show="m_oController.isVisibleFilter(m_oController.getSelectedValueInMission(mission,'collection'),filter.indexname,mission.name)">
+                                                <label class="filter-label" ng-show="$ctrl.isVisibleFilter($ctrl.getSelectedValueInMission(mission,'collection'),filter.indexname,mission.name)">
+                                                    {{filter.indexlabel}}
+                                                </label>
+                                                <!--INPUT class="form controller"-->
+                                                <input type="text" class="filter-input wasdi-input"
+                                                       placeholder="{{$ctrl.getFilterPlaceholder(filter)}}"
+                                                       ng-model="filter.indexvalue"
+                                                       ng-value="filter.indexvalue"
+                                                       ng-blur="$ctrl.updateFilter($parent.$parent.$index)"
+                                                       ng-pattern="filter.regex"
+                                                       ng-show="$ctrl.isVisibleFilter($ctrl.getSelectedValueInMission(mission,'collection'),filter.indexname,mission.name)">
 
-                                                    <span class="highlight filter-highlight"></span>
-                                                    <span class="bar filter-bar"></span>
-                                                </div>
+                                                <span class="highlight filter-highlight"></span>
+                                                <span class="bar filter-bar"></span>
                                             </div>
                                         </div>
 
                                         <!-- INPUT NUMBER-->
                                         <!--<div class="col-md-6" ng-if="(filter.indexmin && filter.indexmax && filter.indexvalues === '')">-->
-                                            <!--<div class="group">-->
-                                                <!--<div class="my-input-text" >-->
-                                                    <!--<label class="filter-label">{{filter.indexlabel}}</label>-->
-                                                    <!--<input type="number" ng-model="filter.indexvalue" ng-value="filter.indexvalue"-->
-                                                           <!--name="points" min="filter.indexmin" max="filter.indexmax" ng-blur="m_oController.updateFilter($parent.$parent.$index)">-->
-                                                <!--</div>-->
-                                            <!--</div>-->
+                                        <!--<div class="group">-->
+                                        <!--<div class="my-input-text" >-->
+                                        <!--<label class="filter-label">{{filter.indexlabel}}</label>-->
+                                        <!--<input type="number" ng-model="filter.indexvalue" ng-value="filter.indexvalue"-->
+                                        <!--name="points" min="filter.indexmin" max="filter.indexmax" ng-blur="$ctrl.updateFilter($parent.$parent.$index)">-->
                                         <!--</div>-->
+                                        <!--</div>-->
+                                        <!--</div>-->
+
                                         <!-- LIST OF OPTIONS-->
-                                        <div id="adv-options" class="group col-md-6 my-input-text"
-                                             ng-if="(filter.indexvalues && filter.indexvalues.split('|').length > 0)">
+                                        <div id="adv-options" class="group" ng-if="(filter.indexvalues && filter.indexvalues.split('|').length > 0)">
                                             <label class="filter-label"
-                                                   ng-show="m_oController.isVisibleFilter(m_oController.getSelectedValueInMission(mission,'collection'),filter.indexname,mission.name)">
+                                                   ng-show="$ctrl.isVisibleFilter($ctrl.getSelectedValueInMission(mission,'collection'),filter.indexname,mission.name)">
                                                 {{filter.indexlabel}}
                                             </label>
                                             <!--INPUT class="form controller"-->
                                             <input type="text" ng-model="filter.indexvalue" ng-value="filter.indexvalue"
-                                                   class=" filter-input"
-                                                   ng-blur="m_oController.updateFilter($parent.$parent.$index)"
-                                                   ng-click="m_oController.clearInput($parent.$parent.$index, $parent.$index)"
+                                                   class="filter-input wasdi-input"
+                                                   ng-blur="$ctrl.updateFilter($parent.$parent.$index)"
+                                                   ng-click="$ctrl.clearInput($parent.$parent.$index, $parent.$index)"
                                                    ng-pattern="filter.regex"
                                                    list="{{$parent.$parent.$index}}_{{$index}}_optlist"
-                                                   ng-show="m_oController.isVisibleFilter(m_oController.getSelectedValueInMission(mission,'collection'),filter.indexname,mission.name)">
+                                                   ng-show="$ctrl.isVisibleFilter($ctrl.getSelectedValueInMission(mission,'collection'),filter.indexname,mission.name)">
                                             <div class="adv-selectfield"
-                                                 ng-show="m_oController.isVisibleFilter(m_oController.getSelectedValueInMission(mission,'collection'),filter.indexname,mission.name)">
+                                                 ng-show="$ctrl.isVisibleFilter($ctrl.getSelectedValueInMission(mission,'collection'),filter.indexname,mission.name)">
                                                 <datalist id="{{$parent.$parent.$index}}_{{$index}}_optlist"
                                                           class="browser-default" ng-model="filter.indexvalue">
 
@@ -263,261 +244,66 @@
                                         </div>
                                     </div>
                                 </div>
-
-
                             </div>
 
-                        </div>
 
+                            <!--&lt;!&ndash;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45; MERGER SEARCH &#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&ndash;&gt;-->
+                            <!--<div class="merge-search" ng-show="$ctrl.m_bisVisibleLocalStorageInputs == true">-->
 
-                    </div>
+                            <!--<div class="col-md-4 col-sd-4 col-xs-4 advanced-calendar-label ">-->
+                            <!--Time for Local storage:-->
+                            <!--</div>-->
 
+                            <!--<div class="col-md-8 col-sd-8 col-xs-8  advanced-calendar-input input-calendar-container my-input-text">-->
+                            <!--<p class="input-group">-->
 
+                            <!--<input type="text" class="form-control advanced-calendar-date-input"-->
+                            <!--uib-datepicker-popup="yyyy/MM/dd"-->
+                            <!--ng-model="$ctrl.m_oMergeSearch.period"-->
+                            <!--close-text="Close"-->
+                            <!--readonly="true" data-container="body"-->
+                            <!--is-open="$ctrl.m_oMergeSearch.statusIsOpen"/>-->
 
-                <!---------------------------- MERGER SEARCH -------------------->
-                <div class="merge-search" ng-show="m_oController.m_bisVisibleLocalStorageInputs == true">
+                            <!--<span class="input-group-btn">-->
+                            <!--<button type="button" class="btn btn-default advanced-calendar-button"-->
+                            <!--ng-click="$ctrl.openPeriodForMergeSearch($event)"><i class="fa fa-calendar" aria-hidden="true"></i></button>-->
+                            <!--</span>-->
+                            <!--</p>-->
 
-                    <div class="col-md-4 col-sd-4 col-xs-4 advanced-calendar-label ">
-                        Time for Local storage:
-                    </div>
+                            <!--<br/>-->
+                            <!--<div class="search-button-container" >-->
 
-                    <div class="col-md-8 col-sd-8 col-xs-8  advanced-calendar-input input-calendar-container my-input-text">
-                        <p class="input-group">
+                            <!--<div class="search-button" ng-click="$ctrl.loadProductsInLocalStorage()" >-->
+                            <!--&lt;!&ndash;<i class="fa fa-search fa-lg" aria-hidden="true"></i>&ndash;&gt;-->
+                            <!--{{"IMPORT_SEARCH_BUTTON"|translate}}-->
+                            <!--</div>-->
 
-                            <input type="text" class="form-control advanced-calendar-date-input"
-                                   uib-datepicker-popup="yyyy/MM/dd"
-                                   ng-model="m_oController.m_oMergeSearch.period"
-                                   close-text="Close"
-                                   readonly="true" data-container="body"
-                                   is-open="m_oController.m_oMergeSearch.statusIsOpen"/>
+                            <!--&lt;!&ndash;<span class="advanced-search-clear" ng-click="$ctrl.clearFilter()" title="Clear Search Filter" >{{"IMPORT_CLEAR_BUTTON"|translate}}</span>&ndash;&gt;-->
+                            <!--</div>-->
+                            <!--</div>-->
 
-                                        <span class="input-group-btn">
-							                <button type="button" class="btn btn-default advanced-calendar-button"
-                                                    ng-click="m_oController.openPeriodForMergeSearch($event)"><i class="fa fa-calendar" aria-hidden="true"></i></button>
-						                </span>
-                        </p>
-
-                        <br/>
-                        <div class="search-button-container" >
-
-                            <div class="search-button" ng-click="m_oController.loadProductsInLocalStorage()" >
-                                <!--<i class="fa fa-search fa-lg" aria-hidden="true"></i>-->
-                                {{"IMPORT_SEARCH_BUTTON"|translate}}
-                            </div>
-
-                            <!--<span class="advanced-search-clear" ng-click="m_oController.clearFilter()" title="Clear Search Filter" >{{"IMPORT_CLEAR_BUTTON"|translate}}</span>-->
+                            <!--</div>-->
                         </div>
                     </div>
 
-                </div>
-
-                <!--**************** PRODUCTS-LAYERS TABLE ----------------------->
-
-
-                <div class="tabs-container" ng-show="m_oController.m_bIsVisibleListOfLayers">
-                    <!-- TAB NAVIGATION -->
-
-                    <ul class="nav nav-tabs" role="tablist" ><!-- ng-hide="m_oController.m_bIsVisibleListOfLayers " && m_oController.isEmptyProductsList() == true-->
-                        <li ng-class="{active: m_oController.m_iActiveProvidersTab === $index}"
-                            ng-repeat="provider in m_oController.m_aListOfProvider | filter:{ selected: true }"
-                            ng-click="m_oController.m_iActiveProvidersTab = $index; m_oController.updateLayerListForActiveTab(provider.name)">
-                            <a href="" role="tab" data-toggle="tab">
-                                {{provider.name }}
-                                <span class="badge pull-right">{{ m_oController.m_oPageService.getNumberOfProductByProvider(provider.name)}}</span>
-                            </a>
-
-
-                        </li>
-                    </ul>
-                </div>
-                <div ng-repeat="provider in m_oController.m_aListOfProvider | filter:{ selected: true }" class="missions" ng-show="m_oController.m_iActiveProvidersTab === $index">
-                    <div class="pages" ng-hide="(m_oController.m_bIsVisibleListOfLayers && m_oController.m_bIsPaginatedList === false) || m_oController.isEmptyProductsList() == true">
-                        <ul class="pager">
-
-                            <div class="form-group">
-                                <label for="selectPages">{{"IMPORT_PRODUCTS_PER_PAGE_LABEL"|translate}}</label>
-                                <select class="form-control" id="selectPages" ng-model="m_oController.m_oPageService.getProviderObject(provider.name).productsPerPageSelected"
-                                        ng-options="product for product in m_oController.m_oPageService.m_iProductsPerPage"
-                                        ng-change="m_oController.m_oPageService.changeNumberOfProductsPerPage(provider.name,m_oController)"><!--ng-change="m_oController.search(provider.name)">-->
-                                </select>
-                            </div><br>
-                            <li ng-click="m_oController.m_oPageService.firstPage(provider.name,m_oController)" ><a><i class="fa fa-angle-double-left" aria-hidden="true"></i></a></li>
-                            <li ng-click="m_oController.m_oPageService.minusOnePage(provider.name,m_oController)" ><a><i class="fa fa-angle-left" aria-hidden="true"></i></a></li>
-                            <form ng-submit="m_oController.m_oPageService.changePage(m_oController.m_oPageService.getProviderObject(provider.name).currentPage,provider.name,m_oController)">
-                                {{"IMPORT_PAGE_LABEL"|translate}}
-                                <input type="text" class="form-control" ng-model="m_oController.m_oPageService.getProviderObject(provider.name).currentPage">
-                                {{"IMPORT_OF_LABEL"|translate}} {{m_oController.m_oPageService.getProviderObject(provider.name).totalPages}}
-                            </form>
-                            <li ng-click="m_oController.m_oPageService.plusOnePage(provider.name, m_oController)" ><a><i class="fa fa-angle-right" aria-hidden="true"></i></a></li>
-                            <li ng-click="m_oController.m_oPageService.lastPage(provider.name,m_oController)" ><a><i class="fa fa-angle-double-right" aria-hidden="true"></i></a></li>
-
-                        </ul>
-
+                    <!-- *** PRODUCTS-LAYERS TABLE *** -->
+                    <div class="search-result-container flex-fill d-flex flex-column">
+                        <ng-include src="'partials/missions-result.component.html'" class="flex-fill d-flex flex-column"></ng-include>
                     </div>
-                    <!--<div class="test">-->
-
-                    <div class="container-table-row" ng-class="{'container-table-row-without-pagination' :
-                                    (m_oController.m_bIsVisibleListOfLayers && m_oController.m_bIsPaginatedList === false)
-                                    || m_oController.isEmptyProductsList() == true}"
-                         ng-show="m_oController.m_bIsVisibleListOfLayers" id="div-container-table" >
-
-                    <!-- TAB CONTENT -->
-                    <!--<div>-->
-                    <!--<div ng-repeat="provider in m_oController.m_aListOfProvider | filter:{ selected: true }" class="missions" ng-show="m_oController.m_iActiveProvidersTab === $index">-->
-
-                    <!--PAGING CONTROL-->
-                    <!--<div class="pages" ng-hide="(m_oController.m_bIsVisibleListOfLayers && m_oController.m_bIsPaginatedList === false) || m_oController.isEmptyProductsList() == true">-->
-                    <!--<ul class="pager">-->
-
-                    <!--<div class="form-group">-->
-                    <!--<label for="selectPages">{{"IMPORT_PRODUCTS_PER_PAGE_LABEL"|translate}}</label>-->
-                    <!--<select class="form-control" id="selectPages" ng-model="m_oController.m_oPageService.getProviderObject(provider.name).productsPerPageSelected"-->
-                    <!--ng-options="product for product in m_oController.m_oPageService.m_iProductsPerPage"-->
-                    <!--ng-change="m_oController.m_oPageService.changeNumberOfProductsPerPage(provider.name,m_oController)">&lt;!&ndash;ng-change="m_oController.search(provider.name)">&ndash;&gt;-->
-                    <!--</select>-->
-                    <!--</div><br>-->
-                    <!--<li ng-click="m_oController.m_oPageService.firstPage(provider.name,m_oController)" ><a><i class="fa fa-angle-double-left" aria-hidden="true"></i></a></li>-->
-                    <!--<li ng-click="m_oController.m_oPageService.minusOnePage(provider.name,m_oController)" ><a><i class="fa fa-angle-left" aria-hidden="true"></i></a></li>-->
-                    <!--<form ng-submit="m_oController.m_oPageService.changePage(m_oController.m_oPageService.getProviderObject(provider.name).currentPage,provider.name,m_oController)">-->
-                    <!--{{"IMPORT_PAGE_LABEL"|translate}}-->
-                    <!--<input type="text" class="form-control" ng-model="m_oController.m_oPageService.getProviderObject(provider.name).currentPage">-->
-                    <!--{{"IMPORT_OF_LABEL"|translate}} {{m_oController.m_oPageService.getProviderObject(provider.name).totalPages}}-->
-                    <!--</form>-->
-                    <!--<li ng-click="m_oController.m_oPageService.plusOnePage(provider.name, m_oController)" ><a><i class="fa fa-angle-right" aria-hidden="true"></i></a></li>-->
-                    <!--<li ng-click="m_oController.m_oPageService.lastPage(provider.name,m_oController)" ><a><i class="fa fa-angle-double-right" aria-hidden="true"></i></a></li>-->
-
-                    <!--</ul>-->
-
-                    <!--</div>-->
-
-                    <!------------ IF THE LIST OF LAYERS IS EMPTY ------------>
-                    <div ng-show = "m_oController.isEmptyProviderLayerList(provider.name) && provider.isLoaded === true" style=" padding-left: 10px">
-                        <h3>
-                            No results for {{provider.description}} provider
-                            <i class="fa fa-exclamation" aria-hidden="true"></i>
-                        </h3>
-                    </div>
-                    <!----------------- LOADING LIST OF LAYERS ---------------------->
-                    <div ng-show = "m_oController.isEmptyProviderLayerList(provider.name) && m_oController.m_bIsVisibleListOfLayers === true &&  provider.isLoaded === false" class="loadIcon">
-                        <invader></invader>
-                    </div>
-
-                    <table class="table table-hover layers " id="table_layers_list" ng-show="m_oController.m_bIsVisibleListOfLayers && m_oController.isEmptyProductsList() == false" >
-
-                        <tbody ng-repeat="layer in m_oController.m_aoProductsList | filter:{ provider: provider.name } "
-                               ng-mouseover="m_oController.changeStyleRectangleMouseOver(layer.rectangle)"
-                               ng-mouseleave="m_oController.changeStyleRectangleMouseLeave(layer.rectangle)"
-                               id='{{"layer"+layer.id}}'> <!--id='{{"layer:"+$index}}' layer.id-->
-                        <!------------------------------- SUMMARY ------------------------------->
-                        <tr class="info-layer" >
-                            <!-- BUTTONS -->
-                            <td class="button-cell">
-                                <div class="btn-group-vertical" role="group" >
-                                    <!-- CHECK PRODUCT-->
-                                    <button type="button" class="btn btn btn-primary" ng-show="layer.checked" ng-click="layer.checked= !layer.checked"
-                                            data-toggle="tooltip" data-placement="top" title="{{'IMPORT_TOOLTIP_CHECK'|translate}}">
-                                        <i class="fa fa-check-square-o" aria-hidden="true"></i>
-                                    </button>
-                                    <!-- UNCHECK PRODUCT-->
-                                    <button type="button" class="btn btn btn-primary" ng-hide="layer.checked" ng-click="layer.checked= !layer.checked "
-                                            data-toggle="tooltip" data-placement="top" title="{{'IMPORT_TOOLTIP_UNCHECK'|translate}}">
-                                        <i class="fa fa-square-o" aria-hidden="true"></i>
-                                    </button>
-                                    <button type="button" class="btn btn btn-primary" ng-click="m_oController.openModalDownloadProductInSelectedWorkspaces(layer)"
-                                            ng-disabled="m_oController.isPossibleDoDownload(layer) || (layer.isDisabledToDoDownload != null && layer.isDisabledToDoDownload)"
-                                            data-toggle="tooltip" data-placement="top" title="{{'IMPORT_TOOLTIP_ADD_PRODUCT'|translate}}">
-                                        <i class="fa fa-plus " aria-hidden="true"></i>
-                                    </button>
-                                    <button type="button" class="btn btn btn-primary" ng-click="m_oController.zoomOnBounds(layer.rectangle)"
-                                            data-toggle="tooltip" data-placement="top" title="{{'IMPORT_TOOLTIP_ZOOM_ON_PRODUCT'|translate}}">
-                                        <i class="fa fa-search-plus" aria-hidden="true"></i>
-                                    </button>
-                                    <button type="button" class="btn btn btn-primary" ng-click="m_oController.infoLayer(layer)"
-                                            data-toggle="tooltip" data-placement="top" title="{{'IMPORT_TOOLTIP_INFO'|translate}}">
-                                        <i class="fa fa-info-circle" aria-hidden="true"></i>
-                                    </button>
-
-                                    <!--<button type="button" class="btn btn btn-primary"  data-toggle="tooltip" data-placement="top"-->
-                                            <!--title="{{'IMPORT_TOOLTIP_DOWNLOAD'|translate}}"  ng-disabled="true">-->
-                                        <!--<i class="fa fa-download" aria-hidden="true"></i>-->
-                                    <!--</button>-->
-
-
-                                </div>
-                            </td>
-                            <!-- IMAGE CELL -->
-                            <td class="image-cell">
-                                <span class="label label-success">{{layer.summary.Mode}}</span>&nbsp;<!--Mode-->
-                                <span class="label label-success"> {{layer.summary.Instrument}}</span><!--Instrument-->
-                                <div class="preview-layer-image" ><img src={{layer.preview}} alt="Image" style="height: 82px;width: 82px; "></div>
-                                <span class="badge">{{layer.summary.Size}}</span><!--Size-->
-                            </td>
-                            <!-- INFO CELL -->
-                            <td class="info-cell">
-
-                                <div>{{layer.summary.Date|date:'medium'}}</div><!--Date-->
-                                </br>
-
-                                <div>
-                                    <span>Name: </span>
-                                    <span><b>{{layer.title}}</b></span>
-                                </div>
-
-                                <div>
-                                    <span>Polarisation: </span>
-                                    <span><b>{{layer.summary.Mode}}</b></span>
-                                </div>
-
-                                <div>
-                                    <span>Relative Orbit: </span>
-                                    <span><b>{{layer.properties.relativeorbitnumber}}</b></span>
-                                </div>
-
-                                <!--<div>{{"layer"+layer.id}}</div>-->
-                                <div>
-                                    <span>Provider:</span>
-                                    <span><b>{{layer.provider}}</b></span>
-                                </div>
-
-                                <div>
-                                    <span>Platform name:</span>
-                                    <span><b>{{layer.properties.platformname}}</b></span>
-                                </div>
-                                <div>
-                                    <span>Sensor Operational mode:</span>
-                                    <span><b>{{layer.properties.sensoroperationalmode}}</b></span>
-                                </div>
-                            </td>
-
-                        </tr>
-                        </tbody>
-                    </table>
-                    <!--</div>-->
-
-                    <!--</div>-->
-
                 </div>
-                    <!--</div>-->
-                </div>
-                <!--the table become visible after the user Search a layer -->
-
             </div>
+        </div><!-- Sidebar end -->
+
+
+
+
+        <!----------------------------------- MAP ------------------------------------------->
+        <div class="col-v4-lg-8 col-v4-md-8 col-v4-sm-8 col-v4-xs-12 map-column ">
+            <div class="map-container">
+                <div class="map" id="wasdiMapImport"></div>
             </div>
         </div>
-    <!--</div>-->
-        <!-- OPEN MENU -->
-    <!--<div class="fixed" ng-click="m_oController.openNav()">-->
-        <!--<i class="fa fa-search fa-lg" aria-hidden="true"></i>-->
-
-    <!--</div>-->
-    <!----------------------------------- MAP ------------------------------------------->
-    <div class="col-lg-8 col-md-8 col-sm-8 col-xs-12 map-column ">
-        <div class="map-container">
-            <div class="map" id="wasdiMapImport"></div>
-        </div>
-
     </div>
-
 </div>
 
 <script>

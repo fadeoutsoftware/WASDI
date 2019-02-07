@@ -1,238 +1,222 @@
-.workspaces-view
-{
-  //OPERATION BAR
-  .operations-bar {
+.workspaces-view {
+    //OPERATION BAR
+    //.operations-bar {
+    //
+    //  text-align: right;
+    //  margin-top: -45px;
+    //  .my-input-text
+    //  {
+    //    width: 20%;
+    //    margin-left: 20px;
+    //  }
+    //  .my-button{
+    //    padding: 12px 20px;
+    //    margin: 9px 2px;
+    //  }
+    //}
 
-    text-align: right;
-    margin-top: -45px;
-    .my-input-text
-    {
-      width: 20%;
-      float: left;
-      margin-left: 20px;
+    .toolbar {
+        .filter-search-wrapper{
+            margin-left: 96px;
+            width: 300px;
+        }
     }
-    .my-button{
-      float:right;
-      padding: 12px 20px;
-      margin: 9px 2px;
-    }
-  }
 
     //GLOBE
-  .globe-container{
-    margin-top: 10px;
-    .globe-style
-    {
-      width: auto;//500px
-      height: $wasdi-heigth-globe-workspaces;//500px
-      border: 2px solid black;
-    }
-
-    //@media screen and (max-width: 1600px) and (min-width: 1500px)
-    //{
-    //  .globe-style {
-    //    width: auto;//500px
-    //    height: 73vh;//500px
-    //    border: 2px solid black;
-    //  }
-    //}
-    //@media screen and (max-width: 1400px) and (min-width: 1300px)
-    //{
-    //  .globe-style {
-    //    width: auto;//500px
-    //    height: 71vh;//500px
-    //    border: 2px solid black;
-    //  }
-    //}
-    //@media screen and (max-width: 1300px) and (min-width: 1200px) and (max-height: 850px) and (min-height: 750px)
-    //{
-    //  .globe-style {
-    //    width: auto;//500px
-    //    height: 67vh;//500px
-    //    //border: 2px solid black;
-    //    border: 2px solid red;
-    //
-    //  }
-    //}
-
-    .toolbar-right-bottom {
-      display: block;
-      position: absolute;
-      right: 20px;
-      bottom: 5px;
-
-    }
-  }
-
-  //TITLE
-  .my-title
-  {
-    text-align: center;
-    font-family: $wasdi-font-web;
-  }
-
-  //TABLE WORKSPACES
-  //.table-hover tbody tr:hover td, .table-hover tbody tr:hover th {
-  //  background-color: #44536C;
-  //  color: white;
-  //}
-  .workspace-list
-  {
-      margin-top: 10px;
-      //height: $wasdi-heigth-panel;
-    .table-workspaces{
-      height: $wasdi-heigth-panel-workspaces-page;
-      overflow: auto;
-      .wizards{
-        margin: 30px 5px 5px 10px;
-      }
-
-      thead
-      {
-        th{
-          background-color: #44536C;
-          color: white;
+    .globe-container {
+        margin-top: 10px;
+        .globe-style {
+            width: auto; //500px
+            //height: $wasdi-heigth-globe-workspaces; //500px
+            border: 2px solid black;
         }
-      }
 
-      .table-hover tbody tr:hover td, .table-hover tbody tr:hover th {
-        background-color: #44536C;
-        color: white;
-        cursor:pointer;
-      }
-      // COLOR OVER A TD
-      //.over-color
-      //{
-      //  background-color: $wasdi-white;
-      //  color: $wasdi-blue-logo;
-      //
-      //  &:hover{
-      //    cursor:pointer;
-      //    i:hover {
-      //
-      //      //background-color:white;
-      //      color:$wasdi-over-icon;
-      //    }
-      //  }
-      //
-      //}
-      .selected-row
-      {
+        //@media screen and (max-width: 1600px) and (min-width: 1500px)
+        //{
+        //  .globe-style {
+        //    width: auto;//500px
+        //    height: 73vh;//500px
+        //    border: 2px solid black;
+        //  }
+        //}
+        //@media screen and (max-width: 1400px) and (min-width: 1300px)
+        //{
+        //  .globe-style {
+        //    width: auto;//500px
+        //    height: 71vh;//500px
+        //    border: 2px solid black;
+        //  }
+        //}
+        //@media screen and (max-width: 1300px) and (min-width: 1200px) and (max-height: 850px) and (min-height: 750px)
+        //{
+        //  .globe-style {
+        //    width: auto;//500px
+        //    height: 67vh;//500px
+        //    //border: 2px solid black;
+        //    border: 2px solid red;
+        //
+        //  }
+        //}
 
-        background-color: #44536C;
-        color: white;
-
-        // COLOR OVER A TD
-        .over-color
-        {
-          background-color: $wasdi-white !important;
-          color: $wasdi-blue-logo !important;
-          border-top: none;
-
-          &:hover{
-
-            background-color: $wasdi-grey !important;
-            cursor:pointer;
-            //color:$wasdi-over-icon !important;
-            i:hover {
-
-              //background-color:white;
-              color:$wasdi-over-icon;
-            }
-          }
+        .toolbar-right-bottom {
+            display: block;
+            position: absolute;
+            right: 20px;
+            bottom: 5px;
 
         }
-      }
     }
-  }
-  // LIST OF FILES IN WORKSPACES
-  .fieldset-list-files{
-    //overflow-y: auto;
-    //overflow-x: hidden;
-    //height: $wasdi-max-height-workspaces;
-    height: $wasdi-heigth-panel-workspaces-page;
 
-    //@media screen and (max-width: 1600px) and (min-width: 1500px) {
-    //  height: 34vh;
-    //}
-    //@media screen and (max-width: 1400px) and (min-width: 1300px)
-    //{
-    //  height: 30vh;
-    //}
-    //@media screen and (max-width: 1300px) and (min-width: 1200px)
-    //{
-    //  height: 40vh;
-    //}
-
-    .list-files
-    {
-      height: $wasdi-heigth-workspace-list;
-      overflow-y: auto;
-      overflow-x: hidden;
-
-      .loading-files
-      {
-        width: 50%;
-        margin: 0 auto;
+    //TITLE
+    .my-title {
         text-align: center;
-      }
+        font-family: $wasdi-font-web;
+    }
 
-      .panel-default
-      {
-        border-color: $wasdi-list-of-files-border-color;
-        border-width: 2px;
-        .panel-heading
-        {
-          //font-size:
-          .panel-title
-          {
-            /*color icon*/
-            font-size: 14px;
-            i
-            {
-              color:$wasdi-blue-logo;
+    //TABLE WORKSPACES
+    //.table-hover tbody tr:hover td, .table-hover tbody tr:hover th {
+    //  background-color: #44536C;
+    //  color: white;
+    //}
+    .workspace-list {
+        margin-top: 10px;
+        //height: $wasdi-heigth-panel;
+        .table-workspaces {
+            height: $wasdi-heigth-panel-workspaces-page;
+            overflow: auto;
+            .wizards {
+                margin: 30px 5px 5px 10px;
             }
-            //no underline
-            a, u {
-              text-decoration: none;
+
+            thead {
+                th {
+                    background-color: #44536C;
+                    color: white;
+                }
             }
-          }
+
+            .table-hover tbody tr:hover td, .table-hover tbody tr:hover th {
+                background-color: #44536C;
+                color: white;
+                cursor: pointer;
+            }
+            // COLOR OVER A TD
+            //.over-color
+            //{
+            //  background-color: $wasdi-white;
+            //  color: $wasdi-blue-logo;
+            //
+            //  &:hover{
+            //    cursor:pointer;
+            //    i:hover {
+            //
+            //      //background-color:white;
+            //      color:$wasdi-over-icon;
+            //    }
+            //  }
+            //
+            //}
+            .selected-row {
+
+                background-color: #44536C;
+                color: white;
+
+                // COLOR OVER A TD
+                .over-color {
+                    background-color: $wasdi-white !important;
+                    color: $wasdi-blue-logo !important;
+                    border-top: none;
+
+                    &:hover {
+
+                        background-color: $wasdi-grey !important;
+                        cursor: pointer;
+                        //color:$wasdi-over-icon !important;
+                        i:hover {
+
+                            //background-color:white;
+                            color: $wasdi-over-icon;
+                        }
+                    }
+
+                }
+            }
         }
+    }
+    // LIST OF FILES IN WORKSPACES
+    .fieldset-list-files {
+        //overflow-y: auto;
+        //overflow-x: hidden;
+        //height: $wasdi-max-height-workspaces;
+        height: $wasdi-heigth-panel-workspaces-page;
 
-        .list-group-item
-        {
-          border-color: $wasdi-list-of-files-border-color;
+        //@media screen and (max-width: 1600px) and (min-width: 1500px) {
+        //  height: 34vh;
+        //}
+        //@media screen and (max-width: 1400px) and (min-width: 1300px)
+        //{
+        //  height: 30vh;
+        //}
+        //@media screen and (max-width: 1300px) and (min-width: 1200px)
+        //{
+        //  height: 40vh;
+        //}
+
+        .list-files {
+            height: $wasdi-heigth-workspace-list;
+            overflow-y: auto;
+            overflow-x: hidden;
+
+            .loading-files {
+                width: 50%;
+                margin: 0 auto;
+                text-align: center;
+            }
+
+            .panel-default {
+                border-color: $wasdi-list-of-files-border-color;
+                border-width: 2px;
+                .panel-heading {
+                    //font-size:
+                    .panel-title {
+                        /*color icon*/
+                        font-size: 14px;
+                        i {
+                            color: $wasdi-blue-logo;
+                        }
+                        //no underline
+                        a, u {
+                            text-decoration: none;
+                        }
+                    }
+                }
+
+                .list-group-item {
+                    border-color: $wasdi-list-of-files-border-color;
+                }
+
+            }
+
         }
-
-
-
-
-      }
-
     }
-  }
 
-
-  //Graphic trick
-  form
-  {
-    fieldset
-    {
-      border:2px solid $wasdi-blue-logo;
-      padding: 3px 20px;
+    //Graphic trick
+    form {
+        fieldset {
+            border: 2px solid $wasdi-blue-logo;
+            padding: 3px 20px;
+        }
+        legend {
+            width: auto;
+            border-bottom: 0;
+        }
     }
-    legend
-    {
-      width: auto;
-      border-bottom: 0;
+
+    button.cesium-infoBox-camera {
+        display: none;
     }
-  }
 
-  button.cesium-infoBox-camera {
-    display: none;
-  }
-
-  div.cesium-infoBox-title {
-    color: #22EE22;
-  }
+    div.cesium-infoBox-title {
+        color: #22EE22;
+    }
 }

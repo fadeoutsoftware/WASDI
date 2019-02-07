@@ -9,13 +9,17 @@
             <div class="modal-body">
 
                 <!--{{m_oController.getLayers()}}-->
-
-                <div class="my-input-text" >
-                    <input type="text" class="form-control" placeholder="{{'DIALOG_GET_CAPABILITIES_SERVER'|translate}}" ng-model="input">
+                <div class="row-v4">
+                    <div class="col-v4">
+                        <div class="my-input-text" >
+                            <input type="text" class="form-control" placeholder="{{'DIALOG_GET_CAPABILITIES_SERVER'|translate}}" ng-model="input">
+                        </div>
+                    </div>
+                    <div class="col-v4-auto d-flex flex-column justify-content-center">
+                        <div class="btn btn-primary btn-wasdi" ng-click="m_oController.loadLayers(input)" >{{"DIALOG_GET_CAPABILITIES_SEARCH"|translate}}</div>
+                    </div>
                 </div>
 
-
-                <div class="my-button" ng-click="m_oController.loadLayers(input)" >{{"DIALOG_GET_CAPABILITIES_SEARCH"|translate}}</div>
 
                 <div ng-show="m_oController.m_bIsVisibleLoadIcon == true" class="my-loading" >
                     <i class="fa fa-spinner fa-pulse fa-3x fa-fw" ></i>
