@@ -20,12 +20,20 @@ import it.fadeout.Wasdi;
 import wasdi.shared.business.User;
 import wasdi.shared.opensearch.OpenSearchQuery;
 import wasdi.shared.opensearch.QueryExecutor;
+import wasdi.shared.opensearch.QueryExecutorFactory;
+import wasdi.shared.opensearch.QueryExecutorFactorySupplier;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.QueryResultViewModel;
 import wasdi.shared.viewmodels.SearchProviderViewModel;
 
 @Path("/search")
 public class OpenSearchResource {
+	
+	private static QueryExecutorFactorySupplier s_oSupplier;
+	
+	static {
+		s_oSupplier = new QueryExecutorFactorySupplier();
+	}
 
 	@Context
 	ServletConfig m_oServletConfig;
@@ -139,27 +147,24 @@ public class OpenSearchResource {
 		Map<String, Integer> aiQueryCountResultsPerProvider = new HashMap<String, Integer>();
 		String asProviders[] = sProviders.split(",|;");
 		for (String sProvider : asProviders) {
-			String sUser = m_oServletConfig.getInitParameter(sProvider + ".OSUser");
-			String sPassword = m_oServletConfig.getInitParameter(sProvider + ".OSPwd");
-			String sDownloadProtocol = m_oServletConfig.getInitParameter(sProvider+".downloadProtocol");
 
 			String sOffset = null;
 			String sLimit = null;
 			String sSortedBy = null;
 			String sOrder = null;
-			// XXX move this into SENTINEL query executor
+			// XXX can we get rid of this code?
+			/*
 			if (sProvider.equals("SENTINEL")) {
 				sOffset = "0";
 				sLimit = "1";
 				sSortedBy = "ingestiondate";
 				sOrder = "asc";
 			}
+			*/
 
-			String sGetMetadata = m_oServletConfig.getInitParameter("getProductMetadata");
-			QueryExecutor oExecutor =
-					QueryExecutor.newInstance(sProvider, sUser,
-							sPassword, sOffset, sLimit,
-							sSortedBy, sOrder, sDownloadProtocol, sGetMetadata);
+			
+			QueryExecutor oExecutor = getExecutor(sProviders, sOffset, sLimit, sSortedBy, sOrder);
+
 			try {
 				Integer iProviderCountResults = 0;
 				iProviderCountResults = oExecutor.executeCount(sQuery);
@@ -211,6 +216,7 @@ public class OpenSearchResource {
 
 			ArrayList<QueryResultViewModel> aoResults = new ArrayList<QueryResultViewModel>();
 
+			//XXX embed this code into a method
 			int iLimit = 25;
 			try {
 				iLimit = Integer.parseInt(sLimit);
@@ -245,17 +251,15 @@ public class OpenSearchResource {
 				int iActualOffset = Math.max(0, iOffset - iSkipped - aoResults.size());
 				String sActualOffset = "" + iActualOffset;
 
-				String sUser = m_oServletConfig.getInitParameter(sProvider + ".OSUser");
-				String sPassword = m_oServletConfig.getInitParameter(sProvider + ".OSPwd");
-				String sDownloadProtocol = m_oServletConfig.getInitParameter(sProvider+".downloadProtocol");
 
 				System.out.println(
 						"Executing query for " + sProvider + ": offset=" + sActualOffset + ": limit=" + sActualLimit);
 
-				String sGetMetadata = m_oServletConfig.getInitParameter("getProductMetadata");
-				QueryExecutor oExecutor = QueryExecutor.newInstance(sProvider, sUser, sPassword, sActualOffset,
-						sActualLimit, sSortedBy, sOrder, sDownloadProtocol, sGetMetadata);
+				//TODO use only sProviders
+				QueryExecutor oExecutor = getExecutor(sProviders, sActualOffset, sActualLimit, sSortedBy, sOrder);
+
 				try {
+					//TODO pass object containing sQuery, sActualOffset, sActualLimit, sSortedBy, sOrder 
 					ArrayList<QueryResultViewModel> aoTmp = oExecutor.execute(sQuery);
 					if (aoTmp != null && !aoTmp.isEmpty()) {
 						aoResults.addAll(aoTmp);
@@ -393,13 +397,8 @@ public class OpenSearchResource {
 
 						String sActualLimit = "" + iLimit;
 
-						String sUser = m_oServletConfig.getInitParameter(sProvider + ".OSUser");
-						String sPassword = m_oServletConfig.getInitParameter(sProvider + ".OSPwd");
-						String sDownloadProtocol = m_oServletConfig.getInitParameter(sProvider+".downloadProtocol");
-						String sGetMetadata = m_oServletConfig.getInitParameter("getProductMetadata");
-						
-						QueryExecutor oExecutor = QueryExecutor.newInstance(sProvider, sUser, sPassword, sActualOffset,
-								sActualLimit, sSortedBy, sOrder, sDownloadProtocol, sGetMetadata);
+						QueryExecutor oExecutor = getExecutor(sProviders, sActualOffset, sActualLimit, sSortedBy, sOrder);
+
 						try {
 							ArrayList<QueryResultViewModel> aoTmp = oExecutor.execute(sQuery, false);
 
@@ -425,6 +424,27 @@ public class OpenSearchResource {
 		}
 
 		return null;
+	}
+	
+	private QueryExecutor getExecutor(String sProvider, String sOffset, String sLimit, String sSortedBy, String sOrder) {
+		
+		String sUser = m_oServletConfig.getInitParameter(sProvider + ".OSUser");
+		String sPassword = m_oServletConfig.getInitParameter(sProvider + ".OSPwd");
+		String sDownloadProtocol = m_oServletConfig.getInitParameter(sProvider+".downloadProtocol");
+		String sGetMetadata = m_oServletConfig.getInitParameter("getProductMetadata");
+		
+		QueryExecutorFactory oFactory = s_oSupplier.supply(sProvider);
+		QueryExecutor oExecutor = oFactory.newInstance(
+				//TODO transform into credentials
+				sUser, sPassword,
+				//TODO remove from the constructor and pass to the execute method
+				sOffset, sLimit, sSortedBy, sOrder,
+				//TODO change into config method
+				sDownloadProtocol, sGetMetadata);
+		
+		return oExecutor;
+		
+	 
 	}
 
 }

@@ -33,6 +33,7 @@ import org.apache.abdera.protocol.client.AbderaClient;
 import org.apache.abdera.protocol.client.ClientResponse;
 import org.apache.abdera.protocol.client.RequestOptions;
 
+import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.QueryResultViewModel;
 
 public abstract class QueryExecutor {
@@ -41,9 +42,17 @@ public abstract class QueryExecutor {
 	protected DiasResponseTranslator m_oResponseTranslator;
 	protected String m_sDownloadProtocol;
 	protected boolean m_bMustCollectMetadata;
+	protected String m_sProvider; 
+	protected String m_sUser; 
+	protected String m_sPassword; 
+	protected String m_sOffset; 
+	protected String m_sLimit; 
+	protected String m_sSortedBy; 
+	protected String m_sOrder;
 
 	//TODO refactor w/ a factory
 	//TODO refactor: pass a dictionary instead
+	/*
 	public static QueryExecutor newInstance(
 			String sProvider, String sUser, String sPassword, String sOffset,
 			String sLimit, String sSortedBy, String sOrder, String sDownloadProtocol, String sGetMetadata) {
@@ -62,7 +71,7 @@ public abstract class QueryExecutor {
 				oExecutor.setLimit(sLimit);
 				oExecutor.setSortedBy(sSortedBy);
 				oExecutor.setOrder(sOrder);
-				oExecutor.setMustCollectMetadata(shallRetrieveMetadata(sGetMetadata));
+				oExecutor.setMustCollectMetadata(Utils.doesThisStringMeansTrue(sGetMetadata));
 				//TODO get rid of this if! 
 				if(sProvider.equals("ONDA")) {
 					oExecutor.setQueryTranslator(new DiasQueryTranslatorONDA());
@@ -80,37 +89,21 @@ public abstract class QueryExecutor {
 		}
 		
 		return null;
-	}
+	}*/
 	
-	private void setQueryTranslator(DiasQueryTranslator oQueryTranslator) {
+	void setQueryTranslator(DiasQueryTranslator oQueryTranslator) {
 		m_oQueryTranslator = oQueryTranslator;
 		
 	}
 
-	public void setResponseTranslator(DiasResponseTranslator oResponseTranslator) {
+	void setResponseTranslator(DiasResponseTranslator oResponseTranslator) {
 		this.m_oResponseTranslator = oResponseTranslator;
 	}
 
-	private static boolean shallRetrieveMetadata(String sGetMetadata) {
-		if(null == sGetMetadata) {
-			return true;
-		} else if (sGetMetadata.equalsIgnoreCase("true") || sGetMetadata.equalsIgnoreCase("1")) {
-			return true;
-		} else return true;
-	}
-
-	private void setMustCollectMetadata(boolean bGetMetadata) {
+	void setMustCollectMetadata(boolean bGetMetadata) {
 		m_bMustCollectMetadata = bGetMetadata;
 		
-	}
-
-	protected String m_sProvider; 
-	protected String m_sUser; 
-	protected String m_sPassword; 
-	protected String m_sOffset; 
-	protected String m_sLimit; 
-	protected String m_sSortedBy; 
-	protected String m_sOrder;	
+	}	
 	
 
 	public void setProvider(String m_sProvider) {
@@ -441,8 +434,11 @@ public abstract class QueryExecutor {
 	
 
 	public static void main(String[] args) {
-		QueryExecutor oExecutor = QueryExecutor.newInstance("MATERA", "user", "password", "0", "10", "ingestiondate", "asc", "", "true");
 		
+		QueryExecutorFactorySupplier oSupplier = new QueryExecutorFactorySupplier();
+		QueryExecutorFactory oFactory = oSupplier.supply("MATERA");
+		QueryExecutor oExecutor = oFactory.newInstance("user", "password", "0", "10", "ingestiondate", "asc", "", "true");
+				
 		try {
 			String sQuery = "( beginPosition:[2017-05-15T00:00:00.000Z TO 2017-05-15T23:59:59.999Z] AND endPosition:[2017-05-15T00:00:00.000Z TO 2017-05-15T23:59:59.999Z] ) AND   (platformname:Sentinel-1 AND filename:S1A_* AND producttype:GRD)";
 			
@@ -468,6 +464,14 @@ public abstract class QueryExecutor {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+
+	public void setDownloadProtocol(String sDownloadProtocol) {
+		if(null == sDownloadProtocol) {
+			throw new NullPointerException("QueryExecutor.setDownloadProtocol: sDownloadProtocol is null");
+		}
+		m_sDownloadProtocol = sDownloadProtocol;
+		
 	}
 	
 }
