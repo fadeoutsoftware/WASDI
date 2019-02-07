@@ -1,9 +1,12 @@
 package it.fadeout.rest.resources;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 
 import javax.servlet.ServletConfig;
 import javax.ws.rs.Consumes;
@@ -13,9 +16,11 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 
+import org.jaitools.tilecache.BasicCacheVisitor.Key;
 import org.nfs.orbits.CoverageTool.Polygon;
 import org.nfs.orbits.CoverageTool.apoint;
 import org.nfs.orbits.sat.CoverageSwathResult;
@@ -24,7 +29,23 @@ import org.nfs.orbits.sat.SatSensor;
 import org.nfs.orbits.sat.Satellite;
 import org.nfs.orbits.sat.SwathArea;
 
+//import com.google.common.collect.SortedLists.KeyAbsentBehavior;
+
+//import com.vividsolutions.jts.geom.Coordinate;
+
+import de.micromata.opengis.kml.v_2_2_0.AbstractObject;
+import de.micromata.opengis.kml.v_2_2_0.AltitudeMode;
+import de.micromata.opengis.kml.v_2_2_0.Boundary;
+import de.micromata.opengis.kml.v_2_2_0.ColorMode;
+import de.micromata.opengis.kml.v_2_2_0.Coordinate;
 import de.micromata.opengis.kml.v_2_2_0.Kml;
+import de.micromata.opengis.kml.v_2_2_0.KmlFactory;
+import de.micromata.opengis.kml.v_2_2_0.LineStyle;
+import de.micromata.opengis.kml.v_2_2_0.LinearRing;
+import de.micromata.opengis.kml.v_2_2_0.Pair;
+import de.micromata.opengis.kml.v_2_2_0.Placemark;
+import de.micromata.opengis.kml.v_2_2_0.PolyStyle;
+import de.micromata.opengis.kml.v_2_2_0.StyleState;
 import it.fadeout.Wasdi;
 import it.fadeout.business.InstanceFinder;
 import it.fadeout.viewmodels.CoverageSwathResultViewModel;
@@ -391,20 +412,77 @@ public class OpportunitySearchResource {
 	@Produces({ "application/xml"})//, "application/json", "text/html" 
 	//@Consumes(MediaType.APP)
 	@Consumes(MediaType.APPLICATION_XML)
-	public Kml getKmlSearchResults ()
+	public Kml getKmlSearchResults (@HeaderParam("x-session-token") String sSessionId,
+									@QueryParam("text") String sText,
+									@QueryParam("footPrint") String sFootPrint)
 	{
-		final Kml kml = new Kml();
-		kml.createAndSetPlacemark()
-		   .withName("London, UK").withOpen(Boolean.TRUE)
-		   .createAndSetPoint().addToCoordinates(-0.126236, 51.500152);
+		User oUser = Wasdi.GetUserFromSession(sSessionId);
 		
-		/*try {
-			kml.marshal(new File("C:\\temp\\wasdi\\HelloKml.kml"));
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		if (oUser == null) {
 			return null;
-		}*/
+		}
+		if (Utils.isNullOrEmpty(oUser.getUserId())) {
+			return null;
+		}
+		if(sFootPrint.isEmpty() || sText.isEmpty())
+		{
+			return null;
+		}
+		
+		String[] asPoints = Utils.convertPolygonToArray(sFootPrint);
+		Kml kml = KmlFactory.createKml();
+		
+		//get coordinates
+		Boundary oOuterBoundaryIs = new Boundary();
+		LinearRing oLinearRing = new LinearRing() ;
+		List<Coordinate> aoCoordinates = new ArrayList<Coordinate>();
+		for (String string : asPoints) 
+		{
+			string = string.replaceAll(" ", ",");
+			Coordinate oCoordinate = new Coordinate(string);
+
+			aoCoordinates.add(oCoordinate);
+
+		}
+		
+		oLinearRing.setCoordinates(aoCoordinates);
+		
+		oOuterBoundaryIs.setLinearRing(oLinearRing);
+
+		
+		//set placemark
+		Placemark oPlacemark= kml.createAndSetPlacemark()
+									.withName(sText)
+									.withVisibility(true);
+		//styleLine
+		oPlacemark.createAndAddStyleMap()
+				  		.createAndAddPair()
+				  			.withKey(StyleState.NORMAL)
+							.createAndSetStyle()
+								.createAndSetLineStyle()
+									.withColor("FF0000FF")
+									.withColorMode(ColorMode.NORMAL)
+									.withWidth(1);
+
+	
+		//set polystyle
+		oPlacemark.createAndAddStyleMap()
+			.createAndAddPair()
+				.createAndSetStyle()
+					.createAndSetPolyStyle()
+						.withColor("FF0000FF")
+							.withColorMode(ColorMode.NORMAL)
+							.withFill(true)
+							.withOutline(true);
+
+		//set polygon
+		oPlacemark.createAndSetPolygon()
+			.withAltitudeMode(AltitudeMode.CLAMP_TO_GROUND)
+			.withExtrude(false)
+			.withOuterBoundaryIs(oOuterBoundaryIs);
+		
+		kml.setFeature(oPlacemark);
+		
 		return kml;
 	}
 	

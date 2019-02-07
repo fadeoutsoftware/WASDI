@@ -731,6 +731,7 @@ public class InstanceFinder {
 		
 		return oPoligon;
 	}
+	
 	private static void setEnableSensorsAndSensorModes(ArrayList<SatSensor> aoSatSensors, ArrayList<SensorViewModel> aoSatelliteSensorsEnabled)
 	{
 		

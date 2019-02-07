@@ -9,12 +9,12 @@ service('ConstantsService', [function () {
     this.COOKIE_EXPIRE_TIME_DAYS = 1;//days
 
     // WASDI SERVER
-    /**/
-        // this.URL = 'http://178.22.66.96/wasdiwebserver/';
-        // this.WEBSTOMPURL = 'http://178.22.66.96/rabbit/stomp';
-        // this.WMSURL = "http://178.22.66.96/geoserver/ows?";
-        // //this.WASDIGEOSERVERWPS = "http://178.22.66.96/geoserver/wps";
-        //  this.WASDIGEOSERVERWPS = "http://www.wasdi.net/geoserver/wps";
+    // /**/   this.URL = 'http://178.22.66.96/wasdiwebserver/';
+    // this.WEBSTOMPURL = 'http://178.22.66.96/rabbit/stomp';
+    // this.WMSURL = "http://178.22.66.96/geoserver/ows?";
+    // //this.WASDIGEOSERVERWPS = "http://178.22.66.96/geoserver/wps";
+    // this.WASDIGEOSERVERWPS = "http://www.wasdi.net/geoserver/wps";
+
     //
 
     /**/
@@ -47,7 +47,7 @@ service('ConstantsService', [function () {
     this.URL= 'http://127.0.0.1:8080/wasdiwebserver/';//
     this.WEBSTOMPURL = 'http://178.22.66.96/rabbit/stomp';
     this.WMSURL = "http://127.0.0.1:8080/geoserver/ows?";//wasdi/wms? OLD VERSION
-    
+
 
     this.WPSPROXY =  'https://cors-anywhere.herokuapp.com/';
 

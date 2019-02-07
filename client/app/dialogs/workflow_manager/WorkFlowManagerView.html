@@ -51,9 +51,12 @@
                             </div>
 
                             <div class="row my-input-text">
-                                <div class="col-xs-8 col-sm-8 col-md-8 col-lg-8 col-xs-offset-2 col-sm-offset-2 col-md-offset-2 col-lg-offset-2">
+                                <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
                                     <input type="text" name="name"  class="my-input-text" value="" title="" required="required"
                                            placeholder="Workflow name" ng-model="m_oController.m_oWorkflowFileData.workflowName">
+                                </div>
+                                <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+                                    is public
                                 </div>
 
                             </div>
@@ -142,7 +145,9 @@
                                                 ng-click="m_oController.m_oSelectedWorkflow = workflow">
                                                 <td >{{workflow.name}}</td>
                                                 <td>{{workflow.description}}</td>
-                                                <td class="td-button" ng-click="m_oController.deleteWorkflow(workflow)">
+                                                <!--<td class="td-button" ng-click="m_oController.deleteWorkflow(workflow)">-->
+                                                <td class="td-button" ng-click="m_oController.openDeleteWorkflowDialog(workflow)"
+                                                    ng-disabled = "m_oController.isTheOwnerOfWorkflow(workflow)">
                                                     <i class="fa fa-trash" aria-hidden="true"></i>
                                                 </td>
                                             </tr>
