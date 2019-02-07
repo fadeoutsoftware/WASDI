@@ -16,6 +16,7 @@ import javax.imageio.ImageIO;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import org.apache.abdera.Abdera;
+import org.apache.abdera.i18n.iri.IRI;
 import org.apache.abdera.i18n.templates.Template;
 import org.apache.abdera.model.Document;
 import org.apache.abdera.model.Entry;
@@ -335,7 +336,9 @@ public class QueryExecutorPROBAV extends QueryExecutor  {
 				//				System.out.println("Icon Link: " + oLink.getHref().toString());
 
 				try {
-					ClientResponse oImageResponse = oClient.get(oLink.getHref().toString(), oOptions);
+					IRI oIri = oLink.getHref();
+					String sHref = oIri.toString();
+					ClientResponse oImageResponse = oClient.get(sHref, oOptions);
 					//					System.out.println("Response Got from the client");
 					if (oImageResponse.getType() == ResponseType.SUCCESS)
 					{
