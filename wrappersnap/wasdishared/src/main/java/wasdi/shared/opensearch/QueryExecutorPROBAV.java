@@ -33,6 +33,10 @@ import wasdi.shared.viewmodels.QueryResultViewModel;
 
 public class QueryExecutorPROBAV extends QueryExecutor  {
 
+	QueryExecutorPROBAV(){
+		m_sProvider = "PROBAV";
+	}
+	
 	@Override
 	protected String[] getUrlPath() {
 		return new String[] {"openSearch/findProducts"};
@@ -51,7 +55,7 @@ public class QueryExecutorPROBAV extends QueryExecutor  {
 	}
 
 	@Override
-	protected String buildUrl(String sQuery){
+	protected String buildUrl(PaginatedQuery oQuery){
 		//Template oTemplate = getTemplate();
 		//Map<String,Object> oParamsMap = new HashMap<String, Object>();		
 		//oParamsMap.put("scheme", getUrlSchema());
@@ -67,7 +71,7 @@ public class QueryExecutorPROBAV extends QueryExecutor  {
 		String collection = null;
 		String cloudCover = null;
 		String snowCover = null;
-		String[] asFootprint = sQuery.split("AND");
+		String[] asFootprint = oQuery.getQuery().split("AND");
 		if (asFootprint.length > 0)
 		{
 			for (String item : asFootprint) {
@@ -157,10 +161,10 @@ public class QueryExecutorPROBAV extends QueryExecutor  {
 			sUrl+="&" + cloudCover;
 		if (snowCover != null)
 			sUrl+="&" + snowCover;
-		if (this.m_sOffset != null)
-			sUrl+="&startIndex=" + this.m_sOffset;
-		if (this.m_sLimit != null)
-			sUrl+="&count=" + this.m_sLimit;
+		if (oQuery.getOffset() != null)
+			sUrl+="&startIndex=" + oQuery.getOffset();
+		if (oQuery.getLimit() != null)
+			sUrl+="&count=" + oQuery.getLimit();
 
 		//addUrlParams(oParamsMap);
 		return sUrl;
@@ -169,10 +173,8 @@ public class QueryExecutorPROBAV extends QueryExecutor  {
 	@Override
 	public int executeCount(String sQuery) throws IOException
 	{
-		String sOldLimit = m_sLimit;
-		m_sLimit = "0";
-		String sUrl = buildUrl(sQuery);
-		m_sLimit = sOldLimit;
+		PaginatedQuery oQuery = new PaginatedQuery(sQuery, null, null, null, null);
+		String sUrl = buildUrl(oQuery);
 		
 		//create abdera client
 		Abdera oAbdera = new Abdera();

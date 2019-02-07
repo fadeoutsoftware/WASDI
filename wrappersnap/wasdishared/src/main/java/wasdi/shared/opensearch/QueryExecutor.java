@@ -38,125 +38,53 @@ import wasdi.shared.viewmodels.QueryResultViewModel;
 
 public abstract class QueryExecutor {
 	
-	protected DiasQueryTranslator m_oQueryTranslator;
-	protected DiasResponseTranslator m_oResponseTranslator;
 	protected String m_sDownloadProtocol;
 	protected boolean m_bMustCollectMetadata;
 	protected String m_sProvider; 
 	protected String m_sUser; 
 	protected String m_sPassword; 
-	protected String m_sOffset; 
-	protected String m_sLimit; 
-	protected String m_sSortedBy; 
-	protected String m_sOrder;
-
-	//TODO refactor w/ a factory
-	//TODO refactor: pass a dictionary instead
-	/*
-	public static QueryExecutor newInstance(
-			String sProvider, String sUser, String sPassword, String sOffset,
-			String sLimit, String sSortedBy, String sOrder, String sDownloadProtocol, String sGetMetadata) {
-		
-		String sClassName = QueryExecutor.class.getName() + sProvider;
-		
-		try {
-			Object o = Class.forName(sClassName).newInstance();
-			
-			if (o instanceof QueryExecutor) {
-				QueryExecutor oExecutor = (QueryExecutor) o;
-				oExecutor.setProvider(sProvider);
-				oExecutor.setUser(sUser);
-				oExecutor.setPassword(sPassword);
-				oExecutor.setOffset(sOffset);
-				oExecutor.setLimit(sLimit);
-				oExecutor.setSortedBy(sSortedBy);
-				oExecutor.setOrder(sOrder);
-				oExecutor.setMustCollectMetadata(Utils.doesThisStringMeansTrue(sGetMetadata));
-				//TODO get rid of this if! 
-				if(sProvider.equals("ONDA")) {
-					oExecutor.setQueryTranslator(new DiasQueryTranslatorONDA());
-					oExecutor.setResponseTranslator(new DiasResponseTranslatorONDA());
-				}
-				oExecutor.m_sDownloadProtocol = sDownloadProtocol;
-				return oExecutor;
-			}
-		} catch (InstantiationException e) {
-			e.printStackTrace();
-		} catch (IllegalAccessException e) {
-			e.printStackTrace();
-		} catch (ClassNotFoundException e) {
-			e.printStackTrace();
-		}
-		
-		return null;
-	}*/
 	
-	void setQueryTranslator(DiasQueryTranslator oQueryTranslator) {
-		m_oQueryTranslator = oQueryTranslator;
-		
-	}
+	protected DiasQueryTranslator m_oQueryTranslator;
+	protected DiasResponseTranslator m_oResponseTranslator;
+	
+	
+	//TODO convert into arguments of method execute
+//	protected String m_sOffset; 
+//	protected String m_sLimit; 
+//	protected String m_sSortedBy; 
+//	protected String m_sOrder;
+	
 
-	void setResponseTranslator(DiasResponseTranslator oResponseTranslator) {
-		this.m_oResponseTranslator = oResponseTranslator;
-	}
 
-	void setMustCollectMetadata(boolean bGetMetadata) {
+		void setMustCollectMetadata(boolean bGetMetadata) {
 		m_bMustCollectMetadata = bGetMetadata;
 		
 	}	
 	
-
-	public void setProvider(String m_sProvider) {
-		this.m_sProvider = m_sProvider;
-	}
-
-
 	public void setUser(String m_sUser) {
 		this.m_sUser = m_sUser;
 	}
-
 
 	public void setPassword(String m_sPassword) {
 		this.m_sPassword = m_sPassword;
 	}
 
 
-	public void setOffset(String m_sOffset) {
-		this.m_sOffset = m_sOffset;
-	}
 
 
-	public void setLimit(String m_sLimit) {
-		this.m_sLimit = m_sLimit;
-	}
-
-
-	public void setSortedBy(String m_sSortedBy) {
-		this.m_sSortedBy = m_sSortedBy;
-	}
-
-
-	public void setOrder(String m_sOrder) {
-		this.m_sOrder = m_sOrder;
-	}
-
-
-	protected String buildUrl(String sQuery) {
+	protected String buildUrl(PaginatedQuery oQuery) {
 		Template oTemplate = getTemplate();
 		Map<String,Object> oParamsMap = new HashMap<String, Object>();		
 		oParamsMap.put("scheme", getUrlSchema());
 		oParamsMap.put("path", getUrlPath());
-		oParamsMap.put("start", m_sOffset);
-		oParamsMap.put("rows", m_sLimit);
-		oParamsMap.put("orderby", m_sSortedBy + " " + m_sOrder);
-		oParamsMap.put("q", sQuery);
+		oParamsMap.put("start", oQuery.getOffset() );
+		oParamsMap.put("rows", oQuery.getLimit() );
+		oParamsMap.put("orderby", oQuery.getSortedBy() + " " + oQuery.getOrder() );
+		oParamsMap.put("q", oQuery.getQuery() );
 		addUrlParams(oParamsMap);
 		return oTemplate.expand(oParamsMap);
 		
 	}
-	
-
-	
 	
 	protected void addUrlParams(Map<String, Object> oParamsMap) {
 	}
@@ -166,7 +94,6 @@ public abstract class QueryExecutor {
 		return "http";
 	}
 
-	
 	protected abstract String[] getUrlPath();
 	
 	
@@ -217,8 +144,7 @@ public abstract class QueryExecutor {
 					}
 				}
 			}
-			
-			
+					
 			//retrieve the icon
 			oLink = oEntry.getLink("icon");			
 			if (oLink != null) {
@@ -358,12 +284,11 @@ public abstract class QueryExecutor {
 				
 		return Integer.parseInt(response.toString());
 	}
-	
 
-	public ArrayList<QueryResultViewModel> execute(String sQuery, boolean bFullViewModel) throws IOException {
+	public ArrayList<QueryResultViewModel> executeAndRetrieve(PaginatedQuery oQuery, boolean bFullViewModel) throws IOException {
 		//XXX log instead
 		System.out.println("QueryExecutor.execute");
-		String sUrl = buildUrl(sQuery);
+		String sUrl = buildUrl(oQuery );
 		
 		//create abdera client
 		Abdera oAbdera = new Abdera();
@@ -427,39 +352,22 @@ public abstract class QueryExecutor {
 		else return buildResultLightViewModel(oDocument, oClient, oOptions);
 	}
 	
-	public ArrayList<QueryResultViewModel> execute(String sQuery) throws IOException {
-		return execute(sQuery,true);
+	public ArrayList<QueryResultViewModel> executeAndRetrieve(PaginatedQuery oQuery) throws IOException {
+		return executeAndRetrieve(oQuery,true);
 	}
-
-	
 
 	public static void main(String[] args) {
 		
-		QueryExecutorFactorySupplier oSupplier = new QueryExecutorFactorySupplier();
-		QueryExecutorFactory oFactory = oSupplier.supply("MATERA");
-		QueryExecutor oExecutor = oFactory.newInstance("user", "password", "0", "10", "ingestiondate", "asc", "", "true");
+		QueryExecutorFactory oFactory = new QueryExecutorFactory();
+		AuthenticationCredentials oCredentials = new AuthenticationCredentials("user", "password");
+		QueryExecutor oExecutor = oFactory.getExecutor("MATERA", oCredentials,
+				//"0", "10", "ingestiondate", "asc",
+				"", "true");
 				
 		try {
 			String sQuery = "( beginPosition:[2017-05-15T00:00:00.000Z TO 2017-05-15T23:59:59.999Z] AND endPosition:[2017-05-15T00:00:00.000Z TO 2017-05-15T23:59:59.999Z] ) AND   (platformname:Sentinel-1 AND filename:S1A_* AND producttype:GRD)";
 			
-			System.out.println(oExecutor.executeCount(sQuery));
-			
-//			String sParameter = URLEncoder.encode(sQuery, "UTF-8");
-//			ArrayList<QueryResultViewModel> aoResults = oExecutor.execute(sQuery);
-//			if (aoResults!=null) {
-//				for (QueryResultViewModel oResult : aoResults) {
-//					System.out.println(oResult.getTitle());
-//					System.out.println("    ID: " + oResult.getId());
-//					System.out.println("    SUMMARY: " + oResult.getSummary());
-//					System.out.println("    LINK: " + oResult.getLink());
-//					if (oResult.getPreview()!=null) System.out.println("    PREVIEW-LEN:" + oResult.getPreview().length());
-//					System.out.println("    FOOTPPRINT:" + oResult.getFootprint());
-//					for (String sKey : oResult.getProperties().keySet()) {
-//						System.out.println("        PROPERTY: " + sKey + " --> " + oResult.getProperties().get(sKey));
-//					}
-//				}				
-//			}
-			
+			System.out.println(oExecutor.executeCount(sQuery));			
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -471,6 +379,16 @@ public abstract class QueryExecutor {
 			throw new NullPointerException("QueryExecutor.setDownloadProtocol: sDownloadProtocol is null");
 		}
 		m_sDownloadProtocol = sDownloadProtocol;
+		
+	}
+
+	public void setCredentials(AuthenticationCredentials oCredentials) {
+		if(null!=oCredentials) {
+			setUser(oCredentials.getUser());
+			setPassword(oCredentials.getPassword());
+		} else {
+			throw new NullPointerException("QueryExecutor.setCredentials: null oCredentials");
+		}
 		
 	}
 	

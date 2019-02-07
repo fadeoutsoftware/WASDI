@@ -17,9 +17,10 @@ import com.vividsolutions.jts.geom.Polygon;
 import wasdi.ConfigReader;
 import wasdi.filebuffer.ProviderAdapter;
 import wasdi.filebuffer.ProviderAdapterSupplier;
+import wasdi.shared.opensearch.AuthenticationCredentials;
+import wasdi.shared.opensearch.PaginatedQuery;
 import wasdi.shared.opensearch.QueryExecutor;
 import wasdi.shared.opensearch.QueryExecutorFactory;
-import wasdi.shared.opensearch.QueryExecutorFactorySupplier;
 import wasdi.shared.viewmodels.QueryResultViewModel;
 
 
@@ -96,9 +97,11 @@ public class DownloadManager {
 				.replaceAll("__PRODUCTTYPE__", m_sproductType);
 		//TODO read from config file
 		String sDownloadProtocol = "";
-		QueryExecutorFactorySupplier oSupplier = new QueryExecutorFactorySupplier();
-		QueryExecutorFactory oFactory = oSupplier.supply(m_sproviderName);
-		QueryExecutor oExecutor = oFactory.newInstance(m_sproviderUser, m_sproviderPassword, "0", m_squeryLimit, m_squerySortedBy, m_squeryOrder, sDownloadProtocol, "true");
+		QueryExecutorFactory oFactory = new QueryExecutorFactory();
+		AuthenticationCredentials oCredentials = new AuthenticationCredentials(m_sproviderUser, m_sproviderPassword);
+		QueryExecutor oExecutor = oFactory.getExecutor(m_sproviderName, oCredentials,
+				//"0", m_squeryLimit, m_squerySortedBy, m_squeryOrder,
+				sDownloadProtocol, "true");
 		
 		//replaced by the next one
 		//DownloadFile oDownloadFile = DownloadFile.getDownloadFile("SENTINEL");
@@ -112,7 +115,8 @@ public class DownloadManager {
 //			System.out.println("managing footprint " + footprint);
 			
 			try {
-				ArrayList<QueryResultViewModel> aoResults = oExecutor.execute(sFootprintQuery);
+				PaginatedQuery oQuery = new PaginatedQuery(sFootprintQuery, "0", m_squeryLimit, m_squerySortedBy, m_squeryOrder ); 
+				ArrayList<QueryResultViewModel> aoResults = oExecutor.executeAndRetrieve(oQuery);
 				if (aoResults == null) {
 					System.out.println("\tno results found");
 					continue;
