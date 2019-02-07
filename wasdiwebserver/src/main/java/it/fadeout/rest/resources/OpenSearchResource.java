@@ -18,10 +18,11 @@ import javax.ws.rs.core.Context;
 
 import it.fadeout.Wasdi;
 import wasdi.shared.business.User;
+import wasdi.shared.opensearch.AuthenticationCredentials;
 import wasdi.shared.opensearch.OpenSearchQuery;
+import wasdi.shared.opensearch.PaginatedQuery;
 import wasdi.shared.opensearch.QueryExecutor;
 import wasdi.shared.opensearch.QueryExecutorFactory;
-import wasdi.shared.opensearch.QueryExecutorFactorySupplier;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.QueryResultViewModel;
 import wasdi.shared.viewmodels.SearchProviderViewModel;
@@ -29,10 +30,15 @@ import wasdi.shared.viewmodels.SearchProviderViewModel;
 @Path("/search")
 public class OpenSearchResource {
 	
-	private static QueryExecutorFactorySupplier s_oSupplier;
+	private static QueryExecutorFactory s_oQueryExecutorFactory;
+	private Map<String,AuthenticationCredentials> m_aoCredentials;
 	
 	static {
-		s_oSupplier = new QueryExecutorFactorySupplier();
+		s_oQueryExecutorFactory = new QueryExecutorFactory();
+	}
+	
+	public OpenSearchResource() {
+		m_aoCredentials = new HashMap<>();
 	}
 
 	@Context
@@ -259,8 +265,8 @@ public class OpenSearchResource {
 				QueryExecutor oExecutor = getExecutor(sProviders, sActualOffset, sActualLimit, sSortedBy, sOrder);
 
 				try {
-					//TODO pass object containing sQuery, sActualOffset, sActualLimit, sSortedBy, sOrder 
-					ArrayList<QueryResultViewModel> aoTmp = oExecutor.execute(sQuery);
+					PaginatedQuery oQuery = new PaginatedQuery(sQuery, sActualOffset, sActualLimit, sSortedBy, sOrder);
+					ArrayList<QueryResultViewModel> aoTmp = oExecutor.executeAndRetrieve(oQuery);
 					if (aoTmp != null && !aoTmp.isEmpty()) {
 						aoResults.addAll(aoTmp);
 						System.out.println("Found " + aoTmp.size() + " results for " + sProvider);
@@ -400,7 +406,8 @@ public class OpenSearchResource {
 						QueryExecutor oExecutor = getExecutor(sProviders, sActualOffset, sActualLimit, sSortedBy, sOrder);
 
 						try {
-							ArrayList<QueryResultViewModel> aoTmp = oExecutor.execute(sQuery, false);
+							PaginatedQuery oQuery = new PaginatedQuery(sQuery, sActualOffset, sActualLimit, sSortedBy, sOrder);
+							ArrayList<QueryResultViewModel> aoTmp = oExecutor.executeAndRetrieve(oQuery, false);
 
 							if (aoTmp != null && !aoTmp.isEmpty()) {
 								iObtainedResults += aoTmp.size();
@@ -427,24 +434,33 @@ public class OpenSearchResource {
 	}
 	
 	private QueryExecutor getExecutor(String sProvider, String sOffset, String sLimit, String sSortedBy, String sOrder) {
-		
-		String sUser = m_oServletConfig.getInitParameter(sProvider + ".OSUser");
-		String sPassword = m_oServletConfig.getInitParameter(sProvider + ".OSPwd");
-		String sDownloadProtocol = m_oServletConfig.getInitParameter(sProvider+".downloadProtocol");
-		String sGetMetadata = m_oServletConfig.getInitParameter("getProductMetadata");
-		
-		QueryExecutorFactory oFactory = s_oSupplier.supply(sProvider);
-		QueryExecutor oExecutor = oFactory.newInstance(
-				//TODO transform into credentials
-				sUser, sPassword,
-				//TODO remove from the constructor and pass to the execute method
-				sOffset, sLimit, sSortedBy, sOrder,
-				//TODO change into config method
-				sDownloadProtocol, sGetMetadata);
-		
+		QueryExecutor oExecutor = null;
+		if(null!=sProvider) {
+			AuthenticationCredentials oCredentials = getCredentials(sProvider);
+			String sDownloadProtocol = m_oServletConfig.getInitParameter(sProvider+".downloadProtocol");
+			String sGetMetadata = m_oServletConfig.getInitParameter("getProductMetadata");
+			
+			oExecutor = s_oQueryExecutorFactory.getExecutor(
+					sProvider,
+					oCredentials,
+					//TODO remove from the constructor and pass to the execute method
+					//sOffset, sLimit, sSortedBy, sOrder,
+					//TODO change into config method
+					sDownloadProtocol, sGetMetadata);
+		}
 		return oExecutor;
 		
-	 
+	}
+	
+	private AuthenticationCredentials getCredentials(String sProvider) {
+		AuthenticationCredentials oCredentials = m_aoCredentials.get(sProvider);
+		if(null == oCredentials) {
+			String sUser = m_oServletConfig.getInitParameter("OSUser");
+			String sPassword = m_oServletConfig.getInitParameter("OSPwd");
+			oCredentials = new AuthenticationCredentials(sUser, sPassword);
+			m_aoCredentials.put(sProvider, oCredentials);
+		}
+		return oCredentials;
 	}
 
 }

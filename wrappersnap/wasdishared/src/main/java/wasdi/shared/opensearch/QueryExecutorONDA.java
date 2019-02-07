@@ -25,6 +25,12 @@ import wasdi.shared.viewmodels.QueryResultViewModel;
  *
  */
 public class QueryExecutorONDA extends QueryExecutor {
+	
+	public QueryExecutorONDA() {
+		m_sProvider="ONDA";
+		this.m_oQueryTranslator = new DiasQueryTranslatorONDA();
+		this.m_oResponseTranslator = new DiasResponseTranslatorONDA();
+	}
 
 	/* (non-Javadoc)
 	 * @see wasdi.shared.opensearch.QueryExecutor#getUrlPath()
@@ -58,12 +64,11 @@ public class QueryExecutorONDA extends QueryExecutor {
 	//append:
 	// /Products/$count?$search="name:S2*"
 	@Override
-	protected String buildUrl(String sQuery){
+	protected String buildUrl(PaginatedQuery oQuery){
 		String sUrl = "https://catalogue.onda-dias.eu/dias-catalogue/Products?$search=%22";
-		sUrl+=m_oQueryTranslator.translateAndEncode(sQuery);
-		//TODO get rid of the $top=10 and introduce pagination
+		sUrl+=m_oQueryTranslator.translateAndEncode(oQuery.getQuery());
 		//TODO don't use hardcoded values
-		sUrl+="%22&$top=" + m_sLimit + "&$skip="+ m_sOffset +"&$format=json"+ "&$orderby=creationDate";
+		sUrl+="%22&$top=" + oQuery.getLimit() + "&$skip="+ oQuery.getOffset() +"&$format=json"+ "&$orderby=creationDate";
 		return sUrl;
 	}
 	
@@ -142,10 +147,10 @@ public class QueryExecutorONDA extends QueryExecutor {
 
 	
 	@Override
-	public ArrayList<QueryResultViewModel> execute(String sQuery) throws IOException {
+	public ArrayList<QueryResultViewModel> executeAndRetrieve(PaginatedQuery oQuery) throws IOException {
 
 
-		String sUrl = buildUrl(sQuery);
+		String sUrl = buildUrl(oQuery);
 		
 		String sResult = httpGetResults(sUrl);
 		
@@ -223,16 +228,16 @@ public class QueryExecutorONDA extends QueryExecutor {
 							sBaseUrl += sId;
 							sBaseUrl += ")";
 							String sFormat = "?$format=json";
-							String sProductInfoUrl =  sBaseUrl + sFormat;
-							String sMetadataUrl = sBaseUrl + "/Metadata" + sFormat;
 
 							//not necessary
+//							String sProductInfoUrl =  sBaseUrl + sFormat;
 //							String sProductInfoJson = httpGetResults(sProductInfoUrl);
 //							if(null!=sProductInfoJson) {
 //								JSONObject oProductInfo = new JSONObject(sProductInfoJson); 
 //								oOndaFullEntry.put("productInfo", oProductInfo);
 //							}
 							//XXX is it possible to query metadata for all products at once, instead of performing a call each time?
+							String sMetadataUrl = sBaseUrl + "/Metadata" + sFormat;
 							if(m_bMustCollectMetadata) {
 								String sMetadataJson = httpGetResults(sMetadataUrl);
 								if(null!=sMetadataJson) {

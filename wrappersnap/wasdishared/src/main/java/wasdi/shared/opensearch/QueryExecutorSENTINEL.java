@@ -19,6 +19,10 @@ import org.apache.abdera.protocol.client.RequestOptions;
 
 public class QueryExecutorSENTINEL extends QueryExecutor {
 
+	public QueryExecutorSENTINEL() {
+		m_sProvider = "SENTINEL";
+	}
+	
 	@Override
 	protected Template getTemplate() {
 		return new Template("{scheme}://{-append|.|host}scihub.copernicus.eu{-opt|/|path}{-listjoin|/|path}{-prefix|/|page}{-opt|?|q}{-join|&|q,start,rows,orderby}");
@@ -45,7 +49,8 @@ public class QueryExecutorSENTINEL extends QueryExecutor {
 	//public int executeCountSentinel(String sQuery) throws IOException {
 	public int executeCount(String sQuery) throws IOException {	
 		
-		String sUrl = buildUrl(sQuery);
+		PaginatedQuery oQuery = new PaginatedQuery(sQuery, null, null, null, null);
+		String sUrl = buildUrl(oQuery);
 		//create abdera client
 		Abdera oAbdera = new Abdera();
 		AbderaClient oClient = new AbderaClient(oAbdera);
