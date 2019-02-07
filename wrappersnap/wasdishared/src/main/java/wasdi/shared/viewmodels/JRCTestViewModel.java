@@ -4,7 +4,14 @@ public class JRCTestViewModel {
 	private String inputFileName;
 	private String epsg;
 	private String outputFileName;
+	private String preprocess;
 	
+	public String getPreprocess() {
+		return preprocess;
+	}
+	public void setPreprocess(String preprocess) {
+		this.preprocess = preprocess;
+	}
 	public String getInputFileName() {
 		return inputFileName;
 	}
