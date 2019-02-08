@@ -28,14 +28,8 @@ public class AuthenticationCredentials {
 	public String getUser() {
 		return sUser;
 	}
-	public void setUser(String sUser) {
-		this.sUser = sUser;
-	}
 	public String getPassword() {
 		return sPassword;
-	}
-	public void setPassword(String sPassword) {
-		this.sPassword = sPassword;
 	}
 	
 }
