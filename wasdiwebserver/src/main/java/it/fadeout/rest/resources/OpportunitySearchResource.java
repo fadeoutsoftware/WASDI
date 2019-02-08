@@ -1,12 +1,9 @@
 package it.fadeout.rest.resources;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Date;
 import java.util.GregorianCalendar;
-import java.util.Iterator;
 import java.util.List;
-import java.util.ListIterator;
 
 import javax.servlet.ServletConfig;
 import javax.ws.rs.Consumes;
@@ -20,7 +17,6 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 
-import org.jaitools.tilecache.BasicCacheVisitor.Key;
 import org.nfs.orbits.CoverageTool.Polygon;
 import org.nfs.orbits.CoverageTool.apoint;
 import org.nfs.orbits.sat.CoverageSwathResult;
@@ -29,22 +25,14 @@ import org.nfs.orbits.sat.SatSensor;
 import org.nfs.orbits.sat.Satellite;
 import org.nfs.orbits.sat.SwathArea;
 
-//import com.google.common.collect.SortedLists.KeyAbsentBehavior;
-
-//import com.vividsolutions.jts.geom.Coordinate;
-
-import de.micromata.opengis.kml.v_2_2_0.AbstractObject;
 import de.micromata.opengis.kml.v_2_2_0.AltitudeMode;
 import de.micromata.opengis.kml.v_2_2_0.Boundary;
 import de.micromata.opengis.kml.v_2_2_0.ColorMode;
 import de.micromata.opengis.kml.v_2_2_0.Coordinate;
 import de.micromata.opengis.kml.v_2_2_0.Kml;
 import de.micromata.opengis.kml.v_2_2_0.KmlFactory;
-import de.micromata.opengis.kml.v_2_2_0.LineStyle;
 import de.micromata.opengis.kml.v_2_2_0.LinearRing;
-import de.micromata.opengis.kml.v_2_2_0.Pair;
 import de.micromata.opengis.kml.v_2_2_0.Placemark;
-import de.micromata.opengis.kml.v_2_2_0.PolyStyle;
 import de.micromata.opengis.kml.v_2_2_0.StyleState;
 import it.fadeout.Wasdi;
 import it.fadeout.business.InstanceFinder;
