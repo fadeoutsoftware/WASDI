@@ -168,7 +168,10 @@ var RootController = (function() {
                             //approximate result
                             var seconds = Math.ceil(result / 1000);
 
-                            if(utilsIsObjectNullOrUndefined(seconds) || seconds < 0) seconds = 0;
+                            if(utilsIsObjectNullOrUndefined(seconds) || seconds < 0 || utilsIsANumber(seconds)=== false)
+                            {
+                                seconds = 0;
+                            }
 
                             var oDate = new Date(1970, 0, 1);
                             oDate.setSeconds(0 + seconds);
@@ -188,7 +191,10 @@ var RootController = (function() {
                             //approximate result
                             var seconds = Math.ceil(result / 1000);
 
-                            if(utilsIsObjectNullOrUndefined(seconds) || seconds < 0) seconds = 0;
+                            if(utilsIsObjectNullOrUndefined(seconds) || seconds < 0  || utilsIsANumber(seconds)=== false)
+                            {
+                                seconds = 0;
+                            }
 
                             var oDate = new Date(1970, 0, 1);
                             oDate.setSeconds(0 + seconds);
