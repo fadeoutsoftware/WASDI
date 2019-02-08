@@ -33,6 +33,7 @@ import org.apache.abdera.protocol.client.AbderaClient;
 import org.apache.abdera.protocol.client.ClientResponse;
 import org.apache.abdera.protocol.client.RequestOptions;
 
+import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.QueryResultViewModel;
 
 public abstract class QueryExecutor {
@@ -327,7 +328,9 @@ public abstract class QueryExecutor {
 		    oResponseStringBuilder.append(sResponseLine);
 		}
 		
-		String sResultAsString = oResponseStringBuilder.toString();
+//		String sResultAsString = oResponseStringBuilder.toString();
+//		String sTmpFilePath = "insert/a/realistic/path/to/file.xml";
+//		Utils.printToFile(sTmpFilePath, sResultAsString);
 		
 //		System.out.println(sResultAsString);
 
@@ -340,6 +343,7 @@ public abstract class QueryExecutor {
 		oParserOptions.setFilterRestrictedCharacters(true);
 		oParserOptions.setMustPreserveWhitespace(false);
 		oParserOptions.setParseFilter(null);
+		
 		
 		Document<Feed> oDocument = oParser.parse(new StringReader(sResultAsString), oParserOptions);
 		if (oDocument == null) {
