@@ -33,110 +33,58 @@ import org.apache.abdera.protocol.client.AbderaClient;
 import org.apache.abdera.protocol.client.ClientResponse;
 import org.apache.abdera.protocol.client.RequestOptions;
 
+import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.QueryResultViewModel;
 
 public abstract class QueryExecutor {
 	
-	protected DiasQueryTranslator m_oQueryTranslator;
-	protected DiasResponseTranslator m_oResponseTranslator;
 	protected String m_sDownloadProtocol;
-
-	//TODO refactor w/ a factory
-	//TODO refactor: pass a dictionary instead
-	public static QueryExecutor newInstance(String sProvider, String sUser, String sPassword, String sOffset, String sLimit, String sSortedBy, String sOrder, String sDownloadProtocol) {
-		
-		String sClassName = QueryExecutor.class.getName() + sProvider;
-		
-		try {
-			Object o = Class.forName(sClassName).newInstance();
-			if (o instanceof QueryExecutor) {
-				QueryExecutor oExecutor = (QueryExecutor) o;
-				oExecutor.setProvider(sProvider);
-				oExecutor.setUser(sUser);
-				oExecutor.setPassword(sPassword);
-				oExecutor.setOffset(sOffset);
-				oExecutor.setLimit(sLimit);
-				oExecutor.setSortedBy(sSortedBy);
-				oExecutor.setOrder(sOrder);
-				//TODO get rid of this if! 
-				if(sProvider.equals("ONDA")) {
-					oExecutor.m_oQueryTranslator = new DiasQueryTranslatorONDA();
-					oExecutor.m_oResponseTranslator = new DiasResponseTranslatorONDA();
-				}
-				oExecutor.m_sDownloadProtocol = sDownloadProtocol;
-				return oExecutor;
-			}
-		} catch (InstantiationException e) {
-			e.printStackTrace();
-		} catch (IllegalAccessException e) {
-			e.printStackTrace();
-		} catch (ClassNotFoundException e) {
-			e.printStackTrace();
-		}
-		
-		return null;
-	}
-	
+	protected boolean m_bMustCollectMetadata;
 	protected String m_sProvider; 
 	protected String m_sUser; 
 	protected String m_sPassword; 
-	protected String m_sOffset; 
-	protected String m_sLimit; 
-	protected String m_sSortedBy; 
-	protected String m_sOrder;	
+	
+	protected DiasQueryTranslator m_oQueryTranslator;
+	protected DiasResponseTranslator m_oResponseTranslator;
+	
+	
+	//TODO convert into arguments of method execute
+//	protected String m_sOffset; 
+//	protected String m_sLimit; 
+//	protected String m_sSortedBy; 
+//	protected String m_sOrder;
 	
 
-	public void setProvider(String m_sProvider) {
-		this.m_sProvider = m_sProvider;
-	}
 
-
+		void setMustCollectMetadata(boolean bGetMetadata) {
+		m_bMustCollectMetadata = bGetMetadata;
+		
+	}	
+	
 	public void setUser(String m_sUser) {
 		this.m_sUser = m_sUser;
 	}
-
 
 	public void setPassword(String m_sPassword) {
 		this.m_sPassword = m_sPassword;
 	}
 
 
-	public void setOffset(String m_sOffset) {
-		this.m_sOffset = m_sOffset;
-	}
 
 
-	public void setLimit(String m_sLimit) {
-		this.m_sLimit = m_sLimit;
-	}
-
-
-	public void setSortedBy(String m_sSortedBy) {
-		this.m_sSortedBy = m_sSortedBy;
-	}
-
-
-	public void setOrder(String m_sOrder) {
-		this.m_sOrder = m_sOrder;
-	}
-
-
-	protected String buildUrl(String sQuery) {
+	protected String buildUrl(PaginatedQuery oQuery) {
 		Template oTemplate = getTemplate();
 		Map<String,Object> oParamsMap = new HashMap<String, Object>();		
 		oParamsMap.put("scheme", getUrlSchema());
 		oParamsMap.put("path", getUrlPath());
-		oParamsMap.put("start", m_sOffset);
-		oParamsMap.put("rows", m_sLimit);
-		oParamsMap.put("orderby", m_sSortedBy + " " + m_sOrder);
-		oParamsMap.put("q", sQuery);
+		oParamsMap.put("start", oQuery.getOffset() );
+		oParamsMap.put("rows", oQuery.getLimit() );
+		oParamsMap.put("orderby", oQuery.getSortedBy() + " " + oQuery.getOrder() );
+		oParamsMap.put("q", oQuery.getQuery() );
 		addUrlParams(oParamsMap);
 		return oTemplate.expand(oParamsMap);
 		
 	}
-	
-
-	
 	
 	protected void addUrlParams(Map<String, Object> oParamsMap) {
 	}
@@ -146,7 +94,6 @@ public abstract class QueryExecutor {
 		return "http";
 	}
 
-	
 	protected abstract String[] getUrlPath();
 	
 	
@@ -169,7 +116,7 @@ public abstract class QueryExecutor {
 
 			QueryResultViewModel oResult = new QueryResultViewModel();
 			oResult.setProvider(m_sProvider);
-//			System.out.println("Parsing new Entry");
+//			System.out.println("QueryExecutor.buildResultViewModel: Parsing new Entry");
 			
 			//retrive the title
 			oResult.setTitle(oEntry.getTitle());			
@@ -197,39 +144,38 @@ public abstract class QueryExecutor {
 					}
 				}
 			}
-			
-			
+					
 			//retrieve the icon
 			oLink = oEntry.getLink("icon");			
 			if (oLink != null) {
-//				System.out.println("Icon Link: " + oLink.getHref().toString());
+//				System.out.println("QueryExecutor.buildResultViewModel: Icon Link: " + oLink.getHref().toString());
 
 				try {
 					ClientResponse oImageResponse = oClient.get(oLink.getHref().toString(), oOptions);
-//					System.out.println("Response Got from the client");
+//					System.out.println("QueryExecutor.buildResultViewModel: Response Got from the client");
 					if (oImageResponse.getType() == ResponseType.SUCCESS)
 					{
-//						System.out.println("Success: saving image preview");
+//						System.out.println("QueryExecutor.buildResultViewModel: Success: saving image preview");
 						InputStream oInputStreamImage = oImageResponse.getInputStream();
 						BufferedImage  oImage = ImageIO.read(oInputStreamImage);
 						ByteArrayOutputStream bas = new ByteArrayOutputStream();
 						ImageIO.write(oImage, "png", bas);
 						oResult.setPreview("data:image/png;base64," + Base64.getEncoder().encodeToString((bas.toByteArray())));
-//						System.out.println("Image Saved");
+//						System.out.println("QueryExecutor.buildResultViewModel: Image Saved");
 					}				
 				}
 				catch (Exception e) {
-					System.out.println("Image Preview Cycle Exception " + e.toString());
+					System.out.println("QueryExecutor.buildResultViewModel: Image Preview Cycle Exception " + e.toString());
 				}					
 			}
 			else {
-				System.out.println("Link Not Available" );
+				System.out.println("QueryExecutor.buildResultViewModel: Link Not Available" );
 			}
 			
 			aoResults.add(oResult);
 		} 
 
-		System.out.println("Search Done: found " + aoResults.size() + " results");
+		System.out.println("QueryExecutor.buildResultViewModel: Search Done: found " + aoResults.size() + " results");
 
 		return aoResults;
 	}
@@ -276,7 +222,7 @@ public abstract class QueryExecutor {
 			aoResults.add(oResult);
 		} 
 
-		System.out.println("Search Done: found " + aoResults.size() + " results");
+		System.out.println("QueryExecutor.buildResultLightViewModel: Search Done: found " + aoResults.size() + " results");
 
 		return aoResults;
 	}
@@ -305,7 +251,7 @@ public abstract class QueryExecutor {
 			oConnection.setRequestProperty ("Authorization", sBasicAuth);
 		}
 		
-		System.out.println("\nSending 'GET' request to URL : " + sUrl);
+		System.out.println("\nQueryExecutor.executeCount: Sending 'GET' request to URL : " + sUrl);
 		//int responseCode = -1;
 		//try
 		//{
@@ -313,10 +259,10 @@ public abstract class QueryExecutor {
 		//}
 		//catch(IOException oEx)
 		//{
-		//	System.out.println("Exception Get response : " + oEx.getMessage());	
+		//	System.out.println("QueryExecutor.executeCount: Exception Get response : " + oEx.getMessage());	
 		//}
 		int responseCode =  oConnection.getResponseCode();
-		System.out.println("Response Code : " + responseCode);
+		System.out.println("QueryExecutor.executeCount: Response Code : " + responseCode);
 
 		BufferedReader in = new BufferedReader(new InputStreamReader(oConnection.getInputStream()));
 		String inputLine;
@@ -328,7 +274,7 @@ public abstract class QueryExecutor {
 		in.close();
 
 		//print result
-		System.out.println("Count Done: Response " + response.toString());
+		System.out.println("QueryExecutor.executeCount: Count Done: Response " + response.toString());
 		
 		//for (Element element : oFeed.getElements()) {
 			//String sText = element.getText();
@@ -338,91 +284,11 @@ public abstract class QueryExecutor {
 				
 		return Integer.parseInt(response.toString());
 	}
-	
-	public int executeCountSentinel(String sQuery) throws IOException {
-		
-		String sUrl = buildUrl(sQuery);
-		//create abdera client
-		Abdera oAbdera = new Abdera();
-		AbderaClient oClient = new AbderaClient(oAbdera);
-		oClient.setConnectionTimeout(15000);
-		oClient.setSocketTimeout(40000);
-		oClient.setConnectionManagerTimeout(20000);
-		oClient.setMaxConnectionsTotal(200);
-		oClient.setMaxConnectionsPerHost(50);
-		
-		// get default request option
-		RequestOptions oOptions = oClient.getDefaultRequestOptions();
-		
-		// build the parser
-		Parser oParser = oAbdera.getParser();
-		ParserOptions oParserOptions = oParser.getDefaultParserOptions();
-		oParserOptions.setCharset("UTF-8");
-		//options.setCompressionCodecs(CompressionCodec.GZIP);
-		oParserOptions.setFilterRestrictedCharacterReplacement('_');
-		oParserOptions.setFilterRestrictedCharacters(true);
-		oParserOptions.setMustPreserveWhitespace(false);
-		oParserOptions.setParseFilter(null);
-		
-		// set authorization
-		if (m_sUser!=null && m_sPassword!=null) {
-			String sUserCredentials = m_sUser + ":" + m_sPassword;
-			String sBasicAuth = "Basic " + Base64.getEncoder().encodeToString(sUserCredentials.getBytes());
-			oOptions.setAuthorization(sBasicAuth);			
-		}
-		
-		
-//		System.out.println("\nSending 'GET' request to URL : " + sUrl);
-		ClientResponse response = oClient.get(sUrl, oOptions);
-		
-		Document<Feed> oDocument = null;
-		
-		
-		if (response.getType() != ResponseType.SUCCESS) {
-			System.out.println("Response ERROR: " + response.getType());
-			return -1;
-		}
 
-		System.out.println("Response Success");		
-		
-		// Get The Result as a string
-		BufferedReader oBuffRead = new BufferedReader(response.getReader());
-		String sResponseLine = null;
-		StringBuilder oResponseStringBuilder = new StringBuilder();
-		while ((sResponseLine = oBuffRead.readLine()) != null) {
-		    oResponseStringBuilder.append(sResponseLine);
-		}
-		
-		String sResultAsString = oResponseStringBuilder.toString();
-		
-//		System.out.println(sResultAsString);
-
-		oDocument = oParser.parse(new StringReader(sResultAsString), oParserOptions);
-
-		if (oDocument == null) {
-			System.out.println("OpenSearchQuery.ExecuteQuery: Document response null");
-			return -1;
-		}
-		
-		Feed oFeed = (Feed) oDocument.getRoot();
-		String sText = null;
-		for (Element element : oFeed.getElements()) 
-		{
-			
-			if (element.getQName().getLocalPart()== "totalResults")
-			{
-				sText = element.getText();
-			}
-		} 
-		//String sTotalResults = oFeed.getAttributeValue("opensearch:totalResults");
-				
-		return Integer.parseInt(sText);
-	}
-
-	public ArrayList<QueryResultViewModel> execute(String sQuery, boolean bFullViewModel) throws IOException {
+	public ArrayList<QueryResultViewModel> executeAndRetrieve(PaginatedQuery oQuery, boolean bFullViewModel) throws IOException {
 		//XXX log instead
-		System.out.println("QueryExecutor.execute");
-		String sUrl = buildUrl(sQuery);
+		System.out.println("QueryExecutor.executeAndRetrieve(PaginatedQuery oQuery, boolean bFullViewModel)");
+		String sUrl = buildUrl(oQuery );
 		
 		//create abdera client
 		Abdera oAbdera = new Abdera();
@@ -443,16 +309,16 @@ public abstract class QueryExecutor {
 			oOptions.setAuthorization(sBasicAuth);			
 		}
 
-		System.out.println("\nSending 'GET' request to URL : " + sUrl);
+		System.out.println("\nQueryExecutor.executeAndRetrieve: Sending 'GET' request to URL : " + sUrl);
 		ClientResponse response = oClient.get(sUrl, oOptions);
 				
 		
 		if (response.getType() != ResponseType.SUCCESS) {
-			System.out.println("Response ERROR: " + response.getType());
+			System.out.println("QueryExecutor.executeAndRetrieve: Response ERROR: " + response.getType());
 			return null;
 		}
 
-		System.out.println("Response Success");		
+		System.out.println("QueryExecutor.executeAndRetrieve: Response Success");		
 		
 		// Get The Result as a string
 		BufferedReader oBuffRead = new BufferedReader(response.getReader());
@@ -462,7 +328,9 @@ public abstract class QueryExecutor {
 		    oResponseStringBuilder.append(sResponseLine);
 		}
 		
-		String sResultAsString = oResponseStringBuilder.toString();
+//		String sResultAsString = oResponseStringBuilder.toString();
+//		String sTmpFilePath = "insert/a/realistic/path/to/file.xml";
+//		Utils.printToFile(sTmpFilePath, sResultAsString);
 		
 //		System.out.println(sResultAsString);
 
@@ -476,9 +344,10 @@ public abstract class QueryExecutor {
 		oParserOptions.setMustPreserveWhitespace(false);
 		oParserOptions.setParseFilter(null);
 		
+		
 		Document<Feed> oDocument = oParser.parse(new StringReader(sResultAsString), oParserOptions);
 		if (oDocument == null) {
-			System.out.println("OpenSearchQuery.ExecuteQuery: Document response null");
+			System.out.println("OpenSearchQuery.executeAndRetrieve: Document response null");
 			return null;
 		}
 		
@@ -486,40 +355,46 @@ public abstract class QueryExecutor {
 		else return buildResultLightViewModel(oDocument, oClient, oOptions);
 	}
 	
-	public ArrayList<QueryResultViewModel> execute(String sQuery) throws IOException {
-		return execute(sQuery,true);
+	public ArrayList<QueryResultViewModel> executeAndRetrieve(PaginatedQuery oQuery) throws IOException {
+		System.out.println("QueryExecutor.executeAndRetrieve(PaginatedQuery oQuery)");
+		return executeAndRetrieve(oQuery,true);
 	}
 
-	
 
-	public static void main(String[] args) {
-		QueryExecutor oExecutor = QueryExecutor.newInstance("MATERA", "user", "password", "0", "10", "ingestiondate", "asc", "");
+	public void setDownloadProtocol(String sDownloadProtocol) {
+		System.out.println("QueryExecutor.setDownloadProtocol");
+		m_sDownloadProtocol = sDownloadProtocol;
+		if(null==m_sDownloadProtocol) {
+			m_sDownloadProtocol = "https:";
+		}
+	}
+
+	public void setCredentials(AuthenticationCredentials oCredentials) {
+		System.out.println("QueryExecutor.setCredentials");
+		if(null!=oCredentials) {
+			setUser(oCredentials.getUser());
+			setPassword(oCredentials.getPassword());
+		} else {
+			throw new NullPointerException("QueryExecutor.setCredentials: null oCredentials");
+		}
 		
+	}
+	
+	public static void main(String[] args) {
+		
+		QueryExecutorFactory oFactory = new QueryExecutorFactory();
+		AuthenticationCredentials oCredentials = new AuthenticationCredentials("user", "password");
+		QueryExecutor oExecutor = oFactory.getExecutor("MATERA", oCredentials,
+				//"0", "10", "ingestiondate", "asc",
+				"", "true");
+				
 		try {
 			String sQuery = "( beginPosition:[2017-05-15T00:00:00.000Z TO 2017-05-15T23:59:59.999Z] AND endPosition:[2017-05-15T00:00:00.000Z TO 2017-05-15T23:59:59.999Z] ) AND   (platformname:Sentinel-1 AND filename:S1A_* AND producttype:GRD)";
 			
-			System.out.println(oExecutor.executeCount(sQuery));
-			
-//			String sParameter = URLEncoder.encode(sQuery, "UTF-8");
-//			ArrayList<QueryResultViewModel> aoResults = oExecutor.execute(sQuery);
-//			if (aoResults!=null) {
-//				for (QueryResultViewModel oResult : aoResults) {
-//					System.out.println(oResult.getTitle());
-//					System.out.println("    ID: " + oResult.getId());
-//					System.out.println("    SUMMARY: " + oResult.getSummary());
-//					System.out.println("    LINK: " + oResult.getLink());
-//					if (oResult.getPreview()!=null) System.out.println("    PREVIEW-LEN:" + oResult.getPreview().length());
-//					System.out.println("    FOOTPPRINT:" + oResult.getFootprint());
-//					for (String sKey : oResult.getProperties().keySet()) {
-//						System.out.println("        PROPERTY: " + sKey + " --> " + oResult.getProperties().get(sKey));
-//					}
-//				}				
-//			}
-			
+			System.out.println(oExecutor.executeCount(sQuery));			
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
-	
 }

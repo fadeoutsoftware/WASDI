@@ -16,6 +16,7 @@ import javax.imageio.ImageIO;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import org.apache.abdera.Abdera;
+import org.apache.abdera.i18n.iri.IRI;
 import org.apache.abdera.i18n.templates.Template;
 import org.apache.abdera.model.Document;
 import org.apache.abdera.model.Entry;
@@ -33,48 +34,48 @@ import wasdi.shared.viewmodels.QueryResultViewModel;
 
 public class QueryExecutorPROBAV extends QueryExecutor  {
 
+	QueryExecutorPROBAV(){
+		m_sProvider = "PROBAV";
+	}
+	
 	@Override
 	protected String[] getUrlPath() {
+		System.out.println("QueryExecutorPROBAV.getUrlPath");
 		return new String[] {"openSearch/findProducts"};
 	}
 
 	@Override
 	protected Template getTemplate() {
+		System.out.println("QueryExecutorPROBAV.getTemplate");
 		//http://www.vito-eodata.be/openSearch/findProducts?collection=urn:ogc:def:EOP:VITO:PROBAV_S1-TOC_1KM_V001&start=2016-05-05T00:00&end=2016-05-14T23:59&bbox=-180.00,0.00,180.00,90.00
 		return new Template("{scheme}://{-append|.|host}www.vito-eodata.be{-opt|/|path}{-listjoin|/|path}{-prefix|/|page}{-opt|?|q}{-join|&|q,start,rows,orderby}");
 	}
 
 	@Override
 	protected String getCountUrl(String sQuery) {
+		System.out.println("QueryExecutorPROBAV.getCountUrl");
 		//http://www.vito-eodata.be/openSearch/findProducts?collection=urn:ogc:def:EOP:VITO:PROBAV_S1-TOC_1KM_V001&start=2016-05-05T00:00&end=2016-05-14T23:59&bbox=-180.00,0.00,180.00,90.00
 		return "http://www.vito-eodata.be/openSearch/count?filter=" + sQuery;
 	}
 
 	@Override
-	protected String buildUrl(String sQuery){
-		//Template oTemplate = getTemplate();
-		//Map<String,Object> oParamsMap = new HashMap<String, Object>();		
-		//oParamsMap.put("scheme", getUrlSchema());
-		//oParamsMap.put("path", getUrlPath());
-		//oParamsMap.put("start", m_sOffset);
-		//oParamsMap.put("rows", m_sLimit);
-		//oParamsMap.put("orderby", m_sSortedBy + " " + m_sOrder);
-		//oParamsMap.put("q", sQuery);
+	protected String buildUrl(PaginatedQuery oQuery){
+		System.out.println("QueryExecutorPROBAV.buildUrl");
 
 		String sUrl = "http://www.vito-eodata.be/openSearch/findProducts?";
-		String polygon = null;
-		String date = null;
-		String collection = null;
-		String cloudCover = null;
-		String snowCover = null;
-		String[] asFootprint = sQuery.split("AND");
+		String sPolygon = null;
+		String sDate = null;
+		String sCollection = null;
+		String sCloudCover = null;
+		String sSnowCover = null;
+		String[] asFootprint = oQuery.getQuery().split("AND");
 		if (asFootprint.length > 0)
 		{
-			for (String item : asFootprint) {
-				if (item.contains("POLYGON"))
+			for (String sItem : asFootprint) {
+				if (sItem.contains("POLYGON"))
 				{
-					String refString = item;
-					String[] asPolygon = refString.split("POLYGON\\(\\(");
+					String sRefString = sItem;
+					String[] asPolygon = sRefString.split("POLYGON\\(\\(");
 					if (asPolygon.length > 0)
 					{
 						String[] asCoordinates = asPolygon[1].split("\\)\\)")[0].split(",");
@@ -85,82 +86,59 @@ public class QueryExecutorPROBAV extends QueryExecutor  {
 							sPoints += sCoord.replace(" ", ",");
 							
 						}
-						polygon = String.format("geometry=polygon((%s))", sPoints);
-						
-						/*	
-						double maxX;
-						double minX;
-						double maxY;
-						double minY;
-						//init
-						String[] asCordinate = asCoordinates[0].split(" ");
-						maxX = Double.parseDouble(asCordinate[0]);
-						minX = Double.parseDouble(asCordinate[0]);
-						maxY = Double.parseDouble(asCordinate[1]);
-						minY = Double.parseDouble(asCordinate[1]);
-						for (String sCoord : asCoordinates) {
-							asCordinate = sCoord.split(" ");
-							maxX = Math.max(maxX, Double.parseDouble(asCordinate[0]));
-							minX = Math.min(minX, Double.parseDouble(asCordinate[0]));
-							maxY = Math.max(maxY, Double.parseDouble(asCordinate[1]));
-							minY = Math.min(minY, Double.parseDouble(asCordinate[1]));
-						}
-					 	*/
-						//bbox = String.format("bbox=%s,%s,%s,%s", String.valueOf(minX), String.valueOf(minY), String.valueOf(maxX), String.valueOf(maxY));
-						//refString = asPolygon[1].split("\\)\\)")[0].replace(" ", ",");
-						
+						sPolygon = String.format("geometry=polygon((%s))", sPoints);						
 					}
 				}
 
-				if (item.contains("beginPosition"))
+				if (sItem.contains("beginPosition"))
 				{
-					String refString = item;
-					String[] asDate = refString.split("\\[")[1].split("\\]")[0].split("TO");
-					String startdate = asDate[0].trim().substring(0, 16);
-					String enddate = asDate[1].trim().substring(0, 16);
+					String sRefString = sItem;
+					String[] asDate = sRefString.split("\\[")[1].split("\\]")[0].split("TO");
+					String sStartdate = asDate[0].trim().substring(0, 16);
+					String sEnddate = asDate[1].trim().substring(0, 16);
 
-					date = String.format("start=%s&end%s", startdate, enddate);
+					sDate = String.format("start=%s&end%s", sStartdate, sEnddate);
 				}
 
-				if (item.contains("collection"))
+				if (sItem.contains("collection"))
 				{
-					String refString = item;
-					String[] asNameColletion = refString.split(":", 2)[1].split("\\)");
-					collection = String.format("collection=%s",asNameColletion[0]);
+					String sRefString = sItem;
+					String[] asNameColletion = sRefString.split(":", 2)[1].split("\\)");
+					sCollection = String.format("collection=%s",asNameColletion[0]);
 				}
 
 				
-				if (item.contains("cloudcoverpercentage"))
+				if (sItem.contains("cloudcoverpercentage"))
 				{
-					String refString = item;
-					String[] asNameColletion = refString.split(":", 2)[1].split("\\)");
-					cloudCover = String.format("cloudCover=[0,%s]",asNameColletion[0]);
+					String sRefString = sItem;
+					String[] asNameColletion = sRefString.split(":", 2)[1].split("\\)");
+					sCloudCover = String.format("cloudCover=[0,%s]",asNameColletion[0]);
 				}
 
-				if (item.contains("snowcoverpercentage"))
+				if (sItem.contains("snowcoverpercentage"))
 				{
-					String refString = item;
-					String[] asNameColletion = refString.split(":", 2)[1].split("\\)");
-					snowCover = String.format("snowCover=[0,%s]",asNameColletion[0]);
+					String sRefString = sItem;
+					String[] asNameColletion = sRefString.split(":", 2)[1].split("\\)");
+					sSnowCover = String.format("snowCover=[0,%s]",asNameColletion[0]);
 				}
 				
 			}
 
 		}
-		if (collection != null)
-			sUrl+=collection;
-		if (polygon != null)
-			sUrl+="&" + polygon;
-		if (date != null)
-			sUrl+="&" + date;
-		if (cloudCover != null)
-			sUrl+="&" + cloudCover;
-		if (snowCover != null)
-			sUrl+="&" + snowCover;
-		if (this.m_sOffset != null)
-			sUrl+="&startIndex=" + this.m_sOffset;
-		if (this.m_sLimit != null)
-			sUrl+="&count=" + this.m_sLimit;
+		if (sCollection != null)
+			sUrl+=sCollection;
+		if (sPolygon != null)
+			sUrl+="&" + sPolygon;
+		if (sDate != null)
+			sUrl+="&" + sDate;
+		if (sCloudCover != null)
+			sUrl+="&" + sCloudCover;
+		if (sSnowCover != null)
+			sUrl+="&" + sSnowCover;
+		if (oQuery.getOffset() != null)
+			sUrl+="&startIndex=" + oQuery.getOffset();
+		if (oQuery.getLimit() != null)
+			sUrl+="&count=" + oQuery.getLimit();
 
 		//addUrlParams(oParamsMap);
 		return sUrl;
@@ -169,10 +147,9 @@ public class QueryExecutorPROBAV extends QueryExecutor  {
 	@Override
 	public int executeCount(String sQuery) throws IOException
 	{
-		String sOldLimit = m_sLimit;
-		m_sLimit = "0";
-		String sUrl = buildUrl(sQuery);
-		m_sLimit = sOldLimit;
+		System.out.println("QueryExecutorPROBAV.executeCount");
+		PaginatedQuery oQuery = new PaginatedQuery(sQuery, null, null, null, null);
+		String sUrl = buildUrl(oQuery);
 		
 		//create abdera client
 		Abdera oAbdera = new Abdera();
@@ -247,6 +224,7 @@ public class QueryExecutorPROBAV extends QueryExecutor  {
 	@Override
 	protected ArrayList<QueryResultViewModel> buildResultLightViewModel(Document<Feed> oDocument, AbderaClient oClient, RequestOptions oOptions) {
 
+		System.out.println("QueryExecutorPROBAV.buildResultLightViewModel");
 		Feed oFeed = (Feed) oDocument.getRoot();
 
 		Map<String, String> oMap = getFootprint(oDocument);
@@ -301,6 +279,8 @@ public class QueryExecutorPROBAV extends QueryExecutor  {
 
 	@Override
 	protected ArrayList<QueryResultViewModel> buildResultViewModel(Document<Feed> oDocument, AbderaClient oClient, RequestOptions oOptions) {
+		
+		System.out.println("QueryExecutorPROBAV.buildResultViewModel");
 		//int iStreamSize = 1000000;
 		Feed oFeed = (Feed) oDocument.getRoot();
 
@@ -356,7 +336,9 @@ public class QueryExecutorPROBAV extends QueryExecutor  {
 				//				System.out.println("Icon Link: " + oLink.getHref().toString());
 
 				try {
-					ClientResponse oImageResponse = oClient.get(oLink.getHref().toString(), oOptions);
+					IRI oIri = oLink.getHref();
+					String sHref = oIri.toString();
+					ClientResponse oImageResponse = oClient.get(sHref, oOptions);
 					//					System.out.println("Response Got from the client");
 					if (oImageResponse.getType() == ResponseType.SUCCESS)
 					{
@@ -385,8 +367,8 @@ public class QueryExecutorPROBAV extends QueryExecutor  {
 		return aoResults;
 	}
 	
-	private Map<String, String> getFootprint(Document<Feed> oDocument)
-	{
+	private Map<String, String> getFootprint(Document<Feed> oDocument){
+		System.out.println("QueryExecutorPROBAV.getFootprint");
 		Map<String, String> oMap = new HashMap<String, String>();
 		
 		ByteArrayOutputStream outStream = new ByteArrayOutputStream();
@@ -442,8 +424,6 @@ public class QueryExecutorPROBAV extends QueryExecutor  {
 							}
 							
 							sFootprint = String.format("POLYGON ((%s))", sFootprint);
-							
-							
 						}
 					}
 					
