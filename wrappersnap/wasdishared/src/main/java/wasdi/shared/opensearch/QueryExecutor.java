@@ -328,7 +328,7 @@ public abstract class QueryExecutor {
 		    oResponseStringBuilder.append(sResponseLine);
 		}
 		
-//		String sResultAsString = oResponseStringBuilder.toString();
+		String sResultAsString = oResponseStringBuilder.toString();
 //		String sTmpFilePath = "insert/a/realistic/path/to/file.xml";
 //		Utils.printToFile(sTmpFilePath, sResultAsString);
 		
