@@ -153,13 +153,8 @@ public class OpenSearchResource {
 		Map<String, Integer> aiQueryCountResultsPerProvider = new HashMap<String, Integer>();
 		String asProviders[] = sProviders.split(",|;");
 		for (String sProvider : asProviders) {
-
-			String sOffset = null;
-			String sLimit = null;
-			String sSortedBy = null;
-			String sOrder = null;
 			
-			QueryExecutor oExecutor = getExecutor(sProviders, sOffset, sLimit, sSortedBy, sOrder);
+			QueryExecutor oExecutor = getExecutor(sProviders);
 
 			try {
 				Integer iProviderCountResults = 0;
@@ -252,7 +247,7 @@ public class OpenSearchResource {
 						"Executing query for " + sProvider + ": offset=" + sActualOffset + ": limit=" + sActualLimit);
 
 				//TODO use only sProviders
-				QueryExecutor oExecutor = getExecutor(sProviders, sActualOffset, sActualLimit, sSortedBy, sOrder);
+				QueryExecutor oExecutor = getExecutor(sProviders);
 
 				try {
 					PaginatedQuery oQuery = new PaginatedQuery(sQuery, sActualOffset, sActualLimit, sSortedBy, sOrder);
@@ -393,7 +388,7 @@ public class OpenSearchResource {
 
 						String sActualLimit = "" + iLimit;
 
-						QueryExecutor oExecutor = getExecutor(sProviders, sActualOffset, sActualLimit, sSortedBy, sOrder);
+						QueryExecutor oExecutor = getExecutor(sProviders);
 
 						try {
 							PaginatedQuery oQuery = new PaginatedQuery(sQuery, sActualOffset, sActualLimit, sSortedBy, sOrder);
@@ -423,7 +418,7 @@ public class OpenSearchResource {
 		return null;
 	}
 	
-	private QueryExecutor getExecutor(String sProvider, String sOffset, String sLimit, String sSortedBy, String sOrder) {
+	private QueryExecutor getExecutor(String sProvider) {
 		QueryExecutor oExecutor = null;
 		if(null!=sProvider) {
 			AuthenticationCredentials oCredentials = getCredentials(sProvider);
@@ -433,8 +428,6 @@ public class OpenSearchResource {
 			oExecutor = s_oQueryExecutorFactory.getExecutor(
 					sProvider,
 					oCredentials,
-					//TODO remove from the constructor and pass to the execute method
-					//sOffset, sLimit, sSortedBy, sOrder,
 					//TODO change into config method
 					sDownloadProtocol, sGetMetadata);
 		}

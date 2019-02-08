@@ -47,7 +47,6 @@ public class QueryExecutorFactory {
 	public QueryExecutor getExecutor(
 			String sProvider,
 			AuthenticationCredentials oCredentials,
-			//String sOffset, String sLimit, String sSortedBy, String sOrder,
 			String sDownloadProtocol, String sGetMetadata) {
 		
 		QueryExecutor oExecutor = null;
@@ -56,11 +55,6 @@ public class QueryExecutorFactory {
 			
 			oExecutor = supply(sProvider);
 			oExecutor.setCredentials(oCredentials);
-
-//			oExecutor.setOffset(sOffset);
-//			oExecutor.setLimit(sLimit);
-//			oExecutor.setSortedBy(sSortedBy);
-//			oExecutor.setOrder(sOrder);
 			
 			oExecutor.setMustCollectMetadata(Utils.doesThisStringMeansTrue(sGetMetadata));
 			oExecutor.setDownloadProtocol(sDownloadProtocol);
