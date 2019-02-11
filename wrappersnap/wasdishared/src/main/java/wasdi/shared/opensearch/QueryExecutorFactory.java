@@ -22,6 +22,7 @@ public class QueryExecutorFactory {
 	private static final Map<String, Supplier<QueryExecutor>> s_aoExecutors;
 
 	static {
+		System.out.println("QueryExecutorFactory");
 		final Map<String, Supplier<QueryExecutor>> aoMap = new HashMap<>();
 		
 		aoMap.put("ONDA", QueryExecutorONDA::new);
@@ -31,15 +32,22 @@ public class QueryExecutorFactory {
 		aoMap.put("FEDEO", QueryExecutorFEDEO::new);
 		
 		s_aoExecutors = Collections.unmodifiableMap(aoMap);
+		System.out.println("QueryExecutorFactory.static constructor, s_aoExecutors content:");
+		for (String sKey : s_aoExecutors.keySet()) {
+			System.out.println("QueryExecutorFactory.s_aoExecutors key: " + sKey);
+		}
 	}
 	
 	private QueryExecutor supply(String sProvider) {
+		System.out.println("QueryExecutorFactory.QueryExecutor( "+sProvider+" )");
 		QueryExecutor oExecutor = null;
 		if(null!=sProvider) {
 			Supplier<QueryExecutor> oSupplier = s_aoExecutors.get(sProvider);
 			if(null!=oSupplier) {
 				oExecutor = oSupplier.get();
 			}
+		} else {
+			System.out.println("QueryExecutorFactory.QueryExecutor: sProvider is null");
 		}
 		return oExecutor;	
 	}
@@ -48,14 +56,12 @@ public class QueryExecutorFactory {
 			String sProvider,
 			AuthenticationCredentials oCredentials,
 			String sDownloadProtocol, String sGetMetadata) {
-		
+		System.out.println("QueryExecutorFactory.getExecutor( "+sProvider+"...");
 		QueryExecutor oExecutor = null;
 		
 		try {
-			
 			oExecutor = supply(sProvider);
 			oExecutor.setCredentials(oCredentials);
-			
 			oExecutor.setMustCollectMetadata(Utils.doesThisStringMeansTrue(sGetMetadata));
 			oExecutor.setDownloadProtocol(sDownloadProtocol);
 			

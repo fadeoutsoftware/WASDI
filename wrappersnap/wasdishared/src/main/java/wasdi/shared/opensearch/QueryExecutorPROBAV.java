@@ -35,6 +35,7 @@ import wasdi.shared.viewmodels.QueryResultViewModel;
 public class QueryExecutorPROBAV extends QueryExecutor  {
 
 	QueryExecutorPROBAV(){
+		System.out.println("QueryExecutorPROBAV");
 		m_sProvider = "PROBAV";
 	}
 	

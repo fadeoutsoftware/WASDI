@@ -20,6 +20,7 @@ import org.apache.abdera.protocol.client.RequestOptions;
 public class QueryExecutorSENTINEL extends QueryExecutor {
 
 	public QueryExecutorSENTINEL() {
+		System.out.println("QueryExecutorSENTINEL");
 		m_sProvider = "SENTINEL";
 	}
 	
@@ -40,6 +41,7 @@ public class QueryExecutorSENTINEL extends QueryExecutor {
 
 	@Override
 	protected String getCountUrl(String sQuery) {
+		System.out.println("QueryExecutorSENTINEL.getCountUrl");
 		//return "https://scihub.copernicus.eu/dhus/api/stub/products/count?filter=" + sQuery;
 		//return "https://scihub.copernicus.eu/dhus/odata/v1/Products/$count?$filter=" + sQuery;
 		return "https://scihub.copernicus.eu/dhus/search?q=" + sQuery; 
@@ -47,7 +49,8 @@ public class QueryExecutorSENTINEL extends QueryExecutor {
 	}
 
 	//public int executeCountSentinel(String sQuery) throws IOException {
-	public int executeCount(String sQuery) throws IOException {	
+	public int executeCount(String sQuery) throws IOException {
+		System.out.println("QueryExecutorSENTINEL.executeCount");
 		PaginatedQuery oQuery = new PaginatedQuery(sQuery, "0", "1", "ingestiondate", "asc");
 		String sUrl = buildUrl(oQuery);
 		//create abdera client

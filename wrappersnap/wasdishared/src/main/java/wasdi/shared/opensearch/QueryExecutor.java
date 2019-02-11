@@ -65,6 +65,10 @@ public abstract class QueryExecutor {
 
 
 	protected String buildUrl(PaginatedQuery oQuery) {
+		System.out.println("QueryExecutor.buildUrl");
+		if(null==oQuery) {
+			System.out.println("QueryExecutor.buildUrl: oQuery is null");
+		}
 		Template oTemplate = getTemplate();
 		Map<String,Object> oParamsMap = new HashMap<String, Object>();		
 		oParamsMap.put("scheme", getUrlSchema());
@@ -94,6 +98,7 @@ public abstract class QueryExecutor {
 	protected abstract String getCountUrl(String sQuery);	
 
 	protected ArrayList<QueryResultViewModel> buildResultViewModel(Document<Feed> oDocument, AbderaClient oClient, RequestOptions oOptions) {
+		System.out.println("QueryExecutor.buildResultViewModel(3 args)");
 		//int iStreamSize = 1000000;
 		Feed oFeed = (Feed) oDocument.getRoot();
 
@@ -174,6 +179,7 @@ public abstract class QueryExecutor {
 
 	protected ArrayList<QueryResultViewModel> buildResultLightViewModel(Document<Feed> oDocument, AbderaClient oClient, RequestOptions oOptions) {
 
+		System.out.println("QueryExecutor.buildResultLightViewModel(3 args)");
 		Feed oFeed = (Feed) oDocument.getRoot();
 
 		ArrayList<QueryResultViewModel> aoResults = new ArrayList<QueryResultViewModel>();
@@ -220,6 +226,7 @@ public abstract class QueryExecutor {
 	}
 
 	public int executeCount(String sQuery) throws IOException {
+		System.out.println("QueryExecutor.executeCount");
 
 		String sUrl = getCountUrl(URLEncoder.encode(sQuery, "UTF-8"));
 		//		if (sProvider.equals("SENTINEL"))
