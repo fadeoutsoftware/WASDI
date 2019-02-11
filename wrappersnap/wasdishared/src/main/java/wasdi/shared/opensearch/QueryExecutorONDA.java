@@ -147,16 +147,31 @@ public class QueryExecutorONDA extends QueryExecutor {
 
 	
 	@Override
+	public ArrayList<QueryResultViewModel> executeAndRetrieve(PaginatedQuery oQuery, boolean bFullViewModel) throws IOException {
+		if(!bFullViewModel) {
+			String sUrl = buildUrl(oQuery);
+			String sResult = httpGetResults(sUrl);		
+			ArrayList<QueryResultViewModel> aoResult = null;
+			if(sResult!= null) {
+				aoResult = buildResultViewModel(sResult);
+				for (QueryResultViewModel oViewModel : aoResult) {
+					oViewModel.setPreview(null);
+				}
+			}
+			return aoResult;
+		} else {
+			return executeAndRetrieve(oQuery);
+		}
+	}
+	
+	@Override
 	public ArrayList<QueryResultViewModel> executeAndRetrieve(PaginatedQuery oQuery) throws IOException {
 
-
 		String sUrl = buildUrl(oQuery);
-		
-		String sResult = httpGetResults(sUrl);
-		
+		String sResult = httpGetResults(sUrl);		
 		ArrayList<QueryResultViewModel> aoResult = null;
 		if(sResult!= null) {
-			aoResult = buildResultLightViewModel(sResult);
+			aoResult = buildResultViewModel(sResult);
 		}
 		return aoResult;
 
@@ -204,7 +219,7 @@ public class QueryExecutorONDA extends QueryExecutor {
 //		}
 	}
 	
-	protected ArrayList<QueryResultViewModel> buildResultLightViewModel(String sJson){
+	protected ArrayList<QueryResultViewModel> buildResultViewModel(String sJson){
 		System.out.println("QueryExecutor.buildResultLightViewModel");
 		if(null==sJson ) {
 			System.out.println("QueryExecutor.buildResultLightViewModel: passed a null string");
