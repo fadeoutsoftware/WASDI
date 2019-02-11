@@ -16,10 +16,7 @@ public abstract class DiasQueryTranslator {
 	
 	protected HashMap<String, String> keyMapping;
 	protected HashMap<String, String> valueMapping;
-
-	//TODO add appropriate structure to store intermediate query components
-	
-	
+		
 	//translates from WASDI query (OpenSearch) to <derived class> format
 	public abstract String translate(String sQuery);
 	public abstract String encode( String sDecoded );
