@@ -51,7 +51,7 @@ public class OpenSearchResource {
 	public String SearchSentinel(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sQuery") String sQuery,
 			@QueryParam("offset") String sOffset, @QueryParam("limit") String sLimit,
 			@QueryParam("sortedby") String sSortedBy, @QueryParam("order") String sOrder) {
-		Wasdi.DebugLog("OpenSearchResource.SearchSentinel");
+		Wasdi.DebugLog("OpenSearchResource.SearchSentinel, session: "+sSessionId);
 
 		if (Utils.isNullOrEmpty(sSessionId))
 			return null;
@@ -79,7 +79,7 @@ public class OpenSearchResource {
 			asParameterMap.put("OSUser", m_oServletConfig.getInitParameter("OSUser"));
 			asParameterMap.put("OSPwd", m_oServletConfig.getInitParameter("OSPwd"));
 
-			System.out.println("Search Sentinel: execute query " + sQuery);
+			Wasdi.DebugLog("OpenSearchResource.SearchSentinel, user: " + oUser.getUserId() + " execute query " + sQuery);
 
 			// return OpenSearchQuery.ExecuteQuerySentinel(sQuery, asParams.toArray(new
 			// String[asParams.size()]));
@@ -98,7 +98,7 @@ public class OpenSearchResource {
 	@Produces({ "application/xml", "application/json", "text/html" })
 	public String GetProductsCountSentinel(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("sQuery") String sQuery) {
-		Wasdi.DebugLog("OpenSearchResource.GetProductsCountSentinel");
+		Wasdi.DebugLog("OpenSearchResource.GetProductsCountSentinel, session: " + sSessionId);
 
 		if (Utils.isNullOrEmpty(sSessionId))
 			return null;
@@ -111,7 +111,7 @@ public class OpenSearchResource {
 			return null;
 
 		try {
-			System.out.println("OpenSearchResource.GetProductsCount: Query: " + sQuery);
+			Wasdi.DebugLog("OpenSearchResource.GetProductsCount, user: " + oUser.getUserId() + " Query: " + sQuery);
 			return OpenSearchQuery.ExecuteQueryCount(sQuery, m_oServletConfig.getInitParameter("OSUser"),
 					m_oServletConfig.getInitParameter("OSPwd"), m_oServletConfig.getInitParameter("OSProvider"));
 		} catch (URISyntaxException | IOException e) {
@@ -127,7 +127,7 @@ public class OpenSearchResource {
 	@Produces({ "application/xml", "application/json", "text/html" })
 	public int GetProductsCount(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sQuery") String sQuery,
 			@QueryParam("providers") String sProviders) {
-		Wasdi.DebugLog("OpenSearchResource.GetProductsCount");
+		Wasdi.DebugLog("OpenSearchResource.GetProductsCount, session: " + sSessionId);
 
 		if (Utils.isNullOrEmpty(sSessionId))
 			return 0;
@@ -137,6 +137,7 @@ public class OpenSearchResource {
 
 		int iCounter = 0;
 		if (sProviders != null) {
+			Wasdi.DebugLog("OpenSearchResource.GetProductsCount, user: " + oUser.getUserId() + ", providers: " + sProviders + ", query: " + sQuery);
 			Map<String, Integer> aiQueryCountResultsPerProvider = getQueryCountResultsPerProvider(sQuery, sProviders);
 
 			for (Integer count : aiQueryCountResultsPerProvider.values()) {
@@ -176,7 +177,7 @@ public class OpenSearchResource {
 			@QueryParam("offset") String sOffset, @QueryParam("limit") String sLimit,
 			@QueryParam("sortedby") String sSortedBy, @QueryParam("order") String sOrder) {
 
-		Wasdi.DebugLog("OpenSearchResource.Search");
+		Wasdi.DebugLog("OpenSearchResource.Search, session: " + sSessionId);
 
 		User oUser = Wasdi.GetUserFromSession(sSessionId);
 		if (oUser == null)
@@ -197,6 +198,7 @@ public class OpenSearchResource {
 
 			Map<String, Integer> aiCounterMap = null;
 			try {
+				Wasdi.DebugLog("OpenSearchResource.Search, counting. User: " + oUser.getUserId() + ", providers: " + sProviders + ", query: " + sQuery);
 				aiCounterMap = getQueryCountResultsPerProvider(sQuery, sProviders);
 				// TEST
 				// counterMap = new HashMap();
@@ -242,11 +244,7 @@ public class OpenSearchResource {
 				int iActualOffset = Math.max(0, iOffset - iSkipped - aoResults.size());
 				String sActualOffset = "" + iActualOffset;
 
-
-				System.out.println(
-						"Executing query for " + sProvider + ": offset=" + sActualOffset + ": limit=" + sActualLimit);
-
-				//TODO use only sProviders
+				Wasdi.DebugLog("OpenSearchResource.Search, executing. User: " + oUser.getUserId() + ", " + sProvider + ": offset=" + sActualOffset + ": limit=" + sActualLimit);
 				QueryExecutor oExecutor = getExecutor(sProviders);
 
 				try {
@@ -254,9 +252,9 @@ public class OpenSearchResource {
 					ArrayList<QueryResultViewModel> aoTmp = oExecutor.executeAndRetrieve(oQuery);
 					if (aoTmp != null && !aoTmp.isEmpty()) {
 						aoResults.addAll(aoTmp);
-						System.out.println("Found " + aoTmp.size() + " results for " + sProvider);
+						Wasdi.DebugLog("Found " + aoTmp.size() + " results for " + sProvider);
 					} else {
-						System.out.println("No results found for " + sProvider);
+						Wasdi.DebugLog("No results found for " + sProvider);
 					}
 				} catch (IOException e) {
 					e.printStackTrace();
@@ -284,7 +282,7 @@ public class OpenSearchResource {
 
 		ArrayList<SearchProviderViewModel> aoRetProviders = new ArrayList<>();
 
-		Wasdi.DebugLog("OpenSearchResource.GetSearchProviders");
+		Wasdi.DebugLog("OpenSearchResource.GetSearchProviders, session: " + sSessionId);
 
 		String sProviders = m_oServletConfig.getInitParameter("SearchProviders");
 		if (sProviders != null && sProviders.length() > 0) {
@@ -312,7 +310,7 @@ public class OpenSearchResource {
 	public int GetListProductsCount(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("sQuery") String sQuery, @QueryParam("providers") String sProviders,
 			ArrayList<String> asQueries) {
-		Wasdi.DebugLog("OpenSearchResource.GetListProductsCount");
+		Wasdi.DebugLog("OpenSearchResource.GetListProductsCount, session: "+sSessionId+", providers: "+sProviders);
 
 		if (Utils.isNullOrEmpty(sSessionId))
 			return 0;
@@ -343,7 +341,7 @@ public class OpenSearchResource {
 			@QueryParam("offset") String sOffset, @QueryParam("limit") String sLimit,
 			@QueryParam("sortedby") String sSortedBy, @QueryParam("order") String sOrder, ArrayList<String> asQueries) {
 
-		Wasdi.DebugLog("OpenSearchResource.SearchList");
+		Wasdi.DebugLog("OpenSearchResource.SearchList, session: "+sSessionId);
 
 		User oUser = Wasdi.GetUserFromSession(sSessionId);
 		if (oUser == null)
@@ -358,7 +356,7 @@ public class OpenSearchResource {
 			if (sOrder == null)
 				sOrder = "asc";
 
-			Wasdi.DebugLog("OpenSearchResource.SearchList: Providers = " + sProviders + " Queries " + asQueries.size());
+			Wasdi.DebugLog("OpenSearchResource.SearchList, user:" + oUser.getUserId() + ", providers: " + sProviders + ", queries " + asQueries.size());
 
 			ArrayList<QueryResultViewModel> aoResults = new ArrayList<QueryResultViewModel>();
 
@@ -366,7 +364,7 @@ public class OpenSearchResource {
 
 				sQuery = asQueries.get(iQueries);
 
-				Wasdi.DebugLog("OpenSearchResource.SearchList: [" + sProviders + "] Query[" + iQueries + "] = " + asQueries.get(iQueries));
+				Wasdi.DebugLog("OpenSearchResource.SearchList, user:" + oUser.getUserId() + ", count: [" + sProviders + "] Query[" + iQueries + "] = " + asQueries.get(iQueries));
 
 				Map<String, Integer> counterMap = getQueryCountResultsPerProvider(sQuery, sProviders);
 
@@ -392,16 +390,17 @@ public class OpenSearchResource {
 
 						try {
 							PaginatedQuery oQuery = new PaginatedQuery(sQuery, sActualOffset, sActualLimit, sSortedBy, sOrder);
+							Wasdi.DebugLog("OpenSearchResource.SearchList, user:" + oUser.getUserId() +
+									", execute: [" + sProviders + "] query: " + sQuery);
 							ArrayList<QueryResultViewModel> aoTmp = oExecutor.executeAndRetrieve(oQuery, false);
 
 							if (aoTmp != null && !aoTmp.isEmpty()) {
 								iObtainedResults += aoTmp.size();
 								aoResults.addAll(aoTmp);
-								System.out.println("Found " + aoTmp.size() +
-										" results for Query#" + iQueries +
-										" for " + sProvider);
+								Wasdi.DebugLog("OpenSearchResource.SearchList, user:" + oUser.getUserId() +", found " + aoTmp.size() +
+										" results for Query#" + iQueries +" for " + sProvider);
 							} else {
-								System.out.println("No results found for " + sProvider);
+								Wasdi.DebugLog("OpenSearchResource.SearchList, user:" + oUser.getUserId() +", NO results found for " + sProvider);
 							}
 						} catch (IOException e) {
 							e.printStackTrace();
@@ -419,6 +418,7 @@ public class OpenSearchResource {
 	}
 	
 	private QueryExecutor getExecutor(String sProvider) {
+		Wasdi.DebugLog("OpenSearchResource.getExecutor, provider: " + sProvider);
 		QueryExecutor oExecutor = null;
 		if(null!=sProvider) {
 			AuthenticationCredentials oCredentials = getCredentials(sProvider);
@@ -436,6 +436,7 @@ public class OpenSearchResource {
 	}
 	
 	private AuthenticationCredentials getCredentials(String sProvider) {
+		Wasdi.DebugLog("OpenSearchResource.getCredentials( " + sProvider + " )");
 		AuthenticationCredentials oCredentials = m_aoCredentials.get(sProvider);
 		if(null == oCredentials) {
 			String sUser = m_oServletConfig.getInitParameter(sProvider+".OSUser");
