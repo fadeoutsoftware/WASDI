@@ -215,6 +215,7 @@ wasdiApp.controller("FTPController", FTPController);
 wasdiApp.controller("ListFloodAreaDetectionController", ListFloodAreaDetectionController);
 wasdiApp.controller("JRCProcessorController", JRCProcessorController);
 
+wasdiApp.controller(UploadFileController.REG_NAME, UploadFileController);
 wasdiApp.controller(ImageEditorController.REG_NAME, ImageEditorController);
 
 

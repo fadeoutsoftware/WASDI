@@ -34,6 +34,13 @@ service('ProductService', ['$http',  'ConstantsService', function ($http, oConst
     this.getApiMetadata= function(sProductName){
         return this.APIURL+"/product/metadatabyname?sProductName="+sProductName;
     };
-
+    this.uploadFile = function(sWorkspaceInput,oBody)
+    {
+        var oOptions = {
+            transformRequest: angular.identity,
+            headers: {'Content-Type': undefined}
+        };
+        return this.m_oHttp.post(this.APIURL + '/product/uploadfile?workspace=' + sWorkspaceInput  ,oBody ,oOptions);
+    }
 }]);
 
