@@ -117,7 +117,7 @@ public class Wasdi extends Application {
 			s_sDebugPassword = getInitParameter("DebugPassword", "password");
 		}
 		
-		if (getInitParameter("DebugLog", "false").equalsIgnoreCase("true")) {
+		if (getInitParameter("DebugLog", "true").equalsIgnoreCase("true")) {
 			s_bDebugLog = true;
 			System.out.println("-------Debug Log on");
 		}
