@@ -147,64 +147,29 @@ public class QueryExecutorONDA extends QueryExecutor {
 
 	
 	@Override
-	public ArrayList<QueryResultViewModel> executeAndRetrieve(PaginatedQuery oQuery) throws IOException {
-
-
+	public ArrayList<QueryResultViewModel> executeAndRetrieve(PaginatedQuery oQuery, boolean bFullViewModel) throws IOException {
 		String sUrl = buildUrl(oQuery);
-		
-		String sResult = httpGetResults(sUrl);
-		
+		String sResult = httpGetResults(sUrl);		
 		ArrayList<QueryResultViewModel> aoResult = null;
 		if(sResult!= null) {
-			aoResult = buildResultLightViewModel(sResult);
+			aoResult = buildResultViewModel(sResult, bFullViewModel);
+			for (QueryResultViewModel oViewModel : aoResult) {
+				oViewModel.setPreview(null);
+			}
 		}
 		return aoResult;
+	}
+	
+	@Override
+	public ArrayList<QueryResultViewModel> executeAndRetrieve(PaginatedQuery oQuery_AssumeFullviewModel) throws IOException {
 
+		return executeAndRetrieve(oQuery_AssumeFullviewModel, true);
 		
 		////use this to test with just 3 results
 		////sUrl = "https://catalogue.onda-dias.eu/dias-catalogue/Products?$search=%22(%20(%20name:S1*%20AND%20name:S1A_*%20AND%20name:*SLC*%20AND%20name:*%20AND%20sensorOperationalMode:SM%20)%20)%20AND%20(%20(%20beginPosition:[2018-12-02T00:00:00.000Z%20TO%202018-12-02T23:59:59.999Z]%20AND%20endPosition:[2018-12-02T00:00:00.000Z%20TO%202018-12-02T23:59:59.999Z]%20)%20)%22&$orderby=creationDate%20desc&$top=15&$skip=0&$format=json";
-		
-		
-//		URL oURL = new URL(sUrl);
-//		HttpURLConnection oConnection = (HttpURLConnection) oURL.openConnection();
-//
-//
-//		// optional default is GET
-//		oConnection.setRequestMethod("GET");
-//		oConnection.setRequestProperty("Accept", "*/*");
-//
-//		//XXX add user and password
-//
-//		System.out.println("\nSending 'GET' request to URL : " + sUrl);
-//
-//		int responseCode =  oConnection.getResponseCode();
-//		System.out.println("Response Code : " + responseCode);
-//
-//		if(200 == responseCode) {
-//			BufferedReader in = new BufferedReader(new InputStreamReader(oConnection.getInputStream()));
-//			String inputLine;
-//			StringBuffer oResponse = new StringBuffer();
-//	
-//			while ((inputLine = in.readLine()) != null) {
-//				oResponse.append(inputLine);
-//			}
-//			in.close();
-//		
-//
-//			//print result
-//			System.out.println("Count Done: Response " + oResponse.toString());
-//	
-//			ArrayList<QueryResultViewModel> aoResult = buildResultLightViewModel(oResponse.toString());
-//			//MAYBE filter aoResult using info from the query
-//			return aoResult;
-//		} else {
-//			String sMessage = oConnection.getResponseMessage();
-//			System.out.println(sMessage);
-//			return null;
-//		}
 	}
 	
-	protected ArrayList<QueryResultViewModel> buildResultLightViewModel(String sJson){
+	protected ArrayList<QueryResultViewModel> buildResultViewModel(String sJson, boolean bFullViewModel){
 		System.out.println("QueryExecutor.buildResultLightViewModel");
 		if(null==sJson ) {
 			System.out.println("QueryExecutor.buildResultLightViewModel: passed a null string");
@@ -220,6 +185,12 @@ public class QueryExecutorONDA extends QueryExecutor {
 						JSONObject oOndaFullEntry = new JSONObject("{}");
 						String sEntryKey = "entry";
 						JSONObject oOndaEntry = (JSONObject)(oObject);
+						if(!bFullViewModel) {
+							String sQuicklook = oOndaEntry.optString("quicklook");
+							if(null!=sQuicklook) {
+								oOndaEntry.put("quicklook", (String)null);
+							}
+						}
 						oOndaFullEntry.put(sEntryKey, oOndaEntry);
 
 						String sId = oOndaEntry.optString("id");
@@ -229,13 +200,6 @@ public class QueryExecutorONDA extends QueryExecutor {
 							sBaseUrl += ")";
 							String sFormat = "?$format=json";
 
-							//not necessary
-//							String sProductInfoUrl =  sBaseUrl + sFormat;
-//							String sProductInfoJson = httpGetResults(sProductInfoUrl);
-//							if(null!=sProductInfoJson) {
-//								JSONObject oProductInfo = new JSONObject(sProductInfoJson); 
-//								oOndaFullEntry.put("productInfo", oProductInfo);
-//							}
 							//XXX is it possible to query metadata for all products at once, instead of performing a call each time?
 							String sMetadataUrl = sBaseUrl + "/Metadata" + sFormat;
 							if(m_bMustCollectMetadata) {

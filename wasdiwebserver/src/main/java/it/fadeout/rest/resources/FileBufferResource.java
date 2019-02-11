@@ -46,7 +46,7 @@ public class FileBufferResource {
 	{
 		try {
 			
-			Wasdi.DebugLog("FileBufferResource.Download");
+			Wasdi.DebugLog("FileBufferResource.Download, session: " + sSessionId);
 
 			Boolean bSessionIsValid = !Utils.isNullOrEmpty(sSessionId); 
 			if (!bSessionIsValid) {
@@ -95,10 +95,10 @@ public class FileBufferResource {
 				oProcess.setProcessObjId(sProcessObjId);
 				oProcess.setStatus(ProcessStatus.CREATED.name());
 				oRepository.InsertProcessWorkspace(oProcess);
-				Wasdi.DebugLog("FileBufferResource.Download: Process Scheduled for Launcher");
+				Wasdi.DebugLog("FileBufferResource.Download: Process Scheduled for Launcher, user: " + sUserId + ", process ID: " + sProcessObjId);
 			}
 			catch(Exception oEx){
-				System.out.println("DownloadResource.Download: Error updating process list " + oEx.getMessage());
+				Wasdi.DebugLog("DownloadResource.Download: Error updating process list " + oEx.getMessage());
 				oEx.printStackTrace();
 				return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
 			}
@@ -121,7 +121,7 @@ public class FileBufferResource {
 	{
 		try {
 			
-			Wasdi.DebugLog("FileBufferResource.Publish");
+			Wasdi.DebugLog("FileBufferResource.Publish, session: " + sSessionId);
 
 			if (Utils.isNullOrEmpty(sSessionId)) return Response.status(401).build();
 
@@ -161,10 +161,10 @@ public class FileBufferResource {
 				oProcess.setProcessObjId(sProcessObjId);
 				oProcess.setStatus(ProcessStatus.CREATED.name());
 				oRepository.InsertProcessWorkspace(oProcess);
-				Wasdi.DebugLog("FileBufferResource.Publish: Process Scheduled for Launcher");
+				Wasdi.DebugLog("FileBufferResource.Publish: Process Scheduled for Launcher, user: " + sUserId + ", process ID: " + sProcessObjId);
 			}
 			catch(Exception oEx){
-				System.out.println("DownloadResource.Publish: Error updating process list " + oEx.getMessage());
+				Wasdi.DebugLog("DownloadResource.Publish: Error updating process list " + oEx.getMessage());
 				oEx.printStackTrace();
 				return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
 			}
@@ -189,14 +189,15 @@ public class FileBufferResource {
 		RabbitMessageViewModel oReturnValue = null;
 		try {
 			
-			Wasdi.DebugLog("FileBufferResource.PublishBand");
+			Wasdi.DebugLog("FileBufferResource.PublishBand, session: " + sSessionId);
 
 			if (Utils.isNullOrEmpty(sSessionId)) return oReturnValue;
 			User oUser = Wasdi.GetUserFromSession(sSessionId);
 			if (oUser==null) return oReturnValue;
-			if (Utils.isNullOrEmpty(oUser.getUserId())) return oReturnValue;
+			String sUserId = oUser.getUserId();
+			if (Utils.isNullOrEmpty(sUserId)) return oReturnValue;
 
-			System.out.println("FileBufferResource.PublishBand: read product workspaces " + sWorkspaceId);
+			Wasdi.DebugLog("FileBufferResource.PublishBand, user: " + oUser.getUserId() + ", read product workspaces " + sWorkspaceId);
 
 			oReturnValue = new RabbitMessageViewModel();
 			// Get Product List
@@ -208,7 +209,7 @@ public class FileBufferResource {
 
 			if (oPublishBand != null)
 			{
-				System.out.println("FileBufferResource.PublishBand: band already published " );
+				Wasdi.DebugLog("FileBufferResource.PublishBand: band already published " );
 				PublishBandResultViewModel oPublishViewModel = new PublishBandResultViewModel();
 				oPublishViewModel.setBoundingBox(oPublishBand.getBoundingBox());
 				oPublishViewModel.setBandName(oPublishBand.getBandName());
@@ -218,14 +219,11 @@ public class FileBufferResource {
 				oReturnValue.setMessageCode(LauncherOperations.PUBLISHBAND.name());
 				oReturnValue.setPayload(oPublishViewModel);
 				
-				System.out.println("FileBufferResource.PublishBand: return published band" );
+				Wasdi.DebugLog("FileBufferResource.PublishBand: return published band, user: " + sUserId );
 				return oReturnValue;
 			}
 			
-			
 			String sProcessObjId = Utils.GetRandomName();
-
-			String sUserId = oUser.getUserId();
 
 			PublishBandParameter oParameter = new PublishBandParameter();
 			oParameter.setQueue(sSessionId);
@@ -254,10 +252,10 @@ public class FileBufferResource {
 				oProcess.setProcessObjId(sProcessObjId);
 				oProcess.setStatus(ProcessStatus.CREATED.name());
 				oRepository.InsertProcessWorkspace(oProcess);
-				Wasdi.DebugLog("FileBufferResource.PublishBand: Process Scheduled for Launcher");
+				Wasdi.DebugLog("FileBufferResource.PublishBand: Process Scheduled for Launcher, user: " + sUserId +", process ID: " + sProcessObjId);
 			}
 			catch(Exception oEx){
-				System.out.println("DownloadResource.PublishBand: Error updating process list " + oEx.getMessage());
+				Wasdi.DebugLog("DownloadResource.PublishBand: Error updating process list " + oEx.getMessage());
 				oEx.printStackTrace();
 				return oReturnValue;
 			}
@@ -282,11 +280,9 @@ public class FileBufferResource {
 	@Produces({"application/xml", "application/json", "text/xml"})
 	public PrimitiveResult GetBandLayerId(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sFileUrl") String sFileUrl, @QueryParam("sWorkspaceId") String sWorkspaceId, @QueryParam("sBand") String sBand) throws IOException
 	{
+		Wasdi.DebugLog("FileBufferResource.GetBandLayerId, session: "+sSessionId);
 		PrimitiveResult oReturnValue = null;
 		try {
-			
-			Wasdi.DebugLog("FileBufferResource.GetBandLayerId");
-
 			if (Utils.isNullOrEmpty(sSessionId)) return oReturnValue;
 			User oUser = Wasdi.GetUserFromSession(sSessionId);
 			if (oUser==null) return oReturnValue;
@@ -298,27 +294,21 @@ public class FileBufferResource {
 			// Get Product List
 			DownloadedFilesRepository oDownloadedFilesRepository = new DownloadedFilesRepository();
 			DownloadedFile oDownloadedFile = oDownloadedFilesRepository.GetDownloadedFile(sFileUrl);
-			
 			PublishedBandsRepository oPublishedBandsRepository = new PublishedBandsRepository();
 			PublishedBand oPublishBand = oPublishedBandsRepository.GetPublishedBand(oDownloadedFile.getProductViewModel().getName(), sBand);
 
-			if (oPublishBand != null)
-			{
+			if (oPublishBand != null){
 				Wasdi.DebugLog("FileBufferResource.GetBandLayerId: band already published return " +oPublishBand.getLayerId() );
 				oReturnValue.setStringValue(oPublishBand.getLayerId());
-			}
-			else {
+			} else {
 				Wasdi.DebugLog("FileBufferResource.GetBandLayerId: band never published");
 			}
-			
-
 		} catch (Exception e) {
 			e.printStackTrace();
 			return oReturnValue;
 		}
 
 		return oReturnValue;
-
 	}	
 
 }

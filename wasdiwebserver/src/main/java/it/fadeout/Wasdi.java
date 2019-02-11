@@ -4,6 +4,7 @@ import java.lang.reflect.Field;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
@@ -116,7 +117,7 @@ public class Wasdi extends Application {
 			s_sDebugPassword = getInitParameter("DebugPassword", "password");
 		}
 		
-		if (getInitParameter("DebugLog", "false").equalsIgnoreCase("true")) {
+		if (getInitParameter("DebugLog", "true").equalsIgnoreCase("true")) {
 			s_bDebugLog = true;
 			System.out.println("-------Debug Log on");
 		}
@@ -354,7 +355,8 @@ public class Wasdi extends Application {
 	 */
 	public static void DebugLog(String sMessage) {
 		if (s_bDebugLog) {
-			System.out.println(sMessage);
+			LocalDateTime oNow = LocalDateTime.now();
+			System.out.println(oNow+": " + sMessage);
 		}
 	}
 	
