@@ -18,14 +18,28 @@ import javax.ws.rs.core.Context;
 
 import it.fadeout.Wasdi;
 import wasdi.shared.business.User;
+import wasdi.shared.opensearch.AuthenticationCredentials;
 import wasdi.shared.opensearch.OpenSearchQuery;
+import wasdi.shared.opensearch.PaginatedQuery;
 import wasdi.shared.opensearch.QueryExecutor;
+import wasdi.shared.opensearch.QueryExecutorFactory;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.QueryResultViewModel;
 import wasdi.shared.viewmodels.SearchProviderViewModel;
 
 @Path("/search")
 public class OpenSearchResource {
+	
+	private static QueryExecutorFactory s_oQueryExecutorFactory;
+	private Map<String,AuthenticationCredentials> m_aoCredentials;
+	
+	static {
+		s_oQueryExecutorFactory = new QueryExecutorFactory();
+	}
+	
+	public OpenSearchResource() {
+		m_aoCredentials = new HashMap<>();
+	}
 
 	@Context
 	ServletConfig m_oServletConfig;
@@ -139,34 +153,12 @@ public class OpenSearchResource {
 		Map<String, Integer> aiQueryCountResultsPerProvider = new HashMap<String, Integer>();
 		String asProviders[] = sProviders.split(",|;");
 		for (String sProvider : asProviders) {
-			String sUser = m_oServletConfig.getInitParameter(sProvider + ".OSUser");
-			String sPassword = m_oServletConfig.getInitParameter(sProvider + ".OSPwd");
-			String sDownloadProtocol = m_oServletConfig.getInitParameter(sProvider+".downloadProtocol");
+			
+			QueryExecutor oExecutor = getExecutor(sProviders);
 
-			String sOffset = null;
-			String sLimit = null;
-			String sSortedBy = null;
-			String sOrder = null;
-			// XXX move this into SENTINEL query executor
-			if (sProvider.equals("SENTINEL")) {
-				sOffset = "0";
-				sLimit = "1";
-				sSortedBy = "ingestiondate";
-				sOrder = "asc";
-			}
-
-			// QueryExecutor oExecutor = QueryExecutor.newInstance(sProvider, sUser,
-			// sPassword, null, null, null, null);
-			QueryExecutor oExecutor = QueryExecutor.newInstance(sProvider, sUser, sPassword, sOffset, sLimit, sSortedBy,
-					sOrder, sDownloadProtocol);
 			try {
 				Integer iProviderCountResults = 0;
-				if (sProvider.equals("SENTINEL")) {
-					// XXX move this into SENTINEL query executor
-					iProviderCountResults = oExecutor.executeCountSentinel(sQuery);
-				} else {
-					iProviderCountResults = oExecutor.executeCount(sQuery);
-				}
+				iProviderCountResults = oExecutor.executeCount(sQuery);
 				aiQueryCountResultsPerProvider.put(sProvider, iProviderCountResults);
 			} catch (IOException e) {
 				e.printStackTrace();
@@ -215,6 +207,7 @@ public class OpenSearchResource {
 
 			ArrayList<QueryResultViewModel> aoResults = new ArrayList<QueryResultViewModel>();
 
+			//XXX embed this code into a method
 			int iLimit = 25;
 			try {
 				iLimit = Integer.parseInt(sLimit);
@@ -249,17 +242,16 @@ public class OpenSearchResource {
 				int iActualOffset = Math.max(0, iOffset - iSkipped - aoResults.size());
 				String sActualOffset = "" + iActualOffset;
 
-				String sUser = m_oServletConfig.getInitParameter(sProvider + ".OSUser");
-				String sPassword = m_oServletConfig.getInitParameter(sProvider + ".OSPwd");
-				String sDownloadProtocol = m_oServletConfig.getInitParameter(sProvider+".downloadProtocol");
 
 				System.out.println(
 						"Executing query for " + sProvider + ": offset=" + sActualOffset + ": limit=" + sActualLimit);
 
-				QueryExecutor oExecutor = QueryExecutor.newInstance(sProvider, sUser, sPassword, sActualOffset,
-						sActualLimit, sSortedBy, sOrder, sDownloadProtocol);
+				//TODO use only sProviders
+				QueryExecutor oExecutor = getExecutor(sProviders);
+
 				try {
-					ArrayList<QueryResultViewModel> aoTmp = oExecutor.execute(sQuery);
+					PaginatedQuery oQuery = new PaginatedQuery(sQuery, sActualOffset, sActualLimit, sSortedBy, sOrder);
+					ArrayList<QueryResultViewModel> aoTmp = oExecutor.executeAndRetrieve(oQuery);
 					if (aoTmp != null && !aoTmp.isEmpty()) {
 						aoResults.addAll(aoTmp);
 						System.out.println("Found " + aoTmp.size() + " results for " + sProvider);
@@ -396,14 +388,11 @@ public class OpenSearchResource {
 
 						String sActualLimit = "" + iLimit;
 
-						String sUser = m_oServletConfig.getInitParameter(sProvider + ".OSUser");
-						String sPassword = m_oServletConfig.getInitParameter(sProvider + ".OSPwd");
-						String sDownloadProtocol = m_oServletConfig.getInitParameter(sProvider+".downloadProtocol");
+						QueryExecutor oExecutor = getExecutor(sProviders);
 
-						QueryExecutor oExecutor = QueryExecutor.newInstance(sProvider, sUser, sPassword, sActualOffset,
-								sActualLimit, sSortedBy, sOrder, sDownloadProtocol);
 						try {
-							ArrayList<QueryResultViewModel> aoTmp = oExecutor.execute(sQuery, false);
+							PaginatedQuery oQuery = new PaginatedQuery(sQuery, sActualOffset, sActualLimit, sSortedBy, sOrder);
+							ArrayList<QueryResultViewModel> aoTmp = oExecutor.executeAndRetrieve(oQuery, false);
 
 							if (aoTmp != null && !aoTmp.isEmpty()) {
 								iObtainedResults += aoTmp.size();
@@ -427,6 +416,34 @@ public class OpenSearchResource {
 		}
 
 		return null;
+	}
+	
+	private QueryExecutor getExecutor(String sProvider) {
+		QueryExecutor oExecutor = null;
+		if(null!=sProvider) {
+			AuthenticationCredentials oCredentials = getCredentials(sProvider);
+			String sDownloadProtocol = m_oServletConfig.getInitParameter(sProvider+".downloadProtocol");
+			String sGetMetadata = m_oServletConfig.getInitParameter("getProductMetadata");
+			
+			oExecutor = s_oQueryExecutorFactory.getExecutor(
+					sProvider,
+					oCredentials,
+					//TODO change into config method
+					sDownloadProtocol, sGetMetadata);
+		}
+		return oExecutor;
+		
+	}
+	
+	private AuthenticationCredentials getCredentials(String sProvider) {
+		AuthenticationCredentials oCredentials = m_aoCredentials.get(sProvider);
+		if(null == oCredentials) {
+			String sUser = m_oServletConfig.getInitParameter(sProvider+".OSUser");
+			String sPassword = m_oServletConfig.getInitParameter(sProvider+".OSPwd");
+			oCredentials = new AuthenticationCredentials(sUser, sPassword);
+			m_aoCredentials.put(sProvider, oCredentials);
+		}
+		return oCredentials;
 	}
 
 }

@@ -17,6 +17,7 @@ import wasdi.shared.utils.Utils;
  */
 public class DiasQueryTranslatorONDA extends DiasQueryTranslator {
 	
+	//see issue #32
 	//TODO make a JSON file with query configuration
 	//TODO write the path of the JSON file in the configuration file (web.xml, filename read and passed from the server?)
 	
