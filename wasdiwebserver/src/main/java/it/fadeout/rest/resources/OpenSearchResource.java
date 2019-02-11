@@ -386,12 +386,13 @@ public class OpenSearchResource {
 
 						String sActualLimit = "" + iLimit;
 
-						QueryExecutor oExecutor = getExecutor(sProviders);
+						
 
 						try {
 							PaginatedQuery oQuery = new PaginatedQuery(sQuery, sActualOffset, sActualLimit, sSortedBy, sOrder);
 							Wasdi.DebugLog("OpenSearchResource.SearchList, user:" + oUser.getUserId() +
 									", execute: [" + sProviders + "] query: " + sQuery);
+							QueryExecutor oExecutor = getExecutor(sProviders);
 							ArrayList<QueryResultViewModel> aoTmp = oExecutor.executeAndRetrieve(oQuery, false);
 
 							if (aoTmp != null && !aoTmp.isEmpty()) {
