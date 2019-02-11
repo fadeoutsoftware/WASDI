@@ -155,7 +155,7 @@ public class OpenSearchResource {
 		String asProviders[] = sProviders.split(",|;");
 		for (String sProvider : asProviders) {
 			
-			QueryExecutor oExecutor = getExecutor(sProviders);
+			QueryExecutor oExecutor = getExecutor(sProvider);
 
 			try {
 				Integer iProviderCountResults = 0;
