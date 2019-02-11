@@ -22,6 +22,7 @@ public abstract class DiasQueryTranslator {
 	public abstract String encode( String sDecoded );
 	
 	public String translateAndEncode(String sQuery) {
+		System.out.println("DiasQueryTranslator.translateAndEncode");
 		return encode(translate(sQuery));
 	}
 	

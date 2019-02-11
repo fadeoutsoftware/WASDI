@@ -18,6 +18,7 @@ import org.json.JSONObject;
 
 import com.google.gson.JsonObject;
 
+import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.QueryResultViewModel;
 
 /**
@@ -27,6 +28,7 @@ import wasdi.shared.viewmodels.QueryResultViewModel;
 public class QueryExecutorONDA extends QueryExecutor {
 	
 	public QueryExecutorONDA() {
+		System.out.println("QueryExecutorONDA");
 		m_sProvider="ONDA";
 		this.m_oQueryTranslator = new DiasQueryTranslatorONDA();
 		this.m_oResponseTranslator = new DiasResponseTranslatorONDA();
@@ -55,6 +57,10 @@ public class QueryExecutorONDA extends QueryExecutor {
 	 */
 	@Override
 	protected String getCountUrl(String sQuery) {
+		System.out.println("QueryExecutorONDA.getCountUrl");
+		if(Utils.isNullOrEmpty(sQuery)) {
+			System.out.println("QueryExecutorONDA.getCountUrl: sQuery is null");
+		}
 		String sUrl = "https://catalogue.onda-dias.eu/dias-catalogue/Products/$count?$search=%22";
 		sUrl+=m_oQueryTranslator.translateAndEncode(sQuery);
 		sUrl+="%22";
@@ -65,6 +71,10 @@ public class QueryExecutorONDA extends QueryExecutor {
 	// /Products/$count?$search="name:S2*"
 	@Override
 	protected String buildUrl(PaginatedQuery oQuery){
+		System.out.println("QueryExecutorONDA.BuildUrl");
+		if(null==oQuery) {
+			System.out.println("QueryExecutorONDA.buildUrl: oQuery is null");
+		}
 		String sUrl = "https://catalogue.onda-dias.eu/dias-catalogue/Products?$search=%22";
 		sUrl+=m_oQueryTranslator.translateAndEncode(oQuery.getQuery());
 		//TODO don't use hardcoded values
@@ -74,6 +84,7 @@ public class QueryExecutorONDA extends QueryExecutor {
 	
 	@Override
 	public int executeCount(String sQuery) throws IOException {
+		System.out.println("QueryExecutorONDA.executeCount");
 		//note: the following parameters specified by WASDI are not supported by ONDA:
 		//polarisation
 		//relative orbit
@@ -148,6 +159,7 @@ public class QueryExecutorONDA extends QueryExecutor {
 	
 	@Override
 	public ArrayList<QueryResultViewModel> executeAndRetrieve(PaginatedQuery oQuery, boolean bFullViewModel) throws IOException {
+		System.out.println("QueryExecutorONDA.executeAndRetrieve(2 args)");
 		String sUrl = buildUrl(oQuery);
 		String sResult = httpGetResults(sUrl);		
 		ArrayList<QueryResultViewModel> aoResult = null;
@@ -162,7 +174,7 @@ public class QueryExecutorONDA extends QueryExecutor {
 	
 	@Override
 	public ArrayList<QueryResultViewModel> executeAndRetrieve(PaginatedQuery oQuery_AssumeFullviewModel) throws IOException {
-
+		System.out.println("QueryExecutorONDA.executeAndRetrieve(1 arg)");
 		return executeAndRetrieve(oQuery_AssumeFullviewModel, true);
 		
 		////use this to test with just 3 results
@@ -223,6 +235,7 @@ public class QueryExecutorONDA extends QueryExecutor {
 	}
 
 	private String httpGetResults(String sUrl) {
+		System.out.println("QueryExecutorONDA.httpGetResults");
 		String sResult = null;
 		try {
 			URL oURL = new URL(sUrl);
