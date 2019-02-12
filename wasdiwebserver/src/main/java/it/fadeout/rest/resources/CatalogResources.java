@@ -156,8 +156,10 @@ public class CatalogResources {
 			Wasdi.DebugLog("CatalogResources.getEntryFile: file " + sFileName + " not found");
 			return null;
 		}
+		
+		String sFilePath = oDownloadedFile.getFilePath();
 
-		File oFile = new File(oDownloadedFile.getFilePath());
+		File oFile = new File(sFilePath);
 		//File oFile = new File("C:\\temp\\wasdi\\S1A_IW_GRDH_1SDV_20180605T051925_20180605T051950_022217_026754_8ADD.zip");
 		
 		if( oFile.canRead() == true)
@@ -175,7 +177,7 @@ public class CatalogResources {
 	@Produces(MediaType.APPLICATION_OCTET_STREAM)
 	public Response DownloadEntryByName(@HeaderParam("x-session-token") String sSessionId, @QueryParam("token") String sTokenSessionId, @QueryParam("filename") String sFileName)
 	{			
-		Wasdi.DebugLog("CatalogResources.DownloadEntryByName");
+		Wasdi.DebugLog("CatalogResources.DownloadEntryByName" + sSessionId);
 		
 		if( Utils.isNullOrEmpty(sSessionId) == false) {
 			sTokenSessionId = sSessionId;
@@ -209,6 +211,7 @@ public class CatalogResources {
 	
 	
 	private boolean mustBeZipped(File oFile) {
+		Wasdi.DebugLog("CatalogResources.mustBeZipped");
 		boolean bRet = false;
 		String sName = oFile.getName(); 
 		if(null!=sName) {
@@ -219,26 +222,38 @@ public class CatalogResources {
 		return bRet;
 	}
 	
-	private File getZippedFile(File oFile) {
+	private File getZippedFile(File oFileToBeZipped) {
+		Wasdi.DebugLog("CatalogResources.getZippedFile");
+		if(null==oFileToBeZipped) {
+			Wasdi.DebugLog("CatalogResources.getZippedFile: oFile is null");
+			return null;
+		}
+		File oResult = null;
 		try {
-			String sParent = oFile.getParent();
-			String sFileName = oFile.getName();
-			String sBaseName = sFileName.substring(0, sFileName.lastIndexOf(".dim"));
-			String sDirToBeZipped = sBaseName + ".data";
-			String sZipFileName = sBaseName + ".zip";
+			String sBaseName = oFileToBeZipped.getName();
+			sBaseName = sBaseName.substring(0, sBaseName.lastIndexOf(".dim"));
+			
+			String sAbsolutePathWithName = oFileToBeZipped.getCanonicalPath();
+			String sBasePath = sAbsolutePathWithName.substring(0, sAbsolutePathWithName.lastIndexOf(".dim"));
+			String sDirToBeZipped = sBasePath + ".data";
+			String sZipFileName = sBasePath + ".zip";
 			
 			FileOutputStream oStream = new FileOutputStream(sZipFileName);
 			ZipOutputStream oZip = new ZipOutputStream(oStream);
-			File oDir = new File(sDirToBeZipped);
+			File oDirToBeZipped = new File(sDirToBeZipped);
+			
+		
 			WasdiFileUtils oFileUtils = new WasdiFileUtils();
-			oFileUtils.zipFile(oDir, sZipFileName, oZip);
-			oFileUtils.zipFile(oFile, sFileName, oZip);
+			oFileUtils.zipFile(oDirToBeZipped, sBaseName + ".data/", oZip);
+			
+			oFileUtils.zipFile(oFileToBeZipped, sBaseName + ".dim", oZip);
 			oZip.close();
 			oStream.close();
+			oResult = new File(sZipFileName);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		return null;
+		return oResult;
 	}
 
 
