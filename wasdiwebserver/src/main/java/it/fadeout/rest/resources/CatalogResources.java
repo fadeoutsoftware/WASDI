@@ -1,6 +1,8 @@
 package it.fadeout.rest.resources;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -8,6 +10,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.zip.ZipOutputStream;
 
 import javax.servlet.ServletConfig;
 import javax.ws.rs.GET;
@@ -23,6 +26,8 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
+
+import com.sun.jna.platform.FileUtils;
 
 import it.fadeout.Wasdi;
 import wasdi.shared.LauncherOperations;
@@ -46,6 +51,7 @@ import wasdi.shared.parameters.IngestFileParameter;
 import wasdi.shared.utils.CredentialPolicy;
 import wasdi.shared.utils.SerializationUtils;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.viewmodels.CatalogViewModel;
 import wasdi.shared.viewmodels.FtpTransferViewModel;
 import wasdi.shared.viewmodels.PrimitiveResult;
@@ -187,8 +193,10 @@ public class CatalogResources {
 		if(oFile == null) {
 			Wasdi.DebugLog("CatalogResources.DownloadEntryByName: file not readable");
 			oResponseBuilder = Response.serverError();	
-		}
-		else {
+		} else {
+			if(mustBeZipped(oFile)) {
+				oFile = getZippedFile(oFile);
+			}
 			Wasdi.DebugLog("CatalogResources.DownloadEntryByName: file ok return content");
 			oResponseBuilder = Response.ok(oFile);
 			oResponseBuilder.header("Content-Disposition", "attachment; filename="+ oFile.getName());
@@ -198,6 +206,42 @@ public class CatalogResources {
 		return oResponseBuilder.build();
 	}
 	
+	
+	
+	private boolean mustBeZipped(File oFile) {
+		boolean bRet = false;
+		String sName = oFile.getName(); 
+		if(null!=sName) {
+			if(sName.endsWith(".dim")) {
+				bRet = true;
+			}
+		}
+		return bRet;
+	}
+	
+	private File getZippedFile(File oFile) {
+		try {
+			String sParent = oFile.getParent();
+			String sFileName = oFile.getName();
+			String sBaseName = sFileName.substring(0, sFileName.lastIndexOf(".dim"));
+			String sDirToBeZipped = sBaseName + ".data";
+			String sZipFileName = sBaseName + ".zip";
+			
+			FileOutputStream oStream = new FileOutputStream(sZipFileName);
+			ZipOutputStream oZip = new ZipOutputStream(oStream);
+			File oDir = new File(sDirToBeZipped);
+			WasdiFileUtils oFileUtils = new WasdiFileUtils();
+			oFileUtils.zipFile(oDir, sZipFileName, oZip);
+			oFileUtils.zipFile(oFile, sFileName, oZip);
+			oZip.close();
+			oStream.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+
 	@GET
 	@Path("checkdownloadavaialibitybyname")
 	@Produces({"application/xml", "application/json", "text/xml"})
