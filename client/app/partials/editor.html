@@ -9,12 +9,12 @@
 
                 <!--<div class="button-container" ng-repeat="button in m_oController.m_aoNavBarMenu">-->
             <div class="button-container" >
-                <button class="btn btn-outline-primary no-border btn-wasdi" ng-if = " button.onClick !== '' "  ng-click="button.onClick(m_oController)">
+                <button class="btn btn-outline-primary no-border btn-wasdi" ng-if="m_oController.isToolbarBtnDropdown(button) == false"  ng-click="button.onClick(m_oController)">
                     <i class="custom-icon" ng-class="button.icon"></i>
                     <span>{{button.name}}</span>
                 </button>
 
-                <div class="dropdown" ng-if = " button.onClick === '' ">
+                <div class="dropdown" ng-if="m_oController.isToolbarBtnDropdown(button) == true">
                     <!--<button class="btn btn-primary btn-wasdi dropdown-toggle" id="navBarMenuDropdown" data-toggle="dropdown">-->
                     <button class="btn btn-outline-primary no-border btn-wasdi dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                         <i class="custom-icon" ng-class="button.icon"></i>

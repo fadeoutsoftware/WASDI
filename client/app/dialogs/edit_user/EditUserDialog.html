@@ -17,13 +17,82 @@
             </div>
             <!-- BODY -->
             <div class="modal-body ">
-                <h4>
 
-                    <div class="edit-content" >
+                <div class="row-v4">
+                    <div class="col-v4">
                         <form ng-show = "m_oController.isUserLoggedWithGoogle()">
                             <legend>{{"DIALOG_EDIT_USER_INFO_GOOGLE_ACCOUNT"|translate}}</legend>
                             User email: {{m_oController.m_oUser.userId}}
                         </form>
+                    </div>
+                </div>
+
+                <!-- Edit user info form -->
+                <div class="row-v4">
+                    <div class="col-v4">
+                        <legend>{{"DIALOG_EDIT_USER_INFO"|translate}}</legend>
+                        <form name="changeUserInfoForm" ng-submit="m_oController.changeUserInfo()" ng-hide = "m_oController.isUserLoggedWithGoogle()">
+                            <div class="form-v4-group row">
+                                <label class="col-sm-2 col-form-v4-label">{{'DIALOG_EDIT_USER_INFO_NAME'|translate}}</label>
+                                <div class="col-sm-10">
+                                    <input type="text" class="form-v4-control-plaintext wasdi-input" name="name"  ng-model="m_oController.m_oEditUser.name" required>
+                                </div>
+                            </div>
+                            <div class="form-v4-group row">
+                                <label class="col-sm-2 col-form-v4-label">{{'DIALOG_EDIT_USER_INFO_SURNAME'|translate}}</label>
+                                <div class="col-sm-10">
+                                    <input type="text" class="form-v4-control-plaintext wasdi-input" ng-model="m_oController.m_oEditUser.surname" required>
+                                </div>
+                            </div>
+                            <button type="submit"  class="btn btn-primary btn-wasdi" ng-disabled="changeUserInfoForm.$invalid === true || changeUserInfoForm.$dirty === false ">
+                                {{"DIALOG_EDIT_USER_EDIT_USER_INFO"|translate}}
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Edit user password form -->
+                <div class="row-v4">
+                    <div class="col-v4">
+                        <legend>{{"DIALOG_EDIT_USER_CHANGE_PASSWORD"|translate}}</legend>
+                        <form name="changeUserInfoForm" ng-submit="m_oController.changeUserInfo()" ng-hide = "m_oController.isUserLoggedWithGoogle()">
+                            <div class="form-v4-group row">
+                                <label class="col-sm-2 col-form-v4-label">{{'DIALOG_EDIT_USER_OLD_PASSWORD'|translate}}</label>
+                                <div class="col-sm-10">
+                                    <input type="password" class="form-v4-control-plaintext wasdi-input" name="usercurrentpassword"  ng-model="m_oController.m_oEditUser.currentPassword" required>
+                                </div>
+                            </div>
+                            <div class="form-v4-group row">
+                                <label class="col-sm-2 col-form-v4-label">{{'DIALOG_EDIT_USER_NEW_PASSWORD'|translate}}</label>
+                                <div class="col-sm-10">
+                                    <input type="password" class="form-v4-control-plaintext wasdi-input" name="usernewpassword"  ng-model="m_oController.m_oEditUser.newPassword" ng-minlength="8" required>
+                                </div>
+                                <h5 class="error-message" ng-if="(m_oController.m_oEditUser.newPassword.length !== 0) &&
+                                                         (!changePasswordForm.usernewpassword.$valid)">
+                                    The value is too short
+                                </h5>
+                            </div>
+                            <div class="form-v4-group row">
+                                <label class="col-sm-2 col-form-v4-label">{{'DIALOG_EDIT_USER_REPEAT_NEW_PASSWORD'|translate}}</label>
+                                <div class="col-sm-10">
+                                    <input type="password" class="form-v4-control-plaintext wasdi-input" name="userrepeatpassword" ng-model="m_oController.m_oEditUser.repeatNewPassword" ng-minlength="8" required>
+                                </div>
+                                <h5 class="error-message" ng-if="(changePasswordForm.userrepeatpassword.$dirty === true) &&
+                                                        (changePasswordForm.usernewpassword.$viewValue !== changePasswordForm.userrepeatpassword.$viewValue)">
+                                    The passwords are different
+                                </h5>
+                            </div>
+                            <button type="submit" class="my-button" ng-disabled="changePasswordForm.$invalid === true"><!--ng-class="{disabled: changePasswordForm.$invalid === true }"-->
+                                {{"DIALOG_EDIT_USER_CHANGE_PASSWORD"|translate}}
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <h4>
+
+                    <div class="edit-content" >
+
 
                         <form name="changeUserInfoForm" ng-submit="m_oController.changeUserInfo()" ng-hide = "m_oController.isUserLoggedWithGoogle()">
                             <legend>{{"DIALOG_EDIT_USER_INFO"|translate}}</legend>
