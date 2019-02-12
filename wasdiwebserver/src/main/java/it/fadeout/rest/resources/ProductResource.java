@@ -361,8 +361,8 @@ public class ProductResource {
 	@POST
 	@Path("/uploadfile")
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
-	public Response uploadGraph(@FormDataParam("file") InputStream fileInputStream, @HeaderParam("x-session-token") String sSessionId, 
-			@QueryParam("workspace") String workspace) throws Exception 
+	public Response uploadFile(@FormDataParam("file") InputStream fileInputStream, @HeaderParam("x-session-token") String sSessionId, 
+			@QueryParam("workspace") String workspace,@QueryParam("name") String sName) throws Exception 
 	{
 		Wasdi.DebugLog("ProductResource.uploadfile");
 	
@@ -382,22 +382,26 @@ public class ProductResource {
 		}
 		String sUserId = oUser.getUserId();
 		
+		if(Utils.isNullOrEmpty(sName) || sName.isEmpty())
+		{
+			sName="defaultName";
+		}
+		
+		//take path
 		String sDownloadRootPath = m_oServletConfig.getInitParameter("DownloadRootPath");
 		if (!sDownloadRootPath.endsWith("/")) 
 		{
 			sDownloadRootPath = sDownloadRootPath + "\\";
 		}
-		String sPath = sDownloadRootPath + sUserId + "\nomeFile" ;
-		File oUserPath = new File(sPath);
+		String sPath = sDownloadRootPath + sUserId + "\\" ;
+		File oUserPath = new File(sPath + sName);
 		Integer iIndex=0;
 		while( oUserPath.exists() ) 
 		{
-			oUserPath = new File(sPath + "("+ iIndex + ")");
+			oUserPath = new File(sPath + "("+ iIndex + ")"+ sName);
 			iIndex++;
 		}
-//		
-//		String sWorkflowId =  UUID.randomUUID().toString();
-//		File oWorkflowXmlFile = new File(sDownloadRootPath+sUserId+ "/workflows/" + sWorkflowId + ".xml");
+
 		
 		int iRead = 0;
 		byte[] ayBytes = new byte[1024];
