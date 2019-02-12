@@ -1,6 +1,8 @@
 package it.fadeout.rest.resources;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -8,6 +10,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.zip.ZipOutputStream;
 
 import javax.servlet.ServletConfig;
 import javax.ws.rs.GET;
@@ -23,6 +26,8 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
+
+import com.sun.jna.platform.FileUtils;
 
 import it.fadeout.Wasdi;
 import wasdi.shared.LauncherOperations;
@@ -46,6 +51,7 @@ import wasdi.shared.parameters.IngestFileParameter;
 import wasdi.shared.utils.CredentialPolicy;
 import wasdi.shared.utils.SerializationUtils;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.utils.WasdiFileUtils;
 import wasdi.shared.viewmodels.CatalogViewModel;
 import wasdi.shared.viewmodels.FtpTransferViewModel;
 import wasdi.shared.viewmodels.PrimitiveResult;
@@ -150,8 +156,10 @@ public class CatalogResources {
 			Wasdi.DebugLog("CatalogResources.getEntryFile: file " + sFileName + " not found");
 			return null;
 		}
+		
+		String sFilePath = oDownloadedFile.getFilePath();
 
-		File oFile = new File(oDownloadedFile.getFilePath());
+		File oFile = new File(sFilePath);
 		//File oFile = new File("C:\\temp\\wasdi\\S1A_IW_GRDH_1SDV_20180605T051925_20180605T051950_022217_026754_8ADD.zip");
 		
 		if( oFile.canRead() == true)
@@ -169,7 +177,7 @@ public class CatalogResources {
 	@Produces(MediaType.APPLICATION_OCTET_STREAM)
 	public Response DownloadEntryByName(@HeaderParam("x-session-token") String sSessionId, @QueryParam("token") String sTokenSessionId, @QueryParam("filename") String sFileName)
 	{			
-		Wasdi.DebugLog("CatalogResources.DownloadEntryByName");
+		Wasdi.DebugLog("CatalogResources.DownloadEntryByName" + sSessionId);
 		
 		if( Utils.isNullOrEmpty(sSessionId) == false) {
 			sTokenSessionId = sSessionId;
@@ -187,8 +195,10 @@ public class CatalogResources {
 		if(oFile == null) {
 			Wasdi.DebugLog("CatalogResources.DownloadEntryByName: file not readable");
 			oResponseBuilder = Response.serverError();	
-		}
-		else {
+		} else {
+			if(mustBeZipped(oFile)) {
+				oFile = getZippedFile(oFile);
+			}
 			Wasdi.DebugLog("CatalogResources.DownloadEntryByName: file ok return content");
 			oResponseBuilder = Response.ok(oFile);
 			oResponseBuilder.header("Content-Disposition", "attachment; filename="+ oFile.getName());
@@ -198,6 +208,60 @@ public class CatalogResources {
 		return oResponseBuilder.build();
 	}
 	
+	
+	
+	private boolean mustBeZipped(File oFile) {
+		Wasdi.DebugLog("CatalogResources.mustBeZipped");
+		if(null==oFile) {
+			Wasdi.DebugLog("CatalogResources.mustBeZipped: oFile is null");
+			throw new NullPointerException("File is null");
+		}
+		boolean bRet = false;
+		
+		String sName = oFile.getName(); 
+		if(!Utils.isNullOrEmpty(sName)) {
+			if(sName.endsWith(".dim")) {
+				bRet = true;
+			}
+		}
+		return bRet;
+	}
+	
+	private File getZippedFile(File oFileToBeZipped) {
+		Wasdi.DebugLog("CatalogResources.getZippedFile");
+		if(null==oFileToBeZipped) {
+			Wasdi.DebugLog("CatalogResources.getZippedFile: oFile is null");
+			return null;
+		}
+		File oResult = null;
+		try {
+			String sBaseName = oFileToBeZipped.getName();
+			sBaseName = sBaseName.substring(0, sBaseName.lastIndexOf(".dim"));
+			
+			String sAbsolutePathWithName = oFileToBeZipped.getCanonicalPath();
+			String sBasePath = sAbsolutePathWithName.substring(0, sAbsolutePathWithName.lastIndexOf(".dim"));
+			String sDirToBeZipped = sBasePath + ".data";
+			String sZipFileName = sBasePath + ".zip";
+			
+			FileOutputStream oStream = new FileOutputStream(sZipFileName);
+			ZipOutputStream oZip = new ZipOutputStream(oStream);
+			File oDirToBeZipped = new File(sDirToBeZipped);
+			
+		
+			WasdiFileUtils oFileUtils = new WasdiFileUtils();
+			oFileUtils.zipFile(oDirToBeZipped, sBaseName + ".data/", oZip);
+			
+			oFileUtils.zipFile(oFileToBeZipped, sBaseName + ".dim", oZip);
+			oZip.close();
+			oStream.close();
+			oResult = new File(sZipFileName);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return oResult;
+	}
+
+
 	@GET
 	@Path("checkdownloadavaialibitybyname")
 	@Produces({"application/xml", "application/json", "text/xml"})
