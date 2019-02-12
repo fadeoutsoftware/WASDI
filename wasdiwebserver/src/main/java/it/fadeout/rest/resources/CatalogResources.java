@@ -212,9 +212,14 @@ public class CatalogResources {
 	
 	private boolean mustBeZipped(File oFile) {
 		Wasdi.DebugLog("CatalogResources.mustBeZipped");
+		if(null==oFile) {
+			Wasdi.DebugLog("CatalogResources.mustBeZipped: oFile is null");
+			throw new NullPointerException("File is null");
+		}
 		boolean bRet = false;
+		
 		String sName = oFile.getName(); 
-		if(null!=sName) {
+		if(!Utils.isNullOrEmpty(sName)) {
 			if(sName.endsWith(".dim")) {
 				bRet = true;
 			}
