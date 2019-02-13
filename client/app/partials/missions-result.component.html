@@ -17,6 +17,22 @@
     <div class="d-flex flex-column" ng-repeat="provider in $ctrl.m_aListOfProvider | filter:{ selected: true }" ng-show="$ctrl.m_iActiveProvidersTab === $index">
         <div class="missions d-flex flex-column">
             <div class="pages mb-3 mt-3" ng-hide="($ctrl.m_bIsVisibleListOfLayers && $ctrl.m_bIsPaginatedList === false) || $ctrl.isEmptyProductsList() == true">
+
+                <!--<div class="row-v4">-->
+                    <!--<div class="col-v4">-->
+                        <!--<div class="form-group">-->
+                            <!--<label for="selectPages">{{"IMPORT_PRODUCTS_PER_PAGE_LABEL"|translate}}</label>-->
+                            <!--<select class="form-control" id="selectPages" ng-model="$ctrl.m_oPageService.getProviderObject(provider.name).productsPerPageSelected"-->
+                                    <!--ng-options="product for product in $ctrl.m_oPageService.m_iProductsPerPage"-->
+                                    <!--ng-change="$ctrl.m_oPageService.changeNumberOfProductsPerPage(provider.name,$ctrl)">&lt;!&ndash;ng-change="$ctrl.search(provider.name)">&ndash;&gt;-->
+                            <!--</select>-->
+                        <!--</div>-->
+                    <!--</div>-->
+                    <!--<div class="col-v4">-->
+
+                    <!--</div>-->
+                <!--</div>-->
+
                 <ul class="pager">
 
                     <div class="form-group">

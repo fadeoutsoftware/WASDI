@@ -21,18 +21,51 @@
                 //  border-color:$wasdi-input-text-border-color ;
                 //
                 //}
-                display: flex;
-                flex-direction: column;
-                flex: 1 1 auto !important;
+
+                height: $size-modals-max-height;
 
                 .tab-content{
+                    height: 85%;
+                    overflow-y: auto;
+                    overflow-y: auto;
+
                     .tab-pane{
-                        display: flex;
-                        flex: 1 1 auto !important;
-                        overflow-y: auto;
-                        overflow-x: hidden;
+                        //display: flex;
+                        //flex: 1 1 auto !important;
+                        //overflow-y: auto;
+                        //overflow-x: hidden;
                     }
                 }
+
+
+                .workflows-list-container{
+                    table-layout: fixed;
+                    width: 100%;
+                }
+
+                .multiselect-directive{
+                    width: 100%;
+                }
+
+
+                .is-public-content{
+                    .fa{
+                        top: 1px;
+                        position: relative;
+                        margin-right: 8px;
+                    }
+                }
+
+                .drag-and-drop{
+                    .drop-box{
+                        height: calc(100% - 41px);
+                        padding: 0px;
+                        margin: 0px;
+                        margin-top: 3px;
+                    }
+                }
+
+
 
                 .loadIcon {
                     margin-bottom: 20px;

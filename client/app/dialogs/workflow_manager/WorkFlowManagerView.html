@@ -12,49 +12,57 @@
             </div>
 
             <div class="modal-body">
-                    <!-- TAB NAVIGATION -->
-                    <ul class="nav nav-tabs" role="tablist">
-                        <li ng-class="{'active':m_oController.m_sSelectedWorkflowTab === 'WorkFlowTab3'}" ng-click="m_oController.m_sSelectedWorkflowTab = 'WorkFlowTab3'"
-                            ng-hide=" (m_oController.m_aoWorkflows.length === 0) && (m_oController.m_bIsLoadingWorkflows === false)">
-                            <a href="" role="tab" data-toggle="tab">
-                                {{"DIALOG_WORKFLOW_MANAGER_TAB_EXECUTE_SAVED_WORKFLOW" | translate}}
-                            </a>
-                        </li>
-                        <li ng-class="{'active':m_oController.m_sSelectedWorkflowTab === 'WorkFlowTab1'}" ng-click="m_oController.m_sSelectedWorkflowTab = 'WorkFlowTab1'"
-                            ng-hide=" (m_oController.m_aoWorkflows.length === 0) && (m_oController.m_bIsLoadingWorkflows === false)">
-                            <a href="" role="tab" data-toggle="tab">
-                                {{"DIALOG_WORKFLOW_MANAGER_TAB_BATCH_WORKFLOW" | translate}}
+                <!-- TAB NAVIGATION -->
+                <ul class="nav nav-tabs" role="tablist">
+                    <li ng-class="{'active':m_oController.m_sSelectedWorkflowTab === 'WorkFlowTab3'}" ng-click="m_oController.m_sSelectedWorkflowTab = 'WorkFlowTab3'"
+                        ng-hide=" (m_oController.m_aoWorkflows.length === 0) && (m_oController.m_bIsLoadingWorkflows === false)">
+                        <a href="" role="tab" data-toggle="tab">
+                            {{"DIALOG_WORKFLOW_MANAGER_TAB_EXECUTE_SAVED_WORKFLOW" | translate}}
+                        </a>
+                    </li>
+                    <li ng-class="{'active':m_oController.m_sSelectedWorkflowTab === 'WorkFlowTab1'}" ng-click="m_oController.m_sSelectedWorkflowTab = 'WorkFlowTab1'"
+                        ng-hide=" (m_oController.m_aoWorkflows.length === 0) && (m_oController.m_bIsLoadingWorkflows === false)">
+                        <a href="" role="tab" data-toggle="tab">
+                            {{"DIALOG_WORKFLOW_MANAGER_TAB_BATCH_WORKFLOW" | translate}}
 
-                            </a>
-                        </li>
-                        <li ng-class="{'active':m_oController.m_sSelectedWorkflowTab === 'WorkFlowTab2'}" ng-click="m_oController.m_sSelectedWorkflowTab = 'WorkFlowTab2'">
-                            <a href="" role="tab" data-toggle="tab">
-                                {{"DIALOG_WORKFLOW_MANAGER_TAB_UPLOAD_WORKFLOW" | translate}}
-                            </a>
-                        </li>
-                    </ul>
+                        </a>
+                    </li>
+                    <li ng-class="{'active':m_oController.m_sSelectedWorkflowTab === 'WorkFlowTab2'}" ng-click="m_oController.m_sSelectedWorkflowTab = 'WorkFlowTab2'">
+                        <a href="" role="tab" data-toggle="tab">
+                            {{"DIALOG_WORKFLOW_MANAGER_TAB_UPLOAD_WORKFLOW" | translate}}
+                        </a>
+                    </li>
+                </ul>
 
 
-                    <!-- TAB CONTENT -->
-                    <div class="tab-content">
-                        <div class="tab-pane fade in" ng-class="{'active':m_oController.m_sSelectedWorkflowTab === 'WorkFlowTab2'}" id="WorkFlowTab2" >
-                            <ng-include src="'dialogs/workflow_manager/tab-upload.html'"></ng-include>
-                        </div>
-
-                        <!--------------------------------   TABLE WORKFLOWS + LIST OF PRODUCTS -------------------------------->
-                        <div class="tab-pane fade in" id="WorkFlowTab1"
-                             ng-class="{'active':m_oController.m_sSelectedWorkflowTab === 'WorkFlowTab1'}"
-                             ng-hide=" (m_oController.m_aoWorkflows.length === 0) && (m_oController.m_bIsLoadingWorkflows === false)">
-                            <ng-include src="'dialogs/workflow_manager/tab-execute-batch.html'"></ng-include>
-                        </div>
-
-                        <!----------------------------------------- MULTI WORKFLOW INPUT ----------------------------------------->
-                        <div class="tab-pane fade in" id="WorkFlowTab3"
-                             ng-class="{'active':m_oController.m_sSelectedWorkflowTab === 'WorkFlowTab3'}"
-                             ng-show="m_oController.m_sSelectedWorkflowTab === 'WorkFlowTab3'">
-                            <ng-include src="'dialogs/workflow_manager/tab-execute.html'"></ng-include>
-                        </div>
+                <!-- TAB CONTENT -->
+                <div class="tab-content">
+                    <!-------   TABLE WORKFLOWS + LIST OF PRODUCTS ------->
+                    <div class="tab-pane fade in" id="WorkFlowTab1"
+                         ng-class="{'active':m_oController.m_sSelectedWorkflowTab === 'WorkFlowTab1'}"
+                         ng-hide=" (m_oController.m_aoWorkflows.length === 0) && (m_oController.m_bIsLoadingWorkflows === false)">
+                        <ng-include src="'dialogs/workflow_manager/tab-execute-batch.html'"></ng-include>
+                        <!--<div style="height: 60px; width: 60px; background-color: red"></div>-->
                     </div>
+
+                    <!------- MULTI WORKFLOW INPUT ------->
+                    <div class="tab-pane fade in" id="WorkFlowTab3"
+                         ng-class="{'active':m_oController.m_sSelectedWorkflowTab === 'WorkFlowTab3'}"
+                         ng-hide="m_oController.m_sSelectedWorkflowTab != 'WorkFlowTab3'">
+                        <ng-include src="'dialogs/workflow_manager/tab-execute.html'"></ng-include>
+                        <!--<div style="height: 60px; width: 60px; background-color: blue"></div>-->
+                    </div>
+
+                    <!------- Upload ------->
+                    <div class="tab-pane fade in" id="WorkFlowTab2"
+                         ng-class="{'active':m_oController.m_sSelectedWorkflowTab === 'WorkFlowTab2'}"
+                         ng-hide="m_oController.m_sSelectedWorkflowTab != 'WorkFlowTab2'">
+                        <ng-include src="'dialogs/workflow_manager/tab-upload.html'"></ng-include>
+                        <!--<div style="height: 60px; width: 60px; background-color: green"></div>-->
+                    </div>
+
+
+                </div>
             </div>
 
             <div class="modal-footer">
