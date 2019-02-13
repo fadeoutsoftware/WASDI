@@ -2,6 +2,8 @@ package wasdi.jwasdilib;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -9,6 +11,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -1182,11 +1185,64 @@ public class WasdiLib {
 			oOutputStream.write(abBuffer, 0, iBytesRead);
 
 		}
-
+				
 		oOutputStream.close();
 		oInputStream.close();
 		
 	}
+	
+	/**
+	 * 
+	 * @param sFileName
+	 */
+	public void uploadFile(String sFileName) 
+	{
+		if(sFileName==null || sFileName.isEmpty())
+		{
+			//TODO ERROR
+			System.out.println("sFileName must not be empty or null");
+		}
+		String sFullPath = getSavePath() + sFileName;
+//		String sFullPath = getSavePath() + "miao.txt";
+		FileOutputStream oFileOutputStream=null;
+		try {
+//			oFileInputStream = new FileInputStream(sFullPath);
+			oFileOutputStream = new FileOutputStream(sFullPath);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+
+		String sUrl = m_sBaseUrl + "/product/uploadfile?name="+sFileName +"&workspace=" + m_sActiveWorkspace;
+	    
+		URL oURL;
+		HttpURLConnection oConnection;
+	    HashMap<String, String> asHeaders = getStandardHeaders();
+		
+	    httpPost(sUrl,oFileOutputStream.toString(),asHeaders);
+//		try {
+//			oURL = new URL(sUrl);
+//			oConnection = (HttpURLConnection) oURL.openConnection();
+//			// optional default is GET
+//			oConnection.setRequestMethod("POST");
+//			
+//		    if (asHeaders != null) {
+//				for (String sKey : asHeaders.keySet()) {
+//					oConnection.setRequestProperty(sKey,asHeaders.get(sKey));
+//				}
+//			}
+//		    
+//
+//		
+//		} catch (Exception e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+
+		
+	}
+
 
 	
 	
