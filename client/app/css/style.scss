@@ -259,6 +259,12 @@ h4 {
     margin: 0px;
     border-width: 1px !important;
 }
+
+textarea{
+    &.not-resizable{
+        resize: none;
+    }
+}
 //----------------------------------------------------
 
 
