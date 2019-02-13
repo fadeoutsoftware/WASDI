@@ -34,6 +34,10 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.StreamingOutput;
 
+import org.apache.commons.io.IOUtils;
+
+import com.fasterxml.jackson.databind.util.ObjectBuffer;
+
 import it.fadeout.Wasdi;
 import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.Catalog;
@@ -236,6 +240,7 @@ public class CatalogResources {
 			return null;
 		}		
 		try {
+			Wasdi.DebugLog("CatalogResources.zipOnTheFlyAndStream: init");
 			Stack<File> aoFileStack = new Stack<File>();
 			aoFileStack.push(oInitialFile);
 			String sBasePath = oInitialFile.getAbsolutePath();
@@ -254,6 +259,7 @@ public class CatalogResources {
 			int iBaseLen = sBasePath.length();
 			Map<String, File> aoFileEntries = new HashMap<>();
 			while(aoFileStack.size()>=1) {
+				Wasdi.DebugLog("CatalogResources.zipOnTheFlyAndStream: pushing files into stack");
 				oFile = aoFileStack.pop();
 				String sAbsolutePath = oFile.getCanonicalPath();
 
@@ -267,18 +273,31 @@ public class CatalogResources {
 					}
 				}
 				String sRelativePath = sAbsolutePath.substring(iBaseLen);
+				Wasdi.DebugLog("CatalogResources.zipOnTheFlyAndStream: adding file " + sRelativePath +" for compression");
 				aoFileEntries.put(sRelativePath,oFile);
 			}
+			Wasdi.DebugLog("CatalogResources.zipOnTheFlyAndStream: done preparing map, added " + aoFileEntries.size() + " files");
 
+			
 			StreamingOutput oStream = new StreamingOutput() {
 				@Override
 				public void write(OutputStream oOutputStream) throws IOException {
+					
+					Wasdi.DebugLog("CatalogResources.zipOnTheFlyAndStream::StreamingOutput.write");
 
-					ZipOutputStream oZipOutputStream = new ZipOutputStream(new BufferedOutputStream(oOutputStream));
+					BufferedOutputStream oBufferedOutputStream = new BufferedOutputStream(oOutputStream);
+					ZipOutputStream oZipOutputStream = new ZipOutputStream(oBufferedOutputStream);
+					//TODO try reducing the compression to increase speed
+					//oZipOutputStream.setLevel(level);
 					InputStream oInputStream = null;
 					try {
 						Set<String> oZippedFileNames = aoFileEntries.keySet();
+						int iTotalFiles = aoFileEntries.size();
+						int iDone = 0;
+						Wasdi.DebugLog("CatalogResources.zipOnTheFlyAndStream::StreamingOutput.write: begin");
 						for (String oZippedName : oZippedFileNames) {
+							iDone++;
+							Wasdi.DebugLog("CatalogResources.zipOnTheFlyAndStream::StreamingOutput.write: File: "+oZippedName);
 							File oFileToZip = aoFileEntries.get(oZippedName);
 							if(oFileToZip.isDirectory()) {
 								oZipOutputStream.putNextEntry(new ZipEntry(oZippedName));
@@ -286,28 +305,52 @@ public class CatalogResources {
 							} else {
 								oZipOutputStream.putNextEntry(new ZipEntry(oZippedName));
 								oInputStream = new FileInputStream(oFileToZip);
+//								long lCopiedBytes = IOUtils.copyLarge(oInputStream, oZipOutputStream);
+								//IOUtils.copy(oInputStream, oZipOutputStream, 16384);
 								//IOUtils.copy(oInputStream, oZipOutputStream);
-								byte[] bytes = new byte[2048];
-								int iLength;
-								while ((iLength = oInputStream.read(bytes)) >= 0) {
+								//
+								//TODO try different buffer sizes
+								//byte[] bytes = new byte[16384];
+								byte[] bytes = new byte[1024];
+								int iLength = -1;
+								long lTotalLength = oFileToZip.length();
+								long lCumulativeLength = 0;
+								iLength = oInputStream.read(bytes);
+								//while ((iLength = oInputStream.read(bytes)) >= 0) {
+								while(iLength>=0) {
+									lCumulativeLength += iLength;
 									oZipOutputStream.write(bytes, 0, iLength);
+									oZipOutputStream.flush();
+									Wasdi.DebugLog("CatalogResources.zipOnTheFlyAndStream::StreamingOutput.write: File: "+oZippedName+": "+lCumulativeLength + " / " + lTotalLength);
+									iLength = oInputStream.read(bytes);
 								}
+								//
+
 								oZipOutputStream.closeEntry();
 								oInputStream.close();
 							}
+							Wasdi.DebugLog("CatalogResources.zipOnTheFlyAndStream::StreamingOutput.write: done file: "+oZippedName+" -> "+ iDone +" / " +iTotalFiles);
 						}
+						Wasdi.DebugLog("CatalogResources.zipOnTheFlyAndStream::StreamingOutput.write: done writing to zipstream");
+						oZipOutputStream.flush();
 						oZipOutputStream.close();
+						Wasdi.DebugLog("CatalogResources.zipOnTheFlyAndStream::StreamingOutput.write: ZipOutputStream closed");
 					} catch (Exception e) {
+						Wasdi.DebugLog("CatalogResources.zipOnTheFlyAndStream::StreamingOutput.write: exception caught:");
+						Wasdi.DebugLog("CatalogResources.zipOnTheFlyAndStream::StreamingOutput.write: "+e.getMessage() );
 						e.printStackTrace();
 					} finally {
 						// Flush output
 						if( oOutputStream!=null ) {
 							oOutputStream.flush();
 							oOutputStream.close();
+							Wasdi.DebugLog("CatalogResources.zipOnTheFlyAndStream::StreamingOutput.write: OutputStream closed");
 						}
 						// Close input
-						if( oInputStream !=null )
+						if( oInputStream !=null ) {
 							oInputStream.close();
+							Wasdi.DebugLog("CatalogResources.zipOnTheFlyAndStream::StreamingOutput.write: InputStream closed");
+						}
 					}
 				}
 			};
@@ -317,8 +360,11 @@ public class CatalogResources {
 			String sFileName = oInitialFile.getName();
 			sFileName = sFileName.substring(0, sFileName.lastIndexOf(".dim") ) + ".zip";
 			oResponseBuilder.header("Content-Disposition", "attachment; filename=\""+ sFileName +"\"");
+			Wasdi.DebugLog("CatalogResources.zipOnTheFlyAndStream: return ");
 			return oResponseBuilder.build();
 		} catch (Exception e) {
+			Wasdi.DebugLog("CatalogResources.zipOnTheFlyAndStream: exception caught:");
+			Wasdi.DebugLog("CatalogResources.zipOnTheFlyAndStream: " + e.getMessage());
 			e.printStackTrace();
 		} 
 		return null;
