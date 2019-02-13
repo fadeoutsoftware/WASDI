@@ -341,40 +341,6 @@ public class CatalogResources {
 		return bRet;
 	}
 
-	private File getZippedFile(File oFileToBeZipped) {
-		Wasdi.DebugLog("CatalogResources.getZippedFile");
-		if(null==oFileToBeZipped) {
-			Wasdi.DebugLog("CatalogResources.getZippedFile: oFile is null");
-			return null;
-		}
-		File oResult = null;
-		try {
-			String sBaseName = oFileToBeZipped.getName();
-			sBaseName = sBaseName.substring(0, sBaseName.lastIndexOf(".dim"));
-
-			String sAbsolutePathWithName = oFileToBeZipped.getCanonicalPath();
-			String sBasePath = sAbsolutePathWithName.substring(0, sAbsolutePathWithName.lastIndexOf(".dim"));
-			String sDirToBeZipped = sBasePath + ".data";
-			String sZipFileName = sBasePath + ".zip";
-
-			FileOutputStream oStream = new FileOutputStream(sZipFileName);
-			ZipOutputStream oZip = new ZipOutputStream(oStream);
-			File oDirToBeZipped = new File(sDirToBeZipped);
-
-
-			WasdiFileUtils oFileUtils = new WasdiFileUtils();
-			oFileUtils.recursiveZipFile(oDirToBeZipped, sBaseName + ".data/", oZip);
-
-			oFileUtils.recursiveZipFile(oFileToBeZipped, sBaseName + ".dim", oZip);
-			oZip.close();
-			oStream.close();
-			oResult = new File(sZipFileName);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return oResult;
-	}
-
 
 	@GET
 	@Path("checkdownloadavaialibitybyname")
