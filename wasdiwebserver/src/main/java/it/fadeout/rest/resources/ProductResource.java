@@ -387,6 +387,7 @@ public class ProductResource {
 			sName="defaultName";
 		}
 		
+		
 		//take path
 		String sDownloadRootPath = m_oServletConfig.getInitParameter("DownloadRootPath");
 		if (!sDownloadRootPath.endsWith("/")) 
