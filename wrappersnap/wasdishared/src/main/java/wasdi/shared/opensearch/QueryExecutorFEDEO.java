@@ -5,6 +5,7 @@ import org.apache.abdera.i18n.templates.Template;
 public class QueryExecutorFEDEO extends QueryExecutor {
 
 	QueryExecutorFEDEO(){
+		System.out.println("QueryExecutorFEDEO");
 		m_sProvider = "FEDEO";
 	}
 	
