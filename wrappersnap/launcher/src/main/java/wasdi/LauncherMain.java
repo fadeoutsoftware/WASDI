@@ -1142,13 +1142,16 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 				return sLayerId;
 			}
 
-			// Default EPSG: can be changed in the following lines if read from the Product
-			//            String sEPSG = "EPSG:4326";
 			// Default Style: can be changed in the following lines depending by the product
 			String sStyle = "raster";
 
-			s_oLogger.debug( "LauncherMain.PublishBandImage:  Generating Band Image...");
+			// Hard Coded set Flood Style - STYLES HAS TO BE MANAGED
+			if (sFile.toUpperCase().contains("FLOOD")) {
+				sStyle = "DDS_FLOODED_AREAS";
+			}
 
+			s_oLogger.debug( "LauncherMain.PublishBandImage:  Generating Band Image...");
+			
 			// Read the product
 			ReadProduct oReadProduct = new ReadProduct();
 			Product oProduct = oReadProduct.ReadProduct(oFile, null);            
@@ -1171,44 +1174,51 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			File oOutputFile = new File(sOutputFilePath);
 
 			s_oLogger.debug("LauncherMain.PublishBandImage: to " + sOutputFilePath + " [LayerId] = " + sLayerId);
+			
+			if ((sFile.endsWith(".tif") || sFile.endsWith(".tiff"))==false) {
 
-			if (oProduct.getProductType().startsWith("S2") && oProduct.getProductReader().getClass().getName().startsWith("org.esa.s2tbx")) {
+				if (oProduct.getProductType().startsWith("S2") && oProduct.getProductReader().getClass().getName().startsWith("org.esa.s2tbx")) {
 
-				s_oLogger.debug( "LauncherMain.PublishBandImage:  Managing S2 Product");
-				s_oLogger.debug( "LauncherMain.PublishBandImage:  Getting Band " + oParameter.getBandName());
+					s_oLogger.debug( "LauncherMain.PublishBandImage:  Managing S2 Product");
+					s_oLogger.debug( "LauncherMain.PublishBandImage:  Getting Band " + oParameter.getBandName());
 
-				Band oBand = oProduct.getBand(oParameter.getBandName());            
-				Product oGeotiffProduct = new Product(oParameter.getBandName(), "GEOTIFF");
-				oGeotiffProduct.addBand(oBand);                 
-				sOutputFilePath = new WriteProduct(oProcessWorkspaceRepository, oProcessWorkspace).WriteGeoTiff(oGeotiffProduct, sTargetDir, sLayerId);
-				oOutputFile = new File(sOutputFilePath);
-				s_oLogger.debug( "LauncherMain.PublishBandImage:  Geotiff File Created (EPSG=" + sEPSG + "): " + sOutputFilePath);
+					Band oBand = oProduct.getBand(oParameter.getBandName());            
+					Product oGeotiffProduct = new Product(oParameter.getBandName(), "GEOTIFF");
+					oGeotiffProduct.addBand(oBand);                 
+					sOutputFilePath = new WriteProduct(oProcessWorkspaceRepository, oProcessWorkspace).WriteGeoTiff(oGeotiffProduct, sTargetDir, sLayerId);
+					oOutputFile = new File(sOutputFilePath);
+					s_oLogger.debug( "LauncherMain.PublishBandImage:  Geotiff File Created (EPSG=" + sEPSG + "): " + sOutputFilePath);
 
-			} else {
+				} else {
 
-				s_oLogger.debug( "LauncherMain.PublishBandImage:  Managing NON S2 Product");
-				s_oLogger.debug( "LauncherMain.PublishBandImage:  Getting Band " + oParameter.getBandName());
+					s_oLogger.debug( "LauncherMain.PublishBandImage:  Managing NON S2 Product");
+					s_oLogger.debug( "LauncherMain.PublishBandImage:  Getting Band " + oParameter.getBandName());
 
-				// Get the Geocoding and Band
-				GeoCoding oGeoCoding = oProduct.getSceneGeoCoding();;
-				if (oGeoCoding==null) throw new Exception("unable to obtain scene geocoding from product " + oProduct.getName());
-				Band oBand = oProduct.getBand(oParameter.getBandName());
+					// Get the Geocoding and Band
+					GeoCoding oGeoCoding = oProduct.getSceneGeoCoding();;
+					if (oGeoCoding==null) throw new Exception("unable to obtain scene geocoding from product " + oProduct.getName());
+					Band oBand = oProduct.getBand(oParameter.getBandName());
 
-				// Get Image
-				MultiLevelImage oBandImage = oBand.getSourceImage();
-				// Get TIFF Metadata
-				GeoTIFFMetadata oMetadata = GeoCoding2GeoTIFFMetadata.createGeoTIFFMetadata(oGeoCoding, oBandImage.getWidth(),oBandImage.getHeight());
+					// Get Image
+					MultiLevelImage oBandImage = oBand.getSourceImage();
+					// Get TIFF Metadata
+					GeoTIFFMetadata oMetadata = GeoCoding2GeoTIFFMetadata.createGeoTIFFMetadata(oGeoCoding, oBandImage.getWidth(),oBandImage.getHeight());
 
-				s_oLogger.debug( "LauncherMain.PublishBandImage:  Output file: " + sOutputFilePath);
+					s_oLogger.debug( "LauncherMain.PublishBandImage:  Output file: " + sOutputFilePath);
 
-				// Write the Band Tiff
-				if (ConfigReader.getPropValue("CREATE_BAND_GEOTIFF_ACTIVE").equals("true")) {
-					s_oLogger.debug("LauncherMain.PublishBandImage:  Writing Image");
-					GeoTIFF.writeImage(oBandImage, oOutputFile, oMetadata);
-				}
-				else {
-					s_oLogger.debug( "LauncherMain.PublishBandImage:  Debug on. Jump GeoTiff Generate");
-				}
+					// Write the Band Tiff
+					if (ConfigReader.getPropValue("CREATE_BAND_GEOTIFF_ACTIVE").equals("true")) {
+						s_oLogger.debug("LauncherMain.PublishBandImage:  Writing Image");
+						GeoTIFF.writeImage(oBandImage, oOutputFile, oMetadata);
+					}
+					else {
+						s_oLogger.debug( "LauncherMain.PublishBandImage:  Debug on. Jump GeoTiff Generate");
+					}
+				}				
+			}
+			else {
+				// This is a geotiff, just copy
+				FileUtils.copyFile(oFile, oOutputFile);
 			}
 
 			updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 50);
