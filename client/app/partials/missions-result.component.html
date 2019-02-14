@@ -16,43 +16,59 @@
 
     <div class="d-flex flex-column" ng-repeat="provider in $ctrl.m_aListOfProvider | filter:{ selected: true }" ng-show="$ctrl.m_iActiveProvidersTab === $index">
         <div class="missions d-flex flex-column">
-            <div class="pages mb-3 mt-3" ng-hide="($ctrl.m_bIsVisibleListOfLayers && $ctrl.m_bIsPaginatedList === false) || $ctrl.isEmptyProductsList() == true">
+            <div class="pages mb-3 mt-3 container-fluid-v4" ng-hide="($ctrl.m_bIsVisibleListOfLayers && $ctrl.m_bIsPaginatedList === false) || $ctrl.isEmptyProductsList() == true">
 
-                <!--<div class="row-v4">-->
-                    <!--<div class="col-v4">-->
-                        <!--<div class="form-group">-->
-                            <!--<label for="selectPages">{{"IMPORT_PRODUCTS_PER_PAGE_LABEL"|translate}}</label>-->
-                            <!--<select class="form-control" id="selectPages" ng-model="$ctrl.m_oPageService.getProviderObject(provider.name).productsPerPageSelected"-->
-                                    <!--ng-options="product for product in $ctrl.m_oPageService.m_iProductsPerPage"-->
-                                    <!--ng-change="$ctrl.m_oPageService.changeNumberOfProductsPerPage(provider.name,$ctrl)">&lt;!&ndash;ng-change="$ctrl.search(provider.name)">&ndash;&gt;-->
-                            <!--</select>-->
-                        <!--</div>-->
-                    <!--</div>-->
-                    <!--<div class="col-v4">-->
 
-                    <!--</div>-->
-                <!--</div>-->
 
-                <ul class="pager">
+                <div class="row-v4 paginator-wrapper">
+                    <div class="col-v4 items-per-page-wrapper">
+                        <div class="form-group">
+                            <label for="selectPages">{{"IMPORT_PRODUCTS_PER_PAGE_LABEL"|translate}}</label>
+                            <select class="form-control" id="selectPages" ng-model="$ctrl.m_oPageService.getProviderObject(provider.name).productsPerPageSelected"
+                                    ng-options="product for product in $ctrl.m_oPageService.m_iProductsPerPage"
+                                    ng-change="$ctrl.m_oPageService.changeNumberOfProductsPerPage(provider.name,$ctrl)"><!--ng-change="$ctrl.search(provider.name)">-->
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-v4-auto ml-auto">
+                        <div class="form-v4-row">
+                            <div class="col-v4-auto">
+                                <div class="paginator-arrow" ng-click="$ctrl.m_oPageService.minusOnePage(provider.name,$ctrl)" ><a><i class="fa fa-angle-left" aria-hidden="true"></i></a></div>
+                            </div>
+                            <div class="col-v4">
+                                <form ng-submit="$ctrl.m_oPageService.changePage($ctrl.m_oPageService.getProviderObject(provider.name).currentPage,provider.name,$ctrl)">
+                                    {{"IMPORT_PAGE_LABEL"|translate}}
+                                    <input type="text" class="form-control" ng-model="$ctrl.m_oPageService.getProviderObject(provider.name).currentPage">
+                                    {{"IMPORT_OF_LABEL"|translate}} {{$ctrl.m_oPageService.getProviderObject(provider.name).totalPages}}
+                                </form>
+                            </div>
+                            <div class="col-v4-auto">
+                                <div class="paginator-arrow" ng-click="$ctrl.m_oPageService.plusOnePage(provider.name, $ctrl)" ><a><i class="fa fa-angle-right" aria-hidden="true"></i></a></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
-                    <div class="form-group">
-                        <label for="selectPages">{{"IMPORT_PRODUCTS_PER_PAGE_LABEL"|translate}}</label>
-                        <select class="form-control" id="selectPages" ng-model="$ctrl.m_oPageService.getProviderObject(provider.name).productsPerPageSelected"
-                                ng-options="product for product in $ctrl.m_oPageService.m_iProductsPerPage"
-                                ng-change="$ctrl.m_oPageService.changeNumberOfProductsPerPage(provider.name,$ctrl)"><!--ng-change="$ctrl.search(provider.name)">-->
-                        </select>
-                    </div><br>
-                    <li ng-click="$ctrl.m_oPageService.firstPage(provider.name,$ctrl)" ><a><i class="fa fa-angle-double-left" aria-hidden="true"></i></a></li>
-                    <li ng-click="$ctrl.m_oPageService.minusOnePage(provider.name,$ctrl)" ><a><i class="fa fa-angle-left" aria-hidden="true"></i></a></li>
-                    <form ng-submit="$ctrl.m_oPageService.changePage($ctrl.m_oPageService.getProviderObject(provider.name).currentPage,provider.name,$ctrl)">
-                        {{"IMPORT_PAGE_LABEL"|translate}}
-                        <input type="text" class="form-control" ng-model="$ctrl.m_oPageService.getProviderObject(provider.name).currentPage">
-                        {{"IMPORT_OF_LABEL"|translate}} {{$ctrl.m_oPageService.getProviderObject(provider.name).totalPages}}
-                    </form>
-                    <li ng-click="$ctrl.m_oPageService.plusOnePage(provider.name, $ctrl)" ><a><i class="fa fa-angle-right" aria-hidden="true"></i></a></li>
-                    <li ng-click="$ctrl.m_oPageService.lastPage(provider.name,$ctrl)" ><a><i class="fa fa-angle-double-right" aria-hidden="true"></i></a></li>
+                <!--<ul class="pager">-->
 
-                </ul>
+                    <!--<div class="form-group">-->
+                        <!--<label for="selectPages">{{"IMPORT_PRODUCTS_PER_PAGE_LABEL"|translate}}</label>-->
+                        <!--<select class="form-control" id="selectPages" ng-model="$ctrl.m_oPageService.getProviderObject(provider.name).productsPerPageSelected"-->
+                                <!--ng-options="product for product in $ctrl.m_oPageService.m_iProductsPerPage"-->
+                                <!--ng-change="$ctrl.m_oPageService.changeNumberOfProductsPerPage(provider.name,$ctrl)">&lt;!&ndash;ng-change="$ctrl.search(provider.name)">&ndash;&gt;-->
+                        <!--</select>-->
+                    <!--</div><br>-->
+                    <!--<li ng-click="$ctrl.m_oPageService.firstPage(provider.name,$ctrl)" ><a><i class="fa fa-angle-double-left" aria-hidden="true"></i></a></li>-->
+                    <!--<li ng-click="$ctrl.m_oPageService.minusOnePage(provider.name,$ctrl)" ><a><i class="fa fa-angle-left" aria-hidden="true"></i></a></li>-->
+                    <!--<form ng-submit="$ctrl.m_oPageService.changePage($ctrl.m_oPageService.getProviderObject(provider.name).currentPage,provider.name,$ctrl)">-->
+                        <!--{{"IMPORT_PAGE_LABEL"|translate}}-->
+                        <!--<input type="text" class="form-control" ng-model="$ctrl.m_oPageService.getProviderObject(provider.name).currentPage">-->
+                        <!--{{"IMPORT_OF_LABEL"|translate}} {{$ctrl.m_oPageService.getProviderObject(provider.name).totalPages}}-->
+                    <!--</form>-->
+                    <!--<li ng-click="$ctrl.m_oPageService.plusOnePage(provider.name, $ctrl)" ><a><i class="fa fa-angle-right" aria-hidden="true"></i></a></li>-->
+                    <!--<li ng-click="$ctrl.m_oPageService.lastPage(provider.name,$ctrl)" ><a><i class="fa fa-angle-double-right" aria-hidden="true"></i></a></li>-->
+
+                <!--</ul>-->
 
             </div>
             <!--<div class="test">-->
