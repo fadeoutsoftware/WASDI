@@ -2,9 +2,10 @@ package wasdi.shared.opensearch;
 
 import org.apache.abdera.i18n.templates.Template;
 
-public class QueryExecutorSERCO extends QueryExecutor {
+public class QueryExecutorSERCOOLD extends QueryExecutor {
 
-	public QueryExecutorSERCO() {
+	public QueryExecutorSERCOOLD() {
+		System.out.println("QueryExecutorSERCOOLD");
 		m_sProvider = "SERCO";
 	}
 	
