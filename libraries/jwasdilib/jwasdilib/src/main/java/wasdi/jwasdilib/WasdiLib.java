@@ -1326,7 +1326,8 @@ public class WasdiLib {
 		
 
 		String sUrl = m_sBaseUrl + "/product/uploadfile?name="+sFileName +"&workspace=" + m_sActiveWorkspace;
-	    
+//		String sUrl = m_sBaseUrl + "/product/uploadfile?workspace=" + m_sActiveWorkspace + "&name=" + sFileName;
+
 		URL oURL;
 		HttpURLConnection oConnection;
 	    HashMap<String, String> asHeaders = getStreamingHeaders();
