@@ -139,7 +139,7 @@ var WorkspaceController = (function() {
                     {
                         if (data != undefined)
                         {
-                            data = []; // DEBUG
+                            //data = []; // DEBUG
                             oController.m_aoWorkspaceList = data;
                             oController.m_bIsLoading = false;
                         }
