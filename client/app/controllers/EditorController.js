@@ -255,6 +255,12 @@ var EditorController = (function () {
                         subMenu:[],
                         onClick: this.openJRCProcessorDialog,
                         icon:"fa fa-lg fa-file-code-o"
+                    },
+                    {
+                        name:"Upload File",//Upload
+                        subMenu:[],
+                        onClick: this.openUploadFileDialog,
+                        icon:"fa fa-lg fa-file-code-o"
                     }
 
                 ]
@@ -2455,6 +2461,34 @@ var EditorController = (function () {
             inputs: {
                 extras: {
                     products:oController.m_aoProducts,
+                }
+            }
+        }).then(function (modal) {
+            modal.element.modal();
+            modal.close.then(function(oResult){
+
+            });
+        });
+    };
+
+    EditorController.prototype.openUploadFileDialog = function(oWindow)
+    {
+        var oController;
+        if(utilsIsObjectNullOrUndefined(oWindow) === true)
+        {
+            oController = this;
+        }
+        else
+        {
+            oController = oWindow;
+        }
+
+        oController.m_oModalService.showModal({
+            templateUrl: "dialogs/upload_file/UploadFileView.html",
+            controller: "UploadFileController",
+            inputs: {
+                extras: {
+                    workflowId:oController.m_oActiveWorkspace.workspaceId
                 }
             }
         }).then(function (modal) {
