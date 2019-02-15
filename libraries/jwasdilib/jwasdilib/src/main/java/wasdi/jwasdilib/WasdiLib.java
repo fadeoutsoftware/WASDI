@@ -1,7 +1,12 @@
 package wasdi.jwasdilib;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
+import java.io.DataOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -9,7 +14,10 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLConnection;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -515,7 +523,18 @@ public class WasdiLib {
 		
 		return aoHeaders;
 	}
-
+	
+	/**
+	 * 
+	 * @return
+	 */
+	protected HashMap<String, String> getStreamingHeaders() {
+		HashMap<String, String> aoHeaders = new HashMap<String, String>();
+		aoHeaders.put("x-session-token", m_sSessionId);
+		aoHeaders.put("Content-Type", "multipart/form-data");
+		
+		return aoHeaders;
+	}
 
 	/**
 	 * get the list of workspaces of the logged user
@@ -1056,7 +1075,7 @@ public class WasdiLib {
 			}
 			
 			OutputStream oPostOutputStream = oConnection.getOutputStream();
-			OutputStreamWriter oStreamWriter = new OutputStreamWriter(oPostOutputStream, "UTF-8");    
+			OutputStreamWriter oStreamWriter = new OutputStreamWriter(oPostOutputStream, "UTF-8");  
 			oStreamWriter.write(sPayload);
 			oStreamWriter.flush();
 			oStreamWriter.close();
@@ -1081,6 +1100,103 @@ public class WasdiLib {
 		}
 	}
 	
+	public String httpPost(String sUrl, File oUploadFile, Map<String, String> asHeaders) {
+//		URLConnection urlconnection = null;
+//		try {
+//			URL url = new URL(sUrl);
+//			urlconnection = url.openConnection();
+//			urlconnection.setDoOutput(true);
+//			urlconnection.setDoInput(true);
+//
+//			if (urlconnection instanceof HttpURLConnection) {
+//				((HttpURLConnection) urlconnection).setRequestMethod("POST");
+//				((HttpURLConnection) urlconnection).setRequestProperty("Content-type", "multipart/form-data");
+//				((HttpURLConnection) urlconnection).connect();
+//			}
+//
+//			BufferedOutputStream bos = new BufferedOutputStream(urlconnection.getOutputStream());
+//			BufferedInputStream bis = new BufferedInputStream(new FileInputStream(oUploadFile));
+//			int i;
+//			// read byte by byte until end of stream
+//			while ((i = bis.read()) > 0) {
+//				bos.write(i);
+//			}
+//			bis.close();
+//			bos.close();
+//			System.out.println(((HttpURLConnection) urlconnection).getResponseMessage());
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//		}
+//		try {
+//
+//			InputStream inputStream;
+//			int responseCode = ((HttpURLConnection) urlconnection).getResponseCode();
+//			if ((responseCode >= 200) && (responseCode <= 202)) {
+//				inputStream = ((HttpURLConnection) urlconnection).getInputStream();
+//				int j;
+//				while ((j = inputStream.read()) > 0) {
+//					System.out.println(j);
+//				}
+//
+//			} else {
+//				inputStream = ((HttpURLConnection) urlconnection).getErrorStream();
+//			}
+//			((HttpURLConnection) urlconnection).disconnect();
+//
+//		} catch (IOException e) {
+//			e.printStackTrace();
+//		}
+//		return "";
+				try {
+			URL oURL = new URL(sUrl);
+			HttpURLConnection oConnection = (HttpURLConnection) oURL.openConnection();
+
+			oConnection.setDoOutput(true);
+			// Set POST
+			oConnection.setRequestMethod("POST");
+			
+			if (asHeaders != null) {
+				for (String sKey : asHeaders.keySet()) {
+					oConnection.setRequestProperty(sKey,asHeaders.get(sKey));
+				}
+			}
+
+			//TODO MY CODE (BY STACKOVERFLOW) 
+//			BufferedOutputStream oBos = new BufferedOutputStream(oConnection.getOutputStream());
+			OutputStream oBos = oConnection.getOutputStream();
+
+//			BufferedInputStream oBis = new BufferedInputStream(new FileInputStream(oUploadFile));
+			InputStream oBis = new FileInputStream(oUploadFile);
+
+			
+			int i;
+			// read byte by byte until end of stream
+			while ((i = oBis.read()) > 0) {
+				oBos.write(i);
+			}
+			oBis.close();
+			oBos.close();
+			//TODO MY CODE END 
+			
+			oConnection.connect();//MOVE ABOVE ? 
+
+			InputStream oInputStream= oConnection.getInputStream();
+			BufferedReader oInputBuffer = new BufferedReader(new InputStreamReader(oInputStream));
+			String sInputLine;
+			StringBuffer sResponse = new StringBuffer();
+	
+			while ((sInputLine = oInputBuffer.readLine()) != null) {
+				sResponse.append(sInputLine);
+			}
+			oInputBuffer.close();
+			
+			return sResponse.toString();
+		}
+		catch (Exception oEx) {
+			oEx.printStackTrace();
+			return "";
+		}
+	}
 	/**
 	 * Download a file on the local PC
 	 * @param sFileName File Name
@@ -1182,11 +1298,46 @@ public class WasdiLib {
 			oOutputStream.write(abBuffer, 0, iBytesRead);
 
 		}
-
+				
 		oOutputStream.close();
 		oInputStream.close();
 		
 	}
+	
+	/**
+	 * 
+	 * @param sFileName
+	 */
+	public void uploadFile(String sFileName) 
+	{
+		if(sFileName==null || sFileName.isEmpty())
+		{
+			//TODO ERROR
+			System.out.println("sFileName must not be empty or null");
+		}
+		String sFullPath = getSavePath() + sFileName;
+//		FileInputStream oFileInputStream=null;
+//		try {
+//			oFileInputStream = new FileInputStream(sFullPath);
+//		} catch (Exception e) {
+			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+		
+
+		String sUrl = m_sBaseUrl + "/product/uploadfile?name="+sFileName +"&workspace=" + m_sActiveWorkspace;
+//		String sUrl = m_sBaseUrl + "/product/uploadfile?workspace=" + m_sActiveWorkspace + "&name=" + sFileName;
+
+		URL oURL;
+		HttpURLConnection oConnection;
+	    HashMap<String, String> asHeaders = getStreamingHeaders();
+
+	    File oFile = new File(sFullPath);
+
+	    httpPost(sUrl,oFile ,asHeaders);
+	
+	}
+
 
 	
 	
