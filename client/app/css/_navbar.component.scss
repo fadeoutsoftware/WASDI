@@ -59,6 +59,7 @@
                         width: 21px;
                         text-align: center;
                         margin-right: 4px;
+                        font-size: calculatePxFromRemAndBasePx(1rem, 16px);
                     }
                 }
             }
