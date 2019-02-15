@@ -1,0 +1,50 @@
+.paginator-wrapper {
+    .items-per-page-wrapper {
+        label, select {
+            display: inline-block;
+        }
+
+        select {
+            display: inline-block;
+            max-width: 60px;
+            padding: 4px;
+            border: 2px solid $wasdi-blue-logo;
+        }
+    }
+
+    .paginator-arrow {
+        $size-arrow-circle-diameter: 34px;
+
+        height: $size-arrow-circle-diameter;
+        width: $size-arrow-circle-diameter;
+        display: inline-block;
+        border: 2px solid $wasdi-blue-logo;
+        border-radius: 50%;
+        text-align: center;
+        font-weight: 600;
+        font-size: ($size-arrow-circle-diameter / 2) + 1px;
+
+        a{
+            position: relative;
+            top: 3px;
+        }
+
+        &:hover{
+            cursor: pointer;
+        }
+    }
+
+    form {
+        display: inline-block;
+        position: relative;
+        top: -4px;
+
+        input {
+            padding: 4px 6px;
+            width: 50px;
+            border: 2px solid $wasdi-blue-logo;
+            display: inline-block;
+            text-align: center;
+        }
+    }
+}
