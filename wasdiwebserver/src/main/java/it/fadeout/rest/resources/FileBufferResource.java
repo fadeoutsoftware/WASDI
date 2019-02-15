@@ -234,7 +234,9 @@ public class FileBufferResource {
 			oParameter.setExchange(sWorkspaceId);
 			oParameter.setProcessObjId(sProcessObjId);
 
-			String sPath = m_oServletConfig.getInitParameter("SerializationPath") + sProcessObjId;
+			String sPath = m_oServletConfig.getInitParameter("SerializationPath");
+			if (!(sPath.endsWith("\\") || sPath.endsWith("/"))) sPath += "/";
+			sPath += sProcessObjId;
 			
 			SerializationUtils.serializeObjectToXML(sPath, oParameter);
 
