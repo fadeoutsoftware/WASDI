@@ -11,7 +11,7 @@
 //utilities
 @import "utilities";
 
-@import "header";
+@import "navbar.component";
 @import "login";
 @import "root";
 @import "editor";
@@ -21,6 +21,7 @@
 @import "catalog";
 @import "validatenewuser";
 @import "status-bar";
+@import "paginator";
 
 
 
@@ -208,7 +209,7 @@ h4 {
     .full-width-content{
         position: relative;
         height: $size-full-width-content-height;
-        overflow-y: auto;
+        overflow-y: hidden;
         overflow-x: hidden;
         //background-color: lightseagreen;  //debug
 
@@ -257,8 +258,39 @@ h4 {
     box-sizing: border-box;
     background-color: white;
     margin: 0px;
+    border-width: 1px !important;
+}
+
+textarea{
+    &.not-resizable{
+        resize: none;
+    }
 }
 //----------------------------------------------------
+
+
+//----------------------------------------------------
+// Modal body fix without <h4>
+.modal{
+    .modal-dialog{
+        &.modal-wasdi{
+            .modal-body{
+                font-size: calculatePxFromRemAndBasePx(1.2rem, 16px);
+
+                label{
+                    font-size: calculatePxFromRemAndBasePx(1rem, 16px);
+                }
+
+                .wasdi-input{
+                    font-size: calculatePxFromRemAndBasePx(1rem, 16px);
+                    padding: 8px 14px;
+                }
+            }
+        }
+    }
+}
+//----------------------------------------------------
+
 
 
 // In tabs with icons and text set fixed space between icon and text
