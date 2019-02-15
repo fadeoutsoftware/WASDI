@@ -259,7 +259,7 @@ public class CatalogResources {
 			int iBaseLen = sBasePath.length();
 			Map<String, File> aoFileEntries = new HashMap<>();
 			while(aoFileStack.size()>=1) {
-				Wasdi.DebugLog("CatalogResources.zipOnTheFlyAndStream: pushing files into stack");
+				//Wasdi.DebugLog("CatalogResources.zipOnTheFlyAndStream: pushing files into stack");
 				oFile = aoFileStack.pop();
 				String sAbsolutePath = oFile.getCanonicalPath();
 
@@ -273,7 +273,7 @@ public class CatalogResources {
 					}
 				}
 				String sRelativePath = sAbsolutePath.substring(iBaseLen);
-				Wasdi.DebugLog("CatalogResources.zipOnTheFlyAndStream: adding file " + sRelativePath +" for compression");
+				//Wasdi.DebugLog("CatalogResources.zipOnTheFlyAndStream: adding file " + sRelativePath +" for compression");
 				aoFileEntries.put(sRelativePath,oFile);
 			}
 			Wasdi.DebugLog("CatalogResources.zipOnTheFlyAndStream: done preparing map, added " + aoFileEntries.size() + " files");
@@ -336,7 +336,7 @@ public class CatalogResources {
 							Wasdi.DebugLog("CatalogResources.zipOnTheFlyAndStream::StreamingOutput.write: done file: "+oZippedName+" -> "+ iDone +" / " +iTotalFiles);
 						}
 						Wasdi.DebugLog("CatalogResources.zipOnTheFlyAndStream::StreamingOutput.write: done writing to zipstream");
-						oZipOutputStream.flush();
+						//oZipOutputStream.flush();
 						oZipOutputStream.close();
 						Wasdi.DebugLog("CatalogResources.zipOnTheFlyAndStream::StreamingOutput.write: ZipOutputStream closed");
 					} catch (Exception e) {
