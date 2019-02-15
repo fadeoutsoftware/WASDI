@@ -762,10 +762,10 @@ public class InstanceFinder {
 //						}
 //					}
 				}
-				else
-				{
-					oSensor.setEnabled(false);
-				}
+//				else
+//				{
+//					oSensor.setEnabled(false);
+//				}
 			}
 		}
 		
@@ -774,20 +774,37 @@ public class InstanceFinder {
 	
 	private static void setEnableSensorModes(ArrayList<SensorMode> oSensorModes, ArrayList<SensorModeViewModel> oSensorModesEnabled)
 	{
-		for (SensorMode oSensorMode : oSensorModes) {
-			for(SensorModeViewModel oSensorModeEnabled:oSensorModesEnabled)
+		for(SensorModeViewModel oSensorModeEnabled:oSensorModesEnabled)
+		{
+			for (SensorMode oSensorMode : oSensorModes) 
 			{
 				if(oSensorMode.getName().equals(oSensorModeEnabled.getName()))
 				{
 					oSensorMode.setEnabled(true);
+					
 				}
-				else
-				{
-					oSensorMode.setEnabled(false);
-				}
-
+//				else
+//				{
+//					oSensorMode.setEnabled(false);
+//				}
 			}
 		}
+		
+//		for (SensorMode oSensorMode : oSensorModes) 
+//		{
+//			for(SensorModeViewModel oSensorModeEnabled:oSensorModesEnabled)
+//			{
+//				if(oSensorMode.getName().equals(oSensorModeEnabled.getName()))
+//				{
+//					oSensorMode.setEnabled(true);
+//				}
+//				else
+//				{
+//					oSensorMode.setEnabled(false);
+//				}
+//
+//			}
+//		}
 	}
 	
 	private static LookingType convertLookingTypeString(String sLookingType)
