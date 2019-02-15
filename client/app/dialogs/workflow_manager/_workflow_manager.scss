@@ -26,7 +26,7 @@
 
                 .tab-content{
                     height: 85%;
-                    overflow-y: auto;
+                    overflow-x: hidden;
                     overflow-y: auto;
 
                     .tab-pane{
@@ -61,7 +61,7 @@
                         height: calc(100% - 41px);
                         padding: 0px;
                         margin: 0px;
-                        margin-top: 3px;
+                        margin-top: 6px;
                     }
                 }
 
@@ -99,6 +99,12 @@
                         li {
                             max-height: 100px;
                         }
+                    }
+                }
+
+                .multiselect-directive{
+                    .list-group{
+                        max-height: 240px;
                     }
                 }
 
