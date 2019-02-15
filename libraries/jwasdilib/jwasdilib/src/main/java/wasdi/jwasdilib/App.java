@@ -15,8 +15,8 @@ public class App
         WasdiLib oLib = new WasdiLib();
         
         oLib.init();
-        
-        
+        testUploadFileDUMMYFILE(oLib);
+
         //HashMap<String, String> asHeaders = new HashMap<>();
         //asHeaders.put("Accept","text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8");
         //asHeaders.put("Host", "gpod.eo.esa.int");
@@ -36,18 +36,18 @@ public class App
         System.out.println("File Path " + sPath);
 */
         
-        oLib.openWorkspace("FirstWS");
-        
-        System.out.println(oLib.getParam("INPUTFILE"));
-        System.out.println(oLib.getParam("SOGLIA"));
-        System.out.println(oLib.getParam("PROVA"));
-        System.out.println(oLib.getParam("MANCA"));
-        
-        long lStartTime = System.currentTimeMillis();
-        String sPath = oLib.getFullProductPath("out.tif");
-        System.out.println("Donwload Time: " + (System.currentTimeMillis() - lStartTime) + " ms");
-        
-        System.out.println("File Path " + sPath);
+//        oLib.openWorkspace("FirstWS");
+//        
+//        System.out.println(oLib.getParam("INPUTFILE"));
+//        System.out.println(oLib.getParam("SOGLIA"));
+//        System.out.println(oLib.getParam("PROVA"));
+//        System.out.println(oLib.getParam("MANCA"));
+//        
+//        long lStartTime = System.currentTimeMillis();
+//        String sPath = oLib.getFullProductPath("out.tif");
+//        System.out.println("Donwload Time: " + (System.currentTimeMillis() - lStartTime) + " ms");
+//        
+//        System.out.println("File Path " + sPath);
 
         
         /*
@@ -68,4 +68,17 @@ public class App
         System.out.println("JWasdiLib Test Done");
         
     }
+    
+    public static void testUploadFile(WasdiLib oLib)
+    {
+    	oLib.uploadFile("S1B_IW_GRDH_1SDV_20180101T001334_20180101T001359_008970_010027_F7B8.zip");
+    	
+    }
+    public static void testUploadFileDUMMYFILE(WasdiLib oLib)
+    {
+    	oLib.uploadFile("miao.txt");
+    	
+    }
+    
+    
 }
