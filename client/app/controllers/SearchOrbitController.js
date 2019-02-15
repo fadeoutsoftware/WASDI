@@ -841,7 +841,13 @@ var SearchOrbitController = (function() {
         //     this.m_oMapService.removeLayerFromMap(oOrbit.FootPrintRectangle);//remove orbit rectangle from map
         //     oOrbit.FootPrintRectangle = null;
         // }
+
+        // this.m_oMapService.clearMap();
+        // this.m_oMapService.initMap('orbitMap');
+        this.removeAllLayers();
         this.m_aoOrbits = [];
+        // this.m_oMapService.initMap('orbitMap');
+
         return true;
     };
 
@@ -1411,12 +1417,6 @@ var SearchOrbitController = (function() {
                         oController.m_oTreeService.loadNewTree(oController.m_sIdDiv,oController.m_oOpportunitiesTree);
                     }
 
-
-                    // oController.setOrbitAsUnchecked();
-                    // if(data.length === 0)
-                    // {
-                    //     utilsVexDialogAlertTop("GURU MEDITATION<br>NO RESULTS FOR YOUR FILTERS");
-                    // }
                 }
                 else
                 {
@@ -1744,7 +1744,41 @@ var SearchOrbitController = (function() {
 
         }
         return sCoordinatesPolygon;
+    };
+
+    SearchOrbitController.prototype.removeAllLayers = function(){
+        var treeInst = $(this.m_sIdDiv).jstree(true);
+        var aoNodes = treeInst._model.data;
+        this.removeAllLayersInMapByNodes(aoNodes,this.m_sIdDiv)
     }
+
+    SearchOrbitController.prototype.removeAllLayersInMapByNodes = function(aoNodes,sIdDiv)
+    {
+        if(utilsIsObjectNullOrUndefined(aoNodes) === true)
+        {
+            return false;
+        }
+
+        for (var iIndex in aoNodes)
+        {
+            if ( (utilsIsObjectNullOrUndefined(aoNodes[iIndex]) === false) )
+            {
+                // $('orbitMap').jstree("_open_to", aoNodes[iIndex].id);
+                var oNode = this.m_oTreeService.getNodeById(aoNodes[iIndex].id,sIdDiv);
+                if( utilsIsObjectNullOrUndefined(oNode.original) === false )
+                {
+                    if(utilsIsObjectNullOrUndefined(oNode.original.rectangle) === false)
+                    {
+                        // this.m_oMapService.removeRectangle(oNode.original.rectangle);
+                        this.m_oMapService.removeLayerFromMap(oNode.original.rectangle);
+                    }
+                }
+
+
+            }
+        }
+        return true;
+    };
     SearchOrbitController.$inject = [
         '$scope',
         '$location',

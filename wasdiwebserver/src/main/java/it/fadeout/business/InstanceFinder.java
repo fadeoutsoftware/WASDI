@@ -666,7 +666,7 @@ public class InstanceFinder {
 	private static CoverageRequest getCoverageRequest(InterestArea oAreaOfInterest,ArrayList<ISatellite> aoSatellites,Time oDateTimeStart,Time oDateTimeEnd)
 	{
 		CoverageRequest oCoverageRequest = new CoverageRequest();
-
+		
 		// aggiungo l'area di interesse (posso aggiungerne anche più di una)
 		oCoverageRequest.addInterestArea(oAreaOfInterest);
 
@@ -762,10 +762,10 @@ public class InstanceFinder {
 //						}
 //					}
 				}
-				else
+				/*else
 				{
 					oSensor.setEnabled(false);
-				}
+				}*/
 			}
 		}
 		
@@ -781,10 +781,10 @@ public class InstanceFinder {
 				{
 					oSensorMode.setEnabled(true);
 				}
-				else
+				/*else
 				{
 					oSensorMode.setEnabled(false);
-				}
+				}*/
 
 			}
 		}
