@@ -1226,7 +1226,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			// Ok publish
 			s_oLogger.debug("LauncherMain.PublishBandImage: call PublishImage");
 
-			GeoServerManager manager = new GeoServerManager(ConfigReader.getPropValue("GEOSERVER_ADDRESS"),ConfigReader.getPropValue("GEOSERVER_USER"),ConfigReader.getPropValue("GEOSERVER_PASSWORD"));            
+			GeoServerManager oGeoServerManager = new GeoServerManager(ConfigReader.getPropValue("GEOSERVER_ADDRESS"),ConfigReader.getPropValue("GEOSERVER_USER"),ConfigReader.getPropValue("GEOSERVER_PASSWORD"));            
 
 			Publisher oPublisher = new Publisher();
 
@@ -1239,7 +1239,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			}
 
 			s_oLogger.debug("Call publish geotiff sOutputFilePath = " + sOutputFilePath + " , sLayerId = " + sLayerId);
-			sLayerId = oPublisher.publishGeoTiff(sOutputFilePath, sLayerId, sEPSG, sStyle, manager);
+			sLayerId = oPublisher.publishGeoTiff(sOutputFilePath, sLayerId, sEPSG, sStyle, oGeoServerManager);
 
 			s_oLogger.debug("Obtained sLayerId = " + sLayerId);
 
@@ -1250,55 +1250,55 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			if (sLayerId == null) {
 				bResultPublishBand = false;
 				s_oLogger.debug("LauncherMain.PublishBandImage: Image not published . ");
+				throw new Exception("Layer Id is null. Image not published");
 			}
 			else {
 				s_oLogger.debug("LauncherMain.PublishBandImage: Image published. ");
+				
+				s_oLogger.debug("LauncherMain.PublishBandImage: Get Image Bounding Box");
+
+				//get bounding box from data base
+				String sBBox = oDownloadedFile.getBoundingBox();
+
+				String sGeoserverBBox = oGeoServerManager.getLayerBBox(sLayerId);//GeoserverUtils.GetBoundingBox(sLayerId, "json");
+
+
+				s_oLogger.debug("LauncherMain.PublishBandImage: Bounding Box: " + sBBox);
+				s_oLogger.debug("LauncherMain.PublishBandImage: Geoserver Bounding Box: " + sGeoserverBBox + " for Layer Id " + sLayerId);
+				s_oLogger.debug("LauncherMain.PublishBandImage: Update index and Send Rabbit Message");
+
+				// Create Entity
+				PublishedBand oPublishedBand = new PublishedBand();
+				oPublishedBand.setLayerId(sLayerId);
+				oPublishedBand.setProductName(sProductName);
+				oPublishedBand.setBandName(oParameter.getBandName());
+				oPublishedBand.setUserId(oParameter.getUserId());
+				oPublishedBand.setWorkspaceId(oParameter.getWorkspace());
+				oPublishedBand.setBoundingBox(sBBox);
+				oPublishedBand.setGeoserverBoundingBox(sGeoserverBBox);
+
+				// Add it the the db
+				oPublishedBandsRepository.InsertPublishedBand(oPublishedBand);
+
+				s_oLogger.debug("LauncherMain.PublishBandImage: Index Updated" );
+				s_oLogger.debug("LauncherMain.PublishBandImage: Queue = " + oParameter.getQueue() + " LayerId = " + sLayerId);
+
+				// Create the View Model
+				PublishBandResultViewModel oVM = new PublishBandResultViewModel();
+				oVM.setBandName(oParameter.getBandName());
+				oVM.setProductName(sProductName);
+				oVM.setLayerId(sLayerId);
+				oVM.setBoundingBox(sBBox);
+				oVM.setGeoserverBoundingBox(sGeoserverBBox);
+
+				boolean bRet = s_oSendToRabbit!=null && s_oSendToRabbit.SendRabbitMessage(bResultPublishBand,LauncherOperations.PUBLISHBAND.name(), oParameter.getWorkspace(),oVM,oParameter.getExchange());
+
+				if (bRet == false) {
+					s_oLogger.debug("LauncherMain.PublishBandImage: Error sending Rabbit Message");
+				}
+
+				if (oProcessWorkspace != null) oProcessWorkspace.setStatus(ProcessStatus.DONE.name());				
 			}
-
-
-			s_oLogger.debug("LauncherMain.PublishBandImage: Get Image Bounding Box");
-
-			//get bounding box from data base
-			String sBBox = oDownloadedFile.getBoundingBox();
-
-			String sGeoserverBBox = manager.getLayerBBox(sLayerId);//GeoserverUtils.GetBoundingBox(sLayerId, "json");
-
-
-			s_oLogger.debug("LauncherMain.PublishBandImage: Bounding Box: " + sBBox);
-			s_oLogger.debug("LauncherMain.PublishBandImage: Geoserver Bounding Box: " + sGeoserverBBox + " for Layer Id " + sLayerId);
-			s_oLogger.debug("LauncherMain.PublishBandImage: Update index and Send Rabbit Message");
-
-			// Create Entity
-			PublishedBand oPublishedBand = new PublishedBand();
-			oPublishedBand.setLayerId(sLayerId);
-			oPublishedBand.setProductName(sProductName);
-			oPublishedBand.setBandName(oParameter.getBandName());
-			oPublishedBand.setUserId(oParameter.getUserId());
-			oPublishedBand.setWorkspaceId(oParameter.getWorkspace());
-			oPublishedBand.setBoundingBox(sBBox);
-			oPublishedBand.setGeoserverBoundingBox(sGeoserverBBox);
-
-			// Add it the the db
-			oPublishedBandsRepository.InsertPublishedBand(oPublishedBand);
-
-			s_oLogger.debug("LauncherMain.PublishBandImage: Index Updated" );
-			s_oLogger.debug("LauncherMain.PublishBandImage: Queue = " + oParameter.getQueue() + " LayerId = " + sLayerId);
-
-			// Create the View Model
-			PublishBandResultViewModel oVM = new PublishBandResultViewModel();
-			oVM.setBandName(oParameter.getBandName());
-			oVM.setProductName(sProductName);
-			oVM.setLayerId(sLayerId);
-			oVM.setBoundingBox(sBBox);
-			oVM.setGeoserverBoundingBox(sGeoserverBBox);
-
-			boolean bRet = s_oSendToRabbit!=null && s_oSendToRabbit.SendRabbitMessage(bResultPublishBand,LauncherOperations.PUBLISHBAND.name(), oParameter.getWorkspace(),oVM,oParameter.getExchange());
-
-			if (bRet == false) {
-				s_oLogger.debug("LauncherMain.PublishBandImage: Error sending Rabbit Message");
-			}
-
-			if (oProcessWorkspace != null) oProcessWorkspace.setStatus(ProcessStatus.DONE.name());
 		}
 		catch (Exception oEx) {
 			s_oLogger.error( "LauncherMain.PublishBandImage: Exception " + oEx.toString() + " " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
