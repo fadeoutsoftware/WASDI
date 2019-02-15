@@ -1,4 +1,8 @@
 {
+  "BTN_SEARCH" : "Search",
+  "BTN_IMPORT" : "Import",
+  "BTN_CREATE_FIRST_WORKSPACE" : "Create first workspace",
+
   "LOGIN_PLACEHOLDER_EMAIL":"Email Address",
   "LOGIN_PLACEHOLDER_PASSWORD":"Password",
   "LOGIN_CHECK_BOX_LABEL":"Remember me",
@@ -61,6 +65,7 @@
   "WORKSPACES_TOOLTIP_EDIT":"Open workspace",
   "WORKSPACES_ADD_NEW_WORKSPSACE":"You still don't have any Workspace: Create your first ",
   "WORKSPACES_LIST_OF_WORKFLOWS_TITLE":"List of Workflows",
+  "WORKSPACES_NO_WORKSPACE":"You have no Workspaces yet",
 
 
   "EDITOR_TOOLTIP_SWITCH_3D_2D":"Switch 3D globe and 2D map",
@@ -109,9 +114,6 @@
   "EDITOR_COLOUR_MANIPULATION_TOOLTIP_95%":"Auto-adjust to 95% of all pixels",
   "EDITOR_COLOUR_MANIPULATION_TOOLTIP_RESET_DEFAULTS":"Reset to defaults",
   "EDITOR_COLOUR_MANIPULATION_TOOLTIP_APPLY_COLOR_MANIPULATION":"Apply color manipulation",
-
-  "BTN_SEARCH" : "Search",
-  "BTN_IMPORT" : "Import",
 
   "IMPORT_ADVANCE_SEARCH_LABEL":"Advance search",
   "IMPORT_PRODUCTS_PER_PAGE_LABEL":"Products per page:",
