@@ -6,6 +6,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -202,10 +203,9 @@ public class CatalogResources {
 				Wasdi.DebugLog("CatalogResources.DownloadEntryByName: user not authorized");
 				return Response.status(Status.UNAUTHORIZED).build();
 			}
-
-			ResponseBuilder oResponseBuilder = null;
+			
 			File oFile = this.getEntryFile(sFileName);
-
+			ResponseBuilder oResponseBuilder = null;
 			if(oFile == null) {
 				Wasdi.DebugLog("CatalogResources.DownloadEntryByName: file not readable");
 				oResponseBuilder = Response.serverError();	
@@ -310,8 +310,8 @@ public class CatalogResources {
 								//IOUtils.copy(oInputStream, oZipOutputStream);
 								//
 								//TODO try different buffer sizes
-								//byte[] bytes = new byte[16384];
-								byte[] bytes = new byte[1024];
+								byte[] bytes = new byte[16384];
+								//byte[] bytes = new byte[1024];
 								int iLength = -1;
 								long lTotalLength = oFileToZip.length();
 								long lCumulativeLength = 0;
@@ -321,7 +321,11 @@ public class CatalogResources {
 									lCumulativeLength += iLength;
 									oZipOutputStream.write(bytes, 0, iLength);
 									oZipOutputStream.flush();
-									Wasdi.DebugLog("CatalogResources.zipOnTheFlyAndStream::StreamingOutput.write: File: "+oZippedName+": "+lCumulativeLength + " / " + lTotalLength);
+									oBufferedOutputStream.flush();
+									oOutputStream.flush();
+									double dPerc = (double)lCumulativeLength / (double)lTotalLength;
+									dPerc = Math.floor(dPerc * 100.0) / 100.0;
+									//Wasdi.DebugLog("CatalogResources.zipOnTheFlyAndStream::StreamingOutput.write: File: "+oZippedName+": "+lCumulativeLength + " / " + lTotalLength + " = " + dPerc + "%");
 									iLength = oInputStream.read(bytes);
 								}
 								//
