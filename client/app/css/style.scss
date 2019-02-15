@@ -276,7 +276,7 @@ textarea{
     .modal-dialog{
         &.modal-wasdi{
             .modal-body{
-                font-size: calculatePxFromRemAndBasePx(1.2rem, 16px);
+                font-size: calculatePxFromRemAndBasePx(0.9rem, 16px);
 
                 label{
                     font-size: calculatePxFromRemAndBasePx(1rem, 16px);
