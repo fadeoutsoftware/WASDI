@@ -19,7 +19,6 @@ service('ProcessesLaunchedService', ['ConstantsService','$rootScope','$http', fu
 
     /* ATTENTION!!! THE ORDER OF TYPE PROCESS IS IMPORTANT !! */
     this.TYPE_OF_PROCESS=["DOWNLOAD","PUBLISHBAND","PUBLISH","UPDATEPROCESSES"];
-    /*TODO ADD ID USER FOR COOKIE*/
 
     this.loadProcessesFromServer = function(sWorkSpaceId)
     {

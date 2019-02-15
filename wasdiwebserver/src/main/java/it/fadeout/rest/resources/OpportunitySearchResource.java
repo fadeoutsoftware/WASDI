@@ -168,6 +168,8 @@ public class OpportunitySearchResource {
 //			{
 				ArrayList<CoverageSwathResult> aoCoverageSwathResult = new ArrayList<>();
 				aoCoverageSwathResult = InstanceFinder.findSwatsByFilters(OpportunitiesSearch);
+				Wasdi.DebugLog("TEST ");
+
 				
 //			}
 //			// Foreach filter combination found
@@ -218,7 +220,7 @@ public class OpportunitySearchResource {
 		return aoCoverageSwathResultViewModels;
 	}
 	
-	public CoverageSwathResultViewModel getCoverageSwathResultViewModelFromCoverageSwathResult(CoverageSwathResult oSwath) {
+	private CoverageSwathResultViewModel getCoverageSwathResultViewModelFromCoverageSwathResult(CoverageSwathResult oSwath) {
 		
 		CoverageSwathResultViewModel oVM = new CoverageSwathResultViewModel();
 		

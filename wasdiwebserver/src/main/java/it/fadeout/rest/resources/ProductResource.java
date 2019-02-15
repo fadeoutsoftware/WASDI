@@ -1,11 +1,16 @@
 package it.fadeout.rest.resources;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FilenameFilter;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import javax.servlet.ServletConfig;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
@@ -13,9 +18,11 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.apache.commons.io.FileUtils;
+import org.glassfish.jersey.media.multipart.FormDataParam;
 
 import it.fadeout.Wasdi;
 import wasdi.shared.business.DownloadedFile;
@@ -351,6 +358,65 @@ public class ProductResource {
 		return Response.status(200).build();
 	}
 	
+	@POST
+	@Path("/uploadfile")
+	@Consumes(MediaType.MULTIPART_FORM_DATA)
+	public Response uploadFile(@FormDataParam("file") InputStream fileInputStream, @HeaderParam("x-session-token") String sSessionId, 
+			@QueryParam("workspace") String workspace,@QueryParam("name") String sName) throws Exception 
+	{
+		Wasdi.DebugLog("ProductResource.uploadfile");
+	
+		if (Utils.isNullOrEmpty(sSessionId)) 
+		{
+			return Response.status(401).build();
+		}
+		
+		User oUser = Wasdi.GetUserFromSession(sSessionId);
+		if (oUser==null) 
+		{
+			return Response.status(401).build();
+		}
+		if (Utils.isNullOrEmpty(oUser.getUserId())) 
+		{
+			return Response.status(401).build();
+		}
+		String sUserId = oUser.getUserId();
+		
+		if(Utils.isNullOrEmpty(sName) || sName.isEmpty())
+		{
+			sName="defaultName";
+		}
+		
+		
+		//take path
+		String sDownloadRootPath = m_oServletConfig.getInitParameter("DownloadRootPath");
+		if (!sDownloadRootPath.endsWith("/")) 
+		{
+			sDownloadRootPath = sDownloadRootPath + "\\";
+		}
+		String sPath = sDownloadRootPath + sUserId + "\\" ;
+		File oUserPath = new File(sPath + sName);
+		Integer iIndex=0;
+		while( oUserPath.exists() ) 
+		{
+			oUserPath = new File(sPath + "("+ iIndex + ")"+ sName);
+			iIndex++;
+		}
+
+		
+		int iRead = 0;
+		byte[] ayBytes = new byte[1024];
+		OutputStream oOutStream = new FileOutputStream(oUserPath);
+		while ((iRead = fileInputStream.read(ayBytes)) != -1) {
+			oOutStream.write(ayBytes, 0, iRead);
+		}
+		oOutStream.flush();
+		oOutStream.close();
+		
+		//TODO SAVE IN DATABASE
+		
+		return Response.status(200).build();
+	}
 
 
 	@GET
