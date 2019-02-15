@@ -24,8 +24,13 @@
             <div class="table-workspaces flex-grow-1" >
                 <div class="wizards" ng-show="(m_oController.getWorkspaceInfoList().length === 0) && (m_oController.m_bIsLoading === false)">
                     <h4>
-                        {{"WORKSPACES_ADD_NEW_WORKSPSACE"|translate}}<a href="" ng-click="m_oController.createWorkspace()">{{"WORKSPACES_BUTTON_NEW_WORKSPACE"|translate}}</a>
+                        {{"WORKSPACES_NO_WORKSPACE"|translate}}.
                     </h4>
+                    <div class="w-100 text-center mt-5">
+                        <button class="btn btn-primary btn-wasdi btn-mdlg" ng-click="m_oController.createWorkspace()">
+                            <i class="fa fa-plus" aria-hidden="true"></i>{{"BTN_CREATE_FIRST_WORKSPACE"|translate}}
+                        </button>
+                    </div>
                 </div>
 
                 <div class="loadIcon" ng-hide="( (m_oController.getWorkspaceInfoList().length) > 0 && (m_oController.m_bIsLoading === false) )||
