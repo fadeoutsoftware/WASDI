@@ -30,7 +30,7 @@ var WorkFlowManagerController = (function() {
         this.isUploadingWorkflow = false;
         if( utilsIsObjectNullOrUndefined(this.m_oExtras.defaultTab) === true)
         {
-            this.m_sSelectedWorkflowTab = 'WorkFlowTab1';
+            this.m_sSelectedWorkflowTab = 'WorkFlowTab3';
         }
         else
         {
@@ -63,7 +63,7 @@ var WorkFlowManagerController = (function() {
             }
             else
             {
-                utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN GET WORKFLOWS, THERE AREN'T DATA");
+                utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN GET WORKFLOWS, DATA NOT AVAILABLE");
             }
 
             //it changes the default tab, we can't visualize the 'WorkFlowTab1' because there aren't workflows
@@ -73,7 +73,7 @@ var WorkFlowManagerController = (function() {
             }
             oController.m_bIsLoadingWorkflows = false;
         }).error(function (error) {
-            utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN GET WORKFLOWS");
+            utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR GETTING WORKFLOW LIST");
             oController.m_bIsLoadingWorkflows = false;
         });
     };

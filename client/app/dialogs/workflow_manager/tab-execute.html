@@ -1,6 +1,6 @@
 <div class="row">
     <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
-        Execute workflow
+        Select Workflow:
     </div>
 </div>
 
@@ -44,7 +44,7 @@
                     <td>{{workflow.userId}}</td>
 
                     <td class="td-button" ng-click="m_oController.deleteWorkflow(workflow)"
-                        ng-hide="m_oController.userIsOwnerOfWorkflow(workflow)===false">
+                        ng-hide="m_oController.isTheOwnerOfWorkflow(workflow)===false">
                         <i class="fa fa-trash" aria-hidden="true" ></i>
                     </td>
                 </tr>
