@@ -1,4 +1,8 @@
 {
+    "BTN_SEARCH" : "Search",
+    "BTN_IMPORT" : "Import",
+    "BTN_CREATE_FIRST_WORKSPACE" : "Create first workspace",
+
     "LOGIN_PLACEHOLDER_EMAIL":"Email Address",
     "LOGIN_PLACEHOLDER_PASSWORD":"Password",
     "LOGIN_CHECK_BOX_LABEL":"Remember me",
@@ -61,6 +65,7 @@
     "WORKSPACES_TOOLTIP_EDIT":"Open workspace",
     "WORKSPACES_ADD_NEW_WORKSPSACE":"You still don't have any Workspace: Create your first ",
     "WORKSPACES_LIST_OF_WORKFLOWS_TITLE":"List of Workflows",
+    "WORKSPACES_NO_WORKSPACE":"You have no Workspaces yet",
 
 
     "EDITOR_TOOLTIP_SWITCH_3D_2D":"Switch 3D globe and 2D map",
