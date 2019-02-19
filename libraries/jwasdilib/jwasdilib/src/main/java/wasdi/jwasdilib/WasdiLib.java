@@ -26,6 +26,8 @@ import java.util.Map;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import Utils.MultipartUtility;
+
 
 public class WasdiLib {
 	
@@ -1147,6 +1149,7 @@ public class WasdiLib {
 //			e.printStackTrace();
 //		}
 //		return "";
+		
 				try {
 			URL oURL = new URL(sUrl);
 			HttpURLConnection oConnection = (HttpURLConnection) oURL.openConnection();
@@ -1316,31 +1319,47 @@ public class WasdiLib {
 			System.out.println("sFileName must not be empty or null");
 		}
 		String sFullPath = getSavePath() + sFileName;
-//		FileInputStream oFileInputStream=null;
-//		try {
-//			oFileInputStream = new FileInputStream(sFullPath);
-//		} catch (Exception e) {
-			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
-		
 
-		String sUrl = m_sBaseUrl + "/product/uploadfile?name="+sFileName +"&workspace=" + m_sActiveWorkspace;
-//		String sUrl = m_sBaseUrl + "/product/uploadfile?workspace=" + m_sActiveWorkspace + "&name=" + sFileName;
+//		String sUrl = m_sBaseUrl + "/product/uploadfile?name="+sFileName +"&workspace=" + m_sActiveWorkspace;
+		String sUrl = m_sBaseUrl + "/product/uploadfile?workspace=" + m_sActiveWorkspace + "&name=" + sFileName;
 
 		URL oURL;
 		HttpURLConnection oConnection;
 	    HashMap<String, String> asHeaders = getStreamingHeaders();
 
 	    File oFile = new File(sFullPath);
-
+	    //la testUpload si basa su del codice trovato in internet vedi utils multipartUtility 
+//	    testUpload(sUrl,oFile);
+	    //httpPost metodo fatto da me per upload dei file (il codice commentanto all'inizio è preso da stackoverflow)
 	    httpPost(sUrl,oFile ,asHeaders);
-	
+	    
+	    //hello world funziona
+//	    httpGet(m_sBaseUrl + "/wasdi/hello",asHeaders);  
 	}
-
-
 	
-	
+	private void testUpload(String sUrl,File oFile)
+	{
+		//upload tramite libreria esterna
+		String charset = "UTF-8";
+		try {
+			MultipartUtility multipart = new MultipartUtility(sUrl, charset);
+			multipart.addHeaderField("x-session-token", "m_sSessionId");
+//			multipart.addHeaderField("Content-Disposition", "attachment; filename="+ oFile.getName());
+			//Content-Disposition", "attachment; filename="+ oFile.getName()
+//			multipart.addHeaderField("Content-Type", "multipart/form-data");
+			multipart.addFilePart("file", oFile);
+			List<String> response = multipart.finish();
+			System.out.println("SERVER REPLIED:");
+			for (String line : response) 
+			{
+				System.out.println(line);
+			}
+			
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}	
+	}
 	
 	/**
 	 * Default Http Post
