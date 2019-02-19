@@ -15,7 +15,7 @@
                         ng-class="{'disabled': $ctrl.isSearchBtnEnabled() == false, 'search-button': $ctrl.thereIsAtLeastOneProvider() === true }"
                         ng-show="$ctrl.m_sTypeOfFilterSelected === 'Time series'">
                     <i class="fa fa-search" aria-hidden="true"></i>{{"IMPORT_SEARCHLIST_BUTTON"|translate}}</button>
-                <button type="button" class="btn btn-secondary btn-wasdi search-button" ng-class="{'disabled': ($ctrl.m_bIsVisibleListOfLayers === false)}"
+                <button type="button" class="btn btn-primary btn-wasdi search-button" ng-class="{'disabled': ($ctrl.m_bIsVisibleListOfLayers === false)}"
                         ng-click="$ctrl.openModalDownloadSelectedProductsInSelectedWorkspaces()" >
                     <i class="fa fa-download" aria-hidden="true"></i>Download selected</button>
             </div>
@@ -222,7 +222,7 @@
                                                 {{filter.indexlabel}}
                                             </label>
                                             <!--INPUT class="form controller"-->
-                                            <input type="text" ng-model="filter.indexvalue" ng-value="filter.indexvalue"
+                                            <input type="text" ng-model="filter.indexvalue" ng-value="filter.indexvalue"in
                                                    class="filter-input wasdi-input"
                                                    ng-blur="$ctrl.updateFilter($parent.$parent.$index)"
                                                    ng-click="$ctrl.clearInput($parent.$parent.$index, $parent.$index)"

@@ -1,79 +1,121 @@
-.workflow-manager-modal
-{
-  .modal-dialog
-  {
-    //width:50%;
-    .modal-content
-    {
-      .modal-header
-      {
-        color:$wasdi-white;
-        background-color: $wasdi-blue-logo;
-        .close
-        {
-          color: $wasdi-white;
-          opacity: 1;
+.workflow-manager-modal {
+    .modal-dialog {
+        //width:50%;
+        .modal-content {
+            .modal-header {
+                color: $wasdi-white;
+                background-color: $wasdi-blue-logo;
+                .close {
+                    color: $wasdi-white;
+                    opacity: 1;
+                }
+                .snap-logo {
+                    width: 50px;
+                }
+            }
+
+            .modal-body {
+                //textarea {
+                //  resize: none;
+                //  background-color: $wasdi-white;
+                //  border-color:$wasdi-input-text-border-color ;
+                //
+                //}
+
+                height: $size-modals-max-height;
+
+                .tab-content{
+                    height: 85%;
+                    overflow-x: hidden;
+                    overflow-y: auto;
+
+                    .tab-pane{
+                        //display: flex;
+                        //flex: 1 1 auto !important;
+                        //overflow-y: auto;
+                        //overflow-x: hidden;
+                    }
+                }
+
+
+                .workflows-list-container{
+                    table-layout: fixed;
+                    width: 100%;
+                }
+
+                .multiselect-directive{
+                    width: 100%;
+                }
+
+
+                .is-public-content{
+                    .fa{
+                        top: 1px;
+                        position: relative;
+                        margin-right: 8px;
+                    }
+                }
+
+                .drag-and-drop{
+                    .drop-box{
+                        height: calc(100% - 41px);
+                        padding: 0px;
+                        margin: 0px;
+                        margin-top: 6px;
+                    }
+                }
+
+
+
+                .loadIcon {
+                    margin-bottom: 20px;
+                }
+                table {
+                    .selectedWorkflow {
+
+                        color: $wasdi-white;
+                        background-color: $wasdi-green-logo;
+                    }
+
+                }
+
+                .row {
+                    margin-top: 20px;
+                    .button-container {
+                        float: right;
+                    }
+                }
+
+                .tab-content {
+                    margin-top: 10px;
+                    .is-public-content {
+                        margin-top: 15px;
+                    }
+                }
+
+                .multi-input-workflows {
+                    margin-bottom: 100px;
+                    .my-dropdown {
+                        li {
+                            max-height: 100px;
+                        }
+                    }
+                }
+
+                .multiselect-directive{
+                    .list-group{
+                        max-height: 240px;
+                    }
+                }
+
+            }
+
+            .modal-footer {
+                border-top: 1px solid $wasdi-blue-logo;
+                .my-button {
+                    padding: 10px 21px;
+                }
+            }
         }
-        .snap-logo{
-          width: 50px;
-        }
-      }
-
-      .modal-body
-      {
-        //textarea {
-        //  resize: none;
-        //  background-color: $wasdi-white;
-        //  border-color:$wasdi-input-text-border-color ;
-        //
-        //}
-        .loadIcon {
-          margin-bottom: 20px;
-        }
-        table{
-          .selectedWorkflow{
-
-            color:$wasdi-white;
-            background-color: $wasdi-green-logo;
-          }
-
-        }
-
-        .row{
-          margin-top: 20px;
-          .button-container{
-            float:right;
-          }
-        }
-
-        .tab-content{
-          margin-top: 10px;
-          .is-public-content{
-            margin-top: 15px;
-          }
-        }
-
-
-
-      .multi-input-workflows{
-        margin-bottom: 100px;
-        .my-dropdown{
-          li{
-            max-height: 100px;
-          }
-        }
-      }
-
-      }
-
-      .modal-footer
-      {
-        border-top:1px solid $wasdi-blue-logo;
-        .my-button
-        {
-          padding: 10px 21px;
-        }
-      }
     }
-  }
 }

@@ -24,8 +24,13 @@
             <div class="table-workspaces flex-grow-1" >
                 <div class="wizards" ng-show="(m_oController.getWorkspaceInfoList().length === 0) && (m_oController.m_bIsLoading === false)">
                     <h4>
-                        {{"WORKSPACES_ADD_NEW_WORKSPSACE"|translate}}<a href="" ng-click="m_oController.createWorkspace()">{{"WORKSPACES_BUTTON_NEW_WORKSPACE"|translate}}</a>
+                        {{"WORKSPACES_NO_WORKSPACE"|translate}}.
                     </h4>
+                    <div class="w-100 text-center mt-5">
+                        <button class="btn btn-primary btn-wasdi btn-mdlg" ng-click="m_oController.createWorkspace()">
+                            <i class="fa fa-plus" aria-hidden="true"></i>{{"BTN_CREATE_FIRST_WORKSPACE"|translate}}
+                        </button>
+                    </div>
                 </div>
 
                 <div class="loadIcon" ng-hide="( (m_oController.getWorkspaceInfoList().length) > 0 && (m_oController.m_bIsLoading === false) )||
@@ -42,7 +47,8 @@
                     <th ng-hide="m_oController.m_oWorkspaceSelected === null"></th>
                     </thead>
                     <tr ng-repeat="oWSListItem in m_oController.getWorkspaceInfoList() | filter:searchWorkSpace"
-                        ng-class="{'selected-row':m_oController.isSelectedRowInWorkspaceTable(oWSListItem)}"><!-- ng-class="m_oController.isSelectedRowInWorkspaceTableCSS(oWSListItem)"-->
+                        class="workspaces-list-item"
+                        ng-class="{'selected-row':m_oController.isSelectedRowInWorkspaceTable(oWSListItem)}">
                         <td  ng-click="m_oController.loadProductList(oWSListItem)" >{{$index + 1}}</td>
                         <td  ng-click="m_oController.loadProductList(oWSListItem)" > {{oWSListItem.workspaceName}}  <!--b class="cursor" style="margin-left: 0px" ng-show="m_oController.showCursorOnWSRow(oWSListItem.workspaceId)" id="cursor">H</b--></td>
                         <td  ng-click="m_oController.loadProductList(oWSListItem)" >{{oWSListItem.ownerUserId}}</td>
@@ -52,13 +58,15 @@
                         <!--</td>-->
 
                         <td class="over-color" data-toggle="tooltip" data-placement="top" title="{{'WORKSPACES_TOOLTIP_EDIT'|translate}}"
-                                                        ng-show="m_oController.isSelectedRowInWorkspaceTable(oWSListItem)"
-                                                        ng-click="m_oController.openWorkspace(oWSListItem.workspaceId)">
-                            <!--<i class="fa fa-folder-open" style="margin-left: 10px;" aria-hidden="true" ng-click="m_oController.openWorkspace(oWSListItem.workspaceId)" ></i>-->
-                            <i  ng-hide="m_oController.isLoadingIconVisible() == true">
-                                open
-                                <i class="fa fa-sign-in fa-lg" style="margin-left: 10px;" aria-hidden="true"  ></i>
-                            </i>
+                            ng-class="{'disabled' : m_oController.isRabbitConnected() == false}"
+                            ng-show="m_oController.isSelectedRowInWorkspaceTable(oWSListItem)"
+                            ng-click="m_oController.openWorkspace(oWSListItem.workspaceId)">
+                            <div>
+                                <i  ng-hide="m_oController.isLoadingIconVisible() == true">
+                                    open
+                                    <i class="fa fa-sign-in fa-lg" style="margin-left: 10px;" aria-hidden="true"  ></i>
+                                </i>
+                            </div>
                             <div class="loadIcon"  ng-hide="m_oController.isLoadingIconVisible() === false">
                                 <smallinvaderfixed> </smallinvaderfixed>
                             </div>

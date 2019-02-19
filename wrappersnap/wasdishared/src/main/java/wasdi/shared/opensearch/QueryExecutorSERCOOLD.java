@@ -2,8 +2,13 @@ package wasdi.shared.opensearch;
 
 import org.apache.abdera.i18n.templates.Template;
 
-public class QueryExecutorSERCO extends QueryExecutor {
+public class QueryExecutorSERCOOLD extends QueryExecutor {
 
+	public QueryExecutorSERCOOLD() {
+		System.out.println("QueryExecutorSERCOOLD");
+		m_sProvider = "SERCO";
+	}
+	
 	@Override
 	protected Template getTemplate() {
 		return new Template("{scheme}://{-append|.|host}early.onda-dias.eu{-opt|/|path}{-listjoin|/|path}{-prefix|/|page}{-opt|?|q}{-join|&|q,start,rows,orderby}");

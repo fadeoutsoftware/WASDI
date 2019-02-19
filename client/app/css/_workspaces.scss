@@ -127,22 +127,41 @@
                     color: $wasdi-blue-logo !important;
                     border-top: none;
 
-                    &:hover {
+                    &:not(.disabled) {
+                        &:hover {
 
-                        background-color: $wasdi-grey !important;
-                        cursor: pointer;
-                        //color:$wasdi-over-icon !important;
-                        i:hover {
+                            background-color: $wasdi-grey !important;
+                            cursor: pointer;
+                            //color:$wasdi-over-icon !important;
+                            i:hover {
 
-                            //background-color:white;
-                            color: $wasdi-over-icon;
+                                //background-color:white;
+                                color: $wasdi-over-icon;
+                            }
                         }
                     }
-
                 }
             }
         }
     }
+
+
+    .workspaces-list-item{
+        .disabled{
+            &:hover{
+                cursor: not-allowed !important;
+            }
+
+            div{
+                opacity: .5;
+                &:hover{
+                    cursor: not-allowed;
+                }
+            }
+
+        }
+    }
+
     // LIST OF FILES IN WORKSPACES
     .fieldset-list-files {
         //overflow-y: auto;
