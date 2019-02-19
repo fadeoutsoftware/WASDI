@@ -15,7 +15,7 @@ public class App
         WasdiLib oLib = new WasdiLib();
         
         oLib.init();
-        testUploadFileDUMMYFILE(oLib);
+        testUploadFileDUMMYIMAGE(oLib);
 
         //HashMap<String, String> asHeaders = new HashMap<>();
         //asHeaders.put("Accept","text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8");
@@ -79,6 +79,12 @@ public class App
     	oLib.uploadFile("miao.txt");
     	
     }
+    public static void testUploadFileDUMMYIMAGE(WasdiLib oLib)
+    {
+    	oLib.uploadFile("bau.jpg");
+    	
+    }
+    
     
     
 }
