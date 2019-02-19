@@ -285,8 +285,9 @@ public class CatalogResources {
 					
 					Wasdi.DebugLog("CatalogResources.zipOnTheFlyAndStream::StreamingOutput.write");
 
-					BufferedOutputStream oBufferedOutputStream = new BufferedOutputStream(oOutputStream);
-					ZipOutputStream oZipOutputStream = new ZipOutputStream(oBufferedOutputStream);
+					//BufferedOutputStream oBufferedOutputStream = new BufferedOutputStream(oOutputStream);
+					//ZipOutputStream oZipOutputStream = new ZipOutputStream(oBufferedOutputStream);
+					ZipOutputStream oZipOutputStream = new ZipOutputStream(oOutputStream);
 					//TODO try reducing the compression to increase speed
 					//oZipOutputStream.setLevel(level);
 					InputStream oInputStream = null;
@@ -305,29 +306,34 @@ public class CatalogResources {
 							} else {
 								oZipOutputStream.putNextEntry(new ZipEntry(oZippedName));
 								oInputStream = new FileInputStream(oFileToZip);
-//								long lCopiedBytes = IOUtils.copyLarge(oInputStream, oZipOutputStream);
+								long lCopiedBytes = 0;
+								if(oFileToZip.length()>2048*2048) {
+									lCopiedBytes = IOUtils.copyLarge(oInputStream, oZipOutputStream);
+								} else {
 								//IOUtils.copy(oInputStream, oZipOutputStream, 16384);
-								//IOUtils.copy(oInputStream, oZipOutputStream);
+									lCopiedBytes = IOUtils.copy(oInputStream, oZipOutputStream);
+								}
+								Wasdi.DebugLog("CatalogResources.zipOnTheFlyAndStream::StreamingOutput.write: file " + oZippedName + "copied " + lCopiedBytes + " bytes");
 								//
 								//TODO try different buffer sizes
-								byte[] bytes = new byte[16384];
-								//byte[] bytes = new byte[1024];
-								int iLength = -1;
-								long lTotalLength = oFileToZip.length();
-								long lCumulativeLength = 0;
-								iLength = oInputStream.read(bytes);
-								//while ((iLength = oInputStream.read(bytes)) >= 0) {
-								while(iLength>=0) {
-									lCumulativeLength += iLength;
-									oZipOutputStream.write(bytes, 0, iLength);
-									oZipOutputStream.flush();
-									oBufferedOutputStream.flush();
-									oOutputStream.flush();
-									double dPerc = (double)lCumulativeLength / (double)lTotalLength;
-									dPerc = Math.floor(dPerc * 100.0) / 100.0;
-									//Wasdi.DebugLog("CatalogResources.zipOnTheFlyAndStream::StreamingOutput.write: File: "+oZippedName+": "+lCumulativeLength + " / " + lTotalLength + " = " + dPerc + "%");
-									iLength = oInputStream.read(bytes);
-								}
+//								byte[] bytes = new byte[16384];
+//								//byte[] bytes = new byte[1024];
+//								int iLength = -1;
+//								long lTotalLength = oFileToZip.length();
+//								long lCumulativeLength = 0;
+//								iLength = oInputStream.read(bytes);
+//								//while ((iLength = oInputStream.read(bytes)) >= 0) {
+//								while(iLength>=0) {
+//									lCumulativeLength += iLength;
+//									oZipOutputStream.write(bytes, 0, iLength);
+//									oZipOutputStream.flush();
+//									oBufferedOutputStream.flush();
+//									oOutputStream.flush();
+//									double dPerc = (double)lCumulativeLength / (double)lTotalLength;
+//									dPerc = Math.floor(dPerc * 100.0) / 100.0;
+//									//Wasdi.DebugLog("CatalogResources.zipOnTheFlyAndStream::StreamingOutput.write: File: "+oZippedName+": "+lCumulativeLength + " / " + lTotalLength + " = " + dPerc + "%");
+//									iLength = oInputStream.read(bytes);
+//								}
 								//
 
 								oZipOutputStream.closeEntry();
