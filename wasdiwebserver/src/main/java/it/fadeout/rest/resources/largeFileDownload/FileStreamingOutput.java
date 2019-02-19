@@ -29,7 +29,7 @@ public class FileStreamingOutput implements StreamingOutput {
 
 	public FileStreamingOutput(File oFile){
 		if(null==oFile) {
-			throw new NullPointerException("FileStreamingOutput.FileStreamingOutput: passed a null OutputStream");
+			throw new NullPointerException("FileStreamingOutput.FileStreamingOutput: passed a null File");
 		}
 		m_oFile = oFile;
 	}
@@ -46,7 +46,9 @@ public class FileStreamingOutput implements StreamingOutput {
 		try {
 			oInputStream = new FileInputStream(m_oFile);
 			long lCopiedBytes = 0;
-			if(m_oFile.length() > 2*1024*1024*1024) {
+			long lThreshold = 2L*1024*1024*1024;
+			long lSize = m_oFile.length(); 
+			if(lSize > lThreshold) {
 				lCopiedBytes = IOUtils.copyLarge(oInputStream, oOutputStream);
 			} else {
 				lCopiedBytes = IOUtils.copy(oInputStream, oOutputStream);
