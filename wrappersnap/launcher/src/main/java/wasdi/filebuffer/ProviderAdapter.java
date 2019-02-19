@@ -234,6 +234,7 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 			// opens an output stream to save into file
 			FileOutputStream oOutputStream = new FileOutputStream(sSaveFilePath);
 
+			//TODO take countermeasures in case of failure, e.g. retry if timeout. Here or in copyStream?
 			copyStream(m_oProcessWorkspace, lContentLength, oInputStream, oOutputStream);
 
 			sReturnFilePath = sSaveFilePath;
@@ -256,6 +257,7 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 	 * @param oOutputStream
 	 * @throws IOException
 	 */
+	//TODO change the method signature to return some status including not only success or failure but also reason (e.g. timeout, file not found...)
 	protected void copyStream(ProcessWorkspace oProcessWorkspace, long lContentLength, InputStream oInputStream, OutputStream oOutputStream) throws IOException {
 
 		// Cumulative Byte Count

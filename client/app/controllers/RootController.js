@@ -35,11 +35,15 @@ var RootController = (function() {
             if( connectionState === 1) {
                 oController.m_isRabbitConnected = true;
             }
-            else if( connectionState === 2) {
+            else
+            {
                 oController.m_isRabbitConnected = false;
-                if(oRabbitStompService.m_oRabbitReconnectAttemptCount === 0 || forceNotification === true)
+                if( connectionState === 2)
                 {
-                    this.signalRabbitConnectionLost();
+                    if(oRabbitStompService.m_oRabbitReconnectAttemptCount === 0 || forceNotification === true)
+                    {
+                        this.signalRabbitConnectionLost();
+                    }
                 }
             }
         }
@@ -168,7 +172,10 @@ var RootController = (function() {
                             //approximate result
                             var seconds = Math.ceil(result / 1000);
 
-                            if(utilsIsObjectNullOrUndefined(seconds) || seconds < 0) seconds = 0;
+                            if(utilsIsObjectNullOrUndefined(seconds) || seconds < 0 || utilsIsANumber(seconds)=== false)
+                            {
+                                seconds = 0;
+                            }
 
                             var oDate = new Date(1970, 0, 1);
                             oDate.setSeconds(0 + seconds);
@@ -188,7 +195,10 @@ var RootController = (function() {
                             //approximate result
                             var seconds = Math.ceil(result / 1000);
 
-                            if(utilsIsObjectNullOrUndefined(seconds) || seconds < 0) seconds = 0;
+                            if(utilsIsObjectNullOrUndefined(seconds) || seconds < 0  || utilsIsANumber(seconds)=== false)
+                            {
+                                seconds = 0;
+                            }
 
                             var oDate = new Date(1970, 0, 1);
                             oDate.setSeconds(0 + seconds);
@@ -294,6 +304,7 @@ var RootController = (function() {
 
     RootController.prototype.isRabbitConnected = function()
     {
+        //console.debug("Rabbit is connected?", this.m_isRabbitConnected);
         return this.m_isRabbitConnected;
     }
 

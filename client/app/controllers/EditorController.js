@@ -167,201 +167,266 @@ var EditorController = (function () {
 
     }
     /********************************************************* TRANSLATE SERVICE ********************************************************/
-    EditorController.prototype.generateDefaultNavBarMenu = function(){
+    EditorController.prototype.generateDefaultNavBarMenu = function()
+    {
         this.m_aoNavBarMenu = [
+            // --- Workflow ---
             {
-                name:"",//sftp
+                name:"",
+                icon:"fa fa-file-code-o",
+                caption_i18n : "EDITOR_OPERATION_TITLE_WORKFLOW",
                 subMenu:[],
-                onClick: this.openSFTPDialogInNavBar,
-                icon:"fa fa-upload"
+                onClick: this.openWorkflowManagerDialog
             },
+            // --- Import (SFTP) ---
             {
-                name:"",//radar
-                subMenu:[
-                    {
-                        name:"",//apply orbit
-                        subMenu:[],
-                        onClick: this.openApplyOrbitDialogInNavBar,
-                        icon:"icon-applyorbit-operations"
-                    },
-                    {
-                        name:"",//multilooking
-                        subMenu:[],
-                        onClick: this.openMultilookingDialogInNavBar,
-                        icon:"icon-multilooking-operations"
-                    },
-                    {
-                        name:"",// radiometric calibrate
-                        subMenu:[],
-                        onClick: this.openRadiometricCalibrationDialogInNavBar,
-                        icon:"icon-radiometriccalibrate-operations"
-                    },
-                    {
-                        name:"",//range doppler terrain correction
-                        subMenu:[],
-                        onClick: this.rangeDopplerTerrainCorrectionDialogInNavBar,
-                        icon:"icon-range-doppler-terrain-correction-operations"
-                    }
-                ],
+                name:"",
+                icon:"fa fa-upload",
+                caption_i18n : "EDITOR_OPERATION_TITLE_SFTP",
+                subMenu:[],
+                onClick: this.openSFTPDialogInNavBar
+            },
+            // --- WPS ---
+            {
+                name:"WPS",
+                icon:"fa fa-tasks",
+                caption_i18n : "EDITOR_OPERATION_TITLE_APPLY_WPS",
+                onClick: this.openWPSDialog,
+                subMenu:[]
+            },
+            // --- Processor ---
+            {
+                name:"",
+                icon:"icon-document-gear",
+                caption_i18n : "EDITOR_OPERATION_TITLE_APPLY_RADIOMETRIC_PROCESSOR",
                 onClick: "",
-                icon:"icon-radar"
-            },
-            {
-                name:"",//optical
-                subMenu:[
-                    {
-                        name:"",//range doppler terrain correction
-                        subMenu:[],
-                        onClick: this.openNDVIDialogInNavBar,
-                        icon:""
-                    }
-                ],
-                onClick: "",
-                icon:"icon-eye"
-            },
-            {
-                name:"",//Processor
                 subMenu:[
                     {
                         name:"",//mida
+                        caption_i18n : "EDITOR_OPERATION_TITLE_MIDA",
                         subMenu:[],
                         onClick: this.openMergeDialogInNavBar,
                         icon:"icon-mida-merge-operations"
                     },
                     {
                         name:"",//OPERA
+                        caption_i18n : "EDITOR_OPERATION_TITLE_OPERA",
                         subMenu:[],
                         onClick: this.openWappDialog,
                         icon:"fa fa-lg fa-tint"
                     },
                     {
                         name:"",//RASOR
+                        caption_i18n : "EDITOR_OPERATION_TITLE_RASOR",
                         subMenu:[],
                         onClick: this.openRasorDialog,
                         icon:"fa fa-lg fa-users"
                     },
-                    {
-                        name:"",//workflow
-                        subMenu:[],
-                        onClick: this.openWorkflowManagerDialog,
-                        icon:"fa fa-lg fa-file-code-o"
-                    },
+                    // {
+                    //     name:"",//workflow
+                    //     subMenu:[],
+                    //     onClick: this.openWorkflowManagerDialog,
+                    //     icon:"fa fa-lg fa-file-code-o"
+                    // },
                     {
                         name:"",// New Processor
+                        caption_i18n : "EDITOR_OPERATION_TITLE_NEW_PROCESSOR",
                         subMenu:[],
                         onClick: this.openProcessorDialog,
                         icon:"fa fa-lg fa-file-code-o"
                     },
                     {
                         name:"",//WAPPS
+                        caption_i18n : "EDITOR_OPERATION_TITLE_WAPPS",
                         subMenu:[],
                         onClick: this.openWappsDialog,
                         icon:"fa fa-lg fa-rocket"
                     },
                     {
                         name:"",//LIST FLOOD AREA DETECTION
+                        caption_i18n : "EDITOR_OPERATION_TITLE_LIST_FLOOD_AREA_DETECTION",
                         subMenu:[],
                         onClick: this.openListtFloodAreaDetectionDialog,
                         icon:"fa fa-lg fa-file-code-o"
                     },
                     {
-                        name:"",//JSC Processor
+                        name:"",//JRC Processor
+                        caption_i18n : "EDITOR_OPERATION_TITLE_JRC_PROCESSOR",
                         subMenu:[],
                         onClick: this.openJRCProcessorDialog,
                         icon:"fa fa-lg fa-file-code-o"
+                    },
+                    {
+                        name:"Upload File",//Upload
+                        subMenu:[],
+                        onClick: this.openUploadFileDialog,
+                        icon:"fa fa-lg fa-file-code-o"
                     }
 
-                ],
-                onClick: "",
-                icon:"icon-document-gear"
+                ]
             },
+            // --- Optical ---
             {
-                name:"WPS", //WPS
-                subMenu:[],
-                onClick: this.openWPSDialog,
-                icon:"fa fa-tasks"
+                name:"",
+                icon:"icon-eye",
+                caption_i18n : "EDITOR_TOOLTIP_ICON_EYE",
+                onClick: "",
+                subMenu:[
+                    {
+                        name:"",//range doppler terrain correction
+                        caption_i18n : "EDITOR_OPERATION_TITLE_APPLY_RADIOMETRIC_RANGE_DOPPLER_TERRAIN_CORRECTION",
+                        subMenu:[],
+                        onClick: this.openNDVIDialogInNavBar,
+                        icon:""
+                    }
+                ]
+            },
+            // --- Radar ---
+            {
+                name:"",
+                icon:"icon-radar",
+                caption_i18n : "EDITOR_TOOLTIP_ICON_RADAR",
+                onClick: "",
+                subMenu:[
+                    {
+                        name:"",//apply orbit
+                        caption_i18n : "EDITOR_OPERATION_TITLE_APPLY_ORBIT",
+                        subMenu:[],
+                        onClick: this.openApplyOrbitDialogInNavBar,
+                        icon:"icon-applyorbit-operations"
+                    },
+                    {
+                        name:"",//multilooking
+                        caption_i18n : "EDITOR_OPERATION_TITLE_APPLY_MULTILOOKING",
+                        subMenu:[],
+                        onClick: this.openMultilookingDialogInNavBar,
+                        icon:"icon-multilooking-operations"
+                    },
+                    {
+                        name:"",// radiometric calibrate
+                        caption_i18n : "EDITOR_OPERATION_TITLE_APPLY_RADIOMETRIC_CALIBRATE",
+                        subMenu:[],
+                        onClick: this.openRadiometricCalibrationDialogInNavBar,
+                        icon:"icon-radiometriccalibrate-operations"
+                    },
+                    {
+                        name:"",//range doppler terrain correction
+                        caption_i18n : "EDITOR_OPERATION_TITLE_APPLY_RADIOMETRIC_RANGE_DOPPLER_TERRAIN_CORRECTION",
+                        subMenu:[],
+                        onClick: this.rangeDopplerTerrainCorrectionDialogInNavBar,
+                        icon:"icon-range-doppler-terrain-correction-operations"
+                    }
+                ]
             }
         ]
+        
+        this.translateToolbarMenuList(this.m_aoNavBarMenu);
     };
+
+    EditorController.prototype.isToolbarBtnDropdown = function(btn)
+    {
+        return btn.subMenu.length != 0;
+    }
+
+    EditorController.prototype.translateToolbarMenu = function(menuItem)
+    {
+        this.m_oTranslate(menuItem.caption_i18n).then(function(text){
+            menuItem.name = text;
+        })
+    }
+
+    EditorController.prototype.translateToolbarMenuList = function(menuList)
+    {
+        for(var i = 0; i < menuList.length; i++)
+        {
+            var menuItem = menuList[i];
+            this.translateToolbarMenu(menuItem);
+            if( this.isToolbarBtnDropdown(menuItem) == true){
+                this.translateToolbarMenuList(menuItem.subMenu);
+            }
+        }
+    }
+
+
 
     EditorController.prototype.navbarMenuTranslation = function()
     {
-        var oController = this;
-
-        this.m_oTranslate('EDITOR_OPERATION_TITLE_SFTP').then(function(text)
-        {
-            oController.m_aoNavBarMenu[0].name  = text;
-        });
-        this.m_oTranslate('EDITOR_TOOLTIP_ICON_RADAR').then(function(text)
-        {
-            oController.m_aoNavBarMenu[1].name  = text;
-        });
-        this.m_oTranslate('EDITOR_TOOLTIP_ICON_EYE').then(function(text)
-        {
-            oController.m_aoNavBarMenu[2].name  = text;
-        });
-        this.m_oTranslate('EDITOR_OPERATION_TITLE_APPLY_RADIOMETRIC_PROCESSOR').then(function(text)
-        {
-            oController.m_aoNavBarMenu[3].name  = text;
-        });
-
-
-
-        //RADAR MENU
-        this.m_oTranslate('EDITOR_OPERATION_TITLE_APPLY_ORBIT').then(function(text)
-        {
-            oController.m_aoNavBarMenu[1].subMenu[0].name = text;
-        });
-        this.m_oTranslate('EDITOR_OPERATION_TITLE_APPLY_MULTILOOKING').then(function(text)
-        {
-            oController.m_aoNavBarMenu[1].subMenu[1].name = text;
-        });
-        this.m_oTranslate('EDITOR_OPERATION_TITLE_APPLY_RADIOMETRIC_CALIBRATE').then(function(text)
-        {
-            oController.m_aoNavBarMenu[1].subMenu[2].name = text;
-        });
-        this.m_oTranslate('EDITOR_OPERATION_TITLE_APPLY_RADIOMETRIC_RANGE_DOPPLER_TERRAIN_CORRECTION').then(function(text)
-        {
-            oController.m_aoNavBarMenu[1].subMenu[3].name = text;
-        });
-        //OPTICAL MENU
-        this.m_oTranslate('EDITOR_OPERATION_TITLE_APPLY_RADIOMETRIC_NDVI').then(function(text)
-        {
-            oController.m_aoNavBarMenu[2].subMenu[0].name  = text;
-        });
-        //PROCESSOR MENU
-        this.m_oTranslate('EDITOR_OPERATION_TITLE_MIDA').then(function(text)
-        {
-            oController.m_aoNavBarMenu[3].subMenu[0].name  = text;
-        });
-        this.m_oTranslate('EDITOR_OPERATION_TITLE_OPERA').then(function(text)
-        {
-            oController.m_aoNavBarMenu[3].subMenu[1].name  = text;
-        });
-        this.m_oTranslate('EDITOR_OPERATION_TITLE_RASOR').then(function(text)
-        {
-            oController.m_aoNavBarMenu[3].subMenu[2].name  = text;
-        });
-        this.m_oTranslate('EDITOR_OPERATION_TITLE_WORKFLOW').then(function(text)
-        {
-            oController.m_aoNavBarMenu[3].subMenu[3].name  = text;
-        });
-        this.m_oTranslate('EDITOR_OPERATION_TITLE_NEW_PROCESSOR').then(function(text)
-        {
-            oController.m_aoNavBarMenu[3].subMenu[4].name  = text;
-        });
-        this.m_oTranslate('EDITOR_OPERATION_TITLE_WAPPS').then(function(text)
-        {
-            oController.m_aoNavBarMenu[3].subMenu[5].name  = text;
-        });
-        this.m_oTranslate('EDITOR_OPERATION_TITLE_LIST_FLOOD_AREA_DETECTION').then(function(text)
-        {
-            oController.m_aoNavBarMenu[3].subMenu[6].name  = text;
-        });
-        this.m_oTranslate('EDITOR_OPERATION_TITLE_JRC_PROCESSOR').then(function(text)
-        {
-            oController.m_aoNavBarMenu[3].subMenu[7].name  = text;
-        });
+        // var oController = this;
+        //
+        // this.m_oTranslate('EDITOR_OPERATION_TITLE_SFTP').then(function(text)
+        // {
+        //     oController.m_aoNavBarMenu[0].name  = text;
+        // });
+        // this.m_oTranslate('EDITOR_TOOLTIP_ICON_RADAR').then(function(text)
+        // {
+        //     oController.m_aoNavBarMenu[1].name  = text;
+        // });
+        // this.m_oTranslate('EDITOR_TOOLTIP_ICON_EYE').then(function(text)
+        // {
+        //     oController.m_aoNavBarMenu[2].name  = text;
+        // });
+        // this.m_oTranslate('EDITOR_OPERATION_TITLE_APPLY_RADIOMETRIC_PROCESSOR').then(function(text)
+        // {
+        //     oController.m_aoNavBarMenu[3].name  = text;
+        // });
+        //
+        //
+        //
+        // //RADAR MENU
+        // this.m_oTranslate('EDITOR_OPERATION_TITLE_APPLY_ORBIT').then(function(text)
+        // {
+        //     oController.m_aoNavBarMenu[1].subMenu[0].name = text;
+        // });
+        // this.m_oTranslate('EDITOR_OPERATION_TITLE_APPLY_MULTILOOKING').then(function(text)
+        // {
+        //     oController.m_aoNavBarMenu[1].subMenu[1].name = text;
+        // });
+        // this.m_oTranslate('EDITOR_OPERATION_TITLE_APPLY_RADIOMETRIC_CALIBRATE').then(function(text)
+        // {
+        //     oController.m_aoNavBarMenu[1].subMenu[2].name = text;
+        // });
+        // this.m_oTranslate('EDITOR_OPERATION_TITLE_APPLY_RADIOMETRIC_RANGE_DOPPLER_TERRAIN_CORRECTION').then(function(text)
+        // {
+        //     oController.m_aoNavBarMenu[1].subMenu[3].name = text;
+        // });
+        // //OPTICAL MENU
+        // this.m_oTranslate('EDITOR_OPERATION_TITLE_APPLY_RADIOMETRIC_NDVI').then(function(text)
+        // {
+        //     oController.m_aoNavBarMenu[2].subMenu[0].name  = text;
+        // });
+        // //PROCESSOR MENU
+        // this.m_oTranslate('EDITOR_OPERATION_TITLE_MIDA').then(function(text)
+        // {
+        //     oController.m_aoNavBarMenu[3].subMenu[0].name  = text;
+        // });
+        // this.m_oTranslate('EDITOR_OPERATION_TITLE_OPERA').then(function(text)
+        // {
+        //     oController.m_aoNavBarMenu[3].subMenu[1].name  = text;
+        // });
+        // this.m_oTranslate('EDITOR_OPERATION_TITLE_RASOR').then(function(text)
+        // {
+        //     oController.m_aoNavBarMenu[3].subMenu[2].name  = text;
+        // });
+        // this.m_oTranslate('EDITOR_OPERATION_TITLE_WORKFLOW').then(function(text)
+        // {
+        //     oController.m_aoNavBarMenu[3].subMenu[3].name  = text;
+        // });
+        // this.m_oTranslate('EDITOR_OPERATION_TITLE_NEW_PROCESSOR').then(function(text)
+        // {
+        //     oController.m_aoNavBarMenu[3].subMenu[4].name  = text;
+        // });
+        // this.m_oTranslate('EDITOR_OPERATION_TITLE_WAPPS').then(function(text)
+        // {
+        //     oController.m_aoNavBarMenu[3].subMenu[5].name  = text;
+        // });
+        // this.m_oTranslate('EDITOR_OPERATION_TITLE_LIST_FLOOD_AREA_DETECTION').then(function(text)
+        // {
+        //     oController.m_aoNavBarMenu[3].subMenu[6].name  = text;
+        // });
+        // this.m_oTranslate('EDITOR_OPERATION_TITLE_JRC_PROCESSOR').then(function(text)
+        // {
+        //     oController.m_aoNavBarMenu[3].subMenu[7].name  = text;
+        // });
     };
 
     /*********************************************************** VIEW METHODS**********************************************************/
@@ -2396,6 +2461,34 @@ var EditorController = (function () {
             inputs: {
                 extras: {
                     products:oController.m_aoProducts,
+                }
+            }
+        }).then(function (modal) {
+            modal.element.modal();
+            modal.close.then(function(oResult){
+
+            });
+        });
+    };
+
+    EditorController.prototype.openUploadFileDialog = function(oWindow)
+    {
+        var oController;
+        if(utilsIsObjectNullOrUndefined(oWindow) === true)
+        {
+            oController = this;
+        }
+        else
+        {
+            oController = oWindow;
+        }
+
+        oController.m_oModalService.showModal({
+            templateUrl: "dialogs/upload_file/UploadFileView.html",
+            controller: "UploadFileController",
+            inputs: {
+                extras: {
+                    workflowId:oController.m_oActiveWorkspace.workspaceId
                 }
             }
         }).then(function (modal) {

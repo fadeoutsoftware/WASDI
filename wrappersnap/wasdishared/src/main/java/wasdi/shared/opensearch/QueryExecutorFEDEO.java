@@ -4,6 +4,11 @@ import org.apache.abdera.i18n.templates.Template;
 
 public class QueryExecutorFEDEO extends QueryExecutor {
 
+	QueryExecutorFEDEO(){
+		System.out.println("QueryExecutorFEDEO");
+		m_sProvider = "FEDEO";
+	}
+	
 	@Override
 	protected Template getTemplate() {
 		return new Template("{scheme}://{-append|.|host}fedeo.esa.int{-opt|/|path}{-listjoin|/|path}{-prefix|/|page}{-opt|?|q}{-join|&|q,start,rows,orderby}");
@@ -16,7 +21,6 @@ public class QueryExecutorFEDEO extends QueryExecutor {
 
 	@Override
 	protected String getCountUrl(String sQuery) {
-		//TODO
 		return null;
 	}
 

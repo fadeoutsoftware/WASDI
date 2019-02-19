@@ -3,6 +3,11 @@ package wasdi.shared.opensearch;
 import org.apache.abdera.i18n.templates.Template;
 
 public class QueryExecutorMATERA extends QueryExecutor {
+	
+	public QueryExecutorMATERA() {
+		System.out.println("QueryExecutorMATERA");
+		m_sProvider = "MATERA";
+	}
 
 	@Override
 	protected String[] getUrlPath() {

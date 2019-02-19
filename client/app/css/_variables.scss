@@ -20,12 +20,13 @@ $size-content-spacer: ($size-header-virtual-height - $size-header-height) - $siz
 $size-full-width-content-height: calc(100% - #{$size-content-spacer + $size-toolbar-height-total});
 
 $size-status-bar-height-closed: 48px;
-$size-status-bar-height-opened: 500px;
+$size-status-bar-height-opened: 460px;
 
 $size-panel-heading-height-single-row-total: 40px; // 39px real
 $size-panel-body-height-with-single-row-heading: calc(100% - #{$size-panel-heading-height-single-row-total});
 
 
+$size-modals-max-height: 70vh;
 
 
 $z-index-context-menu-right-click: 1001;

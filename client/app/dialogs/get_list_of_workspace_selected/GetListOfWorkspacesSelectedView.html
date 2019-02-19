@@ -7,21 +7,23 @@
             </div>
             <div class="modal-body ">
                 <div class="row-v4">
-                    <div class="col">
+                    <div class="col-v4">
                         <h3>
                             <div>
                                 <label>{{"DIALOG_LIST_OF_WORKSPACES_TITLE_TABLE_LIST_OF_WORKSPACES"|translate}}</label>
                             </div>
                         </h3>
                         <h4>
-                            <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
-                                <a href="" ng-click="m_oController.createWorkspace()" ng-hide="m_oController.m_bIsCreatingWorskapce">{{"DIALOG_LIST_OF_WORKSPACES_ADD_NEW_WORKSPACE_BUTTON"|translate}}</a>
-                            </div>
-                            <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
-                                <a href="" ng-click="m_oController.m_bIsVisibleWorkFlowsOption = !m_oController.m_bIsVisibleWorkFlowsOption"
-                                    ng-hide="m_oController.m_bIsVisibleWorkFlowsOption">
-                                    {{"DIALOG_LIST_OF_WORKSPACES_SHOW_WORKFLOWS_BUTTON" | translate}}
-                                </a>
+                            <div class="row-v4">
+                                <div class="col-v4-auto">
+                                    <a href="" ng-click="m_oController.createWorkspace()" ng-hide="m_oController.m_bIsCreatingWorskapce">{{"DIALOG_LIST_OF_WORKSPACES_ADD_NEW_WORKSPACE_BUTTON"|translate}}</a>
+                                </div>
+                                <div class="col-v4-auto ml-auto">
+                                    <a href="" ng-click="m_oController.m_bIsVisibleWorkFlowsOption = !m_oController.m_bIsVisibleWorkFlowsOption"
+                                        ng-hide="m_oController.m_bIsVisibleWorkFlowsOption">
+                                        {{"DIALOG_LIST_OF_WORKSPACES_SHOW_WORKFLOWS_BUTTON" | translate}}
+                                    </a>
+                                </div>
                             </div>
                         </h4>
 
@@ -82,7 +84,7 @@
                         </div>
                     </div>
 
-                    <div class="col" ng-show="m_oController.m_bIsVisibleWorkFlowsOption"><!---->
+                    <div class="col-v4" ng-show="m_oController.m_bIsVisibleWorkFlowsOption"><!---->
                         <h3>
                             <label>
                                 {{"WORKSPACES_LIST_OF_WORKFLOWS_TITLE"|translate}}

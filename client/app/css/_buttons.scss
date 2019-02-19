@@ -5,7 +5,7 @@
 
         @if ( fontFamilyContains($wasdi-font-web, "Hero-Light")) {
             font-weight: 600;
-            letter-spacing: 0.4px;
+            letter-spacing: 0.6px;
         }
 
         &.btn-primary {
@@ -76,6 +76,12 @@
         .fa{
             margin-right: 8px;
             background-color: transparent !important;
+        }
+
+        &.btn-mdlg{
+            padding-top: 10px;
+            padding-bottom: 10px;
+            min-width: 90px;
         }
 
 

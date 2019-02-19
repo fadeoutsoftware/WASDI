@@ -1,0 +1,128 @@
+<div class="row-v4 header-wrapper">
+    <div class="col-v4-auto">
+        <a  href=""  ng-click="m_oController.openSnake()"><!--ui-sref="root.workspaces"-->
+            <!--<img class="navbar-brand-logo">-->
+            <img class="brand-logo" id="brand-logo" >
+            <script>
+                // Script fix an error with Firefox which does not
+                // show image correctly if the 'SRC' is set from CSS
+                // via 'content' field
+                $(document).ready(function () {
+                    var oImage = $("#brand-logo");
+                    var imageSrc = oImage.css("content");
+                    imageSrc = imageSrc.replace("url(\"","");
+                    imageSrc = imageSrc.replace("\")","");
+                    oImage.attr("src",imageSrc);
+                })
+            </script>
+        </a>
+    </div>
+
+
+    <div class="col-v4 my-nav-bar pl-0">
+        <nav class="navbar navbar-default navbar-wasdi" ><!--ng-show="m_oController.isVisibleNavBar()"-->
+            <div class="container-fluid-v4">
+                <div class="navbar-header">
+                    <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+                        <span class="sr-only">Toggle navigation</span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+                </div>
+
+                <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                    <!-- EDIT NAME -->
+                    <div class="nav navbar-nav navbar-left name-workspace" ng-hide="m_oController.hideWorkspaceName()">
+                        <div class="form-group">
+                            <input type="text" readonly ng-model="m_oController.m_oConstantsService.getActiveWorkspace().name" placeholder="..."
+                                   ng-class="{'input-mydisable': !m_oController.m_bIsEditModelWorkspaceNameActive,'input-myenable': m_oController.m_bIsEditModelWorkspaceNameActive}"
+                                   ng-click="m_oController.editModelWorkspaceNameSetTrue()" style="height: 36px">
+                            <b class="cursor" ></b>
+
+                        </div>
+                    </div>
+                    <!------------------------------ USER ------------------------------>
+                    <div class="nav navbar-nav navbar-right user-container">
+                        <div class="dropdown">
+                            <div class="dropdown-toggle ml-4" type="button" id="dropdownMenuUser" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                                <img src="assets/icons/white-user-icon2.png" style="width: 26px" onmouseover="this.src='assets/icons/green-user-icon2.png';" onmouseout="this.src='assets/icons/white-user-icon2.png';" />
+                            </div>
+                            <ul class="dropdown-menu mt-3" aria-labelledby="dropdownMenuUser">
+                                <li role="presentation"  ng-click="m_oController.editUserInfo()" ><!--dropdown-header-->
+                                    <a role="menuitem" tabindex="-1">
+
+                                        <!--<span class="user-span">-->
+                                        <i class="fa fa-user-o fa-lg" aria-hidden="true"></i>
+                                        <span class="" ng-hide="m_oController.m_oUser.name === null">{{"ROOT_VIEW_LABEL_USER"|translate}} {{m_oController.m_oUser.name}}</span>
+                                        <span ng-show=" m_oController.m_oUser.name === null && m_oController.m_oUser.email !== null">{{"ROOT_VIEW_LABEL_USER"|translate}} {{m_oController.m_oUser.userId}}</span>
+                                        <!--</span>-->
+                                    </a>
+
+                                </li>
+
+                                <li role="presentation" class="divider"></li>
+
+                                <li role="presentation" class="disabled">
+                                    <a role="menuitem" tabindex="-1" href="" >
+                                        <i class="fa fa-info fa-lg" aria-hidden="true"></i>
+                                        <span>{{"ROOT_VIEW_LINK_HELP"|translate}}</span>
+                                    </a>
+                                </li>
+                                <li role="presentation">
+                                    <a role="menuitem" tabindex="-1" ng-click="m_oController.onClickLogOut()">
+                                        <i class="fa fa-sign-out fa-lg" aria-hidden="true"></i>
+                                        <span>{{"ROOT_VIEW_LINK_LOG_OUT"|translate}}</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <ul class="nav navbar-nav navbar-right">
+                        <!-- WORKSPACES BUTTON-->
+                        <li ng-class="{active:m_oController.activePageCss('root.workspaces')}">
+                            <a ui-sref="root.workspaces" ><i class="fa fa-list-ul" aria-hidden="true"></i>
+                                {{"ROOT_VIEW_NAV_BAR_LINK_WORKSPACES"|translate}}
+                            </a>
+                        </li>
+                        <!-- PLAN BUTTON-->
+                        <li ng-class="{active:m_oController.activePageCss('root.searchorbit')}"  > <!-- -->
+                            <a ng-click="m_oController.openSearchorbit()"  href="" > <!---->
+                                <i class="fa fa-calendar-o fa-lg" aria-hidden="true" ></i>
+                                {{"ROOT_VIEW_NAV_BAR_LINK_SEARCH"|translate}}
+                            </a>
+                        </li>
+                        <!-- SEARCH BUTTON-->
+                        <li   ng-class="{active:m_oController.activePageCss('root.import')}"    >
+                            <a ng-click="m_oController.openImportPage()" href=""   >
+                                <i class="fa fa-search fa-lg" aria-hidden="true"></i><!--ui-sref="root.import"-->
+                                {{"ROOT_VIEW_NAV_BAR_LINK_IMPORT"|translate}}
+                            </a>
+                        </li>
+                        <!-- EDITOR BUTTON-->
+                        <li ng-class="{active:m_oController.activePageCss('root.editor')}" ng-disabled="m_oController.disableEditorButton()" >
+                            <a ng-click="m_oController.onClickProcess();m_oController.openEditorPage()" href="" ng-style="{cursor:m_oController.cursorCss()}"  >
+                                <!--i class="fa fa-cogs fa-lg" aria-hidden="true"></i>-->
+                                <i class="fa fa-rocket fa-lg" aria-hidden="true"></i>
+                                {{"ROOT_VIEW_NAV_BAR_LINK_PROCESS"|translate}}
+                            </a>
+                        </li>
+                        <!-- CATALOGUE BUTTON-->
+                        <li ng-class="{active:m_oController.activePageCss('root.catalog')}"  >
+                            <a ng-click="m_oController.openCatalogPage()" href=""  >
+                                <i class="fa fa-database fa-lg" aria-hidden="true"></i>
+                                {{"ROOT_VIEW_NAV_BAR_LINK_CATALOG"|translate}}
+                            </a>
+                        </li>
+                    </ul>
+
+
+
+                </div>
+
+
+            </div>
+        </nav>
+    </div>
+</div>

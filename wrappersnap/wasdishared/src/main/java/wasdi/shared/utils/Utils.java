@@ -3,6 +3,7 @@ package wasdi.shared.utils;
 import wasdi.shared.business.UserSession;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -59,6 +60,9 @@ public class Utils {
         return  true;
     }
 
+    //FIXME it may not work as expected in the following case:
+    //the filename contains one or more dots ('.'):
+    //  /home/username/my.lovely.file.name.zip
     public static String GetFileNameWithoutExtension(String sInputFile) {
         String sReturn = "";
         File oFile = new File(sInputFile);
@@ -217,6 +221,29 @@ public class Utils {
 		String sCleanedArea = sArea.replaceAll("[POLYGN()]", "");
 		String[] asAreaPoints = sCleanedArea.split(",");
 		return asAreaPoints;
+	}
 
+	public static boolean doesThisStringMeansTrue(String sString) {
+		//default value is arbitrary!
+		if(isNullOrEmpty(sString)) {
+			return true;
+		} else if(sString.equalsIgnoreCase("true")) {
+			return true;
+		} else if(sString.equalsIgnoreCase("1")) {
+			return true;
+		}
+		return false;
+	}
+	
+	public static void printToFile(String sFilePath, String sToBePrinted) {
+		FileWriter oFileWeriter;
+		try {
+			oFileWeriter = new FileWriter(sFilePath);
+			oFileWeriter.write(sToBePrinted);
+			oFileWeriter.flush();
+			oFileWeriter.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 }

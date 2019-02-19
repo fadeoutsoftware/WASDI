@@ -17,6 +17,7 @@ import wasdi.shared.utils.Utils;
  */
 public class DiasQueryTranslatorONDA extends DiasQueryTranslator {
 	
+	//see issue #32
 	//TODO make a JSON file with query configuration
 	//TODO write the path of the JSON file in the configuration file (web.xml, filename read and passed from the server?)
 	
@@ -63,8 +64,13 @@ public class DiasQueryTranslatorONDA extends DiasQueryTranslator {
 		if(Utils.isNullOrEmpty(sInput)) {
 			return new String("");
 		}
-			
-		String sQuery = prepareQuery(sInput);
+		
+//		String sPrefixQuery = sInput.split("AND")[0];
+//		if(!Utils.isNullOrEmpty(sPrefixQuery)) {
+//			if()
+//		}
+		String sPreProcessed = sInput;
+		String sQuery = prepareQuery(sPreProcessed);
 		
 		String sResult = new String("");
 		String sTmp = "";
@@ -112,7 +118,8 @@ public class DiasQueryTranslatorONDA extends DiasQueryTranslator {
 		String sAdditional = parseAdditionalQuery(sQuery);
 		if(!Utils.isNullOrEmpty(sAdditional)) {
 			if(!Utils.isNullOrEmpty(sResult)) {
-				sResult += " OR ";
+				sResult = "( " + sResult + " ) AND ";
+				//sResult += " OR ";
 			}
 			sResult += sAdditional;
 		}

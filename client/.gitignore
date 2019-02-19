@@ -27,3 +27,4 @@ Thumbs.db
 *.css
 *.css.map
 **/secrets.js
+**/environment.js

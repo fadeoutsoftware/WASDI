@@ -167,10 +167,8 @@ public class ONDAProviderAdapter extends ProviderAdapter {
 		setProcessWorkspace(oProcessWorkspace);
 
 		if(sFileURL.startsWith("file:")) {
-			
+			//  file:/mnt/OPTICAL/LEVEL-1C/2018/12/12/S2B_MSIL1C_20181212T010259_N0207_R045_T54PZA_20181212T021706.zip/.value		
 			m_oLogger.debug("ONDAProviderAdapter.ExecuteDownloadFile: this is a \"file:\" protocol, get file name");
-			
-			//file:/mnt/OPTICAL/LEVEL-1C/2018/12/12/S2B_MSIL1C_20181212T010259_N0207_R045_T54PZA_20181212T021706.zip/.value
 			
 			String sPrefix = "file:";
 			// Remove the prefix
@@ -203,14 +201,23 @@ public class ONDAProviderAdapter extends ProviderAdapter {
 				
 				m_oLogger.debug("ONDAProviderAdapter.ExecuteDownloadFile: start copy stream");
 				
+				//TODO change method signature and check result: if it fails try https or retry if timeout
+				//MAYBE pass the entire pseudopath so that if one does not work, another one can be tried
 				copyStream(oProcessWorkspace, oSourceFile.length(), oInputStream, oOutputStream);
 
 			} catch (Exception e) {
 				m_oLogger.debug( "ONDAProviderAdapter.Exception: " + e.toString());
 			}
+			//TODO else - i.e., if it fails - try get the file from https instead
+			//	- in this case the sUrl must be modified in order to include http, so that it can be retrieved  
 			return sDestinationFileName;
 		} else if(sFileURL.startsWith("https://")) {
-			return downloadViaHttp(sFileURL, sDownloadUser, sDownloadPassword, sSaveDirOnServer);
+			//  https://catalogue.onda-dias.eu/dias-catalogue/Products(357ae76d-f1c4-4f25-b535-e278c3f937af)/$value
+			String sResult = downloadViaHttp(sFileURL, sDownloadUser, sDownloadPassword, sSaveDirOnServer);
+			//TODO else - i.e., if it fails - try get the file from the file system or retry if timeout
+			//  - in this case the sUrl must be modified in order to include file id, so that it can be retrieved			
+			return sResult;
+			
 
 		}
 		return "";
