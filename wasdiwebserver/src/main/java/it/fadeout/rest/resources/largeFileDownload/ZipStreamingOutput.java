@@ -71,7 +71,9 @@ public class ZipStreamingOutput implements StreamingOutput {
 					oZipOutputStream.putNextEntry(new ZipEntry(oZippedName));
 					oInputStream = new FileInputStream(oFileToZip);
 					long lCopiedBytes = 0;
-					if(oFileToZip.length()>2*1024*1024*1024) {
+					long lThreshold = 2L*1024*1024*1024;
+					long lSize = oFileToZip.length(); 
+					if(lSize > lThreshold) {
 						lCopiedBytes = IOUtils.copyLarge(oInputStream, oZipOutputStream);
 					} else {
 						//IOUtils.copy(oInputStream, oZipOutputStream, 16384);
