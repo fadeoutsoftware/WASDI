@@ -1328,13 +1328,18 @@ public class WasdiLib {
 	    HashMap<String, String> asHeaders = getStreamingHeaders();
 
 	    File oFile = new File(sFullPath);
+	    //la testUpload si basa su del codice trovato in internet vedi utils multipartUtility 
 //	    testUpload(sUrl,oFile);
+	    //httpPost metodo fatto da me per upload dei file (il codice commentanto all'inizio è preso da stackoverflow)
 	    httpPost(sUrl,oFile ,asHeaders);
-//	    httpGet(m_sBaseUrl + "/wasdi/hello",asHeaders);
+	    
+	    //hello world funziona
+//	    httpGet(m_sBaseUrl + "/wasdi/hello",asHeaders);  
 	}
 	
 	private void testUpload(String sUrl,File oFile)
 	{
+		//upload tramite libreria esterna
 		String charset = "UTF-8";
 		try {
 			MultipartUtility multipart = new MultipartUtility(sUrl, charset);
