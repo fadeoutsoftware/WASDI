@@ -3809,7 +3809,7 @@ var EditorController = (function () {
                                             }
                                         },
                                         // "_disabled": (!$node.original.band.bVisibleNow && !oController.isEnable2DZoomInTreeInEditorMode())
-                                        "_disabled": (!oController.isEnable2DZoomInTreeInEditorMode())
+                                        "_disabled": ( oController.isEnable2DZoomInTreeInEditorMode() && oController.isActiveEditorMode()=== true )
                                     },
                                     "Zoom3D" : {
                                         "label" : "Zoom Band 3D Map",
@@ -3819,7 +3819,7 @@ var EditorController = (function () {
                                             }
                                         },
                                         // "_disabled": (!$node.original.band.bVisibleNow && !oController.isEnable3DZoomInTreeInEditorMode())
-                                        "_disabled": (!oController.isEnable3DZoomInTreeInEditorMode())
+                                        "_disabled": (  oController.isEnable3DZoomInTreeInEditorMode() && oController.isActiveEditorMode()=== true )
                                     },
                                     "Properties": {
                                         "label": "Properties ",
