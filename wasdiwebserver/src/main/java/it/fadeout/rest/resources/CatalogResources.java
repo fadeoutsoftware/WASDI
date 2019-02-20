@@ -210,17 +210,21 @@ public class CatalogResources {
 			} else {
 				//InputStream oStream = null;
 				FileStreamingOutput oStream;
-				if(mustBeZipped(oFile)) {
+				boolean bMustZip = mustBeZipped(oFile); 
+				if(bMustZip) {
 					//oFile = getZippedFile(oFile);
 					//oStream = new FileInputStream(oFile);
+					Wasdi.DebugLog("CatalogResources.DownloadEntryByName: file " + oFile.getName() + "must be zipped");
 					return zipOnTheFlyAndStream(oFile);
 				} else {
+					Wasdi.DebugLog("CatalogResources.DownloadEntryByName: no need to zip file " + oFile.getName());
 					oStream = new FileStreamingOutput(oFile);
 					//oStream = new FileInputStream(oFile);
+					Wasdi.DebugLog("CatalogResources.DownloadEntryByName: file ok return content");
+					oResponseBuilder = Response.ok(oStream);
+					oResponseBuilder.header("Content-Disposition", "attachment; filename="+ oFile.getName());
+					oResponseBuilder.header("Content-Length", oFile.length());
 				}
-				Wasdi.DebugLog("CatalogResources.DownloadEntryByName: file ok return content");
-				oResponseBuilder = Response.ok(oStream);
-				oResponseBuilder.header("Content-Disposition", "attachment; filename="+ oFile.getName());
 			}
 			Wasdi.DebugLog("CatalogResources.DownloadEntryByName: done, return");
 			return oResponseBuilder.build();
@@ -372,6 +376,15 @@ public class CatalogResources {
 			String sFileName = oInitialFile.getName();
 			sFileName = sFileName.substring(0, sFileName.lastIndexOf(".dim") ) + ".zip";
 			oResponseBuilder.header("Content-Disposition", "attachment; filename=\""+ sFileName +"\"");
+			Long lLength = 0L;
+			for (String sFile : aoFileEntries.keySet()) {
+				File oTempFile = aoFileEntries.get(sFile);
+				if(!oTempFile.isDirectory()) {
+					//NOTE: this way we are cheating, it is an upper bound, not the real size!
+					lLength += oTempFile.length();
+				}
+			}
+			oResponseBuilder.header("Content-Length", lLength);
 			Wasdi.DebugLog("CatalogResources.zipOnTheFlyAndStream: return ");
 			return oResponseBuilder.build();
 		} catch (Exception e) {
