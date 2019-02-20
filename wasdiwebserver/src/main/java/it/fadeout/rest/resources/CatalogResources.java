@@ -1,12 +1,6 @@
 package it.fadeout.rest.resources;
 
-import java.io.BufferedOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -14,10 +8,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Stack;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
 
 import javax.servlet.ServletConfig;
 import javax.ws.rs.GET;
@@ -33,13 +24,10 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
-import javax.ws.rs.core.StreamingOutput;
-
-import org.apache.commons.io.IOUtils;
-
-import com.fasterxml.jackson.databind.util.ObjectBuffer;
 
 import it.fadeout.Wasdi;
+import it.fadeout.rest.resources.largeFileDownload.FileStreamingOutput;
+import it.fadeout.rest.resources.largeFileDownload.ZipStreamingOutput;
 import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.Catalog;
 import wasdi.shared.business.DownloadedFile;
@@ -210,17 +198,23 @@ public class CatalogResources {
 				Wasdi.DebugLog("CatalogResources.DownloadEntryByName: file not readable");
 				oResponseBuilder = Response.serverError();	
 			} else {
-				InputStream oStream = null;
-				if(mustBeZipped(oFile)) {
+				//InputStream oStream = null;
+				FileStreamingOutput oStream;
+				boolean bMustZip = mustBeZipped(oFile); 
+				if(bMustZip) {
 					//oFile = getZippedFile(oFile);
 					//oStream = new FileInputStream(oFile);
+					Wasdi.DebugLog("CatalogResources.DownloadEntryByName: file " + oFile.getName() + "must be zipped");
 					return zipOnTheFlyAndStream(oFile);
 				} else {
-					oStream = new FileInputStream(oFile);
+					Wasdi.DebugLog("CatalogResources.DownloadEntryByName: no need to zip file " + oFile.getName());
+					oStream = new FileStreamingOutput(oFile);
+					//oStream = new FileInputStream(oFile);
+					Wasdi.DebugLog("CatalogResources.DownloadEntryByName: file ok return content");
+					oResponseBuilder = Response.ok(oStream);
+					oResponseBuilder.header("Content-Disposition", "attachment; filename="+ oFile.getName());
+					oResponseBuilder.header("Content-Length", oFile.length());
 				}
-				Wasdi.DebugLog("CatalogResources.DownloadEntryByName: file ok return content");
-				oResponseBuilder = Response.ok(oStream);
-				oResponseBuilder.header("Content-Disposition", "attachment; filename="+ oFile.getName());
 			}
 			Wasdi.DebugLog("CatalogResources.DownloadEntryByName: done, return");
 			return oResponseBuilder.build();
@@ -277,93 +271,23 @@ public class CatalogResources {
 				aoFileEntries.put(sRelativePath,oFile);
 			}
 			Wasdi.DebugLog("CatalogResources.zipOnTheFlyAndStream: done preparing map, added " + aoFileEntries.size() + " files");
-
-			
-			StreamingOutput oStream = new StreamingOutput() {
-				@Override
-				public void write(OutputStream oOutputStream) throws IOException {
-					
-					Wasdi.DebugLog("CatalogResources.zipOnTheFlyAndStream::StreamingOutput.write");
-
-					BufferedOutputStream oBufferedOutputStream = new BufferedOutputStream(oOutputStream);
-					ZipOutputStream oZipOutputStream = new ZipOutputStream(oBufferedOutputStream);
-					//TODO try reducing the compression to increase speed
-					//oZipOutputStream.setLevel(level);
-					InputStream oInputStream = null;
-					try {
-						Set<String> oZippedFileNames = aoFileEntries.keySet();
-						int iTotalFiles = aoFileEntries.size();
-						int iDone = 0;
-						Wasdi.DebugLog("CatalogResources.zipOnTheFlyAndStream::StreamingOutput.write: begin");
-						for (String oZippedName : oZippedFileNames) {
-							iDone++;
-							Wasdi.DebugLog("CatalogResources.zipOnTheFlyAndStream::StreamingOutput.write: File: "+oZippedName);
-							File oFileToZip = aoFileEntries.get(oZippedName);
-							if(oFileToZip.isDirectory()) {
-								oZipOutputStream.putNextEntry(new ZipEntry(oZippedName));
-								oZipOutputStream.closeEntry();
-							} else {
-								oZipOutputStream.putNextEntry(new ZipEntry(oZippedName));
-								oInputStream = new FileInputStream(oFileToZip);
-//								long lCopiedBytes = IOUtils.copyLarge(oInputStream, oZipOutputStream);
-								//IOUtils.copy(oInputStream, oZipOutputStream, 16384);
-								//IOUtils.copy(oInputStream, oZipOutputStream);
-								//
-								//TODO try different buffer sizes
-								byte[] bytes = new byte[16384];
-								//byte[] bytes = new byte[1024];
-								int iLength = -1;
-								long lTotalLength = oFileToZip.length();
-								long lCumulativeLength = 0;
-								iLength = oInputStream.read(bytes);
-								//while ((iLength = oInputStream.read(bytes)) >= 0) {
-								while(iLength>=0) {
-									lCumulativeLength += iLength;
-									oZipOutputStream.write(bytes, 0, iLength);
-									oZipOutputStream.flush();
-									oBufferedOutputStream.flush();
-									oOutputStream.flush();
-									double dPerc = (double)lCumulativeLength / (double)lTotalLength;
-									dPerc = Math.floor(dPerc * 100.0) / 100.0;
-									//Wasdi.DebugLog("CatalogResources.zipOnTheFlyAndStream::StreamingOutput.write: File: "+oZippedName+": "+lCumulativeLength + " / " + lTotalLength + " = " + dPerc + "%");
-									iLength = oInputStream.read(bytes);
-								}
-								//
-
-								oZipOutputStream.closeEntry();
-								oInputStream.close();
-							}
-							Wasdi.DebugLog("CatalogResources.zipOnTheFlyAndStream::StreamingOutput.write: done file: "+oZippedName+" -> "+ iDone +" / " +iTotalFiles);
-						}
-						Wasdi.DebugLog("CatalogResources.zipOnTheFlyAndStream::StreamingOutput.write: done writing to zipstream");
-						//oZipOutputStream.flush();
-						oZipOutputStream.close();
-						Wasdi.DebugLog("CatalogResources.zipOnTheFlyAndStream::StreamingOutput.write: ZipOutputStream closed");
-					} catch (Exception e) {
-						Wasdi.DebugLog("CatalogResources.zipOnTheFlyAndStream::StreamingOutput.write: exception caught:");
-						Wasdi.DebugLog("CatalogResources.zipOnTheFlyAndStream::StreamingOutput.write: "+e.getMessage() );
-						e.printStackTrace();
-					} finally {
-						// Flush output
-						if( oOutputStream!=null ) {
-							oOutputStream.flush();
-							oOutputStream.close();
-							Wasdi.DebugLog("CatalogResources.zipOnTheFlyAndStream::StreamingOutput.write: OutputStream closed");
-						}
-						// Close input
-						if( oInputStream !=null ) {
-							oInputStream.close();
-							Wasdi.DebugLog("CatalogResources.zipOnTheFlyAndStream::StreamingOutput.write: InputStream closed");
-						}
-					}
-				}
-			};
+						
+			ZipStreamingOutput oStream = new ZipStreamingOutput(aoFileEntries);
 
 			// Set response headers and return 
 			ResponseBuilder oResponseBuilder = Response.ok(oStream);
 			String sFileName = oInitialFile.getName();
 			sFileName = sFileName.substring(0, sFileName.lastIndexOf(".dim") ) + ".zip";
 			oResponseBuilder.header("Content-Disposition", "attachment; filename=\""+ sFileName +"\"");
+			Long lLength = 0L;
+			for (String sFile : aoFileEntries.keySet()) {
+				File oTempFile = aoFileEntries.get(sFile);
+				if(!oTempFile.isDirectory()) {
+					//NOTE: this way we are cheating, it is an upper bound, not the real size!
+					lLength += oTempFile.length();
+				}
+			}
+			oResponseBuilder.header("Content-Length", lLength);
 			Wasdi.DebugLog("CatalogResources.zipOnTheFlyAndStream: return ");
 			return oResponseBuilder.build();
 		} catch (Exception e) {
