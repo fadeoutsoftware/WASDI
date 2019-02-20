@@ -17,10 +17,10 @@ import com.vividsolutions.jts.geom.Polygon;
 import wasdi.ConfigReader;
 import wasdi.filebuffer.ProviderAdapter;
 import wasdi.filebuffer.ProviderAdapterSupplier;
-import wasdi.shared.opensearch.AuthenticationCredentials;
 import wasdi.shared.opensearch.PaginatedQuery;
 import wasdi.shared.opensearch.QueryExecutor;
 import wasdi.shared.opensearch.QueryExecutorFactory;
+import wasdi.shared.utils.AuthenticationCredentials;
 import wasdi.shared.viewmodels.QueryResultViewModel;
 
 
