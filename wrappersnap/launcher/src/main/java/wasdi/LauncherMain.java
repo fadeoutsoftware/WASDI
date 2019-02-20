@@ -331,11 +331,8 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			}
 			break;
 			case FTPUPLOAD: {
-				s_oLogger.debug("ExecuteOperation: UPLOADVIAFT case: load parameters");
 				FtpUploadParameters oFtpTransferParameters = (FtpUploadParameters) SerializationUtils.deserializeXMLToObject(sParameter);
-				s_oLogger.debug("ExecuteOperation: UPLOADVIAFT case: try ftp transfer");
 				ftpTransfer(oFtpTransferParameters);
-				s_oLogger.debug("ExecuteOperation: UPLOADVIAFT case: done");
 			}
 			break;
 			case PUBLISHBAND: {
@@ -393,14 +390,12 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			break;
 			case DEPLOYPROCESSOR: {
 				DeployProcessorParameter oParameter = (DeployProcessorParameter) SerializationUtils.deserializeXMLToObject(sParameter);
-
 				WasdiProcessorEngine oEngine = WasdiProcessorEngine.GetProcessorEngine(oParameter.getProcessorType(), ConfigReader.getPropValue("DOWNLOAD_ROOT_PATH"), ConfigReader.getPropValue("DOCKER_TEMPLATE_PATH"));
 				oEngine.DeployProcessor(oParameter);
 			}
 			break;
 			case RUNPROCESSOR: {
 				DeployProcessorParameter oParameter = (DeployProcessorParameter) SerializationUtils.deserializeXMLToObject(sParameter);
-
 				WasdiProcessorEngine oEngine = WasdiProcessorEngine.GetProcessorEngine(oParameter.getProcessorType(), ConfigReader.getPropValue("DOWNLOAD_ROOT_PATH"), ConfigReader.getPropValue("DOCKER_TEMPLATE_PATH"));
 				oEngine.run(oParameter);
 			}
