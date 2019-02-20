@@ -14,47 +14,49 @@ import wasdi.shared.parameters.BaseParameter;
  */
 public class WpsParameters extends BaseParameter {
 
-	private String sWpsProvider;
-	private String sXmlPayload;
-	private String sWpsOperationName;
-	private String sWpsProcessIdOnRemoteService;
-	private String sUsername;
-	private String sPassword;
+	private String wpsProvider;
+	private String xmlPayload;
+	private String wpsOperationName;
+	private String wpsProcessIdOnRemoteService;
+	private String username;
+	private String password;
 	
-	public String getsWpsProvider() {
-		return sWpsProvider;
+	public String getWpsProvider() {
+		return wpsProvider;
 	}
-	public void setsWpsProvider(String sWpsProvider) {
-		this.sWpsProvider = sWpsProvider;
+	public void setWpsProvider(String wpsProvider) {
+		this.wpsProvider = wpsProvider;
 	}
-	public String getsXmlPayload() {
-		return sXmlPayload;
+	public String getXmlPayload() {
+		return xmlPayload;
 	}
-	public void setsXmlPayload(String sXmlPayload) {
-		this.sXmlPayload = sXmlPayload;
+	public void setXmlPayload(String xmlPayload) {
+		this.xmlPayload = xmlPayload;
 	}
-	public String getsWpsOperationName() {
-		return sWpsOperationName;
+	public String getWpsOperationName() {
+		return wpsOperationName;
 	}
-	public void setsWpsOperationName(String sWpsOperationName) {
-		this.sWpsOperationName = sWpsOperationName;
+	public void setWpsOperationName(String wpsOperationName) {
+		this.wpsOperationName = wpsOperationName;
 	}
-	public String getsWpsProcessIdOnRemoteService() {
-		return sWpsProcessIdOnRemoteService;
+	public String getWpsProcessIdOnRemoteService() {
+		return wpsProcessIdOnRemoteService;
 	}
-	public void setsWpsProcessIdOnRemoteService(String sWpsProcessIdOnRemoteService) {
-		this.sWpsProcessIdOnRemoteService = sWpsProcessIdOnRemoteService;
+	public void setWpsProcessIdOnRemoteService(String wpsProcessIdOnRemoteService) {
+		this.wpsProcessIdOnRemoteService = wpsProcessIdOnRemoteService;
 	}
-	public String getsUsername() {
-		return sUsername;
+	public String getUsername() {
+		return username;
 	}
-	public void setsUsername(String sUsername) {
-		this.sUsername = sUsername;
+	public void setUsername(String username) {
+		this.username = username;
 	}
-	public String getsPassword() {
-		return sPassword;
+	public String getPassword() {
+		return password;
 	}
-	public void setsPassword(String sPassword) {
-		this.sPassword = sPassword;
+	public void setPassword(String password) {
+		this.password = password;
 	}
+	
+	
 }
