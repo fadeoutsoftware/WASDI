@@ -22,5 +22,6 @@ public enum LauncherOperations {
     DEPLOYPROCESSOR,
     RUNPROCESSOR,
     RUNIDL,
-    RUNMATLAB
+    RUNMATLAB,
+    WPS
 }
