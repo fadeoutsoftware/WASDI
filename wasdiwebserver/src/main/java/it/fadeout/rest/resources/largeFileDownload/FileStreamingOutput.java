@@ -28,6 +28,7 @@ public class FileStreamingOutput implements StreamingOutput {
 	final File m_oFile;
 
 	public FileStreamingOutput(File oFile){
+		Wasdi.DebugLog("FileStreamingOutput.FileStreamingOutput");
 		if(null==oFile) {
 			throw new NullPointerException("FileStreamingOutput.FileStreamingOutput: passed a null File");
 		}
@@ -39,6 +40,7 @@ public class FileStreamingOutput implements StreamingOutput {
 	 */
 	@Override
 	public void write(OutputStream oOutputStream) throws IOException, WebApplicationException {
+		Wasdi.DebugLog("FileStreamingOutput.write");
 		if(null == oOutputStream) {
 			throw new NullPointerException("FileStreamingOutput.write: passed a null OutputStream");
 		}
@@ -53,7 +55,7 @@ public class FileStreamingOutput implements StreamingOutput {
 			} else {
 				lCopiedBytes = IOUtils.copy(oInputStream, oOutputStream);
 			}
-			Wasdi.DebugLog("ZipStreamingOutput.write: "+ m_oFile.getName()+": copied "+lCopiedBytes+" B out of " + m_oFile.length() );
+			Wasdi.DebugLog("FileStreamingOutput.write: "+ m_oFile.getName()+": copied "+lCopiedBytes+" B out of " + m_oFile.length() );
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {
@@ -61,12 +63,12 @@ public class FileStreamingOutput implements StreamingOutput {
 			if( oOutputStream!=null ) {
 				oOutputStream.flush();
 				oOutputStream.close();
-				Wasdi.DebugLog("ZipStreamingOutput.write: OutputStream closed");
+				Wasdi.DebugLog("FileStreamingOutput.write: OutputStream closed");
 			}
 			// Close input
 			if( oInputStream !=null ) {
 				oInputStream.close();
-				Wasdi.DebugLog("ZipStreamingOutput.write: InputStream closed");
+				Wasdi.DebugLog("FileStreamingOutput.write: InputStream closed");
 			}
 		}
 	}
