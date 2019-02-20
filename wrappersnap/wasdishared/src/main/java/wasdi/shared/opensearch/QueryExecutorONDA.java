@@ -75,12 +75,57 @@ public class QueryExecutorONDA extends QueryExecutor {
 		if(null==oQuery) {
 			System.out.println("QueryExecutorONDA.buildUrl: oQuery is null");
 		}
-		String sUrl = "https://catalogue.onda-dias.eu/dias-catalogue/Products?$search=%22";
-		sUrl+=m_oQueryTranslator.translateAndEncode(oQuery.getQuery());
-		//TODO don't use hardcoded values
-		sUrl+="%22&$top=" + oQuery.getLimit() + "&$skip="+ oQuery.getOffset() +"&$format=json"+ "&$orderby=creationDate";
+		String sUrl = buildUrlPrefix(oQuery);		
+		
+		String sMetadata = "$expand=Metadata";
+		if(!Utils.isNullOrEmpty(sMetadata)) {
+			sUrl += "&" + sMetadata;
+		}
+		sUrl = buildUrlSuffix(oQuery, sUrl);
 		return sUrl;
 	}
+	
+	private String buildUrlForList(PaginatedQuery oQuery) {
+		System.out.println("QueryExecutorONDA.buildUrlForList");
+		if(null==oQuery) {
+			System.out.println("QueryExecutorONDA.buildUrlForList: oQuery is null");
+		}
+		String sUrl = buildUrlPrefix(oQuery);
+		
+		sUrl += "&$select=id,name,creationDate,beginPosition,offline,size,pseudopath,footprint";
+		
+		sUrl = buildUrlSuffix(oQuery, sUrl);
+		return sUrl;
+	}
+	
+	private String buildUrlPrefix(PaginatedQuery oQuery) {
+		System.out.println("QueryExecutorONDA.BuildBaseUrl");
+		if(null==oQuery) {
+			throw new NullPointerException("QueryExecutorONDA.buildBaseUrl: oQuery is null");
+		}
+		String sUrl = "https://catalogue.onda-dias.eu/dias-catalogue/Products?$search=%22";
+		sUrl+=m_oQueryTranslator.translateAndEncode(oQuery.getQuery()) + "%22";
+		return sUrl;
+	}
+	
+	protected String buildUrlSuffix(PaginatedQuery oQuery, String sInUrl) {
+		String sUrl = sInUrl;
+		sUrl+="&$top=" + oQuery.getLimit() + "&$skip="+ oQuery.getOffset();
+		
+		String sFormat = "$format=json";
+		if(!Utils.isNullOrEmpty(sFormat)) {
+			sUrl += "&" + sFormat;
+		}
+		
+		String sOrderBy = oQuery.getSortedBy();
+		//TODO do not use hardcoded values
+		sOrderBy = "$orderby=creationDate";
+		if(!Utils.isNullOrEmpty(sOrderBy)) {
+			sUrl += "&" + sOrderBy;
+		}
+		return sUrl;
+	}
+
 	
 	@Override
 	public int executeCount(String sQuery) throws IOException {
@@ -160,7 +205,12 @@ public class QueryExecutorONDA extends QueryExecutor {
 	@Override
 	public ArrayList<QueryResultViewModel> executeAndRetrieve(PaginatedQuery oQuery, boolean bFullViewModel) throws IOException {
 		System.out.println("QueryExecutorONDA.executeAndRetrieve(2 args)");
-		String sUrl = buildUrl(oQuery);
+		String sUrl = null;
+		if(bFullViewModel) {
+			sUrl = buildUrl(oQuery);
+		} else {
+			sUrl = buildUrlForList(oQuery);
+		}
 		String sResult = httpGetResults(sUrl);		
 		ArrayList<QueryResultViewModel> aoResult = null;
 		if(sResult!= null) {
@@ -171,7 +221,8 @@ public class QueryExecutorONDA extends QueryExecutor {
 		}
 		return aoResult;
 	}
-	
+
+
 	@Override
 	public ArrayList<QueryResultViewModel> executeAndRetrieve(PaginatedQuery oQuery_AssumeFullviewModel) throws IOException {
 		System.out.println("QueryExecutorONDA.executeAndRetrieve(1 arg)");
@@ -199,29 +250,30 @@ public class QueryExecutorONDA extends QueryExecutor {
 						JSONObject oOndaEntry = (JSONObject)(oObject);
 						if(!bFullViewModel) {
 							String sQuicklook = oOndaEntry.optString("quicklook");
-							if(null!=sQuicklook) {
+							if(!Utils.isNullOrEmpty(sQuicklook)) {
 								oOndaEntry.put("quicklook", (String)null);
 							}
 						}
 						oOndaFullEntry.put(sEntryKey, oOndaEntry);
 
-						String sId = oOndaEntry.optString("id");
-						if(null!=sId) {
-							String sBaseUrl = "https://catalogue.onda-dias.eu/dias-catalogue/Products(";
-							sBaseUrl += sId;
-							sBaseUrl += ")";
-							String sFormat = "?$format=json";
-
-							//XXX is it possible to query metadata for all products at once, instead of performing a call each time?
-							String sMetadataUrl = sBaseUrl + "/Metadata" + sFormat;
-							if(m_bMustCollectMetadata && bFullViewModel) {
-								String sMetadataJson = httpGetResults(sMetadataUrl);
-								if(null!=sMetadataJson) {
-									JSONObject oMetadata = new JSONObject(sMetadataJson);
-									oOndaFullEntry.put("metadata", oMetadata);
-								}
-							}
-						}
+						//TODO remove, metadata are already downloaded
+//						String sId = oOndaEntry.optString("id");
+//						if(null!=sId) {
+//							String sBaseUrl = "https://catalogue.onda-dias.eu/dias-catalogue/Products(";
+//							sBaseUrl += sId;
+//							sBaseUrl += ")";
+//							String sFormat = "?$format=json";
+//
+//							//XXX is it possible to query metadata for all products at once, instead of performing a call each time?
+//							String sMetadataUrl = sBaseUrl + "/Metadata" + sFormat;
+//							if(m_bMustCollectMetadata && bFullViewModel) {
+//								String sMetadataJson = httpGetResults(sMetadataUrl);
+//								if(null!=sMetadataJson) {
+//									JSONObject oMetadata = new JSONObject(sMetadataJson);
+//									oOndaFullEntry.put("metadata", oMetadata);
+//								}
+//							}
+//						}
 						QueryResultViewModel oRes = m_oResponseTranslator.translate(oOndaFullEntry, m_sDownloadProtocol);
 						aoResult.add(oRes);
 					}
