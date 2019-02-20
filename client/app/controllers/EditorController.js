@@ -30,7 +30,7 @@ var EditorController = (function () {
         this.m_b2DMapModeOn = true;
         // Flag to know if the big map is the Geographical Mode (true) or in the Editor Mode (false)
         this.m_bIsActiveGeoraphicalMode = false;
-            
+
         this.m_bIsLoadingColourManipulation = false;
         this.m_bIsLoadingTree = true;
         this.m_sToolTipBtnSwitchGeographic = "EDITOR_TOOLTIP_TO_GEO";
@@ -251,9 +251,16 @@ var EditorController = (function () {
                     },
                     {
                         name:"",//JRC Processor
-                        caption_i18n : "EDITOR_OPERATION_TITLE_JRC_PROCESSOR",
+                        caption_i18n : "EDITOR_OPERATION_TITLE_JRC_WORKFLOW",
                         subMenu:[],
-                        onClick: this.openJRCProcessorDialog,
+                        onClick: this.openJRCWorkflowDialog,
+                        icon:"fa fa-lg fa-file-code-o"
+                    },
+                    {
+                        name:"",//JRC Processor
+                        caption_i18n : "EDITOR_OPERATION_TITLE_JRC_CLASSIFICATION",
+                        subMenu:[],
+                        onClick: this.openJRCClassificationDialog,
                         icon:"fa fa-lg fa-file-code-o"
                     },
                     {
@@ -319,7 +326,7 @@ var EditorController = (function () {
                 ]
             }
         ]
-        
+
         this.translateToolbarMenuList(this.m_aoNavBarMenu);
     };
 
@@ -2443,7 +2450,7 @@ var EditorController = (function () {
         });
     };
 
-    EditorController.prototype.openJRCProcessorDialog = function(oWindow)
+    EditorController.prototype.openJRCClassificationDialog = function(oWindow)
     {
         var oController;
         if(utilsIsObjectNullOrUndefined(oWindow) === true)
@@ -2456,8 +2463,39 @@ var EditorController = (function () {
         }
 
         oController.m_oModalService.showModal({
-            templateUrl: "dialogs/JRC_processor/JRCProcessorView.html",
-            controller: "JRCProcessorController",
+            templateUrl: "dialogs/JRC_classification/JRCClassificationView.html",
+            controller: "JRCClassificationController",
+            inputs: {
+                extras: {
+                    products:oController.m_aoProducts,
+                }
+            }
+        }).then(function (modal) {
+            modal.element.modal();
+            modal.close.then(function(oResult){
+
+            });
+        });
+    };
+    /**
+     *
+     * @param oWindow
+     */
+    EditorController.prototype.openJRCWorkflowDialog = function(oWindow)
+    {
+        var oController;
+        if(utilsIsObjectNullOrUndefined(oWindow) === true)
+        {
+            oController = this;
+        }
+        else
+        {
+            oController = oWindow;
+        }
+
+        oController.m_oModalService.showModal({
+            templateUrl: "dialogs/JRC_workflow/JRCWorkflowView.html",
+            controller: "JRCWorkflowController",
             inputs: {
                 extras: {
                     products:oController.m_aoProducts,
@@ -3770,7 +3808,8 @@ var EditorController = (function () {
                                                 oController.m_oMapService.zoomBandImageOnGeoserverBoundingBox(oBand.geoserverBoundingBox);
                                             }
                                         },
-                                        "_disabled": !$node.original.band.bVisibleNow
+                                        // "_disabled": (!$node.original.band.bVisibleNow && !oController.isEnable2DZoomInTreeInEditorMode())
+                                        "_disabled": (!oController.isEnable2DZoomInTreeInEditorMode())
                                     },
                                     "Zoom3D" : {
                                         "label" : "Zoom Band 3D Map",
@@ -3779,7 +3818,8 @@ var EditorController = (function () {
                                                 oController.m_oGlobeService.zoomBandImageOnBBOX(oBand.bbox);
                                             }
                                         },
-                                        "_disabled": !$node.original.band.bVisibleNow
+                                        // "_disabled": (!$node.original.band.bVisibleNow && !oController.isEnable3DZoomInTreeInEditorMode())
+                                        "_disabled": (!oController.isEnable3DZoomInTreeInEditorMode())
                                     },
                                     "Properties": {
                                         "label": "Properties ",
@@ -4181,6 +4221,26 @@ var EditorController = (function () {
         return oSelectedProduct;
 
     };
+
+    EditorController.prototype.isEnable2DZoomInTreeInEditorMode = function(){
+       if(this.isActiveEditorMode() )
+       {
+           return this.m_b2DMapModeOn;
+       }
+        return false;
+    };
+
+    EditorController.prototype.isEnable3DZoomInTreeInEditorMode= function(){
+        if(this.isActiveEditorMode() )
+        {
+            return !this.m_b2DMapModeOn;
+        }
+        return false;
+    };
+    EditorController.prototype.isActiveEditorMode = function()
+    {
+        return this.m_bIsActiveGeoraphicalMode === false;
+    }
     EditorController.$inject = [
         '$scope',
         '$location',

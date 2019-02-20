@@ -213,9 +213,10 @@ wasdiApp.controller("OperaWappController", OperaWappController);
 wasdiApp.controller("EditUserController", EditUserController);
 wasdiApp.controller("FTPController", FTPController);
 wasdiApp.controller("ListFloodAreaDetectionController", ListFloodAreaDetectionController);
-wasdiApp.controller("JRCProcessorController", JRCProcessorController);
+wasdiApp.controller("JRCWorkflowController", JRCWorkflowController);
 
 wasdiApp.controller(UploadFileController.REG_NAME, UploadFileController);
+wasdiApp.controller(JRCClassificationController.REG_NAME, JRCClassificationController);
 wasdiApp.controller(ImageEditorController.REG_NAME, ImageEditorController);
 
 
