@@ -92,8 +92,8 @@ service('SnapOperationService', ['$http',  'ConstantsService', function ($http, 
         sUrl = sUrl.replace("{sOperation}", sOperation);
         return this.m_oHttp.post(sUrl,oOptionsInput,oConfig);
     };
-    
-    
+
+
     this.runSaba = function (sFile, sWorkspaceId) {
         return this.m_oHttp.get(this.APIURL + '/processing/saba?file=' + sFile + "&workspaceId=" + sWorkspaceId);
     }
@@ -110,8 +110,11 @@ service('SnapOperationService', ['$http',  'ConstantsService', function ($http, 
         return this.m_oHttp.post(this.APIURL + '/processing/asynchlistflood?workspaceId='+sWorkspaceId ,oListFlood);
     };
 
-    this.runJRCProcessor = function (oJRC,sWorkspaceId) {
+    this.runJRCWorkflow = function (oJRC,sWorkspaceId) {
         return this.m_oHttp.post(this.APIURL + '/processing/asynchjrctest?workspaceId='+sWorkspaceId ,oJRC);
+    };
+    this.runJRCClassification = function (oJRC,sWorkspaceId) {
+        return this.m_oHttp.post(this.APIURL + '/processing/asynchjrctest2?workspaceId='+sWorkspaceId ,oJRC);
     };
 
 

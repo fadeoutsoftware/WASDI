@@ -1,0 +1,104 @@
+<div class="modal fade jrc-classification">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <!-- HEADER -->
+            <div class=" modal-header">
+                <button type="button" class="close" ng-click="close(null)" data-dismiss="modal" aria-hidden="true">&times;</button>
+
+                JRC Classification
+
+            </div>
+            <!-- BODY -->
+            <div class="modal-body my-input-text ">
+                <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                    <div class="row">
+
+                        <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4 ">
+                            <img class="logo-container-partner" src="assets/wasdi/FadeoutLogo.png" ng-click="m_oController.redirectToWebSite()">
+                        </div>
+
+                        <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
+                            <img class="logo-container-partner" src="assets/JRCProcessor/logo-jrc2.png" ng-click="m_oController.redirectToWebSite()">
+                        </div>
+
+                        <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4 ">
+                            <img class="logo-container-partner" src="assets/wasdi/logoCima.png" ng-click="m_oController.redirectToWebSite()">
+                        </div>
+
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
+                        Input File:
+                    </div>
+                    <div class="col-xs-9 col-sm-9 col-md-9 col-lg-9">
+                        <!--<multiselect options="m_oController.m_asProductsName" selected="m_oController.m_asSelectedProducts"></multiselect>-->
+
+                        <div class="dropdown my-dropdown">
+                            <button class="btn btn-default dropdown-toggle" type="button" id="dropdownJRCProcessorProduct"
+                                    data-toggle="dropdown">
+                                {{m_oController.m_oSelectedReferenceProduct.name}}
+                                <span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownJRCProcessorProduct">
+                                <li role="presentation" ng-repeat="product in m_oController.m_aoProduct" >
+                                    <a role="menuitem" tabindex="-1" href="" ng-click="m_oController.m_oSelectedReferenceProduct = product">
+                                        {{product.name}}
+                                    </a>
+                                </li>
+
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
+                        GLC
+                    </div>
+                    <div class="col-xs-9 col-sm-9 col-md-9 col-lg-9">
+                        <input type="text" name="name"  class="form-control" value="" title="" ng-model="m_oController.m_sEPSG">
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
+                        LANDSATGHSL
+                    </div>
+                    <div class="col-xs-9 col-sm-9 col-md-9 col-lg-9">
+                        <input type="text" name="name"  class="form-control" value="" title="" ng-model="m_oController.m_sOutputFile">
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
+                        Preprocess
+                    </div>
+                    <div class="col-xs-9 col-sm-9 col-md-9 col-lg-9">
+                        <input type="text" name="name"  class="form-control" value="" title="" ng-model="m_oController.m_sPreprocess">
+                    </div>
+                </div>
+
+
+            </div>
+
+            <!-- FOOTER -->
+            <div class="modal-footer">
+                <button type="button" ng-click="close(null)" class="my-button" data-dismiss="modal">
+                    {{"DIALOG_JRCTEST_CLOSE"|translate}}
+                </button>
+                <!--<button type="button" ng-click="add(null)" class="my-button" ng-disabled="m_oController.isEmptyListOfFilters()" data-dismiss="modal">-->
+                    <!--{{"DIALOG_CRONOTAB_OK_BUTTON"|translate}}-->
+                <!--</button>      -->
+
+                <button type="button" ng-click="m_oController.runJrcProcessor();close(null);" class="my-button"  data-dismiss="modal">
+                    {{"DIALOG_JRCTEST_RUN"|translate}}
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
