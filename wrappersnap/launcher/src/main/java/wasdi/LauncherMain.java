@@ -415,6 +415,11 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 				executeMATLABProcessor(oParameter);
 			}
 			break;
+			case WPS:{
+				WpsParameters oParam = (WpsParameters) SerializationUtils.deserializeXMLToObject(sParameter);
+				executeWPS(oParam);
+			}
+			break;
 			default:
 				s_oLogger.debug("Operation Not Recognized. Nothing to do");
 				break;
@@ -427,6 +432,11 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 		}
 
 		s_oLogger.debug("Launcher did his job. Bye bye, see you soon.");
+	}
+
+	private void executeWPS(WpsParameters oParam) {
+		// TODO Auto-generated method stub
+		
 	}
 
 	public void ExecuteGraph(GraphParameter params) throws Exception {
