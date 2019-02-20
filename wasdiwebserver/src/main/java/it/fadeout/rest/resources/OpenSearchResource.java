@@ -391,7 +391,7 @@ public class OpenSearchResource {
 				while (iObtainedResults < iTotalResultsForProviders) {
 
 					String sActualOffset = "" + iObtainedResults;
-					// NOTE: This limit should be a Provider Parameter
+					// TODO This limit should be a Provider Parameter
 					int iLimit = 100;
 
 					if ((iTotalResultsForProviders - iObtainedResults) < iLimit) {
