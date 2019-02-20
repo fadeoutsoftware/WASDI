@@ -453,7 +453,8 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 		ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
 		ProcessWorkspace oProcessWorkspace = oProcessWorkspaceRepository.GetProcessByProcessObjId(oParameter.getProcessObjId());
 		
-		WpsFactory oWpsSupplier = new WpsFactory(oParameter.getsWpsProvider());
+		WpsFactory oWpsFactory = new WpsFactory(oParameter.getWpsProvider() );
+		oWpsFactory.supply(oParameter.getWpsProvider());
 	}
 	
 	/**
