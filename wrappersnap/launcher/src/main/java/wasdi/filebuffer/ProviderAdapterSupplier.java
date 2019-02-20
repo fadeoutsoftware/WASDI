@@ -39,6 +39,8 @@ public class ProviderAdapterSupplier {
 			if(oSupplier != null ) {
 				oResult = oSupplier.get();
 			}
+		} else {
+			throw new NullPointerException("ProviderAdapterSupplier.supplyProviderAdapter: passed a null string");
 		}
 
 		return oResult;
