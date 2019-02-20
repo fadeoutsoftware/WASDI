@@ -32,6 +32,7 @@ public class ZipStreamingOutput implements StreamingOutput {
 	final Map<String,File> m_aoFileEntries;
 
 	public ZipStreamingOutput(Map<String,File> aoInitMap) {
+		Wasdi.DebugLog("ZipStreamingOutput.ZipStreamingOutput");
 		if(null==aoInitMap) {
 			throw new NullPointerException("ZipStreamingOutput.ZipStreamingOutput: passed a null Map");
 		}
