@@ -97,6 +97,7 @@ import wasdi.snapopearations.ReadProduct;
 import wasdi.snapopearations.TerrainCorrection;
 import wasdi.snapopearations.WasdiGraph;
 import wasdi.snapopearations.WriteProduct;
+import wasdi.wps.WpsFactory;
 
 
 
@@ -411,8 +412,8 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			}
 			break;
 			case WPS:{
-				WpsParameters oParam = (WpsParameters) SerializationUtils.deserializeXMLToObject(sParameter);
-				executeWPS(oParam);
+				WpsParameters oParameter = (WpsParameters) SerializationUtils.deserializeXMLToObject(sParameter);
+				executeWPS(oParameter);
 			}
 			break;
 			default:
@@ -427,11 +428,6 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 		}
 
 		s_oLogger.debug("Launcher did his job. Bye bye, see you soon.");
-	}
-
-	private void executeWPS(WpsParameters oParam) {
-		// TODO Auto-generated method stub
-		
 	}
 
 	public void ExecuteGraph(GraphParameter params) throws Exception {
@@ -452,6 +448,14 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 		}
 	}
 
+	private void executeWPS(WpsParameters oParameter) {
+		s_oLogger.debug("ExecuteWPS");
+		ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
+		ProcessWorkspace oProcessWorkspace = oProcessWorkspaceRepository.GetProcessByProcessObjId(oParameter.getProcessObjId());
+		
+		WpsFactory oWpsSupplier = new WpsFactory(oParameter.getsWpsProvider());
+	}
+	
 	/**
 	 * Downloads a new product
 	 * @param oParameter
