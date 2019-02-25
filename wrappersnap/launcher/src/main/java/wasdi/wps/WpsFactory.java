@@ -23,7 +23,9 @@ public class WpsFactory {
 	static {
 		System.out.println("WpsFactory static constructor");
 		final Map<String, Supplier<WpsExecutionClient>> aoWpsSuppliers = new HashMap<>();
-		//TODO populate
+		aoWpsSuppliers.put("wasdi", WasdiWpsExecutionclient::new);
+		//TODO add gpod
+		//TODO add utep
 		s_aoWpsSuppliers = Collections.unmodifiableMap(aoWpsSuppliers);
 	}
 	

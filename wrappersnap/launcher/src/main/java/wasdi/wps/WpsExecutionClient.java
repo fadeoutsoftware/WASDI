@@ -6,9 +6,17 @@
  */
 package wasdi.wps;
 
+
 /**
  * @author c.nattero
  *
  */
-public class WpsExecutionClient {
+public abstract class WpsExecutionClient {
+	
+	protected String m_sWpsHost;
+	
+	 
+	public abstract int execute();
+	//TODO getStatus
+	//TODO getResult
 }
