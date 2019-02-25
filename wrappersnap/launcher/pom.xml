@@ -182,6 +182,11 @@
 		</dependency>
 		<dependency>
 			<groupId>org.esa.s2tbx</groupId>
+			<artifactId>s2tbx-mosaic</artifactId>
+			<version>6.0.2</version>
+		</dependency>
+		<dependency>
+			<groupId>org.esa.s2tbx</groupId>
 			<artifactId>s2tbx-cache</artifactId>
 			<version>6.0.2</version>
 		</dependency>

@@ -1,0 +1,134 @@
+package wasdi.shared.parameters;
+
+import java.util.ArrayList;
+
+public class MosaicSetting implements ISetting{
+
+	String crs = "GEOGCS[\"WGS84(DD)\", \r\n" + 
+    		"		  DATUM[\"WGS84\", \r\n" + 
+    		"			SPHEROID[\"WGS84\", 6378137.0, 298.257223563]], \r\n" + 
+    		"		  PRIMEM[\"Greenwich\", 0.0], \r\n" + 
+    		"		  UNIT[\"degree\", 0.017453292519943295], \r\n" + 
+    		"		  AXIS[\"Geodetic longitude\", EAST], \r\n" + 
+    		"		  AXIS[\"Geodetic latitude\", NORTH]]";
+	double southBound = -1.0;
+	double eastBound = -1.0;
+	double westBound = -1.0;
+	double northBound = -1.0;
+	double pixelSizeX = -1.0;
+	double pixelSizeY = -1.0;
+	String overlappingMethod = "MOSAIC_TYPE_OVERLAY";
+	Boolean showSourceProducts = false;
+	String elevationModelName = "ASTER 1sec GDEM";
+	String resamplingName = "Nearest";
+	Boolean updateMode = false;
+	Boolean nativeResolution = true;
+	String combine = "OR";
+	
+	ArrayList<String> sources = new ArrayList<>();
+	ArrayList<String> variableNames = new ArrayList<>();
+	ArrayList<String> variableExpressions = new ArrayList<>();
+	
+	public String getCrs() {
+		return crs;
+	}
+	public void setCrs(String crs) {
+		this.crs = crs;
+	}
+	public double getSouthBound() {
+		return southBound;
+	}
+	public void setSouthBound(double southBound) {
+		this.southBound = southBound;
+	}
+	public double getEastBound() {
+		return eastBound;
+	}
+	public void setEastBound(double eastBound) {
+		this.eastBound = eastBound;
+	}
+	public double getWestBound() {
+		return westBound;
+	}
+	public void setWestBound(double westBound) {
+		this.westBound = westBound;
+	}
+	public double getNorthBound() {
+		return northBound;
+	}
+	public void setNorthBound(double northBound) {
+		this.northBound = northBound;
+	}
+	public double getPixelSizeX() {
+		return pixelSizeX;
+	}
+	public void setPixelSizeX(double pixelSizeX) {
+		this.pixelSizeX = pixelSizeX;
+	}
+	public double getPixelSizeY() {
+		return pixelSizeY;
+	}
+	public void setPixelSizeY(double pixelSizeY) {
+		this.pixelSizeY = pixelSizeY;
+	}
+	public String getOverlappingMethod() {
+		return overlappingMethod;
+	}
+	public void setOverlappingMethod(String overlappingMethod) {
+		this.overlappingMethod = overlappingMethod;
+	}
+	public Boolean getShowSourceProducts() {
+		return showSourceProducts;
+	}
+	public void setShowSourceProducts(Boolean showSourceProducts) {
+		this.showSourceProducts = showSourceProducts;
+	}
+	public String getElevationModelName() {
+		return elevationModelName;
+	}
+	public void setElevationModelName(String elevationModelName) {
+		this.elevationModelName = elevationModelName;
+	}
+	public String getResamplingName() {
+		return resamplingName;
+	}
+	public void setResamplingName(String resamplingName) {
+		this.resamplingName = resamplingName;
+	}
+	public Boolean getUpdateMode() {
+		return updateMode;
+	}
+	public void setUpdateMode(Boolean updateMode) {
+		this.updateMode = updateMode;
+	}
+	public Boolean getNativeResolution() {
+		return nativeResolution;
+	}
+	public void setNativeResolution(Boolean nativeResolution) {
+		this.nativeResolution = nativeResolution;
+	}
+	public String getCombine() {
+		return combine;
+	}
+	public void setCombine(String combine) {
+		this.combine = combine;
+	}
+	public ArrayList<String> getSources() {
+		return sources;
+	}
+	public void setSources(ArrayList<String> sources) {
+		this.sources = sources;
+	}
+	public ArrayList<String> getVariableNames() {
+		return variableNames;
+	}
+	public void setVariableNames(ArrayList<String> variableNames) {
+		this.variableNames = variableNames;
+	}
+	public ArrayList<String> getVariableExpressions() {
+		return variableExpressions;
+	}
+	public void setVariableExpressions(ArrayList<String> variableExpressions) {
+		this.variableExpressions = variableExpressions;
+	}
+}
