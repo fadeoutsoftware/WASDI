@@ -13,8 +13,6 @@ import java.util.Map;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import com.google.gson.JsonObject;
-
 import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.QueryResultViewModel;
 

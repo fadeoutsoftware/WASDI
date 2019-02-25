@@ -1,6 +1,6 @@
 package wasdi.shared.utils;
 
-import wasdi.shared.business.UserSession;
+import static org.apache.commons.lang.SystemUtils.IS_OS_UNIX;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -9,16 +9,21 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.PosixFilePermission;
 import java.text.SimpleDateFormat;
-import java.util.*;
-import java.util.stream.Stream;
-import static org.apache.commons.lang.SystemUtils.IS_OS_UNIX;
-// email, IP addresses (v4 and v6), domains and URL validators:
-import org.apache.commons.validator.routines.*;
-import org.opengis.geometry.coordinate.Polygon;
-
 import java.util.Arrays;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.Random;
+import java.util.Set;
+import java.util.UUID;
+import java.util.stream.Stream;
+
+// email, IP addresses (v4 and v6), domains and URL validators:
+import org.apache.commons.validator.routines.DomainValidator;
+import org.apache.commons.validator.routines.EmailValidator;
+import org.apache.commons.validator.routines.InetAddressValidator;
+import org.apache.commons.validator.routines.UrlValidator;
+
+import wasdi.shared.business.UserSession;
 
 /**
  * Created by p.campanella on 14/10/2016.

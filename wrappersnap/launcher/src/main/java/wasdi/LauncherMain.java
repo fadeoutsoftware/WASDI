@@ -71,6 +71,7 @@ import wasdi.shared.parameters.GraphParameter;
 import wasdi.shared.parameters.IDLProcParameter;
 import wasdi.shared.parameters.IngestFileParameter;
 import wasdi.shared.parameters.MATLABProcParameters;
+import wasdi.shared.parameters.MosaicParameter;
 import wasdi.shared.parameters.MultilookingParameter;
 import wasdi.shared.parameters.NDVIParameter;
 import wasdi.shared.parameters.OperatorParameter;
@@ -91,6 +92,7 @@ import wasdi.snapopearations.ApplyOrbit;
 import wasdi.snapopearations.BaseOperation;
 import wasdi.snapopearations.Calibration;
 import wasdi.snapopearations.Filter;
+import wasdi.snapopearations.Mosaic;
 import wasdi.snapopearations.Multilooking;
 import wasdi.snapopearations.NDVI;
 import wasdi.snapopearations.RasterGeometricResampling;
@@ -401,6 +403,11 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			case RUNMATLAB: {
 				MATLABProcParameters oParameter = (MATLABProcParameters) SerializationUtils.deserializeXMLToObject(sParameter);
 				executeMATLABProcessor(oParameter);
+			}
+			break;
+			case MOSAIC: {
+				MosaicParameter oParameter = (MosaicParameter) SerializationUtils.deserializeXMLToObject(sParameter);
+				executeMosaic(oParameter);
 			}
 			break;
 			default:
@@ -1526,7 +1533,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 				if (oProcessWorkspace != null) oProcessWorkspace.setStatus(ProcessStatus.DONE.name());
 			}
 			else {
-				// errore
+				// error
 				s_oLogger.debug("LauncherMain.executeMATLABProcessor: process done with code != 0");
 				if (oProcessWorkspace != null) oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
 				
@@ -1538,13 +1545,56 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			if (oProcessWorkspace != null) oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
 
 			String sError = org.apache.commons.lang.exception.ExceptionUtils.getMessage(oEx);
-			if (s_oSendToRabbit!=null) s_oSendToRabbit.SendRabbitMessage(false,LauncherOperations.RUNIDL.name(),oParameter.getWorkspace(),sError,oParameter.getExchange());
+			if (s_oSendToRabbit!=null) s_oSendToRabbit.SendRabbitMessage(false,LauncherOperations.RUNMATLAB.name(),oParameter.getWorkspace(),sError,oParameter.getExchange());
 
 		}
 		finally {			
 			s_oLogger.debug("LauncherMain.executeMATLABProcessor: End");
 			CloseProcessWorkspace(oProcessWorkspaceRepository, oProcessWorkspace);
 		}
+	}
+
+	/**
+	 * Execute Mosaic Processor
+	 * @param oParameter
+	 */
+	public void executeMosaic(MosaicParameter oParameter) {
+		
+		s_oLogger.debug("LauncherMain.executeMosaic: Start");
+		ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
+		ProcessWorkspace oProcessWorkspace = oProcessWorkspaceRepository.GetProcessByProcessObjId(oParameter.getProcessObjId());
+		
+		
+		try {
+			String sBasePath = ConfigReader.getPropValue("DOWNLOAD_ROOT_PATH");
+			
+			Mosaic oMosaic = new Mosaic(oParameter, sBasePath);
+			
+			if (oMosaic.runMosaic()) {
+				s_oLogger.debug("LauncherMain.executeMosaic done");
+				if (oProcessWorkspace != null) oProcessWorkspace.setStatus(ProcessStatus.DONE.name());
+				
+			}
+			else {
+				// error
+				s_oLogger.debug("LauncherMain.executeMosaic: error");
+				if (oProcessWorkspace != null) oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
+			}
+			
+		}
+		catch (Exception oEx) {
+			s_oLogger.error("LauncherMain.executeMosaic: exception " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
+			if (oProcessWorkspace != null) oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
+
+			String sError = org.apache.commons.lang.exception.ExceptionUtils.getMessage(oEx);
+			if (s_oSendToRabbit!=null) s_oSendToRabbit.SendRabbitMessage(false,LauncherOperations.MOSAIC.name(),oParameter.getWorkspace(),sError,oParameter.getExchange());
+
+		}
+		finally {			
+			s_oLogger.debug("LauncherMain.executeMATLABProcessor: End");
+			CloseProcessWorkspace(oProcessWorkspaceRepository, oProcessWorkspace);
+		}
+		
 	}
 
 
