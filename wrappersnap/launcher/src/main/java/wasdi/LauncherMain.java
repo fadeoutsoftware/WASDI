@@ -44,7 +44,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import sun.management.VMManagement;
 import wasdi.asynch.SaveMetadataThread;
 import wasdi.filebuffer.ProviderAdapter;
-import wasdi.filebuffer.ProviderAdapterSupplier;
+import wasdi.filebuffer.ProviderAdapterFactory;
 import wasdi.geoserver.Publisher;
 import wasdi.processors.WasdiProcessorEngine;
 import wasdi.shared.LauncherOperations;
@@ -77,6 +77,7 @@ import wasdi.shared.parameters.OperatorParameter;
 import wasdi.shared.parameters.PublishBandParameter;
 import wasdi.shared.parameters.RangeDopplerGeocodingParameter;
 import wasdi.shared.parameters.RasterGeometricResampleParameter;
+import wasdi.shared.parameters.WpsParameters;
 import wasdi.shared.rabbit.RabbitFactory;
 import wasdi.shared.rabbit.Send;
 import wasdi.shared.utils.EndMessageProvider;
@@ -463,7 +464,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 0);
 			s_oLogger.debug("LauncherMain.Download: Download Start");
 			
-			ProviderAdapter oProviderAdapter = new ProviderAdapterSupplier().supplyProviderAdapter(oParameter.getProvider());
+			ProviderAdapter oProviderAdapter = new ProviderAdapterFactory().supplyProviderAdapter(oParameter.getProvider());
 			if (oProviderAdapter != null) {
 				oProviderAdapter.subscribe(this);
 			} else {
