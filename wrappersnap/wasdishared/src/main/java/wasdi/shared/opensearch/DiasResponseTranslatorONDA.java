@@ -117,18 +117,30 @@ public class DiasResponseTranslatorONDA implements DiasResponseTranslator {
 	}
 
 	//TODO change the method signature to get rid of the protocol
-	public QueryResultViewModel translate(JSONObject oInJsonOndaResult, String sProtocol) {
+	public QueryResultViewModel translate(JSONObject oInJson, String sProtocol) {
 		QueryResultViewModel oResult = null;
 		try {			
-			JSONObject oJsonOndaResult = oInJsonOndaResult.optJSONObject("entry");
-			if(null!=oJsonOndaResult) {
-				oResult = parseBaseData(sProtocol, oJsonOndaResult);
+			String sInJson = oInJson.toString();
+			System.out.println(sInJson);
+			JSONObject oOndaJson = oInJson.optJSONObject("entry");
+			if(null!=oOndaJson) {
+				String sJson = oOndaJson.toString();
+				System.out.println(sJson);
+				oResult = parseBaseData(sProtocol, oOndaJson);
 			}
-			Object oMetadataObject = oInJsonOndaResult.opt("metadata");
+			JSONArray aoMetadata = oOndaJson.optJSONArray("Metadata");
+			if(null!=aoMetadata) {
+				parseMetadataArray(oResult, aoMetadata);
+			}
+			
+			/*
+			JSONObject oMetadata = 
+			Object oMetadataObject = oOndaJson.opt("Metadata");
 			if(null!=oMetadataObject) {
 				JSONObject oMetadata = (JSONObject)(oMetadataObject);
 				parseMetadata(oResult, oMetadata);
 			}
+			*/
 			finalizeViewModel(oResult);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -312,6 +324,12 @@ public class DiasResponseTranslatorONDA implements DiasResponseTranslator {
 		}
 		JSONArray aoMetadataArray = oEntireMetadata.optJSONArray("value");
 
+		parseMetadataArray(oResult, aoMetadataArray);
+
+	}
+
+
+	protected void parseMetadataArray(QueryResultViewModel oResult, JSONArray aoMetadataArray) {
 		for (Object oObject : aoMetadataArray) {
 			if(null!=oObject) {
 				JSONObject oMetadataSingleEntry = (JSONObject)oObject;
@@ -370,7 +388,6 @@ public class DiasResponseTranslatorONDA implements DiasResponseTranslator {
 				}
 			}
 		}
-
 	}
 
 	private void buildSummary(QueryResultViewModel oResult) {

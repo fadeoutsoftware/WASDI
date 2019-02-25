@@ -1,8 +1,8 @@
 
 
-var JRCProcessorController = (function() {
+var JRCWorkflowController = (function() {
 
-    function JRCProcessorController ($scope, oClose,oExtras,oSnapOperationService,oConstantsService) {
+    function JRCWorkflowController ($scope, oClose,oExtras,oSnapOperationService,oConstantsService) {
         //MEMBERS
         this.m_oScope = $scope;
         this.m_oScope.m_oController = this;
@@ -29,11 +29,11 @@ var JRCProcessorController = (function() {
 
     };
 
-    JRCProcessorController.prototype.redirectToWebSite = function(){
+    JRCWorkflowController.prototype.redirectToWebSite = function(){
         this.m_oWindow.open('https://ec.europa.eu/jrc/en', '_blank');
     };
 
-    JRCProcessorController.prototype.runJrcProcessor = function()
+    JRCWorkflowController.prototype.runJrcProcessor = function()
     {
         var oJRCJson = {
             inputFileName: this.m_oSelectedReferenceProduct.fileName,
@@ -44,7 +44,7 @@ var JRCProcessorController = (function() {
 
         var oActiveWorkspace = this.m_oConstantsService.getActiveWorkspace();
 
-        this.m_oSnapOperationService.runJRCProcessor(oJRCJson,oActiveWorkspace.workspaceId)
+        this.m_oSnapOperationService.runJRCWorkflow(oJRCJson,oActiveWorkspace.workspaceId)
             .success(function(data,status){
 
             })
@@ -52,7 +52,7 @@ var JRCProcessorController = (function() {
 
             });
     }
-    JRCProcessorController .$inject = [
+    JRCWorkflowController .$inject = [
         '$scope',
         'close',
         'extras',
@@ -61,5 +61,5 @@ var JRCProcessorController = (function() {
 
 
     ];
-    return JRCProcessorController ;
+    return JRCWorkflowController ;
 })();
