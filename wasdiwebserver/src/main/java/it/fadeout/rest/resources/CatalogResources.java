@@ -46,6 +46,7 @@ import wasdi.shared.data.WorkspaceRepository;
 import wasdi.shared.parameters.FtpUploadParameters;
 import wasdi.shared.parameters.IngestFileParameter;
 import wasdi.shared.utils.CredentialPolicy;
+import wasdi.shared.utils.EndMessageProvider;
 import wasdi.shared.utils.SerializationUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.CatalogViewModel;
@@ -217,8 +218,10 @@ public class CatalogResources {
 				}
 			}
 			Wasdi.DebugLog("CatalogResources.DownloadEntryByName: done, return");
+			Wasdi.DebugLog(new EndMessageProvider().getGood());
 			return oResponseBuilder.build();
 		} catch (Exception e) {
+			Wasdi.DebugLog(new EndMessageProvider().getBad());
 			e.printStackTrace();
 		}
 		return null;
@@ -291,6 +294,7 @@ public class CatalogResources {
 			Wasdi.DebugLog("CatalogResources.zipOnTheFlyAndStream: return ");
 			return oResponseBuilder.build();
 		} catch (Exception e) {
+			Wasdi.DebugLog(new EndMessageProvider().getBad());
 			Wasdi.DebugLog("CatalogResources.zipOnTheFlyAndStream: exception caught:");
 			Wasdi.DebugLog("CatalogResources.zipOnTheFlyAndStream: " + e.getMessage());
 			e.printStackTrace();
