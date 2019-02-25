@@ -17,7 +17,7 @@ import wasdi.shared.utils.Utils;
  * @author c.nattero
  *
  */
-public class ProviderAdapterSupplier {
+public class ProviderAdapterFactory {
 
 	private static final Map<String, Supplier<ProviderAdapter>> s_aoDownloaderSuppliers;
 
