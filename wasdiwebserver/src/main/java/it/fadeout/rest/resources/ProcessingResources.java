@@ -2019,8 +2019,9 @@ public class ProcessingResources {
 			}
 			
 			Wasdi.DebugLog("ProcessingResource.asynchJRCTest2: INPUT FILE " + oJRCViewModel.getInputFileName());
-			Wasdi.DebugLog("ProcessingResource.asynchJRCTest2: OUTPUT FILE " + oJRCViewModel.getOutputFileName());
-			Wasdi.DebugLog("ProcessingResource.asynchJRCTest2: EPSG " + oJRCViewModel.getEpsg());
+			Wasdi.DebugLog("ProcessingResource.asynchJRCTest2: GLC " + oJRCViewModel.getGlc());
+			Wasdi.DebugLog("ProcessingResource.asynchJRCTest2: LANDSATGHSL " + oJRCViewModel.getLandsatghsl());
+			Wasdi.DebugLog("ProcessingResource.asynchJRCTest2: PREPROCESS " + oJRCViewModel.getPreprocess());
 			
 			Wasdi.DebugLog("ProcessingResource.asynchJRCTest2: launching MATLAB JRC 2 Processor");
 						
@@ -2048,7 +2049,6 @@ public class ProcessingResources {
 		PrimitiveResult oResult = new PrimitiveResult();
 		String sProcessObjId = Utils.GetRandomName();
 		String sUserId = Wasdi.GetUserFromSession(sSessionId).getUserId();
-		String sFloodMapFile = "";
 		
 		oResult.setBoolValue(false);
 		oResult.setIntValue(500);
@@ -2063,7 +2063,6 @@ public class ProcessingResources {
 			Workspace oWorkspace = oWorkspaceRepository.GetWorkspace(sWorkspaceId);
 			
 			File oFile = new File(sParamFullPath);
-			String sFolder = oFile.getParent();
 			File oConfigFile = new File (sConfigFullPath);
 			
 			BufferedWriter oWriter = new BufferedWriter(new FileWriter(oConfigFile));
