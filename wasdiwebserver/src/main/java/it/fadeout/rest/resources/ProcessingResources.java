@@ -92,6 +92,8 @@ import wasdi.shared.parameters.GraphSetting;
 import wasdi.shared.parameters.IDLProcParameter;
 import wasdi.shared.parameters.ISetting;
 import wasdi.shared.parameters.MATLABProcParameters;
+import wasdi.shared.parameters.MosaicParameter;
+import wasdi.shared.parameters.MosaicSetting;
 import wasdi.shared.parameters.MultilookingParameter;
 import wasdi.shared.parameters.MultilookingSetting;
 import wasdi.shared.parameters.NDVIParameter;
@@ -137,37 +139,37 @@ public class ProcessingResources {
 	@POST
 	@Path("geometric/rangeDopplerTerrainCorrection")
 	@Produces({"application/xml", "application/json", "text/xml"})
-	public PrimitiveResult TerrainCorrection(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sSourceProductName") String sSourceProductName, @QueryParam("sDestinationProductName") String sDestinationProductName, @QueryParam("sWorkspaceId") String sWorkspaceId, RangeDopplerGeocodingSetting oSetting) throws IOException
+	public PrimitiveResult terrainCorrection(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sSourceProductName") String sSourceProductName, @QueryParam("sDestinationProductName") String sDestinationProductName, @QueryParam("sWorkspaceId") String sWorkspaceId, RangeDopplerGeocodingSetting oSetting) throws IOException
 	{
 		Wasdi.DebugLog("ProcessingResources.TerrainCorrection");
-		return ExecuteOperation(sSessionId, sSourceProductName, sDestinationProductName, sWorkspaceId, oSetting, LauncherOperations.TERRAIN);
+		return executeOperation(sSessionId, sSourceProductName, sDestinationProductName, sWorkspaceId, oSetting, LauncherOperations.TERRAIN);
 	}
 	
 	@POST
 	@Path("radar/applyOrbit")
 	@Produces({"application/xml", "application/json", "text/xml"})
-	public PrimitiveResult ApplyOrbit(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sSourceProductName") String sSourceProductName, @QueryParam("sDestinationProductName") String sDestinationProductName, @QueryParam("sWorkspaceId") String sWorkspaceId, ApplyOrbitSetting oSetting) throws IOException
+	public PrimitiveResult applyOrbit(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sSourceProductName") String sSourceProductName, @QueryParam("sDestinationProductName") String sDestinationProductName, @QueryParam("sWorkspaceId") String sWorkspaceId, ApplyOrbitSetting oSetting) throws IOException
 	{	
 		Wasdi.DebugLog("ProcessingResources.ApplyOrbit");
-		return ExecuteOperation(sSessionId, sSourceProductName, sDestinationProductName, sWorkspaceId, oSetting, LauncherOperations.APPLYORBIT);
+		return executeOperation(sSessionId, sSourceProductName, sDestinationProductName, sWorkspaceId, oSetting, LauncherOperations.APPLYORBIT);
 	}
 	
 	@POST
 	@Path("radar/radiometricCalibration")
 	@Produces({"application/xml", "application/json", "text/xml"})
-	public PrimitiveResult Calibrate(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sSourceProductName") String sSourceProductName, @QueryParam("sDestinationProductName") String sDestinationProductName, @QueryParam("sWorkspaceId") String sWorkspaceId, CalibratorSetting oSetting) throws IOException
+	public PrimitiveResult calibrate(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sSourceProductName") String sSourceProductName, @QueryParam("sDestinationProductName") String sDestinationProductName, @QueryParam("sWorkspaceId") String sWorkspaceId, CalibratorSetting oSetting) throws IOException
 	{
 		Wasdi.DebugLog("ProcessingResources.Calibrate");
-		return ExecuteOperation(sSessionId, sSourceProductName, sDestinationProductName, sWorkspaceId, oSetting, LauncherOperations.CALIBRATE);
+		return executeOperation(sSessionId, sSourceProductName, sDestinationProductName, sWorkspaceId, oSetting, LauncherOperations.CALIBRATE);
 	}
 	
 	@POST
 	@Path("radar/multilooking")
 	@Produces({"application/xml", "application/json", "text/xml"})
-	public PrimitiveResult Multilooking(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sSourceProductName") String sSourceProductName, @QueryParam("sDestinationProductName") String sDestinationProductName, @QueryParam("sWorkspaceId") String sWorkspaceId, MultilookingSetting oSetting) throws IOException
+	public PrimitiveResult multilooking(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sSourceProductName") String sSourceProductName, @QueryParam("sDestinationProductName") String sDestinationProductName, @QueryParam("sWorkspaceId") String sWorkspaceId, MultilookingSetting oSetting) throws IOException
 	{
 		Wasdi.DebugLog("ProcessingResources.Multilooking");
-		return ExecuteOperation(sSessionId, sSourceProductName, sDestinationProductName, sWorkspaceId, oSetting, LauncherOperations.MULTILOOKING);
+		return executeOperation(sSessionId, sSourceProductName, sDestinationProductName, sWorkspaceId, oSetting, LauncherOperations.MULTILOOKING);
 
 	}
 	
@@ -177,14 +179,24 @@ public class ProcessingResources {
 	public PrimitiveResult NDVI(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sSourceProductName") String sSourceProductName, @QueryParam("sDestinationProductName") String sDestinationProductName, @QueryParam("sWorkspaceId") String sWorkspaceId, NDVISetting oSetting) throws IOException
 	{
 		Wasdi.DebugLog("ProcessingResources.NDVI");
-		return ExecuteOperation(sSessionId, sSourceProductName, sDestinationProductName, sWorkspaceId, oSetting, LauncherOperations.NDVI);
+		return executeOperation(sSessionId, sSourceProductName, sDestinationProductName, sWorkspaceId, oSetting, LauncherOperations.NDVI);
 	}
 
+	
+	@POST
+	@Path("geometric/mosaic")
+	@Produces({"application/xml", "application/json", "text/xml"})
+	public PrimitiveResult mosaic(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sDestinationProductName") String sDestinationProductName, @QueryParam("sWorkspaceId") String sWorkspaceId, MosaicSetting oSetting) throws IOException
+	{
+		Wasdi.DebugLog("ProcessingResources.Mosaic");
+		return executeOperation(sSessionId, "", sDestinationProductName, sWorkspaceId, oSetting, LauncherOperations.MOSAIC);
+	}
+	
 
 	@GET
 	@Path("parameters")
 	@Produces({"application/json"})
-	public SnapOperatorParameterViewModel[] OperatorParameters(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sOperation") String sOperation) throws IOException
+	public SnapOperatorParameterViewModel[] operatorParameters(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sOperation") String sOperation) throws IOException
 	{
 		Wasdi.DebugLog("ProcessingResources.OperatorParameters");
 		ArrayList<SnapOperatorParameterViewModel> oChoices = new ArrayList<SnapOperatorParameterViewModel>();
@@ -445,7 +457,7 @@ public class ProcessingResources {
 		sGraphXml = IOUtils.toString(fileInputStream, Charset.defaultCharset().name());
 		oSettings.setGraphXml(sGraphXml);
 		
-		return ExecuteOperation(sessionId, sourceProductName, destinationProdutName, workspace, oSettings, LauncherOperations.GRAPH);
+		return executeOperation(sessionId, sourceProductName, destinationProdutName, workspace, oSettings, LauncherOperations.GRAPH);
 		
 	}
 	
@@ -484,7 +496,7 @@ public class ProcessingResources {
 		sGraphXml = IOUtils.toString(fileInputStream, Charset.defaultCharset().name());
 		oSettings.setGraphXml(sGraphXml);
 		
-		return ExecuteOperation(sessionId, sourceProductName, destinationProdutName, workspace, oSettings, LauncherOperations.GRAPH);
+		return executeOperation(sessionId, sourceProductName, destinationProdutName, workspace, oSettings, LauncherOperations.GRAPH);
 	}
 	
 	/**
@@ -564,7 +576,7 @@ public class ProcessingResources {
 			sDestinationProdutName = sSourceProductName + "_" + sWorkFlowName;
 		}
 		
-		return ExecuteOperation(sessionId, sSourceProductName, sDestinationProdutName, workspace, oGraphSettings, LauncherOperations.GRAPH);
+		return executeOperation(sessionId, sSourceProductName, sDestinationProdutName, workspace, oGraphSettings, LauncherOperations.GRAPH);
 	}
 
 	@GET
@@ -685,7 +697,7 @@ public class ProcessingResources {
 		Wasdi.DebugLog("ProcessingResources.getBandImage");
 
 		// Check user session
-		String userId = AcceptedUserAndSession(sSessionId);
+		String userId = acceptedUserAndSession(sSessionId);
 		if (Utils.isNullOrEmpty(userId)) return Response.status(401).build();
 
 		
@@ -845,7 +857,7 @@ public class ProcessingResources {
 	@Path("/assimilation")
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
 	@Produces(MediaType.APPLICATION_OCTET_STREAM)
-	public String Assimilation(
+	public String assimilation(
 			@FormDataParam("humidity") InputStream humidityFile,
 			@FormDataParam("humidity") FormDataContentDisposition humidityFileMetaData,
 			@HeaderParam("x-session-token") String sessionId,
@@ -908,7 +920,7 @@ public class ProcessingResources {
 	@GET
 	@Path("/saba")
 	@Produces({"application/json"})
-	public PrimitiveResult Saba(@HeaderParam("x-session-token") String sSessionId, @QueryParam("file") String sFileName, @QueryParam("workspaceId") String sWorkspaceId) {
+	public PrimitiveResult saba(@HeaderParam("x-session-token") String sSessionId, @QueryParam("file") String sFileName, @QueryParam("workspaceId") String sWorkspaceId) {
 		
 		PrimitiveResult oResult = new PrimitiveResult();
 		
@@ -1242,7 +1254,7 @@ public class ProcessingResources {
 		return true;
 	}
 	
-	private String AcceptedUserAndSession(String sSessionId) {
+	private String acceptedUserAndSession(String sSessionId) {
 		//Check user
 		if (Utils.isNullOrEmpty(sSessionId)) return null;
 		User oUser = Wasdi.GetUserFromSession(sSessionId);
@@ -1252,15 +1264,28 @@ public class ProcessingResources {
 		return oUser.getUserId();
 	}
 	
-	private PrimitiveResult ExecuteOperation(String sSessionId, String sSourceProductName, String sDestinationProductName, String sWorkspaceId, ISetting oSetting, LauncherOperations operation) {
+	/**
+	 * Trigger the execution in the launcher of a SNAP Operation
+	 * @param sSessionId User Session Id
+	 * @param sSourceProductName Source Product Name
+	 * @param sDestinationProductName Target Product Name
+	 * @param sWorkspaceId Active Workspace
+	 * @param oSetting Generic Operation Setting
+	 * @param oOperation Launcher Operation Type
+	 * @return
+	 */
+	private PrimitiveResult executeOperation(String sSessionId, String sSourceProductName, String sDestinationProductName, String sWorkspaceId, ISetting oSetting, LauncherOperations oOperation) {
 		
 		PrimitiveResult oResult = new PrimitiveResult();
 		String sProcessObjId = "";
-		//String sProcessObjId = "";
+
+		// Check the user
+		String sUserId = acceptedUserAndSession(sSessionId);
 		
-		String sUserId = AcceptedUserAndSession(sSessionId);
-		
+		// Is valid?
 		if (Utils.isNullOrEmpty(sUserId)) {
+			
+			// Not authorized
 			oResult.setIntValue(401);
 			oResult.setBoolValue(false);
 			
@@ -1272,29 +1297,36 @@ public class ProcessingResources {
 			
 			sProcessObjId = Utils.GetRandomName();
 			
-			OperatorParameter oParameter = GetParameter(operation); 
+			// Create Operator instance
+			OperatorParameter oParameter = getParameter(oOperation);
+			
+			// Set common settings
 			oParameter.setSourceProductName(sSourceProductName);
 			oParameter.setDestinationProductName(sDestinationProductName);
 			oParameter.setWorkspace(sWorkspaceId);
 			oParameter.setUserId(sUserId);
 			oParameter.setExchange(sWorkspaceId);
 			oParameter.setProcessObjId(sProcessObjId);
+			
+			// Do we have settings?
 			if (oSetting != null) oParameter.setSettings(oSetting);	
 			
+			// Serialization Path
 			String sPath = m_oServletConfig.getInitParameter("SerializationPath");
 			
 			if (!(sPath.endsWith("\\") || sPath.endsWith("/"))) sPath += "/";
 			sPath = sPath + sProcessObjId;
 
 			SerializationUtils.serializeObjectToXML(sPath, oParameter);
-
+			
+			// Create the process Workspace
 			ProcessWorkspaceRepository oRepository = new ProcessWorkspaceRepository();
 			ProcessWorkspace oProcess = new ProcessWorkspace();
 			
 			try
 			{
 				oProcess.setOperationDate(Wasdi.GetFormatDate(new Date()));
-				oProcess.setOperationType(operation.name());
+				oProcess.setOperationType(oOperation.name());
 				oProcess.setProductName(sSourceProductName);
 				oProcess.setWorkspaceId(sWorkspaceId);
 				oProcess.setUserId(sUserId);
@@ -1323,6 +1355,7 @@ public class ProcessingResources {
 			return oResult;
 		}
 		
+		// Ok, operation triggered
 		oResult.setBoolValue( true);
 		oResult.setIntValue(200);
 		oResult.setStringValue(sProcessObjId);
@@ -1331,9 +1364,14 @@ public class ProcessingResources {
 	}
 
 	
-	private OperatorParameter GetParameter(LauncherOperations op)
+	/**
+	 * Get the paramter Object for a specific Launcher Operation
+	 * @param oOperation
+	 * @return
+	 */
+	private OperatorParameter getParameter(LauncherOperations oOperation)
 	{
-		switch (op) {
+		switch (oOperation) {
 		case APPLYORBIT:
 			return new ApplyOrbitParameter();
 		case CALIBRATE:
@@ -1344,9 +1382,10 @@ public class ProcessingResources {
 			return new RangeDopplerGeocodingParameter();
 		case NDVI:
 			return new NDVIParameter();
-			
 		case GRAPH:
 			return new GraphParameter();
+		case MOSAIC:
+			return new MosaicParameter();
 		default:
 			return null;
 			
@@ -1361,8 +1400,8 @@ public class ProcessingResources {
 	@GET
 	@Path("/idlDemo") 
 	@Produces({"application/json"})
-	public PrimitiveResult idlDemo(
-			@HeaderParam("x-session-token") String sSessionId) {
+	public PrimitiveResult idlDemo( @HeaderParam("x-session-token") String sSessionId) {
+		
 		Wasdi.DebugLog("ProcessingResource.idlDemo");
 	
 		
@@ -1413,98 +1452,6 @@ public class ProcessingResources {
 		return oResult;
 	}
 	
-	/**
-	 * Runs a the IDL script implementation of the LIST flood algorithm with sample input files
-	 * Shows a practical usage of WASDL 
-	 * @param sSessionId a valid session identifier
-	 * @return BAD_REQUEST if null request, UNAUTHORIZED if session is not valid, OK after execution of the script
-	 */
-	
-	/*
-	@GET
-	@Path("/listFloodDemo")
-	@Produces({"application/json"})
-	public PrimitiveResult listFloodDemo(
-			@HeaderParam("x-session-token") String sSessionId) {
-		Wasdi.DebugLog("ProcessingResource.listFloodDemo");
-		try {
-			//get standard demo files and parameters
-			String sFileName = m_oServletConfig.getInitParameter("ListFloodDemo.fileName");
-			String sWorkspaceId = m_oServletConfig.getInitParameter("ListFloodDemo.workspaceId");
-			return listflood(sSessionId, sFileName, sWorkspaceId);
-		} catch (Exception e) {
-			e.printStackTrace();
-			PrimitiveResult oResult = PrimitiveResult.getInvalidInstance();
-			oResult.setIntValue(Integer.parseInt(Response.Status.INTERNAL_SERVER_ERROR.toString()));
-			return oResult;
-		}
-		
-	}
-	*/
-	/**
-	 * Runs a the IDL script implementation of the LIST flood algorithm on specified files
-	 * @param sSessionId a valid session identifier
-	 * @param sFileName input file
-	 * @param a workspase identifier
-	 * @return BAD_REQUEST if null request, UNAUTHORIZED if session is not valid, OK after execution of the script
-	 */
-	@POST
-	@Path("/listflood")
-	@Produces({"application/json"})
-	public PrimitiveResult listflood(
-			@HeaderParam("x-session-token") String sSessionId,
-			@QueryParam("workspaceId") String sWorkspaceId,
-			ListFloodViewModel oListFloodViewModel) {
-		
-		Wasdi.DebugLog("ProcessingResource.algList");
-		
-		if(null == sSessionId ) {
-			PrimitiveResult oResult = new PrimitiveResult();
-			oResult.setBoolValue(false);
-			oResult.setIntValue(400);
-			return oResult;
-		}
-		
-		User oUser = Wasdi.GetUserFromSession(sSessionId);
-		
-		try {
-			//check authentication
-			if (oUser == null || Utils.isNullOrEmpty(oUser.getUserId())) {
-				PrimitiveResult oResult = PrimitiveResult.getInvalidInstance();
-				oResult.setIntValue(401);
-				return oResult;				
-			}
-			
-			Wasdi.DebugLog("ProcessingResource.listflood: REF FILE " + oListFloodViewModel.getReferenceFile());
-			Wasdi.DebugLog("ProcessingResource.listflood: POST EVENT FILE " + oListFloodViewModel.getPostEventFile());
-			Wasdi.DebugLog("ProcessingResource.listflood: launching ENVI LIST Processor");
-			
-			//try execute algorithm
-			if (launchList(sSessionId, oListFloodViewModel, oUser, sWorkspaceId)) {
-				Wasdi.DebugLog("ProcessingResource.algList: ok return");
-				//TODO read value somewhere (input argument? config file?)
-
-				PrimitiveResult oResult = new PrimitiveResult();
-				oResult.setBoolValue(true);
-				oResult.setIntValue(200);
-				return oResult;
-			}
-			else {
-				Wasdi.DebugLog("ProcessingResource.algList: error, return");
-				PrimitiveResult oResult = PrimitiveResult.getInvalidInstance();
-				oResult.setBoolValue(false);
-				oResult.setIntValue(500);
-				return oResult;
-			}
-		} catch (Exception e) {
-			System.out.println("ProcessingResource.algList: error launching list " + e.getMessage());
-			e.printStackTrace();
-			PrimitiveResult oResult = PrimitiveResult.getInvalidInstance();
-			oResult.setBoolValue(false);
-			oResult.setIntValue(500);				
-			return oResult;
-		}
-	}
 	
 	/**
 	 * Runs a the IDL script implementation of the LIST flood algorithm on specified files
@@ -1562,102 +1509,6 @@ public class ProcessingResources {
 	 * @param sWorkspaceId
 	 * @return
 	 */
-	private boolean launchList(String sSessionId, ListFloodViewModel oListFloodViewModel, User oUser, String sWorkspaceId) {
-
-		try {
-			String asCmd[] = new String[] {
-					m_oServletConfig.getInitParameter("ListScript")
-			};
-			
-			Wasdi.DebugLog("ProcessingResource.launchList " + asCmd[0] );
-			
-			String sParamFile = m_oServletConfig.getInitParameter("ListParam");
-			
-			Wasdi.DebugLog("ProcessingResource.launchList ParamFile " + sParamFile);
-			
-			WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
-			Workspace oWorkspace = oWorkspaceRepository.GetWorkspace(sWorkspaceId);
-			
-			File oFile = new File(sParamFile);
-			
-			BufferedWriter oWriter = new BufferedWriter(new FileWriter(oFile));
-			if(null!= oWriter) {
-				Wasdi.DebugLog("ProcessingResource.launchList: BufferedWriter created");
-
-				oWriter.write(m_oServletConfig.getInitParameter("DownloadRootPath"));
-				oWriter.newLine();
-				oWriter.write(oUser.getUserId());
-				oWriter.newLine();
-				if (Utils.isNullOrEmpty(sSessionId)) oWriter.write(oUser.getPassword());
-				else oWriter.write("");
-				oWriter.newLine();
-				oWriter.write(oWorkspace.getName());
-				oWriter.newLine();
-				oWriter.write(sSessionId);
-				
-				oWriter.newLine();
-
-				oWriter.write(oListFloodViewModel.getPostEventFile());
-				oWriter.newLine();
-				oWriter.write(oListFloodViewModel.getReferenceFile());
-				oWriter.newLine();
-				oWriter.newLine();
-				oWriter.newLine();
-				
-				String sMaskFile = oListFloodViewModel.getPostEventFile();
-				sMaskFile = Utils.GetFileNameWithoutExtension(sMaskFile);
-				sMaskFile += "_HSBA_MASK.tif";
-				
-				oWriter.write(sMaskFile);
-				oWriter.newLine();
-				
-				String sFloodMapFile = oListFloodViewModel.getPostEventFile();
-				sFloodMapFile = Utils.GetFileNameWithoutExtension(sFloodMapFile);
-				sFloodMapFile += "_flood_map.tif";				
-				
-				oWriter.write(sFloodMapFile);
-				oWriter.newLine();
-				oWriter.write("" + oListFloodViewModel.getHsbaStartDepth());
-				oWriter.newLine();
-				oWriter.write("" + oListFloodViewModel.getBimodalityCoeff());
-				oWriter.newLine();
-				oWriter.write(""+oListFloodViewModel.getMinTileDimension());
-				oWriter.newLine();
-				oWriter.write("" + oListFloodViewModel.getMinBlobRemoval());
-				oWriter.newLine();
-				oWriter.flush();
-				oWriter.close();
-			}
-			
-			System.out.println("ProcessingResource.launchList: shell exec " + Arrays.toString(asCmd));
-			Process oProc = Runtime.getRuntime().exec(asCmd);
-			BufferedReader oInput = new BufferedReader(new InputStreamReader(oProc.getInputStream()));
-			
-            String sLine;
-            while((sLine=oInput.readLine()) != null) {
-            	System.out.println("ProcessingResource.launchList: envi stdout: " + sLine);
-            }
-			if (oProc.waitFor() != 0) return false;
-		} catch (Exception oEx) {
-			System.out.println("ProcessingResource.launchList: error during list process " + oEx.getMessage());
-			oEx.printStackTrace();
-			return false;
-		}
-
-		return true;
-	}
-	
-	
-	
-	
-	
-	
-	/**
-	 * Launch LIST ENVI process
-	 * @param sReferenceFile 
-	 * @param sWorkspaceId
-	 * @return
-	 */
 	private PrimitiveResult asynchLaunchList(String sSessionId, ListFloodViewModel oListFloodViewModel, User oUser, String sWorkspaceId) {
 
 		PrimitiveResult oResult = new PrimitiveResult();
@@ -1680,7 +1531,6 @@ public class ProcessingResources {
 			Workspace oWorkspace = oWorkspaceRepository.GetWorkspace(sWorkspaceId);
 			
 			File oFile = new File(sParamFullPath);
-			String sFolder = oFile.getParent();
 			File oConfigFile = new File (sConfigFullPath);
 			
 			BufferedWriter oWriter = new BufferedWriter(new FileWriter(oConfigFile));
@@ -1866,7 +1716,6 @@ public class ProcessingResources {
 		PrimitiveResult oResult = new PrimitiveResult();
 		String sProcessObjId = Utils.GetRandomName();
 		String sUserId = Wasdi.GetUserFromSession(sSessionId).getUserId();
-		String sFloodMapFile = "";
 		
 		oResult.setBoolValue(false);
 		oResult.setIntValue(500);
@@ -1881,7 +1730,6 @@ public class ProcessingResources {
 			Workspace oWorkspace = oWorkspaceRepository.GetWorkspace(sWorkspaceId);
 			
 			File oFile = new File(sParamFullPath);
-			String sFolder = oFile.getParent();
 			File oConfigFile = new File (sConfigFullPath);
 			
 			BufferedWriter oWriter = new BufferedWriter(new FileWriter(oConfigFile));
