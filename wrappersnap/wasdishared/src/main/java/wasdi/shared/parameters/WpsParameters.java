@@ -4,9 +4,7 @@
  * Fadeout software
  *
  */
-package wasdi;
-
-import wasdi.shared.parameters.BaseParameter;
+package wasdi.shared.parameters;
 
 /**
  * @author c.nattero
