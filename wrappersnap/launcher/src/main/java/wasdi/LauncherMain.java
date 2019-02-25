@@ -79,6 +79,7 @@ import wasdi.shared.parameters.RangeDopplerGeocodingParameter;
 import wasdi.shared.parameters.RasterGeometricResampleParameter;
 import wasdi.shared.rabbit.RabbitFactory;
 import wasdi.shared.rabbit.Send;
+import wasdi.shared.utils.EndMessageProvider;
 import wasdi.shared.utils.FtpClient;
 import wasdi.shared.utils.SerializationUtils;
 import wasdi.shared.utils.Utils;
@@ -119,7 +120,6 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 	 * @throws Exception
 	 */
 	public static void main(String[] args) throws Exception {
-
 
 		try {
 			//get jar directory
@@ -238,19 +238,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 	}
 	
 	private static String getBye() {
-		ArrayList<String> m_asByes = new ArrayList<>();
-		m_asByes.add("----WASDI:Operation Done----");
-		m_asByes.add("----WASDI:Look behind you, a Three-Headed Monster!----");
-		m_asByes.add("----WASDI:Mission Completed----");
-		m_asByes.add("----WASDI:So you want to be a pirate, eh? You look more like a flooring inspector----");
-		m_asByes.add("----WASDI:Use the force Luke----");
-		m_asByes.add("----WASDI:one small step for man, one giant leap for mankind----");
-		m_asByes.add("----WASDI:I love it when a plan comes together----");
-		m_asByes.add("----WASDI:Follow the white Rabbit----");
-		m_asByes.add("----WASDI:Don't panic----");
-		//m_asByes.add("----WASDI: ----");
-		
-		return m_asByes.get(((int)(Math.random()*100000))%m_asByes.size());
+		return new EndMessageProvider().getGood();	
 	}
 
 	/**
