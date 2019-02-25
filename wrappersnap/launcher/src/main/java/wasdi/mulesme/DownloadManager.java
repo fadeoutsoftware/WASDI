@@ -16,7 +16,7 @@ import com.vividsolutions.jts.geom.Polygon;
 
 import wasdi.ConfigReader;
 import wasdi.filebuffer.ProviderAdapter;
-import wasdi.filebuffer.ProviderAdapterSupplier;
+import wasdi.filebuffer.ProviderAdapterFactory;
 import wasdi.shared.opensearch.PaginatedQuery;
 import wasdi.shared.opensearch.QueryExecutor;
 import wasdi.shared.opensearch.QueryExecutorFactory;
@@ -105,7 +105,7 @@ public class DownloadManager {
 		
 		//replaced by the next one
 		//DownloadFile oDownloadFile = DownloadFile.getDownloadFile("SENTINEL");
-		ProviderAdapter oProviderAdapter = new ProviderAdapterSupplier().supplyProviderAdapter("SENTINEL");
+		ProviderAdapter oProviderAdapter = new ProviderAdapterFactory().supplyProviderAdapter("SENTINEL");
 		
 		System.out.println("searching products between " + from + " and " + to + " for " + m_asfootprints.size() + " regions ");
 		
