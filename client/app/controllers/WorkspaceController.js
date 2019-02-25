@@ -63,9 +63,9 @@ var WorkspaceController = (function() {
 
         this.isLoadingIconVisible = function()
         {
-            return false;
-            // if( this.m_oRabbitStompService.isReadyState() === false){ return true; }
             // return false;
+            if( this.m_oRabbitStompService.isReadyState() === false){ return true; }
+            return false;
         }
     }
 
