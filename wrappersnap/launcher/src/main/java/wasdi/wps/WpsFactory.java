@@ -18,21 +18,22 @@ import wasdi.shared.utils.Utils;
  *
  */
 public class WpsFactory {
-	private static final Map<String, Supplier<WpsExecutionClient>> s_aoWpsSuppliers;
+	private static final Map<String, Supplier<WpsAdapter>> s_aoWpsSuppliers;
 	
 	static {
 		System.out.println("WpsFactory static constructor");
-		final Map<String, Supplier<WpsExecutionClient>> aoWpsSuppliers = new HashMap<>();
-		aoWpsSuppliers.put("wasdi", WasdiWpsExecutionclient::new);
+		final Map<String, Supplier<WpsAdapter>> aoWpsSuppliers = new HashMap<>();
+		aoWpsSuppliers.put("wasdi", WasdiWpsAdapter::new);
+		aoWpsSuppliers.put("n52Demo", N52DemoWpsAdapter::new);
 		//TODO add gpod
 		//TODO add utep
 		s_aoWpsSuppliers = Collections.unmodifiableMap(aoWpsSuppliers);
 	}
 	
 
-	public WpsExecutionClient supply(String sWpsProvider) {
+	public WpsAdapter supply(String sWpsProvider) {
 		System.out.println("WpsFactory.WpsFactory");
-		WpsExecutionClient oWps = null;
+		WpsAdapter oWps = null;
 		if(Utils.isNullOrEmpty(sWpsProvider)) {
 			throw new NullPointerException("WpsFactory.WpsFactory: passed a null String");
 		} else {

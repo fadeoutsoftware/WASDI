@@ -99,7 +99,7 @@ import wasdi.snapopearations.ReadProduct;
 import wasdi.snapopearations.TerrainCorrection;
 import wasdi.snapopearations.WasdiGraph;
 import wasdi.snapopearations.WriteProduct;
-import wasdi.wps.WpsExecutionClient;
+import wasdi.wps.WpsAdapter;
 import wasdi.wps.WpsFactory;
 
 
@@ -444,7 +444,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 		ProcessWorkspace oProcessWorkspace = oProcessWorkspaceRepository.GetProcessByProcessObjId(oParameter.getProcessObjId());
 		
 		WpsFactory oWpsFactory = new WpsFactory();
-		WpsExecutionClient oWps = oWpsFactory.supply(oParameter.getWpsProvider());
+		WpsAdapter oWps = oWpsFactory.supply(oParameter.getWpsProvider());
 		//oWps.
 	}
 	
