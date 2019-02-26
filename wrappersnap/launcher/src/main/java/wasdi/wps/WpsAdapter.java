@@ -45,6 +45,10 @@ public abstract class WpsAdapter {
 	// http://cite.opengeospatial.org/pub/cite/files/edu/wps/text/operations.html#execute
 	public int execute() {
 		System.out.println("WpsAdapter.execute");
+		
+		//TODO use WPSclient: org.n52.wps.client.ExecuteRequestBuilder.ExecuteRequestBuilder
+		//see WPSClientExample.executeProcess
+		
 		int iResponseCode = -1;
 		try {
 		
