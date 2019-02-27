@@ -7,11 +7,20 @@
 package wasdi.wps;
 
 import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
+import java.io.InputStream;
 import java.io.OutputStreamWriter;
+import java.io.StringBufferInputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
+
+import org.n52.geoprocessing.wps.client.ExecuteRequestBuilder;
+import org.n52.geoprocessing.wps.client.WPS20ProcessParser;
+
+import com.sun.tools.doclets.standard.Standard;
 
 /**
  * @author c.nattero
@@ -28,6 +37,7 @@ public abstract class WpsAdapter {
 	
 	protected String m_sJobId;
 	
+
 	public WpsAdapter(){
 		m_sService = "WPS";
 	}
@@ -45,12 +55,18 @@ public abstract class WpsAdapter {
 	// http://cite.opengeospatial.org/pub/cite/files/edu/wps/text/operations.html#execute
 	public int execute() {
 		System.out.println("WpsAdapter.execute");
-		
-		//TODO use WPSclient: org.n52.wps.client.ExecuteRequestBuilder.ExecuteRequestBuilder
-		//see WPSClientExample.executeProcess
-		
 		int iResponseCode = -1;
 		try {
+			
+			//TODO use WPSclient: org.n52.wps.client.ExecuteRequestBuilder.ExecuteRequestBuilder
+			//see WPSClientExample.executeProcess
+			
+			InputStream oInputStream = new ByteArrayInputStream(m_sXmlPayload.getBytes(StandardCharsets.UTF_8));
+
+			org.n52.geoprocessing.wps.client.model.Process oWpsProcess = WPS20ProcessParser.parseProcess(oInputStream);
+			ExecuteRequestBuilder oExecuteRequestBuilder = new ExecuteRequestBuilder(oWpsProcess);		
+			
+			
 		
 			String sUrl = s_sWpsHost + "?" +
 					"service=" + m_sService + "&" +
@@ -58,7 +74,7 @@ public abstract class WpsAdapter {
 					//and nothing else, pass the XML payload instead
 			
 			
-			URL oUrl = new URL(s_sWpsHost);
+			URL oUrl = new URL(sUrl);
 			Object oConnectionObject = oUrl.openConnection();
 			HttpURLConnection oConnection = (HttpURLConnection)oConnectionObject;
 			oConnection.setRequestMethod("POST");
