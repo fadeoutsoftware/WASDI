@@ -1,3 +1,4 @@
+package wasdi.wps;
 /*
  * ﻿Copyright (C) 2018 52°North Initiative for Geospatial Open Source
  * Software GmbH
