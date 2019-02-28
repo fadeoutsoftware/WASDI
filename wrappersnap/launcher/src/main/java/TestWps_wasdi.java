@@ -13,7 +13,7 @@ import wasdi.wps.WpsFactory;
  * @author c.nattero
  *
  */
-public class TestWps {
+public class TestWps_wasdi {
 
 	public static void main(String[] args) throws Exception {
 		WpsFactory oFactory = new WpsFactory();
