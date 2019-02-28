@@ -7,20 +7,11 @@
 package wasdi.wps;
 
 import java.io.BufferedInputStream;
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
-import java.io.InputStream;
 import java.io.OutputStreamWriter;
-import java.io.StringBufferInputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.nio.charset.StandardCharsets;
-
-import org.n52.geoprocessing.wps.client.ExecuteRequestBuilder;
-import org.n52.geoprocessing.wps.client.WPS20ProcessParser;
-
-import com.sun.tools.doclets.standard.Standard;
 
 /**
  * @author c.nattero
@@ -52,26 +43,45 @@ public abstract class WpsAdapter {
 	// http://cite.opengeospatial.org/pub/cite/files/edu/wps/text/operations.html#describeprocess
 	//MAYBE describeProcess
 
+//	public int n52Execute() {
+//		System.out.println("WpsAdapter.n52Execute");
+//		int iResponseCode = -1;
+//		try {
+//			XmlObject oXmlObject = XmlObject.Factory.parse(m_sXmlPayload);
+//			ExecuteDocument oRequest = (ExecuteDocument) oXmlObject;
+//			oRequest.getExecute().setService(m_sService);
+//			WPSClientSession oClientSession = WPSClientSession.getInstance();
+//			String sUrl = buildExecuteUrl();
+//			Object oResponseObject = oClientSession.execute(sUrl, oRequest);
+//			
+//			if (oResponseObject instanceof ExecuteResponseDocument) {
+//	            ExecuteResponseDocument oResponse = (ExecuteResponseDocument) oResponseObject;
+//	            
+////	            ExecuteResponseAnalyser analyser = new ExecuteResponseAnalyser(oExecute, oResponse, oProcessDescription);
+////	            IData oIData = (IData) analyser.getComplexDataByIndex(0,String.class);
+//	            
+//	            XObject oXObject = XPathAPI.eval(oResponse.getDomNode(), "//wps:LiteralData");
+//	            String sOutput = oXObject.toString();
+//	            
+//	            //return sOutput;
+//	        }
+//			
+//			
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//		}
+//		return iResponseCode;
+//	}
+	
 	// http://cite.opengeospatial.org/pub/cite/files/edu/wps/text/operations.html#execute
 	public int execute() {
 		System.out.println("WpsAdapter.execute");
 		int iResponseCode = -1;
 		try {
 			
-			//TODO use WPSclient: org.n52.wps.client.ExecuteRequestBuilder.ExecuteRequestBuilder
-			//see WPSClientExample.executeProcess
-			
-			InputStream oInputStream = new ByteArrayInputStream(m_sXmlPayload.getBytes(StandardCharsets.UTF_8));
-
-			org.n52.geoprocessing.wps.client.model.Process oWpsProcess = WPS20ProcessParser.parseProcess(oInputStream);
-			ExecuteRequestBuilder oExecuteRequestBuilder = new ExecuteRequestBuilder(oWpsProcess);		
 			
 			
-		
-			String sUrl = s_sWpsHost + "?" +
-					"service=" + m_sService + "&" +
-					"version=" + s_sVersion;
-					//and nothing else, pass the XML payload instead
+			String sUrl = buildExecuteUrl();
 			
 			
 			URL oUrl = new URL(sUrl);
@@ -114,6 +124,14 @@ public abstract class WpsAdapter {
 			e.printStackTrace();
 		} 
 		return iResponseCode;
+	}
+
+	protected String buildExecuteUrl() {
+		String sUrl = s_sWpsHost + "?" +
+				"service=" + m_sService + "&" +
+				"version=" + s_sVersion;
+				//and nothing else, pass the XML payload instead
+		return sUrl;
 	}
 
 	public String getResponse() {
