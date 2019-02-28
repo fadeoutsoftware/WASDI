@@ -1,5 +1,6 @@
 package it.fadeout.viewmodels;
 
+import java.util.ArrayList;
 import java.util.Date;
 
 public class CoverageSwathResultViewModel {
@@ -24,6 +25,7 @@ public class CoverageSwathResultViewModel {
 	public int IdTriggerType;
 	public String FrameFootPrintGeometry;
 	public Boolean IsAscending;
+	public ArrayList<CoverageSwathResultViewModel> aoChilds;
 	
 	public CoverageSwathResultViewModel(){
 			
@@ -47,5 +49,6 @@ public class CoverageSwathResultViewModel {
 		this.SensorType = oCopy.SensorType;
 		this.IdTriggerType = oCopy.IdTriggerType;
 		this.IsAscending = oCopy.IsAscending;
+		this.aoChilds = oCopy.aoChilds;
 	}
 }
