@@ -647,7 +647,6 @@ public class InstanceFinder {
 		
 		// preparo la richiesta di copertura
 		CoverageRequest coverageRequest = new CoverageRequest();
-
 		coverageRequest = getCoverageRequest(oAreaOfInterest,m_aoSatellites,oDateTimeStart,oDateTimeEnd);
 		//String sLookingType,String sViewAngle,String sSwathSize
 		System.out.println("findSwats CHIAMO SOLVE REQUEST");
@@ -762,10 +761,10 @@ public class InstanceFinder {
 //						}
 //					}
 				}
-				/*else
-				{
-					oSensor.setEnabled(false);
-				}*/
+//				else
+//				{
+//					oSensor.setEnabled(false);
+//				}
 			}
 		}
 		
