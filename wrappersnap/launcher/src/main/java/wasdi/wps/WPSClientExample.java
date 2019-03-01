@@ -173,7 +173,7 @@ public class WPSClientExample {
 	public static void main(String[] args) {
 
 		// TODO find way to initialize parsers/generators
-		System.setProperty("javax.xml.stream.XMLOutputFactory", "com.sun.xml.internal.stream.XMLOutputFactoryImpl");
+		System.setProperty("javax.xml.stream.XMLOutputFactory",   "com.sun.xml.internal.stream.XMLOutputFactoryImpl");
 		WPSClientExample client = new WPSClientExample();
 		client.testExecute("1.0.0");
 	}
