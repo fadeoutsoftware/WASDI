@@ -1704,8 +1704,12 @@ var EditorController = (function () {
             return false;
         }
 
-        //delete color manipulation in jstree (the colour manipulation is passed with reference)
-         delete this.m_oActiveBand.colorManipulation;
+        if(utilsIsObjectNullOrUndefined(this.m_oActiveBand) === false)
+        {
+            //delete color manipulation in jstree (the colour manipulation is passed with reference)
+            delete this.m_oActiveBand.colorManipulation;
+        }
+
         // Clear the active Band
         this.m_oActiveBand = null;
         // Get the layer Id
