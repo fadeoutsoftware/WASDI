@@ -293,7 +293,7 @@ service('GlobeService', ['$http',  'ConstantsService','SatelliteService', functi
         {
             //TODO ERROR  browser doesn't support WebGL
             console.log("Error in Cesium Globe miss WebGl");
-            utilsVexDialogAlertTop("ERROR IN CESIUM GLOBE MISS WEBGL<br>PLEASE UPADETE<br>LINK: HTTPS://GET.WEBGL.ORG/");
+            utilsVexDialogAlertTop("GURU MEDITATION<br>PLEASE UPDATE WEB GL<br>LINK: HTTPS://GET.WEBGL.ORG/");
         }
     };
     /*ROTATION GLOBE*/
