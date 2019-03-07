@@ -443,9 +443,13 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 		ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
 		ProcessWorkspace oProcessWorkspace = oProcessWorkspaceRepository.GetProcessByProcessObjId(oParameter.getProcessObjId());
 		
-		WpsFactory oWpsFactory = new WpsFactory();
-		WpsAdapter oWps = oWpsFactory.supply(oParameter.getWpsProvider());
-		//oWps.
+		//TODO no more factories necessary, just a plain client which calls the proxy
+		//necessary parameters:
+		//XML payload
+		//provider name (WASDI standard, used to initialize the appropriate proxy)
+		//see issue # 89 https://github.com/fadeoutsoftware/WASDI/issues/89.
+		
+		//the client calls the proxy and the polls for the status, and finally retrieve the result 
 	}
 	
 	/**
