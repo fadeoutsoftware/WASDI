@@ -15,14 +15,21 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import javax.inject.Inject;
 import javax.servlet.ServletConfig;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
+import javax.ws.rs.HeaderParam;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
+import javax.ws.rs.core.UriInfo;
 
 /**
  * @author c.nattero
@@ -31,24 +38,126 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 @Path("/wps")
 public class WasdiWps {
 
+	public WasdiWps() {
+		System.out.println("Hello WPS proxy");
+	}
+	
+	@Inject
+	WpsProxyFactory m_oWpsProxyFactory; 
+	
 	@Context
 	ServletConfig m_oServletConfig;
 
 	@GET
-	@Path("geoprocessing")
+	@Produces({"application/xml", "text/xml"})
+	public Response singleGet( @Context javax.ws.rs.core.UriInfo oUriInfo,
+			@Context javax.ws.rs.core.HttpHeaders oHeaders ) {
+		String sProvider = getProviderUrl(oUriInfo, oHeaders);
+		WpsProxy oProxy = m_oWpsProxyFactory.get(sProvider);
+		//TODO for developing purposes, get rid of this ASAP
+		oProxy.setProviderUrl("http://geoprocessing.demo.52north.org:8080/wps/WebProcessingService");
+		String sParam = getParamList(oUriInfo);
+		return oProxy.get(sParam, oHeaders);
+	}
+	
+	@POST
+	@Produces({"application/xml", "text/xml"})
+	@Consumes({"application/xml", "text/xml"})
+	public Response singlePost(@Context javax.ws.rs.core.UriInfo oUriInfo,
+			@Context javax.ws.rs.core.HttpHeaders oHeaders,
+			String sPayload ) {
+		String sProvider = getProviderUrl(oUriInfo, oHeaders);
+		WpsProxy oProxy = m_oWpsProxyFactory.get(sProvider);
+		String sParam = getParamList(oUriInfo);
+		//TODO for developing purposes, get rid of this ASAP
+		oProxy.setProviderUrl("http://geoprocessing.demo.52north.org:8080/wps/WebProcessingService");
+		return oProxy.post(sParam, oHeaders, sPayload);
+	}
+	
+	
+	private String getProviderUrl(UriInfo oUriInfo, HttpHeaders oHeaders) {
+		String sResult = null;
+		if(null!=oHeaders) {
+			//TODO change string into a variable, and read it from servlet config
+			sResult = oHeaders.getRequestHeaders().getFirst("wpsProviderName"); 
+			if(null==sResult) {
+				sResult = getProviderUrl(oUriInfo);
+			} //TODO else remove wpsProviderName from oHeaders
+		}
+		return sResult;
+	}
+	
+	private String getProviderUrl(UriInfo oUriInfo) {
+		MultivaluedMap<String, String> oQueryParamsMap = oUriInfo.getQueryParameters();
+		String sResult = "";
+		Set<String> sKeyset = oQueryParamsMap.keySet();
+		//TODO change string into a variable, and read it from servlet config 
+		if(sKeyset.contains("wpsProviderName")) {
+			sResult = oQueryParamsMap.getFirst("wpsProviderName");
+			//TODO remove wpsProviderName from oUriInfo
+		}
+		return sResult;
+	}
+
+	@GET
+	@Path("/geoprocessing")
 	@Produces({"application/xml", "text/xml"})
 	public Response getGeoProcessing(@Context javax.ws.rs.core.UriInfo oUriInfo) {
 		try {
+			String sPassedBaseUrl = oUriInfo.getAbsolutePath().toString();
+			String sBaseURL = getProviderUrl(oUriInfo);
 			String sParams = getParamList(oUriInfo);
+			
+			//String sBaseURL = "http://geoprocessing.demo.52north.org:8080/wps/WebProcessingService";
+			String sWpsRequest = sBaseURL+sParams;
 
-			String sBaseURL = "http://geoprocessing.demo.52north.org:8080/wps/WebProcessingService";
+			URL oUrl = new URL(sWpsRequest);
+			HttpURLConnection oHttpURLConnection = (HttpURLConnection) oUrl.openConnection();
+			oHttpURLConnection.setRequestMethod("GET");
+			oHttpURLConnection.setRequestProperty("Content-Type", "application/xml");
+			oHttpURLConnection.setDoOutput(true);
+			int iStatus = oHttpURLConnection.getResponseCode();
+			
+			
+			//TODO forward the response
+			
+			ResponseBuilder oResponseBuilder = null;
+			if(iStatus <= 299) {
+				String sResponse = getFullResponse(oHttpURLConnection);
+				System.out.println(sResponse);
+				oResponseBuilder = Response.ok(sResponse);
+			} else {
+				oResponseBuilder = Response.status(iStatus);
+			}
+			return oResponseBuilder.build();
+			
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+
+		//TODO instantiate an appropriate provider handler
+		//TODO pass the request to the provider handler (and let it do its job)
+		//TODO collect the response and pass it back to the client 
+		return null;
+	}
+	
+	@POST
+	@Path("/geoprocessing")
+	@Produces({"application/xml", "text/xml"})
+	@Consumes(MediaType.TEXT_XML)
+	public Response postGeoProcessing(@Context javax.ws.rs.core.UriInfo oUriInfo, String sPayload) {
+		try {
+			String sBaseURL = getProviderUrl(oUriInfo);
+			String sParams = getParamList(oUriInfo);			
 			String sWpsRequest = sBaseURL+sParams;
 
 
 			URL oUrl = new URL(sWpsRequest);
 			HttpURLConnection oHttpURLConnection = (HttpURLConnection) oUrl.openConnection();
-			oHttpURLConnection.setRequestMethod("GET");
-			oHttpURLConnection.setDoOutput(true);
+			oHttpURLConnection.setRequestMethod("POST");
+			
 
 			//try this one instead of building the entire URL string directly
 			//DataOutputStream out = new DataOutputStream(con.getOutputStream());
@@ -57,6 +166,10 @@ public class WasdiWps {
 			//out.close();
 
 			oHttpURLConnection.setRequestProperty("Content-Type", "application/xml");
+			oHttpURLConnection.setRequestProperty("User-Agent", "Mozilla/5.0" );
+			oHttpURLConnection.setRequestProperty("Accept-Language", "en-US,en;q=0.5");
+			
+			oHttpURLConnection.setDoOutput(true);
 
 			int iStatus = oHttpURLConnection.getResponseCode();
 			String sResponse = getFullResponse(oHttpURLConnection);
@@ -81,7 +194,9 @@ public class WasdiWps {
 		Set<String> sKeyset = oQueryParamsMap.keySet();
 		for (String sKey : sKeyset) {
 			String sValue = oQueryParamsMap.getFirst(sKey);
-			sParams+=sKey+"="+sValue+"&";
+			if(!sValue.startsWith("http")) {
+				sParams+=sKey+"="+sValue+"&";
+			}
 		}
 		if(sParams.endsWith("&")) {
 			sParams = sParams.substring(0, sParams.length()-1);
@@ -92,31 +207,6 @@ public class WasdiWps {
 	public static String getFullResponse(HttpURLConnection oHttpURLConnection) {
 		StringBuilder oFullResponseBuilder = new StringBuilder();
 		try {
-/*
-			// read status and message
-			oFullResponseBuilder.append(oHttpURLConnection.getResponseCode())
-			.append(" ")
-			.append(oHttpURLConnection.getResponseMessage())
-			.append("\n");
-
-			
-			// read headers
-			oHttpURLConnection.getHeaderFields().entrySet().stream()
-			.filter(entry -> entry.getKey() != null)
-			.forEach(entry -> {
-				oFullResponseBuilder.append(entry.getKey()).append(": ");
-				List<String> asHeaderValues = entry.getValue();
-				Iterator<String> oIterator = asHeaderValues.iterator();
-				if (oIterator.hasNext()) {
-					oFullResponseBuilder.append(oIterator.next());
-					while (oIterator.hasNext()) {
-						oFullResponseBuilder.append(", ").append(oIterator.next());
-					}
-				}
-				oFullResponseBuilder.append("\n");
-			});
-*/
-			// read response content
 			BufferedReader oBufferedReader = new BufferedReader(
 					new InputStreamReader(oHttpURLConnection.getInputStream()));
 			String sInputLine = null;
@@ -133,25 +223,5 @@ public class WasdiWps {
 
 		return oFullResponseBuilder.toString();
 	}
-
-	//TODO replicate for each WPS provider
-
-
-	//  Most of the query params are:	
-	//	
-	//	@QueryParam("request") String sRequest, //Mandatory: GetCapabilities, 
-	//	@QueryParam("service") String sService, //Mandatory: GetCapabilities, 
-	//	
-	//	@QueryParam("version") String sVersion, //Optional: GetCapabilities,
-	//	@QueryParam("AcceptVersions") String sAcceptVersions, //Optional
-	//	@QueryParam("Language") String sLanguage, //
-	//	@QueryParam("Identifier") String sIdentifier, //
-	//	@QueryParam("DataInputs") String sDataInputs, //
-	//	@QueryParam("ResponseDocument") String sResponseDocument, //
-	//	@QueryParam("storeExecuteResponse") String sStoreExecuteResponse, //
-	//	@QueryParam("lineage") String sLineage, //
-	//	@QueryParam("status") String sStatus //
-
-
 
 }

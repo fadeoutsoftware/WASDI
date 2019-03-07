@@ -246,4 +246,14 @@ public class Utils {
 			e.printStackTrace();
 		}
 	}
+
+	public static boolean isPlausibleHttpUrl(String sUrl) {
+		if(isNullOrEmpty(sUrl)) {
+			return false;
+		}
+		if(sUrl.startsWith("https://") || sUrl.startsWith("http://")) {
+			return true;
+		}
+		return false;
+	}
 }
