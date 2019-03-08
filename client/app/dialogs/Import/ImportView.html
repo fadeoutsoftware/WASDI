@@ -1,0 +1,62 @@
+<div class="modal fade import-file-modal">
+    <div class="modal-dialog ">
+        <div class="modal-content">
+            <!-- HEADER -->
+            <div class="modal-header">
+                <div class="row-v4">
+                    <div class="col-v4-xs-11 col-v4-sm-11 col-v4-md-11 col-v4-lg-11">
+                        <h4 class="modal-title ">
+                            Import
+                        </h4>
+                    </div>
+                    <div class="col-v4-xs-1 col-v4-sm-1 col-v4-md-1 col-v4-lg-1">
+                        <button type="button" class="close" ng-click="close(null)" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    </div>
+                </div>
+            </div>
+            <!-- BODY -->
+            <div class="modal-body container-fluid-v4">
+                <ul class="nav nav-tabs" role="tablist">
+                    <li ng-class="{'active':m_oController.m_sTabSelected === 'SFTP'}" ng-click="m_oController.m_sTabSelected = 'SFTP'">
+                        <a href="" role="tab" data-toggle="tab">
+                            SFTP
+                        </a>
+                    </li>
+                    <li ng-class="{'active':m_oController.m_sTabSelected === 'Upload'}" ng-click="m_oController.m_sTabSelected = 'Upload'">
+                        <a href="" role="tab" data-toggle="tab">
+                            Upload
+                        </a>
+                    </li>
+
+                </ul>
+
+                <div class="tab-content">
+                    <!-------   TABLE WORKFLOWS + LIST OF PRODUCTS ------->
+                    <div class="tab-pane fade in" id="SFTP"
+                         ng-class="{'active':m_oController.m_sTabSelected === 'SFTP'}">
+
+                        <ng-include src="'dialogs/Import/SftpTab.html'"></ng-include>
+
+                    </div>
+
+                    <!------- MULTI WORKFLOW INPUT ------->
+                    <div class="tab-pane fade in" id="Upload"
+                         ng-class="{'active':m_oController.m_sTabSelected === 'Upload'}">
+                        <ng-include src="'dialogs/Import/ImportTab.html'"></ng-include>
+
+                    </div>
+
+                </div>
+
+            </div>
+            <!-- FOOTER -->
+            <div class="modal-footer">
+
+                <button type="button" ng-click="close(null)" class="btn btn-primary btn-wasdi " data-dismiss="modal">
+                    {{"DIALOG_CLOSE_BUTTON"|translate}}
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>

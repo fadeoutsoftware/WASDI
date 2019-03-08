@@ -159,7 +159,7 @@ var EditorController = (function () {
 
         //set default navbar menu
         this.generateDefaultNavBarMenu();
-        this.navbarMenuTranslation();
+        // this.navbarMenuTranslation();
 
         // Launch image editor modal to debug it
         //this.openImageEditorDialog();
@@ -178,14 +178,22 @@ var EditorController = (function () {
                 subMenu:[],
                 onClick: this.openWorkflowManagerDialog
             },
-            // --- Import (SFTP) ---
+                // --- Import ---
             {
                 name:"",
                 icon:"fa fa-upload",
-                caption_i18n : "EDITOR_OPERATION_TITLE_SFTP",
+                caption_i18n : "EDITOR_OPERATION_TITLE_IMPORT",
                 subMenu:[],
-                onClick: this.openSFTPDialogInNavBar
+                onClick: this.openImportsDialog
             },
+            // --- Import (SFTP) ---
+            // {
+            //     name:"",
+            //     icon:"fa fa-upload",
+            //     caption_i18n : "EDITOR_OPERATION_TITLE_SFTP",
+            //     subMenu:[],
+            //     onClick: this.openSFTPDialogInNavBar
+            // },
             // --- WPS ---
             {
                 name:"WPS",
@@ -263,12 +271,12 @@ var EditorController = (function () {
                         onClick: this.openJRCClassificationDialog,
                         icon:"fa fa-lg fa-file-code-o"
                     },
-                    {
-                        name:"Upload File",//Upload
-                        subMenu:[],
-                        onClick: this.openUploadFileDialog,
-                        icon:"fa fa-lg fa-file-code-o"
-                    }
+                    // {
+                    //     name:"Upload File",//Upload
+                    //     subMenu:[],
+                    //     onClick: this.openUploadFileDialog,
+                    //     icon:"fa fa-lg fa-file-code-o"
+                    // }
 
                 ]
             },
@@ -355,86 +363,86 @@ var EditorController = (function () {
     }
 
 
-
-    EditorController.prototype.navbarMenuTranslation = function()
-    {
-        // var oController = this;
-        //
-        // this.m_oTranslate('EDITOR_OPERATION_TITLE_SFTP').then(function(text)
-        // {
-        //     oController.m_aoNavBarMenu[0].name  = text;
-        // });
-        // this.m_oTranslate('EDITOR_TOOLTIP_ICON_RADAR').then(function(text)
-        // {
-        //     oController.m_aoNavBarMenu[1].name  = text;
-        // });
-        // this.m_oTranslate('EDITOR_TOOLTIP_ICON_EYE').then(function(text)
-        // {
-        //     oController.m_aoNavBarMenu[2].name  = text;
-        // });
-        // this.m_oTranslate('EDITOR_OPERATION_TITLE_APPLY_RADIOMETRIC_PROCESSOR').then(function(text)
-        // {
-        //     oController.m_aoNavBarMenu[3].name  = text;
-        // });
-        //
-        //
-        //
-        // //RADAR MENU
-        // this.m_oTranslate('EDITOR_OPERATION_TITLE_APPLY_ORBIT').then(function(text)
-        // {
-        //     oController.m_aoNavBarMenu[1].subMenu[0].name = text;
-        // });
-        // this.m_oTranslate('EDITOR_OPERATION_TITLE_APPLY_MULTILOOKING').then(function(text)
-        // {
-        //     oController.m_aoNavBarMenu[1].subMenu[1].name = text;
-        // });
-        // this.m_oTranslate('EDITOR_OPERATION_TITLE_APPLY_RADIOMETRIC_CALIBRATE').then(function(text)
-        // {
-        //     oController.m_aoNavBarMenu[1].subMenu[2].name = text;
-        // });
-        // this.m_oTranslate('EDITOR_OPERATION_TITLE_APPLY_RADIOMETRIC_RANGE_DOPPLER_TERRAIN_CORRECTION').then(function(text)
-        // {
-        //     oController.m_aoNavBarMenu[1].subMenu[3].name = text;
-        // });
-        // //OPTICAL MENU
-        // this.m_oTranslate('EDITOR_OPERATION_TITLE_APPLY_RADIOMETRIC_NDVI').then(function(text)
-        // {
-        //     oController.m_aoNavBarMenu[2].subMenu[0].name  = text;
-        // });
-        // //PROCESSOR MENU
-        // this.m_oTranslate('EDITOR_OPERATION_TITLE_MIDA').then(function(text)
-        // {
-        //     oController.m_aoNavBarMenu[3].subMenu[0].name  = text;
-        // });
-        // this.m_oTranslate('EDITOR_OPERATION_TITLE_OPERA').then(function(text)
-        // {
-        //     oController.m_aoNavBarMenu[3].subMenu[1].name  = text;
-        // });
-        // this.m_oTranslate('EDITOR_OPERATION_TITLE_RASOR').then(function(text)
-        // {
-        //     oController.m_aoNavBarMenu[3].subMenu[2].name  = text;
-        // });
-        // this.m_oTranslate('EDITOR_OPERATION_TITLE_WORKFLOW').then(function(text)
-        // {
-        //     oController.m_aoNavBarMenu[3].subMenu[3].name  = text;
-        // });
-        // this.m_oTranslate('EDITOR_OPERATION_TITLE_NEW_PROCESSOR').then(function(text)
-        // {
-        //     oController.m_aoNavBarMenu[3].subMenu[4].name  = text;
-        // });
-        // this.m_oTranslate('EDITOR_OPERATION_TITLE_WAPPS').then(function(text)
-        // {
-        //     oController.m_aoNavBarMenu[3].subMenu[5].name  = text;
-        // });
-        // this.m_oTranslate('EDITOR_OPERATION_TITLE_LIST_FLOOD_AREA_DETECTION').then(function(text)
-        // {
-        //     oController.m_aoNavBarMenu[3].subMenu[6].name  = text;
-        // });
-        // this.m_oTranslate('EDITOR_OPERATION_TITLE_JRC_PROCESSOR').then(function(text)
-        // {
-        //     oController.m_aoNavBarMenu[3].subMenu[7].name  = text;
-        // });
-    };
+    //
+    // EditorController.prototype.navbarMenuTranslation = function()
+    // {
+    //     // var oController = this;
+    //     //
+    //     // this.m_oTranslate('EDITOR_OPERATION_TITLE_SFTP').then(function(text)
+    //     // {
+    //     //     oController.m_aoNavBarMenu[0].name  = text;
+    //     // });
+    //     // this.m_oTranslate('EDITOR_TOOLTIP_ICON_RADAR').then(function(text)
+    //     // {
+    //     //     oController.m_aoNavBarMenu[1].name  = text;
+    //     // });
+    //     // this.m_oTranslate('EDITOR_TOOLTIP_ICON_EYE').then(function(text)
+    //     // {
+    //     //     oController.m_aoNavBarMenu[2].name  = text;
+    //     // });
+    //     // this.m_oTranslate('EDITOR_OPERATION_TITLE_APPLY_RADIOMETRIC_PROCESSOR').then(function(text)
+    //     // {
+    //     //     oController.m_aoNavBarMenu[3].name  = text;
+    //     // });
+    //     //
+    //     //
+    //     //
+    //     // //RADAR MENU
+    //     // this.m_oTranslate('EDITOR_OPERATION_TITLE_APPLY_ORBIT').then(function(text)
+    //     // {
+    //     //     oController.m_aoNavBarMenu[1].subMenu[0].name = text;
+    //     // });
+    //     // this.m_oTranslate('EDITOR_OPERATION_TITLE_APPLY_MULTILOOKING').then(function(text)
+    //     // {
+    //     //     oController.m_aoNavBarMenu[1].subMenu[1].name = text;
+    //     // });
+    //     // this.m_oTranslate('EDITOR_OPERATION_TITLE_APPLY_RADIOMETRIC_CALIBRATE').then(function(text)
+    //     // {
+    //     //     oController.m_aoNavBarMenu[1].subMenu[2].name = text;
+    //     // });
+    //     // this.m_oTranslate('EDITOR_OPERATION_TITLE_APPLY_RADIOMETRIC_RANGE_DOPPLER_TERRAIN_CORRECTION').then(function(text)
+    //     // {
+    //     //     oController.m_aoNavBarMenu[1].subMenu[3].name = text;
+    //     // });
+    //     // //OPTICAL MENU
+    //     // this.m_oTranslate('EDITOR_OPERATION_TITLE_APPLY_RADIOMETRIC_NDVI').then(function(text)
+    //     // {
+    //     //     oController.m_aoNavBarMenu[2].subMenu[0].name  = text;
+    //     // });
+    //     // //PROCESSOR MENU
+    //     // this.m_oTranslate('EDITOR_OPERATION_TITLE_MIDA').then(function(text)
+    //     // {
+    //     //     oController.m_aoNavBarMenu[3].subMenu[0].name  = text;
+    //     // });
+    //     // this.m_oTranslate('EDITOR_OPERATION_TITLE_OPERA').then(function(text)
+    //     // {
+    //     //     oController.m_aoNavBarMenu[3].subMenu[1].name  = text;
+    //     // });
+    //     // this.m_oTranslate('EDITOR_OPERATION_TITLE_RASOR').then(function(text)
+    //     // {
+    //     //     oController.m_aoNavBarMenu[3].subMenu[2].name  = text;
+    //     // });
+    //     // this.m_oTranslate('EDITOR_OPERATION_TITLE_WORKFLOW').then(function(text)
+    //     // {
+    //     //     oController.m_aoNavBarMenu[3].subMenu[3].name  = text;
+    //     // });
+    //     // this.m_oTranslate('EDITOR_OPERATION_TITLE_NEW_PROCESSOR').then(function(text)
+    //     // {
+    //     //     oController.m_aoNavBarMenu[3].subMenu[4].name  = text;
+    //     // });
+    //     // this.m_oTranslate('EDITOR_OPERATION_TITLE_WAPPS').then(function(text)
+    //     // {
+    //     //     oController.m_aoNavBarMenu[3].subMenu[5].name  = text;
+    //     // });
+    //     // this.m_oTranslate('EDITOR_OPERATION_TITLE_LIST_FLOOD_AREA_DETECTION').then(function(text)
+    //     // {
+    //     //     oController.m_aoNavBarMenu[3].subMenu[6].name  = text;
+    //     // });
+    //     // this.m_oTranslate('EDITOR_OPERATION_TITLE_JRC_PROCESSOR').then(function(text)
+    //     // {
+    //     //     oController.m_aoNavBarMenu[3].subMenu[7].name  = text;
+    //     // });
+    // };
 
     /*********************************************************** VIEW METHODS**********************************************************/
 
@@ -2175,6 +2183,43 @@ var EditorController = (function () {
             modal.close.then(function (oResult) {
 
                 oController.m_oProcessesLaunchedService.loadProcessesFromServer(oController.m_oActiveWorkspace.workspaceId);
+            });
+        });
+
+        return true;
+    };
+
+    /**
+     *
+     * @param oWindow
+     * @returns {boolean}
+     */
+    EditorController.prototype.openImportsDialog = function(oWindow){
+        var oController;
+        if(utilsIsObjectNullOrUndefined(oWindow) === true)
+        {
+            oController = this;
+        }
+        else
+        {
+            oController = oWindow;
+        }
+
+        oController.m_oModalService.showModal({
+            templateUrl: "dialogs/Import/ImportView.html",
+            controller: "ImportController",
+            inputs: {
+                extras: {
+                    WorkSpaceId: oController.m_oActiveWorkspace.workspaceId
+                    // products:oController.m_aoProducts,
+                    // workflowId:oController.m_oActiveWorkspace.workspaceId
+                }
+            }
+        }).then(function (modal) {
+            modal.element.modal();
+            modal.close.then(function (oResult) {
+
+                // oController.m_oProcessesLaunchedService.loadProcessesFromServer(oController.m_oActiveWorkspace.workspaceId);
             });
         });
 
