@@ -7,16 +7,9 @@
 package it.fadeout.rest.resources.wps;
 
 import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
 import java.io.DataOutputStream;
-import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.PipedOutputStream;
-import java.io.Serializable;
 import java.io.StringWriter;
-import java.io.Writer;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.List;
@@ -25,13 +18,10 @@ import java.util.Set;
 
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.SerializationUtils;
-import org.apache.http.client.methods.RequestBuilder;
 
 import it.fadeout.Wasdi;
 import wasdi.shared.utils.Utils;
