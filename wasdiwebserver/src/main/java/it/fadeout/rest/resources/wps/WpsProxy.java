@@ -24,6 +24,8 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 import org.apache.commons.io.IOUtils;
 
 import it.fadeout.Wasdi;
+import wasdi.shared.business.WpsProvider;
+import wasdi.shared.data.WpsProvidersRepository;
 import wasdi.shared.utils.Utils;
 
 /**
@@ -36,7 +38,7 @@ public class WpsProxy {
 	protected String m_sProviderName;
 
 	public WpsProxy() {
-
+		
 	}
 
 	public void setProviderUrl(String sUrl) {
@@ -247,7 +249,15 @@ public class WpsProxy {
 	}
 
 	public void setProviderName(String sWpsProvider) {
-		// TODO ask the database for provider URL and set it as m_sProviderUrl
+		if(null == sWpsProvider) {
+			throw new NullPointerException("WpsProxy.setProviderName: passed a null String");
+		}
+		m_sProviderName = sWpsProvider;
+		WpsProvidersRepository oRepo = new WpsProvidersRepository();
+		String sUrl = oRepo.getProviderUrl(m_sProviderName);
+		if(null!=sUrl) {
+			m_sProviderUrl = sUrl;
+		}
 		
 	}
 
