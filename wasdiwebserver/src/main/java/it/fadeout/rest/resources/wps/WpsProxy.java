@@ -8,11 +8,13 @@ package it.fadeout.rest.resources.wps;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
+import java.io.DataOutputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PipedOutputStream;
+import java.io.Serializable;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.net.HttpURLConnection;
@@ -28,6 +30,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.SerializationUtils;
 import org.apache.http.client.methods.RequestBuilder;
 
 import it.fadeout.Wasdi;
@@ -135,14 +138,12 @@ public class WpsProxy {
 			oHttpURLConnection.setInstanceFollowRedirects(true);
 			
 //			//MAYBE improve this implementation which is inefficient, because it stores the entire payload before performing the request
-			OutputStream oOutputStream = oHttpURLConnection.getOutputStream();
-			Writer oWriter = new OutputStreamWriter(oOutputStream);
-			oWriter.write(sPayload);
+			DataOutputStream oOutputStream = new DataOutputStream(oHttpURLConnection.getOutputStream());
+			oOutputStream.writeBytes(sPayload);
 			oOutputStream.flush();
 			oOutputStream.close();
 			
 			return performAndHandleResult(oHttpURLConnection);
-
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -197,7 +198,6 @@ public class WpsProxy {
 				oBuilder = addHeaders(oBuilder, oHttpURLConnection.getHeaderFields());
 				return oBuilder.build();
 			}
-
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
