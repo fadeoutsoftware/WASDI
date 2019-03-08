@@ -1,0 +1,32 @@
+
+    <div class="row-v4">
+        <div class="col-v4 container" >
+
+            <div class="d-flex align-items-start" ng-hide="m_oController.m_bIsUploading === false">
+                <div class="loadIcon">
+                    <invader> </invader>
+                </div>
+            </div>
+
+            <div ng-show="m_oController.m_bIsUploading === false">
+                <div class="drag-and-drop " >
+                    <div ngf-drop ngf-select ng-model="m_oController.m_oFile" class="drop-box"
+                         ngf-drag-over-class="'dragover'" ngf-multiple="true" ngf-allow-dir="true"
+                         accept="*/*"
+                         ngf-pattern="'*/*'">
+
+                        <div ng-show="m_oController.m_oFile">File: {{m_oController.m_oFile[0].name}}</div>
+                        <div ngf-no-file-drop>File Drag/Drop is not supported for this browser</div>
+
+                    </div>
+                </div>
+            </div>
+
+            <button type="button" ng-click="run(null)" class="btn btn-primary btn-wasdi" ng-disabled="m_oController.isFileChosen()" >
+                Upload file
+            </button>
+
+        </div>
+
+    </div>
+
