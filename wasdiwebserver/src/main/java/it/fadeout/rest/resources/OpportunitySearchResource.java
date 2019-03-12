@@ -147,51 +147,28 @@ public class OpportunitySearchResource {
 			if (Utils.isNullOrEmpty(oUser.getUserId())) {
 				return aoCoverageSwathResultViewModels;
 			}
-//
-//			if (OrbitSearch == null)
-//				return null;
-//
+
 			// set nfs properties download
 			String userHome = System.getProperty("user.home");
 			String Nfs = System.getProperty("nfs.data.download");
 			if (Nfs == null)
 				System.setProperty("nfs.data.download", userHome + "/nfs/download");
-//
+
 			System.out.println("nfs dir " + System.getProperty("nfs.data.download"));
 
 			Date dtDate = new Date();
-//			String sArea = OpportunitiesSearch.getPolygon();
 			int iIdCoverageCounter = 1;
 			
 			ArrayList<SatelliteFilterViewModel> aoSatelliteFilters = OpportunitiesSearch.getSatelliteFilters();
-//			for(SatelliteFilterViewModel oSatelliteFilter : aoSatelliteFilters )
-//			{
-				ArrayList<CoverageSwathResult> aoCoverageSwathResult = new ArrayList<>();
-				aoCoverageSwathResult = InstanceFinder.findSwatsByFilters(OpportunitiesSearch);
-				Wasdi.DebugLog("TEST ");
 
+			ArrayList<CoverageSwathResult> aoCoverageSwathResult = new ArrayList<>();
+			aoCoverageSwathResult = InstanceFinder.findSwatsByFilters(OpportunitiesSearch);
 				
-//			}
-//			// Foreach filter combination found
-//			List<OrbitFilterViewModel> oOrbitFilters = OrbitSearch.getOrbitFilters();
-//			for (OrbitFilterViewModel oOrbitFilter : oOrbitFilters) {
-//
-//				// Find the opportunities
-//				ArrayList<CoverageSwathResult> aoCoverageSwathResult = new ArrayList<>();
-//				try {
-//					aoCoverageSwathResult = InstanceFinder.findSwatsByFilters(sArea,
-//							OrbitSearch.getAcquisitionStartTime(), OrbitSearch.getAcquisitionEndTime(),
-//							OrbitSearch.getSatelliteNames(), oOrbitFilter.getSensorResolution(),
-//							oOrbitFilter.getSensorType(),OrbitSearch.getLookingType(),OrbitSearch.getViewAngle(),OrbitSearch.getSwathSize());
-//				} 
-//				catch (ParseException e) {
-//					e.printStackTrace();
-//				}
-//
-				if (aoCoverageSwathResult == null)
-					return null;
-//
-				// For each Swat Result
+
+			if (aoCoverageSwathResult == null)
+				return null;
+
+				// For each Swath Result
 				for (CoverageSwathResult oSwatResul : aoCoverageSwathResult) {
 					// Get View Model and Childs
 					ArrayList<CoverageSwathResultViewModel> aoModels = getSwatViewModelFromResult(oSwatResul);
@@ -208,7 +185,13 @@ public class OpportunitySearchResource {
 					
 					aoCoverageSwathResultViewModels.add(oSwathResultViewModel);
 				}
-//
+
+
+//				for (CoverageSwathResult oSwatResul : aoCoverageSwathResult) {
+//					CoverageSwathResultViewModel oSwathResultViewModel = getCoverageSwathResultViewModelFromCoverageSwathResult(oSwatResul);
+//					aoCoverageSwathResultViewModels.add(oSwathResultViewModel);
+//				}
+////
 //			}
 //
 //			return aoCoverageSwathResultViewModels;
@@ -219,11 +202,12 @@ public class OpportunitySearchResource {
 
 		return aoCoverageSwathResultViewModels;
 	}
-	
-	private CoverageSwathResultViewModel getCoverageSwathResultViewModelFromCoverageSwathResult(CoverageSwathResult oSwath) {
+
+
+	public CoverageSwathResultViewModel getCoverageSwathResultViewModelFromCoverageSwathResult(CoverageSwathResult oSwath) {
 		
 		CoverageSwathResultViewModel oVM = new CoverageSwathResultViewModel();
-		
+
 		if (oSwath != null) {
 
 			oVM.SwathName = oSwath.getSwathName();
@@ -283,7 +267,87 @@ public class OpportunitySearchResource {
 				}
 			}
 		}
-		
+
+		//ADD CHILDS
+		ArrayList<SwathArea> aoChilds = oSwath.getChilds();
+		ArrayList<CoverageSwathResultViewModel> aoChildsViewModel = new ArrayList<CoverageSwathResultViewModel>();
+
+		for (SwathArea swathArea : aoChilds)
+		{
+			CoverageSwathResultViewModel oChild;
+			oChild = getCoverageSwathResultViewModelFromCoverageSwathResult(swathArea);
+			aoChildsViewModel.add(oChild);
+
+		}
+		oVM.aoChilds = aoChildsViewModel;
+
+		return oVM;
+	}
+
+	public CoverageSwathResultViewModel getCoverageSwathResultViewModelFromCoverageSwathResult(SwathArea oSwath) {
+
+		CoverageSwathResultViewModel oVM = new CoverageSwathResultViewModel();
+
+		if (oSwath != null) {
+
+			oVM.SwathName = oSwath.getSwathName();
+			oVM.IsAscending = oSwath.isAscending();
+			if (oSwath.getSat() != null) {
+				oVM.SatelliteName = oSwath.getSat().getName();
+			}
+
+			if (oSwath.getSat() != null) {
+				oVM.SensorName = oSwath.getSensor().getSName();
+
+				if (oSwath.getSat().getType() != null)
+					oVM.SensorType = oSwath.getSat().getType().name();
+
+			}
+
+			if (oSwath.getCoveredArea() != null)
+				oVM.CoveredAreaName = oSwath.getCoveredArea().getName();
+
+			if (oSwath.getSensor() != null) {
+				if (oSwath.getSensor().getLooking() != null)
+					oVM.SensorLookDirection = oSwath.getSensor().getLooking().toString();
+			}
+
+			if (oSwath.getTimeStart() != null) {
+				GregorianCalendar oCalendar = oSwath.getTimeStart().getCurrentGregorianCalendar();
+				// oVM.AcquisitionStartTime = oCalendar.getTime();
+				oVM.AcquisitionStartTime = new Date(oCalendar.getTimeInMillis());
+			}
+			if (oSwath.getTimeEnd() != null) {
+				GregorianCalendar oCalendar = oSwath.getTimeEnd().getCurrentGregorianCalendar();
+				// oVM.AcquisitionEndTime = oCalendar.getTime();
+				oVM.AcquisitionEndTime = new Date(oCalendar.getTimeInMillis());
+			}
+
+			oVM.AcquisitionDuration = oSwath.getDuration();
+
+			if (oSwath.getFootprint() != null) {
+				Polygon oPolygon = oSwath.getFootprint();
+				apoint[] aoPoints = oPolygon.getVertex();
+
+				if (aoPoints != null) {
+
+					oVM.SwathFootPrint = "POLYGON((";
+
+					for (int iPoints = 0; iPoints < aoPoints.length; iPoints++) {
+						apoint oPoint = aoPoints[iPoints];
+						oVM.SwathFootPrint += "" + (oPoint.x * 180.0 / Math.PI);
+						oVM.SwathFootPrint += " ";
+						oVM.SwathFootPrint += "" + (oPoint.y * 180.0 / Math.PI);
+						oVM.SwathFootPrint += ",";
+					}
+
+					oVM.SwathFootPrint = oVM.SwathFootPrint.substring(0, oVM.SwathFootPrint.length() - 2);
+
+					oVM.SwathFootPrint += "))";
+				}
+			}
+		}
+
 		return oVM;
 	}
 	

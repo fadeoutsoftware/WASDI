@@ -45,7 +45,7 @@ var SearchOrbitController = (function() {
         // this.m_aoSatelliteResources = [];
         this.m_aoSatelliteResourcesTree = null;
         this.m_aoSatelliteResources = [];
-
+        this.m_isDisabledSearchButton=false;
         //order the table
         this.m_sOrderBy = "Satellite";
         this.m_bReverseOrder = false;
@@ -829,19 +829,11 @@ var SearchOrbitController = (function() {
     // }
 
     SearchOrbitController.prototype.clearOrbitsTable = function(){
-        // this.m_oMapService.removeLayersFromMap();
-        // if(utilsIsObjectNullOrUndefined(this.m_aoOrbits) === true)
-        //     return false;
-        //
-        // var iNumberOfOrbits = this.m_aoOrbits.length;
-        //
-        // for(var iIndexOrbit = 0; iIndexOrbit < iNumberOfOrbits; iIndexOrbit++)
-        // {
-        //     var oOrbit = this.m_aoOrbits[iIndexOrbit];
-        //     this.m_oMapService.removeLayerFromMap(oOrbit.FootPrintRectangle);//remove orbit rectangle from map
-        //     oOrbit.FootPrintRectangle = null;
-        // }
+
+        this.removeAllLayers();
         this.m_aoOrbits = [];
+        this.m_isDisabledSearchButton = false;
+        this.m_oTreeService.uncheckAllNodes(this.m_sIdDiv)
         return true;
     };
 
@@ -891,7 +883,7 @@ var SearchOrbitController = (function() {
             checkbox: {
                 three_state : false, // to avoid that fact that checking a node also check others
                     whole_node : false,  // to avoid checking the box just clicking the node
-                    tie_selection : false // for checking without selecting and selecting without checking
+                    tie_selection : false, // for checking without selecting and selecting without checking
             },
             plugins: ['checkbox','contextmenu'],
             "contextmenu": { // my right click menu
@@ -1236,7 +1228,7 @@ var SearchOrbitController = (function() {
     {
 
         var oData1 = this.generateSatellitesResourcesTree(oDataInput);
-
+        var oController = this;
         var oJsonData = {
             core: {
                 data: oData1,
@@ -1247,8 +1239,35 @@ var SearchOrbitController = (function() {
                 whole_node : false,  // to avoid checking the box just clicking the node
                 tie_selection : false // for checking without selecting and selecting without checking
             },
-            plugins: ['checkbox'],
+            plugins: ['checkbox','contextmenu'],
+            "contextmenu": { // my right click menu
+                "items":function($node){
+                    // var oController = this;
+                    // var bIsEmptyNodeFootPrint = oController.isEmptyNodeFootPrint($node);
+                    var bIsSensorNode = oController.IsSensorNode($node);
+                    var oReturnValue = {
+                        "Select all sensor modes": {
+                            "label": "Select all sensor modes",
+                            "action": function (obj) {
+                                // oController.downloadKML($node);
+                                oController.m_oTreeService.checkChildren(oController.m_sIdDivSatelliteResourceTree,$node)
+                            },
+                             "_disabled":!bIsSensorNode
+                        },
+                        "Deselect all sensor modes": {
+                            "label": "Deselect all sensor modes",
+                            "action": function (obj) {
+                                // oController.downloadKML($node);
+                                oController.m_oTreeService.uncheckChildren(oController.m_sIdDivSatelliteResourceTree,$node)
+                            },
+                            "_disabled":!bIsSensorNode
+                        }
+                    }
 
+                    return oReturnValue;
+                }
+
+            }
         }
 
         return oJsonData;
@@ -1288,7 +1307,16 @@ var SearchOrbitController = (function() {
     //
     //     return oReturnValue;
     // };
-
+    SearchOrbitController.prototype.IsSensorNode = function(oNode)
+    {
+        if( (utilsIsObjectNullOrUndefined(oNode) === false) &&
+            (utilsIsObjectNullOrUndefined(oNode.original.isSensor) === false) &&
+            (oNode.original.isSensor === true) )
+        {
+            return true;
+        }
+        return false;
+    }
     SearchOrbitController.prototype.isEmptyNodeFootPrint = function(oNode)
     {
         if( (oNode.original.isFrame === false) || (oNode.original.isSwath===false) ||
@@ -1341,7 +1369,7 @@ var SearchOrbitController = (function() {
                 //add sensor
                 var oSatelliteSensorTree = this.generateNode(oSatelliteTree,sDescription);
                 oSatelliteSensorTree.icon = "folder-icon-menu-jstree";
-
+                oSatelliteSensorTree.isSensor = true;
 
                 var oSensor = oSatellite.satelliteSensors[iSensor];
                 var iNumberOfSensorModes = oSensor.sensorModes.length;
@@ -1392,6 +1420,8 @@ var SearchOrbitController = (function() {
         this.m_bIsVisibleLoadingIcon = true;
         // oJSON = JSON.string
         // ify(oJSON);
+        this.m_isDisabledSearchButton = true;
+
         this.m_oSearchOrbitService.searchOrbit(oJSON)
             .success(function (data, status, headers, config) {
                 if(!utilsIsObjectNullOrUndefined(data))
@@ -1411,16 +1441,11 @@ var SearchOrbitController = (function() {
                         oController.m_oTreeService.loadNewTree(oController.m_sIdDiv,oController.m_oOpportunitiesTree);
                     }
 
-
-                    // oController.setOrbitAsUnchecked();
-                    // if(data.length === 0)
-                    // {
-                    //     utilsVexDialogAlertTop("GURU MEDITATION<br>NO RESULTS FOR YOUR FILTERS");
-                    // }
                 }
                 else
                 {
                     utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR: SEARCH ORBITS FAILS.");
+                    oController.m_isDisabledSearchButton = false;
                 }
                 // oController.initOrbitSearch();
                 oController.m_bIsVisibleLoadingIcon = false;
@@ -1431,6 +1456,7 @@ var SearchOrbitController = (function() {
                 // oController.initOrbitSearch();
                 oController.m_aoOrbits = null;
                 oController.m_bIsVisibleLoadingIcon = false;
+                oController.m_isDisabledSearchButton = false;
                 // oController.m_aoSatelliteResources=[];
             });
 
@@ -1744,7 +1770,41 @@ var SearchOrbitController = (function() {
 
         }
         return sCoordinatesPolygon;
+    };
+
+    SearchOrbitController.prototype.removeAllLayers = function(){
+        var treeInst = $(this.m_sIdDiv).jstree(true);
+        var aoNodes = treeInst._model.data;
+        this.removeAllLayersInMapByNodes(aoNodes,this.m_sIdDiv)
     }
+
+    SearchOrbitController.prototype.removeAllLayersInMapByNodes = function(aoNodes,sIdDiv)
+    {
+        if(utilsIsObjectNullOrUndefined(aoNodes) === true)
+        {
+            return false;
+        }
+
+        for (var iIndex in aoNodes)
+        {
+            if ( (utilsIsObjectNullOrUndefined(aoNodes[iIndex]) === false) )
+            {
+                // $('orbitMap').jstree("_open_to", aoNodes[iIndex].id);
+                var oNode = this.m_oTreeService.getNodeById(aoNodes[iIndex].id,sIdDiv);
+                if( utilsIsObjectNullOrUndefined(oNode.original) === false )
+                {
+                    if(utilsIsObjectNullOrUndefined(oNode.original.rectangle) === false)
+                    {
+                        // this.m_oMapService.removeRectangle(oNode.original.rectangle);
+                        this.m_oMapService.removeLayerFromMap(oNode.original.rectangle);
+                    }
+                }
+
+
+            }
+        }
+        return true;
+    };
     SearchOrbitController.$inject = [
         '$scope',
         '$location',

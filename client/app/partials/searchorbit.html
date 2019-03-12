@@ -3,7 +3,10 @@
     <!-- TOP TOOLBAR/OPERATION BAR -->
     <div class="row-v4 justify-content-end toolbar">
         <div class="col-v4-auto ml-auto">
-            <button class="btn btn-primary btn-wasdi" ng-click="m_oController.searchOrbit()"><i class="fa fa-search" aria-hidden="true"></i>Search</button>
+            <button class="btn btn-primary btn-wasdi" ng-click="m_oController.searchOrbit()"
+                    ng-class="{'disabled': m_oController.m_isDisabledSearchButton}" ng-disabled="m_oController.m_isDisabledSearchButton">
+                <i class="fa fa-search" aria-hidden="true"></i>Search
+            </button>
         </div>
     </div>
 
@@ -77,7 +80,7 @@
                                 <div class="btn-group" role="group" aria-label="...">
                                     <button type="button" class="btn btn-primary btn-wasdi btn-sm"
                                             ng-click="m_oController.m_oTreeService.openAllCheckedNodes(m_oController.m_sIdDivSatelliteResourceTree)">
-                                        checked nodes
+                                        open selected nodes
                                     </button>
                                     <button type="button" class="btn btn-primary btn-wasdi btn-sm"
                                             ng-click="m_oController.m_oTreeService.closeAllNodes(m_oController.m_sIdDivSatelliteResourceTree)">
@@ -118,7 +121,7 @@
                                 <div class="btn-group" role="group" aria-label="...">
                                     <button type="button" class="btn btn-primary btn-wasdi"
                                             ng-click="m_oController.m_oTreeService.openAllCheckedNodes(m_oController.m_sIdDiv)">
-                                        open checked nodes
+                                        open selected nodes
                                     </button>
                                     <button type="button" class="btn btn-primary btn-wasdi"
                                             ng-click="m_oController.m_oTreeService.closeAllNodes(m_oController.m_sIdDiv)">

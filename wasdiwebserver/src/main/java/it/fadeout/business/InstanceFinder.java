@@ -629,9 +629,27 @@ public class InstanceFinder {
 			}
 		}
 		
+		/*
+		 * 7.694467267311044,43.030983666389005 10.490520405749205,43.030983666389005 10.539621859336185,45.07445697505224 7.645365813724064,45.07445697505224 7.694467267311044,43.030983666389005 NFS KML
+		 * 7.694467267311044 43.030983666389005,10.490520405749205 43.030983666389005,10.539621859336185 45.07445697505224,7.645365813724064 45.07445697505224,7.694467267311044 43.030983666389005 NFS
+		 *
+		 * 7.229347229003907 43.004647127794435,7.229347229003907 45.67548217560647,11.492042541503908 45.67548217560647,11.492042541503908 43.004647127794435,7.229347229003907 43.004647127794435 MIO
+		 * 7.229347229003907 43.004647127794435,11.492042541503908 43.004647127794435,11.492042541503908 45.67548217560647,7.229347229003907 45.67548217560647,7.229347229003907 43.004647127794435 MIO MODIFICATO
+		 *
+		 * 8.490242096782813,44.02210614526421 9.875676095276264,44.01965421943342 9.891090537191394,45.015831913404114 8.481763277950172,45.01832612341336 8.490242096782813,44.02210614526421 NFS KML
+		 * 8.490242096782813 44.02210614526421,9.875676095276264 44.01965421943342,9.891090537191394 45.015831913404114,8.481763277950172 45.01832612341336,8.490242096782813 44.02210614526421 NFS KML
+		 * */
 		// preparo l'area di interesse
 		InterestArea oAreaOfInterest = new InterestArea("required area");
 		String sArea = oOpportunitiesSearch.getPolygon();
+
+		//TODO REMOVE IT DEBUG
+//		sArea="7.694467267311044 43.030983666389005,10.490520405749205 43.030983666389005,10.539621859336185 45.07445697505224,7.645365813724064 45.07445697505224,7.694467267311044 43.030983666389005";
+		//sArea="7.694467267311044 43.030983666389005,7.645365813724064 45.07445697505224,10.539621859336185 45.07445697505224,10.490520405749205 43.030983666389005,7.694467267311044 43.030983666389005";
+
+//		sArea="7.229347229003907 43.004647127794435,7.229347229003907 45.67548217560647,11.492042541503908 45.67548217560647,11.492042541503908 43.004647127794435,7.229347229003907 43.004647127794435";
+//		sArea="7.229347229003907 43.004647127794435,11.492042541503908 43.004647127794435,11.492042541503908 45.67548217560647,7.229347229003907 45.67548217560647,7.229347229003907 43.004647127794435";
+
 		Polygon oPoligon = prepareAreaOfInterest(sArea);
 		oAreaOfInterest.setArea(oPoligon);
 		
@@ -647,7 +665,6 @@ public class InstanceFinder {
 		
 		// preparo la richiesta di copertura
 		CoverageRequest coverageRequest = new CoverageRequest();
-
 		coverageRequest = getCoverageRequest(oAreaOfInterest,m_aoSatellites,oDateTimeStart,oDateTimeEnd);
 		//String sLookingType,String sViewAngle,String sSwathSize
 		System.out.println("findSwats CHIAMO SOLVE REQUEST");
@@ -774,37 +791,20 @@ public class InstanceFinder {
 	
 	private static void setEnableSensorModes(ArrayList<SensorMode> oSensorModes, ArrayList<SensorModeViewModel> oSensorModesEnabled)
 	{
-		for(SensorModeViewModel oSensorModeEnabled:oSensorModesEnabled)
-		{
-			for (SensorMode oSensorMode : oSensorModes) 
+		for (SensorMode oSensorMode : oSensorModes) {
+			for(SensorModeViewModel oSensorModeEnabled:oSensorModesEnabled)
 			{
 				if(oSensorMode.getName().equals(oSensorModeEnabled.getName()))
 				{
 					oSensorMode.setEnabled(true);
-					
 				}
-//				else
-//				{
-//					oSensorMode.setEnabled(false);
-//				}
+				/*else
+				{
+					oSensorMode.setEnabled(false);
+				}*/
+
 			}
 		}
-		
-//		for (SensorMode oSensorMode : oSensorModes) 
-//		{
-//			for(SensorModeViewModel oSensorModeEnabled:oSensorModesEnabled)
-//			{
-//				if(oSensorMode.getName().equals(oSensorModeEnabled.getName()))
-//				{
-//					oSensorMode.setEnabled(true);
-//				}
-//				else
-//				{
-//					oSensorMode.setEnabled(false);
-//				}
-//
-//			}
-//		}
 	}
 	
 	private static LookingType convertLookingTypeString(String sLookingType)
