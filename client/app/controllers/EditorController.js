@@ -289,7 +289,7 @@ var EditorController = (function () {
                 subMenu:[
                     {
                         name:"",//range doppler terrain correction
-                        caption_i18n : "EDITOR_OPERATION_TITLE_APPLY_RADIOMETRIC_RANGE_DOPPLER_TERRAIN_CORRECTION",
+                        caption_i18n : "EDITOR_OPERATION_TITLE_APPLY_RADIOMETRIC_NDVI",
                         subMenu:[],
                         onClick: this.openNDVIDialogInNavBar,
                         icon:""
