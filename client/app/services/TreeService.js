@@ -168,5 +168,44 @@ service('TreeService', ['$http',  'ConstantsService', function ($http, oConstant
         return iNumberOfCheckedNodes;
     };
 
+    this.checkChildren = function(sIdDiv,oNode)
+    {
+        if( (utilsIsStrNullOrEmpty(sIdDiv) === true) || utilsIsObjectNullOrUndefined(oNode))
+        {
+            return false;
+        }
 
+        var iNumberOfChildren = oNode.children.length;
+        if(iNumberOfChildren > 0)
+        {
+            $(sIdDiv).jstree(true).check_node(oNode.children);
+        }
+
+        // for(var iIndexChild = 0; iIndexChild < iNumberOfChildren;iIndexChild++)
+        // {
+        //
+        // }
+
+        return true;
+    }
+    this.uncheckChildren = function(sIdDiv,oNode)
+    {
+        if( (utilsIsStrNullOrEmpty(sIdDiv) === true) || utilsIsObjectNullOrUndefined(oNode))
+        {
+            return false;
+        }
+
+        var iNumberOfChildren = oNode.children.length;
+        if(iNumberOfChildren > 0)
+        {
+            $(sIdDiv).jstree(true).uncheck_node(oNode.children);
+        }
+
+        // for(var iIndexChild = 0; iIndexChild < iNumberOfChildren;iIndexChild++)
+        // {
+        //
+        // }
+
+        return true;
+    }
 }]);
