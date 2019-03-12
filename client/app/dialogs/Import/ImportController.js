@@ -21,7 +21,7 @@ var ImportController = (function() {
         this.m_oUser = this.m_oConstantsService.getUser();
         this.m_bIsVisibleLoadIcon = false;
         this.m_aoSelectedFiles = [];
-        this.m_sTabSelected = "SFTP";
+        this.m_sTabSelected = "Upload";
         this.m_bIsUploading = false;
         this.m_sWorkspaceId = oExtras.WorkSpaceId;
 
