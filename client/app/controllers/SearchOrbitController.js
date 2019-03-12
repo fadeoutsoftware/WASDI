@@ -45,7 +45,7 @@ var SearchOrbitController = (function() {
         // this.m_aoSatelliteResources = [];
         this.m_aoSatelliteResourcesTree = null;
         this.m_aoSatelliteResources = [];
-
+        this.m_isDisabledSearchButton=false;
         //order the table
         this.m_sOrderBy = "Satellite";
         this.m_bReverseOrder = false;
@@ -829,25 +829,11 @@ var SearchOrbitController = (function() {
     // }
 
     SearchOrbitController.prototype.clearOrbitsTable = function(){
-        // this.m_oMapService.removeLayersFromMap();
-        // if(utilsIsObjectNullOrUndefined(this.m_aoOrbits) === true)
-        //     return false;
-        //
-        // var iNumberOfOrbits = this.m_aoOrbits.length;
-        //
-        // for(var iIndexOrbit = 0; iIndexOrbit < iNumberOfOrbits; iIndexOrbit++)
-        // {
-        //     var oOrbit = this.m_aoOrbits[iIndexOrbit];
-        //     this.m_oMapService.removeLayerFromMap(oOrbit.FootPrintRectangle);//remove orbit rectangle from map
-        //     oOrbit.FootPrintRectangle = null;
-        // }
 
-        // this.m_oMapService.clearMap();
-        // this.m_oMapService.initMap('orbitMap');
         this.removeAllLayers();
         this.m_aoOrbits = [];
-        // this.m_oMapService.initMap('orbitMap');
-
+        this.m_isDisabledSearchButton = false;
+        this.m_oTreeService.uncheckAllNodes(this.m_sIdDiv)
         return true;
     };
 
@@ -897,7 +883,7 @@ var SearchOrbitController = (function() {
             checkbox: {
                 three_state : false, // to avoid that fact that checking a node also check others
                     whole_node : false,  // to avoid checking the box just clicking the node
-                    tie_selection : false // for checking without selecting and selecting without checking
+                    tie_selection : false, // for checking without selecting and selecting without checking
             },
             plugins: ['checkbox','contextmenu'],
             "contextmenu": { // my right click menu
@@ -1434,6 +1420,8 @@ var SearchOrbitController = (function() {
         this.m_bIsVisibleLoadingIcon = true;
         // oJSON = JSON.string
         // ify(oJSON);
+        this.m_isDisabledSearchButton = true;
+
         this.m_oSearchOrbitService.searchOrbit(oJSON)
             .success(function (data, status, headers, config) {
                 if(!utilsIsObjectNullOrUndefined(data))
@@ -1457,6 +1445,7 @@ var SearchOrbitController = (function() {
                 else
                 {
                     utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR: SEARCH ORBITS FAILS.");
+                    oController.m_isDisabledSearchButton = false;
                 }
                 // oController.initOrbitSearch();
                 oController.m_bIsVisibleLoadingIcon = false;
@@ -1467,6 +1456,7 @@ var SearchOrbitController = (function() {
                 // oController.initOrbitSearch();
                 oController.m_aoOrbits = null;
                 oController.m_bIsVisibleLoadingIcon = false;
+                oController.m_isDisabledSearchButton = false;
                 // oController.m_aoSatelliteResources=[];
             });
 

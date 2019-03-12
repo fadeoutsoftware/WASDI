@@ -3,7 +3,10 @@
     <!-- TOP TOOLBAR/OPERATION BAR -->
     <div class="row-v4 justify-content-end toolbar">
         <div class="col-v4-auto ml-auto">
-            <button class="btn btn-primary btn-wasdi" ng-click="m_oController.searchOrbit()"><i class="fa fa-search" aria-hidden="true"></i>Search</button>
+            <button class="btn btn-primary btn-wasdi" ng-click="m_oController.searchOrbit()"
+                    ng-class="{'disabled': m_oController.m_isDisabledSearchButton}" ng-disabled="m_oController.m_isDisabledSearchButton">
+                <i class="fa fa-search" aria-hidden="true"></i>Search
+            </button>
         </div>
     </div>
 
