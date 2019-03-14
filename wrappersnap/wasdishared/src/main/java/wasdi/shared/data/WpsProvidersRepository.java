@@ -17,6 +17,7 @@ import org.bson.Document;
 import com.mongodb.client.FindIterable;
 
 import wasdi.shared.business.WpsProvider;
+import wasdi.shared.utils.AuthenticationCredentials;
 
 public class WpsProvidersRepository extends MongoRepository {
 
@@ -79,5 +80,21 @@ public class WpsProvidersRepository extends MongoRepository {
 		} else {
 			return null;
 		}
+	}
+	
+	public AuthenticationCredentials getCredentials(String sProviderName) {
+		System.out.println("WpsProvidersRepository");
+		if(null==sProviderName) {
+			throw new NullPointerException("WpsProviderRepository.getProviderUrl: null String passed");
+		}
+		WpsProvider oProvider = getProvider(sProviderName);
+		if(null == oProvider) {
+			return null;
+		}
+		if(null == oProvider.getUsername() || null == oProvider.getPassword()) {
+			return null;
+		}
+		AuthenticationCredentials oCredentials = new AuthenticationCredentials(oProvider.getUsername(), oProvider.getPassword());
+		return oCredentials;
 	}
 }
