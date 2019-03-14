@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.function.Supplier;
 
 import it.fadeout.Wasdi;
+import wasdi.shared.data.WpsProvidersRepository;
 import wasdi.shared.utils.Utils;
 
 /**
@@ -27,7 +28,8 @@ public class WpsProxyFactory {
 		Map<String, Supplier<WpsProxy>> aoProxies = new HashMap<>();
 		aoProxies.put("default", WpsProxy::new);
 		aoProxies.put("gpod", WpsProxyGPOD::new);
-		aoProxies.put("utep", WpsProxyUTEP::new);
+		aoProxies.put("utep", WpsProxyBasicAuth::new);
+		aoProxies.put("basicAuth", WpsProxyBasicAuth::new);
 		aoProxies.put("wasdi", WpsProxyWASDI::new);
 		
 		s_aoProxies = Collections.unmodifiableMap(aoProxies);
@@ -49,6 +51,8 @@ public class WpsProxyFactory {
 		if(null==oSupplier) {
 			Wasdi.DebugLog("WpsProxyFactory.get: no suitable proxy for given provider found, trying default");
 			oSupplier = s_aoProxies.get("default");
+		} else {
+			Wasdi.DebugLog("WpsProxyFactory.get: returning WpsProxy for "+sWpsProvider );
 		}
 		WpsProxy oResult = oSupplier.get();
 		oResult.setProviderName(sWpsProvider);

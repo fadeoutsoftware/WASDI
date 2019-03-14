@@ -51,7 +51,7 @@ public class WasdiWps {
 		String sProvider = getProviderUrl(oUriInfo, oHeaders);
 		WpsProxy oProxy = m_oWpsProxyFactory.get(sProvider);
 		//TODO for developing purposes, get rid of this ASAP
-		oProxy.setProviderUrl("http://geoprocessing.demo.52north.org:8080/wps/WebProcessingService");
+		//oProxy.setProviderUrl("http://geoprocessing.demo.52north.org:8080/wps/WebProcessingService");
 		String sParam = getParamList(oUriInfo);
 		return oProxy.get(sParam, oHeaders);
 	}
@@ -66,7 +66,7 @@ public class WasdiWps {
 		WpsProxy oProxy = m_oWpsProxyFactory.get(sProvider);
 		String sParam = getParamList(oUriInfo);
 		//TODO for developing purposes, get rid of this ASAP
-		oProxy.setProviderUrl("http://geoprocessing.demo.52north.org:8080/wps/WebProcessingService");
+		//oProxy.setProviderUrl("http://geoprocessing.demo.52north.org:8080/wps/WebProcessingService");
 		return oProxy.post(sParam, oHeaders, sPayload);
 	}
 	
