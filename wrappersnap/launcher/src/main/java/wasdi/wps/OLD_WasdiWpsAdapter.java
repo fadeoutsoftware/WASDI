@@ -10,7 +10,7 @@ package wasdi.wps;
  * @author c.nattero
  *
  */
-public class WasdiWpsAdapter extends WpsAdapter {
+public class OLD_WasdiWpsAdapter extends OLD_WpsAdapter {
 	//TODO implement ProcessWorkspaceUpdateNotifier
 	
 	static {

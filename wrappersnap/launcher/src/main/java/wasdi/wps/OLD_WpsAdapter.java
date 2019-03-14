@@ -17,7 +17,7 @@ import java.net.URL;
  * @author c.nattero
  *
  */
-public abstract class WpsAdapter {
+public abstract class OLD_WpsAdapter {
 	
 	protected static String s_sWpsHost;
 	protected static String s_sVersion;
@@ -29,7 +29,7 @@ public abstract class WpsAdapter {
 	protected String m_sJobId;
 	
 
-	public WpsAdapter(){
+	public OLD_WpsAdapter(){
 		m_sService = "WPS";
 	}
 		

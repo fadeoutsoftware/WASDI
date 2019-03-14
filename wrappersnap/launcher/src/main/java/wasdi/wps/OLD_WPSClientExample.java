@@ -32,7 +32,7 @@ import org.n52.geoprocessing.wps.client.model.execution.BoundingBox;
 import org.n52.geoprocessing.wps.client.model.execution.Data;
 import org.n52.geoprocessing.wps.client.model.execution.Execute;
 
-public class WPSClientExample {
+public class OLD_WPSClientExample {
 
 	private static final String MIME_TYPE_TEXT_CSV = "text/csv";
 	private static final String MIME_TYPE_TEXT_XML = "text/xml";
@@ -174,7 +174,7 @@ public class WPSClientExample {
 
 		// TODO find way to initialize parsers/generators
 		System.setProperty("javax.xml.stream.XMLOutputFactory",   "com.sun.xml.internal.stream.XMLOutputFactoryImpl");
-		WPSClientExample client = new WPSClientExample();
+		OLD_WPSClientExample client = new OLD_WPSClientExample();
 		client.testExecute("1.0.0");
 	}
 
