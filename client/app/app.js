@@ -214,7 +214,8 @@ wasdiApp.controller("EditUserController", EditUserController);
 wasdiApp.controller("FTPController", FTPController);
 wasdiApp.controller("ListFloodAreaDetectionController", ListFloodAreaDetectionController);
 wasdiApp.controller("JRCWorkflowController", JRCWorkflowController);
-wasdiApp.controller("ImportController", ImportController);
+wasdiApp.controller("UploadController", UploadController);
+wasdiApp.controller("JRCS2Controller", JRCS2Controller);
 
 wasdiApp.controller(UploadFileController.REG_NAME, UploadFileController);
 wasdiApp.controller(JRCClassificationController.REG_NAME, JRCClassificationController);

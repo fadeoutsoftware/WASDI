@@ -271,6 +271,13 @@ var EditorController = (function () {
                         onClick: this.openJRCClassificationDialog,
                         icon:"fa fa-lg fa-file-code-o"
                     },
+                    {
+                        name:"",//JRC Processor
+                        caption_i18n : "EDITOR_OPERATION_TITLE_JRCS2_TEST_PROCESSOR",
+                        subMenu:[],
+                        onClick: this.openJRCS2TestProcessor,
+                        icon:"fa fa-lg fa-file-code-o"
+                    },
                     // {
                     //     name:"Upload File",//Upload
                     //     subMenu:[],
@@ -2207,7 +2214,7 @@ var EditorController = (function () {
 
         oController.m_oModalService.showModal({
             templateUrl: "dialogs/Import/ImportView.html",
-            controller: "ImportController",
+            controller: "UploadController",
             inputs: {
                 extras: {
                     WorkSpaceId: oController.m_oActiveWorkspace.workspaceId
@@ -2514,6 +2521,33 @@ var EditorController = (function () {
         oController.m_oModalService.showModal({
             templateUrl: "dialogs/JRC_classification/JRCClassificationView.html",
             controller: "JRCClassificationController",
+            inputs: {
+                extras: {
+                    products:oController.m_aoProducts,
+                }
+            }
+        }).then(function (modal) {
+            modal.element.modal();
+            modal.close.then(function(oResult){
+
+            });
+        });
+    };
+    EditorController.prototype.openJRCS2TestProcessor = function(oWindow)
+    {
+        var oController;
+        if(utilsIsObjectNullOrUndefined(oWindow) === true)
+        {
+            oController = this;
+        }
+        else
+        {
+            oController = oWindow;
+        }
+
+        oController.m_oModalService.showModal({
+            templateUrl: "dialogs/JRCS2/JRCS2.html",
+            controller: "JRCS2Controller",
             inputs: {
                 extras: {
                     products:oController.m_aoProducts,

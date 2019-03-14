@@ -1,9 +1,6 @@
-.import-file-modal {
-
+.mosaic-modal {
     .modal-dialog {
-        //width: 90% !important;
-        //height: 90% !important;
-
+        //width:50%;
         .modal-content {
             .modal-header {
                 color: $wasdi-white;
@@ -12,21 +9,10 @@
                     color: $wasdi-white;
                     opacity: 1;
                 }
-                .snap-logo {
-                    width: 50px;
-                }
+
             }
 
             .modal-body {
-                //max-height: none !important;
-                .user-options{
-                    .wasdi-input{
-                        margin-top: 0;
-                    }
-                    .btn-wasdi{
-                        margin-top: 1px;
-                    }
-                }
 
 
             }

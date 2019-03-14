@@ -4,9 +4,9 @@
 
 
 
-var ImportController = (function() {
+var UploadController = (function() {
 
-    function ImportController($scope, oClose,oExtras,oAuthService,oConstantsService,oCatalogService,oProductService) {
+    function UploadController($scope, oClose,oExtras,oAuthService,oConstantsService,oCatalogService,oProductService) {
         this.m_oScope = $scope;
         this.m_oScope.m_oController = this;
         this.m_oAuthService = oAuthService;
@@ -38,12 +38,12 @@ var ImportController = (function() {
 
     }
     /*************** UPLOAD ***************/
-    ImportController.prototype.isFileChosen = function()
+    UploadController.prototype.isFileChosen = function()
     {
         return ( utilsIsObjectNullOrUndefined(this.m_oFile) || utilsIsObjectNullOrUndefined(this.m_oFile[0]));
     };
 
-    ImportController.prototype.uploadFile = function(){
+    UploadController.prototype.uploadFile = function(){
         if( utilsIsObjectNullOrUndefined(this.m_oFile) || utilsIsObjectNullOrUndefined(this.m_oFile[0]) )
         {
             return false;
@@ -80,7 +80,7 @@ var ImportController = (function() {
 
         return true;
     }
-    ImportController.prototype.cleanDragAndDrop = function()
+    UploadController.prototype.cleanDragAndDrop = function()
     {
         this.m_oFile[0] = null;
     }
@@ -88,7 +88,7 @@ var ImportController = (function() {
 
     /********************* SFTP ********************/
 
-    ImportController.prototype.deleteSftpAccount = function(){
+    UploadController.prototype.deleteSftpAccount = function(){
         //TODO check if there is the user
         if(utilsIsObjectNullOrUndefined(this.m_oUser)=== true ||utilsIsObjectNullOrUndefined(this.m_oUser.userId)=== true)
             return false;
@@ -107,7 +107,7 @@ var ImportController = (function() {
         });
         return true;
     };
-    ImportController.prototype.updateSftpPassword = function(){
+    UploadController.prototype.updateSftpPassword = function(){
         if(utilsIsObjectNullOrUndefined(this.m_sEmailNewPassword) === true || utilsIsStrNullOrEmpty(this.m_sEmailNewPassword) === true )
             return false;
         this.m_bIsVisibleLoadIcon = true;
@@ -130,7 +130,7 @@ var ImportController = (function() {
         return true;
     };
 
-    ImportController.prototype.createAccountUpload = function()
+    UploadController.prototype.createAccountUpload = function()
     {
         if(utilsIsObjectNullOrUndefined(this.m_sEmailNewUser) === true || utilsIsStrNullOrEmpty(this.m_sEmailNewUser) === true || utilsIsEmail(this.m_sEmailNewUser)=== false )
             return false;
@@ -154,7 +154,7 @@ var ImportController = (function() {
         });
     };
 
-    ImportController.prototype.isCreatedAccountUpload = function()
+    UploadController.prototype.isCreatedAccountUpload = function()
     {
         var oController = this;
         this.m_oAuthService.isCreatedAccountUpload().success(function (data, status) {
@@ -175,7 +175,7 @@ var ImportController = (function() {
                 console.log("SftpUploadController error during check if the account is created");
         });
     }
-    ImportController.prototype.getListFiles = function ()
+    UploadController.prototype.getListFiles = function ()
     {
         var oThat = this;
         this.m_oAuthService.getListFilesUpload().success(function (data, status) {
@@ -190,7 +190,7 @@ var ImportController = (function() {
         });
     };
 
-    ImportController.prototype.isVisibleLoadIcon = function(){
+    UploadController.prototype.isVisibleLoadIcon = function(){
         if(utilsIsObjectNullOrUndefined(this.m_bIsAccountCreated) === true || this.m_bIsVisibleLoadIcon === true)
         {
             return true;
@@ -200,7 +200,7 @@ var ImportController = (function() {
         }
     };
 
-    ImportController.prototype.isAccountCreated = function(){
+    UploadController.prototype.isAccountCreated = function(){
         if( this.m_bIsAccountCreated)
         {
             return true;
@@ -211,7 +211,7 @@ var ImportController = (function() {
 
     };
 
-    ImportController.prototype.ingestAllSelectedFiles = function () {
+    UploadController.prototype.ingestAllSelectedFiles = function () {
         var iSelectedFilesLength = this.m_aoSelectedFiles.length;
 
         for(var iIndexSelectedFile = 0; iIndexSelectedFile < iSelectedFilesLength ; iIndexSelectedFile++){
@@ -225,7 +225,7 @@ var ImportController = (function() {
      * @param oSelectedFile
      * @returns {boolean}
      */
-    ImportController.prototype.ingestFile = function(oSelectedFile){
+    UploadController.prototype.ingestFile = function(oSelectedFile){
         if(utilsIsObjectNullOrUndefined(oSelectedFile)=== true )
             return false;
         this.m_oCatalogService.ingestFile(oSelectedFile,this.m_oConstantsService.getActiveWorkspace().workspaceId).success(function (data, status) {
@@ -243,7 +243,7 @@ var ImportController = (function() {
         });
         return true;
     };
-    ImportController.$inject = [
+    UploadController.$inject = [
         '$scope',
         'close',
         'extras',
@@ -252,5 +252,5 @@ var ImportController = (function() {
         'CatalogService',
         'ProductService',
     ];
-    return ImportController;
+    return UploadController;
 })();
