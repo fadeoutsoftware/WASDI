@@ -58,7 +58,7 @@ public class AuthResource {
 	@POST
 	@Path("/login")
 	@Produces({"application/xml", "application/json", "text/xml"})
-	public UserViewModel Login(LoginInfo oLoginInfo) {
+	public UserViewModel login(LoginInfo oLoginInfo) {
 		Wasdi.DebugLog("AuthResource.Login");
 		//TODO captcha
 		
@@ -175,7 +175,7 @@ public class AuthResource {
 	@GET
 	@Path("/checksession")
 	@Produces({"application/xml", "application/json", "text/xml"})
-	public UserViewModel CheckSession(@HeaderParam("x-session-token") String sSessionId) {
+	public UserViewModel checkSession(@HeaderParam("x-session-token") String sSessionId) {
 		Wasdi.DebugLog("AuthResource.CheckSession");
 		
 		if(null == sSessionId) {
@@ -204,7 +204,7 @@ public class AuthResource {
 	@Path("/logout")
 	@Produces({"application/xml", "application/json", "text/xml"})
 	//MAYBEchange return type to http response @sergin13 @kr1zz 
-	public PrimitiveResult Logout(@HeaderParam("x-session-token") String sSessionId) {
+	public PrimitiveResult logout(@HeaderParam("x-session-token") String sSessionId) {
 		Wasdi.DebugLog("AuthResource.Logout");
 		
 		if(null == sSessionId) {
@@ -243,7 +243,7 @@ public class AuthResource {
 	@POST
 	@Path("/upload/createaccount")
 	@Produces({"application/json", "text/xml"})
-	public Response CreateSftpAccount(@HeaderParam("x-session-token") String sSessionId, String sEmail) {
+	public Response createSftpAccount(@HeaderParam("x-session-token") String sSessionId, String sEmail) {
 		Wasdi.DebugLog("AuthService.CreateSftpAccount: Called for Mail " + sEmail);
 		
 		if(! m_oCredentialPolicy.validSessionId(sSessionId) || !m_oCredentialPolicy.validEmail(sEmail)) {
@@ -281,7 +281,7 @@ public class AuthResource {
 	@GET
 	@Path("/upload/existsaccount")
 	@Produces({"application/json", "text/xml"})
-	public Boolean ExixtsSftpAccount(@HeaderParam("x-session-token") String sSessionId) {
+	public Boolean exixtsSftpAccount(@HeaderParam("x-session-token") String sSessionId) {
 		Wasdi.DebugLog("AuthService.ExistsSftpAccount");
 		
 		User oUser = Wasdi.GetUserFromSession(sSessionId);
@@ -310,7 +310,7 @@ public class AuthResource {
 	@GET
 	@Path("/upload/list")
 	@Produces({"application/json", "text/xml"})
-	public String[] ListSftpAccount(@HeaderParam("x-session-token") String sSessionId) {
+	public String[] listSftpAccount(@HeaderParam("x-session-token") String sSessionId) {
 		Wasdi.DebugLog("AuthService.ListSftpAccount");
 		if(! m_oCredentialPolicy.validSessionId(sSessionId) ) {
 			return null;
@@ -336,7 +336,7 @@ public class AuthResource {
 	@DELETE
 	@Path("/upload/removeaccount")
 	@Produces({"application/json", "text/xml"})
-	public Response RemoveSftpAccount(@HeaderParam("x-session-token") String sSessionId) {
+	public Response removeSftpAccount(@HeaderParam("x-session-token") String sSessionId) {
 		Wasdi.DebugLog("AuthService.RemoveSftpAccount");
 		if( null==sSessionId ) {
 			return Response.status(Status.BAD_REQUEST).build();
@@ -363,7 +363,7 @@ public class AuthResource {
 	@POST
 	@Path("/upload/updatepassword")
 	@Produces({"application/json", "text/xml"})
-	public Response UpdateSftpPassword(@HeaderParam("x-session-token") String sSessionId, String sEmail) {
+	public Response updateSftpPassword(@HeaderParam("x-session-token") String sSessionId, String sEmail) {
 		Wasdi.DebugLog("AuthService.UpdateSftpPassword");
 		if(!m_oCredentialPolicy.validSessionId(sSessionId) || !m_oCredentialPolicy.validEmail(sEmail)) {
 			return Response.status(Status.BAD_REQUEST).build();
@@ -400,7 +400,7 @@ public class AuthResource {
 	@POST
 	@Path("/logingoogleuser")
 	@Produces({"application/xml", "application/json", "text/xml"})
-	public UserViewModel LoginGoogleUser(LoginInfo oLoginInfo) {
+	public UserViewModel loginGoogleUser(LoginInfo oLoginInfo) {
 		Wasdi.DebugLog("AuthResource.CheckGoogleUserId");
 		//TODO captcha
 		
@@ -693,7 +693,7 @@ public class AuthResource {
 	@POST
 	@Path("/changePassword")
 	@Produces({"application/json", "text/xml"})
-	public PrimitiveResult ChangeUserPassword(@HeaderParam("x-session-token") String sSessionId,
+	public PrimitiveResult changeUserPassword(@HeaderParam("x-session-token") String sSessionId,
 			ChangeUserPasswordViewModel oChPasswViewModel) {
 		
 		Wasdi.DebugLog("AuthService.ChangeUserPassword"  );

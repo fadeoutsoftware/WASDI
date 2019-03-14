@@ -18,7 +18,7 @@ public class WasdiResource {
 	@GET
 	@Path("/hello")
 	@Produces({"application/xml", "application/json", "text/xml"})	
-	public PrimitiveResult Hello()
+	public PrimitiveResult hello()
 	{
 		PrimitiveResult oResult = new PrimitiveResult();
 		oResult.setStringValue("Hello Wasdi!!");
@@ -28,7 +28,7 @@ public class WasdiResource {
 	@GET
 	@Path("/version")
 	@Produces({"application/xml", "application/json", "text/xml"})	
-	public PrimitiveResult ServerVersion()
+	public PrimitiveResult serverVersion()
 	{
 		PrimitiveResult oResult = new PrimitiveResult();
 		oResult.setStringValue(m_oServletConfig.getInitParameter("ServerVersion"));

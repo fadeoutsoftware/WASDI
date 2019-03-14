@@ -128,7 +128,7 @@ public class WorkspaceResource {
 	@GET
 	@Path("/byuser")
 	@Produces({"application/xml", "application/json", "text/xml"})
-	public ArrayList<WorkspaceListInfoViewModel> GetListByUser(@HeaderParam("x-session-token") String sSessionId) {
+	public ArrayList<WorkspaceListInfoViewModel> getListByUser(@HeaderParam("x-session-token") String sSessionId) {
 		
 		Wasdi.DebugLog("WorkspaceResource.GetListByUser");
 
@@ -198,7 +198,7 @@ public class WorkspaceResource {
 	@GET
 	@Path("")
 	@Produces({"application/xml", "application/json", "text/xml"})
-	public WorkspaceEditorViewModel GetWorkspaceEditorViewModel(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sWorkspaceId") String sWorkspaceId) {
+	public WorkspaceEditorViewModel getWorkspaceEditorViewModel(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sWorkspaceId") String sWorkspaceId) {
 		
 		Wasdi.DebugLog("WorkspaceResource.GetWorkspaceEditorViewModel");
 
@@ -258,7 +258,7 @@ public class WorkspaceResource {
 	@GET
 	@Path("create")
 	@Produces({"application/xml", "application/json", "text/xml"})	
-	public PrimitiveResult CreateWorkspace(@HeaderParam("x-session-token") String sSessionId) {
+	public PrimitiveResult createWorkspace(@HeaderParam("x-session-token") String sSessionId) {
 		
 		Wasdi.DebugLog("WorkspaceResource.CreateWorkspace");
 
@@ -294,7 +294,7 @@ public class WorkspaceResource {
 	@POST
 	@Path("update")
 	@Produces({"application/xml", "application/json", "text/xml"})	
-	public WorkspaceEditorViewModel UpdateWorkspace(@HeaderParam("x-session-token") String sSessionId, WorkspaceEditorViewModel oViewModel) {
+	public WorkspaceEditorViewModel updateWorkspace(@HeaderParam("x-session-token") String sSessionId, WorkspaceEditorViewModel oViewModel) {
 		
 		Wasdi.DebugLog("WorkspaceResource.UpdateWorkspace");
 
@@ -339,7 +339,7 @@ public class WorkspaceResource {
 	@DELETE
 	@Path("delete")
 	@Produces({"application/xml", "application/json", "text/xml"})	
-	public Response DeleteWorkspace(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sWorkspaceId") String sWorkspaceId, @QueryParam("bDeleteLayer") Boolean bDeleteLayer, @QueryParam("bDeleteFile") Boolean bDeleteFile) {
+	public Response deleteWorkspace(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sWorkspaceId") String sWorkspaceId, @QueryParam("bDeleteLayer") Boolean bDeleteLayer, @QueryParam("bDeleteFile") Boolean bDeleteFile) {
 		
 		Wasdi.DebugLog("WorkspaceResource.DeleteWorkspace");
 

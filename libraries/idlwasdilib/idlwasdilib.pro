@@ -632,6 +632,76 @@ FUNCTION WASDIEXECUTEWORKFLOW, asInputFileNames, asOutputFileNames, sWorkflow
   RETURN, sStatus
 end
 
+
+
+
+; Execute a SNAP xml Workflow in WASDI
+FUNCTION WASDIMOSAIC, asInputFileNames, sOutputFile
+
+  COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose
+  sessioncookie = token
+
+
+  ; API url
+  UrlPath = '/processing/geometric/mosaic?sDestinationProductName='+sOutputFile+"&sWorkspaceId="+activeworkspace
+  
+  ; Generate input file names JSON array
+  sInputFilesJSON = '['
+  
+  ; For each input name
+  for i=0,n_elements(asInputFileNames)-1 do begin
+    
+    sInputName = asInputFileNames[i]
+	; wrap with '
+	sInputFilesJSON = sInputFilesJSON + '"' + sInputName + '"'
+	
+	; check of is not the last one
+    if i lt n_elements(asInputFileNames)-1 then begin
+	  ; add ,
+      sInputFilesJSON = sInputFilesJSON + ','
+    endif
+  endfor
+  
+  ; close the array
+  sInputFilesJSON = sInputFilesJSON + ']'
+  
+  ;print, 'Input Files JSON ', sInputFilesJSON
+  
+  ; compose the full MosaicSetting JSON View Model
+  sMosaicSettingsString='{  "crs": "GEOGCS[\"WGS84(DD)\", \r\n\t\t  DATUM[\"WGS84\", \r\n\t\t\tSPHEROID[\"WGS84\", 6378137.0, 298.257223563]], \r\n\t\t  PRIMEM[\"Greenwich\", 0.0], \r\n\t\t  UNIT[\"degree\", 0.017453292519943295], \r\n\t\t  AXIS[\"Geodetic longitude\", EAST], \r\n\t\t  AXIS[\"Geodetic latitude\", NORTH]]",  "southBound": -1.0,"eastBound": -1.0, "westBound": -1.0, "northBound": -1.0, "pixelSizeX": 0.005, "pixelSizeY": 0.005, "overlappingMethod": "MOSAIC_TYPE_OVERLAY", "showSourceProducts": false, "elevationModelName": "ASTER 1sec GDEM", "resamplingName": "Nearest", "updateMode": false, "nativeResolution": true, "combine": "OR",  "sources":'+sInputFilesJSON +', "variableNames": [], "variableExpressions": [] }'
+  
+  IF (verbose eq '1') THEN BEGIN
+	print, 'MOSAIC SETTINGS JSON ' , sMosaicSettingsString
+  END
+
+  wasdiResult = WASDIHTTPPOST(UrlPath, sMosaicSettingsString)
+  
+  sResponse = GETVALUEBYKEY(wasdiResult, 'boolValue')
+  
+  sProcessID = ''
+  
+  ; get the process id
+  if sResponse then begin
+    sValue = GETVALUEBYKEY(wasdiResult, 'stringValue')
+    sProcessID=sValue
+  endif
+  
+  sStatus = "ERROR"
+  
+  ; Wait for the process to finish
+  if sProcessID ne '' then begin
+    sStatus = WASDIWAITPROCESS(sProcessID)
+  endif
+  
+  RETURN, sStatus
+end
+
+
+
+
+
+
+
 ; Update the progress of this own process
 PRO WASDIUPDATEPROGRESS, iPerc
 

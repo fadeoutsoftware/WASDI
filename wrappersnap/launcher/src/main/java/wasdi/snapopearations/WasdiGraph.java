@@ -276,7 +276,7 @@ public class WasdiGraph {
 			
 			// P.Campanella 16/06/2017: should add real file size to the Process Log
             //set file size     
-            LauncherMain.SetFileSizeToProcess(m_oInputFile, m_oProcess);
+            LauncherMain.setFileSizeToProcess(m_oInputFile, m_oProcess);
 			
 			//build the snap graph context and processor
 			GraphContext oContext = new GraphContext(m_oGraph);		

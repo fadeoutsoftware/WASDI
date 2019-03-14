@@ -41,7 +41,7 @@ public class FileBufferResource {
 	@GET
 	@Path("download")
 	@Produces({"application/xml", "application/json", "text/xml"})
-	public Response Download(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sFileUrl") String sFileUrl, @QueryParam("sProvider") String sProvider, 
+	public Response download(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sFileUrl") String sFileUrl, @QueryParam("sProvider") String sProvider, 
 			@QueryParam("sWorkspaceId") String sWorkspaceId, @QueryParam("sBoundingBox") String sBoundingBox) throws IOException
 	{
 		try {
@@ -117,7 +117,7 @@ public class FileBufferResource {
 	@GET
 	@Path("publish")
 	@Produces({"application/xml", "application/json", "text/xml"})
-	public Response Publish(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sFileUrl") String sFileUrl, @QueryParam("sWorkspaceId") String sWorkspaceId) throws IOException
+	public Response publish(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sFileUrl") String sFileUrl, @QueryParam("sWorkspaceId") String sWorkspaceId) throws IOException
 	{
 		try {
 			
@@ -182,7 +182,7 @@ public class FileBufferResource {
 	@GET
 	@Path("publishband")
 	@Produces({"application/xml", "application/json", "text/xml"})
-	public RabbitMessageViewModel PublishBand(	@HeaderParam("x-session-token") String sSessionId,
+	public RabbitMessageViewModel publishBand(	@HeaderParam("x-session-token") String sSessionId,
 												@QueryParam("sFileUrl") String sFileUrl,
 												@QueryParam("sWorkspaceId") String sWorkspaceId,
 												@QueryParam("sBand") String sBand) throws IOException {
@@ -280,7 +280,7 @@ public class FileBufferResource {
 	@GET
 	@Path("getbandlayerid")
 	@Produces({"application/xml", "application/json", "text/xml"})
-	public PrimitiveResult GetBandLayerId(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sFileUrl") String sFileUrl, @QueryParam("sWorkspaceId") String sWorkspaceId, @QueryParam("sBand") String sBand) throws IOException
+	public PrimitiveResult getBandLayerId(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sFileUrl") String sFileUrl, @QueryParam("sWorkspaceId") String sWorkspaceId, @QueryParam("sBand") String sBand) throws IOException
 	{
 		Wasdi.DebugLog("FileBufferResource.GetBandLayerId, session: "+sSessionId);
 		PrimitiveResult oReturnValue = null;
