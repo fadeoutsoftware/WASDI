@@ -19,7 +19,8 @@ import java.util.Map;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import Utils.MultipartUtility;
+import wasdi.jwasdilib.utils.MosaicSetting;
+import wasdi.jwasdilib.utils.MultipartUtility;
 
 
 public class WasdiLib {
@@ -310,6 +311,11 @@ public class WasdiLib {
 	}
 
 
+	/**
+	 * Init the WASDI Library starting from a configuration file
+	 * @param sConfigFilePath full path of the configuration file
+	 * @return True if the system is initializad, False if there is any error
+	 */
 	public Boolean init(String sConfigFilePath) {
 		try {
 			
@@ -520,7 +526,7 @@ public class WasdiLib {
 	}
 	
 	/**
-	 * 
+	 * Get the headers for a Streming POST call
 	 * @return
 	 */
 	protected HashMap<String, String> getStreamingHeaders() {
@@ -660,6 +666,10 @@ public class WasdiLib {
 		}
 	}
 
+	/**
+	 * Get the local Save Path to use to save custom generated files
+	 * @return Local Path to use to save a custom generated file
+	 */
 	public String getSavePath() {
 		try {
 			String sFullPath = m_sBasePath;
@@ -955,6 +965,13 @@ public class WasdiLib {
 		m_oParametersReader.refresh();
 	}
 	
+	/**
+	 * Private version of the add file to wasdi function.
+	 * Adds a generated file to current open workspace
+	 * @param sFileName File Name to add to the open workspace
+	 * @param bAsynch true if the process has to be asynch, false to wait for the result
+	 * @return
+	 */
 	protected String internalAddFileToWADI(String sFileName, Boolean bAsynch) {
 		try {
 			
@@ -1004,7 +1021,347 @@ public class WasdiLib {
 		return internalAddFileToWADI(sFileName, true);
 	}
 	
+	
+	/**
+	 * Protected Mosaic with minimum parameters
+	 * @param bAsynch True to return after the triggering, False to wait the process to finish
+	 * @param asInputFiles List of input files to mosaic
+	 * @param sOutputFile Name of the mosaic output file
+	 * @return Process id or end status of the process
+	 */
+	protected String internalMosaic(boolean bAsynch, List<String> asInputFiles, String sOutputFile) {
+		return internalMosaic(bAsynch, asInputFiles, sOutputFile, new ArrayList<String>());
+	}
+	
+	/**
+	 * Protected Mosaic with also Bands Parameters
+	 * @param bAsynch True to return after the triggering, False to wait the process to finish
+	 * @param asInputFiles List of input files to mosaic
+	 * @param sOutputFile Name of the mosaic output file
+	 * @param asBands List of the bands to use for the mosaic
+	 * @return Process id or end status of the process
+	 */
+	protected String internalMosaic(boolean bAsynch, List<String> asInputFiles, String sOutputFile, List<String> asBands) {
+		return internalMosaic(bAsynch, asInputFiles, sOutputFile, asBands, 0.005, 0.005);
+	}
 
+	
+	/**
+	 * Protected Mosaic with also Pixel Size Parameters
+	 * @param bAsynch True to return after the triggering, False to wait the process to finish
+	 * @param asInputFiles List of input files to mosaic
+	 * @param sOutputFile Name of the mosaic output file
+	 * @param asBands List of the bands to use for the mosaic
+	 * @param dPixelSizeX X Pixel Size
+	 * @param dPixelSizeY Y Pixel Size
+	 * @return Process id or end status of the process
+	 */
+	protected String internalMosaic(boolean bAsynch, List<String> asInputFiles, String sOutputFile, List<String> asBands, double dPixelSizeX, double dPixelSizeY) {
+		
+		String sCrs = "GEOGCS[\"WGS84(DD)\", \r\n" + 
+	    		"		  DATUM[\"WGS84\", \r\n" + 
+	    		"			SPHEROID[\"WGS84\", 6378137.0, 298.257223563]], \r\n" + 
+	    		"		  PRIMEM[\"Greenwich\", 0.0], \r\n" + 
+	    		"		  UNIT[\"degree\", 0.017453292519943295], \r\n" + 
+	    		"		  AXIS[\"Geodetic longitude\", EAST], \r\n" + 
+	    		"		  AXIS[\"Geodetic latitude\", NORTH]]";
+		
+		return internalMosaic(bAsynch, asInputFiles, sOutputFile, asBands, dPixelSizeX, dPixelSizeY, sCrs);
+	}
+
+	/**
+	 * Protected Mosaic with also CRS Input
+	 * @param bAsynch True to return after the triggering, False to wait the process to finish
+	 * @param asInputFiles List of input files to mosaic
+	 * @param sOutputFile Name of the mosaic output file
+	 * @param asBands List of the bands to use for the mosaic
+	 * @param dPixelSizeX X Pixel Size
+	 * @param dPixelSizeY Y Pixel Size
+	 * @param sCrs WKT of the CRS to use
+	 * @return Process id or end status of the process
+	 */
+	protected String internalMosaic(boolean bAsynch, List<String> asInputFiles, String sOutputFile, List<String> asBands, double dPixelSizeX, double dPixelSizeY, String sCrs) {
+		
+		double dSouthBound = -1.0;
+		double dEastBound = -1.0;
+		double dWestBound = -1.0;
+		double dNorthBound = -1.0;
+		String sOverlappingMethod = "MOSAIC_TYPE_OVERLAY";
+		Boolean bShowSourceProducts = false;
+		String sElevationModelName = "ASTER 1sec GDEM";
+		String sResamplingName = "Nearest";
+		Boolean bUpdateMode = false;
+		Boolean bNativeResolution = true;
+		String sCombine = "OR";
+
+		
+		return internalMosaic(bAsynch, asInputFiles, sOutputFile, asBands, dPixelSizeX, dPixelSizeY, sCrs,dSouthBound, dNorthBound, dEastBound, dWestBound, sOverlappingMethod, bShowSourceProducts, sElevationModelName, sResamplingName, bUpdateMode, bNativeResolution, sCombine);
+	}
+
+	/**
+	 * Protected Mosaic with all the input parameters
+	 * @param bAsynch True to return after the triggering, False to wait the process to finish
+	 * @param asInputFiles List of input files to mosaic
+	 * @param sOutputFile Name of the mosaic output file
+	 * @param asBands List of the bands to use for the mosaic
+	 * @param dPixelSizeX X Pixel Size
+	 * @param dPixelSizeY Y Pixel Size
+	 * @param sCrs WKT of the CRS to use
+	 * @param dSouthBound South Bound
+	 * @param dNorthBound North Bound
+	 * @param dEastBound East Bound
+	 * @param dWestBound West Bound
+	 * @param sOverlappingMethod Overlapping Method
+	 * @param bShowSourceProducts Show Source Products Flag 
+	 * @param sElevationModelName DEM Model Name
+	 * @param sResamplingName Resampling Method Name
+	 * @param bUpdateMode Update Mode Flag
+	 * @param bNativeResolution Native Resolution Flag
+	 * @param sCombine Combine verb
+	 * @return Process id or end status of the process
+	 */
+	protected String internalMosaic(boolean bAsynch, List<String> asInputFiles, String sOutputFile, List<String> asBands, double dPixelSizeX, double dPixelSizeY, String sCrs, double dSouthBound, double dNorthBound, double dEastBound, double dWestBound, String sOverlappingMethod, boolean bShowSourceProducts, String sElevationModelName, String sResamplingName, boolean bUpdateMode, boolean bNativeResolution, String sCombine) {
+		try {
+			
+			// Check minimun input values
+			if (asInputFiles == null) {
+				System.out.println("asInputFiles must not be null");
+				return "";
+			}
+
+			if (asInputFiles.size() == 0) {
+				System.out.println("asInputFiles must not be empty");
+				return "";
+			}
+			
+			if (sOutputFile == null) {
+				System.out.println("sOutputFile must not be null");
+				return "";
+			}
+			
+			if (sOutputFile.equals("")) {
+				System.out.println("sOutputFile must not empty string");
+				return "";
+			}
+
+			// Build API URL
+		    String sUrl = m_sBaseUrl + "/processing/geometric/mosaic?sDestinationProductName="+sOutputFile+"&sWorkspaceId="+m_sActiveWorkspace;
+		    
+		    // Fill the Setting Object
+		    MosaicSetting oMosaicSetting = new MosaicSetting();
+		    oMosaicSetting.setCombine(sCombine);
+		    oMosaicSetting.setCrs(sCrs);
+		    oMosaicSetting.setEastBound(dEastBound);
+		    oMosaicSetting.setElevationModelName(sElevationModelName);
+		    oMosaicSetting.setNativeResolution(bNativeResolution);
+		    oMosaicSetting.setNorthBound(dNorthBound);
+		    oMosaicSetting.setOverlappingMethod(sOverlappingMethod);
+		    oMosaicSetting.setPixelSizeX(dPixelSizeX);
+		    oMosaicSetting.setPixelSizeY(dPixelSizeY);
+		    oMosaicSetting.setResamplingName(sResamplingName);
+		    oMosaicSetting.setShowSourceProducts(bShowSourceProducts);
+		    
+		    ArrayList<String> asSources = new ArrayList<>();
+		    
+		    for (String sInput : asInputFiles) {
+				asSources.add(sInput);
+			}
+		    
+		    oMosaicSetting.setSources(asSources);
+		    oMosaicSetting.setSouthBound(dSouthBound);
+		    oMosaicSetting.setUpdateMode(bUpdateMode);
+		    
+		    oMosaicSetting.setVariableExpressions(new ArrayList<String>());
+		    
+		    ArrayList<String> asVariableNames = new ArrayList<>();
+		    
+		    for (String sVariable : asBands) {
+		    	asVariableNames.add(sVariable);
+		    }
+		    
+		    oMosaicSetting.setVariableNames(asVariableNames);
+		    oMosaicSetting.setWestBound(dWestBound);
+		    
+		    // Convert to JSON
+		    String sMosaicSetting = s_oMapper.writeValueAsString(oMosaicSetting);
+		    
+		    // Call the API
+		    String sResponse = httpPost(sUrl, sMosaicSetting, getStandardHeaders());
+		    
+		    // Read the result
+		    Map<String, Object> aoJSONMap = s_oMapper.readValue(sResponse, new TypeReference<Map<String,Object>>(){});
+		    
+		    // Extract Process Id
+		    String sProcessId = aoJSONMap.get("stringValue").toString();
+		    
+		    // Return or wait
+			if (bAsynch) return sProcessId;
+			else return waitProcess(sProcessId);
+		}
+		catch (Exception oEx) {
+			oEx.printStackTrace();
+			return "";
+		}		
+	}
+	
+	/**
+	 * Mosaic with minimum parameters
+	 * @param asInputFiles List of input files to mosaic
+	 * @param sOutputFile Name of the mosaic output file
+	 * @return End status of the process
+	 */
+	protected String mosaic(List<String> asInputFiles, String sOutputFile) {
+		return internalMosaic(false, asInputFiles, sOutputFile);
+	}
+	
+	/**
+	 * Mosaic with also Bands Parameters
+	 * @param asInputFiles List of input files to mosaic
+	 * @param sOutputFile Name of the mosaic output file
+	 * @param asBands List of the bands to use for the mosaic
+	 * @return End status of the process
+	 */
+	protected String mosaic(List<String> asInputFiles, String sOutputFile, List<String> asBands) {
+		return internalMosaic(false, asInputFiles, sOutputFile);
+	}
+
+	
+	/**
+	 *  Mosaic with also Pixel Size Parameters
+	 * @param asInputFiles List of input files to mosaic
+	 * @param sOutputFile Name of the mosaic output file
+	 * @param asBands List of the bands to use for the mosaic
+	 * @param dPixelSizeX X Pixel Size
+	 * @param dPixelSizeY Y Pixel Size
+	 * @return End status of the process
+	 */
+	protected String mosaic( List<String> asInputFiles, String sOutputFile, List<String> asBands, double dPixelSizeX, double dPixelSizeY) {		
+		return internalMosaic(false, asInputFiles, sOutputFile, asBands, dPixelSizeX, dPixelSizeY);
+	}
+
+
+	/**
+	 *  Mosaic with also CRS Input
+	 * @param asInputFiles List of input files to mosaic
+	 * @param sOutputFile Name of the mosaic output file
+	 * @param asBands List of the bands to use for the mosaic
+	 * @param dPixelSizeX X Pixel Size
+	 * @param dPixelSizeY Y Pixel Size
+	 * @param sCrs WKT of the CRS to use
+	 * @return End status of the process
+	 */
+	protected String mosaic(List<String> asInputFiles, String sOutputFile, List<String> asBands, double dPixelSizeX, double dPixelSizeY, String sCrs) {
+				
+		return internalMosaic(false, asInputFiles, sOutputFile, asBands, dPixelSizeX, dPixelSizeY, sCrs);
+	}
+
+
+	/**
+	 * Mosaic with all the input parameters
+	 * @param asInputFiles List of input files to mosaic
+	 * @param sOutputFile Name of the mosaic output file
+	 * @param asBands List of the bands to use for the mosaic
+	 * @param dPixelSizeX X Pixel Size
+	 * @param dPixelSizeY Y Pixel Size
+	 * @param sCrs WKT of the CRS to use
+	 * @param dSouthBound South Bound
+	 * @param dNorthBound North Bound
+	 * @param dEastBound East Bound
+	 * @param dWestBound West Bound
+	 * @param sOverlappingMethod Overlapping Method
+	 * @param bShowSourceProducts Show Source Products Flag 
+	 * @param sElevationModelName DEM Model Name
+	 * @param sResamplingName Resampling Method Name
+	 * @param bUpdateMode Update Mode Flag
+	 * @param bNativeResolution Native Resolution Flag
+	 * @param sCombine Combine verb
+	 * @return End status of the process
+	 */
+	protected String mosaic(List<String> asInputFiles, String sOutputFile, List<String> asBands, double dPixelSizeX, double dPixelSizeY, String sCrs, double dSouthBound, double dNorthBound, double dEastBound, double dWestBound, String sOverlappingMethod, boolean bShowSourceProducts, String sElevationModelName, String sResamplingName, boolean bUpdateMode, boolean bNativeResolution, String sCombine) {
+		return internalMosaic(false, asInputFiles, sOutputFile, asBands, dPixelSizeX, dPixelSizeY, sCrs, dSouthBound, dNorthBound, dEastBound, dWestBound, sOverlappingMethod, bShowSourceProducts, sElevationModelName, sResamplingName, bUpdateMode, bNativeResolution, sCombine);
+	}
+	
+	/**
+	 * Asynch Mosaic with minimum parameters
+	 * @param asInputFiles List of input files to mosaic
+	 * @param sOutputFile Name of the mosaic output file
+	 * @return Process id 
+	 */
+	protected String asynchMosaic(List<String> asInputFiles, String sOutputFile) {
+		return internalMosaic(true, asInputFiles, sOutputFile);
+	}
+	
+	/**
+	 * Asynch Mosaic with also Bands Parameters
+	 * @param asInputFiles List of input files to mosaic
+	 * @param sOutputFile Name of the mosaic output file
+	 * @param asBands List of the bands to use for the mosaic
+	 * @return Process id 
+	 */
+	protected String asynchMosaic(List<String> asInputFiles, String sOutputFile, List<String> asBands) {
+		return internalMosaic(true, asInputFiles, sOutputFile);
+	}
+
+	
+	/**
+	 * Asynch Mosaic with also Pixel Size Parameters
+	 * @param asInputFiles List of input files to mosaic
+	 * @param sOutputFile Name of the mosaic output file
+	 * @param asBands List of the bands to use for the mosaic
+	 * @param dPixelSizeX X Pixel Size
+	 * @param dPixelSizeY Y Pixel Size
+	 * @return Process id 
+	 */
+	protected String asynchMosaic( List<String> asInputFiles, String sOutputFile, List<String> asBands, double dPixelSizeX, double dPixelSizeY) {		
+		return internalMosaic(true, asInputFiles, sOutputFile, asBands, dPixelSizeX, dPixelSizeY);
+	}
+
+	/**
+	 * Asynch Mosaic with also CRS Input
+	 * @param asInputFiles List of input files to mosaic
+	 * @param sOutputFile Name of the mosaic output file
+	 * @param asBands List of the bands to use for the mosaic
+	 * @param dPixelSizeX X Pixel Size
+	 * @param dPixelSizeY Y Pixel Size
+	 * @param sCrs WKT of the CRS to use
+	 * @return Process id
+	 */
+	protected String asynchMosaic(List<String> asInputFiles, String sOutputFile, List<String> asBands, double dPixelSizeX, double dPixelSizeY, String sCrs) {
+				
+		return internalMosaic(true, asInputFiles, sOutputFile, asBands, dPixelSizeX, dPixelSizeY, sCrs);
+	}
+
+	/**
+	 * Asynch Mosaic with all the input parameters
+	 * @param asInputFiles List of input files to mosaic
+	 * @param sOutputFile Name of the mosaic output file
+	 * @param asBands List of the bands to use for the mosaic
+	 * @param dPixelSizeX X Pixel Size
+	 * @param dPixelSizeY Y Pixel Size
+	 * @param sCrs WKT of the CRS to use
+	 * @param dSouthBound South Bound
+	 * @param dNorthBound North Bound
+	 * @param dEastBound East Bound
+	 * @param dWestBound West Bound
+	 * @param sOverlappingMethod Overlapping Method
+	 * @param bShowSourceProducts Show Source Products Flag 
+	 * @param sElevationModelName DEM Model Name
+	 * @param sResamplingName Resampling Method Name
+	 * @param bUpdateMode Update Mode Flag
+	 * @param bNativeResolution Native Resolution Flag
+	 * @param sCombine Combine verb
+	 * @return Process id
+	 */
+	protected String asynchMosaic(List<String> asInputFiles, String sOutputFile, List<String> asBands, double dPixelSizeX, double dPixelSizeY, String sCrs, double dSouthBound, double dNorthBound, double dEastBound, double dWestBound, String sOverlappingMethod, boolean bShowSourceProducts, String sElevationModelName, String sResamplingName, boolean bUpdateMode, boolean bNativeResolution, String sCombine) {
+		return internalMosaic(true, asInputFiles, sOutputFile, asBands, dPixelSizeX, dPixelSizeY, sCrs, dSouthBound, dNorthBound, dEastBound, dWestBound, sOverlappingMethod, bShowSourceProducts, sElevationModelName, sResamplingName, bUpdateMode, bNativeResolution, sCombine);
+	}
+	
+	/**
+	 * Http get Method Helper
+	 * @param sUrl Url to call
+	 * @param asHeaders Headers Dictionary
+	 * @return Server response
+	 */
 	public String httpGet(String sUrl, Map<String, String> asHeaders) {
 		
 		try {
@@ -1053,6 +1410,13 @@ public class WasdiLib {
 		}
 	}
 	
+	/**
+	 * Standard http post uility function
+	 * @param sUrl url to call
+	 * @param sPayload payload of the post 
+	 * @param asHeaders headers dictionary
+	 * @return server response
+	 */
 	public String httpPost(String sUrl, String sPayload, Map<String, String> asHeaders) {
 		
 		try {
@@ -1193,6 +1557,7 @@ public class WasdiLib {
 			return "";
 		}
 	}
+	
 	/**
 	 * Download a file on the local PC
 	 * @param sFileName File Name

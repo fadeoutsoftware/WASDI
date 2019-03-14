@@ -407,7 +407,7 @@ public class Mosaic {
         aoParameterMap.put("updateMode", m_oMosaicSetting.getUpdateMode());
         
         aoParameterMap.put("nativeResolution", m_oMosaicSetting.getNativeResolution());
-        aoParameterMap.put("combine" ,"OR");
+        aoParameterMap.put("combine" , m_oMosaicSetting.getCombine());
         
         // Check if we need multi size or single
         Boolean bMultiSize = false;

@@ -1,4 +1,4 @@
-package Utils;
+package wasdi.jwasdilib.utils;
 import java.io.BufferedReader;
 
 import java.io.File;

@@ -1,4 +1,5 @@
 package wasdi;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -9,7 +10,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -102,21 +102,24 @@ import wasdi.snapopearations.WasdiGraph;
 import wasdi.snapopearations.WriteProduct;
 
 
-
-
 /**
- * Created by s.adamo on 23/09/2016.
+ * WASDI Launcher Main Class
  */
 public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 
-	// Define a static s_oLogger variable so that it references the
-	// Logger instance named "MyApp".
+	
+	/**
+	 * Static Logger that references the "MyApp" logger
+	 */
 	public static Logger s_oLogger = Logger.getLogger(LauncherMain.class);
 
+	/**
+	 * Static reference to Send To Rabbit utility class
+	 */
 	public static Send s_oSendToRabbit = null;
 
 	/**
-	 * Launcher Main Entry Point
+	 * WASDI Launcher Main Entry Point
 	 * 
 	 * @param args -operation <operation> -elaboratefile <file>
 	 * @throws Exception
@@ -202,7 +205,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			}
 
 			// And Run
-			oLauncher.ExecuteOperation(sOperation,sParameter);
+			oLauncher.executeOperation(sOperation,sParameter);
 
 			s_oLogger.debug(getBye());
 		}
@@ -239,6 +242,10 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 
 	}
 	
+	/**
+	 * Get the bye message for logger
+	 * @return
+	 */
 	private static String getBye() {
 		return new EndMessageProvider().getGood();	
 	}
@@ -277,14 +284,14 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 	 * @param sOperation Operation to be done
 	 * @param sParameter Parameter
 	 */
-	public void ExecuteOperation(String sOperation, String sParameter) {
+	public void executeOperation(String sOperation, String sParameter) {
 
 		String sWorkspace = "";
 		String sExchange = "";
 
 		if (sOperation.equals("MAGIC_UPDATE_BANDS")) {
 			System.out.println("MAGIC UPDATE BANDS CYCLE");
-			LauncherMain.UpdateBandViewModelsCycle();
+			LauncherMain.updateBandViewModelsCycle();
 			return;
 		}
 
@@ -293,119 +300,118 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			sWorkspace = oBaseParameter.getWorkspace();
 			sExchange = oBaseParameter.getExchange();
 		} catch (Exception e) {
-			String sError = "Impossible to deserialize Operation Parameters: operation aborted";
+			String sError = "LauncherMain.executeOperation: Impossible to deserialize Operation Parameters: operation aborted";
 			if (s_oSendToRabbit!=null) s_oSendToRabbit.SendRabbitMessage(false, sOperation, sWorkspace,sError,sExchange);			
-			s_oLogger.error("ExecuteOperation Exception", e);
+			s_oLogger.error("LauncherMain.executeOperation:  Exception", e);
 			return;
 		}
 
 		try {
-			//XXX refactor this switch
-			//suggestions:
-			// https://www.developer.com/java/data/seven-ways-to-refactor-java-switch-statements.html
-			// https://www.google.it/search?q=java+get+rid+of+switch
-			LauncherOperations op = LauncherOperations.valueOf(sOperation);
-			switch (op)
+	
+			LauncherOperations oLauncherOperation = LauncherOperations.valueOf(sOperation);
+			
+			switch (oLauncherOperation)
 			{
 			case INGEST: {
 				// Deserialize Parameters
 				IngestFileParameter oIngestFileParameter = (IngestFileParameter) SerializationUtils.deserializeXMLToObject(sParameter);
-				Ingest(oIngestFileParameter, ConfigReader.getPropValue("DOWNLOAD_ROOT_PATH"));
+				ingest(oIngestFileParameter, ConfigReader.getPropValue("DOWNLOAD_ROOT_PATH"));
 			}
 			break;
 			case DOWNLOAD: {
-
 				// Deserialize Parameters
 				DownloadFileParameter oDownloadFileParameter = (DownloadFileParameter) SerializationUtils.deserializeXMLToObject(sParameter);
-				Download(oDownloadFileParameter, ConfigReader.getPropValue("DOWNLOAD_ROOT_PATH"));
+				download(oDownloadFileParameter, ConfigReader.getPropValue("DOWNLOAD_ROOT_PATH"));
 			}
 			break;
 			case FTPUPLOAD: {
-				s_oLogger.debug("ExecuteOperation: UPLOADVIAFT case: load parameters");
+				// FTP Upload
 				FtpUploadParameters oFtpTransferParameters = (FtpUploadParameters) SerializationUtils.deserializeXMLToObject(sParameter);
-				s_oLogger.debug("ExecuteOperation: UPLOADVIAFT case: try ftp transfer");
 				ftpTransfer(oFtpTransferParameters);
-				s_oLogger.debug("ExecuteOperation: UPLOADVIAFT case: done");
 			}
 			break;
 			case PUBLISHBAND: {
 				// Deserialize Parameters
 				PublishBandParameter oPublishBandParameter = (PublishBandParameter) SerializationUtils.deserializeXMLToObject(sParameter);
-				PublishBandImage(oPublishBandParameter);
+				publishBandImage(oPublishBandParameter);
 			}
 			break;
 			case APPLYORBIT:{
 				// Deserialize Parameters
 				ApplyOrbitParameter oParameter = (ApplyOrbitParameter) SerializationUtils.deserializeXMLToObject(sParameter);
-				ExecuteOperator(oParameter, new ApplyOrbit(), LauncherOperations.APPLYORBIT);
+				executeOperator(oParameter, new ApplyOrbit(), LauncherOperations.APPLYORBIT);
 			}
 			break;
 			case CALIBRATE:{
 				// Deserialize Parameters
 				CalibratorParameter oParameter = (CalibratorParameter) SerializationUtils.deserializeXMLToObject(sParameter);
-				ExecuteOperator(oParameter, new Calibration(), LauncherOperations.CALIBRATE);
+				executeOperator(oParameter, new Calibration(), LauncherOperations.CALIBRATE);
 			}
 			break;
 			case MULTILOOKING:{
 				// Deserialize Parameters
 				MultilookingParameter oParameter = (MultilookingParameter) SerializationUtils.deserializeXMLToObject(sParameter);
-				ExecuteOperator(oParameter, new Multilooking(), LauncherOperations.MULTILOOKING);
+				executeOperator(oParameter, new Multilooking(), LauncherOperations.MULTILOOKING);
 			}
 			break;
 			case TERRAIN:{
 				// Deserialize Parameters
 				RangeDopplerGeocodingParameter oParameter = (RangeDopplerGeocodingParameter) SerializationUtils.deserializeXMLToObject(sParameter);
-				ExecuteOperator(oParameter, new TerrainCorrection(), LauncherOperations.TERRAIN);
+				executeOperator(oParameter, new TerrainCorrection(), LauncherOperations.TERRAIN);
 			}
 			break;
 			case FILTER:{
 				// Deserialize Parameters
 				FilterParameter oParameter = (FilterParameter) SerializationUtils.deserializeXMLToObject(sParameter);
-				ExecuteOperator(oParameter, new Filter(), LauncherOperations.FILTER);
+				executeOperator(oParameter, new Filter(), LauncherOperations.FILTER);
 			}
 			break;
 			case NDVI:{
 				// Deserialize Parameters
 				NDVIParameter oParameter = (NDVIParameter) SerializationUtils.deserializeXMLToObject(sParameter);
-				ExecuteOperator(oParameter, new NDVI(), LauncherOperations.NDVI);
+				executeOperator(oParameter, new NDVI(), LauncherOperations.NDVI);
 			}
 			break;
 			case RASTERGEOMETRICRESAMPLE:{
 				// Deserialize Parameters
 				RasterGeometricResampleParameter oParameter = (RasterGeometricResampleParameter) SerializationUtils.deserializeXMLToObject(sParameter);
-				RasterGeometricResample(oParameter);
+				rasterGeometricResample(oParameter);
 			}
 			break;
 			case GRAPH: {
+				// Execute SNAP Workflow
 				GraphParameter oParameter = (GraphParameter) SerializationUtils.deserializeXMLToObject(sParameter);
-				ExecuteGraph(oParameter);                	
+				executeGraph(oParameter);                	
 			}
 			break;
 			case DEPLOYPROCESSOR: {
+				// Deploy new user processor
 				DeployProcessorParameter oParameter = (DeployProcessorParameter) SerializationUtils.deserializeXMLToObject(sParameter);
-
 				WasdiProcessorEngine oEngine = WasdiProcessorEngine.GetProcessorEngine(oParameter.getProcessorType(), ConfigReader.getPropValue("DOWNLOAD_ROOT_PATH"), ConfigReader.getPropValue("DOCKER_TEMPLATE_PATH"));
 				oEngine.DeployProcessor(oParameter);
 			}
 			break;
 			case RUNPROCESSOR: {
+				// Execute User Processor
 				DeployProcessorParameter oParameter = (DeployProcessorParameter) SerializationUtils.deserializeXMLToObject(sParameter);
-
 				WasdiProcessorEngine oEngine = WasdiProcessorEngine.GetProcessorEngine(oParameter.getProcessorType(), ConfigReader.getPropValue("DOWNLOAD_ROOT_PATH"), ConfigReader.getPropValue("DOCKER_TEMPLATE_PATH"));
 				oEngine.run(oParameter);
 			}
 			break;
 			case RUNIDL: {
+				// Run IDL Processor
 				IDLProcParameter oParameter = (IDLProcParameter) SerializationUtils.deserializeXMLToObject(sParameter);
 				executeIDLProcessor(oParameter);
 			}
 			break;
 			case RUNMATLAB: {
+				// Run Matlab Processor
 				MATLABProcParameters oParameter = (MATLABProcParameters) SerializationUtils.deserializeXMLToObject(sParameter);
 				executeMATLABProcessor(oParameter);
 			}
 			break;
 			case MOSAIC: {
+				// Execute Mosaic Operation
 				MosaicParameter oParameter = (MosaicParameter) SerializationUtils.deserializeXMLToObject(sParameter);
 				executeMosaic(oParameter);
 			}
@@ -418,16 +424,22 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 		catch (Exception oEx) {
 			String sError = org.apache.commons.lang.exception.ExceptionUtils.getMessage(oEx);
 			if (s_oSendToRabbit!=null) s_oSendToRabbit.SendRabbitMessage(false, sOperation, sWorkspace,sError,sExchange);			
-			s_oLogger.error("ExecuteOperation Exception", oEx);
+			s_oLogger.error("LauncherMain.executeOperation Exception", oEx);
 		}
 
 		s_oLogger.debug("Launcher did his job. Bye bye, see you soon.");
 	}
 
-	public void ExecuteGraph(GraphParameter params) throws Exception {
+	/**
+	 * Execute a SNAP Workflow
+	 * @param oGraphParams
+	 * @throws Exception
+	 */
+	public void executeGraph(GraphParameter oGraphParams) throws Exception {
+		
 		try {
-			WasdiGraph graphManager = new WasdiGraph(params, s_oSendToRabbit);
-			graphManager.execute();			
+			WasdiGraph oGraphManager = new WasdiGraph(oGraphParams, s_oSendToRabbit);
+			oGraphManager.execute();			
 		}
 		catch (Exception oEx) {
 			s_oLogger.error("ExecuteGraph Exception", oEx);
@@ -435,10 +447,10 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 
 			// P.Campanella 2018/03/30: handle exception and close the process
 			ProcessWorkspaceRepository oRepo = new ProcessWorkspaceRepository();
-			ProcessWorkspace oProcessWorkspace = oRepo.GetProcessByProcessObjId(params.getProcessObjId());
+			ProcessWorkspace oProcessWorkspace = oRepo.GetProcessByProcessObjId(oGraphParams.getProcessObjId());
 			updateProcessStatus(oRepo, oProcessWorkspace, ProcessStatus.ERROR, 100);
 
-			if (s_oSendToRabbit!=null) s_oSendToRabbit.SendRabbitMessage(false, LauncherOperations.GRAPH.name(), params.getWorkspace(),sError,params.getExchange());			
+			if (s_oSendToRabbit!=null) s_oSendToRabbit.SendRabbitMessage(false, LauncherOperations.GRAPH.name(), oGraphParams.getWorkspace(),sError,oGraphParams.getExchange());			
 		}
 	}
 
@@ -448,7 +460,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 	 * @param sDownloadPath
 	 * @return
 	 */
-	public String Download(DownloadFileParameter oParameter, String sDownloadPath) {
+	public String download(DownloadFileParameter oParameter, String sDownloadPath) {
 		String sFileName = "";
 
 		ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
@@ -471,10 +483,10 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 				//get file size
 				long lFileSizeByte = oProviderAdapter.GetDownloadFileSize(oParameter.getUrl());
 				//set file size
-				SetFileSizeToProcess(lFileSizeByte, oProcessWorkspace);
+				setFileSizeToProcess(lFileSizeByte, oProcessWorkspace);
 
 				//get process pid
-				oProcessWorkspace.setPid(GetProcessId());
+				oProcessWorkspace.setPid(getProcessId());
 
 			} else {
 				s_oLogger.debug("LauncherMain.Download: process not found: " + oParameter.getProcessObjId());
@@ -537,7 +549,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 					Product oProduct = oReadProduct.ReadProduct(oProductFile, null);
 					oVM = oReadProduct.getProductViewModel(oProduct, oProductFile);
 					// Save Metadata
-					oVM.setMetadataFileReference(AsynchSaveMetadata(sFileName));
+					oVM.setMetadataFileReference(asynchSaveMetadata(sFileName));
 
 
 					// Save it in the register
@@ -589,7 +601,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 				if (s_oSendToRabbit!=null) s_oSendToRabbit.SendRabbitMessage(false,LauncherOperations.DOWNLOAD.name(),oParameter.getWorkspace(),sError,oParameter.getExchange());
 				if (oProcessWorkspace != null) oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
 			} else {
-				AddProductToDbAndSendToRabbit(oVM, sFileName, oParameter.getWorkspace(), oParameter.getExchange(), LauncherOperations.DOWNLOAD.name(), oParameter.getBoundingBox());
+				addProductToDbAndSendToRabbit(oVM, sFileName, oParameter.getWorkspace(), oParameter.getExchange(), LauncherOperations.DOWNLOAD.name(), oParameter.getBoundingBox());
 
 				s_oLogger.debug("LauncherMain.Download: Add Product to Db and Send to Rabbit Done");
 
@@ -614,7 +626,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 		} finally {
 			s_oLogger.debug("LauncherMain.Download: finally call CloseProcessWorkspace ");
 			//update process status and send rabbit updateProcess message
-			CloseProcessWorkspace(oProcessWorkspaceRepository, oProcessWorkspace);
+			closeProcessWorkspace(oProcessWorkspaceRepository, oProcessWorkspace);
 
 			s_oLogger.debug("LauncherMain.Download: CloseProcessWorkspace done");
 		}
@@ -648,7 +660,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 		if(!Utils.isFilePathPlausible(oParam.getFullLocalPath())) {
 			s_oLogger.debug("ftpTransfer: null local path");
 			oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
-			CloseProcessWorkspace(oProcessWorkspaceRepository, oProcessWorkspace);
+			closeProcessWorkspace(oProcessWorkspaceRepository, oProcessWorkspace);
 			return false;
 		}
 		updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 1);
@@ -661,7 +673,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 		if(!oFile.exists()) {
 			s_oLogger.debug("ftpTransfer: local file does not exist");
 			oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
-			CloseProcessWorkspace(oProcessWorkspaceRepository, oProcessWorkspace);
+			closeProcessWorkspace(oProcessWorkspaceRepository, oProcessWorkspace);
 			return false;
 		}
 		updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 2);
@@ -675,7 +687,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 				)){
 			s_oLogger.debug("ftpTransfer: invalid FTP parameters");
 			oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
-			CloseProcessWorkspace(oProcessWorkspaceRepository, oProcessWorkspace);
+			closeProcessWorkspace(oProcessWorkspaceRepository, oProcessWorkspace);
 			return false;
 		}
 		updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 3);
@@ -692,7 +704,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			s_oLogger.debug("username: "+oParam.getM_sUsername());
 			s_oLogger.debug("password: " + oParam.getM_sPassword());
 			oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
-			CloseProcessWorkspace(oProcessWorkspaceRepository, oProcessWorkspace);
+			closeProcessWorkspace(oProcessWorkspaceRepository, oProcessWorkspace);
 			return false;
 		}
 		updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 4);
@@ -701,7 +713,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 		if(!bPut) {
 			s_oLogger.debug("ftpTransfer: put failed");
 			oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
-			CloseProcessWorkspace(oProcessWorkspaceRepository, oProcessWorkspace);
+			closeProcessWorkspace(oProcessWorkspaceRepository, oProcessWorkspace);
 			return false;
 		}
 		updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 95);
@@ -711,17 +723,17 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 		if(!bCheck) {
 			s_oLogger.debug("ftpTransfer: could not find file on server");
 			oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
-			CloseProcessWorkspace(oProcessWorkspaceRepository, oProcessWorkspace);
+			closeProcessWorkspace(oProcessWorkspaceRepository, oProcessWorkspace);
 			return false;
 		}
 		oFtpClient.close();
 		updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.DONE, 100);
-		CloseProcessWorkspace(oProcessWorkspaceRepository, oProcessWorkspace);
+		closeProcessWorkspace(oProcessWorkspaceRepository, oProcessWorkspace);
 		s_oLogger.debug("ftpTransfer completed successfully");
 		return true;
 	}
 
-	public String SaveMetadata(ReadProduct oReadProduct, File oProductFile) {
+	public String saveMetadata(ReadProduct oReadProduct, File oProductFile) {
 
 		// Write Metadata to file system
 		try {
@@ -750,7 +762,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 		return "";
 	}
 
-	public String AsynchSaveMetadata(String sProductFile) {
+	public String asynchSaveMetadata(String sProductFile) {
 
 		// Write Metadata to file system
 		try {
@@ -783,7 +795,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 
 
 
-	public String Ingest(IngestFileParameter oParameter, String sDownloadPath) throws Exception {
+	public String ingest(IngestFileParameter oParameter, String sDownloadPath) throws Exception {
 
 		File oFilePath = new File(oParameter.getFilePath());
 		if (!oFilePath.canRead()) {
@@ -799,10 +811,10 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 				//get file size
 				long lFileSizeByte = oFilePath.length(); 
 				//set file size
-				SetFileSizeToProcess(lFileSizeByte, oProcessWorkspace);
+				setFileSizeToProcess(lFileSizeByte, oProcessWorkspace);
 
 				//get process pid
-				oProcessWorkspace.setPid(GetProcessId());
+				oProcessWorkspace.setPid(getProcessId());
 
 				updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 0);
 			} else {
@@ -828,7 +840,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 25);
 
 			// Save Metadata
-			oVM.setMetadataFileReference(AsynchSaveMetadata(oParameter.getFilePath()));
+			oVM.setMetadataFileReference(asynchSaveMetadata(oParameter.getFilePath()));
 
 			updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 50);	        
 
@@ -863,7 +875,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 90);
 
 			//add product to db
-			AddProductToDbAndSendToRabbit(oVM, oFilePath.getAbsolutePath(), oParameter.getWorkspace(), oParameter.getExchange(), LauncherOperations.INGEST.name(), oBB);
+			addProductToDbAndSendToRabbit(oVM, oFilePath.getAbsolutePath(), oParameter.getWorkspace(), oParameter.getExchange(), LauncherOperations.INGEST.name(), oBB);
 
 			if (oProcessWorkspace != null) {
 				oProcessWorkspace.setStatus(ProcessStatus.DONE.name());
@@ -882,7 +894,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 
 		} finally{
 			//update process status and send rabbit updateProcess message
-			CloseProcessWorkspace(oProcessWorkspaceRepository, oProcessWorkspace);
+			closeProcessWorkspace(oProcessWorkspaceRepository, oProcessWorkspace);
 		}
 
 
@@ -930,7 +942,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 	 * @param oParameter
 	 * @return
 	 */
-	public void ExecuteOperator(OperatorParameter oParameter, BaseOperation oOperation, LauncherOperations operation) {
+	public void executeOperator(OperatorParameter oParameter, BaseOperation oOperation, LauncherOperations operation) {
 
 		s_oLogger.debug("LauncherMain.ExecuteOperation: Start operation " + operation);
 
@@ -943,7 +955,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			if (oProcessWorkspace != null) {
 
 				//get process pid
-				oProcessWorkspace.setPid(GetProcessId());
+				oProcessWorkspace.setPid(getProcessId());
 				oProcessWorkspace.setStatus(ProcessStatus.RUNNING.name());
 				oProcessWorkspace.setProgressPerc(0);
 				//update the process
@@ -981,7 +993,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			File oSourceFile = new File(sFile);
 
 			//set file size            
-			SetFileSizeToProcess(oSourceFile, oProcessWorkspace);
+			setFileSizeToProcess(oSourceFile, oProcessWorkspace);
 
 			WriteProduct oWriter = new WriteProduct(oProcessWorkspaceRepository, oProcessWorkspace);
 
@@ -1029,7 +1041,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 				sBB = oAlreadyDownloaded.getBoundingBox();
 			}
 
-			AddProductToDbAndSendToRabbit(null, sTargetAbsFileName, oParameter.getWorkspace(), oParameter.getExchange(), operation.name(), sBB);
+			addProductToDbAndSendToRabbit(null, sTargetAbsFileName, oParameter.getWorkspace(), oParameter.getExchange(), operation.name(), sBB);
 
 			//this.PublishOnGeoserver(oParameter.getPublishParameter(), oTerrainProduct.getName(), sBandName);
 			if (oProcessWorkspace != null) oProcessWorkspace.setStatus(ProcessStatus.DONE.name());
@@ -1045,7 +1057,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 		finally{
 			s_oLogger.debug("LauncherMain.ExecuteOperation: End");
 
-			CloseProcessWorkspace(oProcessWorkspaceRepository, oProcessWorkspace);
+			closeProcessWorkspace(oProcessWorkspaceRepository, oProcessWorkspace);
 
 		}
 	}
@@ -1056,7 +1068,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 	 * @param oParameter
 	 * @return
 	 */
-	public String PublishBandImage(PublishBandParameter oParameter) {
+	public String publishBandImage(PublishBandParameter oParameter) {
 
 		String sLayerId = "";
 		ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
@@ -1066,7 +1078,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 
 			if (oProcessWorkspace != null) {
 				//get process pid
-				oProcessWorkspace.setPid(GetProcessId());
+				oProcessWorkspace.setPid(getProcessId());
 				updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 0);
 			}
 
@@ -1106,7 +1118,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			String sInputFileNameOnly = oFile.getName();
 
 			//set file size
-			SetFileSizeToProcess(oFile, oProcessWorkspace);
+			setFileSizeToProcess(oFile, oProcessWorkspace);
 
 			// Generate Layer Id
 			sLayerId = sInputFileNameOnly;
@@ -1310,7 +1322,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			if (oProcessWorkspace != null) oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
 		}
 		finally{
-			CloseProcessWorkspace(oProcessWorkspaceRepository, oProcessWorkspace);
+			closeProcessWorkspace(oProcessWorkspaceRepository, oProcessWorkspace);
 		}
 
 		return  sLayerId;
@@ -1322,7 +1334,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 	 * @param oParameter
 	 * @return
 	 */
-	public void RasterGeometricResample(RasterGeometricResampleParameter oParameter) {
+	public void rasterGeometricResample(RasterGeometricResampleParameter oParameter) {
 
 		s_oLogger.debug("LauncherMain.RasterGeometricResample: Start");
 		ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
@@ -1332,7 +1344,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 
 			if (oProcessWorkspace != null) {
 				//get process pid
-				oProcessWorkspace.setPid(GetProcessId());
+				oProcessWorkspace.setPid(getProcessId());
 				oProcessWorkspace.setStatus(ProcessStatus.RUNNING.name());
 				oProcessWorkspace.setProgressPerc(0);
 				//update the process
@@ -1387,7 +1399,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			s_oLogger.debug("LauncherMain.RasterGeometricResample: convert product to view model");
 			String sOutFile = oWriter.WriteBEAMDIMAP(oResampledProduct, sPath, sFileNameOnly+"_resampled");
 
-			AddProductToDbAndSendToRabbit(null, sOutFile, oParameter.getWorkspace(), oParameter.getExchange(), LauncherOperations.RASTERGEOMETRICRESAMPLE.name(), null);
+			addProductToDbAndSendToRabbit(null, sOutFile, oParameter.getWorkspace(), oParameter.getExchange(), LauncherOperations.RASTERGEOMETRICRESAMPLE.name(), null);
 			if (oProcessWorkspace != null) oProcessWorkspace.setStatus(ProcessStatus.DONE.name());
 
 		}
@@ -1401,7 +1413,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 		}
 		finally{
 			s_oLogger.debug("LauncherMain.RasterGeometricResample: End");
-			CloseProcessWorkspace(oProcessWorkspaceRepository, oProcessWorkspace);
+			closeProcessWorkspace(oProcessWorkspaceRepository, oProcessWorkspace);
 		}
 	}
 	
@@ -1415,7 +1427,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 
 			if (oProcessWorkspace != null) {
 				//get process pid
-				oProcessWorkspace.setPid(GetProcessId());
+				oProcessWorkspace.setPid(getProcessId());
 				oProcessWorkspace.setStatus(ProcessStatus.RUNNING.name());
 				oProcessWorkspace.setProgressPerc(0);
 				//update the process
@@ -1458,7 +1470,6 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 				// errore
 				s_oLogger.debug("LauncherMain.RunIDLProcessor: process done with code != 0");
 				if (oProcessWorkspace != null) oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
-				
 			}
 
 		}
@@ -1472,7 +1483,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 		}
 		finally {			
 			s_oLogger.debug("LauncherMain.RunIDLProcessor: End");
-			CloseProcessWorkspace(oProcessWorkspaceRepository, oProcessWorkspace);
+			closeProcessWorkspace(oProcessWorkspaceRepository, oProcessWorkspace);
 		}
 	}
 
@@ -1486,7 +1497,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 
 			if (oProcessWorkspace != null) {
 				//get process pid
-				oProcessWorkspace.setPid(GetProcessId());
+				oProcessWorkspace.setPid(getProcessId());
 				oProcessWorkspace.setStatus(ProcessStatus.RUNNING.name());
 				oProcessWorkspace.setProgressPerc(0);
 				//update the process
@@ -1550,7 +1561,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 		}
 		finally {			
 			s_oLogger.debug("LauncherMain.executeMATLABProcessor: End");
-			CloseProcessWorkspace(oProcessWorkspaceRepository, oProcessWorkspace);
+			closeProcessWorkspace(oProcessWorkspaceRepository, oProcessWorkspace);
 		}
 	}
 
@@ -1592,7 +1603,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 		}
 		finally {			
 			s_oLogger.debug("LauncherMain.executeMATLABProcessor: End");
-			CloseProcessWorkspace(oProcessWorkspaceRepository, oProcessWorkspace);
+			closeProcessWorkspace(oProcessWorkspaceRepository, oProcessWorkspace);
 		}
 		
 	}
@@ -1604,7 +1615,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 	 * @param sWorkspaceId Workspace Id
 	 * @return True if the product is already or have been added to the WS. False otherwise
 	 */
-	public boolean AddProductToWorkspace(String sProductName, String sWorkspaceId) {
+	public boolean addProductToWorkspace(String sProductName, String sWorkspaceId) {
 
 		try {
 
@@ -1648,7 +1659,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 	 * @param oProcessWorkspaceRepository Repository 
 	 * @param oProcessWorkspace Process to close
 	 */
-	private void CloseProcessWorkspace(ProcessWorkspaceRepository oProcessWorkspaceRepository, ProcessWorkspace oProcessWorkspace) {
+	private void closeProcessWorkspace(ProcessWorkspaceRepository oProcessWorkspaceRepository, ProcessWorkspace oProcessWorkspace) {
 		try{
 			s_oLogger.debug("LauncherMain.CloseProcessWorkspace");
 			if (oProcessWorkspace != null) {
@@ -1673,7 +1684,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 	 * @param oFile File to read the size from
 	 * @param oProcessWorkspace Process to update
 	 */
-	public static void SetFileSizeToProcess(File oFile, ProcessWorkspace oProcessWorkspace) {
+	public static void setFileSizeToProcess(File oFile, ProcessWorkspace oProcessWorkspace) {
 
 		if (oFile== null) {
 			s_oLogger.error("LauncherMain.SetFileSizeToProcess: input file is null");
@@ -1707,7 +1718,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			}
 		}
 
-		SetFileSizeToProcess(lSize, oProcessWorkspace);
+		setFileSizeToProcess(lSize, oProcessWorkspace);
 	}
 
 	/**
@@ -1715,7 +1726,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 	 * @param lSize Size
 	 * @param oProcessWorkspace Process to update
 	 */
-	public static void SetFileSizeToProcess(Long lSize, ProcessWorkspace oProcessWorkspace) {
+	public static void setFileSizeToProcess(Long lSize, ProcessWorkspace oProcessWorkspace) {
 
 		if (oProcessWorkspace == null) {
 			s_oLogger.error("LauncherMain.SetFileSizeToProcess: input process is null");
@@ -1737,7 +1748,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 	 * @param sOperation Operation Done
 	 * @param sBBox Bounding Box
 	 */
-	private void AddProductToDbAndSendToRabbit(ProductViewModel oVM, String sFileName, String sWorkspace, String sExchange, String sOperation, String sBBox) throws Exception
+	private void addProductToDbAndSendToRabbit(ProductViewModel oVM, String sFileName, String sWorkspace, String sExchange, String sOperation, String sBBox) throws Exception
 	{
 		s_oLogger.debug("LauncherMain.AddProductToDbAndSendToRabbit: File Name = " + sFileName);
 
@@ -1747,7 +1758,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			s_oLogger.debug("LauncherMain.AddProductToDbAndSendToRabbit: call read product");
 			File oProductFile = new File(sFileName);
 			oVM = oReadProduct.getProductViewModel(oProductFile);
-			oVM.setMetadataFileReference(SaveMetadata(oReadProduct, oProductFile));
+			oVM.setMetadataFileReference(saveMetadata(oReadProduct, oProductFile));
 
 			if (oVM.getBandsGroups() == null) {
 				s_oLogger.debug("LauncherMain.AddProductToDbAndSendToRabbit: Band Groups is NULL");
@@ -1791,7 +1802,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 		}
 
 		if (bAddProductToWS) {
-			AddProductToWorkspace(oFile.getName(), sWorkspace);
+			addProductToWorkspace(oFile.getName(), sWorkspace);
 		}
 		else {
 			s_oLogger.error("Product NOT added to the Workspace");
@@ -1808,7 +1819,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 	 * Get the id of the process
 	 * @return
 	 */
-	private Integer GetProcessId()
+	private Integer getProcessId()
 	{
 		Integer iPid = 0;
 		try {
@@ -1827,7 +1838,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 		return iPid;
 	}
 
-	public static void UpdateBandViewModelsCycle() {
+	public static void updateBandViewModelsCycle() {
 		// Create repo
 		ProductWorkspaceRepository oProductWorkspaceRepository = new ProductWorkspaceRepository();
 		DownloadedFilesRepository oDownloadedFilesRepository = new DownloadedFilesRepository();

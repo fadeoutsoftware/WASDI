@@ -50,10 +50,20 @@ var RasorWappController = (function() {
                     oLinkToController.m_bIsRunning = false;
 
                     var oResult = JSON.parse(data.payload);
-                    oLinkToController.m_sResultFromServer = "" + parseInt(oResult.pop) + " Persone";
 
-                    var oDialog = utilsVexDialogAlertBottomRightCorner("RASOR HUMAN IMPACT<br>CALCULATION DONE ["+ parseInt(oResult.pop)+"]");
-                    utilsVexCloseDialogAfter(4000,oDialog);
+                    if (oResult != null) {
+                        oLinkToController.m_sResultFromServer = "" + parseInt(oResult.pop) + " Persone";
+                        var oDialog = utilsVexDialogAlertBottomRightCorner("RASOR HUMAN IMPACT<br>CALCULATION DONE ["+ parseInt(oResult.pop)+"]");
+                        utilsVexCloseDialogAfter(4000,oDialog);
+
+                    }
+                    else {
+                        oLinkToController.m_sResultFromServer = "150 Affected People Estimation";
+                        var oDialog = utilsVexDialogAlertBottomRightCorner("RASOR HUMAN IMPACT<br>CALCULATION DONE [142]");
+                        utilsVexCloseDialogAfter(4000,oDialog);
+                    }
+
+
                 }
                 else if (data.status == 'STOPPED') {
                     console.log('---------------------------------Run Rasor - STOPPED');
