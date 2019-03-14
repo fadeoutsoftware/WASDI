@@ -104,7 +104,9 @@ public class WasdiWpsHttpHelper {
 		//do nothing, use only in derived classes
 	}
 
-	//maybe implement a "direct version", which does not cache the result?
+	//TODO save just last response and set body and other properties to null, unless explicitly requested
+	//and save them only in those cases
+	//TODO let the client object decide whether to cache the result and body or not
 	public CloseableHttpResponse httpGet( String sInUrl, Map<String,String> asHeaders ) {
 		//TODO safety checks
 		if(null==sInUrl) {
