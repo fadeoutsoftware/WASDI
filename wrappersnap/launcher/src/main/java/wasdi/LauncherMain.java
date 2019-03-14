@@ -99,8 +99,8 @@ import wasdi.snapopearations.ReadProduct;
 import wasdi.snapopearations.TerrainCorrection;
 import wasdi.snapopearations.WasdiGraph;
 import wasdi.snapopearations.WriteProduct;
-import wasdi.wps.WpsAdapter;
-import wasdi.wps.WpsFactory;
+import wasdi.wps.OLD_WpsAdapter;
+import wasdi.wps.OLD_WpsFactory;
 
 
 

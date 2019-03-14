@@ -6,8 +6,8 @@
  */
 
 
-import wasdi.wps.WpsAdapter;
-import wasdi.wps.WpsFactory;
+import wasdi.wps.OLD_WpsAdapter;
+import wasdi.wps.OLD_WpsFactory;
 
 /**
  * @author c.nattero
@@ -16,8 +16,8 @@ import wasdi.wps.WpsFactory;
 public class TestWps_wasdi {
 
 	public static void main(String[] args) throws Exception {
-		WpsFactory oFactory = new WpsFactory();
-		WpsAdapter oWasdiDemoClient = oFactory.supply("wasdi");
+		OLD_WpsFactory oFactory = new OLD_WpsFactory();
+		OLD_WpsAdapter oWasdiDemoClient = oFactory.supply("wasdi");
 		String sWasdiPayload = 
 				"<wps:Execute service=\"WPS\" version=\"1.0.0\" 	xmlns:wps=\"http://www.opengis.net/wps/1.0.0\" 	xmlns:ows=\"http://www.opengis.net/ows/1.1\" 	xmlns:xlink=\"http://www.w3.org/1999/xlink\" 	xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" 	xsi:schemaLocation=\"http://www.opengis.net/wps/1.0.0 	  http://schemas.opengis.net/wps/1.0.0/wpsExecute_request.xsd\"> " + 
 				"	<ows:Identifier>gs:WASDIHello</ows:Identifier> " + 
@@ -41,7 +41,7 @@ public class TestWps_wasdi {
 		int iExec = oWasdiDemoClient.execute();
 		String sStatus = oWasdiDemoClient.getStatus();
 
-		WpsAdapter oN52DemoClient = oFactory.supply("n52Demo");
+		OLD_WpsAdapter oN52DemoClient = oFactory.supply("n52Demo");
 		String sN52Payload =
 				"<wps:Execute xmlns:wps=\"http://www.opengis.net/wps/2.0\" " + 
 				" xmlns:ows=\"http://www.opengis.net/ows/2.0\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" " + 
