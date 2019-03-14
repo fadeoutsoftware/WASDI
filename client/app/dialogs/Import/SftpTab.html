@@ -4,7 +4,7 @@
         <invader ng-show="m_oController.isVisibleLoadIcon()"></invader><!--ng-show="m_oController.isVisibleLoadIcon()"-->
     </div>
     <!-- NEW USER -->
-    <form ng-hide="m_oController.isVisibleLoadIcon() || m_oController.isAccountCreated()">
+    <form class="user-options" ng-hide="m_oController.isVisibleLoadIcon() || m_oController.isAccountCreated()">
         <fieldset class="my-input-text">
             <legend><h3>{{ "DIALOG_SFTP_UPLOAD_REGISTER_LABEL"|translate}}</h3></legend>
             <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
@@ -12,7 +12,7 @@
                     <label>{{"DIALOG_SFTP_UPLOAD_EMAIL_LABEL"|translate}}</label>
                 </div>
                 <div class="col-xs-9 col-sm-9 col-md-9 col-lg-9">
-                    <input type="text" name="name"  class="form-control" value="" title=""
+                    <input type="text" name="name"  class="form-v4-control-plaintext wasdi-input" value="" title=""
                            required="required" placeholder="{{'DIALOG_SFTP_UPLOAD_EMAIL_PLACEHOLDER'|translate}}" ng-model="m_oController.m_sEmailNewUser">
                 </div>
                 <div class="col-xs-1 col-sm-1 col-md-1 col-lg-1">
