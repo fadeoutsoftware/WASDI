@@ -26,6 +26,7 @@ import org.apache.commons.io.IOUtils;
 import it.fadeout.Wasdi;
 import wasdi.shared.business.WpsProvider;
 import wasdi.shared.data.WpsProvidersRepository;
+import wasdi.shared.utils.AuthenticationCredentials;
 import wasdi.shared.utils.Utils;
 
 /**
@@ -36,28 +37,18 @@ public class WpsProxy {
 
 	protected String m_sProviderUrl;
 	protected String m_sProviderName;
+	
+	protected AuthenticationCredentials m_oCredentials;
 
 	public WpsProxy() {
 		
 	}
 
-	public void setProviderUrl(String sUrl) {
-		Wasdi.DebugLog("WpsProxy.setProviderUrl");
-		if(null == sUrl) {
-			throw new NullPointerException("WpsProxy.setProviderUrl: null string passed");
-		}
-		if(!Utils.isPlausibleHttpUrl(sUrl)) {
-			throw new IllegalArgumentException("WpsProxy.setProviderUrl: the provided provider URL is not plausible");
-		}
-		m_sProviderUrl = sUrl;
-	}
-
 
 	public Response get(String sParam, HttpHeaders oHeaders) {
 		Wasdi.DebugLog("WpsProxy.get");
-		if(Utils.isNullOrEmpty(m_sProviderUrl)) {
-			throw new NullPointerException("WpsProxy.get: provider not initialized");
-		}
+		updateProviderUrlAsNeeded();
+		authenticateAsNeeded();
 		try {
 			String sUrl = m_sProviderUrl;
 			if(!Utils.isNullOrEmpty(sParam)) {
@@ -80,7 +71,8 @@ public class WpsProxy {
 			}
 			//TODO get rid of this if already set somehow else
 			oHttpURLConnection.setRequestProperty("Content-Type", "application/xml");
-
+			
+			//TODO adopt basic auth, see ProviderAdapter.downloadViaHttp
 
 			oHttpURLConnection.setDoOutput(true);
 			oHttpURLConnection.setInstanceFollowRedirects(true);
@@ -96,9 +88,8 @@ public class WpsProxy {
 	//TODO refactor with a method to get and post in order to get rid of redundancies
 	public Response post(String sParam, HttpHeaders oHeaders, String sPayload) {
 		Wasdi.DebugLog("WpsProxy.post");
-		if(Utils.isNullOrEmpty(m_sProviderUrl)) {
-			throw new NullPointerException("WpsProxy.post: provider not initialized");
-		}
+		updateProviderUrlAsNeeded();
+		authenticateAsNeeded();
 		Wasdi.DebugLog("WpsProxy.get");
 		if(Utils.isNullOrEmpty(m_sProviderUrl)) {
 			throw new NullPointerException("WpsProxy.get: provider not initialized");
@@ -142,14 +133,29 @@ public class WpsProxy {
 		}
 		return null;
 	}
+	
+	public void setProviderUrl(String sUrl) {
+		Wasdi.DebugLog("WpsProxy.setProviderUrl");
+		if(null == sUrl) {
+			throw new NullPointerException("WpsProxy.setProviderUrl: null string passed");
+		}
+		if(!Utils.isPlausibleHttpUrl(sUrl)) {
+			throw new IllegalArgumentException("WpsProxy.setProviderUrl: the provided provider URL is not plausible");
+		}
+		m_sProviderUrl = sUrl;
+	}
 
 	//TODO refactor with a common method to get rid of redundancies
 	protected Response performAndHandleResult(HttpURLConnection oHttpURLConnection) {
+		if(null==oHttpURLConnection) {
+			throw new NullPointerException("WpsProxy.performAndHandleResult: null HttpURLConnection passed");
+		}
 		try {
 			int iStatus = oHttpURLConnection.getResponseCode();
 			if(200 <= iStatus && iStatus < 300 ) {
-				String sBody = getFullResponse(oHttpURLConnection);
-				ResponseBuilder oBuilder = Response.ok(sBody);
+				//String sBody = getFullResponse(oHttpURLConnection);
+				//ResponseBuilder oBuilder = Response.ok(sBody);
+				ResponseBuilder oBuilder = Response.ok(oHttpURLConnection.getInputStream());
 				if(200!=iStatus) {
 					oBuilder.status(iStatus);
 				}
@@ -197,6 +203,9 @@ public class WpsProxy {
 	}
 	
 	protected static String getFullResponse(HttpURLConnection oHttpURLConnection) {
+		if(null==oHttpURLConnection) {
+			throw new NullPointerException("WpsProxy.getFullResponse: null HttpURLConnection passed");
+		}
 		StringBuilder oFullResponseBuilder = new StringBuilder();
 		try {
 			BufferedReader oBufferedReader = new BufferedReader(
@@ -244,8 +253,20 @@ public class WpsProxy {
 
 	}
 
-	protected void authenticate() {
+	public void setCredentials(AuthenticationCredentials oCredentials) {
+		if(null == oCredentials) {
+			throw new NullPointerException("WpsProxy.setCredentials: null AuthenticationCredentials passed");
+		}
+		m_oCredentials = new AuthenticationCredentials(oCredentials.getUser(), oCredentials.getPassword());
+	}
+	
+	protected void setAuthenticator() {
 		Wasdi.DebugLog("WpsProxy.authenticate");
+		updateProviderUrlAsNeeded();
+	}
+	
+	protected void authenticateAsNeeded() {
+		Wasdi.DebugLog("WpsProxy.authenticateAsNeeded");
 	}
 
 	public void setProviderName(String sWpsProvider) {
@@ -253,12 +274,23 @@ public class WpsProxy {
 			throw new NullPointerException("WpsProxy.setProviderName: passed a null String");
 		}
 		m_sProviderName = sWpsProvider;
+	}
+
+	protected void updateProviderUrl() {
 		WpsProvidersRepository oRepo = new WpsProvidersRepository();
 		String sUrl = oRepo.getProviderUrl(m_sProviderName);
 		if(null!=sUrl) {
 			m_sProviderUrl = sUrl;
 		}
-		
+		if(null!=oRepo.getCredentials(m_sProviderName)) {
+			setCredentials(oRepo.getCredentials(m_sProviderName));
+		}
 	}
-
+	
+	protected void updateProviderUrlAsNeeded() {
+		if(null==m_sProviderUrl) {
+			updateProviderUrl();
+		}
+	}
+	
 }
