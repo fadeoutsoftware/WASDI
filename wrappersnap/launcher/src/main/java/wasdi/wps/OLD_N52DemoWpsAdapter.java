@@ -10,7 +10,7 @@ package wasdi.wps;
  * @author c.nattero
  *
  */
-public class N52DemoWpsAdapter extends WpsAdapter {
+public class OLD_N52DemoWpsAdapter extends OLD_WpsAdapter {
 	
 	static {
 		s_sWpsHost = "http://geoprocessing.demo.52north.org:8080/wps/WebProcessingService";
