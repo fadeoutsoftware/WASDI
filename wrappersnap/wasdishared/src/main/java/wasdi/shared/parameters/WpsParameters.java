@@ -12,7 +12,9 @@ package wasdi.shared.parameters;
  */
 public class WpsParameters extends BaseParameter {
 
+	//the provider, e.g., WASDI, 
 	private String wpsProvider;
+	private String wpsProviderUrl;
 	private String xmlPayload;
 	private String wpsOperationName;
 	private String wpsProcessIdOnRemoteService;
@@ -24,6 +26,12 @@ public class WpsParameters extends BaseParameter {
 	}
 	public void setWpsProvider(String wpsProvider) {
 		this.wpsProvider = wpsProvider;
+	}
+	public String getWpsProviderUrl() {
+		return wpsProviderUrl;
+	}
+	public void setWpsProviderUrl(String wpsProviderUrl) {
+		this.wpsProviderUrl = wpsProviderUrl;
 	}
 	public String getXmlPayload() {
 		return xmlPayload;
