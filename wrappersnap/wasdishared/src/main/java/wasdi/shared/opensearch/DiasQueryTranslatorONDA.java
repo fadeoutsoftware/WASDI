@@ -115,6 +115,14 @@ public class DiasQueryTranslatorONDA extends DiasQueryTranslator {
 			sResult += sTmp;
 		}
 		
+		sTmp = parseCopernicusMarine(sQuery);
+		if(!Utils.isNullOrEmpty(sTmp)) {
+			if(!Utils.isNullOrEmpty(sResult)) {
+				sResult += " OR ";
+			}
+			sResult += sTmp;
+		}
+		
 		String sAdditional = parseAdditionalQuery(sQuery);
 		if(!Utils.isNullOrEmpty(sAdditional)) {
 			if(!Utils.isNullOrEmpty(sResult)) {
@@ -157,6 +165,14 @@ public class DiasQueryTranslatorONDA extends DiasQueryTranslator {
 		return sResult;
 	}
 
+	private String parseCopernicusMarine(String sQuery) {
+		String sResult = "";
+		if(sQuery.contains("Copernicus-marine")) {
+			sResult += "( productMainClass:Copernicus-marine )";
+		}
+		return sResult;
+	}
+
 	protected String parseAdditionalQuery(String sQuery) {
 		String sResult = "";
 		int iStop = Math.min( Math.max(sQuery.indexOf(" AND "),0), sQuery.length() );
@@ -166,6 +182,7 @@ public class DiasQueryTranslatorONDA extends DiasQueryTranslator {
 				!sSubQuery.contains("Landsat") &&
 				!sSubQuery.contains("Envisat") &&
 				!sSubQuery.contains("Proba") &&
+				!sSubQuery.contains("Copernicus-marine") &&
 				!sSubQuery.contains("footprint") &&
 				!sSubQuery.contains("beginPosition") &&
 				!sSubQuery.contains("endPosition")
