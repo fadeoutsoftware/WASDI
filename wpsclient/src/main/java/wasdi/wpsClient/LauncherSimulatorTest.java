@@ -23,7 +23,10 @@ public class LauncherSimulatorTest {
     private static final String MIME_TYPE_TEXT_XML = "text/xml";
 	
 	public static void main(String[] args) {
-		String sVersion = "1.0.0";
+		System.setProperty("javax.xml.stream.XMLOutputFactory", "com.sun.xml.internal.stream.XMLOutputFactoryImpl");
+		
+		
+		String sVersion = "2.0.0";
 		
 		callN52WPS(sVersion);
 		//callWasdiWPS(sVersion);
@@ -34,6 +37,7 @@ public class LauncherSimulatorTest {
 		WasdiWpsClientLib oClient = new WasdiWpsClientLib();
        String sWpsURL =
        "http://geoprocessing.demo.52north.org:8080/wps/WebProcessingService";
+	   //"http://178.22.66.96/geoserver/wps";
       String sProcessID = null; 
 
       try {
