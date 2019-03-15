@@ -14,14 +14,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package wasdi.wpsClient;
+package org.n52.geoprocessing.wps.client;
 
 import java.io.IOException;
 import java.util.List;
 
 import org.n52.geoprocessing.wps.client.ExecuteRequestBuilder;
 import org.n52.geoprocessing.wps.client.WPSClientException;
-import org.n52.geoprocessing.wps.client.WasdiWPSClientSession;
 import org.n52.geoprocessing.wps.client.model.InputDescription;
 import org.n52.geoprocessing.wps.client.model.Process;
 import org.n52.geoprocessing.wps.client.model.Result;
@@ -173,6 +172,7 @@ public class WasdiWPSClientExample {
     }
 
     public static void main(String[] args) {
+    	System.setProperty("javax.xml.stream.XMLOutputFactory", "com.sun.xml.internal.stream.XMLOutputFactoryImpl");
 
         // TODO find way to initialize parsers/generators
 
