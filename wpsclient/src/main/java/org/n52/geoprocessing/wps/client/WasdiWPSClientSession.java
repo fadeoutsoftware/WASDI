@@ -545,7 +545,8 @@ public final class WasdiWPSClientSession {
 
         CloseableHttpResponse oHttpResponse = m_oHttpHelper.httpPost(oUrl.toString(), sExecuteObject, asHeaders);
 
-        Object oResponseObject = parseInputStreamToString(oHttpResponse.getEntity().getContent());
+        //Object oResponseObject = parseInputStreamToString(oHttpResponse.getEntity().getContent());
+        Object oResponseObject = parseInputStreamToString(m_oHttpHelper.getBodyAsStream());
 
         try {
             checkStatusCode(oHttpResponse);
@@ -571,13 +572,23 @@ public final class WasdiWPSClientSession {
     private Object parseInputStreamToString(InputStream oInputStream) throws IOException, WPSClientException {
 
         XMLEventReader oXmlReader = null;
+//        Object oResult = null;
         try {
-            oXmlReader = XMLInputFactory.newInstance()
-                    .createXMLEventReader(new InputStreamReader(oInputStream, StandardCharsets.UTF_8));
+//        	XMLInputFactory oXMLInputFactory = XMLInputFactory.newInstance();
+//        	InputStreamReader oReader = new InputStreamReader(oInputStream, StandardCharsets.UTF_8);
+//            oXmlReader = oXMLInputFactory.createXMLEventReader(oReader);
+        	
+        	oXmlReader = XMLInputFactory.newInstance()
+        			.createXMLEventReader(new InputStreamReader(oInputStream, StandardCharsets.UTF_8));
+            
+//            WPSResponseReader oWPSResponseReader = new WPSResponseReader();
+//            oResult = oWPSResponseReader.readElement(oXmlReader);
+            //WAS:
             return new WPSResponseReader().readElement(oXmlReader);
         } catch (XMLStreamException e) {
             throw new WPSClientException("Could not decode Inputstream.", e);
         }
+//        return oResult;
     }
 
     @SuppressWarnings("unchecked")
