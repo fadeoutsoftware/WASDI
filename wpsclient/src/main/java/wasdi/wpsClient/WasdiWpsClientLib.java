@@ -16,14 +16,10 @@
  */
 package wasdi.wpsClient;
 
-import java.io.BufferedInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 
-import org.n52.geoprocessing.wps.client.ExecuteRequestBuilder;
 import org.n52.geoprocessing.wps.client.WPSClientException;
 import org.n52.geoprocessing.wps.client.WasdiWPSClientSession;
 import org.n52.geoprocessing.wps.client.model.InputDescription;
@@ -31,11 +27,8 @@ import org.n52.geoprocessing.wps.client.model.Process;
 import org.n52.geoprocessing.wps.client.model.Result;
 import org.n52.geoprocessing.wps.client.model.StatusInfo;
 import org.n52.geoprocessing.wps.client.model.WPSCapabilities;
-import org.n52.geoprocessing.wps.client.model.execution.BoundingBox;
 import org.n52.geoprocessing.wps.client.model.execution.Data;
 import org.n52.geoprocessing.wps.client.model.execution.Execute;
-
-import net.opengis.wps.x100.ProcessDescriptionType;
 
 public class WasdiWpsClientLib {
     
@@ -57,6 +50,10 @@ public class WasdiWpsClientLib {
     	m_oWasdiWPSClientSession = WasdiWPSClientSession.getInstance(m_sProvider);
     }
 
+    //TODO facilities for parsing result:
+      // if it's a status, how to poll update?
+      // how to collect result?
+    
     
     public String rawExecute(String sUrl, String sPayload, Map<String, String> asHeaders) {
     	return m_oWasdiWPSClientSession.rawExecute(sUrl, sPayload, asHeaders);
@@ -137,11 +134,16 @@ public class WasdiWpsClientLib {
 
         Process oProcessDescription = oWpsClient.getProcessDescription(sUrl, sProcessID, sVersion);
 
-        List<InputDescription> aoInputList = oProcessDescription.getInputs();
-
-        for (InputDescription oInput : aoInputList) {
-            System.out.println(oInput.getId());
+        if(null!= oProcessDescription) {
+	        List<InputDescription> aoInputList = oProcessDescription.getInputs();
+	
+	        for (InputDescription oInput : aoInputList) {
+	            System.out.println(oInput.getId());
+	        }
         }
+        //else?
+        //FIXME handle case when null is returned
+        
         return oProcessDescription;
     }
 
