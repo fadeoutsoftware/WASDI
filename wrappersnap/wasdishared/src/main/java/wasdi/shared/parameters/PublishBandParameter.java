@@ -8,6 +8,7 @@ public class PublishBandParameter extends BaseParameter{
     private String fileName;
     private String queue;
     private String bandName;
+    private String style;
 
     public String getFileName() {
         return fileName;
@@ -32,4 +33,12 @@ public class PublishBandParameter extends BaseParameter{
     public void setBandName(String bandName) {
         this.bandName = bandName;
     }
+
+	public String getStyle() {
+		return style;
+	}
+
+	public void setStyle(String style) {
+		this.style = style;
+	}
 }

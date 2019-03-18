@@ -693,28 +693,28 @@ public class ProcessingResources {
 	@Path("/bandimage")
 	@Produces(MediaType.APPLICATION_OCTET_STREAM)
 	public Response getBandImage(@HeaderParam("x-session-token") String sSessionId,
-			@QueryParam("workspace") String workspace,
-			BandImageViewModel model) throws IOException {
+			@QueryParam("workspace") String sWorkspace,
+			BandImageViewModel oBandImageViewModel) throws IOException {
 		
 		Wasdi.DebugLog("ProcessingResources.getBandImage");
 
 		// Check user session
-		String userId = acceptedUserAndSession(sSessionId);
-		if (Utils.isNullOrEmpty(userId)) return Response.status(401).build();
+		String sUserId = acceptedUserAndSession(sSessionId);
+		if (Utils.isNullOrEmpty(sUserId)) return Response.status(401).build();
 
 		
 		// Init the registry for JAI
-		OperationRegistry operationRegistry = JAI.getDefaultInstance().getOperationRegistry();
-		RegistryElementDescriptor oDescriptor = operationRegistry.getDescriptor("rendered", "Paint");
+		OperationRegistry oOperationRegistry = JAI.getDefaultInstance().getOperationRegistry();
+		RegistryElementDescriptor oDescriptor = oOperationRegistry.getDescriptor("rendered", "Paint");
 		
 		if (oDescriptor==null) {
 			System.out.println("getBandImage: REGISTER Descriptor!!!!");
 			try {
-				operationRegistry.registerServices(this.getClass().getClassLoader());
+				oOperationRegistry.registerServices(this.getClass().getClassLoader());
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-			oDescriptor = operationRegistry.getDescriptor("rendered", "Paint");
+			oDescriptor = oOperationRegistry.getDescriptor("rendered", "Paint");
 			
 			
 			IIORegistry.getDefaultInstance().registerApplicationClasspathSpis();
@@ -722,17 +722,17 @@ public class ProcessingResources {
 		
 		
 		// Get Download File Path
-        String downloadPath = m_oServletConfig.getInitParameter("DownloadRootPath");
-        File productFile = new File(new File(new File(downloadPath, userId), workspace), model.getProductFileName());
+        String sDownloadPath = m_oServletConfig.getInitParameter("DownloadRootPath");
+        File oProductFile = new File(new File(new File(sDownloadPath, sUserId), sWorkspace), oBandImageViewModel.getProductFileName());
 		
 //		File productFile = new File("/home/doy/tmp/wasdi/tmp/S2B_MSIL1C_20180117T102339_N0206_R065_T32TMQ_20180117T122826.zip");
         
-        if (!productFile.exists()) {
-        	System.out.println("ProcessingResource.getBandImage: FILE NOT FOUND: " + productFile.getAbsolutePath());
+        if (!oProductFile.exists()) {
+        	System.out.println("ProcessingResource.getBandImage: FILE NOT FOUND: " + oProductFile.getAbsolutePath());
         	return Response.status(500).build();
         }
         
-        Product oSNAPProduct = ProductIO.readProduct(productFile);
+        Product oSNAPProduct = ProductIO.readProduct(oProductFile);
         
         if (oSNAPProduct == null) {
         	Wasdi.DebugLog("ProcessingResources.getBandImage: SNAP product is null, impossibile to read. Return");
@@ -741,107 +741,107 @@ public class ProcessingResources {
         	Wasdi.DebugLog("ProcessingResources.getBandImage: product read");
         }
         
-		BandImageManager manager = new BandImageManager(oSNAPProduct);
+		BandImageManager oBandImageManager = new BandImageManager(oSNAPProduct);
 		
-		RasterDataNode raster = null;
+		RasterDataNode oRasterDataNode = null;
 		
-		if (model.getFilterVM() != null) {
-			Filter filter = model.getFilterVM().getFilter();
-			FilterBand filteredBand = manager.getFilterBand(model.getBandName(), filter, model.getFilterIterationCount());
-			if (filteredBand == null) {
-				Wasdi.DebugLog("ProcessingResource.getBandImage: CANNOT APPLY FILTER TO BAND " + model.getBandName());
+		if (oBandImageViewModel.getFilterVM() != null) {
+			Filter oFilter = oBandImageViewModel.getFilterVM().getFilter();
+			FilterBand oFilteredBand = oBandImageManager.getFilterBand(oBandImageViewModel.getBandName(), oFilter, oBandImageViewModel.getFilterIterationCount());
+			if (oFilteredBand == null) {
+				Wasdi.DebugLog("ProcessingResource.getBandImage: CANNOT APPLY FILTER TO BAND " + oBandImageViewModel.getBandName());
 	        	return Response.status(500).build();
 			}
-			raster = filteredBand;
+			oRasterDataNode = oFilteredBand;
 		} else {
-			raster = oSNAPProduct.getBand(model.getBandName());
+			oRasterDataNode = oSNAPProduct.getBand(oBandImageViewModel.getBandName());
 		}
 		
-		if (model.getVp_x()<0||model.getVp_y()<0||model.getImg_w()<=0||model.getImg_h()<=0) {
-			Wasdi.DebugLog("ProcessingResources.getBandImage: Invalid Parameters: VPX= " + model.getVp_x() +" VPY= "+ model.getVp_y() +" VPW= "+ model.getVp_w() +" VPH= "+ model.getVp_h() + " OUTW = " + model.getImg_w() + " OUTH = " +model.getImg_h() );
+		if (oBandImageViewModel.getVp_x()<0||oBandImageViewModel.getVp_y()<0||oBandImageViewModel.getImg_w()<=0||oBandImageViewModel.getImg_h()<=0) {
+			Wasdi.DebugLog("ProcessingResources.getBandImage: Invalid Parameters: VPX= " + oBandImageViewModel.getVp_x() +" VPY= "+ oBandImageViewModel.getVp_y() +" VPW= "+ oBandImageViewModel.getVp_w() +" VPH= "+ oBandImageViewModel.getVp_h() + " OUTW = " + oBandImageViewModel.getImg_w() + " OUTH = " +oBandImageViewModel.getImg_h() );
 			return Response.status(500).build();
 		} else {
 			Wasdi.DebugLog("ProcessingResources.getBandImage: parameters OK");
 		}
 		
-		Rectangle vp = new Rectangle(model.getVp_x(), model.getVp_y(), model.getVp_w(), model.getVp_h());
-		Dimension imgSize = new Dimension(model.getImg_w(), model.getImg_h());
+		Rectangle oRectangleViewPort = new Rectangle(oBandImageViewModel.getVp_x(), oBandImageViewModel.getVp_y(), oBandImageViewModel.getVp_w(), oBandImageViewModel.getVp_h());
+		Dimension oImgSize = new Dimension(oBandImageViewModel.getImg_w(), oBandImageViewModel.getImg_h());
 		
 		//apply product masks
-		List<ProductMaskViewModel> productMasksModels = model.getProductMasks();
-		if (productMasksModels!=null) {
-			for (ProductMaskViewModel maskModel : productMasksModels) {
-				Mask mask = oSNAPProduct.getMaskGroup().get(maskModel.getName());
-				if (mask == null) {
-					Wasdi.DebugLog("ProcessingResources.getBandImage: cannot find mask by name: " + maskModel.getName());
+		List<ProductMaskViewModel> aoProductMasksModels = oBandImageViewModel.getProductMasks();
+		if (aoProductMasksModels!=null) {
+			for (ProductMaskViewModel oMaskModel : aoProductMasksModels) {
+				Mask oMask = oSNAPProduct.getMaskGroup().get(oMaskModel.getName());
+				if (oMask == null) {
+					Wasdi.DebugLog("ProcessingResources.getBandImage: cannot find mask by name: " + oMaskModel.getName());
 				} else {
 					//set the user specified color
-					mask.setImageColor(new Color(maskModel.getColorRed(), maskModel.getColorGreen(), maskModel.getColorBlue()));
-					mask.setImageTransparency(maskModel.getTransparency());
-					raster.getOverlayMaskGroup().add(mask);
+					oMask.setImageColor(new Color(oMaskModel.getColorRed(), oMaskModel.getColorGreen(), oMaskModel.getColorBlue()));
+					oMask.setImageTransparency(oMaskModel.getTransparency());
+					oRasterDataNode.getOverlayMaskGroup().add(oMask);
 				}
 			}
 		}
 		
 		//applying range masks
-		List<RangeMaskViewModel> rangeMasksModels = model.getRangeMasks();
-		if (rangeMasksModels != null) {
-			for (RangeMaskViewModel maskModel : rangeMasksModels) {
+		List<RangeMaskViewModel> aoRangeMasksModels = oBandImageViewModel.getRangeMasks();
+		if (aoRangeMasksModels != null) {
+			for (RangeMaskViewModel oMaskModel : aoRangeMasksModels) {
 
-				Mask mask = createMask(oSNAPProduct, maskModel, Mask.RangeType.INSTANCE);
+				Mask oMask = createMask(oSNAPProduct, oMaskModel, Mask.RangeType.INSTANCE);
 				
-				String externalName = Tokenizer.createExternalName(model.getBandName());
-		        PropertyContainer imageConfig = mask.getImageConfig();
-		        imageConfig.setValue(Mask.RangeType.PROPERTY_NAME_MINIMUM, maskModel.getMin());
-		        imageConfig.setValue(Mask.RangeType.PROPERTY_NAME_MAXIMUM, maskModel.getMax());
-		        imageConfig.setValue(Mask.RangeType.PROPERTY_NAME_RASTER, externalName);
-		        oSNAPProduct.addMask(mask);
-				raster.getOverlayMaskGroup().add(mask);
+				String sExternalName = Tokenizer.createExternalName(oBandImageViewModel.getBandName());
+		        PropertyContainer oImageConfig = oMask.getImageConfig();
+		        oImageConfig.setValue(Mask.RangeType.PROPERTY_NAME_MINIMUM, oMaskModel.getMin());
+		        oImageConfig.setValue(Mask.RangeType.PROPERTY_NAME_MAXIMUM, oMaskModel.getMax());
+		        oImageConfig.setValue(Mask.RangeType.PROPERTY_NAME_RASTER, sExternalName);
+		        oSNAPProduct.addMask(oMask);
+				oRasterDataNode.getOverlayMaskGroup().add(oMask);
 			}
 		}
 		
 		//applying math masks
-		List<MathMaskViewModel> mathMasksModels = model.getMathMasks();
-		if (mathMasksModels != null) {
-			for (MathMaskViewModel maskModel : mathMasksModels) {
+		List<MathMaskViewModel> aoMathMasksModels = oBandImageViewModel.getMathMasks();
+		if (aoMathMasksModels != null) {
+			for (MathMaskViewModel oMaskModel : aoMathMasksModels) {
 				
-				Mask mask = createMask(oSNAPProduct, maskModel, Mask.BandMathsType.INSTANCE);
+				Mask oMask = createMask(oSNAPProduct, oMaskModel, Mask.BandMathsType.INSTANCE);
 				
-				PropertyContainer imageConfig = mask.getImageConfig();
-		        imageConfig.setValue(Mask.BandMathsType.PROPERTY_NAME_EXPRESSION, maskModel.getExpression());
-		        oSNAPProduct.addMask(mask);
-				raster.getOverlayMaskGroup().add(mask);
+				PropertyContainer oImageConfig = oMask.getImageConfig();
+		        oImageConfig.setValue(Mask.BandMathsType.PROPERTY_NAME_EXPRESSION, oMaskModel.getExpression());
+		        oSNAPProduct.addMask(oMask);
+				oRasterDataNode.getOverlayMaskGroup().add(oMask);
 			}
 		}
 
 		//applying color manipulation
 		
-		ColorManipulationViewModel colorManiputalion = model.getColorManiputalion();
-		if (colorManiputalion!=null) {
-			manager.applyColorManipulation(raster, colorManiputalion);
+		ColorManipulationViewModel oColorManiputalionViewModel = oBandImageViewModel.getColorManiputalion();
+		if (oColorManiputalionViewModel!=null) {
+			oBandImageManager.applyColorManipulation(oRasterDataNode, oColorManiputalionViewModel);
 		}
 		
 		//creating the image
-		BufferedImage img;
+		BufferedImage oBufferedImg;
 		try {
-			img = manager.buildImageWithMasks(raster, imgSize, vp, colorManiputalion==null);
+			oBufferedImg = oBandImageManager.buildImageWithMasks(oRasterDataNode, oImgSize, oRectangleViewPort, oColorManiputalionViewModel==null);
 		} catch (Exception e) {
 			e.printStackTrace();
 			return Response.status(500).build();
 		}
 		
-		if (img == null) {
+		if (oBufferedImg == null) {
 			Wasdi.DebugLog("ProcessingResource.getBandImage: img null");
 			return Response.status(500).build();
 		}
 		
-		Wasdi.DebugLog("ProcessingResource.getBandImage: Generated image for band " + model.getBandName() + " X= " + model.getVp_x() + " Y= " + model.getVp_y() + " W= " + model.getVp_w() + " H= "  + model.getVp_h());
+		Wasdi.DebugLog("ProcessingResource.getBandImage: Generated image for band " + oBandImageViewModel.getBandName() + " X= " + oBandImageViewModel.getVp_x() + " Y= " + oBandImageViewModel.getVp_y() + " W= " + oBandImageViewModel.getVp_w() + " H= "  + oBandImageViewModel.getVp_h());
 		
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-	    ImageIO.write(img, "jpg", baos);
-	    byte[] imageData = baos.toByteArray();
+		ByteArrayOutputStream oByteOutStream = new ByteArrayOutputStream();
+	    ImageIO.write(oBufferedImg, "jpg", oByteOutStream);
+	    byte[] ayImageData = oByteOutStream.toByteArray();
 		
-		return Response.ok(imageData).build();
+		return Response.ok(ayImageData).build();
 	}
 
 	private Mask createMask(Product oSNAPProduct, MaskViewModel maskModel, Mask.ImageType type) {

@@ -79,6 +79,18 @@ public class BandImageManager {
 	
 	private static Thread m_oCacheThread = null;
 	
+	public static void stopChacheThread() {
+		if (m_oCacheThread != null) {
+			try {
+				m_oCacheThread.interrupt();
+			}
+			catch (Exception e) {
+				System.out.println("stopChacheThread " + e.toString());
+			}
+			
+		}
+	}
+	
 	static {
 		
 		System.out.println("BandImageManager.buildImage: laucnhing cached sources thread!");
@@ -133,6 +145,7 @@ public class BandImageManager {
 		});
 		
 		m_oCacheThread.start();
+
 	}
 	
 
@@ -367,9 +380,13 @@ public class BandImageManager {
 		
         return oOutputBufferedImage;
 	}
-
 	
 	public BufferedImage buildImageWithMasks(RasterDataNode oInputBand, Dimension oOutputImageSize, Rectangle oInputImageViewPortToRender, boolean bUseCache) {
+		return buildImageWithMasks(oInputBand, oOutputImageSize, oInputImageViewPortToRender, bUseCache, false);
+	}
+
+	
+	public BufferedImage buildImageWithMasks(RasterDataNode oInputBand, Dimension oOutputImageSize, Rectangle oInputImageViewPortToRender, boolean bUseCache, boolean bAlphaChannel) {
 		
 		BufferedImage oOutputBufferedImage = null;
 		
@@ -408,9 +425,12 @@ public class BandImageManager {
 	        System.out.println("BandImageManager.buildImage: multi level source obtained: " + (System.currentTimeMillis() - lStartTime) + " ms");
 
 	        // Create the Output buffered Image
-	        final int iOutputImageWidth = oOutputImageSize.width;
-	        final int iOutputImageHeight = oOutputImageSize.height;
-	        final int iOutputImageType = BufferedImage.TYPE_3BYTE_BGR;
+	        int iOutputImageWidth = oOutputImageSize.width;
+	        int iOutputImageHeight = oOutputImageSize.height;
+	        int iOutputImageType = BufferedImage.TYPE_3BYTE_BGR;
+	        
+	        if (bAlphaChannel) iOutputImageType = BufferedImage.TYPE_4BYTE_ABGR;
+	        
 	        oOutputBufferedImage = new BufferedImage(iOutputImageWidth, iOutputImageHeight, iOutputImageType);
 	        
 	        // Create Image Layer
@@ -434,7 +454,7 @@ public class BandImageManager {
 	        // P.CAMPANELLA 23/02/2018: E' questo che rende nere le immagini sentinel 2. In effetti in debug si vede che lo zoom fatto nella riga oSnapshotViewPort.zoom(oSnapImageLayer.getModelBounds());
 	        // Ha dei numeri completamente diversi. Sembra che in qualche modo l'immagine sia come traslata..
 	        //if (oInputImageViewPortToRender!=null) oImageRendering.getViewport().zoom(oInputImageViewPortToRender);
-	        // Nelle sentinel 1 invece � come ci aspettiamo esattamente delle dimensioni del raster.
+	        // Nelle sentinel 1 invece e' come ci aspettiamo esattamente delle dimensioni del raster.
 	        	        
 	        if (oInputImageViewPortToRender!=null) {
 		        AffineTransform oImageToModel = oSnapImageLayer.getImageToModelTransform();

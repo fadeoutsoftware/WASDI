@@ -203,7 +203,8 @@ public class FileBufferResource {
 	public RabbitMessageViewModel publishBand(	@HeaderParam("x-session-token") String sSessionId,
 												@QueryParam("sFileUrl") String sFileUrl,
 												@QueryParam("sWorkspaceId") String sWorkspaceId,
-												@QueryParam("sBand") String sBand) throws IOException {
+												@QueryParam("sBand") String sBand,
+												@QueryParam("sStyle") String sStyle) throws IOException {
 		RabbitMessageViewModel oReturnValue = null;
 		try {
 			
@@ -249,6 +250,7 @@ public class FileBufferResource {
 			oParameter.setWorkspace(sWorkspaceId);
 			oParameter.setUserId(sUserId);
 			oParameter.setBandName(sBand);
+			oParameter.setStyle(sStyle);
 			oParameter.setExchange(sWorkspaceId);
 			oParameter.setProcessObjId(sProcessObjId);
 
