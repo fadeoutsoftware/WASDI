@@ -1,5 +1,7 @@
 package wasdi;
 
+import java.awt.image.ColorModel;
+import java.awt.image.SampleModel;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -16,6 +18,8 @@ import java.util.List;
 import java.util.logging.FileHandler;
 import java.util.logging.Level;
 import java.util.logging.SimpleFormatter;
+
+import javax.media.jai.PlanarImage;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -1087,6 +1091,11 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 
 			DownloadedFilesRepository oDownloadedFilesRepository = new DownloadedFilesRepository();
 			DownloadedFile oDownloadedFile = oDownloadedFilesRepository.GetDownloadedFile(sFile);
+			
+			if (oDownloadedFile == null)   {
+				s_oLogger.error("Downloaded file is null!! Return empyt layer id for ["+ sFile +"]");
+				return sLayerId;
+			}
 
 			// Keep the product name
 			String sProductName = oDownloadedFile.getProductViewModel().getName();
@@ -1205,9 +1214,18 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 					GeoCoding oGeoCoding = oProduct.getSceneGeoCoding();;
 					if (oGeoCoding==null) throw new Exception("unable to obtain scene geocoding from product " + oProduct.getName());
 					Band oBand = oProduct.getBand(oParameter.getBandName());
-
 					// Get Image
 					MultiLevelImage oBandImage = oBand.getSourceImage();
+					
+					
+					ColorModel oColorModel = oBandImage.getColorModel();
+					if(null==oColorModel) {
+						SampleModel oSampleModel = oBandImage.getSampleModel();
+						oColorModel = PlanarImage.createColorModel(oSampleModel);
+						//oBandImage.setProperty(name, value);
+						if (oColorModel == null) oColorModel = ColorModel.getRGBdefault();
+					}
+					
 					// Get TIFF Metadata
 					GeoTIFFMetadata oMetadata = GeoCoding2GeoTIFFMetadata.createGeoTIFFMetadata(oGeoCoding, oBandImage.getWidth(),oBandImage.getHeight());
 
@@ -1216,6 +1234,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 					// Write the Band Tiff
 					if (ConfigReader.getPropValue("CREATE_BAND_GEOTIFF_ACTIVE").equals("true")) {
 						s_oLogger.debug("LauncherMain.PublishBandImage:  Writing Image");
+												
 						GeoTIFF.writeImage(oBandImage, oOutputFile, oMetadata);
 					}
 					else {
