@@ -4,3 +4,7 @@ org.esa.snap.core.layer.RasterImageLayerType
 org.esa.snap.core.layer.RgbImageLayerType
 org.esa.snap.core.layer.MaskCollectionLayerType
 org.esa.snap.core.layer.MaskLayerType
+com.bc.ceres.glayer.CollectionLayer$Type
+com.bc.ceres.glayer.support.ImageLayer$Type
+com.bc.ceres.glayer.support.BackgroundLayer$Type
+com.bc.ceres.glayer.support.ShapeLayer$Type

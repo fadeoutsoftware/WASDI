@@ -280,7 +280,7 @@ public class Utils {
             if (iIndexBounds > 0) sOutput += ", ";
             
             try{
-            	sOutput += asNewBounds[1] + "," + asNewBounds[1];
+            	sOutput += asNewBounds[1] + "," + asNewBounds[0];
             }catch(Exception oEx){
                 oEx.printStackTrace();
             }

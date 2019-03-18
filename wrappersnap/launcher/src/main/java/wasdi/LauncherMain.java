@@ -1,6 +1,9 @@
 package wasdi;
 
+import java.awt.Dimension;
+import java.awt.Rectangle;
 import java.awt.image.ColorModel;
+import java.awt.image.RenderedImage;
 import java.awt.image.SampleModel;
 import java.io.BufferedReader;
 import java.io.File;
@@ -34,6 +37,7 @@ import org.apache.log4j.xml.DOMConfigurator;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.GeoCoding;
 import org.esa.snap.core.datamodel.Product;
+import org.esa.snap.core.util.ProductUtils;
 import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.core.util.geotiff.GeoCoding2GeoTIFFMetadata;
 import org.esa.snap.core.util.geotiff.GeoTIFF;
@@ -84,6 +88,7 @@ import wasdi.shared.parameters.RangeDopplerGeocodingParameter;
 import wasdi.shared.parameters.RasterGeometricResampleParameter;
 import wasdi.shared.rabbit.RabbitFactory;
 import wasdi.shared.rabbit.Send;
+import wasdi.shared.utils.BandImageManager;
 import wasdi.shared.utils.EndMessageProvider;
 import wasdi.shared.utils.FtpClient;
 import wasdi.shared.utils.SerializationUtils;
@@ -1172,6 +1177,10 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			if (sFile.toUpperCase().contains("FLOOD")) {
 				sStyle = "DDS_FLOODED_AREAS";
 			}
+			
+			if (Utils.isNullOrEmpty(oParameter.getStyle()) == false) {
+				sStyle = oParameter.getStyle();
+			}
 
 			s_oLogger.debug( "LauncherMain.PublishBandImage:  Generating Band Image...");
 			
@@ -1182,7 +1191,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 
 			updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 20);
 
-			// P.Campanella 13/02/2018: write the data directly to GeoServer Data Dir
+			// write the data directly to GeoServer Data Dir
 			String sGeoServerDataDir = ConfigReader.getPropValue("GEOSERVER_DATADIR");
 			String sTargetDir = sGeoServerDataDir;
 
@@ -1192,14 +1201,18 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			File oTargetDir = new File(sTargetDir);
 			if (!oTargetDir.exists()) oTargetDir.mkdirs();
 
+			// Output file Path
 			String sOutputFilePath = sTargetDir + sLayerId + ".tif";
 
+			// Output File
 			File oOutputFile = new File(sOutputFilePath);
 
 			s_oLogger.debug("LauncherMain.PublishBandImage: to " + sOutputFilePath + " [LayerId] = " + sLayerId);
 			
+			// Check if is already a .tif image
 			if ((sFile.endsWith(".tif") || sFile.endsWith(".tiff"))==false) {
 
+				// Check if it is a S2
 				if (oProduct.getProductType().startsWith("S2") && oProduct.getProductReader().getClass().getName().startsWith("org.esa.s2tbx")) {
 
 					s_oLogger.debug( "LauncherMain.PublishBandImage:  Managing S2 Product");
@@ -1212,29 +1225,36 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 					oOutputFile = new File(sOutputFilePath);
 					s_oLogger.debug( "LauncherMain.PublishBandImage:  Geotiff File Created (EPSG=" + sEPSG + "): " + sOutputFilePath);
 
-				} else {
-
+				} 
+				else {
+					
 					s_oLogger.debug( "LauncherMain.PublishBandImage:  Managing NON S2 Product");
 					s_oLogger.debug( "LauncherMain.PublishBandImage:  Getting Band " + oParameter.getBandName());
 
-					// Get the Geocoding and Band
-					GeoCoding oGeoCoding = oProduct.getSceneGeoCoding();;
-					if (oGeoCoding==null) throw new Exception("unable to obtain scene geocoding from product " + oProduct.getName());
+					// Get the Band					
 					Band oBand = oProduct.getBand(oParameter.getBandName());
 					// Get Image
-					MultiLevelImage oBandImage = oBand.getSourceImage();
+					//MultiLevelImage oBandImage = oBand.getSourceImage();
+					RenderedImage oBandImage = oBand.getSourceImage();
 					
-					
+					// Check if the Color Model is present					
 					ColorModel oColorModel = oBandImage.getColorModel();
-					if(null==oColorModel) {
-						SampleModel oSampleModel = oBandImage.getSampleModel();
-						oColorModel = PlanarImage.createColorModel(oSampleModel);
-						//oBandImage.setProperty(name, value);
-						if (oColorModel == null) oColorModel = ColorModel.getRGBdefault();
+					
+					// Tested for Copernicus Marine - netcdf files
+					if(oColorModel == null) {
+						
+						// Color Model not present: try a different way to get the Image
+						BandImageManager oImgManager = new BandImageManager(oProduct);
+						
+						// Create full dimension and View port
+						Dimension oOutputImageSize = new Dimension(oBand.getRasterWidth(), oBand.getRasterHeight());
+						
+						// Rendere the image
+						oBandImage = oImgManager.buildImageWithMasks(oBand, oOutputImageSize, null, false, true);
 					}
 					
 					// Get TIFF Metadata
-					GeoTIFFMetadata oMetadata = GeoCoding2GeoTIFFMetadata.createGeoTIFFMetadata(oGeoCoding, oBandImage.getWidth(),oBandImage.getHeight());
+					GeoTIFFMetadata oMetadata = ProductUtils.createGeoTIFFMetadata(oProduct);
 
 					s_oLogger.debug( "LauncherMain.PublishBandImage:  Output file: " + sOutputFilePath);
 
@@ -1349,6 +1369,8 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 		}
 		finally{
 			closeProcessWorkspace(oProcessWorkspaceRepository, oProcessWorkspace);
+			
+			BandImageManager.stopChacheThread();
 		}
 
 		return  sLayerId;
