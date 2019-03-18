@@ -11,6 +11,7 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -328,6 +329,8 @@ public class WasdiLib {
 				}
 			}
 			
+			log("Config File Path " + sConfigFilePath);
+			
 			m_sUser = ConfigReader.getPropValue("USER", "");
 			m_sPassword = ConfigReader.getPropValue("PASSWORD", "");
 			m_sBasePath = ConfigReader.getPropValue("BASEPATH", "");
@@ -335,6 +338,12 @@ public class WasdiLib {
 			m_sSessionId = ConfigReader.getPropValue("SESSIONID","");
 			m_sActiveWorkspace = ConfigReader.getPropValue("WORKSPACEID","");
 			m_sParametersFilePath = ConfigReader.getPropValue("PARAMETERSFILEPATH","./parameters.txt");
+			String sVerbose = ConfigReader.getPropValue("VERBOSE","");
+			if (sVerbose.equals("1") || sVerbose.toUpperCase().equals("TRUE")) {
+				m_bVerbose = true;
+			}
+			
+			log("SessionId from config " + m_sSessionId);
 
 			String sDownloadActive = ConfigReader.getPropValue("DOWNLOADACTIVE", "1");
 			
@@ -348,6 +357,7 @@ public class WasdiLib {
 				m_bIsOnServer = true;
 				// On Server Force Download to false
 				m_bDownloadActive = false;
+				m_bVerbose = true;
 			}
 
 			if (m_sBasePath.equals("")) {
@@ -410,11 +420,10 @@ public class WasdiLib {
 			
 			log("jWASDILib Init");
 			
-			
 			// User Name Needed 
 			if (m_sUser == null) return false;
 			
-			log("User not null");
+			log("User not null " + m_sUser);
 			
 			// Is there a password?
 			if (m_sPassword != null && !m_sPassword.equals("")) {
@@ -431,25 +440,39 @@ public class WasdiLib {
 				
 				if (aoJSONMap.containsKey("sessionId")) {
 					// Got Session
-					m_sSessionId = (String) aoJSONMap.get("sessionId"); 
+					m_sSessionId = (String) aoJSONMap.get("sessionId");
+					
+					log("User logged: session ID " + m_sSessionId);
+					
 					return true;
 				}				
 			}
 			else if (m_sSessionId != null) {
+				
+				log("Check Session: session ID " + m_sSessionId);
 				
 				// Check User supplied Session
 				String sResponse = checkSession(m_sSessionId);
 				
 				// Get JSON
 				Map<String, Object> aoJSONMap = s_oMapper.readValue(sResponse, new TypeReference<Map<String,Object>>(){});
-				if (aoJSONMap == null) return false;
+				if (aoJSONMap == null) {
+					log("Check Session: session ID not valid");
+					return false;
+				}
 				
 				// Check if session and user id are the same
 				if (aoJSONMap.containsKey("userId")) {
 					if (((String)aoJSONMap.get("userId")).equals(m_sUser)) {
+						log("Check Session: session ID OK");
 						return true;
 					}
+					else {
+						log("Check Session: session Wrong User " + ((String)aoJSONMap.get("userId")));
+					}
 				}
+				
+				log("Session invalid or not of the user ");
 			}
 			
 			
@@ -1057,15 +1080,23 @@ public class WasdiLib {
 	 * @return Process id or end status of the process
 	 */
 	protected String internalMosaic(boolean bAsynch, List<String> asInputFiles, String sOutputFile, List<String> asBands, double dPixelSizeX, double dPixelSizeY) {
-		
-		String sCrs = "GEOGCS[\"WGS84(DD)\", \r\n" + 
-	    		"		  DATUM[\"WGS84\", \r\n" + 
-	    		"			SPHEROID[\"WGS84\", 6378137.0, 298.257223563]], \r\n" + 
-	    		"		  PRIMEM[\"Greenwich\", 0.0], \r\n" + 
-	    		"		  UNIT[\"degree\", 0.017453292519943295], \r\n" + 
-	    		"		  AXIS[\"Geodetic longitude\", EAST], \r\n" + 
+/*		
+		String sCrs = "GEOGCS[\"WGS84(DD)\"," + 
+	    		"		  DATUM[\"WGS84\"," + 
+	    		"			SPHEROID[\"WGS84\", 6378137.0, 298.257223563]]," + 
+	    		"		  PRIMEM[\"Greenwich\", 0.0]," + 
+	    		"		  UNIT[\"degree\", 0.017453292519943295]," + 
+	    		"		  AXIS[\"Geodetic longitude\", EAST]," + 
 	    		"		  AXIS[\"Geodetic latitude\", NORTH]]";
-		
+*/
+		String sCrs = "GEOGCS[\"WGS84(DD)\"," + 
+	    		" DATUM[\"WGS84\"," + 
+	    		" SPHEROID[\"WGS84\", 6378137.0, 298.257223563]]," + 
+	    		" PRIMEM[\"Greenwich\", 0.0]," + 
+	    		" UNIT[\"degree\", 0.017453292519943295]," + 
+	    		" AXIS[\"Geodetic longitude\", EAST]," + 
+	    		" AXIS[\"Geodetic latitude\", NORTH]]";
+
 		return internalMosaic(bAsynch, asInputFiles, sOutputFile, asBands, dPixelSizeX, dPixelSizeY, sCrs);
 	}
 
@@ -1160,14 +1191,9 @@ public class WasdiLib {
 		    oMosaicSetting.setPixelSizeY(dPixelSizeY);
 		    oMosaicSetting.setResamplingName(sResamplingName);
 		    oMosaicSetting.setShowSourceProducts(bShowSourceProducts);
+
 		    
-		    ArrayList<String> asSources = new ArrayList<>();
-		    
-		    for (String sInput : asInputFiles) {
-				asSources.add(sInput);
-			}
-		    
-		    oMosaicSetting.setSources(asSources);
+		    oMosaicSetting.setSources((ArrayList<String>) asInputFiles);
 		    oMosaicSetting.setSouthBound(dSouthBound);
 		    oMosaicSetting.setUpdateMode(bUpdateMode);
 		    
@@ -1205,7 +1231,7 @@ public class WasdiLib {
 	}
 	
 	/**
-	 * Mosaic with minimum parameters
+	 * Mosaic with minimum parameters: input and output files
 	 * @param asInputFiles List of input files to mosaic
 	 * @param sOutputFile Name of the mosaic output file
 	 * @return End status of the process
@@ -1356,6 +1382,249 @@ public class WasdiLib {
 		return internalMosaic(true, asInputFiles, sOutputFile, asBands, dPixelSizeX, dPixelSizeY, sCrs, dSouthBound, dNorthBound, dEastBound, dWestBound, sOverlappingMethod, bShowSourceProducts, sElevationModelName, sResamplingName, bUpdateMode, bNativeResolution, sCombine);
 	}
 	
+	
+	/**
+	 * Search EO-Images 
+	 * @param sPlatform Satellite Platform. Accepts "S1","S2"
+	 * @param sDateFrom Starting date in format "YYYY-MM-DD"
+	 * @param sDateTo End date in format "YYYY-MM-DD"
+	 * @param dULLat Upper Left Lat Coordinate. Can be null.
+	 * @param dULLon Upper Left Lon Coordinate. Can be null.
+	 * @param dLRLat Lower Right Lat Coordinate. Can be null.
+	 * @param dLRLon Lower Right Lon Coordinate. Can be null.
+	 * @param sProductType Product Type. If Platform = "S1" -> Accepts "SLC","GRD", "OCN". If Platform = "S2" -> Accepts "S2MSI1C","S2MSI2Ap","S2MSI2A". Can be null.
+	 * @param iOrbitNumber Sentinel Orbit Number. Can be null.
+	 * @param sSensorOperationalMode Sensor Operational Mode. ONLY for S1. Accepts -> "SM", "IW", "EW", "WV". Can be null. Ignored for Platform "S1"
+	 * @param sCloudCoverage Cloud Coverage. Sample syntax: [0 
+	 * @return List of the available products as a LIST of Dictionary representing JSON Object:
+	 * {
+	 * 		footprint = <image footprint in WKT>
+	 * 		id = <unique id of the product for the proviveder>
+	 * 		link = <direct link for download>
+	 * 		provider = <WASDI provider used for search>
+	 * 		Size = <Product Size>
+	 * 		title = <Name of the Product>
+	 * 		properties = < Another JSON Object containing other product-specific info >
+	 * }
+	 */
+	public List<Map<String, Object>> searchEOImages(String sPlatform, String sDateFrom, String sDateTo, Double dULLat, Double dULLon, Double dLRLat, Double dLRLon,  String sProductType, Integer iOrbitNumber, String sSensorOperationalMode, String sCloudCoverage ) {
+		
+		List<Map<String, Object>> aoReturnList = (List<Map<String, Object>>) new ArrayList<Map<String, Object>>() ;
+		
+		if (sPlatform == null) {
+			log("searchEOImages: platform cannot be null");
+			return aoReturnList;
+		}
+		
+		if (!(sPlatform.equals("S1")|| sPlatform.equals("S2"))) {
+			log("searchEOImages: platform must be S1 or S2. Received [" + sPlatform + "]");
+			return aoReturnList;
+		}
+		
+		if (sPlatform.equals("S1")) {
+			if (sProductType != null) {
+				if (!(sProductType.equals("SLC") ||sProductType.equals("GRD") || sProductType.equals("OCN") )) {
+					log("searchEOImages: Available Product Types for S1; SLC, GRD, OCN. Received [" + sProductType + "]");
+				}
+			}
+		}
+
+		if (sPlatform.equals("S2")) {
+			if (sProductType != null) {
+				if (!(sProductType.equals("S2MSI1C") ||sProductType.equals("S2MSI2Ap") || sProductType.equals("S2MSI2A") )) {
+					log("searchEOImages: Available Product Types for S2; S2MSI1C, S2MSI2Ap, S2MSI2A. Received [" + sProductType + "]");
+				}
+			}
+		}
+
+		if (sDateFrom == null) {
+			log("searchEOImages: sDateFrom cannot be null");
+			return aoReturnList;			
+		}
+
+		if (sDateFrom.length()<10) {
+			log("searchEOImages: sDateFrom must be in format YYYY-MM-DD");
+			return aoReturnList;			
+		}		
+
+		if (sDateTo == null) {
+			log("searchEOImages: sDateTo cannot be null");
+			return aoReturnList;			
+		}
+
+		if (sDateTo.length()<10) {
+			log("searchEOImages: sDateTo must be in format YYYY-MM-DD");
+			return aoReturnList;			
+		}
+		
+		// Create Query String:
+		
+		// Platform name for sure
+		String sQuery = "( platformname:";
+		if (sPlatform.equals("S2")) sQuery += "Sentinel-2 ";
+		else sQuery += "Sentinel-1";
+		
+		// If available add product type
+		if (sProductType != null) {
+			sQuery += " AND producttype:" + sProductType;
+		}
+		
+		// If available Sensor Operational Mode
+		if (sSensorOperationalMode != null && sPlatform.equals("S1")) {
+			sQuery += " AND sensoroperationalmode:" + sSensorOperationalMode;
+		}
+		
+		// If available cloud coverage
+		if (sCloudCoverage != null && sCloudCoverage.equals("S2")) {
+			sQuery += " AND cloudcoverpercentage:" + sCloudCoverage;
+		}
+				
+		// If available add orbit number
+		if (iOrbitNumber != null) {
+			sQuery += " AND relativeorbitnumber:" + iOrbitNumber;
+		}
+		
+		// Close the first block
+		sQuery += ") ";
+		
+		// Date Block
+		sQuery += "AND ( beginPosition:[" + sDateFrom + "T00:00:00.000Z TO " + sDateTo + "T23:59:59.999Z]";
+		sQuery += "AND ( endPosition:[" + sDateFrom + "T00:00:00.000Z TO " + sDateTo + "T23:59:59.999Z]";
+		
+		// Close the second block
+		sQuery += ") ";
+		
+		if (dULLat != null && dULLon != null && dLRLat != null && dLRLon != null ) {
+			String sFootPrint = "( footprint:\"intersects(POLYGON(( " + dULLon + " " +dLRLat + "," + dULLon + " " + dULLat + "," + dLRLon + " " + dULLat + "," + dLRLon + " " + dLRLat + "," + dULLon + " " +dLRLat + ")))\") AND ";
+			sQuery = sFootPrint + sQuery;
+		}
+		
+		String sQueryBody = "[\"" + sQuery.replace("\"", "\\\"") + "\"]"; 
+		sQuery = "sQuery=" + URLEncoder.encode(sQuery) + "&offset=0&limit=10&providers=ONDA";
+		
+		
+		try {
+		    String sUrl = m_sBaseUrl + "/search/querylist?" + sQuery;
+		    
+		    String sResponse = httpPost(sUrl, sQueryBody, getStandardHeaders());
+		    List<Map<String, Object>> aoJSONMap = s_oMapper.readValue(sResponse, new TypeReference<List<Map<String,Object>>>(){});
+		    
+		    log("" + aoJSONMap);
+		    
+			return aoJSONMap;		
+		}
+		catch (Exception oEx) {
+			oEx.printStackTrace();
+		}
+		
+		return aoReturnList;
+	}
+	
+	/**
+	 * Get the name of a Product found by searchEOImage
+	 * @param oProduct JSON Dictionary Product as returned by searchEOImage
+	 * @return Name of the product
+	 */
+	public String getFoundProductName(Map<String, Object> oProduct) {
+		if (oProduct == null) return "";
+		if (!oProduct.containsKey("title")) return "";
+		
+		return oProduct.get("title").toString();
+	}
+
+	/**
+	 * Get the direct download link of a Product found by searchEOImage
+	 * @param oProduct JSON Dictionary Product as returned by searchEOImage
+	 * @return Name of the product
+	 */
+	public String getFoundProductLink(Map<String, Object> oProduct) {
+		if (oProduct == null) return "";
+		if (!oProduct.containsKey("link")) return "";
+		
+		return oProduct.get("link").toString();
+	}
+	
+	
+	
+	/**
+	 * Import a Product from a Provider in WASDI.
+	 * 
+	 * @param oProduct Product Map JSON representation as returned by searchEOImage
+	 * @return status of the Import process
+	 */
+	public String importProduct(Map<String, Object> oProduct) {
+		String sReturn = "ERROR";
+		
+		try {
+			// Get URL And Bounding Box from the JSON representation
+			String sFileUrl = getFoundProductLink(oProduct);
+			String sBoundingBox = "";
+			
+			if (oProduct.containsKey("footprint")) {
+				sBoundingBox = oProduct.get("footprint").toString();
+			}
+			
+			return importProduct(sFileUrl, sBoundingBox);
+		}
+		catch (Exception oEx) {
+			oEx.printStackTrace();
+		}
+		
+		return sReturn;
+	}
+	
+	/**
+	 * Import a Product from a Provider in WASDI.
+	 * @param sFileUrl Direct link of the product
+	 * @return status of the Import process
+	 */
+	public String importProduct(String sFileUrl) {
+		return importProduct(sFileUrl, "");
+	}
+	
+	/**
+	 * Import a Product from a Provider in WASDI.
+	 * @param sFileUrl Direct link of the product
+	 * @param sBoundingBox Bounding Box of the product
+	 * @return status of the Import process
+	 */
+	public String importProduct(String sFileUrl, String sBoundingBox) {
+		String sReturn = "ERROR";
+		
+		try {
+			
+			// Encode link and bb
+			String sEncodedFileLink = URLEncoder.encode(sFileUrl);
+			String sEncodedBoundingBox = URLEncoder.encode(sBoundingBox);
+			
+			// Generate the Url
+		    String sUrl = m_sBaseUrl + "/filebuffer/download?sFileUrl=" + sEncodedFileLink+"&sProvider=ONDA&sWorkspaceId="+m_sActiveWorkspace+"&sBoundingBox="+sEncodedBoundingBox;
+		    
+		    // Call the server
+		    String sResponse = httpGet(sUrl, getStandardHeaders());
+		    
+		    // Read the Primitive Result response
+		    Map<String, Object> aoJSONMap = s_oMapper.readValue(sResponse, new TypeReference<Map<String,Object>>(){});
+		    
+		    // Check if the process was ok
+		    if ( ((Boolean)aoJSONMap.get("boolValue")) == true) {
+		    	// Take the process id
+		    	String sProcessId = (String) aoJSONMap.get("stringValue");
+		    	// Wait for the operation to finish
+		    	sReturn = waitProcess(sProcessId);
+		    }
+		    
+		    // Return the status of the import WASDI process
+			return sReturn;
+		}
+		catch (Exception oEx) {
+			oEx.printStackTrace();
+		}
+		
+		return sReturn;
+	}
+
+	
 	/**
 	 * Http get Method Helper
 	 * @param sUrl Url to call
@@ -1435,7 +1704,7 @@ public class WasdiLib {
 			
 			OutputStream oPostOutputStream = oConnection.getOutputStream();
 			OutputStreamWriter oStreamWriter = new OutputStreamWriter(oPostOutputStream, "UTF-8");  
-			oStreamWriter.write(sPayload);
+			if (sPayload!= null) oStreamWriter.write(sPayload);
 			oStreamWriter.flush();
 			oStreamWriter.close();
 			oPostOutputStream.close(); 
@@ -1459,6 +1728,7 @@ public class WasdiLib {
 		}
 	}
 	
+/*
 	public String httpPost(String sUrl, File oUploadFile, Map<String, String> asHeaders) {
 //		URLConnection urlconnection = null;
 //		try {
@@ -1557,7 +1827,7 @@ public class WasdiLib {
 			return "";
 		}
 	}
-	
+*/
 	/**
 	 * Download a file on the local PC
 	 * @param sFileName File Name
@@ -1689,7 +1959,7 @@ public class WasdiLib {
 	    //la testUpload si basa su del codice trovato in internet vedi utils multipartUtility 
 //	    testUpload(sUrl,oFile);
 	    //httpPost metodo fatto da me per upload dei file (il codice commentanto all'inizio è preso da stackoverflow)
-	    httpPost(sUrl,oFile ,asHeaders);
+	    //httpPost(sUrl,oFile ,asHeaders);
 	    
 	    //hello world funziona
 //	    httpGet(m_sBaseUrl + "/wasdi/hello",asHeaders);  

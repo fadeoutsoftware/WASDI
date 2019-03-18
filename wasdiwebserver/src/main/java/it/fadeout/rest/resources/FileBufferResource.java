@@ -41,22 +41,32 @@ public class FileBufferResource {
 	@GET
 	@Path("download")
 	@Produces({"application/xml", "application/json", "text/xml"})
-	public Response download(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sFileUrl") String sFileUrl, @QueryParam("sProvider") String sProvider, 
+	public PrimitiveResult download(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sFileUrl") String sFileUrl, @QueryParam("sProvider") String sProvider, 
 			@QueryParam("sWorkspaceId") String sWorkspaceId, @QueryParam("sBoundingBox") String sBoundingBox) throws IOException
 	{
+		PrimitiveResult oResult = new PrimitiveResult();
+		oResult.setBoolValue(false);
+		
 		try {
 			
 			Wasdi.DebugLog("FileBufferResource.Download, session: " + sSessionId);
 
 			Boolean bSessionIsValid = !Utils.isNullOrEmpty(sSessionId); 
 			if (!bSessionIsValid) {
-				return Response.status(401).build();
+				oResult.setIntValue(401);
+				return oResult;
 			}
 
 			User oUser = Wasdi.GetUserFromSession(sSessionId);
 
-			if (oUser==null) return Response.status(401).build();
-			if (Utils.isNullOrEmpty(oUser.getUserId())) return Response.status(401).build();
+			if (oUser==null) {
+				oResult.setIntValue(401);
+				return oResult;
+			}
+			if (Utils.isNullOrEmpty(oUser.getUserId())) {
+				oResult.setIntValue(401);
+				return oResult;
+			}
 
 			String sUserId = oUser.getUserId();
 
@@ -96,11 +106,20 @@ public class FileBufferResource {
 				oProcess.setStatus(ProcessStatus.CREATED.name());
 				oRepository.InsertProcessWorkspace(oProcess);
 				Wasdi.DebugLog("FileBufferResource.Download: Process Scheduled for Launcher, user: " + sUserId + ", process ID: " + sProcessObjId);
+				
+				oResult.setBoolValue(true);
+				oResult.setIntValue(200);
+				oResult.setStringValue(sProcessObjId);
+				
+				return oResult;
+
 			}
 			catch(Exception oEx){
 				Wasdi.DebugLog("DownloadResource.Download: Error updating process list " + oEx.getMessage());
 				oEx.printStackTrace();
-				return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+				
+				oResult.setIntValue(500);
+				return oResult;
 			}
 						
 		} catch (IOException e) {
@@ -109,8 +128,7 @@ public class FileBufferResource {
 			e.printStackTrace();
 		}
 
-		return Response.ok().build();
-
+		return oResult;
 	}	
 
 	
