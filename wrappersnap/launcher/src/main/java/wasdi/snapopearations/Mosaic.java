@@ -75,6 +75,7 @@ public class Mosaic {
 	
 	public Mosaic(MosaicParameter oParameter, String sBasePath) {
 		m_oMosaicSetting = (MosaicSetting) oParameter.getSettings();
+		m_oMosaicParameter = oParameter;
 		m_sBasePath = sBasePath;
 		m_sOuptutFile = oParameter.getDestinationProductName();
 		

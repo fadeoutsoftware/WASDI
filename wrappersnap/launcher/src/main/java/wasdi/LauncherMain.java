@@ -557,7 +557,14 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 					oAlreadyDownloaded.setFileName(sFileNameWithoutPath);
 					oAlreadyDownloaded.setFilePath(sFileName);
 					oAlreadyDownloaded.setProductViewModel(oVM);
-					oAlreadyDownloaded.setBoundingBox(oParameter.getBoundingBox());
+					
+					String sBoundingBox = oParameter.getBoundingBox();
+					
+					if (sBoundingBox.startsWith("POLY") || sBoundingBox.startsWith("MULTI")) {
+						sBoundingBox = Utils.polygonToBounds(sBoundingBox);
+					}
+					
+					oAlreadyDownloaded.setBoundingBox(sBoundingBox);
 					oAlreadyDownloaded.setRefDate(oProduct.getStartTime().getAsDate());
 					oAlreadyDownloaded.setCategory(DownloadedFileCategory.DOWNLOAD.name());
 					oDownloadedRepo.InsertDownloadedFile(oAlreadyDownloaded);
