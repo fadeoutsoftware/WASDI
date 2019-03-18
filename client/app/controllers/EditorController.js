@@ -202,6 +202,13 @@ var EditorController = (function () {
                 onClick: this.openWPSDialog,
                 subMenu:[]
             },
+            {
+                name:"Mosaic",
+                icon:"fa fa-tasks",
+                caption_i18n : "EDITOR_OPERATION_TITLE_MOSAIC",
+                onClick: this.openMosaicDialog,
+                subMenu:[]
+            },
             // --- Processor ---
             {
                 name:"",
@@ -2148,6 +2155,43 @@ var EditorController = (function () {
             inputs: {
                 extras: {
                     // products:oController.m_aoProducts
+                }
+            }
+        }).then(function (modal) {
+            modal.element.modal();
+            modal.close.then(function (oResult) {
+
+                // oController.m_oProcessesLaunchedService.loadProcessesFromServer(oController.m_oActiveWorkspace.workspaceId);
+            });
+        });
+
+        return true;
+    };
+
+    /**
+     * openWPSDialog
+     * @returns {boolean}
+     */
+    EditorController.prototype.openMosaicDialog = function(oWindow)
+    {
+        var oController;
+        if(utilsIsObjectNullOrUndefined(oWindow) === true)
+        {
+            oController = this;
+        }
+        else
+        {
+            oController = oWindow;
+        }
+
+        oController.m_oModalService.showModal({
+            templateUrl: "dialogs/mosaic/MosaicView.html",
+            controller: "MosaicController",
+            inputs: {
+                extras: {
+                    // products:oController.m_aoProducts
+                    products:oController.m_aoProducts,
+
                 }
             }
         }).then(function (modal) {

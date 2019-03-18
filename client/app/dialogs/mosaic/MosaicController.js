@@ -11,8 +11,11 @@ var MosaicController = (function() {
         this.m_oClose = oClose;
         this.m_oScope.m_oController = this;
         this.m_oExtras = oExtras;
+        this.m_aoProducts = this.m_oExtras.products;
         this.m_oSnapOperationService = oSnapOperationService;
         this.m_oConstantsService = oConstantsService;
+        this.m_asProductsName = utilsProjectGetProductsName(this.m_aoProducts);
+        this.m_asSelectedProducts = [];
 
 
         $scope.close = function(result) {
