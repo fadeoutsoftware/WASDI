@@ -180,7 +180,12 @@ function utilsProjectShowRabbitMessageUserFeedBack(oMessage) {
         case "TERRAIN":
             sUserMessage = "RANGE DOPPLER TERRAIN CORRECTION COMPLETED<br>READY";
             break;
-
+        case "RUNPROCESSOR":
+            sUserMessage = "CUSTOM PROCESSOR DONE<br>READY"
+        case "RUNIDL":
+            sUserMessage = "IDL PROCESSOR DONE<br>READY"
+        case "RUNMATLAB":
+            sUserMessage = "MATLAB PROCESSOR DONE<br>READY"
         default:
             console.log("RABBIT ERROR: GOT EMPTY MESSAGE<br>READY");
     }
