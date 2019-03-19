@@ -112,7 +112,8 @@ function utilsIsSubstring(sString1,sString2)
 {
     if(utilsIsStrNullOrEmpty(sString1) || utilsIsStrNullOrEmpty(sString2))
     {
-        console.log("Error, Invalid String ")
+        console.log("Error, Invalid String ");
+        return false;
     }
 
     if(sString1.indexOf(sString2) == -1)
