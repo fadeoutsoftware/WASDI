@@ -318,33 +318,51 @@ public class QueryExecutorONDA extends QueryExecutor {
 			long lStart = System.nanoTime();
 			int responseCode =  oConnection.getResponseCode();
 			System.out.println("Response Code : " + responseCode);
-
+			int iResponseSize = 0;
+			iResponseSize = oConnection.getContentLength();
 			if(200 == responseCode) {
 				BufferedReader in = new BufferedReader(new InputStreamReader(oConnection.getInputStream()));
 				String inputLine;
-				StringBuffer oResponse = new StringBuffer();
+				StringBuffer oResponseStringBuffer = new StringBuffer();
+				
 
 				while ((inputLine = in.readLine()) != null) {
-					oResponse.append(inputLine);
+					oResponseStringBuffer.append(inputLine);
 				}
 				in.close();
 
-				sResult = oResponse.toString();
+				sResult = oResponseStringBuffer.toString();
 				if(!Utils.isNullOrEmpty(sResult)) {
-					System.out.println("QueryExecutorONDA.httpGetResults: Response " + sResult.substring(0, Math.min(200, oResponse.length())) + "...");
+					System.out.println("QueryExecutorONDA.httpGetResults: Response " + sResult.substring(0, Math.min(200, oResponseStringBuffer.length())) + "...");
+					if(iResponseSize <= 0) {
+						iResponseSize = sResult.getBytes().length;
+					}
 				} else {
 					System.out.println("QueryExecutorONDA.httpGetResults: reponse is empty");
 				}
-
 			} else {
 				System.out.println("QueryExecutorONDA.httpGetResults: ONDA did not return 200 but "+responseCode+" and the following message:");
 				String sMessage = oConnection.getResponseMessage();
 				System.out.println(sMessage);
+				if(iResponseSize <= 0) {
+					iResponseSize = sMessage.getBytes().length;
+				}
 			}
 			long lEnd = System.nanoTime();
 			long lTimeElapsed = lEnd - lStart;
-			long lMillis = lTimeElapsed / 1000000;
-			System.out.println("QueryExecutionONDA.httpGetResults took "+lMillis+" milliseconds");
+			double dMillis = lTimeElapsed / (1000.0 * 1000.0);
+			String sQueryType = "";
+			if(sUrl.contains("count")) {
+				sQueryType+="count";
+			} else {
+				sQueryType+="search";
+			}
+			double dSpeed = -1;
+			if(iResponseSize > 0) {
+				dSpeed = ( (double) iResponseSize ) / dMillis;
+				dSpeed *= 1000.0;
+			}
+			System.out.println("QueryExecutionONDA.httpGetResults: " + sQueryType+" ([ms,B,B/s]): "+dMillis+"," + iResponseSize + "," + dSpeed);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
