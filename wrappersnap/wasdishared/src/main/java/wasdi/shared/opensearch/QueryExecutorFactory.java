@@ -56,7 +56,7 @@ public class QueryExecutorFactory {
 			String sProvider,
 			AuthenticationCredentials oCredentials,
 			String sDownloadProtocol, String sGetMetadata) {
-		System.out.println("QueryExecutorFactory.getExecutor( "+sProvider+"...");
+		System.out.println("QueryExecutorFactory.getExecutor( "+sProvider+" )...");
 		QueryExecutor oExecutor = null;
 		
 		try {

@@ -26,7 +26,7 @@ import wasdi.shared.viewmodels.QueryResultViewModel;
  *
  */
 public class QueryExecutorONDA extends QueryExecutor {
-	
+
 	public QueryExecutorONDA() {
 		System.out.println("QueryExecutorONDA");
 		m_sProvider="ONDA";
@@ -66,7 +66,7 @@ public class QueryExecutorONDA extends QueryExecutor {
 		sUrl+="%22";
 		return sUrl;
 	}
-	
+
 	//append:
 	// /Products/$count?$search="name:S2*"
 	@Override
@@ -76,7 +76,7 @@ public class QueryExecutorONDA extends QueryExecutor {
 			System.out.println("QueryExecutorONDA.buildUrl: oQuery is null");
 		}
 		String sUrl = buildUrlPrefix(oQuery);		
-		
+
 		String sMetadata = "$expand=Metadata";
 		if(!Utils.isNullOrEmpty(sMetadata)) {
 			sUrl += "&" + sMetadata;
@@ -84,20 +84,20 @@ public class QueryExecutorONDA extends QueryExecutor {
 		sUrl = buildUrlSuffix(oQuery, sUrl);
 		return sUrl;
 	}
-	
+
 	private String buildUrlForList(PaginatedQuery oQuery) {
 		System.out.println("QueryExecutorONDA.buildUrlForList");
 		if(null==oQuery) {
 			System.out.println("QueryExecutorONDA.buildUrlForList: oQuery is null");
 		}
 		String sUrl = buildUrlPrefix(oQuery);
-		
+
 		sUrl += "&$select=id,name,creationDate,beginPosition,offline,size,pseudopath,footprint";
-		
+
 		sUrl = buildUrlSuffix(oQuery, sUrl);
 		return sUrl;
 	}
-	
+
 	private String buildUrlPrefix(PaginatedQuery oQuery) {
 		System.out.println("QueryExecutorONDA.BuildBaseUrl");
 		if(null==oQuery) {
@@ -107,16 +107,16 @@ public class QueryExecutorONDA extends QueryExecutor {
 		sUrl+=m_oQueryTranslator.translateAndEncode(oQuery.getQuery()) + "%22";
 		return sUrl;
 	}
-	
+
 	protected String buildUrlSuffix(PaginatedQuery oQuery, String sInUrl) {
 		String sUrl = sInUrl;
 		sUrl+="&$top=" + oQuery.getLimit() + "&$skip="+ oQuery.getOffset();
-		
+
 		String sFormat = "$format=json";
 		if(!Utils.isNullOrEmpty(sFormat)) {
 			sUrl += "&" + sFormat;
 		}
-		
+
 		String sOrderBy = oQuery.getSortedBy();
 		//TODO do not use hardcoded values
 		sOrderBy = "$orderby=creationDate";
@@ -126,7 +126,7 @@ public class QueryExecutorONDA extends QueryExecutor {
 		return sUrl;
 	}
 
-	
+
 	@Override
 	public int executeCount(String sQuery) throws IOException {
 		System.out.println("QueryExecutorONDA.executeCount");
@@ -136,22 +136,22 @@ public class QueryExecutorONDA extends QueryExecutor {
 		//Swath
 		//
 		//XXX is it possible to filter results accordingly using info from the query?
-		
+
 		//Naming conventions:
 		// https://sentinel.esa.int/web/sentinel/user-guides
 		//sentinel 1:
-			// https://sentinel.esa.int/web/sentinel/user-guides/sentinel-1-sar/naming-conventions
-			// https://sentinel.esa.int/web/sentinel/user-guides/sentinel-2-msi/naming-convention
+		// https://sentinel.esa.int/web/sentinel/user-guides/sentinel-1-sar/naming-conventions
+		// https://sentinel.esa.int/web/sentinel/user-guides/sentinel-2-msi/naming-convention
 		//sentinel 2:
-			// https://sentinel.esa.int/web/sentinel/user-guides/sentinel-2-msi/naming-convention
+		// https://sentinel.esa.int/web/sentinel/user-guides/sentinel-2-msi/naming-convention
 		//sentinel 3:
-			//...
-		
-		
+		//...
+
+
 		String sUrl = getCountUrl(sQuery);
 		////use this to test with just 3 results
 		////sUrl = "https://catalogue.onda-dias.eu/dias-catalogue/Products/$count?$search=%22(%20(%20name:S1*%20AND%20name:S1A_*%20AND%20name:*SLC*%20AND%20name:*%20AND%20sensorOperationalMode:SM%20)%20)%20AND%20(%20(%20beginPosition:[2018-12-02T00:00:00.000Z%20TO%202018-12-02T23:59:59.999Z]%20AND%20endPosition:[2018-12-02T00:00:00.000Z%20TO%202018-12-02T23:59:59.999Z]%20)%20)%22";
-		
+
 		int iResult = -1;
 		String sResult = httpGetResults(sUrl);
 		if(null!=sResult) {
@@ -162,46 +162,46 @@ public class QueryExecutorONDA extends QueryExecutor {
 			}
 		}
 		return iResult;
-		
-		
-//		URL oURL = new URL(sUrl);
-//		HttpURLConnection oConnection = (HttpURLConnection) oURL.openConnection();
-//
-//
-//		// optional default is GET
-//		oConnection.setRequestMethod("GET");
-//		oConnection.setRequestProperty("Accept", "*/*");
-//
-//		//XXX add user and password
-//
-//		System.out.println("\nSending 'GET' request to URL : " + sUrl);
-//
-//		int responseCode =  oConnection.getResponseCode();
-//		System.out.println("Response Code : " + responseCode);
-//
-//		if(200 == responseCode) {
-//			BufferedReader in = new BufferedReader(new InputStreamReader(oConnection.getInputStream()));
-//			String inputLine;
-//			StringBuffer sResponse = new StringBuffer();
-//	
-//			while ((inputLine = in.readLine()) != null) {
-//				sResponse.append(inputLine);
-//			}
-//			in.close();
-//		
-//
-//			//print result
-//			System.out.println("Count Done: Response " + sResponse.toString());
-//	
-//			return Integer.parseInt(sResponse.toString());
-//		} else {
-//			String sMessage = oConnection.getResponseMessage();
-//			System.out.println(sMessage);
-//			return -1;
-//		}
+
+
+		//		URL oURL = new URL(sUrl);
+		//		HttpURLConnection oConnection = (HttpURLConnection) oURL.openConnection();
+		//
+		//
+		//		// optional default is GET
+		//		oConnection.setRequestMethod("GET");
+		//		oConnection.setRequestProperty("Accept", "*/*");
+		//
+		//		//XXX add user and password
+		//
+		//		System.out.println("\nSending 'GET' request to URL : " + sUrl);
+		//
+		//		int responseCode =  oConnection.getResponseCode();
+		//		System.out.println("Response Code : " + responseCode);
+		//
+		//		if(200 == responseCode) {
+		//			BufferedReader in = new BufferedReader(new InputStreamReader(oConnection.getInputStream()));
+		//			String inputLine;
+		//			StringBuffer sResponse = new StringBuffer();
+		//	
+		//			while ((inputLine = in.readLine()) != null) {
+		//				sResponse.append(inputLine);
+		//			}
+		//			in.close();
+		//		
+		//
+		//			//print result
+		//			System.out.println("Count Done: Response " + sResponse.toString());
+		//	
+		//			return Integer.parseInt(sResponse.toString());
+		//		} else {
+		//			String sMessage = oConnection.getResponseMessage();
+		//			System.out.println(sMessage);
+		//			return -1;
+		//		}
 	}
 
-	
+
 	@Override
 	public ArrayList<QueryResultViewModel> executeAndRetrieve(PaginatedQuery oQuery, boolean bFullViewModel) throws IOException {
 		System.out.println("QueryExecutorONDA.executeAndRetrieve(2 args)");
@@ -213,11 +213,20 @@ public class QueryExecutorONDA extends QueryExecutor {
 		}
 		String sResult = httpGetResults(sUrl);		
 		ArrayList<QueryResultViewModel> aoResult = null;
-		if(sResult!= null) {
+		if(!Utils.isNullOrEmpty(sResult)) {
 			aoResult = buildResultViewModel(sResult, bFullViewModel);
-			for (QueryResultViewModel oViewModel : aoResult) {
-				oViewModel.setPreview(null);
+			if(null==aoResult) {
+				throw new NullPointerException("QueryExecutorONDA.executeAndRetrieve: aoResult is null"); 
 			}
+			if(!bFullViewModel) {
+				//XXX we can probably get rid of this, but let's keep it for safety until thoroughly tested
+				for (QueryResultViewModel oViewModel : aoResult) {
+					oViewModel.setPreview(null);
+				}
+			}
+		} else {
+			System.out.println("QueryExecutorONDA.executeAndRetrieve: no result for the following query:");
+			System.out.print(sUrl);
 		}
 		return aoResult;
 	}
@@ -227,11 +236,11 @@ public class QueryExecutorONDA extends QueryExecutor {
 	public ArrayList<QueryResultViewModel> executeAndRetrieve(PaginatedQuery oQuery_AssumeFullviewModel) throws IOException {
 		System.out.println("QueryExecutorONDA.executeAndRetrieve(1 arg)");
 		return executeAndRetrieve(oQuery_AssumeFullviewModel, true);
-		
+
 		////use this to test with just 3 results
 		////sUrl = "https://catalogue.onda-dias.eu/dias-catalogue/Products?$search=%22(%20(%20name:S1*%20AND%20name:S1A_*%20AND%20name:*SLC*%20AND%20name:*%20AND%20sensorOperationalMode:SM%20)%20)%20AND%20(%20(%20beginPosition:[2018-12-02T00:00:00.000Z%20TO%202018-12-02T23:59:59.999Z]%20AND%20endPosition:[2018-12-02T00:00:00.000Z%20TO%202018-12-02T23:59:59.999Z]%20)%20)%22&$orderby=creationDate%20desc&$top=15&$skip=0&$format=json";
 	}
-	
+
 	protected ArrayList<QueryResultViewModel> buildResultViewModel(String sJson, boolean bFullViewModel){
 		System.out.println("QueryExecutor.buildResultLightViewModel");
 		if(null==sJson ) {
@@ -243,41 +252,48 @@ public class QueryExecutorONDA extends QueryExecutor {
 			ArrayList<QueryResultViewModel> aoResult = new ArrayList<QueryResultViewModel>();
 			JSONArray aoJsonArray = oJsonOndaResponse.optJSONArray("value");
 			if(null!=aoJsonArray) {
-				for (Object oObject : aoJsonArray) {
-					if(null!=oObject) {
-						JSONObject oOndaFullEntry = new JSONObject("{}");
-						String sEntryKey = "entry";
-						JSONObject oOndaEntry = (JSONObject)(oObject);
-						if(!bFullViewModel) {
-							String sQuicklook = oOndaEntry.optString("quicklook");
-							if(!Utils.isNullOrEmpty(sQuicklook)) {
-								oOndaEntry.put("quicklook", (String)null);
+				if(aoJsonArray.length()<=0) {
+					System.out.println("QueryExecutorONDA.buildResultViewModel: JSON string contains an empty array");
+				} else {
+					for (Object oObject : aoJsonArray) {
+						if(null!=oObject) {
+							JSONObject oOndaFullEntry = new JSONObject("{}");
+							String sEntryKey = "entry";
+							JSONObject oOndaEntry = (JSONObject)(oObject);
+							if(!bFullViewModel) {
+								String sQuicklook = oOndaEntry.optString("quicklook");
+								if(!Utils.isNullOrEmpty(sQuicklook)) {
+									oOndaEntry.put("quicklook", (String)null);
+								}
 							}
-						}
-						oOndaFullEntry.put(sEntryKey, oOndaEntry);
+							oOndaFullEntry.put(sEntryKey, oOndaEntry);
 
-						//TODO remove, metadata are already downloaded
-//						String sId = oOndaEntry.optString("id");
-//						if(null!=sId) {
-//							String sBaseUrl = "https://catalogue.onda-dias.eu/dias-catalogue/Products(";
-//							sBaseUrl += sId;
-//							sBaseUrl += ")";
-//							String sFormat = "?$format=json";
-//
-//							//XXX is it possible to query metadata for all products at once, instead of performing a call each time?
-//							String sMetadataUrl = sBaseUrl + "/Metadata" + sFormat;
-//							if(m_bMustCollectMetadata && bFullViewModel) {
-//								String sMetadataJson = httpGetResults(sMetadataUrl);
-//								if(null!=sMetadataJson) {
-//									JSONObject oMetadata = new JSONObject(sMetadataJson);
-//									oOndaFullEntry.put("metadata", oMetadata);
-//								}
-//							}
-//						}
-						QueryResultViewModel oRes = m_oResponseTranslator.translate(oOndaFullEntry, m_sDownloadProtocol);
-						aoResult.add(oRes);
+							//TODO remove, metadata are already downloaded
+							//						String sId = oOndaEntry.optString("id");
+							//						if(null!=sId) {
+							//							String sBaseUrl = "https://catalogue.onda-dias.eu/dias-catalogue/Products(";
+							//							sBaseUrl += sId;
+							//							sBaseUrl += ")";
+							//							String sFormat = "?$format=json";
+							//
+							//							//XXX is it possible to query metadata for all products at once, instead of performing a call each time?
+							//							String sMetadataUrl = sBaseUrl + "/Metadata" + sFormat;
+							//							if(m_bMustCollectMetadata && bFullViewModel) {
+							//								String sMetadataJson = httpGetResults(sMetadataUrl);
+							//								if(null!=sMetadataJson) {
+							//									JSONObject oMetadata = new JSONObject(sMetadataJson);
+							//									oOndaFullEntry.put("metadata", oMetadata);
+							//								}
+							//							}
+							//						}
+							QueryResultViewModel oRes = m_oResponseTranslator.translate(oOndaFullEntry, m_sDownloadProtocol);
+							aoResult.add(oRes);
+						}
 					}
 				}
+			}
+			if(aoResult.isEmpty()) {
+				System.out.println("QueryExecutorONDA.buildResultViewModel: no results");
 			}
 			return aoResult;
 		} catch (Exception e) {
@@ -292,39 +308,66 @@ public class QueryExecutorONDA extends QueryExecutor {
 		try {
 			URL oURL = new URL(sUrl);
 			HttpURLConnection oConnection = (HttpURLConnection) oURL.openConnection();
-	
+
 			// optional default is GET
 			oConnection.setRequestMethod("GET");
 			oConnection.setRequestProperty("Accept", "*/*");
-	
+
 			System.out.println("\nSending 'GET' request to URL : " + sUrl);
-	
+
+			long lStart = System.nanoTime();
 			int responseCode =  oConnection.getResponseCode();
 			System.out.println("Response Code : " + responseCode);
-	
+			int iResponseSize = 0;
+			iResponseSize = oConnection.getContentLength();
 			if(200 == responseCode) {
 				BufferedReader in = new BufferedReader(new InputStreamReader(oConnection.getInputStream()));
 				String inputLine;
-				StringBuffer oResponse = new StringBuffer();
-		
+				StringBuffer oResponseStringBuffer = new StringBuffer();
+				
+
 				while ((inputLine = in.readLine()) != null) {
-					oResponse.append(inputLine);
+					oResponseStringBuffer.append(inputLine);
 				}
 				in.close();
-	
-				//print result
-				System.out.println("Count Done: Response " + oResponse.toString().substring(0, Math.min(256, oResponse.length())) + "...");
-		
-				sResult = oResponse.toString();
+
+				sResult = oResponseStringBuffer.toString();
+				if(!Utils.isNullOrEmpty(sResult)) {
+					System.out.println("QueryExecutorONDA.httpGetResults: Response " + sResult.substring(0, Math.min(200, oResponseStringBuffer.length())) + "...");
+					if(iResponseSize <= 0) {
+						iResponseSize = sResult.getBytes().length;
+					}
+				} else {
+					System.out.println("QueryExecutorONDA.httpGetResults: reponse is empty");
+				}
 			} else {
+				System.out.println("QueryExecutorONDA.httpGetResults: ONDA did not return 200 but "+responseCode+" and the following message:");
 				String sMessage = oConnection.getResponseMessage();
 				System.out.println(sMessage);
+				if(iResponseSize <= 0) {
+					iResponseSize = sMessage.getBytes().length;
+				}
 			}
+			long lEnd = System.nanoTime();
+			long lTimeElapsed = lEnd - lStart;
+			double dMillis = lTimeElapsed / (1000.0 * 1000.0);
+			String sQueryType = "";
+			if(sUrl.contains("count")) {
+				sQueryType+="count";
+			} else {
+				sQueryType+="search";
+			}
+			double dSpeed = -1;
+			if(iResponseSize > 0) {
+				dSpeed = ( (double) iResponseSize ) / dMillis;
+				dSpeed *= 1000.0;
+			}
+			System.out.println("QueryExecutionONDA.httpGetResults: " + sQueryType+" ([ms,B,B/s]): "+dMillis+"," + iResponseSize + "," + dSpeed);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		return sResult;
 	}
-	
+
 }
 
