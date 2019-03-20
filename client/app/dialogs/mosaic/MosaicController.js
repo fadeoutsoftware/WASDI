@@ -16,16 +16,54 @@ var MosaicController = (function() {
         this.m_oConstantsService = oConstantsService;
         this.m_asProductsName = utilsProjectGetProductsName(this.m_aoProducts);
         this.m_asSelectedProducts = [];
-
-
+        this.m_bAutoFindBoundingBox = true;
+        this.m_bAutoSelectBands = true;
+        this.m_oMosaicViewModel = {
+            autoFindBoundingBox:true,
+            autoSelectBands:true,
+            southBound:-1,
+            eastBound:-1,
+            westBound :-1,
+            northBound :-1,
+            pixelSizeX:0.005,
+            pixelSizeY:0.005,
+            outputFile:"",
+            bands:""
+        }
         $scope.close = function(result) {
 
             oClose(result, 500); // close, but give 500ms for bootstrap to animate
         };
+        $scope.run = function(result) {
+
+            close(""); // close, but give 500ms for bootstrap to animate
+        };
 
     }
 
+    MosaicController.prototype.isDisabledRunButton = function(){
+        if(utilsIsObjectNullOrUndefined(this.m_asSelectedProducts))
+        {
+            return true;
+        }
+        var iNumberOfSelectedProducts = this.m_asSelectedProducts.length;
 
+        if( iNumberOfSelectedProducts < 2)
+        {
+            return true;
+        }
+        return false;
+    }
+    MosaicController.prototype.isDisabledRunButton = function(){
+
+        var oActiveWorkspace = this.m_oConstantsService.getActiveWorkspace();
+
+        this.m_SnapOperationService.geometricMosaic(oActiveWorkspace.workspaceId,this.m_oMosaicViewModel).success(function (data) {
+
+        }).error(function (error) {
+            utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN GET PARAMETERS");
+        });
+    }
     MosaicController.$inject = [
         '$scope',
         'close',
