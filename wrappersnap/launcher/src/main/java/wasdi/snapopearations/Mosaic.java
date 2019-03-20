@@ -75,6 +75,7 @@ public class Mosaic {
 	
 	public Mosaic(MosaicParameter oParameter, String sBasePath) {
 		m_oMosaicSetting = (MosaicSetting) oParameter.getSettings();
+		m_oMosaicParameter = oParameter;
 		m_sBasePath = sBasePath;
 		m_sOuptutFile = oParameter.getDestinationProductName();
 		
@@ -407,7 +408,7 @@ public class Mosaic {
         aoParameterMap.put("updateMode", m_oMosaicSetting.getUpdateMode());
         
         aoParameterMap.put("nativeResolution", m_oMosaicSetting.getNativeResolution());
-        aoParameterMap.put("combine" ,"OR");
+        aoParameterMap.put("combine" , m_oMosaicSetting.getCombine());
         
         // Check if we need multi size or single
         Boolean bMultiSize = false;

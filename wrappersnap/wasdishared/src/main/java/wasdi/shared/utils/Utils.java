@@ -251,4 +251,42 @@ public class Utils {
 			e.printStackTrace();
 		}
 	}
+	
+	
+	/**
+	 * Confert a Polygon WKT String in a set of Lat Lon Points comma separated
+	 * @param sContent 
+	 * @return
+	 */
+	public static String polygonToBounds (String sContent) {
+        sContent = sContent.replace("MULTIPOLYGON ","");
+        sContent = sContent.replace("MULTIPOLYGON","");
+        sContent = sContent.replace("POLYGON ","");
+        sContent = sContent.replace("POLYGON","");
+        sContent = sContent.replace("(((","");
+        sContent = sContent.replace(")))","");
+        sContent = sContent.replace("((","");
+        sContent = sContent.replace("))","");
+
+        String [] asContent = sContent.split(",");
+        
+        String sOutput = "";
+        
+        for (int iIndexBounds = 0; iIndexBounds < asContent.length; iIndexBounds++)
+        {
+            String sBounds = asContent[iIndexBounds];
+            String [] asNewBounds = sBounds.split(" ");
+
+            if (iIndexBounds > 0) sOutput += ", ";
+            
+            try{
+            	sOutput += asNewBounds[1] + "," + asNewBounds[0];
+            }catch(Exception oEx){
+                oEx.printStackTrace();
+            }
+                        
+        }
+        return sOutput;
+
+	}	
 }

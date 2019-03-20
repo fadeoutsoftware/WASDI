@@ -38,9 +38,9 @@ service('ProductService', ['$http',  'ConstantsService', function ($http, oConst
     {
         var oOptions = {
             transformRequest: angular.identity,
-            headers: {'Content-Type': undefined}
+            headers: {'Content-Type': 'multipart/form-data'}
         };
         return this.m_oHttp.post(this.APIURL + '/product/uploadfile?workspace=' + sWorkspaceInput + '&name=' + sName  ,oBody ,oOptions);
-    }
+    };
 }]);
 

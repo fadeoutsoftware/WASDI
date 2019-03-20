@@ -6,6 +6,7 @@ import java.io.FilenameFilter;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -25,14 +26,19 @@ import org.apache.commons.io.FileUtils;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 
 import it.fadeout.Wasdi;
+import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.DownloadedFile;
+import wasdi.shared.business.ProcessStatus;
+import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.business.ProductWorkspace;
 import wasdi.shared.business.PublishedBand;
 import wasdi.shared.business.User;
 import wasdi.shared.data.DownloadedFilesRepository;
+import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.data.ProductWorkspaceRepository;
 import wasdi.shared.data.PublishedBandsRepository;
 import wasdi.shared.geoserver.GeoServerManager;
+import wasdi.shared.parameters.IngestFileParameter;
 import wasdi.shared.utils.SerializationUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.BandViewModel;
@@ -51,7 +57,7 @@ public class ProductResource {
 	@GET
 	@Path("addtows")
 	@Produces({"application/xml", "application/json", "text/xml"})	
-	public PrimitiveResult AddProductToWorkspace(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sProductName") String sProductName, @QueryParam("sWorkspaceId") String sWorkspaceId ) {
+	public PrimitiveResult addProductToWorkspace(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sProductName") String sProductName, @QueryParam("sWorkspaceId") String sWorkspaceId ) {
 
 
 		System.out.println("ProductResource.AddProductToWorkspace:  called WS: " + sWorkspaceId + " Product " + sProductName);
@@ -93,7 +99,7 @@ public class ProductResource {
 	@GET
 	@Path("byname")
 	@Produces({"application/xml", "application/json", "text/xml"})	
-	public ProductViewModel GetByProductName(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sProductName") String sProductName) {
+	public ProductViewModel getByProductName(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sProductName") String sProductName) {
 		
 		Wasdi.DebugLog("ProductResource.GetByProductName");
 
@@ -121,7 +127,7 @@ public class ProductResource {
 	@GET
 	@Path("metadatabyname")
 	@Produces({"application/xml", "application/json", "text/xml"})	
-	public MetadataViewModel GetMetadataByProductName(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sProductName") String sProductName) {
+	public MetadataViewModel getMetadataByProductName(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sProductName") String sProductName) {
 		
 		Wasdi.DebugLog("ProductResource.GetMetadataByProductName");
 
@@ -178,7 +184,7 @@ public class ProductResource {
 	@GET
 	@Path("info")
 	@Produces({"application/xml", "application/json", "text/xml"})
-	public ProductInfoViewModel GetInfo(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sProductName") String sProductName) {
+	public ProductInfoViewModel getInfo(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sProductName") String sProductName) {
 		
 		Wasdi.DebugLog("ProductResource.GetInfo");
 
@@ -206,7 +212,7 @@ public class ProductResource {
 	@GET
 	@Path("/byws")
 	@Produces({"application/xml", "application/json", "text/xml"})
-	public ArrayList<GeorefProductViewModel> GetListByWorkspace(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sWorkspaceId") String sWorkspaceId) {
+	public ArrayList<GeorefProductViewModel> getListByWorkspace(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sWorkspaceId") String sWorkspaceId) {
 		
 		Wasdi.DebugLog("ProductResource.GetListByWorkspace");
 
@@ -301,7 +307,7 @@ public class ProductResource {
 	@POST
 	@Path("/update")
 	@Produces({"application/xml", "application/json", "text/xml"})
-	public Response UpdateProductViewModel(@HeaderParam("x-session-token") String sSessionId, ProductViewModel oProductViewModel) {
+	public Response updateProductViewModel(@HeaderParam("x-session-token") String sSessionId, ProductViewModel oProductViewModel) {
 		
 		Wasdi.DebugLog("ProductResource.UpdateProductViewModel");
 
@@ -362,10 +368,11 @@ public class ProductResource {
 	@Path("/uploadfile")
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
 	public Response uploadFile(@FormDataParam("file") InputStream fileInputStream, @HeaderParam("x-session-token") String sSessionId, 
-			@QueryParam("workspace") String workspace,@QueryParam("name") String sName) throws Exception 
+			@QueryParam("workspace") String sWorkspace,@QueryParam("name") String sName) throws Exception 
 	{
 		Wasdi.DebugLog("ProductResource.uploadfile");
 	
+		// Check the user session
 		if (Utils.isNullOrEmpty(sSessionId)) 
 		{
 			return Response.status(401).build();
@@ -382,38 +389,76 @@ public class ProductResource {
 		}
 		String sUserId = oUser.getUserId();
 		
+		// Check the file name
 		if(Utils.isNullOrEmpty(sName) || sName.isEmpty())
 		{
 			sName="defaultName";
 		}
 		
 		
-		//take path
+		// Take path
 		String sDownloadRootPath = m_oServletConfig.getInitParameter("DownloadRootPath");
 		if (!sDownloadRootPath.endsWith("/")) 
 		{
-			sDownloadRootPath = sDownloadRootPath + "\\";
+			sDownloadRootPath = sDownloadRootPath + "/";
 		}
-		String sPath = sDownloadRootPath + sUserId + "\\" ;
-		File oUserPath = new File(sPath + sName);
-		Integer iIndex=0;
-		while( oUserPath.exists() ) 
-		{
-			oUserPath = new File(sPath + "("+ iIndex + ")"+ sName);
-			iIndex++;
-		}
-
+		String sPath = sDownloadRootPath + sUserId + "/" + sWorkspace + "/";
 		
+		File oOutputFilePath = new File(sPath + sName);
+		
+		if (oOutputFilePath.getParentFile().exists() == false) {
+			oOutputFilePath.getParentFile().mkdirs();
+		}
+		
+		// Copy the stream
 		int iRead = 0;
 		byte[] ayBytes = new byte[1024];
-		OutputStream oOutStream = new FileOutputStream(oUserPath);
+		OutputStream oOutStream = new FileOutputStream(oOutputFilePath);
 		while ((iRead = fileInputStream.read(ayBytes)) != -1) {
 			oOutStream.write(ayBytes, 0, iRead);
 		}
 		oOutStream.flush();
 		oOutStream.close();
 		
-		//TODO SAVE IN DATABASE
+		// Start ingestion
+		try {
+			ProcessWorkspace oProcess = null;
+			ProcessWorkspaceRepository oRepository = new ProcessWorkspaceRepository();
+
+			String sProcessObjId = Utils.GetRandomName();
+
+			IngestFileParameter oParameter = new IngestFileParameter();
+			oParameter.setWorkspace(sWorkspace);
+			oParameter.setUserId(sUserId);
+			oParameter.setExchange(sWorkspace);
+			oParameter.setFilePath(oOutputFilePath.getAbsolutePath());
+			oParameter.setProcessObjId(sProcessObjId);
+
+			sPath = m_oServletConfig.getInitParameter("SerializationPath") + sProcessObjId;
+			SerializationUtils.serializeObjectToXML(sPath, oParameter);
+
+			try
+			{
+				oProcess = new ProcessWorkspace();
+				oProcess.setOperationDate(Wasdi.GetFormatDate(new Date()));
+				oProcess.setOperationType(LauncherOperations.INGEST.name());
+				oProcess.setProductName(oOutputFilePath.getName());
+				oProcess.setWorkspaceId(sWorkspace);
+				oProcess.setUserId(sUserId);
+				oProcess.setProcessObjId(sProcessObjId);
+				oProcess.setStatus(ProcessStatus.CREATED.name());
+				oRepository.InsertProcessWorkspace(oProcess);
+				Wasdi.DebugLog("ProductResource.uploadfile: Process Scheduled for Launcher");
+			}
+			catch(Exception oEx){
+				System.out.println("ProductResource.uploadfile: Error updating process list " + oEx.getMessage());
+				oEx.printStackTrace();
+				Response.status(500).build();
+			}
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 		
 		return Response.status(200).build();
 	}
@@ -422,7 +467,7 @@ public class ProductResource {
 	@GET
 	@Path("delete")
 	@Produces({"application/xml", "application/json", "text/xml"})	
-	public Response DeleteProduct(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sProductName") String sProductName, @QueryParam("bDeleteFile") Boolean bDeleteFile, @QueryParam("sWorkspaceId") String sWorkspace, @QueryParam("bDeleteLayer") Boolean bDeleteLayer) 
+	public Response deleteProduct(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sProductName") String sProductName, @QueryParam("bDeleteFile") Boolean bDeleteFile, @QueryParam("sWorkspaceId") String sWorkspace, @QueryParam("bDeleteLayer") Boolean bDeleteLayer) 
 	{
 		Wasdi.DebugLog("ProductResource.DeleteProduct");
 		

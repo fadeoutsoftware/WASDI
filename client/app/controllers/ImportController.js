@@ -609,7 +609,7 @@ var ImportController = (function() {
                     oProvider.isLoaded = true;
                 }
             }, function errorCallback(response) {
-                utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN OPEN SEARCH REQUEST...");
+                utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN OPEN SEARCH REQUEST");
                 oProvider.isLoaded = true;
                 // oController.m_bIsVisibleListOfLayers = false;//visualize filter list
                 // oController.m_oResultsOfSearchService.setIsVisibleListOfProducts(oController.m_bIsVisibleListOfLayers );
@@ -759,7 +759,9 @@ var ImportController = (function() {
                 oProvider.isLoaded = true;
             }
         }, function errorCallback(response) {
-            utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN OPEN SEARCH REQUEST...");
+            var oDialog = utilsVexDialogAlertBottomRightCorner("GURU MEDITATION<br>ERROR IN OPEN SEARCH REQUEST");
+            utilsVexCloseDialogAfter(4000, oDialog);
+
             oController.m_bIsVisibleListOfLayers = false;//visualize filter list
             oController.m_oResultsOfSearchService.setIsVisibleListOfProducts(oController.m_bIsVisibleListOfLayers );
         });

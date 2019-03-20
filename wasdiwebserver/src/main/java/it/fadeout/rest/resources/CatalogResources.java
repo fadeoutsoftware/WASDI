@@ -68,7 +68,7 @@ public class CatalogResources {
 	@GET
 	@Path("categories")
 	@Produces({"application/json"})
-	public ArrayList<String> GetCategories(@HeaderParam("x-session-token") String sSessionId) {
+	public ArrayList<String> getCategories(@HeaderParam("x-session-token") String sSessionId) {
 		Wasdi.DebugLog("CatalogResources.GetCategories");
 
 		ArrayList<String> categories = new ArrayList<String>();
@@ -82,7 +82,7 @@ public class CatalogResources {
 	@GET
 	@Path("entries")
 	@Produces({"application/json"})
-	public ArrayList<DownloadedFile> GetEntries(@HeaderParam("x-session-token") String sSessionId, 
+	public ArrayList<DownloadedFile> getEntries(@HeaderParam("x-session-token") String sSessionId, 
 			@QueryParam("from") String sFrom, 
 			@QueryParam("to") String sTo,
 			@QueryParam("freetext") String sFreeText,
@@ -109,7 +109,7 @@ public class CatalogResources {
 	@POST
 	@Path("downloadentry")
 	@Produces(MediaType.APPLICATION_OCTET_STREAM)
-	public Response DownloadEntry(@HeaderParam("x-session-token") String sSessionId, DownloadedFile oEntry) {
+	public Response downloadEntry(@HeaderParam("x-session-token") String sSessionId, DownloadedFile oEntry) {
 
 		Wasdi.DebugLog("CatalogResources.DownloadEntry");
 
@@ -175,7 +175,7 @@ public class CatalogResources {
 	@GET
 	@Path("downloadbyname")
 	@Produces(MediaType.APPLICATION_OCTET_STREAM)
-	public Response DownloadEntryByName(@HeaderParam("x-session-token") String sSessionId,
+	public Response downloadEntryByName(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("token") String sTokenSessionId,
 			@QueryParam("filename") String sFileName)
 	{			
@@ -403,7 +403,7 @@ public class CatalogResources {
 	@GET
 	@Path("")
 	@Produces({"application/xml", "application/json", "text/xml"})
-	public ArrayList<CatalogViewModel> GetCatalogs(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sWorkspaceId") String sWorkspaceId) {
+	public ArrayList<CatalogViewModel> getCatalogs(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sWorkspaceId") String sWorkspaceId) {
 
 		Wasdi.DebugLog("CatalogResources.GetCatalogues");
 
@@ -450,39 +450,49 @@ public class CatalogResources {
 	}
 
 
-
+	/**
+	 * Ingest a new file from sftp in to a target Workspace
+	 * @param sSessionId User session token header
+	 * @param sFile name of the file to ingest
+	 * @param sWorkspace target workspace
+	 * @return Http Response
+	 */
 	@PUT
 	@Path("/upload/ingest")
 	@Produces({"application/json", "text/xml"})
-	public Response IngestFile(@HeaderParam("x-session-token") String sSessionId, @QueryParam("file") String sFile, @QueryParam("workspace") String sWorkspace) {
+	public Response ingestFile(@HeaderParam("x-session-token") String sSessionId, @QueryParam("file") String sFile, @QueryParam("workspace") String sWorkspace) {
 
 		Wasdi.DebugLog("CatalogResource.IngestFile");
 
+		// Check user session
 		User oUser = Wasdi.GetUserFromSession(sSessionId);
 		if (oUser == null || Utils.isNullOrEmpty(oUser.getUserId())) return Response.status(Status.UNAUTHORIZED).build();		
 		String sAccount = oUser.getUserId();		
 
+		// Find the sftp folder
 		String sUserBaseDir = m_oServletConfig.getInitParameter("sftpManagementUserDir");
 
 		File oUserBaseDir = new File(sUserBaseDir);
 		File oFilePath = new File(new File(new File(oUserBaseDir, sAccount), "uploads"), sFile);
 
+		// Is the file available?
 		if (!oFilePath.canRead()) {
 			System.out.println("CatalogResource.IngestFile: ERROR: unable to access uploaded file " + oFilePath.getAbsolutePath());
 			return Response.serverError().build();
 		}
 		try {
+			// Create the ingest process
 			ProcessWorkspace oProcess = null;
 			ProcessWorkspaceRepository oRepository = new ProcessWorkspaceRepository();
 
 			String sProcessObjId = Utils.GetRandomName();
-
+			
+			// Ingest file parameter
 			IngestFileParameter oParameter = new IngestFileParameter();
 			oParameter.setWorkspace(sWorkspace);
 			oParameter.setUserId(sAccount);
 			oParameter.setExchange(sWorkspace);
 			oParameter.setFilePath(oFilePath.getAbsolutePath());
-			//set the process object Id to params
 			oParameter.setProcessObjId(sProcessObjId);
 
 			String sPath = m_oServletConfig.getInitParameter("SerializationPath") + sProcessObjId;
@@ -490,6 +500,7 @@ public class CatalogResources {
 
 			try
 			{
+				// Create the process
 				oProcess = new ProcessWorkspace();
 				oProcess.setOperationDate(Wasdi.GetFormatDate(new Date()));
 				oProcess.setOperationType(LauncherOperations.INGEST.name());
@@ -517,32 +528,45 @@ public class CatalogResources {
 
 	}
 
+	/**
+	 * Ingest a file already existing in a Workspace 
+	 * @param sSessionId User Session token
+	 * @param sFile Name of the file to ingest
+	 * @param sWorkspace Id of the target workspace 
+	 * @return Primitive Result with boolValue true or false and Http Code in intValue
+	 */
 	@GET
 	@Path("/upload/ingestinws")
 	@Produces({"application/json", "text/xml"})
-	public PrimitiveResult IngestFileInWorkspace(@HeaderParam("x-session-token") String sSessionId, @QueryParam("file") String sFile, @QueryParam("workspace") String sWorkspace) {
-
+	public PrimitiveResult ingestFileInWorkspace(@HeaderParam("x-session-token") String sSessionId, @QueryParam("file") String sFile, @QueryParam("workspace") String sWorkspace) {
+		
+		// Create the result object
 		PrimitiveResult oResult = new PrimitiveResult();
 
 		Wasdi.DebugLog("CatalogResource.IngestFileInWorkspace");
 
+		// Check the user session
 		User oUser = Wasdi.GetUserFromSession(sSessionId);
 		if (oUser == null || Utils.isNullOrEmpty(oUser.getUserId())) {
 			oResult.setBoolValue(false);
 			oResult.setIntValue(401);
 			return oResult;		
 		}
+		
+		// Get the user account
 		String sAccount = oUser.getUserId();		
-
+		
+		// Get the file path
 		String sDownloadRootPath = m_oServletConfig.getInitParameter("DownloadRootPath");
 		if (!sDownloadRootPath.endsWith("/")) sDownloadRootPath = sDownloadRootPath + "/";
 
 		File oUserBaseDir = new File(sDownloadRootPath+sAccount+ "/" +sWorkspace+"/");
 
 		File oFilePath = new File(oUserBaseDir, sFile);
-
+		
+		// Check if the file exists 
 		if (!oFilePath.canRead()) {
-			Wasdi.DebugLog("CatalogResource.IngestFileInWorkspace: file not found. Check if it is an exension problem");
+			Wasdi.DebugLog("CatalogResource.IngestFileInWorkspace: file not found. Check if it is an extension problem");
 
 			String [] asSplittedFileName = sFile.split("\\.");
 
@@ -569,6 +593,7 @@ public class CatalogResources {
 			}
 
 		}
+		
 		try {
 			ProcessWorkspace oProcess = null;
 			ProcessWorkspaceRepository oRepository = new ProcessWorkspaceRepository();

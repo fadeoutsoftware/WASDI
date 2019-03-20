@@ -175,6 +175,10 @@ FUNCTION WASDIHTTPPOST, sUrlPath, sBody
   oUrl->SetProperty, URL_PATH = sUrlPath
   oUrl->SetProperty, HEADERS = ['Content-Type: application/json','x-session-token: '+sessioncookie]
   
+  IF (verbose EQ '1') THEN BEGIN
+	print, 'WasdiHttpGet Url ', sUrlPath
+  END  
+  
   ; CALL THE HTTP POST URL WITH BODY
   serverJSONResult = oUrl->Put(sBody, /STRING_ARRAY,/POST, /BUFFER)
 
@@ -631,6 +635,212 @@ FUNCTION WASDIEXECUTEWORKFLOW, asInputFileNames, asOutputFileNames, sWorkflow
   
   RETURN, sStatus
 end
+
+
+
+
+; Create a Mosaic from a list of input images
+FUNCTION WASDIMOSAIC, asInputFileNames, sOutputFile, dPixelSizeX, dPixelSizeY
+
+  COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose
+  sessioncookie = token
+
+
+  ; API url
+  UrlPath = '/wasdiwebserver/rest/processing/geometric/mosaic?sDestinationProductName='+sOutputFile+"&sWorkspaceId="+activeworkspace
+  
+  ; Generate input file names JSON array
+  sInputFilesJSON = '['
+  
+  ; For each input name
+  for i=0,n_elements(asInputFileNames)-1 do begin
+    
+    sInputName = asInputFileNames[i]
+	; wrap with '
+	sInputFilesJSON = sInputFilesJSON + '"' + sInputName + '"'
+	
+	; check of is not the last one
+    if i lt n_elements(asInputFileNames)-1 then begin
+	  ; add ,
+      sInputFilesJSON = sInputFilesJSON + ','
+    endif
+  endfor
+  
+  ; close the array
+  sInputFilesJSON = sInputFilesJSON + ']'
+  
+  IF (verbose eq '1') THEN BEGIN
+	print, 'Input Files JSON ', sInputFilesJSON
+  END
+  
+  ; compose the full MosaicSetting JSON View Model
+  sMosaicSettingsString='{  "crs": "GEOGCS[\"WGS84(DD)\", DATUM[\"WGS84\", SPHEROID[\"WGS84\", 6378137.0, 298.257223563]], PRIMEM[\"Greenwich\", 0.0], UNIT[\"degree\", 0.017453292519943295],  AXIS[\"Geodetic longitude\", EAST], AXIS[\"Geodetic latitude\", NORTH]]",  "southBound": -1.0,"eastBound": -1.0, "westBound": -1.0, "northBound": -1.0, "pixelSizeX":'+dPixelSizeX +', "pixelSizeY": ' + dPixelSizeY + ', "overlappingMethod": "MOSAIC_TYPE_OVERLAY", "showSourceProducts": false, "elevationModelName": "ASTER 1sec GDEM", "resamplingName": "Nearest", "updateMode": false, "nativeResolution": true, "combine": "OR",  "sources":'+sInputFilesJSON +', "variableNames": [], "variableExpressions": [] }'
+  
+  IF (verbose eq '1') THEN BEGIN
+	print, 'MOSAIC SETTINGS JSON ' , sMosaicSettingsString
+	print, 'URL: ', UrlPath
+  END
+  
+  
+
+  wasdiResult = WASDIHTTPPOST(UrlPath, sMosaicSettingsString)
+  
+  sResponse = GETVALUEBYKEY(wasdiResult, 'boolValue')
+  
+  sProcessID = ''
+  
+  ; get the process id
+  if sResponse then begin
+    sValue = GETVALUEBYKEY(wasdiResult, 'stringValue')
+    sProcessID=sValue
+  endif
+  
+  sStatus = "ERROR"
+  
+  ; Wait for the process to finish
+  if sProcessID ne '' then begin
+    sStatus = WASDIWAITPROCESS(sProcessID)
+  endif
+  
+  RETURN, sStatus
+end
+
+
+
+
+; Search Sentinel EO Images
+FUNCTION WASDISEARCHEOIMAGE, sPlatform, sDateFrom, sDateTo, dULLat, dULLon, dLRLat, dLRLon, sProductType, iOrbitNumber, sSensorOperationalMode, sCloudCoverage 
+
+  COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose
+  sessioncookie = token
+
+  ; API url
+  UrlPath = '/wasdiwebserver/rest/search/querylist?'
+  
+  sQuery = "( platformname:";
+  
+  IF (sPlatform eq 'S2') THEN BEGIN
+	 sQuery = sQuery + "Sentinel-2 "
+  END ELSE BEGIN
+	 sQuery = sQuery + "Sentinel-1"
+  END
+
+  IF (sProductType NE !NULL) THEN BEGIN
+	 sQuery = sQuery + " AND producttype:" + sProductType
+  END
+  
+  IF (sSensorOperationalMode NE !NULL) THEN BEGIN
+	 sQuery = sQuery + " AND sensoroperationalmode:" + sSensorOperationalMode
+  END
+  
+  IF (sCloudCoverage NE !NULL) THEN BEGIN
+	 sQuery = sQuery + " AND cloudcoverpercentage:" + sCloudCoverage
+  END  
+		
+  ; TODO: CloudCoverage for S2
+  
+  ;If available add orbit number
+  IF (iOrbitNumber NE !NULL) THEN BEGIN
+	 sQuery = sQuery + " AND relativeorbitnumber:" + iOrbitNumber
+  END
+  
+  ;Close the first block
+  sQuery = sQuery + ") "
+  
+  ;Date Block
+  sQuery = sQuery + "AND ( beginPosition:[" + sDateFrom + "T00:00:00.000Z TO " + sDateTo + "T23:59:59.999Z]"
+  sQuery = sQuery + "AND ( endPosition:[" + sDateFrom + "T00:00:00.000Z TO " + sDateTo + "T23:59:59.999Z]"
+  
+  ;Close the second block
+  sQuery = sQuery + ") "
+  
+    
+  IF ((dULLat NE !NULL) AND  (dULLon NE !NULL) AND (dLRLat NE !NULL) AND (dLRLon NE !NULL) ) THEN BEGIN
+	sFootPrint = '( footprint:"intersects(POLYGON(( ' + dULLon + " " +dLRLat + "," + dULLon + " " + dULLat + "," + dLRLon + " " + dULLat + "," + dLRLon + " " + dLRLat + "," + dULLon + " " +dLRLat + ')))") AND ';
+	
+	sQuery = sFootPrint + sQuery;
+  END
+
+   ; Replace " with \"
+  sEscapedQuery = STRJOIN(STRSPLIT(sQuery,'"', /EXTRACT), '\"')
+  
+  sQueryBody = '["' + sEscapedQuery + '"]'; 
+  
+  ; Create a new url object
+  oUrl = OBJ_NEW('IDLnetUrl')
+  sEncodedQuery = oUrl->URLEncode(sQuery)
+
+  sQuery = "sQuery=" + sEncodedQuery + "&offset=0&limit=10&providers=ONDA";
+  
+  UrlPath = UrlPath + '?' + sQuery
+    
+  IF (verbose eq '1') THEN BEGIN
+	print, 'SEARCH BODY  ' , sQueryBody
+	print, 'SEARCH URL  ' , UrlPath
+  END
+
+  wasdiResult = WASDIHTTPPOST(UrlPath, sQueryBody)
+  
+  RETURN, wasdiResult
+END
+
+; Return the name of a product having in input the result dictionary obtained by SEARCHEOIMAGE
+FUNCTION GETFOUNDPRODUCTNAME, oFoundProduct
+	RETURN, GETVALUEBYKEY(oFoundProduct,'title')
+END
+
+; Return the name of a product having in input the result dictionary obtained by SEARCHEOIMAGE
+FUNCTION GETFOUNDPRODUCTLINK, oFoundProduct
+	RETURN, GETVALUEBYKEY(oFoundProduct,'link')
+END
+
+
+
+
+; Import EO Image in WASDI
+FUNCTION WASDIIMPORTEOIMAGE, oEOImage
+
+  COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose
+  sessioncookie = token
+
+  ; API url
+  UrlPath = '/wasdiwebserver/rest/filebuffer/download'
+  
+  sFileLink = GETFOUNDPRODUCTLINK(oEOImage)
+  sBoundingBox = GETVALUEBYKEY(oEOImage,'footprint')
+
+  ; Create a new url object
+  oUrl = OBJ_NEW('IDLnetUrl')
+  sEncodedLink = oUrl->URLEncode(sFileLink)
+  sEncodedBB = oUrl->URLEncode(sBoundingBox)
+
+  sQuery = "sFileUrl=" + sEncodedLink + "&sProvider=ONDA&sWorkspaceId=" + activeworkspace + "&sBoundingBox=" + sEncodedBB
+  
+  UrlPath = UrlPath + '?' + sQuery
+  
+  wasdiResult = WASDIHTTPGET(UrlPath)
+   
+  sResponse = GETVALUEBYKEY(wasdiResult, 'boolValue')
+  
+  sProcessID = ''
+  
+  ; get the process id
+  if sResponse then begin
+    sValue = GETVALUEBYKEY(wasdiResult, 'stringValue')
+    sProcessID=sValue
+  endif
+  
+  sStatus = "ERROR"
+  
+  ; Wait for the process to finish
+  if sProcessID ne '' then begin
+    sStatus = WASDIWAITPROCESS(sProcessID)
+  endif  
+  
+  RETURN, wasdiResult
+END
+
+
 
 ; Update the progress of this own process
 PRO WASDIUPDATEPROGRESS, iPerc

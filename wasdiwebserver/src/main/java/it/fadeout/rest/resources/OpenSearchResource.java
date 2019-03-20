@@ -48,7 +48,7 @@ public class OpenSearchResource {
 	@GET
 	@Path("/sentinel/result")
 	@Produces({ "application/xml", "application/json", "text/html" })
-	public String SearchSentinel(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sQuery") String sQuery,
+	public String searchSentinel(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sQuery") String sQuery,
 			@QueryParam("offset") String sOffset, @QueryParam("limit") String sLimit,
 			@QueryParam("sortedby") String sSortedBy, @QueryParam("order") String sOrder) {
 		Wasdi.DebugLog("OpenSearchResource.SearchSentinel, session: "+sSessionId);
@@ -96,7 +96,7 @@ public class OpenSearchResource {
 	@GET
 	@Path("/sentinel/count")
 	@Produces({ "application/xml", "application/json", "text/html" })
-	public String GetProductsCountSentinel(@HeaderParam("x-session-token") String sSessionId,
+	public String getProductsCountSentinel(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("sQuery") String sQuery) {
 		Wasdi.DebugLog("OpenSearchResource.GetProductsCountSentinel, session: " + sSessionId);
 
@@ -125,7 +125,7 @@ public class OpenSearchResource {
 	@GET
 	@Path("/query/count")
 	@Produces({ "application/xml", "application/json", "text/html" })
-	public int GetProductsCount(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sQuery") String sQuery,
+	public int getProductsCount(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sQuery") String sQuery,
 			@QueryParam("providers") String sProviders) {
 		Wasdi.DebugLog("OpenSearchResource.GetProductsCount, session: " + sSessionId);
 
@@ -172,7 +172,7 @@ public class OpenSearchResource {
 	@GET
 	@Path("/query")
 	@Produces({ "application/json", "text/html" })
-	public QueryResultViewModel[] Search(@HeaderParam("x-session-token") String sSessionId,
+	public QueryResultViewModel[] search(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("providers") String sProviders, @QueryParam("sQuery") String sQuery,
 			@QueryParam("offset") String sOffset, @QueryParam("limit") String sLimit,
 			@QueryParam("sortedby") String sSortedBy, @QueryParam("order") String sOrder) {
@@ -271,7 +271,7 @@ public class OpenSearchResource {
 	@GET
 	@Path("/providers")
 	@Produces({ "application/json", "text/html" })
-	public ArrayList<SearchProviderViewModel> GetSearchProviders(@HeaderParam("x-session-token") String sSessionId) {
+	public ArrayList<SearchProviderViewModel> getSearchProviders(@HeaderParam("x-session-token") String sSessionId) {
 		if (Utils.isNullOrEmpty(sSessionId))
 			return null;
 		User oUser = Wasdi.GetUserFromSession(sSessionId);
@@ -307,7 +307,7 @@ public class OpenSearchResource {
 	@POST
 	@Path("/query/countlist")
 	@Produces({ "application/xml", "application/json", "text/html" })
-	public int GetListProductsCount(@HeaderParam("x-session-token") String sSessionId,
+	public int getListProductsCount(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("sQuery") String sQuery, @QueryParam("providers") String sProviders,
 			ArrayList<String> asQueries) {
 		Wasdi.DebugLog("OpenSearchResource.GetListProductsCount, session: "+sSessionId+", providers: "+sProviders);
@@ -344,7 +344,7 @@ public class OpenSearchResource {
 	@POST
 	@Path("/querylist")
 	@Produces({ "application/json", "text/html" })
-	public QueryResultViewModel[] SearchList(@HeaderParam("x-session-token") String sSessionId,
+	public QueryResultViewModel[] searchList(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("providers") String sProviders, @QueryParam("sQuery") String sQuery,
 			@QueryParam("offset") String sOffset, @QueryParam("limit") String sLimit,
 			@QueryParam("sortedby") String sSortedBy, @QueryParam("order") String sOrder, ArrayList<String> asQueries) {
