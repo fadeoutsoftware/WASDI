@@ -1,53 +1,97 @@
 <div class="container-v4">
     <div class="row-v4">
         <div class="col-v4">
+
+            <h5>you have to select two products: </h5>
             <multiselect options="m_oController.m_asProductsName" selected="m_oController.m_asSelectedProducts"> </multiselect>
+
         </div>
 
     </div>
-    <div class="row-v4">
-        <div class="col-v4">
-            Auto Find Bounding Box
+
+    <div class="well">
+        <div class="row-v4">
+            <div class="col-v4">
+                Auto Find Bounding Box
+            </div>
+
+            <div class="col-v4">
+                <i class="fa fa-check-square-o pointer-cursor-hover" aria-hidden="true" ng-show="m_oController.m_oMosaicViewModel.autoFindBoundingBox"
+                   ng-click="m_oController.m_oMosaicViewModel.autoFindBoundingBox = !m_oController.m_oMosaicViewModel.autoFindBoundingBox"></i>
+                <i class="fa fa-square-o pointer-cursor-hover" aria-hidden="true" ng-hide="m_oController.m_oMosaicViewModel.autoFindBoundingBox"
+                   ng-click="m_oController.m_oMosaicViewModel.autoFindBoundingBox = !m_oController.m_oMosaicViewModel.autoFindBoundingBox"></i>
+            </div>
+
         </div>
 
-        <div class="col-v4">
-            <i class="fa fa-check-square-o" aria-hidden="true"></i>
-            <i class="fa fa-square-o" aria-hidden="true"></i>
-        </div>
+        <div class="row-v4 my-input-text align-items-center" ng-class="{'disable-all':m_oController.m_oMosaicViewModel.autoFindBoundingBox === true}">
+            <div class="col-v4">
+                North
+            </div>
 
+            <div class="col-v4">
+                <input type="text" name="name"  class="wasdi-input" ng-model="m_oController.m_oMosaicViewModel.northBound"
+                       ng-disabled="m_oController.m_oMosaicViewModel.autoFindBoundingBox === true">
+
+            </div>
+            <div class="col-v4">
+                South
+            </div>
+
+            <div class="col-v4">
+                <input type="text" name="name"  class="wasdi-input" ng-model="m_oController.m_oMosaicViewModel.southBound"
+                       ng-disabled="m_oController.m_oMosaicViewModel.autoFindBoundingBox === true">
+            </div>
+            <div class="col-v4">
+                East
+            </div>
+
+            <div class="col-v4">
+                <input type="text" name="name"  class="wasdi-input" ng-model="m_oController.m_oMosaicViewModel.eastBound"
+                       ng-disabled="m_oController.m_oMosaicViewModel.autoFindBoundingBox === true">
+            </div>
+            <div class="col-v4">
+                West
+            </div>
+
+            <div class="col-v4">
+                <input type="text" name="name"  class="wasdi-input" ng-model="m_oController.m_oMosaicViewModel.westBound"
+                       ng-disabled="m_oController.m_oMosaicViewModel.autoFindBoundingBox === true">
+            </div>
+
+
+        </div>
     </div>
-    <div class="row-v4 my-input-text align-items-center">
-        <div class="col-v4">
-            North
-        </div>
-
-        <div class="col-v4">
-            <input type="text" name="name"  class="wasdi-input" >
-
-        </div>
-        <div class="col-v4">
-            South
-        </div>
-
-        <div class="col-v4">
-            <input type="text" name="name"  class="wasdi-input" >
-        </div>
-        <div class="col-v4">
-            East
-        </div>
-
-        <div class="col-v4">
-            <input type="text" name="name"  class="wasdi-input" >
-        </div>
-        <div class="col-v4">
-            West
-        </div>
-
-        <div class="col-v4">
-            <input type="text" name="name"  class="wasdi-input" >
-        </div>
 
 
+    <div class="well">
+
+        <div class="row-v4">
+            <div class="col-v4">
+                Auto Select Bands
+            </div>
+
+            <div class="col-v4 ">
+                <i class="fa fa-check-square-o pointer-cursor-hover" aria-hidden="true" ng-show="m_oController.m_oMosaicViewModel.autoSelectBands"
+                   ng-click="m_oController.m_oMosaicViewModel.autoSelectBands = !m_oController.m_oMosaicViewModel.autoSelectBands"></i>
+                <i class="fa fa-square-o pointer-cursor-hover" aria-hidden="true" ng-hide="m_oController.m_oMosaicViewModel.autoSelectBands"
+                   ng-click="m_oController.m_oMosaicViewModel.autoSelectBands = !m_oController.m_oMosaicViewModel.autoSelectBands"></i>
+            </div>
+
+        </div>
+
+        <div class="row-v4 my-input-text align-items-center" ng-class="{'disable-all':m_oController.m_oMosaicViewModel.autoSelectBands === true}">
+            <div class="col-v4">
+                Bands
+            </div>
+
+            <div class="col-v4" >
+                <input type="text" name="name"  class="wasdi-input" model="m_oController.m_oMosaicViewModel.bands"
+                       ng-disabled="m_oController.m_oMosaicViewModel.autoSelectBands === true">
+
+            </div>
+
+        </div>
     </div>
 
     <div class="row-v4 my-input-text align-items-center">
@@ -56,31 +100,7 @@
         </div>
 
         <div class="col-v4">
-            <input type="text" name="name"  class="wasdi-input" >
-
-        </div>
-
-    </div>
-
-    <div class="row-v4">
-        <div class="col-v4">
-            Auto Find Bounding Box
-        </div>
-
-        <div class="col-v4">
-            <i class="fa fa-check-square-o" aria-hidden="true"></i>
-            <i class="fa fa-square-o" aria-hidden="true"></i>
-        </div>
-
-    </div>
-
-    <div class="row-v4 my-input-text align-items-center">
-        <div class="col-v4">
-            Bands
-        </div>
-
-        <div class="col-v4">
-            <input type="text" name="name"  class="wasdi-input" >
+            <input type="text" name="name"  class="wasdi-input" model="m_oController.m_oMosaicViewModel.outputFile">
 
         </div>
 

@@ -119,7 +119,8 @@ service('SnapOperationService', ['$http',  'ConstantsService', function ($http, 
     this.runJRCClassification = function (oJRC,sWorkspaceId) {
         return this.m_oHttp.post(this.APIURL + '/processing/asynchjrctest2?workspaceId='+sWorkspaceId ,oJRC);
     };
-
-
+    this.geometricMosaic = function(sWorkspaceId,oMosaic){
+        return this.m_oHttp.post(this.APIURL + '/processing/geometric/mosaic?workspaceId='+sWorkspaceId ,oMosaic);
+    }
 }]);
 

@@ -14,7 +14,15 @@
 
             .modal-body {
 
+                .disable-all{
+                    @include isDisabled();
+                }
 
+                .well{
+                    .my-input-text{
+                        background-color: transparent !important;
+                    }
+                }
             }
 
             .modal-footer {
