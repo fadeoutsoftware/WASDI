@@ -109,6 +109,7 @@ import wasdi.shared.viewmodels.BandImageViewModel;
 import wasdi.shared.viewmodels.ColorManipulationViewModel;
 import wasdi.shared.viewmodels.JRCTestViewModel;
 import wasdi.shared.viewmodels.JRCTestViewModel2;
+import wasdi.shared.viewmodels.JRCTestViewModel3;
 import wasdi.shared.viewmodels.ListFloodViewModel;
 import wasdi.shared.viewmodels.MaskViewModel;
 import wasdi.shared.viewmodels.MathMaskViewModel;
@@ -692,28 +693,28 @@ public class ProcessingResources {
 	@Path("/bandimage")
 	@Produces(MediaType.APPLICATION_OCTET_STREAM)
 	public Response getBandImage(@HeaderParam("x-session-token") String sSessionId,
-			@QueryParam("workspace") String workspace,
-			BandImageViewModel model) throws IOException {
+			@QueryParam("workspace") String sWorkspace,
+			BandImageViewModel oBandImageViewModel) throws IOException {
 		
 		Wasdi.DebugLog("ProcessingResources.getBandImage");
 
 		// Check user session
-		String userId = acceptedUserAndSession(sSessionId);
-		if (Utils.isNullOrEmpty(userId)) return Response.status(401).build();
+		String sUserId = acceptedUserAndSession(sSessionId);
+		if (Utils.isNullOrEmpty(sUserId)) return Response.status(401).build();
 
 		
 		// Init the registry for JAI
-		OperationRegistry operationRegistry = JAI.getDefaultInstance().getOperationRegistry();
-		RegistryElementDescriptor oDescriptor = operationRegistry.getDescriptor("rendered", "Paint");
+		OperationRegistry oOperationRegistry = JAI.getDefaultInstance().getOperationRegistry();
+		RegistryElementDescriptor oDescriptor = oOperationRegistry.getDescriptor("rendered", "Paint");
 		
 		if (oDescriptor==null) {
 			System.out.println("getBandImage: REGISTER Descriptor!!!!");
 			try {
-				operationRegistry.registerServices(this.getClass().getClassLoader());
+				oOperationRegistry.registerServices(this.getClass().getClassLoader());
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-			oDescriptor = operationRegistry.getDescriptor("rendered", "Paint");
+			oDescriptor = oOperationRegistry.getDescriptor("rendered", "Paint");
 			
 			
 			IIORegistry.getDefaultInstance().registerApplicationClasspathSpis();
@@ -721,17 +722,17 @@ public class ProcessingResources {
 		
 		
 		// Get Download File Path
-        String downloadPath = m_oServletConfig.getInitParameter("DownloadRootPath");
-        File productFile = new File(new File(new File(downloadPath, userId), workspace), model.getProductFileName());
+        String sDownloadPath = m_oServletConfig.getInitParameter("DownloadRootPath");
+        File oProductFile = new File(new File(new File(sDownloadPath, sUserId), sWorkspace), oBandImageViewModel.getProductFileName());
 		
 //		File productFile = new File("/home/doy/tmp/wasdi/tmp/S2B_MSIL1C_20180117T102339_N0206_R065_T32TMQ_20180117T122826.zip");
         
-        if (!productFile.exists()) {
-        	System.out.println("ProcessingResource.getBandImage: FILE NOT FOUND: " + productFile.getAbsolutePath());
+        if (!oProductFile.exists()) {
+        	System.out.println("ProcessingResource.getBandImage: FILE NOT FOUND: " + oProductFile.getAbsolutePath());
         	return Response.status(500).build();
         }
         
-        Product oSNAPProduct = ProductIO.readProduct(productFile);
+        Product oSNAPProduct = ProductIO.readProduct(oProductFile);
         
         if (oSNAPProduct == null) {
         	Wasdi.DebugLog("ProcessingResources.getBandImage: SNAP product is null, impossibile to read. Return");
@@ -740,107 +741,107 @@ public class ProcessingResources {
         	Wasdi.DebugLog("ProcessingResources.getBandImage: product read");
         }
         
-		BandImageManager manager = new BandImageManager(oSNAPProduct);
+		BandImageManager oBandImageManager = new BandImageManager(oSNAPProduct);
 		
-		RasterDataNode raster = null;
+		RasterDataNode oRasterDataNode = null;
 		
-		if (model.getFilterVM() != null) {
-			Filter filter = model.getFilterVM().getFilter();
-			FilterBand filteredBand = manager.getFilterBand(model.getBandName(), filter, model.getFilterIterationCount());
-			if (filteredBand == null) {
-				Wasdi.DebugLog("ProcessingResource.getBandImage: CANNOT APPLY FILTER TO BAND " + model.getBandName());
+		if (oBandImageViewModel.getFilterVM() != null) {
+			Filter oFilter = oBandImageViewModel.getFilterVM().getFilter();
+			FilterBand oFilteredBand = oBandImageManager.getFilterBand(oBandImageViewModel.getBandName(), oFilter, oBandImageViewModel.getFilterIterationCount());
+			if (oFilteredBand == null) {
+				Wasdi.DebugLog("ProcessingResource.getBandImage: CANNOT APPLY FILTER TO BAND " + oBandImageViewModel.getBandName());
 	        	return Response.status(500).build();
 			}
-			raster = filteredBand;
+			oRasterDataNode = oFilteredBand;
 		} else {
-			raster = oSNAPProduct.getBand(model.getBandName());
+			oRasterDataNode = oSNAPProduct.getBand(oBandImageViewModel.getBandName());
 		}
 		
-		if (model.getVp_x()<0||model.getVp_y()<0||model.getImg_w()<=0||model.getImg_h()<=0) {
-			Wasdi.DebugLog("ProcessingResources.getBandImage: Invalid Parameters: VPX= " + model.getVp_x() +" VPY= "+ model.getVp_y() +" VPW= "+ model.getVp_w() +" VPH= "+ model.getVp_h() + " OUTW = " + model.getImg_w() + " OUTH = " +model.getImg_h() );
+		if (oBandImageViewModel.getVp_x()<0||oBandImageViewModel.getVp_y()<0||oBandImageViewModel.getImg_w()<=0||oBandImageViewModel.getImg_h()<=0) {
+			Wasdi.DebugLog("ProcessingResources.getBandImage: Invalid Parameters: VPX= " + oBandImageViewModel.getVp_x() +" VPY= "+ oBandImageViewModel.getVp_y() +" VPW= "+ oBandImageViewModel.getVp_w() +" VPH= "+ oBandImageViewModel.getVp_h() + " OUTW = " + oBandImageViewModel.getImg_w() + " OUTH = " +oBandImageViewModel.getImg_h() );
 			return Response.status(500).build();
 		} else {
 			Wasdi.DebugLog("ProcessingResources.getBandImage: parameters OK");
 		}
 		
-		Rectangle vp = new Rectangle(model.getVp_x(), model.getVp_y(), model.getVp_w(), model.getVp_h());
-		Dimension imgSize = new Dimension(model.getImg_w(), model.getImg_h());
+		Rectangle oRectangleViewPort = new Rectangle(oBandImageViewModel.getVp_x(), oBandImageViewModel.getVp_y(), oBandImageViewModel.getVp_w(), oBandImageViewModel.getVp_h());
+		Dimension oImgSize = new Dimension(oBandImageViewModel.getImg_w(), oBandImageViewModel.getImg_h());
 		
 		//apply product masks
-		List<ProductMaskViewModel> productMasksModels = model.getProductMasks();
-		if (productMasksModels!=null) {
-			for (ProductMaskViewModel maskModel : productMasksModels) {
-				Mask mask = oSNAPProduct.getMaskGroup().get(maskModel.getName());
-				if (mask == null) {
-					Wasdi.DebugLog("ProcessingResources.getBandImage: cannot find mask by name: " + maskModel.getName());
+		List<ProductMaskViewModel> aoProductMasksModels = oBandImageViewModel.getProductMasks();
+		if (aoProductMasksModels!=null) {
+			for (ProductMaskViewModel oMaskModel : aoProductMasksModels) {
+				Mask oMask = oSNAPProduct.getMaskGroup().get(oMaskModel.getName());
+				if (oMask == null) {
+					Wasdi.DebugLog("ProcessingResources.getBandImage: cannot find mask by name: " + oMaskModel.getName());
 				} else {
 					//set the user specified color
-					mask.setImageColor(new Color(maskModel.getColorRed(), maskModel.getColorGreen(), maskModel.getColorBlue()));
-					mask.setImageTransparency(maskModel.getTransparency());
-					raster.getOverlayMaskGroup().add(mask);
+					oMask.setImageColor(new Color(oMaskModel.getColorRed(), oMaskModel.getColorGreen(), oMaskModel.getColorBlue()));
+					oMask.setImageTransparency(oMaskModel.getTransparency());
+					oRasterDataNode.getOverlayMaskGroup().add(oMask);
 				}
 			}
 		}
 		
 		//applying range masks
-		List<RangeMaskViewModel> rangeMasksModels = model.getRangeMasks();
-		if (rangeMasksModels != null) {
-			for (RangeMaskViewModel maskModel : rangeMasksModels) {
+		List<RangeMaskViewModel> aoRangeMasksModels = oBandImageViewModel.getRangeMasks();
+		if (aoRangeMasksModels != null) {
+			for (RangeMaskViewModel oMaskModel : aoRangeMasksModels) {
 
-				Mask mask = createMask(oSNAPProduct, maskModel, Mask.RangeType.INSTANCE);
+				Mask oMask = createMask(oSNAPProduct, oMaskModel, Mask.RangeType.INSTANCE);
 				
-				String externalName = Tokenizer.createExternalName(model.getBandName());
-		        PropertyContainer imageConfig = mask.getImageConfig();
-		        imageConfig.setValue(Mask.RangeType.PROPERTY_NAME_MINIMUM, maskModel.getMin());
-		        imageConfig.setValue(Mask.RangeType.PROPERTY_NAME_MAXIMUM, maskModel.getMax());
-		        imageConfig.setValue(Mask.RangeType.PROPERTY_NAME_RASTER, externalName);
-		        oSNAPProduct.addMask(mask);
-				raster.getOverlayMaskGroup().add(mask);
+				String sExternalName = Tokenizer.createExternalName(oBandImageViewModel.getBandName());
+		        PropertyContainer oImageConfig = oMask.getImageConfig();
+		        oImageConfig.setValue(Mask.RangeType.PROPERTY_NAME_MINIMUM, oMaskModel.getMin());
+		        oImageConfig.setValue(Mask.RangeType.PROPERTY_NAME_MAXIMUM, oMaskModel.getMax());
+		        oImageConfig.setValue(Mask.RangeType.PROPERTY_NAME_RASTER, sExternalName);
+		        oSNAPProduct.addMask(oMask);
+				oRasterDataNode.getOverlayMaskGroup().add(oMask);
 			}
 		}
 		
 		//applying math masks
-		List<MathMaskViewModel> mathMasksModels = model.getMathMasks();
-		if (mathMasksModels != null) {
-			for (MathMaskViewModel maskModel : mathMasksModels) {
+		List<MathMaskViewModel> aoMathMasksModels = oBandImageViewModel.getMathMasks();
+		if (aoMathMasksModels != null) {
+			for (MathMaskViewModel oMaskModel : aoMathMasksModels) {
 				
-				Mask mask = createMask(oSNAPProduct, maskModel, Mask.BandMathsType.INSTANCE);
+				Mask oMask = createMask(oSNAPProduct, oMaskModel, Mask.BandMathsType.INSTANCE);
 				
-				PropertyContainer imageConfig = mask.getImageConfig();
-		        imageConfig.setValue(Mask.BandMathsType.PROPERTY_NAME_EXPRESSION, maskModel.getExpression());
-		        oSNAPProduct.addMask(mask);
-				raster.getOverlayMaskGroup().add(mask);
+				PropertyContainer oImageConfig = oMask.getImageConfig();
+		        oImageConfig.setValue(Mask.BandMathsType.PROPERTY_NAME_EXPRESSION, oMaskModel.getExpression());
+		        oSNAPProduct.addMask(oMask);
+				oRasterDataNode.getOverlayMaskGroup().add(oMask);
 			}
 		}
 
 		//applying color manipulation
 		
-		ColorManipulationViewModel colorManiputalion = model.getColorManiputalion();
-		if (colorManiputalion!=null) {
-			manager.applyColorManipulation(raster, colorManiputalion);
+		ColorManipulationViewModel oColorManiputalionViewModel = oBandImageViewModel.getColorManiputalion();
+		if (oColorManiputalionViewModel!=null) {
+			oBandImageManager.applyColorManipulation(oRasterDataNode, oColorManiputalionViewModel);
 		}
 		
 		//creating the image
-		BufferedImage img;
+		BufferedImage oBufferedImg;
 		try {
-			img = manager.buildImageWithMasks(raster, imgSize, vp, colorManiputalion==null);
+			oBufferedImg = oBandImageManager.buildImageWithMasks(oRasterDataNode, oImgSize, oRectangleViewPort, oColorManiputalionViewModel==null);
 		} catch (Exception e) {
 			e.printStackTrace();
 			return Response.status(500).build();
 		}
 		
-		if (img == null) {
+		if (oBufferedImg == null) {
 			Wasdi.DebugLog("ProcessingResource.getBandImage: img null");
 			return Response.status(500).build();
 		}
 		
-		Wasdi.DebugLog("ProcessingResource.getBandImage: Generated image for band " + model.getBandName() + " X= " + model.getVp_x() + " Y= " + model.getVp_y() + " W= " + model.getVp_w() + " H= "  + model.getVp_h());
+		Wasdi.DebugLog("ProcessingResource.getBandImage: Generated image for band " + oBandImageViewModel.getBandName() + " X= " + oBandImageViewModel.getVp_x() + " Y= " + oBandImageViewModel.getVp_y() + " W= " + oBandImageViewModel.getVp_w() + " H= "  + oBandImageViewModel.getVp_h());
 		
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-	    ImageIO.write(img, "jpg", baos);
-	    byte[] imageData = baos.toByteArray();
+		ByteArrayOutputStream oByteOutStream = new ByteArrayOutputStream();
+	    ImageIO.write(oBufferedImg, "jpg", oByteOutStream);
+	    byte[] ayImageData = oByteOutStream.toByteArray();
 		
-		return Response.ok(imageData).build();
+		return Response.ok(ayImageData).build();
 	}
 
 	private Mask createMask(Product oSNAPProduct, MaskViewModel maskModel, Mask.ImageType type) {
@@ -1990,6 +1991,189 @@ public class ProcessingResources {
 			}
 			catch(Exception oEx){
 				System.out.println("ProcessingResource.asynchLaunchList2: Error updating process list " + oEx.getMessage());
+				oEx.printStackTrace();
+				oResult.setBoolValue( false);
+				oResult.setIntValue(500);
+				return oResult;
+			}
+
+			oResult.setBoolValue(true);
+			oResult.setIntValue(200);
+			oResult.setStringValue(oProcess.getProcessObjId());
+			
+		} catch (Exception oEx) {
+			System.out.println("ProcessingResource.launchList2: error during list process " + oEx.getMessage());
+			oEx.printStackTrace();
+			oResult.setBoolValue(false);
+			oResult.setIntValue(500);
+			return oResult;
+		}
+				
+		return oResult;
+	}
+	
+	
+	/**
+	 * Runs the JRC Matlab Processor v3
+	 * @param sSessionId a valid session identifier
+	 * @param sFileName input file
+	 * @param a workspase identifier
+	 * @return BAD_REQUEST if null request, UNAUTHORIZED if session is not valid, OK after execution of the script
+	 */
+	@POST
+	@Path("/asynchjrctest3")
+	@Produces({"application/json"})
+	public PrimitiveResult asynchJRCTest3(
+			@HeaderParam("x-session-token") String sSessionId,
+			@QueryParam("workspaceId") String sWorkspaceId,
+			JRCTestViewModel3 oJRCViewModel) {
+		
+		Wasdi.DebugLog("ProcessingResource.asynchJRCTest3");
+		
+		if(null == sSessionId ) {
+			PrimitiveResult oResult = new PrimitiveResult();
+			oResult.setBoolValue(false);
+			oResult.setIntValue(400);
+			return oResult;
+		}
+		
+		User oUser = Wasdi.GetUserFromSession(sSessionId);
+		
+		try {
+			//check authentication
+			if (oUser == null || Utils.isNullOrEmpty(oUser.getUserId())) {
+				PrimitiveResult oResult = PrimitiveResult.getInvalidInstance();
+				oResult.setIntValue(401);
+				return oResult;				
+			}
+			
+			Wasdi.DebugLog("ProcessingResource.asynchJRCTest3: INPUT FILE " + oJRCViewModel.getInputFileName());
+			Wasdi.DebugLog("ProcessingResource.asynchJRCTest3: LRN_SET " + oJRCViewModel.getLrnSet());
+			Wasdi.DebugLog("ProcessingResource.asynchJRCTest3: LRN_SET_POSITIVE " + oJRCViewModel.getLrnSetPositive());
+			Wasdi.DebugLog("ProcessingResource.asynchJRCTest3: LRN_SET_NODATA " + oJRCViewModel.getLrnSetNoData());
+			Wasdi.DebugLog("ProcessingResource.asynchJRCTest3: CLOUD_THRESH " + oJRCViewModel.getCloudThresh());
+			
+			Wasdi.DebugLog("ProcessingResource.asynchJRCTest3: launching MATLAB JRC 3 Processor");
+						
+			return 	asynchLaunchJRC3(sSessionId, oJRCViewModel, oUser, sWorkspaceId);
+						
+		} catch (Exception e) {
+			System.out.println("ProcessingResource.asynchJRCTest3: error launching list " + e.getMessage());
+			e.printStackTrace();
+			PrimitiveResult oResult = PrimitiveResult.getInvalidInstance();
+			oResult.setBoolValue(false);
+			oResult.setIntValue(500);				
+			return oResult;
+		}
+	}
+	
+	
+	/**
+	 * Launch LIST ENVI process
+	 * @param sReferenceFile 
+	 * @param sWorkspaceId
+	 * @return
+	 */
+	private PrimitiveResult asynchLaunchJRC3(String sSessionId, JRCTestViewModel3 oJRCViewModel, User oUser, String sWorkspaceId) {
+
+		PrimitiveResult oResult = new PrimitiveResult();
+		String sProcessObjId = Utils.GetRandomName();
+		String sUserId = Wasdi.GetUserFromSession(sSessionId).getUserId();
+		
+		oResult.setBoolValue(false);
+		oResult.setIntValue(500);
+		
+		try {			
+			String sParamFile = "param.txt";
+			
+			String sParamFullPath = m_oServletConfig.getInitParameter("DownloadRootPath") + "/processors/wasdi_matlab_test_03/" + sParamFile;
+			String sConfigFullPath = m_oServletConfig.getInitParameter("DownloadRootPath") + "/processors/wasdi_matlab_test_03/config.properties"; 
+			
+			WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
+			Workspace oWorkspace = oWorkspaceRepository.GetWorkspace(sWorkspaceId);
+			
+			File oFile = new File(sParamFullPath);
+			File oConfigFile = new File (sConfigFullPath);
+			
+			BufferedWriter oWriter = new BufferedWriter(new FileWriter(oConfigFile));
+			
+			if(null!= oWriter) {
+				Wasdi.DebugLog("ProcessingResource.asynchLaunchJRC3: Creating config.properties file");
+
+				oWriter.write("BASEPATH=" + m_oServletConfig.getInitParameter("DownloadRootPath"));
+				oWriter.newLine();
+				oWriter.write("USER=" + oUser.getUserId());
+				oWriter.newLine();
+				oWriter.write("WORKSPACE=" + oWorkspace.getName());
+				oWriter.newLine();
+				oWriter.write("SESSIONID="+sSessionId);
+				oWriter.newLine();
+				oWriter.write("ISONSERVER=1");
+				oWriter.newLine();
+				oWriter.write("DOWNLOADACTIVE=0");
+				oWriter.newLine();				
+				oWriter.write("MYPROCID="+sProcessObjId);
+				oWriter.newLine();				
+				oWriter.write("PARAMETERSFILEPATH="+sParamFullPath);
+				oWriter.newLine();
+				oWriter.flush();
+				oWriter.close();
+			}			
+			
+			
+			oWriter = new BufferedWriter(new FileWriter(oFile));
+			if(null!= oWriter) {
+				Wasdi.DebugLog("ProcessingResource.asynchLaunchJRC2: Creating parameters file");
+
+				oWriter.write("INPUT=" + oJRCViewModel.getInputFileName());
+				oWriter.newLine();
+				oWriter.write("LRN_SET=" + oJRCViewModel.getLrnSet());
+				oWriter.newLine();
+				oWriter.write("LRN_SET_POSITIVE=" + oJRCViewModel.getLrnSetPositive());
+				oWriter.newLine();
+				oWriter.write("LRN_SET_NODATA=" + oJRCViewModel.getLrnSetNoData());
+				oWriter.newLine();
+				oWriter.write("CLOUD_THRESH=" + oJRCViewModel.getCloudThresh());
+				oWriter.newLine();
+				oWriter.flush();
+				oWriter.close();
+			}
+			
+			//Update process list
+			
+			MATLABProcParameters oParameter = new MATLABProcParameters();
+			oParameter.setWorkspace(sWorkspaceId);
+			oParameter.setUserId(sUserId);
+			oParameter.setExchange(sWorkspaceId);
+			oParameter.setProcessObjId(sProcessObjId);
+			oParameter.setConfigFilePath(sConfigFullPath);
+			oParameter.setParamFilePath(sParamFullPath);
+			oParameter.setProcessorName("wasdi_matlab_test_03");
+	
+			String sPath = m_oServletConfig.getInitParameter("SerializationPath");			
+			if (!(sPath.endsWith("\\") || sPath.endsWith("/"))) sPath += "/";
+			sPath = sPath + sProcessObjId;
+			
+			SerializationUtils.serializeObjectToXML(sPath, oParameter);
+
+			
+			ProcessWorkspaceRepository oRepository = new ProcessWorkspaceRepository();
+			ProcessWorkspace oProcess = new ProcessWorkspace();
+			
+			try
+			{
+				oProcess.setOperationDate(Wasdi.GetFormatDate(new Date()));
+				oProcess.setOperationType(LauncherOperations.RUNMATLAB.toString());
+				oProcess.setProductName(oJRCViewModel.getInputFileName());
+				oProcess.setWorkspaceId(sWorkspaceId);
+				oProcess.setUserId(sUserId);
+				oProcess.setProcessObjId(sProcessObjId);
+				oProcess.setStatus(ProcessStatus.CREATED.name());
+				oRepository.InsertProcessWorkspace(oProcess);
+				Wasdi.DebugLog("ProcessingResource.asynchLaunch3: Process Scheduled for Launcher");
+			}
+			catch(Exception oEx){
+				System.out.println("ProcessingResource.asynchLaunchList3: Error updating process list " + oEx.getMessage());
 				oEx.printStackTrace();
 				oResult.setBoolValue( false);
 				oResult.setIntValue(500);

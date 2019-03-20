@@ -36,7 +36,7 @@ var DownloadProductInWorkspaceController = (function() {
             }
         }).error(function (data,status) {
             //alert('error');
-            utilsVexDialogAlertTop('GURU MEDITATION<br>ERROR IN WORKSPACESINFO');
+            utilsVexDialogAlertTop('GURU MEDITATION<br>ERROR READING WORKSPACES');
         });
     };
 
@@ -56,7 +56,7 @@ var DownloadProductInWorkspaceController = (function() {
             }
         }).error(function (data,status) {
             //alert('error');
-            utilsVexDialogAlertTop('GURU MEDITATION<br>ERROR IN CREATE WORKSPACE');
+            utilsVexDialogAlertTop('GURU MEDITATION<br>ERROR CREATING NEW WORKSPACE');
         });
     };
     DownloadProductInWorkspaceController.$inject = [

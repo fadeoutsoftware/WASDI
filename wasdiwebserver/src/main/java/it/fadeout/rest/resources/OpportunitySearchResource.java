@@ -133,7 +133,7 @@ public class OpportunitySearchResource {
 	@Path("/search")
 	@Produces({ "application/xml", "application/json", "text/html" })
 	@Consumes(MediaType.APPLICATION_JSON)
-	public ArrayList<CoverageSwathResultViewModel> Search(@HeaderParam("x-session-token") String sSessionId,OpportunitiesSearchViewModel OpportunitiesSearch) {
+	public ArrayList<CoverageSwathResultViewModel> search(@HeaderParam("x-session-token") String sSessionId,OpportunitiesSearchViewModel OpportunitiesSearch) {
 		Wasdi.DebugLog("OpportunitySearchResource.Search");
 
 		User oUser = Wasdi.GetUserFromSession(sSessionId);

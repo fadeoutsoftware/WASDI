@@ -665,10 +665,35 @@ service('MapService', ['$http','$rootScope', 'ConstantsService', function ($http
     {
         if( ( utilsIsObjectNullOrUndefined(boundingBox) === true ) || ( utilsIsObjectNullOrUndefined(geoserverBoundindBox) === true) )
         {
-            if(utilsIsObjectNullOrUndefined(boundingBox) === true){ console.debug("Product bounding box is null"); }
-            else if(utilsIsObjectNullOrUndefined(geoserverBoundindBox) === true){ console.debug("Geoserver bounding box is null"); }
+            if(utilsIsObjectNullOrUndefined(boundingBox) === true)
+            {
+                console.debug("Product bounding box is null");
+                // Impossible to assume if is correct or not. Assume true
+                return true;
+            }
+            else if(utilsIsObjectNullOrUndefined(geoserverBoundindBox) === true)
+            {
+                console.debug("Geoserver bounding box is null");
+            }
+
             return false;
         }
+
+        if( ( utilsIsStrNullOrEmpty(boundingBox) === true ) || ( utilsIsStrNullOrEmpty(geoserverBoundindBox) === true) )
+        {
+            if(utilsIsStrNullOrEmpty(boundingBox) === true)
+            {
+                console.debug("Product bounding box is null");
+                // Impossible to assume if is correct or not. Assume true
+                return true;
+            }
+            else if(utilsIsStrNullOrEmpty(geoserverBoundindBox) === true)
+            {
+                console.debug("Geoserver bounding box is null");
+            }
+            return false;
+        }
+
         var oGeoserverBoundingBox = this.parseGeoserverBoundingBox(geoserverBoundindBox);
 
         if ( utilsIsObjectNullOrUndefined(oGeoserverBoundingBox)) return false;

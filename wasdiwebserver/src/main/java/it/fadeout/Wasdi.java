@@ -159,7 +159,7 @@ public class Wasdi extends Application {
             RabbitFactory.s_sRABBIT_HOST = getInitParameter("RABBIT_HOST", "127.0.0.1");
             RabbitFactory.s_sRABBIT_QUEUE_PORT = getInitParameter("RABBIT_QUEUE_PORT","5672");
             
-            System.out.println("-------Mongo db User " + MongoRepository.DB_USER);
+            System.out.println("-------Rabbit User " + RabbitFactory.s_sRABBIT_QUEUE_USER);
 			
 		} catch (Throwable e) {
 			e.printStackTrace();

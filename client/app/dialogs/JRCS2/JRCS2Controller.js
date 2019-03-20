@@ -37,10 +37,10 @@ var JRCS2Controller = (function() {
     {
         var oJRCJson = {
             inputFileName: this.m_oSelectedReferenceProduct.fileName,
-            LrnSet:this.m_sLrnSet,
-            LrnSetPositive:this.m_sLrnSetPositive,
-            LrnSetPositiveNodata:this.m_sLrnSetPositiveNodata,
-            CloudThresh:this.m_sCloudThresh
+            lrnSet:this.m_sLrnSet,
+            lrnSetPositive:this.m_sLrnSetPositive,
+            lrnSetNoData:this.m_sLrnSetPositiveNodata,
+            cloudThresh:this.m_sCloudThresh
         };
 
         var oActiveWorkspace = this.m_oConstantsService.getActiveWorkspace();

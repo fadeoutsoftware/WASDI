@@ -1,5 +1,9 @@
 package wasdi.jwasdilib;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
 /**
  * Hello world!
  *
@@ -11,8 +15,12 @@ public class App
         System.out.println( "JWasdiLib Test Start" );
         WasdiLib oLib = new WasdiLib();
         
-        oLib.init();
-        testUploadFileDUMMYIMAGE(oLib);
+        oLib.init("C:\\Temp\\wasdi\\JMatLibTest\\config.properties");
+        //testUploadFileDUMMYIMAGE(oLib);
+        //testMosaic(oLib);
+        testSearch(oLib);
+        
+        
 
         //HashMap<String, String> asHeaders = new HashMap<>();
         //asHeaders.put("Accept","text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8");
@@ -64,6 +72,27 @@ public class App
         */
         System.out.println("JWasdiLib Test Done");
         
+    }
+    
+    public static void testSearch(WasdiLib oLib) {
+    	List<Map<String,Object>> aoFound = oLib.searchEOImages("S1", "2019-03-01", "2019-03-15", 45.1510532655634, 6.4193710684776315, 42.732667148204456, 10.188904702663422, "GRD", null, null, null);
+    	
+    	if (aoFound != null) {
+    		if (aoFound.size() > 0) {
+    			String sImport = oLib.importProduct(aoFound.get(0));
+    			System.out.println("Import Status = " + sImport);
+    		}
+    	}
+    }
+    
+    public static void testMosaic(WasdiLib oLib) {
+    	ArrayList<String> asInputs = new ArrayList<>();
+    	asInputs.add("S1A_IW_GRDH_1SDV_20190128T062955_20190128T063020_025674_02DA10_0E8F_LISTSinglePreproc.tif");
+    	asInputs.add("S1A_IW_GRDH_1SDV_20190128T063020_20190128T063045_025674_02DA10_0D61_LISTSinglePreproc.tif");
+    	String sOutputFile = "mosaicFromLib.tif";
+    	
+    	oLib.mosaic(asInputs, sOutputFile);
+    	oLib.addFileToWASDI(sOutputFile);
     }
     
     public static void testUploadFile(WasdiLib oLib)

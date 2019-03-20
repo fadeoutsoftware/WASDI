@@ -127,7 +127,7 @@ public class TestMain {
         oParameter.setDestinationProductName("S1B_IW_GRDH_1SDV_20170226T053524_20170226T053549_004467_007C6B_F7DE_APPLYORBIT");
         ((ApplyOrbitSetting)(oParameter.getSettings())).setOrbitType(SentinelPODOrbitFile.PRECISE + " (Auto Download)");
         
-        oLauncherMain.ExecuteOperator(oParameter, new ApplyOrbit(), LauncherOperations.APPLYORBIT);
+        oLauncherMain.executeOperator(oParameter, new ApplyOrbit(), LauncherOperations.APPLYORBIT);
     }
     
     public void RadiometricCalibration(){
@@ -138,7 +138,7 @@ public class TestMain {
         oParameter.setUserId("test");
         oParameter.setSourceProductName("S1B_IW_GRDH_1SDV_20170226T053524_20170226T053549_004467_007C6B_F7DE.zip");
         oParameter.setDestinationProductName("S1B_IW_GRDH_1SDV_20170226T053524_20170226T053549_004467_007C6B_F7DE_RADIOMETRICCALIBRATION");
-        oLauncherMain.ExecuteOperator(oParameter, new Calibration(), LauncherOperations.CALIBRATE);
+        oLauncherMain.executeOperator(oParameter, new Calibration(), LauncherOperations.CALIBRATE);
 
     }
     
@@ -150,7 +150,7 @@ public class TestMain {
         oParameter.setUserId("test");
         oParameter.setSourceProductName("S1B_IW_GRDH_1SDV_20170226T053524_20170226T053549_004467_007C6B_F7DE.zip");
         oParameter.setDestinationProductName("S1B_IW_GRDH_1SDV_20170226T053524_20170226T053549_004467_007C6B_F7DE_MULTILOOKING");
-        oLauncherMain.ExecuteOperator(oParameter, new Multilooking(), LauncherOperations.MULTILOOKING);
+        oLauncherMain.executeOperator(oParameter, new Multilooking(), LauncherOperations.MULTILOOKING);
     }
 
     public void TerrainCorrection(){
@@ -164,7 +164,7 @@ public class TestMain {
 		String[] asBands = new String[]{"Amplitude_VH"};
 		((RangeDopplerGeocodingSetting)(oParameter.getSettings())).setSourceBandNames(asBands);
         
-        oLauncherMain.ExecuteOperator(oParameter, new wasdi.snapopearations.TerrainCorrection(), LauncherOperations.TERRAIN);
+        oLauncherMain.executeOperator(oParameter, new wasdi.snapopearations.TerrainCorrection(), LauncherOperations.TERRAIN);
     }
 
     public void NDVI(){
@@ -175,7 +175,7 @@ public class TestMain {
         oParameter.setUserId("test");
         oParameter.setSourceProductName("S1B_IW_GRDH_1SDV_20170226T053524_20170226T053549_004467_007C6B_F7DE.zip");
         oParameter.setDestinationProductName("S1B_IW_GRDH_1SDV_20170226T053524_20170226T053549_004467_007C6B_F7DE_TERRAIN");
-		oLauncherMain.ExecuteOperator(oParameter, new wasdi.snapopearations.NDVI(), LauncherOperations.TERRAIN);
+		oLauncherMain.executeOperator(oParameter, new wasdi.snapopearations.NDVI(), LauncherOperations.TERRAIN);
     }
 
     @SuppressWarnings("unused")
@@ -264,7 +264,7 @@ public class TestMain {
         oBandParam.setBandName("B1");
         oBandParam.setFileName("S2A_MSIL1C_20170226T102021_N0204_R065_T32TMP_20170226T102458.zip");
         oBandParam.setQueue("6de8a7af-c383-4d34-8423-3c229e610d39");
-        oLauncherMain.PublishBandImage(oBandParam);
+        oLauncherMain.publishBandImage(oBandParam);
     }
 
     public  void TestPublish() {
@@ -447,7 +447,7 @@ public class TestMain {
         oParams.setUserId("paolo");
         oParams.setWorkspace("6de8a7af-c383-4d34-8423-3c229e610d39");
 
-        oLauncher.RasterGeometricResample(oParams);
+        oLauncher.rasterGeometricResample(oParams);
     }
 
     public void TestBB()

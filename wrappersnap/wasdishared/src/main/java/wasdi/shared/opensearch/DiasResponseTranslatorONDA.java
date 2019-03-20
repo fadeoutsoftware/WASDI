@@ -175,7 +175,7 @@ public class DiasResponseTranslatorONDA implements DiasResponseTranslator {
 			System.out.println("DiasResponseTranslatorONDA.translate: WARNING: sProductId is null");
 		}
 
-		String sPreview = oJsonOndaResult.optString("quicklook","");
+		String sPreview = oJsonOndaResult.optString("quicklook",(String)null);
 		if(null!= sPreview ) {
 			oResult.setPreview("data:image/png;base64,"+ sPreview);
 		}
@@ -235,8 +235,11 @@ public class DiasResponseTranslatorONDA implements DiasResponseTranslator {
 
 	//XXX move this method to some shared class
 	private String pruneFileExtension(String sFileName) {
-		String sResult = sFileName.substring(0, sFileName.lastIndexOf(".")); //eliminate the file extension .ZIP, .SAFE...
-		//now handle cases like: 2.tar.gz", ".tar.bz" 
+		String sResult = sFileName;
+		if(sResult.contains(".")) {
+			sResult = sFileName.substring(0, sFileName.lastIndexOf(".")); //eliminate the file extension .ZIP, .SAFE...
+		}
+		//now handle cases like: "*.tar.gz", "*.tar.bz" 
 		if(sResult.endsWith(".tar")) {
 			sResult = pruneFileExtension(sResult);
 		}
