@@ -30,13 +30,14 @@ var MosaicController = (function() {
             outputFile:"",
             bands:""
         }
-        $scope.close = function(result) {
 
+        var oController = this;
+        $scope.close = function(result) {
             oClose(result, 500); // close, but give 500ms for bootstrap to animate
         };
         $scope.run = function(result) {
-
-            close(""); // close, but give 500ms for bootstrap to animate
+            oController.runMosaic();
+            // close(""); // close, but give 500ms for bootstrap to animate
         };
 
     }
@@ -54,11 +55,11 @@ var MosaicController = (function() {
         }
         return false;
     }
-    MosaicController.prototype.isDisabledRunButton = function(){
+    MosaicController.prototype.runMosaic = function(){
 
         var oActiveWorkspace = this.m_oConstantsService.getActiveWorkspace();
 
-        this.m_SnapOperationService.geometricMosaic(oActiveWorkspace.workspaceId,this.m_oMosaicViewModel).success(function (data) {
+        this.m_oSnapOperationService.geometricMosaic(oActiveWorkspace.workspaceId,this.m_oMosaicViewModel.outputFile, this.m_oMosaicViewModel).success(function (data) {
 
         }).error(function (error) {
             utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN GET PARAMETERS");
