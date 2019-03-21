@@ -588,6 +588,11 @@ var EditorController = (function () {
                             };
                             oController.m_aoProductsLayersIn3DMapArentGeoreferenced.push(oLayer3DMap);
                         }
+                       else
+                       {
+                           oController.addLayerMap3D(oController.m_aoVisibleBands[iIndexLayers].layerId);
+                       }
+
 
                     }
 
