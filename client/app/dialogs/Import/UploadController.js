@@ -23,6 +23,7 @@ var UploadController = (function() {
         this.m_aoSelectedFiles = [];
         this.m_sTabSelected = "Upload";
         this.m_bIsUploading = false;
+        // this.m_bIsUploading = true;
         this.m_sWorkspaceId = oExtras.WorkSpaceId;
 
         this.isCreatedAccountUpload();
