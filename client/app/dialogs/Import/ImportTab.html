@@ -1,9 +1,9 @@
 
     <div class="row-v4">
-        <div class="col-v4 container" >
+        <div class="col-v4 container align-items-center" >
 
-            <div class="d-flex align-items-start" ng-hide="m_oController.m_bIsUploading === false">
-                <div class="loadIcon">
+            <div class="d-flex " ng-hide="m_oController.m_bIsUploading === false">
+                <div class="loadIcon loadIconDialog">
                     <invader> </invader>
                 </div>
             </div>
@@ -22,7 +22,8 @@
                 </div>
             </div>
 
-            <button type="button" ng-click="run(null)" class="btn btn-primary btn-wasdi" ng-disabled="m_oController.isFileChosen()" >
+            <button type="button" ng-click="run(null)" class="btn btn-primary btn-wasdi"
+                    ng-disabled="m_oController.isFileChosen()" ng-show="m_oController.m_bIsUploading === false">
                 Upload file
             </button>
 
