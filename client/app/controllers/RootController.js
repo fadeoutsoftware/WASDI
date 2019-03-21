@@ -3,7 +3,8 @@
  */
 var RootController = (function() {
 
-    function RootController($scope, oConstantsService, oAuthService, $state, oProcessesLaunchedService, oWorkspaceService,$timeout,oModalService,oRabbitStompService) {
+    function RootController($scope, oConstantsService, oAuthService, $state, oProcessesLaunchedService, oWorkspaceService,
+                            $timeout,oModalService,oRabbitStompService) {
         this.m_oScope = $scope;
         this.m_oScope.m_oController = this;
         this.m_oConstantsService = oConstantsService;
@@ -13,6 +14,7 @@ var RootController = (function() {
         this.m_oWorkspaceService = oWorkspaceService;
         this.m_oScope.m_oController=this;
         this.m_aoProcessesRunning=[];
+        this.m_aoWorkspaces=[];
         this.m_iNumberOfProcesses = 0;
         this.m_iWaitingProcesses = 0;
         this.m_oLastProcesses = null;
@@ -229,6 +231,7 @@ var RootController = (function() {
             {
                 if(newValue.name === "Untitled Workspace")
                 {
+                    $scope.m_oController.getWorkspacesInfo();
                     $scope.m_oController.editModelWorkspaceNameSetTrue();
                 }
             }
@@ -264,7 +267,7 @@ var RootController = (function() {
         var mytimeout = $timeout($scope.onTimeout,1000);
 
 
-
+        this.getWorkspacesInfo();
         this.initTooltips();
     }
 
@@ -566,8 +569,14 @@ var RootController = (function() {
 
         var oCallback = function (value) {
 
-            if (utilsIsObjectNullOrUndefined(value)) return;
-
+            if (utilsIsObjectNullOrUndefined(value))
+            {
+                return;
+            }
+            if( value === "Untitled Workspace" )
+            {
+                value = oController.forcedChangeNameWorkspace();
+            }
             var oWorkspace = oController.m_oConstantsService.getActiveWorkspace();
             oWorkspace.name = value;
 
@@ -606,6 +615,50 @@ var RootController = (function() {
         return true;
     };
 
+    RootController.prototype.getWorkspacesInfo = function()
+    {
+        if (this.m_oConstantsService.getUser() != null) {
+            if (this.m_oConstantsService.getUser() != undefined) {
+
+                var oController = this;
+
+                this.m_oWorkspaceService.getWorkspacesInfoListByUser().success(function (data, status) {
+                    if (utilsIsObjectNullOrUndefined(data) === false)
+                    {
+                        oController.m_aoWorkspaces = data;
+                    }
+
+                }).error(function (data,status) {
+                    utilsVexDialogAlertTop('GURU MEDITATION<br>ERROR IN WORKSPACESINFO');
+
+                });
+            }
+        }
+    }
+
+    RootController.prototype.forcedChangeNameWorkspace = function () {
+        //Untitled Workspace
+        var sName="Untitled Workspace";
+
+        if(utilsIsObjectNullOrUndefined(this.m_aoWorkspaces) === true)
+        {
+            return sName;
+        }
+        var iNumberOfWorkspaces = this.m_aoWorkspaces.length;
+        var iIndexReturnValue = 1;
+        var sReturnValue = sName + "(" + iIndexReturnValue + ")";
+        for(var iIndexWorkspace = 0 ; iIndexWorkspace < iNumberOfWorkspaces ; iIndexWorkspace++ )
+        {
+
+            if(this.m_aoWorkspaces[iIndexWorkspace].workspaceName === sReturnValue)
+            {
+                iIndexReturnValue++;
+                sReturnValue = sName + "(" + iIndexReturnValue + ")";
+            }
+        }
+
+        return sReturnValue;
+    };
 
     /*********************************************************************/
     RootController.$inject = [
@@ -617,7 +670,8 @@ var RootController = (function() {
         'WorkspaceService',
         '$timeout',
         'ModalService',
-        'RabbitStompService'
+        'RabbitStompService',
+
     ];
 
     return RootController;
