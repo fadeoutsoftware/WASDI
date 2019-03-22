@@ -118,11 +118,9 @@ public class WasdiWpsClientLib {
    
     public WPSCapabilities requestGetCapabilities() throws WPSClientException {
 
-        WasdiWPSClientSession oWpsClient = WasdiWPSClientSession.getInstance();
+        m_oWasdiWPSClientSession.connect(m_sUrl, m_sVersion);
 
-        oWpsClient.connect(m_sUrl, m_sVersion);
-
-        WPSCapabilities oCapabilities = oWpsClient.getWPSCaps(m_sUrl);
+        WPSCapabilities oCapabilities = m_oWasdiWPSClientSession.getWPSCaps(m_sUrl);
 
         List<Process> aoProcessList = oCapabilities.getProcesses();
 
@@ -135,9 +133,7 @@ public class WasdiWpsClientLib {
 
     public Process requestDescribeProcess(String sProcessID) throws IOException {
 
-        WasdiWPSClientSession oWpsClient = WasdiWPSClientSession.getInstance();
-
-        Process oProcessDescription = oWpsClient.getProcessDescription(m_sUrl, sProcessID, m_sVersion);
+        Process oProcessDescription = m_oWasdiWPSClientSession.getProcessDescription(m_sUrl, sProcessID, m_sVersion);
 
         if(null!= oProcessDescription) {
 	        List<InputDescription> aoInputList = oProcessDescription.getInputs();

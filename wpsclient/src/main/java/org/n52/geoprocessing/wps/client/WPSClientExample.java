@@ -39,10 +39,13 @@ public class WPSClientExample {
     public void testExecute(String version) {
 
 //        String wpsURL = "http://localhost:8080/wps/WebProcessingService";
-         String wpsURL =
-         "http://geoprocessing.demo.52north.org:8080/wps/WebProcessingService";
+//         String wpsURL =
+//         "http://geoprocessing.demo.52north.org:8080/wps/WebProcessingService";
 
-        String processID = "org.n52.wps.server.algorithm.test.DummyTestClass";
+//        String processID = "org.n52.wps.server.algorithm.test.DummyTestClass";
+        		 
+    	String wpsURL = "http://gpod.eo.esa.int/wps";
+    	String processID = "GPODTEST";
 
         // try {
         // ProcessDescriptionType describeProcessDocument =
@@ -178,7 +181,7 @@ public class WPSClientExample {
 
     	System.setProperty("javax.xml.stream.XMLOutputFactory", "com.sun.xml.internal.stream.XMLOutputFactoryImpl");
         WPSClientExample client = new WPSClientExample();
-        client.testExecute("2.0.0");
+        client.testExecute("1.0.0");
     }
 
 }

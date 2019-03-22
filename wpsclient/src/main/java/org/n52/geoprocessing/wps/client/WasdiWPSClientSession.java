@@ -136,11 +136,18 @@ public final class WasdiWPSClientSession {
         
         m_sProvider = sWpsProvider;
         
-        if (sWpsProvider == null) {
+        if( null==sWpsProvider) {
+    			m_oHttpHelper = new WasdiWpsHttpHelper();
+        } else if (sWpsProvider.toUpperCase().equals("GPOD")) {
+        	m_oHttpHelper = new WasdiGpodHttpHelper();
+        }
+		else if (sWpsProvider.toUpperCase().equals("UTEP")) {
+			m_oHttpHelper = new WasdiUTepHttpHelper();
+		}
+		else {
+			//DEFAULT
 			m_oHttpHelper = new WasdiWpsHttpHelper();
 		}
-		else if (sWpsProvider.equals("GPOD")) m_oHttpHelper = new WasdiGpodHttpHelper();
-		else if (sWpsProvider.equals("UTEP")) m_oHttpHelper = new WasdiUTepHttpHelper();
     }
     
     public static WasdiWPSClientSession getInstance() {
