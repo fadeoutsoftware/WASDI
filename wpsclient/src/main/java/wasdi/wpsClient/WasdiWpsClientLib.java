@@ -35,6 +35,7 @@ public class WasdiWpsClientLib {
     private WasdiWPSClientSession m_oWasdiWPSClientSession;
     private String m_sProvider;
     private String m_sVersion;
+    private String m_sUrl;
     
     public WasdiWpsClientLib() {
     	this(null);
@@ -49,29 +50,40 @@ public class WasdiWpsClientLib {
     	m_sVersion = sVersion;
     	m_oWasdiWPSClientSession = WasdiWPSClientSession.getInstance(m_sProvider);
     }
+    
+    public WasdiWpsClientLib(String sProvider, String sVersion, String sUrl) {
+    	this(sProvider, sVersion);
+    	setServerUrl(sUrl);
+    }
+    
+    public void setServerUrl(String sUrl) {
+    	if(null == sUrl) {
+    		throw new NullPointerException("WasdiWpsClientLib.setServerUrl: server URL is null");
+    	}
+    	m_sUrl = sUrl;
+    }
+    
 
     //TODO facilities for parsing result:
       // if it's a status, how to poll update?
       // how to collect result?
     
-    
+    //FIXME incomplete and untested
     public String rawExecute(String sUrl, String sPayload, Map<String, String> asHeaders) {
     	return m_oWasdiWPSClientSession.rawExecute(sUrl, sPayload, asHeaders);
     }
 	
     
     //TODO facilities for building oExecute
-    public Object execute(String sUrl, Execute oExecute, String sVersion) {
-
-        WasdiWPSClientSession oWpsClient = WasdiWPSClientSession.getInstance();
+    public Object execute(Execute oExecute) {
 
         try {
-            Object oExecuteResponse = oWpsClient.execute(sUrl, oExecute, sVersion);
+            Object oExecuteResponse = m_oWasdiWPSClientSession.execute(m_sUrl, oExecute, m_sVersion);
 
             System.out.println(oExecuteResponse);
 
             if (oExecuteResponse instanceof Result) {
-            	//TODO download results
+            	//TODO download results: do it as an asyncronous download?
                 printOutputs((Result) oExecuteResponse);
             } else if (oExecuteResponse instanceof StatusInfo) {
             	//TODO update status in processWorkspace
@@ -103,19 +115,14 @@ public class WasdiWpsClientLib {
         }
 
     }
-
-    public WPSCapabilities requestGetCapabilities(String sUrl) throws WPSClientException {
-    	return requestGetCapabilities(sUrl, WasdiWPSClientSession.s_sDefaultVersion);
-    }
-    
-    public WPSCapabilities requestGetCapabilities(String sUrl,
-            String sVersion) throws WPSClientException {
+   
+    public WPSCapabilities requestGetCapabilities() throws WPSClientException {
 
         WasdiWPSClientSession oWpsClient = WasdiWPSClientSession.getInstance();
 
-        oWpsClient.connect(sUrl, sVersion);
+        oWpsClient.connect(m_sUrl, m_sVersion);
 
-        WPSCapabilities oCapabilities = oWpsClient.getWPSCaps(sUrl);
+        WPSCapabilities oCapabilities = oWpsClient.getWPSCaps(m_sUrl);
 
         List<Process> aoProcessList = oCapabilities.getProcesses();
 
@@ -126,13 +133,11 @@ public class WasdiWpsClientLib {
         return oCapabilities;
     }
 
-    public Process requestDescribeProcess(String sUrl,
-            String sProcessID,
-            String sVersion) throws IOException {
+    public Process requestDescribeProcess(String sProcessID) throws IOException {
 
         WasdiWPSClientSession oWpsClient = WasdiWPSClientSession.getInstance();
 
-        Process oProcessDescription = oWpsClient.getProcessDescription(sUrl, sProcessID, sVersion);
+        Process oProcessDescription = oWpsClient.getProcessDescription(m_sUrl, sProcessID, m_sVersion);
 
         if(null!= oProcessDescription) {
 	        List<InputDescription> aoInputList = oProcessDescription.getInputs();
