@@ -151,7 +151,6 @@ public final class WasdiWPSClientSession {
      * @result An instance of a WPS Client session.
      */
     public static WasdiWPSClientSession getInstance(String sWpsProvider) {
-    	//TODO practically unused. maybe handle providers here, otherwise remove
         synchronized (WasdiWPSClientSession.class) {
             if (s_oSession == null) {
                 s_oSession = new WasdiWPSClientSession(sWpsProvider);
