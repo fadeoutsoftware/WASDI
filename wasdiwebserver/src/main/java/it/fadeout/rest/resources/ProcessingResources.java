@@ -101,6 +101,7 @@ import wasdi.shared.parameters.NDVISetting;
 import wasdi.shared.parameters.OperatorParameter;
 import wasdi.shared.parameters.RangeDopplerGeocodingParameter;
 import wasdi.shared.parameters.RangeDopplerGeocodingSetting;
+import wasdi.shared.parameters.SubsetSetting;
 import wasdi.shared.utils.BandImageManager;
 import wasdi.shared.utils.CredentialPolicy;
 import wasdi.shared.utils.SerializationUtils;
@@ -192,6 +193,15 @@ public class ProcessingResources {
 	{
 		Wasdi.DebugLog("ProcessingResources.Mosaic");
 		return executeOperation(sSessionId, "", sDestinationProductName, sWorkspaceId, oSetting, LauncherOperations.MOSAIC);
+	}
+	
+	@POST
+	@Path("geometric/subset")
+	@Produces({"application/xml", "application/json", "text/xml"})
+	public PrimitiveResult subset(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sDestinationProductName") String sDestinationProductName, @QueryParam("sWorkspaceId") String sWorkspaceId, SubsetSetting oSetting) throws IOException
+	{
+		Wasdi.DebugLog("ProcessingResources.Subset");
+		return executeOperation(sSessionId, "", sDestinationProductName, sWorkspaceId, oSetting, LauncherOperations.SUBSET);
 	}
 	
 
