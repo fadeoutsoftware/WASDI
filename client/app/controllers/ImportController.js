@@ -542,13 +542,13 @@ var ImportController = (function() {
         {
             if(this.m_aListOfProvider[iIndexProvider].selected === true)
             {
-                this.search(this.m_aListOfProvider[iIndexProvider]);
+                this.searchAndCount(this.m_aListOfProvider[iIndexProvider]);
             }
         }
         return true;
     };
 
-    ImportController.prototype.search = function(oProvider, oThat)
+    ImportController.prototype.searchAndCount = function(oProvider, oThat)
     {
         var oController = this;
         if(utilsIsObjectNullOrUndefined(oThat) === false) oController = oThat;
@@ -579,22 +579,92 @@ var ImportController = (function() {
         oProvider.totalOfProducts = 0;
 
         oController.m_oSearchService.getProductsCount().then(
-                function(result)
+            function(result)
+            {
+                if(result)
                 {
-                    if(result)
+                    if(utilsIsObjectNullOrUndefined(result.data) === false )
                     {
-                        if(utilsIsObjectNullOrUndefined(result.data) === false )
-                        {
-                            oProvider.totalOfProducts = result.data;
-                            //calc number of pages
-                            var remainder = oProvider.totalOfProducts % oProvider.productsPerPageSelected;
-                            oProvider.totalPages =  Math.floor(oProvider.totalOfProducts / oProvider.productsPerPageSelected);
-                            if(remainder !== 0) oProvider.totalPages += 1;
-                        }
+                        oProvider.totalOfProducts = result.data;
+                        //calc number of pages
+                        var remainder = oProvider.totalOfProducts % oProvider.productsPerPageSelected;
+                        oProvider.totalPages =  Math.floor(oProvider.totalOfProducts / oProvider.productsPerPageSelected);
+                        if(remainder !== 0) oProvider.totalPages += 1;
                     }
-                }, function errorCallback(response) {
-                    console.log("Impossible get products number");
-                });
+                }
+            }, function errorCallback(response) {
+                console.log("Impossible get products number");
+            });
+
+        oController.m_oSearchService.search().then(function(result){
+            var sResults = result;
+
+            if(!utilsIsObjectNullOrUndefined(sResults))
+            {
+                if (!utilsIsObjectNullOrUndefined(sResults.data) && sResults.data != "" ) {
+                    var aoData = sResults.data;
+                    oController.generateLayersList(aoData);
+                }
+
+                oProvider.isLoaded = true;
+            }
+        }, function errorCallback(response) {
+            utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN OPEN SEARCH REQUEST");
+            oProvider.isLoaded = true;
+            // oController.m_bIsVisibleListOfLayers = false;//visualize filter list
+            // oController.m_oResultsOfSearchService.setIsVisibleListOfProducts(oController.m_bIsVisibleListOfLayers );
+        });
+
+
+    };
+
+    ImportController.prototype.search = function(oProvider, oThat)
+    {
+        var oController = this;
+        if(utilsIsObjectNullOrUndefined(oThat) === false) oController = oThat;
+
+        if(oController.thereIsAtLeastOneProvider() === false) return false;
+        if(utilsIsObjectNullOrUndefined(oProvider) === true) return false;
+
+        oController.m_bClearFiltersEnabled = false;
+        //delete layers and relatives rectangles in map
+        oController.deleteProducts(oProvider.name);
+        //hide previous results
+        oController.m_bIsVisibleListOfLayers = true;
+        oController.m_bIsPaginatedList = true;
+        //TODO
+        // "*" + oController.m_oModel.textQuery + "*" fix
+        // oController.m_oSearchService.setTextQuery("*" + oController.m_oModel.textQuery + "*");
+        oController.m_oSearchService.setTextQuery(oController.m_oModel.textQuery);
+        oController.m_oSearchService.setGeoselection(oController.m_oModel.geoselection);
+        var aoProviders = [];
+        aoProviders.push(oProvider);
+        oController.m_oSearchService.setProviders(aoProviders);
+
+        var oProvider = oController.m_oPageService.getProviderObject(oProvider.name);
+        var iOffset = oController.m_oPageService.calcOffset(oProvider.name);
+        oController.m_oSearchService.setOffset(iOffset);//default 0 (index page)
+        oController.m_oSearchService.setLimit(oProvider.productsPerPageSelected);// default 10 (total of element per page)
+        oProvider.isLoaded = false;
+        // oProvider.totalOfProducts = 0;
+
+        // oController.m_oSearchService.getProductsCount().then(
+        //         function(result)
+        //         {
+        //             if(result)
+        //             {
+        //                 if(utilsIsObjectNullOrUndefined(result.data) === false )
+        //                 {
+        //                     oProvider.totalOfProducts = result.data;
+        //                     //calc number of pages
+        //                     var remainder = oProvider.totalOfProducts % oProvider.productsPerPageSelected;
+        //                     oProvider.totalPages =  Math.floor(oProvider.totalOfProducts / oProvider.productsPerPageSelected);
+        //                     if(remainder !== 0) oProvider.totalPages += 1;
+        //                 }
+        //             }
+        //         }, function errorCallback(response) {
+        //             console.log("Impossible get products number");
+        //         });
 
         oController.m_oSearchService.search().then(function(result){
                 var sResults = result;
@@ -863,12 +933,12 @@ var ImportController = (function() {
     {
         if(filter["indexhint"] != undefined){
             return filter["indexhint"];
-        }    
+        }
         return "";
-        
+
     }
-    
-    
+
+
 
     /**
      * downloadProduct
@@ -2375,7 +2445,7 @@ var ImportController = (function() {
                 break;
 
             default: return false;
-            
+
             return false;
         }
 
