@@ -15,7 +15,8 @@ public class App
         System.out.println( "JWasdiLib Test Start" );
         WasdiLib oLib = new WasdiLib();
         
-        oLib.init("C:\\Temp\\wasdi\\JMatLibTest\\config.properties");
+        oLib.init("C:\\Temp\\wasdi\\config.properties");
+        oLib.getFullProductPath("S1A_IW_GRDH_1SDV_20190301T052753_20190301T052818_026140_02EABC_9A54.zip");        
         //testUploadFileDUMMYIMAGE(oLib);
         //testMosaic(oLib);
         testSearch(oLib);
@@ -74,6 +75,31 @@ public class App
         
     }
     
+    
+    public static void testSearchAndMosaic(WasdiLib oLib) {
+    	List<Map<String,Object>> aoFound = oLib.searchEOImages("S1", "2019-03-01", "2019-03-15", 45.1510532655634, 6.4193710684776315, 42.732667148204456, 10.188904702663422, "GRD", null, null, null);
+    	
+    	if (aoFound != null) {
+    		if (aoFound.size() > 1) {
+    			String sImport = oLib.importProduct(aoFound.get(0));
+    			sImport = oLib.importProduct(aoFound.get(1));
+    			
+    			System.out.println("Import Status = " + sImport);
+    			
+    	    	ArrayList<String> asInputs = new ArrayList<>();
+    	    	asInputs.add(aoFound.get(0).get("title")+".zip");
+    	    	asInputs.add(aoFound.get(1).get("title")+".zip");
+    	    	String sOutputFile = "mosaicFromLib.tif";
+    	    	
+    	    	oLib.mosaic(asInputs, sOutputFile);
+    	    	oLib.addFileToWASDI(sOutputFile);
+    	    	String sMosaic = oLib.getFullProductPath(sOutputFile);
+    	    	System.out.println("Mosaic File : " + sMosaic);
+    		}
+    	}
+    }
+
+    
     public static void testSearch(WasdiLib oLib) {
     	List<Map<String,Object>> aoFound = oLib.searchEOImages("S1", "2019-03-01", "2019-03-15", 45.1510532655634, 6.4193710684776315, 42.732667148204456, 10.188904702663422, "GRD", null, null, null);
     	
@@ -93,6 +119,8 @@ public class App
     	
     	oLib.mosaic(asInputs, sOutputFile);
     	oLib.addFileToWASDI(sOutputFile);
+    	String sMosaic = oLib.getFullProductPath(sOutputFile);
+    	System.out.println("Mosaic File : " + sMosaic);
     }
     
     public static void testUploadFile(WasdiLib oLib)
