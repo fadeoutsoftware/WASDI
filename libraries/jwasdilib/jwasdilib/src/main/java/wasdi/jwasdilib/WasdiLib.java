@@ -2,7 +2,6 @@ package wasdi.jwasdilib;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -361,13 +360,19 @@ public class WasdiLib {
 			}
 
 			if (m_sBasePath.equals("")) {
-				String sUserHome = System.getProperty("user.home");
-				String sWasdiHome = sUserHome + "/.wasdi/";
 				
-				File oFolder = new File(sWasdiHome);
-				oFolder.mkdirs();
-				
-				m_sBasePath = sWasdiHome;
+				if (!m_bIsOnServer ) {
+					String sUserHome = System.getProperty("user.home");
+					String sWasdiHome = sUserHome + "/.wasdi/";
+					
+					File oFolder = new File(sWasdiHome);
+					oFolder.mkdirs();
+					
+					m_sBasePath = sWasdiHome;					
+				}
+				else {
+					m_sBasePath = "/data/wasdi/";
+				}
 			}
 			
 			// Read the parameters file
@@ -661,10 +666,6 @@ public class WasdiLib {
 		try {
 			String sFullPath = m_sBasePath;
 			
-			if (m_bIsOnServer) {
-				sFullPath = "/data/wasdi";
-			}
-			
 			if (! (sFullPath.endsWith("\\") || sFullPath.endsWith("/") ) ){
 				sFullPath +="/";
 			}
@@ -696,10 +697,6 @@ public class WasdiLib {
 	public String getSavePath() {
 		try {
 			String sFullPath = m_sBasePath;
-			
-			if (m_bIsOnServer) {
-				sFullPath = "/data/wasdi";
-			}
 			
 			if (! (sFullPath.endsWith("\\") || sFullPath.endsWith("/") ) ){
 				sFullPath +="/";
@@ -1080,15 +1077,7 @@ public class WasdiLib {
 	 * @return Process id or end status of the process
 	 */
 	protected String internalMosaic(boolean bAsynch, List<String> asInputFiles, String sOutputFile, List<String> asBands, double dPixelSizeX, double dPixelSizeY) {
-/*		
-		String sCrs = "GEOGCS[\"WGS84(DD)\"," + 
-	    		"		  DATUM[\"WGS84\"," + 
-	    		"			SPHEROID[\"WGS84\", 6378137.0, 298.257223563]]," + 
-	    		"		  PRIMEM[\"Greenwich\", 0.0]," + 
-	    		"		  UNIT[\"degree\", 0.017453292519943295]," + 
-	    		"		  AXIS[\"Geodetic longitude\", EAST]," + 
-	    		"		  AXIS[\"Geodetic latitude\", NORTH]]";
-*/
+		
 		String sCrs = "GEOGCS[\"WGS84(DD)\"," + 
 	    		" DATUM[\"WGS84\"," + 
 	    		" SPHEROID[\"WGS84\", 6378137.0, 298.257223563]]," + 
@@ -1625,6 +1614,64 @@ public class WasdiLib {
 	}
 
 	
+	/***
+	 * Make a Subset (tile) of an input image in a specified Lat Lon Rectangle
+	 * @param sInputFile Name of the input file
+	 * @param sOutputFile Name of the output file
+	 * @param dLatN Lat North Coordinate
+	 * @param dLonW Lon West Coordinate
+	 * @param dLatS Lat South Coordinate
+	 * @param dLonE Lon East Coordinate 
+	 * @return Status of the operation
+	 */
+	public String subset(String sInputFile, String sOutputFile, double dLatN, double dLonW, double dLatS, double dLonE) {
+		try {
+			
+			// Check minimun input values
+			if (sInputFile == null) {
+				System.out.println("input file must not be null");
+				return "";
+			}
+
+			if (sInputFile.equals("")) {
+				System.out.println("input file must not be empty");
+				return "";
+			}
+			
+			if (sOutputFile == null) {
+				System.out.println("sOutputFile must not be null");
+				return "";
+			}
+			
+			if (sOutputFile.equals("")) {
+				System.out.println("sOutputFile must not empty string");
+				return "";
+			}
+
+			// Build API URL
+		    String sUrl = m_sBaseUrl + "/processing/geometric/subset?sSourceProductName="+sInputFile+"&sDestinationProductName="+sOutputFile+"&sWorkspaceId="+m_sActiveWorkspace;
+		    
+		    // Fill the Setting Object
+		    String sSubsetSetting = "{ \"latN\":"+dLatN+", \"lonW\":" + dLonW + ", \"latS\":"+dLatS + ", \"lonE\":"+ dLonE + " }";
+		    
+		    // Call the API
+		    String sResponse = httpPost(sUrl, sSubsetSetting, getStandardHeaders());
+		    
+		    // Read the result
+		    Map<String, Object> aoJSONMap = s_oMapper.readValue(sResponse, new TypeReference<Map<String,Object>>(){});
+		    
+		    // Extract Process Id
+		    String sProcessId = aoJSONMap.get("stringValue").toString();
+		    
+		    // Return process output status
+			return waitProcess(sProcessId);
+		}
+		catch (Exception oEx) {
+			oEx.printStackTrace();
+			return "ERROR";
+		}		
+	}
+	
 	/**
 	 * Http get Method Helper
 	 * @param sUrl Url to call
@@ -1910,24 +1957,14 @@ public class WasdiLib {
 	 * @throws IOException
 	 */
 	protected void copyStream(InputStream oInputStream, OutputStream oOutputStream) throws IOException {
-
 		int BUFFER_SIZE = 4096;
-	    //int MAX_NUM_ZEORES_DURING_READ = 20;
 
 		int iBytesRead = -1;
 		byte[] abBuffer = new byte[BUFFER_SIZE];
-		//int nZeroes = MAX_NUM_ZEORES_DURING_READ;
+		
 		while ((iBytesRead = oInputStream.read(abBuffer)) != -1) {
 
-			//if (iBytesRead <= 0) {
-			//	nZeroes--;
-			//} else {
-			//	nZeroes = MAX_NUM_ZEORES_DURING_READ;
-			//}
-			//if (nZeroes <= 0) break;
-
 			oOutputStream.write(abBuffer, 0, iBytesRead);
-
 		}
 				
 		oOutputStream.close();

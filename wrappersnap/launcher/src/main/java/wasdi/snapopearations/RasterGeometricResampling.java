@@ -31,7 +31,8 @@ public class RasterGeometricResampling {
             LauncherMain.s_oLogger.debug("RasterGeometricResampling.getResampledProduct: error resampling product " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
         }
         finally {
-            return oResampledProduct;
+            
         }
+        return oResampledProduct;
     }
 }

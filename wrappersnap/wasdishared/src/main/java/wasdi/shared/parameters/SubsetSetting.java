@@ -7,6 +7,7 @@ public class SubsetSetting implements ISetting {
     double lonE = -180.0;
     
     
+    
 	public double getLatN() {
 		return latN;
 	}

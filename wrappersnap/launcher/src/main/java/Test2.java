@@ -5,8 +5,6 @@
 //import publish.Publisher;
 import java.util.ArrayList;
 
-import wasdi.ConfigReader;
-
 public class Test2 {
 	
 	private static String getBye() {

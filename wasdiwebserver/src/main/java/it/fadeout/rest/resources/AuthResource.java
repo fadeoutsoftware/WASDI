@@ -564,6 +564,9 @@ public class AuthResource {
 					Boolean bMailSuccess = sendRegistrationEmail(oNewUser, sLink);
 					
 					if(bMailSuccess){
+						
+						notifyNewUserInWasdi(oNewUser, false);
+						
 						return oResult;
 					} else {
 						//problem sending the email: either the given address is invalid
@@ -617,11 +620,15 @@ public class AuthResource {
 		if( null == oUser.getValidAfterFirstAccess()) {
 			Wasdi.DebugLog("AuthResources.validateNewUser: unexpected null first access validation flag");
 			return PrimitiveResult.getInvalid();
-		} else if( oUser.getValidAfterFirstAccess() ) {
+		} 
+		else if( oUser.getValidAfterFirstAccess() ) {
 			Wasdi.DebugLog("AuthResources.validateNewUser: unexpected true first access validation flag");
 			return PrimitiveResult.getInvalid();
-		} else if( !oUser.getValidAfterFirstAccess() ) {
+		} 
+		else if( !oUser.getValidAfterFirstAccess() ) {
+			
 			String sDBToken = oUser.getFirstAccessUUID();
+			
 			if(m_oCredentialPolicy.validFirstAccessUUID(sToken)) {
 				if(sDBToken.equals(sToken)) {
 					oUser.setValidAfterFirstAccess(true);
@@ -629,6 +636,9 @@ public class AuthResource {
 					PrimitiveResult oResult = new PrimitiveResult();
 					oResult.setBoolValue(true);
 					oResult.setStringValue(oUser.getUserId());
+					
+					notifyNewUserInWasdi(oUser, true);
+					
 					return oResult;
 				} else {
 					Wasdi.DebugLog("AuthResources.validateNewUser: registration token mismatch");
@@ -812,7 +822,7 @@ public class AuthResource {
 			//TODO read the sender from the servlet config file
 			String sSender = m_oServletConfig.getInitParameter("sftpManagementMailSenser");
 			if (sSender==null) {
-				sSender = "adminwasdi@wasdi.org";
+				sSender = "wasdi@wasdi.net";
 			}
 			oMessage.setSender(sSender);
 			
@@ -852,7 +862,6 @@ public class AuthResource {
 		return sResult;
 	}
 
-
 	private Boolean sendPasswordEmail(String sRecipientEmail, String sAccount, String sPassword) {
 		Wasdi.DebugLog("AuthResource.sendPasswordEmail");
 		if(null == sRecipientEmail || null == sPassword ) {
@@ -868,7 +877,7 @@ public class AuthResource {
 		String sTitle = m_oServletConfig.getInitParameter("sftpMailTitle");
 		oMessage.setTilte(sTitle);
 		String sSenser = m_oServletConfig.getInitParameter("sftpManagementMailSenser");
-		if (sSenser==null) sSenser = "adminwasdi@wasdi.org";
+		if (sSenser==null) sSenser = "wasdi@wasdi.net";
 		oMessage.setSender(sSenser);
 		
 		String sMessage = m_oServletConfig.getInitParameter("sftpMailText");
@@ -881,4 +890,73 @@ public class AuthResource {
 		return false;
 	}
 
+	
+	/**
+	 * Send a notification email to the administrators
+	 * @param oUser
+	 * @return
+	 */
+	private Boolean notifyNewUserInWasdi(User oUser, boolean bConfirmed) {
+		
+		Wasdi.DebugLog("AuthResource.notifyNewUserInWasdi");
+		 
+		if (oUser == null) {
+			Wasdi.DebugLog("AuthResource.notifyNewUserInWasdi: user null, return false");
+			return false;
+		}
+
+		try {
+			
+			String sMercuriusAPIAddress = m_oServletConfig.getInitParameter("mercuriusAPIAddress");
+			
+			if(Utils.isNullOrEmpty(sMercuriusAPIAddress)) {
+				Wasdi.DebugLog("AuthResource.sendRegistrationEmail: sMercuriusAPIAddress is null");
+				return false;
+			}
+			
+			MercuriusAPI oAPI = new MercuriusAPI(sMercuriusAPIAddress);			
+			Message oMessage = new Message();
+			
+			String sTitle = "New WASDI User";
+			
+			oMessage.setTilte(sTitle);
+			
+			//TODO read the sender from the servlet config file
+			String sSender = m_oServletConfig.getInitParameter("sftpManagementMailSenser");
+			if (sSender==null) {
+				sSender = "wasdi@wasdi.net";
+			}
+			oMessage.setSender(sSender);
+			
+			String sMessage = "A new user registered in WASDI. User Name: " + oUser.getName();
+			
+			if (bConfirmed) {
+				sMessage = "The new User " + oUser.getName() + " confirmed the access and validated the account"; 
+			}
+			
+			oMessage.setMessage(sMessage);
+	
+			Integer iPositiveSucceded = 0;
+			
+			String sWasdiAdminMail = m_oServletConfig.getInitParameter("WasdiAdminMail");
+			
+			if (Utils.isNullOrEmpty(sWasdiAdminMail)) {
+				sWasdiAdminMail = "info@fadeout.biz";
+			}
+			
+			iPositiveSucceded = oAPI.sendMailDirect(sWasdiAdminMail, oMessage);
+			
+			Wasdi.DebugLog("AuthResource.notifyNewUserInWasdi: "+iPositiveSucceded.toString());
+			
+			if(iPositiveSucceded < 0 ) {
+				
+				Wasdi.DebugLog("AuthResource.notifyNewUserInWasdi: error sending notification email to admin");
+				return false;
+			}
+		} catch(Exception e) {
+			Wasdi.DebugLog("\n\n"+e.getMessage()+"\n\n" );
+			return false;
+		}
+		return true;
+	}
 }
