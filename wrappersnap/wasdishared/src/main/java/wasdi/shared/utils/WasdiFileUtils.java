@@ -8,7 +8,6 @@ package wasdi.shared.utils;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -55,13 +54,4 @@ public class WasdiFileUtils {
 		}
 	}
 	
-	public void addFileToZip(File oFileToAdd, File oZipFile) {
-		try {
-		FileOutputStream oOutStream = new FileOutputStream(oZipFile);
-		ZipOutputStream oZipStream = new ZipOutputStream(oOutStream);
-		
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
 }

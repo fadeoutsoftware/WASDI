@@ -5,7 +5,6 @@ import java.awt.Rectangle;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.ColorModel;
 import java.awt.image.RenderedImage;
-import java.awt.image.SampleModel;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -22,8 +21,6 @@ import java.util.List;
 import java.util.logging.FileHandler;
 import java.util.logging.Level;
 import java.util.logging.SimpleFormatter;
-
-import javax.media.jai.PlanarImage;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -44,7 +41,6 @@ import org.esa.snap.core.datamodel.PixelPos;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.util.ProductUtils;
 import org.esa.snap.core.util.SystemUtils;
-import org.esa.snap.core.util.geotiff.GeoCoding2GeoTIFFMetadata;
 import org.esa.snap.core.util.geotiff.GeoTIFF;
 import org.esa.snap.core.util.geotiff.GeoTIFFMetadata;
 import org.esa.snap.dataio.geotiff.GeoTiffProductWriterPlugIn;
@@ -52,7 +48,6 @@ import org.esa.snap.runtime.Config;
 import org.esa.snap.runtime.Engine;
 import org.geotools.referencing.CRS;
 
-import com.bc.ceres.glevel.MultiLevelImage;
 import com.fasterxml.jackson.core.JsonProcessingException;
 
 import sun.management.VMManagement;
@@ -1731,6 +1726,18 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 	        s_oLogger.debug("LauncherMain.executeSubset done");
 			
 			if (oProcessWorkspace != null) oProcessWorkspace.setStatus(ProcessStatus.DONE.name());
+			
+			s_oLogger.debug("LauncherMain.executeSubset adding product to Workspace");
+			
+			addProductToDbAndSendToRabbit(null, sOutputPath,oParameter.getWorkspace(), oParameter.getWorkspace(), LauncherOperations.SUBSET.toString(), null);
+			
+			if (addProductToWorkspace(oParameter.getDestinationProductName(), oParameter.getWorkspace())) {
+				s_oLogger.debug("LauncherMain.executeSubset: product added to workspace");
+			}
+			else {
+				s_oLogger.debug("LauncherMain.executeSubset: error adding product to workspace");
+			}
+
 		}
 		catch (Exception oEx) {
 			s_oLogger.error("LauncherMain.executeSubset: exception " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
@@ -1767,6 +1774,16 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 				s_oLogger.debug("LauncherMain.executeMosaic done");
 				if (oProcessWorkspace != null) oProcessWorkspace.setStatus(ProcessStatus.DONE.name());
 				
+				s_oLogger.debug("LauncherMain.executeMosaic adding product to Workspace");
+				
+				addProductToDbAndSendToRabbit(null, getWorspacePath(oParameter)+oParameter.getDestinationProductName(),oParameter.getWorkspace(), oParameter.getWorkspace(), LauncherOperations.MOSAIC.toString(), null);
+				
+				if (addProductToWorkspace(oParameter.getDestinationProductName(), oParameter.getWorkspace())) {
+					s_oLogger.debug("LauncherMain.executeMosaic: product added to workspace");
+				}
+				else {
+					s_oLogger.debug("LauncherMain.executeMosaic: error adding product to workspace");
+				}
 			}
 			else {
 				// error
@@ -1948,6 +1965,11 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 				s_oLogger.debug("LauncherMain.AddProductToDbAndSendToRabbit: bands is NULL");
 			} else {
 				s_oLogger.debug("LauncherMain.AddProductToDbAndSendToRabbit: bands " + oVM.getBandsGroups().getBands().size());
+			}
+			
+			if (Utils.isNullOrEmpty(sBBox)) {
+				s_oLogger.debug("LauncherMain.AddProductToDbAndSendToRabbit: bbox not set. Try to auto get it ");
+				sBBox= oReadProduct.getProductBoundingBox(oProductFile);
 			}
 
 			s_oLogger.debug("LauncherMain.AddProductToDbAndSendToRabbit: done read product");

@@ -3,7 +3,6 @@ package wasdi.asynch;
 import java.io.File;
 import java.io.IOException;
 
-import wasdi.LauncherMain;
 import wasdi.shared.utils.SerializationUtils;
 import wasdi.snapopearations.ReadProduct;
 

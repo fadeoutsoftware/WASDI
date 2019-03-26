@@ -6,7 +6,6 @@ import java.util.HashMap;
 import org.apache.xpath.XPathAPI;
 import org.apache.xpath.objects.XObject;
 import org.geotools.feature.FeatureCollection;
-import org.n52.wps.client.ExecuteResponseAnalyser;
 import org.n52.wps.client.WPSClientException;
 import org.n52.wps.client.WPSClientSession;
 import org.n52.wps.io.data.IData;

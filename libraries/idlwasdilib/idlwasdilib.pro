@@ -707,6 +707,48 @@ end
 
 
 
+; Create a Subset from an image
+FUNCTION WASDISUBSET, sInputFile, sOutputFile, sLatN, sLonW, sLatS, sLonE
+
+  COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose
+  sessioncookie = token
+
+
+  ; API url
+  UrlPath = '/wasdiwebserver/rest/processing/geometric/subset?sSourceProductName='+sInputFile+'&sDestinationProductName='+sOutputFile+"&sWorkspaceId="+activeworkspace
+    
+  ; compose the full MosaicSetting JSON View Model
+  sSubsetSettingsString='{  "latN": '+ sLatN +',  "lonW": '+ sLonW +',"latS": '+ sLatS +', "lonE": '+ sLonE +'}'
+  
+  IF (verbose eq '1') THEN BEGIN
+	print, 'SUBSET SETTINGS JSON ' , sSubsetSettingsString
+	print, 'URL: ', UrlPath
+  END
+  
+  
+
+  wasdiResult = WASDIHTTPPOST(UrlPath, sSubsetSettingsString)
+  
+  sResponse = GETVALUEBYKEY(wasdiResult, 'boolValue')
+  
+  sProcessID = ''
+  
+  ; get the process id
+  if sResponse then begin
+    sValue = GETVALUEBYKEY(wasdiResult, 'stringValue')
+    sProcessID=sValue
+  endif
+  
+  sStatus = "ERROR"
+  
+  ; Wait for the process to finish
+  if sProcessID ne '' then begin
+    sStatus = WASDIWAITPROCESS(sProcessID)
+  endif
+  
+  RETURN, sStatus
+end
+
 
 ; Search Sentinel EO Images
 FUNCTION WASDISEARCHEOIMAGE, sPlatform, sDateFrom, sDateTo, dULLat, dULLon, dLRLat, dLRLon, sProductType, iOrbitNumber, sSensorOperationalMode, sCloudCoverage 

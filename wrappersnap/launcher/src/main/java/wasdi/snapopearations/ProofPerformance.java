@@ -11,9 +11,6 @@ import com.bc.ceres.core.ProgressMonitor;
 
 import wasdi.shared.parameters.ApplyOrbitParameter;
 import wasdi.shared.parameters.ISetting;
-import wasdi.snapopearations.ApplyOrbit;
-import wasdi.snapopearations.ReadProduct;
-import wasdi.snapopearations.WriteProduct;
 
 public class ProofPerformance {
 

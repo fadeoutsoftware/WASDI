@@ -6,12 +6,11 @@ import java.io.File;
 import java.io.IOException;
 
 import javax.imageio.ImageIO;
+
 import org.esa.snap.core.dataio.ProductIO;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.RasterDataNode;
-import org.esa.snap.rcp.imgfilter.model.Filter;
-import org.esa.snap.rcp.imgfilter.model.StandardFilters;
 
 import wasdi.shared.utils.BandImageManager;
 

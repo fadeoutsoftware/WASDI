@@ -9,7 +9,9 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
+import java.util.logging.FileHandler;
 import java.util.logging.Level;
+import java.util.logging.SimpleFormatter;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.ServletConfig;
@@ -209,6 +211,19 @@ public class Wasdi extends Application {
 			SystemUtils.init3rdPartyLibs(null);
 			SystemUtils.LOG.setLevel(Level.ALL);
 			
+			String sSnapLogActive =getInitParameter("SNAP_LOG_ACTIVE", "1");
+			
+			if (sSnapLogActive.equals("1") || sSnapLogActive.equalsIgnoreCase("true")) {
+				String sSnapLogFolder = getInitParameter("SNAP_LOG_FOLDER", "/usr/lib/wasdi/launcher/logs/snapweb.log");
+
+				FileHandler oFileHandler = new FileHandler(sSnapLogFolder,true);
+				//ConsoleHandler handler = new ConsoleHandler();
+				oFileHandler.setLevel(Level.ALL);
+				SimpleFormatter oSimpleFormatter = new SimpleFormatter();
+				oFileHandler.setFormatter(oSimpleFormatter);
+				SystemUtils.LOG.setLevel(Level.ALL);
+				SystemUtils.LOG.addHandler(oFileHandler);            	
+			}
 			Engine.start(false);
 			
 			//init HASH
