@@ -10,6 +10,7 @@ angular.module('wasdi.ImageEditorDirective', [])
                 body : '=',
                 getDefaultImage:'&',
                 applyEditorPreviewImage:'&',
+                editPanel:'&',
                 maskManager: '&',
                 filterManager: '&',
                 onEditBtnClick : '&onEditClick',
@@ -189,6 +190,10 @@ angular.module('wasdi.ImageEditorDirective', [])
                     scope.maskManager();
                 };
 
+                scope.clickOnEditPanel = function () {
+                    scope.editPanel();
+                };
+
                 scope.clickOnFilter = function () {
                     scope.filterManager();
                 }
@@ -320,7 +325,7 @@ angular.module('wasdi.ImageEditorDirective', [])
                         iAy = oZoomSquarePoint.y;
 
                     }
-                    
+
                     // Consider always the ViewPort with origin point on top left and positive dimensions
                     if (iHeightSquare<0) {
                         iAy = iAy + iHeightSquare;

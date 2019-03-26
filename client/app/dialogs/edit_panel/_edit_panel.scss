@@ -1,0 +1,225 @@
+.edit-panel-modal
+{
+    .modal-dialog
+    {
+
+        .modal-content
+        {
+            //HEADER
+            .modal-header
+            {
+                .icon-apply-orbit {
+                    content:$wasdi-orbit-icon-applyorbit-white-version;
+                    width: $wasdi-size-icon-title-dialogs;
+                    height: auto;
+                }
+            }
+            //BODY
+            .modal-body
+            {
+                .mask-manager{
+                    .dialog-operation-animation
+                    {
+                        z-index: 4000;
+                        position: fixed;
+                        transition: all linear 0.2s;
+                        background-color: $wasdi-grey;
+                        //height: 100px;
+                        box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+                        border: solid 1px $wasdi-green-logo;
+                        .row
+                        {
+                            margin-top: 20px;
+                            .my-button
+                            {
+                                padding: 10px 20px;
+                                margin-bottom: 10px;
+                            }
+                            .my-input-text
+                            {
+                                border-color:$wasdi-blue-logo;
+                                width: 75%;
+                            }
+                            .btn-default{
+                                border-color:$wasdi-blue-logo;
+                                width:100%;
+                            }
+                            h3
+                            {
+                                display: inline;
+                            }
+
+                        }
+                        .logical-mask
+                        {
+                            .list-group
+                            {
+                                overflow-y: auto;
+                                max-height:160px;
+                                min-height: 50px;
+
+                                border: 1px solid #43516A;
+                                border-top-left-radius: 4px;
+                                border-top-right-radius: 4px;
+                                a
+                                {
+                                    //color: $wasdi-blue-logo;
+                                    //border-color: $wasdi-blue-logo;
+                                    border-color: transparent;
+                                }
+                                a:hover
+                                {
+                                    background-color: darkgrey;
+                                }
+
+                            }
+                            .btn-group-vertical
+                            {
+                                ul{
+                                    overflow-y: scroll;
+                                    height: 200px;
+
+                                }
+                            }
+
+                            .list-group-item.active, .list-group-item.active:focus, .list-group-item.active:hover {
+                                z-index: 2;
+                                color: #fff;
+                                background-color: #009036;
+                                border-color:white;//#337ab7;
+                            }
+                        }
+
+
+                    }
+                }
+
+                .filter-band-tab
+                {
+                    label{
+                        color: $wasdi-green-logo;
+                    }
+                    .system-content
+                    {
+                        padding: 10px;
+                        border: 1px solid $wasdi-blue-logo;
+                        .options
+                        {
+                            //padding-left: 10px;
+
+                            .operation
+                            {
+                                padding: 7px 5px 7px 10px;
+                                cursor:pointer;
+                                &:hover
+                                {
+                                    background: $wasdi-grey-background-text;
+                                }
+                            }
+
+                            .filter-properties
+                            {
+                                float:left;
+                                input
+                                {
+                                    width:90%;
+
+                                }
+                                padding-bottom: 15px;
+                            }
+
+                            .square-content
+                            {
+
+                            }
+                            .filter-properties-content
+                            {
+                                //float:right;
+                            }
+
+                            .increase-buttons
+                            {
+                                margin-top: 26px;
+                                .btn{
+                                    height: 15px;
+                                    padding-top: 0;
+                                    padding-bottom: 0;
+                                }
+                            }
+
+                        }
+                    }
+                }
+                //form
+                //{
+                //    fieldset
+                //    {
+                //        border:2px solid $wasdi-blue-logo;
+                //        padding: 20px 20px;
+                //        .btn-default {
+                //            display: block;
+                //            width: 100%;
+                //        }
+                //
+                //        .row{
+                //            .dropdown
+                //            {
+                //                margin-left: 0;
+                //            }
+                //
+                //            .orbit-state
+                //            {
+                //                margin-top: 5px;
+                //            }
+                //            .polynomial-degree
+                //            {
+                //                margin-top: 15px;
+                //            }
+                //        }
+                //
+                //        legend
+                //        {
+                //            width: auto;
+                //            border-bottom: 0;
+                //        }
+                //        .my-input-text
+                //        {
+                //            .input-group
+                //            {
+                //                .input-group-btn
+                //                {
+                //                    .btn-default {
+                //                        color: $wasdi-blue-logo;
+                //                        background-color: $wasdi-grey;
+                //                        border-color: $wasdi-blue-logo;
+                //                    }
+                //                }
+                //            }
+                //        }
+                //        .inline
+                //        {
+                //            float: left;
+                //        }
+                //
+                //        .polynomial-degree
+                //        {
+                //            margin-top: 10px;
+                //        }
+                //
+                //        .form-group
+                //        {
+                //            margin: 10px 0 0 0;
+                //        }
+                //
+                //    }
+                //}
+
+            }
+            //FOOTER
+            .modal-footer
+            {
+                text-align: left;
+            }
+        }
+    }
+}

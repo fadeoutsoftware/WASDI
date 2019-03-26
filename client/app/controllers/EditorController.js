@@ -2412,6 +2412,15 @@ var EditorController = (function () {
     };
 
     /**
+     *
+     */
+    EditorController.prototype.openEditPanelFromImageEditor = function () {
+        if (utilsIsObjectNullOrUndefined(this.m_oActiveBand)) return;
+        var oFoundProduct = this.m_aoProducts[this.m_oActiveBand.productIndex];
+        this.openEditPanelDialog(this.m_oActiveBand,oFoundProduct);
+    };
+
+    /**
      * Handle click on "show filters" from image editor
      */
     EditorController.prototype.openFiltersFromImageEditor = function () {
@@ -2473,22 +2482,6 @@ var EditorController = (function () {
                     oController.m_bIsLoadedViewBandImage = true;
                 });
 
-                // oController.m_oFilterService.getProductBand(oResult.body,oController.m_oActiveWorkspace.workspaceId).success(function (data, status) {
-                //
-                //     if (data != null)
-                //     {
-                //         if (data != undefined)
-                //         {
-                //             // Create the link to the stream
-                //             var blob = new Blob([data], {type: "octet/stream"});
-                //             var objectUrl = URL.createObjectURL(blob);
-                //             oController.m_sViewUrlSelectedBand = objectUrl;
-                //         }
-                //     }
-                // }).error(function (data, status) {
-                //     utilsVexDialogAlertTop('GURU MEDITATION<br>ERROR PROCESSING BAND IMAGE ');
-                //
-                // });
 
             });
         });
@@ -3264,6 +3257,72 @@ var EditorController = (function () {
             });
         });
         return true;
+    };
+
+
+    EditorController.prototype.openEditPanelDialog = function (oBand,oProduct)
+    {
+        // if(utilsIsObjectNullOrUndefined(oSelectedBand) === true) return false;
+
+        var oController = this;
+        var oFinalSelectedBand = oBand;
+
+        this.m_oModalService.showModal({
+            templateUrl: "dialogs/edit_panel/EditPanelView.html",
+            controller: "EditPanelController",
+            inputs: {
+                extras: {
+                    maskManager:{
+                        band:oBand,
+                        product:oProduct,
+                        workspaceId: oController.m_oActiveWorkspace.workspaceId,
+                        masksSaved:oController.m_oMasksSaved,
+                    },
+                    filterBand:{
+                        workspaceId: oController.m_oActiveWorkspace.workspaceId,
+                        selectedBand:oBand
+                    }
+
+                }
+            }
+        }).then(function (modal) {
+            modal.element.modal();
+            modal.close.then(function (oResult) {
+
+                oController.runMaskManager(oResult,oController,oFinalSelectedBand)
+            });
+        });
+        return true;
+    };
+
+    EditorController.prototype.runMaskManager = function(oResult,oController,oFinalBand){
+        if(utilsIsObjectNullOrUndefined(oResult) === true) return false;
+        if(utilsIsObjectNullOrUndefined(oResult.body) === true) return false;
+
+        //sav filter
+        oController.m_oMasksSaved = oResult.listOfMasks;
+
+        // Set a filter, if it has been selected by the user
+        oResult.body.filterVM = oFinalBand.actualFilter;
+        // Save the masks, as user selected
+        oFinalBand.productMasks = oResult.body.productMasks;
+        oFinalBand.rangeMasks = oResult.body.rangeMasks;
+        oFinalBand.mathMasks = oResult.body.mathMasks;
+        oController.m_bIsLoadedViewBandImage = false;
+        oController.m_oFilterService.getProductBand(oResult.body,oController.m_oActiveWorkspace.workspaceId).success(function (data, status)
+        {
+            if (data != null)
+            {
+                if (data != undefined)
+                {
+                    // Create the link to the stream
+                    var blob = new Blob([data], {type: "octet/stream"});
+                    var objectUrl = URL.createObjectURL(blob);
+                    oController.m_sViewUrlSelectedBand = objectUrl;
+                }
+            }
+            oController.m_bIsLoadedViewBandImage = true;
+        });
     };
 
     EditorController.prototype.getMapContainerSize = function( iScalingValue){
