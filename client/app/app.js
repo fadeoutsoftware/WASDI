@@ -217,6 +217,7 @@ wasdiApp.controller("JRCWorkflowController", JRCWorkflowController);
 wasdiApp.controller("UploadController", UploadController);
 wasdiApp.controller("JRCS2Controller", JRCS2Controller);
 wasdiApp.controller("MosaicController", MosaicController);
+wasdiApp.controller("EditPanelController", EditPanelController);
 
 wasdiApp.controller(UploadFileController.REG_NAME, UploadFileController);
 wasdiApp.controller(JRCClassificationController.REG_NAME, JRCClassificationController);
