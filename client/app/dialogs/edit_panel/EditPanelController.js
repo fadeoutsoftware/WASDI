@@ -13,6 +13,7 @@ var EditPanelController = (function() {
         this.m_oTime = $timeout;
         this.m_oWorkspaceService = oWorkspaceService;
         this.m_oFilterService = oFilterService;
+        this.m_oClose = oClose;
 
         this.m_oExtras = oExtras;
         this.m_oSelectedTab = "MaskManager" // mask manager,filter band
@@ -37,6 +38,7 @@ var EditPanelController = (function() {
         };
         this.m_sFilterMaskTable = "";
         this.m_bAreProductMasksLoading = false;
+        this.m_bIsLoadingColourManipulation = false;
         //MASK LIST
         this.m_aoMasks=[];
         //IF THERE AREN'T DIFFERENT
@@ -203,10 +205,11 @@ var EditPanelController = (function() {
 
         this.getFilters();
 
+        this.getProductColorManipulation(this.m_oProduct.fileName,this.m_oBand.name,true,this.m_sWorkspaceId);
 
         var oController = this;
-        $scope.close = function() {
-            oClose("close", 500); // close, but give 500ms for bootstrap to animate
+        $scope.close = function(oReturnValue) {
+            oClose(oReturnValue, 500); // close, but give 500ms for bootstrap to animate
         };
         $scope.saveMaskManager = function() {
             var result = {
@@ -770,7 +773,7 @@ var EditPanelController = (function() {
             color:"white" ,
             fontcolor:"black",
             value:"0",
-            click:function(){this.value = oThat.m_iSelectedValue;}//
+            click:function(){}//this.value = oThat.m_iSelectedValue;
         };
         var aaoEmptyMatrix = this.makeEmptyMatrix(4,4,oDefaultValue);
         this.m_aoUserFilterOptions[0].options.push( {name:"NewFilter", matrix:aaoEmptyMatrix});
@@ -862,7 +865,7 @@ var EditPanelController = (function() {
             color:"white" ,
             fontcolor:"black",
             value:"0",
-            click:function(){this.value = oThat.m_iSelectedValue;}
+            click:function(){}//this.value = oThat.m_iSelectedValue;
         };
         return this.addRowInMatrix(aaoMatrix,oDefaultValue)
     };
@@ -896,7 +899,7 @@ var EditPanelController = (function() {
             color:"white" ,
             fontcolor:"black",
             value:"0",
-            click:function(){this.value = oThat.m_iSelectedValue;}
+            click:function(){}//this.value = oThat.m_iSelectedValue;
         };
         return this.addColumnInMatrix(aaoMatrix,oDefaultValue)
     };
@@ -964,7 +967,7 @@ var EditPanelController = (function() {
                 color:"white" ,
                 fontcolor:"black",
                 value:"0",
-                click:function(){this.value = oThat.m_iSelectedValue;}//
+                click:function(){}//this.value = oThat.m_iSelectedValue;
             };
             var iValue = aArrayValues[iIndexArrayValues];
             oDefaultValue.value = iValue;
@@ -1030,7 +1033,183 @@ var EditPanelController = (function() {
     {
         jQuery('.collapse').collapse('hide');
     };
+    /************************************** COLOR MANIPULATION *****************************************/
 
+    EditPanelController.prototype.getProductColorManipulation = function(sFile,sBand,bAccurate,sWorkspaceId)
+    {
+        if( utilsIsStrNullOrEmpty(sFile) === true || utilsIsStrNullOrEmpty(sBand) === true || utilsIsStrNullOrEmpty(sWorkspaceId) === true || utilsIsObjectNullOrUndefined(bAccurate) === true )
+        {
+            return false;
+        }
+        var oController = this;
+        this.m_bIsLoadingColourManipulation = true;
+        this.m_oSnapOperationService.getProductColorManipulation(sFile,sBand,bAccurate,sWorkspaceId).success(function (data, status) {
+            if (data != null)
+            {
+                if (data != undefined)
+                {
+                    // oController.m_oColorManipulation = data;
+                    // if (utilsIsObjectNullOrUndefined(oController.m_oActiveBand) === false)
+                    // {
+                    //     oController.m_oActiveBand.colorManipulation = data;
+                        oController.drawColourManipulationHistogram("colourManipulationContainer",data.histogramBins);
+
+                    // }
+                }
+            }
+            oController.m_bIsLoadingColourManipulation = false;
+        }).error(function (data, status) {
+            utilsVexDialogAlertTop('GURU MEDITATION<br>PRODUCT COLOR MANIPULATION ');
+            oController.m_bIsLoadingColourManipulation = false;
+        });
+
+        return true;
+    };
+
+    EditPanelController.prototype.drawColourManipulationHistogram = function(sNameDiv,afValues)
+    {
+
+        if(utilsIsStrNullOrEmpty(sNameDiv) === true)
+            return false;
+        if(utilsIsObjectNullOrUndefined(afValues) === true)
+            return false;
+        //todo test
+        var x = utilsGenerateArrayWithFirstNIntValue(0,afValues.length);
+        if(utilsIsObjectNullOrUndefined(x) === true)
+        {
+            return false;
+        }
+
+        var trace = {
+            x: x ,
+            y: afValues,
+            // type: 'histogram'
+            type: 'bar',
+            marker: {
+                color: '#43516A',
+            }
+        };
+        var data = [trace];
+        var layout = {
+            // title: "Colour Manipolation",
+            showlegend: false,
+            height:200,
+            width:500,
+            xaxis: {
+                showgrid: true,
+                zeroline: true,
+            },
+            paper_bgcolor:"#000000",
+            // paper_bgcolor:"#EF4343",
+            margin: {
+                l: 5,
+                r: 5,
+                b: 5,
+                t: 5,
+                pad: 4
+            },
+
+        };
+        Plotly.newPlot(sNameDiv, data,layout,{staticPlot: true});//,layout,{staticPlot: true}
+
+        return true;
+    };
+
+    /**
+     * processingProductColorManipulation
+     */
+    EditPanelController.prototype.processingProductColorManipulation = function()
+    {
+        // if (utilsIsObjectNullOrUndefined(this.m_oActiveBand) === true) return;
+
+        var sWorkspaceId,oBand;
+        oBand = this.m_oBand;
+        sWorkspaceId = this.m_sWorkspaceId;
+
+        //get map size
+        var oMapContainerSize = this.getMapContainerSize(this.m_iPanScalingValue);
+        var heightMapContainer = oMapContainerSize.height;
+        var widthMapContainer = oMapContainerSize.width;
+
+        var sFileName = this.m_oProduct.fileName;
+        //get body
+        var oBodyMapContainer = this.createBodyForProcessingBandImage(sFileName,oBand.name,oBand.actualFilter,0,0,
+            oBand.width, oBand.height,widthMapContainer, heightMapContainer, oBand.colorManipulation);
+        //processing image with color manipulation
+        var oReturnValue = {
+            bodyMapContainer:oBodyMapContainer,
+            workspaceId:sWorkspaceId
+        };
+
+        this.m_oClose(oReturnValue, 500);
+        // this.processingGetBandImage(oBodyMapContainer, sWorkspaceId);
+    };
+
+    EditPanelController.prototype.getMapContainerSize = function( iScalingValue){
+        var elementMapContainer = angular.element(document.querySelector('#mapcontainer'));
+        var heightMapContainer = elementMapContainer[0].offsetHeight * iScalingValue;
+        var widthMapContainer = elementMapContainer[0].offsetWidth * iScalingValue;
+
+        return {
+            height:heightMapContainer,
+            width:widthMapContainer
+        };
+
+    };
+
+
+    EditPanelController.prototype.createBodyForProcessingBandImage = function(sFileName, sBandName, sFilters, iRectangleX, iRectangleY,
+                                                                           iRectangleWidth, iRectangleHeight, iOutputWidth, iOutputHeight,oColorManipulation){
+
+        var oBandImageBody = {
+            "productFileName": sFileName,
+            "bandName": sBandName,
+            "filterVM": sFilters,
+            "vp_x": iRectangleX,
+            "vp_y": iRectangleY,
+            "vp_w": iRectangleWidth,
+            "vp_h": iRectangleHeight,
+            "img_w": iOutputWidth,
+            "img_h": iOutputHeight,
+            "colorManiputalion":oColorManipulation
+        };
+
+        return oBandImageBody;
+    };
+    // EditPanelController.prototype.getDefaultProductColorManipulation = function()
+    // {
+    //     if(utilsIsObjectNullOrUndefined(this.m_oActiveBand.colorManipulation ) === false)
+    //     {
+    //         delete this.m_oActiveBand.colorManipulation;
+    //         //without the property body.colorManipulation the server return default colorManipulation
+    //     }
+    //     //get default value of color manipolation
+    //     this.processingProductColorManipulation()
+    // };
+    //
+    //
+    // /**
+    //  *
+    //  * @param oColorManipulation
+    //  * @returns {boolean}
+    //  */
+    // EditorController.prototype.adjust95percentageColourManipulation = function(oColorManipulation)
+    // {
+    //     if(utilsIsObjectNullOrUndefined(oColorManipulation) === true)
+    //     {
+    //         return false;
+    //     }
+    //     //min value
+    //     oColorManipulation.colors[0].value = oColorManipulation.histogramMin;
+    //     //average value
+    //     oColorManipulation.colors[1].value = (oColorManipulation.histogramMax / 2 );
+    //     //max value
+    //     oColorManipulation.colors[2].value = oColorManipulation.histogramMax;
+    //
+    //     this.processingProductColorManipulation();
+    //
+    //     return true;
+    // };
     EditPanelController.$inject = [
         '$scope',
         'close',
