@@ -3289,7 +3289,27 @@ var EditorController = (function () {
             modal.element.modal();
             modal.close.then(function (oResult) {
 
-                oController.runMaskManager(oResult,oController,oFinalSelectedBand)
+                if(utilsIsObjectNullOrUndefined(oResult) || utilsIsString(oResult))
+                {
+                    return false;
+                }
+
+                if(oResult.hasOwnProperty("listOfMasks") === true)
+                {
+                    oController.runMaskManager(oResult,oController,oFinalSelectedBand);
+                    return true;
+
+                }
+                if(oResult.hasOwnProperty("filter") === true)
+                {
+                    oController.runFilterBand(oResult,oController,oFinalSelectedBand);
+                    return true;
+                }
+                if(oResult.hasOwnProperty("bodyMapContainer") === true)
+                {
+                    oController.processingGetBandImage(oResult.bodyMapContainer, oResult.workspaceId);
+                }
+                return false;
             });
         });
         return true;
@@ -3323,6 +3343,39 @@ var EditorController = (function () {
             }
             oController.m_bIsLoadedViewBandImage = true;
         });
+    };
+
+    EditorController.prototype.runFilterBand = function (oResult,oController,oFinalSelectedBand) {
+        if(utilsIsObjectNullOrUndefined(oResult) === true)  return false;
+        if(utilsIsObjectNullOrUndefined(oResult.filter) === true) return false;
+
+        // var elementMapContainer = angular.element(document.querySelector('#mapcontainer'));
+        var oMapContainerSize = oController.getMapContainerSize(oController.m_iPanScalingValue);
+        var heightMapContainer = oMapContainerSize.height;
+        var widthMapContainer = oMapContainerSize.width;
+
+        // var elementImagePreview = angular.element(document.querySelector('#imagepreviewcanvas'));
+        // var heightImagePreview = elementImagePreview[0].offsetHeight;
+        // var widthImagePreview = elementImagePreview[0].offsetWidth;
+
+        var sFileName = oController.m_aoProducts[oResult.band.productIndex].fileName;
+
+        var oBodyMapContainer = oController.createBodyForProcessingBandImage(sFileName,oResult.band.name,oResult.filter,0,0,
+            oResult.band.width, oResult.band.height,widthMapContainer, heightMapContainer,oResult.band.colorManipulation);
+
+        // Filters does not apply in the preview
+
+        // Save the filter for further operations
+        oFinalSelectedBand.actualFilter = oResult.filter;
+
+        // Add user selected masks, if available
+        oBodyMapContainer.productMasks = oFinalSelectedBand.productMasks;
+        oBodyMapContainer.rangeMasks = oFinalSelectedBand.rangeMasks;
+        oBodyMapContainer.mathMasks = oFinalSelectedBand.mathMasks;
+
+        oController.processingGetBandImage(oBodyMapContainer, oController.m_oActiveWorkspace.workspaceId);
+
+        return true;
     };
 
     EditorController.prototype.getMapContainerSize = function( iScalingValue){

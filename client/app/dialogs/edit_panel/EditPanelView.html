@@ -29,6 +29,13 @@
 
                         </a>
                     </li>
+                    <li ng-class="{'active':m_oController.m_oSelectedTab === 'ColorManipulation'}"
+                        ng-click="m_oController.m_oSelectedTab = 'ColorManipulation'">
+                        <a href="" role="tab" data-toggle="tab">
+                            {{"DIALOG_EDIT_PANEL_DIALOG_COLOR_MANIPULATION_TAB"|translate}}
+
+                        </a>
+                    </li>
 
                 </ul>
 
@@ -41,6 +48,10 @@
                          ng-class="{'active':m_oController.m_oSelectedTab === 'FilterBand'}">
                         <ng-include src="'dialogs/edit_panel/TabFilterBand.html'"></ng-include>
                     </div>
+                    <div class="tab-pane fade in" id="ColorManipulation"
+                         ng-class="{'active':m_oController.m_oSelectedTab === 'ColorManipulation'}">
+                        <ng-include src="'dialogs/edit_panel/TabColorManipulation.html'"></ng-include>
+                    </div>
 
                 </div>
 
@@ -51,13 +62,15 @@
 
                 <div class="row-v4">
                     <div class="col-v4 offset-9">
-                        <button type="button" ng-click="saveMaskManager(null)" class="my-button"  data-dismiss="modal">
+                        <button type="button" ng-click="saveMaskManager(null)" class="my-button"  data-dismiss="modal"
+                                ng-disabled="m_oController.m_oSelectedTab !== 'MaskManager'"  ng-show="m_oController.m_oSelectedTab === 'MaskManager'">
                             {{"DIALOG_EDIT_PANEL_DIALOG_APPLY_MASK_MANAGER_BUTTON"|translate}}
                         </button>
-                        <button type="button" ng-click="applyFilterOnClose(null)" class="my-button"  data-dismiss="modal">
+                        <button type="button" ng-click="applyFilterOnClose(null)" class="my-button"  data-dismiss="modal"
+                                ng-disabled="m_oController.m_oSelectedTab !== 'FilterBand'"  ng-show="m_oController.m_oSelectedTab === 'FilterBand'">
                             {{"DIALOG_EDIT_PANEL_DIALOG_APPLY_FILTER_BUTTON"|translate}}
                         </button>
-                        <button type="button" ng-click="close(null)" class="my-button" data-dismiss="modal">
+                        <button type="button" ng-click="close('close')" class="my-button" data-dismiss="modal">
                             {{"DIALOG_CLOSE_BUTTON"|translate}}
                         </button>
                     </div>
