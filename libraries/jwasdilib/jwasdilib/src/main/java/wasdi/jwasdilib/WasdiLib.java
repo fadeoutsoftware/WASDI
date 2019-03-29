@@ -1,5 +1,7 @@
 package wasdi.jwasdilib;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -12,9 +14,12 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -1912,10 +1917,33 @@ public class WasdiLib {
 				
 				int responseCode =  oConnection.getResponseCode();
 
-				if(responseCode == 200) {
+ 				if(responseCode == 200) {
+							
+					Map<String, List<String>> aoHeaders = oConnection.getHeaderFields();
+					List<String> asContents = null;
+					if(null!=aoHeaders) {
+						asContents = aoHeaders.get("Content-Disposition");
+					}
+					String sAttachmentName = null;
+					if(null!=asContents) {
+						String sHeader = asContents.get(0);
+						sAttachmentName = sHeader.split("filename=")[1];
+						if(sAttachmentName.startsWith("\"")) {
+							sAttachmentName = sAttachmentName.substring(1);
+						}
+						if(sAttachmentName.endsWith("\"")) {
+							sAttachmentName = sAttachmentName.substring(0,sAttachmentName.length()-1);
+						}
+						System.out.println(sAttachmentName);
+						
+					}
 					
-					sOutputFilePath = getSavePath();
-					sOutputFilePath += sFileName;
+					String sSavePath = getSavePath();
+					if(sAttachmentName!=null) {
+						sOutputFilePath = sSavePath + sAttachmentName;
+					} else {
+						sOutputFilePath = sSavePath + sFileName;
+					}
 
 					File oTargetFile = new File(sOutputFilePath);
 					File oTargetDir = oTargetFile.getParentFile();
@@ -1929,8 +1957,12 @@ public class WasdiLib {
 					copyStream(oInputStream, oOutputStream);
 
 					oInputStream.close();
-				
+					
+					if(null!=sAttachmentName && !sFileName.equals(sAttachmentName) && sAttachmentName.toLowerCase().endsWith(".zip")) {
+						unzip(sAttachmentName, sSavePath);
+					}
 			
+					
 					return sOutputFilePath;
 				} else {
 					String sMessage = oConnection.getResponseMessage();
@@ -1950,6 +1982,61 @@ public class WasdiLib {
 		}		
 	}
 	
+	private void unzip(String sAttachmentName, String sPath) {
+		try {
+			if(!sPath.endsWith("/") && !sPath.endsWith("\\")) {
+				sPath+="/";
+			}
+			String sZipFilePath = sPath+sAttachmentName;
+			//create directories first, otherwise there's no place to write the files
+			ZipFile oZipFile = new ZipFile(sZipFilePath);
+			Enumeration<? extends ZipEntry> aoEntries = oZipFile.entries();
+			while(aoEntries.hasMoreElements()) {
+				ZipEntry oZipeEntry = aoEntries.nextElement();
+				if(oZipeEntry.isDirectory()) {
+					String sDirName = sPath+oZipeEntry.getName();
+					File oDir = new File(sDirName);
+					boolean bCreated = oDir.mkdirs();
+					//TODO check directory creation and otherwise throw
+				}
+			}
+			
+			//now unzip just files
+			aoEntries = oZipFile.entries();
+			while(aoEntries.hasMoreElements()) {
+				ZipEntry oZipeEntry = aoEntries.nextElement();
+				if(!oZipeEntry.isDirectory()) {
+					InputStream oInputStream = oZipFile.getInputStream(oZipeEntry);
+					BufferedInputStream oBufferedInputStream = new BufferedInputStream(oInputStream);
+					String sFileName = sPath+oZipeEntry.getName();
+					File oFile = new File(sFileName);
+					//oFile.createNewFile();
+					FileOutputStream oFileOutputStream = new FileOutputStream(oFile);
+					BufferedOutputStream oBufferedOutputStream = new BufferedOutputStream(oFileOutputStream);
+					while(oBufferedInputStream.available()>0) {
+						oBufferedOutputStream.write(oBufferedInputStream.read());
+					}
+					oBufferedOutputStream.close();
+					oBufferedInputStream.close();
+					
+					//TODO fix import issue and use IOUtils.copy() or IOUtils.copyLarge()
+//					long lSize = oZipeEntry.getSize();
+//					long lThreshold = 2L*1024*1024*1024;
+//					long lcopiedBytes = 0L;
+//					if(lSize < lThreshold) {
+//						lcopiedBytes = IOUtils.copy()
+//					}
+					
+				}
+			}
+			oZipFile.close();
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+	}
+
 	/**
 	 * Copy Input Stream in Output Stream
 	 * @param oInputStream
