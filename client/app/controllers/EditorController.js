@@ -3281,6 +3281,9 @@ var EditorController = (function () {
                     filterBand:{
                         workspaceId: oController.m_oActiveWorkspace.workspaceId,
                         selectedBand:oBand
+                    },
+                    colorManipulation:{
+                        panScalingValue:oController.m_iPanScalingValue
                     }
 
                 }

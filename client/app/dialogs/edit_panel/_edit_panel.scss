@@ -160,6 +160,21 @@
                     .loadIcon {
                         margin-bottom: 20px;
                     }
+                    .ranges-container {
+                        margin-top: 10px;
+
+                        .color-value {
+                            margin-left: 20px;
+                            color: $wasdi-green-logo;
+
+                        }
+
+                        input[type=range] {
+                            width: 80%;
+                            float: left;
+
+                        }
+                    }
                 }
 
             }

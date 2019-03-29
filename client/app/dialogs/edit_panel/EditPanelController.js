@@ -16,14 +16,15 @@ var EditPanelController = (function() {
         this.m_oClose = oClose;
 
         this.m_oExtras = oExtras;
-        this.m_oSelectedTab = "MaskManager" // mask manager,filter band
         this.m_oBand = oExtras.maskManager.band;
         this.m_oProduct = oExtras.maskManager.product;
         this.m_sWorkspaceId = oExtras.maskManager.workspaceId;
-
         this.m_sWorkspaceId =  oExtras.filterBand.workspaceId;
         this.m_oSelectedBand = oExtras.filterBand.selectedBand;
+        this.m_iPanScalingValue = oExtras.colorManipulation.panScalingValue;
+
         this.m_sSelectedFilter = "";
+        this.m_oSelectedTab = "MaskManager" // mask manager,filter band
 
         //mask selected
         this.m_oMasksSaved = oExtras.maskManager.masksSaved;
@@ -1048,13 +1049,13 @@ var EditPanelController = (function() {
             {
                 if (data != undefined)
                 {
-                    // oController.m_oColorManipulation = data;
-                    // if (utilsIsObjectNullOrUndefined(oController.m_oActiveBand) === false)
-                    // {
-                    //     oController.m_oActiveBand.colorManipulation = data;
-                        oController.drawColourManipulationHistogram("colourManipulationContainer",data.histogramBins);
+                     //oController.m_oColorManipulation = data;
+                     if (utilsIsObjectNullOrUndefined(oController.m_oBand) === false)
+                     {
+                         oController.m_oBand.colorManipulation = data;
+                         oController.drawColourManipulationHistogram("colourManipulationContainer",data.histogramBins);
 
-                    // }
+                   }
                 }
             }
             oController.m_bIsLoadingColourManipulation = false;
@@ -1141,7 +1142,8 @@ var EditPanelController = (function() {
             workspaceId:sWorkspaceId
         };
 
-        this.m_oClose(oReturnValue, 500);
+        // this.m_oClose(oReturnValue, 500);
+        this.m_oClose(oReturnValue, 1000);
         // this.processingGetBandImage(oBodyMapContainer, sWorkspaceId);
     };
 
@@ -1176,40 +1178,52 @@ var EditPanelController = (function() {
 
         return oBandImageBody;
     };
-    // EditPanelController.prototype.getDefaultProductColorManipulation = function()
-    // {
-    //     if(utilsIsObjectNullOrUndefined(this.m_oActiveBand.colorManipulation ) === false)
-    //     {
-    //         delete this.m_oActiveBand.colorManipulation;
-    //         //without the property body.colorManipulation the server return default colorManipulation
-    //     }
-    //     //get default value of color manipolation
-    //     this.processingProductColorManipulation()
-    // };
-    //
-    //
-    // /**
-    //  *
-    //  * @param oColorManipulation
-    //  * @returns {boolean}
-    //  */
-    // EditorController.prototype.adjust95percentageColourManipulation = function(oColorManipulation)
-    // {
-    //     if(utilsIsObjectNullOrUndefined(oColorManipulation) === true)
-    //     {
-    //         return false;
-    //     }
-    //     //min value
-    //     oColorManipulation.colors[0].value = oColorManipulation.histogramMin;
-    //     //average value
-    //     oColorManipulation.colors[1].value = (oColorManipulation.histogramMax / 2 );
-    //     //max value
-    //     oColorManipulation.colors[2].value = oColorManipulation.histogramMax;
-    //
-    //     this.processingProductColorManipulation();
-    //
-    //     return true;
-    // };
+
+    EditPanelController.prototype.getDefaultProductColorManipulation = function()
+    {
+        if(utilsIsObjectNullOrUndefined(this.m_oBand.colorManipulation ) === false)
+        {
+            delete this.m_oBand.colorManipulation;
+            //without the property body.colorManipulation the server return default colorManipulation
+        }
+        //get default value of color manipolation
+        this.processingProductColorManipulation();
+    };
+
+
+    /**
+     *
+     * @param oColorManipulation
+     * @returns {boolean}
+     */
+    EditPanelController.prototype.adjust95percentageColourManipulation = function(oColorManipulation)
+    {
+        if(utilsIsObjectNullOrUndefined(oColorManipulation) === true)
+        {
+            return false;
+        }
+        //min value
+        oColorManipulation.colors[0].value = oColorManipulation.histogramMin;
+        //average value
+        oColorManipulation.colors[1].value = (oColorManipulation.histogramMax / 2 );
+        //max value
+        oColorManipulation.colors[2].value = oColorManipulation.histogramMax;
+
+        this.processingProductColorManipulation();
+
+        return true;
+    };
+
+    EditPanelController.prototype.generateColor = function(oColors)
+    {
+        if( utilsIsObjectNullOrUndefined(oColors) === true )
+        {
+            return "";
+        }
+
+        return "rgb(" + oColors.colorBlue + "," + oColors.colorGreen + "," + oColors.colorRed +")";
+    };
+    
     EditPanelController.$inject = [
         '$scope',
         'close',
