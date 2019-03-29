@@ -1,5 +1,7 @@
 package wasdi.shared.business;
 
+import java.util.Date;
+
 /**
  * WASDI User
  * Created by p.campanella on 21/10/2016.
@@ -26,14 +28,47 @@ public class User {
      * Password
      */
     private String password;
+    
+    /**
+     * Flag to check the first Access
+     */
     private Boolean validAfterFirstAccess;
+    
+    /**
+     * UUID for the confirmation mail
+     */
     private String firstAccessUUID;
+    
+    /**
+     * Internal code of the authentication provider
+     */
     private String authServiceProvider;
+    
+    /**
+     * Google Id Token for google users
+     */
     private String googleIdToken;
-    
-    //singleton pattern
+
+    /**
+     * User registration date
+     */
+    private String m_sRegistrationDate = null;
+
+    /**
+     * User confirmation
+     */
+    private String m_sConfirmationDate = null;
+
+    /**
+     * User last login date
+     */
+    private String m_sLastLogin = null;
+
+    /**
+     * Singleton invalid User
+     */
     private static User s_oInvalid;
-    
+        
     static {
     	s_oInvalid = new User();
     	s_oInvalid.id = -1;
@@ -120,6 +155,30 @@ public class User {
 
 	public void setGoogleIdToken(String googleIdToken) {
 		this.googleIdToken = googleIdToken;
+	}
+
+	public String getRegistrationDate() {
+		return m_sRegistrationDate;
+	}
+
+	public void setRegistrationDate(String sRegistrationDate) {
+		this.m_sRegistrationDate = sRegistrationDate;
+	}
+
+	public String getLastLogin() {
+		return m_sLastLogin;
+	}
+
+	public void setLastLogin(String sLastLogin) {
+		this.m_sLastLogin = sLastLogin;
+	}
+
+	public String getConfirmationDate() {
+		return m_sConfirmationDate;
+	}
+
+	public void setConfirmationDate(String oConfirmationDate) {
+		this.m_sConfirmationDate = oConfirmationDate;
 	}
 
 }
