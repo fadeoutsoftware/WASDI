@@ -100,10 +100,7 @@ public class AuthResource {
 				
 				if(oWasdiUser.getValidAfterFirstAccess() ) {
 					
-					Boolean bLoginSuccess = m_oPasswordAuthentication.authenticate(
-											oLoginInfo.getUserPassword().toCharArray(),
-											oWasdiUser.getPassword()
-										);
+					Boolean bLoginSuccess = m_oPasswordAuthentication.authenticate(oLoginInfo.getUserPassword().toCharArray(), oWasdiUser.getPassword() );
 					
 					if ( bLoginSuccess ) {
 						
@@ -118,14 +115,14 @@ public class AuthResource {
 						UserSession oSession = new UserSession();
 						oSession.setUserId(oWasdiUser.getUserId());
 						
-						//XXX check: two users must not have the same sessionId (to avoid ambiguity when getting user from sessionId)
-						//can it really happen? Should we really read from DB to check for this possibility?
-						//Actual risk of collision is very low (~10^-10 over a year)
-						//https://stackoverflow.com/questions/20999792/does-randomuuid-give-a-unique-id
 						String sSessionId = UUID.randomUUID().toString();
 						oSession.setSessionId(sSessionId);
 						oSession.setLoginDate((double) new Date().getTime());
 						oSession.setLastTouch((double) new Date().getTime());
+						
+						
+						oWasdiUser.setLastLogin((new Date()).toString());
+						oUserRepository.UpdateUser(oWasdiUser);
 						
 						SessionRepository oSessionRepo = new SessionRepository();
 						Boolean bRet = oSessionRepo.InsertSession(oSession);
@@ -542,6 +539,7 @@ public class AuthResource {
 					oNewUser.setSurname(oRegistrationInfoViewModel.getSurname());
 					oNewUser.setPassword(m_oPasswordAuthentication.hash(oRegistrationInfoViewModel.getPassword().toCharArray()));
 					oNewUser.setValidAfterFirstAccess(false);
+					oNewUser.setRegistrationDate((new Date()).toString());
 					String sToken = UUID.randomUUID().toString();
 					oNewUser.setFirstAccessUUID(sToken);
 					
@@ -632,6 +630,7 @@ public class AuthResource {
 			if(m_oCredentialPolicy.validFirstAccessUUID(sToken)) {
 				if(sDBToken.equals(sToken)) {
 					oUser.setValidAfterFirstAccess(true);
+					oUser.setConfirmationDate( (new Date()).toString() );
 					oUserRepo.UpdateUser(oUser);
 					PrimitiveResult oResult = new PrimitiveResult();
 					oResult.setBoolValue(true);
@@ -928,10 +927,10 @@ public class AuthResource {
 			}
 			oMessage.setSender(sSender);
 			
-			String sMessage = "A new user registered in WASDI. User Name: " + oUser.getName();
+			String sMessage = "A new user registered in WASDI. User Name: " + oUser.getUserId();
 			
 			if (bConfirmed) {
-				sMessage = "The new User " + oUser.getName() + " confirmed the access and validated the account"; 
+				sMessage = "The new User " + oUser.getUserId() + " confirmed the access and validated the account"; 
 			}
 			
 			oMessage.setMessage(sMessage);
