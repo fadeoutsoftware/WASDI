@@ -15,12 +15,13 @@ public class App
         System.out.println( "JWasdiLib Test Start" );
         WasdiLib oLib = new WasdiLib();
         
-        oLib.init("C:\\Temp\\wasdi\\JMatLibTest\\config.properties");
-
+        oLib.init("C:/Users/c.nattero/workspace/wasdi/wasdilib/config.properties");
+        testBaseLib(oLib);
+        
         //testUploadFileDUMMYIMAGE(oLib);
         //testMosaic(oLib);
         //testSearch(oLib);
-        testSubset(oLib);
+//        testSubset(oLib);
         
 
         System.out.println("JWasdiLib Test Done");
@@ -32,9 +33,9 @@ public class App
     	
         System.out.println(oLib.getWorkspaces());
         System.out.println(oLib.getWorkflows());
-        System.out.println(oLib.getProductsByWorkspace("FirstWS"));
+        System.out.println(oLib.getProductsByWorkspace(".dim"));
 
-        String sPath = oLib.getFullProductPath("PROBAV_L2A_20180604_104840_2_1KM_V101.HDF5");
+        String sPath = oLib.getFullProductPath("S2A_MSIL1C_20190321T004701_N0207_R102_T53HPA_20190321T020838_NDVI.dim");
         System.out.println("File Path " + sPath);
         
         oLib.openWorkspace("FirstWS");
