@@ -21,6 +21,10 @@ import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
+import javax.imageio.stream.ImageOutputStreamImpl;
+
+import org.apache.commons.net.io.Util;
+
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -1954,7 +1958,7 @@ public class WasdiLib {
 
 					InputStream oInputStream = oConnection.getInputStream();
 
-					copyStream(oInputStream, oOutputStream);
+					Util.copyStream(oInputStream, oOutputStream);
 
 					oInputStream.close();
 					
@@ -1997,11 +2001,13 @@ public class WasdiLib {
 					String sDirName = sPath+oZipeEntry.getName();
 					File oDir = new File(sDirName);
 					boolean bCreated = oDir.mkdirs();
-					//TODO check directory creation and otherwise throw
+					if(!bCreated) {
+						throw new IOException("WasdiLib.unzip: cannot create directory " + oDir);
+					}
 				}
 			}
 			
-			//now unzip just files
+			//now unzip files
 			aoEntries = oZipFile.entries();
 			while(aoEntries.hasMoreElements()) {
 				ZipEntry oZipeEntry = aoEntries.nextElement();
@@ -2013,20 +2019,9 @@ public class WasdiLib {
 					//oFile.createNewFile();
 					FileOutputStream oFileOutputStream = new FileOutputStream(oFile);
 					BufferedOutputStream oBufferedOutputStream = new BufferedOutputStream(oFileOutputStream);
-					while(oBufferedInputStream.available()>0) {
-						oBufferedOutputStream.write(oBufferedInputStream.read());
-					}
+					Util.copyStream(oBufferedInputStream, oBufferedOutputStream);
 					oBufferedOutputStream.close();
 					oBufferedInputStream.close();
-					
-					//TODO fix import issue and use IOUtils.copy() or IOUtils.copyLarge()
-//					long lSize = oZipeEntry.getSize();
-//					long lThreshold = 2L*1024*1024*1024;
-//					long lcopiedBytes = 0L;
-//					if(lSize < lThreshold) {
-//						lcopiedBytes = IOUtils.copy()
-//					}
-					
 				}
 			}
 			oZipFile.close();
