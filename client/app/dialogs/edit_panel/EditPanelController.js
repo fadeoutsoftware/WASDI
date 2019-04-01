@@ -1091,11 +1091,15 @@ var EditPanelController = (function() {
             }
         };
         var data = [trace];
+        var oHistogramSize = this.calculateHistogramDimension(0.7,0.7);
+
         var layout = {
             // title: "Colour Manipolation",
             showlegend: false,
-            height:200,
-            width:500,
+            height:oHistogramSize.height,
+            //height:200,
+            //width:500,
+            width:oHistogramSize.width,
             xaxis: {
                 showgrid: true,
                 zeroline: true,
@@ -1149,6 +1153,7 @@ var EditPanelController = (function() {
 
     EditPanelController.prototype.getMapContainerSize = function( iScalingValue){
         var elementMapContainer = angular.element(document.querySelector('#mapcontainer'));
+        //var elementMapContainer = angular.element(document.querySelector('#editPanelBody'));
         var heightMapContainer = elementMapContainer[0].offsetHeight * iScalingValue;
         var widthMapContainer = elementMapContainer[0].offsetWidth * iScalingValue;
 
@@ -1157,6 +1162,35 @@ var EditPanelController = (function() {
             width:widthMapContainer
         };
 
+    };
+
+    EditPanelController.prototype.getModalBodySize = function( ){
+        var elementModalBody = angular.element(document.querySelector('#editPanelBody'));
+        //var elementMapContainer = angular.element(document.querySelector('#editPanelBody'));
+        var heightMapContainer = elementModalBody[0].offsetHeight ;
+        var widthMapContainer = elementModalBody[0].offsetWidth ;
+
+        return {
+            height:heightMapContainer,
+            width:widthMapContainer
+        };
+
+    };
+
+    EditPanelController.prototype.calculateHistogramDimension = function(fHeightScaleValue,fWidthScaleValue)
+    {
+        var oWindowSize = this.getModalBodySize();
+        if(utilsIsObjectNullOrUndefined(oWindowSize))
+        {
+            return null;
+        }
+        if( (utilsIsANumber(oWindowSize.height) === false) || (utilsIsANumber(oWindowSize.width) === false))
+        {
+            return null;
+        }
+        oWindowSize.height = oWindowSize.height * fHeightScaleValue;
+        oWindowSize.width = oWindowSize.width * fWidthScaleValue;
+        return oWindowSize
     };
 
 
@@ -1223,7 +1257,7 @@ var EditPanelController = (function() {
 
         return "rgb(" + oColors.colorBlue + "," + oColors.colorGreen + "," + oColors.colorRed +")";
     };
-    
+
     EditPanelController.$inject = [
         '$scope',
         'close',
