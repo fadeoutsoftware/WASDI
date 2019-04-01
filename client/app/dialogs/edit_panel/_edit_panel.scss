@@ -17,7 +17,12 @@
             //BODY
             .modal-body
             {
-                .mask-manager{
+                @mixin tabEditPanel() {
+                    margin-top: 10px;
+                }
+                .mask-manager
+                {
+                    @include tabEditPanel();
                     .dialog-operation-animation
                     {
                         z-index: 4000;
@@ -92,10 +97,16 @@
 
 
                     }
+                    table{
+                        .loading-tr{
+                            height: 50px;
+                        }
+                    }
                 }
 
                 .filter-band-tab
                 {
+                    @include tabEditPanel();
                     .option-selected{
                         //color:$wasdi-green-logo;
                         background-color: $wasdi-green-logo;
@@ -156,7 +167,9 @@
                     }
                 }
 
-                .color-manipulation-tab{
+                .color-manipulation-tab
+                {
+                    @include tabEditPanel();
                     .loadIcon {
                         margin-bottom: 20px;
                     }
@@ -176,6 +189,7 @@
                         }
                     }
                 }
+
 
             }
             //FOOTER
