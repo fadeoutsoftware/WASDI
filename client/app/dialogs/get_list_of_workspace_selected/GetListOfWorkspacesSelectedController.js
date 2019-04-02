@@ -253,6 +253,16 @@ var GetListOfWorkspacesController = (function() {
 
         return true;
     };
+
+    GetListOfWorkspacesController.prototype.isEmptyWorkspaceList = function()
+    {
+        if( utilsIsObjectNullOrUndefined(this.m_aoWorkspaceList) === true || this.m_aoWorkspaceList.length <= 0 )
+        {
+            return true;
+        }
+        return false;
+    };
+
     GetListOfWorkspacesController.$inject = [
         '$scope',
         'close',

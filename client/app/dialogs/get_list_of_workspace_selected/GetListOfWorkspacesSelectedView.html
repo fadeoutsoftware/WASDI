@@ -1,5 +1,5 @@
 <div class="modal fade get-list-of-worksapce">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-wasdi">
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" ng-click="close(null)" data-dismiss="modal" aria-hidden="true">&times;</button>
@@ -27,13 +27,13 @@
                             </div>
                         </h4>
 
-                        <div ng-show="(m_oController.m_bisLoadingWorkspacesList === false) && (m_oController.m_aoWorkspaceList.length === 0) ">
-                            <h4>
-                                {{"WORKSPACES_ADD_NEW_WORKSPSACE"|translate}}<a href="" ng-click="m_oController.createWorkspace()">{{"WORKSPACES_BUTTON_NEW_WORKSPACE"|translate}}</a>
-                            </h4>
-                        </div>
+                        <!--<div ng-show="(m_oController.m_bisLoadingWorkspacesList === false) && (m_oController.m_aoWorkspaceList.length === 0) ">-->
+                            <!--<h4>-->
+                                <!--{{"WORKSPACES_ADD_NEW_WORKSPSACE"|translate}}<a href="" ng-click="m_oController.createWorkspace()">{{"WORKSPACES_BUTTON_NEW_WORKSPACE"|translate}}</a>-->
+                            <!--</h4>-->
+                        <!--</div>-->
                         <div ><!--ng-show="m_oController.m_aoWorkspaceList.length > 0"-->
-                            <h4>
+                            <!--<h4>-->
 
                                 <table class="table table-hover">
                                     <thead>
@@ -66,10 +66,10 @@
                                     </tr>
                                     <tr>
                                         <td colspan="4">
-                                            <h4>
+                                            <!--<h4>-->
                                                 <!--<a href="" ng-click="m_oController.createWorkspace()" ng-hide="m_oController.m_bIsCreatingWorskapce">{{"DIALOG_LIST_OF_WORKSPACES_ADD_NEW_WORKSPACE_BUTTON"|translate}}</a>-->
                                                 <invaderfixed ng-show="m_oController.m_bIsCreatingWorskapce"></invaderfixed>
-                                            </h4>
+                                            <!--</h4>-->
                                         </td>
                                     </tr>
 
@@ -77,7 +77,12 @@
 
                                 </table>
 
-                            </h4>
+                                <div ng-show="(m_oController.m_bisLoadingWorkspacesList === false) && (m_oController.m_aoWorkspaceList.length === 0) ">
+                                    <h4>
+                                        {{"WORKSPACES_ADD_NEW_WORKSPSACE"|translate}}<a href="" ng-click="m_oController.createWorkspace()">{{"WORKSPACES_BUTTON_NEW_WORKSPACE"|translate}}</a>
+                                    </h4>
+                                </div>
+                            <!--</h4>-->
                             <!-- LIST OF WORKSPACES -->
 
 
@@ -95,15 +100,15 @@
                             <a href="" ng-click="m_oController.openWorkflowManagerDialog()" ng-hide="m_oController.m_bisLoadingWorkflows">{{"DIALOG_LIST_OF_WORKSPACES_MANAGER_WORKFLOWS_BUTTON"|translate}}</a>
                         </h4>
 
-                        <h4>
+                       <!-- <h4>-->
                             <table class="table table-hover my-table" >
                                 <thead>
                                 <tr>
                                     <th>
-                                        {{"DIALOG_WORKFLOW_MANAGER_TABLE_NAME"|translate}}
+                                        <label>{{"DIALOG_WORKFLOW_MANAGER_TABLE_NAME"|translate}}</label>
                                     </th>
                                     <th>
-                                        {{"DIALOG_WORKFLOW_MANAGER_TABLE_DESCRIPTION"|translate}}
+                                        <label>{{"DIALOG_WORKFLOW_MANAGER_TABLE_DESCRIPTION"|translate}}</label>
                                     </th>
 
                                 </tr>
@@ -119,15 +124,15 @@
                                 </tr>
                                 <tr>
                                     <td colspan="4">
-                                        <h4>
+                                        <!--<h4>-->
                                             <!--<a href="" ng-click="m_oController.createWorkspace()" ng-hide="m_oController.m_bIsCreatingWorskapce">{{"DIALOG_LIST_OF_WORKSPACES_MANAGER_WORKFLOWS_BUTTON"|translate}}</a>-->
                                             <invaderfixed ng-show="m_oController.m_bisLoadingWorkflows"></invaderfixed>
-                                        </h4>
+                                        <!--</h4>-->
                                     </td>
                                 </tr>
                                 </tbody>
                             </table>
-                        </h4>
+                       <!-- </h4>-->
                     </div>
                 </div>
 
@@ -135,8 +140,11 @@
             </div>
             <div class="modal-footer">
                 <!--<button type="button" ng-click="close('download')" class="my-button" data-dismiss="modal">Download</button>-->
-                <button type="button" ng-click="m_oController.closeModal()" class="my-button" data-dismiss="modal">Close</button>
-                <button type="button" ng-click="m_oController.closeModalAndReturnSelectedWorkspaces()" class="my-button" data-dismiss="modal">
+                <button type="button" ng-click="m_oController.closeModal()" class="btn btn-wasdi btn-primary" data-dismiss="modal">
+                    Close
+                </button>
+                <button type="button" ng-click="m_oController.closeModalAndReturnSelectedWorkspaces()"
+                        class="btn btn-wasdi btn-primary" data-dismiss="modal" ng-disabled="m_oController.isEmptyWorkspaceList()"><!--ng-disabled = "m_oController.isEmptyWorkspaceList()"-->
                     {{m_oController.m_sButtonName}}
                 </button>
             </div>
