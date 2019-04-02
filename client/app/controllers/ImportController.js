@@ -2254,6 +2254,30 @@ var ImportController = (function() {
         return true;
     };
 
+    ImportController.prototype.getNameOfSelectedResultsTab = function(){
+
+        if( utilsIsObjectNullOrUndefined(this.m_aListOfProvider) === true )
+        {
+            return "";
+        }
+
+        var iNumberOfProviders = this.m_aListOfProvider.length;
+        var iIndexOfSelectedTabs = 0;
+        for(var iIndexProvider = 0; iIndexProvider < iNumberOfProviders; iIndexProvider++)
+        {
+            if( this.m_aListOfProvider[iIndexProvider].selected === true )
+            {
+                if( iIndexOfSelectedTabs === this.m_iActiveProvidersTab)
+                {
+                    return this.m_aListOfProvider[iIndexProvider].name
+                }
+                iIndexOfSelectedTabs++;
+            }
+
+        }
+        return "";
+
+    }
     /**
      * selectAllProducts
      * @returns {boolean}
@@ -2265,10 +2289,13 @@ var ImportController = (function() {
             return false;
         }
         var iNumberOfProducts = this.m_aoProductsList.length ;
-
+        var sProviderTabResults = this.getNameOfSelectedResultsTab()
         for(var iIndexProduct = 0 ; iIndexProduct < iNumberOfProducts; iIndexProduct++)
         {
-            this.m_aoProductsList[iIndexProduct].checked = true;
+            if( this.m_aoProductsList[iIndexProduct].provider === sProviderTabResults )
+            {
+                this.m_aoProductsList[iIndexProduct].checked = true;
+            }
         }
         return true;
     }
@@ -2283,10 +2310,13 @@ var ImportController = (function() {
             return false;
         }
         var iNumberOfProducts = this.m_aoProductsList.length ;
-
+        var sProviderTabResults = this.getNameOfSelectedResultsTab()
         for(var iIndexProduct = 0 ; iIndexProduct < iNumberOfProducts; iIndexProduct++)
         {
-            this.m_aoProductsList[iIndexProduct].checked = false;
+            if( this.m_aoProductsList[iIndexProduct].provider === sProviderTabResults )
+            {
+                this.m_aoProductsList[iIndexProduct].checked = false;
+            }
         }
         return true;
     }
