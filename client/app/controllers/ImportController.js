@@ -1548,6 +1548,7 @@ var ImportController = (function() {
             titleModal:"Add to workspaces",
             buttonName:"Add to workspace"
         };
+
         var oThat = this;
         var oCallback = function(result)
         {
@@ -1555,6 +1556,7 @@ var ImportController = (function() {
             {
                 return false;
             }
+
             var aoWorkSpaces = result;
             var oController = this;
             var iNumberOfWorkspaces = aoWorkSpaces.length;
@@ -1581,6 +1583,8 @@ var ImportController = (function() {
                 oThat.downloadProduct(sUrl,aoWorkSpaces[iIndexWorkspace].workspaceId,sBound,oLayer.provider,null,oError);
 
             }
+
+            oThat.deselectAllProducts();
 
             return true;
         };
@@ -1636,6 +1640,7 @@ var ImportController = (function() {
 
                 }
             }
+            oThat.deselectAllProducts();
 
             return true;
         };
