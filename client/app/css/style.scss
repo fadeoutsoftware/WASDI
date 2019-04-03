@@ -664,7 +664,10 @@ textarea{
 }
 .vakata-context, .vakata-context ul {
     z-index: 1000;
+    left: 20% !important;
 }
+
+
 /*JSTREE WAIT ICON */
 //.jstree-default a.jstree-loading .jstree-icon {
 //  background:url("image") center center no-repeat !important;

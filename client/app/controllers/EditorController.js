@@ -1792,7 +1792,7 @@ var EditorController = (function () {
                 this.m_sViewUrlSelectedBand = "//:0";
 
                 // Fly Home
-                this.m_oGlobeService.flyToWorkspaceBoundingBox(this.m_aoProducts);
+                // this.m_oGlobeService.flyToWorkspaceBoundingBox(this.m_aoProducts);
             }
         }
         else {
