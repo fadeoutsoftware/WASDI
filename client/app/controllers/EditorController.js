@@ -1784,21 +1784,34 @@ var EditorController = (function () {
 
             // We are in 3d Mode
             var aoGlobeLayers = this.m_oGlobeService.getGlobeLayers();
+            // var oGlobe = this.m_oGlobeService.getGlobe();
+
             //Remove band layer
             for (var iIndexLayer=0; iIndexLayer<aoGlobeLayers.length; iIndexLayer++) {
                 var oLayer = aoGlobeLayers.get(iIndexLayer);
 
-                if (utilsIsStrNullOrEmpty(sLayerId) == false && utilsIsObjectNullOrUndefined(oLayer) == false && oLayer.imageryProvider.layers == sLayerId) {
-                    oLayer = aoGlobeLayers.remove(oLayer);
-                    break;
+                if (utilsIsStrNullOrEmpty(sLayerId) == false && utilsIsObjectNullOrUndefined(oLayer) == false && oLayer.imageryProvider.layers == sLayerId)
+                {
+                     oLayer = aoGlobeLayers.remove(oLayer);
+                    // oLayer = oGlobe.remove(oLayer);
+                    //break;
+                    iIndexLayer = 0;
                 }
+
             }
+
             //if the layers isn't georeferenced remove the Corresponding rectangle
             var iNumberOfProdcutsLayers = this.m_aoProductsLayersIn3DMapArentGeoreferenced.length;
             for(var iIndexProductLayer = 0; iIndexProductLayer < iNumberOfProdcutsLayers; iIndexProductLayer++)
             {
-                 var sProductLayerId = "wasdi:" + this.m_aoProductsLayersIn3DMapArentGeoreferenced[iIndexProductLayer].id;
-                if( utilsIsStrNullOrEmpty(sLayerId) == false && utilsIsObjectNullOrUndefined(oLayer) == false && sProductLayerId === sLayerId)
+
+                var sProductLayerId = "";
+                if( this.m_aoProductsLayersIn3DMapArentGeoreferenced[iIndexProductLayer].hasOwnProperty('id') === true &&
+                    utilsIsObjectNullOrUndefined(this.m_aoProductsLayersIn3DMapArentGeoreferenced[iIndexProductLayer].id) === false)
+                {
+                    sProductLayerId = "wasdi:" + this.m_aoProductsLayersIn3DMapArentGeoreferenced[iIndexProductLayer].id;
+                }
+                if( utilsIsStrNullOrEmpty(sLayerId) === false && sProductLayerId === sLayerId)//&& utilsIsObjectNullOrUndefined(oLayer) == false
                 {
                     this.m_oGlobeService.removeEntity(this.m_aoProductsLayersIn3DMapArentGeoreferenced[iIndexProductLayer].rectangle);
                     utilsRemoveObjectInArray(this.m_aoProductsLayersIn3DMapArentGeoreferenced,this.m_aoProductsLayersIn3DMapArentGeoreferenced[iIndexProductLayer]);
