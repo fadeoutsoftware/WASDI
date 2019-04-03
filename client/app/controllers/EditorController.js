@@ -1779,8 +1779,8 @@ var EditorController = (function () {
                 //undo - redo
                 this.removeActualBoundingBox(oBand.layerId);
                 this.removeUndoBoundingBox(oBand.layerId);
-                this.m_oGlobeService.flyToWorkspaceBoundingBox(this.m_aoProducts);
-                this.m_oMapService.flyToWorkspaceBoundingBox(this.m_aoProducts);
+                // this.m_oGlobeService.flyToWorkspaceBoundingBox(this.m_aoProducts);
+                // this.m_oMapService.flyToWorkspaceBoundingBox(this.m_aoProducts);
             }
             else {
 
@@ -1837,8 +1837,8 @@ var EditorController = (function () {
             this.removeActualBoundingBox(oBand.layerId);
             this.removeUndoBoundingBox(oBand.layerId);
 
-            this.m_oGlobeService.flyToWorkspaceBoundingBox(this.m_aoProducts);
-            this.m_oMapService.flyToWorkspaceBoundingBox(this.m_aoProducts);
+            // this.m_oGlobeService.flyToWorkspaceBoundingBox(this.m_aoProducts);
+            // this.m_oMapService.flyToWorkspaceBoundingBox(this.m_aoProducts);
         }
 
         // Deselect the node
