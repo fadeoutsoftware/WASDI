@@ -4,7 +4,8 @@
 var EditorController = (function () {
     function EditorController($scope, $location, $interval, oConstantsService, oAuthService, oMapService, oFileBufferService,
                               oProductService, $state, oWorkspaceService, oGlobeService, oProcessesLaunchedService, oRabbitStompService,
-                              oSnapOperationService, oModalService, oFilterService, oGetParametersOperationService, oTranslate, oCatalogService) {
+                              oSnapOperationService, oModalService, oFilterService, oGetParametersOperationService, oTranslate, oCatalogService,
+                              $window) {
         // Reference to the needed Services
         this.m_oScope = $scope;
         this.m_oScope.m_oController = this;
@@ -47,6 +48,11 @@ var EditorController = (function () {
         //Url of the Band Image (2D - Editor Mode)
         this.m_sViewUrlSelectedBand = "";
         this.m_oMapContainerSize = utilsProjectGetMapContainerSize();
+
+        // var oThat = this;
+        // this.resizeMapOnBrowserResizeEvent = function(){
+        //     oThat.m_oMapContainerSize = utilsProjectGetMapContainerSize();
+        // }
         this.m_oMapPreviewContainerSize = utilsProjectGetPreviewContainerSize();
         // Object used to exchange information with the image preview directive
         this.m_oImagePreviewDirectivePayload = {
@@ -163,8 +169,17 @@ var EditorController = (function () {
 
         // Launch image editor modal to debug it
         //this.openImageEditorDialog();
+        var oThat = this;
 
+        angular.element($window).bind('resize', function(){
 
+             $scope.width = $window.innerWidth;
+            oThat.m_oMapContainerSize = utilsProjectGetMapContainerSize();
+4
+            // manuall $digest required as resize event
+            // is outside of angular
+             $scope.$digest();
+        });
     }
     /********************************************************* TRANSLATE SERVICE ********************************************************/
     EditorController.prototype.generateDefaultNavBarMenu = function()
@@ -4520,7 +4535,8 @@ var EditorController = (function () {
         'FilterService',
         'GetParametersOperationService',
         '$translate',
-        'CatalogService'
+        'CatalogService',
+        '$window'
 
     ];
 
