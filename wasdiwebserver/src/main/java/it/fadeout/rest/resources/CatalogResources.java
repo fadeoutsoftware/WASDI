@@ -214,7 +214,7 @@ public class CatalogResources {
 					Wasdi.DebugLog("CatalogResources.DownloadEntryByName: file ok return content");
 					oResponseBuilder = Response.ok(oStream);
 					oResponseBuilder.header("Content-Disposition", "attachment; filename="+ oFile.getName());
-					oResponseBuilder.header("Content-Length", oFile.length());
+					oResponseBuilder.header("Content-Length", Long.toString(oFile.length()));
 				}
 			}
 			Wasdi.DebugLog("CatalogResources.DownloadEntryByName: done, return");
