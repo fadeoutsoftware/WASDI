@@ -3,7 +3,10 @@ package wasdi.jwasdilib;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -12,16 +15,16 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLConnection;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
-
-import javax.imageio.stream.ImageOutputStreamImpl;
 
 import org.apache.commons.net.io.Util;
 
@@ -2038,20 +2041,26 @@ public class WasdiLib {
 	 * @param oOutputStream
 	 * @throws IOException
 	 */
-	protected void copyStream(InputStream oInputStream, OutputStream oOutputStream) throws IOException {
-		int BUFFER_SIZE = 4096;
-
-		int iBytesRead = -1;
-		byte[] abBuffer = new byte[BUFFER_SIZE];
-		
-		while ((iBytesRead = oInputStream.read(abBuffer)) != -1) {
-
-			oOutputStream.write(abBuffer, 0, iBytesRead);
-		}
+	protected void copyStreamAndClose(InputStream oInputStream, OutputStream oOutputStream) throws IOException {
+		copyStream(oInputStream, oOutputStream);
 				
 		oOutputStream.close();
 		oInputStream.close();
 		
+	}
+	
+	protected void copyStream(InputStream oInputStream, OutputStream oOutputStream) throws IOException {
+		int BUFFER_SIZE = 8192;//1024*1024;//4096;
+
+		int iBytesRead = -1;
+		byte[] abBuffer = new byte[BUFFER_SIZE];
+		Long lTotal = 0L;
+		
+		//TODO maybe print transfer stats every minute or so: speed, time elapsed
+		while ((iBytesRead = oInputStream.read(abBuffer)) != -1) {
+			oOutputStream.write(abBuffer, 0, iBytesRead);
+			lTotal += iBytesRead;
+		}
 	}
 	
 	/**
@@ -2060,191 +2069,79 @@ public class WasdiLib {
 	 */
 	public void uploadFile(String sFileName) 
 	{
-		if(sFileName==null || sFileName.isEmpty())
-		{
-			//TODO ERROR
-			System.out.println("sFileName must not be empty or null");
+		if(sFileName==null || sFileName.isEmpty()){
+			throw new NullPointerException("WasdiLib.uploadFile: file name is null");
 		}
-		String sFullPath = getSavePath() + sFileName;
-
-//		String sUrl = m_sBaseUrl + "/product/uploadfile?name="+sFileName +"&workspace=" + m_sActiveWorkspace;
-		String sUrl = m_sBaseUrl + "/product/uploadfile?workspace=" + m_sActiveWorkspace + "&name=" + sFileName;
-
-		URL oURL;
-		HttpURLConnection oConnection;
-	    HashMap<String, String> asHeaders = getStreamingHeaders();
-
-	    File oFile = new File(sFullPath);
-	    //la testUpload si basa su del codice trovato in internet vedi utils multipartUtility 
-//	    testUpload(sUrl,oFile);
-	    //httpPost metodo fatto da me per upload dei file (il codice commentanto all'inizio è preso da stackoverflow)
-	    //httpPost(sUrl,oFile ,asHeaders);
-	    
-	    //hello world funziona
-//	    httpGet(m_sBaseUrl + "/wasdi/hello",asHeaders);  
-	}
-	
-	private void testUpload(String sUrl,File oFile)
-	{
-		//upload tramite libreria esterna
-		String charset = "UTF-8";
 		try {
-			MultipartUtility multipart = new MultipartUtility(sUrl, charset);
-			multipart.addHeaderField("x-session-token", "m_sSessionId");
-//			multipart.addHeaderField("Content-Disposition", "attachment; filename="+ oFile.getName());
-			//Content-Disposition", "attachment; filename="+ oFile.getName()
-//			multipart.addHeaderField("Content-Type", "multipart/form-data");
-			multipart.addFilePart("file", oFile);
-			List<String> response = multipart.finish();
-			System.out.println("SERVER REPLIED:");
-			for (String line : response) 
-			{
-				System.out.println(line);
+			//local file
+			String sFullPath = getSavePath() + sFileName;
+			File oFile = new File(sFullPath);
+			if(!oFile.exists()) {
+				throw new IOException("WasdiLib.uploadFile: file not found");
 			}
+			InputStream oInputStream = new FileInputStream(oFile);
 			
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
+		    //request
+			String sUrl = m_sBaseUrl + "/product/uploadfile?workspace=" + m_sActiveWorkspace + "&name=" + sFileName;
+			URL oURL = new URL(sUrl);
+			HttpURLConnection oConnection = (HttpURLConnection) oURL.openConnection();
+		    oConnection.setDoOutput(true);
+		    oConnection.setDoInput(true);
+		    oConnection.setUseCaches(false);
+//		    int iBufferSize = 8192;//8*1024*1024;
+//		    oConnection.setChunkedStreamingMode(iBufferSize);
+		    Long lLen = oFile.length();
+		    System.out.println("WasdiLib.uploadFile: file length is: "+Long.toString(lLen));
+		    oConnection.setRequestProperty("x-session-token", m_sSessionId);
+
+		    String sBoundary = "**WASDIlib**" + UUID.randomUUID().toString() + "**WASDIlib**";
+		    oConnection.setRequestProperty("Content-Type", "multipart/form-data; boundary=" + sBoundary);
+		    oConnection.setRequestProperty("Connection", "Keep-Alive");
+		    oConnection.setRequestProperty("User-Agent", "WasdiLib.Java");
+   
+		    
+		    oConnection.connect();
+		    DataOutputStream oOutputStream = new DataOutputStream(oConnection.getOutputStream());
+		    
+		    oOutputStream.writeBytes( "--" + sBoundary + "\r\n" );
+		    oOutputStream.writeBytes( "Content-Disposition: form-data; name=\"" + "file" + "\"; filename=\"" + sFileName + "\"" + "\r\n");
+		    oOutputStream.writeBytes( "Content-Type: " + URLConnection.guessContentTypeFromName(sFileName) + "\r\n");
+		    oOutputStream.writeBytes( "Content-Transfer-Encoding: binary" + "\r\n");
+		    oOutputStream.writeBytes("\r\n");
+		    
+	        Util.copyStream(oInputStream, oOutputStream);
+	        
+	        oOutputStream.flush();
+	        oInputStream.close();
+	        oOutputStream.writeBytes("\r\n");
+	        oOutputStream.flush();
+	        oOutputStream.writeBytes("\r\n");
+	        oOutputStream.writeBytes("--" + sBoundary + "--"+"\r\n");
+	        oOutputStream.close();
+		    
+		    // response
+		    int iResponse = oConnection.getResponseCode();
+		    System.out.println("WasdiLib.uploadFile: server returned " + iResponse);
+		    InputStream oResponseInputStream = null;
+		    ByteArrayOutputStream oByteArrayOutputStream = new ByteArrayOutputStream();
+		    if( 200 <= iResponse && 299 >= iResponse ) {
+		    	oResponseInputStream = oConnection.getInputStream();
+		    } else {
+		    	oResponseInputStream = oConnection.getErrorStream();
+		    }
+		    if(null!=oResponseInputStream) {
+		    	Util.copyStream(oResponseInputStream, oByteArrayOutputStream);
+		    	String sMessage = oByteArrayOutputStream.toString();
+		    	System.out.println(sMessage);
+		    } else {
+		    	throw new NullPointerException("WasdiLib.uploadFile: stream is null");
+		    }
+		    
+		    oOutputStream.close();
+		    
+		} catch(Exception e) {
 			e.printStackTrace();
-		}	
-	}
-	
-	/**
-	 * Default Http Post
-	 * @param sUrl full url (base path + relative path + queryparams)
-	 * @param sPayload body payload as a string
-	 * @param asHeaders headers dictionary <String key> <String value>
-	 * @return Server response as a String
-	protected String httpPost2(String sUrl, String sPayload, Map<String, String> asHeaders) {
-		
-		HttpClient oClient = new DefaultHttpClient();
-		try {
-			
-			HttpPost oHost = new HttpPost(sUrl);
-
-			if (asHeaders != null) {
-				for (String sKey : asHeaders.keySet()) {
-					oHost.setHeader(sKey,asHeaders.get(sKey));
-				}
-			}
-
-			StringEntity input = new StringEntity(sPayload);
-
-			oHost.setEntity(input);
-
-			HttpResponse response = oClient.execute(oHost);
-
-			BufferedReader rd = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
-
-			StringBuilder oStringBuilder = new StringBuilder();
-
-			String sLine = "";
-
-			while ((sLine = rd.readLine()) != null) {
-
-				oStringBuilder.append(sLine);
-
-			}
-
-			return oStringBuilder.toString();
-
-		} catch (Exception oEx) {
-			oEx.printStackTrace();
-			return "";
-		} finally { 
-			if (oClient != null) ((DefaultHttpClient)oClient).close();
-		}
-
-	}
-	*/
-	
-	
-	/**
-	 * Default Http Get
-	 * @param sUrl full url (base path + relative path + queryparams)
-	 * @param asHeaders headers dictionary <String key> <String value>
-	 * @return Server response as a String
-	 * @return
-	public String httpGet2(String sUrl, Map<String, String> asHeaders) {
-		
-		HttpClient oClient = new DefaultHttpClient();
-		
-		try {
-			
-			HttpGet oHost = new HttpGet(sUrl);
-			
-			if (asHeaders != null) {
-				for (String sKey : asHeaders.keySet()) {
-					oHost.setHeader(sKey,asHeaders.get(sKey));
-				}
-			}
-			
-			HttpResponse response = oClient.execute(oHost);
-		
-			
-			BufferedReader rd = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
-
-			StringBuilder oStringBuilder = new StringBuilder();
-
-			String sLine = "";
-
-			while ((sLine = rd.readLine()) != null) {
-				oStringBuilder.append(sLine);
-			}
-
-			return oStringBuilder.toString();
-
-		} catch (Exception oEx) {
-			oEx.printStackTrace();
-			return "";
 		}
 	}
-	*/
-	
-	/**
-	 * Default Http Get
-	 * @param sUrl full url (base path + relative path + queryparams)
-	 * @param asHeaders headers dictionary <String key> <String value>
-	 * @return Server response as a String
-	 * @return
-	
-	public String httpsGet(String sUrl, Map<String, String> asHeaders) {
-		try {
-			
-			SSLContext sslContext = new SSLContextBuilder().loadTrustMaterial(null, (certificate, authType) -> true).build();
-				 
-			CloseableHttpClient client = HttpClients.custom()
-				      .setSSLContext(sslContext)
-				      .setSSLHostnameVerifier(new NoopHostnameVerifier())
-				      .build();
-
-			HttpGet oHost = new HttpGet(sUrl);
-
-			if (asHeaders != null) {
-				for (String sKey : asHeaders.keySet()) {
-					oHost.setHeader(sKey,asHeaders.get(sKey));
-				}
-			}
-
-			HttpResponse response = client.execute(oHost);
-			
-
-			BufferedReader rd = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
-
-			StringBuilder oStringBuilder = new StringBuilder();
-
-			String sLine = "";
-
-			while ((sLine = rd.readLine()) != null) {
-				oStringBuilder.append(sLine);
-			}
-
-			return oStringBuilder.toString();
-
-		} catch (Exception oEx) {
-			oEx.printStackTrace();
-			return "";
-		}
-	}
-	 */
 	
 }
