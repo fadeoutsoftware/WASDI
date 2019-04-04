@@ -22,6 +22,7 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -2078,7 +2079,8 @@ public class WasdiLib {
 			if(!oFile.exists()) {
 				throw new IOException("WasdiLib.uploadFile: file not found");
 			}
-			InputStream oInputStream = new BufferedInputStream(new FileInputStream(oFile));
+			//InputStream oInputStream = new BufferedInputStream(new FileInputStream(oFile));
+			InputStream oInputStream = new FileInputStream(oFile);
 			
 		    //request
 			String sUrl = m_sBaseUrl + "/product/uploadfile?workspace=" + m_sActiveWorkspace + "&name=" + sFileName;
@@ -2087,14 +2089,15 @@ public class WasdiLib {
 		    oConnection.setDoOutput(true);
 		    oConnection.setDoInput(true);
 		    oConnection.setUseCaches(false);
-		    int iBufferSize = 8192;//8*1024*1024;
-		    oConnection.setChunkedStreamingMode(iBufferSize);
-//		    Long lLen = oFile.length();
-//		    System.out.println("WasdiLib.uploadFile: file length is: "+Long.toString(lLen));
+//		    int iBufferSize = 8192;//8*1024*1024;
+//		    oConnection.setChunkedStreamingMode(iBufferSize);
+		    Long lLen = oFile.length();
+		    System.out.println("WasdiLib.uploadFile: file length is: "+Long.toString(lLen));
 //		    oConnection.setFixedLengthStreamingMode(lLen);
 		    oConnection.setRequestProperty("x-session-token", m_sSessionId);
 
-		    String sBoundary = "*****" + Long.toString(System.currentTimeMillis()) + "*****";
+		    //String sBoundary = "*****" + Long.toString(System.currentTimeMillis()) + "*****";
+		    String sBoundary = "*****" + UUID.randomUUID().toString() + "*****";
 		    oConnection.setRequestProperty("Content-Type", "multipart/form-data; boundary=" + sBoundary);
 		    oConnection.setRequestProperty("Connection", "Keep-Alive");
 		    oConnection.setRequestProperty("User-Agent", "WasdiLib.Java");
@@ -2110,7 +2113,7 @@ public class WasdiLib {
 		    oOutputStream.writeBytes( "Content-Disposition: form-data; name=\"" + "file" + "\"; filename=\"" + sFileName + "\"" + "\r\n");
 		    oOutputStream.writeBytes( "Content-Type: " + URLConnection.guessContentTypeFromName(sFileName) + "\r\n");
 		    oOutputStream.writeBytes( "Content-Transfer-Encoding: binary" + "\r\n");
-		    oOutputStream.writeBytes( "Content-Length: " + Long.toString(oFile.length()) + "\r\n");
+//		    oOutputStream.writeBytes( "Content-Length: " + Long.toString(oFile.length()) + "\r\n");
 		    oOutputStream.writeBytes("\r\n");
 		    
 
