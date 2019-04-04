@@ -2056,7 +2056,7 @@ public class WasdiLib {
 		byte[] abBuffer = new byte[BUFFER_SIZE];
 		Long lTotal = 0L;
 		
-		//TODO print transfer stats every minute or so: speed, time elapsed
+		//TODO maybe print transfer stats every minute or so: speed, time elapsed
 		while ((iBytesRead = oInputStream.read(abBuffer)) != -1) {
 			oOutputStream.write(abBuffer, 0, iBytesRead);
 			lTotal += iBytesRead;
@@ -2079,7 +2079,6 @@ public class WasdiLib {
 			if(!oFile.exists()) {
 				throw new IOException("WasdiLib.uploadFile: file not found");
 			}
-			//InputStream oInputStream = new BufferedInputStream(new FileInputStream(oFile));
 			InputStream oInputStream = new FileInputStream(oFile);
 			
 		    //request
@@ -2093,18 +2092,13 @@ public class WasdiLib {
 //		    oConnection.setChunkedStreamingMode(iBufferSize);
 		    Long lLen = oFile.length();
 		    System.out.println("WasdiLib.uploadFile: file length is: "+Long.toString(lLen));
-//		    oConnection.setFixedLengthStreamingMode(lLen);
 		    oConnection.setRequestProperty("x-session-token", m_sSessionId);
 
-		    //String sBoundary = "*****" + Long.toString(System.currentTimeMillis()) + "*****";
-		    String sBoundary = "*****" + UUID.randomUUID().toString() + "*****";
+		    String sBoundary = "**WASDIlib**" + UUID.randomUUID().toString() + "**WASDIlib**";
 		    oConnection.setRequestProperty("Content-Type", "multipart/form-data; boundary=" + sBoundary);
 		    oConnection.setRequestProperty("Connection", "Keep-Alive");
 		    oConnection.setRequestProperty("User-Agent", "WasdiLib.Java");
-//		    oConnection.setRequestProperty("Test", "Bonjour");
-		    
-		    
-		    
+   
 		    
 		    oConnection.connect();
 		    DataOutputStream oOutputStream = new DataOutputStream(oConnection.getOutputStream());
@@ -2113,38 +2107,17 @@ public class WasdiLib {
 		    oOutputStream.writeBytes( "Content-Disposition: form-data; name=\"" + "file" + "\"; filename=\"" + sFileName + "\"" + "\r\n");
 		    oOutputStream.writeBytes( "Content-Type: " + URLConnection.guessContentTypeFromName(sFileName) + "\r\n");
 		    oOutputStream.writeBytes( "Content-Transfer-Encoding: binary" + "\r\n");
-//		    oOutputStream.writeBytes( "Content-Length: " + Long.toString(oFile.length()) + "\r\n");
 		    oOutputStream.writeBytes("\r\n");
 		    
-
-//	        copyStream(oInputStream, oOutputStream);
 	        Util.copyStream(oInputStream, oOutputStream);
+	        
 	        oOutputStream.flush();
 	        oInputStream.close();
-//	        oWriter.append("\r\n");
 	        oOutputStream.writeBytes("\r\n");
-//	        oWriter.flush();
 	        oOutputStream.flush();
-	        //oWriter.append("\r\n").flush();
 	        oOutputStream.writeBytes("\r\n");
 	        oOutputStream.writeBytes("--" + sBoundary + "--"+"\r\n");
-//	        oWriter.append("--" + sBoundary + "--").append("\r\n");
-//	        oWriter.close();
 	        oOutputStream.close();
-
-//		    oConnection.setRequestProperty("Content-Type", "multipart/form-data");
-//		    //oConnection.setRequestProperty("Content-Type", URLConnection.guessContentTypeFromName(oFile.getName()));
-//		    oConnection.setRequestProperty("Content-Disposition","form-data; name=\"file\"; filename=\""+oFile.getName()+"\"");
-//		    oConnection.setRequestProperty("Content-Transfer-Encoding", "binary");
-//		    oConnection.setRequestProperty("Content-Length", Long.toString(oFile.length()));
-		    
-//		    oOutputStream.writeBytes("--"+sBoundary+"\r\n");
-//		    Util.copyStream(oBufferedInputStream, oOutputStream);
-//		    oOutputStream.writeBytes("--"+sBoundary+"\r\n");
-////		    oReqEntity.writeTo(oOutputStream);
-//		    oOutputStream.flush();
-//		    oBufferedInputStream.close();
-//		    oOutputStream.close();
 		    
 		    // response
 		    int iResponse = oConnection.getResponseCode();
@@ -2170,168 +2143,5 @@ public class WasdiLib {
 			e.printStackTrace();
 		}
 	}
-	
-	private void testUpload(String sUrl,File oFile)
-	{
-		//upload tramite libreria esterna
-		String charset = "UTF-8";
-		try {
-			MultipartUtility multipart = new MultipartUtility(sUrl, charset);
-			multipart.addHeaderField("x-session-token", "m_sSessionId");
-//			multipart.addHeaderField("Content-Disposition", "attachment; filename="+ oFile.getName());
-			//Content-Disposition", "attachment; filename="+ oFile.getName()
-//			multipart.addHeaderField("Content-Type", "multipart/form-data");
-			multipart.addFilePart("file", oFile);
-			List<String> response = multipart.finish();
-			System.out.println("SERVER REPLIED:");
-			for (String line : response) 
-			{
-				System.out.println(line);
-			}
-			
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}	
-	}
-	
-	/**
-	 * Default Http Post
-	 * @param sUrl full url (base path + relative path + queryparams)
-	 * @param sPayload body payload as a string
-	 * @param asHeaders headers dictionary <String key> <String value>
-	 * @return Server response as a String
-	protected String httpPost2(String sUrl, String sPayload, Map<String, String> asHeaders) {
-		
-		HttpClient oClient = new DefaultHttpClient();
-		try {
-			
-			HttpPost oHost = new HttpPost(sUrl);
-
-			if (asHeaders != null) {
-				for (String sKey : asHeaders.keySet()) {
-					oHost.setHeader(sKey,asHeaders.get(sKey));
-				}
-			}
-
-			StringEntity input = new StringEntity(sPayload);
-
-			oHost.setEntity(input);
-
-			HttpResponse response = oClient.execute(oHost);
-
-			BufferedReader rd = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
-
-			StringBuilder oStringBuilder = new StringBuilder();
-
-			String sLine = "";
-
-			while ((sLine = rd.readLine()) != null) {
-
-				oStringBuilder.append(sLine);
-
-			}
-
-			return oStringBuilder.toString();
-
-		} catch (Exception oEx) {
-			oEx.printStackTrace();
-			return "";
-		} finally { 
-			if (oClient != null) ((DefaultHttpClient)oClient).close();
-		}
-
-	}
-	*/
-	
-	
-	/**
-	 * Default Http Get
-	 * @param sUrl full url (base path + relative path + queryparams)
-	 * @param asHeaders headers dictionary <String key> <String value>
-	 * @return Server response as a String
-	 * @return
-	public String httpGet2(String sUrl, Map<String, String> asHeaders) {
-		
-		HttpClient oClient = new DefaultHttpClient();
-		
-		try {
-			
-			HttpGet oHost = new HttpGet(sUrl);
-			
-			if (asHeaders != null) {
-				for (String sKey : asHeaders.keySet()) {
-					oHost.setHeader(sKey,asHeaders.get(sKey));
-				}
-			}
-			
-			HttpResponse response = oClient.execute(oHost);
-		
-			
-			BufferedReader rd = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
-
-			StringBuilder oStringBuilder = new StringBuilder();
-
-			String sLine = "";
-
-			while ((sLine = rd.readLine()) != null) {
-				oStringBuilder.append(sLine);
-			}
-
-			return oStringBuilder.toString();
-
-		} catch (Exception oEx) {
-			oEx.printStackTrace();
-			return "";
-		}
-	}
-	*/
-	
-	/**
-	 * Default Http Get
-	 * @param sUrl full url (base path + relative path + queryparams)
-	 * @param asHeaders headers dictionary <String key> <String value>
-	 * @return Server response as a String
-	 * @return
-	
-	public String httpsGet(String sUrl, Map<String, String> asHeaders) {
-		try {
-			
-			SSLContext sslContext = new SSLContextBuilder().loadTrustMaterial(null, (certificate, authType) -> true).build();
-				 
-			CloseableHttpClient client = HttpClients.custom()
-				      .setSSLContext(sslContext)
-				      .setSSLHostnameVerifier(new NoopHostnameVerifier())
-				      .build();
-
-			HttpGet oHost = new HttpGet(sUrl);
-
-			if (asHeaders != null) {
-				for (String sKey : asHeaders.keySet()) {
-					oHost.setHeader(sKey,asHeaders.get(sKey));
-				}
-			}
-
-			HttpResponse response = client.execute(oHost);
-			
-
-			BufferedReader rd = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
-
-			StringBuilder oStringBuilder = new StringBuilder();
-
-			String sLine = "";
-
-			while ((sLine = rd.readLine()) != null) {
-				oStringBuilder.append(sLine);
-			}
-
-			return oStringBuilder.toString();
-
-		} catch (Exception oEx) {
-			oEx.printStackTrace();
-			return "";
-		}
-	}
-	 */
 	
 }
