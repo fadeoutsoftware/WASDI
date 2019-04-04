@@ -1071,9 +1071,18 @@ var EditPanelController = (function() {
     {
 
         if(utilsIsStrNullOrEmpty(sNameDiv) === true)
+        {
             return false;
+        }
+        var oHTMLElement = angular.element(document).find(sNameDiv);
+        if(utilsIsObjectNullOrUndefined(oHTMLElement) === true || oHTMLElement.length === 0 )
+        {
+            return false;
+        }
         if(utilsIsObjectNullOrUndefined(afValues) === true)
+        {
             return false;
+        }
         //todo test
         var x = utilsGenerateArrayWithFirstNIntValue(0,afValues.length);
         if(utilsIsObjectNullOrUndefined(x) === true)
@@ -1115,6 +1124,7 @@ var EditPanelController = (function() {
             },
 
         };
+
         Plotly.newPlot(sNameDiv, data,layout,{staticPlot: true});//,layout,{staticPlot: true}
 
         return true;
@@ -1167,6 +1177,15 @@ var EditPanelController = (function() {
     EditPanelController.prototype.getModalBodySize = function( ){
         var elementModalBody = angular.element(document.querySelector('#editPanelBody'));
         //var elementMapContainer = angular.element(document.querySelector('#editPanelBody'));
+        if(utilsIsObjectNullOrUndefined(elementModalBody) === true || utilsIsObjectNullOrUndefined(elementModalBody[0]) === true ||
+            elementModalBody[0].hasOwnProperty("offsetHeight") === false || elementModalBody[0].hasOwnProperty("offsetWidth") === false )
+        {
+            return {
+                height:"",
+                width:""
+            };
+        }
+
         var heightMapContainer = elementModalBody[0].offsetHeight ;
         var widthMapContainer = elementModalBody[0].offsetWidth ;
 
