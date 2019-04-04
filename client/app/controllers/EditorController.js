@@ -4,7 +4,8 @@
 var EditorController = (function () {
     function EditorController($scope, $location, $interval, oConstantsService, oAuthService, oMapService, oFileBufferService,
                               oProductService, $state, oWorkspaceService, oGlobeService, oProcessesLaunchedService, oRabbitStompService,
-                              oSnapOperationService, oModalService, oFilterService, oGetParametersOperationService, oTranslate, oCatalogService) {
+                              oSnapOperationService, oModalService, oFilterService, oGetParametersOperationService, oTranslate, oCatalogService,
+                              $window) {
         // Reference to the needed Services
         this.m_oScope = $scope;
         this.m_oScope.m_oController = this;
@@ -47,6 +48,11 @@ var EditorController = (function () {
         //Url of the Band Image (2D - Editor Mode)
         this.m_sViewUrlSelectedBand = "";
         this.m_oMapContainerSize = utilsProjectGetMapContainerSize();
+
+        // var oThat = this;
+        // this.resizeMapOnBrowserResizeEvent = function(){
+        //     oThat.m_oMapContainerSize = utilsProjectGetMapContainerSize();
+        // }
         this.m_oMapPreviewContainerSize = utilsProjectGetPreviewContainerSize();
         // Object used to exchange information with the image preview directive
         this.m_oImagePreviewDirectivePayload = {
@@ -163,8 +169,17 @@ var EditorController = (function () {
 
         // Launch image editor modal to debug it
         //this.openImageEditorDialog();
+        var oThat = this;
 
+        angular.element($window).bind('resize', function(){
 
+             $scope.width = $window.innerWidth;
+            oThat.m_oMapContainerSize = utilsProjectGetMapContainerSize();
+4
+            // manuall $digest required as resize event
+            // is outside of angular
+             $scope.$digest();
+        });
     }
     /********************************************************* TRANSLATE SERVICE ********************************************************/
     EditorController.prototype.generateDefaultNavBarMenu = function()
@@ -1764,8 +1779,8 @@ var EditorController = (function () {
                 //undo - redo
                 this.removeActualBoundingBox(oBand.layerId);
                 this.removeUndoBoundingBox(oBand.layerId);
-                this.m_oGlobeService.flyToWorkspaceBoundingBox(this.m_aoProducts);
-                this.m_oMapService.flyToWorkspaceBoundingBox(this.m_aoProducts);
+                // this.m_oGlobeService.flyToWorkspaceBoundingBox(this.m_aoProducts);
+                // this.m_oMapService.flyToWorkspaceBoundingBox(this.m_aoProducts);
             }
             else {
 
@@ -1777,28 +1792,41 @@ var EditorController = (function () {
                 this.m_sViewUrlSelectedBand = "//:0";
 
                 // Fly Home
-                this.m_oGlobeService.flyToWorkspaceBoundingBox(this.m_aoProducts);
+                // this.m_oGlobeService.flyToWorkspaceBoundingBox(this.m_aoProducts);
             }
         }
         else {
 
             // We are in 3d Mode
             var aoGlobeLayers = this.m_oGlobeService.getGlobeLayers();
+            // var oGlobe = this.m_oGlobeService.getGlobe();
+
             //Remove band layer
             for (var iIndexLayer=0; iIndexLayer<aoGlobeLayers.length; iIndexLayer++) {
                 var oLayer = aoGlobeLayers.get(iIndexLayer);
 
-                if (utilsIsStrNullOrEmpty(sLayerId) == false && utilsIsObjectNullOrUndefined(oLayer) == false && oLayer.imageryProvider.layers == sLayerId) {
-                    oLayer = aoGlobeLayers.remove(oLayer);
-                    break;
+                if (utilsIsStrNullOrEmpty(sLayerId) == false && utilsIsObjectNullOrUndefined(oLayer) == false && oLayer.imageryProvider.layers == sLayerId)
+                {
+                     oLayer = aoGlobeLayers.remove(oLayer);
+                    // oLayer = oGlobe.remove(oLayer);
+                    //break;
+                    iIndexLayer = 0;
                 }
+
             }
+
             //if the layers isn't georeferenced remove the Corresponding rectangle
             var iNumberOfProdcutsLayers = this.m_aoProductsLayersIn3DMapArentGeoreferenced.length;
             for(var iIndexProductLayer = 0; iIndexProductLayer < iNumberOfProdcutsLayers; iIndexProductLayer++)
             {
-                 var sProductLayerId = "wasdi:" + this.m_aoProductsLayersIn3DMapArentGeoreferenced[iIndexProductLayer].id;
-                if( utilsIsStrNullOrEmpty(sLayerId) == false && utilsIsObjectNullOrUndefined(oLayer) == false && sProductLayerId === sLayerId)
+
+                var sProductLayerId = "";
+                if( this.m_aoProductsLayersIn3DMapArentGeoreferenced[iIndexProductLayer].hasOwnProperty('id') === true &&
+                    utilsIsObjectNullOrUndefined(this.m_aoProductsLayersIn3DMapArentGeoreferenced[iIndexProductLayer].id) === false)
+                {
+                    sProductLayerId = "wasdi:" + this.m_aoProductsLayersIn3DMapArentGeoreferenced[iIndexProductLayer].id;
+                }
+                if( utilsIsStrNullOrEmpty(sLayerId) === false && sProductLayerId === sLayerId)//&& utilsIsObjectNullOrUndefined(oLayer) == false
                 {
                     this.m_oGlobeService.removeEntity(this.m_aoProductsLayersIn3DMapArentGeoreferenced[iIndexProductLayer].rectangle);
                     utilsRemoveObjectInArray(this.m_aoProductsLayersIn3DMapArentGeoreferenced,this.m_aoProductsLayersIn3DMapArentGeoreferenced[iIndexProductLayer]);
@@ -1809,8 +1837,8 @@ var EditorController = (function () {
             this.removeActualBoundingBox(oBand.layerId);
             this.removeUndoBoundingBox(oBand.layerId);
 
-            this.m_oGlobeService.flyToWorkspaceBoundingBox(this.m_aoProducts);
-            this.m_oMapService.flyToWorkspaceBoundingBox(this.m_aoProducts);
+            // this.m_oGlobeService.flyToWorkspaceBoundingBox(this.m_aoProducts);
+            // this.m_oMapService.flyToWorkspaceBoundingBox(this.m_aoProducts);
         }
 
         // Deselect the node
@@ -4507,7 +4535,8 @@ var EditorController = (function () {
         'FilterService',
         'GetParametersOperationService',
         '$translate',
-        'CatalogService'
+        'CatalogService',
+        '$window'
 
     ];
 
