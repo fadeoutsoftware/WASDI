@@ -145,11 +145,13 @@ angular.module('wasdi.TreeDirective', [])
                             //data.event.type !="contextmenu" => discard right click of mouse (plugin)
                             if (angular.isUndefined(data.event))  return;
 
+                            //exclude click event context menu
                             if(!utilsIsObjectNullOrUndefined(data.node) && data.event.type !="contextmenu")
                             {
                                 oController.openCloseNode(data.node.id);
 
                                 //$scope.m_oController.m_oProcessesLaunchedService.thereIsPublishBandProcessOfTheProduct(data.node.id) == false &&
+                                //is it a band?
                                 if( data.node.children.length == 0 && !utilsIsObjectNullOrUndefined(data.node.original.band))
                                 {
 
