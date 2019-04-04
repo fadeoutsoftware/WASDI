@@ -24,5 +24,6 @@ public enum LauncherOperations {
     RUNIDL,
     RUNMATLAB,
     MOSAIC,
-    SUBSET
+    SUBSET,
+    WPS
 }

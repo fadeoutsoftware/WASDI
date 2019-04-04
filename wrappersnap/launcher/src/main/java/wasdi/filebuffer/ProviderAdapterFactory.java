@@ -17,31 +17,32 @@ import wasdi.shared.utils.Utils;
  * @author c.nattero
  *
  */
-public class ProviderAdapterSupplier {
+public class ProviderAdapterFactory {
 
 	private static final Map<String, Supplier<ProviderAdapter>> s_aoDownloaderSuppliers;
 
 	static {
 		final Map<String, Supplier<ProviderAdapter>> aoDownloaders = new HashMap<>();
+		aoDownloaders.put("ONDA", ONDAProviderAdapter::new);
 		aoDownloaders.put("SENTINEL", DhUSProviderAdapter::new);
 		aoDownloaders.put("MATERA", DhUSProviderAdapter::new);
-		aoDownloaders.put("FEDEO", DhUSProviderAdapter::new);
 		aoDownloaders.put("PROBAV", PROBAVProviderAdapter::new);
-		aoDownloaders.put("ONDA", ONDAProviderAdapter::new);
-
+		aoDownloaders.put("FEDEO", DhUSProviderAdapter::new);
+		
 		s_aoDownloaderSuppliers = Collections.unmodifiableMap(aoDownloaders);
 	}
 
 	public ProviderAdapter supplyProviderAdapter(String sProviderAdapterType) {
 		ProviderAdapter oResult = null;
-		if(!Utils.isNullOrEmpty(sProviderAdapterType)) {
+		if(Utils.isNullOrEmpty(sProviderAdapterType)) {
+			throw new NullPointerException("ProviderAdapterSupplier.supplyProviderAdapter: a null String has been passed");
+		} else {
 			Supplier<ProviderAdapter> oSupplier = s_aoDownloaderSuppliers.get(sProviderAdapterType);
 			if(oSupplier != null ) {
 				oResult = oSupplier.get();
 			}
 		}
-
+		
 		return oResult;
 	}
-
 }
