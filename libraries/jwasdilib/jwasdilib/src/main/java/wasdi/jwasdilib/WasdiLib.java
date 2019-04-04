@@ -3,7 +3,10 @@ package wasdi.jwasdilib;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -12,6 +15,7 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLConnection;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -20,8 +24,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
-
-import javax.imageio.stream.ImageOutputStreamImpl;
 
 import org.apache.commons.net.io.Util;
 
@@ -2038,20 +2040,26 @@ public class WasdiLib {
 	 * @param oOutputStream
 	 * @throws IOException
 	 */
-	protected void copyStream(InputStream oInputStream, OutputStream oOutputStream) throws IOException {
-		int BUFFER_SIZE = 4096;
-
-		int iBytesRead = -1;
-		byte[] abBuffer = new byte[BUFFER_SIZE];
-		
-		while ((iBytesRead = oInputStream.read(abBuffer)) != -1) {
-
-			oOutputStream.write(abBuffer, 0, iBytesRead);
-		}
+	protected void copyStreamAndClose(InputStream oInputStream, OutputStream oOutputStream) throws IOException {
+		copyStream(oInputStream, oOutputStream);
 				
 		oOutputStream.close();
 		oInputStream.close();
 		
+	}
+	
+	protected void copyStream(InputStream oInputStream, OutputStream oOutputStream) throws IOException {
+		int BUFFER_SIZE = 8192;//1024*1024;//4096;
+
+		int iBytesRead = -1;
+		byte[] abBuffer = new byte[BUFFER_SIZE];
+		Long lTotal = 0L;
+		
+		//TODO print transfer stats every minute or so: speed, time elapsed
+		while ((iBytesRead = oInputStream.read(abBuffer)) != -1) {
+			oOutputStream.write(abBuffer, 0, iBytesRead);
+			lTotal += iBytesRead;
+		}
 	}
 	
 	/**
@@ -2060,28 +2068,104 @@ public class WasdiLib {
 	 */
 	public void uploadFile(String sFileName) 
 	{
-		if(sFileName==null || sFileName.isEmpty())
-		{
-			//TODO ERROR
-			System.out.println("sFileName must not be empty or null");
+		if(sFileName==null || sFileName.isEmpty()){
+			throw new NullPointerException("WasdiLib.uploadFile: file name is null");
 		}
-		String sFullPath = getSavePath() + sFileName;
+		try {
+			//local file
+			String sFullPath = getSavePath() + sFileName;
+			File oFile = new File(sFullPath);
+			if(!oFile.exists()) {
+				throw new IOException("WasdiLib.uploadFile: file not found");
+			}
+			InputStream oInputStream = new BufferedInputStream(new FileInputStream(oFile));
+			
+		    //request
+			String sUrl = m_sBaseUrl + "/product/uploadfile?workspace=" + m_sActiveWorkspace + "&name=" + sFileName;
+			URL oURL = new URL(sUrl);
+			HttpURLConnection oConnection = (HttpURLConnection) oURL.openConnection();
+		    oConnection.setDoOutput(true);
+		    oConnection.setDoInput(true);
+		    oConnection.setUseCaches(false);
+		    int iBufferSize = 8192;//8*1024*1024;
+		    oConnection.setChunkedStreamingMode(iBufferSize);
+//		    Long lLen = oFile.length();
+//		    System.out.println("WasdiLib.uploadFile: file length is: "+Long.toString(lLen));
+//		    oConnection.setFixedLengthStreamingMode(lLen);
+		    oConnection.setRequestProperty("x-session-token", m_sSessionId);
 
-//		String sUrl = m_sBaseUrl + "/product/uploadfile?name="+sFileName +"&workspace=" + m_sActiveWorkspace;
-		String sUrl = m_sBaseUrl + "/product/uploadfile?workspace=" + m_sActiveWorkspace + "&name=" + sFileName;
+		    String sBoundary = "*****" + Long.toString(System.currentTimeMillis()) + "*****";
+		    oConnection.setRequestProperty("Content-Type", "multipart/form-data; boundary=" + sBoundary);
+		    oConnection.setRequestProperty("Connection", "Keep-Alive");
+		    oConnection.setRequestProperty("User-Agent", "WasdiLib.Java");
+//		    oConnection.setRequestProperty("Test", "Bonjour");
+		    
+		    
+		    
+		    
+		    oConnection.connect();
+		    DataOutputStream oOutputStream = new DataOutputStream(oConnection.getOutputStream());
+		    
+		    oOutputStream.writeBytes( "--" + sBoundary + "\r\n" );
+		    oOutputStream.writeBytes( "Content-Disposition: form-data; name=\"" + "file" + "\"; filename=\"" + sFileName + "\"" + "\r\n");
+		    oOutputStream.writeBytes( "Content-Type: " + URLConnection.guessContentTypeFromName(sFileName) + "\r\n");
+		    oOutputStream.writeBytes( "Content-Transfer-Encoding: binary" + "\r\n");
+		    oOutputStream.writeBytes( "Content-Length: " + Long.toString(oFile.length()) + "\r\n");
+		    oOutputStream.writeBytes("\r\n");
+		    
 
-		URL oURL;
-		HttpURLConnection oConnection;
-	    HashMap<String, String> asHeaders = getStreamingHeaders();
+//	        copyStream(oInputStream, oOutputStream);
+	        Util.copyStream(oInputStream, oOutputStream);
+	        oOutputStream.flush();
+	        oInputStream.close();
+//	        oWriter.append("\r\n");
+	        oOutputStream.writeBytes("\r\n");
+//	        oWriter.flush();
+	        oOutputStream.flush();
+	        //oWriter.append("\r\n").flush();
+	        oOutputStream.writeBytes("\r\n");
+	        oOutputStream.writeBytes("--" + sBoundary + "--"+"\r\n");
+//	        oWriter.append("--" + sBoundary + "--").append("\r\n");
+//	        oWriter.close();
+	        oOutputStream.close();
 
-	    File oFile = new File(sFullPath);
-	    //la testUpload si basa su del codice trovato in internet vedi utils multipartUtility 
-//	    testUpload(sUrl,oFile);
-	    //httpPost metodo fatto da me per upload dei file (il codice commentanto all'inizio è preso da stackoverflow)
-	    //httpPost(sUrl,oFile ,asHeaders);
-	    
-	    //hello world funziona
-//	    httpGet(m_sBaseUrl + "/wasdi/hello",asHeaders);  
+//		    oConnection.setRequestProperty("Content-Type", "multipart/form-data");
+//		    //oConnection.setRequestProperty("Content-Type", URLConnection.guessContentTypeFromName(oFile.getName()));
+//		    oConnection.setRequestProperty("Content-Disposition","form-data; name=\"file\"; filename=\""+oFile.getName()+"\"");
+//		    oConnection.setRequestProperty("Content-Transfer-Encoding", "binary");
+//		    oConnection.setRequestProperty("Content-Length", Long.toString(oFile.length()));
+		    
+//		    oOutputStream.writeBytes("--"+sBoundary+"\r\n");
+//		    Util.copyStream(oBufferedInputStream, oOutputStream);
+//		    oOutputStream.writeBytes("--"+sBoundary+"\r\n");
+////		    oReqEntity.writeTo(oOutputStream);
+//		    oOutputStream.flush();
+//		    oBufferedInputStream.close();
+//		    oOutputStream.close();
+		    
+		    // response
+		    int iResponse = oConnection.getResponseCode();
+		    System.out.println("WasdiLib.uploadFile: server returned " + iResponse);
+		    InputStream oResponseInputStream = null;
+		    ByteArrayOutputStream oByteArrayOutputStream = new ByteArrayOutputStream();
+		    if( 200 <= iResponse && 299 >= iResponse ) {
+		    	oResponseInputStream = oConnection.getInputStream();
+		    } else {
+		    	oResponseInputStream = oConnection.getErrorStream();
+		    }
+		    if(null!=oResponseInputStream) {
+		    	Util.copyStream(oResponseInputStream, oByteArrayOutputStream);
+		    	String sMessage = oByteArrayOutputStream.toString();
+		    	System.out.println(sMessage);
+		    } else {
+		    	throw new NullPointerException("WasdiLib.uploadFile: stream is null");
+		    }
+		    
+		    oOutputStream.close();
+		    
+		} catch(Exception e) {
+			e.printStackTrace();
+		}
 	}
 	
 	private void testUpload(String sUrl,File oFile)
