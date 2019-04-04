@@ -765,12 +765,12 @@ var EditorController = (function () {
                             var oRectangleIsNotGeoreferencedProduct = this.productIsNotGeoreferencedRectangle3DMap(sGeoserverBBox,this.m_aoVisibleBands[iIndexLayer].bbox, this.m_aoVisibleBands[iIndexLayer].layerId);
                             if( utilsIsObjectNullOrUndefined(oRectangleIsNotGeoreferencedProduct) === false)
                             {
-                                oController.addLayerMap3D(oController.m_aoVisibleBands[iIndexLayer].layerId);
+                                // this.addLayerMap3D(oController.m_aoVisibleBands[iIndexLayer].layerId);
                                 var oLayer3DMap = {
-                                    id : oController.m_aoVisibleBands[iIndexLayer].layerId,
+                                    id : this.m_aoVisibleBands[iIndexLayer].layerId,
                                     rectangle : oRectangleIsNotGeoreferencedProduct
                                 };
-                                oController.m_aoProductsLayersIn3DMapArentGeoreferenced.push(oLayer3DMap);
+                                this.m_aoProductsLayersIn3DMapArentGeoreferenced.push(oLayer3DMap);
                             }
 
                         }
