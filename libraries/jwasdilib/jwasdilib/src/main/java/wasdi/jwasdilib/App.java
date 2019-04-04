@@ -1,8 +1,14 @@
 package wasdi.jwasdilib;
 
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
+import org.apache.commons.net.io.Util;
 
 /**
  * Hello world!
@@ -16,7 +22,11 @@ public class App
         WasdiLib oLib = new WasdiLib();
         
         oLib.init("C:/Users/c.nattero/workspace/wasdi/wasdilib/config.properties");
-        testBaseLib(oLib);
+        testConnection(oLib);
+//        testUploadFileDUMMYFILE(oLib);
+        testUploadFile(oLib);
+        
+//        testBaseLib(oLib);
         
         //testUploadFileDUMMYIMAGE(oLib);
         //testMosaic(oLib);
@@ -28,6 +38,43 @@ public class App
         
     }
     
+    public static void testConnection(WasdiLib oLib) {
+    	try {
+    		
+    		//request
+	    	String sUrl = oLib.getBaseUrl() + "/wasdi/hello";
+			URL oURL = new URL(sUrl);
+			HttpURLConnection oConnection = (HttpURLConnection) oURL.openConnection();
+		    oConnection.setDoOutput(true);
+		    oConnection.setDoInput(true);
+		    oConnection.setUseCaches(false);
+	//	    oConnection.setRequestProperty("Accept", "*/*");
+		    oConnection.setRequestMethod("GET");
+		    oConnection.connect();
+		    
+		    // response
+		    int iResponse = oConnection.getResponseCode();
+		    System.out.println("WasdiLib.uploadFile: server returned " + iResponse);
+		    InputStream oResponseInputStream = null;
+		    ByteArrayOutputStream oByteArrayOutputStream = new ByteArrayOutputStream();
+		    if( 200 <= iResponse && 299 >= iResponse ) {
+		    	oResponseInputStream = oConnection.getInputStream();
+		    } else {
+		    	oResponseInputStream = oConnection.getErrorStream();
+		    }
+		    if(null!=oResponseInputStream) {
+		    	Util.copyStream(oResponseInputStream, oByteArrayOutputStream);
+		    	String sMessage = oByteArrayOutputStream.toString();
+		    	System.out.println(sMessage);
+		    } else {
+		    	throw new NullPointerException("WasdiLib.uploadFile: stream is null");
+		    }
+		    
+		    
+    	} catch (Exception e) {
+			e.printStackTrace();
+		}
+    }
     
     public static void testBaseLib(WasdiLib oLib) {
     	
@@ -118,7 +165,10 @@ public class App
     
     public static void testUploadFile(WasdiLib oLib)
     {
-    	oLib.uploadFile("S1B_IW_GRDH_1SDV_20180101T001334_20180101T001359_008970_010027_F7B8.zip");
+//    	oLib.uploadFile("S1B_IW_GRDH_1SDV_20180101T001334_20180101T001359_008970_010027_F7B8.zip");
+//    	oLib.uploadFile("out.tif");
+    	oLib.uploadFile("S1A_S3_OCN__2SSH_20181220T000048_20181220T000108_025101_02C553_7619.zip"); //17.5 MB
+    	
     	
     }
     public static void testUploadFileDUMMYFILE(WasdiLib oLib)
