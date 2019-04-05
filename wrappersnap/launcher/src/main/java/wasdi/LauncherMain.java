@@ -878,11 +878,23 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 
 
 	public String ingest(IngestFileParameter oParameter, String sDownloadPath) throws Exception {
+		s_oLogger.debug("LauncherMain.ingest");
 
+		if(null==oParameter) {
+			String sMsg = "LauncherMain.ingest: null parameter";
+			s_oLogger.error(sMsg);
+			throw new NullPointerException(sMsg);
+		}
+		if(null==sDownloadPath) {
+			String sMsg = "LauncherMain.ingest: null download path";
+			s_oLogger.error(sMsg);
+			throw new NullPointerException(sMsg);
+		}
 		File oFilePath = new File(oParameter.getFilePath());
 		if (!oFilePath.canRead()) {
-			System.out.println("LauncherMain.Ingest: ERROR: unable to access uploaded file " + oFilePath.getAbsolutePath());
-			throw new Exception("unable to access uploaded file " + oFilePath.getName());
+			String sMsg = "LauncherMain.Ingest: ERROR: unable to access uploaded file " + oFilePath.getAbsolutePath();
+			s_oLogger.error(sMsg);
+			throw new IOException(sMsg);
 		}
 
 		ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
@@ -900,7 +912,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 
 				updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 0);
 			} else {
-				s_oLogger.debug("LauncherMain.Ingest: process not found: " + oParameter.getProcessObjId());
+				s_oLogger.error("LauncherMain.Ingest: process not found: " + oParameter.getProcessObjId());
 			}
 
 			File oRootPath = new File(sDownloadPath);
@@ -912,7 +924,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 
 			if (!oDstDir.isDirectory() || !oDstDir.canWrite()) {
 				System.out.println("LauncherMain.Ingest: ERROR: unable to access destination directory " + oDstDir.getAbsolutePath());
-				throw new Exception("Unable to access destination directory for the Workspace");
+				throw new IOException("Unable to access destination directory for the Workspace");
 			}
 
 			// Product view Model
@@ -959,20 +971,33 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			//add product to db
 			addProductToDbAndSendToRabbit(oVM, oFilePath.getAbsolutePath(), oParameter.getWorkspace(), oParameter.getExchange(), LauncherOperations.INGEST.name(), oBB);
 
-			updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.DONE, 100);
+			 updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.DONE, 100);
 
 			return oDstFile.getAbsolutePath();
 
 		} catch (Exception e) {
-			System.out.println("LauncherMain.Ingest: ERROR: Exception occurrend during file ingestion");
-			e.printStackTrace();
-
+			String sMsg = "LauncherMain.Ingest: ERROR: Exception occurrend during file ingestion";
+			System.out.println(sMsg);
 			String sError = org.apache.commons.lang.exception.ExceptionUtils.getMessage(e);
+			s_oLogger.error(sMsg);
+			s_oLogger.error(sError);
+			e.printStackTrace();			
 
 			if (oProcessWorkspace != null) oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
 			if (s_oSendToRabbit!=null) s_oSendToRabbit.SendRabbitMessage(false,LauncherOperations.INGEST.name(),oParameter.getWorkspace(),sError,oParameter.getExchange());
 
-		} finally{
+		} catch (Throwable e) {
+			String sMsg = "LauncherMain.Ingest: ERROR: Throwable occurrend during file ingestion";
+			System.out.println(sMsg);
+			String sError = org.apache.commons.lang.exception.ExceptionUtils.getMessage(e);
+			s_oLogger.error(sMsg);
+			s_oLogger.error(sError);
+			e.printStackTrace();			
+
+			if (oProcessWorkspace != null) oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
+			if (s_oSendToRabbit!=null) s_oSendToRabbit.SendRabbitMessage(false,LauncherOperations.INGEST.name(),oParameter.getWorkspace(),sError,oParameter.getExchange());
+		}
+		finally{
 			//update process status and send rabbit updateProcess message
 			closeProcessWorkspace(oProcessWorkspaceRepository, oProcessWorkspace);
 		}
