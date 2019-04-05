@@ -22,6 +22,7 @@ import javax.ws.rs.core.Context;
 import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.runtime.Config;
 import org.esa.snap.runtime.Engine;
+import org.glassfish.jersey.server.ResourceConfig;
 
 import it.fadeout.business.DownloadsThread;
 //import it.fadeout.business.PasswordAuthentication;
@@ -45,7 +46,7 @@ import wasdi.shared.rabbit.RabbitFactory;
 import wasdi.shared.utils.CredentialPolicy;
 import wasdi.shared.utils.Utils;
 
-public class Wasdi extends Application {
+public class Wasdi extends ResourceConfig {
 	@Context
 	ServletConfig m_oServletConfig;
 	
@@ -89,22 +90,27 @@ public class Wasdi extends Application {
 		m_oCredentialPolicy = new CredentialPolicy();
 	}
 	
-	@Override
-	public Set<Class<?>> getClasses() {
-		final Set<Class<?>> classes = new HashSet<Class<?>>();
-		// register resources and features
-		classes.add(FileBufferResource.class);
-		classes.add(OpenSearchResource.class);
-		classes.add(WasdiResource.class);
-		classes.add(AuthResource.class);
-		classes.add(WorkspaceResource.class);
-		classes.add(ProductResource.class);
-		classes.add(OpportunitySearchResource.class);
-		classes.add(ProcessingResources.class);
-		classes.add(ProcessWorkspaceResource.class);
-		classes.add(CatalogResources.class);
-		return classes;
+	public Wasdi() {
+		register(new WasdiBinder());
+		packages(true, "it.fadeout.rest.resources");
 	}
+	
+//	@Override
+//	public Set<Class<?>> getClasses() {
+//		final Set<Class<?>> classes = new HashSet<Class<?>>();
+//		// register resources and features
+//		classes.add(FileBufferResource.class);
+//		classes.add(OpenSearchResource.class);
+//		classes.add(WasdiResource.class);
+//		classes.add(AuthResource.class);
+//		classes.add(WorkspaceResource.class);
+//		classes.add(ProductResource.class);
+//		classes.add(OpportunitySearchResource.class);
+//		classes.add(ProcessingResources.class);
+//		classes.add(ProcessWorkspaceResource.class);
+//		classes.add(CatalogResources.class);
+//		return classes;
+//	}
 	
 	
 	@PostConstruct

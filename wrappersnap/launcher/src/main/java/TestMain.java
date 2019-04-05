@@ -1,4 +1,4 @@
-package wasdi;
+
 
 import java.io.File;
 import java.io.IOException;
@@ -21,6 +21,7 @@ import org.json.JSONObject;
 
 import com.bc.ceres.glevel.MultiLevelImage;
 
+import wasdi.LauncherMain;
 import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.DownloadedFile;
 import wasdi.shared.business.ProcessWorkspace;

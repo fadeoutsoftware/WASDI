@@ -4,9 +4,7 @@
  * Fadeout software
  *
  */
-package wasdi.shared.opensearch;
-
-import wasdi.shared.utils.Utils;
+package wasdi.shared.utils;
 
 /**
  * @author c.nattero
