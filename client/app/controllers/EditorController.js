@@ -909,7 +909,7 @@ var EditorController = (function () {
                             if (oController.m_b2DMapModeOn === false){
                                 //if there are bands not georeferenced we need to remove layers
                                 //(because oController.m_oGlobeService.removeAllEntities(); remove only the red square)
-                                 oController.removeBandLayersIn3dMaps(oController.m_aoVisibleBands[iIndexLayer].layerId);
+                                 oController.removeBandLayersIn3dMaps("wasdi:" + oController.m_aoVisibleBands[iIndexLayer].layerId);
                             }
 
                         }
