@@ -959,9 +959,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			//add product to db
 			addProductToDbAndSendToRabbit(oVM, oFilePath.getAbsolutePath(), oParameter.getWorkspace(), oParameter.getExchange(), LauncherOperations.INGEST.name(), oBB);
 
-			if (oProcessWorkspace != null) {
-				oProcessWorkspace.setStatus(ProcessStatus.DONE.name());
-			}
+			updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.DONE, 100);
 
 			return oDstFile.getAbsolutePath();
 
