@@ -32,7 +32,6 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import wasdi.jwasdilib.utils.MosaicSetting;
-import wasdi.jwasdilib.utils.MultipartUtility;
 
 
 public class WasdiLib {
@@ -1963,7 +1962,12 @@ public class WasdiLib {
 
 					Util.copyStream(oInputStream, oOutputStream);
 
-					oInputStream.close();
+					if(null!=oOutputStream) {
+						oOutputStream.close();
+					}
+					if(null!=oInputStream) {
+						oInputStream.close();
+					}
 					
 					if(null!=sAttachmentName && !sFileName.equals(sAttachmentName) && sAttachmentName.toLowerCase().endsWith(".zip")) {
 						unzip(sAttachmentName, sSavePath);
