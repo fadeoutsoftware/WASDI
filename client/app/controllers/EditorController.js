@@ -707,6 +707,7 @@ var EditorController = (function () {
             oRectangleBoundingBoxMap.options.layers = "wasdi:" + sLayerId;
         }
     };
+
     EditorController.prototype.productIsNotGeoreferencedRectangle3DMap = function(sGeoserverBBox,asBbox,sLayerId)
     {
         var oRectangle = null;
@@ -728,178 +729,223 @@ var EditorController = (function () {
         // Switch the flag
         this.m_bIsActiveGeoraphicalMode = !this.m_bIsActiveGeoraphicalMode;
 
-        //If we are going in Geographical Mode
         if (this.m_bIsActiveGeoraphicalMode == true) {
+            //If we are going in Geographical Mode
 
-            // Clear the Image editor
-            this.clearImageEditor();
+            this.switchToGeographicMode();
 
-            //Check if there is a visible layer and if it is already published
-            for (var iIndexLayer = 0; iIndexLayer < this.m_aoVisibleBands.length; iIndexLayer++) {
-                // var bIsProductGeoreferenced = false;
-                var sColor="#f22323";
-                var sGeoserverBBox = this.m_aoVisibleBands[iIndexLayer].geoserverBoundingBox;
-                // if( this.m_oMapService.isProductGeoreferenced( this.m_aoVisibleBands[iIndexLayer].bbox, this.m_aoVisibleBands[iIndexLayer].geoserverBoundingBox ) === false )
-                // {
-                //     // bIsProductGeoreferenced = true;
-                //     var oRectangleBoundingBoxMap = this.m_oMapService.addRectangleByGeoserverBoundingBox(sGeoserverBBox,sColor);
-                //     //the options.layers property is used for remove the rectangle to the map
-                //     oRectangleBoundingBoxMao.options.layers = "wasdi:" + this.m_aoVisibleBands[iIndexLayer].layerId;
-                // }
-
-
-                //check if the layer has the layer Id
-                if (!utilsIsObjectNullOrUndefined(this.m_aoVisibleBands[iIndexLayer].layerId)) {
-                    // And if it is valid
-                    if (!utilsIsStrNullOrEmpty(this.m_aoVisibleBands[iIndexLayer].layerId)) {
-
-                        // show the layer
-                        if (this.m_b2DMapModeOn)
-                        {
-                            this.addLayerMap2D(this.m_aoVisibleBands[iIndexLayer].layerId);
-                            this.productIsNotGeoreferencedRectangle2DMap(sColor,sGeoserverBBox,this.m_aoVisibleBands[iIndexLayer].bbox,this.m_aoVisibleBands[iIndexLayer].layerId);
-                        }
-                        else
-                        {
-                            this.addLayerMap3D(this.m_aoVisibleBands[iIndexLayer].layerId);
-                            var oRectangleIsNotGeoreferencedProduct = this.productIsNotGeoreferencedRectangle3DMap(sGeoserverBBox,this.m_aoVisibleBands[iIndexLayer].bbox, this.m_aoVisibleBands[iIndexLayer].layerId);
-                            if( utilsIsObjectNullOrUndefined(oRectangleIsNotGeoreferencedProduct) === false)
-                            {
-                                // this.addLayerMap3D(oController.m_aoVisibleBands[iIndexLayer].layerId);
-                                var oLayer3DMap = {
-                                    id : this.m_aoVisibleBands[iIndexLayer].layerId,
-                                    rectangle : oRectangleIsNotGeoreferencedProduct
-                                };
-                                this.m_aoProductsLayersIn3DMapArentGeoreferenced.push(oLayer3DMap);
-                            }
-
-                        }
-
-                        // Check for geoserver bounding box
-                        if (!utilsIsStrNullOrEmpty(this.m_aoVisibleBands[iIndexLayer].geoserverBoundingBox))
-                        {
-                            this.m_oGlobeService.zoomBandImageOnGeoserverBoundingBox(this.m_aoVisibleBands[iIndexLayer].geoserverBoundingBox);
-                            this.m_oMapService.zoomBandImageOnGeoserverBoundingBox(this.m_aoVisibleBands[iIndexLayer].geoserverBoundingBox);
-                            this.saveBoundingBoxUndo(this.m_aoVisibleBands[iIndexLayer].geoserverBoundingBox,'geoserverBB',  this.m_aoVisibleBands[iIndexLayer].layerId);
-                        }
-                        else {
-                            // Try with the generic product bounding box
-                            this.m_oGlobeService.zoomBandImageOnBBOX(this.m_aoVisibleBands[iIndexLayer].bbox);
-                            this.m_oMapService.zoomBandImageOnBBOX(this.m_aoVisibleBands[iIndexLayer].bbox);
-                            this.saveBoundingBoxUndo(this.m_aoVisibleBands[iIndexLayer].geoserverBoundingBox,'BB',  this.m_aoVisibleBands[iIndexLayer].layerId);
-
-                        }
-                    }
-                }
-                else {
-
-                    var oController = this;
-                    // should always be 0 ...
-                    var iProductIndex = iIndexLayer;
-
-                    // Band Not Yet Published !!
-                    var oPublishBandCallback = function (value) {
-                        var oBand = oController.m_aoVisibleBands[iProductIndex];
-
-                        if (value) {
-                            // Remove it from Visible Layer List
-                            oController.removeBandFromVisibleList(oBand);
-                            // Publish the band
-                            oController.openBandImage(oBand);
-                            return true;
-                        }
-                        else {
-                            oController.removeBandFromVisibleList(oBand);
-                            var sNode = oBand.productName+"_"+oBand.name;
-                            oController.setTreeNodeAsDeselected(sNode);
-                            return false;
-                        }
-                    };
-
-                    //ask user if he want to publish the band
-                    utilsVexDialogConfirm("GOING IN GEOGRAPHICAL-MODE WITH A BAND STILL NOT PUBLISHED:<br>DO YOU WANT TO PUBLISH IT?", oPublishBandCallback);
-                }
-            }
-
-            // Show the external Layers
-            for (var iExternals = 0; iExternals<this.m_aoExternalLayers.length; iExternals++) {
-                var oLayer = this.m_aoExternalLayers[iExternals];
-
-                // Add to the map External Layer
-                this.addLayerMap2DByServer(this.m_aoExternalLayers[iExternals].Name, oLayer.sServerLink);
-                this.addLayerMap3DByServer(this.m_aoExternalLayers[iExternals].Name, oLayer.sServerLink);
-            }
-
-            // Set the base maps
-            this.m_oMapService.setBasicMap();
-
-            if (this.m_aoVisibleBands.length == 0) {
-                this.m_oMapService.flyToWorkspaceBoundingBox(this.m_aoProducts);
-            }
         }
         else {
             // We are going in Editor Mode
+            this.switchToEditorMode();
 
-            var iNumberOfLayers = this.m_aoVisibleBands.length;
+        }
+    };
 
-            // With more than one layer visible the user can cancel the action. So it will be cleared in the callback
-            if (iNumberOfLayers<=1) {
-                // Clear the Map
-                if (this.m_b2DMapModeOn) this.m_oMapService.removeLayersFromMap();
-                else this.m_oGlobeService.removeAllEntities();
-            }
+    EditorController.prototype.switchToGeographicMode = function()
+    {
+        this.clearImageEditor();
 
-            if (iNumberOfLayers == 0)
-            {
-                // If there are no layers go to the workspace bounding box
-                if (this.m_b2DMapModeOn) this.m_oGlobeService.flyToWorkspaceBoundingBox(this.m_aoProducts);
-                else this.m_oMapService.flyToWorkspaceBoundingBox(this.m_aoProducts);
-            }
-            else if (iNumberOfLayers == 1)
-            {
-                //if there is only one layer open it
-                this.openBandImage(this.m_aoVisibleBands[0]);
-            }
-            else
-            {
-                //if there are 2 or more layers remove all but the Active One
-                var oController = this;
-
-                var oRemoveOtherLayersCallback = function (value) {
-                    if (value) {
-                        // Clear the Map
-                        if (oController.m_b2DMapModeOn) oController.m_oMapService.removeLayersFromMap();
-                        else oController.m_oGlobeService.removeAllEntities();
+        //Check if there is a visible layer and if it is already published
+        for (var iIndexLayer = 0; iIndexLayer < this.m_aoVisibleBands.length; iIndexLayer++) {
+            // var bIsProductGeoreferenced = false;
+            var sColor="#f22323";
+            var sGeoserverBBox = this.m_aoVisibleBands[iIndexLayer].geoserverBoundingBox;
+            // if( this.m_oMapService.isProductGeoreferenced( this.m_aoVisibleBands[iIndexLayer].bbox, this.m_aoVisibleBands[iIndexLayer].geoserverBoundingBox ) === false )
+            // {
+            //     // bIsProductGeoreferenced = true;
+            //     var oRectangleBoundingBoxMap = this.m_oMapService.addRectangleByGeoserverBoundingBox(sGeoserverBBox,sColor);
+            //     //the options.layers property is used for remove the rectangle to the map
+            //     oRectangleBoundingBoxMao.options.layers = "wasdi:" + this.m_aoVisibleBands[iIndexLayer].layerId;
+            // }
 
 
-                        // Close all the layers
-                        for (var iIndexLayer = 0; iIndexLayer < iNumberOfLayers; iIndexLayer++) {
-                            if (!utilsIsObjectNullOrUndefined(oController.m_aoVisibleBands[iIndexLayer].layerId)) {
-                                var sNodeId = oController.m_aoVisibleBands[iIndexLayer].productName + "_" + oController.m_aoVisibleBands[iIndexLayer].name;
-                                oController.setTreeNodeAsDeselected(sNodeId);
-                            }
+            //check if the layer has the layer Id
+            if (!utilsIsObjectNullOrUndefined(this.m_aoVisibleBands[iIndexLayer].layerId)) {
+                // And if it is valid
+                if (!utilsIsStrNullOrEmpty(this.m_aoVisibleBands[iIndexLayer].layerId)) {
+
+                    // show the layer
+                    if (this.m_b2DMapModeOn)
+                    {
+                        this.addLayerMap2D(this.m_aoVisibleBands[iIndexLayer].layerId);
+                        this.productIsNotGeoreferencedRectangle2DMap(sColor,sGeoserverBBox,this.m_aoVisibleBands[iIndexLayer].bbox,this.m_aoVisibleBands[iIndexLayer].layerId);
+                    }
+                    else
+                    {
+                        this.addLayerMap3D(this.m_aoVisibleBands[iIndexLayer].layerId);
+                        var oRectangleIsNotGeoreferencedProduct = this.productIsNotGeoreferencedRectangle3DMap(sGeoserverBBox,this.m_aoVisibleBands[iIndexLayer].bbox, this.m_aoVisibleBands[iIndexLayer].layerId);
+                        if( utilsIsObjectNullOrUndefined(oRectangleIsNotGeoreferencedProduct) === false)
+                        {
+                            // this.addLayerMap3D(oController.m_aoVisibleBands[iIndexLayer].layerId);
+                            var oLayer3DMap = {
+                                id : this.m_aoVisibleBands[iIndexLayer].layerId,
+                                rectangle : oRectangleIsNotGeoreferencedProduct
+                            };
+                            this.m_aoProductsLayersIn3DMapArentGeoreferenced.push(oLayer3DMap);
                         }
+                    }
 
-                        // Clear the list
-                        oController.m_aoVisibleBands = [];
+                    // Check for geoserver bounding box
+                    if (!utilsIsStrNullOrEmpty(this.m_aoVisibleBands[iIndexLayer].geoserverBoundingBox))
+                    {
+                        this.m_oGlobeService.zoomBandImageOnGeoserverBoundingBox(this.m_aoVisibleBands[iIndexLayer].geoserverBoundingBox);
+                        this.m_oMapService.zoomBandImageOnGeoserverBoundingBox(this.m_aoVisibleBands[iIndexLayer].geoserverBoundingBox);
+                        this.saveBoundingBoxUndo(this.m_aoVisibleBands[iIndexLayer].geoserverBoundingBox,'geoserverBB',  this.m_aoVisibleBands[iIndexLayer].layerId);
+                    }
+                    else {
+                        // Try with the generic product bounding box
+                        this.m_oGlobeService.zoomBandImageOnBBOX(this.m_aoVisibleBands[iIndexLayer].bbox);
+                        this.m_oMapService.zoomBandImageOnBBOX(this.m_aoVisibleBands[iIndexLayer].bbox);
+                        this.saveBoundingBoxUndo(this.m_aoVisibleBands[iIndexLayer].geoserverBoundingBox,'BB',  this.m_aoVisibleBands[iIndexLayer].layerId);
 
-                        // Reopen only the active one
-                        oController.openBandImage(oController.m_oActiveBand);
+                    }
+                }
+            }
+            else {
 
+                var oController = this;
+                // should always be 0 ...
+                var iProductIndex = iIndexLayer;
+
+                // Band Not Yet Published !!
+                var oPublishBandCallback = function (value) {
+                    var oBand = oController.m_aoVisibleBands[iProductIndex];
+
+                    if (value) {
+                        // Remove it from Visible Layer List
+                        oController.removeBandFromVisibleList(oBand);
+                        // Publish the band
+                        oController.openBandImage(oBand);
                         return true;
                     }
                     else {
-                        //revert status
-                        oController.m_bIsActiveGeoraphicalMode = !oController.m_bIsActiveGeoraphicalMode;
+                        oController.removeBandFromVisibleList(oBand);
+                        var sNode = oBand.productName+"_"+oBand.name;
+                        oController.setTreeNodeAsDeselected(sNode);
                         return false;
                     }
                 };
 
-                utilsVexDialogConfirm("IN EDITOR MODE ONLY LAST IMAGE WILL BE SHOWN", oRemoveOtherLayersCallback);
+                //ask user if he want to publish the band
+                utilsVexDialogConfirm("GOING IN GEOGRAPHICAL-MODE WITH A BAND STILL NOT PUBLISHED:<br>DO YOU WANT TO PUBLISH IT?", oPublishBandCallback);
             }
+        }
+
+        // Show the external Layers
+        this.addExternalLayersOnMaps();
+        // for (var iExternals = 0; iExternals<this.m_aoExternalLayers.length; iExternals++) {
+        //     var oLayer = this.m_aoExternalLayers[iExternals];
+        //
+        //     // Add to the map External Layer
+        //     this.addLayerMap2DByServer(this.m_aoExternalLayers[iExternals].Name, oLayer.sServerLink);
+        //     this.addLayerMap3DByServer(this.m_aoExternalLayers[iExternals].Name, oLayer.sServerLink);
+        // }
+
+        // Set the base maps
+        this.m_oMapService.setBasicMap();
+
+        if (this.m_aoVisibleBands.length == 0) {
+            this.m_oMapService.flyToWorkspaceBoundingBox(this.m_aoProducts);
         }
     };
 
+    EditorController.prototype.addExternalLayersOnMaps = function(){
+        for (var iExternals = 0; iExternals<this.m_aoExternalLayers.length; iExternals++) {
+            var oLayer = this.m_aoExternalLayers[iExternals];
+
+            // Add to the map External Layer
+            this.addLayerMap2DByServer(this.m_aoExternalLayers[iExternals].Name, oLayer.sServerLink);
+            this.addLayerMap3DByServer(this.m_aoExternalLayers[iExternals].Name, oLayer.sServerLink);
+        }
+    };
+
+    EditorController.prototype.switchToEditorMode = function(){
+
+        var iNumberOfLayers = this.m_aoVisibleBands.length;
+
+        // With more than one layer visible the user can cancel the action. So it will be cleared in the callback
+        if (iNumberOfLayers <= 1) {
+            // Clear the Map
+            if (this.m_b2DMapModeOn) this.m_oMapService.removeLayersFromMap();
+            else this.m_oGlobeService.removeAllEntities();
+        }
+
+        if (iNumberOfLayers == 0)
+        {
+            // If there are no layers go to the workspace bounding box
+            if (this.m_b2DMapModeOn) this.m_oGlobeService.flyToWorkspaceBoundingBox(this.m_aoProducts);
+            else this.m_oMapService.flyToWorkspaceBoundingBox(this.m_aoProducts);
+        }
+        else if (iNumberOfLayers == 1)
+        {
+            //if there is only one layer open it
+            this.openBandImage(this.m_aoVisibleBands[0]);
+        }
+        else
+        {
+            //if there are 2 or more layers remove all but the Active One
+            var oController = this;
+
+            var oRemoveOtherLayersCallback = function (value) {
+                if (value) {
+                    // Clear the Map
+                    if (oController.m_b2DMapModeOn) {
+                        oController.m_oMapService.removeLayersFromMap();
+                    }
+                    else {
+
+                        oController.removeAllRedSquareBoundingBox();
+                         // oController.m_oGlobeService.removeAllEntities();
+                    }
+
+                    var iNumberOfLayers = oController.m_aoVisibleBands.length;
+                    // Close all the layers
+                    for (var iIndexLayer = 0; iIndexLayer < iNumberOfLayers; iIndexLayer++) {
+                        if (!utilsIsObjectNullOrUndefined(oController.m_aoVisibleBands[iIndexLayer].layerId)) {
+                            var sNodeId = oController.m_aoVisibleBands[iIndexLayer].productName + "_" + oController.m_aoVisibleBands[iIndexLayer].name;
+                            oController.setTreeNodeAsDeselected(sNodeId);
+
+                            if (oController.m_b2DMapModeOn === false){
+                                //if there are bands not georeferenced we need to remove layers
+                                //(because oController.m_oGlobeService.removeAllEntities(); remove only the red square)
+                                 oController.removeBandLayersIn3dMaps(oController.m_aoVisibleBands[iIndexLayer].layerId);
+                            }
+
+                        }
+                    }
+
+                    // Clear the list
+
+                    if( utilsIsObjectNullOrUndefined(oController.m_oActiveBand) === true )
+                    {
+                        if(utilsIsObjectNullOrUndefined(oController.m_aoVisibleBands) === false && oController.m_aoVisibleBands.length > 0)
+                        {
+                            //insert new active layer
+                            oController.m_oActiveBand = oController.m_aoVisibleBands[oController.m_aoVisibleBands.length - 1];
+                            oController.m_aoVisibleBands.splice(0,oController.m_aoVisibleBands.length - 1);
+                        }
+
+                    }
+                    else
+                    {
+                        oController.m_aoVisibleBands = [];
+                        oController.m_aoVisibleBands.push(oController.m_oActiveBand);
+                    }
+                    // Reopen only the active one
+                    oController.openBandImage(oController.m_oActiveBand);
+                    return true;
+                }
+                else {
+                    //revert status
+                    oController.m_bIsActiveGeoraphicalMode = !oController.m_bIsActiveGeoraphicalMode;
+                    return false;
+                }
+            };
+
+            utilsVexDialogConfirm("IN EDITOR MODE ONLY LAST IMAGE WILL BE SHOWN", oRemoveOtherLayersCallback);
+        }
+    }
 
     EditorController.prototype.applyEditorPreviewImageUpdate = function () {
 
@@ -1797,42 +1843,28 @@ var EditorController = (function () {
         }
         else {
 
-            // We are in 3d Mode
-            var aoGlobeLayers = this.m_oGlobeService.getGlobeLayers();
-            // var oGlobe = this.m_oGlobeService.getGlobe();
+            this.removeBandLayersIn3dMaps(sLayerId);
 
-            //Remove band layer
-            for (var iIndexLayer=0; iIndexLayer<aoGlobeLayers.length; iIndexLayer++) {
-                var oLayer = aoGlobeLayers.get(iIndexLayer);
-
-                if (utilsIsStrNullOrEmpty(sLayerId) == false && utilsIsObjectNullOrUndefined(oLayer) == false && oLayer.imageryProvider.layers == sLayerId)
-                {
-                     oLayer = aoGlobeLayers.remove(oLayer);
-                    // oLayer = oGlobe.remove(oLayer);
-                    //break;
-                    iIndexLayer = 0;
-                }
-
-            }
 
             //if the layers isn't georeferenced remove the Corresponding rectangle
-            var iNumberOfProdcutsLayers = this.m_aoProductsLayersIn3DMapArentGeoreferenced.length;
-            for(var iIndexProductLayer = 0; iIndexProductLayer < iNumberOfProdcutsLayers; iIndexProductLayer++)
-            {
-
-                var sProductLayerId = "";
-                if( this.m_aoProductsLayersIn3DMapArentGeoreferenced[iIndexProductLayer].hasOwnProperty('id') === true &&
-                    utilsIsObjectNullOrUndefined(this.m_aoProductsLayersIn3DMapArentGeoreferenced[iIndexProductLayer].id) === false)
-                {
-                    sProductLayerId = "wasdi:" + this.m_aoProductsLayersIn3DMapArentGeoreferenced[iIndexProductLayer].id;
-                }
-                if( utilsIsStrNullOrEmpty(sLayerId) === false && sProductLayerId === sLayerId)//&& utilsIsObjectNullOrUndefined(oLayer) == false
-                {
-                    this.m_oGlobeService.removeEntity(this.m_aoProductsLayersIn3DMapArentGeoreferenced[iIndexProductLayer].rectangle);
-                    utilsRemoveObjectInArray(this.m_aoProductsLayersIn3DMapArentGeoreferenced,this.m_aoProductsLayersIn3DMapArentGeoreferenced[iIndexProductLayer]);
-                    break;
-                }
-            }
+            this.removeRedSquareIn3DMap(sLayerId);
+            // var iNumberOfProdcutsLayers = this.m_aoProductsLayersIn3DMapArentGeoreferenced.length;
+            // for(var iIndexProductLayer = 0; iIndexProductLayer < iNumberOfProdcutsLayers; iIndexProductLayer++)
+            // {
+            //
+            //     var sProductLayerId = "";
+            //     if( this.m_aoProductsLayersIn3DMapArentGeoreferenced[iIndexProductLayer].hasOwnProperty('id') === true &&
+            //         utilsIsObjectNullOrUndefined(this.m_aoProductsLayersIn3DMapArentGeoreferenced[iIndexProductLayer].id) === false)
+            //     {
+            //         sProductLayerId = "wasdi:" + this.m_aoProductsLayersIn3DMapArentGeoreferenced[iIndexProductLayer].id;
+            //     }
+            //     if( utilsIsStrNullOrEmpty(sLayerId) === false && sProductLayerId === sLayerId)//&& utilsIsObjectNullOrUndefined(oLayer) == false
+            //     {
+            //         this.m_oGlobeService.removeEntity(this.m_aoProductsLayersIn3DMapArentGeoreferenced[iIndexProductLayer].rectangle);
+            //         utilsRemoveObjectInArray(this.m_aoProductsLayersIn3DMapArentGeoreferenced,this.m_aoProductsLayersIn3DMapArentGeoreferenced[iIndexProductLayer]);
+            //         break;
+            //     }
+            // }
             //undo - redo
             this.removeActualBoundingBox(oBand.layerId);
             this.removeUndoBoundingBox(oBand.layerId);
@@ -1850,6 +1882,48 @@ var EditorController = (function () {
 
     };
 
+    EditorController.prototype.removeRedSquareIn3DMap = function(sLayerId){
+        var iNumberOfProdcutsLayers = this.m_aoProductsLayersIn3DMapArentGeoreferenced.length;
+        for(var iIndexProductLayer = 0; iIndexProductLayer < iNumberOfProdcutsLayers; iIndexProductLayer++)
+        {
+
+            var sProductLayerId = "";
+            if( this.m_aoProductsLayersIn3DMapArentGeoreferenced[iIndexProductLayer].hasOwnProperty('id') === true &&
+                utilsIsObjectNullOrUndefined(this.m_aoProductsLayersIn3DMapArentGeoreferenced[iIndexProductLayer].id) === false)
+            {
+                sProductLayerId = "wasdi:" + this.m_aoProductsLayersIn3DMapArentGeoreferenced[iIndexProductLayer].id;
+            }
+            if( utilsIsStrNullOrEmpty(sLayerId) === false && sProductLayerId === sLayerId)//&& utilsIsObjectNullOrUndefined(oLayer) == false
+            {
+                this.m_oGlobeService.removeEntity(this.m_aoProductsLayersIn3DMapArentGeoreferenced[iIndexProductLayer].rectangle);
+                utilsRemoveObjectInArray(this.m_aoProductsLayersIn3DMapArentGeoreferenced,this.m_aoProductsLayersIn3DMapArentGeoreferenced[iIndexProductLayer]);
+                break;
+            }
+        }
+    }
+    EditorController.prototype.removeAllRedSquareBoundingBox = function(){
+        this.m_oGlobeService.removeAllEntities();
+    };
+
+    EditorController.prototype.removeBandLayersIn3dMaps = function(sLayerId){
+        // We are in 3d Mode
+        var aoGlobeLayers = this.m_oGlobeService.getGlobeLayers();
+        // var oGlobe = this.m_oGlobeService.getGlobe();
+
+        //Remove band layer
+        for (var iIndexLayer=0; iIndexLayer<aoGlobeLayers.length; iIndexLayer++) {
+            var oLayer = aoGlobeLayers.get(iIndexLayer);
+
+            if (utilsIsStrNullOrEmpty(sLayerId) == false && utilsIsObjectNullOrUndefined(oLayer) == false && oLayer.imageryProvider.layers == sLayerId)
+            {
+                oLayer = aoGlobeLayers.remove(oLayer);
+                // oLayer = oGlobe.remove(oLayer);
+                //break;
+                iIndexLayer = 0;
+            }
+
+        }
+    }
 
     /**
      * Removes a band from the list of visible Bands
