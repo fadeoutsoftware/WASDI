@@ -53,7 +53,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import sun.management.VMManagement;
 import wasdi.asynch.SaveMetadataThread;
 import wasdi.filebuffer.ProviderAdapter;
-import wasdi.filebuffer.ProviderAdapterSupplier;
+import wasdi.filebuffer.ProviderAdapterFactory;
 import wasdi.geoserver.Publisher;
 import wasdi.processors.WasdiProcessorEngine;
 import wasdi.shared.LauncherOperations;
@@ -89,6 +89,7 @@ import wasdi.shared.parameters.RangeDopplerGeocodingParameter;
 import wasdi.shared.parameters.RasterGeometricResampleParameter;
 import wasdi.shared.parameters.SubsetParameter;
 import wasdi.shared.parameters.SubsetSetting;
+import wasdi.shared.parameters.WpsParameters;
 import wasdi.shared.rabbit.RabbitFactory;
 import wasdi.shared.rabbit.Send;
 import wasdi.shared.utils.BandImageManager;
@@ -112,6 +113,8 @@ import wasdi.snapopearations.ReadProduct;
 import wasdi.snapopearations.TerrainCorrection;
 import wasdi.snapopearations.WasdiGraph;
 import wasdi.snapopearations.WriteProduct;
+import wasdi.wps.OLD_WpsAdapter;
+import wasdi.wps.OLD_WpsFactory;
 
 
 /**
@@ -434,6 +437,11 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 				executeSubset(oParameter);
 			}
 			break;			
+			case WPS:{
+				WpsParameters oParameter = (WpsParameters) SerializationUtils.deserializeXMLToObject(sParameter);
+				executeWPS(oParameter);
+			}
+			break;
 			default:
 				s_oLogger.debug("Operation Not Recognized. Nothing to do");
 				break;
@@ -508,6 +516,18 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 	}
 	
 
+	private void executeWPS(WpsParameters oParameter) {
+		s_oLogger.debug("ExecuteWPS");
+		ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
+		ProcessWorkspace oProcessWorkspace = oProcessWorkspaceRepository.GetProcessByProcessObjId(oParameter.getProcessObjId());
+		
+		
+		// Work in Progress
+		// issue #89
+		// https://github.com/fadeoutsoftware/WASDI/issues/89
+		 
+	}
+	
 	/**
 	 * Downloads a new product
 	 * @param oParameter
@@ -524,7 +544,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 0);
 			s_oLogger.debug("LauncherMain.Download: Download Start");
 			
-			ProviderAdapter oProviderAdapter = new ProviderAdapterSupplier().supplyProviderAdapter(oParameter.getProvider());
+			ProviderAdapter oProviderAdapter = new ProviderAdapterFactory().supplyProviderAdapter(oParameter.getProvider());
 			if (oProviderAdapter != null) {
 				oProviderAdapter.subscribe(this);
 			} else {

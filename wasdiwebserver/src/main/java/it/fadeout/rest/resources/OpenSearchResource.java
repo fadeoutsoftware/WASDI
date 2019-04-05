@@ -18,11 +18,11 @@ import javax.ws.rs.core.Context;
 
 import it.fadeout.Wasdi;
 import wasdi.shared.business.User;
-import wasdi.shared.opensearch.AuthenticationCredentials;
 import wasdi.shared.opensearch.OpenSearchQuery;
 import wasdi.shared.opensearch.PaginatedQuery;
 import wasdi.shared.opensearch.QueryExecutor;
 import wasdi.shared.opensearch.QueryExecutorFactory;
+import wasdi.shared.utils.AuthenticationCredentials;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.QueryResultViewModel;
 import wasdi.shared.viewmodels.SearchProviderViewModel;

@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
 
+import wasdi.shared.utils.AuthenticationCredentials;
 import wasdi.shared.utils.Utils;
 
 /**
