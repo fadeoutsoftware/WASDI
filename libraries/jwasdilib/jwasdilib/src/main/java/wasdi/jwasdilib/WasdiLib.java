@@ -74,6 +74,11 @@ public class WasdiLib {
 	private Boolean m_bDownloadActive = true;
 	
 	/**
+	 * Flag to activate the automatic upload of locally created files
+	 */
+	private Boolean m_bUploadActive = true;
+	
+	/**
 	 * Base Folder Path
 	 */
 	private String m_sBasePath = "";
@@ -102,6 +107,7 @@ public class WasdiLib {
 	 * Path of the Parameters file
 	 */
 	private String m_sParametersFilePath = "";
+
 	
 	/**
 	 * Self constructor. If there is a config file initilizes the class members
@@ -359,8 +365,12 @@ public class WasdiLib {
 			
 			if (sDownloadActive.equals("0") || sDownloadActive.toUpperCase().equals("FALSE")) {
 				m_bDownloadActive = false;
-			} else {
-				m_bDownloadActive = true;
+			}
+			
+			String sUploadactive = ConfigReader.getPropValue("UPLOADACTIVE", "1");
+			
+			if(sUploadactive.equals("0") || sUploadactive.toUpperCase().equals("FALSE")) {
+				m_bUploadActive = false;
 			}
 
 			String sIsOnServer = ConfigReader.getPropValue("ISONSERVER", "0");
