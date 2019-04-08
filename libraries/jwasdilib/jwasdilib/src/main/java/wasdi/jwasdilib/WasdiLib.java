@@ -2096,8 +2096,8 @@ public class WasdiLib {
 		    oConnection.setDoOutput(true);
 		    oConnection.setDoInput(true);
 		    oConnection.setUseCaches(false);
-//		    int iBufferSize = 8192;//8*1024*1024;
-//		    oConnection.setChunkedStreamingMode(iBufferSize);
+		    int iBufferSize = 8192;//8*1024*1024;
+		    oConnection.setChunkedStreamingMode(iBufferSize);
 		    Long lLen = oFile.length();
 		    System.out.println("WasdiLib.uploadFile: file length is: "+Long.toString(lLen));
 		    oConnection.setRequestProperty("x-session-token", m_sSessionId);
@@ -2146,6 +2146,7 @@ public class WasdiLib {
 		    }
 		    
 		    oOutputStream.close();
+		    oConnection.disconnect();
 		    
 		} catch(Exception e) {
 			e.printStackTrace();
