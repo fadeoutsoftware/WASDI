@@ -707,13 +707,13 @@ public class WasdiLib {
 					downloadFile(sProductName);
 					System.out.println("File Downloaded on Local PC, keep on working!");
 				}
-				if(m_bUploadActive && bFileExists) {
-					if(!fileExistsOnWasdi(sProductName)) {
-						System.out.println("Remote file Missing. Start WASDI upload. Please wait");
-						uploadFile(sProductName);
-						System.out.println("File Uploaded on WASDI cloud, keep on working!");
-					}
-				}
+//				if(m_bUploadActive && bFileExists) {
+//					if(!fileExistsOnWasdi(sProductName)) {
+//						System.out.println("Remote file Missing. Start WASDI upload. Please wait");
+//						uploadFile(sProductName);
+//						System.out.println("File Uploaded on WASDI cloud, keep on working!");
+//					}
+//				}
 			}
 
 			return sFullPath;
@@ -1086,6 +1086,18 @@ public class WasdiLib {
 				System.out.println("sFileName must not be empty");
 			}
 
+			if(m_bUploadActive) {
+				File oFile = new File(sFileName);
+				Boolean bFileExists = oFile.exists();
+				if(bFileExists) {
+					if(!fileExistsOnWasdi(sFileName)) {
+						System.out.println("Remote file Missing. Start WASDI upload. Please wait");
+						uploadFile(sFileName);
+						System.out.println("File Uploaded on WASDI cloud, keep on working!");
+					}
+				}
+			}
+						
 			String sUrl = m_sBaseUrl + "/catalog/upload/ingestinws?file="+sFileName+"&workspace="+m_sActiveWorkspace;
 
 			String sResponse = httpGet(sUrl, getStandardHeaders());
@@ -1110,7 +1122,7 @@ public class WasdiLib {
 	 * @return Output state of the ingestion process
 	 */
 	public String addFileToWASDI(String sFileName) {
-		return internalAddFileToWADI(sFileName, false);
+		return internalAddFileToWASDI(sFileName, false);
 	}
 
 	/**
@@ -1121,7 +1133,7 @@ public class WasdiLib {
 	 * @return Process Id of the ingestion process
 	 */
 	public String asynchAddFileToWASDI(String sFileName) {
-		return internalAddFileToWADI(sFileName, true);
+		return internalAddFileToWASDI(sFileName, true);
 	}
 
 
