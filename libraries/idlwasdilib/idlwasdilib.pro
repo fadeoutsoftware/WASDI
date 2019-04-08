@@ -147,46 +147,52 @@ END
 
 ; IDL HTTP GET Function Utility
 FUNCTION WASDIHTTPGET, sUrlPath
-
-  COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params
+	
+	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params
   
-  IF (token EQ !NULL) OR (STRLEN(token) LE 1) THEN BEGIN
-    sessioncookie = ''
-  END ELSE BEGIN
-	sessioncookie = token
-  END  
+	IF (token EQ !NULL) OR (STRLEN(token) LE 1) THEN BEGIN
+		sessioncookie = ''
+	END ELSE BEGIN
+		sessioncookie = token
+	END  
 
-  IF (verbose EQ '1') THEN BEGIN
-	print, 'WasdiHttpGet Url ', sUrlPath
-  END
+	CATCH, iErrorStatus 
+
+	IF iErrorStatus NE 0 THEN BEGIN
+		print, 'WasdiHttpGet ERROR STATUS=', iErrorStatus, ' return NULL'
+		RETURN, !NULL
+	ENDIF
+
+	IF (verbose EQ '1') THEN BEGIN
+		print, 'WasdiHttpGet Url ', sUrlPath
+	END
   
-  ; Create a new url object
-  oUrl = OBJ_NEW('IDLnetUrl')
+	; Create a new url object
+	oUrl = OBJ_NEW('IDLnetUrl')
 
-  ; This is an http transaction
-  oUrl->SetProperty, URL_SCHEME = 'http'
+	; This is an http transaction
+	oUrl->SetProperty, URL_SCHEME = 'http'
 
-  ; Use the http server string
-  oUrl->SetProperty, URL_HOSTNAME = '217.182.93.57'
+	; Use the http server string
+	oUrl->SetProperty, URL_HOSTNAME = '217.182.93.57'
 
-  ; name of remote path
-  oUrl->SetProperty, URL_PATH = sUrlPath
-  oUrl->SetProperty, HEADERS = ['Content-Type: application/json','x-session-token: '+sessioncookie]
+	; name of remote path
+	oUrl->SetProperty, URL_PATH = sUrlPath
+	oUrl->SetProperty, HEADERS = ['Content-Type: application/json','x-session-token: '+sessioncookie]
 
-  ; Call the http url and get result
-  serverJSONResult = oUrl->Get( /STRING_ARRAY)
-  ;print,serverJSONResult
+	; Call the http url and get result
+	serverJSONResult = oUrl->Get( /STRING_ARRAY)
+	;print,serverJSONResult
 
-  ; Parse the result in JSON
-  wasdiResult = JSON_PARSE(serverJSONResult)
+	; Parse the result in JSON
+	wasdiResult = JSON_PARSE(serverJSONResult)
 
-  ; Close the connection to the remote server, and destroy the object
-  oUrl->CloseConnections
-  OBJ_DESTROY, oUrl
-  
-  ; Return the JSON
-  RETURN, wasdiResult
+	; Close the connection to the remote server, and destroy the object
+	oUrl->CloseConnections
+	OBJ_DESTROY, oUrl
 
+	; Return the JSON
+	RETURN, wasdiResult
 END
 
 ; IDL HTTP POST UTILITY FUNCTION
@@ -247,6 +253,26 @@ FUNCTION GETVALUEBYKEY, jsonResult, sKey
   
   RETURN, sValue
 
+END
+
+FUNCTION GETDATESTRINGFROMJULDAY, julDay
+	CALDAT, julDay, Month1, Day1, Year1
+
+	sYear = STRTRIM(STRING(Year1),2)
+	sMonth = STRTRIM(STRING(Month1),2)
+	sDay = STRTRIM(STRING(Day1),2)
+	
+	IF (STRLEN(sMonth) EQ 1) THEN BEGIN
+		sMonth = '0'+ sMonth
+	END 
+	
+	IF (STRLEN(sDay) EQ 1) THEN BEGIN
+		sDay = '0'+ sDay
+	END 
+	
+	sDate = sYear + '-' + sMonth + '-' + sDay
+	
+	RETURN, sDate
 END
 
 
@@ -434,6 +460,42 @@ FUNCTION WASDIGETWORKSPACEIDBYNAME, workspacename
   
 end
 
+
+; Check if a product exists already. returns 1 if exists, 0 if not
+FUNCTION WASDICHECKPRODUCTEXISTS, filename
+
+	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params
+
+	workspaceId = "";
+
+	; API URL
+	UrlPath = '/wasdiwebserver/rest/product/byname?sProductName='+filename
+
+	; Get the list of users workpsaces
+	wasdiResult = WASDIHTTPGET(UrlPath)
+
+	iReturn = 0
+
+	; Catch the possible null excetpion
+	CATCH, iErrorStatus 
+
+	IF iErrorStatus NE 0 THEN BEGIN
+		RETURN, iReturn
+	ENDIF
+
+	; try to check the file name
+	sCheckFileName = GETVALUEBYKEY(wasdiResult, 'fileName')
+
+	IF (filename EQ sCheckFileName) THEN BEGIN
+		iReturn = 1
+	END
+
+	; return the flag
+	RETURN, iReturn
+
+end
+
+
 ; Open a  Workspace by name
 pro WASDIOPENWORKSPACE,workspacename
 
@@ -558,7 +620,7 @@ pro WASDIGETSAVEPATH, sFullPath
 
 end
 
-
+; Get the list of available workflows
 FUNCTION WASDIGETWORKFLOWS
 
   COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params

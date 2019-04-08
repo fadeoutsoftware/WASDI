@@ -25,6 +25,7 @@ import org.esa.snap.runtime.Engine;
 import org.glassfish.jersey.server.ResourceConfig;
 
 import it.fadeout.business.DownloadsThread;
+import it.fadeout.business.IDLThread;
 //import it.fadeout.business.PasswordAuthentication;
 import it.fadeout.business.ProcessingThread;
 import it.fadeout.rest.resources.AuthResource;
@@ -72,7 +73,12 @@ public class Wasdi extends ResourceConfig {
 	 * Downloads queue scheduler
 	 */
 	private static DownloadsThread s_oDownloadsThread = null;
-	
+
+	/**
+	 * IDL Processors queue scheduler
+	 */
+	private static IDLThread s_oIDLThread = null;
+
 	/**
 	 * User for debug mode auto login
 	 */
@@ -198,6 +204,15 @@ public class Wasdi extends ResourceConfig {
 					System.out.println("-------downloads thread DISABLED");
 				}
 				
+				if (getInitParameter("EnableIDLScheduler", "true").toLowerCase().equals("true")) {
+					s_oIDLThread = new IDLThread(m_oServletConfig);
+					s_oIDLThread.start();
+					System.out.println("-------IDL thread STARTED");
+				}
+				else {
+					System.out.println("-------IDL thread DISABLED");
+				}
+				
 				
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -255,6 +270,7 @@ public class Wasdi extends ResourceConfig {
 			
 			s_oProcessingThread.stopThread();
 			s_oDownloadsThread.stopThread();
+			s_oIDLThread.stopThread();
 			MongoRepository.shutDownConnection();
 		}
 		catch (Exception e) {
