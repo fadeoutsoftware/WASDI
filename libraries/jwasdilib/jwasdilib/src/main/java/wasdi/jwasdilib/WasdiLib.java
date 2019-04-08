@@ -1075,7 +1075,7 @@ public class WasdiLib {
 	 * @param bAsynch true if the process has to be asynch, false to wait for the result
 	 * @return
 	 */
-	protected String internalAddFileToWADI(String sFileName, Boolean bAsynch) {
+	protected String internalAddFileToWASDI(String sFileName, Boolean bAsynch) {
 		try {
 
 			if (sFileName == null) {
