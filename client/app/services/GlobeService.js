@@ -32,6 +32,69 @@ service('GlobeService', ['$http',  'ConstantsService','SatelliteService', functi
         scene3DOnly:true
     }
 
+    this.initGlobeWithLayersPicker  = function(sGlobeDiv){
+        // this.oGlobeOptions = {}
+        this.oGlobeOptions.baseLayerPicker = false;
+        // this.oGlobeOptions.imageryProvider = null;
+
+        var imageryViewModels = [];
+        imageryViewModels.push(new Cesium.ProviderViewModel({
+            name : 'Open\u00adStreet\u00adMap',
+            iconUrl : Cesium.buildModuleUrl('Widgets/Images/ImageryProviders/openStreetMap.png'),
+            tooltip : 'OpenStreetMap (OSM) is a collaborative project to create a free editable \
+            map of the world.\nhttp://www.openstreetmap.org',
+            creationFunction : function() {
+                return Cesium.createOpenStreetMapImageryProvider({
+                    url : 'https://a.tile.openstreetmap.org/'
+                });
+            }
+        }));
+
+
+        // imageryViewModels.push(new Cesium.ProviderViewModel({
+        //     name : 'Earth at Night',
+        //     iconUrl : Cesium.buildModuleUrl('Widgets/Images/ImageryProviders/blackMarble.png'),
+        //     tooltip : 'The lights of cities and villages trace the outlines of civilization \
+        //         in this global view of the Earth at night as seen by NASA/NOAA\'s Suomi NPP satellite.',
+        //     creationFunction : function() {
+        //         return new Cesium.IonImageryProvider({ assetId: 3812 });
+        //     }
+        // }));
+
+        imageryViewModels.push(new Cesium.ProviderViewModel({
+            name : 'Natural Earth\u00a0II',
+            iconUrl : Cesium.buildModuleUrl('Widgets/Images/ImageryProviders/naturalEarthII.png'),
+            tooltip : 'Natural Earth II, darkened for contrast.\nhttp://www.naturalearthdata.com/',
+            creationFunction : function() {
+                return Cesium.createTileMapServiceImageryProvider({
+                    url : Cesium.buildModuleUrl('Assets/Textures/NaturalEarthII')
+                });
+            }
+        }));
+
+        //Create a CesiumWidget without imagery, if you haven't already done so.
+
+        this.initGlobe(sGlobeDiv);
+        var oTest = this.m_oWasdiGlobe.scene.globe;
+        //Finally, create the baseLayerPicker widget using our view models.
+        var baseLayerPicker = new Cesium.BaseLayerPicker('baseLayerPickerContainer', {
+            globe : this.m_oWasdiGlobe.scene.globe,
+            imageryProviderViewModels : imageryViewModels
+        });
+
+
+        //Create a CesiumWidget without imagery, if you haven't already done so.
+        // var cesiumWidget = new Cesium.CesiumWidget('sGlobeDiv', this.oGlobeOptions);//{ imageryProvider: false }
+
+        // //Finally, create the baseLayerPicker widget using our view models.
+        // var layers = cesiumWidget.imageryLayers;
+        // var baseLayerPicker = new Cesium.BaseLayerPicker('baseLayerPickerContainer', {
+        //     globe : cesiumWidget.scene.globe,
+        //     imageryProviderViewModels : imageryViewModels
+        // });
+        // this.m_oWasdiGlobe = cesiumWidget;
+
+    }
 
     this.initGlobe = function(sGlobeDiv)
     {

@@ -117,6 +117,7 @@ var EditorController = (function () {
         oMapService.removeLayersFromMap();
         // Initialize the globe
         this.m_oGlobeService.initGlobe('cesiumContainer2');
+        // this.m_oGlobeService.initGlobeWithLayersPicker('cesiumContainer2');
 
         //if there isn't workspace
         if (utilsIsObjectNullOrUndefined(this.m_oActiveWorkspace) && utilsIsStrNullOrEmpty(this.m_oActiveWorkspace)) {
