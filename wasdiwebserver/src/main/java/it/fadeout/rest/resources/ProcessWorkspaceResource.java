@@ -322,6 +322,8 @@ public class ProcessWorkspaceResource {
 			
 			oSummaryViewModel.setUserDownloadRunning(iUserDownloadRunning);
 
+			//P.Campanella 20190408: at the moment this API is still not used. We separated IDL processor queue 
+			// If this will be used here we have to manage also IDL queue
 		}
 		catch (Exception oEx) {
 			System.out.println("ProcessWorkspaceResource.GetSummary: error retrieving process " + oEx.getMessage());
