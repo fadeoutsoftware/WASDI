@@ -357,17 +357,21 @@ public class WasdiLib {
 
 			String sDownloadActive = ConfigReader.getPropValue("DOWNLOADACTIVE", "1");
 			
-			if (sDownloadActive.equals("0")) {
+			if (sDownloadActive.equals("0") || sDownloadActive.toUpperCase().equals("FALSE")) {
 				m_bDownloadActive = false;
+			} else {
+				m_bDownloadActive = true;
 			}
 
 			String sIsOnServer = ConfigReader.getPropValue("ISONSERVER", "0");
 			
-			if (sIsOnServer.equals("1")) {
+			if (sIsOnServer.equals("1") || sIsOnServer.toUpperCase().equals("TRUE")) {
 				m_bIsOnServer = true;
 				// On Server Force Download to false
 				m_bDownloadActive = false;
 				m_bVerbose = true;
+			} else {
+				m_bIsOnServer = false;
 			}
 
 			if (m_sBasePath.equals("")) {
