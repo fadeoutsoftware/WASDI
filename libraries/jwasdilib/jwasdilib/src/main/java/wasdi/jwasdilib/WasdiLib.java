@@ -2091,9 +2091,11 @@ public class WasdiLib {
 				if(oZipeEntry.isDirectory()) {
 					String sDirName = sPath+oZipeEntry.getName();
 					File oDir = new File(sDirName);
-					boolean bCreated = oDir.mkdirs();
-					if(!bCreated) {
-						throw new IOException("WasdiLib.unzip: cannot create directory " + oDir);
+					if(!oDir.exists()) {
+						boolean bCreated = oDir.mkdirs();
+						if(!bCreated) {
+							throw new IOException("WasdiLib.unzip: cannot create directory " + oDir);
+						}
 					}
 				}
 			}
