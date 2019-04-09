@@ -22,9 +22,13 @@ public class App
         WasdiLib oLib = new WasdiLib();
         
         oLib.init("C:/Users/c.nattero/workspace/wasdi/wasdilib/config.properties");
+        
         testConnection(oLib);
+        testDownload(oLib);
+        testAutomaticUpload(oLib);
+        
 //        testUploadFileDUMMYFILE(oLib);
-        testUploadFile(oLib);
+//        testUploadFile(oLib);
         
 //        testBaseLib(oLib);
         
@@ -167,8 +171,9 @@ public class App
     {
 //    	oLib.uploadFile("S1B_IW_GRDH_1SDV_20180101T001334_20180101T001359_008970_010027_F7B8.zip");
 //    	oLib.uploadFile("out.tif");
-    	//oLib.uploadFile("S1A_S3_OCN__2SSH_20181220T000048_20181220T000108_025101_02C553_7619.zip"); //17.5 MB
-    	oLib.uploadFile("S1A_EW_RAW__0SSH_20181219T091407_20181219T091454_025092_02C502_BE3D.zip"); //337 MB
+    	oLib.uploadFile("S1A_S3_OCN__2SSH_20181220T000048_20181220T000108_025101_02C553_7619.zip"); //17.5 MB
+//    	oLib.uploadFile("S1A_EW_RAW__0SSH_20181219T091407_20181219T091454_025092_02C502_BE3D.zip"); //337 MB
+//    	oLib.uploadFile("S1A_IW_SLC__1SDV_20170502T045516_20170502T045544_016398_01B271_D413.zip");
     	
     	
     }
@@ -197,6 +202,33 @@ public class App
     	String sOutputState = oLib.subset(sInputFile, sOutputFile, dLatN, dLonW, dLatS, dLonE);
     	System.out.println("Subset result = " + sOutputState);
     }
+
+    public static void testAutomaticUpload(WasdiLib oLib) {
+    	String sResult = null;
+    	//sResult = oLib.getFullProductPath("S2A_MSIL1C_20181212T001711_N0207_R116_T55MHP_20181212T013828.zip");
+    	sResult = oLib.addFileToWASDI("S2A_MSIL1C_20181212T001711_N0207_R116_T55MHP_20181212T013828.zip");
+    	System.out.println(sResult);
+    }
     
+    public static void testDownload(WasdiLib oLib) {
+    	
+    	String sResult = null;
+//    	sResult = oLib.getFullProductPath("S1A_IW_GRDH_1SDV_20190407T171450_20190407T171515_026687_02FECA_7F6E.zip");
+//    	System.out.println(sResult);
+//    	sResult = oLib.getFullProductPath("S2A_MSIL1C_20190404T101031_N0207_R022_T32TNR_20190404T185546.zip");
+//    	System.out.println(sResult);
+//    	sResult = oLib.getFullProductPath("out.tif");
+//    	System.out.println(sResult);
+//    	sResult = oLib.getFullProductPath("S3A_OL_2_LFR____20190401T085814_20190401T090114_20190401T104829_0179_043_107_2160_LN1_O_NR_002.zip");
+//    	System.out.println(sResult);
+//    	sResult = oLib.getFullProductPath("LC08_L1TP_192029_20180427_20180502_01_T1.tar.gz");
+//    	System.out.println(sResult);
+//    	sResult = oLib.getFullProductPath("20170525_8d_20170601-ACRI-L4-BBP-GSM_MULTI_4KM-GLO-DT-v02.nc");
+//    	System.out.println(sResult);
+    	sResult = oLib.getFullProductPath("S1A_IW_GRDH_1SDV_20190407T171450_20190407T171515_026687_02FECA_7F6E_ApplyOrbit.dim");
+    	System.out.println(sResult);
+//    	sResult = oLib.getFullProductPath("S2A_MSIL1C_20190404T101031_N0207_R022_T32TNR_20190404T185546_NDVI.dim");
+//    	System.out.println(sResult);
+    }
     
 }
