@@ -72,7 +72,7 @@ import wasdi.shared.geoserver.GeoServerManager;
 import wasdi.shared.parameters.ApplyOrbitParameter;
 import wasdi.shared.parameters.BaseParameter;
 import wasdi.shared.parameters.CalibratorParameter;
-import wasdi.shared.parameters.DeployProcessorParameter;
+import wasdi.shared.parameters.ProcessorParameter;
 import wasdi.shared.parameters.DownloadFileParameter;
 import wasdi.shared.parameters.FilterParameter;
 import wasdi.shared.parameters.FtpUploadParameters;
@@ -401,24 +401,25 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			break;
 			case DEPLOYPROCESSOR: {
 				// Deploy new user processor
-				DeployProcessorParameter oParameter = (DeployProcessorParameter) SerializationUtils.deserializeXMLToObject(sParameter);
+				ProcessorParameter oParameter = (ProcessorParameter) SerializationUtils.deserializeXMLToObject(sParameter);
 				WasdiProcessorEngine oEngine = WasdiProcessorEngine.GetProcessorEngine(oParameter.getProcessorType(), ConfigReader.getPropValue("DOWNLOAD_ROOT_PATH"), ConfigReader.getPropValue("DOCKER_TEMPLATE_PATH"));
 				oEngine.DeployProcessor(oParameter);
 			}
 			break;
+			case RUNIDL:
 			case RUNPROCESSOR: {
 				// Execute User Processor
-				DeployProcessorParameter oParameter = (DeployProcessorParameter) SerializationUtils.deserializeXMLToObject(sParameter);
+				ProcessorParameter oParameter = (ProcessorParameter) SerializationUtils.deserializeXMLToObject(sParameter);
 				WasdiProcessorEngine oEngine = WasdiProcessorEngine.GetProcessorEngine(oParameter.getProcessorType(), ConfigReader.getPropValue("DOWNLOAD_ROOT_PATH"), ConfigReader.getPropValue("DOCKER_TEMPLATE_PATH"));
 				oEngine.run(oParameter);
 			}
 			break;
-			case RUNIDL: {
+			/*case RUNIDL: {
 				// Run IDL Processor
 				IDLProcParameter oParameter = (IDLProcParameter) SerializationUtils.deserializeXMLToObject(sParameter);
 				executeIDLProcessor(oParameter);
 			}
-			break;
+			break;*/
 			case RUNMATLAB: {
 				// Run Matlab Processor
 				MATLABProcParameters oParameter = (MATLABProcParameters) SerializationUtils.deserializeXMLToObject(sParameter);
@@ -1811,11 +1812,17 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 		try {
 			String sBasePath = ConfigReader.getPropValue("DOWNLOAD_ROOT_PATH");
 			
+			if (oProcessWorkspace != null) {
+				updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 0);
+			}
+			
 			Mosaic oMosaic = new Mosaic(oParameter, sBasePath);
 			
 			if (oMosaic.runMosaic()) {
 				s_oLogger.debug("LauncherMain.executeMosaic done");
-				if (oProcessWorkspace != null) oProcessWorkspace.setStatus(ProcessStatus.DONE.name());
+				if (oProcessWorkspace != null) {
+					oProcessWorkspace.setStatus(ProcessStatus.DONE.name());
+				}
 				
 				s_oLogger.debug("LauncherMain.executeMosaic adding product to Workspace");
 				

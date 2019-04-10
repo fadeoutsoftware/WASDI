@@ -7,4 +7,5 @@ package wasdi.shared.business;
  */
 public class ProcessorTypes {
 	public static String UBUNTU_PYTHON_SNAP = "ubuntu_python_snap";
+	public static String IDL = "IDL";
 }
