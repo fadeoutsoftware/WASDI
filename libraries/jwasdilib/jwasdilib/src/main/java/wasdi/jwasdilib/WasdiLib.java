@@ -1178,6 +1178,12 @@ public class WasdiLib {
 			// Build API URL
 		    String sUrl = m_sBaseUrl + "/processing/geometric/mosaic?sDestinationProductName="+sOutputFile+"&sWorkspaceId="+m_sActiveWorkspace;
 		    
+		    // Output Format: "GeoTIFF" and BEAM supported
+		    String sOutputFormat = "GeoTIFF";
+		    if (sOutputFile.endsWith(".dim")) {
+		    	sOutputFormat = "BEAM-DIMAP";
+		    }
+		    
 		    // Fill the Setting Object
 		    MosaicSetting oMosaicSetting = new MosaicSetting();
 		    oMosaicSetting.setCombine(sCombine);
@@ -1191,6 +1197,7 @@ public class WasdiLib {
 		    oMosaicSetting.setPixelSizeY(dPixelSizeY);
 		    oMosaicSetting.setResamplingName(sResamplingName);
 		    oMosaicSetting.setShowSourceProducts(bShowSourceProducts);
+		    oMosaicSetting.setOutputFormat(sOutputFormat);
 
 		    
 		    oMosaicSetting.setSources((ArrayList<String>) asInputFiles);

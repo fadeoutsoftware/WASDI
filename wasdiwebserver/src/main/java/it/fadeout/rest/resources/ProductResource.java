@@ -98,7 +98,7 @@ public class ProductResource {
 	@GET
 	@Path("byname")
 	@Produces({"application/xml", "application/json", "text/xml"})	
-	public ProductViewModel getByProductName(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sProductName") String sProductName) {
+	public GeorefProductViewModel getByProductName(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sProductName") String sProductName) {
 		
 		Wasdi.DebugLog("ProductResource.GetByProductName");
 
@@ -110,10 +110,13 @@ public class ProductResource {
 		// Read the product from db
 		DownloadedFilesRepository oDownloadedFilesRepository = new DownloadedFilesRepository();
 		DownloadedFile oDownloadedFile = oDownloadedFilesRepository.GetDownloadedFile(sProductName);
-
+		
 		if (oDownloadedFile != null) {
+			GeorefProductViewModel oGeoViewModel = new GeorefProductViewModel(oDownloadedFile.getProductViewModel());
+			oGeoViewModel.setBbox(oDownloadedFile.getBoundingBox());
+			
 			// Ok read
-			return oDownloadedFile.getProductViewModel();
+			return oGeoViewModel;
 		}
 		else {
 			// There was a problem
