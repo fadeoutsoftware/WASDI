@@ -274,6 +274,7 @@ public class Utils {
         for (int iIndexBounds = 0; iIndexBounds < asContent.length; iIndexBounds++)
         {
             String sBounds = asContent[iIndexBounds];
+            sBounds = sBounds.trim();
             String [] asNewBounds = sBounds.split(" ");
 
             if (iIndexBounds > 0) sOutput += ", ";
