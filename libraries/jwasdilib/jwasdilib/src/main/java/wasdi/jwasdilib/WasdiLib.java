@@ -14,6 +14,8 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.ProtocolException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
@@ -72,7 +74,12 @@ public class WasdiLib {
 	 * Flag to activate the automatic local download
 	 */
 	private Boolean m_bDownloadActive = true;
-	
+
+	/**
+	 * Flag to activate the automatic upload of locally created files
+	 */
+	private Boolean m_bUploadActive = true;
+
 	/**
 	 * Base Folder Path
 	 */
@@ -356,18 +363,26 @@ public class WasdiLib {
 			log("SessionId from config " + m_sSessionId);
 
 			String sDownloadActive = ConfigReader.getPropValue("DOWNLOADACTIVE", "1");
-			
-			if (sDownloadActive.equals("0")) {
+
+			if (sDownloadActive.equals("0") || sDownloadActive.toUpperCase().equals("FALSE")) {
 				m_bDownloadActive = false;
 			}
 
+			String sUploadactive = ConfigReader.getPropValue("UPLOADACTIVE", "1");
+
+			if(sUploadactive.equals("0") || sUploadactive.toUpperCase().equals("FALSE")) {
+				m_bUploadActive = false;
+			}
+
 			String sIsOnServer = ConfigReader.getPropValue("ISONSERVER", "0");
-			
-			if (sIsOnServer.equals("1")) {
+
+			if (sIsOnServer.equals("1") || sIsOnServer.toUpperCase().equals("TRUE")) {
 				m_bIsOnServer = true;
 				// On Server Force Download to false
 				m_bDownloadActive = false;
 				m_bVerbose = true;
+			} else {
+				m_bIsOnServer = false;
 			}
 
 			if (m_sBasePath.equals("")) {
@@ -684,13 +699,20 @@ public class WasdiLib {
 			sFullPath = sFullPath +m_sUser + "/" + m_sActiveWorkspace + "/" + sProductName;
 			
 			if (m_bIsOnServer==false) {
-				if (m_bDownloadActive == true) {
-					if (new File(sFullPath).exists() == false) {
-						System.out.println("Local file Missing. Start WASDI download. Please wait");
-						downloadFile(sProductName);
-						System.out.println("File Downloaded on Local PC, keep on working!");
-					}
+				File oFile = new File(sFullPath);
+				Boolean bFileExists = oFile.exists();
+				if (m_bDownloadActive && !bFileExists) {
+					System.out.println("Local file Missing. Start WASDI download. Please wait");
+					downloadFile(sProductName);
+					System.out.println("File Downloaded on Local PC, keep on working!");
 				}
+//				if(m_bUploadActive && bFileExists) {
+//					if(!fileExistsOnWasdi(sProductName)) {
+//						System.out.println("Remote file Missing. Start WASDI upload. Please wait");
+//						uploadFile(sProductName);
+//						System.out.println("File Uploaded on WASDI cloud, keep on working!");
+//					}
+//				}
 			}
 			
 			return sFullPath;
@@ -699,6 +721,55 @@ public class WasdiLib {
 			oEx.printStackTrace();
 			return "";
 		}
+	}
+
+	private boolean fileExistsOnWasdi(String sFileName) {
+		if(null==sFileName) {
+			throw new NullPointerException("WasdiLib.fileExistssOnWasdi: passed a null file name");
+		}
+		int iResult = 200;
+		try{
+			String sUrl = m_sBaseUrl + "/catalog/checkdownloadavaialibitybyname?token=";
+			sUrl += m_sSessionId;
+			sUrl += "filename";
+			sUrl += sFileName;
+			URL oURL;
+			oURL = new URL(sUrl);
+			HttpURLConnection oConnection;
+			oConnection = (HttpURLConnection) oURL.openConnection();
+			oConnection.setRequestMethod("GET");
+			oConnection.connect();
+			iResult =  oConnection.getResponseCode();
+
+			InputStream oInputStream = null;
+			if(200 <= iResult && 299 >= iResult) {
+				oInputStream = oConnection.getInputStream();
+			} else {
+				oInputStream = oConnection.getErrorStream();
+			}
+			ByteArrayOutputStream oBytearrayOutputStream = new ByteArrayOutputStream();
+			if(null!=oInputStream) {
+				Util.copyStream(oInputStream, oBytearrayOutputStream);
+				String sMessage = oBytearrayOutputStream.toString();
+				System.out.println(sMessage);
+			}
+			
+			if(200 == iResult) {
+				return true;
+			}
+			
+		} catch(MalformedURLException e) {
+			e.printStackTrace();
+		} catch (ProtocolException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch(Exception e) {
+			e.printStackTrace();
+		}
+		//false, because in general no upload is desirable 
+		return false; 
+
 	}
 
 	/**
@@ -1014,13 +1085,25 @@ public class WasdiLib {
 				System.out.println("sFileName must not be empty");
 			}
 
-		    String sUrl = m_sBaseUrl + "/catalog/upload/ingestinws?file="+sFileName+"&workspace="+m_sActiveWorkspace;
-		    
-		    String sResponse = httpGet(sUrl, getStandardHeaders());
-		    Map<String, Object> aoJSONMap = s_oMapper.readValue(sResponse, new TypeReference<Map<String,Object>>(){});
-		    
-		    String sProcessId = aoJSONMap.get("stringValue").toString();
-		    
+			if(m_bUploadActive) {
+				File oFile = new File(sFileName);
+				Boolean bFileExists = oFile.exists();
+				if(bFileExists) {
+					if(!fileExistsOnWasdi(sFileName)) {
+						System.out.println("Remote file Missing. Start WASDI upload. Please wait");
+						uploadFile(sFileName);
+						System.out.println("File Uploaded on WASDI cloud, keep on working!");
+					}
+				}
+			}
+						
+			String sUrl = m_sBaseUrl + "/catalog/upload/ingestinws?file="+sFileName+"&workspace="+m_sActiveWorkspace;
+
+			String sResponse = httpGet(sUrl, getStandardHeaders());
+			Map<String, Object> aoJSONMap = s_oMapper.readValue(sResponse, new TypeReference<Map<String,Object>>(){});
+
+			String sProcessId = aoJSONMap.get("stringValue").toString();
+
 			if (bAsynch) return sProcessId;
 			else return waitProcess(sProcessId);
 		}
@@ -2014,9 +2097,11 @@ public class WasdiLib {
 				if(oZipeEntry.isDirectory()) {
 					String sDirName = sPath+oZipeEntry.getName();
 					File oDir = new File(sDirName);
-					boolean bCreated = oDir.mkdirs();
-					if(!bCreated) {
-						throw new IOException("WasdiLib.unzip: cannot create directory " + oDir);
+					if(!oDir.exists()) {
+						boolean bCreated = oDir.mkdirs();
+						if(!bCreated) {
+							throw new IOException("WasdiLib.unzip: cannot create directory " + oDir);
+						}
 					}
 				}
 			}
@@ -2096,60 +2181,61 @@ public class WasdiLib {
 			String sUrl = m_sBaseUrl + "/product/uploadfile?workspace=" + m_sActiveWorkspace + "&name=" + sFileName;
 			URL oURL = new URL(sUrl);
 			HttpURLConnection oConnection = (HttpURLConnection) oURL.openConnection();
-		    oConnection.setDoOutput(true);
-		    oConnection.setDoInput(true);
-		    oConnection.setUseCaches(false);
-//		    int iBufferSize = 8192;//8*1024*1024;
-//		    oConnection.setChunkedStreamingMode(iBufferSize);
-		    Long lLen = oFile.length();
-		    System.out.println("WasdiLib.uploadFile: file length is: "+Long.toString(lLen));
-		    oConnection.setRequestProperty("x-session-token", m_sSessionId);
+			oConnection.setDoOutput(true);
+			oConnection.setDoInput(true);
+			oConnection.setUseCaches(false);
+			int iBufferSize = 8192;//8*1024*1024;
+			oConnection.setChunkedStreamingMode(iBufferSize);
+			Long lLen = oFile.length();
+			System.out.println("WasdiLib.uploadFile: file length is: "+Long.toString(lLen));
+			oConnection.setRequestProperty("x-session-token", m_sSessionId);
 
-		    String sBoundary = "**WASDIlib**" + UUID.randomUUID().toString() + "**WASDIlib**";
-		    oConnection.setRequestProperty("Content-Type", "multipart/form-data; boundary=" + sBoundary);
-		    oConnection.setRequestProperty("Connection", "Keep-Alive");
-		    oConnection.setRequestProperty("User-Agent", "WasdiLib.Java");
-   
-		    
-		    oConnection.connect();
-		    DataOutputStream oOutputStream = new DataOutputStream(oConnection.getOutputStream());
-		    
-		    oOutputStream.writeBytes( "--" + sBoundary + "\r\n" );
-		    oOutputStream.writeBytes( "Content-Disposition: form-data; name=\"" + "file" + "\"; filename=\"" + sFileName + "\"" + "\r\n");
-		    oOutputStream.writeBytes( "Content-Type: " + URLConnection.guessContentTypeFromName(sFileName) + "\r\n");
-		    oOutputStream.writeBytes( "Content-Transfer-Encoding: binary" + "\r\n");
-		    oOutputStream.writeBytes("\r\n");
-		    
-	        Util.copyStream(oInputStream, oOutputStream);
-	        
-	        oOutputStream.flush();
-	        oInputStream.close();
-	        oOutputStream.writeBytes("\r\n");
-	        oOutputStream.flush();
-	        oOutputStream.writeBytes("\r\n");
-	        oOutputStream.writeBytes("--" + sBoundary + "--"+"\r\n");
-	        oOutputStream.close();
-		    
-		    // response
-		    int iResponse = oConnection.getResponseCode();
-		    System.out.println("WasdiLib.uploadFile: server returned " + iResponse);
-		    InputStream oResponseInputStream = null;
-		    ByteArrayOutputStream oByteArrayOutputStream = new ByteArrayOutputStream();
-		    if( 200 <= iResponse && 299 >= iResponse ) {
-		    	oResponseInputStream = oConnection.getInputStream();
-		    } else {
-		    	oResponseInputStream = oConnection.getErrorStream();
-		    }
-		    if(null!=oResponseInputStream) {
-		    	Util.copyStream(oResponseInputStream, oByteArrayOutputStream);
-		    	String sMessage = oByteArrayOutputStream.toString();
-		    	System.out.println(sMessage);
-		    } else {
-		    	throw new NullPointerException("WasdiLib.uploadFile: stream is null");
-		    }
-		    
-		    oOutputStream.close();
-		    
+			String sBoundary = "**WASDIlib**" + UUID.randomUUID().toString() + "**WASDIlib**";
+			oConnection.setRequestProperty("Content-Type", "multipart/form-data; boundary=" + sBoundary);
+			oConnection.setRequestProperty("Connection", "Keep-Alive");
+			oConnection.setRequestProperty("User-Agent", "WasdiLib.Java");
+
+
+			oConnection.connect();
+			DataOutputStream oOutputStream = new DataOutputStream(oConnection.getOutputStream());
+
+			oOutputStream.writeBytes( "--" + sBoundary + "\r\n" );
+			oOutputStream.writeBytes( "Content-Disposition: form-data; name=\"" + "file" + "\"; filename=\"" + sFileName + "\"" + "\r\n");
+			oOutputStream.writeBytes( "Content-Type: " + URLConnection.guessContentTypeFromName(sFileName) + "\r\n");
+			oOutputStream.writeBytes( "Content-Transfer-Encoding: binary" + "\r\n");
+			oOutputStream.writeBytes("\r\n");
+
+			Util.copyStream(oInputStream, oOutputStream);
+
+			oOutputStream.flush();
+			oInputStream.close();
+			oOutputStream.writeBytes("\r\n");
+			oOutputStream.flush();
+			oOutputStream.writeBytes("\r\n");
+			oOutputStream.writeBytes("--" + sBoundary + "--"+"\r\n");
+			oOutputStream.close();
+
+			// response
+			int iResponse = oConnection.getResponseCode();
+			System.out.println("WasdiLib.uploadFile: server returned " + iResponse);
+			InputStream oResponseInputStream = null;
+			ByteArrayOutputStream oByteArrayOutputStream = new ByteArrayOutputStream();
+			if( 200 <= iResponse && 299 >= iResponse ) {
+				oResponseInputStream = oConnection.getInputStream();
+			} else {
+				oResponseInputStream = oConnection.getErrorStream();
+			}
+			if(null!=oResponseInputStream) {
+				Util.copyStream(oResponseInputStream, oByteArrayOutputStream);
+				String sMessage = oByteArrayOutputStream.toString();
+				System.out.println(sMessage);
+			} else {
+				throw new NullPointerException("WasdiLib.uploadFile: stream is null");
+			}
+
+			oOutputStream.close();
+			oConnection.disconnect();
+
 		} catch(Exception e) {
 			e.printStackTrace();
 		}
