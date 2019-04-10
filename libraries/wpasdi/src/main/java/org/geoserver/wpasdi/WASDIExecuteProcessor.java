@@ -17,7 +17,7 @@ import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.business.Processor;
 import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.data.ProcessorRepository;
-import wasdi.shared.parameters.DeployProcessorParameter;
+import wasdi.shared.parameters.ProcessorParameter;
 import wasdi.shared.utils.SerializationUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.RunningProcessorViewModel;
@@ -53,7 +53,7 @@ public class WASDIExecuteProcessor implements GeoServerProcess {
 				
 				String sPath = sSerializationPath + oProcessWorkspace.getProcessObjId();
 
-				DeployProcessorParameter oDeployPocessorParameter = new DeployProcessorParameter();
+				ProcessorParameter oDeployPocessorParameter = new ProcessorParameter();
 				oDeployPocessorParameter.setName(sProcessorName);
 				oDeployPocessorParameter.setProcessorID(oProcessorToRun.getProcessorId());
 				oDeployPocessorParameter.setWorkspace("wps");

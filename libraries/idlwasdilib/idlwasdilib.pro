@@ -112,10 +112,21 @@ PRO STARTWASDI, sConfigFilePath
 	
 		READF, lun, sParametersFileLine & $
 		asKeyValue = STRSPLIT(sParametersFileLine,'=',/EXTRACT)
-		params[asKeyValue[0]] = asKeyValue[1]
 		
-		IF (verbose EQ '1') THEN BEGIN
-			print, 'parameter added: key=', asKeyValue[0], ' value=', asKeyValue[1]
+		IF (n_elements(asKeyValue) GE 2) THEN BEGIN
+			params[asKeyValue[0]] = asKeyValue[1]
+			
+			IF (verbose EQ '1') THEN BEGIN
+				print, 'parameter added: key=', asKeyValue[0], ' value=', asKeyValue[1]
+			END
+		END
+		
+		IF (n_elements(asKeyValue) EQ 1) THEN BEGIN
+			params[asKeyValue[0]] = !NULL
+			
+			IF (verbose EQ '1') THEN BEGIN
+				print, 'parameter added: key=', asKeyValue[0], ' value=!NULL'
+			END			
 		END
 		
 	ENDWHILE
@@ -730,101 +741,161 @@ end
 ; Execute a SNAP xml Workflow in WASDI
 FUNCTION WASDIEXECUTEWORKFLOW, asInputFileNames, asOutputFileNames, sWorkflow
 
-  COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params
-  sessioncookie = token
+	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params
+	sessioncookie = token
 
-  ;get the list of workflows
-  aoWorkflows = WASDIGETWORKFLOWS()
+	;get the list of workflows
+	aoWorkflows = WASDIGETWORKFLOWS()
 
-  ; Search the named one
-  for i=0,n_elements(aoWorkflows)-1 do begin
+	; Search the named one
+	FOR i=0,n_elements(aoWorkflows)-1 DO BEGIN
 
-    oWorkflow = aoWorkflows[i]
-    sWfName = GETVALUEBYKEY(oWorkflow, 'name')
+		oWorkflow = aoWorkflows[i]
+		sWfName = GETVALUEBYKEY(oWorkflow, 'name')
 
-    if sWfName eq sWorkflow then begin
-      sWfId = GETVALUEBYKEY(oWorkflow, 'workflowId')
-      sWorkflowId = sWfId
-      break;
-    endif
-  endfor
+		IF sWfName EQ sWorkflow THEN BEGIN
+			sWfId = GETVALUEBYKEY(oWorkflow, 'workflowId')
+			sWorkflowId = sWfId
+			BREAK;
+		ENDIF
+	ENDFOR
 
-  ; API url
-  UrlPath = '/wasdiwebserver/rest/processing/graph_id?workspace='+activeworkspace
-  
-  ; Generate input file names JSON array
-  sInputFilesJSON = '['
-  
-  ; For each input name
-  for i=0,n_elements(asInputFileNames)-1 do begin
-    
-    sInputName = asInputFileNames[i]
-	; wrap with '
-	sInputFilesJSON = sInputFilesJSON + '"' + sInputName + '"'
+	; API url
+	UrlPath = '/wasdiwebserver/rest/processing/graph_id?workspace='+activeworkspace
+
+	; Generate input file names JSON array
+	sInputFilesJSON = '['
+
+	; For each input name
+	FOR i=0,n_elements(asInputFileNames)-1 DO BEGIN
+
+		sInputName = asInputFileNames[i]
+		; wrap with '
+		sInputFilesJSON = sInputFilesJSON + '"' + sInputName + '"'
+
+		; check of is not the last one
+		IF i LT n_elements(asInputFileNames)-1 THEN BEGIN
+			; add ,
+			sInputFilesJSON = sInputFilesJSON + ','
+		ENDIF
+	ENDFOR
+
+	; close the array
+	sInputFilesJSON = sInputFilesJSON + ']'
+
+	;print, 'Input Files JSON ', sInputFilesJSON
+
+	; Create the output file names array
+	sOutputFilesJSON = '['
+
+	; For each output name
+	FOR i=0,n_elements(asOutputFileNames)-1 DO BEGIN
+
+		sOutputName = asOutputFileNames[i]
+		; wrap with '
+		sOutputFilesJSON = sOutputFilesJSON + '"' + sOutputName + '"'
+
+		; check of is not the last one
+		IF i LT n_elements(asOutputFileNames)-1 then BEGIN
+			; add , for the next one
+			sOutputFilesJSON = sOutputFilesJSON + ','
+		ENDIF
+
+	ENDFOR
+
+	; close the array
+	sOutputFilesJSON = sOutputFilesJSON + ']'
+
+	;print, 'Output File JSON ' + sOutputFilesJSON
+
+	; compose the full execute workflow JSON View Model
+	sWorkFlowViewModelString='{  "workflowId":"'+sWorkflowId+'",  "name":"'+sWfName +'",  "inputFileNames":'+sInputFilesJSON +',  "outputFileNames":'+sOutputFilesJSON+'}'
+
+	IF (verbose eq '1') THEN BEGIN
+		print, 'Workflow JSON ' , sWorkFlowViewModelString
+	END
+
+	wasdiResult = WASDIHTTPPOST(UrlPath, sWorkFlowViewModelString)
+
+	sResponse = GETVALUEBYKEY(wasdiResult, 'boolValue')
+
+	sProcessID = ''
+
+	; get the process id
+	IF sResponse then BEGIN
+		sValue = GETVALUEBYKEY(wasdiResult, 'stringValue')
+		sProcessID=sValue
+	ENDIF
+
+	sStatus = "ERROR"
+
+	; Wait for the process to finish
+	IF sProcessID NE '' THEN BEGIN
+		sStatus = WASDIWAITPROCESS(sProcessID)
+	ENDIF
+
+	RETURN, sStatus
+END
+
+
+; Execute a WASDI PROCESSOR
+FUNCTION WASDIASYNCHEXECUTEPROCESSOR, sProcessorName, aoParameters
+
+	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params
+	sessioncookie = token
+
+	; API url
+	UrlPath = '/wasdiwebserver/rest/processors/run?workspace='+activeworkspace+'&name='+sProcessorName+'&encodedJson='
+
+	; Generate input file names JSON array
+	sParamsJSON = '{'
+
+	; For each input name
+	FOREACH sKey , aoParameters.Keys() DO BEGIN
+
+		sParamsJSON = sParamsJSON + '"' + sKey + '":'
+		
+		sValue = aoParameters[sKey]
+		
+		IF (sValue NE !NULL) THEN BEGIN
+			sParamsJSON = sParamsJSON + '"' + sValue + '" , '
+		END ELSE BEGIN
+			sParamsJSON = sParamsJSON + '"" , '
+		END
+		
+	END
+
+	sParamsJSON = STRMID(sParamsJSON, 0, STRLEN(sParamsJSON)-2)
+	sParamsJSON = sParamsJSON + '}'
 	
-	; check of is not the last one
-    if i lt n_elements(asInputFileNames)-1 then begin
-	  ; add ,
-      sInputFilesJSON = sInputFilesJSON + ','
-    endif
-  endfor
-  
-  ; close the array
-  sInputFilesJSON = sInputFilesJSON + ']'
-  
-  ;print, 'Input Files JSON ', sInputFilesJSON
-  
-  ; Create the output file names array
-  sOutputFilesJSON = '['
-  
-  ; For each output name
-  for i=0,n_elements(asOutputFileNames)-1 do begin
-
-    sOutputName = asOutputFileNames[i]
-	; wrap with '
-	sOutputFilesJSON = sOutputFilesJSON + '"' + sOutputName + '"'
+	print, 'Parameter JSON ', sParamsJSON
 	
-	; check of is not the last one
-    if i lt n_elements(asOutputFileNames)-1 then begin
-	  ; add , for the next one
-      sOutputFilesJSON = sOutputFilesJSON + ','
-    endif
+	IF (verbose EQ 1) THEN BEGIN
+		print, 'Parameter JSON ', sParamsJSON
+	END
 	
-  endfor
-  
-  ; close the array
-  sOutputFilesJSON = sOutputFilesJSON + ']'
-  
-  ;print, 'Output File JSON ' + sOutputFilesJSON
-  
-  ; compose the full execute workflow JSON View Model
-  sWorkFlowViewModelString='{  "workflowId":"'+sWorkflowId+'",  "name":"'+sWfName +'",  "inputFileNames":'+sInputFilesJSON +',  "outputFileNames":'+sOutputFilesJSON+'}'
-  
-  IF (verbose eq '1') THEN BEGIN
-	print, 'Workflow JSON ' , sWorkFlowViewModelString
-  END
+	;Create a new url object
+	oUrl = OBJ_NEW('IDLnetUrl')
+	sEncodedParametersJSON = oUrl->URLEncode(sParamsJSON)
 
-  wasdiResult = WASDIHTTPPOST(UrlPath, sWorkFlowViewModelString)
-  
-  sResponse = GETVALUEBYKEY(wasdiResult, 'boolValue')
-  
-  sProcessID = ''
-  
-  ; get the process id
-  if sResponse then begin
-    sValue = GETVALUEBYKEY(wasdiResult, 'stringValue')
-    sProcessID=sValue
-  endif
-  
-  sStatus = "ERROR"
-  
-  ; Wait for the process to finish
-  if sProcessID ne '' then begin
-    sStatus = WASDIWAITPROCESS(sProcessID)
-  endif
-  
-  RETURN, sStatus
-end
+	UrlPath = UrlPath + sEncodedParametersJSON
+	
+	print, UrlPath
+
+	wasdiResult = WASDIHTTPGET(UrlPath)
+
+	sResponse = GETVALUEBYKEY(wasdiResult, 'boolValue')
+
+	sProcessID = ''
+
+	; get the process id
+	IF sResponse THEN BEGIN
+		sValue = GETVALUEBYKEY(wasdiResult, 'processingIdentifier')
+		sProcessID=sValue
+	ENDIF
+	
+	RETURN, sProcessID
+END
 
 ; Create a Mosaic from a list of input images
 FUNCTION WASDIMOSAIC, asInputFileNames, sOutputFile, dPixelSizeX, dPixelSizeY
@@ -861,14 +932,14 @@ FUNCTION WASDIMOSAIC, asInputFileNames, sOutputFile, dPixelSizeX, dPixelSizeY
   END
   
   sOutputFormat='GeoTIFF'
-  IF (STRMATCH(sOutputFile, '+.tif', /FOLD_CASE) EQ 1) THEN BEGIN
+  IF (STRMATCH(sOutputFile, '*.tif', /FOLD_CASE) EQ 1) THEN BEGIN
 	sOutputFormat='GeoTIFF'
-  END ELSE IF (STRMATCH(sOutputFile, '+.dim', /FOLD_CASE) EQ 1)  THEN BEGIN
+  END ELSE IF (STRMATCH(sOutputFile, '*.dim', /FOLD_CASE) EQ 1)  THEN BEGIN
 	sOutputFormat='BEAM-DIMAP'
   END
   
   ; compose the full MosaicSetting JSON View Model
-  sMosaicSettingsString='{  "crs": "GEOGCS[\"WGS84(DD)\", DATUM[\"WGS84\", SPHEROID[\"WGS84\", 6378137.0, 298.257223563]], PRIMEM[\"Greenwich\", 0.0], UNIT[\"degree\", 0.017453292519943295],  AXIS[\"Geodetic longitude\", EAST], AXIS[\"Geodetic latitude\", NORTH]]",  "southBound": -1.0,"eastBound": -1.0, "westBound": -1.0, "northBound": -1.0, "pixelSizeX":'+dPixelSizeX +', "pixelSizeY": ' + dPixelSizeY + ', "overlappingMethod": "MOSAIC_TYPE_OVERLAY", "showSourceProducts": false, "elevationModelName": "ASTER 1sec GDEM", "resamplingName": "Nearest", "updateMode": false, "nativeResolution": true, "combine": "OR",  "sources":'+sInputFilesJSON +', "variableNames": [], "variableExpressions": [], "outputFormat":"',sOutputFormat,'" }'
+  sMosaicSettingsString='{  "crs": "GEOGCS[\"WGS84(DD)\", DATUM[\"WGS84\", SPHEROID[\"WGS84\", 6378137.0, 298.257223563]], PRIMEM[\"Greenwich\", 0.0], UNIT[\"degree\", 0.017453292519943295],  AXIS[\"Geodetic longitude\", EAST], AXIS[\"Geodetic latitude\", NORTH]]",  "southBound": -1.0,"eastBound": -1.0, "westBound": -1.0, "northBound": -1.0, "pixelSizeX":'+dPixelSizeX +', "pixelSizeY": ' + dPixelSizeY + ', "overlappingMethod": "MOSAIC_TYPE_OVERLAY", "showSourceProducts": false, "elevationModelName": "ASTER 1sec GDEM", "resamplingName": "Nearest", "updateMode": false, "nativeResolution": true, "combine": "OR",  "sources":'+sInputFilesJSON +', "variableNames": [], "variableExpressions": [], "outputFormat":"' + sOutputFormat + '" }'
   
   IF (verbose eq '1') THEN BEGIN
 	print, 'MOSAIC SETTINGS JSON ' , sMosaicSettingsString
