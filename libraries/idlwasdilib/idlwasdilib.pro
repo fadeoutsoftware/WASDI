@@ -868,8 +868,6 @@ FUNCTION WASDIASYNCHEXECUTEPROCESSOR, sProcessorName, aoParameters
 	sParamsJSON = STRMID(sParamsJSON, 0, STRLEN(sParamsJSON)-2)
 	sParamsJSON = sParamsJSON + '}'
 	
-	print, 'Parameter JSON ', sParamsJSON
-	
 	IF (verbose EQ 1) THEN BEGIN
 		print, 'Parameter JSON ', sParamsJSON
 	END
@@ -879,8 +877,6 @@ FUNCTION WASDIASYNCHEXECUTEPROCESSOR, sProcessorName, aoParameters
 	sEncodedParametersJSON = oUrl->URLEncode(sParamsJSON)
 
 	UrlPath = UrlPath + sEncodedParametersJSON
-	
-	print, UrlPath
 
 	wasdiResult = WASDIHTTPGET(UrlPath)
 

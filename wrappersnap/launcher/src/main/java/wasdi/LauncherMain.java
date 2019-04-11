@@ -1024,7 +1024,10 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 		//update the process
 		if (!oProcessWorkspaceRepository.UpdateProcess(oProcessWorkspace)) {
 			s_oLogger.debug("Error during process update");
-		}	                
+		}
+		else {
+			s_oLogger.debug("Process Closed with status " + oProcessWorkspace.getStatus());
+		}
 		//send update process message
 		if(null == s_oSendToRabbit) {
 			try {
@@ -1851,7 +1854,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 
 		}
 		finally {			
-			s_oLogger.debug("LauncherMain.executeMosaic: End");
+			s_oLogger.debug("LauncherMain.executeMosaic: End Closing Process Workspace with status " + oProcessWorkspace.getStatus());
 			closeProcessWorkspace(oProcessWorkspaceRepository, oProcessWorkspace);
 		}
 		
