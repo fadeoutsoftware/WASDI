@@ -35,7 +35,7 @@ import wasdi.shared.business.ProcessorTypes;
 import wasdi.shared.business.User;
 import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.data.ProcessorRepository;
-import wasdi.shared.parameters.DeployProcessorParameter;
+import wasdi.shared.parameters.ProcessorParameter;
 import wasdi.shared.utils.SerializationUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.DeployedProcessorViewModel;
@@ -131,7 +131,7 @@ public class ProcessorsResource {
 			
 			String sProcessObjId = Utils.GetRandomName();
 			
-			DeployProcessorParameter oDeployProcessorParameter = new DeployProcessorParameter();
+			ProcessorParameter oDeployProcessorParameter = new ProcessorParameter();
 			oDeployProcessorParameter.setName(sName);
 			oDeployProcessorParameter.setProcessorID(sProcessorId);
 			oDeployProcessorParameter.setWorkspace(sWorkspaceId);
@@ -237,6 +237,12 @@ public class ProcessorsResource {
 			Wasdi.DebugLog("ProcessorsResource.run: get Processor");	
 			ProcessorRepository oProcessorRepository = new ProcessorRepository();
 			Processor oProcessorToRun = oProcessorRepository.GetProcessorByName(sName);
+			
+			if (oProcessorToRun == null) {
+				Wasdi.DebugLog("ProcessorsResource.run: unable to find processor " + sName);
+				oRunningProcessorViewModel.setStatus("ERROR");
+				return oRunningProcessorViewModel;
+			}
 
 			// Schedule the process to run the processor
 			
@@ -246,18 +252,18 @@ public class ProcessorsResource {
 			if (! (sPath.endsWith("/")||sPath.endsWith("\\"))) sPath+="/";
 			sPath += sProcessObjId;
 
-			DeployProcessorParameter oDeployProcessorParameter = new DeployProcessorParameter();
-			oDeployProcessorParameter.setName(sName);
-			oDeployProcessorParameter.setProcessorID(oProcessorToRun.getProcessorId());
-			oDeployProcessorParameter.setWorkspace(sWorkspaceId);
-			oDeployProcessorParameter.setUserId(sUserId);
-			oDeployProcessorParameter.setExchange(sWorkspaceId);
-			oDeployProcessorParameter.setProcessObjId(sProcessObjId);
-			oDeployProcessorParameter.setJson(sEncodedJson);
-			oDeployProcessorParameter.setProcessorType(oProcessorToRun.getType());
+			ProcessorParameter oProcessorParameter = new ProcessorParameter();
+			oProcessorParameter.setName(sName);
+			oProcessorParameter.setProcessorID(oProcessorToRun.getProcessorId());
+			oProcessorParameter.setWorkspace(sWorkspaceId);
+			oProcessorParameter.setUserId(sUserId);
+			oProcessorParameter.setExchange(sWorkspaceId);
+			oProcessorParameter.setProcessObjId(sProcessObjId);
+			oProcessorParameter.setJson(sEncodedJson);
+			oProcessorParameter.setProcessorType(oProcessorToRun.getType());
+			oProcessorParameter.setSessionID(sSessionId);
 			
-			//TODO move it before inserting the new process into DB
-			SerializationUtils.serializeObjectToXML(sPath, oDeployProcessorParameter);
+			SerializationUtils.serializeObjectToXML(sPath, oProcessorParameter);
 
 			
 			ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
@@ -266,7 +272,7 @@ public class ProcessorsResource {
 			try{
 				Wasdi.DebugLog("ProcessorsResource.run: create task"); 
 				oProcessWorkspace.setOperationDate(Wasdi.GetFormatDate(new Date()));
-				oProcessWorkspace.setOperationType(LauncherOperations.RUNPROCESSOR.name());
+				oProcessWorkspace.setOperationType(oProcessorParameter.getLauncherOperation());
 				oProcessWorkspace.setProductName(sName);
 				oProcessWorkspace.setWorkspaceId(sWorkspaceId);
 				oProcessWorkspace.setUserId(sUserId);

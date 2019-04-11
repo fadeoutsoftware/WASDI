@@ -7,11 +7,14 @@
 *.class
 .idea
 .idea/
+**/.idea
+**/.idea/
 /node_modules
 **/.metadata	
 /Servers/
 /.metadata/
 
-
+wasdiwebserver/WebContent/META-INF/
+wasdiwebserver/WebContent/WEB-INF/web.xml
 
 /playground

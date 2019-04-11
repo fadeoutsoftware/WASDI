@@ -2,7 +2,7 @@ package wasdi.processors;
 
 import java.util.ArrayList;
 
-public class UbuntuPythonProcessorEngine extends WasdiProcessorEngine {
+public class UbuntuPythonProcessorEngine extends DockerProcessorEngine {
 
 	public UbuntuPythonProcessorEngine(String sWorkingRootPath, String sDockerTemplatePath) {
 		super(sWorkingRootPath, sDockerTemplatePath);

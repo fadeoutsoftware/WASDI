@@ -128,7 +128,7 @@ public class ProcessingThread extends Thread {
 					System.out.println(m_sLogPrefix + "removing " + key + " from launched");
 				}
 				
-				List<ProcessWorkspace> queuedProcess = null;
+				List<ProcessWorkspace> aoQueuedProcess = null;
 				
 				int iProcIndex = 0;
 				
@@ -139,18 +139,18 @@ public class ProcessingThread extends Thread {
 					if (m_asRunningProcessesSlots[iRunningSlots]==null || isProcessDone(iRunningSlots)) {
 						
 						//if not yet loaded, load the list of process to execute
-						if (queuedProcess==null) {
+						if (aoQueuedProcess==null) {
 							checkRepo();
-							queuedProcess = getQueuedProcess();
+							aoQueuedProcess = getQueuedProcess();
 						}
 						
 						//try to execute a process
-						String executedProcessId = null;
+						String sExecutedProcessId = null;
 						
-						while (iProcIndex<queuedProcess.size() && executedProcessId==null) {
-							ProcessWorkspace process = queuedProcess.get(iProcIndex);
-							if (!m_aoLaunchedProcesses.containsKey(process.getProcessObjId())) {
-								executedProcessId = executeProcess(process);
+						while (iProcIndex<aoQueuedProcess.size() && sExecutedProcessId==null) {
+							ProcessWorkspace oProcess = aoQueuedProcess.get(iProcIndex);
+							if (!m_aoLaunchedProcesses.containsKey(oProcess.getProcessObjId())) {
+								sExecutedProcessId = executeProcess(oProcess);
 								// Let the process start...
 								try {
 									//sleep before starting next iteraction
@@ -159,11 +159,11 @@ public class ProcessingThread extends Thread {
 									e.printStackTrace();
 								}
 							} else {
-								System.out.println(m_sLogPrefix + "process lauched before: " + process.getProcessObjId());
+								System.out.println(m_sLogPrefix + "process lauched before: " + oProcess.getProcessObjId());
 							}
 							iProcIndex++;
 						}
-						m_asRunningProcessesSlots[iRunningSlots] = executedProcessId;
+						m_asRunningProcessesSlots[iRunningSlots] = sExecutedProcessId;
 					}
 				}
 				
@@ -205,12 +205,7 @@ public class ProcessingThread extends Thread {
 	protected List<ProcessWorkspace> getQueuedProcess() {
 		checkRepo();
 		List<ProcessWorkspace> queuedProcess = m_oProcessWorkspaceRepository.GetQueuedProcess();
-		
-//		System.out.println(m_sLogPrefix + "read process queue. size: " + queuedProcess.size());
-//		for (ProcessWorkspace p : queuedProcess) {
-//			System.out.println(logPrefix + "     " + p.getProcessObjId());
-//		}
-		
+				
 		// Reverse the collection, otherwise the olders will dead of starvation
 		Collections.reverse(queuedProcess);
 		

@@ -24,6 +24,7 @@ public class MosaicSetting {
 	Boolean updateMode = false;
 	Boolean nativeResolution = true;
 	String combine = "OR";
+	String outputFormat = "GeoTIFF";
 	
 	ArrayList<String> sources = new ArrayList<>();
 	ArrayList<String> variableNames = new ArrayList<>();
@@ -130,5 +131,11 @@ public class MosaicSetting {
 	}
 	public void setVariableExpressions(ArrayList<String> variableExpressions) {
 		this.variableExpressions = variableExpressions;
+	}
+	public String getOutputFormat() {
+		return outputFormat;
+	}
+	public void setOutputFormat(String outputFormat) {
+		this.outputFormat = outputFormat;
 	}
 }

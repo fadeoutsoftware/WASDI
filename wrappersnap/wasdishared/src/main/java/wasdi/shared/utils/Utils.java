@@ -252,7 +252,6 @@ public class Utils {
 		}
 	}
 	
-	
 	/**
 	 * Confert a Polygon WKT String in a set of Lat Lon Points comma separated
 	 * @param sContent 
@@ -275,6 +274,7 @@ public class Utils {
         for (int iIndexBounds = 0; iIndexBounds < asContent.length; iIndexBounds++)
         {
             String sBounds = asContent[iIndexBounds];
+            sBounds = sBounds.trim();
             String [] asNewBounds = sBounds.split(" ");
 
             if (iIndexBounds > 0) sOutput += ", ";
@@ -289,4 +289,14 @@ public class Utils {
         return sOutput;
 
 	}	
+
+	public static boolean isPlausibleHttpUrl(String sUrl) {
+		if(isNullOrEmpty(sUrl)) {
+			return false;
+		}
+		if(sUrl.startsWith("https://") || sUrl.startsWith("http://")) {
+			return true;
+		}
+		return false;
+	}
 }
