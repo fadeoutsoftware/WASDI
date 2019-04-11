@@ -22,8 +22,10 @@ import javax.ws.rs.core.Context;
 import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.runtime.Config;
 import org.esa.snap.runtime.Engine;
+import org.glassfish.jersey.server.ResourceConfig;
 
 import it.fadeout.business.DownloadsThread;
+import it.fadeout.business.IDLThread;
 //import it.fadeout.business.PasswordAuthentication;
 import it.fadeout.business.ProcessingThread;
 import it.fadeout.rest.resources.AuthResource;
@@ -45,7 +47,7 @@ import wasdi.shared.rabbit.RabbitFactory;
 import wasdi.shared.utils.CredentialPolicy;
 import wasdi.shared.utils.Utils;
 
-public class Wasdi extends Application {
+public class Wasdi extends ResourceConfig {
 	@Context
 	ServletConfig m_oServletConfig;
 	
@@ -71,7 +73,12 @@ public class Wasdi extends Application {
 	 * Downloads queue scheduler
 	 */
 	private static DownloadsThread s_oDownloadsThread = null;
-	
+
+	/**
+	 * IDL Processors queue scheduler
+	 */
+	private static IDLThread s_oIDLThread = null;
+
 	/**
 	 * User for debug mode auto login
 	 */
@@ -89,22 +96,27 @@ public class Wasdi extends Application {
 		m_oCredentialPolicy = new CredentialPolicy();
 	}
 	
-	@Override
-	public Set<Class<?>> getClasses() {
-		final Set<Class<?>> classes = new HashSet<Class<?>>();
-		// register resources and features
-		classes.add(FileBufferResource.class);
-		classes.add(OpenSearchResource.class);
-		classes.add(WasdiResource.class);
-		classes.add(AuthResource.class);
-		classes.add(WorkspaceResource.class);
-		classes.add(ProductResource.class);
-		classes.add(OpportunitySearchResource.class);
-		classes.add(ProcessingResources.class);
-		classes.add(ProcessWorkspaceResource.class);
-		classes.add(CatalogResources.class);
-		return classes;
+	public Wasdi() {
+		register(new WasdiBinder());
+		packages(true, "it.fadeout.rest.resources");
 	}
+	
+//	@Override
+//	public Set<Class<?>> getClasses() {
+//		final Set<Class<?>> classes = new HashSet<Class<?>>();
+//		// register resources and features
+//		classes.add(FileBufferResource.class);
+//		classes.add(OpenSearchResource.class);
+//		classes.add(WasdiResource.class);
+//		classes.add(AuthResource.class);
+//		classes.add(WorkspaceResource.class);
+//		classes.add(ProductResource.class);
+//		classes.add(OpportunitySearchResource.class);
+//		classes.add(ProcessingResources.class);
+//		classes.add(ProcessWorkspaceResource.class);
+//		classes.add(CatalogResources.class);
+//		return classes;
+//	}
 	
 	
 	@PostConstruct
@@ -192,6 +204,15 @@ public class Wasdi extends Application {
 					System.out.println("-------downloads thread DISABLED");
 				}
 				
+				if (getInitParameter("EnableIDLScheduler", "true").toLowerCase().equals("true")) {
+					s_oIDLThread = new IDLThread(m_oServletConfig);
+					s_oIDLThread.start();
+					System.out.println("-------IDL thread STARTED");
+				}
+				else {
+					System.out.println("-------IDL thread DISABLED");
+				}
+				
 				
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -249,6 +270,7 @@ public class Wasdi extends Application {
 			
 			s_oProcessingThread.stopThread();
 			s_oDownloadsThread.stopThread();
+			s_oIDLThread.stopThread();
 			MongoRepository.shutDownConnection();
 		}
 		catch (Exception e) {

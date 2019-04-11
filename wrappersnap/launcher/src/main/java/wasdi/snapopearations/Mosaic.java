@@ -22,6 +22,7 @@ import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.parameters.MosaicParameter;
 import wasdi.shared.parameters.MosaicSetting;
+import wasdi.shared.utils.Utils;
 
 public class Mosaic {
 	
@@ -78,6 +79,10 @@ public class Mosaic {
 		m_oMosaicParameter = oParameter;
 		m_sBasePath = sBasePath;
 		m_sOuptutFile = oParameter.getDestinationProductName();
+		
+		if (!Utils.isNullOrEmpty(m_oMosaicSetting.getOutputFormat())) {
+			m_sOutputFileFormat = m_oMosaicSetting.getOutputFormat();
+		}
 		
 		m_oProcessRepository = new ProcessWorkspaceRepository();
 		m_oProcess = m_oProcessRepository.GetProcessByProcessObjId(oParameter.getProcessObjId());

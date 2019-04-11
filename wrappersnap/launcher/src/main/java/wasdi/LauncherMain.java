@@ -53,7 +53,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import sun.management.VMManagement;
 import wasdi.asynch.SaveMetadataThread;
 import wasdi.filebuffer.ProviderAdapter;
-import wasdi.filebuffer.ProviderAdapterSupplier;
+import wasdi.filebuffer.ProviderAdapterFactory;
 import wasdi.geoserver.Publisher;
 import wasdi.processors.WasdiProcessorEngine;
 import wasdi.shared.LauncherOperations;
@@ -72,7 +72,7 @@ import wasdi.shared.geoserver.GeoServerManager;
 import wasdi.shared.parameters.ApplyOrbitParameter;
 import wasdi.shared.parameters.BaseParameter;
 import wasdi.shared.parameters.CalibratorParameter;
-import wasdi.shared.parameters.DeployProcessorParameter;
+import wasdi.shared.parameters.ProcessorParameter;
 import wasdi.shared.parameters.DownloadFileParameter;
 import wasdi.shared.parameters.FilterParameter;
 import wasdi.shared.parameters.FtpUploadParameters;
@@ -89,6 +89,7 @@ import wasdi.shared.parameters.RangeDopplerGeocodingParameter;
 import wasdi.shared.parameters.RasterGeometricResampleParameter;
 import wasdi.shared.parameters.SubsetParameter;
 import wasdi.shared.parameters.SubsetSetting;
+import wasdi.shared.parameters.WpsParameters;
 import wasdi.shared.rabbit.RabbitFactory;
 import wasdi.shared.rabbit.Send;
 import wasdi.shared.utils.BandImageManager;
@@ -112,6 +113,8 @@ import wasdi.snapopearations.ReadProduct;
 import wasdi.snapopearations.TerrainCorrection;
 import wasdi.snapopearations.WasdiGraph;
 import wasdi.snapopearations.WriteProduct;
+import wasdi.wps.OLD_WpsAdapter;
+import wasdi.wps.OLD_WpsFactory;
 
 
 /**
@@ -398,24 +401,25 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			break;
 			case DEPLOYPROCESSOR: {
 				// Deploy new user processor
-				DeployProcessorParameter oParameter = (DeployProcessorParameter) SerializationUtils.deserializeXMLToObject(sParameter);
+				ProcessorParameter oParameter = (ProcessorParameter) SerializationUtils.deserializeXMLToObject(sParameter);
 				WasdiProcessorEngine oEngine = WasdiProcessorEngine.GetProcessorEngine(oParameter.getProcessorType(), ConfigReader.getPropValue("DOWNLOAD_ROOT_PATH"), ConfigReader.getPropValue("DOCKER_TEMPLATE_PATH"));
 				oEngine.DeployProcessor(oParameter);
 			}
 			break;
+			case RUNIDL:
 			case RUNPROCESSOR: {
 				// Execute User Processor
-				DeployProcessorParameter oParameter = (DeployProcessorParameter) SerializationUtils.deserializeXMLToObject(sParameter);
+				ProcessorParameter oParameter = (ProcessorParameter) SerializationUtils.deserializeXMLToObject(sParameter);
 				WasdiProcessorEngine oEngine = WasdiProcessorEngine.GetProcessorEngine(oParameter.getProcessorType(), ConfigReader.getPropValue("DOWNLOAD_ROOT_PATH"), ConfigReader.getPropValue("DOCKER_TEMPLATE_PATH"));
 				oEngine.run(oParameter);
 			}
 			break;
-			case RUNIDL: {
+			/*case RUNIDL: {
 				// Run IDL Processor
 				IDLProcParameter oParameter = (IDLProcParameter) SerializationUtils.deserializeXMLToObject(sParameter);
 				executeIDLProcessor(oParameter);
 			}
-			break;
+			break;*/
 			case RUNMATLAB: {
 				// Run Matlab Processor
 				MATLABProcParameters oParameter = (MATLABProcParameters) SerializationUtils.deserializeXMLToObject(sParameter);
@@ -434,6 +438,11 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 				executeSubset(oParameter);
 			}
 			break;			
+			case WPS:{
+				WpsParameters oParameter = (WpsParameters) SerializationUtils.deserializeXMLToObject(sParameter);
+				executeWPS(oParameter);
+			}
+			break;
 			default:
 				s_oLogger.debug("Operation Not Recognized. Nothing to do");
 				break;
@@ -508,6 +517,18 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 	}
 	
 
+	private void executeWPS(WpsParameters oParameter) {
+		s_oLogger.debug("ExecuteWPS");
+		ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
+		ProcessWorkspace oProcessWorkspace = oProcessWorkspaceRepository.GetProcessByProcessObjId(oParameter.getProcessObjId());
+		
+		
+		// Work in Progress
+		// issue #89
+		// https://github.com/fadeoutsoftware/WASDI/issues/89
+		 
+	}
+	
 	/**
 	 * Downloads a new product
 	 * @param oParameter
@@ -524,7 +545,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 0);
 			s_oLogger.debug("LauncherMain.Download: Download Start");
 			
-			ProviderAdapter oProviderAdapter = new ProviderAdapterSupplier().supplyProviderAdapter(oParameter.getProvider());
+			ProviderAdapter oProviderAdapter = new ProviderAdapterFactory().supplyProviderAdapter(oParameter.getProvider());
 			if (oProviderAdapter != null) {
 				oProviderAdapter.subscribe(this);
 			} else {
@@ -858,11 +879,23 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 
 
 	public String ingest(IngestFileParameter oParameter, String sDownloadPath) throws Exception {
+		s_oLogger.debug("LauncherMain.ingest");
 
+		if(null==oParameter) {
+			String sMsg = "LauncherMain.ingest: null parameter";
+			s_oLogger.error(sMsg);
+			throw new NullPointerException(sMsg);
+		}
+		if(null==sDownloadPath) {
+			String sMsg = "LauncherMain.ingest: null download path";
+			s_oLogger.error(sMsg);
+			throw new NullPointerException(sMsg);
+		}
 		File oFilePath = new File(oParameter.getFilePath());
 		if (!oFilePath.canRead()) {
-			System.out.println("LauncherMain.Ingest: ERROR: unable to access uploaded file " + oFilePath.getAbsolutePath());
-			throw new Exception("unable to access uploaded file " + oFilePath.getName());
+			String sMsg = "LauncherMain.Ingest: ERROR: unable to access uploaded file " + oFilePath.getAbsolutePath();
+			s_oLogger.error(sMsg);
+			throw new IOException(sMsg);
 		}
 
 		ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
@@ -880,7 +913,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 
 				updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 0);
 			} else {
-				s_oLogger.debug("LauncherMain.Ingest: process not found: " + oParameter.getProcessObjId());
+				s_oLogger.error("LauncherMain.Ingest: process not found: " + oParameter.getProcessObjId());
 			}
 
 			File oRootPath = new File(sDownloadPath);
@@ -892,7 +925,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 
 			if (!oDstDir.isDirectory() || !oDstDir.canWrite()) {
 				System.out.println("LauncherMain.Ingest: ERROR: unable to access destination directory " + oDstDir.getAbsolutePath());
-				throw new Exception("Unable to access destination directory for the Workspace");
+				throw new IOException("Unable to access destination directory for the Workspace");
 			}
 
 			// Product view Model
@@ -939,22 +972,33 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			//add product to db
 			addProductToDbAndSendToRabbit(oVM, oFilePath.getAbsolutePath(), oParameter.getWorkspace(), oParameter.getExchange(), LauncherOperations.INGEST.name(), oBB);
 
-			if (oProcessWorkspace != null) {
-				oProcessWorkspace.setStatus(ProcessStatus.DONE.name());
-			}
+			 updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.DONE, 100);
 
 			return oDstFile.getAbsolutePath();
 
 		} catch (Exception e) {
-			System.out.println("LauncherMain.Ingest: ERROR: Exception occurrend during file ingestion");
-			e.printStackTrace();
-
+			String sMsg = "LauncherMain.Ingest: ERROR: Exception occurrend during file ingestion";
+			System.out.println(sMsg);
 			String sError = org.apache.commons.lang.exception.ExceptionUtils.getMessage(e);
+			s_oLogger.error(sMsg);
+			s_oLogger.error(sError);
+			e.printStackTrace();			
 
 			if (oProcessWorkspace != null) oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
 			if (s_oSendToRabbit!=null) s_oSendToRabbit.SendRabbitMessage(false,LauncherOperations.INGEST.name(),oParameter.getWorkspace(),sError,oParameter.getExchange());
 
-		} finally{
+		} catch (Throwable e) {
+			String sMsg = "LauncherMain.Ingest: ERROR: Throwable occurrend during file ingestion";
+			System.out.println(sMsg);
+			String sError = org.apache.commons.lang.exception.ExceptionUtils.getMessage(e);
+			s_oLogger.error(sMsg);
+			s_oLogger.error(sError);
+			e.printStackTrace();			
+
+			if (oProcessWorkspace != null) oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
+			if (s_oSendToRabbit!=null) s_oSendToRabbit.SendRabbitMessage(false,LauncherOperations.INGEST.name(),oParameter.getWorkspace(),sError,oParameter.getExchange());
+		}
+		finally{
 			//update process status and send rabbit updateProcess message
 			closeProcessWorkspace(oProcessWorkspaceRepository, oProcessWorkspace);
 		}
@@ -1768,11 +1812,17 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 		try {
 			String sBasePath = ConfigReader.getPropValue("DOWNLOAD_ROOT_PATH");
 			
+			if (oProcessWorkspace != null) {
+				updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 0);
+			}
+			
 			Mosaic oMosaic = new Mosaic(oParameter, sBasePath);
 			
 			if (oMosaic.runMosaic()) {
 				s_oLogger.debug("LauncherMain.executeMosaic done");
-				if (oProcessWorkspace != null) oProcessWorkspace.setStatus(ProcessStatus.DONE.name());
+				if (oProcessWorkspace != null) {
+					oProcessWorkspace.setStatus(ProcessStatus.DONE.name());
+				}
 				
 				s_oLogger.debug("LauncherMain.executeMosaic adding product to Workspace");
 				

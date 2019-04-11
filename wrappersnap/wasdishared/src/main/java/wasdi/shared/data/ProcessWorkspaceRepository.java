@@ -120,7 +120,8 @@ public class ProcessWorkspaceRepository extends MongoRepository {
             FindIterable<Document> oWSDocuments = getCollection("processworkpsace").find(
             		Filters.and(
             				Filters.eq("status", ProcessStatus.CREATED.name()),
-            				Filters.not(Filters.eq("operationType", LauncherOperations.DOWNLOAD.name()))
+            				Filters.not(Filters.eq("operationType", LauncherOperations.DOWNLOAD.name())),
+            				Filters.not(Filters.eq("operationType", LauncherOperations.RUNIDL.name()))
             				)
             		)
             		.sort(new Document("operationDate", -1));
@@ -165,6 +166,27 @@ public class ProcessWorkspaceRepository extends MongoRepository {
             		Filters.and(
             				Filters.eq("status", ProcessStatus.CREATED.name()),
             				Filters.eq("operationType", LauncherOperations.DOWNLOAD.name())
+            				)
+            		)
+            		.sort(new Document("operationDate", -1));
+            fillList(aoReturnList, oWSDocuments);
+
+        } catch (Exception oEx) {
+            oEx.printStackTrace();
+        }
+
+        return aoReturnList;
+    }
+    
+    public List<ProcessWorkspace> GetQueuedIDL() {
+
+        final ArrayList<ProcessWorkspace> aoReturnList = new ArrayList<ProcessWorkspace>();
+        try {
+
+            FindIterable<Document> oWSDocuments = getCollection("processworkpsace").find(
+            		Filters.and(
+            				Filters.eq("status", ProcessStatus.CREATED.name()),
+            				Filters.eq("operationType", LauncherOperations.RUNIDL.name())
             				)
             		)
             		.sort(new Document("operationDate", -1));
