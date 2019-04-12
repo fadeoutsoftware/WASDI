@@ -10,16 +10,10 @@ var EDriftFloodAutomaticChainController = (function() {
         this.m_oScope = $scope;
         this.m_oScope.m_oController = this;
         this.m_oExtras = oExtras;
-        this.m_SnapOperationService = oSnapOperationService;
         this.m_oProcessorService = oProcessorService;
         this.m_oConstantsService = oConstantsService;
         this.m_aoProducts = this.m_oExtras.products;
-        this.m_oSelectedReferenceProduct = null;
-        this.m_oSelectedPostEventImageProduct = null;
-        this.m_iHSBAStartDepth = 0;
-        this.m_dBimodalityCoefficent = 2.4;
-        this.m_iMinimumTileDimension = 1000;
-        this.m_iMinimalBlobRemoval = 10;
+
         this.m_oParameters = {BBOX:"29.0,92.0,10.0,100.0",
             ORBITS:"33",
             GRIDSTEP:"1,1",
@@ -29,12 +23,8 @@ var EDriftFloodAutomaticChainController = (function() {
             MOSAICXSTEP: "0.00018",
             MOSAICYSTEP: "0.00018",
             SIMULATE: "0",
-            ENDDATE: "2019-04-09"}
-        if(utilsIsObjectNullOrUndefined(this.m_aoProducts) === false)
-        {
-            this.m_oSelectedReferenceProduct = this.m_aoProducts[0];
-            this.m_oSelectedPostEventImageProduct = this.m_aoProducts[0];
-        }
+            ENDDATE: "2019-04-09"};
+
         $scope.close = function(result) {
             oClose(result, 300); // close, but give 500ms for bootstrap to animate
         };
@@ -42,7 +32,7 @@ var EDriftFloodAutomaticChainController = (function() {
     };
 
     EDriftFloodAutomaticChainController.prototype.redirectToWebSite = function(){
-        this.m_oWindow.open('http://www.mydewetra.org', '_blank');
+        this.m_oWindow.open('http://edrift.cimafoundation.org', '_blank');
     };
 
     EDriftFloodAutomaticChainController.prototype.runAutoChain = function(){
@@ -61,6 +51,7 @@ var EDriftFloodAutomaticChainController = (function() {
         //     SIMULATE: "0",
         //     ENDDATE: "2019-04-09"
         // };
+
         var oAutoChain = this.m_oParameters;
 
         sJSON=JSON.stringify(oAutoChain);
@@ -89,73 +80,6 @@ var EDriftFloodAutomaticChainController = (function() {
                 utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR: AUTO CHAIN FAILED");
             });
     };
-
-    EDriftFloodAutomaticChainController.prototype.runListFloodAreaDetection = function(){
-        var oActiveWorkspace = this.m_oConstantsService.getActiveWorkspace();
-
-        if(this.checkListFloodAreaDetectionObject(this.m_oSelectedReferenceProduct,this.m_oSelectedPostEventImageProduct,
-                                               this.m_iHSBAStartDepth,this.m_dBimodalityCoefficent,this.m_iMinimumTileDimension,
-                                               this.m_iMinimalBlobRemoval ) === false)
-        {
-            return false;
-        }
-
-        var oListFlood = {
-            REF_IN:this.m_oSelectedReferenceProduct.fileName,
-            FLOOD_IN:this.m_oSelectedPostEventImageProduct.fileName,
-            HSBA_FLOOD_MASK_OUT:"",
-            FLOOD_MAP_OUT:"",
-            HSBA_DEPTH_IN: this.m_iHSBAStartDepth,
-            ASHMAN_COEFF: this.m_dBimodalityCoefficent,
-            MIN_PIXNB_BIMODD: this.m_iMinimumTileDimension,
-            BLOBS_SIZE: this.m_iMinimalBlobRemoval
-        };
-
-        sJSON=JSON.stringify(oListFlood);
-
-        if(utilsIsObjectNullOrUndefined(oActiveWorkspace) === true)
-        {
-            utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR: INVALID ACTIVE WORKSPACE ");
-            return false;
-        }
-
-
-        this.m_oProcessorService.runProcessor('edriftlistflood',sJSON)
-            .success(function(data,status){
-                if( (utilsIsObjectNullOrUndefined(data) === false) && (status === 200))
-                {
-                    var oDialog =  utilsVexDialogAlertBottomRightCorner("eDRIFT FLOODED AREA DETECTION<br>THE PROCESS HAS BEEN SCHEDULED");
-                    utilsVexCloseDialogAfter(4000, oDialog);
-                }
-                else
-                {
-                    utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR: LIST FLOOD FAILED");
-                }
-
-            })
-            .error(function(){
-                utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR: LIST FLOOD FAILED");
-            });
-
-    };
-
-    EDriftFloodAutomaticChainController .prototype.checkListFloodAreaDetectionObject = function(oReferenceProduct,oPostEventImageProduct,
-                                                                                             iHsbaStartDepth,dBimodalityCoeff,
-                                                                                             iMinTileDimension,iMinBlobRemoval)
-    {
-        var bReturnValue = true;
-        if(utilsIsObjectNullOrUndefined(oReferenceProduct) === true )
-        {
-            utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR: INVALID REFERENCE PRODUCT ");
-            bReturnValue = false;
-        }
-        if(utilsIsObjectNullOrUndefined(oPostEventImageProduct) === true )
-        {
-            utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR: INVALID POST EVENT IMAGE PRODUCT ");
-            bReturnValue = false;
-        }
-        return bReturnValue;
-    }
 
     EDriftFloodAutomaticChainController.$inject = [
         '$scope',

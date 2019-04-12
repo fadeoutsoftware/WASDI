@@ -538,7 +538,7 @@ FUNCTION WASDICHECKPRODUCTEXISTS, filename
 	workspaceId = "";
 
 	; API URL
-	UrlPath = '/wasdiwebserver/rest/product/byname?sProductName='+filename
+	UrlPath = '/wasdiwebserver/rest/product/byname?sProductName='+filename+'&workspace='+activeworkspace
 
 	; Get the list of users workpsaces
 	wasdiResult = WASDIHTTPGET(UrlPath)
@@ -572,7 +572,7 @@ FUNCTION WASDIGETPRODUCTBBOX, filename
 	workspaceId = "";
 
 	; API URL
-	UrlPath = '/wasdiwebserver/rest/product/byname?sProductName='+filename
+	UrlPath = '/wasdiwebserver/rest/product/byname?sProductName='+filename+'&workspace='+activeworkspace
 
 	; Get the list of users workpsaces
 	wasdiResult = WASDIHTTPGET(UrlPath)
@@ -724,7 +724,7 @@ PRO WASDIDOWNLOADFILE, sProductName, sFullPath
 		sessioncookie = token
 	END 
 
-	sUrlPath = 'wasdiwebserver/rest/catalog/downloadbyname?filename='+sProductName
+	sUrlPath = 'wasdiwebserver/rest/catalog/downloadbyname?filename='+sProductName+'&workspace='+activeworkspace
 
 	IF (verbose EQ '1') THEN BEGIN
 		print, 'WASDIDOWNLOADFILE Url ', sUrlPath

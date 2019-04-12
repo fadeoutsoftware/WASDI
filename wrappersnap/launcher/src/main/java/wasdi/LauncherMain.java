@@ -587,7 +587,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 				DownloadedFilesRepository oDownloadedRepo = new DownloadedFilesRepository();
 				
 				if (!Utils.isNullOrEmpty(sFileNameWithoutPath)) {
-					// Check if it is already downloaded
+					// Check if it is already downloaded, in any workpsace
 					oAlreadyDownloaded = oDownloadedRepo.GetDownloadedFile(sFileNameWithoutPath);
 				}
 
@@ -616,6 +616,9 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 						throw new Exception(sError);
 					}
 					oProviderAdapter.unsubscribe(this);
+					
+					// Control Check for the file Name
+					sFileName = sFileName.replaceAll("//", "/");
 
 					// Get The product view Model
 					ReadProduct oReadProduct = new ReadProduct();
@@ -652,7 +655,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 					s_oLogger.debug("LauncherMain.Download: Check if file exists");
 
 					// Check the path where we want the file
-					String sDestinationFileWithPath = sDownloadPath + "/" + sFileNameWithoutPath;
+					String sDestinationFileWithPath = sDownloadPath + sFileNameWithoutPath;
 
 					// Is it different?
 					if (sDestinationFileWithPath.equals(sFileName) == false) {
@@ -970,7 +973,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			}
 			
 			//add product to db
-			addProductToDbAndWorkspaceAndSendToRabbit(oVM, oFileToIngestPath.getAbsolutePath(), oParameter.getWorkspace(), oParameter.getExchange(), LauncherOperations.INGEST.name(), null);
+			addProductToDbAndWorkspaceAndSendToRabbit(oVM, oDstFile.getAbsolutePath(), oParameter.getWorkspace(), oParameter.getExchange(), LauncherOperations.INGEST.name(), null);
 
 			 updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.DONE, 100);
 
@@ -1025,9 +1028,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 		if (!oProcessWorkspaceRepository.UpdateProcess(oProcessWorkspace)) {
 			s_oLogger.debug("Error during process update");
 		}
-		else {
-			s_oLogger.debug("Process Closed with status " + oProcessWorkspace.getStatus());
-		}
+		
 		//send update process message
 		if(null == s_oSendToRabbit) {
 			try {
@@ -2203,16 +2204,18 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 		for (int i=0; i<aoProductsWSs.size(); i++) {
 			ProductWorkspace oPW = aoProductsWSs.get(i);
 
-			DownloadedFile oDF = oDownloadedFilesRepository.GetDownloadedFile(oPW.getProductName());
+			// LEGACY: now the product is identified by the full path.
+			// This is commented, to be fixed if has to be used again.
+			//DownloadedFile oDF = oDownloadedFilesRepository.GetDownloadedFile(oPW.getProductName());
 
-			if (oDF == null) {
-				System.out.println("\nINVALID Product : " + oPW.getProductName() + " WS : " + oPW.getWorkspaceId());
-				oProductWorkspaceRepository.DeleteByProductNameWorkspace(oPW.getProductName(), oPW.getWorkspaceId());
-				System.out.println("DELETED");
-			}
-			else {
-				System.out.print(".");
-			}
+			//if (oDF == null) {
+			//	System.out.println("\nINVALID Product : " + oPW.getProductName() + " WS : " + oPW.getWorkspaceId());
+			//	oProductWorkspaceRepository.DeleteByProductNameWorkspace(oPW.getProductName(), oPW.getWorkspaceId());
+			//	System.out.println("DELETED");
+			//}
+			//else {
+			//	System.out.print(".");
+			//}
 		}
 
 

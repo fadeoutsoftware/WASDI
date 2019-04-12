@@ -219,9 +219,12 @@ public class FileBufferResource {
 			Wasdi.DebugLog("FileBufferResource.PublishBand, user: " + oUser.getUserId() + ", read product workspaces " + sWorkspaceId);
 
 			oReturnValue = new RabbitMessageViewModel();
+			
+			String sFullProductPath = Wasdi.getProductPath(m_oServletConfig, sUserId, sWorkspaceId);
+			
 			// Get Product List
 			DownloadedFilesRepository oDownloadedFilesRepository = new DownloadedFilesRepository();
-			DownloadedFile oDownloadedFile = oDownloadedFilesRepository.GetDownloadedFile(sFileUrl);
+			DownloadedFile oDownloadedFile = oDownloadedFilesRepository.GetDownloadedFileByPath(sFullProductPath+sFileUrl);
 			
 			PublishedBandsRepository oPublishedBandsRepository = new PublishedBandsRepository();
 			PublishedBand oPublishBand = oPublishedBandsRepository.GetPublishedBand(oDownloadedFile.getProductViewModel().getName(), sBand);
@@ -315,7 +318,10 @@ public class FileBufferResource {
 			oReturnValue = new PrimitiveResult();
 			// Get Product List
 			DownloadedFilesRepository oDownloadedFilesRepository = new DownloadedFilesRepository();
-			DownloadedFile oDownloadedFile = oDownloadedFilesRepository.GetDownloadedFile(sFileUrl);
+			
+			String sFullPath = Wasdi.getProductPath(m_oServletConfig, oUser.getUserId(), sWorkspaceId);
+			
+			DownloadedFile oDownloadedFile = oDownloadedFilesRepository.GetDownloadedFileByPath(sFullPath+sFileUrl);
 			PublishedBandsRepository oPublishedBandsRepository = new PublishedBandsRepository();
 			PublishedBand oPublishBand = oPublishedBandsRepository.GetPublishedBand(oDownloadedFile.getProductViewModel().getName(), sBand);
 

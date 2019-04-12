@@ -407,7 +407,7 @@ public class WorkspaceResource {
 
 								try {
 									
-									DownloadedFile oDownloadedFile = oDownloadedFilesRepository.GetDownloadedFile(oProductWorkspace.getProductName());
+									DownloadedFile oDownloadedFile = oDownloadedFilesRepository.GetDownloadedFileByPath(oProductWorkspace.getProductName());
 									//delete published band on data base
 									oPublishRepository.DeleteByProductNameLayerId(oDownloadedFile.getProductViewModel().getName(), oPublishedBand.getLayerId());
 								} catch(Exception oEx) {

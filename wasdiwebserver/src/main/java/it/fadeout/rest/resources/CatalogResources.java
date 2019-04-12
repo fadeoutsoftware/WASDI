@@ -730,10 +730,10 @@ public class CatalogResources {
 			oParams.setLocalFileName(sFileName);
 			oParams.setExchange(sWorkspace);
 			oParams.setWorkspace(sWorkspace);
+			
+			String sFullPath = Wasdi.getProductPath(m_oServletConfig, sUserId, sWorkspace);
 
-			//TODO replace with new kind of repository: FtpUploadRepository, see TODO below...
-			DownloadedFilesRepository oDownRepo = new DownloadedFilesRepository();
-			String sFullLocalPath = oDownRepo.GetDownloadedFile(sFileName).getFilePath();
+			String sFullLocalPath = sFullPath+sFileName;
 
 			/*
 			//The DB stores the full path, i.e., dirs + filename. Therefore it has to be removed
