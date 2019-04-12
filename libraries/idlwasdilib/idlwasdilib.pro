@@ -440,6 +440,47 @@ FUNCTION WASDIWAITPROCESS, sProcessID
 	RETURN, sStatus
 end
 
+
+FUNCTION WASDIWAITPROCESSES, asProcessIDs
+	sStatus=' '
+	
+	print, 'Waiting for  ' STRTRIM(STRING(N_ELEMENTS(asProcessIDs)),2) '  processes to finish'
+	
+	asProcessToCeck = [asProcessIDs]
+	asNewList = []
+	
+	iProcessCount = N_ELEMENTS(asProcessToCeck)
+	
+	iTotalTime = 0
+	
+	WHILE iProcessCount GT 0 DO BEGIN
+	
+		FOR iProcesses=0, iProcessCount -1 DO BEGIN
+		
+			sProcessID = asProcessIDs[iProcesses]
+			sStatus = WASDIGETPROCESSSTATUS(sProcessID)
+			
+			IF (sStatus EQ 'DONE') OR (sStatus EQ 'STOPPED') OR (sStatus NE 'ERROR') THEN BEGIN
+				print, 'Process ', sProcessID, ' finished with status ', sStatus
+			END ELSE BEGIN
+				asNewList = [asNewList, sProcessID]
+			END
+			
+		ENDFOR
+		
+		asProcessIDs = [asNewList]
+		asNewList = []
+		iProcessCount = N_ELEMENTS(asProcessToCeck)
+		
+		iTotalTime = iTotalTime + 2
+		
+	ENDWHILE 
+	
+	print, 'All Processes Are Done (took approx ', STRTRIM(STRING(iTotalTime),2), '  seconds)'
+
+	RETURN, sStatus
+end
+
 ; Get list of workspace of the user
 FUNCTION WASDIGETWORKSPACES
 
@@ -736,10 +777,23 @@ FUNCTION WASDIGETWORKFLOWS
   wasdiResult = WASDIHTTPGET(UrlPath)
 
   RETURN, wasdiResult
-end
+END
+
+
+; Execute a SNAP xml Workflow in WASDI without waiting the process to finish
+;FUNCTION WASDIASYNCHEXECUTEWORKFLOW, asInputFileNames, asOutputFileNames, sWorkflow
+;	RETURN, WASDIINTERNALEXECUTEWORKFLOW(asInputFileNames, asOutputFileNames, sWorkflow, 1)
+;END
 
 ; Execute a SNAP xml Workflow in WASDI
-FUNCTION WASDIEXECUTEWORKFLOW, asInputFileNames, asOutputFileNames, sWorkflow
+;FUNCTION WASDIEXECUTEWORKFLOW, asInputFileNames, asOutputFileNames, sWorkflow, iAsynch
+;	RETURN, WASDIINTERNALEXECUTEWORKFLOW(asInputFileNames, asOutputFileNames, sWorkflow, 0)
+;END
+
+; Execute a SNAP xml Workflow in WASDI
+FUNCTION WASDIINTERNALEXECUTEWORKFLOW, asInputFileNames, asOutputFileNames, sWorkflow
+
+	iAsynch = 0
 
 	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params
 	sessioncookie = token
@@ -827,12 +881,17 @@ FUNCTION WASDIEXECUTEWORKFLOW, asInputFileNames, asOutputFileNames, sWorkflow
 		sProcessID=sValue
 	ENDIF
 
-	sStatus = "ERROR"
+	IF (iAsynch EQ 0) THEN BEGIN
+		sStatus = "ERROR"
 
-	; Wait for the process to finish
-	IF sProcessID NE '' THEN BEGIN
-		sStatus = WASDIWAITPROCESS(sProcessID)
-	ENDIF
+		; Wait for the process to finish
+		IF sProcessID NE '' THEN BEGIN
+			sStatus = WASDIWAITPROCESS(sProcessID)
+		ENDIF
+	END ELSE BEGIN
+		; Return the 
+		sStatus = sProcessID
+	END
 
 	RETURN, sStatus
 END
