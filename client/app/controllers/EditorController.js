@@ -4561,24 +4561,8 @@ var EditorController = (function () {
             return false;
         }
 
-        this.m_oCatalogService.downloadByName(sFileName)
-        //     .success(function(data,status){
-        //         if(utilsIsObjectNullOrUndefined(data) == false)
-        //         {
-        //             var blob = new Blob([data], {type: "application/octet-stream"});
-        //             saveAs(blob, sFileName);
-        //         }
-        //     })
-        //     .error(function(data,status){
-        //         utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR DOWNLOADING FILE");
-        //
-        //     });
-        /*
-            .catch(function(data,status){
-                utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR DOWNLOADING FILE");
+        this.m_oCatalogService.downloadByName(sFileName, this.m_oActiveWorkspace.workspaceId);
 
-            });
-        */
         return true;
     };
 

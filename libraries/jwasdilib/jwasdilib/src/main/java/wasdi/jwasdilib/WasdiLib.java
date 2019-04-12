@@ -731,8 +731,11 @@ public class WasdiLib {
 		try{
 			String sUrl = m_sBaseUrl + "/catalog/checkdownloadavaialibitybyname?token=";
 			sUrl += m_sSessionId;
-			sUrl += "filename";
+			sUrl += "&filename=";
 			sUrl += sFileName;
+			sUrl += "&workspace=";
+			sUrl += m_sActiveWorkspace;
+			
 			URL oURL;
 			oURL = new URL(sUrl);
 			HttpURLConnection oConnection;
@@ -1992,7 +1995,7 @@ public class WasdiLib {
 				System.out.println("sFileName must not be empty");
 			}
 
-		    String sUrl = m_sBaseUrl + "/catalog/downloadbyname?filename="+sFileName;
+		    String sUrl = m_sBaseUrl + "/catalog/downloadbyname?filename="+sFileName+"&workspace="+m_sActiveWorkspace;
 		    
 		    String sOutputFilePath = "";
 		    

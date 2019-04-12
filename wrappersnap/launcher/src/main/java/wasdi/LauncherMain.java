@@ -546,6 +546,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			s_oLogger.debug("LauncherMain.Download: Download Start");
 			
 			ProviderAdapter oProviderAdapter = new ProviderAdapterFactory().supplyProviderAdapter(oParameter.getProvider());
+			
 			if (oProviderAdapter != null) {
 				oProviderAdapter.subscribe(this);
 			} else {
@@ -563,15 +564,10 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 				//get process pid
 				oProcessWorkspace.setPid(getProcessId());
 
-			} else {
+			} 
+			else {
 				s_oLogger.debug("LauncherMain.Download: process not found: " + oParameter.getProcessObjId());
-				//FIXME what happens if oProcessWorkspace is null? Shall we let the download proceed anyway?
 			}
-
-
-			//if (!sDownloadPath.endsWith("/")) sDownloadPath+="/";
-			// Generate the Path adding user id and workspace
-			//sDownloadPath += oParameter.getUserId()+"/"+oParameter.getWorkspace();
 			
 			sDownloadPath = getWorspacePath(oParameter, sDownloadPath);
 
@@ -586,8 +582,10 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 				// Get the file name
 				String sFileNameWithoutPath = oProviderAdapter.GetFileName(oParameter.getUrl());
 				s_oLogger.debug("LauncherMain.Download: File to download: " + sFileNameWithoutPath);
+				
 				DownloadedFile oAlreadyDownloaded = null;
 				DownloadedFilesRepository oDownloadedRepo = new DownloadedFilesRepository();
+				
 				if (!Utils.isNullOrEmpty(sFileNameWithoutPath)) {
 					// Check if it is already downloaded
 					oAlreadyDownloaded = oDownloadedRepo.GetDownloadedFile(sFileNameWithoutPath);
@@ -667,8 +665,6 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 					}
 
 				}
-
-				//updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 80);
 			}
 			else {
 				s_oLogger.debug("LauncherMain.Download: Debug Option Active: file not really downloaded, using configured one");
@@ -684,7 +680,8 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 				if (s_oSendToRabbit!=null) s_oSendToRabbit.SendRabbitMessage(false,LauncherOperations.DOWNLOAD.name(),oParameter.getWorkspace(),sError,oParameter.getExchange());
 				if (oProcessWorkspace != null) oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
 			} else {
-				addProductToDbAndSendToRabbit(oVM, sFileName, oParameter.getWorkspace(), oParameter.getExchange(), LauncherOperations.DOWNLOAD.name(), oParameter.getBoundingBox());
+				
+				addProductToDbAndWorkspaceAndSendToRabbit(oVM, sFileName, oParameter.getWorkspace(), oParameter.getExchange(), LauncherOperations.DOWNLOAD.name(), oParameter.getBoundingBox());
 
 				s_oLogger.debug("LauncherMain.Download: Add Product to Db and Send to Rabbit Done");
 
@@ -720,8 +717,12 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 	}
 
 
-	//XXX sprout class
-	//XXX notify client via rabbit of the transfer status
+	/**
+	 * FTP File Transfer
+	 * @param oParam
+	 * @return
+	 * @throws IOException
+	 */
 	public Boolean ftpTransfer(FtpUploadParameters oParam) throws IOException {
 		s_oLogger.debug("ftpTransfer begin");
 		if(null == oParam) {
@@ -747,9 +748,9 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			return false;
 		}
 		updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 1);
-
-		DownloadedFilesRepository oDownRepo = new DownloadedFilesRepository();
-		String sFullLocalPath = oDownRepo.GetDownloadedFile(oParam.getM_sLocalFileName()).getFilePath();
+		
+		//String sFullLocalPath = oDownRepo.GetDownloadedFile(oParam.getLocalFileName()).getFilePath();
+		String sFullLocalPath = getWorspacePath(oParam)+oParam.getLocalFileName(); 
 
 		//String fullLocalPath = oParam.getM_sLocalPath();
 		File oFile = new File(sFullLocalPath);
@@ -761,13 +762,13 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 		}
 		updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 2);
 		String sFtpServer = oParam.getFtpServer();
-		//TODO move here checks on server name
+		
 		if(!(	Utils.isServerNamePlausible( sFtpServer ) &&
-				Utils.isPortNumberPlausible(oParam.getM_iPort()) &&
-				!Utils.isNullOrEmpty(oParam.getM_sUsername()) &&
+				Utils.isPortNumberPlausible(oParam.getPort()) &&
+				!Utils.isNullOrEmpty(oParam.getUsername()) &&
 				//actually password might be empty
-				(null != oParam.getM_sPassword())
-				)){
+				(null != oParam.getPassword()))){
+			
 			s_oLogger.debug("ftpTransfer: invalid FTP parameters");
 			oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
 			closeProcessWorkspace(oProcessWorkspaceRepository, oProcessWorkspace);
@@ -776,23 +777,24 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 		updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 3);
 
 		FtpClient oFtpClient = new FtpClient(oParam.getFtpServer(),
-				oParam.getM_iPort(),
-				oParam.getM_sUsername(),
-				oParam.getM_sPassword() );
+				oParam.getPort(),
+				oParam.getUsername(),
+				oParam.getPassword() );
 
 		if(!oFtpClient.open() ) {
 			s_oLogger.debug("ftpTransfer: could not connect to FTP server with these credentials:");
 			s_oLogger.debug("server: "+oParam.getFtpServer());
-			s_oLogger.debug("por: "+oParam.getM_iPort());
-			s_oLogger.debug("username: "+oParam.getM_sUsername());
-			s_oLogger.debug("password: " + oParam.getM_sPassword());
+			s_oLogger.debug("por: "+oParam.getPort());
+			s_oLogger.debug("username: "+oParam.getUsername());
+			s_oLogger.debug("password: " + oParam.getPassword());
 			oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
 			closeProcessWorkspace(oProcessWorkspaceRepository, oProcessWorkspace);
 			return false;
 		}
 		updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 4);
+		
 		//XXX see how to modify FTP client to update status
-		Boolean bPut = oFtpClient.putFileToPath(oFile, oParam.getM_sRemotePath() );
+		Boolean bPut = oFtpClient.putFileToPath(oFile, oParam.getRemotePath() );
 		if(!bPut) {
 			s_oLogger.debug("ftpTransfer: put failed");
 			oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
@@ -877,8 +879,14 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 	}
 
 
-
-	public String ingest(IngestFileParameter oParameter, String sDownloadPath) throws Exception {
+	/**
+	 * Ingest an existing file in a workspace
+	 * @param oParameter
+	 * @param sRootPath
+	 * @return
+	 * @throws Exception
+	 */
+	public String ingest(IngestFileParameter oParameter, String sRootPath) throws Exception {
 		s_oLogger.debug("LauncherMain.ingest");
 
 		if(null==oParameter) {
@@ -886,14 +894,17 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			s_oLogger.error(sMsg);
 			throw new NullPointerException(sMsg);
 		}
-		if(null==sDownloadPath) {
+		
+		if(null==sRootPath) {
 			String sMsg = "LauncherMain.ingest: null download path";
 			s_oLogger.error(sMsg);
 			throw new NullPointerException(sMsg);
 		}
-		File oFilePath = new File(oParameter.getFilePath());
-		if (!oFilePath.canRead()) {
-			String sMsg = "LauncherMain.Ingest: ERROR: unable to access uploaded file " + oFilePath.getAbsolutePath();
+		
+		File oFileToIngestPath = new File(oParameter.getFilePath());
+		
+		if (!oFileToIngestPath.canRead()) {
+			String sMsg = "LauncherMain.Ingest: ERROR: unable to access file to Ingest " + oFileToIngestPath.getAbsolutePath();
 			s_oLogger.error(sMsg);
 			throw new IOException(sMsg);
 		}
@@ -904,7 +915,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 		try {	
 			if (oProcessWorkspace != null) {
 				//get file size
-				long lFileSizeByte = oFilePath.length(); 
+				long lFileSizeByte = oFileToIngestPath.length(); 
 				//set file size
 				setFileSizeToProcess(lFileSizeByte, oProcessWorkspace);
 
@@ -912,12 +923,14 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 				oProcessWorkspace.setPid(getProcessId());
 
 				updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 0);
-			} else {
+			} 
+			else {
 				s_oLogger.error("LauncherMain.Ingest: process not found: " + oParameter.getProcessObjId());
 			}
+			
+			String sDestinationPath = getWorspacePath(oParameter, sRootPath);
 
-			File oRootPath = new File(sDownloadPath);
-			File oDstDir = new File(new File(oRootPath, oParameter.getUserId()), oParameter.getWorkspace());
+			File oDstDir = new File(sDestinationPath);
 
 			if (!oDstDir.exists()) {
 				oDstDir.mkdirs();
@@ -930,7 +943,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 
 			// Product view Model
 			ReadProduct oReadProduct = new ReadProduct();
-			ProductViewModel oVM = oReadProduct.getProductViewModel(oFilePath);
+			ProductViewModel oVM = oReadProduct.getProductViewModel(oFileToIngestPath);
 
 			updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 25);
 
@@ -940,37 +953,24 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 50);	        
 
 			//copy file to workspace directory
-			if (!oFilePath.getParent().equals(oDstDir.getAbsolutePath())) {
+			if (!oFileToIngestPath.getParent().equals(oDstDir.getAbsolutePath())) {
 				s_oLogger.debug("File in another folder make a copy");
-				FileUtils.copyFileToDirectory(oFilePath, oDstDir);
+				FileUtils.copyFileToDirectory(oFileToIngestPath, oDstDir);
 			}
 			else {
 				s_oLogger.debug("File already in place");
 			}
 
-			File oDstFile = new File(oDstDir, oFilePath.getName());
+			File oDstFile = new File(oDstDir, oFileToIngestPath.getName());
 
 			updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 75);
 
 			if (oVM.getName().equals("geotiff")) {
 				oVM.setName(oVM.getFileName());
 			}
-			// Save it in the register
-			DownloadedFilesRepository oDownloadedRepo = new DownloadedFilesRepository();
-			DownloadedFile oAlreadyDownloaded = new DownloadedFile();
-			oAlreadyDownloaded.setFileName(oFilePath.getName());
-			oAlreadyDownloaded.setFilePath(oDstFile.getAbsolutePath());
-			oAlreadyDownloaded.setProductViewModel(oVM);
-			oAlreadyDownloaded.setRefDate(new Date());
-			oAlreadyDownloaded.setCategory(DownloadedFileCategory.INGESTION.name());
-			String oBB = oReadProduct.getProductBoundingBox(oFilePath);
-			oAlreadyDownloaded.setBoundingBox(oBB);
-			oDownloadedRepo.InsertDownloadedFile(oAlreadyDownloaded);            
-
-			updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 90);
-
+			
 			//add product to db
-			addProductToDbAndSendToRabbit(oVM, oFilePath.getAbsolutePath(), oParameter.getWorkspace(), oParameter.getExchange(), LauncherOperations.INGEST.name(), oBB);
+			addProductToDbAndWorkspaceAndSendToRabbit(oVM, oFileToIngestPath.getAbsolutePath(), oParameter.getWorkspace(), oParameter.getExchange(), LauncherOperations.INGEST.name(), null);
 
 			 updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.DONE, 100);
 
@@ -1137,6 +1137,8 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 
 			s_oLogger.debug("LauncherMain.ExecuteOperation: convert product to view model");
 
+			/*
+			// Now the system supports auto bbox read
 			// P.Campanella 12/05/2017: get the BB from the orginal product
 			// Get the original Bounding Box
 			DownloadedFilesRepository oDownloadedRepo = new DownloadedFilesRepository();
@@ -1146,8 +1148,9 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			if (oAlreadyDownloaded != null) {
 				sBB = oAlreadyDownloaded.getBoundingBox();
 			}
+			*/
 
-			addProductToDbAndSendToRabbit(null, sTargetAbsFileName, oParameter.getWorkspace(), oParameter.getExchange(), oLauncherOperation.name(), sBB);
+			addProductToDbAndWorkspaceAndSendToRabbit(null, sTargetAbsFileName, oParameter.getWorkspace(), oParameter.getExchange(), oLauncherOperation.name(), null);
 
 			if (oProcessWorkspace != null) oProcessWorkspace.setStatus(ProcessStatus.DONE.name());
 		}
@@ -1188,9 +1191,11 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 
 			// Read File Name
 			String sFile = oParameter.getFileName();
+			
+			String sFullPath = getWorspacePath(oParameter) + sFile;
 
 			DownloadedFilesRepository oDownloadedFilesRepository = new DownloadedFilesRepository();
-			DownloadedFile oDownloadedFile = oDownloadedFilesRepository.GetDownloadedFile(sFile);
+			DownloadedFile oDownloadedFile = oDownloadedFilesRepository.GetDownloadedFileByPath(sFullPath);
 			
 			if (oDownloadedFile == null)   {
 				s_oLogger.error("Downloaded file is null!! Return empyt layer id for ["+ sFile +"]");
@@ -1537,7 +1542,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			s_oLogger.debug("LauncherMain.RasterGeometricResample: convert product to view model");
 			String sOutFile = oWriter.WriteBEAMDIMAP(oResampledProduct, sPath, sFileNameOnly+"_resampled");
 
-			addProductToDbAndSendToRabbit(null, sOutFile, oParameter.getWorkspace(), oParameter.getExchange(), LauncherOperations.RASTERGEOMETRICRESAMPLE.name(), null);
+			addProductToDbAndWorkspaceAndSendToRabbit(null, sOutFile, oParameter.getWorkspace(), oParameter.getExchange(), LauncherOperations.RASTERGEOMETRICRESAMPLE.name(), null);
 			if (oProcessWorkspace != null) oProcessWorkspace.setStatus(ProcessStatus.DONE.name());
 
 		}
@@ -1776,15 +1781,10 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			
 			s_oLogger.debug("LauncherMain.executeSubset adding product to Workspace");
 			
-			addProductToDbAndSendToRabbit(null, sOutputPath,oParameter.getWorkspace(), oParameter.getWorkspace(), LauncherOperations.SUBSET.toString(), null);
+			addProductToDbAndWorkspaceAndSendToRabbit(null, sOutputPath,oParameter.getWorkspace(), oParameter.getWorkspace(), LauncherOperations.SUBSET.toString(), null);
 			
-			if (addProductToWorkspace(oParameter.getDestinationProductName(), oParameter.getWorkspace())) {
-				s_oLogger.debug("LauncherMain.executeSubset: product added to workspace");
-			}
-			else {
-				s_oLogger.debug("LauncherMain.executeSubset: error adding product to workspace");
-			}
-
+			s_oLogger.debug("LauncherMain.executeSubset: product added to workspace");
+			
 		}
 		catch (Exception oEx) {
 			s_oLogger.error("LauncherMain.executeSubset: exception " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
@@ -1829,14 +1829,11 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 				
 				s_oLogger.debug("LauncherMain.executeMosaic adding product to Workspace");
 				
-				addProductToDbAndSendToRabbit(null, getWorspacePath(oParameter)+oParameter.getDestinationProductName(),oParameter.getWorkspace(), oParameter.getWorkspace(), LauncherOperations.MOSAIC.toString(), null);
+				String sFileOutputFullPath = getWorspacePath(oParameter)+oParameter.getDestinationProductName();
 				
-				if (addProductToWorkspace(oParameter.getDestinationProductName(), oParameter.getWorkspace())) {
-					s_oLogger.debug("LauncherMain.executeMosaic: product added to workspace");
-				}
-				else {
-					s_oLogger.debug("LauncherMain.executeMosaic: error adding product to workspace");
-				}
+				addProductToDbAndWorkspaceAndSendToRabbit(null, sFileOutputFullPath,oParameter.getWorkspace(), oParameter.getWorkspace(), LauncherOperations.MOSAIC.toString(), null);
+				
+				s_oLogger.debug("LauncherMain.executeMosaic: product added to workspace");
 			}
 			else {
 				// error
@@ -1863,11 +1860,11 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 
 	/**
 	 * Adds a product to a Workspace. If it is alredy added it will not be duplicated.
-	 * @param sProductName Product to Add
+	 * @param sProductFullPath Product to Add
 	 * @param sWorkspaceId Workspace Id
 	 * @return True if the product is already or have been added to the WS. False otherwise
 	 */
-	public boolean addProductToWorkspace(String sProductName, String sWorkspaceId) {
+	public boolean addProductToWorkspace(String sProductFullPath, String sWorkspaceId) {
 
 		try {
 
@@ -1875,27 +1872,27 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			ProductWorkspaceRepository oProductWorkspaceRepository = new ProductWorkspaceRepository();
 
 			// Check if product is already in the Workspace
-			if (oProductWorkspaceRepository.ExistsProductWorkspace(sProductName, sWorkspaceId) == false) {
+			if (oProductWorkspaceRepository.ExistsProductWorkspace(sProductFullPath, sWorkspaceId) == false) {
 
 				// Create the entity
 				ProductWorkspace oProductWorkspace = new ProductWorkspace();
-				oProductWorkspace.setProductName(sProductName);
+				oProductWorkspace.setProductName(sProductFullPath);
 				oProductWorkspace.setWorkspaceId(sWorkspaceId);
 
 				// Try to insert
 				if (oProductWorkspaceRepository.InsertProductWorkspace(oProductWorkspace)) {
 
-					s_oLogger.debug("LauncherMain.AddProductToWorkspace:  Inserted [" +sProductName + "] in WS: [" + sWorkspaceId+ "]");
+					s_oLogger.debug("LauncherMain.AddProductToWorkspace:  Inserted [" +sProductFullPath + "] in WS: [" + sWorkspaceId+ "]");
 					return true;
 				}
 				else {
 
-					s_oLogger.debug("LauncherMain.AddProductToWorkspace:  Error adding ["  +sProductName + "] in WS: [" + sWorkspaceId+ "]");
+					s_oLogger.debug("LauncherMain.AddProductToWorkspace:  Error adding ["  +sProductFullPath + "] in WS: [" + sWorkspaceId+ "]");
 					return false;
 				}
 			}
 			else {
-				s_oLogger.debug("LauncherMain.AddProductToWorkspace: Product [" +sProductName + "] Already exists in WS: [" + sWorkspaceId+ "]");
+				s_oLogger.debug("LauncherMain.AddProductToWorkspace: Product [" +sProductFullPath + "] Already exists in WS: [" + sWorkspaceId+ "]");
 				return true;
 			}
 		}
@@ -1992,78 +1989,79 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 
 
 	/**
-	 * Converts a product in a ViewModel and send it to the rabbit queue
+	 * Converts a product in a ViewModel, add it to the workspace and send it to the rabbit queue
+	 * The method is Safe: controls if the products already exists and if it is already added to the workspace
 	 * @param oVM View Model... if null, read it from the product in sFileName
-	 * @param sFileName File Name
+	 * @param sFullPathFileName File Name
 	 * @param sWorkspace Workspace
 	 * @param sExchange Queue Id
 	 * @param sOperation Operation Done
 	 * @param sBBox Bounding Box
 	 */
-	private void addProductToDbAndSendToRabbit(ProductViewModel oVM, String sFileName, String sWorkspace, String sExchange, String sOperation, String sBBox) throws Exception
+	private void addProductToDbAndWorkspaceAndSendToRabbit(ProductViewModel oVM, String sFullPathFileName, String sWorkspace, String sExchange, String sOperation, String sBBox) throws Exception
 	{
-		s_oLogger.debug("LauncherMain.AddProductToDbAndSendToRabbit: File Name = " + sFileName);
+		s_oLogger.debug("LauncherMain.AddProductToDbAndSendToRabbit: File Name = " + sFullPathFileName);
 
-		// Get The product view Model            
-		if (oVM == null) {
-			ReadProduct oReadProduct = new ReadProduct();
-			s_oLogger.debug("LauncherMain.AddProductToDbAndSendToRabbit: call read product");
-			File oProductFile = new File(sFileName);
-			oVM = oReadProduct.getProductViewModel(oProductFile);
-			oVM.setMetadataFileReference(saveMetadata(oReadProduct, oProductFile));
+		// Check if the file is really to Add
+		DownloadedFilesRepository oDownloadedRepo = new DownloadedFilesRepository();
+		DownloadedFile oCheck = oDownloadedRepo.GetDownloadedFileByPath(sFullPathFileName);
+		
+		File oFile = new File(sFullPathFileName);
+		ReadProduct oReadProduct = new ReadProduct();
+		
+		// Get the Boundig Box
+		if (Utils.isNullOrEmpty(sBBox)) {
+			s_oLogger.debug("LauncherMain.AddProductToDbAndSendToRabbit: bbox not set. Try to auto get it ");
+			sBBox= oReadProduct.getProductBoundingBox(oFile);
+		}
+		
+		if (oCheck == null) {
 
-			if (oVM.getBandsGroups() == null) {
-				s_oLogger.debug("LauncherMain.AddProductToDbAndSendToRabbit: Band Groups is NULL");
-			} else if (oVM.getBandsGroups().getBands() == null) {
-				s_oLogger.debug("LauncherMain.AddProductToDbAndSendToRabbit: bands is NULL");
-			} else {
-				s_oLogger.debug("LauncherMain.AddProductToDbAndSendToRabbit: bands " + oVM.getBandsGroups().getBands().size());
+			// The VM Is Available?
+			if (oVM == null) {
+				
+				// Get The product view Model				
+				s_oLogger.debug("LauncherMain.AddProductToDbAndSendToRabbit: read View Model");
+				oVM = oReadProduct.getProductViewModel(oFile);
+				
+				// Asynch Metadata Save
+				oVM.setMetadataFileReference(asynchSaveMetadata(sFullPathFileName));
+				
+				s_oLogger.debug("LauncherMain.AddProductToDbAndSendToRabbit: done read product");
 			}
 			
-			if (Utils.isNullOrEmpty(sBBox)) {
-				s_oLogger.debug("LauncherMain.AddProductToDbAndSendToRabbit: bbox not set. Try to auto get it ");
-				sBBox= oReadProduct.getProductBoundingBox(oProductFile);
-			}
-
-			s_oLogger.debug("LauncherMain.AddProductToDbAndSendToRabbit: done read product");
-		}
-
-
-		// P.Campanella 12/05/2017: it looks it is done before. Let leave here a check
-		DownloadedFilesRepository oDownloadedRepo = new DownloadedFilesRepository();
-
-		DownloadedFile oCheck = oDownloadedRepo.GetDownloadedFile(oVM.getFileName());
-		File oFile = new File(sFileName);
-
-		boolean bAddProductToWS = true;
-
-		if (oCheck == null) {
 			s_oLogger.debug("AddProductToDbAndSendToRabbit: Insert in db");
 
 			// Save it in the register
-			DownloadedFile oAlreadyDownloaded = new DownloadedFile();
+			DownloadedFile oDownloadedProduct = new DownloadedFile();
 
-			oAlreadyDownloaded.setFileName(oFile.getName());
-			oAlreadyDownloaded.setFilePath(sFileName);
-			oAlreadyDownloaded.setProductViewModel(oVM);
-			oAlreadyDownloaded.setBoundingBox(sBBox);
-			oAlreadyDownloaded.setRefDate(new Date());
-			oAlreadyDownloaded.setCategory(DownloadedFileCategory.COMPUTED.name());
+			oDownloadedProduct.setFileName(oFile.getName());
+			oDownloadedProduct.setFilePath(sFullPathFileName);
+			oDownloadedProduct.setProductViewModel(oVM);
+			oDownloadedProduct.setBoundingBox(sBBox);
+			oDownloadedProduct.setRefDate(new Date());
+			oDownloadedProduct.setCategory(DownloadedFileCategory.COMPUTED.name());
 
-			if (!oDownloadedRepo.InsertDownloadedFile(oAlreadyDownloaded)) {
+			// Insert in the Db
+			if (!oDownloadedRepo.InsertDownloadedFile(oDownloadedProduct)) {
 				s_oLogger.error("Impossible to Insert the new Product " + oFile.getName() + " in the database.");
 			}
 			else {
 				s_oLogger.info("Product Inserted");
 			}
 		}
-
-		if (bAddProductToWS) {
-			addProductToWorkspace(oFile.getName(), sWorkspace);
-		}
 		else {
-			s_oLogger.error("Product NOT added to the Workspace");
+			
+			// The product is already there. No need to add
+			if (oVM == null) {
+				oVM = oCheck.getProductViewModel();
+			}
+			
+			s_oLogger.debug("AddProductToDbAndSendToRabbit: Product Already in the Database. Do not add");
 		}
+
+		// The Add Produt to Workspace is safe. No need to check if the product is already in the workspace
+		addProductToWorkspace(oFile.getAbsolutePath(), sWorkspace);
 
 		s_oLogger.debug("LauncherMain.AddProductToDbAndSendToRabbit: Image added. Send Rabbit Message Exchange = " + sExchange);
 

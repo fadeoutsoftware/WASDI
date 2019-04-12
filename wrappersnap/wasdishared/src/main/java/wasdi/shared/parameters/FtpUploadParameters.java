@@ -22,14 +22,7 @@ public class FtpUploadParameters extends BaseParameter {
 	String m_sUsername;
 	String m_sPassword;
 	String m_sRemoteFileName;
-	String m_sRemotePath;
-	
-	//TODO remove logic
-	//TODO rename without m?
-	//TODO use just localFileName
-	
-	//local file info
-	//MAYBE read from config?
+	String m_sRemotePath;	
 	String m_sLocalFileName;
 	String m_sLocalPath;
 	
@@ -56,52 +49,46 @@ public class FtpUploadParameters extends BaseParameter {
 			throw new IllegalArgumentException();
 		}
 	}
-	public Integer getM_iPort() {
+	public Integer getPort() {
 		return m_iPort;
 	}
-	public void setM_iPort(Integer iPort) {
-		//TODO validate input
+	public void setPort(Integer iPort) {
 		this.m_iPort = iPort;
 	}
-	public String getM_sUsername() {
+	public String getUsername() {
 		return m_sUsername;
 	}
-	public void setM_sUsername(String sUsername) {
-		//TODO validate input
+	public void setUsername(String sUsername) {
 		this.m_sUsername = sUsername;
 	}
-	public String getM_sPassword() {
+	public String getPassword() {
 		return m_sPassword;
 	}
-	public void setM_sPassword(String sPassword) {
-		//TODO validate input
+	public void setPassword(String sPassword) {
 		this.m_sPassword = sPassword;
 	}
-	public String getM_sRemoteFileName() {
+	public String getRemoteFileName() {
 		return m_sRemoteFileName;
 	}
-	public void setM_sRemoteFileName(String sFileName) {
-		//TODO validate input
+	public void setRemoteFileName(String sFileName) {
 		this.m_sRemoteFileName = sFileName;
 	}
-	public String getM_sRemotePath() {
+	public String getRemotePath() {
 		return m_sRemotePath;
 	}
-	public void setM_sRemotePath(String sPath) {
-		//null or "" means root
+	public void setRemotePath(String sPath) {
 		this.m_sRemotePath = sPath;
 	}
-	public String getM_sLocalFileName() {
+	public String getLocalFileName() {
 		return m_sLocalFileName;
 	}
-	public void setM_sLocalFileName(String sLocalFileName) {
-		//TODO validate input
+	public void setLocalFileName(String sLocalFileName) {
 		this.m_sLocalFileName = sLocalFileName;
 	}
-	public String getM_sLocalPath() {
+	public String getLocalPath() {
 		return m_sLocalPath;
 	}
-	public void setM_sLocalPath(String sLocalPath) {
+	public void setLocalPath(String sLocalPath) {
 		if(null == sLocalPath) {
 			throw new IllegalArgumentException();
 		}
@@ -109,14 +96,6 @@ public class FtpUploadParameters extends BaseParameter {
 			throw new IllegalArgumentException();
 		}
 		this.m_sLocalPath=new String( FilenameUtils.normalizeNoEndSeparator(sLocalPath, true) );
-		/*
-		if(!m_sLocalPath.endsWith("/")) {
-			m_sLocalPath+="/";
-		}
-		while(m_sLocalPath.startsWith("/")) {
-			m_sLocalPath = m_sLocalPath.substring(1);
-		}
-		*/
 	}
 	
 	public String getFullLocalPath() {

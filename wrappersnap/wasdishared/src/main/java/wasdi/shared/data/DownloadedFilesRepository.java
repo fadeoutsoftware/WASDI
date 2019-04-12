@@ -92,6 +92,29 @@ public class DownloadedFilesRepository extends MongoRepository {
 
         return  null;
     }
+    
+    /**
+     * Get Downloaded file by name
+     * @param sFileName
+     * @return
+     */
+    public DownloadedFile GetDownloadedFileByPath(String sFileFullPath) {
+        try {
+            Document oSessionDocument = getCollection("downloadedfiles").find(new Document("filePath", sFileFullPath)).first();
+
+            if (oSessionDocument==null) return  null;
+
+            String sJSON = oSessionDocument.toJson();
+
+            DownloadedFile oFile = s_oMapper.readValue(sJSON,DownloadedFile.class);
+
+            return oFile;
+        } catch (Exception oEx) {
+            oEx.printStackTrace();
+        }
+
+        return  null;
+    }
 
     /**
      * Search files
@@ -196,42 +219,6 @@ public class DownloadedFilesRepository extends MongoRepository {
         }
 
         return aoReturnList;    	
-    }
-    
-    public static void main(String[] args) {
-	    String productName = "S2B_MSIL1C_20171102T100139_N0206_R122_T32TQP_20171102T121017.zip";
-		DownloadedFilesRepository repo = new DownloadedFilesRepository();
-		DownloadedFile df = repo.GetDownloadedFile(productName);
-		MetadataViewModel m = df.getProductViewModel().getMetadata();
-		if (m!=null) {
-			showMetadata(m.getName(), m);
-		} else {
-			System.out.println("No metadata found!");
-		}
-		
-    } 
-   
-    private static void showMetadata(String pre, MetadataViewModel m) {
-//	   System.out.println(pre + " NAME: " + m.getName());
-	   ArrayList<AttributeViewModel> attrs = m.getAttributes();
-	   if (attrs!=null) {
-		   for (AttributeViewModel attr : attrs) {
-			   System.out.println(pre + ": " + attr.getDescription() + " = " + attr.getData());
-			   //System.out.println(pre + " - DATA: " + attr.getData());
-			   //System.out.println(pre + " - DESCR: " + attr.getDescription());
-			   //System.out.println(pre + " - TYPE: " + attr.getDataType());
-			   //System.out.println(pre + " - NUM_EL: " + attr.getNumElems());
-		   }
-	   } else {
-		   System.out.println(pre + " - NO ATTRIBUTES");
-	   }
-	   String newPre = (pre.isEmpty()) ? m.getName() : pre + "." + m.getName();
-	   ArrayList<MetadataViewModel> childs = m.getElements();
-	   if (childs != null) {
-		   for (MetadataViewModel anotherM : childs) {
-			   showMetadata(newPre, anotherM);
-		   }		   
-	   }
     }
     
 }
