@@ -223,7 +223,10 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 
 			// opens input stream from the HTTP connection
 			InputStream oInputStream = oHttpConn.getInputStream();
-			String sSaveFilePath = sSaveDirOnServer + "/" + sFileName;
+			
+			if (!sSaveDirOnServer.endsWith("/")) sSaveDirOnServer+="/";
+			
+			String sSaveFilePath = sSaveDirOnServer + sFileName;
 
 			m_oLogger.debug("ProviderAdapter.downloadViaHttp: Create Save File Path = " + sSaveFilePath);
 
