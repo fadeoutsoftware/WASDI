@@ -5,12 +5,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.bson.Document;
+import org.bson.conversions.Bson;
 
 import com.mongodb.Block;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.result.DeleteResult;
+import com.mongodb.client.result.UpdateResult;
 
+import wasdi.shared.business.DownloadedFile;
 import wasdi.shared.business.ProductWorkspace;
 
 /**
@@ -28,7 +31,7 @@ public class ProductWorkspaceRepository extends MongoRepository {
             }
 
             String sJSON = s_oMapper.writeValueAsString(oProductWorkspace);
-            getCollection("productworkpsace").insertOne(Document.parse(sJSON));
+            getCollection("productworkpsace_copy").insertOne(Document.parse(sJSON));
 
             return true;
 
@@ -44,7 +47,7 @@ public class ProductWorkspaceRepository extends MongoRepository {
         final ArrayList<ProductWorkspace> aoReturnList = new ArrayList<ProductWorkspace>();
         try {
 
-            FindIterable<Document> oWSDocuments = getCollection("productworkpsace").find(new Document("workspaceId", sWorkspaceId));
+            FindIterable<Document> oWSDocuments = getCollection("productworkpsace_copy").find(new Document("workspaceId", sWorkspaceId));
 
             oWSDocuments.forEach(new Block<Document>() {
                 public void apply(Document document) {
@@ -70,7 +73,7 @@ public class ProductWorkspaceRepository extends MongoRepository {
     public List<String> getWorkspaces(String sProductId) {    	
     	List<String> asWorkspaces = new ArrayList<String>();
     	
-    	FindIterable<Document> aoDocuments = getCollection("productworkpsace").find(new Document("productName", sProductId));
+    	FindIterable<Document> aoDocuments = getCollection("productworkpsace_copy").find(new Document("productName", sProductId));
     	aoDocuments.forEach(new Block<Document>() {
     		public void apply(Document oDocument) {
                 String sJson = oDocument.toJson();
@@ -93,7 +96,7 @@ public class ProductWorkspaceRepository extends MongoRepository {
         boolean bExists = false;
         try {
 
-            FindIterable<Document> oWSDocuments = getCollection("productworkpsace").find(Filters.and(Filters.eq("productName", sProductId), Filters.eq("workspaceId", sWorkspaceId)));
+            FindIterable<Document> oWSDocuments = getCollection("productworkpsace_copy").find(Filters.and(Filters.eq("productName", sProductId), Filters.eq("workspaceId", sWorkspaceId)));
 
             oWSDocuments.forEach(new Block<Document>() {
                 public void apply(Document document) {
@@ -123,7 +126,7 @@ public class ProductWorkspaceRepository extends MongoRepository {
 
         try {
 
-            DeleteResult oDeleteResult = getCollection("productworkpsace").deleteMany(new Document("wokspaceId", sWorkspaceId));
+            DeleteResult oDeleteResult = getCollection("productworkpsace_copy").deleteMany(new Document("wokspaceId", sWorkspaceId));
 
             if (oDeleteResult != null)
             {
@@ -141,7 +144,7 @@ public class ProductWorkspaceRepository extends MongoRepository {
 
         try {
 
-            DeleteResult oDeleteResult = getCollection("productworkpsace").deleteOne(Filters.and(Filters.eq("productName", sProductName), Filters.eq("workspaceId",sWorkspaceId)));
+            DeleteResult oDeleteResult = getCollection("productworkpsace_copy").deleteOne(Filters.and(Filters.eq("productName", sProductName), Filters.eq("workspaceId",sWorkspaceId)));
 
             if (oDeleteResult != null)
             {
@@ -159,7 +162,7 @@ public class ProductWorkspaceRepository extends MongoRepository {
 
         try {
 
-            DeleteResult oDeleteResult = getCollection("productworkpsace").deleteMany(Filters.and(Filters.eq("productName", sProductName)));
+            DeleteResult oDeleteResult = getCollection("productworkpsace_copy").deleteMany(Filters.and(Filters.eq("productName", sProductName)));
 
             if (oDeleteResult != null)
             {
@@ -178,7 +181,7 @@ public class ProductWorkspaceRepository extends MongoRepository {
         final ArrayList<ProductWorkspace> aoReturnList = new ArrayList<ProductWorkspace>();
         try {
 
-            FindIterable<Document> oDFDocuments = getCollection("productworkpsace").find();
+            FindIterable<Document> oDFDocuments = getCollection("productworkpsace_copy").find();
 
             oDFDocuments.forEach(new Block<Document>() {
                 public void apply(Document document) {
@@ -200,4 +203,24 @@ public class ProductWorkspaceRepository extends MongoRepository {
 
         return aoReturnList;    	
     }
+    
+    public boolean UpdateProductWorkspace(ProductWorkspace oProductWorkspace, String sOldProductName) {
+        try {
+            String sJSON = s_oMapper.writeValueAsString(oProductWorkspace);
+            
+            Bson oFilter = new Document("productName", sOldProductName);
+            
+            Bson oUpdateOperationDocument = new Document("$set", new Document(Document.parse(sJSON)));
+            
+            UpdateResult oResult = getCollection("productworkpsace_copy").updateOne(oFilter, oUpdateOperationDocument);
+
+            if (oResult.getModifiedCount()==1) return  true;
+        }
+        catch (Exception oEx) {
+            oEx.printStackTrace();
+        }
+
+        return  false;
+    }
+            
 }

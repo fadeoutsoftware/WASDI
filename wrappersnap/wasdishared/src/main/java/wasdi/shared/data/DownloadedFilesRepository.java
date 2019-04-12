@@ -92,12 +92,14 @@ public class DownloadedFilesRepository extends MongoRepository {
 
         return  null;
     }
-    
+
+
     /**
      * Get Downloaded file by name
      * @param sFileName
      * @return
      */
+
     public DownloadedFile GetDownloadedFileByPath(String sFileFullPath) {
         try {
             Document oSessionDocument = getCollection("downloadedfiles").find(new Document("filePath", sFileFullPath)).first();
@@ -114,6 +116,34 @@ public class DownloadedFilesRepository extends MongoRepository {
         }
 
         return  null;
+    }          
+
+    public List<DownloadedFile> GetDownloadedFileListByName(String sFileName) {
+        final ArrayList<DownloadedFile> aoReturnList = new ArrayList<DownloadedFile>();
+        try {
+
+            FindIterable<Document> oDFDocuments = getCollection("downloadedfiles").find(new Document("fileName", sFileName));
+
+            oDFDocuments.forEach(new Block<Document>() {
+                public void apply(Document document) {
+                    String sJSON = document.toJson();
+                    DownloadedFile oDwFile = null;
+                    try {
+                        oDwFile = s_oMapper.readValue(sJSON,DownloadedFile.class);
+                        aoReturnList.add(oDwFile);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+
+                }
+            });
+
+        } catch (Exception oEx) {
+            oEx.printStackTrace();
+        }
+
+        return aoReturnList;    	
+
     }
 
     /**
