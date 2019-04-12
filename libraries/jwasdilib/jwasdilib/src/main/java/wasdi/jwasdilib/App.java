@@ -25,7 +25,7 @@ public class App
         
         testConnection(oLib);
         testDownload(oLib);
-        testAutomaticUpload(oLib);
+    //    testAutomaticUpload(oLib);
         
 //        testUploadFileDUMMYFILE(oLib);
 //        testUploadFile(oLib);
@@ -225,7 +225,9 @@ public class App
 //    	System.out.println(sResult);
 //    	sResult = oLib.getFullProductPath("20170525_8d_20170601-ACRI-L4-BBP-GSM_MULTI_4KM-GLO-DT-v02.nc");
 //    	System.out.println(sResult);
-    	sResult = oLib.getFullProductPath("S1A_IW_GRDH_1SDV_20190407T171450_20190407T171515_026687_02FECA_7F6E_ApplyOrbit.dim");
+//    	sResult = oLib.getFullProductPath("S1A_IW_GRDH_1SDV_20190407T171450_20190407T171515_026687_02FECA_7F6E_ApplyOrbit.dim");
+//    	System.out.println(sResult);
+    	sResult = oLib.getFullProductPath("S2A_MSIL1C_20190322T013651_N0207_R117_T53RQQ_20190322T032332_NDVI");
     	System.out.println(sResult);
 //    	sResult = oLib.getFullProductPath("S2A_MSIL1C_20190404T101031_N0207_R022_T32TNR_20190404T185546_NDVI.dim");
 //    	System.out.println(sResult);
