@@ -350,14 +350,14 @@ public class WorkspaceResource {
 
 		try {
 			//repositories
-			ProductWorkspaceRepository oProductRepository = new ProductWorkspaceRepository();
+			ProductWorkspaceRepository oProductWorkspaceRepository = new ProductWorkspaceRepository();
 			PublishedBandsRepository oPublishRepository = new PublishedBandsRepository();
 			WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
 			DownloadedFilesRepository oDownloadedFilesRepository = new DownloadedFilesRepository();
 
 			if (oWorkspaceRepository.DeleteWorkspace(sWorkspaceId)) {
 				//get all product in workspace
-				List<ProductWorkspace> aoProducts = oProductRepository.GetProductsByWorkspace(sWorkspaceId);
+				List<ProductWorkspace> aoProducts = oProductWorkspaceRepository.GetProductsByWorkspace(sWorkspaceId);
 
 				if (bDeleteFile) {
 					try {

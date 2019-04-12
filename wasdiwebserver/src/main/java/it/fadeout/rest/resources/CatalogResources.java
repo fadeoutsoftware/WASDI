@@ -143,11 +143,23 @@ public class CatalogResources {
 	 * @param sFileName
 	 * @return A File object if the file can be download, NULL if the file does not exist or is unreadable
 	 */
-	private File getEntryFile(String sFileName)
+	private File getEntryFile(String sFileName, String sUserId, String sWorkspace)
 	{
 		Wasdi.DebugLog("CatalogResources.getEntryFile( " + sFileName + " )");
+		
+		
+
+		String sDownloadRootPath = "";
+		if (m_oServletConfig.getInitParameter("DownloadRootPath") != null) {
+			sDownloadRootPath = m_oServletConfig.getInitParameter("DownloadRootPath");
+			if (!m_oServletConfig.getInitParameter("DownloadRootPath").endsWith("/"))
+				sDownloadRootPath += "/";
+		}
+
+		String sTargetFilePath = sDownloadRootPath +sUserId + "/" + sWorkspace + "/" + sFileName;
+
 		DownloadedFilesRepository oRepo = new DownloadedFilesRepository();
-		DownloadedFile oDownloadedFile = oRepo.GetDownloadedFile(sFileName);
+		DownloadedFile oDownloadedFile = oRepo.GetDownloadedFileByPath(sTargetFilePath);
 
 		if (oDownloadedFile == null) 
 		{
@@ -155,15 +167,9 @@ public class CatalogResources {
 			return null;
 		}
 		
-		String sFilePath = oDownloadedFile.getFilePath();
+		File oFile = new File(sTargetFilePath);
 
-
-
-		File oFile = new File(sFilePath);
-		//File oFile = new File("C:\\temp\\wasdi\\S1A_IW_GRDH_1SDV_20180605T051925_20180605T051950_022217_026754_8ADD.zip");
-
-		if( oFile.canRead() == true)
-		{
+		if( oFile.canRead() == true) {
 			return oFile;
 		}
 		else {
@@ -177,11 +183,14 @@ public class CatalogResources {
 	@Produces(MediaType.APPLICATION_OCTET_STREAM)
 	public Response downloadEntryByName(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("token") String sTokenSessionId,
-			@QueryParam("filename") String sFileName)
+			@QueryParam("filename") String sFileName,
+			@QueryParam("workspace") String sWorkspace)
 	{			
 
 		Wasdi.DebugLog("CatalogResources.DownloadEntryByName( " + sSessionId + ", "+ sTokenSessionId + ", " + sFileName);
+		
 		try {
+			
 			if( Utils.isNullOrEmpty(sSessionId) == false) {
 				sTokenSessionId = sSessionId;
 			}
@@ -193,7 +202,8 @@ public class CatalogResources {
 				return Response.status(Status.UNAUTHORIZED).build();
 			}
 			
-			File oFile = this.getEntryFile(sFileName);
+			File oFile = this.getEntryFile(sFileName, oUser.getUserId(), sWorkspace);
+			
 			ResponseBuilder oResponseBuilder = null;
 			if(oFile == null) {
 				Wasdi.DebugLog("CatalogResources.DownloadEntryByName: file not readable");
@@ -203,8 +213,6 @@ public class CatalogResources {
 				FileStreamingOutput oStream;
 				boolean bMustZip = mustBeZipped(oFile); 
 				if(bMustZip) {
-					//oFile = getZippedFile(oFile);
-					//oStream = new FileInputStream(oFile);
 					Wasdi.DebugLog("CatalogResources.DownloadEntryByName: file " + oFile.getName() + " must be zipped");
 					return zipOnTheFlyAndStream(oFile);
 				} else {
@@ -344,7 +352,7 @@ public class CatalogResources {
 	@GET
 	@Path("checkdownloadavaialibitybyname")
 	@Produces({"application/xml", "application/json", "text/xml"})
-	public Response checkDownloadEntryAvailabilityByName(@QueryParam("token") String sSessionId, @QueryParam("filename") String sFileName)
+	public Response checkDownloadEntryAvailabilityByName(@QueryParam("token") String sSessionId, @QueryParam("filename") String sFileName, @QueryParam("workspace") String sWorkspace)
 	{			
 		Wasdi.DebugLog("CatalogResources.CheckDownloadEntryAvailabilityByName");
 
@@ -355,7 +363,8 @@ public class CatalogResources {
 			return Response.status(Status.UNAUTHORIZED).build();
 		}
 
-		File oFile = this.getEntryFile(sFileName);
+		File oFile = this.getEntryFile(sFileName, oUser.getUserId(),sWorkspace);
+		
 		if(oFile == null) {
 			return Response.serverError().build();	
 		}
@@ -712,13 +721,13 @@ public class CatalogResources {
 			oParams.setFtpServer(oFtpTransferVM.getServer());
 
 			//TODO move here checks on server name from the viewModel
-			oParams.setM_iPort(oFtpTransferVM.getPort());
-			oParams.setM_sUsername(oFtpTransferVM.getUser());
-			oParams.setM_sPassword(oFtpTransferVM.getPassword());
-			oParams.setM_sRemotePath(oFtpTransferVM.getDestinationAbsolutePath());
+			oParams.setPort(oFtpTransferVM.getPort());
+			oParams.setUsername(oFtpTransferVM.getUser());
+			oParams.setPassword(oFtpTransferVM.getPassword());
+			oParams.setRemotePath(oFtpTransferVM.getDestinationAbsolutePath());
 			String sFileName = oFtpTransferVM.getFileName();
-			oParams.setM_sRemoteFileName(sFileName);
-			oParams.setM_sLocalFileName(sFileName);
+			oParams.setRemoteFileName(sFileName);
+			oParams.setLocalFileName(sFileName);
 			oParams.setExchange(sWorkspace);
 			oParams.setWorkspace(sWorkspace);
 
@@ -740,7 +749,7 @@ public class CatalogResources {
 			}
 			 */
 
-			oParams.setM_sLocalPath(sFullLocalPath);
+			oParams.setLocalPath(sFullLocalPath);
 
 			Wasdi.DebugLog("CatalogResource.ftpTransferFile: prepare process");
 			ProcessWorkspace oProcess = new ProcessWorkspace();

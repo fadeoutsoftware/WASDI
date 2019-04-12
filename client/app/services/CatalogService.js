@@ -21,10 +21,10 @@ service('CatalogService', ['$http',  'ConstantsService', function ($http, oConst
     {
           return this.m_oHttp.post(this.APIURL + "/catalog/downloadentry",oEntry,{responseType: 'arraybuffer'});
     };
-    this.downloadByName = function(sFileName)
+    this.downloadByName = function(sFileName, sWorkspace)
     {
         var urlParams = "?" + "token=" + oConstantsService.getSessionId();
-        urlParams = urlParams + "&" + "filename=" + sFileName;
+        urlParams = urlParams + "&" + "filename=" + sFileName + "&workspace=" + sWorkspace;
 
         var _this = this;
 

@@ -67,16 +67,16 @@ public class ProductWorkspaceRepository extends MongoRepository {
         return aoReturnList;
     }
 
-    public List<String> getWorkspaces(String productId) {    	
-    	List<String> workspaces = new ArrayList<String>();
+    public List<String> getWorkspaces(String sProductId) {    	
+    	List<String> asWorkspaces = new ArrayList<String>();
     	
-    	FindIterable<Document> documents = getCollection("productworkpsace").find(new Document("productName", productId));
-    	documents.forEach(new Block<Document>() {
-    		public void apply(Document document) {
-                String json = document.toJson();
+    	FindIterable<Document> aoDocuments = getCollection("productworkpsace").find(new Document("productName", sProductId));
+    	aoDocuments.forEach(new Block<Document>() {
+    		public void apply(Document oDocument) {
+                String sJson = oDocument.toJson();
                 try {
-                	ProductWorkspace pw = s_oMapper.readValue(json,ProductWorkspace.class);
-                    workspaces.add(pw.getWorkspaceId());
+                	ProductWorkspace pw = s_oMapper.readValue(sJson,ProductWorkspace.class);
+                    asWorkspaces.add(pw.getWorkspaceId());
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -84,7 +84,7 @@ public class ProductWorkspaceRepository extends MongoRepository {
             }
 		});
     	
-		return workspaces ;
+		return asWorkspaces ;
     }
 
     public boolean ExistsProductWorkspace(String sProductId, String sWorkspaceId) {

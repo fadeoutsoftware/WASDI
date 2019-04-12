@@ -469,7 +469,7 @@ public class WasdiGraph {
         }
         
         if (bAddProductToWS) {
-        	addProductToWorkspace(oProductFile.getName());
+        	addProductToWorkspace(oProductFile.getAbsolutePath());
         }
         else {
         	m_oLogger.error("Product NOT added to the Workspace");

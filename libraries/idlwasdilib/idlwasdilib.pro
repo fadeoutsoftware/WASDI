@@ -442,9 +442,9 @@ end
 
 
 FUNCTION WASDIWAITPROCESSES, asProcessIDs
-	sStatus=' '
+	sStatus=''
 	
-	print, 'Waiting for  ' STRTRIM(STRING(N_ELEMENTS(asProcessIDs)),2) '  processes to finish'
+	print, 'Waiting for ', STRTRIM(STRING(N_ELEMENTS(asProcessIDs)),2), ' processes to finish'
 	
 	asProcessToCeck = [asProcessIDs]
 	asNewList = []
@@ -457,10 +457,10 @@ FUNCTION WASDIWAITPROCESSES, asProcessIDs
 	
 		FOR iProcesses=0, iProcessCount -1 DO BEGIN
 		
-			sProcessID = asProcessIDs[iProcesses]
+			sProcessID = asProcessToCeck[iProcesses]
 			sStatus = WASDIGETPROCESSSTATUS(sProcessID)
 			
-			IF (sStatus EQ 'DONE') OR (sStatus EQ 'STOPPED') OR (sStatus NE 'ERROR') THEN BEGIN
+			IF (sStatus EQ 'DONE') OR (sStatus EQ 'STOPPED') OR (sStatus EQ 'ERROR') THEN BEGIN
 				print, 'Process ', sProcessID, ' finished with status ', sStatus
 			END ELSE BEGIN
 				asNewList = [asNewList, sProcessID]
@@ -468,7 +468,7 @@ FUNCTION WASDIWAITPROCESSES, asProcessIDs
 			
 		ENDFOR
 		
-		asProcessIDs = [asNewList]
+		asProcessToCeck = [asNewList]
 		asNewList = []
 		iProcessCount = N_ELEMENTS(asProcessToCeck)
 		
@@ -519,6 +519,10 @@ FUNCTION WASDIGETWORKSPACEIDBYNAME, workspacename
       break
     endif
   endfor
+  
+  if (workspaceId EQ '') THEN BEGIN
+	print, 'Workspace ', workspacename, ' NOT FOUND'
+  END
   
   ; return the found id or ""
   RETURN, workspaceId
@@ -780,26 +784,16 @@ FUNCTION WASDIGETWORKFLOWS
 END
 
 
-; Execute a SNAP xml Workflow in WASDI without waiting the process to finish
-;FUNCTION WASDIASYNCHEXECUTEWORKFLOW, asInputFileNames, asOutputFileNames, sWorkflow
-;	RETURN, WASDIINTERNALEXECUTEWORKFLOW(asInputFileNames, asOutputFileNames, sWorkflow, 1)
-;END
-
 ; Execute a SNAP xml Workflow in WASDI
-;FUNCTION WASDIEXECUTEWORKFLOW, asInputFileNames, asOutputFileNames, sWorkflow, iAsynch
-;	RETURN, WASDIINTERNALEXECUTEWORKFLOW(asInputFileNames, asOutputFileNames, sWorkflow, 0)
-;END
-
-; Execute a SNAP xml Workflow in WASDI
-FUNCTION WASDIINTERNALEXECUTEWORKFLOW, asInputFileNames, asOutputFileNames, sWorkflow
-
-	iAsynch = 0
+FUNCTION WASDIINTERNALEXECUTEWORKFLOW, asInputFileNames, asOutputFileNames, sWorkflow, iAsynch
 
 	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params
 	sessioncookie = token
 
 	;get the list of workflows
 	aoWorkflows = WASDIGETWORKFLOWS()
+	
+	sWorkflowId = !NULL
 
 	; Search the named one
 	FOR i=0,n_elements(aoWorkflows)-1 DO BEGIN
@@ -813,6 +807,11 @@ FUNCTION WASDIINTERNALEXECUTEWORKFLOW, asInputFileNames, asOutputFileNames, sWor
 			BREAK;
 		ENDIF
 	ENDFOR
+	
+	IF (sWorkflowId EQ !NULL) THEN BEGIN
+		print, 'Workflow ', sWorkflow, ' not found'
+		RETURN, 'ERROR'
+	END
 
 	; API url
 	UrlPath = '/wasdiwebserver/rest/processing/graph_id?workspace='+activeworkspace
@@ -895,6 +894,17 @@ FUNCTION WASDIINTERNALEXECUTEWORKFLOW, asInputFileNames, asOutputFileNames, sWor
 
 	RETURN, sStatus
 END
+
+; Execute a SNAP xml Workflow in WASDI without waiting the process to finish
+FUNCTION WASDIASYNCHEXECUTEWORKFLOW, asInputFileNames, asOutputFileNames, sWorkflow
+	RETURN, WASDIINTERNALEXECUTEWORKFLOW(asInputFileNames, asOutputFileNames, sWorkflow, 1)
+END
+
+; Execute a SNAP xml Workflow in WASDI
+FUNCTION WASDIEXECUTEWORKFLOW, asInputFileNames, asOutputFileNames, sWorkflow, iAsynch
+	RETURN, WASDIINTERNALEXECUTEWORKFLOW(asInputFileNames, asOutputFileNames, sWorkflow, 0)
+END
+
 
 
 ; Execute a WASDI PROCESSOR

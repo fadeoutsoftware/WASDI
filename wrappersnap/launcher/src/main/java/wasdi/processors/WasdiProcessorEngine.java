@@ -1,29 +1,12 @@
 package wasdi.processors;
 
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
-
-import org.apache.commons.io.FileUtils;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
 
 import wasdi.LauncherMain;
-import wasdi.shared.business.ProcessStatus;
-import wasdi.shared.business.ProcessWorkspace;
-import wasdi.shared.business.Processor;
 import wasdi.shared.business.ProcessorTypes;
-import wasdi.shared.data.ProcessWorkspaceRepository;
-import wasdi.shared.data.ProcessorRepository;
 import wasdi.shared.parameters.ProcessorParameter;
 import wasdi.shared.utils.Utils;
 

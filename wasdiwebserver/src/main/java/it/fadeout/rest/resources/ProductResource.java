@@ -65,13 +65,25 @@ public class ProductResource {
 		User oUser = Wasdi.GetUserFromSession(sSessionId);
 		if (oUser == null) return null;
 		if (Utils.isNullOrEmpty(oUser.getUserId())) return null;
+		
+		
+		String sPath = Wasdi.getProductPath(m_oServletConfig, oUser.getUserId(), sWorkspaceId);
 
 		// Create the entity
 		ProductWorkspace oProductWorkspace = new ProductWorkspace();
-		oProductWorkspace.setProductName(sProductName);
+		oProductWorkspace.setProductName(sPath+sProductName);
 		oProductWorkspace.setWorkspaceId(sWorkspaceId);
 
 		ProductWorkspaceRepository oProductWorkspaceRepository = new ProductWorkspaceRepository();
+		
+		if (oProductWorkspaceRepository.ExistsProductWorkspace(oProductWorkspace.getProductName(), oProductWorkspace.getWorkspaceId())) {
+			System.out.println("ProductResource.AddProductToWorkspace:  Product already in the workspace");
+			
+			// Ok done
+			PrimitiveResult oResult = new PrimitiveResult();
+			oResult.setBoolValue(true);
+			return oResult;			
+		}
 
 		// Try to insert
 		if (oProductWorkspaceRepository.InsertProductWorkspace(oProductWorkspace)) {
@@ -399,12 +411,7 @@ public class ProductResource {
 		
 		
 		// Take path
-		String sDownloadRootPath = m_oServletConfig.getInitParameter("DownloadRootPath");
-		if (!sDownloadRootPath.endsWith("/")) 
-		{
-			sDownloadRootPath = sDownloadRootPath + "/";
-		}
-		String sPath = sDownloadRootPath + sUserId + "/" + sWorkspace + "/";
+		String sPath = Wasdi.getProductPath(m_oServletConfig, sUserId, sWorkspace);
 		
 		File oOutputFilePath = new File(sPath + sName);
 		
@@ -469,35 +476,31 @@ public class ProductResource {
 	@GET
 	@Path("delete")
 	@Produces({"application/xml", "application/json", "text/xml"})	
-	public Response deleteProduct(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sProductName") String sProductName, @QueryParam("bDeleteFile") Boolean bDeleteFile, @QueryParam("sWorkspaceId") String sWorkspace, @QueryParam("bDeleteLayer") Boolean bDeleteLayer) 
+	public PrimitiveResult deleteProduct(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sProductName") String sProductName, @QueryParam("bDeleteFile") Boolean bDeleteFile, @QueryParam("sWorkspaceId") String sWorkspace, @QueryParam("bDeleteLayer") Boolean bDeleteLayer) 
 	{
 		Wasdi.DebugLog("ProductResource.DeleteProduct");
+		
+		PrimitiveResult oReturn = new PrimitiveResult();
+		oReturn.setBoolValue(false);
 		
 		User oUser = Wasdi.GetUserFromSession(sSessionId);
 		try {
 
 			// Domain Check
 			if (oUser == null) {
-				return null;
+				oReturn.setIntValue(404);
+				return oReturn;
 			}
 			if (Utils.isNullOrEmpty(oUser.getUserId())) {
-				return null;
+				oReturn.setIntValue(404);
+				return oReturn;
 			}
 
 			ProductWorkspaceRepository oProductWorkspaceRepository = new ProductWorkspaceRepository();
 			DownloadedFilesRepository oDownloadedFilesRepository = new DownloadedFilesRepository();
 			DownloadedFile oDownloadedFile = oDownloadedFilesRepository.GetDownloadedFile(sProductName);
 
-			String sUserId = oUser.getUserId();
-
-			String sDownloadRootPath = "";
-			if (m_oServletConfig.getInitParameter("DownloadRootPath") != null) {
-				sDownloadRootPath = m_oServletConfig.getInitParameter("DownloadRootPath");
-				if (!m_oServletConfig.getInitParameter("DownloadRootPath").endsWith("/"))
-					sDownloadRootPath += "/";
-			}
-
-			String sDownloadPath = sDownloadRootPath + sUserId+ "/" + sWorkspace;
+			String sDownloadPath = Wasdi.getProductPath(m_oServletConfig, oUser.getUserId(), sWorkspace);
 			System.out.println("ProductResource.DeleteProduct: Download Path: " + sDownloadPath);
 			String sFilePath = sDownloadPath + "/" +  sProductName;
 			System.out.println("ProductResource.DeleteProduct: File Path: " + sFilePath);
@@ -505,9 +508,11 @@ public class ProductResource {
 			PublishedBandsRepository oPublishedBandsRepository = new PublishedBandsRepository();
 
 			List<PublishedBand> aoPublishedBands = null;
-			if (bDeleteFile || bDeleteLayer)
+			
+			if (bDeleteFile || bDeleteLayer) {
 				//Get all bands files
-				aoPublishedBands = oPublishedBandsRepository.GetPublishedBandsByProductName(sProductName);
+				aoPublishedBands = oPublishedBandsRepository.GetPublishedBandsByProductName(sProductName);				
+			}
 
 			//get files that begin with the product name
 			if (bDeleteFile)
@@ -541,6 +546,8 @@ public class ProductResource {
 						return false;
 					}
 				};
+				
+				
 				File[] aoFiles = oFolder.listFiles(oFilter);
 				if (aoFiles != null) {
 					System.out.println("ProductResource.DeleteProduct: Number of files to delete " + aoFiles.length);
@@ -552,16 +559,10 @@ public class ProductResource {
 						} else {
 							System.out.println("    OK");
 						}
-						
-//						try {
-//							if (!oFile.isDirectory()) {
-//								oFile.delete();
-//							} 
-//						} catch(Exception oEx) {
-//							System.out.println("ProductResource.DeleteProduct: error deleting file product " + oEx.toString());
-//						}
-
 					}
+				}
+				else {
+					System.out.println("ProductResource.DeleteProduct: No File to delete ");
 				}
 			}
 
@@ -569,8 +570,7 @@ public class ProductResource {
 			{
 				//Delete layerId on Geoserver
 				
-				GeoServerManager gsManager = new GeoServerManager(m_oServletConfig.getInitParameter("GS_URL"), m_oServletConfig.getInitParameter("GS_USER"), 
-						m_oServletConfig.getInitParameter("GS_PASSWORD"));
+				GeoServerManager gsManager = new GeoServerManager(m_oServletConfig.getInitParameter("GS_URL"), m_oServletConfig.getInitParameter("GS_USER"),  m_oServletConfig.getInitParameter("GS_PASSWORD"));
 				
 				for (PublishedBand publishedBand : aoPublishedBands) {
 					try
@@ -603,18 +603,24 @@ public class ProductResource {
 			}
 			catch (Exception oEx) {
 				System.out.println("ProductResource.DeleteProduct: error deleting product " + oEx.toString());
-				return null;	
+				oReturn.setIntValue(500);
+				oReturn.setStringValue(oEx.toString());
+				return oReturn;	
 			}
 
 
 		}
 		catch (Exception oEx) {
 			System.out.println("ProductResource.DeleteProduct: error deleting product " + oEx.toString());
-			return null;
+			oReturn.setIntValue(500);
+			oReturn.setStringValue(oEx.toString());
+			return oReturn;
 		}
+		
+		oReturn.setBoolValue(true);
+		oReturn.setIntValue(200);
 
-		return Response.ok().build();
-
+		return oReturn;
 	}
 
 

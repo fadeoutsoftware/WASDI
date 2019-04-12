@@ -1,13 +1,12 @@
 package it.fadeout;
 
+import java.io.File;
 import java.lang.reflect.Field;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.UUID;
 import java.util.logging.FileHandler;
 import java.util.logging.Level;
@@ -16,7 +15,6 @@ import java.util.logging.SimpleFormatter;
 import javax.annotation.PostConstruct;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
-import javax.ws.rs.core.Application;
 import javax.ws.rs.core.Context;
 
 import org.esa.snap.core.util.SystemUtils;
@@ -26,18 +24,7 @@ import org.glassfish.jersey.server.ResourceConfig;
 
 import it.fadeout.business.DownloadsThread;
 import it.fadeout.business.IDLThread;
-//import it.fadeout.business.PasswordAuthentication;
 import it.fadeout.business.ProcessingThread;
-import it.fadeout.rest.resources.AuthResource;
-import it.fadeout.rest.resources.CatalogResources;
-import it.fadeout.rest.resources.FileBufferResource;
-import it.fadeout.rest.resources.OpenSearchResource;
-import it.fadeout.rest.resources.OpportunitySearchResource;
-import it.fadeout.rest.resources.ProcessWorkspaceResource;
-import it.fadeout.rest.resources.ProcessingResources;
-import it.fadeout.rest.resources.ProductResource;
-import it.fadeout.rest.resources.WasdiResource;
-import it.fadeout.rest.resources.WorkspaceResource;
 import wasdi.shared.business.User;
 import wasdi.shared.business.UserSession;
 import wasdi.shared.data.MongoRepository;
@@ -397,5 +384,21 @@ public class Wasdi extends ResourceConfig {
 		}
 	}
 	
+	public static String getProductPath(ServletConfig oServletConfig, String sUserId, String sWorkspace) {
+		// Take path
+		String sDownloadRootPath = oServletConfig.getInitParameter("DownloadRootPath");
+		
+		if (Utils.isNullOrEmpty(sDownloadRootPath)) {
+			sDownloadRootPath = "/data/wasdi/";
+		}
+		
+		if (!sDownloadRootPath.endsWith("/")) 
+		{
+			sDownloadRootPath = sDownloadRootPath + "/";
+		}
+		String sPath = sDownloadRootPath + sUserId + "/" + sWorkspace + "/";
+
+		return sPath;
+	}
 	
 }
