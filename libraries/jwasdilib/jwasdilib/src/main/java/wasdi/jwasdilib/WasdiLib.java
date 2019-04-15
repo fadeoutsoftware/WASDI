@@ -1082,7 +1082,8 @@ public class WasdiLib {
 			}
 
 			if(m_bUploadActive) {
-				File oFile = new File(sFileName);
+				String sFilePath = m_sBasePath + m_sUser + "/" + m_sActiveWorkspace + "/" + sFileName;
+				File oFile = new File(sFilePath);
 				Boolean bFileExists = oFile.exists();
 				if(bFileExists) {
 					if(!fileExistsOnWasdi(sFileName)) {
