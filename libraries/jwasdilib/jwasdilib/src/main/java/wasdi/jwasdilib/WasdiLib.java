@@ -706,13 +706,6 @@ public class WasdiLib {
 					downloadFile(sProductName);
 					System.out.println("File Downloaded on Local PC, keep on working!");
 				}
-//				if(m_bUploadActive && bFileExists) {
-//					if(!fileExistsOnWasdi(sProductName)) {
-//						System.out.println("Remote file Missing. Start WASDI upload. Please wait");
-//						uploadFile(sProductName);
-//						System.out.println("File Uploaded on WASDI cloud, keep on working!");
-//					}
-//				}
 			}
 			
 			return sFullPath;
