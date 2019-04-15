@@ -465,10 +465,23 @@ public class ProductResource {
 
 			// Domain Check
 			if (oUser == null) {
+				String sMessage = "passed a null user";
+				System.out.println("ProductResource.DeleteProduct: "+sMessage);
+				oReturn.setStringValue(sMessage);
 				oReturn.setIntValue(404);
 				return oReturn;
 			}
 			if (Utils.isNullOrEmpty(oUser.getUserId())) {
+				String sMessage = "user not found";
+				System.out.println("ProductResource.DeleteProduct: "+sMessage);
+				oReturn.setStringValue(sMessage);
+				oReturn.setIntValue(404);
+				return oReturn;
+			}
+			if(Utils.isNullOrEmpty(sWorkspace)) {
+				String sMessage = "workspace null or empty";
+				System.out.println("ProductResource.DeleteProduct: "+sMessage);
+				oReturn.setStringValue(sMessage);
 				oReturn.setIntValue(404);
 				return oReturn;
 			}
@@ -477,7 +490,6 @@ public class ProductResource {
 
 			ProductWorkspaceRepository oProductWorkspaceRepository = new ProductWorkspaceRepository();
 			DownloadedFilesRepository oDownloadedFilesRepository = new DownloadedFilesRepository();
-			DownloadedFile oDownloadedFile = oDownloadedFilesRepository.GetDownloadedFileByPath(sFullPath+sProductName);
 
 			String sDownloadPath = Wasdi.getProductPath(m_oServletConfig, oUser.getUserId(), sWorkspace);
 			System.out.println("ProductResource.DeleteProduct: Download Path: " + sDownloadPath);
@@ -494,8 +506,7 @@ public class ProductResource {
 			}
 
 			//get files that begin with the product name
-			if (bDeleteFile)
-			{
+			if (bDeleteFile) {
 				final List<PublishedBand> aoLocalPublishedBands = aoPublishedBands;
 				File oFolder = new File(sDownloadPath);
 				FilenameFilter oFilter = new FilenameFilter() {
@@ -514,8 +525,7 @@ public class ProductResource {
 							}
 						}
 
-						if (aoLocalPublishedBands != null)
-						{
+						if (aoLocalPublishedBands != null) {
 							for (PublishedBand oPublishedBand : aoLocalPublishedBands) {
 								if (name.toLowerCase().contains(oPublishedBand.getLayerId().toLowerCase()))
 									return true;
@@ -547,6 +557,7 @@ public class ProductResource {
 
 			if(bDeleteLayer)
 			{
+				DownloadedFile oDownloadedFile = oDownloadedFilesRepository.GetDownloadedFileByPath(sFullPath+sProductName);
 				//Delete layerId on Geoserver
 				
 				GeoServerManager gsManager = new GeoServerManager(m_oServletConfig.getInitParameter("GS_URL"), m_oServletConfig.getInitParameter("GS_USER"),  m_oServletConfig.getInitParameter("GS_PASSWORD"));
