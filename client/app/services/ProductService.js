@@ -9,7 +9,7 @@ service('ProductService', ['$http',  'ConstantsService', function ($http, oConst
     this.m_oHttp = $http;
 
     this.getProductByName = function(sProductName) {
-        return this.m_oHttp.get(this.APIURL + '/product/byname?sProductName='+sProductName);
+        return this.m_oHttp.get(this.APIURL + '/product/byname?sProductName='+sProductName+'&workspace='+oConstantsService.getActiveWorkspace().workspaceId);
     };
 
     this.getProductListByWorkspace = function (sWorkspaceId) {
@@ -25,14 +25,12 @@ service('ProductService', ['$http',  'ConstantsService', function ($http, oConst
         return this.m_oHttp.get(this.APIURL + '/product/delete?sProductName='+sProductName+'&sWorkspaceId='+sWorkspaceId + '&bDeleteFile=' + bDeleteFile + '&bDeleteLayer=' + bDeleteLayer);
     };
 
-    this.updateProduct = function (oProductViewModel) {
-        return this.m_oHttp.post(this.APIURL + '/product/update', oProductViewModel);
+    this.updateProduct = function (oProductViewModel,workspaceId) {
+        return this.m_oHttp.post(this.APIURL + '/product/update?workspace=' + workspaceId, oProductViewModel);
     };
-    this.getMetadata = function(sProductName){
-        return this.m_oHttp.get(this.APIURL+"/product/metadatabyname?sProductName="+sProductName);
-    };
-    this.getApiMetadata= function(sProductName){
-        return this.APIURL+"/product/metadatabyname?sProductName="+sProductName;
+
+    this.getApiMetadata= function(sProductName, sWorkspace){
+        return this.APIURL+"/product/metadatabyname?sProductName="+sProductName+"&workspace="+sWorkspace;
     };
 
 

@@ -303,7 +303,7 @@ public class WasdiGraph {
 				
 	            // Get the original Bounding Box
 	            DownloadedFilesRepository oDownloadedRepo = new DownloadedFilesRepository();
-	            DownloadedFile oDownloadedFile = oDownloadedRepo.GetDownloadedFile(m_oInputFile.getName()) ;
+	            DownloadedFile oDownloadedFile = oDownloadedRepo.GetDownloadedFileByPath(m_oInputFile.getAbsolutePath()) ;
 	            
 	            String sBbox = "";            
 	            if (oDownloadedFile != null) {
@@ -428,7 +428,7 @@ public class WasdiGraph {
         
         // P.Campanella 12/05/2017: it looks it is done before. Let leave here a check
         DownloadedFilesRepository oDownloadedRepo = new DownloadedFilesRepository();
-        DownloadedFile oCheck = oDownloadedRepo.GetDownloadedFile(oVM.getFileName());
+        DownloadedFile oCheck = oDownloadedRepo.GetDownloadedFileByPath(oProductFile.getAbsolutePath());
         
         boolean bAddProductToWS = true;
         

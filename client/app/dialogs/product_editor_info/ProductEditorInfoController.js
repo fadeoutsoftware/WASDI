@@ -4,18 +4,19 @@
 
 var ProductEditorInfoController = (function() {
 
-    function ProductEditorInfoController($scope, oClose,oExtras,oProductService) {//,
+    function ProductEditorInfoController($scope, oClose,oExtras,oProductService, oConstantsService) {//,
         this.m_oScope = $scope;
         this.m_oScope.m_oController = this;
         this.m_oProduct = oExtras.product;
         this.m_oProductService = oProductService;
         this.m_oReturnProduct = oExtras.product;
         this.m_oOldFriendlyName = oExtras.product.productFriendlyName;
+        this.workspaceId = oConstantsService.getActiveWorkspace().workspaceId;
         //$scope.close = oClose;
 
         var oController=this;
         $scope.close = function(result) {
-            oController.updateProduct(oController.m_oProduct);
+            oController.updateProduct(oController.m_oProduct, oController.workspaceId);
 
             oClose(oController.m_oReturnProduct, 500); // close, but give 500ms for bootstrap to animate
         };
@@ -48,7 +49,7 @@ var ProductEditorInfoController = (function() {
             return false;
 
 
-        this.m_oProductService.updateProduct(this.m_oProduct).success(function (data, status)
+        this.m_oProductService.updateProduct(this.m_oProduct, this.workspaceId).success(function (data, status)
         {
             if(data === "") {
                 _this.m_oProduct.metadata = oOldMetadata;
@@ -75,7 +76,8 @@ var ProductEditorInfoController = (function() {
         '$scope',
         'close',
         'extras',
-        'ProductService'
+        'ProductService',
+        'ConstantsService'
     ];
     return ProductEditorInfoController;
 })();
