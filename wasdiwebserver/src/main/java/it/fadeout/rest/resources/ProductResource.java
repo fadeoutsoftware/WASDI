@@ -485,11 +485,6 @@ public class ProductResource {
 				oReturn.setIntValue(404);
 				return oReturn;
 			}
-			
-			String sFullPath = Wasdi.getProductPath(m_oServletConfig, oUser.getUserId(), sWorkspace);
-
-			ProductWorkspaceRepository oProductWorkspaceRepository = new ProductWorkspaceRepository();
-			DownloadedFilesRepository oDownloadedFilesRepository = new DownloadedFilesRepository();
 
 			String sDownloadPath = Wasdi.getProductPath(m_oServletConfig, oUser.getUserId(), sWorkspace);
 			System.out.println("ProductResource.DeleteProduct: Download Path: " + sDownloadPath);
@@ -555,16 +550,16 @@ public class ProductResource {
 				}
 			}
 
-			if(bDeleteLayer)
-			{
-				DownloadedFile oDownloadedFile = oDownloadedFilesRepository.GetDownloadedFileByPath(sFullPath+sProductName);
+			String sFullPath = Wasdi.getProductPath(m_oServletConfig, oUser.getUserId(), sWorkspace);
+			DownloadedFilesRepository oDownloadedFilesRepository = new DownloadedFilesRepository();
+			if(bDeleteLayer) {
 				//Delete layerId on Geoserver
 				
+				DownloadedFile oDownloadedFile = oDownloadedFilesRepository.GetDownloadedFileByPath(sFullPath+sProductName);
 				GeoServerManager gsManager = new GeoServerManager(m_oServletConfig.getInitParameter("GS_URL"), m_oServletConfig.getInitParameter("GS_USER"),  m_oServletConfig.getInitParameter("GS_PASSWORD"));
 				
 				for (PublishedBand publishedBand : aoPublishedBands) {
-					try
-					{
+					try {
 						System.out.println("ProductResource.DeleteProduct: LayerId to delete " + publishedBand.getLayerId());
 
 						if (!gsManager.removeLayer(publishedBand.getLayerId())) {
@@ -588,6 +583,7 @@ public class ProductResource {
 
 			//delete product record on db
 			try{
+				ProductWorkspaceRepository oProductWorkspaceRepository = new ProductWorkspaceRepository();
 				oProductWorkspaceRepository.DeleteByProductNameWorkspace(sDownloadPath +  sProductName, sWorkspace);
 				oDownloadedFilesRepository.DeleteByFilePath(sDownloadPath + sProductName);
 			}
