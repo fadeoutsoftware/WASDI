@@ -24,8 +24,8 @@ public class App
         oLib.init("C:/Users/c.nattero/workspace/wasdi/wasdilib/config.properties");
         
         testConnection(oLib);
-        testDownload(oLib);
-    //    testAutomaticUpload(oLib);
+    //    testDownload(oLib);
+        testAutomaticUpload(oLib);
         
 //        testUploadFileDUMMYFILE(oLib);
 //        testUploadFile(oLib);
@@ -206,7 +206,8 @@ public class App
     public static void testAutomaticUpload(WasdiLib oLib) {
     	String sResult = null;
     	//sResult = oLib.getFullProductPath("S2A_MSIL1C_20181212T001711_N0207_R116_T55MHP_20181212T013828.zip");
-    	sResult = oLib.addFileToWASDI("S2A_MSIL1C_20181212T001711_N0207_R116_T55MHP_20181212T013828.zip");
+//    	sResult = oLib.addFileToWASDI("S2A_MSIL1C_20181212T001711_N0207_R116_T55MHP_20181212T013828.zip");
+    	sResult = oLib.addFileToWASDI("S1A_EW_GRDM_1SDH_20190411T070942_20190411T071003_026739_0300B8_A1C6.zip");
     	System.out.println(sResult);
     }
     
@@ -227,10 +228,16 @@ public class App
 //    	System.out.println(sResult);
 //    	sResult = oLib.getFullProductPath("S1A_IW_GRDH_1SDV_20190407T171450_20190407T171515_026687_02FECA_7F6E_ApplyOrbit.dim");
 //    	System.out.println(sResult);
-    	sResult = oLib.getFullProductPath("S2A_MSIL1C_20190322T013651_N0207_R117_T53RQQ_20190322T032332_NDVI");
-    	System.out.println(sResult);
+//    	sResult = oLib.getFullProductPath("S2A_MSIL1C_20190322T013651_N0207_R117_T53RQQ_20190322T032332_NDVI");
+//    	System.out.println(sResult);
 //    	sResult = oLib.getFullProductPath("S2A_MSIL1C_20190404T101031_N0207_R022_T32TNR_20190404T185546_NDVI.dim");
 //    	System.out.println(sResult);
+//    	sResult = oLib.getFullProductPath("S1A_WV_OCN__2SSV_20190117T081609_20190117T082514_025514_02D447_B7E3.zip");
+//    	System.out.println(sResult);
+    	sResult = oLib.getFullProductPath("S1A_EW_GRDM_1SDH_20190411T070942_20190411T071003_026739_0300B8_A1C6.zip");
+    	System.out.println(sResult);
+    	sResult = oLib.getFullProductPath("S1A_EW_GRDM_1SDH_20190411T070942_20190411T071003_026739_0300B8_A1C6_ApplyOrbit.dim");
+    	System.out.println(sResult);
     }
     
 }
