@@ -507,22 +507,22 @@ public class ProductResource {
 				FilenameFilter oFilter = new FilenameFilter() {
 
 					@Override
-					public boolean accept(File dir, String name) {
+					public boolean accept(File dir, String sName) {
 
-						if (name.equalsIgnoreCase(sProductName)) {
+						if (sName.equalsIgnoreCase(sProductName)) {
 							return true;
 						}
 						
 						if (sProductName.endsWith(".dim")) {
 							String baseName = sProductName.substring(0, sProductName.length()-4);
-							if (name.equalsIgnoreCase(baseName + ".data")) {
+							if (sName.equalsIgnoreCase(baseName + ".data")) {
 								return true;
 							}
 						}
 
 						if (aoLocalPublishedBands != null) {
 							for (PublishedBand oPublishedBand : aoLocalPublishedBands) {
-								if (name.toLowerCase().contains(oPublishedBand.getLayerId().toLowerCase()))
+								if (sName.toLowerCase().contains(oPublishedBand.getLayerId().toLowerCase()))
 									return true;
 							}
 						}
