@@ -110,7 +110,7 @@ public class ProductResource {
 	@GET
 	@Path("byname")
 	@Produces({"application/xml", "application/json", "text/xml"})	
-	public GeorefProductViewModel getByProductName(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sProductName") String sProductName) {
+	public GeorefProductViewModel getByProductName(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sProductName") String sProductName, @QueryParam("workspace") String sWorkspace) {
 		
 		Wasdi.DebugLog("ProductResource.GetByProductName");
 
@@ -118,10 +118,12 @@ public class ProductResource {
 		User oUser = Wasdi.GetUserFromSession(sSessionId);
 		if (oUser == null) return null;
 		if (Utils.isNullOrEmpty(oUser.getUserId())) return null;
+		
+		String sFullPath = Wasdi.getProductPath(m_oServletConfig, oUser.getUserId(), sWorkspace);
 
 		// Read the product from db
 		DownloadedFilesRepository oDownloadedFilesRepository = new DownloadedFilesRepository();
-		DownloadedFile oDownloadedFile = oDownloadedFilesRepository.GetDownloadedFile(sProductName);
+		DownloadedFile oDownloadedFile = oDownloadedFilesRepository.GetDownloadedFileByPath(sFullPath+sProductName);
 		
 		if (oDownloadedFile != null) {
 			GeorefProductViewModel oGeoViewModel = new GeorefProductViewModel(oDownloadedFile.getProductViewModel());
@@ -141,7 +143,7 @@ public class ProductResource {
 	@GET
 	@Path("metadatabyname")
 	@Produces({"application/xml", "application/json", "text/xml"})	
-	public MetadataViewModel getMetadataByProductName(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sProductName") String sProductName) {
+	public MetadataViewModel getMetadataByProductName(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sProductName") String sProductName, @QueryParam("workspace") String sWorkspaceId) {
 		
 		Wasdi.DebugLog("ProductResource.GetMetadataByProductName");
 
@@ -149,10 +151,12 @@ public class ProductResource {
 		User oUser = Wasdi.GetUserFromSession(sSessionId);
 		if (oUser == null) return null;
 		if (Utils.isNullOrEmpty(oUser.getUserId())) return null;
+		
+		String sProductPath = Wasdi.getProductPath(m_oServletConfig, oUser.getUserId(), sWorkspaceId);
 
 		// Read the product from db
 		DownloadedFilesRepository oDownloadedFilesRepository = new DownloadedFilesRepository();
-		DownloadedFile oDownloadedFile = oDownloadedFilesRepository.GetDownloadedFile(sProductName);
+		DownloadedFile oDownloadedFile = oDownloadedFilesRepository.GetDownloadedFileByPath(sProductPath+sProductName);
 
 		if (oDownloadedFile != null) {
 			if (oDownloadedFile.getProductViewModel() != null) {
@@ -193,35 +197,6 @@ public class ProductResource {
 		return null;
 	}
 	
-	
-	//XXX Remove legacy method: it's not used by anyone and it does not return anything but null
-	@GET
-	@Path("info")
-	@Produces({"application/xml", "application/json", "text/xml"})
-	public ProductInfoViewModel getInfo(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sProductName") String sProductName) {
-		
-		Wasdi.DebugLog("ProductResource.GetInfo");
-
-		// Validate Session
-		User oUser = Wasdi.GetUserFromSession(sSessionId);
-		if (oUser == null) return null;
-		if (Utils.isNullOrEmpty(oUser.getUserId())) return null;
-
-		// Read the product from db
-		DownloadedFilesRepository oDownloadedFilesRepository = new DownloadedFilesRepository();
-		DownloadedFile oDownloadedFile = oDownloadedFilesRepository.GetDownloadedFile(sProductName);
-
-		if (oDownloadedFile != null) {
-			if (oDownloadedFile.getProductViewModel() != null) {
-				// Ok read
-				//TODO this is useless, return something
-				//MetadataViewModel metadata = oDownloadedFile.getProductViewModel().getMetadata();
-			}
-		}		
-		// There was a problem
-		return null;
-	}
-
 
 	@GET
 	@Path("/byws")
@@ -261,7 +236,7 @@ public class ProductResource {
 			for (int iProducts=0; iProducts<aoProductWorkspace.size(); iProducts++) {
 
 				// Get the downloaded file
-				DownloadedFile oDownloaded = oDownloadedFilesRepository.GetDownloadedFile(aoProductWorkspace.get(iProducts).getProductName());
+				DownloadedFile oDownloaded = oDownloadedFilesRepository.GetDownloadedFileByPath(aoProductWorkspace.get(iProducts).getProductName());
 
 				// Add View model to return list
 				if (oDownloaded != null) {
@@ -321,7 +296,7 @@ public class ProductResource {
 	@POST
 	@Path("/update")
 	@Produces({"application/xml", "application/json", "text/xml"})
-	public Response updateProductViewModel(@HeaderParam("x-session-token") String sSessionId, ProductViewModel oProductViewModel) {
+	public Response updateProductViewModel(@HeaderParam("x-session-token") String sSessionId, @QueryParam("workspace") String sWorkspace, ProductViewModel oProductViewModel) {
 		
 		Wasdi.DebugLog("ProductResource.UpdateProductViewModel");
 
@@ -343,11 +318,13 @@ public class ProductResource {
 
 
 			System.out.println("ProductResource.UpdateProductViewModel: product " + oProductViewModel.getFileName());
+			
+			String sFullPath = Wasdi.getProductPath(m_oServletConfig, oUser.getUserId(), sWorkspace);
 
 			// Create repo
 			DownloadedFilesRepository oDownloadedFilesRepository = new DownloadedFilesRepository();
 			
-			DownloadedFile oDownlaoded = oDownloadedFilesRepository.GetDownloadedFile(oProductViewModel.getFileName());
+			DownloadedFile oDownlaoded = oDownloadedFilesRepository.GetDownloadedFileByPath(sFullPath+oProductViewModel.getFileName());
 			
 			if (oDownlaoded == null) {
 				System.out.println("ProductResource.UpdateProductViewModel: Associated downloaded file not found.");
@@ -495,14 +472,16 @@ public class ProductResource {
 				oReturn.setIntValue(404);
 				return oReturn;
 			}
+			
+			String sFullPath = Wasdi.getProductPath(m_oServletConfig, oUser.getUserId(), sWorkspace);
 
 			ProductWorkspaceRepository oProductWorkspaceRepository = new ProductWorkspaceRepository();
 			DownloadedFilesRepository oDownloadedFilesRepository = new DownloadedFilesRepository();
-			DownloadedFile oDownloadedFile = oDownloadedFilesRepository.GetDownloadedFile(sProductName);
+			DownloadedFile oDownloadedFile = oDownloadedFilesRepository.GetDownloadedFileByPath(sFullPath+sProductName);
 
 			String sDownloadPath = Wasdi.getProductPath(m_oServletConfig, oUser.getUserId(), sWorkspace);
 			System.out.println("ProductResource.DeleteProduct: Download Path: " + sDownloadPath);
-			String sFilePath = sDownloadPath + "/" +  sProductName;
+			String sFilePath = sDownloadPath +  sProductName;
 			System.out.println("ProductResource.DeleteProduct: File Path: " + sFilePath);
 
 			PublishedBandsRepository oPublishedBandsRepository = new PublishedBandsRepository();
@@ -598,8 +577,8 @@ public class ProductResource {
 
 			//delete product record on db
 			try{
-				oProductWorkspaceRepository.DeleteByProductNameWorkspace(sProductName, sWorkspace);
-				oDownloadedFilesRepository.DeleteByFilePath(sFilePath);
+				oProductWorkspaceRepository.DeleteByProductNameWorkspace(sDownloadPath +  sProductName, sWorkspace);
+				oDownloadedFilesRepository.DeleteByFilePath(sDownloadPath + sProductName);
 			}
 			catch (Exception oEx) {
 				System.out.println("ProductResource.DeleteProduct: error deleting product " + oEx.toString());

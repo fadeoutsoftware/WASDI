@@ -4480,7 +4480,7 @@ var EditorController = (function () {
                     "icon": "assets/icons/metadata-24.png",
                     "children": [],
                     "clicked":false,//semaphore
-                    "url" : oController.m_oProductService.getApiMetadata(oNode.fileName)
+                    "url" : oController.m_oProductService.getApiMetadata(oNode.fileName, oController.m_oActiveWorkspace.workspaceId)
                 },
                 {
                     "text": "Bands",
