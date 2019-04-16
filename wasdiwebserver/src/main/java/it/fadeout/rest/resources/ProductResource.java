@@ -472,19 +472,26 @@ public class ProductResource {
 
 			// Domain Check
 			if (oUser == null) {
+				String sMessage = "passed a null user";
+				System.out.println("ProductResource.DeleteProduct: "+sMessage);
+				oReturn.setStringValue(sMessage);
 				oReturn.setIntValue(404);
 				return oReturn;
 			}
 			if (Utils.isNullOrEmpty(oUser.getUserId())) {
+				String sMessage = "user not found";
+				System.out.println("ProductResource.DeleteProduct: "+sMessage);
+				oReturn.setStringValue(sMessage);
 				oReturn.setIntValue(404);
 				return oReturn;
 			}
-			
-			String sFullPath = Wasdi.getProductPath(m_oServletConfig, oUser.getUserId(), sWorkspace);
-
-			ProductWorkspaceRepository oProductWorkspaceRepository = new ProductWorkspaceRepository();
-			DownloadedFilesRepository oDownloadedFilesRepository = new DownloadedFilesRepository();
-			DownloadedFile oDownloadedFile = oDownloadedFilesRepository.GetDownloadedFileByPath(sFullPath+sProductName);
+			if(Utils.isNullOrEmpty(sWorkspace)) {
+				String sMessage = "workspace null or empty";
+				System.out.println("ProductResource.DeleteProduct: "+sMessage);
+				oReturn.setStringValue(sMessage);
+				oReturn.setIntValue(404);
+				return oReturn;
+			}
 
 			String sDownloadPath = Wasdi.getProductPath(m_oServletConfig, oUser.getUserId(), sWorkspace);
 			System.out.println("ProductResource.DeleteProduct: Download Path: " + sDownloadPath);
@@ -501,30 +508,28 @@ public class ProductResource {
 			}
 
 			//get files that begin with the product name
-			if (bDeleteFile)
-			{
+			if (bDeleteFile) {
 				final List<PublishedBand> aoLocalPublishedBands = aoPublishedBands;
 				File oFolder = new File(sDownloadPath);
 				FilenameFilter oFilter = new FilenameFilter() {
 
 					@Override
-					public boolean accept(File dir, String name) {
+					public boolean accept(File dir, String sName) {
 
-						if (name.equalsIgnoreCase(sProductName)) {
+						if (sName.equalsIgnoreCase(sProductName)) {
 							return true;
 						}
 						
 						if (sProductName.endsWith(".dim")) {
 							String baseName = sProductName.substring(0, sProductName.length()-4);
-							if (name.equalsIgnoreCase(baseName + ".data")) {
+							if (sName.equalsIgnoreCase(baseName + ".data")) {
 								return true;
 							}
 						}
 
-						if (aoLocalPublishedBands != null)
-						{
+						if (aoLocalPublishedBands != null) {
 							for (PublishedBand oPublishedBand : aoLocalPublishedBands) {
-								if (name.toLowerCase().contains(oPublishedBand.getLayerId().toLowerCase()))
+								if (sName.toLowerCase().contains(oPublishedBand.getLayerId().toLowerCase()))
 									return true;
 							}
 						}
@@ -552,15 +557,16 @@ public class ProductResource {
 				}
 			}
 
-			if(bDeleteLayer)
-			{
+			String sFullPath = Wasdi.getProductPath(m_oServletConfig, oUser.getUserId(), sWorkspace);
+			DownloadedFilesRepository oDownloadedFilesRepository = new DownloadedFilesRepository();
+			if(bDeleteLayer) {
 				//Delete layerId on Geoserver
 				
+				DownloadedFile oDownloadedFile = oDownloadedFilesRepository.GetDownloadedFileByPath(sFullPath+sProductName);
 				GeoServerManager gsManager = new GeoServerManager(m_oServletConfig.getInitParameter("GS_URL"), m_oServletConfig.getInitParameter("GS_USER"),  m_oServletConfig.getInitParameter("GS_PASSWORD"));
 				
 				for (PublishedBand publishedBand : aoPublishedBands) {
-					try
-					{
+					try {
 						System.out.println("ProductResource.DeleteProduct: LayerId to delete " + publishedBand.getLayerId());
 
 						if (!gsManager.removeLayer(publishedBand.getLayerId())) {
@@ -584,6 +590,7 @@ public class ProductResource {
 
 			//delete product record on db
 			try{
+				ProductWorkspaceRepository oProductWorkspaceRepository = new ProductWorkspaceRepository();
 				oProductWorkspaceRepository.DeleteByProductNameWorkspace(sDownloadPath +  sProductName, sWorkspace);
 				oDownloadedFilesRepository.DeleteByFilePath(sDownloadPath + sProductName);
 			}

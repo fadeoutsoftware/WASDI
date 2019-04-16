@@ -706,13 +706,6 @@ public class WasdiLib {
 					downloadFile(sProductName);
 					System.out.println("File Downloaded on Local PC, keep on working!");
 				}
-//				if(m_bUploadActive && bFileExists) {
-//					if(!fileExistsOnWasdi(sProductName)) {
-//						System.out.println("Remote file Missing. Start WASDI upload. Please wait");
-//						uploadFile(sProductName);
-//						System.out.println("File Uploaded on WASDI cloud, keep on working!");
-//					}
-//				}
 			}
 			
 			return sFullPath;
@@ -1077,7 +1070,7 @@ public class WasdiLib {
 	 * @param bAsynch true if the process has to be asynch, false to wait for the result
 	 * @return
 	 */
-	protected String internalAddFileToWADI(String sFileName, Boolean bAsynch) {
+	protected String internalAddFileToWASDI(String sFileName, Boolean bAsynch) {
 		try {
 			
 			if (sFileName == null) {
@@ -1089,7 +1082,8 @@ public class WasdiLib {
 			}
 
 			if(m_bUploadActive) {
-				File oFile = new File(sFileName);
+				String sFilePath = getSavePath() + sFileName;
+				File oFile = new File(sFilePath);
 				Boolean bFileExists = oFile.exists();
 				if(bFileExists) {
 					if(!fileExistsOnWasdi(sFileName)) {
@@ -1124,7 +1118,7 @@ public class WasdiLib {
 	 * @return Output state of the ingestion process
 	 */
 	public String addFileToWASDI(String sFileName) {
-		return internalAddFileToWADI(sFileName, false);
+		return internalAddFileToWASDI(sFileName, false);
 	}
 	
 	/**
@@ -1135,7 +1129,7 @@ public class WasdiLib {
 	 * @return Process Id of the ingestion process
 	 */
 	public String asynchAddFileToWASDI(String sFileName) {
-		return internalAddFileToWADI(sFileName, true);
+		return internalAddFileToWASDI(sFileName, true);
 	}
 	
 	
