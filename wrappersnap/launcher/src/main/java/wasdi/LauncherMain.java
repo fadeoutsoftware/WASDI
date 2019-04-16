@@ -81,6 +81,8 @@ import wasdi.shared.parameters.IDLProcParameter;
 import wasdi.shared.parameters.IngestFileParameter;
 import wasdi.shared.parameters.MATLABProcParameters;
 import wasdi.shared.parameters.MosaicParameter;
+import wasdi.shared.parameters.MultiSubsetParameter;
+import wasdi.shared.parameters.MultiSubsetSetting;
 import wasdi.shared.parameters.MultilookingParameter;
 import wasdi.shared.parameters.NDVIParameter;
 import wasdi.shared.parameters.OperatorParameter;
@@ -436,6 +438,12 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 				// Execute Subset Operation
 				SubsetParameter oParameter = (SubsetParameter) SerializationUtils.deserializeXMLToObject(sParameter);
 				executeSubset(oParameter);
+			}
+			break;			
+			case MULTISUBSET: {
+				// Execute Multi Subset Operation
+				MultiSubsetParameter oParameter = (MultiSubsetParameter) SerializationUtils.deserializeXMLToObject(sParameter);
+				executeMultiSubset(oParameter);
 			}
 			break;			
 			case WPS:{
@@ -1797,6 +1805,136 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 		}
 		finally {			
 			s_oLogger.debug("LauncherMain.executeSubset: End");
+			closeProcessWorkspace(oProcessWorkspaceRepository, oProcessWorkspace);
+		}		
+
+	}
+	
+	
+	
+	/**
+	 * Computes and save a list subset all from an Input image (a tile or clip)
+	 * @param oParameter
+	 */
+	public void executeMultiSubset(MultiSubsetParameter oParameter) {
+		
+		s_oLogger.debug("LauncherMain.executeMultiSubset: Start");
+		
+		ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
+		ProcessWorkspace oProcessWorkspace = oProcessWorkspaceRepository.GetProcessByProcessObjId(oParameter.getProcessObjId());
+		
+		
+		try {
+			
+			String sSourceProduct = oParameter.getSourceProductName();
+			
+			
+			
+			//String sOutputProduct = oParameter.getDestinationProductName();
+			
+			MultiSubsetSetting oSettings = (MultiSubsetSetting) oParameter.getSettings();
+			
+			
+			ReadProduct oReadProduct = new ReadProduct();
+			File oProductFile = new File(getWorspacePath(oParameter)+sSourceProduct);
+			Product oInputProduct = oReadProduct.ReadProduct(oProductFile, null);
+			
+	        // Take the Geo Coding
+	        final GeoCoding oGeoCoding = oInputProduct.getSceneGeoCoding();
+	        
+	        
+	        for (int iTiles = 0; iTiles<oSettings.getOutputNames().size(); iTiles ++) {
+	        	
+	        	
+	        	String sOutputProduct = oSettings.getOutputNames().get(iTiles);
+	        	
+	        	if (oSettings.getLatNList().size()<=iTiles) {
+	        		s_oLogger.debug("Lat N List does not have " + iTiles + " element. continue");
+	        		continue;
+	        	}
+	        	
+	        	if (oSettings.getLatSList().size()<=iTiles) {
+	        		s_oLogger.debug("Lat S List does not have " + iTiles + " element. continue");
+	        		continue;
+	        	}
+
+	        	if (oSettings.getLonEList().size()<=iTiles) {
+	        		s_oLogger.debug("Lon E List does not have " + iTiles + " element. continue");
+	        		continue;
+	        	}
+
+	        	if (oSettings.getLonWList().size()<=iTiles) {
+	        		s_oLogger.debug("Lon W List does not have " + iTiles + " element. continue");
+	        		continue;
+	        	}
+
+
+		        // Create 2 GeoPos points
+		        GeoPos oGeoPosNW= new GeoPos(oSettings.getLatNList().get(iTiles), oSettings.getLonWList().get(iTiles));
+		        GeoPos oGeoPosSE= new GeoPos(oSettings.getLatSList().get(iTiles), oSettings.getLonEList().get(iTiles));
+		        
+		        // Convert to Pixel Position
+		        PixelPos oPixelPosNW = oGeoCoding.getPixelPos(oGeoPosNW, null);
+		        if (!oPixelPosNW.isValid()) {
+		            oPixelPosNW.setLocation(0, 0);
+		        }
+		        
+		        PixelPos oPixelPosSW = oGeoCoding.getPixelPos(oGeoPosSE, null);
+		        if (!oPixelPosSW.isValid()) {
+		            oPixelPosSW.setLocation(oInputProduct.getSceneRasterWidth(), oInputProduct.getSceneRasterHeight());
+		        }
+		        
+		        // Create the final region
+		        Rectangle.Float oRegion = new Rectangle.Float();
+		        oRegion.setFrameFromDiagonal(oPixelPosNW.x, oPixelPosNW.y, oPixelPosSW.x, oPixelPosSW.y);
+		        
+		        // Create the product bound rectangle
+		        Rectangle.Float oProductBounds = new Rectangle.Float(0, 0, oInputProduct.getSceneRasterWidth(), oInputProduct.getSceneRasterHeight());
+		        
+		        // Intersect
+		        Rectangle2D oSubsetRegion = oProductBounds.createIntersection(oRegion);
+		            	        
+		        ProductSubsetDef oSubsetDef = new ProductSubsetDef();
+		        oSubsetDef.setRegion(oSubsetRegion.getBounds());
+		        oSubsetDef.setIgnoreMetadata(false);
+		        oSubsetDef.setSubSampling(1, 1);
+		        oSubsetDef.setSubsetName("subset");
+		        oSubsetDef.setTreatVirtualBandsAsRealBands(false);
+		        oSubsetDef.setNodeNames(oInputProduct.getBandNames());
+		        oSubsetDef.addNodeNames(oInputProduct.getTiePointGridNames());
+		        
+		        Product oSubsetProduct = oInputProduct.createSubset(oSubsetDef, sOutputProduct, oInputProduct.getDescription());
+		        
+		        String sOutputPath = getWorspacePath(oParameter) + sOutputProduct;
+		        
+		        ProductIO.writeProduct(oSubsetProduct, sOutputPath, GeoTiffProductWriterPlugIn.GEOTIFF_FORMAT_NAME);
+		        
+		        s_oLogger.debug("LauncherMain.executeMultiSubset done");
+		        
+				s_oLogger.debug("LauncherMain.executeMultiSubset adding product to Workspace");
+				
+				addProductToDbAndWorkspaceAndSendToRabbit(null, sOutputPath,oParameter.getWorkspace(), oParameter.getWorkspace(), LauncherOperations.SUBSET.toString(), null);
+				
+				s_oLogger.debug("LauncherMain.executeMultiSubset: product added to workspace");
+		        
+	        }
+	        
+
+			
+			if (oProcessWorkspace != null) oProcessWorkspace.setStatus(ProcessStatus.DONE.name());
+			
+			
+		}
+		catch (Exception oEx) {
+			s_oLogger.error("LauncherMain.executeMultiSubset: exception " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
+			if (oProcessWorkspace != null) oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
+
+			String sError = org.apache.commons.lang.exception.ExceptionUtils.getMessage(oEx);
+			if (s_oSendToRabbit!=null) s_oSendToRabbit.SendRabbitMessage(false,LauncherOperations.SUBSET.name(),oParameter.getWorkspace(),sError,oParameter.getExchange());
+
+		}
+		finally {			
+			s_oLogger.debug("LauncherMain.executeMultiSubset: End");
 			closeProcessWorkspace(oProcessWorkspaceRepository, oProcessWorkspace);
 		}		
 

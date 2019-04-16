@@ -94,6 +94,8 @@ import wasdi.shared.parameters.ISetting;
 import wasdi.shared.parameters.MATLABProcParameters;
 import wasdi.shared.parameters.MosaicParameter;
 import wasdi.shared.parameters.MosaicSetting;
+import wasdi.shared.parameters.MultiSubsetParameter;
+import wasdi.shared.parameters.MultiSubsetSetting;
 import wasdi.shared.parameters.MultilookingParameter;
 import wasdi.shared.parameters.MultilookingSetting;
 import wasdi.shared.parameters.NDVIParameter;
@@ -204,6 +206,15 @@ public class ProcessingResources {
 		Wasdi.DebugLog("ProcessingResources.Subset");
 		return executeOperation(sSessionId, sSourceProductName, sDestinationProductName, sWorkspaceId, oSetting, LauncherOperations.SUBSET);
 	}
+	
+	@POST
+	@Path("geometric/multisubset")
+	@Produces({"application/xml", "application/json", "text/xml"})
+	public PrimitiveResult multiSubset(@HeaderParam("x-session-token") String sSessionId,  @QueryParam("sSourceProductName") String sSourceProductName, @QueryParam("sDestinationProductName") String sDestinationProductName, @QueryParam("sWorkspaceId") String sWorkspaceId, MultiSubsetSetting oSetting) throws IOException
+	{
+		Wasdi.DebugLog("ProcessingResources.MultiSubset");
+		return executeOperation(sSessionId, sSourceProductName, sDestinationProductName, sWorkspaceId, oSetting, LauncherOperations.MULTISUBSET);
+	}	
 	
 
 	@GET
@@ -1401,6 +1412,8 @@ public class ProcessingResources {
 			return new MosaicParameter();
 		case SUBSET:
 			return new SubsetParameter();
+		case MULTISUBSET:
+			return new MultiSubsetParameter();
 		default:
 			return null;
 			

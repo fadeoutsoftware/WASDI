@@ -476,9 +476,24 @@ FUNCTION WASDIWAITPROCESSES, asProcessIDs
 		
 	ENDWHILE 
 	
+	; Read again the status to give back the ordered result list
+	
+	iProcessCount = N_ELEMENTS(asProcessIDs)
+	
+	asResults = []
+	
+	FOR iProcesses=0, iProcessCount -1 DO BEGIN
+	
+		sProcessID = asProcessIDs[iProcesses]
+		sStatus = WASDIGETPROCESSSTATUS(sProcessID)
+		
+		asResults = [asResults, sStatus]
+		
+	ENDFOR
+	
 	print, 'All Processes Are Done (took approx ', STRTRIM(STRING(iTotalTime),2), '  seconds)'
 
-	RETURN, sStatus
+	RETURN, asResults
 end
 
 ; Get list of workspace of the user
@@ -901,7 +916,7 @@ FUNCTION WASDIASYNCHEXECUTEWORKFLOW, asInputFileNames, asOutputFileNames, sWorkf
 END
 
 ; Execute a SNAP xml Workflow in WASDI
-FUNCTION WASDIEXECUTEWORKFLOW, asInputFileNames, asOutputFileNames, sWorkflow, iAsynch
+FUNCTION WASDIEXECUTEWORKFLOW, asInputFileNames, asOutputFileNames, sWorkflow
 	RETURN, WASDIINTERNALEXECUTEWORKFLOW(asInputFileNames, asOutputFileNames, sWorkflow, 0)
 END
 
@@ -1038,44 +1053,115 @@ end
 ; Create a Subset from an image
 FUNCTION WASDISUBSET, sInputFile, sOutputFile, sLatN, sLonW, sLatS, sLonE
 
-  COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params
-  sessioncookie = token
+	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params
+	sessioncookie = token
 
 
-  ; API url
-  UrlPath = '/wasdiwebserver/rest/processing/geometric/subset?sSourceProductName='+sInputFile+'&sDestinationProductName='+sOutputFile+"&sWorkspaceId="+activeworkspace
-    
-  ; compose the full MosaicSetting JSON View Model
-  sSubsetSettingsString='{  "latN": '+ sLatN +',  "lonW": '+ sLonW +',"latS": '+ sLatS +', "lonE": '+ sLonE +'}'
-  
-  IF (verbose eq '1') THEN BEGIN
-	print, 'SUBSET SETTINGS JSON ' , sSubsetSettingsString
-	print, 'URL: ', UrlPath
-  END
-  
-  
+	; API url
+	UrlPath = '/wasdiwebserver/rest/processing/geometric/subset?sSourceProductName='+sInputFile+'&sDestinationProductName='+sOutputFile+"&sWorkspaceId="+activeworkspace
 
-  wasdiResult = WASDIHTTPPOST(UrlPath, sSubsetSettingsString)
-  
-  sResponse = GETVALUEBYKEY(wasdiResult, 'boolValue')
-  
-  sProcessID = ''
-  
-  ; get the process id
-  if sResponse then begin
-    sValue = GETVALUEBYKEY(wasdiResult, 'stringValue')
-    sProcessID=sValue
-  endif
-  
-  sStatus = "ERROR"
-  
-  ; Wait for the process to finish
-  if sProcessID ne '' then begin
-    sStatus = WASDIWAITPROCESS(sProcessID)
-  endif
-  
-  RETURN, sStatus
-end
+	; compose the full SubsetSetting JSON View Model
+	sSubsetSettingsString='{  "latN": '+ sLatN +',  "lonW": '+ sLonW +',"latS": '+ sLatS +', "lonE": '+ sLonE +'}'
+
+	IF (verbose eq '1') THEN BEGIN
+		print, 'SUBSET SETTINGS JSON ' , sSubsetSettingsString
+		print, 'URL: ', UrlPath
+	END
+
+	wasdiResult = WASDIHTTPPOST(UrlPath, sSubsetSettingsString)
+
+	sResponse = GETVALUEBYKEY(wasdiResult, 'boolValue')
+
+	sProcessID = ''
+
+	; get the process id
+	IF sResponse THEN BEGIN
+		sValue = GETVALUEBYKEY(wasdiResult, 'stringValue')
+		sProcessID=sValue
+	ENDIF
+
+	sStatus = "ERROR"
+
+	; Wait for the process to finish
+	IF sProcessID NE '' THEN BEGIN
+		sStatus = WASDIWAITPROCESS(sProcessID)
+	ENDIF
+
+	RETURN, sStatus
+END
+
+FUNCTION WASDIGENERATEJSONARRAY, asArray
+
+	; Generate output JSON array
+	sOutputJSON = '['
+
+	; For each input name
+	FOR iElements=0,N_ELEMENTS(asArray)-1 DO BEGIN
+
+		sElement = asArray[iElements]
+		; wrap with '
+		sOutputJSON = sOutputJSON + '"' + sElement + '"'
+
+		; check of is not the last one
+		IF iElements LT N_ELEMENTS(asArray)-1 THEN BEGIN
+			; add ,
+			sOutputJSON = sOutputJSON + ','
+		ENDIF
+	ENDFOR
+	
+	sOutputJSON = sOutputJSON + ']'
+	
+	RETURN, sOutputJSON
+END
+
+
+; Create a Subset from an image
+FUNCTION WASDIMULTISUBSET, sInputFile, asOutputFile, asLatN, asLonW, asLatS, asLonE
+
+	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params
+	sessioncookie = token
+
+
+	; API url
+	UrlPath = '/wasdiwebserver/rest/processing/geometric/multisubset?sSourceProductName='+sInputFile+'&sDestinationProductName='+sInputFile+"&sWorkspaceId="+activeworkspace
+	
+	sOutputFilesJSON = WASDIGENERATEJSONARRAY(asOutputFile)
+	
+	sLatNJSON = WASDIGENERATEJSONARRAY(asLatN)
+	sLonWJSON = WASDIGENERATEJSONARRAY(asLonW)
+	sLatSJSON = WASDIGENERATEJSONARRAY(asLatS)
+	sLonEJSON = WASDIGENERATEJSONARRAY(asLonE)
+
+	
+	; compose the full SubsetSetting JSON View Model
+	sSubsetSettingsString='{ "outputName": ' + sOutputFilesJSON + ', "latNList": '+ sLatNJSON +',  "lonWList": '+ sLonWJSON +',"latSList": '+ sLatSJSON +', "lonEList": '+ sLonEJSON +'}'
+
+	IF (verbose eq '1') THEN BEGIN
+		print, 'SUBSET MULTI SETTINGS JSON ' , sSubsetSettingsString
+		print, 'URL: ', UrlPath
+	END
+
+	wasdiResult = WASDIHTTPPOST(UrlPath, sSubsetSettingsString)
+
+	sResponse = GETVALUEBYKEY(wasdiResult, 'boolValue')
+
+	sProcessID = ''
+
+	; get the process id
+	IF sResponse THEN BEGIN
+		sValue = GETVALUEBYKEY(wasdiResult, 'stringValue')
+		sProcessID=sValue
+	ENDIF
+
+	sStatus = "ERROR"
+
+	; Wait for the process to finish
+	IF sProcessID NE '' THEN BEGIN
+		sStatus = WASDIWAITPROCESS(sProcessID)
+	ENDIF
+
+	RETURN, sStatus
+END
 
 
 ; Search Sentinel EO Images

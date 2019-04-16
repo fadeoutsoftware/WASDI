@@ -125,7 +125,12 @@ public class ProductResource {
 		DownloadedFilesRepository oDownloadedFilesRepository = new DownloadedFilesRepository();
 		DownloadedFile oDownloadedFile = oDownloadedFilesRepository.GetDownloadedFileByPath(sFullPath+sProductName);
 		
+		Wasdi.DebugLog("ProductResource.GetByProductName: search file "+sFullPath+sProductName);
+		
 		if (oDownloadedFile != null) {
+			
+			Wasdi.DebugLog("ProductResource.GetByProductName: product found");
+			
 			GeorefProductViewModel oGeoViewModel = new GeorefProductViewModel(oDownloadedFile.getProductViewModel());
 			oGeoViewModel.setBbox(oDownloadedFile.getBoundingBox());
 			
@@ -133,7 +138,9 @@ public class ProductResource {
 			return oGeoViewModel;
 		}
 		else {
-			// There was a problem
+			Wasdi.DebugLog("ProductResource.GetByProductName: product not found");
+			
+			// Product not available
 			return null;
 		}
 	}
