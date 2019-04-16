@@ -1,6 +1,5 @@
 package it.fadeout;
 
-import java.io.File;
 import java.lang.reflect.Field;
 import java.nio.file.Path;
 import java.nio.file.Paths;

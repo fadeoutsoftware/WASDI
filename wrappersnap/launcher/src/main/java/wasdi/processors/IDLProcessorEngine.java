@@ -1,10 +1,8 @@
 package wasdi.processors;
 
-import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
-import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
@@ -178,12 +176,15 @@ public class IDLProcessorEngine extends WasdiProcessorEngine{
 			ProcessBuilder oProcBuilder = new ProcessBuilder(asCmd);
 			Process oProc = oProcBuilder.start();
 			
-			BufferedReader oInput = new BufferedReader(new InputStreamReader(oProc.getInputStream()));
 			
-            String sLine;
-            while((sLine=oInput.readLine()) != null) {
-            	LauncherMain.s_oLogger.debug("IDLProcessorEngine.run: envi stdout: " + sLine);
-            }
+			// P.Campanella 2019/04/16: to read the output looks to much instable
+			// The log can be read redirecting the output to a file
+//			BufferedReader oInput = new BufferedReader(new InputStreamReader(oProc.getInputStream()));
+//			
+//            String sLine;
+//            while((sLine=oInput.readLine()) != null) {
+//            	LauncherMain.s_oLogger.debug("IDLProcessorEngine.run: envi stdout: " + sLine);
+//            }
             
             LauncherMain.s_oLogger.debug("IDLProcessorEngine.run: waiting for the process to exit");
 			

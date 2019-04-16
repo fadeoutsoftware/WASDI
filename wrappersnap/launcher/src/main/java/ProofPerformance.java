@@ -125,7 +125,7 @@ public class ProofPerformance {
 		ApplyOrbit operation = new ApplyOrbit();
 //        WriteProduct writer = new WriteProduct();
         ReadProduct reader = new ReadProduct();
-        Product inProduct = reader.ReadProduct(inFile, null);
+        Product inProduct = reader.readSnapProduct(inFile, null);
                 
         System.out.println("input product read: " + (System.currentTimeMillis()-t));
         t = System.currentTimeMillis();

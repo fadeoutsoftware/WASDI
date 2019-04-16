@@ -9,6 +9,7 @@ public class MultiSubsetSetting implements ISetting {
 	ArrayList<Double> lonWList = new ArrayList<>();
 	ArrayList<Double> latSList = new ArrayList<>();
 	ArrayList<Double> lonEList = new ArrayList<>();
+	ArrayList<String> bands = new ArrayList<>();
 	
 	
 	public ArrayList<String> getOutputNames() {
@@ -41,5 +42,10 @@ public class MultiSubsetSetting implements ISetting {
 	public void setLonEList(ArrayList<Double> lonEList) {
 		this.lonEList = lonEList;
 	}
-
+	public ArrayList<String> getBands() {
+		return bands;
+	}
+	public void setBands(ArrayList<String> bands) {
+		this.bands = bands;
+	}
 }

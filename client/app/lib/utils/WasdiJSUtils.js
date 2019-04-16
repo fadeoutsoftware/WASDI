@@ -153,7 +153,6 @@ function utilsProjectShowRabbitMessageUserFeedBack(oMessage) {
     switch(sMessageCode)
     {
         case "DOWNLOAD":
-            //sUserMessage = "FILE NOW AVAILABLE ON WASDI SERVER<br>READY";
             sUserMessage = "PRODUCT ADDED TO THE WORKSPACE<br>READY";
             break;
         case "PUBLISH":
@@ -169,23 +168,38 @@ function utilsProjectShowRabbitMessageUserFeedBack(oMessage) {
             sUserMessage = "APPLY ORBIT COMPLETED<br>READY";
             break;
         case "CALIBRATE":
-            sUserMessage = "RADIOMETRIC CALIBRATE COMPLETE<br>READY";
+            sUserMessage = "RADIOMETRIC CALIBRATE COMPLETED<br>READY";
             break;
         case "MULTILOOKING":
-            sUserMessage = "Multilooking Completed<br>READY";
+            sUserMessage = "MULTILOOKING COMPLETED<br>READY";
             break;
         case "NDVI":
-            sUserMessage = "NDVI Completed<br>READY";
+            sUserMessage = "NDVI COMPLETED<br>READY";
             break;
         case "TERRAIN":
             sUserMessage = "RANGE DOPPLER TERRAIN CORRECTION COMPLETED<br>READY";
             break;
+        case "MOSAIC":
+            sUserMessage = "MOSAIC COMPLETED<br>READY";
+            break;
+        case "SUBSET":
+            sUserMessage = "MOSAIC COMPLETED<br>READY";
+            break;
+        case "MULTISUBSET":
+            sUserMessage = "MOSAIC COMPLETED<br>READY";
+            break;
+        case "GRAPH":
+            sUserMessage = "WORKFLOW COMPLETED<br>READY";
+            break;
         case "RUNPROCESSOR":
-            sUserMessage = "CUSTOM PROCESSOR DONE<br>READY"
+            sUserMessage = "CUSTOM PROCESSOR COMPLETED<br>READY"
+            break;
         case "RUNIDL":
-            sUserMessage = "IDL PROCESSOR DONE<br>READY"
+            sUserMessage = "IDL PROCESSOR COMPLETED<br>READY"
+            break;
         case "RUNMATLAB":
-            sUserMessage = "MATLAB PROCESSOR DONE<br>READY"
+            sUserMessage = "MATLAB PROCESSOR COMPLETED<br>READY"
+            break;
         default:
             console.log("RABBIT ERROR: GOT EMPTY MESSAGE<br>READY");
     }

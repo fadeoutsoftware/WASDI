@@ -216,60 +216,58 @@ END
 ; IDL HTTP POST UTILITY FUNCTION
 FUNCTION WASDIHTTPPOST, sUrlPath, sBody
 
-  COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params
-  
-  
-  sessioncookie = token
+	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params
 
-  ; Create a new url object
-  oUrl = OBJ_NEW('IDLnetUrl')
+	sessioncookie = token
 
-  ; This is an http transaction
-  oUrl->SetProperty, URL_SCHEME = 'http'
+	; Create a new url object
+	oUrl = OBJ_NEW('IDLnetUrl')
 
-  ; Use the http server string
-  oUrl->SetProperty, URL_HOSTNAME = '217.182.93.57'
+	; This is an http transaction
+	oUrl->SetProperty, URL_SCHEME = 'http'
 
-  ; name of remote path
-  oUrl->SetProperty, URL_PATH = sUrlPath
-  oUrl->SetProperty, HEADERS = ['Content-Type: application/json','x-session-token: '+sessioncookie]
-  
-  IF (verbose EQ '1') THEN BEGIN
-	print, 'WasdiHttpPost Url ', sUrlPath
-  END  
-  
-  ; CALL THE HTTP POST URL WITH BODY
-  serverJSONResult = oUrl->Put(sBody, /STRING_ARRAY,/POST, /BUFFER)
+	; Use the http server string
+	oUrl->SetProperty, URL_HOSTNAME = '217.182.93.57'
 
-  ; Close the connection to the remote server, and destroy the object
-  oUrl->CloseConnections
-  OBJ_DESTROY, oUrl
+	; name of remote path
+	oUrl->SetProperty, URL_PATH = sUrlPath
+	oUrl->SetProperty, HEADERS = ['Content-Type: application/json','x-session-token: '+sessioncookie]
 
-  ; PARSE THE JSON RESULT
-  wasdiResult = JSON_PARSE(serverJSONResult)
-  
-  RETURN, wasdiResult
-  
+	IF (verbose EQ '1') THEN BEGIN
+		print, 'WasdiHttpPost Url ', sUrlPath
+	END  
+
+	; CALL THE HTTP POST URL WITH BODY
+	serverJSONResult = oUrl->Put(sBody, /STRING_ARRAY,/POST, /BUFFER)
+
+	; Close the connection to the remote server, and destroy the object
+	oUrl->CloseConnections
+	OBJ_DESTROY, oUrl
+
+	; PARSE THE JSON RESULT
+	wasdiResult = JSON_PARSE(serverJSONResult)
+
+	RETURN, wasdiResult
 END
 
 ;Utility method to get value of a key in a ordered hash
 FUNCTION GETVALUEBYKEY, jsonResult, sKey
 
-  oJSONObject = jsonResult
-  aoKeys = oJSONObject.keys()
-  aoValues = oJSONObject.values()
-  sValue = ""
+	oJSONObject = jsonResult
+	aoKeys = oJSONObject.keys()
+	aoValues = oJSONObject.values()
+	sValue = ""
 
-  for j=0,n_elements(aoKeys)-1 do begin
+	FOR j=0,n_elements(aoKeys)-1 DO BEGIN
 
-    if aoKeys[j] eq sKey then begin
-      sValue = aoValues[j]
-      break
-    endif
-	
-  endfor
-  
-  RETURN, sValue
+		IF aoKeys[j] EQ sKey THEN BEGIN
+			sValue = aoValues[j]
+			break
+		ENDIF
+
+	ENDFOR
+
+	RETURN, sValue
 
 END
 
@@ -361,67 +359,68 @@ END
 ; Method Used to login in wasdi. Do not need to call, is called in the Init
 FUNCTION WASDILOGIN,wuser,wpassword
 
-  COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params
+	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params
 
-  ; Path of login API
-  UrlPath = '/wasdiwebserver/rest/auth/login'
-  ; Create body json
-  LoginString='{  "userId":"'+wuser+'",  "userPassword":"'+wpassword+'"}'
+	; Path of login API
+	UrlPath = '/wasdiwebserver/rest/auth/login'
+	; Create body json
+	LoginString='{  "userId":"'+wuser+'",  "userPassword":"'+wpassword+'"}'
 
-  ; Send post request
-  serverJSONResult = WASDIHTTPPOST(UrlPath, LoginString)
-  
-  ; get back the session key
-  sessionCookie = GETVALUEBYKEY(serverJSONResult, "sessionId")
+	; Send post request
+	serverJSONResult = WASDIHTTPPOST(UrlPath, LoginString)
 
-  RETURN, sessionCookie
+	; get back the session key
+	sessionCookie = GETVALUEBYKEY(serverJSONResult, "sessionId")
+
+	RETURN, sessionCookie
 END
 
 ;Init WASDL Library
 PRO INITWASDI,sUser,sPassword,sBasePath,sSessionId,sMyProdId
-  ; Define a set of shared variables
-  COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params
 
-  basepath = sBasePath
-  user = sUser
-  password = sPassword
-  myprocid=sMyProdId
-  token = sSessionId
-    
-  IF (sSessionId EQ !NULL) OR (STRLEN(sSessionId) LE 1) THEN BEGIN
-    print, 'InitWasdi: login with user and password'
-	sessioncookie = WASDILOGIN(sUser,sPassword)
-	token = sessioncookie
-	print, 'User Logged in'
-  END ELSE BEGIN
-    print, 'InitWasdi: login using session id'
-    token = sSessionId
-  END
+	; Define a set of shared variables
+	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params
+
+	basepath = sBasePath
+	user = sUser
+	password = sPassword
+	myprocid=sMyProdId
+	token = sSessionId
+
+	IF (sSessionId EQ !NULL) OR (STRLEN(sSessionId) LE 1) THEN BEGIN
+		print, 'InitWasdi: login with user and password'
+		sessioncookie = WASDILOGIN(sUser,sPassword)
+		token = sessioncookie
+		print, 'User Logged in'
+	END ELSE BEGIN
+		print, 'InitWasdi: login using session id'
+		token = sSessionId
+	END
 END
 
 
 ; Hello WASDI
 PRO HELLOWASDI
-  WASDIHTTPGET, '/wasdiwebserver/rest/wasdi/hello'
+	WASDIHTTPGET, '/wasdiwebserver/rest/wasdi/hello'
 END
 
 ; Get the status of a WASDI Process
 FUNCTION WASDIGETPROCESSSTATUS, sProcessID
 
-  COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params
-  
-  ; API URL
-  UrlPath = '/wasdiwebserver/rest/process/byid?sProcessId='+sProcessID
-  
-  ; Call get status
-  wasdiResult = WASDIHTTPGET(UrlPath)
-  
-  ; read response JSON.
-  sStatus = GETVALUEBYKEY(wasdiResult, 'status')
+	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params
 
-  ; Status will be one of CREATED,  RUNNING,  STOPPED,  DONE,  ERROR
-  RETURN, sStatus
-end
+	; API URL
+	UrlPath = '/wasdiwebserver/rest/process/byid?sProcessId='+sProcessID
+
+	; Call get status
+	wasdiResult = WASDIHTTPGET(UrlPath)
+
+	; read response JSON.
+	sStatus = GETVALUEBYKEY(wasdiResult, 'status')
+
+	; Status will be one of CREATED,  RUNNING,  STOPPED,  DONE,  ERROR
+	RETURN, sStatus
+END
 
 FUNCTION WASDIWAITPROCESS, sProcessID
 	sStatus=' '
@@ -499,48 +498,48 @@ end
 ; Get list of workspace of the user
 FUNCTION WASDIGETWORKSPACES
 
-  ; API URL
-  UrlPath = '/wasdiwebserver/rest/ws/byuser'  
-  
-  RETURN, WASDIHTTPGET(UrlPath)
+	; API URL
+	UrlPath = '/wasdiwebserver/rest/ws/byuser'  
+
+	RETURN, WASDIHTTPGET(UrlPath)
 END
 
 
 ; converts a ws name in a ws id. For internal use
 FUNCTION WASDIGETWORKSPACEIDBYNAME, workspacename
 
-  COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params
-  
-  workspaceId = "";
+	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params
 
-  ; API URL
-  UrlPath = '/wasdiwebserver/rest/ws/byuser'
-  
-  ; Get the list of users workpsaces
-  wasdiResult = WASDIHTTPGET(UrlPath)
+	workspaceId = "";
 
-  ; Search the Workspace with the desired name
-  for i=0,n_elements(wasdiResult)-1 do begin
-  
-    oWorkspace = wasdiResult[i]
-    
-	; Check the name property
-    sName = GETVALUEBYKEY(oWorkspace, 'workspaceName')
+	; API URL
+	UrlPath = '/wasdiwebserver/rest/ws/byuser'
 
-    if sName eq workspaceName then begin
-	  ; found it
-      sId = GETVALUEBYKEY(oWorkspace, 'workspaceId')
-      workspaceId = sId
-      break
-    endif
-  endfor
-  
-  if (workspaceId EQ '') THEN BEGIN
+	; Get the list of users workpsaces
+	wasdiResult = WASDIHTTPGET(UrlPath)
+
+	; Search the Workspace with the desired name
+	FOR i=0,n_elements(wasdiResult)-1 DO BEGIN
+
+		oWorkspace = wasdiResult[i]
+
+		; Check the name property
+		sName = GETVALUEBYKEY(oWorkspace, 'workspaceName')
+
+		IF sName EQ workspaceName THEN BEGIN
+			; found it
+			sId = GETVALUEBYKEY(oWorkspace, 'workspaceId')
+			workspaceId = sId
+			BREAK
+		ENDIF
+	ENDFOR
+
+	IF (workspaceId EQ '') THEN BEGIN
 	print, 'Workspace ', workspacename, ' NOT FOUND'
-  END
-  
-  ; return the found id or ""
-  RETURN, workspaceId
+END
+
+; return the found id or ""
+RETURN, workspaceId
   
 END
 
@@ -1134,7 +1133,7 @@ FUNCTION WASDIMULTISUBSET, sInputFile, asOutputFile, asLatN, asLonW, asLatS, asL
 
 	
 	; compose the full SubsetSetting JSON View Model
-	sSubsetSettingsString='{ "outputName": ' + sOutputFilesJSON + ', "latNList": '+ sLatNJSON +',  "lonWList": '+ sLonWJSON +',"latSList": '+ sLatSJSON +', "lonEList": '+ sLonEJSON +'}'
+	sSubsetSettingsString='{ "outputNames": ' + sOutputFilesJSON + ', "latNList": '+ sLatNJSON +',  "lonWList": '+ sLonWJSON +',"latSList": '+ sLatSJSON +', "lonEList": '+ sLonEJSON +'}'
 
 	IF (verbose eq '1') THEN BEGIN
 		print, 'SUBSET MULTI SETTINGS JSON ' , sSubsetSettingsString
@@ -1324,24 +1323,23 @@ END
 ; Update the progress of this own process
 PRO WASDIUPDATEPROGRESS, iPerc
 
-  COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params
-  sMyProcId = myprocid
+	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params
+	sMyProcId = myprocid
 
-  sPerc = STRING(iPerc)
+	sPerc = STRING(iPerc)
+
+	IF (sMyProcId EQ !NULL) OR (STRLEN(sMyProcId) LE 1) THEN BEGIN
+		print, 'Progress Update ', sPerc.Trim()
+	END ELSE BEGIN
+		; API url
+		UrlPath = '/wasdiwebserver/rest/process/updatebyid?sProcessId='+sMyProcId+'&status=RUNNING&perc='+sPerc.Trim()+'&sendrabbit=1'
+		wasdiResult = WASDIHTTPGET(UrlPath)
+
+		; Read updated status
+		sStatus = GETVALUEBYKEY(wasdiResult, 'status')
+	END
   
-  IF (sMyProcId EQ !NULL) OR (STRLEN(sMyProcId) LE 1) THEN BEGIN
-    print, 'Progress Update ', sPerc.Trim()
-  END ELSE BEGIN
-    ; API url
-    UrlPath = '/wasdiwebserver/rest/process/updatebyid?sProcessId='+sMyProcId+'&status=RUNNING&perc='+sPerc.Trim()+'&sendrabbit=1'
-    print, UrlPath
-    wasdiResult = WASDIHTTPGET(UrlPath)
-  
-    ; Read updated status
-    sStatus = GETVALUEBYKEY(wasdiResult, 'status')
-  END
-  
-end
+END
 
 ; Update the status of a WASDI Process
 FUNCTION WASDIUPDATEPROCESSSTATUS, sProcessID, sStatus, iPerc

@@ -75,7 +75,7 @@ public class UpdateBandViewModels {
 			// Read The Product
             ReadProduct oReadSNAPProduct = new ReadProduct();
             File oProductFile = new File(oDownloadedFileEntity.getFilePath());
-            Product oProduct = oReadSNAPProduct.ReadProduct(oProductFile, null);
+            Product oProduct = oReadSNAPProduct.readSnapProduct(oProductFile, null);
             
             if (Utils.isNullOrEmpty(oDownloadedFileEntity.getFileName())) {
             	System.out.println("Fixing DownloadedFile - FileName");

@@ -241,7 +241,7 @@ public class TestMain {
         ReadProduct oReadProduct = new ReadProduct();
         ProductViewModel oVM = oReadProduct.getProductViewModel(oFile);
 
-        Product oSentinel = oReadProduct.ReadProduct(oFile, null);
+        Product oSentinel = oReadProduct.readSnapProduct(oFile, null);
 
         GeoCoding oGeoCoding = oSentinel.getSceneGeoCoding();
 
