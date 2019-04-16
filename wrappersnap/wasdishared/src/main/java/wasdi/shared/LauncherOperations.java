@@ -25,5 +25,6 @@ public enum LauncherOperations {
     RUNMATLAB,
     MOSAIC,
     SUBSET,
+    MULTISUBSET,
     WPS
 }

@@ -21,15 +21,15 @@ import wasdi.shared.viewmodels.RabbitMessageViewModel;
  */
 public class Send {
 	
-	Connection oConnection = null;
-	Channel oChannel= null;
+	Connection m_oConnection = null;
+	Channel m_oChannel= null;
 	String m_sExchangeName = "amq.topic";
 	
 	public Send(String sExchange) {
 		//create connection to the server
         try {
-            oConnection = RabbitFactory.getConnectionFactory().newConnection();
-            if (oConnection!=null) oChannel = oConnection.createChannel();
+            m_oConnection = RabbitFactory.getConnectionFactory().newConnection();
+            if (m_oConnection!=null) m_oChannel = m_oConnection.createChannel();
             m_sExchangeName = sExchange;
         } catch (Exception e) {
             System.out.println("Send.Init: Error connecting to rabbit " + e.toString());
@@ -38,7 +38,7 @@ public class Send {
 	
 	public void Free() {
 		try {
-			if (oConnection!=null) oConnection.close();
+			if (m_oConnection!=null) m_oConnection.close();
 		} catch (IOException e) {
 			System.out.println("Send.Free: Error closing connection " + e.toString());
 		}
@@ -53,11 +53,15 @@ public class Send {
      */
     private boolean SendMsg(String sRoutingKey, String sMessageAttribute)
     {
-    	if (oChannel == null) return false;
+    	if (m_oChannel == null) return false;
     	
         try {        	
-            oChannel.basicPublish(m_sExchangeName, sRoutingKey, null, sMessageAttribute.getBytes());
+            m_oChannel.basicPublish(m_sExchangeName, sRoutingKey, null, sMessageAttribute.getBytes());
         } catch (IOException e) {
+        	System.out.println("Send.SendMgs: Error publishing message " + sMessageAttribute + " to " + sRoutingKey + " " + e.toString());
+            return false;
+        }
+        catch (Exception e) {
         	System.out.println("Send.SendMgs: Error publishing message " + sMessageAttribute + " to " + sRoutingKey + " " + e.toString());
             return false;
         }
