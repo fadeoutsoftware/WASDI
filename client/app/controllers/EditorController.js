@@ -1070,6 +1070,9 @@ var EditorController = (function () {
             case "TERRAIN":
             case "GRAPH":
             case "INGEST":
+            case "MOSAIC":
+            case "SUBSET":
+            case "MULTISUBSET":
                 oController.receivedNewProductMessage(oMessage);
                 break;
         }

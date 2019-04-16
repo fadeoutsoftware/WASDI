@@ -146,8 +146,6 @@ public class ProcessWorkspaceResource {
 	@Produces({"application/xml", "application/json", "text/xml"})
 	public ArrayList<ProcessWorkspaceViewModel> getLastProcessByWorkspace(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sWorkspaceId") String sWorkspaceId) {
 		
-		Wasdi.DebugLog("ProcessWorkspaceResource.GetLastProcessByWS");
-
 		User oUser = Wasdi.GetUserFromSession(sSessionId);
 
 		ArrayList<ProcessWorkspaceViewModel> aoProcessList = new ArrayList<ProcessWorkspaceViewModel>();
@@ -155,18 +153,21 @@ public class ProcessWorkspaceResource {
 		try {
 			// Domain Check
 			if (oUser == null) {
+				Wasdi.DebugLog("ProcessWorkspaceResource.GetProcessByWorkspace: user not found from session");
 				return aoProcessList;
 			}
 			if (Utils.isNullOrEmpty(oUser.getUserId())) {
+				Wasdi.DebugLog("ProcessWorkspaceResource.GetProcessByWorkspace: user id is null");
 				return aoProcessList;
 			}
 			
 			if (Utils.isNullOrEmpty(sWorkspaceId)) {
+				Wasdi.DebugLog("ProcessWorkspaceResource.GetProcessByWorkspace: ws id is null");
 				return aoProcessList;
 			}
 
 
-			System.out.println("ProcessWorkspaceResource.GetProcessByWorkspace: process for ws " + sWorkspaceId);
+			Wasdi.DebugLog("ProcessWorkspaceResource.GetProcessByWorkspace: process for ws " + sWorkspaceId);
 
 			// Create repo
 			ProcessWorkspaceRepository oRepository = new ProcessWorkspaceRepository();

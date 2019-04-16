@@ -44,7 +44,6 @@ import wasdi.shared.viewmodels.BandViewModel;
 import wasdi.shared.viewmodels.GeorefProductViewModel;
 import wasdi.shared.viewmodels.MetadataViewModel;
 import wasdi.shared.viewmodels.PrimitiveResult;
-import wasdi.shared.viewmodels.ProductInfoViewModel;
 import wasdi.shared.viewmodels.ProductViewModel;
 
 @Path("/product")

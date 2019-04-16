@@ -631,7 +631,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 					// Get The product view Model
 					ReadProduct oReadProduct = new ReadProduct();
 					File oProductFile = new File(sFileName);
-					Product oProduct = oReadProduct.ReadProduct(oProductFile, null);
+					Product oProduct = oReadProduct.readSnapProduct(oProductFile, null);
 					oVM = oReadProduct.getProductViewModel(oProduct, oProductFile);
 					// Save Metadata
 					oVM.setMetadataFileReference(asynchSaveMetadata(sFileName));
@@ -1114,7 +1114,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 
 			ReadProduct oReadProduct = new ReadProduct();
 			s_oLogger.debug("LauncherMain.ExecuteOperation: Read Product");
-			Product oSourceProduct = oReadProduct.ReadProduct(oSourceFile, null);
+			Product oSourceProduct = oReadProduct.readSnapProduct(oSourceFile, null);
 
 			if (oSourceProduct == null)
 			{
@@ -1289,7 +1289,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			
 			// Read the product
 			ReadProduct oReadProduct = new ReadProduct();
-			Product oProduct = oReadProduct.ReadProduct(oFile, null);            
+			Product oProduct = oReadProduct.readSnapProduct(oFile, null);            
 			String sEPSG = CRS.lookupIdentifier(oProduct.getSceneCRS(),true);
 
 			updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 20);
@@ -1531,7 +1531,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			ReadProduct oReadProduct = new ReadProduct();
 
 			s_oLogger.debug("LauncherMain.RasterGeometricResample: Read Product");
-			Product oSourceProduct = oReadProduct.ReadProduct(oSourceFile, null);
+			Product oSourceProduct = oReadProduct.readSnapProduct(oSourceFile, null);
 
 			if (oSourceProduct == null)
 			{
@@ -1731,6 +1731,10 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 		
 		try {
 			
+			if (oProcessWorkspace != null) {
+				updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 0);
+			}
+			
 			String sSourceProduct = oParameter.getSourceProductName();
 			String sOutputProduct = oParameter.getDestinationProductName();
 			
@@ -1739,7 +1743,11 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			
 			ReadProduct oReadProduct = new ReadProduct();
 			File oProductFile = new File(getWorspacePath(oParameter)+sSourceProduct);
-			Product oInputProduct = oReadProduct.ReadProduct(oProductFile, null);
+			Product oInputProduct = oReadProduct.readSnapProduct(oProductFile, null);
+			
+			if (oProcessWorkspace != null) {
+				updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 30);
+			}
 			
 	        // Take the Geo Coding
 	        final GeoCoding oGeoCoding = oInputProduct.getSceneGeoCoding();
@@ -1777,16 +1785,22 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 	        oSubsetDef.setTreatVirtualBandsAsRealBands(false);
 	        oSubsetDef.setNodeNames(oInputProduct.getBandNames());
 	        oSubsetDef.addNodeNames(oInputProduct.getTiePointGridNames());
-	        
+	        	        
 	        Product oSubsetProduct = oInputProduct.createSubset(oSubsetDef, sOutputProduct, oInputProduct.getDescription());
+	        
+			if (oProcessWorkspace != null) {
+				updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 50);
+			}
 	        
 	        String sOutputPath = getWorspacePath(oParameter) + sOutputProduct;
 	        
 	        ProductIO.writeProduct(oSubsetProduct, sOutputPath, GeoTiffProductWriterPlugIn.GEOTIFF_FORMAT_NAME);
 	        
 	        s_oLogger.debug("LauncherMain.executeSubset done");
-			
-			if (oProcessWorkspace != null) oProcessWorkspace.setStatus(ProcessStatus.DONE.name());
+	        
+			if (oProcessWorkspace != null) {
+				updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.DONE, 100);
+			}
 			
 			s_oLogger.debug("LauncherMain.executeSubset adding product to Workspace");
 			
@@ -1826,22 +1840,34 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 		
 		try {
 			
-			String sSourceProduct = oParameter.getSourceProductName();
+			if (oProcessWorkspace != null) {
+				updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 0);
+			}
 			
-			
-			
-			//String sOutputProduct = oParameter.getDestinationProductName();
-			
+			String sSourceProduct = oParameter.getSourceProductName();			
 			MultiSubsetSetting oSettings = (MultiSubsetSetting) oParameter.getSettings();
 			
 			
 			ReadProduct oReadProduct = new ReadProduct();
 			File oProductFile = new File(getWorspacePath(oParameter)+sSourceProduct);
-			Product oInputProduct = oReadProduct.ReadProduct(oProductFile, null);
+			Product oInputProduct = oReadProduct.readSnapProduct(oProductFile, null);
 			
 	        // Take the Geo Coding
 	        final GeoCoding oGeoCoding = oInputProduct.getSceneGeoCoding();
 	        
+			if (oProcessWorkspace != null) {
+				updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 20);
+			}
+			
+			int iTileCount = oSettings.getOutputNames().size();
+			
+			int iStepPerTile = 80;
+			
+			if (iTileCount>0) {
+				iStepPerTile = 80/iTileCount;;
+			}
+			
+			int iProgress = 20;
 	        
 	        for (int iTiles = 0; iTiles<oSettings.getOutputNames().size(); iTiles ++) {
 	        	
@@ -1868,6 +1894,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 	        		continue;
 	        	}
 
+	        	s_oLogger.debug("Computing tile " + sOutputProduct);
 
 		        // Create 2 GeoPos points
 		        GeoPos oGeoPosNW= new GeoPos(oSettings.getLatNList().get(iTiles), oSettings.getLonWList().get(iTiles));
@@ -1900,8 +1927,14 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 		        oSubsetDef.setSubSampling(1, 1);
 		        oSubsetDef.setSubsetName("subset");
 		        oSubsetDef.setTreatVirtualBandsAsRealBands(false);
-		        oSubsetDef.setNodeNames(oInputProduct.getBandNames());
-		        oSubsetDef.addNodeNames(oInputProduct.getTiePointGridNames());
+		        
+		        if (oSettings.getBands().size() == 0) {
+			        oSubsetDef.setNodeNames(oInputProduct.getBandNames());
+			        oSubsetDef.addNodeNames(oInputProduct.getTiePointGridNames());		        	
+		        }
+		        else {
+		        	oSubsetDef.setNodeNames(oSettings.getBands().toArray(new String[oSettings.getBands().size()]));
+		        }
 		        
 		        Product oSubsetProduct = oInputProduct.createSubset(oSubsetDef, sOutputProduct, oInputProduct.getDescription());
 		        
@@ -1913,24 +1946,26 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 		        
 				s_oLogger.debug("LauncherMain.executeMultiSubset adding product to Workspace");
 				
-				addProductToDbAndWorkspaceAndSendToRabbit(null, sOutputPath,oParameter.getWorkspace(), oParameter.getWorkspace(), LauncherOperations.SUBSET.toString(), null);
+				addProductToDbAndWorkspaceAndSendToRabbit(null, sOutputPath,oParameter.getWorkspace(), oParameter.getWorkspace(), LauncherOperations.MULTISUBSET.toString(), null);
 				
 				s_oLogger.debug("LauncherMain.executeMultiSubset: product added to workspace");
+				
+				if (oProcessWorkspace != null) {
+					iProgress = iProgress + iStepPerTile;
+					if (iProgress>100) iProgress = 100;
+					updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, iProgress);
+				}
 		        
 	        }
 	        
-
-			
 			if (oProcessWorkspace != null) oProcessWorkspace.setStatus(ProcessStatus.DONE.name());
-			
-			
 		}
 		catch (Exception oEx) {
 			s_oLogger.error("LauncherMain.executeMultiSubset: exception " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
 			if (oProcessWorkspace != null) oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
 
 			String sError = org.apache.commons.lang.exception.ExceptionUtils.getMessage(oEx);
-			if (s_oSendToRabbit!=null) s_oSendToRabbit.SendRabbitMessage(false,LauncherOperations.SUBSET.name(),oParameter.getWorkspace(),sError,oParameter.getExchange());
+			if (s_oSendToRabbit!=null) s_oSendToRabbit.SendRabbitMessage(false,LauncherOperations.MULTISUBSET.name(),oParameter.getWorkspace(),sError,oParameter.getExchange());
 
 		}
 		finally {			
@@ -1963,6 +1998,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			if (oMosaic.runMosaic()) {
 				s_oLogger.debug("LauncherMain.executeMosaic done");
 				if (oProcessWorkspace != null) {
+					oProcessWorkspace.setProgressPerc(100);
 					oProcessWorkspace.setStatus(ProcessStatus.DONE.name());
 				}
 				
@@ -2257,7 +2293,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			// Read The Product
 			ReadProduct oReadSNAPProduct = new ReadProduct();
 			File oProductFile = new File(oDownloadedFileEntity.getFilePath());
-			Product oProduct = oReadSNAPProduct.ReadProduct(oProductFile, null);
+			Product oProduct = oReadSNAPProduct.readSnapProduct(oProductFile, null);
 
 			if (Utils.isNullOrEmpty(oDownloadedFileEntity.getFileName())) {
 				System.out.println("Fixing DownloadedFile - FileName");

@@ -102,6 +102,8 @@ public class BandImageManager {
 				
 				int iCycleCount = 0;
 				
+				int iLastValue = 0;
+				
 				while (true) {
 					
 					try {
@@ -113,22 +115,27 @@ public class BandImageManager {
 							
 							for (Entry<String, CachedSource> oCacheEntry : m_aoSourceCacheMap.entrySet()) {
 								
-								if (lActualTimestamp - oCacheEntry.getValue().m_lTimestamp > 600000L) { //not accessed by 10 minutes
+								//not accessed by 10 minutes
+								if (lActualTimestamp - oCacheEntry.getValue().m_lTimestamp > 600000L) { 
 									asElementsToRemove.add(oCacheEntry.getKey());
 								}
 							}
 							
-							for (String key : asElementsToRemove) {
-								CachedSource removed = m_aoSourceCacheMap.remove(key);
-								removed.m_oMultiLevelSource = null;
+							for (String sKey : asElementsToRemove) {
+								CachedSource oRemoved = m_aoSourceCacheMap.remove(sKey);
+								oRemoved.m_oMultiLevelSource = null;
 								
-								System.out.println("BandImageManager.buildImage: removed from cache: " + key);
+								System.out.println("BandImageManager.buildImage: removed from cache: " + sKey);
 							}
 							
 							iCycleCount++;
 							
 							if ((iCycleCount%6)==0) {
-								System.out.println("------------ BandImageManager cache size: " + m_aoSourceCacheMap.entrySet().size());
+								
+								if (m_aoSourceCacheMap.entrySet().size() != iLastValue) {
+									System.out.println("------------ BandImageManager cache size: " + m_aoSourceCacheMap.entrySet().size());
+									iLastValue = m_aoSourceCacheMap.entrySet().size();
+								}
 							}
 							
 						}						

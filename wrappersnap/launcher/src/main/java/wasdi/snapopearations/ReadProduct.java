@@ -30,10 +30,6 @@ import wasdi.shared.viewmodels.ProductViewModel;
  */
 public class ReadProduct {
 
-	/**
-	 * Static Cache implemented as a Hash Map Name, Product Object
-	 */
-    public  static HashMap<String, Product> m_oCacheProducts = new HashMap<String, Product>();
 
     /**
      * Read a Satellite Product 
@@ -41,32 +37,33 @@ public class ReadProduct {
      * @param sFormatName Format, if known.
      * @return Product object
      */
-    public Product ReadProduct(File oFile, String sFormatName) {
-        Product exportProduct = null;
+    public Product readSnapProduct(File oFile, String sFormatName) {
+    	
+        Product oProduct = null;
 
+        // P.Campanella 2019/04/16: deleted the static cache. There is a new instance of this class every time is used
+        // so the cache was useless and could have memory problems
+        
         try {
 
-            if (m_oCacheProducts.get(oFile.getName()) == null) {
-                LauncherMain.s_oLogger.debug("ReadProduct.ReadProduct: begin read");
+            LauncherMain.s_oLogger.debug("ReadProduct.ReadProduct: begin read");
 
-                if (sFormatName != null) {
-                    exportProduct = ProductIO.readProduct(oFile, sFormatName);
-                } 
-                else {
-                    exportProduct = ProductIO.readProduct(oFile);
-                }
-                
-                //put in cache dictionary
-                m_oCacheProducts.put(oFile.getName(), exportProduct);
+            if (sFormatName != null) {
+                oProduct = ProductIO.readProduct(oFile, sFormatName);
+            } 
+            else {
+                oProduct = ProductIO.readProduct(oFile);
             }
+                
+            return oProduct;
+            
         } catch (Exception oEx) {
             oEx.printStackTrace();
             LauncherMain.s_oLogger.debug("ReadProduct.ReadProduct: excetpion: " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
-
         }
 
 
-        return m_oCacheProducts.get(oFile.getName());
+        return null;
     }
 
     /**
@@ -83,20 +80,6 @@ public class ReadProduct {
     }
     
     /**
-     * Remove a file from the cache
-     * @param oFile
-     * @return
-     */
-    private boolean RemoveFromCache(File oFile) {
-        if (m_oCacheProducts.get(oFile.getName()) != null) {
-            m_oCacheProducts.remove(oFile.getName());
-            return  true;
-        }
-
-        return  false;
-    }
-
-    /**
      * Converts a product in a View Model
      * @param oFile
      * @return
@@ -106,7 +89,7 @@ public class ReadProduct {
     {
         LauncherMain.s_oLogger.debug("ReadProduct.getProductViewModel: start");
 
-        Product exportProduct = ReadProduct(oFile, null);
+        Product exportProduct = readSnapProduct(oFile, null);
 
         if (exportProduct == null) {
             LauncherMain.s_oLogger.debug("ReadProduct.getProductViewModel: read product returns null");
@@ -189,7 +172,7 @@ public class ReadProduct {
 	 */
     public MetadataViewModel getProductMetadataViewModel(File oFile) throws IOException
     {
-        Product exportProduct = ReadProduct(oFile, null);
+        Product exportProduct = readSnapProduct(oFile, null);
 
         if (exportProduct == null) return null;
 
