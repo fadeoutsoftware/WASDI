@@ -288,6 +288,15 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			Config.instance().load();
 
 			SystemUtils.init3rdPartyLibs(null);
+			String sSnapLogFolder = ConfigReader.getPropValue("SNAP_LOG_FOLDER", "/usr/lib/wasdi/launcher/logs/snaplauncher.log");
+
+			FileHandler oFileHandler = new FileHandler(sSnapLogFolder,true);
+			oFileHandler.setLevel(Level.ALL);
+			SimpleFormatter oSimpleFormatter = new SimpleFormatter();
+			oFileHandler.setFormatter(oSimpleFormatter);
+			SystemUtils.LOG.setLevel(Level.ALL);
+			SystemUtils.LOG.addHandler(oFileHandler);			
+			
 			Engine.start(false);
 
 		}
@@ -305,12 +314,6 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 
 		String sWorkspace = "";
 		String sExchange = "";
-
-		if (sOperation.equals("MAGIC_UPDATE_BANDS")) {
-			System.out.println("MAGIC UPDATE BANDS CYCLE");
-			LauncherMain.updateBandViewModelsCycle();
-			return;
-		}
 
 		try {
 			BaseParameter oBaseParameter = (BaseParameter) SerializationUtils.deserializeXMLToObject(sParameter);
@@ -840,7 +843,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 
 			s_oLogger.debug("SaveMetadata: file = " + sMetadataFileName);
 
-			SerializationUtils.serializeObjectToXML(sMetadataPath+sMetadataFileName, oReadProduct.getProductMetadataViewModel(oProductFile));
+			SerializationUtils.serializeObjectToXML(sMetadataPath+sMetadataFileName, oReadProduct.getProductMetadataViewModel());
 
 			s_oLogger.debug("SaveMetadata: file = saved");
 
@@ -1938,17 +1941,28 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 		        
 		        Product oSubsetProduct = oInputProduct.createSubset(oSubsetDef, sOutputProduct, oInputProduct.getDescription());
 		        
-		        String sOutputPath = getWorspacePath(oParameter) + sOutputProduct;
+		        if (oSubsetProduct != null) {
+			        String sOutputPath = getWorspacePath(oParameter) + sOutputProduct;
+			        
+			        ProductIO.writeProduct(oSubsetProduct, sOutputPath, GeoTiffProductWriterPlugIn.GEOTIFF_FORMAT_NAME);
+			        
+			        s_oLogger.debug("LauncherMain.executeMultiSubset done for index " + iTiles);
+			        
+					s_oLogger.debug("LauncherMain.executeMultiSubset adding product to Workspace");
+					
+					
+					
+					addProductToDbAndWorkspaceAndSendToRabbit(null, sOutputPath,oParameter.getWorkspace(), oParameter.getWorkspace(), LauncherOperations.MULTISUBSET.toString(), null, false);
+					
+					s_oLogger.debug("LauncherMain.executeMultiSubset: product added to workspace");		        	
+		        }
+		        else {
+		        	s_oLogger.debug("LauncherMain.executeMultiSubset Subset null for index " + iTiles);
+		        }
 		        
-		        ProductIO.writeProduct(oSubsetProduct, sOutputPath, GeoTiffProductWriterPlugIn.GEOTIFF_FORMAT_NAME);
 		        
-		        s_oLogger.debug("LauncherMain.executeMultiSubset done");
-		        
-				s_oLogger.debug("LauncherMain.executeMultiSubset adding product to Workspace");
-				
-				addProductToDbAndWorkspaceAndSendToRabbit(null, sOutputPath,oParameter.getWorkspace(), oParameter.getWorkspace(), LauncherOperations.MULTISUBSET.toString(), null);
-				
-				s_oLogger.debug("LauncherMain.executeMultiSubset: product added to workspace");
+		        oSubsetProduct.dispose();
+
 				
 				if (oProcessWorkspace != null) {
 					iProgress = iProgress + iStepPerTile;
@@ -2162,7 +2176,6 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 	}
 
 
-
 	/**
 	 * Converts a product in a ViewModel, add it to the workspace and send it to the rabbit queue
 	 * The method is Safe: controls if the products already exists and if it is already added to the workspace
@@ -2175,6 +2188,24 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 	 */
 	private void addProductToDbAndWorkspaceAndSendToRabbit(ProductViewModel oVM, String sFullPathFileName, String sWorkspace, String sExchange, String sOperation, String sBBox) throws Exception
 	{
+		addProductToDbAndWorkspaceAndSendToRabbit(oVM, sFullPathFileName, sWorkspace, sExchange, sOperation, sBBox, true);
+	}
+
+
+	/**
+	 * Converts a product in a ViewModel, add it to the workspace and send it to the rabbit queue
+	 * The method is Safe: controls if the products already exists and if it is already added to the workspace
+	 * @param oVM View Model... if null, read it from the product in sFileName
+	 * @param sFullPathFileName File Name
+	 * @param sWorkspace Workspace
+	 * @param sExchange Queue Id
+	 * @param sOperation Operation Done
+	 * @param sBBox Bounding Box
+	 * @param bAsynchMetadata Flag to know if save metadata in asynch or synch way
+	 * @throws Exception
+	 */
+	private void addProductToDbAndWorkspaceAndSendToRabbit(ProductViewModel oVM, String sFullPathFileName, String sWorkspace, String sExchange, String sOperation, String sBBox, Boolean bAsynchMetadata) throws Exception
+	{
 		s_oLogger.debug("LauncherMain.AddProductToDbAndSendToRabbit: File Name = " + sFullPathFileName);
 
 		// Check if the file is really to Add
@@ -2182,12 +2213,12 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 		DownloadedFile oCheck = oDownloadedRepo.GetDownloadedFileByPath(sFullPathFileName);
 		
 		File oFile = new File(sFullPathFileName);
-		ReadProduct oReadProduct = new ReadProduct();
+		ReadProduct oReadProduct = new ReadProduct(oFile);
 		
 		// Get the Boundig Box
 		if (Utils.isNullOrEmpty(sBBox)) {
 			s_oLogger.debug("LauncherMain.AddProductToDbAndSendToRabbit: bbox not set. Try to auto get it ");
-			sBBox= oReadProduct.getProductBoundingBox(oFile);
+			sBBox= oReadProduct.getProductBoundingBox();
 		}
 		
 		if (oCheck == null) {
@@ -2197,10 +2228,17 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 				
 				// Get The product view Model				
 				s_oLogger.debug("LauncherMain.AddProductToDbAndSendToRabbit: read View Model");
-				oVM = oReadProduct.getProductViewModel(oFile);
+				oVM = oReadProduct.getProductViewModel();
 				
-				// Asynch Metadata Save
-				oVM.setMetadataFileReference(asynchSaveMetadata(sFullPathFileName));
+				if (bAsynchMetadata) {
+					// Asynch Metadata Save
+					s_oLogger.debug("LauncherMain.AddProductToDbAndSendToRabbit: start metadata thread");
+					oVM.setMetadataFileReference(asynchSaveMetadata(sFullPathFileName));					
+				}
+				else {
+					s_oLogger.debug("LauncherMain.AddProductToDbAndSendToRabbit: save synch metadata");
+					oVM.setMetadataFileReference(saveMetadata(oReadProduct, oFile));
+				}
 				
 				s_oLogger.debug("LauncherMain.AddProductToDbAndSendToRabbit: done read product");
 			}
@@ -2241,6 +2279,10 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 		s_oLogger.debug("LauncherMain.AddProductToDbAndSendToRabbit: Image added. Send Rabbit Message Exchange = " + sExchange);
 
 		if (s_oSendToRabbit!=null) s_oSendToRabbit.SendRabbitMessage(true,sOperation,sWorkspace,oVM,sExchange);
+		
+		if (oReadProduct.getProduct() != null) {
+			oReadProduct.getProduct().dispose();
+		}
 
 		s_oLogger.debug("LauncherMain.AddProductToDbAndSendToRabbit: Method finished");
 	}
@@ -2266,134 +2308,6 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 		}
 
 		return iPid;
-	}
-
-	public static void updateBandViewModelsCycle() {
-		// Create repo
-		ProductWorkspaceRepository oProductWorkspaceRepository = new ProductWorkspaceRepository();
-		DownloadedFilesRepository oDownloadedFilesRepository = new DownloadedFilesRepository();
-
-		List<DownloadedFile> aoDownloaded = oDownloadedFilesRepository.getList();
-
-		// For all the downloaded files
-		for (int i=0; i<aoDownloaded.size(); i++) {
-
-			DownloadedFile oDownloadedFileEntity = aoDownloaded.get(i);
-
-			System.out.println("Product [" + i + "] - " + oDownloadedFileEntity.getFilePath());
-
-			if (oDownloadedFileEntity.getFileName()!= null) {
-				if (oDownloadedFileEntity.getFileName().startsWith("SMCItaly")) {
-					System.out.println("MIDA Public Product, jump");
-					continue;
-				}
-			}
-
-
-			// Read The Product
-			ReadProduct oReadSNAPProduct = new ReadProduct();
-			File oProductFile = new File(oDownloadedFileEntity.getFilePath());
-			Product oProduct = oReadSNAPProduct.readSnapProduct(oProductFile, null);
-
-			if (Utils.isNullOrEmpty(oDownloadedFileEntity.getFileName())) {
-				System.out.println("Fixing DownloadedFile - FileName");
-				oDownloadedFileEntity.setFileName(oProductFile.getName());
-				oDownloadedFilesRepository.UpdateDownloadedFile(oDownloadedFileEntity);
-			}
-
-			// There was any problem?
-			if (oProduct == null) {
-
-				// Product NULL
-
-				// Check if the file exists
-				if (oProductFile.exists()==false) {
-
-					System.out.println("File does not Exists: delete it");
-					oProductWorkspaceRepository.DeleteByProductName(oDownloadedFileEntity.getFileName());
-					oDownloadedFilesRepository.DeleteByFilePath(oDownloadedFileEntity.getFilePath());
-					System.out.println("File does not Exists: deleted");
-				}
-				else {            		
-
-					// Clear Metadata anyway
-					System.out.println("File Exists but could not be read");
-
-					if (oDownloadedFileEntity.getProductViewModel() != null && oDownloadedFileEntity.getProductViewModel().getMetadata() != null) {
-						oDownloadedFileEntity.getProductViewModel().setMetadata(null);
-						oDownloadedFilesRepository.UpdateDownloadedFile(oDownloadedFileEntity);
-						System.out.println("Cleared Metadata");
-					}
-
-				}
-				continue;
-			}
-
-			try {
-				ProductViewModel oVM = oReadSNAPProduct.getProductViewModel(oProduct, oProductFile);
-
-				if (oVM == null) {
-					System.out.println("WARNING - Product View Model NULL FOR " +  oDownloadedFileEntity.getFilePath());
-					continue;
-				}
-
-				//oVM.setMetadata(oReadSNAPProduct.getProductMetadataViewModel(oProductFile));
-				MetadataViewModel oMetadataViewModel = oReadSNAPProduct.getProductMetadataViewModel(oProductFile);
-
-				if (oDownloadedFileEntity.getProductViewModel().getMetadataFileReference() == null || oDownloadedFileEntity.getProductViewModel().getMetadataFileReference().isEmpty()) {
-					System.out.println("Serialize Metadata");
-					String sMetadataFile = Utils.GetRandomName();
-					SerializationUtils.serializeObjectToXML("/data/wasdi/metadata/"+sMetadataFile, oMetadataViewModel);
-					oDownloadedFileEntity.getProductViewModel().setBandsGroups(oVM.getBandsGroups());
-					oDownloadedFileEntity.getProductViewModel().setMetadataFileReference(sMetadataFile);                		                	
-				}
-				else {
-					System.out.println("Metadata Already Serialized");
-				}
-
-				System.out.println("Check Band Dimensions. Bands count = " + oDownloadedFileEntity.getProductViewModel().getBandsGroups().getBands().size());
-
-				for (int iBands = 0; iBands < oDownloadedFileEntity.getProductViewModel().getBandsGroups().getBands().size(); iBands++) {
-					BandViewModel oBandVM = oDownloadedFileEntity.getProductViewModel().getBandsGroups().getBands().get(iBands);
-					if (oBandVM.getWidth() == 0 || oBandVM.getHeight() == 0) {
-						System.out.println("PRODUCT " +oDownloadedFileEntity.getProductViewModel().getName() + " BAND " + oBandVM.getName() + " DIMENSION PROBLEMS [W, H] = [" + oBandVM.getWidth() + ", " + oBandVM.getHeight()+ "]");
-					}
-				}
-
-				oDownloadedFileEntity.getProductViewModel().setMetadata(null);
-				oDownloadedFilesRepository.UpdateDownloadedFile(oDownloadedFileEntity);
-
-				//MetadataViewModel oReloaded = (MetadataViewModel) SerializationUtils.deserializeXMLToObject("C:\\Temp\\wasdi\\metadata\\"+oDownloadedFileEntity.getProductViewModel().getMetadataFileReference());
-			}
-			catch (Exception oEx) {
-				System.out.println("Exception " + oEx);
-			}
-		}
-
-
-		System.out.println("Clearing Product Workspace Table..");
-
-		List<ProductWorkspace> aoProductsWSs = oProductWorkspaceRepository.getList();
-
-		for (int i=0; i<aoProductsWSs.size(); i++) {
-			ProductWorkspace oPW = aoProductsWSs.get(i);
-
-			// LEGACY: now the product is identified by the full path.
-			// This is commented, to be fixed if has to be used again.
-			//DownloadedFile oDF = oDownloadedFilesRepository.GetDownloadedFile(oPW.getProductName());
-
-			//if (oDF == null) {
-			//	System.out.println("\nINVALID Product : " + oPW.getProductName() + " WS : " + oPW.getWorkspaceId());
-			//	oProductWorkspaceRepository.DeleteByProductNameWorkspace(oPW.getProductName(), oPW.getWorkspaceId());
-			//	System.out.println("DELETED");
-			//}
-			//else {
-			//	System.out.print(".");
-			//}
-		}
-
-
-		System.out.println("\nBye Bye");
 	}
 
 	@Override

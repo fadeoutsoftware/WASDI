@@ -20,6 +20,8 @@ var ListFloodAreaDetectionController = (function() {
         this.m_dBimodalityCoefficent = 2.4;
         this.m_iMinimumTileDimension = 1000;
         this.m_iMinimalBlobRemoval = 10;
+        this.m_sPreprocess = '1';
+
         if(utilsIsObjectNullOrUndefined(this.m_aoProducts) === false)
         {
             this.m_oSelectedReferenceProduct = this.m_aoProducts[0];
@@ -32,51 +34,7 @@ var ListFloodAreaDetectionController = (function() {
     };
 
     ListFloodAreaDetectionController.prototype.redirectToWebSite = function(){
-        this.m_oWindow.open('http://www.mydewetra.org', '_blank');
-    };
-
-    ListFloodAreaDetectionController.prototype.runAutoChain = function(){
-
-        var oActiveWorkspace = this.m_oConstantsService.getActiveWorkspace();
-
-        var oAutoChain = {
-            BBOX:"29.0,92.0,10.0,100.0",
-            ORBITS:"33",
-            GRIDSTEP:"1,1",
-            LASTDAYS:"1",
-            PREPROCWORKFLOW: "LISTSinglePreproc",
-            MOSAICBASENAME: "MY",
-            MOSAICXSTEP: "0.00018",
-            MOSAICYSTEP: "0.00018",
-            SIMULATE: "0",
-            ENDDATE: "2019-04-09"
-        };
-
-        sJSON=JSON.stringify(oAutoChain);
-
-        if(utilsIsObjectNullOrUndefined(oActiveWorkspace) === true)
-        {
-            utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR: INVALID ACTIVE WORKSPACE ");
-            return false;
-        }
-
-
-        this.m_oProcessorService.runProcessor('mosaic_tile',sJSON)
-            .success(function(data,status){
-                if( (utilsIsObjectNullOrUndefined(data) === false) && (status === 200))
-                {
-                    var oDialog =  utilsVexDialogAlertBottomRightCorner("eDRIFT AUTO CHAIN<br>THE PROCESS HAS BEEN SCHEDULED");
-                    utilsVexCloseDialogAfter(4000, oDialog);
-                }
-                else
-                {
-                    utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR: AUTO CHAIN FAILED");
-                }
-
-            })
-            .error(function(){
-                utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR: AUTO CHAIN FAILED");
-            });
+        this.m_oWindow.open('http://edrift.cimafoundation.org', '_blank');
     };
 
     ListFloodAreaDetectionController.prototype.runListFloodAreaDetection = function(){
@@ -97,7 +55,8 @@ var ListFloodAreaDetectionController = (function() {
             HSBA_DEPTH_IN: this.m_iHSBAStartDepth,
             ASHMAN_COEFF: this.m_dBimodalityCoefficent,
             MIN_PIXNB_BIMODD: this.m_iMinimumTileDimension,
-            BLOBS_SIZE: this.m_iMinimalBlobRemoval
+            BLOBS_SIZE: this.m_iMinimalBlobRemoval,
+            PRE_PROC_FLAG: this.m_sPreprocess
         };
 
         sJSON=JSON.stringify(oListFlood);

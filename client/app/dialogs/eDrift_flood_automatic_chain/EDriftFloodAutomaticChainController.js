@@ -14,8 +14,17 @@ var EDriftFloodAutomaticChainController = (function() {
         this.m_oConstantsService = oConstantsService;
         this.m_aoProducts = this.m_oExtras.products;
 
+        var sNow = new Date()
+        var iDay =  sNow.getDate()
+        var sDay = ""+iDay
+        if (iDay<10) sDay = "0"+sDay
+        var sMonth = ""+(sNow.getMonth() + 1)
+        if ((sNow.getMonth() + 1)<10) sMonth = "0"+sMonth;
+        var sFormattedDate =  sNow.getFullYear()+ "-" + sMonth+"-" + sDay;
+
+
         this.m_oParameters = {BBOX:"29.0,92.0,10.0,100.0",
-            ORBITS:"33",
+            ORBITS:"33,41,62,70,77,99,106,135,143,172",
             GRIDSTEP:"1,1",
             LASTDAYS:"1",
             PREPROCWORKFLOW: "LISTSinglePreproc",
@@ -23,7 +32,8 @@ var EDriftFloodAutomaticChainController = (function() {
             MOSAICXSTEP: "0.00018",
             MOSAICYSTEP: "0.00018",
             SIMULATE: "0",
-            ENDDATE: "2019-04-09"};
+            ENDDATE: sFormattedDate,
+            DELETE: "0"};
 
         $scope.close = function(result) {
             oClose(result, 300); // close, but give 500ms for bootstrap to animate

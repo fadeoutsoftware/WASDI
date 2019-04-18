@@ -253,6 +253,14 @@ END
 ;Utility method to get value of a key in a ordered hash
 FUNCTION GETVALUEBYKEY, jsonResult, sKey
 
+	IF (jsonResult EQ !NULL) THEN BEGIN
+		RETURN !NULL
+	END
+	
+	IF (sKey EQ !NULL) THEN BEGIN
+		RETURN !NULL
+	END
+
 	oJSONObject = jsonResult
 	aoKeys = oJSONObject.keys()
 	aoValues = oJSONObject.values()

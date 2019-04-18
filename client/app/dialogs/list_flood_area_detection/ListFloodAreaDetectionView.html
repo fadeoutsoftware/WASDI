@@ -130,6 +130,14 @@
                                 <input type="text" name="" class="" value="" title="" ng-model="m_oController.m_iMinimalBlobRemoval">
                             </div>
                         </div>
+                        <div class="row post-event-image-container">
+                            <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
+                                {{"DIALOG_LIST_FLOOD_AREA_DETECTION_PRE_PROCESS"|translate}}
+                            </div>
+                            <div class="col-xs-9 col-sm-9 col-md-9 col-lg-9">
+                                <input type="text" name="" class="" value="" title="" ng-model="m_oController.m_sPreprocess">
+                            </div>
+                        </div>
 
                     </div>
 
@@ -146,10 +154,6 @@
             <div class="modal-footer">
                 <button type="button" ng-click="close(null)" class="my-button" data-dismiss="modal">
                     {{"DIALOG_CLOSE_BUTTON"|translate}}
-                </button>
-
-                <button ng-click="m_oController.runAutoChain()" class="my-button" data-dismiss="modal">
-                    Run Auto Chain
                 </button>
 
                 <button ng-click="m_oController.runListFloodAreaDetection()" class="my-button" data-dismiss="modal">

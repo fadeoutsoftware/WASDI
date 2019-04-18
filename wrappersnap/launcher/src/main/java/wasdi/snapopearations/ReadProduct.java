@@ -4,7 +4,6 @@ import java.awt.Dimension;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 
 import org.esa.snap.core.dataio.ProductIO;
 import org.esa.snap.core.dataio.ProductReader;
@@ -16,6 +15,7 @@ import org.esa.snap.core.datamodel.MetadataAttribute;
 import org.esa.snap.core.datamodel.MetadataElement;
 import org.esa.snap.core.datamodel.PixelPos;
 import org.esa.snap.core.datamodel.Product;
+
 import wasdi.LauncherMain;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.AttributeViewModel;
@@ -29,8 +29,40 @@ import wasdi.shared.viewmodels.ProductViewModel;
  * Created by s.adamo on 18/05/2016.
  */
 public class ReadProduct {
+	
+	Product m_oProduct;
+	File m_oProductFile;
+	
+	public ReadProduct() {
+		
+	}
+	
+	public ReadProduct(File oProductFile) {
+		if (oProductFile!=null) {
+			if (oProductFile.exists()) {
+				m_oProductFile = oProductFile;
+				m_oProduct = readSnapProduct(m_oProductFile, null);
+			}
+		}
+	}
 
 
+	public Product getProduct() {
+		return m_oProduct;
+	}
+
+	public void setProduct(Product oProduct) {
+		this.m_oProduct = oProduct;
+	}
+
+	public File getProductFile() {
+		return m_oProductFile;
+	}
+
+	public void setProductFile(File oProductFile) {
+		this.m_oProductFile = oProductFile;
+	}
+	
     /**
      * Read a Satellite Product 
      * @param oFile File to open
@@ -44,9 +76,15 @@ public class ReadProduct {
         // P.Campanella 2019/04/16: deleted the static cache. There is a new instance of this class every time is used
         // so the cache was useless and could have memory problems
         
+        if (oFile == null) {
+        	LauncherMain.s_oLogger.debug("ReadProduct.ReadProduct: file to read is null, return null ");
+        	return null;
+        }
+        
         try {
 
-            LauncherMain.s_oLogger.debug("ReadProduct.ReadProduct: begin read");
+        	long lStartTime = System.currentTimeMillis();
+            LauncherMain.s_oLogger.debug("ReadProduct.ReadProduct: begin read " + oFile.getAbsolutePath());
 
             if (sFormatName != null) {
                 oProduct = ProductIO.readProduct(oFile, sFormatName);
@@ -55,13 +93,14 @@ public class ReadProduct {
                 oProduct = ProductIO.readProduct(oFile);
             }
                 
+            LauncherMain.s_oLogger.debug("ReadProduct.ReadProduct: read done in " + (System.currentTimeMillis() - lStartTime) + "ms");
+            
             return oProduct;
             
         } catch (Exception oEx) {
             oEx.printStackTrace();
             LauncherMain.s_oLogger.debug("ReadProduct.ReadProduct: excetpion: " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
         }
-
 
         return null;
     }
@@ -98,15 +137,37 @@ public class ReadProduct {
 
         ProductViewModel oViewModel = getProductViewModel(exportProduct, oFile);
 
+        LauncherMain.s_oLogger.debug("ReadProduct.getProductViewModel: done");
         return  oViewModel;
     }
 
     /**
      * Converts a product in a View Model
-     * @param exportProduct
+     * @param oFile
+     * @return
+     * @throws IOException
+     */
+    public ProductViewModel getProductViewModel() throws IOException
+    {
+        LauncherMain.s_oLogger.debug("ReadProduct.getProductViewModel: start");
+        
+        if (m_oProduct == null) {
+        	LauncherMain.s_oLogger.debug("ReadProduct.getProductViewModel: member product is null, return null");
+        	return null;
+        }
+
+        ProductViewModel oViewModel = getProductViewModel(m_oProduct, m_oProductFile);
+
+        LauncherMain.s_oLogger.debug("ReadProduct.getProductViewModel: done");
+        return  oViewModel;
+    }
+    
+    /**
+     * Converts a product in a View Model
+     * @param oExportProduct
      * @return
      */
-	public ProductViewModel getProductViewModel(Product exportProduct, File oFile) {
+	public ProductViewModel getProductViewModel(Product oExportProduct, File oFile) {
 		
 		// Create View Model
 		ProductViewModel oViewModel = new ProductViewModel();
@@ -114,14 +175,12 @@ public class ReadProduct {
         LauncherMain.s_oLogger.debug("ReadProduct.getProductViewModel: call fill bands view model");
 
         // Get Bands
-        this.FillBandsViewModel(oViewModel, exportProduct);
+        this.FillBandsViewModel(oViewModel, oExportProduct);
 
         LauncherMain.s_oLogger.debug("ReadProduct.getProductViewModel: setting Name and Path");
-
-//        File oFile = exportProduct.getFileLocation();
         
         // Set name and path
-        oViewModel.setName(exportProduct.getName());
+        oViewModel.setName(oExportProduct.getName());
         if (oFile!=null) oViewModel.setFileName(oFile.getName());
 
         LauncherMain.s_oLogger.debug("ReadProduct.getProductViewModel: end");
@@ -138,7 +197,6 @@ public class ReadProduct {
 		try {
 			Product oProduct = ProductIO.readProduct(oProductFile);
 			
-//			CoordinateReferenceSystem crs = oProduct.getSceneCRS();
 			GeoCoding geocoding = oProduct.getSceneGeoCoding();
 			if (geocoding!=null) {
 				Dimension dim = oProduct.getSceneRasterSize();		
@@ -148,10 +206,6 @@ public class ReadProduct {
 				float minY = (float) Math.min(min.lat, max.lat);
 				float maxX = (float) Math.max(min.lon, max.lon);
 				float maxY = (float) Math.max(min.lat, max.lat);
-				
-//				Integer epsgCode = CRS.lookupEpsgCode(crs, true);
-//				String epsg = "EPSG:" + (epsgCode==null ? 4326 : epsgCode);
-//				return String.format("{\"miny\":%f,\"minx\":%f,\"crs\":\"%s\",\"maxy\":%f,\"maxx\":%f", minY, minX, epsg, maxY, maxX);
 				
 				return String.format("%f,%f,%f,%f,%f,%f,%f,%f,%f,%f", minY, minX, minY, maxX, maxY, maxX, maxY, minX, minY, minX);
 			}
@@ -163,7 +217,51 @@ public class ReadProduct {
 		return "";
 	}
 	
+	/**
+	 * Get Product Bounding Box from File
+	 * @param oProductFile
+	 * @return "%f,%f,%f,%f,%f,%f,%f,%f,%f,%f", minY, minX, minY, maxX, maxY, maxX, maxY, minX, minY, minX
+	 */
+	public String getProductBoundingBox() {
+		
+		try {
+			
+			if (m_oProduct == null) {
+				LauncherMain.s_oLogger.debug("ReadProduct.getProductBoundingBox: internal product is null return empty string");
+				return "";
+			}
+			
+			GeoCoding geocoding = m_oProduct.getSceneGeoCoding();
+			if (geocoding!=null) {
+				Dimension dim = m_oProduct.getSceneRasterSize();		
+				GeoPos min = geocoding.getGeoPos(new PixelPos(0,0), null);
+				GeoPos max = geocoding.getGeoPos(new PixelPos(dim.getWidth(), dim.getHeight()), null);
+				float minX = (float) Math.min(min.lon, max.lon);
+				float minY = (float) Math.min(min.lat, max.lat);
+				float maxX = (float) Math.max(min.lon, max.lon);
+				float maxY = (float) Math.max(min.lat, max.lat);
+								
+				return String.format("%f,%f,%f,%f,%f,%f,%f,%f,%f,%f", minY, minX, minY, maxX, maxY, maxX, maxY, minX, minY, minX);
+			}
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		return "";
+	}
 	
+	
+	/**
+	 * Get the metadata View Model of a Product
+	 * @return
+	 * @throws IOException
+	 */
+    public MetadataViewModel getProductMetadataViewModel() throws IOException
+    {
+        return  GetMetadataViewModel(m_oProduct.getMetadataRoot(), new MetadataViewModel("Metadata"));
+    }
+    
 	/**
 	 * Get the metadata View Model of a Product
 	 * @param oFile
