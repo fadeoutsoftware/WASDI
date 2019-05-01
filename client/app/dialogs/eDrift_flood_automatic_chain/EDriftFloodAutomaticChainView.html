@@ -33,31 +33,15 @@
                     <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 my-input-text">
                         <div class="row post-event-image-container">
                             <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
-                                Bounding box
+                                End date
                             </div>
                             <div class="col-xs-9 col-sm-9 col-md-9 col-lg-9">
-                                <input type="text" name="" class="" value="" title="" ng-model="m_oController.m_oParameters.BBOX">
+                                <input type="text" name="" class="" value="" title="" ng-model="m_oController.m_oParameters.ENDDATE">
                             </div>
                         </div>
                         <div class="row post-event-image-container">
                             <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
-                                Orbits
-                            </div>
-                            <div class="col-xs-9 col-sm-9 col-md-9 col-lg-9">
-                                <input type="text" name="" class="" value="" title="" ng-model="m_oController.m_oParameters.ORBITS">
-                            </div>
-                        </div>
-                        <div class="row post-event-image-container">
-                            <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
-                                Grid step
-                            </div>
-                            <div class="col-xs-9 col-sm-9 col-md-9 col-lg-9">
-                                <input type="text" name="" class="" value="" title="" ng-model="m_oController.m_oParameters.GRIDSTEP">
-                            </div>
-                        </div>
-                        <div class="row post-event-image-container">
-                            <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
-                                Last days
+                                Days to search back
                             </div>
                             <div class="col-xs-9 col-sm-9 col-md-9 col-lg-9">
                                 <input type="text" name="" class="" value="" title="" ng-model="m_oController.m_oParameters.LASTDAYS">
@@ -65,7 +49,47 @@
                         </div>
                         <div class="row post-event-image-container">
                             <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
-                                Preprocess workflow
+                                Delete Intermediate Files
+                            </div>
+                            <div class="col-xs-9 col-sm-9 col-md-9 col-lg-9">
+                                <input type="text" name="" class="" value="" title="" ng-model="m_oController.m_oParameters.DELETE">
+                            </div>
+                        </div>
+                        <div class="row post-event-image-container">
+                            <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
+                                Simulate flood Detection
+                            </div>
+                            <div class="col-xs-9 col-sm-9 col-md-9 col-lg-9">
+                                <input type="text" name="" class="" value="" title="" ng-model="m_oController.m_oParameters.SIMULATE">
+                            </div>
+                        </div>
+                        <div class="row post-event-image-container">
+                            <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
+                                Search Bounding box
+                            </div>
+                            <div class="col-xs-9 col-sm-9 col-md-9 col-lg-9">
+                                <input type="text" name="" class="" value="" title="" ng-model="m_oController.m_oParameters.BBOX">
+                            </div>
+                        </div>
+                        <div class="row post-event-image-container">
+                            <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
+                                Search Orbits
+                            </div>
+                            <div class="col-xs-9 col-sm-9 col-md-9 col-lg-9">
+                                <input type="text" name="" class="" value="" title="" ng-model="m_oController.m_oParameters.ORBITS">
+                            </div>
+                        </div>
+                        <div class="row post-event-image-container">
+                            <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
+                                Tile Grid step (x,y) [degrees]
+                            </div>
+                            <div class="col-xs-9 col-sm-9 col-md-9 col-lg-9">
+                                <input type="text" name="" class="" value="" title="" ng-model="m_oController.m_oParameters.GRIDSTEP">
+                            </div>
+                        </div>
+                        <div class="row post-event-image-container">
+                            <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
+                                S1 Preprocess workflow
                             </div>
                             <div class="col-xs-9 col-sm-9 col-md-9 col-lg-9">
                                 <input type="text" name="" class="" value="" title="" ng-model="m_oController.m_oParameters.PREPROCWORKFLOW">
@@ -81,7 +105,7 @@
                         </div>
                         <div class="row post-event-image-container">
                             <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
-                                Mosaic X step
+                                Mosaic X step [degrees]
                             </div>
                             <div class="col-xs-9 col-sm-9 col-md-9 col-lg-9">
                                 <input type="text" name="" class="" value="" title="" ng-model="m_oController.m_oParameters.MOSAICXSTEP">
@@ -89,37 +113,12 @@
                         </div>
                         <div class="row post-event-image-container">
                             <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
-                                Mosaic Y step
+                                Mosaic Y step [degrees]
                             </div>
                             <div class="col-xs-9 col-sm-9 col-md-9 col-lg-9">
                                 <input type="text" name="" class="" value="" title="" ng-model="m_oController.m_oParameters.MOSAICYSTEP">
                             </div>
                         </div>
-                        <div class="row post-event-image-container">
-                            <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
-                                Simulate
-                            </div>
-                            <div class="col-xs-9 col-sm-9 col-md-9 col-lg-9">
-                                <input type="text" name="" class="" value="" title="" ng-model="m_oController.m_oParameters.SIMULATE">
-                            </div>
-                        </div>
-                        <div class="row post-event-image-container">
-                            <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
-                                End date
-                            </div>
-                            <div class="col-xs-9 col-sm-9 col-md-9 col-lg-9">
-                                <input type="text" name="" class="" value="" title="" ng-model="m_oController.m_oParameters.ENDDATE">
-                            </div>
-                        </div>
-                        <div class="row post-event-image-container">
-                            <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
-                                Delete Flag
-                            </div>
-                            <div class="col-xs-9 col-sm-9 col-md-9 col-lg-9">
-                                <input type="text" name="" class="" value="" title="" ng-model="m_oController.m_oParameters.DELETE">
-                            </div>
-                        </div>
-
 
                     </div>
 

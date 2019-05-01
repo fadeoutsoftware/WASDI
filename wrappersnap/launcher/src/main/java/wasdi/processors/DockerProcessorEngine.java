@@ -27,7 +27,7 @@ import wasdi.shared.parameters.ProcessorParameter;
 
 public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 	
-	protected String m_sDockerTemplatePath = "";
+	//protected String m_sDockerTemplatePath = "";
 
 	public DockerProcessorEngine(String sWorkingRootPath, String sDockerTemplatePath) {
 		super(sWorkingRootPath, sDockerTemplatePath);

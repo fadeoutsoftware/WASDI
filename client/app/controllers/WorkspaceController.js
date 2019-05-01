@@ -266,10 +266,10 @@ var WorkspaceController = (function() {
 
             // Split bbox string
             aArraySplit = this.m_aoProducts[iIndexProduct].bbox.split(",");
-            aoTotalArray.push.apply(aoTotalArray,aArraySplit);
             iArraySplitLength = aArraySplit.length;
 
             if(iArraySplitLength < 10) continue;
+            aoTotalArray.push.apply(aoTotalArray,aArraySplit);
 
             for(var iIndex = 0; iIndex < iArraySplitLength-1; iIndex = iIndex + 2){
                 iInvertedArraySplit.push(aArraySplit[iIndex+1]);

@@ -633,6 +633,10 @@ service('GlobeService', ['$http',  'ConstantsService','SatelliteService', functi
             for(var iIndexProduct = 0; iIndexProduct < iProductsLength; iIndexProduct++){
                 // Split bbox string
                 aoArraySplit = aoProducts[iIndexProduct].bbox.split(",");
+
+                var iArraySplitLength = aoArraySplit.length;
+                if(iArraySplitLength < 10) continue;
+
                 aoTotalArray.push.apply(aoTotalArray,aoArraySplit);
             }
 
@@ -681,6 +685,9 @@ service('GlobeService', ['$http',  'ConstantsService','SatelliteService', functi
 
                 // Split bbox string
                 aoArraySplit = aoProducts[iIndexProduct].bbox.split(",");
+                var iArraySplitLength = aoArraySplit.length;
+                if(iArraySplitLength < 10) continue;
+
                 aoTotalArray.push.apply(aoTotalArray,aoArraySplit);
 
                 // Get the array representing the bounding box

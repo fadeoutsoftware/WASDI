@@ -255,7 +255,7 @@ public class AuthResource {
 		}
 		
 		String sAccount = oUser.getUserId();
-		//TODO read from servlet config file
+		
 		String wsAddress = m_oServletConfig.getInitParameter("sftpManagementWSServiceAddress");
 		if (wsAddress==null) {
 			wsAddress = "ws://localhost:6703";

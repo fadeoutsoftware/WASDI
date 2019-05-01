@@ -3,6 +3,7 @@ Created on 11 Jun 2018
 
 @author: p.campanella
 '''
+from _overlapped import NULL
 name = "wasdi"
 
 import requests
@@ -11,7 +12,7 @@ import json
 
 m_sUser = 'urs'
 m_sPassword= 'pw'
-m_sBasePath = 'c:\\temp\\wasdi\\data'
+m_sBasePath = '/data/wasdi/'
 m_sSessionCookie = ''
 m_sActiveWorkspace = ''
 m_sBaseUrl = 'http://www.wasdi.net/wasdiwebserver/rest'
@@ -72,6 +73,20 @@ def getPassword():
     """    
     global m_sPassword
     return m_sPassword
+
+def setSessionId(sSessionId):
+    """
+    Set the WASDI Session
+    """    
+    global m_sSessionCookie
+    m_sSessionCookie = sSessionId
+
+def getSessionId():
+    """
+    Get the WASDI Session
+    """    
+    global m_sSessionCookie
+    return m_sSessionCookie
     
 def setBasePath(sBasePath):
     """
@@ -140,24 +155,45 @@ def init():
     global m_sBaseUrl
     global m_sSessionCookie
     
-    headers = {'Content-Type': 'application/json'}
-    
-    sUrl = m_sBaseUrl + '/auth/login'
-    
-    sPayload = '{"userId":"' + m_sUser+ '","userPassword":"'+ m_sPassword + '" }'
-    
-    oResult = requests.post(sUrl, data = sPayload,headers=headers)
-    
-    if (oResult.ok == True):
-    
-        oJsonResult = oResult.json()
-        try:
-            m_sSessionCookie = oJsonResult['sessionId']
-            return True
-        except:
+    if (m_sSessionCookie != ''):
+        headers = {'Content-Type': 'application/json','x-session-token': m_sSessionCookie}
+        
+        sUrl = m_sBaseUrl + '/auth/checksession'
+        
+        oResult = requests.get(sUrl, headers=headers)
+        
+        if (oResult.ok == True):
+            oJsonResult = oResult.json()
+            try:
+                sUser = oJsonResult['userId']
+                
+                if (sUser == m_sUser):
+                    return True
+                else:
+                    return False
+            except:
+                return False
+        else:
+            return False        
+    else:    
+        headers = {'Content-Type': 'application/json'}
+        
+        sUrl = m_sBaseUrl + '/auth/login'
+        
+        sPayload = '{"userId":"' + m_sUser+ '","userPassword":"'+ m_sPassword + '" }'
+        
+        oResult = requests.post(sUrl, data = sPayload,headers=headers)
+        
+        if (oResult.ok == True):
+        
+            oJsonResult = oResult.json()
+            try:
+                m_sSessionCookie = oJsonResult['sessionId']
+                return True
+            except:
+                return False
+        else:
             return False
-    else:
-        return False
 
 def hello():
     """
