@@ -40,4 +40,8 @@ service('ProcessorService', ['ConstantsService','$rootScope','$http', function (
             ,oBody ,oOptions);
     }
 
+    this.getAllErrorLogs = function(oProcessId){
+
+        return this.m_oHttp.get(this.APIURL + '/processors/logs/list?processworkspace='+oProcessId);
+    };
 }]);

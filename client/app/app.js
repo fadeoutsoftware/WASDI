@@ -219,6 +219,7 @@ wasdiApp.controller("JRCS2Controller", JRCS2Controller);
 wasdiApp.controller("MosaicController", MosaicController);
 wasdiApp.controller("EditPanelController", EditPanelController);
 wasdiApp.controller("EDriftFloodAutomaticChainController", EDriftFloodAutomaticChainController);
+wasdiApp.controller("ProcessErrorLogsDialogController", ProcessErrorLogsDialogController);
 
 wasdiApp.controller(UploadFileController.REG_NAME, UploadFileController);
 wasdiApp.controller(JRCClassificationController.REG_NAME, JRCClassificationController);

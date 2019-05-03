@@ -67,13 +67,15 @@
                         {{"RECOVERY_EMAIL_TITLE"|translate}}
                     </div>
                     <div class="form-group">
-                        <input type="email"  placeholder="{{'LOGIN_PLACEHOLDER_EMAIL'|translate}}" class="form-control" id="mail" >
-                    </div>
+                        <input type="email" name="recoveryemail" placeholder="{{'LOGIN_PLACEHOLDER_EMAIL'|translate}}" class="form-control" id="mail" >
 
-                    <button class="btn btn-md btn-primary btn-block btn-signin" ng-class="{disabled: (recoveryForm.$invalid === true || recoveryForm.$dirty === false) }"
-                            type="submit">
+                    </div>
+                    <!-- recoveryForm.recoverymail.$dirty === false-->
+                    <!--ng-class="{disabled: ( recoveryForm.recoveryemail.$invalid === true || recoveryForm.recoveryemail.$dirty === false) }"-->
+                    <button class="btn btn-md btn-primary btn-block btn-signin" type="submit">
                         {{"RECOVERY_EMAIL_BUTTON"|translate}}
                     </button>
+
                     <a href="" ng-click="m_oController.m_bIsVisibleRecoveryPassword = !m_oController.m_bIsVisibleRecoveryPassword">
                         <i class="fa fa-arrow-left" aria-hidden="true"></i>
                         BACK
@@ -97,7 +99,6 @@
                             {{"SIGN_IN_ERROR_INVALID_TOO_SHORT"|translate}}
                         </h6>
                     </div>
-
                     <div class="form-group">
                         <input type="password" name="userpassword"  ng-model="m_oController.m_oRegistrationUser.password"
                                placeholder="{{'SIGN_IN_PLACEHOLDER_PASSWORD'|translate}}" class="form-control"

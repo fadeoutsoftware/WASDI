@@ -320,6 +320,38 @@ var HomeController = (function() {
             userId:""//userId == email
         }
     }
+
+    HomeController.prototype.recoverPassword = function(){
+
+        var oController = this;
+        this.m_oAuthService.recoverPassword(oUser).success(
+            function (data,status) {
+                // oController.callbackLogin(data, status,oController);
+                if(utilsIsObjectNullOrUndefined(data) !== true)
+                {
+                    if(data.boolValue === true)
+                    {
+                        oController.m_bSuccess = true;
+                    }
+                    else
+                    {
+                        if(utilsIsStrNullOrEmpty(data.stringValue) === false)
+                        {
+                            oController.m_sMessageError = data.stringValue;
+                        }
+                        oController.m_bError = true;
+                    }
+                }
+                else
+                {
+                    utilsVexDialogAlertTop("GURU MEDITATION<br>SIGNIN ERROR");
+                }
+            }).error(function (data,status) {
+            //alert('error');
+            utilsVexDialogAlertTop("GURU MEDITATION<br>SIGNIN ERROR");
+
+        });
+    };
     // HomeController.prototype.onSignIn = function (googleUser) {
     //     var profile = googleUser.getBasicProfile();
     //     console.log('ID: ' + profile.getId()); // Do not send to your backend! Use an ID token instead.

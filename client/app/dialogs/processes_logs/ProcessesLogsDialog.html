@@ -41,6 +41,7 @@
                                 <th>Real size</th>
                                 <th>Progress</th>
                                 <th>{{"ROOT_TABLE_HEAD_TIME"|translate}} </th>
+                                <th></th>
                                 <!--<th></th>-->
                             </tr>
                             </thead>
@@ -84,6 +85,10 @@
                                         <!--<i class="fa fa-times-circle" aria-hidden="true" data-toggle="tooltip" title="Stop processes"  data-placement="bottom"></i>-->
                                     <!--</div>-->
                                 <!--</td>-->
+                                <td>
+
+                                    <button class="btn btn-default btn-wasdi" ng-click="m_oController.openErrorLogsDialog(oProcess)"> Logs </button>
+                                </td>
                             </tr>
 
                             </tbody>

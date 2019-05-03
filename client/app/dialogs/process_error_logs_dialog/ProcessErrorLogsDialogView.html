@@ -1,0 +1,61 @@
+ <div class="modal fade process-error-logs-dialog">
+    <div class="modal-dialog modal-dialog-extra-large">
+        <div class="modal-content">
+            <!-- HEADER -->
+            <div class="modal-header">
+                <div class="row-v4">
+                    <div class="col-v4-xs-11 col-v4-sm-11 col-v4-md-11 col-v4-lg-11">
+                        <h4 class="modal-title ">
+                            Process error logs
+                        </h4>
+                    </div>
+                    <div class="col-v4-xs-1 col-v4-sm-1 col-v4-md-1 col-v4-lg-1">
+                        <button type="button" class="close" ng-click="close(null)" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    </div>
+                </div>
+            </div>
+            <!-- BODY -->
+            <div class="modal-body container-fluid-v4">
+
+              	<div class="container-v4">
+                    <table class="table">
+                        <thead>
+                        <tr>
+                            <th scope="col">Date</th>
+                            <th scope="col">Row</th>
+                            <th scope="col">Process Workspace Id</th>
+                            <th scope="col">Row Number</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr ng-repeat="log in m_oController.m_aoLogs">
+                            <td >{{log.logDate}}</td>
+                            <td>{{log.logRow}}</td>
+                            <td>{{log.processWorkspaceId}}</td>
+                            <td>{{log.rowNumber}}</td>
+                        </tr>
+
+                        </tbody>
+                    </table>
+				</div>
+                <!--<ul class="pagination">-->
+                    <!--<li class="page-item"><a class="page-link" href="#">Previous</a></li>-->
+                    <!--<li class="page-item"><a class="page-link" href="#">1</a></li>-->
+                    <!--<li class="page-item"><a class="page-link" href="#">2</a></li>-->
+                    <!--<li class="page-item"><a class="page-link" href="#">3</a></li>-->
+                    <!--<li class="page-item"><a class="page-link" href="#">Next</a></li>-->
+                <!--</ul>-->
+            </div>
+            <!-- FOOTER -->
+            <div class="modal-footer">
+                <button type="button" ng-click="m_oController.getAllErrorLogs(m_oController.m_oProcess.processObjId)" class="btn btn-primary btn-wasdi " >
+                    Refresh
+                </button>
+                <button type="button" ng-click="close(null)" class="btn btn-primary btn-wasdi " data-dismiss="modal">
+                    {{"DIALOG_CLOSE_BUTTON"|translate}}
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>

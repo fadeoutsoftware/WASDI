@@ -88,5 +88,9 @@ service('AuthService', ['$http',  '$state', 'ConstantsService', function ($http,
     // this.ingestFile = function(sSelectedFile,sWorkspace){
     //     return this.m_oHttp.put(this.APIURL + '/auth/upload/ingest?file=' + sSelectedFile + '&workspace=' + sWorkspace);
     // };
+    this.recoverPassword = function(sEmail)
+    {
+        return this.m_oHttp.get(this.APIURL + '/auth/validateNewUser?email=' + sEmail );
+    }
 
 }]);
