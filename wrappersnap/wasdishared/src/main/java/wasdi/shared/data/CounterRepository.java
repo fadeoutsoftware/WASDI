@@ -27,7 +27,6 @@ public class CounterRepository extends MongoRepository {
 	public String InsertCounter(Counter oCounter) {
 	
 	        try {
-	        	        	
 	            String sJSON = s_oMapper.writeValueAsString(oCounter);
 	            Document oDocument = Document.parse(sJSON);
 	            getCollection("counter").insertOne(oDocument);

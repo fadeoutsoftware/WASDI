@@ -29,12 +29,14 @@ import org.glassfish.jersey.media.multipart.FormDataParam;
 
 import it.fadeout.Wasdi;
 import wasdi.shared.LauncherOperations;
+import wasdi.shared.business.Counter;
 import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.business.Processor;
 import wasdi.shared.business.ProcessorLog;
 import wasdi.shared.business.ProcessorTypes;
 import wasdi.shared.business.User;
+import wasdi.shared.data.CounterRepository;
 import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.data.ProcessorLogRepository;
 import wasdi.shared.data.ProcessorRepository;
@@ -493,7 +495,48 @@ public class ProcessorsResource {
 	 }
 	
 	
-	//TODO count log lines -> use counter
+	@GET
+	@Path("/logs/count")
+	public int countLogs(@HeaderParam("x-session-token") String sSessionId,
+			@QueryParam("processworkspace") String sProcessWorkspaceId){
+		Wasdi.DebugLog("ProcessorsResource.countLogs - SessionId: " + sSessionId);
+		int iResult = -1;
+		try {
+			if (Utils.isNullOrEmpty(sSessionId)) {
+				Wasdi.DebugLog("ProcessorResource: addLog: 401 session id null");
+				return iResult;
+			}
+			User oUser = Wasdi.GetUserFromSession(sSessionId);
+	
+			if (oUser==null) {
+				Wasdi.DebugLog("ProcessorResource: addLog: user null");
+				return iResult;
+			}
+			
+			if (Utils.isNullOrEmpty(oUser.getUserId())) {
+				Wasdi.DebugLog("ProcessorResource: addLog: userId null");
+				return iResult;
+			}
+			
+			Wasdi.DebugLog("ProcessorResource.countLogs: get log count for process " + sProcessWorkspaceId);
+			
+			CounterRepository oCounterRepository = new CounterRepository();
+			Counter oCounter = null;
+			oCounter = oCounterRepository.GetCounterBySequence(sProcessWorkspaceId);
+			if(null == oCounter) {
+				Wasdi.DebugLog("ProcessorResource.countLogs: CounterRepository returned a null Counter");
+				return iResult;
+			}
+			iResult = oCounter.getValue();
+			
+		} catch (Exception oEx) {
+			Wasdi.DebugLog("ProcessorResource.countLogs: addLog exception " + oEx.getMessage());
+			oEx.printStackTrace();
+			return iResult;
+		}
+		
+		return iResult;
+	}
 	
 	@GET
 	@Path("/logs/list")
@@ -507,26 +550,25 @@ public class ProcessorsResource {
 		ArrayList<ProcessorLogViewModel> aoRetList = new ArrayList<>();
 		
 		try {
-			//todo manage start and end
 			
 			// Check User 
 			if (Utils.isNullOrEmpty(sSessionId)) {
-				Wasdi.DebugLog("ProcessorResource: addLog: 401 session id null");
+				Wasdi.DebugLog("ProcessorResource.getLogs: addLog: 401 session id null");
 				return aoRetList;
 			}
 			User oUser = Wasdi.GetUserFromSession(sSessionId);
 
 			if (oUser==null) {
-				Wasdi.DebugLog("ProcessorResource: addLog: user null");
+				Wasdi.DebugLog("ProcessorResource.getLogs: addLog: user null");
 				return aoRetList;
 			}
 			
 			if (Utils.isNullOrEmpty(oUser.getUserId())) {
-				Wasdi.DebugLog("ProcessorResource: addLog: userId null");
+				Wasdi.DebugLog("ProcessorResource.getLogs: addLog: userId null");
 				return aoRetList;
 			}
 			
-			Wasdi.DebugLog("ProcessorResource: get log for process " + sProcessWorkspaceId);
+			Wasdi.DebugLog("ProcessorResource.getLogs: get log for process " + sProcessWorkspaceId);
 			
 			ProcessorLogRepository oProcessorLogRepository = new ProcessorLogRepository();
 			List<ProcessorLog> aoLogs = null;
@@ -549,7 +591,7 @@ public class ProcessorsResource {
 			
 		}
 		catch (Exception oEx) {
-			Wasdi.DebugLog("ProcessorResource: addLog exception " + oEx.getMessage());
+			Wasdi.DebugLog("ProcessorResource.getLogs: addLog exception " + oEx.getMessage());
 			oEx.printStackTrace();
 			return aoRetList;
 		}
