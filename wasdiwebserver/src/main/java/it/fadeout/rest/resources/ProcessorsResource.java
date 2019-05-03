@@ -19,6 +19,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
@@ -31,15 +32,18 @@ import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.business.Processor;
+import wasdi.shared.business.ProcessorLog;
 import wasdi.shared.business.ProcessorTypes;
 import wasdi.shared.business.User;
 import wasdi.shared.data.ProcessWorkspaceRepository;
+import wasdi.shared.data.ProcessorLogRepository;
 import wasdi.shared.data.ProcessorRepository;
 import wasdi.shared.parameters.ProcessorParameter;
 import wasdi.shared.utils.SerializationUtils;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.DeployedProcessorViewModel;
 import wasdi.shared.viewmodels.PrimitiveResult;
+import wasdi.shared.viewmodels.ProcessorLogViewModel;
 import wasdi.shared.viewmodels.RunningProcessorViewModel;
 
 @Path("/processors")
@@ -443,4 +447,101 @@ public class ProcessorsResource {
 		
 		return oRunning;
 	}
+	
+	
+	
+	@POST
+	@Path("/logs/add")
+	@Produces({"application/xml", "application/json", "text/xml"})
+	public Response addLog(@HeaderParam("x-session-token") String sSessionId, @QueryParam("processworkspace") String sProcessWorkspaceId, String sLog) {
+		
+		try {
+			// Check User 
+			if (Utils.isNullOrEmpty(sSessionId)) {
+				Wasdi.DebugLog("ProcessorResource: addLog: 401 session id null");
+				return Response.status(401).build();
+			}
+			User oUser = Wasdi.GetUserFromSession(sSessionId);
+
+			if (oUser==null) {
+				Wasdi.DebugLog("ProcessorResource: addLog: user null");
+				return Response.status(401).build();
+			}
+			
+			if (Utils.isNullOrEmpty(oUser.getUserId())) {
+				Wasdi.DebugLog("ProcessorResource: addLog: userId null");
+				return Response.status(401).build();
+			}
+			
+			ProcessorLog oLog = new ProcessorLog();
+			
+			oLog.setLogDate(Wasdi.GetFormatDate(new Date()));
+			oLog.setProcessWorkspaceId(sProcessWorkspaceId);
+			oLog.setLogRow(sLog);
+			
+			ProcessorLogRepository oProcessorLogRepository = new ProcessorLogRepository();
+			oProcessorLogRepository.InsertProcessLog(oLog);
+			Wasdi.DebugLog("ProcessorResource: added log row to processid " + sProcessWorkspaceId);
+		}
+		catch (Exception oEx) {
+			Wasdi.DebugLog("ProcessorResource: addLog exception " + oEx.getMessage());
+			oEx.printStackTrace();
+			return Response.serverError().build();
+		}
+		
+		return Response.ok().build();
+	 }
+	
+	@GET
+	@Path("/logs/list")
+	public ArrayList<ProcessorLogViewModel> getLogs(@HeaderParam("x-session-token") String sSessionId, @QueryParam("processworkspace") String sProcessWorkspaceId, @QueryParam("startrow") Integer iStartRow, @QueryParam("startrow") Integer iEndRow) {
+		
+		ArrayList<ProcessorLogViewModel> aoRetList = new ArrayList<>();
+		
+		try {
+			
+			
+			// Check User 
+			if (Utils.isNullOrEmpty(sSessionId)) {
+				Wasdi.DebugLog("ProcessorResource: addLog: 401 session id null");
+				return aoRetList;
+			}
+			User oUser = Wasdi.GetUserFromSession(sSessionId);
+
+			if (oUser==null) {
+				Wasdi.DebugLog("ProcessorResource: addLog: user null");
+				return aoRetList;
+			}
+			
+			if (Utils.isNullOrEmpty(oUser.getUserId())) {
+				Wasdi.DebugLog("ProcessorResource: addLog: userId null");
+				return aoRetList;
+			}
+			
+			Wasdi.DebugLog("ProcessorResource: get log for process " + sProcessWorkspaceId);
+			
+			ProcessorLogRepository oProcessorLogRepository = new ProcessorLogRepository();
+			List<ProcessorLog> aoLogs = oProcessorLogRepository.GetLogsByProcessWorkspaceId(sProcessWorkspaceId);
+			
+			for(int iLogs = 0; iLogs<aoLogs.size(); iLogs++) {
+				ProcessorLog oLog = aoLogs.get(iLogs);
+				
+				ProcessorLogViewModel oLogVM = new ProcessorLogViewModel();
+				oLogVM.setLogDate(oLog.getLogDate());
+				oLogVM.setLogRow(oLog.getLogRow());
+				oLogVM.setProcessWorkspaceId(sProcessWorkspaceId);
+				oLogVM.setRowNumber(oLog.getRowNumber());
+				aoRetList.add(oLogVM);
+			}
+			
+		}
+		catch (Exception oEx) {
+			Wasdi.DebugLog("ProcessorResource: addLog exception " + oEx.getMessage());
+			oEx.printStackTrace();
+			return aoRetList;
+		}
+		
+		return aoRetList;
+
+	 }
 }
