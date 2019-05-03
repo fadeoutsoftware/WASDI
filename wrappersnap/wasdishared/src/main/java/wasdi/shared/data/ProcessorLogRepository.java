@@ -6,7 +6,6 @@ import java.util.List;
 
 import org.bson.Document;
 import org.bson.types.ObjectId;
-import org.bson.conversions.Bson;
 
 import com.mongodb.BasicDBObject;
 import com.mongodb.Block;
@@ -14,7 +13,6 @@ import com.mongodb.DBObject;
 import com.mongodb.QueryBuilder;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
-import com.mongodb.client.model.Filters;
 
 import wasdi.shared.business.ProcessorLog;
 
