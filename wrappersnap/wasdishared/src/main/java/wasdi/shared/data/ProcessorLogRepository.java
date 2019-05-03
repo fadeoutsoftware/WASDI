@@ -6,14 +6,21 @@ import java.util.List;
 
 import org.bson.Document;
 import org.bson.types.ObjectId;
+import org.bson.conversions.Bson;
 
+import com.mongodb.BasicDBObject;
 import com.mongodb.Block;
+import com.mongodb.DBObject;
+import com.mongodb.QueryBuilder;
 import com.mongodb.client.FindIterable;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.model.Filters;
 
 import wasdi.shared.business.ProcessorLog;
 
 public class ProcessorLogRepository extends MongoRepository {
 	
+
     public String InsertProcessLog(ProcessorLog oProcessLog) {
 
         try {
@@ -63,6 +70,42 @@ public class ProcessorLogRepository extends MongoRepository {
 
         return aoReturnList;
     }
+    
+    
+    //note iLo and iUp are included
+	public List<ProcessorLog> getLogsByWorkspaceIdInRange(String sProcessWorkspaceId, Integer iLo, Integer iUp){
+		if(null == sProcessWorkspaceId || iLo == null || iUp == null) {
+			throw new NullPointerException("ProcessorLogRepository.getLogsByWorkspaceIdInRange: null argument passed");
+		}
+		if(iLo < 0 || iLo >iUp) {
+			throw new IllegalArgumentException("ProcessorLogRepository.getLogsByWorkspaceIdInRange: 0 <= "+iLo+" <= "+iUp+" is unverified");
+		}
+	
+        final ArrayList<ProcessorLog> aoReturnList = new ArrayList<ProcessorLog>();
+        try {
+        	//new QueryBuilder();
+			//MongoDB query is:
+    		//db.getCollection('processorlog').find({ "rowNumber":{$gte: iLo, $lte: iUp}, processWorkspaceId: sProceessWorkspaceId })
+        	DBObject oQuery = QueryBuilder.start().and(
+        					QueryBuilder.start().put("processWorkspaceId").is(sProcessWorkspaceId).get(),
+        					QueryBuilder.start().and(
+        						QueryBuilder.start().put("rowNumber").greaterThanEquals(iLo).get(),
+        						QueryBuilder.start().put("rowNumber").lessThanEquals(iUp).get()
+        					).get()
+        		    ).get();
+        	BasicDBObject oDocument = new BasicDBObject();
+        	oDocument.putAll(oQuery);
+        	MongoCollection<Document> aoProcessorLogCollection =  getCollection("processorlog");
+        	FindIterable<Document> oWSDocuments = aoProcessorLogCollection.find(oDocument);
+            fillList(aoReturnList, oWSDocuments);
+
+        } catch (Exception oEx) {
+            oEx.printStackTrace();
+        }
+
+        return aoReturnList;
+
+	}
 /*
     public List<ProcessWorkspace> GetQueuedProcess() {
 
