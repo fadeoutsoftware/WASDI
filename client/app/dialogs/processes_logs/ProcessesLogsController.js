@@ -4,10 +4,10 @@
 
 var ProcessesLogsController = (function() {
 
-    function ProcessesLogsController($scope, oClose, oProcessesLaunchedService,oConstantsService) {//,oExtras
+    function ProcessesLogsController($scope, oClose, oProcessesLaunchedService,oConstantsService,oModalService) {//,oExtras
         this.m_oScope = $scope;
         this.m_oScope.m_oController = this;
-
+        this.m_oModalService = oModalService;
         this.hasError = false;
         this.m_oProcessesLaunchedService = oProcessesLaunchedService;
         this.m_aoProcessesLogs = [];
@@ -116,7 +116,9 @@ var ProcessesLogsController = (function() {
 
         return sText;
     }
-
+    /**
+     *
+     */
     ProcessesLogsController.prototype.generateLogFile = function()
     {
         var sText = this.makeStringLogFile();
@@ -124,11 +126,38 @@ var ProcessesLogsController = (function() {
         return oFile;
     };
 
+    ProcessesLogsController.prototype.openErrorLogsDialog = function(oProcess)
+    {
+
+        var oController = this;
+
+       if(utilsIsObjectNullOrUndefined(oProcess) === true)
+       {
+           return false;
+       }
+        oController.m_oModalService.showModal({
+            templateUrl: "dialogs/process_error_logs_dialog/ProcessErrorLogsDialogView.html",
+            controller: "ProcessErrorLogsDialogController",
+            inputs: {
+                extras: {
+                     process:oProcess,
+                }
+            }
+        }).then(function (modal) {
+            modal.element.modal();
+            modal.close.then(function(oResult){
+
+            });
+        });
+       return true;
+    };
+
     ProcessesLogsController.$inject = [
         '$scope',
         'close',
         'ProcessesLaunchedService',
         'ConstantsService',
+        'ModalService'
         // 'extras',
     ];
     return ProcessesLogsController;
