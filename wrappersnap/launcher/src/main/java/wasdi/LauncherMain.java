@@ -1449,6 +1449,9 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 				oVM.setLayerId(sLayerId);
 				oVM.setBoundingBox(sBBox);
 				oVM.setGeoserverBoundingBox(sGeoserverBBox);
+				
+				// P.Campanella 2019/05/02: Wait a little bit to make GeoServer "finish" the process
+				Thread.sleep(10000);
 
 				boolean bRet = s_oSendToRabbit!=null && s_oSendToRabbit.SendRabbitMessage(bResultPublishBand,LauncherOperations.PUBLISHBAND.name(), oParameter.getWorkspace(),oVM,oParameter.getExchange());
 

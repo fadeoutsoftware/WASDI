@@ -173,6 +173,9 @@ public class Publisher {
 
         //publish image pyramid
         try {
+        	
+        	s_oLogger.info("Publisher.PublishGeoTiffImage: STORE: " + sStoreName + " File: " + oFile.getAbsolutePath() + " EPGS " + sEPSG + " STYLE " + sStyle);
+        	
             //Pubblico il layer
             if (!oManager.publishStandardGeoTiff(sStoreName, oFile, sEPSG, sStyle)) {
             	s_oLogger.error("Publisher.PublishGeoTiffImage: unable to publish geotiff " + sStoreName);
