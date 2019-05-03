@@ -492,14 +492,22 @@ public class ProcessorsResource {
 		return Response.ok().build();
 	 }
 	
+	
+	//TODO count log lines -> use counter
+	
 	@GET
 	@Path("/logs/list")
-	public ArrayList<ProcessorLogViewModel> getLogs(@HeaderParam("x-session-token") String sSessionId, @QueryParam("processworkspace") String sProcessWorkspaceId, @QueryParam("startrow") Integer iStartRow, @QueryParam("startrow") Integer iEndRow) {
+	public ArrayList<ProcessorLogViewModel> getLogs(@HeaderParam("x-session-token") String sSessionId,
+			@QueryParam("processworkspace") String sProcessWorkspaceId,
+			//note: range extremes are included
+			@QueryParam("startrow") Integer iStartRow, @QueryParam("endrow") Integer iEndRow) {
+		
+		Wasdi.DebugLog("ProcessorsResource.getLogs - SessionId: " + sSessionId);
 		
 		ArrayList<ProcessorLogViewModel> aoRetList = new ArrayList<>();
 		
 		try {
-			
+			//todo manage start and end
 			
 			// Check User 
 			if (Utils.isNullOrEmpty(sSessionId)) {
@@ -521,7 +529,12 @@ public class ProcessorsResource {
 			Wasdi.DebugLog("ProcessorResource: get log for process " + sProcessWorkspaceId);
 			
 			ProcessorLogRepository oProcessorLogRepository = new ProcessorLogRepository();
-			List<ProcessorLog> aoLogs = oProcessorLogRepository.GetLogsByProcessWorkspaceId(sProcessWorkspaceId);
+			List<ProcessorLog> aoLogs = null;
+			if(null==iStartRow || null==iEndRow) {
+				aoLogs = oProcessorLogRepository.GetLogsByProcessWorkspaceId(sProcessWorkspaceId);
+			} else {
+				aoLogs = oProcessorLogRepository.getLogsByWorkspaceIdInRange(sProcessWorkspaceId, iStartRow, iEndRow);
+			}
 			
 			for(int iLogs = 0; iLogs<aoLogs.size(); iLogs++) {
 				ProcessorLog oLog = aoLogs.get(iLogs);
