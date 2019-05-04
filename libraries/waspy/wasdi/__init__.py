@@ -18,6 +18,7 @@ m_sActiveWorkspace = ''
 m_sBaseUrl = 'http://www.wasdi.net/wasdiwebserver/rest'
 m_bIsOnServer = False
 m_bDownloadActive = True
+m_sMyProcId = ''
 m_oParamsDictionary = {}
 
 
@@ -145,6 +146,20 @@ def getDownloadActive():
     global m_bDownloadActive
     return m_bDownloadActive
 
+def setProcId(sProcID):
+    """
+    Own Proc Id 
+    """    
+    global m_sMyProcId
+    m_sMyProcId = sProcID
+
+def getProcId():
+    """
+    Get the Own Proc Id
+    """    
+    global m_sMyProcId
+    return m_sMyProcId
+
 def init():
     """
     Init WASDI Library. Call it after setting user, password, path and url or use it with a config file
@@ -258,6 +273,17 @@ def getWorkspaceIdByName(sName):
                 return ''
             
     return ''
+
+def openWorkspaceById(sWorkspaceId):
+    """
+    Open a workspace by Id
+    return the WorkspaceId as a String, '' if there is any error
+    """    
+    global m_sActiveWorkspace
+    
+    m_sActiveWorkspace = sWorkspaceId
+    
+    return m_sActiveWorkspace
 
 def openWorkspace(sWorkspaceName):
     """
@@ -500,7 +526,7 @@ def setProcessPayload(sProcessId, data):
     global m_sSessionCookie
     
     headers = {'Content-Type': 'application/json','x-session-token': m_sSessionCookie}
-    payload = {'sProcessId': sProcessId, 'payload': json.dump(data)}
+    payload = {'sProcessId': sProcessId, 'payload': json.dumps(data)}
     
     sUrl = m_sBaseUrl + '/process/setpayload'
     
@@ -590,6 +616,22 @@ def downloadFile(sFileName):
         
     return
 
+def wasdiLog(sLogRow):
+    
+    global m_sBaseUrl
+    global m_sSessionCookie
+    global m_sActiveWorkspace
+    
+    if (m_bIsOnServer):
+        
+        sHeaders = {'Content-Type': 'application/json','x-session-token': m_sSessionCookie}
+        
+        sUrl = m_sBaseUrl + '/processors/logs/add?processworkspace=' +m_sMyProcId
+        
+        oResult = requests.post(sUrl, data = sLogRow,headers=sHeaders)
+        
+    else:
+        print(sLogRow)    
 
 
 if __name__ == '__main__':

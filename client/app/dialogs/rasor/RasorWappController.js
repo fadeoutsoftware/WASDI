@@ -193,7 +193,7 @@ var RasorWappController = (function() {
         this.m_sResultFromServer = "eDRIFT RASOR App is waiting to start";
         this.m_bIsRunning = true;
 
-        this.m_oProcessorService.runProcessor('rasor9', sJSON).success(function (data) {
+        this.m_oProcessorService.runProcessor('rasoredrift', sJSON).success(function (data) {
             if(utilsIsObjectNullOrUndefined(data) == false)
             {
                 var sRasorProcessId = data.processingIdentifier;

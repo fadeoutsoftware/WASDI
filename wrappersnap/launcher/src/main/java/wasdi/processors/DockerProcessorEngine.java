@@ -9,6 +9,7 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -24,6 +25,7 @@ import wasdi.shared.business.Processor;
 import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.data.ProcessorRepository;
 import wasdi.shared.parameters.ProcessorParameter;
+import wasdi.shared.utils.Utils;
 
 public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 	
@@ -374,6 +376,10 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 			
 			// Read Again Process Workspace: the user may have changed it!
 			oProcessWorkspace = oProcessWorkspaceRepository.GetProcessByProcessObjId(oProcessWorkspace.getProcessObjId());
+			
+			if (Utils.isNullOrEmpty(oProcessWorkspace.getOperationEndDate())) {
+				oProcessWorkspace.setOperationEndDate(Utils.GetFormatDate(new Date()));
+			}
 			
 			LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.DONE, 100);
 		}
