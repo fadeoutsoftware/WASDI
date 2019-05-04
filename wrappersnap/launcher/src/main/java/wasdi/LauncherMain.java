@@ -17,7 +17,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.List;
 import java.util.logging.FileHandler;
 import java.util.logging.Level;
 import java.util.logging.SimpleFormatter;
@@ -25,8 +24,6 @@ import java.util.logging.SimpleFormatter;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
-import org.apache.commons.cli.Option;
-import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.io.FileUtils;
@@ -72,7 +69,6 @@ import wasdi.shared.geoserver.GeoServerManager;
 import wasdi.shared.parameters.ApplyOrbitParameter;
 import wasdi.shared.parameters.BaseParameter;
 import wasdi.shared.parameters.CalibratorParameter;
-import wasdi.shared.parameters.ProcessorParameter;
 import wasdi.shared.parameters.DownloadFileParameter;
 import wasdi.shared.parameters.FilterParameter;
 import wasdi.shared.parameters.FtpUploadParameters;
@@ -86,6 +82,7 @@ import wasdi.shared.parameters.MultiSubsetSetting;
 import wasdi.shared.parameters.MultilookingParameter;
 import wasdi.shared.parameters.NDVIParameter;
 import wasdi.shared.parameters.OperatorParameter;
+import wasdi.shared.parameters.ProcessorParameter;
 import wasdi.shared.parameters.PublishBandParameter;
 import wasdi.shared.parameters.RangeDopplerGeocodingParameter;
 import wasdi.shared.parameters.RasterGeometricResampleParameter;
@@ -99,8 +96,6 @@ import wasdi.shared.utils.EndMessageProvider;
 import wasdi.shared.utils.FtpClient;
 import wasdi.shared.utils.SerializationUtils;
 import wasdi.shared.utils.Utils;
-import wasdi.shared.viewmodels.BandViewModel;
-import wasdi.shared.viewmodels.MetadataViewModel;
 import wasdi.shared.viewmodels.ProductViewModel;
 import wasdi.shared.viewmodels.PublishBandResultViewModel;
 import wasdi.snapopearations.ApplyOrbit;
@@ -115,8 +110,6 @@ import wasdi.snapopearations.ReadProduct;
 import wasdi.snapopearations.TerrainCorrection;
 import wasdi.snapopearations.WasdiGraph;
 import wasdi.snapopearations.WriteProduct;
-import wasdi.wps.OLD_WpsAdapter;
-import wasdi.wps.OLD_WpsFactory;
 
 
 /**
@@ -166,15 +159,10 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 
 		// create Options object
 		Options oOptions = new Options();
-
-
-		Option oOptOperation   = OptionBuilder.withArgName( "operation" ).hasArg().withDescription(  "" ).create( "operation" );
-		Option oOptParameter   = OptionBuilder.withArgName( "parameter" ).hasArg().withDescription(  "" ).create( "parameter" );
-
-
-		oOptions.addOption(oOptOperation);
-		oOptions.addOption(oOptParameter);
-
+		
+		oOptions.addOption("o","operation", true, "WASDI Launcher Operation");
+		oOptions.addOption("p","parameter", true, "WASDI Operation Parameter");
+		
 		String sOperation = "";
 		String sParameter = "";
 
