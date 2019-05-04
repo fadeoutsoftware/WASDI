@@ -1031,15 +1031,7 @@ FUNCTION WASDIASYNCHEXECUTEPROCESSOR, sProcessorName, aoParameters
 
 	wasdiResult = WASDIHTTPGET(UrlPath)
 
-	sResponse = GETVALUEBYKEY(wasdiResult, 'boolValue')
-
-	sProcessID = ''
-
-	; get the process id
-	IF sResponse THEN BEGIN
-		sValue = GETVALUEBYKEY(wasdiResult, 'processingIdentifier')
-		sProcessID=sValue
-	ENDIF
+	sProcessID = GETVALUEBYKEY(wasdiResult, 'processingIdentifier')
 	
 	RETURN, sProcessID
 END
