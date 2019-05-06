@@ -217,6 +217,11 @@ service('ProcessesLaunchedService', ['ConstantsService','$rootScope','$http', fu
     {
         var oService = this;
         return this.m_oHttp.get(this.APIURL + '/process/byid?sProcessId=' + sProcessId);
-    }
+    };
+
+    this.getSummary  =function()
+    {
+        return this.m_oHttp.get(this.APIURL + '/process/summary');
+    };
 
 }]);
