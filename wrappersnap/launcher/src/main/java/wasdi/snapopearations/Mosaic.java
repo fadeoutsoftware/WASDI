@@ -10,6 +10,7 @@ import java.util.Map;
 
 import org.apache.log4j.Logger;
 import org.esa.snap.core.dataio.ProductIO;
+import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.GeoCoding;
 import org.esa.snap.core.datamodel.PixelPos;
 import org.esa.snap.core.datamodel.Product;
@@ -443,6 +444,28 @@ public class Mosaic {
         }
         
         try {
+        	
+        	/*
+        	 * This can be a speed up: do not save the _count band. 
+        	 * But how then the processor consider non valid pixels? 
+        	 * How does it work "normally"?
+
+
+        	// Remove (not requested) _count bands if in place
+        	for (int iBands = 0; iBands<m_oMosaicSetting.getVariableNames().size(); iBands++) {
+        		String sName = m_oMosaicSetting.getVariableNames().get(iBands);
+        		
+        		if (Utils.isNullOrEmpty(sName)) continue;
+        		
+        		Band oBand = oOutputProduct.getBand(sName);
+        		Band oCountBand = oOutputProduct.getBand(sName+"_count");
+        		
+        		if (oCountBand != null && oBand != null) {
+        			oBand.setValidPixelExpression("");
+        			oOutputProduct.removeBand(oCountBand);
+        		}
+        	}
+        	*/
         	// Save output
 			ProductIO.writeProduct(oOutputProduct, getWorspacePath() + m_sOuptutFile, m_sOutputFileFormat, new WasdiProgreeMonitor(m_oProcessRepository, m_oProcess));
 		} 
