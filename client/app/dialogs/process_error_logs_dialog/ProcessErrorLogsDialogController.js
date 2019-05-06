@@ -45,7 +45,7 @@
     }
 
      ProcessErrorLogsDialogController.prototype.getAllErrorLogs = function(oProcessObjId){
-         oProcessObjId = "fb99a0b1-93cb-40ab-9d44-9701a7b11b9b";//TEST
+         //oProcessObjId = "fb99a0b1-93cb-40ab-9d44-9701a7b11b9b";//TEST
         if(utilsIsObjectNullOrUndefined(oProcessObjId) === true)
         {
             return false;
