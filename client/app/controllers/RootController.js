@@ -24,6 +24,7 @@ var RootController = (function() {
         this.m_oRabbitStompService = oRabbitStompService;
         this.m_bIsEditModelWorkspaceNameActive = false;
         this.m_isRabbitConnected = true;
+        this.m_oSummary = {};
         var oController = this;
 
 
@@ -124,26 +125,26 @@ var RootController = (function() {
             if(data == true)
             {
                 var aoProcessesRunning = $scope.m_oController.m_oProcessesLaunchedService.getProcesses();
-
                 if(utilsIsObjectNullOrUndefined(aoProcessesRunning) == true) return;
 
                 var iTotalProcessesNumber = aoProcessesRunning.length;
 
                 // get the number of active and waiting processes
-                var iActiveCount = 0;
-                var iWaitingCount = 0;
-                aoProcessesRunning.forEach(function (oProcess) {
-                    if (oProcess.status == "RUNNING") {
-                        iActiveCount++;
-                    }
-                    else if (oProcess.status == "CREATED") {
-                        iWaitingCount++;
-                    }
-                });
+                // var iActiveCount = 0;
+                // var iWaitingCount = 0;
+                // aoProcessesRunning.forEach(function (oProcess) {
+                //     if (oProcess.status == "RUNNING") {
+                //         iActiveCount++;
+                //     }
+                //     else if (oProcess.status == "CREATED") {
+                //         iWaitingCount++;
+                //     }
+                // });
 
                 // Set the number of running processes
-                $scope.m_oController.m_iNumberOfProcesses = iActiveCount;
-                $scope.m_oController.m_iWaitingProcesses = iWaitingCount;
+                $scope.m_oController.getSummary();
+                // $scope.m_oController.m_iNumberOfProcesses = iActiveCount;
+                // $scope.m_oController.m_iWaitingProcesses = iWaitingCount;
 
                 //FIND LAST RUNNING PROCESSES
                 var oLastProcessRunning = null;
@@ -269,9 +270,33 @@ var RootController = (function() {
 
         this.getWorkspacesInfo();
         this.initTooltips();
+        this.getSummary()
     }
 
     /*********************************** METHODS **************************************/
+
+    RootController.prototype.getSummary = function()
+    {
+        var oController = this;
+        this.m_oProcessesLaunchedService.getSummary()
+            .success(function (data, status) {
+                if(utilsIsObjectNullOrUndefined(data) === true || data.BoolValue === false)
+                {
+                    utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN GET SUMMARY");
+                }
+                else
+                {
+                    oController.m_oSummary = data;
+                    oController.m_iNumberOfProcesses = data.userProcessRunning + data.userDownloadRunning + data.userIDLRunning;
+                    oController.m_iWaitingProcesses = data.userProcessWaiting + data.userDownloadWaiting + data.userIDLWaiting;
+                }
+
+            })
+            .error(function (data,status) {
+                utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN GET SUMMARY");
+
+            });
+    };
 
     RootController.prototype.getConnectionStatusForTooltip = function()
     {
