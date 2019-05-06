@@ -126,6 +126,15 @@ public class ProcessWorkspaceResource {
 
 	private ProcessWorkspaceViewModel buildProcessWorkspaceViewModel(ProcessWorkspace oProcess) {
 		ProcessWorkspaceViewModel oViewModel = new ProcessWorkspaceViewModel();
+		
+		// Set the start date: beeing introduced later, for compatibility, if not present use the Operation Date
+		if (!Utils.isNullOrEmpty(oProcess.getOperationStartDate())) {
+			oViewModel.setOperationStartDate(oProcess.getOperationStartDate() + " " + TimeZone.getDefault().getDisplayName(false, TimeZone.SHORT));
+		}
+		else {
+			oViewModel.setOperationStartDate(oProcess.getOperationDate() + " " + TimeZone.getDefault().getDisplayName(false, TimeZone.SHORT));
+		}
+		
 		oViewModel.setOperationDate(oProcess.getOperationDate() + " " + TimeZone.getDefault().getDisplayName(false, TimeZone.SHORT));
 		oViewModel.setOperationEndDate(oProcess.getOperationEndDate() + " " + TimeZone.getDefault().getDisplayName(false, TimeZone.SHORT));
 		oViewModel.setOperationType(oProcess.getOperationType());
@@ -291,6 +300,21 @@ public class ProcessWorkspaceResource {
 			
 			oSummaryViewModel.setUserProcessWaiting(iUserProcessWaiting);
 			
+			// Get IDL Waiting Process List
+			List<ProcessWorkspace> aoQueuedIDL= oRepository.GetQueuedIDL();
+
+			oSummaryViewModel.setAllIDLWaiting(aoQueuedIDL.size());
+			
+			int iUserIDLWaiting = 0 ;
+			// Count the user's ones
+			for (int iProcess=0; iProcess<aoQueuedIDL.size(); iProcess++) {
+				// Create View Model
+				ProcessWorkspace oProcess = aoQueuedIDL.get(iProcess);
+				if (oProcess.getUserId().equals(oUser.getUserId())) iUserIDLWaiting ++;
+			}
+			
+			oSummaryViewModel.setUserIDLWaiting(iUserIDLWaiting);
+			
 			
 			
 			// Get Processing Running  List
@@ -323,8 +347,21 @@ public class ProcessWorkspaceResource {
 			
 			oSummaryViewModel.setUserDownloadRunning(iUserDownloadRunning);
 
-			//P.Campanella 20190408: at the moment this API is still not used. We separated IDL processor queue 
-			// If this will be used here we have to manage also IDL queue
+			// Get IDL Running  List
+			List<ProcessWorkspace> aoRunningIDL= oRepository.GetRunningIDL();
+
+			oSummaryViewModel.setAllIDLRunning(aoRunningIDL.size());
+			
+			int iUserIDLRunning= 0 ;
+			// Count the user's ones
+			for (int iProcess=0; iProcess<aoRunningIDL.size(); iProcess++) {
+				// Create View Model
+				ProcessWorkspace oProcess = aoRunningIDL.get(iProcess);
+				if (oProcess.getUserId().equals(oUser.getUserId())) iUserIDLRunning ++;
+			}
+			
+			oSummaryViewModel.setUserIDLRunning(iUserIDLRunning);
+			
 		}
 		catch (Exception oEx) {
 			System.out.println("ProcessWorkspaceResource.GetSummary: error retrieving process " + oEx.getMessage());
@@ -416,7 +453,7 @@ public class ProcessWorkspaceResource {
 	@Produces({"application/xml", "application/json", "text/xml"})
 	public ProcessWorkspaceViewModel getProcessById(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sProcessId") String sProcessWorkspaceId) {
 		
-		Wasdi.DebugLog("ProcessWorkspaceResource.GetProcessById");
+		//Wasdi.DebugLog("ProcessWorkspaceResource.GetProcessById");
 
 		User oUser = Wasdi.GetUserFromSession(sSessionId);
 
@@ -431,7 +468,7 @@ public class ProcessWorkspaceResource {
 				return oProcess;
 			}
 
-			System.out.println("ProcessWorkspaceResource.GetProcessByUser: process id " + sProcessWorkspaceId);
+			System.out.println("ProcessWorkspaceResource.getProcessById: process id " + sProcessWorkspaceId);
 
 			// Create repo
 			ProcessWorkspaceRepository oRepository = new ProcessWorkspaceRepository();
