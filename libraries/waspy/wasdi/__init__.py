@@ -3,6 +3,7 @@ Created on 11 Jun 2018
 
 @author: p.campanella
 '''
+from _overlapped import NULL
 name = "wasdi"
 
 import requests
@@ -11,12 +12,13 @@ import json
 
 m_sUser = 'urs'
 m_sPassword= 'pw'
-m_sBasePath = 'c:\\temp\\wasdi\\data'
+m_sBasePath = '/data/wasdi/'
 m_sSessionCookie = ''
 m_sActiveWorkspace = ''
 m_sBaseUrl = 'http://www.wasdi.net/wasdiwebserver/rest'
 m_bIsOnServer = False
 m_bDownloadActive = True
+m_sMyProcId = ''
 m_oParamsDictionary = {}
 
 
@@ -72,6 +74,20 @@ def getPassword():
     """    
     global m_sPassword
     return m_sPassword
+
+def setSessionId(sSessionId):
+    """
+    Set the WASDI Session
+    """    
+    global m_sSessionCookie
+    m_sSessionCookie = sSessionId
+
+def getSessionId():
+    """
+    Get the WASDI Session
+    """    
+    global m_sSessionCookie
+    return m_sSessionCookie
     
 def setBasePath(sBasePath):
     """
@@ -130,6 +146,20 @@ def getDownloadActive():
     global m_bDownloadActive
     return m_bDownloadActive
 
+def setProcId(sProcID):
+    """
+    Own Proc Id 
+    """    
+    global m_sMyProcId
+    m_sMyProcId = sProcID
+
+def getProcId():
+    """
+    Get the Own Proc Id
+    """    
+    global m_sMyProcId
+    return m_sMyProcId
+
 def init():
     """
     Init WASDI Library. Call it after setting user, password, path and url or use it with a config file
@@ -140,24 +170,45 @@ def init():
     global m_sBaseUrl
     global m_sSessionCookie
     
-    headers = {'Content-Type': 'application/json'}
-    
-    sUrl = m_sBaseUrl + '/auth/login'
-    
-    sPayload = '{"userId":"' + m_sUser+ '","userPassword":"'+ m_sPassword + '" }'
-    
-    oResult = requests.post(sUrl, data = sPayload,headers=headers)
-    
-    if (oResult.ok == True):
-    
-        oJsonResult = oResult.json()
-        try:
-            m_sSessionCookie = oJsonResult['sessionId']
-            return True
-        except:
+    if (m_sSessionCookie != ''):
+        headers = {'Content-Type': 'application/json','x-session-token': m_sSessionCookie}
+        
+        sUrl = m_sBaseUrl + '/auth/checksession'
+        
+        oResult = requests.get(sUrl, headers=headers)
+        
+        if (oResult.ok == True):
+            oJsonResult = oResult.json()
+            try:
+                sUser = oJsonResult['userId']
+                
+                if (sUser == m_sUser):
+                    return True
+                else:
+                    return False
+            except:
+                return False
+        else:
+            return False        
+    else:    
+        headers = {'Content-Type': 'application/json'}
+        
+        sUrl = m_sBaseUrl + '/auth/login'
+        
+        sPayload = '{"userId":"' + m_sUser+ '","userPassword":"'+ m_sPassword + '" }'
+        
+        oResult = requests.post(sUrl, data = sPayload,headers=headers)
+        
+        if (oResult.ok == True):
+        
+            oJsonResult = oResult.json()
+            try:
+                m_sSessionCookie = oJsonResult['sessionId']
+                return True
+            except:
+                return False
+        else:
             return False
-    else:
-        return False
 
 def hello():
     """
@@ -222,6 +273,17 @@ def getWorkspaceIdByName(sName):
                 return ''
             
     return ''
+
+def openWorkspaceById(sWorkspaceId):
+    """
+    Open a workspace by Id
+    return the WorkspaceId as a String, '' if there is any error
+    """    
+    global m_sActiveWorkspace
+    
+    m_sActiveWorkspace = sWorkspaceId
+    
+    return m_sActiveWorkspace
 
 def openWorkspace(sWorkspaceName):
     """
@@ -464,7 +526,7 @@ def setProcessPayload(sProcessId, data):
     global m_sSessionCookie
     
     headers = {'Content-Type': 'application/json','x-session-token': m_sSessionCookie}
-    payload = {'sProcessId': sProcessId, 'payload': json.dump(data)}
+    payload = {'sProcessId': sProcessId, 'payload': json.dumps(data)}
     
     sUrl = m_sBaseUrl + '/process/setpayload'
     
@@ -554,6 +616,22 @@ def downloadFile(sFileName):
         
     return
 
+def wasdiLog(sLogRow):
+    
+    global m_sBaseUrl
+    global m_sSessionCookie
+    global m_sActiveWorkspace
+    
+    if (m_bIsOnServer):
+        
+        sHeaders = {'Content-Type': 'application/json','x-session-token': m_sSessionCookie}
+        
+        sUrl = m_sBaseUrl + '/processors/logs/add?processworkspace=' +m_sMyProcId
+        
+        oResult = requests.post(sUrl, data = sLogRow,headers=sHeaders)
+        
+    else:
+        print(sLogRow)    
 
 
 if __name__ == '__main__':

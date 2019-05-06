@@ -108,6 +108,110 @@ var RasorWappController = (function() {
         });
     };
 
+    RasorWappController.prototype.checkProcessResult2 = function(sRasorProcessId,oController) {
+        console.log('---------------------------------CHIEDI RISULTATO ' + sRasorProcessId);
+
+        var oLinkToController = oController;
+
+        oLinkToController.m_oProcessesLaunchedService.getProcessWorkspaceById(sRasorProcessId).success(function (data) {
+            if(utilsIsObjectNullOrUndefined(data) == false)
+            {
+                if (data.status == 'DONE') {
+                    console.log('---------------------------------Run Rasor - DONE = ' + data.payload);
+                    oLinkToController.m_bIsRunning = false;
+
+                    var oResult = JSON.parse(data.payload);
+
+                    if (oResult != null) {
+                        oLinkToController.m_sResultFromServer = "" + parseInt(oResult.pop) + " People Affected Estimate";
+                        var oDialog = utilsVexDialogAlertBottomRightCorner("eDRIFT RASOR PEOPLE AFFECTED ESTIMATE<br>CALCULATION DONE ["+ parseInt(oResult.pop)+"]");
+                        utilsVexCloseDialogAfter(4000,oDialog);
+
+                    }
+                    else {
+                        oLinkToController.m_sResultFromServer = "NA";
+                        var oDialog = utilsVexDialogAlertBottomRightCorner("eDRIFT RASOR PEOPLE AFFECTED ESTIMATE<br>IMPOSSIBILE TO MAKE ESTIMATE");
+                        utilsVexCloseDialogAfter(4000,oDialog);
+                    }
+
+
+                }
+                else if (data.status == 'STOPPED') {
+                    console.log('---------------------------------Run Rasor - STOPPED');
+                    oLinkToController.m_sResultFromServer = "eDRIFT RASOR has been Stopped by the User";
+                    oLinkToController.m_bIsRunning = false;
+                }
+                else if (data.status == 'ERROR') {
+                    console.log('---------------------------------Run Rasor - ERROR');
+                    oLinkToController.m_sResultFromServer = "There was an Error running eDRIFT RASOR";
+                    oLinkToController.m_bIsRunning = false;
+                }
+                else if (data.status == 'WAITING') {
+                    console.log('---------------------------------Run Rasor - WAITING');
+                    oLinkToController.m_sResultFromServer = "eDRIFT RASOR App is waiting to start";
+                    oLinkToController.m_oInterval(oLinkToController.checkProcessResult2,1000,1,true,data.processObjId, oLinkToController);
+                }
+                else if (data.status == 'RUNNING') {
+                    console.log('---------------------------------Run Rasor - RUNNING');
+                    oLinkToController.m_sResultFromServer = "eDRIFT RASOR App is Running";
+                    oLinkToController.m_oInterval(oLinkToController.checkProcessResult2,1000,1,true,data.processObjId, oLinkToController);
+                }
+                else if (data.status == 'CREATED') {
+                    console.log('---------------------------------Run Rasor - CREATED');
+                    oLinkToController.m_sResultFromServer = "eDRIFT RASOR App Created";
+                    oLinkToController.m_oInterval(oLinkToController.checkProcessResult2,1000,1,true,data.processObjId, oLinkToController);
+                }
+                else {
+                    console.log('---------------------------------Run Rasor - UNKNOWN ' + data.status);
+                    oLinkToController.m_oInterval(oLinkToController.checkProcessResult2,1000,1,true,data.processObjId, oLinkToController);
+                }
+            }
+            else
+            {
+                console.log('---------------------------------Run Rasor - DATA NuLL');
+
+                utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR RUNNING eDRIFT RASOR WAPP");
+            }
+        }).error(function (error) {
+            console.log('---------------------------------Run Rasor - ERROR');
+            utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR RUNNING eDRIFT RASOR WAPP");
+            oController.cleanAllExecuteWorkflowFields();
+        });
+    };
+
+
+    RasorWappController.prototype.runeDriftRasor = function() {
+        console.log("RUN eDRIFT RASOR WAPP" );
+
+        var oController = this;
+
+        var sWorkspaceId = this.m_oConstantsService.getActiveWorkspace().name;
+        var sFile = this.m_oSelectedProduct.fileName;
+        var sPopFile = 'WB_MMR_DenS2015_app3_PPP_admin1.tif';
+        var sJSON = '{"scenario_file":"'+ sFile+'","workspace":"'+sWorkspaceId + '","pop_file":"'+sPopFile+'"}';
+
+        this.m_sResultFromServer = "eDRIFT RASOR App is waiting to start";
+        this.m_bIsRunning = true;
+
+        this.m_oProcessorService.runProcessor('rasoredrift', sJSON).success(function (data) {
+            if(utilsIsObjectNullOrUndefined(data) == false)
+            {
+                var sRasorProcessId = data.processingIdentifier;
+                console.log('Run Rasor - Proc ID = ' + sRasorProcessId);
+                oController.m_oInterval(oController.checkProcessResult2,1000,1,true,sRasorProcessId,oController);
+            }
+            else
+            {
+                utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR RUNNING eDRIFT RASOR WAPP");
+            }
+        }).error(function (error) {
+            utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR RUNNING eDRIFT RASOR WAPP");
+            oController.cleanAllExecuteWorkflowFields();
+            oController.m_bIsRunning = false;
+        });
+
+    };
+
     RasorWappController.prototype.runRasor = function() {
         console.log("RUN  RASOR WAPP" );
 

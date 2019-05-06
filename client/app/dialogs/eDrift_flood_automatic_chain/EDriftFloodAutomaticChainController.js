@@ -26,7 +26,7 @@ var EDriftFloodAutomaticChainController = (function() {
         this.m_oParameters = {BBOX:"29.0,92.0,10.0,100.0",
             ORBITS:"33,41,62,70,77,99,106,135,143,172",
             GRIDSTEP:"1,1",
-            LASTDAYS:"1",
+            LASTDAYS:"0",
             PREPROCWORKFLOW: "LISTSinglePreproc",
             MOSAICBASENAME: "MY",
             MOSAICXSTEP: "0.00018",
