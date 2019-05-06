@@ -18,7 +18,7 @@
         this.getAllErrorLogs(this.m_oProcess.processObjId);
 
 
-        this.m_oTick = this.startTick();
+        this.m_oTick = this.startTick(this.m_oProcess.status);
 
         $scope.$on('$destroy', function() {
             // Make sure that the interval is destroyed too
@@ -29,7 +29,11 @@
         });
     }
     /*************** METHODS ***************/
-    ProcessErrorLogsDialogController.prototype.startTick=function(){
+    ProcessErrorLogsDialogController.prototype.startTick=function(sStatus){
+        if( ( utilsIsStrNullOrEmpty(sStatus) === true ) || ( sStatus !== "RUNNING" ) )
+        {
+            return undefined;
+        }
         var oController=this;
         var oTick = this.m_oInterval(function () {
             console.log("Update logs");
@@ -41,7 +45,7 @@
     }
 
      ProcessErrorLogsDialogController.prototype.getAllErrorLogs = function(oProcessObjId){
-        // oProcessObjId = "fb99a0b1-93cb-40ab-9d44-9701a7b11b9b";//TEST
+         oProcessObjId = "fb99a0b1-93cb-40ab-9d44-9701a7b11b9b";//TEST
         if(utilsIsObjectNullOrUndefined(oProcessObjId) === true)
         {
             return false;
