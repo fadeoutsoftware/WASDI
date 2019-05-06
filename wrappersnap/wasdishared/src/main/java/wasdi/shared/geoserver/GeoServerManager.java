@@ -128,7 +128,23 @@ public class GeoServerManager {
     	if (oLayer != null) removeLayer(sStoreName);
 
     	if (sStyle == null || sStyle.isEmpty()) sStyle = "raster";
+    	
+    	if (m_sWorkspace == null) {
+    		System.out.println("GeoServerManager.publishStandardGeoTiff: Workspace is null");
+    	}
+    	
+    	if (sStoreName == null) {
+    		System.out.println("GeoServerManager.publishStandardGeoTiff: Store Name is null");
+    	}
+    	
+    	if (oGeotiffFile == null) {
+    		System.out.println("GeoServerManager.publishStandardGeoTiff: oGeoTiffFile is null");
+    	}
         
+    	if (sEpsg == null) {
+    		System.out.println("GeoServerManager.publishStandardGeoTiff: sEpsg is null");
+    	}
+    	    	
         boolean bRes = m_oGsPublisher.publishExternalGeoTIFF(m_sWorkspace,sStoreName,oGeotiffFile, sStoreName, sEpsg, GSResourceEncoder.ProjectionPolicy.FORCE_DECLARED,sStyle);
         
         if (bRes && m_oGsReader.existsCoveragestore(m_sWorkspace, sStoreName) && m_oGsReader.existsCoverage(m_sWorkspace, sStoreName, sStoreName)) {

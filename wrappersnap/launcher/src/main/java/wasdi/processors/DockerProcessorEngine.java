@@ -9,6 +9,7 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -24,10 +25,11 @@ import wasdi.shared.business.Processor;
 import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.data.ProcessorRepository;
 import wasdi.shared.parameters.ProcessorParameter;
+import wasdi.shared.utils.Utils;
 
 public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 	
-	protected String m_sDockerTemplatePath = "";
+	//protected String m_sDockerTemplatePath = "";
 
 	public DockerProcessorEngine(String sWorkingRootPath, String sDockerTemplatePath) {
 		super(sWorkingRootPath, sDockerTemplatePath);
@@ -298,6 +300,10 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 			// Call localhost:port
 			String sUrl = "http://localhost:"+oProcessor.getPort()+"/run/"+oParameter.getProcessObjId();
 			
+			sUrl += "?user=" + oParameter.getUserId();
+			sUrl += "&sessionid=" + oParameter.getSessionID();
+			sUrl += "&workspace=" + oParameter.getWorkspace();
+			
 			LauncherMain.s_oLogger.debug("WasdiProcessorEngine.run: calling URL = " + sUrl);
 			
 			
@@ -312,7 +318,50 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 			oOutputStream.flush();
 			
 			if (! (oConnection.getResponseCode() == HttpURLConnection.HTTP_OK || oConnection.getResponseCode() == HttpURLConnection.HTTP_CREATED )) {
-				throw new RuntimeException("Failed : HTTP error code : " + oConnection.getResponseCode());
+				
+				LauncherMain.s_oLogger.debug("WasdiProcessorEngine.run: connection failed: try to start container again");
+				
+				// Try to start Again the docker
+				
+				ArrayList<String> asArgs = new ArrayList<>();
+				// Run the container
+				int iProcessorPort = oProcessor.getPort();
+				//docker run -it -p 8888:5000 fadeout/wasdi:0.6
+				asArgs.clear();
+				asArgs.add("run");
+				// P.Campanella 11/06/2018: mounted volume
+				// NOTA: QUI INVECE SI CHE ABBIAMO PROBLEMI DI DIRITTI!!!!!!!!!!!!
+				asArgs.add("-v"+ m_sWorkingRootPath + ":/data/wasdi");
+				asArgs.add("-p127.0.0.1:"+iProcessorPort+":5000");
+				asArgs.add(oProcessor.getName());
+				
+				String sCommand = "docker";
+				
+				handleRunCommand(sCommand, asArgs);
+				
+				shellExec(sCommand, asArgs, false);
+				
+				LauncherMain.s_oLogger.debug("WasdiProcessorEngine.run: wait 5 sec to let docker start");
+				Thread.sleep(5000);
+				
+				// Try again
+				LauncherMain.s_oLogger.debug("WasdiProcessorEngine.run: connection failed: try to connect again");
+				oProcessorUrl = new URL(sUrl);
+				oConnection = (HttpURLConnection) oProcessorUrl.openConnection();
+				oConnection.setDoOutput(true);
+				oConnection.setRequestMethod("POST");
+				oConnection.setRequestProperty("Content-Type", "application/json");
+
+				oOutputStream = oConnection.getOutputStream();
+				oOutputStream.write(sJson.getBytes());
+				oOutputStream.flush();
+				
+				if (! (oConnection.getResponseCode() == HttpURLConnection.HTTP_OK || oConnection.getResponseCode() == HttpURLConnection.HTTP_CREATED )) {
+					// Nothing to do
+					throw new RuntimeException("Failed Again: HTTP error code : " + oConnection.getResponseCode());
+				}
+				
+				LauncherMain.s_oLogger.debug("WasdiProcessorEngine.run: ok container recovered");
 			}
 
 			BufferedReader oBufferedReader = new BufferedReader(new InputStreamReader((oConnection.getInputStream())));
@@ -327,6 +376,10 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 			
 			// Read Again Process Workspace: the user may have changed it!
 			oProcessWorkspace = oProcessWorkspaceRepository.GetProcessByProcessObjId(oProcessWorkspace.getProcessObjId());
+			
+			if (Utils.isNullOrEmpty(oProcessWorkspace.getOperationEndDate())) {
+				oProcessWorkspace.setOperationEndDate(Utils.GetFormatDate(new Date()));
+			}
 			
 			LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.DONE, 100);
 		}

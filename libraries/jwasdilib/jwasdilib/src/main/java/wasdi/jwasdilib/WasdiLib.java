@@ -63,7 +63,7 @@ public class WasdiLib {
 	/**
 	 * Data Base Url
 	 */
-	private String m_sBaseUrl = "";
+	private String m_sBaseUrl = "http://www.wasdi.net/wasdiwebserver/rest";
 	
 	/**
 	 * Flag to know if we are on the real server
@@ -370,7 +370,7 @@ public class WasdiLib {
 
 			String sUploadactive = ConfigReader.getPropValue("UPLOADACTIVE", "1");
 
-			if(sUploadactive.equals("0") || sUploadactive.toUpperCase().equals("FALSE")) {
+			if (sUploadactive.equals("0") || sUploadactive.toUpperCase().equals("FALSE")) {
 				m_bUploadActive = false;
 			}
 
@@ -1768,6 +1768,83 @@ public class WasdiLib {
 			oEx.printStackTrace();
 			return "ERROR";
 		}		
+	}
+	
+	/**
+	 * Execute a WASDI processor in Asynch way
+	 * @param sProcessorName Processor Name
+	 * @param aoParams Dictionary of Params
+	 * @return ProcessWorkspace Id
+	 */
+	public String asynchExecuteProcessor(String sProcessorName, HashMap<String, Object> aoParams) {
+		
+		try {
+			// Initialize
+			String sParamsJson = "";
+			
+			// Convert dictionary in a JSON
+			if (aoParams!= null) {
+				sParamsJson = s_oMapper.writeValueAsString(aoParams);
+			}
+			
+			// Encode the params
+			sParamsJson = URLEncoder.encode(sParamsJson);
+			
+			// Use the string version
+			return asynchExecuteProcessor(sProcessorName, sParamsJson);
+		}
+		catch (Exception oEx) {
+			oEx.printStackTrace();
+			return "";
+		}
+		
+	}
+	
+	/**
+	 * Execute a WASDI processor in Asynch way
+	 * @param sProcessorName Processor Name
+	 * @param sEncodedParams Already JSON Encoded Params
+	 * @return ProcessWorkspace Id
+	 */
+	public String asynchExecuteProcessor(String sProcessorName, String sEncodedParams) {
+		
+		//Domain check
+		if (sProcessorName == null) {
+			log("ProcessorName is null, return");
+			return "";
+		}
+		
+		if (sProcessorName.isEmpty()) {
+			log("ProcessorName is empty, return");
+			return "";
+		}
+		
+		if (sEncodedParams == null) {
+			log("EncodedParams is null, return");
+			return "";			
+		}
+		
+		try {
+			
+			// Build API URL
+		    String sUrl = m_sBaseUrl + "/processors/run?workspace="+m_sActiveWorkspace+"&name="+sProcessorName+"&encodedJson="+sEncodedParams;
+		    
+		    // Call API
+		    String sResponse = httpGet(sUrl, getStandardHeaders());
+
+		    // Read the result
+		    Map<String, Object> aoJSONMap = s_oMapper.readValue(sResponse, new TypeReference<Map<String,Object>>(){});
+		    
+		    // Extract Process Id
+		    String sProcessId = aoJSONMap.get("processingIdentifier").toString();
+		    
+		    return sProcessId;
+
+		}
+		catch (Exception oEx) {
+			oEx.printStackTrace();
+			return "";
+		}
 	}
 	
 	/**
