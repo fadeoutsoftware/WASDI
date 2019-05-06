@@ -13,7 +13,15 @@
       //BODY
       .modal-body
       {
-        
+
+        table{
+            thead {
+                th {
+                    background-color: #44536C;
+                    color: white;
+                }
+            }
+        }
 
       }
       //FOOTER
