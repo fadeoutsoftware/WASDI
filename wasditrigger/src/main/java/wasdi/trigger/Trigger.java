@@ -22,7 +22,8 @@ import wasdi.shared.utils.Utils;
 
 public class Trigger {
 	
-	String m_sLibBasePath = "/data/wasdi/";
+	String m_sBasePath = "/data/wasdi/";
+	String m_sBaseUrl = "http://www.wasdi.net/wasdiwebserver/rest/";
 	
 	public Trigger() {
 		try {
@@ -30,7 +31,8 @@ public class Trigger {
 			MongoRepository.DB_NAME = ConfigReader.getPropValue("MONGO_DBNAME");
 			MongoRepository.DB_USER = ConfigReader.getPropValue("MONGO_DBUSER");
 			MongoRepository.DB_PWD = ConfigReader.getPropValue("MONGO_DBPWD");
-			m_sLibBasePath = ConfigReader.getPropValue("BASE_PATH", "/data/wasdi/");
+			m_sBasePath = ConfigReader.getPropValue("BASE_PATH", "/data/wasdi/");
+			m_sBaseUrl = ConfigReader.getPropValue("BASE_URL", "http://www.wasdi.net/wasdiwebserver/rest/");
 		} 
 		catch (Throwable oEx) {
 			oEx.printStackTrace();
@@ -134,9 +136,10 @@ public class Trigger {
 		oWasdiLib.setUser(oSchedule.getUserId());
 		oWasdiLib.setActiveWorkspace(oSchedule.getWorkspaceId());
 		oWasdiLib.setSessionId(oUserSession.getSessionId());
-		oWasdiLib.setBasePath(m_sLibBasePath);
+		oWasdiLib.setBasePath(m_sBasePath);
 		oWasdiLib.setIsOnServer(true);
 		oWasdiLib.setDownloadActive(false);
+		oWasdiLib.setBaseUrl(m_sBaseUrl);
 		
 		// Init the lib
 		if (oWasdiLib.internalInit()) {
