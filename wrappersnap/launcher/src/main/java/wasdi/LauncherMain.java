@@ -147,11 +147,10 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 		catch(Exception exp)
 		{
 			//no log4j configuration
-			System.err.println( "Launcher Main - Error loading log.  Reason: " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(exp) );
-			//System.exit(-1);
+			System.err.println( "Launcher Main - Error loading log configuration.  Reason: " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(exp) );
 		}
 
-		s_oLogger.debug("Launcher Main Start");
+		s_oLogger.debug("WASDI Launcher Main Start");
 
 
 		// create the parser
@@ -163,35 +162,50 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 		oOptions.addOption("o","operation", true, "WASDI Launcher Operation");
 		oOptions.addOption("p","parameter", true, "WASDI Operation Parameter");
 		
-		String sOperation = "";
-		String sParameter = "";
+		String sOperation = "ND";
+		String sParameter = "ND";
+		
+		// parse the command line arguments
+		CommandLine oLine = oParser.parse( oOptions, args );
 
+		if (oLine.hasOption("operation")) {
+			// Get the Operation Code
+			sOperation  = oLine.getOptionValue("operation");
+
+		}
+
+		if (oLine.hasOption("parameter")) {
+			// Get the Parameter File
+			sParameter = oLine.getOptionValue("parameter");
+		}
+		
+		if (sParameter.equals("ND")) {
+			System.err.println( "Launcher Main - parameter file not available. Exit");
+			System.exit(-1);
+		}
+
+		ProcessWorkspace oProcessWorkspace = null;
+		
 		try {
-
-			// parse the command line arguments
-			CommandLine oLine = oParser.parse( oOptions, args );
-
-			if (oLine.hasOption("operation")) {
-				// Get the Operation Code
-				sOperation  = oLine.getOptionValue("operation");
-
-			}
-
-			if (oLine.hasOption("parameter")) {
-				// Get the Parameter File
-				sParameter = oLine.getOptionValue("parameter");
-			}
-			
 			
 			// Set Rabbit Factory Params
             RabbitFactory.s_sRABBIT_QUEUE_USER = ConfigReader.getPropValue("RABBIT_QUEUE_USER");
             RabbitFactory.s_sRABBIT_QUEUE_PWD = ConfigReader.getPropValue("RABBIT_QUEUE_PWD");
             RabbitFactory.s_sRABBIT_HOST = ConfigReader.getPropValue("RABBIT_HOST");
             RabbitFactory.s_sRABBIT_QUEUE_PORT = ConfigReader.getPropValue("RABBIT_QUEUE_PORT");
-
-			// Create Launcher Instance
+            
+   			// Create Launcher Instance
 			LauncherMain.s_oSendToRabbit = new Send(ConfigReader.getPropValue("RABBIT_EXCHANGE", "amq.topic"));
 			LauncherMain oLauncher = new LauncherMain();
+			
+			BaseParameter oBaseParameter = (BaseParameter) SerializationUtils.deserializeXMLToObject(sParameter);
+			ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
+			oProcessWorkspace = oProcessWorkspaceRepository.GetProcessByProcessObjId(oBaseParameter.getProcessObjId());
+			
+			if (oProcessWorkspace == null) {
+				s_oLogger.error("Process Workspace null for parameter [" + sParameter+ "]. Exit");
+				System.exit(-1);
+			}
 
 			s_oLogger.debug("Executing " + sOperation + " Parameter " + sParameter);
 
@@ -209,17 +223,13 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 				SystemUtils.LOG.addHandler(oFileHandler);            	
 			}
 			
-			BaseParameter oBaseParameter = (BaseParameter) SerializationUtils.deserializeXMLToObject(sParameter);
-			ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
-			ProcessWorkspace oProcessWorkspace = oProcessWorkspaceRepository.GetProcessByProcessObjId(oBaseParameter.getProcessObjId());
 			
-			if (oProcessWorkspace != null) {
-				
-				oProcessWorkspace.setOperationStartDate(Utils.GetFormatDate(new Date()));
-				
-				if (!oProcessWorkspaceRepository.UpdateProcess(oProcessWorkspace)) {
-					s_oLogger.debug("LauncherMain: Error setting ProcessWorkspace start date");
-				}
+			s_oLogger.debug("LauncherMain: setting ProcessWorkspace start date to now");
+			
+			oProcessWorkspace.setOperationStartDate(Utils.GetFormatDate(new Date()));
+			
+			if (!oProcessWorkspaceRepository.UpdateProcess(oProcessWorkspace)) {
+				s_oLogger.debug("LauncherMain: Error setting ProcessWorkspace start date");
 			}		
 
 			// And Run
@@ -227,26 +237,21 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 
 			s_oLogger.debug(getBye());
 		}
-		catch( ParseException exp ) {
-			s_oLogger.error("Launcher Main Exception " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(exp));
-			// oops, something went wrong
-			System.err.println( "Parsing failed.  Reason: " + exp.getMessage() );
-
-
+		catch( Throwable oException ) {
+			s_oLogger.error("Launcher Main Exception " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oException));
+			
 			try {
-				System.err.println("LauncherMain: try to put process in Safe ERROR state");
-				BaseParameter oBaseParameter = (BaseParameter) SerializationUtils.deserializeXMLToObject(sParameter);
+				System.err.println("LauncherMain: try to put process [" + sParameter + "] in Safe ERROR state");
+				
 				ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
-				ProcessWorkspace oProcessWorkspace = oProcessWorkspaceRepository.GetProcessByProcessObjId(oBaseParameter.getProcessObjId());
 
 				if (oProcessWorkspace != null) {
 					oProcessWorkspace.setProgressPerc(100);
 					oProcessWorkspace.setOperationEndDate(Utils.GetFormatDate(new Date()));
 					oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
 					if (!oProcessWorkspaceRepository.UpdateProcess(oProcessWorkspace)) {
-						s_oLogger.debug("LauncherMain FINAL catch: Error during process update (terminated)");
+						s_oLogger.debug("LauncherMain FINAL catch: Error during process update (terminated) " + sParameter);
 					}
-
 				}
 			}
 			catch (Exception e) {
@@ -255,6 +260,28 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			System.exit(-1);
 		}
 		finally {
+
+			// Final Check of the Process Workspace Status
+			ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
+			
+			if (oProcessWorkspace != null) {
+				
+				// Read again the process workspace 
+				oProcessWorkspace = oProcessWorkspaceRepository.GetProcessByProcessObjId(oProcessWorkspace.getProcessObjId());
+				
+				if (oProcessWorkspace.getStatus().equals("RUNNING") || oProcessWorkspace.getStatus().equals("CREATED")) {
+					
+					s_oLogger.error("Launcher Main FINAL: process status not closed [" + oProcessWorkspace.getProcessObjId()+ "]: " + oProcessWorkspace.getStatus());
+					s_oLogger.error("Launcher Main FINAL: force status as ERROR [" + oProcessWorkspace.getProcessObjId()+ "]");
+					
+					oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
+					
+					if (!oProcessWorkspaceRepository.UpdateProcess(oProcessWorkspace)) {
+						s_oLogger.debug("LauncherMain FINAL : Error during process update (terminated) " + sParameter);
+					}					
+				}
+			}
+			
 			LauncherMain.s_oSendToRabbit.Free();
 		}
 
@@ -302,7 +329,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 
 		}
 		catch (Throwable e) {
-			e.printStackTrace();
+			s_oLogger.error("Launcher Main Constructor Exception " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(e));
 		}
 	}
 
@@ -420,12 +447,6 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 				oEngine.run(oParameter);
 			}
 			break;
-			/*case RUNIDL: {
-				// Run IDL Processor
-				IDLProcParameter oParameter = (IDLProcParameter) SerializationUtils.deserializeXMLToObject(sParameter);
-				executeIDLProcessor(oParameter);
-			}
-			break;*/
 			case RUNMATLAB: {
 				// Run Matlab Processor
 				MATLABProcParameters oParameter = (MATLABProcParameters) SerializationUtils.deserializeXMLToObject(sParameter);
@@ -466,7 +487,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			s_oLogger.error("LauncherMain.executeOperation Exception", oEx);
 		}
 
-		s_oLogger.debug("Launcher did his job. Bye bye, see you soon.");
+		s_oLogger.debug("Launcher did his job. Bye bye, see you soon. [" + sParameter + "]");
 	}
 
 	/**
@@ -1845,6 +1866,8 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 		ProcessWorkspace oProcessWorkspace = oProcessWorkspaceRepository.GetProcessByProcessObjId(oParameter.getProcessObjId());
 		
 		
+		Product oInputProduct = null;
+		
 		try {
 			
 			if (oProcessWorkspace != null) {
@@ -1857,7 +1880,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			
 			ReadProduct oReadProduct = new ReadProduct();
 			File oProductFile = new File(getWorspacePath(oParameter)+sSourceProduct);
-			Product oInputProduct = oReadProduct.readSnapProduct(oProductFile, null);
+			oInputProduct = oReadProduct.readSnapProduct(oProductFile, null);
 			
 	        // Take the Geo Coding
 	        final GeoCoding oGeoCoding = oInputProduct.getSceneGeoCoding();
@@ -1955,7 +1978,6 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 					s_oLogger.debug("LauncherMain.executeMultiSubset adding product to Workspace");
 					
 					
-					
 					addProductToDbAndWorkspaceAndSendToRabbit(null, sOutputPath,oParameter.getWorkspace(), oParameter.getWorkspace(), LauncherOperations.MULTISUBSET.toString(), null, false);
 					
 					s_oLogger.debug("LauncherMain.executeMultiSubset: product added to workspace");		        	
@@ -1986,10 +2008,26 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			if (s_oSendToRabbit!=null) s_oSendToRabbit.SendRabbitMessage(false,LauncherOperations.MULTISUBSET.name(),oParameter.getWorkspace(),sError,oParameter.getExchange());
 
 		}
-		finally {			
-			s_oLogger.debug("LauncherMain.executeMultiSubset: End");
+		finally {	
+			
+			if (oInputProduct!=null) {
+				try {
+					oInputProduct.closeProductReader();
+				}
+				catch (Exception e) {
+					e.printStackTrace();
+				}
+				
+				oInputProduct.dispose();
+			}
+			
+			String sProcWSId = "";
+			if (oProcessWorkspace!=null) sProcWSId = oProcessWorkspace.getProcessObjId();
+			
+			s_oLogger.debug("LauncherMain.executeMultiSubset: End ["+sProcWSId+"]");
+			
 			closeProcessWorkspace(oProcessWorkspaceRepository, oProcessWorkspace);
-		}		
+		}
 
 	}
 

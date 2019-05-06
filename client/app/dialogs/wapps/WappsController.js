@@ -76,22 +76,23 @@ var WappsController = (function() {
         console.log("RUN - " + sProcessor);
 
         var oController = this;
-        //TODO CHECK IF STRING CONVERT AS OBJECT
 
-        if(utilsIsString(sJSON) === true)
-        {
-            try {
-                sJSON = JSON.parse(sJSON);
-            }
-            catch(err) {
-                utilsVexDialogAlertTop("Invalid JSON");
-                return;
-            }
+        var sStringJSON = "";
+        //CHECK: IF OBJECT AS STRING
 
+        if(utilsIsString(sJSON) === false)  {
+            sStringJSON = JSON.stringify(sJSON);
         }
-        this.m_oProcessorService.runProcessor(sProcessor, sJSON).success(function (data) {
+        else {
+            sStringJSON = sJSON;
+        }
+
+        this.m_oProcessorService.runProcessor(sProcessor, sStringJSON).success(function (data) {
             if(utilsIsObjectNullOrUndefined(data) == false)
             {
+                var oDialog = utilsVexDialogAlertBottomRightCorner("PROCESSOR SCHEDULED<br>READY");
+                utilsVexCloseDialogAfter(4000,oDialog);
+
                 console.log('Run ' + data);
             }
             else
