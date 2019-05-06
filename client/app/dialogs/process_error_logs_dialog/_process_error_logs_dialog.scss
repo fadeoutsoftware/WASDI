@@ -13,12 +13,15 @@
       //BODY
       .modal-body
       {
+        .table-container{
+            margin-top: 20px;
+            table{
+                thead {
+                    th {
 
-        table{
-            thead {
-                th {
-                    background-color: #44536C;
-                    color: white;
+                        background-color: #44536C;
+                        color: white;
+                    }
                 }
             }
         }

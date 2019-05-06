@@ -6,7 +6,7 @@
                 <div class="row-v4">
                     <div class="col-v4-xs-11 col-v4-sm-11 col-v4-md-11 col-v4-lg-11">
                         <h4 class="modal-title ">
-                            Process error logs
+                            Wasdi Processor Logs
                         </h4>
                     </div>
                     <div class="col-v4-xs-1 col-v4-sm-1 col-v4-md-1 col-v4-lg-1">
@@ -16,23 +16,34 @@
             </div>
             <!-- BODY -->
             <div class="modal-body container-fluid-v4">
-
-              	<div class="container-v4">
+                <div class="container-v4">
+                    <div class="col-v4" >
+                        Search by text: <input type="text" class="wasdi-input" ng-model="m_oController.m_sSearch">
+                    </div>
+                </div>
+              	<div class="container-v4 table-container">
                     <table class="table table-hover">
                         <thead>
                         <tr>
-                            <th scope="col">Date</th>
-                            <th scope="col">Row</th>
-                            <th scope="col">Process Workspace Id</th>
-                            <th scope="col">Row Number</th>
+                            <th scope="col" class="pointer-cursor-hover" ng-click="m_oController.sortBy('Date')">
+                                Date
+                                <i class="fa fa-caret-down" aria-hidden="true" ng-show="m_oController.isCaretIconVisible('Date','fa-caret-down')"></i>
+                                <i class="fa fa-caret-up" aria-hidden="true" ng-show="m_oController.isCaretIconVisible('Date','fa-caret-up')"></i>
+
+                            </th>
+                            <th scope="col" class="pointer-cursor-hover" ng-click="m_oController.sortBy('Row')">
+                                Row
+                                <i class="fa fa-caret-down" aria-hidden="true" ng-show="m_oController.isCaretIconVisible('Row','fa-caret-down')"></i>
+                                <i class="fa fa-caret-up" aria-hidden="true" ng-show="m_oController.isCaretIconVisible('Row','fa-caret-up')"></i>
+                            </th>
+
                         </tr>
                         </thead>
                         <tbody>
-                        <tr ng-repeat="log in m_oController.m_aoLogs">
+                        <tr ng-repeat="log in m_oController.m_aoLogs | orderBy:m_oController.propertyName:m_oController.m_bSortReverse | filter:m_oController.m_sSearch">
                             <td >{{log.logDate}}</td>
                             <td>{{log.logRow}}</td>
-                            <td>{{log.processWorkspaceId}}</td>
-                            <td>{{log.rowNumber}}</td>
+
                         </tr>
 
                         </tbody>

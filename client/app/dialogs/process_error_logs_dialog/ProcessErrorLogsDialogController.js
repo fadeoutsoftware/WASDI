@@ -11,6 +11,10 @@
         this.m_oProcessorService = oProcessorService;
         this.m_oInterval = $interval;
         this.m_aoLogs = [];
+        this.m_sSearch="";
+        this.m_bSortReverse = true;
+        this.m_sSortByColum = "Date";
+
         var oController = this;
         $scope.close = function(result) {
             oClose(result, 500); // close, but give 500ms for bootstrap to animate
@@ -29,6 +33,10 @@
         });
     }
     /*************** METHODS ***************/
+    ProcessErrorLogsDialogController.prototype.sortBy = function(propertyName) {
+        this.m_bSortReverse = (this.m_sSortByColum === propertyName) ? !this.m_bSortReverse : false;
+        this.m_sSortByColum = propertyName;
+    };
     ProcessErrorLogsDialogController.prototype.startTick=function(sStatus){
         if( ( utilsIsStrNullOrEmpty(sStatus) === true ) || ( sStatus !== "RUNNING" ) )
         {
@@ -45,7 +53,7 @@
     }
 
      ProcessErrorLogsDialogController.prototype.getAllErrorLogs = function(oProcessObjId){
-         //oProcessObjId = "fb99a0b1-93cb-40ab-9d44-9701a7b11b9b";//TEST
+        // oProcessObjId = "fb99a0b1-93cb-40ab-9d44-9701a7b11b9b";//TEST
         if(utilsIsObjectNullOrUndefined(oProcessObjId) === true)
         {
             return false;
@@ -65,6 +73,46 @@
         return true;
     }
 
+    ProcessErrorLogsDialogController.prototype.isCaretIconVisible = function(sColumnName,sCaretName)
+    {
+        if(utilsIsStrNullOrEmpty(sColumnName) === true || utilsIsStrNullOrEmpty(sCaretName) === true)
+        {
+            return false;
+        }
+
+        if(this.m_sSortByColum === sColumnName)
+        {
+            if(sCaretName === "fa-caret-down"  )
+            {
+                if(this.m_bSortReverse === false)
+                {
+                    return false;
+                }
+                else
+                {
+                    return true;
+                }
+            }
+            else
+            {
+                // sCaretName === fa-caret-up
+                if(this.m_bSortReverse === false)
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+        }
+        else
+        {
+            return false;
+        }
+
+
+    }
     ProcessErrorLogsDialogController.$inject = [
         '$scope',
         'close',
