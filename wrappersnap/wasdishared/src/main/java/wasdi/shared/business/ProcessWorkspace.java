@@ -24,9 +24,13 @@ public class ProcessWorkspace {
      */
     private String operationType;
     /**
-     * Start date of the operation
+     * Creation date of the operation
      */
     private String operationDate;
+    /**
+     * Start date of the operation
+     */
+    private String operationStartDate;    
     /**
      * End date of the operation
      */
@@ -150,6 +154,14 @@ public class ProcessWorkspace {
 
 	public void setOperationEndDate(String operationEndDate) {
 		this.operationEndDate = operationEndDate;
+	}
+
+	public String getOperationStartDate() {
+		return operationStartDate;
+	}
+
+	public void setOperationStartDate(String operationStartDate) {
+		this.operationStartDate = operationStartDate;
 	}
     
 }

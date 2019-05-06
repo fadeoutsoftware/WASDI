@@ -5,6 +5,7 @@ public class Cron {
 		
 		String sPlan = sMinute + " " + sHour + " " + sDayOfMonth + " " + sMonth + " " + sDayOfWeek; 
 		String sShellExec = "crontab -u "+sUser + " -l ; echo \"" + sPlan + " " + sCommand + "\" | crontab -u "+ sUser + " -";
+		
 		/*
 		 * 
 		 * (crontab -u sUser -l ; echo "sPlan sCommand") | crontab -u sUser -

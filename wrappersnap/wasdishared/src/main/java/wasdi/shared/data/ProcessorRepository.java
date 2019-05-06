@@ -176,7 +176,8 @@ public class ProcessorRepository extends  MongoRepository {
         final ArrayList<Processor> aoReturnList = new ArrayList<Processor>();
         try {
 
-            FindIterable<Document> oWSDocuments = getCollection("processors").find(new Document("port", new Document("$gt", 4999)));
+            //FindIterable<Document> oWSDocuments = getCollection("processors").find(new Document("port", new Document("$gt", 4999)));
+        	FindIterable<Document> oWSDocuments = getCollection("processors").find();
 
             oWSDocuments.forEach(new Block<Document>() {
                 public void apply(Document document) {

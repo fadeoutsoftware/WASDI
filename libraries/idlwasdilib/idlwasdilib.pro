@@ -262,9 +262,13 @@ FUNCTION WASDIHTTPPOST, sUrlPath, sBody
 	oUrl->CloseConnections
 	OBJ_DESTROY, oUrl
 
-	; PARSE THE JSON RESULT
-	wasdiResult = JSON_PARSE(serverJSONResult)
-
+	wasdiResult = ''
+	
+	IF (STRLEN(serverJSONResult) GT 0) THEN BEGIN
+		; PARSE THE JSON RESULT
+		wasdiResult = JSON_PARSE(serverJSONResult)		
+	END 
+	
 	RETURN, wasdiResult
 END
 
@@ -496,16 +500,16 @@ FUNCTION WASDIWAITPROCESS, sProcessID
 	print, 'Waiting for scheduled process to finish'
 	
 	iTotalTime = 0
-	while sStatus ne 'DONE' and sStatus ne 'STOPPED' and sStatus ne 'ERROR' do begin
+	WHILE sStatus ne 'DONE' and sStatus ne 'STOPPED' and sStatus ne 'ERROR' DO BEGIN
 		sStatus = WASDIGETPROCESSSTATUS(sProcessID)
 		WAIT, 2
 		iTotalTime = iTotalTime + 2
-	endwhile
+	ENDWHILE
 	
 	print, 'Process Done (took ', STRTRIM(STRING(iTotalTime),2), ' seconds)'
 
 	RETURN, sStatus
-end
+END
 
 
 FUNCTION WASDIWAITPROCESSES, asProcessIDs
@@ -539,6 +543,8 @@ FUNCTION WASDIWAITPROCESSES, asProcessIDs
 		asNewList = []
 		iProcessCount = N_ELEMENTS(asProcessToCeck)
 		
+		WAIT, 2
+		
 		iTotalTime = iTotalTime + 2
 		
 	ENDWHILE 
@@ -561,7 +567,7 @@ FUNCTION WASDIWAITPROCESSES, asProcessIDs
 	print, 'All Processes Are Done (took approx ', STRTRIM(STRING(iTotalTime),2), '  seconds)'
 
 	RETURN, asResults
-end
+END
 
 ; Get list of workspace of the user
 FUNCTION WASDIGETWORKSPACES
@@ -706,7 +712,7 @@ pro WASDIOPENWORKSPACE,workspacename
   COMMON WASDI_SHARED
   
   activeworkspace = WASDIGETWORKSPACEIDBYNAME(workspacename)
-end
+END
 
 ; Get the list of products in a WS. Takes the name in input gives in output an array of string with on element for each file
 FUNCTION WASDIGETPRODUCTSBYWORKSPACE,workspacename
@@ -726,17 +732,17 @@ FUNCTION WASDIGETPRODUCTSBYWORKSPACE,workspacename
   asProductsNames = []
 
   ; Convert JSON in a String Array
-  for i=0,n_elements(wasdiResult)-1 do begin
+  FOR i=0,n_elements(wasdiResult)-1 DO BEGIN
 
     oProduct = wasdiResult[i]
     sFileName = GETVALUEBYKEY(oProduct, 'fileName')
     asProductsNames=[asProductsNames,sFileName]
 
-  endfor
+  ENDFOR
 
   ; Return the array
   RETURN, asProductsNames
-end
+END
 
 ; Get the list of products in a WS. Takes the name in input gives in output an array of string with on element for each file
 FUNCTION WASDIGETACTIVEWORKSPACEPRODUCTS
@@ -744,26 +750,31 @@ FUNCTION WASDIGETACTIVEWORKSPACEPRODUCTS
   COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive
 
   ; API url
-  UrlPath = '/wasdiwebserver/rest/product/byws?sWorkspaceId='+activeworkspace
+  UrlPath = '/wasdiwebserver/rest/product/namesbyws?sWorkspaceId='+activeworkspace
 
   ; Get the list of products
   wasdiResult = WASDIHTTPGET(UrlPath)
   
+  iResults = n_elements(wasdiResult)
+  
   ; Create the output array
-  asProductsNames = []
+  asProductsNames = STRARR(iResults)
 
   ; Convert JSON in a String Array
-  for i=0,n_elements(wasdiResult)-1 do begin
+  FOR i=0,iResults-1 DO BEGIN
 
-    oProduct = wasdiResult[i]
-    sFileName = GETVALUEBYKEY(oProduct, 'fileName')
-    asProductsNames=[asProductsNames,sFileName]
+    ;oProduct = wasdiResult[i]
+    ;sFileName = GETVALUEBYKEY(oProduct, 'fileName')
+	;sFileName = oProduct['fileName']
+	
+    ;asProductsNames[i]=sFileName
+	asProductsNames[i]=wasdiResult[i]
 
-  endfor
+  ENDFOR
 
   ; Return the array
   RETURN, asProductsNames
-end
+END
 
 ; Obtain the local full path of a EO File
 FUNCTION WASDIGETFULLPRODUCTPATH, sProductName
@@ -793,7 +804,7 @@ FUNCTION WASDIGETFULLPRODUCTPATH, sProductName
   END
 
   RETURN, sFullPath
-end
+END
 
 ; Donwloads a File from WASDI
 PRO WASDIDOWNLOADFILE, sProductName, sFullPath
@@ -842,14 +853,14 @@ pro WASDIGETSAVEPATH, sFullPath
   COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive
 
   ; be sure to end the base path with /
-  if (not(  (basepath.charAt(strlen(basepath)-1) eq '\') or (basepath.charAt(strlen(basepath)-1) eq '/'))) then begin
+  IF (not(  (basepath.charAt(strlen(basepath)-1) eq '\') or (basepath.charAt(strlen(basepath)-1) eq '/'))) THEN BEGIN
     basepath = basepath + '/'
-  endif
+  ENDIF
 
   ; compose the full path
   sFullPath = basepath + user +'/' + activeworkspace + '/'
 
-end
+END
 
 ; Get the list of available workflows
 FUNCTION WASDIGETWORKFLOWS
@@ -1050,18 +1061,18 @@ FUNCTION WASDIMOSAIC, asInputFileNames, sOutputFile, dPixelSizeX, dPixelSizeY
   sInputFilesJSON = '['
   
   ; For each input name
-  for i=0,n_elements(asInputFileNames)-1 do begin
+  FOR i=0,n_elements(asInputFileNames)-1 DO BEGIN
     
     sInputName = asInputFileNames[i]
 	; wrap with '
 	sInputFilesJSON = sInputFilesJSON + '"' + sInputName + '"'
 	
 	; check of is not the last one
-    if i lt n_elements(asInputFileNames)-1 then begin
+    IF i lt n_elements(asInputFileNames)-1 then BEGIN
 	  ; add ,
       sInputFilesJSON = sInputFilesJSON + ','
-    endif
-  endfor
+    ENDIF
+  ENDFOR
   
   ; close the array
   sInputFilesJSON = sInputFilesJSON + ']'
@@ -1092,20 +1103,20 @@ FUNCTION WASDIMOSAIC, asInputFileNames, sOutputFile, dPixelSizeX, dPixelSizeY
   sProcessID = ''
   
   ; get the process id
-  if sResponse then begin
+  IF sResponse then BEGIN
     sValue = GETVALUEBYKEY(wasdiResult, 'stringValue')
     sProcessID=sValue
-  endif
+  ENDIF
   
   sStatus = "ERROR"
   
   ; Wait for the process to finish
-  if sProcessID ne '' then begin
+  IF sProcessID ne '' then BEGIN
     sStatus = WASDIWAITPROCESS(sProcessID)
-  endif
+  ENDIF
   
   RETURN, sStatus
-end
+END
 
 
 
@@ -1363,22 +1374,20 @@ FUNCTION WASDIIMPORTEOIMAGE, oEOImage
   sProcessID = ''
   
   ; get the process id
-  if sResponse then begin
+  IF sResponse then BEGIN
     sValue = GETVALUEBYKEY(wasdiResult, 'stringValue')
     sProcessID=sValue
-  endif
+  ENDIF
   
   sStatus = "ERROR"
   
   ; Wait for the process to finish
-  if sProcessID ne '' then begin
+  IF sProcessID ne '' then BEGIN
     sStatus = WASDIWAITPROCESS(sProcessID)
-  endif  
+  ENDIF  
   
   RETURN, wasdiResult
 END
-
-
 
 ; Update the progress of this own process
 PRO WASDIUPDATEPROGRESS, iPerc
@@ -1401,6 +1410,19 @@ PRO WASDIUPDATEPROGRESS, iPerc
   
 END
 
+; Update the progress of this own process
+PRO WASDILOG, sLog
+
+	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive
+	
+	print, sLog
+	IF (isonserver EQ '1') THEN BEGIN
+		; API url
+		UrlPath = '/wasdiwebserver/rest/processors/logs/add?processworkspace='+myprocid
+		wasdiResult = WASDIHTTPPOST(UrlPath, sLog)
+	END  
+END
+
 ; Update the status of a WASDI Process
 FUNCTION WASDIUPDATEPROCESSSTATUS, sProcessID, sStatus, iPerc
 
@@ -1414,7 +1436,7 @@ FUNCTION WASDIUPDATEPROCESSSTATUS, sProcessID, sStatus, iPerc
   sUpdatedStatus = GETVALUEBYKEY(wasdiResult, 'status')
   
   RETURN, sUpdatedStatus
-end
+END
 
 
 ; Adds a new product to the Workspace in WASDI
@@ -1446,8 +1468,8 @@ FUNCTION WASDISAVEFILE, sFileName
 	ENDIF
 
 	RETURN, sStatus;
+END
 
-end
 
 ;Get a Parameter stored in the parameters file 
 FUNCTION WASDIGETPARAMETER, sParameterName

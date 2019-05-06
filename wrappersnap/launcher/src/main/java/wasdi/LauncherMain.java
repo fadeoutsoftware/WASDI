@@ -148,7 +148,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 		{
 			//no log4j configuration
 			System.err.println( "Launcher Main - Error loading log.  Reason: " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(exp) );
-			System.exit(-1);
+			//System.exit(-1);
 		}
 
 		s_oLogger.debug("Launcher Main Start");
@@ -208,6 +208,19 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 				SystemUtils.LOG.setLevel(Level.ALL);
 				SystemUtils.LOG.addHandler(oFileHandler);            	
 			}
+			
+			BaseParameter oBaseParameter = (BaseParameter) SerializationUtils.deserializeXMLToObject(sParameter);
+			ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
+			ProcessWorkspace oProcessWorkspace = oProcessWorkspaceRepository.GetProcessByProcessObjId(oBaseParameter.getProcessObjId());
+			
+			if (oProcessWorkspace != null) {
+				
+				oProcessWorkspace.setOperationStartDate(Utils.GetFormatDate(new Date()));
+				
+				if (!oProcessWorkspaceRepository.UpdateProcess(oProcessWorkspace)) {
+					s_oLogger.debug("LauncherMain: Error setting ProcessWorkspace start date");
+				}
+			}		
 
 			// And Run
 			oLauncher.executeOperation(sOperation,sParameter);
