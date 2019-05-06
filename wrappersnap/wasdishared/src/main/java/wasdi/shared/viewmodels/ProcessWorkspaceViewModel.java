@@ -8,6 +8,7 @@ public class ProcessWorkspaceViewModel {
     private String productName;
     private String operationType;
     private String operationDate;
+    private String operationStartDate;
     private String operationEndDate;
     private String userId;
     private String fileSize;
@@ -100,6 +101,14 @@ public class ProcessWorkspaceViewModel {
 
 	public String getOperationEndDate() {
 		return operationEndDate;
+	}
+
+	public String getOperationStartDate() {
+		return operationStartDate;
+	}
+
+	public void setOperationStartDate(String operationStartDate) {
+		this.operationStartDate = operationStartDate;
 	}
 
 	public void setOperationEndDate(String operationEndDate) {

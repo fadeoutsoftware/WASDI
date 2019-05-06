@@ -299,6 +299,59 @@ public class ProductResource {
 		return aoProductList;
 	}
 	
+	@GET
+	@Path("/namesbyws")
+	@Produces({"application/xml", "application/json", "text/xml"})
+	public ArrayList<String> getNamesByWorkspace(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sWorkspaceId") String sWorkspaceId) {
+		
+		Wasdi.DebugLog("ProductResource.GetListByWorkspace");
+
+		User oUser = Wasdi.GetUserFromSession(sSessionId);
+
+		ArrayList<String> aoProductList = new ArrayList<String>();
+
+		try {
+
+			// Domain Check
+			if (oUser == null) {
+				return aoProductList;
+			}
+			if (Utils.isNullOrEmpty(oUser.getUserId())) {
+				return aoProductList;
+			}
+			
+			System.out.println("ProductResource.getNamesByWorkspace: products for " + sWorkspaceId);
+
+			// Create repo
+			ProductWorkspaceRepository oProductWorkspaceRepository = new ProductWorkspaceRepository();
+			DownloadedFilesRepository oDownloadedFilesRepository = new DownloadedFilesRepository();
+
+			// Get Product List
+			List<ProductWorkspace> aoProductWorkspace = oProductWorkspaceRepository.GetProductsByWorkspace(sWorkspaceId);
+			
+			System.out.println("ProductResource.getNamesByWorkspace: found " + aoProductWorkspace.size());
+
+			// For each
+			for (int iProducts=0; iProducts<aoProductWorkspace.size(); iProducts++) {
+				
+				// Get the downloaded file
+				DownloadedFile oDownloaded = oDownloadedFilesRepository.GetDownloadedFileByPath(aoProductWorkspace.get(iProducts).getProductName());
+
+				// Add View model to return list
+				if (oDownloaded != null) {
+					aoProductList.add(oDownloaded.getFileName());
+
+				} else {
+					System.out.println("WARNING: the product " + aoProductWorkspace.get(iProducts).getProductName() + " should be in WS " + sWorkspaceId + " but is not a Downloaded File" );
+				}
+			}
+		} catch (Exception oEx) {
+			oEx.toString();
+		}
+
+		return aoProductList;
+	}
+	
 	@POST
 	@Path("/update")
 	@Produces({"application/xml", "application/json", "text/xml"})
