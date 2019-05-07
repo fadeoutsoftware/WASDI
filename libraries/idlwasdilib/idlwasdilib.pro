@@ -327,13 +327,12 @@ FUNCTION GETDATESTRINGFROMJULDAY, julDay
 	RETURN, sDate
 END
 
-
-FUNCTION TIMESTAMP, format, $
+FUNCTION WASDITIMESTAMP, format, $
     NO_PREFIX=no_prefix, $
     RANDOM_DIGITS=random_digits, $
     UTC=utc, $
     VALID=valid
-
+	
     On_Error, 2
 
     ; Set keyword values.
