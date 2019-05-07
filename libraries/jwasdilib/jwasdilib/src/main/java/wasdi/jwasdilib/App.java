@@ -21,11 +21,11 @@ public class App
         System.out.println( "JWasdiLib Test Start" );
         WasdiLib oLib = new WasdiLib();
         
-        oLib.init("C:/Users/c.nattero/workspace/wasdi/wasdilib/config.properties");
+        oLib.init("C:\\Temp\\wasdi\\JMatLibTest\\config.properties");
         
-        testConnection(oLib);
+        //testConnection(oLib);
     //    testDownload(oLib);
-        testAutomaticUpload(oLib);
+        //testAutomaticUpload(oLib);
         
 //        testUploadFileDUMMYFILE(oLib);
 //        testUploadFile(oLib);
@@ -33,7 +33,7 @@ public class App
 //        testBaseLib(oLib);
         
         //testUploadFileDUMMYIMAGE(oLib);
-        //testMosaic(oLib);
+        testMosaic(oLib);
         //testSearch(oLib);
 //        testSubset(oLib);
         
@@ -157,9 +157,9 @@ public class App
     
     public static void testMosaic(WasdiLib oLib) {
     	ArrayList<String> asInputs = new ArrayList<>();
-    	asInputs.add("S1A_IW_GRDH_1SDV_20190128T062955_20190128T063020_025674_02DA10_0E8F_LISTSinglePreproc.tif");
-    	asInputs.add("S1A_IW_GRDH_1SDV_20190128T063020_20190128T063045_025674_02DA10_0D61_LISTSinglePreproc.tif");
-    	String sOutputFile = "mosaicFromLib.tif";
+    	asInputs.add("S1B_IW_GRDH_1SDV_20190416T230853_20190416T230907_015838_01DBE2_3BF4_preproc.tif");
+    	asInputs.add("S1B_IW_GRDH_1SDV_20190416T230828_20190416T230853_015838_01DBE2_EBAA_preproc.tif");
+    	String sOutputFile = "mosaicFromLibNoCount.tif";
     	
     	oLib.mosaic(asInputs, sOutputFile);
     	oLib.addFileToWASDI(sOutputFile);
