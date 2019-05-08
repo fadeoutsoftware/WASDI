@@ -4,10 +4,11 @@
 
 var ProcessesLogsController = (function() {
 
-    function ProcessesLogsController($scope, oClose, oProcessesLaunchedService,oConstantsService,oModalService) {//,oExtras
+    function ProcessesLogsController($scope, oClose, oProcessesLaunchedService,oConstantsService,oModalService,oProcessorService) {//,oExtras
         this.m_oScope = $scope;
         this.m_oScope.m_oController = this;
         this.m_oModalService = oModalService;
+        this.m_oProcessorService = oProcessorService;
         this.hasError = false;
         this.m_oProcessesLaunchedService = oProcessesLaunchedService;
         this.m_aoProcessesLogs = [];
@@ -64,8 +65,13 @@ var ProcessesLogsController = (function() {
 
     ProcessesLogsController.prototype.getProcessDuration = function (oProcess) {
         //time by server
-        var oStartTime = new Date(oProcess.operationDate);
+        var oStartTime = new Date(oProcess.operationStartDate);
+
         var oEndTime = new Date(oProcess.operationEndDate);
+        if( utilsIsValidDate(oEndTime) === false )
+        {
+            oEndTime = new Date();
+        }
         //pick time
         var result =  Math.abs(oEndTime-oStartTime);
         //approximate result
@@ -97,7 +103,7 @@ var ProcessesLogsController = (function() {
         for(var iIndexProcessLog = 0; iIndexProcessLog < iNumberOfProcessesLogs; iIndexProcessLog++)
         {
             // sText += this.m_aoProcessesLogs[iIndexProcessLog] + "/n";
-            var sOperationDate = this.m_aoProcessesLogs[iIndexProcessLog].operationDate;
+            var sOperationDate = this.m_aoProcessesLogs[iIndexProcessLog].operationStartDate;
             var sFileSize = this.m_aoProcessesLogs[iIndexProcessLog].fileSize;
             var sOperationEndDate = this.m_aoProcessesLogs[iIndexProcessLog].operationEndDate;
             var sOperationType = this.m_aoProcessesLogs[iIndexProcessLog].operationType;
@@ -152,12 +158,15 @@ var ProcessesLogsController = (function() {
        return true;
     };
 
+
+
     ProcessesLogsController.$inject = [
         '$scope',
         'close',
         'ProcessesLaunchedService',
         'ConstantsService',
-        'ModalService'
+        'ModalService',
+        'ProcessorService'
         // 'extras',
     ];
     return ProcessesLogsController;
