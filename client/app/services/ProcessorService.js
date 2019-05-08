@@ -8,7 +8,7 @@ service('ProcessorService', ['ConstantsService','$rootScope','$http', function (
     this.m_oConstantsService = oConstantsService;
     this.APIURL = oConstantsService.getAPIURL();
     this.m_oHttp = $http;
-
+    this.m_sResource = "/processors";
     this.getProcessorsList = function() {
         return this.m_oHttp.get(this.APIURL + '/processors/getdeployed');
     };
@@ -43,5 +43,15 @@ service('ProcessorService', ['ConstantsService','$rootScope','$http', function (
     this.getAllErrorLogs = function(oProcessId){
 
         return this.m_oHttp.get(this.APIURL + '/processors/logs/list?processworkspace='+oProcessId);
+    };
+
+    this.getCountLogs = function(oProcessId)
+    {
+        return this.m_oHttp.get(this.APIURL + this.m_sResource + '/logs/count?processworkspace=' + oProcessId);
+
+    };
+    this.getLogs = function(oProcessId,iStartRow,iEndRow)
+    {
+        return this.m_oHttp.get(this.APIURL + '/processors/logs/list?processworkspace='+oProcessId + '&startrow=' + iStartRow + '&endrow=' + iEndRow);
     };
 }]);
