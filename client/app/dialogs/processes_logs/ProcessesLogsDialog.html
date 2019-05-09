@@ -42,7 +42,7 @@
                                 <th>Progress</th>
                                 <th>{{"ROOT_TABLE_HEAD_TIME"|translate}} </th>
                                 <th></th>
-                                <!--<th></th>-->
+                                <th></th>
                             </tr>
                             </thead>
                             <tbody>
@@ -80,14 +80,17 @@
                                 <td>
                                     {{m_oController.getProcessDuration(oProcess) | date:'HH:mm:ss'}}
                                 </td>
-                                <!--<td >-->
-                                    <!--<div class="my-button" ng-click="m_oController.deleteProcess(oProcess)" ng-show="oProcess.status === 'RUNNING' || oProcess.status === 'CREATED'">-->
-                                        <!--<i class="fa fa-times-circle" aria-hidden="true" data-toggle="tooltip" title="Stop processes"  data-placement="bottom"></i>-->
-                                    <!--</div>-->
-                                <!--</td>-->
-                                <td>
-
-                                    <button class="btn btn-default btn-wasdi" ng-click="m_oController.openErrorLogsDialog(oProcess)"> Logs </button>
+                                <td >
+                                    <div  class="pointer-cursor-hover" ng-click="m_oController.deleteProcess(oProcess)"
+                                          ng-show="oProcess.status === 'RUNNING' || oProcess.status === 'CREATED'"><!--class="btn btn-default btn-wasdi"-->
+                                        <i class="fa fa-times-circle" aria-hidden="true" data-toggle="tooltip" title="Stop processes"  data-placement="bottom"></i>
+                                    </div>
+                                </td>
+                                <td ><!--ng-show="oProcess.status === 'RUNNING'"-->
+                                    <button class="btn btn-default btn-wasdi" ng-click="m_oController.openErrorLogsDialog(oProcess)"
+                                            ng-show="oProcess.operationType === 'RUNIDL' || oProcess.status === 'RUNNING'" ><!-- -->
+                                        Logs
+                                    </button>
                                 </td>
                             </tr>
 

@@ -764,3 +764,8 @@ function utilsSearchTree(element, matchingTitle,sPropertyIdNodeName,sChildrenNod
     }
     return null;
 }
+
+/******************************  DATA *****************************/
+function utilsIsValidDate(d) {
+    return d instanceof Date && !isNaN(d);
+}
