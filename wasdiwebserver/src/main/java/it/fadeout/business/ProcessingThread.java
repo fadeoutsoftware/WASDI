@@ -152,12 +152,9 @@ public class ProcessingThread extends Thread {
 							if (!m_aoLaunchedProcesses.containsKey(oProcess.getProcessObjId())) {
 								sExecutedProcessId = executeProcess(oProcess);
 								// Let the process start...
-								try {
-									//sleep before starting next iteraction
-									sleep(2000);
-								} catch (InterruptedException e) {
-									e.printStackTrace();
-								}
+								//sleep before starting next iteraction
+								waitForProcessToStart();
+								
 							} else {
 								System.out.println(m_sLogPrefix + "process lauched before: " + oProcess.getProcessObjId());
 							}
@@ -196,6 +193,14 @@ public class ProcessingThread extends Thread {
 	public synchronized void stopThread() {
 		interrupt();
 		m_bRunning = false;
+	}
+	
+	protected void waitForProcessToStart() {
+		try {
+			sleep(2000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
 	}
 
 	/**

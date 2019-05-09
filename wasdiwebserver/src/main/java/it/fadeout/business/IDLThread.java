@@ -24,4 +24,13 @@ public class IDLThread extends ProcessingThread {
 		return queuedProcess;
 		
 	}
+	
+	@Override
+	protected void waitForProcessToStart() {
+		try {
+			sleep(10000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+	}
 }

@@ -1,7 +1,10 @@
 package wasdi.snapopearations;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -334,6 +337,98 @@ public class Mosaic {
 		
 		if (m_oMosaicSetting.getVariableNames().size()>0) return true;
 		else return false;
+	}
+	
+	public Boolean runGDALMosaic() {
+		
+		// Check parameter
+		if (m_oMosaicSetting == null) {
+			m_oLogger.error("Mosaic.runGDALMosaic: parameter is null, return false");
+			return false;
+		}
+		
+		if (m_oMosaicSetting.getSources() == null) {
+			m_oLogger.error("Mosaic.runGDALMosaic: sources are null, return false");
+			return false;
+		}
+		
+		if (m_oMosaicSetting.getSources().size() <= 0) {
+			m_oLogger.error("Mosaic.runGDALMosaic: sources are empty, return false");
+			return false;
+		}
+		
+		
+		try {
+			String sGdalMergeCommand = "gdal_merge.py";
+			
+			ArrayList<String> asArgs = new ArrayList<String>();
+			asArgs.add(sGdalMergeCommand);
+			
+			// Output file
+			asArgs.add("-o");
+			asArgs.add(getWorspacePath() + m_sOuptutFile);
+			
+			// Output format
+			asArgs.add("-of");
+			asArgs.add(LauncherMain.snapFormat2GDALFormat(m_sOutputFileFormat));
+			
+			if (LauncherMain.snapFormat2GDALFormat(m_sOutputFileFormat).equals("GTiff")) {
+				asArgs.add("-co");
+				asArgs.add("COMPRESS=LZW");
+			}
+			
+			// Get Base Path
+			String sWorkspacePath = getWorspacePath();
+			
+			// for each product
+			for (int iProducts = 0; iProducts<m_oMosaicSetting.getSources().size(); iProducts ++) {
+				
+				// Get full path
+				String sProductFile = sWorkspacePath+m_oMosaicSetting.getSources().get(iProducts);
+				m_oLogger.debug("Mosaic.runGDALMosaic: Product [" + iProducts +"] = " + sProductFile);
+				
+				asArgs.add(sProductFile);
+			}
+			
+			// Execute the process
+			ProcessBuilder oProcessBuidler = new ProcessBuilder(asArgs.toArray(new String[0]));
+			Process oProcess;
+		
+			String sCommand = "";
+			for (String sArg : asArgs) {
+				sCommand += sArg + " ";
+			}
+			
+			m_oLogger.debug("Mosaic.runGDALMosaic: Command = " + sCommand);
+			
+			oProcessBuidler.redirectErrorStream(true);
+			oProcess = oProcessBuidler.start();
+			
+			BufferedReader oReader = new BufferedReader(new InputStreamReader(oProcess.getInputStream()));
+			String sLine;
+			while ((sLine = oReader.readLine()) != null)
+				m_oLogger.debug("[gdal]: " + sLine);
+			
+			oProcess.waitFor();
+			
+			if (new File(sWorkspacePath+m_sOuptutFile).exists()) {
+				// Done
+				m_oLogger.debug("Mosaic.runGDALMosaic: created GDAL file = " + m_sOuptutFile);				
+			}
+			else {
+				// Error
+				m_oLogger.debug("Mosaic.runGDALMosaic: error creating mosaic = " + m_sOuptutFile);
+				return false;
+			}
+			
+		} 
+        catch (Throwable e) {
+			m_oLogger.error("Mosaic.runGDALMosaic: Exception generating output Product " + getWorspacePath() + m_sOuptutFile);
+			m_oLogger.error("Mosaic.runGDALMosaic: " + e.toString());
+			return false;
+		}
+
+		return true;		
 	}
 	
 	/**

@@ -1,11 +1,3 @@
-'''
-Created on 11 Jun 2018
-
-@author: p.campanella
-'''
-from _overlapped import NULL
-name = "wasdi"
-
 import requests
 import os
 import json
@@ -301,11 +293,19 @@ def getProductsByWorkspace(sWorkspaceName):
     Get the list of products in a workspace
     the list is an array of string. Can be empty if there is any error
     """    
+    
+    sWorkspaceId = getWorkspaceIdByName(sWorkspaceName)
+    
+    return getProductsByWorkspaceId(sWorkspaceId)
+
+def getProductsByWorkspaceId(sWorkspaceId):
+    """
+    Get the list of products in a workspace (by Id)
+    the list is an array of string. Can be empty if there is any error
+    """    
     global m_sBaseUrl
     global m_sSessionCookie
     global m_sActiveWorkspace
-    
-    sWorkspaceId = getWorkspaceIdByName(sWorkspaceName)
     
     m_sActiveWorkspace = sWorkspaceId
     
@@ -327,7 +327,16 @@ def getProductsByWorkspace(sWorkspaceName):
             except:
                 continue
     
-    return asProducts
+    return asProducts    
+    
+def getProductsByActiveWorkspace():
+    """
+    Get the list of products in a workspace
+    the list is an array of string. Can be empty if there is any error
+    """    
+    global m_sActiveWorkspace
+    
+    return getProductsByWorkspaceId(m_sActiveWorkspace)
 
 
 def getFullProductPath(sProductName):
@@ -583,7 +592,7 @@ def downloadFile(sFileName):
     global m_sActiveWorkspace
     
     headers = {'Content-Type': 'application/json','x-session-token': m_sSessionCookie}
-    payload = {'filename': sFileName}
+    payload = {'filename': sFileName, 'workspace':m_sActiveWorkspace}
     
     sUrl = m_sBaseUrl + '/catalog/downloadbyname'
     
@@ -643,6 +652,7 @@ def deleteProduct(sProduct):
     sUrl = m_sBaseUrl + "/product/delete?sProductName="+sProduct+"&bDeleteFile=true&sWorkspaceId="+m_sActiveWorkspace+"&bDeleteLayer=true";
     
     oResult = requests.get(sUrl, headers=sHeaders)   
+        
 
 if __name__ == '__main__':
     print('WASPY - The WASDI Python Library. Include in your code for space development processors. Visit www.wasdi.net')

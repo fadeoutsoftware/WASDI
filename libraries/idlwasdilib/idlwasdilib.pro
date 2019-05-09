@@ -1414,7 +1414,7 @@ PRO WASDILOG, sLog
 
 	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive
 	
-	print, sLog
+	print, '[', myprocid, ']: ', sLog
 	IF (isonserver EQ '1') THEN BEGIN
 		; API url
 		UrlPath = '/wasdiwebserver/rest/processors/logs/add?processworkspace='+myprocid
