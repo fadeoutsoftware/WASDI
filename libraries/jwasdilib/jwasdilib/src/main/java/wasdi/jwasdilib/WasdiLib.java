@@ -1847,6 +1847,29 @@ public class WasdiLib {
 		}
 	}
 	
+	
+	/**
+	 * Delete a Product in the active Workspace
+	 * @param sProduct
+	 */
+	public void deleteProduct(String sProduct) {
+		try {
+			
+			// Build API URL
+		    String sUrl = m_sBaseUrl + "/product/delete?sProductName="+sProduct+"&bDeleteFile=true&sWorkspaceId="+m_sActiveWorkspace+"&bDeleteLayer=true";
+		    
+		    // Call API
+		    String sResponse = httpGet(sUrl, getStandardHeaders());
+
+		    return ;
+
+		}
+		catch (Exception oEx) {
+			oEx.printStackTrace();
+			return;
+		}		
+	}
+	
 	/**
 	 * Http get Method Helper
 	 * @param sUrl Url to call

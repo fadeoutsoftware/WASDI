@@ -458,6 +458,9 @@ public class ProcessWorkspaceResource {
 		User oUser = Wasdi.GetUserFromSession(sSessionId);
 
 		ProcessWorkspaceViewModel oProcess = new ProcessWorkspaceViewModel();
+		
+		// Initialize status as ERROR
+		oProcess.setStatus("ERROR");
 
 		try {
 			// Domain Check
