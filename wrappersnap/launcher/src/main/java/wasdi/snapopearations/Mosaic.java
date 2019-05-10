@@ -375,6 +375,9 @@ public class Mosaic {
 			if (LauncherMain.snapFormat2GDALFormat(m_sOutputFileFormat).equals("GTiff")) {
 				asArgs.add("-co");
 				asArgs.add("COMPRESS=LZW");
+				
+				asArgs.add("-co");
+				asArgs.add("BIGTIFF=YES");
 			}
 			
 			// Get Base Path

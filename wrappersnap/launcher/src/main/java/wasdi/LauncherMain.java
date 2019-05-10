@@ -207,9 +207,9 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 				s_oLogger.error("Process Workspace null for parameter [" + sParameter+ "]. Exit");
 				System.exit(-1);
 			}
-
+			
 			s_oLogger.debug("Executing " + sOperation + " Parameter " + sParameter);
-
+			
 			String sSnapLogActive = ConfigReader.getPropValue("SNAPLOGACTIVE", "0");
 
 			if (sSnapLogActive.equals("1") || sSnapLogActive.equalsIgnoreCase("true")) {
@@ -225,9 +225,10 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			}
 			
 			
+			// Set the process as running
 			s_oLogger.debug("LauncherMain: setting ProcessWorkspace start date to now");
-			
 			oProcessWorkspace.setOperationStartDate(Utils.GetFormatDate(new Date()));
+			oProcessWorkspace.setStatus(ProcessStatus.RUNNING.name());
 			
 			if (!oProcessWorkspaceRepository.UpdateProcess(oProcessWorkspace)) {
 				s_oLogger.debug("LauncherMain: Error setting ProcessWorkspace start date");
@@ -1310,6 +1311,10 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			if (sFile.toUpperCase().contains("FLOOD")) {
 				sStyle = "DDS_FLOODED_AREAS";
 			}
+			// Hard Coded set Flood Style - STYLES HAS TO BE MANAGED
+			if (sFile.toUpperCase().contains("NDVI")) {
+				sStyle = "wasdi:NDVI";
+			}
 			
 			if (Utils.isNullOrEmpty(oParameter.getStyle()) == false) {
 				sStyle = oParameter.getStyle();
@@ -2099,15 +2104,13 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 	        	
 				ArrayList<String> asArgs = new ArrayList<String>();
 				asArgs.add(sGdalTranslateCommand);
-				
-				// Output file
-				asArgs.add("-o");
-				asArgs.add(getWorspacePath(oParameter) + sOutputProduct);
-				
+								
 				// Output format
 				asArgs.add("-of");
 				asArgs.add("GTiff");
-				asArgs.add("-co COMPRESS=LZW");
+				asArgs.add("-co");
+				// TO BE TESTED
+				asArgs.add("COMPRESS=LZW");
 
 				asArgs.add("-projwin");
 				// ulx uly lrx lry:
@@ -2130,8 +2133,16 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 				
 				s_oLogger.debug("LauncherMain.executeGDALMultiSubset Command Line " + sCommand);
 				 
+				//oProcessBuidler.redirectErrorStream(true);
 				oProcess = oProcessBuidler.start();
+				
+				//BufferedReader oReader = new BufferedReader(new InputStreamReader(oProcess.getInputStream()));
+				//String sLine;
+				//while ((sLine = oReader.readLine()) != null)
+				//	s_oLogger.debug("[gdal]: " + sLine);
+				
 				oProcess.waitFor();
+
 
 				File oTileFile = new File(getWorspacePath(oParameter) + sOutputProduct);
 				
@@ -2139,12 +2150,11 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			        String sOutputPath = getWorspacePath(oParameter) + sOutputProduct;
 			        			        
 			        s_oLogger.debug("LauncherMain.executeGDALMultiSubset done for index " + iTiles);
-			        
-					s_oLogger.debug("LauncherMain.executeGDALMultiSubset adding product to Workspace");
 					
-					addProductToDbAndWorkspaceAndSendToRabbit(null, sOutputPath,oParameter.getWorkspace(), oParameter.getWorkspace(), LauncherOperations.MULTISUBSET.toString(), null, false);
+					addProductToDbAndWorkspaceAndSendToRabbit(null, sOutputPath,oParameter.getWorkspace(), oParameter.getWorkspace(), LauncherOperations.MULTISUBSET.toString(), null, false, false);
 					
-					s_oLogger.debug("LauncherMain.executeGDALMultiSubset: product added to workspace");
+					s_oLogger.debug("LauncherMain.executeGDALMultiSubset: product added to workspace");						
+					
 		        }
 		        else {
 		        	s_oLogger.debug("LauncherMain.executeGDALMultiSubset Subset null for index " + iTiles);
@@ -2159,6 +2169,8 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 	        }
 	        
 			if (oProcessWorkspace != null) oProcessWorkspace.setStatus(ProcessStatus.DONE.name());
+			
+			if (s_oSendToRabbit!=null) s_oSendToRabbit.SendRabbitMessage(true,LauncherOperations.MULTISUBSET.name(), oParameter.getWorkspace(),"Multisubset Done",oParameter.getExchange());
 		}
 		catch (Exception oEx) {
 			s_oLogger.error("LauncherMain.executeGDALMultiSubset: exception " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
@@ -2398,15 +2410,33 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 	 * @param bAsynchMetadata Flag to know if save metadata in asynch or synch way
 	 * @throws Exception
 	 */
-	private void addProductToDbAndWorkspaceAndSendToRabbit(ProductViewModel oVM, String sFullPathFileName, String sWorkspace, String sExchange, String sOperation, String sBBox, Boolean bAsynchMetadata) throws Exception
+	private void addProductToDbAndWorkspaceAndSendToRabbit(ProductViewModel oVM, String sFullPathFileName, String sWorkspace, String sExchange, String sOperation, String sBBox, Boolean bAsynchMetadata) throws Exception {
+		addProductToDbAndWorkspaceAndSendToRabbit(oVM,sFullPathFileName,sWorkspace,sExchange,sOperation,sBBox,bAsynchMetadata,true);
+	}
+	
+	/**
+	 * Converts a product in a ViewModel, add it to the workspace and send it to the rabbit queue
+	 * The method is Safe: controls if the products already exists and if it is already added to the workspace
+	 * @param oVM View Model... if null, read it from the product in sFileName
+	 * @param sFullPathFileName File Name
+	 * @param sWorkspace Workspace
+	 * @param sExchange Queue Id
+	 * @param sOperation Operation Done
+	 * @param sBBox Bounding Box
+	 * @param bAsynchMetadata Flag to know if save metadata in asynch or synch way
+	 * @param bSendToRabbit Flat to know it we need to send update on rabbit or not
+	 * @throws Exception
+	 */
+	private void addProductToDbAndWorkspaceAndSendToRabbit(ProductViewModel oVM, String sFullPathFileName, String sWorkspace, String sExchange, String sOperation, String sBBox, Boolean bAsynchMetadata, Boolean bSendToRabbit) throws Exception
 	{
 		s_oLogger.debug("LauncherMain.AddProductToDbAndSendToRabbit: File Name = " + sFullPathFileName);
 
 		// Check if the file is really to Add
-		DownloadedFilesRepository oDownloadedRepo = new DownloadedFilesRepository();
+		DownloadedFilesRepository oDownloadedRepo = new DownloadedFilesRepository();		
 		DownloadedFile oCheck = oDownloadedRepo.GetDownloadedFileByPath(sFullPathFileName);
 		
 		File oFile = new File(sFullPathFileName);
+		
 		ReadProduct oReadProduct = new ReadProduct(oFile);
 		
 		// Get the Boundig Box
@@ -2464,15 +2494,23 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 				oVM = oCheck.getProductViewModel();
 			}
 			
+			// Update the Product View Model
+			oCheck.setProductViewModel(oVM);
+			oDownloadedRepo.UpdateDownloadedFile(oCheck);
+			
+			// TODO: Update metadata?
+			
 			s_oLogger.debug("AddProductToDbAndSendToRabbit: Product Already in the Database. Do not add");
 		}
 
 		// The Add Produt to Workspace is safe. No need to check if the product is already in the workspace
 		addProductToWorkspace(oFile.getAbsolutePath(), sWorkspace);
 
-		s_oLogger.debug("LauncherMain.AddProductToDbAndSendToRabbit: Image added. Send Rabbit Message Exchange = " + sExchange);
+		if (bSendToRabbit) {
+			s_oLogger.debug("LauncherMain.AddProductToDbAndSendToRabbit: Image added. Send Rabbit Message Exchange = " + sExchange);
 
-		if (s_oSendToRabbit!=null) s_oSendToRabbit.SendRabbitMessage(true,sOperation,sWorkspace,oVM,sExchange);
+			if (s_oSendToRabbit!=null) s_oSendToRabbit.SendRabbitMessage(true,sOperation,sWorkspace,oVM,sExchange);			
+		}
 		
 		if (oReadProduct.getProduct() != null) {
 			oReadProduct.getProduct().dispose();
