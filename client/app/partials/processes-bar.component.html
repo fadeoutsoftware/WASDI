@@ -121,6 +121,17 @@
                                     <i class="fa fa-times-circle" aria-hidden="true" data-toggle="tooltip" title="Stop processes"  data-placement="bottom"></i>
                                 </div>
                             </td>
+                            <td class="over-icon" ng-click="m_oController.openErrorLogsDialog(oProcess)" >
+                                <div ng-show="oProcess.operationType === 'RUNIDL' || oProcess.status === 'RUNPROCESSOR'">
+                                    <!--<i class="fa fa-file-text-o" aria-hidden="true" title="Logs" data-placement="bottom" data-toggle="tooltip"></i>-->
+                                    <i class="fa fa-file-text" aria-hidden="true" title="Logs" data-placement="bottom" data-toggle="tooltip"></i>
+
+                                </div>
+                                <!--<button class="btn btn-default btn-wasdi" ng-click="m_oController.openErrorLogsDialog(oProcess)"-->
+                                         <!--&gt;&lt;!&ndash; ng-show="oProcess.operationType === 'RUNIDL' || oProcess.status === 'RUNPROCESSOR'" &ndash;&gt;-->
+                                    <!--Logs-->
+                                <!--</button>-->
+                            </td>
                         </tr>
 
                         </tbody>
