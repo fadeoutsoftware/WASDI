@@ -13,9 +13,9 @@ def run(parameters, processId):
         if (sProduct.endswith('_mask.tif')):
             wasdi.wasdiLog('DELETE ' + sProduct)
             wasdi.deleteProduct(sProduct)
-        if (sProduct.endswith('_preproc.tif')):
-            wasdi.wasdiLog('DELETE ' + sProduct)
-            wasdi.deleteProduct(sProduct)
+        #if (sProduct.endswith('_preproc.tif')):
+        #    wasdi.wasdiLog('DELETE ' + sProduct)
+        #    wasdi.deleteProduct(sProduct)
     
 def WasdiHelp():
     sHelp = "eDRIFT Delete Images Utility"
