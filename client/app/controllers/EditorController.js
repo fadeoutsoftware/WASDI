@@ -32,6 +32,9 @@ var EditorController = (function () {
         // Flag to know if the big map is the Geographical Mode (true) or in the Editor Mode (false)
         this.m_bIsActiveGeoraphicalMode = false;
 
+        //filter query text in tree
+        this.m_sTextQueryFilterInTree = "";
+
         this.m_bIsLoadingColourManipulation = false;
         this.m_bIsLoadingTree = true;
         this.m_sToolTipBtnSwitchGeographic = "EDITOR_TOOLTIP_TO_GEO";
@@ -4086,7 +4089,11 @@ var EditorController = (function () {
             {
                 'core': {'data': [], "check_callback": true},
                 "state" : { "key" : "state_tree" },
-                "plugins": ["contextmenu","state"],  // all plugin i use
+                "plugins": ["contextmenu","state","search"], // all plugin in use
+                "search":{
+                    "show_only_matches":true,
+                    "show_only_matches_children":true
+                },
                 "contextmenu": { // my right click menu
                     "items": function ($node) {
 
@@ -4612,6 +4619,16 @@ var EditorController = (function () {
     EditorController.prototype.isActiveEditorMode = function()
     {
         return this.m_bIsActiveGeoraphicalMode === false;
+    }
+    EditorController.prototype.filterTree = function(sTextQuery){
+        if(utilsIsObjectNullOrUndefined(sTextQuery) === true)
+        {
+            sTextQuery = "";
+        }
+
+        $('#jstree').jstree(true).search(sTextQuery);//,false,true
+
+        return true;
     }
     EditorController.$inject = [
         '$scope',

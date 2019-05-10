@@ -183,10 +183,10 @@ function utilsProjectShowRabbitMessageUserFeedBack(oMessage) {
             sUserMessage = "MOSAIC COMPLETED<br>READY";
             break;
         case "SUBSET":
-            sUserMessage = "MOSAIC COMPLETED<br>READY";
+            sUserMessage = "SUBSET COMPLETED<br>READY";
             break;
         case "MULTISUBSET":
-            sUserMessage = "MOSAIC COMPLETED<br>READY";
+            sUserMessage = "MULTISUBSET COMPLETED<br>READY";
             break;
         case "GRAPH":
             sUserMessage = "WORKFLOW COMPLETED<br>READY";

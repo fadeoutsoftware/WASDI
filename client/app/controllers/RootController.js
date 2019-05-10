@@ -770,6 +770,31 @@ var RootController = (function() {
         return sReturnValue;
     };
 
+    RootController.prototype.openErrorLogsDialog = function(oProcess)
+    {
+
+        var oController = this;
+
+        if(utilsIsObjectNullOrUndefined(oProcess) === true)
+        {
+            return false;
+        }
+        oController.m_oModalService.showModal({
+            templateUrl: "dialogs/process_error_logs_dialog/ProcessErrorLogsDialogView.html",
+            controller: "ProcessErrorLogsDialogController",
+            inputs: {
+                extras: {
+                    process:oProcess,
+                }
+            }
+        }).then(function (modal) {
+            modal.element.modal();
+            modal.close.then(function(oResult){
+
+            });
+        });
+        return true;
+    };
     /*********************************************************************/
     RootController.$inject = [
         '$scope',
