@@ -49,7 +49,8 @@
 
                             <tr ng-repeat="oProcess in m_oController.m_aoProcessesLogs  | orderBy:'-' | filter: m_oController.filterTable track by $index ">
                                 <td>
-                                    <invaderfixed ng-show="oProcess.status === 'RUNNING' || oProcess.status === 'CREATED'"></invaderfixed>
+                                    <invaderfixed ng-show="oProcess.status === 'RUNNING'"></invaderfixed>
+                                    <span class="label label-info" ng-show="oProcess.status === 'CREATED'">Waiting</span>
                                     <span class="label label-warning" ng-show="oProcess.status === 'DONE'">Log</span>
                                     <span class="label label-danger" ng-show="oProcess.status === 'STOPPED'">Stopped</span>
                                     <span class="label label-danger" ng-show="oProcess.status === 'ERROR'" >Error</span>
@@ -88,7 +89,7 @@
                                 </td>
                                 <td ><!--ng-show="oProcess.status === 'RUNNING'"-->
                                     <button class="btn btn-default btn-wasdi" ng-click="m_oController.openErrorLogsDialog(oProcess)"
-                                            ng-show="oProcess.operationType === 'RUNIDL' || oProcess.status === 'RUNNING'" ><!-- -->
+                                            ng-show="oProcess.operationType === 'RUNIDL' || oProcess.status === 'RUNPROCESSOR'" ><!-- -->
                                         Logs
                                     </button>
                                 </td>

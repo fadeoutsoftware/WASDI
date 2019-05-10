@@ -148,9 +148,7 @@ public class ReadProduct {
      * @throws IOException
      */
     public ProductViewModel getProductViewModel() throws IOException
-    {
-        LauncherMain.s_oLogger.debug("ReadProduct.getProductViewModel: start");
-        
+    {        
         if (m_oProduct == null) {
         	LauncherMain.s_oLogger.debug("ReadProduct.getProductViewModel: member product is null, return null");
         	return null;
@@ -158,7 +156,6 @@ public class ReadProduct {
 
         ProductViewModel oViewModel = getProductViewModel(m_oProduct, m_oProductFile);
 
-        LauncherMain.s_oLogger.debug("ReadProduct.getProductViewModel: done");
         return  oViewModel;
     }
     
@@ -169,21 +166,19 @@ public class ReadProduct {
      */
 	public ProductViewModel getProductViewModel(Product oExportProduct, File oFile) {
 		
+		LauncherMain.s_oLogger.debug("ReadProduct.getProductViewModel: start");
+		
 		// Create View Model
 		ProductViewModel oViewModel = new ProductViewModel();
 
-        LauncherMain.s_oLogger.debug("ReadProduct.getProductViewModel: call fill bands view model");
-
         // Get Bands
         this.FillBandsViewModel(oViewModel, oExportProduct);
-
-        LauncherMain.s_oLogger.debug("ReadProduct.getProductViewModel: setting Name and Path");
         
         // Set name and path
         oViewModel.setName(oExportProduct.getName());
         if (oFile!=null) oViewModel.setFileName(oFile.getName());
 
-        LauncherMain.s_oLogger.debug("ReadProduct.getProductViewModel: end");
+        LauncherMain.s_oLogger.debug("ReadProduct.getProductViewModel: done");
 		return oViewModel;
 	}
 
