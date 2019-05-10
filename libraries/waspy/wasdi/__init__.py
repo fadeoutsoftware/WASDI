@@ -10,6 +10,8 @@ name = "wasdi"
 import requests
 import os
 import json
+import urllib.parse
+import traceback
 
 m_sUser = 'urs'
 m_sPassword = 'pw'
@@ -686,6 +688,116 @@ def deleteProduct(sProduct):
     sUrl = m_sBaseUrl + "/product/delete?sProductName=" + sProduct + "&bDeleteFile=true&sWorkspaceId=" + m_sActiveWorkspace + "&bDeleteLayer=true";
     oResult = requests.get(sUrl, headers=sHeaders)
 
+
+# todo doing - in progress...
+def searchEOImages(sPlatform, sDateFrom, sDateTo, dULLat, dULLon, dLRLat, dLRLon, sProductType, iOrbitNumber,
+                   sSensorOperationalMode, sCloudCoverage):
+    aoReturnList = []
+
+    if sPlatform is None:
+        log("searchEOImages: platform cannot be None")
+        return aoReturnList
+
+    # todo support other platforms
+    if (sPlatform != "S1") and (sPlatform != "S2"):
+        log("searchEOImages: platform must be S1 or S2. Received [" + sPlatform + "]")
+        return aoReturnList
+
+    if sPlatform == "S1":
+        if sProductType is not None:
+            if not (sProductType == "SLC" or sProductType == "GRD" or sProductType == "OCN"):
+                log("searchEOImages: Available Product Types for S1; SLC, GRD, OCN. Received [" + sProductType + "]")
+
+    if sPlatform == "S2":
+        if sProductType is not None:
+            if not (sProductType == "S2MSI1C" or sProductType == "S2MSI2Ap" or sProductType == "S2MSI2A"):
+                log("searchEOImages: Available Product Types for S2; S2MSI1C, S2MSI2Ap, S2MSI2A. Received ["
+                    + sProductType + "]")
+
+    if sDateFrom is None:
+        log("searchEOImages: sDateFrom cannot be None")
+        return aoReturnList
+
+    if len(sDateFrom) < 10 or sDateFrom[4] != '-' or sDateFrom[7] != '-':
+        # todo improve validation
+        log("searchEOImages: sDateFrom must be in format YYYY-MM-DD")
+        return aoReturnList
+
+    if sDateTo is None:
+        log("searchEOImages: sDateTo cannot be None")
+        return aoReturnList
+
+    if len(sDateTo) < 10 or sDateTo[4] != '-' or sDateTo[7] != '-':
+        # todo improve validation
+        log("searchEOImages: sDateTo must be in format YYYY-MM-DD")
+        return aoReturnList
+
+    # create query string:
+
+    # platform name
+    sQuery = "( platformname:"
+    if sPlatform == "S2":
+        sQuery += "Sentinel-2 "
+    elif sPlatform == "S1":
+        sQuery += "Sentinel-1"
+
+    # If available add product type
+    if sProductType != None:
+        sQuery += " AND producttype:" + sProductType
+
+    # If available Sensor Operational Mode
+    if (sSensorOperationalMode is not None) and (sPlatform == "S1"):
+        sQuery += " AND sensoroperationalmode:" + sSensorOperationalMode
+
+    # If available cloud coverage
+    if (sCloudCoverage is not None) and (sCloudCoverage == "S2"):
+        sQuery += " AND cloudcoverpercentage:" + sCloudCoverage
+
+    # If available add orbit number
+    if iOrbitNumber is not None:
+        sQuery += " AND relativeorbitnumber:" + iOrbitNumber
+
+    # Close the first block
+    sQuery += ") "
+
+    # Date Block
+    sQuery += "AND ( beginPosition:[" + sDateFrom + "T00:00:00.000Z TO " + sDateTo + "T23:59:59.999Z]"
+    sQuery += "AND ( endPosition:[" + sDateFrom + "T00:00:00.000Z TO " + sDateTo + "T23:59:59.999Z]"
+
+    # Close the second block
+    sQuery += ") "
+
+    # footprint polygon
+    if (dULLat is not None) and (dULLon is not None) and (dLRLat is not None) and (dLRLon is not None):
+        sFootPrint = "( footprint:\"intersects(POLYGON(( " + dULLon + " " +dLRLat + "," +\
+                     dULLon + " " + dULLat + "," + dLRLon + " " + dULLat + "," + dLRLon +\
+                     " " + dLRLat + "," + dULLon + " " +dLRLat + ")))\") AND ";
+    sQuery = sFootPrint + sQuery
+
+    sQueryBody = "[\"" + sQuery.replace("\"", "\\\"") + "\"]";
+    sQuery = urllib.parse.quote(sQuery)
+    sQuery = "sQuery=" + sQuery + "&offset=0&limit=10&providers=ONDA"
+
+    try:
+        sUrl = getBaseUrl() + "/search/querylist?" + sQuery
+        # todo remaining Java code to translate
+        # String sResponse = httpPost(sUrl, sQueryBody, getStandardHeaders())
+        asHeaders = {}
+        # todo write standard headers, maybe make a function
+        oResponse = requests.post(sUrl, data=sQueryBody, headers=asHeaders)
+        aoJSONMap = []
+        # todo populate list from response
+        # List<Map<String, Object>> aoJSONMap = s_oMapper.readValue(sResponse, new TypeReference<List<Map<String,Object>>>(){})
+        log("" + aoJSONMap)
+        return aoJSONMap
+    except Exception as oEx:
+        print(type(oEx))
+        traceback.print_exc()
+        # print(oEx.args)
+        print(oEx)
+
+    # todo can we use just this list instead of aoJSONMap
+    return aoReturnList
 
 if __name__ == '__main__':
     sTx = 'WASPY - The WASDI Python Library. Include in your code for space development processors. Visit www.wasdi.net'
