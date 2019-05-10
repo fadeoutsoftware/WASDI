@@ -26,7 +26,7 @@ m_bVerbose = False
 m_sParametersFilePath = ''
 
 
-def getParametersDict():
+def getParams():
     """
     Get the full Params Dictionary
     """
@@ -166,7 +166,7 @@ def getDownloadActive():
     return m_bDownloadActive
 
 
-def setProcId(sProcID):
+def setMyProcId(sProcID):
     """
     Own Proc Id 
     """
@@ -174,7 +174,7 @@ def setProcId(sProcID):
     m_sMyProcId = sProcID
 
 
-def getProcId():
+def getMyProcId():
     """
     Get the Own Proc Id
     """
@@ -623,6 +623,9 @@ def downloadFile(sFileName):
     The method takes a file saved in the workspace root (see getSaveFilePath) not already added to the WS 
     To work be sure that the file is on the server
     """
+
+    # todo auto unzip
+
     global m_sBaseUrl
     global m_sSessionId
     global m_sActiveWorkspace
@@ -636,7 +639,7 @@ def downloadFile(sFileName):
 
     oResult = requests.get(sUrl, headers=headers, params=payload, stream=True)
 
-    if (oResult is not None) and oResult.status_code == 200:
+    if (oResult is not None) and (oResult.status_code == 200):
         print('WASDI: got ok result, downloading')
 
         sSavePath = getSavePath()
@@ -666,11 +669,8 @@ def wasdiLog(sLogRow):
     global m_sActiveWorkspace
 
     if m_bIsOnServer:
-
         sHeaders = {'Content-Type': 'application/json', 'x-session-token': m_sSessionId}
-
         sUrl = m_sBaseUrl + '/processors/logs/add?processworkspace=' + m_sMyProcId
-
         oResult = requests.post(sUrl, data=sLogRow, headers=sHeaders)
 
     else:
@@ -683,9 +683,7 @@ def deleteProduct(sProduct):
     global m_sActiveWorkspace
 
     sHeaders = {'Content-Type': 'application/json', 'x-session-token': m_sSessionId}
-
     sUrl = m_sBaseUrl + "/product/delete?sProductName=" + sProduct + "&bDeleteFile=true&sWorkspaceId=" + m_sActiveWorkspace + "&bDeleteLayer=true";
-
     oResult = requests.get(sUrl, headers=sHeaders)
 
 
