@@ -203,12 +203,12 @@ def init():
         sUrl = m_sBaseUrl + '/auth/checksession'
         oResult = requests.get(sUrl, headers=headers)
 
-        if (oResult.ok == True):
+        if (oResult is not None) and (oResult.ok is True):
             oJsonResult = oResult.json()
             try:
                 sUser = oJsonResult['userId']
 
-                if (sUser == m_sUser):
+                if sUser == m_sUser:
                     return True
                 else:
                     return False
@@ -269,7 +269,7 @@ def getWorkspaces():
 
     oResult = requests.get(sUrl, headers=headers)
 
-    if (oResult is not None) and oResult.ok:
+    if (oResult is not None) and (oResult.ok is True):
         oJsonResult = oResult.json()
         return oJsonResult
     else:
@@ -290,12 +290,12 @@ def getWorkspaceIdByName(sName):
 
     oResult = requests.get(sUrl, headers=headers)
 
-    if (oResult.ok):
+    if (oResult is not None) and (oResult.ok is True):
         oJsonResult = oResult.json()
 
         for oWorkspace in oJsonResult:
             try:
-                if (oWorkspace['workspaceName'] == sName):
+                if oWorkspace['workspaceName'] == sName:
                     return oWorkspace['workspaceId']
             except:
                 return ''
@@ -349,7 +349,7 @@ def getProductsByWorkspace(sWorkspaceName):
 
     oResult = requests.get(sUrl, headers=headers, params=payload)
 
-    if (oResult.ok):
+    if oResult.ok is True:
         oJsonResults = oResult.json()
 
         for oProduct in oJsonResults:
@@ -372,19 +372,19 @@ def getFullProductPath(sProductName):
     global m_bIsOnServer
     global m_bDownloadActive
 
-    if (m_bIsOnServer):
+    if m_bIsOnServer:
         sFullPath = '/data/wasdi/'
     else:
         sFullPath = m_sBasePath
 
-    if (not (sFullPath.endswith('/') or sFullPath.endswith('\\'))):
+    if not (sFullPath.endswith('/') or sFullPath.endswith('\\')):
         sFullPath = sFullPath + '/'
 
     sFullPath = sFullPath + m_sUser + '/' + m_sActiveWorkspace + '/' + sProductName
 
-    if (m_bIsOnServer == False):
-        if (m_bDownloadActive == True):
-            if (os.path.isfile(sFullPath) == False):
+    if m_bIsOnServer is False:
+        if m_bDownloadActive is True:
+            if os.path.isfile(sFullPath) is False:
                 # Download The File from WASDI
                 print('LOCAL WASDI FILE MISSING: START DOWNLOAD... PLEASE WAIT')
                 downloadFile(sProductName)
@@ -400,12 +400,12 @@ def getSavePath():
     global m_sActiveWorkspace
     global m_sUser
 
-    if (m_bIsOnServer):
+    if m_bIsOnServer is True:
         sFullPath = '/data/wasdi/'
     else:
         sFullPath = m_sBasePath
 
-    if (not (sFullPath.endswith('/') or sFullPath.endswith('\\'))):
+    if not (sFullPath.endswith('/') or sFullPath.endswith('\\')):
         sFullPath = sFullPath + '/'
 
     sFullPath = sFullPath + m_sUser + '/' + m_sActiveWorkspace + '/'
@@ -435,7 +435,7 @@ def getWorkflows():
 
     oResult = requests.get(sUrl, headers=headers)
 
-    if (oResult.ok):
+    if (oResult is not None) and (oResult.ok is True):
         oJsonResults = oResult.json()
         return oJsonResults
     else:
@@ -457,7 +457,7 @@ def executeWorkflow(sInputFileName, sOutputFileName, sWorkflowName):
 
     for oWorkflow in aoWorkflows:
         try:
-            if (oWorkflow['name'] == sWorkflowName):
+            if oWorkflow['name'] == sWorkflowName:
                 sWorkflowId = oWorkflow['workflowId']
                 break
         except:
@@ -473,11 +473,11 @@ def executeWorkflow(sInputFileName, sOutputFileName, sWorkflowName):
 
     sProcessId = ''
 
-    if (oResult.ok):
+    if (oResult is not None) and (oResult.ok is True):
         oJsonResults = oResult.json()
 
         try:
-            if (oJsonResults['boolValue']):
+            if oJsonResults['boolValue'] is True:
                 sProcessId = oJsonResults['stringValue']
         except:
             return sProcessId
@@ -504,7 +504,7 @@ def getProcessStatus(sProcessId):
 
     sStatus = ''
 
-    if (oResult.ok):
+    if (oResult is not None) and (oResult.ok is True):
         oJsonResult = oResult.json()
 
         try:
@@ -526,17 +526,22 @@ def updateProcessStatus(sProcessId, sStatus, iPerc):
     headers = {'Content-Type': 'application/json', 'x-session-token': m_sSessionId}
     payload = {'sProcessId': sProcessId, 'status': sStatus, 'perc': iPerc}
 
-    if (iPerc < 0):
+    if iPerc < 0:
         print('iPerc < 0 not valid')
         return ''
-    if (iPerc > 100):
+    elif iPerc > 100:
         print('iPerc > 100 not valid')
         return ''
-    if (not (
-            sStatus == 'CREATED' or sStatus == 'RUNNING' or sStatus == 'STOPPED' or sStatus == 'DONE' or sStatus == 'ERROR')):
+    elif not (
+            sStatus == 'CREATED' or\
+            sStatus == 'RUNNING' or\
+            sStatus == 'STOPPED' or\
+            sStatus == 'DONE' or\
+            sStatus == 'ERROR'
+    ):
         print('sStatus must be a string like one of  CREATED,  RUNNING,  STOPPED,  DONE,  ERROR')
         return ''
-    if (sProcessId == ''):
+    elif sProcessId == '':
         return ''
 
     sUrl = m_sBaseUrl + '/process/updatebyid'
@@ -545,7 +550,7 @@ def updateProcessStatus(sProcessId, sStatus, iPerc):
 
     sStatus = ''
 
-    if (oResult.ok):
+    if (oResult is not None) and (oResult.ok is True):
         oJsonResult = oResult.json()
         try:
             sStatus = oJsonResult['status']
@@ -572,7 +577,7 @@ def setProcessPayload(sProcessId, data):
 
     sStatus = ''
 
-    if (oResult.ok):
+    if (oResult is not None) and (oResult.ok is True):
         oJsonResult = oResult.json()
         try:
             sStatus = oJsonResult['status']
@@ -601,10 +606,10 @@ def saveFile(sFileName):
 
     sProcessId = ''
 
-    if (oResult.ok):
+    if (oResult is not None) and (oResult.ok is True):
         oJsonResult = oResult.json()
         try:
-            if (oJsonResult['boolValue']):
+            if oJsonResult['boolValue'] is True:
                 sProcessId = oJsonResult['stringValue']
         except:
             sProcessId = ''
@@ -631,7 +636,7 @@ def downloadFile(sFileName):
 
     oResult = requests.get(sUrl, headers=headers, params=payload, stream=True)
 
-    if (oResult.status_code == 200):
+    if (oResult is not None) and oResult.status_code == 200:
         print('WASDI: got ok result, downloading')
 
         sSavePath = getSavePath()
@@ -660,7 +665,7 @@ def wasdiLog(sLogRow):
     global m_sSessionId
     global m_sActiveWorkspace
 
-    if (m_bIsOnServer):
+    if m_bIsOnServer:
 
         sHeaders = {'Content-Type': 'application/json', 'x-session-token': m_sSessionId}
 
