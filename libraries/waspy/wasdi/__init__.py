@@ -11,38 +11,41 @@ import os
 import json
 
 m_sUser = 'urs'
-m_sPassword= 'pw'
+m_sPassword = 'pw'
 m_sBasePath = '/data/wasdi/'
-m_sSessionCookie = ''
+m_sSessionId = ''
 m_sActiveWorkspace = ''
 m_sBaseUrl = 'http://www.wasdi.net/wasdiwebserver/rest'
 m_bIsOnServer = False
 m_bDownloadActive = True
 m_sMyProcId = ''
-m_oParamsDictionary = {}
+m_aoParamsDictionary = {}
+m_bUploadActive = True
+m_bVerbose = False
+m_sParametersFilePath = ''
 
 
 def getParametersDict():
     '''
     Get the full Params Dictionary
     '''
-    global m_oParamsDictionary
-    return m_oParamsDictionary
+    global m_aoParamsDictionary
+    return m_aoParamsDictionary
 
 def addParameter(sKey, oValue):
     '''
     Add a sigle Parameter to the Dictionary
     '''
-    global m_oParamsDictionary
-    m_oParamsDictionary[sKey] = oValue
+    global m_aoParamsDictionary
+    m_aoParamsDictionary[sKey] = oValue
     
 def getParameter(sKey):
     '''
     Get a Parameter. None if key does not exists
     '''
-    global m_oParamsDictionary
+    global m_aoParamsDictionary
     try:
-        return m_oParamsDictionary[sKey]
+        return m_aoParamsDictionary[sKey]
     except:
         return None
 
@@ -79,15 +82,15 @@ def setSessionId(sSessionId):
     """
     Set the WASDI Session
     """    
-    global m_sSessionCookie
-    m_sSessionCookie = sSessionId
+    global m_sSessionId
+    m_sSessionId = sSessionId
 
 def getSessionId():
     """
     Get the WASDI Session
     """    
-    global m_sSessionCookie
-    return m_sSessionCookie
+    global m_sSessionId
+    return m_sSessionId
     
 def setBasePath(sBasePath):
     """
@@ -160,6 +163,11 @@ def getProcId():
     global m_sMyProcId
     return m_sMyProcId
 
+
+def log(sLog):
+    if m_bVerbose:
+        print(sLog)
+
 def init():
     """
     Init WASDI Library. Call it after setting user, password, path and url or use it with a config file
@@ -168,10 +176,10 @@ def init():
     global m_sUser
     global m_sPassword
     global m_sBaseUrl
-    global m_sSessionCookie
+    global m_sSessionId
     
-    if (m_sSessionCookie != ''):
-        headers = {'Content-Type': 'application/json','x-session-token': m_sSessionCookie}
+    if (m_sSessionId != ''):
+        headers = {'Content-Type': 'application/json','x-session-token': m_sSessionId}
         
         sUrl = m_sBaseUrl + '/auth/checksession'
         
@@ -203,7 +211,7 @@ def init():
         
             oJsonResult = oResult.json()
             try:
-                m_sSessionCookie = oJsonResult['sessionId']
+                m_sSessionId = oJsonResult['sessionId']
                 return True
             except:
                 return False
@@ -234,9 +242,9 @@ def getWorkspaces():
     }
     """    
     global m_sBaseUrl
-    global m_sSessionCookie
+    global m_sSessionId
     
-    headers = {'Content-Type': 'application/json','x-session-token': m_sSessionCookie}
+    headers = {'Content-Type': 'application/json','x-session-token': m_sSessionId}
     
     sUrl = m_sBaseUrl + '/ws/byuser'
         
@@ -254,9 +262,9 @@ def getWorkspaceIdByName(sName):
     Return the WorkspaceId as a String, '' if there is any error
     """    
     global m_sBaseUrl
-    global m_sSessionCookie
+    global m_sSessionId
     
-    headers = {'Content-Type': 'application/json','x-session-token': m_sSessionCookie}
+    headers = {'Content-Type': 'application/json','x-session-token': m_sSessionId}
     
     sUrl = m_sBaseUrl + '/ws/byuser'
         
@@ -302,14 +310,14 @@ def getProductsByWorkspace(sWorkspaceName):
     the list is an array of string. Can be empty if there is any error
     """    
     global m_sBaseUrl
-    global m_sSessionCookie
+    global m_sSessionId
     global m_sActiveWorkspace
     
     sWorkspaceId = getWorkspaceIdByName(sWorkspaceName)
     
     m_sActiveWorkspace = sWorkspaceId
     
-    headers = {'Content-Type': 'application/json','x-session-token': m_sSessionCookie}
+    headers = {'Content-Type': 'application/json','x-session-token': m_sSessionId}
     payload = {'sWorkspaceId': sWorkspaceId}
     
     sUrl = m_sBaseUrl + '/product/byws'
@@ -394,10 +402,10 @@ def getWorkflows():
         
     """    
     global m_sBaseUrl
-    global m_sSessionCookie
+    global m_sSessionId
     
     
-    headers = {'Content-Type': 'application/json','x-session-token': m_sSessionCookie}
+    headers = {'Content-Type': 'application/json','x-session-token': m_sSessionId}
     
     sUrl = m_sBaseUrl + '/processing/getgraphsbyusr'
         
@@ -416,7 +424,7 @@ def executeWorkflow(sInputFileName, sOutputFileName, sWorkflowName):
     return '' if there was any problem
     """    
     global m_sBaseUrl
-    global m_sSessionCookie
+    global m_sSessionId
     global m_sActiveWorkspace
     
     sWorkflowId = ''
@@ -430,7 +438,7 @@ def executeWorkflow(sInputFileName, sOutputFileName, sWorkflowName):
         except:
             continue
     
-    headers = {'Content-Type': 'application/json','x-session-token': m_sSessionCookie}
+    headers = {'Content-Type': 'application/json','x-session-token': m_sSessionId}
     payload = {'workspace': m_sActiveWorkspace, 'source': sInputFileName,'destination':sOutputFileName,'workflowId':sWorkflowId}
     
     sUrl = m_sBaseUrl + '/processing/graph_id'
@@ -458,9 +466,9 @@ def getProcessStatus(sProcessId):
     STATUS are  CREATED,  RUNNING,  STOPPED,  DONE,  ERROR
     """    
     global m_sBaseUrl
-    global m_sSessionCookie
+    global m_sSessionId
     
-    headers = {'Content-Type': 'application/json','x-session-token': m_sSessionCookie}
+    headers = {'Content-Type': 'application/json','x-session-token': m_sSessionId}
     payload = {'sProcessId': sProcessId}
     
     sUrl = m_sBaseUrl + '/process/byid'
@@ -485,9 +493,9 @@ def updateProcessStatus(sProcessId, sStatus, iPerc):
     return the updated status as a String or '' if there was any problem
     """    
     global m_sBaseUrl
-    global m_sSessionCookie
+    global m_sSessionId
     
-    headers = {'Content-Type': 'application/json','x-session-token': m_sSessionCookie}
+    headers = {'Content-Type': 'application/json','x-session-token': m_sSessionId}
     payload = {'sProcessId': sProcessId,'status': sStatus,'perc':iPerc}
     
     if (iPerc<0):
@@ -523,9 +531,9 @@ def setProcessPayload(sProcessId, data):
     return the updated status as a String or '' if there was any problem
     """    
     global m_sBaseUrl
-    global m_sSessionCookie
+    global m_sSessionId
     
-    headers = {'Content-Type': 'application/json','x-session-token': m_sSessionCookie}
+    headers = {'Content-Type': 'application/json','x-session-token': m_sSessionId}
     payload = {'sProcessId': sProcessId, 'payload': json.dumps(data)}
     
     sUrl = m_sBaseUrl + '/process/setpayload'
@@ -550,10 +558,10 @@ def saveFile(sFileName):
     To work be sure that the file is on the server
     """    
     global m_sBaseUrl
-    global m_sSessionCookie
+    global m_sSessionId
     global m_sActiveWorkspace
     
-    headers = {'Content-Type': 'application/json','x-session-token': m_sSessionCookie}
+    headers = {'Content-Type': 'application/json','x-session-token': m_sSessionId}
     payload = {'file': sFileName,'workspace': m_sActiveWorkspace}
     
     sUrl = m_sBaseUrl + '/catalog/upload/ingestinws'
@@ -579,10 +587,10 @@ def downloadFile(sFileName):
     To work be sure that the file is on the server
     """    
     global m_sBaseUrl
-    global m_sSessionCookie
+    global m_sSessionId
     global m_sActiveWorkspace
     
-    headers = {'Content-Type': 'application/json','x-session-token': m_sSessionCookie}
+    headers = {'Content-Type': 'application/json','x-session-token': m_sSessionId}
     payload = {'filename': sFileName}
     
     sUrl = m_sBaseUrl + '/catalog/downloadbyname'
@@ -619,12 +627,12 @@ def downloadFile(sFileName):
 def wasdiLog(sLogRow):
     
     global m_sBaseUrl
-    global m_sSessionCookie
+    global m_sSessionId
     global m_sActiveWorkspace
     
     if (m_bIsOnServer):
         
-        sHeaders = {'Content-Type': 'application/json','x-session-token': m_sSessionCookie}
+        sHeaders = {'Content-Type': 'application/json','x-session-token': m_sSessionId}
         
         sUrl = m_sBaseUrl + '/processors/logs/add?processworkspace=' +m_sMyProcId
         
@@ -635,10 +643,10 @@ def wasdiLog(sLogRow):
 
 def deleteProduct(sProduct):
     global m_sBaseUrl
-    global m_sSessionCookie
+    global m_sSessionId
     global m_sActiveWorkspace
      
-    sHeaders = {'Content-Type': 'application/json','x-session-token': m_sSessionCookie}
+    sHeaders = {'Content-Type': 'application/json','x-session-token': m_sSessionId}
     
     sUrl = m_sBaseUrl + "/product/delete?sProductName="+sProduct+"&bDeleteFile=true&sWorkspaceId="+m_sActiveWorkspace+"&bDeleteLayer=true";
     
