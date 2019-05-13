@@ -4,6 +4,7 @@ package wasdi.shared.rabbit;
  * Created by s.adamo on 23/09/2016.
  */
 import java.io.IOException;
+import java.util.concurrent.TimeoutException;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.rabbitmq.client.Channel;
@@ -38,8 +39,18 @@ public class Send {
 	
 	public void Free() {
 		try {
-			if (m_oConnection!=null) m_oConnection.close();
+			
+			if (m_oChannel != null) {
+				m_oChannel.close();
+			}
+			
+			if (m_oConnection!=null) {
+				m_oConnection.close();
+			}
+			
 		} catch (IOException e) {
+			System.out.println("Send.Free: Error closing connection " + e.toString());
+		} catch (TimeoutException e) {
 			System.out.println("Send.Free: Error closing connection " + e.toString());
 		}
 	}

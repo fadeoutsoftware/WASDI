@@ -541,7 +541,7 @@ public class ProcessorsResource {
 	@GET
 	@Path("/logs/list")
 	public ArrayList<ProcessorLogViewModel> getLogs(@HeaderParam("x-session-token") String sSessionId,
-			@QueryParam(" ") String sProcessWorkspaceId,
+			@QueryParam("processworkspace") String sProcessWorkspaceId,
 			//note: range extremes are included
 			@QueryParam("startrow") Integer iStartRow, @QueryParam("endrow") Integer iEndRow) {
 		
