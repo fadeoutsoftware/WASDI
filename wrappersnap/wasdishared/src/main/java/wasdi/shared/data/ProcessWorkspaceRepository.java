@@ -96,6 +96,33 @@ public class ProcessWorkspaceRepository extends MongoRepository {
         return aoReturnList;
     }
     
+    public List<ProcessWorkspace> GetProcessByWorkspace(String sWorkspaceId, int iStartIndex, int iEndIndex) {
+
+        final ArrayList<ProcessWorkspace> aoReturnList = new ArrayList<ProcessWorkspace>();
+        try {
+
+            FindIterable<Document> oWSDocuments = getCollection("processworkpsace").find(new Document("workspaceId", sWorkspaceId)).skip(iStartIndex).limit(iEndIndex-iStartIndex);
+            fillList(aoReturnList, oWSDocuments);
+
+        } catch (Exception oEx) {
+            oEx.printStackTrace();
+        }
+
+        return aoReturnList;
+    }
+    
+    public long CountByWorkspace(String sWorkspaceId) {
+    	try {
+    		long lCount = getCollection("processworkpsace").count(new Document("workspaceId", sWorkspaceId));
+    		return lCount;
+    	}
+    	catch (Exception oEx) {
+    		oEx.printStackTrace();
+		}
+    	
+    	return 0;
+    }
+    
     public List<ProcessWorkspace> GetProcessByUser(String sUserId) {
 
         final ArrayList<ProcessWorkspace> aoReturnList = new ArrayList<ProcessWorkspace>();
