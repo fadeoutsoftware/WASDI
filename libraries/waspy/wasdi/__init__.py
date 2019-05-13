@@ -12,6 +12,7 @@ import os
 import json
 import urllib.parse
 import traceback
+import re
 
 m_sUser = 'urs'
 m_sPassword = 'pw'
@@ -685,7 +686,8 @@ def deleteProduct(sProduct):
     global m_sActiveWorkspace
 
     sHeaders = {'Content-Type': 'application/json', 'x-session-token': m_sSessionId}
-    sUrl = m_sBaseUrl + "/product/delete?sProductName=" + sProduct + "&bDeleteFile=true&sWorkspaceId=" + m_sActiveWorkspace + "&bDeleteLayer=true";
+    sUrl = m_sBaseUrl + "/product/delete?sProductName=" + sProduct + "&bDeleteFile=true&sWorkspaceId=" +\
+           m_sActiveWorkspace + "&bDeleteLayer=true";
     oResult = requests.get(sUrl, headers=sHeaders)
 
 
@@ -718,8 +720,8 @@ def searchEOImages(sPlatform, sDateFrom, sDateTo, dULLat, dULLon, dLRLat, dLRLon
         log("searchEOImages: sDateFrom cannot be None")
         return aoReturnList
 
-    if len(sDateFrom) < 10 or sDateFrom[4] != '-' or sDateFrom[7] != '-':
-        # todo improve validation
+    # if (len(sDateFrom) < 10) or (sDateFrom[4] != '-') or (sDateFrom[7] != '-'):
+    if not bool(re.match(r"\d\d\d\d\-\d\d\-\d\d", sDateFrom)):
         log("searchEOImages: sDateFrom must be in format YYYY-MM-DD")
         return aoReturnList
 
@@ -727,8 +729,8 @@ def searchEOImages(sPlatform, sDateFrom, sDateTo, dULLat, dULLon, dLRLat, dLRLon
         log("searchEOImages: sDateTo cannot be None")
         return aoReturnList
 
-    if len(sDateTo) < 10 or sDateTo[4] != '-' or sDateTo[7] != '-':
-        # todo improve validation
+    # if len(sDateTo) < 10 or sDateTo[4] != '-' or sDateTo[7] != '-':
+    if not bool(re.match(r"\d\d\d\d\-\d\d\-\d\d", sDateTo)):
         log("searchEOImages: sDateTo must be in format YYYY-MM-DD")
         return aoReturnList
 
@@ -786,8 +788,14 @@ def searchEOImages(sPlatform, sDateFrom, sDateTo, dULLat, dULLon, dLRLat, dLRLon
         # todo write standard headers, maybe make a function
         oResponse = requests.post(sUrl, data=sQueryBody, headers=asHeaders)
         aoJSONMap = []
-        # todo populate list from response
-        # List<Map<String, Object>> aoJSONMap = s_oMapper.readValue(sResponse, new TypeReference<List<Map<String,Object>>>(){})
+        try:
+            oJsonResponse = oResponse.json()
+            # todo populate list from response
+            # List<Map<String, Object>> aoJSONMap = s_oMapper.readValue(sResponse, new TypeReference<List<Map<String,Object>>>(){})
+        except Exception as oEx:
+            print('[ERROR] waspy.searchEOImages: exception while trying to convert response into JSON object')
+            raise
+
         log("" + aoJSONMap)
         return aoJSONMap
     except Exception as oEx:
