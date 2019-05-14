@@ -277,6 +277,15 @@ def openWorkspaceById(sWorkspaceId):
     
     return m_sActiveWorkspace
 
+def getActiveWorkspaceId():
+    """
+    Get Active workspace Id
+    return the WorkspaceId as a String, '' if there is any error
+    """    
+    global m_sActiveWorkspace
+    
+    return m_sActiveWorkspace
+
 def openWorkspace(sWorkspaceName):
     """
     Open a workspace
@@ -337,6 +346,15 @@ def getProductsByActiveWorkspace():
     global m_sActiveWorkspace
     
     return getProductsByWorkspaceId(m_sActiveWorkspace)
+
+def getActiveWorkspace():
+    """
+    Get the list of products in a workspace
+    the list is an array of string. Can be empty if there is any error
+    """    
+    global m_sActiveWorkspace
+    
+    return m_sActiveWorkspace
 
 
 def getFullProductPath(sProductName):

@@ -285,6 +285,15 @@ def openWorkspaceById(sWorkspaceId):
     
     return m_sActiveWorkspace
 
+def getActiveWorkspaceId():
+    """
+    Get Active workspace Id
+    return the WorkspaceId as a String, '' if there is any error
+    """    
+    global m_sActiveWorkspace
+    
+    return m_sActiveWorkspace
+
 def openWorkspace(sWorkspaceName):
     """
     Open a workspace
