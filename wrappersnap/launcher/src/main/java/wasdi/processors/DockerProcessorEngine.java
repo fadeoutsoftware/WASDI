@@ -311,7 +311,7 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 			
 			sUrl += "?user=" + oParameter.getUserId();
 			sUrl += "&sessionid=" + oParameter.getSessionID();
-			sUrl += "&workspace=" + oParameter.getWorkspace();
+			sUrl += "&workspaceid=" + oParameter.getWorkspace();
 			
 			LauncherMain.s_oLogger.debug("WasdiProcessorEngine.run: calling URL = " + sUrl);
 			
