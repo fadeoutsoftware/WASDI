@@ -678,6 +678,9 @@ service('GlobeService', ['$http',  'ConstantsService','SatelliteService', functi
             // Check we have products
             if(utilsIsObjectNullOrUndefined(aoProducts) === true) return false;
 
+            // Clear the previous footprints
+            this.removeAllEntities();
+
             var iProductsLength = aoProducts.length;
 
             // For each product

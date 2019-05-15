@@ -242,6 +242,15 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 		try {
 			if (asArgs==null) asArgs = new ArrayList<String>();
 			asArgs.add(0, sCommand);
+			
+			String sCommandLine = "";
+			
+			for (String sArg : asArgs) {
+				sCommandLine += sArg + " ";
+			}
+			
+			LauncherMain.s_oLogger.debug("ShellExec CommandLine: " + sCommandLine);
+			
 			ProcessBuilder pb = new ProcessBuilder(asArgs.toArray(new String[0]));
 			pb.redirectErrorStream(true);
 			Process process = pb.start();
@@ -302,26 +311,37 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 			
 			sUrl += "?user=" + oParameter.getUserId();
 			sUrl += "&sessionid=" + oParameter.getSessionID();
-			sUrl += "&workspace=" + oParameter.getWorkspace();
+			sUrl += "&workspaceid=" + oParameter.getWorkspace();
 			
 			LauncherMain.s_oLogger.debug("WasdiProcessorEngine.run: calling URL = " + sUrl);
 			
 			
 			URL oProcessorUrl = new URL(sUrl);
+			
+			LauncherMain.s_oLogger.debug("WasdiProcessorEngine.run: call open connection");
 			HttpURLConnection oConnection = (HttpURLConnection) oProcessorUrl.openConnection();
 			oConnection.setDoOutput(true);
 			oConnection.setRequestMethod("POST");
 			oConnection.setRequestProperty("Content-Type", "application/json");
 
-			OutputStream oOutputStream = oConnection.getOutputStream();
-			oOutputStream.write(sJson.getBytes());
-			oOutputStream.flush();
-			
-			if (! (oConnection.getResponseCode() == HttpURLConnection.HTTP_OK || oConnection.getResponseCode() == HttpURLConnection.HTTP_CREATED )) {
+			OutputStream oOutputStream = null;
+			try {
 				
+				oOutputStream = oConnection.getOutputStream();
+				oOutputStream.write(sJson.getBytes());
+				oOutputStream.flush();
+				
+				if (! (oConnection.getResponseCode() == HttpURLConnection.HTTP_OK || oConnection.getResponseCode() == HttpURLConnection.HTTP_CREATED )) {
+					throw new Exception();
+				}
+			}
+			catch (Exception e) {
 				LauncherMain.s_oLogger.debug("WasdiProcessorEngine.run: connection failed: try to start container again");
 				
 				// Try to start Again the docker
+				
+				
+				String sDockerName = "wasdi/"+sProcessorName+":"+oProcessor.getVersion();
 				
 				ArrayList<String> asArgs = new ArrayList<>();
 				// Run the container
@@ -333,7 +353,7 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 				// NOTA: QUI INVECE SI CHE ABBIAMO PROBLEMI DI DIRITTI!!!!!!!!!!!!
 				asArgs.add("-v"+ m_sWorkingRootPath + ":/data/wasdi");
 				asArgs.add("-p127.0.0.1:"+iProcessorPort+":5000");
-				asArgs.add(oProcessor.getName());
+				asArgs.add(sDockerName);
 				
 				String sCommand = "docker";
 				
@@ -363,7 +383,7 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 				
 				LauncherMain.s_oLogger.debug("WasdiProcessorEngine.run: ok container recovered");
 			}
-
+				
 			BufferedReader oBufferedReader = new BufferedReader(new InputStreamReader((oConnection.getInputStream())));
 
 			String sOutputResult;
