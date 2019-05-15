@@ -15,8 +15,10 @@
         this.m_bSortReverse = true;
         this.m_sSortByColum = "Date";
         this.m_iCurrentPage = 1;
-        this.m_iTotalPages = 0;
+        // this.m_iTotalPages = 0;
+        this.m_iNumberOfLogs = 0;
         this.m_iNumberOfLogsPerPage = 10;
+
         var oController = this;
         $scope.close = function(result) {
             oClose(result, 500); // close, but give 500ms for bootstrap to animate
@@ -43,7 +45,7 @@
                 var iLastRow = oController.m_iNumberOfLogsPerPage * newValue;
                 var iFirstRow = oController.m_iNumberOfLogsPerPage * (newValue - 1);
                 oController.getLogs(oController.m_oProcess.processObjId,iFirstRow,iLastRow);
-                oController.getCountLogs(oController.m_oProcess.processObjId);
+                oController.getCountLogs(oController.m_oProcess.processObjId,oController.getCountLogsCallback);
                 // if(newValue.name === "Untitled Workspace")
                 // {
                 //     $scope.m_oController.getWorkspacesInfo();
@@ -58,9 +60,22 @@
         this.m_sSortByColum = propertyName;
     };
 
-    ProcessErrorLogsDialogController.prototype.getNumberOfPages = function(iNumberOfLogs){
-        return iNumberOfLogs/this.m_iNumberOfLogsPerPage;
-    };
+    // ProcessErrorLogsDialogController.prototype.getNumberOfPages = function(iNumberOfLogs){
+    //
+    //     if( (utilsIsObjectNullOrUndefined(this.m_iNumberOfLogsPerPage) === true)|| ( this.m_iNumberOfLogsPerPage === 0 ))
+    //     {
+    //         return 0;
+    //     }
+    //     if( utilsIsObjectNullOrUndefined(iNumberOfLogs) === true )
+    //     {
+    //         return 0;
+    //     }
+    //     var iNumberOfPages = iNumberOfLogs/this.m_iNumberOfLogsPerPage;
+    //
+    //     //Math.ceil(x) returns the value of x rounded up to its nearest integer
+    //     iNumberOfPages = Math.ceil(iNumberOfPages);
+    //     return iNumberOfPages;
+    // };
 
     ProcessErrorLogsDialogController.prototype.startTick=function(sStatus){
         if( ( utilsIsStrNullOrEmpty(sStatus) === true ) || ( sStatus !== "RUNNING" ) )
@@ -73,7 +88,7 @@
             var iLastRow = oController.m_iNumberOfLogsPerPage * oController.m_iCurrentPage;
             var iFirstRow = oController.m_iNumberOfLogsPerPage * (oController.m_iCurrentPage - 1);
             oController.getLogs(oController.m_oProcess.processObjId,iFirstRow,iLastRow);
-            oController.getCountLogs(oController.m_oProcess.processObjId);
+            oController.getCountLogs(oController.m_oProcess.processObjId,oController.getCountLogsCallback);
 
         }, 5000);
 
@@ -141,8 +156,38 @@
 
 
     }
+     ProcessErrorLogsDialogController.prototype.getCountLogsCallback = function(data, status,oController)
+     {
+         if (data != null)
+         {
+             if (data != undefined)
+             {
+                 oController.m_iNumberOfLogs = data;
+                 // oController.m_iTotalPages = oController.getNumberOfPages(data);
+             }
+         }
+     }
 
-     ProcessErrorLogsDialogController.prototype.getCountLogs = function(oProcessObjId)
+     // ProcessErrorLogsDialogController.prototype.getCountLogs = function(oProcessObjId, oCallback)
+     // {
+     //     if(utilsIsObjectNullOrUndefined(oProcessObjId) === true)
+     //     {
+     //         return false;
+     //     }
+     //     // oProcessObjId = "fb99a0b1-93cb-40ab-9d44-9701a7b11b9b";
+     //
+     //     var oController = this;
+     //     this.m_oProcessorService.getCountLogs(oProcessObjId).success(function (data, status) {
+     //         oCallback(data, status,oController);
+     //     }).error(function (data,status) {
+     //         //alert('error');
+     //         utilsVexDialogAlertTop('GURU MEDITATION<br>ERROR IN GET COUNT LOGS');
+     //     });
+     //     return true;
+     //
+     // };
+
+    ProcessErrorLogsDialogController.prototype.getCountLogs = function(oProcessObjId)
      {
          if(utilsIsObjectNullOrUndefined(oProcessObjId) === true)
          {
@@ -156,7 +201,8 @@
              {
                  if (data != undefined)
                  {
-                     oController.m_iTotalPages = oController.getNumberOfPages(data);
+                     oController.m_iNumberOfLogs = data;
+                     // oController.m_iTotalPages = oController.getNumberOfPages(data);
                  }
              }
          }).error(function (data,status) {

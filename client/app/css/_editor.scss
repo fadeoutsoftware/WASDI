@@ -1,6 +1,10 @@
 .editor-view {
 
     .toolbar{
+        .filter-search-wrapper{
+            margin-left: 96px;
+            width: 300px;
+        }
         .button-menu-with-icons{
             &:not(:last-of-type){
                 padding-right: 0px;

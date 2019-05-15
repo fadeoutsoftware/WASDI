@@ -13,7 +13,8 @@
       //BODY
       .modal-body
       {
-        .table-container{
+          max-height: 85vh;
+          .table-container{
             margin-top: 20px;
             table{
                 thead {
