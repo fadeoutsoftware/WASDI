@@ -1,5 +1,4 @@
 import wasdi
-import os
 
 def run(parameters, processId):
     
@@ -18,8 +17,15 @@ def run(parameters, processId):
     wasdi.wasdiLog('PURGE DATE ' + sPurge)
     wasdi.wasdiLog('SENTINEL ' + sSentinel)
     wasdi.wasdiLog('MASKS ' + sMasks)
+    
+    wasdi.wasdiLog('ACTIVE WORKSPACE = ' + wasdi.getActiveWorkspaceId())
+    
     #wasdi.wasdiLog('FLOODTILES ' + sMasks)
     asProducts = wasdi.getProductsByActiveWorkspace()
+    
+    iLen = len(asProducts)
+    
+    wasdi.wasdiLog('Products in the WORKSPACE = ' + str(iLen))
     
     for sProduct in asProducts:
         

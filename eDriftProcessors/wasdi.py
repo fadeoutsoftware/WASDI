@@ -649,6 +649,8 @@ def wasdiLog(sLogRow):
     global m_sSessionCookie
     global m_sActiveWorkspace
     
+    print(sLogRow)
+    
     if (m_bIsOnServer):
         
         sHeaders = {'Content-Type': 'application/json','x-session-token': m_sSessionCookie}
@@ -656,9 +658,7 @@ def wasdiLog(sLogRow):
         sUrl = m_sBaseUrl + '/processors/logs/add?processworkspace=' +m_sMyProcId
         
         oResult = requests.post(sUrl, data = sLogRow,headers=sHeaders)
-        
-    else:
-        print(sLogRow)    
+           
 
 def deleteProduct(sProduct):
     global m_sBaseUrl
