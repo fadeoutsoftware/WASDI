@@ -16,17 +16,22 @@ import re
 
 m_sUser = 'urs'
 m_sPassword = 'pw'
-m_sBasePath = '/data/wasdi/'
-m_sSessionId = ''
+
 m_sActiveWorkspace = ''
+
+m_sParametersFilePath = ''
+m_sSessionId = ''
+m_sBasePath = '/data/wasdi/'
+
+m_bDownloadActive = True
+m_bUploadActive = True
+m_bVerbose = True
+m_aoParamsDictionary = {}
+
+m_sMyProcId = ''
 m_sBaseUrl = 'http://www.wasdi.net/wasdiwebserver/rest'
 m_bIsOnServer = False
-m_bDownloadActive = True
-m_sMyProcId = ''
-m_aoParamsDictionary = {}
-m_bUploadActive = True
-m_bVerbose = False
-m_sParametersFilePath = ''
+
 
 
 def getParams():
@@ -184,13 +189,70 @@ def getMyProcId():
     global m_sMyProcId
     return m_sMyProcId
 
-
 def log(sLog):
     if m_bVerbose:
         print(sLog)
 
+def getStandardHeaders():
+    global m_sSessionId
+    asHeaders = {'Content-Type': 'application/json', 'x-session-token': m_sSessionId}
+    return asHeaders
 
-def init():
+def __loadConfig(sConfigFilePath):
+    """
+    Loads configuration from given file
+    :param sConfigFilePath: a string containing a path to the configuration file
+    """
+    if sConfigFilePath is None:
+        raise TypeError("[ERROR] waspy.__loadConfigParams: config parameter file name is None, cannot load config")
+    if sConfigFilePath == '':
+        raise ValueError("[ERROR] waspy.__loadConfigParams: config parameter file name is empty, cannot load config")
+
+    global m_sUser
+    global m_sPassword
+    global m_sActiveWorkspace
+    global m_sParametersFilePath
+    global m_sSessionId
+    global m_sBasePath
+
+    global m_bDownloadActive
+    global m_bUploadActive
+    global m_bVerbose
+
+    try:
+        # assume it is a JSON file
+        with open(sConfigFilePath) as oJsonFile:
+            oJson = json.load(oJsonFile)
+
+            m_sUser = oJson["USER"]
+            m_sPassword = oJson["PASSWORD"]
+            sTmpWorkspace = oJson["WORKSPACE"]
+            if (sTmpWorkspace is None) and (sTmpWorkspace == ''):
+                m_sActiveWorkspace = oJson["WORKSPACEID"]
+            m_sParametersFilePath = oJson["PARAMETERSFILEPATH"]
+            m_bDownloadActive = bool(oJson["DOWNLOADACTIVE"])
+            m_bUploadActive = bool(oJson["UPLOADACTIVE"])
+            m_bVerbose = bool(oJson["VERBOSE"])
+
+
+    except Exception as oEx:
+        print('[ERROR] waspy.__loadConfigParams: something went wrong')
+        raise
+
+
+def __loadParams():
+    """
+    Loads parameters from file, if specified in configuration file
+    """
+    global m_sParametersFilePath
+    global m_aoParamsDictionary
+
+    if (m_sParametersFilePath is not None) and (m_sParametersFilePath != ''):
+        with open(m_sParametersFilePath) as oJsonFile:
+            m_aoParamsDictionary = json.load(oJsonFile)
+
+
+def init(sConfigFilePath):
     """
     Init WASDI Library. Call it after setting user, password, path and url or use it with a config file
     Return True if login was successful, False otherwise
@@ -201,6 +263,10 @@ def init():
     global m_sBaseUrl
     global m_sSessionId
 
+    if sConfigFilePath is not None:
+        __loadConfig(sConfigFilePath)
+    __loadParams()
+
     if m_sSessionId != '':
         headers = {'Content-Type': 'application/json', 'x-session-token': m_sSessionId}
         sUrl = m_sBaseUrl + '/auth/checksession'
@@ -210,7 +276,6 @@ def init():
             oJsonResult = oResult.json()
             try:
                 sUser = oJsonResult['userId']
-
                 if sUser == m_sUser:
                     return True
                 else:
@@ -221,11 +286,8 @@ def init():
             return False
     else:
         headers = {'Content-Type': 'application/json'}
-
         sUrl = m_sBaseUrl + '/auth/login'
-
         sPayload = '{"userId":"' + m_sUser + '","userPassword":"' + m_sPassword + '" }'
-
         oResult = requests.post(sUrl, data=sPayload, headers=headers)
 
         if oResult.ok is True:
@@ -692,8 +754,26 @@ def deleteProduct(sProduct):
 
 
 # todo doing - in progress...
-def searchEOImages(sPlatform, sDateFrom, sDateTo, dULLat, dULLon, dLRLat, dLRLon, sProductType, iOrbitNumber,
+def searchEOImages(sPlatform, sDateFrom, sDateTo,
+                   dULLat, dULLon, dLRLat, dLRLon,
+                   sProductType, iOrbitNumber,
                    sSensorOperationalMode, sCloudCoverage):
+    """
+    Search EO images
+
+    :param sPlatform: satellite platform (S1 or S2)
+    :param sDateFrom: inital date
+    :param sDateTo: final date
+    :param dULLat: Latitude of Upper-Left corner
+    :param dULLon: Longitude of Upper-Left corner
+    :param dLRLat: Latitude of Lower-Right corner
+    :param dLRLon: Longitude of Lower-Right corner
+    :param sProductType: type of EO product
+    :param iOrbitNumber: orbit number
+    :param sSensorOperationalMode: sensor operational mode
+    :param sCloudCoverage: interval of allowed cloud coverage, e.g. "[0 TO 22.5]"
+    :return: a list of results
+    """
     aoReturnList = []
 
     if sPlatform is None:
@@ -782,22 +862,20 @@ def searchEOImages(sPlatform, sDateFrom, sDateTo, dULLat, dULLon, dLRLat, dLRLon
 
     try:
         sUrl = getBaseUrl() + "/search/querylist?" + sQuery
-        # todo remaining Java code to translate
-        # String sResponse = httpPost(sUrl, sQueryBody, getStandardHeaders())
-        asHeaders = {}
         # todo write standard headers, maybe make a function
+        asHeaders = getStandardHeaders()
         oResponse = requests.post(sUrl, data=sQueryBody, headers=asHeaders)
-        aoJSONMap = []
         try:
-            oJsonResponse = oResponse.json()
-            # todo populate list from response
+            # populate list from response
             # List<Map<String, Object>> aoJSONMap = s_oMapper.readValue(sResponse, new TypeReference<List<Map<String,Object>>>(){})
+            oJsonResponse = oResponse.json()
+            aoReturnList = oJsonResponse
         except Exception as oEx:
             print('[ERROR] waspy.searchEOImages: exception while trying to convert response into JSON object')
             raise
 
-        log("" + aoJSONMap)
-        return aoJSONMap
+        log("" + repr(aoReturnList))
+        return aoReturnList
     except Exception as oEx:
         print(type(oEx))
         traceback.print_exc()
