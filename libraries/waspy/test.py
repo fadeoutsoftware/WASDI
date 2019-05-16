@@ -4,21 +4,26 @@ import os
 print(os.getcwd())
 
 bInitOk = False
-bInitOk = wasdi.init('./config.json')
+# wasdi.__loadConfig('./config.json')
+# wasdi.m_sSessionId = '04ff2155-0166-4ea0-b662-114e9717337d'
+# wasdi.setUser('c.nattero@fadeout.it')
+# bInitOk = wasdi.init()
 
+bInitOk = wasdi.init('./config.json')
 
 
 if bInitOk:
     print('[INFO] waspy: init ok')
 
-    wasdi.printStatus()
-
-    bExists = wasdi.__fileExistsOnWasdi('itsAFalseFileDoNeverMind')
+    sFileName = 'itsAFalseFileDoNeverMind'
+    bExists = wasdi.__fileExistsOnWasdi(sFileName)
     assert(bExists is False)
-    bExists = wasdi.__fileExistsOnWasdi('S1A_EW_GRDM_1SSH_20190509T004543_20190509T004646_027143_030F49_B737.zip')
+    sFileName = 'S1A_EW_GRDM_1SSH_20190509T004543_20190509T004646_027143_030F49_B737.zip'
+    bExists = wasdi.__fileExistsOnWasdi(sFileName)
     assert(bExists is True)
+    if bExists:
+        wasdi.downloadFile(sFileName)
 
-    '''
     aoSearchResult = wasdi.searchEOImages(
         sPlatform="S1",
         sDateFrom="2019-05-06",
@@ -35,11 +40,6 @@ if bInitOk:
         sCloudCoverage=None
     )
     print(repr(aoSearchResult))
-    '''
-
-
 
 else:
     print('[ERROR] cannot init waspy')
-
-
