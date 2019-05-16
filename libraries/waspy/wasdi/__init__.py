@@ -31,6 +31,34 @@ m_sMyProcId = ''
 m_sBaseUrl = 'http://www.wasdi.net/wasdiwebserver/rest'
 m_bIsOnServer = False
 
+def printStatus():
+    global m_sUser
+    global m_sPassword
+    global m_sActiveWorkspace
+    global m_sParametersFilePath
+    global m_sSessionId
+    global m_sBasePath
+    global m_bDownloadActive
+    global m_bUploadActive
+    global m_bVerbose
+    global m_aoParamsDictionary
+    global m_sMyProcId
+    global m_sBaseUrl
+    global m_bIsOnServer
+
+    print('user: '+str(m_sUser))
+    print('password: '+str(m_sPassword))
+    print('active workspace: '+str(m_sActiveWorkspace))
+    print('parameters file path: '+str(m_sParametersFilePath))
+    print('session id: '+str(m_sSessionId))
+    print('base path: '+str(m_sBasePath))
+    print('download active: '+str(m_bDownloadActive))
+    print('upload active: '+str(m_bUploadActive))
+    print('verbose: '+str(m_bVerbose))
+    print('param dict: '+str(m_aoParamsDictionary))
+    print('proc id: '+str(m_sMyProcId))
+    print('base url: '+str(m_sBaseUrl))
+    print('is on server: '+str(m_bIsOnServer))
 
 def getParametersDict():
     '''
