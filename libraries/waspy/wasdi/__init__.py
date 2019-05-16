@@ -202,7 +202,7 @@ def log(sLog):
     if m_bVerbose:
         print(sLog)
 
-def getStandardHeaders():
+def __getStandardHeaders():
     global m_sSessionId
     asHeaders = {'Content-Type': 'application/json', 'x-session-token': m_sSessionId}
     return asHeaders
@@ -285,7 +285,7 @@ def init(sConfigFilePath):
 
 
         if m_sSessionId != '':
-            asHeaders = getStandardHeaders()
+            asHeaders = __getStandardHeaders()
             sUrl = m_sBaseUrl + '/auth/checksession'
             oResponse = requests.get(sUrl, headers=asHeaders)
             if (oResponse is not None) and (oResponse.ok is True):
@@ -352,7 +352,7 @@ def getWorkspaces():
     global m_sBaseUrl
     global m_sSessionId
 
-    asHeaders = getStandardHeaders()
+    asHeaders = __getStandardHeaders()
 
     sUrl = m_sBaseUrl + '/ws/byuser'
         
@@ -373,7 +373,7 @@ def getWorkspaceIdByName(sName):
     global m_sBaseUrl
     global m_sSessionId
 
-    asHeaders = getStandardHeaders()
+    asHeaders = __getStandardHeaders()
 
     sUrl = m_sBaseUrl + '/ws/byuser'
 
@@ -522,7 +522,7 @@ def getWorkflows():
     global m_sBaseUrl
     global m_sSessionId
 
-    asHeaders = getStandardHeaders()
+    asHeaders = __getStandardHeaders()
     
     sUrl = m_sBaseUrl + '/processing/getgraphsbyusr'
         
@@ -555,7 +555,7 @@ def executeWorkflow(sInputFileName, sOutputFileName, sWorkflowName):
         except:
             continue
 
-    asHeaders = getStandardHeaders()
+    asHeaders = __getStandardHeaders()
     payload = {'workspace': m_sActiveWorkspace, 'source': sInputFileName, 'destination': sOutputFileName,
                'workflowId': sWorkflowId}
 
@@ -586,7 +586,7 @@ def getProcessStatus(sProcessId):
     global m_sBaseUrl
     global m_sSessionId
 
-    asHeaders = getStandardHeaders()
+    asHeaders = __getStandardHeaders()
     payload = {'sProcessId': sProcessId}
     
     sUrl = m_sBaseUrl + '/process/byid'
@@ -613,7 +613,7 @@ def updateProcessStatus(sProcessId, sStatus, iPerc):
     global m_sBaseUrl
     global m_sSessionId
 
-    asHeaders = getStandardHeaders()
+    asHeaders = __getStandardHeaders()
     payload = {'sProcessId': sProcessId, 'status': sStatus, 'perc': iPerc}
 
     if iPerc < 0:
@@ -657,7 +657,7 @@ def setProcessPayload(sProcessId, data):
     global m_sBaseUrl
     global m_sSessionId
 
-    asHeaders = getStandardHeaders()
+    asHeaders = __getStandardHeaders()
     payload = {'sProcessId': sProcessId, 'payload': json.dumps(data)}
     
     sUrl = m_sBaseUrl + '/process/setpayload'
@@ -685,7 +685,7 @@ def saveFile(sFileName):
     global m_sSessionId
     global m_sActiveWorkspace
 
-    asHeaders = getStandardHeaders()
+    asHeaders = __getStandardHeaders()
     payload = {'file': sFileName, 'workspace': m_sActiveWorkspace}
 
     sUrl = m_sBaseUrl + '/catalog/upload/ingestinws'
@@ -717,7 +717,7 @@ def downloadFile(sFileName):
     global m_sSessionId
     global m_sActiveWorkspace
 
-    asHeaders = getStandardHeaders()
+    asHeaders = __getStandardHeaders()
     payload = {'filename': sFileName}
     
     sUrl = m_sBaseUrl + '/catalog/downloadbyname'
@@ -756,7 +756,7 @@ def wasdiLog(sLogRow):
     global m_sActiveWorkspace
 
     if m_bIsOnServer:
-        asHeaders = getStandardHeaders()
+        asHeaders = __getStandardHeaders()
         sUrl = m_sBaseUrl + '/processors/logs/add?processworkspace=' + m_sMyProcId
         oResult = requests.post(sUrl, data=sLogRow, headers=asHeaders)
 
@@ -768,7 +768,7 @@ def deleteProduct(sProduct):
     global m_sSessionId
     global m_sActiveWorkspace
 
-    asHeaders = getStandardHeaders
+    asHeaders = __getStandardHeaders
     sUrl = m_sBaseUrl +\
            "/product/delete?sProductName="\
            + sProduct +\
@@ -884,13 +884,12 @@ def searchEOImages(sPlatform, sDateFrom, sDateTo,
     sQuery = sFootPrint + sQuery
 
     sQueryBody = "[\"" + sQuery.replace("\"", "\\\"") + "\"]";
-    sQuery = urllib.parse.quote(sQuery)
     sQuery = "sQuery=" + sQuery + "&offset=0&limit=10&providers=ONDA"
 
     try:
         sUrl = getBaseUrl() + "/search/querylist?" + sQuery
         # todo write standard headers, maybe make a function
-        asHeaders = getStandardHeaders()
+        asHeaders = __getStandardHeaders()
         oResponse = requests.post(sUrl, data=sQueryBody, headers=asHeaders)
         try:
             # populate list from response
@@ -935,14 +934,19 @@ def __fileExistsOnWasdi(sFileName):
            "&workspace=" +\
            sActiveWorkspace
 
-    asHeaders = getStandardHeaders()
+    asHeaders = __getStandardHeaders()
     oResult = requests.get(sUrl, headers=asHeaders)
 
     return oResult.ok
 
 
 def __unzip(sAttachmentName, sPath):
-
+    """
+    Unzips a file
+    :param sAttachmentName: filename to unzip
+    :param sPath: both the path where the file is and where it must be unzipped
+    :return:
+    """
     if sPath is None:
         raise TypeError('No path no party!')
     if sAttachmentName:
