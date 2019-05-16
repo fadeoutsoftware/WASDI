@@ -12,17 +12,17 @@ bInitOk = False
 bInitOk = wasdi.init('./config.json')
 
 
-
-
 if bInitOk:
     print('[INFO] waspy: init ok')
 
-    wasdi.printStatus()
-
-    bExists = wasdi.__fileExistsOnWasdi('itsAFalseFileDoNeverMind')
+    sFileName = 'itsAFalseFileDoNeverMind'
+    bExists = wasdi.__fileExistsOnWasdi(sFileName)
     assert(bExists is False)
-    bExists = wasdi.__fileExistsOnWasdi('S1A_EW_GRDM_1SSH_20190509T004543_20190509T004646_027143_030F49_B737.zip')
+    sFileName = 'S1A_EW_GRDM_1SSH_20190509T004543_20190509T004646_027143_030F49_B737.zip'
+    bExists = wasdi.__fileExistsOnWasdi(sFileName)
     assert(bExists is True)
+    if bExists:
+        wasdi.downloadFile(sFileName)
 
     aoSearchResult = wasdi.searchEOImages(
         sPlatform="S1",
@@ -41,9 +41,5 @@ if bInitOk:
     )
     print(repr(aoSearchResult))
 
-
-
 else:
     print('[ERROR] cannot init waspy')
-
-
