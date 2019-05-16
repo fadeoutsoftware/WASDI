@@ -4,7 +4,13 @@ import os
 print(os.getcwd())
 
 bInitOk = False
+# wasdi.__loadConfig('./config.json')
+# wasdi.m_sSessionId = '04ff2155-0166-4ea0-b662-114e9717337d'
+# wasdi.setUser('c.nattero@fadeout.it')
+# bInitOk = wasdi.init()
+
 bInitOk = wasdi.init('./config.json')
+
 
 
 
@@ -18,7 +24,6 @@ if bInitOk:
     bExists = wasdi.__fileExistsOnWasdi('S1A_EW_GRDM_1SSH_20190509T004543_20190509T004646_027143_030F49_B737.zip')
     assert(bExists is True)
 
-    '''
     aoSearchResult = wasdi.searchEOImages(
         sPlatform="S1",
         sDateFrom="2019-05-06",
@@ -35,7 +40,6 @@ if bInitOk:
         sCloudCoverage=None
     )
     print(repr(aoSearchResult))
-    '''
 
 
 

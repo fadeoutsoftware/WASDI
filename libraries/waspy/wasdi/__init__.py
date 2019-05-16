@@ -13,12 +13,12 @@ import traceback
 import re
 import zipfile
 
-m_sUser = 'urs'
-m_sPassword = 'pw'
+m_sUser = None
+m_sPassword = None
 
-m_sActiveWorkspace = ''
+m_sActiveWorkspace = None
 
-m_sParametersFilePath = ''
+m_sParametersFilePath = None
 m_sSessionId = ''
 m_sBasePath = '/data/wasdi/'
 
@@ -64,23 +64,23 @@ def getParametersDict():
     '''
     Get the full Params Dictionary
     '''
-    global m_oParamsDictionary
-    return m_oParamsDictionary
+    global m_aoParamsDictionary
+    return m_aoParamsDictionary
 
 def addParameter(sKey, oValue):
     '''
     Add a sigle Parameter to the Dictionary
     '''
-    global m_oParamsDictionary
-    m_oParamsDictionary[sKey] = oValue
+    global m_aoParamsDictionary
+    m_aoParamsDictionary[sKey] = oValue
     
 def getParameter(sKey):
     '''
     Get a Parameter. None if key does not exists
     '''
-    global m_oParamsDictionary
+    global m_aoParamsDictionary
     try:
-        return m_oParamsDictionary[sKey]
+        return m_aoParamsDictionary[sKey]
     except:
         return None
 
@@ -267,7 +267,7 @@ def __loadParams():
             m_aoParamsDictionary = json.load(oJsonFile)
 
 
-def init(sConfigFilePath):
+def init(sConfigFilePath=None):
     """
     Init WASDI Library. Call it after setting user, password, path and url or use it with a config file
     Return True if login was successful, False otherwise
@@ -277,52 +277,56 @@ def init(sConfigFilePath):
     global m_sBaseUrl
     global m_sSessionId
 
+    sWname = None
+    sWId = None
     bResult = False
     if sConfigFilePath is not None:
         bConfigOk, sWname, sWId = __loadConfig(sConfigFilePath)
-    if bConfigOk is True:
-        __loadParams()
+        if bConfigOk is True:
+            __loadParams()
 
+    if m_sUser is None:
+        raise TypeError('Must initialize user first')
 
-        if m_sSessionId != '':
-            asHeaders = __getStandardHeaders()
-            sUrl = m_sBaseUrl + '/auth/checksession'
-            oResponse = requests.get(sUrl, headers=asHeaders)
-            if (oResponse is not None) and (oResponse.ok is True):
-                oJsonResult = oResponse.json()
-                try:
-                    sUser = oJsonResult['userId']
-                    if sUser == m_sUser:
-                        bResult = True
-                    else:
-                        bResult = False
-                except:
+    if m_sSessionId != '':
+        asHeaders = __getStandardHeaders()
+        sUrl = m_sBaseUrl + '/auth/checksession'
+        oResponse = requests.get(sUrl, headers=asHeaders)
+        if (oResponse is not None) and (oResponse.ok is True):
+            oJsonResult = oResponse.json()
+            try:
+                sUser = oJsonResult['userId']
+                if sUser == m_sUser:
+                    bResult = True
+                else:
                     bResult = False
-            else:
+            except:
                 bResult = False
         else:
-            asHeaders = {'Content-Type': 'application/json'}
-            sUrl = m_sBaseUrl + '/auth/login'
-            sPayload = '{"userId":"' + m_sUser + '","userPassword":"' + m_sPassword + '" }'
-            oResponse = requests.post(sUrl, data=sPayload, headers=asHeaders)
+            bResult = False
+    else:
+        asHeaders = {'Content-Type': 'application/json'}
+        sUrl = m_sBaseUrl + '/auth/login'
+        sPayload = '{"userId":"' + m_sUser + '","userPassword":"' + m_sPassword + '" }'
+        oResponse = requests.post(sUrl, data=sPayload, headers=asHeaders)
 
-            if oResponse.ok is True:
-                oJsonResult = oResponse.json()
-                try:
-                    m_sSessionId = oJsonResult['sessionId']
-                    bResult = True
-                except:
-                    bResult = False
-            else:
+        if oResponse.ok is True:
+            oJsonResult = oResponse.json()
+            try:
+                m_sSessionId = oJsonResult['sessionId']
+                bResult = True
+            except:
                 bResult = False
+        else:
+            bResult = False
 
-        if bResult is True:
-            sW = getActiveWorkspaceId()
-            if (sW is None) or (len(sW) < 1):
-                if sWname is not None:
-                    openWorkspace(sWname)
-                else:
-                    openWorkspaceById(sWId)
+    if bResult is True:
+        sW = getActiveWorkspaceId()
+        if (sW is None) or (len(sW) < 1):
+            if sWname is not None:
+                openWorkspace(sWname)
+            elif sWId is not None:
+                openWorkspaceById(sWId)
 
     return bResult
 
@@ -421,39 +425,58 @@ def openWorkspace(sWorkspaceName):
     m_sActiveWorkspace = getWorkspaceIdByName(sWorkspaceName)
     
     return m_sActiveWorkspace
-    
+
+
 def getProductsByWorkspace(sWorkspaceName):
     """
     Get the list of products in a workspace
     the list is an array of string. Can be empty if there is any error
-    """    
-    global m_sBaseUrl
-    global m_sSessionId
-    global m_sActiveWorkspace
-    
+    """
+
     sWorkspaceId = getWorkspaceIdByName(sWorkspaceName)
-    
+
+    return getProductsByWorkspaceId(sWorkspaceId)
+
+
+def getProductsByWorkspaceId(sWorkspaceId):
+    """
+    Get the list of products in a workspace (by Id)
+    the list is an array of string. Can be empty if there is any error
+    """
+    global m_sBaseUrl
+    global m_sActiveWorkspace
+
     m_sActiveWorkspace = sWorkspaceId
 
-    asHeaders = getStandardHeaders()
+    asHeaders = __getStandardHeaders()
     payload = {'sWorkspaceId': sWorkspaceId}
-    
+
     sUrl = m_sBaseUrl + '/product/byws'
-    
+
     asProducts = []
-        
+
     oResult = requests.get(sUrl, headers=asHeaders, params=payload)
 
-    if oResult.ok is True:
+    if (oResult.ok):
         oJsonResults = oResult.json()
-        
+
         for oProduct in oJsonResults:
             try:
                 asProducts.append(oProduct['fileName'])
             except:
                 continue
-    
+
     return asProducts
+
+
+def getProductsByActiveWorkspace():
+    """
+    Get the list of products in a workspace
+    the list is an array of string. Can be empty if there is any error
+    """
+    global m_sActiveWorkspace
+
+    return getProductsByWorkspaceId(m_sActiveWorkspace)
 
 
 def getFullProductPath(sProductName):
