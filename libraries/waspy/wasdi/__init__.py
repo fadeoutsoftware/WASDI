@@ -230,19 +230,25 @@ def __loadConfig(sConfigFilePath):
 
     try:
         # assume it is a JSON file
+        sTempWorkspaceName = None
+        sTempWorkspaceID = None
         with open(sConfigFilePath) as oJsonFile:
             oJson = json.load(oJsonFile)
 
             m_sUser = oJson["USER"]
             m_sPassword = oJson["PASSWORD"]
-            sTmpWorkspace = oJson["WORKSPACE"]
-            if (sTmpWorkspace is None) and (sTmpWorkspace == ''):
-                m_sActiveWorkspace = oJson["WORKSPACEID"]
+            sTempWorkspaceName = oJson["WORKSPACE"]
+            sTempWorkspaceID = None
+            if (sTempWorkspaceName is None) and (sTempWorkspaceName == ''):
+                sTempWorkspaceID = oJson["WORKSPACEID"]
+                sTempWorkspaceName = None
+
             m_sParametersFilePath = oJson["PARAMETERSFILEPATH"]
             m_bDownloadActive = bool(oJson["DOWNLOADACTIVE"])
             m_bUploadActive = bool(oJson["UPLOADACTIVE"])
             m_bVerbose = bool(oJson["VERBOSE"])
 
+        return True, sTempWorkspaceName, sTempWorkspaceID
 
     except Exception as oEx:
         print('[ERROR] waspy.__loadConfigParams: something went wrong')
@@ -271,43 +277,54 @@ def init(sConfigFilePath):
     global m_sBaseUrl
     global m_sSessionId
 
+    bResult = False
     if sConfigFilePath is not None:
-        __loadConfig(sConfigFilePath)
-    __loadParams()
+        bConfigOk, sWname, sWId = __loadConfig(sConfigFilePath)
+    if bConfigOk is True:
+        __loadParams()
 
-    if m_sSessionId != '':
-        headers = {'Content-Type': 'application/json', 'x-session-token': m_sSessionId}
-        sUrl = m_sBaseUrl + '/auth/checksession'
-        
-        oResult = requests.get(sUrl, headers=headers)
 
-        if (oResult is not None) and (oResult.ok is True):
-            oJsonResult = oResult.json()
-            try:
-                sUser = oJsonResult['userId']
-                if sUser == m_sUser:
-                    return True
+        if m_sSessionId != '':
+            asHeaders = getStandardHeaders()
+            sUrl = m_sBaseUrl + '/auth/checksession'
+            oResponse = requests.get(sUrl, headers=asHeaders)
+            if (oResponse is not None) and (oResponse.ok is True):
+                oJsonResult = oResponse.json()
+                try:
+                    sUser = oJsonResult['userId']
+                    if sUser == m_sUser:
+                        bResult = True
+                    else:
+                        bResult = False
+                except:
+                    bResult = False
+            else:
+                bResult = False
+        else:
+            asHeaders = {'Content-Type': 'application/json'}
+            sUrl = m_sBaseUrl + '/auth/login'
+            sPayload = '{"userId":"' + m_sUser + '","userPassword":"' + m_sPassword + '" }'
+            oResponse = requests.post(sUrl, data=sPayload, headers=asHeaders)
+
+            if oResponse.ok is True:
+                oJsonResult = oResponse.json()
+                try:
+                    m_sSessionId = oJsonResult['sessionId']
+                    bResult = True
+                except:
+                    bResult = False
+            else:
+                bResult = False
+
+        if bResult is True:
+            sW = getActiveWorkspaceId()
+            if (sW is None) or (len(sW) < 1):
+                if sWname is not None:
+                    openWorkspace(sWname)
                 else:
-                    return False
-            except:
-                return False
-        else:
-            return False        
-    else:    
-        headers = {'Content-Type': 'application/json'}
-        sUrl = m_sBaseUrl + '/auth/login'
-        sPayload = '{"userId":"' + m_sUser + '","userPassword":"' + m_sPassword + '" }'
-        oResult = requests.post(sUrl, data=sPayload, headers=headers)
+                    openWorkspaceById(sWId)
 
-        if oResult.ok is True:
-            oJsonResult = oResult.json()
-            try:
-                m_sSessionId = oJsonResult['sessionId']
-                return True
-            except:
-                return False
-        else:
-            return False
+    return bResult
 
 def hello():
     """
