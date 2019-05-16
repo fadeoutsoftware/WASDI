@@ -3,23 +3,22 @@ Created on 11 Jun 2018
 
 @author: p.campanella
 '''
-from _overlapped import NULL
+
 name = "wasdi"
 
 import requests
 import os
 import json
-import urllib.parse
 import traceback
 import re
 import zipfile
 
-m_sUser = 'urs'
-m_sPassword = 'pw'
+m_sUser = None
+m_sPassword = None
 
-m_sActiveWorkspace = ''
+m_sActiveWorkspace = None
 
-m_sParametersFilePath = ''
+m_sParametersFilePath = None
 m_sSessionId = ''
 m_sBasePath = '/data/wasdi/'
 
@@ -47,41 +46,41 @@ def printStatus():
     global m_sBaseUrl
     global m_bIsOnServer
 
-    print('user: '+str(m_sUser))
-    print('password: '+str(m_sPassword))
-    print('active workspace: '+str(m_sActiveWorkspace))
-    print('parameters file path: '+str(m_sParametersFilePath))
-    print('session id: '+str(m_sSessionId))
-    print('base path: '+str(m_sBasePath))
-    print('download active: '+str(m_bDownloadActive))
-    print('upload active: '+str(m_bUploadActive))
-    print('verbose: '+str(m_bVerbose))
-    print('param dict: '+str(m_aoParamsDictionary))
-    print('proc id: '+str(m_sMyProcId))
-    print('base url: '+str(m_sBaseUrl))
-    print('is on server: '+str(m_bIsOnServer))
+    log('user: '+str(m_sUser))
+    log('password: '+str(m_sPassword))
+    log('active workspace: '+str(m_sActiveWorkspace))
+    log('parameters file path: '+str(m_sParametersFilePath))
+    log('session id: '+str(m_sSessionId))
+    log('base path: '+str(m_sBasePath))
+    log('download active: '+str(m_bDownloadActive))
+    log('upload active: '+str(m_bUploadActive))
+    log('verbose: '+str(m_bVerbose))
+    log('param dict: '+str(m_aoParamsDictionary))
+    log('proc id: '+str(m_sMyProcId))
+    log('base url: '+str(m_sBaseUrl))
+    log('is on server: '+str(m_bIsOnServer))
 
 def getParametersDict():
     '''
     Get the full Params Dictionary
     '''
-    global m_oParamsDictionary
-    return m_oParamsDictionary
+    global m_aoParamsDictionary
+    return m_aoParamsDictionary
 
 def addParameter(sKey, oValue):
     '''
     Add a sigle Parameter to the Dictionary
     '''
-    global m_oParamsDictionary
-    m_oParamsDictionary[sKey] = oValue
+    global m_aoParamsDictionary
+    m_aoParamsDictionary[sKey] = oValue
     
 def getParameter(sKey):
     '''
     Get a Parameter. None if key does not exists
     '''
-    global m_oParamsDictionary
+    global m_aoParamsDictionary
     try:
-        return m_oParamsDictionary[sKey]
+        return m_aoParamsDictionary[sKey]
     except:
         return None
 
@@ -203,7 +202,7 @@ def log(sLog):
     if m_bVerbose:
         print(sLog)
 
-def getStandardHeaders():
+def __getStandardHeaders():
     global m_sSessionId
     asHeaders = {'Content-Type': 'application/json', 'x-session-token': m_sSessionId}
     return asHeaders
@@ -268,7 +267,7 @@ def __loadParams():
             m_aoParamsDictionary = json.load(oJsonFile)
 
 
-def init(sConfigFilePath):
+def init(sConfigFilePath=None):
     """
     Init WASDI Library. Call it after setting user, password, path and url or use it with a config file
     Return True if login was successful, False otherwise
@@ -278,53 +277,58 @@ def init(sConfigFilePath):
     global m_sBaseUrl
     global m_sSessionId
 
+    sWname = None
+    sWId = None
     bResult = False
     if sConfigFilePath is not None:
         bConfigOk, sWname, sWId = __loadConfig(sConfigFilePath)
-    if bConfigOk is True:
-        __loadParams()
+        if bConfigOk is True:
+            __loadParams()
 
+    if m_sUser is None:
+        raise TypeError('Must initialize user first')
 
-        if m_sSessionId != '':
-            asHeaders = getStandardHeaders()
-            sUrl = m_sBaseUrl + '/auth/checksession'
-            oResponse = requests.get(sUrl, headers=asHeaders)
-            if (oResponse is not None) and (oResponse.ok is True):
-                oJsonResult = oResponse.json()
-                try:
-                    sUser = oJsonResult['userId']
-                    if sUser == m_sUser:
-                        bResult = True
-                    else:
-                        bResult = False
-                except:
+    if m_sSessionId != '':
+        asHeaders = __getStandardHeaders()
+        sUrl = m_sBaseUrl + '/auth/checksession'
+        oResponse = requests.get(sUrl, headers=asHeaders)
+        if (oResponse is not None) and (oResponse.ok is True):
+            oJsonResult = oResponse.json()
+            try:
+                sUser = oJsonResult['userId']
+                if sUser == m_sUser:
+                    bResult = True
+                else:
                     bResult = False
-            else:
+            except:
                 bResult = False
         else:
-            asHeaders = {'Content-Type': 'application/json'}
-            sUrl = m_sBaseUrl + '/auth/login'
-            sPayload = '{"userId":"' + m_sUser + '","userPassword":"' + m_sPassword + '" }'
-            oResponse = requests.post(sUrl, data=sPayload, headers=asHeaders)
+            bResult = False
+    else:
+        asHeaders = {'Content-Type': 'application/json'}
+        sUrl = m_sBaseUrl + '/auth/login'
+        sPayload = '{"userId":"' + m_sUser + '","userPassword":"' + m_sPassword + '" }'
+        oResponse = requests.post(sUrl, data=sPayload, headers=asHeaders)
 
-            if oResponse.ok is True:
-                oJsonResult = oResponse.json()
-                try:
-                    m_sSessionId = oJsonResult['sessionId']
-                    bResult = True
-                except:
-                    bResult = False
-            else:
+        if oResponse.ok is True:
+            oJsonResult = oResponse.json()
+            try:
+                m_sSessionId = oJsonResult['sessionId']
+                bResult = True
+            except:
                 bResult = False
+        else:
+            bResult = False
 
-        if bResult is True:
-            sW = getActiveWorkspaceId()
-            if (sW is None) or (len(sW) < 1):
-                if sWname is not None:
-                    openWorkspace(sWname)
-                else:
-                    openWorkspaceById(sWId)
+    if bResult is True:
+        sW = getActiveWorkspaceId()
+        if (sW is None) or (len(sW) < 1):
+            if sWname is not None:
+                openWorkspace(sWname)
+            elif sWId is not None:
+                openWorkspaceById(sWId)
 
+    printStatus()
     return bResult
 
 def hello():
@@ -353,7 +357,7 @@ def getWorkspaces():
     global m_sBaseUrl
     global m_sSessionId
 
-    asHeaders = getStandardHeaders()
+    asHeaders = __getStandardHeaders()
 
     sUrl = m_sBaseUrl + '/ws/byuser'
         
@@ -374,7 +378,7 @@ def getWorkspaceIdByName(sName):
     global m_sBaseUrl
     global m_sSessionId
 
-    asHeaders = getStandardHeaders()
+    asHeaders = __getStandardHeaders()
 
     sUrl = m_sBaseUrl + '/ws/byuser'
 
@@ -422,39 +426,58 @@ def openWorkspace(sWorkspaceName):
     m_sActiveWorkspace = getWorkspaceIdByName(sWorkspaceName)
     
     return m_sActiveWorkspace
-    
+
+
 def getProductsByWorkspace(sWorkspaceName):
     """
     Get the list of products in a workspace
     the list is an array of string. Can be empty if there is any error
-    """    
-    global m_sBaseUrl
-    global m_sSessionId
-    global m_sActiveWorkspace
-    
+    """
+
     sWorkspaceId = getWorkspaceIdByName(sWorkspaceName)
-    
+
+    return getProductsByWorkspaceId(sWorkspaceId)
+
+
+def getProductsByWorkspaceId(sWorkspaceId):
+    """
+    Get the list of products in a workspace (by Id)
+    the list is an array of string. Can be empty if there is any error
+    """
+    global m_sBaseUrl
+    global m_sActiveWorkspace
+
     m_sActiveWorkspace = sWorkspaceId
 
-    asHeaders = getStandardHeaders()
+    asHeaders = __getStandardHeaders()
     payload = {'sWorkspaceId': sWorkspaceId}
-    
+
     sUrl = m_sBaseUrl + '/product/byws'
-    
+
     asProducts = []
-        
+
     oResult = requests.get(sUrl, headers=asHeaders, params=payload)
 
-    if oResult.ok is True:
+    if (oResult.ok):
         oJsonResults = oResult.json()
-        
+
         for oProduct in oJsonResults:
             try:
                 asProducts.append(oProduct['fileName'])
             except:
                 continue
-    
+
     return asProducts
+
+
+def getProductsByActiveWorkspace():
+    """
+    Get the list of products in a workspace
+    the list is an array of string. Can be empty if there is any error
+    """
+    global m_sActiveWorkspace
+
+    return getProductsByWorkspaceId(m_sActiveWorkspace)
 
 
 def getFullProductPath(sProductName):
@@ -523,7 +546,7 @@ def getWorkflows():
     global m_sBaseUrl
     global m_sSessionId
 
-    asHeaders = getStandardHeaders()
+    asHeaders = __getStandardHeaders()
     
     sUrl = m_sBaseUrl + '/processing/getgraphsbyusr'
         
@@ -556,7 +579,7 @@ def executeWorkflow(sInputFileName, sOutputFileName, sWorkflowName):
         except:
             continue
 
-    asHeaders = getStandardHeaders()
+    asHeaders = __getStandardHeaders()
     payload = {'workspace': m_sActiveWorkspace, 'source': sInputFileName, 'destination': sOutputFileName,
                'workflowId': sWorkflowId}
 
@@ -587,7 +610,7 @@ def getProcessStatus(sProcessId):
     global m_sBaseUrl
     global m_sSessionId
 
-    asHeaders = getStandardHeaders()
+    asHeaders = __getStandardHeaders()
     payload = {'sProcessId': sProcessId}
     
     sUrl = m_sBaseUrl + '/process/byid'
@@ -614,11 +637,11 @@ def updateProcessStatus(sProcessId, sStatus, iPerc):
     global m_sBaseUrl
     global m_sSessionId
 
-    asHeaders = getStandardHeaders()
+    asHeaders = __getStandardHeaders()
     payload = {'sProcessId': sProcessId, 'status': sStatus, 'perc': iPerc}
 
     if iPerc < 0:
-        print('iPerc < 0 not valid')
+        log('iPerc < 0 not valid')
         return ''
     elif iPerc > 100:
         print('iPerc > 100 not valid')
@@ -658,7 +681,7 @@ def setProcessPayload(sProcessId, data):
     global m_sBaseUrl
     global m_sSessionId
 
-    asHeaders = getStandardHeaders()
+    asHeaders = __getStandardHeaders()
     payload = {'sProcessId': sProcessId, 'payload': json.dumps(data)}
     
     sUrl = m_sBaseUrl + '/process/setpayload'
@@ -686,7 +709,7 @@ def saveFile(sFileName):
     global m_sSessionId
     global m_sActiveWorkspace
 
-    asHeaders = getStandardHeaders()
+    asHeaders = __getStandardHeaders()
     payload = {'file': sFileName, 'workspace': m_sActiveWorkspace}
 
     sUrl = m_sBaseUrl + '/catalog/upload/ingestinws'
@@ -712,41 +735,57 @@ def downloadFile(sFileName):
     To work be sure that the file is on the server
     """
 
-    # todo auto unzip
+    log('wasdi.downloadFile( '+ sFileName +' )')
 
     global m_sBaseUrl
     global m_sSessionId
     global m_sActiveWorkspace
 
-    asHeaders = getStandardHeaders()
+    asHeaders = __getStandardHeaders()
     payload = {'filename': sFileName}
-    
-    sUrl = m_sBaseUrl + '/catalog/downloadbyname'
-    
-    print('WASDI: send request to configured url ' + sUrl)
-    
-    oResult = requests.get(sUrl, headers=asHeaders, params=payload, stream=True)
 
-    if (oResult is not None) and (oResult.status_code == 200):
-        print('WASDI: got ok result, downloading')
-        
+    sUrl = m_sBaseUrl + '/catalog/downloadbyname?' + \
+           'filename=' + sFileName + \
+           "&workspace=" + getActiveWorkspaceId()
+    
+    log('WASDI: send request to configured url ' + sUrl)
+    
+    oResponse = requests.get(sUrl, headers=asHeaders, params=payload, stream=True)
+
+    if (oResponse is not None) and (oResponse.status_code == 200):
+        log('WASDI: got ok result, downloading')
+        sAttachmentName = None
+        asResponseHeaders = oResponse.headers
+        if asResponseHeaders is not None:
+            if 'Content-Disposition' in asResponseHeaders:
+                sContentDisposition = asResponseHeaders['Content-Disposition']
+                sAttachmentName = sContentDisposition.split('filename=')[1]
+                if (sAttachmentName[0] == '/') or (sAttachmentName[0] == '\\'):
+                    sAttachmentName = sAttachmentName[1:]
+                if (sAttachmentName[-1] == '/') or (sAttachmentName[-1] == '\\'):
+                    sAttachmentName = sAttachmentName[:-1]
         sSavePath = getSavePath()
-        sSavePath+=sFileName
+        sSavePath += sFileName
         
         try:
             os.makedirs(os.path.dirname(sSavePath))
         except: # Guard against race condition
-            print('Error Creating File Path!!')        
+            log('Error Creating File Path!!')
         
-        print('WASDI: downloading local file ' + sSavePath)
+        log('WASDI: downloading local file ' + sSavePath)
 
         with open(sSavePath, 'wb') as oFile:
-            for oChunk in oResult:
-                print('.')
+            for oChunk in oResponse:
+                log('.')
                 oFile.write(oChunk)
-        print('WASDI: download Done new file locally available ' + sSavePath)
+        log('WASDI: download Done new file locally available ' + sSavePath)
+
+        if (sAttachmentName is not None) and\
+            (sAttachmentName != sFileName) and\
+            sAttachmentName.lower().endswith('.zip'):
+        # todo unzip
     else:
-        print('WASDI: download error server code: ' + oResult.status_code)
+        log('WASDI: download error server code: ' + str(oResponse.status_code))
         
     return
 
@@ -757,7 +796,7 @@ def wasdiLog(sLogRow):
     global m_sActiveWorkspace
 
     if m_bIsOnServer:
-        asHeaders = getStandardHeaders()
+        asHeaders = __getStandardHeaders()
         sUrl = m_sBaseUrl + '/processors/logs/add?processworkspace=' + m_sMyProcId
         oResult = requests.post(sUrl, data=sLogRow, headers=asHeaders)
 
@@ -769,7 +808,7 @@ def deleteProduct(sProduct):
     global m_sSessionId
     global m_sActiveWorkspace
 
-    asHeaders = getStandardHeaders
+    asHeaders = __getStandardHeaders
     sUrl = m_sBaseUrl +\
            "/product/delete?sProductName="\
            + sProduct +\
@@ -885,29 +924,27 @@ def searchEOImages(sPlatform, sDateFrom, sDateTo,
     sQuery = sFootPrint + sQuery
 
     sQueryBody = "[\"" + sQuery.replace("\"", "\\\"") + "\"]";
-    sQuery = urllib.parse.quote(sQuery)
     sQuery = "sQuery=" + sQuery + "&offset=0&limit=10&providers=ONDA"
 
     try:
         sUrl = getBaseUrl() + "/search/querylist?" + sQuery
         # todo write standard headers, maybe make a function
-        asHeaders = getStandardHeaders()
+        asHeaders = __getStandardHeaders()
         oResponse = requests.post(sUrl, data=sQueryBody, headers=asHeaders)
         try:
             # populate list from response
             oJsonResponse = oResponse.json()
             aoReturnList = oJsonResponse
         except Exception as oEx:
-            print('[ERROR] waspy.searchEOImages: exception while trying to convert response into JSON object')
+            log('[ERROR] waspy.searchEOImages: exception while trying to convert response into JSON object')
             raise
 
         log("" + repr(aoReturnList))
         return aoReturnList
     except Exception as oEx:
-        print(type(oEx))
+        log(type(oEx))
         traceback.print_exc()
-        # print(oEx.args)
-        print(oEx)
+        log(oEx)
 
     return aoReturnList
 
@@ -936,14 +973,19 @@ def __fileExistsOnWasdi(sFileName):
            "&workspace=" +\
            sActiveWorkspace
 
-    asHeaders = getStandardHeaders()
+    asHeaders = __getStandardHeaders()
     oResult = requests.get(sUrl, headers=asHeaders)
 
     return oResult.ok
 
 
 def __unzip(sAttachmentName, sPath):
-
+    """
+    Unzips a file
+    :param sAttachmentName: filename to unzip
+    :param sPath: both the path where the file is and where it must be unzipped
+    :return:
+    """
     if sPath is None:
         raise TypeError('No path no party!')
     if sAttachmentName:
@@ -956,4 +998,4 @@ def __unzip(sAttachmentName, sPath):
 
 
 if __name__ == '__main__':
-    print('WASPY - The WASDI Python Library. Include in your code for space development processors. Visit www.wasdi.net')
+    log('WASPY - The WASDI Python Library. Include in your code for space development processors. Visit www.wasdi.net')
