@@ -3,13 +3,12 @@ Created on 11 Jun 2018
 
 @author: p.campanella
 '''
-from _overlapped import NULL
+
 name = "wasdi"
 
 import requests
 import os
 import json
-import urllib.parse
 import traceback
 import re
 import zipfile
