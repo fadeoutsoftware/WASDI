@@ -849,7 +849,6 @@ def searchEOImages(sPlatform, sDateFrom, sDateTo,
         oResponse = requests.post(sUrl, data=sQueryBody, headers=asHeaders)
         try:
             # populate list from response
-            # List<Map<String, Object>> aoJSONMap = s_oMapper.readValue(sResponse, new TypeReference<List<Map<String,Object>>>(){})
             oJsonResponse = oResponse.json()
             aoReturnList = oJsonResponse
         except Exception as oEx:
@@ -864,7 +863,6 @@ def searchEOImages(sPlatform, sDateFrom, sDateTo,
         # print(oEx.args)
         print(oEx)
 
-    # todo can we use just this list instead of aoJSONMap
     return aoReturnList
 
 
