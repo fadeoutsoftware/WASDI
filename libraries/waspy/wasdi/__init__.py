@@ -12,6 +12,7 @@ import json
 import urllib.parse
 import traceback
 import re
+import zipfile
 
 m_sUser = 'urs'
 m_sPassword = 'pw'
@@ -922,22 +923,37 @@ def __fileExistsOnWasdi(sFileName):
     if len(sFileName) < 1:
         raise ValueError('File name too short')
 
-    global m_sBaseUrl
-    global m_sSessionId
-    global m_sActiveWorkspace
+    sBaseUrl = getBaseUrl()
+    sSessionId = getSessionId()
+    sActiveWorkspace = getActiveWorkspaceId()
+
 
     sUrl = m_sBaseUrl +\
            "/catalog/checkdownloadavaialibitybyname?token=" +\
-           m_sSessionId +\
+           sSessionId +\
            "&filename=" +\
            sFileName +\
            "&workspace=" +\
-           m_sActiveWorkspace
+           sActiveWorkspace
 
     asHeaders = getStandardHeaders()
     oResult = requests.get(sUrl, headers=asHeaders)
 
     return oResult.ok
+
+
+def __unzip(sAttachmentName, sPath):
+
+    if sPath is None:
+        raise TypeError('No path no party!')
+    if sAttachmentName:
+        raise TypeError('No attachment to unzip!')
+
+    sZipFilePath = sPath + sAttachmentName
+    zip_ref = zipfile.ZipFile(sZipFilePath, 'r')
+    zip_ref.extractall(sPath)
+    zip_ref.close()
+
 
 if __name__ == '__main__':
     print('WASPY - The WASDI Python Library. Include in your code for space development processors. Visit www.wasdi.net')
