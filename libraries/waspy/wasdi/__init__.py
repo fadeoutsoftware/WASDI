@@ -46,19 +46,19 @@ def printStatus():
     global m_sBaseUrl
     global m_bIsOnServer
 
-    print('user: '+str(m_sUser))
-    print('password: '+str(m_sPassword))
-    print('active workspace: '+str(m_sActiveWorkspace))
-    print('parameters file path: '+str(m_sParametersFilePath))
-    print('session id: '+str(m_sSessionId))
-    print('base path: '+str(m_sBasePath))
-    print('download active: '+str(m_bDownloadActive))
-    print('upload active: '+str(m_bUploadActive))
-    print('verbose: '+str(m_bVerbose))
-    print('param dict: '+str(m_aoParamsDictionary))
-    print('proc id: '+str(m_sMyProcId))
-    print('base url: '+str(m_sBaseUrl))
-    print('is on server: '+str(m_bIsOnServer))
+    log('user: '+str(m_sUser))
+    log('password: '+str(m_sPassword))
+    log('active workspace: '+str(m_sActiveWorkspace))
+    log('parameters file path: '+str(m_sParametersFilePath))
+    log('session id: '+str(m_sSessionId))
+    log('base path: '+str(m_sBasePath))
+    log('download active: '+str(m_bDownloadActive))
+    log('upload active: '+str(m_bUploadActive))
+    log('verbose: '+str(m_bVerbose))
+    log('param dict: '+str(m_aoParamsDictionary))
+    log('proc id: '+str(m_sMyProcId))
+    log('base url: '+str(m_sBaseUrl))
+    log('is on server: '+str(m_bIsOnServer))
 
 def getParametersDict():
     '''
@@ -328,6 +328,7 @@ def init(sConfigFilePath=None):
             elif sWId is not None:
                 openWorkspaceById(sWId)
 
+    printStatus()
     return bResult
 
 def hello():
@@ -640,7 +641,7 @@ def updateProcessStatus(sProcessId, sStatus, iPerc):
     payload = {'sProcessId': sProcessId, 'status': sStatus, 'perc': iPerc}
 
     if iPerc < 0:
-        print('iPerc < 0 not valid')
+        log('iPerc < 0 not valid')
         return ''
     elif iPerc > 100:
         print('iPerc > 100 not valid')
@@ -734,7 +735,7 @@ def downloadFile(sFileName):
     To work be sure that the file is on the server
     """
 
-    # todo auto unzip
+    log('wasdi.downloadFile( '+ sFileName +' )')
 
     global m_sBaseUrl
     global m_sSessionId
@@ -742,33 +743,49 @@ def downloadFile(sFileName):
 
     asHeaders = __getStandardHeaders()
     payload = {'filename': sFileName}
-    
-    sUrl = m_sBaseUrl + '/catalog/downloadbyname'
-    
-    print('WASDI: send request to configured url ' + sUrl)
-    
-    oResult = requests.get(sUrl, headers=asHeaders, params=payload, stream=True)
 
-    if (oResult is not None) and (oResult.status_code == 200):
-        print('WASDI: got ok result, downloading')
-        
+    sUrl = m_sBaseUrl + '/catalog/downloadbyname?' + \
+           'filename=' + sFileName + \
+           "&workspace=" + getActiveWorkspaceId()
+    
+    log('WASDI: send request to configured url ' + sUrl)
+    
+    oResponse = requests.get(sUrl, headers=asHeaders, params=payload, stream=True)
+
+    if (oResponse is not None) and (oResponse.status_code == 200):
+        log('WASDI: got ok result, downloading')
+        sAttachmentName = None
+        asResponseHeaders = oResponse.headers
+        if asResponseHeaders is not None:
+            if 'Content-Disposition' in asResponseHeaders:
+                sContentDisposition = asResponseHeaders['Content-Disposition']
+                sAttachmentName = sContentDisposition.split('filename=')[1]
+                if (sAttachmentName[0] == '/') or (sAttachmentName[0] == '\\'):
+                    sAttachmentName = sAttachmentName[1:]
+                if (sAttachmentName[-1] == '/') or (sAttachmentName[-1] == '\\'):
+                    sAttachmentName = sAttachmentName[:-1]
         sSavePath = getSavePath()
-        sSavePath+=sFileName
+        sSavePath += sFileName
         
         try:
             os.makedirs(os.path.dirname(sSavePath))
         except: # Guard against race condition
-            print('Error Creating File Path!!')        
+            log('Error Creating File Path!!')
         
-        print('WASDI: downloading local file ' + sSavePath)
+        log('WASDI: downloading local file ' + sSavePath)
 
         with open(sSavePath, 'wb') as oFile:
-            for oChunk in oResult:
-                print('.')
+            for oChunk in oResponse:
+                log('.')
                 oFile.write(oChunk)
-        print('WASDI: download Done new file locally available ' + sSavePath)
+        log('WASDI: download Done new file locally available ' + sSavePath)
+
+        if (sAttachmentName is not None) and\
+            (sAttachmentName != sFileName) and\
+            sAttachmentName.lower().endswith('.zip'):
+        # todo unzip
     else:
-        print('WASDI: download error server code: ' + oResult.status_code)
+        log('WASDI: download error server code: ' + str(oResponse.status_code))
         
     return
 
@@ -919,16 +936,15 @@ def searchEOImages(sPlatform, sDateFrom, sDateTo,
             oJsonResponse = oResponse.json()
             aoReturnList = oJsonResponse
         except Exception as oEx:
-            print('[ERROR] waspy.searchEOImages: exception while trying to convert response into JSON object')
+            log('[ERROR] waspy.searchEOImages: exception while trying to convert response into JSON object')
             raise
 
         log("" + repr(aoReturnList))
         return aoReturnList
     except Exception as oEx:
-        print(type(oEx))
+        log(type(oEx))
         traceback.print_exc()
-        # print(oEx.args)
-        print(oEx)
+        log(oEx)
 
     return aoReturnList
 
@@ -982,4 +998,4 @@ def __unzip(sAttachmentName, sPath):
 
 
 if __name__ == '__main__':
-    print('WASPY - The WASDI Python Library. Include in your code for space development processors. Visit www.wasdi.net')
+    log('WASPY - The WASDI Python Library. Include in your code for space development processors. Visit www.wasdi.net')
