@@ -1049,5 +1049,60 @@ def __unzip(sAttachmentName, sPath):
     zip_ref.close()
 
 
+def importProduct(sFileUrl=None, sBoundingBox=None, asProduct=None):
+    """
+    Imports a product from a Provider in WASDI
+    :param sFileUrl:
+    :param sBoundingBox:
+    :return:
+    """
+
+    __log('wasdi.importProduct( ' + str(sFileUrl) + ', ' + str(sBoundingBox) + ', ' + str(asProduct) + ' )')
+
+    sReturn = "ERROR"
+
+    if sFileUrl is None:
+        if asProduct is not None and "link" in asProduct:
+            sFileUrl = asProduct["link"]
+            if "footprint" in asProduct:
+                sBoundingBox = asProduct["footprint"]
+        else:
+            raise TypeError('Cannot import product without url or a map')
+
+    sUrl = getBaseUrl()
+    sUrl += "/filebuffer/download?sFileUrl="
+    sUrl += sFileUrl
+    sUrl += "&sProvider=ONDA&sWorkspaceId="
+    sUrl += getActiveWorkspaceId()
+    sUrl += "&sBoundingBox="
+    sUrl += sBoundingBox
+
+    asHeaders = __getStandardHeaders()
+
+    oResponse = requests.get(sUrl, headers=asHeaders)
+    if (oResponse is not None) and (oResponse.ok is True):
+        oJsonResponse = oResponse.json()
+        if ("boolValue" in oJsonResponse) and (oJsonResponse["boolValue"] is True):
+            if "stringValue" in oJsonResponse:
+                sProcessId = oJsonResponse["stringValue"]
+                sReturn = waitProcess(sProcessId)
+
+    return sReturn
+
+# todo extend to a list of processes
+def waitProcess(sProcessId):
+    if sProcessId is None:
+        raise TypeError('Passed None, expected a process ID')
+
+    sStatus = ''
+
+    while sStatus not in {"DONE", "STOPPED", "ERROR"}:
+        sStatus = getProcessStatus(sProcessId)
+        time.sleep(2)
+
+    return sStatus
+
+
+
 if __name__ == '__main__':
-    log('WASPY - The WASDI Python Library. Include in your code for space development processors. Visit www.wasdi.net')
+    __log('WASPY - The WASDI Python Library. Include in your code for space development processors. Visit www.wasdi.net')
