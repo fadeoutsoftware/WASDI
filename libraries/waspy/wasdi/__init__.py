@@ -713,6 +713,26 @@ def updateProcessStatus(sProcessId, sStatus, iPerc):
     return sStatus
 
 
+def updateProgressPerc(iPerc):
+    __log('wasdi.updateProgressPerc( ' + str(iPerc) + ' )')
+    if iPerc is None:
+        raise TypeError('Passed None, expected a percentage')
+    if 0 > iPerc or 100 < iPerc:
+        raise ValueError('Percentage must be in [0, 100]')
+    if (getProcId() is None) or (len(getProcId())):
+        raise TypeError('Cannot update progress if process ID is not known')
+
+    sStatus = "RUNNING"
+    sUrl = getBaseUrl() + "/process/updatebyid?sProcessId=" + getProcId() + "&status=" + sStatus + "&perc=" + iPerc + "&sendrabbit=1"
+    asHeaders = __getStandardHeaders()
+    oResponse = requests.get(sUrl, headers=asHeaders)
+    sResult = ""
+    if (oResponse is not None) and (oResponse.ok is True):
+        oJson = oResponse.json()
+        if (oJson is not None) and ("status" in oJson):
+            sResult = oJson['status']
+    return sResult
+
 def setProcessPayload(sProcessId, data):
     """
     Update the status of a process

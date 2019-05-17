@@ -1,6 +1,7 @@
 import wasdi
 import os
 
+
 print(os.getcwd())
 
 bInitOk = False
@@ -26,11 +27,11 @@ if bInitOk:
     # if bExists:
     #     wasdi.downloadFile(sFileName)
 
-    sFileName = 'S1A_EW_GRDM_1SSH_20190509T004543_20190509T004646_027143_030F49_B737_ApplyOrbit.dim'
-    bExists = wasdi.__fileExistsOnWasdi(sFileName)
-    assert (bExists is True)
-    if bExists:
-        wasdi.downloadFile(sFileName)
+    # sFileName = 'S1A_EW_GRDM_1SSH_20190509T004543_20190509T004646_027143_030F49_B737_ApplyOrbit.dim'
+    # bExists = wasdi.__fileExistsOnWasdi(sFileName)
+    # assert (bExists is True)
+    # if bExists:
+    #     wasdi.downloadFile(sFileName)
 
     aoSearchResult = wasdi.searchEOImages(
         sPlatform="S1",
@@ -47,7 +48,13 @@ if bInitOk:
         sSensorOperationalMode=None,
         sCloudCoverage=None
     )
-    print(repr(aoSearchResult))
+    print(aoSearchResult)
+
+    oSelected = aoSearchResult[0]
+    print(oSelected)
+    sImported = wasdi.importProduct(asProduct=oSelected)
+    print(sImported)
+
 
 else:
     print('[ERROR] cannot init waspy')
