@@ -32,6 +32,13 @@
         .ellipsis{
           max-width: 700px;
         }
+
+        .loadIcon, .loading-files {
+            //width: 90%;
+            //padding: 0 15px;
+            margin-top: -250px;
+            padding-bottom: 25px;
+        }
       }
 
       .modal-footer

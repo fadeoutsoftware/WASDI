@@ -34,7 +34,8 @@ public class ProcessWorkspaceResource {
 	@GET
 	@Path("/byws")
 	@Produces({"application/xml", "application/json", "text/xml"})
-	public ArrayList<ProcessWorkspaceViewModel> getProcessByWorkspace(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sWorkspaceId") String sWorkspaceId, @QueryParam("startindex") Integer iStartIndex, @QueryParam("endindex") Integer iEndIndex) {
+	public ArrayList<ProcessWorkspaceViewModel> getProcessByWorkspace(@HeaderParam("x-session-token") String sSessionId,
+			@QueryParam("sWorkspaceId") String sWorkspaceId, @QueryParam("startindex") Integer iStartIndex, @QueryParam("endindex") Integer iEndIndex) {
 		
 		Wasdi.DebugLog("ProcessWorkspaceResource.GetProcessByWorkspace");
 

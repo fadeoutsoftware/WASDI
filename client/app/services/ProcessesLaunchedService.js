@@ -70,9 +70,9 @@ service('ProcessesLaunchedService', ['ConstantsService','$rootScope','$http', fu
             });
     };
 
-    this.getAllProcessesFromServer = function(sWorkSpaceId)
+    this.getAllProcessesFromServer = function(sWorkSpaceId,iStartIndex,iEndIndex)
     {
-        return this.m_oHttp.get(this.APIURL + '/process/byws?sWorkspaceId='+sWorkSpaceId);
+        return this.m_oHttp.get(this.APIURL + '/process/byws?sWorkspaceId='+sWorkSpaceId +"&startindex=" + iStartIndex + "&endindex=" + iEndIndex);
     };
 
     this.removeProcessInServer = function(sPidInput,sWorkSpaceId,oProcess)
