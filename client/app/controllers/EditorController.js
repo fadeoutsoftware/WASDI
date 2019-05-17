@@ -311,6 +311,13 @@ var EditorController = (function () {
                         onClick: this.openEDriftFloodAutomaticChain,
                         icon:"fa fa-lg fa-file-code-o"
                     },
+                    {
+                        name:"",//EDriftCheckImagesAvailability
+                        caption_i18n : "EDITOR_OPERATION_TITLE_EDRIFT_CHECK_IMAGES_AVAILABILITY",
+                        subMenu:[],
+                        onClick: this.openEDriftCheckImagesAvailability,
+                        icon:"fa fa-lg fa-file-code-o"
+                    }
                     // {
                     //     name:"Upload File",//Upload
                     //     subMenu:[],
@@ -2718,6 +2725,35 @@ var EditorController = (function () {
             });
         });
     };
+
+    EditorController.prototype.openEDriftCheckImagesAvailability = function(oWindow)
+    {
+        var oController;
+        if(utilsIsObjectNullOrUndefined(oWindow) === true)
+        {
+            oController = this;
+        }
+        else
+        {
+            oController = oWindow;
+        }
+
+        oController.m_oModalService.showModal({
+            templateUrl: "dialogs/edrift_checkimagestool/edrift_checkimagestool.html",
+            controller: "EdriftCheckImagesTool",
+            inputs: {
+                extras: {
+                    products:oController.m_aoProducts,
+                }
+            }
+        }).then(function (modal) {
+            modal.element.modal();
+            modal.close.then(function(oResult){
+
+            });
+        });
+    };
+
 
     EditorController.prototype.openEDriftFloodAutomaticChain = function(oWindow)
     {

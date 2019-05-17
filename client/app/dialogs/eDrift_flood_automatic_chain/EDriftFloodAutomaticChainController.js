@@ -48,19 +48,6 @@ var EDriftFloodAutomaticChainController = (function() {
     EDriftFloodAutomaticChainController.prototype.runAutoChain = function(){
 
         var oActiveWorkspace = this.m_oConstantsService.getActiveWorkspace();
-        //
-        // var oAutoChain = {
-        //     BBOX:"29.0,92.0,10.0,100.0",
-        //     ORBITS:"33",
-        //     GRIDSTEP:"1,1",
-        //     LASTDAYS:"1",
-        //     PREPROCWORKFLOW: "LISTSinglePreproc",
-        //     MOSAICBASENAME: "MY",
-        //     MOSAICXSTEP: "0.00018",
-        //     MOSAICYSTEP: "0.00018",
-        //     SIMULATE: "0",
-        //     ENDDATE: "2019-04-09"
-        // };
 
         var oAutoChain = this.m_oParameters;
 
