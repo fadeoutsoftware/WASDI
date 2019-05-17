@@ -10,7 +10,7 @@ import requests
 m_sUser = 'urs'
 m_sPassword= 'pw'
 m_sBasePath = 'c:\\temp\\wasdi'
-m_sSessionCookie = ''
+m_sSessionId = ''
 m_sActiveWorkspace = ''
 m_sBaseUrl = 'http://www.wasdi.net/wasdiwebserver/rest'
 
@@ -78,7 +78,7 @@ def init():
     global m_sUser
     global m_sPassword
     global m_sBaseUrl
-    global m_sSessionCookie
+    global m_sSessionId
     
     headers = {'Content-Type': 'application/json'}
     
@@ -120,7 +120,7 @@ def getWorkspaces():
     }
     """    
     global m_sBaseUrl
-    global m_sSessionCookie
+    global m_sSessionId
     
     headers = {'Content-Type': 'application/json','x-session-token': m_sSessionCookie}
     
@@ -140,7 +140,7 @@ def getWorkspaceIdByName(sName):
     Return the WorkspaceId as a String, '' if there is any error
     """    
     global m_sBaseUrl
-    global m_sSessionCookie
+    global m_sSessionId
     
     headers = {'Content-Type': 'application/json','x-session-token': m_sSessionCookie}
     
@@ -174,7 +174,7 @@ def getProductsByWorkspace(sWorkspaceName):
     the list is an array of string. Can be empty if there is any error
     """    
     global m_sBaseUrl
-    global m_sSessionCookie
+    global m_sSessionId
     global m_sActiveWorkspace
     
     sWorkspaceId = getWorkspaceIdByName(sWorkspaceName)
@@ -247,7 +247,7 @@ def getWorkflows():
         
     """    
     global m_sBaseUrl
-    global m_sSessionCookie
+    global m_sSessionId
     
     
     headers = {'Content-Type': 'application/json','x-session-token': m_sSessionCookie}
@@ -269,7 +269,7 @@ def executeWorkflow(sInputFileName, sOutputFileName, sWorkflowName):
     return '' if there was any problem
     """    
     global m_sBaseUrl
-    global m_sSessionCookie
+    global m_sSessionId
     global m_sActiveWorkspace
     
     sWorkflowId = ''
@@ -305,7 +305,7 @@ def getProcessStatus(sProcessId):
     STATUS are  CREATED,  RUNNING,  STOPPED,  DONE,  ERROR
     """    
     global m_sBaseUrl
-    global m_sSessionCookie
+    global m_sSessionId
     
     headers = {'Content-Type': 'application/json','x-session-token': m_sSessionCookie}
     payload = {'sProcessId': sProcessId}
@@ -328,7 +328,7 @@ def updateProcessStatus(sProcessId, sStatus, iPerc):
     return the updated status as a String or '' if there was any problem
     """    
     global m_sBaseUrl
-    global m_sSessionCookie
+    global m_sSessionId
     
     headers = {'Content-Type': 'application/json','x-session-token': m_sSessionCookie}
     payload = {'sProcessId': sProcessId,'status': sStatus,'perc':iPerc}
@@ -362,7 +362,7 @@ def saveFile(sFileName):
     To work be sure that the file is on the server
     """    
     global m_sBaseUrl
-    global m_sSessionCookie
+    global m_sSessionId
     global m_sActiveWorkspace
     
     headers = {'Content-Type': 'application/json','x-session-token': m_sSessionCookie}
