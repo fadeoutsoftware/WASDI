@@ -5,7 +5,7 @@
 
 var EdriftCheckImagesTool = (function() {
 
-    function EdriftCheckImagesTool ($scope, oClose,oExtras,oAuthService,oConstantsService, oProcessorService, $interval, oProcessesLaunchedService) {
+    function EdriftCheckImagesTool ($scope, oClose,oExtras,oAuthService,oConstantsService, oProcessorService, $interval, oProcessesLaunchedService, oModalService) {
         //MEMBERS
         this.m_oScope = $scope;
         this.m_oScope.m_oController = this;
@@ -16,7 +16,9 @@ var EdriftCheckImagesTool = (function() {
         this.m_oInterval = $interval;
         this.m_oProcessesLaunchedService = oProcessesLaunchedService;
         this.m_oParameters = {};
+        this.m_oModalService = oModalService;
         this.m_bIsRunning = false;
+        this.m_sProcessRunningId = "";
 
         this.initializeParameters();
 
@@ -30,12 +32,15 @@ var EdriftCheckImagesTool = (function() {
 
     EdriftCheckImagesTool.prototype.initializeParameters = function()
     {
+
+        var sTodayDate = new Date().toISOString().slice(0,10);
+
         this.m_oParameters = {
-            startdate:"",
-            enddate:"",
+            startdate: sTodayDate,
+            enddate: sTodayDate,
             bbox:"29.0,92.0,10.0,100.0",
             orbits:"33,41,62,70,77,99,106,135,143,172"
-        }
+        };
 
     };
 
@@ -121,7 +126,11 @@ var EdriftCheckImagesTool = (function() {
                     var oDialog =  utilsVexDialogAlertBottomRightCorner("eDRIFT CHECK IMAGES<br>PROCESS HAS BEEN SCHEDULED");
                     utilsVexCloseDialogAfter(4000, oDialog);
 
+
                     var sProcessId = data.processingIdentifier;
+
+                    oController.m_sProcessRunningId = sProcessId;
+
                     console.log('Run Processor - Proc ID = ' + sProcessId);
                     oController.m_oInterval(oController.checkProcessResult,1000,1,true,sProcessId,oController);
 
@@ -136,6 +145,43 @@ var EdriftCheckImagesTool = (function() {
                 utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR: CHECK IMAGES ERROR");
                 oController.m_bIsRunning = false;
             });
+    };
+
+    EdriftCheckImagesTool.prototype.showLogs = function(){
+
+        var oController = this;
+
+        this.m_oProcessesLaunchedService.getProcessWorkspaceById(oController.m_sProcessRunningId).success(function(data,status){
+            if( (utilsIsObjectNullOrUndefined(data) === false) && (status === 200))
+            {
+                oController.m_oModalService.showModal({
+                    templateUrl: "dialogs/process_error_logs_dialog/ProcessErrorLogsDialogView.html",
+                    controller: "ProcessErrorLogsDialogController",
+                    inputs: {
+                        extras: {
+                            process:data,
+                        }
+                    }
+                }).then(function (modal) {
+                    modal.element.modal();
+                    modal.close.then(function(oResult){
+
+                    });
+                });
+
+            }
+            else
+            {
+                utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR: CHECK IMAGES SCHEDULING FAILED");
+            }
+
+        })
+            .error(function(){
+                utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR: CHECK IMAGES ERROR");
+                oController.m_bIsRunning = false;
+            });
+
+
     };
 
 
@@ -214,7 +260,8 @@ var EdriftCheckImagesTool = (function() {
         'ConstantsService',
         'ProcessorService',
         '$interval',
-        'ProcessesLaunchedService'
+        'ProcessesLaunchedService',
+        'ModalService'
     ];
     return EdriftCheckImagesTool;
 })();
