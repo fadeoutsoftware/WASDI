@@ -1,8 +1,8 @@
-'''
+"""
 Created on 11 Jun 2018
 
 @author: p.campanella
-'''
+"""
 
 name = "wasdi"
 
@@ -12,6 +12,7 @@ import json
 import traceback
 import re
 import zipfile
+
 
 m_sUser = None
 m_sPassword = None
@@ -30,6 +31,7 @@ m_aoParamsDictionary = {}
 m_sMyProcId = ''
 m_sBaseUrl = 'http://www.wasdi.net/wasdiwebserver/rest'
 m_bIsOnServer = False
+
 
 def printStatus():
     global m_sUser
@@ -60,24 +62,27 @@ def printStatus():
     log('base url: '+str(m_sBaseUrl))
     log('is on server: '+str(m_bIsOnServer))
 
+
 def getParametersDict():
-    '''
+    """
     Get the full Params Dictionary
-    '''
+    """
     global m_aoParamsDictionary
     return m_aoParamsDictionary
 
+
 def addParameter(sKey, oValue):
-    '''
+    """
     Add a sigle Parameter to the Dictionary
-    '''
+    """
     global m_aoParamsDictionary
     m_aoParamsDictionary[sKey] = oValue
-    
+
+
 def getParameter(sKey):
-    '''
+    """
     Get a Parameter. None if key does not exists
-    '''
+    """
     global m_aoParamsDictionary
     try:
         return m_aoParamsDictionary[sKey]
@@ -92,19 +97,22 @@ def setUser(sUser):
     global m_sUser
     m_sUser = sUser
 
+
 def getUser():
     """
     Get the WASDI User
     """    
     global m_sUser
     return m_sUser
- 
+
+
 def setPassword(sPassword):
     """
     Set the WASDI Password
     """    
     global m_sPassword
     m_sPassword = sPassword
+
 
 def getPassword():
     """
@@ -113,12 +121,14 @@ def getPassword():
     global m_sPassword
     return m_sPassword
 
+
 def setSessionId(sSessionId):
     """
     Set the WASDI Session
     """    
     global m_sSessionId
     m_sSessionId = sSessionId
+
 
 def getSessionId():
     """
@@ -127,12 +137,14 @@ def getSessionId():
     global m_sSessionId
     return m_sSessionId
     
+
 def setBasePath(sBasePath):
     """
     Set the local Base Path for WASDI
     """    
     global m_sBasePath
     m_sBasePath = sBasePath
+
 
 def getBasePath():
     """
@@ -141,12 +153,14 @@ def getBasePath():
     global m_sBasePath
     return m_sBasePath
        
+
 def setBaseUrl(sBaseUrl):
     """
     Set the WASDI API URL
     """    
     global m_sBaseUrl
     m_sBaseUrl = sBaseUrl
+
 
 def getBaseUrl():
     """
@@ -155,6 +169,7 @@ def getBaseUrl():
     global m_sBaseUrl
     return m_sBaseUrl
 
+
 def setIsOnServer(bIsOnServer):
     """
     Set the Is on Server Flag: keep it false, as default, while developing
@@ -162,12 +177,14 @@ def setIsOnServer(bIsOnServer):
     global m_bIsOnServer
     m_bIsOnServer = bIsOnServer
 
+
 def getIsOnServer():
     """
     Get the WASDI API URL
     """    
     global m_bIsOnServer
     return m_bIsOnServer
+
 
 def setDownloadActive(bDownloadActive):
     """
@@ -177,12 +194,14 @@ def setDownloadActive(bDownloadActive):
     global m_bDownloadActive
     m_bDownloadActive = bDownloadActive
 
+
 def getDownloadActive():
     """
     Get the WASDI API URL
     """    
     global m_bDownloadActive
     return m_bDownloadActive
+
 
 def setProcId(sProcID):
     """
@@ -191,6 +210,7 @@ def setProcId(sProcID):
     global m_sMyProcId
     m_sMyProcId = sProcID
 
+
 def getProcId():
     """
     Get the Own Proc Id
@@ -198,14 +218,17 @@ def getProcId():
     global m_sMyProcId
     return m_sMyProcId
 
+
 def log(sLog):
     if m_bVerbose:
         print(sLog)
+
 
 def __getStandardHeaders():
     global m_sSessionId
     asHeaders = {'Content-Type': 'application/json', 'x-session-token': m_sSessionId}
     return asHeaders
+
 
 def __loadConfig(sConfigFilePath):
     """
@@ -331,6 +354,7 @@ def init(sConfigFilePath=None):
     printStatus()
     return bResult
 
+
 def hello():
     """
     Hello Wasdi to test the connection.
@@ -341,6 +365,7 @@ def hello():
     sUrl = m_sBaseUrl + '/wasdi/hello'
     oResult = requests.get(sUrl)
     return oResult.text
+
 
 def getWorkspaces():
     """
@@ -396,6 +421,7 @@ def getWorkspaceIdByName(sName):
 
     return ''
 
+
 def openWorkspaceById(sWorkspaceId):
     """
     Open a workspace by Id
@@ -407,6 +433,7 @@ def openWorkspaceById(sWorkspaceId):
     
     return m_sActiveWorkspace
 
+
 def getActiveWorkspaceId():
     """
     Get Active workspace Id
@@ -415,6 +442,7 @@ def getActiveWorkspaceId():
     global m_sActiveWorkspace
     
     return m_sActiveWorkspace
+
 
 def openWorkspace(sWorkspaceName):
     """
@@ -458,7 +486,7 @@ def getProductsByWorkspaceId(sWorkspaceId):
 
     oResult = requests.get(sUrl, headers=asHeaders, params=payload)
 
-    if (oResult.ok):
+    if oResult.ok is True:
         oJsonResults = oResult.json()
 
         for oProduct in oJsonResults:
@@ -491,7 +519,7 @@ def getFullProductPath(sProductName):
     global m_bIsOnServer
     global m_bDownloadActive
     
-    if (m_bIsOnServer):
+    if m_bIsOnServer is True:
         sFullPath = '/data/wasdi/'
     else:
         sFullPath = m_sBasePath
@@ -509,6 +537,7 @@ def getFullProductPath(sProductName):
                 downloadFile(sProductName)
     
     return sFullPath
+
 
 def getSavePath():
     """
@@ -529,7 +558,8 @@ def getSavePath():
     sFullPath = sFullPath + m_sUser + '/' + m_sActiveWorkspace + '/'
     
     return sFullPath
-    
+
+
 def getWorkflows():
     """
         Get the list of workflows for the user
@@ -557,7 +587,8 @@ def getWorkflows():
         return oJsonResults
     else:
         return None
-    
+
+
 def executeWorkflow(sInputFileName, sOutputFileName, sWorkflowName):
     """
     Executes a WASDI SNAP Workflow
@@ -593,12 +624,13 @@ def executeWorkflow(sInputFileName, sOutputFileName, sWorkflowName):
         oJsonResults = oResult.json()
         
         try:
-            if (oJsonResults['boolValue']):
+            if oJsonResults['boolValue'] is True:
                 sProcessId = oJsonResults['stringValue']
         except:
             return sProcessId
     
     return sProcessId
+
 
 def getProcessStatus(sProcessId):
     """
@@ -629,6 +661,7 @@ def getProcessStatus(sProcessId):
     
     return sStatus
 
+
 def updateProcessStatus(sProcessId, sStatus, iPerc):
     """
     Update the status of a process
@@ -647,10 +680,10 @@ def updateProcessStatus(sProcessId, sStatus, iPerc):
         print('iPerc > 100 not valid')
         return ''
     elif not (
-            sStatus == 'CREATED' or\
-            sStatus == 'RUNNING' or\
-            sStatus == 'STOPPED' or\
-            sStatus == 'DONE' or\
+            sStatus == 'CREATED' or
+            sStatus == 'RUNNING' or
+            sStatus == 'STOPPED' or
+            sStatus == 'DONE' or
             sStatus == 'ERROR'
     ):
         print('sStatus must be a string like one of  CREATED,  RUNNING,  STOPPED,  DONE,  ERROR')
@@ -672,6 +705,7 @@ def updateProcessStatus(sProcessId, sStatus, iPerc):
             sStatus = ''
     
     return sStatus
+
 
 def setProcessPayload(sProcessId, data):
     """
@@ -698,6 +732,7 @@ def setProcessPayload(sProcessId, data):
             sStatus = ''
     
     return sStatus
+
 
 def saveFile(sFileName):
     """
@@ -728,6 +763,7 @@ def saveFile(sFileName):
 
     return sProcessId
 
+
 def downloadFile(sFileName):
     """
     Ingest a new file in the Active WASDI Workspace.
@@ -744,9 +780,12 @@ def downloadFile(sFileName):
     asHeaders = __getStandardHeaders()
     payload = {'filename': sFileName}
 
-    sUrl = m_sBaseUrl + '/catalog/downloadbyname?' + \
-           'filename=' + sFileName + \
-           "&workspace=" + getActiveWorkspaceId()
+    sUrl = m_sBaseUrl
+    sUrl += '/catalog/downloadbyname?'
+    sUrl += 'filename='
+    sUrl += sFileName
+    sUrl += "&workspace="
+    sUrl += getActiveWorkspaceId()
     
     log('WASDI: send request to configured url ' + sUrl)
     
@@ -781,8 +820,8 @@ def downloadFile(sFileName):
         log('WASDI: download Done new file locally available ' + sSavePath)
 
         if (sAttachmentName is not None) and\
-            (sAttachmentName != sFileName) and\
-            sAttachmentName.lower().endswith('.zip'):
+                (sAttachmentName != sFileName) and\
+                sAttachmentName.lower().endswith('.zip'):
             sPath = getSavePath()
             __unzip(sAttachmentName, sPath)
 
@@ -790,6 +829,7 @@ def downloadFile(sFileName):
         log('WASDI: download error server code: ' + str(oResponse.status_code))
         
     return
+
 
 def wasdiLog(sLogRow):
     
@@ -805,24 +845,24 @@ def wasdiLog(sLogRow):
     else:
         print(sLogRow)    
 
+
 def deleteProduct(sProduct):
     global m_sBaseUrl
     global m_sSessionId
     global m_sActiveWorkspace
 
     asHeaders = __getStandardHeaders
-    sUrl = m_sBaseUrl +\
-           "/product/delete?sProductName="\
-           + sProduct +\
-           "&bDeleteFile=true&sWorkspaceId=" +\
-           m_sActiveWorkspace +\
-           "&bDeleteLayer=true"
+    sUrl = m_sBaseUrl
+    sUrl += "/product/delete?sProductName="
+    sUrl += sProduct
+    sUrl += "&bDeleteFile=true&sWorkspaceId="
+    sUrl += m_sActiveWorkspace
+    sUrl += "&bDeleteLayer=true"
     oResult = requests.get(sUrl, headers=asHeaders)
 
     return oResult.ok
 
 
-# todo doing - in progress...
 def searchEOImages(sPlatform, sDateFrom, sDateTo,
                    dULLat, dULLon, dLRLat, dLRLon,
                    sProductType, iOrbitNumber,
@@ -893,7 +933,7 @@ def searchEOImages(sPlatform, sDateFrom, sDateTo,
         sQuery += "Sentinel-1"
 
     # If available add product type
-    if sProductType != None:
+    if sProductType is not None:
         sQuery += " AND producttype:" + sProductType
 
     # If available Sensor Operational Mode
@@ -966,14 +1006,13 @@ def __fileExistsOnWasdi(sFileName):
     sSessionId = getSessionId()
     sActiveWorkspace = getActiveWorkspaceId()
 
-
-    sUrl = m_sBaseUrl +\
-           "/catalog/checkdownloadavaialibitybyname?token=" +\
-           sSessionId +\
-           "&filename=" +\
-           sFileName +\
-           "&workspace=" +\
-           sActiveWorkspace
+    sUrl = m_sBaseUrl
+    sUrl += "/catalog/checkdownloadavaialibitybyname?token="
+    sUrl += sSessionId
+    sUrl += "&filename="
+    sUrl += sFileName
+    sUrl += "&workspace="
+    sUrl += sActiveWorkspace
 
     asHeaders = __getStandardHeaders()
     oResult = requests.get(sUrl, headers=asHeaders)
