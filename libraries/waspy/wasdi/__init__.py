@@ -322,6 +322,7 @@ def init(sConfigFilePath=None):
             m_sBasePath = '/data/wasdi/'
         else:
             sHome = os.path.expanduser("~")
+            # the empty string at the end adds a separator
             m_sBasePath = os.path.join(sHome, ".wasdi", "")
 
     if m_sSessionId != '':
@@ -537,10 +538,7 @@ def getFullProductPath(sProductName):
     else:
         sFullPath = m_sBasePath
 
-    if not (sFullPath.endswith('/') or sFullPath.endswith('\\')):
-        sFullPath = sFullPath + '/'
-    
-    sFullPath = sFullPath + m_sUser + '/' + m_sActiveWorkspace + '/' + sProductName
+    sFullPath = os.path.join(sFullPath, m_sUser, m_sActiveWorkspace, sProductName)
 
     if m_bIsOnServer is False:
         if m_bDownloadActive is True:
@@ -565,10 +563,8 @@ def getSavePath():
     else:
         sFullPath = m_sBasePath
 
-    if not (sFullPath.endswith('/') or sFullPath.endswith('\\')):
-        sFullPath = sFullPath + '/'
-    
-    sFullPath = sFullPath + m_sUser + '/' + m_sActiveWorkspace + '/'
+    # empty string at the ends adds a final separator
+    sFullPath = os.path.join(sFullPath, m_sUser, m_sActiveWorkspace, "")
     
     return sFullPath
 
@@ -624,7 +620,9 @@ def executeWorkflow(sInputFileName, sOutputFileName, sWorkflowName):
             continue
 
     asHeaders = __getStandardHeaders()
-    payload = {'workspace': m_sActiveWorkspace, 'source': sInputFileName, 'destination': sOutputFileName,
+    payload = {'workspace': m_sActiveWorkspace,
+               'source': sInputFileName,
+               'destination': sOutputFileName,
                'workflowId': sWorkflowId}
 
     sUrl = m_sBaseUrl + '/processing/graph_id'
@@ -810,8 +808,12 @@ def downloadFile(sFileName):
                     sAttachmentName = sAttachmentName[1:]
                 if (sAttachmentName[-1] == '/') or (sAttachmentName[-1] == '\\'):
                     sAttachmentName = sAttachmentName[:-1]
+                if (sAttachmentName[0] == '\"') or (sAttachmentName[0] == '\''):
+                    sAttachmentName = sAttachmentName[1:]
+                if (sAttachmentName[-1] == '\"') or (sAttachmentName[-1] == '\''):
+                    sAttachmentName = sAttachmentName[:-1]
         sSavePath = getSavePath()
-        sSavePath += sAttachmentName
+        sSavePath = os.path.join(sSavePath, sAttachmentName)
         
         try:
             os.makedirs(os.path.dirname(sSavePath))
@@ -1037,10 +1039,10 @@ def __unzip(sAttachmentName, sPath):
     log('wasdi.__unzip( ' + sAttachmentName + ', ' + sPath + ' )')
     if sPath is None:
         raise TypeError('No path no party!')
-    if sAttachmentName:
+    if sAttachmentName is None:
         raise TypeError('No attachment to unzip!')
 
-    sZipFilePath = sPath + sAttachmentName
+    sZipFilePath = os.path.join(sPath, sAttachmentName)
     zip_ref = zipfile.ZipFile(sZipFilePath, 'r')
     zip_ref.extractall(sPath)
     zip_ref.close()
