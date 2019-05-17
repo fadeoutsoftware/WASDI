@@ -13,7 +13,6 @@ import traceback
 import re
 import zipfile
 
-
 m_sUser = None
 m_sPassword = None
 
@@ -21,7 +20,7 @@ m_sActiveWorkspace = None
 
 m_sParametersFilePath = None
 m_sSessionId = ''
-m_sBasePath = '/data/wasdi/'
+m_sBasePath = None
 
 m_bDownloadActive = True
 m_bUploadActive = True
@@ -242,7 +241,6 @@ def __loadConfig(sConfigFilePath):
 
     global m_sUser
     global m_sPassword
-    global m_sActiveWorkspace
     global m_sParametersFilePath
     global m_sSessionId
     global m_sBasePath
@@ -257,19 +255,26 @@ def __loadConfig(sConfigFilePath):
         sTempWorkspaceID = None
         with open(sConfigFilePath) as oJsonFile:
             oJson = json.load(oJsonFile)
-
-            m_sUser = oJson["USER"]
-            m_sPassword = oJson["PASSWORD"]
-            sTempWorkspaceName = oJson["WORKSPACE"]
-            sTempWorkspaceID = None
-            if (sTempWorkspaceName is None) and (sTempWorkspaceName == ''):
+            if "USER" in oJson:
+                m_sUser = oJson["USER"]
+            if "PASSWORD" in oJson:
+                m_sPassword = oJson["PASSWORD"]
+            if "WORKSPACE" in oJson:
+                sTempWorkspaceName = oJson["WORKSPACE"]
+                sTempWorkspaceID = None
+            elif "WORKSPACEID" in oJson:
                 sTempWorkspaceID = oJson["WORKSPACEID"]
                 sTempWorkspaceName = None
-
-            m_sParametersFilePath = oJson["PARAMETERSFILEPATH"]
-            m_bDownloadActive = bool(oJson["DOWNLOADACTIVE"])
-            m_bUploadActive = bool(oJson["UPLOADACTIVE"])
-            m_bVerbose = bool(oJson["VERBOSE"])
+            if "BASEPATH" in oJson:
+                m_sBasePath = oJson["BASEPATH"]
+            if "PARAMETERSFILEPATH" in oJson:
+                m_sParametersFilePath = oJson["PARAMETERSFILEPATH"]
+            if "DOWNLOADACTIVE" in oJson:
+                m_bDownloadActive = bool(oJson["DOWNLOADACTIVE"])
+            if "UPLOADACTIVE" in oJson:
+                m_bUploadActive = bool(oJson["UPLOADACTIVE"])
+            if "VERBOSE" in oJson:
+                m_bVerbose = bool(oJson["VERBOSE"])
 
         return True, sTempWorkspaceName, sTempWorkspaceID
 
@@ -299,6 +304,7 @@ def init(sConfigFilePath=None):
     global m_sPassword
     global m_sBaseUrl
     global m_sSessionId
+    global m_sBasePath
 
     sWname = None
     sWId = None
@@ -310,6 +316,13 @@ def init(sConfigFilePath=None):
 
     if m_sUser is None:
         raise TypeError('Must initialize user first')
+
+    if m_sBasePath is None:
+        if m_bIsOnServer is True:
+            m_sBasePath = '/data/wasdi/'
+        else:
+            sHome = os.path.expanduser("~")
+            m_sBasePath = os.path.join(sHome, ".wasdi", "")
 
     if m_sSessionId != '':
         asHeaders = __getStandardHeaders()
