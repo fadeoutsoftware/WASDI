@@ -54,8 +54,53 @@
         this.m_sSortByColum = propertyName;
     };
 
+     ProcessErrorLogsDialogController.prototype.getProcessWorkspaceId = function() {
+         if (this.m_oProcess.processObjId != null) {
+             return this.m_oProcess.processObjId;
+         }
+         else {
+             return "";
+         }
+     };
 
-    ProcessErrorLogsDialogController.prototype.startTick=function(sStatus){
+     ProcessErrorLogsDialogController.prototype.getProcessorType = function() {
+         if (this.m_oProcess.operationType != null) {
+             return this.m_oProcess.operationType;
+         }
+         else {
+             return "";
+         }
+     };
+
+     ProcessErrorLogsDialogController.prototype.getProcessorName = function() {
+         if (this.m_oProcess.productName != null) {
+             return this.m_oProcess.productName;
+         }
+         else {
+             return "";
+         }
+     };
+
+     ProcessErrorLogsDialogController.prototype.getProcessorStatus = function() {
+         if (this.m_oProcess.status != null) {
+             return this.m_oProcess.status;
+         }
+         else {
+             return "";
+         }
+     };
+
+
+     ProcessErrorLogsDialogController.prototype.getPayload = function() {
+         if (this.m_oProcess.payload != null) {
+             utilsVexDialogBigAlertTop(this.m_oProcess.payload,null);
+         }
+         else {
+             utilsVexDialogBigAlertTop("Payload not available",null);
+         }
+     };
+
+     ProcessErrorLogsDialogController.prototype.startTick=function(sStatus){
         if( ( utilsIsStrNullOrEmpty(sStatus) === true ) || ( sStatus !== "RUNNING" ) )
         {
             return undefined;

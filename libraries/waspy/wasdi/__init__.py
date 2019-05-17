@@ -236,9 +236,11 @@ def __loadConfig(sConfigFilePath):
     :param sConfigFilePath: a string containing a path to the configuration file
     """
     if sConfigFilePath is None:
-        raise TypeError("[ERROR] waspy.__loadConfigParams: config parameter file name is None, cannot load config")
+        __log("[ERROR] waspy.__loadConfigParams: config parameter file name is None, cannot load config")
+        return
     if sConfigFilePath == '':
-        raise ValueError("[ERROR] waspy.__loadConfigParams: config parameter file name is empty, cannot load config")
+        __log("[ERROR] waspy.__loadConfigParams: config parameter file name is empty, cannot load config")
+        return
 
     global m_sUser
     global m_sPassword
@@ -280,8 +282,8 @@ def __loadConfig(sConfigFilePath):
         return True, sTempWorkspaceName, sTempWorkspaceID
 
     except Exception as oEx:
-        print('[ERROR] waspy.__loadConfigParams: something went wrong')
-        raise
+        __log('[ERROR] waspy.__loadConfigParams: something went wrong')
+        return
 
 
 def __loadParams():
@@ -316,7 +318,8 @@ def init(sConfigFilePath=None):
             __loadParams()
 
     if m_sUser is None:
-        raise TypeError('Must initialize user first')
+        __log('Must initialize user first')
+        return
 
     if m_sBasePath is None:
         if m_bIsOnServer is True:
@@ -716,11 +719,18 @@ def updateProcessStatus(sProcessId, sStatus, iPerc):
 def updateProgressPerc(iPerc):
     __log('wasdi.updateProgressPerc( ' + str(iPerc) + ' )')
     if iPerc is None:
-        raise TypeError('Passed None, expected a percentage')
+        __log('Passed None, expected a percentage')
+        return ""
     if 0 > iPerc or 100 < iPerc:
-        raise ValueError('Percentage must be in [0, 100]')
+        __log('Percentage must be in [0, 100]')
+        if (iPerc<0):
+            iPerc = 0
+        if (iPerc>100):
+            iPerc = 100
+        
     if (getProcId() is None) or (len(getProcId())):
-        raise TypeError('Cannot update progress if process ID is not known')
+        __log('Cannot update progress if process ID is not known')
+        return ""
 
     sStatus = "RUNNING"
     sUrl = getBaseUrl() + "/process/updatebyid?sProcessId=" + getProcId() + "&status=" + sStatus + "&perc=" + iPerc + "&sendrabbit=1"
@@ -1009,7 +1019,7 @@ def searchEOImages(sPlatform, sDateFrom, sDateTo,
             aoReturnList = oJsonResponse
         except Exception as oEx:
             __log('[ERROR] waspy.searchEOImages: exception while trying to convert response into JSON object')
-            raise
+            return aoReturnList
 
         __log("" + repr(aoReturnList))
         return aoReturnList
@@ -1028,9 +1038,11 @@ def __fileExistsOnWasdi(sFileName):
     :return: True if the file exists, False otherwise
     """
     if sFileName is None:
-        raise TypeError('File name must not be None')
+        __log('File name must not be None')
+        return False
     if len(sFileName) < 1:
-        raise ValueError('File name too short')
+        __log('File name too short')
+        return False
 
     sBaseUrl = getBaseUrl()
     sSessionId = getSessionId()
@@ -1059,9 +1071,11 @@ def __unzip(sAttachmentName, sPath):
     """
     __log('wasdi.__unzip( ' + sAttachmentName + ', ' + sPath + ' )')
     if sPath is None:
-        raise TypeError('No path no party!')
+        __log('No path no party!')
+        return
     if sAttachmentName is None:
-        raise TypeError('No attachment to unzip!')
+        __log('No attachment to unzip!')
+        return
 
     sZipFilePath = os.path.join(sPath, sAttachmentName)
     zip_ref = zipfile.ZipFile(sZipFilePath, 'r')
@@ -1087,7 +1101,8 @@ def importProduct(sFileUrl=None, sBoundingBox=None, asProduct=None):
             if "footprint" in asProduct:
                 sBoundingBox = asProduct["footprint"]
         else:
-            raise TypeError('Cannot import product without url or a map')
+            __log('Cannot import product without url or a map')
+            return ""
 
     sUrl = getBaseUrl()
     sUrl += "/filebuffer/download?sFileUrl="
@@ -1112,7 +1127,8 @@ def importProduct(sFileUrl=None, sBoundingBox=None, asProduct=None):
 # todo extend to a list of processes
 def waitProcess(sProcessId):
     if sProcessId is None:
-        raise TypeError('Passed None, expected a process ID')
+        __log('Passed None, expected a process ID')
+        return "ERROR"
 
     sStatus = ''
 

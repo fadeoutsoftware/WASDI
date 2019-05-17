@@ -93,7 +93,8 @@ def run(parameters, processId):
             iProgress += iUpdateOrbitStep
             if (iProgress>100):
                 iProgress = 100
-            wasdi.updateProcessStatus(processId, "RUNNING", iProgress)
+            
+            wasdi.updateProgressPerc(iProgress)
         
         aoResults.append(aoDay)
         

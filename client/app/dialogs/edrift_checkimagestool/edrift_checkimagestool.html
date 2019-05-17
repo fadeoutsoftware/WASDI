@@ -84,8 +84,11 @@
                 <button type="button" ng-click="close(null)" class="btn btn-primary btn-wasdi" data-dismiss="modal">
                     {{"DIALOG_CLOSE_BUTTON"|translate}}
                 </button>
-                <button ng-click="m_oController.runProcessor()" class="my-button">
+                <button type="button"  ng-click="m_oController.runProcessor()" class="btn btn-primary btn-wasdi" ng-show="!m_oController.m_bIsRunning">
                     Run
+                </button>
+                <button type="button"  ng-click="m_oController.showLogs()" class="btn btn-primary btn-wasdi" ng-show="m_oController.m_bIsRunning">
+                    Logs
                 </button>
             </div>
 
