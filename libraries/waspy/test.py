@@ -12,6 +12,8 @@ bInitOk = False
 bInitOk = wasdi.init('./config.json')
 
 
+# 	"BASEPATH": "./",
+
 if bInitOk:
     print('[INFO] waspy: init ok')
 
@@ -21,6 +23,12 @@ if bInitOk:
     sFileName = 'S1A_EW_GRDM_1SSH_20190509T004543_20190509T004646_027143_030F49_B737.zip'
     bExists = wasdi.__fileExistsOnWasdi(sFileName)
     assert(bExists is True)
+    # if bExists:
+    #     wasdi.downloadFile(sFileName)
+
+    sFileName = 'S1A_EW_GRDM_1SSH_20190509T004543_20190509T004646_027143_030F49_B737_ApplyOrbit.dim'
+    bExists = wasdi.__fileExistsOnWasdi(sFileName)
+    assert (bExists is True)
     if bExists:
         wasdi.downloadFile(sFileName)
 
