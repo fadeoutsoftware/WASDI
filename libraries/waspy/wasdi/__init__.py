@@ -735,7 +735,7 @@ def downloadFile(sFileName):
     To work be sure that the file is on the server
     """
 
-    log('wasdi.downloadFile( '+ sFileName +' )')
+    log('wasdi.downloadFile( ' + sFileName + ' )')
 
     global m_sBaseUrl
     global m_sSessionId
@@ -765,11 +765,11 @@ def downloadFile(sFileName):
                 if (sAttachmentName[-1] == '/') or (sAttachmentName[-1] == '\\'):
                     sAttachmentName = sAttachmentName[:-1]
         sSavePath = getSavePath()
-        sSavePath += sFileName
+        sSavePath += sAttachmentName
         
         try:
             os.makedirs(os.path.dirname(sSavePath))
-        except: # Guard against race condition
+        except:  # Guard against race condition
             log('Error Creating File Path!!')
         
         log('WASDI: downloading local file ' + sSavePath)
@@ -783,7 +783,9 @@ def downloadFile(sFileName):
         if (sAttachmentName is not None) and\
             (sAttachmentName != sFileName) and\
             sAttachmentName.lower().endswith('.zip'):
-        # todo unzip
+            sPath = getSavePath()
+            __unzip(sAttachmentName, sPath)
+
     else:
         log('WASDI: download error server code: ' + str(oResponse.status_code))
         
@@ -986,6 +988,7 @@ def __unzip(sAttachmentName, sPath):
     :param sPath: both the path where the file is and where it must be unzipped
     :return:
     """
+    log('wasdi.__unzip( ' + sAttachmentName + ', ' + sPath + ' )')
     if sPath is None:
         raise TypeError('No path no party!')
     if sAttachmentName:
