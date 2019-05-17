@@ -692,14 +692,8 @@ def updateProcessStatus(sProcessId, sStatus, iPerc):
     elif iPerc > 100:
         print('iPerc > 100 not valid')
         return ''
-    elif not (
-            sStatus == 'CREATED' or
-            sStatus == 'RUNNING' or
-            sStatus == 'STOPPED' or
-            sStatus == 'DONE' or
-            sStatus == 'ERROR'
-    ):
-        print('sStatus must be a string like one of  CREATED,  RUNNING,  STOPPED,  DONE,  ERROR')
+    elif sStatus not in {'CREATED', 'RUNNING', 'STOPPED', 'DONE', 'ERROR'}:
+        print('sStatus must be a string in: {CREATED,  RUNNING,  STOPPED,  DONE,  ERROR')
         return ''
     elif sProcessId == '':
         return ''
