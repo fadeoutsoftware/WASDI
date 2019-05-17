@@ -25,8 +25,8 @@
         };
         //this.getAllErrorLogs(this.m_oProcess.processObjId);
 
-        this.getLogs(this.m_oProcess.processObjId,0,this.m_iNumberOfLogsPerPage);
-        this.getCountLogs(this.m_oProcess.processObjId);
+        // this.getLogs(this.m_oProcess.processObjId,0,this.m_iNumberOfLogsPerPage);
+        this.getCountLogs(this.m_oProcess.processObjIdm,this.getCountLogsANDLogsCallback);
         this.m_oTick = this.startTick(this.m_oProcess.status);
 
         $scope.$on('$destroy', function() {
@@ -44,8 +44,8 @@
             {
                 var iLastRow = oController.m_iNumberOfLogsPerPage * newValue;
                 var iFirstRow = oController.m_iNumberOfLogsPerPage * (newValue - 1);
-                oController.getLogs(oController.m_oProcess.processObjId,iFirstRow,iLastRow);
-                oController.getCountLogs(oController.m_oProcess.processObjId,oController.getCountLogsCallback);
+                // oController.getLogs(oController.m_oProcess.processObjId,iFirstRow,iLastRow);
+                oController.getCountLogs(oController.m_oProcess.processObjId,oController.getCountLogsANDLogsCallback);
                 // if(newValue.name === "Untitled Workspace")
                 // {
                 //     $scope.m_oController.getWorkspacesInfo();
@@ -155,7 +155,7 @@
         }
 
 
-    }
+    };
      ProcessErrorLogsDialogController.prototype.getCountLogsCallback = function(data, status,oController)
      {
          if (data != null)
@@ -166,30 +166,43 @@
                  // oController.m_iTotalPages = oController.getNumberOfPages(data);
              }
          }
+     };
+
+     ProcessErrorLogsDialogController.prototype.getCountLogsANDLogsCallback = function(data, status,oController)
+     {
+         if (data != null)
+         {
+             if (data != undefined)
+             {
+                 oController.m_iNumberOfLogs = data;
+                 // var iLastRow = oController.m_iNumberOfLogs - (oController.m_iNumberOfLogsPerPage * oController.m_iCurrentPage);
+                 // var iFirstRow = oController.m_iNumberOfLogs - (oController.m_iNumberOfLogsPerPage * (oController.m_iCurrentPage - 1));
+                 // var iFirstRow  = oController.m_iNumberOfLogs - (oController.m_iNumberOfLogsPerPage * oController.m_iCurrentPage);
+                 // var iLastRow = oController.m_iNumberOfLogs - (oController.m_iNumberOfLogsPerPage * (oController.m_iCurrentPage - 1) );
+                 // iLastRow = iFirstRow-1;
+                 // if(iFirstRow < 0)
+                 // {
+                 //     iFirstRow = 0;
+                 // }
+                 var iFirstRow = oController.m_iNumberOfLogs - (oController.m_iCurrentPage * oController.m_iNumberOfLogsPerPage);
+                 var iLastRow = iFirstRow + oController.m_iNumberOfLogsPerPage;
+                 if(iFirstRow < 0)
+                 {
+                     iFirstRow = 0;
+                 }
+                 oController.getLogs(oController.oProcessObjId,iFirstRow,iLastRow);
+                 // oController.m_iTotalPages = oController.getNumberOfPages(data);
+             }
+         }
      }
 
-     // ProcessErrorLogsDialogController.prototype.getCountLogs = function(oProcessObjId, oCallback)
-     // {
-     //     if(utilsIsObjectNullOrUndefined(oProcessObjId) === true)
-     //     {
-     //         return false;
-     //     }
-     //     // oProcessObjId = "fb99a0b1-93cb-40ab-9d44-9701a7b11b9b";
-     //
-     //     var oController = this;
-     //     this.m_oProcessorService.getCountLogs(oProcessObjId).success(function (data, status) {
-     //         oCallback(data, status,oController);
-     //     }).error(function (data,status) {
-     //         //alert('error');
-     //         utilsVexDialogAlertTop('GURU MEDITATION<br>ERROR IN GET COUNT LOGS');
-     //     });
-     //     return true;
-     //
-     // };
-
-    ProcessErrorLogsDialogController.prototype.getCountLogs = function(oProcessObjId)
+     ProcessErrorLogsDialogController.prototype.getCountLogs = function(oProcessObjId, oCallback)
      {
          if(utilsIsObjectNullOrUndefined(oProcessObjId) === true)
+         {
+             return false;
+         }
+         if(utilsIsObjectNullOrUndefined(oCallback) === true)
          {
              return false;
          }
@@ -197,14 +210,7 @@
 
          var oController = this;
          this.m_oProcessorService.getCountLogs(oProcessObjId).success(function (data, status) {
-             if (data != null)
-             {
-                 if (data != undefined)
-                 {
-                     oController.m_iNumberOfLogs = data;
-                     // oController.m_iTotalPages = oController.getNumberOfPages(data);
-                 }
-             }
+             oCallback(data, status,oController);
          }).error(function (data,status) {
              //alert('error');
              utilsVexDialogAlertTop('GURU MEDITATION<br>ERROR IN GET COUNT LOGS');
@@ -212,6 +218,32 @@
          return true;
 
      };
+
+    // ProcessErrorLogsDialogController.prototype.getCountLogs = function(oProcessObjId)
+    //  {
+    //      if(utilsIsObjectNullOrUndefined(oProcessObjId) === true)
+    //      {
+    //          return false;
+    //      }
+    //      // oProcessObjId = "fb99a0b1-93cb-40ab-9d44-9701a7b11b9b";
+    //
+    //      var oController = this;
+    //      this.m_oProcessorService.getCountLogs(oProcessObjId).success(function (data, status) {
+    //          if (data != null)
+    //          {
+    //              if (data != undefined)
+    //              {
+    //                  oController.m_iNumberOfLogs = data;
+    //                  // oController.m_iTotalPages = oController.getNumberOfPages(data);
+    //              }
+    //          }
+    //      }).error(function (data,status) {
+    //          //alert('error');
+    //          utilsVexDialogAlertTop('GURU MEDITATION<br>ERROR IN GET COUNT LOGS');
+    //      });
+    //      return true;
+    //
+    //  };
 
      ProcessErrorLogsDialogController.prototype.getLogs = function(oProcessObjId,iStartRow,iEndRow)
      {
