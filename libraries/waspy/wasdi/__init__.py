@@ -12,6 +12,7 @@ import json
 import traceback
 import re
 import zipfile
+import time
 
 m_sUser = None
 m_sPassword = None
@@ -47,19 +48,19 @@ def printStatus():
     global m_sBaseUrl
     global m_bIsOnServer
 
-    log('user: '+str(m_sUser))
-    log('password: '+str(m_sPassword))
-    log('active workspace: '+str(m_sActiveWorkspace))
-    log('parameters file path: '+str(m_sParametersFilePath))
-    log('session id: '+str(m_sSessionId))
-    log('base path: '+str(m_sBasePath))
-    log('download active: '+str(m_bDownloadActive))
-    log('upload active: '+str(m_bUploadActive))
-    log('verbose: '+str(m_bVerbose))
-    log('param dict: '+str(m_aoParamsDictionary))
-    log('proc id: '+str(m_sMyProcId))
-    log('base url: '+str(m_sBaseUrl))
-    log('is on server: '+str(m_bIsOnServer))
+    __log('user: ' + str(m_sUser))
+    __log('password: ' + str(m_sPassword))
+    __log('active workspace: ' + str(m_sActiveWorkspace))
+    __log('parameters file path: ' + str(m_sParametersFilePath))
+    __log('session id: ' + str(m_sSessionId))
+    __log('base path: ' + str(m_sBasePath))
+    __log('download active: ' + str(m_bDownloadActive))
+    __log('upload active: ' + str(m_bUploadActive))
+    __log('verbose: ' + str(m_bVerbose))
+    __log('param dict: ' + str(m_aoParamsDictionary))
+    __log('proc id: ' + str(m_sMyProcId))
+    __log('base url: ' + str(m_sBaseUrl))
+    __log('is on server: ' + str(m_bIsOnServer))
 
 
 def getParametersDict():
@@ -218,7 +219,7 @@ def getProcId():
     return m_sMyProcId
 
 
-def log(sLog):
+def __log(sLog):
     if m_bVerbose:
         print(sLog)
 
@@ -685,7 +686,7 @@ def updateProcessStatus(sProcessId, sStatus, iPerc):
     payload = {'sProcessId': sProcessId, 'status': sStatus, 'perc': iPerc}
 
     if iPerc < 0:
-        log('iPerc < 0 not valid')
+        __log('iPerc < 0 not valid')
         return ''
     elif iPerc > 100:
         print('iPerc > 100 not valid')
@@ -776,7 +777,7 @@ def downloadFile(sFileName):
     To work be sure that the file is on the server
     """
 
-    log('wasdi.downloadFile( ' + sFileName + ' )')
+    __log('wasdi.downloadFile( ' + sFileName + ' )')
 
     global m_sBaseUrl
     global m_sSessionId
@@ -792,12 +793,12 @@ def downloadFile(sFileName):
     sUrl += "&workspace="
     sUrl += getActiveWorkspaceId()
     
-    log('WASDI: send request to configured url ' + sUrl)
+    __log('WASDI: send request to configured url ' + sUrl)
     
     oResponse = requests.get(sUrl, headers=asHeaders, params=payload, stream=True)
 
     if (oResponse is not None) and (oResponse.status_code == 200):
-        log('WASDI: got ok result, downloading')
+        __log('WASDI: got ok result, downloading')
         sAttachmentName = None
         asResponseHeaders = oResponse.headers
         if asResponseHeaders is not None:
@@ -818,15 +819,15 @@ def downloadFile(sFileName):
         try:
             os.makedirs(os.path.dirname(sSavePath))
         except:  # Guard against race condition
-            log('Error Creating File Path!!')
+            __log('Error Creating File Path!!')
         
-        log('WASDI: downloading local file ' + sSavePath)
+        __log('WASDI: downloading local file ' + sSavePath)
 
         with open(sSavePath, 'wb') as oFile:
             for oChunk in oResponse:
-                log('.')
+                __log('.')
                 oFile.write(oChunk)
-        log('WASDI: download Done new file locally available ' + sSavePath)
+        __log('WASDI: download Done new file locally available ' + sSavePath)
 
         if (sAttachmentName is not None) and\
                 (sAttachmentName != sFileName) and\
@@ -835,7 +836,7 @@ def downloadFile(sFileName):
             __unzip(sAttachmentName, sPath)
 
     else:
-        log('WASDI: download error server code: ' + str(oResponse.status_code))
+        __log('WASDI: download error server code: ' + str(oResponse.status_code))
         
     return
 
@@ -895,41 +896,41 @@ def searchEOImages(sPlatform, sDateFrom, sDateTo,
     aoReturnList = []
 
     if sPlatform is None:
-        log("searchEOImages: platform cannot be None")
+        __log("searchEOImages: platform cannot be None")
         return aoReturnList
 
     # todo support other platforms
     if (sPlatform != "S1") and (sPlatform != "S2"):
-        log("searchEOImages: platform must be S1 or S2. Received [" + sPlatform + "]")
+        __log("searchEOImages: platform must be S1 or S2. Received [" + sPlatform + "]")
         return aoReturnList
 
     if sPlatform == "S1":
         if sProductType is not None:
             if not (sProductType == "SLC" or sProductType == "GRD" or sProductType == "OCN"):
-                log("searchEOImages: Available Product Types for S1; SLC, GRD, OCN. Received [" + sProductType + "]")
+                __log("searchEOImages: Available Product Types for S1; SLC, GRD, OCN. Received [" + sProductType + "]")
 
     if sPlatform == "S2":
         if sProductType is not None:
             if not (sProductType == "S2MSI1C" or sProductType == "S2MSI2Ap" or sProductType == "S2MSI2A"):
-                log("searchEOImages: Available Product Types for S2; S2MSI1C, S2MSI2Ap, S2MSI2A. Received ["
-                    + sProductType + "]")
+                __log("searchEOImages: Available Product Types for S2; S2MSI1C, S2MSI2Ap, S2MSI2A. Received ["
+                      + sProductType + "]")
 
     if sDateFrom is None:
-        log("searchEOImages: sDateFrom cannot be None")
+        __log("searchEOImages: sDateFrom cannot be None")
         return aoReturnList
 
     # if (len(sDateFrom) < 10) or (sDateFrom[4] != '-') or (sDateFrom[7] != '-'):
     if not bool(re.match(r"\d\d\d\d\-\d\d\-\d\d", sDateFrom)):
-        log("searchEOImages: sDateFrom must be in format YYYY-MM-DD")
+        __log("searchEOImages: sDateFrom must be in format YYYY-MM-DD")
         return aoReturnList
 
     if sDateTo is None:
-        log("searchEOImages: sDateTo cannot be None")
+        __log("searchEOImages: sDateTo cannot be None")
         return aoReturnList
 
     # if len(sDateTo) < 10 or sDateTo[4] != '-' or sDateTo[7] != '-':
     if not bool(re.match(r"\d\d\d\d\-\d\d\-\d\d", sDateTo)):
-        log("searchEOImages: sDateTo must be in format YYYY-MM-DD")
+        __log("searchEOImages: sDateTo must be in format YYYY-MM-DD")
         return aoReturnList
 
     # create query string:
@@ -987,15 +988,15 @@ def searchEOImages(sPlatform, sDateFrom, sDateTo,
             oJsonResponse = oResponse.json()
             aoReturnList = oJsonResponse
         except Exception as oEx:
-            log('[ERROR] waspy.searchEOImages: exception while trying to convert response into JSON object')
+            __log('[ERROR] waspy.searchEOImages: exception while trying to convert response into JSON object')
             raise
 
-        log("" + repr(aoReturnList))
+        __log("" + repr(aoReturnList))
         return aoReturnList
     except Exception as oEx:
-        log(type(oEx))
+        __log(type(oEx))
         traceback.print_exc()
-        log(oEx)
+        __log(oEx)
 
     return aoReturnList
 
@@ -1036,7 +1037,7 @@ def __unzip(sAttachmentName, sPath):
     :param sPath: both the path where the file is and where it must be unzipped
     :return:
     """
-    log('wasdi.__unzip( ' + sAttachmentName + ', ' + sPath + ' )')
+    __log('wasdi.__unzip( ' + sAttachmentName + ', ' + sPath + ' )')
     if sPath is None:
         raise TypeError('No path no party!')
     if sAttachmentName is None:
