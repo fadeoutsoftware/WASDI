@@ -34,8 +34,9 @@ m_bIsOnServer = False
 
 
 def printStatus():
-    global m_sUser
-    global m_sPassword
+    """
+    Prints status
+    """
     global m_sActiveWorkspace
     global m_sParametersFilePath
     global m_sSessionId
@@ -48,24 +49,25 @@ def printStatus():
     global m_sBaseUrl
     global m_bIsOnServer
 
-    __log('user: ' + str(m_sUser))
-    __log('password: ' + str(m_sPassword))
-    __log('active workspace: ' + str(m_sActiveWorkspace))
-    __log('parameters file path: ' + str(m_sParametersFilePath))
-    __log('session id: ' + str(m_sSessionId))
-    __log('base path: ' + str(m_sBasePath))
-    __log('download active: ' + str(m_bDownloadActive))
-    __log('upload active: ' + str(m_bUploadActive))
-    __log('verbose: ' + str(m_bVerbose))
-    __log('param dict: ' + str(m_aoParamsDictionary))
-    __log('proc id: ' + str(m_sMyProcId))
-    __log('base url: ' + str(m_sBaseUrl))
-    __log('is on server: ' + str(m_bIsOnServer))
+    __log('[INFO] user: ' + str(getUser()))
+    __log('[INFO] password: ' + str(getPassword()))
+    __log('[INFO] active workspace: ' + str(getActiveWorkspaceId()))
+    __log('[INFO] parameters file path: ' + str(m_sParametersFilePath))
+    __log('[INFO] session id: ' + str(getSessionId()))
+    __log('[INFO] base path: ' + str(getBasePath()))
+    __log('[INFO] download active: ' + str(getDownloadActive()))
+    __log('[INFO] upload active: ' + str(m_bUploadActive))
+    __log('[INFO] verbose: ' + str(m_bVerbose))
+    __log('[INFO] param dict: ' + str(getParametersDict()))
+    __log('[INFO] proc id: ' + str(getProcId()))
+    __log('[INFO] base url: ' + str(getBaseUrl()))
+    __log('[INFO] is on server: ' + str(getIsOnServer()))
 
 
 def getParametersDict():
     """
     Get the full Params Dictionary
+    :return: a dictionary containing the parameters
     """
     global m_aoParamsDictionary
     return m_aoParamsDictionary
