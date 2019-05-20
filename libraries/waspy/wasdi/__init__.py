@@ -422,7 +422,7 @@ def init(sConfigFilePath=None):
         if (oResponse is not None) and (oResponse.ok is True):
             oJsonResult = oResponse.json()
             try:
-                sUser = oJsonResult['userId']
+                sUser = str(oJsonResult['userId'])
                 if sUser == m_sUser:
                     bResult = True
                 else:
@@ -448,7 +448,7 @@ def init(sConfigFilePath=None):
         else:
             oJsonResult = oResponse.json()
             try:
-                m_sSessionId = oJsonResult['sessionId']
+                m_sSessionId = str(oJsonResult['sessionId'])
                 bResult = True
             except:
                 bResult = False
@@ -837,7 +837,7 @@ def updateProgressPerc(iPerc):
     if (oResponse is not None) and (oResponse.ok is True):
         oJson = oResponse.json()
         if (oJson is not None) and ("status" in oJson):
-            sResult = oJson['status']
+            sResult = str(oJson['status'])
     else:
         print('[ERROR] waspy.updateProgressPerc: could not update progress')
     return sResult
@@ -1278,7 +1278,7 @@ def importProduct(sFileUrl=None, sBoundingBox=None, asProduct=None):
         oJsonResponse = oResponse.json()
         if ("boolValue" in oJsonResponse) and (oJsonResponse["boolValue"] is True):
             if "stringValue" in oJsonResponse:
-                sProcessId = oJsonResponse["stringValue"]
+                sProcessId = str(oJsonResponse["stringValue"])
                 sReturn = waitProcess(sProcessId)
 
     return sReturn
@@ -1299,7 +1299,7 @@ def waitProcess(sProcessId):
     return sStatus
 
 
-def upload(sFileName):
+def uploadFile(sFileName):
     """
     Uploads a file to WASDI
     :param sFileName: name of file inside working directory OR path to file RELATIVE to working directory
