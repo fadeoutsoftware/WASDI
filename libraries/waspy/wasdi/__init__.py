@@ -3,6 +3,7 @@ Created on 11 Jun 2018
 
 @author: p.campanella
 """
+from pandas._libs.join import outer_join_indexer
 
 name = "wasdi"
 
@@ -1408,6 +1409,42 @@ def __internalAddFileToWASDI(sFileName, bAsynch=None):
     return sResult
 
 
+def subset(sInputFile, sOutputFile, dLatN, dLonW, dLatS, dLonE):
+    __log('[INFO] waspy.subset( ' + str(sInputFile) + ', ' + str(sOutputFile) + ', ' +
+         str(dLatN) + ', ' + str(dLonW) + ', ' + str(dLatS) + ', ' + str(dLonE) + ' )')
+
+    if sInputFile is None:
+        print('[ERROR] waspy.subset: input file must not be None, aborting')
+        return ''
+    if len(sInputFile) < 1:
+        print('[ERROR] waspy.subset: input file name must not have zero length, aborting')
+        return ''
+    if sOutputFile is None:
+        print('[ERROR] waspy.subset: output file must not be None, aborting')
+        return ''
+    if len(sOutputFile) < 1:
+        print('[ERROR] waspy.subset: output file name len must not have zero length, aborting')
+        return ''
+
+    sUrl = m_sBaseUrl + "/processing/geometric/subset?sSourceProductName=" + sInputFile + "&sDestinationProductName=" +\
+           sOutputFile + "&sWorkspaceId=" + m_sActiveWorkspace
+    sSubsetSetting = "{ \"latN\":" + dLatN + ", \"lonW\":" + dLonW + ", \"latS\":" + dLatS + ", \"lonE\":" + dLonE + " }"
+    asHeaders = __getStandardHeaders()
+    oResponse = requests.get(sUrl, data=sSubsetSetting, headers=asHeaders)
+    if oResponse is None:
+        print('[ERROR] waspy.subset: cannot contact server')
+        return ''
+    if oResponse.ok is not True:
+        print('[ERROR] waspy.subset: failed, server returned '+ str(oResponse.status_code))
+        return ''
+    else:
+        oJson = oResponse.json()
+        if oJson is not None:
+            if 'stringValue' in oJson:
+                sProcessId = oJson['stringValue']
+                return waitProcess(sProcessId)
+
+    return ''
 
 
 if __name__ == '__main__':
