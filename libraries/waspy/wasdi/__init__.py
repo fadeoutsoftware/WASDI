@@ -1341,5 +1341,75 @@ def __normPath(sPath):
 
     return sPath
 
+def addFileToWASDI(sFileName):
+    return __internalAddFileToWASDI(sFileName, False)
+
+def asynchAddFileToWASDI(sFileName):
+    return __internalAddFileToWASDI(sFileName, True)
+
+def __internalAddFileToWASDI(sFileName, bAsynch=None):
+    __log('[INFO] waspy.__internalAddFileToWASDI( ' + str(sFileName) + ', ' + str(bAsynch) + ' )')
+
+    if sFileName is None:
+        print('[ERROR] waspy.__internalAddFileToWASDI: file name is None, aborting')
+        return ''
+    if not isinstance(sFileName, str):
+        print('[WARNING] waspy.__internalAddFileToWASDI: file name is not a string, trying conversion')
+        try:
+            sFileName = str(sFileName)
+        except:
+            print('[ERROR] waspy.__internalAddFileToWASDI: cannot convert file name into string, aborting')
+            return ''
+    if len(sFileName) < 1:
+        print('[ERROR] waspy.__internalAddFileToWASDI: file name has zero length, aborting')
+        return ''
+
+    if bAsynch is None:
+        print('[WARNING] waspy.__internalAddFileToWASDI: asynch flag is None, assuming False')
+        bAsynch = False
+    if not isinstance(bAsynch, bool):
+        print('[WARNING] waspy.__internalAddFileToWASDI: asynch flag is not a boolean, trying conversion')
+        try:
+            bAsynch = bool(bAsynch)
+        except:
+            print('[ERROR] waspy.__internalAddFileToWASDI: could not convert asynch flag into bool, aborting')
+            return ''
+
+    sResult = ''
+    try:
+        if getUploadActive() is True:
+            sFilePath = os.path.join(getSavePath(), sFileName)
+            if __fileExistsOnWasdi(sFilePath) is False:
+                __log('[INFO] waspy.__internalAddFileToWASDI: remote file is missing, uploading')
+                try:
+                    uploadFile(sFileName)
+                    __log('[INFO] waspy.__internalAddFileToWASDI: file uploaded, keep on working!')
+                except:
+                    print('[ERROR] waspy.__internalAddFileToWASDI: could not proceed with upload')
+
+        sUrl = getBaseUrl() + "/catalog/upload/ingestinws?file=" + sFileName + "&workspace=" + getActiveWorkspaceId()
+        asHeaders = __getStandardHeaders()
+        oResponse = requests.get(url=sUrl, headers=asHeaders)
+        if oResponse is None:
+            print('[ERROR] waspy.__internalAddFileToWASDI: cannot contact server')
+        elif oResponse.ok is not True:
+            print('[ERROR] waspy.__internalAddFileToWASDI: failed, server replied ' + str(oResponse.status_code))
+        else:
+            oJson = oResponse.json()
+            if 'stringValue' in oJson:
+                sProcessId = str(oJson['stringValue'])
+                if bAsynch is True:
+                    sResult = sProcessId
+                else:
+                    sResult = waitProcess(sProcessId)
+    except:
+        print('[ERROR] waspy.__internalAddFileToWASDI: something broke alongside')
+
+    return sResult
+
+
+
+
 if __name__ == '__main__':
     __log('WASPY - The WASDI Python Library. Include in your code for space development processors. Visit www.wasdi.net')
+
