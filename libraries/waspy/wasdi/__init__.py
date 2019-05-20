@@ -378,6 +378,11 @@ def __loadParams():
     else:
         __log('[INFO] wasdi could not load param file. That is fine, you can still load it later, don\'t worry')
 
+def refreshParameters():
+    """
+    Refresh parameters, reading the file again
+    """
+    __loadParams()
 
 def init(sConfigFilePath=None):
     """
