@@ -52,17 +52,37 @@ def printStatus():
     __log('[INFO] user: ' + str(getUser()))
     __log('[INFO] password: ' + str(getPassword()))
     __log('[INFO] active workspace: ' + str(getActiveWorkspaceId()))
-    __log('[INFO] parameters file path: ' + str(m_sParametersFilePath))
+    __log('[INFO] parameters file path: ' + str(getParametersFilePath()))
     __log('[INFO] session id: ' + str(getSessionId()))
     __log('[INFO] base path: ' + str(getBasePath()))
     __log('[INFO] download active: ' + str(getDownloadActive()))
-    __log('[INFO] upload active: ' + str(m_bUploadActive))
-    __log('[INFO] verbose: ' + str(m_bVerbose))
+    __log('[INFO] upload active: ' + str(getUploadActive()))
+    __log('[INFO] verbose: ' + str(getVerbose()))
     __log('[INFO] param dict: ' + str(getParametersDict()))
     __log('[INFO] proc id: ' + str(getProcId()))
     __log('[INFO] base url: ' + str(getBaseUrl()))
     __log('[INFO] is on server: ' + str(getIsOnServer()))
 
+
+def setVerbose(bVerbose):
+    if bVerbose is None:
+        print('[ERROR] waspy.setVerbose: passed None, won\'t change')
+        return
+    if not isinstance(bVerbose, bool):
+        print('[ERROR] waspy.setVerbose: passed non boolean, trying to convert')
+        try:
+            bVerbose = bool(bVerbose)
+        except:
+            print('[ERROR] waspy.setVerbose: cannot convert argument into boolean, won\'t change')
+            return
+
+    global m_bVerbose
+    m_bVerbose = bVerbose
+
+
+def getVerbose():
+    global m_bVerbose
+    return m_bVerbose
 
 def getParametersDict():
     """
@@ -137,6 +157,23 @@ def setSessionId(sSessionId):
     global m_sSessionId
     m_sSessionId = sSessionId
 
+def setParametersFilePath(sParamPath):
+    if sParamPath is None:
+        print('[ERROR] waspy.setParametersFilePath: passed None as path, won\'t change')
+        return
+    if len(sParamPath) < 1:
+        print('[ERROR] waspy.setParametersFilePath: string passed has zero length, won\'t change')
+        return
+
+    global m_sParametersFilePath
+    m_sParametersFilePath = sParamPath
+
+
+def getParametersFilePath():
+    global m_sParametersFilePath
+    return m_sParametersFilePath
+
+
 def getSessionId():
     """
     Get the WASDI Session
@@ -195,9 +232,16 @@ def getIsOnServer():
 
 def setDownloadActive(bDownloadActive):
     """
-    When in development, set True to download locally files on Server.
+    When in development, set True to download locally files from Server.
     Set it to false to NOT donwload data. In this case the developer must check the availability of the files
-    """    
+    """
+
+    if bDownloadActive is None:
+        print('[ERROR] waspy.setDownloadActive: passed None, won\'t change')
+        return
+    if len(bDownloadActive) < 1:
+        print('[ERROR] waspy.setDownloadActive: path is too short, won\' change')
+        return
     global m_bDownloadActive
     m_bDownloadActive = bDownloadActive
 
@@ -208,6 +252,31 @@ def getDownloadActive():
     """    
     global m_bDownloadActive
     return m_bDownloadActive
+
+
+def setDownloadActive(bUploadActive):
+    """
+    When in development, set True to upload local files on Server.
+    Set it to false to NOT upload data. In this case the developer must check the availability of the files
+    """
+
+    if bUploadActive is None:
+        print('[ERROR] waspy.setDownloadActive: passed None, won\'t change')
+        return
+    if len(bUploadActive) < 1:
+        print('[ERROR] waspy.setDownloadActive: path is too short, won\' change')
+        return
+
+    global m_bUploadActive
+    m_bUploadActive = bUploadActive
+
+
+def getUploadActive():
+    """
+    Get the WASDI API URL
+    """
+    global m_bUploadActive
+    return m_bUploadActive
 
 
 def setProcId(sProcID):
@@ -464,9 +533,7 @@ def openWorkspaceById(sWorkspaceId):
     return the WorkspaceId as a String, '' if there is any error
     """    
     global m_sActiveWorkspace
-    
     m_sActiveWorkspace = sWorkspaceId
-    
     return m_sActiveWorkspace
 
 
@@ -476,7 +543,6 @@ def getActiveWorkspaceId():
     return the WorkspaceId as a String, '' if there is any error
     """    
     global m_sActiveWorkspace
-    
     return m_sActiveWorkspace
 
 
@@ -486,9 +552,7 @@ def openWorkspace(sWorkspaceName):
     return the WorkspaceId as a String, '' if there is any error
     """    
     global m_sActiveWorkspace
-    
     m_sActiveWorkspace = getWorkspaceIdByName(sWorkspaceName)
-    
     return m_sActiveWorkspace
 
 
@@ -499,7 +563,6 @@ def getProductsByWorkspace(sWorkspaceName):
     """
 
     sWorkspaceId = getWorkspaceIdByName(sWorkspaceName)
-
     return getProductsByWorkspaceId(sWorkspaceId)
 
 
@@ -512,7 +575,6 @@ def getProductsByWorkspaceId(sWorkspaceId):
     global m_sActiveWorkspace
 
     m_sActiveWorkspace = sWorkspaceId
-
     asHeaders = __getStandardHeaders()
     payload = {'sWorkspaceId': sWorkspaceId}
 
