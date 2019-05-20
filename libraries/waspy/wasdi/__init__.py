@@ -1232,6 +1232,32 @@ def waitProcess(sProcessId):
     return sStatus
 
 
+def upload(sFileName):
+    """
+    Uploads a file to WASDI
+    :param sFileName: name of file inside working directory OR path to file RELATIVE to working directory
+    :return: True if succeded, False otherwise
+    """
+
+    __log('[INFO] waspy.upload( ' + str(sFileName) + ' )')
+
+    if sFileName is None:
+        print('[ERROR] waspy.upload: the given file name is None, cannot upload')
+        return False
+    if sFileName.startswith('.'):
+        sFileName = sFileName[1:]
+    if sFileName.startswith('/') or sFileName.startswith('\\'):
+        sFileName = sFileName[1:]
+
+    sFileName = __normPath(sFileName)
+
+    bResult = False
+
+    sBasePath = getBasePath()
+    sFullPath = os.path.join(sBasePath, sFileName)
+
+    return bResult
+
 def __normPath(sPath):
     """
     Normalizes path by adjusting separator
