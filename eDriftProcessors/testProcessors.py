@@ -1,13 +1,11 @@
 #from snappy import ProductIO
 import wasdi 
 import eDriftDeleteImages
+import eDriftCheckImages
+import eDriftRasor
+import eDriftGetTileCoordinate
 
-wasdi.setUser('paolo')
-wasdi.setPassword('password')
-wasdi.openWorkspaceById("7d05edb2-bb7a-48fb-8c65-1939e1663afc")
-wasdi.addParameter('workspace', 'MYANMAR')
-wasdi.addParameter('enddate', '2017-07-15') 
-
-wasdi.init()
-
-eDriftDeleteImages.run(wasdi.getParametersDict(), '')
+if (wasdi.init("C:\Codice\Progetti\WASDI\Codice\eDriftProcessors\config.properties")):
+    #eDriftCheckImages.run(wasdi.getParametersDict(), '35888d57-21c1-4fa2-94bc-daf2beda37d4')
+    #eDriftRasor.run(wasdi.getParametersDict(), '')
+    eDriftGetTileCoordinate.run(wasdi.getParametersDict(), '')
