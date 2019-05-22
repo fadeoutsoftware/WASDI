@@ -103,6 +103,7 @@ import wasdi.shared.parameters.NDVISetting;
 import wasdi.shared.parameters.OperatorParameter;
 import wasdi.shared.parameters.RangeDopplerGeocodingParameter;
 import wasdi.shared.parameters.RangeDopplerGeocodingSetting;
+import wasdi.shared.parameters.RegridParameter;
 import wasdi.shared.parameters.SubsetParameter;
 import wasdi.shared.parameters.SubsetSetting;
 import wasdi.shared.utils.BandImageManager;
@@ -1414,6 +1415,8 @@ public class ProcessingResources {
 			return new SubsetParameter();
 		case MULTISUBSET:
 			return new MultiSubsetParameter();
+		case REGRID:
+			return new RegridParameter();
 		default:
 			return null;
 			

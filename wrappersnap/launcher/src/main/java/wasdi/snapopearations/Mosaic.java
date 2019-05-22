@@ -380,6 +380,10 @@ public class Mosaic {
 				asArgs.add("BIGTIFF=YES");
 			}
 			
+			// Set 0 as No Data
+			asArgs.add("-n");
+			asArgs.add("0");
+			
 			// Get Base Path
 			String sWorkspacePath = getWorspacePath();
 			
