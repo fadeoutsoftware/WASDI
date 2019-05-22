@@ -76,7 +76,13 @@ var WappsController = (function() {
     {
         this._selectedProcessor = processor;
         this.myJson = {};
-        this.m_sMyJsonString = "";
+
+        if (!utilsIsStrNullOrEmpty(processor.paramsSample)) {
+            this.m_sMyJsonString = decodeURIComponent(processor.paramsSample);
+        }
+        else {
+            this.m_sMyJsonString = "";
+        }
     }
 
     WappsController.prototype.runProcessor = function()

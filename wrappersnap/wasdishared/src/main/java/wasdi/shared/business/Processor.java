@@ -37,6 +37,17 @@ public class Processor {
 	 */
 	private String type;
 	
+	/**
+	 * Sample JSON Parameter
+	 */
+	private String parameterSample="";
+	
+	public String getParameterSample() {
+		return parameterSample;
+	}
+	public void setParameterSample(String parameterSample) {
+		this.parameterSample = parameterSample;
+	}
 	public String getType() {
 		return type;
 	}

@@ -3,7 +3,7 @@ Created on 11 Jun 2018
 
 @author: p.campanella
 """
-from pandas._libs.join import outer_join_indexer
+#from pandas._libs.join import outer_join_indexer
 
 name = "wasdi"
 
@@ -240,9 +240,7 @@ def setDownloadActive(bDownloadActive):
     if bDownloadActive is None:
         print('[ERROR] waspy.setDownloadActive: passed None, won\'t change')
         return
-    if len(bDownloadActive) < 1:
-        print('[ERROR] waspy.setDownloadActive: path is too short, won\' change')
-        return
+    
     global m_bDownloadActive
     m_bDownloadActive = bDownloadActive
 
@@ -255,17 +253,14 @@ def getDownloadActive():
     return m_bDownloadActive
 
 
-def setDownloadActive(bUploadActive):
+def setUploadActive(bUploadActive):
     """
     When in development, set True to upload local files on Server.
     Set it to false to NOT upload data. In this case the developer must check the availability of the files
     """
 
     if bUploadActive is None:
-        print('[ERROR] waspy.setDownloadActive: passed None, won\'t change')
-        return
-    if len(bUploadActive) < 1:
-        print('[ERROR] waspy.setDownloadActive: path is too short, won\' change')
+        print('[ERROR] waspy.setUploadActive: passed None, won\'t change')
         return
 
     global m_bUploadActive
@@ -974,7 +969,7 @@ def downloadFile(sFileName):
 
         with open(sSavePath, 'wb') as oFile:
             for oChunk in oResponse:
-                __log('.')
+                #__log('.')
                 oFile.write(oChunk)
         __log('[INFO] waspy.downloadFile: download done, new file locally available ' + sSavePath)
 
@@ -1284,6 +1279,39 @@ def importProduct(sFileUrl=None, sBoundingBox=None, asProduct=None):
 
     return sReturn
 
+
+def executeProcessor(sProcessorName, aoProcessParams):
+    """
+    Executes a WASDI Processor
+    return the Process Id if every thing is ok
+    return '' if there was any problem
+    """    
+    global m_sBaseUrl
+    global m_sSessionId
+    global m_sActiveWorkspace
+    
+    sEncodedParams = json.dumps(aoProcessParams)
+    asHeaders = __getStandardHeaders()
+    payload = {'workspace': m_sActiveWorkspace,
+               'name': sProcessorName,
+               'sProcessorName': sEncodedParams}
+
+    sUrl = m_sBaseUrl + '/processors/run'
+    
+    oResult = requests.get(sUrl, headers=asHeaders, params=payload)
+
+    sProcessId = ''
+
+    if (oResult is not None) and (oResult.ok is True):
+        oJsonResults = oResult.json()
+        
+        try:
+            if oJsonResults['boolValue'] is True:
+                sProcessId = oJsonResults['stringValue']
+        except:
+            return sProcessId
+    
+    return sProcessId
 
 # todo extend to a list of processes
 def waitProcess(sProcessId):
