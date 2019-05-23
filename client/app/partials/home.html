@@ -46,33 +46,34 @@
 
                 <br>
 
-                <!--TODO REMOVE IT-->
-                <!--<div class="google-button-container" ng-hide="m_oController.m_bIsVisibleRecoveryPassword">-->
-                    <!--<google-plus-signin clientid="882119222530-0e4bq80lvftjh3iqehb7mcit5mgh1bu7.apps.googleusercontent.com" language="it"></google-plus-signin>-->
-                <!--</div>-->
 
+
+                <!--GOOGLE BUTTOn-->
                 <div id="my-signin2" ng-hide="m_oController.m_bIsVisibleRecoveryPassword"></div>
 
                 <script src="https://apis.google.com/js/platform.js?onload=renderButton" async defer></script>
-
 
                 <div  ng-hide="m_oController.m_bIsVisibleRecoveryPassword">
                     <a href="#" class="forgot-password" ng-click="m_oController.m_bIsVisibleRecoveryPassword = !m_oController.m_bIsVisibleRecoveryPassword">
                         {{"LOGIN_LINK_FORGOT_PASSWORD"|translate}}
                     </a>
                 </div>
+
                 <!-- RECOVEY FORM -->
                 <form class="form-signin" name="recoveryForm"  ng-show="m_oController.m_bIsVisibleRecoveryPassword === true">
                     <div>
                         {{"RECOVERY_EMAIL_TITLE"|translate}}
                     </div>
                     <div class="form-group">
-                        <input type="email" name="recoveryemail" placeholder="{{'LOGIN_PLACEHOLDER_EMAIL'|translate}}" class="form-control" id="mail" >
+                        <input type="email" name="recoveryemail" placeholder="{{'LOGIN_PLACEHOLDER_EMAIL'|translate}}"
+                               class="form-control" id="mail" ng-model="m_oController.m_sEmailToRecoverPassword">
 
                     </div>
                     <!-- recoveryForm.recoverymail.$dirty === false-->
                     <!--ng-class="{disabled: ( recoveryForm.recoveryemail.$invalid === true || recoveryForm.recoveryemail.$dirty === false) }"-->
-                    <button class="btn btn-md btn-primary btn-block btn-signin" type="submit">
+                    <button class="btn btn-md btn-primary btn-block btn-signin" type="submit"
+                            ng-disabled="m_oController.isRecoverPasswordButtonEnable(m_oController.m_sEmailToRecoverPassword) === false"
+                            ng-click="m_oController.recoverPassword(m_oController.m_sEmailToRecoverPassword)">
                         {{"RECOVERY_EMAIL_BUTTON"|translate}}
                     </button>
 
