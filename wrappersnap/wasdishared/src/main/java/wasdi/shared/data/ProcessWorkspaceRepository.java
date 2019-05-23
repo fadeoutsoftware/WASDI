@@ -101,7 +101,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
         final ArrayList<ProcessWorkspace> aoReturnList = new ArrayList<ProcessWorkspace>();
         try {
 
-            FindIterable<Document> oWSDocuments = getCollection("processworkpsace").find(new Document("workspaceId", sWorkspaceId)).skip(iStartIndex).limit(iEndIndex-iStartIndex);
+            FindIterable<Document> oWSDocuments = getCollection("processworkpsace").find(new Document("workspaceId", sWorkspaceId)).sort(new Document("$natural", -1)).skip(iStartIndex).limit(iEndIndex-iStartIndex);
             fillList(aoReturnList, oWSDocuments);
 
         } catch (Exception oEx) {

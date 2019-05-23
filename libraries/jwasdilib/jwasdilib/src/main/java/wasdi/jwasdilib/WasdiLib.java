@@ -955,7 +955,7 @@ public class WasdiLib {
 				System.out.println("sProcessId must not be empty");
 			}
 
-		    String sUrl = m_sBaseUrl + "/process/updatebyid?sProcessId="+sProcessId+"&status="+sStatus+"&perc="+iPerc;
+		    String sUrl = m_sBaseUrl + "/process/updatebyid?sProcessId="+sProcessId+"&status="+sStatus+"&perc="+iPerc + "&sendrabbit=1";
 		    
 		    String sResponse = httpGet(sUrl, getStandardHeaders());
 		    Map<String, Object> aoJSONMap = s_oMapper.readValue(sResponse, new TypeReference<Map<String,Object>>(){});

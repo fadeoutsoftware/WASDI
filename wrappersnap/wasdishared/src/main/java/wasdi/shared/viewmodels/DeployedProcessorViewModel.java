@@ -7,7 +7,14 @@ public class DeployedProcessorViewModel {
 	private String processorDescription;
 	private String imgLink;
 	private String publisher;
+	private String paramsSample = "";
 	
+	public String getParamsSample() {
+		return paramsSample;
+	}
+	public void setParamsSample(String paramsSample) {
+		this.paramsSample = paramsSample;
+	}
 	public String getProcessorId() {
 		return processorId;
 	}

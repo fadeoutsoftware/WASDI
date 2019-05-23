@@ -24,11 +24,48 @@ def run(parameters, processId):
     adBBOX = sBBox.split(",")
     aiOrbits = sOrbits.split(",")
     
-    oStartDay = datetime.strptime(sStartDate , '%Y-%m-%d')
-    oEndDay = datetime.strptime(sEndDate, '%Y-%m-%d')
+    oStartDay = datetime.today()
+    oEndDay = datetime.today()
+    
+    if (len(adBBOX)!=4):
+        wasdi.wasdiLog("Boundig Box Must have 4 values: UpLeft Lat, UpLeft Lon, LowRight Lat, Low Right Lon")
+        wasdi.updateProcessStatus(processId, "ERROR", 100)
+        return
+    
+    if (len(aiOrbits)<1):
+        wasdi.wasdiLog("Set one or more orbits (comma separated)")
+        wasdi.updateProcessStatus(processId, "ERROR", 100)
+        return    
+        
+    try:
+        oStartDay = datetime.strptime(sStartDate , '%Y-%m-%d')
+    except:
+        wasdi.wasdiLog('Start Date not valid, assuming today')
+        
+    try:
+        oEndDay = datetime.strptime(sEndDate, '%Y-%m-%d')
+    except:
+        wasdi.wasdiLog('End Date not valid, assuming today')
 
     oActualDate = oStartDay
     oTimeDelta = timedelta(days=1)
+    oTimeDelta2 = oEndDay-oStartDay
+    
+    iDays = oTimeDelta2.days;
+    
+    if (iDays == 0):
+        iDays=1
+    
+    if (iDays < 0):
+        oSwapDate = oStartDay
+        oStartDay = oEndDay
+        oEndDay = oSwapDate
+        iDays = -1*iDays        
+    
+    iUpdateStep = 100/iDays;
+    iUpdateOrbitStep = iUpdateStep/len(aiOrbits)
+    
+    iProgress = 0;
     
     aoResults = []
     
@@ -52,6 +89,12 @@ def run(parameters, processId):
                 oDayOrbit["orbit"] = iOrbit
                 oDayOrbit["images"] = len(aoReturnList)
                 aoDay["orbits"].append(oDayOrbit)
+                
+            iProgress += iUpdateOrbitStep
+            if (iProgress>100):
+                iProgress = 100
+            
+            wasdi.updateProgressPerc(iProgress)
         
         aoResults.append(aoDay)
         

@@ -1,6 +1,7 @@
 import wasdi
 import os
 
+
 print(os.getcwd())
 
 bInitOk = False
@@ -12,18 +13,9 @@ bInitOk = False
 bInitOk = wasdi.init('./config.json')
 
 
-if bInitOk:
-    print('[INFO] waspy: init ok')
+# 	"BASEPATH": "./",
 
-    sFileName = 'itsAFalseFileDoNeverMind'
-    bExists = wasdi.__fileExistsOnWasdi(sFileName)
-    assert(bExists is False)
-    sFileName = 'S1A_EW_GRDM_1SSH_20190509T004543_20190509T004646_027143_030F49_B737.zip'
-    bExists = wasdi.__fileExistsOnWasdi(sFileName)
-    assert(bExists is True)
-    if bExists:
-        wasdi.downloadFile(sFileName)
-
+def searchEO():
     aoSearchResult = wasdi.searchEOImages(
         sPlatform="S1",
         sDateFrom="2019-05-06",
@@ -39,7 +31,46 @@ if bInitOk:
         sSensorOperationalMode=None,
         sCloudCoverage=None
     )
-    print(repr(aoSearchResult))
+    print(aoSearchResult)
+    return aoSearchResult
+
+
+def importProduct(sProductName):
+    print(sProductName)
+    sImported = wasdi.importProduct(asProduct=sProductName)
+    print(sImported)
+    return sImported
+
+
+if bInitOk:
+    print('[INFO] waspy: init ok')
+
+    wasdi.uploadFile('./a/deeeply\\nested/ciccio\\pasticcio.txt')
+
+    sFileName = 'thisIsAFalseFileNameDoNeverMind'
+    bExists = wasdi.__fileExistsOnWasdi(sFileName)
+    assert(bExists is False)
+
+    # test download no unzip
+    # sFileName = 'S1B_IW_RAW__0SDV_20190506T052631_20190506T052703_016119_01E53A_D2AD.zip'
+    # bExists = wasdi.__fileExistsOnWasdi(sFileName)
+    # if bExists:
+    #     wasdi.downloadFile(sFileName)
+    #     bExists = wasdi.__fileExistsOnWasdi(sFileName)
+    #     assert (bExists is True)
+
+    # test download + unzip
+    sFileName = 'S1A_EW_GRDM_1SSH_20190509T004543_20190509T004646_027143_030F49_B737_ApplyOrbit.dim'
+    bExists = wasdi.__fileExistsOnWasdi(sFileName)
+    if bExists:
+        wasdi.downloadFile(sFileName)
+        bExists = wasdi.__fileExistsOnWasdi(sFileName)
+        assert (bExists is True)
+
+    aoSearchResult = searchEO()
+    oSelected = aoSearchResult[0]
+    sImported = importProduct(oSelected)
+
 
 else:
     print('[ERROR] cannot init waspy')
