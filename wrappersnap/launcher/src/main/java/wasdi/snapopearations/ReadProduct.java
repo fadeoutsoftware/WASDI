@@ -226,17 +226,17 @@ public class ReadProduct {
 				return "";
 			}
 			
-			GeoCoding geocoding = m_oProduct.getSceneGeoCoding();
-			if (geocoding!=null) {
-				Dimension dim = m_oProduct.getSceneRasterSize();		
-				GeoPos min = geocoding.getGeoPos(new PixelPos(0,0), null);
-				GeoPos max = geocoding.getGeoPos(new PixelPos(dim.getWidth(), dim.getHeight()), null);
-				float minX = (float) Math.min(min.lon, max.lon);
-				float minY = (float) Math.min(min.lat, max.lat);
-				float maxX = (float) Math.max(min.lon, max.lon);
-				float maxY = (float) Math.max(min.lat, max.lat);
+			GeoCoding oGeocoding = m_oProduct.getSceneGeoCoding();
+			if (oGeocoding!=null) {
+				Dimension oDim = m_oProduct.getSceneRasterSize();		
+				GeoPos oMin = oGeocoding.getGeoPos(new PixelPos(0,0), null);
+				GeoPos oMax = oGeocoding.getGeoPos(new PixelPos(oDim.getWidth(), oDim.getHeight()), null);
+				float fMinX = (float) Math.min(oMin.lon, oMax.lon);
+				float fMinY = (float) Math.min(oMin.lat, oMax.lat);
+				float fMaxX = (float) Math.max(oMin.lon, oMax.lon);
+				float fMaxY = (float) Math.max(oMin.lat, oMax.lat);
 								
-				return String.format("%f,%f,%f,%f,%f,%f,%f,%f,%f,%f", minY, minX, minY, maxX, maxY, maxX, maxY, minX, minY, minX);
+				return String.format("%f,%f,%f,%f,%f,%f,%f,%f,%f,%f", fMinY, fMinX, fMinY, fMaxX, fMaxY, fMaxX, fMaxY, fMinX, fMinY, fMinX);
 			}
 			
 		} catch (Exception e) {

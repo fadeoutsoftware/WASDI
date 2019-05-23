@@ -18,7 +18,7 @@ var WappsController = (function() {
         this.m_sFileName = "";
         this.m_oProcessorService = oProcessorService;
         this.m_aoProcessorList = [];
-        this.m_bIsJsonEditModeActive = true;
+        this.m_bIsJsonEditModeActive = false;
         this.myJson = {};
         this.m_sMyJsonString = "";
         var oController = this;
@@ -72,10 +72,31 @@ var WappsController = (function() {
         return aoProcessorList;
     };
 
-    WappsController.prototype.runProcessor = function(sProcessor, sJSON) {
-        console.log("RUN - " + sProcessor);
+    WappsController.prototype.selectProcessor = function(processor)
+    {
+        this._selectedProcessor = processor;
+        this.myJson = {};
+
+        if (!utilsIsStrNullOrEmpty(processor.paramsSample)) {
+            this.m_sMyJsonString = decodeURIComponent(processor.paramsSample);
+        }
+        else {
+            this.m_sMyJsonString = "";
+        }
+    }
+
+    WappsController.prototype.runProcessor = function()
+    {
+        console.log("RUN - " + this._selectedProcessor.processorName);
 
         var oController = this;
+
+        let sJSON = null;
+        if(this.m_bIsJsonEditModeActive == true){
+            sJSON = this.myJson;
+        }else{
+            sJSON = this.m_sMyJsonString;
+        }
 
         var sStringJSON = "";
         //CHECK: IF OBJECT AS STRING
@@ -87,32 +108,53 @@ var WappsController = (function() {
             sStringJSON = sJSON;
         }
 
-        this.m_oProcessorService.runProcessor(sProcessor, sStringJSON).success(function (data) {
-            if(utilsIsObjectNullOrUndefined(data) == false)
-            {
-                var oDialog = utilsVexDialogAlertBottomRightCorner("PROCESSOR SCHEDULED<br>READY");
-                utilsVexCloseDialogAfter(4000,oDialog);
+        this.m_oProcessorService.runProcessor(this._selectedProcessor.processorName, sStringJSON)
+            .success(function (data) {
+                if(utilsIsObjectNullOrUndefined(data) == false)
+                {
+                    var oDialog = utilsVexDialogAlertBottomRightCorner("PROCESSOR SCHEDULED<br>READY");
+                    utilsVexCloseDialogAfter(4000,oDialog);
 
-                console.log('Run ' + data);
-            }
-            else
-            {
+                    console.log('Run ' + data);
+
+                    let rootscope = oController.m_oScope.$parent;
+                    while(rootscope.$parent != null || rootscope.$parent != undefined)
+                    {
+                        rootscope = rootscope.$parent;
+                    }
+
+                    let payload = { processId: data.processingIdentifier };
+                    rootscope.$broadcast(RootController.BROADCAST_MSG_OPEN_LOGS_DIALOG_PROCESS_ID, payload);
+
+
+                    $('#wappsDialog').modal('hide');
+
+                }
+                else
+                {
+                    utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR RUNNING WAPP");
+                }
+            })
+            .error(function (error) {
                 utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR RUNNING WAPP");
-            }
-        }).error(function (error) {
-            utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR RUNNING WAPP");
-            oController.cleanAllExecuteWorkflowFields();
-        });
+                oController.cleanAllExecuteWorkflowFields();
+            });
 
     };
 
+    WappsController.prototype.getProcessorNameAsTitle = function(){
+        if( this._selectedProcessor ){
+            return this._selectedProcessor.processorName;
+        }
+        return "";
+    }
 
-    WappsController.prototype.getHelpFromProcessor = function(sProcessor) {
-        console.log("HELP - " + sProcessor);
+    WappsController.prototype.getHelpFromProcessor = function() {
+        console.log("HELP - " + this._selectedProcessor.processorName);
 
         var oController = this;
 
-        this.m_oProcessorService.getHelpFromProcessor(sProcessor).success(function (data) {
+        this.m_oProcessorService.getHelpFromProcessor(this._selectedProcessor.processorName).success(function (data) {
             if(utilsIsObjectNullOrUndefined(data) === false)
             {
                 var sHelpMessage = data.stringValue;

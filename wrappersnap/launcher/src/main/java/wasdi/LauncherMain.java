@@ -87,6 +87,8 @@ import wasdi.shared.parameters.ProcessorParameter;
 import wasdi.shared.parameters.PublishBandParameter;
 import wasdi.shared.parameters.RangeDopplerGeocodingParameter;
 import wasdi.shared.parameters.RasterGeometricResampleParameter;
+import wasdi.shared.parameters.RegridParameter;
+import wasdi.shared.parameters.RegridSetting;
 import wasdi.shared.parameters.SubsetParameter;
 import wasdi.shared.parameters.SubsetSetting;
 import wasdi.shared.parameters.WpsParameters;
@@ -214,14 +216,18 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 
 			if (sSnapLogActive.equals("1") || sSnapLogActive.equalsIgnoreCase("true")) {
 				String sSnapLogFolder = ConfigReader.getPropValue("SNAPLOGFOLDER", "/usr/lib/wasdi/launcher/logs/snap.log");
-
-				FileHandler oFileHandler = new FileHandler(sSnapLogFolder,true);
-				//ConsoleHandler handler = new ConsoleHandler();
-				oFileHandler.setLevel(Level.ALL);
-				SimpleFormatter oSimpleFormatter = new SimpleFormatter();
-				oFileHandler.setFormatter(oSimpleFormatter);
-				SystemUtils.LOG.setLevel(Level.ALL);
-				SystemUtils.LOG.addHandler(oFileHandler);            	
+				try {
+					FileHandler oFileHandler = new FileHandler(sSnapLogFolder,true);
+					//ConsoleHandler handler = new ConsoleHandler();
+					oFileHandler.setLevel(Level.ALL);
+					SimpleFormatter oSimpleFormatter = new SimpleFormatter();
+					oFileHandler.setFormatter(oSimpleFormatter);
+					SystemUtils.LOG.setLevel(Level.ALL);
+					SystemUtils.LOG.addHandler(oFileHandler);            						
+				}
+				catch (Exception oEx) {
+					System.out.println("Launcher Constructor: exception configuring log file " + oEx.toString());
+				}
 			}
 			
 			
@@ -480,6 +486,11 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			case WPS:{
 				WpsParameters oParameter = (WpsParameters) SerializationUtils.deserializeXMLToObject(sParameter);
 				executeWPS(oParameter);
+			}
+			case REGRID: {
+				// TODO: STILL HAVE TO FIND PIXEL SPACING
+				RegridParameter oParameter = (RegridParameter) SerializationUtils.deserializeXMLToObject(sParameter);
+				executeGDALRegrid(oParameter);
 			}
 			break;
 			default:
@@ -2193,6 +2204,142 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 		}
 
 	}
+	
+
+	/**
+	 *  TODO: TO FINISH
+	 * @param oParameter
+	 */
+	public void executeGDALRegrid(RegridParameter oParameter) {
+		
+		s_oLogger.debug("LauncherMain.executeGDALRegrid: Start");
+		
+		ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
+		ProcessWorkspace oProcessWorkspace = oProcessWorkspaceRepository.GetProcessByProcessObjId(oParameter.getProcessObjId());
+		
+		try {
+			
+			if (oProcessWorkspace != null) {
+				updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 0);
+			}
+			
+			String sSourceProduct = oParameter.getSourceProductName();
+			String sDestinationProduct = oParameter.getDestinationProductName();
+			
+			RegridSetting oSettings = (RegridSetting) oParameter.getSettings();
+			String sReferenceProduct = oSettings.getReferenceFile();
+			
+			File oReferenceFile = new File(getWorspacePath(oParameter)+ sReferenceProduct);
+			
+			ReadProduct oRead = new ReadProduct(oReferenceFile);
+			
+			// minY, minX, minY, maxX, maxY, maxX, maxY, minX, minY, minX
+			String sBBox = oRead.getProductBoundingBox();
+			
+			String [] asBBox = sBBox.split(",");
+			double [] adBBox = new double[10];
+
+			// It it is null, we will have handled excpetion
+			if (asBBox.length>=10) {
+				for (int iStrings = 0; iStrings<10; iStrings++) {
+					try {
+						adBBox[iStrings] = Double.parseDouble(asBBox[iStrings]);
+					}
+					catch (Exception e) {
+						s_oLogger.error("LauncherMain.executeGDALRegrid: error convering bbox " + e.toString());
+						adBBox[iStrings] = 0.0;
+					}
+				}
+			}
+						
+			double dXOrigin = adBBox[1];
+			double dYOrigin = adBBox[0];
+			double dXEnd = adBBox[3];
+			double dYEnd = adBBox[4]; 
+			
+			Dimension oDim = oRead.getProduct().getSceneRasterSize();
+			
+			// STILL HAVE TO FIND THE SCALE: THIS IS NOT PRECISE
+			double dXScale = (dXEnd-dXOrigin)/oDim.getWidth();
+			double dYScale = (dYEnd-dYOrigin)/oDim.getHeight();
+
+			
+			if (oProcessWorkspace != null) {
+				updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 20);
+			}
+			
+			//SPAWN, ['gdalwarp', '-r', 'near', '-tr', STRING(xscale, Format='(D)'), STRING(yscale, Format='(D)'), '-te', STRING(xOrigin, Format='(D)'), STRING(yOrigin, Format='(D)'), STRING(xEnd, Format='(D)'), STRING(yEnd, Format='(D)'), flood_in, flood_temp,'-co','COMPRESS=LZW'], /NOSHELL
+        	String sGdalWarpCommand = "gdalwarp";
+        	
+			ArrayList<String> asArgs = new ArrayList<String>();
+			asArgs.add(sGdalWarpCommand);
+							
+			// Output format
+			asArgs.add("-r");
+			asArgs.add("near");
+			
+			asArgs.add("-tr");
+			asArgs.add("" + dXScale);
+			asArgs.add("" + dYScale);
+			
+			asArgs.add("-te");
+			asArgs.add("" + dXOrigin);
+			asArgs.add("" + dYOrigin);
+			asArgs.add("" + dXEnd);
+			asArgs.add("" + dYEnd);
+			
+			asArgs.add(getWorspacePath(oParameter)+sSourceProduct);
+			asArgs.add(getWorspacePath(oParameter)+sDestinationProduct);
+			
+			asArgs.add("-co");
+			asArgs.add("COMPRESS=LZW");
+
+			// Execute the process
+			ProcessBuilder oProcessBuidler = new ProcessBuilder(asArgs.toArray(new String[0]));
+			Process oProcess;
+			
+			String sCommand = "";
+			for (String sArg : asArgs) {
+				sCommand += sArg + " ";
+			}
+			
+			s_oLogger.debug("LauncherMain.executeGDALMultiSubset Command Line " + sCommand);
+			 
+			oProcess = oProcessBuidler.start();
+			
+			oProcess.waitFor();
+	        
+			addProductToDbAndWorkspaceAndSendToRabbit(null, getWorspacePath(oParameter)+sDestinationProduct, oParameter.getWorkspace(), oParameter.getExchange(), LauncherOperations.REGRID.name(), sBBox, false, true);
+			if (oProcessWorkspace != null) {
+				updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 100);
+			}
+			
+			if (oProcessWorkspace != null) oProcessWorkspace.setStatus(ProcessStatus.DONE.name());
+			
+			if (s_oSendToRabbit!=null) s_oSendToRabbit.SendRabbitMessage(true,LauncherOperations.MULTISUBSET.name(), oParameter.getWorkspace(),"Multisubset Done",oParameter.getExchange());
+		}
+		catch (Exception oEx) {
+			s_oLogger.error("LauncherMain.executeGDALMultiSubset: exception " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
+			if (oProcessWorkspace != null) oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
+
+			String sError = org.apache.commons.lang.exception.ExceptionUtils.getMessage(oEx);
+			if (s_oSendToRabbit!=null) s_oSendToRabbit.SendRabbitMessage(false,LauncherOperations.MULTISUBSET.name(),oParameter.getWorkspace(),sError,oParameter.getExchange());
+
+		}
+		finally {	
+			
+			String sProcWSId = "";
+			if (oProcessWorkspace!=null) sProcWSId = oProcessWorkspace.getProcessObjId();
+			
+			s_oLogger.debug("LauncherMain.executeGDALMultiSubset: calling close Process Workspace");
+			
+			closeProcessWorkspace(oProcessWorkspaceRepository, oProcessWorkspace);
+			
+			s_oLogger.debug("LauncherMain.executeGDALMultiSubset: End ["+sProcWSId+"]");
+		}
+
+	}
+	
 
 	/**
 	 * Execute Mosaic Processor

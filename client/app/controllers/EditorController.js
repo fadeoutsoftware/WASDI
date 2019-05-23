@@ -236,11 +236,25 @@ var EditorController = (function () {
                 onClick: "",
                 subMenu:[
                     {
+                        name:"",//WAPPS
+                        caption_i18n : "EDITOR_OPERATION_TITLE_WAPPS",
+                        subMenu:[],
+                        onClick: this.openWappsDialog,
+                        icon:"fa fa-lg fa-rocket"
+                    },
+                    {
+                        name:"",// New Processor
+                        caption_i18n : "EDITOR_OPERATION_TITLE_NEW_PROCESSOR",
+                        subMenu:[],
+                        onClick: this.openProcessorDialog,
+                        icon:"fa fa-lg fa-plus-square"
+                    },
+                    {
                         name:"",//mida
                         caption_i18n : "EDITOR_OPERATION_TITLE_MIDA",
                         subMenu:[],
                         onClick: this.openMergeDialogInNavBar,
-                        icon:"icon-mida-merge-operations"
+                        icon:"fa fa-lg fa-rocket"
                     },
                     {
                         name:"",//OPERA
@@ -256,32 +270,12 @@ var EditorController = (function () {
                         onClick: this.openRasorDialog,
                         icon:"fa fa-lg fa-users"
                     },
-                    // {
-                    //     name:"",//workflow
-                    //     subMenu:[],
-                    //     onClick: this.openWorkflowManagerDialog,
-                    //     icon:"fa fa-lg fa-file-code-o"
-                    // },
-                    {
-                        name:"",// New Processor
-                        caption_i18n : "EDITOR_OPERATION_TITLE_NEW_PROCESSOR",
-                        subMenu:[],
-                        onClick: this.openProcessorDialog,
-                        icon:"fa fa-lg fa-file-code-o"
-                    },
-                    {
-                        name:"",//WAPPS
-                        caption_i18n : "EDITOR_OPERATION_TITLE_WAPPS",
-                        subMenu:[],
-                        onClick: this.openWappsDialog,
-                        icon:"fa fa-lg fa-rocket"
-                    },
                     {
                         name:"",//LIST FLOOD AREA DETECTION
                         caption_i18n : "EDITOR_OPERATION_TITLE_LIST_FLOOD_AREA_DETECTION",
                         subMenu:[],
                         onClick: this.openListtFloodAreaDetectionDialog,
-                        icon:"fa fa-lg fa-file-code-o"
+                        icon:"fa fa-lg fa-rocket"
                     },
                     {
                         name:"",//JRC Processor
@@ -309,8 +303,15 @@ var EditorController = (function () {
                         caption_i18n : "EDITOR_OPERATION_TITLE_EDRIFT_FLOOD_AUTOMATIC_CHAIN",
                         subMenu:[],
                         onClick: this.openEDriftFloodAutomaticChain,
-                        icon:"fa fa-lg fa-file-code-o"
+                        icon:"fa fa-lg fa-rocket"
                     },
+                    {
+                        name:"",//EDriftCheckImagesAvailability
+                        caption_i18n : "EDITOR_OPERATION_TITLE_EDRIFT_CHECK_IMAGES_AVAILABILITY",
+                        subMenu:[],
+                        onClick: this.openEDriftCheckImagesAvailability,
+                        icon:"fa fa-lg fa-rocket"
+                    }
                     // {
                     //     name:"Upload File",//Upload
                     //     subMenu:[],
@@ -2718,6 +2719,35 @@ var EditorController = (function () {
             });
         });
     };
+
+    EditorController.prototype.openEDriftCheckImagesAvailability = function(oWindow)
+    {
+        var oController;
+        if(utilsIsObjectNullOrUndefined(oWindow) === true)
+        {
+            oController = this;
+        }
+        else
+        {
+            oController = oWindow;
+        }
+
+        oController.m_oModalService.showModal({
+            templateUrl: "dialogs/edrift_checkimagestool/edrift_checkimagestool.html",
+            controller: "EdriftCheckImagesTool",
+            inputs: {
+                extras: {
+                    products:oController.m_aoProducts,
+                }
+            }
+        }).then(function (modal) {
+            modal.element.modal();
+            modal.close.then(function(oResult){
+
+            });
+        });
+    };
+
 
     EditorController.prototype.openEDriftFloodAutomaticChain = function(oWindow)
     {
