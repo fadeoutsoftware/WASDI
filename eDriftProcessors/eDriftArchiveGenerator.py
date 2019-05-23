@@ -40,11 +40,9 @@ def run(parameters, processId):
     
     iDays = oTimeDelta2.days;
     
-    if (iDays == 0):
-        iDays = 1
-    
-    iStep = 100/iDays
+    iStep = 100/(iDays+1)
     iProgress = 0
+    
     
     while oActualDate <= oEndDay:
         
@@ -66,7 +64,7 @@ def run(parameters, processId):
         aoChainParams["MOSAICYSTEP"] = sMosaicYStep
         
         #TODO wasdi.executeProcess
-        sProcessId = ""
+        sProcessId = wasdi.executeProcessor("mosaic_tile", aoChainParams)
         
         wasdi.wasdiLog('Chain started waiting for end')
         
@@ -80,9 +78,6 @@ def run(parameters, processId):
     
     wasdi.updateProcessStatus(processId, "eDrift Archive Generator DONE", 100)
     
-    
-
-            
     
 def WasdiHelp():
     sHelp = "eDRIFT Archive Generator Utility\n"

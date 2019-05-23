@@ -1306,8 +1306,7 @@ def executeProcessor(sProcessorName, aoProcessParams):
         oJsonResults = oResult.json()
         
         try:
-            if oJsonResults['boolValue'] is True:
-                sProcessId = oJsonResults['stringValue']
+            sProcessId = oJsonResults['processingIdentifier']
         except:
             return sProcessId
     
@@ -1317,6 +1316,10 @@ def executeProcessor(sProcessorName, aoProcessParams):
 def waitProcess(sProcessId):
     if sProcessId is None:
         __log('Passed None, expected a process ID')
+        return "ERROR"
+    
+    if sProcessId == '':
+        __log('Passed empty, expected a process ID')
         return "ERROR"
 
     sStatus = ''
