@@ -90,7 +90,7 @@ service('AuthService', ['$http',  '$state', 'ConstantsService', function ($http,
     // };
     this.recoverPassword = function(sEmail)
     {
-        return this.m_oHttp.get(this.APIURL + '/auth/validateNewUser?email=' + sEmail );
+        return this.m_oHttp.get(this.APIURL + '/auth/lostPassword?userId=' + sEmail );
     }
 
 }]);
