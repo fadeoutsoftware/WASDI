@@ -546,6 +546,10 @@ def openWorkspaceById(sWorkspaceId):
     return m_sActiveWorkspace
 
 
+def setActiveWorkspaceId(sActiveWorkspace):
+    global m_sActiveWorkspace
+    m_sActiveWorkspace = sActiveWorkspace
+
 def getActiveWorkspaceId():
     """
     Get Active workspace Id
@@ -1133,6 +1137,17 @@ def searchEOImages(sPlatform, sDateFrom, sDateTo,
     return aoReturnList
 
 
+def getFoundProductName(aoProduct):
+    if aoProduct is None:
+        print('[ERROR] waspy.getFoundProductName: product is None, aborting')
+        return''
+    elif "title" not in aoProduct:
+        print('[ERROR] waspy.getFoundProductName: title not found in product, aborting')
+        return ''
+    else:
+        return aoProduct['title']
+
+
 def __fileExistsOnWasdi(sFileName):
     """
     checks hwther a file already exists on WASDI or not
@@ -1594,7 +1609,115 @@ def __internalExecuteWorkflow(asInputFileNames, asOutputFileNames, sWorkflowName
     return ''
 
 
+def mosaic(asInputFiles, sOutputFile, asBands,
+           fPixelSizeX=-1.0, fPixelSizeY=-1.0, sCrs=None,
+           fSouthBound=-1.0, fNorthBound=-1.0, fEastBound=-1.0, fWestBound=-1.0,
+           sOverlappingMethod="MOSAIC_TYPE_OVERLAY", bShowSourceProducts=False, sElevationModelName="ASTER 1sec GDEM",
+           sResamplingName="Nearest", bUpdateMode=False, bNativeResolution=True, sCombine="OR", bAsynch=False):
+    """
+    Constructs a mosaic out of a set of images
 
+    :param asInputFiles: List of input files to mosaic
+    :param sOutputFile: Name of the mosaic output file
+    :param asBands: List of the bands to use for the mosaic
+    :param fPixelSizeX: X Pixel Size
+    :param fPixelSizeY: Y Pixel Size
+    :param sCrs: WKT of the CRS to use
+    :param fSouthBound: South Bound
+    :param fNorthBound: North Bound
+    :param fEastBound: East Bound
+    :param fWestBound: West Bound
+    :param sOverlappingMethod: Overlapping Method
+    :param bShowSourceProducts: Show Source Products Flag
+    :param sElevationModelName: DEM Model Name
+    :param sResamplingName: Resampling Method Name
+    :param bUpdateMode: Update Mode Flag
+    :param bNativeResolution: Native Resolution Flag
+    :param sCombine: Combine verb
+    :param bAsynch: True to return after the triggering, False to wait the process to finish
+    :return: Process ID is asynchronous execution, end status otherwise. An empty string is returned in case of failure
+    """
+
+    if asInputFiles is None:
+        print('[ERROR] waspy.mosaic: list of input files is None, aborting')
+        return ''
+    elif len(asInputFiles) <= 0:
+        print('[ERROR] waspy.mosaic: list of input files is empty, aborting')
+        return ''
+
+    if sOutputFile is None:
+        print('[ERROR] waspy.mosaic: name of output file is None, aborting')
+        return ''
+    elif len(sOutputFile) <= 0:
+        print('[ERROR] waspy.mosaic: output file name is empty, aborting')
+        return ''
+
+    sUrl = getBaseUrl() + "/processing/geometric/mosaic?sDestinationProductName=" + sOutputFile + "&sWorkspaceId=" +\
+        getActiveWorkspaceId()
+
+    sOutputFormat = "GeoTIFF"
+    if sOutputFile.endsWith(".dim"):
+        sOutputFormat = "BEAM-DIMAP"
+
+    if sCrs is None:
+        sCrs = __getDefaultCRS()
+
+    # todo check input type is appropriate
+    try:
+        aoMosaicSettings = {
+            'crs': sCrs,
+            'southBound': fSouthBound,
+            'eastBound': fEastBound,
+            'northBound': fNorthBound,
+            'westBound': fWestBound,
+            'pixelSizeX': fPixelSizeX,
+            'pixelSizeY': fPixelSizeY,
+            'overlappingMethod': sOverlappingMethod,
+            'showSourceProducts': bShowSourceProducts,
+            'elevationModelName': sElevationModelName,
+            'resamplingName': sResamplingName,
+            'updateMode': bUpdateMode,
+            'nativeResolution': bNativeResolution,
+            'combine': sCombine,
+            'outputFormat': sOutputFormat,
+            'sources': asInputFiles,
+            'variableNames': asBands,
+            'variableExpressions': []
+        }
+    except:
+        print('[ERROR] waspy.mosaic: cannot build DTO, please check your input. Aborting')
+        return ''
+
+    asHeaders = __getStandardHeaders()
+    oResponse = requests.put(sUrl, data=aoMosaicSettings, headers=asHeaders)
+    if oResponse is None:
+        print('[ERROR] waspy.mosaic: cannot contact server, aborting')
+        return ''
+    if oResponse.ok is True:
+        asJson = oResponse.json()
+        if 'stringValue' in asJson:
+            sProcessId = str(asJson['stringValue'])
+            if bAsynch is True:
+                return waitProcess(sProcessId)
+            else:
+                return sProcessId
+    else:
+        print('[ERROR] waspy.mosaic: server respondend with status: ' + str(oResponse.status_code) + ', aborting')
+        return ''
+
+    return ''
+
+
+def __getDefaultCRS():
+    return (
+            "GEOGCS[\"WGS84(DD)\", \r\n" +
+            "		  DATUM[\"WGS84\", \r\n" +
+            "			SPHEROID[\"WGS84\", 6378137.0, 298.257223563]], \r\n" +
+            "		  PRIMEM[\"Greenwich\", 0.0], \r\n" +
+            "		  UNIT[\"degree\", 0.017453292519943295], \r\n" +
+            "		  AXIS[\"Geodetic longitude\", EAST], \r\n" +
+            "		  AXIS[\"Geodetic latitude\", NORTH]]"
+    )
 
 
 if __name__ == '__main__':
