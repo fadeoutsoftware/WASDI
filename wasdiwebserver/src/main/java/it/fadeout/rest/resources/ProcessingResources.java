@@ -640,10 +640,7 @@ public class ProcessingResources {
 		
 		Wasdi.DebugLog("Params. File: " + sProductFile +" - Band: " + sBandName + " - Workspace: " + sWorkspaceId);
 		
-		String sDownloadRootPath = m_oServletConfig.getInitParameter("DownloadRootPath");
-		if (!sDownloadRootPath.endsWith("/")) sDownloadRootPath = sDownloadRootPath + "/";
-		
-		String sProductFileFullPath = sDownloadRootPath+sUserId+ "/" + sWorkspaceId + "/" + sProductFile;
+		String sProductFileFullPath = Wasdi.getProductPath(m_oServletConfig, sUserId, sWorkspaceId) + sProductFile;
 		
 		Wasdi.DebugLog("ProcessingResources.getProductMasks: file Path: " + sProductFileFullPath);
 
@@ -696,13 +693,8 @@ public class ProcessingResources {
 		String sUserId = oUser.getUserId();
 		
 		Wasdi.DebugLog("ProcessingResources.getColorManipulation. Params. File: " + sProductFile +" - Band: " + sBandName + " - Workspace: " + sWorkspaceId);
-		
-		String sDownloadRootPath = m_oServletConfig.getInitParameter("DownloadRootPath");
-		if (!sDownloadRootPath.endsWith("/")) sDownloadRootPath = sDownloadRootPath + "/";
-		
-		String sProductFileFullPath = sDownloadRootPath+sUserId+ "/" + sWorkspaceId + "/" + sProductFile;
-		
-//		String sProductFileFullPath = "/home/doy/tmp/wasdi/tmp/S2B_MSIL1C_20180117T102339_N0206_R065_T32TMQ_20180117T122826.zip";
+				
+		String sProductFileFullPath = Wasdi.getProductPath(m_oServletConfig, sUserId, sWorkspaceId);
 		
 		Wasdi.DebugLog("ProcessingResources.getColorManipulation: file Path: " + sProductFileFullPath);
 
@@ -745,10 +737,11 @@ public class ProcessingResources {
 		
 		
 		// Get Download File Path
-        String sDownloadPath = m_oServletConfig.getInitParameter("DownloadRootPath");
-        File oProductFile = new File(new File(new File(sDownloadPath, sUserId), sWorkspace), oBandImageViewModel.getProductFileName());
+        //String sDownloadPath = m_oServletConfig.getInitParameter("DownloadRootPath");
+        //File oProductFile = new File(new File(new File(sDownloadPath, sUserId), sWorkspace), oBandImageViewModel.getProductFileName());
 		
-//		File productFile = new File("/home/doy/tmp/wasdi/tmp/S2B_MSIL1C_20180117T102339_N0206_R065_T32TMQ_20180117T122826.zip");
+        String sProductPath = Wasdi.getProductPath(m_oServletConfig, sUserId, sWorkspace);
+        File oProductFile = new File(sProductPath+oBandImageViewModel.getProductFileName());
         
         if (!oProductFile.exists()) {
         	System.out.println("ProcessingResource.getBandImage: FILE NOT FOUND: " + oProductFile.getAbsolutePath());
