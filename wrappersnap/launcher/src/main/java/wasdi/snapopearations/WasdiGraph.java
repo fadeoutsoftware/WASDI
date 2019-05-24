@@ -178,9 +178,12 @@ public class WasdiGraph {
 			m_oLogger.info("WasdiGraph.execute: start");
 			
 	        //check input file
-	        File oBaseDir = new File(ConfigReader.getPropValue("DOWNLOAD_ROOT_PATH"));
-	        File oUserDir = new File(oBaseDir, m_oParams.getUserId());
-	        File oWorkspaceDir = new File(oUserDir, m_oParams.getWorkspace());
+			//File oBaseDir = new File(ConfigReader.getPropValue("DOWNLOAD_ROOT_PATH"));
+	        //File oUserDir = new File(oBaseDir, m_oParams.getUserId());
+	        //File oWorkspaceDir = new File(oUserDir, m_oParams.getWorkspace());
+	        
+	        String sWorkspaceDir = LauncherMain.getWorspacePath(m_oParams);
+	        File oWorkspaceDir = new File(sWorkspaceDir);
 	        
 	        ArrayList<File> aoOutputFiles = new ArrayList<>(); 
 
