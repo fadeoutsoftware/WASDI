@@ -1,4 +1,12 @@
 """
+This is WASPY, the WASDI Python lib.
+The methods allow to interact with WASDI seamlessly.
+Note:
+the philosophy of safe programming is adopted as widely as possible, the lib will try to workaround issues such as
+faulty input, and print an error rather than raise an exception, so that your program can possibly go on. Please check
+the return statues
+
+
 Created on 11 Jun 2018
 
 @author: p.campanella
@@ -658,7 +666,7 @@ def getWorkflows():
     """
         Get the list of workflows for the user
         Return None if there is any error
-        Return an array of WASI Workspace JSON Objects if everything is ok:
+        Return an array of WASDI Workspace JSON Objects if everything is ok:
         
         {
             "description":STRING,
@@ -681,51 +689,6 @@ def getWorkflows():
         return oJsonResults
     else:
         return None
-
-
-def executeWorkflow(sInputFileName, sOutputFileName, sWorkflowName):
-    """
-    Executes a WASDI SNAP Workflow
-    return the Process Id if every thing is ok
-    return '' if there was any problem
-    """    
-    global m_sBaseUrl
-    global m_sSessionId
-    global m_sActiveWorkspace
-    
-    sWorkflowId = ''
-    aoWorkflows = getWorkflows()
-        
-    for oWorkflow in aoWorkflows:
-        try:
-            if oWorkflow['name'] == sWorkflowName:
-                sWorkflowId = oWorkflow['workflowId']
-                break
-        except:
-            continue
-
-    asHeaders = __getStandardHeaders()
-    payload = {'workspace': m_sActiveWorkspace,
-               'source': sInputFileName,
-               'destination': sOutputFileName,
-               'workflowId': sWorkflowId}
-
-    sUrl = m_sBaseUrl + '/processing/graph_id'
-    
-    oResult = requests.get(sUrl, headers=asHeaders, params=payload)
-
-    sProcessId = ''
-
-    if (oResult is not None) and (oResult.ok is True):
-        oJsonResults = oResult.json()
-        
-        try:
-            if oJsonResults['boolValue'] is True:
-                sProcessId = oJsonResults['stringValue']
-        except:
-            return sProcessId
-    
-    return sProcessId
 
 
 def getProcessStatus(sProcessId):
@@ -1280,6 +1243,50 @@ def importProduct(sFileUrl=None, sBoundingBox=None, asProduct=None):
     return sReturn
 
 
+def asynchExecuteProcessor(sProcessorName, aoParams={}):
+    """
+    Execute a WASDI processor asynchronously
+    :param sProcessorName: WASDI processor name
+    :param aoParams: a dictionary of parameters for the processor
+    :return: processor ID
+    """
+
+    __log('[INFO] waspy.asynchExecuteProcessor( ' + str(sProcessorName) + ', ' + str(aoParams) + ' )')
+
+    if sProcessorName is None:
+        print('[ERROR] waspy.asynchExecuteProcessor: processor name is None, aborting')
+        return ''
+    elif len(sProcessorName) <= 0:
+        print('[ERROR] waspy.asynchExecuteProcessor: processor name empty, aborting')
+        return ''
+    if isinstance(aoParams, dict) is not True:
+        print('[ERROR] waspy.asynchExecuteProcessor: parameters must be a dictionary but it is not, aborting')
+        return ''
+
+    sUrl = getBaseUrl() +\
+           "/processors/run?workspace="+ getActiveWorkspaceId() +\
+           "&name="+ sProcessorName +\
+           "&encodedJson=" + str(aoParams)
+    asHeaders = __getStandardHeaders()
+    oResponse = requests.get(sUrl, headers=asHeaders, params=aoParams)
+    if oResponse is None:
+        print('[ERROR] waspy.asynchExecuteProcessor: something broke when contacting the server, aborting')
+        return ''
+    elif oResponse.ok is True:
+        __log('[INFO] waspy.asynchExecuteProcessor: API call OK')
+        aoJson = oResponse.json()
+        if "processingIdentifier" in aoJson:
+            sProcessID = aoJson['processingIdentifier']
+            return sProcessID
+        else:
+            print('[ERROR] waspy.asynchExecuteProcessor: cannot extract processing identifier from response, aborting')
+    else:
+        print('[ERROR] waspy.asynchExecuteProcessor: server returned status ' + str(oResponse.status_code))
+
+    return ''
+
+
+
 def executeProcessor(sProcessorName, aoProcessParams):
     """
     Executes a WASDI Processor
@@ -1373,11 +1380,14 @@ def __normPath(sPath):
 
     return sPath
 
+
 def addFileToWASDI(sFileName):
     return __internalAddFileToWASDI(sFileName, False)
 
+
 def asynchAddFileToWASDI(sFileName):
     return __internalAddFileToWASDI(sFileName, True)
+
 
 def __internalAddFileToWASDI(sFileName, bAsynch=None):
     __log('[INFO] waspy.__internalAddFileToWASDI( ' + str(sFileName) + ', ' + str(bAsynch) + ' )')
@@ -1476,6 +1486,115 @@ def subset(sInputFile, sOutputFile, dLatN, dLonW, dLatS, dLonE):
                 return waitProcess(sProcessId)
 
     return ''
+
+
+def executeWorkflow(asInputFileNames, asOutputFileNames, sWorkflowName):
+    return __internalExecuteWorkflow(asInputFileNames, asOutputFileNames, sWorkflowName, False)
+
+
+def asynchExecuteWorkflow(asInputFileNames, asOutputFileNames, sWorkflowName):
+    return __internalExecuteWorkflow(asInputFileNames, asOutputFileNames, sWorkflowName, True)
+
+
+def __internalExecuteWorkflow(asInputFileNames, asOutputFileNames, sWorkflowName, bAsynch=False):
+    """
+    Internal call to execute workflow
+
+    :param asInputFileNames:
+    :param asOutputFileNames:
+    :param sWorkflowName:
+    :param bAsynch:
+    :return: processID if asynch, status of the executed process if synch, empty string in case of failure
+    """
+
+    __log('[INFO] waspy.__internalExecuteWorkflow( ' + str(asInputFileNames) + ', ' +
+          str(asOutputFileNames) + ', ' + str(sWorkflowName) + ', ' + str(bAsynch) + ' )')
+
+    if asInputFileNames is None:
+        print('[ERROR] waspy.__internalExecuteWorkflow: input file names None, aborting')
+        return ''
+    elif len(asInputFileNames) <= 0:
+        print('[ERROR] waspy.__internalExecuteWorkflow: no input file names, aborting')
+        return ''
+
+    if asOutputFileNames is None:
+        print('[ERROR] waspy.__internalExecuteWorkflow: output file names None, aborting')
+        return ''
+    elif len(asOutputFileNames) <= 0:
+        print('[ERROR] waspy.__internalExecuteWorkflow: no output file names, aborting')
+        return ''
+
+    if sWorkflowName is None:
+        print('[ERROR] waspy.__internalExecuteWorkflow: workspace name is None, aborting')
+        return ''
+    elif len(sWorkflowName) <= 0:
+        print('[ERROR] waspy.__internalExecuteWorkflow: workflow name too short, aborting')
+        return ''
+
+    sProcessId = ''
+    sWorkflowId = None
+    sUrl = getBaseUrl() + "/processing/graph_id?workspace=" + getActiveWorkspaceId()
+
+    # get a list of workflows in this form: :
+    #   {  "description":STRING,
+    #       "name": STRING,
+    #       "workflowId": STRING }
+    aoWorkflows = getWorkflows()
+    if aoWorkflows is None:
+        print('[ERROR] waspy.__internalExecuteWorkflow: workflow list is None, aborting')
+        return ''
+    elif len(aoWorkflows) <= 0:
+        print('[ERROR] waspy.__internalExecuteWorkflow: workflow list is empty, aborting')
+        return ''
+    else:
+        for asWorkflow in aoWorkflows:
+            if asWorkflow is not None:
+                if "name" in asWorkflow:
+                    if asWorkflow["name"] == sWorkflowName:
+                        if "workflowId" in asWorkflow:
+                            sWorkflowId = asWorkflow["workflowId"]
+                            break
+    if sWorkflowId is None:
+        print('[ERROR] waspy.__internalExecuteWorkflow: workflow name not found, aborting')
+        return ''
+
+    try:
+        oJsonPayload = {
+            'workflowId': sWorkflowId,
+            'name': sWorkflowName,
+            'description': '',
+            'inputNodeNames': asInputFileNames,
+            'outputNodeNames': asOutputFileNames
+        }
+    except:
+        print('[ERROR] waspy.__internalExecuteWorkflow: payload could not be generated, aborting')
+        return ''
+
+    __log('[INFO] waspy.__internalExecuteWorkflow: about to HTTP put to '+str(sUrl) + ' with payload ' +
+          str(oJsonPayload))
+    asHeaders = __getStandardHeaders()
+    oResponse = requests.put(sUrl, headers=asHeaders, data=oJsonPayload)
+    if oResponse is None:
+        print('[ERROR] waspy.__internalExecuteWorkflow: communication with the server failed, aborting')
+        return ''
+    elif oResponse.ok is True:
+        __log('[ERROR] waspy.__internalExecuteWorkflow: server replied OK')
+        asJson = oResponse.json()
+        if "stringValue" in asJson:
+            sProcessId = asJson["stringValue"]
+            if bAsynch is True:
+                return sProcessId
+            else:
+                return waitProcess(sProcessId)
+        else:
+            print('[ERROR] waspy.__internalExecuteWorkflow: cannot find process ID in response, aborting')
+            return ''
+    else:
+        print('[ERROR] waspy.__internalExecuteWorkflow: server returned status ' + str(oResponse.status_code))
+    return ''
+
+
+
 
 
 if __name__ == '__main__':
