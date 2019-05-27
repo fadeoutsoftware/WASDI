@@ -361,15 +361,9 @@ public class WorkspaceResource {
 
 				if (bDeleteFile) {
 					try {
-						//get workspace path
-						String sDownloadRootPath = "";
-						if (m_oServletConfig.getInitParameter("DownloadRootPath") != null) {
-							sDownloadRootPath = m_oServletConfig.getInitParameter("DownloadRootPath");
-							if (!m_oServletConfig.getInitParameter("DownloadRootPath").endsWith("/"))
-								sDownloadRootPath += "/";
-						}
-
-						String sDownloadPath = sDownloadRootPath + oUser.getUserId()+ "/" + sWorkspaceId + "/";
+						//get workspace path						
+						String sDownloadPath = Wasdi.getProductPath(m_oServletConfig, Wasdi.getWorkspaceOwner(sWorkspaceId), sWorkspaceId);
+						
 						System.out.println("WorkspaceResource.DeleteWorkspace: Delete workspace " + sDownloadPath);
 						//delete directory
 						FileUtils.deleteDirectory(new File(sDownloadPath));

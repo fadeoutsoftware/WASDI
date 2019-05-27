@@ -131,17 +131,7 @@ public class ProcessingResources {
 	@Context
 	ServletConfig m_oServletConfig;
 	
-	//XXX replace by dependency injection
-	CredentialPolicy m_oCredentialPolicy = new CredentialPolicy();
-		
-//	@GET
-//	@Path("test")
-//	@Produces({"application/xml", "application/json", "text/xml"})
-//	public Response test() throws IOException
-//	{
-//		return ExecuteOperation("ciao", "test", "test", "test", null, LauncherOperations.TERRAIN);
-//	}
-	
+	CredentialPolicy m_oCredentialPolicy = new CredentialPolicy();		
 	
 	@POST
 	@Path("geometric/rangeDopplerTerrainCorrection")
@@ -223,7 +213,7 @@ public class ProcessingResources {
 	@Produces({"application/json"})
 	public SnapOperatorParameterViewModel[] operatorParameters(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sOperation") String sOperation) throws IOException
 	{
-		Wasdi.DebugLog("ProcessingResources.OperatorParameters");
+		Wasdi.DebugLog("ProcessingResources.operatorParameters");
 		ArrayList<SnapOperatorParameterViewModel> oChoices = new ArrayList<SnapOperatorParameterViewModel>();
 		
 		Class oOperatorClass = SnapOperatorFactory.getOperatorClass(sOperation);
@@ -232,7 +222,7 @@ public class ProcessingResources {
     	for (Field oOperatorField : aoOperatorFields) {
     		
     		if (oOperatorField.getName().equals("mapProjection")) {
-    			System.out.println("ciao");
+    			System.out.println("operatorParameters found mapProjection parameter");
     		}
     		
 			Annotation[] aoAnnotations = oOperatorField.getAnnotations();			
@@ -433,6 +423,18 @@ public class ProcessingResources {
 		if (oWorkflow == null) return Response.status(Status.INTERNAL_SERVER_ERROR).build();
 		
 		if (oWorkflow.getUserId().equals(sUserId) == false)  return Response.status(Status.UNAUTHORIZED).build();
+		
+		if (!Utils.isNullOrEmpty(oWorkflow.getFilePath())) {
+			File oWorkflowFile = new File(oWorkflow.getFilePath());
+			if (oWorkflowFile.exists()) {
+				if (!oWorkflowFile.delete()) {
+					Wasdi.DebugLog("ProcessingResource.deleteWorkflow: Error deleting the workflow file " + oWorkflow.getFilePath());
+				}
+			}
+		}
+		else {
+			Wasdi.DebugLog("ProcessingResource.deleteWorkflow: workflow file path is null or empty.");
+		}
 
 		oSnapWorkflowRepository.DeleteSnapWorkflow(sWorkflowId);
 	
@@ -486,6 +488,9 @@ public class ProcessingResources {
 		
 	}
 	
+/*	
+ * THIS SHOULD BE LEGACY: HAD AN HARDCODED FILE NAME AND WAS NOT FOUND IN THE CLIENT OR IN THE LIB
+ * AFTER SOME TIME DELETE ALSO THIS COMMENT
 	@POST
 	@Path("/graph_file")
 	public PrimitiveResult executeGraphFromFile(@HeaderParam("x-session-token") String sessionId, 
@@ -523,7 +528,7 @@ public class ProcessingResources {
 		
 		return executeOperation(sessionId, sourceProductName, destinationProdutName, workspace, oSettings, LauncherOperations.GRAPH);
 	}
-	
+*/	
 	/**
 	 * Exectues a Workflow from workflow Id
 	 * @param sessionId
@@ -640,7 +645,7 @@ public class ProcessingResources {
 		
 		Wasdi.DebugLog("Params. File: " + sProductFile +" - Band: " + sBandName + " - Workspace: " + sWorkspaceId);
 		
-		String sProductFileFullPath = Wasdi.getProductPath(m_oServletConfig, sUserId, sWorkspaceId) + sProductFile;
+		String sProductFileFullPath = Wasdi.getProductPath(m_oServletConfig, Wasdi.getWorkspaceOwner(sWorkspaceId), sWorkspaceId) + sProductFile;
 		
 		Wasdi.DebugLog("ProcessingResources.getProductMasks: file Path: " + sProductFileFullPath);
 
@@ -694,7 +699,7 @@ public class ProcessingResources {
 		
 		Wasdi.DebugLog("ProcessingResources.getColorManipulation. Params. File: " + sProductFile +" - Band: " + sBandName + " - Workspace: " + sWorkspaceId);
 				
-		String sProductFileFullPath = Wasdi.getProductPath(m_oServletConfig, sUserId, sWorkspaceId);
+		String sProductFileFullPath = Wasdi.getProductPath(m_oServletConfig, Wasdi.getWorkspaceOwner(sWorkspaceId), sWorkspaceId);
 		
 		Wasdi.DebugLog("ProcessingResources.getColorManipulation: file Path: " + sProductFileFullPath);
 
@@ -740,7 +745,7 @@ public class ProcessingResources {
         //String sDownloadPath = m_oServletConfig.getInitParameter("DownloadRootPath");
         //File oProductFile = new File(new File(new File(sDownloadPath, sUserId), sWorkspace), oBandImageViewModel.getProductFileName());
 		
-        String sProductPath = Wasdi.getProductPath(m_oServletConfig, sUserId, sWorkspace);
+        String sProductPath = Wasdi.getProductPath(m_oServletConfig, Wasdi.getWorkspaceOwner(sWorkspace), sWorkspace);
         File oProductFile = new File(sProductPath+oBandImageViewModel.getProductFileName());
         
         if (!oProductFile.exists()) {
@@ -1171,9 +1176,10 @@ public class ProcessingResources {
 	@Produces({"application/xml", "application/json", "text/xml"})
 	public ArrayList<WpsViewModel> getWpsList( @HeaderParam("x-session-token") String sSessionId ){
 		Wasdi.DebugLog("ProcessingResource.getWpsList");
-		//TODO validate input
+		
 		WpsProvidersRepository oWPSrepo = new WpsProvidersRepository();
 		ArrayList<WpsProvider> aoWPSProviders = oWPSrepo.getWpsList();
+		
 		if(null!=aoWPSProviders) {
 			ArrayList<WpsViewModel> aoResult = new ArrayList<WpsViewModel>();
 			for (WpsProvider oWpsProvider : aoWPSProviders) {
@@ -1325,6 +1331,7 @@ public class ProcessingResources {
 			oParameter.setUserId(sUserId);
 			oParameter.setExchange(sWorkspaceId);
 			oParameter.setProcessObjId(sProcessObjId);
+			oParameter.setWorkspaceOwnerId(Wasdi.getWorkspaceOwner(sWorkspaceId));
 			
 			// Do we have settings?
 			if (oSetting != null) oParameter.setSettings(oSetting);	
@@ -1415,265 +1422,6 @@ public class ProcessingResources {
 			
 		}
 	}
-	
-	/**
-	 * Runs a dummy IDL script. Used to test the setup and as a stub to implement the launch of new IDL scripts 
-	 * @param sSessionId a valid session identifier
-	 * @return BAD_REQUEST if null request, UNAUTHORIZED if session is not valid, OK after execution of the script
-	 */
-	@GET
-	@Path("/idlDemo") 
-	@Produces({"application/json"})
-	public PrimitiveResult idlDemo( @HeaderParam("x-session-token") String sSessionId) {
-		
-		Wasdi.DebugLog("ProcessingResource.idlDemo");
-	
-		
-		if(null != sSessionId ) {
-			PrimitiveResult oResult = new PrimitiveResult();
-			oResult.setBoolValue(false);
-			oResult.setIntValue(400);
-			return oResult;
-		}
-		User oUser = Wasdi.GetUserFromSession(sSessionId);
-		//check session validity
-		if (oUser == null || Utils.isNullOrEmpty(oUser.getUserId())) {
-			PrimitiveResult oResult = new PrimitiveResult();
-			oResult.setBoolValue(false);
-			oResult.setIntValue(401);
-			return oResult;				
-		}
-		Wasdi.DebugLog("ProcessingResource.idlDemo: ok valid session, let's go");
-
-		try {
-			String cmd[] = new String[] {
-					m_oServletConfig.getInitParameter("IdlDemoScript")
-			};
-			
-			Wasdi.DebugLog("ProcessingResource.idlDemo " + cmd[0] );
-			
-			System.out.println("ProcessingResource.idlDemo: shell exec " + Arrays.toString(cmd));
-			Process proc = Runtime.getRuntime().exec(cmd);
-			BufferedReader input = new BufferedReader(new InputStreamReader(proc.getInputStream()));
-            String line = null;
-            while((line=input.readLine()) != null) {
-            	System.out.println("ProcessingResource.idlDemo: envi stdout: " + line);
-            }
-			if (proc.waitFor() != 0) {
-				return PrimitiveResult.getInvalidInstance();
-			}
-		} catch (Exception oEx) {
-			System.out.println("ProcessingResource.idlDemo: error happened" + oEx.getMessage());
-			oEx.printStackTrace();
-			return PrimitiveResult.getInvalidInstance();
-		}
-
-		System.out.println("ProcessingResource.idlDemo: about to respond and close");
-		PrimitiveResult oResult = new PrimitiveResult();
-		oResult.setBoolValue(true);
-		oResult.setIntValue(200);
-		oResult.setStringValue("IDL code executed");
-		return oResult;
-	}
-	
-	
-	/**
-	 * Runs a the IDL script implementation of the LIST flood algorithm on specified files
-	 * @param sSessionId a valid session identifier
-	 * @param sFileName input file
-	 * @param a workspase identifier
-	 * @return BAD_REQUEST if null request, UNAUTHORIZED if session is not valid, OK after execution of the script
-	 */
-	@POST
-	@Path("/asynchlistflood")
-	@Produces({"application/json"})
-	public PrimitiveResult asynchListFlood(
-			@HeaderParam("x-session-token") String sSessionId,
-			@QueryParam("workspaceId") String sWorkspaceId,
-			ListFloodViewModel oListFloodViewModel) {
-		
-		Wasdi.DebugLog("ProcessingResource.algList");
-		
-		if(null == sSessionId ) {
-			PrimitiveResult oResult = new PrimitiveResult();
-			oResult.setBoolValue(false);
-			oResult.setIntValue(400);
-			return oResult;
-		}
-		
-		User oUser = Wasdi.GetUserFromSession(sSessionId);
-		
-		try {
-			//check authentication
-			if (oUser == null || Utils.isNullOrEmpty(oUser.getUserId())) {
-				PrimitiveResult oResult = PrimitiveResult.getInvalidInstance();
-				oResult.setIntValue(401);
-				return oResult;				
-			}
-			
-			Wasdi.DebugLog("ProcessingResource.asynchListFlood: REF FILE " + oListFloodViewModel.getReferenceFile());
-			Wasdi.DebugLog("ProcessingResource.asynchListFlood: POST EVENT FILE " + oListFloodViewModel.getPostEventFile());
-			Wasdi.DebugLog("ProcessingResource.asynchListFlood: launching ENVI LIST Processor");
-						
-			return 	asynchLaunchList(sSessionId, oListFloodViewModel, oUser, sWorkspaceId);
-						
-		} catch (Exception e) {
-			System.out.println("ProcessingResource.algList: error launching list " + e.getMessage());
-			e.printStackTrace();
-			PrimitiveResult oResult = PrimitiveResult.getInvalidInstance();
-			oResult.setBoolValue(false);
-			oResult.setIntValue(500);				
-			return oResult;
-		}
-	}
-	
-	/**
-	 * Launch LIST ENVI process
-	 * @param sReferenceFile 
-	 * @param sWorkspaceId
-	 * @return
-	 */
-	private PrimitiveResult asynchLaunchList(String sSessionId, ListFloodViewModel oListFloodViewModel, User oUser, String sWorkspaceId) {
-
-		PrimitiveResult oResult = new PrimitiveResult();
-		String sProcessObjId = Utils.GetRandomName();
-		String sUserId = Wasdi.GetUserFromSession(sSessionId).getUserId();
-		String sFloodMapFile = "";
-		
-		oResult.setBoolValue(false);
-		oResult.setIntValue(500);
-		
-		try {			
-			String sParamFile = m_oServletConfig.getInitParameter("ListParamAsynch");
-			
-			Wasdi.DebugLog("ProcessingResource.launchList ParamFile " + sParamFile);
-			
-			String sParamFullPath = m_oServletConfig.getInitParameter("DownloadRootPath") + "/processors/listflood/" + sParamFile;
-			String sConfigFullPath = m_oServletConfig.getInitParameter("DownloadRootPath") + "/processors/listflood/config.properties"; 
-			
-			WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
-			Workspace oWorkspace = oWorkspaceRepository.GetWorkspace(sWorkspaceId);
-			
-			File oFile = new File(sParamFullPath);
-			File oConfigFile = new File (sConfigFullPath);
-			
-			BufferedWriter oWriter = new BufferedWriter(new FileWriter(oConfigFile));
-			
-			if(null!= oWriter) {
-				Wasdi.DebugLog("ProcessingResource.launchList: Creating config.properties file");
-
-				oWriter.write("BASEPATH=" + m_oServletConfig.getInitParameter("DownloadRootPath"));
-				oWriter.newLine();
-				oWriter.write("USER=" + oUser.getUserId());
-				oWriter.newLine();
-				oWriter.write("WORKSPACE=" + oWorkspace.getName());
-				oWriter.newLine();
-				oWriter.write("SESSIONID="+sSessionId);
-				oWriter.newLine();
-				oWriter.write("ISONSERVER=1");
-				oWriter.newLine();
-				oWriter.write("DOWNLOADACTIVE=0");
-				oWriter.newLine();				
-				oWriter.write("MYPROCID="+sProcessObjId);
-				oWriter.newLine();				
-				oWriter.flush();
-				oWriter.close();
-			}			
-			
-			
-			oWriter = new BufferedWriter(new FileWriter(oFile));
-			if(null!= oWriter) {
-				Wasdi.DebugLog("ProcessingResource.launchList: Creating parameters file");
-
-				oWriter.write(oListFloodViewModel.getPostEventFile());
-				oWriter.newLine();
-				oWriter.write(oListFloodViewModel.getReferenceFile());
-				oWriter.newLine();
-				oWriter.newLine();
-				oWriter.newLine();
-				
-				String sMaskFile = oListFloodViewModel.getPostEventFile();
-				sMaskFile = Utils.GetFileNameWithoutExtension(sMaskFile);
-				sMaskFile += "_HSBA_MASK.tif";
-				
-				oWriter.write(sMaskFile);
-				oWriter.newLine();
-				
-				sFloodMapFile = oListFloodViewModel.getPostEventFile();
-				sFloodMapFile = Utils.GetFileNameWithoutExtension(sFloodMapFile);
-				sFloodMapFile += "_flood_map.tif";				
-				
-				oWriter.write(sFloodMapFile);
-				oWriter.newLine();
-				oWriter.write("" + oListFloodViewModel.getHsbaStartDepth());
-				oWriter.newLine();
-				oWriter.write("" + oListFloodViewModel.getBimodalityCoeff());
-				oWriter.newLine();
-				oWriter.write(""+oListFloodViewModel.getMinTileDimension());
-				oWriter.newLine();
-				oWriter.write("" + oListFloodViewModel.getMinBlobRemoval());
-				oWriter.newLine();
-				oWriter.flush();
-				oWriter.close();
-			}
-			
-			//Update process list
-			
-			IDLProcParameter oParameter = new IDLProcParameter();
-			oParameter.setWorkspace(sWorkspaceId);
-			oParameter.setUserId(sUserId);
-			oParameter.setExchange(sWorkspaceId);
-			oParameter.setProcessObjId(sProcessObjId);
-			oParameter.setParameterFile(sParamFile);
-			oParameter.setProcessorName("listflood");
-	
-			String sPath = m_oServletConfig.getInitParameter("SerializationPath");			
-			if (!(sPath.endsWith("\\") || sPath.endsWith("/"))) sPath += "/";
-			sPath = sPath + sProcessObjId;
-			
-			SerializationUtils.serializeObjectToXML(sPath, oParameter);
-
-			
-			ProcessWorkspaceRepository oRepository = new ProcessWorkspaceRepository();
-			ProcessWorkspace oProcess = new ProcessWorkspace();
-			
-			try
-			{
-				oProcess.setOperationDate(Wasdi.GetFormatDate(new Date()));
-				oProcess.setOperationType(LauncherOperations.RUNIDL.toString());
-				oProcess.setProductName(oListFloodViewModel.getReferenceFile());
-				oProcess.setWorkspaceId(sWorkspaceId);
-				oProcess.setUserId(sUserId);
-				oProcess.setProcessObjId(sProcessObjId);
-				oProcess.setStatus(ProcessStatus.CREATED.name());
-				oRepository.InsertProcessWorkspace(oProcess);
-				Wasdi.DebugLog("ProcessingResource.asynchLaunch: Process Scheduled for Launcher");
-			}
-			catch(Exception oEx){
-				System.out.println("ProcessingResource.asynchLaunchList: Error updating process list " + oEx.getMessage());
-				oEx.printStackTrace();
-				oResult.setBoolValue( false);
-				oResult.setIntValue(500);
-				return oResult;
-			}
-
-			oResult.setBoolValue(true);
-			oResult.setIntValue(200);
-			oResult.setStringValue(oProcess.getProcessObjId());
-			
-		} catch (Exception oEx) {
-			System.out.println("ProcessingResource.launchList: error during list process " + oEx.getMessage());
-			oEx.printStackTrace();
-			oResult.setBoolValue(false);
-			oResult.setIntValue(500);
-			return oResult;
-		}
-				
-		return oResult;
-	}
-	
-	
-	
 	
 	
 	/**
@@ -1808,6 +1556,7 @@ public class ProcessingResources {
 			oParameter.setConfigFilePath(sConfigFullPath);
 			oParameter.setParamFilePath(sParamFullPath);
 			oParameter.setProcessorName("wasdi_matlab_test_01");
+			oParameter.setWorkspaceOwnerId(Wasdi.getWorkspaceOwner(sWorkspaceId));
 	
 			String sPath = m_oServletConfig.getInitParameter("SerializationPath");			
 			if (!(sPath.endsWith("\\") || sPath.endsWith("/"))) sPath += "/";
@@ -1988,6 +1737,7 @@ public class ProcessingResources {
 			oParameter.setConfigFilePath(sConfigFullPath);
 			oParameter.setParamFilePath(sParamFullPath);
 			oParameter.setProcessorName("wasdi_matlab_test_02");
+			oParameter.setWorkspaceOwnerId(Wasdi.getWorkspaceOwner(sWorkspaceId));
 	
 			String sPath = m_oServletConfig.getInitParameter("SerializationPath");			
 			if (!(sPath.endsWith("\\") || sPath.endsWith("/"))) sPath += "/";
@@ -2171,6 +1921,7 @@ public class ProcessingResources {
 			oParameter.setConfigFilePath(sConfigFullPath);
 			oParameter.setParamFilePath(sParamFullPath);
 			oParameter.setProcessorName("wasdi_matlab_test_03");
+			oParameter.setWorkspaceOwnerId(Wasdi.getWorkspaceOwner(sWorkspaceId));
 	
 			String sPath = m_oServletConfig.getInitParameter("SerializationPath");			
 			if (!(sPath.endsWith("\\") || sPath.endsWith("/"))) sPath += "/";

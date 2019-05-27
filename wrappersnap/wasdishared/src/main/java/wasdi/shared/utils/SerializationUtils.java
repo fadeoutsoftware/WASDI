@@ -2,8 +2,11 @@ package wasdi.shared.utils;
 
 import java.beans.XMLDecoder;
 import java.beans.XMLEncoder;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.InputStream;
 
 /**
  * Created by s.adamo on 10/10/2016.
@@ -13,22 +16,50 @@ public class SerializationUtils {
     /**
      * This method saves (serializes) any java bean object into xml file
      */
-    public static void serializeObjectToXML(String xmlFileLocation, Object objectToSerialize) throws Exception {
-        FileOutputStream os = new FileOutputStream(xmlFileLocation);
-        XMLEncoder encoder = new XMLEncoder(os);
-        encoder.writeObject(objectToSerialize);
-        encoder.close();
+    public static void serializeObjectToXML(String sXmlFileLocation, Object oObjectToSerialize) throws Exception {
+        FileOutputStream oOutputStream = new FileOutputStream(sXmlFileLocation);
+        XMLEncoder oEncoder = new XMLEncoder(oOutputStream);
+        oEncoder.writeObject(oObjectToSerialize);
+        oEncoder.close();
     }
 
     /**
      * Reads Java Bean Object From XML File
      */
-    public static Object deserializeXMLToObject(String xmlFileLocation) throws Exception {
-        FileInputStream os = new FileInputStream(xmlFileLocation);
-        XMLDecoder decoder = new XMLDecoder(os);
-        Object deSerializedObject = decoder.readObject();
-        decoder.close();
+    public static Object deserializeXMLToObject(String sXmlFileLocation) throws Exception {
+        FileInputStream oOutputStream = new FileInputStream(sXmlFileLocation);
+        XMLDecoder oDecoder = new XMLDecoder(oOutputStream);
+        Object oDeSerializedObject = oDecoder.readObject();
+        oDecoder.close();
 
-        return deSerializedObject;
+        return oDeSerializedObject;
     }
+
+    
+    /**
+     * This method serializes any java bean object into a String
+     */
+    public static String serializeObjectToStringXML(Object oObjectToSerialize) throws Exception {
+        ByteArrayOutputStream aoOutputStream = new ByteArrayOutputStream();
+        XMLEncoder oEncoder = new XMLEncoder(aoOutputStream);
+        oEncoder.writeObject(aoOutputStream);
+        oEncoder.close();
+        
+        return aoOutputStream.toString();
+    }
+
+    /**
+     * Reads Java Bean Object From XML File
+     */
+    public static Object deserializeStringXMLToObject(String sXMLObject) throws Exception {
+    	
+    	InputStream oTargetStream = new ByteArrayInputStream(sXMLObject.getBytes());
+        XMLDecoder oDecoder = new XMLDecoder(oTargetStream);
+        Object oDeSerializedObject = oDecoder.readObject();
+        oDecoder.close();
+
+        return oDeSerializedObject;
+    }
+    
+
 }
