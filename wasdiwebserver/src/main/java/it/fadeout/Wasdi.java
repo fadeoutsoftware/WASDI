@@ -26,9 +26,11 @@ import it.fadeout.business.IDLThread;
 import it.fadeout.business.ProcessingThread;
 import wasdi.shared.business.User;
 import wasdi.shared.business.UserSession;
+import wasdi.shared.business.Workspace;
 import wasdi.shared.data.MongoRepository;
 import wasdi.shared.data.SessionRepository;
 import wasdi.shared.data.UserRepository;
+import wasdi.shared.data.WorkspaceRepository;
 import wasdi.shared.rabbit.RabbitFactory;
 import wasdi.shared.utils.CredentialPolicy;
 import wasdi.shared.utils.Utils;
@@ -383,7 +385,7 @@ public class Wasdi extends ResourceConfig {
 		}
 	}
 	
-	public static String getProductPath(ServletConfig oServletConfig, String sUserId, String sWorkspace) {
+	public static String getWorkspacePath(ServletConfig oServletConfig, String sUserId, String sWorkspace) {
 		// Take path
 		String sDownloadRootPath = oServletConfig.getInitParameter("DownloadRootPath");
 		
@@ -400,4 +402,15 @@ public class Wasdi extends ResourceConfig {
 		return sPath;
 	}
 	
+	/**
+	 * Get The owner of a workspace starting from the workspace id
+	 * @param sWorkspaceId Id of the Workspace
+	 * @return User Id of the owner
+	 */
+	public static String getWorkspaceOwner(String sWorkspaceId) {
+		WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
+		Workspace oWorkspace = oWorkspaceRepository.GetWorkspace(sWorkspaceId);
+		String sWorkspaceOwner = oWorkspace.getUserId();
+		return sWorkspaceOwner;
+	}
 }

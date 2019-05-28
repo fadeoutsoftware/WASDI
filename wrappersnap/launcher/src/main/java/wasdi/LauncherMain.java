@@ -536,7 +536,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 	 * @param oParameter Base Parameter
 	 * @return full workspace path 
 	 */
-	protected String getWorspacePath(BaseParameter oParameter) {
+	public static String getWorspacePath(BaseParameter oParameter) {
 		try {
 			return getWorspacePath(oParameter, ConfigReader.getPropValue("DOWNLOAD_ROOT_PATH"));
 		} catch (IOException e) {
@@ -551,14 +551,20 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 	 * @param sRootPath
 	 * @return full workspace path 
 	 */
-	protected String getWorspacePath(BaseParameter oParameter, String sRootPath) {
+	public static String getWorspacePath(BaseParameter oParameter, String sRootPath) {
 		// Get Base Path
 		String sWorkspacePath = sRootPath;
 		
 		if (!(sWorkspacePath.endsWith("/")||sWorkspacePath.endsWith("//"))) sWorkspacePath += "/";
 		
+		String sUser = oParameter.getUserId();
+		
+		if (Utils.isNullOrEmpty(oParameter.getWorkspaceOwnerId())==false) {
+			sUser = oParameter.getWorkspaceOwnerId();
+		}
+		
 		// Get Workspace path
-		sWorkspacePath += oParameter.getUserId();
+		sWorkspacePath += sUser;
 		sWorkspacePath += "/";
 		sWorkspacePath += oParameter.getWorkspace();
 		sWorkspacePath += "/";
@@ -637,8 +643,19 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 				DownloadedFilesRepository oDownloadedRepo = new DownloadedFilesRepository();
 				
 				if (!Utils.isNullOrEmpty(sFileNameWithoutPath)) {
-					// Check if it is already downloaded, in any workpsace
-					oAlreadyDownloaded = oDownloadedRepo.GetDownloadedFile(sFileNameWithoutPath);
+					
+					// First check if it is already in this workspace:
+					oAlreadyDownloaded = oDownloadedRepo.GetDownloadedFileByPath(sDownloadPath+sFileNameWithoutPath);
+					
+					if (oAlreadyDownloaded == null) {
+						s_oLogger.debug("LauncherMain.Download: Product NOT found in the workspace, search in other workspaces");
+						// Check if it is already downloaded, in any workpsace
+						oAlreadyDownloaded = oDownloadedRepo.GetDownloadedFile(sFileNameWithoutPath);						
+					}
+					else {
+						s_oLogger.debug("LauncherMain.Download: Product already found in the workspace");
+					}
+					
 				}
 
 				if (oAlreadyDownloaded == null) {
@@ -713,6 +730,10 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 						if (!new File(sDestinationFileWithPath).exists()) {
 							// Yes, make a copy
 							FileUtils.copyFile(new File(sFileName), new File(sDestinationFileWithPath));
+							sFileName = sDestinationFileWithPath;
+						}
+						else {
+							// If it exists... 
 							sFileName = sDestinationFileWithPath;
 						}
 					}
@@ -1131,9 +1152,6 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			// Read File Name
 			String sFile = oParameter.getSourceProductName();
 
-			//String sRootPath = ConfigReader.getPropValue("DOWNLOAD_ROOT_PATH");
-			//if (!sRootPath.endsWith("/")) sRootPath += "/";
-			//final String sPath = sRootPath + oParameter.getUserId() + "/" + oParameter.getWorkspace() + "/";
 			final String sPath = getWorspacePath(oParameter);
 			sFile = sPath + sFile;
 

@@ -52,82 +52,6 @@ public class OpportunitySearchResource {
 	ServletConfig m_oServletConfig;
 	
 	CredentialPolicy m_oCredentialPolicy = new CredentialPolicy();
-
-//	@POST
-//	@Path("/search")
-//	@Produces({ "application/xml", "application/json", "text/html" })
-//	@Consumes(MediaType.APPLICATION_JSON)
-//	public ArrayList<CoverageSwathResultViewModel> Search(@HeaderParam("x-session-token") String sSessionId,
-//			OrbitSearchViewModel OrbitSearch) {
-//		Wasdi.DebugLog("OpportunitySearchResource.Search");
-//
-//		User oUser = Wasdi.GetUserFromSession(sSessionId);
-//
-//		ArrayList<CoverageSwathResultViewModel> aoCoverageSwathResultViewModels = new ArrayList<CoverageSwathResultViewModel>();
-//
-//		try {
-//			if (oUser == null) {
-//				return aoCoverageSwathResultViewModels;
-//			}
-//			if (Utils.isNullOrEmpty(oUser.getUserId())) {
-//				return aoCoverageSwathResultViewModels;
-//			}
-//
-//			if (OrbitSearch == null)
-//				return null;
-//
-//			// set nfs properties download
-//			String userHome = System.getProperty("user.home");
-//			String Nfs = System.getProperty("nfs.data.download");
-//			if (Nfs == null)
-//				System.setProperty("nfs.data.download", userHome + "/nfs/download");
-//
-//			System.out.println("nfs dir " + System.getProperty("nfs.data.download"));
-//
-//			Date dtDate = new Date();
-//			String sArea = OrbitSearch.getPolygon();
-//			int iIdCoverageCounter = 1;
-//
-//			// Foreach filter combination found
-//			List<OrbitFilterViewModel> oOrbitFilters = OrbitSearch.getOrbitFilters();
-//			for (OrbitFilterViewModel oOrbitFilter : oOrbitFilters) {
-//
-//				// Find the opportunities
-//				ArrayList<CoverageSwathResult> aoCoverageSwathResult = new ArrayList<>();
-//				try {
-//					aoCoverageSwathResult = InstanceFinder.findSwatsByFilters(sArea,
-//							OrbitSearch.getAcquisitionStartTime(), OrbitSearch.getAcquisitionEndTime(),
-//							OrbitSearch.getSatelliteNames(), oOrbitFilter.getSensorResolution(),
-//							oOrbitFilter.getSensorType(),OrbitSearch.getLookingType(),OrbitSearch.getViewAngle(),OrbitSearch.getSwathSize());
-//				} 
-//				catch (ParseException e) {
-//					e.printStackTrace();
-//				}
-//
-//				if (aoCoverageSwathResult == null)
-//					return null;
-//
-//				// For each Swat Result
-//				for (CoverageSwathResult oSwatResul : aoCoverageSwathResult) {
-//					// Get View Model and Childs
-//					ArrayList<CoverageSwathResultViewModel> aoModels = getSwatViewModelFromResult(oSwatResul);
-//					for (CoverageSwathResultViewModel oCoverageSwathResultViewModel : aoModels) {
-//						oCoverageSwathResultViewModel.IdCoverageSwathResultViewModel = iIdCoverageCounter;
-//						iIdCoverageCounter++;
-//						aoCoverageSwathResultViewModels.add(oCoverageSwathResultViewModel);
-//					}
-//				}
-//
-//			}
-//
-//			return aoCoverageSwathResultViewModels;
-//		} catch (Exception oEx) {
-//			System.out.println("OpportunitySearchResource.Search: Error searching opportunity " + oEx.getMessage());
-//			oEx.printStackTrace();
-//		}
-//
-//		return aoCoverageSwathResultViewModels;
-//	}
 	
 	@POST
 	@Path("/search")
@@ -156,14 +80,10 @@ public class OpportunitySearchResource {
 
 			System.out.println("nfs dir " + System.getProperty("nfs.data.download"));
 
-			Date dtDate = new Date();
 			int iIdCoverageCounter = 1;
 			
-			ArrayList<SatelliteFilterViewModel> aoSatelliteFilters = OpportunitiesSearch.getSatelliteFilters();
-
 			ArrayList<CoverageSwathResult> aoCoverageSwathResult = new ArrayList<>();
 			aoCoverageSwathResult = InstanceFinder.findSwatsByFilters(OpportunitiesSearch);
-				
 
 			if (aoCoverageSwathResult == null)
 				return null;
@@ -185,16 +105,7 @@ public class OpportunitySearchResource {
 					
 					aoCoverageSwathResultViewModels.add(oSwathResultViewModel);
 				}
-
-
-//				for (CoverageSwathResult oSwatResul : aoCoverageSwathResult) {
-//					CoverageSwathResultViewModel oSwathResultViewModel = getCoverageSwathResultViewModelFromCoverageSwathResult(oSwatResul);
-//					aoCoverageSwathResultViewModels.add(oSwathResultViewModel);
-//				}
-////
-//			}
-//
-//			return aoCoverageSwathResultViewModels;
+				
 		} catch (Exception oEx) {
 			System.out.println("OpportunitySearchResource.Search: Error searching opportunity " + oEx.getMessage());
 			oEx.printStackTrace();
@@ -204,6 +115,11 @@ public class OpportunitySearchResource {
 	}
 
 
+	/**
+	 * Converts the Orbit Lib Ouptut in a WASDI View Model
+	 * @param oSwath CoverageSwathResult of the Orbit Lib
+	 * @return CoverageSwathResultViewModel representig the oSwath entity
+	 */
 	public CoverageSwathResultViewModel getCoverageSwathResultViewModelFromCoverageSwathResult(CoverageSwathResult oSwath) {
 		
 		CoverageSwathResultViewModel oVM = new CoverageSwathResultViewModel();
@@ -234,12 +150,10 @@ public class OpportunitySearchResource {
 
 			if (oSwath.getTimeStart() != null) {
 				GregorianCalendar oCalendar = oSwath.getTimeStart().getCurrentGregorianCalendar();
-				// oVM.AcquisitionStartTime = oCalendar.getTime();
 				oVM.AcquisitionStartTime = new Date(oCalendar.getTimeInMillis());
 			}
 			if (oSwath.getTimeEnd() != null) {
 				GregorianCalendar oCalendar = oSwath.getTimeEnd().getCurrentGregorianCalendar();
-				// oVM.AcquisitionEndTime = oCalendar.getTime();
 				oVM.AcquisitionEndTime = new Date(oCalendar.getTimeInMillis());
 			}
 
@@ -283,7 +197,8 @@ public class OpportunitySearchResource {
 
 		return oVM;
 	}
-
+	
+	
 	public CoverageSwathResultViewModel getCoverageSwathResultViewModelFromCoverageSwathResult(SwathArea oSwath) {
 
 		CoverageSwathResultViewModel oVM = new CoverageSwathResultViewModel();
@@ -637,7 +552,7 @@ public class OpportunitySearchResource {
 				oSatelliteResource.setSatelliteSensors(aoSatelliteSensors);
 				aaoReturnValue.add(oSatelliteResource);
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
+				Wasdi.DebugLog("getSatellitesResources Exception: " + e.toString());
 				e.printStackTrace();
 				return null;
 			}			

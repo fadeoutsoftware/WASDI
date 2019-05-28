@@ -53,15 +53,12 @@ public class OpenSearchResource {
 			@QueryParam("sortedby") String sSortedBy, @QueryParam("order") String sOrder) {
 		Wasdi.DebugLog("OpenSearchResource.SearchSentinel, session: "+sSessionId);
 
-		if (Utils.isNullOrEmpty(sSessionId))
-			return null;
+		if (Utils.isNullOrEmpty(sSessionId)) return null;
 
 		User oUser = Wasdi.GetUserFromSession(sSessionId);
 
-		if (oUser == null)
-			return null;
-		if (Utils.isNullOrEmpty(oUser.getUserId()))
-			return null;
+		if (oUser == null) return null;
+		if (Utils.isNullOrEmpty(oUser.getUserId())) return null;
 
 		try {
 			HashMap<String, String> asParameterMap = new HashMap<>();
@@ -200,9 +197,6 @@ public class OpenSearchResource {
 			try {
 				Wasdi.DebugLog("OpenSearchResource.Search, counting. User: " + oUser.getUserId() + ", providers: " + sProviders + ", query: " + sQuery);
 				aiCounterMap = getQueryCountResultsPerProvider(sQuery, sProviders);
-				// TEST
-				// counterMap = new HashMap();
-				// counterMap.put("SENTINEL", 10);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -431,6 +425,11 @@ public class OpenSearchResource {
 		return aoResults.toArray(new QueryResultViewModel[aoResults.size()]);
 	}
 
+	/**
+	 * Get the Query Executor for a specific provider
+	 * @param sProvider Provider code
+	 * @return QueryExecutor of the specific provider
+	 */
 	private QueryExecutor getExecutor(String sProvider) {
 		Wasdi.DebugLog("OpenSearchResource.getExecutor, provider: " + sProvider);
 		QueryExecutor oExecutor = null;
@@ -449,6 +448,11 @@ public class OpenSearchResource {
 
 	}
 
+	/**
+	 * Get Auth Credentials for a specific provider
+	 * @param sProvider Provider Code
+	 * @return AuthenticationCredentials entity
+	 */
 	private AuthenticationCredentials getCredentials(String sProvider) {
 		Wasdi.DebugLog("OpenSearchResource.getCredentials( " + sProvider + " )");
 		AuthenticationCredentials oCredentials = m_aoCredentials.get(sProvider);

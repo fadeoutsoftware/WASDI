@@ -296,17 +296,24 @@ service('GlobeService', ['$http',  'ConstantsService','SatelliteService', functi
         if(utilsIsObjectNullOrUndefined(aArray) == true) return false;
         if(utilsIsObjectNullOrUndefined(this.m_oWasdiGlobe) == true) return false;
 
-        var oRectangle = this.m_oWasdiGlobe.entities.add({
-            polygon : {
-                hierarchy : new Cesium.PolygonHierarchy(Cesium.Cartesian3.fromDegreesArray(aArray)),
-                outline : true,
-                 outlineColor : Cesium.Color.RED.withAlpha(1),
-                outlineWidth : 10,
-                material : Cesium.Color.RED.withAlpha(0.2)
-            }
-        });
+        try {
+            var oRectangle = this.m_oWasdiGlobe.entities.add({
+                polygon : {
+                    hierarchy : new Cesium.PolygonHierarchy(Cesium.Cartesian3.fromDegreesArray(aArray)),
+                    outline : true,
+                    outlineColor : Cesium.Color.RED.withAlpha(1),
+                    outlineWidth : 10,
+                    material : Cesium.Color.RED.withAlpha(0.2)
+                }
+            });
 
-        return oRectangle;
+            return oRectangle;
+        }
+        catch(err) {
+            console.log(err)
+            return null;
+        }
+
     };
 
     this.removeAllEntities = function ()
@@ -637,6 +644,16 @@ service('GlobeService', ['$http',  'ConstantsService','SatelliteService', functi
                 var iArraySplitLength = aoArraySplit.length;
                 if(iArraySplitLength < 10) continue;
 
+                var bHasNan = false;
+                for (var iValues = 0; iValues< aoArraySplit.length; iValues ++) {
+                    if (isNaN(aoArraySplit[iValues])) {
+                        bHasNan = true;
+                        break;
+                    }
+                }
+
+                if (bHasNan) continue;
+
                 aoTotalArray.push.apply(aoTotalArray,aoArraySplit);
             }
 
@@ -690,6 +707,16 @@ service('GlobeService', ['$http',  'ConstantsService','SatelliteService', functi
                 aoArraySplit = aoProducts[iIndexProduct].bbox.split(",");
                 var iArraySplitLength = aoArraySplit.length;
                 if(iArraySplitLength < 10) continue;
+
+                var bHasNan = false;
+                for (var iValues = 0; iValues< aoArraySplit.length; iValues ++) {
+                    if (isNaN(aoArraySplit[iValues])) {
+                        bHasNan = true;
+                        break;
+                    }
+                }
+
+                if (bHasNan) continue;
 
                 aoTotalArray.push.apply(aoTotalArray,aoArraySplit);
 

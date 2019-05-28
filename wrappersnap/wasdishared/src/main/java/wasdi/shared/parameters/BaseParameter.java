@@ -14,6 +14,11 @@ public class BaseParameter {
      * Workspace
      */
     private String workspace;
+    
+    /**
+     * Workspace Onwer
+     */
+    private String workspaceOwnerId;
 
     /**
      * Is workspace
@@ -56,4 +61,12 @@ public class BaseParameter {
     public void setExchange(String exchange) {
         this.exchange = exchange;
     }
+
+	public String getWorkspaceOwnerId() {
+		return workspaceOwnerId;
+	}
+
+	public void setWorkspaceOwnerId(String workspaceOwnerId) {
+		this.workspaceOwnerId = workspaceOwnerId;
+	}
 }

@@ -826,7 +826,7 @@ def updateProgressPerc(iPerc):
             iPerc = 100
 
     sStatus = "RUNNING"
-    sUrl = getBaseUrl() + "/process/updatebyid?sProcessId=" + getProcId() + "&status=" + sStatus + "&perc=" + iPerc + "&sendrabbit=1"
+    sUrl = getBaseUrl() + "/process/updatebyid?sProcessId=" + getProcId() + "&status=" + sStatus + "&perc=" + str(iPerc) + "&sendrabbit=1"
     asHeaders = __getStandardHeaders()
     oResponse = requests.get(sUrl, headers=asHeaders)
     sResult = ""
@@ -1280,10 +1280,46 @@ def importProduct(sFileUrl=None, sBoundingBox=None, asProduct=None):
     return sReturn
 
 
+def executeProcessor(sProcessorName, aoProcessParams):
+    """
+    Executes a WASDI Processor
+    return the Process Id if every thing is ok
+    return '' if there was any problem
+    """    
+    global m_sBaseUrl
+    global m_sSessionId
+    global m_sActiveWorkspace
+    
+    sEncodedParams = json.dumps(aoProcessParams)
+    asHeaders = __getStandardHeaders()
+    payload = {'workspace': m_sActiveWorkspace,
+               'name': sProcessorName,
+               'encodedJson': sEncodedParams}
+
+    sUrl = m_sBaseUrl + '/processors/run'
+    
+    oResult = requests.get(sUrl, headers=asHeaders, params=payload)
+
+    sProcessId = ''
+
+    if (oResult is not None) and (oResult.ok is True):
+        oJsonResults = oResult.json()
+        
+        try:
+            sProcessId = oJsonResults['processingIdentifier']
+        except:
+            return sProcessId
+    
+    return sProcessId
+
 # todo extend to a list of processes
 def waitProcess(sProcessId):
     if sProcessId is None:
         __log('Passed None, expected a process ID')
+        return "ERROR"
+    
+    if sProcessId == '':
+        __log('Passed empty, expected a process ID')
         return "ERROR"
 
     sStatus = ''
