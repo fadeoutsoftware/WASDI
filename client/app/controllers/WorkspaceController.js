@@ -31,6 +31,23 @@ var WorkspaceController = (function() {
         this.m_oUfoPointer = null;
 
         this.m_bOpeningWorkspace = false;
+        this.m_oReturnValue ={};
+
+        // this.m_aoTest = [
+        //     {
+        //         name:"nome",
+        //         id:"id"
+        //     },{
+        //         name:"test1",
+        //         id:"id"
+        //     },{
+        //         name:"prova",
+        //         id:"id"
+        //     }
+        // ];
+        // this.test = function(oValue){
+        //     console.log(oValue.name)
+        // }
 
         this.fetchWorkspaceInfoList();
         this.m_oRabbitStompService.unsubscribe();

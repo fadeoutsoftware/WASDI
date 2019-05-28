@@ -1,76 +1,12 @@
 <!-- Example : https://stackoverflow.com/questions/25089297/twitter-bootstrap-avoid-dropdown-menu-close-on-click-inside-->
 <div class="MultiRadioButtonDropdownDirective">
 
-        <!--<button type="button" class="btn btn-default" ng-click="optionsFunctionOnClick({sSeason:'test'})">Button</button>-->
 
-    <!--<form>-->
-
-        <!--<select ng-model="myVar">-->
-            <!--<h4>-->
-                <!--<option value="">-->
-                    <!--{{optionsName}}-->
-                <!--</option>-->
-                <!--<option ng-repeat="option in optionsDirective" ng-value="option.name" ng-change="option.myfunction()" >&lt;!&ndash;ng-click="optionsFunctionOnClick({sSeason:option.name})"&ndash;&gt;-->
-                <!--{{option.name}}-->
-                    <!--{{option}}-->
-                <!--</option>-->
-                <!--&lt;!&ndash;<option value="dogs">Dogs&ndash;&gt;-->
-                <!--&lt;!&ndash;<option value="tuts">Tutorials&ndash;&gt;-->
-                <!--&lt;!&ndash;<option value="cars">Cars&ndash;&gt;-->
-            <!--</h4>-->
-        <!--</select>-->
-    <!--</form>-->
-    <!--<form>-->
-        <!--&lt;!&ndash;<select ng-options="option.name for option in optionsDirective"  ng-change="option.myfunction()">&ndash;&gt;-->
-            <!--&lt;!&ndash;&lt;!&ndash;{{option.name}}&ndash;&gt;&ndash;&gt;-->
-        <!--&lt;!&ndash;</select>&ndash;&gt;-->
-        <!--<select  ng-model="myVar"  ng-change="console.log('test')" >-->
-            <!--<option ng-repeat="option in optionsDirective"  >-->
-                <!--{{option.name}}-->
-            <!--</option>-->
-        <!--</select>-->
-    <!--</form>-->
-    <!--<button ng-click="optionsDirective[0].myfunction()"></button>-->
     <select ng-model="optionSelected" ng-change="onClick({sSeason:optionSelected})">
         <option value="">{{optionsName}}</option>
         <option ng-repeat="option in optionsDirective"  value="{{option.name}}">{{option.name}}</option>
     </select>
 
-    <!--<ul class="nav navbar-nav">-->
-        <!--<li class="dropdown mega-dropdown-radio ">-->
-            <!--<a href="javascript:;" class="dropdown-toggle">-->
-                <!--<i class="fa fa-"></i>{{optionsName}}-->
-                <!--<span class="fa fa-chevron-down pull-right"></span>-->
-            <!--</a>-->
 
-            <!--<ul class="dropdown-menu mega-dropdown-menu ">-->
-                <!--<form>-->
-                <!--<li >-->
-                    <!--<div class="radio" ng-repeat="option in optionsDirective" >-->
-                        <!--<label>-->
-                            <!--<input type="radio" value="">&lt;!&ndash;ng-checked="option.selected"&ndash;&gt;-->
-                            <!--{{option.name}}-->
-
-                        <!--</label>-->
-                    <!--</div>-->
-
-                <!--</li>-->
-                <!--</form>-->
-            <!--</ul>-->
-        <!--</li>-->
-    <!--</ul>-->
 </div>
 
-
-<!--<script>-->
-    <!--//OVERRIDE BOOTSTRAP3 CLICK-->
-    <!--$('li.dropdown.mega-dropdown-radio a').on('click', function (event) {-->
-        <!--$(this).parent().toggleClass("open");-->
-    <!--});-->
-
-    <!--$('body').on('click', function (e) {-->
-        <!--if (!$('li.dropdown.mega-dropdown-radio').is(e.target) && $('li.dropdown.mega-dropdown-radio').has(e.target).length === 0 && $('.open').has(e.target).length === 0) {-->
-            <!--$('li.dropdown.mega-dropdown-radio').removeClass('open');-->
-        <!--}-->
-    <!--});-->
-<!--</script>-->

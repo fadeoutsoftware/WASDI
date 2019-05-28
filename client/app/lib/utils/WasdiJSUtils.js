@@ -518,3 +518,43 @@ function utilsProjectGetPolygonArray(sPolygonString){
     return sTemp;
 }
 
+function utilsProjectGetDropdownMenuListFromProductsList(aoProduct)
+{
+    if(utilsIsObjectNullOrUndefined(aoProduct) === true)
+    {
+        return [];
+    }
+    var iNumberOfProducts = aoProduct.length;
+    var aoReturnValue=[];
+    for(var iIndexProduct = 0; iIndexProduct < iNumberOfProducts; iIndexProduct++)
+    {
+
+        var oValue = {
+            name:aoProduct[iIndexProduct].name,
+            id:aoProduct[iIndexProduct].fileName
+        };
+        aoReturnValue.push(oValue);
+    }
+
+    return aoReturnValue;
+}
+
+function utilsProjectDropdownGetSelectedProduct(aoProduct,oSelectedProduct){
+    if(utilsIsObjectNullOrUndefined(aoProduct) === true)
+    {
+        return [];
+    }
+    var iNumberOfProducts = aoProduct.length;
+    var oReturnValue={};
+    for(var iIndexProduct = 0; iIndexProduct < iNumberOfProducts; iIndexProduct++)
+    {
+        if( oSelectedProduct.name === aoProduct[iIndexProduct].name )
+        {
+            oReturnValue = aoProduct[iIndexProduct];
+            break;
+        }
+
+    }
+    return oReturnValue;
+}
+

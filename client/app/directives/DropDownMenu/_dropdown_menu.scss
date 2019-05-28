@@ -6,5 +6,17 @@
       border-color: #2D394F !important;
       border-width: 2px;
     }
+    .dropdown-menu{
+        max-height: 200px;
+        overflow: auto;
+        .dropdown-input {
+          padding: 20px;
+          margin-top: -6px;
+          border: 0;
+          border-radius: 0;
+          background: #f1f1f1;
+        }
+      }
+
   }
 }

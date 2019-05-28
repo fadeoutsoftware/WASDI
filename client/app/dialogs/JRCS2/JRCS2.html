@@ -47,25 +47,33 @@
                             Input File:
                         </div>
                         <div class="col-v4-9">
+                            <!--<div class="dropdown my-dropdown">-->
+                                <!--<button class="btn btn-default dropdown-toggle" type="button" id="dropdownJRCProcessorProduct"-->
+                                        <!--data-toggle="dropdown">-->
+                                    <!--{{m_oController.m_oSelectedReferenceProduct.name}}-->
+                                    <!--<span class="caret"></span>-->
+                                <!--</button>-->
+                                <!--<ul class="dropdown-menu" role="menu" aria-labelledby="dropdownJRCProcessorProduct">-->
+                                    <!--<li role="presentation" ng-repeat="product in m_oController.m_aoProduct" >-->
+                                        <!--<a role="menuitem" tabindex="-1" href="" ng-click="m_oController.m_oSelectedReferenceProduct = product">-->
+                                            <!--{{product.name}}-->
+                                        <!--</a>-->
+                                    <!--</li>-->
+
+                                <!--</ul>-->
+                            <!--</div>-->
                             <div class="dropdown my-dropdown">
-                                <button class="btn btn-default dropdown-toggle" type="button" id="dropdownJRCProcessorProduct"
-                                        data-toggle="dropdown">
-                                    {{m_oController.m_oSelectedReferenceProduct.name}}
-                                    <span class="caret"></span>
-                                </button>
-                                <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownJRCProcessorProduct">
-                                    <li role="presentation" ng-repeat="product in m_oController.m_aoProduct" >
-                                        <a role="menuitem" tabindex="-1" href="" ng-click="m_oController.m_oSelectedReferenceProduct = product">
-                                            {{product.name}}
-                                        </a>
-                                    </li>
-
-                                </ul>
+                                <dropdownmenudirective list-of-values="m_oController.m_aoProductListDropdown"
+                                                       selected-value="m_oController.m_oReturnValueDropdown"
+                                                       enable-search-filter="true"
+                                                       dropdown-name="'Input file'"></dropdownmenudirective>
                             </div>
-                        </div>
+                            {{m_oController.m_oReturnValue}}
 
-                    </div>
-                <!--</div>-->
+             </div>
+
+         </div>
+     <!--</div>-->
 
                 <!--<div class="container-v4">-->
                     <div class="row-v4">
