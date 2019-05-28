@@ -799,7 +799,7 @@ def updateProgressPerc(iPerc):
             iPerc = 100
 
     sStatus = "RUNNING"
-    sUrl = getBaseUrl() + "/process/updatebyid?sProcessId=" + getProcId() + "&status=" + sStatus + "&perc=" + iPerc + "&sendrabbit=1"
+    sUrl = getBaseUrl() + "/process/updatebyid?sProcessId=" + getProcId() + "&status=" + sStatus + "&perc=" + str(iPerc) + "&sendrabbit=1"
     asHeaders = __getStandardHeaders()
     oResponse = requests.get(sUrl, headers=asHeaders)
     sResult = ""
