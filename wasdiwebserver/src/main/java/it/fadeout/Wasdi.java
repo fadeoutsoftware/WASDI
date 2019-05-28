@@ -385,7 +385,7 @@ public class Wasdi extends ResourceConfig {
 		}
 	}
 	
-	public static String getProductPath(ServletConfig oServletConfig, String sUserId, String sWorkspace) {
+	public static String getWorkspacePath(ServletConfig oServletConfig, String sUserId, String sWorkspace) {
 		// Take path
 		String sDownloadRootPath = oServletConfig.getInitParameter("DownloadRootPath");
 		

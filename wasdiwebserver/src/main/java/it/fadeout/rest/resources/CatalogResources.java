@@ -145,7 +145,7 @@ public class CatalogResources {
 	{
 		Wasdi.DebugLog("CatalogResources.getEntryFile( " + sFileName + " )");
 				
-		String sTargetFilePath = Wasdi.getProductPath(m_oServletConfig, sUserId, sWorkspace) + sFileName;
+		String sTargetFilePath = Wasdi.getWorkspacePath(m_oServletConfig, sUserId, sWorkspace) + sFileName;
 
 		DownloadedFilesRepository oRepo = new DownloadedFilesRepository();
 		DownloadedFile oDownloadedFile = oRepo.GetDownloadedFileByPath(sTargetFilePath);
@@ -576,7 +576,7 @@ public class CatalogResources {
 		String sAccount = oUser.getUserId();		
 		
 		// Get the file path		
-		String sFilePath = Wasdi.getProductPath(m_oServletConfig, Wasdi.getWorkspaceOwner(sWorkspace), sWorkspace) + sFile;
+		String sFilePath = Wasdi.getWorkspacePath(m_oServletConfig, Wasdi.getWorkspaceOwner(sWorkspace), sWorkspace) + sFile;
 		File oFilePath = new File(sFilePath);
 		
 		// Check if the file exists 
@@ -590,7 +590,7 @@ public class CatalogResources {
 				Wasdi.DebugLog("CatalogResource.IngestFileInWorkspace: file without exension, try .dim");
 
 				sFile = sFile + ".dim";
-				sFilePath = Wasdi.getProductPath(m_oServletConfig, Wasdi.getWorkspaceOwner(sWorkspace), sWorkspace) + sFile;
+				sFilePath = Wasdi.getWorkspacePath(m_oServletConfig, Wasdi.getWorkspaceOwner(sWorkspace), sWorkspace) + sFile;
 				oFilePath = new File(sFilePath);
 
 				if (!oFilePath.canRead()) {
@@ -718,7 +718,7 @@ public class CatalogResources {
 			oParams.setExchange(sWorkspace);
 			oParams.setWorkspace(sWorkspace);
 			
-			String sFullPath = Wasdi.getProductPath(m_oServletConfig, Wasdi.getWorkspaceOwner(sUserId), sWorkspace);
+			String sFullPath = Wasdi.getWorkspacePath(m_oServletConfig, Wasdi.getWorkspaceOwner(sUserId), sWorkspace);
 			String sFullLocalPath = sFullPath+sFileName;
 			
 			oParams.setLocalPath(sFullLocalPath);
