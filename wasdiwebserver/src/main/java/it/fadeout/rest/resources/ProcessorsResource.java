@@ -148,6 +148,7 @@ public class ProcessorsResource {
 			oDeployProcessorParameter.setExchange(sWorkspaceId);
 			oDeployProcessorParameter.setProcessObjId(sProcessObjId);
 			oDeployProcessorParameter.setProcessorType(sType);
+			oDeployProcessorParameter.setWorkspaceOwnerId(Wasdi.getWorkspaceOwner(sWorkspaceId));
 			
 			String sPath = m_oServletConfig.getInitParameter("SerializationPath");
 			if (! (sPath.endsWith("/")||sPath.endsWith("\\"))) sPath+="/";
@@ -272,6 +273,7 @@ public class ProcessorsResource {
 			oProcessorParameter.setJson(sEncodedJson);
 			oProcessorParameter.setProcessorType(oProcessorToRun.getType());
 			oProcessorParameter.setSessionID(sSessionId);
+			oProcessorParameter.setWorkspaceOwnerId(Wasdi.getWorkspaceOwner(sWorkspaceId));
 			
 			SerializationUtils.serializeObjectToXML(sPath, oProcessorParameter);
 

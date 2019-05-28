@@ -27,13 +27,13 @@ var EDriftFloodAutomaticChainController = (function() {
             ORBITS:"33,41,62,70,77,99,106,135,143,172",
             GRIDSTEP:"1,1",
             LASTDAYS:"0",
-            PREPROCWORKFLOW: "LISTSinglePreproc",
+            PREPROCWORKFLOW: "LISTSinglePreproc2",
             MOSAICBASENAME: "MY",
             MOSAICXSTEP: "0.00018",
             MOSAICYSTEP: "0.00018",
             SIMULATE: "0",
             ENDDATE: sFormattedDate,
-            DELETE: "0"};
+            DELETE: "1"};
 
         $scope.close = function(result) {
             oClose(result, 300); // close, but give 500ms for bootstrap to animate

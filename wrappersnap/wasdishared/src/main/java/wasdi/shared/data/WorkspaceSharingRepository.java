@@ -60,6 +60,34 @@ public class WorkspaceSharingRepository extends  MongoRepository{
 
         return aoReturnList;
     }
+    
+    public List<WorkspaceSharing> GetWorkspaceSharingByUser(String sUserId) {
+
+        final ArrayList<WorkspaceSharing> aoReturnList = new ArrayList<WorkspaceSharing>();
+        try {
+
+            FindIterable<Document> oWSDocuments = getCollection("workspacessharing").find(new Document("userId", sUserId));
+
+            oWSDocuments.forEach(new Block<Document>() {
+                public void apply(Document document) {
+                    String sJSON = document.toJson();
+                    WorkspaceSharing oWorkspaceSharing = null;
+                    try {
+                        oWorkspaceSharing = s_oMapper.readValue(sJSON,WorkspaceSharing.class);
+                        aoReturnList.add(oWorkspaceSharing);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+
+                }
+            });
+
+        } catch (Exception oEx) {
+            oEx.printStackTrace();
+        }
+
+        return aoReturnList;
+    }
 
 
     public List<WorkspaceSharing> GetWorkspaceSharingByWorkspace(String sWorkspaceId) {

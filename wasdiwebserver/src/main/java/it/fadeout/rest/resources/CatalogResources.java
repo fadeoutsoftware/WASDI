@@ -57,8 +57,6 @@ import wasdi.shared.viewmodels.ProductViewModel;
 @Path("/catalog")
 public class CatalogResources {
 
-	//XXX replace with dependency injection
-	//MAYBE two different policy: one for google one for username/password
 	CredentialPolicy m_oCredentialPolicy = new CredentialPolicy();
 
 	@Context
@@ -146,17 +144,8 @@ public class CatalogResources {
 	private File getEntryFile(String sFileName, String sUserId, String sWorkspace)
 	{
 		Wasdi.DebugLog("CatalogResources.getEntryFile( " + sFileName + " )");
-		
-		
-
-		String sDownloadRootPath = "";
-		if (m_oServletConfig.getInitParameter("DownloadRootPath") != null) {
-			sDownloadRootPath = m_oServletConfig.getInitParameter("DownloadRootPath");
-			if (!m_oServletConfig.getInitParameter("DownloadRootPath").endsWith("/"))
-				sDownloadRootPath += "/";
-		}
-
-		String sTargetFilePath = sDownloadRootPath +sUserId + "/" + sWorkspace + "/" + sFileName;
+				
+		String sTargetFilePath = Wasdi.getWorkspacePath(m_oServletConfig, sUserId, sWorkspace) + sFileName;
 
 		DownloadedFilesRepository oRepo = new DownloadedFilesRepository();
 		DownloadedFile oDownloadedFile = oRepo.GetDownloadedFileByPath(sTargetFilePath);
@@ -238,7 +227,6 @@ public class CatalogResources {
 
 
 	private Response zipOnTheFlyAndStream(File oInitialFile) {
-		//TODO generalise, maybe accept a collection of File
 		Wasdi.DebugLog("CatalogResources.zipOnTheFlyAndStream");
 		if(null==oInitialFile) {
 			Wasdi.DebugLog("CatalogResources.zipOnTheFlyAndStream: oFile is null");
@@ -513,7 +501,8 @@ public class CatalogResources {
 			// Create the ingest process
 			ProcessWorkspace oProcess = null;
 			ProcessWorkspaceRepository oRepository = new ProcessWorkspaceRepository();
-
+						
+			// Generate the unique process id
 			String sProcessObjId = Utils.GetRandomName();
 			
 			// Ingest file parameter
@@ -523,6 +512,7 @@ public class CatalogResources {
 			oParameter.setExchange(sWorkspace);
 			oParameter.setFilePath(oFilePath.getAbsolutePath());
 			oParameter.setProcessObjId(sProcessObjId);
+			oParameter.setWorkspaceOwnerId(Wasdi.getWorkspaceOwner(sWorkspace));
 
 			String sPath = m_oServletConfig.getInitParameter("SerializationPath") + sProcessObjId;
 			SerializationUtils.serializeObjectToXML(sPath, oParameter);
@@ -585,13 +575,9 @@ public class CatalogResources {
 		// Get the user account
 		String sAccount = oUser.getUserId();		
 		
-		// Get the file path
-		String sDownloadRootPath = m_oServletConfig.getInitParameter("DownloadRootPath");
-		if (!sDownloadRootPath.endsWith("/")) sDownloadRootPath = sDownloadRootPath + "/";
-
-		File oUserBaseDir = new File(sDownloadRootPath+sAccount+ "/" +sWorkspace+"/");
-
-		File oFilePath = new File(oUserBaseDir, sFile);
+		// Get the file path		
+		String sFilePath = Wasdi.getWorkspacePath(m_oServletConfig, Wasdi.getWorkspaceOwner(sWorkspace), sWorkspace) + sFile;
+		File oFilePath = new File(sFilePath);
 		
 		// Check if the file exists 
 		if (!oFilePath.canRead()) {
@@ -604,7 +590,8 @@ public class CatalogResources {
 				Wasdi.DebugLog("CatalogResource.IngestFileInWorkspace: file without exension, try .dim");
 
 				sFile = sFile + ".dim";
-				oFilePath = new File(oUserBaseDir, sFile);
+				sFilePath = Wasdi.getWorkspacePath(m_oServletConfig, Wasdi.getWorkspaceOwner(sWorkspace), sWorkspace) + sFile;
+				oFilePath = new File(sFilePath);
 
 				if (!oFilePath.canRead()) {
 					Wasdi.DebugLog("CatalogResource.IngestFileInWorkspace: file not availalbe. Can be a developer process. Return 500 [file: " + sFile + "]");
@@ -636,6 +623,7 @@ public class CatalogResources {
 			oParameter.setFilePath(oFilePath.getAbsolutePath());
 			//set the process object Id to params
 			oParameter.setProcessObjId(sProcessObjId);
+			oParameter.setWorkspaceOwnerId(Wasdi.getWorkspaceOwner(sWorkspace));
 
 			String sPath = m_oServletConfig.getInitParameter("SerializationPath") + sProcessObjId;
 			SerializationUtils.serializeObjectToXML(sPath, oParameter);
@@ -717,10 +705,9 @@ public class CatalogResources {
 
 		try {
 			Wasdi.DebugLog("CatalogResource.ftpTransferFile: prepare parameters");
+			
 			FtpUploadParameters oParams = new FtpUploadParameters();
 			oParams.setFtpServer(oFtpTransferVM.getServer());
-
-			//TODO move here checks on server name from the viewModel
 			oParams.setPort(oFtpTransferVM.getPort());
 			oParams.setUsername(oFtpTransferVM.getUser());
 			oParams.setPassword(oFtpTransferVM.getPassword());
@@ -731,25 +718,11 @@ public class CatalogResources {
 			oParams.setExchange(sWorkspace);
 			oParams.setWorkspace(sWorkspace);
 			
-			String sFullPath = Wasdi.getProductPath(m_oServletConfig, sUserId, sWorkspace);
-
+			String sFullPath = Wasdi.getWorkspacePath(m_oServletConfig, Wasdi.getWorkspaceOwner(sUserId), sWorkspace);
 			String sFullLocalPath = sFullPath+sFileName;
-
-			/*
-			//The DB stores the full path, i.e., dirs + filename. Therefore it has to be removed
-			//there should be no ending slashes, but just in case...
-			while(sFullLocalPath.endsWith("/")) {
-				sFullLocalPath = sFullLocalPath.substring(0, sFullLocalPath.length()-1);
-			}
-			//here we are: remove the filename suffix and keep just the directories
-			//note: this makes sense just as long as the path format in the DB is with the file name at the end
-			if(sFullLocalPath.endsWith(sFileName) ) {
-				Integer iLen = sFullLocalPath.length() - sFileName.length();
-				sFullLocalPath = sFullLocalPath.substring(0, iLen);
-			}
-			 */
-
+			
 			oParams.setLocalPath(sFullLocalPath);
+			oParams.setWorkspaceOwnerId(Wasdi.getWorkspaceOwner(sUserId));
 
 			Wasdi.DebugLog("CatalogResource.ftpTransferFile: prepare process");
 			ProcessWorkspace oProcess = new ProcessWorkspace();

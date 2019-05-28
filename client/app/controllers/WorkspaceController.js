@@ -265,7 +265,7 @@ var WorkspaceController = (function() {
         var oRectangle = null;
         var aArraySplit = [];
         var iArraySplitLength = 0;
-        var iInvertedArraySplit = [];
+        var aiInvertedArraySplit = [];
 
         var aoTotalArray = [];
 
@@ -276,7 +276,8 @@ var WorkspaceController = (function() {
 
         // For each product
         for(var iIndexProduct = 0; iIndexProduct < iProductsLength; iIndexProduct++){
-            iInvertedArraySplit = [];
+
+            aiInvertedArraySplit = [];
             aArraySplit = [];
             // skip if there isn't the product bounding box
             if(utilsIsObjectNullOrUndefined(this.m_aoProducts[iIndexProduct].bbox) === true ) continue;
@@ -286,16 +287,27 @@ var WorkspaceController = (function() {
             iArraySplitLength = aArraySplit.length;
 
             if(iArraySplitLength < 10) continue;
+
+            var bHasNan = false;
+            for (var iValues = 0; iValues< aArraySplit.length; iValues ++) {
+                if (isNaN(aArraySplit[iValues])) {
+                    bHasNan = true;
+                    break;
+                }
+            }
+
+            if (bHasNan) continue;
+
             aoTotalArray.push.apply(aoTotalArray,aArraySplit);
 
             for(var iIndex = 0; iIndex < iArraySplitLength-1; iIndex = iIndex + 2){
-                iInvertedArraySplit.push(aArraySplit[iIndex+1]);
-                iInvertedArraySplit.push(aArraySplit[iIndex]);
+                aiInvertedArraySplit.push(aArraySplit[iIndex+1]);
+                aiInvertedArraySplit.push(aArraySplit[iIndex]);
             }
 
-            oRectangle = this.m_oGlobeService.addRectangleOnGlobeParamArray(iInvertedArraySplit);
+            oRectangle = this.m_oGlobeService.addRectangleOnGlobeParamArray(aiInvertedArraySplit);
             this.m_aoProducts[iIndexProduct].oRectangle = oRectangle;
-            this.m_aoProducts[iIndexProduct].aBounds = iInvertedArraySplit;
+            this.m_aoProducts[iIndexProduct].aBounds = aiInvertedArraySplit;
         }
 
 

@@ -45,12 +45,15 @@ import com.google.api.client.json.jackson2.JacksonFactory;
 @Path("/auth")
 public class AuthResource {
 	
-	//XXX replace with dependency injection
+	/**
+	 * Authentication Helper
+	 */
 	PasswordAuthentication m_oPasswordAuthentication = new PasswordAuthentication();
-	//XXX replace with dependency injection
-	//MAYBE two different policy: one for google one for username/password
+	
+	/**
+	 * Credential Policy
+	 */
 	CredentialPolicy m_oCredentialPolicy = new CredentialPolicy();
-	//MAYBE separate
 	
 	@Context
 	ServletConfig m_oServletConfig;
@@ -64,13 +67,11 @@ public class AuthResource {
 		
 		if (oLoginInfo == null) {
 			Wasdi.DebugLog("Auth.Login: login info null, user not authenticated");
-			
 			return UserViewModel.getInvalid();
 		}
 		
 		if(!m_oCredentialPolicy.satisfies(oLoginInfo)) {
 			Wasdi.DebugLog("Auth.Login: Login Info does not support Credential Policy, user " + oLoginInfo.getUserId() + " not authenticated" );
-			
 			return UserViewModel.getInvalid();
 		}
 
@@ -120,7 +121,6 @@ public class AuthResource {
 						oSession.setLoginDate((double) new Date().getTime());
 						oSession.setLastTouch((double) new Date().getTime());
 						
-						
 						oWasdiUser.setLastLogin((new Date()).toString());
 						oUserRepository.UpdateUser(oWasdiUser);
 						
@@ -156,8 +156,11 @@ public class AuthResource {
 		return oUserVM;
 	}
 
+	/**
+	 * Clear all the user expired sessions
+	 * @param oUser
+	 */
 	private void clearUserExpiredSessions(User oUser) {
-		//MAYBE check for User policy satisfaction 
 		SessionRepository oSessionRepository = new SessionRepository();
 		List<UserSession> aoEspiredSessions = oSessionRepository.GetAllExpiredSessions(oUser.getUserId());
 		for (UserSession oUserSession : aoEspiredSessions) {
@@ -200,7 +203,6 @@ public class AuthResource {
 	@GET
 	@Path("/logout")
 	@Produces({"application/xml", "application/json", "text/xml"})
-	//MAYBEchange return type to http response @sergin13 @kr1zz 
 	public PrimitiveResult logout(@HeaderParam("x-session-token") String sSessionId) {
 		Wasdi.DebugLog("AuthResource.Logout");
 		
@@ -254,24 +256,32 @@ public class AuthResource {
 			return Response.status(Status.UNAUTHORIZED).build();
 		}
 		
+		// Get the User Id
 		String sAccount = oUser.getUserId();
 		
+		// Search for the sftp service
 		String wsAddress = m_oServletConfig.getInitParameter("sftpManagementWSServiceAddress");
 		if (wsAddress==null) {
 			wsAddress = "ws://localhost:6703";
 		}
+		
+		// Manager instance
 		SFTPManager oManager = new SFTPManager(wsAddress);
 		String sPassword = Utils.generateRandomPassword();
 		
+		// Try to create the account
 		if (!oManager.createAccount(sAccount, sPassword)) {
 			
 			Wasdi.DebugLog("AuthService.CreateSftpAccount: error creating sftp account");
 			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
 		}
+		
+		// Sent the credentials to the user
 		if(!sendPasswordEmail(sEmail, sAccount, sPassword)) {
 			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
 		}
 	    
+		// All is done
 		return Response.ok().build();
 	}
 	
@@ -289,13 +299,14 @@ public class AuthResource {
 		}
 		String sAccount = oUser.getUserId();		
 		
-		//TODO read param from servlet config file
+		// Get the service address
 		String wsAddress = m_oServletConfig.getInitParameter("sftpManagementWSServiceAddress");
 		if (wsAddress==null) wsAddress = "ws://localhost:6703"; 
 		SFTPManager oManager = new SFTPManager(wsAddress);
 
 		Boolean bRes = null;
 		try{
+			// Check the user
 			bRes = oManager.checkUser(sAccount);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -321,11 +332,12 @@ public class AuthResource {
 		}	
 		String sAccount = oUser.getUserId();		
 		
-		//TODO read param from servlet config file
+		// Get Service Address
 		String wsAddress = m_oServletConfig.getInitParameter("sftpManagementWSServiceAddress");
 		if (wsAddress==null) wsAddress = "ws://localhost:6703"; 
 		SFTPManager oManager = new SFTPManager(wsAddress);
-
+		
+		// Return the list
 		return oManager.list(sAccount);
 	}
 	
@@ -349,10 +361,12 @@ public class AuthResource {
 		}
 		String sAccount = oUser.getUserId();
 		
+		// Get service address
 		String wsAddress = m_oServletConfig.getInitParameter("sftpManagementWSServiceAddress");
 		if (wsAddress==null) wsAddress = "ws://localhost:6703"; 
 		SFTPManager oManager = new SFTPManager(wsAddress);
 
+		// Remove the account
 		return oManager.removeAccount(sAccount) ? Response.ok().build() : Response.status(Status.INTERNAL_SERVER_ERROR).build();
 	}
 
@@ -375,25 +389,27 @@ public class AuthResource {
 		
 		String sAccount = oUser.getUserId();
 		
-		//TODO read param from servlet config file
+		// Get the service address
 		String wsAddress = m_oServletConfig.getInitParameter("sftpManagementWSServiceAddress");
 		if (wsAddress==null) wsAddress = "ws://localhost:6703"; 
 		SFTPManager oManager = new SFTPManager(wsAddress);
 		
+		// New Password
 		String sPassword = Utils.generateRandomPassword();
 		
+		// Try to update
 		if (!oManager.updatePassword(sAccount, sPassword)) {
 			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
 		}
 		
+		// Send password to the user
 		if(!sendPasswordEmail(sEmail, sAccount, sPassword)) {
 			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
 		}
 
 		return Response.ok().build();
 	}
-	
-	//CHECK USER ID TOKEN BY GOOGLE 
+	 
 	@POST
 	@Path("/logingoogleuser")
 	@Produces({"application/xml", "application/json", "text/xml"})
@@ -737,7 +753,6 @@ public class AuthResource {
 			} else {
 				oUserId.setPassword(m_oPasswordAuthentication.hash(oChPasswViewModel.getNewPassword().toCharArray()));
 				UserRepository oUR = new UserRepository();
-				//TODO check return value
 				oUR.UpdateUser(oUserId);
 				oResult = new PrimitiveResult();
 				oResult.setBoolValue(true);
@@ -850,8 +865,6 @@ public class AuthResource {
 	private String buildRegistrationLink(User oUser) {
 		Wasdi.DebugLog("AuthResource.buildRegistrationLink");
 		String sResult = "";
-		//MAYBE validate input	
-		//TODO link to a client's page @sergin13 @kr1zz (web.xml... can be temporary hardcoded, otherwise)
 		String sAPIUrl =  m_oServletConfig.getInitParameter("REGISTRATION_API_URL");
 		String sUserId = "email=" + oUser.getUserId();
 		String sToken = "validationCode=" + oUser.getFirstAccessUUID();
@@ -867,8 +880,6 @@ public class AuthResource {
 			Wasdi.DebugLog("AuthResource.sendPasswordEmail: null input, not enough information to send email");
 			return false;
 		}
-		//XXX refactor (?) to use null object @sergin13 + @kr1zz (?)
-		//maybe check w/ CredentialPolicy
 		//send email with new password
 		String sMercuriusAPIAddress = m_oServletConfig.getInitParameter("mercuriusAPIAddress");
 		MercuriusAPI oAPI = new MercuriusAPI(sMercuriusAPIAddress);			
