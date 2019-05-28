@@ -17,11 +17,7 @@ angular.module('wasdi.MultiRadioButtonDropdownMenuDirective', [])
                 // * Two-way binding ('=' or '=?') *
                 // * Function binding ('&' or '&?') *
             },
-            // link: function(scope, elem, attrs) {
-            //     var elementId = 123;
-            //     var file = 124;
-            //     scope.onDrop({elementId:'123',file:'125'});
-            // },
+
             templateUrl:"directives/multiradiobutton_dropdown_menu/MultiRadioButtonDropdownMenuView.html",
 
         };
