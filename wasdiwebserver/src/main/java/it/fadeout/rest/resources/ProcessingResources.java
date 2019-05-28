@@ -645,7 +645,7 @@ public class ProcessingResources {
 		
 		Wasdi.DebugLog("Params. File: " + sProductFile +" - Band: " + sBandName + " - Workspace: " + sWorkspaceId);
 		
-		String sProductFileFullPath = Wasdi.getProductPath(m_oServletConfig, Wasdi.getWorkspaceOwner(sWorkspaceId), sWorkspaceId) + sProductFile;
+		String sProductFileFullPath = Wasdi.getWorkspacePath(m_oServletConfig, Wasdi.getWorkspaceOwner(sWorkspaceId), sWorkspaceId) + sProductFile;
 		
 		Wasdi.DebugLog("ProcessingResources.getProductMasks: file Path: " + sProductFileFullPath);
 
@@ -699,7 +699,7 @@ public class ProcessingResources {
 		
 		Wasdi.DebugLog("ProcessingResources.getColorManipulation. Params. File: " + sProductFile +" - Band: " + sBandName + " - Workspace: " + sWorkspaceId);
 				
-		String sProductFileFullPath = Wasdi.getProductPath(m_oServletConfig, Wasdi.getWorkspaceOwner(sWorkspaceId), sWorkspaceId);
+		String sProductFileFullPath = Wasdi.getWorkspacePath(m_oServletConfig, Wasdi.getWorkspaceOwner(sWorkspaceId), sWorkspaceId);
 		
 		Wasdi.DebugLog("ProcessingResources.getColorManipulation: file Path: " + sProductFileFullPath);
 
@@ -745,7 +745,7 @@ public class ProcessingResources {
         //String sDownloadPath = m_oServletConfig.getInitParameter("DownloadRootPath");
         //File oProductFile = new File(new File(new File(sDownloadPath, sUserId), sWorkspace), oBandImageViewModel.getProductFileName());
 		
-        String sProductPath = Wasdi.getProductPath(m_oServletConfig, Wasdi.getWorkspaceOwner(sWorkspace), sWorkspace);
+        String sProductPath = Wasdi.getWorkspacePath(m_oServletConfig, Wasdi.getWorkspaceOwner(sWorkspace), sWorkspace);
         File oProductFile = new File(sProductPath+oBandImageViewModel.getProductFileName());
         
         if (!oProductFile.exists()) {

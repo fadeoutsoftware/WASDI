@@ -222,7 +222,7 @@ public class FileBufferResource {
 
 			oReturnValue = new RabbitMessageViewModel();
 			
-			String sFullProductPath = Wasdi.getProductPath(m_oServletConfig, Wasdi.getWorkspaceOwner(sWorkspaceId), sWorkspaceId);
+			String sFullProductPath = Wasdi.getWorkspacePath(m_oServletConfig, Wasdi.getWorkspaceOwner(sWorkspaceId), sWorkspaceId);
 			
 			// Get Product List
 			DownloadedFilesRepository oDownloadedFilesRepository = new DownloadedFilesRepository();
@@ -322,7 +322,7 @@ public class FileBufferResource {
 			// Get Product List
 			DownloadedFilesRepository oDownloadedFilesRepository = new DownloadedFilesRepository();
 			
-			String sFullPath = Wasdi.getProductPath(m_oServletConfig, Wasdi.getWorkspaceOwner(sWorkspaceId), sWorkspaceId);
+			String sFullPath = Wasdi.getWorkspacePath(m_oServletConfig, Wasdi.getWorkspaceOwner(sWorkspaceId), sWorkspaceId);
 			
 			DownloadedFile oDownloadedFile = oDownloadedFilesRepository.GetDownloadedFileByPath(sFullPath+sFileUrl);
 			PublishedBandsRepository oPublishedBandsRepository = new PublishedBandsRepository();

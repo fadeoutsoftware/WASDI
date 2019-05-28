@@ -102,25 +102,6 @@ public class WorkspaceResource {
 				aoResult.add(oTemp);
 			}
 		}
-		//retrieve workspace list and check it's not null
-		/*WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
-		ArrayList<Workspace> aoWSList = oWorkspaceRepository.getWorkspaceListByProductName(sProductName);
-		if(null == aoWSList) {
-			return null;
-		}*/
-		
-		//create and populate result 
-		//ArrayList<WorkspaceListInfoViewModel> aoResult = new ArrayList<WorkspaceListInfoViewModel>(); 
-		/*for (Workspace oWorkspace : aoWSList) {
-			if(null != oWorkspace) {
-				WorkspaceListInfoViewModel oTemp = new WorkspaceListInfoViewModel();
-				oTemp.setWorkspaceId(oWorkspace.getWorkspaceId());
-				oTemp.setWorkspaceName(oWorkspace.getName());
-				oTemp.setOwnerUserId(oWorkspace.getUserId());
-			} else {
-				Wasdi.DebugLog("WorkspaceResource.getWorkspaceListByProductName: found null workspace from DB");
-			}
-		}*/
 
 		return aoResult;
 	}
@@ -181,14 +162,51 @@ public class WorkspaceResource {
 				aoWSList.add(oWSViewModel);
 
 			}
+			
+			// Get the list of workspace shared with this user
+			List<WorkspaceSharing> aoSharedWorkspaces = oWorkspaceSharingRepository.GetWorkspaceSharingByUser(oUser.getUserId());
+			
+			if (aoSharedWorkspaces.size()>0) {
+				// For each
+				for (int iWorkspaces=0; iWorkspaces<aoSharedWorkspaces.size(); iWorkspaces++) {
+					
+					// Create View Model
+					WorkspaceListInfoViewModel oWSViewModel = new WorkspaceListInfoViewModel();
+					Workspace oWorkspace = oWSRepository.GetWorkspace(aoSharedWorkspaces.get(iWorkspaces).getWorkspaceId());
+					
+					if (oWorkspace == null) {
+						Wasdi.DebugLog("WorkspaceResult.getListByUser: WS Shared not available " + aoSharedWorkspaces.get(iWorkspaces).getWorkspaceId());
+						continue;
+					}
+
+					oWSViewModel.setOwnerUserId(oWorkspace.getUserId());
+					oWSViewModel.setWorkspaceId(oWorkspace.getWorkspaceId());
+					oWSViewModel.setWorkspaceName(oWorkspace.getName());
+
+					// Get Sharings
+					List<WorkspaceSharing> aoSharings = oWorkspaceSharingRepository.GetWorkspaceSharingByWorkspace(oWorkspace.getWorkspaceId());
+
+					// Add Sharings to View Model
+					if (aoSharings != null) {
+						for (int iSharings=0; iSharings<aoSharings.size(); iSharings++) {
+							if (oWSViewModel.getSharedUsers() == null) {
+								oWSViewModel.setSharedUsers(new ArrayList<String>());
+							}
+
+							oWSViewModel.getSharedUsers().add(aoSharings.get(iSharings).getUserId());
+						}
+					}
+
+					aoWSList.add(oWSViewModel);
+
+				}				
+			}
 
 		}
 		catch (Exception oEx) {
 			oEx.toString();
 		}
-
-
-
+		
 		return aoWSList;
 	}
 
@@ -362,7 +380,7 @@ public class WorkspaceResource {
 				if (bDeleteFile) {
 					try {
 						//get workspace path						
-						String sDownloadPath = Wasdi.getProductPath(m_oServletConfig, Wasdi.getWorkspaceOwner(sWorkspaceId), sWorkspaceId);
+						String sDownloadPath = Wasdi.getWorkspacePath(m_oServletConfig, Wasdi.getWorkspaceOwner(sWorkspaceId), sWorkspaceId);
 						
 						System.out.println("WorkspaceResource.DeleteWorkspace: Delete workspace " + sDownloadPath);
 						//delete directory

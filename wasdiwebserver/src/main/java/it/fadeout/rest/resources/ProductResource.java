@@ -66,7 +66,7 @@ public class ProductResource {
 		if (Utils.isNullOrEmpty(oUser.getUserId())) return null;
 		
 		
-		String sPath = Wasdi.getProductPath(m_oServletConfig, Wasdi.getWorkspaceOwner(sWorkspaceId), sWorkspaceId);
+		String sPath = Wasdi.getWorkspacePath(m_oServletConfig, Wasdi.getWorkspaceOwner(sWorkspaceId), sWorkspaceId);
 
 		// Create the entity
 		ProductWorkspace oProductWorkspace = new ProductWorkspace();
@@ -118,7 +118,7 @@ public class ProductResource {
 		if (oUser == null) return null;
 		if (Utils.isNullOrEmpty(oUser.getUserId())) return null;
 		
-		String sFullPath = Wasdi.getProductPath(m_oServletConfig, Wasdi.getWorkspaceOwner(sWorkspace), sWorkspace);
+		String sFullPath = Wasdi.getWorkspacePath(m_oServletConfig, Wasdi.getWorkspaceOwner(sWorkspace), sWorkspace);
 
 		// Read the product from db
 		DownloadedFilesRepository oDownloadedFilesRepository = new DownloadedFilesRepository();
@@ -158,7 +158,7 @@ public class ProductResource {
 		if (oUser == null) return null;
 		if (Utils.isNullOrEmpty(oUser.getUserId())) return null;
 		
-		String sProductPath = Wasdi.getProductPath(m_oServletConfig, Wasdi.getWorkspaceOwner(sWorkspaceId), sWorkspaceId);
+		String sProductPath = Wasdi.getWorkspacePath(m_oServletConfig, Wasdi.getWorkspaceOwner(sWorkspaceId), sWorkspaceId);
 
 		// Read the product from db
 		DownloadedFilesRepository oDownloadedFilesRepository = new DownloadedFilesRepository();
@@ -378,7 +378,7 @@ public class ProductResource {
 
 			System.out.println("ProductResource.UpdateProductViewModel: product " + oProductViewModel.getFileName());
 			
-			String sFullPath = Wasdi.getProductPath(m_oServletConfig, Wasdi.getWorkspaceOwner(sWorkspace), sWorkspace);
+			String sFullPath = Wasdi.getWorkspacePath(m_oServletConfig, Wasdi.getWorkspaceOwner(sWorkspace), sWorkspace);
 
 			// Create repo
 			DownloadedFilesRepository oDownloadedFilesRepository = new DownloadedFilesRepository();
@@ -447,7 +447,7 @@ public class ProductResource {
 		
 		
 		// Take path
-		String sPath = Wasdi.getProductPath(m_oServletConfig, Wasdi.getWorkspaceOwner(sWorkspace), sWorkspace);
+		String sPath = Wasdi.getWorkspacePath(m_oServletConfig, Wasdi.getWorkspaceOwner(sWorkspace), sWorkspace);
 		
 		File oOutputFilePath = new File(sPath + sName);
 		
@@ -546,7 +546,7 @@ public class ProductResource {
 				return oReturn;
 			}
 
-			String sDownloadPath = Wasdi.getProductPath(m_oServletConfig, Wasdi.getWorkspaceOwner(sWorkspace), sWorkspace);
+			String sDownloadPath = Wasdi.getWorkspacePath(m_oServletConfig, Wasdi.getWorkspaceOwner(sWorkspace), sWorkspace);
 			System.out.println("ProductResource.DeleteProduct: Download Path: " + sDownloadPath);
 			String sFilePath = sDownloadPath +  sProductName;
 			System.out.println("ProductResource.DeleteProduct: File Path: " + sFilePath);
@@ -610,7 +610,7 @@ public class ProductResource {
 				}
 			}
 
-			String sFullPath = Wasdi.getProductPath(m_oServletConfig, Wasdi.getWorkspaceOwner(sWorkspace), sWorkspace);
+			String sFullPath = Wasdi.getWorkspacePath(m_oServletConfig, Wasdi.getWorkspaceOwner(sWorkspace), sWorkspace);
 			DownloadedFilesRepository oDownloadedFilesRepository = new DownloadedFilesRepository();
 			if(bDeleteLayer) {
 				//Delete layerId on Geoserver

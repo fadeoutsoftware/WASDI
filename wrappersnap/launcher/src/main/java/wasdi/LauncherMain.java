@@ -557,8 +557,14 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 		
 		if (!(sWorkspacePath.endsWith("/")||sWorkspacePath.endsWith("//"))) sWorkspacePath += "/";
 		
+		String sUser = oParameter.getUserId();
+		
+		if (Utils.isNullOrEmpty(oParameter.getWorkspaceOwnerId())==false) {
+			sUser = oParameter.getWorkspaceOwnerId();
+		}
+		
 		// Get Workspace path
-		sWorkspacePath += oParameter.getUserId();
+		sWorkspacePath += sUser;
 		sWorkspacePath += "/";
 		sWorkspacePath += oParameter.getWorkspace();
 		sWorkspacePath += "/";
