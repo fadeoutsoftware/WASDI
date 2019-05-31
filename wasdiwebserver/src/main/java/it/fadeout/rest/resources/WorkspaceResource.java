@@ -372,6 +372,19 @@ public class WorkspaceResource {
 			PublishedBandsRepository oPublishRepository = new PublishedBandsRepository();
 			WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
 			DownloadedFilesRepository oDownloadedFilesRepository = new DownloadedFilesRepository();
+			
+			String sWorkspaceOwner = Wasdi.getWorkspaceOwner(sWorkspaceId);
+			
+			if (!sWorkspaceOwner.equals(oUser.getUserId())) {
+				// This is not the owner of the workspace
+				Wasdi.DebugLog("User " + oUser.getUserId() + " is not the owner ["+sWorkspaceOwner+"]: delete the sharing, not the ws");
+				WorkspaceSharingRepository oWorkspaceSharingRepository = new WorkspaceSharingRepository();
+				oWorkspaceSharingRepository.DeleteByUserIdWorkspaceId(oUser.getUserId(), sWorkspaceId);
+				return Response.ok().build();
+			}
+
+			//get workspace path						
+			String sDownloadPath = Wasdi.getWorkspacePath(m_oServletConfig, sWorkspaceOwner, sWorkspaceId);
 
 			if (oWorkspaceRepository.DeleteWorkspace(sWorkspaceId)) {
 				//get all product in workspace
@@ -379,8 +392,6 @@ public class WorkspaceResource {
 
 				if (bDeleteFile) {
 					try {
-						//get workspace path						
-						String sDownloadPath = Wasdi.getWorkspacePath(m_oServletConfig, Wasdi.getWorkspaceOwner(sWorkspaceId), sWorkspaceId);
 						
 						System.out.println("WorkspaceResource.DeleteWorkspace: Delete workspace " + sDownloadPath);
 						//delete directory

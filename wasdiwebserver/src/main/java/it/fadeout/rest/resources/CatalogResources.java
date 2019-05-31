@@ -145,7 +145,7 @@ public class CatalogResources {
 	{
 		Wasdi.DebugLog("CatalogResources.getEntryFile( " + sFileName + " )");
 				
-		String sTargetFilePath = Wasdi.getWorkspacePath(m_oServletConfig, sUserId, sWorkspace) + sFileName;
+		String sTargetFilePath = Wasdi.getWorkspacePath(m_oServletConfig, Wasdi.getWorkspaceOwner(sWorkspace), sWorkspace) + sFileName;
 
 		DownloadedFilesRepository oRepo = new DownloadedFilesRepository();
 		DownloadedFile oDownloadedFile = oRepo.GetDownloadedFileByPath(sTargetFilePath);
