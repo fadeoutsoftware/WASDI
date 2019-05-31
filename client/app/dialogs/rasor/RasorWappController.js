@@ -22,6 +22,9 @@ var RasorWappController = (function() {
         this.m_oProcessesLaunchedService = oProcessesLaunchedService;
         this.m_bIsRunning = false;
 
+        this.m_oReturnValueDropdown = {};
+        this.m_aoProductListDropdown = this.getDropdownMenuList(this.m_aoProducts);
+
         if(utilsIsObjectNullOrUndefined(this.m_aoProducts) === false)
         {
             this.m_oSelectedProduct = this.m_aoProducts[0];
@@ -33,6 +36,14 @@ var RasorWappController = (function() {
 
     }
 
+    RasorWappController.prototype.getDropdownMenuList = function(aoProduct){
+
+        return utilsProjectGetDropdownMenuListFromProductsList(aoProduct)
+    };
+    RasorWappController.prototype.getSelectedProduct = function(aoProduct,oSelectedProduct){
+
+        return utilsProjectDropdownGetSelectedProduct(aoProduct,oSelectedProduct);
+    }
     RasorWappController.prototype.redirectToRasorWebSite = function(){
         this.m_oWindow.open('http://www.rasor.eu/rasor/', '_blank');
     };
@@ -186,7 +197,9 @@ var RasorWappController = (function() {
         var oController = this;
 
         var sWorkspaceId = this.m_oConstantsService.getActiveWorkspace().name;
-        var sFile = this.m_oSelectedProduct.fileName;
+        // var sFile = this.m_oSelectedProduct.fileName;
+        var oInputFile = this.getSelectedProduct(this.m_aoProduct,this.m_oReturnValueDropdown);
+        var sFile = oInputFile.fileName;
         var sPopFile = 'WB_MMR_DenS2015_app3_PPP_admin1.tif';
         var sJSON = '{"scenario_file":"'+ sFile+'","workspace":"'+sWorkspaceId + '","pop_file":"'+sPopFile+'"}';
 
@@ -218,8 +231,12 @@ var RasorWappController = (function() {
         var oController = this;
 
         var sWorkspaceId = this.m_oConstantsService.getActiveWorkspace().name;
-        var sFile = this.m_oSelectedProduct.fileName;
+        // var sFile = this.m_oSelectedProduct.fileName;
+
+        var oInputFile = this.getSelectedProduct(this.m_aoProducts,this.m_oReturnValueDropdown);
+        var sFile = oInputFile.fileName;
         var sJSON = '{"file":"'+ sFile+'","workspace":"'+sWorkspaceId + '"}';
+
 
         this.m_sResultFromServer = "RASOR App is waiting to start";
         this.m_bIsRunning = true;

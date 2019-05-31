@@ -37,7 +37,8 @@ var JRCS2Controller = (function() {
     JRCS2Controller.prototype.getSelectedProduct = function(aoProduct,oSelectedProduct){
 
         return utilsProjectDropdownGetSelectedProduct(aoProduct,oSelectedProduct);
-    }
+    };
+
     JRCS2Controller.prototype.redirectToWebSite = function(){
         this.m_oWindow.open('https://ec.europa.eu/jrc/en', '_blank');
     };

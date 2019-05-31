@@ -20,6 +20,9 @@ var MergeProductsController = (function() {
         this.m_oClose = oClose;       //$scope.close = oClose;
         this.searchEntries();
 
+        this.m_oReturnValueDropdown = null;
+
+
         $scope.close = function(result) {
             oClose(result, 500); // close, but give 500ms for bootstrap to animate
         };
@@ -35,6 +38,45 @@ var MergeProductsController = (function() {
         //    }
         //});
     }
+
+    MergeProductsController.prototype.getDropdownMenuList = function(aoProduct){
+
+        if(utilsIsObjectNullOrUndefined(aoProduct) === true)
+        {
+            return [];
+        }
+        var iNumberOfProducts = aoProduct.length;
+        var aoReturnValue=[];
+        for(var iIndexProduct = 0; iIndexProduct < iNumberOfProducts; iIndexProduct++)
+        {
+
+            var oValue = {
+                name:aoProduct[iIndexProduct].fileName,
+                id:aoProduct[iIndexProduct].filePath
+            };
+            aoReturnValue.push(oValue);
+        }
+
+        return aoReturnValue;
+    };
+    MergeProductsController.prototype.getSelectedProduct = function(aoProduct,oSelectedProduct){
+        if(utilsIsObjectNullOrUndefined(aoProduct) === true)
+        {
+            return [];
+        }
+        var iNumberOfProducts = aoProduct.length;
+        var oReturnValue={};
+        for(var iIndexProduct = 0; iIndexProduct < iNumberOfProducts; iIndexProduct++)
+        {
+            if( oSelectedProduct.name === aoProduct[iIndexProduct].fileName )
+            {
+                oReturnValue = aoProduct[iIndexProduct];
+                break;
+            }
+
+        }
+        return oReturnValue;
+    };
 
     MergeProductsController.prototype.isVisibleDropDownMenu = function()
     {
@@ -76,19 +118,29 @@ var MergeProductsController = (function() {
             return false;
         if(utilsIsObjectNullOrUndefined(this.m_oWorkSpaceActive))
             return false;
-        if(utilsIsObjectNullOrUndefined(this.m_oSelectedEntry) === true)
+        if(utilsIsObjectNullOrUndefined(this.m_oReturnValueDropdown) === true)
             return false;
-        if((utilsIsStrNullOrEmpty(this.m_oSelectedEntry.filePath)===true)||(utilsIsObjectNullOrUndefined(this.m_oSelectedEntry.filePath) === true) )
-        {
-            utilsVexDialogAlertTop("the delected entry file path is invalid");
-            return false;
-        }
+        // if((utilsIsStrNullOrEmpty(this.m_oSelectedEntry.filePath)===true)||(utilsIsObjectNullOrUndefined(this.m_oSelectedEntry.filePath) === true) )
+        // {
+        //     utilsVexDialogAlertTop("the delected entry file path is invalid");
+        //     return false;
+        // }
 
 
         var oController = this;
         var sUrl = oController.m_oConstantService.getAPIURL();
         // sUrl += "/processing/assimilation?midapath=" +"/data/wasdi/catalogue/mulesme/2017/09/19/SMCItaly_20170919.tif";
-        sUrl += "/processing/assimilation?midapath=" + this.m_oSelectedEntry.filePath;
+
+        var oInputFile = this.getSelectedProduct(this.m_aoEntries,this.m_oReturnValueDropdown);
+
+        // sUrl += "/processing/assimilation?midapath=" + this.m_oSelectedEntry.filePath;
+        sUrl += "/processing/assimilation?midapath=" + oInputFile.filePath;
+
+        if((utilsIsStrNullOrEmpty(oInputFile.filePath)===true)||(utilsIsObjectNullOrUndefined(oInputFile.filePath) === true) )
+        {
+            utilsVexDialogAlertTop("the delected entry file path is invalid");
+            return false;
+        }
 
         var successCallback = function(data, status)
         {
@@ -171,6 +223,7 @@ var MergeProductsController = (function() {
             if(utilsIsObjectNullOrUndefined(data) == false)
             {
                 oController.m_aoEntries = data;
+                oController.m_aoProductListDropdown = oController.getDropdownMenuList(oController.m_aoEntries);
             }
         }).error(function (error) {
             utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN GET ENTRIES");
@@ -179,7 +232,8 @@ var MergeProductsController = (function() {
     MergeProductsController.prototype.selectedEntry = function(oEntry){
         if(utilsIsObjectNullOrUndefined(oEntry) === true)
             return false;
-        this.m_oSelectedEntry = oEntry;
+        // this.m_oSelectedEntry = oEntry;
+        this.m_oReturnValueDropdown = oEntry;
         return true;
     };
     MergeProductsController.prototype.closeDialog=function (sResult)

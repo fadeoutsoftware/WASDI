@@ -1,14 +1,20 @@
 <div class="dropdown-menu-container">
     <div class="dropdown">
         <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenuDirective" data-toggle="dropdown">
-            <span ng-hide=" isSelectedValue === false">
-                {{selectedValue.name }}
-            </span>
-            <span ng-show="isSelectedValue === false">
-                {{dropdownName}}
+            <div class="row">
+                <div class="col-xs-11 col-sm-11 col-md-11 col-lg-11 col-plr0">
+                    <span ng-hide=" isSelectedValue === false" class="text">
+                        {{selectedValue.name }}
+                    </span>
+                    <span ng-show="isSelectedValue === false" class="text">
+                        {{dropdownName}}
+                    </span>
+                </div>
+                <div class="col-xs-1 col-sm-1 col-md-1 col-lg-1 col-plr0">
+                    <span class="caret"></span>
+                </div>
+            </div>
 
-            </span>
-            <span class="caret"></span>
         </button>
         <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenuDirective">
             <input class="form-control dropdown-input"  type="text" placeholder="Search.." ng-show="enableSearchFilter" ng-model="textFilter">
