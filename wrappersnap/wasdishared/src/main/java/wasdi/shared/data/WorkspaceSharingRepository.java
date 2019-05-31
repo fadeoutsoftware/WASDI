@@ -6,10 +6,13 @@ import java.util.List;
 
 import org.bson.Document;
 
+import com.mongodb.BasicDBObject;
 import com.mongodb.Block;
 import com.mongodb.client.FindIterable;
+import com.mongodb.client.model.Filters;
 import com.mongodb.client.result.DeleteResult;
 
+import wasdi.shared.business.PublishedBand;
 import wasdi.shared.business.WorkspaceSharing;
 
 /**
@@ -153,4 +156,22 @@ public class WorkspaceSharingRepository extends  MongoRepository{
 
         return 0;
     }
+    
+    public int DeleteByUserIdWorkspaceId(String sUserId, String sWorkspaceId) {
+        try {
+
+            DeleteResult oDeleteResult = getCollection("workspacessharing").deleteMany(Filters.and(Filters.eq("userId", sUserId), Filters.eq("workspaceId", sWorkspaceId)));
+
+            if (oDeleteResult != null)
+            {
+                return  (int) oDeleteResult.getDeletedCount();
+            }
+
+        } 
+        catch (Exception oEx) {
+            oEx.printStackTrace();
+        }
+
+        return 0;
+    } 
 }

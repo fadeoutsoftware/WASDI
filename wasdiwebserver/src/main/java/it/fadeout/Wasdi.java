@@ -410,6 +410,7 @@ public class Wasdi extends ResourceConfig {
 	public static String getWorkspaceOwner(String sWorkspaceId) {
 		WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
 		Workspace oWorkspace = oWorkspaceRepository.GetWorkspace(sWorkspaceId);
+		if (oWorkspace==null) return "";
 		String sWorkspaceOwner = oWorkspace.getUserId();
 		return sWorkspaceOwner;
 	}

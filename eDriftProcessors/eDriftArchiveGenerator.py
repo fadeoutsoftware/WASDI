@@ -76,7 +76,7 @@ def run(parameters, processId):
         
         oActualDate += oTimeDelta
     
-    wasdi.updateProcessStatus(processId, "eDrift Archive Generator DONE", 100)
+    wasdi.updateProcessStatus(processId, "DONE", 100)
     
     
 def WasdiHelp():
