@@ -1,0 +1,35 @@
+.workflow-manager-modal {
+    .modal-dialog {
+        //width:50%;
+        .modal-content {
+            .modal-header {
+                color: $wasdi-white;
+                background-color: $wasdi-blue-logo;
+                .close {
+                    color: $wasdi-white;
+                    opacity: 1;
+                }
+                .snap-logo {
+                    width: 50px;
+                }
+            }
+
+            .modal-body {
+                .main-container{
+                    //margin-left: 0px;
+                    //margin-right: 0px;
+                }
+                .give-permission-row{
+                    margin-top: 0;
+                }
+            }
+
+            .modal-footer {
+                border-top: 1px solid $wasdi-blue-logo;
+                .my-button {
+                    padding: 10px 21px;
+                }
+            }
+        }
+    }
+}

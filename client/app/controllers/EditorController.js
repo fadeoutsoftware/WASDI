@@ -205,29 +205,14 @@ var EditorController = (function () {
                 subMenu:[],
                 onClick: this.openImportsDialog
             },
-            // --- Import (SFTP) ---
-            // {
-            //     name:"",
-            //     icon:"fa fa-upload",
-            //     caption_i18n : "EDITOR_OPERATION_TITLE_SFTP",
-            //     subMenu:[],
-            //     onClick: this.openSFTPDialogInNavBar
-            // },
-            // --- WPS ---
             {
-                name:"WPS",
-                icon:"fa fa-tasks",
-                caption_i18n : "EDITOR_OPERATION_TITLE_APPLY_WPS",
-                onClick: this.openWPSDialog,
-                subMenu:[]
+                name:"",//WAPPS
+                caption_i18n : "EDITOR_OPERATION_TITLE_WAPPS",
+                subMenu:[],
+                onClick: this.openWappsDialog,
+                icon:"fa fa-lg fa-rocket"
             },
-            {
-                name:"Mosaic",
-                icon:"fa fa-tasks",
-                caption_i18n : "EDITOR_OPERATION_TITLE_MOSAIC",
-                onClick: this.openMosaicDialog,
-                subMenu:[]
-            },
+
             // --- Processor ---
             {
                 name:"",
@@ -235,13 +220,7 @@ var EditorController = (function () {
                 caption_i18n : "EDITOR_OPERATION_TITLE_APPLY_RADIOMETRIC_PROCESSOR",
                 onClick: "",
                 subMenu:[
-                    {
-                        name:"",//WAPPS
-                        caption_i18n : "EDITOR_OPERATION_TITLE_WAPPS",
-                        subMenu:[],
-                        onClick: this.openWappsDialog,
-                        icon:"fa fa-lg fa-rocket"
-                    },
+
                     {
                         name:"",// New Processor
                         caption_i18n : "EDITOR_OPERATION_TITLE_NEW_PROCESSOR",
@@ -311,14 +290,22 @@ var EditorController = (function () {
                         subMenu:[],
                         onClick: this.openEDriftCheckImagesAvailability,
                         icon:"fa fa-lg fa-rocket"
+                    },
+                    // --- WPS ---
+                    {
+                        name:"WPS",
+                        icon:"fa fa-tasks",
+                        caption_i18n : "EDITOR_OPERATION_TITLE_APPLY_WPS",
+                        onClick: this.openWPSDialog,
+                        subMenu:[]
+                    },
+                    {
+                        name:"Mosaic",
+                        icon:"fa fa-tasks",
+                        caption_i18n : "EDITOR_OPERATION_TITLE_MOSAIC",
+                        onClick: this.openMosaicDialog,
+                        subMenu:[]
                     }
-                    // {
-                    //     name:"Upload File",//Upload
-                    //     subMenu:[],
-                    //     onClick: this.openUploadFileDialog,
-                    //     icon:"fa fa-lg fa-file-code-o"
-                    // }
-
                 ]
             },
             // --- Optical ---
@@ -373,7 +360,15 @@ var EditorController = (function () {
                         icon:"icon-range-doppler-terrain-correction-operations"
                     }
                 ]
+            },
+            {
+                name:"",//WAPPS
+                caption_i18n : "EDITOR_OPERATION_TITLE_SHARE",
+                subMenu:[],
+                onClick: this.openShareDialog,
+                icon:"fa fa-share-alt fa-lg"
             }
+
         ]
 
         this.translateToolbarMenuList(this.m_aoNavBarMenu);
@@ -2623,6 +2618,33 @@ var EditorController = (function () {
             inputs: {
                 extras: {
 
+                }
+            }
+        }).then(function (modal) {
+            modal.element.modal();
+            modal.close.then(function(oResult){
+
+            });
+        });
+    };
+
+    EditorController.prototype.openShareDialog = function(oWindow)
+    {
+        var oController;
+        if(utilsIsObjectNullOrUndefined(oWindow) === true)
+        {
+            oController = this;
+        }
+        else
+        {
+            oController = oWindow;
+        }
+        oController.m_oModalService.showModal({
+            templateUrl: "dialogs/share_workspace/ShareWorkspaceDialog.html",
+            controller: "ShareWorkspaceController",
+            inputs: {
+                extras: {
+                    workspace:oController.m_oActiveWorkspace
                 }
             }
         }).then(function (modal) {
