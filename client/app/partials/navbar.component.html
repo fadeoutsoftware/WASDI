@@ -82,7 +82,8 @@
                     <ul class="nav navbar-nav navbar-right">
                         <!-- WORKSPACES BUTTON-->
                         <li ng-class="{active:m_oController.activePageCss('root.workspaces')}">
-                            <a ui-sref="root.workspaces" ><i class="fa fa-list-ul" aria-hidden="true"></i>
+                            <a ui-sref="root.workspaces" >
+                                <i class="fa fa-globe fa-lg" aria-hidden="true"></i>
                                 {{"ROOT_VIEW_NAV_BAR_LINK_WORKSPACES"|translate}}
                             </a>
                         </li>
@@ -109,12 +110,12 @@
                             </a>
                         </li>
                         <!-- CATALOGUE BUTTON-->
-                        <li ng-class="{active:m_oController.activePageCss('root.catalog')}"  >
-                            <a ng-click="m_oController.openCatalogPage()" href=""  >
-                                <i class="fa fa-database fa-lg" aria-hidden="true"></i>
-                                {{"ROOT_VIEW_NAV_BAR_LINK_CATALOG"|translate}}
-                            </a>
-                        </li>
+                        <!--<li ng-class="{active:m_oController.activePageCss('root.catalog')}"  >-->
+                            <!--<a ng-click="m_oController.openCatalogPage()" href=""  >-->
+                                <!--<i class="fa fa-database fa-lg" aria-hidden="true"></i>-->
+                                <!--{{"ROOT_VIEW_NAV_BAR_LINK_CATALOG"|translate}}-->
+                            <!--</a>-->
+                        <!--</li>-->
                     </ul>
 
 
