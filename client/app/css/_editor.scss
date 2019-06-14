@@ -697,4 +697,14 @@
         color: #0a6aa1;
         font-style: italic;
     }
+
+}
+
+// Move down the cesium globe toolbar when active in editor
+#mapcontainer .cesium-viewer-toolbar {
+    margin-top: 3em;
+}
+
+#mapcontainer .cesium-infoBox {
+    margin-top: 4em;
 }
