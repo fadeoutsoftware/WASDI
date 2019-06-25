@@ -58,19 +58,19 @@ def printStatus():
     global m_sBaseUrl
     global m_bIsOnServer
 
-    __log('[INFO] user: ' + str(getUser()))
-    __log('[INFO] password: ' + str(getPassword()))
-    __log('[INFO] active workspace: ' + str(getActiveWorkspaceId()))
-    __log('[INFO] parameters file path: ' + str(getParametersFilePath()))
-    __log('[INFO] session id: ' + str(getSessionId()))
-    __log('[INFO] base path: ' + str(getBasePath()))
-    __log('[INFO] download active: ' + str(getDownloadActive()))
-    __log('[INFO] upload active: ' + str(getUploadActive()))
-    __log('[INFO] verbose: ' + str(getVerbose()))
-    __log('[INFO] param dict: ' + str(getParametersDict()))
-    __log('[INFO] proc id: ' + str(getProcId()))
-    __log('[INFO] base url: ' + str(getBaseUrl()))
-    __log('[INFO] is on server: ' + str(getIsOnServer()))
+    _log('[INFO] user: ' + str(getUser()))
+    _log('[INFO] password: ' + str(getPassword()))
+    _log('[INFO] active workspace: ' + str(getActiveWorkspaceId()))
+    _log('[INFO] parameters file path: ' + str(getParametersFilePath()))
+    _log('[INFO] session id: ' + str(getSessionId()))
+    _log('[INFO] base path: ' + str(getBasePath()))
+    _log('[INFO] download active: ' + str(getDownloadActive()))
+    _log('[INFO] upload active: ' + str(getUploadActive()))
+    _log('[INFO] verbose: ' + str(getVerbose()))
+    _log('[INFO] param dict: ' + str(getParametersDict()))
+    _log('[INFO] proc id: ' + str(getProcId()))
+    _log('[INFO] base url: ' + str(getBaseUrl()))
+    _log('[INFO] is on server: ' + str(getIsOnServer()))
 
 
 def setVerbose(bVerbose):
@@ -301,30 +301,30 @@ def getProcId():
     return m_sMyProcId
 
 
-def __log(sLog):
+def _log(sLog):
     if m_bVerbose:
         print(sLog)
 
 
-def __getStandardHeaders():
+def _getStandardHeaders():
     global m_sSessionId
     asHeaders = {'Content-Type': 'application/json', 'x-session-token': m_sSessionId}
     return asHeaders
 
 
-def __loadConfig(sConfigFilePath):
+def _loadConfig(sConfigFilePath):
     """
     Loads configuration from given file
     :param sConfigFilePath: a string containing a path to the configuration file
     """
     if sConfigFilePath is None:
-        print("[ERROR] waspy.__loadConfigParams: config parameter file name is None, cannot load config")
+        print("[ERROR] waspy._loadConfigParams: config parameter file name is None, cannot load config")
         return
     if sConfigFilePath == '':
-        print("[ERROR] waspy.__loadConfigParams: config parameter file name is empty, cannot load config")
+        print("[ERROR] waspy._loadConfigParams: config parameter file name is empty, cannot load config")
         return
 
-    sConfigFilePath = __normPath(sConfigFilePath)
+    sConfigFilePath = _normPath(sConfigFilePath)
 
     global m_sUser
     global m_sPassword
@@ -356,7 +356,7 @@ def __loadConfig(sConfigFilePath):
                 m_sBasePath = oJson["BASEPATH"]
             if "PARAMETERSFILEPATH" in oJson:
                 m_sParametersFilePath = oJson["PARAMETERSFILEPATH"]
-                m_sParametersFilePath = __normPath(m_sParametersFilePath)
+                m_sParametersFilePath = _normPath(m_sParametersFilePath)
             if "DOWNLOADACTIVE" in oJson:
                 m_bDownloadActive = bool(oJson["DOWNLOADACTIVE"])
             if "UPLOADACTIVE" in oJson:
@@ -367,29 +367,35 @@ def __loadConfig(sConfigFilePath):
         return True, sTempWorkspaceName, sTempWorkspaceID
 
     except Exception as oEx:
-        print('[ERROR] waspy.__loadConfigParams: something went wrong')
+        print('[ERROR] waspy._loadConfigParams: something went wrong')
         return
 
 
-def __loadParams():
+def _loadParams():
     """
     Loads parameters from file, if specified in configuration file
     """
     global m_sParametersFilePath
     global m_aoParamsDictionary
 
+    bParamLoaded = False
     if (m_sParametersFilePath is not None) and (m_sParametersFilePath != ''):
-        with open(m_sParametersFilePath) as oJsonFile:
-            m_aoParamsDictionary = json.load(oJsonFile)
-    else:
-        __log('[INFO] wasdi could not load param file. That is fine, you can still load it later, don\'t worry')
+        try:
+            with open(m_sParametersFilePath) as oJsonFile:
+                m_aoParamsDictionary = json.load(oJsonFile)
+                bParamLoaded = True
+        except FileNotFoundError:
+            pass
+
+    if not bParamLoaded:
+        _log('[INFO] wasdi could not load param file. That is fine, you can still load it later, don\'t worry')
 
 
 def refreshParameters():
     """
     Refresh parameters, reading the file again
     """
-    __loadParams()
+    _loadParams()
 
 
 def init(sConfigFilePath=None):
@@ -407,9 +413,9 @@ def init(sConfigFilePath=None):
     sWId = None
     bResult = False
     if sConfigFilePath is not None:
-        bConfigOk, sWname, sWId = __loadConfig(sConfigFilePath)
+        bConfigOk, sWname, sWId = _loadConfig(sConfigFilePath)
         if bConfigOk is True:
-            __loadParams()
+            _loadParams()
 
     if m_sUser is None:
         print('[ERROR] waspy.init: must initialize user first, but None given')
@@ -424,7 +430,7 @@ def init(sConfigFilePath=None):
             m_sBasePath = os.path.join(sHome, ".wasdi", "")
 
     if m_sSessionId != '':
-        asHeaders = __getStandardHeaders()
+        asHeaders = _getStandardHeaders()
         sUrl = m_sBaseUrl + '/auth/checksession'
         oResponse = requests.get(sUrl, headers=asHeaders)
         if (oResponse is not None) and (oResponse.ok is True):
@@ -500,7 +506,7 @@ def getWorkspaces():
     global m_sBaseUrl
     global m_sSessionId
 
-    asHeaders = __getStandardHeaders()
+    asHeaders = _getStandardHeaders()
 
     sUrl = m_sBaseUrl + '/ws/byuser'
 
@@ -521,7 +527,7 @@ def getWorkspaceIdByName(sName):
     global m_sBaseUrl
     global m_sSessionId
 
-    asHeaders = __getStandardHeaders()
+    asHeaders = _getStandardHeaders()
 
     sUrl = m_sBaseUrl + '/ws/byuser'
 
@@ -593,7 +599,7 @@ def getProductsByWorkspaceId(sWorkspaceId):
     global m_sActiveWorkspace
 
     m_sActiveWorkspace = sWorkspaceId
-    asHeaders = __getStandardHeaders()
+    asHeaders = _getStandardHeaders()
     payload = {'sWorkspaceId': sWorkspaceId}
 
     sUrl = m_sBaseUrl + '/product/byws'
@@ -687,7 +693,7 @@ def getWorkflows():
     global m_sBaseUrl
     global m_sSessionId
 
-    asHeaders = __getStandardHeaders()
+    asHeaders = _getStandardHeaders()
 
     sUrl = m_sBaseUrl + '/processing/getgraphsbyusr'
 
@@ -710,7 +716,7 @@ def getProcessStatus(sProcessId):
     global m_sBaseUrl
     global m_sSessionId
 
-    asHeaders = __getStandardHeaders()
+    asHeaders = _getStandardHeaders()
     payload = {'sProcessId': sProcessId}
 
     sUrl = m_sBaseUrl + '/process/byid'
@@ -762,7 +768,7 @@ def updateProcessStatus(sProcessId, sStatus, iPerc):
     global m_sBaseUrl
     global m_sSessionId
 
-    asHeaders = __getStandardHeaders()
+    asHeaders = _getStandardHeaders()
     payload = {'sProcessId': sProcessId, 'status': sStatus, 'perc': iPerc}
 
     sUrl = m_sBaseUrl + '/process/updatebyid'
@@ -782,7 +788,7 @@ def updateProcessStatus(sProcessId, sStatus, iPerc):
 
 
 def updateProgressPerc(iPerc):
-    __log('[INFO] waspy.updateProgressPerc( ' + str(iPerc) + ' )')
+    _log('[INFO] waspy.updateProgressPerc( ' + str(iPerc) + ' )')
     if iPerc is None:
         print('[ERROR] waspy.updateProgressPerc: Passed None, expected a percentage')
         return ''
@@ -800,7 +806,7 @@ def updateProgressPerc(iPerc):
 
     sStatus = "RUNNING"
     sUrl = getBaseUrl() + "/process/updatebyid?sProcessId=" + getProcId() + "&status=" + sStatus + "&perc=" + str(iPerc) + "&sendrabbit=1"
-    asHeaders = __getStandardHeaders()
+    asHeaders = _getStandardHeaders()
     oResponse = requests.get(sUrl, headers=asHeaders)
     sResult = ""
     if (oResponse is not None) and (oResponse.ok is True):
@@ -820,7 +826,7 @@ def setProcessPayload(sProcessId, data):
     global m_sBaseUrl
     global m_sSessionId
 
-    asHeaders = __getStandardHeaders()
+    asHeaders = _getStandardHeaders()
     payload = {'sProcessId': sProcessId, 'payload': json.dumps(data)}
 
     sUrl = m_sBaseUrl + '/process/setpayload'
@@ -849,7 +855,7 @@ def saveFile(sFileName):
     global m_sSessionId
     global m_sActiveWorkspace
 
-    asHeaders = __getStandardHeaders()
+    asHeaders = _getStandardHeaders()
     payload = {'file': sFileName, 'workspace': m_sActiveWorkspace}
 
     sUrl = m_sBaseUrl + '/catalog/upload/ingestinws'
@@ -876,13 +882,13 @@ def downloadFile(sFileName):
     To work be sure that the file is on the server
     """
 
-    __log('[INFO] waspy.downloadFile( ' + sFileName + ' )')
+    _log('[INFO] waspy.downloadFile( ' + sFileName + ' )')
 
     global m_sBaseUrl
     global m_sSessionId
     global m_sActiveWorkspace
 
-    asHeaders = __getStandardHeaders()
+    asHeaders = _getStandardHeaders()
     payload = {'filename': sFileName}
 
     sUrl = m_sBaseUrl
@@ -892,12 +898,12 @@ def downloadFile(sFileName):
     sUrl += "&workspace="
     sUrl += getActiveWorkspaceId()
 
-    __log('[INFO] waspy.downloadfile: send request to configured url ' + sUrl)
+    _log('[INFO] waspy.downloadfile: send request to configured url ' + sUrl)
 
     oResponse = requests.get(sUrl, headers=asHeaders, params=payload, stream=True)
 
     if (oResponse is not None) and (oResponse.status_code == 200):
-        __log('[INFO] waspy.downloadFile: got ok result, downloading')
+        _log('[INFO] waspy.downloadFile: got ok result, downloading')
         sAttachmentName = None
         asResponseHeaders = oResponse.headers
         if asResponseHeaders is not None:
@@ -939,19 +945,19 @@ def downloadFile(sFileName):
         except:  # Guard against race condition
             print('[ERROR] waspy.downloadFile Creating File Path!!')
 
-        __log('[INFO] waspy.downloadFile: downloading local file ' + sSavePath)
+        _log('[INFO] waspy.downloadFile: downloading local file ' + sSavePath)
 
         with open(sSavePath, 'wb') as oFile:
             for oChunk in oResponse:
-                # __log('.')
+                # _log('.')
                 oFile.write(oChunk)
-        __log('[INFO] waspy.downloadFile: download done, new file locally available ' + sSavePath)
+        _log('[INFO] waspy.downloadFile: download done, new file locally available ' + sSavePath)
 
         if (sAttachmentName is not None) and \
                 (sAttachmentName != sFileName) and \
                 sAttachmentName.lower().endswith('.zip'):
             sPath = getSavePath()
-            __unzip(sAttachmentName, sPath)
+            _unzip(sAttachmentName, sPath)
 
     else:
         print('[ERROR] waspy.downloadFile: download error, server code: ' + str(oResponse.status_code))
@@ -965,7 +971,7 @@ def wasdiLog(sLogRow):
     global m_sActiveWorkspace
 
     if m_bIsOnServer:
-        asHeaders = __getStandardHeaders()
+        asHeaders = _getStandardHeaders()
         sUrl = m_sBaseUrl + '/processors/logs/add?processworkspace=' + m_sMyProcId
         oResult = requests.post(sUrl, data=sLogRow, headers=asHeaders)
         if oResult is None:
@@ -984,7 +990,7 @@ def deleteProduct(sProduct):
     if sProduct is None:
         print('[ERROR] waspy.deleteProduct: product passed is None')
 
-    asHeaders = __getStandardHeaders
+    asHeaders = _getStandardHeaders
     sUrl = m_sBaseUrl
     sUrl += "/product/delete?sProductName="
     sUrl += sProduct
@@ -1123,7 +1129,7 @@ def searchEOImages(sPlatform, sDateFrom, sDateTo,
 
     try:
         sUrl = getBaseUrl() + "/search/querylist?" + sQuery
-        asHeaders = __getStandardHeaders()
+        asHeaders = _getStandardHeaders()
         oResponse = requests.post(sUrl, data=sQueryBody, headers=asHeaders)
         try:
             # populate list from response
@@ -1133,13 +1139,13 @@ def searchEOImages(sPlatform, sDateFrom, sDateTo,
             print('[ERROR] waspy.searchEOImages: exception while trying to convert response into JSON object')
             return aoReturnList
 
-        __log("[INFO] waspy.searchEOImages: search results:\n" + repr(aoReturnList))
+        _log("[INFO] waspy.searchEOImages: search results:\n" + repr(aoReturnList))
         return aoReturnList
     except Exception as oEx:
         print('[ERROR] waspy.searchEOImages: an error occured')
-        __log(type(oEx))
+        _log(type(oEx))
         traceback.print_exc()
-        __log(oEx)
+        _log(oEx)
 
     return aoReturnList
 
@@ -1155,17 +1161,17 @@ def getFoundProductName(aoProduct):
         return aoProduct['title']
 
 
-def __fileExistsOnWasdi(sFileName):
+def _fileExistsOnWasdi(sFileName):
     """
     checks hwther a file already exists on WASDI or not
     :param sFileName: file name. Warning: must be the complete path
     :return: True if the file exists, False otherwise
     """
     if sFileName is None:
-        print('[ERROR] waspy.__fileExistsOnWasdi: file name must not be None')
+        print('[ERROR] waspy._fileExistsOnWasdi: file name must not be None')
         return False
     if len(sFileName) < 1:
-        print('[ERROR] waspy.__fileExistsOnWasdi: File name too short')
+        print('[ERROR] waspy._fileExistsOnWasdi: File name too short')
         return False
 
     sBaseUrl = getBaseUrl()
@@ -1180,32 +1186,32 @@ def __fileExistsOnWasdi(sFileName):
     sUrl += "&workspace="
     sUrl += sActiveWorkspace
 
-    asHeaders = __getStandardHeaders()
+    asHeaders = _getStandardHeaders()
     oResult = requests.get(sUrl, headers=asHeaders)
 
     if oResult is None:
-        print('[ERROR] waspy.__fileExistsOnWasdi: failed contacting the server')
+        print('[ERROR] waspy._fileExistsOnWasdi: failed contacting the server')
         return False
     elif oResult.ok is not True:
-        print('[ERROR] waspy.__fileExistsOnWasdi: failed, server returned: ' + str(oResult.status_code))
+        print('[ERROR] waspy._fileExistsOnWasdi: failed, server returned: ' + str(oResult.status_code))
         return False
     else:
         return oResult.ok
 
 
-def __unzip(sAttachmentName, sPath):
+def _unzip(sAttachmentName, sPath):
     """
     Unzips a file
     :param sAttachmentName: filename to unzip
     :param sPath: both the path where the file is and where it must be unzipped
     :return:
     """
-    __log('waspy.__unzip( ' + sAttachmentName + ', ' + sPath + ' )')
+    _log('waspy._unzip( ' + sAttachmentName + ', ' + sPath + ' )')
     if sPath is None:
-        print('[ERROR] waspy.__unzip: path is None')
+        print('[ERROR] waspy._unzip: path is None')
         return
     if sAttachmentName is None:
-        print('[ERROR] waspy.__unzip: attachment to unzip is None')
+        print('[ERROR] waspy._unzip: attachment to unzip is None')
         return
 
     try:
@@ -1214,7 +1220,7 @@ def __unzip(sAttachmentName, sPath):
         zip_ref.extractall(sPath)
         zip_ref.close()
     except:
-        print('[ERROR] waspy.__unzip: failed unzipping')
+        print('[ERROR] waspy._unzip: failed unzipping')
 
     return
 
@@ -1228,7 +1234,7 @@ def importProduct(sFileUrl=None, sBoundingBox=None, asProduct=None):
     :return: execution status
     """
 
-    __log('waspy.importProduct( ' + str(sFileUrl) + ', ' + str(sBoundingBox) + ', ' + str(asProduct) + ' )')
+    _log('waspy.importProduct( ' + str(sFileUrl) + ', ' + str(sBoundingBox) + ', ' + str(asProduct) + ' )')
 
     sReturn = "ERROR"
 
@@ -1253,7 +1259,7 @@ def importProduct(sFileUrl=None, sBoundingBox=None, asProduct=None):
     sUrl += "&sBoundingBox="
     sUrl += sBoundingBox
 
-    asHeaders = __getStandardHeaders()
+    asHeaders = _getStandardHeaders()
 
     oResponse = requests.get(sUrl, headers=asHeaders)
     if oResponse is None:
@@ -1278,7 +1284,7 @@ def asynchExecuteProcessor(sProcessorName, aoParams={}):
     :return: processor ID
     """
 
-    __log('[INFO] waspy.asynchExecuteProcessor( ' + str(sProcessorName) + ', ' + str(aoParams) + ' )')
+    _log('[INFO] waspy.asynchExecuteProcessor( ' + str(sProcessorName) + ', ' + str(aoParams) + ' )')
 
     if sProcessorName is None:
         print('[ERROR] waspy.asynchExecuteProcessor: processor name is None, aborting')
@@ -1294,13 +1300,13 @@ def asynchExecuteProcessor(sProcessorName, aoParams={}):
            "/processors/run?workspace=" + getActiveWorkspaceId() + \
            "&name=" + sProcessorName + \
            "&encodedJson=" + str(aoParams)
-    asHeaders = __getStandardHeaders()
+    asHeaders = _getStandardHeaders()
     oResponse = requests.get(sUrl, headers=asHeaders, params=aoParams)
     if oResponse is None:
         print('[ERROR] waspy.asynchExecuteProcessor: something broke when contacting the server, aborting')
         return ''
     elif oResponse.ok is True:
-        __log('[INFO] waspy.asynchExecuteProcessor: API call OK')
+        _log('[INFO] waspy.asynchExecuteProcessor: API call OK')
         aoJson = oResponse.json()
         if "processingIdentifier" in aoJson:
             sProcessID = aoJson['processingIdentifier']
@@ -1324,7 +1330,7 @@ def executeProcessor(sProcessorName, aoProcessParams):
     global m_sActiveWorkspace
 
     sEncodedParams = json.dumps(aoProcessParams)
-    asHeaders = __getStandardHeaders()
+    asHeaders = _getStandardHeaders()
     payload = {'workspace': m_sActiveWorkspace,
                'name': sProcessorName,
                'sProcessorName': sEncodedParams}
@@ -1349,11 +1355,11 @@ def executeProcessor(sProcessorName, aoProcessParams):
 # todo extend to a list of processes
 def waitProcess(sProcessId):
     if sProcessId is None:
-        __log('Passed None, expected a process ID')
+        _log('Passed None, expected a process ID')
         return "ERROR"
 
     if sProcessId == '':
-        __log('Passed empty, expected a process ID')
+        _log('Passed empty, expected a process ID')
         return "ERROR"
 
     sStatus = ''
@@ -1372,7 +1378,7 @@ def uploadFile(sFileName):
     :return: True if succeded, False otherwise
     """
 
-    __log('[INFO] waspy.upload( ' + str(sFileName) + ' )')
+    _log('[INFO] waspy.upload( ' + str(sFileName) + ' )')
 
     if sFileName is None:
         print('[ERROR] waspy.upload: the given file name is None, cannot upload')
@@ -1382,7 +1388,7 @@ def uploadFile(sFileName):
     if sFileName.startswith('/') or sFileName.startswith('\\'):
         sFileName = sFileName[1:]
 
-    sFileName = __normPath(sFileName)
+    sFileName = _normPath(sFileName)
 
     bResult = False
 
@@ -1392,7 +1398,7 @@ def uploadFile(sFileName):
     return bResult
 
 
-def __normPath(sPath):
+def _normPath(sPath):
     """
     Normalizes path by adjusting separator
     :param sPath: a path to be normalized
@@ -1400,7 +1406,7 @@ def __normPath(sPath):
     """
 
     if sPath is None:
-        print('[ERROR] waspy.__normPath: passed path is None')
+        print('[ERROR] waspy._normPath: passed path is None')
         return None
 
     sPath = sPath.replace('/', os.path.sep)
@@ -1410,60 +1416,60 @@ def __normPath(sPath):
 
 
 def addFileToWASDI(sFileName):
-    return __internalAddFileToWASDI(sFileName, False)
+    return _internalAddFileToWASDI(sFileName, False)
 
 
 def asynchAddFileToWASDI(sFileName):
-    return __internalAddFileToWASDI(sFileName, True)
+    return _internalAddFileToWASDI(sFileName, True)
 
 
-def __internalAddFileToWASDI(sFileName, bAsynch=None):
-    __log('[INFO] waspy.__internalAddFileToWASDI( ' + str(sFileName) + ', ' + str(bAsynch) + ' )')
+def _internalAddFileToWASDI(sFileName, bAsynch=None):
+    _log('[INFO] waspy._internalAddFileToWASDI( ' + str(sFileName) + ', ' + str(bAsynch) + ' )')
 
     if sFileName is None:
-        print('[ERROR] waspy.__internalAddFileToWASDI: file name is None, aborting')
+        print('[ERROR] waspy._internalAddFileToWASDI: file name is None, aborting')
         return ''
     if not isinstance(sFileName, str):
-        print('[WARNING] waspy.__internalAddFileToWASDI: file name is not a string, trying conversion')
+        print('[WARNING] waspy._internalAddFileToWASDI: file name is not a string, trying conversion')
         try:
             sFileName = str(sFileName)
         except:
-            print('[ERROR] waspy.__internalAddFileToWASDI: cannot convert file name into string, aborting')
+            print('[ERROR] waspy._internalAddFileToWASDI: cannot convert file name into string, aborting')
             return ''
     if len(sFileName) < 1:
-        print('[ERROR] waspy.__internalAddFileToWASDI: file name has zero length, aborting')
+        print('[ERROR] waspy._internalAddFileToWASDI: file name has zero length, aborting')
         return ''
 
     if bAsynch is None:
-        print('[WARNING] waspy.__internalAddFileToWASDI: asynch flag is None, assuming False')
+        print('[WARNING] waspy._internalAddFileToWASDI: asynch flag is None, assuming False')
         bAsynch = False
     if not isinstance(bAsynch, bool):
-        print('[WARNING] waspy.__internalAddFileToWASDI: asynch flag is not a boolean, trying conversion')
+        print('[WARNING] waspy._internalAddFileToWASDI: asynch flag is not a boolean, trying conversion')
         try:
             bAsynch = bool(bAsynch)
         except:
-            print('[ERROR] waspy.__internalAddFileToWASDI: could not convert asynch flag into bool, aborting')
+            print('[ERROR] waspy._internalAddFileToWASDI: could not convert asynch flag into bool, aborting')
             return ''
 
     sResult = ''
     try:
         if getUploadActive() is True:
             sFilePath = os.path.join(getSavePath(), sFileName)
-            if __fileExistsOnWasdi(sFilePath) is False:
-                __log('[INFO] waspy.__internalAddFileToWASDI: remote file is missing, uploading')
+            if _fileExistsOnWasdi(sFilePath) is False:
+                _log('[INFO] waspy._internalAddFileToWASDI: remote file is missing, uploading')
                 try:
                     uploadFile(sFileName)
-                    __log('[INFO] waspy.__internalAddFileToWASDI: file uploaded, keep on working!')
+                    _log('[INFO] waspy._internalAddFileToWASDI: file uploaded, keep on working!')
                 except:
-                    print('[ERROR] waspy.__internalAddFileToWASDI: could not proceed with upload')
+                    print('[ERROR] waspy._internalAddFileToWASDI: could not proceed with upload')
 
         sUrl = getBaseUrl() + "/catalog/upload/ingestinws?file=" + sFileName + "&workspace=" + getActiveWorkspaceId()
-        asHeaders = __getStandardHeaders()
+        asHeaders = _getStandardHeaders()
         oResponse = requests.get(url=sUrl, headers=asHeaders)
         if oResponse is None:
-            print('[ERROR] waspy.__internalAddFileToWASDI: cannot contact server')
+            print('[ERROR] waspy._internalAddFileToWASDI: cannot contact server')
         elif oResponse.ok is not True:
-            print('[ERROR] waspy.__internalAddFileToWASDI: failed, server replied ' + str(oResponse.status_code))
+            print('[ERROR] waspy._internalAddFileToWASDI: failed, server replied ' + str(oResponse.status_code))
         else:
             oJson = oResponse.json()
             if 'stringValue' in oJson:
@@ -1473,13 +1479,13 @@ def __internalAddFileToWASDI(sFileName, bAsynch=None):
                 else:
                     sResult = waitProcess(sProcessId)
     except:
-        print('[ERROR] waspy.__internalAddFileToWASDI: something broke alongside')
+        print('[ERROR] waspy._internalAddFileToWASDI: something broke alongside')
 
     return sResult
 
 
 def subset(sInputFile, sOutputFile, dLatN, dLonW, dLatS, dLonE):
-    __log('[INFO] waspy.subset( ' + str(sInputFile) + ', ' + str(sOutputFile) + ', ' +
+    _log('[INFO] waspy.subset( ' + str(sInputFile) + ', ' + str(sOutputFile) + ', ' +
           str(dLatN) + ', ' + str(dLonW) + ', ' + str(dLatS) + ', ' + str(dLonE) + ' )')
 
     if sInputFile is None:
@@ -1498,7 +1504,7 @@ def subset(sInputFile, sOutputFile, dLatN, dLonW, dLatS, dLonE):
     sUrl = m_sBaseUrl + "/processing/geometric/subset?sSourceProductName=" + sInputFile + "&sDestinationProductName=" + \
            sOutputFile + "&sWorkspaceId=" + m_sActiveWorkspace
     sSubsetSetting = "{ \"latN\":" + dLatN + ", \"lonW\":" + dLonW + ", \"latS\":" + dLatS + ", \"lonE\":" + dLonE + " }"
-    asHeaders = __getStandardHeaders()
+    asHeaders = _getStandardHeaders()
     oResponse = requests.get(sUrl, data=sSubsetSetting, headers=asHeaders)
     if oResponse is None:
         print('[ERROR] waspy.subset: cannot contact server')
@@ -1517,14 +1523,14 @@ def subset(sInputFile, sOutputFile, dLatN, dLonW, dLatS, dLonE):
 
 
 def executeWorkflow(asInputFileNames, asOutputFileNames, sWorkflowName):
-    return __internalExecuteWorkflow(asInputFileNames, asOutputFileNames, sWorkflowName, False)
+    return _internalExecuteWorkflow(asInputFileNames, asOutputFileNames, sWorkflowName, False)
 
 
 def asynchExecuteWorkflow(asInputFileNames, asOutputFileNames, sWorkflowName):
-    return __internalExecuteWorkflow(asInputFileNames, asOutputFileNames, sWorkflowName, True)
+    return _internalExecuteWorkflow(asInputFileNames, asOutputFileNames, sWorkflowName, True)
 
 
-def __internalExecuteWorkflow(asInputFileNames, asOutputFileNames, sWorkflowName, bAsynch=False):
+def _internalExecuteWorkflow(asInputFileNames, asOutputFileNames, sWorkflowName, bAsynch=False):
     """
     Internal call to execute workflow
 
@@ -1535,28 +1541,28 @@ def __internalExecuteWorkflow(asInputFileNames, asOutputFileNames, sWorkflowName
     :return: processID if asynch, status of the executed process if synch, empty string in case of failure
     """
 
-    __log('[INFO] waspy.__internalExecuteWorkflow( ' + str(asInputFileNames) + ', ' +
+    _log('[INFO] waspy._internalExecuteWorkflow( ' + str(asInputFileNames) + ', ' +
           str(asOutputFileNames) + ', ' + str(sWorkflowName) + ', ' + str(bAsynch) + ' )')
 
     if asInputFileNames is None:
-        print('[ERROR] waspy.__internalExecuteWorkflow: input file names None, aborting')
+        print('[ERROR] waspy._internalExecuteWorkflow: input file names None, aborting')
         return ''
     elif len(asInputFileNames) <= 0:
-        print('[ERROR] waspy.__internalExecuteWorkflow: no input file names, aborting')
+        print('[ERROR] waspy._internalExecuteWorkflow: no input file names, aborting')
         return ''
 
     if asOutputFileNames is None:
-        print('[ERROR] waspy.__internalExecuteWorkflow: output file names None, aborting')
+        print('[ERROR] waspy._internalExecuteWorkflow: output file names None, aborting')
         return ''
     # elif len(asOutputFileNames) <= 0:
-    #     print('[ERROR] waspy.__internalExecuteWorkflow: no output file names, aborting')
+    #     print('[ERROR] waspy._internalExecuteWorkflow: no output file names, aborting')
     #     return ''
 
     if sWorkflowName is None:
-        print('[ERROR] waspy.__internalExecuteWorkflow: workspace name is None, aborting')
+        print('[ERROR] waspy._internalExecuteWorkflow: workspace name is None, aborting')
         return ''
     elif len(sWorkflowName) <= 0:
-        print('[ERROR] waspy.__internalExecuteWorkflow: workflow name too short, aborting')
+        print('[ERROR] waspy._internalExecuteWorkflow: workflow name too short, aborting')
         return ''
 
     sProcessId = ''
@@ -1570,10 +1576,10 @@ def __internalExecuteWorkflow(asInputFileNames, asOutputFileNames, sWorkflowName
     aoWorkflows = getWorkflows()
     aoDictPayload = None
     if aoWorkflows is None:
-        print('[ERROR] waspy.__internalExecuteWorkflow: workflow list is None, aborting')
+        print('[ERROR] waspy._internalExecuteWorkflow: workflow list is None, aborting')
         return ''
     elif len(aoWorkflows) <= 0:
-        print('[ERROR] waspy.__internalExecuteWorkflow: workflow list is empty, aborting')
+        print('[ERROR] waspy._internalExecuteWorkflow: workflow list is empty, aborting')
         return ''
     else:
         for asWorkflow in aoWorkflows:
@@ -1588,25 +1594,25 @@ def __internalExecuteWorkflow(asInputFileNames, asOutputFileNames, sWorkflowName
                             aoDictPayload["workflowId"] = asWorkflow["workflowId"]
                             break
     if aoDictPayload is None:
-        print('[ERROR] waspy.__internalExecuteWorkflow: workflow name not found, aborting')
+        print('[ERROR] waspy._internalExecuteWorkflow: workflow name not found, aborting')
         return ''
 
     try:
         aoDictPayload["inputFileNames"] = asInputFileNames
         aoDictPayload["outputFileNames"] = asOutputFileNames
     except:
-        print('[ERROR] waspy.__internalExecuteWorkflow: payload could not be generated, aborting')
+        print('[ERROR] waspy._internalExecuteWorkflow: payload could not be generated, aborting')
         return ''
 
-    __log('[INFO] waspy.__internalExecuteWorkflow: about to HTTP put to ' + str(sUrl) + ' with payload ' +
+    _log('[INFO] waspy._internalExecuteWorkflow: about to HTTP put to ' + str(sUrl) + ' with payload ' +
           str(aoDictPayload))
-    asHeaders = __getStandardHeaders()
+    asHeaders = _getStandardHeaders()
     oResponse = requests.post(sUrl, headers=asHeaders, data=json.dumps(aoDictPayload))
     if oResponse is None:
-        print('[ERROR] waspy.__internalExecuteWorkflow: communication with the server failed, aborting')
+        print('[ERROR] waspy._internalExecuteWorkflow: communication with the server failed, aborting')
         return ''
     elif oResponse.ok is True:
-        __log('[INFO] waspy.__internalExecuteWorkflow: server replied OK')
+        _log('[INFO] waspy._internalExecuteWorkflow: server replied OK')
         asJson = oResponse.json()
         if "stringValue" in asJson:
             sProcessId = asJson["stringValue"]
@@ -1615,10 +1621,10 @@ def __internalExecuteWorkflow(asInputFileNames, asOutputFileNames, sWorkflowName
             else:
                 return waitProcess(sProcessId)
         else:
-            print('[ERROR] waspy.__internalExecuteWorkflow: cannot find process ID in response, aborting')
+            print('[ERROR] waspy._internalExecuteWorkflow: cannot find process ID in response, aborting')
             return ''
     else:
-        print('[ERROR] waspy.__internalExecuteWorkflow: server returned status ' + str(oResponse.status_code))
+        print('[ERROR] waspy._internalExecuteWorkflow: server returned status ' + str(oResponse.status_code))
         print(oResponse.content)
     return ''
 
@@ -1652,7 +1658,7 @@ def mosaic(asInputFiles, sOutputFile, asBands=None,
     :return: Process ID is asynchronous execution, end status otherwise. An empty string is returned in case of failure
     """
 
-    __log('[INFO]  waspy.mosaic( ' +
+    _log('[INFO]  waspy.mosaic( ' +
           str(asInputFiles) + ', ' +
           str(sOutputFile) + ', ' +
           str(asBands) + ', ' +
@@ -1699,7 +1705,7 @@ def mosaic(asInputFiles, sOutputFile, asBands=None,
         sOutputFormat = "BEAM-DIMAP"
 
     if sCrs is None:
-        sCrs = __getDefaultCRS()
+        sCrs = _getDefaultCRS()
 
     # todo check input type is appropriate
     try:
@@ -1727,7 +1733,7 @@ def mosaic(asInputFiles, sOutputFile, asBands=None,
         print('[ERROR] waspy.mosaic: cannot build DTO, please check your input. Aborting')
         return ''
 
-    asHeaders = __getStandardHeaders()
+    asHeaders = _getStandardHeaders()
     oResponse = requests.post(sUrl, data=json.dumps(aoMosaicSettings), headers=asHeaders)
     if oResponse is None:
         print('[ERROR] waspy.mosaic: cannot contact server, aborting')
@@ -1747,7 +1753,7 @@ def mosaic(asInputFiles, sOutputFile, asBands=None,
     return ''
 
 
-def __getDefaultCRS():
+def _getDefaultCRS():
     return (
             "GEOGCS[\"WGS84(DD)\", \r\n" +
             "		  DATUM[\"WGS84\", \r\n" +
@@ -1760,6 +1766,7 @@ def __getDefaultCRS():
 
 
 if __name__ == '__main__':
-    __log(
-        'WASPY - The WASDI Python Library. Include in your code for space development processors. Visit www.wasdi.net')
+    _log(
+        'WASPY - The WASDI Python Library. Include in your code for space development processors. Visit www.wasdi.net'
+    )
 
