@@ -378,10 +378,16 @@ def _loadParams():
     global m_sParametersFilePath
     global m_aoParamsDictionary
 
+    bParamLoaded = False
     if (m_sParametersFilePath is not None) and (m_sParametersFilePath != ''):
-        with open(m_sParametersFilePath) as oJsonFile:
-            m_aoParamsDictionary = json.load(oJsonFile)
-    else:
+        try:
+            with open(m_sParametersFilePath) as oJsonFile:
+                m_aoParamsDictionary = json.load(oJsonFile)
+                bParamLoaded = True
+        except FileNotFoundError:
+            pass
+
+    if not bParamLoaded:
         _log('[INFO] wasdi could not load param file. That is fine, you can still load it later, don\'t worry')
 
 
