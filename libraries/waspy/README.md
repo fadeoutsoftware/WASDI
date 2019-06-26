@@ -2,9 +2,9 @@
 
 This is a **preliminary version** of the Python Library you can use to access the [WASDI](http://www.wasdi.net) platform functionalities from your Python code.
 
-The source code can be found [here](https://github.com/fadeoutsoftware/WASDI/tree/develop/libraries/waspy)
-
 Visit us at [http://www.wasdi.net](http://www.wasdi.net)
+
+The source code can be found [here](https://github.com/fadeoutsoftware/WASDI/tree/develop/libraries/waspy)
 
 ----
 
@@ -15,7 +15,7 @@ WASPY is the **WAS**DI **Py**thon Library.
 
 ### Prerequisites:
 
-- a WASDI registered user (with a username/password, google users are not supported yet)
+- a [WASDI](http://www.wasdi.net) registered user (with a username/password, google users are not supported yet)
 - at least one workspace
 - some EO products in your workspace
 
