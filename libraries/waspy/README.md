@@ -9,7 +9,7 @@ Visit us at http://www.wasdi.net
 
 ## Python tutorial
 
-WASPY is the **WAS**DI **Py**thon Library. To start working with it, just install the library using:
+WASPY is the **WAS**DI **Py**thon Library. You need WASDI registered user (with a username/password, don't create it using google) to use it. To start working with it, just install the library using:
 
 
 ```bash
@@ -35,21 +35,22 @@ You should see this kind of output:
 
 
 
-### Edit the `config.json` file
+### Create a `config.json` file
 
-The `config.json` file is a standard json file, the syntax is:
+The `config.json` file is a standard json file, which is used to store the credentials of the user and some other settings. The syntax is:
 
+```json
 “VARIABLE_NAME”: value
+```
 
 The minimal configuration to begin working with WASPY is:
-
 
 ```json
 {
   "USER": "yourUser@wasdi.net",
   "PASSWORD": "yourPasswordHere",
   "WORKSPACE": "nameOfTheWorkspaceYouWantToUse",
-  "PARAMETERSFILEPATH": <path to a json file w/ your own parameters>
+  "PARAMETERSFILEPATH": "<path to a json file w/ your own parameters>"
 }
 ```
 
@@ -78,7 +79,7 @@ getWorkspaces()
 you should see a result like this:
 
 
-```json
+```
 [{u'ownerUserId': u'yourUser@wasdi.net',
   u'sharedUsers': [],
   u'workspaceId': u'23ab54f3-b453-2b3e-284a-b6a4243f0f2c',
@@ -109,7 +110,7 @@ getProductsByWorkspace('aNiceNameForThisWorkspace')
 
 and the lib returns a list of the products in the given workspace:
 
-```json
+```
 [u'S1A_IW_GRDH_1SDV_20190517T053543_20190517T053608_027263_0312F1_F071.zip',
 u'S1B_IW_RAW__0SDV_20190506T052631_20190506T052703_016119_01E53A_D2AD.zip', u'S1A_IW_GRDH_1SDV_20190517T053608_20190517T053633_027263_0312F1_3382.zip']
 ```
