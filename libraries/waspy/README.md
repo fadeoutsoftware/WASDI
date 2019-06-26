@@ -2,6 +2,8 @@
 
 This is a **preliminary version** of the Python Library you can use to access the [WASDI](http://www.wasdi.net) platform functionalities from your Python code.
 
+The source code can be found [here](https://github.com/fadeoutsoftware/WASDI/tree/develop/libraries/waspy)
+
 Visit us at http://www.wasdi.net
 
 ----
@@ -9,13 +11,21 @@ Visit us at http://www.wasdi.net
 
 ## Python tutorial
 
-WASPY is the **WAS**DI **Py**thon Library. You need WASDI registered user (with a username/password, don't create it using google) to use it. To start working with it, just install the library using:
+WASPY is the **WAS**DI **Py**thon Library. 
 
+### Prerequisites:
+
+- a WASDI registered user (with a username/password, don't create it using google)
+- at least one workspace
+- some EO products in your workspace
+
+### Installation
+
+To start working with WASPY, just install the library using:
 
 ```bash
 pip install wasdi
 ```
-
 
 To quickly check if the installation worked correctly, try running the following code:
 
@@ -25,7 +35,6 @@ import wasdi
 print(wasdi.hello())
 ```
 
-
 You should see this kind of output:
 
 
@@ -34,14 +43,15 @@ You should see this kind of output:
 ```
 
 
+### Configuration
 
-### Create a `config.json` file
-
-The `config.json` file is a standard json file, which is used to store the credentials of the user and some other settings. The syntax is:
+Create a `config.json` file. It is a standard json file, which is used to store the credentials of the user and some other settings. The syntax is:
 
 ```json
 “VARIABLE_NAME”: value
 ```
+
+Hint: exploit an editor which can check the syntax (there are many which can be accessed online for free)
 
 The minimal configuration to begin working with WASPY is:
 
@@ -49,8 +59,7 @@ The minimal configuration to begin working with WASPY is:
 {
   "USER": "yourUser@wasdi.net",
   "PASSWORD": "yourPasswordHere",
-  "WORKSPACE": "nameOfTheWorkspaceYouWantToUse",
-  "PARAMETERSFILEPATH": "<path to a json file w/ your own parameters>"
+  "WORKSPACE": "nameOfTheWorkspaceYouWantToUse"
 }
 ```
 
@@ -72,7 +81,7 @@ The Lib will read the configuration file, load the user and password, log the us
 
 
 ```python
-getWorkspaces()
+wasdi.getWorkspaces()
 ```
 
 
@@ -93,19 +102,19 @@ you should see a result like this:
 The configured Workspace is already opened.  The use can open another workspace using:
 
 ```python
-openWorkspace('aNiceNameForThisWorkspace')
+wasdi.openWorkspace('aNiceNameForThisWorkspace')
 ```
 
 and the lib replies showing the workspace unique id:
 
-```python
+```
 u'9ce787d4-1d59-4146-8df7-3fc9516d4eb3'
 ```
 
 To get the list of the products available in the workspace, call
 
 ```python
-getProductsByWorkspace('aNiceNameForThisWorkspace')
+wasdi.getProductsByWorkspace('aNiceNameForThisWorkspace')
 ```
 
 and the lib returns a list of the products in the given workspace:
@@ -128,6 +137,7 @@ outputfilename = "~wasdiUser/EO/myoutput.tiff"
 
 # Read the file
 EOimage = multibandRead(filename, size, precision, offset, interleave, byteorder)
+
 # Elaborate the image somehow
 EOimage *= 2
 
@@ -143,35 +153,40 @@ import os
 filename = 'myfile.zip'
 outputFileName = 'myoutput.tiff'
 
-fullInputPath = getFullProductPath(filename)
+fullInputPath = wasdi.getFullProductPath(filename)
 
 # Read the file
 EOproduct = multibandRead(fullInputPath, size, precision, offset, interleave, byteorder)
+
 # Elaborate the image
 EOproduct *= 2
 
 # Save the output
 # Get The Path
-outputPath = getSavePath()
+outputPath = wasdi.getSavePath()
 fullOutputPath = os.path.join(outputPath, outputFileName)
+
 # Use the save path
 imwrite(EOproduct, fullOutputPath)
+
 # Ingest in WASDI
-AddFileToWASDI(outputFileName)
+wasdi.addFileToWASDI(outputFileName)
 ```
 
 We modified the code to start the library and then to receive from WASDI the paths to use. 
 
 The input files are supposed to be in the workspace. In order for this to happen, the user can go the wasdi web application, open the workspace, search the needed image and add it to the workspace.
 
-The `getFullProductPath` method has a double goal:
+The `wasdi.getFullProductPath` method has a double goal:
 
 1. as the name suggests, it returns the local path to use back to the developer
 2. if the code is running on the client PC, the Wasdi Lib will checks if the file is available locally: in case this checks fails, the lib will automatically download the file from the WASDI cloud to the local PC. \
-To disable the auto download feature, is possible to add this parameter to the `config.json` file: \
-`"DOWNLOADACTIVE":0`
+To disable the auto download feature, is possible to add this parameter to the `config.json` file:\
+```json
+"DOWNLOADACTIVE":0
+```
 
-To save a file the name is left to the user,  WASPY just provides the folder to use (`GetSavePath`). So to save the file we need to get the path and then concatenate the custom file name.
+The choice of a name for the output file is left to the user,  WASPY just provides the folder to use (`wasdi.GetSavePath`). So to save the file we need to get the path and then concatenate the custom file name (`fullOutputPath = os.path.join(outputPath, outputFileName)`).
 
 The last call, `AddFileToWASDI`, has the goal to add the product to the workspace. It takes in input only the file name, without the full path.
 
@@ -187,7 +202,7 @@ Every processor usually has its own parameters. A typical example can be the nam
 Add this line to the configuration file `config.json`:
 
 ```json
-"PARAMETERSFILEPATH": <path to a similar file for own parameters>
+"PARAMETERSFILEPATH": "<path to a similar file for own parameters>"
 ```
 
 e.g.
@@ -214,7 +229,7 @@ In WASPY there are these three methods available:
 *   `addParameter(sKey, sValue)`: updates the value of a Parameter (ONLY in memory NOT in the file)
 *   `refreshParameters()`: reads the parameter file from disk again
 
-Let’s update the code above to use the parameters file. First of all create a parameter file and set the name and path in the `config.json` file. The file (i.e., `parameters.json`) becomes:
+Let’s update the code above to use the parameters file. First of all create a parameter file and set the name and path in the `config.json` file. The file (i.e., `parameters.json`) might look like this:
 
 ```json
 {
@@ -226,24 +241,27 @@ Let’s update the code above to use the parameters file. First of all create a 
 Then modify the code to read the parameters without using hard-coded input:
 
 ```python
-# THE INPUT FILE IS SUPPOSED TO BE IN THE WORKSPACE
-# READ THE FILE FROM PARAMETERS
-filename = getParameter("INPUT_FILE")
-outputfilename = getParameter("OUTPUT_FILE")
+# The input file is supposed to be in the workspace
+# Read the file from parameters
+filename = wasdi.getParameter("INPUT_FILE")
+outputfilename = wasdi.getParameter("OUTPUT_FILE")
 
-fullInputPath = getFullProductPath(filename)
+fullInputPath = wasdi.getFullProductPath(filename)
 
 # Read the file
 EOproduct = multibandRead(fullInputPath, size, precision, offset, interleave, byteorder)
+
 # Elaborate the image
 EOproduct  *= 2
 
 # Save the output
 # Get The Path
-outputPath = getSavePath()
+outputPath = wasdi.getSavePath()
 fullOutputPath = os.path.join(outputPath, outputFileName)
+
 # Use the save path
 imwrite(EOproduct, fullOutputPath)
+
 # Ingest in WASDI
-addFileToWASDI(outputFileName)
+wasdi.addFileToWASDI(outputFileName)
 ```
