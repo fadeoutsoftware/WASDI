@@ -4,7 +4,7 @@ This is a **preliminary version** of the Python Library you can use to access th
 
 The source code can be found [here](https://github.com/fadeoutsoftware/WASDI/tree/develop/libraries/waspy)
 
-Visit us at http://www.wasdi.net
+Visit us at [http://www.wasdi.net](http://www.wasdi.net)
 
 ----
 
@@ -15,7 +15,7 @@ WASPY is the **WAS**DI **Py**thon Library.
 
 ### Prerequisites:
 
-- a WASDI registered user (with a username/password, don't create it using google)
+- a WASDI registered user (with a username/password, google users are not supported yet)
 - at least one workspace
 - some EO products in your workspace
 
@@ -76,6 +76,7 @@ To start WASPY and check if everything is working, run the following code:
 wasdi.init('./config.json')
 ```
 
+(Adapt the path if the file is not located in your working directory)
 
 The Lib will read the configuration file, load the user and password, log the user in, and then open the workspace specified in the configuration file. To check if everything is working, try to get the list of workspaces available for the user:
 
@@ -84,15 +85,13 @@ The Lib will read the configuration file, load the user and password, log the us
 wasdi.getWorkspaces()
 ```
 
-
-you should see a result like this:
-
+You should be able to see a result similar to the following one:
 
 ```
 [{u'ownerUserId': u'yourUser@wasdi.net',
   u'sharedUsers': [],
   u'workspaceId': u'23ab54f3-b453-2b3e-284a-b6a4243f0f2c',
-  u'workspaceName': u'aNiceNameForThisWorkspace'},
+  u'workspaceName': u'nameOfTheWorkspaceYouWantToUse'},
  {u'ownerUserId': u'yourUser@wasdi.net',
   u'sharedUsers': [],
   u'workspaceId': u'103fbf01-2e68-22d3-bd45-2cf95665dac2',
@@ -102,7 +101,7 @@ you should see a result like this:
 The configured Workspace is already opened.  The use can open another workspace using:
 
 ```python
-wasdi.openWorkspace('aNiceNameForThisWorkspace')
+wasdi.openWorkspace('theNameOfAnotherWorkspace')
 ```
 
 and the lib replies showing the workspace unique id:
@@ -114,12 +113,12 @@ u'9ce787d4-1d59-4146-8df7-3fc9516d4eb3'
 To get the list of the products available in the workspace, call
 
 ```python
-wasdi.getProductsByWorkspace('aNiceNameForThisWorkspace')
+wasdi.getProductsByWorkspace('nameOfTheWorkspaceYouWantToUse')
 ```
 
 and the lib returns a list of the products in the given workspace:
 
-```
+```python
 [u'S1A_IW_GRDH_1SDV_20190517T053543_20190517T053608_027263_0312F1_F071.zip',
 u'S1B_IW_RAW__0SDV_20190506T052631_20190506T052703_016119_01E53A_D2AD.zip', u'S1A_IW_GRDH_1SDV_20190517T053608_20190517T053633_027263_0312F1_3382.zip']
 ```
@@ -225,9 +224,9 @@ The only limit is that each parameter has to be written in one line.
 
 In WASPY there are these three methods available:
 
-*   `getParameter(sKey)`: return the value of the sKey Parameter
-*   `addParameter(sKey, sValue)`: updates the value of a Parameter (ONLY in memory NOT in the file)
-*   `refreshParameters()`: reads the parameter file from disk again
+-   `wasdi.getParameter(sKey)`: return the value of the sKey Parameter
+-   `wasdi.addParameter(sKey, sValue)`: updates the value of a Parameter (ONLY in memory NOT in the file)
+-   `wasdi.refreshParameters()`: reads the parameter file from disk again
 
 Let’s update the code above to use the parameters file. First of all create a parameter file and set the name and path in the `config.json` file. The file (i.e., `parameters.json`) might look like this:
 
