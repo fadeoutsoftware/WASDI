@@ -147,6 +147,7 @@ imwrite(EOimage, outputfilename)
 To port the code onto WASDI, the pseudo-code has to be integrated like this:
 
 ```python
+import wasdi
 import os
 
 filename = 'myfile.zip'
@@ -240,6 +241,9 @@ Let’s update the code above to use the parameters file. First of all create a 
 Then modify the code to read the parameters without using hard-coded input:
 
 ```python
+import wasdi
+import os
+
 # The input file is supposed to be in the workspace
 # Read the file from parameters
 filename = wasdi.getParameter("INPUT_FILE")
