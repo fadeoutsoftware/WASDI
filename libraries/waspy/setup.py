@@ -13,7 +13,7 @@ with open("README.md", "r") as oFh:
 
 setuptools.setup(
     name="wasdi",
-    version="0.1.6",
+    version="0.1.7",
     author="FadeOut Software",
     author_email="info@fadeout.biz",
     description="The Wasdi Python library",
@@ -22,7 +22,7 @@ setuptools.setup(
     url="http://www.wasdi.net",
     packages=setuptools.find_packages(),
     classifiers=[
-        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 2",
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
