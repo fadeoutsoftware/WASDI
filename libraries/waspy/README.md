@@ -87,7 +87,7 @@ wasdi.getWorkspaces()
 
 You should be able to see a result similar to the following one:
 
-```
+```python
 [{u'ownerUserId': u'yourUser@wasdi.net',
   u'sharedUsers': [],
   u'workspaceId': u'23ab54f3-b453-2b3e-284a-b6a4243f0f2c',
@@ -106,7 +106,7 @@ wasdi.openWorkspace('theNameOfAnotherWorkspace')
 
 and the lib replies showing the workspace unique id:
 
-```
+```python
 u'9ce787d4-1d59-4146-8df7-3fc9516d4eb3'
 ```
 
