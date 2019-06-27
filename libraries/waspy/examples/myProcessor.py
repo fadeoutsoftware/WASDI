@@ -2,9 +2,9 @@ import wasdi
 
 
 def run(parameters, processId):
-    wasdi.wasdiLog('Big Dive Test')
-    aoImages = wasdi.searchEOImages("S1", "2018-09-01", "2018-09-02", 44, 11, 43, 12, None, None, None, None)
-    wasdi.wasdiLog('Found ' + str(len(aoImages)));
+    wasdi.wasdiLog('Let\'s search some images')
+    aoImages = wasdi.searchEOImages("S1", "2018-09-01", "2018-09-02", 44, 11, 43, 12)
+    wasdi.wasdiLog('Found ' + str(len(aoImages)))
 
 
 def WasdiHelp():
