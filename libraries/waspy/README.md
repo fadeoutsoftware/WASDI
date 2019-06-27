@@ -137,8 +137,6 @@ The output should be similar to this:
 ```
  Let's search some images
 [INFO] waspy.searchEOImages: search results:
-```
-```json
 [
 	{
 		'footprint': 'POLYGON ((8.8724 45.3272, 8.4505 43.3746, 11.4656 43.0981, 11.9901 45.0472, 8.8724 45.3272, 8.8724 45.3272))',
@@ -163,8 +161,6 @@ The output should be similar to this:
 		'(...7 more results similar to this one, omitted for brevity)'
 	}
 ]
-```
-```
 Found 8
 ```
 
