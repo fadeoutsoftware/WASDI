@@ -13,7 +13,7 @@ with open("README.md", "r") as oFh:
 
 setuptools.setup(
     name="wasdi",
-    version="0.1.7",
+    version="0.1.8",
     author="FadeOut Software",
     author_email="info@fadeout.biz",
     description="The Wasdi Python library",
