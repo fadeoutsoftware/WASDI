@@ -79,8 +79,7 @@ def printStatus():
               '  ******************************************************************************')
 
 
-
-    def setVerbose(bVerbose):
+def setVerbose(bVerbose):
     if bVerbose is None:
         print('[ERROR] waspy.setVerbose: passed None, won\'t change' +
               '  ******************************************************************************')
