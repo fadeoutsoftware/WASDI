@@ -1,6 +1,6 @@
 # WASDI Python Library
 
-This is a **preliminary version** of the Python Library you can use to access the [WASDI](http://www.wasdi.net) platform functionalities from your Python code.
+WASDI is the Web Advanced Space Developer Interface. This software is a **preliminary version** of the Python Library you can use to access the [WASDI](http://www.wasdi.net) platform functionalities from your Python code.
 
 Visit us at [http://www.wasdi.net](http://www.wasdi.net)
 
@@ -15,9 +15,15 @@ WASPY is the **WAS**DI **Py**thon Library.
 
 ### Prerequisites:
 
+mandatory:
+
 - a [WASDI](http://www.wasdi.net) registered user (with a username/password, google users are not supported yet)
 - at least one workspace
 - some EO products in your workspace
+
+Optional:
+
+- [SNAP Python (snappy) interface](https://senbox.atlassian.net/wiki/spaces/SNAP/pages/50855941/Configure+Python+to+use+the+SNAP-Python+snappy+interface): this is not necessary but you may find these useful, especially for reading and writing images locally ([howto](https://senbox.atlassian.net/wiki/spaces/SNAP/pages/19300362/How+to+use+the+SNAP+API+from+Python)). Anyway, most of the SNAP functionalities are wrapped by WASDI, so don't worry.
 
 ### Installation
 
@@ -137,8 +143,7 @@ The output should be similar to this:
 ```
  Let's search some images
 [INFO] waspy.searchEOImages: search results:
-[
-	{
+[{
 		'footprint': 'POLYGON ((8.8724 45.3272, 8.4505 43.3746, 11.4656 43.0981, 11.9901 45.0472, 8.8724 45.3272, 8.8724 45.3272))',
 		'id': 'cba6c104-3006-4af7-a2d1-cbd55f58b939',
 		'link': 'https://catalogue.onda-dias.eu/dias-catalogue/Products(cba6c104-3006-4af7-a2d1-cbd55f58b939)/$value',
@@ -156,13 +161,25 @@ The output should be similar to this:
 		'provider': 'ONDA',
 		'summary': 'Date: 2018-09-03T05:12:37.000Z, Instrument: null, Mode: null, Satellite: null, Size: 1.54 GB',
 		'title': 'S1A_IW_RAW__0SDV_20180902T052727_20180902T052759_023515_028F75_7325'
-	},
-	{
-		'(...7 more results similar to this one, omitted for brevity)'
-	}
-]
+},
+{'(...7 more results similar to this one, omitted for brevity)'}]
 Found 8
 ```
+
+Now we can import one of those products in WASDI using the value of the field `link`. Let's download the first one:
+
+```python
+wasdi.importProduct('https://catalogue.onda-dias.eu/dias-catalogue/Products(cba6c104-3006-4af7-a2d1-cbd55f58b939)/$value')
+```
+
+### Running an existing workflow
+
+If you wish to run an existing SNAP workflow you can use `wasdi.executeWorkflow`. For example, if you wish to execute a workflow that calibrates and corrects the georeference of a Sentinel 1 image, you may use the workflow called `LISTSinglePreproc` in this way:
+
+
+Let's consider a somewhat more complicated 
+
+### Deploy your processor on 
 
 
 ### Include WASDI in a custom Processor
