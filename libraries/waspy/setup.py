@@ -13,7 +13,7 @@ with open("README.md", "r") as oFh:
 
 setuptools.setup(
     name="wasdi",
-    version="0.1.8",
+    version="0.1.10",
     author="FadeOut Software",
     author_email="info@fadeout.biz",
     description="The Wasdi Python library",
@@ -25,5 +25,14 @@ setuptools.setup(
         "Programming Language :: Python :: 2",
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
+        "Development Status :: 3 - Alpha",
+        "Intended Audience :: Science/Research",
+        "Topic :: Scientific/Engineering",
+        "Topic :: Scientific/Engineering :: GIS",
+        "Topic :: Software Development :: Libraries"
     ],
+    project_urls={
+        'Source': 'https://github.com/fadeoutsoftware/WASDI/tree/develop/libraries/waspy',
+        'Tracker': 'https://github.com/fadeoutsoftware/WASDI/issues'
+    }
 )
