@@ -1,6 +1,13 @@
 """
+**Disclaimer ** please consider this is a preliminary version of the lib. It is undergoing many tests but also many changes,
+so please be patient and do not trust anyone's life with the library (not yet)
+
+# WASDI
+
 This is WASPY, the WASDI Python lib.
-The methods allow to interact with WASDI seamlessly.
+
+The methods in the module allow to interact with WASDI seamlessly.
+
 Note:
 the philosophy of safe programming is adopted as widely as possible, the lib will try to workaround issues such as
 faulty input, and print an error rather than raise an exception, so that your program can possibly go on. Please check
