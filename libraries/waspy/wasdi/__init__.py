@@ -52,8 +52,7 @@ m_bIsOnServer = False
 
 
 def printStatus():
-    """
-    Prints status
+    """Prints status
     """
     global m_sActiveWorkspace
     global m_sParametersFilePath
@@ -89,6 +88,11 @@ def printStatus():
 
 
 def setVerbose(bVerbose):
+    """Sets verbosity
+
+    :param bVerbose: False non verbose, True verbose
+    :return:
+    """
     if bVerbose is None:
         print('[ERROR] waspy.setVerbose: passed None, won\'t change' +
               '  ******************************************************************************')
