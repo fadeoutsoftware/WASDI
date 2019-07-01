@@ -15,13 +15,14 @@ Created on 11 Jun 2018
 
 name = "wasdi"
 
-import requests
-import os
 import json
-import traceback
+import os
 import re
-import zipfile
 import time
+import traceback
+import zipfile
+
+import requests
 
 m_sUser = None
 m_sPassword = None
@@ -59,6 +60,7 @@ def printStatus():
     global m_sBaseUrl
     global m_bIsOnServer
 
+    _log('')
     _log('[INFO] waspy.printStatus: user: ' + str(getUser()))
     _log('[INFO] waspy.printStatus: password: ***********')
     _log('[INFO] waspy.printStatus: session id: ' + str(getSessionId()))
@@ -91,7 +93,7 @@ def setVerbose(bVerbose):
             bVerbose = bool(bVerbose)
         except:
             print('[ERROR] waspy.setVerbose: cannot convert argument into boolean, won\'t change' +
-              '  ******************************************************************************')
+                  '  ******************************************************************************')
             return
 
     global m_bVerbose
@@ -466,7 +468,7 @@ def init(sConfigFilePath=None):
     else:
         if m_sPassword is None:
             print('[ERROR] waspy.init: must initialize password first, but None given' +
-              '  ******************************************************************************')
+                  '  ******************************************************************************')
             return False
         asHeaders = {'Content-Type': 'application/json'}
         sUrl = m_sBaseUrl + '/auth/login'
@@ -474,17 +476,17 @@ def init(sConfigFilePath=None):
         oResponse = requests.post(sUrl, data=sPayload, headers=asHeaders)
         if oResponse is None:
             print('[ERROR] waspy.init: cannot authenticate' +
-              '  ******************************************************************************')
+                  '  ******************************************************************************')
             m_bValidSession = False
         elif oResponse.ok is not True:
             print('[ERROR] waspy.init: cannot authenticate, server replied: ' + str(oResponse.status_code) +
-              '  ******************************************************************************')
+                  '  ******************************************************************************')
             m_bValidSession = False
         else:
             oJsonResult = oResponse.json()
             try:
                 m_sSessionId = str(oJsonResult['sessionId'])
-                _log('[INFO] waspy.init: returned session is: '+ str(m_sSessionId))
+                _log('[INFO] waspy.init: returned session is: ' + str(m_sSessionId) + '\n')
                 if m_sSessionId is not None and m_sSessionId != '' and m_sSessionId != 'None':
                     m_bValidSession = True
                 else:
@@ -503,7 +505,6 @@ def init(sConfigFilePath=None):
     else:
         print('[ERROR] waspy.init: could not init WASPY :-(' +
               '  ******************************************************************************')
-
 
     printStatus()
     return m_bValidSession
@@ -844,7 +845,8 @@ def updateProgressPerc(iPerc):
             iPerc = 100
 
     sStatus = "RUNNING"
-    sUrl = getBaseUrl() + "/process/updatebyid?sProcessId=" + getProcId() + "&status=" + sStatus + "&perc=" + str(iPerc) + "&sendrabbit=1"
+    sUrl = getBaseUrl() + "/process/updatebyid?sProcessId=" + getProcId() + "&status=" + sStatus + "&perc=" + str(
+        iPerc) + "&sendrabbit=1"
     asHeaders = _getStandardHeaders()
     oResponse = requests.get(sUrl, headers=asHeaders)
     sResult = ""
@@ -984,7 +986,7 @@ def downloadFile(sFileName):
             os.makedirs(os.path.dirname(sSavePath))
         except:  # Guard against race condition
             print('[ERROR] waspy.downloadFile: cannot create File Path, aborting' +
-              '  ******************************************************************************')
+                  '  ******************************************************************************')
             return
 
         _log('[INFO] waspy.downloadFile: downloading local file ' + sSavePath)
@@ -1022,7 +1024,7 @@ def wasdiLog(sLogRow):
         elif oResult.ok is not True:
             print('[WARNING] waspy.wasdiLog: could not log, server returned: ' + str(oResult.status_code))
     else:
-        print(sLogRow)
+        _log(sLogRow)
 
 
 def deleteProduct(sProduct):
@@ -1192,7 +1194,7 @@ def searchEOImages(sPlatform, sDateFrom, sDateTo,
             aoReturnList = oJsonResponse
         except Exception as oEx:
             print('[ERROR] waspy.searchEOImages: exception while trying to convert response into JSON object' +
-              '  ******************************************************************************')
+                  '  ******************************************************************************')
             return aoReturnList
 
         _log("[INFO] waspy.searchEOImages: search results:\n" + repr(aoReturnList))
@@ -1269,7 +1271,7 @@ def _unzip(sAttachmentName, sPath):
     :param sPath: both the path where the file is and where it must be unzipped
     :return:
     """
-    _log('waspy._unzip( ' + sAttachmentName + ', ' + sPath + ' )')
+    _log('[INFO] waspy._unzip( ' + sAttachmentName + ', ' + sPath + ' )')
     if sPath is None:
         print('[ERROR] waspy._unzip: path is None' +
               '  ******************************************************************************')
@@ -1300,32 +1302,28 @@ def importProduct(sFileUrl=None, sBoundingBox=None, asProduct=None):
     :return: execution status
     """
 
-    _log('waspy.importProduct( ' + str(sFileUrl) + ', ' + str(sBoundingBox) + ', ' + str(asProduct) + ' )')
+    _log('[INFO] waspy.importProduct( ' + str(sFileUrl) + ', ' + str(sBoundingBox) + ', ' + str(asProduct) + ' )')
 
     sReturn = "ERROR"
 
-    if sFileUrl is None:
-        if asProduct is not None and "link" in asProduct:
-            sFileUrl = asProduct["link"]
-            if "footprint" in asProduct:
-                sBoundingBox = asProduct["footprint"]
-        else:
-            print('[ERROR] waspy.importProduct: cannot import product without url or a dict containing the link' +
-              '  ******************************************************************************')
-            return ''
+    if sFileUrl is None and asProduct is not None and "link" in asProduct:
+        sFileUrl = asProduct["link"]
+        if "footprint" in asProduct:
+            sBoundingBox = asProduct["footprint"]
 
     if sFileUrl is None:
-        print('[ERROR] waspy.importProduct: cannot detect the link to get the requested product' +
+        print('[ERROR] waspy.importProduct: cannot find a link to download the requested product' +
               '  ******************************************************************************')
-        return ''
+        return sReturn
 
     sUrl = getBaseUrl()
     sUrl += "/filebuffer/download?sFileUrl="
     sUrl += sFileUrl
     sUrl += "&sProvider=ONDA&sWorkspaceId="
     sUrl += getActiveWorkspaceId()
-    sUrl += "&sBoundingBox="
-    sUrl += sBoundingBox
+    if sBoundingBox is not None:
+        sUrl += "&sBoundingBox="
+        sUrl += sBoundingBox
 
     asHeaders = _getStandardHeaders()
 
@@ -1387,7 +1385,7 @@ def asynchExecuteProcessor(sProcessorName, aoParams={}):
             return sProcessID
         else:
             print('[ERROR] waspy.asynchExecuteProcessor: cannot extract processing identifier from response, aborting' +
-              '  ******************************************************************************')
+                  '  ******************************************************************************')
     else:
         print('[ERROR] waspy.asynchExecuteProcessor: server returned status ' + str(oResponse.status_code) +
               '  ******************************************************************************')
@@ -1517,7 +1515,7 @@ def _internalAddFileToWASDI(sFileName, bAsynch=None):
             sFileName = str(sFileName)
         except:
             print('[ERROR] waspy._internalAddFileToWASDI: cannot convert file name into string, aborting' +
-              '  ******************************************************************************')
+                  '  ******************************************************************************')
             return ''
     if len(sFileName) < 1:
         print('[ERROR] waspy._internalAddFileToWASDI: file name has zero length, aborting' +
@@ -1533,7 +1531,7 @@ def _internalAddFileToWASDI(sFileName, bAsynch=None):
             bAsynch = bool(bAsynch)
         except:
             print('[ERROR] waspy._internalAddFileToWASDI: could not convert asynch flag into bool, aborting' +
-              '  ******************************************************************************')
+                  '  ******************************************************************************')
             return ''
 
     sResult = ''
@@ -1554,10 +1552,10 @@ def _internalAddFileToWASDI(sFileName, bAsynch=None):
         oResponse = requests.get(url=sUrl, headers=asHeaders)
         if oResponse is None:
             print('[ERROR] waspy._internalAddFileToWASDI: cannot contact server' +
-              '  ******************************************************************************')
+                  '  ******************************************************************************')
         elif oResponse.ok is not True:
             print('[ERROR] waspy._internalAddFileToWASDI: failed, server replied ' + str(oResponse.status_code) +
-              '  ******************************************************************************')
+                  '  ******************************************************************************')
         else:
             oJson = oResponse.json()
             if 'stringValue' in oJson:
@@ -1575,7 +1573,7 @@ def _internalAddFileToWASDI(sFileName, bAsynch=None):
 
 def subset(sInputFile, sOutputFile, dLatN, dLonW, dLatS, dLonE):
     _log('[INFO] waspy.subset( ' + str(sInputFile) + ', ' + str(sOutputFile) + ', ' +
-          str(dLatN) + ', ' + str(dLonW) + ', ' + str(dLatS) + ', ' + str(dLonE) + ' )')
+         str(dLatN) + ', ' + str(dLonW) + ', ' + str(dLatS) + ', ' + str(dLonE) + ' )')
 
     if sInputFile is None:
         print('[ERROR] waspy.subset: input file must not be None, aborting' +
@@ -1637,7 +1635,7 @@ def _internalExecuteWorkflow(asInputFileNames, asOutputFileNames, sWorkflowName,
     """
 
     _log('[INFO] waspy._internalExecuteWorkflow( ' + str(asInputFileNames) + ', ' +
-          str(asOutputFileNames) + ', ' + str(sWorkflowName) + ', ' + str(bAsynch) + ' )')
+         str(asOutputFileNames) + ', ' + str(sWorkflowName) + ', ' + str(bAsynch) + ' )')
 
     if asInputFileNames is None:
         print('[ERROR] waspy._internalExecuteWorkflow: input file names None, aborting' +
@@ -1708,7 +1706,7 @@ def _internalExecuteWorkflow(asInputFileNames, asOutputFileNames, sWorkflowName,
         return ''
 
     _log('[INFO] waspy._internalExecuteWorkflow: about to HTTP put to ' + str(sUrl) + ' with payload ' +
-          str(aoDictPayload))
+         str(aoDictPayload))
     asHeaders = _getStandardHeaders()
     oResponse = requests.post(sUrl, headers=asHeaders, data=json.dumps(aoDictPayload))
     if oResponse is None:
@@ -1726,7 +1724,7 @@ def _internalExecuteWorkflow(asInputFileNames, asOutputFileNames, sWorkflowName,
                 return waitProcess(sProcessId)
         else:
             print('[ERROR] waspy._internalExecuteWorkflow: cannot find process ID in response, aborting' +
-              '  ******************************************************************************')
+                  '  ******************************************************************************')
             return ''
     else:
         print('[ERROR] waspy._internalExecuteWorkflow: server returned status ' + str(oResponse.status_code) +
@@ -1765,25 +1763,25 @@ def mosaic(asInputFiles, sOutputFile, asBands=None,
     """
 
     _log('[INFO]  waspy.mosaic( ' +
-          str(asInputFiles) + ', ' +
-          str(sOutputFile) + ', ' +
-          str(asBands) + ', ' +
-          str(fPixelSizeX) + ', ' +
-          str(fPixelSizeY) + ', ' +
-          str(sCrs) + ', ' +
-          str(fSouthBound) + ', ' +
-          str(fNorthBound) + ', ' +
-          str(fEastBound) + ', ' +
-          str(fWestBound) + ', ' +
-          str(sOverlappingMethod) + ', ' +
-          str(bShowSourceProducts) + ', ' +
-          str(sElevationModelName) + ', ' +
-          str(sResamplingName) + ', ' +
-          str(bUpdateMode) + ', ' +
-          str(bNativeResolution) + ', ' +
-          str(sCombine) + ', ' +
-          str(bAsynch) + ' )'
-          )
+         str(asInputFiles) + ', ' +
+         str(sOutputFile) + ', ' +
+         str(asBands) + ', ' +
+         str(fPixelSizeX) + ', ' +
+         str(fPixelSizeY) + ', ' +
+         str(sCrs) + ', ' +
+         str(fSouthBound) + ', ' +
+         str(fNorthBound) + ', ' +
+         str(fEastBound) + ', ' +
+         str(fWestBound) + ', ' +
+         str(sOverlappingMethod) + ', ' +
+         str(bShowSourceProducts) + ', ' +
+         str(sElevationModelName) + ', ' +
+         str(sResamplingName) + ', ' +
+         str(bUpdateMode) + ', ' +
+         str(bNativeResolution) + ', ' +
+         str(sCombine) + ', ' +
+         str(bAsynch) + ' )'
+         )
 
     if asInputFiles is None:
         print('[ERROR] waspy.mosaic: list of input files is None, aborting' +
@@ -1883,4 +1881,3 @@ if __name__ == '__main__':
     _log(
         'WASPY - The WASDI Python Library. Include in your code for space development processors. Visit www.wasdi.net'
     )
-
