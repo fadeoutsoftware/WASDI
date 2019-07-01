@@ -280,7 +280,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 				
 				s_oLogger.error("Launcher Main FINAL: process status [" + oProcessWorkspace.getProcessObjId()+ "]: " + oProcessWorkspace.getStatus());
 				
-				if (oProcessWorkspace.getStatus().equals(ProcessStatus.ERROR.name()) || oProcessWorkspace.getStatus().equals(ProcessStatus.CREATED.name())) {
+				if (oProcessWorkspace.getStatus().equals(ProcessStatus.RUNNING.name()) || oProcessWorkspace.getStatus().equals(ProcessStatus.CREATED.name())) {
 					
 					s_oLogger.error("Launcher Main FINAL: process status not closed [" + oProcessWorkspace.getProcessObjId()+ "]: " + oProcessWorkspace.getStatus());
 					s_oLogger.error("Launcher Main FINAL: force status as ERROR [" + oProcessWorkspace.getProcessObjId()+ "]");
