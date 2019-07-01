@@ -303,6 +303,14 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 			
 			LauncherMain.s_oLogger.debug("WasdiProcessorEngine.run: calling " + sProcessorName + " at port " + oProcessor.getPort());
 			
+			if (Utils.isNullOrEmpty(sEncodedJson)) {
+				sEncodedJson = "{}";
+			}
+			
+			if (Utils.isNullOrEmpty(sJson)) {
+				sJson = "{}";
+			}
+			
 			LauncherMain.s_oLogger.debug("WasdiProcessorEngine.run: Encoded JSON Parameter " + sEncodedJson);
 			LauncherMain.s_oLogger.debug("WasdiProcessorEngine.run: Dencoded JSON Parameter " + sJson);
 			
@@ -391,17 +399,50 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 			while ((sOutputResult = oBufferedReader.readLine()) != null) {
 				LauncherMain.s_oLogger.debug("WasdiProcessorEngine.run: " + sOutputResult);
 			}
-
+			
+			LauncherMain.s_oLogger.debug("WasdiProcessorEngine.run: out from the read Line loop");
+			
 			oConnection.disconnect();
 			
 			// Read Again Process Workspace: the user may have changed it!
 			oProcessWorkspace = oProcessWorkspaceRepository.GetProcessByProcessObjId(oProcessWorkspace.getProcessObjId());
 			
+			// Here we can wait for the process to finish with the status check
+			// we can also handle a timeout, that can be a property (with default) of the processor
+			int iTimeSpentMs = 0;
+			int iThreadSleepMs = 2000;
+			
+			String sStatus = oProcessWorkspace.getStatus();
+			
+			LauncherMain.s_oLogger.debug("WasdiProcessorEngine.run: process Status: " + sStatus);
+			
+//			while ( ! (sStatus.equals("DONE") || sStatus.equals("STOPPED") || sStatus.equals("ERROR"))) {
+//				oProcessWorkspace = oProcessWorkspaceRepository.GetProcessByProcessObjId(oProcessWorkspace.getProcessObjId());
+//				
+//				sStatus = oProcessWorkspace.getStatus();
+//				try {
+//					Thread.sleep(iThreadSleepMs);
+//				} catch (InterruptedException e) {
+//					e.printStackTrace();
+//				}
+//				
+//				// Increase the time
+//				iTimeSpentMs += iThreadSleepMs;
+//				
+//				if (iTimeSpentMs > oProcessor.getTimeoutMs()) {
+//					// Timout
+//					LauncherMain.s_oLogger.debug("WasdiProcessorEngine.run: Timeout of Processor with ProcId " + oProcessWorkspace.getProcessObjId() + " Time spent [ms] " + iTimeSpentMs );
+//					
+//					LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 100);
+//				}
+//			}
+			
+			
+			LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.DONE, 100);
+			
 			if (Utils.isNullOrEmpty(oProcessWorkspace.getOperationEndDate())) {
 				oProcessWorkspace.setOperationEndDate(Utils.GetFormatDate(new Date()));
 			}
-			
-			LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.DONE, 100);
 		}
 		catch (Exception oEx) {
 			//String sError = org.apache.commons.lang.exception.ExceptionUtils.getMessage(oEx);

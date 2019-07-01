@@ -756,23 +756,28 @@ FUNCTION WASDIGETACTIVEWORKSPACEPRODUCTS
   
   iResults = n_elements(wasdiResult)
   
-  ; Create the output array
-  asProductsNames = STRARR(iResults)
+  IF iResults GT 0 THEN BEGIN  
+	  ; Create the output array
+	  asProductsNames = STRARR(iResults)
 
-  ; Convert JSON in a String Array
-  FOR i=0,iResults-1 DO BEGIN
+	  ; Convert JSON in a String Array
+	  FOR i=0,iResults-1 DO BEGIN
 
-    ;oProduct = wasdiResult[i]
-    ;sFileName = GETVALUEBYKEY(oProduct, 'fileName')
-	;sFileName = oProduct['fileName']
-	
-    ;asProductsNames[i]=sFileName
-	asProductsNames[i]=wasdiResult[i]
+		;oProduct = wasdiResult[i]
+		;sFileName = GETVALUEBYKEY(oProduct, 'fileName')
+		;sFileName = oProduct['fileName']
+		
+		;asProductsNames[i]=sFileName
+		asProductsNames[i]=wasdiResult[i]
 
-  ENDFOR
-
+	  ENDFOR
+  END ELSE BEGIN
+	asProductsNames = []
+  END
+  
   ; Return the array
   RETURN, asProductsNames
+   
 END
 
 ; Obtain the local full path of a EO File
@@ -1047,7 +1052,7 @@ FUNCTION WASDIASYNCHEXECUTEPROCESSOR, sProcessorName, aoParameters
 END
 
 ; Create a Mosaic from a list of input images
-FUNCTION WASDIMOSAIC, asInputFileNames, sOutputFile, dPixelSizeX, dPixelSizeY
+FUNCTION WASDIMOSAIC, asInputFileNames, sOutputFile, sNoDataValue, sInputIgnoreValue
 
   COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive
   sessioncookie = token
@@ -1055,67 +1060,149 @@ FUNCTION WASDIMOSAIC, asInputFileNames, sOutputFile, dPixelSizeX, dPixelSizeY
 
   ; API url
   UrlPath = '/wasdiwebserver/rest/processing/geometric/mosaic?sDestinationProductName='+sOutputFile+"&sWorkspaceId="+activeworkspace
-  
+ 
   ; Generate input file names JSON array
   sInputFilesJSON = '['
-  
+ 
   ; For each input name
   FOR i=0,n_elements(asInputFileNames)-1 DO BEGIN
-    
+   
     sInputName = asInputFileNames[i]
 	; wrap with '
 	sInputFilesJSON = sInputFilesJSON + '"' + sInputName + '"'
 	
 	; check of is not the last one
-    IF i lt n_elements(asInputFileNames)-1 then BEGIN
+   IF i lt n_elements(asInputFileNames)-1 then BEGIN
 	  ; add ,
       sInputFilesJSON = sInputFilesJSON + ','
     ENDIF
   ENDFOR
-  
+ 
   ; close the array
   sInputFilesJSON = sInputFilesJSON + ']'
-  
+ 
   IF (verbose eq '1') THEN BEGIN
 	print, 'Input Files JSON ', sInputFilesJSON
   END
-  
+ 
   sOutputFormat='GeoTIFF'
   IF (STRMATCH(sOutputFile, '*.tif', /FOLD_CASE) EQ 1) THEN BEGIN
 	sOutputFormat='GeoTIFF'
   END ELSE IF (STRMATCH(sOutputFile, '*.dim', /FOLD_CASE) EQ 1)  THEN BEGIN
 	sOutputFormat='BEAM-DIMAP'
   END
-  
+ 
   ; compose the full MosaicSetting JSON View Model
-  sMosaicSettingsString='{  "crs": "GEOGCS[\"WGS84(DD)\", DATUM[\"WGS84\", SPHEROID[\"WGS84\", 6378137.0, 298.257223563]], PRIMEM[\"Greenwich\", 0.0], UNIT[\"degree\", 0.017453292519943295],  AXIS[\"Geodetic longitude\", EAST], AXIS[\"Geodetic latitude\", NORTH]]",  "southBound": -1.0,"eastBound": -1.0, "westBound": -1.0, "northBound": -1.0, "pixelSizeX":'+dPixelSizeX +', "pixelSizeY": ' + dPixelSizeY + ', "overlappingMethod": "MOSAIC_TYPE_OVERLAY", "showSourceProducts": false, "elevationModelName": "ASTER 1sec GDEM", "resamplingName": "Nearest", "updateMode": false, "nativeResolution": true, "combine": "OR",  "sources":'+sInputFilesJSON +', "variableNames": [], "variableExpressions": [], "outputFormat":"' + sOutputFormat + '" }'
+  sMosaicSettingsString='{  "crs": "GEOGCS[\"WGS84(DD)\", DATUM[\"WGS84\", SPHEROID[\"WGS84\", 6378137.0, 298.257223563]], PRIMEM[\"Greenwich\", 0.0], UNIT[\"degree\", 0.017453292519943295],  AXIS[\"Geodetic longitude\", EAST], AXIS[\"Geodetic latitude\", NORTH]]",  "southBound": -1.0,"eastBound": -1.0, "westBound": -1.0, "northBound": -1.0, "pixelSizeX": -1.0, "pixelSizeY":  -1.0, "overlappingMethod": "MOSAIC_TYPE_OVERLAY", "showSourceProducts": false, "elevationModelName": "ASTER 1sec GDEM", "resamplingName": "Nearest", "updateMode": false, "nativeResolution": true, "combine": "OR", "sources":'+sInputFilesJSON +', "variableNames": [], "variableExpressions": [], "outputFormat":"' + sOutputFormat + '"'
   
+  if (sNoDataValue NE !NULL) THEN BEGIN
+	sMosaicSettingsString = sMosaicSettingsString + ', "noDataValue":' + sNoDataValue
+  END
+  
+  if (sInputIgnoreValue NE !NULL) THEN BEGIN
+	sMosaicSettingsString = sMosaicSettingsString + ', "inputIgnoreValue":' + sInputIgnoreValue
+  END  
+  
+  sMosaicSettingsString = sMosaicSettingsString + ' }'
+ 
   IF (verbose eq '1') THEN BEGIN
 	print, 'MOSAIC SETTINGS JSON ' , sMosaicSettingsString
 	print, 'URL: ', UrlPath
   END
 
   wasdiResult = WASDIHTTPPOST(UrlPath, sMosaicSettingsString)
-  
+ 
   sResponse = GETVALUEBYKEY(wasdiResult, 'boolValue')
-  
+ 
   sProcessID = ''
-  
+ 
   ; get the process id
   IF sResponse then BEGIN
     sValue = GETVALUEBYKEY(wasdiResult, 'stringValue')
     sProcessID=sValue
   ENDIF
-  
+ 
   sStatus = "ERROR"
-  
+ 
   ; Wait for the process to finish
   IF sProcessID ne '' then BEGIN
     sStatus = WASDIWAITPROCESS(sProcessID)
   ENDIF
-  
+ 
   RETURN, sStatus
 END
+
+
+; Create a Mosaic from a list of input images
+;FUNCTION WASDIMOSAIC, asInputFileNames, sOutputFile, dPixelSizeX, dPixelSizeY
+;
+;  COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive
+;  sessioncookie = token
+;
+;
+;  ; API url
+;  UrlPath = '/wasdiwebserver/rest/processing/geometric/mosaic?sDestinationProductName='+sOutputFile+"&sWorkspaceId="+activeworkspace
+;  
+;  ; Generate input file names JSON array
+;  sInputFilesJSON = '['
+;  
+;  ; For each input name
+;  FOR i=0,n_elements(asInputFileNames)-1 DO BEGIN
+;    
+;    sInputName = asInputFileNames[i]
+;	; wrap with '
+;	sInputFilesJSON = sInputFilesJSON + '"' + sInputName + '"'
+;	
+;	; check of is not the last one
+;    IF i lt n_elements(asInputFileNames)-1 then BEGIN
+;	  ; add ,
+;      sInputFilesJSON = sInputFilesJSON + ','
+;    ENDIF
+;  ENDFOR
+;  
+;  ; close the array
+;  sInputFilesJSON = sInputFilesJSON + ']'
+;  
+;  IF (verbose eq '1') THEN BEGIN
+;	print, 'Input Files JSON ', sInputFilesJSON
+;  END
+;  
+;  sOutputFormat='GeoTIFF'
+;  IF (STRMATCH(sOutputFile, '*.tif', /FOLD_CASE) EQ 1) THEN BEGIN
+;	sOutputFormat='GeoTIFF'
+;  END ELSE IF (STRMATCH(sOutputFile, '*.dim', /FOLD_CASE) EQ 1)  THEN BEGIN
+;	sOutputFormat='BEAM-DIMAP'
+;  END
+;  
+;  ; compose the full MosaicSetting JSON View Model
+;  sMosaicSettingsString='{  "crs": "GEOGCS[\"WGS84(DD)\", DATUM[\"WGS84\", SPHEROID[\"WGS84\", 6378137.0, 298.257223563]], PRIMEM[\"Greenwich\", 0.0], UNIT[\"degree\", 0.017453292519943295],  AXIS[\"Geodetic longitude\", EAST], AXIS[\"Geodetic latitude\", NORTH]]",  "southBound": -1.0,"eastBound": -1.0, "westBound": -1.0, "northBound": -1.0, "pixelSizeX":'+dPixelSizeX +', "pixelSizeY": ' + dPixelSizeY + ', "overlappingMethod": "MOSAIC_TYPE_OVERLAY", "showSourceProducts": false, "elevationModelName": "ASTER 1sec GDEM", "resamplingName": "Nearest", "updateMode": false, "nativeResolution": true, "combine": "OR", "noDataValue": -9999, inputIgnoreValue = 0, sources":'+sInputFilesJSON +', "variableNames": [], "variableExpressions": [], "outputFormat":"' + sOutputFormat + '" }'
+;  
+;  IF (verbose eq '1') THEN BEGIN
+;	print, 'MOSAIC SETTINGS JSON ' , sMosaicSettingsString
+;	print, 'URL: ', UrlPath
+;  END
+;
+;  wasdiResult = WASDIHTTPPOST(UrlPath, sMosaicSettingsString)
+;  
+;  sResponse = GETVALUEBYKEY(wasdiResult, 'boolValue')
+;  
+;  sProcessID = ''
+;  
+;  ; get the process id
+;  IF sResponse then BEGIN
+;    sValue = GETVALUEBYKEY(wasdiResult, 'stringValue')
+;    sProcessID=sValue
+;  ENDIF
+;  
+;  sStatus = "ERROR"
+;  
+;  ; Wait for the process to finish
+;  IF sProcessID ne '' then BEGIN
+;    sStatus = WASDIWAITPROCESS(sProcessID)
+;  ENDIF
+;  
+;  RETURN, sStatus
+;END
 
 
 

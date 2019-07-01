@@ -16,10 +16,15 @@ def run(parameters, processId):
     sLastDays = parameters.get('LASTDAYS', "0")
     sPreprocWorkflow = parameters.get('PREPROCWORKFLOW', "LISTSinglePreproc2")
     sMosaicBaseName = parameters.get('MOSAICBASENAME', "MY")
-    sMosaicXStep = parameters.get('MOSAICXSTEP', "0.00018")
-    sMosaicYStep = parameters.get('MOSAICYSTEP', "0.00018")
+    sMosaicXStep = parameters.get('MOSAICXSTEP', "-1.0")
+    sMosaicYStep = parameters.get('MOSAICYSTEP', "-1.0")
     
-    wasdi.wasdiLog('eDrift Archive Generator: Start Archive from ' + sArchiveStartDate + ' to ' + sArchiveEndDate)
+    sHSBA_DEPTH_IN = parameters.get('HSBA_DEPTH_IN', "-1")
+    sASHMAN_COEFF = parameters.get('ASHMAN_COEFF', "2.4")
+    sMIN_PIXNB_BIMODD = parameters.get('MIN_PIXNB_BIMODD', "40000")
+    sBLOBS_SIZE = parameters.get('BLOBS_SIZE', "150")
+        
+    wasdi.wasdiLog('eDrift Archive Generator: Start Archive Generation from ' + sArchiveStartDate + ' to ' + sArchiveEndDate)
     
     oStartDay = datetime.today()
     oEndDay = datetime.today()
@@ -62,8 +67,11 @@ def run(parameters, processId):
         aoChainParams["MOSAICBASENAME"] = sMosaicBaseName
         aoChainParams["MOSAICXSTEP"] = sMosaicXStep
         aoChainParams["MOSAICYSTEP"] = sMosaicYStep
+        aoChainParams["HSBA_DEPTH_IN"] = sHSBA_DEPTH_IN
+        aoChainParams["ASHMAN_COEFF"] = sASHMAN_COEFF
+        aoChainParams["MIN_PIXNB_BIMODD"] = sMIN_PIXNB_BIMODD
+        aoChainParams["BLOBS_SIZE"] = sBLOBS_SIZE
         
-        #TODO wasdi.executeProcess
         sProcessId = wasdi.executeProcessor("mosaic_tile", aoChainParams)
         
         wasdi.wasdiLog('Chain started waiting for end')
@@ -80,22 +88,26 @@ def run(parameters, processId):
     
     
 def WasdiHelp():
-    sHelp = "eDRIFT Archive Generator Utility\n"
-    sHelp += "Tool to generate an eDRIFT flood Archive\n"
-    sHelp += "Takes as input all the params of the chain, a start date and an end date\n"
-    sHelp += "Triggers the chain for each day in the interval with the supplied params\n"
-    sHelp += "Parameters are:\n"
-    sHelp += 'ARCHIVE_START_DATE: bbox in lat lon string:"ULLat,ULLon,LRLat,LRLon'
-    sHelp += "ARCHIVE_END_DATE: xstep,ystep\n"    
-    sHelp += "DELETE: flag delete for the chain"
-    sHelp += "SIMULATE: flag simulate for the chain"
-    sHelp += "BBOX: bbox for the chain"
-    sHelp += "ORBITS: orbits for the chain"
-    sHelp += "GRIDSTEP: grid step for the chain" 
-    sHelp += "LASTDAYS: last days for the chain"
-    sHelp += "PREPROCWORKFLOW: pre proc workflow for the chain"
-    sHelp += "MOSAICBASENAME: mosaic base name for the chain"
-    sHelp += "MOSAICXSTEP: mosaic x step for the chain"
-    sHelp += "MOSAICYSTEP: mosaic y step for the chain"
-
+    sHelp = "eDRIFT Archive Generator Utility<br>"
+    sHelp += "Tool to generate an eDRIFT flood Archive<br>"
+    sHelp += "Takes as input all the params of the chain, a start date and an end date<br>"
+    sHelp += "Triggers the chain for each day in the interval with the supplied params<br>"
+    sHelp += "Parameters are:<br>"
+    sHelp += 'ARCHIVE_START_DATE: bbox in lat lon string:"ULLat,ULLon,LRLat,LRLon<br>'
+    sHelp += "ARCHIVE_END_DATE: xstep,ystep<br>"    
+    sHelp += "DELETE: flag delete for the chain<br>"
+    sHelp += "SIMULATE: flag simulate for the chain<br>"
+    sHelp += "BBOX: bbox for the chain<br>"
+    sHelp += "ORBITS: orbits for the chain<br>"
+    sHelp += "GRIDSTEP: grid step for the chain<br>" 
+    sHelp += "LASTDAYS: last days for the chain<br>"
+    sHelp += "PREPROCWORKFLOW: pre proc workflow for the chain<br>"
+    sHelp += "MOSAICBASENAME: mosaic base name for the chain<br>"
+    sHelp += "MOSAICXSTEP: mosaic x step for the chain (-1 => Native)<br>"
+    sHelp += "MOSAICYSTEP: mosaic y step for the chain (-1 => Native)<br>"
+    sHelp += "HSBA_DEPTH_IN: hbsa Depth in for the flood detection<br>"
+    sHelp += "ASHMAN_COEFF: ashman coefficient for the flood detection<br>"
+    sHelp += "MIN_PIXNB_BIMODD: min number of pixel for bimodal mask  for the flood detection<br>"
+    sHelp += "BLOBS_SIZE: blob size for the flood detection<br>"
+    
     return sHelp

@@ -104,6 +104,7 @@ import wasdi.shared.parameters.OperatorParameter;
 import wasdi.shared.parameters.RangeDopplerGeocodingParameter;
 import wasdi.shared.parameters.RangeDopplerGeocodingSetting;
 import wasdi.shared.parameters.RegridParameter;
+import wasdi.shared.parameters.RegridSetting;
 import wasdi.shared.parameters.SubsetParameter;
 import wasdi.shared.parameters.SubsetSetting;
 import wasdi.shared.utils.BandImageManager;
@@ -187,6 +188,15 @@ public class ProcessingResources {
 	{
 		Wasdi.DebugLog("ProcessingResources.Mosaic");
 		return executeOperation(sSessionId, "", sDestinationProductName, sWorkspaceId, oSetting, LauncherOperations.MOSAIC);
+	}
+	
+	@POST
+	@Path("geometric/regrid")
+	@Produces({"application/xml", "application/json", "text/xml"})
+	public PrimitiveResult regrid(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sDestinationProductName") String sDestinationProductName, @QueryParam("sWorkspaceId") String sWorkspaceId, RegridSetting oSetting) throws IOException
+	{
+		Wasdi.DebugLog("ProcessingResources.Mosaic");
+		return executeOperation(sSessionId, "", sDestinationProductName, sWorkspaceId, oSetting, LauncherOperations.REGRID);
 	}
 	
 	@POST

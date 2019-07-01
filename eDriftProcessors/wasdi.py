@@ -1,9 +1,17 @@
 """
+This is WASPY, the WASDI Python lib.
+The methods allow to interact with WASDI seamlessly.
+Note:
+the philosophy of safe programming is adopted as widely as possible, the lib will try to workaround issues such as
+faulty input, and print an error rather than raise an exception, so that your program can possibly go on. Please check
+the return statues
+
+
 Created on 11 Jun 2018
 
 @author: p.campanella
 """
-#from pandas._libs.join import outer_join_indexer
+# from pandas._libs.join import outer_join_indexer
 
 name = "wasdi"
 
@@ -85,6 +93,7 @@ def getVerbose():
     global m_bVerbose
     return m_bVerbose
 
+
 def getParametersDict():
     """
     Get the full Params Dictionary
@@ -116,7 +125,7 @@ def getParameter(sKey):
     except:
         return None
 
-    
+
 def setUser(sUser):
     """
     Sets the WASDI User
@@ -130,7 +139,7 @@ def setUser(sUser):
 def getUser():
     """
     Get the WASDI User
-    """    
+    """
     global m_sUser
     return m_sUser
 
@@ -138,7 +147,7 @@ def getUser():
 def setPassword(sPassword):
     """
     Set the WASDI Password
-    """    
+    """
     global m_sPassword
     m_sPassword = sPassword
 
@@ -146,7 +155,7 @@ def setPassword(sPassword):
 def getPassword():
     """
     Get the WASDI Password
-    """    
+    """
     global m_sPassword
     return m_sPassword
 
@@ -154,9 +163,10 @@ def getPassword():
 def setSessionId(sSessionId):
     """
     Set the WASDI Session
-    """    
+    """
     global m_sSessionId
     m_sSessionId = sSessionId
+
 
 def setParametersFilePath(sParamPath):
     if sParamPath is None:
@@ -178,15 +188,15 @@ def getParametersFilePath():
 def getSessionId():
     """
     Get the WASDI Session
-    """    
+    """
     global m_sSessionId
     return m_sSessionId
-    
+
 
 def setBasePath(sBasePath):
     """
     Set the local Base Path for WASDI
-    """    
+    """
     global m_sBasePath
     m_sBasePath = sBasePath
 
@@ -194,15 +204,15 @@ def setBasePath(sBasePath):
 def getBasePath():
     """
     Get the local Base Path for WASDI
-    """    
+    """
     global m_sBasePath
     return m_sBasePath
-       
+
 
 def setBaseUrl(sBaseUrl):
     """
     Set the WASDI API URL
-    """    
+    """
     global m_sBaseUrl
     m_sBaseUrl = sBaseUrl
 
@@ -210,7 +220,7 @@ def setBaseUrl(sBaseUrl):
 def getBaseUrl():
     """
     Get the WASDI API URL
-    """    
+    """
     global m_sBaseUrl
     return m_sBaseUrl
 
@@ -218,7 +228,7 @@ def getBaseUrl():
 def setIsOnServer(bIsOnServer):
     """
     Set the Is on Server Flag: keep it false, as default, while developing
-    """    
+    """
     global m_bIsOnServer
     m_bIsOnServer = bIsOnServer
 
@@ -226,7 +236,7 @@ def setIsOnServer(bIsOnServer):
 def getIsOnServer():
     """
     Get the WASDI API URL
-    """    
+    """
     global m_bIsOnServer
     return m_bIsOnServer
 
@@ -240,7 +250,7 @@ def setDownloadActive(bDownloadActive):
     if bDownloadActive is None:
         print('[ERROR] waspy.setDownloadActive: passed None, won\'t change')
         return
-    
+
     global m_bDownloadActive
     m_bDownloadActive = bDownloadActive
 
@@ -248,7 +258,7 @@ def setDownloadActive(bDownloadActive):
 def getDownloadActive():
     """
     Get the WASDI API URL
-    """    
+    """
     global m_bDownloadActive
     return m_bDownloadActive
 
@@ -277,8 +287,8 @@ def getUploadActive():
 
 def setProcId(sProcID):
     """
-    Own Proc Id 
-    """    
+    Own Proc Id
+    """
     global m_sMyProcId
     m_sMyProcId = sProcID
 
@@ -286,7 +296,7 @@ def setProcId(sProcID):
 def getProcId():
     """
     Get the Own Proc Id
-    """    
+    """
     global m_sMyProcId
     return m_sMyProcId
 
@@ -374,17 +384,19 @@ def __loadParams():
     else:
         __log('[INFO] wasdi could not load param file. That is fine, you can still load it later, don\'t worry')
 
+
 def refreshParameters():
     """
     Refresh parameters, reading the file again
     """
     __loadParams()
 
+
 def init(sConfigFilePath=None):
     """
     Init WASDI Library. Call it after setting user, password, path and url or use it with a config file
     Return True if login was successful, False otherwise
-    """    
+    """
     global m_sUser
     global m_sPassword
     global m_sBaseUrl
@@ -439,7 +451,7 @@ def init(sConfigFilePath=None):
             print('[ERROR] waspy.init: cannot authenticate')
             bResult = False
         elif oResponse.ok is not True:
-            print('[ERROR] waspy.init: cannot authenticate, server replied: '+str(oResponse.status_code))
+            print('[ERROR] waspy.init: cannot authenticate, server replied: ' + str(oResponse.status_code))
             bResult = False
         else:
             oJsonResult = oResponse.json()
@@ -465,9 +477,9 @@ def hello():
     """
     Hello Wasdi to test the connection.
     :return: the hello message as Text
-    """    
+    """
     global m_sBaseUrl
-    
+
     sUrl = m_sBaseUrl + '/wasdi/hello'
     oResult = requests.get(sUrl)
     return oResult.text
@@ -482,16 +494,16 @@ def getWorkspaces():
         "ownerUserId":STRING,
         "sharedUsers":[STRING],
         "workspaceId":STRING,
-        "workspaceName":STRING    
+        "workspaceName":STRING
     }
-    """    
+    """
     global m_sBaseUrl
     global m_sSessionId
 
     asHeaders = __getStandardHeaders()
 
     sUrl = m_sBaseUrl + '/ws/byuser'
-        
+
     oResult = requests.get(sUrl, headers=asHeaders)
 
     if (oResult is not None) and (oResult.ok is True):
@@ -505,7 +517,7 @@ def getWorkspaceIdByName(sName):
     """
     Get Id of a Workspace from the name
     Return the WorkspaceId as a String, '' if there is any error
-    """    
+    """
     global m_sBaseUrl
     global m_sSessionId
 
@@ -532,17 +544,22 @@ def openWorkspaceById(sWorkspaceId):
     """
     Open a workspace by Id
     return the WorkspaceId as a String, '' if there is any error
-    """    
+    """
     global m_sActiveWorkspace
     m_sActiveWorkspace = sWorkspaceId
     return m_sActiveWorkspace
+
+
+def setActiveWorkspaceId(sActiveWorkspace):
+    global m_sActiveWorkspace
+    m_sActiveWorkspace = sActiveWorkspace
 
 
 def getActiveWorkspaceId():
     """
     Get Active workspace Id
     return the WorkspaceId as a String, '' if there is any error
-    """    
+    """
     global m_sActiveWorkspace
     return m_sActiveWorkspace
 
@@ -551,7 +568,7 @@ def openWorkspace(sWorkspaceName):
     """
     Open a workspace
     return the WorkspaceId as a String, '' if there is any error
-    """    
+    """
     global m_sActiveWorkspace
     m_sActiveWorkspace = getWorkspaceIdByName(sWorkspaceName)
     return m_sActiveWorkspace
@@ -611,13 +628,13 @@ def getFullProductPath(sProductName):
     """
     Get the full local path of a product given the product name.
     Use the output of this API to open the file
-    """    
+    """
     global m_sBasePath
     global m_sActiveWorkspace
     global m_sUser
     global m_bIsOnServer
     global m_bDownloadActive
-    
+
     if m_bIsOnServer is True:
         sFullPath = '/data/wasdi/'
     else:
@@ -631,14 +648,14 @@ def getFullProductPath(sProductName):
                 # Download The File from WASDI
                 print('[INFO] waspy.getFullProductPath: LOCAL WASDI FILE MISSING: START DOWNLOAD... PLEASE WAIT')
                 downloadFile(sProductName)
-    
+
     return sFullPath
 
 
 def getSavePath():
     """
     Get the local base save path for a product. To save use this path + fileName. Path already include '/' as last char
-    """    
+    """
     global m_sBasePath
     global m_sActiveWorkspace
     global m_sUser
@@ -650,7 +667,7 @@ def getSavePath():
 
     # empty string at the ends adds a final separator
     sFullPath = os.path.join(sFullPath, m_sUser, m_sActiveWorkspace, "")
-    
+
     return sFullPath
 
 
@@ -658,22 +675,22 @@ def getWorkflows():
     """
         Get the list of workflows for the user
         Return None if there is any error
-        Return an array of WASI Workspace JSON Objects if everything is ok:
-        
+        Return an array of WASDI Workspace JSON Objects if everything is ok, None otherwise. The format is as follows:
+
         {
             "description":STRING,
             "name": STRING,
             "workflowId": STRING
-        }        
-        
-    """    
+        }
+
+    """
     global m_sBaseUrl
     global m_sSessionId
 
     asHeaders = __getStandardHeaders()
-    
+
     sUrl = m_sBaseUrl + '/processing/getgraphsbyusr'
-        
+
     oResult = requests.get(sUrl, headers=asHeaders)
 
     if (oResult is not None) and (oResult.ok is True):
@@ -683,78 +700,33 @@ def getWorkflows():
         return None
 
 
-def executeWorkflow(sInputFileName, sOutputFileName, sWorkflowName):
-    """
-    Executes a WASDI SNAP Workflow
-    return the Process Id if every thing is ok
-    return '' if there was any problem
-    """    
-    global m_sBaseUrl
-    global m_sSessionId
-    global m_sActiveWorkspace
-    
-    sWorkflowId = ''
-    aoWorkflows = getWorkflows()
-        
-    for oWorkflow in aoWorkflows:
-        try:
-            if oWorkflow['name'] == sWorkflowName:
-                sWorkflowId = oWorkflow['workflowId']
-                break
-        except:
-            continue
-
-    asHeaders = __getStandardHeaders()
-    payload = {'workspace': m_sActiveWorkspace,
-               'source': sInputFileName,
-               'destination': sOutputFileName,
-               'workflowId': sWorkflowId}
-
-    sUrl = m_sBaseUrl + '/processing/graph_id'
-    
-    oResult = requests.get(sUrl, headers=asHeaders, params=payload)
-
-    sProcessId = ''
-
-    if (oResult is not None) and (oResult.ok is True):
-        oJsonResults = oResult.json()
-        
-        try:
-            if oJsonResults['boolValue'] is True:
-                sProcessId = oJsonResults['stringValue']
-        except:
-            return sProcessId
-    
-    return sProcessId
-
-
 def getProcessStatus(sProcessId):
     """
     get the status of a Process
     return the status or '' if there was any error
-    
+
     STATUS are  CREATED,  RUNNING,  STOPPED,  DONE,  ERROR
-    """    
+    """
     global m_sBaseUrl
     global m_sSessionId
 
     asHeaders = __getStandardHeaders()
     payload = {'sProcessId': sProcessId}
-    
+
     sUrl = m_sBaseUrl + '/process/byid'
-    
+
     oResult = requests.get(sUrl, headers=asHeaders, params=payload)
-    
+
     sStatus = ''
 
     if (oResult is not None) and (oResult.ok is True):
         oJsonResult = oResult.json()
-        
+
         try:
             sStatus = oJsonResult['status']
         except:
             sStatus = ''
-    
+
     return sStatus
 
 
@@ -781,7 +753,8 @@ def updateProcessStatus(sProcessId, sStatus, iPerc):
         print('[ERROR] waspy.updateProcessStatus: iPerc > 100 not valid')
         return ''
     elif sStatus not in {'CREATED', 'RUNNING', 'STOPPED', 'DONE', 'ERROR'}:
-        print('[ERROR] waspy.updateProcessStatus: sStatus must be a string in: {CREATED,  RUNNING,  STOPPED,  DONE,  ERROR')
+        print(
+            '[ERROR] waspy.updateProcessStatus: sStatus must be a string in: {CREATED,  RUNNING,  STOPPED,  DONE,  ERROR')
         return ''
     elif sProcessId == '':
         return ''
@@ -793,9 +766,9 @@ def updateProcessStatus(sProcessId, sStatus, iPerc):
     payload = {'sProcessId': sProcessId, 'status': sStatus, 'perc': iPerc}
 
     sUrl = m_sBaseUrl + '/process/updatebyid'
-    
+
     oResult = requests.get(sUrl, headers=asHeaders, params=payload)
-    
+
     sStatus = ''
 
     if (oResult is not None) and (oResult.ok is True):
@@ -804,7 +777,7 @@ def updateProcessStatus(sProcessId, sStatus, iPerc):
             sStatus = oJsonResult['status']
         except:
             sStatus = ''
-    
+
     return sStatus
 
 
@@ -838,21 +811,22 @@ def updateProgressPerc(iPerc):
         print('[ERROR] waspy.updateProgressPerc: could not update progress')
     return sResult
 
+
 def setProcessPayload(sProcessId, data):
     """
     Update the status of a process
     return the updated status as a String or '' if there was any problem
-    """    
+    """
     global m_sBaseUrl
     global m_sSessionId
 
     asHeaders = __getStandardHeaders()
     payload = {'sProcessId': sProcessId, 'payload': json.dumps(data)}
-    
+
     sUrl = m_sBaseUrl + '/process/setpayload'
-    
+
     oResult = requests.get(sUrl, headers=asHeaders, params=payload)
-    
+
     sStatus = ''
 
     if (oResult is not None) and (oResult.ok is True):
@@ -861,16 +835,16 @@ def setProcessPayload(sProcessId, data):
             sStatus = oJsonResult['status']
         except:
             sStatus = ''
-    
+
     return sStatus
 
 
 def saveFile(sFileName):
     """
     Ingest a new file in the Active WASDI Workspace.
-    The method takes a file saved in the workspace root (see getSaveFilePath) not already added to the WS 
+    The method takes a file saved in the workspace root (see getSaveFilePath) not already added to the WS
     To work be sure that the file is on the server
-    """    
+    """
     global m_sBaseUrl
     global m_sSessionId
     global m_sActiveWorkspace
@@ -879,9 +853,9 @@ def saveFile(sFileName):
     payload = {'file': sFileName, 'workspace': m_sActiveWorkspace}
 
     sUrl = m_sBaseUrl + '/catalog/upload/ingestinws'
-    
+
     oResult = requests.get(sUrl, headers=asHeaders, params=payload)
-    
+
     sProcessId = ''
 
     if (oResult is not None) and (oResult.ok is True):
@@ -898,7 +872,7 @@ def saveFile(sFileName):
 def downloadFile(sFileName):
     """
     Ingest a new file in the Active WASDI Workspace.
-    The method takes a file saved in the workspace root (see getSaveFilePath) not already added to the WS 
+    The method takes a file saved in the workspace root (see getSaveFilePath) not already added to the WS
     To work be sure that the file is on the server
     """
 
@@ -917,9 +891,9 @@ def downloadFile(sFileName):
     sUrl += sFileName
     sUrl += "&workspace="
     sUrl += getActiveWorkspaceId()
-    
+
     __log('[INFO] waspy.downloadfile: send request to configured url ' + sUrl)
-    
+
     oResponse = requests.get(sUrl, headers=asHeaders, params=payload, stream=True)
 
     if (oResponse is not None) and (oResponse.status_code == 200):
@@ -959,39 +933,39 @@ def downloadFile(sFileName):
                         bLoop = False
         sSavePath = getSavePath()
         sSavePath = os.path.join(sSavePath, sAttachmentName)
-        
+
         try:
             os.makedirs(os.path.dirname(sSavePath))
         except:  # Guard against race condition
             print('[ERROR] waspy.downloadFile Creating File Path!!')
-        
+
         __log('[INFO] waspy.downloadFile: downloading local file ' + sSavePath)
 
         with open(sSavePath, 'wb') as oFile:
             for oChunk in oResponse:
-                #__log('.')
+                # __log('.')
                 oFile.write(oChunk)
         __log('[INFO] waspy.downloadFile: download done, new file locally available ' + sSavePath)
 
-        if (sAttachmentName is not None) and\
-                (sAttachmentName != sFileName) and\
+        if (sAttachmentName is not None) and \
+                (sAttachmentName != sFileName) and \
                 sAttachmentName.lower().endswith('.zip'):
             sPath = getSavePath()
             __unzip(sAttachmentName, sPath)
 
     else:
         print('[ERROR] waspy.downloadFile: download error, server code: ' + str(oResponse.status_code))
-        
+
     return
 
 
 def wasdiLog(sLogRow):
-    
     global m_sBaseUrl
     global m_sSessionId
     global m_sActiveWorkspace
 
     if m_bIsOnServer:
+        print(sLogRow)
         asHeaders = __getStandardHeaders()
         sUrl = m_sBaseUrl + '/processors/logs/add?processworkspace=' + m_sMyProcId
         oResult = requests.post(sUrl, data=sLogRow, headers=asHeaders)
@@ -1030,19 +1004,19 @@ def deleteProduct(sProduct):
 
 
 def searchEOImages(sPlatform, sDateFrom, sDateTo,
-                   dULLat, dULLon, dLRLat, dLRLon,
-                   sProductType, iOrbitNumber,
-                   sSensorOperationalMode, sCloudCoverage):
+                   fULLat=None, fULLon=None, fLRLat=None, fLRLon=None,
+                   sProductType=None, iOrbitNumber=None,
+                   sSensorOperationalMode=None, sCloudCoverage=None):
     """
     Search EO images
 
     :param sPlatform: satellite platform (S1 or S2)
-    :param sDateFrom: inital date
-    :param sDateTo: final date
-    :param dULLat: Latitude of Upper-Left corner
-    :param dULLon: Longitude of Upper-Left corner
-    :param dLRLat: Latitude of Lower-Right corner
-    :param dLRLon: Longitude of Lower-Right corner
+    :param sDateFrom: inital date YYYY-MM-DD
+    :param sDateTo: final date YYYY-MM-DD
+    :param fULLat: Latitude of Upper-Left corner
+    :param fULLon: Longitude of Upper-Left corner
+    :param fLRLat: Latitude of Lower-Right corner
+    :param fLRLon: Longitude of Lower-Right corner
     :param sProductType: type of EO product
     :param iOrbitNumber: orbit number
     :param sSensorOperationalMode: sensor operational mode
@@ -1070,8 +1044,9 @@ def searchEOImages(sPlatform, sDateFrom, sDateTo,
     if sPlatform == "S2":
         if sProductType is not None:
             if not (sProductType == "S2MSI1C" or sProductType == "S2MSI2Ap" or sProductType == "S2MSI2A"):
-                print("[ERROR] waspy.searchEOImages: Available Product Types for S2; S2MSI1C, S2MSI2Ap, S2MSI2A. Received ["
-                      + sProductType + "]")
+                print(
+                    "[ERROR] waspy.searchEOImages: Available Product Types for S2; S2MSI1C, S2MSI2Ap, S2MSI2A. Received ["
+                    + sProductType + "]")
                 return aoReturnList
 
     if sDateFrom is None:
@@ -1116,7 +1091,7 @@ def searchEOImages(sPlatform, sDateFrom, sDateTo,
     # If available add orbit number
     if iOrbitNumber is not None:
         if isinstance(iOrbitNumber, int):
-            sQuery += " AND relativeorbitnumber:" + iOrbitNumber
+            sQuery += " AND relativeorbitnumber:" + str(iOrbitNumber)
         else:
             print('[WARNING] waspy.searchEOImages: iOrbitNumber is' + str(iOrbitNumber),
                   ', but it should be an integer')
@@ -1131,17 +1106,17 @@ def searchEOImages(sPlatform, sDateFrom, sDateTo,
     sQuery += ") "
 
     # Date Block
-    sQuery += "AND ( beginPosition:[" + sDateFrom + "T00:00:00.000Z TO " + sDateTo + "T23:59:59.999Z]"
-    sQuery += "AND ( endPosition:[" + sDateFrom + "T00:00:00.000Z TO " + sDateTo + "T23:59:59.999Z]"
+    sQuery += "AND ( beginPosition:[" + str(sDateFrom) + "T00:00:00.000Z TO " + str(sDateTo) + "T23:59:59.999Z]"
+    sQuery += "AND ( endPosition:[" + str(sDateFrom) + "T00:00:00.000Z TO " + str(sDateTo) + "T23:59:59.999Z]"
 
     # Close the second block
     sQuery += ") "
 
     # footprint polygon
-    if (dULLat is not None) and (dULLon is not None) and (dLRLat is not None) and (dLRLon is not None):
-        sFootPrint = "( footprint:\"intersects(POLYGON(( " + str(dULLon) + " " +str(dLRLat) + "," +\
-                 str(dULLon) + " " + str(dULLat) + "," + str(dLRLon) + " " + str(dULLat) + "," + str(dLRLon) +\
-                 " " + str(dLRLat) + "," + str(dULLon) + " " + str(dLRLat) + ")))\") AND "
+    if (fULLat is not None) and (fULLon is not None) and (fLRLat is not None) and (fLRLon is not None):
+        sFootPrint = "( footprint:\"intersects(POLYGON(( " + str(fULLon) + " " + str(fLRLat) + "," + \
+                     str(fULLon) + " " + str(fULLat) + "," + str(fLRLon) + " " + str(fULLat) + "," + str(fLRLon) + \
+                     " " + str(fLRLat) + "," + str(fULLon) + " " + str(fLRLat) + ")))\") AND "
     sQuery = sFootPrint + sQuery
 
     sQueryBody = "[\"" + sQuery.replace("\"", "\\\"") + "\"]"
@@ -1168,6 +1143,17 @@ def searchEOImages(sPlatform, sDateFrom, sDateTo,
         __log(oEx)
 
     return aoReturnList
+
+
+def getFoundProductName(aoProduct):
+    if aoProduct is None:
+        print('[ERROR] waspy.getFoundProductName: product is None, aborting')
+        return ''
+    elif "title" not in aoProduct:
+        print('[ERROR] waspy.getFoundProductName: title not found in product, aborting')
+        return ''
+    else:
+        return aoProduct['title']
 
 
 def __fileExistsOnWasdi(sFileName):
@@ -1202,7 +1188,7 @@ def __fileExistsOnWasdi(sFileName):
         print('[ERROR] waspy.__fileExistsOnWasdi: failed contacting the server')
         return False
     elif oResult.ok is not True:
-        print('[ERROR] waspy.__fileExistsOnWasdi: failed, server returned: ' + str(oResult.status_code) )
+        print('[ERROR] waspy.__fileExistsOnWasdi: failed, server returned: ' + str(oResult.status_code))
         return False
     else:
         return oResult.ok
@@ -1220,7 +1206,7 @@ def __unzip(sAttachmentName, sPath):
         print('[ERROR] waspy.__unzip: path is None')
         return
     if sAttachmentName is None:
-        __log('[ERROR] waspy.__unzip: attachment to unzip is None')
+        print('[ERROR] waspy.__unzip: attachment to unzip is None')
         return
 
     try:
@@ -1234,12 +1220,13 @@ def __unzip(sAttachmentName, sPath):
     return
 
 
+# todo split into 2 functions
 def importProduct(sFileUrl=None, sBoundingBox=None, asProduct=None):
     """
     Imports a product from a Provider in WASDI
     :param sFileUrl:
     :param sBoundingBox:
-    :return:
+    :return: execution status
     """
 
     __log('waspy.importProduct( ' + str(sFileUrl) + ', ' + str(sBoundingBox) + ', ' + str(asProduct) + ' )')
@@ -1254,6 +1241,10 @@ def importProduct(sFileUrl=None, sBoundingBox=None, asProduct=None):
         else:
             print('[ERROR] waspy.importProduct: cannot import product without url or a dict containing the link')
             return ''
+
+    if sFileUrl is None:
+        print('[ERROR] waspy.importProduct: cannot detect the link to get the requested product')
+        return ''
 
     sUrl = getBaseUrl()
     sUrl += "/filebuffer/download?sFileUrl="
@@ -1280,44 +1271,88 @@ def importProduct(sFileUrl=None, sBoundingBox=None, asProduct=None):
     return sReturn
 
 
+def asynchExecuteProcessor(sProcessorName, aoParams={}):
+    """
+    Execute a WASDI processor asynchronously
+    :param sProcessorName: WASDI processor name
+    :param aoParams: a dictionary of parameters for the processor
+    :return: processor ID
+    """
+
+    __log('[INFO] waspy.asynchExecuteProcessor( ' + str(sProcessorName) + ', ' + str(aoParams) + ' )')
+
+    if sProcessorName is None:
+        print('[ERROR] waspy.asynchExecuteProcessor: processor name is None, aborting')
+        return ''
+    elif len(sProcessorName) <= 0:
+        print('[ERROR] waspy.asynchExecuteProcessor: processor name empty, aborting')
+        return ''
+    if isinstance(aoParams, dict) is not True:
+        print('[ERROR] waspy.asynchExecuteProcessor: parameters must be a dictionary but it is not, aborting')
+        return ''
+
+    sUrl = getBaseUrl() + \
+           "/processors/run?workspace=" + getActiveWorkspaceId() + \
+           "&name=" + sProcessorName + \
+           "&encodedJson=" + str(aoParams)
+    asHeaders = __getStandardHeaders()
+    oResponse = requests.get(sUrl, headers=asHeaders, params=aoParams)
+    if oResponse is None:
+        print('[ERROR] waspy.asynchExecuteProcessor: something broke when contacting the server, aborting')
+        return ''
+    elif oResponse.ok is True:
+        __log('[INFO] waspy.asynchExecuteProcessor: API call OK')
+        aoJson = oResponse.json()
+        if "processingIdentifier" in aoJson:
+            sProcessID = aoJson['processingIdentifier']
+            return sProcessID
+        else:
+            print('[ERROR] waspy.asynchExecuteProcessor: cannot extract processing identifier from response, aborting')
+    else:
+        print('[ERROR] waspy.asynchExecuteProcessor: server returned status ' + str(oResponse.status_code))
+
+    return ''
+
+
 def executeProcessor(sProcessorName, aoProcessParams):
     """
     Executes a WASDI Processor
     return the Process Id if every thing is ok
     return '' if there was any problem
-    """    
+    """
     global m_sBaseUrl
     global m_sSessionId
     global m_sActiveWorkspace
-    
+
     sEncodedParams = json.dumps(aoProcessParams)
     asHeaders = __getStandardHeaders()
     payload = {'workspace': m_sActiveWorkspace,
                'name': sProcessorName,
-               'encodedJson': sEncodedParams}
+               'sProcessorName': sEncodedParams}
 
     sUrl = m_sBaseUrl + '/processors/run'
-    
+
     oResult = requests.get(sUrl, headers=asHeaders, params=payload)
 
     sProcessId = ''
 
     if (oResult is not None) and (oResult.ok is True):
         oJsonResults = oResult.json()
-        
+
         try:
             sProcessId = oJsonResults['processingIdentifier']
         except:
             return sProcessId
-    
+
     return sProcessId
+
 
 # todo extend to a list of processes
 def waitProcess(sProcessId):
     if sProcessId is None:
         __log('Passed None, expected a process ID')
         return "ERROR"
-    
+
     if sProcessId == '':
         __log('Passed empty, expected a process ID')
         return "ERROR"
@@ -1357,6 +1392,7 @@ def uploadFile(sFileName):
 
     return bResult
 
+
 def __normPath(sPath):
     """
     Normalizes path by adjusting separator
@@ -1373,11 +1409,14 @@ def __normPath(sPath):
 
     return sPath
 
+
 def addFileToWASDI(sFileName):
     return __internalAddFileToWASDI(sFileName, False)
 
+
 def asynchAddFileToWASDI(sFileName):
     return __internalAddFileToWASDI(sFileName, True)
+
 
 def __internalAddFileToWASDI(sFileName, bAsynch=None):
     __log('[INFO] waspy.__internalAddFileToWASDI( ' + str(sFileName) + ', ' + str(bAsynch) + ' )')
@@ -1442,7 +1481,7 @@ def __internalAddFileToWASDI(sFileName, bAsynch=None):
 
 def subset(sInputFile, sOutputFile, dLatN, dLonW, dLatS, dLonE):
     __log('[INFO] waspy.subset( ' + str(sInputFile) + ', ' + str(sOutputFile) + ', ' +
-         str(dLatN) + ', ' + str(dLonW) + ', ' + str(dLatS) + ', ' + str(dLonE) + ' )')
+          str(dLatN) + ', ' + str(dLonW) + ', ' + str(dLatS) + ', ' + str(dLonE) + ' )')
 
     if sInputFile is None:
         print('[ERROR] waspy.subset: input file must not be None, aborting')
@@ -1457,7 +1496,7 @@ def subset(sInputFile, sOutputFile, dLatN, dLonW, dLatS, dLonE):
         print('[ERROR] waspy.subset: output file name len must not have zero length, aborting')
         return ''
 
-    sUrl = m_sBaseUrl + "/processing/geometric/subset?sSourceProductName=" + sInputFile + "&sDestinationProductName=" +\
+    sUrl = m_sBaseUrl + "/processing/geometric/subset?sSourceProductName=" + sInputFile + "&sDestinationProductName=" + \
            sOutputFile + "&sWorkspaceId=" + m_sActiveWorkspace
     sSubsetSetting = "{ \"latN\":" + dLatN + ", \"lonW\":" + dLonW + ", \"latS\":" + dLatS + ", \"lonE\":" + dLonE + " }"
     asHeaders = __getStandardHeaders()
@@ -1466,7 +1505,7 @@ def subset(sInputFile, sOutputFile, dLatN, dLonW, dLatS, dLonE):
         print('[ERROR] waspy.subset: cannot contact server')
         return ''
     if oResponse.ok is not True:
-        print('[ERROR] waspy.subset: failed, server returned '+ str(oResponse.status_code))
+        print('[ERROR] waspy.subset: failed, server returned ' + str(oResponse.status_code))
         return ''
     else:
         oJson = oResponse.json()
@@ -1478,6 +1517,254 @@ def subset(sInputFile, sOutputFile, dLatN, dLonW, dLatS, dLonE):
     return ''
 
 
+def executeWorkflow(asInputFileNames, asOutputFileNames, sWorkflowName):
+    return __internalExecuteWorkflow(asInputFileNames, asOutputFileNames, sWorkflowName, False)
+
+
+def asynchExecuteWorkflow(asInputFileNames, asOutputFileNames, sWorkflowName):
+    return __internalExecuteWorkflow(asInputFileNames, asOutputFileNames, sWorkflowName, True)
+
+
+def __internalExecuteWorkflow(asInputFileNames, asOutputFileNames, sWorkflowName, bAsynch=False):
+    """
+    Internal call to execute workflow
+
+    :param asInputFileNames:
+    :param asOutputFileNames:
+    :param sWorkflowName:
+    :param bAsynch:
+    :return: processID if asynch, status of the executed process if synch, empty string in case of failure
+    """
+
+    __log('[INFO] waspy.__internalExecuteWorkflow( ' + str(asInputFileNames) + ', ' +
+          str(asOutputFileNames) + ', ' + str(sWorkflowName) + ', ' + str(bAsynch) + ' )')
+
+    if asInputFileNames is None:
+        print('[ERROR] waspy.__internalExecuteWorkflow: input file names None, aborting')
+        return ''
+    elif len(asInputFileNames) <= 0:
+        print('[ERROR] waspy.__internalExecuteWorkflow: no input file names, aborting')
+        return ''
+
+    if asOutputFileNames is None:
+        print('[ERROR] waspy.__internalExecuteWorkflow: output file names None, aborting')
+        return ''
+    # elif len(asOutputFileNames) <= 0:
+    #     print('[ERROR] waspy.__internalExecuteWorkflow: no output file names, aborting')
+    #     return ''
+
+    if sWorkflowName is None:
+        print('[ERROR] waspy.__internalExecuteWorkflow: workspace name is None, aborting')
+        return ''
+    elif len(sWorkflowName) <= 0:
+        print('[ERROR] waspy.__internalExecuteWorkflow: workflow name too short, aborting')
+        return ''
+
+    sProcessId = ''
+    sWorkflowId = None
+    sUrl = getBaseUrl() + "/processing/graph_id?workspace=" + getActiveWorkspaceId()
+
+    # get a list of workflows, with entries in this form: :
+    #   {  "description":STRING,
+    #       "name": STRING,
+    #       "workflowId": STRING }
+    aoWorkflows = getWorkflows()
+    aoDictPayload = None
+    if aoWorkflows is None:
+        print('[ERROR] waspy.__internalExecuteWorkflow: workflow list is None, aborting')
+        return ''
+    elif len(aoWorkflows) <= 0:
+        print('[ERROR] waspy.__internalExecuteWorkflow: workflow list is empty, aborting')
+        return ''
+    else:
+        for asWorkflow in aoWorkflows:
+            if asWorkflow is not None:
+                if "name" in asWorkflow:
+                    if asWorkflow["name"] == sWorkflowName:
+                        if "workflowId" in asWorkflow:
+                            # replace \' with \" everywhere
+                            aoDictPayload = {}
+                            aoDictPayload["description"] = asWorkflow["description"]
+                            aoDictPayload["name"] = asWorkflow["name"]
+                            aoDictPayload["workflowId"] = asWorkflow["workflowId"]
+                            break
+    if aoDictPayload is None:
+        print('[ERROR] waspy.__internalExecuteWorkflow: workflow name not found, aborting')
+        return ''
+
+    try:
+        aoDictPayload["inputFileNames"] = asInputFileNames
+        aoDictPayload["outputFileNames"] = asOutputFileNames
+    except:
+        print('[ERROR] waspy.__internalExecuteWorkflow: payload could not be generated, aborting')
+        return ''
+
+    __log('[INFO] waspy.__internalExecuteWorkflow: about to HTTP put to ' + str(sUrl) + ' with payload ' +
+          str(aoDictPayload))
+    asHeaders = __getStandardHeaders()
+    oResponse = requests.post(sUrl, headers=asHeaders, data=json.dumps(aoDictPayload))
+    if oResponse is None:
+        print('[ERROR] waspy.__internalExecuteWorkflow: communication with the server failed, aborting')
+        return ''
+    elif oResponse.ok is True:
+        __log('[INFO] waspy.__internalExecuteWorkflow: server replied OK')
+        asJson = oResponse.json()
+        if "stringValue" in asJson:
+            sProcessId = asJson["stringValue"]
+            if bAsynch is True:
+                return sProcessId
+            else:
+                return waitProcess(sProcessId)
+        else:
+            print('[ERROR] waspy.__internalExecuteWorkflow: cannot find process ID in response, aborting')
+            return ''
+    else:
+        print('[ERROR] waspy.__internalExecuteWorkflow: server returned status ' + str(oResponse.status_code))
+        print(oResponse.content)
+    return ''
+
+
+def mosaic(asInputFiles, sOutputFile, iNoDataValue = None, iIgnoreInputValue = None, asBands=None,
+           fPixelSizeX=-1.0, fPixelSizeY=-1.0, sCrs=None,
+           fSouthBound=-1.0, fNorthBound=-1.0, fEastBound=-1.0, fWestBound=-1.0,
+           sOverlappingMethod="MOSAIC_TYPE_OVERLAY", bShowSourceProducts=False, sElevationModelName="ASTER 1sec GDEM",
+           sResamplingName="Nearest", bUpdateMode=False, bNativeResolution=True, sCombine="OR", bAsynch=False):
+    """
+    Constructs a mosaic out of a set of images
+
+    :param asInputFiles: List of input files to mosaic
+    :param sOutputFile: Name of the mosaic output file
+    :param iNoDataValue: Value to use as noData. Use -1 to ignore
+    :param asBands: List of the bands to use for the mosaic
+    :param fPixelSizeX: X Pixel Size
+    :param fPixelSizeY: Y Pixel Size
+    :param sCrs: WKT of the CRS to use
+    :param fSouthBound: South Bound
+    :param fNorthBound: North Bound
+    :param fEastBound: East Bound
+    :param fWestBound: West Bound
+    :param sOverlappingMethod: Overlapping Method
+    :param bShowSourceProducts: Show Source Products Flag
+    :param sElevationModelName: DEM Model Name
+    :param sResamplingName: Resampling Method Name
+    :param bUpdateMode: Update Mode Flag
+    :param bNativeResolution: Native Resolution Flag
+    :param sCombine: Combine verb
+    :param bAsynch: True to return after the triggering, False to wait the process to finish
+    :return: Process ID is asynchronous execution, end status otherwise. An empty string is returned in case of failure
+    """
+
+    __log('[INFO]  waspy.mosaic( ' +
+          str(asInputFiles) + ', ' +
+          str(sOutputFile) + ', ' +
+          str(iNoDataValue) + ', ' +
+          str(asBands) + ', ' +
+          str(fPixelSizeX) + ', ' +
+          str(fPixelSizeY) + ', ' +
+          str(sCrs) + ', ' +
+          str(fSouthBound) + ', ' +
+          str(fNorthBound) + ', ' +
+          str(fEastBound) + ', ' +
+          str(fWestBound) + ', ' +
+          str(sOverlappingMethod) + ', ' +
+          str(bShowSourceProducts) + ', ' +
+          str(sElevationModelName) + ', ' +
+          str(sResamplingName) + ', ' +
+          str(bUpdateMode) + ', ' +
+          str(bNativeResolution) + ', ' +
+          str(sCombine) + ', ' +
+          str(bAsynch) + ' )'
+          )
+
+    if asInputFiles is None:
+        print('[ERROR] waspy.mosaic: list of input files is None, aborting')
+        return ''
+    elif len(asInputFiles) <= 0:
+        print('[ERROR] waspy.mosaic: list of input files is empty, aborting')
+        return ''
+
+    if sOutputFile is None:
+        print('[ERROR] waspy.mosaic: name of output file is None, aborting')
+        return ''
+    elif isinstance(sOutputFile, str) is False:
+        print('[ERROR] waspy.mosaic: output file name must be a string, but a ' + str(type(sOutputFile)) +
+              ' was passed, aborting')
+        return ''
+    elif len(sOutputFile) <= 0:
+        print('[ERROR] waspy.mosaic: output file name is empty, aborting')
+        return ''
+
+    sUrl = getBaseUrl() + "/processing/geometric/mosaic?sDestinationProductName=" + sOutputFile + "&sWorkspaceId=" + \
+           getActiveWorkspaceId()
+
+    sOutputFormat = "GeoTIFF"
+    if sOutputFile.endswith(".dim"):
+        sOutputFormat = "BEAM-DIMAP"
+
+    if sCrs is None:
+        sCrs = __getDefaultCRS()
+
+    # todo check input type is appropriate
+    try:
+        aoMosaicSettings = {
+            'crs': sCrs,
+            'southBound': fSouthBound,
+            'eastBound': fEastBound,
+            'northBound': fNorthBound,
+            'westBound': fWestBound,
+            'pixelSizeX': fPixelSizeX,
+            'pixelSizeY': fPixelSizeY,
+            'overlappingMethod': sOverlappingMethod,
+            'showSourceProducts': bShowSourceProducts,
+            'elevationModelName': sElevationModelName,
+            'resamplingName': sResamplingName,
+            'updateMode': bUpdateMode,
+            'nativeResolution': bNativeResolution,
+            'combine': sCombine,
+            'outputFormat': sOutputFormat,
+            'sources': asInputFiles,
+            'variableNames': asBands,
+            'noDataValue': iNoDataValue,
+            'inputIgnoreValue': iIgnoreInputValue,
+            'variableExpressions': []
+        }
+    except:
+        print('[ERROR] waspy.mosaic: cannot build DTO, please check your input. Aborting')
+        return ''
+
+    asHeaders = __getStandardHeaders()
+    oResponse = requests.post(sUrl, data=json.dumps(aoMosaicSettings), headers=asHeaders)
+    if oResponse is None:
+        print('[ERROR] waspy.mosaic: cannot contact server, aborting')
+        return ''
+    if oResponse.ok is True:
+        asJson = oResponse.json()
+        if 'stringValue' in asJson:
+            sProcessId = str(asJson['stringValue'])
+            if bAsynch is False:
+                return waitProcess(sProcessId)
+            else:
+                return sProcessId
+    else:
+        print('[ERROR] waspy.mosaic: server respondend with status: ' + str(oResponse.status_code) + ', aborting')
+        return ''
+
+    return ''
+
+
+def __getDefaultCRS():
+    return (
+            "GEOGCS[\"WGS84(DD)\", \r\n" +
+            "          DATUM[\"WGS84\", \r\n" +
+            "            SPHEROID[\"WGS84\", 6378137.0, 298.257223563]], \r\n" +
+            "          PRIMEM[\"Greenwich\", 0.0], \r\n" +
+            "          UNIT[\"degree\", 0.017453292519943295], \r\n" +
+            "          AXIS[\"Geodetic longitude\", EAST], \r\n" +
+            "          AXIS[\"Geodetic latitude\", NORTH]]"
+    )
+
+
 if __name__ == '__main__':
-    __log('WASPY - The WASDI Python Library. Include in your code for space development processors. Visit www.wasdi.net')
+    __log(
+        'WASPY - The WASDI Python Library. Include in your code for space development processors. Visit www.wasdi.net')
 

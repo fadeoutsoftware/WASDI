@@ -5,6 +5,7 @@ import eDriftCheckImages
 import eDriftRasor
 import eDriftGetTileCoordinate
 import eDriftArchiveGenerator
+import testMosaic
 import gabTest
 
 if (wasdi.init("C:\Codice\Progetti\WASDI\Codice\eDriftProcessors\config.properties")):
@@ -12,4 +13,4 @@ if (wasdi.init("C:\Codice\Progetti\WASDI\Codice\eDriftProcessors\config.properti
     #eDriftRasor.run(wasdi.getParametersDict(), '')
     #eDriftGetTileCoordinate.run(wasdi.getParametersDict(), '')
     #eDriftArchiveGenerator.run(wasdi.getParametersDict(), '')
-    gabTest.run(wasdi.getParametersDict(), '')
+    testMosaic.run(wasdi.getParametersDict(), '')
