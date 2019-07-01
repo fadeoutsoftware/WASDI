@@ -166,23 +166,105 @@ The output should be similar to this:
 Found 8
 ```
 
-Now we can import one of those products in WASDI using the value of the field `link`. Let's download the first one:
+Now we can import one of those products in WASDI: let's download the first one:
 
 ```python
-wasdi.importProduct('https://catalogue.onda-dias.eu/dias-catalogue/Products(cba6c104-3006-4af7-a2d1-cbd55f58b939)/$value')
+sImportWithDict = wasdi.importProduct(None, None, aoImages[0])
 ```
+
+We can see a list of the products in the workspace as follows:
+
+```python
+asProducts = wasdi.getProductsByActiveWorkspace()
+wasdi.wasdiLog(asProducts)
+```
+
+The second line logs the list of products
 
 ### Running an existing workflow
 
 If you wish to run an existing SNAP workflow you can use `wasdi.executeWorkflow`. For example, if you wish to execute a workflow that calibrates and corrects the georeference of a Sentinel 1 image, you may use the workflow called `LISTSinglePreproc` in this way:
 
+```python
+asProducts = wasdi.getProductsByActiveWorkspace()
+sStatus = wasdi.executeWorkflow([asProducts[0]], ['lovelyOutput'], 'LISTSinglePreproc')
+```
 
-Let's consider a somewhat more complicated 
+Here the first line gets the list of products and the second calls the workflow `LISTSinglePreproc` on the first product of the workspace and creates another product called `lovelyOutput`.
 
-### Deploy your processor on 
+### A more complete example
+
+Now put everything back together. Create a file called [`myProcessor.py`](https://github.com/fadeoutsoftware/WASDI/blob/develop/libraries/waspy/examples/myProcessor.py) (follow the link to download the file) with the following content:
+
+```python
+import wasdi
 
 
-### Include WASDI in a custom Processor
+def run(parameters, processId):
+    wasdi.wasdiLog('Here\'s the list of your workspaces:')
+    aoWorkspaces = wasdi.getWorkspaces()
+    wasdi.wasdiLog(aoWorkspaces)
+    wasdi.wasdiLog('The ID of currently selected workspace is:')
+    sActiveWorkspace = wasdi.getActiveWorkspaceId()
+    wasdi.wasdiLog(sActiveWorkspace)
+
+    wasdi.wasdiLog('Let\'s search some images...')
+    aoImages = wasdi.searchEOImages("S1", "2018-09-01", "2018-09-02", 44, 11, 43, 12, sProductType='GRD')
+    wasdi.wasdiLog('Found ' + str(len(aoImages)) + ' images')
+
+    wasdi.wasdiLog('Download the first one passing the dictionary...')
+    sImportWithDict = wasdi.importProduct(None, None, aoImages[0])
+    wasdi.wasdiLog('Import with dict returned: ' + sImportWithDict)
+
+    wasdi.wasdiLog('Now, these are the products in your workspace: ')
+    asProducts = wasdi.getProductsByActiveWorkspace()
+    wasdi.wasdiLog(asProducts)
+
+    wasdi.wasdiLog('Let\'s run a workflow on the first image to rectify its georeference...')
+    sStatus = wasdi.executeWorkflow([asProducts[0]], ['lovelyOutput'], 'LISTSinglePreproc')
+    if sStatus == 'DONE':
+        wasdi.wasdiLog('The product is now in your workspace, look at it on the website')
+
+    wasdi.wasdiLog('It\'s over!')
+
+def WasdiHelp():
+    sHelp = "Wasdi Tutorial"
+    return sHelp
+```
+
+Then create another file to start the processor. Let's call it [`tutorial.py`](https://github.com/fadeoutsoftware/WASDI/blob/develop/libraries/waspy/examples/tutorial.py) (follow the link to download the file), with the following content:
+
+```python
+import myProcessor
+import wasdi
+
+bInitResult = wasdi.init('config.json')
+if bInitResult:
+    myProcessor.run(wasdi.getParametersDict(), '')
+
+```
+
+Now, if you run `tutorial.py`, it will call `myProcessor.py`, which will go through the instructions we saw above. Pro tip: keep the browser open in wasdi.net (make sure you are logged in) and open the workspace you are using, to see the evolution of the script in real time.
+
+### Deploy your processor on WASDI
+
+Finally, to deply our processor on WASDI, you need first to create a text file called [`pip.txt`](https://github.com/fadeoutsoftware/WASDI/blob/develop/libraries/waspy/examples/pip.txt) (follow the link to download the file) containg the packages we imported in `myProcessor.py`, one per line. Since we just imported `wasdi`, it should look like this:
+
+```
+wasdi
+```
+
+Now, create a zip file containing these two files:
+
+- `myProcessor.py`
+- `pip.txt`
+
+You can now upload the zip file on wasdi.net from *Edit* -> *Processor* -> *New WASDI App* by giving it a name and completing the other details. You will need to do this just once.
+To run it, go to *WADI Apps* -> (select yours) -> no parameters are needed, so just enter `{}` and clic *run*.
+
+----
+
+### More to include WASDI in a custom Processor
 
 Let’s assume that the developer has his own EO Product Manipulation Code. At some point, the developer wishes to read his own input file, then make elaborations and finally save an output file. 
 
