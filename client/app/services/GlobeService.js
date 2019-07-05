@@ -18,10 +18,10 @@ service('GlobeService', ['$http',  'ConstantsService','SatelliteService', functi
     this.m_aoLayers = [];
     this.oGlobeOptions =
     {
-        imageryProvider : Cesium.createOpenStreetMapImageryProvider(),
+        //imageryProvider : Cesium.createOpenStreetMapImageryProvider(),
         timeline: false,
         animation: false,
-        baseLayerPicker:false,
+        baseLayerPicker:true,
         fullscreenButton:false,
         infoBox:false,
         selectionIndicator:false,
@@ -32,79 +32,35 @@ service('GlobeService', ['$http',  'ConstantsService','SatelliteService', functi
         scene3DOnly:true
     }
 
-    this.initGlobeWithLayersPicker  = function(sGlobeDiv){
-        // this.oGlobeOptions = {}
-        this.oGlobeOptions.baseLayerPicker = false;
-        // this.oGlobeOptions.imageryProvider = null;
-
-        var imageryViewModels = [];
-        imageryViewModels.push(new Cesium.ProviderViewModel({
-            name : 'Open\u00adStreet\u00adMap',
-            iconUrl : Cesium.buildModuleUrl('Widgets/Images/ImageryProviders/openStreetMap.png'),
-            tooltip : 'OpenStreetMap (OSM) is a collaborative project to create a free editable \
-            map of the world.\nhttp://www.openstreetmap.org',
-            creationFunction : function() {
-                return Cesium.createOpenStreetMapImageryProvider({
-                    url : 'https://a.tile.openstreetmap.org/'
-                });
-            }
-        }));
-
-
-        // imageryViewModels.push(new Cesium.ProviderViewModel({
-        //     name : 'Earth at Night',
-        //     iconUrl : Cesium.buildModuleUrl('Widgets/Images/ImageryProviders/blackMarble.png'),
-        //     tooltip : 'The lights of cities and villages trace the outlines of civilization \
-        //         in this global view of the Earth at night as seen by NASA/NOAA\'s Suomi NPP satellite.',
-        //     creationFunction : function() {
-        //         return new Cesium.IonImageryProvider({ assetId: 3812 });
-        //     }
-        // }));
-
-        imageryViewModels.push(new Cesium.ProviderViewModel({
-            name : 'Natural Earth\u00a0II',
-            iconUrl : Cesium.buildModuleUrl('Widgets/Images/ImageryProviders/naturalEarthII.png'),
-            tooltip : 'Natural Earth II, darkened for contrast.\nhttp://www.naturalearthdata.com/',
-            creationFunction : function() {
-                return Cesium.createTileMapServiceImageryProvider({
-                    url : Cesium.buildModuleUrl('Assets/Textures/NaturalEarthII')
-                });
-            }
-        }));
-
-        //Create a CesiumWidget without imagery, if you haven't already done so.
-
-        this.initGlobe(sGlobeDiv);
-        var oTest = this.m_oWasdiGlobe.scene.globe;
-        //Finally, create the baseLayerPicker widget using our view models.
-        var baseLayerPicker = new Cesium.BaseLayerPicker('baseLayerPickerContainer', {
-            globe : this.m_oWasdiGlobe.scene.globe,
-            imageryProviderViewModels : imageryViewModels
-        });
-
-
-        //Create a CesiumWidget without imagery, if you haven't already done so.
-        // var cesiumWidget = new Cesium.CesiumWidget('sGlobeDiv', this.oGlobeOptions);//{ imageryProvider: false }
-
-        // //Finally, create the baseLayerPicker widget using our view models.
-        // var layers = cesiumWidget.imageryLayers;
-        // var baseLayerPicker = new Cesium.BaseLayerPicker('baseLayerPickerContainer', {
-        //     globe : cesiumWidget.scene.globe,
-        //     imageryProviderViewModels : imageryViewModels
-        // });
-        // this.m_oWasdiGlobe = cesiumWidget;
-
-    }
-
     this.initGlobe = function(sGlobeDiv)
     {
 
         if (window.WebGLRenderingContext)//check if browser supports WebGL
         {
             // browser supports WebGL
-            // default globe
             try {
-                this.m_oWasdiGlobe = new Cesium.Viewer(sGlobeDiv, this.oGlobeOptions);
+                var oGlobeOptions =
+                    {
+                        timeline: false,
+                        animation: false,
+                        baseLayerPicker:true,
+                        fullscreenButton:false,
+                        infoBox:true,
+                        selectionIndicator:true,
+                        geocoder:true,
+                        navigationHelpButton:false,
+                        sceneModePicker:false,
+                        homeButton:false,
+                        scene3DOnly:true
+                    };
+
+                Cesium.Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiIwODY1YzJlOS1lNGYxLTQ2OTQtOWNjMy01M2E2Y2EwMTQwYWYiLCJpZCI6MTIwODUsInNjb3BlcyI6WyJhc3IiLCJnYyJdLCJpYXQiOjE1NjAzMzMxNzJ9.p-wPCUj_m_NlYw2KsyW8jp7dRb_2EdS84cCWAirm_HI';
+                this.m_oWasdiGlobe = new Cesium.Viewer(sGlobeDiv, oGlobeOptions);
+
+                // Select OpenLayers and Cesium DEM Terrain by default
+                this.m_oWasdiGlobe.baseLayerPicker.viewModel.selectedImagery  = this.m_oWasdiGlobe.baseLayerPicker.viewModel.imageryProviderViewModels[9];
+                this.m_oWasdiGlobe.baseLayerPicker.viewModel.selectedTerrain = this.m_oWasdiGlobe.baseLayerPicker.viewModel.terrainProviderViewModels[1];
+
                 this.m_aoLayers = this.m_oWasdiGlobe.imageryLayers;
             }
             catch(err) {
@@ -296,17 +252,24 @@ service('GlobeService', ['$http',  'ConstantsService','SatelliteService', functi
         if(utilsIsObjectNullOrUndefined(aArray) == true) return false;
         if(utilsIsObjectNullOrUndefined(this.m_oWasdiGlobe) == true) return false;
 
-        var oRectangle = this.m_oWasdiGlobe.entities.add({
-            polygon : {
-                hierarchy : new Cesium.PolygonHierarchy(Cesium.Cartesian3.fromDegreesArray(aArray)),
-                outline : true,
-                 outlineColor : Cesium.Color.RED.withAlpha(1),
-                outlineWidth : 10,
-                material : Cesium.Color.RED.withAlpha(0.2)
-            }
-        });
+        try {
+            var oRectangle = this.m_oWasdiGlobe.entities.add({
+                polygon : {
+                    hierarchy : new Cesium.PolygonHierarchy(Cesium.Cartesian3.fromDegreesArray(aArray)),
+                    outline : true,
+                    outlineColor : Cesium.Color.RED.withAlpha(1),
+                    outlineWidth : 10,
+                    material : Cesium.Color.RED.withAlpha(0.2)
+                }
+            });
 
-        return oRectangle;
+            return oRectangle;
+        }
+        catch(err) {
+            console.log(err)
+            return null;
+        }
+
     };
 
     this.removeAllEntities = function ()
@@ -321,26 +284,9 @@ service('GlobeService', ['$http',  'ConstantsService','SatelliteService', functi
         if (window.WebGLRenderingContext)//check if browser supports WebGL
         {
             // browser supports WebGL
-
-            // default globe
             try {
-                var oGlobeOptions =
-                    {
-                        imageryProvider : Cesium.createOpenStreetMapImageryProvider(),
-                        timeline: false,
-                        animation: false,
-                        baseLayerPicker:false,
-                        fullscreenButton:false,
-                        infoBox:true,
-                        selectionIndicator:true,
-                        geocoder:false,
-                        navigationHelpButton:false,
-                        sceneModePicker:false,
-                        homeButton:false,
-                        scene3DOnly:true
-                    }
-                this.m_oWasdiGlobe = new Cesium.Viewer(sGlobeDiv, oGlobeOptions);
-                this.m_aoLayers = this.m_oWasdiGlobe.imageryLayers;
+
+                this.initGlobe(sGlobeDiv);
 
                 //rotate globe
                 this.m_oWasdiGlobe.camera.flyHome(0);
@@ -368,22 +314,25 @@ service('GlobeService', ['$http',  'ConstantsService','SatelliteService', functi
         var icrfToFixed = Cesium.Transforms.computeIcrfToFixedMatrix(time);
         if (Cesium.defined(icrfToFixed)) {
 
-            var camera =  oController.m_oWasdiGlobe.camera;
-            var offset = Cesium.Cartesian3.clone(camera.position);
+            var offset = Cesium.Cartesian3.clone(oController.m_oWasdiGlobe.camera.position);
             var transform = Cesium.Matrix4.fromRotationTranslation(icrfToFixed);
-            camera.lookAtTransform(transform, offset);
+            oController.m_oWasdiGlobe.camera.lookAtTransform(transform, offset);
         }
     };
 
     /*Stop rotation*/
     this.stopRotationGlobe = function(){
         this.m_oWasdiGlobe.clock.multiplier = 0;
+        this.m_oWasdiGlobe.clock.canAnimate = true;
+        this.m_oWasdiGlobe.clock.shouldAnimate = true;
     };
 
     /*Start rotation*/
     this.startRotationGlobe = function(iRotationValue){
         if(utilsIsANumber(iRotationValue) === false)
             return false;
+        this.m_oWasdiGlobe.clock.canAnimate = true;
+        this.m_oWasdiGlobe.clock.shouldAnimate = true;
         this.m_oWasdiGlobe.clock.multiplier = iRotationValue * 600 ;
         return true;
     };
@@ -637,6 +586,16 @@ service('GlobeService', ['$http',  'ConstantsService','SatelliteService', functi
                 var iArraySplitLength = aoArraySplit.length;
                 if(iArraySplitLength < 10) continue;
 
+                var bHasNan = false;
+                for (var iValues = 0; iValues< aoArraySplit.length; iValues ++) {
+                    if (isNaN(aoArraySplit[iValues])) {
+                        bHasNan = true;
+                        break;
+                    }
+                }
+
+                if (bHasNan) continue;
+
                 aoTotalArray.push.apply(aoTotalArray,aoArraySplit);
             }
 
@@ -678,6 +637,9 @@ service('GlobeService', ['$http',  'ConstantsService','SatelliteService', functi
             // Check we have products
             if(utilsIsObjectNullOrUndefined(aoProducts) === true) return false;
 
+            // Clear the previous footprints
+            this.removeAllEntities();
+
             var iProductsLength = aoProducts.length;
 
             // For each product
@@ -687,6 +649,16 @@ service('GlobeService', ['$http',  'ConstantsService','SatelliteService', functi
                 aoArraySplit = aoProducts[iIndexProduct].bbox.split(",");
                 var iArraySplitLength = aoArraySplit.length;
                 if(iArraySplitLength < 10) continue;
+
+                var bHasNan = false;
+                for (var iValues = 0; iValues< aoArraySplit.length; iValues ++) {
+                    if (isNaN(aoArraySplit[iValues])) {
+                        bHasNan = true;
+                        break;
+                    }
+                }
+
+                if (bHasNan) continue;
 
                 aoTotalArray.push.apply(aoTotalArray,aoArraySplit);
 

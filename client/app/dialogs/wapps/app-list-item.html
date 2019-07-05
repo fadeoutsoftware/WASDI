@@ -1,0 +1,19 @@
+<div class="row-v4">
+    <div class="col-v4-4 mb-4" ng-repeat="processor in m_oController.m_aoProcessorList">
+        <div class="p-3 h-100 app-item" ng-click="m_oController.selectProcessor(processor)" ng-class="{'selected' : m_oController._selectedProcessor == processor}">
+            <div class="content-image text-center">
+                <!--<img src={{processor.imgLink}} alt="Image" >-->
+                <i class="fa fa-laptop"></i>
+            </div>
+            <div class="" >
+                <label>
+                    {{processor.processorName}}
+                </label>
+                <div>
+                    {{processor.processorDescription}}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+

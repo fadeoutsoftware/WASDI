@@ -22,6 +22,9 @@ var OperaWappController = (function() {
         this.m_sLastGeneratedFile = "";
         this.m_bHasResult = false;
 
+        this.m_oReturnValueDropdown = {};
+        this.m_aoProductListDropdown = this.getDropdownMenuList(this.m_aoProducts);
+
         if(utilsIsObjectNullOrUndefined(this.m_aoProducts) === false)
         {
             this.m_oSelectedProduct = this.m_aoProducts[0];
@@ -36,11 +39,22 @@ var OperaWappController = (function() {
         this.m_oWindow.open('http://www.mydewetra.org', '_blank');
     };
 
+    OperaWappController.prototype.getDropdownMenuList = function(aoProduct){
+
+        return utilsProjectGetDropdownMenuListFromProductsList(aoProduct)
+    };
+    OperaWappController.prototype.getSelectedProduct = function(aoProduct,oSelectedProduct){
+
+        return utilsProjectDropdownGetSelectedProduct(aoProduct,oSelectedProduct);
+    }
     OperaWappController.prototype.runSaba = function() {
 
         this.m_bHasResult = false;
 
-        var sFile = this.m_oSelectedProduct.fileName;
+        // var sFile = this.m_oSelectedProduct.fileName;
+        var oInputFile = this.getSelectedProduct(this.m_aoProducts,this.m_oReturnValueDropdown);
+        var sFile = oInputFile.fileName;
+
         var sWorkspaceId = this.m_oConstantsService.getActiveWorkspace().workspaceId;
 
         this.m_sResultFromServer = "Opera Automatic Flooded Area Detection Running";

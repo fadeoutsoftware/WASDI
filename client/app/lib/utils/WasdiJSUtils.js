@@ -183,10 +183,10 @@ function utilsProjectShowRabbitMessageUserFeedBack(oMessage) {
             sUserMessage = "MOSAIC COMPLETED<br>READY";
             break;
         case "SUBSET":
-            sUserMessage = "MOSAIC COMPLETED<br>READY";
+            sUserMessage = "SUBSET COMPLETED<br>READY";
             break;
         case "MULTISUBSET":
-            sUserMessage = "MOSAIC COMPLETED<br>READY";
+            sUserMessage = "MULTISUBSET COMPLETED<br>READY";
             break;
         case "GRAPH":
             sUserMessage = "WORKFLOW COMPLETED<br>READY";
@@ -516,5 +516,45 @@ function utilsProjectGetPolygonArray(sPolygonString){
     sTemp = sTemp.split(",");
 
     return sTemp;
+}
+
+function utilsProjectGetDropdownMenuListFromProductsList(aoProduct)
+{
+    if(utilsIsObjectNullOrUndefined(aoProduct) === true)
+    {
+        return [];
+    }
+    var iNumberOfProducts = aoProduct.length;
+    var aoReturnValue=[];
+    for(var iIndexProduct = 0; iIndexProduct < iNumberOfProducts; iIndexProduct++)
+    {
+
+        var oValue = {
+            name:aoProduct[iIndexProduct].name,
+            id:aoProduct[iIndexProduct].fileName
+        };
+        aoReturnValue.push(oValue);
+    }
+
+    return aoReturnValue;
+}
+
+function utilsProjectDropdownGetSelectedProduct(aoProduct,oSelectedProduct){
+    if(utilsIsObjectNullOrUndefined(aoProduct) === true)
+    {
+        return [];
+    }
+    var iNumberOfProducts = aoProduct.length;
+    var oReturnValue={};
+    for(var iIndexProduct = 0; iIndexProduct < iNumberOfProducts; iIndexProduct++)
+    {
+        if( oSelectedProduct.name === aoProduct[iIndexProduct].name )
+        {
+            oReturnValue = aoProduct[iIndexProduct];
+            break;
+        }
+
+    }
+    return oReturnValue;
 }
 

@@ -18,6 +18,9 @@ var JRCWorkflowController = (function() {
         // this.m_asSelectedProducts = [];
         // this.m_asProductsName = utilsProjectGetProductsName(this.m_aoProduct);
 
+        this.m_oReturnValueDropdown = {};
+        this.m_aoProductListDropdown = this.getDropdownMenuList(this.m_aoProduct);
+
         // var oController = this;
         $scope.close = function(result) {
             oClose(null, 300); // close, but give 500ms for bootstrap to animate
@@ -28,6 +31,14 @@ var JRCWorkflowController = (function() {
         // };
 
     };
+    JRCWorkflowController.prototype.getDropdownMenuList = function(aoProduct){
+
+        return utilsProjectGetDropdownMenuListFromProductsList(aoProduct)
+    };
+    JRCWorkflowController.prototype.getSelectedProduct = function(aoProduct,oSelectedProduct){
+
+        return utilsProjectDropdownGetSelectedProduct(aoProduct,oSelectedProduct);
+    };
 
     JRCWorkflowController.prototype.redirectToWebSite = function(){
         this.m_oWindow.open('https://ec.europa.eu/jrc/en', '_blank');
@@ -35,8 +46,10 @@ var JRCWorkflowController = (function() {
 
     JRCWorkflowController.prototype.runJrcProcessor = function()
     {
+        var oInputFile = this.getSelectedProduct(this.m_aoProduct,this.m_oReturnValueDropdown);
+
         var oJRCJson = {
-            inputFileName: this.m_oSelectedReferenceProduct.fileName,
+            inputFileName: oInputFile.fileName,
             epsg:this.m_sEPSG,
             outputFileName:this.m_sOutputFile,
             preprocess:this.m_sPreprocess

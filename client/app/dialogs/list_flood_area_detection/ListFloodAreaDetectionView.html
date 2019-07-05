@@ -49,19 +49,23 @@
                             </div>
                             <div class="col-xs-9 col-sm-9 col-md-9 col-lg-9">
                                 <div class="dropdown my-dropdown">
-                                    <button class="btn btn-default dropdown-toggle" type="button" id="dropdownReferenceProduct"
-                                            data-toggle="dropdown">
-                                        {{m_oController.m_oSelectedReferenceProduct.name}}
-                                        <span class="caret"></span>
-                                    </button>
-                                    <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownReferenceProduct">
-                                        <li role="presentation" ng-repeat="product in m_oController.m_aoProducts" >
-                                            <a role="menuitem" tabindex="-1" href="" ng-click="m_oController.m_oSelectedReferenceProduct = product">
-                                                {{product.name}}
-                                            </a>
-                                        </li>
+                                    <!--<button class="btn btn-default dropdown-toggle" type="button" id="dropdownReferenceProduct"-->
+                                            <!--data-toggle="dropdown">-->
+                                        <!--{{m_oController.m_oSelectedReferenceProduct.name}}-->
+                                        <!--<span class="caret"></span>-->
+                                    <!--</button>-->
+                                    <!--<ul class="dropdown-menu" role="menu" aria-labelledby="dropdownReferenceProduct">-->
+                                        <!--<li role="presentation" ng-repeat="product in m_oController.m_aoProducts" >-->
+                                            <!--<a role="menuitem" tabindex="-1" href="" ng-click="m_oController.m_oSelectedReferenceProduct = product">-->
+                                                <!--{{product.name}}-->
+                                            <!--</a>-->
+                                        <!--</li>-->
 
-                                    </ul>
+                                    <!--</ul>-->
+                                    <dropdownmenudirective list-of-values="m_oController.m_aoProductListDropdown"
+                                                           selected-value="m_oController.m_oReturnReferenceValueDropdown"
+                                                           enable-search-filter="true"
+                                                           dropdown-name="'Reference'"></dropdownmenudirective>
                                 </div>
                             </div>
 
@@ -75,19 +79,23 @@
                             </div>
                             <div class="col-xs-9 col-sm-9 col-md-9 col-lg-9">
                                 <div class="dropdown my-dropdown">
-                                    <button class="btn btn-default dropdown-toggle" type="button" id="dropdownPostEventImageProduct"
-                                            data-toggle="dropdown">
-                                        {{m_oController.m_oSelectedPostEventImageProduct.name}}
-                                        <span class="caret"></span>
-                                    </button>
-                                    <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownPostEventImageProduct">
-                                        <li role="presentation" ng-repeat="product in m_oController.m_aoProducts" >
-                                            <a role="menuitem" tabindex="-1" href="" ng-click="m_oController.m_oSelectedPostEventImageProduct = product">
-                                                {{product.name}}
-                                            </a>
-                                        </li>
+                                    <!--<button class="btn btn-default dropdown-toggle" type="button" id="dropdownPostEventImageProduct"-->
+                                            <!--data-toggle="dropdown">-->
+                                        <!--{{m_oController.m_oSelectedPostEventImageProduct.name}}-->
+                                        <!--<span class="caret"></span>-->
+                                    <!--</button>-->
+                                    <!--<ul class="dropdown-menu" role="menu" aria-labelledby="dropdownPostEventImageProduct">-->
+                                        <!--<li role="presentation" ng-repeat="product in m_oController.m_aoProducts" >-->
+                                            <!--<a role="menuitem" tabindex="-1" href="" ng-click="m_oController.m_oSelectedPostEventImageProduct = product">-->
+                                                <!--{{product.name}}-->
+                                            <!--</a>-->
+                                        <!--</li>-->
 
-                                    </ul>
+                                    <!--</ul>-->
+                                    <dropdownmenudirective list-of-values="m_oController.m_aoProductListDropdown"
+                                                           selected-value="m_oController.m_oReturnPostEventeValueDropdown"
+                                                           enable-search-filter="true"
+                                                           dropdown-name="'Flood in'"></dropdownmenudirective>
                                 </div>
                             </div>
 

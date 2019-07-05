@@ -32,6 +32,9 @@ var EditorController = (function () {
         // Flag to know if the big map is the Geographical Mode (true) or in the Editor Mode (false)
         this.m_bIsActiveGeoraphicalMode = false;
 
+        //filter query text in tree
+        this.m_sTextQueryFilterInTree = "";
+
         this.m_bIsLoadingColourManipulation = false;
         this.m_bIsLoadingTree = true;
         this.m_sToolTipBtnSwitchGeographic = "EDITOR_TOOLTIP_TO_GEO";
@@ -202,29 +205,14 @@ var EditorController = (function () {
                 subMenu:[],
                 onClick: this.openImportsDialog
             },
-            // --- Import (SFTP) ---
-            // {
-            //     name:"",
-            //     icon:"fa fa-upload",
-            //     caption_i18n : "EDITOR_OPERATION_TITLE_SFTP",
-            //     subMenu:[],
-            //     onClick: this.openSFTPDialogInNavBar
-            // },
-            // --- WPS ---
             {
-                name:"WPS",
-                icon:"fa fa-tasks",
-                caption_i18n : "EDITOR_OPERATION_TITLE_APPLY_WPS",
-                onClick: this.openWPSDialog,
-                subMenu:[]
+                name:"",//WAPPS
+                caption_i18n : "EDITOR_OPERATION_TITLE_WAPPS",
+                subMenu:[],
+                onClick: this.openWappsDialog,
+                icon:"fa fa-lg fa-rocket"
             },
-            {
-                name:"Mosaic",
-                icon:"fa fa-tasks",
-                caption_i18n : "EDITOR_OPERATION_TITLE_MOSAIC",
-                onClick: this.openMosaicDialog,
-                subMenu:[]
-            },
+
             // --- Processor ---
             {
                 name:"",
@@ -232,12 +220,20 @@ var EditorController = (function () {
                 caption_i18n : "EDITOR_OPERATION_TITLE_APPLY_RADIOMETRIC_PROCESSOR",
                 onClick: "",
                 subMenu:[
+
+                    {
+                        name:"",// New Processor
+                        caption_i18n : "EDITOR_OPERATION_TITLE_NEW_PROCESSOR",
+                        subMenu:[],
+                        onClick: this.openProcessorDialog,
+                        icon:"fa fa-lg fa-plus-square"
+                    },
                     {
                         name:"",//mida
                         caption_i18n : "EDITOR_OPERATION_TITLE_MIDA",
                         subMenu:[],
                         onClick: this.openMergeDialogInNavBar,
-                        icon:"icon-mida-merge-operations"
+                        icon:"fa fa-lg fa-rocket"
                     },
                     {
                         name:"",//OPERA
@@ -253,32 +249,12 @@ var EditorController = (function () {
                         onClick: this.openRasorDialog,
                         icon:"fa fa-lg fa-users"
                     },
-                    // {
-                    //     name:"",//workflow
-                    //     subMenu:[],
-                    //     onClick: this.openWorkflowManagerDialog,
-                    //     icon:"fa fa-lg fa-file-code-o"
-                    // },
-                    {
-                        name:"",// New Processor
-                        caption_i18n : "EDITOR_OPERATION_TITLE_NEW_PROCESSOR",
-                        subMenu:[],
-                        onClick: this.openProcessorDialog,
-                        icon:"fa fa-lg fa-file-code-o"
-                    },
-                    {
-                        name:"",//WAPPS
-                        caption_i18n : "EDITOR_OPERATION_TITLE_WAPPS",
-                        subMenu:[],
-                        onClick: this.openWappsDialog,
-                        icon:"fa fa-lg fa-rocket"
-                    },
                     {
                         name:"",//LIST FLOOD AREA DETECTION
                         caption_i18n : "EDITOR_OPERATION_TITLE_LIST_FLOOD_AREA_DETECTION",
                         subMenu:[],
                         onClick: this.openListtFloodAreaDetectionDialog,
-                        icon:"fa fa-lg fa-file-code-o"
+                        icon:"fa fa-lg fa-rocket"
                     },
                     {
                         name:"",//JRC Processor
@@ -306,15 +282,30 @@ var EditorController = (function () {
                         caption_i18n : "EDITOR_OPERATION_TITLE_EDRIFT_FLOOD_AUTOMATIC_CHAIN",
                         subMenu:[],
                         onClick: this.openEDriftFloodAutomaticChain,
-                        icon:"fa fa-lg fa-file-code-o"
+                        icon:"fa fa-lg fa-rocket"
                     },
-                    // {
-                    //     name:"Upload File",//Upload
-                    //     subMenu:[],
-                    //     onClick: this.openUploadFileDialog,
-                    //     icon:"fa fa-lg fa-file-code-o"
-                    // }
-
+                    {
+                        name:"",//EDriftCheckImagesAvailability
+                        caption_i18n : "EDITOR_OPERATION_TITLE_EDRIFT_CHECK_IMAGES_AVAILABILITY",
+                        subMenu:[],
+                        onClick: this.openEDriftCheckImagesAvailability,
+                        icon:"fa fa-lg fa-rocket"
+                    },
+                    // --- WPS ---
+                    {
+                        name:"WPS",
+                        icon:"fa fa-tasks",
+                        caption_i18n : "EDITOR_OPERATION_TITLE_APPLY_WPS",
+                        onClick: this.openWPSDialog,
+                        subMenu:[]
+                    },
+                    {
+                        name:"Mosaic",
+                        icon:"fa fa-tasks",
+                        caption_i18n : "EDITOR_OPERATION_TITLE_MOSAIC",
+                        onClick: this.openMosaicDialog,
+                        subMenu:[]
+                    }
                 ]
             },
             // --- Optical ---
@@ -369,7 +360,15 @@ var EditorController = (function () {
                         icon:"icon-range-doppler-terrain-correction-operations"
                     }
                 ]
+            },
+            {
+                name:"",//WAPPS
+                caption_i18n : "EDITOR_OPERATION_TITLE_SHARE",
+                subMenu:[],
+                onClick: this.openShareDialog,
+                icon:"fa fa-share-alt fa-lg"
             }
+
         ]
 
         this.translateToolbarMenuList(this.m_aoNavBarMenu);
@@ -2629,6 +2628,33 @@ var EditorController = (function () {
         });
     };
 
+    EditorController.prototype.openShareDialog = function(oWindow)
+    {
+        var oController;
+        if(utilsIsObjectNullOrUndefined(oWindow) === true)
+        {
+            oController = this;
+        }
+        else
+        {
+            oController = oWindow;
+        }
+        oController.m_oModalService.showModal({
+            templateUrl: "dialogs/share_workspace/ShareWorkspaceDialog.html",
+            controller: "ShareWorkspaceController",
+            inputs: {
+                extras: {
+                    workspace:oController.m_oActiveWorkspace
+                }
+            }
+        }).then(function (modal) {
+            modal.element.modal();
+            modal.close.then(function(oResult){
+
+            });
+        });
+    };
+
     /**
      * openListtFloodAreaDetectionDialog
      * @param oWindow
@@ -2715,6 +2741,35 @@ var EditorController = (function () {
             });
         });
     };
+
+    EditorController.prototype.openEDriftCheckImagesAvailability = function(oWindow)
+    {
+        var oController;
+        if(utilsIsObjectNullOrUndefined(oWindow) === true)
+        {
+            oController = this;
+        }
+        else
+        {
+            oController = oWindow;
+        }
+
+        oController.m_oModalService.showModal({
+            templateUrl: "dialogs/edrift_checkimagestool/edrift_checkimagestool.html",
+            controller: "EdriftCheckImagesTool",
+            inputs: {
+                extras: {
+                    products:oController.m_aoProducts,
+                }
+            }
+        }).then(function (modal) {
+            modal.element.modal();
+            modal.close.then(function(oResult){
+
+            });
+        });
+    };
+
 
     EditorController.prototype.openEDriftFloodAutomaticChain = function(oWindow)
     {
@@ -4086,7 +4141,11 @@ var EditorController = (function () {
             {
                 'core': {'data': [], "check_callback": true},
                 "state" : { "key" : "state_tree" },
-                "plugins": ["contextmenu","state"],  // all plugin i use
+                "plugins": ["contextmenu","state","search"], // all plugin in use
+                "search":{
+                    "show_only_matches":true,
+                    "show_only_matches_children":true
+                },
                 "contextmenu": { // my right click menu
                     "items": function ($node) {
 
@@ -4612,6 +4671,16 @@ var EditorController = (function () {
     EditorController.prototype.isActiveEditorMode = function()
     {
         return this.m_bIsActiveGeoraphicalMode === false;
+    }
+    EditorController.prototype.filterTree = function(sTextQuery){
+        if(utilsIsObjectNullOrUndefined(sTextQuery) === true)
+        {
+            sTextQuery = "";
+        }
+
+        $('#jstree').jstree(true).search(sTextQuery);//,false,true
+
+        return true;
     }
     EditorController.$inject = [
         '$scope',

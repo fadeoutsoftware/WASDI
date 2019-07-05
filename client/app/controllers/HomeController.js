@@ -14,6 +14,7 @@ var HomeController = (function() {
         this.m_oAuthServiceFacebook = oAuthServiceFacebook;
         this.m_oAuthServiceGoogle = oAuthServiceGoogle;
 
+        this.m_sEmailToRecoverPassword = "";
         this.m_oScope.m_oController=this;
         this.m_bLoginIsVisible = false;//Login in visible after click on logo
         this.m_bIsVisibleRecoveryPassword = false;
@@ -46,43 +47,10 @@ var HomeController = (function() {
             this.m_bVisualizeLink = true;
         }
 
-        // var oController = this;
-        // $scope.$on('event:google-plus-signin-success', function (event,authResult) {
-        //
-        //     // Send login to server
-        //     if(utilsIsObjectNullOrUndefined(authResult) === false)
-        //     {
-        //         var oIdToken = {
-        //             userId: authResult.client_id,
-        //             googleIdToken : authResult.id_token
-        //         }
-        //         if(utilsIsStrNullOrEmpty(oIdToken.googleIdToken) === false && utilsIsStrNullOrEmpty(oIdToken.userId) === false )
-        //         {
-        //             oController.m_oAuthServiceGoogle.loginGoogleUser(oIdToken).success(
-        //                 function (data,status)
-        //                 {
-        //                     oController.callbackLogin(data, status,oController)
-        //                 }).error(function (data,status) {
-        //                 //alert('error');
-        //                 utilsVexDialogAlertTop("GURU MEDITATION<br>GOOGLE LOGIN ERROR");
-        //
-        //             });
-        //         }
-        //
-        //     }
-        //
-        // });
-        // $scope.$on('event:google-plus-signin-failure', function (event,authResult) {
-        //     // Auth failure or signout detected
-        //     console.log("event:google-plus-signin-failure");
-        // });
 
         var oController = this;
         // on success google login event
         this.onSuccess = function (googleUser) {
-            //882119222530-0e4bq80lvftjh3iqehb7mcit5mgh1bu7.apps.googleusercontent.com
-
-            // console.log('Logged in as: ' + googleUser.getBasicProfile().getName());
 
             if(utilsIsObjectNullOrUndefined(googleUser) === false)
             {
@@ -321,10 +289,14 @@ var HomeController = (function() {
         }
     }
 
-    HomeController.prototype.recoverPassword = function(){
-
+    HomeController.prototype.recoverPassword = function(sEmailToRecoverPassword)
+    {
+        if(utilsIsStrNullOrEmpty(sEmailToRecoverPassword) === true)
+        {
+            return false;
+        }
         var oController = this;
-        this.m_oAuthService.recoverPassword(oUser).success(
+        this.m_oAuthService.recoverPassword(sEmailToRecoverPassword).success(
             function (data,status) {
                 // oController.callbackLogin(data, status,oController);
                 if(utilsIsObjectNullOrUndefined(data) !== true)
@@ -351,16 +323,19 @@ var HomeController = (function() {
             utilsVexDialogAlertTop("GURU MEDITATION<br>SIGNIN ERROR");
 
         });
+
+        return true;
     };
-    // HomeController.prototype.onSignIn = function (googleUser) {
-    //     var profile = googleUser.getBasicProfile();
-    //     console.log('ID: ' + profile.getId()); // Do not send to your backend! Use an ID token instead.
-    //     console.log('Name: ' + profile.getName());
-    //     console.log('Image URL: ' + profile.getImageUrl());
-    //     console.log('Email: ' + profile.getEmail()); // This is null if the 'email' scope is not present.
-    // };
 
+    HomeController.prototype.isRecoverPasswordButtonEnable = function(sEmailToRecoverPassword )
+    {
+        if(utilsIsStrNullOrEmpty(sEmailToRecoverPassword) === true || sEmailToRecoverPassword === "" || utilsIsEmail(sEmailToRecoverPassword) === false)
+        {
+            return false;
+        }
 
+        return true;
+    }
     HomeController.$inject = [
         '$scope',
         '$location',

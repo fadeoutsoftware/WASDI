@@ -34,7 +34,8 @@ public class ProcessWorkspaceResource {
 	@GET
 	@Path("/byws")
 	@Produces({"application/xml", "application/json", "text/xml"})
-	public ArrayList<ProcessWorkspaceViewModel> getProcessByWorkspace(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sWorkspaceId") String sWorkspaceId) {
+	public ArrayList<ProcessWorkspaceViewModel> getProcessByWorkspace(@HeaderParam("x-session-token") String sSessionId,
+			@QueryParam("sWorkspaceId") String sWorkspaceId, @QueryParam("startindex") Integer iStartIndex, @QueryParam("endindex") Integer iEndIndex) {
 		
 		Wasdi.DebugLog("ProcessWorkspaceResource.GetProcessByWorkspace");
 
@@ -60,7 +61,14 @@ public class ProcessWorkspaceResource {
 			ProcessWorkspaceRepository oRepository = new ProcessWorkspaceRepository();
 
 			// Get Process List
-			List<ProcessWorkspace> aoProcess = oRepository.GetProcessByWorkspace(sWorkspaceId);
+			List<ProcessWorkspace> aoProcess = null;
+			
+			if (iStartIndex != null && iEndIndex != null) {
+				aoProcess = oRepository.GetProcessByWorkspace(sWorkspaceId, iStartIndex, iEndIndex);
+			}
+			else {
+				aoProcess = oRepository.GetProcessByWorkspace(sWorkspaceId);
+			}
 
 			// For each
 			for (int iProcess=0; iProcess<aoProcess.size(); iProcess++) {
@@ -541,6 +549,7 @@ public class ProcessWorkspaceResource {
 					// Send the Asynch Message to the clients
 					Send oSendToRabbit = new Send(sExchange);
 					oSendToRabbit.SendUpdateProcessMessage(oProcessWorkspace);
+					oSendToRabbit.Free();
 				}
 			}
 		}

@@ -7,13 +7,16 @@
 package wasdi.shared.opensearch;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 
 import org.apache.abdera.i18n.templates.Template;
+import org.apache.commons.net.io.Util;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -320,19 +323,32 @@ public class QueryExecutorONDA extends QueryExecutor {
 			int iResponseSize = 0;
 			iResponseSize = oConnection.getContentLength();
 			if(200 == responseCode) {
-				BufferedReader in = new BufferedReader(new InputStreamReader(oConnection.getInputStream()));
-				String inputLine;
-				StringBuffer oResponseStringBuffer = new StringBuffer();
+				InputStream oInputStream = oConnection.getInputStream();
+				ByteArrayOutputStream oBytearrayOutputStream = new ByteArrayOutputStream();
 				
-
-				while ((inputLine = in.readLine()) != null) {
-					oResponseStringBuffer.append(inputLine);
+				//begin version 1:
+				
+				if(null!=oInputStream) {
+					Util.copyStream(oInputStream, oBytearrayOutputStream);
+					sResult = oBytearrayOutputStream.toString();
 				}
-				in.close();
-
-				sResult = oResponseStringBuffer.toString();
+				//end version 1
+				
+				//version 0:
+//				BufferedReader in = new BufferedReader(new InputStreamReader(oInputStream));
+//				String inputLine;
+//
+//				StringBuffer oResponseStringBuffer = new StringBuffer();
+//				while ((inputLine = in.readLine()) != null) {
+//					oResponseStringBuffer.append(inputLine);
+//				}
+//				in.close();
+//				sResult = oResponseStringBuffer.toString();
+				//end version 0:
+				
+				
 				if(!Utils.isNullOrEmpty(sResult)) {
-					System.out.println("QueryExecutorONDA.httpGetResults: Response " + sResult.substring(0, Math.min(200, oResponseStringBuffer.length())) + "...");
+					System.out.println("QueryExecutorONDA.httpGetResults: Response " + sResult.substring(0, Math.min(200, sResult.length())) + "...");
 					if(iResponseSize <= 0) {
 						iResponseSize = sResult.getBytes().length;
 					}

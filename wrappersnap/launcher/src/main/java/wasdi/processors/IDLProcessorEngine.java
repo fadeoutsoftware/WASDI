@@ -146,9 +146,13 @@ public class IDLProcessorEngine extends WasdiProcessorEngine{
 				// Get the JSON
 				String sJson = oParameter.getJson();
 				
+				LauncherMain.s_oLogger.debug("IDLProcessorEngine.run: JSON " + sJson);
+				
 				// URL Decode
 				try {
 				    sJson = java.net.URLDecoder.decode(sJson, StandardCharsets.UTF_8.name());
+				    
+				    LauncherMain.s_oLogger.debug("IDLProcessorEngine.run: Decoded JSON " + sJson);
 				} catch (UnsupportedEncodingException e) {
 					LauncherMain.s_oLogger.debug("IDLProcessorEngine.run: Exception decoding JSON " + e.toString());
 				}

@@ -3,8 +3,14 @@
  */
 var RootController = (function() {
 
+    RootController.BROADCAST_MSG_OPEN_LOGS_DIALOG_PROCESS_ID = "RootController.openLogsDialogProcessId";
+
     function RootController($scope, oConstantsService, oAuthService, $state, oProcessesLaunchedService, oWorkspaceService,
                             $timeout,oModalService,oRabbitStompService) {
+
+        //
+
+
         this.m_oScope = $scope;
         this.m_oScope.m_oController = this;
         this.m_oConstantsService = oConstantsService;
@@ -226,6 +232,17 @@ var RootController = (function() {
             }
 
         });
+
+        $scope.$on(RootController.BROADCAST_MSG_OPEN_LOGS_DIALOG_PROCESS_ID, function(event,data) {
+
+            let intervalId = setInterval(function(){
+                if( $scope.m_oController.openLogsDialogByProcessId(data.processId) == true){
+                    clearInterval(intervalId);
+                };
+            }, 1000);
+        });
+
+
 
         /* WATCH  ACTIVE WORKSPACE IN CONSTANT SERVICE
         * every time the workspace change, it clean the log list &&
@@ -768,6 +785,60 @@ var RootController = (function() {
         }
 
         return sReturnValue;
+    };
+
+    RootController.prototype.openErrorLogsDialog = function(oProcess)
+    {
+
+        var oController = this;
+
+        if(utilsIsObjectNullOrUndefined(oProcess) === true)
+        {
+            return false;
+        }
+        oController.m_oModalService.showModal({
+            templateUrl: "dialogs/process_error_logs_dialog/ProcessErrorLogsDialogView.html",
+            controller: "ProcessErrorLogsDialogController",
+            inputs: {
+                extras: {
+                    process:oProcess,
+                }
+            }
+        }).then(function (modal) {
+            modal.element.modal();
+            modal.close.then(function(oResult){
+
+            });
+        });
+        return true;
+    };
+
+    RootController.prototype.openLogsDialogByProcessId = function(processId)
+    {
+
+        var oController = this;
+
+        if(!processId)
+        {
+            return false;
+        }
+
+        let process = null;
+        for(let i = 0; i < oController.m_aoProcessesRunning.length; i++)
+        {
+            if(processId == oController.m_aoProcessesRunning[i].processObjId){
+                process = oController.m_aoProcessesRunning[i];
+                break;
+            }
+        }
+
+        if( process != null){
+            oController.openErrorLogsDialog(process);
+            return true;
+        }else{
+            console.error("Cannot find process ID " + processId + " in the processes list")
+            return false;
+        }
     };
 
     /*********************************************************************/

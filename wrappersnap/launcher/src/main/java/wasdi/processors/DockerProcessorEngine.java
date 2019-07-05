@@ -242,6 +242,15 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 		try {
 			if (asArgs==null) asArgs = new ArrayList<String>();
 			asArgs.add(0, sCommand);
+			
+			String sCommandLine = "";
+			
+			for (String sArg : asArgs) {
+				sCommandLine += sArg + " ";
+			}
+			
+			LauncherMain.s_oLogger.debug("ShellExec CommandLine: " + sCommandLine);
+			
 			ProcessBuilder pb = new ProcessBuilder(asArgs.toArray(new String[0]));
 			pb.redirectErrorStream(true);
 			Process process = pb.start();
@@ -294,6 +303,14 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 			
 			LauncherMain.s_oLogger.debug("WasdiProcessorEngine.run: calling " + sProcessorName + " at port " + oProcessor.getPort());
 			
+			if (Utils.isNullOrEmpty(sEncodedJson)) {
+				sEncodedJson = "{}";
+			}
+			
+			if (Utils.isNullOrEmpty(sJson)) {
+				sJson = "{}";
+			}
+			
 			LauncherMain.s_oLogger.debug("WasdiProcessorEngine.run: Encoded JSON Parameter " + sEncodedJson);
 			LauncherMain.s_oLogger.debug("WasdiProcessorEngine.run: Dencoded JSON Parameter " + sJson);
 			
@@ -302,26 +319,37 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 			
 			sUrl += "?user=" + oParameter.getUserId();
 			sUrl += "&sessionid=" + oParameter.getSessionID();
-			sUrl += "&workspace=" + oParameter.getWorkspace();
+			sUrl += "&workspaceid=" + oParameter.getWorkspace();
 			
 			LauncherMain.s_oLogger.debug("WasdiProcessorEngine.run: calling URL = " + sUrl);
 			
 			
 			URL oProcessorUrl = new URL(sUrl);
+			
+			LauncherMain.s_oLogger.debug("WasdiProcessorEngine.run: call open connection");
 			HttpURLConnection oConnection = (HttpURLConnection) oProcessorUrl.openConnection();
 			oConnection.setDoOutput(true);
 			oConnection.setRequestMethod("POST");
 			oConnection.setRequestProperty("Content-Type", "application/json");
 
-			OutputStream oOutputStream = oConnection.getOutputStream();
-			oOutputStream.write(sJson.getBytes());
-			oOutputStream.flush();
-			
-			if (! (oConnection.getResponseCode() == HttpURLConnection.HTTP_OK || oConnection.getResponseCode() == HttpURLConnection.HTTP_CREATED )) {
+			OutputStream oOutputStream = null;
+			try {
 				
+				oOutputStream = oConnection.getOutputStream();
+				oOutputStream.write(sJson.getBytes());
+				oOutputStream.flush();
+				
+				if (! (oConnection.getResponseCode() == HttpURLConnection.HTTP_OK || oConnection.getResponseCode() == HttpURLConnection.HTTP_CREATED )) {
+					throw new Exception();
+				}
+			}
+			catch (Exception e) {
 				LauncherMain.s_oLogger.debug("WasdiProcessorEngine.run: connection failed: try to start container again");
 				
 				// Try to start Again the docker
+				
+				
+				String sDockerName = "wasdi/"+sProcessorName+":"+oProcessor.getVersion();
 				
 				ArrayList<String> asArgs = new ArrayList<>();
 				// Run the container
@@ -333,7 +361,7 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 				// NOTA: QUI INVECE SI CHE ABBIAMO PROBLEMI DI DIRITTI!!!!!!!!!!!!
 				asArgs.add("-v"+ m_sWorkingRootPath + ":/data/wasdi");
 				asArgs.add("-p127.0.0.1:"+iProcessorPort+":5000");
-				asArgs.add(oProcessor.getName());
+				asArgs.add(sDockerName);
 				
 				String sCommand = "docker";
 				
@@ -363,7 +391,7 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 				
 				LauncherMain.s_oLogger.debug("WasdiProcessorEngine.run: ok container recovered");
 			}
-
+				
 			BufferedReader oBufferedReader = new BufferedReader(new InputStreamReader((oConnection.getInputStream())));
 
 			String sOutputResult;
@@ -371,17 +399,50 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 			while ((sOutputResult = oBufferedReader.readLine()) != null) {
 				LauncherMain.s_oLogger.debug("WasdiProcessorEngine.run: " + sOutputResult);
 			}
-
+			
+			LauncherMain.s_oLogger.debug("WasdiProcessorEngine.run: out from the read Line loop");
+			
 			oConnection.disconnect();
 			
 			// Read Again Process Workspace: the user may have changed it!
 			oProcessWorkspace = oProcessWorkspaceRepository.GetProcessByProcessObjId(oProcessWorkspace.getProcessObjId());
 			
+			// Here we can wait for the process to finish with the status check
+			// we can also handle a timeout, that can be a property (with default) of the processor
+			int iTimeSpentMs = 0;
+			int iThreadSleepMs = 2000;
+			
+			String sStatus = oProcessWorkspace.getStatus();
+			
+			LauncherMain.s_oLogger.debug("WasdiProcessorEngine.run: process Status: " + sStatus);
+			
+//			while ( ! (sStatus.equals("DONE") || sStatus.equals("STOPPED") || sStatus.equals("ERROR"))) {
+//				oProcessWorkspace = oProcessWorkspaceRepository.GetProcessByProcessObjId(oProcessWorkspace.getProcessObjId());
+//				
+//				sStatus = oProcessWorkspace.getStatus();
+//				try {
+//					Thread.sleep(iThreadSleepMs);
+//				} catch (InterruptedException e) {
+//					e.printStackTrace();
+//				}
+//				
+//				// Increase the time
+//				iTimeSpentMs += iThreadSleepMs;
+//				
+//				if (iTimeSpentMs > oProcessor.getTimeoutMs()) {
+//					// Timout
+//					LauncherMain.s_oLogger.debug("WasdiProcessorEngine.run: Timeout of Processor with ProcId " + oProcessWorkspace.getProcessObjId() + " Time spent [ms] " + iTimeSpentMs );
+//					
+//					LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 100);
+//				}
+//			}
+			
+			
+			LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.DONE, 100);
+			
 			if (Utils.isNullOrEmpty(oProcessWorkspace.getOperationEndDate())) {
 				oProcessWorkspace.setOperationEndDate(Utils.GetFormatDate(new Date()));
 			}
-			
-			LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.DONE, 100);
 		}
 		catch (Exception oEx) {
 			//String sError = org.apache.commons.lang.exception.ExceptionUtils.getMessage(oEx);

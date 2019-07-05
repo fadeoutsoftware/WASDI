@@ -6,7 +6,7 @@
                 <div class="row-v4">
                     <div class="col-v4-xs-11 col-v4-sm-11 col-v4-md-11 col-v4-lg-11">
                         <h4 class="modal-title ">
-                            Wasdi Processor Logs
+                            WASDI Processor Logs [ID: {{m_oController.getProcessWorkspaceId()}}]
                         </h4>
                     </div>
                     <div class="col-v4-xs-1 col-v4-sm-1 col-v4-md-1 col-v4-lg-1">
@@ -18,7 +18,10 @@
             <div class="modal-body container-fluid-v4">
                 <div class="container-v4">
                     <div class="col-v4" >
-                        Search by text: <input type="text" class="wasdi-input" ng-model="m_oController.m_sSearch">
+                        Search by text: <input type="text" class="wasdi-input" ng-model="m_oController.m_sSearch"> Operation: <b>{{m_oController.getProcessorType()}}</b> Name: <b>{{m_oController.getProcessorName()}}</b> Status: <b>{{m_oController.getProcessorStatus()}}</b>
+                    </div>
+                    <div class="col-v4" >
+
                     </div>
                 </div>
               	<div class="container-v4 table-container">
@@ -50,19 +53,17 @@
                     </table>
 				</div>
                 <div class="container-v4 ">
-                    <ul uib-pagination total-items="m_oController.m_iTotalPages" ng-model="m_oController.m_iCurrentPage" max-size="5" class="pagination-sm" boundary-links="true" num-pages="numPages"></ul>
+                    <ul uib-pagination total-items="m_oController.m_iNumberOfLogs" ng-model="m_oController.m_iCurrentPage" max-size="5" class="pagination-sm" boundary-links="true" num-pages="numPages"></ul>
+                    <!--<ul uib-pagination total-items="m_oController.m_iTotalPages" ng-model="m_oController.m_iCurrentPage" max-size="5" class="pagination-sm" boundary-links="true" num-pages="numPages"></ul>-->
+                <!--{{m_oController.m_iNumberOfLogs}}-->
                 </div>
 
-                <!--<ul class="pagination">-->
-                    <!--<li class="page-item"><a class="page-link" href="#">Previous</a></li>-->
-                    <!--<li class="page-item"><a class="page-link" href="#">1</a></li>-->
-                    <!--<li class="page-item"><a class="page-link" href="#">2</a></li>-->
-                    <!--<li class="page-item"><a class="page-link" href="#">3</a></li>-->
-                    <!--<li class="page-item"><a class="page-link" href="#">Next</a></li>-->
-                <!--</ul>-->
             </div>
             <!-- FOOTER -->
             <div class="modal-footer">
+                <button type="button" ng-click="m_oController.getPayload()" class="btn btn-primary btn-wasdi " >
+                    Payload
+                </button>
                 <button type="button" ng-click="m_oController.getAllErrorLogs(m_oController.m_oProcess.processObjId)" class="btn btn-primary btn-wasdi " >
                     Refresh
                 </button>

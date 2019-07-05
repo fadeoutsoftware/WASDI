@@ -2,6 +2,12 @@
 
     <!--Operation bar-->
     <div class="row-v4 justify-content-end toolbar">
+
+        <div class="col-v4-auto mr-auto filter-search-wrapper"><!--mr-auto-->
+            <input type="text" name="name" class="wasdi-input" value="" title=""  ng-model="m_oController.m_sTextQueryFilterInTree"
+                   required="required" ng-keyup="m_oController.filterTree(m_oController.m_sTextQueryFilterInTree)" placeholder="Tree filter">
+        </div>
+
         <div class="col-v4-auto button-menu-with-icons pl-1"
              ng-repeat="button in m_oController.m_aoNavBarMenu"
              ng-class="{'ml-auto' : $index === 0}"
@@ -53,8 +59,11 @@
                     <div class="loadIcon" ng-show="m_oController.m_bIsLoadingTree">
                         <invader ></invader>
                     </div>
+                    <!--<input type="text" name="name" id="inputID" class="wasdi-input" value="" title=""  ng-model="m_oController.m_sTextQueryFilterInTree"-->
+                           <!--required="required" ng-keyup="m_oController.filterTree(m_oController.m_sTextQueryFilterInTree)">-->
 
                     <tree class="flex-fill d-flex flex-column" ngModelTree="prova" ng-hide="m_oController.isHideTree() || (m_oController.m_bIsLoadingTree === true)" ></tree>
+
                     <!--|| (m_oController.m_oTree === null)||(m_oController.m_oTree.core.data.length === 0)-->
                     <div class = "wizards p-4" ng-show="m_oController.isHideTree() && (m_oController.m_bIsLoadingTree === false)">
                         <h4 class="mt-0">{{"EDITOR_WIZARDS_HOW_TO_ADD_NEW_PRODUCT"|translate}} :</h4>

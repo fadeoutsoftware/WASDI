@@ -1,6 +1,10 @@
 .editor-view {
 
     .toolbar{
+        .filter-search-wrapper{
+            margin-left: 96px;
+            width: 300px;
+        }
         .button-menu-with-icons{
             &:not(:last-of-type){
                 padding-right: 0px;
@@ -693,4 +697,14 @@
         color: #0a6aa1;
         font-style: italic;
     }
+
+}
+
+// Move down the cesium globe toolbar when active in editor
+#mapcontainer .cesium-viewer-toolbar {
+    margin-top: 3em;
+}
+
+#mapcontainer .cesium-infoBox {
+    margin-top: 4em;
 }
