@@ -39,7 +39,7 @@
                     <td>{{workflow.userId}}</td>
                     <!--<td class="td-button" ng-click="m_oController.deleteWorkflow(workflow)">-->
                     <td class="td-button" ng-click="m_oController.openDeleteWorkflowDialog(workflow)"
-                        ng-hide="m_oController.userIsOwnerOfWorkflow(workflow)===false">
+                        ng-hide="m_oController.isTheOwnerOfWorkflow(workflow)===false">
                         <i class="fa fa-trash" aria-hidden="true"></i>
                     </td>
                 </tr>

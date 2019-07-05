@@ -36,7 +36,23 @@ public class Processor {
 	 * Processor type
 	 */
 	private String type;
+
+	/**
+	 * timeoutMs: 3 hours by default
+	 */
+	private int timeoutMs = 1000*60*60*3;
+		
+	/**
+	 * Sample JSON Parameter
+	 */
+	private String parameterSample="";
 	
+	public String getParameterSample() {
+		return parameterSample;
+	}
+	public void setParameterSample(String parameterSample) {
+		this.parameterSample = parameterSample;
+	}
 	public String getType() {
 		return type;
 	}
@@ -79,4 +95,10 @@ public class Processor {
 	public void setPort(int port) {
 		this.port = port;
 	}
+	public int getTimeoutMs() {
+		return timeoutMs;
+	}
+	public void setTimeoutMs(int timeoutMs) {
+		this.timeoutMs = timeoutMs;
+	}	
 }

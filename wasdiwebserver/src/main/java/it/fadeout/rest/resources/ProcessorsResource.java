@@ -68,7 +68,7 @@ public class ProcessorsResource {
 	@Path("/uploadprocessor")
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
 	public Response uploadProcessor(@FormDataParam("file") InputStream fileInputStream, @HeaderParam("x-session-token") String sSessionId, 
-			@QueryParam("workspace") String sWorkspaceId, @QueryParam("name") String sName, @QueryParam("version") String sVersion, @QueryParam("description") String sDescription, @QueryParam("type") String sType) throws Exception {
+			@QueryParam("workspace") String sWorkspaceId, @QueryParam("name") String sName, @QueryParam("version") String sVersion, @QueryParam("description") String sDescription, @QueryParam("type") String sType, @QueryParam("paramsSample") String sParamsSample) throws Exception {
 
 		Wasdi.DebugLog("ProcessorsResource.uploadProcessor");
 		
@@ -128,6 +128,9 @@ public class ProcessorsResource {
 			oProcessor.setVersion(sVersion);
 			oProcessor.setPort(-1);
 			oProcessor.setType(sType);
+			if (!Utils.isNullOrEmpty(sParamsSample)) {
+				oProcessor.setParameterSample(sParamsSample);
+			}
 			
 			// Store in the db
 			ProcessorRepository oProcessorRepository = new ProcessorRepository();
@@ -145,6 +148,7 @@ public class ProcessorsResource {
 			oDeployProcessorParameter.setExchange(sWorkspaceId);
 			oDeployProcessorParameter.setProcessObjId(sProcessObjId);
 			oDeployProcessorParameter.setProcessorType(sType);
+			oDeployProcessorParameter.setWorkspaceOwnerId(Wasdi.getWorkspaceOwner(sWorkspaceId));
 			
 			String sPath = m_oServletConfig.getInitParameter("SerializationPath");
 			if (! (sPath.endsWith("/")||sPath.endsWith("\\"))) sPath+="/";
@@ -211,6 +215,7 @@ public class ProcessorsResource {
 				oVM.setProcessorName(oProcessor.getName());
 				oVM.setProcessorVersion(oProcessor.getVersion());
 				oVM.setPublisher(oProcessor.getUserId());
+				oVM.setParamsSample(oProcessor.getParameterSample());
 				
 				aoRet.add(oVM);
 			}
@@ -268,6 +273,7 @@ public class ProcessorsResource {
 			oProcessorParameter.setJson(sEncodedJson);
 			oProcessorParameter.setProcessorType(oProcessorToRun.getType());
 			oProcessorParameter.setSessionID(sSessionId);
+			oProcessorParameter.setWorkspaceOwnerId(Wasdi.getWorkspaceOwner(sWorkspaceId));
 			
 			SerializationUtils.serializeObjectToXML(sPath, oProcessorParameter);
 

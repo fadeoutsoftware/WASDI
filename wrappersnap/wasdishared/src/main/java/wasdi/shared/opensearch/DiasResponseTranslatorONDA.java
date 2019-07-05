@@ -119,11 +119,12 @@ public class DiasResponseTranslatorONDA implements DiasResponseTranslator {
 		QueryResultViewModel oResult = null;
 		try {			
 			String sInJson = oInJson.toString();
-			System.out.println(sInJson);
+
+			//System.out.println(sInJson);
 			JSONObject oOndaJson = oInJson.optJSONObject("entry");
 			if(null!=oOndaJson) {
 				String sJson = oOndaJson.toString();
-				System.out.println(sJson);
+				//System.out.println(sJson);
 				oResult = parseBaseData(sProtocol, oOndaJson);
 			}
 			JSONArray aoMetadata = oOndaJson.optJSONArray("Metadata");

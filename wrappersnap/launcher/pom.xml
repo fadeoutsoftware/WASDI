@@ -90,11 +90,6 @@
 			<artifactId>log4j</artifactId>
 			<version>1.2.17</version>
 		</dependency>
-		<dependency>
-			<groupId>com.rabbitmq</groupId>
-			<artifactId>amqp-client</artifactId>
-			<version>3.6.5</version>
-		</dependency>
 		<!-- https://mvnrepository.com/artifact/org.apache.abdera/abdera-core -->
 		<dependency>
 			<groupId>org.apache.abdera</groupId>
@@ -107,55 +102,60 @@
 		<dependency>
 			<groupId>org.esa.snap</groupId>
 			<artifactId>snap-core</artifactId>
-			<version>6.0.5</version>
+			<version>6.0.7</version>
 		</dependency>
 		<dependency>
 			<groupId>org.esa.snap</groupId>
 			<artifactId>snap-engine-utilities</artifactId>
-			<version>6.0.5</version>
+			<version>6.0.7</version>
 		</dependency>
 		<dependency>
 			<groupId>org.esa.snap</groupId>
 			<artifactId>snap-bigtiff</artifactId>
-			<version>6.0.5</version>
+			<version>6.0.7</version>
 		</dependency>
 		<dependency>
 			<groupId>org.esa.snap</groupId>
 			<artifactId>snap-rcp</artifactId>
-			<version>6.0.5</version>
+			<version>6.0.7</version>
 		</dependency>
 		<dependency>
 			<groupId>org.esa.snap</groupId>
 			<artifactId>snap-raster</artifactId>
-			<version>6.0.5</version>
+			<version>6.0.7</version>
 		</dependency>
+		<dependency>
+			<groupId>org.esa.snap</groupId>
+			<artifactId>snap-ndvi</artifactId>
+			<version>6.0.7</version>
+		</dependency>		
 
 		<!-- S1 -->
 
 		<dependency>
 			<groupId>org.esa.s1tbx</groupId>
 			<artifactId>s1tbx-op-sar-processing</artifactId>
-			<version>6.0.5</version>
+			<version>6.0.6</version>
 		</dependency>
 		<dependency>
 			<groupId>org.esa.s1tbx</groupId>
 			<artifactId>s1tbx-op-calibration</artifactId>
-			<version>6.0.5</version>
+			<version>6.0.6</version>
 		</dependency>
 		<dependency>
 			<groupId>org.esa.s1tbx</groupId>
 			<artifactId>s1tbx-op-sentinel1-ui</artifactId>
-			<version>6.0.5</version>
+			<version>6.0.6</version>
 		</dependency> 
 		<dependency>
 			<groupId>org.esa.s1tbx</groupId>
 			<artifactId>s1tbx-op-utilities</artifactId>
-			<version>6.0.5</version>
+			<version>6.0.6</version>
 		</dependency> 
 		<dependency>
 			<groupId>org.esa.s1tbx</groupId>
 			<artifactId>s1tbx-op-sar-processing-ui</artifactId>
-			<version>6.0.5</version>
+			<version>6.0.6</version>
 		</dependency>
 
 		<!-- S2 -->
@@ -163,214 +163,214 @@
 		<dependency>
 			<groupId>org.esa.s2tbx</groupId>
 			<artifactId>s2tbx-spot-reader</artifactId>
-			<version>6.0.2</version>
+			<version>6.0.3</version>
 		</dependency>
 		<dependency>
 			<groupId>org.esa.s2tbx</groupId>
 			<artifactId>s2tbx-spot6-reader</artifactId>
-			<version>6.0.2</version>
+			<version>6.0.3</version>
 		</dependency>
 		<dependency>
 			<groupId>org.esa.s2tbx</groupId>
 			<artifactId>s2tbx-s2msi-reader</artifactId>
-			<version>6.0.2</version>
+			<version>6.0.3</version>
 		</dependency>
 		<dependency>
 			<groupId>org.esa.s2tbx</groupId>
 			<artifactId>s2tbx-rapideye-reader</artifactId>
-			<version>6.0.2</version>
+			<version>6.0.3</version>
 		</dependency>
 		<dependency>
 			<groupId>org.esa.s2tbx</groupId>
 			<artifactId>s2tbx-jp2-reader</artifactId>
-			<version>6.0.2</version>
+			<version>6.0.3</version>
 		</dependency>
 		<dependency>
 			<groupId>org.esa.s2tbx</groupId>
 			<artifactId>s2tbx-gdal-reader</artifactId>
-			<version>6.0.2</version>
+			<version>6.0.3</version>
 		</dependency>
 		<dependency>
 			<groupId>org.esa.s2tbx</groupId>
 			<artifactId>s2tbx-radiometric-indices</artifactId>
-			<version>6.0.2</version>
+			<version>6.0.3</version>
 		</dependency>
 		<dependency>
 			<groupId>org.esa.s2tbx</groupId>
 			<artifactId>s2tbx-mosaic</artifactId>
-			<version>6.0.2</version>
+			<version>6.0.3</version>
 		</dependency>
 		<dependency>
 			<groupId>org.esa.s2tbx</groupId>
 			<artifactId>s2tbx-cache</artifactId>
-			<version>6.0.2</version>
+			<version>6.0.3</version>
 		</dependency>
 		<dependency>
 			<groupId>org.esa.s2tbx</groupId>
 			<artifactId>s2tbx-biophysical</artifactId>
-			<version>6.0.2</version>
+			<version>6.0.3</version>
 		</dependency>
 		<dependency>
 			<groupId>org.esa.s2tbx</groupId>
 			<artifactId>lib-gdal</artifactId>
-			<version>6.0.2</version>
+			<version>6.0.3</version>
 		</dependency>
 		
 		<!-- S3 -->
 		<dependency>
 			<groupId>org.esa.s3tbx</groupId>
 			<artifactId>s3tbx-aatsr-sst</artifactId>
-			<version>6.0.4</version>     
+			<version>6.0.5</version>     
 		</dependency>
 		<dependency>
 			<groupId>org.esa.s3tbx</groupId>
 			<artifactId>s3tbx-aerosol-retrieval</artifactId>
-			<version>6.0.4</version>     
+			<version>6.0.5</version>     
 		</dependency>
 		<dependency>
 			<groupId>org.esa.s3tbx</groupId>
 			<artifactId>s3tbx-alos-reader</artifactId>
-			<version>6.0.4</version>     
+			<version>6.0.5</version>     
 		</dependency>
 		<dependency>
 			<groupId>org.esa.s3tbx</groupId>
 			<artifactId>s3tbx-arc</artifactId>
-			<version>6.0.4</version>     
+			<version>6.0.5</version>     
 		</dependency>
 		<dependency>
 			<groupId>org.esa.s3tbx</groupId>
 			<artifactId>s3tbx-atsr-reader</artifactId>
-			<version>6.0.4</version>     
+			<version>6.0.5</version>     
 		</dependency>
 		<dependency>
 			<groupId>org.esa.s3tbx</groupId>
 			<artifactId>s3tbx-avhrr-reader</artifactId>
-			<version>6.0.4</version>     
+			<version>6.0.5</version>     
 		</dependency>
 		<dependency>
 			<groupId>org.esa.s3tbx</groupId>
 			<artifactId>s3tbx-c2rcc</artifactId>
-			<version>6.0.4</version>     
+			<version>6.0.5</version>     
 		</dependency>
 		<dependency>
 			<groupId>org.esa.s3tbx</groupId>
 			<artifactId>s3tbx-chris-reader</artifactId>
-			<version>6.0.4</version>     
+			<version>6.0.5</version>     
 		</dependency>
 		<dependency>
 			<groupId>org.esa.s3tbx</groupId>
 			<artifactId>s3tbx-flhmci</artifactId>
-			<version>6.0.4</version>     
+			<version>6.0.5</version>     
 		</dependency>
 		<dependency>
 			<groupId>org.esa.s3tbx</groupId>
 			<artifactId>s3tbx-fub-wew</artifactId>
-			<version>6.0.4</version>     
+			<version>6.0.5</version>     
 		</dependency>
 		<dependency>
 			<groupId>org.esa.s3tbx</groupId>
 			<artifactId>s3tbx-fu-operator</artifactId>
-			<version>6.0.4</version>     
+			<version>6.0.5</version>     
 		</dependency>
 		<dependency>
 			<groupId>org.esa.s3tbx</groupId>
 			<artifactId>s3tbx-idepix</artifactId>
-			<version>6.0.4</version>     
+			<version>6.0.5</version>     
 		</dependency>
 		<dependency>
 			<groupId>org.esa.s3tbx</groupId>
 			<artifactId>s3tbx-kit</artifactId>
-			<version>6.0.4</version>     
+			<version>6.0.5</version>     
 		</dependency>
 		<dependency>
 			<groupId>org.esa.s3tbx</groupId>
 			<artifactId>s3tbx-landsat-reader</artifactId>
-			<version>6.0.4</version>     
+			<version>6.0.5</version>     
 		</dependency>
 		<dependency>
 			<groupId>org.esa.s3tbx</groupId>
 			<artifactId>s3tbx-meris-cloud</artifactId>
-			<version>6.0.4</version>     
+			<version>6.0.5</version>     
 		</dependency>
 		<dependency>
 			<groupId>org.esa.s3tbx</groupId>
 			<artifactId>s3tbx-meris-brr</artifactId>
-			<version>6.0.4</version>     
+			<version>6.0.5</version>     
 		</dependency>
 		<dependency>
 			<groupId>org.esa.s3tbx</groupId>
 			<artifactId>s3tbx-meris-sdr</artifactId>
-			<version>6.0.4</version>     
+			<version>6.0.5</version>     
 		</dependency>
 		<dependency>
 			<groupId>org.esa.s3tbx</groupId>
 			<artifactId>s3tbx-meris-l2auxdata</artifactId>
-			<version>6.0.4</version>     
+			<version>6.0.5</version>     
 		</dependency>
 		<dependency>
 			<groupId>org.esa.s3tbx</groupId>
 			<artifactId>s3tbx-meris-radiometry</artifactId>
-			<version>6.0.4</version>     
+			<version>6.0.5</version>     
 		</dependency>
 		<dependency>
 			<groupId>org.esa.s3tbx</groupId>
 			<artifactId>s3tbx-meris-smac</artifactId>
-			<version>6.0.4</version>     
+			<version>6.0.5</version>     
 		</dependency>
 		<dependency>
 			<groupId>org.esa.s3tbx</groupId>
 			<artifactId>s3tbx-meris-ops</artifactId>
-			<version>6.0.4</version>     
+			<version>6.0.5</version>     
 		</dependency>
 		<dependency>
 			<groupId>org.esa.s3tbx</groupId>
 			<artifactId>s3tbx-merisl3-reader</artifactId>
-			<version>6.0.4</version>     
+			<version>6.0.5</version>     
 		</dependency>
 		<dependency>
 			<groupId>org.esa.s3tbx</groupId>
 			<artifactId>s3tbx-modis-reader</artifactId>
-			<version>6.0.4</version>     
+			<version>6.0.5</version>     
 		</dependency>
 		<dependency>
 			<groupId>org.esa.s3tbx</groupId>
 			<artifactId>s3tbx-mphchl</artifactId>
-			<version>6.0.4</version>     
+			<version>6.0.5</version>     
 		</dependency>
 		<dependency>
 			<groupId>org.esa.s3tbx</groupId>
 			<artifactId>s3tbx-rad2refl</artifactId>
-			<version>6.0.4</version>     
+			<version>6.0.5</version>     
 		</dependency>
 		<dependency>
 			<groupId>org.esa.s3tbx</groupId>
 			<artifactId>s3tbx-olci-radiometry</artifactId>
-			<version>6.0.4</version>     
+			<version>6.0.5</version>     
 		</dependency>
 		<dependency>
 			<groupId>org.esa.s3tbx</groupId>
 			<artifactId>s3tbx-owt-classification</artifactId>
-			<version>6.0.4</version>     
+			<version>6.0.5</version>     
 		</dependency>
 		<dependency>
 			<groupId>org.esa.s3tbx</groupId>
 			<artifactId>s3tbx-sentinel3-reader</artifactId>
-			<version>6.0.4</version>     
+			<version>6.0.5</version>     
 		</dependency>
 		<dependency>
 			<groupId>org.esa.s3tbx</groupId>
 			<artifactId>s3tbx-slstr-pdu-stitching</artifactId>
-			<version>6.0.4</version>     
+			<version>6.0.5</version>     
 		</dependency>
 		<dependency>
 			<groupId>org.esa.s3tbx</groupId>
 			<artifactId>s3tbx-slstr-regrid</artifactId>
-			<version>6.0.4</version>     
+			<version>6.0.5</version>     
 		</dependency>
 		<dependency>
 			<groupId>org.esa.s3tbx</groupId>
 			<artifactId>s3tbx-spot-vgt-reader</artifactId>
-			<version>6.0.4</version>     
+			<version>6.0.5</version>     
 		</dependency>
 		
 		<!-- PROBAV -->
@@ -399,23 +399,6 @@
 			<artifactId>wps-client-lib</artifactId>
 			<version>1.0.1</version>
 		</dependency>
-
-		<!-- openGIS -->
-
-		<!-- https://mvnrepository.com/artifact/org.geotools.ogc/net.opengis.wps -->
-		<!--<dependency>
-			<groupId>org.geotools.ogc</groupId>
-			<artifactId>net.opengis.wps</artifactId>
-			<version>21-RC</version>
-		</dependency>-->
-
-		<!-- https://mvnrepository.com/artifact/net.opengis/wps -->
-		<!--<dependency>
-			<groupId>net.opengis</groupId>
-			<artifactId>wps</artifactId>
-			<version>1.0.0</version>
-		</dependency>-->
-
 		<!-- FTP server + tests -->
 		<dependency> 
 			<groupId>org.mockftpserver</groupId> 
@@ -430,22 +413,9 @@
 			<version>2.1.0</version>
 			<scope>test</scope>
 		</dependency>
-		<!--dependency>
-      		<groupId>com.github.docker-java</groupId>
-      		<artifactId>docker-java</artifactId>
-      		<version>3.0.14</version>
-		</dependency-->           
 	</dependencies>
 
 	<repositories>
-		<!--<repository>
-			<id>osgeo</id>
-			<name>OSGEO</name>
-			<url>http://download.osgeo.org/webdav/geotools/</url>
-			<snapshots>
-				<enabled>true</enabled>
-			</snapshots>        
-		</repository>  -->
 		<repository>
 			<id>n52-releases</id>
 			<name>52n Releases</name>

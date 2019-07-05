@@ -12,10 +12,17 @@ var ProcessesLogsController = (function() {
         this.hasError = false;
         this.m_oProcessesLaunchedService = oProcessesLaunchedService;
         this.m_aoProcessesLogs = [];
-        this.filterTable = "";this.m_bAreProcessesLoaded = false;
+        this.filterTable = "";
+        this.m_bAreProcessesLoaded = false;
+
+
+        this.m_iNumberOfProcessForRequest = 40;
+        this.m_iFirstProcess = 0;
+        this.m_iLastProcess = this.m_iNumberOfProcessForRequest;
         // this.m_oExtrs= oExtras;
         //$scope.close = oClose;
         this.m_oConstantsService = oConstantsService;
+        this.isLoadMoreButtonClickable = true;
 
         if(_.isNil(this.m_oConstantsService.getActiveWorkspace()) == false)
         {
@@ -44,24 +51,46 @@ var ProcessesLogsController = (function() {
         var oController = this;
 
         if(utilsIsObjectNullOrUndefined(this.m_sActiveWorkspaceId)=== true)
+        {
             return false;
+        }
 
-        this.m_oProcessesLaunchedService.getAllProcessesFromServer(this.m_sActiveWorkspaceId).success(function (data, status)
+        this.m_bAreProcessesLoaded = false;
+        this.m_oProcessesLaunchedService.getAllProcessesFromServer(this.m_sActiveWorkspaceId,this.m_iFirstProcess,this.m_iLastProcess).success(function (data, status)
         {
             if(!utilsIsObjectNullOrUndefined(data))
             {
-                oController.m_aoProcessesLogs = data;
+                if(data.length > 0){
+                    oController.m_aoProcessesLogs = oController.m_aoProcessesLogs.concat(data);
+                    oController.m_sHrefLogFile = oController.generateLogFile();
+                    oController.calculateNextListOfProcess();
+                }
+                else
+                {
+                    oController.isLoadMoreButtonClickable = false;
+                }
+
+                if(data.length < oController.m_iNumberOfProcessForRequest )
+                {
+                    //there aren't enough processes for other requests so you can't load more processes
+                    oController.isLoadMoreButtonClickable = false;
+
+                }
                 oController.m_bAreProcessesLoaded = true;
-                oController.m_sHrefLogFile = oController.generateLogFile();
             }
         }).error(function (data,status)
         {
-
             utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN PROCESSES LOGS DIALOG<br>UNABLE TO LOAD ALL PROCESSES LOGS FROM SERVER");
+            oController.m_bAreProcessesLoaded = true;
         });
 
         return true;
     }
+
+    ProcessesLogsController.prototype.calculateNextListOfProcess = function(){
+        this.m_iFirstProcess = this.m_iFirstProcess + this.m_iNumberOfProcessForRequest;
+        this.m_iLastProcess = this.m_iLastProcess + this.m_iNumberOfProcessForRequest;
+    };
 
     ProcessesLogsController.prototype.getProcessDuration = function (oProcess) {
         //time by server

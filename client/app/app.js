@@ -220,6 +220,8 @@ wasdiApp.controller("MosaicController", MosaicController);
 wasdiApp.controller("EditPanelController", EditPanelController);
 wasdiApp.controller("EDriftFloodAutomaticChainController", EDriftFloodAutomaticChainController);
 wasdiApp.controller("ProcessErrorLogsDialogController", ProcessErrorLogsDialogController);
+wasdiApp.controller("EdriftCheckImagesTool", EdriftCheckImagesTool);
+wasdiApp.controller("ShareWorkspaceController", ShareWorkspaceController);
 
 wasdiApp.controller(UploadFileController.REG_NAME, UploadFileController);
 wasdiApp.controller(JRCClassificationController.REG_NAME, JRCClassificationController);

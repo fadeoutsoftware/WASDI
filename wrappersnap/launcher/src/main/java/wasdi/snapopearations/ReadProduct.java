@@ -148,9 +148,7 @@ public class ReadProduct {
      * @throws IOException
      */
     public ProductViewModel getProductViewModel() throws IOException
-    {
-        LauncherMain.s_oLogger.debug("ReadProduct.getProductViewModel: start");
-        
+    {        
         if (m_oProduct == null) {
         	LauncherMain.s_oLogger.debug("ReadProduct.getProductViewModel: member product is null, return null");
         	return null;
@@ -158,7 +156,6 @@ public class ReadProduct {
 
         ProductViewModel oViewModel = getProductViewModel(m_oProduct, m_oProductFile);
 
-        LauncherMain.s_oLogger.debug("ReadProduct.getProductViewModel: done");
         return  oViewModel;
     }
     
@@ -169,21 +166,19 @@ public class ReadProduct {
      */
 	public ProductViewModel getProductViewModel(Product oExportProduct, File oFile) {
 		
+		LauncherMain.s_oLogger.debug("ReadProduct.getProductViewModel: start");
+		
 		// Create View Model
 		ProductViewModel oViewModel = new ProductViewModel();
 
-        LauncherMain.s_oLogger.debug("ReadProduct.getProductViewModel: call fill bands view model");
-
         // Get Bands
         this.FillBandsViewModel(oViewModel, oExportProduct);
-
-        LauncherMain.s_oLogger.debug("ReadProduct.getProductViewModel: setting Name and Path");
         
         // Set name and path
         oViewModel.setName(oExportProduct.getName());
         if (oFile!=null) oViewModel.setFileName(oFile.getName());
 
-        LauncherMain.s_oLogger.debug("ReadProduct.getProductViewModel: end");
+        LauncherMain.s_oLogger.debug("ReadProduct.getProductViewModel: done");
 		return oViewModel;
 	}
 
@@ -231,17 +226,17 @@ public class ReadProduct {
 				return "";
 			}
 			
-			GeoCoding geocoding = m_oProduct.getSceneGeoCoding();
-			if (geocoding!=null) {
-				Dimension dim = m_oProduct.getSceneRasterSize();		
-				GeoPos min = geocoding.getGeoPos(new PixelPos(0,0), null);
-				GeoPos max = geocoding.getGeoPos(new PixelPos(dim.getWidth(), dim.getHeight()), null);
-				float minX = (float) Math.min(min.lon, max.lon);
-				float minY = (float) Math.min(min.lat, max.lat);
-				float maxX = (float) Math.max(min.lon, max.lon);
-				float maxY = (float) Math.max(min.lat, max.lat);
+			GeoCoding oGeocoding = m_oProduct.getSceneGeoCoding();
+			if (oGeocoding!=null) {
+				Dimension oDim = m_oProduct.getSceneRasterSize();		
+				GeoPos oMin = oGeocoding.getGeoPos(new PixelPos(0,0), null);
+				GeoPos oMax = oGeocoding.getGeoPos(new PixelPos(oDim.getWidth(), oDim.getHeight()), null);
+				float fMinX = (float) Math.min(oMin.lon, oMax.lon);
+				float fMinY = (float) Math.min(oMin.lat, oMax.lat);
+				float fMaxX = (float) Math.max(oMin.lon, oMax.lon);
+				float fMaxY = (float) Math.max(oMin.lat, oMax.lat);
 								
-				return String.format("%f,%f,%f,%f,%f,%f,%f,%f,%f,%f", minY, minX, minY, maxX, maxY, maxX, maxY, minX, minY, minX);
+				return String.format("%f,%f,%f,%f,%f,%f,%f,%f,%f,%f", fMinY, fMinX, fMinY, fMaxX, fMaxY, fMaxX, fMaxY, fMinX, fMinY, fMinX);
 			}
 			
 		} catch (Exception e) {

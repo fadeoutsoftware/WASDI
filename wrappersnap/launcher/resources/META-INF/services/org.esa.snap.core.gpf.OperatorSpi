@@ -72,6 +72,7 @@ org.esa.snap.raster.gpf.masks.TerrainMaskOp$Spi
 org.esa.snap.dem.gpf.AddElevationOp$Spi
 org.esa.snap.dem.gpf.FillDEMHoleOp$Spi
 
+org.esa.snap.ndvi.NdviOp$Spi
 
 #Sentinel-2
 org.esa.s2tbx.processor.mci.S2MciOp$Spi

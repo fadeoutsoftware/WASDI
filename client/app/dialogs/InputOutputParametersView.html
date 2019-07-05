@@ -5,34 +5,13 @@
 
         <legend><h3>{{"DIALOG_APPLY_ORBIT_TAB_INPUT_OUTPUT"|translate}}</h3></legend>
         <!---------------------------- CHOOSE PRODUCT --------------------------------->
-        <div class="my-input-text"><!--my-input-text-->
+        <div class="my-input-text">
             <!--SOURCE-->
-            <div class="input-group">
-                <!--<input type="text" class="form-control" placeholder="Source" ng-model="m_oController.m_oSelectedProduct">-->
-                <div class="input-group-btn">
-                    <!--Dropdown-->
-
-                    <!--<button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown">{{m_oController.m_oSelectedProduct.productFriendlyName}}-->
-                        <!--<span class="caret"></span></button>-->
-
-                    <!--<ul class="dropdown-menu productsDropDown" >-->
-                        <!--<li role="presentation" ng-repeat="product in m_oController.m_aoProducts" ng-click="m_oController.changeProduct(product);">-->
-                            <!--<a role="menuitem" tabindex="-1" href="">{{product.productFriendlyName}}</a>-->
-                        <!--</li>-->
-                    <!--</ul>-->
-
-                    <!--Download file button-->
-                    <!--<button class="btn btn-default " ngf-select="uploadFiles($files, $invalidFiles)" accept="image/*" >...</button>-->
-                </div>
-            </div>
-
-            <multiselect options="m_oController.m_asProductsName" selected="m_oController.m_asSelectedProducts"></multiselect>
-            <!----------------------- NAME ------------------->
-            <!--<div class="my-input-text">&lt;!&ndash;my-input-text&ndash;&gt;-->
-                <!--<input type="text" class="form-control" ng-model="m_oController.m_sFileName_Operation" placeholder="name"  >&lt;!&ndash;Name&ndash;&gt;&lt;!&ndash;ng-disabled="true"&ndash;&gt;-->
-                <!--&lt;!&ndash;ng-style="{'border-color':(m_oController.nameIsUsed())?'red':''}"&ndash;&gt;-->
+            <!--<div class="input-group">-->
+                <!--<div class="input-group-btn">-->
+                <!--</div>-->
             <!--</div>-->
-
+            <multiselect options="m_oController.m_asProductsName" selected="m_oController.m_asSelectedProducts"></multiselect>
         </div>
     </fieldset>
 </form>

@@ -7,7 +7,7 @@
 @import "functions";
 @import "main_theme";
 @import "layout/modal";
-
+@import "layout/divider_lines";
 //utilities
 @import "utils/utilities";
 
@@ -85,6 +85,9 @@
 @import "../dialogs/edit_panel/edit_panel";
 @import "../dialogs/eDrift_flood_automatic_chain/edrift_flood_automatic_chain";
 @import "../dialogs/process_error_logs_dialog/process_error_logs_dialog";
+@import "../dialogs/edrift_checkimagestool/edrift_checkimagestool";
+@import "../dialogs/share_workspace/share_workspace";
+
 
 @import "buttons";
 
@@ -1109,3 +1112,5 @@ textarea{
         margin-top: 10em ;
     }
 }
+
+

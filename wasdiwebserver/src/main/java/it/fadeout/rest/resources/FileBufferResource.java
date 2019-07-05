@@ -86,6 +86,7 @@ public class FileBufferResource {
 			oParameter.setDownloadUser(m_oServletConfig.getInitParameter(sProvider+".OSUser"));
 			oParameter.setDownloadPassword(m_oServletConfig.getInitParameter(sProvider+".OSPwd"));
 			oParameter.setProvider(sProvider);
+			oParameter.setWorkspaceOwnerId(Wasdi.getWorkspaceOwner(sWorkspaceId));
 			//set the process object Id to params
 			oParameter.setProcessObjId(sProcessObjId);
 			
@@ -159,6 +160,7 @@ public class FileBufferResource {
 			oParameter.setUserId(sUserId);
 			oParameter.setExchange(sWorkspaceId);
 			oParameter.setProcessObjId(sProcessObjId);
+			oParameter.setWorkspaceOwnerId(Wasdi.getWorkspaceOwner(sWorkspaceId));
 
 			String sPath = m_oServletConfig.getInitParameter("SerializationPath") + sProcessObjId;
 			SerializationUtils.serializeObjectToXML(sPath, oParameter);
@@ -220,7 +222,7 @@ public class FileBufferResource {
 
 			oReturnValue = new RabbitMessageViewModel();
 			
-			String sFullProductPath = Wasdi.getProductPath(m_oServletConfig, sUserId, sWorkspaceId);
+			String sFullProductPath = Wasdi.getWorkspacePath(m_oServletConfig, Wasdi.getWorkspaceOwner(sWorkspaceId), sWorkspaceId);
 			
 			// Get Product List
 			DownloadedFilesRepository oDownloadedFilesRepository = new DownloadedFilesRepository();
@@ -256,6 +258,7 @@ public class FileBufferResource {
 			oParameter.setStyle(sStyle);
 			oParameter.setExchange(sWorkspaceId);
 			oParameter.setProcessObjId(sProcessObjId);
+			oParameter.setWorkspaceOwnerId(Wasdi.getWorkspaceOwner(sWorkspaceId));
 
 			String sPath = m_oServletConfig.getInitParameter("SerializationPath");
 			if (!(sPath.endsWith("\\") || sPath.endsWith("/"))) sPath += "/";
@@ -319,7 +322,7 @@ public class FileBufferResource {
 			// Get Product List
 			DownloadedFilesRepository oDownloadedFilesRepository = new DownloadedFilesRepository();
 			
-			String sFullPath = Wasdi.getProductPath(m_oServletConfig, oUser.getUserId(), sWorkspaceId);
+			String sFullPath = Wasdi.getWorkspacePath(m_oServletConfig, Wasdi.getWorkspaceOwner(sWorkspaceId), sWorkspaceId);
 			
 			DownloadedFile oDownloadedFile = oDownloadedFilesRepository.GetDownloadedFileByPath(sFullPath+sFileUrl);
 			PublishedBandsRepository oPublishedBandsRepository = new PublishedBandsRepository();

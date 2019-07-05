@@ -22,6 +22,10 @@ var ListFloodAreaDetectionController = (function() {
         this.m_iMinimalBlobRemoval = 10;
         this.m_sPreprocess = '1';
 
+        this.m_oReturnReferenceValueDropdown = {};
+        this.m_oReturnPostEventeValueDropdown = {};
+        this.m_aoProductListDropdown = this.getDropdownMenuList(this.m_aoProducts);
+
         if(utilsIsObjectNullOrUndefined(this.m_aoProducts) === false)
         {
             this.m_oSelectedReferenceProduct = this.m_aoProducts[0];
@@ -32,6 +36,15 @@ var ListFloodAreaDetectionController = (function() {
         };
 
     };
+
+    ListFloodAreaDetectionController.prototype.getDropdownMenuList = function(aoProduct){
+
+        return utilsProjectGetDropdownMenuListFromProductsList(aoProduct)
+    };
+    ListFloodAreaDetectionController.prototype.getSelectedProduct = function(aoProduct,oSelectedProduct){
+
+        return utilsProjectDropdownGetSelectedProduct(aoProduct,oSelectedProduct);
+    }
 
     ListFloodAreaDetectionController.prototype.redirectToWebSite = function(){
         this.m_oWindow.open('http://edrift.cimafoundation.org', '_blank');
@@ -47,9 +60,13 @@ var ListFloodAreaDetectionController = (function() {
             return false;
         }
 
+        var oInputFile = this.getSelectedProduct(this.m_aoProducts,this.m_oReturnReferenceValueDropdown);
+        var oInputFilePostEvent = this.getSelectedProduct(this.m_aoProducts,this.m_oReturnPostEventeValueDropdown);
+
         var oListFlood = {
-            REF_IN:this.m_oSelectedReferenceProduct.fileName,
-            FLOOD_IN:this.m_oSelectedPostEventImageProduct.fileName,
+            // REF_IN:this.m_oSelectedReferenceProduct.fileName,
+            REF_IN:oInputFile.fileName,
+            FLOOD_IN:oInputFilePostEvent.fileName,
             HSBA_FLOOD_MASK_OUT:"",
             FLOOD_MAP_OUT:"",
             HSBA_DEPTH_IN: this.m_iHSBAStartDepth,
@@ -66,7 +83,6 @@ var ListFloodAreaDetectionController = (function() {
             utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR: INVALID ACTIVE WORKSPACE ");
             return false;
         }
-
 
         this.m_oProcessorService.runProcessor('edriftlistflood',sJSON)
             .success(function(data,status){

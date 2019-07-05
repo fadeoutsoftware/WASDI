@@ -5,19 +5,12 @@ angular.module('wasdi.DropdownMenuDirective', [])
             restrict : 'EAC',
             templateUrl:"directives/DropDownMenu/DropDownMenuView.html",
             scope :{
-                onClickFunction:"&onClickFunction",
-                selectedValue:"=selectedValue",
-                listOfValues:"=listOfValues"
-                // urlImage : '=',
-                // body : '=',
-                // getDefaultImage:'&',
-                // applyEditorPreviewImage:'&',
-                // maskManager: '&',
-                // filterManager: '&',
-                // panScaling: '=',
-                // heightCanvas: '=',
-                // widthCanvas: '='
-                // isLoaded : '='
+                onClickFunction:"&",
+                selectedValue:"=",
+                listOfValues:"=",
+                enableSearchFilter:"=",
+                dropdownName:"="
+
 
                 // * Text binding ('@' or '@?') *
                 // * One-way binding ('<' or '<?') *
@@ -26,18 +19,34 @@ angular.module('wasdi.DropdownMenuDirective', [])
             },
             link: function(scope, elem, attrs)
             {
-                if(utilsIsStrNullOrEmpty(scope.nameDropdown) === true)
+                if(  typeof scope.enableSearchOption !== "boolean")
                 {
-                    scope.nameDropdown = "";
+                    scope.enableSearchOption = false;
                 }
-                scope.changeSelectedValueOnClick = function(sNewValue){
-                    scope.selectedValue = sNewValue;
+                if( utilsIsObjectNullOrUndefined(scope.dropdownName) === true)
+                {
+                    scope.dropdownName = "";
                 }
-                // if(utilsIsObjectNullOrUndefined(scope.selectedValue) === true)
-                // {
-                //     scope.selectedValue = null;
-                // }
+                scope.isSelectedValue = false;
+                scope.selectedValue = {
+                    name:"",
+                    id:""
+                };
 
+                scope.onClickValue = function(oSelectedValue){
+                    scope.isSelectedValue = true;
+                    scope.selectedValue = oSelectedValue;
+                   // scope.setDefaultSelectedValue();
+                }
+
+                scope.setDefaultSelectedValue = function(){
+                    scope.selectedValue = {
+                        name:"",
+                        id:""
+                    };
+                }
+
+                scope.setDefaultSelectedValue();
             }
         };
     });

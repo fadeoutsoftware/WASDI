@@ -94,10 +94,10 @@ public class ProcessorRepository extends  MongoRepository {
             oWSDocuments.forEach(new Block<Document>() {
                 public void apply(Document document) {
                     String sJSON = document.toJson();
-                    Processor oWorkflow = null;
+                    Processor oProcesor = null;
                     try {
-                        oWorkflow = s_oMapper.readValue(sJSON,Processor.class);
-                        aoReturnList.add(oWorkflow);
+                        oProcesor = s_oMapper.readValue(sJSON,Processor.class);
+                        aoReturnList.add(oProcesor);
                     } catch (IOException e) {
                         e.printStackTrace();
                     }

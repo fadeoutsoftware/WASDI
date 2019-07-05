@@ -124,28 +124,13 @@ public class Mosaic {
 		this.m_sOutputFileFormat = sOutputFileFormat;
 	}
 	
-	protected String getWorspacePath() {
-		// Get Base Path
-		String sWorkspacePath = m_sBasePath;
-		
-		if (!(sWorkspacePath.endsWith("/")||sWorkspacePath.endsWith("//"))) sWorkspacePath += "/";
-		
-		// Get Workspace path
-		sWorkspacePath += m_oMosaicParameter.getUserId();
-		sWorkspacePath += "/";
-		sWorkspacePath += m_oMosaicParameter.getWorkspace();
-		sWorkspacePath += "/";
-
-		return sWorkspacePath;
-	}
-	
 	/**
 	 * Init internal product map
 	 */
 	protected void initializeProductMap() {
 		
 		// Get Base Path
-		String sWorkspacePath = getWorspacePath();
+		String sWorkspacePath = LauncherMain.getWorspacePath(m_oMosaicParameter);
 		
 		// for each product
 		for (int iProducts = 0; iProducts<m_oMosaicSetting.getSources().size(); iProducts ++) {
@@ -366,7 +351,7 @@ public class Mosaic {
 			
 			// Output file
 			asArgs.add("-o");
-			asArgs.add(getWorspacePath() + m_sOuptutFile);
+			asArgs.add(LauncherMain.getWorspacePath(m_oMosaicParameter) + m_sOuptutFile);
 			
 			// Output format
 			asArgs.add("-of");
@@ -375,10 +360,35 @@ public class Mosaic {
 			if (LauncherMain.snapFormat2GDALFormat(m_sOutputFileFormat).equals("GTiff")) {
 				asArgs.add("-co");
 				asArgs.add("COMPRESS=LZW");
+				
+				asArgs.add("-co");
+				asArgs.add("BIGTIFF=YES");
+			}
+			
+			// Set No Data for input 
+			if (m_oMosaicSetting.getInputIgnoreValue()!= null) {
+				asArgs.add("-n");
+				asArgs.add(""+m_oMosaicSetting.getInputIgnoreValue());				
+			}
+
+			if (m_oMosaicSetting.getNoDataValue() != null) {
+				asArgs.add("-a_nodata");
+				asArgs.add(""+m_oMosaicSetting.getNoDataValue());				
+
+				asArgs.add("-init");
+				asArgs.add(""+m_oMosaicSetting.getNoDataValue());				
+
+			}
+			
+			// Pixel Size
+			if (m_oMosaicSetting.getPixelSizeX()>0.0 && m_oMosaicSetting.getPixelSizeY()>0.0) {
+				asArgs.add("-ps");
+				asArgs.add(""+ m_oMosaicSetting.getPixelSizeX());
+				asArgs.add("" + m_oMosaicSetting.getPixelSizeY());
 			}
 			
 			// Get Base Path
-			String sWorkspacePath = getWorspacePath();
+			String sWorkspacePath = LauncherMain.getWorspacePath(m_oMosaicParameter);
 			
 			// for each product
 			for (int iProducts = 0; iProducts<m_oMosaicSetting.getSources().size(); iProducts ++) {
@@ -423,7 +433,7 @@ public class Mosaic {
 			
 		} 
         catch (Throwable e) {
-			m_oLogger.error("Mosaic.runGDALMosaic: Exception generating output Product " + getWorspacePath() + m_sOuptutFile);
+			m_oLogger.error("Mosaic.runGDALMosaic: Exception generating output Product " + LauncherMain.getWorspacePath(m_oMosaicParameter) + m_sOuptutFile);
 			m_oLogger.error("Mosaic.runGDALMosaic: " + e.toString());
 			return false;
 		}
@@ -562,7 +572,7 @@ public class Mosaic {
         	}
         	*/
         	// Save output
-			ProductIO.writeProduct(oOutputProduct, getWorspacePath() + m_sOuptutFile, m_sOutputFileFormat, new WasdiProgreeMonitor(m_oProcessRepository, m_oProcess));
+			ProductIO.writeProduct(oOutputProduct, LauncherMain.getWorspacePath(m_oMosaicParameter) + m_sOuptutFile, m_sOutputFileFormat, new WasdiProgreeMonitor(m_oProcessRepository, m_oProcess));
 		} 
         catch (IOException e) {
 			m_oLogger.error("Mosaic.runMosaic: Exception writing output Product " + m_sOuptutFile);
