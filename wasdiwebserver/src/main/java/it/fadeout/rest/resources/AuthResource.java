@@ -184,10 +184,7 @@ public class AuthResource {
 		}
 
 		User oUser = Wasdi.GetUserFromSession(sSessionId);
-		if (oUser == null) {
-			return UserViewModel.getInvalid();
-			
-		} else if(!m_oCredentialPolicy.satisfies(oUser)) {
+		if (oUser == null || !m_oCredentialPolicy.satisfies(oUser)) {
 			return UserViewModel.getInvalid();
 		}
 		
@@ -215,7 +212,7 @@ public class AuthResource {
 		if(!m_oCredentialPolicy.validSessionId(sSessionId)) {
 			return PrimitiveResult.getInvalid();
 		}
-		PrimitiveResult oResult = PrimitiveResult.getInvalid();
+		PrimitiveResult oResult = null;
 		SessionRepository oSessionRepository = new SessionRepository();
 		UserSession oSession = oSessionRepository.GetSession(sSessionId);
 		if(oSession != null) {
@@ -250,9 +247,7 @@ public class AuthResource {
 		}
 		
 		User oUser = Wasdi.GetUserFromSession(sSessionId);
-		if (oUser == null  ) {
-			return Response.status(Status.UNAUTHORIZED).build();
-		} else if(!m_oCredentialPolicy.satisfies(oUser)) {
+		if (oUser == null || !m_oCredentialPolicy.satisfies(oUser)) {
 			return Response.status(Status.UNAUTHORIZED).build();
 		}
 		
@@ -292,9 +287,7 @@ public class AuthResource {
 		Wasdi.DebugLog("AuthService.ExistsSftpAccount");
 		
 		User oUser = Wasdi.GetUserFromSession(sSessionId);
-		if (oUser == null) {
-			return null;
-		} else if(!m_oCredentialPolicy.satisfies(oUser)) {
+		if (oUser == null || !m_oCredentialPolicy.satisfies(oUser)) {
 			return null;
 		}
 		String sAccount = oUser.getUserId();		
@@ -325,9 +318,7 @@ public class AuthResource {
 		}
 		
 		User oUser = Wasdi.GetUserFromSession(sSessionId);
-		if (oUser == null) {
-			return null;
-		} else if(!m_oCredentialPolicy.satisfies(oUser)) {
+		if (oUser == null || !m_oCredentialPolicy.satisfies(oUser)) {
 			return null;
 		}	
 		String sAccount = oUser.getUserId();		
@@ -347,16 +338,12 @@ public class AuthResource {
 	@Produces({"application/json", "text/xml"})
 	public Response removeSftpAccount(@HeaderParam("x-session-token") String sSessionId) {
 		Wasdi.DebugLog("AuthService.RemoveSftpAccount");
-		if( null==sSessionId ) {
-			return Response.status(Status.BAD_REQUEST).build();
-		} else if( !m_oCredentialPolicy.validSessionId(sSessionId)) {
+		if( null==sSessionId || !m_oCredentialPolicy.validSessionId(sSessionId)) {
 			return Response.status(Status.BAD_REQUEST).build();
 		}
 		
 		User oUser = Wasdi.GetUserFromSession(sSessionId);
-		if (oUser == null) {
-			return Response.status(Status.UNAUTHORIZED).build();
-		} else if(!m_oCredentialPolicy.satisfies(oUser)) {
+		if (oUser == null || !m_oCredentialPolicy.satisfies(oUser)) {
 			return Response.status(Status.UNAUTHORIZED).build();
 		}
 		String sAccount = oUser.getUserId();
@@ -381,9 +368,7 @@ public class AuthResource {
 		}
 		
 		User oUser = Wasdi.GetUserFromSession(sSessionId);
-		if(null == oUser) {
-			return Response.status(Status.UNAUTHORIZED).build();
-		} else if( !m_oCredentialPolicy.satisfies(oUser)) {
+		if(null == oUser || !m_oCredentialPolicy.satisfies(oUser)) {
 			return Response.status(Status.UNAUTHORIZED).build(); 
 		}
 		
@@ -446,13 +431,7 @@ public class AuthResource {
 			 
 			  // Get profile information from payload
 			  String sEmail = oPayload.getEmail();
-			  
-			 // boolean bEmailVerified = Boolean.valueOf(oPayload.getEmailVerified());
-			 // String sName = (String) oPayload.get("name");
-			 // String sPictureUrl = (String) oPayload.get("picture");
-			 // String sLocale = (String) oPayload.get("locale");
-			 // String sGivenName = (String) oPayload.get("given_name");
-			 // String sFamilyName = (String) oPayload.get("family_name");
+
 			  
 			  // store profile information and create session
 			  Wasdi.DebugLog("AuthResource.LoginGoogleUser: requested access from " + sGoogleIdToken);
@@ -474,7 +453,7 @@ public class AuthResource {
 				  }
 			  }
 			  
-			  if (oWasdiUser != null && oWasdiUser.getAuthServiceProvider().equalsIgnoreCase("google") == true) {
+			  if (oWasdiUser != null && oWasdiUser.getAuthServiceProvider().equalsIgnoreCase("google")) {
 				  //get all expired sessions
 				  SessionRepository oSessionRepository = new SessionRepository();
 				  List<UserSession> aoEspiredSessions = oSessionRepository.GetAllExpiredSessions(oWasdiUser.getUserId());
@@ -482,7 +461,7 @@ public class AuthResource {
 					  //delete data base session
 					  if (!oSessionRepository.DeleteSession(oUserSession)) {
 						  //XXX log instead
-						  System.out.println("AuthService.LoginGoogleUser: Error deleting session.");
+						  Wasdi.DebugLog("AuthService.LoginGoogleUser: Error deleting session.");
 					  }
 				  }
 
@@ -559,14 +538,13 @@ public class AuthResource {
 					String sToken = UUID.randomUUID().toString();
 					oNewUser.setFirstAccessUUID(sToken);
 					
-					PrimitiveResult oResult = PrimitiveResult.getInvalid();
-					if(oUserRepository.InsertUser(oNewUser) == true) {
+					PrimitiveResult oResult = null;
+					if(oUserRepository.InsertUser(oNewUser)) {
 						//the user is stored in DB
 						oResult = new PrimitiveResult();
 						oResult.setBoolValue(true);
 						oResult.setStringValue(oNewUser.getUserId());
 					} else {
-						
 						Wasdi.DebugLog("AuthResource.userRegistration: insert new user in DB failed");
 						return PrimitiveResult.getInvalid();
 					}
@@ -687,7 +665,7 @@ public class AuthResource {
 			User oUserId = Wasdi.GetUserFromSession(sSessionId);
 			if(null == oUserId) {
 				//Maybe the user didn't exist, or failed for some other reasons
-				System.err.print("Null user from session id (does the user exist?)");
+				Wasdi.DebugLog("Null user from session id (does the user exist?)");
 				return UserViewModel.getInvalid();
 			}
 	
@@ -790,7 +768,7 @@ public class AuthResource {
 						String sHashedPassword = m_oPasswordAuthentication.hash( sPassword.toCharArray() ); 
 						oUser.setPassword(sHashedPassword);
 						if(oUserRepository.UpdateUser(oUser)) {
-							if(! sendPasswordEmail(sUserId, sUserId, sPassword) ) {
+							if(!sendPasswordEmail(sUserId, sUserId, sPassword) ) {
 								return PrimitiveResult.getInvalid(); 
 							}
 							PrimitiveResult oResult = new PrimitiveResult();
@@ -840,7 +818,6 @@ public class AuthResource {
 			}
 			oMessage.setSender(sSender);
 			
-			//String sMessage = m_oServletConfig.getInitParameter("sftpMailText");
 			//TODO read the message from the servlet config file
 			String sMessage = "Dear " + oUser.getName() + " " + oUser.getSurname() + ",\n welcome to WASDI.\n\n"+
 					"Please click on the link below to activate your account:\n\n" + 
@@ -882,20 +859,24 @@ public class AuthResource {
 		}
 		//send email with new password
 		String sMercuriusAPIAddress = m_oServletConfig.getInitParameter("mercuriusAPIAddress");
-		MercuriusAPI oAPI = new MercuriusAPI(sMercuriusAPIAddress);			
+		MercuriusAPI oMercuriusAPI = new MercuriusAPI(sMercuriusAPIAddress);			
 		Message oMessage = new Message();
 		String sTitle = m_oServletConfig.getInitParameter("sftpMailTitle");
 		oMessage.setTilte(sTitle);
-		String sSenser = m_oServletConfig.getInitParameter("sftpManagementMailSenser");
-		if (sSenser==null) sSenser = "wasdi@wasdi.net";
-		oMessage.setSender(sSenser);
+		String sSender = m_oServletConfig.getInitParameter("sftpManagementMailSenser");
+		if (sSender==null) sSender = "wasdi@wasdi.net";
+		oMessage.setSender(sSender);
 		
 		String sMessage = m_oServletConfig.getInitParameter("sftpMailText");
 		sMessage += "\n\nUSER: " + sAccount + " - PASSWORD: " + sPassword;
 		oMessage.setMessage(sMessage);
-		
-		if(oAPI.sendMailDirect(sRecipientEmail, oMessage) >= 0) {
-			return true;
+		try {
+			if(oMercuriusAPI.sendMailDirect(sRecipientEmail, oMessage) >= 0) {
+				return true;
+			}
+		} catch (Exception e) {
+			Wasdi.DebugLog("sendPasswordEmail: " + e.toString());
+			return false;
 		}
 		return false;
 	}
