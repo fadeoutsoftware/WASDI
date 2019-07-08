@@ -204,6 +204,7 @@ public class DiasResponseTranslatorONDA implements DiasResponseTranslator {
 				//this hack is needed because ONDA serves ENVISAT images from file system only
 				if(sProductFileName.startsWith("EN1")) {
 					oResult.getProperties().put("link", sPath);
+					sProtocol = "file";
 				}
 			} else {
 				//NOTE this should not happen. Is it possible to take countermeasures?
