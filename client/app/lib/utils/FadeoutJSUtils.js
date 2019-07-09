@@ -160,6 +160,17 @@ function utilsStrContainsCaseInsensitive(sSource, sStrToSearch)
     var s2 = sStrToSearch.toLowerCase();
     return (s1.indexOf(s2) > -1);
 }
+
+/**
+ *
+ * @param sString
+ */
+function utilsRemoveSpaces(sString){
+    if(utilsIsString(sString)){
+        sString.replace(/\s/g, "")
+    }
+}
+
 /**
  *
  * @param oValue

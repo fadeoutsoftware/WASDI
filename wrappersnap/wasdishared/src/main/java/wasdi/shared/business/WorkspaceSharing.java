@@ -1,5 +1,7 @@
 package wasdi.shared.business;
 
+import java.util.Date;
+
 /**
  * Workshape sharing entity
  * Represent the association between a workspace and the user that can access it
@@ -22,7 +24,7 @@ public class WorkspaceSharing {
     /**
      * Sharing grant timestamp
      */
-    private  long shareDate;
+    private Double shareDate;
 
     public String getWorkspaceId() {
         return workspaceId;
@@ -48,11 +50,11 @@ public class WorkspaceSharing {
         this.ownerId = ownerId;
     }
 
-    public long getShareDate() {
+    public Double getShareDate() {
         return shareDate;
     }
 
-    public void setShareDate(long shareDate) {
+    public void setShareDate(Double shareDate) {
         this.shareDate = shareDate;
     }
 }

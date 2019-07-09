@@ -19,13 +19,13 @@
                                 <div class="row give-permission-row">
                                     <h3>Give permission</h3>
                                     <div class="col-xs-11 col-sm-11 col-md-11 col-lg-11">
-                                        <input type="email" name="name" id="" class="form-control wasdi-input" value="" title=""
-                                            required="required" placeholder="User email">
+                                        <input type="text" name="name" id="" class="form-control wasdi-input" value="" title=""
+                                            ng-model="m_oController.m_sUserEmail" required="required" placeholder="User email">
                                     </div>
 
                                     <div class="col-xs-1 col-sm-1 col-md-1 col-lg-1">
                                         <button class="btn btn-primary btn-wasdi"
-                                            ng-click="m_oController.disablePermisionsUsersByWorkspace(m_oController.m_sWorkspace.workspaceId,oUser)">
+                                            ng-click="m_oController.shareWorkspaceByUserEmail(m_oController.m_sWorkspace.workspaceId,m_oController.m_sUserEmail)">
                                             Add user
                                         </button>
                                     </div>
@@ -50,11 +50,11 @@
                                 <tbody>
                                 <tr ng-repeat="oUser in m_oController.m_aoEnableUsers">
                                     <td>
-                                        {{oUser}}
+                                        {{oUser.userId}}
                                     </td>
                                     <td class="over-icon">
                                         <button class="btn btn-primary btn-wasdi"
-                                                ng-click="m_oController.disablePermisionsUsersByWorkspace(m_oController.m_sWorkspace.workspaceId,oUser)">
+                                                ng-click="m_oController.disablePermissionsUsersByWorkspace(m_oController.m_sWorkspace.workspaceId,oUser.userId)">
                                             Remove permission
                                             <!--<i class="fa fa-trash fa-lg" aria-hidden="true"></i>-->
                                         </button>

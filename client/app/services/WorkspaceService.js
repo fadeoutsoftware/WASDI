@@ -32,4 +32,17 @@ service('WorkspaceService', ['$http',  'ConstantsService', function ($http, oCon
         return this.m_oHttp.get(this.APIURL + '/ws/workspacelistbyproductname?productname=' + sProductName);
     };
 
+    this.putShareWorkspace = function(sWorkspaceId,sUserId){
+        return this.m_oHttp.put(this.APIURL + '/ws/share?sWorkspaceId=' + sWorkspaceId + "&sUserId=" + sUserId);
+    };
+
+    this.getUsersBySharedWorkspace = function(sWorkspaceId){
+        return this.m_oHttp.get(this.APIURL + '/ws/enableusersworkspace?sWorkspaceId=' + sWorkspaceId );
+    };
+    this.deleteUserSharedWorkspace = function(sWorkspaceId,sUserId){
+        return this.m_oHttp.delete(this.APIURL + '/ws/deleteworkspacesharing?sWorkspaceId=' + sWorkspaceId + "&sUserId=" + sUserId );
+    };
+
+
+
 }]);

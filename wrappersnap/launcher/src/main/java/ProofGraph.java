@@ -110,8 +110,8 @@ public class ProofGraph {
 		 */
 		
 //		Product oTest = ProductIO.readProduct("C:\\Temp\\wasdi\\data\\paolo\\2c1271a4-9e2b-4291-aabd-caf3074adb25\\S1A_IW_GRDH_1SDV_20180129T052722_20180129T052747_020365_022CA8_9D99.zip");	
-		System.setProperty("user.home", "C:\\Users\\p.campanella.FADEOUT");
-        Path propFile = Paths.get("C:\\Codice\\Progetti\\WASDI\\server\\launcher\\target\\config.properties");
+		System.setProperty("user.home", "C:\\Users\\a.corrado");
+        Path propFile = Paths.get("C:\\Codice_Alessio\\WASDI_GITHUB\\wrappersnap\\launcher\\resources\\config.properties");
         Config.instance("snap.auxdata").load(propFile);
         Config.instance().load();
         

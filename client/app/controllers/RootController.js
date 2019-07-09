@@ -135,100 +135,14 @@ var RootController = (function() {
 
                 var iTotalProcessesNumber = aoProcessesRunning.length;
 
-                // get the number of active and waiting processes
-                // var iActiveCount = 0;
-                // var iWaitingCount = 0;
-                // aoProcessesRunning.forEach(function (oProcess) {
-                //     if (oProcess.status == "RUNNING") {
-                //         iActiveCount++;
-                //     }
-                //     else if (oProcess.status == "CREATED") {
-                //         iWaitingCount++;
-                //     }
-                // });
-
                 // Set the number of running processes
 
                 $scope.m_oController.getSummary();
 
-                // $scope.m_oController.m_iNumberOfProcesses = iActiveCount;
-                // $scope.m_oController.m_iWaitingProcesses = iWaitingCount;
-
-                //FIND LAST RUNNING PROCESSES
-                // var oLastProcessRunning = null;
-
-                // Search the last one that is in running state
-                // for( var  iIndexNewProcess= 0; iIndexNewProcess < iTotalProcessesNumber; iIndexNewProcess++) {
-                //     if (aoProcessesRunning[iIndexNewProcess].status === "RUNNING") {
-                //         oLastProcessRunning = aoProcessesRunning[iIndexNewProcess];
-                //     }
-                // }
-
-                // Set the variable: it will be null if there aren't running processes or the last one otherwise
-                // $scope.m_oController.m_oLastProcesses = oLastProcessRunning;
                 $scope.m_oController.m_oLastProcesses = $scope.m_oController.findLastProcess(aoProcessesRunning);
-
-                // Initialize the time counter for new processes
-                // for( var  iIndexNewProcess= 0; iIndexNewProcess < iTotalProcessesNumber; iIndexNewProcess++)
-                // {
-                //     if (aoProcessesRunning[iIndexNewProcess].status == "CREATED" || aoProcessesRunning[iIndexNewProcess].status == "RUNNING" )
-                //     {
-                //         if (utilsIsObjectNullOrUndefined(aoProcessesRunning[iIndexNewProcess].timeRunning)) {
-                //             // add start time (useful if the page was reloaded)
-                //
-                //             //time by server
-                //             var oStartTime = new Date(aoProcessesRunning[iIndexNewProcess].operationDate);
-                //             //pick time
-                //             var oNow = new Date();
-                //             var result =  Math.abs(oNow-oStartTime);
-                //             //approximate result
-                //             var seconds = Math.ceil(result / 1000);
-                //
-                //             if(utilsIsObjectNullOrUndefined(seconds) || seconds < 0 || utilsIsANumber(seconds)=== false)
-                //             {
-                //                 seconds = 0;
-                //             }
-                //
-                //             var oDate = new Date(1970, 0, 1);
-                //             oDate.setSeconds(0 + seconds);
-                //             //add running time
-                //             aoProcessesRunning[iIndexNewProcess].timeRunning = oDate;
-                //         }
-                //     }
-                //     else {
-                //         if (utilsIsObjectNullOrUndefined(aoProcessesRunning[iIndexNewProcess].timeRunning)) {
-                //             aoProcessesRunning[iIndexNewProcess].timeRunning = 0;
-                //
-                //             //time by server
-                //             var oStartTime = new Date(aoProcessesRunning[iIndexNewProcess].operationDate);
-                //             var oEndTime = new Date(aoProcessesRunning[iIndexNewProcess].operationEndDate);
-                //             //pick time
-                //             var result =  Math.abs(oEndTime-oStartTime);
-                //             //approximate result
-                //             var seconds = Math.ceil(result / 1000);
-                //
-                //             if(utilsIsObjectNullOrUndefined(seconds) || seconds < 0  || utilsIsANumber(seconds)=== false)
-                //             {
-                //                 seconds = 0;
-                //             }
-                //
-                //             var oDate = new Date(1970, 0, 1);
-                //             oDate.setSeconds(0 + seconds);
-                //             //add running time
-                //             aoProcessesRunning[iIndexNewProcess].timeRunning = oDate;
-                //         }
-                //     }
-                // }
-
-                // $scope.m_oController.m_aoProcessesRunning = aoProcessesRunning;
 
                 $scope.m_oController.m_aoProcessesRunning = $scope.m_oController.initializeTimeCounter(aoProcessesRunning);
 
-
-                // Debug processes bar (+)
-                // var testProcess = {"fileSize":"420.5 MB","operationDate":"2019-01-24 08:54:41 GMT","operationEndDate":"null GMT","operationType":"DOWNLOAD","payload":null,"pid":1066,"processObjId":"fde1b926-c524-4c5c-ad77-9ed2cfbb12be","productName":"S2A_MSIL2A_20190117T102351_N0211_R065_T32TPQ_20190117T130032.zip","progressPerc":0,"status":"RUNNING","userId":"paolo"};
-                // this.m_oLastProcesses = testProcess;
-                // Debug processes bar (-)
             }
 
         });
@@ -308,7 +222,7 @@ var RootController = (function() {
 
         for( var  iIndexNewProcess= 0; iIndexNewProcess < iTotalProcessesNumber; iIndexNewProcess++)
         {
-            if (aoProcessesRunning[iIndexNewProcess].status == "CREATED" || aoProcessesRunning[iIndexNewProcess].status == "RUNNING" )
+            if (aoProcessesRunning[iIndexNewProcess].status === "RUNNING" )//aoProcessesRunning[iIndexNewProcess].status === "CREATED" ||
             {
                 if (utilsIsObjectNullOrUndefined(aoProcessesRunning[iIndexNewProcess].timeRunning)) {
                     // add start time (useful if the page was reloaded)
