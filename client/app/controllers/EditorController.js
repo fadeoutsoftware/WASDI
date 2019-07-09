@@ -4300,8 +4300,12 @@ var EditorController = (function () {
 
                                                         for(var iIndexChildren = 0; iIndexChildren < iLengthChildren_d; iIndexChildren++)
                                                         {
+                                                            oController.removeAllRedSquareBoundingBox();
+                                                            oController.m_oGlobeService.addAllWorkspaceRectanglesOnMap(oController.m_aoProducts);
                                                             for(var iIndexLayer = 0; iIndexLayer < iLengthLayer; iIndexLayer++)
                                                             {
+
+
                                                                 if( that.temp.children_d[iIndexChildren] ===  oController.m_aoVisibleBands[iIndexLayer].layerId)
                                                                 {
                                                                     oController.removeBandImage(oController.m_aoVisibleBands[iIndexChildren]);
@@ -4490,6 +4494,8 @@ var EditorController = (function () {
 
                                                             for(var iIndexChildren = 0; iIndexChildren < iLengthChildren_d; iIndexChildren++)
                                                             {
+                                                                oController.removeAllRedSquareBoundingBox();
+                                                                oController.m_oGlobeService.addAllWorkspaceRectanglesOnMap(oController.m_aoProducts);
                                                                 for(var iIndexLayer = 0; iIndexLayer < iLengthLayer; iIndexLayer++)
                                                                 {
                                                                     if( that.temp.children_d[iIndexChildren] ===  oController.m_aoVisibleBands[iIndexLayer].layerId)

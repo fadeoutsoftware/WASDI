@@ -1,6 +1,7 @@
 package it.fadeout.rest.resources;
 
 import java.io.File;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -10,6 +11,7 @@ import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
@@ -457,6 +459,169 @@ public class WorkspaceResource {
 		}
 
 		return null;
+	}
+	
+	@PUT
+	@Path("share")
+	@Produces({"application/xml", "application/json", "text/xml"})	
+	public PrimitiveResult shareWorkspace(@HeaderParam("x-session-token") String sSessionId, 
+													@QueryParam("sWorkspaceId") String sWorkspaceId,
+													@QueryParam("sUserId") String sUserId) {
+		
+		Wasdi.DebugLog("WorkspaceResource.ShareWorkspace");
+		
+		// Validate Session
+		User oOwnerUser = Wasdi.GetUserFromSession(sSessionId);
+		PrimitiveResult oResult = new PrimitiveResult();
+		oResult.setBoolValue(false);
+		
+		if ( oOwnerUser == null ) 
+		{
+			oResult.setStringValue("Invalid user.");
+			return oResult;
+		}
+		
+		if ( Utils.isNullOrEmpty(oOwnerUser.getUserId()) ) 
+		{
+			oResult.setStringValue("Invalid user.");
+			return oResult;
+		}
+		
+		if( m_oCredentialPolicy.validUserId(sUserId) == false )
+		{
+			oResult.setStringValue("Invalid user.");
+			return oResult;
+		}
+		
+		if( m_oWorkspacePolicy.validWorkspaceId(sWorkspaceId) == false)
+		{
+			oResult.setStringValue("Invalid workspace.");
+			return oResult;
+		}
+		
+		try{
+			WorkspaceSharing oWorkspaceSharing = new WorkspaceSharing();
+			WorkspaceSharingRepository oWorkspaceSharingRepository = new WorkspaceSharingRepository();
+			Timestamp oTimestamp = new Timestamp(System.currentTimeMillis());
+			oWorkspaceSharing.setOwnerId(oOwnerUser.getUserId());
+			oWorkspaceSharing.setUserId(sUserId);
+			oWorkspaceSharing.setWorkspaceId(sWorkspaceId);
+			oWorkspaceSharing.setShareDate((double)oTimestamp.getTime());
+			oWorkspaceSharingRepository.InsertWorkspaceSharing(oWorkspaceSharing);
+		}
+		catch(Exception oEx){
+			oEx.printStackTrace();
+			System.out.println("WorkspaceResource.ShareWorkspace: Error share workspace: " + oEx.getMessage());
+			
+			oResult.setStringValue("Error in save proccess");
+			oResult.setBoolValue(false);
+
+			return oResult;
+		}
+		
+		oResult.setStringValue("Done");
+		oResult.setBoolValue(true);
+
+		return oResult;
+
+	}
+	
+	@GET
+	@Path("enableusersworkspace")
+	@Produces({"application/xml", "application/json", "text/xml"})	
+	public List<WorkspaceSharing> getEnableUsersSharedWorksace(@HeaderParam("x-session-token") String sSessionId, 
+																@QueryParam("sWorkspaceId") String sWorkspaceId) {
+		
+		Wasdi.DebugLog("WorkspaceResource.getUsersSharedWorksace");
+
+		// Validate Session
+		User oOwnerUser = Wasdi.GetUserFromSession(sSessionId);
+		List<WorkspaceSharing> aoWorkspaceSharing = null;
+		
+		if (oOwnerUser == null) 
+		{
+			return null;
+		}
+		
+		if (Utils.isNullOrEmpty(oOwnerUser.getUserId())) 
+		{
+			return null;
+		}
+		
+		if( m_oWorkspacePolicy.validWorkspaceId(sWorkspaceId) == false)
+		{
+			return null;
+		}
+		
+
+		try{
+			WorkspaceSharingRepository oWorkspaceSharingRepository = new WorkspaceSharingRepository();
+			aoWorkspaceSharing = oWorkspaceSharingRepository.GetWorkspaceSharingByWorkspace(sWorkspaceId);
+		}
+		catch(Exception oEx){
+			oEx.printStackTrace();
+			System.out.println("WorkspaceResource.getUsersSharedWorksace: Error get users shared worksace: " + oEx.getMessage());
+			return null;
+		}
+
+		return aoWorkspaceSharing;
+
+	}
+	
+	@DELETE
+	@Path("deleteworkspacesharing")
+	@Produces({"application/xml", "application/json", "text/xml"})	
+	public PrimitiveResult deleteUserSharedWorkspace(@HeaderParam("x-session-token") String sSessionId, 
+																@QueryParam("sWorkspaceId") String sWorkspaceId,
+																@QueryParam("sUserId") String sUserId) {
+		
+		Wasdi.DebugLog("WorkspaceResource.deleteUserSharedWorkspace");
+		PrimitiveResult oResult = new PrimitiveResult();
+		oResult.setBoolValue(false);
+		// Validate Session
+		User oOwnerUser = Wasdi.GetUserFromSession(sSessionId);
+		
+		if (oOwnerUser == null) 
+		{
+			oResult.setStringValue("Invalid user.");
+			return oResult;
+		}
+		
+		if (Utils.isNullOrEmpty(oOwnerUser.getUserId())) 
+		{
+			oResult.setStringValue("Invalid user.");
+			return oResult;
+		}
+
+		
+		if( m_oWorkspacePolicy.validWorkspaceId(sWorkspaceId) == false)
+		{
+			oResult.setStringValue("Invalid workspace.");
+			return oResult;
+		}
+		
+		if( m_oCredentialPolicy.validUserId(sUserId) == false )
+		{
+			oResult.setStringValue("Invalid user.");
+			return oResult;
+		}
+		try{
+			WorkspaceSharingRepository oWorkspaceSharingRepository = new WorkspaceSharingRepository();
+			
+			oWorkspaceSharingRepository.DeleteByUserIdWorkspaceId(sUserId, sWorkspaceId);
+		}
+		catch(Exception oEx){
+			oEx.printStackTrace();
+			
+			System.out.println("WorkspaceResource.deleteUserSharedWorkspace: Error get users shared worksace: " + oEx.getMessage());
+			oResult.setStringValue("Error in delete proccess");
+			return oResult;
+		}
+		
+		oResult.setStringValue("Done");
+		oResult.setBoolValue(true);
+		return oResult;
+
 	}
 
 }
