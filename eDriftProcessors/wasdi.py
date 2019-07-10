@@ -1328,7 +1328,7 @@ def executeProcessor(sProcessorName, aoProcessParams):
     asHeaders = __getStandardHeaders()
     payload = {'workspace': m_sActiveWorkspace,
                'name': sProcessorName,
-               'sProcessorName': sEncodedParams}
+               'encodedJson': sEncodedParams}
 
     sUrl = m_sBaseUrl + '/processors/run'
 
