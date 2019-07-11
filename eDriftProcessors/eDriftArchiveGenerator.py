@@ -1,6 +1,7 @@
 import wasdi
 from datetime import datetime
 from datetime import timedelta
+from __builtin__ import int
 
 def run(parameters, processId):
     wasdi.wasdiLog('eDrift Check Images tool start')
@@ -21,9 +22,17 @@ def run(parameters, processId):
     
     sHSBA_DEPTH_IN = parameters.get('HSBA_DEPTH_IN', "-1")
     sASHMAN_COEFF = parameters.get('ASHMAN_COEFF', "2.4")
-    sMIN_PIXNB_BIMODD = parameters.get('MIN_PIXNB_BIMODD', "40000")
+    sMIN_PIXNB_BIMODD = parameters.get('MIN_PIXNB_BIMODD', "10000")
     sBLOBS_SIZE = parameters.get('BLOBS_SIZE', "150")
-        
+    
+    sNODATAVALUE = parameters.get('NODATAVALUE', "-9999")
+    sINPUTIGNOREVALUE = parameters.get('INPUTIGNOREVALUE', "0")
+    sFLOODNODATAVALUE = parameters.get('FLOODNODATAVALUE', "255")
+    sFLOODINPUTIGNOREVALUE = parameters.get('FLOODINPUTIGNOREVALUE', "-9999")
+    sMOSAICNODATAVALUE = parameters.get('MOSAICNODATAVALUE', "255")
+    sMOSAICINPUTIGNOREVALUE = parameters.get('MOSAICINPUTIGNOREVALUE', "255")
+    sAPPLYMAPCONVERSION = parameters.get('APPLYMAPCONVERSION', "1")
+            
     wasdi.wasdiLog('eDrift Archive Generator: Start Archive Generation from ' + sArchiveStartDate + ' to ' + sArchiveEndDate)
     
     oStartDay = datetime.today()
@@ -45,8 +54,8 @@ def run(parameters, processId):
     
     iDays = oTimeDelta2.days;
     
-    iStep = 100/(iDays+1)
-    iProgress = 0
+    iStep = 100.0/float(iDays+1)
+    iProgress = 0.0
     
     
     while oActualDate <= oEndDay:
@@ -72,6 +81,16 @@ def run(parameters, processId):
         aoChainParams["MIN_PIXNB_BIMODD"] = sMIN_PIXNB_BIMODD
         aoChainParams["BLOBS_SIZE"] = sBLOBS_SIZE
         
+        
+        aoChainParams['NODATAVALUE'] = sNODATAVALUE
+        aoChainParams['INPUTIGNOREVALUE'] = sINPUTIGNOREVALUE
+        aoChainParams['FLOODNODATAVALUE'] = sFLOODNODATAVALUE
+        aoChainParams['FLOODINPUTIGNOREVALUE'] = sFLOODINPUTIGNOREVALUE
+        aoChainParams['MOSAICNODATAVALUE'] = sMOSAICNODATAVALUE
+        aoChainParams['MOSAICINPUTIGNOREVALUE'] = sMOSAICINPUTIGNOREVALUE
+        aoChainParams['APPLYMAPCONVERSION'] = sAPPLYMAPCONVERSION
+        
+        
         sProcessId = wasdi.executeProcessor("mosaic_tile", aoChainParams)
         
         wasdi.wasdiLog('Chain started waiting for end')
@@ -79,7 +98,7 @@ def run(parameters, processId):
         wasdi.waitProcess(sProcessId) 
         
         iProgress = iProgress+iStep
-        wasdi.updateProgressPerc(iProgress)
+        wasdi.updateProgressPerc(int(iProgress))
         wasdi.wasdiLog('Chain done for day ' + sDate)
         
         oActualDate += oTimeDelta
@@ -109,5 +128,13 @@ def WasdiHelp():
     sHelp += "ASHMAN_COEFF: ashman coefficient for the flood detection<br>"
     sHelp += "MIN_PIXNB_BIMODD: min number of pixel for bimodal mask  for the flood detection<br>"
     sHelp += "BLOBS_SIZE: blob size for the flood detection<br>"
+    
+    sHelp += 'NODATAVALUE: no data value to use for sentinel mosaic<br>'
+    sHelp += 'INPUTIGNOREVALUE: input no data value for the sentinel mosaic and tiles<br>'
+    sHelp += 'FLOODNODATAVALUE: output no data value for flood maps<br>'
+    sHelp += 'FLOODINPUTIGNOREVALUE: input no data value for the flood maps<br>'
+    sHelp += 'MOSAICNODATAVALUE: no data value for flood mosaic<br>'
+    sHelp += 'MOSAICINPUTIGNOREVALUE: input no data value for flood mosaic<br>'
+    sHelp += 'APPLYMAPCONVERSION: 1 to apply seadrif palette. 0 to leave values<br>'
     
     return sHelp

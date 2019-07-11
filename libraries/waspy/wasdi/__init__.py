@@ -413,7 +413,7 @@ def _loadParams():
             with open(m_sParametersFilePath) as oJsonFile:
                 m_aoParamsDictionary = json.load(oJsonFile)
                 bParamLoaded = True
-        except FileNotFoundError:
+        except:
             pass
 
     if not bParamLoaded:
@@ -1418,7 +1418,7 @@ def executeProcessor(sProcessorName, aoProcessParams):
     asHeaders = _getStandardHeaders()
     payload = {'workspace': m_sActiveWorkspace,
                'name': sProcessorName,
-               'sProcessorName': sEncodedParams}
+               'encodedJson': sEncodedParams}
 
     sUrl = m_sBaseUrl + '/processors/run'
 

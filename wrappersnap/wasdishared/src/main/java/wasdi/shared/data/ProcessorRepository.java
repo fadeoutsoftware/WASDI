@@ -131,11 +131,11 @@ public class ProcessorRepository extends  MongoRepository {
         return iPort;
     }
 
-    public boolean DeleteProcessor(String sWorkflowId) {
+    public boolean DeleteProcessor(String sProcessorId) {
 
         try {
 
-            DeleteResult oDeleteResult = getCollection("processors").deleteOne(new Document("workflowId", sWorkflowId));
+            DeleteResult oDeleteResult = getCollection("processors").deleteOne(new Document("processorId", sProcessorId));
 
             if (oDeleteResult != null)
             {

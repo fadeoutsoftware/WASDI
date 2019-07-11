@@ -27,5 +27,6 @@ public enum LauncherOperations {
     SUBSET,
     MULTISUBSET,
     WPS,
-    REGRID
+    REGRID,
+    DELETEPROCESSOR
 }

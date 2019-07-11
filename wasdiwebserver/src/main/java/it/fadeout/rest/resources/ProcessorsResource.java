@@ -24,6 +24,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 
 import org.glassfish.jersey.media.multipart.FormDataParam;
 
@@ -605,4 +606,85 @@ public class ProcessorsResource {
 		return aoRetList;
 
 	 }
+	
+	@GET
+	@Path("/delete")
+	public Response deleteProcessor(@HeaderParam("x-session-token") String sSessionId, @QueryParam("processorId") String sProcessorId, @QueryParam("workspaceId") String sWorkspaceId) {
+		Wasdi.DebugLog("ProcessorResources.deleteProcessor");
+		
+		try {
+			if (Utils.isNullOrEmpty(sSessionId)) return Response.status(Status.UNAUTHORIZED).build();
+			User oUser = Wasdi.GetUserFromSession(sSessionId);
+
+			if (oUser==null) return Response.status(Status.UNAUTHORIZED).build();
+			if (Utils.isNullOrEmpty(oUser.getUserId())) return Response.status(Status.UNAUTHORIZED).build();
+
+			String sUserId = oUser.getUserId();
+			
+			Wasdi.DebugLog("ProcessorsResource.deleteProcessor: get Processor");	
+			ProcessorRepository oProcessorRepository = new ProcessorRepository();
+			Processor oProcessorToDelete = oProcessorRepository.GetProcessor(sProcessorId);
+			
+			if (oProcessorToDelete == null) {
+				Wasdi.DebugLog("ProcessorsResource.deleteProcessor: unable to find processor " + sProcessorId);
+				return Response.serverError().build();
+			}
+
+			// Schedule the process to run the processor
+			
+			String sProcessObjId = Utils.GetRandomName();
+			
+			String sPath = m_oServletConfig.getInitParameter("SerializationPath");
+			if (! (sPath.endsWith("/")||sPath.endsWith("\\"))) sPath+="/";
+			sPath += sProcessObjId;
+
+			ProcessorParameter oProcessorParameter = new ProcessorParameter();
+			oProcessorParameter.setName(oProcessorToDelete.getName());
+			oProcessorParameter.setProcessorID(oProcessorToDelete.getProcessorId());
+			oProcessorParameter.setWorkspace(sWorkspaceId);
+			oProcessorParameter.setUserId(sUserId);
+			oProcessorParameter.setExchange(sWorkspaceId);
+			oProcessorParameter.setProcessObjId(sProcessObjId);
+			oProcessorParameter.setJson("{}");
+			oProcessorParameter.setProcessorType(oProcessorToDelete.getType());
+			oProcessorParameter.setSessionID(sSessionId);
+			oProcessorParameter.setWorkspaceOwnerId(Wasdi.getWorkspaceOwner(sWorkspaceId));
+			
+			SerializationUtils.serializeObjectToXML(sPath, oProcessorParameter);
+
+			
+			ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
+			ProcessWorkspace oProcessWorkspace = new ProcessWorkspace();
+			
+			try{
+				Wasdi.DebugLog("ProcessorsResource.deleteProcessor: create task"); 
+				oProcessWorkspace.setOperationDate(Wasdi.GetFormatDate(new Date()));
+				oProcessWorkspace.setOperationType(LauncherOperations.DELETEPROCESSOR.name());
+				oProcessWorkspace.setProductName(oProcessorToDelete.getName());
+				oProcessWorkspace.setWorkspaceId(sWorkspaceId);
+				oProcessWorkspace.setUserId(sUserId);
+				oProcessWorkspace.setProcessObjId(sProcessObjId);
+				oProcessWorkspace.setStatus(ProcessStatus.CREATED.name());
+				oProcessWorkspaceRepository.InsertProcessWorkspace(oProcessWorkspace);
+				
+				Wasdi.DebugLog("ProcessorResource.deleteProcessor: Process Scheduled for Launcher");
+								
+				Wasdi.DebugLog("ProcessorsResource.deleteProcessor: done"); 
+			}
+			catch(Exception oEx){
+				System.out.println("ProcessorsResource.deleteProcessor: Error scheduling the run process " + oEx.getMessage());
+				oEx.printStackTrace();
+				return Response.serverError().build();
+			}
+			
+			
+			return Response.ok().build();
+		}
+		catch (Exception oEx) {
+			Wasdi.DebugLog("ProcessorResource.deleteProcessor: exception " + oEx.getMessage());
+			oEx.printStackTrace();
+			return Response.serverError().build();
+
+		}
+	}
 }
