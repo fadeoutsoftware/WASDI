@@ -280,7 +280,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 				
 				s_oLogger.error("Launcher Main FINAL: process status [" + oProcessWorkspace.getProcessObjId()+ "]: " + oProcessWorkspace.getStatus());
 				
-				if (oProcessWorkspace.getStatus().equals(ProcessStatus.ERROR.name()) || oProcessWorkspace.getStatus().equals(ProcessStatus.CREATED.name())) {
+				if (oProcessWorkspace.getStatus().equals(ProcessStatus.RUNNING.name()) || oProcessWorkspace.getStatus().equals(ProcessStatus.CREATED.name())) {
 					
 					s_oLogger.error("Launcher Main FINAL: process status not closed [" + oProcessWorkspace.getProcessObjId()+ "]: " + oProcessWorkspace.getStatus());
 					s_oLogger.error("Launcher Main FINAL: force status as ERROR [" + oProcessWorkspace.getProcessObjId()+ "]");
@@ -491,6 +491,13 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 				// TODO: STILL HAVE TO FIND PIXEL SPACING
 				RegridParameter oParameter = (RegridParameter) SerializationUtils.deserializeXMLToObject(sParameter);
 				executeGDALRegrid(oParameter);
+			}
+			break;
+			case DELETEPROCESSOR: {
+				// Delete User Processor
+				ProcessorParameter oParameter = (ProcessorParameter) SerializationUtils.deserializeXMLToObject(sParameter);
+				WasdiProcessorEngine oEngine = WasdiProcessorEngine.GetProcessorEngine(oParameter.getProcessorType(), ConfigReader.getPropValue("DOWNLOAD_ROOT_PATH"), ConfigReader.getPropValue("DOCKER_TEMPLATE_PATH"));
+				oEngine.delete(oParameter);
 			}
 			break;
 			default:

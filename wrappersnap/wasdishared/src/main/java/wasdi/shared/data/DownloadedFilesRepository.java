@@ -11,6 +11,7 @@ import java.util.regex.Pattern;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 
+import com.mongodb.BasicDBObject;
 import com.mongodb.Block;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.model.Filters;
@@ -121,6 +122,38 @@ public class DownloadedFilesRepository extends MongoRepository {
         try {
 
             FindIterable<Document> oDFDocuments = getCollection("downloadedfiles").find(new Document("fileName", sFileName));
+
+            oDFDocuments.forEach(new Block<Document>() {
+                public void apply(Document document) {
+                    String sJSON = document.toJson();
+                    DownloadedFile oDwFile = null;
+                    try {
+                        oDwFile = s_oMapper.readValue(sJSON,DownloadedFile.class);
+                        aoReturnList.add(oDwFile);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+
+                }
+            });
+
+        } catch (Exception oEx) {
+            oEx.printStackTrace();
+        }
+
+        return aoReturnList;    	
+
+    }
+    
+    public List<DownloadedFile> GetDownloadedFileListByPath(String sFilePath) {
+        final ArrayList<DownloadedFile> aoReturnList = new ArrayList<DownloadedFile>();
+        try {
+
+        	BasicDBObject oLikeQuery = new BasicDBObject();
+        	Pattern oRegEx = Pattern.compile(sFilePath); // should be m in your case
+        	oLikeQuery.put("filePath", oRegEx);
+        	
+            FindIterable<Document> oDFDocuments = getCollection("downloadedfiles").find(oLikeQuery);
 
             oDFDocuments.forEach(new Block<Document>() {
                 public void apply(Document document) {

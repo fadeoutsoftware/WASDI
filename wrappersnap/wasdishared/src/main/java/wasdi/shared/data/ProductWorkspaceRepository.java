@@ -3,10 +3,12 @@ package wasdi.shared.data;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import org.bson.Document;
 import org.bson.conversions.Bson;
 
+import com.mongodb.BasicDBObject;
 import com.mongodb.Block;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.model.Filters;
@@ -122,6 +124,38 @@ public class ProductWorkspaceRepository extends MongoRepository {
         return bExists;
     }
 
+    public ProductWorkspace GetProductWorkspace(String sProductId, String sWorkspaceId) {
+
+        final ArrayList<ProductWorkspace> aoReturnList = new ArrayList<ProductWorkspace>();
+        
+        
+        try {
+
+            FindIterable<Document> oWSDocuments = getCollection("productworkpsace").find(Filters.and(Filters.eq("productName", sProductId), Filters.eq("workspaceId", sWorkspaceId)));
+
+            oWSDocuments.forEach(new Block<Document>() {
+                public void apply(Document document) {
+                    String sJSON = document.toJson();
+                    ProductWorkspace oProductWorkspace = null;
+                    try {
+                        oProductWorkspace = s_oMapper.readValue(sJSON,ProductWorkspace.class);
+                        aoReturnList.add(oProductWorkspace);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+
+                }
+            });
+
+        } catch (Exception oEx) {
+            oEx.printStackTrace();
+        }
+
+        if (aoReturnList.size() > 0)
+            return aoReturnList.get(0);
+
+        return null;
+    }
     public int DeleteByWorkspaceId(String sWorkspaceId) {
 
         try {
@@ -221,6 +255,38 @@ public class ProductWorkspaceRepository extends MongoRepository {
         }
 
         return  false;
+    }
+    
+    public List<ProductWorkspace> GetProductWorkspaceListByPath(String sFilePath) {
+        final ArrayList<ProductWorkspace> aoReturnList = new ArrayList<ProductWorkspace>();
+        try {
+
+        	BasicDBObject oLikeQuery = new BasicDBObject();
+        	Pattern oRegEx = Pattern.compile(sFilePath);
+        	oLikeQuery.put("productName", oRegEx);
+        	
+            FindIterable<Document> oDFDocuments = getCollection("productworkpsace").find(oLikeQuery);
+
+            oDFDocuments.forEach(new Block<Document>() {
+                public void apply(Document document) {
+                    String sJSON = document.toJson();
+                    ProductWorkspace oProductWorkspace = null;
+                    try {
+                        oProductWorkspace = s_oMapper.readValue(sJSON,ProductWorkspace.class);
+                        aoReturnList.add(oProductWorkspace);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+
+                }
+            });
+
+        } catch (Exception oEx) {
+            oEx.printStackTrace();
+        }
+
+        return aoReturnList;    	
+
     }
             
 }
