@@ -46,6 +46,8 @@ public abstract class WasdiProcessorEngine {
 	
 	public abstract boolean run(ProcessorParameter oParameter);
 	
+	public abstract boolean delete(ProcessorParameter oParameter);
+	
 	public void shellExec(String sCommand, List<String> asArgs) {
 		shellExec(sCommand,asArgs,true);
 	}

@@ -10,6 +10,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.io.FileUtils;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -18,8 +20,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import wasdi.LauncherMain;
 import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
+import wasdi.shared.business.Processor;
 import wasdi.shared.business.Workspace;
 import wasdi.shared.data.ProcessWorkspaceRepository;
+import wasdi.shared.data.ProcessorRepository;
 import wasdi.shared.data.WorkspaceRepository;
 import wasdi.shared.parameters.ProcessorParameter;
 import wasdi.shared.utils.Utils;
@@ -146,9 +150,13 @@ public class IDLProcessorEngine extends WasdiProcessorEngine{
 				// Get the JSON
 				String sJson = oParameter.getJson();
 				
+				LauncherMain.s_oLogger.debug("IDLProcessorEngine.run: JSON " + sJson);
+				
 				// URL Decode
 				try {
 				    sJson = java.net.URLDecoder.decode(sJson, StandardCharsets.UTF_8.name());
+				    
+				    LauncherMain.s_oLogger.debug("IDLProcessorEngine.run: Decoded JSON " + sJson);
 				} catch (UnsupportedEncodingException e) {
 					LauncherMain.s_oLogger.debug("IDLProcessorEngine.run: Exception decoding JSON " + e.toString());
 				}
@@ -222,4 +230,64 @@ public class IDLProcessorEngine extends WasdiProcessorEngine{
 		return true;
 	}
 
+	public boolean delete(ProcessorParameter oParameter) {
+		
+		if (oParameter == null) {
+			LauncherMain.s_oLogger.error("IDLProcessorEngine.delete: oParameter is null");
+			return false;
+		}
+		
+		ProcessWorkspaceRepository oProcessWorkspaceRepository = null;
+		ProcessWorkspace oProcessWorkspace = null;		
+
+		try {
+			oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
+			oProcessWorkspace = oProcessWorkspaceRepository.GetProcessByProcessObjId(oParameter.getProcessObjId());
+			
+			LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 0);
+
+			// First Check if processor exists
+			String sProcessorName = oParameter.getName();
+			String sProcessorId = oParameter.getProcessorID();
+			
+			ProcessorRepository oProcessorRepository = new ProcessorRepository();
+			Processor oProcessor = oProcessorRepository.GetProcessor(sProcessorId);
+			
+			// Check processor
+			if (oProcessor == null) { 
+				LauncherMain.s_oLogger.error("IDLProcessorEngine.delete: oProcessor is null [" + sProcessorId +"]");
+				return false;
+			}
+			
+			// delete the folder
+			
+			// Set the processor path
+			String sDownloadRootPath = m_sWorkingRootPath;
+			if (!sDownloadRootPath.endsWith("/")) sDownloadRootPath = sDownloadRootPath + "/";
+			
+			String sProcessorFolder = sDownloadRootPath+ "/processors/" + sProcessorName + "/" ;
+			
+			File oProcessorFolder = new File(sProcessorFolder);
+			FileUtils.deleteDirectory(oProcessorFolder);
+			LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 66);
+			
+			// delete the db entry
+			oProcessorRepository.DeleteProcessor(oProcessor.getProcessorId());
+			
+			LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.DONE, 100);			
+		}
+		catch (Exception oEx) {
+			LauncherMain.s_oLogger.error("IDLProcessorEngine.delete Exception", oEx);
+			try {
+				LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 100);
+			} catch (Exception e) {
+				LauncherMain.s_oLogger.error("IDLProcessorEngine.delete Exception", e);
+			}
+			
+			return false;
+		}
+
+		return false;
+	}
+	
 }

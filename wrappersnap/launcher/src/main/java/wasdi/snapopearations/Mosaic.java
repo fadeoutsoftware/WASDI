@@ -365,9 +365,27 @@ public class Mosaic {
 				asArgs.add("BIGTIFF=YES");
 			}
 			
-			// Set 0 as No Data
-			asArgs.add("-n");
-			asArgs.add("0");
+			// Set No Data for input 
+			if (m_oMosaicSetting.getInputIgnoreValue()!= null) {
+				asArgs.add("-n");
+				asArgs.add(""+m_oMosaicSetting.getInputIgnoreValue());				
+			}
+
+			if (m_oMosaicSetting.getNoDataValue() != null) {
+				asArgs.add("-a_nodata");
+				asArgs.add(""+m_oMosaicSetting.getNoDataValue());				
+
+				asArgs.add("-init");
+				asArgs.add(""+m_oMosaicSetting.getNoDataValue());				
+
+			}
+			
+			// Pixel Size
+			if (m_oMosaicSetting.getPixelSizeX()>0.0 && m_oMosaicSetting.getPixelSizeY()>0.0) {
+				asArgs.add("-ps");
+				asArgs.add(""+ m_oMosaicSetting.getPixelSizeX());
+				asArgs.add("" + m_oMosaicSetting.getPixelSizeY());
+			}
 			
 			// Get Base Path
 			String sWorkspacePath = LauncherMain.getWorspacePath(m_oMosaicParameter);

@@ -119,11 +119,12 @@ public class DiasResponseTranslatorONDA implements DiasResponseTranslator {
 		QueryResultViewModel oResult = null;
 		try {			
 			String sInJson = oInJson.toString();
-			System.out.println(sInJson);
+
+			//System.out.println(sInJson);
 			JSONObject oOndaJson = oInJson.optJSONObject("entry");
 			if(null!=oOndaJson) {
 				String sJson = oOndaJson.toString();
-				System.out.println(sJson);
+				//System.out.println(sJson);
 				oResult = parseBaseData(sProtocol, oOndaJson);
 			}
 			JSONArray aoMetadata = oOndaJson.optJSONArray("Metadata");
@@ -148,7 +149,7 @@ public class DiasResponseTranslatorONDA implements DiasResponseTranslator {
 	}
 
 
-	protected QueryResultViewModel parseBaseData(String sProtocol, JSONObject oJsonOndaResult) {
+	protected QueryResultViewModel parseBaseData(String sInProtocol, JSONObject oJsonOndaResult) {
 		QueryResultViewModel oResult;
 		oResult = new QueryResultViewModel();
 		oResult.setProvider("ONDA");
@@ -156,6 +157,7 @@ public class DiasResponseTranslatorONDA implements DiasResponseTranslator {
 		oResult.setFootprint( sFootprint );
 		String sProductId = oJsonOndaResult.optString("id","");
 		String sLink = "";
+		String sProtocol = sInProtocol;
 		if(!Utils.isNullOrEmpty(sProductId)) {
 			oResult.setId(sProductId);
 			//TODO use m_sLinkPrefix and m_sLinkSuffix instead
@@ -198,6 +200,12 @@ public class DiasResponseTranslatorONDA implements DiasResponseTranslator {
 				//MAYBE change the Launcher so that all pseudopaths can be passed (maybe iterate through them...)
 				sPath += sIntermediate[0]; 
 				sPath += "/" + sProductFileName + "/.value";
+				
+				//this hack is needed because ONDA serves ENVISAT images from file system only
+				if(sProductFileName.startsWith("EN1")) {
+					oResult.getProperties().put("link", sPath);
+					sProtocol = "file";
+				}
 			} else {
 				//NOTE this should not happen. Is it possible to take countermeasures?
 				System.out.println("DiasResponseTranslatorONDA.translate: WARNING: sPseudopath is null");
