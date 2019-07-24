@@ -53,6 +53,9 @@ def run(parameters, processId):
             if (sProduct.startswith("S1A_")):
                 wasdi.wasdiLog('DELETE ' + sProduct)
                 wasdi.deleteProduct(sProduct)
+            if (sProduct.startswith("S1B_")):
+                wasdi.wasdiLog('DELETE ' + sProduct)
+                wasdi.deleteProduct(sProduct)
                 
     wasdi.wasdiLog('eDRIFT Delete Tools done')
                 
