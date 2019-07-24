@@ -550,14 +550,19 @@ public class ProductResource {
 			System.out.println("ProductResource.DeleteProduct: Download Path: " + sDownloadPath);
 			String sFilePath = sDownloadPath +  sProductName;
 			System.out.println("ProductResource.DeleteProduct: File Path: " + sFilePath);
-
+			
+			// P.Campanella:20190724: try to fix the bug that pub bands are not deleted.
+			// Here the name has the extension. In the db the reference to the product is without
+			// Try to split the extension
+			String sProductNameWithoutExtension = Utils.GetFileNameWithoutExtension(sProductName);
+			
 			PublishedBandsRepository oPublishedBandsRepository = new PublishedBandsRepository();
 
 			List<PublishedBand> aoPublishedBands = null;
 			
 			if (bDeleteFile || bDeleteLayer) {
 				//Get all bands files
-				aoPublishedBands = oPublishedBandsRepository.GetPublishedBandsByProductName(sProductName);				
+				aoPublishedBands = oPublishedBandsRepository.GetPublishedBandsByProductName(sProductNameWithoutExtension);				
 			}
 
 			//get files that begin with the product name
@@ -616,19 +621,19 @@ public class ProductResource {
 				//Delete layerId on Geoserver
 				
 				DownloadedFile oDownloadedFile = oDownloadedFilesRepository.GetDownloadedFileByPath(sFullPath+sProductName);
-				GeoServerManager gsManager = new GeoServerManager(m_oServletConfig.getInitParameter("GS_URL"), m_oServletConfig.getInitParameter("GS_USER"),  m_oServletConfig.getInitParameter("GS_PASSWORD"));
+				GeoServerManager oGeoServerManager = new GeoServerManager(m_oServletConfig.getInitParameter("GS_URL"), m_oServletConfig.getInitParameter("GS_USER"),  m_oServletConfig.getInitParameter("GS_PASSWORD"));
 				
-				for (PublishedBand publishedBand : aoPublishedBands) {
+				for (PublishedBand oPublishedBand : aoPublishedBands) {
 					try {
-						System.out.println("ProductResource.DeleteProduct: LayerId to delete " + publishedBand.getLayerId());
+						System.out.println("ProductResource.DeleteProduct: LayerId to delete " + oPublishedBand.getLayerId());
 
-						if (!gsManager.removeLayer(publishedBand.getLayerId())) {
-							System.out.println("ProductResource.DeleteProduct: error deleting layer " + publishedBand.getLayerId() + " from geoserver");
+						if (!oGeoServerManager.removeLayer(oPublishedBand.getLayerId())) {
+							System.out.println("ProductResource.DeleteProduct: error deleting layer " + oPublishedBand.getLayerId() + " from geoserver");
 						}
 
 						try {
 							//delete published band on data base
-							oPublishedBandsRepository.DeleteByProductNameLayerId(oDownloadedFile.getProductViewModel().getName(), publishedBand.getLayerId());
+							oPublishedBandsRepository.DeleteByProductNameLayerId(oDownloadedFile.getProductViewModel().getName(), oPublishedBand.getLayerId());
 						} catch(Exception oEx) {
 							System.out.println("ProductResource.DeleteProduct: error deleting published band on data base " + oEx.toString());
 						}

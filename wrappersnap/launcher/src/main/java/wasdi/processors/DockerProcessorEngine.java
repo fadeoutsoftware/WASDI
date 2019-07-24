@@ -65,7 +65,7 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 			String sDownloadRootPath = m_sWorkingRootPath;
 			if (!sDownloadRootPath.endsWith("/")) sDownloadRootPath = sDownloadRootPath + "/";
 			
-			String sProcessorFolder = sDownloadRootPath+ "/processors/" + sProcessorName + "/" ;
+			String sProcessorFolder = sDownloadRootPath+ "processors/" + sProcessorName + "/" ;
 			// Create the file
 			File oProcessorZipFile = new File(sProcessorFolder + sProcessorId + ".zip");
 			
@@ -113,6 +113,7 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 			ArrayList<String> asArgs = new ArrayList<>();
 			
 			asArgs.add("build");
+			//asArgs.add("--no-cache");
 			asArgs.add("-t"+sDockerName);
 			asArgs.add(sProcessorFolder);
 			
@@ -254,7 +255,7 @@ public abstract class  DockerProcessorEngine extends WasdiProcessorEngine {
 			LauncherMain.s_oLogger.debug("ShellExec CommandLine: " + sCommandLine);
 			
 			ProcessBuilder pb = new ProcessBuilder(asArgs.toArray(new String[0]));
-			pb.redirectErrorStream(true);
+			//pb.redirectErrorStream(true);
 			Process process = pb.start();
 			if (bWait) {
 //				BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
