@@ -197,14 +197,14 @@
                 },
                 {
                     "indexname": "timeliness",
-                    "indexlabel": "Timelinesse",
+                    "indexlabel": "Timeliness",
                     "indexvalues":"Near Real Time|Short Time Critical|Non Time Critical",
                     "regex": ".*"
 
                 },
                 {
                     "indexname": "Instrument",
-                    "indexlabel": "instrument",
+                    "indexlabel": "Instrument",
                     "indexvalues":"SRAL",
                     "regex": ".*"
 
@@ -218,7 +218,7 @@
                 },
                 {
                     "indexname": "relativeorbitstart ",
-                    "indexlabel": "CRelative Orbit Start",
+                    "indexlabel": "Relative Orbit Start",
                         "indexhint" : "e.g. [1-385]",
                     "indexvalues":"",
                     "indexmin":"1",
@@ -272,7 +272,7 @@
 
                 },{
                     "indexname": "cameraId",
-                    "indexlabel": "cameraId",
+                    "indexlabel": "Camera Id",
                     "indexvalues":"",
                     "regex": ".*"
 
@@ -311,7 +311,7 @@
 
                 },{
                     "indexname": "orbitDirection",
-                    "indexlabel": "orbitDirection",
+                    "indexlabel": "Orbit Direction",
                     "indexvalues":"ASCENDING|DESCENDING",
                     "regex": ".*"
 
