@@ -1384,7 +1384,7 @@ FUNCTION WASDISEARCHEOIMAGE, sPlatform, sDateFrom, sDateTo, dULLat, dULLon, dLRL
   
   ;Date Block
   sQuery = sQuery + "AND ( beginPosition:[" + sDateFrom + "T00:00:00.000Z TO " + sDateTo + "T23:59:59.999Z]"
-  sQuery = sQuery + "AND ( endPosition:[" + sDateFrom + "T00:00:00.000Z TO " + sDateTo + "T23:59:59.999Z]"
+  sQuery = sQuery + "AND endPosition:[" + sDateFrom + "T00:00:00.000Z TO " + sDateTo + "T23:59:59.999Z]"
   
   ;Close the second block
   sQuery = sQuery + ") "
