@@ -321,8 +321,6 @@ public class QueryExecutorONDA extends QueryExecutor {
 				System.out.println("QueryExecutorONDA.httpGetResults: " + oE);
 			}
 			
-			
-			
 			long lEnd = System.nanoTime();
 			long lTimeElapsed = lEnd - lStart;
 			double dMillis = lTimeElapsed / (1000.0 * 1000.0);
