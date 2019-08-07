@@ -154,7 +154,7 @@ public class QueryExecutorONDA extends QueryExecutor {
 		////use this to test with just 3 results
 		////sUrl = "https://catalogue.onda-dias.eu/dias-catalogue/Products/$count?$search=%22(%20(%20name:S1*%20AND%20name:S1A_*%20AND%20name:*SLC*%20AND%20name:*%20AND%20sensorOperationalMode:SM%20)%20)%20AND%20(%20(%20beginPosition:[2018-12-02T00:00:00.000Z%20TO%202018-12-02T23:59:59.999Z]%20AND%20endPosition:[2018-12-02T00:00:00.000Z%20TO%202018-12-02T23:59:59.999Z]%20)%20)%22";
 
-		int iResult = -1;
+		int iResult = 0;
 		String sResult = httpGetResults(sUrl);
 		if(null!=sResult) {
 			try {
@@ -199,7 +199,7 @@ public class QueryExecutorONDA extends QueryExecutor {
 		//		} else {
 		//			String sMessage = oConnection.getResponseMessage();
 		//			System.out.println(sMessage);
-		//			return -1;
+		//			return 0;
 		//		}
 	}
 
@@ -372,7 +372,7 @@ public class QueryExecutorONDA extends QueryExecutor {
 			} else {
 				sQueryType+="search";
 			}
-			double dSpeed = -1;
+			double dSpeed = 0;
 			if(iResponseSize > 0) {
 				dSpeed = ( (double) iResponseSize ) / dMillis;
 				dSpeed *= 1000.0;
