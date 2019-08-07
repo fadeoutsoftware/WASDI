@@ -33,6 +33,12 @@ import org.json.JSONObject;
 import org.json.XML;
 
 public class OpenSearchQuery{
+	
+	static String s_sClassName;
+	
+	static {
+		s_sClassName = "OpenSearchQuery";
+	}
 
 
 	//String sParameter = URLEncoder.encode("( beginPosition:[2016-10-03T00:00:00.000Z TO 2016-10-06T23:59:59.999Z] AND endPosition:[2016-10-03T00:00:00.000Z TO 2016-10-06T23:59:59.999Z] ) AND   (platformname:Sentinel-1 AND filename:S1A_* AND producttype:SLC)&offset=0&limit=25", "UTF-8");
@@ -41,6 +47,7 @@ public class OpenSearchQuery{
 	public static String ExecuteQuery(String sQuery, HashMap<String, String> asParams) throws URISyntaxException, IOException
 	{
 		try {
+			System.out.println(s_sClassName+".ExecuteQuery( " + sQuery + ", " + " )");
 //			String sParameter = URLEncoder.encode(sQuery, "UTF-8");
 			//String sParameter = "'( beginPosition:[2016-10-03T00:00:00.000Z TO 2016-10-06T23:59:59.999Z] AND endPosition:[2016-10-03T00:00:00.000Z TO 2016-10-06T23:59:59.999Z] ) AND   (platformname:Sentinel-1 AND filename:S1A_* AND producttype:SLC)'";
 //			sParameter = URLEncoder.encode(sParameter, "UTF-8");
@@ -167,52 +174,13 @@ public class OpenSearchQuery{
 
 		}
 		catch (Exception e) {
-			System.out.println("ExecuteQuery Exception " + e.toString());
+			System.out.println(s_sClassName + ".ExecuteQuery: " + e.toString());
 		}
 
 		return "";
 	}
 
 	
-	/*
-	public static String ExecuteQuerySentinel(String sQuery, String[] aoParams) throws URISyntaxException, IOException
-	{
-
-		HttpClient oClient = null;
-		try {
-			String sUrl = "https://scihub.copernicus.eu/dhus/api/stub/products?filter=";
-			String sParameter = URLEncoder.encode(sQuery, "UTF-8");
-			sUrl += sParameter;  
-			//Add params
-			for(int iParamCount = 0; iParamCount < aoParams.length;iParamCount++)
-			{
-				sUrl+='&' + aoParams[iParamCount];
-			}
-			oClient = new DefaultHttpClient();
-			HttpGet request = new HttpGet(sUrl);
-			request.addHeader("Authorization", "Basic c2FkYW1vOmVzYTE1YWRhbQ==");
-			HttpResponse response = oClient.execute(request);
-			StringBuffer responseBuffer = new StringBuffer();
-			// Get the response
-			BufferedReader rd = new BufferedReader
-			        (new InputStreamReader(
-			        response.getEntity().getContent()));
-
-			String line = "";
-			while ((line = rd.readLine()) != null) {
-				responseBuffer.append(line);
-			}
-
-			return responseBuffer.toString();			
-		}
-		catch (Exception e) {
-			e.printStackTrace();
-		}
-
-		return "";
-	}
-	 */
-
 	private static JSONObject Atom2Json(Abdera oAbdera, ByteArrayOutputStream oOutputStream, Base oFeed) throws IOException{
 		Writer writer = oAbdera.getWriterFactory().getWriter("prettyxml");
 		writer.writeTo(oFeed, oOutputStream);
