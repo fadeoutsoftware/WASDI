@@ -145,7 +145,7 @@ public class OpenSearchQuery{
 						System.out.println(s_sClassName+".ExecuteQuery: got response from the client");
 						if (oImageResponse.getType() == ResponseType.SUCCESS)
 						{
-							System.out.println("Success: saving image preview");
+							System.out.println(s_sClassName+".ExecuteQuery: saving image preview");
 							InputStream oInputStreamImage = oImageResponse.getInputStream();
 							BufferedImage  oImage = ImageIO.read(oInputStreamImage);
 							ByteArrayOutputStream bas = new ByteArrayOutputStream();
@@ -173,11 +173,12 @@ public class OpenSearchQuery{
 
 	
 	private static JSONObject Atom2Json(Abdera oAbdera, ByteArrayOutputStream oOutputStream, Base oFeed) throws IOException{
+		System.out.println(s_sClassName+".Atom2Json");
 		Writer writer = oAbdera.getWriterFactory().getWriter("prettyxml");
 		writer.writeTo(oFeed, oOutputStream);
 		
 		String sXML = oOutputStream.toString();
-		System.out.println(sXML);
+		//System.out.println(sXML);
 		
 		JSONObject oJson = XML.toJSONObject(sXML);
 		return oJson;
