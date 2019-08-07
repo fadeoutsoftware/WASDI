@@ -47,7 +47,7 @@ public class OpenSearchQuery{
 	public static String ExecuteQuery(String sQuery, HashMap<String, String> asParams) throws URISyntaxException, IOException
 	{
 		try {
-			System.out.println(s_sClassName+".ExecuteQuery( " + sQuery + ", " + " )");
+			System.out.println(s_sClassName+".ExecuteQuery( " + sQuery + ", ... )");
 //			String sParameter = URLEncoder.encode(sQuery, "UTF-8");
 			//String sParameter = "'( beginPosition:[2016-10-03T00:00:00.000Z TO 2016-10-06T23:59:59.999Z] AND endPosition:[2016-10-03T00:00:00.000Z TO 2016-10-06T23:59:59.999Z] ) AND   (platformname:Sentinel-1 AND filename:S1A_* AND producttype:SLC)'";
 //			sParameter = URLEncoder.encode(sParameter, "UTF-8");
@@ -89,7 +89,7 @@ public class OpenSearchQuery{
 			oOptions.setAuthorization(sBasicAuth);
 			
 			
-			System.out.println("\nSending 'GET' request to URL : " + sUrl);
+			System.out.println(s_sClassName+".ExecuteQuery: Sending 'GET' request to URL : " + sUrl);
 			ClientResponse response = oClient.get(sUrl, oOptions);
 			
 			
@@ -98,9 +98,8 @@ public class OpenSearchQuery{
 			
 			if (response.getType() == ResponseType.SUCCESS)
 			{
-				System.out.println("Response Success");
-				
-				
+				System.out.println(s_sClassName+".ExecuteQuery: response Success");
+		
 				// Get The Result as a string
 				BufferedReader oBuffRead = new BufferedReader(response.getReader());
 				String sResponseLine = null;
@@ -110,20 +109,18 @@ public class OpenSearchQuery{
 				}
 				
 				String sResultAsString = oResponseStringBuilder.toString();
-				
-				System.out.println(sResultAsString);
+				System.out.println(s_sClassName+".ExecuteQuery: result: " +
+						sResultAsString.substring(0, Math.min(sResultAsString.length(), 20)) + "...");
 
 				oDocument = oParser.parse(new StringReader(sResultAsString), oParserOptions);
 				//oDocument = oParser.parse(response.getInputStream(), oParserOptions);
 
 				if (oDocument == null) {
-					System.out.println("OpenSearchQuery.ExecuteQuery: Document response null");
+					System.out.println(s_sClassName+".ExecuteQuery: Document response null");
 					return null;
 				}
-			}
-			else
-			{
-				System.out.println("Response ERROR: " + response.getType());
+			} else {
+				System.out.println(s_sClassName+".ExecuteQuery: response ERROR: " + response.getType());
 				return null;
 			}
 
@@ -137,16 +134,15 @@ public class OpenSearchQuery{
 
 			for (Entry oEntry : oFeed.getEntries()) {
 
-				System.out.println("Parsing new Entry");
+				System.out.println(s_sClassName+".ExecuteQuery: parsing new Entry");
 
 				Link oLink = oEntry.getLink("icon");
 				
 				if (oLink != null) {
-					System.out.println("Icon Link: " + oLink.getHref().toString());
-
+					System.out.println(s_sClassName+".ExecuteQuery: icon Link: " + oLink.getHref().toString());
 					try {
 						ClientResponse oImageResponse = oClient.get(oLink.getHref().toString(), oOptions);
-						System.out.println("Response Got from the client");
+						System.out.println(s_sClassName+".ExecuteQuery: got response from the client");
 						if (oImageResponse.getType() == ResponseType.SUCCESS)
 						{
 							System.out.println("Success: saving image preview");
@@ -155,29 +151,24 @@ public class OpenSearchQuery{
 							ByteArrayOutputStream bas = new ByteArrayOutputStream();
 							ImageIO.write(oImage, "png", bas);
 							oLink.addSimpleExtension(new javax.xml.namespace.QName("image"), "data:image/png;base64," + Base64.getEncoder().encodeToString((bas.toByteArray())));
-							System.out.println("Image Saved");
+							System.out.println(s_sClassName+".ExecuteQuery: image Saved");
 						}				
-					}
-					catch (Exception e) {
-						System.out.println("Image Preview Cycle Exception " + e.toString());
+					} catch (Exception e) {
+						System.out.println(s_sClassName+".ExecuteQuery: Image Preview Cycle Exception: " + e.toString());
 					}					
-				}
-				else {
-					System.out.println("Link Not Available" );
+				} else {
+					System.out.println(s_sClassName+".ExecuteQuery: link Not Available" );
 				}
 			} 
 			JSONObject oFeedJSON = Atom2Json(oAbdera, new ByteArrayOutputStream(iStreamSize), oFeed);
-
-			System.out.println("Search Done");
-
+			System.out.println(s_sClassName+".ExecuteQuery: search done");
 			return oFeedJSON.toString();
-
 		}
-		catch (Exception e) {
-			System.out.println(s_sClassName + ".ExecuteQuery: " + e.toString());
+		catch (Exception oE) {
+			System.out.println(s_sClassName + ".ExecuteQuery: " + oE);
 		}
 
-		return "";
+		return null;
 	}
 
 	
@@ -194,6 +185,7 @@ public class OpenSearchQuery{
 
 	public static String ExecuteQueryCount(String sQuery, String sOSUser, String sOSPwd, String sProvider) throws URISyntaxException, IOException
 	{
+		System.out.println(s_sClassName+"ExecuteCount( " + sQuery + ", " + sOSUser + ", " + sOSPwd + ", " + sProvider + " )");
 		String sParameter = URLEncoder.encode(sQuery, "UTF-8");
 		//String sParameter = "'( beginPosition:[2016-10-03T00:00:00.000Z TO 2016-10-06T23:59:59.999Z] AND endPosition:[2016-10-03T00:00:00.000Z TO 2016-10-06T23:59:59.999Z] ) AND   (platformname:Sentinel-1 AND filename:S1A_* AND producttype:SLC)&offset=0&limit=25'";
 		String sUrl = "";
@@ -215,11 +207,9 @@ public class OpenSearchQuery{
 		String sUserCredentials = sOSUser + ":" + sOSPwd;
 		String sBasicAuth = "Basic " + Base64.getEncoder().encodeToString(sUserCredentials.getBytes("UTF-8"));
 		con.setRequestProperty ("Authorization", sBasicAuth);
-
 		int responseCode = con.getResponseCode();
 		System.out.println("\nSending 'GET' request to URL : " + sUrl + sParameter);
 		System.out.println("Response Code : " + responseCode);
-
 		BufferedReader in = new BufferedReader(
 				new InputStreamReader(con.getInputStream()));
 		String inputLine;
@@ -229,11 +219,11 @@ public class OpenSearchQuery{
 			response.append(inputLine);
 		}
 		in.close();
+		String sResultAsString = response.toString();
 
 		//print result
-		System.out.println("Count Done: Response " + response.toString());
-
-
+		System.out.println(s_sClassName+"ExecuteCount: Count Done: Response " +
+				sResultAsString.substring(0, Math.min(sResultAsString.length(), 20)) + "...");
 		return response.toString();
 	}
 
