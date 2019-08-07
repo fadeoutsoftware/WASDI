@@ -6,12 +6,11 @@
  */
 package wasdi.shared.opensearch;
 
-import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
+import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.util.ArrayList;
 
@@ -131,106 +130,57 @@ public class QueryExecutorONDA extends QueryExecutor {
 
 	@Override
 	public int executeCount(String sQuery) throws IOException {
-		System.out.println("QueryExecutorONDA.executeCount");
-		//note: the following parameters specified by WASDI are not supported by ONDA:
-		//polarisation
-		//relative orbit
-		//Swath
-		//
-		//XXX is it possible to filter results accordingly using info from the query?
-
-		//Naming conventions:
-		// https://sentinel.esa.int/web/sentinel/user-guides
-		//sentinel 1:
-		// https://sentinel.esa.int/web/sentinel/user-guides/sentinel-1-sar/naming-conventions
-		// https://sentinel.esa.int/web/sentinel/user-guides/sentinel-2-msi/naming-convention
-		//sentinel 2:
-		// https://sentinel.esa.int/web/sentinel/user-guides/sentinel-2-msi/naming-convention
-		//sentinel 3:
-		//...
-
-
+		System.out.println("QueryExecutorONDA.executeCount( " + sQuery + " )");
 		String sUrl = getCountUrl(sQuery);
-		////use this to test with just 3 results
-		////sUrl = "https://catalogue.onda-dias.eu/dias-catalogue/Products/$count?$search=%22(%20(%20name:S1*%20AND%20name:S1A_*%20AND%20name:*SLC*%20AND%20name:*%20AND%20sensorOperationalMode:SM%20)%20)%20AND%20(%20(%20beginPosition:[2018-12-02T00:00:00.000Z%20TO%202018-12-02T23:59:59.999Z]%20AND%20endPosition:[2018-12-02T00:00:00.000Z%20TO%202018-12-02T23:59:59.999Z]%20)%20)%22";
-
 		int iResult = 0;
-		String sResult = httpGetResults(sUrl);
-		if(null!=sResult) {
-			try {
+		String sResult = "0";
+		try {
+			sResult = httpGetResults(sUrl);
+			if(null!=sResult) {
 				iResult = Integer.parseInt(sResult);
-			} catch (Exception e) {
-				e.printStackTrace();
+			} else {
+				iResult = -1;
 			}
+		} catch (Exception oE) {
+			System.out.println("QueryExecutorONDA.executeCount( " + sQuery + " ): " + oE.getMessage());
+			iResult = -1;
 		}
 		return iResult;
-
-
-		//		URL oURL = new URL(sUrl);
-		//		HttpURLConnection oConnection = (HttpURLConnection) oURL.openConnection();
-		//
-		//
-		//		// optional default is GET
-		//		oConnection.setRequestMethod("GET");
-		//		oConnection.setRequestProperty("Accept", "*/*");
-		//
-		//		//XXX add user and password
-		//
-		//		System.out.println("\nSending 'GET' request to URL : " + sUrl);
-		//
-		//		int responseCode =  oConnection.getResponseCode();
-		//		System.out.println("Response Code : " + responseCode);
-		//
-		//		if(200 == responseCode) {
-		//			BufferedReader in = new BufferedReader(new InputStreamReader(oConnection.getInputStream()));
-		//			String inputLine;
-		//			StringBuffer sResponse = new StringBuffer();
-		//	
-		//			while ((inputLine = in.readLine()) != null) {
-		//				sResponse.append(inputLine);
-		//			}
-		//			in.close();
-		//		
-		//
-		//			//print result
-		//			System.out.println("Count Done: Response " + sResponse.toString());
-		//	
-		//			return Integer.parseInt(sResponse.toString());
-		//		} else {
-		//			String sMessage = oConnection.getResponseMessage();
-		//			System.out.println(sMessage);
-		//			return 0;
-		//		}
 	}
 
 
 	@Override
 	public ArrayList<QueryResultViewModel> executeAndRetrieve(PaginatedQuery oQuery, boolean bFullViewModel) throws IOException {
 		System.out.println("QueryExecutorONDA.executeAndRetrieve(2 args)");
+		String sResult = null;
 		String sUrl = null;
-		if(bFullViewModel) {
-			sUrl = buildUrl(oQuery);
-		} else {
-			sUrl = buildUrlForList(oQuery);
-		}
-		String sResult = httpGetResults(sUrl);		
-		ArrayList<QueryResultViewModel> aoResult = null;
-		if(!Utils.isNullOrEmpty(sResult)) {
-			aoResult = buildResultViewModel(sResult, bFullViewModel);
-			if(null==aoResult) {
-				throw new NullPointerException("QueryExecutorONDA.executeAndRetrieve: aoResult is null"); 
+		try {
+			if(bFullViewModel) {
+				sUrl = buildUrl(oQuery);
+			} else {
+				sUrl = buildUrlForList(oQuery);
 			}
-			if(!bFullViewModel) {
-				//XXX we can probably get rid of this, but let's keep it for safety until thoroughly tested
-				for (QueryResultViewModel oViewModel : aoResult) {
-					oViewModel.setPreview(null);
+			sResult = httpGetResults(sUrl);		
+			ArrayList<QueryResultViewModel> aoResult = null;
+			if(!Utils.isNullOrEmpty(sResult)) {
+				aoResult = buildResultViewModel(sResult, bFullViewModel);
+				if(null==aoResult) {
+					throw new NullPointerException("QueryExecutorONDA.executeAndRetrieve: aoResult is null"); 
 				}
+				if(!bFullViewModel) {
+					//XXX we can probably get rid of this, but let's keep it for safety until thoroughly tested
+					for (QueryResultViewModel oViewModel : aoResult) {
+						oViewModel.setPreview(null);
+					}
+				}
+			} else {
+				System.out.println("QueryExecutorONDA.executeAndRetrieve(2 args): could not fetch results for url: " + sUrl);
 			}
-		} else {
-			System.out.println("QueryExecutorONDA.executeAndRetrieve: no result for the following query:");
-			System.out.print(sUrl);
+			return aoResult;
+		} catch (Exception oE) {
+			System.out.println("QueryExecutorONDA.executeAndRetrieve(2 args, with sUrl=" + sUrl + "): " + oE);
 		}
-		return aoResult;
+		return null;
 	}
 
 
@@ -298,8 +248,8 @@ public class QueryExecutorONDA extends QueryExecutor {
 				System.out.println("QueryExecutorONDA.buildResultViewModel: no results");
 			}
 			return aoResult;
-		} catch (Exception e) {
-			e.printStackTrace();
+		} catch (Exception oE) {
+			System.out.println("QueryExecutorONDA.buildResultViewModel: " + oE);
 		}
 		return null;
 	}
@@ -318,51 +268,61 @@ public class QueryExecutorONDA extends QueryExecutor {
 			System.out.println("\nSending 'GET' request to URL : " + sUrl);
 
 			long lStart = System.nanoTime();
-			int responseCode =  oConnection.getResponseCode();
-			System.out.println("Response Code : " + responseCode);
 			int iResponseSize = 0;
-			iResponseSize = oConnection.getContentLength();
-			if(200 == responseCode) {
-				InputStream oInputStream = oConnection.getInputStream();
-				ByteArrayOutputStream oBytearrayOutputStream = new ByteArrayOutputStream();
-				
-				//begin version 1:
-				
-				if(null!=oInputStream) {
-					Util.copyStream(oInputStream, oBytearrayOutputStream);
-					sResult = oBytearrayOutputStream.toString();
-				}
-				//end version 1
-				
-				//version 0:
-//				BufferedReader in = new BufferedReader(new InputStreamReader(oInputStream));
-//				String inputLine;
-//
-//				StringBuffer oResponseStringBuffer = new StringBuffer();
-//				while ((inputLine = in.readLine()) != null) {
-//					oResponseStringBuffer.append(inputLine);
-//				}
-//				in.close();
-//				sResult = oResponseStringBuffer.toString();
-				//end version 0:
-				
-				
-				if(!Utils.isNullOrEmpty(sResult)) {
-					System.out.println("QueryExecutorONDA.httpGetResults: Response " + sResult.substring(0, Math.min(200, sResult.length())) + "...");
-					if(iResponseSize <= 0) {
-						iResponseSize = sResult.getBytes().length;
+			try {
+				int responseCode =  oConnection.getResponseCode();
+				System.out.println("Response Code : " + responseCode);
+				iResponseSize = oConnection.getContentLength();
+				if(200 == responseCode) {
+					InputStream oInputStream = oConnection.getInputStream();
+					ByteArrayOutputStream oBytearrayOutputStream = new ByteArrayOutputStream();
+					//begin version 1:
+					
+					if(null!=oInputStream) {
+						Util.copyStream(oInputStream, oBytearrayOutputStream);
+						sResult = oBytearrayOutputStream.toString();
+					}
+					//end version 1
+					
+					//version 0:
+	//				BufferedReader in = new BufferedReader(new InputStreamReader(oInputStream));
+	//				String inputLine;
+	//
+	//				StringBuffer oResponseStringBuffer = new StringBuffer();
+	//				while ((inputLine = in.readLine()) != null) {
+	//					oResponseStringBuffer.append(inputLine);
+	//				}
+	//				in.close();
+	//				sResult = oResponseStringBuffer.toString();
+					//end version 0:
+					
+					if(!Utils.isNullOrEmpty(sResult)) {
+						System.out.println("QueryExecutorONDA.httpGetResults: Response " + sResult.substring(0, Math.min(200, sResult.length())) + "...");
+						if(iResponseSize <= 0) {
+							iResponseSize = sResult.getBytes().length;
+						}
+					} else {
+						System.out.println("QueryExecutorONDA.httpGetResults: reponse is empty");
 					}
 				} else {
-					System.out.println("QueryExecutorONDA.httpGetResults: reponse is empty");
+					System.out.println("QueryExecutorONDA.httpGetResults: ONDA did not return 200 but "+responseCode+
+							" (1/2) and the following message: " + oConnection.getResponseMessage());
+					ByteArrayOutputStream oBytearrayOutputStream = new ByteArrayOutputStream();
+					InputStream oErrorStream = oConnection.getErrorStream();
+					Util.copyStream(oErrorStream, oBytearrayOutputStream);
+					String sMessage = oBytearrayOutputStream.toString();
+					System.out.println("QueryExecutorONDA.httpGetResults: ONDA did not return 200 but "+responseCode+
+							" (2/2) and this is the content of the error stream " + sMessage);
+					if(iResponseSize <= 0) {
+						iResponseSize = sMessage.getBytes().length;
+					}
 				}
-			} else {
-				System.out.println("QueryExecutorONDA.httpGetResults: ONDA did not return 200 but "+responseCode+" and the following message:");
-				String sMessage = oConnection.getResponseMessage();
-				System.out.println(sMessage);
-				if(iResponseSize <= 0) {
-					iResponseSize = sMessage.getBytes().length;
-				}
+			} catch (SocketTimeoutException oE) {
+				System.out.println("QueryExecutorONDA.httpGetResults: " + oE);
 			}
+			
+			
+			
 			long lEnd = System.nanoTime();
 			long lTimeElapsed = lEnd - lStart;
 			double dMillis = lTimeElapsed / (1000.0 * 1000.0);
@@ -378,8 +338,9 @@ public class QueryExecutorONDA extends QueryExecutor {
 				dSpeed *= 1000.0;
 			}
 			System.out.println("QueryExecutionONDA.httpGetResults: " + sQueryType+" ([ms,B,B/s]): "+dMillis+"," + iResponseSize + "," + dSpeed);
-		} catch (Exception e) {
-			e.printStackTrace();
+		}
+		catch (Exception oE) {
+			System.out.println("QueryExecutorONDA.httpGetResults: " + oE);
 		}
 		return sResult;
 	}
