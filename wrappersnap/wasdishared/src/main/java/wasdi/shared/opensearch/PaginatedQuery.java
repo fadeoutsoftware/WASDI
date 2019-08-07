@@ -19,6 +19,12 @@ public class PaginatedQuery {
 	
 	
 	public PaginatedQuery(String sQuery, String sOffset, String sLimit, String sSortedBy, String sOrder) {
+		if (sSortedBy == null) {
+			sSortedBy = "ingestiondate";
+		}
+		if (sOrder == null) {
+			sOrder = "asc";
+		}
 		this.sQuery = sQuery;
 		this.sOffset = sOffset;
 		this.sLimit = sLimit;
