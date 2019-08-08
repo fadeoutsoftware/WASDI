@@ -55,7 +55,7 @@ public class ProcessWorkspaceResource {
 				return aoProcessList;
 			}
 
-			System.out.println("ProcessWorkspaceResource.GetProcessByWorkspace: process for ws " + sWorkspaceId);
+			Wasdi.DebugLog("ProcessWorkspaceResource.GetProcessByWorkspace: process for ws " + sWorkspaceId);
 
 			// Create repo
 			ProcessWorkspaceRepository oRepository = new ProcessWorkspaceRepository();
@@ -79,7 +79,7 @@ public class ProcessWorkspaceResource {
 
 		}
 		catch (Exception oEx) {
-			System.out.println("ProcessWorkspaceResource.GetProcessByWorkspace: error retrieving process " + oEx.getMessage());
+			Wasdi.DebugLog("ProcessWorkspaceResource.GetProcessByWorkspace: error retrieving process " + oEx.getMessage());
 			oEx.printStackTrace();
 		}
 
@@ -107,7 +107,7 @@ public class ProcessWorkspaceResource {
 				return aoProcessList;
 			}
 
-			System.out.println("ProcessWorkspaceResource.GetProcessByUser: process for User " + oUser.getUserId());
+			Wasdi.DebugLog("ProcessWorkspaceResource.GetProcessByUser: process for User " + oUser.getUserId());
 
 			// Create repo
 			ProcessWorkspaceRepository oRepository = new ProcessWorkspaceRepository();
@@ -124,7 +124,7 @@ public class ProcessWorkspaceResource {
 
 		}
 		catch (Exception oEx) {
-			System.out.println("ProcessWorkspaceResource.GetProcessByUser: error retrieving process " + oEx.getMessage());
+			Wasdi.DebugLog("ProcessWorkspaceResource.GetProcessByUser: error retrieving process " + oEx.getMessage());
 			oEx.printStackTrace();
 		}
 
@@ -201,7 +201,7 @@ public class ProcessWorkspaceResource {
 
 		}
 		catch (Exception oEx) {
-			System.out.println("ProcessWorkspaceResource.GetProcessByWorkspace: error retrieving process " + oEx.getMessage());
+			Wasdi.DebugLog("ProcessWorkspaceResource.GetProcessByWorkspace: error retrieving process " + oEx.getMessage());
 			oEx.printStackTrace();
 		}
 
@@ -228,7 +228,7 @@ public class ProcessWorkspaceResource {
 				return aoProcessList;
 			}
 
-			System.out.println("ProcessWorkspaceResource.GetLastProcessByUser: process for user " + oUser.getUserId());
+			Wasdi.DebugLog("ProcessWorkspaceResource.GetLastProcessByUser: process for user " + oUser.getUserId());
 
 			// Create repo
 			ProcessWorkspaceRepository oRepository = new ProcessWorkspaceRepository();
@@ -245,7 +245,7 @@ public class ProcessWorkspaceResource {
 
 		}
 		catch (Exception oEx) {
-			System.out.println("ProcessWorkspaceResource.GetLastProcessByUser: error retrieving process " + oEx.getMessage());
+			Wasdi.DebugLog("ProcessWorkspaceResource.GetLastProcessByUser: error retrieving process " + oEx.getMessage());
 			oEx.printStackTrace();
 		}
 
@@ -256,11 +256,8 @@ public class ProcessWorkspaceResource {
 	@Path("/summary")
 	@Produces({"application/xml", "application/json", "text/xml"})
 	public ProcessWorkspaceSummaryViewModel getSummary(@HeaderParam("x-session-token") String sSessionId) {
-		
-		Wasdi.DebugLog("ProcessWorkspaceResource.GetSummary");
-
+		//Wasdi.DebugLog("ProcessWorkspaceResource.GetSummary( " + sSessionId + " )");
 		User oUser = Wasdi.GetUserFromSession(sSessionId);
-
 		ProcessWorkspaceSummaryViewModel oSummaryViewModel = new ProcessWorkspaceSummaryViewModel();
 
 		try {
@@ -272,7 +269,7 @@ public class ProcessWorkspaceResource {
 				return oSummaryViewModel;
 			}
 
-			System.out.println("ProcessWorkspaceResource.GetSummary: process for user " + oUser.getUserId());
+			Wasdi.DebugLog("ProcessWorkspaceResource.GetSummary: process for user " + oUser.getUserId());
 
 			// Create repo
 			ProcessWorkspaceRepository oRepository = new ProcessWorkspaceRepository();
@@ -372,7 +369,7 @@ public class ProcessWorkspaceResource {
 			
 		}
 		catch (Exception oEx) {
-			System.out.println("ProcessWorkspaceResource.GetSummary: error retrieving process " + oEx.getMessage());
+			Wasdi.DebugLog("ProcessWorkspaceResource.GetSummary: error retrieving process " + oEx.getMessage());
 			oEx.printStackTrace();
 		}
 
@@ -407,15 +404,15 @@ public class ProcessWorkspaceResource {
 					// Exists Pid, kill process
 					String sShellExString = m_oServletConfig.getInitParameter("KillCommand") + " " + iPid;
 					
-					System.out.println("ProcessWorkspaceResource.DeleteProcess: shell exec " + sShellExString);
+					Wasdi.DebugLog("ProcessWorkspaceResource.DeleteProcess: shell exec " + sShellExString);
 					
 					Process oProc = Runtime.getRuntime().exec(sShellExString);
 					
-					System.out.println("ProcessWorkspaceResource.DeleteProcess: kill result: " + oProc.waitFor());
+					Wasdi.DebugLog("ProcessWorkspaceResource.DeleteProcess: kill result: " + oProc.waitFor());
 
 				} else {
 					
-					System.out.println("ProcessWorkspaceResource. Process pid not in data");
+					Wasdi.DebugLog("ProcessWorkspaceResource. Process pid not in data");
 					
 				}
 								
@@ -428,11 +425,11 @@ public class ProcessWorkspaceResource {
 					oProcessToDelete.setOperationEndDate(Utils.GetFormatDate(new Date()));
 					
 					if (!oRepository.UpdateProcess(oProcessToDelete)) {
-						System.out.println("ProcessWorkspaceResource.DeleteProcess: Unable to update process status");
+						Wasdi.DebugLog("ProcessWorkspaceResource.DeleteProcess: Unable to update process status");
 					}
 					
 				} else {
-					System.out.println("ProcessWorkspaceResource.DeleteProcess: Process already terminated: " + sPrecSatus);
+					Wasdi.DebugLog("ProcessWorkspaceResource.DeleteProcess: Process already terminated: " + sPrecSatus);
 				}
 				
 				
@@ -440,14 +437,14 @@ public class ProcessWorkspaceResource {
 				
 			} else {
 				
-				System.out.println("ProcessWorkspaceResource. Process not found in DB");
+				Wasdi.DebugLog("ProcessWorkspaceResource. Process not found in DB");
 				return Response.status(404).build();
 				
 			}
 						
 		}
 		catch (Exception oEx) {
-			System.out.println("WorkspaceResource.DeleteProcess: error deleting process " + oEx.getMessage());
+			Wasdi.DebugLog("WorkspaceResource.DeleteProcess: error deleting process " + oEx.getMessage());
 			oEx.printStackTrace();
 		}
 
@@ -479,7 +476,7 @@ public class ProcessWorkspaceResource {
 				return oProcess;
 			}
 
-			System.out.println("ProcessWorkspaceResource.getProcessById: process id " + sProcessWorkspaceId);
+			Wasdi.DebugLog("ProcessWorkspaceResource.getProcessById: process id " + sProcessWorkspaceId);
 
 			// Create repo
 			ProcessWorkspaceRepository oRepository = new ProcessWorkspaceRepository();
@@ -490,7 +487,7 @@ public class ProcessWorkspaceResource {
 
 		}
 		catch (Exception oEx) {
-			System.out.println("ProcessWorkspaceResource.GetProcessById: error retrieving process " + oEx.getMessage());
+			Wasdi.DebugLog("ProcessWorkspaceResource.GetProcessById: error retrieving process " + oEx.getMessage());
 			oEx.printStackTrace();
 		}
 
@@ -518,7 +515,7 @@ public class ProcessWorkspaceResource {
 				return oProcess;
 			}
 
-			System.out.println("ProcessWorkspaceResource.UpdateProcessById: process id " + sProcessWorkspaceId);
+			Wasdi.DebugLog("ProcessWorkspaceResource.UpdateProcessById: process id " + sProcessWorkspaceId);
 
 			// Create repo
 			ProcessWorkspaceRepository oRepository = new ProcessWorkspaceRepository();
@@ -554,7 +551,7 @@ public class ProcessWorkspaceResource {
 			}
 		}
 		catch (Exception oEx) {
-			System.out.println("ProcessWorkspaceResource.UpdateProcessById: error retrieving process " + oEx.getMessage());
+			Wasdi.DebugLog("ProcessWorkspaceResource.UpdateProcessById: error retrieving process " + oEx.getMessage());
 			oEx.printStackTrace();
 		}
 
@@ -582,8 +579,8 @@ public class ProcessWorkspaceResource {
 				return oProcess;
 			}
 
-			System.out.println("ProcessWorkspaceResource.SetProcessPayload: process id " + sProcessWorkspaceId);
-			System.out.println("ProcessWorkspaceResource.SetProcessPayload: PAYLOAD " + sPayload);
+			Wasdi.DebugLog("ProcessWorkspaceResource.SetProcessPayload: process id " + sProcessWorkspaceId);
+			Wasdi.DebugLog("ProcessWorkspaceResource.SetProcessPayload: PAYLOAD " + sPayload);
 
 			// Create repo
 			ProcessWorkspaceRepository oRepository = new ProcessWorkspaceRepository();
@@ -599,7 +596,7 @@ public class ProcessWorkspaceResource {
 
 		}
 		catch (Exception oEx) {
-			System.out.println("ProcessWorkspaceResource.SetProcessPayload: error retrieving process " + oEx.getMessage());
+			Wasdi.DebugLog("ProcessWorkspaceResource.SetProcessPayload: error retrieving process " + oEx.getMessage());
 			oEx.printStackTrace();
 		}
 
@@ -633,7 +630,7 @@ public class ProcessWorkspaceResource {
 			
 		}
 		catch (Exception oEx) {
-			System.out.println("ProcessWorkspaceResource.CleanQueue: error " + oEx.getMessage());
+			Wasdi.DebugLog("ProcessWorkspaceResource.CleanQueue: error " + oEx.getMessage());
 			oEx.printStackTrace();
 			
 		}
