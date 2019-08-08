@@ -57,7 +57,7 @@ public class ProcessorsResource {
 	
 	/**
 	 * Upload a new processor in Wasdi
-	 * @param fileInputStream
+	 * @param oInputStreamForFile
 	 * @param sSessionId
 	 * @param sName
 	 * @param sVersion
@@ -68,53 +68,59 @@ public class ProcessorsResource {
 	@POST
 	@Path("/uploadprocessor")
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
-	public Response uploadProcessor(@FormDataParam("file") InputStream fileInputStream, @HeaderParam("x-session-token") String sSessionId, 
-			@QueryParam("workspace") String sWorkspaceId, @QueryParam("name") String sName, @QueryParam("version") String sVersion, @QueryParam("description") String sDescription, @QueryParam("type") String sType, @QueryParam("paramsSample") String sParamsSample) throws Exception {
+	public Response uploadProcessor(@FormDataParam("file") InputStream oInputStreamForFile, @HeaderParam("x-session-token") String sSessionId, 
+			@QueryParam("workspace") String sWorkspaceId, @QueryParam("name") String sName, @QueryParam("version") String sVersion,
+			@QueryParam("description") String sDescription, @QueryParam("type") String sType, @QueryParam("paramsSample") String sParamsSample) throws Exception {
 
-		Wasdi.DebugLog("ProcessorsResource.uploadProcessor");
-		
+		Wasdi.DebugLog("ProcessorsResource.uploadProcessor( oInputStreamForFile, " + sSessionId + ", " + sWorkspaceId + ", " + sName + ", " + sVersion + 
+				sDescription + ", " + sType + ", " + sParamsSample + " )");
 		try {
 			// Check User 
-			if (Utils.isNullOrEmpty(sSessionId)) return Response.status(401).build();
+			if (Utils.isNullOrEmpty(sSessionId)) {
+				Wasdi.DebugLog("ProcessorsResource.uploadProcessor: session is null or empty, aborting");
+				return Response.status(401).build();
+			}
 			User oUser = Wasdi.GetUserFromSession(sSessionId);
-
-			if (oUser==null) return Response.status(401).build();
-			if (Utils.isNullOrEmpty(oUser.getUserId())) return Response.status(401).build();
-			
-			// Get the user Id
+			if (oUser==null) {
+				Wasdi.DebugLog("ProcessorsResource.uploadProcessor: user (from session) is null, aborting");
+				return Response.status(401).build();
+			}
 			String sUserId = oUser.getUserId();
+			if (Utils.isNullOrEmpty(sUserId)) {
+				Wasdi.DebugLog("ProcessorsResource.uploadProcessor: userid of user (from session) is null or empty, aborting");
+				return Response.status(401).build();
+			}
 			
 			// Set the processor path
 			String sDownloadRootPath = m_oServletConfig.getInitParameter("DownloadRootPath");
-			if (!sDownloadRootPath.endsWith("/")) sDownloadRootPath = sDownloadRootPath + "/";
-			
+			if (!sDownloadRootPath.endsWith("/")) {
+				sDownloadRootPath = sDownloadRootPath + "/";
+			}
 			File oProcessorPath = new File(sDownloadRootPath+ "/processors/" + sName);
 			
 			// Create folders
-			// TODO: Se esiste in effetti non va bene
 			if (!oProcessorPath.exists()) {
 				oProcessorPath.mkdirs();
-			}
+			} // TODO: else: it shouldn't exist. Shall we oaverwrite it?
 			
 			// Create file
 			String sProcessorId =  UUID.randomUUID().toString();
 			File oProcessorFile = new File(sDownloadRootPath+"/processors/" + sName + "/" + sProcessorId + ".zip");
-			
 			Wasdi.DebugLog("ProcessorsResource.uploadProcessor: Processor file Path: " + oProcessorFile.getPath());
 			
 			//save uploaded file
 			int iRead = 0;
 			byte[] ayBytes = new byte[1024];
 			OutputStream oOutputStream = new FileOutputStream(oProcessorFile);
-			while ((iRead = fileInputStream.read(ayBytes)) != -1) {
+			while ((iRead = oInputStreamForFile.read(ayBytes)) != -1) {
 				oOutputStream.write(ayBytes, 0, iRead);
 			}
 			oOutputStream.flush();
 			oOutputStream.close();
 			
-			// TODO: Controllare che sia uno zip file e che contenga almeno myProcessor.py
-			// Magari guardiamo anche se ha almeno una run
-			
+			// TODO: check it is a zip file
+			// TODO: check it contains at least myProcessor.py
+			// XXX: check it also has a run
 			
 			if (Utils.isNullOrEmpty(sType)) {
 				sType = ProcessorTypes.UBUNTU_PYTHON_SNAP;
@@ -160,8 +166,7 @@ public class ProcessorsResource {
 			ProcessWorkspaceRepository oRepository = new ProcessWorkspaceRepository();
 			ProcessWorkspace oProcessWorkspace = new ProcessWorkspace();
 			
-			try
-			{
+			try{
 				oProcessWorkspace.setOperationDate(Wasdi.GetFormatDate(new Date()));
 				oProcessWorkspace.setOperationType(LauncherOperations.DEPLOYPROCESSOR.name());
 				oProcessWorkspace.setProductName(sName);
@@ -172,20 +177,15 @@ public class ProcessorsResource {
 				oRepository.InsertProcessWorkspace(oProcessWorkspace);
 				
 				Wasdi.DebugLog("ProcessorResource.uploadProcessor: Process Scheduled for Launcher");
-			}
-			catch(Exception oEx){
-				System.out.println("ProcessorsResource.uploadProcessor: Error scheduling the deploy process " + oEx.getMessage());
-				oEx.printStackTrace();
+			} catch(Exception oEx){
+				Wasdi.DebugLog("ProcessorsResource.uploadProcessor: Error scheduling the deploy process " + oEx);
 				return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
 			}
-
-
 		}
 		catch (Exception oEx) {
-			oEx.printStackTrace();
+			Wasdi.DebugLog("ProcessorsResource.uploadProcessor:" + oEx);
 			return Response.serverError().build();
 		}
-				
 		return Response.ok().build();
 	}
 	
@@ -194,7 +194,7 @@ public class ProcessorsResource {
 	public List<DeployedProcessorViewModel> getDeployedProcessors(@HeaderParam("x-session-token") String sSessionId) throws Exception {
 
 		ArrayList<DeployedProcessorViewModel> aoRet = new ArrayList<>(); 
-		Wasdi.DebugLog("ProcessorsResource.getDeployedProcessors");
+		Wasdi.DebugLog("ProcessorsResource.getDeployedProcessors( " + sSessionId + " )");
 		
 		try {
 			// Check User 
@@ -222,7 +222,7 @@ public class ProcessorsResource {
 			}
 		}
 		catch (Exception oEx) {
-			oEx.printStackTrace();
+			Wasdi.DebugLog("ProcessorsResource.getDeployedProcessors: " + oEx);
 			return aoRet;
 		}		
 		return aoRet;
@@ -231,8 +231,10 @@ public class ProcessorsResource {
 	
 	@GET
 	@Path("/run")
-	public RunningProcessorViewModel run(@HeaderParam("x-session-token") String sSessionId, @QueryParam("name") String sName, @QueryParam("encodedJson") String sEncodedJson, @QueryParam("workspace") String sWorkspaceId) throws Exception {
-		Wasdi.DebugLog("ProcessorsResource.run");
+	public RunningProcessorViewModel run(@HeaderParam("x-session-token") String sSessionId,
+			@QueryParam("name") String sName, @QueryParam("encodedJson") String sEncodedJson,
+			@QueryParam("workspace") String sWorkspaceId) throws Exception {
+		Wasdi.DebugLog("ProcessorsResource.run( " + sSessionId + ", " + sName + ", encodedJson, " + sWorkspaceId + " )");
 
 		RunningProcessorViewModel oRunningProcessorViewModel = new RunningProcessorViewModel();
 		
@@ -303,14 +305,13 @@ public class ProcessorsResource {
 				Wasdi.DebugLog("ProcessorsResource.run: done"); 
 			}
 			catch(Exception oEx){
-				System.out.println("ProcessorsResource.run: Error scheduling the run process " + oEx.getMessage());
-				oEx.printStackTrace();
+				System.out.println("ProcessorsResource.run: Error scheduling the run process " + oEx);
 				oRunningProcessorViewModel.setStatus(ProcessStatus.ERROR.toString());
 				return oRunningProcessorViewModel;
 			}
 		}
 		catch (Exception oEx) {
-			oEx.printStackTrace();
+			Wasdi.DebugLog("ProcessorsResource.run: " + oEx );
 			oRunningProcessorViewModel.setStatus(ProcessStatus.ERROR.toString());
 			return oRunningProcessorViewModel;
 		}
@@ -322,11 +323,9 @@ public class ProcessorsResource {
 	@GET
 	@Path("/help")
 	public PrimitiveResult help(@HeaderParam("x-session-token") String sSessionId, @QueryParam("name") String sName) throws Exception {
-
+		Wasdi.DebugLog("ProcessorsResource.help( " + sSessionId + ", " + sName + " )");
 		PrimitiveResult oPrimitiveResult = new PrimitiveResult();
 		oPrimitiveResult.setBoolValue(false);
-		
-		Wasdi.DebugLog("ProcessorsResource.help");
 		
 		try {
 			// Check User 
@@ -379,7 +378,7 @@ public class ProcessorsResource {
 			oPrimitiveResult.setStringValue(sOutputCumulativeResult);
 		}
 		catch (Exception oEx) {
-			oEx.printStackTrace();
+			Wasdi.DebugLog("ProcessorsResource.help: " + oEx);
 			return oPrimitiveResult;
 		}
 		
@@ -388,12 +387,11 @@ public class ProcessorsResource {
 	
 	@GET
 	@Path("/status")
-	public RunningProcessorViewModel status(@HeaderParam("x-session-token") String sSessionId, @QueryParam("processingId") String sProcessingId) throws Exception {
-
+	public RunningProcessorViewModel status(@HeaderParam("x-session-token") String sSessionId,
+			@QueryParam("processingId") String sProcessingId) throws Exception {
+		Wasdi.DebugLog("ProcessorsResource.status( " + sSessionId + ", " + sProcessingId + " )");
 		RunningProcessorViewModel oRunning = new RunningProcessorViewModel();
-		Wasdi.DebugLog("ProcessorsResource.status");
 		oRunning.setStatus(ProcessStatus.ERROR.toString());
-		
 		try {
 			// Check User 
 			if (Utils.isNullOrEmpty(sSessionId)) return oRunning;
@@ -449,11 +447,9 @@ public class ProcessorsResource {
 			}
 		}
 		catch (Exception oEx) {
-			System.out.println("ProcessorsResource.run: Error scheduling the deploy process " + oEx.getMessage());
-			oEx.printStackTrace();
+			System.out.println("ProcessorsResource.run: Error scheduling the deploy process " + oEx);
 			oRunning.setStatus(ProcessStatus.ERROR.toString());
 		}
-		
 		return oRunning;
 	}
 	
@@ -463,22 +459,22 @@ public class ProcessorsResource {
 	@Path("/logs/add")
 	@Produces({"application/xml", "application/json", "text/xml"})
 	public Response addLog(@HeaderParam("x-session-token") String sSessionId, @QueryParam("processworkspace") String sProcessWorkspaceId, String sLog) {
-		
+		//Wasdi.DebugLog("ProcessorsResource.addLog( " + sSessionId + ", " + sProcessWorkspaceId + ", " + sLog + " )");
 		try {
 			// Check User 
 			if (Utils.isNullOrEmpty(sSessionId)) {
-				Wasdi.DebugLog("ProcessorResource: addLog: 401 session id null");
+				Wasdi.DebugLog("ProcessorResource.addLog: 401 session id null");
 				return Response.status(401).build();
 			}
 			User oUser = Wasdi.GetUserFromSession(sSessionId);
 
 			if (oUser==null) {
-				Wasdi.DebugLog("ProcessorResource: addLog: user null");
+				Wasdi.DebugLog("ProcessorResource.addLog: user null");
 				return Response.status(401).build();
 			}
 			
 			if (Utils.isNullOrEmpty(oUser.getUserId())) {
-				Wasdi.DebugLog("ProcessorResource: addLog: userId null");
+				Wasdi.DebugLog("ProcessorResource.addLog: userId null");
 				return Response.status(401).build();
 			}
 			
@@ -489,15 +485,17 @@ public class ProcessorsResource {
 			oLog.setLogRow(sLog);
 			
 			ProcessorLogRepository oProcessorLogRepository = new ProcessorLogRepository();
-			oProcessorLogRepository.InsertProcessLog(oLog);
-			Wasdi.DebugLog("ProcessorResource: added log row to processid " + sProcessWorkspaceId);
+			String sResult = oProcessorLogRepository.InsertProcessLog(oLog);
+			if(!Utils.isNullOrEmpty(sResult)) {
+				Wasdi.DebugLog("ProcessorResource.addLog: added log row to processid " + sProcessWorkspaceId);
+			} else {
+				Wasdi.DebugLog("ProcessorResource.addLog: failed to add log row");
+			}
 		}
 		catch (Exception oEx) {
-			Wasdi.DebugLog("ProcessorResource: addLog exception " + oEx.getMessage());
-			oEx.printStackTrace();
+			Wasdi.DebugLog("ProcessorResource.addLog" + oEx);
 			return Response.serverError().build();
 		}
-		
 		return Response.ok().build();
 	 }
 	
@@ -506,22 +504,22 @@ public class ProcessorsResource {
 	@Path("/logs/count")
 	public int countLogs(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("processworkspace") String sProcessWorkspaceId){
-		Wasdi.DebugLog("ProcessorsResource.countLogs - SessionId: " + sSessionId);
+		Wasdi.DebugLog("ProcessorResource.countLogs( " + sSessionId + ", " + sProcessWorkspaceId + " )");
 		int iResult = -1;
 		try {
 			if (Utils.isNullOrEmpty(sSessionId)) {
-				Wasdi.DebugLog("ProcessorResource: addLog: 401 session id null");
+				Wasdi.DebugLog("ProcessorResource.countLogs: 401 session id null");
 				return iResult;
 			}
 			User oUser = Wasdi.GetUserFromSession(sSessionId);
 	
 			if (oUser==null) {
-				Wasdi.DebugLog("ProcessorResource: addLog: user null");
+				Wasdi.DebugLog("ProcessorResource.countLogs: user null");
 				return iResult;
 			}
 			
 			if (Utils.isNullOrEmpty(oUser.getUserId())) {
-				Wasdi.DebugLog("ProcessorResource: addLog: userId null");
+				Wasdi.DebugLog("ProcessorResource.countLogs: userId null");
 				return iResult;
 			}
 			
@@ -531,17 +529,14 @@ public class ProcessorsResource {
 			Counter oCounter = null;
 			oCounter = oCounterRepository.GetCounterBySequence(sProcessWorkspaceId);
 			if(null == oCounter) {
-				Wasdi.DebugLog("ProcessorResource.countLogs: CounterRepository returned a null Counter");
+				Wasdi.DebugLog("ProcessorResource.countLogs( " + sSessionId + ", " + sProcessWorkspaceId +
+						" ): CounterRepository returned a null Counter");
 				return iResult;
 			}
 			iResult = oCounter.getValue();
-			
 		} catch (Exception oEx) {
-			Wasdi.DebugLog("ProcessorResource.countLogs: addLog exception " + oEx.getMessage());
-			oEx.printStackTrace();
-			return iResult;
+			Wasdi.DebugLog("ProcessorResource.countLogs( " + sSessionId + ", " + sProcessWorkspaceId + " ): " + oEx);
 		}
-		
 		return iResult;
 	}
 	
@@ -552,10 +547,8 @@ public class ProcessorsResource {
 			//note: range extremes are included
 			@QueryParam("startrow") Integer iStartRow, @QueryParam("endrow") Integer iEndRow) {
 		
-		Wasdi.DebugLog("ProcessorsResource.getLogs - SessionId: " + sSessionId);
-		
+		Wasdi.DebugLog("ProcessorsResource.getLogs( " + sSessionId + ", " + sProcessWorkspaceId + ", " + iStartRow + ", " + iEndRow + " )");
 		ArrayList<ProcessorLogViewModel> aoRetList = new ArrayList<>();
-		
 		try {
 			
 			// Check User 
@@ -598,8 +591,7 @@ public class ProcessorsResource {
 			
 		}
 		catch (Exception oEx) {
-			Wasdi.DebugLog("ProcessorResource.getLogs: addLog exception " + oEx.getMessage());
-			oEx.printStackTrace();
+			Wasdi.DebugLog("ProcessorResource.getLogs: " + oEx);
 			return aoRetList;
 		}
 		
@@ -609,8 +601,10 @@ public class ProcessorsResource {
 	
 	@GET
 	@Path("/delete")
-	public Response deleteProcessor(@HeaderParam("x-session-token") String sSessionId, @QueryParam("processorId") String sProcessorId, @QueryParam("workspaceId") String sWorkspaceId) {
-		Wasdi.DebugLog("ProcessorResources.deleteProcessor");
+	public Response deleteProcessor(@HeaderParam("x-session-token") String sSessionId,
+			@QueryParam("processorId") String sProcessorId,
+			@QueryParam("workspaceId") String sWorkspaceId) {
+		Wasdi.DebugLog("ProcessorResources.deleteProcessor( " + sSessionId + ", " + sProcessorId + ", " + sWorkspaceId + " )");
 		
 		try {
 			if (Utils.isNullOrEmpty(sSessionId)) return Response.status(Status.UNAUTHORIZED).build();
@@ -672,8 +666,7 @@ public class ProcessorsResource {
 				Wasdi.DebugLog("ProcessorsResource.deleteProcessor: done"); 
 			}
 			catch(Exception oEx){
-				System.out.println("ProcessorsResource.deleteProcessor: Error scheduling the run process " + oEx.getMessage());
-				oEx.printStackTrace();
+				System.out.println("ProcessorsResource.deleteProcessor: Error scheduling the run process: " + oEx);
 				return Response.serverError().build();
 			}
 			
@@ -681,10 +674,8 @@ public class ProcessorsResource {
 			return Response.ok().build();
 		}
 		catch (Exception oEx) {
-			Wasdi.DebugLog("ProcessorResource.deleteProcessor: exception " + oEx.getMessage());
-			oEx.printStackTrace();
+			Wasdi.DebugLog("ProcessorResource.deleteProcessor: " + oEx);
 			return Response.serverError().build();
-
 		}
 	}
 }
