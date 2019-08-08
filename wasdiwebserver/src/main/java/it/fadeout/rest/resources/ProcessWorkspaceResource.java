@@ -36,8 +36,8 @@ public class ProcessWorkspaceResource {
 	@Produces({"application/xml", "application/json", "text/xml"})
 	public ArrayList<ProcessWorkspaceViewModel> getProcessByWorkspace(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("sWorkspaceId") String sWorkspaceId, @QueryParam("startindex") Integer iStartIndex, @QueryParam("endindex") Integer iEndIndex) {
-		
-		Wasdi.DebugLog("ProcessWorkspaceResource.GetProcessByWorkspace");
+		Wasdi.DebugLog("ProcessWorkspaceResource.GetProcessByWorkspace( " + sSessionId + ", " + sWorkspaceId + ", " +
+				iStartIndex + ", " + iEndIndex);
 
 		User oUser = Wasdi.GetUserFromSession(sSessionId);
 
@@ -55,7 +55,7 @@ public class ProcessWorkspaceResource {
 				return aoProcessList;
 			}
 
-			Wasdi.DebugLog("ProcessWorkspaceResource.GetProcessByWorkspace: process for ws " + sWorkspaceId);
+//			Wasdi.DebugLog("ProcessWorkspaceResource.GetProcessByWorkspace: process for ws " + sWorkspaceId);
 
 			// Create repo
 			ProcessWorkspaceRepository oRepository = new ProcessWorkspaceRepository();
@@ -79,8 +79,7 @@ public class ProcessWorkspaceResource {
 
 		}
 		catch (Exception oEx) {
-			Wasdi.DebugLog("ProcessWorkspaceResource.GetProcessByWorkspace: error retrieving process " + oEx.getMessage());
-			oEx.printStackTrace();
+			Wasdi.DebugLog("ProcessWorkspaceResource.GetProcessByWorkspace: " + oEx);
 		}
 
 		return aoProcessList;
