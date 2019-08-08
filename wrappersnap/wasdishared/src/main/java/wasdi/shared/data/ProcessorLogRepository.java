@@ -15,14 +15,17 @@ import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 
 import wasdi.shared.business.ProcessorLog;
+import wasdi.shared.utils.Utils;
 
 public class ProcessorLogRepository extends MongoRepository {
 	
 
     public String InsertProcessLog(ProcessorLog oProcessLog) {
-
         try {
-        	
+        	if(null == oProcessLog) {
+        		System.out.println("ProcessorLogRepository.InsertProcessLog: oProcessorLog is null");
+        		return null;
+        	}
         	CounterRepository oCounterRepo = new CounterRepository();
         	
         	oProcessLog.setRowNumber(oCounterRepo.getNextValue(oProcessLog.getProcessWorkspaceId()));
@@ -34,21 +37,19 @@ public class ProcessorLogRepository extends MongoRepository {
             return oDocument.getObjectId("_id").toHexString();
 
         } catch (Exception oEx) {
-            oEx.printStackTrace();
+            System.out.println("ProcessorLogRepository.InsertProcessLog: "+oEx);
         }
-
         return "";
     }
 
     public boolean DeleteProcessorLog(String sId) {
-
         try {
             getCollection("processorlog").deleteOne(new Document("_id", new ObjectId(sId)));
 
             return true;
 
         } catch (Exception oEx) {
-            oEx.printStackTrace();
+        	System.out.println("ProcessorLogRepository.DeleteProcessorLog( "+sId+" )" +oEx);
         }
 
         return false;
@@ -57,15 +58,16 @@ public class ProcessorLogRepository extends MongoRepository {
     public List<ProcessorLog> GetLogsByProcessWorkspaceId(String sProcessWorkspaceId) {
 
         final ArrayList<ProcessorLog> aoReturnList = new ArrayList<ProcessorLog>();
-        try {
-
-            FindIterable<Document> oWSDocuments = getCollection("processorlog").find(new Document("processWorkspaceId", sProcessWorkspaceId));
-            fillList(aoReturnList, oWSDocuments);
-
-        } catch (Exception oEx) {
-            oEx.printStackTrace();
+        if(!Utils.isNullOrEmpty(sProcessWorkspaceId)) {
+	        try {
+	            FindIterable<Document> oWSDocuments = getCollection("processorlog").find(new Document("processWorkspaceId", sProcessWorkspaceId));
+	            if(oWSDocuments!=null) {
+	            	fillList(aoReturnList, oWSDocuments);
+	            }
+	        } catch (Exception oEx) {
+	        	System.out.println("ProcessorLogRepository.GetLogsByProcessWorkspaceId( " + sProcessWorkspaceId + " )" +oEx);
+	        }
         }
-
         return aoReturnList;
     }
     
@@ -73,7 +75,8 @@ public class ProcessorLogRepository extends MongoRepository {
     //note iLo and iUp are included
 	public List<ProcessorLog> getLogsByWorkspaceIdInRange(String sProcessWorkspaceId, Integer iLo, Integer iUp){
 		if(null == sProcessWorkspaceId || iLo == null || iUp == null) {
-			throw new NullPointerException("ProcessorLogRepository.getLogsByWorkspaceIdInRange: null argument passed");
+			throw new NullPointerException("ProcessorLogRepository.getLogsByWorkspaceIdInRange( " +
+					sProcessWorkspaceId + ", " + iLo + ", " + iUp + " ): null argument passed");
 		}
 		if(iLo < 0 || iLo >iUp) {
 			throw new IllegalArgumentException("ProcessorLogRepository.getLogsByWorkspaceIdInRange: 0 <= "+iLo+" <= "+iUp+" is unverified");
@@ -95,10 +98,11 @@ public class ProcessorLogRepository extends MongoRepository {
         	oDocument.putAll(oQuery);
         	MongoCollection<Document> aoProcessorLogCollection =  getCollection("processorlog");
         	FindIterable<Document> oWSDocuments = aoProcessorLogCollection.find(oDocument);
-            fillList(aoReturnList, oWSDocuments);
-
+        	if(oWSDocuments != null) {
+        		fillList(aoReturnList, oWSDocuments);
+        	}
         } catch (Exception oEx) {
-            oEx.printStackTrace();
+        	System.out.println("ProcessorLogRepository.getLogsByWorkspaceIdInRange" + oEx);
         }
 
         return aoReturnList;
@@ -121,7 +125,7 @@ public class ProcessorLogRepository extends MongoRepository {
             fillList(aoReturnList, oWSDocuments);
 
         } catch (Exception oEx) {
-            oEx.printStackTrace();
+            System.out.println("ProcessorLogRepository.GetQueuedProcess: "+oEx);
         }
 
         return aoReturnList;
@@ -137,8 +141,8 @@ public class ProcessorLogRepository extends MongoRepository {
 		        try {
 		        	oProcessorLog = s_oMapper.readValue(sJSON,ProcessorLog.class);
 		            aoReturnList.add(oProcessorLog);
-		        } catch (IOException e) {
-		            e.printStackTrace();
+		        } catch (IOException oEx) {
+		        	System.out.println("ProcessorLogRepository.fillList: "+oEx);
 		        }
 
 		    }
