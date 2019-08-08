@@ -3,12 +3,12 @@ package wasdi.shared.data;
 import org.bson.Document;
 
 import wasdi.shared.business.Counter;
+import wasdi.shared.utils.Utils;
 
 public class CounterRepository extends MongoRepository {
-	
+
 	public int getNextValue(String sSequence) {
 		Counter oCounter = GetCounterBySequence(sSequence);
-		
 		if (oCounter == null) {
 			oCounter = new Counter();
 			oCounter.setSequence(sSequence);
@@ -23,57 +23,53 @@ public class CounterRepository extends MongoRepository {
 			return iNext;
 		}
 	}
-	   
+
 	public String InsertCounter(Counter oCounter) {
+		String sResult = "";
+		if(oCounter != null) {
+			try {
+				String sJSON = s_oMapper.writeValueAsString(oCounter);
+				Document oDocument = Document.parse(sJSON);
+				getCollection("counter").insertOne(oDocument);
+				sResult = oDocument.getObjectId("_id").toHexString();
 	
-	        try {
-	            String sJSON = s_oMapper.writeValueAsString(oCounter);
-	            Document oDocument = Document.parse(sJSON);
-	            getCollection("counter").insertOne(oDocument);
-	        return oDocument.getObjectId("_id").toHexString();
-	
-	    } catch (Exception oEx) {
-	        oEx.printStackTrace();
-	    }
-	
-	    return "";
+			} catch (Exception oEx) {
+				System.out.println("CounterRepository.InsertCounter: " + oEx);
+			}
+		}
+		return sResult;
 	}
-	
-	
+
+
 	public Counter GetCounterBySequence(String sSequence) {
-
-        try {
-            Document oWSDocument = getCollection("counter").find(new Document("sequence", sSequence)).first();
-
-            String sJSON = oWSDocument.toJson();
-
-            Counter oCounter = s_oMapper.readValue(sJSON,Counter.class);
-
-            return oCounter;
-        } catch (Exception oEx) {
-            oEx.printStackTrace();
-        }
-
-        return  null;
+		Counter oCounter = null;
+		if(!Utils.isNullOrEmpty(sSequence)) {
+			try {
+				Document oWSDocument = getCollection("counter").find(new Document("sequence", sSequence)).first();
+				String sJSON = oWSDocument.toJson();
+				oCounter = s_oMapper.readValue(sJSON,Counter.class);
+			} catch (Exception oEx) {
+				System.out.println("CounterRepository.GetCounterBySequence( " + sSequence + " ): " + oEx);
+			}
+		}
+		return oCounter;
 	}
+
+	public boolean UpdateCounter(Counter oCounter) {
+		if(oCounter!=null) {
+			try {
 	
-    public boolean UpdateCounter(Counter oCounter) {
-
-        try {
-        	        	
-            String sJSON = s_oMapper.writeValueAsString(oCounter);
-            Document filter = new Document("sequence", oCounter.getSequence());
-			Document update = new Document("$set", new Document(Document.parse(sJSON)));
-			getCollection("counter").updateOne(filter, update);
-
-            return true;
-
-        } catch (Exception oEx) {
-            oEx.printStackTrace();
-        }
-
-        return false;
-    }
-	 
-	    
+				String sJSON = s_oMapper.writeValueAsString(oCounter);
+				Document filter = new Document("sequence", oCounter.getSequence());
+				Document update = new Document("$set", new Document(Document.parse(sJSON)));
+				getCollection("counter").updateOne(filter, update);
+	
+				return true;
+	
+			} catch (Exception oEx) {
+				System.out.println("CounterRepository.UpdateCounter: " + oEx);
+			}
+		}
+		return false;
+	}
 }
