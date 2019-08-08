@@ -305,7 +305,7 @@ public class ProcessorsResource {
 				Wasdi.DebugLog("ProcessorsResource.run: done"); 
 			}
 			catch(Exception oEx){
-				System.out.println("ProcessorsResource.run: Error scheduling the run process " + oEx);
+				Wasdi.DebugLog("ProcessorsResource.run: Error scheduling the run process " + oEx);
 				oRunningProcessorViewModel.setStatus(ProcessStatus.ERROR.toString());
 				return oRunningProcessorViewModel;
 			}
@@ -447,7 +447,7 @@ public class ProcessorsResource {
 			}
 		}
 		catch (Exception oEx) {
-			System.out.println("ProcessorsResource.run: Error scheduling the deploy process " + oEx);
+			Wasdi.DebugLog("ProcessorsResource.run: Error scheduling the deploy process " + oEx);
 			oRunning.setStatus(ProcessStatus.ERROR.toString());
 		}
 		return oRunning;
@@ -666,7 +666,7 @@ public class ProcessorsResource {
 				Wasdi.DebugLog("ProcessorsResource.deleteProcessor: done"); 
 			}
 			catch(Exception oEx){
-				System.out.println("ProcessorsResource.deleteProcessor: Error scheduling the run process: " + oEx);
+				Wasdi.DebugLog("ProcessorsResource.deleteProcessor: Error scheduling the run process: " + oEx);
 				return Response.serverError().build();
 			}
 			
