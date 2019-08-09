@@ -46,7 +46,6 @@ public class FileBufferResource {
 	{
 		PrimitiveResult oResult = new PrimitiveResult();
 		oResult.setBoolValue(false);
-		
 		try {
 			
 			Wasdi.DebugLog("FileBufferResource.Download, session: " + sSessionId);
@@ -116,19 +115,14 @@ public class FileBufferResource {
 
 			}
 			catch(Exception oEx){
-				Wasdi.DebugLog("DownloadResource.Download: Error updating process list " + oEx.getMessage());
-				oEx.printStackTrace();
-				
-				oResult.setIntValue(500);
-				return oResult;
+				Wasdi.DebugLog("DownloadResource.Download: Error updating process list " + oEx);
 			}
-						
 		} catch (IOException e) {
-			e.printStackTrace();
+			Wasdi.DebugLog("DownloadResource.Download: Error updating process list " + e);
 		} catch (Exception e) {
-			e.printStackTrace();
+			Wasdi.DebugLog("DownloadResource.Download: Error updating process list " + e);
 		}
-
+		oResult.setIntValue(500);
 		return oResult;
 	}	
 
@@ -184,15 +178,14 @@ public class FileBufferResource {
 				Wasdi.DebugLog("FileBufferResource.Publish: Process Scheduled for Launcher, user: " + sUserId + ", process ID: " + sProcessObjId);
 			}
 			catch(Exception oEx){
-				Wasdi.DebugLog("DownloadResource.Publish: Error updating process list " + oEx.getMessage());
-				oEx.printStackTrace();
+				Wasdi.DebugLog("DownloadResource.Publish: Error updating process list " + oEx);
 				return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
 			}
 
 		} catch (IOException e) {
-			e.printStackTrace();
+			Wasdi.DebugLog("DownloadResource.Publish: " + e);
 		} catch (Exception e) {
-			e.printStackTrace();
+			Wasdi.DebugLog("DownloadResource.Publish: " + e);
 		}
 
 		return Response.ok().build();
@@ -283,17 +276,16 @@ public class FileBufferResource {
 				Wasdi.DebugLog("FileBufferResource.PublishBand: Process Scheduled for Launcher, user: " + sUserId +", process ID: " + sProcessObjId);
 			}
 			catch(Exception oEx){
-				Wasdi.DebugLog("DownloadResource.PublishBand: Error updating process list " + oEx.getMessage());
-				oEx.printStackTrace();
+				Wasdi.DebugLog("DownloadResource.PublishBand: Error updating process list " + oEx);
 				return oReturnValue;
 			}
 
 		}catch (IOException e) {
-			e.printStackTrace();
+			Wasdi.DebugLog("DownloadResource.PublishBand: " + e);
 			return oReturnValue;
 
 		} catch (Exception e) {
-			e.printStackTrace();
+			Wasdi.DebugLog("DownloadResource.PublishBand: " + e);
 			return oReturnValue;
 		}
 
@@ -335,7 +327,7 @@ public class FileBufferResource {
 				Wasdi.DebugLog("FileBufferResource.GetBandLayerId: band never published");
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
+			Wasdi.DebugLog("FileBufferResource.GetBandLayerId: " + e);
 			return oReturnValue;
 		}
 
