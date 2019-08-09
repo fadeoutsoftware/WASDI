@@ -30,198 +30,194 @@ import wasdi.shared.business.UserSession;
  * Created by p.campanella on 14/10/2016.
  */
 public class Utils {
-	
-	public static int m_iSessionValidityMinutes = 24*60;
-	
-    public static boolean isNullOrEmpty(String sString) {
-        if (sString == null) return true;
-        if (sString.isEmpty()) return  true;
 
-        return  false;
-    }
+	public static int m_iSessionValidityMinutes = 24 * 60;
 
-    public static String GetRandomName()
-    {
-        return UUID.randomUUID().toString();
-    }
+	public static boolean isNullOrEmpty(String sString) {
+		if (sString == null)
+			return true;
+		if (sString.isEmpty())
+			return true;
 
-    public static Date getDate(Double oDouble) {
-        double dDate = oDouble;
-        long lLong = (long)dDate;
-        return new Date(lLong);
-    }
+		return false;
+	}
 
-    public static  boolean isValidSession(UserSession oSession) {
+	public static String GetRandomName() {
+		return UUID.randomUUID().toString();
+	}
 
-        if (oSession == null) return false;
-        if (isNullOrEmpty(oSession.getUserId()) ) return false;
+	public static Date getDate(Double oDouble) {
+		double dDate = oDouble;
+		long lLong = (long) dDate;
+		return new Date(lLong);
+	}
 
-        Date oLastTouch = getDate(oSession.getLastTouch());
+	public static boolean isValidSession(UserSession oSession) {
 
-        long lNow = new Date().getTime();
-        long lLastTouch = oLastTouch.getTime();
+		if (oSession == null)
+			return false;
+		if (isNullOrEmpty(oSession.getUserId()))
+			return false;
 
-        if ((lNow-lLastTouch)> m_iSessionValidityMinutes*60*1000) return  false;
+		Date oLastTouch = getDate(oSession.getLastTouch());
 
-        return  true;
-    }
+		long lNow = new Date().getTime();
+		long lLastTouch = oLastTouch.getTime();
 
-    //FIXME it may not work as expected in the following case:
-    //the filename contains one or more dots ('.'):
-    //  /home/username/my.lovely.file.name.zip
-    public static String GetFileNameWithoutExtension(String sInputFile) {
-        String sReturn = "";
-        File oFile = new File(sInputFile);
-        String sInputFileNameOnly = oFile.getName();
+		if ((lNow - lLastTouch) > m_iSessionValidityMinutes * 60 * 1000)
+			return false;
 
-        // Create a clean layer id: the file name without any extension
-        String [] asLayerIdSplit = sInputFileNameOnly.split("\\.");
-        if (asLayerIdSplit!=null) {
-            if (asLayerIdSplit.length>0){
-                sReturn = asLayerIdSplit[0];
-            }
-        }
+		return true;
+	}
 
-        return sReturn;
-    }
+	// FIXME it may not work as expected in the following case:
+	// the filename contains one or more dots ('.'):
+	// /home/username/my.lovely.file.name.zip
+	public static String GetFileNameWithoutExtension(String sInputFile) {
+		String sReturn = "";
+		File oFile = new File(sInputFile);
+		String sInputFileNameOnly = oFile.getName();
 
-    public static String GetFileNameExtension(String sInputFile) {
-        String sReturn = "";
-        File oFile = new File(sInputFile);
-        String sInputFileNameOnly = oFile.getName();
+		// Create a clean layer id: the file name without any extension
+		String[] asLayerIdSplit = sInputFileNameOnly.split("\\.");
+		if (asLayerIdSplit != null) {
+			if (asLayerIdSplit.length > 0) {
+				sReturn = asLayerIdSplit[0];
+			}
+		}
 
-        // Create a clean layer id: the file name without any extension
-        String [] asLayerIdSplit = sInputFileNameOnly.split("\\.");
-        if (asLayerIdSplit!=null) {
-            if (asLayerIdSplit.length>0){
-                sReturn = asLayerIdSplit[asLayerIdSplit.length-1];
-            }
-        }
+		return sReturn;
+	}
 
-        return sReturn;
-    }
+	public static String GetFileNameExtension(String sInputFile) {
+		String sReturn = "";
+		File oFile = new File(sInputFile);
+		String sInputFileNameOnly = oFile.getName();
 
-    public static void fixUpPermissions(Path destPath) throws IOException {
-        Stream<Path> files = Files.list(destPath);
-        files.forEach(path -> {
-            if (Files.isDirectory(path)) {
-                try {
-                    fixUpPermissions(path);
-                } catch (IOException e) {
-                    e.printStackTrace();
+		// Create a clean layer id: the file name without any extension
+		String[] asLayerIdSplit = sInputFileNameOnly.split("\\.");
+		if (asLayerIdSplit != null) {
+			if (asLayerIdSplit.length > 0) {
+				sReturn = asLayerIdSplit[asLayerIdSplit.length - 1];
+			}
+		}
 
-                }
-            }
-            else {
-                setExecutablePermissions(path);
-            }
-        });
-        files.close();
-    }
+		return sReturn;
+	}
 
-    private static void setExecutablePermissions(Path executablePathName) {
-        if (IS_OS_UNIX) {
-            Set<PosixFilePermission> permissions = new HashSet<>(Arrays.asList(
-                    PosixFilePermission.OWNER_READ,
-                    PosixFilePermission.OWNER_WRITE,
-                    PosixFilePermission.OWNER_EXECUTE,
-                    PosixFilePermission.GROUP_READ,
-                    PosixFilePermission.GROUP_EXECUTE,
-                    PosixFilePermission.OTHERS_READ,
-                    PosixFilePermission.OTHERS_EXECUTE));
-            try {
-                Files.setPosixFilePermissions(executablePathName, permissions);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-    
-    //XXX remove if not used
-    public static boolean isValidEmail(String sEmail)
-    {
-    	boolean bIsValid = false;
-    	if(!isNullOrEmpty(sEmail)) {
-    		bIsValid = EmailValidator.getInstance().isValid(sEmail);
-    	}
+	public static void fixUpPermissions(Path destPath) throws IOException {
+		Stream<Path> files = Files.list(destPath);
+		files.forEach(path -> {
+			if (Files.isDirectory(path)) {
+				try {
+					fixUpPermissions(path);
+				} catch (IOException e) {
+					e.printStackTrace();
+
+				}
+			} else {
+				setExecutablePermissions(path);
+			}
+		});
+		files.close();
+	}
+
+	private static void setExecutablePermissions(Path executablePathName) {
+		if (IS_OS_UNIX) {
+			Set<PosixFilePermission> permissions = new HashSet<>(Arrays.asList(PosixFilePermission.OWNER_READ,
+					PosixFilePermission.OWNER_WRITE, PosixFilePermission.OWNER_EXECUTE, PosixFilePermission.GROUP_READ,
+					PosixFilePermission.GROUP_EXECUTE, PosixFilePermission.OTHERS_READ,
+					PosixFilePermission.OTHERS_EXECUTE));
+			try {
+				Files.setPosixFilePermissions(executablePathName, permissions);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
+	// XXX remove if not used
+	public static boolean isValidEmail(String sEmail) {
+		boolean bIsValid = false;
+		if (!isNullOrEmpty(sEmail)) {
+			bIsValid = EmailValidator.getInstance().isValid(sEmail);
+		}
 		return bIsValid;
-    	
-    }
-    
-	public static String GetFormatDate(Date oDate){
-		
+
+	}
+
+	public static String GetFormatDate(Date oDate) {
+
 		return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(oDate);
 	}
 
 	public static String GetFormatFileDimension(long bytes) {
-		 int unit = 1024;
-		 if (bytes < unit) return bytes + " B";
-		 int exp = (int) (Math.log(bytes) / Math.log(unit));
-		 String pre = ("KMGTPE").charAt(exp-1) + "";
-		 return String.format("%.1f %sB", bytes / Math.pow(unit, exp), pre);
+		int unit = 1024;
+		if (bytes < unit)
+			return bytes + " B";
+		int exp = (int) (Math.log(bytes) / Math.log(unit));
+		String pre = ("KMGTPE").charAt(exp - 1) + "";
+		return String.format("%.1f %sB", bytes / Math.pow(unit, exp), pre);
 	}
 
 	private static char randomChar() {
 		Random r = new Random();
-		char c = (char)(r.nextInt(26) + 'a');
+		char c = (char) (r.nextInt(26) + 'a');
 		return c;
 	}
-	
-	
+
 	public static String generateRandomPassword() {
-		//String sPassword = UUID.randomUUID().toString().split("-")[0];
+		// String sPassword = UUID.randomUUID().toString().split("-")[0];
 		String sPassword = new String(UUID.randomUUID().toString());
 		sPassword = sPassword.replace('-', randomChar());
-		//XXX shuffle string before returning
+		// XXX shuffle string before returning
 		return sPassword;
 	}
-	
+
 	public static Boolean isFilePathPlausible(String sFullPath) {
-		if(isNullOrEmpty(sFullPath)) {
+		if (isNullOrEmpty(sFullPath)) {
 			return false;
 		}
-		
+
 		return true;
 	}
-	
-	
+
 	public static Boolean isServerNamePlausible(String sServer) {
-		if(isNullOrEmpty(sServer)) {
+		if (isNullOrEmpty(sServer)) {
 			return false;
 		}
-		//Ok, let's inspect the server...
+		// Ok, let's inspect the server...
 		Boolean bRes = false;
 		bRes = InetAddressValidator.getInstance().isValid(sServer);
-		if(!bRes) {
-			//then maybe it's a domain
+		if (!bRes) {
+			// then maybe it's a domain
 			bRes = DomainValidator.getInstance().isValid(sServer);
-			if(!bRes) {
-				//then maybe it's an URL
+			if (!bRes) {
+				// then maybe it's an URL
 				bRes = UrlValidator.getInstance().isValid(sServer);
 			}
-			if(!bRes) {
-				//then maybe it's localhost
-				if(sServer.equals("localhost")) {
+			if (!bRes) {
+				// then maybe it's localhost
+				if (sServer.equals("localhost")) {
 					bRes = true;
 				}
 			}
 		}
 		return bRes;
 	}
-	
+
 	public static Boolean isPortNumberPlausible(Integer iPort) {
-		if(null == iPort) {
+		if (null == iPort) {
 			return false;
 		}
-		if( 0 <= iPort && iPort <= 65535 ){
+		if (0 <= iPort && iPort <= 65535) {
 			return true;
 		}
 		return false;
 	}
-	
-	public static String[] convertPolygonToArray(String sArea){
-		if(sArea.isEmpty()== true)
-		{
+
+	public static String[] convertPolygonToArray(String sArea) {
+		if (sArea.isEmpty() == true) {
 			return null;
 		}
 		String sCleanedArea = sArea.replaceAll("[POLYGN()]", "");
@@ -230,17 +226,17 @@ public class Utils {
 	}
 
 	public static boolean doesThisStringMeansTrue(String sString) {
-		//default value is arbitrary!
-		if(isNullOrEmpty(sString)) {
+		// default value is arbitrary!
+		if (isNullOrEmpty(sString)) {
 			return true;
-		} else if(sString.equalsIgnoreCase("true")) {
+		} else if (sString.equalsIgnoreCase("true")) {
 			return true;
-		} else if(sString.equalsIgnoreCase("1")) {
+		} else if (sString.equalsIgnoreCase("1")) {
 			return true;
 		}
 		return false;
 	}
-	
+
 	public static void printToFile(String sFilePath, String sToBePrinted) {
 		FileWriter oFileWeriter;
 		try {
@@ -252,50 +248,51 @@ public class Utils {
 			e.printStackTrace();
 		}
 	}
-	
+
 	/**
 	 * Confert a Polygon WKT String in a set of Lat Lon Points comma separated
-	 * @param sContent 
+	 * 
+	 * @param sContent
 	 * @return
 	 */
-	public static String polygonToBounds (String sContent) {
-        sContent = sContent.replace("MULTIPOLYGON ","");
-        sContent = sContent.replace("MULTIPOLYGON","");
-        sContent = sContent.replace("POLYGON ","");
-        sContent = sContent.replace("POLYGON","");
-        sContent = sContent.replace("(((","");
-        sContent = sContent.replace(")))","");
-        sContent = sContent.replace("((","");
-        sContent = sContent.replace("))","");
+	public static String polygonToBounds(String sContent) {
+		sContent = sContent.replace("MULTIPOLYGON ", "");
+		sContent = sContent.replace("MULTIPOLYGON", "");
+		sContent = sContent.replace("POLYGON ", "");
+		sContent = sContent.replace("POLYGON", "");
+		sContent = sContent.replace("(((", "");
+		sContent = sContent.replace(")))", "");
+		sContent = sContent.replace("((", "");
+		sContent = sContent.replace("))", "");
 
-        String [] asContent = sContent.split(",");
-        
-        String sOutput = "";
-        
-        for (int iIndexBounds = 0; iIndexBounds < asContent.length; iIndexBounds++)
-        {
-            String sBounds = asContent[iIndexBounds];
-            sBounds = sBounds.trim();
-            String [] asNewBounds = sBounds.split(" ");
+		String[] asContent = sContent.split(",");
 
-            if (iIndexBounds > 0) sOutput += ", ";
-            
-            try{
-            	sOutput += asNewBounds[1] + "," + asNewBounds[0];
-            }catch(Exception oEx){
-                oEx.printStackTrace();
-            }
-                        
-        }
-        return sOutput;
+		String sOutput = "";
 
-	}	
+		for (int iIndexBounds = 0; iIndexBounds < asContent.length; iIndexBounds++) {
+			String sBounds = asContent[iIndexBounds];
+			sBounds = sBounds.trim();
+			String[] asNewBounds = sBounds.split(" ");
+
+			if (iIndexBounds > 0)
+				sOutput += ", ";
+
+			try {
+				sOutput += asNewBounds[1] + "," + asNewBounds[0];
+			} catch (Exception oEx) {
+				oEx.printStackTrace();
+			}
+
+		}
+		return sOutput;
+
+	}
 
 	public static boolean isPlausibleHttpUrl(String sUrl) {
-		if(isNullOrEmpty(sUrl)) {
+		if (isNullOrEmpty(sUrl)) {
 			return false;
 		}
-		if(sUrl.startsWith("https://") || sUrl.startsWith("http://")) {
+		if (sUrl.startsWith("https://") || sUrl.startsWith("http://")) {
 			return true;
 		}
 		return false;
@@ -303,10 +300,11 @@ public class Utils {
 
 	/**
 	 * Debug Log
+	 * 
 	 * @param sMessage
 	 */
 	public static void debugLog(String sMessage) {
 		LocalDateTime oNow = LocalDateTime.now();
-		System.out.println(oNow+": " + sMessage);
+		System.out.println(oNow + ": " + sMessage);
 	}
 }
