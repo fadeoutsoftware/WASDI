@@ -130,6 +130,7 @@ public class ProcessWorkspaceResource {
 
 
 	private ProcessWorkspaceViewModel buildProcessWorkspaceViewModel(ProcessWorkspace oProcess) {
+		Wasdi.DebugLog("ProcessWorkspaceResource.buildProcessWorkspaceViewModel");
 		ProcessWorkspaceViewModel oViewModel = new ProcessWorkspaceViewModel();
 		try {
 			// Set the start date: beeing introduced later, for compatibility, if not present use the Operation Date
@@ -255,7 +256,7 @@ public class ProcessWorkspaceResource {
 	@Path("/summary")
 	@Produces({"application/xml", "application/json", "text/xml"})
 	public ProcessWorkspaceSummaryViewModel getSummary(@HeaderParam("x-session-token") String sSessionId) {
-		//Wasdi.DebugLog("ProcessWorkspaceResource.GetSummary( " + sSessionId + " )");
+		Wasdi.DebugLog("ProcessWorkspaceResource.GetSummary( " + sSessionId + " )");
 		User oUser = Wasdi.GetUserFromSession(sSessionId);
 		ProcessWorkspaceSummaryViewModel oSummaryViewModel = new ProcessWorkspaceSummaryViewModel();
 
