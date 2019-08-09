@@ -1,6 +1,6 @@
 package it.fadeout.sftp;
 
-import it.fadeout.Wasdi;
+import wasdi.shared.utils.Utils;
 
 /**
  * class for sftp account management
@@ -19,7 +19,7 @@ public class SFTPManager {
 		try {
 			WsClient oClient = new WsClient(m_sAddress, sCommand);
 			if (oClient.isOk()) return oClient.getData();		
-			Wasdi.debugLog("ERROR: " + oClient.getData());		
+			Utils.debugLog("ERROR: " + oClient.getData());		
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}				

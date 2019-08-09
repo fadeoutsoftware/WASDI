@@ -11,10 +11,10 @@ import javax.ws.rs.core.MediaType;
 import org.nfs.orbits.sat.SatFactory;
 import org.nfs.orbits.sat.Satellite;
 
-import it.fadeout.Wasdi;
 import it.fadeout.business.InstanceFinder;
 import it.fadeout.viewmodels.SatelliteOrbitResultViewModel;
 import satLib.astro.time.Time;
+import wasdi.shared.utils.Utils;
 
 @Path("/satellite")
 public class SatelliteResource {
@@ -26,7 +26,7 @@ public class SatelliteResource {
 	public SatelliteOrbitResultViewModel getSatelliteTrack(@HeaderParam("x-session-token") String sSessionId,
 			@PathParam("satellitename") String sSatname) {
 
-		Wasdi.debugLog("SatelliteResource.getSatelliteTrack( " + sSessionId + ", " + sSatname + " )");
+		Utils.debugLog("SatelliteResource.getSatelliteTrack( " + sSessionId + ", " + sSatname + " )");
 
 		SatelliteOrbitResultViewModel ret = new SatelliteOrbitResultViewModel();
 		String satres = InstanceFinder.s_sOrbitSatsMap.get(sSatname);
@@ -60,7 +60,7 @@ public class SatelliteResource {
 				ret.lastPositionsTime.add(tconv.convertJD2String(tm[i]));
 			}
 		} catch (Exception e) {
-			Wasdi.debugLog("SatelliteResource.getSatelliteTrack: " + e);
+			Utils.debugLog("SatelliteResource.getSatelliteTrack: " + e);
 		}
 		return ret;
 	}

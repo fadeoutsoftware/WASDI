@@ -57,7 +57,7 @@ public class ProductResource {
 	@Produces({ "application/xml", "application/json", "text/xml" })
 	public PrimitiveResult addProductToWorkspace(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("sProductName") String sProductName, @QueryParam("sWorkspaceId") String sWorkspaceId) {
-		Wasdi.debugLog(
+		Utils.debugLog(
 				"ProductResource.AddProductToWorkspace:  called WS: " + sWorkspaceId + " Product " + sProductName);
 
 		// Validate Session
@@ -78,7 +78,7 @@ public class ProductResource {
 
 		if (oProductWorkspaceRepository.ExistsProductWorkspace(oProductWorkspace.getProductName(),
 				oProductWorkspace.getWorkspaceId())) {
-			Wasdi.debugLog("ProductResource.AddProductToWorkspace:  Product already in the workspace");
+			Utils.debugLog("ProductResource.AddProductToWorkspace:  Product already in the workspace");
 
 			// Ok done
 			PrimitiveResult oResult = new PrimitiveResult();
@@ -89,14 +89,14 @@ public class ProductResource {
 		// Try to insert
 		if (oProductWorkspaceRepository.InsertProductWorkspace(oProductWorkspace)) {
 
-			Wasdi.debugLog("ProductResource.AddProductToWorkspace:  Inserted");
+			Utils.debugLog("ProductResource.AddProductToWorkspace:  Inserted");
 
 			// Ok done
 			PrimitiveResult oResult = new PrimitiveResult();
 			oResult.setBoolValue(true);
 			return oResult;
 		} else {
-			Wasdi.debugLog("ProductResource.AddProductToWorkspace:  Error");
+			Utils.debugLog("ProductResource.AddProductToWorkspace:  Error");
 
 			// There was a problem
 			PrimitiveResult oResult = new PrimitiveResult();
@@ -112,7 +112,7 @@ public class ProductResource {
 	public GeorefProductViewModel getByProductName(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("sProductName") String sProductName, @QueryParam("workspace") String sWorkspace) {
 
-		Wasdi.debugLog(
+		Utils.debugLog(
 				"ProductResource.GetByProductName( " + sSessionId + ", " + sProductName + ", " + sWorkspace + " )");
 
 		// Validate Session
@@ -128,11 +128,11 @@ public class ProductResource {
 		DownloadedFilesRepository oDownloadedFilesRepository = new DownloadedFilesRepository();
 		DownloadedFile oDownloadedFile = oDownloadedFilesRepository.GetDownloadedFileByPath(sFullPath + sProductName);
 
-		Wasdi.debugLog("ProductResource.GetByProductName: search file " + sFullPath + sProductName);
+		Utils.debugLog("ProductResource.GetByProductName: search file " + sFullPath + sProductName);
 
 		if (oDownloadedFile != null) {
 
-			Wasdi.debugLog("ProductResource.GetByProductName: product found");
+			Utils.debugLog("ProductResource.GetByProductName: product found");
 
 			GeorefProductViewModel oGeoViewModel = new GeorefProductViewModel(oDownloadedFile.getProductViewModel());
 			oGeoViewModel.setBbox(oDownloadedFile.getBoundingBox());
@@ -140,7 +140,7 @@ public class ProductResource {
 			// Ok read
 			return oGeoViewModel;
 		} else {
-			Wasdi.debugLog("ProductResource.GetByProductName: product not found");
+			Utils.debugLog("ProductResource.GetByProductName: product not found");
 
 			// Product not available
 			return null;
@@ -153,7 +153,7 @@ public class ProductResource {
 	public MetadataViewModel getMetadataByProductName(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("sProductName") String sProductName, @QueryParam("workspace") String sWorkspaceId) {
 
-		Wasdi.debugLog("ProductResource.GetMetadataByProductName( " + sSessionId + ", " + sProductName + ", "
+		Utils.debugLog("ProductResource.GetMetadataByProductName( " + sSessionId + ", " + sProductName + ", "
 				+ sWorkspaceId + " )");
 
 		// Validate Session
@@ -186,19 +186,19 @@ public class ProductResource {
 					String sMetadataFile = oDownloadedFile.getProductViewModel().getMetadataFileReference();
 
 					if (sMetadataFile == null) {
-						Wasdi.debugLog("ProductResource.GetMetadataByProductName: MetadataFile = null for product "
+						Utils.debugLog("ProductResource.GetMetadataByProductName: MetadataFile = null for product "
 								+ oDownloadedFile.getFilePath());
 						return null;
 					}
 
 					MetadataViewModel oReloaded = (MetadataViewModel) SerializationUtils
 							.deserializeXMLToObject(sMetadataPath + sMetadataFile);
-					Wasdi.debugLog("ProductResource.GetMetadataByProductName: return Metadata for product "
+					Utils.debugLog("ProductResource.GetMetadataByProductName: return Metadata for product "
 							+ oDownloadedFile.getFilePath());
 					// Ok return Metadata
 					return oReloaded;
 				} catch (Exception oEx) {
-					Wasdi.debugLog("ProductResource.GetMetadataByProductName: " + oEx);
+					Utils.debugLog("ProductResource.GetMetadataByProductName: " + oEx);
 					return null;
 				}
 
@@ -214,7 +214,7 @@ public class ProductResource {
 	@Produces({ "application/xml", "application/json", "text/xml" })
 	public ArrayList<GeorefProductViewModel> getListByWorkspace(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("sWorkspaceId") String sWorkspaceId) {
-		Wasdi.debugLog("ProductResource.GetListByWorkspace( " + sSessionId + ", " + sWorkspaceId + " )");
+		Utils.debugLog("ProductResource.GetListByWorkspace( " + sSessionId + ", " + sWorkspaceId + " )");
 		User oUser = Wasdi.GetUserFromSession(sSessionId);
 
 		ArrayList<GeorefProductViewModel> aoProductList = new ArrayList<GeorefProductViewModel>();
@@ -229,7 +229,7 @@ public class ProductResource {
 				return aoProductList;
 			}
 
-			Wasdi.debugLog("ProductResource.GetListByWorkspace: products for " + sWorkspaceId);
+			Utils.debugLog("ProductResource.GetListByWorkspace: products for " + sWorkspaceId);
 
 			// Create repo
 			ProductWorkspaceRepository oProductWorkspaceRepository = new ProductWorkspaceRepository();
@@ -240,7 +240,7 @@ public class ProductResource {
 			List<ProductWorkspace> aoProductWorkspace = oProductWorkspaceRepository
 					.GetProductsByWorkspace(sWorkspaceId);
 
-			Wasdi.debugLog("ProductResource.GetListByWorkspace: found " + aoProductWorkspace.size());
+			Utils.debugLog("ProductResource.GetListByWorkspace: found " + aoProductWorkspace.size());
 
 			// For each
 			for (int iProducts = 0; iProducts < aoProductWorkspace.size(); iProducts++) {
@@ -288,17 +288,17 @@ public class ProductResource {
 						aoProductList.add(geoPVM);
 
 					} else {
-						Wasdi.debugLog("ProductResource.GetListByWorkspace: ProductViewModel is Null: jump product");
+						Utils.debugLog("ProductResource.GetListByWorkspace: ProductViewModel is Null: jump product");
 					}
 
 				} else {
-					Wasdi.debugLog("ProductResource.GetListByWorkspace: WARNING: the product "
+					Utils.debugLog("ProductResource.GetListByWorkspace: WARNING: the product "
 							+ aoProductWorkspace.get(iProducts).getProductName() + " should be in WS " + sWorkspaceId
 							+ " but is not a Downloaded File");
 				}
 			}
 		} catch (Exception oEx) {
-			Wasdi.debugLog("ProductResource.GetListByWorkspace: " + oEx);
+			Utils.debugLog("ProductResource.GetListByWorkspace: " + oEx);
 		}
 
 		return aoProductList;
@@ -310,7 +310,7 @@ public class ProductResource {
 	public ArrayList<String> getNamesByWorkspace(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("sWorkspaceId") String sWorkspaceId) {
 
-		Wasdi.debugLog("ProductResource.GetListByWorkspace( " + sSessionId + ", " + sWorkspaceId + " )");
+		Utils.debugLog("ProductResource.GetListByWorkspace( " + sSessionId + ", " + sWorkspaceId + " )");
 
 		User oUser = Wasdi.GetUserFromSession(sSessionId);
 
@@ -326,7 +326,7 @@ public class ProductResource {
 				return aoProductList;
 			}
 
-			Wasdi.debugLog("ProductResource.getNamesByWorkspace: products for " + sWorkspaceId);
+			Utils.debugLog("ProductResource.getNamesByWorkspace: products for " + sWorkspaceId);
 
 			// Create repo
 			ProductWorkspaceRepository oProductWorkspaceRepository = new ProductWorkspaceRepository();
@@ -336,7 +336,7 @@ public class ProductResource {
 			List<ProductWorkspace> aoProductWorkspace = oProductWorkspaceRepository
 					.GetProductsByWorkspace(sWorkspaceId);
 
-			Wasdi.debugLog("ProductResource.getNamesByWorkspace: found " + aoProductWorkspace.size());
+			Utils.debugLog("ProductResource.getNamesByWorkspace: found " + aoProductWorkspace.size());
 
 			// For each
 			for (int iProducts = 0; iProducts < aoProductWorkspace.size(); iProducts++) {
@@ -350,13 +350,13 @@ public class ProductResource {
 					aoProductList.add(oDownloaded.getFileName());
 
 				} else {
-					Wasdi.debugLog("ProductResource.getNamesByWorkspace: WARNING: the product "
+					Utils.debugLog("ProductResource.getNamesByWorkspace: WARNING: the product "
 							+ aoProductWorkspace.get(iProducts).getProductName() + " should be in WS " + sWorkspaceId
 							+ " but is not a Downloaded File");
 				}
 			}
 		} catch (Exception oEx) {
-			Wasdi.debugLog("ProductResource.getNamesByWorkspace: " + oEx);
+			Utils.debugLog("ProductResource.getNamesByWorkspace: " + oEx);
 		}
 
 		return aoProductList;
@@ -368,7 +368,7 @@ public class ProductResource {
 	public Response updateProductViewModel(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("workspace") String sWorkspace, ProductViewModel oProductViewModel) {
 
-		Wasdi.debugLog("ProductResource.UpdateProductViewModel( " + sSessionId + ", " + sWorkspace + ", ... )");
+		Utils.debugLog("ProductResource.UpdateProductViewModel( " + sSessionId + ", " + sWorkspace + ", ... )");
 
 		User oUser = Wasdi.GetUserFromSession(sSessionId);
 
@@ -386,7 +386,7 @@ public class ProductResource {
 				return Response.status(500).build();
 			}
 
-			Wasdi.debugLog("ProductResource.UpdateProductViewModel: product " + oProductViewModel.getFileName());
+			Utils.debugLog("ProductResource.UpdateProductViewModel: product " + oProductViewModel.getFileName());
 
 			String sFullPath = Wasdi.getWorkspacePath(m_oServletConfig, Wasdi.getWorkspaceOwner(sWorkspace),
 					sWorkspace);
@@ -398,7 +398,7 @@ public class ProductResource {
 					.GetDownloadedFileByPath(sFullPath + oProductViewModel.getFileName());
 
 			if (oDownlaoded == null) {
-				Wasdi.debugLog("ProductResource.UpdateProductViewModel: Associated downloaded file not found.");
+				Utils.debugLog("ProductResource.UpdateProductViewModel: Associated downloaded file not found.");
 				return Response.status(500).build();
 			}
 
@@ -410,16 +410,16 @@ public class ProductResource {
 
 			// Save
 			if (oDownloadedFilesRepository.UpdateDownloadedFile(oDownlaoded) == false) {
-				Wasdi.debugLog("ProductResource.UpdateProductViewModel: There was an error updating Downloaded File.");
+				Utils.debugLog("ProductResource.UpdateProductViewModel: There was an error updating Downloaded File.");
 				return Response.status(500).build();
 			}
 
 		} catch (Exception oEx) {
-			Wasdi.debugLog("ProductResource.UpdateProductViewModel: " + oEx);
+			Utils.debugLog("ProductResource.UpdateProductViewModel: " + oEx);
 			return Response.status(500).build();
 		}
 
-		Wasdi.debugLog("ProductResource.UpdateProductViewModel: Updated ");
+		Utils.debugLog("ProductResource.UpdateProductViewModel: Updated ");
 
 		return Response.status(200).build();
 	}
@@ -430,7 +430,7 @@ public class ProductResource {
 	public Response uploadFile(@FormDataParam("file") InputStream fileInputStream,
 			@HeaderParam("x-session-token") String sSessionId, @QueryParam("workspace") String sWorkspace,
 			@QueryParam("name") String sName) throws Exception {
-		Wasdi.debugLog(
+		Utils.debugLog(
 				"ProductResource.uploadfile( InputStream, " + sSessionId + ", " + sWorkspace + ", " + sName + " )");
 
 		// Check the user session
@@ -499,14 +499,14 @@ public class ProductResource {
 				oProcess.setProcessObjId(sProcessObjId);
 				oProcess.setStatus(ProcessStatus.CREATED.name());
 				oRepository.InsertProcessWorkspace(oProcess);
-				Wasdi.debugLog("ProductResource.uploadfile: Process Scheduled for Launcher");
+				Utils.debugLog("ProductResource.uploadfile: Process Scheduled for Launcher");
 			} catch (Exception oEx) {
-				Wasdi.debugLog("ProductResource.uploadfile: Error updating process list " + oEx);
+				Utils.debugLog("ProductResource.uploadfile: Error updating process list " + oEx);
 				return Response.status(500).build();
 			}
 
 		} catch (Exception e) {
-			Wasdi.debugLog("ProductResource.uploadfile: " + e);
+			Utils.debugLog("ProductResource.uploadfile: " + e);
 			return Response.status(500).build();
 		}
 
@@ -519,7 +519,7 @@ public class ProductResource {
 	public PrimitiveResult deleteProduct(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("sProductName") String sProductName, @QueryParam("bDeleteFile") Boolean bDeleteFile,
 			@QueryParam("sWorkspaceId") String sWorkspace, @QueryParam("bDeleteLayer") Boolean bDeleteLayer) {
-		Wasdi.debugLog("ProductResource.DeleteProduct( " + sSessionId + ", " + sProductName + ", " + bDeleteFile + ", "
+		Utils.debugLog("ProductResource.DeleteProduct( " + sSessionId + ", " + sProductName + ", " + bDeleteFile + ", "
 				+ sWorkspace + ", " + bDeleteLayer + " )");
 
 		PrimitiveResult oReturn = new PrimitiveResult();
@@ -531,21 +531,21 @@ public class ProductResource {
 			// Domain Check
 			if (oUser == null) {
 				String sMessage = "passed a null user";
-				Wasdi.debugLog("ProductResource.DeleteProduct: " + sMessage);
+				Utils.debugLog("ProductResource.DeleteProduct: " + sMessage);
 				oReturn.setStringValue(sMessage);
 				oReturn.setIntValue(404);
 				return oReturn;
 			}
 			if (Utils.isNullOrEmpty(oUser.getUserId())) {
 				String sMessage = "user not found";
-				Wasdi.debugLog("ProductResource.DeleteProduct: " + sMessage);
+				Utils.debugLog("ProductResource.DeleteProduct: " + sMessage);
 				oReturn.setStringValue(sMessage);
 				oReturn.setIntValue(404);
 				return oReturn;
 			}
 			if (Utils.isNullOrEmpty(sWorkspace)) {
 				String sMessage = "workspace null or empty";
-				Wasdi.debugLog("ProductResource.DeleteProduct: " + sMessage);
+				Utils.debugLog("ProductResource.DeleteProduct: " + sMessage);
 				oReturn.setStringValue(sMessage);
 				oReturn.setIntValue(404);
 				return oReturn;
@@ -553,9 +553,9 @@ public class ProductResource {
 
 			String sDownloadPath = Wasdi.getWorkspacePath(m_oServletConfig, Wasdi.getWorkspaceOwner(sWorkspace),
 					sWorkspace);
-			Wasdi.debugLog("ProductResource.DeleteProduct: Download Path: " + sDownloadPath);
+			Utils.debugLog("ProductResource.DeleteProduct: Download Path: " + sDownloadPath);
 			String sFilePath = sDownloadPath + sProductName;
-			Wasdi.debugLog("ProductResource.DeleteProduct: File Path: " + sFilePath);
+			Utils.debugLog("ProductResource.DeleteProduct: File Path: " + sFilePath);
 
 			// P.Campanella:20190724: try to fix the bug that pub bands are not deleted.
 			// Here the name has the extension. In the db the reference to the product is
@@ -606,19 +606,19 @@ public class ProductResource {
 
 				File[] aoFiles = oFolder.listFiles(oFilter);
 				if (aoFiles != null) {
-					Wasdi.debugLog("ProductResource.DeleteProduct: Number of files to delete " + aoFiles.length);
+					Utils.debugLog("ProductResource.DeleteProduct: Number of files to delete " + aoFiles.length);
 					for (File oFile : aoFiles) {
 
 						System.out.print("ProductResource.DeleteProduct: deleting file product "
 								+ oFile.getAbsolutePath() + "...");
 						if (!FileUtils.deleteQuietly(oFile)) {
-							Wasdi.debugLog("    ERROR");
+							Utils.debugLog("    ERROR");
 						} else {
-							Wasdi.debugLog("    OK");
+							Utils.debugLog("    OK");
 						}
 					}
 				} else {
-					Wasdi.debugLog("ProductResource.DeleteProduct: No File to delete ");
+					Utils.debugLog("ProductResource.DeleteProduct: No File to delete ");
 				}
 			}
 
@@ -635,11 +635,11 @@ public class ProductResource {
 
 				for (PublishedBand oPublishedBand : aoPublishedBands) {
 					try {
-						Wasdi.debugLog(
+						Utils.debugLog(
 								"ProductResource.DeleteProduct: LayerId to delete " + oPublishedBand.getLayerId());
 
 						if (!oGeoServerManager.removeLayer(oPublishedBand.getLayerId())) {
-							Wasdi.debugLog("ProductResource.DeleteProduct: error deleting layer "
+							Utils.debugLog("ProductResource.DeleteProduct: error deleting layer "
 									+ oPublishedBand.getLayerId() + " from geoserver");
 						}
 
@@ -648,12 +648,12 @@ public class ProductResource {
 							oPublishedBandsRepository.DeleteByProductNameLayerId(
 									oDownloadedFile.getProductViewModel().getName(), oPublishedBand.getLayerId());
 						} catch (Exception oEx) {
-							Wasdi.debugLog(
+							Utils.debugLog(
 									"ProductResource.DeleteProduct: error deleting published band on data base " + oEx);
 						}
 
 					} catch (Exception oEx) {
-						Wasdi.debugLog("ProductResource.DeleteProduct: " + oEx);
+						Utils.debugLog("ProductResource.DeleteProduct: " + oEx);
 					}
 				}
 			}
@@ -664,14 +664,14 @@ public class ProductResource {
 				oProductWorkspaceRepository.DeleteByProductNameWorkspace(sDownloadPath + sProductName, sWorkspace);
 				oDownloadedFilesRepository.DeleteByFilePath(sDownloadPath + sProductName);
 			} catch (Exception oEx) {
-				Wasdi.debugLog("ProductResource.DeleteProduct: error deleting product " + oEx);
+				Utils.debugLog("ProductResource.DeleteProduct: error deleting product " + oEx);
 				oReturn.setIntValue(500);
 				oReturn.setStringValue(oEx.toString());
 				return oReturn;
 			}
 
 		} catch (Exception oEx) {
-			Wasdi.debugLog("ProductResource.DeleteProduct: error deleting product " + oEx);
+			Utils.debugLog("ProductResource.DeleteProduct: error deleting product " + oEx);
 			oReturn.setIntValue(500);
 			oReturn.setStringValue(oEx.toString());
 			return oReturn;

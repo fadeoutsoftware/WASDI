@@ -9,6 +9,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.PosixFilePermission;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
@@ -298,5 +299,14 @@ public class Utils {
 			return true;
 		}
 		return false;
+	}
+
+	/**
+	 * Debug Log
+	 * @param sMessage
+	 */
+	public static void debugLog(String sMessage) {
+		LocalDateTime oNow = LocalDateTime.now();
+		System.out.println(oNow+": " + sMessage);
 	}
 }

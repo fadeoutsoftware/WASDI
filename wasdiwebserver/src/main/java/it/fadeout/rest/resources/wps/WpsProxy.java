@@ -23,7 +23,6 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 
 import org.apache.commons.io.IOUtils;
 
-import it.fadeout.Wasdi;
 import wasdi.shared.business.WpsProvider;
 import wasdi.shared.data.WpsProvidersRepository;
 import wasdi.shared.utils.AuthenticationCredentials;
@@ -46,7 +45,7 @@ public class WpsProxy {
 
 
 	public Response get(String sParam, HttpHeaders oHeaders) {
-		Wasdi.debugLog("WpsProxy.get");
+		Utils.debugLog("WpsProxy.get");
 		updateProviderUrlAsNeeded();
 		authenticateAsNeeded();
 		try {
@@ -87,10 +86,10 @@ public class WpsProxy {
 
 	//TODO refactor with a method to get and post in order to get rid of redundancies
 	public Response post(String sParam, HttpHeaders oHeaders, String sPayload) {
-		Wasdi.debugLog("WpsProxy.post");
+		Utils.debugLog("WpsProxy.post");
 		updateProviderUrlAsNeeded();
 		authenticateAsNeeded();
-		Wasdi.debugLog("WpsProxy.get");
+		Utils.debugLog("WpsProxy.get");
 		if(Utils.isNullOrEmpty(m_sProviderUrl)) {
 			throw new NullPointerException("WpsProxy.get: provider not initialized");
 		}
@@ -135,7 +134,7 @@ public class WpsProxy {
 	}
 	
 	public void setProviderUrl(String sUrl) {
-		Wasdi.debugLog("WpsProxy.setProviderUrl");
+		Utils.debugLog("WpsProxy.setProviderUrl");
 		if(null == sUrl) {
 			throw new NullPointerException("WpsProxy.setProviderUrl: null string passed");
 		}
@@ -261,12 +260,12 @@ public class WpsProxy {
 	}
 	
 	protected void setAuthenticator() {
-		Wasdi.debugLog("WpsProxy.authenticate");
+		Utils.debugLog("WpsProxy.authenticate");
 		updateProviderUrlAsNeeded();
 	}
 	
 	protected void authenticateAsNeeded() {
-		Wasdi.debugLog("WpsProxy.authenticateAsNeeded");
+		Utils.debugLog("WpsProxy.authenticateAsNeeded");
 	}
 
 	public void setProviderName(String sWpsProvider) {

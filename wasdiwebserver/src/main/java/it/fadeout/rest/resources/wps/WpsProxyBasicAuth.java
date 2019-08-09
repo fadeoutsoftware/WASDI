@@ -9,7 +9,7 @@ package it.fadeout.rest.resources.wps;
 import java.net.Authenticator;
 import java.net.PasswordAuthentication;
 
-import it.fadeout.Wasdi;
+import wasdi.shared.utils.Utils;
 
 /**
  * @author c.nattero
@@ -25,7 +25,7 @@ public class WpsProxyBasicAuth extends WpsProxy {
 
 	@Override
 	protected void setAuthenticator() {
-		Wasdi.debugLog("WpsProxyBasicAuth.authenticate");
+		Utils.debugLog("WpsProxyBasicAuth.authenticate");
 		updateProviderUrlAsNeeded();
 		if(null==m_oCredentials) {
 			throw new NullPointerException("WpsProxyBNasicAuth.setAuthenticator: null credentials. Not initialized?");
@@ -35,7 +35,7 @@ public class WpsProxyBasicAuth extends WpsProxy {
 				try {
 					return new PasswordAuthentication(m_oCredentials.getUser(), m_oCredentials.getPassword().toCharArray());
 				} catch (Exception oEx) {
-					Wasdi.debugLog("WpsProxyBasicAuth.authenticate" + oEx.getMessage() );
+					Utils.debugLog("WpsProxyBasicAuth.authenticate" + oEx.getMessage() );
 					throw oEx;
 				}
 			}
@@ -45,7 +45,7 @@ public class WpsProxyBasicAuth extends WpsProxy {
 
 	@Override
 	protected void authenticateAsNeeded() {
-		Wasdi.debugLog("WpsProxyBasicAuth.authenticateAsNeeded");
+		Utils.debugLog("WpsProxyBasicAuth.authenticateAsNeeded");
 		if(!m_bIsAuthenticatorSet) {
 			setAuthenticator();
 			if(null==m_oCredentials) {

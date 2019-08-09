@@ -27,7 +27,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.UriInfo;
 
-import it.fadeout.Wasdi;
+import wasdi.shared.utils.Utils;
 
 /**
  * @author c.nattero
@@ -37,7 +37,7 @@ import it.fadeout.Wasdi;
 public class WasdiWps {
 
 	public WasdiWps() {
-		Wasdi.debugLog("Hello WPS proxy");
+		Utils.debugLog("Hello WPS proxy");
 	}
 	
 	@Inject
@@ -122,7 +122,7 @@ public class WasdiWps {
 			ResponseBuilder oResponseBuilder = null;
 			if(iStatus <= 299) {
 				String sResponse = getFullResponse(oHttpURLConnection);
-				Wasdi.debugLog(sResponse);
+				Utils.debugLog(sResponse);
 				oResponseBuilder = Response.ok(sResponse);
 			} else {
 				oResponseBuilder = Response.status(iStatus);
@@ -171,7 +171,7 @@ public class WasdiWps {
 
 			int iStatus = oHttpURLConnection.getResponseCode();
 			String sResponse = getFullResponse(oHttpURLConnection);
-			Wasdi.debugLog(sResponse);
+			Utils.debugLog(sResponse);
 			ResponseBuilder oResponseBuilder = Response.ok(sResponse);
 			return oResponseBuilder.build();
 

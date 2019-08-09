@@ -54,19 +54,19 @@ public class OpenSearchResource {
 			@QueryParam("offset") String sOffset, @QueryParam("limit") String sLimit,
 			@QueryParam("sortedby") String sSortedBy, @QueryParam("order") String sOrder) {
 		
-		Wasdi.debugLog(s_sClassName + ".SearchSentinel( "+sSessionId+", " + sQuery + ", " +
+		Utils.debugLog(s_sClassName + ".SearchSentinel( "+sSessionId+", " + sQuery + ", " +
 				sOffset + ", " + sLimit + ", " + sSortedBy + ", " + sOrder + " )");
 		if (Utils.isNullOrEmpty(sSessionId)) {
-			Wasdi.debugLog(s_sClassName + ".SearchSentinel: session is null");
+			Utils.debugLog(s_sClassName + ".SearchSentinel: session is null");
 			return null;
 		}
 		User oUser = Wasdi.GetUserFromSession(sSessionId);
 		if (oUser == null) {
-			Wasdi.debugLog(s_sClassName + ".SearchSentinel: user corresponding to session is null");
+			Utils.debugLog(s_sClassName + ".SearchSentinel: user corresponding to session is null");
 			return null;
 		}
 		if (Utils.isNullOrEmpty(oUser.getUserId())) {
-			Wasdi.debugLog(s_sClassName + ".SearchSentinel: user corresponding to session is not null, but it's userid is null");
+			Utils.debugLog(s_sClassName + ".SearchSentinel: user corresponding to session is not null, but it's userid is null");
 			return null;
 		}
 		try {
@@ -85,7 +85,7 @@ public class OpenSearchResource {
 			asParameterMap.put("OSUser", m_oServletConfig.getInitParameter("OSUser"));
 			asParameterMap.put("OSPwd", m_oServletConfig.getInitParameter("OSPwd"));
 
-			Wasdi.debugLog(s_sClassName + ".SearchSentinel, user: " + oUser.getUserId() + " execute query " + sQuery);
+			Utils.debugLog(s_sClassName + ".SearchSentinel, user: " + oUser.getUserId() + " execute query " + sQuery);
 
 			// return OpenSearchQuery.ExecuteQuerySentinel(sQuery, asParams.toArray(new String[asParams.size()]));
 			String sResult = null;
@@ -93,10 +93,10 @@ public class OpenSearchResource {
 				sResult = OpenSearchQuery.ExecuteQuery(sQuery, asParameterMap);
 				return sResult;
 			} catch (NumberFormatException oE) {
-				Wasdi.debugLog(s_sClassName + ".SearchSentinel: caught NumberFormatException: " + oE);
+				Utils.debugLog(s_sClassName + ".SearchSentinel: caught NumberFormatException: " + oE);
 			}
 		} catch (URISyntaxException | IOException oE) {
-			Wasdi.debugLog(s_sClassName + ".SearchSentinel: caught Exception: " + oE);
+			Utils.debugLog(s_sClassName + ".SearchSentinel: caught Exception: " + oE);
 		}
 		return null;
 	}
@@ -107,7 +107,7 @@ public class OpenSearchResource {
 	@Produces({ "application/xml", "application/json", "text/html" })
 	public String getProductsCountSentinel(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sQuery") String sQuery) {
 
-		Wasdi.debugLog(s_sClassName + ".GetProductsCountSentinel( " + sSessionId + ", " + sQuery + " )");
+		Utils.debugLog(s_sClassName + ".GetProductsCountSentinel( " + sSessionId + ", " + sQuery + " )");
 		if (Utils.isNullOrEmpty(sSessionId)) {
 			return null;
 		}
@@ -119,18 +119,18 @@ public class OpenSearchResource {
 			return null;
 		}
 		try {
-			Wasdi.debugLog(s_sClassName + ".GetProductsCount, user: " + oUser.getUserId() + " Query: " + sQuery);
+			Utils.debugLog(s_sClassName + ".GetProductsCount, user: " + oUser.getUserId() + " Query: " + sQuery);
 			String sResult = null;
 			try {
 				sResult = OpenSearchQuery.ExecuteQueryCount(sQuery, m_oServletConfig.getInitParameter("OSUser"),
 						m_oServletConfig.getInitParameter("OSPwd"), m_oServletConfig.getInitParameter("OSProvider")); 
 				return sResult;
 			} catch (NumberFormatException oNumberFormatException) {
-				Wasdi.debugLog(s_sClassName + ".getProductsCountSentinel: caught NumberFormatException: " + oNumberFormatException);
+				Utils.debugLog(s_sClassName + ".getProductsCountSentinel: caught NumberFormatException: " + oNumberFormatException);
 				return null;
 			}
 		} catch (URISyntaxException | IOException oE) {
-			Wasdi.debugLog(s_sClassName + ".getProductsCountSentinel: caught Exception: " + oE);
+			Utils.debugLog(s_sClassName + ".getProductsCountSentinel: caught Exception: " + oE);
 		}
 		return null;
 	}
@@ -141,7 +141,7 @@ public class OpenSearchResource {
 	public int getProductsCount(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sQuery") String sQuery,
 			@QueryParam("providers") String sProviders) {
 
-		Wasdi.debugLog(s_sClassName + ".getProductsCount( " + sSessionId + ", " + sQuery + ", " + sProviders + " )");
+		Utils.debugLog(s_sClassName + ".getProductsCount( " + sSessionId + ", " + sQuery + ", " + sProviders + " )");
 		try {
 			if (Utils.isNullOrEmpty(sSessionId)) {
 				return -1;
@@ -153,27 +153,27 @@ public class OpenSearchResource {
 	
 			int iCounter = 0;
 			if (sProviders != null) {
-				Wasdi.debugLog(s_sClassName + ".getProductsCount, user: " + oUser.getUserId() + ", providers: " + sProviders + ", query: " + sQuery);
+				Utils.debugLog(s_sClassName + ".getProductsCount, user: " + oUser.getUserId() + ", providers: " + sProviders + ", query: " + sQuery);
 				try {
 					Map<String, Integer> aiQueryCountResultsPerProvider = getQueryCountResultsPerProvider(sQuery, sProviders);
 					for (Integer count : aiQueryCountResultsPerProvider.values()) {
 						iCounter += count;
 					}
 				} catch (NumberFormatException oE) {
-					Wasdi.debugLog(s_sClassName + ".getProductsCount: " + oE);
+					Utils.debugLog(s_sClassName + ".getProductsCount: " + oE);
 					return -1;
 				}
 			}
 			return iCounter;
 		} catch (Exception oE) {
-			Wasdi.debugLog(s_sClassName + ".getProductsCount: " + oE);
+			Utils.debugLog(s_sClassName + ".getProductsCount: " + oE);
 		}
 		return -1;
 	}
 
 	private Map<String, Integer> getQueryCountResultsPerProvider(String sQuery, String sProviders) {
 
-		Wasdi.debugLog(s_sClassName + ".getQueryCounters( " + sQuery + ", " + sProviders + " )");
+		Utils.debugLog(s_sClassName + ".getQueryCounters( " + sQuery + ", " + sProviders + " )");
 		Map<String, Integer> aiQueryCountResultsPerProvider = new HashMap<>();
 		try {
 			String asProviders[] = sProviders.split(",|;");
@@ -184,24 +184,24 @@ public class OpenSearchResource {
 					try {
 						iProviderCountResults = oExecutor.executeCount(sQuery);
 					} catch (NumberFormatException oNumberFormatException) {
-						Wasdi.debugLog(s_sClassName + ".getQueryCountResultsPerProvider: caught NumberFormatException: " + oNumberFormatException);
+						Utils.debugLog(s_sClassName + ".getQueryCountResultsPerProvider: caught NumberFormatException: " + oNumberFormatException);
 						iProviderCountResults = -1;
 					} catch (IOException oIOException) {
-						Wasdi.debugLog(s_sClassName + ".getQueryCountResultsPerProvider: caught IOException: " + oIOException);
+						Utils.debugLog(s_sClassName + ".getQueryCountResultsPerProvider: caught IOException: " + oIOException);
 						iProviderCountResults = -1;
 					}catch (NullPointerException oNp) {
-						Wasdi.debugLog(s_sClassName + ".getQueryCountResultsPerProvider: caught NullPointerException: " +oNp);
+						Utils.debugLog(s_sClassName + ".getQueryCountResultsPerProvider: caught NullPointerException: " +oNp);
 						iProviderCountResults = -1;
 					}
 				} catch (Exception oE) {
-					Wasdi.debugLog(s_sClassName + ".getQueryCountResultsPerProvider: " +oE);
+					Utils.debugLog(s_sClassName + ".getQueryCountResultsPerProvider: " +oE);
 					iProviderCountResults = -1;
 				}
 				aiQueryCountResultsPerProvider.put(sProvider, iProviderCountResults);
 			}
 			return aiQueryCountResultsPerProvider;
 		} catch (Exception oE) {
-			Wasdi.debugLog(s_sClassName + ".getQueryCountResultsPerProvider: " +oE);
+			Utils.debugLog(s_sClassName + ".getQueryCountResultsPerProvider: " +oE);
 		}
 		return null;
 	}
@@ -214,7 +214,7 @@ public class OpenSearchResource {
 			@QueryParam("offset") String sOffset, @QueryParam("limit") String sLimit,
 			@QueryParam("sortedby") String sSortedBy, @QueryParam("order") String sOrder) {
 		
-		Wasdi.debugLog(s_sClassName + ".search( " + sSessionId + ", " + sProviders + ", " +
+		Utils.debugLog(s_sClassName + ".search( " + sSessionId + ", " + sProviders + ", " +
 				sQuery + ", " + sOffset + ", " + sLimit + ", " + sSortedBy + ", " + sOrder + " )");
 		User oUser = Wasdi.GetUserFromSession(sSessionId);
 		if (oUser == null) {
@@ -234,13 +234,13 @@ public class OpenSearchResource {
 				sOrder = "asc";
 			Map<String, Integer> aiCounterMap = null;
 			try {
-				Wasdi.debugLog(s_sClassName + ".Search, counting. User: " + oUser.getUserId() + ", providers: " + sProviders + ", query: " + sQuery);
+				Utils.debugLog(s_sClassName + ".Search, counting. User: " + oUser.getUserId() + ", providers: " + sProviders + ", query: " + sQuery);
 				aiCounterMap = getQueryCountResultsPerProvider(sQuery, sProviders);
 			} catch (NumberFormatException oNumberFormatException) {
-				Wasdi.debugLog(s_sClassName + ".search: caught NumberFormatException: " + oNumberFormatException);
+				Utils.debugLog(s_sClassName + ".search: caught NumberFormatException: " + oNumberFormatException);
 				return null;
 			} catch (Exception oException) {
-				Wasdi.debugLog(s_sClassName + ".search: caught Exception: " + oException);
+				Utils.debugLog(s_sClassName + ".search: caught Exception: " + oException);
 				return null;
 			}
 			ArrayList<QueryResultViewModel> aoResults = new ArrayList<>();
@@ -248,14 +248,14 @@ public class OpenSearchResource {
 			try {
 				iLimit = Integer.parseInt(sLimit);
 			} catch (NumberFormatException oE1) {
-				Wasdi.debugLog(s_sClassName + ".search: caught NumberFormatException: " + oE1);
+				Utils.debugLog(s_sClassName + ".search: caught NumberFormatException: " + oE1);
 				return null;
 			}
 			int iOffset = 0;
 			try {
 				iOffset = Integer.parseInt(sOffset);
 			} catch (NumberFormatException oE2) {
-				Wasdi.debugLog(s_sClassName + ".search: caught NumberFormatException: " + oE2);
+				Utils.debugLog(s_sClassName + ".search: caught NumberFormatException: " + oE2);
 				return null;
 			}
 			int iSkipped = 0;
@@ -273,7 +273,7 @@ public class OpenSearchResource {
 				String sCurrentLimit = "" + iCurrentLimit;
 				int iCurrentOffset = Math.max(0, iOffset - iSkipped - aoResults.size());
 				String sCurrentOffset = "" + iCurrentOffset;
-				Wasdi.debugLog(s_sClassName + ".search, executing. User: " + oUser.getUserId() + ", " +
+				Utils.debugLog(s_sClassName + ".search, executing. User: " + oUser.getUserId() + ", " +
 						sProvider + ": offset=" + sCurrentOffset + ": limit=" + sCurrentLimit);
 				try {
 					QueryExecutor oExecutor = getExecutor(sProviders);
@@ -282,20 +282,20 @@ public class OpenSearchResource {
 						ArrayList<QueryResultViewModel> aoTmp = oExecutor.executeAndRetrieve(oQuery);
 						if (aoTmp != null && !aoTmp.isEmpty()) {
 							aoResults.addAll(aoTmp);
-							Wasdi.debugLog(s_sClassName + ".search: found " + aoTmp.size() + " results for " + sProvider);
+							Utils.debugLog(s_sClassName + ".search: found " + aoTmp.size() + " results for " + sProvider);
 						} else {
-							Wasdi.debugLog(s_sClassName + ".search: no results found for " + sProvider);
+							Utils.debugLog(s_sClassName + ".search: no results found for " + sProvider);
 						}
 					} catch (NumberFormatException oNumberFormatException) {
-						Wasdi.debugLog(s_sClassName + ".search: " + oNumberFormatException);
+						Utils.debugLog(s_sClassName + ".search: " + oNumberFormatException);
 						aoResults.add(null);
 					} catch (IOException oIOException) {
-						Wasdi.debugLog(s_sClassName + ".search: " + oIOException);
+						Utils.debugLog(s_sClassName + ".search: " + oIOException);
 						aoResults.add(null);
 					}
 					iSkipped += iCount;
 				} catch (Exception oE) {
-					Wasdi.debugLog(s_sClassName + ".search: " + oE);
+					Utils.debugLog(s_sClassName + ".search: " + oE);
 					aoResults.add(null);
 				}
 			}
@@ -308,7 +308,7 @@ public class OpenSearchResource {
 	@Path("/providers")
 	@Produces({ "application/json", "text/html" })
 	public ArrayList<SearchProviderViewModel> getSearchProviders(@HeaderParam("x-session-token") String sSessionId) {
-		Wasdi.debugLog(s_sClassName + ".getSearchProviders( " + sSessionId +" )");
+		Utils.debugLog(s_sClassName + ".getSearchProviders( " + sSessionId +" )");
 		try {
 			if (Utils.isNullOrEmpty(sSessionId)) {
 				return null;
@@ -339,7 +339,7 @@ public class OpenSearchResource {
 			}
 			return aoRetProviders;
 		} catch (Exception oE) {
-			Wasdi.debugLog(s_sClassName + ".getSearchProviders: " + oE);
+			Utils.debugLog(s_sClassName + ".getSearchProviders: " + oE);
 			return null;
 		}
 	}
@@ -351,19 +351,19 @@ public class OpenSearchResource {
 			@QueryParam("sQuery") String sQuery, @QueryParam("providers") String sProviders,
 			ArrayList<String> asQueries) {
 
-		Wasdi.debugLog(s_sClassName + ".GetListProductsCount( " + sSessionId + ", " + sQuery + ", " + sProviders + ", " + asQueries + " )");
+		Utils.debugLog(s_sClassName + ".GetListProductsCount( " + sSessionId + ", " + sQuery + ", " + sProviders + ", " + asQueries + " )");
 		try {
 			if (Utils.isNullOrEmpty(sSessionId)) {
-				Wasdi.debugLog(s_sClassName + ".GetListProductsCount, session is null");
+				Utils.debugLog(s_sClassName + ".GetListProductsCount, session is null");
 				return -1;
 			}
 			User oUser = Wasdi.GetUserFromSession(sSessionId);
 			if (oUser == null || Utils.isNullOrEmpty(oUser.getUserId())) {
-				Wasdi.debugLog(s_sClassName + ".GetListProductsCount, session: "+sSessionId+", corresponding user is null");
+				Utils.debugLog(s_sClassName + ".GetListProductsCount, session: "+sSessionId+", corresponding user is null");
 				return -1;
 			}
 			if(null==asQueries || asQueries.size() <= 0) {
-				Wasdi.debugLog(s_sClassName + ".GetListProductsCount, session: "+sSessionId+" of user " + oUser.getUserId() + ", asQueries is null");
+				Utils.debugLog(s_sClassName + ".GetListProductsCount, session: "+sSessionId+" of user " + oUser.getUserId() + ", asQueries is null");
 				return -1;
 			}
 			int iCounter = 0;
@@ -378,13 +378,13 @@ public class OpenSearchResource {
 						}
 					}
 				} catch (NumberFormatException oE) {
-					Wasdi.debugLog(s_sClassName + ".getListProductsCount (maybe your request was ill-formatted: " + sQuery + " ?): " + oE);
+					Utils.debugLog(s_sClassName + ".getListProductsCount (maybe your request was ill-formatted: " + sQuery + " ?): " + oE);
 					return -1;
 				}
 			}
 			return iCounter;
 		} catch (Exception oE) {
-			Wasdi.debugLog(s_sClassName + ".getListProductsCount (maybe your request was ill-formatted: "+ sQuery + " ?): " + oE);
+			Utils.debugLog(s_sClassName + ".getListProductsCount (maybe your request was ill-formatted: "+ sQuery + " ?): " + oE);
 		}
 		return -1;
 	}
@@ -397,33 +397,33 @@ public class OpenSearchResource {
 			@QueryParam("offset") String sOffset, @QueryParam("limit") String sLimit,
 			@QueryParam("sortedby") String sSortedBy, @QueryParam("order") String sOrder, ArrayList<String> asQueries) {
 
-		Wasdi.debugLog(s_sClassName + ".SearchList( " + sSessionId + ", " + sProviders + ", " + sQuery+
+		Utils.debugLog(s_sClassName + ".SearchList( " + sSessionId + ", " + sProviders + ", " + sQuery+
 				", " + sOffset + ", " + sLimit + ", " + sSortedBy + ", " + sOrder + ", " + asQueries + " )");
 		try {
 			User oUser = Wasdi.GetUserFromSession(sSessionId);
 			if (oUser == null) {
-				Wasdi.debugLog(s_sClassName + ".SearchList, session: "+sSessionId+", null user");
+				Utils.debugLog(s_sClassName + ".SearchList, session: "+sSessionId+", null user");
 				return null;
 			}
 			if (Utils.isNullOrEmpty(oUser.getUserId())) {
-				Wasdi.debugLog(s_sClassName + ".SearchList, session: "+sSessionId+", session: "+sSessionId+", null userId");
+				Utils.debugLog(s_sClassName + ".SearchList, session: "+sSessionId+", session: "+sSessionId+", null userId");
 				return null;
 			}
 			if(Utils.isNullOrEmpty(sProviders)) {
-				Wasdi.debugLog(s_sClassName + ".SearchList, user: "+oUser.getUserId()+", sProviders is null");
+				Utils.debugLog(s_sClassName + ".SearchList, user: "+oUser.getUserId()+", sProviders is null");
 				return null;
 			}
 			if(null==asQueries || asQueries.size()<= 0) {
-				Wasdi.debugLog(s_sClassName + ".SearchList, user: "+oUser.getUserId()+", asQueries = "+asQueries);
+				Utils.debugLog(s_sClassName + ".SearchList, user: "+oUser.getUserId()+", asQueries = "+asQueries);
 				return null;
 			}
 	
-			Wasdi.debugLog(s_sClassName + ".SearchList, user:" + oUser.getUserId() + ", providers: " + sProviders + ", queries " + asQueries.size());
+			Utils.debugLog(s_sClassName + ".SearchList, user:" + oUser.getUserId() + ", providers: " + sProviders + ", queries " + asQueries.size());
 			ArrayList<QueryResultViewModel> aoResults = new ArrayList<QueryResultViewModel>();
 			for (int iQueries = 0; iQueries < asQueries.size(); iQueries++) {
 				try {
 					sQuery = asQueries.get(iQueries);
-					Wasdi.debugLog(s_sClassName + ".SearchList, user:" + oUser.getUserId() + ", count: [" + sProviders + "] Query[" + iQueries + "] = " + asQueries.get(iQueries));
+					Utils.debugLog(s_sClassName + ".SearchList, user:" + oUser.getUserId() + ", count: [" + sProviders + "] Query[" + iQueries + "] = " + asQueries.get(iQueries));
 					Map<String, Integer> counterMap = getQueryCountResultsPerProvider(sQuery, sProviders);
 					for (Entry<String, Integer> entry : counterMap.entrySet()) {
 						String sProvider = entry.getKey();
@@ -440,27 +440,27 @@ public class OpenSearchResource {
 		
 							String sCurrentLimit = "" + iLimit;
 							PaginatedQuery oQuery = new PaginatedQuery(sQuery, sCurrentOffset, sCurrentLimit, sSortedBy, sOrder);
-							Wasdi.debugLog(s_sClassName + ".SearchList, user:" + oUser.getUserId() + ", execute: [" + sProviders + "] query: " + sQuery);
+							Utils.debugLog(s_sClassName + ".SearchList, user:" + oUser.getUserId() + ", execute: [" + sProviders + "] query: " + sQuery);
 							QueryExecutor oExecutor = getExecutor(sProviders);
 							ArrayList<QueryResultViewModel> aoTmp = oExecutor.executeAndRetrieve(oQuery, false);
 							if (aoTmp != null && !aoTmp.isEmpty()) {
 								iObtainedResults += aoTmp.size();
 								aoResults.addAll(aoTmp);
-								Wasdi.debugLog(s_sClassName + ".SearchList, user:" + oUser.getUserId() +", found " + aoTmp.size() +
+								Utils.debugLog(s_sClassName + ".SearchList, user:" + oUser.getUserId() +", found " + aoTmp.size() +
 										" results for Query#" + iQueries +" for " + sProvider);
 							} else {
-								Wasdi.debugLog(s_sClassName + ".SearchList, user:" + oUser.getUserId() +", NO results found for " + sProvider);
+								Utils.debugLog(s_sClassName + ".SearchList, user:" + oUser.getUserId() +", NO results found for " + sProvider);
 							}
 						}
 					}
 				} catch (NumberFormatException oE) {
-					Wasdi.debugLog(s_sClassName + ".SearchList: (maybe your request was ill-formatted: " + sQuery + " ?). : " + oE);
+					Utils.debugLog(s_sClassName + ".SearchList: (maybe your request was ill-formatted: " + sQuery + " ?). : " + oE);
 					aoResults.add(null); 
 				}
 			}
 			return aoResults.toArray(new QueryResultViewModel[aoResults.size()]);
 		} catch (Exception oE) {
-			Wasdi.debugLog(s_sClassName + ".SearchList: " + oE);
+			Utils.debugLog(s_sClassName + ".SearchList: " + oE);
 		}
 		return null;
 	}
@@ -471,7 +471,7 @@ public class OpenSearchResource {
 	 * @return QueryExecutor of the specific provider
 	 */
 	private QueryExecutor getExecutor(String sProvider) {
-		Wasdi.debugLog(s_sClassName + ".getExecutor, provider: " + sProvider);
+		Utils.debugLog(s_sClassName + ".getExecutor, provider: " + sProvider);
 		QueryExecutor oExecutor = null;
 		try {
 			if(null!=sProvider) {
@@ -486,7 +486,7 @@ public class OpenSearchResource {
 						sDownloadProtocol, sGetMetadata);
 			}
 		} catch (Exception oE) {
-			Wasdi.debugLog(s_sClassName + ".getExecutor( " + sProvider + " ): " + oE);
+			Utils.debugLog(s_sClassName + ".getExecutor( " + sProvider + " ): " + oE);
 		}
 		return oExecutor;
 
@@ -498,7 +498,7 @@ public class OpenSearchResource {
 	 * @return AuthenticationCredentials entity
 	 */
 	private AuthenticationCredentials getCredentials(String sProvider) {
-		Wasdi.debugLog(s_sClassName + ".getCredentials( " + sProvider + " )");
+		Utils.debugLog(s_sClassName + ".getCredentials( " + sProvider + " )");
 		AuthenticationCredentials oCredentials = null;
 		try {
 			oCredentials = m_aoCredentials.get(sProvider);
@@ -509,7 +509,7 @@ public class OpenSearchResource {
 				m_aoCredentials.put(sProvider, oCredentials);
 			}
 		} catch (Exception oE) {
-			Wasdi.debugLog(s_sClassName + ".getCredentials( " + sProvider + " ): " + oE);
+			Utils.debugLog(s_sClassName + ".getCredentials( " + sProvider + " ): " + oE);
 		}
 		return oCredentials;
 	}
