@@ -139,7 +139,7 @@ public class ProcessingResources {
 			@QueryParam("sSourceProductName") String sSourceProductName,
 			@QueryParam("sDestinationProductName") String sDestinationProductName,
 			@QueryParam("sWorkspaceId") String sWorkspaceId, RangeDopplerGeocodingSetting oSetting) throws IOException {
-		Wasdi.DebugLog("ProcessingResources.TerrainCorrection( " + sSessionId + ", " + sSourceProductName + ", "
+		Wasdi.debugLog("ProcessingResources.TerrainCorrection( " + sSessionId + ", " + sSourceProductName + ", "
 				+ sDestinationProductName + ", " + sWorkspaceId + ", ... )");
 		return executeOperation(sSessionId, sSourceProductName, sDestinationProductName, sWorkspaceId, oSetting,
 				LauncherOperations.TERRAIN);
@@ -152,7 +152,7 @@ public class ProcessingResources {
 			@QueryParam("sSourceProductName") String sSourceProductName,
 			@QueryParam("sDestinationProductName") String sDestinationProductName,
 			@QueryParam("sWorkspaceId") String sWorkspaceId, ApplyOrbitSetting oSetting) throws IOException {
-		Wasdi.DebugLog("ProcessingResources.ApplyOrbit( " + sSessionId + ", " + sDestinationProductName + ", "
+		Wasdi.debugLog("ProcessingResources.ApplyOrbit( " + sSessionId + ", " + sDestinationProductName + ", "
 				+ sWorkspaceId + ", ... )");
 		return executeOperation(sSessionId, sSourceProductName, sDestinationProductName, sWorkspaceId, oSetting,
 				LauncherOperations.APPLYORBIT);
@@ -165,7 +165,7 @@ public class ProcessingResources {
 			@QueryParam("sSourceProductName") String sSourceProductName,
 			@QueryParam("sDestinationProductName") String sDestinationProductName,
 			@QueryParam("sWorkspaceId") String sWorkspaceId, CalibratorSetting oSetting) throws IOException {
-		Wasdi.DebugLog("ProcessingResources.Calibrate( " + sSessionId + ", " + sSourceProductName + ", "
+		Wasdi.debugLog("ProcessingResources.Calibrate( " + sSessionId + ", " + sSourceProductName + ", "
 				+ sDestinationProductName + ", " + sWorkspaceId + ", ... )");
 		return executeOperation(sSessionId, sSourceProductName, sDestinationProductName, sWorkspaceId, oSetting,
 				LauncherOperations.CALIBRATE);
@@ -178,7 +178,7 @@ public class ProcessingResources {
 			@QueryParam("sSourceProductName") String sSourceProductName,
 			@QueryParam("sDestinationProductName") String sDestinationProductName,
 			@QueryParam("sWorkspaceId") String sWorkspaceId, MultilookingSetting oSetting) throws IOException {
-		Wasdi.DebugLog("ProcessingResources.Multilooking(" + sSessionId + ", " + sSourceProductName + ", "
+		Wasdi.debugLog("ProcessingResources.Multilooking(" + sSessionId + ", " + sSourceProductName + ", "
 				+ sDestinationProductName + ", " + sWorkspaceId + ")");
 		return executeOperation(sSessionId, sSourceProductName, sDestinationProductName, sWorkspaceId, oSetting,
 				LauncherOperations.MULTILOOKING);
@@ -192,7 +192,7 @@ public class ProcessingResources {
 			@QueryParam("sSourceProductName") String sSourceProductName,
 			@QueryParam("sDestinationProductName") String sDestinationProductName,
 			@QueryParam("sWorkspaceId") String sWorkspaceId, NDVISetting oSetting) throws IOException {
-		Wasdi.DebugLog("ProcessingResources.NDVI(" + sSessionId + ", " + sSourceProductName + ", "
+		Wasdi.debugLog("ProcessingResources.NDVI(" + sSessionId + ", " + sSourceProductName + ", "
 				+ sDestinationProductName + ", " + sWorkspaceId + ", ... )");
 		return executeOperation(sSessionId, sSourceProductName, sDestinationProductName, sWorkspaceId, oSetting,
 				LauncherOperations.NDVI);
@@ -204,7 +204,7 @@ public class ProcessingResources {
 	public PrimitiveResult mosaic(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("sDestinationProductName") String sDestinationProductName,
 			@QueryParam("sWorkspaceId") String sWorkspaceId, MosaicSetting oSetting) throws IOException {
-		Wasdi.DebugLog("ProcessingResources.Mosaic( " + sSessionId + ", " + sDestinationProductName + ", "
+		Wasdi.debugLog("ProcessingResources.Mosaic( " + sSessionId + ", " + sDestinationProductName + ", "
 				+ sWorkspaceId + ", ... )");
 		return executeOperation(sSessionId, "", sDestinationProductName, sWorkspaceId, oSetting,
 				LauncherOperations.MOSAIC);
@@ -216,7 +216,7 @@ public class ProcessingResources {
 	public PrimitiveResult regrid(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("sDestinationProductName") String sDestinationProductName,
 			@QueryParam("sWorkspaceId") String sWorkspaceId, RegridSetting oSetting) throws IOException {
-		Wasdi.DebugLog("ProcessingResources.Mosaic( " + sSessionId + ", " + sDestinationProductName + ", "
+		Wasdi.debugLog("ProcessingResources.Mosaic( " + sSessionId + ", " + sDestinationProductName + ", "
 				+ sWorkspaceId + ", ... )");
 		return executeOperation(sSessionId, "", sDestinationProductName, sWorkspaceId, oSetting,
 				LauncherOperations.REGRID);
@@ -229,7 +229,7 @@ public class ProcessingResources {
 			@QueryParam("sSourceProductName") String sSourceProductName,
 			@QueryParam("sDestinationProductName") String sDestinationProductName,
 			@QueryParam("sWorkspaceId") String sWorkspaceId, SubsetSetting oSetting) throws IOException {
-		Wasdi.DebugLog("ProcessingResources.Subset( " + sSessionId + ", " + sSourceProductName + ", "
+		Wasdi.debugLog("ProcessingResources.Subset( " + sSessionId + ", " + sSourceProductName + ", "
 				+ sDestinationProductName + ", " + sWorkspaceId + ", ... )");
 		return executeOperation(sSessionId, sSourceProductName, sDestinationProductName, sWorkspaceId, oSetting,
 				LauncherOperations.SUBSET);
@@ -242,7 +242,7 @@ public class ProcessingResources {
 			@QueryParam("sSourceProductName") String sSourceProductName,
 			@QueryParam("sDestinationProductName") String sDestinationProductName,
 			@QueryParam("sWorkspaceId") String sWorkspaceId, MultiSubsetSetting oSetting) throws IOException {
-		Wasdi.DebugLog("ProcessingResources.MultiSubset( " + sSessionId + ", " + sSourceProductName + ", "
+		Wasdi.debugLog("ProcessingResources.MultiSubset( " + sSessionId + ", " + sSourceProductName + ", "
 				+ sDestinationProductName + ", " + sWorkspaceId + ", ... )");
 		return executeOperation(sSessionId, sSourceProductName, sDestinationProductName, sWorkspaceId, oSetting,
 				LauncherOperations.MULTISUBSET);
@@ -253,7 +253,7 @@ public class ProcessingResources {
 	@Produces({ "application/json" })
 	public SnapOperatorParameterViewModel[] operatorParameters(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("sOperation") String sOperation) throws IOException {
-		Wasdi.DebugLog("ProcessingResources.operatorParameters( " + sSessionId + ", " + sOperation + " )");
+		Wasdi.debugLog("ProcessingResources.operatorParameters( " + sSessionId + ", " + sOperation + " )");
 		ArrayList<SnapOperatorParameterViewModel> oChoices = new ArrayList<SnapOperatorParameterViewModel>();
 
 		Class oOperatorClass = SnapOperatorFactory.getOperatorClass(sOperation);
@@ -262,7 +262,7 @@ public class ProcessingResources {
 		for (Field oOperatorField : aoOperatorFields) {
 
 			if (oOperatorField.getName().equals("mapProjection")) {
-				Wasdi.DebugLog("operatorParameters found mapProjection parameter");
+				Wasdi.debugLog("operatorParameters found mapProjection parameter");
 			}
 
 			Annotation[] aoAnnotations = oOperatorField.getAnnotations();
@@ -315,7 +315,7 @@ public class ProcessingResources {
 			@QueryParam("name") String sName, @QueryParam("description") String sDescription,
 			@QueryParam("public") Boolean bPublic) throws Exception {
 
-		Wasdi.DebugLog("ProcessingResources.uploadGraph( InputStream, " + sSessionId + ", " + sWorkspace + ", " + sName
+		Wasdi.debugLog("ProcessingResources.uploadGraph( InputStream, " + sSessionId + ", " + sWorkspace + ", " + sName
 				+ ", " + sDescription + ", " + bPublic + " )");
 
 		try {
@@ -343,7 +343,7 @@ public class ProcessingResources {
 			String sWorkflowId = UUID.randomUUID().toString();
 			File oWorkflowXmlFile = new File(sDownloadRootPath + sUserId + "/workflows/" + sWorkflowId + ".xml");
 
-			Wasdi.DebugLog("ProcessingResources.uploadGraph: workflow file Path: " + oWorkflowXmlFile.getPath());
+			Wasdi.debugLog("ProcessingResources.uploadGraph: workflow file Path: " + oWorkflowXmlFile.getPath());
 
 			// save uploaded file
 			int iRead = 0;
@@ -385,7 +385,7 @@ public class ProcessingResources {
 			SnapWorkflowRepository oSnapWorkflowRepository = new SnapWorkflowRepository();
 			oSnapWorkflowRepository.InsertSnapWorkflow(oWorkflow);
 		} catch (Exception oEx) {
-			Wasdi.DebugLog("ProcessingResources.uploadGraph: " + oEx);
+			Wasdi.debugLog("ProcessingResources.uploadGraph: " + oEx);
 			return Response.serverError().build();
 		}
 
@@ -401,21 +401,21 @@ public class ProcessingResources {
 	@GET
 	@Path("/getgraphsbyusr")
 	public ArrayList<SnapWorkflowViewModel> getWorkflowsByUser(@HeaderParam("x-session-token") String sSessionId) {
-		Wasdi.DebugLog("ProcessingResources.getWorkflowsByUser( " + sSessionId + " )");
+		Wasdi.debugLog("ProcessingResources.getWorkflowsByUser( " + sSessionId + " )");
 
 		if (Utils.isNullOrEmpty(sSessionId)) {
-			Wasdi.DebugLog("ProcessingResources.getWorkflowsByUser: session null");
+			Wasdi.debugLog("ProcessingResources.getWorkflowsByUser: session null");
 			return null;
 		}
 		User oUser = Wasdi.GetUserFromSession(sSessionId);
 
 		if (oUser == null) {
-			Wasdi.DebugLog("ProcessingResources.getWorkflowsByUser: user null");
+			Wasdi.debugLog("ProcessingResources.getWorkflowsByUser: user null");
 			return null;
 		}
 
 		if (Utils.isNullOrEmpty(oUser.getUserId())) {
-			Wasdi.DebugLog("ProcessingResources.getWorkflowsByUser: user id null");
+			Wasdi.debugLog("ProcessingResources.getWorkflowsByUser: user id null");
 			return null;
 		}
 
@@ -438,7 +438,7 @@ public class ProcessingResources {
 			aoRetWorkflows.add(oVM);
 		}
 
-		Wasdi.DebugLog("ProcessingResources.getWorkflowsByUser: return " + aoRetWorkflows.size() + " workflows");
+		Wasdi.debugLog("ProcessingResources.getWorkflowsByUser: return " + aoRetWorkflows.size() + " workflows");
 
 		return aoRetWorkflows;
 	}
@@ -454,7 +454,7 @@ public class ProcessingResources {
 	@Path("/deletegraph")
 	public Response deleteWorkflow(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("workflowId") String sWorkflowId) {
-		Wasdi.DebugLog("ProcessingResources.deleteWorkflow( " + sSessionId + ", " + sWorkflowId + " )");
+		Wasdi.debugLog("ProcessingResources.deleteWorkflow( " + sSessionId + ", " + sWorkflowId + " )");
 
 		if (Utils.isNullOrEmpty(sSessionId))
 			return Response.status(Status.UNAUTHORIZED).build();
@@ -481,12 +481,12 @@ public class ProcessingResources {
 			File oWorkflowFile = new File(oWorkflow.getFilePath());
 			if (oWorkflowFile.exists()) {
 				if (!oWorkflowFile.delete()) {
-					Wasdi.DebugLog("ProcessingResource.deleteWorkflow: Error deleting the workflow file "
+					Wasdi.debugLog("ProcessingResource.deleteWorkflow: Error deleting the workflow file "
 							+ oWorkflow.getFilePath());
 				}
 			}
 		} else {
-			Wasdi.DebugLog("ProcessingResource.deleteWorkflow: workflow file path is null or empty.");
+			Wasdi.debugLog("ProcessingResource.deleteWorkflow: workflow file path is null or empty.");
 		}
 
 		oSnapWorkflowRepository.DeleteSnapWorkflow(sWorkflowId);
@@ -513,7 +513,7 @@ public class ProcessingResources {
 			@QueryParam("source") String sSourceProductName, @QueryParam("destination") String sDestinationProdutName)
 					throws Exception {
 
-		Wasdi.DebugLog("ProcessingResources.ExecuteGraph( InputStream, " + sSessionId + ", " + sWorkspace + ", "
+		Wasdi.debugLog("ProcessingResources.ExecuteGraph( InputStream, " + sSessionId + ", " + sWorkspace + ", "
 				+ sSourceProductName + ", " + sDestinationProdutName + " )");
 		PrimitiveResult oResult = new PrimitiveResult();
 
@@ -600,7 +600,7 @@ public class ProcessingResources {
 			@QueryParam("workspace") String sWorkspace, SnapWorkflowViewModel oSnapWorkflowViewModel) throws Exception {
 
 		PrimitiveResult oResult = new PrimitiveResult();
-		Wasdi.DebugLog("ProcessingResources.executeGraphFromWorkflowId( " + sSessionId + ", " + sWorkspace + ", ... )");
+		Wasdi.debugLog("ProcessingResources.executeGraphFromWorkflowId( " + sSessionId + ", " + sWorkspace + ", ... )");
 
 		if (Utils.isNullOrEmpty(sSessionId)) {
 			oResult.setBoolValue(false);
@@ -670,7 +670,7 @@ public class ProcessingResources {
 	@Produces({ "application/json" })
 	public Map<String, Filter[]> getStandardFilters(@HeaderParam("x-session-token") String sSessionId) {
 
-		Wasdi.DebugLog("ProcessingResources.GetStandardFilters( " + sSessionId + " )");
+		Wasdi.debugLog("ProcessingResources.GetStandardFilters( " + sSessionId + " )");
 
 		Map<String, Filter[]> filtersMap = new HashMap<String, Filter[]>();
 		filtersMap.put("Detect Lines", StandardFilters.LINE_DETECTION_FILTERS);
@@ -690,7 +690,7 @@ public class ProcessingResources {
 			@QueryParam("file") String sProductFile, @QueryParam("band") String sBandName,
 			@QueryParam("workspaceId") String sWorkspaceId) throws Exception {
 
-		Wasdi.DebugLog("ProcessingResources.getProductMasks");
+		Wasdi.debugLog("ProcessingResources.getProductMasks");
 
 		if (Utils.isNullOrEmpty(sSessionId))
 			return null;
@@ -703,12 +703,12 @@ public class ProcessingResources {
 
 		String sUserId = oUser.getUserId();
 
-		Wasdi.DebugLog("Params. File: " + sProductFile + " - Band: " + sBandName + " - Workspace: " + sWorkspaceId);
+		Wasdi.debugLog("Params. File: " + sProductFile + " - Band: " + sBandName + " - Workspace: " + sWorkspaceId);
 
 		String sProductFileFullPath = Wasdi.getWorkspacePath(m_oServletConfig, Wasdi.getWorkspaceOwner(sWorkspaceId),
 				sWorkspaceId) + sProductFile;
 
-		Wasdi.DebugLog("ProcessingResources.getProductMasks: file Path: " + sProductFileFullPath);
+		Wasdi.debugLog("ProcessingResources.getProductMasks: file Path: " + sProductFileFullPath);
 
 		ArrayList<ProductMaskViewModel> asMasks = new ArrayList<ProductMaskViewModel>();
 
@@ -732,7 +732,7 @@ public class ProcessingResources {
 				}
 			}
 		} catch (Exception oEx) {
-			Wasdi.DebugLog("ProcessingResources.getProductMasks: " + oEx);
+			Wasdi.debugLog("ProcessingResources.getProductMasks: " + oEx);
 		}
 
 		return asMasks;
@@ -746,7 +746,7 @@ public class ProcessingResources {
 			@QueryParam("accurate") boolean bAccurate, @QueryParam("workspaceId") String sWorkspaceId)
 					throws Exception {
 
-		Wasdi.DebugLog("ProcessingResources.getColorManipulation( " + sSessionId + ", " + sProductFile + ", "
+		Wasdi.debugLog("ProcessingResources.getColorManipulation( " + sSessionId + ", " + sProductFile + ", "
 				+ sBandName + ", " + sProductFile + ", " + sBandName + ", " + bAccurate + ", " + sWorkspaceId + " )");
 
 		if (Utils.isNullOrEmpty(sSessionId))
@@ -760,13 +760,13 @@ public class ProcessingResources {
 
 		String sUserId = oUser.getUserId();
 
-		Wasdi.DebugLog("ProcessingResources.getColorManipulation. Params. File: " + sProductFile + " - Band: "
+		Wasdi.debugLog("ProcessingResources.getColorManipulation. Params. File: " + sProductFile + " - Band: "
 				+ sBandName + " - Workspace: " + sWorkspaceId);
 
 		String sProductFileFullPath = Wasdi.getWorkspacePath(m_oServletConfig, Wasdi.getWorkspaceOwner(sWorkspaceId),
 				sWorkspaceId);
 
-		Wasdi.DebugLog("ProcessingResources.getColorManipulation: file Path: " + sProductFileFullPath);
+		Wasdi.debugLog("ProcessingResources.getColorManipulation: file Path: " + sProductFileFullPath);
 
 		Product product = ProductIO.readProduct(sProductFileFullPath);
 		BandImageManager manager = new BandImageManager(product);
@@ -780,7 +780,7 @@ public class ProcessingResources {
 	public Response getBandImage(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("workspace") String sWorkspace, BandImageViewModel oBandImageViewModel) throws IOException {
 
-		Wasdi.DebugLog("ProcessingResources.getBandImage( " + sSessionId + ", " + sWorkspace + ", ... )");
+		Wasdi.debugLog("ProcessingResources.getBandImage( " + sSessionId + ", " + sWorkspace + ", ... )");
 
 		// Check user session
 		String sUserId = acceptedUserAndSession(sSessionId);
@@ -792,11 +792,11 @@ public class ProcessingResources {
 		RegistryElementDescriptor oDescriptor = oOperationRegistry.getDescriptor("rendered", "Paint");
 
 		if (oDescriptor == null) {
-			Wasdi.DebugLog("getBandImage: REGISTER Descriptor!!!!");
+			Wasdi.debugLog("getBandImage: REGISTER Descriptor!!!!");
 			try {
 				oOperationRegistry.registerServices(this.getClass().getClassLoader());
 			} catch (Exception e) {
-				Wasdi.DebugLog("ProcessingResources.getBandImage: " + e);
+				Wasdi.debugLog("ProcessingResources.getBandImage: " + e);
 			}
 			oDescriptor = oOperationRegistry.getDescriptor("rendered", "Paint");
 
@@ -812,17 +812,17 @@ public class ProcessingResources {
 		File oProductFile = new File(sProductPath + oBandImageViewModel.getProductFileName());
 
 		if (!oProductFile.exists()) {
-			Wasdi.DebugLog("ProcessingResource.getBandImage: FILE NOT FOUND: " + oProductFile.getAbsolutePath());
+			Wasdi.debugLog("ProcessingResource.getBandImage: FILE NOT FOUND: " + oProductFile.getAbsolutePath());
 			return Response.status(500).build();
 		}
 
 		Product oSNAPProduct = ProductIO.readProduct(oProductFile);
 
 		if (oSNAPProduct == null) {
-			Wasdi.DebugLog("ProcessingResources.getBandImage: SNAP product is null, impossibile to read. Return");
+			Wasdi.debugLog("ProcessingResources.getBandImage: SNAP product is null, impossibile to read. Return");
 			return Response.status(500).build();
 		} else {
-			Wasdi.DebugLog("ProcessingResources.getBandImage: product read");
+			Wasdi.debugLog("ProcessingResources.getBandImage: product read");
 		}
 
 		BandImageManager oBandImageManager = new BandImageManager(oSNAPProduct);
@@ -834,7 +834,7 @@ public class ProcessingResources {
 			FilterBand oFilteredBand = oBandImageManager.getFilterBand(oBandImageViewModel.getBandName(), oFilter,
 					oBandImageViewModel.getFilterIterationCount());
 			if (oFilteredBand == null) {
-				Wasdi.DebugLog("ProcessingResource.getBandImage: CANNOT APPLY FILTER TO BAND "
+				Wasdi.debugLog("ProcessingResource.getBandImage: CANNOT APPLY FILTER TO BAND "
 						+ oBandImageViewModel.getBandName());
 				return Response.status(500).build();
 			}
@@ -845,13 +845,13 @@ public class ProcessingResources {
 
 		if (oBandImageViewModel.getVp_x() < 0 || oBandImageViewModel.getVp_y() < 0
 				|| oBandImageViewModel.getImg_w() <= 0 || oBandImageViewModel.getImg_h() <= 0) {
-			Wasdi.DebugLog("ProcessingResources.getBandImage: Invalid Parameters: VPX= " + oBandImageViewModel.getVp_x()
+			Wasdi.debugLog("ProcessingResources.getBandImage: Invalid Parameters: VPX= " + oBandImageViewModel.getVp_x()
 			+ " VPY= " + oBandImageViewModel.getVp_y() + " VPW= " + oBandImageViewModel.getVp_w() + " VPH= "
 			+ oBandImageViewModel.getVp_h() + " OUTW = " + oBandImageViewModel.getImg_w() + " OUTH = "
 			+ oBandImageViewModel.getImg_h());
 			return Response.status(500).build();
 		} else {
-			Wasdi.DebugLog("ProcessingResources.getBandImage: parameters OK");
+			Wasdi.debugLog("ProcessingResources.getBandImage: parameters OK");
 		}
 
 		Rectangle oRectangleViewPort = new Rectangle(oBandImageViewModel.getVp_x(), oBandImageViewModel.getVp_y(),
@@ -864,7 +864,7 @@ public class ProcessingResources {
 			for (ProductMaskViewModel oMaskModel : aoProductMasksModels) {
 				Mask oMask = oSNAPProduct.getMaskGroup().get(oMaskModel.getName());
 				if (oMask == null) {
-					Wasdi.DebugLog(
+					Wasdi.debugLog(
 							"ProcessingResources.getBandImage: cannot find mask by name: " + oMaskModel.getName());
 				} else {
 					// set the user specified color
@@ -920,16 +920,16 @@ public class ProcessingResources {
 			oBufferedImg = oBandImageManager.buildImageWithMasks(oRasterDataNode, oImgSize, oRectangleViewPort,
 					oColorManiputalionViewModel == null);
 		} catch (Exception e) {
-			Wasdi.DebugLog("ProcessingResources.getBandImage: " + e);
+			Wasdi.debugLog("ProcessingResources.getBandImage: " + e);
 			return Response.status(500).build();
 		}
 
 		if (oBufferedImg == null) {
-			Wasdi.DebugLog("ProcessingResource.getBandImage: img null");
+			Wasdi.debugLog("ProcessingResource.getBandImage: img null");
 			return Response.status(500).build();
 		}
 
-		Wasdi.DebugLog("ProcessingResource.getBandImage: Generated image for band " + oBandImageViewModel.getBandName()
+		Wasdi.debugLog("ProcessingResource.getBandImage: Generated image for band " + oBandImageViewModel.getBandName()
 		+ " X= " + oBandImageViewModel.getVp_x() + " Y= " + oBandImageViewModel.getVp_y() + " W= "
 		+ oBandImageViewModel.getVp_w() + " H= " + oBandImageViewModel.getVp_h());
 
@@ -941,7 +941,7 @@ public class ProcessingResources {
 	}
 
 	private Mask createMask(Product oSNAPProduct, MaskViewModel maskModel, Mask.ImageType type) {
-		Wasdi.DebugLog("ProcessingResource.createMask( Product, MaskViewModel, Mask.ImageType )");
+		Wasdi.debugLog("ProcessingResource.createMask( Product, MaskViewModel, Mask.ImageType )");
 		String maskName = UUID.randomUUID().toString();
 		Dimension maskSize = new Dimension(oSNAPProduct.getSceneRasterWidth(), oSNAPProduct.getSceneRasterHeight());
 		Mask mask = new Mask(maskName, maskSize.width, maskSize.height, type);
@@ -958,7 +958,7 @@ public class ProcessingResources {
 			@FormDataParam("humidity") FormDataContentDisposition humidityFileMetaData,
 			@HeaderParam("x-session-token") String sSessionId, @QueryParam("midapath") String sMidaPath) {
 
-		Wasdi.DebugLog("ProcessingResource.Assimilation( InputStream, FormDataContentDisposition, " + sSessionId + ", "
+		Wasdi.debugLog("ProcessingResource.Assimilation( InputStream, FormDataContentDisposition, " + sSessionId + ", "
 				+ sMidaPath + " )");
 
 		User user = Wasdi.GetUserFromSession(sSessionId);
@@ -972,13 +972,13 @@ public class ProcessingResources {
 			// build and check paths
 			File assimilationWD = new File(m_oServletConfig.getInitParameter("AssimilationWDPath"));
 			if (!assimilationWD.isDirectory()) {
-				Wasdi.DebugLog("ProcessingResource.Assimilation: ERROR: Invalid directory: "
+				Wasdi.debugLog("ProcessingResource.Assimilation: ERROR: Invalid directory: "
 						+ assimilationWD.getAbsolutePath());
 				throw new InternalServerErrorException("invalid directory in assimilation settings");
 			}
 			File midaTifFile = new File(sMidaPath);
 			if (!midaTifFile.canRead()) {
-				Wasdi.DebugLog(
+				Wasdi.debugLog(
 						"ProcessingResource.Assimilation: ERROR: Invalid mida path: " + midaTifFile.getAbsolutePath());
 				throw new InternalServerErrorException("invalid path in assimilation settings");
 			}
@@ -1003,7 +1003,7 @@ public class ProcessingResources {
 			}
 
 		} catch (Exception e) {
-			Wasdi.DebugLog("ProcessingResource.Assimilation: " + e);
+			Wasdi.debugLog("ProcessingResource.Assimilation: " + e);
 			throw new InternalServerErrorException("Error launching assimilation: " + e);
 		}
 		throw new InternalServerErrorException("unable to execute assimilation");
@@ -1015,7 +1015,7 @@ public class ProcessingResources {
 	public PrimitiveResult saba(@HeaderParam("x-session-token") String sSessionId, @QueryParam("file") String sFileName,
 			@QueryParam("workspaceId") String sWorkspaceId) {
 
-		Wasdi.DebugLog("ProcessingResource.Saba( " + sSessionId + ", " + sFileName + ", " + sWorkspaceId + " )");
+		Wasdi.debugLog("ProcessingResource.Saba( " + sSessionId + ", " + sFileName + ", " + sWorkspaceId + " )");
 		PrimitiveResult oResult = new PrimitiveResult();
 		User oUser = Wasdi.GetUserFromSession(sSessionId);
 		try {
@@ -1027,13 +1027,13 @@ public class ProcessingResources {
 				return oResult;
 			}
 
-			Wasdi.DebugLog("ProcessingResource.Saba: INPUT FILE " + sFileName);
+			Wasdi.debugLog("ProcessingResource.Saba: INPUT FILE " + sFileName);
 
-			Wasdi.DebugLog("ProcessingResource.Saba: launching ENVI SABA Processor");
+			Wasdi.debugLog("ProcessingResource.Saba: launching ENVI SABA Processor");
 
 			// execute assimilation
 			if (launchSaba(sFileName, sWorkspaceId)) {
-				Wasdi.DebugLog("ProcessingResource.Saba: ok return");
+				Wasdi.debugLog("ProcessingResource.Saba: ok return");
 				String sOutputFile = "";
 
 				if (sFileName.startsWith("CSK")) {
@@ -1047,12 +1047,12 @@ public class ProcessingResources {
 				oResult.setBoolValue(true);
 				oResult.setIntValue(200);
 			} else {
-				Wasdi.DebugLog("ProcessingResource.Saba: error, return");
+				Wasdi.debugLog("ProcessingResource.Saba: error, return");
 				oResult.setBoolValue(false);
 				oResult.setIntValue(500);
 			}
 		} catch (Exception e) {
-			Wasdi.DebugLog("ProcessingResource.Saba: " + e);
+			Wasdi.debugLog("ProcessingResource.Saba: " + e);
 			oResult.setBoolValue(false);
 			oResult.setIntValue(500);
 			return oResult;
@@ -1067,7 +1067,7 @@ public class ProcessingResources {
 	public PrimitiveResult DDSPublishSaba(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("file") String sFileName, @QueryParam("workspaceId") String sWorkspaceId) {
 
-		Wasdi.DebugLog(
+		Wasdi.debugLog(
 				"ProcessingResource.DDSPublishSaba( " + sSessionId + ", " + sFileName + ", " + sWorkspaceId + " )");
 		PrimitiveResult oResult = new PrimitiveResult();
 
@@ -1081,7 +1081,7 @@ public class ProcessingResources {
 				return null;
 			}
 
-			Wasdi.DebugLog("ProcessingResource.DDSPublishSaba: INPUT FILE " + sFileName);
+			Wasdi.debugLog("ProcessingResource.DDSPublishSaba: INPUT FILE " + sFileName);
 
 			String sAccount = oUser.getUserId();
 
@@ -1091,7 +1091,7 @@ public class ProcessingResources {
 			File oUserBaseDir = new File(sDownloadRootPath + sAccount + "/" + sWorkspaceId + "/");
 			File oFilePath = new File(oUserBaseDir, sFileName);
 
-			Wasdi.DebugLog("ProcessingResource.DDSPublishSaba: Full Path " + oFilePath.getPath());
+			Wasdi.debugLog("ProcessingResource.DDSPublishSaba: Full Path " + oFilePath.getPath());
 
 			String sDestinationFile = m_oServletConfig.getInitParameter("DDSPath");
 			String[] asFileNameSplitted = sFileName.split("_");
@@ -1115,7 +1115,7 @@ public class ProcessingResources {
 			String sDDSFileFolder = sDestinationFile + sDate.substring(0, 4) + "/" + sDate.substring(4, 6) + "/"
 					+ sDate.substring(6, 8) + "/";
 
-			Wasdi.DebugLog("ProcessingResource.DDSPublishSaba: Output File Path " + sDDSFileFolder);
+			Wasdi.debugLog("ProcessingResource.DDSPublishSaba: Output File Path " + sDDSFileFolder);
 
 			File oOutputFile = new File(sDDSFileFolder);
 
@@ -1123,20 +1123,20 @@ public class ProcessingResources {
 
 			String sOutputFileOnlyName = "FLOOD_" + sDate.replace("T", "") + "f";
 
-			Wasdi.DebugLog("ProcessingResource.DDSPublishSaba: Output File Name " + sOutputFileOnlyName);
+			Wasdi.debugLog("ProcessingResource.DDSPublishSaba: Output File Name " + sOutputFileOnlyName);
 
 			oOutputFile = new File(sDDSFileFolder + sOutputFileOnlyName);
 
 			FileUtils.copyFile(oFilePath, oOutputFile);
 
-			Wasdi.DebugLog("ProcessingResource.DDSPublishSaba: Copy Done");
+			Wasdi.debugLog("ProcessingResource.DDSPublishSaba: Copy Done");
 
 			oResult.setStringValue(sDDSFileFolder);
 			oResult.setBoolValue(true);
 			oResult.setIntValue(200);
 
 		} catch (Exception e) {
-			Wasdi.DebugLog("ProcessingResource.DDSPublishSaba: " + e);
+			Wasdi.debugLog("ProcessingResource.DDSPublishSaba: " + e);
 			oResult.setBoolValue(false);
 			oResult.setIntValue(500);
 			return oResult;
@@ -1152,7 +1152,7 @@ public class ProcessingResources {
 			@FormDataParam("file") FormDataContentDisposition fileMetaData,
 			@HeaderParam("x-session-token") String sSessionId, @QueryParam("sWorkspaceId") String sWorkspaceId)
 					throws Exception {
-		Wasdi.DebugLog("ProcessingResource.UploadModel( InputStream, FormDataContentDisposition, " + sSessionId + ", "
+		Wasdi.debugLog("ProcessingResource.UploadModel( InputStream, FormDataContentDisposition, " + sSessionId + ", "
 				+ sWorkspaceId + " )");
 
 		User oUser = Wasdi.GetUserFromSession(sSessionId);
@@ -1169,7 +1169,7 @@ public class ProcessingResources {
 
 		if (!Files.exists(Paths.get(sDownloadPath))) {
 			if (Files.createDirectories(Paths.get(sDownloadPath)) == null) {
-				Wasdi.DebugLog("ProcessingResource.uploadMapFile: Directory " + sDownloadPath + " not created");
+				Wasdi.debugLog("ProcessingResource.uploadMapFile: Directory " + sDownloadPath + " not created");
 				return Response.status(Status.INTERNAL_SERVER_ERROR).build();
 			}
 
@@ -1230,7 +1230,7 @@ public class ProcessingResources {
 	@Path("/WPSlist")
 	@Produces({ "application/xml", "application/json", "text/xml" })
 	public ArrayList<WpsViewModel> getWpsList(@HeaderParam("x-session-token") String sSessionId) {
-		Wasdi.DebugLog("ProcessingResource.getWpsList( " + sSessionId + " )");
+		Wasdi.debugLog("ProcessingResource.getWpsList( " + sSessionId + " )");
 
 		WpsProvidersRepository oWPSrepo = new WpsProvidersRepository();
 		ArrayList<WpsProvider> aoWPSProviders = oWPSrepo.getWpsList();
@@ -1250,24 +1250,24 @@ public class ProcessingResources {
 	}
 
 	private boolean launchAssimilation(File midaTifFile, File humidityTifFile, File resultTifFile) {
-		Wasdi.DebugLog("ProcessingResource.launchAssimilation( File, File, File )");
+		Wasdi.debugLog("ProcessingResource.launchAssimilation( File, File, File )");
 		try {
 
 			String cmd[] = new String[] { m_oServletConfig.getInitParameter("AssimilationScript"),
 					midaTifFile.getAbsolutePath(), humidityTifFile.getAbsolutePath(), resultTifFile.getAbsolutePath() };
 
-			Wasdi.DebugLog("ProcessingResource.LaunchAssimilation: shell exec " + Arrays.toString(cmd));
+			Wasdi.debugLog("ProcessingResource.LaunchAssimilation: shell exec " + Arrays.toString(cmd));
 
 			Process proc = Runtime.getRuntime().exec(cmd);
 			BufferedReader input = new BufferedReader(new InputStreamReader(proc.getInputStream()));
 			String line;
 			while ((line = input.readLine()) != null) {
-				Wasdi.DebugLog("ProcessingResource.LaunchAssimilation: Assimilation stdout: " + line);
+				Wasdi.debugLog("ProcessingResource.LaunchAssimilation: Assimilation stdout: " + line);
 			}
 			if (proc.waitFor() != 0)
 				return false;
 		} catch (Exception oEx) {
-			Wasdi.DebugLog("ProcessingResource.LaunchAssimilation: " + oEx);
+			Wasdi.debugLog("ProcessingResource.LaunchAssimilation: " + oEx);
 			return false;
 		}
 
@@ -1282,16 +1282,16 @@ public class ProcessingResources {
 	 * @return
 	 */
 	private boolean launchSaba(String sInputFile, String sWorkspaceId) {
-		Wasdi.DebugLog("ProcessingResources.launchSaba( " + sInputFile + ", " + sWorkspaceId + " )");
+		Wasdi.debugLog("ProcessingResources.launchSaba( " + sInputFile + ", " + sWorkspaceId + " )");
 		try {
 
 			String cmd[] = new String[] { m_oServletConfig.getInitParameter("SabaScript") };
 
 			String sParamFile = m_oServletConfig.getInitParameter("SabaParam");
 
-			Wasdi.DebugLog("ProcessingResource.launchSaba ParamFile " + sParamFile);
+			Wasdi.debugLog("ProcessingResource.launchSaba ParamFile " + sParamFile);
 
-			Wasdi.DebugLog("ProcessingResource.launchSaba: shell exec " + Arrays.toString(cmd));
+			Wasdi.debugLog("ProcessingResource.launchSaba: shell exec " + Arrays.toString(cmd));
 			File oFile = new File(sParamFile);
 
 			if (!oFile.exists()) {
@@ -1314,12 +1314,12 @@ public class ProcessingResources {
 			BufferedReader input = new BufferedReader(new InputStreamReader(proc.getInputStream()));
 			String line;
 			while ((line = input.readLine()) != null) {
-				Wasdi.DebugLog("ProcessingResource.launchSaba: envi stdout: " + line);
+				Wasdi.debugLog("ProcessingResource.launchSaba: envi stdout: " + line);
 			}
 			if (proc.waitFor() != 0)
 				return false;
 		} catch (Exception oEx) {
-			Wasdi.DebugLog("ProcessingResource.launchSaba: " + oEx);
+			Wasdi.debugLog("ProcessingResource.launchSaba: " + oEx);
 			return false;
 		}
 
@@ -1327,7 +1327,7 @@ public class ProcessingResources {
 	}
 
 	private String acceptedUserAndSession(String sSessionId) {
-		Wasdi.DebugLog("ProcessingResource.acceptedUserAndSession( " + sSessionId + " )");
+		Wasdi.debugLog("ProcessingResource.acceptedUserAndSession( " + sSessionId + " )");
 		// Check user
 		if (Utils.isNullOrEmpty(sSessionId))
 			return null;
@@ -1354,7 +1354,7 @@ public class ProcessingResources {
 	private PrimitiveResult executeOperation(String sSessionId, String sSourceProductName,
 			String sDestinationProductName, String sWorkspaceId, ISetting oSetting, LauncherOperations oOperation) {
 
-		Wasdi.DebugLog("ProsessingResources.executeOperation( " + sSessionId + ", " + sSourceProductName + ", "
+		Wasdi.debugLog("ProsessingResources.executeOperation( " + sSessionId + ", " + sSourceProductName + ", "
 				+ sDestinationProductName + ", " + sWorkspaceId + ", ISetting, LauncherOperations )");
 		PrimitiveResult oResult = new PrimitiveResult();
 		String sProcessObjId = "";
@@ -1415,21 +1415,21 @@ public class ProcessingResources {
 				oProcess.setProcessObjId(sProcessObjId);
 				oProcess.setStatus(ProcessStatus.CREATED.name());
 				oRepository.InsertProcessWorkspace(oProcess);
-				Wasdi.DebugLog("ProcessingResource.ExecuteOperation: Process Scheduled for Launcher");
+				Wasdi.debugLog("ProcessingResource.ExecuteOperation: Process Scheduled for Launcher");
 			} catch (Exception oEx) {
-				Wasdi.DebugLog("SnapOperations.ExecuteOperation: " + oEx);
+				Wasdi.debugLog("SnapOperations.ExecuteOperation: " + oEx);
 				oResult.setBoolValue(false);
 				oResult.setIntValue(500);
 				return oResult;
 			}
 
 		} catch (IOException e) {
-			Wasdi.DebugLog("SnapOperations.ExecuteOperation: " + e);
+			Wasdi.debugLog("SnapOperations.ExecuteOperation: " + e);
 			oResult.setBoolValue(false);
 			oResult.setIntValue(500);
 			return oResult;
 		} catch (Exception e) {
-			Wasdi.DebugLog("SnapOperations.ExecuteOperation: " + e);
+			Wasdi.debugLog("SnapOperations.ExecuteOperation: " + e);
 			oResult.setBoolValue(false);
 			oResult.setIntValue(500);
 			return oResult;
@@ -1450,7 +1450,7 @@ public class ProcessingResources {
 	 * @return
 	 */
 	private OperatorParameter getParameter(LauncherOperations oOperation) {
-		Wasdi.DebugLog("ProcessingResources.OperatorParameter(  LauncherOperations )");
+		Wasdi.debugLog("ProcessingResources.OperatorParameter(  LauncherOperations )");
 		switch (oOperation) {
 		case APPLYORBIT:
 			return new ApplyOrbitParameter();
@@ -1494,7 +1494,7 @@ public class ProcessingResources {
 	public PrimitiveResult asynchJRCTest(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("workspaceId") String sWorkspaceId, JRCTestViewModel oJRCViewModel) {
 
-		Wasdi.DebugLog("ProcessingResource.asynchJRCTest( " + sSessionId + ", " + sWorkspaceId + ", ... )");
+		Wasdi.debugLog("ProcessingResource.asynchJRCTest( " + sSessionId + ", " + sWorkspaceId + ", ... )");
 
 		if (null == sSessionId) {
 			PrimitiveResult oResult = new PrimitiveResult();
@@ -1513,16 +1513,16 @@ public class ProcessingResources {
 				return oResult;
 			}
 
-			Wasdi.DebugLog("ProcessingResource.asynchJRCTest: INPUT FILE " + oJRCViewModel.getInputFileName());
-			Wasdi.DebugLog("ProcessingResource.asynchJRCTest: OUTPUT FILE " + oJRCViewModel.getOutputFileName());
-			Wasdi.DebugLog("ProcessingResource.asynchJRCTest: EPSG " + oJRCViewModel.getEpsg());
+			Wasdi.debugLog("ProcessingResource.asynchJRCTest: INPUT FILE " + oJRCViewModel.getInputFileName());
+			Wasdi.debugLog("ProcessingResource.asynchJRCTest: OUTPUT FILE " + oJRCViewModel.getOutputFileName());
+			Wasdi.debugLog("ProcessingResource.asynchJRCTest: EPSG " + oJRCViewModel.getEpsg());
 
-			Wasdi.DebugLog("ProcessingResource.asynchJRCTest: launching MATLAB JRC Processor");
+			Wasdi.debugLog("ProcessingResource.asynchJRCTest: launching MATLAB JRC Processor");
 
 			return asynchLaunchJRC(sSessionId, oJRCViewModel, oUser, sWorkspaceId);
 
 		} catch (Exception e) {
-			Wasdi.DebugLog("ProcessingResource.asynchJRCTest: " + e);
+			Wasdi.debugLog("ProcessingResource.asynchJRCTest: " + e);
 			PrimitiveResult oResult = PrimitiveResult.getInvalidInstance();
 			oResult.setBoolValue(false);
 			oResult.setIntValue(500);
@@ -1539,7 +1539,7 @@ public class ProcessingResources {
 	 */
 	private PrimitiveResult asynchLaunchJRC(String sSessionId, JRCTestViewModel oJRCViewModel, User oUser,
 			String sWorkspaceId) {
-		Wasdi.DebugLog("ProcessingResources.asynchLaunchJRC( " + sSessionId + ", JRCTestViewModel, User, "
+		Wasdi.debugLog("ProcessingResources.asynchLaunchJRC( " + sSessionId + ", JRCTestViewModel, User, "
 				+ sWorkspaceId + " )");
 		PrimitiveResult oResult = new PrimitiveResult();
 		String sProcessObjId = Utils.GetRandomName();
@@ -1565,7 +1565,7 @@ public class ProcessingResources {
 			BufferedWriter oWriter = new BufferedWriter(new FileWriter(oConfigFile));
 
 			if (null != oWriter) {
-				Wasdi.DebugLog("ProcessingResource.asynchLaunchJRC: Creating config.properties file");
+				Wasdi.debugLog("ProcessingResource.asynchLaunchJRC: Creating config.properties file");
 
 				oWriter.write("BASEPATH=" + m_oServletConfig.getInitParameter("DownloadRootPath"));
 				oWriter.newLine();
@@ -1589,7 +1589,7 @@ public class ProcessingResources {
 
 			oWriter = new BufferedWriter(new FileWriter(oFile));
 			if (null != oWriter) {
-				Wasdi.DebugLog("ProcessingResource.asynchLaunchJRC: Creating parameters file");
+				Wasdi.debugLog("ProcessingResource.asynchLaunchJRC: Creating parameters file");
 
 				oWriter.write("INPUT=" + oJRCViewModel.getInputFileName());
 				oWriter.newLine();
@@ -1634,9 +1634,9 @@ public class ProcessingResources {
 				oProcess.setProcessObjId(sProcessObjId);
 				oProcess.setStatus(ProcessStatus.CREATED.name());
 				oRepository.InsertProcessWorkspace(oProcess);
-				Wasdi.DebugLog("ProcessingResource.asynchLaunch: Process Scheduled for Launcher");
+				Wasdi.debugLog("ProcessingResource.asynchLaunch: Process Scheduled for Launcher");
 			} catch (Exception oEx) {
-				Wasdi.DebugLog("ProcessingResource.asynchLaunchList: Error updating process list " + oEx);
+				Wasdi.debugLog("ProcessingResource.asynchLaunchList: Error updating process list " + oEx);
 				oResult.setBoolValue(false);
 				oResult.setIntValue(500);
 				return oResult;
@@ -1647,7 +1647,7 @@ public class ProcessingResources {
 			oResult.setStringValue(oProcess.getProcessObjId());
 
 		} catch (Exception oEx) {
-			Wasdi.DebugLog("ProcessingResource.launchList: " + oEx);
+			Wasdi.debugLog("ProcessingResource.launchList: " + oEx);
 			oResult.setBoolValue(false);
 			oResult.setIntValue(500);
 			return oResult;
@@ -1672,7 +1672,7 @@ public class ProcessingResources {
 	public PrimitiveResult asynchJRCTest2(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("workspaceId") String sWorkspaceId, JRCTestViewModel2 oJRCViewModel) {
 
-		Wasdi.DebugLog(
+		Wasdi.debugLog(
 				"ProcessingResource.asynchJRCTest2( " + sSessionId + ", " + sWorkspaceId + ", JRCTestViewModel2 )");
 
 		if (null == sSessionId) {
@@ -1692,17 +1692,17 @@ public class ProcessingResources {
 				return oResult;
 			}
 
-			Wasdi.DebugLog("ProcessingResource.asynchJRCTest2: INPUT FILE " + oJRCViewModel.getInputFileName());
-			Wasdi.DebugLog("ProcessingResource.asynchJRCTest2: GLC " + oJRCViewModel.getGlc());
-			Wasdi.DebugLog("ProcessingResource.asynchJRCTest2: LANDSATGHSL " + oJRCViewModel.getLandsatghsl());
-			Wasdi.DebugLog("ProcessingResource.asynchJRCTest2: PREPROCESS " + oJRCViewModel.getPreprocess());
+			Wasdi.debugLog("ProcessingResource.asynchJRCTest2: INPUT FILE " + oJRCViewModel.getInputFileName());
+			Wasdi.debugLog("ProcessingResource.asynchJRCTest2: GLC " + oJRCViewModel.getGlc());
+			Wasdi.debugLog("ProcessingResource.asynchJRCTest2: LANDSATGHSL " + oJRCViewModel.getLandsatghsl());
+			Wasdi.debugLog("ProcessingResource.asynchJRCTest2: PREPROCESS " + oJRCViewModel.getPreprocess());
 
-			Wasdi.DebugLog("ProcessingResource.asynchJRCTest2: launching MATLAB JRC 2 Processor");
+			Wasdi.debugLog("ProcessingResource.asynchJRCTest2: launching MATLAB JRC 2 Processor");
 
 			return asynchLaunchJRC2(sSessionId, oJRCViewModel, oUser, sWorkspaceId);
 
 		} catch (Exception e) {
-			Wasdi.DebugLog("ProcessingResource.asynchJRCTest2: " + e);
+			Wasdi.debugLog("ProcessingResource.asynchJRCTest2: " + e);
 			PrimitiveResult oResult = PrimitiveResult.getInvalidInstance();
 			oResult.setBoolValue(false);
 			oResult.setIntValue(500);
@@ -1720,7 +1720,7 @@ public class ProcessingResources {
 	private PrimitiveResult asynchLaunchJRC2(String sSessionId, JRCTestViewModel2 oJRCViewModel, User oUser,
 			String sWorkspaceId) {
 
-		Wasdi.DebugLog("ProcessingResources.asynchLaunchJRC2( " + sSessionId + ", JRCTestViewModel2, oUser, "
+		Wasdi.debugLog("ProcessingResources.asynchLaunchJRC2( " + sSessionId + ", JRCTestViewModel2, oUser, "
 				+ sWorkspaceId + " )");
 		PrimitiveResult oResult = new PrimitiveResult();
 		String sProcessObjId = Utils.GetRandomName();
@@ -1746,7 +1746,7 @@ public class ProcessingResources {
 			BufferedWriter oWriter = new BufferedWriter(new FileWriter(oConfigFile));
 
 			if (null != oWriter) {
-				Wasdi.DebugLog("ProcessingResource.asynchLaunchJRC2: Creating config.properties file");
+				Wasdi.debugLog("ProcessingResource.asynchLaunchJRC2: Creating config.properties file");
 
 				oWriter.write("BASEPATH=" + m_oServletConfig.getInitParameter("DownloadRootPath"));
 				oWriter.newLine();
@@ -1770,7 +1770,7 @@ public class ProcessingResources {
 
 			oWriter = new BufferedWriter(new FileWriter(oFile));
 			if (null != oWriter) {
-				Wasdi.DebugLog("ProcessingResource.asynchLaunchJRC2: Creating parameters file");
+				Wasdi.debugLog("ProcessingResource.asynchLaunchJRC2: Creating parameters file");
 
 				oWriter.write("INPUT=" + oJRCViewModel.getInputFileName());
 				oWriter.newLine();
@@ -1815,9 +1815,9 @@ public class ProcessingResources {
 				oProcess.setProcessObjId(sProcessObjId);
 				oProcess.setStatus(ProcessStatus.CREATED.name());
 				oRepository.InsertProcessWorkspace(oProcess);
-				Wasdi.DebugLog("ProcessingResource.asynchLaunch2: Process Scheduled for Launcher");
+				Wasdi.debugLog("ProcessingResource.asynchLaunch2: Process Scheduled for Launcher");
 			} catch (Exception oEx) {
-				Wasdi.DebugLog("ProcessingResource.asynchLaunchList2: Error updating process list " + oEx);
+				Wasdi.debugLog("ProcessingResource.asynchLaunchList2: Error updating process list " + oEx);
 				oResult.setBoolValue(false);
 				oResult.setIntValue(500);
 				return oResult;
@@ -1828,7 +1828,7 @@ public class ProcessingResources {
 			oResult.setStringValue(oProcess.getProcessObjId());
 
 		} catch (Exception oEx) {
-			Wasdi.DebugLog("ProcessingResource.launchList2: " + oEx);
+			Wasdi.debugLog("ProcessingResource.launchList2: " + oEx);
 			oResult.setBoolValue(false);
 			oResult.setIntValue(500);
 			return oResult;
@@ -1852,7 +1852,7 @@ public class ProcessingResources {
 	public PrimitiveResult asynchJRCTest3(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("workspaceId") String sWorkspaceId, JRCTestViewModel3 oJRCViewModel) {
 
-		Wasdi.DebugLog(
+		Wasdi.debugLog(
 				"ProcessingResource.asynchJRCTest3( " + sSessionId + ", " + sWorkspaceId + ", JRCTestViewModel3 )");
 
 		if (null == sSessionId) {
@@ -1872,18 +1872,18 @@ public class ProcessingResources {
 				return oResult;
 			}
 
-			Wasdi.DebugLog("ProcessingResource.asynchJRCTest3: INPUT FILE " + oJRCViewModel.getInputFileName());
-			Wasdi.DebugLog("ProcessingResource.asynchJRCTest3: LRN_SET " + oJRCViewModel.getLrnSet());
-			Wasdi.DebugLog("ProcessingResource.asynchJRCTest3: LRN_SET_POSITIVE " + oJRCViewModel.getLrnSetPositive());
-			Wasdi.DebugLog("ProcessingResource.asynchJRCTest3: LRN_SET_NODATA " + oJRCViewModel.getLrnSetNoData());
-			Wasdi.DebugLog("ProcessingResource.asynchJRCTest3: CLOUD_THRESH " + oJRCViewModel.getCloudThresh());
+			Wasdi.debugLog("ProcessingResource.asynchJRCTest3: INPUT FILE " + oJRCViewModel.getInputFileName());
+			Wasdi.debugLog("ProcessingResource.asynchJRCTest3: LRN_SET " + oJRCViewModel.getLrnSet());
+			Wasdi.debugLog("ProcessingResource.asynchJRCTest3: LRN_SET_POSITIVE " + oJRCViewModel.getLrnSetPositive());
+			Wasdi.debugLog("ProcessingResource.asynchJRCTest3: LRN_SET_NODATA " + oJRCViewModel.getLrnSetNoData());
+			Wasdi.debugLog("ProcessingResource.asynchJRCTest3: CLOUD_THRESH " + oJRCViewModel.getCloudThresh());
 
-			Wasdi.DebugLog("ProcessingResource.asynchJRCTest3: launching MATLAB JRC 3 Processor");
+			Wasdi.debugLog("ProcessingResource.asynchJRCTest3: launching MATLAB JRC 3 Processor");
 
 			return asynchLaunchJRC3(sSessionId, oJRCViewModel, oUser, sWorkspaceId);
 
 		} catch (Exception e) {
-			Wasdi.DebugLog("ProcessingResource.asynchJRCTest3: " + e);
+			Wasdi.debugLog("ProcessingResource.asynchJRCTest3: " + e);
 			PrimitiveResult oResult = PrimitiveResult.getInvalidInstance();
 			oResult.setBoolValue(false);
 			oResult.setIntValue(500);
@@ -1901,7 +1901,7 @@ public class ProcessingResources {
 	private PrimitiveResult asynchLaunchJRC3(String sSessionId, JRCTestViewModel3 oJRCViewModel, User oUser,
 			String sWorkspaceId) {
 
-		Wasdi.DebugLog("ProcessingResources.asynchLaunchJRC3( " + sSessionId + ", oJRCViewModel, User, " + sWorkspaceId
+		Wasdi.debugLog("ProcessingResources.asynchLaunchJRC3( " + sSessionId + ", oJRCViewModel, User, " + sWorkspaceId
 				+ " )");
 		PrimitiveResult oResult = new PrimitiveResult();
 		String sProcessObjId = Utils.GetRandomName();
@@ -1927,7 +1927,7 @@ public class ProcessingResources {
 			BufferedWriter oWriter = new BufferedWriter(new FileWriter(oConfigFile));
 
 			if (null != oWriter) {
-				Wasdi.DebugLog("ProcessingResource.asynchLaunchJRC3: Creating config.properties file");
+				Wasdi.debugLog("ProcessingResource.asynchLaunchJRC3: Creating config.properties file");
 
 				oWriter.write("BASEPATH=" + m_oServletConfig.getInitParameter("DownloadRootPath"));
 				oWriter.newLine();
@@ -1951,7 +1951,7 @@ public class ProcessingResources {
 
 			oWriter = new BufferedWriter(new FileWriter(oFile));
 			if (null != oWriter) {
-				Wasdi.DebugLog("ProcessingResource.asynchLaunchJRC2: Creating parameters file");
+				Wasdi.debugLog("ProcessingResource.asynchLaunchJRC2: Creating parameters file");
 
 				oWriter.write("INPUT=" + oJRCViewModel.getInputFileName());
 				oWriter.newLine();
@@ -1998,9 +1998,9 @@ public class ProcessingResources {
 				oProcess.setProcessObjId(sProcessObjId);
 				oProcess.setStatus(ProcessStatus.CREATED.name());
 				oRepository.InsertProcessWorkspace(oProcess);
-				Wasdi.DebugLog("ProcessingResource.asynchLaunch3: Process Scheduled for Launcher");
+				Wasdi.debugLog("ProcessingResource.asynchLaunch3: Process Scheduled for Launcher");
 			} catch (Exception oEx) {
-				Wasdi.DebugLog("ProcessingResource.asynchLaunchList3: Error updating process list " + oEx);
+				Wasdi.debugLog("ProcessingResource.asynchLaunchList3: Error updating process list " + oEx);
 				oResult.setBoolValue(false);
 				oResult.setIntValue(500);
 				return oResult;
@@ -2011,7 +2011,7 @@ public class ProcessingResources {
 			oResult.setStringValue(oProcess.getProcessObjId());
 
 		} catch (Exception oEx) {
-			Wasdi.DebugLog("ProcessingResource.launchList2: " + oEx);
+			Wasdi.debugLog("ProcessingResource.launchList2: " + oEx);
 			oResult.setBoolValue(false);
 			oResult.setIntValue(500);
 			return oResult;

@@ -24,7 +24,7 @@ public class WpsProxyFactory {
 	static final Map<String,Supplier<WpsProxy>> s_aoProxies;
 	
 	static {
-		Wasdi.DebugLog("WpsProxyFactory: static constructor");
+		Wasdi.debugLog("WpsProxyFactory: static constructor");
 		Map<String, Supplier<WpsProxy>> aoProxies = new HashMap<>();
 		aoProxies.put("default", WpsProxy::new);
 		aoProxies.put("gpod", WpsProxyGPOD::new);
@@ -36,23 +36,23 @@ public class WpsProxyFactory {
 	}
 	
 	public WpsProxyFactory() {
-		Wasdi.DebugLog("WpsProxyFactory.WpsProxyFactory");
+		Wasdi.debugLog("WpsProxyFactory.WpsProxyFactory");
 	}
 
 	public WpsProxy get(String sWpsProvider) {
-		Wasdi.DebugLog("WpsProxyFactory.get");
+		Wasdi.debugLog("WpsProxyFactory.get");
 		Supplier<WpsProxy> oSupplier = null;
 		if(Utils.isNullOrEmpty(sWpsProvider)) {
-			Wasdi.DebugLog("WpsProxyFactory.get: null or empty provider, returning default");
+			Wasdi.debugLog("WpsProxyFactory.get: null or empty provider, returning default");
 			oSupplier = s_aoProxies.get("default");
 		} else {
 			oSupplier = s_aoProxies.get(sWpsProvider.toLowerCase());
 		}
 		if(null==oSupplier) {
-			Wasdi.DebugLog("WpsProxyFactory.get: no suitable proxy for given provider found, trying default");
+			Wasdi.debugLog("WpsProxyFactory.get: no suitable proxy for given provider found, trying default");
 			oSupplier = s_aoProxies.get("default");
 		} else {
-			Wasdi.DebugLog("WpsProxyFactory.get: returning WpsProxy for "+sWpsProvider );
+			Wasdi.debugLog("WpsProxyFactory.get: returning WpsProxy for "+sWpsProvider );
 		}
 		WpsProxy oResult = oSupplier.get();
 		oResult.setProviderName(sWpsProvider);

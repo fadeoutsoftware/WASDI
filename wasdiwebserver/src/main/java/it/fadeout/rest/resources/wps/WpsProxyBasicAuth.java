@@ -25,7 +25,7 @@ public class WpsProxyBasicAuth extends WpsProxy {
 
 	@Override
 	protected void setAuthenticator() {
-		Wasdi.DebugLog("WpsProxyBasicAuth.authenticate");
+		Wasdi.debugLog("WpsProxyBasicAuth.authenticate");
 		updateProviderUrlAsNeeded();
 		if(null==m_oCredentials) {
 			throw new NullPointerException("WpsProxyBNasicAuth.setAuthenticator: null credentials. Not initialized?");
@@ -35,7 +35,7 @@ public class WpsProxyBasicAuth extends WpsProxy {
 				try {
 					return new PasswordAuthentication(m_oCredentials.getUser(), m_oCredentials.getPassword().toCharArray());
 				} catch (Exception oEx) {
-					Wasdi.DebugLog("WpsProxyBasicAuth.authenticate" + oEx.getMessage() );
+					Wasdi.debugLog("WpsProxyBasicAuth.authenticate" + oEx.getMessage() );
 					throw oEx;
 				}
 			}
@@ -45,7 +45,7 @@ public class WpsProxyBasicAuth extends WpsProxy {
 
 	@Override
 	protected void authenticateAsNeeded() {
-		Wasdi.DebugLog("WpsProxyBasicAuth.authenticateAsNeeded");
+		Wasdi.debugLog("WpsProxyBasicAuth.authenticateAsNeeded");
 		if(!m_bIsAuthenticatorSet) {
 			setAuthenticator();
 			if(null==m_oCredentials) {

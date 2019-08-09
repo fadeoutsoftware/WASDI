@@ -3,7 +3,6 @@ package it.fadeout;
 import java.lang.reflect.Field;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.UUID;
@@ -254,7 +253,7 @@ public class Wasdi extends ResourceConfig {
 	 */
 	public static void shutDown() {
 		try {
-			Wasdi.DebugLog("-------Shutting Down Wasdi");
+			Wasdi.debugLog("-------Shutting Down Wasdi");
 			
 			s_oProcessingThread.stopThread();
 			s_oDownloadsThread.stopThread();
@@ -378,7 +377,7 @@ public class Wasdi extends ResourceConfig {
 	 * Debug Log
 	 * @param sMessage
 	 */
-	public static void DebugLog(String sMessage) {
+	public static void debugLog(String sMessage) {
 		if (s_bDebugLog) {
 			LocalDateTime oNow = LocalDateTime.now();
 			System.out.println(oNow+": " + sMessage);
