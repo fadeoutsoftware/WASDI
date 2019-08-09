@@ -58,7 +58,7 @@ public class ProductResource {
 	public PrimitiveResult addProductToWorkspace(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sProductName") String sProductName, @QueryParam("sWorkspaceId") String sWorkspaceId ) {
 
 
-		Wasdi.DebugLog.println("ProductResource.AddProductToWorkspace:  called WS: " + sWorkspaceId + " Product " + sProductName);
+		Wasdi.DebugLog("ProductResource.AddProductToWorkspace:  called WS: " + sWorkspaceId + " Product " + sProductName);
 		
 		// Validate Session
 		User oUser = Wasdi.GetUserFromSession(sSessionId);
@@ -190,8 +190,7 @@ public class ProductResource {
 					return oReloaded;					
 				}
 				catch (Exception oEx) {
-					Wasdi.DebugLog("ProductResource.GetMetadataByProductName: exception");
-					oEx.printStackTrace();
+					Wasdi.DebugLog("ProductResource.GetMetadataByProductName: " + oEx);
 					return null;
 				}
 				
@@ -497,13 +496,12 @@ public class ProductResource {
 				Wasdi.DebugLog("ProductResource.uploadfile: Process Scheduled for Launcher");
 			}
 			catch(Exception oEx){
-				Wasdi.DebugLog("ProductResource.uploadfile: Error updating process list " + oEx.getMessage());
-				oEx.printStackTrace();
+				Wasdi.DebugLog("ProductResource.uploadfile: Error updating process list " + oEx);
 				Response.status(500).build();
 			}
 			
 		} catch (Exception e) {
-			e.printStackTrace();
+			Wasdi.DebugLog("ProductResource.uploadfile: " + e);
 		}
 		
 		return Response.status(200).build();
