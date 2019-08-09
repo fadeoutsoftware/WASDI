@@ -98,8 +98,8 @@ public class CatalogResources {
 			Date dtTo = (sTo==null || sTo.isEmpty())?null:oDateFormat.parse(sTo);
 			return searchEntries(dtFrom, dtTo, sFreeText, sCategory, sUserId);
 		} catch (ParseException e) {
-			e.printStackTrace();
-			throw new InternalServerErrorException("invalid date: " + e.getMessage());
+			Wasdi.DebugLog("CatalogResources.GetEntries: " + e);
+			throw new InternalServerErrorException("invalid date: " + e);
 		}		
 	}
 
@@ -218,8 +218,7 @@ public class CatalogResources {
 			Wasdi.DebugLog(new EndMessageProvider().getGood());
 			return oResponseBuilder.build();
 		} catch (Exception e) {
-			Wasdi.DebugLog(new EndMessageProvider().getBad());
-			e.printStackTrace();
+			Wasdi.DebugLog("CatalogResources.DownloadEntryByName: " + e);
 		}
 		return null;
 	}
@@ -310,10 +309,7 @@ public class CatalogResources {
 			Wasdi.DebugLog("CatalogResources.zipOnTheFlyAndStream: return ");
 			return oResponseBuilder.build();
 		} catch (Exception e) {
-			Wasdi.DebugLog(new EndMessageProvider().getBad());
-			Wasdi.DebugLog("CatalogResources.zipOnTheFlyAndStream: exception caught:");
-			Wasdi.DebugLog("CatalogResources.zipOnTheFlyAndStream: " + e.getMessage());
-			e.printStackTrace();
+			Wasdi.DebugLog("CatalogResources.zipOnTheFlyAndStream: " + e);
 		} 
 		return null;
 	}
@@ -459,8 +455,7 @@ public class CatalogResources {
 
 		}
 		catch (Exception oEx) {
-			System.out.println("CatalogResources.GetCatalogs: error retrieving catalogs " + oEx.getMessage());
-			oEx.printStackTrace();
+			Wasdi.DebugLog("CatalogResources.GetCatalogs: " + oEx);
 		}
 
 		return aoCatalogList;
@@ -494,7 +489,7 @@ public class CatalogResources {
 
 		// Is the file available?
 		if (!oFilePath.canRead()) {
-			System.out.println("CatalogResource.IngestFile: ERROR: unable to access uploaded file " + oFilePath.getAbsolutePath());
+			Wasdi.DebugLog("CatalogResource.IngestFile: ERROR: unable to access uploaded file " + oFilePath.getAbsolutePath());
 			return Response.serverError().build();
 		}
 		try {
@@ -532,15 +527,14 @@ public class CatalogResources {
 				Wasdi.DebugLog("CatalogueResource.IngestFile: Process Scheduled for Launcher");
 			}
 			catch(Exception oEx){
-				System.out.println("DownloadResource.Download: Error updating process list " + oEx.getMessage());
-				oEx.printStackTrace();
+				Wasdi.DebugLog("DownloadResource.Download: " + oEx);
 				return Response.serverError().build();
 			}
 
 			return Response.ok().build();
 
 		} catch (Exception e) {
-			e.printStackTrace();
+			Wasdi.DebugLog("DownloadResource.Download: " + e);
 		}
 
 		return Response.serverError().build();
@@ -642,8 +636,7 @@ public class CatalogResources {
 				Wasdi.DebugLog("CatalogueResource.IngestFileInWorkspace: Process Scheduled for Launcher");
 			}
 			catch(Exception oEx){
-				System.out.println("CatalogueResource.IngestFileInWorkspace: Error updating process list " + oEx.getMessage());
-				oEx.printStackTrace();
+				Wasdi.DebugLog("CatalogueResource.IngestFileInWorkspace: Error updating process list " + oEx);
 				oResult.setBoolValue(false);
 				oResult.setIntValue(500);
 				return oResult;		
@@ -655,7 +648,7 @@ public class CatalogResources {
 			return oResult;		
 
 		} catch (Exception e) {
-			e.printStackTrace();
+			Wasdi.DebugLog("CatalogueResource.IngestFileInWorkspace: " + e);
 		}
 
 		oResult.setBoolValue(false);
@@ -744,9 +737,9 @@ public class CatalogResources {
 			Wasdi.DebugLog("CatalogueResource.ftpTransferFile: Process Scheduled for Launcher");
 
 		} catch (Exception e) {
-			e.printStackTrace();
+			Wasdi.DebugLog("CatalogueResource.ftpTransferFile: " + e);
 			PrimitiveResult oRes = PrimitiveResult.getInvalidInstance();
-			oRes.setStringValue(e.getMessage());
+			oRes.setStringValue(e.toString());
 			return oRes;
 		}
 
