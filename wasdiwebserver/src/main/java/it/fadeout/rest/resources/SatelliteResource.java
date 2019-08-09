@@ -16,59 +16,53 @@ import it.fadeout.business.InstanceFinder;
 import it.fadeout.viewmodels.SatelliteOrbitResultViewModel;
 import satLib.astro.time.Time;
 
-
 @Path("/satellite")
 public class SatelliteResource {
 
-	
 	@GET
 	@Path("/track/{satellitename}")
-	@Produces({"application/xml", "application/json", "text/html"})
+	@Produces({ "application/xml", "application/json", "text/html" })
 	@Consumes(MediaType.APPLICATION_JSON)
-	public SatelliteOrbitResultViewModel getSatelliteTrack(@HeaderParam("x-session-token") String sSessionId,@PathParam("satellitename")String satname){
-		
-		Wasdi.DebugLog("SatelliteResource.getSatelliteTrack");
-		
+	public SatelliteOrbitResultViewModel getSatelliteTrack(@HeaderParam("x-session-token") String sSessionId,
+			@PathParam("satellitename") String sSatname) {
+
+		Wasdi.DebugLog("SatelliteResource.getSatelliteTrack( " + sSessionId + ", " + sSatname + " )");
+
 		SatelliteOrbitResultViewModel ret = new SatelliteOrbitResultViewModel();
-		String satres=InstanceFinder.s_sOrbitSatsMap.get(satname);
+		String satres = InstanceFinder.s_sOrbitSatsMap.get(sSatname);
 		try {
-		
+
 			Time tconv = new Time();
-			double k=180.0/Math.PI;
-		    tconv.setDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+			double k = 180.0 / Math.PI;
+			tconv.setDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
 			Satellite sat = SatFactory.buildSat(satres);
-			ret.satelliteName=sat.getDescription();
+			ret.satelliteName = sat.getDescription();
 			sat.getSatController().moveToNow();
-			ret.currentPosition=(sat.getOrbitCore().getLatitude()*k)+";"+(sat.getOrbitCore().getLongitude()*k)+";"+sat.getOrbitCore().getAltitude();
+			ret.currentPosition = (sat.getOrbitCore().getLatitude() * k) + ";" + (sat.getOrbitCore().getLongitude() * k)
+					+ ";" + sat.getOrbitCore().getAltitude();
 			sat.getOrbitCore().setShowGroundTrack(true);
-			//lead
+			// lead
 			double[] tm = sat.getOrbitCore().getTimeLead();
-			int num=sat.getOrbitCore().getNumGroundTrackLeadPts();
-			for(int i=0; i<num; i++){
-				ret.nextPositions.add(
-						(sat.getOrbitCore().getGroundTrackLlaLeadPt(i)[0]*k)+";"+
-						(sat.getOrbitCore().getGroundTrackLlaLeadPt(i)[1]*k)+";"+
-						sat.getOrbitCore().getGroundTrackLlaLeadPt(i)[2]+";"
-						);
+			int num = sat.getOrbitCore().getNumGroundTrackLeadPts();
+			for (int i = 0; i < num; i++) {
+				ret.nextPositions.add((sat.getOrbitCore().getGroundTrackLlaLeadPt(i)[0] * k) + ";"
+						+ (sat.getOrbitCore().getGroundTrackLlaLeadPt(i)[1] * k) + ";"
+						+ sat.getOrbitCore().getGroundTrackLlaLeadPt(i)[2] + ";");
 				ret.nextPositionsTime.add(tconv.convertJD2String(tm[i]));
 			}
-			//lag
+			// lag
 			tm = sat.getOrbitCore().getTimeLag();
-			num=sat.getOrbitCore().getNumGroundTrackLagPts();
-			for(int i=0; i<num; i++){
-				ret.lastPositions.add(
-						(sat.getOrbitCore().getGroundTrackLlaLagPt(i)[0]*k)+";"+
-						(sat.getOrbitCore().getGroundTrackLlaLagPt(i)[1]*k)+";"+
-						sat.getOrbitCore().getGroundTrackLlaLagPt(i)[2]+";"
-						);
+			num = sat.getOrbitCore().getNumGroundTrackLagPts();
+			for (int i = 0; i < num; i++) {
+				ret.lastPositions.add((sat.getOrbitCore().getGroundTrackLlaLagPt(i)[0] * k) + ";"
+						+ (sat.getOrbitCore().getGroundTrackLlaLagPt(i)[1] * k) + ";"
+						+ sat.getOrbitCore().getGroundTrackLlaLagPt(i)[2] + ";");
 				ret.lastPositionsTime.add(tconv.convertJD2String(tm[i]));
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
+			Wasdi.DebugLog("SatelliteResource.getSatelliteTrack: " + e);
 		}
 		return ret;
 	}
-	
 
-	
 }
