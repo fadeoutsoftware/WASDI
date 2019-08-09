@@ -1,5 +1,7 @@
 package it.fadeout.sftp;
 
+import it.fadeout.Wasdi;
+
 /**
  * class for sftp account management
  * @author doy
@@ -17,7 +19,7 @@ public class SFTPManager {
 		try {
 			WsClient oClient = new WsClient(m_sAddress, sCommand);
 			if (oClient.isOk()) return oClient.getData();		
-			System.out.println("ERROR: " + oClient.getData());		
+			Wasdi.debugLog("ERROR: " + oClient.getData());		
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}				
@@ -79,20 +81,20 @@ public class SFTPManager {
 		String sAccount = "prova";
 		
 //		oManager.createAccount(sAccount, sAccount);		
-//		System.out.println(Arrays.toString(oManager.list(sAccount)));
+//		Wasdi.debugLog(Arrays.toString(oManager.list(sAccount)));
 		oManager.removeAccount(sAccount);		
 		
 		
 //		String sPassword = UUID.randomUUID().toString().split("-")[0];
-//		System.out.println(sPassword);
+//		Wasdi.debugLog(sPassword);
 //		oManager.removeAccount(sAccount);
-//		if (!oManager.createAccount(sAccount, sPassword)) System.out.println("NOOOO");
+//		if (!oManager.createAccount(sAccount, sPassword)) Wasdi.debugLog("NOOOO");
 //		//send email with new password
 //		MercuriusAPI oAPI = new MercuriusAPI("http://130.251.104.84:8080/it.fadeout.mercurius.webapi");			
 //		Message oMessage = new Message();
 //		oMessage.setTilte("Wasdi sftp account");
 //		oMessage.setSender("adminwasdi@acrotec.it");
 //		oMessage.setMessage("USER: " + sAccount + " - PASSWORD: " + sPassword);
-//		System.out.println(oAPI.sendMailDirect("alessandro.burastero@gmail.com", oMessage));
+//		Wasdi.debugLog(oAPI.sendMailDirect("alessandro.burastero@gmail.com", oMessage));
 	}
 }
