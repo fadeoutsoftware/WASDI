@@ -6,7 +6,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 
-import it.fadeout.Wasdi;
+import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.PrimitiveResult;
 
 @Path("wasdi")
@@ -19,7 +19,7 @@ public class WasdiResource {
 	@Path("/hello")
 	@Produces({ "application/xml", "application/json", "text/xml" })
 	public PrimitiveResult hello() {
-		Wasdi.debugLog("WasdiResource.hello");
+		Utils.debugLog("WasdiResource.hello");
 		PrimitiveResult oResult = new PrimitiveResult();
 		oResult.setStringValue("Hello Wasdi!!");
 		return oResult;
@@ -29,7 +29,7 @@ public class WasdiResource {
 	@Path("/version")
 	@Produces({ "application/xml", "application/json", "text/xml" })
 	public PrimitiveResult serverVersion() {
-		Wasdi.debugLog("WasdiResource.serverVersion");
+		Utils.debugLog("WasdiResource.serverVersion");
 		PrimitiveResult oResult = new PrimitiveResult();
 		oResult.setStringValue(m_oServletConfig.getInitParameter("ServerVersion"));
 		return oResult;

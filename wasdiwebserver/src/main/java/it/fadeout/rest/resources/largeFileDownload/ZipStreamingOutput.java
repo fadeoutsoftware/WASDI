@@ -21,7 +21,7 @@ import javax.ws.rs.core.StreamingOutput;
 
 import org.apache.commons.io.IOUtils;
 
-import it.fadeout.Wasdi;
+import wasdi.shared.utils.Utils;
 
 /**
  * @author c.nattero
@@ -32,7 +32,7 @@ public class ZipStreamingOutput implements StreamingOutput {
 	final Map<String,File> m_aoFileEntries;
 
 	public ZipStreamingOutput(Map<String,File> aoInitMap) {
-		Wasdi.debugLog("ZipStreamingOutput.ZipStreamingOutput");
+		Utils.debugLog("ZipStreamingOutput.ZipStreamingOutput");
 		if(null==aoInitMap) {
 			throw new NullPointerException("ZipStreamingOutput.ZipStreamingOutput: passed a null Map");
 		}
@@ -45,7 +45,7 @@ public class ZipStreamingOutput implements StreamingOutput {
 	 */
 	@Override
 	public void write(OutputStream oOutputStream) throws IOException, WebApplicationException {
-		Wasdi.debugLog("ZipStreamingOutput.write");
+		Utils.debugLog("ZipStreamingOutput.write");
 		if(null == oOutputStream) {
 			throw new NullPointerException("ZipStreamingOutput.write: passed a null OutputStream");
 		}
@@ -60,10 +60,10 @@ public class ZipStreamingOutput implements StreamingOutput {
 			Set<String> oZippedFileNames = m_aoFileEntries.keySet();
 			int iTotalFiles = m_aoFileEntries.size();
 			int iDone = 0;
-			Wasdi.debugLog("ZipStreamingOutput.write: begin");
+			Utils.debugLog("ZipStreamingOutput.write: begin");
 			for (String oZippedName : oZippedFileNames) {
 				iDone++;
-				Wasdi.debugLog("ZipStreamingOutput.write: File: "+oZippedName);
+				Utils.debugLog("ZipStreamingOutput.write: File: "+oZippedName);
 				File oFileToZip = m_aoFileEntries.get(oZippedName);
 				if(oFileToZip.isDirectory()) {
 					oZipOutputStream.putNextEntry(new ZipEntry(oZippedName));
@@ -80,7 +80,7 @@ public class ZipStreamingOutput implements StreamingOutput {
 						//IOUtils.copy(oInputStream, oZipOutputStream, 16384);
 						lCopiedBytes = IOUtils.copy(oInputStream, oZipOutputStream);
 					}
-					Wasdi.debugLog("ZipStreamingOutput.write: file " + oZippedName + "copied " + lCopiedBytes + " B out of " + oFileToZip.length());
+					Utils.debugLog("ZipStreamingOutput.write: file " + oZippedName + "copied " + lCopiedBytes + " B out of " + oFileToZip.length());
 					//
 					//TODO try different buffer sizes
 					//					byte[] bytes = new byte[16384];
@@ -106,27 +106,27 @@ public class ZipStreamingOutput implements StreamingOutput {
 					oZipOutputStream.closeEntry();
 					oInputStream.close();
 				}
-				Wasdi.debugLog("ZipStreamingOutput.write: done file: "+oZippedName+" -> "+ iDone +" / " +iTotalFiles);
+				Utils.debugLog("ZipStreamingOutput.write: done file: "+oZippedName+" -> "+ iDone +" / " +iTotalFiles);
 			}
-			Wasdi.debugLog("ZipStreamingOutput.write: done writing to zipstream");
+			Utils.debugLog("ZipStreamingOutput.write: done writing to zipstream");
 			//oZipOutputStream.flush();
 			oZipOutputStream.close();
-			Wasdi.debugLog("ZipStreamingOutput.write: ZipOutputStream closed");
+			Utils.debugLog("ZipStreamingOutput.write: ZipOutputStream closed");
 		} catch (Exception e) {
-			Wasdi.debugLog("ZipStreamingOutput.write: exception caught:");
-			Wasdi.debugLog("ZipStreamingOutput.write: "+e.getMessage() );
+			Utils.debugLog("ZipStreamingOutput.write: exception caught:");
+			Utils.debugLog("ZipStreamingOutput.write: "+e.getMessage() );
 			e.printStackTrace();
 		} finally {
 			// Flush output
 			if( oOutputStream!=null ) {
 				oOutputStream.flush();
 				oOutputStream.close();
-				Wasdi.debugLog("ZipStreamingOutput.write: OutputStream closed");
+				Utils.debugLog("ZipStreamingOutput.write: OutputStream closed");
 			}
 			// Close input
 			if( oInputStream !=null ) {
 				oInputStream.close();
-				Wasdi.debugLog("ZipStreamingOutput.write: InputStream closed");
+				Utils.debugLog("ZipStreamingOutput.write: InputStream closed");
 			}
 		}
 	}

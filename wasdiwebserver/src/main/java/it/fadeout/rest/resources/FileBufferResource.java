@@ -48,7 +48,7 @@ public class FileBufferResource {
 		oResult.setBoolValue(false);
 		try {
 			
-			Wasdi.debugLog("FileBufferResource.Download, session: " + sSessionId);
+			Utils.debugLog("FileBufferResource.Download, session: " + sSessionId);
 
 			Boolean bSessionIsValid = !Utils.isNullOrEmpty(sSessionId); 
 			if (!bSessionIsValid) {
@@ -105,7 +105,7 @@ public class FileBufferResource {
 				oProcess.setProcessObjId(sProcessObjId);
 				oProcess.setStatus(ProcessStatus.CREATED.name());
 				oRepository.InsertProcessWorkspace(oProcess);
-				Wasdi.debugLog("FileBufferResource.Download: Process Scheduled for Launcher, user: " + sUserId + ", process ID: " + sProcessObjId);
+				Utils.debugLog("FileBufferResource.Download: Process Scheduled for Launcher, user: " + sUserId + ", process ID: " + sProcessObjId);
 				
 				oResult.setBoolValue(true);
 				oResult.setIntValue(200);
@@ -115,12 +115,12 @@ public class FileBufferResource {
 
 			}
 			catch(Exception oEx){
-				Wasdi.debugLog("DownloadResource.Download: Error updating process list " + oEx);
+				Utils.debugLog("DownloadResource.Download: Error updating process list " + oEx);
 			}
 		} catch (IOException e) {
-			Wasdi.debugLog("DownloadResource.Download: Error updating process list " + e);
+			Utils.debugLog("DownloadResource.Download: Error updating process list " + e);
 		} catch (Exception e) {
-			Wasdi.debugLog("DownloadResource.Download: Error updating process list " + e);
+			Utils.debugLog("DownloadResource.Download: Error updating process list " + e);
 		}
 		oResult.setIntValue(500);
 		return oResult;
@@ -134,7 +134,7 @@ public class FileBufferResource {
 	{
 		try {
 			
-			Wasdi.debugLog("FileBufferResource.Publish, session: " + sSessionId);
+			Utils.debugLog("FileBufferResource.Publish, session: " + sSessionId);
 
 			if (Utils.isNullOrEmpty(sSessionId)) return Response.status(401).build();
 
@@ -175,17 +175,17 @@ public class FileBufferResource {
 				oProcess.setProcessObjId(sProcessObjId);
 				oProcess.setStatus(ProcessStatus.CREATED.name());
 				oRepository.InsertProcessWorkspace(oProcess);
-				Wasdi.debugLog("FileBufferResource.Publish: Process Scheduled for Launcher, user: " + sUserId + ", process ID: " + sProcessObjId);
+				Utils.debugLog("FileBufferResource.Publish: Process Scheduled for Launcher, user: " + sUserId + ", process ID: " + sProcessObjId);
 			}
 			catch(Exception oEx){
-				Wasdi.debugLog("DownloadResource.Publish: Error updating process list " + oEx);
+				Utils.debugLog("DownloadResource.Publish: Error updating process list " + oEx);
 				return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
 			}
 
 		} catch (IOException e) {
-			Wasdi.debugLog("DownloadResource.Publish: " + e);
+			Utils.debugLog("DownloadResource.Publish: " + e);
 		} catch (Exception e) {
-			Wasdi.debugLog("DownloadResource.Publish: " + e);
+			Utils.debugLog("DownloadResource.Publish: " + e);
 		}
 
 		return Response.ok().build();
@@ -203,7 +203,7 @@ public class FileBufferResource {
 		RabbitMessageViewModel oReturnValue = null;
 		try {
 			
-			Wasdi.debugLog("FileBufferResource.PublishBand, session: " + sSessionId);
+			Utils.debugLog("FileBufferResource.PublishBand, session: " + sSessionId);
 
 			if (Utils.isNullOrEmpty(sSessionId)) return oReturnValue;
 			User oUser = Wasdi.GetUserFromSession(sSessionId);
@@ -211,7 +211,7 @@ public class FileBufferResource {
 			String sUserId = oUser.getUserId();
 			if (Utils.isNullOrEmpty(sUserId)) return oReturnValue;
 
-			Wasdi.debugLog("FileBufferResource.PublishBand, user: " + oUser.getUserId() + ", read product workspaces " + sWorkspaceId);
+			Utils.debugLog("FileBufferResource.PublishBand, user: " + oUser.getUserId() + ", read product workspaces " + sWorkspaceId);
 
 			oReturnValue = new RabbitMessageViewModel();
 			
@@ -226,7 +226,7 @@ public class FileBufferResource {
 
 			if (oPublishBand != null)
 			{
-				Wasdi.debugLog("FileBufferResource.PublishBand: band already published " );
+				Utils.debugLog("FileBufferResource.PublishBand: band already published " );
 				PublishBandResultViewModel oPublishViewModel = new PublishBandResultViewModel();
 				oPublishViewModel.setBoundingBox(oPublishBand.getBoundingBox());
 				oPublishViewModel.setBandName(oPublishBand.getBandName());
@@ -236,7 +236,7 @@ public class FileBufferResource {
 				oReturnValue.setMessageCode(LauncherOperations.PUBLISHBAND.name());
 				oReturnValue.setPayload(oPublishViewModel);
 				
-				Wasdi.debugLog("FileBufferResource.PublishBand: return published band, user: " + sUserId );
+				Utils.debugLog("FileBufferResource.PublishBand: return published band, user: " + sUserId );
 				return oReturnValue;
 			}
 			
@@ -273,19 +273,19 @@ public class FileBufferResource {
 				oProcess.setProcessObjId(sProcessObjId);
 				oProcess.setStatus(ProcessStatus.CREATED.name());
 				oRepository.InsertProcessWorkspace(oProcess);
-				Wasdi.debugLog("FileBufferResource.PublishBand: Process Scheduled for Launcher, user: " + sUserId +", process ID: " + sProcessObjId);
+				Utils.debugLog("FileBufferResource.PublishBand: Process Scheduled for Launcher, user: " + sUserId +", process ID: " + sProcessObjId);
 			}
 			catch(Exception oEx){
-				Wasdi.debugLog("DownloadResource.PublishBand: Error updating process list " + oEx);
+				Utils.debugLog("DownloadResource.PublishBand: Error updating process list " + oEx);
 				return oReturnValue;
 			}
 
 		}catch (IOException e) {
-			Wasdi.debugLog("DownloadResource.PublishBand: " + e);
+			Utils.debugLog("DownloadResource.PublishBand: " + e);
 			return oReturnValue;
 
 		} catch (Exception e) {
-			Wasdi.debugLog("DownloadResource.PublishBand: " + e);
+			Utils.debugLog("DownloadResource.PublishBand: " + e);
 			return oReturnValue;
 		}
 
@@ -300,7 +300,7 @@ public class FileBufferResource {
 	@Produces({"application/xml", "application/json", "text/xml"})
 	public PrimitiveResult getBandLayerId(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sFileUrl") String sFileUrl, @QueryParam("sWorkspaceId") String sWorkspaceId, @QueryParam("sBand") String sBand) throws IOException
 	{
-		Wasdi.debugLog("FileBufferResource.GetBandLayerId, session: "+sSessionId);
+		Utils.debugLog("FileBufferResource.GetBandLayerId, session: "+sSessionId);
 		PrimitiveResult oReturnValue = null;
 		try {
 			if (Utils.isNullOrEmpty(sSessionId)) return oReturnValue;
@@ -308,7 +308,7 @@ public class FileBufferResource {
 			if (oUser==null) return oReturnValue;
 			if (Utils.isNullOrEmpty(oUser.getUserId())) return oReturnValue;
 
-			Wasdi.debugLog("FileBufferResource.GetBandLayerId: read product workspaces " + sWorkspaceId);
+			Utils.debugLog("FileBufferResource.GetBandLayerId: read product workspaces " + sWorkspaceId);
 
 			oReturnValue = new PrimitiveResult();
 			// Get Product List
@@ -321,13 +321,13 @@ public class FileBufferResource {
 			PublishedBand oPublishBand = oPublishedBandsRepository.GetPublishedBand(oDownloadedFile.getProductViewModel().getName(), sBand);
 
 			if (oPublishBand != null){
-				Wasdi.debugLog("FileBufferResource.GetBandLayerId: band already published return " +oPublishBand.getLayerId() );
+				Utils.debugLog("FileBufferResource.GetBandLayerId: band already published return " +oPublishBand.getLayerId() );
 				oReturnValue.setStringValue(oPublishBand.getLayerId());
 			} else {
-				Wasdi.debugLog("FileBufferResource.GetBandLayerId: band never published");
+				Utils.debugLog("FileBufferResource.GetBandLayerId: band never published");
 			}
 		} catch (Exception e) {
-			Wasdi.debugLog("FileBufferResource.GetBandLayerId: " + e);
+			Utils.debugLog("FileBufferResource.GetBandLayerId: " + e);
 			return oReturnValue;
 		}
 

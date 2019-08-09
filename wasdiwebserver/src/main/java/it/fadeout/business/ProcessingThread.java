@@ -12,10 +12,10 @@ import java.util.Map.Entry;
 
 import javax.servlet.ServletConfig;
 
-import it.fadeout.Wasdi;
 import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.data.ProcessWorkspaceRepository;
+import wasdi.shared.utils.Utils;
 
 /**
  * thread used to manage the process queue
@@ -105,7 +105,7 @@ public class ProcessingThread extends Thread {
 	@Override
 	public void run() {
 		
-		Wasdi.debugLog(m_sLogPrefix + "run!");
+		Utils.debugLog(m_sLogPrefix + "run!");
 		
 		while (getIsRunning()) {
 			
@@ -126,7 +126,7 @@ public class ProcessingThread extends Thread {
 				// Clear every killed process
 				for (String key : asToClear) {
 					m_aoLaunchedProcesses.remove(key);
-					Wasdi.debugLog(m_sLogPrefix + "removing " + key + " from launched");
+					Utils.debugLog(m_sLogPrefix + "removing " + key + " from launched");
 				}
 				
 				List<ProcessWorkspace> aoQueuedProcess = null;
@@ -157,7 +157,7 @@ public class ProcessingThread extends Thread {
 								waitForProcessToStart();
 								
 							} else {
-								Wasdi.debugLog(m_sLogPrefix + "process lauched before: " + oProcess.getProcessObjId());
+								Utils.debugLog(m_sLogPrefix + "process lauched before: " + oProcess.getProcessObjId());
 							}
 							iProcIndex++;
 						}
@@ -177,7 +177,7 @@ public class ProcessingThread extends Thread {
 			}	
 		}
 		
-		Wasdi.debugLog(m_sLogPrefix + " STOPPED");
+		Utils.debugLog(m_sLogPrefix + " STOPPED");
 	}
 	
 	/**
@@ -231,32 +231,32 @@ public class ProcessingThread extends Thread {
 				" -operation " + oProcessWorkspace.getOperationType() +
 				" -parameter " + oParameterFilePath.getAbsolutePath();
 
-		Wasdi.debugLog(m_sLogPrefix + "executing command for process " + oProcessWorkspace.getProcessObjId() + ": ");
-		Wasdi.debugLog(sShellExString);
+		Utils.debugLog(m_sLogPrefix + "executing command for process " + oProcessWorkspace.getProcessObjId() + ": ");
+		Utils.debugLog(sShellExString);
 
 		try {
 			
 			Process oSystemProc = Runtime.getRuntime().exec(sShellExString);
-			Wasdi.debugLog(""+oSystemProc.isAlive());
-			Wasdi.debugLog(m_sLogPrefix + "executed!!!");
+			Utils.debugLog(""+oSystemProc.isAlive());
+			Utils.debugLog(m_sLogPrefix + "executed!!!");
 			
 			m_aoLaunchedProcesses.put(oProcessWorkspace.getProcessObjId(), new Date());
-			Wasdi.debugLog(""+oSystemProc.isAlive());
+			Utils.debugLog(""+oSystemProc.isAlive());
 			
 		} catch (IOException e) {
 			
-			Wasdi.debugLog(m_sLogPrefix + " executeProcess : Exception" + e.toString());
+			Utils.debugLog(m_sLogPrefix + " executeProcess : Exception" + e.toString());
 			e.printStackTrace();
-			Wasdi.debugLog(m_sLogPrefix + " executeProcess : try to set the process in Error");
+			Utils.debugLog(m_sLogPrefix + " executeProcess : try to set the process in Error");
 			
 			try {
 				checkRepo();
 				oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
 				m_oProcessWorkspaceRepository.UpdateProcess(oProcessWorkspace);				
-				Wasdi.debugLog(m_sLogPrefix + " executeProcess : Error status set");
+				Utils.debugLog(m_sLogPrefix + " executeProcess : Error status set");
 			}
 			catch (Exception oInnerEx) {
-				Wasdi.debugLog(m_sLogPrefix + " executeProcess : INNER Exception" + oInnerEx.toString());
+				Utils.debugLog(m_sLogPrefix + " executeProcess : INNER Exception" + oInnerEx.toString());
 				oInnerEx.printStackTrace();
 			}
 			
