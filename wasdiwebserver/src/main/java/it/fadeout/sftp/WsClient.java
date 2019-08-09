@@ -12,6 +12,8 @@ import javax.websocket.OnOpen;
 import javax.websocket.Session;
 import javax.websocket.WebSocketContainer;
 
+import it.fadeout.Wasdi;
+
 @ClientEndpoint
 public class WsClient extends Semaphore {
 	
@@ -35,15 +37,15 @@ public class WsClient extends Semaphore {
 		
    @OnOpen
     public void onOpen(Session userSession) {
-        System.out.println("opening websocket...");
+        Wasdi.debugLog("opening websocket...");
         m_sUserSession = userSession;
-        System.out.println("WsClient.onOpen: userSession = " + userSession.getId() );
+        Wasdi.debugLog("WsClient.onOpen: userSession = " + userSession.getId() );
         userSession.getAsyncRemote().sendText(m_sMessage);	        
    }
    
 	@OnClose
 	public void onClose(Session userSession, CloseReason reason) {
-	    System.out.println("closing websocket");		    
+	    Wasdi.debugLog("closing websocket");		    
 	}
 
     /**
@@ -54,7 +56,7 @@ public class WsClient extends Semaphore {
     @OnMessage
     public void onMessage(String message) {
     	
-    	System.out.println(message);
+    	Wasdi.debugLog(message);
     	
     	ok = message.startsWith("OK;");
     	String[] toks = message.split(",|;");
