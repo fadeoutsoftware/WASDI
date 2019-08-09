@@ -67,7 +67,7 @@ public class CatalogResources {
 	@Path("categories")
 	@Produces({"application/json"})
 	public ArrayList<String> getCategories(@HeaderParam("x-session-token") String sSessionId) {
-		Wasdi.DebugLog("CatalogResources.GetCategories");
+		Wasdi.debugLog("CatalogResources.GetCategories");
 
 		ArrayList<String> categories = new ArrayList<String>();
 		for ( DownloadedFileCategory c : DownloadedFileCategory.values()) {
@@ -87,7 +87,7 @@ public class CatalogResources {
 			@QueryParam("category") String sCategory
 			) {
 
-		Wasdi.DebugLog("CatalogResources.GetEntries");
+		Wasdi.debugLog("CatalogResources.GetEntries");
 
 		User oUser = Wasdi.GetUserFromSession(sSessionId);
 		String sUserId = oUser.getUserId();
@@ -98,7 +98,7 @@ public class CatalogResources {
 			Date dtTo = (sTo==null || sTo.isEmpty())?null:oDateFormat.parse(sTo);
 			return searchEntries(dtFrom, dtTo, sFreeText, sCategory, sUserId);
 		} catch (ParseException e) {
-			Wasdi.DebugLog("CatalogResources.GetEntries: " + e);
+			Wasdi.debugLog("CatalogResources.GetEntries: " + e);
 			throw new InternalServerErrorException("invalid date: " + e);
 		}		
 	}
@@ -109,12 +109,12 @@ public class CatalogResources {
 	@Produces(MediaType.APPLICATION_OCTET_STREAM)
 	public Response downloadEntry(@HeaderParam("x-session-token") String sSessionId, DownloadedFile oEntry) {
 
-		Wasdi.DebugLog("CatalogResources.DownloadEntry");
+		Wasdi.debugLog("CatalogResources.DownloadEntry");
 
 		User oUser = Wasdi.GetUserFromSession(sSessionId);
 
 		if (oUser == null) {
-			Wasdi.DebugLog("CatalogResources.DownloadEntry: user not authorized");
+			Wasdi.debugLog("CatalogResources.DownloadEntry: user not authorized");
 			return Response.status(Status.UNAUTHORIZED).build();
 		}
 
@@ -122,16 +122,16 @@ public class CatalogResources {
 
 		ResponseBuilder oResponseBuilder = null;
 		if (!oFile.canRead()) {
-			Wasdi.DebugLog("CatalogResources.DownloadEntry: file not readable");
+			Wasdi.debugLog("CatalogResources.DownloadEntry: file not readable");
 			oResponseBuilder = Response.serverError();
 		} 
 		else {
-			Wasdi.DebugLog("CatalogResources.DownloadEntry: file ok return content");
+			Wasdi.debugLog("CatalogResources.DownloadEntry: file ok return content");
 			oResponseBuilder = Response.ok(oFile);
 			oResponseBuilder.header("Content-Disposition", "attachment; filename="+ oEntry.getFileName());
 		}
 
-		Wasdi.DebugLog("CatalogResources.DownloadEntry: done, return");
+		Wasdi.debugLog("CatalogResources.DownloadEntry: done, return");
 		return oResponseBuilder.build();
 	}
 
@@ -143,7 +143,7 @@ public class CatalogResources {
 	 */
 	private File getEntryFile(String sFileName, String sUserId, String sWorkspace)
 	{
-		Wasdi.DebugLog("CatalogResources.getEntryFile( " + sFileName + " )");
+		Wasdi.debugLog("CatalogResources.getEntryFile( " + sFileName + " )");
 				
 		String sTargetFilePath = Wasdi.getWorkspacePath(m_oServletConfig, Wasdi.getWorkspaceOwner(sWorkspace), sWorkspace) + sFileName;
 
@@ -152,7 +152,7 @@ public class CatalogResources {
 
 		if (oDownloadedFile == null) 
 		{
-			Wasdi.DebugLog("CatalogResources.getEntryFile: file " + sFileName + " not found");
+			Wasdi.debugLog("CatalogResources.getEntryFile: file " + sFileName + " not found");
 			return null;
 		}
 		
@@ -176,7 +176,7 @@ public class CatalogResources {
 			@QueryParam("workspace") String sWorkspace)
 	{			
 
-		Wasdi.DebugLog("CatalogResources.DownloadEntryByName( " + sSessionId + ", "+ sTokenSessionId + ", " + sFileName);
+		Wasdi.debugLog("CatalogResources.DownloadEntryByName( " + sSessionId + ", "+ sTokenSessionId + ", " + sFileName);
 		
 		try {
 			
@@ -187,7 +187,7 @@ public class CatalogResources {
 			User oUser = Wasdi.GetUserFromSession(sTokenSessionId);
 
 			if (oUser == null) {
-				Wasdi.DebugLog("CatalogResources.DownloadEntryByName: user not authorized");
+				Wasdi.debugLog("CatalogResources.DownloadEntryByName: user not authorized");
 				return Response.status(Status.UNAUTHORIZED).build();
 			}
 			
@@ -195,30 +195,30 @@ public class CatalogResources {
 			
 			ResponseBuilder oResponseBuilder = null;
 			if(oFile == null) {
-				Wasdi.DebugLog("CatalogResources.DownloadEntryByName: file not readable");
+				Wasdi.debugLog("CatalogResources.DownloadEntryByName: file not readable");
 				oResponseBuilder = Response.serverError();	
 			} else {
 				//InputStream oStream = null;
 				FileStreamingOutput oStream;
 				boolean bMustZip = mustBeZipped(oFile); 
 				if(bMustZip) {
-					Wasdi.DebugLog("CatalogResources.DownloadEntryByName: file " + oFile.getName() + " must be zipped");
+					Wasdi.debugLog("CatalogResources.DownloadEntryByName: file " + oFile.getName() + " must be zipped");
 					return zipOnTheFlyAndStream(oFile);
 				} else {
-					Wasdi.DebugLog("CatalogResources.DownloadEntryByName: no need to zip file " + oFile.getName());
+					Wasdi.debugLog("CatalogResources.DownloadEntryByName: no need to zip file " + oFile.getName());
 					oStream = new FileStreamingOutput(oFile);
 					//oStream = new FileInputStream(oFile);
-					Wasdi.DebugLog("CatalogResources.DownloadEntryByName: file ok return content");
+					Wasdi.debugLog("CatalogResources.DownloadEntryByName: file ok return content");
 					oResponseBuilder = Response.ok(oStream);
 					oResponseBuilder.header("Content-Disposition", "attachment; filename="+ oFile.getName());
 					oResponseBuilder.header("Content-Length", Long.toString(oFile.length()));
 				}
 			}
-			Wasdi.DebugLog("CatalogResources.DownloadEntryByName: done, return");
-			Wasdi.DebugLog(new EndMessageProvider().getGood());
+			Wasdi.debugLog("CatalogResources.DownloadEntryByName: done, return");
+			Wasdi.debugLog(new EndMessageProvider().getGood());
 			return oResponseBuilder.build();
 		} catch (Exception e) {
-			Wasdi.DebugLog("CatalogResources.DownloadEntryByName: " + e);
+			Wasdi.debugLog("CatalogResources.DownloadEntryByName: " + e);
 		}
 		return null;
 	}
@@ -226,23 +226,23 @@ public class CatalogResources {
 
 
 	private Response zipOnTheFlyAndStream(File oInitialFile) {
-		Wasdi.DebugLog("CatalogResources.zipOnTheFlyAndStream");
+		Wasdi.debugLog("CatalogResources.zipOnTheFlyAndStream");
 		if(null==oInitialFile) {
-			Wasdi.DebugLog("CatalogResources.zipOnTheFlyAndStream: oFile is null");
+			Wasdi.debugLog("CatalogResources.zipOnTheFlyAndStream: oFile is null");
 			return null;
 		}		
 		try {
-			Wasdi.DebugLog("CatalogResources.zipOnTheFlyAndStream: init");
+			Wasdi.debugLog("CatalogResources.zipOnTheFlyAndStream: init");
 			Stack<File> aoFileStack = new Stack<File>();
 			aoFileStack.push(oInitialFile);
 			String sBasePath = oInitialFile.getAbsolutePath();
 			
-			Wasdi.DebugLog("CatalogResources.zipOnTheFlyAndStream: sBasePath = " + sBasePath);
+			Wasdi.debugLog("CatalogResources.zipOnTheFlyAndStream: sBasePath = " + sBasePath);
 			
 			int iLast = sBasePath.lastIndexOf(".dim");
 			String sDir = sBasePath.substring(0, iLast) + ".data";
 			
-			Wasdi.DebugLog("CatalogResources.zipOnTheFlyAndStream: sDir = " + sDir);
+			Wasdi.debugLog("CatalogResources.zipOnTheFlyAndStream: sDir = " + sDir);
 			
 			File oFile = new File(sDir);
 			aoFileStack.push(oFile);
@@ -254,7 +254,7 @@ public class CatalogResources {
 				sBasePath = sBasePath + "/";
 			}
 			
-			Wasdi.DebugLog("CatalogResources.zipOnTheFlyAndStream: updated sBasePath = " + sBasePath);
+			Wasdi.debugLog("CatalogResources.zipOnTheFlyAndStream: updated sBasePath = " + sBasePath);
 			
 			int iBaseLen = sBasePath.length();
 			Map<String, File> aoFileEntries = new HashMap<>();
@@ -264,7 +264,7 @@ public class CatalogResources {
 				oFile = aoFileStack.pop();
 				String sAbsolutePath = oFile.getAbsolutePath();
 				
-				Wasdi.DebugLog("CatalogResources.zipOnTheFlyAndStream: sAbsolute Path " + sAbsolutePath);
+				Wasdi.debugLog("CatalogResources.zipOnTheFlyAndStream: sAbsolute Path " + sAbsolutePath);
 
 				if(oFile.isDirectory()) {
 					if(!sAbsolutePath.endsWith("/") && !sAbsolutePath.endsWith("\\")) {
@@ -276,13 +276,13 @@ public class CatalogResources {
 					}
 				}
 				
-				Wasdi.DebugLog("CatalogResources.zipOnTheFlyAndStream: sAbsolute Path 2 " + sAbsolutePath);
+				Wasdi.debugLog("CatalogResources.zipOnTheFlyAndStream: sAbsolute Path 2 " + sAbsolutePath);
 				
 				String sRelativePath = sAbsolutePath.substring(iBaseLen);
-				Wasdi.DebugLog("CatalogResources.zipOnTheFlyAndStream: adding file " + sRelativePath +" for compression");
+				Wasdi.debugLog("CatalogResources.zipOnTheFlyAndStream: adding file " + sRelativePath +" for compression");
 				aoFileEntries.put(sRelativePath,oFile);
 			}
-			Wasdi.DebugLog("CatalogResources.zipOnTheFlyAndStream: done preparing map, added " + aoFileEntries.size() + " files");
+			Wasdi.debugLog("CatalogResources.zipOnTheFlyAndStream: done preparing map, added " + aoFileEntries.size() + " files");
 						
 			ZipStreamingOutput oStream = new ZipStreamingOutput(aoFileEntries);
 
@@ -290,11 +290,11 @@ public class CatalogResources {
 			ResponseBuilder oResponseBuilder = Response.ok(oStream);
 			String sFileName = oInitialFile.getName();
 			
-			Wasdi.DebugLog("CatalogResources.zipOnTheFlyAndStream: sFileName1 " + sFileName);
+			Wasdi.debugLog("CatalogResources.zipOnTheFlyAndStream: sFileName1 " + sFileName);
 			
 			sFileName = sFileName.substring(0, sFileName.lastIndexOf(".dim") ) + ".zip";
 			
-			Wasdi.DebugLog("CatalogResources.zipOnTheFlyAndStream: sFileName2 Path " + sFileName);
+			Wasdi.debugLog("CatalogResources.zipOnTheFlyAndStream: sFileName2 Path " + sFileName);
 			
 			oResponseBuilder.header("Content-Disposition", "attachment; filename=\""+ sFileName +"\"");
 			Long lLength = 0L;
@@ -306,19 +306,19 @@ public class CatalogResources {
 				}
 			}
 			oResponseBuilder.header("Content-Length", lLength);
-			Wasdi.DebugLog("CatalogResources.zipOnTheFlyAndStream: return ");
+			Wasdi.debugLog("CatalogResources.zipOnTheFlyAndStream: return ");
 			return oResponseBuilder.build();
 		} catch (Exception e) {
-			Wasdi.DebugLog("CatalogResources.zipOnTheFlyAndStream: " + e);
+			Wasdi.debugLog("CatalogResources.zipOnTheFlyAndStream: " + e);
 		} 
 		return null;
 	}
 
 
 	private boolean mustBeZipped(File oFile) {
-		Wasdi.DebugLog("CatalogResources.mustBeZipped");
+		Wasdi.debugLog("CatalogResources.mustBeZipped");
 		if(null==oFile) {
-			Wasdi.DebugLog("CatalogResources.mustBeZipped: oFile is null");
+			Wasdi.debugLog("CatalogResources.mustBeZipped: oFile is null");
 			throw new NullPointerException("File is null");
 		}
 		boolean bRet = false;
@@ -338,12 +338,12 @@ public class CatalogResources {
 	@Produces({"application/xml", "application/json", "text/xml"})
 	public Response checkDownloadEntryAvailabilityByName(@QueryParam("token") String sSessionId, @QueryParam("filename") String sFileName, @QueryParam("workspace") String sWorkspace)
 	{			
-		Wasdi.DebugLog("CatalogResources.CheckDownloadEntryAvailabilityByName");
+		Wasdi.debugLog("CatalogResources.CheckDownloadEntryAvailabilityByName");
 
 		User oUser = Wasdi.GetUserFromSession(sSessionId);
 
 		if (oUser == null) {
-			Wasdi.DebugLog("CatalogResources.DownloadEntryByName: user not authorized");
+			Wasdi.debugLog("CatalogResources.DownloadEntryByName: user not authorized");
 			return Response.status(Status.UNAUTHORIZED).build();
 		}
 
@@ -418,7 +418,7 @@ public class CatalogResources {
 	@Produces({"application/xml", "application/json", "text/xml"})
 	public ArrayList<CatalogViewModel> getCatalogs(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sWorkspaceId") String sWorkspaceId) {
 
-		Wasdi.DebugLog("CatalogResources.GetCatalogues");
+		Wasdi.debugLog("CatalogResources.GetCatalogues");
 
 		User oUser = Wasdi.GetUserFromSession(sSessionId);
 
@@ -455,7 +455,7 @@ public class CatalogResources {
 
 		}
 		catch (Exception oEx) {
-			Wasdi.DebugLog("CatalogResources.GetCatalogs: " + oEx);
+			Wasdi.debugLog("CatalogResources.GetCatalogs: " + oEx);
 		}
 
 		return aoCatalogList;
@@ -474,7 +474,7 @@ public class CatalogResources {
 	@Produces({"application/json", "text/xml"})
 	public Response ingestFile(@HeaderParam("x-session-token") String sSessionId, @QueryParam("file") String sFile, @QueryParam("workspace") String sWorkspace) {
 
-		Wasdi.DebugLog("CatalogResource.IngestFile");
+		Wasdi.debugLog("CatalogResource.IngestFile");
 
 		// Check user session
 		User oUser = Wasdi.GetUserFromSession(sSessionId);
@@ -489,7 +489,7 @@ public class CatalogResources {
 
 		// Is the file available?
 		if (!oFilePath.canRead()) {
-			Wasdi.DebugLog("CatalogResource.IngestFile: ERROR: unable to access uploaded file " + oFilePath.getAbsolutePath());
+			Wasdi.debugLog("CatalogResource.IngestFile: ERROR: unable to access uploaded file " + oFilePath.getAbsolutePath());
 			return Response.serverError().build();
 		}
 		try {
@@ -524,17 +524,17 @@ public class CatalogResources {
 				oProcess.setProcessObjId(sProcessObjId);
 				oProcess.setStatus(ProcessStatus.CREATED.name());
 				oRepository.InsertProcessWorkspace(oProcess);
-				Wasdi.DebugLog("CatalogueResource.IngestFile: Process Scheduled for Launcher");
+				Wasdi.debugLog("CatalogueResource.IngestFile: Process Scheduled for Launcher");
 			}
 			catch(Exception oEx){
-				Wasdi.DebugLog("DownloadResource.Download: " + oEx);
+				Wasdi.debugLog("DownloadResource.Download: " + oEx);
 				return Response.serverError().build();
 			}
 
 			return Response.ok().build();
 
 		} catch (Exception e) {
-			Wasdi.DebugLog("DownloadResource.Download: " + e);
+			Wasdi.debugLog("DownloadResource.Download: " + e);
 		}
 
 		return Response.serverError().build();
@@ -556,7 +556,7 @@ public class CatalogResources {
 		// Create the result object
 		PrimitiveResult oResult = new PrimitiveResult();
 
-		Wasdi.DebugLog("CatalogResource.IngestFileInWorkspace");
+		Wasdi.debugLog("CatalogResource.IngestFileInWorkspace");
 
 		// Check the user session
 		User oUser = Wasdi.GetUserFromSession(sSessionId);
@@ -575,28 +575,28 @@ public class CatalogResources {
 		
 		// Check if the file exists 
 		if (!oFilePath.canRead()) {
-			Wasdi.DebugLog("CatalogResource.IngestFileInWorkspace: file not found. Check if it is an extension problem");
+			Wasdi.debugLog("CatalogResource.IngestFileInWorkspace: file not found. Check if it is an extension problem");
 
 			String [] asSplittedFileName = sFile.split("\\.");
 
 			if (asSplittedFileName.length == 1) {
 
-				Wasdi.DebugLog("CatalogResource.IngestFileInWorkspace: file without exension, try .dim");
+				Wasdi.debugLog("CatalogResource.IngestFileInWorkspace: file without exension, try .dim");
 
 				sFile = sFile + ".dim";
 				sFilePath = Wasdi.getWorkspacePath(m_oServletConfig, Wasdi.getWorkspaceOwner(sWorkspace), sWorkspace) + sFile;
 				oFilePath = new File(sFilePath);
 
 				if (!oFilePath.canRead()) {
-					Wasdi.DebugLog("CatalogResource.IngestFileInWorkspace: file not availalbe. Can be a developer process. Return 500 [file: " + sFile + "]");
+					Wasdi.debugLog("CatalogResource.IngestFileInWorkspace: file not availalbe. Can be a developer process. Return 500 [file: " + sFile + "]");
 					oResult.setBoolValue(false);
 					oResult.setIntValue(500);
 					return oResult;							
 				}
 			}
 			else {
-				Wasdi.DebugLog("CatalogResource.IngestFileInWorkspace: file with exension but not available");
-				Wasdi.DebugLog("CatalogResource.IngestFileInWorkspace: file not availalbe. Can be a developer process. Return 500 [file: " + sFile + "]");
+				Wasdi.debugLog("CatalogResource.IngestFileInWorkspace: file with exension but not available");
+				Wasdi.debugLog("CatalogResource.IngestFileInWorkspace: file not availalbe. Can be a developer process. Return 500 [file: " + sFile + "]");
 				oResult.setBoolValue(false);
 				oResult.setIntValue(500);
 				return oResult;											
@@ -633,10 +633,10 @@ public class CatalogResources {
 				oProcess.setProcessObjId(sProcessObjId);
 				oProcess.setStatus(ProcessStatus.CREATED.name());
 				oRepository.InsertProcessWorkspace(oProcess);
-				Wasdi.DebugLog("CatalogueResource.IngestFileInWorkspace: Process Scheduled for Launcher");
+				Wasdi.debugLog("CatalogueResource.IngestFileInWorkspace: Process Scheduled for Launcher");
 			}
 			catch(Exception oEx){
-				Wasdi.DebugLog("CatalogueResource.IngestFileInWorkspace: Error updating process list " + oEx);
+				Wasdi.debugLog("CatalogueResource.IngestFileInWorkspace: Error updating process list " + oEx);
 				oResult.setBoolValue(false);
 				oResult.setIntValue(500);
 				return oResult;		
@@ -648,7 +648,7 @@ public class CatalogResources {
 			return oResult;		
 
 		} catch (Exception e) {
-			Wasdi.DebugLog("CatalogueResource.IngestFileInWorkspace: " + e);
+			Wasdi.debugLog("CatalogueResource.IngestFileInWorkspace: " + e);
 		}
 
 		oResult.setBoolValue(false);
@@ -660,7 +660,7 @@ public class CatalogResources {
 	@Path("/upload/ftp")
 	@Produces({"application/json", "text/xml"})
 	public PrimitiveResult ftpTransferFile(@HeaderParam("x-session-token") String sSessionId,  @QueryParam("workspace") String sWorkspace, FtpTransferViewModel oFtpTransferVM) {
-		Wasdi.DebugLog("CatalogResource.ftpTransferFile");
+		Wasdi.debugLog("CatalogResource.ftpTransferFile");
 
 		//input validation
 		if(null == sSessionId || null == oFtpTransferVM) {
@@ -697,7 +697,7 @@ public class CatalogResources {
 
 
 		try {
-			Wasdi.DebugLog("CatalogResource.ftpTransferFile: prepare parameters");
+			Wasdi.debugLog("CatalogResource.ftpTransferFile: prepare parameters");
 			
 			FtpUploadParameters oParams = new FtpUploadParameters();
 			oParams.setFtpServer(oFtpTransferVM.getServer());
@@ -717,7 +717,7 @@ public class CatalogResources {
 			oParams.setLocalPath(sFullLocalPath);
 			oParams.setWorkspaceOwnerId(Wasdi.getWorkspaceOwner(sUserId));
 
-			Wasdi.DebugLog("CatalogResource.ftpTransferFile: prepare process");
+			Wasdi.debugLog("CatalogResource.ftpTransferFile: prepare process");
 			ProcessWorkspace oProcess = new ProcessWorkspace();
 			oProcess.setOperationDate(Wasdi.GetFormatDate(new Date()));
 			oProcess.setOperationType(LauncherOperations.FTPUPLOAD.name());
@@ -728,16 +728,16 @@ public class CatalogResources {
 			oProcess.setStatus(ProcessStatus.CREATED.name());
 			oParams.setProcessObjId(oProcess.getProcessObjId());
 
-			Wasdi.DebugLog("CatalogResource.ftpTransferFile: serialize parameters");
+			Wasdi.debugLog("CatalogResource.ftpTransferFile: serialize parameters");
 			String sPath = m_oServletConfig.getInitParameter("SerializationPath") + oProcess.getProcessObjId();
 			SerializationUtils.serializeObjectToXML(sPath, oParams);
 
 			ProcessWorkspaceRepository oRepository = new ProcessWorkspaceRepository();
 			oRepository.InsertProcessWorkspace(oProcess);
-			Wasdi.DebugLog("CatalogueResource.ftpTransferFile: Process Scheduled for Launcher");
+			Wasdi.debugLog("CatalogueResource.ftpTransferFile: Process Scheduled for Launcher");
 
 		} catch (Exception e) {
-			Wasdi.DebugLog("CatalogueResource.ftpTransferFile: " + e);
+			Wasdi.debugLog("CatalogueResource.ftpTransferFile: " + e);
 			PrimitiveResult oRes = PrimitiveResult.getInvalidInstance();
 			oRes.setStringValue(e.toString());
 			return oRes;

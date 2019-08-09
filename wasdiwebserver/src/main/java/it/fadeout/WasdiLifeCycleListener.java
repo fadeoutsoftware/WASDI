@@ -8,7 +8,7 @@ public class WasdiLifeCycleListener implements ServletContextListener {
 
 	@Override
 	public void contextInitialized(ServletContextEvent sce) {
-		Wasdi.DebugLog("WasdiLifeCycleListener.contextInitialized");
+		Wasdi.debugLog("WasdiLifeCycleListener.contextInitialized");
 	}
 
 	@Override

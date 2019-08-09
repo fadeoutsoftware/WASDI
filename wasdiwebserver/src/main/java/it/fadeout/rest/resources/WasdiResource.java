@@ -19,7 +19,7 @@ public class WasdiResource {
 	@Path("/hello")
 	@Produces({ "application/xml", "application/json", "text/xml" })
 	public PrimitiveResult hello() {
-		Wasdi.DebugLog("WasdiResource.hello");
+		Wasdi.debugLog("WasdiResource.hello");
 		PrimitiveResult oResult = new PrimitiveResult();
 		oResult.setStringValue("Hello Wasdi!!");
 		return oResult;
@@ -29,7 +29,7 @@ public class WasdiResource {
 	@Path("/version")
 	@Produces({ "application/xml", "application/json", "text/xml" })
 	public PrimitiveResult serverVersion() {
-		Wasdi.DebugLog("WasdiResource.serverVersion");
+		Wasdi.debugLog("WasdiResource.serverVersion");
 		PrimitiveResult oResult = new PrimitiveResult();
 		oResult.setStringValue(m_oServletConfig.getInitParameter("ServerVersion"));
 		return oResult;

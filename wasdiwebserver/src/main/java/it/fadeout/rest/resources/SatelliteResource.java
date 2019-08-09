@@ -26,7 +26,7 @@ public class SatelliteResource {
 	public SatelliteOrbitResultViewModel getSatelliteTrack(@HeaderParam("x-session-token") String sSessionId,
 			@PathParam("satellitename") String sSatname) {
 
-		Wasdi.DebugLog("SatelliteResource.getSatelliteTrack( " + sSessionId + ", " + sSatname + " )");
+		Wasdi.debugLog("SatelliteResource.getSatelliteTrack( " + sSessionId + ", " + sSatname + " )");
 
 		SatelliteOrbitResultViewModel ret = new SatelliteOrbitResultViewModel();
 		String satres = InstanceFinder.s_sOrbitSatsMap.get(sSatname);
@@ -60,7 +60,7 @@ public class SatelliteResource {
 				ret.lastPositionsTime.add(tconv.convertJD2String(tm[i]));
 			}
 		} catch (Exception e) {
-			Wasdi.DebugLog("SatelliteResource.getSatelliteTrack: " + e);
+			Wasdi.debugLog("SatelliteResource.getSatelliteTrack: " + e);
 		}
 		return ret;
 	}
