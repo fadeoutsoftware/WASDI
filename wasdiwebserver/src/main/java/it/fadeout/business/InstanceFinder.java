@@ -24,6 +24,7 @@ import org.nfs.orbits.sat.SwathArea;
 import org.nfs.orbits.sat.ViewAngle;
 import org.nfs.orbits.sat.swathSize;
 
+import it.fadeout.Wasdi;
 import it.fadeout.viewmodels.OpportunitiesSearchViewModel;
 import it.fadeout.viewmodels.SatelliteFilterViewModel;
 import it.fadeout.viewmodels.SensorModeViewModel;
@@ -115,7 +116,7 @@ public class InstanceFinder {
 				oSatellite=SatFactory.buildSat(s_sOrbitSats[i]);
 			} catch (Throwable oEx) {
 				oEx.printStackTrace();
-				System.out.println("InstanceFinder::findSwats: unable to instantiate satellite " + s_sOrbitSats[i] + " - " + oEx);
+				Wasdi.debugLog("InstanceFinder::findSwats: unable to instantiate satellite " + s_sOrbitSats[i] + " - " + oEx);
 				return null;
 			}
 
@@ -128,7 +129,7 @@ public class InstanceFinder {
 
 			for (SatSensor oSensor : oSatSensors) {
 
-				System.out.println("SENSORE ORBIT: " + oSensor.getSName());
+				Wasdi.debugLog("SENSORE ORBIT: " + oSensor.getSName());
 				// activate all sensors
 				oSensor.setEnabled(true);
 				// ottengo l'elenco di tutti i fasci (angoli) di
@@ -136,7 +137,7 @@ public class InstanceFinder {
 				ArrayList<SensorMode> oSensorModes = oSensor.getSensorModes();
 				// per questo sensore attivo tutti i possibili fasci
 				for (SensorMode oSensorMode : oSensorModes) {
-					System.out.println("\tMODE: " + oSensorMode.getName());
+					Wasdi.debugLog("\tMODE: " + oSensorMode.getName());
 					oSensorMode.setEnabled(true);
 				}
 			}
@@ -162,14 +163,14 @@ public class InstanceFinder {
 				try {
 					dX = Double.valueOf(asPoint[0]);
 				} catch (Exception oEx) {
-					System.out.println("InstanceFinder.findSwats: eccezione nella conversione stringa double del punto x dell'area ");
+					Wasdi.debugLog("InstanceFinder.findSwats: eccezione nella conversione stringa double del punto x dell'area ");
 					dX = 0;
 				}
 				double dY;
 				try {
 					dY = Double.valueOf(asPoint[1]);
 				} catch (Exception oEx) {
-					System.out.println("InstanceFinder.findSwats: eccezione nella conversione stringa double del punto y dell'area ");
+					Wasdi.debugLog("InstanceFinder.findSwats: eccezione nella conversione stringa double del punto y dell'area ");
 					dY = 0;
 				}
 				aoPoints[iCount] = new apoint(dX * s_dConversionFactor, dY * s_dConversionFactor, 0);
@@ -237,24 +238,24 @@ public class InstanceFinder {
 		// inizializzo i satelliti
 		if (m_aoSatellites == null) {			
 
-			System.out.println("findSwats: CREO I SATELLITI");
+			Wasdi.debugLog("findSwats: CREO I SATELLITI");
 
 			m_aoSatellites = new ArrayList<ISatellite>();
 
 			// use all cosmo skymed satellites
 			for (int i = 0; i < s_sOrbitSats.length; i++) {
 
-				System.out.println("findSwats: cerco satellite: " + s_sOrbitSats[i]);
+				Wasdi.debugLog("findSwats: cerco satellite: " + s_sOrbitSats[i]);
 				//InputStream oInputStream = TestSat.class.getResourceAsStream(s_sOrbitSats[i]);
 
 				Satellite oSatellite;
 				try {
 					//oSatellite = new Satellite(oInputStream);
 					oSatellite=SatFactory.buildSat(s_sOrbitSats[i]);
-					System.out.println("costruito");
+					Wasdi.debugLog("costruito");
 				} catch (Throwable oEx) {
 					oEx.printStackTrace();
-					System.out.println("InstanceFinder::findSwats: unable to instantiate satellite " + s_sOrbitSats[i] + " - " + oEx);
+					Wasdi.debugLog("InstanceFinder::findSwats: unable to instantiate satellite " + s_sOrbitSats[i] + " - " + oEx);
 					return null;
 				}
 
@@ -265,10 +266,10 @@ public class InstanceFinder {
 		}
 
 		if (m_aoSatellites != null) {
-			System.out.println("findSwats: Satelliti Disponibili " + m_aoSatellites.size());
+			Wasdi.debugLog("findSwats: Satelliti Disponibili " + m_aoSatellites.size());
 		}
 		else {
-			System.out.println("findSwats: m_aoSatellites NULL ");
+			Wasdi.debugLog("findSwats: m_aoSatellites NULL ");
 		}
 
 		ArrayList<ISatellite> aoSatellites = new ArrayList<ISatellite>();
@@ -291,7 +292,7 @@ public class InstanceFinder {
 					bEnabled = true;
 				}
 
-				//System.out.println("SENSORE ORBIT: " + oSensor.getSName());
+				//Wasdi.debugLog("SENSORE ORBIT: " + oSensor.getSName());
 
 				// activate all sensors
 				oSensor.setEnabled(bEnabled);
@@ -300,7 +301,7 @@ public class InstanceFinder {
 				ArrayList<SensorMode> oSensorModes = oSensor.getSensorModes();
 				// per questo sensore attivo tutti i possibili fasci
 				for (SensorMode oSensorMode : oSensorModes) {
-					//System.out.println("\tMODE: " + oSensorMode.getName());
+					//Wasdi.debugLog("\tMODE: " + oSensorMode.getName());
 					oSensorMode.setEnabled(bEnabled);
 				}
 			}
@@ -325,14 +326,14 @@ public class InstanceFinder {
 				try {
 					dX = Double.valueOf(asPoint[0]);
 				} catch (Exception oEx) {
-					System.out.println("InstanceFinder.findSwats: eccezione nella conversione stringa double del punto x dell'area ");
+					Wasdi.debugLog("InstanceFinder.findSwats: eccezione nella conversione stringa double del punto x dell'area ");
 					dX = 0;
 				}
 				double dY;
 				try {
 					dY = Double.valueOf(asPoint[1]);
 				} catch (Exception oEx) {
-					System.out.println("InstanceFinder.findSwats: eccezione nella conversione stringa double del punto y dell'area ");
+					Wasdi.debugLog("InstanceFinder.findSwats: eccezione nella conversione stringa double del punto y dell'area ");
 					dY = 0;
 				}
 				aoPoints[iCount] = new apoint(dX * s_dConversionFactor, dY * s_dConversionFactor, 0);
@@ -382,14 +383,14 @@ public class InstanceFinder {
 		coverageRequest.setSecondDate(oDateTimeEnd);
 
 
-		System.out.println("findSwats CHIAMO SOLVE REQUEST");
+		Wasdi.debugLog("findSwats CHIAMO SOLVE REQUEST");
 		// Eseguo la ricerca
 		// se a solveRequest passo false ottengo soltanto la potenziale
 		// copertura, i fasci non vengono considerati.
 		// se passo true per ogni potenziale copertura viene calcolata anche la copertura dei fasci attivati precedentemente
 		ArrayList<CoverageSwathResult> oResults = coverageRequest.solveRequest(true);
 
-		System.out.println("findSwats TORNO");
+		Wasdi.debugLog("findSwats TORNO");
 		// ris contiente l'elenco di tutte le potenziali coperture
 
 		return oResults;
@@ -411,24 +412,24 @@ public class InstanceFinder {
 //			String sSensorResolution, String sSensorType,String sLookingType,String sViewAngle,String sSwathSize) throws ParseException {
 //
 //
-//		System.out.println("findSwats: CREO I SATELLITI");
+//		Wasdi.debugLog("findSwats: CREO I SATELLITI");
 //
 //		m_aoSatellites = new ArrayList<ISatellite>();
 //
 //		// use all cosmo skymed satellites
 //		for (int i = 0; i < asSatelliteNames.size(); i++) {
 //
-//			System.out.println("InstanceFinder::findSwatsByFilters: cerco satellite: " + asSatelliteNames.get(i));
+//			Wasdi.debugLog("InstanceFinder::findSwatsByFilters: cerco satellite: " + asSatelliteNames.get(i));
 //			//InputStream oInputStream = TestSat.class.getResourceAsStream(s_sOrbitSatsMap.get(asSatelliteNames.get(i)));
 //
 //			Satellite oSatellite;
 //			try {
 //				//oSatellite = new Satellite(oInputStream);
 //				oSatellite=SatFactory.buildSat(s_sOrbitSatsMap.get(asSatelliteNames.get(i)));
-//				System.out.println("costruito");
+//				Wasdi.debugLog("costruito");
 //			} catch (Throwable oEx) {
 //				oEx.printStackTrace();
-//				System.out.println("InstanceFinder::findSwatsByFilters: unable to instantiate satellite " + s_sOrbitSats[i] + " - " + oEx);
+//				Wasdi.debugLog("InstanceFinder::findSwatsByFilters: unable to instantiate satellite " + s_sOrbitSats[i] + " - " + oEx);
 //				return null;
 //			}
 //
@@ -437,10 +438,10 @@ public class InstanceFinder {
 //		}
 //
 //		if (m_aoSatellites != null) {
-//			System.out.println("InstanceFinder::findSwatsByFilters: Satelliti Disponibili " + m_aoSatellites.size());
+//			Wasdi.debugLog("InstanceFinder::findSwatsByFilters: Satelliti Disponibili " + m_aoSatellites.size());
 //		}
 //		else {
-//			System.out.println("InstanceFinder::findSwatsByFilters: m_aoSatellites NULL ");
+//			Wasdi.debugLog("InstanceFinder::findSwatsByFilters: m_aoSatellites NULL ");
 //		}
 //
 //		ArrayList<ISatellite> aoSatellites = new ArrayList<ISatellite>();
@@ -465,7 +466,7 @@ public class InstanceFinder {
 //					bEnabled = true;
 //				}
 //
-//				//System.out.println("SENSORE ORBIT: " + oSensor.getSName());
+//				//Wasdi.debugLog("SENSORE ORBIT: " + oSensor.getSName());
 //
 //				// activate all sensors
 //				oSensor.setEnabled(bEnabled);
@@ -474,7 +475,7 @@ public class InstanceFinder {
 //				ArrayList<SensorMode> oSensorModes = oSensor.getSensorModes();
 //				// per questo sensore attivo tutti i possibili fasci
 //				for (SensorMode oSensorMode : oSensorModes) {
-//					//System.out.println("\tMODE: " + oSensorMode.getName());
+//					//Wasdi.debugLog("\tMODE: " + oSensorMode.getName());
 //					oSensorMode.setEnabled(bEnabled);
 //				}
 //				
@@ -512,14 +513,14 @@ public class InstanceFinder {
 //				try {
 //					dX = Double.valueOf(asPoint[0]);
 //				} catch (Exception oEx) {
-//					System.out.println("InstanceFinder.findSwats: eccezione nella conversione stringa double del punto x dell'area ");
+//					Wasdi.debugLog("InstanceFinder.findSwats: eccezione nella conversione stringa double del punto x dell'area ");
 //					dX = 0;
 //				}
 //				double dY;
 //				try {
 //					dY = Double.valueOf(asPoint[1]);
 //				} catch (Exception oEx) {
-//					System.out.println("InstanceFinder.findSwats: eccezione nella conversione stringa double del punto y dell'area ");
+//					Wasdi.debugLog("InstanceFinder.findSwats: eccezione nella conversione stringa double del punto y dell'area ");
 //					dY = 0;
 //				}
 //				aoPoints[iCount] = new apoint(dX * s_dConversionFactor, dY * s_dConversionFactor, 0);
@@ -557,14 +558,14 @@ public class InstanceFinder {
 //		coverageRequest.setFirstDate(oDateTimeStart);
 //		coverageRequest.setSecondDate(oDateTimeEnd);
 //		//String sLookingType,String sViewAngle,String sSwathSize
-//		System.out.println("findSwats CHIAMO SOLVE REQUEST");
+//		Wasdi.debugLog("findSwats CHIAMO SOLVE REQUEST");
 //		// Eseguo la ricerca
 //		// se a solveRequest passo false ottengo soltanto la potenziale
 //		// copertura, i fasci non vengono considerati.
 //		// se passo true per ogni potenziale copertura viene calcolata anche la copertura dei fasci attivati precedentemente
 //		ArrayList<CoverageSwathResult> oResults = coverageRequest.solveRequest(true);
 //
-//		System.out.println("findSwats TORNO");
+//		Wasdi.debugLog("findSwats TORNO");
 //		// ris contiente l'elenco di tutte le potenziali coperture
 //
 //		return oResults;
@@ -573,7 +574,7 @@ public class InstanceFinder {
 	
 	public static  ArrayList<CoverageSwathResult> findSwatsByFilters(OpportunitiesSearchViewModel oOpportunitiesSearch)
 	{
-		System.out.println("findSwats: CREO I SATELLITI");
+		Wasdi.debugLog("findSwats: CREO I SATELLITI");
 
 		m_aoSatellites = new ArrayList<ISatellite>();
 		ArrayList<SatelliteFilterViewModel> aoSatelliteFilters;
@@ -582,17 +583,17 @@ public class InstanceFinder {
 		// use all cosmo skymed satellites
 		for (int iIndexSatelliteFitler = 0; iIndexSatelliteFitler < aoSatelliteFilters.size() ; iIndexSatelliteFitler++) {
 			String sSatelliteName = aoSatelliteFilters.get(iIndexSatelliteFitler).getSatelliteName();
-			System.out.println("InstanceFinder::findSwatsByFilters: cerco satellite: " + sSatelliteName);
+			Wasdi.debugLog("InstanceFinder::findSwatsByFilters: cerco satellite: " + sSatelliteName);
 			//InputStream oInputStream = TestSat.class.getResourceAsStream(s_sOrbitSatsMap.get(asSatelliteNames.get(i)));
 
 			Satellite oSatellite;
 			try {
 				//oSatellite = new Satellite(oInputStream);
 				oSatellite=SatFactory.buildSat(s_sOrbitSatsMap.get(sSatelliteName));
-				System.out.println("costruito");
+				Wasdi.debugLog("costruito");
 			} catch (Throwable oEx) {
 				oEx.printStackTrace();
-				System.out.println("InstanceFinder::findSwatsByFilters: unable to instantiate satellite " + s_sOrbitSats[iIndexSatelliteFitler] + " - " + oEx);
+				Wasdi.debugLog("InstanceFinder::findSwatsByFilters: unable to instantiate satellite " + s_sOrbitSats[iIndexSatelliteFitler] + " - " + oEx);
 				return null;
 			}
 
@@ -601,10 +602,10 @@ public class InstanceFinder {
 		}
 
 		if (m_aoSatellites != null) {
-			System.out.println("InstanceFinder::findSwatsByFilters: Satelliti Disponibili " + m_aoSatellites.size());
+			Wasdi.debugLog("InstanceFinder::findSwatsByFilters: Satelliti Disponibili " + m_aoSatellites.size());
 		}
 		else {
-			System.out.println("InstanceFinder::findSwatsByFilters: m_aoSatellites NULL ");
+			Wasdi.debugLog("InstanceFinder::findSwatsByFilters: m_aoSatellites NULL ");
 		}
 		
 		for (int iIndexSatelliteFitler = 0; iIndexSatelliteFitler < aoSatelliteFilters.size() ; iIndexSatelliteFitler++) 
@@ -655,14 +656,14 @@ public class InstanceFinder {
 		CoverageRequest coverageRequest = new CoverageRequest();
 		coverageRequest = getCoverageRequest(oAreaOfInterest,m_aoSatellites,oDateTimeStart,oDateTimeEnd);
 		//String sLookingType,String sViewAngle,String sSwathSize
-		System.out.println("findSwats CHIAMO SOLVE REQUEST");
+		Wasdi.debugLog("findSwats CHIAMO SOLVE REQUEST");
 		// Eseguo la ricerca
 		// se a solveRequest passo false ottengo soltanto la potenziale
 		// copertura, i fasci non vengono considerati.
 		// se passo true per ogni potenziale copertura viene calcolata anche la copertura dei fasci attivati precedentemente
 		ArrayList<CoverageSwathResult> oResults = coverageRequest.solveRequest(true);
 
-		System.out.println("findSwats TORNO");
+		Wasdi.debugLog("findSwats TORNO");
 		// ris contiente l'elenco di tutte le potenziali coperture
 		
 		return oResults;
@@ -727,14 +728,14 @@ public class InstanceFinder {
 					dX = Double.valueOf(asPoint[0]);
 					
 				} catch (Exception oEx) {
-					System.out.println("InstanceFinder.findSwats: eccezione nella conversione stringa double del punto x dell'area ");
+					Wasdi.debugLog("InstanceFinder.findSwats: eccezione nella conversione stringa double del punto x dell'area ");
 					dX = 0;
 				}
 				double dY;
 				try {
 					dY = Double.valueOf(asPoint[1]);
 				} catch (Exception oEx) {
-					System.out.println("InstanceFinder.findSwats: eccezione nella conversione stringa double del punto y dell'area ");
+					Wasdi.debugLog("InstanceFinder.findSwats: eccezione nella conversione stringa double del punto y dell'area ");
 					dY = 0;
 				}
 				dX = dX + dTempFixValue;//TODO remove it after A.Cottino fix 
@@ -946,32 +947,32 @@ public class InstanceFinder {
 		// visualizzo i risultati
 		for (CoverageSwathResult cov : ris) {
 			// visualizzo tutti i dettagli..
-			System.out.println("ID swath: " + cov.getSwathName());
-			System.out.println("satellite: " + cov.getSat().getName());
-			System.out.println("Sensore utilizzato: "
+			Wasdi.debugLog("ID swath: " + cov.getSwathName());
+			Wasdi.debugLog("satellite: " + cov.getSat().getName());
+			Wasdi.debugLog("Sensore utilizzato: "
 					+ cov.getSensor().getSName());
 			// fascio del sensore utilizzato (angoli)
-			System.out.println("Sensore Mode: " + cov.getMode());
+			Wasdi.debugLog("Sensore Mode: " + cov.getMode());
 			// se sono state specificate più aree di interesse è utilse sapere
 			// questo swath che area copre
-			System.out.println("area di interesse coperta: "
+			Wasdi.debugLog("area di interesse coperta: "
 					+ cov.getCoveredArea().getName());
-			System.out.println("% copertura " + cov.getCoverage() * 100);
-			System.out.println("Inizio acquisizione: "
+			Wasdi.debugLog("% copertura " + cov.getCoverage() * 100);
+			Wasdi.debugLog("Inizio acquisizione: "
 					+ cov.getTimeStart().getDateTimeStr());
-			System.out.println("Fine acquisizione: "
+			Wasdi.debugLog("Fine acquisizione: "
 					+ cov.getTimeEnd().getDateTimeStr());
-			System.out.println("Durata " + cov.getDuration());
-			System.out.println("larghezza copertura "
+			Wasdi.debugLog("Durata " + cov.getDuration());
+			Wasdi.debugLog("larghezza copertura "
 					+ cov.getswathSize().getWidth());
-			System.out.println("lunghezza copertura "
+			Wasdi.debugLog("lunghezza copertura "
 					+ cov.getswathSize().getLength());
 			// visualizzo le coordinate della copertura
 
 			apoint[] vrtx = cov.getFootprint().getVertex();
 			for (apoint pnt : vrtx)
 				// converto i punti da radianti a lon lat (wgs84)
-				System.out.println("lon: " + pnt.x / k + " lat: " + pnt.y / k);
+				Wasdi.debugLog("lon: " + pnt.x / k + " lat: " + pnt.y / k);
 			// se a solveRequest ho passato true avro' anche le aree di
 			// copertura di
 			// ogni singolo fascio
