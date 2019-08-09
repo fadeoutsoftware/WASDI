@@ -920,7 +920,7 @@ public class ProcessingResources {
 			oBufferedImg = oBandImageManager.buildImageWithMasks(oRasterDataNode, oImgSize, oRectangleViewPort,
 					oColorManiputalionViewModel == null);
 		} catch (Exception e) {
-			e.printStackTrace();
+			Wasdi.DebugLog("ProcessingResources.getBandImage: " + e);
 			return Response.status(500).build();
 		}
 
@@ -1137,7 +1137,6 @@ public class ProcessingResources {
 
 		} catch (Exception e) {
 			Wasdi.DebugLog("ProcessingResource.DDSPublishSaba: " + e);
-			e.printStackTrace();
 			oResult.setBoolValue(false);
 			oResult.setIntValue(500);
 			return oResult;
@@ -1269,7 +1268,6 @@ public class ProcessingResources {
 				return false;
 		} catch (Exception oEx) {
 			Wasdi.DebugLog("ProcessingResource.LaunchAssimilation: " + oEx);
-			oEx.printStackTrace();
 			return false;
 		}
 
@@ -1525,7 +1523,6 @@ public class ProcessingResources {
 
 		} catch (Exception e) {
 			Wasdi.DebugLog("ProcessingResource.asynchJRCTest: " + e);
-			e.printStackTrace();
 			PrimitiveResult oResult = PrimitiveResult.getInvalidInstance();
 			oResult.setBoolValue(false);
 			oResult.setIntValue(500);
@@ -1832,7 +1829,6 @@ public class ProcessingResources {
 
 		} catch (Exception oEx) {
 			Wasdi.DebugLog("ProcessingResource.launchList2: " + oEx);
-			oEx.printStackTrace();
 			oResult.setBoolValue(false);
 			oResult.setIntValue(500);
 			return oResult;
