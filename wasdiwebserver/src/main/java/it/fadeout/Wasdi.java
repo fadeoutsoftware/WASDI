@@ -109,24 +109,24 @@ public class Wasdi extends ResourceConfig {
 	@PostConstruct
 	public void initWasdi() {		
 		
-		System.out.println("-----------welcome to WASDI - Web Advanced Space Developer Interface");
+		Wasdi.debugLog("-----------welcome to WASDI - Web Advanced Space Developer Interface");
 
 		if (getInitParameter("DebugVersion", "false").equalsIgnoreCase("true")) {
 			s_bDebug = true;
-			System.out.println("-------Debug Version on");
+			Wasdi.debugLog("-------Debug Version on");
 			s_sDebugUser = getInitParameter("DebugUser", "user");
 			s_sDebugPassword = getInitParameter("DebugPassword", "password");
 		}
 		
 		if (getInitParameter("DebugLog", "true").equalsIgnoreCase("true")) {
 			s_bDebugLog = true;
-			System.out.println("-------Debug Log on");
+			Wasdi.debugLog("-------Debug Log on");
 		}
 
 
 		try {
 			Utils.m_iSessionValidityMinutes = Integer.parseInt(getInitParameter("SessionValidityMinutes", ""+Utils.m_iSessionValidityMinutes));
-			System.out.println("-------Session Validity [minutes]: " + Utils.m_iSessionValidityMinutes);
+			Wasdi.debugLog("-------Session Validity [minutes]: " + Utils.m_iSessionValidityMinutes);
 		} catch (NumberFormatException e) {
 			e.printStackTrace();
 		}
@@ -136,7 +136,7 @@ public class Wasdi extends ResourceConfig {
 		String sNfsFolder = System.getProperty( "nfs.data.download" );
 		if (sNfsFolder == null) System.setProperty( "nfs.data.download", sUserHome + "/nfs/download");
 
-		System.out.println("-------nfs dir " + System.getProperty( "nfs.data.download" ));
+		Wasdi.debugLog("-------nfs dir " + System.getProperty( "nfs.data.download" ));
 		
 		
 		try {
@@ -147,7 +147,7 @@ public class Wasdi extends ResourceConfig {
             MongoRepository.DB_USER = getInitParameter("MONGO_DBUSER","mongo");
             MongoRepository.DB_PWD = getInitParameter("MONGO_DBPWD","mongo");
             
-            System.out.println("-------Mongo db User " + MongoRepository.DB_USER);
+            Wasdi.debugLog("-------Mongo db User " + MongoRepository.DB_USER);
 			
 		} catch (Throwable e) {
 			e.printStackTrace();
@@ -160,7 +160,7 @@ public class Wasdi extends ResourceConfig {
             RabbitFactory.s_sRABBIT_HOST = getInitParameter("RABBIT_HOST", "127.0.0.1");
             RabbitFactory.s_sRABBIT_QUEUE_PORT = getInitParameter("RABBIT_QUEUE_PORT","5672");
             
-            System.out.println("-------Rabbit User " + RabbitFactory.s_sRABBIT_QUEUE_USER);
+            Wasdi.debugLog("-------Rabbit User " + RabbitFactory.s_sRABBIT_QUEUE_USER);
 			
 		} catch (Throwable e) {
 			e.printStackTrace();
@@ -169,49 +169,49 @@ public class Wasdi extends ResourceConfig {
 		if (s_oProcessingThread==null) {
 			try {
 				
-				System.out.println("-------Starting Processing and Download Schedulers...");
+				Wasdi.debugLog("-------Starting Processing and Download Schedulers...");
 				
 				
 				if (getInitParameter("EnableProcessingScheduler", "true").toLowerCase().equals("true")) {
 					s_oProcessingThread = new ProcessingThread(m_oServletConfig);
 					s_oProcessingThread.start();
-					System.out.println("-------processing thread STARTED");
+					Wasdi.debugLog("-------processing thread STARTED");
 				}
 				else {
-					System.out.println("-------processing thread DISABLED");
+					Wasdi.debugLog("-------processing thread DISABLED");
 				}
 				
 				
 				if (getInitParameter("EnableDownloadScheduler", "true").toLowerCase().equals("true")) {
 					s_oDownloadsThread = new DownloadsThread(m_oServletConfig);
 					s_oDownloadsThread.start();
-					System.out.println("-------downloads thread STARTED");
+					Wasdi.debugLog("-------downloads thread STARTED");
 				}
 				else {
-					System.out.println("-------downloads thread DISABLED");
+					Wasdi.debugLog("-------downloads thread DISABLED");
 				}
 				
 				if (getInitParameter("EnableIDLScheduler", "true").toLowerCase().equals("true")) {
 					s_oIDLThread = new IDLThread(m_oServletConfig);
 					s_oIDLThread.start();
-					System.out.println("-------IDL thread STARTED");
+					Wasdi.debugLog("-------IDL thread STARTED");
 				}
 				else {
-					System.out.println("-------IDL thread DISABLED");
+					Wasdi.debugLog("-------IDL thread DISABLED");
 				}
 				
 				
 			} catch (Exception e) {
 				e.printStackTrace();
-				System.out.println("-------ERROR: CANNOT START PROCESSING THREAD!!!");
+				Wasdi.debugLog("-------ERROR: CANNOT START PROCESSING THREAD!!!");
 			}
 		}
 		
-		System.out.println("-------initializing snap...");
+		Wasdi.debugLog("-------initializing snap...");
 		
 		try {		
 			String snapAuxPropPath = getInitParameter("SNAP_AUX_PROPERTIES", null);
-			System.out.println("snap aux properties file: " + snapAuxPropPath);
+			Wasdi.debugLog("snap aux properties file: " + snapAuxPropPath);
 			Path propFile = Paths.get(snapAuxPropPath);
 			Config.instance("snap.auxdata").load(propFile);
 			Config.instance().load();
@@ -242,10 +242,10 @@ public class Wasdi extends ResourceConfig {
 		}
 		
 		
-		System.out.println("------- WASDI Init done ");
-		System.out.println("---------------------------------------------");
-		System.out.println("------- 	 Welcome to space     -------");
-		System.out.println("---------------------------------------------");
+		Wasdi.debugLog("------- WASDI Init done ");
+		Wasdi.debugLog("---------------------------------------------");
+		Wasdi.debugLog("------- 	 Welcome to space     -------");
+		Wasdi.debugLog("---------------------------------------------");
 	}
 	
 	/**
@@ -261,7 +261,7 @@ public class Wasdi extends ResourceConfig {
 			MongoRepository.shutDownConnection();
 		}
 		catch (Exception e) {
-			System.out.println("WASDI SHUTDOWN EXCEPTION: " + e.getMessage());
+			Wasdi.debugLog("WASDI SHUTDOWN EXCEPTION: " + e.getMessage());
 			e.printStackTrace();
 		}
 	}
@@ -364,9 +364,9 @@ public class Wasdi extends ResourceConfig {
 				Field oField = oProc.getClass().getDeclaredField("pid");
 				oField.setAccessible(true);
 				oPID = oField.getInt(oProc);
-				System.out.println("WASDI.getPIDProcess: found PID " + oPID);
+				Wasdi.debugLog("WASDI.getPIDProcess: found PID " + oPID);
 			} catch (Throwable e) {
-				System.out.println("WASDI.getPIDProcess: Error getting PID " + e.getMessage());
+				Wasdi.debugLog("WASDI.getPIDProcess: Error getting PID " + e.getMessage());
 			}
 		}
 		
