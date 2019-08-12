@@ -81,7 +81,7 @@ public class Test_FTP {
 				} else {
 					System.out.println("File transfer failed :-(");
 				}
-				Boolean bFileExistsOnFTPServer = m_oFtpClient.FileIsNowOnServer(sCWD, oFile.getName());
+				Boolean bFileExistsOnFTPServer = m_oFtpClient.fileIsNowOnServer(sCWD, oFile.getName());
 				if(bFileExistsOnFTPServer) {
 					System.out.println("File is on server now :-)");
 				} else {

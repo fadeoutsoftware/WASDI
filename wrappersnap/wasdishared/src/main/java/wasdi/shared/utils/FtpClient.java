@@ -140,7 +140,7 @@ public class FtpClient {
 		return wd;
 	}
 
-	public Boolean FileIsNowOnServer(String sPath, String sFilename) throws IOException {
+	public Boolean fileIsNowOnServer(String sPath, String sFilename) throws IOException {
 		Utils.debugLog("FtpClient.FileIsNowOnServer( " + sPath + ", " + sFilename + " )");
 		if(null == sPath || null == sFilename) {
 			throw new IllegalArgumentException();
