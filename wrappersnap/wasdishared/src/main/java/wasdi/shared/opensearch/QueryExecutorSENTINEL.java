@@ -17,6 +17,8 @@ import org.apache.abdera.protocol.client.AbderaClient;
 import org.apache.abdera.protocol.client.ClientResponse;
 import org.apache.abdera.protocol.client.RequestOptions;
 
+import wasdi.shared.utils.Utils;
+
 public class QueryExecutorSENTINEL extends QueryExecutor {
 
 	
@@ -25,7 +27,7 @@ public class QueryExecutorSENTINEL extends QueryExecutor {
 	}
 	
 	public QueryExecutorSENTINEL() {
-		System.out.println(s_sClassName);
+		Utils.debugLog(s_sClassName);
 		m_sProvider = "SENTINEL";
 	}
 	
@@ -46,7 +48,7 @@ public class QueryExecutorSENTINEL extends QueryExecutor {
 
 	@Override
 	protected String getCountUrl(String sQuery) {
-		//System.out.println("QueryExecutorSENTINEL.getCountUrl( " + sQuery + " )");
+		//Utils.debugLog("QueryExecutorSENTINEL.getCountUrl( " + sQuery + " )");
 		//return "https://scihub.copernicus.eu/dhus/api/stub/products/count?filter=" + sQuery;
 		//return "https://scihub.copernicus.eu/dhus/odata/v1/Products/$count?$filter=" + sQuery;
 		return "https://scihub.copernicus.eu/dhus/search?q=" + sQuery; 
@@ -56,7 +58,7 @@ public class QueryExecutorSENTINEL extends QueryExecutor {
 	@Override
 	public int executeCount(String sQuery) {
 		try {
-			System.out.println(s_sClassName + ".executeCount ( " + sQuery + " )");
+			Utils.debugLog(s_sClassName + ".executeCount ( " + sQuery + " )");
 			PaginatedQuery oQuery = new PaginatedQuery(sQuery, "0", "1", "ingestiondate", "asc");
 			String sUrl = buildUrl(oQuery);
 			//create abdera client
@@ -89,25 +91,25 @@ public class QueryExecutorSENTINEL extends QueryExecutor {
 			}
 			
 			
-	//		System.out.println("\nSending 'GET' request to URL : " + sUrl);
+	//		Utils.debugLog("\nSending 'GET' request to URL : " + sUrl);
 			ClientResponse response = oClient.get(sUrl, oOptions);
 			
 			Document<Feed> oDocument = null;
 			
 			
 			if (response.getType() != ResponseType.SUCCESS) {
-				System.out.println(s_sClassName + ".executeCount: Response ERROR: " + response.getType());
+				Utils.debugLog(s_sClassName + ".executeCount: Response ERROR: " + response.getType());
 				return -1;
 			}
 	
-			System.out.println(s_sClassName + ".executeCount: Response Success");		
+			Utils.debugLog(s_sClassName + ".executeCount: Response Success");		
 			
 			// Get The Result as a string
 			BufferedReader oBuffRead = null;
 			try {
 				oBuffRead = new BufferedReader(response.getReader());
 			} catch (IOException oIo0) {
-				System.out.println(s_sClassName + ".executeCount: " + oIo0);
+				Utils.debugLog(s_sClassName + ".executeCount: " + oIo0);
 				return -1;
 			}
 			String sResponseLine = null;
@@ -117,18 +119,18 @@ public class QueryExecutorSENTINEL extends QueryExecutor {
 				    oResponseStringBuilder.append(sResponseLine);
 				}
 			} catch (IOException oIo1) {
-				System.out.println(s_sClassName + ".executeCount: " + oIo1);
+				Utils.debugLog(s_sClassName + ".executeCount: " + oIo1);
 				return -1;
 			}
 			
 			String sResultAsString = oResponseStringBuilder.toString();
 			if(null==sResultAsString) {
-				System.out.println(s_sClassName + "executeCount: response is null");
+				Utils.debugLog(s_sClassName + "executeCount: response is null");
 				return -1;
 			}
 			oDocument = oParser.parse(new StringReader(sResultAsString), oParserOptions);
 			if (oDocument == null) {
-				System.out.println(s_sClassName + ".executeCount: Document response null, aborting");
+				Utils.debugLog(s_sClassName + ".executeCount: Document response null, aborting");
 				return -1;
 			}
 			
@@ -143,7 +145,7 @@ public class QueryExecutorSENTINEL extends QueryExecutor {
 					
 			return Integer.parseInt(sText);
 		} catch (NullPointerException oE) {
-			System.out.println(s_sClassName + "executeCount: " + oE);
+			Utils.debugLog(s_sClassName + "executeCount: " + oE);
 		}
 		return -1;
 	}

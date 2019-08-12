@@ -18,6 +18,7 @@ import com.mongodb.client.FindIterable;
 
 import wasdi.shared.business.WpsProvider;
 import wasdi.shared.utils.AuthenticationCredentials;
+import wasdi.shared.utils.Utils;
 
 public class WpsProvidersRepository extends MongoRepository {
 
@@ -54,7 +55,7 @@ public class WpsProvidersRepository extends MongoRepository {
 	}
 
 	public WpsProvider getProvider(String sProviderName) {
-		System.out.println("WpsProviderRepository.getProvider");
+		Utils.debugLog("WpsProviderRepository.getProvider");
 		if(null==sProviderName) {
 			throw new NullPointerException("WpsProviderRepository.getProvider: null String passed");
 		}
@@ -70,7 +71,7 @@ public class WpsProvidersRepository extends MongoRepository {
 	}
 	
 	public String getProviderUrl(String sProviderName) {
-		System.out.println("WpsProviderRepository.getProviderUrl");
+		Utils.debugLog("WpsProviderRepository.getProviderUrl");
 		if(null==sProviderName) {
 			throw new NullPointerException("WpsProviderRepository.getProviderUrl: null String passed");
 		}
@@ -83,7 +84,7 @@ public class WpsProvidersRepository extends MongoRepository {
 	}
 	
 	public AuthenticationCredentials getCredentials(String sProviderName) {
-		System.out.println("WpsProvidersRepository");
+		Utils.debugLog("WpsProvidersRepository");
 		if(null==sProviderName) {
 			throw new NullPointerException("WpsProviderRepository.getProviderUrl: null String passed");
 		}

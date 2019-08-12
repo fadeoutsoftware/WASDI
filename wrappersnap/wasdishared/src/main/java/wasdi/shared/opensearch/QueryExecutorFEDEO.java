@@ -2,10 +2,12 @@ package wasdi.shared.opensearch;
 
 import org.apache.abdera.i18n.templates.Template;
 
+import wasdi.shared.utils.Utils;
+
 public class QueryExecutorFEDEO extends QueryExecutor {
 
 	QueryExecutorFEDEO(){
-		System.out.println("QueryExecutorFEDEO");
+		Utils.debugLog("QueryExecutorFEDEO");
 		m_sProvider = "FEDEO";
 	}
 	

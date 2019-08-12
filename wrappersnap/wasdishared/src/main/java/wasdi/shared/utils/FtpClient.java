@@ -34,6 +34,7 @@ public class FtpClient {
     private FTPClient m_oFtp;
 
     public FtpClient(String sServer, int iPort, String sUser, String sPassword) {
+    	Utils.debugLog("FtpClient contructor");
         this.m_sServer = sServer;
         this.m_iPort = iPort;
         this.m_sUser = sUser;
@@ -41,6 +42,7 @@ public class FtpClient {
     }
 
     public Boolean open() throws IOException {
+    	Utils.debugLog("FtpClient.open");
         m_oFtp = new FTPClient();
 
         m_oFtp.addProtocolCommandListener(new PrintCommandListener(new PrintWriter(System.out)));
@@ -56,6 +58,7 @@ public class FtpClient {
     }
 
     public void close() throws IOException {
+    	Utils.debugLog("FtpClient.close");
         m_oFtp.disconnect();
     }
     
@@ -63,10 +66,12 @@ public class FtpClient {
     
     
     public Collection<String> listDirs() throws IOException {
+    	Utils.debugLog("FtpClient.listDirs()");
 		return listDirs(pwd());
 	}
     
     public Collection<String> listDirs(String sPath) throws IOException {
+    	Utils.debugLog("FtpClient.listDirs( " + sPath + " )");
     	FTPFile[] aoFiles = m_oFtp.listDirectories(sPath);
 
         return Arrays.stream(aoFiles)
@@ -75,10 +80,12 @@ public class FtpClient {
 	}
 
 	public Collection<String> listFiles() throws IOException {
+		Utils.debugLog("FtpClient.listFiles()");
 		return listFiles(pwd());
 	}
 
     public Collection<String> listFiles(String sPath) throws IOException {
+    	Utils.debugLog("FtpClient.listFiles( " + sPath + " )");
         FTPFile[] aoFiles = m_oFtp.listFiles(sPath);
 
         return Arrays.stream(aoFiles)
@@ -87,10 +94,12 @@ public class FtpClient {
     }
     
     public Boolean putFileOnServer(File oFile) throws IOException {
+    	Utils.debugLog("FtpClient.putFileOnServer( File )");
 		return putFileToPath(oFile, pwd() );
 	}
     
     public Boolean putFileToPath(File oFile, String sRemoteRelativePath) throws IOException {
+    	Utils.debugLog("FtpClient.putFileToPath( File, " + sRemoteRelativePath + " )");
     	if(null == oFile || null == sRemoteRelativePath) {
     		throw new IllegalArgumentException();
     	}
@@ -119,17 +128,20 @@ public class FtpClient {
     }
 
     public void downloadFile(String sSource, String sDestination) throws IOException {
+    	Utils.debugLog("FtpClient.downloadFile( " + sSource + ",  " + sDestination + " )");
         FileOutputStream oOut = new FileOutputStream(sDestination);
         m_oFtp.retrieveFile(sSource, oOut);
     }
 
 	public String pwd() throws IOException {
+		Utils.debugLog("FtpClient.pwd()");
 		String wd = null;
 		wd = new String(m_oFtp.printWorkingDirectory());
 		return wd;
 	}
 
 	public Boolean FileIsNowOnServer(String sPath, String sFilename) throws IOException {
+		Utils.debugLog("FtpClient.FileIsNowOnServer( " + sPath + ", " + sFilename + " )");
 		if(null == sPath || null == sFilename) {
 			throw new IllegalArgumentException();
 		}
@@ -144,6 +156,7 @@ public class FtpClient {
 	}
 
 	public Boolean cd(String sPath) throws IOException {
+		Utils.debugLog("FtpClient.cd( " + sPath + " )");
 		if(null == sPath) {
 			throw new IllegalArgumentException();
 		}

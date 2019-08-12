@@ -7,6 +7,9 @@ import com.mongodb.MongoCredential;
 import com.mongodb.ServerAddress;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+
+import wasdi.shared.utils.Utils;
+
 import org.bson.Document;
 
 import java.util.Arrays;
@@ -71,7 +74,7 @@ public class MongoRepository {
     	}
     	catch (Exception e) 
     	{
-    		System.out.println("MongoRepository.getMongoDatabase: exception " + e.getMessage());
+    		Utils.debugLog("MongoRepository.getMongoDatabase: exception " + e.getMessage());
 			e.printStackTrace();
     	}
         return s_oMongoDatabase;
@@ -95,7 +98,7 @@ public class MongoRepository {
     			s_oMongoClient.close();
     		}
     		catch (Exception e) {
-				System.out.println("MongoRepository.shutDownConnection: exception " + e.getMessage());
+				Utils.debugLog("MongoRepository.shutDownConnection: exception " + e.getMessage());
 				e.printStackTrace();
 			}
     	}

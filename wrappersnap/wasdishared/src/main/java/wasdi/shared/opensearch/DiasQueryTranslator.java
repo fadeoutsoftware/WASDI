@@ -8,6 +8,8 @@ package wasdi.shared.opensearch;
 
 import java.util.HashMap;
 
+import wasdi.shared.utils.Utils;
+
 /**
  * @author c.nattero
  *
@@ -22,7 +24,7 @@ public abstract class DiasQueryTranslator {
 	public abstract String encode( String sDecoded );
 	
 	public String translateAndEncode(String sQuery) {
-		System.out.println("DiasQueryTranslator.translateAndEncode");
+		Utils.debugLog("DiasQueryTranslator.translateAndEncode");
 		return encode(translate(sQuery));
 	}
 	

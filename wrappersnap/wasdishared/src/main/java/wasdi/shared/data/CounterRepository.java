@@ -34,7 +34,7 @@ public class CounterRepository extends MongoRepository {
 				sResult = oDocument.getObjectId("_id").toHexString();
 	
 			} catch (Exception oEx) {
-				System.out.println("CounterRepository.InsertCounter: " + oEx);
+				Utils.debugLog("CounterRepository.InsertCounter: " + oEx);
 			}
 		}
 		return sResult;
@@ -49,7 +49,7 @@ public class CounterRepository extends MongoRepository {
 				String sJSON = oWSDocument.toJson();
 				oCounter = s_oMapper.readValue(sJSON,Counter.class);
 			} catch (Exception oEx) {
-				System.out.println("CounterRepository.GetCounterBySequence( " + sSequence + " ): " + oEx);
+				Utils.debugLog("CounterRepository.GetCounterBySequence( " + sSequence + " ): " + oEx);
 			}
 		}
 		return oCounter;
@@ -67,7 +67,7 @@ public class CounterRepository extends MongoRepository {
 				return true;
 	
 			} catch (Exception oEx) {
-				System.out.println("CounterRepository.UpdateCounter: " + oEx);
+				Utils.debugLog("CounterRepository.UpdateCounter: " + oEx);
 			}
 		}
 		return false;

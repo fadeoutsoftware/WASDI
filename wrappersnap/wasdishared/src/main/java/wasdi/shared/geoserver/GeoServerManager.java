@@ -15,6 +15,7 @@ import it.geosolutions.geoserver.rest.encoder.GSLayerEncoder;
 import it.geosolutions.geoserver.rest.encoder.GSResourceEncoder;
 import it.geosolutions.geoserver.rest.encoder.coverage.GSCoverageEncoder;
 import it.geosolutions.geoserver.rest.encoder.coverage.GSImageMosaicEncoder;
+import wasdi.shared.utils.Utils;
 
 /**
  * Created by s.adamo on 24/05/2016.
@@ -56,7 +57,7 @@ public class GeoServerManager {
     	}
     	catch (Exception oEx) {
     		String sError = org.apache.commons.lang.exception.ExceptionUtils.getMessage(oEx);
-    		System.out.println("GeoServerManager.getLayerBBox: ERROR " + sError);
+    		Utils.debugLog("GeoServerManager.getLayerBBox: ERROR " + sError);
     		return "";
 		}
     	
@@ -78,7 +79,7 @@ public class GeoServerManager {
 		case RASTER:
 			return m_oGsPublisher.removeCoverageStore(m_sWorkspace, sStoreName, true, Purge.ALL);
 		default:
-			System.out.println("GeoServerManager.removeLayer: unknown layer type for " + sLayerId);
+			Utils.debugLog("GeoServerManager.removeLayer: unknown layer type for " + sLayerId);
 			break;
 		}
 
@@ -130,19 +131,19 @@ public class GeoServerManager {
     	if (sStyle == null || sStyle.isEmpty()) sStyle = "raster";
     	
     	if (m_sWorkspace == null) {
-    		System.out.println("GeoServerManager.publishStandardGeoTiff: Workspace is null");
+    		Utils.debugLog("GeoServerManager.publishStandardGeoTiff: Workspace is null");
     	}
     	
     	if (sStoreName == null) {
-    		System.out.println("GeoServerManager.publishStandardGeoTiff: Store Name is null");
+    		Utils.debugLog("GeoServerManager.publishStandardGeoTiff: Store Name is null");
     	}
     	
     	if (oGeotiffFile == null) {
-    		System.out.println("GeoServerManager.publishStandardGeoTiff: oGeoTiffFile is null");
+    		Utils.debugLog("GeoServerManager.publishStandardGeoTiff: oGeoTiffFile is null");
     	}
         
     	if (sEpsg == null) {
-    		System.out.println("GeoServerManager.publishStandardGeoTiff: sEpsg is null");
+    		Utils.debugLog("GeoServerManager.publishStandardGeoTiff: sEpsg is null");
     	}
     	    	
         boolean bRes = m_oGsPublisher.publishExternalGeoTIFF(m_sWorkspace,sStoreName,oGeotiffFile, sStoreName, sEpsg, GSResourceEncoder.ProjectionPolicy.FORCE_DECLARED,sStyle);

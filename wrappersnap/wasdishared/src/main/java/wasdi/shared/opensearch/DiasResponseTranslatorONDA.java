@@ -120,26 +120,15 @@ public class DiasResponseTranslatorONDA implements DiasResponseTranslator {
 		try {			
 			String sInJson = oInJson.toString();
 
-			//System.out.println(sInJson);
 			JSONObject oOndaJson = oInJson.optJSONObject("entry");
 			if(null!=oOndaJson) {
 				String sJson = oOndaJson.toString();
-				//System.out.println(sJson);
 				oResult = parseBaseData(sProtocol, oOndaJson);
 			}
 			JSONArray aoMetadata = oOndaJson.optJSONArray("Metadata");
 			if(null!=aoMetadata) {
 				parseMetadataArray(oResult, aoMetadata);
 			}
-			
-			/*
-			JSONObject oMetadata = 
-			Object oMetadataObject = oOndaJson.opt("Metadata");
-			if(null!=oMetadataObject) {
-				JSONObject oMetadata = (JSONObject)(oMetadataObject);
-				parseMetadata(oResult, oMetadata);
-			}
-			*/
 			finalizeViewModel(oResult);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -174,7 +163,7 @@ public class DiasResponseTranslatorONDA implements DiasResponseTranslator {
 			oResult.getProperties().put("link", sLink);
 		} else {
 			//NOTE this should not happen. Is it possible to take countermeasures?
-			System.out.println("DiasResponseTranslatorONDA.translate: WARNING: sProductId is null");
+			Utils.debugLog("DiasResponseTranslatorONDA.translate: WARNING: sProductId is null");
 		}
 
 		String sPreview = oJsonOndaResult.optString("quicklook",(String)null);
@@ -208,7 +197,7 @@ public class DiasResponseTranslatorONDA implements DiasResponseTranslator {
 				}
 			} else {
 				//NOTE this should not happen. Is it possible to take countermeasures?
-				System.out.println("DiasResponseTranslatorONDA.translate: WARNING: sPseudopath is null");
+				Utils.debugLog("DiasResponseTranslatorONDA.translate: WARNING: sPseudopath is null");
 			}
 
 			//TODO change how the launcher works so that alternatives can be used
@@ -219,7 +208,7 @@ public class DiasResponseTranslatorONDA implements DiasResponseTranslator {
 			}
 		} else {
 			//NOTE this should not happen. Is it possible to take countermeasures?
-			System.out.println("DiasResponseTranslatorONDA.translate: WARNING: sProductFileName is null");
+			Utils.debugLog("DiasResponseTranslatorONDA.translate: WARNING: sProductFileName is null");
 		}
 
 		Long lSize = oJsonOndaResult.optLong("size");
@@ -317,11 +306,11 @@ public class DiasResponseTranslatorONDA implements DiasResponseTranslator {
 
 	protected void parseMetadata(QueryResultViewModel oResult, JSONObject oEntireMetadata) {
 		if(null==oEntireMetadata) {
-			System.out.println("DiasResponseTranslator.parseMetadata: oMetadata is null");
+			Utils.debugLog("DiasResponseTranslator.parseMetadata: oMetadata is null");
 			return;
 		}
 		if(null== oResult ) {
-			System.out.println("DiasResponseTranslator.parseMetadata: oResult is null");
+			Utils.debugLog("DiasResponseTranslator.parseMetadata: oResult is null");
 			//XXX should we throw an exception instead?
 			return;
 		}
@@ -352,21 +341,21 @@ public class DiasResponseTranslatorONDA implements DiasResponseTranslator {
 						if(null == sKey) {
 							String sPrevious = oResult.getProperties().get(sMetaKey);
 							if(null!=sPrevious) {
-								System.out.println("DiasResponseTranslatorONDA.parseMetadata: sMetaKey : "+sPrevious);
+								Utils.debugLog("DiasResponseTranslatorONDA.parseMetadata: sMetaKey : "+sPrevious);
 							}
 							oResult.getProperties().put(sMetaKey, sMetaValue);
 						} else if( sKey.startsWith(m_sPropertyPrefix) ) {
 							String sTmpKey = sKey.substring( sKey.indexOf(m_sPropertyPrefix) + m_sPropertyPrefix.length() );
 							String sPrevious = oResult.getProperties().get(sTmpKey);
 							if(null!=sPrevious) {
-								System.out.println("DiasResponseTranslatorONDA.parseMetadata: sKey : "+sPrevious);
+								Utils.debugLog("DiasResponseTranslatorONDA.parseMetadata: sKey : "+sPrevious);
 								if(sTmpKey.equals("size")) {
 									sMetaValue = getNormalizedSize(Double.parseDouble(sMetaValue));
 								}
 							}
 							oResult.getProperties().put(sTmpKey, sMetaValue);
 						} else {
-							System.out.println("DiasResponseTranslatorONDA.parseMetadata: hit a viewmodel field: " + sKey + " = " + sMetaValue);
+							Utils.debugLog("DiasResponseTranslatorONDA.parseMetadata: hit a viewmodel field: " + sKey + " = " + sMetaValue);
 							switch(sKey) {
 							case "preview":
 								oResult.setPreview(sMetaValue);
@@ -390,7 +379,7 @@ public class DiasResponseTranslatorONDA implements DiasResponseTranslator {
 								oResult.setProvider(sMetaValue);
 								break;
 							default:
-								System.out.println("DiasResponseTranslatorONDA.parseMetadata: unknown viewmodel field");
+								Utils.debugLog("DiasResponseTranslatorONDA.parseMetadata: unknown viewmodel field");
 							}
 						}
 					}

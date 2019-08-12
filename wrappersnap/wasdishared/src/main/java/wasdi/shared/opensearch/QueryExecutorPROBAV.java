@@ -30,38 +30,40 @@ import org.apache.abdera.protocol.client.ClientResponse;
 import org.apache.abdera.protocol.client.RequestOptions;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+
+import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.QueryResultViewModel;
 
 public class QueryExecutorPROBAV extends QueryExecutor  {
 
 	QueryExecutorPROBAV(){
-		System.out.println("QueryExecutorPROBAV");
+		Utils.debugLog("QueryExecutorPROBAV");
 		m_sProvider = "PROBAV";
 	}
 	
 	@Override
 	protected String[] getUrlPath() {
-		System.out.println("QueryExecutorPROBAV.getUrlPath");
+		Utils.debugLog("QueryExecutorPROBAV.getUrlPath");
 		return new String[] {"openSearch/findProducts"};
 	}
 
 	@Override
 	protected Template getTemplate() {
-		System.out.println("QueryExecutorPROBAV.getTemplate");
+		Utils.debugLog("QueryExecutorPROBAV.getTemplate");
 		//http://www.vito-eodata.be/openSearch/findProducts?collection=urn:ogc:def:EOP:VITO:PROBAV_S1-TOC_1KM_V001&start=2016-05-05T00:00&end=2016-05-14T23:59&bbox=-180.00,0.00,180.00,90.00
 		return new Template("{scheme}://{-append|.|host}www.vito-eodata.be{-opt|/|path}{-listjoin|/|path}{-prefix|/|page}{-opt|?|q}{-join|&|q,start,rows,orderby}");
 	}
 
 	@Override
 	protected String getCountUrl(String sQuery) {
-		System.out.println("QueryExecutorPROBAV.getCountUrl");
+		Utils.debugLog("QueryExecutorPROBAV.getCountUrl");
 		//http://www.vito-eodata.be/openSearch/findProducts?collection=urn:ogc:def:EOP:VITO:PROBAV_S1-TOC_1KM_V001&start=2016-05-05T00:00&end=2016-05-14T23:59&bbox=-180.00,0.00,180.00,90.00
 		return "http://www.vito-eodata.be/openSearch/count?filter=" + sQuery;
 	}
 
 	@Override
 	protected String buildUrl(PaginatedQuery oQuery){
-		System.out.println("QueryExecutorPROBAV.buildUrl");
+		Utils.debugLog("QueryExecutorPROBAV.buildUrl");
 
 		String sUrl = "http://www.vito-eodata.be/openSearch/findProducts?";
 		String sPolygon = null;
@@ -148,7 +150,7 @@ public class QueryExecutorPROBAV extends QueryExecutor  {
 	@Override
 	public int executeCount(String sQuery) throws IOException
 	{
-		System.out.println("QueryExecutorPROBAV.executeCount");
+		Utils.debugLog("QueryExecutorPROBAV.executeCount");
 		PaginatedQuery oQuery = new PaginatedQuery(sQuery, null, null, null, null);
 		String sUrl = buildUrl(oQuery);
 		
@@ -180,18 +182,18 @@ public class QueryExecutorPROBAV extends QueryExecutor  {
 			oOptions.setAuthorization(sBasicAuth);			
 		}
 
-		//		System.out.println("\nSending 'GET' request to URL : " + sUrl);
+		//		Utils.debugLog("\nSending 'GET' request to URL : " + sUrl);
 		ClientResponse response = oClient.get(sUrl, oOptions);
 
 		Document<Feed> oDocument = null;
 
 
 		if (response.getType() != ResponseType.SUCCESS) {
-			System.out.println("Response ERROR: " + response.getType());
+			Utils.debugLog("Response ERROR: " + response.getType());
 			return 0;
 		}
 
-		System.out.println("Response Success");		
+		Utils.debugLog("Response Success");		
 
 		// Get The Result as a string
 		BufferedReader oBuffRead = new BufferedReader(response.getReader());
@@ -203,12 +205,12 @@ public class QueryExecutorPROBAV extends QueryExecutor  {
 
 		String sResultAsString = oResponseStringBuilder.toString();
 
-		//		System.out.println(sResultAsString);
+		//		Utils.debugLog(sResultAsString);
 
 		oDocument = oParser.parse(new StringReader(sResultAsString), oParserOptions);
 
 		if (oDocument == null) {
-			System.out.println("OpenSearchQuery.ExecuteQuery: Document response null");
+			Utils.debugLog("OpenSearchQuery.ExecuteQuery: Document response null");
 			return 0;
 		}
 
@@ -225,7 +227,7 @@ public class QueryExecutorPROBAV extends QueryExecutor  {
 	@Override
 	protected ArrayList<QueryResultViewModel> buildResultLightViewModel(Document<Feed> oDocument, AbderaClient oClient, RequestOptions oOptions) {
 
-		System.out.println("QueryExecutorPROBAV.buildResultLightViewModel");
+		Utils.debugLog("QueryExecutorPROBAV.buildResultLightViewModel");
 		Feed oFeed = (Feed) oDocument.getRoot();
 
 		Map<String, String> oMap = getFootprint(oDocument);
@@ -234,7 +236,7 @@ public class QueryExecutorPROBAV extends QueryExecutor  {
 
 		for (Entry oEntry : oFeed.getEntries()) {
 
-			System.out.println(oEntry.toString());
+			Utils.debugLog(oEntry.toString());
 
 			QueryResultViewModel oResult = new QueryResultViewModel();
 			oResult.setProvider(m_sProvider);
@@ -273,7 +275,7 @@ public class QueryExecutorPROBAV extends QueryExecutor  {
 			aoResults.add(oResult);
 		} 
 
-		System.out.println("Search Done: found " + aoResults.size() + " results");
+		Utils.debugLog("Search Done: found " + aoResults.size() + " results");
 
 		return aoResults;
 	}
@@ -281,7 +283,7 @@ public class QueryExecutorPROBAV extends QueryExecutor  {
 	@Override
 	protected ArrayList<QueryResultViewModel> buildResultViewModel(Document<Feed> oDocument, AbderaClient oClient, RequestOptions oOptions) {
 		
-		System.out.println("QueryExecutorPROBAV.buildResultViewModel");
+		Utils.debugLog("QueryExecutorPROBAV.buildResultViewModel");
 		//int iStreamSize = 1000000;
 		Feed oFeed = (Feed) oDocument.getRoot();
 
@@ -298,7 +300,7 @@ public class QueryExecutorPROBAV extends QueryExecutor  {
 
 			QueryResultViewModel oResult = new QueryResultViewModel();
 			oResult.setProvider(m_sProvider);
-			//			System.out.println("Parsing new Entry");
+			//			Utils.debugLog("Parsing new Entry");
 
 			//retrive the title
 			oResult.setTitle(oEntry.getTitle());			
@@ -334,42 +336,42 @@ public class QueryExecutorPROBAV extends QueryExecutor  {
 			//retrieve the icon
 			oLink = oEntry.getLink("icon");			
 			if (oLink != null) {
-				//				System.out.println("Icon Link: " + oLink.getHref().toString());
+				//				Utils.debugLog("Icon Link: " + oLink.getHref().toString());
 
 				try {
 					IRI oIri = oLink.getHref();
 					String sHref = oIri.toString();
 					ClientResponse oImageResponse = oClient.get(sHref, oOptions);
-					//					System.out.println("Response Got from the client");
+					//					Utils.debugLog("Response Got from the client");
 					if (oImageResponse.getType() == ResponseType.SUCCESS)
 					{
-						//						System.out.println("Success: saving image preview");
+						//						Utils.debugLog("Success: saving image preview");
 						InputStream oInputStreamImage = oImageResponse.getInputStream();
 						BufferedImage  oImage = ImageIO.read(oInputStreamImage);
 						ByteArrayOutputStream bas = new ByteArrayOutputStream();
 						ImageIO.write(oImage, "png", bas);
 						oResult.setPreview("data:image/png;base64," + Base64.getEncoder().encodeToString((bas.toByteArray())));
-						//						System.out.println("Image Saved");
+						//						Utils.debugLog("Image Saved");
 					}				
 				}
 				catch (Exception e) {
-					System.out.println("Image Preview Cycle Exception " + e.toString());
+					Utils.debugLog("Image Preview Cycle Exception " + e.toString());
 				}					
 			}
 			else {
-				System.out.println("Link Not Available" );
+				Utils.debugLog("Link Not Available" );
 			}
 
 			aoResults.add(oResult);
 		} 
 
-		System.out.println("Search Done: found " + aoResults.size() + " results");
+		Utils.debugLog("Search Done: found " + aoResults.size() + " results");
 
 		return aoResults;
 	}
 	
 	private Map<String, String> getFootprint(Document<Feed> oDocument){
-		System.out.println("QueryExecutorPROBAV.getFootprint");
+		Utils.debugLog("QueryExecutorPROBAV.getFootprint");
 		Map<String, String> oMap = new HashMap<String, String>();
 		
 		ByteArrayOutputStream outStream = new ByteArrayOutputStream();
@@ -387,8 +389,7 @@ public class QueryExecutorPROBAV extends QueryExecutor  {
 			b = f.newDocumentBuilder();
 			org.w3c.dom.Document doc = b.parse(reader);
 			doc.getDocumentElement().normalize();
-			System.out.println ("Root element: " + 
-					doc.getDocumentElement().getNodeName());
+			Utils.debugLog("Root element: " + doc.getDocumentElement().getNodeName());
 			// loop through each item
 			doc.getDocumentElement().toString();
 			NodeList items = doc.getChildNodes().item(0).getChildNodes();

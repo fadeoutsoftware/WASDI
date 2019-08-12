@@ -32,6 +32,8 @@ import org.apache.abdera.writer.Writer;
 import org.json.JSONObject;
 import org.json.XML;
 
+import wasdi.shared.utils.Utils;
+
 public class OpenSearchQuery{
 	
 	static String s_sClassName;
@@ -47,7 +49,7 @@ public class OpenSearchQuery{
 	public static String ExecuteQuery(String sQuery, HashMap<String, String> asParams) throws URISyntaxException, IOException
 	{
 		try {
-			System.out.println(s_sClassName+".ExecuteQuery( " + sQuery + ", ... )");
+			Utils.debugLog(s_sClassName+".ExecuteQuery( " + sQuery + ", ... )");
 //			String sParameter = URLEncoder.encode(sQuery, "UTF-8");
 			//String sParameter = "'( beginPosition:[2016-10-03T00:00:00.000Z TO 2016-10-06T23:59:59.999Z] AND endPosition:[2016-10-03T00:00:00.000Z TO 2016-10-06T23:59:59.999Z] ) AND   (platformname:Sentinel-1 AND filename:S1A_* AND producttype:SLC)'";
 //			sParameter = URLEncoder.encode(sParameter, "UTF-8");
@@ -89,7 +91,7 @@ public class OpenSearchQuery{
 			oOptions.setAuthorization(sBasicAuth);
 			
 			
-			System.out.println(s_sClassName+".ExecuteQuery: Sending 'GET' request to URL : " + sUrl);
+			Utils.debugLog(s_sClassName+".ExecuteQuery: Sending 'GET' request to URL : " + sUrl);
 			ClientResponse response = oClient.get(sUrl, oOptions);
 			
 			
@@ -98,7 +100,7 @@ public class OpenSearchQuery{
 			
 			if (response.getType() == ResponseType.SUCCESS)
 			{
-				System.out.println(s_sClassName+".ExecuteQuery: response Success");
+				Utils.debugLog(s_sClassName+".ExecuteQuery: response Success");
 		
 				// Get The Result as a string
 				BufferedReader oBuffRead = new BufferedReader(response.getReader());
@@ -109,18 +111,18 @@ public class OpenSearchQuery{
 				}
 				
 				String sResultAsString = oResponseStringBuilder.toString();
-				System.out.println(s_sClassName+".ExecuteQuery: result: " +
+				Utils.debugLog(s_sClassName+".ExecuteQuery: result: " +
 						sResultAsString.substring(0, Math.min(sResultAsString.length(), 20)) + "...");
 
 				oDocument = oParser.parse(new StringReader(sResultAsString), oParserOptions);
 				//oDocument = oParser.parse(response.getInputStream(), oParserOptions);
 
 				if (oDocument == null) {
-					System.out.println(s_sClassName+".ExecuteQuery: Document response null");
+					Utils.debugLog(s_sClassName+".ExecuteQuery: Document response null");
 					return null;
 				}
 			} else {
-				System.out.println(s_sClassName+".ExecuteQuery: response ERROR: " + response.getType());
+				Utils.debugLog(s_sClassName+".ExecuteQuery: response ERROR: " + response.getType());
 				return null;
 			}
 
@@ -134,38 +136,38 @@ public class OpenSearchQuery{
 
 			for (Entry oEntry : oFeed.getEntries()) {
 
-				System.out.println(s_sClassName+".ExecuteQuery: parsing new Entry");
+				Utils.debugLog(s_sClassName+".ExecuteQuery: parsing new Entry");
 
 				Link oLink = oEntry.getLink("icon");
 				
 				if (oLink != null) {
-					System.out.println(s_sClassName+".ExecuteQuery: icon Link: " + oLink.getHref().toString());
+					Utils.debugLog(s_sClassName+".ExecuteQuery: icon Link: " + oLink.getHref().toString());
 					try {
 						ClientResponse oImageResponse = oClient.get(oLink.getHref().toString(), oOptions);
-						System.out.println(s_sClassName+".ExecuteQuery: got response from the client");
+						Utils.debugLog(s_sClassName+".ExecuteQuery: got response from the client");
 						if (oImageResponse.getType() == ResponseType.SUCCESS)
 						{
-							System.out.println(s_sClassName+".ExecuteQuery: saving image preview");
+							Utils.debugLog(s_sClassName+".ExecuteQuery: saving image preview");
 							InputStream oInputStreamImage = oImageResponse.getInputStream();
 							BufferedImage  oImage = ImageIO.read(oInputStreamImage);
 							ByteArrayOutputStream bas = new ByteArrayOutputStream();
 							ImageIO.write(oImage, "png", bas);
 							oLink.addSimpleExtension(new javax.xml.namespace.QName("image"), "data:image/png;base64," + Base64.getEncoder().encodeToString((bas.toByteArray())));
-							System.out.println(s_sClassName+".ExecuteQuery: image Saved");
+							Utils.debugLog(s_sClassName+".ExecuteQuery: image Saved");
 						}				
 					} catch (Exception e) {
-						System.out.println(s_sClassName+".ExecuteQuery: Image Preview Cycle Exception: " + e.toString());
+						Utils.debugLog(s_sClassName+".ExecuteQuery: Image Preview Cycle Exception: " + e.toString());
 					}					
 				} else {
-					System.out.println(s_sClassName+".ExecuteQuery: link Not Available" );
+					Utils.debugLog(s_sClassName+".ExecuteQuery: link Not Available" );
 				}
 			} 
 			JSONObject oFeedJSON = Atom2Json(oAbdera, new ByteArrayOutputStream(iStreamSize), oFeed);
-			System.out.println(s_sClassName+".ExecuteQuery: search done");
+			Utils.debugLog(s_sClassName+".ExecuteQuery: search done");
 			return oFeedJSON.toString();
 		}
 		catch (Exception oE) {
-			System.out.println(s_sClassName + ".ExecuteQuery: " + oE);
+			Utils.debugLog(s_sClassName + ".ExecuteQuery: " + oE);
 		}
 
 		return null;
@@ -173,12 +175,12 @@ public class OpenSearchQuery{
 
 	
 	private static JSONObject Atom2Json(Abdera oAbdera, ByteArrayOutputStream oOutputStream, Base oFeed) throws IOException{
-		System.out.println(s_sClassName+".Atom2Json");
+		Utils.debugLog(s_sClassName+".Atom2Json");
 		Writer writer = oAbdera.getWriterFactory().getWriter("prettyxml");
 		writer.writeTo(oFeed, oOutputStream);
 		
 		String sXML = oOutputStream.toString();
-		//System.out.println(sXML);
+		//Utils.debugLog(sXML);
 		
 		JSONObject oJson = XML.toJSONObject(sXML);
 		return oJson;
@@ -186,7 +188,7 @@ public class OpenSearchQuery{
 
 	public static String ExecuteQueryCount(String sQuery, String sOSUser, String sOSPwd, String sProvider) throws URISyntaxException, IOException
 	{
-		System.out.println(s_sClassName+"ExecuteCount( " + sQuery + ", " + sOSUser + ", " + sOSPwd + ", " + sProvider + " )");
+		Utils.debugLog(s_sClassName+"ExecuteCount( " + sQuery + ", " + sOSUser + ", " + sOSPwd + ", " + sProvider + " )");
 		String sParameter = URLEncoder.encode(sQuery, "UTF-8");
 		//String sParameter = "'( beginPosition:[2016-10-03T00:00:00.000Z TO 2016-10-06T23:59:59.999Z] AND endPosition:[2016-10-03T00:00:00.000Z TO 2016-10-06T23:59:59.999Z] ) AND   (platformname:Sentinel-1 AND filename:S1A_* AND producttype:SLC)&offset=0&limit=25'";
 		String sUrl = "";
@@ -209,8 +211,8 @@ public class OpenSearchQuery{
 		String sBasicAuth = "Basic " + Base64.getEncoder().encodeToString(sUserCredentials.getBytes("UTF-8"));
 		con.setRequestProperty ("Authorization", sBasicAuth);
 		int responseCode = con.getResponseCode();
-		System.out.println("\nSending 'GET' request to URL : " + sUrl + sParameter);
-		System.out.println("Response Code : " + responseCode);
+		Utils.debugLog("\nSending 'GET' request to URL : " + sUrl + sParameter);
+		Utils.debugLog("Response Code : " + responseCode);
 		BufferedReader in = new BufferedReader(
 				new InputStreamReader(con.getInputStream()));
 		String inputLine;
@@ -223,7 +225,7 @@ public class OpenSearchQuery{
 		String sResultAsString = response.toString();
 
 		//print result
-		System.out.println(s_sClassName+"ExecuteCount: Count Done: Response " +
+		Utils.debugLog(s_sClassName+"ExecuteCount: Count Done: Response " +
 				sResultAsString.substring(0, Math.min(sResultAsString.length(), 20)) + "...");
 		return response.toString();
 	}
