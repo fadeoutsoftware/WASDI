@@ -307,4 +307,8 @@ public class Utils {
 		LocalDateTime oNow = LocalDateTime.now();
 		System.out.println(oNow + ": " + sMessage);
 	}
+	
+	public static void debugLog(int iValue) {
+		debugLog("" + iValue);
+	}
 }
