@@ -609,7 +609,7 @@ public class ProductResource {
 					Utils.debugLog("ProductResource.DeleteProduct: Number of files to delete " + aoFiles.length);
 					for (File oFile : aoFiles) {
 
-						System.out.print("ProductResource.DeleteProduct: deleting file product "
+						Utils.debugLog("ProductResource.DeleteProduct: deleting file product "
 								+ oFile.getAbsolutePath() + "...");
 						if (!FileUtils.deleteQuietly(oFile)) {
 							Utils.debugLog("    ERROR");

@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.QueryResultViewModel;
 
 /**
@@ -23,7 +24,7 @@ public class QueryResultPrinter {
 	public void print(QueryResultViewModel oVm ) {
 		List<String> sListedVm = list(oVm);
 		for (String sLine : sListedVm) {
-			System.out.println(sLine);
+			Utils.debugLog(sLine);
 		}
 	}
 

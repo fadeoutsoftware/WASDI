@@ -13,6 +13,7 @@ import com.rabbitmq.client.Connection;
 import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.data.MongoRepository;
+import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.RabbitMessageViewModel;
 
 /**
@@ -33,7 +34,7 @@ public class Send {
             if (m_oConnection!=null) m_oChannel = m_oConnection.createChannel();
             m_sExchangeName = sExchange;
         } catch (Exception e) {
-            System.out.println("Send.Init: Error connecting to rabbit " + e.toString());
+            Utils.debugLog("Send.Init: Error connecting to rabbit " + e.toString());
         }
 	}
 	
@@ -49,9 +50,9 @@ public class Send {
 			}
 			
 		} catch (IOException e) {
-			System.out.println("Send.Free: Error closing connection " + e.toString());
+			Utils.debugLog("Send.Free: Error closing connection " + e.toString());
 		} catch (TimeoutException e) {
-			System.out.println("Send.Free: Error closing connection " + e.toString());
+			Utils.debugLog("Send.Free: Error closing connection " + e.toString());
 		}
 	}
 	
@@ -69,11 +70,11 @@ public class Send {
         try {        	
             m_oChannel.basicPublish(m_sExchangeName, sRoutingKey, null, sMessageAttribute.getBytes());
         } catch (IOException e) {
-        	System.out.println("Send.SendMgs: Error publishing message " + sMessageAttribute + " to " + sRoutingKey + " " + e.toString());
+        	Utils.debugLog("Send.SendMgs: Error publishing message " + sMessageAttribute + " to " + sRoutingKey + " " + e.toString());
             return false;
         }
         catch (Exception e) {
-        	System.out.println("Send.SendMgs: Error publishing message " + sMessageAttribute + " to " + sRoutingKey + " " + e.toString());
+        	Utils.debugLog("Send.SendMgs: Error publishing message " + sMessageAttribute + " to " + sRoutingKey + " " + e.toString());
             return false;
         }
         //LauncherMain.s_oLogger.debug(" [x] Sent '" + sMessageAttribute + "' to " + sRoutingKey);
@@ -96,7 +97,7 @@ public class Send {
         oUpdateProcessMessage.setWorkspaceId(oProcess.getWorkspaceId());
         oUpdateProcessMessage.setPayload(oProcess.getProcessObjId() + ";" + oProcess.getStatus() + ";" + oProcess.getProgressPerc());
         
-        System.out.println("Send.SendUpdateProcessMessage: Send update message for process " + oProcess.getProcessObjId() + ": " + oUpdateProcessMessage.getPayload());
+        Utils.debugLog("Send.SendUpdateProcessMessage: Send update message for process " + oProcess.getProcessObjId() + ": " + oUpdateProcessMessage.getPayload());
         
         String sJSON = MongoRepository.s_oMapper.writeValueAsString(oUpdateProcessMessage);
         return SendMsg(oProcess.getWorkspaceId(), sJSON);
@@ -127,7 +128,7 @@ public class Send {
             return SendMsg(sExchangeId, sJSON);
         }
         catch (Exception oEx) {
-        	System.out.println("Send.SendRabbitMessage: ERROR " + oEx.toString());
+        	Utils.debugLog("Send.SendRabbitMessage: ERROR " + oEx.toString());
             return  false;
         }
 

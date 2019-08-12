@@ -34,6 +34,7 @@ import org.apache.abdera.protocol.client.ClientResponse;
 import org.apache.abdera.protocol.client.RequestOptions;
 
 import wasdi.shared.utils.AuthenticationCredentials;
+import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.QueryResultViewModel;
 
 public abstract class QueryExecutor {
@@ -64,9 +65,9 @@ public abstract class QueryExecutor {
 
 
 	protected String buildUrl(PaginatedQuery oQuery) {
-		//System.out.println("QueryExecutor.buildUrl( " + oQuery + " )");
+		//Utils.debugLog("QueryExecutor.buildUrl( " + oQuery + " )");
 		if(null==oQuery) {
-			System.out.println("QueryExecutor.buildUrl: oQuery is null");
+			Utils.debugLog("QueryExecutor.buildUrl: oQuery is null");
 			return null;
 		}
 		Template oTemplate = getTemplate();
@@ -99,17 +100,17 @@ public abstract class QueryExecutor {
 	protected abstract String getCountUrl(String sQuery);	
 
 	protected ArrayList<QueryResultViewModel> buildResultViewModel(Document<Feed> oDocument, AbderaClient oClient, RequestOptions oOptions) {
-		System.out.println("QueryExecutor.buildResultViewModel(3 args)");
+		Utils.debugLog("QueryExecutor.buildResultViewModel(3 args)");
 		if(oDocument == null) {
-			System.out.println("QueryExecutor.buildResultViewModel(3 args): Document<feed> oDocument is null, aborting");
+			Utils.debugLog("QueryExecutor.buildResultViewModel(3 args): Document<feed> oDocument is null, aborting");
 			return null;
 		}
 		if(oClient == null) {
-			System.out.println("QueryExecutor.buildResultViewModel(3 args): AbderaClient oClient is null, aborting");
+			Utils.debugLog("QueryExecutor.buildResultViewModel(3 args): AbderaClient oClient is null, aborting");
 			return null;
 		}
 		if(oOptions == null) {
-			System.out.println("QueryExecutor.buildResultViewModel(3 args): RequestOptions oOptions is null, aborting");
+			Utils.debugLog("QueryExecutor.buildResultViewModel(3 args): RequestOptions oOptions is null, aborting");
 			return null;
 		}
 		
@@ -127,7 +128,7 @@ public abstract class QueryExecutor {
 
 			QueryResultViewModel oResult = new QueryResultViewModel();
 			oResult.setProvider(m_sProvider);
-			//			System.out.println("QueryExecutor.buildResultViewModel: Parsing new Entry");
+			//			Utils.debugLog("QueryExecutor.buildResultViewModel: Parsing new Entry");
 
 			//retrive the title
 			oResult.setTitle(oEntry.getTitle());			
@@ -159,45 +160,45 @@ public abstract class QueryExecutor {
 			//retrieve the icon
 			oLink = oEntry.getLink("icon");			
 			if (oLink != null) {
-				//				System.out.println("QueryExecutor.buildResultViewModel: Icon Link: " + oLink.getHref().toString());
+				//				Utils.debugLog("QueryExecutor.buildResultViewModel: Icon Link: " + oLink.getHref().toString());
 
 				try {
 					ClientResponse oImageResponse = oClient.get(oLink.getHref().toString(), oOptions);
-					//					System.out.println("QueryExecutor.buildResultViewModel: Response Got from the client");
+					//					Utils.debugLog("QueryExecutor.buildResultViewModel: Response Got from the client");
 					if (oImageResponse.getType() == ResponseType.SUCCESS) {
-						//						System.out.println("QueryExecutor.buildResultViewModel: Success: saving image preview");
+						//						Utils.debugLog("QueryExecutor.buildResultViewModel: Success: saving image preview");
 						InputStream oInputStreamImage = oImageResponse.getInputStream();
 						BufferedImage  oImage = ImageIO.read(oInputStreamImage);
 						ByteArrayOutputStream bas = new ByteArrayOutputStream();
 						ImageIO.write(oImage, "png", bas);
 						oResult.setPreview("data:image/png;base64," + Base64.getEncoder().encodeToString((bas.toByteArray())));
-						//						System.out.println("QueryExecutor.buildResultViewModel: Image Saved");
+						//						Utils.debugLog("QueryExecutor.buildResultViewModel: Image Saved");
 					}				
 				}
 				catch (Exception e) {
-					System.out.println("QueryExecutor.buildResultViewModel: Image Preview Cycle Exception " + e.toString());
+					Utils.debugLog("QueryExecutor.buildResultViewModel: Image Preview Cycle Exception " + e.toString());
 				}					
 			} else {
-				System.out.println("QueryExecutor.buildResultViewModel: Link Not Available" );
+				Utils.debugLog("QueryExecutor.buildResultViewModel: Link Not Available" );
 			}
 			aoResults.add(oResult);
 		} 
-		System.out.println("QueryExecutor.buildResultViewModel: Search Done: found " + aoResults.size() + " results");
+		Utils.debugLog("QueryExecutor.buildResultViewModel: Search Done: found " + aoResults.size() + " results");
 		return aoResults;
 	}
 
 	protected ArrayList<QueryResultViewModel> buildResultLightViewModel(Document<Feed> oDocument, AbderaClient oClient, RequestOptions oOptions) {
-		System.out.println("QueryExecutor.buildResultLightViewModel(3 args)");
+		Utils.debugLog("QueryExecutor.buildResultLightViewModel(3 args)");
 		if(oDocument == null) {
-			System.out.println("QueryExecutor.buildResultLightViewModel(3 args): Document<feed> oDocument is null, aborting");
+			Utils.debugLog("QueryExecutor.buildResultLightViewModel(3 args): Document<feed> oDocument is null, aborting");
 			return null;
 		}
 		if(oClient == null) {
-			System.out.println("QueryExecutor.buildResultLightViewModel(3 args): AbderaClient oClient is null, aborting");
+			Utils.debugLog("QueryExecutor.buildResultLightViewModel(3 args): AbderaClient oClient is null, aborting");
 			return null;
 		}
 		if(oOptions == null) {
-			System.out.println("QueryExecutor.buildResultLightViewModel(3 args): RequestOptions oOptions is null, aborting");
+			Utils.debugLog("QueryExecutor.buildResultLightViewModel(3 args): RequestOptions oOptions is null, aborting");
 			return null;
 		}
 		Feed oFeed = (Feed) oDocument.getRoot();
@@ -230,13 +231,13 @@ public abstract class QueryExecutor {
 			oResult.setPreview(null);
 			aoResults.add(oResult);
 		} 
-		System.out.println("QueryExecutor.buildResultLightViewModel: Search Done: found " + aoResults.size() + " results");
+		Utils.debugLog("QueryExecutor.buildResultLightViewModel: Search Done: found " + aoResults.size() + " results");
 		return aoResults;
 	}
 
 	public int executeCount(String sQuery) throws IOException {
 		try {
-			System.out.println("QueryExecutor.executeCount( " + sQuery + " )");
+			Utils.debugLog("QueryExecutor.executeCount( " + sQuery + " )");
 			String sUrl = getCountUrl(URLEncoder.encode(sQuery, "UTF-8"));
 			//		if (sProvider.equals("SENTINEL"))
 			//		sUrl = "https://scihub.copernicus.eu/dhus/api/stub/products/count?filter=";
@@ -259,7 +260,7 @@ public abstract class QueryExecutor {
 				oConnection.setRequestProperty ("Authorization", sBasicAuth);
 			}
 	
-			System.out.println("QueryExecutor.executeCount: Sending 'GET' request to URL : " + sUrl);
+			Utils.debugLog("QueryExecutor.executeCount: Sending 'GET' request to URL : " + sUrl);
 			//int responseCode = -1;
 			//try
 			//{
@@ -267,10 +268,10 @@ public abstract class QueryExecutor {
 			//}
 			//catch(IOException oEx)
 			//{
-			//	System.out.println("QueryExecutor.executeCount: Exception Get response : " + oEx.getMessage());	
+			//	Utils.debugLog("QueryExecutor.executeCount: Exception Get response : " + oEx.getMessage());	
 			//}
 			int responseCode =  oConnection.getResponseCode();
-			System.out.println("QueryExecutor.executeCount: Response Code : " + responseCode);
+			Utils.debugLog("QueryExecutor.executeCount: Response Code : " + responseCode);
 	
 			BufferedReader in = new BufferedReader(new InputStreamReader(oConnection.getInputStream()));
 			String inputLine;
@@ -283,7 +284,7 @@ public abstract class QueryExecutor {
 			String sResponse = response.toString();
 	
 			//print result
-			System.out.println("QueryExecutor.executeCount: Count Done: Response " + sResponse);
+			Utils.debugLog("QueryExecutor.executeCount: Count Done: Response " + sResponse);
 	
 			//for (Element element : oFeed.getElements()) {
 			//String sText = element.getText();
@@ -295,21 +296,21 @@ public abstract class QueryExecutor {
 			try {
 				iResult = Integer.parseInt(sResponse);
 			} catch (NumberFormatException oNfe) {
-				System.out.println("QueryExecutor.executeCount: the response ( " + sResponse + " ) was not an int: " + oNfe);
+				Utils.debugLog("QueryExecutor.executeCount: the response ( " + sResponse + " ) was not an int: " + oNfe);
 				return -1;
 			}
 			return iResult;
 		} catch (Exception oE) {
-			System.out.println("QueryExecutor.executeCount: " + oE);
+			Utils.debugLog("QueryExecutor.executeCount: " + oE);
 			return -1;
 		}
 	}
 
 	public ArrayList<QueryResultViewModel> executeAndRetrieve(PaginatedQuery oQuery, boolean bFullViewModel) {
 		//XXX log instead
-		System.out.println("QueryExecutor.executeAndRetrieve(PaginatedQuery oQuery, " + bFullViewModel + ")");
+		Utils.debugLog("QueryExecutor.executeAndRetrieve(PaginatedQuery oQuery, " + bFullViewModel + ")");
 		if(null == oQuery) {
-			System.out.println("QueryExecutor.executeAndRetrieve: PaginatedQuery oQuery is null, aborting");
+			Utils.debugLog("QueryExecutor.executeAndRetrieve: PaginatedQuery oQuery is null, aborting");
 			return null;
 		}
 		try {
@@ -334,23 +335,23 @@ public abstract class QueryExecutor {
 				oOptions.setAuthorization(sBasicAuth);			
 			}
 	
-			System.out.println("\nQueryExecutor.executeAndRetrieve: Sending 'GET' request to URL : " + sUrl);
+			Utils.debugLog("\nQueryExecutor.executeAndRetrieve: Sending 'GET' request to URL : " + sUrl);
 			ClientResponse response = oClient.get(sUrl, oOptions);
 	
 	
 			if (response.getType() != ResponseType.SUCCESS) {
-				System.out.println("QueryExecutor.executeAndRetrieve: Response ERROR: " + response.getType());
+				Utils.debugLog("QueryExecutor.executeAndRetrieve: Response ERROR: " + response.getType());
 				return null;
 			}
 	
-			System.out.println("QueryExecutor.executeAndRetrieve: Response Success");		
+			Utils.debugLog("QueryExecutor.executeAndRetrieve: Response Success");		
 	
 			// Get The Result as a string
 			BufferedReader oBuffRead = null;
 			try {
 				oBuffRead = new BufferedReader(response.getReader());
 			} catch (IOException oe1) {
-				System.out.println("QueryExecutor.executeAndRetrieve: " + oe1);
+				Utils.debugLog("QueryExecutor.executeAndRetrieve: " + oe1);
 				return null;
 			}
 			String sResponseLine = null;
@@ -360,7 +361,7 @@ public abstract class QueryExecutor {
 					oResponseStringBuilder.append(sResponseLine);
 				}
 			} catch (IOException oe2) {
-				System.out.println("QueryExecutor.executeAndRetrieve: " + oe2);
+				Utils.debugLog("QueryExecutor.executeAndRetrieve: " + oe2);
 				return null;
 			}
 	
@@ -368,7 +369,7 @@ public abstract class QueryExecutor {
 			//		String sTmpFilePath = "insert/a/realistic/path/to/file.xml";
 			//		Utils.printToFile(sTmpFilePath, sResultAsString);
 	
-			//		System.out.println(sResultAsString);
+			//		Utils.debugLog(sResultAsString);
 	
 			// build the parser
 			Parser oParser = oAbdera.getParser();
@@ -383,26 +384,26 @@ public abstract class QueryExecutor {
 	
 			Document<Feed> oDocument = oParser.parse(new StringReader(sResultAsString), oParserOptions);
 			if (oDocument == null) {
-				System.out.println("OpenSearchQuery.executeAndRetrieve: Document response null");
+				Utils.debugLog("OpenSearchQuery.executeAndRetrieve: Document response null");
 				return null;
 			}
 	
 			if (bFullViewModel) return buildResultViewModel(oDocument, oClient, oOptions);
 			else return buildResultLightViewModel(oDocument, oClient, oOptions);
 		} catch (NumberFormatException oE) {
-			System.out.println("OpenSearchQuery.executeAndRetrieve: " + oE);
+			Utils.debugLog("OpenSearchQuery.executeAndRetrieve: " + oE);
 			return null;
 		}
 	}
 
 	public ArrayList<QueryResultViewModel> executeAndRetrieve(PaginatedQuery oQuery) throws IOException {
-		System.out.println("QueryExecutor.executeAndRetrieve(PaginatedQuery oQuery)");
+		Utils.debugLog("QueryExecutor.executeAndRetrieve(PaginatedQuery oQuery)");
 		return executeAndRetrieve(oQuery,true);
 	}
 
 
 	public void setDownloadProtocol(String sDownloadProtocol) {
-		System.out.println("QueryExecutor.setDownloadProtocol");
+		Utils.debugLog("QueryExecutor.setDownloadProtocol");
 		m_sDownloadProtocol = sDownloadProtocol;
 		if(null==m_sDownloadProtocol) {
 			m_sDownloadProtocol = "https:";
@@ -410,7 +411,7 @@ public abstract class QueryExecutor {
 	}
 
 	public void setCredentials(AuthenticationCredentials oCredentials) {
-		System.out.println("QueryExecutor.setCredentials");
+		Utils.debugLog("QueryExecutor.setCredentials");
 		if(null!=oCredentials) {
 			setUser(oCredentials.getUser());
 			setPassword(oCredentials.getPassword());
@@ -430,7 +431,7 @@ public abstract class QueryExecutor {
 		try {
 			String sQuery = "( beginPosition:[2017-05-15T00:00:00.000Z TO 2017-05-15T23:59:59.999Z] AND endPosition:[2017-05-15T00:00:00.000Z TO 2017-05-15T23:59:59.999Z] ) AND   (platformname:Sentinel-1 AND filename:S1A_* AND producttype:GRD)";
 
-			System.out.println(oExecutor.executeCount(sQuery));			
+			Utils.debugLog(""+oExecutor.executeCount(sQuery));			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

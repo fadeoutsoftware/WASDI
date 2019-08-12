@@ -2,10 +2,12 @@ package wasdi.shared.opensearch;
 
 import org.apache.abdera.i18n.templates.Template;
 
+import wasdi.shared.utils.Utils;
+
 public class QueryExecutorMATERA extends QueryExecutor {
 	
 	public QueryExecutorMATERA() {
-		System.out.println("QueryExecutorMATERA");
+		Utils.debugLog("QueryExecutorMATERA");
 		m_sProvider = "MATERA";
 	}
 

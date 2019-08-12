@@ -7,13 +7,13 @@ public class WasdiProgressMonitorStub implements ProgressMonitor {
 
 	@Override
 	public void beginTask(String taskName, int totalWork) {
-		System.out.println("WasdiProgressMonitorStub: begin Task " + taskName);
+		Utils.debugLog("WasdiProgressMonitorStub: begin Task " + taskName);
 		m_sTaskName = taskName;
 	}
 
 	@Override
 	public void done() {
-		System.out.println("WasdiProgressMonitorStub: Task done " + m_sTaskName);
+		Utils.debugLog("WasdiProgressMonitorStub: Task done " + m_sTaskName);
 	}
 
 	@Override
@@ -44,7 +44,7 @@ public class WasdiProgressMonitorStub implements ProgressMonitor {
 
 	@Override
 	public void worked(int work) {
-		System.out.println("WasdiProgressMonitorStub: [" + m_sTaskName+ "] Worked " + work);
+		Utils.debugLog("WasdiProgressMonitorStub: [" + m_sTaskName+ "] Worked " + work);
 	}
 
 }

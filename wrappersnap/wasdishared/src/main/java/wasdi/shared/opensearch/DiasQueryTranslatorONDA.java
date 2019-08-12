@@ -158,7 +158,7 @@ public class DiasQueryTranslatorONDA extends DiasQueryTranslator {
 			if(Utils.isNullOrEmpty(sResult)) {
 				sResult += "(_Proba-V_are_Not_Supported_by_ONDA,_then_invalidate_query_with_this_text_to_return_zero_results_)";
 			}
-			System.out.println("DiasQueryTranslatorONDA.translate: ignoring Proba-V as not supported by ONDA");			
+			Utils.debugLog("DiasQueryTranslatorONDA.translate: ignoring Proba-V as not supported by ONDA");			
 		}
 	
 		

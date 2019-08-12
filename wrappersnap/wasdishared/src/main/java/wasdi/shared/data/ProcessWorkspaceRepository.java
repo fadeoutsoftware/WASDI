@@ -15,6 +15,7 @@ import com.mongodb.client.model.Filters;
 import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
+import wasdi.shared.utils.Utils;
 
 /**
  * Created by s.adamo on 31/01/2017.
@@ -25,7 +26,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
 
         try {
         	
-        	System.out.println("Inserting Process " + oProcessWorkspace.getProcessObjId() + " - status: " + oProcessWorkspace.getStatus());
+        	Utils.debugLog("Inserting Process " + oProcessWorkspace.getProcessObjId() + " - status: " + oProcessWorkspace.getStatus());
         	
             String sJSON = s_oMapper.writeValueAsString(oProcessWorkspace);
             Document oDocument = Document.parse(sJSON);
@@ -371,7 +372,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
 
         try {
         	
-        	System.out.println("Updating Process " + oProcessWorkspace.getProcessObjId() + " - status: " + oProcessWorkspace.getStatus());
+        	Utils.debugLog("Updating Process " + oProcessWorkspace.getProcessObjId() + " - status: " + oProcessWorkspace.getStatus());
         	
             String sJSON = s_oMapper.writeValueAsString(oProcessWorkspace);
             Document filter = new Document("processObjId", oProcessWorkspace.getProcessObjId());
@@ -391,7 +392,7 @@ public class ProcessWorkspaceRepository extends MongoRepository {
 
         try {
         	
-        	System.out.println("Cleaning ProcessWorkspace Queue");
+        	Utils.debugLog("Cleaning ProcessWorkspace Queue");
         	String sJSON = "{\"status\":\"ERROR\"}";
             Document oFilter = new Document("status", "CREATED");
 			Document oUpdate = new Document("$set", new Document(Document.parse(sJSON)));

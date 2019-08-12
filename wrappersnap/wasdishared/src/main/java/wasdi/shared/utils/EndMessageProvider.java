@@ -20,7 +20,7 @@ public class EndMessageProvider {
 	private static final List<String> s_asBadEndMessagges;
 	
 	static {
-		System.out.println("EndMessageProvider static constructor");
+		Utils.debugLog("EndMessageProvider static constructor");
 		
 		String sPrefix =  "----WASDI:";
 		String sSuffix = "----";

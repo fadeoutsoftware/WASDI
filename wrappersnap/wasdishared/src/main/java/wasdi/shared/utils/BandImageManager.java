@@ -85,7 +85,7 @@ public class BandImageManager {
 				m_oCacheThread.interrupt();
 			}
 			catch (Exception e) {
-				System.out.println("stopChacheThread " + e.toString());
+				Utils.debugLog("stopChacheThread " + e.toString());
 			}
 			
 		}
@@ -93,7 +93,7 @@ public class BandImageManager {
 	
 	static {
 		
-		System.out.println("BandImageManager.buildImage: laucnhing cached sources thread!");
+		Utils.debugLog("BandImageManager.buildImage: laucnhing cached sources thread!");
 		
 		m_oCacheThread  = new Thread(new Runnable() {
 			
@@ -125,7 +125,7 @@ public class BandImageManager {
 								CachedSource oRemoved = m_aoSourceCacheMap.remove(sKey);
 								oRemoved.m_oMultiLevelSource = null;
 								
-								System.out.println("BandImageManager.buildImage: removed from cache: " + sKey);
+								Utils.debugLog("BandImageManager.buildImage: removed from cache: " + sKey);
 							}
 							
 							iCycleCount++;
@@ -133,7 +133,7 @@ public class BandImageManager {
 							if ((iCycleCount%6)==0) {
 								
 								if (m_aoSourceCacheMap.entrySet().size() != iLastValue) {
-									System.out.println("------------ BandImageManager cache size: " + m_aoSourceCacheMap.entrySet().size());
+									Utils.debugLog("------------ BandImageManager cache size: " + m_aoSourceCacheMap.entrySet().size());
 									iLastValue = m_aoSourceCacheMap.entrySet().size();
 								}
 							}
@@ -273,11 +273,11 @@ public class BandImageManager {
 		BufferedImage oOutputBufferedImage = null;
 		
 		if (oInputBand==null) {
-			System.out.println("BandImageManager.buildImage: band null");
+			Utils.debugLog("BandImageManager.buildImage: band null");
 			return null;
 		}
 		if (oInputBand.getProduct()==null) {
-			System.out.println("BandImageManager.buildImage: band product null");
+			Utils.debugLog("BandImageManager.buildImage: band product null");
 			return null;
 		}
 		
@@ -299,7 +299,7 @@ public class BandImageManager {
 	        
 	        if (oCachedObj == null) {
 	        	oCachedObj = new CachedSource(ColoredBandImageMultiLevelSource.create(oInputBand, ProgressMonitor.NULL));
-	        	System.out.println("BandImageManager.buildImage: multi level source not found in cache... created: " + (System.currentTimeMillis() - lStartTime) + " ms");
+	        	Utils.debugLog("BandImageManager.buildImage: multi level source not found in cache... created: " + (System.currentTimeMillis() - lStartTime) + " ms");
 	        	m_aoSourceCacheMap.put(sProductKey, oCachedObj);
 	        }
 	        
@@ -308,7 +308,7 @@ public class BandImageManager {
 	        
 	        // update cache timestamp
 	        oCachedObj.m_lTimestamp = System.currentTimeMillis();
-	        System.out.println("BandImageManager.buildImage: multi level source obtained: " + (System.currentTimeMillis() - lStartTime) + " ms");
+	        Utils.debugLog("BandImageManager.buildImage: multi level source obtained: " + (System.currentTimeMillis() - lStartTime) + " ms");
 
 	        // Create the Output buffered Image
 	        final int iOutputImageWidth = oOutputImageSize.width;
@@ -319,7 +319,7 @@ public class BandImageManager {
 	        
 	        // Create Image Layer
 	        final ImageLayer oSnapImageLayer = new ImageLayer(oMultiLevelSource);
-	        System.out.println("BandImageManager.buildImage: imageLayer created: " + (System.currentTimeMillis() - lStartTime) + " ms");
+	        Utils.debugLog("BandImageManager.buildImage: imageLayer created: " + (System.currentTimeMillis() - lStartTime) + " ms");
 	        
 //	        Viewport snapshotVp = vp==null ? new DefaultViewport(isModelYAxisDown(imageLayer)) : new DefaultViewport(vp, isModelYAxisDown(imageLayer));
 	        
@@ -380,9 +380,9 @@ public class BandImageManager {
 	        	oImageRendering.getViewport().zoom(oModelViewPortToRender);
 	        }
 	        
-	        System.out.println("BandImageManager.buildImage: init render: " + (System.currentTimeMillis() - lStartTime) + " ms + (" + oSnapImageLayer.getClass().getName() + ")");
+	        Utils.debugLog("BandImageManager.buildImage: init render: " + (System.currentTimeMillis() - lStartTime) + " ms + (" + oSnapImageLayer.getClass().getName() + ")");
 	        oSnapImageLayer.render(oImageRendering);
-	        System.out.println("BandImageManager.buildImage: render done: " + (System.currentTimeMillis() - lStartTime) + " ms");			
+	        Utils.debugLog("BandImageManager.buildImage: render done: " + (System.currentTimeMillis() - lStartTime) + " ms");			
 		}
 		
         return oOutputBufferedImage;
@@ -398,11 +398,11 @@ public class BandImageManager {
 		BufferedImage oOutputBufferedImage = null;
 		
 		if (oInputBand==null) {
-			System.out.println("BandImageManager.buildImage: band null");
+			Utils.debugLog("BandImageManager.buildImage: band null");
 			return null;
 		}
 		if (oInputBand.getProduct()==null) {
-			System.out.println("BandImageManager.buildImage: band product null");
+			Utils.debugLog("BandImageManager.buildImage: band product null");
 			return null;
 		}
 
@@ -417,7 +417,7 @@ public class BandImageManager {
 	        CachedSource oCachedObj = m_aoSourceCacheMap.get(sProductKey); 
 	        if (!bUseCache || oCachedObj == null) {
 	        	oCachedObj = new CachedSource(ColoredBandImageMultiLevelSource.create(oInputBand, ProgressMonitor.NULL));
-	        	System.out.println("BandImageManager.buildImage: multi level source not found in cache... created: " + (System.currentTimeMillis() - lStartTime) + " ms");
+	        	Utils.debugLog("BandImageManager.buildImage: multi level source not found in cache... created: " + (System.currentTimeMillis() - lStartTime) + " ms");
 	        	m_aoSourceCacheMap.put(sProductKey, oCachedObj);
 	        }
 	        if (!bUseCache) {
@@ -429,7 +429,7 @@ public class BandImageManager {
 	        
 	        // update cache timestamp
 	        oCachedObj.m_lTimestamp = System.currentTimeMillis();
-	        System.out.println("BandImageManager.buildImage: multi level source obtained: " + (System.currentTimeMillis() - lStartTime) + " ms");
+	        Utils.debugLog("BandImageManager.buildImage: multi level source obtained: " + (System.currentTimeMillis() - lStartTime) + " ms");
 
 	        // Create the Output buffered Image
 	        int iOutputImageWidth = oOutputImageSize.width;
@@ -442,7 +442,7 @@ public class BandImageManager {
 	        
 	        // Create Image Layer
 	        final ImageLayer oSnapImageLayer = new ImageLayer(oMultiLevelSource);
-	        System.out.println("BandImageManager.buildImage: imageLayer created: " + (System.currentTimeMillis() - lStartTime) + " ms");
+	        Utils.debugLog("BandImageManager.buildImage: imageLayer created: " + (System.currentTimeMillis() - lStartTime) + " ms");
 	        
 //	        Viewport snapshotVp = vp==null ? new DefaultViewport(isModelYAxisDown(imageLayer)) : new DefaultViewport(vp, isModelYAxisDown(imageLayer));
 	        
@@ -507,9 +507,9 @@ public class BandImageManager {
 	        //add all the masks
 	        rootLayer.getChildren().add(getFirstImageLayerIndex(rootLayer), createMaskCollectionLayer(oInputBand));
 	        
-	        System.out.println("BandImageManager.buildImage: init render: " + (System.currentTimeMillis() - lStartTime) + " ms + (" + oSnapImageLayer.getClass().getName() + ")");
+	        Utils.debugLog("BandImageManager.buildImage: init render: " + (System.currentTimeMillis() - lStartTime) + " ms + (" + oSnapImageLayer.getClass().getName() + ")");
 	        rootLayer.render(oImageRendering);
-	        System.out.println("BandImageManager.buildImage: render done: " + (System.currentTimeMillis() - lStartTime) + " ms");			
+	        Utils.debugLog("BandImageManager.buildImage: render done: " + (System.currentTimeMillis() - lStartTime) + " ms");			
 		}
 		
         return oOutputBufferedImage;
@@ -541,11 +541,11 @@ public class BandImageManager {
 		RenderedImage oOutputImage = null;
 		
 		if (oRedBand==null || oBlueBand == null || oGreenBand == null) {
-			System.out.println("BandImageManager.buildImage: band null");
+			Utils.debugLog("BandImageManager.buildImage: band null");
 			return null;
 		}
 		if (oRedBand.getProduct()==null || oBlueBand.getProduct() == null || oGreenBand.getProduct() == null) {
-			System.out.println("BandImageManager.buildImage: band product null");
+			Utils.debugLog("BandImageManager.buildImage: band product null");
 			return null;
 		}
 
@@ -558,7 +558,7 @@ public class BandImageManager {
 	        ImageInfo oInfo = ProductUtils.createImageInfo(aoRasters, true, ProgressMonitor.NULL);
 	        oOutputImage = ImageManager.getInstance().createColoredBandImage(aoRasters, oInfo, 0);
 	        
-	        System.out.println("BandImageManager.buildImage: render done: " + (System.currentTimeMillis() - lStartTime) + " ms");
+	        Utils.debugLog("BandImageManager.buildImage: render done: " + (System.currentTimeMillis() - lStartTime) + " ms");
 	        
 	        lStartTime = System.currentTimeMillis();
 	        
@@ -574,7 +574,7 @@ public class BandImageManager {
 	    	
 	    	oGraphics.drawRenderedImage(oOutputImage, AffineTransform.getScaleInstance(dX, dY));
 	    	oGraphics.dispose();
-	        System.out.println("BandImageManager.buildImage: scaling done: " + (System.currentTimeMillis() - lStartTime) + " ms");
+	        Utils.debugLog("BandImageManager.buildImage: scaling done: " + (System.currentTimeMillis() - lStartTime) + " ms");
 	        
 	        return oResizedImage;	        	
 		}
@@ -590,11 +590,11 @@ public class BandImageManager {
 		BufferedImage oOutputBufferedImage = null;
 		
 		if (oRedBand==null || oBlueBand == null || oGreenBand == null) {
-			System.out.println("BandImageManager.buildImage: band null");
+			Utils.debugLog("BandImageManager.buildImage: band null");
 			return null;
 		}
 		if (oRedBand.getProduct()==null || oBlueBand.getProduct() == null || oGreenBand.getProduct() == null) {
-			System.out.println("BandImageManager.buildImage: band product null");
+			Utils.debugLog("BandImageManager.buildImage: band product null");
 			return null;
 		}
 		
@@ -610,7 +610,7 @@ public class BandImageManager {
 	        
 	        ColoredBandImageMultiLevelSource oColoredBandImageMultiLevelSource = ColoredBandImageMultiLevelSource.create(aoRasters, ProgressMonitor.NULL);
 	        
-	        System.out.println("BandImageManager.buildImage: multi level source obtained: " + (System.currentTimeMillis() - lStartTime) + " ms");
+	        Utils.debugLog("BandImageManager.buildImage: multi level source obtained: " + (System.currentTimeMillis() - lStartTime) + " ms");
 	        
 	        CollectionLayer oRootLayer = new CollectionLayer();
 
@@ -618,14 +618,14 @@ public class BandImageManager {
 	        
 	        final RgbImageLayerType oRgbLayerType = LayerTypeRegistry.getLayerType(RgbImageLayerType.class);
 	        final Layer oLayer = oRgbLayerType.createLayer(aoRasters, oColoredBandImageMultiLevelSource);
-	        System.out.println("BandImageManager.buildImage: RGB imageLayer created: " + (System.currentTimeMillis() - lStartTime) + " ms");
+	        Utils.debugLog("BandImageManager.buildImage: RGB imageLayer created: " + (System.currentTimeMillis() - lStartTime) + " ms");
 	        oLayer.setName("RGB");
 	        oLayer.setVisible(true);
 	        oLayer.setId("org.esa.snap.layers.baseImage");
 	        
 	        oRootLayer.getChildren().add(oLayer);
 	        	        
-	        System.out.println("BandImageManager.buildImage: init render: " + (System.currentTimeMillis() - lStartTime) + " ms ");
+	        Utils.debugLog("BandImageManager.buildImage: init render: " + (System.currentTimeMillis() - lStartTime) + " ms ");
 	        
 	        // Create the Output buffered Image
 	        final int iOutputImageWidth = oOutputImageSize.width;
@@ -641,7 +641,7 @@ public class BandImageManager {
 	        graphics.fillRect(0, 0, iOutputImageWidth, iOutputImageHeight);
 	        
 	        oRootLayer.render(oImageRendering);
-	        System.out.println("BandImageManager.buildImage: render done: " + (System.currentTimeMillis() - lStartTime) + " ms");			
+	        Utils.debugLog("BandImageManager.buildImage: render done: " + (System.currentTimeMillis() - lStartTime) + " ms");			
 		}
 		
         return oOutputBufferedImage;
@@ -654,11 +654,11 @@ public class BandImageManager {
 		BufferedImage oOutputBufferedImage = null;
 		
 		if (oRedBand==null || oBlueBand == null || oGreenBand == null) {
-			System.out.println("BandImageManager.buildImage: band null");
+			Utils.debugLog("BandImageManager.buildImage: band null");
 			return null;
 		}
 		if (oRedBand.getProduct()==null || oBlueBand.getProduct() == null || oGreenBand.getProduct() == null) {
-			System.out.println("BandImageManager.buildImage: band product null");
+			Utils.debugLog("BandImageManager.buildImage: band product null");
 			return null;
 		}
 		
@@ -684,7 +684,7 @@ public class BandImageManager {
 	        graphics.fillRect(0, 0, iOutputImageWidth, iOutputImageHeight);
 	        
 	        oProductSceneImage.getRootLayer().render(oImageRendering);
-	        System.out.println("BandImageManager.buildImage: render done: " + (System.currentTimeMillis() - lStartTime) + " ms");			
+	        Utils.debugLog("BandImageManager.buildImage: render done: " + (System.currentTimeMillis() - lStartTime) + " ms");			
 		}
 		
         return oOutputBufferedImage;
@@ -696,11 +696,11 @@ public class BandImageManager {
 		RenderedImage oRenderedImage = null;
 		
 		if (oRedBand==null || oBlueBand == null || oGreenBand == null) {
-			System.out.println("BandImageManager.buildImage: band null");
+			Utils.debugLog("BandImageManager.buildImage: band null");
 			return null;
 		}
 		if (oRedBand.getProduct()==null || oBlueBand.getProduct() == null || oGreenBand.getProduct() == null) {
-			System.out.println("BandImageManager.buildImage: band product null");
+			Utils.debugLog("BandImageManager.buildImage: band product null");
 			return null;
 		}
 
@@ -713,7 +713,7 @@ public class BandImageManager {
 	        ImageInfo oInfo = ProductUtils.createImageInfo(aoRasters, true, ProgressMonitor.NULL);
 	        oRenderedImage = ImageManager.getInstance().createColoredBandImage(aoRasters, oInfo, 0);
 	        
-	        System.out.println("BandImageManager.buildImage: render done: " + (System.currentTimeMillis() - lStartTime) + " ms");
+	        Utils.debugLog("BandImageManager.buildImage: render done: " + (System.currentTimeMillis() - lStartTime) + " ms");
 	        lStartTime = System.currentTimeMillis();
 	        
 	        CollectionLayer oCollectionLayer = new CollectionLayer();
@@ -733,13 +733,13 @@ public class BandImageManager {
 	        
 	        oCollectionLayer.render(rendering);
 	        
-	        System.out.println("BandImageManager.buildImage: render 2 done: " + (System.currentTimeMillis() - lStartTime) + " ms");
+	        Utils.debugLog("BandImageManager.buildImage: render 2 done: " + (System.currentTimeMillis() - lStartTime) + " ms");
 	        lStartTime = System.currentTimeMillis();
 
 
 	        JAI.create("filestore", rendering.getImage(), "C:\\temp\\ORAVEDIAMO2.JPG", "JPEG");
 	        
-	        System.out.println("BandImageManager.buildImage: render 3 done: " + (System.currentTimeMillis() - lStartTime) + " ms");			
+	        Utils.debugLog("BandImageManager.buildImage: render 3 done: " + (System.currentTimeMillis() - lStartTime) + " ms");			
 		}
 		
         return oRenderedImage;
@@ -806,7 +806,7 @@ public class BandImageManager {
         for (int i = 0; i < masks.getNodeCount(); i++) {
 			Mask mask = masks.get(i);
 			Layer layer = MaskLayerType.createLayer(band, mask);
-			System.out.println("BandImageManager.buildImage: adding mask: " + mask.getDisplayName());
+			Utils.debugLog("BandImageManager.buildImage: adding mask: " + mask.getDisplayName());
 			maskCollectionLayer.getChildren().add(layer);
         }
         return maskCollectionLayer;
