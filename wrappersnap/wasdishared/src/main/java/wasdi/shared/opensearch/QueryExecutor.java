@@ -335,7 +335,7 @@ public abstract class QueryExecutor {
 				oOptions.setAuthorization(sBasicAuth);			
 			}
 	
-			Utils.debugLog("\nQueryExecutor.executeAndRetrieve: Sending 'GET' request to URL : " + sUrl);
+			Utils.debugLog("QueryExecutor.executeAndRetrieve: Sending 'GET' request to URL : " + sUrl);
 			ClientResponse response = oClient.get(sUrl, oOptions);
 	
 	
