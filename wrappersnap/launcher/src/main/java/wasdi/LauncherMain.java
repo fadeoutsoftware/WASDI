@@ -884,7 +884,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 		updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 95);
 		//String sRemotePath = oFtpTransferParameters.getM_sRemotePath();
 		String sRemotePath = ".";
-		Boolean bCheck = oFtpClient.FileIsNowOnServer(sRemotePath, oFile.getName()); 
+		Boolean bCheck = oFtpClient.fileIsNowOnServer(sRemotePath, oFile.getName()); 
 		if(!bCheck) {
 			s_oLogger.debug("ftpTransfer: could not find file on server");
 			oProcessWorkspace.setStatus(ProcessStatus.ERROR.name());
