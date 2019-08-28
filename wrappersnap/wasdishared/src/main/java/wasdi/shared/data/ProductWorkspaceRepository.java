@@ -10,6 +10,8 @@ import org.bson.conversions.Bson;
 
 import com.mongodb.BasicDBObject;
 import com.mongodb.Block;
+import com.mongodb.DBObject;
+import com.mongodb.QueryBuilder;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.result.DeleteResult;
@@ -244,6 +246,34 @@ public class ProductWorkspaceRepository extends MongoRepository {
             
             Bson oFilter = new Document("productName", sOldProductName);
             
+            Bson oUpdateOperationDocument = new Document("$set", new Document(Document.parse(sJSON)));
+            
+            UpdateResult oResult = getCollection("productworkpsace").updateOne(oFilter, oUpdateOperationDocument);
+
+            if (oResult.getModifiedCount()==1) return  true;
+        }
+        catch (Exception oEx) {
+            oEx.printStackTrace();
+        }
+
+        return  false;
+    }
+    
+    public boolean UpdateProductWorkspace(ProductWorkspace oProductWorkspace) {
+        try {
+            String sJSON = s_oMapper.writeValueAsString(oProductWorkspace);
+            
+            // Select by Product Name and Workspace Id
+        	DBObject oQuery = QueryBuilder.start().and(
+					QueryBuilder.start().put("productName").is(oProductWorkspace.getProductName()).get(),
+					QueryBuilder.start().and(
+						QueryBuilder.start().put("workspaceId").is(oProductWorkspace.getWorkspaceId()).get()
+					).get()
+		    ).get();
+            
+        	BasicDBObject oFilter = new BasicDBObject();
+        	oFilter.putAll(oQuery);
+        	
             Bson oUpdateOperationDocument = new Document("$set", new Document(Document.parse(sJSON)));
             
             UpdateResult oResult = getCollection("productworkpsace").updateOne(oFilter, oUpdateOperationDocument);
