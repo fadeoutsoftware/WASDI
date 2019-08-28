@@ -2425,12 +2425,12 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 
 
 	/**
-	 * Adds a product to a Workspace. If it is alredy added it will not be duplicated.
+	 * Adds a product to a Workspace. If it is already added it will not be duplicated.
 	 * @param sProductFullPath Product to Add
 	 * @param sWorkspaceId Workspace Id
 	 * @return True if the product is already or have been added to the WS. False otherwise
 	 */
-	public boolean addProductToWorkspace(String sProductFullPath, String sWorkspaceId) {
+	public boolean addProductToWorkspace(String sProductFullPath, String sWorkspaceId, String sBbox) {
 
 		try {
 
@@ -2444,6 +2444,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 				ProductWorkspace oProductWorkspace = new ProductWorkspace();
 				oProductWorkspace.setProductName(sProductFullPath);
 				oProductWorkspace.setWorkspaceId(sWorkspaceId);
+				oProductWorkspace.setBbox(sBbox);
 
 				// Try to insert
 				if (oProductWorkspaceRepository.InsertProductWorkspace(oProductWorkspace)) {
@@ -2675,7 +2676,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 		}
 
 		// The Add Produt to Workspace is safe. No need to check if the product is already in the workspace
-		addProductToWorkspace(oFile.getAbsolutePath(), sWorkspace);
+		addProductToWorkspace(oFile.getAbsolutePath(), sWorkspace,sBBox);
 
 		if (bSendToRabbit) {
 			s_oLogger.debug("LauncherMain.AddProductToDbAndSendToRabbit: Image added. Send Rabbit Message Exchange = " + sExchange);

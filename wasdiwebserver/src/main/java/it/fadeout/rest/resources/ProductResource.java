@@ -76,14 +76,21 @@ public class ProductResource {
 
 		ProductWorkspaceRepository oProductWorkspaceRepository = new ProductWorkspaceRepository();
 
-		if (oProductWorkspaceRepository.ExistsProductWorkspace(oProductWorkspace.getProductName(),
-				oProductWorkspace.getWorkspaceId())) {
+		if (oProductWorkspaceRepository.ExistsProductWorkspace(oProductWorkspace.getProductName(), oProductWorkspace.getWorkspaceId())) {
 			Utils.debugLog("ProductResource.AddProductToWorkspace:  Product already in the workspace");
 
 			// Ok done
 			PrimitiveResult oResult = new PrimitiveResult();
 			oResult.setBoolValue(true);
 			return oResult;
+		}
+		
+		DownloadedFilesRepository oDownFileRepo = new DownloadedFilesRepository();
+		DownloadedFile oDownFile = oDownFileRepo.GetDownloadedFileByPath(oProductWorkspace.getProductName());
+		
+		if (oDownFile != null) {
+			GeorefProductViewModel oGeoRefViewModel = new GeorefProductViewModel(oDownFile.getProductViewModel());
+			if (oGeoRefViewModel!=null) oProductWorkspace.setBbox(oGeoRefViewModel.getBbox());
 		}
 
 		// Try to insert
@@ -304,6 +311,77 @@ public class ProductResource {
 		return aoProductList;
 	}
 
+	
+	@GET
+	@Path("/bywslight")
+	@Produces({ "application/xml", "application/json", "text/xml" })
+	public ArrayList<GeorefProductViewModel> getLightListByWorkspace(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sWorkspaceId") String sWorkspaceId) {
+		
+		Utils.debugLog("ProductResource.getLightListByWorkspace( " + sSessionId + ", " + sWorkspaceId + " )");
+		User oUser = Wasdi.GetUserFromSession(sSessionId);
+
+		ArrayList<GeorefProductViewModel> aoProductList = new ArrayList<GeorefProductViewModel>();
+
+		try {
+
+			// Domain Check
+			if (oUser == null) {
+				return aoProductList;
+			}
+			if (Utils.isNullOrEmpty(oUser.getUserId())) {
+				return aoProductList;
+			}
+
+			Utils.debugLog("ProductResource.getLightListByWorkspace: products for " + sWorkspaceId);
+
+			// Create repo
+			ProductWorkspaceRepository oProductWorkspaceRepository = new ProductWorkspaceRepository();
+			DownloadedFilesRepository oDownloadedFilesRepository = new DownloadedFilesRepository();
+			//PublishedBandsRepository oPublishedBandsRepository = new PublishedBandsRepository();
+
+			// Get Product List
+			List<ProductWorkspace> aoProductWorkspace = oProductWorkspaceRepository
+					.GetProductsByWorkspace(sWorkspaceId);
+
+			Utils.debugLog("ProductResource.getLightListByWorkspace: found " + aoProductWorkspace.size());
+
+			// For each
+			for (int iProducts = 0; iProducts < aoProductWorkspace.size(); iProducts++) {
+
+				// Get the downloaded file
+				DownloadedFile oDownloaded = oDownloadedFilesRepository.GetDownloadedFileByPath(aoProductWorkspace.get(iProducts).getProductName());
+
+				// Add View model to return list
+				if (oDownloaded != null) {
+
+					ProductViewModel pVM = oDownloaded.getProductViewModel();
+
+					if (pVM != null) {
+						GeorefProductViewModel geoPVM = new GeorefProductViewModel(pVM);
+						geoPVM.setBbox(oDownloaded.getBoundingBox());
+						
+						// Clear all the bands
+						geoPVM.getBandsGroups().getBands().clear();
+
+						geoPVM.setMetadata(null);
+						aoProductList.add(geoPVM);
+
+					} else {
+						Utils.debugLog("ProductResource.getLightListByWorkspace: ProductViewModel is Null: jump product");
+					}
+
+				} else {
+					Utils.debugLog("ProductResource.getLightListByWorkspace: WARNING: the product "
+							+ aoProductWorkspace.get(iProducts).getProductName() + " should be in WS " + sWorkspaceId
+							+ " but is not a Downloaded File");
+				}
+			}
+		} catch (Exception oEx) {
+			Utils.debugLog("ProductResource.getLightListByWorkspace: " + oEx);
+		}
+
+		return aoProductList;
+	}
 	@GET
 	@Path("/namesbyws")
 	@Produces({ "application/xml", "application/json", "text/xml" })

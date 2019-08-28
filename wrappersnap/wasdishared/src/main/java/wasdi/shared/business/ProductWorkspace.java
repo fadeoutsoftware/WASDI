@@ -8,8 +8,17 @@ package wasdi.shared.business;
 public class ProductWorkspace {
     private String productName;
     private String workspaceId;
+    private String bbox;
 
-    public String getProductName() {
+    public String getBbox() {
+		return bbox;
+	}
+
+	public void setBbox(String bbox) {
+		this.bbox = bbox;
+	}
+
+	public String getProductName() {
         return productName;
     }
 
