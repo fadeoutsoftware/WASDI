@@ -1,6 +1,89 @@
-@import "main_theme";
+ @import "main_theme";
 .login-view
 {
+    //immagini
+    $alien_user: url("../assets/img/alien-icon.png");
+    .alien_user
+    {
+        content: $alien_user;
+        width: 200px;
+        padding-top: 20px;
+        height: auto;
+
+    }
+    $loghi_partner: url("../assets/img/loghi_partner.JPG");
+    .loghi_partner
+    {
+        content: $loghi_partner;
+        width: auto;
+        padding-top: 20px;
+        height: auto;
+    }
+
+    $snakewasdi: url("../assets/wasdi/logoWasdi.png");
+    .snake_wasdi
+    {
+        content: $snakewasdi;
+        padding-top: 15px;
+        width: 150px;
+        height: auto;
+        margin: auto;
+        display: block;
+
+    }
+
+
+    $mockupprova2: url("../assets/img/mockup_wasdi_layers.png");
+    .mockupprova2
+    {
+        content: $mockupprova2;
+        width: 600px;
+        height: auto;
+        display: block;
+
+    }
+
+    $slideprova: url("../assets/img/segnapostoslide.jpg");
+    .slideprova
+    {
+        content: $slideprova;
+        width: auto;
+        height: auto;
+    }
+
+    $ufo: url("../assets/img/ufo.png");
+    .ufo
+    {
+        content: $ufo;
+        margin: auto;
+        display: block;
+        padding-top: 10px;
+        width: 200px;
+        height: auto;
+    }
+
+    $terra: url("../assets/img/terra.png");
+    .terra
+    {
+        content: $terra;
+        margin: auto;
+        display: block;
+        padding-top: 10px;
+        width: 200px;
+        height: auto;
+    }
+
+    $github_logo: url("../assets/img/Git_hub_logo.png");
+    .github_logo
+    {
+        content: $github_logo;
+        margin: auto;
+        display: block;
+        padding-top: 10px;
+        width: 200px;
+        height: auto;
+    }
+
   .login-top
   {
     @extend %login-top-background;
@@ -220,5 +303,38 @@
 
     }
   }
+
+}
+//INIZIO SILVIA
+ //background blu
+ .bg_bluewasdi {
+     background-color:$wasdi-blue-logo;
+ }
+// margini vari v. bootstrap 4
+ .marginiverticali {
+     margin-bottom: 5px;
+     margin-bottom: 5px;
+ }
+
+ //link
+ a:link {
+     color: $wasdi-blue-logo;
+ }
+
+ a:visited {
+     color: $wasdi-blue-logo;
+ }
+
+ a:hover {
+     color: $wasdi-green-logo;
+ }
+
+ a:active {
+     color: $wasdi-green-logo;
+ }
+
+
+.section_full_width {
+    height: 100vh;
 
 }
