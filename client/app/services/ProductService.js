@@ -16,6 +16,10 @@ service('ProductService', ['$http',  'ConstantsService', function ($http, oConst
         return this.m_oHttp.get(this.APIURL + '/product/byws?sWorkspaceId='+sWorkspaceId);
     };
 
+    this.getProductLightListByWorkspace = function (sWorkspaceId) {
+        return this.m_oHttp.get(this.APIURL + '/product/bywslight?sWorkspaceId='+sWorkspaceId);
+    };
+
     this.addProductToWorkspace = function (sProductName, sWorkspaceId) {
         return this.m_oHttp.get(this.APIURL + '/product/addtows?sProductName='+sProductName+'&sWorkspaceId='+sWorkspaceId);
     };

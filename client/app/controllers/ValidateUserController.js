@@ -26,7 +26,7 @@ var ValidateUserController  = (function() {
         var oController = this;
         this.m_oTimeout( function(){
             oController.m_oState.go("home");// go workspaces
-        }, 5000 );
+        }, 2000 );
     }
 
     ValidateUserController.prototype.validateUser = function(sEmail,sValidationCode)
@@ -38,17 +38,17 @@ var ValidateUserController  = (function() {
             {
                 if(data.boolValue === true)
                 {
-                    oController.m_sMessage = "The user is validate.";
+                    oController.m_sMessage = "User validated";
                 }
                 else
                 {
-                    oController.m_sMessage = "Server error is impossible validate the user or something goes wrong.";
+                    oController.m_sMessage = "Server error: impossible to validate the user";
                 }
-                oController.m_sMessage = oController.m_sMessage + " Automatically redirect...";
+                oController.m_sMessage = oController.m_sMessage + " Redirecting...";
                 oController.timeoutRedirect();
             }
         }).error(function (data,status){
-            utilsVexDialogAlertTop("GURU MEDITATION<br>VALIDATE USER");
+            utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR VALIDATING USER");
             oController.timeoutRedirect();
 
         });
