@@ -6,7 +6,7 @@ var RootController = (function() {
     RootController.BROADCAST_MSG_OPEN_LOGS_DIALOG_PROCESS_ID = "RootController.openLogsDialogProcessId";
 
     function RootController($scope, oConstantsService, oAuthService, $state, oProcessesLaunchedService, oWorkspaceService,
-                            $timeout,oModalService,oRabbitStompService) {
+                            $timeout,oModalService,oRabbitStompService, $window) {
 
         //
 
@@ -31,7 +31,9 @@ var RootController = (function() {
         this.m_bIsEditModelWorkspaceNameActive = false;
         this.m_isRabbitConnected = true;
         this.m_oSummary = {};
+        this.m_oWindow = $window;
         var oController = this;
+
 
 
 
@@ -755,6 +757,10 @@ var RootController = (function() {
         }
     };
 
+    RootController.prototype.openDocumentatonCenter = function () {
+        this.m_oWindow.open('http://www.wasdi.net/index.php', '_blank');
+    }
+
     /*********************************************************************/
     RootController.$inject = [
         '$scope',
@@ -766,7 +772,7 @@ var RootController = (function() {
         '$timeout',
         'ModalService',
         'RabbitStompService',
-
+        '$window'
     ];
 
     return RootController;

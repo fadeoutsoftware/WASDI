@@ -52,11 +52,11 @@ var EditUserController = (function() {
                 {
                     if(data.boolValue ===  false)
                     {
-                        utilsVexDialogAlertTop("GURU MEDITATION<br>WAS IMPOSSIBLE CHANGE THE PASSWORD");
+                        utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR PASSWORD NOT CHANGED");
                     }
                     else
                     {
-                        var oVexWindow = utilsVexDialogAlertBottomRightCorner("CHANGED PASSWORD");
+                        var oVexWindow = utilsVexDialogAlertBottomRightCorner("PASSWORD CHANGED");
                         utilsVexCloseDialogAfter(3000,oVexWindow);
 
                     }
@@ -64,7 +64,7 @@ var EditUserController = (function() {
                 }
                 else
                 {
-                    utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN CHANGE PASSWORD");
+                    utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR PASSWORD NOT CHANGED");
                 }
                 oController.m_bEditingPassword = false;
                 oController.cleanPasswordsInEditUserObject();
@@ -72,7 +72,7 @@ var EditUserController = (function() {
             })
             .error(function (error)
             {
-                utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN CHANGE PASSWORD");
+                utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR PASSWORD NOT CHANGED");
                 oController.m_bEditingPassword = false;
                 oController.cleanPasswordsInEditUserObject();
             });
@@ -91,7 +91,7 @@ var EditUserController = (function() {
                 {
                     if(data.boolValue ===  false)
                     {
-                        utilsVexDialogAlertTop("GURU MEDITATION<br>WAS IMPOSSIBLE CHANGE THE USER INFO");
+                        utilsVexDialogAlertTop("GURU MEDITATION<br>IMPOSSIBLE TO CHANGE USER INFO");
                     }
                     else
                     {
