@@ -112,16 +112,12 @@
                                     <i class="fa fa-file " aria-hidden="true"></i>
                                     <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" data-target="{{'#product' + $index}}"
                                        aria-expanded="false" aria-controls="collapseThree" ng-click="m_oController.clickOnProduct(product)">
-                                        <b>{{product.fileName}}</b>
+                                        <b>{{product.name}}</b>
                                     </a>
                                 </span>
                                 </div>
                                 <div id="{{'product'+$index}}" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingThree">
                                     <div class="list-group">
-                                        <li class="list-group-item">
-                                            <h4>File name:</h4>
-                                            {{product.fileName}}
-                                        </li>
                                         <li class="list-group-item">
                                             <h4>Name:</h4>
                                             {{product.name}}
