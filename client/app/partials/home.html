@@ -4,14 +4,14 @@
             <nav class="navbar navbar-inverse bg_bluewasdi">
                 <div class="container-fluid">
                     <ul class="nav navbar-nav navbar-right">
-                        <li class="link-login pull-right" ng-show="m_oController.m_bVisualizeLink === true" ng-click="m_oController.changeVisibilityLoginRegister('Login')">
-                            <a href="#" class="text-green-wasdi"><span class="glyphicon glyphicon-log-in"></span> {{"LOGIN_LINK_FORM"|translate}}</a></li>
-                        <li class="link-register pull-right" ng-show="m_oController.m_bVisualizeLink === true" ng-click="m_oController.changeVisibilityLoginRegister('Register')">
-                            <a href="#" class="text-green-wasdi"><span class="glyphicon glyphicon-user"></span> {{"LOGIN_LINK_REGISTER"|translate}}</a></li>
-                        <li class="link-login pull-right"> <a href="#enduser" class="text-green-wasdi" ng-click="m_oController.m_oAnchorService('enduser')">END USER</a> </li>
-                        <li class="link-login pull-right"> <a href="#developer"  class="text-green-wasdi" ng-click="m_oController.m_oAnchorService('developer')">DEVELOPER</a> </li>
-                        <li class="link-login pull-right"> <a href="#eoexpert"  class="text-green-wasdi" ng-click="m_oController.m_oAnchorService('eoexpert')">EO EXPERT</a> </li>
-                        <li class="link-login pull-right"> <a href="#introwasdi"  class="text-green-wasdi" ng-click="m_oController.m_oAnchorService('introwasdi')">ABOUT WASDI</a> </li>
+                        <li class="link-login pull-right nav-item" ng-show="m_oController.m_bVisualizeLink === true" ng-click="m_oController.changeVisibilityLoginRegister('Login')">
+                            <a href="#" class="text-white"><span class="glyphicon glyphicon-log-in"></span> {{"LOGIN_LINK_FORM"|translate}}</a></li>
+                        <li class="link-register pull-right  nav-item" ng-show="m_oController.m_bVisualizeLink === true" ng-click="m_oController.changeVisibilityLoginRegister('Register')">
+                            <a href="#" class="text-white"><span class="glyphicon glyphicon-user"></span> {{"LOGIN_LINK_REGISTER"|translate}}</a></li>
+                        <li class="link-login pull-right  nav-item"> <a href="#enduser" class="text-white" ng-click="m_oController.m_oAnchorService('enduser')">END USER</a> </li>
+                        <li class="link-login pull-right  nav-item"> <a href="#developer"  class="text-white" ng-click="m_oController.m_oAnchorService('developer')">DEVELOPER</a> </li>
+                        <li class="link-login pull-right  nav-item"> <a href="#eoexpert"  class="text-white" ng-click="m_oController.m_oAnchorService('eoexpert')">EO EXPERT</a> </li>
+                        <li class="link-login pull-right  nav-item"> <a href="#introwasdi"  class="text-white" ng-click="m_oController.m_oAnchorService('introwasdi')">ABOUT WASDI</a> </li>
                     </ul>
                 </div>
             </nav>
@@ -232,8 +232,10 @@
             <div class="row bg_bluewasdi text-center text-white marginiverticali">
                 <div class="container">
                     <div class="col-md-4">
-
+                        <div class="user-change bg_bluewasdi">
                         <img class="alien_user animated heartBeat slow delay-2s">
+                        <img class="alien_user_green_eyes img-top">
+                        </div>
                         <h4>
                             <strong>EO EXPERT</strong>
                         </h4>
@@ -241,8 +243,10 @@
                         <a class="btn bg-transparent text-white" href="#eoexpert" ng-click="m_oController.m_oAnchorService('eoexpert')"> <i class="fa fa-angle-double-down fa-2x animated bounce slow delay-2s" aria-hidden="true""></i></a>
                     </div>
                     <div class="col-md-4">
-
+                        <div class="user-change bg_bluewasdi">
                         <img class="alien_user animated heartBeat slow delay-3s">
+                        <img class="alien_user_green_eyes img-top">
+                        </div>
                         <h4>
                             <strong>DEVELOPER</strong>
                         </h4>
@@ -250,8 +254,10 @@
                         <a class="btn bg-transparent text-white" href="#developer" ng-click="m_oController.m_oAnchorService('developer')"> <i class="fa fa-angle-double-down fa-2x animated bounce delay-3s" aria-hidden="true"></i></a>
                     </div>
                     <div class="col-md-4">
-
+                        <div class="user-change bg_bluewasdi">
                         <img class="alien_user animated heartBeat slow delay-4s">
+                        <img class="alien_user_green_eyes img-top">
+                        </div>
                         <h4>
                             <strong>END USER</strong>
                         </h4>
@@ -294,6 +300,8 @@
                  </div>
                 <div class="col-md-6 text-center">
                     <img class="terra">
+                    <br>
+                    <br>
                     <!--slide tutorial wasdi-->
                     <div id="slidetutorial" class="carousel slide" data-ride="carousel">
                         <!-- Indicators -->
@@ -306,15 +314,15 @@
                         <!-- Wrapper for slides -->
                         <div class="carousel-inner">
                             <div class="item active">
-                                <img class="slideprova">
+                                <img class="slide1">
                             </div>
 
                             <div class="item">
-                                <img class="slideprova">
+                                <img class="slide2">
                             </div>
 
                             <div class="item">
-                                <img class="slideprova">
+                                <img class="slide3">
                             </div>
                         </div>
 
@@ -328,7 +336,9 @@
                             <span class="sr-only">Next</span>
                         </a>
                     </div>
-                    <a href="http://www.wasdi.net/index.php" class="btn btn-lg bg_bluewasdi text-white marginiverticali" role="button">View Tutorial</a>
+                    <br>
+                    <br>
+                    <a href="http://www.wasdi.net/index.php?title=Tutorial" target="_blank" class="btn btn-lg bg_bluewasdi text-white marginiverticali" role="button">View Tutorial</a>
                 </div>
 
             </div>
@@ -344,25 +354,26 @@
                 </div>
                 <div class="col-md-6 text-white">
                     <p class="home_p">
-                        The development of a new process is usually a long task, that needs time and debug, that are typically done on the developer PC.
+                        <br>The development of a new process is usually a long task, that needs time and debug, that are typically done on the developer PC.
                         Once the processor is tested and ready, the user should be able to drag and drop it in WASDI to let this processor been automatic deployed in the cloud.<br>
                         The technology is based on a smart multi language library (IDL, pyhon, Matlab, Ocave, Java) that basically simulates a virtual file system between the cloud and the developer PC,
                         with very few and simple primitives. <br>
                         The user can develop using this library in his own environment, and the WASDI code takes care of accessing missing data from the cloud once is needed, during the development and testing phase.
                         Once the processor is ready and deployed, the system recognizes that the software is running on the cloud and makes direct access to the input data in a transparent way.
                     </p>
-
-
+                   <h3 style="text-align: center"><a class="btn btn-lg bg-white"  href="#" target="_blank"> View in GitHub </a></h3>
 
 
 
                 </div>
-                <div class="col-md-6 text-center text-white align-middle">
+                <div class="col-md-6 text-center text-white align-bottom">
+                    <br>
                     <img class="rocket animated slideInUp slow">
                     <h3>WASDI key feature is the possibility for EO Experts to develop their own processor and deploy it to the cloud with a simple drag and drop operation </h3>
+                    <a href="http://www.wasdi.net/index.php?title=DeveloperManual" target="_blank" class="btn btn-lg bg-white marginiverticali" role="button">View Developer Manual</a>
                 </div>
                 <div class="col-md-12">
-                    <h3 style="text-align: center"><a class="btn btn-lg bg-white"  href="#"> VIEW IN GITHUB <img class="github_logo"></a></h3>
+
                 </div>
             </div>
             </div>
@@ -373,6 +384,15 @@
         <section id="enduser" class="container">
             <div class="col-md-12 text-right">
                 <h1 class="text-green-wasdi">END USER</h1>
+                <p class="home_p">WASDI is used by CIMA Foundation researchers to provide to Italian Civil Protection Operational Service
+                     for NRT flooded Area Detection, EO Based Root level soil moisture evaluation, Vegetation indexes for forest fire forecast
+                    models (<a href="http://www.mydewetra.org/">www.mydewetra.org</a> ) .</p>
+                <p class="home_p">WASDI is also the technological base of the eDRIFT project that is providing pre-operational EO Services
+                    developed by LIST, DELTARES and DLR for the Worldbank SEADRIF project, an IT platform able to estimate the number of people
+                    affected by a flood, by a combination of real-time models, EO data and ground observations in the South East ASIA area
+                    (<a href="https://www.seadrif.org/">www.seadrif.org) </a></p>
+                <br>
+
             </div>
             <!-- Success Stories-->
             <div class="container">
@@ -380,10 +400,10 @@
                 <div class="row">
                     <div class="col-lg-6 mb-4">
                         <div class="card h-100">
-                            <a href="#"><img class="card-img-top" src="http://placehold.it/700x400" alt=""></a>
+                            <a href="#"><img class="card-img-top edrift_screenshot"></a>
                             <div class="card-body">
                                 <h2 class="card-title">
-                                    <a href="#">eDRIFT</a>
+                                   eDRIFT
                                 </h2>
                                 <p class="card-text">Project aims to create value-added services utilizing EO data for the insurance market and reinsurance companies. </p>
                                 <p>Main Stakeholder:</p>
@@ -393,10 +413,10 @@
                     </div>
                     <div class="col-lg-6 mb-4">
                         <div class="card h-100">
-                            <a href="#"><img class="card-img-top" src="http://placehold.it/700x400" alt=""></a>
+                            <a href="#"><img class="card-img-top dewetra_screenshot"></a>
                             <div class="card-body">
                                 <h2 class="card-title">
-                                    <a href="#">myDewetra</a>
+                                    myDewetra
                                 </h2>
                                 <p class="card-text">Operational Services running at national for Italian Civil Protection in the field of flood monitoring and forest fire forecast.</p>
                                 <p>Main Stakeholder:</p>
@@ -406,10 +426,10 @@
                     </div>
                     <div class="col-lg-6 mb-4">
                         <div class="card h-100">
-                            <a href="#"><img class="card-img-top" src="http://placehold.it/700x400" alt=""></a>
+                            <a href="#"><img class="card-img-top ghsl_screenshot"></a>
                             <div class="card-body">
                                 <h2 class="card-title">
-                                    <a href="#">GHSL</a>
+                                    GHSL
                                 </h2>
                                 <p class="card-text">Testing the portability of the Global Human Settlement Layer on the DIAS using the feature of the WASDI Platform.</p>
                                 <p>Main Stakeholder:</p>
@@ -419,12 +439,13 @@
                     </div>
                     <div class="col-lg-6 mb-4">
                         <div class="card h-100">
-                            <a href="#"><img class="card-img-top" src="http://placehold.it/700x400" alt=""></a>
+                            <a href="#"><img class="card-img-top wapps_screenshot"></a>
                             <div class="card-body">
-                                <h2 class="card-title">
-                                    <a href="#">Wasdi Apps</a>
+                                <h2 class="card-title text-green-wasdi">
+                                    Wasdi Apps
                                 </h2>
-                                <p class="card-text">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Fugit aliquam aperiam nulla perferendis dolor nobis numquam, rem expedita, aliquid optio, alias illum eaque. Non magni, voluptates quae, necessitatibus unde temporibus.</p>
+                                <p class="card-text"> Free and paid apps will be available on the platform, to provide EO experts with more and more specific filters.
+                                </p>
                             </div>
                         </div>
                     </div>
