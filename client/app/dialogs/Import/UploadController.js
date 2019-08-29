@@ -66,7 +66,7 @@ var UploadController = (function() {
                 }
                 else
                 {
-                    var oDialog = utilsVexDialogAlertBottomRightCorner("GURU MEDITATION<br>FILE UPLOADED");
+                    var oDialog = utilsVexDialogAlertBottomRightCorner("FILE UPLOADED");
                     utilsVexCloseDialogAfter(5000,oDialog);
                 }
                 oController.cleanDragAndDrop();

@@ -203,7 +203,7 @@ var WorkspaceController = (function() {
 
         this.m_bIsVisibleFiles = true;
 
-        this.m_oProductService.getProductListByWorkspace(oWorkspaceId).success(function (data, status) {
+        this.m_oProductService.getProductLightListByWorkspace(oWorkspaceId).success(function (data, status) {
             if(!utilsIsObjectNullOrUndefined(data))
             {
                 for (var i =0; i<oController.m_aoProducts.length; i++) {

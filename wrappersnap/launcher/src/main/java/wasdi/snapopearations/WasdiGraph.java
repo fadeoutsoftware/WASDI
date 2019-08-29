@@ -472,7 +472,7 @@ public class WasdiGraph {
         }
         
         if (bAddProductToWS) {
-        	addProductToWorkspace(oProductFile.getAbsolutePath());
+        	addProductToWorkspace(oProductFile.getAbsolutePath(),sBBox);
         }
         else {
         	m_oLogger.error("Product NOT added to the Workspace");
@@ -491,7 +491,7 @@ public class WasdiGraph {
      * Add product to the workspace
      * @throws Exception
      */
-    private void addProductToWorkspace(String sProductName) throws Exception {
+    private void addProductToWorkspace(String sProductName, String sBbox) throws Exception {
     	
 		// Create Repository
 		ProductWorkspaceRepository oProductRepository = new ProductWorkspaceRepository();
@@ -500,12 +500,13 @@ public class WasdiGraph {
 		if (!oProductRepository.ExistsProductWorkspace(sProductName, m_oParams.getWorkspace())) {
 			
     		// Create the entity
-    		ProductWorkspace oProductEntity = new ProductWorkspace();
-    		oProductEntity.setProductName(sProductName);
-    		oProductEntity.setWorkspaceId(m_oParams.getWorkspace());
+    		ProductWorkspace oProductWorkspaceEntity = new ProductWorkspace();
+    		oProductWorkspaceEntity.setProductName(sProductName);
+    		oProductWorkspaceEntity.setWorkspaceId(m_oParams.getWorkspace());
+    		oProductWorkspaceEntity.setBbox(sBbox);
     		
     		// Try to insert
-    		if (!oProductRepository.InsertProductWorkspace(oProductEntity)) {        			
+    		if (!oProductRepository.InsertProductWorkspace(oProductWorkspaceEntity)) {        			
     			m_oLogger.debug("WasdiGraph.addProductToWorkspace:  Error adding " + sProductName + " in WS " + m_oParams.getWorkspace());
     			throw new Exception("unable to insert product in workspace");
     		}
