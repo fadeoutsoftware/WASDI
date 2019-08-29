@@ -340,41 +340,21 @@ public class ProductResource {
 			//PublishedBandsRepository oPublishedBandsRepository = new PublishedBandsRepository();
 
 			// Get Product List
-			List<ProductWorkspace> aoProductWorkspace = oProductWorkspaceRepository
-					.GetProductsByWorkspace(sWorkspaceId);
+			List<ProductWorkspace> aoProductWorkspace = oProductWorkspaceRepository.GetProductsByWorkspace(sWorkspaceId);
 
 			Utils.debugLog("ProductResource.getLightListByWorkspace: found " + aoProductWorkspace.size());
 
 			// For each
 			for (int iProducts = 0; iProducts < aoProductWorkspace.size(); iProducts++) {
-
-				// Get the downloaded file
-				DownloadedFile oDownloaded = oDownloadedFilesRepository.GetDownloadedFileByPath(aoProductWorkspace.get(iProducts).getProductName());
-
-				// Add View model to return list
-				if (oDownloaded != null) {
-
-					ProductViewModel pVM = oDownloaded.getProductViewModel();
-
-					if (pVM != null) {
-						GeorefProductViewModel geoPVM = new GeorefProductViewModel(pVM);
-						geoPVM.setBbox(oDownloaded.getBoundingBox());
-						
-						// Clear all the bands
-						geoPVM.getBandsGroups().getBands().clear();
-
-						geoPVM.setMetadata(null);
-						aoProductList.add(geoPVM);
-
-					} else {
-						Utils.debugLog("ProductResource.getLightListByWorkspace: ProductViewModel is Null: jump product");
-					}
-
-				} else {
-					Utils.debugLog("ProductResource.getLightListByWorkspace: WARNING: the product "
-							+ aoProductWorkspace.get(iProducts).getProductName() + " should be in WS " + sWorkspaceId
-							+ " but is not a Downloaded File");
-				}
+				GeorefProductViewModel oGeoPVM = new GeorefProductViewModel();
+				oGeoPVM.setBbox(aoProductWorkspace.get(iProducts).getBbox());
+				
+				File oFile = new File(aoProductWorkspace.get(iProducts).getProductName());
+				String sName = Utils.GetFileNameWithoutExtension(oFile.getName());
+				oGeoPVM.setProductFriendlyName(sName);
+				oGeoPVM.setName(sName);
+				
+				aoProductList.add(oGeoPVM);
 			}
 		} catch (Exception oEx) {
 			Utils.debugLog("ProductResource.getLightListByWorkspace: " + oEx);
