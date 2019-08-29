@@ -4,7 +4,7 @@
 
 var HomeController = (function() {
     function HomeController($scope, $location, oConstantsService, oAuthService, oRabbitStompService,oState,oAuthServiceFacebook,
-                            oAuthServiceGoogle,oWindow) {
+                            oAuthServiceGoogle,oWindow,$anchorScroll) {
         this.m_oScope = $scope;
         this.m_oLocation  = $location;
         this.m_oConstantsService = oConstantsService;
@@ -13,6 +13,7 @@ var HomeController = (function() {
         this.m_oState = oState;
         this.m_oAuthServiceFacebook = oAuthServiceFacebook;
         this.m_oAuthServiceGoogle = oAuthServiceGoogle;
+        this.m_oAnchorService = $anchorScroll;
 
         this.m_sEmailToRecoverPassword = "";
         this.m_oScope.m_oController=this;
@@ -345,7 +346,8 @@ var HomeController = (function() {
         '$state',
         'AuthServiceFacebook',
         'AuthServiceGoogle',
-        '$window'
+        '$window',
+        '$anchorScroll'
     ];
 
     return HomeController;

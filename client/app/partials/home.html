@@ -8,10 +8,10 @@
                             <a href="#" class="text-green-wasdi"><span class="glyphicon glyphicon-log-in"></span> {{"LOGIN_LINK_FORM"|translate}}</a></li>
                         <li class="link-register pull-right" ng-show="m_oController.m_bVisualizeLink === true" ng-click="m_oController.changeVisibilityLoginRegister('Register')">
                             <a href="#" class="text-green-wasdi"><span class="glyphicon glyphicon-user"></span> {{"LOGIN_LINK_REGISTER"|translate}}</a></li>
-                        <li class="link-login pull-right"> <a href="#enduser" class="text-green-wasdi">END USER</a> </li>
-                        <li class="link-login pull-right"> <a href="#developer"  class="text-green-wasdi">DEVELOPER</a> </li>
-                        <li class="link-login pull-right"> <a href="#eoexpert"  class="text-green-wasdi">EO EXPERT</a> </li>
-                        <li class="link-login pull-right"> <a href="#introwasdi"  class="text-green-wasdi">ABOUT WASDI</a> </li>
+                        <li class="link-login pull-right"> <a href="#enduser" class="text-green-wasdi" ng-click="m_oController.m_oAnchorService('enduser')">END USER</a> </li>
+                        <li class="link-login pull-right"> <a href="#developer"  class="text-green-wasdi" ng-click="m_oController.m_oAnchorService('developer')">DEVELOPER</a> </li>
+                        <li class="link-login pull-right"> <a href="#eoexpert"  class="text-green-wasdi" ng-click="m_oController.m_oAnchorService('eoexpert')">EO EXPERT</a> </li>
+                        <li class="link-login pull-right"> <a href="#introwasdi"  class="text-green-wasdi" ng-click="m_oController.m_oAnchorService('introwasdi')">ABOUT WASDI</a> </li>
                     </ul>
                 </div>
             </nav>
@@ -75,7 +75,7 @@
                     </a>
                 </div>
 
-                <!-- RECOVEY FORM -->
+                <!-- RECOVERY FORM -->
                 <form class="form-signin" name="recoveryForm"  ng-show="m_oController.m_bIsVisibleRecoveryPassword === true">
                     <div>
                         {{"RECOVERY_EMAIL_TITLE"|translate}}
@@ -196,7 +196,7 @@
                 </div>
                 <div class="col-md-6">
                     <h4>Web Advanced Space Developer Interface</h4>
-                    <a class="btn btn-large" href="#introwasdi"> <i class="fa fa-angle-double-down fa-4x animated bounce" aria-hidden="true"></i></a>
+                    <a class="btn btn-large" href="#introwasdi" ng-click="m_oController.m_oAnchorService('introwasdi')"> <i class="fa fa-angle-double-down fa-4x animated bounce" aria-hidden="true"></i></a>
                 </div>
                 <div class="col-md-3">
                     <img  class="loghi_esa_asi img-responsive center-block">
@@ -238,7 +238,7 @@
                             <strong>EO EXPERT</strong>
                         </h4>
 
-                        <a class="btn bg-transparent text-white" href="#eoexpert"> <i class="fa fa-angle-double-down fa-2x animated bounce slow delay-2s" aria-hidden="true""></i></a>
+                        <a class="btn bg-transparent text-white" href="#eoexpert" ng-click="m_oController.m_oAnchorService('eoexpert')"> <i class="fa fa-angle-double-down fa-2x animated bounce slow delay-2s" aria-hidden="true""></i></a>
                     </div>
                     <div class="col-md-4">
 
@@ -247,7 +247,7 @@
                             <strong>DEVELOPER</strong>
                         </h4>
 
-                        <a class="btn bg-transparent text-white" href="#eoexpert"> <i class="fa fa-angle-double-down fa-2x animated bounce delay-3s" aria-hidden="true"></i></a>
+                        <a class="btn bg-transparent text-white" href="#developer" ng-click="m_oController.m_oAnchorService('developer')"> <i class="fa fa-angle-double-down fa-2x animated bounce delay-3s" aria-hidden="true"></i></a>
                     </div>
                     <div class="col-md-4">
 
@@ -256,7 +256,7 @@
                             <strong>END USER</strong>
                         </h4>
 
-                        <a class="btn bg-transparent text-white" href="#eoexpert"> <i class="fa fa-angle-double-down fa-2x animated bounce delay-4s" aria-hidden="true"></i></a>
+                        <a class="btn bg-transparent text-white" href="#enduser" ng-click="m_oController.m_oAnchorService('enduser')"> <i class="fa fa-angle-double-down fa-2x animated bounce delay-4s" aria-hidden="true"></i></a>
                     </div>
                 </div>
 
