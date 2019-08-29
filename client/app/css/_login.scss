@@ -25,10 +25,15 @@
 
     }
 
+    .nav-item a:hover {
+        color: $wasdi-green-logo !important;
+        cursor: pointer;
+    }
 
 
 
-  .login-top
+
+    .login-top
   {
     @extend %login-top-background;
 
@@ -252,11 +257,66 @@
 
     }
   }
-
-}
+ }
 //INIZIO SILVIA
 
  //immagini
+ $edrift_screenshot: url("../assets/img/edrift.png");
+ .edrift_screenshot
+ {
+     content: $edrift_screenshot;
+     width: 700;
+     height: auto;
+ }
+
+ $dewetra_screenshot: url("../assets/img/dewetra.png");
+ .dewetra_screenshot
+ {
+     content: $dewetra_screenshot;
+     width: 700;
+     height: auto;
+ }
+
+ $ghsl_screenshot: url("../assets/img/ghsl.png");
+ .ghsl_screenshot
+ {
+     content: $ghsl_screenshot;
+     width: 700;
+     height: auto;
+ }
+
+ $wapps_screenshot: url("../assets/img/wapps.png");
+ .wapps_screenshot
+ {
+     content: $wapps_screenshot;
+     width: 700;
+     height: auto;
+ }
+
+
+ $slide1: url("../assets/img/wasdi-1.png");
+ .slide1
+ {
+     content: $slide1;
+     width: auto;
+     height: auto;
+ }
+
+ $slide2: url("../assets/img/wasdi-2.png");
+ .slide2
+ {
+     content: $slide2;
+     width: auto;
+     height: auto;
+ }
+
+ $slide3: url("../assets/img/wasdi-3.png");
+ .slide3
+ {
+     content: $slide3;
+     width: auto;
+     height: auto;
+ }
 
  $loghi_esa_asi: url("../assets/img/loghi_esa_asi.png");
  .loghi_esa_asi
@@ -349,6 +409,41 @@
      height: auto;
 
  }
+
+ $alien_user_green_eyes: url("../assets/img/alien-icon-green-eyes.png");
+ .alien_user_green_eyes
+ {
+     content: $alien_user_green_eyes;
+     width: 150px;
+     padding-top: 20px;
+     height: auto;
+
+ }
+
+ $alien_user_green: url("../assets/img/alien-icon-green.png");
+ .alien_user_green
+ {
+     content: $alien_user_green;
+     width: 150px;
+     padding-top: 20px;
+     height: auto;
+
+ }
+
+ .user-change {
+     position: relative;
+     display: inline-block;
+ }
+ .user-change .img-top {
+     display: none;
+     position: absolute;
+     top: 0;
+     left: 0;
+     z-index: 99;
+ }
+ .user-change:hover .img-top {
+     display: inline;
+ }
  .navbar.navbar-inverse {
      background-color: $wasdi-blue-logo;
      border: 0;
@@ -375,21 +470,12 @@
  }
 
  //link
- a:link {
-     color: $wasdi-blue-logo;
- }
 
- a:visited {
-     color: $wasdi-blue-logo;
- }
 
  a:hover {
      color: $wasdi-green-logo;
  }
 
- a:active {
-     color: $wasdi-green-logo;
- }
 
 
 .section_full_height {
