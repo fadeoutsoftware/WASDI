@@ -1,14 +1,14 @@
-function sStatus=wMosaic(Wasdi, asInputFileNames, sOutputFile, dPixelSizeX, dPixelSizeY)
-% Search for EO images
+function sStatus=wMosaic(Wasdi, asInputFileNames, sOutputFile, sNoDataValue, sInputIgnoreValue)
+% Mosaic input images in the output file
 % Syntax
-% sStatus=wMosaic(Wasdi, asInputFileNames, sOutputFile, dPixelSizeX, dPixelSizeY)
+% sStatus=wMosaic(Wasdi, asInputFileNames, sOutputFile, sNoDataValue, sInputIgnoreValue)
 % 
 % INPUT
 %    Wasdi: Wasdi object created after the wasdilib call
 %	 asInputFileNames: Array of input file names
 %	 sOutputFile: Name of the output file
-%	 dPixelSizeX: Pixel X Size
-%	 dPixelSizeY: Pixel Y Size
+%	 sNoDataValue: value to use as no data in the output file
+%	 sInputIgnoreValue: value used as no data in the input file
 %
 % OUTPUT
 %   sStatus: end status of the mosaic operation
@@ -19,7 +19,7 @@ function sStatus=wMosaic(Wasdi, asInputFileNames, sOutputFile, dPixelSizeX, dPix
     return
    end
    
-   sStatus = Wasdi.mosaic(asInputFileNames, sOutputFile, dPixelSizeX, dPixelSizeY);
+   sStatus = Wasdi.mosaic(asInputFileNames, sOutputFile, sNoDataValue, sInputIgnoreValue);
    
    disp(['Mosaic Status: ' sStatus]);
    
