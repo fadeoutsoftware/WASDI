@@ -1,11 +1,13 @@
-function sStatus =wGetProcessStatus(Wasdi, sProcessId)
-% Get the status of a Process
+function sStatus =wImportProduct(Wasdi, sFileUrl, sBoundingBox)
+% Import a product in the active WASDI workspace.
+%
 % Syntax
-% sStatus =wGetProcessStatus(Wasdi, sProcessId);
+% sStatus =wImportProduct(Wasdi,sFileUrl, sBoundingBox);
 % 
 % INPUT
 %    Wasdi: Wasdi object created after the wasdilib call
-%    sProcessId: Id of the process to query 
+%    sFileUrl: File URL as returned by wSearchEOImages
+%	 sBoundingBox: Footprint as returned by wSearchEOImages
 %  
 %
 % OUTPUT
@@ -16,8 +18,8 @@ function sStatus =wGetProcessStatus(Wasdi, sProcessId)
     return
    end
    
-   sStatus = char(Wasdi.getProcessStatus(sProcessId));
+   sStatus = char(Wasdi.importProduct(sFileUrl, sBoundingBox));
    
-   disp(['Process Status ' sStatus]);
+   disp(['Import Product Status ' sStatus]);
 
 end
