@@ -17,6 +17,8 @@ public class MosaicSetting {
 	double northBound = -1.0;
 	double pixelSizeX = -1.0;
 	double pixelSizeY = -1.0;
+	Integer noDataValue = null;
+	Integer inputIgnoreValue = null;
 	String overlappingMethod = "MOSAIC_TYPE_OVERLAY";
 	Boolean showSourceProducts = false;
 	String elevationModelName = "ASTER 1sec GDEM";
@@ -24,6 +26,7 @@ public class MosaicSetting {
 	Boolean updateMode = false;
 	Boolean nativeResolution = true;
 	String combine = "OR";
+	
 	String outputFormat = "GeoTIFF";
 	
 	ArrayList<String> sources = new ArrayList<>();
@@ -132,10 +135,23 @@ public class MosaicSetting {
 	public void setVariableExpressions(ArrayList<String> variableExpressions) {
 		this.variableExpressions = variableExpressions;
 	}
+	
 	public String getOutputFormat() {
 		return outputFormat;
 	}
 	public void setOutputFormat(String outputFormat) {
 		this.outputFormat = outputFormat;
 	}
+	public Integer getNoDataValue() {
+		return noDataValue;
+	}
+	public void setNoDataValue(Integer noDataValue) {
+		this.noDataValue = noDataValue;
+	}
+	public Integer getInputIgnoreValue() {
+		return inputIgnoreValue;
+	}
+	public void setInputIgnoreValue(Integer inputIgnoreValue) {
+		this.inputIgnoreValue = inputIgnoreValue;
+	}	
 }
