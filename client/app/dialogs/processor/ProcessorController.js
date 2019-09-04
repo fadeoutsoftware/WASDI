@@ -25,6 +25,10 @@ var ProcessorController = (function() {
         this.m_sName = "";
         this.m_sDescription = "";
         this.m_sVersion = "";
+        this.m_sJSONSample = "";
+        this.m_aoProcessorTypes = [{'name':'Python 2.7','id':'ubuntu_python_snap'},{'name':'Python 3.7','id':'ubuntu_python37_snap'},{'name':'IDL 3.7.2','id':'ubuntu_idl372'}];
+        this.m_sSelectedType = "";
+        this.m_oPublic = true;
         this.m_oProcessorService = oProcessorService;
 
         var oController = this;
@@ -46,12 +50,14 @@ var ProcessorController = (function() {
             return false;
         }
 
-        var sType = "ubuntu_python_snap";
+        var sType = oController.m_sSelectedType.id;
+        var sPublic = "1";
+        if (oController.m_oPublic === false) sPublic = "0";
 
         var oBody = new FormData();
         oBody.append('file', this.m_oFile[0]);
 
-        this.m_oProcessorService.uploadProcessor(oController.m_oActiveWorkspace.workspaceId,oController.m_sName,oController.m_sVersion, oController.m_sDescription, sType, oBody).success(function (data) {
+        this.m_oProcessorService.uploadProcessor(oController.m_oActiveWorkspace.workspaceId,oController.m_sName,oController.m_sVersion, oController.m_sDescription, sType, oController.m_sJSONSample,sPublic, oBody).success(function (data) {
             var oDialog = utilsVexDialogAlertBottomRightCorner("PROCESSOR UPLOADED<br>IT WILL BE DEPLOYED IN A WHILE");
             utilsVexCloseDialogAfter(4000,oDialog);
         }).error(function (error) {

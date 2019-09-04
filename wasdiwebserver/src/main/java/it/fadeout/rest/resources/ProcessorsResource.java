@@ -70,7 +70,7 @@ public class ProcessorsResource {
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
 	public Response uploadProcessor(@FormDataParam("file") InputStream oInputStreamForFile, @HeaderParam("x-session-token") String sSessionId, 
 			@QueryParam("workspace") String sWorkspaceId, @QueryParam("name") String sName, @QueryParam("version") String sVersion,
-			@QueryParam("description") String sDescription, @QueryParam("type") String sType, @QueryParam("paramsSample") String sParamsSample) throws Exception {
+			@QueryParam("description") String sDescription, @QueryParam("type") String sType, @QueryParam("paramsSample") String sParamsSample, @QueryParam("public") Integer iPublic) throws Exception {
 
 		Utils.debugLog("ProcessorsResource.uploadProcessor( oInputStreamForFile, " + sSessionId + ", " + sWorkspaceId + ", " + sName + ", " + sVersion + 
 				sDescription + ", " + sType + ", " + sParamsSample + " )");
@@ -91,6 +91,10 @@ public class ProcessorsResource {
 				return Response.status(401).build();
 			}
 			
+			if (iPublic == null) {
+				iPublic = new Integer(1);
+			}
+			
 			// Set the processor path
 			String sDownloadRootPath = m_oServletConfig.getInitParameter("DownloadRootPath");
 			if (!sDownloadRootPath.endsWith("/")) {
@@ -101,7 +105,7 @@ public class ProcessorsResource {
 			// Create folders
 			if (!oProcessorPath.exists()) {
 				oProcessorPath.mkdirs();
-			} // TODO: else: it shouldn't exist. Shall we oaverwrite it?
+			} // TODO: else: it shouldn't exist. Shall we overwrite it?
 			
 			// Create file
 			String sProcessorId =  UUID.randomUUID().toString();
@@ -123,7 +127,7 @@ public class ProcessorsResource {
 			// XXX: check it also has a run
 			
 			if (Utils.isNullOrEmpty(sType)) {
-				sType = ProcessorTypes.UBUNTU_PYTHON_SNAP;
+				sType = ProcessorTypes.UBUNTU_PYTHON27_SNAP;
 			}
 			
 			// Create processor entity
@@ -135,6 +139,8 @@ public class ProcessorsResource {
 			oProcessor.setVersion(sVersion);
 			oProcessor.setPort(-1);
 			oProcessor.setType(sType);
+			oProcessor.setIsPublic(iPublic);
+			
 			if (!Utils.isNullOrEmpty(sParamsSample)) {
 				oProcessor.setParameterSample(sParamsSample);
 			}
@@ -211,6 +217,10 @@ public class ProcessorsResource {
 				DeployedProcessorViewModel oVM = new DeployedProcessorViewModel();
 				Processor oProcessor = aoDeployed.get(i);
 				
+				if (oProcessor.getIsPublic() != 1) {
+					if (oProcessor.getUserId().equals(oUser.getUserId()) == false) continue;
+				}
+				
 				oVM.setProcessorDescription(oProcessor.getDescription());
 				oVM.setProcessorId(oProcessor.getProcessorId());
 				oVM.setProcessorName(oProcessor.getName());
@@ -256,6 +266,10 @@ public class ProcessorsResource {
 				Utils.debugLog("ProcessorsResource.run: unable to find processor " + sName);
 				oRunningProcessorViewModel.setStatus("ERROR");
 				return oRunningProcessorViewModel;
+			}
+			
+			if (Utils.isNullOrEmpty(sEncodedJson)) {
+				sEncodedJson = "%7B%7D";
 			}
 
 			// Schedule the process to run the processor

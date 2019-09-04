@@ -41,7 +41,18 @@ public class Processor {
 	 * timeoutMs: 3 hours by default
 	 */
 	private int timeoutMs = 1000*60*60*3;
+	
+	/**
+	 * Flag to know if it is public or not
+	 */
+	private int isPublic = 1;
 		
+	public int getIsPublic() {
+		return isPublic;
+	}
+	public void setIsPublic(int isPublic) {
+		this.isPublic = isPublic;
+	}
 	/**
 	 * Sample JSON Parameter
 	 */

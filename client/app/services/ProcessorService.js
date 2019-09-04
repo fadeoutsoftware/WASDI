@@ -29,15 +29,14 @@ service('ProcessorService', ['ConstantsService','$rootScope','$http', function (
         return this.m_oHttp.get(this.APIURL + '/processors/help?name='+sProcessorName);
     };
 
-    this.uploadProcessor = function (sWorkspaceId, sName, sVersion, sDescription, sType, oBody) {
+    this.uploadProcessor = function (sWorkspaceId, sName, sVersion, sDescription, sType, sJsonSample, sPublic, oBody) {
 
         var oOptions = {
             transformRequest: angular.identity,
             headers: {'Content-Type': undefined}
         };
 
-        return this.m_oHttp.post(this.APIURL + '/processors/uploadprocessor?workspace=' + encodeURI(sWorkspaceId) + '&name=' + encodeURI(sName) + '&version=' + encodeURI(sVersion) +'&description=' + encodeURI(sDescription) + "&type="+sType
-            ,oBody ,oOptions);
+        return this.m_oHttp.post(this.APIURL + '/processors/uploadprocessor?workspace=' + encodeURI(sWorkspaceId) + '&name=' + encodeURI(sName) + '&version=' + encodeURI(sVersion) +'&description=' + encodeURI(sDescription) + "&type="+encodeURI(sType) + "&paramsSample="+encodeURI(sJsonSample)+"&public="+encodeURI(sPublic),oBody ,oOptions);
     }
 
     this.getAllErrorLogs = function(oProcessId){

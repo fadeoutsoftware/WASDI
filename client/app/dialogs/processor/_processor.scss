@@ -19,6 +19,13 @@
           color:$wasdi-green-logo;
         }
 
+          .dropdown-menu-container .dropdown .btn .row .col-plr0 .text {
+              display: block;
+              width: 46vw;
+              overflow: hidden;
+              text-overflow: ellipsis;
+          }
+
       }
       //FOOTER
       .modal-footer
