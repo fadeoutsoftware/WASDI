@@ -19,14 +19,17 @@ public abstract class WasdiProcessorEngine {
 	public static WasdiProcessorEngine GetProcessorEngine(String sType,String sWorkingRootPath, String sDockerTemplatePath) {
 		
 		if (Utils.isNullOrEmpty(sType)) {
-			sType = ProcessorTypes.UBUNTU_PYTHON_SNAP;
+			sType = ProcessorTypes.UBUNTU_PYTHON27_SNAP;
 		}
 		
-		if (sType.equals(ProcessorTypes.UBUNTU_PYTHON_SNAP)) {
+		if (sType.equals(ProcessorTypes.UBUNTU_PYTHON27_SNAP)) {
 			return new UbuntuPythonProcessorEngine(sWorkingRootPath,sDockerTemplatePath);
 		}
 		else if (sType.equals(ProcessorTypes.IDL)) {
 			return new IDLProcessorEngine(sWorkingRootPath,sDockerTemplatePath);
+		}
+		else if (sType.equals(ProcessorTypes.UBUNTU_PYTHON37_SNAP)) {
+			return new UbuntuPython37ProcessorEngine(sWorkingRootPath,sDockerTemplatePath);
 		}
 		else {
 			return new UbuntuPythonProcessorEngine(sWorkingRootPath, sDockerTemplatePath);

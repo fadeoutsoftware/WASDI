@@ -6,6 +6,10 @@ public class UbuntuPythonProcessorEngine extends DockerProcessorEngine {
 
 	public UbuntuPythonProcessorEngine(String sWorkingRootPath, String sDockerTemplatePath) {
 		super(sWorkingRootPath, sDockerTemplatePath);
+		
+		m_sDockerTemplatePath = sDockerTemplatePath;		
+		if (!m_sDockerTemplatePath.endsWith("/")) m_sDockerTemplatePath += "/";
+		m_sDockerTemplatePath += "python27";		
 	}
 
 	@Override

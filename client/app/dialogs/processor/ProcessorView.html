@@ -11,22 +11,41 @@
                     <div class="input-group">
                         <label for="procname">Processor Name</label> <input id="procname" type="text" class="form-control" placeholder="Name" ng-model="m_oController.m_sName"><br/>
                         <label for="procver">Processor Version</label> <input id = "procver" type="text" class="form-control" placeholder="Version" ng-model="m_oController.m_sVersion"><br/>
-                        <label for="procdescr">Processor Description</label> <input id = "procdescr" type="text" class="form-control" placeholder="Description" ng-model="m_oController.m_sDescription"><br/>
+                        <label for="jsonsample">Processor Type</label> <dropdownmenudirective list-of-values="m_oController.m_aoProcessorTypes"
+                                                                                              selected-value="m_oController.m_sSelectedType"
+                                                                                              enable-search-filter="true"
+                                                                                              dropdown-name="'Select Processor Type'"></dropdownmenudirective>
+                        <label for="procdescr">Processor Description</label> <textarea class="form-control h-100" rows="5"  id = "procdescr" ng-model="m_oController.m_sDescription"></textarea><br/>
+                        <label for="jsonsample">JSON Sample</label> <!--input id = "jsonsample" type="text" class="form-control" placeholder="Sample" ng-model="m_oController.m_sJSONSample"--><br/>
+                        <textarea class="form-control h-100" rows="5" id="jsonsample" ng-model="m_oController.m_sJSONSample"></textarea>
+
                     </div>
                     <div class="drag-and-drop ">
-                        Please Drag and Drop here the .zip file with your Python processor (MUST include myProcessor.py)
+
                         <div ngf-drop ngf-select ng-model="m_oController.m_oFile" class="drop-box"
                              ngf-drag-over-class="'dragover'" ngf-multiple="true" ngf-allow-dir="true"
                              accept="application/zip"
                              ngf-pattern="'.zip'">
-
-                            <!-- TODO PAOLO DEVI SOSTITUIRE QUESTA VOCE AL POSTO DI QUELLA VECCHIA accept="application/zip" -->
+                            Please Drag and Drop here the .zip file with your WASDI App
 
                             <div ng-show="m_oController.m_oFile">File: {{m_oController.m_oFile[0].name}}</div>
                         </div>
 
                         <div ngf-no-file-drop>{{"DIALOG_WORKFLOW_DRAG_DROP_NOT_SUPPORTED"|translate}}</div>
                     </div>
+
+                    <!--label for="apppublic">Make App Public</label> <input id="apppublic" type="checkbox" class="form-control" ng-model="m_oController.m_oPublic"-->
+
+                    <div class="form-v4-group">
+                        <i class="fa fa-square-o " aria-hidden="true"
+                           ng-hide = "m_oController.m_oPublic === true"
+                           ng-click = "m_oController.m_oPublic = !m_oController.m_oPublic"></i>
+                        <i class="fa fa-check-square-o " aria-hidden="true"
+                           ng-hide="m_oController.m_oPublic === false"
+                           ng-click = "m_oController.m_oPublic = !m_oController.m_oPublic"></i>
+                        <span>Make Application Public</span>
+                    </div>
+
                 </h4>
 
             </div>

@@ -1346,9 +1346,13 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			if (sFile.toUpperCase().contains("FLOOD")) {
 				sStyle = "DDS_FLOODED_AREAS";
 			}
-			// Hard Coded set Flood Style - STYLES HAS TO BE MANAGED
+			// Hard Coded set NDVI Style - STYLES HAS TO BE MANAGED
 			if (sFile.toUpperCase().contains("NDVI")) {
 				sStyle = "wasdi:NDVI";
+			}
+			// Hard Coded set Burned Areas Style - STYLES HAS TO BE MANAGED
+			if (sFile.toUpperCase().contains("BURNEDAREA")) {
+				sStyle = "burned_areas";
 			}
 			
 			if (Utils.isNullOrEmpty(oParameter.getStyle()) == false) {
