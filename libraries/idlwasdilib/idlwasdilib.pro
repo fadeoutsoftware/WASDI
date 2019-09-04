@@ -106,52 +106,7 @@ PRO STARTWASDI, sConfigFilePath
   ; Close the config file and free the file unit
   FREE_LUN, lun  
   
-  print, 'Wasdi configuration read, try to read params'
-
-  iExistsParametersFile = FILE_TEST(parametersfilepath) 
-  
-  IF (iExistsParametersFile EQ 1) THEN BEGIN
-  
-    sParametersFileLine = ''
-	
-    print, 'Open parameters file ', parametersfilepath
-	openr,lun,parametersfilepath, /GET_LUN
-	
-	; Read the parameters.txt file
-	WHILE NOT EOF(lun) DO BEGIN & $
-	
-		READF, lun, sParametersFileLine & $
-		asKeyValue = STRSPLIT(sParametersFileLine,'=',/EXTRACT)
-		
-		IF (n_elements(asKeyValue) GE 2) THEN BEGIN
-			params[asKeyValue[0]] = asKeyValue[1]
-			
-			IF (verbose EQ '1') THEN BEGIN
-				print, 'parameter added: key=', asKeyValue[0], ' value=', asKeyValue[1]
-			END
-		END
-		
-		IF (n_elements(asKeyValue) EQ 1) THEN BEGIN
-			params[asKeyValue[0]] = !NULL
-			
-			IF (verbose EQ '1') THEN BEGIN
-				print, 'parameter added: key=', asKeyValue[0], ' value=!NULL'
-			END			
-		END
-		
-	ENDWHILE
-	
-    ; Close the config file and free the file unit
-    FREE_LUN, lun  	
-	
-  END ELSE BEGIN
-	IF (verbose EQ '1') THEN BEGIN
-		print, 'parameters file ', parametersfilepath, ' not found'
-	END
-  END
-  
-  ; Open the Config File
-  
+  REFRESHPARAMETERS
   
   print, 'call to init Wasdi'
   
@@ -166,6 +121,59 @@ PRO STARTWASDI, sConfigFilePath
   
   print, 'Wasdi initialized, welcome to space'
       
+END
+
+PRO REFRESHPARAMETERS
+	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive
+	
+	print, 'Wasdi configuration read, try to read params'
+
+	iExistsParametersFile = FILE_TEST(parametersfilepath) 
+  
+	IF (iExistsParametersFile EQ 1) THEN BEGIN
+  
+		sParametersFileLine = ''
+	
+		print, 'Open parameters file ', parametersfilepath
+		openr,lun,parametersfilepath, /GET_LUN
+	
+		; Read the parameters.txt file
+		WHILE NOT EOF(lun) DO BEGIN & $
+	
+			READF, lun, sParametersFileLine & $
+			
+			IF (sParametersFileLine NE !NULL) THEN BEGIN
+				IF (sParametersFileLine NE '') THEN BEGIN
+					asKeyValue = STRSPLIT(sParametersFileLine,'=',/EXTRACT)
+				
+					IF (n_elements(asKeyValue) GE 2) THEN BEGIN
+						params[asKeyValue[0]] = asKeyValue[1]
+						
+						IF (verbose EQ '1') THEN BEGIN
+							print, 'parameter added: key=', asKeyValue[0], ' value=', asKeyValue[1]
+						END
+					END
+					
+					IF (n_elements(asKeyValue) EQ 1) THEN BEGIN
+						params[asKeyValue[0]] = !NULL
+						
+						IF (verbose EQ '1') THEN BEGIN
+							print, 'parameter added: key=', asKeyValue[0], ' value=!NULL'
+						END			
+					END
+				END
+			END
+			
+		ENDWHILE
+	
+		; Close the config file and free the file unit
+		FREE_LUN, lun  	
+	
+	END ELSE BEGIN
+		IF (verbose EQ '1') THEN BEGIN
+			print, 'parameters file ', parametersfilepath, ' not found'
+		END
+	END
 END
 
 ; IDL HTTP GET Function Utility

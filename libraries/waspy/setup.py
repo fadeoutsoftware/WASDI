@@ -6,14 +6,15 @@ Created on 11 Jun 2018
 @author: p.campanella - FadeOut Software
 """
 import setuptools
+import io
 
-with open("README.md", "r") as oFh:
+with io.open("README.md", "r", encoding="utf8") as oFh:
     sLong_description = oFh.read()
 
 
 setuptools.setup(
     name="wasdi",
-    version="0.1.11",
+    version="0.1.14",
     author="FadeOut Software",
     author_email="info@fadeout.biz",
     description="The Wasdi Python library",
@@ -22,6 +23,7 @@ setuptools.setup(
     url="http://www.wasdi.net",
     packages=setuptools.find_packages(),
     classifiers=[
+        "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 2",
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",

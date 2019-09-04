@@ -176,7 +176,7 @@ public class CatalogResources {
 			@QueryParam("workspace") String sWorkspace)
 	{			
 
-		Utils.debugLog("CatalogResources.DownloadEntryByName( " + sSessionId + ", "+ sTokenSessionId + ", " + sFileName);
+		Utils.debugLog("CatalogResources.DownloadEntryByName( " + sSessionId + ", "+ sTokenSessionId + ", " + sFileName + ", " + sWorkspace);
 		
 		try {
 			

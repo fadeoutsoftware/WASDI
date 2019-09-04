@@ -28,7 +28,6 @@ import re
 import time
 import traceback
 import zipfile
-
 import requests
 
 m_sUser = None
@@ -124,6 +123,13 @@ def getParametersDict():
     global m_aoParamsDictionary
     return m_aoParamsDictionary
 
+def setParametersDict(aoParams):
+    """
+    Get the full Params Dictionary
+    :return: a dictionary containing the parameters
+    """
+    global m_aoParamsDictionary
+    m_aoParamsDictionary = aoParams
 
 def addParameter(sKey, oValue):
     """
