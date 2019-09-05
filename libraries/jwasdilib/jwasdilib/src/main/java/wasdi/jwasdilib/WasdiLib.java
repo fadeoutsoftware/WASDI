@@ -54,6 +54,10 @@ public class WasdiLib {
 	 * Wasdi Active Workspace
 	 */
 	private String m_sActiveWorkspace = "";
+	/**
+	 * Wasdi Workspace Owner
+	 */
+	private String m_sWorkspaceOwner = "";	
 	
 	/**
 	 * Wasdi Active Session
@@ -162,7 +166,16 @@ public class WasdiLib {
 	 * @param sActiveWorkspace
 	 */
 	public void setActiveWorkspace(String sActiveWorkspace) {
-		this.m_sActiveWorkspace = sActiveWorkspace;
+		
+		if (!sActiveWorkspace.equals(m_sActiveWorkspace)) {
+			this.m_sActiveWorkspace = sActiveWorkspace;
+			
+			if (m_sActiveWorkspace != null) {
+				if (!m_sActiveWorkspace.equals("")) {
+					m_sWorkspaceOwner = getWorkspaceOwnerByWSId(sActiveWorkspace);
+				}
+			}
+		}
 	}
 
 	/**
@@ -418,6 +431,7 @@ public class WasdiLib {
 					}
 				}
 				else {
+					m_sWorkspaceOwner = getWorkspaceOwnerByWSId(m_sActiveWorkspace);
 					log("Active workspace set " + m_sActiveWorkspace);
 				}
 				
@@ -642,15 +656,77 @@ public class WasdiLib {
 	}
 	
 	/**
+	 * Get User Id of the owner of a Workspace from the name
+     * Return the userId as a String, "" if there is any error
+	 * @param sWorkspaceName Workspace Name
+	 * @return User Id if found, "" if there is any error
+	 */
+	public String getWorkspaceOwnerByName(String sWorkspaceName) {
+		try {
+			String sUrl = m_sBaseUrl + "/ws/byuser";
+		    
+			// Get all the Workspaces
+		    String sResponse = httpGet(sUrl, getStandardHeaders());
+		    List<Map<String, Object>> aoJSONMap = s_oMapper.readValue(sResponse, new TypeReference<List<Map<String,Object>>>(){});
+		    
+		    // Search the one by name
+		    for (Map<String, Object> oWorkspace : aoJSONMap) {
+				if (oWorkspace.get("workspaceName").toString().equals(sWorkspaceName)) {
+					// Found
+					return (String) oWorkspace.get("ownerUserId").toString();
+				}
+			}
+		    
+		    return "";
+		}
+		catch (Exception oEx) {
+			oEx.printStackTrace();
+			return "";
+		}
+	}
+	
+	/**
+	 * Get userId of the owner of a Workspace from the workspace Id
+     * Return the userId as a String, "" if there is any error
+	 * @param WorkspaceId Workspace Id
+	 * @return userId if found, "" if there is any error
+	 */
+	public String getWorkspaceOwnerByWSId(String sWorkspaceId) {
+		try {
+			String sUrl = m_sBaseUrl + "/ws/byuser";
+		    
+			// Get all the Workspaces
+		    String sResponse = httpGet(sUrl, getStandardHeaders());
+		    List<Map<String, Object>> aoJSONMap = s_oMapper.readValue(sResponse, new TypeReference<List<Map<String,Object>>>(){});
+		    
+		    // Search the one by name
+		    for (Map<String, Object> oWorkspace : aoJSONMap) {
+				if (oWorkspace.get("workspaceId").toString().equals(sWorkspaceId)) {
+					// Found
+					return (String) oWorkspace.get("ownerUserId").toString();
+				}
+			}
+		    
+		    return "";
+		}
+		catch (Exception oEx) {
+			oEx.printStackTrace();
+			return "";
+		}
+	}
+	
+	
+	/**
 	 * Open a workspace
 	 * @param sWorkspaceName Workspace name to open
 	 * @return WorkspaceId as a String, '' if there is any error
 	 */
 	public String openWorkspace(String sWorkspaceName) {
 		
-		log("Open Workspace " + m_sActiveWorkspace);
+		log("Open Workspace " + sWorkspaceName);
 		
 		m_sActiveWorkspace = getWorkspaceIdByName(sWorkspaceName);
+		m_sWorkspaceOwner = getWorkspaceOwnerByName(sWorkspaceName);
 		return m_sActiveWorkspace;
 	}
 	
@@ -722,7 +798,7 @@ public class WasdiLib {
 				sFullPath +="/";
 			}
 			
-			sFullPath = sFullPath +m_sUser + "/" + m_sActiveWorkspace + "/" + sProductName;
+			sFullPath = sFullPath +m_sWorkspaceOwner + "/" + m_sActiveWorkspace + "/" + sProductName;
 			
 			if (m_bIsOnServer==false) {
 				File oFile = new File(sFullPath);
@@ -806,7 +882,7 @@ public class WasdiLib {
 				sFullPath +="/";
 			}
 			
-			sFullPath = sFullPath +m_sUser + "/" + m_sActiveWorkspace + "/";
+			sFullPath = sFullPath +m_sWorkspaceOwner + "/" + m_sActiveWorkspace + "/";
 			
 			return sFullPath;
 		}

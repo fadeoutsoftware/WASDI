@@ -8,6 +8,9 @@ public class DeployedProcessorViewModel {
 	private String imgLink;
 	private String publisher;
 	private String paramsSample = "";
+	private int isPublic = 0;
+	private int iTimeoutMs = 1000*60*60*3;
+	private String type = "";
 	
 	public String getParamsSample() {
 		return paramsSample;
@@ -51,4 +54,23 @@ public class DeployedProcessorViewModel {
 	public void setProcessorDescription(String processorDescription) {
 		this.processorDescription = processorDescription;
 	}
+	public int getIsPublic() {
+		return isPublic;
+	}
+	public void setIsPublic(int isPublic) {
+		this.isPublic = isPublic;
+	}
+	public String getType() {
+		return type;
+	}
+	public void setType(String type) {
+		this.type = type;
+	}
+	public int getiTimeoutMs() {
+		return iTimeoutMs;
+	}
+	public void setiTimeoutMs(int iTimeoutMs) {
+		this.iTimeoutMs = iTimeoutMs;
+	}
+	
 }

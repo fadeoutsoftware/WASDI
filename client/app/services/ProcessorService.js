@@ -25,6 +25,19 @@ service('ProcessorService', ['ConstantsService','$rootScope','$http', function (
         return this.m_oHttp.get(this.APIURL + '/processors/run?name='+sProcessorName+'&encodedJson='+ sEncodedJSON+'&workspace='+sWorkspaceId);
     };
 
+    this.deleteProcessor = function (sProcessorId) {
+
+        var sWorkspaceId = this.m_oConstantsService.getActiveWorkspace();
+
+        if (utilsIsObjectNullOrUndefined(sWorkspaceId) == false) {
+            sWorkspaceId = sWorkspaceId.workspaceId;
+        }
+        else {
+            sWorkspaceId = "-";
+        }
+        return this.m_oHttp.get(this.APIURL + '/processors/delete?processorId='+sProcessorId+'&workspace='+sWorkspaceId);
+    };
+
     this.getHelpFromProcessor = function (sProcessorName, sJSON) {
         return this.m_oHttp.get(this.APIURL + '/processors/help?name='+sProcessorName);
     };
@@ -37,7 +50,7 @@ service('ProcessorService', ['ConstantsService','$rootScope','$http', function (
         };
 
         return this.m_oHttp.post(this.APIURL + '/processors/uploadprocessor?workspace=' + encodeURI(sWorkspaceId) + '&name=' + encodeURI(sName) + '&version=' + encodeURI(sVersion) +'&description=' + encodeURI(sDescription) + "&type="+encodeURI(sType) + "&paramsSample="+encodeURI(sJsonSample)+"&public="+encodeURI(sPublic),oBody ,oOptions);
-    }
+    };
 
     this.getAllErrorLogs = function(oProcessId){
 
@@ -52,5 +65,20 @@ service('ProcessorService', ['ConstantsService','$rootScope','$http', function (
     this.getLogs = function(oProcessId,iStartRow,iEndRow)
     {
         return this.m_oHttp.get(this.APIURL + '/processors/logs/list?processworkspace='+oProcessId + '&startrow=' + iStartRow + '&endrow=' + iEndRow);
+    };
+
+    this.updateProcessor = function (sWorkspaceId, sProcessorId, oBody) {
+
+        return this.m_oHttp.post(this.APIURL + '/processors/update?workspace=' + encodeURI(sWorkspaceId) + '&processorId=' + encodeURI(sProcessorId),oBody);
+    };
+
+    this.updateProcessorFiles = function (sWorkspaceId, sProcessorId, oBody) {
+
+        var oOptions = {
+            transformRequest: angular.identity,
+            headers: {'Content-Type': undefined}
+        };
+
+        return this.m_oHttp.post(this.APIURL + '/processors/updatefiles?workspace=' + encodeURI(sWorkspaceId) + '&processorId=' + encodeURI(sProcessorId),oBody ,oOptions);
     };
 }]);

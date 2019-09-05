@@ -17,11 +17,17 @@
         this.m_iCurrentPage = 1;
         this.m_iNumberOfLogs = 0;
         this.m_iNumberOfLogsPerPage = 10;
+        this.m_oController = this;
 
 
         var oController = this;
 
         $scope.close = function(result) {
+            // Make sure that the interval is destroyed too
+            if (angular.isDefined($scope.m_oController.m_oTick)) {
+                $interval.cancel($scope.m_oController.m_oTick);
+                $scope.m_oController.m_oTick = undefined;
+            }
             oClose(result, 500); // close, but give 500ms for bootstrap to animate
         };
 

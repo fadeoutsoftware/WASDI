@@ -2,6 +2,7 @@ package it.fadeout.rest.resources;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -12,6 +13,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 import javax.servlet.ServletConfig;
 import javax.ws.rs.Consumes;
@@ -227,6 +230,9 @@ public class ProcessorsResource {
 				oVM.setProcessorVersion(oProcessor.getVersion());
 				oVM.setPublisher(oProcessor.getUserId());
 				oVM.setParamsSample(oProcessor.getParameterSample());
+				oVM.setIsPublic(oProcessor.getIsPublic());
+				oVM.setType(oProcessor.getType());
+				oVM.setiTimeoutMs(oProcessor.getTimeoutMs());
 				
 				aoRet.add(oVM);
 			}
@@ -637,6 +643,11 @@ public class ProcessorsResource {
 				Utils.debugLog("ProcessorsResource.deleteProcessor: unable to find processor " + sProcessorId);
 				return Response.serverError().build();
 			}
+			
+			if (!oProcessorToDelete.getUserId().equals(oUser.getUserId())) {
+				Utils.debugLog("ProcessorsResource.deleteProcessor: processor not of user " + oProcessorToDelete.getUserId());
+				return Response.status(Status.UNAUTHORIZED).build();
+			}
 
 			// Schedule the process to run the processor
 			
@@ -692,4 +703,208 @@ public class ProcessorsResource {
 			return Response.serverError().build();
 		}
 	}
+	
+	
+	
+	
+	
+	
+	@POST
+	@Path("/update")
+	public Response updateProcessor(DeployedProcessorViewModel oUpdatedProcessorVM, @HeaderParam("x-session-token") String sSessionId,
+			@QueryParam("processorId") String sProcessorId,
+			@QueryParam("workspaceId") String sWorkspaceId) {
+		
+		Utils.debugLog("ProcessorResources.updateProcessor( " + sSessionId + ", " + sProcessorId + ", " + sWorkspaceId + " )");
+		
+		try {
+			if (Utils.isNullOrEmpty(sSessionId)) return Response.status(Status.UNAUTHORIZED).build();
+			User oUser = Wasdi.GetUserFromSession(sSessionId);
+
+			if (oUser==null) return Response.status(Status.UNAUTHORIZED).build();
+			if (Utils.isNullOrEmpty(oUser.getUserId())) return Response.status(Status.UNAUTHORIZED).build();
+
+			String sUserId = oUser.getUserId();
+			
+			Utils.debugLog("ProcessorsResource.updateProcessor: get Processor " + sProcessorId);	
+			ProcessorRepository oProcessorRepository = new ProcessorRepository();
+			Processor oProcessorToUpdate = oProcessorRepository.GetProcessor(sProcessorId);
+			
+			if (oProcessorToUpdate == null) {
+				Utils.debugLog("ProcessorsResource.updateProcessor: unable to find processor " + sProcessorId);
+				return Response.serverError().build();
+			}
+			
+			if (!oProcessorToUpdate.getUserId().equals(oUser.getUserId())) {
+				Utils.debugLog("ProcessorsResource.updateProcessor: processor not of user " + oProcessorToUpdate.getUserId());
+				return Response.status(Status.UNAUTHORIZED).build();
+			}
+
+			oProcessorToUpdate.setDescription(oUpdatedProcessorVM.getProcessorDescription());
+			oProcessorToUpdate.setIsPublic(oUpdatedProcessorVM.getIsPublic());
+			oProcessorToUpdate.setParameterSample(oUpdatedProcessorVM.getParamsSample());
+			oProcessorToUpdate.setTimeoutMs(oUpdatedProcessorVM.getiTimeoutMs());
+			oProcessorToUpdate.setVersion(oUpdatedProcessorVM.getProcessorVersion());
+			
+			oProcessorRepository.UpdateProcessor(oProcessorToUpdate);
+			
+			Utils.debugLog("ProcessorsResource.updateProcessor: Updated Processor " + sProcessorId);
+			
+			return Response.ok().build();
+		}
+		catch (Exception oEx) {
+			Utils.debugLog("ProcessorResource.deleteProcessor: " + oEx);
+			return Response.serverError().build();
+		}
+	}	
+	
+	
+	@POST
+	@Path("/updatefiles")
+	@Consumes(MediaType.MULTIPART_FORM_DATA)
+	public Response updateProcessorFiles(@FormDataParam("file") InputStream oInputStreamForFile, @HeaderParam("x-session-token") String sSessionId, 
+			@QueryParam("processorId") String sProcessorId,
+			@QueryParam("workspace") String sWorkspaceId) throws Exception {
+
+		Utils.debugLog("ProcessorsResource.updateProcessorFiles( oInputStreamForFile, " + sSessionId + ", " + sWorkspaceId + ", " + sProcessorId + " )");
+		try {
+			// Check User 
+			if (Utils.isNullOrEmpty(sSessionId)) {
+				Utils.debugLog("ProcessorsResource.updateProcessorFiles: session is null or empty, aborting");
+				return Response.status(401).build();
+			}
+			User oUser = Wasdi.GetUserFromSession(sSessionId);
+			if (oUser==null) {
+				Utils.debugLog("ProcessorsResource.updateProcessorFiles: user (from session) is null, aborting");
+				return Response.status(401).build();
+			}
+			
+			String sUserId = oUser.getUserId();
+			if (Utils.isNullOrEmpty(sUserId)) {
+				Utils.debugLog("ProcessorsResource.updateProcessorFiles: userid of user (from session) is null or empty, aborting");
+				return Response.status(401).build();
+			}
+			
+			ProcessorRepository oProcessorRepository = new ProcessorRepository();
+			Processor oProcessorToUpdate = oProcessorRepository.GetProcessor(sProcessorId);
+			
+			if (oProcessorToUpdate == null) {
+				Utils.debugLog("ProcessorsResource.updateProcessor: unable to find processor " + sProcessorId);
+				return Response.serverError().build();
+			}
+			
+			if (!oProcessorToUpdate.getUserId().equals(oUser.getUserId())) {
+				Utils.debugLog("ProcessorsResource.updateProcessor: processor not of user " + oProcessorToUpdate.getUserId());
+				return Response.status(Status.UNAUTHORIZED).build();
+			}
+			
+			// Set the processor path
+			String sDownloadRootPath = m_oServletConfig.getInitParameter("DownloadRootPath");
+			if (!sDownloadRootPath.endsWith("/")) {
+				sDownloadRootPath = sDownloadRootPath + "/";
+			}
+			File oProcessorPath = new File(sDownloadRootPath+ "/processors/" + oProcessorToUpdate.getName());
+			
+			// Create folders
+			if (!oProcessorPath.exists()) {
+				Utils.debugLog("ProcessorsResource.updateProcessorFiles: Processor Path " + oProcessorPath.getPath() + " does not exists. No update");
+				return Response.serverError().build();
+			}
+			
+			// Create file
+			File oProcessorFile = new File(sDownloadRootPath+"/processors/" + oProcessorToUpdate.getName() + "/" + sProcessorId + ".zip");
+			Utils.debugLog("ProcessorsResource.updateProcessorFiles: Processor file Path: " + oProcessorFile.getPath());
+			
+			//save uploaded file
+			int iRead = 0;
+			byte[] ayBytes = new byte[1024];
+			OutputStream oOutputStream = new FileOutputStream(oProcessorFile);
+			while ((iRead = oInputStreamForFile.read(ayBytes)) != -1) {
+				oOutputStream.write(ayBytes, 0, iRead);
+			}
+			oOutputStream.flush();
+			oOutputStream.close();
+			
+			Utils.debugLog("ProcessorsResource.updateProcessorFiles: unzipping the file");
+			
+			if (UnzipProcessor(oProcessorFile)) {
+				Utils.debugLog("ProcessorsResource.updateProcessorFiles: update done");
+			}
+			else {
+				Utils.debugLog("ProcessorsResource.updateProcessorFiles: error in unzip");
+				return Response.serverError().build();
+			}
+
+		}
+		catch (Exception oEx) {
+			Utils.debugLog("ProcessorsResource.updateProcessorFiles:" + oEx);
+			return Response.serverError().build();
+		}
+		return Response.ok().build();
+	}	
+	
+	public boolean UnzipProcessor(File oProcessorZipFile) {
+		try {
+						
+			// Unzip the file and, meanwhile, check if a pro file with the same name exists
+			String sProcessorFolder = oProcessorZipFile.getParent();
+			sProcessorFolder += "/";
+			
+			byte[] ayBuffer = new byte[1024];
+		    ZipInputStream oZipInputStream = new ZipInputStream(new FileInputStream(oProcessorZipFile));
+		    ZipEntry oZipEntry = oZipInputStream.getNextEntry();
+		    while(oZipEntry != null){
+		    	
+		    	String sZippedFileName = oZipEntry.getName();
+		    	
+		    	if (sZippedFileName.toUpperCase().endsWith(".PRO")) {
+		    		
+		    		// Force extension case
+		    	
+		    		sZippedFileName = sZippedFileName.replace(".Pro", ".pro");
+		    		sZippedFileName = sZippedFileName.replace(".PRO", ".pro");
+		    		sZippedFileName = sZippedFileName.replace(".PRo", ".pro");
+		    	}
+		    	
+		    	String sUnzipFilePath = sProcessorFolder+sZippedFileName;
+		    	
+		    	if (oZipEntry.isDirectory()) {
+		    		File oUnzippedDir = new File(sUnzipFilePath);
+	                oUnzippedDir.mkdir();
+		    	}
+		    	else {
+			    	
+			        File oUnzippedFile = new File(sProcessorFolder + sZippedFileName);
+			        FileOutputStream oOutputStream = new FileOutputStream(oUnzippedFile);
+			        int iLen;
+			        while ((iLen = oZipInputStream.read(ayBuffer)) > 0) {
+			        	oOutputStream.write(ayBuffer, 0, iLen);
+			        }
+			        oOutputStream.close();		    		
+		    	}
+		        oZipEntry = oZipInputStream.getNextEntry();
+	        }
+		    oZipInputStream.closeEntry();
+		    oZipInputStream.close();
+		    
+		    
+		    try {
+			    // Remove the zip?
+			    oProcessorZipFile.delete();		    	
+		    }
+		    catch (Exception e) {
+				Utils.debugLog("ProcessorsResource.UnzipProcessor Exception Deleting Zip File " + e.toString());
+				return false;
+			}
+		    
+		}
+		catch (Exception oEx) {
+			Utils.debugLog("ProcessorsResource.DeployProcessor Exception " + oEx.toString());
+			return false;
+		}
+		
+		return true;
+	}
+	
+	
 }
