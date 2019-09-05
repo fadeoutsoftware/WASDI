@@ -102,6 +102,15 @@
                 .my-button {
                     padding: 10px 20px;
                 }
+
+                .wapps-button {
+                    border: none;
+                    background: transparent;
+                    float:right;
+                    &:hover{
+                        color: $wasdi-green-logo;
+                    }
+                }
             }
 
             //FOOTER

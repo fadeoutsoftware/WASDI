@@ -27,11 +27,14 @@ import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.business.Processor;
 import wasdi.shared.business.Workspace;
+import wasdi.shared.business.WorkspaceSharing;
 import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.data.ProcessorRepository;
 import wasdi.shared.data.WorkspaceRepository;
+import wasdi.shared.data.WorkspaceSharingRepository;
 import wasdi.shared.parameters.ProcessorParameter;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.viewmodels.WorkspaceListInfoViewModel;
 
 public class IDLProcessorEngine extends WasdiProcessorEngine{
 	
@@ -309,6 +312,35 @@ public class IDLProcessorEngine extends WasdiProcessorEngine{
 				}
 			}
 			
+			// Check if it is a shared workspace
+			if (Utils.isNullOrEmpty(sWorkspaceName)) {
+				
+				WorkspaceSharingRepository oWorkspaceSharingRepository = new WorkspaceSharingRepository();
+				// Get the list of workspace shared with this user
+				List<WorkspaceSharing> aoSharedWorkspaces = oWorkspaceSharingRepository
+						.GetWorkspaceSharingByUser(oParameter.getUserId());
+
+				if (aoSharedWorkspaces.size() > 0) {
+					// For each
+					for (int iWorkspaces = 0; iWorkspaces < aoSharedWorkspaces.size(); iWorkspaces++) {
+
+						// Create View Model
+						Workspace oWorkspace = oWorkspaceRepository.GetWorkspace(aoSharedWorkspaces.get(iWorkspaces).getWorkspaceId());
+
+						if (oWorkspace == null) {
+							Utils.debugLog("IDLProcessorEngine.run: WS Shared not available " + aoSharedWorkspaces.get(iWorkspaces).getWorkspaceId());
+							continue;
+						}
+						
+						if (oWorkspace.getWorkspaceId().equals(oParameter.getWorkspace())) {
+							sWorkspaceName = oWorkspace.getName();
+							break;
+						}						
+
+					}
+				}				
+			}
+			
 			// Write Param and Config file
 			String sConfigFile = sProcessorFolder + "config.properties";
 			String sParamFile = sProcessorFolder + "params.txt";
@@ -461,9 +493,17 @@ public class IDLProcessorEngine extends WasdiProcessorEngine{
 			
 			// Check processor
 			if (oProcessor == null) { 
-				LauncherMain.s_oLogger.error("IDLProcessorEngine.delete: oProcessor is null [" + sProcessorId +"]");
+				LauncherMain.s_oLogger.error("IDLProcessorEngine.delete: oProcessor is null [" + sProcessorId +"]. Exit");
 				return false;
 			}
+			
+			if (!oParameter.getUserId().equals(oProcessor.getUserId())) {
+				LauncherMain.s_oLogger.error("IDLProcessorEngine.delete: oProcessor is not of user [" + oParameter.getUserId() +"]. Exit");
+				return false;
+				
+			}
+			
+			LauncherMain.s_oLogger.error("IDLProcessorEngine.delete: Deleting Processor " + oProcessor.getName() + " of User " + oProcessor.getUserId());
 			
 			// delete the folder
 			
@@ -473,10 +513,12 @@ public class IDLProcessorEngine extends WasdiProcessorEngine{
 			
 			String sProcessorFolder = sDownloadRootPath+ "/processors/" + sProcessorName + "/" ;
 			
+			LauncherMain.s_oLogger.error("IDLProcessorEngine.delete: Deleting Processor Folder");
 			File oProcessorFolder = new File(sProcessorFolder);
 			FileUtils.deleteDirectory(oProcessorFolder);
 			LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 66);
 			
+			LauncherMain.s_oLogger.error("IDLProcessorEngine.delete: Deleting Processor Db Entry");
 			// delete the db entry
 			oProcessorRepository.DeleteProcessor(oProcessor.getProcessorId());
 			

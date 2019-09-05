@@ -2,25 +2,25 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <!-- HEADER -->
-            <div class=" modal-header">
-                Upload New WASDI App
+            <div class="modal-header" >
+                WASDI App
             </div>
             <!-- BODY -->
             <div class="modal-body ">
                 <h4>
-                    <div class="input-group">
-                        <label for="procname">Processor Name</label> <input id="procname" type="text" class="form-control" placeholder="Name" ng-model="m_oController.m_sName"><br/>
-                        <label for="procver">Processor Version</label> <input id = "procver" type="text" class="form-control" placeholder="Version" ng-model="m_oController.m_sVersion"><br/>
-                        <label for="jsonsample">Processor Type</label> <dropdownmenudirective list-of-values="m_oController.m_aoProcessorTypes"
+                    <div class="input-group" style="width: 100%">
+                        <label for="procname">Processor Name</label> <input id="procname" ng-readonly="m_oController.m_bEditMode" type="text" class="form-control" placeholder="Name" ng-model="m_oController.m_sName"><br/>
+                        <!--label for="procver">Processor Version</label> <input id = "procver" type="text" class="form-control" placeholder="Version" ng-model="m_oController.m_sVersion"><br/-->
+                        <label>Processor Type</label> <div ng-show="!m_oController.m_bEditMode"> <dropdownmenudirective  list-of-values="m_oController.m_aoProcessorTypes"
                                                                                               selected-value="m_oController.m_sSelectedType"
                                                                                               enable-search-filter="true"
-                                                                                              dropdown-name="'Select Processor Type'"></dropdownmenudirective>
+                                                                                              dropdown-name="'Select Processor Type'"></dropdownmenudirective></div>
+                        <input id="typeread" ng-readonly="m_oController.m_bEditMode" ng-show="m_oController.m_bEditMode" type="text" class="form-control" placeholder="Name" ng-model="m_oController.m_sTypeNameOnly"><br/>
                         <label for="procdescr">Processor Description</label> <textarea class="form-control h-100" rows="5"  id = "procdescr" ng-model="m_oController.m_sDescription"></textarea><br/>
                         <label for="jsonsample">JSON Sample</label> <!--input id = "jsonsample" type="text" class="form-control" placeholder="Sample" ng-model="m_oController.m_sJSONSample"--><br/>
                         <textarea class="form-control h-100" rows="5" id="jsonsample" ng-model="m_oController.m_sJSONSample"></textarea>
-
                     </div>
-                    <div class="drag-and-drop ">
+                    <div class="drag-and-drop " ng-show="m_oController.showDragAndDrop()">
 
                         <div ngf-drop ngf-select ng-model="m_oController.m_oFile" class="drop-box"
                              ngf-drag-over-class="'dragover'" ngf-multiple="true" ngf-allow-dir="true"
@@ -34,7 +34,12 @@
                         <div ngf-no-file-drop>{{"DIALOG_WORKFLOW_DRAG_DROP_NOT_SUPPORTED"|translate}}</div>
                     </div>
 
-                    <!--label for="apppublic">Make App Public</label> <input id="apppublic" type="checkbox" class="form-control" ng-model="m_oController.m_oPublic"-->
+                    <div ng-show="!m_oController.showDragAndDrop()">
+                        <br>File Update is available only for IDL Processors.
+                        <br>To update the code of a Python App delete the old app and deploy a new one.
+                        <br>
+                    </div>
+
 
                     <div class="form-v4-group">
                         <i class="fa fa-square-o " aria-hidden="true"

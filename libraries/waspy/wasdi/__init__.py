@@ -34,6 +34,7 @@ m_sUser = None
 m_sPassword = None
 
 m_sActiveWorkspace = None
+m_sWorkspaceOwner = ''
 
 m_sParametersFilePath = None
 m_sSessionId = ''
@@ -54,6 +55,7 @@ def printStatus():
     """Prints status
     """
     global m_sActiveWorkspace
+    global m_sWorkspaceOwner
     global m_sParametersFilePath
     global m_sSessionId
     global m_sBasePath
@@ -70,6 +72,7 @@ def printStatus():
     _log('[INFO] waspy.printStatus: password: ***********')
     _log('[INFO] waspy.printStatus: session id: ' + str(getSessionId()))
     _log('[INFO] waspy.printStatus: active workspace: ' + str(getActiveWorkspaceId()))
+    _log('[INFO] waspy.printStatus: workspace owner: ' + str(m_sWorkspaceOwner))
     _log('[INFO] waspy.printStatus: parameters file path: ' + str(getParametersFilePath()))
     _log('[INFO] waspy.printStatus: base path: ' + str(getBasePath()))
     _log('[INFO] waspy.printStatus: download active: ' + str(getDownloadActive()))
@@ -593,6 +596,58 @@ def getWorkspaceIdByName(sName):
 
     return ''
 
+def getWorkspaceOwnerByName(sName):
+    """
+    Get user Id of the owner of Workspace from the name
+    Return the userId as a String, '' if there is any error
+    """
+    global m_sBaseUrl
+    global m_sSessionId
+
+    asHeaders = _getStandardHeaders()
+
+    sUrl = m_sBaseUrl + '/ws/byuser'
+
+    oResult = requests.get(sUrl, headers=asHeaders)
+
+    if (oResult is not None) and (oResult.ok is True):
+        oJsonResult = oResult.json()
+
+        for oWorkspace in oJsonResult:
+            try:
+                if oWorkspace['workspaceName'] == sName:
+                    return oWorkspace['ownerUserId']
+            except:
+                return ''
+
+    return ''
+
+def getWorkspaceOwnerByWsId(sWsId):
+    """
+    Get user Id of the owner of Workspace from the Workspace Id
+    Return the userId as a String, '' if there is any error
+    """
+    global m_sBaseUrl
+    global m_sSessionId
+
+    asHeaders = _getStandardHeaders()
+
+    sUrl = m_sBaseUrl + '/ws/byuser'
+
+    oResult = requests.get(sUrl, headers=asHeaders)
+
+    if (oResult is not None) and (oResult.ok is True):
+        oJsonResult = oResult.json()
+
+        for oWorkspace in oJsonResult:
+            try:
+                if oWorkspace['workspaceId'] == sWsId:
+                    return oWorkspace['ownerUserId']
+            except:
+                return ''
+
+    return ''
+
 
 def openWorkspaceById(sWorkspaceId):
     """
@@ -600,7 +655,11 @@ def openWorkspaceById(sWorkspaceId):
     return the WorkspaceId as a String, '' if there is any error
     """
     global m_sActiveWorkspace
+    global m_sWorkspaceOwner
+    
     m_sActiveWorkspace = sWorkspaceId
+    m_sWorkspaceOwner = getWorkspaceOwnerByWsId(sWorkspaceId)
+    
     return m_sActiveWorkspace
 
 
@@ -624,7 +683,11 @@ def openWorkspace(sWorkspaceName):
     return the WorkspaceId as a String, '' if there is any error
     """
     global m_sActiveWorkspace
+    global m_sWorkspaceOwner
+    
     m_sActiveWorkspace = getWorkspaceIdByName(sWorkspaceName)
+    m_sWorkspaceOwner = getWorkspaceOwnerByName(sWorkspaceName)
+    
     return m_sActiveWorkspace
 
 
@@ -694,7 +757,7 @@ def getFullProductPath(sProductName):
     else:
         sFullPath = m_sBasePath
 
-    sFullPath = os.path.join(sFullPath, m_sUser, m_sActiveWorkspace, sProductName)
+    sFullPath = os.path.join(sFullPath, m_sWorkspaceOwner, m_sActiveWorkspace, sProductName)
 
     if m_bIsOnServer is False:
         if m_bDownloadActive is True:
@@ -720,7 +783,7 @@ def getSavePath():
         sFullPath = m_sBasePath
 
     # empty string at the ends adds a final separator
-    sFullPath = os.path.join(sFullPath, m_sUser, m_sActiveWorkspace, "")
+    sFullPath = os.path.join(sFullPath, m_sWorkspaceOwner, m_sActiveWorkspace, "")
 
     return sFullPath
 

@@ -2237,7 +2237,7 @@ var EditorController = (function () {
             controller: "ProcessorController",
             inputs: {
                 extras: {
-                    products:oController.m_aoProducts
+                    processor:null
                 }
             }
         }).then(function (modal) {

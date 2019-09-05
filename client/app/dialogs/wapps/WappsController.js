@@ -5,7 +5,7 @@
 
 var WappsController = (function() {
 
-    function WappsController($scope, oClose,oExtras,oWorkspaceService,oProductService, oProcessorService) {
+    function WappsController($scope, oClose,oExtras,oWorkspaceService,oProductService, oProcessorService,oConstantsService, oModalService) {
         //MEMBERS
         this.m_oScope = $scope;
         this.m_oScope.m_oController = this;
@@ -21,6 +21,8 @@ var WappsController = (function() {
         this.m_bIsJsonEditModeActive = false;
         this.myJson = {};
         this.m_sMyJsonString = "";
+        this.m_oModalService = oModalService;
+        this.m_oConstantsService = oConstantsService;
         var oController = this;
         $scope.close = function(result) {
             oClose(result, 300); // close, but give 500ms for bootstrap to animate
@@ -142,6 +144,43 @@ var WappsController = (function() {
 
     };
 
+    WappsController.prototype.deleteClick= function(oProcessor) {
+        if(utilsIsObjectNullOrUndefined(oProcessor) === true)
+        {
+            return false;
+        }
+        var oController = this;
+        var oReturnFunctionValue = function(oValue){
+            if (oValue === true)
+            {
+                oController.m_oProcessorService.deleteProcessor(oProcessor.processorId);
+                oController.getProcessorsList();
+            }
+        }
+
+        utilsVexDialogConfirm("Are you SURE you want to delete the Processor: " + oProcessor.processorName + " ?", oReturnFunctionValue);
+    };
+
+    WappsController.prototype.editClick= function(oProcessor) {
+        var oController = this;
+
+        oController.m_oModalService.showModal({
+            templateUrl: "dialogs/processor/ProcessorView.html",
+            controller: "ProcessorController",
+            inputs: {
+                extras: {
+                    processor:oProcessor
+                }
+            }
+        }).then(function (modal) {
+            modal.element.modal();
+            modal.close.then(function (oResult) {
+                //oController.m_oProcessesLaunchedService.loadProcessesFromServer(oController.m_oActiveWorkspace.workspaceId);
+            });
+        });
+
+    }
+
     WappsController.prototype.getProcessorNameAsTitle = function(){
         if( this._selectedProcessor ){
             return this._selectedProcessor.processorName;
@@ -207,8 +246,9 @@ var WappsController = (function() {
         'extras',
         'WorkspaceService',
         'ProductService',
-        'ProcessorService'
-
+        'ProcessorService',
+        'ConstantsService',
+        'ModalService'
     ];
     return WappsController;
 })();

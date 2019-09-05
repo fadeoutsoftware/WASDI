@@ -161,6 +161,16 @@ service('ConstantsService', [function () {
 
         return this.m_oUser;
     }
+
+    this.getUserId = function () {
+        // check if there is the user
+        if(utilsIsObjectNullOrUndefined(this.m_oUser) )
+        {
+            return "";
+        }
+
+        return this.m_oUser.userId;
+    }
     this.isUserLogged = function () {
 
         if (angular.isUndefined(this.m_oUser) || this.m_oUser == null) return false;
