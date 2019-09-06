@@ -4,14 +4,14 @@
             <nav class="navbar navbar-inverse bg_bluewasdi">
                 <div class="container-fluid">
                     <ul class="nav navbar-nav navbar-right">
-                        <li class="link-login pull-right nav-item" ng-show="m_oController.m_bVisualizeLink === true" ng-click="m_oController.changeVisibilityLoginRegister('Login')">
+                        <li class="link-login pull-right nav-item link-login-first" ng-show="m_oController.m_bVisualizeLink === true" ng-click="m_oController.changeVisibilityLoginRegister('Login')">
                             <a href="#" class="text-white"><span class="glyphicon glyphicon-log-in"></span> {{"LOGIN_LINK_FORM"|translate}}</a></li>
-                        <li class="link-register pull-right  nav-item" ng-show="m_oController.m_bVisualizeLink === true" ng-click="m_oController.changeVisibilityLoginRegister('Register')">
-                            <a href="#" class="text-white"><span class="glyphicon glyphicon-user"></span> {{"LOGIN_LINK_REGISTER"|translate}}</a></li>
-                        <li class="link-login pull-right  nav-item"> <a href="#enduser" class="text-white" ng-click="m_oController.m_oAnchorService('enduser')">USER STORIES</a> </li>
-                        <li class="link-login pull-right  nav-item"> <a href="#developer"  class="text-white" ng-click="m_oController.m_oAnchorService('developer')">DEVELOPER</a> </li>
-                        <li class="link-login pull-right  nav-item"> <a href="#eoexpert"  class="text-white" ng-click="m_oController.m_oAnchorService('eoexpert')">EO EXPERT</a> </li>
-                        <li class="link-login pull-right  nav-item"> <a href="#introwasdi"  class="text-white" ng-click="m_oController.m_oAnchorService('introwasdi')">ABOUT WASDI</a> </li>
+                        <!--li class="link-register pull-right  nav-item" ng-show="m_oController.m_bVisualizeLink === true" ng-click="m_oController.changeVisibilityLoginRegister('Register')">
+                            <a href="#" class="text-white"><span class="glyphicon glyphicon-user"></span> {{"LOGIN_LINK_REGISTER"|translate}}</a></li-->
+                        <li class="link-login pull-right  nav-item"> <a href="#enduser" class="text-white" ng-click="m_oController.m_oAnchorService('enduser')">STORIES</a> </li>
+                        <li class="link-login pull-right  nav-item"> <a href="#developer"  class="text-white" ng-click="m_oController.m_oAnchorService('developer')">ADVANCED</a> </li>
+                        <li class="link-login pull-right  nav-item"> <a href="#eoexpert"  class="text-white" ng-click="m_oController.m_oAnchorService('eoexpert')">BASIC</a> </li>
+                        <li class="link-login pull-right  nav-item"> <a href="#introwasdi"  class="text-white" ng-click="m_oController.m_oAnchorService('introwasdi')">ABOUT</a> </li>
                     </ul>
                 </div>
             </nav>
@@ -69,9 +69,16 @@
 
                 <script src="https://apis.google.com/js/platform.js?onload=renderButton" async defer></script>
 
+                <br>
                 <div  ng-hide="m_oController.m_bIsVisibleRecoveryPassword">
                     <a href="#" class="forgot-password" ng-click="m_oController.m_bIsVisibleRecoveryPassword = !m_oController.m_bIsVisibleRecoveryPassword">
                         {{"LOGIN_LINK_FORGOT_PASSWORD"|translate}}
+                    </a>
+                </div>
+                <br>
+                <div  ng-hide="m_oController.m_bRegisterIsVisible">
+                    <a href="#" class="forgot-password" ng-click="m_oController.m_bRegisterIsVisible = !m_oController.m_bRegisterIsVisible">
+                        New User? Register here!
                     </a>
                 </div>
 
@@ -196,7 +203,7 @@
                 </div>
                 <div class="col-md-6">
                     <h4>Web Advanced Space Developer Interface</h4>
-                    <a class="btn btn-large" href="#introwasdi" ng-click="m_oController.m_oAnchorService('introwasdi')"> <i class="fa fa-angle-double-down fa-4x animated bounce" aria-hidden="true"></i></a>
+                    <a class="btn btn-large" href="#introwasdi" ng-click="m_oController.m_oAnchorService('introwasdi')"> <i class="fa fa-angle-double-down fa-4x animated bounce login-more-icon" aria-hidden="true"></i></a>
                 </div>
                 <div class="col-md-3">
                     <img  class="loghi_esa_asi img-responsive center-block">
@@ -219,10 +226,11 @@
                 <div class="col-md-6 text-center">
 
                     <h3 style="color:#009036;">Discover the amazing  <strong>WASDI</strong> features</h3>
-                    <p class="home_p"><br>> WASDI</span> is an <strong> online version of the typical desktop EO Image Elaboration Software</strong>,  in order to pursue the new paradigm of the market: <i>move processors to the data and not data to the processors.</i>.</p>
+                    <p class="home_p"><br>> WASDI is an <strong> online EO Image Elaboration Software</strong>: <i>handle your Earth Observation project in the Cloud.</i>.</p>
                     <br>
-                    <p class="home_p">> WASDI allows to manage the basic features like searching the multi provider catalogue, explore images and apply pre-processing steps or mask
-                        or filters directly on the web. </p><p class="home_p">> The key feature is the possibility for Developers to create their own processor and deploy it to the cloud with a simple drag and drop operation.</p>
+                    <p class="home_p">> WASDI allows to <strong>search</strong> a multi provider catalogue, explore and process EO images in the cloud.</p>
+                    <br>
+                    <p class="home_p">> Develop your own processor in your usual environment and deploy it to the DIAS with a simple drag and drop operation.</p>
                 </div>
                 </div>
 
@@ -236,10 +244,10 @@
                         <img class="alien_user_green_eyes img-top">
                         </div>
                         <h4>
-                            <strong>EO EXPERT</strong>
+                            <strong>BASIC</strong>
                         </h4>
 
-                        <a class="btn bg-transparent text-white" href="#eoexpert" ng-click="m_oController.m_oAnchorService('eoexpert')"> <i class="fa fa-angle-double-down fa-2x animated bounce slow delay-2s" aria-hidden="true""></i></a>
+                        <a class="btn bg-transparent text-white" href="#eoexpert" ng-click="m_oController.m_oAnchorService('eoexpert')"> <i class="fa fa-angle-double-down fa-2x animated bounce slow delay-2s login-more-icon-white" aria-hidden="true""></i></a>
                     </div>
                     <div class="col-md-4">
                         <div class="user-change bg_bluewasdi">
@@ -247,10 +255,10 @@
                         <img class="alien_user_green_eyes img-top">
                         </div>
                         <h4>
-                            <strong>DEVELOPER</strong>
+                            <strong>ADVANCED</strong>
                         </h4>
 
-                        <a class="btn bg-transparent text-white" href="#developer" ng-click="m_oController.m_oAnchorService('developer')"> <i class="fa fa-angle-double-down fa-2x animated bounce delay-3s" aria-hidden="true"></i></a>
+                        <a class="btn bg-transparent text-white" href="#developer" ng-click="m_oController.m_oAnchorService('developer')"> <i class="fa fa-angle-double-down fa-2x animated bounce delay-3s login-more-icon-white" aria-hidden="true"></i></a>
                     </div>
                     <div class="col-md-4">
                         <div class="user-change bg_bluewasdi">
@@ -258,10 +266,10 @@
                         <img class="alien_user_green_eyes img-top">
                         </div>
                         <h4>
-                            <strong>USER STORIES</strong>
+                            <strong>STORIES</strong>
                         </h4>
 
-                        <a class="btn bg-transparent text-white" href="#enduser" ng-click="m_oController.m_oAnchorService('enduser')"> <i class="fa fa-angle-double-down fa-2x animated bounce delay-4s" aria-hidden="true"></i></a>
+                        <a class="btn bg-transparent text-white" href="#enduser" ng-click="m_oController.m_oAnchorService('enduser')"> <i class="fa fa-angle-double-down fa-2x animated bounce delay-4s login-more-icon-white" aria-hidden="true"></i></a>
                     </div>
                 </div>
 
@@ -274,10 +282,10 @@
 
             <div class="row">
                     <div class="col-md-12">
-                        <h1 class="text-green-wasdi">EO EXPERT</h1>
+                        <h1 class="text-green-wasdi">BASIC</h1>
                     </div>
                 <div class="col-md-6">
-                    <p class="home_p">EO Experts can handle their EO project directly in the web. Use WASDI to search and open EO Images, apply SNAP Workflows, Mask or Filter Images, publish result in WMS. </p>
+                    <p class="home_p">Manage your EO project directly in the Cloud. Use WASDI to search and open EO Images, apply SNAP Workflows, Mask or Filter Images, publish result in WMS. </p>
 
                         <h2 class="home_p">> WASDI allows to manage the full EO Processor development cycle:</h2>
                         <span class="title_icon">SEARCH GATEWAY   </span>
@@ -352,7 +360,7 @@
             <div class="container">
             <div class="row">
                 <div class="col-md-12 text-center text-white">
-                    <h1 class="text-green-wasdi">DEVELOPER</h1>
+                    <h1 class="text-green-wasdi">ADVANCED</h1>
                 </div>
                 <div class="col-md-6 text-white">
                     <p class="home_p">
@@ -370,7 +378,7 @@
                         Develop using the library in your own environment, and the WASDI code takes care of accessing data from the cloud once is needed, during the development and testing phase.
                         Once the processor is ready and deployed, the system recognizes that the software is running on the cloud and makes direct access to the input data in a fully transparent way.
                     </p>
-                   <h3 style="text-align: center"><a class="btn btn-lg bg-white"  href="#" target="_blank"> WASDI GitHub Project </a></h3>
+                   <h3 style="text-align: center"><a class="btn btn-lg bg-white"  href="https://github.com/fadeoutsoftware/WASDI" target="_blank"> WASDI GitHub Project </a></h3>
 
 
 
@@ -392,7 +400,7 @@
         <!--sezione user enduser-->
         <section id="enduser" class="container">
             <div class="col-md-12 text-right">
-                <h1 class="text-green-wasdi">USER STORIES</h1>
+                <h1 class="text-green-wasdi">STORIES</h1><br>
                 <p class="home_p">WASDI is used by CIMA Foundation researchers to provide to Italian Civil Protection Operational Service
                      for NRT flooded Area Detection, EO Based Root level soil moisture evaluation, Vegetation indexes for forest fire forecast
                     models (<a href="http://www.mydewetra.org/">www.mydewetra.org</a> ) .</p>

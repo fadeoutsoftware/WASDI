@@ -1,7 +1,7 @@
  var ProcessErrorLogsDialogController = (function() {
 
     function ProcessErrorLogsDialogController($scope, oClose,oExtras,oAuthService,oConstantsService,oCatalogService,
-                                              oProcessorService,$interval) {
+                                              oProcessorService,$interval, oProcessesLaunchedService) {
         this.m_oScope = $scope;
         this.m_oScope.m_oController = this;
         this.m_oAuthService = oAuthService;
@@ -9,6 +9,7 @@
         this.m_oConstantsService = oConstantsService;
         this.m_oProcess = oExtras.process;
         this.m_oProcessorService = oProcessorService;
+        this.m_oProcessesLaunchedService = oProcessesLaunchedService;
         this.m_oInterval = $interval;
         this.m_aoLogs = [];
         this.m_sSearch="";
@@ -24,10 +25,14 @@
 
         $scope.close = function(result) {
             // Make sure that the interval is destroyed too
-            if (angular.isDefined($scope.m_oController.m_oTick)) {
+            /*if (angular.isDefined($scope.m_oController.m_oTick)) {
                 $interval.cancel($scope.m_oController.m_oTick);
                 $scope.m_oController.m_oTick = undefined;
             }
+             */
+
+            oController.stopTick(oController);
+
             oClose(result, 500); // close, but give 500ms for bootstrap to animate
         };
 
@@ -39,10 +44,12 @@
 
         $scope.$on('$destroy', function() {
             // Make sure that the interval is destroyed too
-            if (angular.isDefined($scope.m_oController.m_oTick)) {
+            /*if (angular.isDefined($scope.m_oController.m_oTick)) {
                 $interval.cancel($scope.m_oController.m_oTick);
                 $scope.m_oController.m_oTick = undefined;
             }
+             */
+            oController.stopTick(oController);
         });
 
 
@@ -106,6 +113,13 @@
          }
      };
 
+     ProcessErrorLogsDialogController.prototype.stopTick=function(oController) {
+         if (angular.isDefined(oController.m_oTick)) {
+             oController.m_oInterval.cancel(oController.m_oTick);
+             oController.m_oTick = undefined;
+         }
+     }
+
      ProcessErrorLogsDialogController.prototype.startTick=function(sStatus){
         if( ( utilsIsStrNullOrEmpty(sStatus) === true ) || ( sStatus !== "RUNNING" ) )
         {
@@ -114,8 +128,15 @@
         var oController=this;
 
         var oTick = this.m_oInterval(function () {
-            console.log("Update logs");
+            console.log("Update WAPPS logs");
             oController.getCountLogs(oController.m_oProcess.processObjId,oController.getCountLogsANDLogsCallback);
+
+            sStatus = oController.m_oProcess.status;
+
+            if( ( sStatus === "STOPPED" ) || ( sStatus === "ERROR" ) || ( sStatus === "DONE" ))
+            {
+                oController.stopTick(oController);
+            }
 
         }, 5000);
 
@@ -199,11 +220,16 @@
          this.m_oProcessorService.getCountLogs(oProcessObjId).success(function (data, status) {
              oCallback(data, status,oController);
          }).error(function (data,status) {
-             //alert('error');
-             utilsVexDialogAlertTop('GURU MEDITATION<br>ERROR IN GET COUNT LOGS');
+             utilsVexDialogAlertTop('GURU MEDITATION<br>ERROR READING PROCESSOR LOGS');
          });
-         return true;
 
+         this.m_oProcessesLaunchedService.getProcessWorkspaceById(oProcessObjId).success(function (data, status) {
+            oController.m_oProcess = data;
+        }).error(function (data,status) {
+            utilsVexDialogAlertTop('GURU MEDITATION<br>ERROR REFRESHING PROCESSOR STATUS');
+        });
+
+         return true;
      };
 
 
@@ -248,7 +274,8 @@
         'ConstantsService',
         'CatalogService',
         'ProcessorService',
-        '$interval'
+        '$interval',
+        'ProcessesLaunchedService'
     ];
     return ProcessErrorLogsDialogController;
 })();
