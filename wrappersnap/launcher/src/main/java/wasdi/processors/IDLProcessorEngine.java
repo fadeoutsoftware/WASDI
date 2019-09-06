@@ -118,11 +118,13 @@ public class IDLProcessorEngine extends WasdiProcessorEngine{
 			// Generate the image
 			LauncherMain.s_oLogger.debug("IDLProcessorEngine.DeployProcessor: Creating script files");
 			
-			// Write Param and Config file
+			// Prepare file names
 			String sCallIdlFile = sProcessorFolder + "call_idl.pro";
+			String sWasdiWrapperFile = sProcessorFolder + "wasdi_wrapper.pro";
 			String sRunFile = sProcessorFolder + "run_"+sProcessorName+".sh";
 			
 			
+			// GENERATE Call IDL File
 			File oCallIdlFile = new File (sCallIdlFile);
 			
 			BufferedWriter oCallIdlWriter = new BufferedWriter(new FileWriter(oCallIdlFile));
@@ -130,7 +132,7 @@ public class IDLProcessorEngine extends WasdiProcessorEngine{
 			if(null!= oCallIdlWriter) {
 				LauncherMain.s_oLogger.debug("IDLProcessorEngine.DeployProcessor: Creating call_idl.pro file");
 
-				oCallIdlWriter.write(".r " + sProcessorFolder + "idlwasdilib.pro");
+				/*oCallIdlWriter.write(".r " + sProcessorFolder + "idlwasdilib.pro");
 				oCallIdlWriter.newLine();
 				oCallIdlWriter.write("STARTWASDI, '"+sProcessorFolder+"config.properties'");
 				oCallIdlWriter.newLine();
@@ -140,8 +142,52 @@ public class IDLProcessorEngine extends WasdiProcessorEngine{
 				oCallIdlWriter.newLine();
 				oCallIdlWriter.write("exit");
 				oCallIdlWriter.flush();
+				oCallIdlWriter.close();*/
+				
+				oCallIdlWriter.write(".r " + sProcessorFolder + "idlwasdilib.pro");
+				oCallIdlWriter.newLine();
+				oCallIdlWriter.write("STARTWASDI, '"+sProcessorFolder+"config.properties'");
+				oCallIdlWriter.newLine();
+				oCallIdlWriter.write(".r "+sProcessorFolder + sProcessorName + ".pro");
+				oCallIdlWriter.newLine();
+				oCallIdlWriter.write(".r "+sProcessorFolder + "wasdi_wrapper.pro");
+				oCallIdlWriter.newLine();
+				oCallIdlWriter.write("CALLWASDI");
+				oCallIdlWriter.newLine();
+				oCallIdlWriter.write("exit");
+				oCallIdlWriter.flush();
 				oCallIdlWriter.close();
+				
 			}
+			
+			// GENERATE WASDI WRAPPER File
+			File oWasdiWrapperFile = new File (sWasdiWrapperFile);
+			
+			BufferedWriter oWasdiWrapperWriter = new BufferedWriter(new FileWriter(oWasdiWrapperFile));
+			
+			if(null!= oWasdiWrapperWriter) {
+				LauncherMain.s_oLogger.debug("IDLProcessorEngine.DeployProcessor: Creating wasdi_wrapper.pro file");
+
+				oWasdiWrapperWriter.write("PRO CALLWASDI");
+				oWasdiWrapperWriter.newLine();
+				oWasdiWrapperWriter.write("\tCATCH, Error_status");
+				oWasdiWrapperWriter.newLine();				
+				oWasdiWrapperWriter.write("\tIF (Error_status NE 0L) THEN BEGIN");
+				oWasdiWrapperWriter.newLine();
+				oWasdiWrapperWriter.write("\t\tWASDILOG, 'Error message: ' + !ERROR_STATE.MSG");
+				oWasdiWrapperWriter.newLine();				
+				oWasdiWrapperWriter.write("\t\tEXIT");
+				oWasdiWrapperWriter.newLine();				
+				oWasdiWrapperWriter.write("\tENDIF");
+				oWasdiWrapperWriter.newLine();				
+				oWasdiWrapperWriter.write("\t"+sProcessorName);
+				oWasdiWrapperWriter.newLine();				
+				oWasdiWrapperWriter.write("END");
+				oWasdiWrapperWriter.newLine();				
+				oWasdiWrapperWriter.flush();
+				oWasdiWrapperWriter.close();
+				
+			}			
 			
 			LauncherMain.updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 80);
 			
