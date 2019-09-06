@@ -130,7 +130,7 @@ public class ProcessWorkspaceResource {
 
 
 	private ProcessWorkspaceViewModel buildProcessWorkspaceViewModel(ProcessWorkspace oProcess) {
-		Utils.debugLog("ProcessWorkspaceResource.buildProcessWorkspaceViewModel");
+		//Utils.debugLog("ProcessWorkspaceResource.buildProcessWorkspaceViewModel");
 		ProcessWorkspaceViewModel oViewModel = new ProcessWorkspaceViewModel();
 		try {
 			// Set the start date: beeing introduced later, for compatibility, if not present use the Operation Date

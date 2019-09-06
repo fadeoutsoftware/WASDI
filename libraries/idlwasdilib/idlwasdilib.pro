@@ -2,9 +2,17 @@
 ; WASDI Corporation
 ; WASDI IDL Lib
 ; Tested with IDL 8.7.2
-; IDL WASDI Lib Version 0.1.14
+; IDL WASDI Lib Version 0.1.16
+; Last Update: 
+;
+; History
+; 0.1.16
+;	Removed debug prints
+;
+; 0.1.15
+;
+;	Fixed path generation for shared workspaces
 ;--------------------------------------------------------------------------------------------------------------------------
-
 
 PRO STARTWASDI, sConfigFilePath
   ; Define a set of shared variables
@@ -623,7 +631,7 @@ FUNCTION WASDIGETWORKSPACEIDBYNAME, workspacename
 	ENDFOR
 
 	IF (workspaceId EQ '') THEN BEGIN
-		print, 'Workspace ', workspacename, ' NOT FOUND'
+		print, 'WASDIGETWORKSPACEIDBYNAME Workspace ', workspacename, ' NOT FOUND'
 	END
 
 	; return the found id or ""
@@ -632,12 +640,12 @@ FUNCTION WASDIGETWORKSPACEIDBYNAME, workspacename
 END
 
 ; Get the owner of a Workspace
-FUNCTION WASDIGETWORKSPACEOWNERBYWSNAME, workspacename
+FUNCTION WASDIGETWORKSPACEOWNERBYWSID, workspaceid
 
 	COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner
 
 	ownerUserId = "";
-
+	
 	; API URL
 	UrlPath = '/wasdiwebserver/rest/ws/byuser'
 
@@ -650,9 +658,9 @@ FUNCTION WASDIGETWORKSPACEOWNERBYWSNAME, workspacename
 		oWorkspace = wasdiResult[i]
 
 		; Check the name property
-		sName = GETVALUEBYKEY(oWorkspace, 'workspaceName')
+		sId = GETVALUEBYKEY(oWorkspace, 'workspaceId')
 
-		IF sName EQ workspacename THEN BEGIN
+		IF sId EQ workspaceid THEN BEGIN
 			; found it
 			ownerUserId = GETVALUEBYKEY(oWorkspace, 'ownerUserId')
 			BREAK
@@ -660,7 +668,7 @@ FUNCTION WASDIGETWORKSPACEOWNERBYWSNAME, workspacename
 	ENDFOR
 
 	IF (ownerUserId EQ '') THEN BEGIN
-		print, 'Workspace ', workspacename, ' NOT FOUND'
+		print, 'WASDIGETWORKSPACEOWNERBYWSID Workspace ', workspaceid, ' NOT FOUND'
 	END
 
 	; return the found id or ""
@@ -761,9 +769,9 @@ END
 pro WASDIOPENWORKSPACE,workspacename
 
   COMMON WASDI_SHARED, user, password, token, activeworkspace, basepath, myprocid, baseurl, parametersfilepath, downloadactive, isonserver, verbose, params, uploadactive, workspaceowner
-  ; Set active Workspace (the WASDIGETWORKSPACEIDBYNAME changes the workspaceowner)
+  ; Set active Workspace and owner
   activeworkspace = WASDIGETWORKSPACEIDBYNAME(workspacename)
-  workspaceowner = WASDIGETWORKSPACEOWNERBYWSNAME(workspacename)
+  workspaceowner = WASDIGETWORKSPACEOWNERBYWSID(workspacename)
   
 END
 
