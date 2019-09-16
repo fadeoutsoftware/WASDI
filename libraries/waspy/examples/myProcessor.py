@@ -2,7 +2,7 @@ import wasdi
 
 
 def run():
-    wasdi.wasdiLog("Hello ")
+    wasdi.wasdiLog("Welcome to your first WASPY processor :-)")
     sNome = wasdi.getParameter("NOME")
     wasdi.wasdiLog("Hello " + str(sNome))
 
@@ -28,3 +28,4 @@ def run():
 
 if __name__ == '__main__':
     wasdi.init("./config.json")
+    run()
