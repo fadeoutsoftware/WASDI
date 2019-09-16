@@ -1,33 +1,28 @@
-import wasdi
+import  wasdi
 
+def run():
+    wasdi.wasdiLog("Hello ")
+    sNome = wasdi.getParameter("NOME")
+    wasdi.wasdiLog("Hello " + str(sNome))
 
-def run(parameters, processId):
-    wasdi.wasdiLog('Here\'s the list of your workspaces:')
-    aoWorkspaces = wasdi.getWorkspaces()
-    wasdi.wasdiLog(aoWorkspaces)
-    wasdi.wasdiLog('The ID of currently selected workspace is:')
-    sActiveWorkspace = wasdi.getActiveWorkspaceId()
-    wasdi.wasdiLog(sActiveWorkspace)
+    aoProducts = wasdi.getProductsByActiveWorkspace()
 
-    wasdi.wasdiLog('Let\'s search some images...')
-    aoImages = wasdi.searchEOImages("S1", "2018-09-01", "2018-09-02", 44, 11, 43, 12, sProductType='GRD')
-    wasdi.wasdiLog('Found ' + str(len(aoImages)) + ' images')
+    if aoProducts is not None:
+        wasdi.wasdiLog("Found " + str(len(aoProducts)))
 
-    wasdi.wasdiLog('Download the first one passing the dictionary...')
-    sImportWithDict = wasdi.importProduct(None, None, aoImages[0])
-    wasdi.wasdiLog('Import with dict returned: ' + sImportWithDict)
+    sOutputName = "myOutputFile.tif"
+    if sOutputName not in aoProducts:
+        wasdi.wasdiLog("About to execute workflow")
+        sWorkFlow = "portu"
+        wasdi.executeWorkflow([aoProducts[len(aoProducts)-1]], [sOutputName], sWorkFlow)
+    else:
+        wasdi.wasdiLog("File exists, no need to run workflow")
 
-    wasdi.wasdiLog('Now, these are the products in your workspace: ')
-    asProducts = wasdi.getProductsByActiveWorkspace()
-    wasdi.wasdiLog(asProducts)
+    sPath = wasdi.getFullProductPath(sOutputName)
 
-    wasdi.wasdiLog('Let\'s run a workflow on the first image to rectify its georeference...')
-    sStatus = wasdi.executeWorkflow([asProducts[0]], ['lovelyOutput'], 'LISTSinglePreproc')
-    if sStatus == 'DONE':
-        wasdi.wasdiLog('The product is now in your workspace, look at it on the website')
+    # more code here...
 
-    wasdi.wasdiLog('It\'s over!')
+    wasdi.wasdiLog("Done :-)")
 
-def WasdiHelp():
-    sHelp = "Wasdi Tutorial"
-    return sHelp
+if _name_ == '__main__':
+    wasdi.init("./config.json")
