@@ -46,6 +46,20 @@ org.esa.s1tbx.insar.gpf.PhaseToDisplacementOp$Spi
 org.esa.s1tbx.insar.gpf.IntegerInterferogramOp$Spi
 org.esa.s1tbx.insar.gpf.StampsExportOp$Spi
 
+org.esa.s1tbx.sentinel1.gpf.TOPSARDeburstOp$Spi
+org.esa.s1tbx.sentinel1.gpf.TOPSARSplitOp$Spi
+org.esa.s1tbx.sentinel1.gpf.SliceAssemblyOp$Spi
+org.esa.s1tbx.sentinel1.gpf.BackGeocodingOp$Spi
+#org.esa.s1tbx.sentinel1.gpf.RangeShiftOp$Spi
+#org.esa.s1tbx.sentinel1.gpf.AzimuthShiftOp$Spi
+org.esa.s1tbx.sentinel1.gpf.SpectralDiversityOp$Spi
+#org.esa.s1tbx.sentinel1.gpf.experimental.DerampedAzimuthSpectrumOp$Spi
+#org.esa.s1tbx.sentinel1.gpf.experimental.DerampDemodPhaseOp$Spi
+org.esa.s1tbx.sentinel1.gpf.TOPSARMergeOp$Spi
+org.esa.s1tbx.sentinel1.gpf.GRDPostProcessOp$Spi
+org.esa.s1tbx.sentinel1.gpf.EAPPhaseCorrectionOp$Spi
+org.esa.s1tbx.sentinel1.gpf.DoubleDifferenceInterferogramOp$Spi
+
 
 org.esa.snap.core.gpf.common.ReadOp$Spi
 org.esa.snap.core.gpf.common.MergeOp$Spi

@@ -21,10 +21,10 @@ var MosaicController = (function() {
         this.m_oMosaicViewModel = {
             autoFindBoundingBox:true,
             autoSelectBands:true,
-            southBound:-1,
-            eastBound:-1,
-            westBound :-1,
-            northBound :-1,
+            southBound:-1.0,
+            eastBound:-1.0,
+            westBound :-1.0,
+            northBound :-1.0,
             pixelSizeX:0.005,
             pixelSizeY:0.005,
             outputFile:"",
@@ -55,6 +55,7 @@ var MosaicController = (function() {
         }
         return false;
     }
+
     MosaicController.prototype.runMosaic = function(){
 
         var oActiveWorkspace = this.m_oConstantsService.getActiveWorkspace();

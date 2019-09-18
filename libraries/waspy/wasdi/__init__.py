@@ -6,6 +6,17 @@ so please be patient and do not trust anyone's life with the library (not yet)
 
 This is WASPY, the WASDI Python lib.
 
+Last Update: 16/09/2019
+
+Tested with: Python 2.7, Python 3.7
+
+History
+0.1.16
+    Fixed getFullProductPath bug to support many files on the same folder
+    Added setPayload to set the payload of the actual running processor.
+0.1.15
+    Fixed Path generation for execution on shared workspaces
+
 The methods in the module allow to interact with WASDI seamlessly.
 
 Note:
@@ -942,7 +953,7 @@ def updateProgressPerc(iPerc):
 
 def setProcessPayload(sProcessId, data):
     """
-    Update the status of a process
+    Saves the Payload of a process
     return the updated status as a String or '' if there was any problem
     """
     global m_sBaseUrl
@@ -966,6 +977,22 @@ def setProcessPayload(sProcessId, data):
 
     return sStatus
 
+
+def setPayload(data):
+    """
+    Set the payload of the actual running process.
+    The payload is saved only when run on Server. In local mode is just a print.
+    return None
+    """
+    global m_sBaseUrl
+    global m_sSessionId
+    global m_sMyProcId
+    global m_bIsOnServer
+    
+    if m_bIsOnServer is True:
+        setProcessPayload(m_sMyProcId, data)
+    else:
+        _log(str(data))
 
 def saveFile(sFileName):
     """
@@ -1061,13 +1088,14 @@ def downloadFile(sFileName):
                         bLoop = False
         sSavePath = getSavePath()
         sSavePath = os.path.join(sSavePath, sAttachmentName)
-
-        try:
-            os.makedirs(os.path.dirname(sSavePath))
-        except:  # Guard against race condition
-            print('[ERROR] waspy.downloadFile: cannot create File Path, aborting' +
-                  '  ******************************************************************************')
-            return
+        
+        if os.path.exists(os.path.dirname(sSavePath)) == False:
+            try:
+                os.makedirs(os.path.dirname(sSavePath))
+            except:  # Guard against race condition
+                print('[ERROR] waspy.downloadFile: cannot create File Path, aborting' +
+                      '  ******************************************************************************')
+                return
 
         _log('[INFO] waspy.downloadFile: downloading local file ' + sSavePath)
 
@@ -1094,17 +1122,19 @@ def wasdiLog(sLogRow):
     global m_sBaseUrl
     global m_sSessionId
     global m_sActiveWorkspace
+    
+    sForceLogRow = str(sLogRow)
 
     if m_bIsOnServer:
         asHeaders = _getStandardHeaders()
         sUrl = m_sBaseUrl + '/processors/logs/add?processworkspace=' + m_sMyProcId
-        oResult = requests.post(sUrl, data=sLogRow, headers=asHeaders)
+        oResult = requests.post(sUrl, data=sForceLogRow, headers=asHeaders)
         if oResult is None:
             print('[WARNING] waspy.wasdiLog: could not log')
         elif oResult.ok is not True:
             print('[WARNING] waspy.wasdiLog: could not log, server returned: ' + str(oResult.status_code))
     else:
-        _log(sLogRow)
+        _log(sForceLogRow)
 
 
 def deleteProduct(sProduct):

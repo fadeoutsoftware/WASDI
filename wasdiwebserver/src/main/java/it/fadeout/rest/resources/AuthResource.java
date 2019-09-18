@@ -912,7 +912,6 @@ public class AuthResource {
 			
 			oMessage.setTilte(sTitle);
 			
-			//TODO read the sender from the servlet config file
 			String sSender = m_oServletConfig.getInitParameter("sftpManagementMailSenser");
 			if (sSender==null) {
 				sSender = "wasdi@wasdi.net";
