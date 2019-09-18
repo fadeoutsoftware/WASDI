@@ -201,7 +201,7 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 			String sFileName = "";
 			String sDisposition = oHttpConn.getHeaderField("Content-Disposition");
 			String sContentType = oHttpConn.getContentType();
-			long lContentLength = oHttpConn.getContentLength();
+			long lContentLength = oHttpConn.getContentLengthLong();
 
 			m_oLogger.debug("ProviderAdapter.downloadViaHttp. ContentLenght: " + lContentLength);
 
@@ -265,7 +265,7 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 
 		// Cumulative Byte Count
 		int iTotalBytes = 0;
-		// Byte that represent 10% of the file
+		// Byte that represent 1% of the file
 		long lOnePercent = lContentLength / 100;
 		// Percent of the completed download
 		int iFilePercent = 0;
@@ -295,8 +295,7 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 			iTotalBytes += iBytesRead;
 
 			// Overcome a 1% limit?
-			if (oProcessWorkspace != null && lContentLength > BUFFER_SIZE && iTotalBytes >= lOnePercent
-					&& iFilePercent <= 100) {
+			if (oProcessWorkspace != null && lContentLength > BUFFER_SIZE && iTotalBytes >= lOnePercent && iFilePercent <= 100) {
 				// Increase the file
 				iFilePercent += 1;
 				if (iFilePercent > 100)
