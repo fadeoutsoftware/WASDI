@@ -248,7 +248,7 @@ public class DiasQueryTranslatorONDA extends DiasQueryTranslator {
 				} else {
 					sResult += "DESCENDING";
 				}
-			}
+			} 
 			
 			sResult +=" )";
 		}
@@ -304,6 +304,8 @@ public class DiasQueryTranslatorONDA extends DiasQueryTranslator {
 				sSentinel2+="name:*MSI1C*";
 			} else if(sQuery.contains("producttype:S2MSI2Ap")) {
 				sSentinel2+="name:*MSIL2Ap*";
+			} else if(sQuery.contains("producttype:S2MSI2A")) {
+				sSentinel2+="name:*MSIL2A*";
 			} else {
 				sSentinel2+="name:*";
 			}
