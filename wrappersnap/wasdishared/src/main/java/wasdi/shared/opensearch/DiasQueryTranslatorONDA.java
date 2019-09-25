@@ -305,7 +305,7 @@ public class DiasQueryTranslatorONDA extends DiasQueryTranslator {
 			} else if(sQuery.contains("producttype:S2MSI2Ap")) {
 				sSentinel2+="name:*MSIL2Ap*";
 			} else if(sQuery.contains("producttype:S2MSI2A")) {
-				sSentinel2+="name:*MSIL2Ap*";
+				sSentinel2+="name:*MSIL2A*";
 			} else {
 				sSentinel2+="name:*";
 			}
