@@ -318,12 +318,12 @@ public class ProductResource {
 	@GET
 	@Path("/bywslight")
 	@Produces({ "application/xml", "application/json", "text/xml" })
-	public ArrayList<GeorefProductViewModel> getLightListByWorkspace(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sWorkspaceId") String sWorkspaceId) {
+	public List<GeorefProductViewModel> getLightListByWorkspace(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sWorkspaceId") String sWorkspaceId) {
 		
 		Utils.debugLog("ProductResource.getLightListByWorkspace( " + sSessionId + ", " + sWorkspaceId + " )");
 		User oUser = Wasdi.GetUserFromSession(sSessionId);
 
-		ArrayList<GeorefProductViewModel> aoProductList = new ArrayList<GeorefProductViewModel>();
+		List<GeorefProductViewModel> aoProductList = new ArrayList<GeorefProductViewModel>();
 
 		try {
 
