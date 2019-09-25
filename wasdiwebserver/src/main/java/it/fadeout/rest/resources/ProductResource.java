@@ -222,8 +222,6 @@ public class ProductResource {
 	public List<GeorefProductViewModel> getListByWorkspace(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("sWorkspaceId") String sWorkspaceId) {
 		Utils.debugLog("ProductResource.GetListByWorkspace( " + sSessionId + ", " + sWorkspaceId + " )");
-		User oUser = Wasdi.GetUserFromSession(sSessionId);
-
 		List<GeorefProductViewModel> aoProductList = new ArrayList<GeorefProductViewModel>();
 		if(Utils.isNullOrEmpty(sWorkspaceId)){
 			Utils.debugLog("ProductResource.getListByWorkspace(" + sSessionId +", " + sWorkspaceId + "): workspace is null or empty");
@@ -231,7 +229,7 @@ public class ProductResource {
 		}
 
 		try {
-
+			User oUser = Wasdi.GetUserFromSession(sSessionId);
 			// Domain Check
 			if (oUser == null) {
 				return aoProductList;
@@ -322,8 +320,6 @@ public class ProductResource {
 	public List<GeorefProductViewModel> getLightListByWorkspace(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sWorkspaceId") String sWorkspaceId) {
 		
 		Utils.debugLog("ProductResource.getLightListByWorkspace( " + sSessionId + ", " + sWorkspaceId + " )");
-		User oUser = Wasdi.GetUserFromSession(sSessionId);
-
 		List<GeorefProductViewModel> aoProductList = new ArrayList<GeorefProductViewModel>();
 		if(Utils.isNullOrEmpty(sWorkspaceId)) {
 			Utils.debugLog("ProductResource.getLightListByWorkspace(" + sSessionId +", " + sWorkspaceId + "): workspace is null or empty");
@@ -331,6 +327,7 @@ public class ProductResource {
 		}
 
 		try {
+			User oUser = Wasdi.GetUserFromSession(sSessionId);
 			// Domain Check
 			if (oUser == null) {
 				return aoProductList;
