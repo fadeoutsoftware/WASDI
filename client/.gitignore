@@ -28,3 +28,4 @@ Thumbs.db
 *.css.map
 **/secrets.js
 **/environment.js
+.sass-cache/
