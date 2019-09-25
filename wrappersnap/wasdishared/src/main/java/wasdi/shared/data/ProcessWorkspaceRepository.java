@@ -346,6 +346,27 @@ public class ProcessWorkspaceRepository extends MongoRepository {
         return oProcessWorkspace;
     }
 
+    public List<ProcessWorkspace> GetProcessByProductNameAndWorkspace(String sProductName, String sWorkspace) {
+
+        final ArrayList<ProcessWorkspace> aoReturnList = new ArrayList<ProcessWorkspace>();
+        try {
+
+            FindIterable<Document> oWSDocuments = getCollection("processworkpsace").find(
+            		Filters.and(
+            				Filters.eq("productName", sProductName),
+            				Filters.eq("workspaceId", sWorkspace)
+            				)
+            		)
+            		.sort(new Document("operationDate", -1));
+            fillList(aoReturnList, oWSDocuments);
+
+        } catch (Exception oEx) {
+            oEx.printStackTrace();
+        }
+
+        return aoReturnList;
+    }
+    
     public ProcessWorkspace GetProcessByProcessObjId(String sProcessObjId) {
         ProcessWorkspace oProcessWorkspace = null;
         try {
