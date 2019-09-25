@@ -49,6 +49,7 @@ public class ProductWorkspaceRepository extends MongoRepository {
     public List<ProductWorkspace> GetProductsByWorkspace(String sWorkspaceId) {
         final ArrayList<ProductWorkspace> aoReturnList = new ArrayList<ProductWorkspace>();
         if(Utils.isNullOrEmpty(sWorkspaceId)) {
+        	Utils.debugLog("ProductWorkspaceRepository.GetProductsByWorkspace( "+sWorkspaceId + " ): null workspace");
         	return aoReturnList;
         }
         try {
