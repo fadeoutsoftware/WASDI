@@ -225,6 +225,9 @@ public class ProductResource {
 		User oUser = Wasdi.GetUserFromSession(sSessionId);
 
 		ArrayList<GeorefProductViewModel> aoProductList = new ArrayList<GeorefProductViewModel>();
+		if(Utils.isNullOrEmpty(sWorkspaceId)){
+			return aoProductList;
+		}
 
 		try {
 
