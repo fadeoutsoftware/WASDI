@@ -18,6 +18,7 @@ import com.mongodb.client.result.DeleteResult;
 import com.mongodb.client.result.UpdateResult;
 
 import wasdi.shared.business.ProductWorkspace;
+import wasdi.shared.utils.Utils;
 
 /**
  * Created by p.campanella on 18/11/2016.
@@ -46,8 +47,10 @@ public class ProductWorkspaceRepository extends MongoRepository {
     }
 
     public List<ProductWorkspace> GetProductsByWorkspace(String sWorkspaceId) {
-
         final ArrayList<ProductWorkspace> aoReturnList = new ArrayList<ProductWorkspace>();
+        if(Utils.isNullOrEmpty(sWorkspaceId)) {
+        	return aoReturnList;
+        }
         try {
 
             FindIterable<Document> oWSDocuments = getCollection("productworkpsace").find(new Document("workspaceId", sWorkspaceId));
