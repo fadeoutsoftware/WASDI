@@ -324,9 +324,11 @@ public class ProductResource {
 		User oUser = Wasdi.GetUserFromSession(sSessionId);
 
 		List<GeorefProductViewModel> aoProductList = new ArrayList<GeorefProductViewModel>();
+		if(Utils.isNullOrEmpty(sWorkspaceId)) {
+			return aoProductList;
+		}
 
 		try {
-
 			// Domain Check
 			if (oUser == null) {
 				return aoProductList;
