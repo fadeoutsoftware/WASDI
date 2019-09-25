@@ -226,6 +226,7 @@ public class ProductResource {
 
 		List<GeorefProductViewModel> aoProductList = new ArrayList<GeorefProductViewModel>();
 		if(Utils.isNullOrEmpty(sWorkspaceId)){
+			Utils.debugLog("ProductResource.getListByWorkspace(" + sSessionId +", " + sWorkspaceId + "): workspace is null or empty");
 			return aoProductList;
 		}
 
@@ -325,6 +326,7 @@ public class ProductResource {
 
 		List<GeorefProductViewModel> aoProductList = new ArrayList<GeorefProductViewModel>();
 		if(Utils.isNullOrEmpty(sWorkspaceId)) {
+			Utils.debugLog("ProductResource.getLightListByWorkspace(" + sSessionId +", " + sWorkspaceId + "): workspace is null or empty");
 			return aoProductList;
 		}
 
