@@ -66,6 +66,9 @@ public class GeoServerManager {
     public boolean removeLayer(String sLayerId) {
 
     	RESTLayer oLayer = m_oGsReader.getLayer(m_sWorkspace, sLayerId);
+    	
+    	if (oLayer == null) return false;
+    	
     	Type oLayerType = oLayer.getType();    	
     	RESTResource oRes = m_oGsReader.getResource(oLayer);
     	

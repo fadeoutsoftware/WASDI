@@ -84,6 +84,36 @@ public class PublishedBandsRepository extends MongoRepository {
 
         return  aoReturnList;
     }
+    
+
+    public List<PublishedBand> GetList() {
+
+        final ArrayList<PublishedBand> aoReturnList = new ArrayList<PublishedBand>();
+        try {
+
+            FindIterable<Document> oWSDocuments = getCollection("publishedbands").find();
+
+            oWSDocuments.forEach(new Block<Document>() {
+                public void apply(Document document) {
+                    String sJSON = document.toJson();
+                    PublishedBand oPublishedBand = null;
+                    try {
+                        oPublishedBand = s_oMapper.readValue(sJSON,PublishedBand.class);
+                        aoReturnList.add(oPublishedBand);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+
+                }
+            });
+
+        } catch (Exception oEx) {
+            oEx.printStackTrace();
+        }
+
+        return  aoReturnList;
+    }
+
 
     public int DeleteByProductName(String sProductName) {
 

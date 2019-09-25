@@ -16,22 +16,22 @@
             </div>
 
             <div class="col-v4">
-                <i class="fa fa-check-square-o pointer-cursor-hover" aria-hidden="true" ng-show="m_oController.m_oMosaicViewModel.autoFindBoundingBox"
-                   ng-click="m_oController.m_oMosaicViewModel.autoFindBoundingBox = !m_oController.m_oMosaicViewModel.autoFindBoundingBox"></i>
-                <i class="fa fa-square-o pointer-cursor-hover" aria-hidden="true" ng-hide="m_oController.m_oMosaicViewModel.autoFindBoundingBox"
-                   ng-click="m_oController.m_oMosaicViewModel.autoFindBoundingBox = !m_oController.m_oMosaicViewModel.autoFindBoundingBox"></i>
+                <i class="fa fa-check-square-o pointer-cursor-hover" aria-hidden="true" ng-show="m_oController.m_bAutoFindBoundingBox"
+                   ng-click="m_oController.m_bAutoFindBoundingBox = !m_oController.m_bAutoFindBoundingBox"></i>
+                <i class="fa fa-square-o pointer-cursor-hover" aria-hidden="true" ng-hide="m_oController.m_bAutoFindBoundingBox"
+                   ng-click="m_oController.m_bAutoFindBoundingBox = !m_oController.m_bAutoFindBoundingBox"></i>
             </div>
 
         </div>
 
-        <div class="row-v4 my-input-text align-items-center" ng-class="{'disable-all':m_oController.m_oMosaicViewModel.autoFindBoundingBox === true}">
+        <div class="row-v4 my-input-text align-items-center" ng-class="{'disable-all':m_oController.m_bAutoFindBoundingBox === true}">
             <div class="col-v4">
                 North
             </div>
 
             <div class="col-v4">
                 <input type="text" name="name"  class="wasdi-input" ng-model="m_oController.m_oMosaicViewModel.northBound"
-                       ng-disabled="m_oController.m_oMosaicViewModel.autoFindBoundingBox === true">
+                       ng-disabled="m_oController.m_bAutoFindBoundingBox === true">
 
             </div>
             <div class="col-v4">
@@ -40,7 +40,7 @@
 
             <div class="col-v4">
                 <input type="text" name="name"  class="wasdi-input" ng-model="m_oController.m_oMosaicViewModel.southBound"
-                       ng-disabled="m_oController.m_oMosaicViewModel.autoFindBoundingBox === true">
+                       ng-disabled="m_oController.m_bAutoFindBoundingBox === true">
             </div>
             <div class="col-v4">
                 East
@@ -48,7 +48,7 @@
 
             <div class="col-v4">
                 <input type="text" name="name"  class="wasdi-input" ng-model="m_oController.m_oMosaicViewModel.eastBound"
-                       ng-disabled="m_oController.m_oMosaicViewModel.autoFindBoundingBox === true">
+                       ng-disabled="m_oController.m_bAutoFindBoundingBox === true">
             </div>
             <div class="col-v4">
                 West
@@ -56,7 +56,7 @@
 
             <div class="col-v4">
                 <input type="text" name="name"  class="wasdi-input" ng-model="m_oController.m_oMosaicViewModel.westBound"
-                       ng-disabled="m_oController.m_oMosaicViewModel.autoFindBoundingBox === true">
+                       ng-disabled="m_oController.m_bAutoFindBoundingBox === true">
             </div>
 
 
@@ -64,7 +64,7 @@
     </div>
 
 
-    <div class="well">
+    <!--div class="well">
 
         <div class="row-v4">
             <div class="col-v4">
@@ -72,27 +72,27 @@
             </div>
 
             <div class="col-v4 ">
-                <i class="fa fa-check-square-o pointer-cursor-hover" aria-hidden="true" ng-show="m_oController.m_oMosaicViewModel.autoSelectBands"
-                   ng-click="m_oController.m_oMosaicViewModel.autoSelectBands = !m_oController.m_oMosaicViewModel.autoSelectBands"></i>
-                <i class="fa fa-square-o pointer-cursor-hover" aria-hidden="true" ng-hide="m_oController.m_oMosaicViewModel.autoSelectBands"
-                   ng-click="m_oController.m_oMosaicViewModel.autoSelectBands = !m_oController.m_oMosaicViewModel.autoSelectBands"></i>
+                <i class="fa fa-check-square-o pointer-cursor-hover" aria-hidden="true" ng-show="m_oController.m_bAutoSelectBands"
+                   ng-click="m_oController.m_bAutoSelectBands = !m_oController.m_bAutoSelectBands"></i>
+                <i class="fa fa-square-o pointer-cursor-hover" aria-hidden="true" ng-hide="m_oController.m_bAutoSelectBands"
+                   ng-click="m_oController.m_bAutoSelectBands = !m_oController.m_bAutoSelectBands"></i>
             </div>
 
         </div>
 
-        <div class="row-v4 my-input-text align-items-center" ng-class="{'disable-all':m_oController.m_oMosaicViewModel.autoSelectBands === true}">
+        <div class="row-v4 my-input-text align-items-center" ng-class="{'disable-all':m_oController.m_bAutoSelectBands === true}">
             <div class="col-v4">
                 Bands
             </div>
 
             <div class="col-v4" >
                 <input type="text" name="name"  class="wasdi-input" ng-model="m_oController.m_oMosaicViewModel.bands"
-                       ng-disabled="m_oController.m_oMosaicViewModel.autoSelectBands === true">
+                       ng-disabled="m_oController.m_bAutoSelectBands === true">
 
             </div>
 
         </div>
-    </div>
+    </div-->
 
     <div class="row-v4 my-input-text align-items-center">
         <div class="col-v4">
@@ -107,7 +107,7 @@
     </div>
     <div class="row-v4 my-input-text align-items-center">
         <div class="col-v4">
-            Pixel size X
+            Pixel size X (keep -1 for native)
         </div>
 
         <div class="col-v4">
@@ -118,7 +118,7 @@
     </div>
     <div class="row-v4 my-input-text align-items-center">
         <div class="col-v4">
-            Pixel size Y
+            Pixel size Y (keep -1 for native)
         </div>
 
         <div class="col-v4">
@@ -127,4 +127,28 @@
         </div>
 
     </div>
+
+    <div class="row-v4 my-input-text align-items-center">
+        <div class="col-v4">
+            Input Ignore Value (Leave nothing to not use)
+        </div>
+
+        <div class="col-v4">
+            <input type="text" name="name"  class="wasdi-input" ng-model="m_oController.inputIgnoreValue">
+
+        </div>
+    </div>
+
+    <div class="row-v4 my-input-text align-items-center">
+        <div class="col-v4">
+            No Data Value (Leave nothing to not use)
+        </div>
+
+        <div class="col-v4">
+            <input type="text" name="name"  class="wasdi-input" ng-model="m_oController.noDataValue">
+
+        </div>
+    </div>
+
+
 </div>

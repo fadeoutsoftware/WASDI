@@ -16,19 +16,35 @@ var MosaicController = (function() {
         this.m_oConstantsService = oConstantsService;
         this.m_asProductsName = utilsProjectGetProductsName(this.m_aoProducts);
         this.m_asSelectedProducts = [];
+
         this.m_bAutoFindBoundingBox = true;
         this.m_bAutoSelectBands = true;
+
         this.m_oMosaicViewModel = {
-            autoFindBoundingBox:true,
-            autoSelectBands:true,
+
             southBound:-1.0,
             eastBound:-1.0,
             westBound :-1.0,
             northBound :-1.0,
-            pixelSizeX:0.005,
-            pixelSizeY:0.005,
-            outputFile:"",
-            bands:""
+            pixelSizeX: -1.0,
+            pixelSizeY: -1.0,
+            outputFile:"output.tif",
+            outputFormat: "GeoTIFF",
+            noDataValue: null,
+            inputIgnoreValue: null,
+
+            // Legacy parameters.
+            bands:"",
+            crs: "GEOGCS[\"WGS84(DD)\", \r\n DATUM[\"WGS84\", \r\n SPHEROID[\"WGS84\", 6378137.0, 298.257223563]], \r\n PRIMEM[\"Greenwich\", 0.0], \r\n UNIT[\"degree\", 0.017453292519943295], \r\n AXIS[\"Geodetic longitude\", EAST], \r\n AXIS[\"Geodetic latitude\", NORTH]]",
+            overlappingMethod: "MOSAIC_TYPE_OVERLAY",
+            showSourceProducts: false,
+            elevationModelName: "ASTER 1sec GDEM",
+            resamplingName: "Nearest",
+            updateMode: false,
+            nativeResolution: true,
+            combine: "OR",
+            variableNames: [],
+            variableExpressions: []
         }
 
         var oController = this;
@@ -57,6 +73,11 @@ var MosaicController = (function() {
     }
 
     MosaicController.prototype.runMosaic = function(){
+
+        if (utilsIsStrNullOrEmpty(this.m_oMosaicViewModel.outputFile)) {
+            utilsVexDialogAlertBottomRightCorner("Please set an output file name", null);
+            return;
+        }
 
         var oActiveWorkspace = this.m_oConstantsService.getActiveWorkspace();
 
