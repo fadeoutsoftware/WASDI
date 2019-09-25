@@ -219,12 +219,12 @@ public class ProductResource {
 	@GET
 	@Path("/byws")
 	@Produces({ "application/xml", "application/json", "text/xml" })
-	public ArrayList<GeorefProductViewModel> getListByWorkspace(@HeaderParam("x-session-token") String sSessionId,
+	public List<GeorefProductViewModel> getListByWorkspace(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("sWorkspaceId") String sWorkspaceId) {
 		Utils.debugLog("ProductResource.GetListByWorkspace( " + sSessionId + ", " + sWorkspaceId + " )");
 		User oUser = Wasdi.GetUserFromSession(sSessionId);
 
-		ArrayList<GeorefProductViewModel> aoProductList = new ArrayList<GeorefProductViewModel>();
+		List<GeorefProductViewModel> aoProductList = new ArrayList<GeorefProductViewModel>();
 		if(Utils.isNullOrEmpty(sWorkspaceId)){
 			return aoProductList;
 		}
