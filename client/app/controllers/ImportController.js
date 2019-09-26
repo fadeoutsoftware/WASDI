@@ -562,9 +562,10 @@ var ImportController = (function() {
         //hide previous results
         oController.m_bIsVisibleListOfLayers = true;
         oController.m_bIsPaginatedList = true;
-        //TODO
-        // "*" + oController.m_oModel.textQuery + "*" fix
-        // oController.m_oSearchService.setTextQuery("*" + oController.m_oModel.textQuery + "*");
+
+        if(oController.m_oModel.textQuery.endsWith('*')){
+            oController.m_oSearchService.setTextQuery("*" + oController.m_oModel.textQuery + "*");
+        }
         oController.m_oSearchService.setTextQuery(oController.m_oModel.textQuery);
         oController.m_oSearchService.setGeoselection(oController.m_oModel.geoselection);
         var aoProviders = [];
