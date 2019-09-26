@@ -165,7 +165,7 @@ public class DiasQueryTranslatorONDA extends DiasQueryTranslator {
 		return sResult;
 	}
 
-	private String parseCopernicusMarine(String sQuery) {
+	protected String parseCopernicusMarine(String sQuery) {
 		String sResult = "";
 		if(sQuery.contains("Copernicus-marine")) {
 			sResult += "( productMainClass:Copernicus-marine )";
@@ -188,6 +188,9 @@ public class DiasQueryTranslatorONDA extends DiasQueryTranslator {
 				!sSubQuery.contains("endPosition")
 		) {
 			sResult += sSubQuery.trim();
+			if(!sResult.endsWith("*")) {
+				sResult += '*';
+			}
 			
 			if(!Utils.isNullOrEmpty(sResult)) {
 				if( !( sResult.startsWith("(") && sResult.endsWith(")") ) ){
