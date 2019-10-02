@@ -71,6 +71,54 @@ public class ProcessorLogRepository extends MongoRepository {
         return aoReturnList;
     }
     
+    public List<ProcessorLog> GetLogRowsByText(String sLogText) {
+
+        final ArrayList<ProcessorLog> aoReturnList = new ArrayList<ProcessorLog>();
+        if(!Utils.isNullOrEmpty(sLogText)) {
+	        try {
+	        	
+	        	BasicDBObject oRegexQuery = new BasicDBObject();
+	        	oRegexQuery.put("logRow", new BasicDBObject("$regex", sLogText));
+	        	
+	            FindIterable<Document> oWSDocuments = getCollection("processorlog").find(oRegexQuery);
+	            if(oWSDocuments!=null) {
+	            	fillList(aoReturnList, oWSDocuments);
+	            }
+	        } catch (Exception oEx) {
+	        	Utils.debugLog("ProcessorLogRepository.GetLogRowsByText( " + sLogText + " )" +oEx);
+	        }
+        }
+        return aoReturnList;
+    }
+    
+    public List<ProcessorLog> GetLogRowsByTextAndProcessId(String sLogText, String sProcessWorkspaceId) {
+
+        final ArrayList<ProcessorLog> aoReturnList = new ArrayList<ProcessorLog>();
+        if(!Utils.isNullOrEmpty(sLogText)) {
+	        try {
+	        	
+	        	BasicDBObject oRegexQuery = new BasicDBObject();
+	        	oRegexQuery.put("logRow", new BasicDBObject("$regex", sLogText));
+
+	        	List<BasicDBObject> aoFilters = new ArrayList<BasicDBObject>();
+	        	aoFilters.add(oRegexQuery);
+	        	aoFilters.add(new BasicDBObject("processWorkspaceId", sProcessWorkspaceId));
+	        	
+	        	BasicDBObject oAndQuery = new BasicDBObject();
+	        	oAndQuery.put("$and", aoFilters);
+	        	
+	        	
+	            FindIterable<Document> oWSDocuments = getCollection("processorlog").find(oAndQuery);
+	            if(oWSDocuments!=null) {
+	            	fillList(aoReturnList, oWSDocuments);
+	            }
+	        } catch (Exception oEx) {
+	        	Utils.debugLog("ProcessorLogRepository.GetLogRowsByText( " + sLogText + " )" +oEx);
+	        }
+        }
+        return aoReturnList;
+    }
+    
     
     //note iLo and iUp are included
 	public List<ProcessorLog> getLogsByWorkspaceIdInRange(String sProcessWorkspaceId, Integer iLo, Integer iUp){
