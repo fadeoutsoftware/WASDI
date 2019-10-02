@@ -179,7 +179,7 @@ var EditorController = (function () {
 
              $scope.width = $window.innerWidth;
             oThat.m_oMapContainerSize = utilsProjectGetMapContainerSize();
-4
+
             // manuall $digest required as resize event
             // is outside of angular
              $scope.$digest();
