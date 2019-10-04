@@ -1,0 +1,63 @@
+ <div class="modal fade eDrift-flood-event-dialog">
+    <div class="modal-dialog ">
+        <div class="modal-content">
+            <!-- HEADER -->
+            <div class="modal-header">
+                <div class="row-v4">
+                    <div class="col-v4-xs-11 col-v4-sm-11 col-v4-md-11 col-v4-lg-11">
+                        <h4 class="modal-title ">
+                            eDrift Flood Event
+                        </h4>
+                    </div>
+                    <div class="col-v4-xs-1 col-v4-sm-1 col-v4-md-1 col-v4-lg-1">
+                        <button type="button" class="close" ng-click="close(null)" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    </div>
+                </div>
+            </div>
+            <!-- BODY -->
+            <div class="modal-body container-fluid-v4">
+
+              	<div class="container-v4">
+                    <div class="row-v4">
+                        <div class="col-v4-1 date-label">
+                            <label>Date:</label>
+                        </div>
+                        <div class="col-v4-11 "> <!--filter-datetime-picker-wrapper-->
+                            <!------------------------- TIME PICKER START -------------------->
+                            <div class="datetime-picker-wrapper ">
+                                <div class="input-group"
+                                     moment-picker="m_oController.m_oSelectedDate"
+                                     format="YYYY-MM-DD HH"
+                                     today="true">
+
+                                    <input class="wasdi-input "
+                                           placeholder="Select acquisition start time"
+                                           ng-model="m_oController.m_oSelectedDate"
+                                           ng-model-options="{ updateOn: 'blur' }">
+
+                                    <span class="input-group-addon">
+                                                <i class="fa fa-calendar"></i>
+                                            </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+              		<div id="mappaedriftfloodevent" style="height: 400px;"></div>
+				</div>
+                <!--<button ng-click="m_oController.getDate()">Test</button>-->
+            </div>
+            <!-- FOOTER -->
+            <div class="modal-footer">
+
+                <button type="button" ng-click="close(null)" class="btn btn-primary btn-wasdi " data-dismiss="modal">
+                    {{"DIALOG_CLOSE_BUTTON"|translate}}
+                </button>
+                <button type="button" ng-click="close(null)" class="btn btn-primary btn-wasdi " data-dismiss="modal">
+                    Do something
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>

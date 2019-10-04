@@ -11,6 +11,7 @@
 //utilities
 @import "utils/utilities";
 
+
 @import "navbar.component";
 @import "login";
 @import "root";
@@ -87,7 +88,7 @@
 @import "../dialogs/process_error_logs_dialog/process_error_logs_dialog";
 @import "../dialogs/edrift_checkimagestool/edrift_checkimagestool";
 @import "../dialogs/share_workspace/share_workspace";
-
+@import "../dialogs/eDrift_Flood_Event_Dialog/e_drift__flood__event__dialog";
 
 @import "buttons";
 
