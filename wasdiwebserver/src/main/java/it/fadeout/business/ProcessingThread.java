@@ -120,7 +120,8 @@ public class ProcessingThread extends Thread {
 				for (Entry<String, Date> entry : m_aoLaunchedProcesses.entrySet()) {
 					
 					// If if is so old, kill it
-					if (lNow - entry.getValue().getTime() > 3600000L) asToClear.add(entry.getKey());
+					if (lNow - entry.getValue().getTime() > 84400000L) asToClear.add(entry.getKey());
+															
 				}
 				
 				// Clear every killed process
@@ -153,7 +154,7 @@ public class ProcessingThread extends Thread {
 							if (!m_aoLaunchedProcesses.containsKey(oProcess.getProcessObjId())) {
 								sExecutedProcessId = executeProcess(oProcess);
 								// Let the process start...
-								//sleep before starting next iteraction
+								// sleep before starting next iteraction
 								waitForProcessToStart();
 								
 							} else {

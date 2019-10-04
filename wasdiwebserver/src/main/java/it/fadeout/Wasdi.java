@@ -1,9 +1,18 @@
 package it.fadeout;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.lang.reflect.Field;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 import java.util.logging.FileHandler;
 import java.util.logging.Level;
@@ -12,6 +21,10 @@ import java.util.logging.SimpleFormatter;
 import javax.annotation.PostConstruct;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
+import javax.ws.rs.HeaderParam;
+import javax.ws.rs.POST;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 
 import org.esa.snap.core.util.SystemUtils;
@@ -22,16 +35,23 @@ import org.glassfish.jersey.server.ResourceConfig;
 import it.fadeout.business.DownloadsThread;
 import it.fadeout.business.IDLThread;
 import it.fadeout.business.ProcessingThread;
+import wasdi.shared.business.ProcessStatus;
+import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.business.User;
 import wasdi.shared.business.UserSession;
 import wasdi.shared.business.Workspace;
 import wasdi.shared.data.MongoRepository;
+import wasdi.shared.data.NodeRepository;
+import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.data.SessionRepository;
 import wasdi.shared.data.UserRepository;
 import wasdi.shared.data.WorkspaceRepository;
+import wasdi.shared.parameters.BaseParameter;
 import wasdi.shared.rabbit.RabbitFactory;
 import wasdi.shared.utils.CredentialPolicy;
+import wasdi.shared.utils.SerializationUtils;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.viewmodels.PrimitiveResult;
 
 public class Wasdi extends ResourceConfig {
 	@Context
@@ -69,8 +89,12 @@ public class Wasdi extends ResourceConfig {
 	 * Password for debug mode auto login
 	 */
 	public static String s_sDebugPassword = "password";
+	
+	/**
+	 * Code of the actual node
+	 */
+	public static String s_sMyNodeCode = "wasdi";
 
-	// XXX replace with dependency injection
 	private static CredentialPolicy m_oCredentialPolicy;
 
 	static {
@@ -81,23 +105,6 @@ public class Wasdi extends ResourceConfig {
 		register(new WasdiBinder());
 		packages(true, "it.fadeout.rest.resources");
 	}
-
-	//	@Override
-	//	public Set<Class<?>> getClasses() {
-	//		final Set<Class<?>> classes = new HashSet<Class<?>>();
-	//		// register resources and features
-	//		classes.add(FileBufferResource.class);
-	//		classes.add(OpenSearchResource.class);
-	//		classes.add(WasdiResource.class);
-	//		classes.add(AuthResource.class);
-	//		classes.add(WorkspaceResource.class);
-	//		classes.add(ProductResource.class);
-	//		classes.add(OpportunitySearchResource.class);
-	//		classes.add(ProcessingResources.class);
-	//		classes.add(ProcessWorkspaceResource.class);
-	//		classes.add(CatalogResources.class);
-	//		return classes;
-	//	}
 
 	@PostConstruct
 	public void initWasdi() {
@@ -140,6 +147,16 @@ public class Wasdi extends ResourceConfig {
 		} catch (Throwable e) {
 			e.printStackTrace();
 		}
+		
+		try {
+
+			s_sMyNodeCode = getInitParameter("NODECODE", "wasdi");
+			Utils.debugLog("-------Node Code " + s_sMyNodeCode);
+
+		} catch (Throwable e) {
+			e.printStackTrace();
+		}
+
 
 		try {
 
@@ -386,4 +403,190 @@ public class Wasdi extends ResourceConfig {
 		String sWorkspaceOwner = oWorkspace.getUserId();
 		return sWorkspaceOwner;
 	}
+	
+	
+	public static PrimitiveResult runProcess(String sUserId, String sSessionId, String sOperationId, String sProductName, String sSerializationPath, BaseParameter oParameter) throws IOException {
+		
+		// Get the Ob Id
+		String sProcessObjId = oParameter.getProcessObjId();
+		
+		PrimitiveResult oResult = new PrimitiveResult();
+
+		try {
+			
+			// Take the Workspace
+			WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
+			Workspace oWorkspace = oWorkspaceRepository.GetWorkspace(oParameter.getWorkspace());
+			
+			if (oWorkspace == null) {
+				Utils.debugLog("Wasdi.runProcess: ws not found. Return 500");
+				oResult.setBoolValue(false);
+				oResult.setIntValue(500);
+				return oResult;				
+			}
+			
+			// Check my node name
+			String sMyNodeCode = Wasdi.s_sMyNodeCode;
+			
+			if (Utils.isNullOrEmpty(sMyNodeCode)) sMyNodeCode = "wasdi";
+					
+			// Is the worspace here?
+			if (!oWorkspace.getNodeCode().equals(sMyNodeCode)) {
+				
+				// No: forward the call on the owner node
+				Utils.debugLog("Wasdi.runProcess: forewarding request to [" + oWorkspace.getNodeCode()+"]");
+				
+				// Get the Node
+				NodeRepository oNodeRepository = new NodeRepository();
+				wasdi.shared.business.Node oDestinationNode = oNodeRepository.GetNodeByCode(oWorkspace.getNodeCode());
+				
+				if (oDestinationNode==null) {
+					Utils.debugLog("Wasdi.runProcess: Node [" + oWorkspace.getNodeCode()+"] not found. Return 500");
+					oResult.setBoolValue(false);
+					oResult.setIntValue(500);
+					return oResult;									
+				}
+				
+				// Get the JSON of the parameter
+				String sPayload = MongoRepository.s_oMapper.writeValueAsString(oParameter);
+
+				// Get the URL of the destination Node
+				String sUrl = oDestinationNode.getNodeBaseAddress();
+				if (sUrl.endsWith("/") == false) sUrl += "/";
+				sUrl += "processing/run?sProductName="+sProductName;
+				
+				// call the API on the destination node 
+				String sResult = httpPost(sUrl, sPayload, getStandardHeaders(sSessionId));
+				
+				
+		        try {
+		        	// Get back the primitive result
+		            PrimitiveResult oPrimitiveResult = MongoRepository.s_oMapper.readValue(sResult,PrimitiveResult.class);
+
+		            return oPrimitiveResult;
+		        } catch (Exception oEx) {
+		            oEx.printStackTrace();
+					Utils.debugLog("Wasdi.runProcess: exception " + oEx);
+					oResult.setBoolValue(false);
+					oResult.setIntValue(500);
+					return oResult;				
+		        }
+			}
+			else {
+				// The Workspace is here. Just add the ProcessWorkspace to the database 
+				
+				// Serialization Path
+				String sPath = sSerializationPath;
+
+				if (!(sPath.endsWith("\\") || sPath.endsWith("/")))
+					sPath += "/";
+				sPath = sPath + sProcessObjId;
+
+				SerializationUtils.serializeObjectToXML(sPath, oParameter);
+
+				// Create the process Workspace
+				ProcessWorkspaceRepository oRepository = new ProcessWorkspaceRepository();
+				ProcessWorkspace oProcess = new ProcessWorkspace();
+
+				try {
+					oProcess.setOperationDate(Wasdi.GetFormatDate(new Date()));
+					oProcess.setOperationType(sOperationId);
+					oProcess.setProductName(sProductName);
+					oProcess.setWorkspaceId(oParameter.getWorkspace());
+					oProcess.setUserId(sUserId);
+					oProcess.setProcessObjId(sProcessObjId);
+					oProcess.setStatus(ProcessStatus.CREATED.name());
+					oRepository.InsertProcessWorkspace(oProcess);
+					Utils.debugLog("Wasdi.runProcess: Process Scheduled for Launcher");
+				} catch (Exception oEx) {
+					Utils.debugLog("Wasdi.runProcess: " + oEx);
+					oResult.setBoolValue(false);
+					oResult.setIntValue(500);
+					return oResult;
+				}				
+			}
+
+		} catch (IOException e) {
+			Utils.debugLog("Wasdi.runProcess: " + e);
+			oResult.setBoolValue(false);
+			oResult.setIntValue(500);
+			return oResult;
+		} catch (Exception e) {
+			Utils.debugLog("Wasdi.runProcess: " + e);
+			oResult.setBoolValue(false);
+			oResult.setIntValue(500);
+			return oResult;
+		}
+
+		// Ok, operation triggered
+		oResult.setBoolValue(true);
+		oResult.setIntValue(200);
+		oResult.setStringValue(sProcessObjId);
+
+		return oResult;
+	}
+	
+	/**
+	 * Get the standard headers for a WASDI call
+	 * @return
+	 */
+	public static HashMap<String, String> getStandardHeaders(String sSessionId) {
+		HashMap<String, String> aoHeaders = new HashMap<String, String>();
+		aoHeaders.put("x-session-token", sSessionId);
+		aoHeaders.put("Content-Type", "application/json");
+		
+		return aoHeaders;
+	}
+
+	
+	/**
+	 * Standard http post utility function
+	 * @param sUrl url to call
+	 * @param sPayload payload of the post 
+	 * @param asHeaders headers dictionary
+	 * @return server response
+	 */
+	public static String httpPost(String sUrl, String sPayload, Map<String, String> asHeaders) {
+		
+		try {
+			URL oURL = new URL(sUrl);
+			HttpURLConnection oConnection = (HttpURLConnection) oURL.openConnection();
+
+			oConnection.setDoOutput(true);
+			// Set POST
+			oConnection.setRequestMethod("POST");
+			
+			if (asHeaders != null) {
+				for (String sKey : asHeaders.keySet()) {
+					oConnection.setRequestProperty(sKey,asHeaders.get(sKey));
+				}
+			}
+			
+			OutputStream oPostOutputStream = oConnection.getOutputStream();
+			OutputStreamWriter oStreamWriter = new OutputStreamWriter(oPostOutputStream, "UTF-8");  
+			if (sPayload!= null) oStreamWriter.write(sPayload);
+			oStreamWriter.flush();
+			oStreamWriter.close();
+			oPostOutputStream.close(); 
+			
+			oConnection.connect();
+
+			BufferedReader oInputBuffer = new BufferedReader(new InputStreamReader(oConnection.getInputStream()));
+			String sInputLine;
+			StringBuffer sResponse = new StringBuffer();
+	
+			while ((sInputLine = oInputBuffer.readLine()) != null) {
+				sResponse.append(sInputLine);
+			}
+			oInputBuffer.close();
+			
+			return sResponse.toString();
+		}
+		catch (Exception oEx) {
+			oEx.printStackTrace();
+			return "";
+		}
+	}	
+	
+		
 }

@@ -535,9 +535,6 @@ public class ProductResource {
 
 		// Start ingestion
 		try {
-			ProcessWorkspace oProcess = null;
-			ProcessWorkspaceRepository oRepository = new ProcessWorkspaceRepository();
-
 			String sProcessObjId = Utils.GetRandomName();
 
 			IngestFileParameter oParameter = new IngestFileParameter();
@@ -548,31 +545,22 @@ public class ProductResource {
 			oParameter.setProcessObjId(sProcessObjId);
 			oParameter.setWorkspaceOwnerId(Wasdi.getWorkspaceOwner(sWorkspace));
 
-			sPath = m_oServletConfig.getInitParameter("SerializationPath") + sProcessObjId;
-			SerializationUtils.serializeObjectToXML(sPath, oParameter);
-
-			try {
-				oProcess = new ProcessWorkspace();
-				oProcess.setOperationDate(Wasdi.GetFormatDate(new Date()));
-				oProcess.setOperationType(LauncherOperations.INGEST.name());
-				oProcess.setProductName(oOutputFilePath.getName());
-				oProcess.setWorkspaceId(sWorkspace);
-				oProcess.setUserId(sUserId);
-				oProcess.setProcessObjId(sProcessObjId);
-				oProcess.setStatus(ProcessStatus.CREATED.name());
-				oRepository.InsertProcessWorkspace(oProcess);
-				Utils.debugLog("ProductResource.uploadfile: Process Scheduled for Launcher");
-			} catch (Exception oEx) {
-				Utils.debugLog("ProductResource.uploadfile: Error updating process list " + oEx);
-				return Response.status(500).build();
+			sPath = m_oServletConfig.getInitParameter("SerializationPath");
+			
+			PrimitiveResult oRes = Wasdi.runProcess(sUserId, sSessionId, LauncherOperations.INGEST.name(), oOutputFilePath.getName(), sPath, oParameter);
+			
+			if (oRes.getBoolValue()) {
+				return Response.ok().build();
 			}
-
-		} catch (Exception e) {
+			else {
+				return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+			}
+			
+		} 
+		catch (Exception e) {
 			Utils.debugLog("ProductResource.uploadfile: " + e);
 			return Response.status(500).build();
 		}
-
-		return Response.status(200).build();
 	}
 
 	@GET
