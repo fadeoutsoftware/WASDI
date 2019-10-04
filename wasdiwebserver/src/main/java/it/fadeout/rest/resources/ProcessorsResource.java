@@ -167,35 +167,22 @@ public class ProcessorsResource {
 			oDeployProcessorParameter.setWorkspaceOwnerId(Wasdi.getWorkspaceOwner(sWorkspaceId));
 			
 			String sPath = m_oServletConfig.getInitParameter("SerializationPath");
-			if (! (sPath.endsWith("/")||sPath.endsWith("\\"))) sPath+="/";
-			sPath += sProcessObjId;
-
-			SerializationUtils.serializeObjectToXML(sPath, oDeployProcessorParameter);
-
-			ProcessWorkspaceRepository oRepository = new ProcessWorkspaceRepository();
-			ProcessWorkspace oProcessWorkspace = new ProcessWorkspace();
 			
-			try{
-				oProcessWorkspace.setOperationDate(Wasdi.GetFormatDate(new Date()));
-				oProcessWorkspace.setOperationType(LauncherOperations.DEPLOYPROCESSOR.name());
-				oProcessWorkspace.setProductName(sName);
-				oProcessWorkspace.setWorkspaceId(sWorkspaceId);
-				oProcessWorkspace.setUserId(sUserId);
-				oProcessWorkspace.setProcessObjId(sProcessObjId);
-				oProcessWorkspace.setStatus(ProcessStatus.CREATED.name());
-				oRepository.InsertProcessWorkspace(oProcessWorkspace);
-				
-				Utils.debugLog("ProcessorResource.uploadProcessor: Process Scheduled for Launcher");
-			} catch(Exception oEx){
-				Utils.debugLog("ProcessorsResource.uploadProcessor: Error scheduling the deploy process " + oEx);
+			PrimitiveResult oRes = Wasdi.runProcess(sUserId, sSessionId, LauncherOperations.DEPLOYPROCESSOR.name(), sName, sPath, oDeployProcessorParameter);
+			
+			if (oRes.getBoolValue()) {
+				return Response.ok().build();
+			}
+			else {
 				return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
 			}
 		}
+		
 		catch (Exception oEx) {
 			Utils.debugLog("ProcessorsResource.uploadProcessor:" + oEx);
 			return Response.serverError().build();
 		}
-		return Response.ok().build();
+		
 	}
 	
 	@GET
@@ -283,8 +270,6 @@ public class ProcessorsResource {
 			String sProcessObjId = Utils.GetRandomName();
 			
 			String sPath = m_oServletConfig.getInitParameter("SerializationPath");
-			if (! (sPath.endsWith("/")||sPath.endsWith("\\"))) sPath+="/";
-			sPath += sProcessObjId;
 
 			ProcessorParameter oProcessorParameter = new ProcessorParameter();
 			oProcessorParameter.setName(sName);
@@ -298,28 +283,18 @@ public class ProcessorsResource {
 			oProcessorParameter.setSessionID(sSessionId);
 			oProcessorParameter.setWorkspaceOwnerId(Wasdi.getWorkspaceOwner(sWorkspaceId));
 			
-			SerializationUtils.serializeObjectToXML(sPath, oProcessorParameter);
-
-			
-			ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
-			ProcessWorkspace oProcessWorkspace = new ProcessWorkspace();
+			PrimitiveResult oResult = Wasdi.runProcess(sUserId, sSessionId, oProcessorParameter.getLauncherOperation(), sName, sPath, oProcessorParameter);
 			
 			try{
-				Utils.debugLog("ProcessorsResource.run: create task"); 
-				oProcessWorkspace.setOperationDate(Wasdi.GetFormatDate(new Date()));
-				oProcessWorkspace.setOperationType(oProcessorParameter.getLauncherOperation());
-				oProcessWorkspace.setProductName(sName);
-				oProcessWorkspace.setWorkspaceId(sWorkspaceId);
-				oProcessWorkspace.setUserId(sUserId);
-				oProcessWorkspace.setProcessObjId(sProcessObjId);
-				oProcessWorkspace.setStatus(ProcessStatus.CREATED.name());
-				oProcessWorkspaceRepository.InsertProcessWorkspace(oProcessWorkspace);
+				Utils.debugLog("ProcessorsResource.run: create task");
 				
-				Utils.debugLog("ProcessorResource.run: Process Scheduled for Launcher");
+				if (oResult.getBoolValue()==false) {
+					throw new Exception();
+				}
 								
 				oRunningProcessorViewModel.setJsonEncodedResult("");
 				oRunningProcessorViewModel.setName(sName);
-				oRunningProcessorViewModel.setProcessingIdentifier(oProcessWorkspace.getProcessObjId());
+				oRunningProcessorViewModel.setProcessingIdentifier(oResult.getStringValue());
 				oRunningProcessorViewModel.setProcessorId(oProcessorToRun.getProcessorId());
 				oRunningProcessorViewModel.setStatus("CREATED");
 				Utils.debugLog("ProcessorsResource.run: done"); 
@@ -654,9 +629,7 @@ public class ProcessorsResource {
 			String sProcessObjId = Utils.GetRandomName();
 			
 			String sPath = m_oServletConfig.getInitParameter("SerializationPath");
-			if (! (sPath.endsWith("/")||sPath.endsWith("\\"))) sPath+="/";
-			sPath += sProcessObjId;
-
+			
 			ProcessorParameter oProcessorParameter = new ProcessorParameter();
 			oProcessorParameter.setName(oProcessorToDelete.getName());
 			oProcessorParameter.setProcessorID(oProcessorToDelete.getProcessorId());
@@ -669,34 +642,14 @@ public class ProcessorsResource {
 			oProcessorParameter.setSessionID(sSessionId);
 			oProcessorParameter.setWorkspaceOwnerId(Wasdi.getWorkspaceOwner(sWorkspaceId));
 			
-			SerializationUtils.serializeObjectToXML(sPath, oProcessorParameter);
-
+			PrimitiveResult oRes = Wasdi.runProcess(sUserId,sSessionId, LauncherOperations.DELETEPROCESSOR.name(),oProcessorToDelete.getName(), sPath,oProcessorParameter);			
 			
-			ProcessWorkspaceRepository oProcessWorkspaceRepository = new ProcessWorkspaceRepository();
-			ProcessWorkspace oProcessWorkspace = new ProcessWorkspace();
-			
-			try{
-				Utils.debugLog("ProcessorsResource.deleteProcessor: create task"); 
-				oProcessWorkspace.setOperationDate(Wasdi.GetFormatDate(new Date()));
-				oProcessWorkspace.setOperationType(LauncherOperations.DELETEPROCESSOR.name());
-				oProcessWorkspace.setProductName(oProcessorToDelete.getName());
-				oProcessWorkspace.setWorkspaceId(sWorkspaceId);
-				oProcessWorkspace.setUserId(sUserId);
-				oProcessWorkspace.setProcessObjId(sProcessObjId);
-				oProcessWorkspace.setStatus(ProcessStatus.CREATED.name());
-				oProcessWorkspaceRepository.InsertProcessWorkspace(oProcessWorkspace);
-				
-				Utils.debugLog("ProcessorResource.deleteProcessor: Process Scheduled for Launcher");
-								
-				Utils.debugLog("ProcessorsResource.deleteProcessor: done"); 
+			if (oRes.getBoolValue()) {
+				return Response.ok().build();
 			}
-			catch(Exception oEx){
-				Utils.debugLog("ProcessorsResource.deleteProcessor: Error scheduling the run process: " + oEx);
+			else {
 				return Response.serverError().build();
 			}
-			
-			
-			return Response.ok().build();
 		}
 		catch (Exception oEx) {
 			Utils.debugLog("ProcessorResource.deleteProcessor: " + oEx);

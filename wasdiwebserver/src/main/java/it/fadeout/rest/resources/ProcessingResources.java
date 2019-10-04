@@ -16,8 +16,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -51,6 +54,7 @@ import javax.ws.rs.core.Response.Status;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.bson.Document;
 import org.esa.snap.core.dataio.ProductIO;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.FilterBand;
@@ -79,12 +83,15 @@ import wasdi.shared.business.SnapWorkflow;
 import wasdi.shared.business.User;
 import wasdi.shared.business.Workspace;
 import wasdi.shared.business.WpsProvider;
+import wasdi.shared.data.MongoRepository;
+import wasdi.shared.data.NodeRepository;
 import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.data.SnapWorkflowRepository;
 import wasdi.shared.data.WorkspaceRepository;
 import wasdi.shared.data.WpsProvidersRepository;
 import wasdi.shared.parameters.ApplyOrbitParameter;
 import wasdi.shared.parameters.ApplyOrbitSetting;
+import wasdi.shared.parameters.BaseParameter;
 import wasdi.shared.parameters.CalibratorParameter;
 import wasdi.shared.parameters.CalibratorSetting;
 import wasdi.shared.parameters.GraphParameter;
@@ -1351,8 +1358,7 @@ public class ProcessingResources {
 	 * @param oOperation              Launcher Operation Type
 	 * @return
 	 */
-	private PrimitiveResult executeOperation(String sSessionId, String sSourceProductName,
-			String sDestinationProductName, String sWorkspaceId, ISetting oSetting, LauncherOperations oOperation) {
+	private PrimitiveResult executeOperation(String sSessionId, String sSourceProductName, String sDestinationProductName, String sWorkspaceId, ISetting oSetting, LauncherOperations oOperation) {
 
 		Utils.debugLog("ProsessingResources.executeOperation( " + sSessionId + ", " + sSourceProductName + ", "
 				+ sDestinationProductName + ", " + sWorkspaceId + ", ISetting, LauncherOperations )");
@@ -1395,53 +1401,53 @@ public class ProcessingResources {
 
 			// Serialization Path
 			String sPath = m_oServletConfig.getInitParameter("SerializationPath");
-
-			if (!(sPath.endsWith("\\") || sPath.endsWith("/")))
-				sPath += "/";
-			sPath = sPath + sProcessObjId;
-
-			SerializationUtils.serializeObjectToXML(sPath, oParameter);
-
-			// Create the process Workspace
-			ProcessWorkspaceRepository oRepository = new ProcessWorkspaceRepository();
-			ProcessWorkspace oProcess = new ProcessWorkspace();
-
-			try {
-				oProcess.setOperationDate(Wasdi.GetFormatDate(new Date()));
-				oProcess.setOperationType(oOperation.name());
-				oProcess.setProductName(sSourceProductName);
-				oProcess.setWorkspaceId(sWorkspaceId);
-				oProcess.setUserId(sUserId);
-				oProcess.setProcessObjId(sProcessObjId);
-				oProcess.setStatus(ProcessStatus.CREATED.name());
-				oRepository.InsertProcessWorkspace(oProcess);
-				Utils.debugLog("ProcessingResource.ExecuteOperation: Process Scheduled for Launcher");
-			} catch (Exception oEx) {
-				Utils.debugLog("SnapOperations.ExecuteOperation: " + oEx);
-				oResult.setBoolValue(false);
-				oResult.setIntValue(500);
-				return oResult;
-			}
-
+			
+			return Wasdi.runProcess(sUserId, sSessionId, oOperation.name(), sSourceProductName, sPath, oParameter);
+			
 		} catch (IOException e) {
-			Utils.debugLog("SnapOperations.ExecuteOperation: " + e);
+			Utils.debugLog("ProsessingResources.ExecuteOperation: " + e);
 			oResult.setBoolValue(false);
 			oResult.setIntValue(500);
 			return oResult;
 		} catch (Exception e) {
-			Utils.debugLog("SnapOperations.ExecuteOperation: " + e);
+			Utils.debugLog("ProsessingResources.ExecuteOperation: " + e);
 			oResult.setBoolValue(false);
 			oResult.setIntValue(500);
 			return oResult;
 		}
-
-		// Ok, operation triggered
-		oResult.setBoolValue(true);
-		oResult.setIntValue(200);
-		oResult.setStringValue(sProcessObjId);
-
-		return oResult;
 	}
+	
+	
+	
+
+	@POST
+	@Path("run")
+	@Produces({ "application/xml", "application/json", "text/xml" })
+	public PrimitiveResult runProcess(@HeaderParam("x-session-token") String sSessionId,
+			@QueryParam("sOperation") String sOperationId, @QueryParam("sProductName") String sProductName, BaseParameter oParameter) throws IOException {
+
+		// Log intro
+		Utils.debugLog("ProsessingResources.runProcess( " + sSessionId + ", " + sOperationId + "," + sProductName + ")");
+		PrimitiveResult oResult = new PrimitiveResult();
+
+		// Check the user
+		String sUserId = acceptedUserAndSession(sSessionId);
+
+		// Is valid?
+		if (Utils.isNullOrEmpty(sUserId)) {
+
+			// Not authorised
+			oResult.setIntValue(401);
+			oResult.setBoolValue(false);
+
+			return oResult;
+		}
+		
+		String sPath = m_oServletConfig.getInitParameter("SerializationPath");
+		return Wasdi.runProcess(sUserId, sSessionId, sOperationId, sProductName, sPath, oParameter);
+	}
+	
+	
 
 	/**
 	 * Get the paramter Object for a specific Launcher Operation
@@ -1616,35 +1622,7 @@ public class ProcessingResources {
 			oParameter.setWorkspaceOwnerId(Wasdi.getWorkspaceOwner(sWorkspaceId));
 
 			String sPath = m_oServletConfig.getInitParameter("SerializationPath");
-			if (!(sPath.endsWith("\\") || sPath.endsWith("/")))
-				sPath += "/";
-			sPath = sPath + sProcessObjId;
-
-			SerializationUtils.serializeObjectToXML(sPath, oParameter);
-
-			ProcessWorkspaceRepository oRepository = new ProcessWorkspaceRepository();
-			ProcessWorkspace oProcess = new ProcessWorkspace();
-
-			try {
-				oProcess.setOperationDate(Wasdi.GetFormatDate(new Date()));
-				oProcess.setOperationType(LauncherOperations.RUNMATLAB.toString());
-				oProcess.setProductName(oJRCViewModel.getInputFileName());
-				oProcess.setWorkspaceId(sWorkspaceId);
-				oProcess.setUserId(sUserId);
-				oProcess.setProcessObjId(sProcessObjId);
-				oProcess.setStatus(ProcessStatus.CREATED.name());
-				oRepository.InsertProcessWorkspace(oProcess);
-				Utils.debugLog("ProcessingResource.asynchLaunch: Process Scheduled for Launcher");
-			} catch (Exception oEx) {
-				Utils.debugLog("ProcessingResource.asynchLaunchList: Error updating process list " + oEx);
-				oResult.setBoolValue(false);
-				oResult.setIntValue(500);
-				return oResult;
-			}
-
-			oResult.setBoolValue(true);
-			oResult.setIntValue(200);
-			oResult.setStringValue(oProcess.getProcessObjId());
+			return Wasdi.runProcess(sUserId, sSessionId, LauncherOperations.RUNMATLAB.toString(), oJRCViewModel.getInputFileName(), sPath, oParameter);
 
 		} catch (Exception oEx) {
 			Utils.debugLog("ProcessingResource.launchList: " + oEx);
@@ -1652,8 +1630,6 @@ public class ProcessingResources {
 			oResult.setIntValue(500);
 			return oResult;
 		}
-
-		return oResult;
 	}
 
 	/**
@@ -1797,35 +1773,9 @@ public class ProcessingResources {
 			oParameter.setWorkspaceOwnerId(Wasdi.getWorkspaceOwner(sWorkspaceId));
 
 			String sPath = m_oServletConfig.getInitParameter("SerializationPath");
-			if (!(sPath.endsWith("\\") || sPath.endsWith("/")))
-				sPath += "/";
 			sPath = sPath + sProcessObjId;
-
-			SerializationUtils.serializeObjectToXML(sPath, oParameter);
-
-			ProcessWorkspaceRepository oRepository = new ProcessWorkspaceRepository();
-			ProcessWorkspace oProcess = new ProcessWorkspace();
-
-			try {
-				oProcess.setOperationDate(Wasdi.GetFormatDate(new Date()));
-				oProcess.setOperationType(LauncherOperations.RUNMATLAB.toString());
-				oProcess.setProductName(oJRCViewModel.getInputFileName());
-				oProcess.setWorkspaceId(sWorkspaceId);
-				oProcess.setUserId(sUserId);
-				oProcess.setProcessObjId(sProcessObjId);
-				oProcess.setStatus(ProcessStatus.CREATED.name());
-				oRepository.InsertProcessWorkspace(oProcess);
-				Utils.debugLog("ProcessingResource.asynchLaunch2: Process Scheduled for Launcher");
-			} catch (Exception oEx) {
-				Utils.debugLog("ProcessingResource.asynchLaunchList2: Error updating process list " + oEx);
-				oResult.setBoolValue(false);
-				oResult.setIntValue(500);
-				return oResult;
-			}
-
-			oResult.setBoolValue(true);
-			oResult.setIntValue(200);
-			oResult.setStringValue(oProcess.getProcessObjId());
+			
+			return Wasdi.runProcess(sUserId, sSessionId, LauncherOperations.RUNMATLAB.toString(), oJRCViewModel.getInputFileName(), sPath, oParameter);
 
 		} catch (Exception oEx) {
 			Utils.debugLog("ProcessingResource.launchList2: " + oEx);
@@ -1833,8 +1783,6 @@ public class ProcessingResources {
 			oResult.setIntValue(500);
 			return oResult;
 		}
-
-		return oResult;
 	}
 
 	/**
@@ -1842,7 +1790,7 @@ public class ProcessingResources {
 	 * 
 	 * @param sSessionId a valid session identifier
 	 * @param sFileName  input file
-	 * @param a          workspase identifier
+	 * @param a workspace identifier
 	 * @return BAD_REQUEST if null request, UNAUTHORIZED if session is not valid, OK
 	 *         after execution of the script
 	 */
@@ -1980,43 +1928,14 @@ public class ProcessingResources {
 			oParameter.setWorkspaceOwnerId(Wasdi.getWorkspaceOwner(sWorkspaceId));
 
 			String sPath = m_oServletConfig.getInitParameter("SerializationPath");
-			if (!(sPath.endsWith("\\") || sPath.endsWith("/")))
-				sPath += "/";
-			sPath = sPath + sProcessObjId;
-
-			SerializationUtils.serializeObjectToXML(sPath, oParameter);
-
-			ProcessWorkspaceRepository oRepository = new ProcessWorkspaceRepository();
-			ProcessWorkspace oProcess = new ProcessWorkspace();
-
-			try {
-				oProcess.setOperationDate(Wasdi.GetFormatDate(new Date()));
-				oProcess.setOperationType(LauncherOperations.RUNMATLAB.toString());
-				oProcess.setProductName(oJRCViewModel.getInputFileName());
-				oProcess.setWorkspaceId(sWorkspaceId);
-				oProcess.setUserId(sUserId);
-				oProcess.setProcessObjId(sProcessObjId);
-				oProcess.setStatus(ProcessStatus.CREATED.name());
-				oRepository.InsertProcessWorkspace(oProcess);
-				Utils.debugLog("ProcessingResource.asynchLaunch3: Process Scheduled for Launcher");
-			} catch (Exception oEx) {
-				Utils.debugLog("ProcessingResource.asynchLaunchList3: Error updating process list " + oEx);
-				oResult.setBoolValue(false);
-				oResult.setIntValue(500);
-				return oResult;
-			}
-
-			oResult.setBoolValue(true);
-			oResult.setIntValue(200);
-			oResult.setStringValue(oProcess.getProcessObjId());
-
+			
+			return Wasdi.runProcess(sUserId, sSessionId, LauncherOperations.RUNMATLAB.toString(), oJRCViewModel.getInputFileName(), sPath, oParameter);
+			
 		} catch (Exception oEx) {
 			Utils.debugLog("ProcessingResource.launchList2: " + oEx);
 			oResult.setBoolValue(false);
 			oResult.setIntValue(500);
 			return oResult;
 		}
-
-		return oResult;
 	}
 }

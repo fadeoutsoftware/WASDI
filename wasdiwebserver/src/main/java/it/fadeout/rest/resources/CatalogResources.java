@@ -479,13 +479,13 @@ public class CatalogResources {
 		// Check user session
 		User oUser = Wasdi.GetUserFromSession(sSessionId);
 		if (oUser == null || Utils.isNullOrEmpty(oUser.getUserId())) return Response.status(Status.UNAUTHORIZED).build();		
-		String sAccount = oUser.getUserId();		
+		String sUserId = oUser.getUserId();		
 
 		// Find the sftp folder
 		String sUserBaseDir = m_oServletConfig.getInitParameter("sftpManagementUserDir");
 
 		File oUserBaseDir = new File(sUserBaseDir);
-		File oFilePath = new File(new File(new File(oUserBaseDir, sAccount), "uploads"), sFile);
+		File oFilePath = new File(new File(new File(oUserBaseDir, sUserId), "uploads"), sFile);
 
 		// Is the file available?
 		if (!oFilePath.canRead()) {
@@ -503,35 +503,21 @@ public class CatalogResources {
 			// Ingest file parameter
 			IngestFileParameter oParameter = new IngestFileParameter();
 			oParameter.setWorkspace(sWorkspace);
-			oParameter.setUserId(sAccount);
+			oParameter.setUserId(sUserId);
 			oParameter.setExchange(sWorkspace);
 			oParameter.setFilePath(oFilePath.getAbsolutePath());
 			oParameter.setProcessObjId(sProcessObjId);
 			oParameter.setWorkspaceOwnerId(Wasdi.getWorkspaceOwner(sWorkspace));
 
-			String sPath = m_oServletConfig.getInitParameter("SerializationPath") + sProcessObjId;
-			SerializationUtils.serializeObjectToXML(sPath, oParameter);
-
-			try
-			{
-				// Create the process
-				oProcess = new ProcessWorkspace();
-				oProcess.setOperationDate(Wasdi.GetFormatDate(new Date()));
-				oProcess.setOperationType(LauncherOperations.INGEST.name());
-				oProcess.setProductName(oFilePath.getName());
-				oProcess.setWorkspaceId(sWorkspace);
-				oProcess.setUserId(sAccount);
-				oProcess.setProcessObjId(sProcessObjId);
-				oProcess.setStatus(ProcessStatus.CREATED.name());
-				oRepository.InsertProcessWorkspace(oProcess);
-				Utils.debugLog("CatalogueResource.IngestFile: Process Scheduled for Launcher");
+			String sPath = m_oServletConfig.getInitParameter("SerializationPath");
+			PrimitiveResult oRes = Wasdi.runProcess(sUserId, sSessionId, LauncherOperations.INGEST.name(), oFilePath.getName(), sPath, oParameter);
+			
+			if (oRes.getBoolValue()) {
+				return Response.ok().build();
 			}
-			catch(Exception oEx){
-				Utils.debugLog("DownloadResource.Download: " + oEx);
+			else {
 				return Response.serverError().build();
 			}
-
-			return Response.ok().build();
 
 		} catch (Exception e) {
 			Utils.debugLog("DownloadResource.Download: " + e);
@@ -567,7 +553,7 @@ public class CatalogResources {
 		}
 		
 		// Get the user account
-		String sAccount = oUser.getUserId();		
+		String sUserId = oUser.getUserId();		
 		
 		// Get the file path		
 		String sFilePath = Wasdi.getWorkspacePath(m_oServletConfig, Wasdi.getWorkspaceOwner(sWorkspace), sWorkspace) + sFile;
@@ -605,47 +591,19 @@ public class CatalogResources {
 		}
 		
 		try {
-			ProcessWorkspace oProcess = null;
-			ProcessWorkspaceRepository oRepository = new ProcessWorkspaceRepository();
-
 			String sProcessObjId = Utils.GetRandomName();
 
 			IngestFileParameter oParameter = new IngestFileParameter();
 			oParameter.setWorkspace(sWorkspace);
-			oParameter.setUserId(sAccount);
+			oParameter.setUserId(sUserId);
 			oParameter.setExchange(sWorkspace);
 			oParameter.setFilePath(oFilePath.getAbsolutePath());
 			//set the process object Id to params
 			oParameter.setProcessObjId(sProcessObjId);
 			oParameter.setWorkspaceOwnerId(Wasdi.getWorkspaceOwner(sWorkspace));
 
-			String sPath = m_oServletConfig.getInitParameter("SerializationPath") + sProcessObjId;
-			SerializationUtils.serializeObjectToXML(sPath, oParameter);
-
-			try
-			{
-				oProcess = new ProcessWorkspace();
-				oProcess.setOperationDate(Wasdi.GetFormatDate(new Date()));
-				oProcess.setOperationType(LauncherOperations.INGEST.name());
-				oProcess.setProductName(oFilePath.getName());
-				oProcess.setWorkspaceId(sWorkspace);
-				oProcess.setUserId(sAccount);
-				oProcess.setProcessObjId(sProcessObjId);
-				oProcess.setStatus(ProcessStatus.CREATED.name());
-				oRepository.InsertProcessWorkspace(oProcess);
-				Utils.debugLog("CatalogueResource.IngestFileInWorkspace: Process Scheduled for Launcher");
-			}
-			catch(Exception oEx){
-				Utils.debugLog("CatalogueResource.IngestFileInWorkspace: Error updating process list " + oEx);
-				oResult.setBoolValue(false);
-				oResult.setIntValue(500);
-				return oResult;		
-			}
-
-			oResult.setBoolValue(true);
-			oResult.setIntValue(200);
-			oResult.setStringValue(oProcess.getProcessObjId());
-			return oResult;		
+			String sPath = m_oServletConfig.getInitParameter("SerializationPath");
+			return Wasdi.runProcess(sUserId, sSessionId, LauncherOperations.INGEST.name(), oFilePath.getName(), sPath, oParameter);
 
 		} catch (Exception e) {
 			Utils.debugLog("CatalogueResource.IngestFileInWorkspace: " + e);
@@ -717,24 +675,9 @@ public class CatalogResources {
 			oParams.setLocalPath(sFullLocalPath);
 			oParams.setWorkspaceOwnerId(Wasdi.getWorkspaceOwner(sUserId));
 
-			Utils.debugLog("CatalogResource.ftpTransferFile: prepare process");
-			ProcessWorkspace oProcess = new ProcessWorkspace();
-			oProcess.setOperationDate(Wasdi.GetFormatDate(new Date()));
-			oProcess.setOperationType(LauncherOperations.FTPUPLOAD.name());
-			//oProcess.setProductName(sFileUrl);
-			oProcess.setWorkspaceId(sWorkspace);
-			oProcess.setUserId(sUserId);
-			oProcess.setProcessObjId(Utils.GetRandomName());
-			oProcess.setStatus(ProcessStatus.CREATED.name());
-			oParams.setProcessObjId(oProcess.getProcessObjId());
-
-			Utils.debugLog("CatalogResource.ftpTransferFile: serialize parameters");
-			String sPath = m_oServletConfig.getInitParameter("SerializationPath") + oProcess.getProcessObjId();
-			SerializationUtils.serializeObjectToXML(sPath, oParams);
-
-			ProcessWorkspaceRepository oRepository = new ProcessWorkspaceRepository();
-			oRepository.InsertProcessWorkspace(oProcess);
-			Utils.debugLog("CatalogueResource.ftpTransferFile: Process Scheduled for Launcher");
+			String sPath = m_oServletConfig.getInitParameter("SerializationPath");
+						
+			return Wasdi.runProcess(sUserId, sSessionId, LauncherOperations.FTPUPLOAD.name(), sFileName, sPath, oParams);
 
 		} catch (Exception e) {
 			Utils.debugLog("CatalogueResource.ftpTransferFile: " + e);
@@ -742,10 +685,6 @@ public class CatalogResources {
 			oRes.setStringValue(e.toString());
 			return oRes;
 		}
-
-		PrimitiveResult oResult = new PrimitiveResult();
-		oResult.setBoolValue(true);
-		return oResult;
 	}
 
 }
