@@ -227,6 +227,12 @@ var EditorController = (function () {
                         subMenu:[],
                         onClick: this.openProcessorDialog,
                         icon:"fa fa-lg fa-plus-square"
+                    },{
+                        name:"",// New Processor
+                        caption_i18n : "EDITOR_OPERATION_TITLE_EDRIFT_FLOOD_EVENT",
+                        subMenu:[],
+                        onClick: this.open_eDriftFloodEventDialog,
+                        icon:"fa fa-lg fa-plus-square"
                     },
                     {
                         name:"",//mida
@@ -2249,7 +2255,38 @@ var EditorController = (function () {
 
         return true;
     };
+    /**
+     *
+     * @returns {boolean}
+     */
+    EditorController.prototype.open_eDriftFloodEventDialog = function(oWindow){
+        var oController;
+        if(utilsIsObjectNullOrUndefined(oWindow) === true)
+        {
+            oController = this;
+        }
+        else
+        {
+            oController = oWindow;
+        }
 
+        oController.m_oModalService.showModal({
+            templateUrl: "dialogs/eDrift_Flood_Event_Dialog/eDrift_Flood_Event_DialogView.html",
+            controller: "eDriftFloodEventDialogController",
+            inputs: {
+                extras: {
+                    processor:null
+                }
+            }
+        }).then(function (modal) {
+            modal.element.modal();
+            modal.close.then(function (oResult) {
+                // oController.m_oProcessesLaunchedService.loadProcessesFromServer(oController.m_oActiveWorkspace.workspaceId);
+            });
+        });
+
+        return true;
+    };
     /**
      * openWPSDialog
      * @returns {boolean}
