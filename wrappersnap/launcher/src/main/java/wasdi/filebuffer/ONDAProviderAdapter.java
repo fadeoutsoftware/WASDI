@@ -6,13 +6,18 @@
  */
 package wasdi.filebuffer;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 
+import org.apache.commons.net.io.Util;
 import org.apache.log4j.Logger;
+import org.json.JSONObject;
 
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.utils.Utils;
@@ -133,7 +138,7 @@ public class ONDAProviderAdapter extends ProviderAdapter {
 				copyStream(oProcessWorkspace, oSourceFile.length(), oInputStream, oOutputStream);
 
 			} catch (Exception e) {
-				m_oLogger.debug( "ONDAProviderAdapter.Exception: " + e);
+				m_oLogger.info("ONDAProviderAdapter.ExecuteDownloadFile: " + e);
 			}
 			//TODO else - i.e., if it fails - try get the file from https instead
 			//	- in this case the sUrl must be modified in order to include http, so that it can be retrieved  
@@ -150,6 +155,94 @@ public class ONDAProviderAdapter extends ProviderAdapter {
 		return "";
 	}
 
+	
+	protected Boolean checkProductAvailability(String sDownloadUrl, String sDownloadUser, String sDownloadPassword) {
+		m_oLogger.debug( "ONDAProviderAdapter.checkProductAvailability( " + sDownloadUrl + ", " + sDownloadUser + ", " + sDownloadPassword + " )");
+		String sUUID = extractProductUUID(sDownloadUrl);
+		return checkProductAvailability(sUUID, sDownloadUser, sDownloadPassword);
+	}
+	
+	protected Boolean checkProductAvailabilityFromUUID(String sUUID, String sDownloadUser, String sDownloadPassword) {
+		m_oLogger.debug( "ONDAProviderAdapter.checkProductAvailability( " + sUUID + ", " + sDownloadUser + ", " + sDownloadPassword + " )");
+		
+		String sCheckUrl = "https://catalogue.onda-dias.eu/dias-catalogue/Products(" + sUUID + ")?$select=offline,downloadable";
+		try {
+				
+			URL oUrl = new URL(sCheckUrl);
+	        HttpURLConnection oHttpConn = (HttpURLConnection) oUrl.openConnection();
+	        oHttpConn.setRequestMethod("GET");
+			oHttpConn.setRequestProperty("Accept", "*/*");
+	        oHttpConn.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:57.0) Gecko/20100101 Firefox/57.0");
+	        int responseCode = oHttpConn.getResponseCode();
+	        if (responseCode == HttpURLConnection.HTTP_OK) {
+	        	//get json
+	        	String sJson = null;
+	        	try {
+	    			InputStream oInputStream = oHttpConn.getInputStream();		
+					if(null!=oInputStream) {
+						ByteArrayOutputStream oBytearrayOutputStream = new ByteArrayOutputStream();
+						Util.copyStream(oInputStream, oBytearrayOutputStream);
+						sJson = oBytearrayOutputStream.toString();
+					}
+					oHttpConn.disconnect();
+	        	}catch (Exception oE) {
+	    			m_oLogger.error( "ONDAProviderAdapter.checkProductAvailabilityFromUUID( " + sUUID + ", " + sDownloadUser + ", " + sDownloadPassword +
+" ): error retrieving  reply: " + oE);
+	    			return null;
+	        	}
+	        	//then parse json
+	        	try {
+	        		Boolean bAvailable = null;
+					if(!Utils.isNullOrEmpty(sJson)) {
+						JSONObject oJson = new JSONObject(sJson);
+						if( oJson.has("offline") ) {
+							bAvailable = oJson.optBoolean("offline");
+							if(null!=bAvailable) {
+								//if offline then not available
+								bAvailable = !bAvailable;
+							}
+						} else if(oJson.has("downloadable")) {
+							bAvailable = oJson.optBoolean("downloadable"); 
+						} else {
+							m_oLogger.error( "ONDAProviderAdapter.checkProductAvailabilityFromUUID( " + sUUID + ", " + sDownloadUser + ", " + sDownloadPassword + "): cannot infer availability from json" );
+						}
+					}
+					return bAvailable;
+	        	}catch (Exception oE) {
+	        		m_oLogger.error( "ONDAProviderAdapter.checkProductAvailabilityFromUUID( " + sUUID + ", " + sDownloadUser + ", " + sDownloadPassword + "): during parse: " + oE);
+	    			return null;
+	        	}
+	        } else {
+	        	m_oLogger.info( "ONDAProviderAdapter.checkProductAvailabilityFromUUID( " + sUUID + ", " + sDownloadUser + ", " + sDownloadPassword + "): Server replied with HTTP code: " + responseCode);
+	            InputStream oErrorStream = oHttpConn.getErrorStream();
+	            if(null!=oErrorStream) {
+					ByteArrayOutputStream oBytearrayOutputStream = new ByteArrayOutputStream();
+					Util.copyStream(oErrorStream, oBytearrayOutputStream);
+					String sError = oBytearrayOutputStream.toString();
+					if(!Utils.isNullOrEmpty(sError)) {
+						m_oLogger.error( "ONDAProviderAdapter.checkProductAvailabilityFromUUID( " + sUUID + ", " + sDownloadUser + ", " + sDownloadPassword + "): additional error info: " + sError );
+					}
+				}
+	            oHttpConn.disconnect();
+	            return null;
+	        }
+			
+		} catch (Exception oE) {
+			m_oLogger.error( "ONDAProviderAdapter.checkProductAvailabilityFromUUID( " + sUUID + " ): error on get: " + oE );
+			return null;
+		}
+	}
+	
+	
+	protected String extractProductUUID(String sUrl) {
+		// we expect a link in the form
+		// https://catalogue.onda-dias.eu/dias-catalogue/Products(865b6925-59ba-49be-8444-8c99d3f0c3c4)/$value
+		int iStart = sUrl.indexOf('(') + 1;
+		int iEnd = sUrl.indexOf(')');
+		String sUUID = sUrl.substring(iStart, iEnd);
+		return sUUID;
+	}
+	
 	/* (non-Javadoc)
 	 * @see wasdi.filebuffer.DownloadFile#GetFileName(java.lang.String)
 	 */
