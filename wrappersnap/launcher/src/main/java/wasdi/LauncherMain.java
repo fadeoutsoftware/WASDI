@@ -457,6 +457,13 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 				oEngine.run(oParameter);
 			}
 			break;
+			case DELETEPROCESSOR: {
+				// Delete User Processor
+				ProcessorParameter oParameter = (ProcessorParameter) SerializationUtils.deserializeXMLToObject(sParameter);
+				WasdiProcessorEngine oEngine = WasdiProcessorEngine.GetProcessorEngine(oParameter.getProcessorType(), ConfigReader.getPropValue("DOWNLOAD_ROOT_PATH"), ConfigReader.getPropValue("DOCKER_TEMPLATE_PATH"));
+				oEngine.delete(oParameter);
+			}
+			break;			
 			case RUNMATLAB: {
 				// Run Matlab Processor
 				MATLABProcParameters oParameter = (MATLABProcParameters) SerializationUtils.deserializeXMLToObject(sParameter);
@@ -490,13 +497,6 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 				// TODO: STILL HAVE TO FIND PIXEL SPACING
 				RegridParameter oParameter = (RegridParameter) SerializationUtils.deserializeXMLToObject(sParameter);
 				executeGDALRegrid(oParameter);
-			}
-			break;
-			case DELETEPROCESSOR: {
-				// Delete User Processor
-				ProcessorParameter oParameter = (ProcessorParameter) SerializationUtils.deserializeXMLToObject(sParameter);
-				WasdiProcessorEngine oEngine = WasdiProcessorEngine.GetProcessorEngine(oParameter.getProcessorType(), ConfigReader.getPropValue("DOWNLOAD_ROOT_PATH"), ConfigReader.getPropValue("DOCKER_TEMPLATE_PATH"));
-				oEngine.delete(oParameter);
 			}
 			break;
 			default:
@@ -1461,11 +1461,11 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			Publisher oPublisher = new Publisher();
 
 			try {
-				oPublisher.m_lMaxMbTiffPyramid = Long.parseLong(ConfigReader.getPropValue("MAX_GEOTIFF_DIMENSION_PYRAMID","50"));
+				oPublisher.m_lMaxMbTiffPyramid = Long.parseLong(ConfigReader.getPropValue("MAX_GEOTIFF_DIMENSION_PYRAMID","1024"));
 			}
 			catch (Exception e) {
-				s_oLogger.error("LauncherMain.PublishBandImage: wrong MAX_GEOTIFF_DIMENSION_PYRAMID, setting default to 50");
-				oPublisher.m_lMaxMbTiffPyramid = 50L;
+				s_oLogger.error("LauncherMain.PublishBandImage: wrong MAX_GEOTIFF_DIMENSION_PYRAMID, setting default to 1024");
+				oPublisher.m_lMaxMbTiffPyramid = 1024L;
 			}
 
 			s_oLogger.debug("Call publish geotiff sOutputFilePath = " + sOutputFilePath + " , sLayerId = " + sLayerId);
