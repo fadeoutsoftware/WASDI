@@ -52,6 +52,8 @@ import wasdi.asynch.SaveMetadataThread;
 import wasdi.filebuffer.ProviderAdapter;
 import wasdi.filebuffer.ProviderAdapterFactory;
 import wasdi.geoserver.Publisher;
+import wasdi.io.WasdiProductReader;
+import wasdi.io.WasdiProductWriter;
 import wasdi.processors.WasdiProcessorEngine;
 import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.DownloadedFile;
@@ -98,6 +100,7 @@ import wasdi.shared.utils.EndMessageProvider;
 import wasdi.shared.utils.FtpClient;
 import wasdi.shared.utils.SerializationUtils;
 import wasdi.shared.utils.Utils;
+import wasdi.shared.viewmodels.MetadataViewModel;
 import wasdi.shared.viewmodels.ProductViewModel;
 import wasdi.shared.viewmodels.PublishBandResultViewModel;
 import wasdi.snapopearations.ApplyOrbit;
@@ -108,10 +111,8 @@ import wasdi.snapopearations.Mosaic;
 import wasdi.snapopearations.Multilooking;
 import wasdi.snapopearations.NDVI;
 import wasdi.snapopearations.RasterGeometricResampling;
-import wasdi.snapopearations.ReadProduct;
 import wasdi.snapopearations.TerrainCorrection;
 import wasdi.snapopearations.WasdiGraph;
-import wasdi.snapopearations.WriteProduct;
 
 
 /**
@@ -694,7 +695,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 					sFileName = sFileName.replaceAll("//", "/");
 
 					// Get The product view Model
-					ReadProduct oReadProduct = new ReadProduct();
+					WasdiProductReader oReadProduct = new WasdiProductReader();
 					File oProductFile = new File(sFileName);
 					Product oProduct = oReadProduct.readSnapProduct(oProductFile, null);
 					oVM = oReadProduct.getProductViewModel(oProduct, oProductFile);
@@ -898,7 +899,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 		return true;
 	}
 
-	public String saveMetadata(ReadProduct oReadProduct, File oProductFile) {
+	public String saveMetadata(WasdiProductReader oReadProduct, File oProductFile) {
 
 		// Write Metadata to file system
 		try {
@@ -907,11 +908,16 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			if (!sMetadataPath.endsWith("/")) sMetadataPath += "/";
 			String sMetadataFileName = Utils.GetRandomName();
 
-			s_oLogger.debug("SaveMetadata: file = " + sMetadataFileName);
-
-			SerializationUtils.serializeObjectToXML(sMetadataPath+sMetadataFileName, oReadProduct.getProductMetadataViewModel());
-
-			s_oLogger.debug("SaveMetadata: file = saved");
+			MetadataViewModel oMetadataViewModel = oReadProduct.getProductMetadataViewModel();
+			
+			if (oMetadataViewModel != null) {
+				s_oLogger.debug("SaveMetadata: file = " + sMetadataFileName);
+				SerializationUtils.serializeObjectToXML(sMetadataPath+sMetadataFileName, oMetadataViewModel);
+				s_oLogger.debug("SaveMetadata: file saved");
+			}
+			else {
+				s_oLogger.debug("SaveMetadata: No Metadata Available");
+			}
 
 			return sMetadataFileName;
 
@@ -996,6 +1002,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			if (oProcessWorkspace != null) {
 				//get file size
 				long lFileSizeByte = oFileToIngestPath.length(); 
+				
 				//set file size
 				setFileSizeToProcess(lFileSizeByte, oProcessWorkspace);
 
@@ -1017,40 +1024,93 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			}
 
 			if (!oDstDir.isDirectory() || !oDstDir.canWrite()) {
-				System.out.println("LauncherMain.Ingest: ERROR: unable to access destination directory " + oDstDir.getAbsolutePath());
+				s_oLogger.error("LauncherMain.Ingest: ERROR: unable to access destination directory " + oDstDir.getAbsolutePath());
 				throw new IOException("Unable to access destination directory for the Workspace");
 			}
-
-			// Product view Model
-			ReadProduct oReadProduct = new ReadProduct();
-			ProductViewModel oVM = oReadProduct.getProductViewModel(oFileToIngestPath);
+			
+			// Usually, we do not unzip after the copy
+			boolean bUnzipAfterCopy = false;
+			
+			// Try to read the Product view Model
+			WasdiProductReader oReadProduct = new WasdiProductReader();
+			ProductViewModel oImportProductViewModel = oReadProduct.getProductViewModel(oFileToIngestPath);
+			
+			String sDestinationFileName = oFileToIngestPath.getName();
+			
+			// Did we got the View Model ?
+			if (oImportProductViewModel == null) {
+				
+				s_oLogger.warn("Impossible to read the Product View Model");
+				
+				// Check if this is a Zipped Shape File
+				if (oFileToIngestPath.getName().toLowerCase().endsWith(".zip")) {
+					if (Utils.isShapeFileZipped(oFileToIngestPath.getPath())) {
+						
+						// May be. 
+						s_oLogger.info("File to ingest looks can be a zipped shape file, try to unzip");
+						
+						// Unzip
+						Utils.unzip(oFileToIngestPath.getName(), oFileToIngestPath.getParent());
+						
+						// Get the name of shp from the zip file (case safe)
+						String sShapeFileTest = Utils.getShpFileNameFromZipFile(oFileToIngestPath.getPath());
+						
+						if (Utils.isNullOrEmpty(sShapeFileTest) == false) {
+							// Ok, we have our file
+							File oShapeFileIngestPath = new File(oFileToIngestPath.getParent()+"/"+sShapeFileTest);
+							// Now get the view model again
+							oImportProductViewModel = oReadProduct.getProductViewModel(oShapeFileIngestPath);
+							bUnzipAfterCopy = true;
+							s_oLogger.info("Ok, zipped shape file found");
+							
+							sDestinationFileName = sShapeFileTest;
+						}								
+					}
+				}
+			}
+			
+			// If we do not have the view model here, we were not able to open the file
+			if (oImportProductViewModel == null) {
+				s_oLogger.error("LauncherMain.Ingest: ERROR: unable to get the product view model");
+				throw new IOException("Unable to get the product view model");				
+			}
 
 			updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 25);
 
 			// Save Metadata
-			oVM.setMetadataFileReference(asynchSaveMetadata(oParameter.getFilePath()));
+			oImportProductViewModel.setMetadataFileReference(asynchSaveMetadata(oParameter.getFilePath()));
 
 			updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 50);	        
 
 			//copy file to workspace directory
 			if (!oFileToIngestPath.getParent().equals(oDstDir.getAbsolutePath())) {
+				
 				s_oLogger.debug("File in another folder make a copy");
 				FileUtils.copyFileToDirectory(oFileToIngestPath, oDstDir);
+				
+				// Must be unzipped?
+				if (bUnzipAfterCopy) {
+					
+					s_oLogger.debug("File must be unzipped");
+					Utils.unzip(oFileToIngestPath.getName(), oDstDir.getPath());
+					s_oLogger.debug("Unzip done");
+				}
 			}
 			else {
 				s_oLogger.debug("File already in place");
 			}
 
-			File oDstFile = new File(oDstDir, oFileToIngestPath.getName());
+			File oDstFile = new File(oDstDir, sDestinationFileName);
 
 			updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 75);
-
-			if (oVM.getName().equals("geotiff")) {
-				oVM.setName(oVM.getFileName());
+			
+			// Snap set the name of geotiff files as geotiff: let replace with the file name
+			if (oImportProductViewModel.getName().equals("geotiff")) {
+				oImportProductViewModel.setName(oImportProductViewModel.getFileName());
 			}
 			
 			//add product to db
-			addProductToDbAndWorkspaceAndSendToRabbit(oVM, oDstFile.getAbsolutePath(), oParameter.getWorkspace(), oParameter.getExchange(), LauncherOperations.INGEST.name(), null);
+			addProductToDbAndWorkspaceAndSendToRabbit(oImportProductViewModel, oDstFile.getAbsolutePath(), oParameter.getWorkspace(), oParameter.getExchange(), LauncherOperations.INGEST.name(), null);
 
 			 updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.DONE, 100);
 
@@ -1176,9 +1236,9 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			//set file size            
 			setFileSizeToProcess(oSourceFile, oProcessWorkspace);
 
-			WriteProduct oWriter = new WriteProduct(oProcessWorkspaceRepository, oProcessWorkspace);
+			WasdiProductWriter oWriter = new WasdiProductWriter(oProcessWorkspaceRepository, oProcessWorkspace);
 
-			ReadProduct oReadProduct = new ReadProduct();
+			WasdiProductReader oReadProduct = new WasdiProductReader();
 			s_oLogger.debug("LauncherMain.ExecuteOperation: Read Product");
 			Product oSourceProduct = oReadProduct.readSnapProduct(oSourceFile, null);
 
@@ -1362,8 +1422,17 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			s_oLogger.debug( "LauncherMain.PublishBandImage:  Generating Band Image...");
 			
 			// Read the product
-			ReadProduct oReadProduct = new ReadProduct();
-			Product oProduct = oReadProduct.readSnapProduct(oFile, null);            
+			WasdiProductReader oReadProduct = new WasdiProductReader();
+			Product oProduct = oReadProduct.readSnapProduct(oFile, null);
+			
+			if (oProduct == null) {
+				
+				// TODO: HERE CHECK IF IT IS A SHAPE FILE!!!!!
+				
+				s_oLogger.error("Not a SNAP Product Return empyt layer id for ["+ sFile +"]");
+				return sLayerId;
+			}
+
 			String sEPSG = CRS.lookupIdentifier(oProduct.getSceneCRS(),true);
 
 			updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 20);
@@ -1398,7 +1467,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 					Band oBand = oProduct.getBand(oParameter.getBandName());            
 					Product oGeotiffProduct = new Product(oParameter.getBandName(), "GEOTIFF");
 					oGeotiffProduct.addBand(oBand);                 
-					sOutputFilePath = new WriteProduct(oProcessWorkspaceRepository, oProcessWorkspace).WriteGeoTiff(oGeotiffProduct, sTargetDir, sLayerId);
+					sOutputFilePath = new WasdiProductWriter(oProcessWorkspaceRepository, oProcessWorkspace).WriteGeoTiff(oGeotiffProduct, sTargetDir, sLayerId);
 					oOutputFile = new File(sOutputFilePath);
 					s_oLogger.debug( "LauncherMain.PublishBandImage:  Geotiff File Created (EPSG=" + sEPSG + "): " + sOutputFilePath);
 
@@ -1603,9 +1672,9 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			File oSourceFile = new File(sFile);
 
 			//FileUtils.copyFile(oDownloadedFile, oTargetFile);
-			WriteProduct oWriter = new WriteProduct(oProcessWorkspaceRepository, oProcessWorkspace);
+			WasdiProductWriter oWriter = new WasdiProductWriter(oProcessWorkspaceRepository, oProcessWorkspace);
 
-			ReadProduct oReadProduct = new ReadProduct();
+			WasdiProductReader oReadProduct = new WasdiProductReader();
 
 			s_oLogger.debug("LauncherMain.RasterGeometricResample: Read Product");
 			Product oSourceProduct = oReadProduct.readSnapProduct(oSourceFile, null);
@@ -1818,9 +1887,16 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			SubsetSetting oSettings = (SubsetSetting) oParameter.getSettings();
 			
 			
-			ReadProduct oReadProduct = new ReadProduct();
+			WasdiProductReader oReadProduct = new WasdiProductReader();
 			File oProductFile = new File(getWorspacePath(oParameter)+sSourceProduct);
 			Product oInputProduct = oReadProduct.readSnapProduct(oProductFile, null);
+			
+			if (oInputProduct == null) {
+				s_oLogger.error("LauncherMain.executeSubset: product is not a SNAP product ");
+				updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 0);
+				return;
+			}
+
 			
 			if (oProcessWorkspace != null) {
 				updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.RUNNING, 30);
@@ -1927,9 +2003,15 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			MultiSubsetSetting oSettings = (MultiSubsetSetting) oParameter.getSettings();
 			
 			
-			ReadProduct oReadProduct = new ReadProduct();
+			WasdiProductReader oReadProduct = new WasdiProductReader();
 			File oProductFile = new File(getWorspacePath(oParameter)+sSourceProduct);
 			oInputProduct = oReadProduct.readSnapProduct(oProductFile, null);
+			
+			if (oInputProduct == null) {
+				s_oLogger.error("LauncherMain.executeMultiSubset: product is not a SNAP product ");
+				updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 0);
+				return;
+			}
 			
 	        // Take the Geo Coding
 	        final GeoCoding oGeoCoding = oInputProduct.getSceneGeoCoding();
@@ -2259,7 +2341,13 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			
 			File oReferenceFile = new File(getWorspacePath(oParameter)+ sReferenceProduct);
 			
-			ReadProduct oRead = new ReadProduct(oReferenceFile);
+			WasdiProductReader oRead = new WasdiProductReader(oReferenceFile);
+			
+			if (oRead.getSnapProduct() == null) {
+				s_oLogger.error("LauncherMain.executeGDALRegrid: product is not a SNAP product ");
+				updateProcessStatus(oProcessWorkspaceRepository, oProcessWorkspace, ProcessStatus.ERROR, 0);
+				return;
+			}
 			
 			// minY, minX, minY, maxX, maxY, maxX, maxY, minX, minY, minX
 			String sBBox = oRead.getProductBoundingBox();
@@ -2285,7 +2373,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			double dXEnd = adBBox[3];
 			double dYEnd = adBBox[4]; 
 			
-			Dimension oDim = oRead.getProduct().getSceneRasterSize();
+			Dimension oDim = oRead.getSnapProduct().getSceneRasterSize();
 			
 			// STILL HAVE TO FIND THE SCALE: THIS IS NOT PRECISE
 			double dXScale = (dXEnd-dXOrigin)/oDim.getWidth();
@@ -2613,7 +2701,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 		
 		File oFile = new File(sFullPathFileName);
 		
-		ReadProduct oReadProduct = new ReadProduct(oFile);
+		WasdiProductReader oReadProduct = new WasdiProductReader(oFile);
 		
 		// Get the Boundig Box
 		if (Utils.isNullOrEmpty(sBBox)) {
@@ -2630,14 +2718,16 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 				s_oLogger.debug("LauncherMain.AddProductToDbAndSendToRabbit: read View Model");
 				oVM = oReadProduct.getProductViewModel();
 				
-				if (bAsynchMetadata) {
-					// Asynch Metadata Save
-					s_oLogger.debug("LauncherMain.AddProductToDbAndSendToRabbit: start metadata thread");
-					oVM.setMetadataFileReference(asynchSaveMetadata(sFullPathFileName));					
-				}
-				else {
-					s_oLogger.debug("LauncherMain.AddProductToDbAndSendToRabbit: save synch metadata");
-					oVM.setMetadataFileReference(saveMetadata(oReadProduct, oFile));
+				if (oVM.getMetadata() != null) {
+					if (bAsynchMetadata) {
+						// Asynch Metadata Save
+						s_oLogger.debug("LauncherMain.AddProductToDbAndSendToRabbit: start metadata thread");
+						oVM.setMetadataFileReference(asynchSaveMetadata(sFullPathFileName));					
+					}
+					else {
+						s_oLogger.debug("LauncherMain.AddProductToDbAndSendToRabbit: save synch metadata");
+						oVM.setMetadataFileReference(saveMetadata(oReadProduct, oFile));
+					}					
 				}
 				
 				s_oLogger.debug("LauncherMain.AddProductToDbAndSendToRabbit: done read product");
@@ -2688,8 +2778,8 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			if (s_oSendToRabbit!=null) s_oSendToRabbit.SendRabbitMessage(true,sOperation,sWorkspace,oVM,sExchange);			
 		}
 		
-		if (oReadProduct.getProduct() != null) {
-			oReadProduct.getProduct().dispose();
+		if (oReadProduct.getSnapProduct() != null) {
+			oReadProduct.getSnapProduct().dispose();
 		}
 
 		s_oLogger.debug("LauncherMain.AddProductToDbAndSendToRabbit: Method finished");
