@@ -2338,13 +2338,14 @@ public class WasdiLib {
 	}
 	
 	private void unzip(String sAttachmentName, String sPath) {
+		ZipFile oZipFile = null;
 		try {
 			if(!sPath.endsWith("/") && !sPath.endsWith("\\")) {
 				sPath+="/";
 			}
 			String sZipFilePath = sPath+sAttachmentName;
 			//create directories first, otherwise there's no place to write the files
-			ZipFile oZipFile = new ZipFile(sZipFilePath);
+			oZipFile = new ZipFile(sZipFilePath);
 			Enumeration<? extends ZipEntry> aoEntries = oZipFile.entries();
 			while(aoEntries.hasMoreElements()) {
 				ZipEntry oZipeEntry = aoEntries.nextElement();
@@ -2377,12 +2378,20 @@ public class WasdiLib {
 					oBufferedInputStream.close();
 				}
 			}
-			oZipFile.close();
+
 			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-
+		finally {
+			if (oZipFile != null) {
+				try {
+					oZipFile.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
 	}
 
 	/**

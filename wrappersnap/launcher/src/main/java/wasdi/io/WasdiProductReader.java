@@ -1,4 +1,4 @@
-package wasdi.snapopearations;
+package wasdi.io;
 
 import java.awt.Dimension;
 import java.io.File;
@@ -15,11 +15,17 @@ import org.esa.snap.core.datamodel.MetadataAttribute;
 import org.esa.snap.core.datamodel.MetadataElement;
 import org.esa.snap.core.datamodel.PixelPos;
 import org.esa.snap.core.datamodel.Product;
+import org.geotools.data.shapefile.ShapefileDataStore;
+import org.geotools.data.simple.SimpleFeatureIterator;
+import org.opengis.feature.simple.SimpleFeature;
+
+import com.mongodb.client.model.geojson.MultiPolygon;
 
 import wasdi.LauncherMain;
 import wasdi.shared.utils.Utils;
 import wasdi.shared.viewmodels.AttributeViewModel;
 import wasdi.shared.viewmodels.BandViewModel;
+import wasdi.shared.viewmodels.GeorefProductViewModel;
 import wasdi.shared.viewmodels.MetadataViewModel;
 import wasdi.shared.viewmodels.NodeGroupViewModel;
 import wasdi.shared.viewmodels.ProductViewModel;
@@ -27,17 +33,20 @@ import wasdi.shared.viewmodels.ProductViewModel;
 /**
  * Read SNAP Product utility class
  * Created by s.adamo on 18/05/2016.
- */
-public class ReadProduct {
+ * Refactoring of 21/10/2019 (p.campanella):
+ * Changed class name
+ * Added support to different file types (starting from shape files)
+ **/
+public class WasdiProductReader {
 	
 	Product m_oProduct;
 	File m_oProductFile;
 	
-	public ReadProduct() {
+	public WasdiProductReader() {
 		
 	}
 	
-	public ReadProduct(File oProductFile) {
+	public WasdiProductReader(File oProductFile) {
 		if (oProductFile!=null) {
 			if (oProductFile.exists()) {
 				m_oProductFile = oProductFile;
@@ -46,25 +55,24 @@ public class ReadProduct {
 		}
 	}
 
-
-	public Product getProduct() {
+	/**
+	 * Get the SNAP product (or null)
+	 * @return
+	 */
+	public Product getSnapProduct() {
 		return m_oProduct;
 	}
-
-	public void setProduct(Product oProduct) {
-		this.m_oProduct = oProduct;
-	}
-
+	
+	/**
+	 * Get the product File Java Object
+	 * @return
+	 */
 	public File getProductFile() {
 		return m_oProductFile;
 	}
-
-	public void setProductFile(File oProductFile) {
-		this.m_oProductFile = oProductFile;
-	}
 	
     /**
-     * Read a Satellite Product 
+     * Read a WASDI Product 
      * @param oFile File to open
      * @param sFormatName Format, if known.
      * @return Product object
@@ -77,14 +85,14 @@ public class ReadProduct {
         // so the cache was useless and could have memory problems
         
         if (oFile == null) {
-        	LauncherMain.s_oLogger.debug("ReadProduct.ReadProduct: file to read is null, return null ");
+        	LauncherMain.s_oLogger.debug("WasdiProductReader.ReadProduct: file to read is null, return null ");
         	return null;
         }
         
         try {
 
         	long lStartTime = System.currentTimeMillis();
-            LauncherMain.s_oLogger.debug("ReadProduct.ReadProduct: begin read " + oFile.getAbsolutePath());
+            LauncherMain.s_oLogger.debug("WasdiProductReader.ReadProduct: begin read " + oFile.getAbsolutePath());
 
             if (sFormatName != null) {
                 oProduct = ProductIO.readProduct(oFile, sFormatName);
@@ -93,13 +101,13 @@ public class ReadProduct {
                 oProduct = ProductIO.readProduct(oFile);
             }
                 
-            LauncherMain.s_oLogger.debug("ReadProduct.ReadProduct: read done in " + (System.currentTimeMillis() - lStartTime) + "ms");
+            LauncherMain.s_oLogger.debug("WasdiProductReader.ReadProduct: read done in " + (System.currentTimeMillis() - lStartTime) + "ms");
             
             return oProduct;
             
         } catch (Exception oEx) {
             oEx.printStackTrace();
-            LauncherMain.s_oLogger.debug("ReadProduct.ReadProduct: excetpion: " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
+            LauncherMain.s_oLogger.debug("WasdiProductReader.ReadProduct: excetpion: " + org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(oEx));
         }
 
         return null;
@@ -119,6 +127,79 @@ public class ReadProduct {
     }
     
     /**
+     * Get Product View Model from a Shape File
+     * @param oFile File to read
+     * @return Product View Model representing the shape file
+     */
+    public ProductViewModel getShapeFileProductViewModel(File oFile) {
+    	
+    	// Create the return value
+    	GeorefProductViewModel oRetViewModel = null;
+    	
+    	try {
+    		
+    		// Try to read the shape
+            ShapefileDataStore oShapefileDataStore = new ShapefileDataStore(oFile.toURI().toURL());
+            
+            // Got it?
+            if (oShapefileDataStore!=null) {
+            	
+            	// Create the Product View Model
+            	oRetViewModel = new GeorefProductViewModel();
+            	
+            	// Set name values
+            	oRetViewModel.setFileName(oFile.getName());
+            	oRetViewModel.setName(Utils.GetFileNameWithoutExtension(oFile.getName()));
+            	oRetViewModel.setProductFriendlyName(oRetViewModel.getName());
+            	
+            	// Create the sub folder
+            	NodeGroupViewModel oNodeGroupViewModel = new NodeGroupViewModel();
+            	oNodeGroupViewModel.setNodeName("ShapeFile");
+            	
+            	// Create the single band representing the shape
+            	BandViewModel oBandViewModel = new BandViewModel();
+            	oBandViewModel.setPublished(false);
+            	oBandViewModel.setGeoserverBoundingBox("");
+            	oBandViewModel.setHeight(0);
+            	oBandViewModel.setWidth(0);
+            	oBandViewModel.setPublished(false);
+            	oBandViewModel.setName(oRetViewModel.getName());
+            	
+            	ArrayList<BandViewModel> oBands = new ArrayList<BandViewModel>();
+            	oBands.add(oBandViewModel);
+            	
+            	oNodeGroupViewModel.setBands(oBands);
+            	
+            	oRetViewModel.setBandsGroups(oNodeGroupViewModel);
+            	
+            	// Bounding Box
+            	oRetViewModel.setBbox("");
+            	
+            }
+            /*
+            // Sample code to read the features
+            SimpleFeatureIterator features = oShapefileDataStore.getFeatureSource().getFeatures().features();
+
+            while (features.hasNext()) {
+            	SimpleFeature shp = features.next();
+            	String name = (String)shp.getAttribute("");
+            	MultiPolygon geom = (MultiPolygon) shp.getDefaultGeometry();
+            }
+            
+            features.close();
+            */
+            
+            // Clean
+            oShapefileDataStore.dispose();    		
+    	}
+    	catch (Exception oEx) {
+    		LauncherMain.s_oLogger.debug("WasdiProductReader.getShapeFileProduct: exception reading the shape file");
+		}
+    	
+    	return oRetViewModel;
+
+    }
+    /**
      * Converts a product in a View Model
      * @param oFile
      * @return
@@ -126,18 +207,24 @@ public class ReadProduct {
      */
     public ProductViewModel getProductViewModel(File oFile) throws IOException
     {
-        LauncherMain.s_oLogger.debug("ReadProduct.getProductViewModel: start");
+        LauncherMain.s_oLogger.debug("WasdiProductReader.getProductViewModel: start");
 
         Product exportProduct = readSnapProduct(oFile, null);
 
         if (exportProduct == null) {
-            LauncherMain.s_oLogger.debug("ReadProduct.getProductViewModel: read product returns null");
-            return null;
+        	
+            LauncherMain.s_oLogger.debug("WasdiProductReader.getProductViewModel: read snap product returns null: try shape file");
+            
+            ProductViewModel oRetValue = getShapeFileProductViewModel(oFile);
+            
+            //Here we can add new file types
+            
+            return oRetValue;
         }
 
         ProductViewModel oViewModel = getProductViewModel(exportProduct, oFile);
 
-        LauncherMain.s_oLogger.debug("ReadProduct.getProductViewModel: done");
+        LauncherMain.s_oLogger.debug("WasdiProductReader.getProductViewModel: done");
         return  oViewModel;
     }
 
@@ -150,7 +237,7 @@ public class ReadProduct {
     public ProductViewModel getProductViewModel() throws IOException
     {        
         if (m_oProduct == null) {
-        	LauncherMain.s_oLogger.debug("ReadProduct.getProductViewModel: member product is null, return null");
+        	LauncherMain.s_oLogger.debug("WasdiProductReader.getProductViewModel: member product is null, return null");
         	return null;
         }
 
@@ -166,7 +253,7 @@ public class ReadProduct {
      */
 	public ProductViewModel getProductViewModel(Product oExportProduct, File oFile) {
 		
-		LauncherMain.s_oLogger.debug("ReadProduct.getProductViewModel: start");
+		LauncherMain.s_oLogger.debug("WasdiProductReader.getProductViewModel: start");
 		
 		// Create View Model
 		ProductViewModel oViewModel = new ProductViewModel();
@@ -178,7 +265,7 @@ public class ReadProduct {
         oViewModel.setName(oExportProduct.getName());
         if (oFile!=null) oViewModel.setFileName(oFile.getName());
 
-        LauncherMain.s_oLogger.debug("ReadProduct.getProductViewModel: done");
+        LauncherMain.s_oLogger.debug("WasdiProductReader.getProductViewModel: done");
 		return oViewModel;
 	}
 
@@ -222,7 +309,7 @@ public class ReadProduct {
 		try {
 			
 			if (m_oProduct == null) {
-				LauncherMain.s_oLogger.debug("ReadProduct.getProductBoundingBox: internal product is null return empty string");
+				LauncherMain.s_oLogger.debug("WasdiProductReader.getProductBoundingBox: internal product is null return empty string");
 				return "";
 			}
 			
@@ -329,19 +416,19 @@ public class ReadProduct {
     private void FillBandsViewModel(ProductViewModel oProductViewModel, Product oProduct)
     {
         if (oProductViewModel == null) {
-            LauncherMain.s_oLogger.debug("ReadProduct.FillBandsViewModel: ViewModel null return");
+            LauncherMain.s_oLogger.debug("WasdiProductReader.FillBandsViewModel: ViewModel null return");
             return;
         }
 
         if (oProduct == null) {
-            LauncherMain.s_oLogger.debug("ReadProduct.FillBandsViewModel: Product null");
+            LauncherMain.s_oLogger.debug("WasdiProductReader.FillBandsViewModel: Product null");
             return;
         }
 
         if (oProductViewModel.getBandsGroups() == null) oProductViewModel.setBandsGroups(new NodeGroupViewModel("Bands"));
 
         for (Band oBand : oProduct.getBands()) {
-            LauncherMain.s_oLogger.debug("ReadProduct.FillBandsViewModel: add band " + oBand.getName());
+            LauncherMain.s_oLogger.debug("WasdiProductReader.FillBandsViewModel: add band " + oBand.getName());
 
             if (oProductViewModel.getBandsGroups().getBands() == null)
                 oProductViewModel.getBandsGroups().setBands(new ArrayList<BandViewModel>());

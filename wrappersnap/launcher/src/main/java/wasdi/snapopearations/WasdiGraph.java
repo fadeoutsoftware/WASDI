@@ -28,6 +28,7 @@ import com.bc.ceres.binding.dom.XppDomElement;
 import sun.management.VMManagement;
 import wasdi.ConfigReader;
 import wasdi.LauncherMain;
+import wasdi.io.WasdiProductReader;
 import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.DownloadedFile;
 import wasdi.shared.business.ProcessStatus;
@@ -426,7 +427,7 @@ public class WasdiGraph {
         }
         
         // Read the View Model
-        ReadProduct oReadProduct = new ReadProduct();
+        WasdiProductReader oReadProduct = new WasdiProductReader();
 		ProductViewModel oVM = oReadProduct.getProductViewModel(oProduct, oProductFile);
         
         // P.Campanella 12/05/2017: it looks it is done before. Let leave here a check

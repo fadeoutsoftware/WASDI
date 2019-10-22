@@ -2,9 +2,13 @@ package wasdi.shared.utils;
 
 import static org.apache.commons.lang.SystemUtils.IS_OS_UNIX;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.PosixFilePermission;
@@ -12,12 +16,16 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Stream;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 
+import org.apache.commons.net.io.Util;
 // email, IP addresses (v4 and v6), domains and URL validators:
 import org.apache.commons.validator.routines.DomainValidator;
 import org.apache.commons.validator.routines.EmailValidator;
@@ -311,4 +319,157 @@ public class Utils {
 	public static void debugLog(int iValue) {
 		debugLog("" + iValue);
 	}
+	
+	
+	/**
+	 * Check if a file is a (presumed) Shape File: it checks if it contains a .shp file
+	 * @param sZipFile Full path of the zip file
+	 * @return True if the zip contains a .shp file, False otherwise
+	 */
+	public static boolean isShapeFileZipped(String sZipFile) {
+		
+		ZipFile oZipFile = null;
+		
+		try {
+			
+			oZipFile = new ZipFile(sZipFile);
+			
+			Enumeration<? extends ZipEntry> aoEntries = oZipFile.entries();
+			
+			while(aoEntries.hasMoreElements()) {
+				ZipEntry oZipEntry = aoEntries.nextElement();
+				
+				if (oZipEntry.getName().toLowerCase().endsWith(".shp")) {
+					return true;
+				}
+			}			
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		finally {
+			if (oZipFile != null) {
+				try {
+					oZipFile.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		
+		return false;
+	}
+	
+	/**
+	 * Check if a file is a (presumed) Shape File: it checks if it contains a .shp file
+	 * @param sZipFile Full path of the zip file
+	 * @return True if the zip contains a .shp file, False otherwise
+	 */
+	public static String getShpFileNameFromZipFile(String sZipFile) {
+		
+		ZipFile oZipFile = null;
+		
+		try {
+			
+			oZipFile = new ZipFile(sZipFile);
+			
+			Enumeration<? extends ZipEntry> aoEntries = oZipFile.entries();
+			
+			while(aoEntries.hasMoreElements()) {
+				ZipEntry oZipEntry = aoEntries.nextElement();
+				
+				if (oZipEntry.getName().toLowerCase().endsWith(".shp")) {
+					return oZipEntry.getName();
+				}
+			}			
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		finally {
+			if (oZipFile != null) {
+				try {
+					oZipFile.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		
+		return "";
+	}
+	
+	
+	/**
+	 * Unzip "ZipFile" in Path (in place) 
+	 * @param sZipFile Zip file name only
+	 * @param sPath
+	 */
+	public static void unzip(String sZipFile, String sPath) {
+		
+		ZipFile oZipFile = null;
+		
+		try {
+			
+			if(!sPath.endsWith("/") && !sPath.endsWith("\\")) {
+				sPath+="/";
+			}
+			
+			String sZipFilePath = sPath+sZipFile;
+			
+			//create directories first, otherwise there's no place to write the files
+			oZipFile = new ZipFile(sZipFilePath);
+			
+			Enumeration<? extends ZipEntry> aoEntries = oZipFile.entries();
+			
+			while(aoEntries.hasMoreElements()) {
+				
+				ZipEntry oZipEntry = aoEntries.nextElement();
+				
+				if(oZipEntry.isDirectory()) {
+					String sDirName = sPath+oZipEntry.getName();
+					File oDir = new File(sDirName);
+					if(!oDir.exists()) {
+						boolean bCreated = oDir.mkdirs();
+						if(!bCreated) {
+							throw new IOException("WasdiLib.unzip: cannot create directory " + oDir);
+						}
+					}
+				}
+			}
+			
+			//now unzip files
+			aoEntries = oZipFile.entries();
+			
+			while(aoEntries.hasMoreElements()) {
+				
+				ZipEntry oZipEntry = aoEntries.nextElement();
+				
+				if(!oZipEntry.isDirectory()) {
+					InputStream oInputStream = oZipFile.getInputStream(oZipEntry);
+					BufferedInputStream oBufferedInputStream = new BufferedInputStream(oInputStream);
+					String sFileName = sPath+oZipEntry.getName();
+					File oFile = new File(sFileName);
+					//oFile.createNewFile();
+					FileOutputStream oFileOutputStream = new FileOutputStream(oFile);
+					BufferedOutputStream oBufferedOutputStream = new BufferedOutputStream(oFileOutputStream);
+					Util.copyStream(oBufferedInputStream, oBufferedOutputStream);
+					oBufferedOutputStream.close();
+					oBufferedInputStream.close();
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		finally {
+			if (oZipFile != null) {
+				try {
+					oZipFile.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+	}
+
 }
