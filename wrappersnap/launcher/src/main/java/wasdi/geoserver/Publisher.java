@@ -8,6 +8,7 @@ import java.nio.file.Paths;
 
 import org.apache.log4j.Logger;
 import org.apache.log4j.xml.DOMConfigurator;
+import org.geotools.data.shapefile.ShapefileDataStoreFactory;
 
 import wasdi.shared.geoserver.GeoServerManager;
 import wasdi.shared.utils.Utils;
@@ -209,4 +210,5 @@ public class Publisher {
         if (lFileLenght> lMaxSize) return this.PublishImagePyramidOnGeoServer(sFileName, sStore, sStyle, oManager);
         else  return this.PublishGeoTiffImage(sFileName, sStore, sEPSG, sStyle, oManager);
     }
+
 }

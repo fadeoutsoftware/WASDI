@@ -16,8 +16,12 @@ import org.esa.snap.core.datamodel.MetadataElement;
 import org.esa.snap.core.datamodel.PixelPos;
 import org.esa.snap.core.datamodel.Product;
 import org.geotools.data.shapefile.ShapefileDataStore;
+import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureIterator;
+import org.geotools.geometry.jts.ReferencedEnvelope;
+import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.opengis.feature.simple.SimpleFeature;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 import com.mongodb.client.model.geojson.MultiPolygon;
 
@@ -172,6 +176,7 @@ public class WasdiProductReader {
             	
             	oRetViewModel.setBandsGroups(oNodeGroupViewModel);
             	
+            	
             	// Bounding Box
             	oRetViewModel.setBbox("");
             	
@@ -190,7 +195,10 @@ public class WasdiProductReader {
             */
             
             // Clean
-            oShapefileDataStore.dispose();    		
+            oShapefileDataStore.dispose();    	
+            
+            String sBbox = getShapeFileBoundingBox(oFile);
+            oRetViewModel.setBbox(sBbox);
     	}
     	catch (Exception oEx) {
     		LauncherMain.s_oLogger.debug("WasdiProductReader.getShapeFileProduct: exception reading the shape file");
@@ -237,8 +245,14 @@ public class WasdiProductReader {
     public ProductViewModel getProductViewModel() throws IOException
     {        
         if (m_oProduct == null) {
-        	LauncherMain.s_oLogger.debug("WasdiProductReader.getProductViewModel: member product is null, return null");
-        	return null;
+        	
+        	if (m_oProductFile != null) {
+        		return getProductViewModel(m_oProductFile);
+        	}
+        	else {
+            	LauncherMain.s_oLogger.debug("WasdiProductReader.getProductViewModel: member product and file are null, return null");
+            	return null;
+        	}        	
         }
 
         ProductViewModel oViewModel = getProductViewModel(m_oProduct, m_oProductFile);
@@ -270,68 +284,102 @@ public class WasdiProductReader {
 	}
 
 	/**
-	 * Get Product Bounding Box from File
+	 * Get Product Bounding Box from a File
 	 * @param oProductFile
 	 * @return "%f,%f,%f,%f,%f,%f,%f,%f,%f,%f", minY, minX, minY, maxX, maxY, maxX, maxY, minX, minY, minX
 	 */
 	public String getProductBoundingBox(File oProductFile) {
 		
+		if (oProductFile == null) {
+			LauncherMain.s_oLogger.info("WasdiProductReader.getProductBoundingBox: file is null return empty ");
+			return "";
+		}
+		
 		try {
 			Product oProduct = ProductIO.readProduct(oProductFile);
 			
-			GeoCoding geocoding = oProduct.getSceneGeoCoding();
-			if (geocoding!=null) {
-				Dimension dim = oProduct.getSceneRasterSize();		
-				GeoPos min = geocoding.getGeoPos(new PixelPos(0,0), null);
-				GeoPos max = geocoding.getGeoPos(new PixelPos(dim.getWidth(), dim.getHeight()), null);
-				float minX = (float) Math.min(min.lon, max.lon);
-				float minY = (float) Math.min(min.lat, max.lat);
-				float maxX = (float) Math.max(min.lon, max.lon);
-				float maxY = (float) Math.max(min.lat, max.lat);
-				
-				return String.format("%f,%f,%f,%f,%f,%f,%f,%f,%f,%f", minY, minX, minY, maxX, maxY, maxX, maxY, minX, minY, minX);
+			if (oProduct == null) {
+				// Not a SNAP product. Try shape file
+				return getShapeFileBoundingBox(oProductFile);
+			}
+			else {
+				// Snap Bounding Box
+				GeoCoding geocoding = oProduct.getSceneGeoCoding();
+				if (geocoding!=null) {
+					Dimension dim = oProduct.getSceneRasterSize();		
+					GeoPos min = geocoding.getGeoPos(new PixelPos(0,0), null);
+					GeoPos max = geocoding.getGeoPos(new PixelPos(dim.getWidth(), dim.getHeight()), null);
+					float minX = (float) Math.min(min.lon, max.lon);
+					float minY = (float) Math.min(min.lat, max.lat);
+					float maxX = (float) Math.max(min.lon, max.lon);
+					float maxY = (float) Math.max(min.lat, max.lat);
+					
+					return String.format("%f,%f,%f,%f,%f,%f,%f,%f,%f,%f", minY, minX, minY, maxX, maxY, maxX, maxY, minX, minY, minX);
+				}				
 			}
 			
+			
 		} catch (Exception e) {
-			e.printStackTrace();
+			LauncherMain.s_oLogger.error("WasdiProductReader.getProductBoundingBox: Exception " + e.getMessage());
 		}
 		
 		return "";
 	}
 	
 	/**
-	 * Get Product Bounding Box from File
-	 * @param oProductFile
+	 * Get Product Bounding Box 
 	 * @return "%f,%f,%f,%f,%f,%f,%f,%f,%f,%f", minY, minX, minY, maxX, maxY, maxX, maxY, minX, minY, minX
 	 */
 	public String getProductBoundingBox() {
 		
+		return getProductBoundingBox(m_oProductFile);
+	}
+	
+	/**
+	 * Get the bounding box of a shape file
+	 * @param oShapeFile
+	 * @return
+	 */
+	public String getShapeFileBoundingBox(File oShapeFile) {
+		
+		String sBbox = "";
+		ShapefileDataStore oShpFileDataStore = null;
+		
 		try {
+			// Open the data store
+			oShpFileDataStore = new ShapefileDataStore(oShapeFile.toURI().toURL());
+			SimpleFeatureCollection oFeatColl = oShpFileDataStore.getFeatureSource().getFeatures();
 			
-			if (m_oProduct == null) {
-				LauncherMain.s_oLogger.debug("WasdiProductReader.getProductBoundingBox: internal product is null return empty string");
-				return "";
+			// Check the coordinate system
+			CoordinateReferenceSystem oCrs = oFeatColl.getSchema().getGeometryDescriptor().getCoordinateReferenceSystem();
+		    if (oCrs == null) {
+		        oCrs = DefaultGeographicCRS.WGS84;
+		    }
+		    
+		    // Get the envelope
+			ReferencedEnvelope oBbox = oFeatColl.getBounds();
+			double dMinY = oBbox.getMinY();
+			double dMinX = oBbox.getMinX();
+			double dMaxY = oBbox.getMaxY();
+			double dMaxX = oBbox.getMaxX();
+			
+			// Write the bounding box
+			sBbox = String.format("%f,%f,%f,%f,%f,%f,%f,%f,%f,%f", dMinY, dMinX, dMinY, dMaxX, dMaxY, dMaxX, dMaxY, dMinX, dMinY, dMinX);
+			
+		} 
+		catch (IOException e) {
+			LauncherMain.s_oLogger.error("WasdiProductReader.getProductBoundingBox: Exception " + e.getMessage());
+		}
+		finally {
+			if (oShpFileDataStore != null) {
+				oShpFileDataStore.dispose();
 			}
-			
-			GeoCoding oGeocoding = m_oProduct.getSceneGeoCoding();
-			if (oGeocoding!=null) {
-				Dimension oDim = m_oProduct.getSceneRasterSize();		
-				GeoPos oMin = oGeocoding.getGeoPos(new PixelPos(0,0), null);
-				GeoPos oMax = oGeocoding.getGeoPos(new PixelPos(oDim.getWidth(), oDim.getHeight()), null);
-				float fMinX = (float) Math.min(oMin.lon, oMax.lon);
-				float fMinY = (float) Math.min(oMin.lat, oMax.lat);
-				float fMaxX = (float) Math.max(oMin.lon, oMax.lon);
-				float fMaxY = (float) Math.max(oMin.lat, oMax.lat);
-								
-				return String.format("%f,%f,%f,%f,%f,%f,%f,%f,%f,%f", fMinY, fMinX, fMinY, fMaxX, fMaxY, fMaxX, fMaxY, fMinX, fMinY, fMinX);
-			}
-			
-		} catch (Exception e) {
-			e.printStackTrace();
 		}
 		
-		return "";
+		return sBbox;
 	}
+	
+
 	
 	
 	/**
