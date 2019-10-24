@@ -6,11 +6,19 @@ so please be patient and do not trust anyone's life with the library (not yet)
 
 This is WASPY, the WASDI Python lib.
 
-Last Update: 15/10/2019
+Last Update: 24/10/2019
 
 Tested with: Python 2.7, Python 3.7
 
 History
+
+0.1.26 [24/10/2019]
+    added try and catch to importProduct
+    getFullProductPath works also for non existing files
+
+0.1.23 [23/10/2019]
+    fixed deleteProduct bug (did not get standard headers)
+
 0.1.22 [16/10/2019]
     updated mosaic to last gdal-supported version
 
@@ -182,7 +190,7 @@ def getParameter(sKey, oDefault=None):
     """
     Gets a parameter using its key
     :param sKey: parameter key
-    :param oDefault: Default value if parameter is not present
+    :param oDefault: Default value to return if parameter is not present
     :return: parameter value
     """
     global m_aoParamsDictionary
@@ -791,15 +799,23 @@ def getFullProductPath(sProductName):
         sFullPath = '/data/wasdi/'
     else:
         sFullPath = m_sBasePath
-
+        
+    # Normalize the path and extract the name
+    sProductName = os.path.basename(os.path.normpath(sProductName))
     sFullPath = os.path.join(sFullPath, m_sWorkspaceOwner, m_sActiveWorkspace, sProductName)
-
+    
+    # If we are on the local PC
     if m_bIsOnServer is False:
+        # If the download is active
         if m_bDownloadActive is True:
+            # If there is no local file
             if os.path.isfile(sFullPath) is False:
-                # Download The File from WASDI
-                print('[INFO] waspy.getFullProductPath: LOCAL WASDI FILE MISSING: START DOWNLOAD... PLEASE WAIT')
-                downloadFile(sProductName)
+                # If the file exists on server
+                if fileExistsOnWasdi(sProductName) is True:
+                    # Download The File from WASDI
+                    print('[INFO] waspy.getFullProductPath: LOCAL WASDI FILE MISSING: START DOWNLOAD... PLEASE WAIT')
+                    downloadFile(sProductName)
+                    print('[INFO] waspy.getFullProductPath: DONWLOAD COMPLETED')
 
     return sFullPath
 
@@ -944,44 +960,50 @@ def updateStatus(sStatus, iPerc):
     Update the status of the running process
     return the updated status as a String or '' if there was any problem
     """
-    
-    return updateProcessStatus(getProcId(), sStatus, iPerc)
+    try:
+        return updateProcessStatus(getProcId(), sStatus, iPerc)
+    except Exception as oEx:
+        print("[ERROR] waspy.updateStatus: exception " + str(oEx))
+        return ''
 
 
 def updateProgressPerc(iPerc):
-    _log('[INFO] waspy.updateProgressPerc( ' + str(iPerc) + ' )')
-    if iPerc is None:
-        print('[ERROR] waspy.updateProgressPerc: Passed None, expected a percentage' +
-              '  ******************************************************************************')
+    try:
+        _log('[INFO] waspy.updateProgressPerc( ' + str(iPerc) + ' )')
+        if iPerc is None:
+            print('[ERROR] waspy.updateProgressPerc: Passed None, expected a percentage' +
+                  '  ******************************************************************************')
+            return ''
+    
+        if (getProcId() is None) or (len(getProcId()) < 1):
+            print('[ERROR] waspy.updateProgressPerc: Cannot update progress: process ID is not known' +
+                  '  ******************************************************************************')
+            return ''
+    
+        if 0 > iPerc or 100 < iPerc:
+            print('[WARNING] waspy.updateProgressPerc: passed' + str(iPerc) + ', automatically resetting in [0, 100]')
+            if iPerc < 0:
+                iPerc = 0
+            if iPerc > 100:
+                iPerc = 100
+    
+        sStatus = "RUNNING"
+        sUrl = getBaseUrl() + "/process/updatebyid?sProcessId=" + getProcId() + "&status=" + sStatus + "&perc=" + str(
+            iPerc) + "&sendrabbit=1"
+        asHeaders = _getStandardHeaders()
+        oResponse = requests.get(sUrl, headers=asHeaders)
+        sResult = ""
+        if (oResponse is not None) and (oResponse.ok is True):
+            oJson = oResponse.json()
+            if (oJson is not None) and ("status" in oJson):
+                sResult = str(oJson['status'])
+        else:
+            print('[ERROR] waspy.updateProgressPerc: could not update progress' +
+                  '  ******************************************************************************')
+        return sResult
+    except Exception as oEx:
+        print("[ERROR] waspy.updateProgressPerc: exception " + str(oEx))
         return ''
-
-    if (getProcId() is None) or (len(getProcId()) < 1):
-        print('[ERROR] waspy.updateProgressPerc: Cannot update progress: process ID is not known' +
-              '  ******************************************************************************')
-        return ''
-
-    if 0 > iPerc or 100 < iPerc:
-        print('[WARNING] waspy.updateProgressPerc: passed' + str(iPerc) + ', automatically resetting in [0, 100]')
-        if iPerc < 0:
-            iPerc = 0
-        if iPerc > 100:
-            iPerc = 100
-
-    sStatus = "RUNNING"
-    sUrl = getBaseUrl() + "/process/updatebyid?sProcessId=" + getProcId() + "&status=" + sStatus + "&perc=" + str(
-        iPerc) + "&sendrabbit=1"
-    asHeaders = _getStandardHeaders()
-    oResponse = requests.get(sUrl, headers=asHeaders)
-    sResult = ""
-    if (oResponse is not None) and (oResponse.ok is True):
-        oJson = oResponse.json()
-        if (oJson is not None) and ("status" in oJson):
-            sResult = str(oJson['status'])
-    else:
-        print('[ERROR] waspy.updateProgressPerc: could not update progress' +
-              '  ******************************************************************************')
-    return sResult
-
 
 def setProcessPayload(sProcessId, data):
     """
@@ -990,25 +1012,29 @@ def setProcessPayload(sProcessId, data):
     """
     global m_sBaseUrl
     global m_sSessionId
+    
+    try:
 
-    asHeaders = _getStandardHeaders()
-    payload = {'sProcessId': sProcessId, 'payload': json.dumps(data)}
-
-    sUrl = m_sBaseUrl + '/process/setpayload'
-
-    oResult = requests.get(sUrl, headers=asHeaders, params=payload)
-
-    sStatus = ''
-
-    if (oResult is not None) and (oResult.ok is True):
-        oJsonResult = oResult.json()
-        try:
-            sStatus = oJsonResult['status']
-        except:
-            sStatus = ''
-
-    return sStatus
-
+        asHeaders = _getStandardHeaders()
+        payload = {'sProcessId': sProcessId, 'payload': json.dumps(data)}
+    
+        sUrl = m_sBaseUrl + '/process/setpayload'
+    
+        oResult = requests.get(sUrl, headers=asHeaders, params=payload)
+    
+        sStatus = ''
+    
+        if (oResult is not None) and (oResult.ok is True):
+            oJsonResult = oResult.json()
+            try:
+                sStatus = oJsonResult['status']
+            except:
+                sStatus = ''
+    
+        return sStatus
+    except Exception as oEx:
+        print("[ERROR] waspy.setProcessPayload: exception " + str(oEx))
+        return ''
 
 def setPayload(data):
     """
@@ -1178,7 +1204,7 @@ def deleteProduct(sProduct):
         print('[ERROR] waspy.deleteProduct: product passed is None' +
               '  ******************************************************************************')
 
-    asHeaders = _getStandardHeaders
+    asHeaders = _getStandardHeaders()
     sUrl = m_sBaseUrl
     sUrl += "/product/delete?sProductName="
     sUrl += sProduct
@@ -1493,13 +1519,17 @@ def importProduct(asProduct):
         return "ERROR"
     
     _log('[INFO] waspy.importProduct( ' + str(asProduct) + ' )')
-
-    sBoundingBox = None
-    sFileUrl = asProduct["link"]
-    if "footprint" in asProduct:
-        sBoundingBox = asProduct["footprint"]
-
-    return importProductByFileUrl(sFileUrl, sBoundingBox)
+    
+    try:
+        sBoundingBox = None
+        sFileUrl = asProduct["link"]
+        if "footprint" in asProduct:
+            sBoundingBox = asProduct["footprint"]
+    
+        return importProductByFileUrl(sFileUrl, sBoundingBox)
+    except Exception as e:
+        print("[ERROR] waspy.importProduct: exception " + str(e))
+        return "ERROR"
 
 
 def asynchExecuteProcessor(sProcessorName, aoParams={}):
