@@ -1,6 +1,7 @@
 package it.fadeout.rest.resources;
 
 import java.io.File;
+import java.io.FilenameFilter;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -223,6 +224,148 @@ public class CatalogResources {
 		return null;
 	}
 
+	private Response zipBeanDimapFile(File oInitialFile) {
+		
+		Stack<File> aoFileStack = new Stack<File>();
+		aoFileStack.push(oInitialFile);
+
+		
+		String sBasePath = oInitialFile.getAbsolutePath();
+		int iLast = sBasePath.lastIndexOf(".dim");
+		String sDir = sBasePath.substring(0, iLast) + ".data";
+		
+		Utils.debugLog("CatalogResources.zipOnTheFlyAndStream: sDir = " + sDir);
+		
+		File oFile = new File(sDir);
+		aoFileStack.push(oFile);
+		
+		iLast = sBasePath.lastIndexOf(oInitialFile.getName());
+		sBasePath = sBasePath.substring(0, iLast);
+		
+		if(!sBasePath.endsWith("/") && !sBasePath.endsWith("\\")) {
+			sBasePath = sBasePath + "/";
+		}
+		
+		Utils.debugLog("CatalogResources.zipOnTheFlyAndStream: updated sBasePath = " + sBasePath);
+		
+		int iBaseLen = sBasePath.length();
+		Map<String, File> aoFileEntries = new HashMap<>();
+		
+		while(aoFileStack.size()>=1) {
+			//Wasdi.DebugLog("CatalogResources.zipOnTheFlyAndStream: pushing files into stack");
+			oFile = aoFileStack.pop();
+			String sAbsolutePath = oFile.getAbsolutePath();
+			
+			Utils.debugLog("CatalogResources.zipOnTheFlyAndStream: sAbsolute Path " + sAbsolutePath);
+
+			if(oFile.isDirectory()) {
+				if(!sAbsolutePath.endsWith("/") && !sAbsolutePath.endsWith("\\")) {
+					sAbsolutePath = sAbsolutePath + "/";
+				}
+				File[] aoChildren = oFile.listFiles();
+				for (File oChild : aoChildren) {
+					aoFileStack.push(oChild);
+				}
+			}
+			
+			Utils.debugLog("CatalogResources.zipOnTheFlyAndStream: sAbsolute Path 2 " + sAbsolutePath);
+			
+			String sRelativePath = sAbsolutePath.substring(iBaseLen);
+			Utils.debugLog("CatalogResources.zipOnTheFlyAndStream: adding file " + sRelativePath +" for compression");
+			aoFileEntries.put(sRelativePath,oFile);
+		}
+		Utils.debugLog("CatalogResources.zipOnTheFlyAndStream: done preparing map, added " + aoFileEntries.size() + " files");
+					
+		ZipStreamingOutput oStream = new ZipStreamingOutput(aoFileEntries);
+
+		// Set response headers and return 
+		ResponseBuilder oResponseBuilder = Response.ok(oStream);
+		String sFileName = oInitialFile.getName();
+		
+		Utils.debugLog("CatalogResources.zipOnTheFlyAndStream: sFileName1 " + sFileName);
+		
+		sFileName = sFileName.substring(0, sFileName.lastIndexOf(".dim") ) + ".zip";
+		
+		Utils.debugLog("CatalogResources.zipOnTheFlyAndStream: sFileName2 Path " + sFileName);
+		
+		oResponseBuilder.header("Content-Disposition", "attachment; filename=\""+ sFileName +"\"");
+		Long lLength = 0L;
+		for (String sFile : aoFileEntries.keySet()) {
+			File oTempFile = aoFileEntries.get(sFile);
+			if(!oTempFile.isDirectory()) {
+				//NOTE: this way we are cheating, it is an upper bound, not the real size!
+				lLength += oTempFile.length();
+			}
+		}
+		oResponseBuilder.header("Content-Length", lLength);
+		Utils.debugLog("CatalogResources.zipOnTheFlyAndStream: return ");
+		return oResponseBuilder.build();
+	}
+	
+	
+	private Response zipShapeFile(File oInitialFile) {
+		
+		// Remove extension
+		final String sNameToFind = Utils.GetFileNameWithoutExtension(oInitialFile.getName());
+		
+		// Get parent folder
+		File oFolder = oInitialFile.getParentFile();
+		
+		// Find all the files of the shape
+		File[] aoMatchingFiles = oFolder.listFiles(new FilenameFilter() {
+			@Override
+			public boolean accept(File dir, String name) {
+				return name.startsWith(sNameToFind) && !(name.endsWith(".zip"));
+			}
+		});
+		
+		// Found something?
+		if (aoMatchingFiles == null) {
+			Utils.debugLog("CatalogResources.zipShapeFile: not found = " + sNameToFind);
+			return null;
+		}
+		
+		if (aoMatchingFiles.length == 0) {
+			Utils.debugLog("CatalogResources.zipShapeFile: not found = " + sNameToFind);
+			return null;
+		}
+		
+		Map<String, File> aoFileEntries = new HashMap<>();
+		
+		for (int i=0; i<aoMatchingFiles.length; i++) {
+			Utils.debugLog("CatalogResources.zipShapeFile: adding " + aoMatchingFiles[i].getName() + " to zip");
+			aoFileEntries.put(aoMatchingFiles[i].getName() ,aoMatchingFiles[i]);
+		}
+		
+
+		Utils.debugLog("CatalogResources.zipShapeFile: done preparing map, added " + aoFileEntries.size() + " files");
+					
+		ZipStreamingOutput oStream = new ZipStreamingOutput(aoFileEntries);
+
+		// Set response headers and return 
+		ResponseBuilder oResponseBuilder = Response.ok(oStream);
+		String sFileName = oInitialFile.getName();
+		
+		Utils.debugLog("CatalogResources.zipShapeFile: sFileName " + sFileName);
+		
+		sFileName = sFileName.replace(".shp", ".zip");
+		sFileName = sFileName.replace(".SHP", ".zip");
+				
+		Utils.debugLog("CatalogResources.zipShapeFile: sFileName after substring " + sFileName);
+		
+		oResponseBuilder.header("Content-Disposition", "attachment; filename=\""+ sFileName +"\"");
+		Long lLength = 0L;
+		for (String sFile : aoFileEntries.keySet()) {
+			File oTempFile = aoFileEntries.get(sFile);
+			if(!oTempFile.isDirectory()) {
+				//NOTE: this way we are cheating, it is an upper bound, not the real size!
+				lLength += oTempFile.length();
+			}
+		}
+		oResponseBuilder.header("Content-Length", lLength);
+		Utils.debugLog("CatalogResources.zipShapeFile: return ");
+		return oResponseBuilder.build();
+	}
 
 
 	private Response zipOnTheFlyAndStream(File oInitialFile) {
@@ -233,82 +376,17 @@ public class CatalogResources {
 		}		
 		try {
 			Utils.debugLog("CatalogResources.zipOnTheFlyAndStream: init");
-			Stack<File> aoFileStack = new Stack<File>();
-			aoFileStack.push(oInitialFile);
 			String sBasePath = oInitialFile.getAbsolutePath();
-			
 			Utils.debugLog("CatalogResources.zipOnTheFlyAndStream: sBasePath = " + sBasePath);
 			
-			int iLast = sBasePath.lastIndexOf(".dim");
-			String sDir = sBasePath.substring(0, iLast) + ".data";
-			
-			Utils.debugLog("CatalogResources.zipOnTheFlyAndStream: sDir = " + sDir);
-			
-			File oFile = new File(sDir);
-			aoFileStack.push(oFile);
-			
-			iLast = sBasePath.lastIndexOf(oInitialFile.getName());
-			sBasePath = sBasePath.substring(0, iLast);
-			
-			if(!sBasePath.endsWith("/") && !sBasePath.endsWith("\\")) {
-				sBasePath = sBasePath + "/";
+			if (sBasePath.endsWith(".dim")) {
+				return zipBeanDimapFile(oInitialFile);
 			}
-			
-			Utils.debugLog("CatalogResources.zipOnTheFlyAndStream: updated sBasePath = " + sBasePath);
-			
-			int iBaseLen = sBasePath.length();
-			Map<String, File> aoFileEntries = new HashMap<>();
-			
-			while(aoFileStack.size()>=1) {
-				//Wasdi.DebugLog("CatalogResources.zipOnTheFlyAndStream: pushing files into stack");
-				oFile = aoFileStack.pop();
-				String sAbsolutePath = oFile.getAbsolutePath();
-				
-				Utils.debugLog("CatalogResources.zipOnTheFlyAndStream: sAbsolute Path " + sAbsolutePath);
-
-				if(oFile.isDirectory()) {
-					if(!sAbsolutePath.endsWith("/") && !sAbsolutePath.endsWith("\\")) {
-						sAbsolutePath = sAbsolutePath + "/";
-					}
-					File[] aoChildren = oFile.listFiles();
-					for (File oChild : aoChildren) {
-						aoFileStack.push(oChild);
-					}
-				}
-				
-				Utils.debugLog("CatalogResources.zipOnTheFlyAndStream: sAbsolute Path 2 " + sAbsolutePath);
-				
-				String sRelativePath = sAbsolutePath.substring(iBaseLen);
-				Utils.debugLog("CatalogResources.zipOnTheFlyAndStream: adding file " + sRelativePath +" for compression");
-				aoFileEntries.put(sRelativePath,oFile);
+			else if (sBasePath.toLowerCase().endsWith(".shp")) {
+				return zipShapeFile(oInitialFile);
 			}
-			Utils.debugLog("CatalogResources.zipOnTheFlyAndStream: done preparing map, added " + aoFileEntries.size() + " files");
-						
-			ZipStreamingOutput oStream = new ZipStreamingOutput(aoFileEntries);
-
-			// Set response headers and return 
-			ResponseBuilder oResponseBuilder = Response.ok(oStream);
-			String sFileName = oInitialFile.getName();
-			
-			Utils.debugLog("CatalogResources.zipOnTheFlyAndStream: sFileName1 " + sFileName);
-			
-			sFileName = sFileName.substring(0, sFileName.lastIndexOf(".dim") ) + ".zip";
-			
-			Utils.debugLog("CatalogResources.zipOnTheFlyAndStream: sFileName2 Path " + sFileName);
-			
-			oResponseBuilder.header("Content-Disposition", "attachment; filename=\""+ sFileName +"\"");
-			Long lLength = 0L;
-			for (String sFile : aoFileEntries.keySet()) {
-				File oTempFile = aoFileEntries.get(sFile);
-				if(!oTempFile.isDirectory()) {
-					//NOTE: this way we are cheating, it is an upper bound, not the real size!
-					lLength += oTempFile.length();
-				}
-			}
-			oResponseBuilder.header("Content-Length", lLength);
-			Utils.debugLog("CatalogResources.zipOnTheFlyAndStream: return ");
-			return oResponseBuilder.build();
-		} catch (Exception e) {
+		} 
+		catch (Exception e) {
 			Utils.debugLog("CatalogResources.zipOnTheFlyAndStream: " + e);
 		} 
 		return null;
@@ -317,15 +395,21 @@ public class CatalogResources {
 
 	private boolean mustBeZipped(File oFile) {
 		Utils.debugLog("CatalogResources.mustBeZipped");
+		
 		if(null==oFile) {
 			Utils.debugLog("CatalogResources.mustBeZipped: oFile is null");
 			throw new NullPointerException("File is null");
 		}
 		boolean bRet = false;
 
-		String sName = oFile.getName(); 
+		String sName = oFile.getName();
+		
 		if(!Utils.isNullOrEmpty(sName)) {
+			
 			if(sName.endsWith(".dim")) {
+				bRet = true;
+			}
+			else if (sName.endsWith(".shp")) {
 				bRet = true;
 			}
 		}
