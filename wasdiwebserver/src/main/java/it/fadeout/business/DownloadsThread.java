@@ -5,6 +5,7 @@ import java.util.List;
 
 import javax.servlet.ServletConfig;
 
+import it.fadeout.Wasdi;
 import wasdi.shared.business.ProcessWorkspace;
 
 public class DownloadsThread extends ProcessingThread {
@@ -16,7 +17,7 @@ public class DownloadsThread extends ProcessingThread {
 
 	@Override
 	protected List<ProcessWorkspace> getQueuedProcess() {
-		List<ProcessWorkspace> queuedProcess = m_oProcessWorkspaceRepository.GetQueuedDownloads();
+		List<ProcessWorkspace> queuedProcess = m_oProcessWorkspaceRepository.GetQueuedDownloadsByNode(Wasdi.s_sMyNodeCode);
 		
 //		Wasdi.debugLog("DownloadsThread: read download queue. size: " + queuedProcess.size());
 //		for (ProcessWorkspace p : queuedProcess) {

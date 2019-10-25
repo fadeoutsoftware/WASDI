@@ -12,6 +12,7 @@ import java.util.Map.Entry;
 
 import javax.servlet.ServletConfig;
 
+import it.fadeout.Wasdi;
 import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.data.ProcessWorkspaceRepository;
@@ -58,7 +59,7 @@ public class ProcessingThread extends Thread {
 	
 	protected String m_sLogPrefix = "ProcessingThread: ";
 	
-	 private volatile boolean m_bRunning = true;
+	private volatile boolean m_bRunning = true;
 	
 	/**
 	 * constructor with parameters
@@ -211,7 +212,7 @@ public class ProcessingThread extends Thread {
 	 */
 	protected List<ProcessWorkspace> getQueuedProcess() {
 		checkRepo();
-		List<ProcessWorkspace> queuedProcess = m_oProcessWorkspaceRepository.GetQueuedProcess();
+		List<ProcessWorkspace> queuedProcess = m_oProcessWorkspaceRepository.GetQueuedProcessByNode(Wasdi.s_sMyNodeCode);
 				
 		// Reverse the collection, otherwise the olders will dead of starvation
 		Collections.reverse(queuedProcess);

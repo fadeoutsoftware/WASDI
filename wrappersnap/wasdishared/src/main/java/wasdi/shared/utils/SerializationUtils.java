@@ -42,7 +42,7 @@ public class SerializationUtils {
     public static String serializeObjectToStringXML(Object oObjectToSerialize) throws Exception {
         ByteArrayOutputStream aoOutputStream = new ByteArrayOutputStream();
         XMLEncoder oEncoder = new XMLEncoder(aoOutputStream);
-        oEncoder.writeObject(aoOutputStream);
+        oEncoder.writeObject(oObjectToSerialize);
         oEncoder.close();
         
         return aoOutputStream.toString();
