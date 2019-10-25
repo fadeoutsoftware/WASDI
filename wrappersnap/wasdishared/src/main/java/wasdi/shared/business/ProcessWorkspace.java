@@ -59,14 +59,10 @@ public class ProcessWorkspace {
      * Process Payload
      */
     private String payload;
-
-    public String getPayload() {
-		return payload;
-	}
-
-	public void setPayload(String payload) {
-		this.payload = payload;
-	}
+    /**
+     * Code of the computing node of the operation
+     */
+    private String nodeCode="wasdi";
 
 	public String getProductName() {
         return productName;
@@ -163,5 +159,21 @@ public class ProcessWorkspace {
 	public void setOperationStartDate(String operationStartDate) {
 		this.operationStartDate = operationStartDate;
 	}
-    
+
+    public String getNodeCode() {
+		return nodeCode;
+	}
+
+	public void setNodeCode(String nodeCode) {
+		this.nodeCode = nodeCode;
+	}
+
+	public String getPayload() {
+		return payload;
+	}
+
+	public void setPayload(String payload) {
+		this.payload = payload;
+	}
+
 }

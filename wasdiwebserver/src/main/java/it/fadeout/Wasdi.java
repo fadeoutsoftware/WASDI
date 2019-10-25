@@ -8,6 +8,7 @@ import java.io.OutputStreamWriter;
 import java.lang.reflect.Field;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Date;
@@ -47,6 +48,8 @@ import wasdi.shared.data.SessionRepository;
 import wasdi.shared.data.UserRepository;
 import wasdi.shared.data.WorkspaceRepository;
 import wasdi.shared.parameters.BaseParameter;
+import wasdi.shared.parameters.DownloadFileParameter;
+import wasdi.shared.parameters.PublishBandParameter;
 import wasdi.shared.rabbit.RabbitFactory;
 import wasdi.shared.utils.CredentialPolicy;
 import wasdi.shared.utils.SerializationUtils;
@@ -233,13 +236,10 @@ public class Wasdi extends ResourceConfig {
 			}
 			Engine.start(false);
 
-			// init HASH
-			// initPasswordAuthenticationParameters();
-
 		} catch (Throwable e) {
 			e.printStackTrace();
 		}
-
+		
 		Utils.debugLog("------- WASDI Init done ");
 		Utils.debugLog("---------------------------------------------");
 		Utils.debugLog("------- 	 Welcome to space     -------");
@@ -448,12 +448,16 @@ public class Wasdi extends ResourceConfig {
 				}
 				
 				// Get the JSON of the parameter
-				String sPayload = MongoRepository.s_oMapper.writeValueAsString(oParameter);
+				//String sPayload = MongoRepository.s_oMapper.writeValueAsString(oParameter);
+				String sPayload = SerializationUtils.serializeObjectToStringXML(oParameter);
 
 				// Get the URL of the destination Node
 				String sUrl = oDestinationNode.getNodeBaseAddress();
 				if (sUrl.endsWith("/") == false) sUrl += "/";
-				sUrl += "processing/run?sProductName="+sProductName;
+				sUrl += "processing/run?sOperation=" + sOperationId + "&sProductName=" + URLEncoder.encode(sProductName);
+				
+				Utils.debugLog("Wasdi.runProcess: URL: " + sUrl);
+				Utils.debugLog("Wasdi.runProcess: PAYLOAD: " + sPayload);
 				
 				// call the API on the destination node 
 				String sResult = httpPost(sUrl, sPayload, getStandardHeaders(sSessionId));
@@ -496,6 +500,7 @@ public class Wasdi extends ResourceConfig {
 					oProcess.setUserId(sUserId);
 					oProcess.setProcessObjId(sProcessObjId);
 					oProcess.setStatus(ProcessStatus.CREATED.name());
+					oProcess.setNodeCode(oWorkspace.getNodeCode());
 					oRepository.InsertProcessWorkspace(oProcess);
 					Utils.debugLog("Wasdi.runProcess: Process Scheduled for Launcher");
 				} catch (Exception oEx) {

@@ -1424,27 +1424,56 @@ public class ProcessingResources {
 	@Path("run")
 	@Produces({ "application/xml", "application/json", "text/xml" })
 	public PrimitiveResult runProcess(@HeaderParam("x-session-token") String sSessionId,
-			@QueryParam("sOperation") String sOperationId, @QueryParam("sProductName") String sProductName, BaseParameter oParameter) throws IOException {
+			@QueryParam("sOperation") String sOperationId, @QueryParam("sProductName") String sProductName, String sParameter) throws IOException {
+			//@QueryParam("sOperation") String sOperationId, @QueryParam("sProductName") String sProductName, BaseParameter oParameter) throws IOException {
 
+		
 		// Log intro
 		Utils.debugLog("ProsessingResources.runProcess( " + sSessionId + ", " + sOperationId + "," + sProductName + ")");
 		PrimitiveResult oResult = new PrimitiveResult();
 
-		// Check the user
-		String sUserId = acceptedUserAndSession(sSessionId);
-
-		// Is valid?
-		if (Utils.isNullOrEmpty(sUserId)) {
-
-			// Not authorised
-			oResult.setIntValue(401);
+		try {
+		
+			// Check the user
+			String sUserId = acceptedUserAndSession(sSessionId);
+	
+			// Is valid?
+			if (Utils.isNullOrEmpty(sUserId)) {
+	
+				// Not authorised
+				oResult.setIntValue(401);
+				oResult.setBoolValue(false);
+	
+				return oResult;
+			}
+			
+			BaseParameter oParameter = BaseParameter.getParameterFromOperationType(sOperationId);
+			
+			if (oParameter == null) {
+				// Error
+				oResult.setIntValue(500);
+				oResult.setBoolValue(false);
+	
+				return oResult;			
+			}			
+			
+			//Class<? extends BaseParameter> oClass = oParameter.getClass();
+			//oParameter = MongoRepository.s_oMapper.readValue(sParameter,oClass);
+		
+			oParameter = (BaseParameter) SerializationUtils.deserializeStringXMLToObject(sParameter);
+		
+			String sPath = m_oServletConfig.getInitParameter("SerializationPath");
+			return Wasdi.runProcess(sUserId, sSessionId, sOperationId, sProductName, sPath, oParameter);
+		} 
+		catch (Exception e) {
+			e.printStackTrace();
+			oResult.setStringValue(e.toString());
+			oResult.setIntValue(500);
 			oResult.setBoolValue(false);
 
-			return oResult;
+			return oResult;					
 		}
 		
-		String sPath = m_oServletConfig.getInitParameter("SerializationPath");
-		return Wasdi.runProcess(sUserId, sSessionId, sOperationId, sProductName, sPath, oParameter);
 	}
 	
 	
