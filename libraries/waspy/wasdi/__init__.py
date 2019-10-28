@@ -6,11 +6,14 @@ so please be patient and do not trust anyone's life with the library (not yet)
 
 This is WASPY, the WASDI Python lib.
 
-Last Update: 24/10/2019
+Last Update: 28/10/2019
 
 Tested with: Python 2.7, Python 3.7
 
 History
+
+0.1.28 [28/10/2019]
+    added support to .vrt format for mosaic 
 
 0.1.26 [24/10/2019]
     added try and catch to importProduct
@@ -2082,6 +2085,8 @@ def mosaic(asInputFiles, sOutputFile, iNoDataValue=None, iIgnoreInputValue=None,
     sOutputFormat = "GeoTIFF"
     if sOutputFile.endswith(".dim"):
         sOutputFormat = "BEAM-DIMAP"
+    if (sOutputFile.endswith(".vrt")):
+        sOutputFormat = "VRT"
 
     if sCrs is None:
         sCrs = _getDefaultCRS()
