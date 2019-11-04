@@ -523,6 +523,14 @@ public class ProcessWorkspaceResource {
 			// Get Process List
 			ProcessWorkspace oProcessWorkspace = oRepository.GetProcessByProcessObjId(sProcessWorkspaceId);
 			
+			if (  (oProcessWorkspace.getStatus().equals(ProcessStatus.CREATED.name()) || oProcessWorkspace.getStatus().equals(ProcessStatus.RUNNING.name()) ) && (sStatus.equals(ProcessStatus.DONE.name()) || sStatus.equals(ProcessStatus.ERROR.name()) || sStatus.equals(ProcessStatus.STOPPED.name()) ) ) {
+				// The process finished
+				if (Utils.isNullOrEmpty(oProcessWorkspace.getOperationEndDate())) {
+					// No end-date set: put it here
+					oProcessWorkspace.setOperationDate(Utils.GetFormatDate(new Date()));
+				}
+			}
+			
 			oProcessWorkspace.setStatus(sStatus);
 			oProcessWorkspace.setProgressPerc(iPerc);
 
