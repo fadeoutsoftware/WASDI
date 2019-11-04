@@ -2842,6 +2842,8 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 			return "GTiff";
 		case "BEAM-DIMAP":
 			return "DIMAP";
+		case "VRT":
+			return "VRT";
 		default:
 			return "GTiff";
 		}
