@@ -160,4 +160,57 @@ public class GeoServerManager {
         
 		return bRes;
     }
+    
+    
+    
+    
+    
+	/**
+	 * aggiunge un layer da uno shapefile
+	 * @param layerName
+	 * @param shp
+	 * @param style
+	 * @throws DataException 
+	 */
+/*
+    public String publishShapeFile(String layerName, File shp, String style) throws Exception {
+    	
+		//cerco lo stile
+		//StyleInfo si = searchStyleInfo(style);
+		
+		//creo il data store
+		ShapefileDataStoreFactory factory = new ShapefileDataStoreFactory();
+		CatalogBuilder builder = new CatalogBuilder(catalog);
+        builder.setWorkspace(workspace);
+        DataStoreInfo dsi = builder.buildDataStore(layerName);
+		dsi.setType(factory.getDisplayName());
+		Map connectionParameters = dsi.getConnectionParameters();
+		connectionParameters.put(ShapefileDataStoreFactory.URLP.key, DataUtilities.fileToURL(shp));
+		builder.setStore(dsi);
+
+		//creo il feature type info
+		try {
+			ShapefileDataStore store = (ShapefileDataStore)factory.createDataStore(connectionParameters);
+			FeatureTypeInfo ftinfo = builder.buildFeatureType(store.getNames().get(0));
+			ftinfo.setName(layerName);
+			builder.lookupSRS(ftinfo, true);
+	        builder.setupBounds(ftinfo);
+	        catalog.add(dsi);
+	        catalog.add(ftinfo);  		
+			
+			//creo il layer
+	        LayerInfo li = builder.buildLayer(ftinfo);
+	        updateLayerInfo(li, si);
+    		catalog.add(li);
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new DataException("errore reading shapefile: " + e.getMessage());
+		}
+
+//			synchronized (storesTimestampsSync) {
+		storesTimestamps.put(dsi.getName(), new Date());
+//			}
+		
+	}
+*/
 }

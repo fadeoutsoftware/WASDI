@@ -462,6 +462,11 @@ public class WorkspaceResource {
 					}
 
 				}
+				
+				// Delete also the sharings, it is deleted by the owner..
+				WorkspaceSharingRepository oWorkspaceSharingRepository = new WorkspaceSharingRepository();
+				oWorkspaceSharingRepository.DeleteByWorkspaceId(sWorkspaceId);
+
 
 				return Response.ok().build();
 			} else

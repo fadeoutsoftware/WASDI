@@ -44,7 +44,8 @@ var MosaicController = (function() {
             nativeResolution: true,
             combine: "OR",
             variableNames: [],
-            variableExpressions: []
+            variableExpressions: [],
+            sources: []
         }
 
         var oController = this;
@@ -81,8 +82,25 @@ var MosaicController = (function() {
 
         var oActiveWorkspace = this.m_oConstantsService.getActiveWorkspace();
 
-        this.m_oSnapOperationService.geometricMosaic(oActiveWorkspace.workspaceId,this.m_oMosaicViewModel.outputFile, this.m_oMosaicViewModel).success(function (data) {
+        var asSourceFiles = [];
 
+        for (var i=0; i<this.m_asSelectedProducts.length; i++) {
+
+            var sName = this.m_asSelectedProducts[i];
+
+            for (var j=0; j<this.m_aoProducts.length; j++) {
+                if (this.m_aoProducts[j].name === sName) {
+                    asSourceFiles.push(this.m_aoProducts[j].fileName);
+                    break;
+                }
+            }
+        }
+
+        this.m_oMosaicViewModel.sources = asSourceFiles;
+
+        this.m_oSnapOperationService.geometricMosaic(oActiveWorkspace.workspaceId,this.m_oMosaicViewModel.outputFile, this.m_oMosaicViewModel).success(function (data) {
+            var oDialog = utilsVexDialogAlertBottomRightCorner("MOSAIC SCHEDULED<br>READY");
+            utilsVexCloseDialogAfter(4000, oDialog);
         }).error(function (error) {
             utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR IN GET PARAMETERS");
         });
