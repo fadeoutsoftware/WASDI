@@ -1,4 +1,4 @@
-package wasdi.snapopearations;
+package wasdi.io;
 
 import java.io.File;
 
@@ -10,20 +10,21 @@ import org.esa.snap.core.gpf.internal.OperatorExecutor;
 import wasdi.LauncherMain;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.data.ProcessWorkspaceRepository;
+import wasdi.snapopearations.WasdiProgreeMonitor;
 
 /**
  * SNAP Product Write Utility
  * Created by s.adamo on 24/05/2016.
  */
-public class WriteProduct  {
+public class WasdiProductWriter  {
 	
 	private ProcessWorkspaceRepository m_oProcessWorkspaceRepository = null;
 	private ProcessWorkspace m_oProcessWorkspace = null;
 
-	public WriteProduct() {
+	public WasdiProductWriter() {
 	}
 	
-	public WriteProduct(ProcessWorkspaceRepository oProcessWorkspaceRepository, ProcessWorkspace oProcessWorkspace) {
+	public WasdiProductWriter(ProcessWorkspaceRepository oProcessWorkspaceRepository, ProcessWorkspace oProcessWorkspace) {
 		super();
 		this.m_oProcessWorkspaceRepository = oProcessWorkspaceRepository;
 		this.m_oProcessWorkspace = oProcessWorkspace;
