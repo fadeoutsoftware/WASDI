@@ -133,7 +133,7 @@ public class ONDAProviderAdapter extends ProviderAdapter {
 				copyStream(oProcessWorkspace, oSourceFile.length(), oInputStream, oOutputStream);
 
 			} catch (Exception e) {
-				m_oLogger.debug( "ONDAProviderAdapter.Exception: " + e.toString());
+				m_oLogger.debug( "ONDAProviderAdapter.Exception: " + e);
 			}
 			//TODO else - i.e., if it fails - try get the file from https instead
 			//	- in this case the sUrl must be modified in order to include http, so that it can be retrieved  
