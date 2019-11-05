@@ -97,7 +97,7 @@ public class QueryExecutorONDA extends QueryExecutor {
 		}
 		String sUrl = buildUrlPrefix(oQuery);
 
-		sUrl += "&$select=id,name,creationDate,beginPosition,offline,size,pseudopath,footprint";
+		sUrl += "&$expand=Metadata&$select=id,name,creationDate,beginPosition,offline,size,pseudopath,footprint";
 
 		sUrl = buildUrlSuffix(oQuery, sUrl);
 		return sUrl;
