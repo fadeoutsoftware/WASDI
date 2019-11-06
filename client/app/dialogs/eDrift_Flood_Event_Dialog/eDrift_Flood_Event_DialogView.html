@@ -27,7 +27,7 @@
                             <div class="datetime-picker-wrapper ">
                                 <div class="input-group"
                                      moment-picker="m_oController.m_oSelectedDate"
-                                     format="YYYY-MM-DD HH"
+                                     format="YYYY-MM-DD"
                                      today="true">
 
                                     <input class="wasdi-input "
@@ -43,6 +43,17 @@
                         </div>
                     </div>
 
+
+                    <div class="row-v4">
+                        <div class="col-v4-1 date-label">
+                            <label>Event Code:</label>
+                        </div>
+                        <div class="col-v4-11 "> <!--filter-datetime-picker-wrapper-->
+                            <!------------------------- BASE NAME -------------------->
+                            <input type="text" name="basename"  class="form-control" value="" title="" ng-model="m_oController.m_sBaseName">
+                        </div>
+                    </div>
+
               		<div id="mappaedriftfloodevent" style="height: 400px;"></div>
 				</div>
                 <!--<button ng-click="m_oController.getDate()">Test</button>-->
@@ -53,8 +64,8 @@
                 <button type="button" ng-click="close(null)" class="btn btn-primary btn-wasdi " data-dismiss="modal">
                     {{"DIALOG_CLOSE_BUTTON"|translate}}
                 </button>
-                <button type="button" ng-click="close(null)" class="btn btn-primary btn-wasdi " data-dismiss="modal">
-                    Do something
+                <button type="button" ng-click="m_oController.run()" class="btn btn-primary btn-wasdi " data-dismiss="modal">
+                    Run
                 </button>
             </div>
 
