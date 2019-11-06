@@ -1,16 +1,19 @@
  var eDriftFloodEventDialogController = (function() {
 
-    function eDriftFloodEventDialogController($scope, oClose,oExtras,oAuthService,oConstantsService,oCatalogService) {
+    function eDriftFloodEventDialogController($scope, oClose,oExtras,oAuthService,oConstantsService,oCatalogService, oProcessorService) {
         this.m_oScope = $scope;
         this.m_oScope.m_oController = this;
         this.m_oAuthService = oAuthService;
         this.m_oCatalogService = oCatalogService;
         this.m_oConstantsService = oConstantsService;
+        this.m_oProcessorService = oProcessorService;
+        this.m_sBaseName = "EV";
         this.m_oBoundingBox = {
             northEast: "",
             southWest: ""
         }
         this.m_oSelectedDate = moment();
+        $scope.m_oController = this;
         var oController = this;
         $scope.close = function(result) {
             oClose(result, 500); // close, but give 500ms for bootstrap to animate
@@ -125,13 +128,56 @@
 
     };
 
+     /*************** METHODS ***************/
+     eDriftFloodEventDialogController.prototype.run = function(){
+         var oBBOX = this.getBoundingBox();
+         var sDate = this.m_oSelectedDate;
+         var sBbox = "" + oBBOX.northEast.lat+","+oBBOX.northEast.lng+","+oBBOX.southWest.lat+","+oBBOX.southWest.lng;
+         var sBaseName = this.m_sBaseName;
+         var oController = this;
+
+         sJSON = '{ "BBOX": "'+sBbox+'", "EVENT_DATE":"' + sDate + '", "BASENAME":"'+ sBaseName + '"}';
+         console.log(sJSON);
+
+         this.m_oProcessorService.runProcessor("edrift_flood_event", sJSON)
+             .success(function (data) {
+                 if(utilsIsObjectNullOrUndefined(data) == false)
+                 {
+                     var oDialog = utilsVexDialogAlertBottomRightCorner("FLOOD EVENT DETECTION SCHEDULED<br>READY");
+                     utilsVexCloseDialogAfter(4000,oDialog);
+
+                     console.log('Run ' + data);
+
+                     let rootscope = oController.m_oScope.$parent;
+
+                     while(rootscope.$parent != null || rootscope.$parent != undefined)
+                     {
+                         rootscope = rootscope.$parent;
+                     }
+
+                     let payload = { processId: data.processingIdentifier };
+                     rootscope.$broadcast(RootController.BROADCAST_MSG_OPEN_LOGS_DIALOG_PROCESS_ID, payload);
+                 }
+                 else
+                 {
+                     utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR RUNNING FLOOD EVENT");
+                 }
+             })
+             .error(function (error) {
+                 utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR RUNNING FLOOD EVENT");
+                 oController.cleanAllExecuteWorkflowFields();
+             });
+
+     };
+
     eDriftFloodEventDialogController.$inject = [
         '$scope',
         'close',
         'extras',
         'AuthService',
         'ConstantsService',
-        'CatalogService'
+        'CatalogService',
+        'ProcessorService',
     ];
     return eDriftFloodEventDialogController;
 })();
