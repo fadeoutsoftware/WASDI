@@ -12,6 +12,9 @@ Tested with: Python 2.7, Python 3.7
 
 History
 
+0.1.29 [05/11/2019]
+    fixed possible infinite loop in addFileToWASDI 
+
 0.1.28 [28/10/2019]
     added support to .vrt format for mosaic 
 
@@ -1830,11 +1833,15 @@ def _internalAddFileToWASDI(sFileName, bAsynch=None):
         else:
             oJson = oResponse.json()
             if 'stringValue' in oJson:
-                sProcessId = str(oJson['stringValue'])
-                if bAsynch is True:
-                    sResult = sProcessId
+                bOk = bool(oJson['boolValue'])
+                if bOk:
+                    sProcessId = str(oJson['stringValue'])
+                    if bAsynch is True:
+                        sResult = sProcessId
+                    else:
+                        sResult = waitProcess(sProcessId)
                 else:
-                    sResult = waitProcess(sProcessId)
+                    print('[ERROR] waspy._internalAddFileToWASDI: impossible to ingest the file in WASDI')
     except:
         print('[ERROR] waspy._internalAddFileToWASDI: something broke alongside' +
               '  ******************************************************************************')
