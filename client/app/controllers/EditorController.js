@@ -1185,13 +1185,6 @@ var EditorController = (function () {
                 var sColor="#f22323";
                 var sGeoserverBBox =oBand.geoserverBoundingBox;
                 this.productIsNotGeoreferencedRectangle2DMap(sColor,sGeoserverBBox,oBand.bbox,oBand.layerId);
-                // if( this.m_oMapService.isProductGeoreferenced( oBand.bbox, oBand.geoserverBoundingBox ) === false )
-                // {
-                //     var oRectangleBoundingBox = this.m_oMapService.addRectangleByGeoserverBoundingBox(sGeoserverBBox,sColor);
-                //     //the options.layers property is used for remove the rectangle to the map
-                //     oRectangleBoundingBox.options.layers = "wasdi:" + oBand.layerId;
-                // }
-                //
                 //if we are in 2D put it on the map
                 this.addLayerMap2D(oBand.layerId);
 
