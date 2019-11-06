@@ -88,8 +88,8 @@ var GetCapabilitiesController = (function() {
         if(this.m_oEditorController.m_bIsActiveGeoraphicalMode == true)
         {
             //if there is a map, add layers to it
-            this.m_oEditorController.addLayerMap2D(oLayer.Name,this.m_sServerLink);
-            this.m_oEditorController.addLayerMap3D(oLayer.Name,this.m_sServerLink);
+            this.m_oEditorController.addLayerMap2DByServer(oLayer.Name,this.m_sServerLink);
+            this.m_oEditorController.addLayerMap3DByServer(oLayer.Name,this.m_sServerLink);
             this.m_oEditorController.m_aoExternalLayers.push(oLayer);
 
             this.m_oMapService.zoomOnExternalLayer(oLayer);
