@@ -89,7 +89,7 @@ var EditorController = (function () {
             radarBar:true,
             opticalBar:true,
             processorBar:true
-        }
+        };
         //we save the masks selected
         this.m_oMasksSaved = null;
         // Index of the actual Active Tab
@@ -603,7 +603,7 @@ var EditorController = (function () {
                                                     oController.m_aoVisibleBands[iIndexLayers].geoserverBoundingBox, oController.m_aoVisibleBands[iIndexLayers].layerId);
                         if( utilsIsObjectNullOrUndefined(oRectangleIsNotGeoreferencedProduct) === false)
                         {
-                            oController.addLayerMap3D(oController.m_aoVisibleBands[iIndexLayers].layerId);
+                            oController.addLayerMap3DByServer(oController.m_aoVisibleBands[iIndexLayers].layerId, oController.m_aoVisibleBands[iIndexLayers].geoserverUrl);
                             var oLayer3DMap = {
                                 id : oController.m_aoVisibleBands[iIndexLayers].layerId,
                                 rectangle : oRectangleIsNotGeoreferencedProduct
@@ -612,12 +612,9 @@ var EditorController = (function () {
                         }
                        else
                        {
-                           oController.addLayerMap3D(oController.m_aoVisibleBands[iIndexLayers].layerId);
+                           oController.addLayerMap3DByServer(oController.m_aoVisibleBands[iIndexLayers].layerId, oController.m_aoVisibleBands[iIndexLayers].geoserverUrl);
                        }
-
-
                     }
-
 
                     var sNodeId = oController.m_aoVisibleBands[iIndexLayers].productName + "_" + oController.m_aoVisibleBands[iIndexLayers].bandName;
                     oController.setTreeNodeAsSelected(sNodeId);
@@ -671,7 +668,7 @@ var EditorController = (function () {
                         // }
                         //
                         oController.productIsNotGeoreferencedRectangle2DMap(sColor,sGeoserverBBox,oController.m_aoVisibleBands[iIndexLayers].bbox, oController.m_aoVisibleBands[iIndexLayers].layerId);
-                        oController.addLayerMap2D(oController.m_aoVisibleBands[iIndexLayers].layerId);
+                        oController.addLayerMap2DByServer(oController.m_aoVisibleBands[iIndexLayers].layerId, oController.m_aoVisibleBands[iIndexLayers].geoserverUrl);
                     }
 
                     var sNodeId = oController.m_aoVisibleBands[iIndexLayers].productName + "_" + oController.m_aoVisibleBands[iIndexLayers].bandName;
@@ -758,14 +755,6 @@ var EditorController = (function () {
             // var bIsProductGeoreferenced = false;
             var sColor="#f22323";
             var sGeoserverBBox = this.m_aoVisibleBands[iIndexLayer].geoserverBoundingBox;
-            // if( this.m_oMapService.isProductGeoreferenced( this.m_aoVisibleBands[iIndexLayer].bbox, this.m_aoVisibleBands[iIndexLayer].geoserverBoundingBox ) === false )
-            // {
-            //     // bIsProductGeoreferenced = true;
-            //     var oRectangleBoundingBoxMap = this.m_oMapService.addRectangleByGeoserverBoundingBox(sGeoserverBBox,sColor);
-            //     //the options.layers property is used for remove the rectangle to the map
-            //     oRectangleBoundingBoxMao.options.layers = "wasdi:" + this.m_aoVisibleBands[iIndexLayer].layerId;
-            // }
-
 
             //check if the layer has the layer Id
             if (!utilsIsObjectNullOrUndefined(this.m_aoVisibleBands[iIndexLayer].layerId)) {
@@ -775,12 +764,12 @@ var EditorController = (function () {
                     // show the layer
                     if (this.m_b2DMapModeOn)
                     {
-                        this.addLayerMap2D(this.m_aoVisibleBands[iIndexLayer].layerId);
+                        this.addLayerMap2DByServer(this.m_aoVisibleBands[iIndexLayer].layerId, this.m_aoVisibleBands[iIndexLayer].geoserverUrl);
                         this.productIsNotGeoreferencedRectangle2DMap(sColor,sGeoserverBBox,this.m_aoVisibleBands[iIndexLayer].bbox,this.m_aoVisibleBands[iIndexLayer].layerId);
                     }
                     else
                     {
-                        this.addLayerMap3D(this.m_aoVisibleBands[iIndexLayer].layerId);
+                        this.addLayerMap3DByServer(this.m_aoVisibleBands[iIndexLayer].layerId, this.m_aoVisibleBands[iIndexLayer].geoserverUrl);
                         var oRectangleIsNotGeoreferencedProduct = this.productIsNotGeoreferencedRectangle3DMap(sGeoserverBBox,this.m_aoVisibleBands[iIndexLayer].bbox, this.m_aoVisibleBands[iIndexLayer].layerId);
                         if( utilsIsObjectNullOrUndefined(oRectangleIsNotGeoreferencedProduct) === false)
                         {
@@ -1144,6 +1133,7 @@ var EditorController = (function () {
         oBand.published=true;
         oBand.bbox = oPublishedBand.boundingBox;
         oBand.geoserverBoundingBox = oPublishedBand.geoserverBoundingBox;
+        oBand.geoserverUrl = oPublishedBand.geoserverUrl;
 
         // Set the tree node as selected and published
         this.setTreeNodeAsSelected(sNodeID);
@@ -1154,16 +1144,14 @@ var EditorController = (function () {
             return false;
         }
         else {
-            //add layer in list
-
-
+            // Add layer in list
             // check if the background is in Editor Mode or in Georeferenced Mode
             if (this.m_b2DMapModeOn == false)
             {
                 var oRectangleIsNotGeoreferencedProduct = this.productIsNotGeoreferencedRectangle3DMap(oBand.geoserverBoundingBox,oBand.bbox,  oBand.layerId);
                 if(utilsIsObjectNullOrUndefined(oRectangleIsNotGeoreferencedProduct) === false)
                 {
-                    this.addLayerMap3D(oBand.layerId);
+                    this.addLayerMap3DByServer(oBand.layerId, oBand.geoserverUrl);
                     var oLayer3DMap = {
                         id : oBand.layerId,
                         rectangle : oRectangleIsNotGeoreferencedProduct
@@ -1172,22 +1160,15 @@ var EditorController = (function () {
                 }
 
                 //if we are in 3D put the layer on the globe
-                this.addLayerMap3D(oBand.layerId);
+                this.addLayerMap3DByServer(oBand.layerId, oBand.geoserverUrl);
             }
             else
             {
                 var sColor="#f22323";
                 var sGeoserverBBox =oBand.geoserverBoundingBox;
                 this.productIsNotGeoreferencedRectangle2DMap(sColor,sGeoserverBBox,oBand.bbox,oBand.layerId);
-                // if( this.m_oMapService.isProductGeoreferenced( oBand.bbox, oBand.geoserverBoundingBox ) === false )
-                // {
-                //     var oRectangleBoundingBox = this.m_oMapService.addRectangleByGeoserverBoundingBox(sGeoserverBBox,sColor);
-                //     //the options.layers property is used for remove the rectangle to the map
-                //     oRectangleBoundingBox.options.layers = "wasdi:" + oBand.layerId;
-                // }
-                //
                 //if we are in 2D put it on the map
-                this.addLayerMap2D(oBand.layerId);
+                this.addLayerMap2DByServer(oBand.layerId,oBand.geoserverUrl);
 
             }
 
@@ -1427,6 +1408,7 @@ var EditorController = (function () {
             oBandItem.bVisibleNow = false;
             oBandItem.bbox = oProduct.bbox;
             oBandItem.geoserverBoundingBox = aoBands[i].geoserverBoundingBox;
+            oBandItem.geoserverUrl = aoBands[i].geoserverUrl;
 
             asBands.push(oBandItem);
         }
@@ -1976,6 +1958,7 @@ var EditorController = (function () {
        // .leaflet-tile { border: solid black 5px; }
         wmsLayer.addTo(oMap);
 
+        return true;
     };
 
     /**
@@ -1999,6 +1982,8 @@ var EditorController = (function () {
         });
 
         oGlobeLayers.addImageryProvider(oProvider);
+
+        return true;
     };
 
     /**
@@ -2007,7 +1992,7 @@ var EditorController = (function () {
      */
     EditorController.prototype.addLayerMap3DByServer = function (sLayerId,sServer) {
         if (sLayerId == null) return false;
-        if(sServer == null) return false;
+        if(sServer == null) return this.addLayerMap3D(sLayerId);
 
         var oGlobeLayers=this.m_oGlobeService.getGlobeLayers();
 
@@ -2033,7 +2018,7 @@ var EditorController = (function () {
      */
     EditorController.prototype.addLayerMap2DByServer = function (sLayerId,sServer) {
         // Chech input data
-        if(sServer == null) return false;
+        if(sServer == null) return this.addLayerMap2D(sLayerId);
         if (sLayerId == null) return false;
 
         var oMap = this.m_oMapService.getMap();
@@ -4213,15 +4198,6 @@ var EditorController = (function () {
                                                 }
                                             }
                                     },
-                                    // "Workflow":{
-                                    //     "label": "Workflow",
-                                    //     "icon" : "workflow-icon-context-menu-jstree",
-                                    //     "action": function (obj) {
-                                    //         var oFoundProduct = oController.m_aoProducts[$node.original.band.productIndex];
-                                    //
-                                    //         if(utilsIsObjectNullOrUndefined(oFoundProduct) == false) oController.openWorkflowDialog();
-                                    //     }
-                                    // },
                                     "Workflow":{
                                         "label": "Workflow",
                                         "action": function (obj) {
@@ -4400,15 +4376,6 @@ var EditorController = (function () {
                                                 }
                                             }
                                     },
-                                    // "Workflow":{
-                                    //     "label": "Workflow",
-                                    //     "action": function (obj) {
-                                    //         var sSourceFileName = $node.original.fileName;
-                                    //         var oFound = oController.findProductByFileName(sSourceFileName);
-                                    //
-                                    //         if(utilsIsObjectNullOrUndefined(oFound) == false) oController.openWorkflowDialog();
-                                    //     }
-                                    // },
                                     "Workflow":{
                                         "label": "Workflow",
                                         "action": function (obj) {

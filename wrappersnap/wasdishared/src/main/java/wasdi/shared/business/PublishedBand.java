@@ -34,8 +34,20 @@ public class PublishedBand {
      * Boundig box in geoserver format
      */
     private String geoserverBoundingBox;
+    /**
+     * URL of the geoserver
+     */
+    private String geoserverUrl;
 
-    public String getProductName() {
+    public String getGeoserverUrl() {
+		return geoserverUrl;
+	}
+
+	public void setGeoserverUrl(String geoserverUrl) {
+		this.geoserverUrl = geoserverUrl;
+	}
+
+	public String getProductName() {
         return productName;
     }
 

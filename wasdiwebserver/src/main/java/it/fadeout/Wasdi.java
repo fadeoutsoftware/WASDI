@@ -36,6 +36,7 @@ import org.glassfish.jersey.server.ResourceConfig;
 import it.fadeout.business.DownloadsThread;
 import it.fadeout.business.IDLThread;
 import it.fadeout.business.ProcessingThread;
+import wasdi.shared.business.Node;
 import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.business.User;
@@ -402,8 +403,7 @@ public class Wasdi extends ResourceConfig {
 			return "";
 		String sWorkspaceOwner = oWorkspace.getUserId();
 		return sWorkspaceOwner;
-	}
-	
+	}	
 	
 	public static PrimitiveResult runProcess(String sUserId, String sSessionId, String sOperationId, String sProductName, String sSerializationPath, BaseParameter oParameter) throws IOException {
 		

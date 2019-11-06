@@ -9,8 +9,17 @@ public class PublishBandResultViewModel {
     private String productName;
     private String boundingBox;
     private String geoserverBoundingBox;
+    private String geoserverUrl;
 
-    public String getLayerId() {
+    public String getGeoserverUrl() {
+		return geoserverUrl;
+	}
+
+	public void setGeoserverUrl(String geoserverUrl) {
+		this.geoserverUrl = geoserverUrl;
+	}
+
+	public String getLayerId() {
         return layerId;
     }
 

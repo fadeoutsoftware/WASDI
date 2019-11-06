@@ -246,8 +246,7 @@ public class ProductResource {
 			PublishedBandsRepository oPublishedBandsRepository = new PublishedBandsRepository();
 
 			// Get Product List
-			List<ProductWorkspace> aoProductWorkspace = oProductWorkspaceRepository
-					.GetProductsByWorkspace(sWorkspaceId);
+			List<ProductWorkspace> aoProductWorkspace = oProductWorkspaceRepository.GetProductsByWorkspace(sWorkspaceId);
 
 			Utils.debugLog("ProductResource.GetListByWorkspace: found " + aoProductWorkspace.size());
 
@@ -255,8 +254,7 @@ public class ProductResource {
 			for (int iProducts = 0; iProducts < aoProductWorkspace.size(); iProducts++) {
 
 				// Get the downloaded file
-				DownloadedFile oDownloaded = oDownloadedFilesRepository
-						.GetDownloadedFileByPath(aoProductWorkspace.get(iProducts).getProductName());
+				DownloadedFile oDownloaded = oDownloadedFilesRepository.GetDownloadedFileByPath(aoProductWorkspace.get(iProducts).getProductName());
 
 				// Add View model to return list
 				if (oDownloaded != null) {
@@ -276,13 +274,14 @@ public class ProductResource {
 									BandViewModel oBand = aoBands.get(iBands);
 
 									if (oBand != null) {
-										PublishedBand oPublishBand = oPublishedBandsRepository
-												.GetPublishedBand(geoPVM.getName(), oBand.getName());
+										PublishedBand oPublishBand = oPublishedBandsRepository.GetPublishedBand(geoPVM.getName(), oBand.getName());
 
 										if (oPublishBand != null) {
 											oBand.setPublished(true);
 											oBand.setLayerId(oPublishBand.getLayerId());
 											oBand.setGeoserverBoundingBox(oPublishBand.getGeoserverBoundingBox());
+											oBand.setGeoserverUrl(oPublishBand.getGeoserverUrl());
+											
 										} else {
 											oBand.setPublished(false);
 										}
@@ -340,8 +339,6 @@ public class ProductResource {
 
 			// Create repo
 			ProductWorkspaceRepository oProductWorkspaceRepository = new ProductWorkspaceRepository();
-			DownloadedFilesRepository oDownloadedFilesRepository = new DownloadedFilesRepository();
-			//PublishedBandsRepository oPublishedBandsRepository = new PublishedBandsRepository();
 
 			// Get Product List
 			List<ProductWorkspace> aoProductWorkspace = oProductWorkspaceRepository.GetProductsByWorkspace(sWorkspaceId);
@@ -395,8 +392,7 @@ public class ProductResource {
 			DownloadedFilesRepository oDownloadedFilesRepository = new DownloadedFilesRepository();
 
 			// Get Product List
-			List<ProductWorkspace> aoProductWorkspace = oProductWorkspaceRepository
-					.GetProductsByWorkspace(sWorkspaceId);
+			List<ProductWorkspace> aoProductWorkspace = oProductWorkspaceRepository.GetProductsByWorkspace(sWorkspaceId);
 
 			Utils.debugLog("ProductResource.getNamesByWorkspace: found " + aoProductWorkspace.size());
 
@@ -404,8 +400,7 @@ public class ProductResource {
 			for (int iProducts = 0; iProducts < aoProductWorkspace.size(); iProducts++) {
 
 				// Get the downloaded file
-				DownloadedFile oDownloaded = oDownloadedFilesRepository
-						.GetDownloadedFileByPath(aoProductWorkspace.get(iProducts).getProductName());
+				DownloadedFile oDownloaded = oDownloadedFilesRepository.GetDownloadedFileByPath(aoProductWorkspace.get(iProducts).getProductName());
 
 				// Add View model to return list
 				if (oDownloaded != null) {
@@ -489,11 +484,8 @@ public class ProductResource {
 	@POST
 	@Path("/uploadfile")
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
-	public Response uploadFile(@FormDataParam("file") InputStream fileInputStream,
-			@HeaderParam("x-session-token") String sSessionId, @QueryParam("workspace") String sWorkspace,
-			@QueryParam("name") String sName) throws Exception {
-		Utils.debugLog(
-				"ProductResource.uploadfile( InputStream, " + sSessionId + ", " + sWorkspace + ", " + sName + " )");
+	public Response uploadFile(@FormDataParam("file") InputStream fileInputStream, @HeaderParam("x-session-token") String sSessionId, @QueryParam("workspace") String sWorkspace, @QueryParam("name") String sName) throws Exception {
+		Utils.debugLog("ProductResource.uploadfile( InputStream, " + sSessionId + ", " + sWorkspace + ", " + sName + " )");
 
 		// Check the user session
 		if (Utils.isNullOrEmpty(sSessionId)) {
