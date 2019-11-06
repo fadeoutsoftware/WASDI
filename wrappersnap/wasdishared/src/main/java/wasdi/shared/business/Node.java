@@ -8,12 +8,23 @@ public class Node {
 	/**
 	 * Base URL
 	 */
-	private String nodeBaseAddress;
-	
+	private String nodeBaseAddress;	
 	/**
 	 * Node Description
 	 */
 	private String nodeDescription;
+	/**
+	 * GeoServer URL
+	 */
+	private String nodeGeoserverAddress;
+	
+	
+	public String getNodeGeoserverAddress() {
+		return nodeGeoserverAddress;
+	}
+	public void setNodeGeoserverAddress(String nodeGeoserverAddress) {
+		this.nodeGeoserverAddress = nodeGeoserverAddress;
+	}
 	
 	public String getNodeCode() {
 		return nodeCode;

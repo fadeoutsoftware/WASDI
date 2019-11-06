@@ -191,6 +191,7 @@ public class FileBufferResource {
 				oPublishViewModel.setLayerId(oPublishBand.getLayerId());
 				oPublishViewModel.setProductName(oPublishBand.getProductName());
 				oPublishViewModel.setGeoserverBoundingBox(oPublishBand.getGeoserverBoundingBox());
+				oPublishViewModel.setGeoserverUrl(oPublishBand.getGeoserverUrl());
 				oReturnValue.setMessageCode(LauncherOperations.PUBLISHBAND.name());
 				oReturnValue.setPayload(oPublishViewModel);
 				
