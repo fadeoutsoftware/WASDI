@@ -169,7 +169,7 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 
 		// Basic HTTP Authentication
 		m_oLogger.debug("ProviderAdapter.downloadViaHttp: sDownloadUser = " + sDownloadUser);
-
+		
 		if (sDownloadUser != null) {
 			Authenticator.setDefault(new Authenticator() {
 				protected PasswordAuthentication getPasswordAuthentication() {
@@ -191,6 +191,7 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 		oHttpConn.setRequestMethod("GET");
 		oHttpConn.setRequestProperty("Accept", "*/*");
 		oHttpConn.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:57.0) Gecko/20100101 Firefox/57.0");
+				
 		int responseCode = oHttpConn.getResponseCode();
 
 		// always check HTTP response code first

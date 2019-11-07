@@ -276,7 +276,7 @@ public class WasdiProductReader {
         this.FillBandsViewModel(oViewModel, oExportProduct);
         
         // Set name and path
-        oViewModel.setName(oExportProduct.getName());
+        if (oExportProduct != null) oViewModel.setName(oExportProduct.getName());
         if (oFile!=null) oViewModel.setFileName(oFile.getName());
 
         LauncherMain.s_oLogger.debug("WasdiProductReader.getProductViewModel: done");
