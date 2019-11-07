@@ -7,7 +7,23 @@
         this.m_oCatalogService = oCatalogService;
         this.m_oConstantsService = oConstantsService;
         this.m_oProcessorService = oProcessorService;
+        this.m_sSelectedWorkflowTab = 'WorkFlowTab1';
         this.m_sBaseName = "EV";
+        this.m_oParameters = {
+            "LASTDAYS": "0",
+            "DELETE": true,
+            "SIMULATE": false,
+            "ORBITS": "",
+            "GRIDSTEP": "1,1",
+            "PREPROCWORKFLOW": "LISTSinglePreproc2",
+            "HSBASTARTDEPTH": "-1",
+            "BIMODALITYCOEFFICENT": "2.4",
+            "MINIMUMTILEDIMENSION": "1000",
+            "MINIMALBLOBREMOVAL": "10",
+            "PREPROCESS": true,
+            "DAYSBACK": "15",
+            "DAYSFORWARD": "15"
+        };
         this.m_oBoundingBox = {
             northEast: "",
             southWest: ""
@@ -136,7 +152,45 @@
          var sBaseName = this.m_sBaseName;
          var oController = this;
 
-         sJSON = '{ "BBOX": "'+sBbox+'", "EVENT_DATE":"' + sDate + '", "BASENAME":"'+ sBaseName + '"}';
+         var oParams = this.m_oParameters;
+
+         var asParams = [];
+         asParams.push('"ASHMAN_COEFF":"'+ oParams.BIMODALITYCOEFFICENT + '"');
+         asParams.push('"GRIDSTEP":"'+ oParams.GRIDSTEP + '"');
+         asParams.push('"HSBA_DEPTH_IN":"'+ oParams.HSBASTARTDEPTH + '"');
+         asParams.push('"LASTDAYS":"'+ oParams.LASTDAYS + '"');
+         asParams.push('"BLOBS_SIZE":"'+ oParams.MINIMALBLOBREMOVAL + '"');
+         asParams.push('"MIN_PIXNB_BIMODD":"'+ oParams.MINIMUMTILEDIMENSION + '"');
+         asParams.push('"PREPROCWORKFLOW":"'+ oParams.PREPROCWORKFLOW + '"');
+         asParams.push('"DAYSFORWARD":"'+ oParams.DAYSFORWARD + '"');
+         asParams.push('"DAYSBACK":"'+ oParams.DAYSBACK + '"');
+
+         if (!utilsIsStrNullOrEmpty(oParams.ORBITS)) {
+             asParams.push('"ORBITS":"'+ oParams.ORBITS + '"');
+         }
+
+         if (oParams.DELETE == false){
+             asParams.push('"DELETE":"0"')
+         }
+
+         if (oParams.PREPROCESS == false){
+             asParams.push('"PREPROCESS":"0"')
+         }
+
+         if (oParams.SIMULATE == true) {
+             asParams.push('"SIMULATE":"1"')
+         }
+
+         sJSON = '{ "BBOX": "'+sBbox+'", "EVENT_DATE":"' + sDate + '", "BASENAME":"'+ sBaseName + '"';
+
+         var iParams = 0;
+
+         for (iParams=0; iParams<asParams.length; iParams++) {
+             sJSON += ", " + asParams[iParams];
+         }
+
+         sJSON += '}';
+
          console.log(sJSON);
 
          this.m_oProcessorService.runProcessor("edrift_flood_event", sJSON)

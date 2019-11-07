@@ -6,7 +6,7 @@
 
             <div class="row post-event-image-container">
                 <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
-                    Days to search back
+                    Days to search back (0 for day by day flood map)
                 </div>
             <div class="col-xs-9 col-sm-9 col-md-9 col-lg-9">
                     <input type="text" name="" class="" value="" title="" ng-model="m_oController.m_oParameters.LASTDAYS">
@@ -22,7 +22,7 @@
             </div>
             <div class="row post-event-image-container">
                 <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
-                    Simulate flood Detection
+                    Simulate flood Detection (use 1 to test only the chain)
                 </div>
                 <div class="col-xs-9 col-sm-9 col-md-9 col-lg-9">
                     <input type="checkbox" name="" class="" value="" title="" ng-model="m_oController.m_oParameters.SIMULATE">
@@ -31,7 +31,7 @@
 
             <div class="row post-event-image-container">
                 <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
-                    Search Orbits
+                    Orbits: put here to force orbits to use
                 </div>
                 <div class="col-xs-9 col-sm-9 col-md-9 col-lg-9">
                     <input type="text" name="" class="" value="" title="" placeholder="&nbsp;" ng-model="m_oController.m_oParameters.ORBITS">
@@ -47,27 +47,10 @@
             </div>
             <div class="row post-event-image-container">
                 <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
-                    S1 Preprocess workflow
+                    S1 Preprocess Workflow
                 </div>
                 <div class="col-xs-9 col-sm-9 col-md-9 col-lg-9">
                     <input type="text" name="" class="" value="" title="" ng-model="m_oController.m_oParameters.PREPROCWORKFLOW">
-                </div>
-            </div>
-
-            <div class="row post-event-image-container">
-                <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
-                    Mosaic X step [degrees]
-                </div>
-                <div class="col-xs-9 col-sm-9 col-md-9 col-lg-9">
-                    <input type="text" name="" class="" value="" title="" ng-model="m_oController.m_oParameters.MOSAICXSTEP">
-                </div>
-            </div>
-            <div class="row post-event-image-container">
-                <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
-                    Mosaic Y step [degrees]
-                </div>
-                <div class="col-xs-9 col-sm-9 col-md-9 col-lg-9">
-                    <input type="text" name="" class="" value="" title="" ng-model="m_oController.m_oParameters.MOSAICYSTEP">
                 </div>
             </div>
             <div class="row post-event-image-container">
@@ -75,7 +58,7 @@
                     {{"DIALOG_LIST_FLOOD_AREA_DETECTION_HSBA_START_DEPTH_LABEL"|translate}}
                 </div>
                 <div class="col-xs-9 col-sm-9 col-md-9 col-lg-9">
-                    <input type="text" name="" class="" value="" title="" ng-model="m_oController.m_iHSBAStartDepth">
+                    <input type="text" name="" class="" value="" title="" ng-model="m_oController.m_oParameters.HSBASTARTDEPTH">
                 </div>
             </div>
             <div class="row post-event-image-container">
@@ -83,7 +66,7 @@
                     {{"DIALOG_LIST_FLOOD_AREA_DETECTION_BIMODALITY_COEFFICENT_LABEL"|translate}}
                 </div>
                 <div class="col-xs-9 col-sm-9 col-md-9 col-lg-9">
-                    <input type="text" name="" class="" value="" title="" ng-model="m_oController.m_dBimodalityCoefficent">
+                    <input type="text" name="" class="" value="" title="" ng-model="m_oController.m_oParameters.BIMODALITYCOEFFICENT">
                 </div>
             </div>
             <div class="row post-event-image-container">
@@ -91,7 +74,7 @@
                     {{"DIALOG_LIST_FLOOD_AREA_DETECTION_MINIMUM_TILE_DIMENSION_LABEL"|translate}}
                 </div>
                 <div class="col-xs-9 col-sm-9 col-md-9 col-lg-9">
-                    <input type="text" name="" class="" value="" title="" ng-model="m_oController.m_iMinimumTileDimension">
+                    <input type="text" name="" class="" value="" title="" ng-model="m_oController.m_oParameters.MINIMUMTILEDIMENSION">
                 </div>
             </div>
             <div class="row post-event-image-container">
@@ -99,19 +82,37 @@
                     {{"DIALOG_LIST_FLOOD_AREA_DETECTION_MINIMAL_BLOB_REMOVAL_LABEL"|translate}}
                 </div>
                 <div class="col-xs-9 col-sm-9 col-md-9 col-lg-9">
-                    <input type="text" name="" class="" value="" title="" ng-model="m_oController.m_iMinimalBlobRemoval">
+                    <input type="text" name="" class="" value="" title="" ng-model="m_oController.m_oParameters.MINIMALBLOBREMOVAL">
                 </div>
             </div>
+
+            <div class="row post-event-image-container">
+                <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
+                    Pre Event Days
+                </div>
+                <div class="col-xs-9 col-sm-9 col-md-9 col-lg-9">
+                    <input type="text" name="" class="" value="" title="" ng-model="m_oController.m_oParameters.DAYSBACK">
+                </div>
+            </div>
+
+            <div class="row post-event-image-container">
+                <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
+                    Post Event Days
+                </div>
+                <div class="col-xs-9 col-sm-9 col-md-9 col-lg-9">
+                    <input type="text" name="" class="" value="" title="" ng-model="m_oController.m_oParameters.DAYSFORWARD">
+                </div>
+            </div>
+
+
             <div class="row post-event-image-container">
                 <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
                     {{"DIALOG_LIST_FLOOD_AREA_DETECTION_PRE_PROCESS"|translate}}
                 </div>
                 <div class="col-xs-9 col-sm-9 col-md-9 col-lg-9">
-                    <input type="checkbox" name="" class="" value="" title="" ng-model="m_oController.m_sPreprocess">
+                    <input type="checkbox" name="" class="" value="" title="" ng-model="m_oController.m_oParameters.PREPROCESS">
                 </div>
             </div>
-
-
         </div>
 
 
