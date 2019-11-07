@@ -132,7 +132,7 @@
      eDriftFloodEventDialogController.prototype.run = function(){
          var oBBOX = this.getBoundingBox();
          var sDate = this.m_oSelectedDate;
-         var sBbox = "" + oBBOX.northEast.lat+","+oBBOX.northEast.lng+","+oBBOX.southWest.lat+","+oBBOX.southWest.lng;
+         var sBbox = "" + oBBOX.northEast.lat+","+oBBOX.southWest.lng+","+oBBOX.southWest.lat+","+oBBOX.northEast.lng;
          var sBaseName = this.m_sBaseName;
          var oController = this;
 
