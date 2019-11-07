@@ -27,11 +27,15 @@
         this.m_oBoundingBox = {
             northEast: "",
             southWest: ""
-        }
+        };
+
         this.m_oSelectedDate = moment();
         $scope.m_oController = this;
+
         var oController = this;
+
         $scope.close = function(result) {
+            if (oController.m_oMap != undefined) { oController.m_oMap.remove(); }
             oClose(result, 500); // close, but give 500ms for bootstrap to animate
         };
 
@@ -47,6 +51,17 @@
     eDriftFloodEventDialogController.prototype.getDate = function(){
       return this.m_oSelectedDate;
     };
+
+    eDriftFloodEventDialogController.prototype.isRunDisabled = function() {
+
+        if(!this.m_oBoundingBox.northEast.lat)
+        {
+            return true;
+        }
+        else {
+            return false;
+        }
+     };
 
     eDriftFloodEventDialogController.prototype.initMap = function(sMapDiv) {
 
@@ -69,13 +84,14 @@
             noWrap: true
         });
 
-
         var oMap = L.map(sMapDiv, {
             zoomControl: false,
             layers: [oOSMBasic],
             keyboard: false
             //maxZoom: 22
         });
+
+        this.m_oMap = oMap;
 
         // coordinates in map find this plugin in lib folder
         L.control.mousePosition().addTo(oMap);
@@ -193,6 +209,11 @@
 
          console.log(sJSON);
 
+         if (this.m_oMap != undefined)
+         {
+             this.m_oMap.remove();
+         }
+
          this.m_oProcessorService.runProcessor("edrift_flood_event", sJSON)
              .success(function (data) {
                  if(utilsIsObjectNullOrUndefined(data) == false)
@@ -219,9 +240,7 @@
              })
              .error(function (error) {
                  utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR RUNNING FLOOD EVENT");
-                 oController.cleanAllExecuteWorkflowFields();
              });
-
      };
 
     eDriftFloodEventDialogController.$inject = [
