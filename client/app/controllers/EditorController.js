@@ -2272,9 +2272,14 @@ var EditorController = (function () {
                 }
             }
         }).then(function (modal) {
-            modal.element.modal();
+            modal.element.modal({
+                backdrop: 'static',
+                keyboard: false
+            });
             modal.close.then(function (oResult) {
                 // oController.m_oProcessesLaunchedService.loadProcessesFromServer(oController.m_oActiveWorkspace.workspaceId);
+                var i=0;
+                i++;
             });
         });
 

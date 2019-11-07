@@ -50,12 +50,6 @@
                     </div>
                 </div>
 
-
-
-
-
-
-                <!--<button ng-click="m_oController.getDate()">Test</button>-->
             </div>
 
             <!-- FOOTER -->
@@ -64,7 +58,7 @@
                 <button type="button" ng-click="close(null)" class="btn btn-primary btn-wasdi " data-dismiss="modal">
                     {{"DIALOG_CLOSE_BUTTON"|translate}}
                 </button>
-                <button type="button" ng-click="m_oController.run()" class="btn btn-primary btn-wasdi " data-dismiss="modal">
+                <button type="button" ng-click="m_oController.run()" ng-disabled="m_oController.isRunDisabled()" class="btn btn-primary btn-wasdi " data-dismiss="modal">
                     Run
                 </button>
             </div>
