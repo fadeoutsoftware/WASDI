@@ -16,48 +16,48 @@
             </div>
             <!-- BODY -->
             <div class="modal-body container-fluid-v4">
+                <!-- TAB NAVIGATION -->
+                <ul class="nav nav-tabs" role="tablist">
+                    <li ng-class="{'active':m_oController.m_sSelectedWorkflowTab === 'WorkFlowTab1'}" ng-click="m_oController.m_sSelectedWorkflowTab = 'WorkFlowTab1'">
+                        <a href="" role="tab" data-toggle="tab">
+                            {{"BASIC" | translate}}
+                        </a>
+                    </li>
+                    <li ng-class="{'active':m_oController.m_sSelectedWorkflowTab === 'WorkFlowTab2'}" ng-click="m_oController.m_sSelectedWorkflowTab = 'WorkFlowTab2'">
+                        <a href="" role="tab" data-toggle="tab">
+                            {{"ADVANCED" | translate}}
 
-              	<div class="container-v4">
-                    <div class="row-v4">
-                        <div class="col-v4-1 date-label">
-                            <label>Date:</label>
-                        </div>
-                        <div class="col-v4-11 "> <!--filter-datetime-picker-wrapper-->
-                            <!------------------------- TIME PICKER START -------------------->
-                            <div class="datetime-picker-wrapper ">
-                                <div class="input-group"
-                                     moment-picker="m_oController.m_oSelectedDate"
-                                     format="YYYY-MM-DD"
-                                     today="true">
+                        </a>
+                    </li>
 
-                                    <input class="wasdi-input "
-                                           placeholder="Select acquisition start time"
-                                           ng-model="m_oController.m_oSelectedDate"
-                                           ng-model-options="{ updateOn: 'blur' }">
-
-                                    <span class="input-group-addon">
-                                                <i class="fa fa-calendar"></i>
-                                            </span>
-                                </div>
-                            </div>
-                        </div>
+                </ul>
+                <!-- TAB content -->
+                <div class="tab-content">
+                    <!----TAB BASIC---->
+                    <div class="tab-pane fade in" id="WorkFlowTab1"
+                         ng-class="{'active':m_oController.m_sSelectedWorkflowTab === 'WorkFlowTab1'}"
+                         ng-hide="m_oController.m_sSelectedWorkflowTab != 'WorkFlowTab1'">
+                        <ng-include src="'dialogs/eDrift_Flood_Event_Dialog/eDrift_Flood_tab_basic.html'"></ng-include>
+                        <!--<div style="height: 60px; width: 60px; background-color: red"></div>-->
                     </div>
 
-
-                    <div class="row-v4">
-                        <div class="col-v4-1 date-label">
-                            <label>Event Code:</label>
-                        </div>
-                        <div class="col-v4-11 "> <!--filter-datetime-picker-wrapper-->
-                            <!------------------------- BASE NAME -------------------->
-                            <input type="text" name="basename"  class="form-control" value="" title="" ng-model="m_oController.m_sBaseName">
-                        </div>
+                    <!------- MULTI WORKFLOW INPUT ------->
+                    <div class="tab-pane fade in" id="WorkFlowTab2"
+                         ng-class="{'active':m_oController.m_sSelectedWorkflowTab === 'WorkFlowTab2'}"
+                         ng-hide="m_oController.m_sSelectedWorkflowTab != 'WorkFlowTab2'">
+                        <ng-include src="'dialogs/eDrift_Flood_Event_Dialog/eDrift_Flood_tab_advance.html'"></ng-include>
+                        <!--<div style="height: 60px; width: 60px; background-color: blue"></div>-->
                     </div>
+                </div>
 
-              		<div id="mappaedriftfloodevent" style="height: 400px;"></div>
-				</div>
+
+
+
+
+
                 <!--<button ng-click="m_oController.getDate()">Test</button>-->
             </div>
+
             <!-- FOOTER -->
             <div class="modal-footer">
 

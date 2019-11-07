@@ -1,0 +1,42 @@
+
+<div class="container-v4">
+    <div class="row-v4">
+        <div class="col-v4-1 date-label">
+            <label>Date:</label>
+        </div>
+        <div class="col-v4-11 ">
+            <!--filter-datetime-picker-wrapper-->
+            <!------------------------- TIME PICKER START -------------------->
+            <div class="datetime-picker-wrapper">
+                <div class="input-group"
+                     moment-picker="m_oController.m_oSelectedDate"
+                     format="YYYY-MM-DD"
+                     today="true">
+
+                    <input class="wasdi-input"
+                           placeholder="Select acquisition start time"
+                           ng-model="m_oController.m_oSelectedDate"
+                           ng-model-options="{ updateOn: 'blur' }">
+
+                    <span class="input-group-addon">
+                                                <i class="fa fa-calendar"></i>
+                                            </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="row-v4">
+        <div class="col-v4-1 date-label">
+            <label>Event Code:</label>
+        </div>
+        <div class="col-v4-11 "> <!--filter-datetime-picker-wrapper-->
+            <!------------------------- BASE NAME -------------------->
+            <input type="text" name="basename"  class="form-control" value="" title="" ng-model="m_oController.m_sBaseName">
+        </div>
+    </div>
+
+    <div id="mappaedriftfloodevent" style="height: 400px;"></div>
+</div>
+
