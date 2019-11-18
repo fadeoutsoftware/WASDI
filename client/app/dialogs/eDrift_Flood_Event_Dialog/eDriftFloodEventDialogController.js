@@ -18,8 +18,8 @@
             "PREPROCWORKFLOW": "LISTSinglePreproc2",
             "HSBASTARTDEPTH": "-1",
             "BIMODALITYCOEFFICENT": "2.4",
-            "MINIMUMTILEDIMENSION": "1000",
-            "MINIMALBLOBREMOVAL": "10",
+            "MINIMUMTILEDIMENSION": "10000",
+            "MINIMALBLOBREMOVAL": "150",
             "PREPROCESS": true,
             "DAYSBACK": "15",
             "DAYSFORWARD": "15"
@@ -212,8 +212,10 @@
          if (this.m_oMap != undefined)
          {
              this.m_oMap.remove();
+             this.m_oMap = undefined;
          }
 
+         /*
          this.m_oProcessorService.runProcessor("edrift_flood_event", sJSON)
              .success(function (data) {
                  if(utilsIsObjectNullOrUndefined(data) == false)
@@ -241,6 +243,8 @@
              .error(function (error) {
                  utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR RUNNING FLOOD EVENT");
              });
+
+          */
      };
 
     eDriftFloodEventDialogController.$inject = [

@@ -102,7 +102,7 @@ public class WasdiProductReader {
                 oProduct = ProductIO.readProduct(oFile, sFormatName);
             } 
             else {
-                oProduct = ProductIO.readProduct(oFile);
+                oProduct = ProductIO.readProduct(oFile);                
             }
                 
             LauncherMain.s_oLogger.debug("WasdiProductReader.ReadProduct: read done in " + (System.currentTimeMillis() - lStartTime) + "ms");

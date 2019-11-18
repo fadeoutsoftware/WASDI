@@ -63,8 +63,12 @@ public class CredentialPolicy {
 			return true;
 		}
 	}
-
-	//TODO check it is not used as an email validator
+	
+	/**
+	 * Check the User Id
+	 * @param sUserId
+	 * @return
+	 */
 	public Boolean validUserId(String sUserId) {
 		if(isNullOrEmpty(sUserId)) {
 			return false;
@@ -226,18 +230,13 @@ public class CredentialPolicy {
 		if(null == oRInfo) {
 			throw new NullPointerException();
 		}
-		//TODO check after refactoring: due to googleId modifications these conditions may change
 		if(validGoogleIdToken(oRInfo.getGoogleIdToken())) {
 			return true;
 		} else if(!validUserId(oRInfo.getUserId())) {
 			return false;
 		} else if(!validEmail(oRInfo.getUserId())) {
 			return false;
-		} else if(!validName(oRInfo.getName())) {
-			return false;
-		} else if(!validSurname(oRInfo.getSurname())) {
-			return false;
-		} else if(!validPassword(oRInfo.getPassword())) {
+		}else if(!validPassword(oRInfo.getPassword())) {
 			return false;
 		} else {
 			return true;

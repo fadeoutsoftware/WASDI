@@ -693,7 +693,16 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 					
 					// Control Check for the file Name
 					sFileName = sFileName.replaceAll("//", "/");
-
+					
+                	if (sFileNameWithoutPath.startsWith("S3") && sFileNameWithoutPath.toLowerCase().endsWith(".zip")) {
+                		s_oLogger.debug("File is a Sentinel 3 image, start unzip");
+                		Utils.unzip(sFileNameWithoutPath, sDownloadPath);
+                		String sFolderName = sDownloadPath + sFileNameWithoutPath.replace(".zip", ".SEN3");
+                		s_oLogger.debug("Unzip done, folder name: " + sFolderName);
+                		sFileName = sFolderName + "/" + "xfdumanifest.xml";
+                		s_oLogger.debug("File Name changed in: " + sFileName);
+                	}
+                	
 					// Get The product view Model
 					WasdiProductReader oReadProduct = new WasdiProductReader();
 					File oProductFile = new File(sFileName);
