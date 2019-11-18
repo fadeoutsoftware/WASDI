@@ -3304,60 +3304,6 @@ var EditorController = (function () {
         return true;
     };
 
-    /**
-     *
-     * @param oProductInput
-     * @returns {boolean}
-     */
-    EditorController.prototype.openSFTPDialog = function (oProductInput,oWindow)
-    {
-        var oController;
-        if(utilsIsObjectNullOrUndefined(oWindow) === true)
-        {
-            oController = this;
-        }
-        else
-        {
-            oController = oWindow;
-        }
-        oController.m_oModalService.showModal({
-            templateUrl: "dialogs/sftp_upload/SftpUploadDialog.html",
-            controller: "SftpUploadController",
-            inputs: {
-                extras: {
-                    product:oProductInput
-                }
-            }
-        }).then(function (modal) {
-            modal.element.modal();
-            modal.close.then(function (result) {
-                if(utilsIsObjectNullOrUndefined(result)===true)
-                    return false;
-                //TODO ADD FILENAME = RESULT
-                oController.m_oScope.Result = result;
-            });
-        });
-
-        return true;
-    };
-
-    /**
-     *
-     * @param oWindow
-     */
-    EditorController.prototype.openSFTPDialogInNavBar = function(oWindow)
-    {
-        var oController;
-        if(utilsIsObjectNullOrUndefined(oWindow) === true)
-        {
-            oController = this;
-        }
-        else
-        {
-            oController = oWindow;
-        }
-        oWindow.openSFTPDialog(null,oController);
-    };
 
     /**
      *

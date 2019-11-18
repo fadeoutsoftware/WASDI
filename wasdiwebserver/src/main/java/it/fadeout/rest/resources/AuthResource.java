@@ -507,17 +507,20 @@ public class AuthResource {
 	@Produces({"application/json", "text/xml"})
 	public PrimitiveResult userRegistration(RegistrationInfoViewModel oRegistrationInfoViewModel) 
 	{	
-		Utils.debugLog("AuthService.UserRegistration");
-		//TODO captcha
-		 
+		Utils.debugLog("AuthService.UserRegistration");		 
 		
 		if(null == oRegistrationInfoViewModel) {
 			return PrimitiveResult.getInvalid();
-		} else {
+		} 
+		else {
 			try
 			{
 				if(!m_oCredentialPolicy.satisfies(oRegistrationInfoViewModel)) {
-					return PrimitiveResult.getInvalid();
+					
+					PrimitiveResult oInvalid = PrimitiveResult.getInvalid();
+					
+					oInvalid.setStringValue("Input data not valid. Please use a valid mail and at least 8 char for password");
+					return oInvalid;
 				}
 				
 				UserRepository oUserRepository = new UserRepository();
@@ -580,7 +583,7 @@ public class AuthResource {
 				else
 				{
 					PrimitiveResult oResult = PrimitiveResult.getInvalid();
-					oResult.setStringValue("mail already in use, impossible to register the new user");
+					oResult.setStringValue("Mail already in use, impossible to register the new user");
 					return oResult;
 				}
 			}

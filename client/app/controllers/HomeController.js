@@ -199,16 +199,20 @@ var HomeController = (function() {
         {
             return false;
         }
+
         oUser.userId = oController.m_oRegistrationUser.userId;
         oUser.password = oController.m_oRegistrationUser.password;
         oUser.name = oController.m_oRegistrationUser.name;
         oUser.surname = oController.m_oRegistrationUser.surname;
 
+        if (utilsIsStrNullOrEmpty(oUser.name)) oUser.name = oUser.userId;
+        if (utilsIsStrNullOrEmpty(oUser.surname)) oUser.surname = "";
+
         this.m_bSuccess = false;
         this.m_bError = false;
         this.m_oAuthService.signingUser(oUser).success(
+
             function (data,status) {
-                // oController.callbackLogin(data, status,oController);
                 if(utilsIsObjectNullOrUndefined(data) !== true)
                 {
                     if(data.boolValue === true)
@@ -222,6 +226,8 @@ var HomeController = (function() {
                             oController.m_sMessageError = data.stringValue;
                         }
                         oController.m_bError = true;
+
+                        utilsVexDialogAlertTop("GURU MEDITATION<br>" + oController.m_sMessageError);
                     }
                 }
                 else
@@ -229,9 +235,7 @@ var HomeController = (function() {
                     utilsVexDialogAlertTop("GURU MEDITATION<br>SIGNIN ERROR");
                 }
             }).error(function (data,status) {
-            //alert('error');
-            utilsVexDialogAlertTop("GURU MEDITATION<br>SIGNIN ERROR");
-
+                utilsVexDialogAlertTop("GURU MEDITATION<br>SIGNIN ERROR");
         });
 
         return true;
@@ -264,7 +268,6 @@ var HomeController = (function() {
         {
             return false;
         }
-
 
         return true;
     }
