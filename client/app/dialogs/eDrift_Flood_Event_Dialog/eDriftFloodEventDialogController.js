@@ -215,7 +215,7 @@
              this.m_oMap = undefined;
          }
 
-         /*
+
          this.m_oProcessorService.runProcessor("edrift_flood_event", sJSON)
              .success(function (data) {
                  if(utilsIsObjectNullOrUndefined(data) == false)
@@ -243,8 +243,6 @@
              .error(function (error) {
                  utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR RUNNING FLOOD EVENT");
              });
-
-          */
      };
 
     eDriftFloodEventDialogController.$inject = [
