@@ -107,12 +107,6 @@ service('MapService', ['$http','$rootScope', 'ConstantsService', function ($http
      */
     this.initMap = function(sMapDiv) {
 
-        //the map
-        // if(this.m_oWasdiMap != null)
-        // {
-        //     this.initTileLayer();
-        // }
-
         /*  it need disabled keyboard, there'is a bug :
         *   https://github.com/Leaflet/Leaflet/issues/1228
         *   thw window scroll vertically when i click (only if the browser window are smaller)

@@ -209,13 +209,6 @@
 
          console.log(sJSON);
 
-         if (this.m_oMap != undefined)
-         {
-             this.m_oMap.remove();
-             this.m_oMap = undefined;
-         }
-
-
          this.m_oProcessorService.runProcessor("edrift_flood_event", sJSON)
              .success(function (data) {
                  if(utilsIsObjectNullOrUndefined(data) == false)
@@ -225,24 +218,28 @@
 
                      console.log('Run ' + data);
 
-                     let rootscope = oController.m_oScope.$parent;
+                     let oRootscope = oController.m_oScope.$parent;
 
-                     while(rootscope.$parent != null || rootscope.$parent != undefined)
+                     while(oRootscope.$parent != null || oRootscope.$parent != undefined)
                      {
-                         rootscope = rootscope.$parent;
+                         oRootscope = oRootscope.$parent;
                      }
 
                      let payload = { processId: data.processingIdentifier };
-                     rootscope.$broadcast(RootController.BROADCAST_MSG_OPEN_LOGS_DIALOG_PROCESS_ID, payload);
+                     oRootscope.$broadcast(RootController.BROADCAST_MSG_OPEN_LOGS_DIALOG_PROCESS_ID, payload);
                  }
                  else
                  {
                      utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR RUNNING FLOOD EVENT");
                  }
+                 oController.m_oScope.close(null);
              })
              .error(function (error) {
                  utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR RUNNING FLOOD EVENT");
+                 oController.m_oScope.close(null);
              });
+
+         //this.m_oScope.close(null);
      };
 
     eDriftFloodEventDialogController.$inject = [
