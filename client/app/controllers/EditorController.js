@@ -227,12 +227,34 @@ var EditorController = (function () {
                         subMenu:[],
                         onClick: this.openProcessorDialog,
                         icon:"fa fa-lg fa-plus-square"
-                    },{
-                        name:"",// New Processor
+                    },
+                    {
+                        name:"",// E DRIFT FOOD EVENT
                         caption_i18n : "EDITOR_OPERATION_TITLE_EDRIFT_FLOOD_EVENT",
                         subMenu:[],
                         onClick: this.open_eDriftFloodEventDialog,
-                        icon:"fa fa-lg fa-plus-square"
+                        icon:"fa fa-lg fa-rocket"
+                    },
+                    {
+                        name:"",//EDriftFloodAutomaticChainController
+                        caption_i18n : "EDITOR_OPERATION_TITLE_EDRIFT_FLOOD_AUTOMATIC_CHAIN",
+                        subMenu:[],
+                        onClick: this.openEDriftFloodAutomaticChain,
+                        icon:"fa fa-lg fa-rocket"
+                    },
+                    {
+                        name:"",//LIST FLOOD AREA DETECTION
+                        caption_i18n : "EDITOR_OPERATION_TITLE_LIST_FLOOD_AREA_DETECTION",
+                        subMenu:[],
+                        onClick: this.openListtFloodAreaDetectionDialog,
+                        icon:"fa fa-lg fa-rocket"
+                    },
+                    {
+                        name:"",//EDriftCheckImagesAvailability
+                        caption_i18n : "EDITOR_OPERATION_TITLE_EDRIFT_CHECK_IMAGES_AVAILABILITY",
+                        subMenu:[],
+                        onClick: this.openEDriftCheckImagesAvailability,
+                        icon:"fa fa-lg fa-rocket"
                     },
                     {
                         name:"",//mida
@@ -256,13 +278,6 @@ var EditorController = (function () {
                         icon:"fa fa-lg fa-users"
                     },
                     {
-                        name:"",//LIST FLOOD AREA DETECTION
-                        caption_i18n : "EDITOR_OPERATION_TITLE_LIST_FLOOD_AREA_DETECTION",
-                        subMenu:[],
-                        onClick: this.openListtFloodAreaDetectionDialog,
-                        icon:"fa fa-lg fa-rocket"
-                    },
-                    {
                         name:"",//JRC Processor
                         caption_i18n : "EDITOR_OPERATION_TITLE_JRC_WORKFLOW",
                         subMenu:[],
@@ -282,20 +297,6 @@ var EditorController = (function () {
                         subMenu:[],
                         onClick: this.openJRCS2TestProcessor,
                         icon:"fa fa-lg fa-file-code-o"
-                    },
-                    {
-                        name:"",//EDriftFloodAutomaticChainController
-                        caption_i18n : "EDITOR_OPERATION_TITLE_EDRIFT_FLOOD_AUTOMATIC_CHAIN",
-                        subMenu:[],
-                        onClick: this.openEDriftFloodAutomaticChain,
-                        icon:"fa fa-lg fa-rocket"
-                    },
-                    {
-                        name:"",//EDriftCheckImagesAvailability
-                        caption_i18n : "EDITOR_OPERATION_TITLE_EDRIFT_CHECK_IMAGES_AVAILABILITY",
-                        subMenu:[],
-                        onClick: this.openEDriftCheckImagesAvailability,
-                        icon:"fa fa-lg fa-rocket"
                     },
                     // --- WPS ---
                     {

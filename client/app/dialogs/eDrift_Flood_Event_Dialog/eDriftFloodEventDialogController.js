@@ -65,15 +65,6 @@
 
     eDriftFloodEventDialogController.prototype.initMap = function(sMapDiv) {
 
-        /*  it need disabled keyboard, there'is a bug :
-        *   https://github.com/Leaflet/Leaflet/issues/1228
-        *   thw window scroll vertically when i click (only if the browser window are smaller)
-        *   alternative solution (hack):
-        *   L.Map.addInitHook(function() {
-        *   return L.DomEvent.off(this._container, "mousedown", this.keyboard._onMouseDown);
-        *   });
-        */
-
         oOSMBasic = L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution:
                 '&copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors',
@@ -124,13 +115,14 @@
                 marker:false,
                 polyline:false,
                 circle:false,
-                polygon:false,
+                circlemarker:false,
+                polygon:false
             },
 
             edit: {
                 featureGroup: drawnItems,//draw items are the "voice" of menu
                 edit: false,// hide edit button
-                remove: true// hide remove button
+                remove: false// hide remove button
             }
         };
 
@@ -155,6 +147,15 @@
         oMap.on(L.Draw.Event.DELETESTOP, function (event) {
             var layer = event.layers;
         });
+
+
+        var geocoder = L.Control.Geocoder.nominatim();
+
+        var control = L.Control.geocoder({
+            geocoder: geocoder,
+            position:'topleft'
+        }).addTo(oMap);
+
 
         return oMap;
 

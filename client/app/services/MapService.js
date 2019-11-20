@@ -11,14 +11,14 @@ service('MapService', ['$http','$rootScope', 'ConstantsService', function ($http
     // Service references
     this.m_oHttp = $http;
     this.m_oConstantsService = oConstantsService;
-    this.m_oRectangleOpenSearch = null;
+    //this.m_oRectangleOpenSearch = null;
     this.m_oDrawItems = null;
-
 
     /**
      * Init base layers
      */
     this.initTileLayer= function(){
+
         this.m_oOSMBasic = L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution:
                 '&copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors',
@@ -34,11 +34,6 @@ service('MapService', ['$http','$rootScope', 'ConstantsService', function ($http
             attribution: 'Map data: &copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>, <a href="http://viewfinderpanoramas.org">SRTM</a> | Map style: &copy; <a href="https://opentopomap.org">OpenTopoMap</a> (<a href="https://creativecommons.org/licenses/by-sa/3.0/">CC-BY-SA</a>)'
         });
 
-        // this.m_oThunderforestSpinalMap =  L.tileLayer('https://{s}.tile.thunderforest.com/spinal-map/{z}/{x}/{y}.png?apikey={apikey}', {
-        //     attribution: '&copy; <a href="http://www.thunderforest.com/">Thunderforest</a>, &copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-        //     apikey: '<your apikey>',
-        //     maxZoom: 22
-        // });
         this.m_oEsriWorldStreetMap = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
             attribution: 'Tiles &copy; Esri &mdash; Source: Esri, DeLorme, NAVTEQ, USGS, Intermap, iPC, NRCAN, Esri Japan, METI, Esri China (Hong Kong), Esri (Thailand), TomTom, 2012'
         });
@@ -46,6 +41,7 @@ service('MapService', ['$http','$rootScope', 'ConstantsService', function ($http
         this.m_oEsriWorldImagery = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
             attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
         });
+
         this.m_oNASAGIBSViirsEarthAtNight2012 = L.tileLayer('https://map1.vis.earthdata.nasa.gov/wmts-webmerc/VIIRS_CityLights_2012/default/{time}/{tilematrixset}{maxZoom}/{z}/{y}/{x}.{format}', {
             attribution: 'Imagery provided by services from the Global Imagery Browse Services (GIBS), operated by the NASA/GSFC/Earth Science Data and Information System (<a href="https://earthdata.nasa.gov">ESDIS</a>) with funding provided by NASA/HQ.',
             bounds: [[-85.0511287776, -179.999999975], [85.0511287776, 179.999999975]],
@@ -60,10 +56,6 @@ service('MapService', ['$http','$rootScope', 'ConstantsService', function ($http
     //init tile layer
     this.initTileLayer();
 
-    // this.m_oGoogleHybrid = new L.gridLayer.googleMutant('hybrid');
-    // this.m_oGoogleMap = new L.gridLayer.googleMutant('roadmap');
-    // this.m_oGoogleTerrain = new L.gridLayer.googleMutant('terrain');
-
     /**
      * layers control
      */
@@ -71,7 +63,6 @@ service('MapService', ['$http','$rootScope', 'ConstantsService', function ($http
         {
             "Standard": this.m_oOSMBasic,
             "OpenTopoMap":this.m_oOpenTopoMap,
-            // "ThunderforestSpinalMap":this.m_oThunderforestSpinalMap,
             "EsriWorldStreetMap":this.m_oEsriWorldStreetMap,
             "EsriWorldImagery":this.m_oEsriWorldImagery,
             "NASAGIBSViirsEarthAtNight2012":this.m_oNASAGIBSViirsEarthAtNight2012
@@ -107,16 +98,9 @@ service('MapService', ['$http','$rootScope', 'ConstantsService', function ($http
      */
     this.initMap = function(sMapDiv) {
 
-        /*  it need disabled keyboard, there'is a bug :
-        *   https://github.com/Leaflet/Leaflet/issues/1228
-        *   thw window scroll vertically when i click (only if the browser window are smaller)
-        *   alternative solution (hack):
-        *   L.Map.addInitHook(function() {
-        *   return L.DomEvent.off(this._container, "mousedown", this.keyboard._onMouseDown);
-        *   });
-        */
         var oMap = L.map(sMapDiv, {
             zoomControl: false,
+            //layers: [this.m_oOSMBasic, this.m_oOpenTopoMap, this.m_oEsriWorldStreetMap, this.m_oEsriWorldImagery, this.m_oNASAGIBSViirsEarthAtNight2012],
             layers: [this.m_oOSMBasic],
             keyboard: false
              //maxZoom: 22
@@ -147,7 +131,7 @@ service('MapService', ['$http','$rootScope', 'ConstantsService', function ($http
         //add event on base change
         oMap.on('baselayerchange', function(e){
             // console.log(e);
-            e.layer.bringToBack();
+            //e.layer.bringToBack();
             oActiveBaseLayer = e;
         });
 
@@ -181,28 +165,26 @@ service('MapService', ['$http','$rootScope', 'ConstantsService', function ($http
         this.m_oDrawItems = drawnItems;//save draw items (used in delete shape)
         this.m_oWasdiMap.addLayer(drawnItems);
 
-
-
         var oOptions={
             position:'topright',//position of menu
             draw:{// what kind of shapes are disable/enable
+                circle:false,
+                circlemarker:false,
                 marker:false,
                 polyline:false,
-                circle:false,
-                polygon:false,
+                polygon:false
             },
 
             edit: {
                 featureGroup: drawnItems,//draw items are the "voice" of menu
                 edit: false,// hide edit button
-                remove: true// hide remove button
+                remove: false// hide remove button
             }
         };
 
         var oDrawControl = new L.Control.Draw(oOptions);
 
-        this.m_oWasdiMap.addControl(oDrawControl);
-        //Without this.m_oWasdiMap.on() the shape isn't saved on map
+        this. m_oWasdiMap.addControl(oDrawControl);
 
         this.m_oWasdiMap.on(L.Draw.Event.CREATED, function (event)
         {
@@ -224,6 +206,7 @@ service('MapService', ['$http','$rootScope', 'ConstantsService', function ($http
         });
 
     };
+
     this.mapDrawEventDeletePolygon = function(oMap,oFunction,oController)
     {
         if(utilsIsObjectNullOrUndefined(oFunction) === true || utilsIsObjectNullOrUndefined(oMap) === true || utilsIsObjectNullOrUndefined(oController) === true)
@@ -235,17 +218,11 @@ service('MapService', ['$http','$rootScope', 'ConstantsService', function ($http
         oMap.on(L.Draw.Event.DELETED,  function (event)
         {
             oFunction(oController);
-            // if(oController.m_oDrawItems && oController.m_oDrawItems.getLayers().length!==0){
-            //     oController.deleteDrawShapeEditToolbar();
-            //     oFunction();
-            //
-            // }
-
         });
 
-
         return true;
-    }
+    };
+
     /**
      * Init map editor
      * @param sMapDiv
@@ -267,8 +244,7 @@ service('MapService', ['$http','$rootScope', 'ConstantsService', function ($http
         /*
             https://github.com/perliedman/leaflet-control-geocoder
         */
-        // var geocoder = L.Control.Geocoder.mapzen('search-DopSHJw');
-        // var MapGeoCoderProvider = L.Control.Geocoder.google('<you API key>', { ... other options ... });
+
         var geocoder = L.Control.Geocoder.nominatim();
 
         var control = L.Control.geocoder({

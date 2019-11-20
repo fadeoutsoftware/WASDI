@@ -21,7 +21,7 @@
     "bootstrap": "3.3.7",
     "angular-bootstrap": "",
     "moment": "",
-    "leaflet-draw": "0.4.7",
+    "leaflet-draw": "1.0.4",
     "leaflet-control-geocoder": "1.5.4",
     "vex": "3.0.0",
     "angular-paging": "~2.2.2",
