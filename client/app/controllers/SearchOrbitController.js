@@ -50,7 +50,6 @@ var SearchOrbitController = (function() {
         this.m_sOrderBy = "Satellite";
         this.m_bReverseOrder = false;
         this.m_sHrefLogFile = "";
-        this.downloadKML();//TODO REMOVE IT
         this.getSatellitesResources();
 
         if(utilsIsObjectNullOrUndefined( this.m_oActiveWorkspace) && utilsIsStrNullOrEmpty( this.m_oActiveWorkspace))
@@ -99,14 +98,6 @@ var SearchOrbitController = (function() {
                 oController.m_oConfiguration = configuration;
                 if(!utilsIsObjectNullOrUndefined(oController.m_oConfiguration.orbitsearch) && !utilsIsObjectNullOrUndefined(oController.m_oConfiguration.orbitsearch.satelliteNames))
                 {
-                    /*
-                    //check as selected all satellites
-                    for(var iIndexSatellite = 0; iIndexSatellite < oController.m_oConfiguration.orbitsearch.satelliteNames.length ; iIndexSatellite++ )
-                    {
-                        var sOrbit = oController.m_oConfiguration.orbitsearch.satelliteNames[iIndexSatellite];
-                        oController.m_oSelectedSatellite.push(sOrbit);
-                    }
-                    */
                 }
                 if(!utilsIsObjectNullOrUndefined(oController.m_oConfiguration.orbitsearch) && !utilsIsObjectNullOrUndefined(oController.m_oConfiguration.orbitsearch.sensortypes))
                 {
@@ -153,204 +144,6 @@ var SearchOrbitController = (function() {
 
     }
 
-    // SearchOrbitController.prototype.getDateFromTimestamp = function(timestamp) {
-    //   return moment.unix(timestamp / 1000).format("YYYY-MM-DD HH:mm:ss");
-    // };
-
-    // SearchOrbitController.prototype.clearMapAndRemoveOrbits = function(){
-    //     if(utilsIsObjectNullOrUndefined(this.m_aoOrbits) === true )
-    //         return false;
-    //     var iOrbitsLength = this.m_aoOrbits.length;
-    //     var oRectangle = null;
-    //     for(var iOrbitIndex = 0; iOrbitIndex < iOrbitsLength; iOrbitIndex++){
-    //         oRectangle = this.m_aoOrbits[iOrbitIndex ].FootPrintRectangle
-    //         this.m_oMapService.removeLayerFromMap(oRectangle);
-    //     }
-    //     this.m_aoOrbits = [];
-    //     return true;
-    // };
-
-    // SearchOrbitController.prototype.searchOrbit = function()
-    // {
-    //
-    //     var sError = "";
-    //
-    //     if(utilsIsObjectNullOrUndefined(this.m_oGeoJSON)) sError += "PLEASE SELECT AREA OF INTEREST<br>TOP RIGHT CORNER OF THE MAP<br>";
-    //
-    //     //if there isn't a resolution throw an error
-    //     if(utilsIsObjectNullOrUndefined(this.m_oSelectedResolutionType) || this.m_oSelectedResolutionType.length == 0) sError += "PLEASE SELECT AT LEAST A RESOLUTION<br>";
-    //     //if there isn't a sensor type throw an error
-    //     if(utilsIsObjectNullOrUndefined(this.m_oSelectedSensorType) || this.m_oSelectedSensorType.length == 0) sError += "PLEASE SELECT AT LEAST A SENSOR TYPE<br>";
-    //     //if there isn't a satellite throw an error
-    //     if(utilsIsObjectNullOrUndefined(this.m_oSelectedSatellite) || this.m_oSelectedSatellite.length == 0) sError += "PLEASE SELECT AT LEAST A MISSION<br>";
-    //
-    //     if (!utilsIsStrNullOrEmpty(sError)) {
-    //         utilsVexDialogAlertDefault(sError,null);
-    //         return;
-    //     }
-    //
-    //     var oController = this;
-    //
-    //     //clear map and remove orbits and set check as false
-    //     this.m_bMasterCheck = false;
-    //     this.clearMapAndRemoveOrbits();
-    //
-    //     var oOrbitSearch = new Object();
-    //     oOrbitSearch.orbitFilters = new Array();
-    //     this.m_oOrbitSearch.orbitFilters = new Array();
-    //     this.m_oOrbitSearch.satelliteNames = new Array();
-    //    // var oOrbitFilter = new Object();
-    //
-    //     if(utilsIsObjectNullOrUndefined(this.m_oSelectedSensorType))
-    //         var iLengthSelectedSensorType = 0;
-    //     else
-    //         var iLengthSelectedSensorType = this.m_oSelectedSensorType.length;
-    //
-    //     if(utilsIsObjectNullOrUndefined(this.m_oSelectedResolutionType))
-    //         var iLengthSelectedResolutionType  = 0;
-    //     else
-    //         var iLengthSelectedResolutionType  = this.m_oSelectedResolutionType.length;
-    //
-    //         //add sensor type and resolution
-    //     for (var iSensorType = 0; iSensorType < iLengthSelectedSensorType; iSensorType++) {
-    //
-    //         for (var iResolutionType = 0; iResolutionType < iLengthSelectedResolutionType; iResolutionType++) {
-    //             var oOrbitFilter = new Object();
-    //             oOrbitFilter.sensorType = this.m_oSelectedSensorType[iSensorType];
-    //             oOrbitFilter.sensorResolution = this.m_oSelectedResolutionType[iResolutionType];
-    //             oController.m_oOrbitSearch.orbitFilters.push(oOrbitFilter);
-    //
-    //         }
-    //
-    //     }
-    //
-    //     if(utilsIsObjectNullOrUndefined(this.m_oSelectedSatellite))
-    //         var iLengthSelectedSatellite = 0;
-    //     else
-    //         var iLengthSelectedSatellite =this.m_oSelectedSatellite.length;
-    //
-    //     //satellite names
-    //     for (var iSatellite = 0; iSatellite < iLengthSelectedSatellite; iSatellite++) {
-    //         oController.m_oOrbitSearch.satelliteNames.push(this.m_oSelectedSatellite[iSatellite]);
-    //     }
-    //
-    //     //
-    //
-    //     //add polygon area
-    //     var sCoordinatesPolygon = "";
-    //     if(utilsIsObjectNullOrUndefined(oController.m_oGeoJSON.geometry.coordinates))
-    //         var iLengthCoordinates = 0;
-    //     else
-    //         var iLengthCoordinates = oController.m_oGeoJSON.geometry.coordinates.length;
-    //
-    //     for (var iLayerCount = 0; iLayerCount < iLengthCoordinates; iLayerCount++) {
-    //
-    //         var oLayer = oController.m_oGeoJSON.geometry.coordinates[iLayerCount];
-    //         for (var iCoordCount = 0; iCoordCount < oLayer.length; iCoordCount++) {
-    //             if (oLayer[iCoordCount].length == 2) {
-    //                 var x = oLayer[iCoordCount][0];
-    //                 var y = oLayer[iCoordCount][1];
-    //                 sCoordinatesPolygon += (x + " " + y);
-    //
-    //                 if (iCoordCount + 1 < oLayer.length)
-    //                     sCoordinatesPolygon += ',';
-    //             }
-    //         }
-    //
-    //
-    //     }
-    //
-    //     oController.m_oOrbitSearch.polygon = sCoordinatesPolygon;
-    //     this.m_bIsVisibleLoadingIcon = true;
-    //     this.m_aoOrbits = null;
-    //     oController.m_oOrbitSearch.acquisitionStartTime += ":00:00";
-    //     oController.m_oOrbitSearch.acquisitionEndTime += ":00:00";
-    //     oController.m_oOrbitSearch.viewAngle = oController.convertViewAngleToString();
-    //     oController.m_oOrbitSearch.swathSize = oController.convertSwathSizeToString();
-    //     //call search
-    //     this.m_oSearchOrbitService.searchOrbit(oController.m_oOrbitSearch)
-    //         .success(function (data, status, headers, config) {
-    //             if(!utilsIsObjectNullOrUndefined(data))
-    //             {
-    //                 //TODO NEW FEATURE
-    //                 //var oDataTree = oController.generateDataTree(data);
-    //                 // oController.m_oTreeService.createNewInstanceTree("#orbitsTree",oController.generateDataTree(data));
-    //                 if(utilsIsObjectNullOrUndefined(oController.m_oOpportunitiesTree) === true)
-    //                 {
-    //                     oController.m_oOpportunitiesTree = oController.getResultOpportunitiesTreeJson(data);
-    //                     oController.m_oTreeService.createNewInstanceTree(oController.m_sIdDiv,oController.m_oOpportunitiesTree);
-    //                 }
-    //                 else
-    //                 {
-    //                     oController.m_oOpportunitiesTree = oController.getResultOpportunitiesTreeJson(data);
-    //                     oController.m_oTreeService.loadNewTree(oController.m_sIdDiv,oController.m_oOpportunitiesTree);
-    //                 }
-    //
-    //                 oController.m_aoOrbits = data;
-    //                 oController.setOrbitAsUnchecked();
-    //                 if(data.length === 0)
-    //                 {
-    //                     utilsVexDialogAlertTop("GURU MEDITATION<br>NO RESULTS FOR YOUR FILTERS");
-    //                 }
-    //             }
-    //             else
-    //             {
-    //                 utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR: SEARCH ORBITS FAILS.");
-    //             }
-    //             oController.initOrbitSearch();
-    //             oController.m_bIsVisibleLoadingIcon = false;
-    //
-    //         })
-    //         .error(function (data, status, header, config) {
-    //             utilsVexDialogAlertTop("GURU MEDITATION<br>ERROR: SEARCH ORBITS FAILS.");
-    //             oController.initOrbitSearch();
-    //             oController.m_aoOrbits = null;
-    //             oController.m_bIsVisibleLoadingIcon = false;
-    //         });
-    //
-    // };
-
-
-    // SearchOrbitController.prototype.convertViewAngleToString = function()
-    // {
-    //     if( (utilsIsObjectNullOrUndefined(this.m_oOrbitSearch) === true)
-    //         || (utilsIsObjectNullOrUndefined(this.m_oOrbitSearch.viewAngle) === true)
-    //         || (utilsIsObjectNullOrUndefined(this.m_oOrbitSearch.viewAngle.nearAngle) === true)
-    //         || (utilsIsObjectNullOrUndefined(this.m_oOrbitSearch.viewAngle.farAngle) === true) )
-    //     {
-    //         return "";
-    //     }
-    //     return "(nearAngle:" + this.m_oOrbitSearch.viewAngle.nearAngle + ",farAngle:" + this.m_oOrbitSearch.viewAngle.farAngle +")";
-    // };
-
-    // SearchOrbitController.prototype.convertSwathSizeToString = function()
-    // {
-    //     if( (utilsIsObjectNullOrUndefined(this.m_oOrbitSearch) === true)
-    //         || (utilsIsObjectNullOrUndefined(this.m_oOrbitSearch.swathSize) === true)
-    //         || (utilsIsObjectNullOrUndefined(this.m_oOrbitSearch.swathSize.length) === true)
-    //         || (utilsIsObjectNullOrUndefined(this.m_oOrbitSearch.swathSize.width) === true) )
-    //     {
-    //         return "";
-    //     }
-    //     return "(length:" + this.m_oOrbitSearch.swathSize.length + ",width:" + this.m_oOrbitSearch.swathSize.width +")";
-    // };
-
-    /**
-     *
-     * @returns {boolean}
-     */
-    // SearchOrbitController.prototype.setOrbitAsUnchecked = function(){
-    //     if( utilsIsObjectNullOrUndefined(this.m_aoOrbits) === true )
-    //     {
-    //         return false;
-    //     }
-    //     var iNumberOfOrbits = this.m_aoOrbits.length;
-    //     for(var iOrbitIndex = 0; iOrbitIndex < iNumberOfOrbits; iOrbitIndex++)
-    //     {
-    //         this.m_aoOrbits[iOrbitIndex].isSelected = false;
-    //     }
-    //     return true;
-    // };
     /**
      *
      * @returns {null|Array|*}
@@ -364,144 +157,6 @@ var SearchOrbitController = (function() {
     };
 
 
-    /**
-     *
-     * @param oOrbit
-     * @returns {boolean}
-     */
-    //TODO REMOVE IT ?
-    // SearchOrbitController.prototype.showSwath = function(oOrbit){
-    //
-    //
-    //     if (utilsIsObjectNullOrUndefined(oOrbit))
-    //         return false;
-    //
-    //     if (!oOrbit.hasOwnProperty('SwathFootPrint'))
-    //         return false;
-    //
-    //     /* find orbit in orbit list*/
-    //     if(utilsIsObjectNullOrUndefined(this.m_aoOrbits))
-    //     {
-    //         return false;
-    //     }
-    //
-    //     //Find orbit in Orbits list return index
-    //     var iIndexOrbitInOrbitsList = utilsFindObjectInArray(this.m_aoOrbits,oOrbit)
-    //     if(iIndexOrbitInOrbitsList == -1)
-    //         return false;
-    //
-    //     //if there is FootPrintRectangle set it null, otherwise create FootPrintRectangle
-    //     // it correspond ----> FootPrintRectangle == null == uncheck ||  FootPrintRectangle != null == check
-    //     if(!utilsIsObjectNullOrUndefined(this.m_aoOrbits[iIndexOrbitInOrbitsList].FootPrintRectangle))
-    //     {
-    //         this.m_oMapService.removeLayerFromMap(this.m_aoOrbits[iIndexOrbitInOrbitsList].FootPrintRectangle);//remove orbit rectangle from map
-    //         this.m_aoOrbits[iIndexOrbitInOrbitsList].FootPrintRectangle = null;
-    //     }
-    //     else
-    //     {
-    //         //create oRectangle
-    //         var sSwath = oOrbit.SwathFootPrint;
-    //         var aasNewContent = [];
-    //         //
-    //         // sSwath = sSwath.replace("POLYGON","");
-    //         // sSwath = sSwath.replace("((","");
-    //         // sSwath = sSwath.replace("))","");
-    //         // sSwath = sSwath.split(",");
-    //         sSwath = utilsProjectGetPolygonArray(sSwath);
-    //
-    //         for (var iIndexBounds = 0; iIndexBounds < sSwath.length; iIndexBounds++)
-    //         {
-    //             var aBounds = sSwath[iIndexBounds];
-    //             // console.log(aBounds);
-    //             var aNewBounds = aBounds.split(" ");
-    //
-    //             var oLatLonArray = [];
-    //
-    //             oLatLonArray[0] = JSON.parse(aNewBounds[1]); //Lat
-    //             oLatLonArray[1] = JSON.parse(aNewBounds[0]); //Lon
-    //
-    //             aasNewContent.push(oLatLonArray);
-    //         }
-    //         var oRectangle = this.m_oMapService.addRectangleByBoundsArrayOnMap(aasNewContent, null, 0);
-    //         if(utilsIsObjectNullOrUndefined(oRectangle))
-    //         {
-    //             utilsVexDialogAlertTop("IMPOSSIBLE TO VISUALIZE ORBIT");
-    //             return false;
-    //         }
-    //         this.m_aoOrbits[iIndexOrbitInOrbitsList].FootPrintRectangle = oRectangle;
-    //     }
-    //     return true;
-    //
-    // };
-
-    /**
-     *
-     * @param oOrbit
-     * @returns {boolean}
-     */
-    // SearchOrbitController.prototype.showFrame = function(oOrbit){
-    //
-    //
-    //     if (utilsIsObjectNullOrUndefined(oOrbit))
-    //         return false;
-    //
-    //     if (!oOrbit.hasOwnProperty('FrameFootPrint'))
-    //         return false;
-    //
-    //     /* find orbit in orbit list*/
-    //     if(utilsIsObjectNullOrUndefined(this.m_aoOrbits))
-    //     {
-    //         return false;
-    //     }
-    //
-    //     //Find orbit in Orbits list return index
-    //     var iIndexOrbitInOrbitsList = utilsFindObjectInArray(this.m_aoOrbits,oOrbit)
-    //     if(iIndexOrbitInOrbitsList == -1)
-    //         return false;
-    //
-    //     //if there is FootPrintRectangle set it null, otherwise create FootPrintRectangle
-    //     // it correspond ----> FootPrintRectangle == null == uncheck ||  FootPrintRectangle != null == check
-    //     if(!utilsIsObjectNullOrUndefined(this.m_aoOrbits[iIndexOrbitInOrbitsList].FootPrintRectangle))
-    //     {
-    //         this.m_oMapService.removeLayerFromMap(this.m_aoOrbits[iIndexOrbitInOrbitsList].FootPrintRectangle);//remove orbit rectangle from map
-    //         this.m_aoOrbits[iIndexOrbitInOrbitsList].FootPrintRectangle = null;
-    //     }
-    //     else
-    //     {
-    //         //create oRectangle
-    //         var sFrame = oOrbit.FrameFootPrint;
-    //         var aasNewContent = [];
-    //
-    //         // sFrame = sFrame.replace("POLYGON","");
-    //         // sFrame = sFrame.replace("((","");
-    //         // sFrame = sFrame.replace("))","");
-    //         // sFrame = sFrame.split(",");
-    //         sFrame = utilsProjectGetPolygonArray(sFrame);
-    //
-    //         for (var iIndexBounds = 0; iIndexBounds < sFrame.length; iIndexBounds++)
-    //         {
-    //             var aBounds = sFrame[iIndexBounds];
-    //             // console.log(aBounds);
-    //             var aNewBounds = aBounds.split(" ");
-    //
-    //             var oLatLonArray = [];
-    //
-    //             oLatLonArray[0] = JSON.parse(aNewBounds[1]); //Lat
-    //             oLatLonArray[1] = JSON.parse(aNewBounds[0]); //Lon
-    //
-    //             aasNewContent.push(oLatLonArray);
-    //         }
-    //         var oRectangle = this.m_oMapService.addRectangleByBoundsArrayOnMap(aasNewContent, null, 0);
-    //         if(utilsIsObjectNullOrUndefined(oRectangle))
-    //         {
-    //             utilsVexDialogAlertTop("IMPOSSIBLE TO VISUALIZE ORBIT");
-    //             return false;
-    //         }
-    //         this.m_aoOrbits[iIndexOrbitInOrbitsList].FootPrintRectangle = oRectangle;
-    //     }
-    //     return true;
-    //
-    // };
     /**
      * openWorkspace
      * @param sWorkspaceId
@@ -529,180 +184,6 @@ var SearchOrbitController = (function() {
         });
     };
 
-    // SearchOrbitController.prototype.showAllFrameFootPrint = function(oCheckValue)
-    // {
-    //     if(utilsIsObjectNullOrUndefined(this.m_aoOrbits))
-    //     {
-    //         return false;
-    //     }
-    //
-    //     var aoFilteredOrbits = this.m_oFilter('filter')(this.m_aoOrbits,this.m_sFilterTable);
-    //
-    //     var iNumberOfOrbits = aoFilteredOrbits.length;
-    //     this.m_bisLoadingAllOrbitInMap = true;
-    //     if(oCheckValue)
-    //     {
-    //         //TRUE
-    //         /*add all rectangles in map*/
-    //         for(var iIndexOrbit = 0; iIndexOrbit < iNumberOfOrbits; iIndexOrbit++)
-    //         {
-    //             var oOrbit = aoFilteredOrbits[iIndexOrbit];
-    //             //if there is saved in orbit the FootPrintRectangle we don't need to create it
-    //             if(!utilsIsObjectNullOrUndefined(oOrbit.FootPrintRectangle))
-    //             {
-    //                 continue;
-    //             }
-    //             this.showFrame(oOrbit);
-    //         }
-    //     }
-    //     else
-    //     {
-    //         //FALSE
-    //         // /*remove all rectangles in map*/
-    //         // for(var iIndexOrbit = 0; iIndexOrbit < iNumberOfOrbits; iIndexOrbit++)
-    //         // {
-    //         //     var oOrbit = this.m_aoOrbits[iIndexOrbit];
-    //         //     this.m_oMapService.removeLayerFromMap(oOrbit.FootPrintRectangle);//remove orbit rectangle from map
-    //         //     oOrbit.FootPrintRectangle = null;
-    //         // }
-    //         this.removeAllRectangle(aoFilteredOrbits);
-    //
-    //     }
-    //     this.m_bisLoadingAllOrbitInMap = false;
-    //     this.selectDeselectAllOrbits(this.m_bMasterCheck,aoFilteredOrbits);
-    // };
-
-    // TODO REMOVE IT?
-    // SearchOrbitController.prototype.showAllSwath = function(oCheckValue){
-    //     if(utilsIsObjectNullOrUndefined(this.m_aoOrbits))
-    //         return false;
-    //     //TODO ADD THIS  -->  var aoFilteredOrbits = this.m_oFilter('filter')(this.m_aoOrbits,this.m_sFilterTable);
-    //     //TODO CHANGE m_aoOrbits with  aoFilteredOrbits
-    //     var iNumberOfOrbits = this.m_aoOrbits.length;
-    //     this.m_bisLoadingAllOrbitInMap = true;
-    //     if(oCheckValue)
-    //     {
-    //         //TRUE
-    //         /*add all rectangles in map*/
-    //         for(var iIndexOrbit = 0; iIndexOrbit < iNumberOfOrbits; iIndexOrbit++)
-    //         {
-    //             var oOrbit = this.m_aoOrbits[iIndexOrbit];
-    //             //if there is saved in orbit the FootPrintRectangle we don't need to create it
-    //             if(!utilsIsObjectNullOrUndefined(oOrbit.FootPrintRectangle))
-    //             {
-    //                continue;
-    //             }
-    //             //TODO SUBSTITUTE THIS PART OF CODE WITH showSwath FUNCTION
-    //             var sSwath = oOrbit.SwathFootPrint;
-    //             var aasNewContent = [];
-    //
-    //             sSwath = sSwath.replace("POLYGON","");
-    //             sSwath = sSwath.replace("((","");
-    //             sSwath = sSwath.replace("))","");
-    //             sSwath = sSwath.split(",");
-    //
-    //             for (var iIndexBounds = 0; iIndexBounds < sSwath.length; iIndexBounds++)
-    //             {
-    //                 var aBounds = sSwath[iIndexBounds];
-    //                 //console.log(aBounds);
-    //                 var aNewBounds = aBounds.split(" ");
-    //
-    //                 var oLatLonArray = [];
-    //
-    //                 oLatLonArray[0] = JSON.parse(aNewBounds[1]); //Lat
-    //                 oLatLonArray[1] = JSON.parse(aNewBounds[0]); //Lon
-    //
-    //                 aasNewContent.push(oLatLonArray);
-    //             }
-    //             var oRectangle = this.m_oMapService.addRectangleByBoundsArrayOnMap(aasNewContent, null, 0);
-    //             if(utilsIsObjectNullOrUndefined(oRectangle))
-    //             {
-    //                 utilsVexDialogAlertTop("IMPOSSIBLE VISUALIZE ORBIT");
-    //                 return false;
-    //             }
-    //             this.m_aoOrbits[iIndexOrbit].FootPrintRectangle = oRectangle;
-    //         }
-    //
-    //     }
-    //     else
-    //     {
-    //         //FALSE
-    //         /*remove all rectangles in map*/
-    //         //TODO CHANGE this.m_aoOrbits with aoFiltered orbits
-    //         this.removeAllRectangle(this.m_aoOrbits);
-    //     }
-    //     this.m_bisLoadingAllOrbitInMap = false;
-    //     //TODO CHANGE this.m_aoOrbits with aoFiltered orbits
-    //     this.selectDeselectAllOrbits(this.m_bMasterCheck,this.m_aoOrbits);
-    //
-    //     // this.m_oScope.$apply();
-    // };
-
-    // SearchOrbitController.prototype.removeAllRectangle = function(aoOrbits)
-    // {
-    //     if(utilsIsObjectNullOrUndefined(aoOrbits) === true)
-    //     {
-    //         return false;
-    //     }
-    //     var iNumberOfOrbits = aoOrbits.length;
-    //
-    //     for(var iIndexOrbit = 0; iIndexOrbit < iNumberOfOrbits; iIndexOrbit++)
-    //     {
-    //         var oOrbit = aoOrbits[iIndexOrbit];
-    //
-    //         if(utilsIsObjectNullOrUndefined(oOrbit.FootPrintRectangle) === false)
-    //         {
-    //             this.m_oMapService.removeLayerFromMap(oOrbit.FootPrintRectangle);//remove orbit rectangle from map
-    //             oOrbit.FootPrintRectangle = null;
-    //         }
-    //     }
-    //     return true;
-    // }
-    /**
-     * selectDeselectAllOrbits
-     * @returns {boolean}
-     */
-    // SearchOrbitController.prototype.selectDeselectAllOrbits = function(bValue,aoOrbits)
-    // {
-    //     if(utilsIsObjectNullOrUndefined(aoOrbits) === true)
-    //     {
-    //         return false;
-    //     }
-    //     var iNumberOfOrbits = aoOrbits.length;
-    //
-    //     for(var iIndexOrbit = 0 ; iIndexOrbit < iNumberOfOrbits; iIndexOrbit++ )
-    //     {
-    //         aoOrbits[iIndexOrbit].isSelected = bValue;
-    //     }
-    //     return true;
-    // };
-
-    /**
-     * mouseOverOrbitInTable
-     * @param oOrbit
-     * @returns {boolean}
-     */
-    // SearchOrbitController.prototype.mouseOverOrbitInTable = function(oOrbit)
-    // {
-    //     if(utilsIsObjectNullOrUndefined(oOrbit))
-    //         return false;
-    //     if(utilsIsObjectNullOrUndefined(oOrbit.FootPrintRectangle))
-    //         return false;
-    //     var oRectangle = oOrbit.FootPrintRectangle;
-    //     oRectangle.setStyle({weight:5,fillOpacity:1,color:"Black"});
-    //     return true;
-    // }
-    // SearchOrbitController.prototype.mouseLeaveOrbitInTable = function(oOrbit)
-    // {
-    //     if(utilsIsObjectNullOrUndefined(oOrbit))
-    //         return false;
-    //     if(utilsIsObjectNullOrUndefined(oOrbit.FootPrintRectangle))
-    //         return false;
-    //     var oRectangle = oOrbit.FootPrintRectangle;
-    //     oRectangle.setStyle({weight:1,fillOpacity:0.2,color:"#ff7800"});
-    //     return true
-    // }
-
 
     /**
      *
@@ -726,15 +207,7 @@ var SearchOrbitController = (function() {
                 oController.m_oScope.Result = result ;
             });
         });
-        //var oMessage = "<div>"+oOrbit.Angle+"</div> " +
-        //    "<div>"+oOrbit.SatelliteName+"</div>" +
-        //    "<div>"+oOrbit.SensorMode+"</div>" +
-        //    "<div>"+oOrbit.SensorName+"</div> " +
-        //    "<div>"+oOrbit.SensorType+"</div> " +
-        //    "<div>"+oOrbit.SwathName+"</div>";
-        //var oOptions ={unsafeMessage: oMessage };
-        //
-        //vex.dialog.alert(oOptions);
+
         return true;
     };
 
@@ -789,44 +262,9 @@ var SearchOrbitController = (function() {
     SearchOrbitController.prototype.receivedNewProductMessage = function (oMessage, oController) {
         var sMessage = 'PRODUCT ADDED TO THE WORKSPACE<br>READY';
 
-        // this.test=function(){
-        //     this.m_oState.go("root.catalog", { })
-        // };
-        // if(oMessage.messageCode !== "DOWNLOAD" )
-        //     sMessage += " <a href='' ng-click='this.test()'> Link </a>"
-
         var oDialog = utilsVexDialogAlertBottomRightCorner(sMessage);
         utilsVexCloseDialogAfter(4000, oDialog);
     };
-
-    // SearchOrbitController.prototype.checkedSatellite = function(sSatellite)
-    // {
-    //     if(utilsIsStrNullOrEmpty(sSatellite) === false)
-    //     {
-    //         this.m_oSelectedSatellite.push(sSatellite);
-    //     }
-    // };
-    // SearchOrbitController.prototype.uncheckedSatellite = function(sSatellite)
-    // {
-    //     if(utilsIsStrNullOrEmpty(sSatellite) === false)
-    //     {
-    //         // var iNumberOfSelectedSatellite = this.m_oSelectedSatellite.length;
-    //         utilsRemoveObjectInArray(this.m_oSelectedSatellite,sSatellite);
-    //     }
-    // };
-    /**
-     *
-     * @param sSatellite
-     * @returns {*}
-     */
-    // SearchOrbitController.prototype.isSatelliteSelected = function(sSatellite)
-    // {
-    //     if(utilsIsStrNullOrEmpty(sSatellite) === true)
-    //     {
-    //         return false;
-    //     }
-    //     return utilsIsElementInArray(this.m_oSelectedSatellite,sSatellite);
-    // }
 
     SearchOrbitController.prototype.clearOrbitsTable = function(){
 
@@ -1249,7 +687,6 @@ var SearchOrbitController = (function() {
                         "Select all sensor modes": {
                             "label": "Select all sensor modes",
                             "action": function (obj) {
-                                // oController.downloadKML($node);
                                 oController.m_oTreeService.checkChildren(oController.m_sIdDivSatelliteResourceTree,$node)
                             },
                              "_disabled":!bIsSensorNode
@@ -1257,7 +694,6 @@ var SearchOrbitController = (function() {
                         "Deselect all sensor modes": {
                             "label": "Deselect all sensor modes",
                             "action": function (obj) {
-                                // oController.downloadKML($node);
                                 oController.m_oTreeService.uncheckChildren(oController.m_sIdDivSatelliteResourceTree,$node)
                             },
                             "_disabled":!bIsSensorNode
@@ -1273,40 +709,6 @@ var SearchOrbitController = (function() {
         return oJsonData;
     };
 
-    // SearchOrbitController.prototype.functionContextMenu = function($node,oController)
-    // {
-    //     // var oController = this;
-    //     var bIsEmptyNodeFootPrint = oController.isEmptyNodeFootPrint($node);
-    //
-    //     var oReturnValue = {
-    //             "KML": {
-    //             "label": "Download KML",
-    //
-    //             "action": function (obj) {
-    //                 // console.log("KML");
-    //                 oController.downloadKML($node);
-    //                 // $node.original
-    //                 // if($node.original.isFrame || $node.original.isSwath)
-    //                 // {
-    //                 //     if( utilsIsObjectNullOrUndefined(oNode.original.rectangle) === true)
-    //                 //     {
-    //                 //         var sColor = "orange";
-    //                 //         if (oNode.original.isSwath) sColor = "yellow";
-    //                 //
-    //                 //         var oRectangle = oController.drawRectangleInMap(oNode.original,sColor);
-    //                 //         oNode.original.rectangle = oRectangle;
-    //                 //     }
-    //                 // }
-    //
-    //             },
-    //             "_disabled":bIsEmptyNodeFootPrint
-    //
-    //             // "icon":"radar-icon-context-menu-jstree",
-    //         }
-    //     }
-    //
-    //     return oReturnValue;
-    // };
     SearchOrbitController.prototype.IsSensorNode = function(oNode)
     {
         if( (utilsIsObjectNullOrUndefined(oNode) === false) &&
@@ -1650,57 +1052,6 @@ var SearchOrbitController = (function() {
         }
         return null;
     };
-
-
-    // SearchOrbitController.prototype.setEnableAllSelectedCheckFilters = function(aoSelectedFilters,aoSatelliteResources)
-    // {
-    //     var aoAllEnableSatellites = this.getAllSatellitesEnable(aoSelectedFilters,aoSatelliteResources);
-    //
-    // };
-
-    // SearchOrbitController.prototype.setEnableAllSensorsModes = function(aoSelectedFilters,aoAllEnableSatellites)
-    // {
-    //     var iNumberOfSatelliteResources  = aoAllEnableSatellites.length;
-    //     var iNumberOfSelectedFilters = aoSelectedFilters.length;
-    //     var aoReturnValue = [];
-    //     for(var iIndexSatellite = 0 ; iIndexSatellite < iNumberOfSatelliteResources ; iIndexSatellite++)
-    //     {
-    //         var oSatelliteResource = aoAllEnableSatellites[iIndexSatellite];
-    //
-    //         for(var iSelectedFilter = 0 ; iSelectedFilter < iNumberOfSelectedFilters; iSelectedFilter++)
-    //         {
-    //             var oSelectedFilter = aoSelectedFilters[iSelectedFilter];
-    //             if( oSatelliteResource.satelliteName === oSelectedFilter.text)
-    //             {
-    //
-    //             }
-    //         }
-    //
-    //     }
-    // }
-
-    // SearchOrbitController.prototype.getAllSatellitesEnable = function(aoSelectedFilters,aoSatelliteResources)
-    // {
-    //     var iNumberOfSatelliteResources  = aoSatelliteResources.length;
-    //     var iNumberOfSelectedFilters = aoSelectedFilters.length;
-    //     var aoReturnValue = [];
-    //     for(var iIndexSatellite = 0 ; iIndexSatellite < iNumberOfSatelliteResources ; iIndexSatellite++)
-    //     {
-    //         var oSatelliteResource = aoSatelliteResources[iIndexSatellite];
-    //
-    //         for(var iSelectedFilter = 0 ; iSelectedFilter < iNumberOfSelectedFilters; iSelectedFilter++)
-    //         {
-    //             var oSelectedFilter = aoSelectedFilters[iSelectedFilter];
-    //             if( oSatelliteResource.satelliteName === oSelectedFilter.text)
-    //             {
-    //                 aoReturnValue.push(oSatelliteResource);
-    //             }
-    //         }
-    //
-    //     }
-    //     return aoReturnValue;
-    // };
-
 
     SearchOrbitController.prototype.searchNodeInSatelliteResources = function(oNode){
         if(utilsIsObjectNullOrUndefined(oNode))
