@@ -2277,7 +2277,6 @@ var EditorController = (function () {
                 keyboard: false
             });
             modal.close.then(function (oResult) {
-                // oController.m_oProcessesLaunchedService.loadProcessesFromServer(oController.m_oActiveWorkspace.workspaceId);
                 var i=0;
                 i++;
             });
