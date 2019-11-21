@@ -17,7 +17,9 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.PasswordAuthentication;
 import java.net.URL;
+import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.net.io.Util;
@@ -87,9 +89,7 @@ public class ONDAProviderAdapter extends ProviderAdapter {
 	 * @see wasdi.filebuffer.DownloadFile#ExecuteDownloadFile(java.lang.String, java.lang.String, java.lang.String, java.lang.String, wasdi.shared.business.ProcessWorkspace)
 	 */
 	@Override
-	public String ExecuteDownloadFile(String sFileURL, String sDownloadUser, String sDownloadPassword,
-			String sSaveDirOnServer, ProcessWorkspace oProcessWorkspace) throws Exception {
-		
+	public String ExecuteDownloadFile(String sFileURL, String sDownloadUser, String sDownloadPassword, String sSaveDirOnServer, ProcessWorkspace oProcessWorkspace) throws Exception {
 		
 		// Domain check
 		if (Utils.isNullOrEmpty(sFileURL)) {
@@ -150,60 +150,104 @@ public class ONDAProviderAdapter extends ProviderAdapter {
 			//TODO else - i.e., if it fails - try get the file from https instead
 			//	- in this case the sUrl must be modified in order to include http, so that it can be retrieved  
 			return sDestinationFileName;
-		} else if(sFileURL.startsWith("https://")) {
+		} 
+		else if(sFileURL.startsWith("https://")) {
 			//  https://catalogue.onda-dias.eu/dias-catalogue/Products(357ae76d-f1c4-4f25-b535-e278c3f937af)/$value
 			
 			Boolean bAvailable = false;
 			String sResult = null;
+			
 			//TODO parameter
 			int iAttempts = 3;
-			boolean bOrdered = false;
-			while(!bAvailable) {
+
+			long lDeltaT = 10;
+
+			while(iAttempts > 0) {
+				
 				bAvailable = checkProductAvailability(sFileURL, sDownloadUser, sDownloadPassword);
+				
 				if(null == bAvailable) {
-					//TODO error handling
-				} else if(bAvailable) {
+					m_oLogger.debug("ONDAProviderAdapter.ExecuteDownloadFile: impossible to check product availability");
+				} 
+				else if(bAvailable) {
+					
+					m_oLogger.debug("ONDAProviderAdapter.ExecuteDownloadFile: product should be available, try to download");
+					
 					sResult = downloadViaHttp(sFileURL, sDownloadUser, sDownloadPassword, sSaveDirOnServer);
-				} else {
-					//TODO parameter
-					long lDeltaT = 10;
+					
+					if (!Utils.isNullOrEmpty(sResult)) break;
+				} 
+				else {
 					String sDate = placeOrder(sFileURL, sDownloadUser, sDownloadPassword);
+					
 					if(null!=sDate) {
-						//TODO inform the client
-						LocalDateTime oNow = LocalDateTime.now();
-						LocalDateTime oExpected = LocalDateTime.parse(sDate);
-						lDeltaT = Math.max(lDeltaT, oExpected.toEpochSecond(null) - oNow.toEpochSecond(null));
+						
+						SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSX");
+						
+						long lExpectedDelta = lDeltaT;
+						
+						Date oNow = new Date();
+						
+						try {
+							Date oExpected = sdf.parse(sDate);
+							lExpectedDelta = oExpected.getTime() - oNow.getTime();
+							lExpectedDelta /= 1000;							
+						}
+						catch (Exception e) {
+							m_oLogger.debug("ONDAProviderAdapter.ExecuteDownloadFile: impossible to parse expected date " + sDate);
+						}
+						
+						lDeltaT = Math.max(lDeltaT, lExpectedDelta);
+						
 						//add some padding
-						//TODO parameter
 						lDeltaT += 10;
 					}
-					if(iAttempts < 0) {
-						break;
+					else {
+						m_oLogger.debug("ONDAProviderAdapter.ExecuteDownloadFile: impossible to place product Order");
 					}
-					iAttempts++;
+										
 					TimeUnit.SECONDS.sleep(lDeltaT);
 				}
-			}
-			//TODO else - i.e., if it fails - try get the file from the file system or retry if timeout
-			//  - in this case the sUrl must be modified in order to include file id, so that it can be retrieved			
-			return sResult;
-			
+				
+				iAttempts--;
+				
+				if(iAttempts <= 0) {
+					break;
+				}
 
-		}
+			}
+			
+			return sResult;
+		}		
 		return "";
 	}
 
 	
+	/**
+	 * Checks the Onda Product Availability from the file URL
+	 * @param sFileURL link of the file
+	 * @param sDownloadUser user
+	 * @param sDownloadPassword pw
+	 * @return true if available false otherwise
+	 */
 	private Boolean checkProductAvailability(String sFileURL, String sDownloadUser, String sDownloadPassword) {
 		m_oLogger.debug( "ONDAProviderAdapter.checkProductAvailability( " + sFileURL + ", " + sDownloadUser + ", " + sDownloadPassword + " )");
 		String sUUID = extractProductUUID(sFileURL);
 		return checkProductAvailabilityFromUUID(sUUID, sDownloadUser, sDownloadPassword);
 	}
 	
+	/**
+	 * Checks the Onda Product Availability from the UUID
+	 * @param sUUID product IID
+	 * @param sDownloadUser user
+	 * @param sDownloadPassword password
+	 * @return true if available false otherwise
+	 */
 	private Boolean checkProductAvailabilityFromUUID(String sUUID, String sDownloadUser, String sDownloadPassword) {
 		m_oLogger.debug( "ONDAProviderAdapter.checkProductAvailability( " + sUUID + ", " + sDownloadUser + ", " + sDownloadPassword + " )");
 		
 		String sCheckUrl = "https://catalogue.onda-dias.eu/dias-catalogue/Products(" + sUUID + ")?$select=offline,downloadable";
+		
 		try {
 				
 			URL oUrl = new URL(sCheckUrl);
@@ -212,6 +256,7 @@ public class ONDAProviderAdapter extends ProviderAdapter {
 			oHttpConn.setRequestProperty("Accept", "application/json");
 	        oHttpConn.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:57.0) Gecko/20100101 Firefox/57.0");
 	        int iResponseCode = oHttpConn.getResponseCode();
+	        
 	        if (iResponseCode == HttpURLConnection.HTTP_OK) {
 	        	//get json
 	        	String sJson = null;
@@ -224,8 +269,7 @@ public class ONDAProviderAdapter extends ProviderAdapter {
 					}
 					oHttpConn.disconnect();
 	        	}catch (Exception oE) {
-	    			m_oLogger.error( "ONDAProviderAdapter.checkProductAvailabilityFromUUID( " + sUUID + ", " + sDownloadUser + ", " + sDownloadPassword +
-" ): error retrieving  reply: " + oE);
+	    			m_oLogger.error( "ONDAProviderAdapter.checkProductAvailabilityFromUUID( " + sUUID + ", " + sDownloadUser + ", " + sDownloadPassword + " ): error retrieving  reply: " + oE);
 	    			return null;
 	        	}
 	        	//then parse json
@@ -286,6 +330,7 @@ public class ONDAProviderAdapter extends ProviderAdapter {
 	}
 	
 	private String placeOrderWithUUID(String sUUID, String sDownloadUser, String sDownloadPassword) {
+		
 		String sOrderUrl = "https://catalogue.onda-dias.eu/dias-catalogue/Products(" + sUUID + ")/Ens.Order";
 		
 		m_oLogger.debug("ONDAProviderAdapter.placeOrder( " + sOrderUrl + ", " + sDownloadUser + ", " + sDownloadPassword + " )");
@@ -302,13 +347,17 @@ public class ONDAProviderAdapter extends ProviderAdapter {
 				}
 			});
 		}
+		
 		URL oUrl;
 		try {
 			oUrl = new URL(sOrderUrl);
+			
 	        HttpURLConnection oHttpConn = (HttpURLConnection) oUrl.openConnection();
 	        oHttpConn.setRequestMethod("POST");
-			oHttpConn.setRequestProperty("Accept", "application/json");
-	        oHttpConn.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:57.0) Gecko/20100101 Firefox/57.0");
+	        oHttpConn.addRequestProperty("Content-Type","application/json");
+			oHttpConn.setRequestProperty("Accept", "*/*");
+	        //oHttpConn.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:57.0) Gecko/20100101 Firefox/57.0");
+	        
 	        int iResponseCode = oHttpConn.getResponseCode();
 	        if (iResponseCode == HttpURLConnection.HTTP_OK) {
 	        	String sJson = null;

@@ -191,10 +191,10 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 		oHttpConn.setRequestMethod("GET");
 		oHttpConn.setRequestProperty("Accept", "*/*");
 		oHttpConn.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:57.0) Gecko/20100101 Firefox/57.0");
-		int responseCode = oHttpConn.getResponseCode();
+		int iResponseCode = oHttpConn.getResponseCode();
 
 		// always check HTTP response code first
-		if (responseCode == HttpURLConnection.HTTP_OK) {
+		if (iResponseCode == HttpURLConnection.HTTP_OK) {
 
 			m_oLogger.debug("ProviderAdapter.downloadViaHttp: Connected");
 
@@ -245,8 +245,8 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 			m_oLogger.debug("ProviderAdapter.downloadViaHttp File downloaded " + sReturnFilePath);
 		} else {
 			m_oLogger.debug(
-					"ProviderAdapter.downloadViaHttp No file to download. Server replied HTTP code: " + responseCode);
-			m_iLastError = responseCode;
+					"ProviderAdapter.downloadViaHttp No file to download. Server replied HTTP code: " + iResponseCode);
+			m_iLastError = iResponseCode;
 		}
 		oHttpConn.disconnect();
 		return sReturnFilePath;
