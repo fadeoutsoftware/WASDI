@@ -1691,7 +1691,13 @@ var EditorController = (function () {
 
         var oController = this;
         this.m_bIsLoadedViewBandImage = false;
-        this.m_oFilterService.getProductBand(oBody,workspaceId).success(function (data, status) {
+        var sUrl = null;
+
+        // P.Campanella 20/11/2019: TODO Test the redirect of the getProductBand to the node that hosts the workspace
+        if (utilsIsStrNullOrEmpty(this.m_oConstantsService.getActiveWorkspace().apiUrl) == false ) {
+            sUrl = this.m_oConstantsService.getActiveWorkspace().apiUrl;
+        }
+        this.m_oFilterService.getProductBand(oBody,workspaceId, sUrl).success(function (data, status) {
 
             // Anyway this is not more a zoom.
             oController.m_bIsEditorZoomingOnExistingImage = false;
