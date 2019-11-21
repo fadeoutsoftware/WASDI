@@ -163,8 +163,7 @@ public class WorkspaceResource {
 			}
 
 			// Get the list of workspace shared with this user
-			List<WorkspaceSharing> aoSharedWorkspaces = oWorkspaceSharingRepository
-					.GetWorkspaceSharingByUser(oUser.getUserId());
+			List<WorkspaceSharing> aoSharedWorkspaces = oWorkspaceSharingRepository.GetWorkspaceSharingByUser(oUser.getUserId());
 
 			if (aoSharedWorkspaces.size() > 0) {
 				// For each
@@ -172,12 +171,10 @@ public class WorkspaceResource {
 
 					// Create View Model
 					WorkspaceListInfoViewModel oWSViewModel = new WorkspaceListInfoViewModel();
-					Workspace oWorkspace = oWSRepository
-							.GetWorkspace(aoSharedWorkspaces.get(iWorkspaces).getWorkspaceId());
+					Workspace oWorkspace = oWSRepository.GetWorkspace(aoSharedWorkspaces.get(iWorkspaces).getWorkspaceId());
 
 					if (oWorkspace == null) {
-						Utils.debugLog("WorkspaceResult.getListByUser: WS Shared not available "
-								+ aoSharedWorkspaces.get(iWorkspaces).getWorkspaceId());
+						Utils.debugLog("WorkspaceResult.getListByUser: WS Shared not available " + aoSharedWorkspaces.get(iWorkspaces).getWorkspaceId());
 						continue;
 					}
 

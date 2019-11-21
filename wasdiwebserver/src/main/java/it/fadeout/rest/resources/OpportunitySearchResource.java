@@ -332,48 +332,51 @@ public class OpportunitySearchResource {
 	@Produces({ "application/xml", "application/json", "text/html" })
 	@Consumes(MediaType.APPLICATION_JSON)
 	public SatelliteOrbitResultViewModel getSatelliteTrack(@HeaderParam("x-session-token") String sSessionId,
-			@PathParam("satellitename") String satname) {
+			@PathParam("satellitename") String sSatname) {
 
-		Utils.debugLog("OpportunitySearchResource.GetSatelliteTrack( " + sSessionId + ", " + satname + " )");
+		Utils.debugLog("OpportunitySearchResource.GetSatelliteTrack( " + sSessionId + ", " + sSatname + " )");
 
 		// set nfs properties download
-		String userHome = System.getProperty("user.home");
-		String Nfs = System.getProperty("nfs.data.download");
-		if (Nfs == null) {
-			System.setProperty("nfs.data.download", userHome + "/nfs/download");
+		String sUserHome = System.getProperty("user.home");
+		String sNfs = System.getProperty("nfs.data.download");
+		if (sNfs == null) {
+			System.setProperty("nfs.data.download", sUserHome + "/nfs/download");
 			Utils.debugLog("nfs dir " + System.getProperty("nfs.data.download"));
 		}
 
-		SatelliteOrbitResultViewModel ret = new SatelliteOrbitResultViewModel();
-		String satres = InstanceFinder.s_sOrbitSatsMap.get(satname);
+		SatelliteOrbitResultViewModel oReturnViewModel = new SatelliteOrbitResultViewModel();
+		String sSatres = InstanceFinder.s_sOrbitSatsMap.get(sSatname);
+		
 		try {
 
-			Time tconv = new Time();
-			tconv.setDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
-			Satellite sat = SatFactory.buildSat(satres);
+			Time oTimeConv = new Time();
+			oTimeConv.setDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+			Satellite oSat = SatFactory.buildSat(sSatres);
+			
+			if (oSat == null) return oReturnViewModel;
 
-			ret.code = satname;
+			oReturnViewModel.code = sSatname;
 
-			ret.satelliteName = sat.getDescription();
-			sat.getSatController().moveToNow();
-			ret.currentTime = tconv.convertJD2String(sat.getOrbitCore().getCurrentJulDate());
-			ret.setCurrentPosition(sat.getOrbitCore().getLLA());
+			oReturnViewModel.satelliteName = oSat.getDescription();
+			oSat.getSatController().moveToNow();
+			oReturnViewModel.currentTime = oTimeConv.convertJD2String(oSat.getOrbitCore().getCurrentJulDate());
+			oReturnViewModel.setCurrentPosition(oSat.getOrbitCore().getLLA());
 
-			sat.getOrbitCore().setShowGroundTrack(true);
+			oSat.getOrbitCore().setShowGroundTrack(true);
 
 			// lag
-			double[] tm = sat.getOrbitCore().getTimeLag();
-			for (int i = sat.getOrbitCore().getNumGroundTrackLagPts() - 1; i >= 0; i--)
-				ret.addPosition(sat.getOrbitCore().getGroundTrackLlaLagPt(i), tconv.convertJD2String(tm[i]));
+			double[] tm = oSat.getOrbitCore().getTimeLag();
+			for (int i = oSat.getOrbitCore().getNumGroundTrackLagPts() - 1; i >= 0; i--)
+				oReturnViewModel.addPosition(oSat.getOrbitCore().getGroundTrackLlaLagPt(i), oTimeConv.convertJD2String(tm[i]));
 
 			// lead
-			tm = sat.getOrbitCore().getTimeLead();
-			for (int i = 0; i < sat.getOrbitCore().getNumGroundTrackLeadPts(); i++)
-				ret.addPosition(sat.getOrbitCore().getGroundTrackLlaLeadPt(i), tconv.convertJD2String(tm[i]));
+			tm = oSat.getOrbitCore().getTimeLead();
+			for (int i = 0; i < oSat.getOrbitCore().getNumGroundTrackLeadPts(); i++)
+				oReturnViewModel.addPosition(oSat.getOrbitCore().getGroundTrackLlaLeadPt(i), oTimeConv.convertJD2String(tm[i]));
 		} catch (Exception e) {
 			Utils.debugLog("OpportunitySearchResource.GetSatelliteTrack: " + e);
 		}
-		return ret;
+		return oReturnViewModel;
 	}
 
 	@GET
