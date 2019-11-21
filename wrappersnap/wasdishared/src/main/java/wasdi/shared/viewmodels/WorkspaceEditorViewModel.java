@@ -12,7 +12,8 @@ public class WorkspaceEditorViewModel {
     private String workspaceId;
     private String name;
     private String userId;
-    private Date creationDate;
+    private String apiUrl;
+	private Date creationDate;
     private Date lastEditDate;
     private List<String> sharedUsers = new ArrayList<>();
 
@@ -63,4 +64,13 @@ public class WorkspaceEditorViewModel {
     public void setLastEditDate(Date lastEditDate) {
         this.lastEditDate = lastEditDate;
     }
+    
+    public String getApiUrl() {
+		return apiUrl;
+	}
+
+	public void setApiUrl(String apiUrl) {
+		this.apiUrl = apiUrl;
+	}
+
 }
