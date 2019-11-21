@@ -50,12 +50,15 @@ public class WorkspaceRepository extends  MongoRepository{
 
         try {
             Document oWSDocument = getCollection("workspaces").find(new Document("workspaceId", sWorkspaceId)).first();
+            
+            if (oWSDocument != null) {
+                String sJSON = oWSDocument.toJson();
 
-            String sJSON = oWSDocument.toJson();
+                Workspace oWorkspace = s_oMapper.readValue(sJSON,Workspace.class);
 
-            Workspace oWorkspace = s_oMapper.readValue(sJSON,Workspace.class);
+                return oWorkspace;            	
+            }
 
-            return oWorkspace;
         } catch (Exception oEx) {
             oEx.printStackTrace();
         }
