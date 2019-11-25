@@ -58,15 +58,19 @@ import wasdi.processors.WasdiProcessorEngine;
 import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.DownloadedFile;
 import wasdi.shared.business.DownloadedFileCategory;
+import wasdi.shared.business.Node;
 import wasdi.shared.business.ProcessStatus;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.business.ProductWorkspace;
 import wasdi.shared.business.PublishedBand;
+import wasdi.shared.business.Workspace;
 import wasdi.shared.data.DownloadedFilesRepository;
 import wasdi.shared.data.MongoRepository;
+import wasdi.shared.data.NodeRepository;
 import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.data.ProductWorkspaceRepository;
 import wasdi.shared.data.PublishedBandsRepository;
+import wasdi.shared.data.WorkspaceRepository;
 import wasdi.shared.geoserver.GeoServerManager;
 import wasdi.shared.parameters.ApplyOrbitParameter;
 import wasdi.shared.parameters.BaseParameter;
@@ -538,6 +542,29 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 		}
 	}
 	
+	/**
+	 * Get The node corresponding to the workspace
+	 * 
+	 * @param sWorkspaceId Id of the Workspace
+	 * @return Node object
+	 */
+	public static Node getWorkspaceNode(String sWorkspaceId) {
+		
+		WorkspaceRepository oWorkspaceRepository = new WorkspaceRepository();
+		Workspace oWorkspace = oWorkspaceRepository.GetWorkspace(sWorkspaceId);
+		
+		if (oWorkspace == null) return null;
+		
+		String sNodeCode = oWorkspace.getNodeCode();
+		
+		if (Utils.isNullOrEmpty(sNodeCode)) return null;
+		
+		NodeRepository oNodeRepo = new NodeRepository();
+		Node oNode = oNodeRepo.GetNodeByCode(sNodeCode);
+		
+		return oNode;
+	}
+
 	/**
 	 * Get the full workspace path for this parameter
 	 * @param oParameter Base Parameter
@@ -1584,6 +1611,16 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 				oPublishedBand.setWorkspaceId(oParameter.getWorkspace());
 				oPublishedBand.setBoundingBox(sBBox);
 				oPublishedBand.setGeoserverBoundingBox(sGeoserverBBox);
+				
+				// P.Campanella 2019-11-06: add the geoserver url to the publish band entity
+				s_oLogger.debug("LauncherMain.PublishBandImage: searching workspace Node for wid: " + oParameter.getWorkspace());
+				
+				Node oNode = getWorkspaceNode(oParameter.getWorkspace());
+				
+				if (oNode != null) {
+					s_oLogger.debug("LauncherMain.PublishBandImage: node code: " + oNode.getNodeCode());
+					oPublishedBand.setGeoserverUrl(oNode.getNodeGeoserverAddress());
+				}
 
 				// Add it the the db
 				oPublishedBandsRepository.InsertPublishedBand(oPublishedBand);
@@ -1598,6 +1635,7 @@ public class LauncherMain implements ProcessWorkspaceUpdateSubscriber {
 				oVM.setLayerId(sLayerId);
 				oVM.setBoundingBox(sBBox);
 				oVM.setGeoserverBoundingBox(sGeoserverBBox);
+				oVM.setGeoserverUrl(oPublishedBand.getGeoserverUrl());
 				
 				// P.Campanella 2019/05/02: Wait a little bit to make GeoServer "finish" the process
 				Thread.sleep(10000);

@@ -249,6 +249,14 @@ public class WorkspaceResource {
 			oVM.setName(oWorkspace.getName());
 			oVM.setCreationDate(Utils.getDate(oWorkspace.getCreationDate()));
 			oVM.setLastEditDate(Utils.getDate(oWorkspace.getLastEditDate()));
+			
+			// If the workspace is on another node, copy the url to the view model
+			if (oWorkspace.getNodeCode().equals(Wasdi.s_sMyNodeCode) == false) {
+				// Get the Node
+				wasdi.shared.data.NodeRepository oNodeRepository = new wasdi.shared.data.NodeRepository();
+				wasdi.shared.business.Node oWorkspaceNode = oNodeRepository.GetNodeByCode(oWorkspace.getNodeCode());
+				oVM.setApiUrl(oWorkspaceNode.getNodeBaseAddress());
+			}
 
 			// Get Sharings
 			List<WorkspaceSharing> aoSharings = oWorkspaceSharingRepository
