@@ -28,6 +28,8 @@ import org.json.JSONObject;
 
 import com.sleepycat.je.rep.impl.TextProtocol.OK;
 
+import wasdi.LauncherMain;
+import wasdi.shared.LauncherOperations;
 import wasdi.shared.business.ProcessWorkspace;
 import wasdi.shared.utils.Utils;
 
@@ -164,6 +166,8 @@ public class ONDAProviderAdapter extends ProviderAdapter {
 
 			while(iAttempts > 0) {
 				
+				m_oLogger.debug("ONDAProviderAdapter.ExecuteDownloadFile: start checkProductAvailability");
+				
 				bAvailable = checkProductAvailability(sFileURL, sDownloadUser, sDownloadPassword);
 				
 				if(null == bAvailable) {
@@ -175,9 +179,14 @@ public class ONDAProviderAdapter extends ProviderAdapter {
 					
 					sResult = downloadViaHttp(sFileURL, sDownloadUser, sDownloadPassword, sSaveDirOnServer);
 					
+					m_oLogger.debug("ONDAProviderAdapter.ExecuteDownloadFile: download method finished");
+					
 					if (!Utils.isNullOrEmpty(sResult)) break;
 				} 
 				else {
+					
+					m_oLogger.debug("ONDAProviderAdapter.ExecuteDownloadFile: product not available, place order");
+					
 					String sDate = placeOrder(sFileURL, sDownloadUser, sDownloadPassword);
 					
 					if(null!=sDate) {
@@ -191,7 +200,14 @@ public class ONDAProviderAdapter extends ProviderAdapter {
 						try {
 							Date oExpected = sdf.parse(sDate);
 							lExpectedDelta = oExpected.getTime() - oNow.getTime();
-							lExpectedDelta /= 1000;							
+							lExpectedDelta /= 1000;
+							
+							m_oLogger.debug("ONDAProviderAdapter.ExecuteDownloadFile: order placed. Expected date " + sDate);
+							
+							if (LauncherMain.s_oSendToRabbit != null) {
+								String sInfo = "Download Operation<br>File in long term archive<br>Retrive scheduled for " + sDate;
+								LauncherMain.s_oSendToRabbit.SendRabbitMessage(true,LauncherOperations.INFO.name(),oProcessWorkspace.getWorkspaceId(), sInfo,oProcessWorkspace.getWorkspaceId());
+							}
 						}
 						catch (Exception e) {
 							m_oLogger.debug("ONDAProviderAdapter.ExecuteDownloadFile: impossible to parse expected date " + sDate);
@@ -205,17 +221,23 @@ public class ONDAProviderAdapter extends ProviderAdapter {
 					else {
 						m_oLogger.debug("ONDAProviderAdapter.ExecuteDownloadFile: impossible to place product Order");
 					}
-										
+					
+					m_oLogger.debug("ONDAProviderAdapter.ExecuteDownloadFile: going to sleep for " + lDeltaT + " [s]");										
 					TimeUnit.SECONDS.sleep(lDeltaT);
 				}
 				
 				iAttempts--;
 				
 				if(iAttempts <= 0) {
+					m_oLogger.debug("ONDAProviderAdapter.ExecuteDownloadFile: attemps finished. Break cycle");
 					break;
 				}
 
 			}
+			
+			String sResLog = sResult;
+			if (Utils.isNullOrEmpty(sResLog)) sResLog = "NULL";
+			m_oLogger.debug("ONDAProviderAdapter.ExecuteDownloadFile: return value " + sResLog);
 			
 			return sResult;
 		}		

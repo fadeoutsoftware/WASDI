@@ -8,7 +8,6 @@ public enum LauncherOperations {
     DOWNLOAD,
     FTPUPLOAD,
     PUBLISH,
-    DOWNLOADANDPUBLISH,
     PUBLISHBAND,
     UPDATEPROCESSES,
     RASTERGEOMETRICRESAMPLE,
@@ -28,5 +27,6 @@ public enum LauncherOperations {
     MULTISUBSET,
     WPS,
     REGRID,
-    DELETEPROCESSOR
+    DELETEPROCESSOR,
+    INFO
 }
