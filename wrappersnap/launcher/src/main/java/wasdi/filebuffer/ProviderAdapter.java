@@ -191,11 +191,10 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 		oHttpConn.setRequestMethod("GET");
 		oHttpConn.setRequestProperty("Accept", "*/*");
 		oHttpConn.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:57.0) Gecko/20100101 Firefox/57.0");
-				
-		int responseCode = oHttpConn.getResponseCode();
+		int iResponseCode = oHttpConn.getResponseCode();
 
 		// always check HTTP response code first
-		if (responseCode == HttpURLConnection.HTTP_OK) {
+		if (iResponseCode == HttpURLConnection.HTTP_OK) {
 
 			m_oLogger.debug("ProviderAdapter.downloadViaHttp: Connected");
 
@@ -246,8 +245,8 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 			m_oLogger.debug("ProviderAdapter.downloadViaHttp File downloaded " + sReturnFilePath);
 		} else {
 			m_oLogger.debug(
-					"ProviderAdapter.downloadViaHttp No file to download. Server replied HTTP code: " + responseCode);
-			m_iLastError = responseCode;
+					"ProviderAdapter.downloadViaHttp No file to download. Server replied HTTP code: " + iResponseCode);
+			m_iLastError = iResponseCode;
 		}
 		oHttpConn.disconnect();
 		return sReturnFilePath;
@@ -261,8 +260,7 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 	 * @param oOutputStream
 	 * @throws IOException
 	 */
-	//TODO change the method signature to return some status including not only success or failure but also reason (e.g. timeout, file not found...)
-	protected void copyStream(ProcessWorkspace oProcessWorkspace, long lContentLength, InputStream oInputStream, OutputStream oOutputStream) throws IOException {
+	protected boolean copyStream(ProcessWorkspace oProcessWorkspace, long lContentLength, InputStream oInputStream, OutputStream oOutputStream) {
 
 		// Cumulative Byte Count
 		int iTotalBytes = 0;
@@ -275,44 +273,51 @@ public abstract class ProviderAdapter implements ProcessWorkspaceUpdateNotifier 
 
 		int iBytesRead = -1;
 		byte[] abBuffer = new byte[BUFFER_SIZE];
-		int nZeroes = MAX_NUM_ZEORES_DURING_READ;
-		while ((iBytesRead = oInputStream.read(abBuffer)) != -1) {
+		int iZeroes = MAX_NUM_ZEORES_DURING_READ;
+		
+		try {
+			while ((iBytesRead = oInputStream.read(abBuffer)) != -1) {
 
-			if (iBytesRead <= 0) {
-				m_oLogger.debug("ProviderAdapter.copyStream: Read 0 bytes from stream. Counter: " + nZeroes);
-				nZeroes--;
-			} else {
-				nZeroes = MAX_NUM_ZEORES_DURING_READ;
+				if (iBytesRead <= 0) {
+					m_oLogger.debug("ProviderAdapter.copyStream: Read 0 bytes from stream. Counter: " + iZeroes);
+					iZeroes--;
+				} 
+				else {
+					iZeroes = MAX_NUM_ZEORES_DURING_READ;
+				}
+				
+				if (iZeroes <= 0) break;
+
+				oOutputStream.write(abBuffer, 0, iBytesRead);
+
+				// Sum bytes
+				iTotalBytes += iBytesRead;
+
+				// Overcome a 1% limit?
+				if (oProcessWorkspace != null && lContentLength > BUFFER_SIZE && iTotalBytes >= lOnePercent && iFilePercent <= 100) {
+					
+					// Increase the file
+					iFilePercent += 1;
+					if (iFilePercent > 100) iFilePercent = 100;
+					
+					// Reset the count
+					iTotalBytes = 0;
+					
+					// Update the progress
+					if (iZeroes == MAX_NUM_ZEORES_DURING_READ) UpdateProcessProgress(iFilePercent);
+				}
 			}
-			if (nZeroes <= 0)
-				break;
 
-			// logger.debug("ExecuteDownloadFile. Read " + iBytesRead + " bytes from
-			// stream");
-
-			oOutputStream.write(abBuffer, 0, iBytesRead);
-
-			// Sum bytes
-			iTotalBytes += iBytesRead;
-
-			// Overcome a 1% limit?
-			if (oProcessWorkspace != null && lContentLength > BUFFER_SIZE && iTotalBytes >= lOnePercent && iFilePercent <= 100) {
-				// Increase the file
-				iFilePercent += 1;
-				if (iFilePercent > 100)
-					iFilePercent = 100;
-				// Reset the count
-				iTotalBytes = 0;
-				// Update the progress
-				if (nZeroes == MAX_NUM_ZEORES_DURING_READ)
-					UpdateProcessProgress(iFilePercent);
-			}
+			oOutputStream.close();
+			oInputStream.close();			
+		}
+		catch (Exception oEx) {
+			m_oLogger.debug("ProviderAdapter.copyStream: Exception: " + oEx.toString());
+			return false;
 		}
 
-		oOutputStream.close();
-		oInputStream.close();
-		
 		m_oLogger.debug("ProviderAdapter.copyStream: copy done");
+		return true;
 	}
 	
 	

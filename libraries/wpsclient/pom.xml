@@ -22,11 +22,32 @@
 			<scope>test</scope>
 		</dependency>
 
-		<dependency>
+		<!--dependency>
 			<groupId>org.n52.wps</groupId>
 			<artifactId>52n-wps-client-lib</artifactId>
 			<version>3.3.1</version>
+		</dependency-->
+		<dependency>
+			<groupId>org.n52.geoprocessing</groupId>
+			<artifactId>wps-client-lib</artifactId>
+			<version>1.0.3</version>
 		</dependency>
+		
+		<dependency>
+		    <groupId>org.apache.httpcomponents</groupId>
+		    <artifactId>httpclient</artifactId>
+		    <version>4.5.10</version>
+		</dependency>
+		<dependency>
+		    <groupId>xalan</groupId>
+		    <artifactId>xalan</artifactId>
+		    <version>2.7.1</version>
+		</dependency>
+		<dependency>
+		    <groupId>net.opengis</groupId>
+		    <artifactId>wps</artifactId>
+		    <version>1.0.0</version>
+		</dependency>		
 	</dependencies>
 
 	<repositories>
