@@ -162,6 +162,28 @@ public class ProcessWorkspaceRepository extends MongoRepository {
         return aoReturnList;
     }
     
+    public List<ProcessWorkspace> GetQueuedProcessByNode(String sComputingNodeCode) {
+
+        final ArrayList<ProcessWorkspace> aoReturnList = new ArrayList<ProcessWorkspace>();
+        try {
+
+            FindIterable<Document> oWSDocuments = getCollection("processworkpsace").find(
+            		Filters.and(
+            				Filters.eq("status", ProcessStatus.CREATED.name()),
+            				Filters.not(Filters.eq("operationType", LauncherOperations.DOWNLOAD.name())),
+            				Filters.not(Filters.eq("operationType", LauncherOperations.RUNIDL.name())),
+            				Filters.eq("nodeCode", sComputingNodeCode)
+            				)
+            		)
+            		.sort(new Document("operationDate", -1));
+            fillList(aoReturnList, oWSDocuments);
+
+        } catch (Exception oEx) {
+            oEx.printStackTrace();
+        }
+
+        return aoReturnList;
+    }
     
     public List<ProcessWorkspace> GetRunningProcess() {
 
@@ -207,6 +229,28 @@ public class ProcessWorkspaceRepository extends MongoRepository {
         return aoReturnList;
     }
     
+    public List<ProcessWorkspace> GetQueuedDownloadsByNode(String sComputingNodeCode) {
+
+        final ArrayList<ProcessWorkspace> aoReturnList = new ArrayList<ProcessWorkspace>();
+        try {
+
+            FindIterable<Document> oWSDocuments = getCollection("processworkpsace").find(
+            		Filters.and(
+            				Filters.eq("status", ProcessStatus.CREATED.name()),
+            				Filters.eq("operationType", LauncherOperations.DOWNLOAD.name()),
+            				Filters.eq("nodeCode", sComputingNodeCode)
+            				)
+            		)
+            		.sort(new Document("operationDate", -1));
+            fillList(aoReturnList, oWSDocuments);
+
+        } catch (Exception oEx) {
+            oEx.printStackTrace();
+        }
+
+        return aoReturnList;
+    }
+    
     public List<ProcessWorkspace> GetQueuedIDL() {
 
         final ArrayList<ProcessWorkspace> aoReturnList = new ArrayList<ProcessWorkspace>();
@@ -216,6 +260,28 @@ public class ProcessWorkspaceRepository extends MongoRepository {
             		Filters.and(
             				Filters.eq("status", ProcessStatus.CREATED.name()),
             				Filters.eq("operationType", LauncherOperations.RUNIDL.name())
+            				)
+            		)
+            		.sort(new Document("operationDate", -1));
+            fillList(aoReturnList, oWSDocuments);
+
+        } catch (Exception oEx) {
+            oEx.printStackTrace();
+        }
+
+        return aoReturnList;
+    }
+    
+    public List<ProcessWorkspace> GetQueuedIDLByNode(String sComputingNode) {
+
+        final ArrayList<ProcessWorkspace> aoReturnList = new ArrayList<ProcessWorkspace>();
+        try {
+
+            FindIterable<Document> oWSDocuments = getCollection("processworkpsace").find(
+            		Filters.and(
+            				Filters.eq("status", ProcessStatus.CREATED.name()),
+            				Filters.eq("operationType", LauncherOperations.RUNIDL.name()),
+            				Filters.eq("nodeCode", sComputingNode)
             				)
             		)
             		.sort(new Document("operationDate", -1));

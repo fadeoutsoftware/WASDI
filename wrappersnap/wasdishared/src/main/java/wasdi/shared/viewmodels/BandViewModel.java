@@ -19,8 +19,15 @@ public class BandViewModel {
     private int height = 0;
     private String layerId;
     private String geoserverBoundingBox;
+    private String geoserverUrl;
 
-    public String getName() {
+    public String getGeoserverUrl() {
+		return geoserverUrl;
+	}
+	public void setGeoserverUrl(String geoserverUrl) {
+		this.geoserverUrl = geoserverUrl;
+	}
+	public String getName() {
         return name;
     }
 

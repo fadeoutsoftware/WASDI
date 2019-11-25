@@ -68,10 +68,6 @@ public class FileBufferResource {
 			}
 
 			String sUserId = oUser.getUserId();
-
-			//Update process list
-			ProcessWorkspace oProcess = null;
-			ProcessWorkspaceRepository oRepository = new ProcessWorkspaceRepository();
 			
 			String sProcessObjId = Utils.GetRandomName();
 			
@@ -90,38 +86,16 @@ public class FileBufferResource {
 			oParameter.setProcessObjId(sProcessObjId);
 			
 			String sPath = m_oServletConfig.getInitParameter("SerializationPath");
-			if (! (sPath.endsWith("\\") || sPath.endsWith("/")) ) sPath += "/";
-			sPath += sProcessObjId;
-			SerializationUtils.serializeObjectToXML(sPath, oParameter);
-
-			try
-			{
-				oProcess = new ProcessWorkspace();
-				oProcess.setOperationDate(Wasdi.GetFormatDate(new Date()));
-				oProcess.setOperationType(LauncherOperations.DOWNLOAD.name());
-				oProcess.setProductName(sFileUrl);
-				oProcess.setWorkspaceId(sWorkspaceId);
-				oProcess.setUserId(sUserId);
-				oProcess.setProcessObjId(sProcessObjId);
-				oProcess.setStatus(ProcessStatus.CREATED.name());
-				oRepository.InsertProcessWorkspace(oProcess);
-				Utils.debugLog("FileBufferResource.Download: Process Scheduled for Launcher, user: " + sUserId + ", process ID: " + sProcessObjId);
-				
-				oResult.setBoolValue(true);
-				oResult.setIntValue(200);
-				oResult.setStringValue(sProcessObjId);
-				
-				return oResult;
-
-			}
-			catch(Exception oEx){
-				Utils.debugLog("DownloadResource.Download: Error updating process list " + oEx);
-			}
+			
+			
+			return Wasdi.runProcess(sUserId, sSessionId, LauncherOperations.DOWNLOAD.name(), sFileUrl, sPath, oParameter);
+			
 		} catch (IOException e) {
 			Utils.debugLog("DownloadResource.Download: Error updating process list " + e);
 		} catch (Exception e) {
 			Utils.debugLog("DownloadResource.Download: Error updating process list " + e);
 		}
+		
 		oResult.setIntValue(500);
 		return oResult;
 	}	
@@ -156,39 +130,23 @@ public class FileBufferResource {
 			oParameter.setProcessObjId(sProcessObjId);
 			oParameter.setWorkspaceOwnerId(Wasdi.getWorkspaceOwner(sWorkspaceId));
 
-			String sPath = m_oServletConfig.getInitParameter("SerializationPath") + sProcessObjId;
-			SerializationUtils.serializeObjectToXML(sPath, oParameter);
+			String sPath = m_oServletConfig.getInitParameter("SerializationPath");
+			PrimitiveResult oRes = Wasdi.runProcess(sUserId, sSessionId, LauncherOperations.PUBLISH.name(), sFileUrl, sPath, oParameter);
 			
-
-			//Update process list
-			ProcessWorkspaceRepository oRepository = new ProcessWorkspaceRepository();
-			ProcessWorkspace oProcess = null;
-			try
-			{
-				
-				oProcess = new ProcessWorkspace();
-				oProcess.setOperationDate(Wasdi.GetFormatDate(new Date()));
-				oProcess.setOperationType(LauncherOperations.PUBLISH.name());
-				oProcess.setProductName(sFileUrl);
-				oProcess.setWorkspaceId(sWorkspaceId);
-				oProcess.setUserId(sUserId);
-				oProcess.setProcessObjId(sProcessObjId);
-				oProcess.setStatus(ProcessStatus.CREATED.name());
-				oRepository.InsertProcessWorkspace(oProcess);
-				Utils.debugLog("FileBufferResource.Publish: Process Scheduled for Launcher, user: " + sUserId + ", process ID: " + sProcessObjId);
+			if (oRes.getBoolValue()) {
+				return Response.ok().build();
 			}
-			catch(Exception oEx){
-				Utils.debugLog("DownloadResource.Publish: Error updating process list " + oEx);
+			else {
 				return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
 			}
-
+			
 		} catch (IOException e) {
 			Utils.debugLog("DownloadResource.Publish: " + e);
+			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
 		} catch (Exception e) {
 			Utils.debugLog("DownloadResource.Publish: " + e);
+			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
 		}
-
-		return Response.ok().build();
 
 	}	
 
@@ -233,6 +191,7 @@ public class FileBufferResource {
 				oPublishViewModel.setLayerId(oPublishBand.getLayerId());
 				oPublishViewModel.setProductName(oPublishBand.getProductName());
 				oPublishViewModel.setGeoserverBoundingBox(oPublishBand.getGeoserverBoundingBox());
+				oPublishViewModel.setGeoserverUrl(oPublishBand.getGeoserverUrl());
 				oReturnValue.setMessageCode(LauncherOperations.PUBLISHBAND.name());
 				oReturnValue.setPayload(oPublishViewModel);
 				
@@ -254,32 +213,9 @@ public class FileBufferResource {
 			oParameter.setWorkspaceOwnerId(Wasdi.getWorkspaceOwner(sWorkspaceId));
 
 			String sPath = m_oServletConfig.getInitParameter("SerializationPath");
-			if (!(sPath.endsWith("\\") || sPath.endsWith("/"))) sPath += "/";
-			sPath += sProcessObjId;
 			
-			SerializationUtils.serializeObjectToXML(sPath, oParameter);
-
-			//Update process list
-			ProcessWorkspaceRepository oRepository = new ProcessWorkspaceRepository();
-			ProcessWorkspace oProcess = null;
-			try
-			{
-				oProcess = new ProcessWorkspace();
-				oProcess.setOperationDate(Wasdi.GetFormatDate(new Date()));
-				oProcess.setOperationType(LauncherOperations.PUBLISHBAND.name());
-				oProcess.setProductName(sFileUrl);
-				oProcess.setWorkspaceId(sWorkspaceId);
-				oProcess.setUserId(oUser.getUserId());
-				oProcess.setProcessObjId(sProcessObjId);
-				oProcess.setStatus(ProcessStatus.CREATED.name());
-				oRepository.InsertProcessWorkspace(oProcess);
-				Utils.debugLog("FileBufferResource.PublishBand: Process Scheduled for Launcher, user: " + sUserId +", process ID: " + sProcessObjId);
-			}
-			catch(Exception oEx){
-				Utils.debugLog("DownloadResource.PublishBand: Error updating process list " + oEx);
-				return oReturnValue;
-			}
-
+			Wasdi.runProcess(sUserId, sSessionId, LauncherOperations.PUBLISHBAND.name(), sFileUrl, sPath, oParameter);
+			
 		}catch (IOException e) {
 			Utils.debugLog("DownloadResource.PublishBand: " + e);
 			return oReturnValue;

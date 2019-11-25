@@ -26,8 +26,21 @@ public class Workspace {
      * Last edit timestamp
      */
     private Double lastEditDate;
+    /**
+     * Code of the WASDI node where the workspace is located
+     */
+    private String nodeCode = "wasdi";    
+    
 
-    public String getName() {
+    public String getNodeCode() {
+		return nodeCode;
+	}
+
+	public void setNodeCode(String nodeCode) {
+		this.nodeCode = nodeCode;
+	}
+
+	public String getName() {
         return name;
     }
 

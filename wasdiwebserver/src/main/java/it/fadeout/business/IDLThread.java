@@ -5,6 +5,7 @@ import java.util.List;
 
 import javax.servlet.ServletConfig;
 
+import it.fadeout.Wasdi;
 import wasdi.shared.business.ProcessWorkspace;
 
 public class IDLThread extends ProcessingThread {
@@ -16,7 +17,7 @@ public class IDLThread extends ProcessingThread {
 
 	@Override
 	protected List<ProcessWorkspace> getQueuedProcess() {
-		List<ProcessWorkspace> queuedProcess = m_oProcessWorkspaceRepository.GetQueuedIDL();
+		List<ProcessWorkspace> queuedProcess = m_oProcessWorkspaceRepository.GetQueuedIDLByNode(Wasdi.s_sMyNodeCode);
 		
 		// Reverse the collection, otherwise the older will dead of starvation
 		Collections.reverse(queuedProcess);
