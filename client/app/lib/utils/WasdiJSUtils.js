@@ -192,13 +192,34 @@ function utilsProjectShowRabbitMessageUserFeedBack(oMessage) {
             sUserMessage = "WORKFLOW COMPLETED<br>READY";
             break;
         case "RUNPROCESSOR":
-            sUserMessage = "CUSTOM PROCESSOR COMPLETED<br>READY"
+            sUserMessage = "WASDI APP DONE<br>READY";
             break;
         case "RUNIDL":
-            sUserMessage = "IDL PROCESSOR COMPLETED<br>READY"
+            sUserMessage = "IDL PROCESSOR COMPLETED<br>READY";
             break;
         case "RUNMATLAB":
-            sUserMessage = "MATLAB PROCESSOR COMPLETED<br>READY"
+            sUserMessage = "MATLAB PROCESSOR COMPLETED<br>READY";
+            break;
+        case "FTPUPLOAD":
+            sUserMessage = "FTP UPLOAD DONE<br>READY";
+            break;
+        case "RASTERGEOMETRICRESAMPLE":
+            sUserMessage = "GEOMETRIC RESAMPLE DONE<br>READY";
+            break;
+        case "FILTER":
+            sUserMessage = "FILTER DONE<br>READY";
+            break;
+        case "REGRID":
+            sUserMessage = "REGRID DONE<br>READY";
+            break;
+        case "DEPLOYPROCESSOR":
+            sUserMessage = "NEW WASDI APP PUBLISHED<br>READY";
+            break;
+        case "DELETEPROCESSOR":
+            sUserMessage = "WASDI APP DELETED<br>READY";
+            break;
+        case "INFO":
+            sUserMessage =  oMessage.payload;
             break;
         default:
             console.log("RABBIT ERROR: GOT EMPTY MESSAGE<br>READY");

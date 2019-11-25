@@ -1041,7 +1041,9 @@ var EditorController = (function () {
 
             var oDialog = utilsVexDialogAlertTop('GURU MEDITATION<br>THERE WAS AN ERROR IN THE ' + sOperation + ' PROCESS'+ sErrorDescription);
             utilsVexCloseDialogAfter(10000, oDialog);
-            this.m_oProcessesLaunchedService.loadProcessesFromServer(this.m_oActiveWorkspace.workspaceId);
+
+            // P.Campanella: 20191125: the loadProcessesFromServer is called by the rabbit stomp service
+            //this.m_oProcessesLaunchedService.loadProcessesFromServer(this.m_oActiveWorkspace.workspaceId);
 
             if (oMessage.messageCode =="PUBLISHBAND") {
                 if (utilsIsObjectNullOrUndefined(oMessage.payload)==false) {
@@ -1058,14 +1060,10 @@ var EditorController = (function () {
         // Switch the Code
         switch(oMessage.messageCode) {
             case "PUBLISH":
-                // oController.receivedPublishBandMessage(oMessage);
                 oController.receivedPublishMessage(oMessage);
                 break;
             case "PUBLISHBAND":
                 oController.receivedPublishBandMessage(oMessage);
-                break;
-            case "UPDATEPROCESSES":
-                //oController.m_oProcessesLaunchedService.loadProcessesFromServer(oController.m_oActiveWorkspace.workspaceId);
                 break;
             case "DOWNLOAD":
             case "APPLYORBIT":
@@ -1078,6 +1076,8 @@ var EditorController = (function () {
             case "MOSAIC":
             case "SUBSET":
             case "MULTISUBSET":
+            case "RASTERGEOMETRICRESAMPLE":
+            case "REGRID":
                 oController.receivedNewProductMessage(oMessage);
                 break;
         }

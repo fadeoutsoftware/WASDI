@@ -89,6 +89,7 @@ angular.module('wasdi.RabbitStompService', ['wasdi.RabbitStompService']).service
             }
 
             this.subscribe = function (workspaceId) {
+
                 this.unsubscribe();
 
                 this.m_sWorkspaceId = workspaceId;
@@ -96,7 +97,6 @@ angular.module('wasdi.RabbitStompService', ['wasdi.RabbitStompService']).service
                 var subscriptionString = "/exchange/amq.topic/" + workspaceId;
                 console.log("RabbitStompService: subscribing to " + subscriptionString);
                 var oThisService = this;
-
 
                 this.m_oSubscription = this.m_oClient.subscribe(subscriptionString, function (message) {
 
@@ -127,24 +127,8 @@ angular.module('wasdi.RabbitStompService', ['wasdi.RabbitStompService']).service
                             console.log("RabbitStompService: Active Workspace is null.")
                         }
 
-                        // if (oMessageResult.messageResult == "KO") {
-                        //
-                        //     // Get the operation NAme
-                        //     var sOperation = "null";
-                        //     if (utilsIsStrNullOrEmpty(oMessageResult.messageCode) == false  ) sOperation = oMessageResult.messageCode;
-                        //
-                        //     // Add an error Message
-                        //     var oDialog = utilsVexDialogAlertBottomRightCorner("There was an error in the " + sOperation + " operation");
-                        //     utilsVexCloseDialogAfter(3000, oDialog);
-                        //     // Update Process Messages
-                        //     oThisService.m_oProcessesLaunchedService.loadProcessesFromServer(sActiveWorkspaceId);
-                        //
-                        //     return;
-                        // }
-
                         //Reject the message if it is for another workspace
                         if (oMessageResult.workspaceId != sActiveWorkspaceId) return false;
-
 
                         // Check if the callback is hooked
                         if (!utilsIsObjectNullOrUndefined(oThisService.m_fMessageCallBack))
@@ -152,7 +136,6 @@ angular.module('wasdi.RabbitStompService', ['wasdi.RabbitStompService']).service
                             // Call the Message Callback
                             oThisService.m_fMessageCallBack(oMessageResult, oThisService.m_oActiveController);
                         }
-
 
                         // Update the process List
                         oThisService.m_oProcessesLaunchedService.loadProcessesFromServer(sActiveWorkspaceId);
