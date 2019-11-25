@@ -218,41 +218,46 @@ var SearchOrbitController = (function() {
      * @param oController
      */
     SearchOrbitController.prototype.receivedRabbitMessage  = function (oMessage, oController) {
-
+        // Check if the message is valid
         if (oMessage == null) return;
+
         // Check the Result
         if (oMessage.messageResult == "KO") {
 
             var sOperation = "null";
-            if (utilsIsStrNullOrEmpty(oMessage.messageCode) === false  )
-                sOperation = oMessage.messageCode;
-            var oDialog = utilsVexDialogAlertTop('GURU MEDITATION<br>THERE WAS AN ERROR IN THE ' + sOperation + ' PROCESS');
-            utilsVexCloseDialogAfter(4000, oDialog);
-            this.m_oProcessesLaunchedService.loadProcessesFromServer(this.m_oActiveWorkspace.workspaceId);
+            if (utilsIsStrNullOrEmpty(oMessage.messageCode) === false  ) sOperation = oMessage.messageCode;
+
+            var sErrorDescription = "";
+
+            if (utilsIsStrNullOrEmpty(oMessage.payload) === false) sErrorDescription = oMessage.payload;
+            if (utilsIsStrNullOrEmpty(sErrorDescription) === false) sErrorDescription = "<br>"+sErrorDescription;
+
+            var oDialog = utilsVexDialogAlertTop('GURU MEDITATION<br>THERE WAS AN ERROR IN THE ' + sOperation + ' PROCESS'+ sErrorDescription);
+            utilsVexCloseDialogAfter(10000, oDialog);
+
             return;
         }
-        switch(oMessage.messageCode)
-        {
-            case "PUBLISH":
-            case "PUBLISHBAND":
-            case "UPDATEPROCESSES":
-                break;
+
+        // Switch the Code
+        switch(oMessage.messageCode) {
+            case "DOWNLOAD":
             case "APPLYORBIT":
             case "CALIBRATE":
             case "MULTILOOKING":
             case "NDVI":
             case "TERRAIN":
-            case "DOWNLOAD":
             case "GRAPH":
             case "INGEST":
-                oController.receivedNewProductMessage(oMessage,oController);
+            case "MOSAIC":
+            case "SUBSET":
+            case "MULTISUBSET":
+            case "RASTERGEOMETRICRESAMPLE":
+            case "REGRID":
+                oController.receivedNewProductMessage(oMessage);
                 break;
-            default:
-                console.log("RABBIT ERROR: got empty message ");
         }
 
         utilsProjectShowRabbitMessageUserFeedBack(oMessage);
-
     }
     /**
      *

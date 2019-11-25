@@ -1647,61 +1647,59 @@ var ImportController = (function() {
         };
 
         utilsProjectOpenGetListOfWorkspacesSelectedModal(oCallback,oOptions,this.m_oModalService);
-    }
+    };
+
     /**
      *
      * @param oMessage
      * @param oController
      */
     ImportController.prototype.receivedRabbitMessage  = function (oMessage, oController) {
-
+        // Check if the message is valid
         if (oMessage == null) return;
+
         // Check the Result
         if (oMessage.messageResult == "KO") {
 
             var sOperation = "null";
-            if (utilsIsStrNullOrEmpty(oMessage.messageCode) === false) sOperation = oMessage.messageCode;
-            var oDialog = utilsVexDialogAlertTop('GURU MEDITATION<br>THERE WAS AN ERROR IN THE ' + sOperation + ' PROCESS');
-            utilsVexCloseDialogAfter(3000, oDialog);
-            if (!utilsIsObjectNullOrUndefined(this.m_oActiveWorkspace)) this.m_oProcessesLaunchedService.loadProcessesFromServer(this.m_oActiveWorkspace.workspaceId);
+            if (utilsIsStrNullOrEmpty(oMessage.messageCode) === false  ) sOperation = oMessage.messageCode;
+
+            var sErrorDescription = "";
+
+            if (utilsIsStrNullOrEmpty(oMessage.payload) === false) sErrorDescription = oMessage.payload;
+            if (utilsIsStrNullOrEmpty(sErrorDescription) === false) sErrorDescription = "<br>"+sErrorDescription;
+
+            var oDialog = utilsVexDialogAlertTop('GURU MEDITATION<br>THERE WAS AN ERROR IN THE ' + sOperation + ' PROCESS'+ sErrorDescription);
+            utilsVexCloseDialogAfter(10000, oDialog);
+
             return;
         }
 
-        switch(oMessage.messageCode)
-        {
-            case "PUBLISH":
-            case "PUBLISHBAND":
-            case "UPDATEPROCESSES":
-                if (!utilsIsObjectNullOrUndefined(oController.m_oActiveWorkspace)) oController.m_oProcessesLaunchedService.loadProcessesFromServer(oController.m_oActiveWorkspace.workspaceId);
-                break;
+        // Switch the Code
+        switch(oMessage.messageCode) {
+            case "DOWNLOAD":
             case "APPLYORBIT":
             case "CALIBRATE":
             case "MULTILOOKING":
             case "NDVI":
             case "TERRAIN":
-            case "DOWNLOAD":
             case "GRAPH":
             case "INGEST":
-                //oController.receivedNewProductMessage(oMessage,oController);
-                // TODO: check the correctnes of this step. It seems a dialog will be shonw here then again in the method below 'utilsProjectShowRabbitMessageUserFeedBack', but is it wrong or right?
+            case "MOSAIC":
+            case "SUBSET":
+            case "MULTISUBSET":
+            case "RASTERGEOMETRICRESAMPLE":
+            case "REGRID":
+                oController.receivedNewProductMessage(oMessage);
                 break;
-            default:
-                console.log("RABBIT ERROR: got empty message ");
         }
 
         utilsProjectShowRabbitMessageUserFeedBack(oMessage);
     };
 
     ImportController.prototype.receivedNewProductMessage = function (oMessage, oController) {
-        var oController = this;
-        // var oCallback = function(value){
-        //
-        //     oController.m_oState.go("root.editor", { workSpace : sWorkSpace.workspaceId });
-        // }
         var oDialog = utilsVexDialogAlertBottomRightCorner('PRODUCT ADDED TO THE WORKSPACE<br>READY');
         utilsVexCloseDialogAfter(3000, oDialog);
-
-        //this.m_oProcessesLaunchedService.loadProcessesFromServer(this.m_oActiveWorkspace.workspaceId);
     };
 
     ImportController.prototype.openWorkspace = function (sWorkspaceId) {
@@ -1897,19 +1895,19 @@ var ImportController = (function() {
 
     ImportController.prototype.getPeriodSpring = function()
     {
-        return this.getPeriod(02,21,05,20)
+        return this.getPeriod(2,21,5,20)
     };
     ImportController.prototype.getPeriodSummer = function()
     {
-        return this.getPeriod(05,21,08,22)
+        return this.getPeriod(5,21,8,22);
     };
     ImportController.prototype.getPeriodWinter = function()
     {
-        return this.getPeriod(11,21,02,20)
+        return this.getPeriod(11,21,2,20);
     };
     ImportController.prototype.getPeriodAutumn = function()
     {
-        return this.getPeriod(08,23,11,20)
+        return this.getPeriod(8,23,11,20);
     };
 
     ImportController.prototype.addSeason = function()
