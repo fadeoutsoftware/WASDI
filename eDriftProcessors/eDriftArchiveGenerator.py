@@ -4,7 +4,7 @@ from datetime import timedelta
 from __builtin__ import int
 
 def run(parameters, processId):
-    wasdi.wasdiLog('eDrift Check Images tool start')
+    wasdi.wasdiLog('eDrift Archive Generator start')
     
     
     sArchiveStartDate = parameters.get('ARCHIVE_START_DATE', "2019-05-01")
