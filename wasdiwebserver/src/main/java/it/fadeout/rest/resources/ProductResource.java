@@ -259,14 +259,14 @@ public class ProductResource {
 				// Add View model to return list
 				if (oDownloaded != null) {
 
-					ProductViewModel pVM = oDownloaded.getProductViewModel();
+					ProductViewModel oProductViewModel = oDownloaded.getProductViewModel();
 
-					if (pVM != null) {
-						GeorefProductViewModel geoPVM = new GeorefProductViewModel(pVM);
-						geoPVM.setBbox(oDownloaded.getBoundingBox());
+					if (oProductViewModel != null) {
+						GeorefProductViewModel oGeoRefProductViewModel = new GeorefProductViewModel(oProductViewModel);
+						oGeoRefProductViewModel.setBbox(oDownloaded.getBoundingBox());
 
-						if (geoPVM.getBandsGroups() != null) {
-							ArrayList<BandViewModel> aoBands = geoPVM.getBandsGroups().getBands();
+						if (oGeoRefProductViewModel.getBandsGroups() != null) {
+							ArrayList<BandViewModel> aoBands = oGeoRefProductViewModel.getBandsGroups().getBands();
 
 							if (aoBands != null) {
 								for (int iBands = 0; iBands < aoBands.size(); iBands++) {
@@ -274,7 +274,7 @@ public class ProductResource {
 									BandViewModel oBand = aoBands.get(iBands);
 
 									if (oBand != null) {
-										PublishedBand oPublishBand = oPublishedBandsRepository.GetPublishedBand(geoPVM.getName(), oBand.getName());
+										PublishedBand oPublishBand = oPublishedBandsRepository.GetPublishedBand(oGeoRefProductViewModel.getName(), oBand.getName());
 
 										if (oPublishBand != null) {
 											oBand.setPublished(true);
@@ -282,7 +282,8 @@ public class ProductResource {
 											oBand.setGeoserverBoundingBox(oPublishBand.getGeoserverBoundingBox());
 											oBand.setGeoserverUrl(oPublishBand.getGeoserverUrl());
 											
-										} else {
+										} 
+										else {
 											oBand.setPublished(false);
 										}
 									}
@@ -292,8 +293,8 @@ public class ProductResource {
 
 						}
 
-						geoPVM.setMetadata(null);
-						aoProductList.add(geoPVM);
+						oGeoRefProductViewModel.setMetadata(null);
+						aoProductList.add(oGeoRefProductViewModel);
 
 					} else {
 						Utils.debugLog("ProductResource.GetListByWorkspace: ProductViewModel is Null: jump product");
