@@ -162,38 +162,41 @@ public class FileBufferResource {
 		try {
 			
 			Utils.debugLog("FileBufferResource.PublishBand, session: " + sSessionId);
-
+			
+			// Check Authentication
 			if (Utils.isNullOrEmpty(sSessionId)) return oReturnValue;
 			User oUser = Wasdi.GetUserFromSession(sSessionId);
 			if (oUser==null) return oReturnValue;
 			String sUserId = oUser.getUserId();
 			if (Utils.isNullOrEmpty(sUserId)) return oReturnValue;
-
-			Utils.debugLog("FileBufferResource.PublishBand, user: " + oUser.getUserId() + ", read product workspaces " + sWorkspaceId);
-
-			oReturnValue = new RabbitMessageViewModel();
 			
+			Utils.debugLog("FileBufferResource.PublishBand, user: " + oUser.getUserId() + ", workspace: " + sWorkspaceId);
+			
+			// Get the full product path
 			String sFullProductPath = Wasdi.getWorkspacePath(m_oServletConfig, Wasdi.getWorkspaceOwner(sWorkspaceId), sWorkspaceId);
 			
-			// Get Product List
+			// Get the product
 			DownloadedFilesRepository oDownloadedFilesRepository = new DownloadedFilesRepository();
 			DownloadedFile oDownloadedFile = oDownloadedFilesRepository.GetDownloadedFileByPath(sFullProductPath+sFileUrl);
 			
+			// Is there this publish band?
 			PublishedBandsRepository oPublishedBandsRepository = new PublishedBandsRepository();
 			PublishedBand oPublishBand = oPublishedBandsRepository.GetPublishedBand(oDownloadedFile.getProductViewModel().getName(), sBand);
+			
+			oReturnValue = new RabbitMessageViewModel();			
 
 			if (oPublishBand != null)
 			{
 				Utils.debugLog("FileBufferResource.PublishBand: band already published " );
-				PublishBandResultViewModel oPublishViewModel = new PublishBandResultViewModel();
-				oPublishViewModel.setBoundingBox(oPublishBand.getBoundingBox());
-				oPublishViewModel.setBandName(oPublishBand.getBandName());
-				oPublishViewModel.setLayerId(oPublishBand.getLayerId());
-				oPublishViewModel.setProductName(oPublishBand.getProductName());
-				oPublishViewModel.setGeoserverBoundingBox(oPublishBand.getGeoserverBoundingBox());
-				oPublishViewModel.setGeoserverUrl(oPublishBand.getGeoserverUrl());
+				PublishBandResultViewModel oPublishBandResultViewModel = new PublishBandResultViewModel();
+				oPublishBandResultViewModel.setBoundingBox(oPublishBand.getBoundingBox());
+				oPublishBandResultViewModel.setBandName(oPublishBand.getBandName());
+				oPublishBandResultViewModel.setLayerId(oPublishBand.getLayerId());
+				oPublishBandResultViewModel.setProductName(oPublishBand.getProductName());
+				oPublishBandResultViewModel.setGeoserverBoundingBox(oPublishBand.getGeoserverBoundingBox());
+				oPublishBandResultViewModel.setGeoserverUrl(oPublishBand.getGeoserverUrl());
 				oReturnValue.setMessageCode(LauncherOperations.PUBLISHBAND.name());
-				oReturnValue.setPayload(oPublishViewModel);
+				oReturnValue.setPayload(oPublishBandResultViewModel);
 				
 				Utils.debugLog("FileBufferResource.PublishBand: return published band, user: " + sUserId );
 				return oReturnValue;
