@@ -71,6 +71,21 @@ public class ProcessorLogRepository extends MongoRepository {
         return aoReturnList;
     }
     
+    
+    public boolean DeleteLogsByProcessWorkspaceId(String sProcessWorkspaceId) {
+        
+        if(!Utils.isNullOrEmpty(sProcessWorkspaceId)) {
+        	
+	        try {
+	            getCollection("processorlog").deleteMany(new Document("processWorkspaceId", sProcessWorkspaceId));
+	            return true;
+	        } catch (Exception oEx) {
+	        	Utils.debugLog("ProcessorLogRepository.GetLogsByProcessWorkspaceId( " + sProcessWorkspaceId + " )" +oEx);
+	        }
+        }
+        return false;
+    }
+    
     public List<ProcessorLog> GetLogRowsByText(String sLogText) {
 
         final ArrayList<ProcessorLog> aoReturnList = new ArrayList<ProcessorLog>();
@@ -156,29 +171,6 @@ public class ProcessorLogRepository extends MongoRepository {
         return aoReturnList;
 
 	}
-/*
-    public List<ProcessWorkspace> GetQueuedProcess() {
-
-        final ArrayList<ProcessWorkspace> aoReturnList = new ArrayList<ProcessWorkspace>();
-        try {
-
-            FindIterable<Document> oWSDocuments = getCollection("processorlog").find(
-            		Filters.and(
-            				Filters.eq("status", ProcessStatus.CREATED.name()),
-            				Filters.not(Filters.eq("operationType", LauncherOperations.DOWNLOAD.name())),
-            				Filters.not(Filters.eq("operationType", LauncherOperations.RUNIDL.name()))
-            				)
-            		)
-            		.sort(new Document("operationDate", -1));
-            fillList(aoReturnList, oWSDocuments);
-
-        } catch (Exception oEx) {
-            Utils.debugLog("ProcessorLogRepository.GetQueuedProcess: "+oEx);
-        }
-
-        return aoReturnList;
-    }
- */
  
     
 	private void fillList(final ArrayList<ProcessorLog> aoReturnList, FindIterable<Document> oWSDocuments) {
