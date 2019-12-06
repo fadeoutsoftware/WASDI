@@ -1244,7 +1244,7 @@ def searchEOImages(sPlatform, sDateFrom, sDateTo,
     :param fULLon: Longitude of Upper-Left corner
     :param fLRLat: Latitude of Lower-Right corner
     :param fLRLon: Longitude of Lower-Right corner
-    :param sProductType: type of EO product. . If Platform = "S1" -> Accepts "SLC","GRD", "OCN". If Platform = "S2" -> Accepts "S2MSI1C","S2MSI2Ap","S2MSI2A". Can be null.
+    :param sProductType: type of EO product; If Platform = "S1" -> Accepts "SLC","GRD", "OCN". If Platform = "S2" -> Accepts "S2MSI1C","S2MSI2Ap","S2MSI2A". Can be null.
     :param iOrbitNumber: orbit number
     :param sSensorOperationalMode: sensor operational mode
     :param sCloudCoverage: interval of allowed cloud coverage, e.g. "[0 TO 22.5]"
@@ -1301,6 +1301,11 @@ def searchEOImages(sPlatform, sDateFrom, sDateTo,
         print("[ERROR] waspy.searchEOImages: sDateTo must be in format YYYY-MM-DD" +
               '  ******************************************************************************')
         return aoReturnList
+    
+    if sCloudCoverage is not None:
+        # Force to be a String
+        sCloudCoverage = str(sCloudCoverage)
+        sCloudCoverage = sCloudCoverage.upper()
 
     # create query string:
 
