@@ -294,21 +294,28 @@ public class DiasQueryTranslatorONDA extends DiasQueryTranslator {
 	protected String parseSentinel2(String sQuery) {
 		String sSentinel2 = "";
 		if(sQuery.contains("platformname:Sentinel-2")) {
-			sSentinel2 = "( name:S2* AND ";
+			//sSentinel2 = "( name:S2* AND ";
+			sSentinel2 = "( platformName:S2* AND ";
+			//platformSerialIdentifier
 			if(sQuery.contains("filename:S2A_*")){
-				sSentinel2+="name:S2A_* AND ";
+				//sSentinel2+="name:S2A_* AND ";
+				sSentinel2+="platformSerialIdentifier:S2A_* AND ";
 			} else if(sQuery.contains("filename:S2B_*")){
-				sSentinel2+="name:S2B_* AND ";
+				//sSentinel2+="name:S2B_* AND ";
+				sSentinel2+="platformSerialIdentifier:S2B_* AND ";
 			} else {
-				sSentinel2+="name:* AND ";
+				sSentinel2+="platformSerialIdentifier:* AND ";
 			}
 
 			if(sQuery.contains("producttype:S2MSI1C")) {
-				sSentinel2+="name:*MSI1C*";
+				//sSentinel2+="name:*MSI1C*";
+				sSentinel2+="productType:*MSI1C*";
 			} else if(sQuery.contains("producttype:S2MSI2Ap")) {
-				sSentinel2+="name:*MSIL2Ap*";
+				//sSentinel2+="name:*MSIL2Ap*";
+				sSentinel2+="productType:*MSIL2Ap*";
 			} else if(sQuery.contains("producttype:S2MSI2A")) {
-				sSentinel2+="name:*MSIL2A*";
+				//sSentinel2+="name:*MSIL2A*";
+				sSentinel2+="productType:*MSIL2A*";
 			} else {
 				sSentinel2+="name:*";
 			}
