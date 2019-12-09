@@ -402,7 +402,7 @@ var WorkspaceController = (function() {
             return false;
 
         return true;
-    }
+    };
     /**
      *
      * @param sWorkspaceId
