@@ -54,16 +54,26 @@
                     <tr ng-repeat="oWSListItem in m_oController.getWorkspaceInfoList() | filter:searchWorkSpace"
                         class="workspaces-list-item"
                         ng-class="{'selected-row':m_oController.isSelectedRowInWorkspaceTable(oWSListItem)}">
-                        <td  ng-click="m_oController.loadProductList(oWSListItem)" >{{$index + 1}}</td>
-                        <td  ng-click="m_oController.loadProductList(oWSListItem)" > {{oWSListItem.workspaceName}}  <!--b class="cursor" style="margin-left: 0px" ng-show="m_oController.showCursorOnWSRow(oWSListItem.workspaceId)" id="cursor">H</b--></td>
-                        <td  ng-click="m_oController.loadProductList(oWSListItem)" >{{oWSListItem.ownerUserId}}</td>
+                        <td  ng-click="m_oController.loadProductList(oWSListItem)" >
+                            {{$index + 1}}
+                        </td>
+                        <td  ng-click="m_oController.loadProductList(oWSListItem)" >
+                            <span class="ellipsis">
+                                {{oWSListItem.workspaceName}}
+                            </span>
+                        </td> <!--b class="cursor" style="margin-left: 0px" ng-show="m_oController.showCursorOnWSRow(oWSListItem.workspaceId)" id="cursor">H</b-->
+                        <td  ng-click="m_oController.loadProductList(oWSListItem)" >
+                            <span class="ellipsis">
+                                {{oWSListItem.ownerUserId}}
+                            </span>
+                        </td>
 
                         <!--<td class="over-color cell-edit-button" ng-click="m_oController.openWorkspace(oWSListItem.workspaceId)"  data-toggle="tooltip" data-placement="top" title="{{'WORKSPACES_TOOLTIP_EDITOR'|translate}}">-->
                             <!--<i class="fa fa-pencil fa-lg" aria-hidden="true"></i>-->
                         <!--</td>-->
 
                         <td class="over-color" data-toggle="tooltip" data-placement="top" title="{{'WORKSPACES_TOOLTIP_EDIT'|translate}}"
-                            ng-class="{'disabled' : m_oController.isRabbitConnected() == false}"
+                            ng-class="{'disabled' : m_oController.isRabbitConnected() === false}"
                             ng-show="m_oController.isSelectedRowInWorkspaceTable(oWSListItem)"
                             ng-click="m_oController.openWorkspace(oWSListItem.workspaceId)">
                             <div>

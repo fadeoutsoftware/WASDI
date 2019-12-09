@@ -454,7 +454,13 @@ var WorkFlowManagerController = (function() {
         }
         return false;
     }
-
+    WorkFlowManagerController.prototype.selectBatchWorkflow = function(oWorkflow){
+        if(utilsIsObjectNullOrUndefined(oWorkflow) === true) {
+            return false;
+        }
+        this.m_asSelectedProducts = [];
+        this.m_oSelectedWorkflow = oWorkflow;
+    };
     WorkFlowManagerController.$inject = [
         '$scope',
         'close',
