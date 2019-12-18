@@ -2,8 +2,11 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
+
+import org.apache.commons.collections.FactoryUtils;
 
 import wasdi.ConfigReader;
 import wasdi.shared.business.DownloadedFile;
@@ -16,6 +19,8 @@ import wasdi.shared.data.ProcessWorkspaceRepository;
 import wasdi.shared.data.ProcessorLogRepository;
 import wasdi.shared.data.ProductWorkspaceRepository;
 import wasdi.shared.data.WorkspaceRepository;
+import wasdi.shared.utils.Utils;
+import wasdi.shared.viewmodels.ProductViewModel;
 
 public class dbUtils {
 
@@ -224,6 +229,8 @@ public class dbUtils {
 					BufferedWriter oBufferedWriter = new BufferedWriter(oWriter);
 					
 					for (ProcessorLog oLogRow : aoLogs) {
+						oBufferedWriter.write(oLogRow.getLogDate());
+						oBufferedWriter.write(" - " );
 						oBufferedWriter.write(oLogRow.getLogRow());
 						oBufferedWriter.write("\n");
 					}
@@ -248,6 +255,79 @@ public class dbUtils {
 			oEx.printStackTrace();
 		}
 	}
+	
+	
+	public static void metadata() {
+		
+		try {
+			
+	        System.out.println("Ok, what we do with metadata?");
+	        
+	        System.out.println("\t1 - Clear Unlinked metadata");
+	        System.out.println("");
+	        
+	        Scanner oScanner = new Scanner( System.in);
+	        String sInputString = oScanner.nextLine();
+
+
+	        if (sInputString.equals("1")) {
+	        	
+	        	System.out.println("Searching Metadata files to delete");
+	        	
+	        	File oMetadataPath = new File("/data/wasdi/metadata");
+	        	
+	        	// Get all the downloaded files
+	        	DownloadedFilesRepository oDownloadedFilesRepository = new DownloadedFilesRepository();
+	        	List<DownloadedFile> aoDownloadedFileList = oDownloadedFilesRepository.getList();
+	        	
+	        	ArrayList<String> asMetadataFileReference = new ArrayList<String>();
+	        	
+	        	// Generate the list of valid metadata file reference
+	        	for (DownloadedFile oDownloadedFile : aoDownloadedFileList) {
+	        		
+	        		// Get the view model
+	        		ProductViewModel oVM = oDownloadedFile.getProductViewModel();
+	        		
+	        		if (oVM != null) {
+	        			if (!Utils.isNullOrEmpty(oVM.getMetadataFileReference())){
+	        				// Check metadata file refernece
+	        				if (!asMetadataFileReference.contains(oVM.getMetadataFileReference())) {
+	        					// Add to the list
+	        					asMetadataFileReference.add(oVM.getMetadataFileReference());
+	        				}
+	        			}
+	        		}
+				}
+	        	
+	        	// Files to delete
+	        	ArrayList<File> aoFilesToDelete = new ArrayList<File>();
+	        	
+	        	// For all the files in metadata
+	        	for (File oFile : oMetadataPath.listFiles()) {
+	        		
+	        		// Get the name:
+	        		String sName = oFile.getName();
+	        		
+	        		// Is linked?
+	        		if (!asMetadataFileReference.contains(sName)) {
+	        			// No!!
+	        			aoFilesToDelete.add(oFile);
+	        		}
+	        	}
+	        	
+	        	
+	        	for (File oFile : aoFilesToDelete) {
+	        		System.out.println("Deleting metadata File: " + oFile.getPath());
+	        		oFile.delete();
+				}
+      	
+	        }
+		}
+		catch (Exception oEx) {
+			System.out.println("metadata Exception: " + oEx);
+			oEx.printStackTrace();
+		}
+	}
 
 	
 	public static void sample() {
@@ -267,6 +347,8 @@ public class dbUtils {
 	        
 	        boolean bExit = false;
 	        
+	        Scanner oScanner = new Scanner( System.in);
+	        
 	        while (!bExit) {
 		        System.out.println("---- WASDI db Utils ----");
 		        System.out.println("Welcome, how can I help you?");
@@ -274,10 +356,11 @@ public class dbUtils {
 		        System.out.println("\t1 - Downloaded Products");
 		        System.out.println("\t2 - Product Workspace");
 		        System.out.println("\t3 - Logs");
+		        System.out.println("\t4 - Metadata");
 		        System.out.println("\tx - Exit");
 		        System.out.println("");
 		        
-		        Scanner oScanner = new Scanner( System.in);
+		        
 		        String sInputString = oScanner.nextLine();
 		        
 		        if (sInputString.equals("1")) {
@@ -288,6 +371,9 @@ public class dbUtils {
 		        }		        
 		        else if (sInputString.equals("3")) {
 		        	logs();
+		        }		        
+		        else if (sInputString.equals("4")) {
+		        	metadata();
 		        }		        
 		        else if (sInputString.toLowerCase().equals("x")) {
 		        	bExit = true;
@@ -301,6 +387,8 @@ public class dbUtils {
 	        
 	        
 	        System.out.println("bye bye");
+	        
+	        oScanner.close();
 			
 		} catch (Exception e) {
 			e.printStackTrace();
