@@ -36,8 +36,8 @@ public class ProcessWorkspaceResource {
 	@Produces({"application/xml", "application/json", "text/xml"})
 	public ArrayList<ProcessWorkspaceViewModel> getProcessByWorkspace(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("sWorkspaceId") String sWorkspaceId, @QueryParam("startindex") Integer iStartIndex, @QueryParam("endindex") Integer iEndIndex) {
-		Utils.debugLog("ProcessWorkspaceResource.GetProcessByWorkspace( " + sSessionId + ", " + sWorkspaceId + ", " +
-				iStartIndex + ", " + iEndIndex);
+		Utils.debugLog("ProcessWorkspaceResource.GetProcessByWorkspace( Session: " + sSessionId + ", WS: " + sWorkspaceId + ", Start: " +
+				iStartIndex + ", End: " + iEndIndex);
 
 		User oUser = Wasdi.GetUserFromSession(sSessionId);
 
@@ -91,7 +91,7 @@ public class ProcessWorkspaceResource {
 	@Produces({"application/xml", "application/json", "text/xml"})
 	public ArrayList<ProcessWorkspaceViewModel> getProcessByUser(@HeaderParam("x-session-token") String sSessionId) {
 		
-		Utils.debugLog("ProcessWorkspaceResource.GetProcessByUser( " + sSessionId + " )");
+		Utils.debugLog("ProcessWorkspaceResource.GetProcessByUser( Session: " + sSessionId + " )");
 
 		User oUser = Wasdi.GetUserFromSession(sSessionId);
 
@@ -164,7 +164,7 @@ public class ProcessWorkspaceResource {
 	@Produces({"application/xml", "application/json", "text/xml"})
 	public ArrayList<ProcessWorkspaceViewModel> getLastProcessByWorkspace(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("sWorkspaceId") String sWorkspaceId) {
-		Utils.debugLog("ProcessWorkspaceRepository.getLastProcessByWorkspace( " + sSessionId + ", " + sWorkspaceId + " )");
+		Utils.debugLog("ProcessWorkspaceRepository.getLastProcessByWorkspace( Session: " + sSessionId + ", WS: " + sWorkspaceId + " )");
 		User oUser = Wasdi.GetUserFromSession(sSessionId);
 
 		ArrayList<ProcessWorkspaceViewModel> aoProcessList = new ArrayList<ProcessWorkspaceViewModel>();
@@ -214,7 +214,7 @@ public class ProcessWorkspaceResource {
 	@Produces({"application/xml", "application/json", "text/xml"})
 	public ArrayList<ProcessWorkspaceViewModel> getLastProcessByUser(@HeaderParam("x-session-token") String sSessionId) {
 		
-		Utils.debugLog("ProcessWorkspaceResource.GetLastProcessByUser( " + sSessionId + " )");
+		Utils.debugLog("ProcessWorkspaceResource.GetLastProcessByUser( Session: " + sSessionId + " )");
 
 		User oUser = Wasdi.GetUserFromSession(sSessionId);
 
@@ -256,7 +256,7 @@ public class ProcessWorkspaceResource {
 	@Path("/summary")
 	@Produces({"application/xml", "application/json", "text/xml"})
 	public ProcessWorkspaceSummaryViewModel getSummary(@HeaderParam("x-session-token") String sSessionId) {
-		Utils.debugLog("ProcessWorkspaceResource.GetSummary( " + sSessionId + " )");
+		Utils.debugLog("ProcessWorkspaceResource.GetSummary( Session: " + sSessionId + " )");
 		User oUser = Wasdi.GetUserFromSession(sSessionId);
 		ProcessWorkspaceSummaryViewModel oSummaryViewModel = new ProcessWorkspaceSummaryViewModel();
 
@@ -380,7 +380,7 @@ public class ProcessWorkspaceResource {
 	@Produces({"application/xml", "application/json", "text/xml"})
 	public Response deleteProcess(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sProcessObjId") String sProcessObjId) {
 		
-		Utils.debugLog("ProcessWorkspaceResource.DeleteProcess( " + sSessionId + ", " + sProcessObjId + " )");
+		Utils.debugLog("ProcessWorkspaceResource.DeleteProcess( Session: " + sSessionId + ", Process: " + sProcessObjId + " )");
 
 		User oUser = Wasdi.GetUserFromSession(sSessionId);
 
@@ -456,7 +456,7 @@ public class ProcessWorkspaceResource {
 	@Produces({"application/xml", "application/json", "text/xml"})
 	public ProcessWorkspaceViewModel getProcessById(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("sProcessId") String sProcessWorkspaceId) {
-		Utils.debugLog("ProcessWorkspaceResource.GetProcessById( " + sSessionId + ", " + sProcessWorkspaceId + " )");
+		Utils.debugLog("ProcessWorkspaceResource.GetProcessById( Session: " + sSessionId + ", ProcWsId: " + sProcessWorkspaceId + " )");
 
 		User oUser = Wasdi.GetUserFromSession(sSessionId);
 
@@ -499,8 +499,8 @@ public class ProcessWorkspaceResource {
 			@QueryParam("sProcessId") String sProcessWorkspaceId, @QueryParam("status") String sStatus,
 			@QueryParam("perc") int iPerc, @QueryParam("sendrabbit") String sSendToRabbit) {
 		
-		Utils.debugLog("ProcessWorkspaceResource.UpdateProcessById( " + sSessionId + ", " +
-				sProcessWorkspaceId + ", " + sStatus + ", " + iPerc + ", " + sSendToRabbit + " )" );
+		Utils.debugLog("ProcessWorkspaceResource.UpdateProcessById( Session: " + sSessionId + ", ProcWsId: " +
+				sProcessWorkspaceId + ", Status: " + sStatus + ", Perc: " + iPerc + ", SendRabbit:" + sSendToRabbit + " )" );
 
 		User oUser = Wasdi.GetUserFromSession(sSessionId);
 
@@ -572,8 +572,8 @@ public class ProcessWorkspaceResource {
 	public ProcessWorkspaceViewModel setProcessPayload(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("sProcessId") String sProcessWorkspaceId, @QueryParam("payload") String sPayload) {
 		
-		Utils.debugLog("ProcessWorkspaceResource.SetProcessPayload( " + sSessionId + ", " + sProcessWorkspaceId +
-				", " + sPayload + " )" );
+		Utils.debugLog("ProcessWorkspaceResource.SetProcessPayload( Session: " + sSessionId + ", ProcWsId: " + sProcessWorkspaceId +
+				", Payload: " + sPayload + " )" );
 
 		User oUser = Wasdi.GetUserFromSession(sSessionId);
 
@@ -616,7 +616,7 @@ public class ProcessWorkspaceResource {
 	@Produces({"application/xml", "application/json", "text/xml"})
 	public PrimitiveResult cleanQueue(@HeaderParam("x-session-token") String sSessionId) {
 		
-		Utils.debugLog("ProcessWorkspaceResource.CleanQueue( " + sSessionId + " )");
+		Utils.debugLog("ProcessWorkspaceResource.CleanQueue( Session: " + sSessionId + " )");
 		
 		PrimitiveResult oResult = new PrimitiveResult();
 		oResult.setBoolValue(false);

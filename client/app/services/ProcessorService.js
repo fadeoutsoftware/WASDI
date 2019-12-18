@@ -35,7 +35,7 @@ service('ProcessorService', ['ConstantsService','$rootScope','$http', function (
         else {
             sWorkspaceId = "-";
         }
-        return this.m_oHttp.get(this.APIURL + '/processors/delete?processorId='+sProcessorId+'&workspace='+sWorkspaceId);
+        return this.m_oHttp.get(this.APIURL + '/processors/delete?processorId='+sProcessorId+'&workspaceId='+sWorkspaceId);
     };
 
     this.getHelpFromProcessor = function (sProcessorName, sJSON) {
