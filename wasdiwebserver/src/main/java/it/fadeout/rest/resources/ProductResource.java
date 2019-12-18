@@ -57,8 +57,7 @@ public class ProductResource {
 	@Produces({ "application/xml", "application/json", "text/xml" })
 	public PrimitiveResult addProductToWorkspace(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("sProductName") String sProductName, @QueryParam("sWorkspaceId") String sWorkspaceId) {
-		Utils.debugLog(
-				"ProductResource.AddProductToWorkspace:  called WS: " + sWorkspaceId + " Product " + sProductName);
+		Utils.debugLog("ProductResource.AddProductToWorkspace:  WS: " + sWorkspaceId + " Product " + sProductName);
 
 		// Validate Session
 		User oUser = Wasdi.GetUserFromSession(sSessionId);
@@ -119,15 +118,13 @@ public class ProductResource {
 	public GeorefProductViewModel getByProductName(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("sProductName") String sProductName, @QueryParam("workspace") String sWorkspace) {
 
-		Utils.debugLog(
-				"ProductResource.GetByProductName( " + sSessionId + ", " + sProductName + ", " + sWorkspace + " )");
+		Utils.debugLog("ProductResource.GetByProductName( Session: " + sSessionId + ", Product: " + sProductName + ", WS: " + sWorkspace + " )");
 
 		// Validate Session
 		User oUser = Wasdi.GetUserFromSession(sSessionId);
-		if (oUser == null)
-			return null;
-		if (Utils.isNullOrEmpty(oUser.getUserId()))
-			return null;
+		
+		if (oUser == null) return null;
+		if (Utils.isNullOrEmpty(oUser.getUserId())) return null;
 
 		String sFullPath = Wasdi.getWorkspacePath(m_oServletConfig, Wasdi.getWorkspaceOwner(sWorkspace), sWorkspace);
 
@@ -160,7 +157,7 @@ public class ProductResource {
 	public MetadataViewModel getMetadataByProductName(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("sProductName") String sProductName, @QueryParam("workspace") String sWorkspaceId) {
 
-		Utils.debugLog("ProductResource.GetMetadataByProductName( " + sSessionId + ", " + sProductName + ", "
+		Utils.debugLog("ProductResource.GetMetadataByProductName( Session: " + sSessionId + ", Product: " + sProductName + ", WS: "
 				+ sWorkspaceId + " )");
 
 		// Validate Session
@@ -221,7 +218,9 @@ public class ProductResource {
 	@Produces({ "application/xml", "application/json", "text/xml" })
 	public List<GeorefProductViewModel> getListByWorkspace(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("sWorkspaceId") String sWorkspaceId) {
-		Utils.debugLog("ProductResource.GetListByWorkspace( " + sSessionId + ", " + sWorkspaceId + " )");
+		
+		Utils.debugLog("ProductResource.GetListByWorkspace( Session: " + sSessionId + ", WS: " + sWorkspaceId + " )");
+		
 		List<GeorefProductViewModel> aoProductList = new ArrayList<GeorefProductViewModel>();
 		if(Utils.isNullOrEmpty(sWorkspaceId)){
 			Utils.debugLog("ProductResource.getListByWorkspace(" + sSessionId +", " + sWorkspaceId + "): workspace is null or empty");
@@ -319,7 +318,8 @@ public class ProductResource {
 	@Produces({ "application/xml", "application/json", "text/xml" })
 	public List<GeorefProductViewModel> getLightListByWorkspace(@HeaderParam("x-session-token") String sSessionId, @QueryParam("sWorkspaceId") String sWorkspaceId) {
 		
-		Utils.debugLog("ProductResource.getLightListByWorkspace( " + sSessionId + ", " + sWorkspaceId + " )");
+		Utils.debugLog("ProductResource.getLightListByWorkspace( Session: " + sSessionId + ", WS: " + sWorkspaceId + " )");
+		
 		List<GeorefProductViewModel> aoProductList = new ArrayList<GeorefProductViewModel>();
 		if(Utils.isNullOrEmpty(sWorkspaceId)) {
 			Utils.debugLog("ProductResource.getLightListByWorkspace(" + sSessionId +", " + sWorkspaceId + "): workspace is null or empty");
@@ -370,7 +370,7 @@ public class ProductResource {
 	public ArrayList<String> getNamesByWorkspace(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("sWorkspaceId") String sWorkspaceId) {
 
-		Utils.debugLog("ProductResource.GetListByWorkspace( " + sSessionId + ", " + sWorkspaceId + " )");
+		Utils.debugLog("ProductResource.GetListByWorkspace( Session: " + sSessionId + ", WS: " + sWorkspaceId + " )");
 
 		User oUser = Wasdi.GetUserFromSession(sSessionId);
 
@@ -426,7 +426,7 @@ public class ProductResource {
 	public Response updateProductViewModel(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("workspace") String sWorkspace, ProductViewModel oProductViewModel) {
 
-		Utils.debugLog("ProductResource.UpdateProductViewModel( " + sSessionId + ", " + sWorkspace + ", ... )");
+		Utils.debugLog("ProductResource.UpdateProductViewModel( Session: " + sSessionId + ", WS: " + sWorkspace + ", ... )");
 
 		User oUser = Wasdi.GetUserFromSession(sSessionId);
 
@@ -486,7 +486,7 @@ public class ProductResource {
 	@Path("/uploadfile")
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
 	public Response uploadFile(@FormDataParam("file") InputStream fileInputStream, @HeaderParam("x-session-token") String sSessionId, @QueryParam("workspace") String sWorkspace, @QueryParam("name") String sName) throws Exception {
-		Utils.debugLog("ProductResource.uploadfile( InputStream, " + sSessionId + ", " + sWorkspace + ", " + sName + " )");
+		Utils.debugLog("ProductResource.uploadfile( InputStream, Session: " + sSessionId + ", WS: " + sWorkspace + ", Name: " + sName + " )");
 
 		// Check the user session
 		if (Utils.isNullOrEmpty(sSessionId)) {
@@ -562,8 +562,8 @@ public class ProductResource {
 	public PrimitiveResult deleteProduct(@HeaderParam("x-session-token") String sSessionId,
 			@QueryParam("sProductName") String sProductName, @QueryParam("bDeleteFile") Boolean bDeleteFile,
 			@QueryParam("sWorkspaceId") String sWorkspace, @QueryParam("bDeleteLayer") Boolean bDeleteLayer) {
-		Utils.debugLog("ProductResource.DeleteProduct( " + sSessionId + ", " + sProductName + ", " + bDeleteFile + ", "
-				+ sWorkspace + ", " + bDeleteLayer + " )");
+		Utils.debugLog("ProductResource.DeleteProduct( Session: " + sSessionId + ", Product: " + sProductName + ", Delete: " + bDeleteFile + ",  WS: "
+				+ sWorkspace + ", DeleteLayer: " + bDeleteLayer + " )");
 
 		PrimitiveResult oReturn = new PrimitiveResult();
 		oReturn.setBoolValue(false);
