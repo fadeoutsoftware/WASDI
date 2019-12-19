@@ -91,23 +91,30 @@ public class QueryExecutorSENTINEL extends QueryExecutor {
 			}
 			
 			
-	//		Utils.debugLog("\nSending 'GET' request to URL : " + sUrl);
-			ClientResponse response = oClient.get(sUrl, oOptions);
+			Utils.debugLog("QueryExecutorSENTINEL.executeCount: Sending 'GET' request to URL : " + sUrl);
+			long lStart = System.nanoTime();
+			ClientResponse oResponse = oClient.get(sUrl, oOptions);
+			long lEnd = System.nanoTime();
 			
 			Document<Feed> oDocument = null;
 			
 			
-			if (response.getType() != ResponseType.SUCCESS) {
-				Utils.debugLog(s_sClassName + ".executeCount: Response ERROR: " + response.getType());
+			if (oResponse.getType() != ResponseType.SUCCESS) {
+				Utils.debugLog(s_sClassName + ".executeCount: Response ERROR: " + oResponse.getType());
 				return -1;
 			}
-	
-			Utils.debugLog(s_sClassName + ".executeCount: Response Success");		
+			
+			//stats
+			long lTimeElapsed = lEnd - lStart;
+			double dMillis = lTimeElapsed / (1000.0 * 1000.0);
+
+			
+			
 			
 			// Get The Result as a string
 			BufferedReader oBuffRead = null;
 			try {
-				oBuffRead = new BufferedReader(response.getReader());
+				oBuffRead = new BufferedReader(oResponse.getReader());
 			} catch (IOException oIo0) {
 				Utils.debugLog(s_sClassName + ".executeCount: " + oIo0);
 				return -1;
@@ -128,6 +135,14 @@ public class QueryExecutorSENTINEL extends QueryExecutor {
 				Utils.debugLog(s_sClassName + "executeCount: response is null");
 				return -1;
 			}
+
+			double dSpeed = 0;
+			int iResponseLength = sResultAsString.length();
+			if(iResponseLength > 0) {
+				dSpeed = ( (double) iResponseLength ) / dMillis;
+				dSpeed *= 1000.0;
+			}
+			Utils.debugLog("QueryExecutorSENTINEL.httpGetResults success: ([ms,B,B/s]): " + dMillis + "," + iResponseLength + "," + dSpeed);
 			oDocument = oParser.parse(new StringReader(sResultAsString), oParserOptions);
 			if (oDocument == null) {
 				Utils.debugLog(s_sClassName + ".executeCount: Document response null, aborting");
